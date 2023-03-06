@@ -1,8 +1,8 @@
-import { Action, ActionPanel, Detail, getPreferenceValues, Icon, openCommandPreferences } from "@raycast/api";
-const { url } = getPreferenceValues();
+import { Action, ActionPanel, Detail, Icon, openCommandPreferences } from "@raycast/api";
+import { getBaseUrl } from "./utils";
 
 export function UnauthorizedError() {
-  const baseUrl = url.replace(/\/$/, "");
+  const baseUrl = getBaseUrl();
   const markdown = `
   # Unauthorized
 

@@ -3,11 +3,12 @@ import { useFetch } from "@raycast/utils";
 import fetch from "node-fetch";
 import { URLSearchParams } from "url";
 import { Event, Issue, Project, User } from "./types";
+import { getBaseUrl } from "./utils";
 
-const { token, url } = getPreferenceValues();
+const { token } = getPreferenceValues();
 const headers = { Authorization: `Bearer ${token}`, "Content-Type": "application/json" };
 
-const baseUrl = url.replace(/\/$/, "");
+const baseUrl = getBaseUrl();
 
 export function useProjects() {
   return useFetch<Project[]>(`${baseUrl}/api/0/projects/`, { headers });
