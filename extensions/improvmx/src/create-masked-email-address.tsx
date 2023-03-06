@@ -232,7 +232,7 @@ export default function CreateMaskedEmail() {
                 </ActionPanel>
               )
             }
-            detail={<List.Item.Detail markdown={"Create masked email using **" + domain.display + "**"} />}
+            // detail={<List.Item.Detail markdown={"Create masked email using **" + domain.display + "**"} />}
           />
         ))}
       </List.Section>

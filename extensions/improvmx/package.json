@@ -57,6 +57,20 @@
       "subtitle": "ImprovMX",
       "description": "Create SMTP credentials for a domain",
       "mode": "view"
+    }, 
+    {
+      "name": "open-dashboard-to-manage-domains-and-aliases",
+      "title": "Open Dashboard to Manage Domains and Aliases",
+      "subtitle": "ImprovMX",
+      "description": "Open the ImprovMX dashboard to manage domains and aliases",
+      "mode": "no-view"
+    },
+    {
+      "name": "manage-domain-and-aliases",
+      "title": "Manage Domain and Aliases",
+      "subtitle": "ImprovMX",
+      "description": "Manage a domain and its aliases",
+      "mode": "view"
     }
   ],
   "dependencies": {

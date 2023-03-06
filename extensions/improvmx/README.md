@@ -14,7 +14,7 @@ This extension provides the following commands:
 
 ### Create Masked Email Address
 
-Quickly generate a new masked email address.
+Quickly generate a new masked email address. Add default domain to "Masked Email Address" in the extension preferences to use it as a default domain for masked email addresses. This will save you some time when creating masked email addresses.
 
 ### Add Domain
 
@@ -28,9 +28,13 @@ Create a new alias for a domain.
 
 Create SMTP credentials for a domain.
 
-### Refresh Account
+### Open the ImprovMX dashboard to manage domains and aliases
 
-Refresh your ImprovMX account email and metadata with the latest data from the server.
+Open the ImprovMX dashboard in the default browser to manage domains and aliases.
+
+### Manage Domain and Aliases
+
+Manage ImprovMX domains and aliases from the Raycast interface.
 
 ## 🛠️ Installation
 
