@@ -4,8 +4,8 @@
   "title": "Hypersonic",
   "description": "Fastest Notion to-do app ever",
   "icon": "icon-purple.png",
-  "author": "reboot",
-  "access": "public",
+  "author": "reboot.studio",
+  "owner": "reboot",
   "version": "2.0.4",
   "categories": [
     "Developer Tools",
