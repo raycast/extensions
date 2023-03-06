@@ -55,13 +55,12 @@ export default function Command() {
           <List.Item
             key={m.id}
             id={m.id}
-            title={m.role === "user" ? "You" : "AI"}
+            title={m.content.trim()}
             icon={
               m.role === "user"
                 ? { source: Icon.QuestionMark, tintColor: Color.Orange }
                 : { source: Icon.Message, tintColor: Color.Green }
             }
-            subtitle={m.content.trim()}
             actions={
               <ActionPanel>
                 <Action.SubmitForm title="Ask" onSubmit={handleQuestion} icon={Icon.Envelope} />
