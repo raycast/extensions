@@ -37,3 +37,5 @@ export const formatDate = (dateString?: string | null) => {
   const nthStr = nth(date)
   return `${month} ${date}${nthStr}, ${year}`
 }
+
+export const cleanTitle = (title: string) => title.replace(/&#39;/, "'")

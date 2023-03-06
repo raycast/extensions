@@ -3,7 +3,7 @@ import { useBook, useHighlights } from './useApi'
 import Highlight from './highlight'
 import React from 'react'
 import Handlebars from 'handlebars'
-import { formatDate } from './utils'
+import { cleanTitle, formatDate } from './utils'
 
 type BookProps = {
   id: string
@@ -90,7 +90,7 @@ export default function Book({ id, template }: BookProps) {
 
   return (
     <List
-      navigationTitle={book?.title}
+      navigationTitle={cleanTitle(book.title)}
       isLoading={isLoadingBook || isLoadingHighlights}
       isShowingDetail={highlights.length !== 0}
       searchBarPlaceholder="Filter Highlights"

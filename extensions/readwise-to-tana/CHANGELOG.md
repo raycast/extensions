@@ -3,6 +3,8 @@
 ## [Fix highlight order, clean titles] - 2023-03-06
 
 - Reverse order of highlights. This will display and copy them in the order they were added, instead of displaying the latest highlight first.
+- Handle unparsed apostrophes in titles, for example "What&#39;s" -> "What's".
+
 ## [Add new highlight fields and author supertag] - 2023-02-14
 
 - Add more field mappings for highlight tagging: Updated At, Highlighted At, and Color
