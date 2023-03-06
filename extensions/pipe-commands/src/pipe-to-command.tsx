@@ -35,9 +35,9 @@ export function PipeCommands(props: { inputType?: InputType }): JSX.Element {
           if (!command.metadatas.input?.type) {
             return props.inputType === "text";
           }
-          return command.metadatas.input.type === props.inputType
+          return command.metadatas.input.type === props.inputType;
         default:
-          return command.metadatas.argument1.type === props.inputType
+          return command.metadatas.argument1.type === props.inputType;
       }
     });
     setState({ commands: await sortByAccessTime(filteredCommands), invalid });
@@ -107,7 +107,7 @@ async function getInput(inputType: InputType) {
       return clipboard;
     }
     case "file": {
-      const selection = await getSelectedFinderItems()
+      const selection = await getSelectedFinderItems();
       if (selection.length == 0) {
         throw new Error("No file selected");
       }
