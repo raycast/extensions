@@ -1,5 +1,144 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
+    "anyOf": [
+        {
+            "allOf": [
+                {
+                    "properties": {
+                        "currentDirectoryPath": {
+                            "type": "string"
+                        },
+                        "description": {
+                            "type": "string"
+                        },
+                        "icon": {
+                            "type": "string"
+                        },
+                        "iconDark": {
+                            "type": "string"
+                        },
+                        "needsConfirmation": {
+                            "type": "boolean"
+                        },
+                        "packageName": {
+                            "type": "string"
+                        },
+                        "schemaVersion": {
+                            "enum": [
+                                1
+                            ],
+                            "type": "number"
+                        },
+                        "title": {
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "schemaVersion",
+                        "title"
+                    ],
+                    "type": "object"
+                },
+                {
+                    "properties": {
+                        "argument1": {
+                            "properties": {
+                                "percentEncoded": {
+                                    "type": "boolean"
+                                },
+                                "type": {
+                                    "$ref": "#/definitions/InputType"
+                                }
+                            },
+                            "required": [
+                                "type"
+                            ],
+                            "type": "object"
+                        },
+                        "mode": {
+                            "enum": [
+                                "silent"
+                            ],
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "argument1",
+                        "mode"
+                    ],
+                    "type": "object"
+                }
+            ]
+        },
+        {
+            "allOf": [
+                {
+                    "properties": {
+                        "currentDirectoryPath": {
+                            "type": "string"
+                        },
+                        "description": {
+                            "type": "string"
+                        },
+                        "icon": {
+                            "type": "string"
+                        },
+                        "iconDark": {
+                            "type": "string"
+                        },
+                        "needsConfirmation": {
+                            "type": "boolean"
+                        },
+                        "packageName": {
+                            "type": "string"
+                        },
+                        "schemaVersion": {
+                            "enum": [
+                                1
+                            ],
+                            "type": "number"
+                        },
+                        "title": {
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "schemaVersion",
+                        "title"
+                    ],
+                    "type": "object"
+                },
+                {
+                    "properties": {
+                        "input": {
+                            "properties": {
+                                "type": {
+                                    "$ref": "#/definitions/InputType"
+                                }
+                            },
+                            "required": [
+                                "type"
+                            ],
+                            "type": "object"
+                        },
+                        "mode": {
+                            "enum": [
+                                "pipe"
+                            ],
+                            "type": "string"
+                        },
+                        "output": {
+                            "$ref": "#/definitions/ScriptOutput"
+                        }
+                    },
+                    "required": [
+                        "mode"
+                    ],
+                    "type": "object"
+                }
+            ]
+        }
+    ],
     "definitions": {
         "InputType": {
             "enum": [
@@ -8,74 +147,14 @@
                 "url"
             ],
             "type": "string"
-        }
-    },
-    "properties": {
-        "argument1": {
-            "properties": {
-                "percentEncoded": {
-                    "type": "boolean"
-                },
-                "type": {
-                    "$ref": "#/definitions/InputType"
-                }
-            },
-            "required": [
-                "type"
-            ],
-            "type": "object"
         },
-        "currentDirectoryPath": {
-            "type": "string"
-        },
-        "description": {
-            "type": "string"
-        },
-        "icon": {
-            "type": "string"
-        },
-        "iconDark": {
-            "type": "string"
-        },
-        "input": {
-            "properties": {
-                "type": {
-                    "$ref": "#/definitions/InputType"
-                }
-            },
-            "required": [
-                "type"
-            ],
-            "type": "object"
-        },
-        "mode": {
+        "ScriptOutput": {
             "enum": [
-                "pipe",
-                "silent"
+                "text",
+                "url"
             ],
-            "type": "string"
-        },
-        "needsConfirmation": {
-            "type": "boolean"
-        },
-        "packageName": {
-            "type": "string"
-        },
-        "schemaVersion": {
-            "enum": [
-                1
-            ],
-            "type": "number"
-        },
-        "title": {
             "type": "string"
         }
-    },
-    "required": [
-        "mode",
-        "schemaVersion",
-        "title"
-    ],
-    "type": "object"
+    }
 }
 

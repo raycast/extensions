@@ -21,7 +21,8 @@ export type ScriptMetadatas = {
     }
   | {
       mode: "pipe";
-      input?: ScriptInput;
+      inputType?: ScriptInput;
+      outputType?: ScriptOutput;
     }
 );
 
@@ -35,3 +36,4 @@ export type ScriptArgument = {
 };
 
 export type InputType = "text" | "file" | "url";
+export type ScriptOutput = "text" | "url";

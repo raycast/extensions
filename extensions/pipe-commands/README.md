@@ -52,7 +52,7 @@ open "https://www.google.com/search?q=$1"
 # @raycast.title Prettify JSON
 # @raycast.packageName Developer Utils
 # @raycast.mode pipe
-# @raycast.input { "type": "text" }
+# @raycast.inputType text
 # @raycast.icon 🔨
 
 python3 -m json.tool --indent 2

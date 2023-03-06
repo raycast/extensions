@@ -4,7 +4,7 @@
 # @raycast.title Convert Newline to Spaces
 # @raycast.packageName Text Actions
 # @raycast.mode pipe
-# @raycast.input { "type": "text" }
+# @raycast.inputType text
 # @raycast.icon 🔤
 
 tr '\n' ' '

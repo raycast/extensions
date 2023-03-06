@@ -4,6 +4,6 @@
 # @raycast.title Copy Path
 # @raycast.packageName File Actions
 # @raycast.mode pipe
-# @raycast.input { "type": "file" }
+# @raycast.inputType file
 
 cat

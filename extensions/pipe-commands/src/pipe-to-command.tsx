@@ -14,6 +14,7 @@ import {
   confirmAlert,
   getPreferenceValues,
   getSelectedFinderItems,
+  open,
 } from "@raycast/api";
 import { spawnSync } from "child_process";
 import { chmodSync, existsSync } from "fs";
@@ -32,10 +33,10 @@ export function PipeCommands(props: { inputType?: InputType }): JSX.Element {
       switch (command.metadatas.mode) {
         case "pipe":
           // If the input is not defined, we assume it's a text input
-          if (!command.metadatas.input?.type) {
+          if (!command.metadatas.inputType?.type) {
             return props.inputType === "text";
           }
-          return command.metadatas.input.type === props.inputType;
+          return command.metadatas.inputType.type === props.inputType;
         default:
           return command.metadatas.argument1.type === props.inputType;
       }
@@ -257,10 +258,15 @@ function CommandActions(props: { command: ScriptCommand; inputFrom: InputType })
         />
       );
 
+      const openInBrowser = (
+        <Action key="open-url" icon={Icon.Globe} title="Open in Browser" onAction={outputHandler(open)} />
+      );
+
       return (
-        <React.Fragment>
+        <>
+          {command.metadatas.outputType == "url" ? openInBrowser : null}
           {primaryAction === "copy" ? [copyAction, pasteAction] : [pasteAction, copyAction]}
-        </React.Fragment>
+        </>
       );
     }
   }

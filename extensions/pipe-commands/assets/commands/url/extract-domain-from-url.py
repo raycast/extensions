@@ -5,7 +5,7 @@
 # @raycast.icon 🔗
 # @raycast.packageName Developer Utils
 # @raycast.mode pipe
-# @raycast.input { "type": "url" }
+# @raycast.inputType url
 
 from urllib.parse import urlparse
 import sys

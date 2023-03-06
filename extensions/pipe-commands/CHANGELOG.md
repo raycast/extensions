@@ -5,7 +5,7 @@
 ### Added
 
 - Add support for file and tab input
-- New directive `@raycast.input` to specify the input type for `pipe` mode
+- New directive `@raycast.inputType` and `@raycast.outputType` to specify the input and output for `pipe` mode
 - `silent` mode now supports setting the `@raycast.argument1` type to `file` or `tab`
 
 ## [Added new pipe commands] - 2022-09-26

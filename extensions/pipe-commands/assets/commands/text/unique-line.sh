@@ -5,6 +5,6 @@
 # @raycast.packageName Text Actions
 # @raycast.icon 🔤
 # @raycast.mode pipe
-# @raycast.input { "type": "text" }
+# @raycast.inputType text
 
 uniq
