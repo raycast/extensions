@@ -28,7 +28,7 @@ export function useConversation() {
 
       try {
         await ask(
-          allMessages.map(({ id, ...m }) => m),
+          allMessages.map(({ id: _id, ...m }) => m),
           addMessageChunk
         );
       } finally {

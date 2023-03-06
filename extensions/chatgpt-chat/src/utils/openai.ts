@@ -39,7 +39,7 @@ export async function ask(messages: ChatCompletionRequestMessage[], onNewChunk: 
     { responseType: "stream" }
   );
 
-  let message: Message = { role: "assistant", id: randomUUID(), content: "" };
+  const message: Message = { role: "assistant", id: randomUUID(), content: "" };
 
   (completion.data as unknown as Stream).on("data", (data) => {
     const lines = data
