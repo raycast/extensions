@@ -30,7 +30,8 @@
     {
       "description": "URL of the Sentry instance to connect with",
       "name": "url",
-      "required": true,
+      "placeholder": "https://sentry.io",
+      "required": false,
       "default": "https://sentry.io",
       "title": "Sentry URL",
       "type": "textfield"
