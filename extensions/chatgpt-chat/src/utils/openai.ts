@@ -1,62 +1,62 @@
+import { getPreferenceValues } from "@raycast/api";
 import { randomUUID } from "crypto";
-import EventEmitter from "events";
-import { ChatCompletionRequestMessage, Configuration, OpenAIApi } from "openai";
+import { ChatCompletionRequestMessage, ChatCompletionRequestMessageRoleEnum, Configuration, OpenAIApi } from "openai";
+import { Stream } from "stream";
 
-export interface Conversation {
-  on(event: "message", listener: (message: ChatCompletionRequestMessage) => void): this;
+let openai: OpenAIApi | undefined;
+function getOpenAIApi() {
+  if (!openai) {
+    const preferences = getPreferenceValues();
+    if (!preferences.apiKey) {
+      throw new Error("No API key found in preferences.");
+    }
+
+    const configuration = new Configuration({
+      apiKey: preferences.apiKey,
+    });
+
+    openai = new OpenAIApi(configuration);
+  }
+
+  return openai;
 }
 
-export type MessageWithId = ChatCompletionRequestMessage & { id: string };
+export interface Message {
+  id: string;
+  role: ChatCompletionRequestMessageRoleEnum;
+  content: string;
+}
 
-export class Conversation extends EventEmitter {
-  private static instance: Conversation;
+export async function ask(messages: ChatCompletionRequestMessage[], onNewChunk: (message: Message) => void) {
+  const openai = getOpenAIApi();
 
-  public static getInstance(apiKey: string) {
-    if (!Conversation.instance) {
-      Conversation.instance = new Conversation(apiKey);
-    }
-    return Conversation.instance;
-  }
-
-  private openai: OpenAIApi;
-  private messages: MessageWithId[] = [];
-
-  private constructor(apiKey: string) {
-    super();
-    const configuration = new Configuration({ apiKey });
-    this.openai = new OpenAIApi(configuration);
-  }
-
-  private addMessage = (_message: ChatCompletionRequestMessage): void => {
-    const id = randomUUID();
-    const message = { ..._message, id };
-    this.messages.push(message);
-    this.emit("message", message);
-  };
-
-  getMessages = (): ReadonlyArray<MessageWithId> => {
-    return this.messages;
-  };
-
-  ask = async (question: string) => {
-    if (question === "") return;
-    this.addMessage({
-      content: question,
-      role: "user",
-    });
-
-    const completion = await this.openai.createChatCompletion({
+  const completion = await openai.createChatCompletion(
+    {
       model: "gpt-3.5-turbo",
-      messages: this.messages.map(({ id, ...m }) => m),
-    });
+      messages,
+      stream: true,
+    },
+    { responseType: "stream" }
+  );
 
-    const message = completion.data.choices[0].message;
-    if (!message) {
-      throw new Error("No content returned from OpenAI");
+  let message: Message = { role: "assistant", id: randomUUID(), content: "" };
+
+  (completion.data as unknown as Stream).on("data", (data) => {
+    const lines = data
+      .toString()
+      .split("\n")
+      .filter((line: string) => line.trim() !== "");
+    for (const line of lines) {
+      const _message = line.replace("data: ", "");
+      if (_message === "[DONE]") {
+        return;
+      }
+      const parsed = JSON.parse(_message);
+      const delta = parsed.choices[0].delta;
+      if (delta.content) {
+        message.content += delta.content;
+      }
+      onNewChunk(message);
     }
-
-    this.addMessage(message);
-
-    return message.content;
-  };
+  });
 }

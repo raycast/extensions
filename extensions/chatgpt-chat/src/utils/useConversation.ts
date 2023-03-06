@@ -1,38 +1,42 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Conversation, MessageWithId } from "./openai";
-import { getPreferenceValues } from "@raycast/api";
+import { randomUUID } from "crypto";
+import { useCallback, useMemo, useState } from "react";
+import { ask, Message } from "./openai";
 
 export function useConversation() {
-  const [messages, setMessages] = useState<ReadonlyArray<MessageWithId>>([]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
-  const conversation = useRef<Conversation | null>(null);
 
-  const getConversation = useCallback(() => {
-    if (conversation.current === null) {
-      const preference = getPreferenceValues();
-      if (!preference.apiKey) {
-        throw new Error("No OpenAI API key found in config");
+  const addMessageChunk = useCallback(
+    (message: Message) => {
+      setMessages((messages) => {
+        if (messages.find((m) => m.id === message.id)) {
+          return messages.map((m) => (m.id === message.id ? { ...m, ...message } : m));
+        }
+        return [...messages, message];
+      });
+    },
+    [messages]
+  );
+
+  const sendMessage = useCallback(
+    async (content: string) => {
+      const id = randomUUID();
+      const allMessages: Message[] = [...messages, { id, content, role: "user" }];
+      setMessages(allMessages);
+
+      setLoading(true);
+
+      try {
+        await ask(
+          allMessages.map(({ id, ...m }) => m),
+          addMessageChunk
+        );
+      } finally {
+        setLoading(false);
       }
-      conversation.current = Conversation.getInstance(preference.apiKey);
-    }
-    return conversation.current;
-  }, []);
-
-  const sendMessage = useCallback(async (message: string) => {
-    const conversation = getConversation();
-    setLoading(true);
-    await conversation.ask(message);
-    setLoading(false);
-  }, []);
-
-  useEffect(() => {
-    getConversation().on("message", () => {
-      setMessages(getConversation().getMessages());
-    });
-    return () => {
-      getConversation().removeAllListeners();
-    };
-  }, []);
+    },
+    [messages]
+  );
 
   return useMemo(() => ({ messages, sendMessage, loading }), [messages, sendMessage, loading]);
 }
