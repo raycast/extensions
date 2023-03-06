@@ -1,6 +1,6 @@
 # Readwise to Tana Changelog
 
-## [Fix highlight order, clean titles, handle notes with line breaks] - 2023-03-06
+## [Fix ordering, clean titles, and handle line breaks] - 2023-03-06
 
 - Reverse order of highlights. This will display and copy them in the order they were added, instead of displaying the latest highlight first.
 - Handle unparsed apostrophes in titles, for example "What&#39;s" -> "What's".
