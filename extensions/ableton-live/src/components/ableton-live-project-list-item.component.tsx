@@ -14,7 +14,10 @@ export function AbletonLiveProjectListItem(props: {
     <List.Item
       title={props.project.name}
       subtitle={tildify(props.project.filePath)}
-      accessories={[{ tag: props.project.modifiedDate }]}
+      accessories={[{
+        tag: props.project.modifiedDate,
+        tooltip: `Last modified: ${props.project.modifiedDate.toLocaleString()}`
+      }]}
       icon="ableton-live-project-icon.png"
       actions={
         <ActionPanel>
