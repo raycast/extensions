@@ -1,7 +1,7 @@
 [
   {
-    "category": "Light｜DustRed（薄暮）",
-    "description": "Fighting Spirit、Bold And Unrestrained｜斗志、奔放",
+    "category": "Light｜DustRed",
+    "description": "Fighting Spirit、Bold And Unrestrained",
     "detial": [
       { "name": "Red1", "hex": "#FFF1F0" },
       { "name": "Red2", "hex": "#FFCCC7" },
@@ -16,8 +16,8 @@
     ]
   },
   {
-    "category": "Light｜Volcano（火山）",
-    "description": "Eye-Catching、Surging｜醒目、澎湃",
+    "category": "Light｜Volcano",
+    "description": "Eye-Catching、Surging",
     "detial": [
       { "name": "Volcano1", "hex": "#FFF2E8" },
       { "name": "Volcano2", "hex": "#FFD8BF" },
@@ -32,8 +32,8 @@
     ]
   },
   {
-    "category": "Light｜SunsetOrange（日暮）",
-    "description": "Warm、Cheerful｜温暖、欢快",
+    "category": "Light｜SunsetOrange",
+    "description": "Warm、Cheerful",
     "detial": [
       { "name": "Orange1", "hex": "#FFF7E6" },
       { "name": "Orange2", "hex": "#FFE7BA" },
@@ -48,8 +48,8 @@
     ]
   },
   {
-    "category": "Light｜CalendulaGold（金盏花）",
-    "description": "Vitality、Positive｜活力、积极",
+    "category": "Light｜CalendulaGold",
+    "description": "Vitality、Positive",
     "detial": [
       { "name": "Gold1", "hex": "#FFFBE6" },
       { "name": "Gold2", "hex": "#FFF1B8" },
@@ -64,8 +64,8 @@
     ]
   },
   {
-    "category": "Light｜SunriseYellow（日出）",
-    "description": "Birth、Sunshine｜出生、阳光",
+    "category": "Light｜SunriseYellow",
+    "description": "Birth、Sunshine",
     "detial": [
       { "name": "Yellow1", "hex": "#FEFFE6" },
       { "name": "Yellow2", "hex": "#FFFFB8" },
@@ -80,8 +80,8 @@
     ]
   },
   {
-    "category": "Light｜Lime（青柠）",
-    "description": "Natural、Vitality｜自然、生机",
+    "category": "Light｜Lime",
+    "description": "Natural、Vitality",
     "detial": [
       { "name": "Lime1", "hex": "#FCFFE6" },
       { "name": "Lime2", "hex": "#F4FFB8" },
@@ -96,8 +96,8 @@
     ]
   },
   {
-    "category": "Light｜PolarGreen（极光绿）",
-    "description": "Health、Innovation｜健康、创新",
+    "category": "Light｜PolarGreen",
+    "description": "Health、Innovation",
     "detial": [
       { "name": "Green1", "hex": "#F6FFED" },
       { "name": "Green2", "hex": "#D9F7BE" },
@@ -112,8 +112,8 @@
     ]
   },
   {
-    "category": "Light｜Cyan（明青）",
-    "description": "Hope、Strong｜希望、坚强",
+    "category": "Light｜Cyan",
+    "description": "Hope、Strong",
     "detial": [
       { "name": "Cyan1", "hex": "#E6FFFB" },
       { "name": "Cyan2", "hex": "#B5F5EC" },
@@ -128,8 +128,8 @@
     ]
   },
   {
-    "category": "Light｜DaybreakBlue（拂晓蓝）",
-    "description": "Inclusiveness、Technology、Inclusiveness｜包容、科技、普惠",
+    "category": "Light｜DaybreakBlue",
+    "description": "Inclusiveness、Technology、Inclusiveness",
     "detial": [
       { "name": "Blue1", "hex": "#E6F4FF" },
       { "name": "Blue2", "hex": "#BAE0FF" },
@@ -144,8 +144,8 @@
     ]
   },
   {
-    "category": "Light｜GeekBlue（极客蓝）",
-    "description": "Explore、Research｜探索、钻研",
+    "category": "Light｜GeekBlue",
+    "description": "Explore、Research",
     "detial": [
       { "name": "GeekBlue1", "hex": "#F0F5FF" },
       { "name": "GeekBlue2", "hex": "#D6E4FF" },
@@ -160,8 +160,8 @@
     ]
   },
   {
-    "category": "Light｜GoldenPurple（酱紫）",
-    "description": "Elegant、Romantic｜优雅、浪漫",
+    "category": "Light｜GoldenPurple",
+    "description": "Elegant、Romantic",
     "detial": [
       { "name": "Purple1", "hex": "#F9F0FF" },
       { "name": "Purple2", "hex": "#EFDBFF" },
@@ -176,8 +176,8 @@
     ]
   },
   {
-    "category": "Light｜Magenta（法式洋红）",
-    "description": "Bright、Emotional｜明快、感性",
+    "category": "Light｜Magenta",
+    "description": "Bright、Emotional",
     "detial": [
       { "name": "Magenta1", "hex": "#FFF0F6" },
       { "name": "Magenta2", "hex": "#FFD6E7" },
@@ -192,8 +192,8 @@
     ]
   },
   {
-    "category": "Light｜Gray（中性灰）",
-    "description": "Neutral｜中性",
+    "category": "Light｜Gray",
+    "description": "Neutral",
     "detial": [
       { "name": "Gray1", "hex": "#FFFFFF" },
       { "name": "Gray2", "hex": "#FAFAFA" },
@@ -211,8 +211,8 @@
     ]
   },
   {
-    "category": "Dark｜DustRed（薄暮）",
-    "description": "Fighting Spirit、Bold And Unrestrained｜斗志、奔放",
+    "category": "Dark｜DustRed",
+    "description": "Fighting Spirit、Bold And Unrestrained",
     "detial": [
       { "name": "Red1", "hex": "#2A1215" },
       { "name": "Red2", "hex": "#431418" },
@@ -227,8 +227,8 @@
     ]
   },
   {
-    "category": "Dark｜Volcano（火山）",
-    "description": "Eye-Catching、Surging｜醒目、澎湃",
+    "category": "Dark｜Volcano",
+    "description": "Eye-Catching、Surging",
     "detial": [
       { "name": "Volcano1", "hex": "#2B1611" },
       { "name": "Volcano2", "hex": "#441D12" },
@@ -243,8 +243,8 @@
     ]
   },
   {
-    "category": "Dark｜SunsetOrange（日暮）",
-    "description": "Warm、Cheerful｜温暖、欢快",
+    "category": "Dark｜SunsetOrange",
+    "description": "Warm、Cheerful",
     "detial": [
       { "name": "Orange1", "hex": "#2B1D11" },
       { "name": "Orange2", "hex": "#442A11" },
@@ -259,8 +259,8 @@
     ]
   },
   {
-    "category": "Dark｜CalendulaGold（金盏花）",
-    "description": "Vitality、Positive｜活力、积极",
+    "category": "Dark｜CalendulaGold",
+    "description": "Vitality、Positive",
     "detial": [
       { "name": "Gold1", "hex": "#2B2111" },
       { "name": "Gold2", "hex": "#443111" },
@@ -275,8 +275,8 @@
     ]
   },
   {
-    "category": "Dark｜SunriseYellow（日出）",
-    "description": "Birth、Sunshine｜出生、阳光",
+    "category": "Dark｜SunriseYellow",
+    "description": "Birth、Sunshine",
     "detial": [
       { "name": "Yellow1", "hex": "#2B2611" },
       { "name": "Yellow2", "hex": "#443B11" },
@@ -291,8 +291,8 @@
     ]
   },
   {
-    "category": "Dark｜Lime（青柠）",
-    "description": "Natural、Vitality｜自然、生机",
+    "category": "Dark｜Lime",
+    "description": "Natural、Vitality",
     "detial": [
       { "name": "Lime1", "hex": "#1F2611" },
       { "name": "Lime2", "hex": "#2E3C10" },
@@ -307,8 +307,8 @@
     ]
   },
   {
-    "category": "Dark｜PolarGreen（极光绿）",
-    "description": "Health、Innovation｜健康、创新",
+    "category": "Dark｜PolarGreen",
+    "description": "Health、Innovation",
     "detial": [
       { "name": "Green1", "hex": "#162312" },
       { "name": "Green2", "hex": "#1D3712" },
@@ -323,8 +323,8 @@
     ]
   },
   {
-    "category": "Dark｜Cyan（明青）",
-    "description": "Hope、Strong｜希望、坚强",
+    "category": "Dark｜Cyan",
+    "description": "Hope、Strong",
     "detial": [
       { "name": "Cyan1", "hex": "#112123" },
       { "name": "Cyan2", "hex": "#113536" },
@@ -339,8 +339,8 @@
     ]
   },
   {
-    "category": "Dark｜DaybreakBlue（拂晓蓝）",
-    "description": "Inclusiveness、Technology、Inclusiveness｜包容、科技、普惠",
+    "category": "Dark｜DaybreakBlue",
+    "description": "Inclusiveness、Technology、Inclusiveness",
     "detial": [
       { "name": "Blue1", "hex": "#111A2C" },
       { "name": "Blue2", "hex": "#112545" },
@@ -355,8 +355,8 @@
     ]
   },
   {
-    "category": "Dark｜GeekBlue（极客蓝）",
-    "description": "Explore、Research｜探索、钻研",
+    "category": "Dark｜GeekBlue",
+    "description": "Explore、Research",
     "detial": [
       { "name": "GeekBlue1", "hex": "#131629" },
       { "name": "GeekBlue2", "hex": "#161D40" },
@@ -371,8 +371,8 @@
     ]
   },
   {
-    "category": "Dark｜GoldenPurple（酱紫）",
-    "description": "Elegant、Romantic｜优雅、浪漫",
+    "category": "Dark｜GoldenPurple",
+    "description": "Elegant、Romantic",
     "detial": [
       { "name": "Purple1", "hex": "#1A1325" },
       { "name": "Purple2", "hex": "#24163A" },
@@ -387,8 +387,8 @@
     ]
   },
   {
-    "category": "Dark｜Magenta（法式洋红）",
-    "description": "Bright、Emotional｜明快、感性",
+    "category": "Dark｜Magenta",
+    "description": "Bright、Emotional",
     "detial": [
       { "name": "Magenta1", "hex": "#291321" },
       { "name": "Magenta2", "hex": "#40162F" },

@@ -1,7 +1,6 @@
 import { Action, ActionPanel, Grid, Cache, Icon } from "@raycast/api";
 import { useState, useEffect, useRef } from "react";
 import { generatePalettes } from "./ColorSchemeVariants";
-import ChineseTraditionalColor from "../assets/Palette_ChineseTraditionalColor.json";
 import OpenColor from "../assets/Plaette_OpenColor.json";
 import AntDesign from "../assets/Palette_AntDesign.json";
 import ArcoDesign from "../assets/Palette_ArcoDesign.json";
@@ -43,12 +42,11 @@ const cp_antv: Palette[] = AntV;
 const cp_spev: Palette[] = SpectrumDV;
 
 // Other Palettes
-const cp_cc: Palette[] = ChineseTraditionalColor;
 const cp_oc: Palette[] = OpenColor;
 
 // Main Command
 export default function Command() {
-  const [palette, setpalette] = useCachedState<Palette[]>("palette", cp_cc);
+  const [palette, setpalette] = useCachedState<Palette[]>("palette", cp_spe);
   const [paletteName, setpaletteName] = useCachedState<string>("paletteName", "chinesetraditionalcolor");
   const paletteRef = useRef(paletteName);
 
@@ -86,9 +84,7 @@ export default function Command() {
           storeValue={true}
           onChange={(value) => {
             setpalette(
-              value === "chinesetraditionalcolor"
-                ? cp_cc
-                : value === "opencolor"
+              value === "opencolor"
                 ? cp_oc
                 : value === "antdesign"
                 ? cp_ant
@@ -108,7 +104,7 @@ export default function Command() {
                 ? cp_spev
                 : value === "variants"
                 ? cp_dg
-                : cp_cc
+                : cp_spe
             );
             paletteRef.current = value;
             setpaletteName(value);
@@ -127,11 +123,6 @@ export default function Command() {
             <Grid.Dropdown.Item title="SpectrumV" value="spectrumv" icon="Icon_AdobeSpectrum.svg" />
           </Grid.Dropdown.Section>
           <Grid.Dropdown.Section title="Other Palettes">
-            <Grid.Dropdown.Item
-              title="Chinese Traditional Color"
-              value="chinesetraditionalcolor"
-              icon="Icon_Default.svg"
-            />
             <Grid.Dropdown.Item title="OpenColor" value="opencolor" icon="Icon_OpenColor.svg" />
           </Grid.Dropdown.Section>
           <Grid.Dropdown.Section title="Dynamic Palettes">
