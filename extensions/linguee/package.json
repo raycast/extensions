@@ -45,9 +45,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.36.0",
-    "axios": "^0.27.2",
-    "axios-hooks": "^3.0.0",
-    "lru-cache": "^7.10.1",
+    "@raycast/utils": "^1.4.18",
     "node-html-parser": "^5.1.0"
   },
   "devDependencies": {
