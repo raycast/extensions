@@ -46,7 +46,7 @@ function CreateQuestForm(props: { onCreate: (quest: Omit<Quest, "id">) => void; 
     >
       <Form.TextField id="title" key="title" defaultValue={quest?.title ?? "Quest"} title="Title" />
       {tasks.map((task, index) => (
-          <Form.TextField key={index.toString()} id={index.toString()} title={`Task ${index}`} defaultValue={task} />
+        <Form.TextField key={index.toString()} id={index.toString()} title={`Task ${index}`} defaultValue={task} />
       ))}
     </Form>
   );
