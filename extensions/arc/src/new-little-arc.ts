@@ -19,7 +19,7 @@ export default async function command(props: LaunchProps<{ arguments: Arcguments
     }
 
     // Append https:// if not http OR https is present
-    let openURL = !/^https?:\/\//i.test(newTabUrl) ? "https://" + newTabUrl : newTabUrl;
+    const openURL = !/^https?:\/\//i.test(newTabUrl) ? "https://" + newTabUrl : newTabUrl;
 
     await closeMainWindow();
     await makeNewLittleArcWindow(openURL);
