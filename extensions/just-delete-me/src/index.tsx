@@ -22,6 +22,7 @@ export default function Command() {
     easy: Color.Green,
     medium: Color.Yellow,
     hard: Color.Orange,
+    limited: Colors.Purple,
     impossible: Color.Red,
   } as { [key: string]: string };
 
