@@ -20,6 +20,7 @@
     {
       "name": "index",
       "title": "Trending Repositories",
+      "subtitle": "GitHub",
       "description": "Quick access to trending repositories on GitHub.",
       "mode": "view"
     }
