@@ -7,6 +7,7 @@ import {
   formatFilePath,
   formatResult,
   getFilesInDir,
+  getPreferredFormat,
   getUserConfiguredGraphPath,
   showGraphPathInvalidToast,
   validateUserConfigGraphPath,
@@ -101,16 +102,17 @@ function useSearch() {
 }
 
 async function performSearch(searchText: string): Promise<SearchResult[]> {
+  const fileType = await getPreferredFormat().then((fileFormat) => `.${fileFormat}`);
   const finalSearchResults: SearchResult[] = [];
   await getFilesInDir(getUserConfiguredGraphPath() + "/pages").then((result) => {
     if (getPreferenceValues().smartSearch == true && searchText.length > 0) {
       const finalInitialResult: SearchResult[] = [];
       //looping through entire database to see a match
       result.forEach((element) => {
-        if (element.endsWith(".md")) {
-          //Making sure only MD files are shown
+        if (element.endsWith(fileType)) {
+          // Making sure only MD/org files are shown
           finalInitialResult.push({
-            name: formatResult(element).replace(".md", ""),
+            name: formatResult(element).replace(fileType, ""),
             description: formatResult(element),
             url: formatFilePath(element),
           });
@@ -129,16 +131,16 @@ async function performSearch(searchText: string): Promise<SearchResult[]> {
       for (const rawSearchResult in rawSearchResults) {
         finalSearchResults.push({
           name: rawSearchResults[rawSearchResult].name,
-          description: rawSearchResults[rawSearchResult].name + ".md",
+          description: rawSearchResults[rawSearchResult].name + fileType,
           url: rawSearchResults[rawSearchResult].url,
         });
       }
     } else {
       result.forEach((element) => {
-        if (element.endsWith(".md") && element.toLowerCase().includes(searchText.toLowerCase())) {
-          //Making sure only MD files are shown
+        if (element.endsWith(fileType) && element.toLowerCase().includes(searchText.toLowerCase())) {
+          //Making sure only MD/org files are shown
           finalSearchResults.push({
-            name: formatResult(element).replace(".md", ""),
+            name: formatResult(element).replace(fileType, ""),
             description: formatResult(element),
             url: formatFilePath(element),
           });

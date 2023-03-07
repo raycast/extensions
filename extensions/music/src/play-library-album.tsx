@@ -1,4 +1,4 @@
-import { Action, ActionPanel, closeMainWindow, List, showToast, Toast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, closeMainWindow, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
 import { flow, pipe } from "fp-ts/lib/function";
 import * as O from "fp-ts/Option";
 import * as S from "fp-ts/string";
@@ -7,6 +7,7 @@ import * as TE from "fp-ts/TaskEither";
 import { useEffect, useState } from "react";
 
 import { Album } from "./util/models";
+import { SFSymbols } from "./util/models";
 import { fromEmptyOrNullable } from "./util/option";
 import { parseResult } from "./util/parser";
 import * as music from "./util/scripts";
@@ -75,8 +76,8 @@ export default function PlayLibraryAlbum() {
         <List.Item
           key={id}
           title={name ?? "--"}
-          subtitle={artist ?? "--"}
-          accessoryTitle={count ? `🎧 ${count}` : ""}
+          subtitle={SFSymbols.ARTIST + ` ${artist}` ?? "--"}
+          accessoryTitle={count ? SFSymbols.PLAYLIST + ` ${count}` : ""}
           icon={{ source: "../assets/icon.png" }}
           actions={<Actions name={name} pop={pop} />}
         />
@@ -93,7 +94,7 @@ function Actions({ name, pop }: { name: string; pop: () => void }) {
       name,
       music.albums.play(shuffle),
       TE.map(() => closeMainWindow()),
-      handleTaskEitherError
+      handleTaskEitherError("Operation failed.")
     )();
 
     pop();
@@ -101,8 +102,8 @@ function Actions({ name, pop }: { name: string; pop: () => void }) {
 
   return (
     <ActionPanel>
-      <Action title={title} onAction={handleSubmit(false)} />
-      <Action title={`Shuffle Album ${name}`} onAction={handleSubmit(true)} />
+      <Action title={title} onAction={handleSubmit(false)} icon={Icon.Play} />
+      <Action title={`Shuffle Album ${name}`} onAction={handleSubmit(true)} icon={Icon.Shuffle} />
     </ActionPanel>
   );
 }

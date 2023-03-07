@@ -2,7 +2,9 @@
 
 SM.MS image hosting service to upload and share images.
 
-**⚠️Warning:**
+⚠️Due to network issues, users from China Mainland are unable to access SM.MS, we have added an alternate domain name [smms.app](https://smms.app)
+
+**⚠Warning:**
 The size of uploaded images is limited to less than 5M.
 
 **How to get API secret token?**

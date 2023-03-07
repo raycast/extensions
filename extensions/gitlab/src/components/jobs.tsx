@@ -13,6 +13,7 @@ export interface Job {
   id: string;
   name: string;
   status: string;
+  allowFailure: boolean;
 }
 
 const GET_PIPELINE_JOBS = gql`
@@ -27,6 +28,7 @@ const GET_PIPELINE_JOBS = gql`
                 id
                 name
                 status
+                allowFailure
               }
             }
           }
@@ -36,7 +38,7 @@ const GET_PIPELINE_JOBS = gql`
   }
 `;
 
-export function getCIJobStatusIcon(status: string): Image {
+export function getCIJobStatusIcon(status: string, allowFailure: boolean): Image {
   switch (status.toLowerCase()) {
     case "success": {
       return { source: GitLabIcons.status_success, tintColor: Color.Green };
@@ -51,7 +53,9 @@ export function getCIJobStatusIcon(status: string): Image {
       return { source: GitLabIcons.status_running, tintColor: Color.Blue };
     }
     case "failed": {
-      return { source: GitLabIcons.status_failed, tintColor: Color.Red };
+      return allowFailure
+        ? { source: Icon.ExclamationMark, tintColor: Color.Orange }
+        : { source: GitLabIcons.status_failed, tintColor: Color.Red };
     }
     case "canceled": {
       return { source: GitLabIcons.status_canceled, tintColor: Color.PrimaryText };
@@ -66,7 +70,7 @@ export function getCIJobStatusIcon(status: string): Image {
       return { source: Icon.ExclamationMark, tintColor: Color.Magenta };
   }
   /*
-  missing 
+  missing
   * WAITING_FOR_RESOURCE
   * PREPARING
   * MANUAL
@@ -107,16 +111,18 @@ export function getCIJobStatusEmoji(status: string): string {
       return "💼";
   }
   /*
-  missing 
+  missing
   * WAITING_FOR_RESOURCE
   * PREPARING
   */
 }
 
-function getStatusText(status: string) {
+function getStatusText(status: string, allowFailure: boolean) {
   const s = status.toLowerCase();
   if (s === "success") {
     return "passed";
+  } else if (allowFailure) {
+    return "allowed to fail";
   } else {
     return status;
   }
@@ -124,9 +130,9 @@ function getStatusText(status: string) {
 
 export function JobListItem(props: { job: Job; projectFullPath: string; onRefreshJobs: () => void }): JSX.Element {
   const job = props.job;
-  const icon = getCIJobStatusIcon(job.status);
+  const icon = getCIJobStatusIcon(job.status, job.allowFailure);
   const subtitle = "#" + getIdFromGqlId(job.id);
-  const status = getStatusText(job.status.toLowerCase());
+  const status = getStatusText(job.status.toLowerCase(), job.allowFailure);
   return (
     <List.Item
       id={job.id}
@@ -154,6 +160,7 @@ export function JobList(props: {
   projectFullPath: string;
   pipelineID: string;
   pipelineIID?: string | undefined;
+  navigationTitle?: string;
 }): JSX.Element {
   const { stages, error, isLoading, refresh } = useSearch(
     "",
@@ -168,10 +175,10 @@ export function JobList(props: {
     showErrorToast(error, "Cannot search Pipelines");
   }
   if (!stages) {
-    return <List isLoading={isLoading} navigationTitle="Jobs" />;
+    return <List isLoading={isLoading} navigationTitle={props.navigationTitle || "Jobs"} />;
   }
   return (
-    <List isLoading={isLoading} navigationTitle="Jobs">
+    <List isLoading={isLoading} navigationTitle={props.navigationTitle || "Jobs"}>
       {Object.keys(stages).map((stagekey) => (
         <List.Section key={stagekey} title={stagekey}>
           {stages[stagekey].map((job) => (
@@ -188,6 +195,7 @@ interface RESTJob {
   status: string;
   stage: string;
   name: string;
+  allowFailure: boolean;
 }
 
 export function useSearch(
@@ -236,7 +244,12 @@ export function useSearch(
               stages[stage.name] = [];
             }
             for (const job of stage.jobs.nodes) {
-              stages[stage.name].push({ id: job.id, name: job.name, status: job.status });
+              stages[stage.name].push({
+                id: job.id,
+                name: job.name,
+                status: job.status,
+                allowFailure: job.allowFailure,
+              });
             }
           }
           if (!didUnmount) {
@@ -253,7 +266,12 @@ export function useSearch(
             if (!stages[job.stage]) {
               stages[job.stage] = [];
             }
-            stages[job.stage].push({ id: `${job.id}`, name: job.name, status: job.status });
+            stages[job.stage].push({
+              id: `${job.id}`,
+              name: job.name,
+              status: job.status,
+              allowFailure: job.allowFailure,
+            });
           }
           if (!didUnmount) {
             setStages(stages);

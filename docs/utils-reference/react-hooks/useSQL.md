@@ -2,12 +2,6 @@
 
 Hook which executes a query on a local SQL database and returns the [AsyncState](#asyncstate) corresponding to the execution of the query. The last value will be kept between command runs.
 
-## Requirement
-
-For this hook to work you need to:
-
-- install the `sql.js` dependency by running `npm install --save sql.js`.
-
 ## Signature
 
 ```ts
@@ -163,7 +157,7 @@ An object corresponding to the execution state of the function.
 ```ts
 // Initial State
 {
-  isLoading: true,
+  isLoading: true, // or `false` if `options.execute` is `false`
   data: undefined,
   error: undefined
 }

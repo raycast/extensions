@@ -15,8 +15,9 @@ interface IDictionary {
 
 const spotlight = (
   query: string,
+  exact = false,
   dir: string | null = null,
-  filter: string | null = null,
+  filter: string[] | null = null,
   attrs = [],
   abortable: React.MutableRefObject<AbortController | null | undefined> | undefined
 ) => {
@@ -25,14 +26,26 @@ const spotlight = (
   if (query.length === 0) throw new Error("query must not be empty.");
   if (dir && "string" !== typeof dir) throw new Error("dir must be a string.");
 
-  const args = [query || ".", "-0"];
+  let processedQuery: string | undefined = query;
+
+  if (exact) {
+    processedQuery = undefined;
+  }
+
+  const args = processedQuery ? [processedQuery, "-0"] : ["-0"];
 
   if (dir) {
     args.push("-onlyin", dir);
   }
 
-  if (filter) {
-    args.push(filter);
+  if (filter && filter.length) {
+    let filterParts = filter;
+
+    if (exact) {
+      filterParts = ["-literal", filter.join(" && ")];
+    }
+
+    args.push(...filterParts);
   }
 
   for (const attr of attrs) {

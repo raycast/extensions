@@ -1,5 +1,15 @@
 # Figma Files Changelog
 
+## [Fixes] - 2022-12-20
+
+- Fixed a bug that caused the extension to crash if a project didn't have any files
+
+## [Fixes] - 2022-09-23
+
+- Fixed a bug where it always tried to open files in the desktop app, even though Figma was not installed.
+- Fixed a endless loop causing the CPU to spike while having extension open.
+- Fixed a crash if data could not be fetched for some reason.
+
 ## [Grid thumbnails and menubar app] - 2022-09-12
 
 - Replaces List with Grid to see larger thumbnails.

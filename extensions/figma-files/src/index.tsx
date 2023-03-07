@@ -1,5 +1,4 @@
-import { Grid } from "@raycast/api";
-
+import { Application, getApplications, Grid } from "@raycast/api";
 import FileGridItem from "./components/FileGridItem";
 import { ErrorView } from "./components/ErrorView";
 import { useVisitedFiles } from "./hooks/useVisitedFiles";
@@ -8,13 +7,17 @@ import { useEffect, useState } from "react";
 
 export default function Command() {
   const { projectFiles, isLoading: isLoadingProjectFiles, hasError } = useProjectFiles();
-
   const { files: visitedFiles, visitFile, isLoading: isLoadingVisitedFiles } = useVisitedFiles();
-
   const isLoading = isLoadingProjectFiles || isLoadingVisitedFiles;
-
   const [filteredFiles, setFilteredFiles] = useState(projectFiles);
   const [isFiltered, setIsFiltered] = useState(false);
+  const [desktopApp, setDesktopApp] = useState<Application>();
+
+  useEffect(() => {
+    getApplications()
+      .then((apps) => apps.find((a) => a.bundleId === "com.figma.Desktop"))
+      .then(setDesktopApp);
+  }, []);
 
   useEffect(() => {
     setFilteredFiles(projectFiles);
@@ -53,6 +56,7 @@ export default function Command() {
             <FileGridItem
               key={file.key + "-recent-file"}
               file={file}
+              desktopApp={desktopApp}
               extraKey={file.key + "-recent-file-item"}
               onVisit={visitFile}
             />
@@ -62,8 +66,8 @@ export default function Command() {
 
       {filteredFiles?.map((project) => (
         <Grid.Section key={project.name + "-project"} title={project.name}>
-          {project.files.map((file) => (
-            <FileGridItem key={file.key + "-file"} file={file} onVisit={visitFile} />
+          {(project.files || []).map((file) => (
+            <FileGridItem key={file.key + "-file"} file={file} desktopApp={desktopApp} onVisit={visitFile} />
           ))}
         </Grid.Section>
       ))}

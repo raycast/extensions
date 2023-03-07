@@ -103,7 +103,7 @@ const useGetOwnedGames = (type: string) => {
   );
 
   return {
-    data: data && data?.length > 0 ? reverse(data) : undefined,
+    data: data ? reverse(data) : undefined,
     isLoading: !data && !error,
     isValidating,
     isError: error,

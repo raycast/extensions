@@ -26,3 +26,9 @@ export const trendsTags = [
   { title: "ZhiHu", value: TrendsTags.ZHIHU },
   { title: "DouYin", value: TrendsTags.DOUYIN },
 ];
+
+export enum CacheKey {
+  WEI_BO = "WeiBo",
+  ZHI_HU = "ZhiHu",
+  DOU_YIN = "DouYin",
+}

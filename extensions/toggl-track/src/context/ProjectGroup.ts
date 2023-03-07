@@ -9,8 +9,8 @@ export type ProjectGroup = {
 
 export function generateProjectGroups(projects: Project[], workspaces: Workspace[], clients: Client[]) {
   const projectGroups = projects.reduce((acc, p) => {
-    const client = clients.find((c) => c.id === p.cid);
-    const workspace = workspaces.find((w) => w.id === p.wid);
+    const client = clients.find((c) => c.id === p.client_id);
+    const workspace = workspaces.find((w) => w.id === p.workspace_id);
     if (!workspace) {
       return acc;
     }

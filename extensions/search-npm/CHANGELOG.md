@@ -1,5 +1,9 @@
 # Search npm Changelog
 
+## [Fixed Yarn install command] - 2022-11-11
+
+- Fixed yarn install command since it's different than npm/pnpm
+
 ## [Added a bunch of new feedback] - 2022-09-05
 
 - Added a cache for faster results

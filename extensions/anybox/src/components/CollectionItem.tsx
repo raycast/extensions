@@ -20,7 +20,7 @@ export default function CollectionItem(props: Props) {
       title={itemTitle(tag)}
       subtitle="Collection"
       icon={{
-        source: `http://localhost:6391/sf-symbols/${tag.icon}`,
+        source: `http://127.0.0.1:6391/sf-symbols/${tag.icon}`,
         fallback: Icon.Hashtag,
         tintColor: tag.color,
       }}
@@ -31,7 +31,7 @@ export default function CollectionItem(props: Props) {
           <Action.Push
             title="Show Links in Collection"
             icon={{
-              source: `http://localhost:6391/sf-symbols/${tag.icon}`,
+              source: `http://127.0.0.1:6391/sf-symbols/${tag.icon}`,
               fallback: Icon.Hashtag,
               tintColor: tag.color,
             }}

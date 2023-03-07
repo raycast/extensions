@@ -1,6 +1,3 @@
-import { buildScriptEnsuringTimIsRunning, runAppleScriptSilently } from "./utils";
+import { installedWrapper, openTaskManager } from "./lib/tim";
 
-export default async () => {
-  const script = buildScriptEnsuringTimIsRunning(`opentaskmanager`);
-  await runAppleScriptSilently(script);
-};
+export default installedWrapper(openTaskManager);

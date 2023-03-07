@@ -5,21 +5,22 @@ import { baseToBase, buildBases } from "./utils/base-converter-utils";
 import { BaseConvertersAdvanceView } from "./components/base-converters-advance-view";
 import { BaseConvertersSimpleView } from "./components/base-converters-simple-view";
 import { getInputItem } from "./hooks/get-input-item";
+import { ActionOpenPreferences } from "./components/action-open-preferences";
 
 export default function BaseConverter() {
   const { autoDetect, priorityDetection, advanceView, advanceViewLocation } = commonPreferences();
 
-  const [base10, setBase10] = useState<string>("0");
-  const [base2, setBase2] = useState<string>("0");
-  const [base4, setBase4] = useState<string>("0");
-  const [base8, setBase8] = useState<string>("0");
-  const [base16, setBase16] = useState<string>("0");
-  const [base32, setBase32] = useState<string>("0");
-  const [baseString, setBaseString] = useState<string>("0");
+  const [base10, setBase10] = useState<string>("");
+  const [base2, setBase2] = useState<string>("");
+  const [base4, setBase4] = useState<string>("");
+  const [base8, setBase8] = useState<string>("");
+  const [base16, setBase16] = useState<string>("");
+  const [base32, setBase32] = useState<string>("");
+  const [baseString, setBaseString] = useState<string>("");
   const [baseRadix, setBaseRadix] = useState<number>(10);
 
-  const [input, setInput] = useState<string>("0");
-  const [output, setOutput] = useState<string>("0");
+  const [input, setInput] = useState<string>("");
+  const [output, setOutput] = useState<string>("");
   const [fromBase, setFromBase] = useState<string>("10");
   const [toBase, setToBase] = useState<string>("2");
   const bases = buildBases();
@@ -37,14 +38,23 @@ export default function BaseConverter() {
   useEffect(() => {
     async function _fetch() {
       const baseNumber = parseInt(baseString, baseRadix);
-      if (isNaN(baseNumber) || isEmpty(baseString.trim())) return;
-      setBase10(baseNumber.toString(10));
-      setBase2(baseNumber.toString(2));
-      setBase4(baseNumber.toString(4));
-      setBase8(baseNumber.toString(8));
-      setBase16(baseNumber.toString(16));
-      setBase32(baseNumber.toString(32));
-      setInput(baseNumber.toString(baseRadix));
+      if (isNaN(baseNumber) || isEmpty(baseString.trim())) {
+        setBase10("");
+        setBase2("");
+        setBase4("");
+        setBase8("");
+        setBase16("");
+        setBase32("");
+        setInput("");
+      } else {
+        setBase10(baseNumber.toString(10));
+        setBase2(baseNumber.toString(2));
+        setBase4(baseNumber.toString(4));
+        setBase8(baseNumber.toString(8));
+        setBase16(baseNumber.toString(16));
+        setBase32(baseNumber.toString(32));
+        setInput(baseNumber.toString(baseRadix));
+      }
     }
 
     _fetch().then();
@@ -93,11 +103,12 @@ export default function BaseConverter() {
               title={"Clear All"}
               shortcut={{ modifiers: ["shift", "cmd"], key: "backspace" }}
               onAction={() => {
-                setBaseString("0");
+                setBaseString("");
                 setBaseRadix(10);
               }}
             />
           </ActionPanel.Section>
+          <ActionOpenPreferences showCommandPreferences={true} showExtensionPreferences={true} />
         </ActionPanel>
       }
     >

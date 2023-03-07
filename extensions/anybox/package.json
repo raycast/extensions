@@ -39,6 +39,14 @@
           "description": "Enable to also search collections and limit search scope to one specific collection."
         },
         {
+          "name": "searchLinkDescriptions",
+          "type": "checkbox",
+          "required": false,
+          "default": false,
+          "label": "Search Link Descriptions",
+          "description": "Also search link descriptions when searching for links."
+        },
+        {
           "name": "usePinyin",
           "type": "checkbox",
           "required": false,
@@ -80,7 +88,7 @@
       "name": "pasteWithCollections",
       "title": "Save Clipboard With Collections",
       "subtitle": "Anybox",
-      "description": "Save clipboard Anybox with optional collections.",
+      "description": "Save clipboard to Anybox with optional collections.",
       "mode": "view"
     },
     {

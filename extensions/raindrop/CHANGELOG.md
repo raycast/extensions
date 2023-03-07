@@ -1,5 +1,17 @@
 # Raindrop.io Extension Changelog
 
+## [Fixes] - 2023-01-02
+
+- Added a fix where some accounts with no collections or groups without collections failed to display results.
+
+## [Add preference setting] - 2022-12-21
+
+- Adds a preference checkbox to always use the last used collection in filter
+
+## [Add collections filter] - 2022-12-16
+
+- Adds a filter in the bookmarks list to be able to limit results to only in the selected collection
+
 ## [Add fallback icon] - 2022-08-03
 
 - Adds Raindrop icon if bookmark has no favicon

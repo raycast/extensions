@@ -5,7 +5,7 @@ export function FolderPageListEmptyView(props: { path: string; pop: () => void }
   const { path, pop } = props;
   return (
     <List.EmptyView
-      icon={{ source: { light: "empty-view-icon.svg", dark: "empty-view-icon@dark.svg" } }}
+      icon={{ source: { light: "empty-view-icon.png", dark: "empty-view-icon@dark.png" } }}
       title={"No folder"}
       actions={
         <ActionPanel>

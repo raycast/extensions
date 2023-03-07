@@ -9,7 +9,7 @@ export default function BookmarkList(props: { bookmarks: Bookmark[] | undefined;
         title={`${props.bookmarks?.length} ${props.bookmarks?.length === 1 ? "Repository" : "Repositories"}`}
       >
         {props.bookmarks?.map((bookmark) => (
-          <BookmarkListItem key={bookmark.RepositoryIdentifier} bookmark={bookmark} />
+          <BookmarkListItem key={bookmark.id} bookmark={bookmark} />
         ))}
       </List.Section>
     </List>

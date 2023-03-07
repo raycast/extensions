@@ -1,52 +1,5 @@
 import { Image } from "@raycast/api";
 
-export interface FormValue {
-  path: string;
-  name: string;
-  content: string;
-  tags: string[];
-}
-
-export interface GlobalPreferences {
-  vaultPath: string;
-}
-
-export interface QuickLookPreferences {
-  removeYAML: boolean;
-  removeLinks: boolean;
-  removeLatex: boolean;
-}
-
-export interface AppendNotePreferences {
-  appendTemplate: string;
-  appendSelectedTemplate: string;
-}
-export interface NoteFormPreferences extends GlobalPreferences {
-  prefPath: string;
-  prefNoteName: string;
-  prefNoteContent: string;
-  fillFormWithDefaults: boolean;
-  prefTag: string;
-  tags: string;
-  openOnCreate: boolean;
-  folderActions: string;
-}
-
-export interface SearchNotePreferences extends GlobalPreferences, QuickLookPreferences, AppendNotePreferences {
-  primaryAction: string;
-  excludedFolders: string;
-  showDetail: boolean;
-  showMetadata: boolean;
-  searchContent: boolean;
-}
-
-export interface RandomNotePreferences extends GlobalPreferences, QuickLookPreferences, AppendNotePreferences {}
-
-export interface SearchMediaPreferences extends GlobalPreferences {
-  imageSize: string;
-  excludedFolders: string;
-}
-
 export interface Vault {
   name: string;
   key: string;
@@ -58,8 +11,20 @@ export interface Note {
   path: string;
   tags: string[];
   content: string;
+  starred: boolean;
 }
 
+export interface CodeBlock {
+  language: string;
+  code: string;
+}
+
+export interface FormValue {
+  path: string;
+  name: string;
+  content: string;
+  tags: string[];
+}
 interface ObsidianVaultJSON {
   path: string;
   ts: number;
@@ -73,11 +38,6 @@ export interface ObsidianJSON {
 export interface ObsidianVaultsState {
   ready: boolean;
   vaults: Vault[];
-}
-
-export interface PinnedNotesJSON {
-  vaultPath: string;
-  pinnedNotes: string[];
 }
 
 export interface SearchArguments {
@@ -99,4 +59,15 @@ export interface MediaState {
 export interface MediaSearchArguments {
   searchArgument: string;
   typeArgument: string;
+}
+
+export interface NoteListProps {
+  title?: string;
+  vault: Vault;
+  notes: Note[];
+  isLoading?: boolean;
+  searchArguments: SearchArguments;
+  action?: (note: Note, vault: Vault) => React.ReactFragment;
+  onDelete?: (note: Note, vault: Vault) => void;
+  onSearchChange?: (search: string) => void;
 }

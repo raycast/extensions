@@ -9,17 +9,43 @@ import {
   List,
   LocalStorage,
   Toast,
+  closeMainWindow,
   environment,
   popToRoot,
   showToast,
+  showHUD,
+  confirmAlert,
+  open,
+  getSelectedFinderItems,
 } from "@raycast/api";
+
 import { usePromise } from "@raycast/utils";
 import { useEffect, useRef, useState } from "react";
 
-import { searchSpotlight } from "./search-spotlight";
-import { SpotlightSearchResult } from "./types";
+import { runAppleScript } from "run-applescript";
 
-import { folderName, enclosingFolderName, maybeMoveResultToTrash, copyFolderToClipboard } from "./utils";
+import { searchSpotlight } from "./search-spotlight";
+import { FolderSearchPlugin, SpotlightSearchResult } from "./types";
+
+import {
+  loadPlugins,
+  folderName,
+  enclosingFolderName,
+  showFolderInfoInFinder,
+  copyFolderToClipboard,
+  maybeMoveResultToTrash,
+  lastUsedSort,
+} from "./utils";
+
+import fse from "fs-extra";
+import path = require("node:path");
+
+// allow string indexing on Icons
+interface IconDictionary {
+  [id: string]: Icon;
+}
+
+const IconDictionaried: IconDictionary = Icon as IconDictionary;
 
 export default function Command() {
   const [searchText, setSearchText] = useState<string>("");
@@ -29,12 +55,38 @@ export default function Command() {
   const [isShowingDetail, setIsShowingDetail] = useState<boolean>(true);
   const [results, setResults] = useState<SpotlightSearchResult[]>([]);
 
+  const [plugins, setPlugins] = useState<FolderSearchPlugin[]>([]);
+
   const [isQuerying, setIsQuerying] = useState<boolean>(false);
   const [canExecute, setCanExecute] = useState<boolean>(false);
 
+  const [hasCheckedPlugins, setHasCheckedPlugins] = useState<boolean>(false);
   const [hasCheckedPreferences, setHasCheckedPreferences] = useState<boolean>(false);
 
   const abortable = useRef<AbortController>();
+
+  // check plugins
+  usePromise(
+    async () => {
+      const plugins = await loadPlugins();
+      setPlugins(plugins);
+    },
+    [],
+    {
+      onData() {
+        setHasCheckedPlugins(true);
+      },
+      onError() {
+        showToast({
+          title: "An Error Occured",
+          message: "Could not read plugins",
+          style: Toast.Style.Failure,
+        });
+
+        setHasCheckedPlugins(true);
+      },
+    }
+  );
 
   // check prefs
   usePromise(
@@ -54,7 +106,7 @@ export default function Command() {
       onData(preferences) {
         setPinnedResults(preferences?.pinned || []);
         setSearchScope(preferences?.searchScope || "");
-        setIsShowingDetail(preferences?.isShowingDetail || true);
+        setIsShowingDetail(preferences?.isShowingDetail);
         setHasCheckedPreferences(true);
       },
       onError() {
@@ -75,10 +127,9 @@ export default function Command() {
     [
       searchText,
       searchScope,
-      "kind:folder", // hard-code
       abortable,
       (result: SpotlightSearchResult) => {
-        setResults((results) => [result, ...results]);
+        setResults((results) => [result, ...results].sort(lastUsedSort));
       },
     ],
     {
@@ -100,7 +151,7 @@ export default function Command() {
 
         setIsQuerying(false);
       },
-      execute: hasCheckedPreferences && canExecute && !!searchText,
+      execute: hasCheckedPlugins && hasCheckedPreferences && canExecute && !!searchText,
       abortable,
     }
   );
@@ -108,7 +159,7 @@ export default function Command() {
   // save preferences
   useEffect(() => {
     (async () => {
-      if (!hasCheckedPreferences) {
+      if (!(hasCheckedPlugins && hasCheckedPreferences)) {
         return;
       }
 
@@ -130,7 +181,17 @@ export default function Command() {
       setResults([]);
       setIsQuerying(false);
 
-      setCanExecute(true);
+      // short-circuit for 'pinned'
+      if (searchScope === "pinned") {
+        setResults(
+          pinnedResults.filter((pin) =>
+            pin.kMDItemFSName.toLocaleLowerCase().includes(searchText.replace(/[[|\]]/gi, "").toLocaleLowerCase())
+          )
+        );
+        setCanExecute(false);
+      } else {
+        setCanExecute(true);
+      }
     })();
   }, [searchText, searchScope]);
 
@@ -187,8 +248,13 @@ export default function Command() {
                     />
                     <List.Item.Detail.Metadata.Separator />
                     <List.Item.Detail.Metadata.Label
-                      title="Last opened"
+                      title="Last used"
                       text={result.kMDItemLastUsedDate?.toLocaleString() || "-"}
+                    />
+                    <List.Item.Detail.Metadata.Separator />
+                    <List.Item.Detail.Metadata.Label
+                      title="Use count"
+                      text={result.kMDItemUseCount?.toLocaleString() || "-"}
                     />
                     <List.Item.Detail.Metadata.Separator />
                   </List.Item.Detail.Metadata>
@@ -207,6 +273,73 @@ export default function Command() {
                   title="Show in Finder"
                   path={result.path}
                   onShow={() => popToRoot({ clearSearchBar: true })}
+                />
+                <Action
+                  title="Send Finder selection to Folder"
+                  icon={Icon.Folder}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
+                  onAction={async () => {
+                    const selectedItems = await getSelectedFinderItems();
+
+                    if (selectedItems.length === 0) {
+                      await showHUD(`⚠️  No Finder selection to send.`);
+                    } else {
+                      for (const item of selectedItems) {
+                        // Source path = item
+                        // Source file name = path.basename(item)
+                        //
+                        // Destination folder = result.path
+                        // Destination file = result.path + '/' + path.basename(item)
+
+                        const sourceFileName = path.basename(item.path);
+                        const destinationFolder = result.path;
+                        const destinationFile = result.path + "/" + path.basename(item.path);
+
+                        try {
+                          const exists = await fse.pathExists(destinationFile);
+                          if (exists) {
+                            const overwrite = await confirmAlert({
+                              title: "Ooverwrite the existing file?",
+                              message: sourceFileName + " already exists in " + destinationFolder,
+                            });
+
+                            if (overwrite) {
+                              if (item.path == destinationFile) {
+                                await showHUD("The source and destination file are the same");
+                              }
+                              fse.moveSync(item.path, destinationFile, { overwrite: true });
+                              await showHUD("Moved file " + path.basename(item.path) + " to " + destinationFolder);
+                            } else {
+                              await showHUD("Cancelling move");
+                            }
+                          } else {
+                            fse.moveSync(item.path, destinationFile);
+                            await showHUD("Moved file " + sourceFileName + " to " + destinationFolder);
+                          }
+
+                          open(result.path);
+                        } catch (e) {
+                          console.error("ERROR " + String(e));
+                          await showToast(Toast.Style.Failure, "Error moving file " + String(e));
+                        }
+                      }
+                    }
+
+                    closeMainWindow();
+                    popToRoot({ clearSearchBar: true });
+                  }}
+                />
+                <Action.OpenWith
+                  title="Open With..."
+                  shortcut={{ modifiers: ["cmd"], key: "o" }}
+                  path={result.path}
+                  onOpen={() => popToRoot({ clearSearchBar: true })}
+                />
+                <Action
+                  title="Show Info in Finder"
+                  icon={Icon.Finder}
+                  shortcut={{ modifiers: ["cmd"], key: "i" }}
+                  onAction={() => showFolderInfoInFinder(result)}
                 />
                 <Action
                   title="Toggle Details"
@@ -239,6 +372,14 @@ export default function Command() {
                   />
                 </ActionPanel.Section>
                 <ActionPanel.Section>
+                  <Action.CreateQuicklink
+                    title="Create Quicklink"
+                    icon={Icon.Link}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
+                    quicklink={{ link: result.path, name: folderName(result) }}
+                  />
+                </ActionPanel.Section>
+                <ActionPanel.Section>
                   <Action
                     title="Move to Trash"
                     style={Action.Style.Destructive}
@@ -246,6 +387,21 @@ export default function Command() {
                     shortcut={{ modifiers: ["ctrl"], key: "x" }}
                     onAction={() => maybeMoveResultToTrash(result, () => removeResultFromPinnedResults(result))}
                   />
+                </ActionPanel.Section>
+                <ActionPanel.Section title="Plugins">
+                  {plugins.map((plugin: FolderSearchPlugin, pluginIndex) => (
+                    <Action
+                      key={pluginIndex}
+                      title={plugin.title}
+                      icon={IconDictionaried[plugin.icon]}
+                      shortcut={{ ...plugin.shortcut }}
+                      onAction={() => {
+                        popToRoot({ clearSearchBar: true });
+                        closeMainWindow({ clearRootSearch: true });
+                        runAppleScript(plugin.appleScript(result));
+                      }}
+                    />
+                  ))}
                 </ActionPanel.Section>
               </ActionPanel>
             }
@@ -255,7 +411,7 @@ export default function Command() {
     );
   };
 
-  return !hasCheckedPreferences ? (
+  return !(hasCheckedPlugins && hasCheckedPreferences) ? (
     // prevent flicker due to details pref being async
     <Form />
   ) : (
@@ -267,10 +423,11 @@ export default function Command() {
       isShowingDetail={isShowingDetail}
       selectedItemId={selectedItemId}
       searchBarAccessory={
-        hasCheckedPreferences ? (
+        hasCheckedPlugins && hasCheckedPreferences ? (
           <List.Dropdown tooltip="Scope" onChange={setSearchScope} value={searchScope}>
-            <List.Dropdown.Item title="This Mac" value=""></List.Dropdown.Item>
-            <List.Dropdown.Item title={`User (${userInfo().username})`} value={userInfo().homedir}></List.Dropdown.Item>
+            <List.Dropdown.Item title="Pinned" value="pinned" />
+            <List.Dropdown.Item title="This Mac" value="" />
+            <List.Dropdown.Item title={`User (${userInfo().username})`} value={userInfo().homedir} />
           </List.Dropdown>
         ) : null
       }

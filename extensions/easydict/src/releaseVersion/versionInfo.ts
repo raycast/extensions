@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-07-01 19:05
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-08-20 11:36
+ * @lastEditTime: 2023-02-28 21:44
  * @fileName: versionInfo.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -11,7 +11,6 @@
 import { LocalStorage } from "@raycast/api";
 import axios from "axios";
 import { requestCostTime } from "../axiosConfig";
-import { releaseNote } from "./releaseNote";
 
 const versionInfoKey = "EasydictVersionInfoKey";
 const githubUrl = "https://github.com";
@@ -26,14 +25,26 @@ export class Easydict {
   static author = "tisfeng";
   static repo = "Raycast-Easydict";
 
-  // new version info
   // * NOTE: this is new version info, don't use it directly. Use getCurrentStoredVersionInfo() instead.
-  version = "2.1.0";
-  buildNumber = 9;
-  versionDate = "2022-09-02";
-  isNeedPrompt = true;
-  hasPrompted = false; // always default false, only show once, then should be set to true.
-  releaseMarkdown = releaseNote;
+  version = "2.7.3";
+  buildNumber = 22;
+  versionDate = "2023-02-28";
+  isNeedPrompt = false;
+  hasPrompted = false; // * always default false, only show once, then should be set to true.
+
+  releaseMarkdown = `
+## [v${this.version}] - ${this.versionDate}
+
+### 💎 优化
+
+- 当使用 Easydict 作为 Fallback Command 时，优先使用用户输入文本作为查询词（而不是选中文本）。
+
+---
+
+### 💎 Improvement
+
+- When using Easydict as Fallback Command, use the user input text as the query word (not the selected text).
+`;
 
   getRepoUrl() {
     return `${githubUrl}/${Easydict.author}/${Easydict.repo}`;
@@ -108,7 +119,7 @@ export class Easydict {
     const currentEasydictInfo = await this.getVersionInfo(currentVersionKey);
     if (currentEasydictInfo) {
       // console.log(`get current easydict cost time: ${Date.now() - startTime} ms`);
-      // console.log(`current easydict info: ${JSON.stringify(currentEasydictInfo, null, 2)}`);
+      // console.log(`current easydict info: ${JSON.stringify(currentEasydictInfo, null, 4)}`);
       return Promise.resolve(currentEasydictInfo);
     } else {
       const startStoredTime = Date.now();
@@ -126,7 +137,7 @@ export class Easydict {
    */
   public async fetchReleaseMarkdown(): Promise<string> {
     try {
-      console.log("fetch release markdown from github");
+      console.log(`fetch release markdown from github: ${this.getReleaseApiUrl()}`);
       const releaseInfo = await this.fetchReleaseInfo(this.getReleaseApiUrl());
       const releaseMarkdown = releaseInfo.body;
       console.log("fetch release markdown from github success");

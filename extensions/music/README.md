@@ -3,7 +3,8 @@
 </p>
 
 # Music
+
 > Apple music extension
 
-![sc1](./metadata/screnshot-1.png)
-![sc2](./metadata/screnshot-2.png)
+![sc1](./assets/screnshot-1.png)
+![sc2](./assets/screnshot-2.png)

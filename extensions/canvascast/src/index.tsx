@@ -6,7 +6,7 @@ import { Announcement } from "./components/announcement";
 import { EmptyView } from "./components/error-view";
 import { checkApi, getCourses, getAnnouncements } from "./utils/api";
 import { course, announcement, assignment } from "./utils/types";
-import { Error } from "./utils/utils";
+import { Error, getCourseColors } from "./utils/utils";
 
 export default function main() {
   const [courses, setCourses] = useState<course[]>();

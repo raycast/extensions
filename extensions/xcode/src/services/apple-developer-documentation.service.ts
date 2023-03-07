@@ -1,5 +1,4 @@
 import fetch from "node-fetch";
-import * as Path from "path";
 import { AppleDeveloperDocumentationEntry } from "../models/apple-developer-documentation/apple-developer-documentation-entry.model";
 import { URL } from "url";
 
@@ -11,6 +10,7 @@ export class AppleDeveloperDocumentationService {
    * The host URL
    */
   private static hostUrl = "https://developer.apple.com";
+
   /**
    * Search Developer Documentation
    * @param query The search query
@@ -27,7 +27,6 @@ export class AppleDeveloperDocumentationService {
     url.pathname = "search/search_data.php";
     url.searchParams.append("q", query);
     url.searchParams.append("results", "500");
-    url.searchParams.append("group", "documentation");
     // Fetch Documentation Response
     const response = await fetch(url.toString(), {
       method: "GET",
@@ -44,7 +43,7 @@ export class AppleDeveloperDocumentationService {
     // For each Entry
     for (const entry of entries) {
       // Update URL
-      entry.url = Path.join(AppleDeveloperDocumentationService.hostUrl, entry.url);
+      entry.url = [AppleDeveloperDocumentationService.hostUrl, entry.url].join(entry.url.startsWith("/") ? "" : "/");
     }
     // Return Documentation Entries
     return entries;

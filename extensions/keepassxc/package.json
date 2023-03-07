@@ -53,6 +53,7 @@
   "dependencies": {
     "@raycast/api": "^1.38.1",
     "@types/crypto-js": "^4.1.0",
+    "run-applescript": "^6.0.0",
     "crypto-js": "^4.1.1"
   },
   "devDependencies": {

@@ -47,11 +47,19 @@
       "subtitle": "Monse",
       "description": "List your latest transactions from your connected accounts.",
       "mode": "view"
+    },
+    {
+      "name": "bank-accounts",
+      "title": "Bank Accounts",
+      "subtitle": "Monse",
+      "description": "List all your bank accounts and current balance",
+      "mode": "view"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.38.3",
-    "@raycast/utils": "^1.1.0"
+    "@raycast/utils": "^1.4.8",
+    "axios": "^0.27.2"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^5.0.0",

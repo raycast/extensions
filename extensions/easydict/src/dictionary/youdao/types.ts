@@ -2,13 +2,13 @@
  * @author: tisfeng
  * @createTime: 2022-08-04 23:21
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-09-04 00:06
+ * @lastEditTime: 2023-02-22 10:28
  * @fileName: types.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
  */
 
-import { LanguageDetectTypeResult } from "../../detectLanauge/types";
+import { DetectedLangModel } from "../../detectLanauge/types";
 
 export interface YoudaoDictionaryFormatResult {
   queryWordInfo: QueryWordInfo;
@@ -18,15 +18,19 @@ export interface YoudaoDictionaryFormatResult {
   webTranslation?: KeyValueItem;
   webPhrases?: KeyValueItem[];
   baike?: BaikeSummary;
+  wikipedia?: BaikeSummary;
+  modernChineseDict?: ModernChineseDataList[];
 }
 
 export enum YoudaoDictionaryListItemType {
-  Translation = "Translate",
+  Translation = "Translation",
   Explanation = "Explanation",
+  ModernChineseDict = "Modern Chinese Dict",
   Forms = "Forms and Tenses",
   WebTranslation = "Web Translation",
   WebPhrase = "Web Phrase",
   Baike = "Baike",
+  Wikipedia = "Wikipedia",
 }
 
 export interface YoudaoDictionaryResult {
@@ -49,12 +53,10 @@ export interface QueryWordInfo {
   toLanguage: string;
   isWord?: boolean; // * Dictionary Type should has value, show web url need this value.
   hasDictionaryEntries?: boolean; // it is true if the word has dictionary entries.
-  detectedLanguage?: LanguageDetectTypeResult;
-  phonetic?: string; // ɡʊd
+  detectedLangModel?: DetectedLangModel;
+  phonetic?: string; // [ɡʊd]
   examTypes?: string[];
-  audioPath?: string;
   speechUrl?: string; // word audio url. some language not have tts url, such as "ຂາດ"
-  tld?: string; // google tld
 }
 
 export interface YoudaoTranslateResultBasicItem {
@@ -97,7 +99,7 @@ eg:
 }
 */
 export interface YoudaoWebTranslateResult {
-  errorCode: number;
+  errorCode?: number;
   translateResult: [[YoudaoWebTranslateResultItem]];
   type: string;
   smartResult?: {
@@ -136,10 +138,11 @@ export interface YoudaoWebDictionaryModel {
   input: string;
   lang: string; // 目标语言，eng。 eg: https://www.youdao.com/w/eng/good
   le: string; // 目标语言，en
-  meta: Meta; // 元数据
+  meta?: Meta; // 元数据
 
   auth_sents_part?: AuthSentsPart; // 权威例句
   baike?: Baike; // 百科
+  wikipedia_digest?: Baike; // 维基百科
   blng_sents_part?: BlngSentsPart; // 双语例句
   collins?: Collins; // 柯林斯英汉双解大辞典
   collins_primary?: CollinsPrimary; // 柯林斯？
@@ -984,22 +987,25 @@ export interface Snippet {
 }
 
 export interface Newhh {
-  dataList?: NewhhDataList[];
+  dataList?: ModernChineseDataList[];
   source?: CeNewSource;
   word?: string;
 }
 
-export interface NewhhDataList {
+export interface ModernChineseDataList {
   pinyin?: string;
   sense?: Sense[];
-  word?: string;
+  word: string;
+  note?: string[];
+  seealso?: string;
 }
 
 export interface Sense {
   examples?: string[];
-  def?: string[];
+  def?: string[] | string; // 的
   cat?: string;
   style?: string;
+  subsense?: Sense[]; // 的
 }
 
 export interface Special {

@@ -1,6 +1,3 @@
-import { buildScriptEnsuringTimIsRunning, runAppleScriptSilently } from "./utils";
+import { installedWrapper, openActiveRecord } from "./lib/tim";
 
-export default async () => {
-  const script = buildScriptEnsuringTimIsRunning(`openactiverecord`);
-  await runAppleScriptSilently(script);
-};
+export default installedWrapper(openActiveRecord);

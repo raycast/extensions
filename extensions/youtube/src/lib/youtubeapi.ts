@@ -57,7 +57,7 @@ export function useRefresher<T>(
   const depsAll = [timestamp];
   if (deps) {
     for (const d of deps) {
-      depsAll.push(d);
+      depsAll.push(d as any);
     }
   }
   let cancel = false;
