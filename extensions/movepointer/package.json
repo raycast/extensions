@@ -1,9 +1,9 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "movepointer",
-  "title": "movePointer",
-  "description": "マウスのポインターを瞬時に移動させます",
-  "icon": "command-icon.png",
+  "title": "Move Pointer",
+  "description": "Memorize the location of the mouse pointer and instantly move it to the memorized location.",
+  "icon": "extension-icon.png",
   "author": "okumura_kosuke",
   "categories": [
     "System"
@@ -13,43 +13,43 @@
     {
       "name": "move-1",
       "title": "Move Pointer-1",
-      "description": "ポインター設定1にポインターを移動させます",
+      "description": "Move the pointer to setting 1",
       "mode": "no-view"
     },
     {
       "name": "move-2",
       "title": "Move Pointer-2",
-      "description": "ポインター設定2にポインターを移動させます",
+      "description": "Move the pointer to setting 2",
       "mode": "no-view"
     },
     {
       "name": "move-3",
       "title": "Move Pointer-3",
-      "description": "ポインター設定3にポインターを移動させます",
+      "description": "Move the pointer to setting 3",
       "mode": "no-view"
     },
     {
       "name": "record-1",
       "title": "Record Pointer-1",
-      "description": "現在のポインター座標をポインター１に設定します",
+      "description": "Save the pointer coordinates to setting 1",
       "mode": "no-view"
     },
     {
       "name": "record-2",
       "title": "Record Pointer-2",
-      "description": "現在のポインター座標をポインター２に設定します",
+      "description": "Save the pointer coordinates to setting 2",
       "mode": "no-view"
     },
     {
       "name": "record-3",
       "title": "Record Pointer-3",
-      "description": "現在のポインター座標をポインター３に設定します",
+      "description": "Save the pointer coordinates to setting 3",
       "mode": "no-view"
     },
     {
       "name": "clear",
       "title": "Clear Point",
-      "description": "全てのポインター設定を削除します",
+      "description": "Delete all pointer settings",
       "mode": "no-view"
     }
   ],
