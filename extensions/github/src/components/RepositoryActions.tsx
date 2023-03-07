@@ -203,7 +203,7 @@ export default function RepositoryActions({ repository, mutateList, onVisit }: R
       <ActionPanel.Section>
         <Action.CopyToClipboard
           content={repository.url}
-          title="Copy Repositoy URL"
+          title="Copy Repository URL"
           shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
         />
 

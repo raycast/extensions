@@ -11,10 +11,17 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "index",
+      "name": "translate",
       "title": "Translate",
-      "subtitle": "dict.cc",
+      "subtitle": "Dict.cc",
       "description": "Translates a given term from one into another language.",
+      "mode": "view"
+    },
+    {
+      "name": "translate-from-clipboard",
+      "title": "Translate from Clipboard",
+      "subtitle": "Dict.cc",
+      "description": "Translates a given term (from clipboard) from one into another language.",
       "mode": "view"
     }
   ],

@@ -1,14 +1,3 @@
-import {
-  buildScriptEnsuringTimIsRunning,
-  checkIfTimInstalled,
-  runAppleScriptSilently,
-  showNotInstalledToast,
-} from "./utils";
+import { installedWrapper, openNavigator } from "./lib/tim";
 
-export default async () => {
-  const timAvailable = await checkIfTimInstalled();
-  if (!timAvailable) return showNotInstalledToast();
-
-  const script = buildScriptEnsuringTimIsRunning(`opennavigator`);
-  await runAppleScriptSilently(script);
-};
+export default installedWrapper(openNavigator);

@@ -63,14 +63,14 @@ export const lastPass = (email: string, password: string) => ({
       /* noop */
     }),
 
-  show: (id: string): Promise<Account> =>
-    execute(`echo "${password}" | LPASS_DISABLE_PINENTRY=1 lpass show --json ${id}`).then(
+  show: (id: string, opts: { sync: "auto" | "now" | "no" } = { sync: "auto" }): Promise<Account> =>
+    execute(`echo "${password}" | LPASS_DISABLE_PINENTRY=1 lpass show --sync=${opts.sync} --json ${id}`).then(
       (stdout) => serializeFromJson(stdout)[0]
     ),
 
-  list: (args: { sync: "auto" | "now" | "no" } = { sync: "auto" }) =>
+  list: (opts: { sync: "auto" | "now" | "no" } = { sync: "auto" }) =>
     execute(
-      `echo "${password}" | LPASS_DISABLE_PINENTRY=1 lpass export --sync=${args.sync} --fields=id,name,username,password,url`
+      `echo "${password}" | LPASS_DISABLE_PINENTRY=1 lpass export --sync=${opts.sync} --fields=id,name,username,password,url`
     ).then((stdout) => {
       const items: { id: string; name: string; username: string; password: string; url: string }[] = stdout
         .split("\n")

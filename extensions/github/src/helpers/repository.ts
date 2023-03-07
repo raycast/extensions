@@ -79,7 +79,7 @@ export function useHistory(searchText: string | undefined, searchFilter: string 
   const repositoryFilter = `${searchFilter?.replaceAll(/org:|user:/g, "").replaceAll(" ", "|")}/.*`;
 
   const data = history
-    .filter((r) => r.nameWithOwner.includes(searchText ?? ""))
+    .filter((r) => r.nameWithOwner.toLowerCase().includes(searchText?.toLowerCase() ?? ""))
     .filter((r) => r.nameWithOwner.match(repositoryFilter));
 
   return { data, visitRepository };

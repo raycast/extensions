@@ -1,4 +1,4 @@
-import { Action, ActionPanel, getPreferenceValues, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, getPreferenceValues, Icon, List, LocalStorage } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { lastPass } from "./cli";
 import { EmptyListView, ErrorDetails, ListItem } from "./components";
@@ -6,16 +6,21 @@ import { EmptyListView, ErrorDetails, ListItem } from "./components";
 interface Preferences {
   email: string;
   password: string;
+  syncRate: "0" | "86400000" | "604800000";
 }
 
+const localStorageKey = "lastpass-sync-timestamp";
+
 export default function Command() {
-  const { email, password } = getPreferenceValues<Preferences>();
+  const { email, password, syncRate } = getPreferenceValues<Preferences>();
+
   const api = lastPass(email, password);
   const [isLoading, setIsLoading] = useState(true);
   const [accounts, setAccounts] = useState<
     { id: string; name: string; username: string; password: string; url: string }[]
   >([]);
   const [error, setError] = useState<Error | null>(null);
+  let sync: "now" | "no" = "now";
 
   useEffect(() => {
     (async () => {
@@ -25,7 +30,14 @@ export default function Command() {
           await api.login();
         }
 
-        const accounts = await api.list();
+        const currentTimestamp = Date.now();
+        const lastSyncTimestamp = (await LocalStorage.getItem<number>(localStorageKey)) || currentTimestamp;
+        await LocalStorage.setItem(localStorageKey, currentTimestamp);
+        const timestampDiff = parseInt(syncRate, 10);
+        const isSyncNow = currentTimestamp - lastSyncTimestamp > timestampDiff;
+        sync = isSyncNow ? "now" : "no";
+
+        const accounts = await api.list({ sync });
         setAccounts(accounts);
         setIsLoading(false);
       } catch (error) {
@@ -58,7 +70,7 @@ export default function Command() {
       {!accounts.length ? (
         <EmptyListView />
       ) : (
-        accounts.map((account) => <ListItem {...account} getDetails={() => api.show(account.id)} />)
+        accounts.map((account) => <ListItem {...account} getDetails={() => api.show(account.id, { sync })} />)
       )}
     </List>
   );

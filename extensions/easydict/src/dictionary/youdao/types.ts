@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-08-04 23:21
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-10-12 10:03
+ * @lastEditTime: 2023-02-22 10:28
  * @fileName: types.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -138,7 +138,7 @@ export interface YoudaoWebDictionaryModel {
   input: string;
   lang: string; // 目标语言，eng。 eg: https://www.youdao.com/w/eng/good
   le: string; // 目标语言，en
-  meta: Meta; // 元数据
+  meta?: Meta; // 元数据
 
   auth_sents_part?: AuthSentsPart; // 权威例句
   baike?: Baike; // 百科
