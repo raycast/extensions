@@ -534,33 +534,27 @@ export function usePlaylistSearch(query: string | undefined): Response<SpotifyAp
   return response;
 }
 
-
-async function getUserPlaylistsPage(
-  offset: number, limit: number
-) {
+async function getUserPlaylistsPage(offset: number, limit: number) {
   return await spotifyApi
-      .getUserPlaylists({ offset: offset, limit: limit })
-      .then(
-        (response: { body: any }) => response.body as SpotifyApi.ListOfUsersPlaylistsResponse
-      )
+    .getUserPlaylists({ offset: offset, limit: limit })
+    .then((response: { body: any }) => response.body as SpotifyApi.ListOfUsersPlaylistsResponse);
 }
 
 async function getAllUserPlaylists(
-  offset:number, items: SpotifyApi.PlaylistObjectSimplified[]
+  offset: number,
+  items: SpotifyApi.PlaylistObjectSimplified[]
 ): Promise<SpotifyApi.PlaylistObjectSimplified[]> {
   const step = 50;
   const resp = await getUserPlaylistsPage(offset, step);
   if (resp.offset >= resp.total || resp.offset >= 500) {
     // Cap the total number of playlists for performance reasons
-    return (
-      items
-      .map(value => ({ value, sort: Math.random() }))
+    return items
+      .map((value) => ({ value, sort: Math.random() }))
       .sort((a, b) => a.sort - b.sort)
-      .map(({ value }) => value)
-    )
+      .map(({ value }) => value);
   } else {
     items.push(...resp.items);
-    return await getAllUserPlaylists(resp.offset+step, items);
+    return await getAllUserPlaylists(resp.offset + step, items);
   }
 }
 
@@ -578,11 +572,11 @@ export function useGetUserPlaylists(): Response<SpotifyApi.PlaylistObjectSimplif
       }
       setResponse((oldState) => ({ ...oldState, isLoading: true }));
 
-
       try {
-        const result = await getAllUserPlaylists(0, []).catch((error) => {
+        const result =
+          (await getAllUserPlaylists(0, []).catch((error) => {
             setResponse((oldState) => ({ ...oldState, error: (error as unknown as SpotifyApi.ErrorObject).message }));
-        }) ?? undefined;
+          })) ?? undefined;
 
         if (!cancel) {
           setResponse((oldState) => ({ ...oldState, result: result }));
