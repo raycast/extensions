@@ -3,7 +3,7 @@
   "name": "movepointer",
   "title": "Move Pointer",
   "description": "Memorize the location of the mouse pointer and instantly move it to the memorized location.",
-  "icon": "extension_icon.png",
+  "icon": "extension-icon.png",
   "author": "okumura_kosuke",
   "categories": [
     "System"
