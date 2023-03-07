@@ -568,7 +568,7 @@
 /extensions/php-docs                                 @comes @pernielsentikaer
 /extensions/phpmon                                   @nicoverbruggen
 /extensions/pianoman                                 @juhamust
-/extensions/pick-random                              @MatteoGauthier
+/extensions/pick-random                              @MatteoGauthier @hongqn
 /extensions/pie-for-pihole                           @GLaDO8
 /extensions/pika                                     @rishimohan
 /extensions/pinata                                   @stevedsimkins
