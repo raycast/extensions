@@ -34,6 +34,23 @@
       "subtitle": "Arc"
     },
     {
+      "name": "new-little-arc",
+      "title": "Open New Little Arc Window",
+      "description": "Create and open a new little arc window",
+      "mode": "no-view",
+      "subtitle": "Arc",
+      "preferences": [
+        {
+          "name": "url",
+          "title": "URL",
+          "description": "The URL to open in the new tab",
+          "type": "textfield",
+          "required": false,
+          "default": "https://google.com"
+        }
+      ]
+    },
+    {
       "name": "search-spaces",
       "title": "Search Spaces",
       "subtitle": "Arc",
