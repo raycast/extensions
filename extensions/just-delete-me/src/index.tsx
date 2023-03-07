@@ -1,4 +1,4 @@
-import { ActionPanel, Detail, List, Action, Icon } from "@raycast/api";
+import { ActionPanel, Detail, List, Action, Icon, Color } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 
 type Site = {
@@ -22,7 +22,7 @@ export default function Command() {
     easy: Color.Green,
     medium: Color.Yellow,
     hard: Color.Orange,
-    limited: Colors.Purple,
+    limited: Color.Purple,
     impossible: Color.Red,
   } as { [key: string]: string };
 
