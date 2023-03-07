@@ -2,20 +2,28 @@ import { runAppleScript } from "run-applescript";
 
 export const getSelectedImages = async () => {
   const selectedImages = await runAppleScript(
-    `tell application "Finder"
+    `set imageTypes to {"PNG", "JPG", "JPEG", "TIF", "HEIC", "GIF", "ICO", "ICNS", "ASTC", "BMP", "DDS", "EXR", "JP2", "KTX", "PBM", "PSD", "PVR", "TGA"}
+
+    tell application "Finder"
       set theSelection to selection
       if theSelection is {} then
         return
       else if (theSelection count) is equal to 1 then
-        if (kind of the first item of theSelection) contains "image" then
-          return the POSIX path of (theSelection as alias)
-        end if
+        repeat with imageType in imageTypes
+          if (kind of the first item of theSelection) contains imageType then
+            return the POSIX path of (theSelection as alias)
+            exit repeat
+          end if
+        end repeat
       else
         set thePaths to {}
         repeat with i from 1 to (theSelection count)
-          if (kind of (item i of theSelection)) contains "image" then
-            copy (POSIX path of (item i of theSelection as alias)) to end of thePaths
-          end if
+          repeat with imageType in imageTypes
+            if (kind of (item i of theSelection)) contains imageType then
+              copy (POSIX path of (item i of theSelection as alias)) to end of thePaths
+              exit repeat
+            end if
+          end repeat
         end repeat
         return thePaths
       end if
