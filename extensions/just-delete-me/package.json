@@ -19,7 +19,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "List Sites",
+      "title": "List Deleteable Sites",
       "description": "A list of sites with information on how to delete your account if possible.",
       "mode": "view"
     }

@@ -40,9 +40,11 @@ export default function Command() {
             <ActionPanel>
               <Action.Push
                 title="Show Details"
+                icon={Icon.AppWindow}
                 target={
                   <Detail
-                    markdown={site.notes || "No notes available."}
+                    navigationTitle={`${site.name}: ${site.domains[0]}`}
+                    markdown={`## How to delete from ${site.name}\n\n ${site.notes || "No notes available."}`}
                     actions={
                       <ActionPanel>
                         <Action.OpenInBrowser title="Go to Site" url={site.url} />
