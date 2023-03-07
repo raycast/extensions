@@ -10,7 +10,7 @@ export default async function PickFigure(props: { arguments: PickFigureArguments
   const minNumber = Number(min || "0");
   const maxNumber = Number(max || "9");
   if (isNaN(minNumber) || isNaN(maxNumber)) {
-    await showHUD("Invalid arguments");
+    await showHUD("❌ Invalid arguments");
     return;
   }
 
