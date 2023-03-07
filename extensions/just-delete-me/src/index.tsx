@@ -19,10 +19,10 @@ export default function Command() {
   );
   const sites: Array<Site> = data === undefined ? [] : JSON.parse(data);
   const difficultyColors = {
-    easy: "#00FF00",
-    medium: "#FFFF00",
-    hard: "#FFA500",
-    impossible: "#FF0000",
+    easy: Color.Green,
+    medium: Color.Yellow,
+    hard: Color.Orange,
+    impossible: Color.Red,
   } as { [key: string]: string };
 
   return (
