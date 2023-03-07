@@ -1,13 +1,16 @@
-import { closeMainWindow, showHUD } from "@raycast/api";
+import { LaunchProps, closeMainWindow, showHUD } from "@raycast/api";
 import isUrl from "is-url";
 import { makeNewLittleArcWindow } from "./arc";
 import { newTabPreferences } from "./preferences";
+import { Arcguments } from "./types";
 
-export default async function command() {
+export default async function command(props: LaunchProps<{ arguments: Arcguments }>) {
+  const { url } = props.arguments;
+
   try {
-    const newTabUrl = newTabPreferences.url;
+    const newTabUrl = url || newTabPreferences.url;
     if (!isUrl(newTabUrl)) {
-      throw new Error("Invalid URL defined in preferences");
+      throw new Error("❌ Invalid URL provided");
     }
 
     await closeMainWindow();

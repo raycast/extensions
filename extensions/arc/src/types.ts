@@ -38,3 +38,7 @@ export type Suggestion = {
   query: string;
   url: string;
 };
+
+export type Arcguments = {
+  url?: string;
+};
