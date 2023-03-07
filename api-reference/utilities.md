@@ -204,6 +204,7 @@ async function launchCommand(options: {
   type: LaunchType;
   arguments?: Arguments | null;
   context?: LaunchContext | null;
+  fallbackText?: string | null;
 }): Promise<void>;
 ```
 
@@ -221,7 +222,7 @@ export default async function Command() => {
 
 | Name | Description | Type |
 | :--- | :--- | :--- |
-| options<mark style="color:red;">*</mark> | A parameter object with the properties: `name`: command name as defined in the extension's manifest `type`: [LaunchType.UserInitiated](environment.md#launchtype) or [LaunchType.Background](environment.md#launchtype) `arguments`: optional object for the argument properties and values as defined in the extension's manifest, for example: `{ "argument1": "value1" }` `context`: arbitrary object for custom data that should be passed to the command and accessible as `environment.launchContext`; the object must be JSON serializable (Dates and Buffers supported) | <code>{ arguments: [Arguments](../information/lifecycle/arguments.md#arguments); context: [LaunchContext](utilities.md#launchcontext); name: string; type: [LaunchType](environment.md#launchtype) }</code> |
+| options<mark style="color:red;">*</mark> | A parameter object with the properties: `name`: command name as defined in the extension's manifest `type`: [LaunchType.UserInitiated](environment.md#launchtype) or [LaunchType.Background](environment.md#launchtype) `arguments`: optional object for the argument properties and values as defined in the extension's manifest, for example: `{ "argument1": "value1" }` `context`: arbitrary object for custom data that should be passed to the command and accessible as `environment.launchContext`; the object must be JSON serializable (Dates and Buffers supported) | <code>[LaunchOptions](utilities.md#launchoptions)</code> |
 
 #### Return
 
@@ -255,3 +256,7 @@ Supported path types.
 ### LaunchContext
 
 Represents the passed context object of programmatic command launches.
+
+### LaunchOptions
+
+A parameter object used to decide which command should be launched and what data (arguments, context) it should receive.
