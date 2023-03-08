@@ -1,5 +1,9 @@
 # Arc Changelog
 
+## [Improvements] - 2023-03-08
+
+- Add a new command to open little arc.
+
 ## [Quicklinks] - 2023-02-15
 
 - Added a new action to quickly create a quicklink from a page.
