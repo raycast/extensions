@@ -5,7 +5,7 @@
   "description": "Open a Warp Launch Configuration right from Raycast.",
   "icon": "command-icon.png",
   "author": "joetannenbaum",
-  "owner": "joe-tannenbaum",
+  "owner": "joetannenbaum",
   "categories": [
     "Developer Tools",
     "Productivity"
