@@ -1,0 +1,69 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "fluent-outdoors",
+  "title": "Fluent Outdoors",
+  "description": "Show maintenance status for outdoors activity tracks like skiing or skating. Backend system Fluent.",
+  "icon": "fluent-outdoors.png",
+  "author": "juhamust",
+  "categories": [
+    "Fun",
+    "News"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Show Track Status",
+      "description": "Show skiing / skating track status from Fluent service(s)",
+      "mode": "view",
+      "keywords": [
+        "outdoors",
+        "skiing",
+        "skating",
+        "sports"
+      ],
+      "preferences": [
+        {
+          "name": "sortBy",
+          "title": "Sort results by",
+          "description": "Sort by name or maintenance",
+          "type": "dropdown",
+          "required": false,
+          "default": "maintenance",
+          "data": [
+            {
+              "title": "Name",
+              "value": "name"
+            },
+            {
+              "title": "Maintenance",
+              "value": "maintenance"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.46.0",
+    "date-fns": "^2.29.3",
+    "node-fetch": "^3.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

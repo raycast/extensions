@@ -1,20 +1,24 @@
-import { List, showToast, ToastStyle } from "@raycast/api";
+import { showToast, Toast } from "@raycast/api";
 import { getErrorMessage } from "../lib/utils";
 import { getPopularVideos, useRefresher, Video } from "../lib/youtubeapi";
-import { VideoListItem } from "./video";
+import { VideoItem } from "./video";
+import { ListOrGrid, getViewLayout, getGridItemSize } from "./listgrid";
+import { PinVideo } from "./recent_videos";
 
 export function PopularVideoList() {
   const { data, error, isLoading } = useRefresher<Video[] | undefined>(async () => {
     return await getPopularVideos();
   }, []);
   if (error) {
-    showToast(ToastStyle.Failure, "Could not search popular Videos", getErrorMessage(error));
+    showToast(Toast.Style.Failure, "Could not search popular Videos", getErrorMessage(error));
   }
+  const layout = getViewLayout();
+  const itemSize = getGridItemSize();
   return (
-    <List isLoading={isLoading}>
+    <ListOrGrid layout={layout} itemSize={itemSize} isLoading={isLoading}>
       {data?.map((v) => (
-        <VideoListItem key={v.id} video={v} />
+        <VideoItem key={v.id} video={v} actions={<PinVideo video={v} />} />
       ))}
-    </List>
+    </ListOrGrid>
   );
 }

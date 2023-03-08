@@ -16,9 +16,10 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.25.7",
+    "@raycast/api": "^1.36.0",
     "cheerio": "^1.0.0-rc.10",
-    "node-fetch": "^3.0.0"
+    "node-fetch": "^3.0.0",
+    "swr": "^1.3.0"
   },
   "devDependencies": {
     "@types/cheerio": "^0.22.30",
@@ -33,6 +34,8 @@
   },
   "scripts": {
     "build": "ray build -e dist",
-    "dev": "ray develop"
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"    
   }
 }

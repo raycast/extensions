@@ -1,0 +1,93 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "passphrase-generator",
+  "title": "Passphrase Generator",
+  "description": "Generates a set of random passwords using different generators.",
+  "icon": "command-icon.png",
+  "author": "omBratteng",
+  "categories": [
+    "Developer Tools",
+    "Security"
+  ],
+  "contributors": [
+    "pernielsentikaer"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "strength",
+      "title": "Generate Password by Strength",
+      "description": "Generate password of given strength",
+      "mode": "view"
+    },
+    {
+      "name": "length",
+      "title": "Generate Password by Length",
+      "description": "Generate password of given length",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "specialCharacters",
+      "title": "Special Characters",
+      "description": "The special characters to use in the password generator.",
+      "type": "textfield",
+      "default": "!\"#$%&'()*+,-./:;<=>?@[]^_`{|}~",
+      "required": false
+    },
+    {
+      "name": "length",
+      "title": "Default password length",
+      "description": "Default length of password",
+      "type": "textfield",
+      "default": "20",
+      "required": false
+    },
+    {
+      "name": "strength",
+      "title": "Default password strength",
+      "description": "Default strength of password",
+      "type": "textfield",
+      "default": "3",
+      "required": false
+    },
+    {
+      "name": "delimiter",
+      "title": "Word delimiter",
+      "description": "Word delimiter",
+      "type": "textfield",
+      "default": "-",
+      "required": false
+    },
+    {
+      "name": "maxWordLength",
+      "title": "Max word length",
+      "description": "Max length of words from dictionary",
+      "type": "textfield",
+      "default": "8",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.37.0"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.20.0",
+    "@typescript-eslint/parser": "^5.20.0",
+    "eslint": "^8.13.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-prettier": "^4.0.0",
+    "eslint-plugin-react": "^7.29.4",
+    "eslint-plugin-react-hooks": "^4.4.0",
+    "prettier": "^2.6.2",
+    "react-devtools": "^4.24.4",
+    "typescript": "^4.6.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

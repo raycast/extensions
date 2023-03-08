@@ -1,10 +1,10 @@
-import { getLocalStorageItem, setLocalStorageItem } from "@raycast/api";
+import { LocalStorage } from "@raycast/api";
 import { useState, useEffect } from "react";
 
 const VISITED_URLS_KEY = "visited_urls_1";
 
 const loadVisitedUrls = async () => {
-  const item = await getLocalStorageItem(VISITED_URLS_KEY);
+  const item = await LocalStorage.getItem(VISITED_URLS_KEY);
   try {
     if (typeof item === "string") {
       const parsed = JSON.parse(item);
@@ -19,7 +19,7 @@ const loadVisitedUrls = async () => {
 };
 
 const saveVisitedUrls = async (visitedUrls: string[]) => {
-  await setLocalStorageItem(VISITED_URLS_KEY, JSON.stringify(visitedUrls));
+  await LocalStorage.setItem(VISITED_URLS_KEY, JSON.stringify(visitedUrls));
 };
 
 export const useVisitedUrls = (): [string[], (url: string) => void] => {

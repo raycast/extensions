@@ -1,5 +1,6 @@
-import { Search } from "./search";
-import { render } from "@raycast/api";
-import { SearchType } from "./lib/api";
+import Search from "./components/Search";
+import { SearchTypeEnum } from "./lib/hub/types";
 
-render(<Search searchType={SearchType.IMAGE} />);
+export default function Command() {
+  return <Search searchType={SearchTypeEnum.IMAGE} />;
+}

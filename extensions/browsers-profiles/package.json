@@ -1,0 +1,42 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "browsers-profiles",
+  "version": "1.0.0",
+  "description": "Access your browsers profiles from Raycast",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "author": "skydiver",
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.36.0",
+    "ini": "^3.0.0"
+  },
+  "devDependencies": {
+    "@types/ini": "^1.3.31",
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "icon": "command-icon.png",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Open Browser Profile",
+      "description": "Access your browsers profiles from Raycast",
+      "mode": "view"
+    }
+  ],
+  "title": "Open Browsers Profiles"
+}

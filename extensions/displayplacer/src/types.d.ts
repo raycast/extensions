@@ -21,7 +21,7 @@ type DisplayPlacerScreen = {
 };
 type DisplayPlacerList = {
   currentId?: string;
-  screens: DisplayPlacerScreen[];
+  // screens: DisplayPlacerScreen[];
   currentCommand: string | null;
 };
 
@@ -31,3 +31,7 @@ type Favorite = {
   subtitle: string;
   command?: string;
 };
+
+interface Preferences {
+  path?: string;
+}

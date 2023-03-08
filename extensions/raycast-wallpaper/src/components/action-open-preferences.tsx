@@ -1,0 +1,14 @@
+import { Action, ActionPanel, Icon, openExtensionPreferences } from "@raycast/api";
+
+export function ActionOpenPreferences() {
+  return (
+    <ActionPanel.Section>
+      <Action
+        icon={Icon.Gear}
+        title="Open Extension Preferences"
+        shortcut={{ modifiers: ["cmd"], key: "," }}
+        onAction={openExtensionPreferences}
+      />
+    </ActionPanel.Section>
+  );
+}

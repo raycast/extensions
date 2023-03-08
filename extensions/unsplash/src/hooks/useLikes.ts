@@ -1,4 +1,4 @@
-import { getPreferenceValues, showToast, ToastStyle } from "@raycast/api";
+import { getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { useState } from "react";
 import fetch from "node-fetch";
 import useSWR from "swr";
@@ -7,7 +7,7 @@ export const useLikes = () => {
   const { accessKey, username } = getPreferenceValues();
 
   if (!username) {
-    showToast(ToastStyle.Failure, "Username is missing.", "Please set a username from extension settings.");
+    showToast(Toast.Style.Failure, "Username is missing.", "Please set a username from extension settings.");
   }
 
   const [loading, setLoading] = useState(true);
@@ -24,7 +24,7 @@ export const useLikes = () => {
     onSuccess: (data) => {
       if ((data as Errors).errors) {
         setLoading(false);
-        showToast(ToastStyle.Failure, "Failed to fetch likes.", (data as Errors).errors?.join("\n"));
+        showToast(Toast.Style.Failure, "Failed to fetch likes.", (data as Errors).errors?.join("\n"));
       } else {
         setLikes(data);
       }
@@ -32,7 +32,7 @@ export const useLikes = () => {
       setLoading(false);
     },
     onError: (error) => {
-      showToast(ToastStyle.Failure, "Something went wrong.", String(error));
+      showToast(Toast.Style.Failure, "Something went wrong.", String(error));
       setLoading(false);
     },
   });

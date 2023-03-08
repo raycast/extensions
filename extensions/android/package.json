@@ -1,0 +1,69 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "android",
+  "title": "Android",
+  "description": "Useful Android commands to list projects and emulators",
+  "icon": "command-icon.png",
+  "author": "mibrahimdev",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "list-android",
+      "title": "List Projects",
+      "subtitle": "Android",
+      "description": "show android projects in directory",
+      "icon": "list-android.png",
+      "mode": "view"
+    },
+    {
+      "name": "list-emulators",
+      "title": "List Emulators",
+      "subtitle": "Android",
+      "description": "show android emulators",
+      "icon": "list-android.png",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.39.0",
+    "expand-tilde": "^2.0.2"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.33.1",
+    "@typescript-eslint/parser": "^5.33.1",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-react": "^7.30.1",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "preferences": [
+    {
+      "title": "Android Projects Directory",
+      "name": "androidProjectsDirectory",
+      "description": "Locate your Android Projects",
+      "placeholder": "/Users/{user-name}/AndroidStudioProjects",
+      "type": "textfield",
+      "required": true,
+      "default": ""
+    },
+    {
+      "title": "Android SDK",
+      "name": "androidSDK",
+      "description": "Locate Android SDK path",
+      "type": "textfield",
+      "required": true,
+      "default": "~/Library/Android/sdk"
+    }
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

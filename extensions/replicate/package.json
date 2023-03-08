@@ -1,0 +1,63 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "replicate",
+  "title": "Replicate",
+  "description": "View and search your Replicate predictions",
+  "icon": "command-icon.png",
+  "author": "KevinBatdorf",
+  "contributors": [
+    "bfirsh"
+  ],
+  "categories": [
+    "Media",
+    "Design Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "replicate",
+      "title": "View Predictions",
+      "subtitle": "Replicate",
+      "description": "View your Replicate predictions",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "token",
+      "type": "password",
+      "title": "API Token",
+      "description": "Add your token from Replicate",
+      "placeholder": "Token",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.42.2",
+    "@raycast/utils": "^1.4.10",
+    "is-image": "^3.1.0",
+    "node-fetch": "^3.2.10",
+    "run-applescript": "^6.0.0",
+    "sql.js": "^1.8.0",
+    "tempy": "^3.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "~18.11.9",
+    "@types/react": "^18.0.25",
+    "@types/sql.js": "^1.4.4",
+    "@typescript-eslint/eslint-plugin": "^5.42.0",
+    "@typescript-eslint/parser": "^5.42.0",
+    "eslint": "^8.26.0",
+    "eslint-config-prettier": "^8.5.0",
+    "prettier": "^2.7.1",
+    "typescript": "^4.8.4"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

@@ -1,40 +1,103 @@
+import { Project as TProject } from "@doist/todoist-api-typescript";
+import { List, ActionPanel, Action, Icon } from "@raycast/api";
+import { useCachedPromise, useCachedState } from "@raycast/utils";
+import { partition } from "lodash";
+
+import { todoist } from "../api";
+import { ViewMode } from "../constants";
+import CreateTask from "../create-task";
+import { GroupByOption, projectGroupByOptions, SectionWithTasks } from "../helpers/groupBy";
+import { getSectionsWithPriorities, getSectionsWithDueDates, getSectionsWithLabels } from "../helpers/sections";
+
 import TaskList from "./TaskList";
-import { Section, Task, ViewMode } from "../types";
-import { useFetch } from "../api";
 
 interface ProjectProps {
-  projectId: number;
+  project: TProject;
+  projects?: TProject[];
 }
 
-function Project({ projectId }: ProjectProps): JSX.Element {
-  const path = `/tasks?project_id=${projectId}`;
-  const { data: rawTasks, isLoading: isLoadingTasks } = useFetch<Task[]>(path);
-  const { data: allSections, isLoading: isLoadingSections } = useFetch<Section[]>(`/sections?project_id=${projectId}`);
+function Project({ project, projects }: ProjectProps): JSX.Element {
+  const {
+    data: tasks,
+    isLoading: isLoadingTasks,
+    mutate: mutateTasks,
+  } = useCachedPromise((projectId) => todoist.getTasks({ projectId }), [project.id]);
 
-  const tasks = rawTasks?.filter((task) => !task.parent_id);
+  const { data: allSections, isLoading: isLoadingSections } = useCachedPromise(
+    (projectId) => todoist.getSections(projectId),
+    [project.id]
+  );
 
-  const sections = [
-    {
-      name: "No section",
-      order: 0,
-      tasks: tasks?.filter((task) => task.section_id === 0) || [],
-    },
-  ];
+  const { data: labels, isLoading: isLoadingLabels } = useCachedPromise(() => todoist.getLabels());
 
-  if (allSections && allSections.length > 0) {
-    sections.push(
-      ...allSections.map((section) => ({
-        name: section.name,
-        order: section.order,
-        tasks: tasks?.filter((task) => task.section_id === section.id) || [],
-      }))
-    );
+  const [groupBy, setGroupBy] = useCachedState<GroupByOption>("todoist.projectgroupby", "default");
+
+  let sections: SectionWithTasks[] = [];
+
+  switch (groupBy) {
+    case "default": {
+      sections = [
+        {
+          name: "No section",
+          tasks: tasks?.filter((task) => !task.sectionId) || [],
+        },
+      ];
+
+      if (allSections && allSections.length > 0) {
+        sections.push(
+          ...allSections.map((section) => ({
+            name: section.name,
+            tasks: tasks?.filter((task) => task.sectionId === section.id) || [],
+          }))
+        );
+      }
+      break;
+    }
+    case "priority":
+      sections = getSectionsWithPriorities(tasks || []);
+      break;
+    case "date": {
+      const [upcomingTasks, noDueDatesTasks] = partition(tasks, (task) => task.due);
+
+      sections = getSectionsWithDueDates(upcomingTasks);
+
+      sections.push({
+        name: "No due date",
+        tasks: noDueDatesTasks,
+      });
+      break;
+    }
+    case "label":
+      sections = getSectionsWithLabels({ tasks: tasks || [], labels: labels || [] });
+      break;
   }
 
-  sections.sort((a, b) => a.order - b.order);
-
-  return (
-    <TaskList path={path} mode={ViewMode.project} sections={sections} isLoading={isLoadingTasks || isLoadingSections} />
+  return tasks?.length === 0 ? (
+    <List isLoading={isLoadingTasks || isLoadingSections || isLoadingLabels} navigationTitle={project.name}>
+      <List.EmptyView
+        title="No tasks in this project."
+        description="How about creating one?"
+        actions={
+          <ActionPanel>
+            <Action.Push
+              title="Create Task"
+              icon={Icon.Plus}
+              target={<CreateTask fromProjectId={project.id} mutateTasks={mutateTasks} />}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
+            />
+          </ActionPanel>
+        }
+      />
+    </List>
+  ) : (
+    <TaskList
+      mode={ViewMode.project}
+      sections={sections}
+      groupBy={{ value: groupBy, setValue: setGroupBy, options: projectGroupByOptions }}
+      isLoading={!tasks || !allSections}
+      mutateTasks={mutateTasks}
+      projects={projects}
+    />
   );
 }
 

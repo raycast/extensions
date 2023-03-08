@@ -1,21 +1,24 @@
-import { showToast, ToastStyle } from "@raycast/api";
+import { showToast, Toast } from "@raycast/api";
 import { Project } from "./project";
 import { Task } from "./task";
 import { runAppleScript } from "run-applescript";
 import { convertMacTime2JSTime, getSectionNameByDate } from "../utils/date";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const taskObject2Task = (object: Record<string, any>): Task => {
+const taskObject2Task = (object: Record<string, unknown>): Task => {
   return {
-    id: object.id as string,
-    title: object.title as string,
+    id: object.id as Task["id"],
+    title: object.title as Task["title"],
+    content: object.content as Task["content"],
+    desc: object.desc as Task["desc"],
     priority: object.priority as Task["priority"],
     projectId: object.projectId as Task["projectId"],
+    items: object.items as Task["items"],
+    kind: object.kind as Task["kind"],
+    tags: (object.tags || []) as Task["tags"],
   };
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const projectObject2Project = (object: Record<string, any>): Project => {
+const projectObject2Project = (object: Record<string, unknown>): Project => {
   return {
     id: object.id as string,
     name: object.name as string,
@@ -30,7 +33,7 @@ const checkAppInstalled = async () => {
 
     if (result === "false") {
       showToast(
-        ToastStyle.Failure,
+        Toast.Style.Failure,
         "Application not found",
         "Please install TickTick or upgrade to the latest version."
       );
@@ -39,87 +42,68 @@ const checkAppInstalled = async () => {
 
     return true;
   } catch (error) {
-    showToast(ToastStyle.Failure, "Application not found", "Please install TickTick or upgrade to the latest version.");
+    showToast(
+      Toast.Style.Failure,
+      "Application not found",
+      "Please install TickTick or upgrade to the latest version."
+    );
     return false;
   }
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const errorHandler = (err: any) => {
+const errorHandler = (err: unknown) => {
   console.log("parse error", err);
-  showToast(ToastStyle.Failure, "Something went wrong");
+  showToast(Toast.Style.Failure, "Something went wrong");
+};
+
+const getDateListData = async (command: string) => {
+  const installed = await checkAppInstalled();
+  if (!installed) return [];
+  try {
+    const result = (await runAppleScript(command)) as string;
+    if (result === "missing value") {
+      return [];
+    }
+    const parsedResult = JSON.parse(result);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return parsedResult.map((section: any) => {
+      if (section.id === "note") {
+        return {
+          id: "note",
+          name: "Note",
+          children: section.tasks.map(taskObject2Task),
+        };
+      }
+      return {
+        id: `date-${section.date}`,
+        name: getSectionNameByDate(new Date(convertMacTime2JSTime(section.date))),
+        children: section.tasks.map(taskObject2Task),
+      };
+    });
+  } catch (e) {
+    errorHandler(e);
+    return [];
+  }
 };
 
 export const getToday = async () => {
-  const installed = await checkAppInstalled();
-  if (!installed) return [];
-  try {
-    const result = (await runAppleScript(`
+  return await getDateListData(`
     set result to ""
     tell application "TickTick"
-	    set result to today tasks from "raycast"
+      set result to today tasks from "raycast"
     end tell
     return result
-  `)) as string;
-    if (result === "missing value") {
-      return [];
-    }
-    const parsedResult = JSON.parse(result);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return parsedResult.map((section: any) => {
-      if (section.id === "note") {
-        return {
-          id: "note",
-          name: "Note",
-          children: section.tasks.map(taskObject2Task),
-        };
-      }
-      return {
-        id: `date-${section.date}`,
-        name: getSectionNameByDate(new Date(convertMacTime2JSTime(section.date))),
-        children: section.tasks.map(taskObject2Task),
-      };
-    });
-  } catch (e) {
-    errorHandler(e);
-    return [];
-  }
+  `);
 };
 
 export const getNext7Days = async () => {
-  const installed = await checkAppInstalled();
-  if (!installed) return [];
-  try {
-    const result = (await runAppleScript(`
+  return await getDateListData(`
     set result to ""
     tell application "TickTick"
-	    set result to next7days tasks from "raycast"
+      set result to next7days tasks from "raycast"
     end tell
     return result
-  `)) as string;
-    if (result === "missing value") {
-      return [];
-    }
-    const parsedResult = JSON.parse(result);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return parsedResult.map((section: any) => {
-      if (section.id === "note") {
-        return {
-          id: "note",
-          name: "Note",
-          children: section.tasks.map(taskObject2Task),
-        };
-      }
-      return {
-        id: `date-${section.date}`,
-        name: getSectionNameByDate(new Date(convertMacTime2JSTime(section.date))),
-        children: section.tasks.map(taskObject2Task),
-      };
-    });
-  } catch (e) {
-    errorHandler(e);
-    return [];
-  }
+  `);
 };
 
 export const getSearchByKeyword = async (keyword: string) => {
@@ -144,9 +128,9 @@ export const getSearchByKeyword = async (keyword: string) => {
   }
 };
 
-export const getProjectId2Project = async () => {
+export const getProjects = async () => {
   const installed = await checkAppInstalled();
-  if (!installed) return {};
+  if (!installed) return [];
   try {
     const result = (await runAppleScript(`
     set result to ""
@@ -156,18 +140,17 @@ export const getProjectId2Project = async () => {
     return result
   `)) as string;
     if (result === "missing value") {
-      return {};
+      return [];
     }
 
     const parsedResult = JSON.parse(result);
-    const projectId2Project: Record<string, Project> = {};
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    parsedResult.forEach((project: any) => {
-      projectId2Project[project.id] = projectObject2Project(project);
+    const projects: Project[] = parsedResult.map((project: any) => {
+      return projectObject2Project(project);
     });
-    return projectId2Project;
+    return projects;
   } catch (e) {
     errorHandler(e);
-    return {};
+    return [];
   }
 };

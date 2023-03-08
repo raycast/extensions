@@ -1,7 +1,7 @@
-import { Icon, OpenAction } from "@raycast/api";
+import { Icon, Action } from "@raycast/api";
 
 const OpenFullDiskAccessPreferencePaneAction = () => (
-  <OpenAction
+  <Action.Open
     title="Open System Preferences"
     icon={Icon.Gear}
     target="x-apple.systempreferences:com.apple.preference.security?Privacy_AllFiles"

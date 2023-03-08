@@ -1,124 +1,234 @@
-import { useState } from "react";
-import { ActionPanel, Form, Icon, render, showToast, ToastStyle, useNavigation } from "@raycast/api";
-import { Project as TProject, Label, TaskPayload } from "./types";
-import { createTask, useFetch } from "./api";
+import { AddTaskArgs, getColorByKey, Task } from "@doist/todoist-api-typescript";
+import { ActionPanel, Form, Icon, useNavigation, open, Toast, Action, Color } from "@raycast/api";
+import { FormValidation, MutatePromise, useCachedPromise, useForm } from "@raycast/utils";
+
+import { handleError, todoist } from "./api";
+import TaskDetail from "./components/TaskDetail";
+import View from "./components/View";
 import { priorities } from "./constants";
-import { getAPIDate } from "./utils";
-import Project from "./components/Project";
+import { getAPIDate } from "./helpers/dates";
+import { isTodoistInstalled } from "./helpers/isTodoistInstalled";
+import { getProjectIcon } from "./helpers/projects";
 
-function CreateTask() {
-  const { push } = useNavigation();
-  const { data: projects, isLoading: isLoadingProjects } = useFetch<TProject[]>("/projects");
-  const { data: labels, isLoading: isLoadingLabels } = useFetch<Label[]>("/labels");
-  const isLoading = isLoadingLabels || isLoadingProjects;
+type CreateTaskValues = {
+  content: string;
+  description: string;
+  dueDate: Date | null;
+  priority: string;
+  projectId: string;
+  sectionId: string;
+  labels: string[];
+};
 
-  const [content, setContent] = useState("");
-  const [description, setDescription] = useState("");
-  const [dueDate, setDueDate] = useState<Date | undefined>();
-  const [priority, setPriority] = useState<string>();
-  const [projectId, setProjectId] = useState<string>();
-  const [labelIds, setLabelIds] = useState<string[]>();
+type CreateTaskProps = {
+  fromProjectId?: string;
+  mutateTasks?: MutatePromise<Task[] | undefined>;
+  draftValues?: CreateTaskValues;
+};
 
-  function clear() {
-    setContent("");
-    setDescription("");
-    setDueDate(undefined);
-    setPriority(String(priorities[0].value));
+export default function CreateTask({ fromProjectId, mutateTasks, draftValues }: CreateTaskProps) {
+  const { push, pop } = useNavigation();
 
-    if (projects) {
-      setProjectId(String(projects[0].id));
-    }
+  const {
+    data: projects,
+    isLoading: isLoadingProjects,
+    error: getProjectsError,
+  } = useCachedPromise(() => todoist.getProjects());
 
-    if (labelIds) {
-      setLabelIds([]);
-    }
+  const {
+    data: sections,
+    isLoading: isLoadingSections,
+    error: getSectionsError,
+  } = useCachedPromise(() => todoist.getSections());
+
+  const {
+    data: labels,
+    isLoading: isLoadingLabels,
+    error: getLabelsError,
+  } = useCachedPromise(() => todoist.getLabels());
+
+  if (getProjectsError) {
+    handleError({ error: getProjectsError, title: "Unable to get projects" });
   }
 
-  async function submitAndGoToProject() {
-    await submit();
-
-    if (projectId) {
-      push(<Project projectId={parseInt(projectId)} />);
-    }
+  if (getSectionsError) {
+    handleError({ error: getSectionsError, title: "Unable to get sections" });
   }
 
-  async function submit() {
-    const body: TaskPayload = { content, description };
-
-    if (!body.content) {
-      await showToast(ToastStyle.Failure, "The title is required");
-      return;
-    }
-
-    if (dueDate) {
-      body.due_date = getAPIDate(dueDate);
-    }
-
-    if (priority) {
-      body.priority = parseInt(priority);
-    }
-
-    if (projectId) {
-      body.project_id = parseInt(projectId);
-    }
-
-    if (labelIds && labelIds.length > 0) {
-      body.label_ids = labelIds.map((id) => parseInt(id));
-    }
-
-    await createTask(body);
-    clear();
+  if (getLabelsError) {
+    handleError({ error: getLabelsError, title: "Unable to get labels" });
   }
+
+  const lowestPriority = priorities[priorities.length - 1];
+
+  const { handleSubmit, itemProps, values, focus, reset } = useForm<CreateTaskValues>({
+    async onSubmit(values) {
+      const body: AddTaskArgs = { content: values.content, description: values.description };
+
+      if (values.dueDate) {
+        body.dueDate = getAPIDate(values.dueDate);
+      }
+
+      if (values.priority) {
+        body.priority = parseInt(values.priority);
+      }
+
+      if (values.projectId) {
+        body.projectId = values.projectId;
+      }
+
+      if (values.sectionId) {
+        body.sectionId = values.sectionId;
+      }
+
+      if (values.labels && values.labels.length > 0) {
+        body.labels = values.labels;
+      }
+
+      const toast = new Toast({ style: Toast.Style.Animated, title: "Creating task" });
+      await toast.show();
+
+      try {
+        const { url, id } = await todoist.addTask(body);
+        toast.style = Toast.Style.Success;
+        toast.title = "Task created";
+
+        toast.primaryAction = {
+          title: "Open Task",
+          shortcut: { modifiers: ["cmd"], key: "o" },
+          onAction: () => push(<TaskDetail taskId={id} />),
+        };
+
+        toast.secondaryAction = {
+          title: `Open Task ${isTodoistInstalled ? "in Todoist" : "in Browser"}`,
+          shortcut: { modifiers: ["cmd", "shift"], key: "o" },
+          onAction: async () => {
+            open(isTodoistInstalled ? `todoist://task?id=${id}` : url);
+          },
+        };
+
+        if (fromProjectId && mutateTasks) {
+          mutateTasks();
+          pop();
+        }
+
+        reset({
+          content: "",
+          description: "",
+          dueDate: null,
+          priority: String(lowestPriority.value),
+          projectId: "",
+          sectionId: "",
+          labels: [],
+        });
+
+        focus("content");
+      } catch (error) {
+        handleError({ error, title: "Unable to create task" });
+      }
+    },
+    initialValues: {
+      content: draftValues?.content,
+      description: draftValues?.description,
+      dueDate: draftValues?.dueDate,
+      priority: draftValues?.priority || String(lowestPriority.value),
+      projectId: draftValues?.projectId
+        ? String(draftValues?.projectId)
+        : "" || fromProjectId
+        ? String(fromProjectId)
+        : "",
+      sectionId: draftValues?.sectionId ? String(draftValues?.sectionId) : "",
+      labels: draftValues?.labels,
+    },
+    validation: {
+      content: FormValidation.Required,
+    },
+  });
+
+  const projectSections = sections?.filter((section) => String(section.projectId) === values.projectId);
 
   return (
-    <Form
-      isLoading={isLoading}
-      actions={
-        <ActionPanel>
-          <ActionPanel.Item title="Create task" onAction={submit} icon={Icon.Plus} />
-          <ActionPanel.Item
-            title="Create task and go to project"
-            onAction={submitAndGoToProject}
-            icon={Icon.ArrowRight}
-          />
-        </ActionPanel>
-      }
-    >
-      <Form.TextField id="content" title="Title" placeholder="Buy fruits" value={content} onChange={setContent} />
+    <View>
+      <Form
+        isLoading={isLoadingProjects || isLoadingSections || isLoadingLabels}
+        actions={
+          <ActionPanel>
+            <Action.SubmitForm title="Create Task" onSubmit={handleSubmit} icon={Icon.Plus} />
+          </ActionPanel>
+        }
+        enableDrafts={!fromProjectId}
+      >
+        <Form.TextField {...itemProps.content} title="Title" placeholder="Buy fruits" />
 
-      <Form.TextArea
-        id="description"
-        title="Description"
-        placeholder="Apples, pears, and **strawberries**"
-        value={description}
-        onChange={setDescription}
-      />
+        <Form.TextArea
+          {...itemProps.description}
+          title="Description"
+          placeholder="Apples, pears, and strawberries (Markdown supported)"
+          enableMarkdown
+        />
 
-      <Form.DatePicker id="due_date" title="Due date" value={dueDate} onChange={setDueDate} />
+        <Form.Separator />
 
-      <Form.Dropdown id="priority" title="Priority" value={priority} onChange={setPriority}>
-        {priorities.map(({ value, name }) => (
-          <Form.Dropdown.Item value={String(value)} title={name} key={value} />
-        ))}
-      </Form.Dropdown>
+        <Form.DatePicker {...itemProps.dueDate} title="Due date" type={Form.DatePicker.Type.Date} />
 
-      {projects && projects.length > 0 ? (
-        <Form.Dropdown id="project_id" title="Project" value={projectId} onChange={setProjectId}>
-          {projects.map(({ id, name }) => (
-            <Form.Dropdown.Item value={String(id)} title={name} key={id} />
+        <Form.Dropdown {...itemProps.priority} title="Priority">
+          {priorities.map(({ value, name, color, icon }) => (
+            <Form.Dropdown.Item
+              value={String(value)}
+              title={name}
+              key={value}
+              icon={{ source: icon ? icon : Icon.Dot, tintColor: color }}
+            />
           ))}
         </Form.Dropdown>
-      ) : null}
 
-      {labels && labels.length > 0 ? (
-        <Form.TagPicker id="label_ids" title="Labels" value={labelIds} onChange={setLabelIds}>
-          {labels.map(({ id, name }) => (
-            <Form.TagPicker.Item value={String(id)} title={name} key={id} />
-          ))}
-        </Form.TagPicker>
-      ) : null}
-    </Form>
+        {projects && projects.length > 0 ? (
+          <Form.Dropdown {...itemProps.projectId} title="Project">
+            <Form.Dropdown.Item title="No project" value="" icon={Icon.List} />
+
+            {projects.map((project) => (
+              <Form.Dropdown.Item
+                key={project.id}
+                value={String(project.id)}
+                icon={getProjectIcon(project)}
+                title={project.name}
+              />
+            ))}
+          </Form.Dropdown>
+        ) : null}
+
+        {projectSections && projectSections.length > 0 ? (
+          <Form.Dropdown {...itemProps.sectionId} title="Section">
+            <Form.Dropdown.Item
+              value=""
+              title="No section"
+              icon={{ source: "section.svg", tintColor: Color.PrimaryText }}
+            />
+
+            {projectSections.map(({ id, name }) => (
+              <Form.Dropdown.Item
+                key={id}
+                value={String(id)}
+                title={name}
+                icon={{ source: "section.svg", tintColor: Color.PrimaryText }}
+              />
+            ))}
+          </Form.Dropdown>
+        ) : null}
+
+        {labels && labels.length > 0 ? (
+          <Form.TagPicker {...itemProps.labels} title="Labels">
+            {labels.map(({ id, name, color }) => (
+              <Form.TagPicker.Item
+                key={id}
+                value={name}
+                title={name}
+                icon={{ source: Icon.Tag, tintColor: getColorByKey(color).hexValue }}
+              />
+            ))}
+          </Form.TagPicker>
+        ) : null}
+      </Form>
+    </View>
   );
 }
-
-render(<CreateTask />);

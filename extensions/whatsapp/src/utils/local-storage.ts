@@ -1,12 +1,12 @@
 import { WhatsAppChat } from "./types";
-import { getLocalStorageItem, setLocalStorageItem } from "@raycast/api";
+import { LocalStorage } from "@raycast/api";
 
 const whatsAppStorageKey = "whatsapp-chats";
 
 export async function getStoredWhatsAppChats(): Promise<Array<WhatsAppChat>> {
-  return JSON.parse((await getLocalStorageItem(whatsAppStorageKey)) || "[]");
+  return JSON.parse((await LocalStorage.getItem(whatsAppStorageKey)) || "[]");
 }
 
 export async function saveStoredWhatsAppChats(contacts: Array<WhatsAppChat>): Promise<void> {
-  await setLocalStorageItem(whatsAppStorageKey, JSON.stringify(contacts));
+  await LocalStorage.setItem(whatsAppStorageKey, JSON.stringify(contacts));
 }

@@ -1,4 +1,4 @@
-import { showToast, ToastStyle } from "@raycast/api";
+import { showToast, Toast } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
 import { buildScriptEnsuringSpotifyIsRunning } from "./utils";
 
@@ -10,8 +10,13 @@ export default async () => {
   `);
   try {
     const result = await runAppleScript(script);
-    await showToast(ToastStyle.Success, result === "true" ? "Shuffle On" : "Shuffle Off");
+    await showToast({
+      title: result === "true" ? "Shuffle On" : "Shuffle Off",
+    });
   } catch (_) {
-    await showToast(ToastStyle.Failure, "Failed toggling shuffle");
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Failed toggling shuffle",
+    });
   }
 };

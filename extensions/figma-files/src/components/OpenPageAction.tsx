@@ -1,4 +1,4 @@
-import { Application, getApplications, Icon, OpenAction, OpenInBrowserAction } from "@raycast/api";
+import { Application, getApplications, Icon, Action } from "@raycast/api";
 import { useState, useEffect } from "react";
 
 import type { File, Node } from "../types";
@@ -13,7 +13,7 @@ export function OpenPageAction(props: { file: File; node: Node; onVisit: (file: 
   }, []);
 
   return desktopApp ? (
-    <OpenAction
+    <Action.Open
       title={props.node.name}
       icon={Icon.Document}
       target={`figma://file/${props.file.key}?node-id=${props.node.id}`}
@@ -21,7 +21,7 @@ export function OpenPageAction(props: { file: File; node: Node; onVisit: (file: 
       onOpen={() => props.onVisit(props.file)}
     />
   ) : (
-    <OpenInBrowserAction
+    <Action.OpenInBrowser
       title={props.node.name}
       url={`https://figma.com/file/${props.file.key}?node-id=${props.node.id}`}
       onOpen={() => props.onVisit(props.file)}

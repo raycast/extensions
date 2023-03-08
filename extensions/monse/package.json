@@ -1,0 +1,79 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "monse",
+  "title": "Monse - Banking In Raycast",
+  "description": "Connect your bank account and see latest incomes, expenses, and details.",
+  "icon": "commands-icon.png",
+  "author": "Falcon",
+  "categories": [
+    "Finance"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "token",
+      "title": "Public Api Token",
+      "description": "You can create your token inside the settings panel at monse.app",
+      "required": true,
+      "label": "Public Api Token",
+      "type": "password"
+    },
+    {
+      "name": "currency",
+      "title": "Default currency",
+      "description": "Choose the main currency to get all your transactions",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "EUR (€)",
+          "value": "EUR"
+        },
+        {
+          "title": "USD ($)",
+          "value": "USD"
+        },
+        {
+          "title": "GBP (£)",
+          "value": "GBP"
+        }
+      ],
+      "required": false
+    }
+  ],
+  "commands": [
+    {
+      "name": "transactions",
+      "title": "Latest Transactions",
+      "subtitle": "Monse",
+      "description": "List your latest transactions from your connected accounts.",
+      "mode": "view"
+    },
+    {
+      "name": "bank-accounts",
+      "title": "Bank Accounts",
+      "subtitle": "Monse",
+      "description": "List all your bank accounts and current balance",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.38.3",
+    "@raycast/utils": "^1.4.8",
+    "axios": "^0.27.2"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

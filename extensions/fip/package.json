@@ -1,0 +1,71 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "fip",
+  "title": "Fip",
+  "description": "Start and explore the fip radio directly from Raycast",
+  "icon": "favicon.png",
+  "author": "louison",
+  "categories": [
+    "Media"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "now",
+      "title": "Currently Playing Track",
+      "subtitle": "Fip Radio",
+      "description": "What's currently playing on fip radio",
+      "mode": "view"
+    },
+    {
+      "name": "prev",
+      "title": "Previous Track",
+      "subtitle": "Fip Radio",
+      "description": "The last track played before the current one on fip radio",
+      "mode": "view"
+    },
+    {
+      "name": "next",
+      "title": "Next Track",
+      "subtitle": "Fip Radio",
+      "description": "The next track to by played by fip radio",
+      "mode": "view"
+    },
+    {
+      "name": "start",
+      "title": "Start Playing",
+      "subtitle": "Fip Radio",
+      "description": "Starts VLC and play the fip radio audio stream",
+      "mode": "no-view"
+    },
+    {
+      "name": "stop",
+      "title": "Stop Playing",
+      "subtitle": "Fip Radio",
+      "description": "Pause fip radio stream on VLC",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.35.1",
+    "@types/node-fetch": "^2.6.1",
+    "node-fetch": "^3.2.4",
+    "run-applescript": "^6.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

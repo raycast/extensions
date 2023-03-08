@@ -1,14 +1,4 @@
-import {
-  ActionPanel,
-  copyTextToClipboard,
-  Form,
-  Icon,
-  OpenInBrowserAction,
-  showToast,
-  SubmitFormAction,
-  Toast,
-  ToastStyle,
-} from "@raycast/api";
+import { ActionPanel, Form, Icon, showToast, Toast, Action, Clipboard } from "@raycast/api";
 import got from "got";
 
 export default function Command() {
@@ -17,7 +7,7 @@ export default function Command() {
       actions={
         <ActionPanel>
           <ShareSecretAction />
-          <OpenInBrowserAction url="https://share.doppler.com" />
+          <Action.OpenInBrowser url="https://share.doppler.com" />
         </ActionPanel>
       }
     >
@@ -48,12 +38,14 @@ export default function Command() {
 function ShareSecretAction() {
   async function handleSubmit(values: { secret: string; expireViews: number; expireDays: number }) {
     if (!values.secret) {
-      showToast(ToastStyle.Failure, "Secret is required");
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Secret is required",
+      });
       return;
     }
 
-    const toast = new Toast({ style: ToastStyle.Animated, title: "Sharing secret" });
-    await toast.show();
+    const toast = await showToast({ style: Toast.Style.Animated, title: "Sharing secret" });
 
     try {
       const { body } = await got.post("https://api.doppler.com/v1/share/secrets/plain", {
@@ -61,17 +53,17 @@ function ShareSecretAction() {
         responseType: "json",
       });
 
-      await copyTextToClipboard((body as any).authenticated_url);
+      await Clipboard.copy((body as any).authenticated_url);
 
-      toast.style = ToastStyle.Success;
+      toast.style = Toast.Style.Success;
       toast.title = "Shared secret";
       toast.message = "Copied link to clipboard";
     } catch (error) {
-      toast.style = ToastStyle.Failure;
+      toast.style = Toast.Style.Failure;
       toast.title = "Failed sharing secret";
       toast.message = String(error);
     }
   }
 
-  return <SubmitFormAction icon={Icon.Upload} title="Share Secret" onSubmit={handleSubmit} />;
+  return <Action.SubmitForm icon={Icon.Upload} title="Share Secret" onSubmit={handleSubmit} />;
 }

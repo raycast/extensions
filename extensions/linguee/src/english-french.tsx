@@ -1,7 +1,5 @@
-import { ResultList } from "./components/ResultList";
+import App from "./App";
 
-const App = () => {
-  return <ResultList languagePairKey="english-french" />;
-};
-
-export default App;
+export default function () {
+  return <App languagePairKey="english-french" />;
+}

@@ -9,8 +9,8 @@ import { runAppleScript } from "run-applescript";
  */
 export function buildScriptEnsuringSpotifyIsRunning(commandsToRunAfterSpotifyIsRunning: string): string {
   return `
-    tell application "Spotify" 
-      if not application "Spotify" is running then  
+    tell application "Spotify"
+      if not application "Spotify" is running then
         activate
 
         set _maxOpenWaitTimeInSeconds to 5

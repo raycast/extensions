@@ -1,0 +1,87 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "monday-com",
+  "title": "monday.com",
+  "description": "Quickly navigate to your latest monday.com boards and create items",
+  "icon": "command-icon.png",
+  "author": "freak4pc",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Recent Boards",
+      "subtitle": "monday.com",
+      "description": "See your recently interacted with boards, navigate to them, copy their links, or quickly add an item to them",
+      "mode": "view"
+    },
+    {
+      "name": "team",
+      "title": "My Team",
+      "subtitle": "monday.com",
+      "description": "Explore all of your team members",
+      "mode": "view"
+    },
+    {
+      "name": "open",
+      "title": "Go to My Account",
+      "subtitle": "monday.com",
+      "description": "Open your account in your default browser",
+      "mode": "no-view",
+      "keywords": [
+        "monday",
+        "slug",
+        "account"
+      ]
+    },
+    {
+      "name": "quickAddItem",
+      "title": "Quick-add an Item",
+      "subtitle": "monday.com",
+      "description": "Adds an item to a pre-defined board",
+      "mode": "view",
+      "keywords": [
+        "add",
+        "item"
+      ],
+      "preferences": [
+        {
+          "name": "quickAddBoardId",
+          "type": "textfield",
+          "required": true,
+          "title": "Board ID",
+          "description": "ID of the board to quick-add items to"
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "type": "password",
+      "required": true,
+      "title": "monday.com API Token",
+      "description": "You can get a token on your monday account's 'Developer' section (or going to `/apps/manage/tokens` under your monday account)"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.29.1",
+    "node-fetch": "^3.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

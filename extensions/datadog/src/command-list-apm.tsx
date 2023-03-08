@@ -1,24 +1,24 @@
-import { ActionPanel, getPreferenceValues, List, OpenInBrowserAction } from "@raycast/api";
+import { Action, ActionPanel, List } from "@raycast/api";
 import { useAPM } from "./useAPM";
+import { linkDomain } from "./util";
 
 // noinspection JSUnusedGlobalSymbols
 export default function CommandListAPM() {
   const { apm, apmIsLoading } = useAPM();
-  const SERVER = getPreferenceValues()["server"];
 
   return (
     <List isLoading={apmIsLoading}>
-      {apm.map(apm => (
+      {apm.map(({ env, name, calls }) => (
         <List.Item
-          key={`${apm.env}-${apm.name}`}
+          key={`${env}-${name}`}
           icon={{ source: { light: "icon@light.png", dark: "icon@dark.png" } }}
-          title={apm.name}
-          subtitle={apm.calls?.length > 0 ? `Calls ${apm.calls.join(", ")}` : undefined}
-          accessoryTitle={apm.env}
-          keywords={[apm.env].concat(apm.calls)}
+          title={name}
+          subtitle={calls?.length > 0 ? `Calls ${calls.join(", ")}` : undefined}
+          accessories={[{ text: env }]}
+          keywords={[env].concat(calls)}
           actions={
             <ActionPanel>
-              <OpenInBrowserAction url={`https://app.${SERVER}/apm/service/${apm.name}?env=${apm.env}`} />
+              <Action.OpenInBrowser url={`https://${linkDomain()}/apm/service/${name}?env=${env}`} />
             </ActionPanel>
           }
         />

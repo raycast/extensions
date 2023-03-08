@@ -1,4 +1,5 @@
 export interface Preferences {
+  streamlinkconfig: any;
   clientId: string;
   authorization: string;
   streamlink?: string;
