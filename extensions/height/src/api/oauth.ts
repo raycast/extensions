@@ -1,4 +1,5 @@
 import { OAuth } from "@raycast/api";
+import fetch from "node-fetch";
 
 const clientId = "YmDF3nLYeimUqKY6ACWQE6SIkCUQMIgCwoIOW2iy4Co";
 
@@ -16,6 +17,7 @@ export async function authorize() {
   if (tokenSet?.accessToken) {
     if (tokenSet?.refreshToken && tokenSet?.isExpired()) {
       const tokens = await refreshTokens(tokenSet.refreshToken);
+      console.log("🚀 ~ file: oauth.ts:20 ~ authorize ~ refreshTokens:", tokens);
       await client.setTokens(tokens);
       return tokens.access_token;
     }
@@ -27,13 +29,18 @@ export async function authorize() {
     endpoint: "https://height.app/oauth/authorization",
     clientId,
     scope: "api",
+    extraParameters: {
+      redirect_uri: "https://raycast.com/redirect?packageName=Height",
+      access_types: "appUser",
+    },
   });
-  console.log("🚀 ~ file: oauth.ts:32 ~ authorize ~ authRequest", authRequest);
+  console.log("🚀 ~ file: oauth.ts:31 ~ authorize ~ authRequest:", authRequest);
 
   const { authorizationCode } = await client.authorize(authRequest);
-  console.log("🚀 ~ file: oauth.ts:37 ~ authorize ~ authorizationCode", authorizationCode);
+  console.log("🚀 ~ file: oauth.ts:34 ~ authorize ~ authorizationCode:", authorizationCode);
+
   const tokens = await fetchTokens(authRequest, authorizationCode);
-  console.log("🚀 ~ file: oauth.ts:38 ~ authorize ~ tokens", tokens);
+  console.log("🚀 ~ file: oauth.ts:39 ~ authorize ~ fetchTokens:", tokens);
   await client.setTokens(tokens);
 
   return tokens.access_token;
@@ -52,7 +59,6 @@ async function fetchTokens(authRequest: OAuth.AuthorizationRequest, authCode: st
       code_verifier: authRequest.codeVerifier,
     }),
   });
-  console.log("🚀 ~ file: oauth.ts:57 ~ fetchTokens ~ response", response);
   if (!response.ok) {
     console.error("Fetch tokens error: ", await response.text());
     throw new Error(response.statusText);
