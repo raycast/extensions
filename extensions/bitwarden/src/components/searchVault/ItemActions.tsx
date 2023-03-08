@@ -12,7 +12,7 @@ import {
 import CopyPasswordAction from "~/components/actions/CopyPassword";
 import PastePasswordAction from "~/components/actions/PastePassword";
 import ComponentReverser from "~/components/ComponentReverser";
-import SearchCommonActions from "~/components/search/CommonActions";
+import SearchCommonActions from "~/components/searchVault/CommonActions";
 import { useBitwarden } from "~/context/bitwarden";
 import { useSession } from "~/context/session";
 import { Item, Reprompt } from "~/types/search";

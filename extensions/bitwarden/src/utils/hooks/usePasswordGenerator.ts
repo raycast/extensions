@@ -36,7 +36,7 @@ const passwordReducer = (state: GeneratorState, action: GeneratorActions): Gener
   }
 };
 
-export function usePasswordGenerator() {
+function usePasswordGenerator() {
   const bitwarden = useBitwarden();
   const [{ options, ...state }, dispatch] = useReducer(passwordReducer, initialPasswordGeneratorState);
   const { abortControllerRef, renew: renewAbortController, abort: abortPreviousGenerate } = useAbortController();
@@ -93,3 +93,5 @@ export function usePasswordGenerator() {
 
   return { ...state, regeneratePassword, options, setOption };
 }
+
+export default usePasswordGenerator;

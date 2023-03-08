@@ -1,7 +1,7 @@
 import { List, Icon, ActionPanel } from "@raycast/api";
 import RootErrorBoundary from "~/components/RootErrorBoundary";
 import SearchCommonActions from "~/components/search/CommonActions";
-import SearchItem from "~/components/search/Item";
+import SearchItem from ~/components/searchVault/Itemm";
 import { BitwardenProvider } from "~/context/bitwarden";
 import { SessionProvider } from "~/context/session";
 import { useVault, VaultProvider } from "~/context/vault";

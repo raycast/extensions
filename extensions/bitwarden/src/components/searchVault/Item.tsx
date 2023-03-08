@@ -1,6 +1,6 @@
 import { ActionPanel, Color, getPreferenceValues, Icon, List } from "@raycast/api";
 import { useMemo } from "react";
-import SearchItemActions from "~/components/search/ItemActions";
+import SearchItemActions from "~/components/searchVault/ItemActions";
 import { Folder, Item } from "~/types/search";
 import { extractKeywords, faviconUrl } from "~/utils/search";
 

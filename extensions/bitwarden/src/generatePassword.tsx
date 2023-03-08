@@ -1,7 +1,7 @@
 import { Form, Detail } from "@raycast/api";
 import { capitalize } from "~/utils/strings";
 import useOneTimePasswordHistoryWarning from "~/utils/hooks/useOneTimePasswordHistoryWarning";
-import { usePasswordGenerator } from "~/utils/hooks/usePasswordGenerator";
+import usePasswordGenerator from "~/utils/hooks/usePasswordGenerator";
 import { PasswordGeneratorOptions, PasswordOptionsToFieldEntries, PasswordType } from "~/types/passwords";
 import { PASSWORD_OPTIONS_MAP } from "~/constants/passwords";
 import { objectEntries } from "~/utils/objects";
