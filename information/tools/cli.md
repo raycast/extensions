@@ -33,8 +33,8 @@ You can use `npx ray build -e dist` to validate that your extension builds prope
 
 ## Migrate
 
-`npx ray migrate` [migrates](../migration/README.md) your extension to the latest version of the `@raycast/api`.
+`npx ray migrate` [migrates](../../migration/README.md) your extension to the latest version of the `@raycast/api`.
 
 ## Publish (For Teams Only)
 
-`npx ray publish` verifies, builds and publishes an extension to an organization store. This command is only availble to users that are part of an organization. Learn more about it [here](../teams/getting-started.md).
+`npx ray publish` verifies, builds and publishes an extension to an organization store. This command is only availble to users that are part of an organization. Learn more about it [here](../../teams/getting-started.md).
