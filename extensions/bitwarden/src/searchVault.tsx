@@ -1,11 +1,11 @@
 import { List, Icon, ActionPanel } from "@raycast/api";
 import RootErrorBoundary from "~/components/RootErrorBoundary";
-import SearchCommonActions from "~/components/search/CommonActions";
-import SearchItem from ~/components/searchVault/Itemm";
+import SearchCommonActions from "~/components/searchVault/CommonActions";
+import SearchItem from "~/components/searchVault/Item";
 import { BitwardenProvider } from "~/context/bitwarden";
 import { SessionProvider } from "~/context/session";
 import { useVault, VaultProvider } from "~/context/vault";
-import { Folder, Item } from "~/types/search";
+import { Folder, Item } from "~/types/vault";
 
 const SearchVaultCommand = () => (
   <RootErrorBoundary>

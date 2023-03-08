@@ -2,7 +2,7 @@ import { showToast, Toast } from "@raycast/api";
 import { createContext, PropsWithChildren, useContext, useEffect, useMemo, useReducer } from "react";
 import { useBitwarden } from "~/context/bitwarden";
 import { useSession } from "~/context/session";
-import { Folder, Item } from "~/types/search";
+import { Folder, Item } from "~/types/vault";
 
 export type VaultState = {
   items: Item[];

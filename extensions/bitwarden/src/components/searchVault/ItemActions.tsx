@@ -15,7 +15,7 @@ import ComponentReverser from "~/components/ComponentReverser";
 import SearchCommonActions from "~/components/searchVault/CommonActions";
 import { useBitwarden } from "~/context/bitwarden";
 import { useSession } from "~/context/session";
-import { Item, Reprompt } from "~/types/search";
+import { Item, Reprompt } from "~/types/vault";
 import { capitalize, codeBlock } from "~/utils/strings";
 
 const { primaryAction } = getPreferenceValues();

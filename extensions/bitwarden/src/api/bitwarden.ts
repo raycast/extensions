@@ -6,7 +6,7 @@ import { CLINotFoundError } from "~/components/RootErrorBoundary";
 import { LOCAL_STORAGE_KEY, DEFAULT_SERVER_URL } from "~/constants/general";
 import { Preferences, VaultState } from "~/types/general";
 import { PasswordGeneratorOptions } from "~/types/passwords";
-import { Item } from "~/types/search";
+import { Item } from "~/types/vault";
 import { getPasswordGeneratingArgs } from "~/utils/passwords";
 import { getServerUrlPreference } from "~/utils/preferences";
 

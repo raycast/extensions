@@ -1,7 +1,7 @@
 import { useNavigation } from "@raycast/api";
 import RepromptForm from "~/components/RepromptForm";
 import { useSession } from "~/context/session";
-import { Item } from "~/types/search";
+import { Item } from "~/types/vault";
 
 export type UseRepromptOptions = {
   item?: Item;
