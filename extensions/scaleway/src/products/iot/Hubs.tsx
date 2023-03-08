@@ -1,4 +1,5 @@
 import { List } from '@raycast/api'
+import { getPreferenceUser } from 'providers'
 import { useReducer } from 'react'
 import { HubAction } from './HubAction'
 import { HubDetail } from './HubDetail'
@@ -6,10 +7,12 @@ import { useAllRegionsHubsQuery } from './queries'
 import { getHubStatusIcon } from './status'
 
 export const Hubs = () => {
+  const clientSetting = getPreferenceUser()
   const [isDetailOpen, toggleIsDetailOpen] = useReducer((state) => !state, true)
 
   const { data: hubs = [], isLoading } = useAllRegionsHubsQuery({
     orderBy: 'created_at_desc',
+    organizationId: clientSetting.defaultOrganizationId,
   })
 
   const isListLoading = isLoading && !hubs

@@ -1,4 +1,5 @@
 import { List } from '@raycast/api'
+import { getPreferenceUser } from 'providers'
 import { useReducer } from 'react'
 import { ServerAction } from './ServerAction'
 import { ServerDetail } from './ServerDetail'
@@ -6,10 +7,12 @@ import { useAllZoneServersQuery } from './queries'
 import { getServerStatusIcon } from './status'
 
 export const Servers = () => {
+  const clientSetting = getPreferenceUser()
   const [isDetailOpen, toggleIsDetailOpen] = useReducer((state) => !state, true)
 
   const { data: servers = [], isLoading } = useAllZoneServersQuery({
     orderBy: 'created_at_desc',
+    organizationId: clientSetting.defaultOrganizationId,
   })
 
   const isListLoading = isLoading && !servers

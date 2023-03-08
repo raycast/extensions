@@ -1,4 +1,5 @@
 import { List } from '@raycast/api'
+import { getPreferenceUser } from 'providers'
 import { useReducer, useState } from 'react'
 import { POLLING_INTERVAL } from '../../constants'
 import { ImageAction, ImageDetail } from './pages/images'
@@ -7,12 +8,14 @@ import { useAllImagesQuery, useAllRegionNamespacesQuery } from './queries'
 import { isImageTransient, isNamespaceTransient } from './status'
 
 export const Images = () => {
+  const clientSetting = getPreferenceUser()
   const [isDetailOpen, toggleIsDetailOpen] = useReducer((state) => !state, true)
   const [selectedNamespaceId, setSelectedNamespaceId] = useState<string>('')
 
   const { data: namespaces = [], isLoading: isLoadingNamespaces } = useAllRegionNamespacesQuery(
     {
       orderBy: 'created_at_desc',
+      organizationId: clientSetting.defaultOrganizationId,
     },
     {
       needPolling: (n) => (n || []).some(isNamespaceTransient),
@@ -22,6 +25,7 @@ export const Images = () => {
   const { data: images, isLoading: isLoadingImages } = useAllImagesQuery(
     {
       namespaceId: selectedNamespaceId,
+      organizationId: clientSetting.defaultOrganizationId,
       region: namespaces.find(({ id }) => id === selectedNamespaceId)?.region,
     },
     {

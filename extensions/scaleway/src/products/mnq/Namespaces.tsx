@@ -1,14 +1,17 @@
 import { List } from '@raycast/api'
+import { getPreferenceUser } from 'providers'
 import { useReducer } from 'react'
 import { NamespaceAction } from './NamespaceAction'
 import { NamespaceDetail } from './NamespaceDetail'
 import { useAllRegionNamespacesQuery } from './queries'
 
 export const Namespaces = () => {
+  const clientSetting = getPreferenceUser()
   const [isDetailOpen, toggleIsDetailOpen] = useReducer((state) => !state, true)
 
   const { data: namespaces = [], isLoading } = useAllRegionNamespacesQuery({
     orderBy: 'created_at_desc',
+    organizationId: clientSetting.defaultOrganizationId,
   })
 
   const isListLoading = isLoading && !namespaces

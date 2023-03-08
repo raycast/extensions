@@ -1,4 +1,5 @@
 import { List } from '@raycast/api'
+import { getPreferenceUser } from 'providers'
 import { useReducer, useState } from 'react'
 import { POLLING_INTERVAL } from '../../constants'
 import { ContainerActions } from './ContainerActions'
@@ -8,11 +9,13 @@ import { useAllContainersQuery, useAllRegionsNamespacesQuery } from './queries'
 import { getContainerStatusIcon, isContainerTransient } from './status'
 
 export const Containers = () => {
+  const clientSetting = getPreferenceUser()
   const [isDetailOpen, toggleIsDetailOpen] = useReducer((state) => !state, true)
   const [selectedNamespaceId, setSelectedNamespaceId] = useState<string>('')
 
   const { data: namespaces } = useAllRegionsNamespacesQuery({
     orderBy: 'created_at_asc',
+    organizationId: clientSetting.defaultOrganizationId,
   })
 
   const {

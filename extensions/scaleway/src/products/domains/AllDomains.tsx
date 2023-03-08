@@ -1,4 +1,5 @@
 import { List } from '@raycast/api'
+import { getPreferenceUser } from 'providers'
 import { useReducer } from 'react'
 import { DomainAction } from './DomainAction'
 import { DomainDetail } from './DomainDetail'
@@ -6,9 +7,12 @@ import { useAllDomainsQuery } from './queries'
 import { getDomainStatusIcon } from './status'
 
 export const AllDomains = () => {
+  const clientSetting = getPreferenceUser()
   const [isDetailOpen, toggleIsDetailOpen] = useReducer((state) => !state, true)
 
-  const { data: domains = [], isLoading } = useAllDomainsQuery({})
+  const { data: domains = [], isLoading } = useAllDomainsQuery({
+    organizationId: clientSetting.defaultOrganizationId,
+  })
 
   const isListLoading = isLoading && !domains
 

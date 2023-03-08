@@ -1,4 +1,5 @@
 import { List } from '@raycast/api'
+import { getPreferenceUser } from 'providers'
 import { useReducer } from 'react'
 import { POLLING_INTERVAL } from '../../constants'
 import { ClusterAction } from './ClusterAction'
@@ -7,11 +8,13 @@ import { useAllZoneClustersQuery } from './queries'
 import { getClusterStatusIcon, isClusterTransient } from './status'
 
 export const Clusters = () => {
+  const clientSetting = getPreferenceUser()
   const [isDetailOpen, toggleIsDetailOpen] = useReducer((state) => !state, true)
 
   const { data: clusters = [], isLoading } = useAllZoneClustersQuery(
     {
       orderBy: 'created_at_desc',
+      organizationId: clientSetting.defaultOrganizationId,
     },
     {
       pollingInterval: POLLING_INTERVAL['10S'],

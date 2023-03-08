@@ -1,4 +1,5 @@
 import { List } from '@raycast/api'
+import { getPreferenceUser } from 'providers'
 import { useReducer } from 'react'
 import { InstanceAction } from './InstanceAction'
 import { InstanceDetail } from './InstanceDetail'
@@ -6,10 +7,12 @@ import { useAllRegionInstancesQuery } from './queries'
 import { getInstanceStatusIcon } from './status'
 
 export const Instances = () => {
+  const clientSetting = getPreferenceUser()
   const [isDetailOpen, toggleIsDetailOpen] = useReducer((state) => !state, true)
 
   const { data: instances = [], isLoading } = useAllRegionInstancesQuery({
     orderBy: 'created_at_desc',
+    organizationId: clientSetting.defaultOrganizationId,
   })
 
   const isListLoading = isLoading && !instances

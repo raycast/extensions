@@ -1,4 +1,5 @@
 import { List } from '@raycast/api'
+import { getPreferenceUser } from 'providers'
 import { useReducer } from 'react'
 import { POLLING_INTERVAL } from '../../constants'
 import { ServerAction } from './ServerAction'
@@ -7,11 +8,13 @@ import { useAllZoneServersQuery } from './queries'
 import { getServerStatusIcon, isServerTransient } from './status'
 
 export const Servers = () => {
+  const clientSetting = getPreferenceUser()
   const [isDetailOpen, toggleIsDetailOpen] = useReducer((state) => !state, true)
 
   const { data: servers = [], isLoading } = useAllZoneServersQuery(
     {
       orderBy: 'created_at_desc',
+      organizationId: clientSetting.defaultOrganizationId,
     },
     {
       pollingInterval: POLLING_INTERVAL['10S'],

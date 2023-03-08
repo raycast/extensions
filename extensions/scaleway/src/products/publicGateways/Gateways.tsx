@@ -1,4 +1,5 @@
 import { List } from '@raycast/api'
+import { getPreferenceUser } from 'providers'
 import { useReducer } from 'react'
 import { GatewayAction } from './GatewayAction'
 import { GatewayDetail } from './GatewayDetail'
@@ -6,10 +7,12 @@ import { useAllZonesGatewaysQuery } from './queries'
 import { getGatewayStatusIcon } from './status'
 
 export const Gateways = () => {
+  const clientSetting = getPreferenceUser()
   const [isDetailOpen, toggleIsDetailOpen] = useReducer((state) => !state, true)
 
   const { data: gateways = [], isLoading } = useAllZonesGatewaysQuery({
     orderBy: 'created_at_asc',
+    organizationId: clientSetting.defaultOrganizationId,
   })
 
   const isListLoading = isLoading && !gateways

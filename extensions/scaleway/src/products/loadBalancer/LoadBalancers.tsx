@@ -1,4 +1,5 @@
 import { List } from '@raycast/api'
+import { getPreferenceUser } from 'providers'
 import { useReducer } from 'react'
 import { LoadBalancerAction } from './LoadBalancerAction'
 import { LoadBalancerDetail } from './LoadBalancerDetail'
@@ -6,10 +7,12 @@ import { useAllZonesLoadBalancersQuery } from './queries'
 import { getLoadBalancerStatusIcon } from './status'
 
 export const LoadBalancers = () => {
+  const clientSetting = getPreferenceUser()
   const [isDetailOpen, toggleIsDetailOpen] = useReducer((state) => !state, true)
 
   const { data: loadBalancers = [], isLoading } = useAllZonesLoadBalancersQuery({
     orderBy: 'created_at_desc',
+    organizationId: clientSetting.defaultOrganizationId,
   })
 
   const isListLoading = isLoading && !loadBalancers

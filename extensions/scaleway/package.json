@@ -133,9 +133,17 @@
       "mode": "view",
       "icon": "transactionalEmail.webp"
     }
+    ,
+    {
+      "name": "webhosting",
+      "title": "Web Hosting",
+      "description": "Get information about webhosting",
+      "mode": "view",
+      "icon": "webhosting.webp"
+    }
   ],
   "dependencies": {
-    "@raycast/api": "1.48.5",
+    "@raycast/api": "1.48.7",
     "@scaleway/configuration-loader": "1.0.0",
     "@scaleway/sdk": "1.2.0",
     "@scaleway/use-dataloader": "4.0.0",
@@ -147,8 +155,8 @@
     "@scaleway/tsconfig": "1.1.0",
     "@types/node": "18.14.6",
     "@types/react": "18.0.28",
-    "@typescript-eslint/eslint-plugin": "5.54.0",
-    "@typescript-eslint/parser": "5.54.0",
+    "@typescript-eslint/eslint-plugin": "5.54.1",
+    "@typescript-eslint/parser": "5.54.1",
     "eslint": "8.35.0",
     "eslint-config-prettier": "8.7.0",
     "prettier": "2.8.4",
@@ -203,11 +211,8 @@
   ],
   "scripts": {
     "lint": "ray lint",
-    "lint:fix": "eslint . --fix --quiet --debug",
-    "build": "ray build -e dev -o build",
+    "build": "ray build -e dist -o build",
     "dev": "ray develop",
-    "help": "ray help",
-    "fix-lint": "ray lint --fix",
-    "version": "ray version"
+    "fix-lint": "ray lint --fix"
   }
 }
