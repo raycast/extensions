@@ -1,5 +1,5 @@
 import { getSelectedText, showHUD, Clipboard, showToast, Toast } from "@raycast/api";
-import { regexList } from "./assets/regexList";
+import { linkReplacer } from "./util/linkReplacer";
 
 export default async function main() {
   try {
@@ -10,18 +10,10 @@ export default async function main() {
       return;
     }
 
-    let newString = text;
+    const replacedString = linkReplacer(text);
+    if (!replacedString) return;
 
-    for (const item of regexList) {
-      newString = newString.replace(item.test, item.replace);
-    }
-
-    if (text === newString) {
-      showHUD("No text to transform");
-      return;
-    }
-
-    await Clipboard.copy(newString);
+    await Clipboard.copy(replacedString);
     showHUD("Copied to clipboard");
   } catch (err) {
     await showToast({

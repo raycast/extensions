@@ -1,20 +1,12 @@
 import { showHUD, Clipboard, showToast, Toast, LaunchProps } from "@raycast/api";
-import { regexList } from "./assets/regexList";
+import { linkReplacer } from "./util/linkReplacer";
 
 export default async function main(props: LaunchProps<{ arguments: { link: string } }>) {
   try {
-    let newString = props.arguments.link;
+    const replacedString = linkReplacer(props.arguments.link);
+    if (!replacedString) return;
 
-    for (const item of regexList) {
-      newString = newString.replace(item.test, item.replace);
-    }
-
-    if (props.arguments.link === newString) {
-      showHUD("No text to transform");
-      return;
-    }
-
-    await Clipboard.copy(newString);
+    await Clipboard.copy(replacedString);
     showHUD("Copied to clipboard");
   } catch (err) {
     await showToast({
