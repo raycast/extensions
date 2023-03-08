@@ -1,6 +1,6 @@
 # Arc Changelog
 
-## [Improvements] - 2023-03-07
+## [Improvements] - 2023-03-08
 
 - Add a new command to open little arc.
 
