@@ -1,37 +1,38 @@
 import { useNavigation } from "@raycast/api";
+import { useRef } from "react";
 import RepromptForm from "~/components/RepromptForm";
-import { useSession } from "~/context/session";
-import { Item } from "~/types/vault";
+
+export type UserRepromptActionProp = { password: string; closeForm: () => void };
+export type UseRepromptAction = (props: UserRepromptActionProp) => boolean | Promise<boolean>;
 
 export type UseRepromptOptions = {
-  item?: Item;
-  what?: string;
+  description?: string;
 };
 
 /**
  * Returns a function for an Action that will navigate to a master password confirmation form.
  * If the confirmation is successful, the provided action will be performed.
  *
- * @param session The session instance.
- * @param action The action to perform upon confirmation.
+ * @param action The action to perform upon confirmation. If the action returns true, navigation will be popped.
  * @param options Options for the form.
  */
-function useReprompt(action: () => void, options: UseRepromptOptions) {
-  const session = useSession();
+function useReprompt(action: UseRepromptAction, options?: UseRepromptOptions) {
+  const { description = "Performing this action" } = options ?? {};
   const { push, pop } = useNavigation();
-  const { item, what } = options ?? {};
+  const wasPopped = useRef(false);
 
-  const description = `Confirmation required${action == null ? "" : ` to ${what}`}${
-    item == null ? "." : ` for ${item.name}.`
-  }`;
+  async function handleConfirm(password: string) {
+    await action({ password, closeForm });
+    if (!wasPopped.current) pop();
+  }
 
-  const handleConfirm = () => {
+  function closeForm() {
+    wasPopped.current = true;
     pop();
-    action();
-  };
+  }
 
   return () => {
-    push(<RepromptForm session={session} description={description} onConfirm={handleConfirm} />);
+    push(<RepromptForm description={description} onConfirm={handleConfirm} />);
   };
 }
 

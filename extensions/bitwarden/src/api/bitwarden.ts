@@ -79,8 +79,8 @@ export class Bitwarden {
   }
 
   private async exec(args: string[], options?: ExecProps): Promise<ExecaChildProcess> {
-    const { abortController, skipLastActivityUpdate = false } = options ?? {};
-    const result = await execa(this.cliPath, args, { env: this.env, input: "", signal: abortController?.signal });
+    const { abortController, input = "", skipLastActivityUpdate = false } = options ?? {};
+    const result = await execa(this.cliPath, args, { env: this.env, input, signal: abortController?.signal });
     if (!skipLastActivityUpdate) {
       await LocalStorage.setItem(LOCAL_STORAGE_KEY.LAST_ACTIVITY_TIME, new Date().toISOString());
     }
@@ -137,9 +137,23 @@ export class Bitwarden {
     const { stdout } = await this.exec(["generate", ...args], { abortController });
     return stdout;
   }
+
+  async getItem(
+    itemId: string,
+    token: string,
+    options?: { password?: string; abortController?: AbortController }
+  ): Promise<Item> {
+    const { password, abortController } = options ?? {};
+    const { stdout } = await this.exec(["get", "item", "--session", token, itemId], {
+      input: password,
+      abortController,
+    });
+    return JSON.parse(stdout);
+  }
 }
 
 type ExecProps = {
   abortController?: AbortController;
   skipLastActivityUpdate?: boolean;
+  input?: string;
 };
