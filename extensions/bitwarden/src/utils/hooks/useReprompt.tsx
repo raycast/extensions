@@ -10,11 +10,8 @@ export type UseRepromptOptions = {
 };
 
 /**
- * Returns a function for an Action that will navigate to a master password confirmation form.
- * If the confirmation is successful, the provided action will be performed.
- *
- * @param action The action to perform upon confirmation. If the action returns true, navigation will be popped.
- * @param options Options for the form.
+ * Returns a function for an Action that will navigate to the {@link RepromptForm}.
+ * The password is not confirm in this hook, only passed down to the action.
  */
 function useReprompt(action: UseRepromptAction, options?: UseRepromptOptions) {
   const { description = "Performing this action" } = options ?? {};

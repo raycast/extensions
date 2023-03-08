@@ -5,14 +5,6 @@ export type RepromptFormProps = {
   onConfirm: (password: string) => void;
 };
 
-/**
- * Form for confirming the master password.
- * This compares with the hashed master password.
- *
- * @param props.session The session instance.
- * @param props.description A description explaining why reprompting is required.
- * @param props.onConfirm Callback if with the entered password.
- */
 const RepromptForm = (props: RepromptFormProps) => {
   const { description, onConfirm } = props;
 

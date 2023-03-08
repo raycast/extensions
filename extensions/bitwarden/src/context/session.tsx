@@ -6,7 +6,6 @@ import { LOCAL_STORAGE_KEY } from "~/constants/general";
 import { useBitwarden } from "~/context/bitwarden";
 import { Preferences, VaultStatus } from "~/types/general";
 import { SessionState } from "~/types/session";
-import { hashMasterPasswordForReprompting } from "~/utils/passwords";
 
 export type Session = {
   active: boolean;
@@ -14,8 +13,6 @@ export type Session = {
   isLoading: boolean;
   isLocked: boolean;
   isAuthenticated: boolean;
-  canRepromptBeSkipped: () => boolean;
-  confirmMasterPassword: (password: string) => Promise<boolean>;
   lock: () => Promise<void>;
   logout: () => Promise<void>;
 };
@@ -27,8 +24,6 @@ const initialState: SessionState = {
   isLoading: true,
   isLocked: false,
   isAuthenticated: false,
-  repromptHash: undefined,
-  passwordEnteredDate: undefined,
   lastActivityTime: undefined,
 };
 
@@ -72,8 +67,6 @@ export function SessionProvider(props: SessionProviderProps) {
         : 0;
       const shouldLock = lastActivityTime != null && timeElapseSinceLastPasswordEnter >= repromptIgnoreDuration;
 
-      /* TODO:: We can't use the "reprompt" confirmations without a hash of the master password. 
-      The old session needs to be invalidated so we can get that. */
       if (token && shouldLock) {
         await bitwarden.lock();
         await deleteToken();
@@ -127,28 +120,13 @@ export function SessionProvider(props: SessionProviderProps) {
     setState(updatedState);
   }
 
-  /**
-   * Set the session token and save it to LocalStorage.
-   *
-   * @param token The new session token.
-   * @param passwordHash A hash of the user's master password.
-   */
-  async function setToken(token: string): Promise<void> {
-    const now = new Date();
-    await Promise.all([
-      LocalStorage.setItem(LOCAL_STORAGE_KEY.SESSION_TOKEN, token),
-      LocalStorage.setItem(LOCAL_STORAGE_KEY.REPROMPT_PASSWORD_ENTERED, now.toString()),
-    ]);
-
-    await update({ token, passwordEnteredDate: now });
+  async function setToken(token: string) {
+    await LocalStorage.setItem(LOCAL_STORAGE_KEY.SESSION_TOKEN, token);
+    await update({ token });
   }
 
-  /** Delete the saved session token. */
-  async function deleteToken(): Promise<void> {
-    await Promise.all([
-      LocalStorage.removeItem(LOCAL_STORAGE_KEY.SESSION_TOKEN),
-      LocalStorage.removeItem(LOCAL_STORAGE_KEY.REPROMPT_HASH),
-    ]);
+  async function deleteToken() {
+    await LocalStorage.removeItem(LOCAL_STORAGE_KEY.SESSION_TOKEN);
     await update({ token: undefined });
   }
 
@@ -166,29 +144,6 @@ export function SessionProvider(props: SessionProviderProps) {
     await toast.hide();
   }
 
-  async function confirmMasterPassword(password: string): Promise<boolean> {
-    const hash = await hashMasterPasswordForReprompting(password);
-    if (hash !== state.repromptHash) {
-      return false;
-    }
-
-    const now = new Date();
-    await LocalStorage.setItem(LOCAL_STORAGE_KEY.REPROMPT_PASSWORD_ENTERED, now.toString());
-    setState({ passwordEnteredDate: now });
-    return true;
-  }
-
-  function canRepromptBeSkipped(): boolean {
-    const { repromptIgnoreDuration } = getPreferenceValues<Preferences>();
-    if (state.passwordEnteredDate == null) {
-      return false;
-    }
-
-    const skipDuration = parseInt(repromptIgnoreDuration, 10);
-    const skipUntil = state.passwordEnteredDate.getTime() + skipDuration;
-    return Date.now() <= skipUntil;
-  }
-
   const value: Session = useMemo(
     () => ({
       token: state.token,
@@ -198,10 +153,8 @@ export function SessionProvider(props: SessionProviderProps) {
       active,
       lock: lockVault,
       logout: logoutVault,
-      canRepromptBeSkipped,
-      confirmMasterPassword,
     }),
-    [state, active, lockVault, logoutVault, canRepromptBeSkipped, confirmMasterPassword]
+    [state, active, lockVault, logoutVault]
   );
 
   const needsUnlockForm = !state.isLoading && (state.isLocked || !state.isAuthenticated);

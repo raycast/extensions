@@ -6,9 +6,7 @@ export const LOCAL_STORAGE_KEY = {
   PASSWORD_OPTIONS: "bw-generate-password-options",
   PASSWORD_ONE_TIME_WARNING: "bw-generate-password-warning-accepted",
   SESSION_TOKEN: "sessionToken",
-  REPROMPT_HASH: "sessionRepromptHash",
   SERVER_URL: "cliServer",
-  REPROMPT_PASSWORD_ENTERED: "sessionRepromptAfter",
   LAST_ACTIVITY_TIME: "lastActivityTime",
 };
 
