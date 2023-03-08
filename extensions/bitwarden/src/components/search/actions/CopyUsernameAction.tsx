@@ -1,14 +1,10 @@
 import { Clipboard, Icon } from "@raycast/api";
 import ActionWithReprompt from "~/components/actions/ActionWithReprompt";
-import { Item, Reprompt } from "~/types/search";
+import { useSelectedVaultItem } from "~/components/search/context/vaultItem";
 
-export type CopyUsernameActionProps = {
-  item: Item;
-};
-
-function CopyUsernameAction(props: CopyUsernameActionProps) {
-  const { item } = props;
-  const username = item?.login?.username;
+function CopyUsernameAction() {
+  const { login, name } = useSelectedVaultItem();
+  const username = login?.username;
 
   if (!username) return null;
 
@@ -16,13 +12,11 @@ function CopyUsernameAction(props: CopyUsernameActionProps) {
 
   return (
     <ActionWithReprompt
-      itemId={item.id}
       title="Copy Username"
       icon={Icon.Person}
       onAction={copyUsername}
       shortcut={{ modifiers: ["cmd"], key: "u" }}
-      reprompt={item.reprompt === Reprompt.REQUIRED}
-      repromptDescription={`Copying the username of <${item.name}>`}
+      repromptDescription={`Copying the username of <${name}>`}
     />
   );
 }

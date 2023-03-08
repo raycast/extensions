@@ -1,17 +1,17 @@
 import { Action, showToast, Toast } from "@raycast/api";
+import { useSelectedVaultItem } from "~/components/search/context/vaultItem";
 import { useBitwarden } from "~/context/bitwarden";
 import { useSession } from "~/context/session";
 import useReprompt, { UserRepromptActionProp } from "~/utils/hooks/useReprompt";
 
 export type ActionWithRepromptProps = Omit<Action.Props, "onAction"> & {
-  itemId: string;
-  reprompt?: boolean;
   repromptDescription?: string;
   onAction: () => void | Promise<void>;
 };
 
 function ActionWithReprompt(props: ActionWithRepromptProps) {
-  const { itemId, repromptDescription, onAction, reprompt, ...componentProps } = props;
+  const { id, reprompt } = useSelectedVaultItem();
+  const { repromptDescription, onAction, ...componentProps } = props;
 
   const bitwarden = useBitwarden();
   const session = useSession();
@@ -20,7 +20,7 @@ function ActionWithReprompt(props: ActionWithRepromptProps) {
   async function performAction({ password, closeForm }: UserRepromptActionProp) {
     const toast = await showToast(Toast.Style.Animated, "Confirming...");
     try {
-      const vaultItem = await bitwarden.getItem(itemId, session.token!, { password });
+      const vaultItem = await bitwarden.getItem(id, session.token!, { password });
       if (!vaultItem) throw new Error("Couldn't get item.");
       closeForm();
       await onAction?.();
@@ -32,8 +32,6 @@ function ActionWithReprompt(props: ActionWithRepromptProps) {
       toast.message = "Check your credentials";
       return false;
     }
-
-    return true;
   }
 
   return <Action {...componentProps} onAction={reprompt ? repromptAndPerformAction : onAction} />;

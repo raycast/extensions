@@ -1,27 +1,21 @@
 import { Action, ActionPanel, Detail, Icon, useNavigation } from "@raycast/api";
 import ActionWithReprompt from "~/components/actions/ActionWithReprompt";
-import { Item, Reprompt } from "~/types/search";
+import { useSelectedVaultItem } from "~/components/search/context/vaultItem";
 import { codeBlock } from "~/utils/strings";
 
-export type ShowSecureNoteActionProps = {
-  item: Item;
-};
-
-function ShowSecureNoteAction(props: ShowSecureNoteActionProps) {
-  const { item } = props;
+function ShowSecureNoteAction() {
+  const { notes, name } = useSelectedVaultItem();
   const { push } = useNavigation();
 
-  const secureNote = item?.notes;
-
-  if (!secureNote) return null;
+  if (!notes) return null;
 
   const showSecureNote = async () => {
     push(
       <Detail
-        markdown={codeBlock(secureNote)}
+        markdown={codeBlock(notes)}
         actions={
           <ActionPanel>
-            <Action.CopyToClipboard title="Copy Secure Notes" content={secureNote} />
+            <Action.CopyToClipboard title="Copy Secure Notes" content={notes} />
           </ActionPanel>
         }
       />
@@ -30,12 +24,10 @@ function ShowSecureNoteAction(props: ShowSecureNoteActionProps) {
 
   return (
     <ActionWithReprompt
-      itemId={item.id}
       title="Show Secure Note"
       icon={Icon.BlankDocument}
       onAction={showSecureNote}
-      reprompt={item.reprompt === Reprompt.REQUIRED}
-      repromptDescription={`Showing the secure note of <${item.name}>`}
+      repromptDescription={`Showing the secure note of <${name}>`}
     />
   );
 }

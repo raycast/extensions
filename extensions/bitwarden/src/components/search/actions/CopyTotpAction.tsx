@@ -2,17 +2,14 @@ import { Clipboard, closeMainWindow, Icon, showToast, Toast } from "@raycast/api
 import ActionWithReprompt from "~/components/actions/ActionWithReprompt";
 import { useBitwarden } from "~/context/bitwarden";
 import { useSession } from "~/context/session";
-import { Item, Reprompt } from "~/types/search";
+import { useSelectedVaultItem } from "~/components/search/context/vaultItem";
 
-export type CopyTotpActionProps = {
-  item: Item;
-};
-
-function CopyTotpAction(props: CopyTotpActionProps) {
-  const { item } = props;
+function CopyTotpAction() {
+  const { name, login } = useSelectedVaultItem();
   const bitwarden = useBitwarden();
   const session = useSession();
-  const code = item?.login?.totp;
+
+  const code = login?.totp;
 
   if (!code) return null;
 
@@ -30,13 +27,11 @@ function CopyTotpAction(props: CopyTotpActionProps) {
 
   return (
     <ActionWithReprompt
-      itemId={item.id}
-      shortcut={{ modifiers: ["cmd"], key: "t" }}
       title="Copy TOTP"
       icon={Icon.Clipboard}
       onAction={copyTotp}
-      reprompt={item.reprompt === Reprompt.REQUIRED}
-      repromptDescription={`Copying the TOTP code of <${item.name}>`}
+      shortcut={{ modifiers: ["cmd"], key: "t" }}
+      repromptDescription={`Copying the TOTP code of <${name}>`}
     />
   );
 }
