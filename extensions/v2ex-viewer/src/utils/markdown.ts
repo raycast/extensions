@@ -1,11 +1,11 @@
 import { Reply, Member, Node } from "@/types/v2ex";
 import { getUnixFromNow } from "./time";
 
-const Code = (content: string) => `\`${content}\``;
-const Bold = (content: string) => `**${content}**`;
+export const Code = (content: string) => `\`${content}\``;
+export const Bold = (content: string) => `**${content}**`;
 const Link = (title: string, url: string) => `[${title}](${url})`;
-const Quote = (content: string) => `> ${content}`;
-const Heading = (level: number, content: string) => {
+export const Quote = (content: string) => `> ${content}`;
+export const Heading = (level: number, content: string) => {
   level = Math.max(1, Math.min(6, level));
   return `${"#".repeat(level)} ${content}`;
 };
