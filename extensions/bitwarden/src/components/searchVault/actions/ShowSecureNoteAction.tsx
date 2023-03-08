@@ -15,7 +15,7 @@ function ShowSecureNoteAction() {
         markdown={codeBlock(notes)}
         actions={
           <ActionPanel>
-            <Action.CopyToClipboard title="Copy Secure Notes" content={notes} />
+            <Action.CopyToClipboard title="Copy Secure Note" content={notes} />
           </ActionPanel>
         }
       />
