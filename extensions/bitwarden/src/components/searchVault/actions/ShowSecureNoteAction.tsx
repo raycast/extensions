@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Detail, Icon, useNavigation } from "@raycast/api";
 import ActionWithReprompt from "~/components/actions/ActionWithReprompt";
-import { useSelectedVaultItem } from "~/components/search/context/vaultItem";
+import { useSelectedVaultItem } from "~/components/searchVault/context/vaultItem";
 import { codeBlock } from "~/utils/strings";
 
 function ShowSecureNoteAction() {

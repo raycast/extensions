@@ -1,6 +1,6 @@
 import { Icon, showHUD } from "@raycast/api";
 import ActionWithReprompt from "~/components/actions/ActionWithReprompt";
-import { useSelectedVaultItem } from "~/components/search/context/vaultItem";
+import { useSelectedVaultItem } from "~/components/searchVault/context/vaultItem";
 import { copyPassword as copyPasswordToClipboard } from "~/utils/clipboard";
 
 function CopyPasswordAction() {

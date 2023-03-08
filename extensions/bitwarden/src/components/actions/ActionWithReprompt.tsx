@@ -1,5 +1,5 @@
 import { Action, showToast, Toast } from "@raycast/api";
-import { useSelectedVaultItem } from "~/components/search/context/vaultItem";
+import { useSelectedVaultItem } from "~/components/searchVault/context/vaultItem";
 import { useBitwarden } from "~/context/bitwarden";
 import { useSession } from "~/context/session";
 import useReprompt, { UserRepromptActionProp } from "~/utils/hooks/useReprompt";

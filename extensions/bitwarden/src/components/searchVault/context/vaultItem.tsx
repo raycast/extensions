@@ -1,5 +1,5 @@
 import { createContext, useContext } from "react";
-import { Item } from "~/types/search";
+import { Item } from "~/types/vault";
 
 const VaultItemContext = createContext<Item | null>(null);
 

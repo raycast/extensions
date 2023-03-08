@@ -2,7 +2,7 @@ import { Clipboard, closeMainWindow, Icon, showToast, Toast } from "@raycast/api
 import ActionWithReprompt from "~/components/actions/ActionWithReprompt";
 import { useBitwarden } from "~/context/bitwarden";
 import { useSession } from "~/context/session";
-import { useSelectedVaultItem } from "~/components/search/context/vaultItem";
+import { useSelectedVaultItem } from "~/components/searchVault/context/vaultItem";
 
 function CopyTotpAction() {
   const { name, login } = useSelectedVaultItem();

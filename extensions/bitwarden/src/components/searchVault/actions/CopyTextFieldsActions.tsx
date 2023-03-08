@@ -1,7 +1,7 @@
 import { Icon } from "@raycast/api";
 import { capitalize } from "~/utils/strings";
-import CopyWithRepromptAction from "~/components/search/actions/CopyWithRepromptAction";
-import { useSelectedVaultItem } from "~/components/search/context/vaultItem";
+import CopyWithRepromptAction from "~/components/searchVault/actions/CopyWithRepromptAction";
+import { useSelectedVaultItem } from "~/components/searchVault/context/vaultItem";
 
 function CopyTextFieldsActions() {
   const { login, notes, card, identity, fields } = useSelectedVaultItem();

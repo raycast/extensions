@@ -1,6 +1,6 @@
 import { Clipboard, Icon } from "@raycast/api";
 import ActionWithReprompt from "~/components/actions/ActionWithReprompt";
-import { useSelectedVaultItem } from "~/components/search/context/vaultItem";
+import { useSelectedVaultItem } from "~/components/searchVault/context/vaultItem";
 
 function PastePasswordAction() {
   const { login, name } = useSelectedVaultItem();
