@@ -1,0 +1,55 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "folder-actions",
+  "title": "Folder Actions",
+  "description": "Run scripts and Raycast commands upon detecting file system changes.",
+  "icon": "command-icon.png",
+  "author": "HelloImSteven",
+  "categories": [
+    "Productivity",
+    "System",
+    "Data"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "new-folder-action",
+      "title": "New Folder Action",
+      "description": "Configure a new folder action",
+      "mode": "view"
+    },
+    {
+      "name": "manage-folder-actions",
+      "title": "Manage Folder Actions",
+      "description": "View and modify folder actions",
+      "mode": "view"
+    },
+    {
+      "name": "check-for-changes",
+      "title": "Check For Changes",
+      "description": "Check all configured folders for changes in their file tree. Runs automatically every 10 seconds.",
+      "mode": "no-view",
+      "interval": "10s"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.48.8"
+  },
+  "devDependencies": {
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
