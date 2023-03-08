@@ -39,6 +39,6 @@ export type Suggestion = {
   url: string;
 };
 
-export type Arcguments = {
+export type NewLittleArcArguments = {
   url?: string;
 };

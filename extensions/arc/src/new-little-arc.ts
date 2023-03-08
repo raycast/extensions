@@ -1,9 +1,9 @@
 import { LaunchProps, closeMainWindow, showHUD } from "@raycast/api";
 import { makeNewLittleArcWindow } from "./arc";
 import { newTabPreferences } from "./preferences";
-import { Arcguments } from "./types";
+import { NewLittleArcArguments } from "./types";
 
-export default async function command(props: LaunchProps<{ arguments: Arcguments }>) {
+export default async function command(props: LaunchProps<{ arguments: NewLittleArcArguments }>) {
   const { url } = props.arguments;
 
   try {
