@@ -267,7 +267,7 @@ export default function CreateIssueForm({ draftValues, enableDrafts = true }: Cr
         })}
       </Form.Dropdown>
 
-      <Form.Dropdown {...itemProps.priorityId} title="Priority">
+      <Form.Dropdown {...itemProps.priorityId} title="Priority" storeValue>
         {priorities?.map((priority) => {
           return (
             <Form.Dropdown.Item key={priority.id} value={priority.id} title={priority.name} icon={priority.iconUrl} />
