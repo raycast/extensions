@@ -1,0 +1,84 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "raycast-chatgpt-api",
+  "title": "Ask ChatGPT",
+  "version": "0.0.1",
+  "description": "Raycast Plugin: Quickly Call ChatGPT API.",
+  "icon": "chatGPT.png",
+  "repository": "git@github.com:xuandao/raycast-chatgpt-api.git",
+  "author": "xuandao",
+  "categories": [
+    "System",
+    "Other"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "gpt_im",
+      "title": "Ask ChatGPT",
+      "subtitle": "Quickly Call ChatGPT API.",
+      "description": "Quickly Call ChatGPT API.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "content",
+          "type": "text",
+          "placeholder": "Please enter your prompt.",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "gpt_history",
+      "title": "View History",
+      "subtitle": "View browsing history.",
+      "description": "View browsing history.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "title": "api_key",
+      "name": "api_key",
+      "description": "The api_key provided by chatGPT.",
+      "type": "textfield",
+      "required": true
+    },
+    {
+      "title": "gpt_model",
+      "name": "gpt_model",
+      "description": "The model name for chatGPT is gpt-3.5-turbo by default.",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "title": "proxy_url",
+      "name": "proxy_url",
+      "description": "Reverse proxy address, defaulting to https://api.openai.com",
+      "type": "textfield",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.48.5",
+    "axios": "^1.3.4"
+  },
+  "devDependencies": {
+    "@types/axios": "^0.14.0",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
