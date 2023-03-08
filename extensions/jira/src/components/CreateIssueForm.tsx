@@ -164,7 +164,7 @@ export default function CreateIssueForm({ draftValues, enableDrafts = true }: Cr
 
   // We only query one project in the getCreateIssueMetadata call
   // It's safe to assume the issue types will always correspond to the first element
-  const issueTypes = issueMetadata?.[0].issuetypes;
+  const issueTypes = issueMetadata?.[0]?.issuetypes;
 
   const selectedIssueType = issueTypes?.find((issueType) => issueType.id === values.issueTypeId);
 
