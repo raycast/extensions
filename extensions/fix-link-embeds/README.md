@@ -20,6 +20,10 @@ Replace links in your texts (clipboard, selected, argument) to get the shiny emb
 - [x] Enable/disable which services to replace in text.
 - [x] Disable extension completely.
 
+### 📀 Demo
+
+https://user-images.githubusercontent.com/13917975/223678783-040873a0-547c-4507-b138-cce2f78bb0c4.mp4
+
 ### 🙋‍♂️ More Services
 
 Please create an issue or edit this extension by yourself to add more services! Simply edit `src/assets/regexList.ts` properly.
