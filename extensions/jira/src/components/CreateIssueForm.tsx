@@ -27,6 +27,7 @@ import { getErrorMessage } from "../helpers/errors";
 import { CustomFieldSchema, getCustomFieldsForCreateIssue } from "../helpers/issues";
 
 import FormParentDropdown from "./FormParentDropdown";
+import FormUserDropdown from "./FormUserDropdown";
 import IssueDetail from "./IssueDetail";
 import IssueFormCustomFields from "./IssueFormCustomFields";
 
@@ -252,20 +253,11 @@ export default function CreateIssueForm({ draftValues, enableDrafts = true }: Cr
         enableMarkdown
       />
 
-      <Form.Dropdown {...itemProps.assigneeId} title="Assignee" storeValue>
-        <Form.Dropdown.Item title="Unassigned" value="" icon={Icon.Person} />
-
-        {users?.map((user) => {
-          return (
-            <Form.Dropdown.Item
-              key={user.accountId}
-              value={user.accountId}
-              title={user.displayName}
-              icon={user.avatarUrls["32x32"]}
-            />
-          );
-        })}
-      </Form.Dropdown>
+      <FormUserDropdown
+        {...itemProps.assigneeId}
+        title="Assignee"
+        autocompleteUrl={selectedIssueType?.fields.assignee.autoCompleteUrl}
+      />
 
       <Form.Dropdown {...itemProps.priorityId} title="Priority" storeValue>
         {priorities?.map((priority) => {
