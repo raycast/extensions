@@ -1,0 +1,7 @@
+{
+  "printWidth": 120,
+  "singleQuote": true,
+  "jsxSingleQuote": true,
+  "arrowParens": "always",
+  "semi": true
+}
