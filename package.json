@@ -1,0 +1,53 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "openai-translate",
+  "title": "OpenAI Translate",
+  "description": "Translate at your finger tips, with the power of OpenAI GPT",
+  "icon": "icon.png",
+  "author": "gabrlyg",
+  "categories": [
+    "Productivity"
+  ],
+  "preferences": [
+    {
+      "name": "openAiApiKey",
+      "title": "OpenAI API Key",
+      "description": "API key is used to authenticate with OpenAI API. Please reload the extension if you changed your API key.",
+      "type": "password",
+      "required": true
+    }
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "icon": "icon.png",
+      "name": "index",
+      "title": "Translate",
+      "description": "Translate with the power of OpenAI GPT",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.48.8",
+    "@raycast/utils": "^1.5.2",
+    "axios": "^1.3.4",
+    "openai": "^3.2.1"
+  },
+  "devDependencies": {
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "@typescript-eslint/eslint-plugin": "^5.54.1",
+    "@typescript-eslint/parser": "^5.54.1",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.7.0",
+    "prettier": "^2.8.4",
+    "typescript": "^4.9.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
