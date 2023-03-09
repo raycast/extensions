@@ -7,8 +7,8 @@ import { showLoadingToast, showFailedToast, showSuccessfulToast } from "./utils/
 import fetch from "node-fetch";
 const getDetail = (text: string) => {
   const regex = text.includes("›")
-    ? /(?<behavior>[^ ]+) › <a[^<>]+?>(?<topicTitle>[^<>]+)/gm
-    : /[^>]+?>(?<topicTitle>[^<>]+)<\/a> \W(?<behavior>[^<>]+)/gm;
+    ? /(?<behavior>[^ ]+) › <a href="(?<topicUrl>[^""]+)">(?<topicTitle>[^<>]+)/gm
+    : /<a href="(?<topicUrl>[^""]+)[^>]+?>(?<topicTitle>[^<>]+)<\/a> \W(?<behavior>[^<>]+)/gm;
   const match = regex.exec(text);
   try {
     return match?.groups;
@@ -22,6 +22,7 @@ const DeleteNotificationAction = ({ onDelete }: { onDelete: () => void }) => {
     <Action
       title="Delete"
       icon={{ source: Icon.Trash, tintColor: Color.Red }}
+      shortcut={{ modifiers: ["cmd"], key: "d" }}
       onAction={async () => {
         await confirmAlert({
           title: "Warning",
@@ -54,13 +55,6 @@ export default function Command() {
       showSuccessfulToast({ message: data.message || "" });
     },
   });
-  // notifications.mutate(
-  //   fetch(`https://www.v2ex.com/api/v2/notifications${id}`, {
-  //     headers: {
-  //       Authorization: `Bearer ${token}`,
-  //     },
-  //   })
-  // );
   const deleteNotification = async (id: number) => {
     await showLoadingToast({ title: "Deleting", message: `/notifications/${id}` });
     try {
@@ -85,6 +79,7 @@ export default function Command() {
       await showSuccessfulToast();
     } catch (error) {
       await showFailedToast();
+      await notifications.revalidate();
     }
   };
 
@@ -92,7 +87,7 @@ export default function Command() {
     <List>
       {notifications.data?.result &&
         notifications.data.result.map(({ created, text, member, payload, id }) => {
-          const { topicTitle, behavior } = getDetail(text) || {};
+          const { topicTitle, behavior, topicUrl } = getDetail(text) || {};
           if (text.includes("›")) {
             return (
               <List.Item
@@ -101,7 +96,7 @@ export default function Command() {
                 accessories={[{ tag: getUnixFromNow(created) }]}
                 actions={
                   <ActionPanel>
-                    <Action.OpenInBrowser url="https://www.v2ex.com/notifications" />
+                    <Action.OpenInBrowser url={`https://www.v2ex.com/${topicUrl}`} />
                     <DeleteNotificationAction
                       onDelete={() => {
                         deleteNotification(id);
@@ -113,11 +108,22 @@ export default function Command() {
             );
           }
           return (
-            <List.Section title={topicTitle}>
+            <List.Section title={""} subtitle={"   " + topicTitle}>
               <List.Item
                 title={"✏️   " + member.username}
                 subtitle={behavior + " : " + payload}
                 accessories={[{ tag: getUnixFromNow(created) }]}
+                actions={
+                  <ActionPanel>
+                    <Action.OpenInBrowser url={`https://www.v2ex.com/${topicUrl}`} title="Open Related Topic" />
+                    <Action.OpenInBrowser url={`https://www.v2ex.com/notifications`} title="View All Notifications" />
+                    <DeleteNotificationAction
+                      onDelete={() => {
+                        deleteNotification(id);
+                      }}
+                    />
+                  </ActionPanel>
+                }
               />
             </List.Section>
           );

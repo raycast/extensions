@@ -62,7 +62,7 @@
       "required": true,
       "default": "programmer create share ideas apple jobs all4all qna",
       "title": "Nodes",
-      "placeholder": "Please enter the nodes you want to visit"
+      "placeholder": "Please enter the names of the nodes you want to visit, separated by spaces"
     }
   ],
   "dependencies": {
