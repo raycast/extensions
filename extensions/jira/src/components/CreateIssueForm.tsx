@@ -169,7 +169,7 @@ export default function CreateIssueForm({ draftValues, enableDrafts = true }: Cr
   const selectedIssueType = issueTypes?.find((issueType) => issueType.id === values.issueTypeId);
 
   const epicsOnly = !selectedIssueType?.subtask;
-  const issueLinksAutocompleteUrl = selectedIssueType?.fields.issuelinks.autoCompleteUrl;
+  const issueLinksAutocompleteUrl = selectedIssueType?.fields.issuelinks?.autoCompleteUrl;
 
   const components = selectedIssueType?.fields.components?.allowedValues as Component[];
   const fixVersions = selectedIssueType?.fields.fixVersions?.allowedValues as Version[];
