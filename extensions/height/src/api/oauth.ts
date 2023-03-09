@@ -13,11 +13,11 @@ const client = new OAuth.PKCEClient({
 
 export async function authorize() {
   const tokenSet = await client.getTokens();
-  console.log("🚀 ~ file: oauth.ts:15 ~ authorize ~ tokenSet:", tokenSet);
+
   if (tokenSet?.accessToken) {
     if (tokenSet?.refreshToken && tokenSet?.isExpired()) {
       const tokens = await refreshTokens(tokenSet.refreshToken);
-      console.log("🚀 ~ file: oauth.ts:20 ~ authorize ~ refreshTokens:", tokens);
+
       await client.setTokens(tokens);
       return tokens.access_token;
     }
@@ -29,18 +29,11 @@ export async function authorize() {
     endpoint: "https://height.app/oauth/authorization",
     clientId,
     scope: "api",
-    extraParameters: {
-      redirect_uri: "https://raycast.com/redirect?packageName=Height",
-      access_types: "appUser",
-    },
   });
-  console.log("🚀 ~ file: oauth.ts:31 ~ authorize ~ authRequest:", authRequest);
 
   const { authorizationCode } = await client.authorize(authRequest);
-  console.log("🚀 ~ file: oauth.ts:34 ~ authorize ~ authorizationCode:", authorizationCode);
 
   const tokens = await fetchTokens(authRequest, authorizationCode);
-  console.log("🚀 ~ file: oauth.ts:39 ~ authorize ~ fetchTokens:", tokens);
   await client.setTokens(tokens);
 
   return tokens.access_token;
