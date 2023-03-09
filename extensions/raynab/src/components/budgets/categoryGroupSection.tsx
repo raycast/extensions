@@ -1,10 +1,11 @@
+import { useState } from 'react';
+import { Category as ynabCategory } from 'ynab';
 import { OpenInYnabAction } from '@components/actions';
 import { TransactionCreationForm } from '@components/transactions/transactionCreationForm';
 import { useLocalStorage } from '@hooks/useLocalStorage';
 import { formatToReadablePrice } from '@lib/utils';
-import { Action, ActionPanel, Icon, List } from '@raycast/api';
+import { Action, ActionPanel, Color, Icon, List } from '@raycast/api';
 import { CurrencyFormat, Category, CategoryGroupWithCategories, BudgetDetailSummary } from '@srcTypes';
-import { useState } from 'react';
 import { BudgetDetails } from './budgetDetails';
 import { CategoryDetails } from './categoryDetails';
 import { CategoryEditForm } from './categoryEditForm';
@@ -24,23 +25,23 @@ export function CategoryGroupSection({
       {categoryGroups
         ?.filter((group) => group.name !== 'Internal Master Category')
         ?.map((group) => (
-          <List.Section
-            key={group.id}
-            id={group.id}
-            title={group.name}
-            subtitle={`${group.categories.length} Categories`}
-          >
+          <List.Section key={group.id} title={group.name} subtitle={`${group.categories.length} Categories`}>
             {group.categories.map((category) => (
               // TODO create unique icons for different goal types
               <List.Item
                 key={category.id}
                 id={category.id}
                 title={category.name}
-                accessoryTitle={
-                  showProgress
-                    ? renderProgressTitle(category)
-                    : formatToReadablePrice({ amount: category.balance, currency: activeBudgetCurrency })
-                }
+                accessories={[
+                  {
+                    tag: {
+                      value: showProgress
+                        ? renderProgressTitle(category)
+                        : formatToReadablePrice({ amount: category.balance, currency: activeBudgetCurrency }),
+                      color: getGoalColor(assessGoalShape(category)),
+                    },
+                  },
+                ]}
                 actions={
                   <ActionPanel>
                     <ActionPanel.Section title="Inspect Budget">
@@ -101,4 +102,51 @@ function renderProgressTitle(category: Category) {
   return `${FULL_SYMBOL.repeat(fullSymbolsCount)}${EMPTY_SYMBOL.repeat(emptySymbolsCount)} ${percentage
     ?.toString()
     .padStart(3, ' ')}%`;
+}
+
+type GoalShape = 'underfunded' | 'funded' | 'overspent' | 'neutral';
+
+function assessGoalShape(category: Category): GoalShape {
+  /*
+    There are multiple types of goals, the goal shape depends on the type
+    As of March 8th 2023, we have the following
+    (TB='Target Category Balance', TBD='Target Category Balance by Date', MF='Monthly Funding', NEED='Plan Your Spending')
+    - TB: Save a certain amount
+    - TBD: Save a certain amount by a certain date -> can be on or off-track
+    - MF: Save a certain amount no matter what
+    - NEED: Save a certain amount, but be able to spend it along the way on a monthly basis
+  */
+
+  // No matter the goal type, if the balance is negative, the goal has been overspent
+  if (category.balance < 0) return 'overspent';
+
+  switch (category.goal_type) {
+    case ynabCategory.GoalTypeEnum.TB:
+      return category.goal_percentage_complete === 100
+        ? 'funded'
+        : Number(category.goal_percentage_complete) > 0
+        ? 'underfunded'
+        : 'neutral';
+    case ynabCategory.GoalTypeEnum.TBD:
+    case ynabCategory.GoalTypeEnum.NEED:
+    case ynabCategory.GoalTypeEnum.MF:
+      return category.goal_percentage_complete === 100 || category.goal_under_funded === 0 ? 'funded' : 'underfunded';
+    default:
+      break;
+  }
+
+  return 'neutral';
+}
+
+function getGoalColor(goalShape: GoalShape) {
+  switch (goalShape) {
+    case 'neutral':
+      return Color.SecondaryText;
+    case 'funded':
+      return Color.Green;
+    case 'underfunded':
+      return Color.Yellow;
+    case 'overspent':
+      return Color.Red;
+  }
 }
