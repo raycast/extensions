@@ -49,14 +49,14 @@ export default function Command() {
         </ActionPanel>
       }
     >
-      <Form.Dropdown id="device" title="device serial" storeValue>
+      <Form.Dropdown id="device" title="Device Serial" storeValue>
         {devices.map((device) => (
           <Form.Dropdown.Item key={device} value={device} title={device} />
         ))}
       </Form.Dropdown>
-      <Form.Dropdown id="size" title="Screen size" storeValue>
+      <Form.Dropdown id="size" title="Screen Size" storeValue>
         <Form.Dropdown.Item value="1024" title="1024" />
-        <Form.Dropdown.Item value="0" title="device size" />
+        <Form.Dropdown.Item value="0" title="Device size" />
       </Form.Dropdown>
 
       <Form.Separator />
@@ -64,8 +64,8 @@ export default function Command() {
       <Form.Description text="Advanced Options" />
       <Form.Checkbox id="turnScreenOff" defaultValue={true} label="Turn screen off" storeValue />
       <Form.Checkbox id="stayAwake" defaultValue={true} label="Stay awake" storeValue />
-      <Form.Checkbox id="hidKeyboard" defaultValue={true} label="HID Keyboard (USB only)" storeValue />
-      <Form.Checkbox id="hidMouse" defaultValue={false} label="HID Mouse (USB only)" storeValue />
+      <Form.Checkbox id="hidKeyboard" defaultValue={true} label="HID keyboard (USB only)" storeValue />
+      <Form.Checkbox id="hidMouse" defaultValue={false} label="HID mouse (USB only)" storeValue />
     </Form>
   );
 }
