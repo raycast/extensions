@@ -29,6 +29,9 @@ export async function authorize() {
     endpoint: "https://height.app/oauth/authorization",
     clientId,
     scope: "api",
+    extraParameters: {
+      redirect_uri: "https://raycast.com/redirect?packageName=Height",
+    },
   });
 
   const { authorizationCode } = await client.authorize(authRequest);
