@@ -21,6 +21,7 @@ import { useState, useMemo } from "react";
 import EditSnippet from "./components/edit-snippet";
 import { uniqBy } from "lodash";
 import EditSnippetXML from "./components/edit-snippet-xml";
+import DynamicFieldsList from "./components/dynamic-fields-list";
 
 export default function Command() {
   const [locations] = useCachedState<Location[]>("locations", []);
@@ -177,6 +178,12 @@ ${snippet.snippet}`}
                       }
                     />
                   )}
+                  <Action.Push
+                    title="Manage Dynamc Fields"
+                    shortcut={{ key: "d", modifiers: ["opt"] }}
+                    icon={Icon.Stars}
+                    target={<DynamicFieldsList snippet={snippet} revalidate={revalidate} />}
+                  />
                   <Action.Push
                     title="Duplicate Snippet"
                     shortcut={{ key: "d", modifiers: ["cmd"] }}
