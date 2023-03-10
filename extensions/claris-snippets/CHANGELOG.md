@@ -1,5 +1,9 @@
 # Claris Snippets Changelog
 
+## [Dynamic Snippets] - 2023-03-10
+
+- Added: Dynamic snippets let you replace any values in a snippet's XML with values from a dynamic form each time you go to copy the snippet.
+
 ## [Support Editing Raw XML] - 2023-03-09
 
 - Added: Edit the raw XML of a snippet inline in Raycast. Since this is advanced, this feature is available in a seperate form
