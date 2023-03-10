@@ -115,7 +115,6 @@ export async function setActiveTab(tab: Tab): Promise<void> {
 }
 
 export async function closeActiveTab(tab: Tab): Promise<void> {
-  // write an apple script to close the "tab"
   await runAppleScript(`
     tell application "Google Chrome"
       activate
