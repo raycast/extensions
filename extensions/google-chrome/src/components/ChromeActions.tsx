@@ -97,11 +97,12 @@ function CloseTab(props: { tab: Tab }) {
     await closeMainWindow();
   }
 
-  return <ActionPanel.Item
-    title="Close Tab"
-    icon={{ source: Icon.XMarkCircle }}
-    onAction={handleAction}
-    shortcut={{ modifiers: ["cmd"], key: "w" }}
-  />;
+  return (
+    <ActionPanel.Item
+      title="Close Tab"
+      icon={{ source: Icon.XMarkCircle }}
+      onAction={handleAction}
+      shortcut={{ modifiers: ["cmd"], key: "w" }}
+    />
+  );
 }
-
