@@ -5,8 +5,7 @@ export default async function main() {
   if (value) {
     await updateCommandMetadata({ subtitle: `Pasting: ${value}` });
 
-    Clipboard.paste(value);
-    return await showHUD("✅ Paste Successful");
+    return Clipboard.paste(value);
   }
 
   await openCommandPreferences();
