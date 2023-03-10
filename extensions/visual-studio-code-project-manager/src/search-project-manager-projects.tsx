@@ -1,7 +1,6 @@
 import { Action, ActionPanel, closeMainWindow, Detail, environment, getPreferenceValues, List } from "@raycast/api";
 import { exec } from "child_process";
 import { existsSync, lstatSync, readFileSync } from "fs";
-import open from "open";
 import { homedir } from "os";
 import config from "parse-git-config";
 import { dirname } from "path";
@@ -209,27 +208,23 @@ function ProjectListItem({ name, rootPath, tags }: ProjectEntry) {
               <Action.Open title={`Open in ${build}`} icon="command-icon.png" target={path} application={appKey} />
             )}
             {terminalInstalled && (
-              <Action
+              <Action.Open
                 title="Open in Terminal"
                 key="terminal"
-                onAction={() => {
-                  open(path, { app: { name: terminalPath, arguments: [path] } });
-                  closeMainWindow();
-                }}
                 icon={{ fileIcon: terminalPath }}
                 shortcut={{ modifiers: ["cmd"], key: "t" }}
+                target={path}
+                application={terminalPath}
               />
             )}
             {gitClientInstalled && isGitRepo(path) && (
-              <Action
+              <Action.Open
                 title="Open in Git client"
                 key="git-client"
-                onAction={() => {
-                  open(path, { app: { name: gitClientPath, arguments: [path] } });
-                  closeMainWindow();
-                }}
                 icon={{ fileIcon: gitClientPath }}
                 shortcut={{ modifiers: ["cmd"], key: "g" }}
+                target={path}
+                application={gitClientPath}
               />
             )}
             <Action.ShowInFinder path={path} />
