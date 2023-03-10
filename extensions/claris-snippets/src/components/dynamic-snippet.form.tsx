@@ -1,4 +1,15 @@
-import { Action, ActionPanel, closeMainWindow, Form, Icon, showHUD, showToast, Toast, Clipboard } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  closeMainWindow,
+  Form,
+  Icon,
+  showHUD,
+  showToast,
+  Toast,
+  Clipboard,
+  useNavigation,
+} from "@raycast/api";
 import { useForm } from "@raycast/utils";
 import React from "react";
 import { XMLToFMObjects } from "../utils/FmClipTools";
@@ -9,6 +20,7 @@ type DynamicSnippetFormProps = {
 };
 export default function DynamicSnippetForm(props: DynamicSnippetFormProps) {
   const { snippet } = props;
+  const { pop } = useNavigation();
 
   const { itemProps, handleSubmit } = useForm({
     initialValues: snippet.dynamicFields
@@ -25,6 +37,7 @@ export default function DynamicSnippetForm(props: DynamicSnippetFormProps) {
       try {
         XMLToFMObjects();
         closeMainWindow();
+        pop();
         showHUD("Copied to Clipboard");
       } catch (e) {
         showToast({
