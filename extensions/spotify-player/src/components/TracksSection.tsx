@@ -8,8 +8,8 @@ export function TracksSection({ tracks, limit }: { tracks: SpotifyApi.TrackObjec
 
   return (
     <List.Section title="Songs">
-      {items?.map((a) => (
-        <TrackListItem key={a.id} track={a} album={a.album} />
+      {items?.map((track) => (
+        <TrackListItem key={track.id} track={track} album={track.album} />
       ))}
     </List.Section>
   );

@@ -1,113 +1,8 @@
 import { showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
-import SpotifyWebApi from "spotify-web-api-node";
 import { Response } from "./interfaces";
-import { authorize } from "./oauth";
 import { isRunning, playTrack, setShuffling } from "./applescript";
 import { getSpotifyClient } from "../helpers/withSpotifyClient";
-
-export function useArtistAlbums(artistId: string | undefined): Response<SpotifyApi.ArtistsAlbumsResponse> {
-  const [response, setResponse] = useState<Response<SpotifyApi.ArtistsAlbumsResponse>>({ isLoading: false });
-
-  let cancel = false;
-
-  useEffect(() => {
-    async function fetchData() {
-      const { spotifyClient: spotifyApi } = getSpotifyClient(); // await authorizeIfNeeded();
-
-      if (cancel) {
-        return;
-      }
-      if (!artistId) {
-        setResponse((oldState) => ({ ...oldState, isLoading: false, result: undefined }));
-        return;
-      }
-      setResponse((oldState) => ({ ...oldState, isLoading: true }));
-
-      try {
-        spotifyApi.searchAlbums(artistId);
-        const response =
-          (await spotifyApi
-            .getArtistAlbums(artistId, { limit: 50 })
-            .then((response: { body: any }) => response.body as SpotifyApi.ArtistsAlbumsResponse)
-            .catch((error) => {
-              setResponse((oldState) => ({ ...oldState, error: (error as unknown as SpotifyApi.ErrorObject).message }));
-            })) ?? undefined;
-
-        if (!cancel) {
-          setResponse((oldState) => ({ ...oldState, result: response }));
-        }
-      } catch (e: any) {
-        if (!cancel) {
-          setResponse((oldState) => ({ ...oldState, error: (e as unknown as SpotifyApi.ErrorObject).message }));
-        }
-      } finally {
-        if (!cancel) {
-          setResponse((oldState) => ({ ...oldState, isLoading: false }));
-        }
-      }
-    }
-
-    fetchData();
-
-    return () => {
-      cancel = true;
-    };
-  }, [artistId]);
-
-  return response;
-}
-
-export function useAlbumTracks(albumId: string | undefined): Response<SpotifyApi.AlbumTracksResponse> {
-  const [response, setResponse] = useState<Response<SpotifyApi.AlbumTracksResponse>>({ isLoading: false });
-
-  let cancel = false;
-
-  useEffect(() => {
-    async function fetchData() {
-      const { spotifyClient: spotifyApi } = getSpotifyClient(); // await authorizeIfNeeded();
-
-      if (cancel) {
-        return;
-      }
-      if (!albumId) {
-        setResponse((oldState) => ({ ...oldState, isLoading: false, result: undefined }));
-        return;
-      }
-      setResponse((oldState) => ({ ...oldState, isLoading: true }));
-
-      try {
-        const response =
-          (await spotifyApi
-            .getAlbumTracks(albumId, { limit: 50 })
-            .then((response: { body: any }) => response.body as SpotifyApi.AlbumTracksResponse)
-            .catch((error) => {
-              setResponse((oldState) => ({ ...oldState, error: (error as unknown as SpotifyApi.ErrorObject).message }));
-            })) ?? undefined;
-
-        if (!cancel) {
-          setResponse((oldState) => ({ ...oldState, result: response }));
-        }
-      } catch (e: any) {
-        if (!cancel) {
-          setResponse((oldState) => ({ ...oldState, error: (e as unknown as SpotifyApi.ErrorObject).message }));
-        }
-      } finally {
-        if (!cancel) {
-          setResponse((oldState) => ({ ...oldState, isLoading: false }));
-        }
-      }
-    }
-
-    fetchData();
-
-    return () => {
-      cancel = true;
-    };
-  }, [albumId]);
-
-  return response;
-}
 
 export function useNowPlaying(): Response<SpotifyApi.CurrentlyPlayingResponse> {
   const [response, setResponse] = useState<Response<SpotifyApi.CurrentlyPlayingResponse>>({ isLoading: true });
@@ -178,8 +73,10 @@ export async function startPlaySimilar(trackIds: string[], artistIds?: string[])
 export async function play(uri?: string, context_uri?: string): Promise<void> {
   const { spotifyClient: spotifyApi } = getSpotifyClient(); // await authorizeIfNeeded();
   try {
+    console.log("playing", uri, context_uri);
     await spotifyApi.play({ uris: uri ? [uri] : undefined, context_uri });
   } catch (error: any) {
+    console.log("error playing", error);
     return error;
   }
 }

@@ -15,12 +15,11 @@ export const oauthClient = new OAuth.PKCEClient({
 
 export async function authorize() {
   const existingTokens = await oauthClient.getTokens();
-  console.log("existingTokens", existingTokens);
+
   if (existingTokens?.accessToken) {
     if (existingTokens.refreshToken && existingTokens.isExpired()) {
       const tokens = await refreshTokens(existingTokens.refreshToken);
       await oauthClient.setTokens(tokens);
-      console.log("Refreshed access token. New access token expires at", tokens);
       return tokens.access_token;
     }
     return existingTokens.accessToken;

@@ -1,8 +1,13 @@
 import { Image } from "@raycast/api";
 import { ListOrGridItem } from "./ListOrGridItem";
-import { ArtistsActionPanel } from "./ArtistsActionPanel";
+import { ArtistActionPanel } from "./ArtistActionPanel";
 
-export function ArtistItem({ artist, type }: { artist: SpotifyApi.ArtistObjectFull; type: "grid" | "list" }) {
+type ArtistItemProps = {
+  type: "grid" | "list";
+  artist: SpotifyApi.ArtistObjectFull;
+};
+
+export function ArtistItem({ type, artist }: ArtistItemProps) {
   const icon: Image.ImageLike = {
     source: artist.images[0]?.url ?? "",
     mask: type === "list" ? Image.Mask.Circle : undefined,
@@ -13,10 +18,10 @@ export function ArtistItem({ artist, type }: { artist: SpotifyApi.ArtistObjectFu
   return (
     <ListOrGridItem
       type={type}
+      icon={icon}
       title={title}
       content={icon}
-      icon={icon}
-      actions={<ArtistsActionPanel title={title} artist={artist} />}
+      actions={<ArtistActionPanel title={title} artist={artist} />}
     />
   );
 }

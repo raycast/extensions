@@ -3,7 +3,7 @@ import { Detail, environment, MenuBarExtra } from "@raycast/api";
 import SpotifyWebApi from "spotify-web-api-node";
 import { authorize } from "../api/oauth";
 
-let spotifyClient: SpotifyWebApi | null = null;
+export let spotifyClient: SpotifyWebApi | null = null;
 
 export function withSpotifyClient(component: JSX.Element) {
   const [x, forceRerender] = useState(0);
@@ -43,4 +43,11 @@ export function getSpotifyClient(): { spotifyClient: SpotifyWebApi } {
   return {
     spotifyClient,
   };
+}
+
+export async function setSpotifyClient() {
+  const accessToken = await authorize();
+
+  spotifyClient = new SpotifyWebApi();
+  spotifyClient.setAccessToken(accessToken);
 }

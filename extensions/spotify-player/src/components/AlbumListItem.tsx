@@ -1,7 +1,7 @@
 import { Image, List } from "@raycast/api";
 import _ from "lodash";
 import { useAlbumTracks } from "../spotify/client";
-import { AlbumsActionPanel } from "./AlbumsActionPanel";
+import { AlbumsActionPanel } from "./AlbumActionPanel";
 
 export default function AlbumListItem(props: { album: SpotifyApi.AlbumObjectSimplified; showDetails: boolean }) {
   const { album, showDetails } = props;

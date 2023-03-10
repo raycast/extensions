@@ -1,25 +1,22 @@
-import AlbumGridItem from "./AlbumGridItem";
 import { ListOrGridSection } from "./ListOrGridSection";
+import { AlbumItem } from "./AlbumItem";
 
-export function AlbumsSection({
-  type,
-  albums,
-  columns,
-  limit,
-}: {
+type AlbumsSectionProps = {
   type: "list" | "grid";
-  limit?: number;
-  columns: number;
   albums: SpotifyApi.AlbumObjectSimplified[] | undefined;
-}) {
+  columns: number;
+  limit?: number;
+};
+
+export function AlbumsSection({ type, albums, columns, limit }: AlbumsSectionProps) {
   if (!albums) return null;
 
   const items = albums.slice(0, limit || albums.length);
 
   return (
     <ListOrGridSection type={type} title="Albums" columns={columns}>
-      {items.map((a) => (
-        <AlbumGridItem type={type} key={a.id} album={a} />
+      {items.map((album) => (
+        <AlbumItem type={type} key={album.id} album={album} />
       ))}
     </ListOrGridSection>
   );

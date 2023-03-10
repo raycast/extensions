@@ -1,7 +1,7 @@
 import { useCachedPromise } from "@raycast/utils";
 import { getArtistAlbums } from "../api/getArtistAlbums";
 
-type UseSearchProps = {
+type UseArtistAlbumsProps = {
   artistId: string;
   limit: number;
   options?: {
@@ -9,7 +9,7 @@ type UseSearchProps = {
   };
 };
 
-export default function useSearch({ artistId, limit = 50, options }: UseSearchProps) {
+export function useArtistAlbums({ artistId, limit = 50, options }: UseArtistAlbumsProps) {
   const { data, error, isLoading } = useCachedPromise(
     (artistId: string, limit: number) => getArtistAlbums(artistId, limit),
     [artistId, limit],
