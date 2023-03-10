@@ -67,21 +67,50 @@ export default function Command() {
                 metadata={
                   <List.Item.Detail.Metadata>
                     {component.implementations.react ? (
-                      <List.Item.Detail.Metadata.Label
-                        title="React"
-                        text={{
-                          value: sentenceCase(
-                            component.implementations.react.status
-                          ),
-                          color:
-                            statusColors[
+                      <>
+                        <List.Item.Detail.Metadata.Label
+                          title="React Implementation"
+                          icon={{
+                            source: Icon.Dot,
+                            tintColor:
+                              statusColors[
+                                component.implementations.react.status
+                              ] || Color.SecondaryText,
+                          }}
+                          text={{
+                            value: sentenceCase(
                               component.implementations.react.status
-                            ] || Color.SecondaryText,
-                        }}
-                      />
+                            ),
+                            color:
+                              statusColors[
+                                component.implementations.react.status
+                              ] || Color.SecondaryText,
+                          }}
+                        />
+                        <List.Item.Detail.Metadata.Label
+                          title="React Accessibility"
+                          icon={
+                            component.implementations.react.a11yReviewed
+                              ? {
+                                  source: Icon.Check,
+                                  tintColor: Color.Purple,
+                                }
+                              : undefined
+                          }
+                          text={{
+                            value: component.implementations.react.a11yReviewed
+                              ? "Reviewed"
+                              : "Not reviewed",
+                            color: component.implementations.react.a11yReviewed
+                              ? Color.Purple
+                              : Color.SecondaryText,
+                          }}
+                        />
+                        {/* )} */}
+                      </>
                     ) : (
                       <List.Item.Detail.Metadata.Label
-                        title="React"
+                        title="React Implementation"
                         text={{
                           value: "Not available",
                           color: Color.SecondaryText,
