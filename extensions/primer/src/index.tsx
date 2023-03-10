@@ -11,7 +11,7 @@ const statusColors: Record<string, Color> = {
 
 const componentSchema = z.object({
   id: z.string(),
-  displayName: z.string(),
+  name: z.string(),
   description: z.union([z.string(), z.null()]),
   implementations: z.object({
     react: z.union([
@@ -34,7 +34,7 @@ export default function Command() {
     "https://primer-5dd8f1e892-26441320.drafts.github.io/components.json"
   );
 
-  const { components } = componentsSchema.parse(data);
+  const { components = [] } = data ? componentsSchema.parse(data) : {};
 
   return (
     <List isLoading={isLoading} isShowingDetail>
@@ -42,7 +42,7 @@ export default function Command() {
         {components.map((component) => (
           <List.Item
             key={component.id}
-            title={component.displayName}
+            title={component.name}
             actions={
               <ActionPanel>
                 <Action.OpenInBrowser
@@ -61,9 +61,7 @@ export default function Command() {
             }
             detail={
               <List.Item.Detail
-                markdown={`# ${component.displayName}\n${
-                  component.description || ""
-                }`}
+                markdown={`# ${component.name}\n${component.description || ""}`}
                 metadata={
                   <List.Item.Detail.Metadata>
                     {component.implementations.react ? (
