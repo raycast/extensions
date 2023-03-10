@@ -1,6 +1,6 @@
 import { ReactElement } from "react";
 import { Action, ActionPanel, closeMainWindow, getPreferenceValues, Icon } from "@raycast/api";
-import { openNewTab, setActiveTab } from "../actions";
+import { closeActiveTab, openNewTab, setActiveTab } from "../actions";
 import { Preferences, SettingsProfileOpenBehaviour, Tab } from "../interfaces";
 import { useCachedState } from "@raycast/utils";
 import { CHROME_PROFILE_KEY, DEFAULT_CHROME_PROFILE_ID } from "../constants";
@@ -30,6 +30,7 @@ function TabListItemActions({ tab }: { tab: Tab }) {
     <ActionPanel title={tab.title}>
       <GoToTab tab={tab} />
       <Action.CopyToClipboard title="Copy URL" content={tab.url} />
+      <CloseTab tab={tab} />
     </ActionPanel>
   );
 }
@@ -89,3 +90,18 @@ function GoToTab(props: { tab: Tab }) {
 
   return <ActionPanel.Item title="Open Tab" icon={{ source: Icon.Eye }} onAction={handleAction} />;
 }
+
+function CloseTab(props: { tab: Tab }) {
+  async function handleAction() {
+    await closeActiveTab(props.tab);
+    await closeMainWindow();
+  }
+
+  return <ActionPanel.Item
+    title="Close Tab"
+    icon={{ source: Icon.XMarkCircle }}
+    onAction={handleAction}
+    shortcut={{ modifiers: ["cmd"], key: "w" }}
+  />;
+}
+
