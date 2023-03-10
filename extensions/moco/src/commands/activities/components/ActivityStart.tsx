@@ -4,6 +4,7 @@ import { Task } from "../../tasks/types";
 import { startActivity } from "../api";
 import { fetchProjects } from "../../projects/api";
 import { Project } from "../../projects/types";
+import { toDecimalTime } from "../utils";
 
 interface ActivityStartProps {
   task?: Task;
@@ -19,7 +20,6 @@ export const ActivityStart: React.FC<ActivityStartProps> = ({ task, projectID })
     projectID ? projectID : task ? task.projectID : null
   );
   const [taskID, setTaskID] = useState<number | null>(task ? task.id : null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const navi = useNavigation();
 
@@ -30,9 +30,7 @@ export const ActivityStart: React.FC<ActivityStartProps> = ({ task, projectID })
   }
 
   const refreshItems = async () => {
-    setIsLoading(true);
     setProjects(await fetchProjects());
-    setIsLoading(false);
   };
 
   useEffect(() => {
@@ -50,6 +48,7 @@ export const ActivityStart: React.FC<ActivityStartProps> = ({ task, projectID })
             onSubmit={(values) =>
               startActivity({
                 ...values,
+                hours: values.hours.includes(":") ? toDecimalTime(values.hours) : values.hours,
                 date: values.date.toISOString().split("T")[0],
                 projectID: values.projectDropdown ? values.projectDropdown : taskProjectID,
                 taskID: values.taskDropdown ? values.taskDropdown : taskID,
