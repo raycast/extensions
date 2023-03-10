@@ -18,6 +18,7 @@ export function AlbumsActionPanel(props: { album: SpotifyApi.AlbumObjectSimplifi
     <ActionPanel title={title}>
       <Action title="Play" icon={Icon.Play} onAction={() => play(undefined, album.uri)} />
       <Action icon={Icon.Shuffle} title="Play Shuffled" onAction={() => playShuffled(album.uri)} />
+      {/* {albums && <Action.Push title="Discography" icon={Icon.ArrowRight} target={<AlbumsList albums={albums} />} />} */}
       <Action.Push
         title="Open Album"
         icon={Icon.ArrowRight}

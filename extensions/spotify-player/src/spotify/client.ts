@@ -4,20 +4,7 @@ import SpotifyWebApi from "spotify-web-api-node";
 import { Response } from "./interfaces";
 import { authorize } from "./oauth";
 import { isRunning, playTrack, setShuffling } from "./applescript";
-
-export const spotifyApi = new SpotifyWebApi();
-
-async function authorizeIfNeeded(): Promise<void> {
-  try {
-    const accessToken = await authorize();
-    spotifyApi.setAccessToken(accessToken);
-  } catch (error) {
-    console.error("authorization error:", error);
-
-    showToast({ style: Toast.Style.Failure, title: String(error) });
-    return;
-  }
-}
+import { getSpotifyClient } from "../helpers/withSpotifyClient";
 
 export function useArtistAlbums(artistId: string | undefined): Response<SpotifyApi.ArtistsAlbumsResponse> {
   const [response, setResponse] = useState<Response<SpotifyApi.ArtistsAlbumsResponse>>({ isLoading: false });
@@ -26,7 +13,7 @@ export function useArtistAlbums(artistId: string | undefined): Response<SpotifyA
 
   useEffect(() => {
     async function fetchData() {
-      await authorizeIfNeeded();
+      const { spotifyClient: spotifyApi } = getSpotifyClient(); // await authorizeIfNeeded();
 
       if (cancel) {
         return;
@@ -71,56 +58,6 @@ export function useArtistAlbums(artistId: string | undefined): Response<SpotifyA
   return response;
 }
 
-export function useSearch(query: string | undefined, limit: number): Response<SpotifyApi.SearchResponse> {
-  const [response, setResponse] = useState<Response<SpotifyApi.SearchResponse>>({ isLoading: false });
-
-  let cancel = false;
-
-  useEffect(() => {
-    async function fetchData() {
-      await authorizeIfNeeded();
-
-      if (cancel) {
-        return;
-      }
-      if (!query) {
-        setResponse((oldState) => ({ ...oldState, isLoading: false, result: undefined }));
-        return;
-      }
-      setResponse((oldState) => ({ ...oldState, isLoading: true }));
-      try {
-        const response =
-          (await spotifyApi
-            .search(query, ["track", "artist", "album", "playlist"], { limit: limit })
-            .then((response: { body: any }) => response.body as SpotifyApi.SearchResponse)
-            .catch((error) => {
-              setResponse((oldState) => ({ ...oldState, error: (error as unknown as SpotifyApi.ErrorObject).message }));
-            })) ?? undefined;
-
-        if (!cancel) {
-          setResponse((oldState) => ({ ...oldState, result: response }));
-        }
-      } catch (e: any) {
-        if (!cancel) {
-          setResponse((oldState) => ({ ...oldState, error: (e as unknown as SpotifyApi.ErrorObject).message }));
-        }
-      } finally {
-        if (!cancel) {
-          setResponse((oldState) => ({ ...oldState, isLoading: false }));
-        }
-      }
-    }
-
-    fetchData();
-
-    return () => {
-      cancel = true;
-    };
-  }, [query]);
-
-  return response;
-}
-
 export function useAlbumTracks(albumId: string | undefined): Response<SpotifyApi.AlbumTracksResponse> {
   const [response, setResponse] = useState<Response<SpotifyApi.AlbumTracksResponse>>({ isLoading: false });
 
@@ -128,7 +65,7 @@ export function useAlbumTracks(albumId: string | undefined): Response<SpotifyApi
 
   useEffect(() => {
     async function fetchData() {
-      await authorizeIfNeeded();
+      const { spotifyClient: spotifyApi } = getSpotifyClient(); // await authorizeIfNeeded();
 
       if (cancel) {
         return;
@@ -180,7 +117,7 @@ export function useNowPlaying(): Response<SpotifyApi.CurrentlyPlayingResponse> {
   useEffect(() => {
     async function fetchData() {
       console.log("fetching now playing");
-      await authorizeIfNeeded();
+      const { spotifyClient: spotifyApi } = getSpotifyClient(); // await authorizeIfNeeded();
 
       if (cancel) {
         return;
@@ -223,7 +160,7 @@ export function useNowPlaying(): Response<SpotifyApi.CurrentlyPlayingResponse> {
 }
 
 export async function startPlaySimilar(trackIds: string[], artistIds?: string[]): Promise<void> {
-  await authorizeIfNeeded();
+  const { spotifyClient: spotifyApi } = getSpotifyClient(); // await authorizeIfNeeded();
   try {
     const response =
       (await spotifyApi
@@ -239,7 +176,7 @@ export async function startPlaySimilar(trackIds: string[], artistIds?: string[])
 }
 
 export async function play(uri?: string, context_uri?: string): Promise<void> {
-  await authorizeIfNeeded();
+  const { spotifyClient: spotifyApi } = getSpotifyClient(); // await authorizeIfNeeded();
   try {
     await spotifyApi.play({ uris: uri ? [uri] : undefined, context_uri });
   } catch (error: any) {
@@ -248,7 +185,7 @@ export async function play(uri?: string, context_uri?: string): Promise<void> {
 }
 
 export async function pause(): Promise<void> {
-  await authorizeIfNeeded();
+  const { spotifyClient: spotifyApi } = getSpotifyClient(); // await authorizeIfNeeded();
   try {
     await spotifyApi.pause();
   } catch (e: any) {
@@ -257,7 +194,7 @@ export async function pause(): Promise<void> {
 }
 
 export async function skipToNext(): Promise<void> {
-  await authorizeIfNeeded();
+  const { spotifyClient: spotifyApi } = getSpotifyClient(); // await authorizeIfNeeded();
   try {
     await spotifyApi.skipToNext();
   } catch (e: any) {
@@ -266,7 +203,7 @@ export async function skipToNext(): Promise<void> {
 }
 
 export async function skipToPrevious(): Promise<void> {
-  await authorizeIfNeeded();
+  const { spotifyClient: spotifyApi } = getSpotifyClient(); // await authorizeIfNeeded();
   try {
     await spotifyApi.skipToPrevious();
   } catch (e: any) {
@@ -275,7 +212,7 @@ export async function skipToPrevious(): Promise<void> {
 }
 
 export async function containsMySavedTracks(trackIds: string[]): Promise<SpotifyApi.CheckUsersSavedTracksResponse> {
-  await authorizeIfNeeded();
+  const { spotifyClient: spotifyApi } = getSpotifyClient(); // await authorizeIfNeeded();
   try {
     const response = await spotifyApi.containsMySavedTracks(trackIds).then((response: { body: any }) => response.body);
     return response as SpotifyApi.CheckUsersSavedTracksResponse;
@@ -288,7 +225,7 @@ export async function playShuffled(uri: string): Promise<void> {
   try {
     const isSpotifyRunning = await isRunning();
     if (isSpotifyRunning) {
-      await authorizeIfNeeded();
+      const { spotifyClient: spotifyApi } = getSpotifyClient(); // await authorizeIfNeeded();
       await spotifyApi.setShuffle(true);
       await spotifyApi.play({ context_uri: uri });
     } else {
@@ -305,7 +242,7 @@ export async function playShuffled(uri: string): Promise<void> {
 }
 
 export async function searchTracks(query: string, limit: number): Promise<Response<SpotifyApi.TrackSearchResponse>> {
-  await authorizeIfNeeded();
+  const { spotifyClient: spotifyApi } = getSpotifyClient(); // await authorizeIfNeeded();
   try {
     const response = (await spotifyApi
       .searchTracks(query, { limit })
@@ -320,7 +257,7 @@ export async function searchTracks(query: string, limit: number): Promise<Respon
 }
 
 export async function addTrackToQueue(trackUri: string): Promise<Response<SpotifyApi.AddToQueueResponse>> {
-  await authorizeIfNeeded();
+  const { spotifyClient: spotifyApi } = getSpotifyClient(); // await authorizeIfNeeded();
   try {
     const response = (await spotifyApi
       .addToQueue(trackUri)
@@ -335,7 +272,7 @@ export async function addTrackToQueue(trackUri: string): Promise<Response<Spotif
 }
 
 export async function addToSavedTracks(trackIds: string[]): Promise<Response<SpotifyApi.SaveTracksForUserResponse>> {
-  await authorizeIfNeeded();
+  const { spotifyClient: spotifyApi } = getSpotifyClient(); // await authorizeIfNeeded();
   try {
     const response = (await spotifyApi
       .addToMySavedTracks(trackIds)
@@ -352,7 +289,7 @@ export async function addToSavedTracks(trackIds: string[]): Promise<Response<Spo
 export async function removeFromSavedTracks(
   trackIds: string[]
 ): Promise<Response<SpotifyApi.SaveTracksForUserResponse>> {
-  await authorizeIfNeeded();
+  const { spotifyClient: spotifyApi } = getSpotifyClient(); // await authorizeIfNeeded();
   try {
     const response = (await spotifyApi
       .removeFromMySavedTracks(trackIds)
@@ -367,7 +304,7 @@ export async function removeFromSavedTracks(
 }
 
 export async function nowPlaying(): Promise<Response<SpotifyApi.CurrentlyPlayingResponse>> {
-  await authorizeIfNeeded();
+  const { spotifyClient: spotifyApi } = getSpotifyClient(); // await authorizeIfNeeded();
 
   try {
     console.log("try");

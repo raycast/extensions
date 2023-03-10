@@ -82,7 +82,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "1.47.3",
+    "@raycast/api": "^1.48.8",
+    "@raycast/utils": "^1.5.2",
     "lodash": "^4.17.21",
     "node-fetch": "^3.2.3",
     "run-applescript": "^6.0.0",

@@ -223,6 +223,7 @@
     "file-type": "^18.2.0",
     "lodash": "^4.17.21",
     "node-emoji": "^1.11.0",
+    "node-fetch": "^3.2.3",
     "remove-markdown": "^0.5.0"
   },
   "devDependencies": {
