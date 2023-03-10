@@ -26,7 +26,7 @@ export default function EditField(props: EditFieldProps) {
         </ActionPanel>
       }
     >
-      <Form.TextField {...itemProps.nameFriendly} title="Display Name" placeholder="For display only" />
+      <Form.TextField {...itemProps.nameFriendly} title="Form Label" placeholder="For display only" />
       <Form.TextField
         {...itemProps.name}
         title="Merge Token"
@@ -44,7 +44,7 @@ export default function EditField(props: EditFieldProps) {
         <Form.Dropdown.Item value="dropdown" title="Dropdown" />
       </Form.Dropdown>
       {values.type === "dropdown" && (
-        <Form.TextField {...itemProps.values} title="Dropdown Options" placeholder="commad-separated values" />
+        <Form.TextField {...itemProps.values} title="Dropdown Options" placeholder="comma-separated values" />
       )}
     </Form>
   );
@@ -57,12 +57,17 @@ function usePageLogic(props: EditFieldProps) {
   async function saveSnippet(values: FormValues) {
     const toast = await showToast({ title: "Saving snippet...", style: Toast.Style.Animated });
 
+    const field = {
+      ...values,
+      values: typeof values.values === "string" ? values.values?.split(",") ?? [] : values.values,
+    };
+
     const i = snippet.dynamicFields.findIndex((f) => f.name === initialName);
 
     const dynamicFields = (
       i < 0
-        ? [...snippet.dynamicFields, values]
-        : [...snippet.dynamicFields.slice(0, i), values, ...snippet.dynamicFields.slice(i + 1)]
+        ? [...snippet.dynamicFields, field]
+        : [...snippet.dynamicFields.slice(0, i), field, ...snippet.dynamicFields.slice(i + 1)]
     ) as SnippetWithPath["dynamicFields"];
 
     const newSnippet = { ...snippet, dynamicFields };

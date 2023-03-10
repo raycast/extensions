@@ -88,7 +88,7 @@ export function useFormLogic({ onSubmit, snippet }: EditSnippetProps) {
     const success = await saveSnippetFile(
       {
         ...values,
-        tags: values.tags?.split(",") ?? [],
+        tags: typeof values.tags === "string" ? values.tags?.split(",") ?? [] : values.tags,
         snippet: snippetText,
         id,
       },

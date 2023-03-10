@@ -2,6 +2,7 @@ import { Action, ActionPanel, Alert, confirmAlert, Detail, Icon, List, useNaviga
 import { usePromise } from "@raycast/utils";
 import { loadSingleSnippet, saveSnippetFile } from "../utils/snippets";
 import { Snippet, SnippetWithPath } from "../utils/types";
+import DynamicSnippetHelp from "./dynamic-snippet.help";
 import EditField from "./edit-field";
 
 async function removeField(snippet: SnippetWithPath, field: Snippet["dynamicFields"][number]) {
@@ -30,6 +31,7 @@ export default function DynamicFieldsList(props: { snippet: SnippetWithPath; rev
             field={args?.field}
             onSubmit={() => {
               mutate();
+              props.revalidate();
               pop();
             }}
           />
@@ -53,6 +55,7 @@ export default function DynamicFieldsList(props: { snippet: SnippetWithPath; rev
             })
           ) {
             mutate(removeField(snippet, field));
+            props.revalidate();
           }
         }}
       />
@@ -89,7 +92,9 @@ export default function DynamicFieldsList(props: { snippet: SnippetWithPath; rev
                   <AddEditFieldAction field={field} />
                   <RemoveFieldAction field={field} />
                 </ActionPanel.Section>
+
                 <AddEditFieldAction />
+                <HelpAction />
               </ActionPanel>
             }
           />
@@ -100,5 +105,5 @@ export default function DynamicFieldsList(props: { snippet: SnippetWithPath; rev
 }
 
 function HelpAction() {
-  return <Action.Push target={<Detail></Detail>} title="Help" icon={Icon.QuestionMarkCircle} />;
+  return <Action.Push target={<DynamicSnippetHelp />} title="Help" icon={Icon.QuestionMarkCircle} />;
 }
