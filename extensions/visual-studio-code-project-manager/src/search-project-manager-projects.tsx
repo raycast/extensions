@@ -4,7 +4,7 @@ import { existsSync, lstatSync, readFileSync } from "fs";
 import { homedir } from "os";
 import config from "parse-git-config";
 import { dirname } from "path";
-import { useState, ReactElement } from "react";
+import { useState, ReactElement, Fragment } from "react";
 import tildify from "tildify";
 import { CachedProjectEntry, Preferences, ProjectEntry, VSCodeBuild } from "./types";
 
@@ -176,7 +176,7 @@ export default function Command() {
         ) : null
       }
     >
-      {elements}
+      <Fragment>{elements}</Fragment>
     </List>
   );
 }
@@ -191,7 +191,7 @@ function ProjectListItem({ name, rootPath, tags }: ProjectEntry) {
       subtitle={subtitle}
       icon={{ fileIcon: path }}
       keywords={tags}
-      accessoryTitle={tags?.join(", ")}
+      accessories={[{ text: tags?.join(", ") }]}
       actions={
         <ActionPanel>
           <ActionPanel.Section>

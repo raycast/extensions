@@ -88,7 +88,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "1.33.2",
+    "@raycast/api": "1.48.8",
     "parse-git-config": "^3.0.0",
     "tildify": "^3.0.0"
   },
