@@ -20,6 +20,7 @@ import { XMLToFMObjects } from "./utils/FmClipTools";
 import { useState, useMemo } from "react";
 import EditSnippet from "./components/edit-snippet";
 import { uniqBy } from "lodash";
+import EditSnippetXML from "./components/edit-snippet-xml";
 
 export default function Command() {
   const [locations] = useCachedState<Location[]>("locations", []);
@@ -203,6 +204,22 @@ ${snippet.snippet}`}
                     icon={Icon.Finder}
                     shortcut={{ key: "r", modifiers: ["cmd", "opt"] }}
                   />
+                  <Action.CopyToClipboard content={snippet.id} title="Copy Snippet ID" icon={Icon.Clipboard} />
+                  {locationMap[snippet.locId]?.git || (
+                    <Action.Push
+                      title="Edit Snippet XML"
+                      icon={Icon.Dna}
+                      target={
+                        <EditSnippetXML
+                          onSubmit={() => {
+                            revalidate();
+                            pop();
+                          }}
+                          snippet={snippet}
+                        />
+                      }
+                    />
+                  )}
                   {/* <Action
                     title="Export Snippet"
                     icon={Icon.Upload}
