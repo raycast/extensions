@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Action, ActionPanel, Form, Icon, showToast, Toast } from "@raycast/api";
 import { FormValidation, useForm } from "@raycast/utils";
 import { SnippetWithPath } from "../utils/types";
@@ -51,11 +52,12 @@ export default function EditField(props: EditFieldProps) {
 
 function usePageLogic(props: EditFieldProps) {
   const { snippet, onSubmit } = props;
+  const [initialName] = useState(props.field?.name);
 
   async function saveSnippet(values: FormValues) {
     const toast = await showToast({ title: "Saving snippet...", style: Toast.Style.Animated });
 
-    const i = snippet.dynamicFields.findIndex((f) => f.name === values.name);
+    const i = snippet.dynamicFields.findIndex((f) => f.name === initialName);
 
     const dynamicFields = (
       i < 0

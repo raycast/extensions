@@ -1,19 +1,21 @@
-import { Action, ActionPanel, Detail, Icon, List, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Alert, confirmAlert, Detail, Icon, List, useNavigation } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
-import { loadSingleSnippet } from "../utils/snippets";
+import { loadSingleSnippet, saveSnippetFile } from "../utils/snippets";
 import { Snippet, SnippetWithPath } from "../utils/types";
 import EditField from "./edit-field";
 
-async function reload(path: string) {
-  return loadSingleSnippet(path);
+async function removeField(snippet: SnippetWithPath, field: Snippet["dynamicFields"][number]) {
+  const newSnippet: SnippetWithPath = {
+    ...snippet,
+    dynamicFields: snippet.dynamicFields.filter((f) => f.name !== field.name),
+  };
+  await saveSnippetFile(newSnippet, snippet.path);
 }
 
 export default function DynamicFieldsList(props: { snippet: SnippetWithPath; revalidate: () => void }) {
   const { pop } = useNavigation();
   const { data, mutate } = usePromise(async () => loadSingleSnippet(props.snippet.path));
   const snippet: SnippetWithPath = { ...props.snippet, ...data, locId: props.snippet.locId };
-
-  console.log("snippet", snippet.path);
 
   function AddEditFieldAction(args?: { field?: Snippet["dynamicFields"][number] }) {
     const isEdit = !!args?.field?.name;
@@ -27,7 +29,7 @@ export default function DynamicFieldsList(props: { snippet: SnippetWithPath; rev
             snippet={snippet}
             field={args?.field}
             onSubmit={() => {
-              mutate(reload(props.snippet.path));
+              mutate();
               pop();
             }}
           />
@@ -41,8 +43,17 @@ export default function DynamicFieldsList(props: { snippet: SnippetWithPath; rev
         title="Remove Field"
         icon={Icon.Trash}
         shortcut={{ key: "delete", modifiers: ["cmd"] }}
-        onAction={() => {
-          console.log("remove field");
+        onAction={async () => {
+          if (
+            await confirmAlert({
+              icon: Icon.Trash,
+              title: "Are you sure?",
+              message: "This edits the snippet file directly and cannot be undone.",
+              primaryAction: { title: "Remove", style: Alert.ActionStyle.Destructive },
+            })
+          ) {
+            mutate(removeField(snippet, field));
+          }
         }}
       />
     );
