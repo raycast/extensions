@@ -21,6 +21,8 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
   const chatGPT = useChatGPT();
 
   async function ask(question: string, model: Model) {
+    clearSearchBar();
+
     setLoading(true);
     const toast = await showToast({
       title: "Getting your answer...",
@@ -40,7 +42,7 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
 
     setTimeout(async () => {
       setSelectedChatId(chat.id);
-    }, 30);
+    }, 50);
 
     await chatGPT
       .createChatCompletion(
@@ -57,7 +59,6 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
         chat = { ...chat, answer: res.data.choices.map((x) => x.message)[0]?.content ?? "" };
         if (typeof chat.answer === "string") {
           setLoading(false);
-          clearSearchBar();
 
           toast.title = "Got your answer!";
           toast.style = Toast.Style.Success;

@@ -15,13 +15,12 @@ export const DEFAULT_MODEL: Model = {
 
 export function useModel(): ModelHook {
   const [data, setData] = useState<Model[]>([]);
-  const [isLoading, setLoading] = useState<boolean>(false);
+  const [isLoading, setLoading] = useState<boolean>(true);
 
   const option: Model["option"][] = ["gpt-3.5-turbo", "gpt-3.5-turbo-0301"];
 
   useEffect(() => {
     (async () => {
-      setLoading(true);
       const storedModels = await LocalStorage.getItem<string>("models");
 
       if (!storedModels) {
