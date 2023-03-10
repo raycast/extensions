@@ -9,9 +9,11 @@ export interface Timer {
 
 export interface Stopwatch {
   name: string;
+  swID: string;
   timeStarted: Date;
   timeElapsed: number;
-  originalFile: string;
+  lastPaused: Date | "----";
+  pauseElapsed: number;
 }
 
 export interface Values {
@@ -31,6 +33,7 @@ export interface Preferences {
   selectedSound: string;
   ringContinuously: boolean;
   copyOnSwStop: boolean;
+  volumeSetting: number;
 }
 
 export interface CTInlineArgs {

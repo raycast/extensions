@@ -34,7 +34,7 @@ export default function Command() {
             icon={{ source: Icon.Clock, tintColor: Color.Yellow }}
             title={timer.name}
             subtitle={formatTime(timer.timeLeft) + " left"}
-            accessoryTitle={formatTime(timer.secondsSet) + " originally"}
+            accessories={[{ text: formatTime(timer.secondsSet) + " originally" }]}
             actions={
               <ActionPanel>
                 <Action title="Stop Timer" onAction={() => handleStopTimer(timer)} />

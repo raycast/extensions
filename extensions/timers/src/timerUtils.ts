@@ -4,7 +4,7 @@ import { randomUUID } from "crypto";
 import { existsSync, readdirSync, readFileSync, writeFileSync } from "fs";
 import { extname } from "path";
 import { CustomTimer, Preferences, Timer } from "./types";
-import { formatTime } from "./formatUtils";
+import { formatTime, secondsBetweenDates } from "./formatUtils";
 
 const DATAPATH = environment.supportPath + "/customTimers.json";
 
@@ -15,19 +15,22 @@ async function startTimer(timeInSeconds: number, timerName = "Untitled") {
 
   const prefs = getPreferenceValues<Preferences>();
   const selectedSoundPath = `${environment.assetsPath + "/" + prefs.selectedSound}`;
-  let command = `sleep ${timeInSeconds} && if [ -f "${masterName}" ]; then `;
+  const cmdParts = [`sleep ${timeInSeconds}`];
+  cmdParts.push(
+    `if [ -f "${masterName}" ]; then osascript -e 'display notification "Timer \\"${timerName}\\" complete" with title "Ding!"'`
+  );
   if (prefs.selectedSound === "speak_timer_name") {
-    command += `say "${timerName}"`;
+    cmdParts.push(`say "${timerName}"`);
   } else {
-    command += `afplay "${selectedSoundPath}"`;
+    cmdParts.push(`afplay "${selectedSoundPath}" --volume ${prefs.volumeSetting}`);
   }
   if (prefs.ringContinuously) {
     const dismissFile = `${masterName}`.replace(".timer", ".dismiss");
     writeFileSync(dismissFile, ".dismiss file for Timers");
-    command += ` && while [ -f "${dismissFile}" ]; do afplay "${selectedSoundPath}"; done`;
+    cmdParts.push(`while [ -f "${dismissFile}" ]; do afplay "${selectedSoundPath}"; done`);
   }
-  command += ` && osascript -e 'display notification "Timer \\"${timerName}\\" complete" with title "Ding!"' && rm "${masterName}"; else echo "Timer deleted"; fi`;
-  exec(command, (error, stderr) => {
+  cmdParts.push(`rm "${masterName}"; else echo "Timer deleted"; fi`);
+  exec(cmdParts.join(" && "), (error, stderr) => {
     if (error) {
       console.log(`error: ${error.message}`);
       return;
@@ -64,10 +67,7 @@ function getTimers() {
       const timerFileParts = timerFile.split("---");
       timer.secondsSet = Number(timerFileParts[1].split(".")[0]);
       const timeStarted = timerFileParts[0].replace(/__/g, ":");
-      timer.timeLeft = Math.max(
-        0,
-        Math.round(timer.secondsSet - (new Date().getTime() - new Date(timeStarted).getTime()) / 1000)
-      );
+      timer.timeLeft = Math.max(0, Math.round(timer.secondsSet - secondsBetweenDates({ d2: timeStarted })));
       setOfTimers.push(timer);
     }
   });
@@ -97,8 +97,7 @@ function createCustomTimer(newTimer: CustomTimer) {
 
 function readCustomTimers() {
   ensureCTFileExists();
-  const customTimers = JSON.parse(readFileSync(DATAPATH, "utf8"));
-  return customTimers;
+  return JSON.parse(readFileSync(DATAPATH, "utf8"));
 }
 
 function renameCustomTimer(ctID: string, newName: string) {
