@@ -70,7 +70,6 @@ export default function Torrent(param: { ip: string }) {
           key={item.idx}
           title={item.title}
           subtitle={item.category}
-          accessoryTitle={item.date}
           actions={
             item.url && (
               <ActionPanel>
@@ -78,6 +77,11 @@ export default function Torrent(param: { ip: string }) {
               </ActionPanel>
             )
           }
+          accessories={[
+            {
+              text: item.date,
+            },
+          ]}
         />
       ))}
     </List>
