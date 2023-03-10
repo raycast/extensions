@@ -264,7 +264,9 @@ export default function RenderForm(props: { token: string; modelName: string }) 
       </Form.Dropdown>
       <Form.Separator />
       {options.map((option) => {
-        return option.values?.type == "string" || "integer" || "number" ? (
+        return option.values?.type == "string" ||
+          option.values?.type == "integer" ||
+          option.values?.type == "number" ? (
           RenderFormInput({ option: option, modelName: modelName })
         ) : (
           <Form.Description key={option.name} text={option.name || "Undefined"} />
