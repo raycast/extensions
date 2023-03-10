@@ -288,7 +288,7 @@ export default function Command(props: LaunchProps<{ arguments: Website }>) {
                   shortcut={{ modifiers: ["cmd"], key: "a" }}
                   icon={Icon.Repeat}
                 />
-                {!tips && (
+                {score !== 6 && !tips && (
                   <Action
                     title="Open Tips"
                     onAction={() => {
@@ -298,7 +298,7 @@ export default function Command(props: LaunchProps<{ arguments: Website }>) {
                     icon={Icon.LightBulb}
                   />
                 )}
-                {tips && (
+                {score !== 6 && tips && (
                   <Action
                     title="Close Tips"
                     onAction={() => {
