@@ -30,7 +30,9 @@ const componentsSchema = z.object({
 
 export default function Command() {
   // TODO: Replace this with primer.style/design URL after merging https://github.com/primer/design/pull/425
-  const { isLoading, data } = useFetch("https://primer-5dd8f1e892-26441320.drafts.github.io/components.json");
+  const { isLoading, data } = useFetch(
+    "https://primer-5dd8f1e892-26441320.drafts.github.io/components.json"
+  );
 
   const { components } = componentsSchema.parse(data);
 
@@ -59,21 +61,31 @@ export default function Command() {
             }
             detail={
               <List.Item.Detail
-                markdown={`# ${component.displayName}\n${component.description || ""}`}
+                markdown={`# ${component.displayName}\n${
+                  component.description || ""
+                }`}
                 metadata={
                   <List.Item.Detail.Metadata>
                     {component.implementations.react ? (
                       <List.Item.Detail.Metadata.Label
                         title="React"
                         text={{
-                          value: sentenceCase(component.implementations.react.status),
-                          color: statusColors[component.implementations.react.status] || Color.SecondaryText,
+                          value: sentenceCase(
+                            component.implementations.react.status
+                          ),
+                          color:
+                            statusColors[
+                              component.implementations.react.status
+                            ] || Color.SecondaryText,
                         }}
                       />
                     ) : (
                       <List.Item.Detail.Metadata.Label
                         title="React"
-                        text={{ value: "Not available", color: Color.SecondaryText }}
+                        text={{
+                          value: "Not available",
+                          color: Color.SecondaryText,
+                        }}
                       />
                     )}
                   </List.Item.Detail.Metadata>
