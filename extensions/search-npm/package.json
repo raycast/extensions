@@ -3,6 +3,7 @@
   "name": "search-npm",
   "title": "Search npm Packages",
   "description": "Search for npm package information",
+  "subtitle": "npm",
   "icon": "command-icon.png",
   "author": "mrmartineau",
   "contributors": [
@@ -10,10 +11,10 @@
     "Timon",
     "luisFilipePT"
   ],
+  "license": "MIT",
   "categories": [
     "Developer Tools"
   ],
-  "license": "MIT",
   "commands": [
     {
       "name": "index",
@@ -25,6 +26,8 @@
   ],
   "preferences": [
     {
+      "name": "defaultCopyAction",
+      "type": "dropdown",
       "data": [
         {
           "title": "yarn",
@@ -39,15 +42,15 @@
           "value": "pnpm"
         }
       ],
-      "default": "npm",
-      "description": "The package manager to use by default",
-      "name": "defaultCopyAction",
-      "required": false,
       "title": "Default Package Manager",
-      "type": "dropdown",
+      "description": "The package manager to use by default",
+      "required": false,
+      "default": "npm",
       "value": "npm"
     },
     {
+      "name": "secondaryCopyAction",
+      "type": "dropdown",
       "data": [
         {
           "title": "yarn",
@@ -62,15 +65,15 @@
           "value": "pnpm"
         }
       ],
-      "default": "yarn",
-      "description": "The secondary package manager to use",
-      "name": "secondaryCopyAction",
-      "required": false,
       "title": "Secondary Package Manager",
-      "type": "dropdown",
+      "description": "The secondary package manager to use",
+      "required": false,
+      "default": "yarn",
       "value": "yarn"
     },
     {
+      "name": "defaultOpenAction",
+      "type": "dropdown",
       "data": [
         {
           "title": "Open Repository",
@@ -89,12 +92,10 @@
           "value": "skypackPackagePage"
         }
       ],
-      "default": "openRepository",
-      "description": "How to open the selected package when Enter is pressed",
-      "name": "defaultOpenAction",
-      "required": false,
       "title": "Default Open Action",
-      "type": "dropdown",
+      "description": "How to open the selected package when Enter is pressed",
+      "required": false,
+      "default": "openRepository",
       "value": "openRepository"
     }
   ],
