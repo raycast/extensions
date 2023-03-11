@@ -1,6 +1,6 @@
 import { Image, List } from "@raycast/api";
+import { msToHMS } from "../helpers/track";
 import { TrackActionPanel } from "./TrackActionPanel";
-import { msToHMS } from "../utils";
 
 type TrackListItemProps = {
   track: SpotifyApi.TrackObjectSimplified;

@@ -5,7 +5,7 @@ type PlayProps = {
   contextUri?: string;
 };
 
-export async function play({ uri, contextUri }: PlayProps) {
+export async function play({ uri, contextUri }: PlayProps = {}) {
   const { spotifyClient } = getSpotifyClient();
   await spotifyClient.play({ uris: uri ? [uri] : undefined, context_uri: contextUri });
 }

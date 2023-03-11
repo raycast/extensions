@@ -1,7 +1,8 @@
 import { Action, ActionPanel, Color, Icon, showHUD, showToast } from "@raycast/api";
+import { addToQueue } from "../api/addTrackToQueue";
 import { play } from "../api/play";
+import { startRadio } from "../api/startRadio";
 import { isSpotifyInstalled } from "../helpers/isSpotifyInstalled";
-import { addTrackToQueue, startPlaySimilar } from "../spotify/client";
 
 type TrackActionPanelProps = {
   title: string;
@@ -23,7 +24,7 @@ export function TrackActionPanel({ title, track }: TrackActionPanelProps) {
         icon={{ source: "radio.png", tintColor: Color.PrimaryText }}
         title="Start Radio"
         onAction={async () => {
-          await startPlaySimilar([track.id]);
+          await startRadio({ trackIds: [track.id] });
           showHUD(`Playing ${title} Radio`);
         }}
         shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
@@ -32,7 +33,7 @@ export function TrackActionPanel({ title, track }: TrackActionPanelProps) {
         icon={Icon.Plus}
         title="Add To Queue"
         onAction={async () => {
-          await addTrackToQueue(track.uri);
+          await addToQueue({ trackUri: track.uri });
           showToast({ title: "Added to queue", message: title });
         }}
         shortcut={{ modifiers: ["cmd", "shift"], key: "+" }}

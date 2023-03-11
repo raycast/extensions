@@ -1,109 +1,139 @@
 import { useEffect, useState } from "react";
-import {
-  open,
-  showToast,
-  Toast,
-  showHUD,
-  Clipboard,
-  Icon,
-  Color,
-  Detail,
-  closeMainWindow,
-  Action,
-  ActionPanel,
-  popToRoot,
-  List,
-  MenuBarExtra,
-} from "@raycast/api";
-import {
-  startPlaySimilar,
-  useNowPlaying,
-  pause,
-  play,
-  skipToNext,
-  skipToPrevious,
-  addToSavedTracks,
-  removeFromSavedTracks,
-  containsMySavedTracks,
-  nowPlaying,
-} from "./spotify/client";
-import { SpotifyProvider, useSpotify } from "./utils/context";
-import { isTrack, optimizeTitle } from "./utils";
-import { Response } from "./spotify/interfaces";
+import { Icon, MenuBarExtra, Color, Clipboard, getPreferenceValues } from "@raycast/api";
+import { useCurrentPlayingTrack } from "./hooks/useCurrentPlayingTrack";
+import View from "./components/View";
+import { containsMySavedTracks } from "./api/containsMySavedTrack";
+import { pause } from "./api/pause";
+import { play } from "./api/play";
+import { skipToNext } from "./api/skipToNext";
+import { skipToPrevious } from "./api/skipToPrevious";
+import { startRadio } from "./api/startRadio";
+import { removeFromMySavedTracks } from "./api/removeFromMySavedTracks";
+import { addToMySavedTracks } from "./api/addToMySavedTracks";
+import { isSpotifyInstalled } from "./helpers/isSpotifyInstalled";
+import { isTrack } from "./helpers/track";
 
-function NowPlayingMenuBar() {
-  const { installed, loading: spotifyLoading } = useSpotify();
-  const response = useNowPlaying();
-  console.log(response);
-  // const [response, setResponse] = useState<Response<SpotifyApi.CurrentlyPlayingResponse>>({
-  //   result: undefined,
-  //   error: undefined,
-  //   isLoading: true,
-  // });
-  const [isPaused, setIsPaused] = useState(true);
+function NowPlayingMenuBarCommand() {
+  const { currentPlayingData } = useCurrentPlayingTrack();
+  const [isPaused, setIsPaused] = useState(currentPlayingData?.is_playing === false);
   const [songAlreadyLiked, setSongAlreadyLiked] = useState<boolean | null>(null);
+  const preferences = getPreferenceValues();
 
   const trackAlreadyLiked = async (trackId: string) => {
-    const songResponse = await containsMySavedTracks([trackId]);
+    const songResponse = await containsMySavedTracks({ trackIds: [trackId] });
     setSongAlreadyLiked(songResponse[0]);
   };
 
-  // const getNowPlaying = async () => {
-  //   console.log("start nowPlayingResponse");
-  //   const nowPlayingResponse = await nowPlaying();
-  //   console.log("nowPlayingResponse", nowPlayingResponse);
-  //   setResponse(nowPlayingResponse);
-  // };
+  useEffect(() => {
+    setIsPaused(currentPlayingData?.is_playing === false);
+    if (
+      currentPlayingData &&
+      Object.keys(currentPlayingData).length > 0 &&
+      isTrack(currentPlayingData)
+    ) {
+      trackAlreadyLiked(currentPlayingData.item.id);
+    }
+  }, [currentPlayingData]);
 
-  // useEffect(() => {
-  //   console.log("mount", spotifyLoading);
-  //   getNowPlaying();
-  // }, [spotifyLoading]);
-
-  // useEffect(() => {
-  //   setIsPaused(response.result?.is_playing === false);
-  //   if (response.result && Object.keys(response.result).length > 0 && isTrack(response.result)) {
-  //     // trackAlreadyLiked(response.result.item.id);
-  //   }
-  // }, [response.result]);
-
-  if (response.error) {
-    return null;
-  }
-
-  if (response.isLoading) {
-    return null;
-  }
-
-  const isIdle = response.result && Object.keys(response.result).length === 0;
+  const isIdle = currentPlayingData && Object.keys(currentPlayingData).length === 0;
 
   if (isIdle) {
+    null;
+  }
+
+  if (!currentPlayingData) {
     return null;
   }
 
-  if (!response.result) {
+  if (!isTrack(currentPlayingData)) {
     return null;
   }
 
-  if (!isTrack(response.result)) {
-    return null;
-  }
+  const { item } = currentPlayingData;
+  const { name: trackName, artists, id: trackId, external_urls } = item;
 
-  const { item } = response.result;
-  const { name: trackName, album, artists, id: trackId, external_urls } = item;
-
-  const albumName = album.name;
-  const albumImage = album.images[0].url;
   const artistName = artists[0]?.name;
   const artistId = artists[0]?.id;
 
+  const makeTitle = (title: string) => {
+    const max = Number(preferences.maxtitlelength);
+    const showEllipsis = Boolean(preferences.showEllipsis);
+
+    if (Number.isNaN(max) || max <= 0 || title.length <= max) {
+      return title;
+    }
+
+    return title.substring(0, max).trim() + (showEllipsis ? "…" : "");
+  };
+
   return (
-    <MenuBarExtra
-      icon="icon.png"
-      title={optimizeTitle(`${trackName} by ${artistName}`)}
-      tooltip={`${trackName} by ${artistName}`}
-      isLoading={spotifyLoading || response.isLoading}
-    >
+    <MenuBarExtra icon="icon.png" title={makeTitle(trackName)} tooltip={trackName}>
+      {!isPaused && (
+        <MenuBarExtra.Item
+          icon={Icon.PauseFilled}
+          title="Pause"
+          onAction={async () => {
+            await pause();
+          }}
+        />
+      )}
+      {isPaused && (
+        <MenuBarExtra.Item
+          icon={Icon.PlayFilled}
+          title="Play"
+          onAction={async () => {
+            await play();
+          }}
+        />
+      )}
+      <MenuBarExtra.Item
+        icon={Icon.Forward}
+        title={"Next Track"}
+        shortcut={{ modifiers: ["cmd"], key: "." }}
+        onAction={async () => {
+          await skipToNext();
+        }}
+      />
+      <MenuBarExtra.Item
+        icon={Icon.Rewind}
+        title={"Previous Track"}
+        shortcut={{ modifiers: ["cmd"], key: "," }}
+        onAction={async () => {
+          await skipToPrevious();
+        }}
+      />
+      <MenuBarExtra.Item
+        title="Start Radio"
+        icon={{ source: "radio.png", tintColor: Color.PrimaryText }}
+        onAction={async () => {
+          await startRadio({ trackIds: [trackId], artistIds: [artistId] });
+        }}
+      />
+      {songAlreadyLiked && (
+        <MenuBarExtra.Item
+          icon={Icon.HeartDisabled}
+          title="Dislike"
+          onAction={async () => {
+            await removeFromMySavedTracks({ trackIds: [trackId] });
+          }}
+        />
+      )}
+      {!songAlreadyLiked && (
+        <MenuBarExtra.Item
+          icon={Icon.Heart}
+          title="Like"
+          onAction={async () => {
+            await addToMySavedTracks({ trackIds: [trackId] });
+          }}
+        />
+      )}
+      <MenuBarExtra.Item
+        icon="icon.png"
+        title="Open on Spotify"
+        onAction={() =>
+          isSpotifyInstalled ? open(`spotify:track:${trackId}`) : open(external_urls.spotify)
+        }
+      />
       <MenuBarExtra.Item
         title="Copy Song URL"
         icon={Icon.Link}
@@ -113,15 +143,16 @@ function NowPlayingMenuBar() {
             html: `<a href=${url}>${trackName} by ${artistName}</a>`,
             text: url,
           });
-          showHUD(`Copied URL to clipboard`);
         }}
       />
     </MenuBarExtra>
   );
 }
 
-export default () => (
-  <SpotifyProvider>
-    <NowPlayingMenuBar />
-  </SpotifyProvider>
-);
+export default function Command() {
+  return (
+    <View>
+      <NowPlayingMenuBarCommand />
+    </View>
+  );
+}

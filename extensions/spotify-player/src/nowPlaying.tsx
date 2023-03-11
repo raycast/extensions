@@ -1,60 +1,42 @@
 import { useEffect, useState } from "react";
-import {
-  open,
-  showToast,
-  Toast,
-  showHUD,
-  Clipboard,
-  Icon,
-  Color,
-  Detail,
-  closeMainWindow,
-  Action,
-  ActionPanel,
-  popToRoot,
-  List,
-} from "@raycast/api";
-import {
-  startPlaySimilar,
-  useNowPlaying,
-  pause,
-  play,
-  skipToNext,
-  skipToPrevious,
-  addToSavedTracks,
-  removeFromSavedTracks,
-  containsMySavedTracks,
-} from "./spotify/client";
-import { SpotifyProvider, useSpotify } from "./utils/context";
-import { isTrack } from "./utils";
+import { showToast, Toast, Icon, Detail, List } from "@raycast/api";
+import { useCurrentPlayingTrack } from "./hooks/useCurrentPlayingTrack";
+import View from "./components/View";
+import { NowPlayingActionPanel } from "./components/NowPlayingActionPanel";
+import { containsMySavedTracks } from "./api/containsMySavedTrack";
+import { isTrack } from "./helpers/track";
 
-function NowPlaying() {
-  const { installed } = useSpotify();
-  const response = useNowPlaying();
-  const [isPaused, setIsPaused] = useState(response.result?.is_playing === false);
+function NowPlayingCommand() {
+  const { currentPlayingData, currentPlayingError, currentPlayingIsLoading } =
+    useCurrentPlayingTrack();
+  const [isPaused, setIsPaused] = useState(currentPlayingData?.is_playing === false);
   const [songAlreadyLiked, setSongAlreadyLiked] = useState<boolean | null>(null);
 
   const trackAlreadyLiked = async (trackId: string) => {
-    const songResponse = await containsMySavedTracks([trackId]);
+    const songResponse = await containsMySavedTracks({ trackIds: [trackId] });
     setSongAlreadyLiked(songResponse[0]);
   };
 
   useEffect(() => {
-    setIsPaused(response.result?.is_playing === false);
-    if (response.result && Object.keys(response.result).length > 0 && isTrack(response.result)) {
-      trackAlreadyLiked(response.result.item.id);
+    setIsPaused(currentPlayingData?.is_playing === false);
+    if (
+      currentPlayingData &&
+      Object.keys(currentPlayingData).length > 0 &&
+      isTrack(currentPlayingData)
+    ) {
+      trackAlreadyLiked(currentPlayingData.item.id);
     }
-  }, [response.result]);
+  }, [currentPlayingData]);
 
-  if (response.error) {
-    showToast(Toast.Style.Failure, "Now Playing has failed", response.error);
+  if (currentPlayingError) {
+    showToast(Toast.Style.Failure, "Now Playing has failed", currentPlayingError.message);
   }
 
-  if (response.isLoading) {
+  if (currentPlayingIsLoading) {
     return <Detail isLoading />;
   }
 
-  const isIdle = response.result && Object.keys(response.result).length === 0;
+  const isIdle = currentPlayingData && Object.keys(currentPlayingData).length === 0;
 
   if (isIdle) {
     return (
@@ -64,19 +46,22 @@ function NowPlaying() {
     );
   }
 
-  if (!response.result) {
+  if (!currentPlayingData) {
     return <Detail markdown={`# Something is wrong`} />;
   }
 
-  if (!isTrack(response.result)) {
+  if (!isTrack(currentPlayingData)) {
     return (
       <List>
-        <List.EmptyView icon={Icon.ExclamationMark} title="Podcasts are not supported at the moment" />
+        <List.EmptyView
+          icon={Icon.ExclamationMark}
+          title="Podcasts are not supported at the moment"
+        />
       </List>
     );
   }
 
-  const { item } = response.result;
+  const { item } = currentPlayingData;
   const { name: trackName, album, artists, id: trackId, external_urls } = item;
 
   const albumName = album.name;
@@ -101,109 +86,24 @@ by ${artistName}
         </Detail.Metadata>
       }
       actions={
-        <ActionPanel>
-          {!isPaused && (
-            <Action
-              icon={Icon.PauseFilled}
-              title="Pause"
-              onAction={async () => {
-                await pause();
-                await closeMainWindow();
-                await popToRoot();
-              }}
-            />
-          )}
-          {isPaused && (
-            <Action
-              icon={Icon.PlayFilled}
-              title="Play"
-              onAction={async () => {
-                await play();
-                await closeMainWindow();
-                await popToRoot();
-              }}
-            />
-          )}
-
-          <Action
-            icon={Icon.Forward}
-            title={"Next Track"}
-            shortcut={{ modifiers: ["cmd"], key: "." }}
-            onAction={async () => {
-              await skipToNext();
-              await closeMainWindow();
-              await popToRoot();
-            }}
-          />
-          <Action
-            icon={Icon.Rewind}
-            title={"Previous Track"}
-            shortcut={{ modifiers: ["cmd"], key: "," }}
-            onAction={async () => {
-              await skipToPrevious();
-              await closeMainWindow();
-              await popToRoot();
-            }}
-          />
-          <Action
-            title="Start Radio"
-            icon={{ source: "radio.png", tintColor: Color.PrimaryText }}
-            onAction={async () => {
-              await startPlaySimilar([trackId], [artistId]);
-              showHUD(`Playing Radio`);
-            }}
-          />
-          {songAlreadyLiked && (
-            <Action
-              icon={Icon.HeartDisabled}
-              title="Dislike"
-              onAction={async () => {
-                await removeFromSavedTracks([trackId]);
-                await closeMainWindow();
-                await popToRoot();
-                showHUD(`Removed from your Liked Songs`);
-              }}
-            />
-          )}
-          {!songAlreadyLiked && (
-            <Action
-              icon={Icon.Heart}
-              title="Like"
-              onAction={async () => {
-                await addToSavedTracks([trackId]);
-                await closeMainWindow();
-                await popToRoot();
-                showHUD(`Added to your Liked Songs`);
-              }}
-            />
-          )}
-
-          <Action
-            key={trackId}
-            icon={"icon.png"}
-            title={`Open in Spotify`}
-            onAction={() => (installed ? open(`spotify:track:${trackId}`) : open(external_urls.spotify))}
-          />
-          <Action
-            title="Copy Song URL"
-            icon={Icon.Link}
-            onAction={async () => {
-              const url = `https://open.spotify.com/track/${trackId}`;
-              await Clipboard.copy({
-                html: `<a href=${url}>${trackName} by ${artistName}</a>`,
-                text: url,
-              });
-              showHUD(`Copied URL to clipboard`);
-            }}
-          />
-        </ActionPanel>
+        <NowPlayingActionPanel
+          isPaused={isPaused}
+          trackId={trackId}
+          artistId={artistId}
+          trackName={trackName}
+          artistName={artistName}
+          songAlreadyLiked={songAlreadyLiked}
+          trackUrl={external_urls.spotify}
+        />
       }
     />
   );
 }
 
-export default () => (
-  <SpotifyProvider>
-    <NowPlaying />
-  </SpotifyProvider>
-);
+export default function Command() {
+  return (
+    <View>
+      <NowPlayingCommand />
+    </View>
+  );
+}

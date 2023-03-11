@@ -1,9 +1,9 @@
 import { Action, ActionPanel, Color, Icon, showHUD } from "@raycast/api";
-import { startPlaySimilar } from "../spotify/client";
 import { isSpotifyInstalled } from "../helpers/isSpotifyInstalled";
 import { AlbumsGrid } from "./AlbumsGrid";
 import { useArtistAlbums } from "../hooks/useArtistAlbums";
 import { play } from "../api/play";
+import { startRadio } from "../api/startRadio";
 
 type ArtistActionPanelProps = {
   title: string;
@@ -26,14 +26,18 @@ export function ArtistActionPanel({ title, artist }: ArtistActionPanelProps) {
         }}
       />
       {albums && (
-        <Action.Push icon={Icon.AppWindowGrid3x3} title="Discography" target={<AlbumsGrid albums={albums} />} />
+        <Action.Push
+          icon={Icon.AppWindowGrid3x3}
+          title="Discography"
+          target={<AlbumsGrid albums={albums} />}
+        />
       )}
       <Action
         icon={{ source: "radio.png", tintColor: Color.PrimaryText }}
         title="Start Radio"
         onAction={async () => {
           const artistId = artist.id.replace("spotify:artist:", "");
-          await startPlaySimilar([], [artistId]);
+          await startRadio({ artistIds: [artistId] });
           showHUD(`Playing ${artist.name} Radio`);
         }}
         shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
