@@ -46,7 +46,7 @@ export default function Command() {
         }
         accessories={[
           {
-            text: "local IP address",
+            text: "Local IP address",
           },
         ]}
       />
@@ -68,7 +68,7 @@ export default function Command() {
         }
         accessories={[
           {
-            text: "public IP address",
+            text: "Public IP address",
           },
         ]}
       />
@@ -80,7 +80,7 @@ export default function Command() {
             subtitle="IP Lookup"
             actions={
               <ActionPanel>
-                <Action.Push title="IP Lookup" target={<LookUp />} icon={Icon.Eye} />
+                <Action.Push title="IP Lookup" target={<LookUp ip={ip} />} icon={Icon.Eye} />
               </ActionPanel>
             }
             accessories={[
