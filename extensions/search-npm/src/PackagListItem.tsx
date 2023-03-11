@@ -155,9 +155,16 @@ export const PackageListItem = ({
             ) : null}
             {type === 'github' || (type === 'gitlab' && owner && name) ? (
               <Action.OpenInBrowser
-                url={`https://github.com/${name}/${name}/releases`}
-                title="View changelog"
-                icon={Icon.List}
+                url={`https://codesandbox.io/s/${
+                  type === 'github' ? 'github' : 'gitlab'
+                }/${owner}/${name}`}
+                title="View in CodeSandbox"
+                icon={{
+                  source: {
+                    light: 'codesandbox-bright.png',
+                    dark: 'codesandbox-dark.png',
+                  },
+                }}
               />
             ) : null}
             <Action.OpenInBrowser
