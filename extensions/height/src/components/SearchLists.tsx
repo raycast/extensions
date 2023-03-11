@@ -30,12 +30,13 @@ export default function SearchLists() {
 
   useEffect(() => {
     if (!listsData) return;
+
     filterList(
       listsData.filter(
         (item) =>
-          item.type === listType &&
-          item.archivedAt === null &&
-          item.name?.toLowerCase().includes(searchText?.toLowerCase())
+          item?.type === listType &&
+          item?.archivedAt === null &&
+          item?.name?.toLowerCase().includes(searchText?.toLowerCase())
       ) ?? []
     );
   }, [searchText, listsData, listType]);

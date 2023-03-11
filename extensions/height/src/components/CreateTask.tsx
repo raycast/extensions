@@ -7,8 +7,7 @@ import {
   launchCommand,
   LaunchType,
   showToast,
-  Toast,
-  List,
+  Toast
 } from "@raycast/api";
 import { useForm } from "@raycast/utils";
 import { useState } from "react";

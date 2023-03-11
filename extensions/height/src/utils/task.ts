@@ -39,7 +39,7 @@ export function getPriorityIcon(priority: string | undefined) {
 }
 
 export function getAssignedUsers(assigneesIds: string[], users: UserObject[] | undefined) {
-  return assigneesIds.map((userId) => {
+  return assigneesIds?.map((userId) => {
     const foundUser = users?.find((user) => user.id === userId);
 
     return {

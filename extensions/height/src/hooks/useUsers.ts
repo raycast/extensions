@@ -19,9 +19,9 @@ export default function useUsers({ options }: Props = {}) {
   });
 
   const { users, bots } = useMemo(() => {
-    const users = data?.list?.filter((user) => !user.deleted && !user?.botType);
+    const users = data?.list?.filter((user) => !user?.deleted && !user?.botType);
 
-    const bots = data?.list?.filter((user) => !user.deleted && Boolean(user?.botType));
+    const bots = data?.list?.filter((user) => !user?.deleted && Boolean(user?.botType));
 
     return { users, bots };
   }, [data]);

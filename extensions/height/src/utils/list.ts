@@ -217,5 +217,5 @@ export function getListById(listId: string, lists: ListObject[] | undefined, sma
 
 export function getTintColorFromHue(hue: ListHue | number | null | undefined, colors: ListColor) {
   const parsedHue = typeof hue === "number" ? String(hue) : typeof hue === "string" ? hue : "";
-  return colors.find((color) => color.value === parsedHue)?.tintColor;
+  return colors?.find((color) => color.value === parsedHue)?.tintColor;
 }
