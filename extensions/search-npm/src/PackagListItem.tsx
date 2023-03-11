@@ -22,7 +22,11 @@ const scoreToPercentage = (score: number): string => {
 }
 
 interface Preferences {
-  defaultOpenAction: 'openRepository' | 'openHomepage' | 'openChangelog' | 'npmPackagePage'
+  defaultOpenAction:
+    | 'openRepository'
+    | 'openHomepage'
+    | 'openChangelog'
+    | 'npmPackagePage'
 }
 
 export const PackageListItem = ({
@@ -32,7 +36,7 @@ export const PackageListItem = ({
   const { defaultOpenAction }: Preferences = getPreferenceValues()
   const pkg = result.package
   const { owner, name, type } = parseRepoUrl(pkg.links.repository)
-  const changelogUrl = getChangeLogUrl(type, owner, name);
+  const changelogUrl = getChangeLogUrl(type, owner, name)
 
   const openActions = {
     openRepository: pkg.links?.repository ? (
@@ -50,7 +54,7 @@ export const PackageListItem = ({
           title="Open Homepage"
           icon={Icon.Link}
         />
-    ) : null,
+      ) : null,
     changelogPackagePage: changelogUrl ? (
       <Action.OpenInBrowser
         key="openChangelog"
@@ -149,7 +153,7 @@ export const PackageListItem = ({
                 shortcut={{ modifiers: ['cmd'], key: '.' }}
               />
             ) : null}
-             {type === 'github' || (type === 'gitlab' && owner && name) ? (
+            {type === 'github' || (type === 'gitlab' && owner && name) ? (
               <Action.OpenInBrowser
                 url={`https://github.com/${name}/${name}/releases`}
                 title="View changelog"
