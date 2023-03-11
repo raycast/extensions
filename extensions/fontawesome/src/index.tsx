@@ -1,9 +1,8 @@
 import { useEffect, useState } from 'react';
-import { Action, ActionPanel, Clipboard, environment, getPreferenceValues, Grid, showHUD } from '@raycast/api';
+import { Action, ActionPanel, Clipboard, Color, getPreferenceValues, Grid, showHUD } from '@raycast/api';
 import { useFetch } from '@raycast/utils';
 import fetch from 'node-fetch';
 import { ApiResponse, Icon, IconStyle, Preferences } from './types';
-import useServer from './use-server';
 
 const iconQuery = `
 query {
@@ -48,13 +47,10 @@ function prettyPrintIconStyle(iconStyle: IconStyle) {
 }
 
 export default function Command() {
-  const port = useServer();
   const { iconStyle } = getPreferenceValues<Preferences>();
 
-  const getSvgUrl = (icon: Icon, iconStyle: IconStyle, isDark?: boolean): string => {
-    return `http://localhost:${port}/${getLibraryType(icon, iconStyle)}/${icon.id}.svg?dark=${
-      isDark ? 'true' : 'false'
-    }`;
+  const getSvgUrl = (icon: Icon, iconStyle: IconStyle): string => {
+    return `https://site-assets.fontawesome.com/releases/v6.2.0/svgs/${getLibraryType(icon, iconStyle)}/${icon.id}.svg`;
   };
 
   const { isLoading, data } = useFetch<ApiResponse>('https://api.fontawesome.com', {
@@ -131,7 +127,10 @@ export default function Command() {
         <Grid.Item
           key={icon.id}
           title={icon.label}
-          content={getSvgUrl(icon, 'regular', environment.theme === 'dark')}
+          content={{
+            source: getSvgUrl(icon, 'regular'),
+            tintColor: Color.PrimaryText,
+          }}
           actions={
             <ActionPanel>
               <Action

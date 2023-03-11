@@ -147,19 +147,6 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
             ...getCopyToastAction(copyToastAction, issue),
           };
 
-          if (values.attachments[0]) {
-            try {
-              await createAttachment({
-                issueId: issue.id,
-                url: values.attachments[0],
-              });
-            } catch (error) {
-              toast.style = Toast.Style.Failure;
-              toast.title = "Failed to create attachment";
-              toast.message = "The issue was still created, but the attachment could not be added.";
-            }
-          }
-
           reset({
             title: "",
             description: "",
@@ -167,13 +154,31 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
             labelIds: [],
             dueDate: null,
             parentId: "",
+            attachments: [],
           });
 
-          if (hasMoreThanOneTeam) {
-            return focus(autofocusField);
-          }
+          hasMoreThanOneTeam ? focus(autofocusField) : focus("title");
 
-          return focus("teamId");
+          if (values.attachments.length > 0) {
+            const attachmentWord = values.attachments.length === 1 ? "attachment" : "attachments";
+
+            try {
+              toast.message = `Uploading ${attachmentWord}…`;
+              await Promise.all(
+                values.attachments.map((attachment) =>
+                  createAttachment({
+                    issueId: issue.id,
+                    url: attachment,
+                  })
+                )
+              );
+              toast.message = `Successfully uploaded ${attachmentWord}`;
+            } catch (error) {
+              toast.style = Toast.Style.Failure;
+              toast.title = `Failed uploading ${attachmentWord}`;
+              toast.message = getErrorMessage(error);
+            }
+          }
         }
       } catch (error) {
         toast.style = Toast.Style.Failure;
@@ -398,7 +403,7 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
 
       <Form.Separator />
 
-      <Form.FilePicker title="Attachment" {...itemProps.attachments} allowMultipleSelection={false} />
+      <Form.FilePicker title="Attachment" {...itemProps.attachments} />
     </Form>
   );
 }

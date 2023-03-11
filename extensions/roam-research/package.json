@@ -1,0 +1,67 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "roam-research",
+  "title": "Roam Research",
+  "description": "Roam Research With Raycast",
+  "icon": "favicon.png",
+  "author": "dive2Pro",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Roam Research",
+      "description": "Roam Research",
+      "mode": "view"
+    },
+    {
+      "name": "random",
+      "title": "Random Note",
+      "description": "Roam Research",
+      "mode": "view"
+    },
+    {
+      "name": "search",
+      "title": "Search Note",
+      "description": "Roam Research",
+      "mode": "view"
+    },
+    {
+      "name": "new-graph",
+      "title": "Add Graph",
+      "description": "Roam Research",
+      "mode": "view"
+    },
+    {
+      "name": "daily-note",
+      "title": "Append to Daily Note",
+      "description": "Roam Research",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.44.0",
+    "@raycast/utils": "^1.4.11",
+    "dayjs": "^1.11.6",
+    "querystring": "^0.2.1"
+  },
+  "devDependencies": {
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

@@ -22,9 +22,7 @@ export default function GetTables() {
     <List
       throttle
       isLoading={!standing}
-      searchBarAccessory={
-        <CompetitionDropdown selected={competition} onSelect={setCompetition} />
-      }
+      searchBarAccessory={<CompetitionDropdown selected={competition} onSelect={setCompetition} />}
       isShowingDetail={showStats}
     >
       {standing?.map((team) => {
@@ -35,12 +33,12 @@ export default function GetTables() {
 
         if (team.position < team.previous_position) {
           icon = {
-            source: Icon.ChevronUp,
+            source: Icon.ChevronUpSmall,
             tintColor: Color.Green,
           };
         } else if (team.position > team.previous_position) {
           icon = {
-            source: Icon.ChevronDown,
+            source: Icon.ChevronDownSmall,
             tintColor: Color.Red,
           };
         }
@@ -51,6 +49,7 @@ export default function GetTables() {
               color: Color.PrimaryText,
               value: team.points.toString(),
             },
+            icon,
             tooltip: "Points",
           },
         ];
@@ -73,7 +72,7 @@ export default function GetTables() {
         return (
           <List.Item
             key={team.team.id}
-            icon={icon}
+            icon={team.team.shield.url}
             title={team.position.toString()}
             subtitle={team.team.nickname}
             keywords={[team.team.nickname, team.team.shortname]}
@@ -87,34 +86,13 @@ export default function GetTables() {
                       title="Previous Position"
                       text={team.previous_position.toString()}
                     />
-                    <List.Item.Detail.Metadata.Label
-                      title="Played"
-                      text={team.played.toString()}
-                    />
-                    <List.Item.Detail.Metadata.Label
-                      title="Won"
-                      text={team.won.toString()}
-                    />
-                    <List.Item.Detail.Metadata.Label
-                      title="Drawn"
-                      text={team.drawn.toString()}
-                    />
-                    <List.Item.Detail.Metadata.Label
-                      title="Lost"
-                      text={team.lost.toString()}
-                    />
-                    <List.Item.Detail.Metadata.Label
-                      title="Goals For"
-                      text={team.goals_for.toString()}
-                    />
-                    <List.Item.Detail.Metadata.Label
-                      title="Goals Against"
-                      text={team.goals_against.toString()}
-                    />
-                    <List.Item.Detail.Metadata.Label
-                      title="Goal Difference"
-                      text={team.goal_difference.toString()}
-                    />
+                    <List.Item.Detail.Metadata.Label title="Played" text={team.played.toString()} />
+                    <List.Item.Detail.Metadata.Label title="Won" text={team.won.toString()} />
+                    <List.Item.Detail.Metadata.Label title="Drawn" text={team.drawn.toString()} />
+                    <List.Item.Detail.Metadata.Label title="Lost" text={team.lost.toString()} />
+                    <List.Item.Detail.Metadata.Label title="Goals For" text={team.goals_for.toString()} />
+                    <List.Item.Detail.Metadata.Label title="Goals Against" text={team.goals_against.toString()} />
+                    <List.Item.Detail.Metadata.Label title="Goal Difference" text={team.goal_difference.toString()} />
                   </List.Item.Detail.Metadata>
                 }
               />

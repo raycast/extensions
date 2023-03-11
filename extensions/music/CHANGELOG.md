@@ -1,5 +1,13 @@
 # Apple Music Changelog
 
+## [Update] - 2023-03-01
+
+- Fixed dislike song command
+
+## [Updates] - 2023-02-10
+
+- Fixed typo on "add to playlist"
+
 ## [Updates] - 2023-02-05
 
 - Re-enabled "add to playlist"

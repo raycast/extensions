@@ -26,6 +26,14 @@
       "title": "API Key",
       "description": "Your Plausible API key.",
       "placeholder": "Find at https://plausible.io/settings#api-keys"
+    },
+    {
+      "name": "hostedDomain",
+      "type": "textfield",
+      "required": false,
+      "title": "Self-hosted domain",
+      "description": "Your URL to access Plausible",
+      "placeholder": "https://my-plausible-instance.com"
     }
   ],
   "dependencies": {

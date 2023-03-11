@@ -1,5 +1,9 @@
 # Craftdocs Changelog
 
+## [Update] - 2023-02-11
+
+Added support for setapp version
+
 ## [Update] - 2022-07-12
 
 - Added a new `Daily Notes` command.

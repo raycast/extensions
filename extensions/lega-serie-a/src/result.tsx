@@ -1,7 +1,6 @@
 import {
   Action,
   ActionPanel,
-  getPreferenceValues,
   Icon,
   List,
   showToast,
@@ -10,26 +9,25 @@ import {
 import { useEffect, useState } from "react";
 import { format } from "date-fns";
 import SeasonDropdown, { seasons } from "./components/season_dropdown";
+import MatchdayView from "./components/matchday";
 import { Match, Matchday } from "./types";
 import { getMatchday, getMatches } from "./api";
-
-const { language } = getPreferenceValues();
-
-interface FixturesAndResults {
-  [key: string]: Match[];
-}
+import groupBy from "lodash.groupby";
 
 export default function Fixture() {
-  const [matches, setMatches] = useState<FixturesAndResults>();
+  const [matches, setMatches] = useState<Match[]>();
   const [season, setSeason] = useState<string>(seasons[0]);
+  const [matchdays, setMatchdays] = useState<Matchday[]>([]);
   const [matchday, setMatchday] = useState<Matchday>();
 
   useEffect(() => {
     if (season) {
+      setMatchdays([]);
       setMatchday(undefined);
       setMatches(undefined);
 
       getMatchday(season).then((data) => {
+        setMatchdays(data);
         const currentDay = data.find(
           (d) =>
             d.category_status === "LIVE" || d.category_status === "TO BE PLAYED"
@@ -37,7 +35,7 @@ export default function Fixture() {
         if (currentDay) {
           setMatchday(currentDay);
         } else {
-          setMatchday(data.reverse()[0]);
+          setMatchday(data[data.length - 1]);
         }
       });
     }
@@ -46,96 +44,69 @@ export default function Fixture() {
   useEffect(() => {
     if (matchday) {
       showToast({
-        title: `Getting ${matchday.title}`,
+        title: "Loading...",
         style: Toast.Style.Animated,
       });
-      getMatches(season, matchday.id_category).then((data) => {
-        setMatches({
-          ...matches,
-          [`${matchday.title}`]: data,
-        });
-        showToast({
-          title: `${matchday.title} Added`,
-          style: Toast.Style.Success,
-        });
-      });
+      getMatches(season, { match_day_id: matchday.id_category }).then(
+        (data) => {
+          setMatches(data);
+          showToast({
+            title: "Completed",
+            style: Toast.Style.Success,
+          });
+        }
+      );
     }
   }, [matchday]);
+
+  const categories = groupBy(matches, (m) =>
+    format(new Date(m.date_time), "dd MMM yyyy")
+  );
+
+  const actionPanel = (
+    <ActionPanel.Section title="Matchday">
+      {matchday && Number(matchday.description) > 1 && (
+        <Action
+          title={matchdays[Number(matchday.description) - 2].title}
+          icon={Icon.ArrowLeftCircle}
+          onAction={() => {
+            setMatchday(matchdays[Number(matchday.description) - 2]);
+          }}
+        />
+      )}
+      {matchday && Number(matchday.description) < 38 && (
+        <Action
+          title={matchdays[Number(matchday.description)].title}
+          icon={Icon.ArrowRightCircle}
+          onAction={() => {
+            setMatchday(matchdays[Number(matchday.description)]);
+          }}
+        />
+      )}
+    </ActionPanel.Section>
+  );
 
   return (
     <List
       throttle
       isLoading={!matches}
+      navigationTitle={
+        matchday
+          ? `${matchday.title} | Fixtures & Results`
+          : "Fixtures & Results"
+      }
       searchBarAccessory={
         <SeasonDropdown selected={season} onSelect={setSeason} />
       }
     >
-      {Object.entries(matches || {}).map(([label, results]) => {
+      {Object.entries(categories).map(([date, fixtures]) => {
         return (
-          <List.Section key={label} title={label}>
-            {results.map((match) => {
-              let weather;
-              try {
-                weather = JSON.parse(match.weather);
-              } catch (e) {
-                // ignore
-              }
-
-              const accessories: List.Item.Accessory[] = [
-                { text: match.venue_name },
-              ];
-
-              if (weather) {
-                accessories.push({
-                  icon: {
-                    source: {
-                      light: weather.icon_day.image_day,
-                      dark: weather.icon_day.image_night,
-                    },
-                  },
-                  tooltip: weather.icon_description,
-                });
-              }
-
-              return (
-                <List.Item
-                  key={match.match_id}
-                  title={format(
-                    new Date(match.date_time),
-                    "dd MMM yyyy - HH:mm"
-                  )}
-                  subtitle={
-                    match.match_day_category_status === "PLAYED"
-                      ? `${match.home_team_name} ${match.home_goal} - ${match.away_goal} ${match.away_team_name}`
-                      : `${match.home_team_name} - ${match.away_team_name}`
-                  }
-                  icon={Icon.Clock}
-                  accessories={accessories}
-                  actions={
-                    <ActionPanel>
-                      <Action.OpenInBrowser
-                        url={`https://www.legaseriea.it/${language}${match.slug}`}
-                      />
-                      <Action.OpenInBrowser
-                        title="Buy Ticket"
-                        icon={Icon.Store}
-                        url={match.ticket_url}
-                      />
-                      {/* {matchday > 1 && (
-                        <Action
-                          title="Load Previous Matchday"
-                          icon={Icon.MagnifyingGlass}
-                          onAction={() => {
-                            setMatchday(matchday - 1);
-                          }}
-                        />
-                      )} */}
-                    </ActionPanel>
-                  }
-                />
-              );
-            })}
-          </List.Section>
+          <MatchdayView
+            date={date}
+            fixtures={fixtures}
+            key={date}
+            actionPanel={actionPanel}
+          />
         );
       })}
     </List>

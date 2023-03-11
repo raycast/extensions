@@ -1,9 +1,21 @@
 import { showHUD, Clipboard } from "@raycast/api";
 
-export default async function PickFigure() {
-  const figures = "0123456789";
-  const char = figures[Math.floor(Math.random() * figures.length)];
+interface PickFigureArguments {
+  min?: string;
+  max?: string;
+}
 
-  await Clipboard.copy(char);
-  await showHUD(`Copied ${char} to clipboard`);
+export default async function PickFigure(props: { arguments: PickFigureArguments }) {
+  const { min = "0", max = "9" } = props.arguments;
+  const minNumber = Number(min || "0");
+  const maxNumber = Number(max || "9");
+  if (isNaN(minNumber) || isNaN(maxNumber)) {
+    await showHUD("❌ Invalid arguments");
+    return;
+  }
+
+  const random = Math.floor(Math.random() * (maxNumber - minNumber + 1)) + minNumber;
+  const result = String(random);
+  await Clipboard.copy(result);
+  await showHUD(`Copied ${result} to clipboard`);
 }

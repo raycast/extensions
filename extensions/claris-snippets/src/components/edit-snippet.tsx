@@ -8,54 +8,15 @@ import { useLocations } from "../utils/use-locations";
 import { useState } from "react";
 import { rmSync } from "fs";
 
-type EditSnippetProps = {
+export type EditSnippetProps = {
   snippet: Partial<Snippet> & Required<Pick<Snippet, "snippet">>;
   onSubmit: () => void;
 };
-type FormValues = Omit<Snippet, "tags"> & { tags: string };
+export type FormValues = Omit<Snippet, "tags"> & { tags: string };
 type ItemPropsType<T extends Form.Value> = Partial<Form.ItemProps<T>> & { id: string };
 
 export default function EditSnippet({ snippet, onSubmit }: EditSnippetProps) {
-  const { handleSubmit, itemProps } = useForm<FormValues>({
-    onSubmit: saveSnippet,
-    initialValues: { ...snippet, type: detectType(snippet.snippet), tags: snippet.tags?.join(",") ?? "" },
-    validation: { name: FormValidation.Required },
-  });
-  const [locations] = useLocations();
-  const [snippetText, setSnippetText] = useState(snippet.snippet);
-
-  async function saveSnippet(values: FormValues) {
-    const toast = await showToast({ title: "Saving snippet...", style: Toast.Style.Animated });
-    const id = snippet.id ?? uuidv4();
-    const foundLocation = locations.find((l) => l.id === values.locId);
-
-    const success = await saveSnippetFile(
-      {
-        ...values,
-        tags: values.tags?.split(",") ?? [],
-        snippet: snippetText,
-        id,
-      },
-      foundLocation
-    );
-    if (success) {
-      if (snippet.locId && values.locId !== snippet.locId) {
-        // location changed, need to move the file instead of just updating the snippet
-        console.log(`Snippet Location moved from ${snippet.locId} to ${values.locId}`);
-        const foundOldLocation = locations.find((l) => l.id === snippet.locId);
-        const oldPath = foundOldLocation?.path ?? getDefaultPath();
-        rmSync(`${oldPath}/${id}.json`);
-      }
-
-      toast.title = "Snippet saved!";
-      toast.message = "";
-      toast.style = Toast.Style.Success;
-      onSubmit();
-    } else {
-      toast.message = "Error saving snippet";
-      toast.style = Toast.Style.Failure;
-    }
-  }
+  const { handleSubmit, itemProps, snippetText, setSnippetText, locations } = useFormLogic({ snippet, onSubmit });
   return (
     <Form
       actions={
@@ -108,4 +69,48 @@ export default function EditSnippet({ snippet, onSubmit }: EditSnippetProps) {
       <Form.Description text={snippetText} title="Snippet" />
     </Form>
   );
+}
+
+export function useFormLogic({ onSubmit, snippet }: EditSnippetProps) {
+  const { handleSubmit, itemProps } = useForm<FormValues>({
+    onSubmit: saveSnippet,
+    initialValues: { ...snippet, type: detectType(snippet.snippet), tags: snippet.tags?.join(",") ?? "" },
+    validation: { name: FormValidation.Required },
+  });
+  const [locations] = useLocations();
+  const [snippetText, setSnippetText] = useState(snippet.snippet);
+
+  async function saveSnippet(values: FormValues) {
+    const toast = await showToast({ title: "Saving snippet...", style: Toast.Style.Animated });
+    const id = snippet.id ?? uuidv4();
+    const foundLocation = locations.find((l) => l.id === values.locId);
+
+    const success = await saveSnippetFile(
+      {
+        ...values,
+        tags: values.tags?.split(",") ?? [],
+        snippet: snippetText,
+        id,
+      },
+      foundLocation
+    );
+    if (success) {
+      if (snippet.locId && values.locId !== snippet.locId) {
+        // location changed, need to move the file instead of just updating the snippet
+        console.log(`Snippet Location moved from ${snippet.locId} to ${values.locId}`);
+        const foundOldLocation = locations.find((l) => l.id === snippet.locId);
+        const oldPath = foundOldLocation?.path ?? getDefaultPath();
+        rmSync(`${oldPath}/${id}.json`);
+      }
+
+      toast.title = "Snippet saved!";
+      toast.message = "";
+      toast.style = Toast.Style.Success;
+      onSubmit();
+    } else {
+      toast.message = "Error saving snippet";
+      toast.style = Toast.Style.Failure;
+    }
+  }
+  return { handleSubmit, itemProps, snippetText, setSnippetText, locations };
 }
