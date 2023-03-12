@@ -1,4 +1,15 @@
-import { Action, ActionPanel, confirmAlert, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  confirmAlert,
+  Icon,
+  launchCommand,
+  LaunchType,
+  List,
+  showToast,
+  Toast,
+  useNavigation,
+} from "@raycast/api";
 import { useCallback, useState } from "react";
 import AddProgressForm, { AddProgressFormValue } from "./components/AddProgressForm";
 import ProgressActionPanel from "./components/ProgressActionPanel";
@@ -32,6 +43,8 @@ export default function XInProgress() {
         style: Toast.Style.Success,
         title: `"${currentProgress.title}" is ${currentProgress.showInMenuBar ? "hidden" : "shown"} from the Menu Bar!`,
       });
+
+      await launchCommand({ name: "index", type: LaunchType.UserInitiated });
     },
     [userProgress]
   );
@@ -57,8 +70,10 @@ export default function XInProgress() {
               navigation.pop();
               await showToast({
                 style: Toast.Style.Success,
-                title: `Progress ${values.title} updated!`,
+                title: `${values.title} is updated!`,
               });
+
+              await launchCommand({ name: "index", type: LaunchType.UserInitiated });
             } catch (err) {
               await showToast({
                 style: Toast.Style.Failure,
@@ -72,7 +87,7 @@ export default function XInProgress() {
     [userProgress]
   );
 
-  const onAddProgress = useCallback(() => {
+  const onAddProgress = useCallback(async () => {
     navigation.push(
       <AddProgressForm
         onSubmit={async (values: AddProgressFormValue) => {
@@ -86,7 +101,7 @@ export default function XInProgress() {
             navigation.pop();
             await showToast({
               style: Toast.Style.Success,
-              title: `"${values.title}" added!`,
+              title: `"${values.title}" is added!`,
             });
           } catch (err) {
             await showToast({
@@ -97,6 +112,8 @@ export default function XInProgress() {
         }}
       />
     );
+
+    await launchCommand({ name: "index", type: LaunchType.UserInitiated });
   }, [userProgress]);
 
   const onDeleteProgress = useCallback(
@@ -108,6 +125,8 @@ export default function XInProgress() {
           title: `${title} is deleted!`,
         });
       }
+
+      await launchCommand({ name: "index", type: LaunchType.UserInitiated });
     },
     [userProgress]
   );
