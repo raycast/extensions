@@ -1,4 +1,7 @@
+import crypto from "crypto";
+
 export type Model = {
+  id: string;
   version: string;
   url: string;
   name: string;

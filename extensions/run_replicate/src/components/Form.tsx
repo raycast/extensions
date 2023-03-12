@@ -7,6 +7,7 @@ import open from "open";
 import { runAppleScript } from "run-applescript";
 import { temporaryFile } from "tempy";
 import fs from "fs";
+import crypto from "crypto";
 
 type Values = {
   textfield: string;
@@ -34,6 +35,12 @@ type Prediction = {
   [key: string]: any;
 };
 
+interface ModelResult {
+  models: Model[];
+}
+
+const generateId = (name: string) => `${crypto.randomUUID()}-${name}`;
+
 export const copyImage = async (url: string) => {
   /**
    * Thank you to https://twitter.com/kevinbatdorf for this
@@ -60,6 +67,7 @@ export default function RenderForm(props: { token: string; modelName: string }) 
   const [isLoading, setIsLoading] = useState(false);
   const [options, setOptions] = useState<Option[]>([]);
   const [modelName, setModelName] = useState(props.modelName);
+  const [modelOptions, setModelOptions] = useState<Model[]>(models);
 
   async function handler(values: Values) {
     const model = (await getModelByName(modelName)) as Model;
@@ -119,7 +127,7 @@ export default function RenderForm(props: { token: string; modelName: string }) 
   }
 
   async function getModelByName(name: string) {
-    const model = models.filter((model) => model.name === name);
+    const model = modelOptions.filter((model) => model.name === name);
     return getModel(model[0].owner, model[0].name);
   }
 
@@ -136,12 +144,30 @@ export default function RenderForm(props: { token: string; modelName: string }) 
     return result;
   }
 
+  async function getModelsByCollection(collection: string) {
+    const response = await fetch(`https://api.replicate.com/v1/collections/${collection}`, {
+      method: "GET",
+      headers: {
+        Authorization: `Token ${props.token}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    const result: ModelResult = (await response.json()) as ModelResult;
+
+    // Add unique id to each model
+    result.models.map((model: Model) => {
+      model.id = generateId(model.name);
+    });
+
+    return JSON.stringify(result.models as Model[]);
+  }
+
   const parseModelInputs = (model: Model) => {
     const options = model.latest_version?.openapi_schema.components.schemas.Input.properties;
 
     // convert options to array
-    const optionsArray = Object.keys(options).map((key) => {
-      const newOptions = options;
+    const newOptions = Object.keys(options).map((key) => {
       if ("allOf" in options[key]) {
         // newOptions[key]["enums"] = model.latest_version.openapi_schema.components.schemas;
 
@@ -153,11 +179,13 @@ export default function RenderForm(props: { token: string; modelName: string }) 
           )[0][1] as OpenApiSchema
         ).enum;
 
-        return { name: key, values: newOptions[key], enums: relevantEnums };
+        return { name: key, values: options[key], enums: relevantEnums };
+      } else {
+        return { name: key, values: options[key], enums: [] };
       }
-      return { name: key, values: newOptions[key] };
     });
-    return optionsArray;
+
+    return newOptions;
   };
 
   const handleSubmit = async (values: Values) => {
@@ -244,6 +272,9 @@ export default function RenderForm(props: { token: string; modelName: string }) 
 
   useEffect(() => {
     updateForm(props.modelName);
+    getModelsByCollection("diffusion-models").then((models) => {
+      setModelOptions(JSON.parse(models));
+    });
   }, []);
 
   return (
@@ -255,22 +286,14 @@ export default function RenderForm(props: { token: string; modelName: string }) 
         </ActionPanel>
       }
     >
-      {/* <Form.Description text="Run a model on Replicate" /> */}
-
       <Form.Dropdown id="dropdown" title="Model" defaultValue={props.modelName} onChange={(e) => updateForm(e)}>
-        {models.map((model) => (
-          <Form.Dropdown.Item key={model.name} value={model.name} title={model.name} />
+        {modelOptions.map((model) => (
+          <Form.Dropdown.Item key={model.id} value={model.name} title={model.name} />
         ))}
       </Form.Dropdown>
       <Form.Separator />
-      {options.map((option) => {
-        return option.values?.type == "string" ||
-          option.values?.type == "integer" ||
-          option.values?.type == "number" ? (
-          RenderFormInput({ option: option, modelName: modelName })
-        ) : (
-          <Form.Description key={option.name} text={option.name || "Undefined"} />
-        );
+      {options.map((option, i) => {
+        return RenderFormInput({ option: option, modelName: modelName });
       })}
     </Form>
   );
@@ -289,6 +312,7 @@ function RenderFormInput(props: { option: Option; modelName: string }) {
   const optionDefault = props.option.values?.default;
   const optionDescription = props.option.values?.description;
 
+  // Note, the ID is used to get the value of input field. Don't change the IDs!
   return "allOf" in (optionValues || []) ? (
     <>
       <Form.Description
