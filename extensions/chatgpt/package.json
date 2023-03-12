@@ -67,7 +67,15 @@
       "required": true
     },
     {
-      "name": "isAutoLoad",
+      "name": "useStream",
+      "label": "Enable streaming completions",
+      "description": "Stream the completions of the generated answer",
+      "type": "checkbox",
+      "title": "Stream Completion",
+      "default": true,
+      "required": true
+    },
+    {
       "name": "isAutoLoadText",
       "label": "Enable auto-load selected text",
       "description": "Load selected text from your frontmost application to the question bar automatically",

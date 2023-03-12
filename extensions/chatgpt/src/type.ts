@@ -97,3 +97,20 @@ export interface ChatViewProps extends ChangeModelProp {
   setConversation: Set<Conversation>;
   use: { chats: ChatHook };
 }
+
+export interface CreateChatCompletionDeltaResponse {
+  id: string;
+  object: "chat.completion.chunk";
+  created: number;
+  model: string;
+  choices: [
+    {
+      delta: {
+        role: "user" | "assistant" | "system";
+        content?: string;
+      };
+      index: number;
+      finish_reason: string | null;
+    }
+  ];
+}

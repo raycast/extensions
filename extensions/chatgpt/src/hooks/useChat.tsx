@@ -1,8 +1,8 @@
-import { clearSearchBar, showToast, Toast } from "@raycast/api";
+import { clearSearchBar, getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { useCallback, useMemo, useState } from "react";
 import say from "say";
 import { v4 as uuidv4 } from "uuid";
-import { Chat, ChatHook, Model } from "../type";
+import { Chat, ChatHook, CreateChatCompletionDeltaResponse, Model } from "../type";
 import { chatTransfomer } from "../utils";
 import { useAutoTTS } from "./useAutoTTS";
 import { useChatGPT } from "./useChatGPT";
@@ -13,6 +13,11 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
   const [data, setData] = useState<Chat[]>(props);
   const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
   const [isLoading, setLoading] = useState<boolean>(false);
+  const [useStream] = useState<boolean>(() => {
+    return getPreferenceValues<{
+      useStream: boolean;
+    }>().useStream;
+  });
 
   const history = useHistory();
   const isAutoTTS = useAutoTTS();
@@ -50,34 +55,78 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
           model: model.option,
           temperature: model.temperature,
           messages: [...chatTransfomer(data, model.prompt), { role: "user", content: question }],
+          stream: useStream,
         },
         {
+          responseType: useStream ? "stream" : undefined,
           proxy,
         }
       )
-      .then((res) => {
-        chat = { ...chat, answer: res.data.choices.map((x) => x.message)[0]?.content ?? "" };
-        if (typeof chat.answer === "string") {
-          setLoading(false);
+      .then(async (res) => {
+        if (useStream) {
+          (res.data as any).on("data", (data: CreateChatCompletionDeltaResponse) => {
+            const lines = data
+              .toString()
+              .split("\n")
+              .filter((line: string) => line.trim() !== "");
+            for (const line of lines) {
+              const message = line.replace(/^data: /, "");
+              if (message === "[DONE]") {
+                setLoading(false);
 
-          toast.title = "Got your answer!";
-          toast.style = Toast.Style.Success;
+                toast.title = "Got your answer!";
+                toast.style = Toast.Style.Success;
 
-          if (isAutoTTS) {
-            say.stop();
-            say.speak(chat.answer);
-          }
-
-          setData((prev) => {
-            return prev.map((a) => {
-              if (a.id === chat.id) {
-                return chat;
+                history.add(chat);
+                return;
               }
-              return a;
-            });
-          });
+              try {
+                const response: CreateChatCompletionDeltaResponse = JSON.parse(message);
 
-          history.add(chat);
+                const content = response.choices[0].delta?.content;
+
+                if (content) chat.answer += response.choices[0].delta.content;
+
+                setTimeout(async () => {
+                  setData((prev) => {
+                    return prev.map((a) => {
+                      if (a.id === chat.id) {
+                        return chat;
+                      }
+                      return a;
+                    });
+                  });
+                }, 5);
+              } catch (error) {
+                console.error("Could not JSON parse stream message", message, error);
+              }
+            }
+          });
+        } else {
+          chat = { ...chat, answer: res.data.choices.map((x) => x.message)[0]?.content ?? "" };
+
+          if (typeof chat.answer === "string") {
+            setLoading(false);
+
+            toast.title = "Got your answer!";
+            toast.style = Toast.Style.Success;
+
+            if (isAutoTTS) {
+              say.stop();
+              say.speak(chat.answer);
+            }
+
+            setData((prev) => {
+              return prev.map((a) => {
+                if (a.id === chat.id) {
+                  return chat;
+                }
+                return a;
+              });
+            });
+
+            history.add(chat);
+          }
         }
       })
       .catch((err) => {
