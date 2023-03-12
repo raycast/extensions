@@ -5,15 +5,17 @@ import { getStoredWhatsAppChats } from "./local-storage";
 
 export function useWhatsAppChats() {
   const [chats, setChats] = useCachedState<Array<WhatsAppChat>>("whatsapp-chats", []);
+  const [migrated, setMigrated] = useCachedState<boolean>("migrated", false);
 
   useEffect(() => {
     // Migrate old way of storing chats
-    if (chats.length === 0) {
+    if (!migrated) {
       getStoredWhatsAppChats().then((chats) => {
         setChats(chats);
+        setMigrated(true);
       });
     }
-  }, [chats]);
+  }, [migrated]);
 
   return [chats, setChats] as const;
 }
