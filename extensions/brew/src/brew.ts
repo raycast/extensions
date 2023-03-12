@@ -7,6 +7,7 @@ import { cpus } from "os";
 import { environment } from "@raycast/api";
 import * as utils from "./utils";
 import { preferences } from "./preferences";
+import { sort } from "fast-sort";
 
 const execp = promisify(exec);
 
@@ -237,21 +238,8 @@ export async function brewSearch(
 
   if (searchQuery.length > 0) {
     const target = searchQuery.toLowerCase();
-    formulae = formulae
-      ?.filter((formula) => {
-        return formula.name.toLowerCase().includes(target) || formula.desc?.toLowerCase().includes(target);
-      })
-      .sort((lhs, rhs) => {
-        return brewCompare(lhs.name, rhs.name, target);
-      });
-
-    casks = casks
-      ?.filter((cask) => {
-        return cask.token.toLowerCase().includes(target) || cask.desc?.toLowerCase().includes(target);
-      })
-      .sort((lhs, rhs) => {
-        return brewCompare(lhs.token, rhs.token, target);
-      });
+    formulae = sortedFormulae(relatedFormulae(formulae, target), target);
+    casks = sortedCasks(relatedCasks(casks, target), target);
   }
 
   const formulaeLen = formulae.length;
@@ -458,16 +446,32 @@ function isCask(maybeCask: Cask | Nameable): maybeCask is Cask {
   return (maybeCask as Cask).token != undefined;
 }
 
-function brewCompare(lhs: string, rhs: string, target: string): number {
-  const lhs_matches = lhs.toLowerCase().includes(target);
-  const rhs_matches = rhs.toLowerCase().includes(target);
-  if (lhs_matches && !rhs_matches) {
-    return -1;
-  } else if (rhs_matches && !lhs_matches) {
-    return 1;
-  } else {
-    return lhs.localeCompare(rhs);
-  }
+function relatedFormulae(formulae: Formula[], query: string): Formula[] {
+  return formulae.filter(
+    (formula) => formula.name.toLowerCase().includes(query) || formula.desc?.toLowerCase().includes(query)
+  );
+}
+
+function sortedFormulae(formulae: Formula[], query: string): Formula[] {
+  return sort(formulae).by([
+    { desc: (formula) => formula.name === query },
+    { desc: (formula) => formula.name.includes(query) },
+    { asc: (formula) => formula.name.indexOf(query) },
+    { desc: (formula) => formula.name },
+  ]);
+}
+
+function relatedCasks(casks: Cask[], query: string): Cask[] {
+  return casks.filter((cask) => cask.token.toLowerCase().includes(query) || cask.desc?.toLowerCase().includes(query));
+}
+
+function sortedCasks(casks: Cask[], query: string): Cask[] {
+  return sort(casks).by([
+    { desc: (cask) => cask.token === query },
+    { desc: (cask) => cask.token.includes(query) },
+    { asc: (cask) => cask.token.indexOf(query) },
+    { desc: (cask) => cask.token },
+  ]);
 }
 
 async function execBrew(cmd: string, cancel?: AbortController): Promise<ExecResult> {
