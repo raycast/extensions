@@ -9,7 +9,7 @@ export default function EditSnippetXML({ snippet, onSubmit }: EditSnippetProps) 
         <ActionPanel>
           <Action.SubmitForm<FormValues>
             title="Save Snippet"
-            onSubmit={(values) => handleSubmit({ ...snippet, ...values, snippet: values.snippet })}
+            onSubmit={(values) => handleSubmit({ ...snippet, ...values, customXML: true, snippet: values.snippet })}
             icon={Icon.Check}
           />
           <ActionPanel.Section>

@@ -34,6 +34,7 @@ export const ZSnippet = z.object({
   tags: z.string().array().default([]),
   description: z.string().default(""),
   locId: z.string().default("default"),
+  customXML: z.boolean().default(false),
   dynamicFields: z
     .discriminatedUnion("type", [
       z.object({
