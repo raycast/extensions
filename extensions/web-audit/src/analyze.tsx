@@ -15,15 +15,12 @@ export default function Command(props: LaunchProps<{ arguments: Website }>) {
   const [urlError, setUrlError] = useState<string | undefined>();
   const [website, setWebsite] = useState<string | undefined>();
   const [score, setScore] = useState<number>(0);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
 
   const checkHTags = (data: string) => {
     const h1 = data.match(/<h1/g)?.length || 0;
     const h2 = data.match(/<h2/g)?.length || 0;
     const h3 = data.match(/<h3/g)?.length || 0;
-    const h4 = data.match(/<h4/g)?.length || 0;
-    const h5 = data.match(/<h5/g)?.length || 0;
-    const h6 = data.match(/<h6/g)?.length || 0;
 
     if (h1 <= h2 && h2 <= h3) {
       setScore((score) => score + 1);
@@ -161,7 +158,6 @@ export default function Command(props: LaunchProps<{ arguments: Website }>) {
   };
 
   const submitForm = async (values: Record<string, string>) => {
-    setLoading(true);
     if (values.url) {
       if (validateUrl(values.url) && (await urlReachable(values.url))) {
         await websiteCheck(String(values.url));
@@ -204,6 +200,7 @@ export default function Command(props: LaunchProps<{ arguments: Website }>) {
 
   return (
     <>
+      {loading && <Detail isLoading={true} navigationTitle="Analyzing..." />}
       {result && !loading && (
         <Detail
           navigationTitle={`Analyzed ${website}`}
