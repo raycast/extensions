@@ -1,18 +1,20 @@
 export interface TVCSymbolArg {
-	symbol: string;
+  symbol: string;
 }
 
 export interface TVCIntervalArg {
-	/** Time interval, denoted in minutes */
-	interval: string;
+  /** Time interval, denoted in minutes */
+  interval: string;
 }
 
-export interface TVCTakeChartScreenshotArgs extends TVCSymbolArg, Partial<TVCIntervalArg> {}
-export interface TVCChangeChartIntervalArgs extends TVCIntervalArg {}
+export interface TVCTakeChartScreenshotArgs
+  extends TVCSymbolArg,
+    Partial<TVCIntervalArg> {}
+export type TVCChangeChartIntervalArgs = TVCIntervalArg;
 export interface TVCPreferences {
-	/** Time interval, denoted in minutes */
-	interval?: string;
+  /** Time interval, denoted in minutes */
+  interval?: string;
 
-	/** Chart symbol */
-	symbol?: string;
+  /** Chart symbol */
+  symbol?: string;
 }

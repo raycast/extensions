@@ -1,23 +1,25 @@
-import { LaunchProps } from '@raycast/api';
-import { runAppleScript } from 'run-applescript';
-import { TVCLogger } from './logger';
-import { TVCOpenSymbol } from './tvc-open-symbol';
-import { TVCSymbolArg } from './types';
+import { LaunchProps } from "@raycast/api";
+import { runAppleScript } from "run-applescript";
+import { TVCLogger } from "./logger";
+import { TVCOpenSymbol } from "./tvc-open-symbol";
+import { TVCSymbolArg } from "./types";
 
-const context = 'src/tvc-add-note-to-symbol.tsx'
+const context = "src/tvc-add-note-to-symbol.tsx";
 
 interface TVCAddNoteToSymbolArgs extends TVCSymbolArg {
-	note: string;
+  note: string;
 }
 
-export default async function TVCAddNoteToSymbol(props: LaunchProps<{ arguments: TVCAddNoteToSymbolArgs }>) {
-  TVCLogger.log('TVCAddNoteToSymbol', { ...props, context });
-  TVCLogger.log('Adding note to symbol in TradingView...', { context })
+export default async function TVCAddNoteToSymbol(
+  props: LaunchProps<{ arguments: TVCAddNoteToSymbolArgs }>
+) {
+  TVCLogger.log("TVCAddNoteToSymbol", { ...props, context });
+  TVCLogger.log("Adding note to symbol in TradingView...", { context });
 
-	const { note } = props.arguments;
-	await TVCOpenSymbol(props);
+  const { note } = props.arguments;
+  await TVCOpenSymbol(props);
 
-	await runAppleScript(`
+  await runAppleScript(`
   set noteText to "${note}"
   tell application "System Events"
     keystroke "n" using {option down}
@@ -26,5 +28,5 @@ export default async function TVCAddNoteToSymbol(props: LaunchProps<{ arguments:
     keystroke return
   end tell`);
 
-  TVCLogger.log('Note added to symbol.', { context })
+  TVCLogger.log("Note added to symbol.", { context });
 }
