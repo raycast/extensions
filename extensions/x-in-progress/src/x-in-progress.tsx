@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, confirmAlert, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
 import { useCallback, useState } from "react";
 import AddProgressForm, { AddProgressFormValue } from "./components/AddProgressForm";
 import ProgressActionPanel from "./components/ProgressActionPanel";
@@ -101,11 +101,13 @@ export default function XInProgress() {
 
   const onDeleteProgress = useCallback(
     async (title: string) => {
-      setUserProgress(userProgress.filter((progress) => progress.title !== title));
-      await showToast({
-        style: Toast.Style.Success,
-        title: `Progress ${title} deleted!`,
-      });
+      if (await confirmAlert({ title: "Are you sure?" })) {
+        setUserProgress(userProgress.filter((progress) => progress.title !== title));
+        await showToast({
+          style: Toast.Style.Success,
+          title: `${title} is deleted!`,
+        });
+      }
     },
     [userProgress]
   );
