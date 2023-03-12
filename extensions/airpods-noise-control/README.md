@@ -2,19 +2,10 @@
 
 This is a simple extension that toggles between Noise Cancellation and Transparency on AirPods.
 
-⚠️ **This extension has only been tested on macOS Ventura `13.2`.**
+⚠️ **This extension has only been tested on macOS Ventura `13.2` and `13.3`.**
 
 Unfortunately, due to limitations in AppleScript, some extra configuration is necessary.    
-Please ensure the following conditions are met to configure the extension.
-
-## Sound Menu
-
-The Sound menu must be visible in the menu bar
-when your AirPods are connected.
-
-1. Open System Settings.
-2. Navigate to Control Center > Control Center Modules > Sound.
-3. Set the setting to either **"Show When Active"** or **"Always Show in Menu Bar"**.
+Please ensure all fo the configuration properties are set correctly.
 
 ## Configuration
 
@@ -41,3 +32,13 @@ command with the localized name of the Sound menu.
 4. Open Control Center.
 5. Locate the module corresponding to your volume slider.
 6. Set the "Sound Menu Localization" configuration value to the title of that module.
+
+## Sound Menu
+
+This is **optional**, but **highly recommended**. If you do not enable
+this setting, the extension will have to open Control Center and navigate the
+menu every time you use it, which will be slower and more disruptive.
+
+1. Open System Settings.
+2. Navigate to Control Center > Control Center Modules > Sound.
+3. Set the setting to either **"Show When Active"** or **"Always Show in Menu Bar"**.
