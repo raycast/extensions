@@ -10,7 +10,6 @@ import {
 import LinkActions from "./LinkActions";
 
 export default function Link(link: SchedulingLink) {
-  console.log(link);
   const isActive = link.state == "active";
   const durations = link.durations.join(", ");
 
