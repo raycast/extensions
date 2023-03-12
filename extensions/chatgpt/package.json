@@ -68,6 +68,7 @@
     },
     {
       "name": "isAutoLoad",
+      "name": "isAutoLoadText",
       "label": "Enable auto-load selected text",
       "description": "Load selected text from your frontmost application to the question bar automatically",
       "type": "checkbox",

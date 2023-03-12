@@ -6,15 +6,15 @@ export function useQuestion(props: { initialQuestion: string; disableAutoLoad?: 
   const { initialQuestion, disableAutoLoad } = props;
   const [data, setData] = useState<string>(initialQuestion);
   const [isLoading, setLoading] = useState<boolean>(false);
-  const [isAutoLoad] = useState<boolean>(() => {
+  const [isAutoLoadText] = useState<boolean>(() => {
     return getPreferenceValues<{
-      isAutoLoad: boolean;
-    }>().isAutoLoad;
+      isAutoLoadText: boolean;
+    }>().isAutoLoadText;
   });
 
   useEffect(() => {
     (async () => {
-      if (isAutoLoad && !disableAutoLoad) {
+      if (isAutoLoadText && !disableAutoLoad) {
         setLoading(true);
         try {
           const selectedText = await getSelectedText();
