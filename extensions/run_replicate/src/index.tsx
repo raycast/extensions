@@ -1,7 +1,5 @@
 import { ActionPanel, Action, getPreferenceValues, List, Icon } from "@raycast/api";
-import { models } from "./models";
 import RenderForm from "./components/Form";
-import ListModels from "./components/ListModels";
 
 export default function Command() {
   const { token } = getPreferenceValues();
@@ -17,7 +15,7 @@ export default function Command() {
           title="Run a model"
           actions={
             <ActionPanel>
-              <Action.Push title="Show Details" target={<RenderForm token={token} modelName={models[0].name} />} />
+              <Action.Push title="Show Details" target={<RenderForm token={token} modelName={"stable-diffusion"} />} />
             </ActionPanel>
           }
         />
