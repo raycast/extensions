@@ -1,5 +1,14 @@
 # AI Assistant Changelog
 
+## [Version: 1.4.1] - 2023-03-05
+
+- Change `gpt-3.5-turbo` token limit from 4000 to 4096 according to [OpenAI API docs](https://platform.openai.com/docs/models/gpt-3-5)
+
+## [Version: 1.4.0] - 2023-03-02
+
+- Add support for OpenAI `gpt-3.5-turbo` model
+- Refine code for Dropdown part
+
 ## [Version: 1.3.0] - 2023-02-28
 
 - Add support for OpenAI `code-cushman-001` model

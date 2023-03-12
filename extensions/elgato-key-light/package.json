@@ -5,7 +5,20 @@
   "description": "Control your Elgato Key Lights with ease",
   "icon": "icon.png",
   "author": "thomas",
+    "contributors": [
+    "omarshahine"
+  ],
   "license": "MIT",
+  "preferences": [
+        {
+          "name": "keyLights_count",
+          "title": "Number of Key Lights",
+          "description": "Enter the number of Key Lights on your network that you wish to controll",
+          "type": "textfield",
+          "required": true,
+          "default": "1"
+        }
+      ],
   "commands": [
     {
       "name": "toggle",

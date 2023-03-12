@@ -1,5 +1,10 @@
 # Linear Changelog
 
+## [Add multiple attachments when creating an issue] - 2023-02-28
+
+- Add support for multiple attachments in the `Create Issue` command
+- Fixed a bug where the title form field was not focused if the teams field was hidden.
+
 ## [Add support for roadmaps] - 2023-02-23
 
 - Add roadmaps dropdown in `Search Projects` command

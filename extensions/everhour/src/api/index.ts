@@ -1,13 +1,19 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import fetch from "node-fetch";
 import { preferences } from "@raycast/api";
-import { Project, Task, TaskTimerResp, TaskStopTimerResp, TaskResp, CurrentTimerResp } from "../types";
+import { Project, Task, TaskTimerResp, TaskStopTimerResp, TaskResp, CurrentTimerResp, TimeRecordResp } from "../types";
 
 const API_KEY = preferences.token.value as string;
 
 const headers = {
   "X-Api-Key": API_KEY,
   "Content-Type": "application/json",
+};
+
+const daysAgo = (days: number) => {
+  const d = new Date();
+  d.setDate(d.getDate() - days);
+  return d;
 };
 
 export const getCurrentUser = async () => {
@@ -18,30 +24,34 @@ export const getCurrentUser = async () => {
   return (await response.json()) as any;
 };
 
-export const getTimeRecords = async (userId: string | null) => {
-  const [currentDate] = new Date().toISOString().split("T");
-  const response = await fetch(`https://api.everhour.com/users/${userId}/time?limit=100&from=${currentDate}`, {
+export const getRecentTasks = async (userId = "me"): Promise<Task[]> => {
+  const [currentDate] = daysAgo(7).toISOString().split("T");
+  const response = await fetch(`https://api.everhour.com/users/${userId}/time?limit=1000&from=${currentDate}`, {
     headers,
   });
 
-  const recordsJson = (await response.json()) as any;
+  const timeRecords = (await response.json()) as any;
 
-  return recordsJson
-    .map(({ task, time }: { task: any; time: number }) => {
-      if (task) {
-        return {
-          id: task.id,
-          name: task.name,
-          timeInMin: time ? Math.round(time / 60) : 0,
-          projectId: task.projects[0],
-        };
-      }
-    })
-    .filter(Boolean);
+  if (timeRecords.code || timeRecords.length == 0) {
+    throw new Error("No recent tasks.");
+  }
+
+  const aggregatedTasks = timeRecords.reduce((agg: { [key: string]: Task }, { time, task }: TimeRecordResp) => {
+    const { id, name, projects, time: taskTime } = task;
+    const { total = 0 } = taskTime;
+    if (!agg[id]) {
+      agg[id] = { id, name, projects, time: { total, recent: time } };
+    } else {
+      agg[id].time.recent += time;
+    }
+    return agg;
+  }, {});
+
+  return Object.values(aggregatedTasks);
 };
 
 export const getProjects = async (): Promise<Project[]> => {
-  const response = await fetch("https://api.everhour.com/projects?limit=100&query=", {
+  const response = await fetch("https://api.everhour.com/projects?limit=1000&query=", {
     headers,
   });
   const projects = (await response.json()) as any;
@@ -69,11 +79,7 @@ export const getTasks = async (projectId: string): Promise<Task[]> => {
     throw new Error(tasks.message);
   }
 
-  return tasks.map(({ id, name, time }: TaskResp) => ({
-    id,
-    name,
-    timeInMin: time ? Math.round(time.total / 60) : 0,
-  }));
+  return tasks.map(({ id, name }: TaskResp) => ({ id, name }));
 };
 
 export const getCurrentTimer = async (): Promise<string | null> => {

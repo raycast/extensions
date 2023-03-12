@@ -1,5 +1,5 @@
 import { Clipboard, Toast, showToast } from "@raycast/api";
-import { runAppleScript } from "run-applescript";
+import { runAppleScript } from "./utils";
 
 export default async () => {
   const directory = await Clipboard.readText();
