@@ -2,7 +2,6 @@ import { Action, ActionPanel, Form, Icon, LaunchProps, popToRoot, showToast } fr
 import { useInstance, useMasto } from "./hooks/masto";
 import { useForm } from "@raycast/utils";
 import { mastodon } from "masto";
-import { stripHtml } from "string-strip-html";
 
 interface Draft {
   cw?: string;
@@ -30,14 +29,14 @@ export default function Post({
 
   const { handleSubmit, itemProps, values } = useForm<Draft>({
     async onSubmit({ message, visibility, cw, date }) {
-      if (launchContext?.action === "edit" && launchContext.status)
+      if (launchContext?.action === "edit" && launchContext.status) {
         await masto?.v1.statuses.update(launchContext.status.id, {
           inReplyToId: launchContext.status.inReplyToId,
           status: message,
           visibility,
           spoilerText: cw,
         });
-      else
+      } else {
         await masto?.v1.statuses.create({
           inReplyToId: launchContext?.replyTo?.id,
           status: message,
@@ -45,6 +44,7 @@ export default function Post({
           spoilerText: cw,
           scheduledAt: date?.toISOString(),
         });
+      }
       showToast({ title: date ? "Successfully scheduled." : "Successfully posted!" });
       popToRoot({ clearSearchBar: true });
     },
@@ -63,8 +63,8 @@ export default function Post({
     initialValues: {
       ...draftValues,
       message: launchContext?.replyTo
-        ? `@${launchContext.replyTo.account.acct}`
-        : launchContext?.status?.text ?? undefined,
+        ? `@${launchContext.replyTo.account.acct} `
+        : launchContext?.status?.text ?? draftValues?.message,
       cw: contextStatus?.spoilerText,
       visibility: contextStatus?.visibility,
     },

@@ -6,7 +6,7 @@ import { mastodon } from "masto";
 
 export default function Mentions() {
   const masto = useMasto();
-  const { data, isLoading } = usePromise(
+  const { data, isLoading, revalidate } = usePromise(
     async (masto?: mastodon.Client) => {
       if (!masto) return;
       return await masto?.v1.notifications.list({ types: ["mention"] });
@@ -16,7 +16,7 @@ export default function Mentions() {
 
   return (
     <List isLoading={!masto || isLoading} isShowingDetail>
-      {data?.map(({ status, id }) => status && <StatusItem key={id} status={status} />)}
+      {data?.map(({ status, id }) => status && <StatusItem key={id} status={status} compact revalidate={revalidate} />)}
     </List>
   );
 }

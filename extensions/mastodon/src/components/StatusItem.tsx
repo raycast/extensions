@@ -2,49 +2,35 @@ import { Action, ActionPanel, Icon, LaunchType, List, confirmAlert, launchComman
 import { mastodon } from "masto";
 import { stripHtml } from "string-strip-html";
 import { useMasto, useMe } from "../hooks/masto";
-import dedent from "dedent";
 import FavoriteAction from "./status/FavoriteAction";
 import ReblogAction from "./status/ReblogAction";
 import { getIconForVisibility, getNameForVisibility, isVisiblityPrivate } from "../utils/visiblity";
 import BookmarkAction from "./status/BookmarkAction";
+import { renderToMarkdown } from "../utils/renderStatus";
 
 interface Props {
   status: mastodon.v1.Status;
+  compact?: boolean;
   revalidate?: () => Promise<unknown>;
 }
 
-export default function StatusItem({ status: originalStatus, revalidate }: Props) {
+export default function StatusItem({ status: originalStatus, compact, revalidate }: Props) {
   const masto = useMasto();
-  const { data: me, isLoading } = useMe(masto);
+  const { data: me } = useMe(masto);
   const status = originalStatus.reblog ?? originalStatus;
   const content = status.spoilerText || status.text || stripHtml(status.content).result;
 
   return (
     <List.Item
       title={content}
+      icon={status.account.avatar}
       accessories={[
-        { icon: status.account.avatar, text: status.account.acct },
         isVisiblityPrivate(status.visibility) && { icon: getIconForVisibility(status.visibility) },
+        { text: !compact ? status.account.acct : undefined },
       ].filter(Boolean)}
       detail={
         <List.Item.Detail
-          markdown={dedent`
-            ## ${status.account.displayName} \`${status.account.acct}\`
-
-            ${content}
-
-            ${status.mediaAttachments.map((media) => {
-              switch (media.type) {
-                case "image":
-                case "gifv":
-                  return `![${media.description ?? ""}](${media.previewUrl})`;
-                default:
-                  return "";
-              }
-            })}
-
-            ${status.card ? `[${status.card.title}](${status.card.url})` : ""}
-          `}
+          markdown={renderToMarkdown(status)}
           metadata={
             <List.Item.Detail.Metadata>
               <List.Item.Detail.Metadata.Label title="Reblogs" text={String(status.reblogsCount)} icon={Icon.Repeat} />

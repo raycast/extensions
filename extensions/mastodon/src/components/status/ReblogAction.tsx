@@ -15,7 +15,7 @@ export default function ReblogAction({ reblogged: providedReblogged, id, masto }
     <Action
       title="Reblog"
       icon={reblogged ? Icon.BoltDisabled : Icon.Bolt}
-      shortcut={{ modifiers: ["cmd"], key: "r" }}
+      shortcut={{ modifiers: ["cmd"], key: "t" }}
       onAction={async () => {
         if (reblogged) await masto?.v1.statuses.unreblog(id);
         else await masto?.v1.statuses.reblog(id);
