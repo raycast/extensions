@@ -2,11 +2,7 @@
 
 [Raycast](https://www.raycast.com/) extension for translation based on ChatGPT API.
 
-
-
 https://user-images.githubusercontent.com/743074/224527077-8256a26a-bbeb-482e-86fa-74fe435e59fe.mov
-
-
 
 # Insipired By
 
@@ -32,25 +28,25 @@ After the extension command show up, You can stop(`Ctrl-c`) the server safely.
 
 ## Store
 
-Waitting  Raycast's review (raycast/extensions#))
+Waitting  Raycast's review : https://github.com/raycast/extensions/pull/5306
 
 # Feature
 
-![Intro](metadata/configuration.png)
+![Intro](doc/configuration.png)
 
-Thanks to  [yetone/openai-translator](https://github.com/yetone/openai-translator)：
+Thanks to [yetone/openai-translator](https://github.com/yetone/openai-translator)：
 
 - Translate
 - Polishing
 - Summarize
 
-![Commands](metadata/commands.png)
-![Translate](metadata/translate.png)
+![Commands](doc/commands.png)
+![Translate](doc/translate.png)
 
 
 - What/What is it? (Thanks to [yihong0618/iWhat](https://github.com/yihong0618/iWhat) 的 Prompts)
 
-![What](metadata/what-en.png)
+![What](doc/what-en.png)
 
 From Raycast:
 
@@ -58,54 +54,7 @@ From Raycast:
 - Automatically import clipboard text
 - Bindable global shortcuts
 
-![Actions](metadata/actions.png)
-
-
-其他
-
-OpenAI Translator
-Raycast extension for translation based on ChatGPT API.
-
-https://user-images.githubusercontent.com/743074/224527077-8256a26a-bbeb-482e-86fa-74fe435e59fe.mov
-
-Inspired By
-yetone/openai-translator
-yihong0618/iWhat
-Learn(Copy) a lot from
-yetone/openai-translator (MIT License)
-abielzulio/chatgpt-raycast (MIT License)
-Install
-Manual
-shell
-Copy code
-git clone https://github.com/douo/raycast-openai-translator.git
-cd raycast-openai-translator
-npm install && npm run dev
-After the extension command shows up, you can stop(Ctrl-c) the server safely.
-
-Store
-Waiting for Raycast's review (raycast/extensions#)
-
-Features
-Intro
-
-Thanks to yetone/openai-translator:
-
-Translation
-Polishing
-Summarization
-Commands
-Translate
-
-What/What is it? (Text recognition) (Thanks to yihong0618/iWhat's Prompts)
-What
-
-From Raycast:
-
-Automatically import the currently selected text
-Automatically import clipboard text
-Bindable global shortcuts
-Actions
+![Actions](doc/actions.png)
 
 Others:
 
@@ -118,9 +67,9 @@ Others:
 - [ ] i18n
 - [ ] TTS
 
-![Stream UI](metadata/stream-text.png)
-![Lang Dropdown](metadata/lang-dropdown.png)
-![Empty](metadata/empty.png)
+![Stream UI](doc/stream-text.png)
+![Lang Dropdown](doc/lang-dropdown.png)
+![Empty](doc/empty.png)
 
 # How to configure one-click query
 
@@ -130,6 +79,6 @@ Others:
 
 ![Enable Global Shortcuts](https://user-images.githubusercontent.com/743074/224528361-6231ba8f-d8aa-45d7-9a36-cb3889452254.png)
 
-The example of pure keyboard operation:：
+The example of pure keyboard operation:
 
 https://user-images.githubusercontent.com/743074/224528436-afca923d-b781-4754-86f5-e6b439b3e9e9.mov
