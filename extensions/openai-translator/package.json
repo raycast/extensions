@@ -34,10 +34,78 @@
     },
     {
       "name": "what",
-      "title": "What",
-      "subtitle": "What is it? Based on ChatGPT API",
+      "title": "What Is It?",
+      "subtitle": "Identifier based on ChatGPT API",
       "description": "Identify some text and tell what is it?",
       "mode": "view"
+    },
+    {
+      "name": "selected",
+      "title": "Query Selected",
+      "description": "Query selected text from frontmost application",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "mode",
+          "type": "dropdown",
+          "required": false,
+          "title": "Query Mode",
+          "default": "translate",
+          "description": "Choice a mode to query using this command",
+          "data": [
+            {
+              "value": "translate",
+              "title": "Translate"
+            },
+            {
+              "value": "polishing",
+              "title": "Polishing"
+            },
+            {
+              "value": "summarize",
+              "title": "Summarize"
+            },
+            {
+              "value": "what",
+              "title": "What"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "clipboard",
+      "title": "Query Clipboard",
+      "description": "Query text from clipboard",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "mode",
+          "type": "dropdown",
+          "required": false,
+          "title": "Query Mode",
+          "default": "translate",
+          "description": "Choice a mode to query using this command",
+          "data": [
+            {
+              "value": "translate",
+              "title": "Translate"
+            },
+            {
+              "value": "polishing",
+              "title": "Polishing"
+            },
+            {
+              "value": "summarize",
+              "title": "Summarize"
+            },
+            {
+              "value": "what",
+              "title": "What"
+            }
+          ]
+        }
+      ]
     }
   ],
   "preferences": [
@@ -308,9 +376,9 @@
     {
       "name": "isAutoStart",
       "label": "Enable auto-start translation",
-      "description": "Auto start translation when the search bar is auto-fill from fallback command or selected or clipboard.",
+      "description": "Auto start translation if search bar auto-fill. for selected or clipboard prefer using \"Query XXX\" commands.",
       "type": "checkbox",
-      "default": true,
+      "default": false,
       "required": false
     },
     {

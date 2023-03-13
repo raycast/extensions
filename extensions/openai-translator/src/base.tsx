@@ -7,9 +7,20 @@ import { useHistory } from "./hooks/useHistory";
 import { TranslateMode } from "./providers/openai/translate";
 import capitalize from "capitalize";
 
-export default function getBase(props: LaunchProps, mode: TranslateMode = "translate") {
+export default function getBase(
+  props: LaunchProps,
+  mode: TranslateMode = "translate",
+  forceEnableAutoStart = false,
+  forceEnableAutoLoadSelected = false,
+  forceEnableAutoLoadClipboard = false
+) {
   const [selectedId, setSelectedId] = useState<string>("");
-  const query = useQuery({ initialQuery: props.fallbackText, disableAutoLoad: false });
+  const query = useQuery({
+    initialQuery: props.fallbackText,
+    forceEnableAutoStart,
+    forceEnableAutoLoadSelected,
+    forceEnableAutoLoadClipboard,
+  });
   const history = useHistory();
 
   return (

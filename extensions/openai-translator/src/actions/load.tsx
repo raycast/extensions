@@ -26,28 +26,5 @@ export const getLoadActionSection = (callback: (arg0: string) => void) => (
         }
       }}
     />
-    <Action
-      title="Load Text From ClipBoard"
-      shortcut={{ modifiers: ["cmd", "ctrl"], key: "l" }}
-      icon={Icon.ArrowDown}
-      onAction={async () => {
-        try {
-          const { text } = await Clipboard.read();
-          if (text.trim().length > 1) {
-            callback(text.trim());
-            await showToast({
-              style: Toast.Style.Success,
-              title: "Clipboard text loaded!",
-            });
-          }
-        } catch (error) {
-          await showToast({
-            style: Toast.Style.Failure,
-            title: "Clipboard text couldn't load",
-            message: String(error),
-          });
-        }
-      }}
-    />
   </ActionPanel.Section>
 );
