@@ -69,6 +69,31 @@
       "description": "Your Atlassian API token.",
       "link": "https://confluence.atlassian.com/enterprise/using-personal-access-tokens-1026032365.html",
       "placeholder": "Enter your Atlassian API token."
+    },
+    {
+      "name": "sort",
+      "type": "dropdown",
+      "required": false,
+      "title": "Sort by",
+      "description": "Sort search results by",
+      "data": [
+        {
+          "value": "none",
+          "title": "None"
+        },
+        {
+          "value": "lastmodified",
+          "title": "Last modified"
+        },
+        {
+          "value": "created",
+          "title": "Created"
+        },
+        {
+          "value": "title",
+          "title": "Title"
+        }
+      ]
     }
   ],
   "dependencies": {

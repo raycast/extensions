@@ -13,7 +13,7 @@ import fetch, { AbortError, RequestInit, Response } from "node-fetch";
 import { useCallback, useEffect, useRef, useState } from "react";
 import https = require("https");
 
-const prefs: { instanceType: string; user: string; instance: string; unsafeHttps: boolean; token: string } =
+const prefs: { instanceType: string; user: string; instance: string; unsafeHttps: boolean; token: string, sort: string } =
   getPreferenceValues();
 export const confluenceUrl =
   prefs.instanceType == "cloud" ? `https://${prefs.instance}/wiki` : `https://${prefs.instance}`;
@@ -131,7 +131,9 @@ async function searchConfluence(searchText: string, _type: string, signal: Abort
   if (_type) {
     query = `type=${_type} AND ${query}`;
   }
-  query = query + ` order by lastmodified desc`;
+  if (prefs.sort !== "none") {
+    query = query + ` order by ${prefs.sort} desc`;
+  }
   // url encode query
   query = encodeURIComponent(query);
   const apiUrl = `${confluenceUrl}/rest/api/search?cql=${query}&expand=content.version`;

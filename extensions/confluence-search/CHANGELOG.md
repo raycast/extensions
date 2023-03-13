@@ -1,11 +1,13 @@
 # Confluence Search Changelog
 
- ## [Update] - 2023-02-14
+## [Update] - 2023-02-14
 
 - feat: Add functionality to open Confluence page for edit
- - feat: show last modified date
- 
- ## [Update] - 2023-02-09
+- feat: support sort by title, created, modified
+- feat: show last modified date
+
+## [Update] - 2023-02-09
+
  - feat: add confluence filter by type, support page, blog, attachment.
  - feat: default only search page, [#4340](https://github.com/raycast/extensions/issues/4340)
  - fix: [#4523](https://github.com/raycast/extensions/issues/4523)
