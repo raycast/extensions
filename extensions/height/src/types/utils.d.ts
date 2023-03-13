@@ -1,4 +1,4 @@
-import { useFetch } from "@raycast/utils";
+import { useCachedPromise } from "@raycast/utils";
 
 export type ApiResponse<T> = {
   list: T;
@@ -15,7 +15,9 @@ export type ApiErrorResponse = {
   };
 };
 
-export type UseFetchParams<T> = Parameters<typeof useFetch<T>>[1];
+export type UseCachedPromiseOptions<T> = Parameters<typeof useCachedPromise<T>>[2];
+
+export type UseCachedPromiseMutatePromise<T> = ReturnType<typeof useCachedPromise<T>>["mutate"];
 
 const HueArray = Array.from(Array(360).keys()) as const;
 

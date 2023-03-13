@@ -37,6 +37,7 @@ export default function SearchTasks({ listId, assignedTasks }: Props = {}) {
 
   useEffect(() => {
     if (!tasks) return;
+
     filterTasks(
       tasks.filter(
         (task) =>

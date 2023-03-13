@@ -1,14 +1,14 @@
-import { useFetch } from "@raycast/utils";
+import { useCachedPromise } from "@raycast/utils";
 import { orderBy } from "lodash-es";
 import { useMemo } from "react";
-import { ApiHeaders, ApiUrls } from "../api/helpers";
-import { TaskObject } from "../types/task";
-import { ApiResponse } from "../types/utils";
+import { ApiUrls } from "../api/helpers";
+import { ApiTask } from "../api/task";
+import { UseCachedPromiseOptions } from "../types/utils";
 
 type Props = {
   listId?: string;
   assigneeId?: string;
-  options?: Parameters<typeof useFetch<ApiResponse<TaskObject[]>>>[1];
+  options?: UseCachedPromiseOptions<typeof ApiTask.get>;
 };
 
 export default function useTasks({ listId, assigneeId, options }: Props = {}) {
@@ -30,8 +30,7 @@ export default function useTasks({ listId, assigneeId, options }: Props = {}) {
 
   const endpoint = `${ApiUrls.tasks}?filters=${stringifiedFilters}&order=${order}&include=${include}`;
 
-  const { data, error, isLoading, mutate } = useFetch<ApiResponse<TaskObject[]>>(endpoint, {
-    headers: ApiHeaders,
+  const { data, error, isLoading, mutate } = useCachedPromise(() => ApiTask.get(endpoint), [], {
     ...options,
   });
 

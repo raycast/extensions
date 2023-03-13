@@ -23,19 +23,20 @@ import UpdateList from "./UpdateList";
 export default function SearchLists() {
   const { push } = useNavigation();
   const [searchText, setSearchText] = useState<string>("");
-  const [listType, setListType] = useState("list");
+  const [listType, setListType] = useState("all");
   const [filteredList, filterList] = useState<ListObject[]>([]);
 
   const { listsData, listsIsLoading, listsMutate } = useLists();
 
   useEffect(() => {
     if (!listsData) return;
+
     filterList(
       listsData.filter(
         (item) =>
-          item.type === listType &&
-          item.archivedAt === null &&
-          item.name?.toLowerCase().includes(searchText?.toLowerCase())
+          (listType === "all" || item?.type?.includes(listType)) &&
+          item?.archivedAt === null &&
+          item?.name?.toLowerCase().includes(searchText?.toLowerCase())
       ) ?? []
     );
   }, [searchText, listsData, listType]);

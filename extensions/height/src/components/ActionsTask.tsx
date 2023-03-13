@@ -12,14 +12,13 @@ import {
   Toast,
   useNavigation,
 } from "@raycast/api";
-import { MutatePromise } from "@raycast/utils";
 import { ApiTask } from "../api/task";
 import useFieldTemplates from "../hooks/useFieldTemplates";
 import useLists from "../hooks/useLists";
 import useTasks from "../hooks/useTasks";
 import useUsers from "../hooks/useUsers";
 import { TaskObject } from "../types/task";
-import { ApiResponse } from "../types/utils";
+import { ApiResponse, UseCachedPromiseMutatePromise } from "../types/utils";
 import { getTintColorFromHue, ListColors } from "../utils/list";
 import { getIconByStatusState, getPriorityIcon } from "../utils/task";
 import DetailsTask from "./DetailsTask";
@@ -27,7 +26,7 @@ import UpdateTask from "./UpdateTask";
 
 type Props = {
   task: TaskObject;
-  mutateTask: MutatePromise<ApiResponse<TaskObject[]> | undefined>;
+  mutateTask: UseCachedPromiseMutatePromise<ApiResponse<TaskObject[]>>;
   detailsTaskRevalidate?: () => void;
   detailsPage?: boolean;
 };
