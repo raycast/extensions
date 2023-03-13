@@ -40,7 +40,6 @@ interface DomainArgs {
 }
 
 export default function createAlias(props: LaunchProps<{ arguments: DomainArgs }>) {
-
   const propDomain = props.arguments.domain;
 
   const [state, setState] = useState<State>({
@@ -231,8 +230,13 @@ export default function createAlias(props: LaunchProps<{ arguments: DomainArgs }
         </ActionPanel>
       }
     >
-      <Form.Dropdown id="domain" title="Domain" placeholder="Select a domain" defaultValue={propDomain}
-       error={state.domainError}>
+      <Form.Dropdown
+        id="domain"
+        title="Domain"
+        placeholder="Select a domain"
+        defaultValue={propDomain}
+        error={state.domainError}
+      >
         {state.domains
           ?.filter((domain) => !domain.banned && domain.active)
           .map((domain) => (

@@ -10,8 +10,9 @@ import {
   Detail,
   openExtensionPreferences,
 } from "@raycast/api";
-import fetch from "node-fetch";
+
 import { useState } from "react";
+import fetch from "node-fetch";
 
 interface Preferences {
   api_token: string;
@@ -33,7 +34,6 @@ export default function AddDomain() {
     error: "",
     isRequireUpgrade: false,
   });
-
 
   const [domain, setDomain] = useState("");
   const [isValid, setIsValid] = useState(true);

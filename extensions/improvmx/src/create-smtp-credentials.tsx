@@ -85,8 +85,6 @@ export default function createSMTPCredentials() {
         const response = (await apiResponse.json()) as unknown;
         const domains = response as { domains: Array<Domain> };
 
-        
-
         setState((prevState) => {
           return { ...prevState, domains: domains.domains, error: "" };
         });

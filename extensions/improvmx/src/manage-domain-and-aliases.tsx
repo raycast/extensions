@@ -96,8 +96,9 @@ export default function CreateMaskedEmail() {
           return { ...prevState, domains: domains.domains, error: "", isDomainsLoading: false };
         });
       } catch (error) {
-        state.error = "There was an error with your request. Make sure you are connected to the internet. Please check that your API Token is correct and up-to-date. You can find your API Token in your [Improvmx Dashboard](https://improvmx.com/dashboard). If you need help, please contact support@improvmx.com",
-        state.isDomainsLoading = false;
+        (state.error =
+          "There was an error with your request. Make sure you are connected to the internet. Please check that your API Token is correct and up-to-date. You can find your API Token in your [Improvmx Dashboard](https://improvmx.com/dashboard). If you need help, please contact support@improvmx.com"),
+          (state.isDomainsLoading = false);
         await showToast(Toast.Style.Failure, "ImprovMX Error", "Failed to fetch domains. Please try again later.");
         return;
       }
@@ -252,11 +253,13 @@ export default function CreateMaskedEmail() {
                   <Action
                     title="Create new alias"
                     onAction={async () => {
-                      await launchCommand({ name: "create-alias", type: LaunchType.UserInitiated, 
-                      arguments: {
-                        domain: state.selectedDomain
-                      }
-                    });
+                      await launchCommand({
+                        name: "create-alias",
+                        type: LaunchType.UserInitiated,
+                        arguments: {
+                          domain: state.selectedDomain,
+                        },
+                      });
                     }}
                   />
                 </ActionPanel>
