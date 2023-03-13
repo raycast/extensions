@@ -1,20 +1,25 @@
-import { useFetch } from "@raycast/utils";
+import { useCachedPromise } from "@raycast/utils";
 import { ApiUrls } from "../api/helpers";
-import { getOAuthToken } from "../components/withHeightAuth";
-import { TaskObject } from "../types/task";
+import { ApiTask } from "../api/task";
+import { UseCachedPromiseOptions } from "../types/utils";
+
+type Props = {
+  taskId: string;
+  options?: UseCachedPromiseOptions<typeof ApiTask.getOne>;
+};
 
 const include = JSON.stringify(["Lists", "ParentTasks"]);
 
 const endpoint = (taskId: string) => `${ApiUrls.tasks}/${taskId}?include=${include}`;
 
-export default function useTask(taskId: string, options?: Parameters<typeof useFetch<TaskObject>>[1]) {
-  const { data, error, isLoading, mutate, revalidate } = useFetch<TaskObject>(endpoint(taskId), {
-    headers: {
-      Authorization: `api-key ${getOAuthToken()}`,
-      "Content-Type": "application/json",
-    },
-    ...options,
-  });
+export default function useTask({ taskId, options }: Props) {
+  const { data, error, isLoading, mutate, revalidate } = useCachedPromise(
+    (taskId) => ApiTask.getOne(endpoint(taskId)),
+    [taskId],
+    {
+      ...options,
+    }
+  );
 
   return {
     task: data,

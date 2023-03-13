@@ -1,20 +1,14 @@
-import { useFetch } from "@raycast/utils";
+import { useCachedPromise } from "@raycast/utils";
 import { useMemo } from "react";
-import { ApiUrls } from "../api/helpers";
-import { getOAuthToken } from "../components/withHeightAuth";
-import { UserObject } from "../types/user";
-import { ApiResponse } from "../types/utils";
+import { ApiUser } from "../api/user";
+import { UseCachedPromiseOptions } from "../types/utils";
 
 type Props = {
-  options?: Parameters<typeof useFetch<ApiResponse<UserObject[]>>>[1];
+  options?: UseCachedPromiseOptions<typeof ApiUser.get>;
 };
 
 export default function useUsers({ options }: Props = {}) {
-  const { data, error, isLoading, mutate } = useFetch<ApiResponse<UserObject[]>>(ApiUrls.users, {
-    headers: {
-      Authorization: `api-key ${getOAuthToken()}`,
-      "Content-Type": "application/json",
-    },
+  const { data, error, isLoading, mutate } = useCachedPromise(ApiUser.get, [], {
     ...options,
   });
 
