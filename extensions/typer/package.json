@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "typer",
   "title": "Typer - Custom Text Hotkey",
-  "description": "An extension for the lazy typer.\nAdd any text you type on a regular basis into commands. Give each command an alias and a hotkey, and save time on typing.",
+  "description": "An extension for the lazy typer. Add any text you type on a regular basis into commands. Give each command an alias and a hotkey, and save time on typing.",
   "icon": "command-icon.png",
   "author": "yaronschwimmer",
   "categories": [
