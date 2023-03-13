@@ -1,5 +1,5 @@
 import { Action, ActionPanel, environment, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
-import { MutatePromise, useForm } from "@raycast/utils";
+import { useForm } from "@raycast/utils";
 import { useState } from "react";
 import { ApiTask } from "../api/task";
 import useFieldTemplates from "../hooks/useFieldTemplates";
@@ -7,13 +7,13 @@ import useLists from "../hooks/useLists";
 import useTasks from "../hooks/useTasks";
 import useUsers from "../hooks/useUsers";
 import { TaskObject, UpdateBatchTaskPayload, UpdateTaskFormValues, UpdateTaskPayload } from "../types/task";
-import { ApiResponse } from "../types/utils";
+import { ApiResponse, UseCachedPromiseMutatePromise } from "../types/utils";
 import { getTintColorFromHue, ListColors } from "../utils/list";
 import { getIconByStatusState } from "../utils/task";
 
 type Props = {
   task: TaskObject;
-  mutateTask: MutatePromise<ApiResponse<TaskObject[]> | undefined>;
+  mutateTask: UseCachedPromiseMutatePromise<ApiResponse<TaskObject[]>>;
   detailsTaskRevalidate?: () => void;
   detailsPage?: boolean;
 };

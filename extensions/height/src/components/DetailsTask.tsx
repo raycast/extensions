@@ -1,19 +1,18 @@
 import { Color, Detail, environment, Icon } from "@raycast/api";
-import { MutatePromise } from "@raycast/utils";
 import { differenceInCalendarDays, format } from "date-fns";
 import useFieldTemplates from "../hooks/useFieldTemplates";
 import useLists from "../hooks/useLists";
 import useTask from "../hooks/useTask";
 import useUsers from "../hooks/useUsers";
 import { TaskObject } from "../types/task";
-import { ApiResponse } from "../types/utils";
+import { ApiResponse, UseCachedPromiseMutatePromise } from "../types/utils";
 import { getListById, getTintColorFromHue, ListColors } from "../utils/list";
 import { getAssigneeById, getIconByStatusState, getPriorityIcon, getStatusById } from "../utils/task";
 import ActionsTask from "./ActionsTask";
 
 type Props = {
   taskId: string;
-  mutateTask: MutatePromise<ApiResponse<TaskObject[]> | undefined>;
+  mutateTask: UseCachedPromiseMutatePromise<ApiResponse<TaskObject[]>>;
 };
 
 const markdown = (task: TaskObject | undefined) => `
@@ -25,7 +24,7 @@ ${task?.description}
 export default function DetailsTask({ taskId, mutateTask }: Props) {
   const { theme } = environment;
   const { fieldTemplatesStatuses, fieldTemplatesIsLoading } = useFieldTemplates();
-  const { task, taskIsLoading, taskRevalidate } = useTask(taskId);
+  const { task, taskIsLoading, taskRevalidate } = useTask({ taskId });
   const { lists, smartLists, listsIsLoading } = useLists();
   const { users, usersIsLoading } = useUsers();
 
