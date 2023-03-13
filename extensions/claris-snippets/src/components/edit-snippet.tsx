@@ -79,7 +79,7 @@ export default function EditSnippet({ snippet, onSubmit }: EditSnippetProps) {
       </Form.Dropdown>
       <Form.Separator />
       <Form.Description text="Press ⌘+R to re-capture the snippet from your clipboard" title="Tip" />
-      <Form.Description text={snippetText} title="Snippet" />
+      <Form.Description text={limit(snippetText, 500)} title="Snippet" />
     </Form>
   );
 }
@@ -126,4 +126,12 @@ export function useFormLogic({ onSubmit, snippet }: EditSnippetProps) {
     }
   }
   return { handleSubmit, itemProps, snippetText, setSnippetText, locations };
+}
+
+function limit(string = "", limit = 0) {
+  const limited = string.substring(0, limit);
+  if (limited.length < string.length) {
+    return limited + "…";
+  }
+  return limited;
 }
