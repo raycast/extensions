@@ -188,6 +188,11 @@ function getConfluenceIcon(searchResult: SearchResult) {
   return "confluence-icon-all.svg";
 }
 
+function getConfluenceEditUrl(result: SearchResult) {
+  return `${confluenceUrl}/pages/editpage.action?pageId=${result.id}`;
+}
+
+
 function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
   return (
     <List.Item
@@ -208,6 +213,7 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
         <ActionPanel>
           <ActionPanel.Section>
             <Action.OpenInBrowser title="Open in Browser" url={confluenceUrl + searchResult.url} />
+            <Action.OpenInBrowser title="Edit in Browser" url={getConfluenceEditUrl(searchResult)} />
             <Action.CopyToClipboard
               title="Copy URL"
               content={confluenceUrl + searchResult.url}
