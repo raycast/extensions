@@ -1,15 +1,24 @@
 import { Detail, environment, MenuBarExtra } from "@raycast/api";
+import { useMemo, useState } from "react";
 import { authorize } from "../api/oauth";
 
 let token: string | null = null;
 
 export function withHeightAuth(component: JSX.Element) {
-  (async function () {
-    token = await authorize();
-  })();
+  const [x, forceRerender] = useState(0);
+
+  // we use a `useMemo` instead of `useEffect` to avoid a render
+  useMemo(() => {
+    (async function () {
+      token = await authorize();
+
+      forceRerender(x + 1);
+    })();
+  }, []);
 
   if (!token) {
     if (environment.commandMode === "view") {
+      // Using the <List /> component makes the placeholder buggy
       return <Detail isLoading />;
     } else if (environment.commandMode === "menu-bar") {
       return <MenuBarExtra isLoading />;
