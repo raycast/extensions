@@ -1,15 +1,29 @@
 import fetch from "node-fetch";
 import { getOAuthToken } from "../components/withHeightAuth";
 import { CreateListPayload, ListObject, UpdateListPayload } from "../types/list";
-import { ApiErrorResponse } from "../types/utils";
+import { ApiErrorResponse, ApiResponse } from "../types/utils";
 import { ApiUrls } from "./helpers";
 
 export const ApiList = {
+  async get() {
+    const response = await fetch(ApiUrls.lists, {
+      headers: {
+        Authorization: `Bearer ${getOAuthToken()}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (response.ok) {
+      return (await response.json()) as ApiResponse<ListObject[]>;
+    } else {
+      throw new Error(((await response.json()) as ApiErrorResponse).error.message);
+    }
+  },
   async create(values: CreateListPayload) {
     const response = await fetch(ApiUrls.lists, {
       method: "POST",
       headers: {
-        Authorization: `api-key ${getOAuthToken()}`,
+        Authorization: `Bearer ${getOAuthToken()}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify(values),
@@ -25,7 +39,7 @@ export const ApiList = {
     return fetch(`${ApiUrls.lists}/${listId}`, {
       method: "PATCH",
       headers: {
-        Authorization: `api-key ${getOAuthToken()}`,
+        Authorization: `Bearer ${getOAuthToken()}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify(values),
