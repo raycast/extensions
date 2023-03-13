@@ -2,21 +2,26 @@ import { environment, getPreferenceValues, LocalStorage, showToast, Toast } from
 import { execa, ExecaChildProcess } from "execa";
 import { existsSync } from "fs";
 import { dirname } from "path/posix";
-import { DEFAULT_SERVER_URL } from "./const";
-import { Item, PasswordGeneratorOptions, Preferences, VaultState } from "./types";
-import { getPasswordGeneratingArgs, getServerUrlPreference } from "./utils";
+import { CLINotFoundError } from "~/components/RootErrorBoundary";
+import { LOCAL_STORAGE_KEY, DEFAULT_SERVER_URL } from "~/constants/general";
+import { Preferences, VaultState } from "~/types/general";
+import { PasswordGeneratorOptions } from "~/types/passwords";
+import { Item } from "~/types/vault";
+import { getPasswordGeneratingArgs } from "~/utils/passwords";
+import { getServerUrlPreference } from "~/utils/preferences";
 
 export class Bitwarden {
   private env: Record<string, string>;
+  private initPromise: Promise<void>;
   cliPath: string;
-  initPromise: Promise<void>;
 
   constructor() {
     const { cliPath, clientId, clientSecret, serverCertsPath } = getPreferenceValues<Preferences>();
     const serverUrl = getServerUrlPreference();
     this.cliPath = cliPath || (process.arch == "arm64" ? "/opt/homebrew/bin/bw" : "/usr/local/bin/bw");
+
     if (!existsSync(this.cliPath)) {
-      throw new Error(`Bitwarden CLI not found at ${this.cliPath}`);
+      throw new CLINotFoundError(`Bitwarden CLI not found at ${this.cliPath}`);
     }
 
     this.env = {
@@ -34,39 +39,48 @@ export class Bitwarden {
     this.initPromise = this.checkServerUrl(serverUrl);
   }
 
+  async initialize() {
+    await this.initPromise;
+    return this;
+  }
+
   async checkServerUrl(serverUrl: string): Promise<void> {
-    const cliServer = (await LocalStorage.getItem<string>("cliServer")) || "";
-    if (cliServer === serverUrl) {
-      return;
-    }
+    const cliServer = (await LocalStorage.getItem<string>(LOCAL_STORAGE_KEY.SERVER_URL)) || "";
+    if (cliServer === serverUrl) return;
+
     // Update the server Url
     const toast = await showToast({
       style: Toast.Style.Animated,
       title: "Switching server...",
-      message: "Bitwarden server preference changed.",
+      message: "Bitwarden server preference changed",
     });
     try {
       try {
-        await this.exec(["logout"], { waitForInit: false });
+        await this.exec(["logout"]);
       } catch (error) {
         // It doesn't matter if we weren't logged in.
       }
       // If URL is empty, set it to the default
-      await this.exec(["config", "server", serverUrl || DEFAULT_SERVER_URL], { waitForInit: false });
-      await LocalStorage.setItem("cliServer", serverUrl);
+      await this.exec(["config", "server", serverUrl || DEFAULT_SERVER_URL]);
+      await LocalStorage.setItem(LOCAL_STORAGE_KEY.SERVER_URL, serverUrl);
 
       toast.style = Toast.Style.Success;
-      toast.title = "Success!";
-      toast.message = "Bitwarden server changed.";
+      toast.title = "Success";
+      toast.message = "Bitwarden server changed";
     } catch (error) {
       toast.style = Toast.Style.Failure;
-      toast.title = "Unable to switch server.";
+      toast.title = "Failed to switch server";
       if (error instanceof Error) {
         toast.message = error.message;
       } else {
-        toast.message = "Unknown error occurred.";
+        toast.message = "Unknown error occurred";
       }
     }
+  }
+
+  private async exec(args: string[], options: { abortController?: AbortController } = {}): Promise<ExecaChildProcess> {
+    const { abortController } = options;
+    return execa(this.cliPath, args, { env: this.env, input: "", signal: abortController?.signal });
   }
 
   async sync(sessionToken: string): Promise<void> {
@@ -83,14 +97,14 @@ export class Bitwarden {
 
   async listItems(sessionToken: string): Promise<Item[]> {
     const { stdout } = await this.exec(["list", "items", "--session", sessionToken]);
-    const items = JSON.parse(stdout);
+    const items = JSON.parse<Item[]>(stdout);
     // Filter out items without a name property (they are not displayed in the bitwarden app)
     return items.filter((item: Item) => !!item.name);
   }
 
   async listFolders(sessionToken: string): Promise<Item[]> {
     const { stdout } = await this.exec(["list", "folders", "--session", sessionToken]);
-    const folders = JSON.parse(stdout);
+    const folders = JSON.parse<Item[]>(stdout);
     return folders;
   }
 
@@ -118,14 +132,5 @@ export class Bitwarden {
     const args = options ? getPasswordGeneratingArgs(options) : [];
     const { stdout } = await this.exec(["generate", ...args], { abortController });
     return stdout;
-  }
-
-  private async exec(
-    args: string[],
-    options: { abortController?: AbortController; waitForInit?: boolean } = {}
-  ): Promise<ExecaChildProcess> {
-    const { abortController, waitForInit = true } = options;
-    if (waitForInit) await this.initPromise;
-    return execa(this.cliPath, args, { env: this.env, input: "", signal: abortController?.signal });
   }
 }

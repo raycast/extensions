@@ -1,5 +1,5 @@
-import { runAppleScript } from "./utils";
 import { Clipboard } from "@raycast/api";
+import { runAppleScript } from "~/utils/commands";
 
 const APPLESCRIPT_COPY_PASSWORD = `
 use AppleScript version "2.4"

@@ -1,11 +1,6 @@
-import { PasswordOptionField, PasswordOptions, PassphraseOptions, PasswordGeneratorOptions } from "./types";
+import { PassphraseOptions, PasswordGeneratorOptions, PasswordOptionField, PasswordOptions } from "~/types/passwords";
 
-export const SESSION_KEY = "sessionToken";
-export const REPROMPT_HASH_KEY = "sessionRepromptHash";
-export const REPROMPT_PASSWORD_ENTERED_KEY = "sessionRepromptAfter";
 export const REPROMPT_HASH_SALT = "foobarbazzybaz";
-
-export const DEFAULT_SERVER_URL = "https://bitwarden.com";
 
 export const DEFAULT_PASSWORD_OPTIONS: PasswordGeneratorOptions = {
   lowercase: true,
@@ -18,11 +13,6 @@ export const DEFAULT_PASSWORD_OPTIONS: PasswordGeneratorOptions = {
   separator: "-",
   capitalize: false,
   includeNumber: false,
-};
-
-export const LOCAL_STORAGE_KEY = {
-  PASSWORD_OPTIONS: "bw-generate-password-options",
-  PASSWORD_ONE_TIME_WARNING: "bw-generate-password-warning-accepted",
 };
 
 export const PASSWORD_OPTIONS_MAP: {
