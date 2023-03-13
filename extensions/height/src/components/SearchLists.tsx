@@ -23,7 +23,7 @@ import UpdateList from "./UpdateList";
 export default function SearchLists() {
   const { push } = useNavigation();
   const [searchText, setSearchText] = useState<string>("");
-  const [listType, setListType] = useState("list");
+  const [listType, setListType] = useState("all");
   const [filteredList, filterList] = useState<ListObject[]>([]);
 
   const { listsData, listsIsLoading, listsMutate } = useLists();
@@ -34,7 +34,7 @@ export default function SearchLists() {
     filterList(
       listsData.filter(
         (item) =>
-          item?.type === listType &&
+          (listType === "all" || item?.type?.includes(listType)) &&
           item?.archivedAt === null &&
           item?.name?.toLowerCase().includes(searchText?.toLowerCase())
       ) ?? []
