@@ -1,5 +1,5 @@
 import { Action, Clipboard, Icon } from "@raycast/api";
-import { Item } from "~/types/search";
+import { Item } from "~/types/vault";
 import useReprompt from "~/utils/hooks/useReprompt";
 
 export type PastePasswordActionProps = {

@@ -1,10 +1,15 @@
-import { Action, ActionPanel, Icon, Image, List } from "@raycast/api";
+import { Action, ActionPanel, Clipboard, Icon, Image, List, showToast, Toast } from "@raycast/api";
+import { useEffect, useState } from "react";
+import got from "got";
+
 import { ActionsProps, Cast, CastDetailsProps } from "./types";
 import { useCastSearch, useFarcasterInstalled, linkify } from "./utils";
-import { useState } from "react";
+import { useDebounce } from "./hooks/useDebounce";
 
 export default function Command() {
-  const [searchText, setSearchText] = useState<string>();
+  const [_searchText, setSearchText] = useState<string>();
+  const searchText = useDebounce(_searchText, 500);
+
   const { data, isLoading } = useCastSearch(searchText || "");
   const hasFarcaster: boolean = useFarcasterInstalled();
 
@@ -43,12 +48,44 @@ export default function Command() {
 function Actions({ cast, farcasterInstalled }: ActionsProps) {
   return (
     <ActionPanel>
-      {farcasterInstalled && (
-        <Action.OpenInBrowser title="Open in Farcaster" url={`farcaster://casts/${cast.merkleRoot}`} />
-      )}
+      {farcasterInstalled && <Action.OpenInBrowser title="Open in Farcaster" url={cast.uri} />}
       <Action.OpenInBrowser
         title="Open in Searchcaster"
         url={`https://searchcaster.xyz/search?merkleRoot=${cast.merkleRoot}`}
+      />
+      <Action
+        title="Copy Shareable Link"
+        icon={{ source: Icon.Link }}
+        onAction={async () => {
+          showToast({
+            style: Toast.Style.Animated,
+            title: "Creating Sharecaster URL",
+            message: "Please wait...",
+          });
+
+          try {
+            const { data }: { data: string } = await got
+              .post("https://sharecaster.xyz/api/share", {
+                json: { sharecast: cast.uri },
+              })
+              .json();
+
+            const sharecasterUrl = `https://sharecaster.xyz/${data}`;
+            await Clipboard.copy(sharecasterUrl);
+
+            showToast({
+              style: Toast.Style.Success,
+              title: "Success",
+              message: "Copied to clipboard",
+            });
+          } catch (err) {
+            showToast({
+              style: Toast.Style.Failure,
+              title: "Error",
+              message: "Failed to create Sharecaster URL",
+            });
+          }
+        }}
       />
     </ActionPanel>
   );

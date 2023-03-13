@@ -1,4 +1,4 @@
-import { List, showToast, ToastStyle } from "@raycast/api";
+import { List, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { returnTodos } from "./utils/fetchTodos";
 import { TrelloFetchResponse } from "./trelloResponse.model";
@@ -17,7 +17,7 @@ export default function PackageList() {
           setLoading(false);
         });
       } catch (error) {
-        showToast(ToastStyle.Failure, "Failed loading todos");
+        showToast(Toast.Style.Failure, "Failed loading todos");
       }
     }
 

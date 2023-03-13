@@ -78,7 +78,7 @@ export default function IssueActions({
     try {
       await showToast({ style: Toast.Style.Animated, title: animatedTitle });
 
-      const asyncUpdate = linearClient.issueUpdate(issue.id, payload);
+      const asyncUpdate = linearClient.updateIssue(issue.id, payload);
 
       await Promise.all([
         asyncUpdate,
@@ -151,7 +151,7 @@ export default function IssueActions({
       try {
         await showToast({ style: Toast.Style.Animated, title: "Deleting issue" });
 
-        const asyncUpdate = linearClient.issueDelete(issue.id);
+        const asyncUpdate = linearClient.deleteIssue(issue.id);
 
         if (mutateDetail) {
           pop();
@@ -310,6 +310,35 @@ export default function IssueActions({
     });
   }
 
+  async function setReminder(reminderDate: Date | null) {
+    if (!reminderDate) {
+      await showToast({ style: Toast.Style.Failure, title: "Failed setting reminder" });
+      return;
+    }
+
+    try {
+      await showToast({ style: Toast.Style.Animated, title: "Setting reminder" });
+
+      await linearClient.issueReminder(issue.id, reminderDate);
+
+      if (mutateDetail) {
+        pop();
+      }
+
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Reminder set",
+        message: `${issue.identifier} reminder set to ${format(reminderDate, "MM/dd/yyyy")}`,
+      });
+    } catch (error) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to set reminder",
+        message: getErrorMessage(error),
+      });
+    }
+  }
+
   function refresh() {
     if (mutateList) {
       mutateList();
@@ -389,7 +418,7 @@ export default function IssueActions({
 
         {me ? (
           <Action
-            title={isAssignedToMe ? "Un-assign from Me" : "Assign to Me"}
+            title={isAssignedToMe ? "Un-Assign From Me" : "Assign to Me"}
             icon={getUserIcon(me)}
             shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
             onAction={() => setToMe(isAssignedToMe ? null : me)}
@@ -419,6 +448,12 @@ export default function IssueActions({
           title="Set Due Date"
           shortcut={{ modifiers: ["opt", "shift"], key: "d" }}
           onChange={setDueDate}
+        />
+
+        <Action.PickDate
+          title="Set Reminder"
+          shortcut={{ modifiers: ["cmd", "shift"], key: "h" }}
+          onChange={setReminder}
         />
 
         <LabelSubmenu issue={issue} updateIssue={updateIssue} />

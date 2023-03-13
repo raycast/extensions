@@ -46,9 +46,11 @@ const configuration = new Configuration({
 const openai = new OpenAIApi(configuration);
 
 export default function Command() {
-  const maxTokensDavinci = 4096;
+  const maxTokensGPT35Turbo = 4096;
+  const maxTokensDavinci = 4000;
   const maxTokensAdaBabbageCurie = 2048;
   const maxTokensCodex = 8000;
+  const maxTokensCushman = 2048;
   const [textPrompt, setTextPrompt] = useState("");
   const [answer, setAnswer] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -63,12 +65,14 @@ export default function Command() {
   const [maxModelTokens, setMaxModelTokens] = useState<number>(maxTokensDavinci);
 
   const modelLimit = {} as modelTokenLimit;
+  modelLimit["gpt-3.5-turbo"] = maxTokensGPT35Turbo;
   modelLimit["text-davinci-003"] = maxTokensDavinci;
   modelLimit["text-davinci-002"] = maxTokensDavinci;
   modelLimit["text-curie-001"] = maxTokensAdaBabbageCurie;
   modelLimit["text-babbage-001"] = maxTokensAdaBabbageCurie;
   modelLimit["text-ada-001"] = maxTokensAdaBabbageCurie;
   modelLimit["code-davinci-002"] = maxTokensCodex;
+  modelLimit["code-cushman-001"] = maxTokensCushman;
 
   function dropPromptErrorIfNeeded() {
     if (promptError && promptError.length > 0) {
@@ -117,17 +121,37 @@ export default function Command() {
     await showToast({ title: "Prompt Sent" });
     setIsLoading(true);
     try {
-      const completion: gptCompletion = await openai.createCompletion({
-        model: formRequest.model,
-        prompt: formRequest.prompt,
-        temperature: Number(formRequest.temperature),
-        max_tokens: Number(formRequest.maxTokens),
-        top_p: Number(formRequest.topP),
-        frequency_penalty: Number(formRequest.frequencyPenalty),
-        presence_penalty: Number(formRequest.presencePenalty),
-      });
+      const completion: gptCompletion =
+        formRequest.model === "gpt-3.5-turbo"
+          ? await openai.createChatCompletion({
+              model: formRequest.model,
+              messages: [
+                {
+                  role: "user",
+                  content: formRequest.prompt,
+                  name: "You",
+                },
+              ],
+              temperature: Number(formRequest.temperature),
+              max_tokens: Number(formRequest.maxTokens),
+              top_p: Number(formRequest.topP),
+              frequency_penalty: Number(formRequest.frequencyPenalty),
+              presence_penalty: Number(formRequest.presencePenalty),
+            })
+          : await openai.createCompletion({
+              model: formRequest.model,
+              prompt: formRequest.prompt,
+              temperature: Number(formRequest.temperature),
+              max_tokens: Number(formRequest.maxTokens),
+              top_p: Number(formRequest.topP),
+              frequency_penalty: Number(formRequest.frequencyPenalty),
+              presence_penalty: Number(formRequest.presencePenalty),
+            });
       await showToast({ title: "Answer Received" });
-      const response = completion.data.choices[0].text;
+      const response =
+        formRequest.model === "gpt-3.5-turbo"
+          ? completion.data.choices[0].message.content
+          : completion.data.choices[0].text;
       setTextPrompt(textPrompt + response);
       setAnswer(response);
       setNumTokensPrompt(completion.data.usage.total_tokens);
@@ -225,12 +249,9 @@ export default function Command() {
         info={infoMessages.model}
         onChange={(newValue: string) => setMaxModelTokens(modelLimit[newValue])}
       >
-        <Form.Dropdown.Item value="text-davinci-003" title="text-davinci-003" />
-        <Form.Dropdown.Item value="text-davinci-002" title="text-davinci-002" />
-        <Form.Dropdown.Item value="text-curie-001" title="text-curie-001" />
-        <Form.Dropdown.Item value="text-babbage-001" title="text-babbage-001" />
-        <Form.Dropdown.Item value="text-ada-001" title="text-ada-001" />
-        <Form.Dropdown.Item value="code-davinci-002" title="code-davinci-002" />
+        {Object.keys(modelLimit).map((key) => {
+          return <Form.Dropdown.Item key={key} value={key} title={key} />;
+        })}
       </Form.Dropdown>
       <Form.TextField
         id="temperature"

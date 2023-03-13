@@ -14,13 +14,13 @@ const GeneratePasswordActionPanel = (props: GeneratePasswordActionPanelProps) =>
       {!!password && (
         <>
           <Action.CopyToClipboard
-            title="Copy password"
+            title="Copy Password"
             icon={Icon.Clipboard}
             content={password}
             shortcut={{ key: "enter", modifiers: ["cmd"] }}
           />
           <Action.Paste
-            title="Paste password to active app"
+            title="Paste Password to Active App"
             icon={Icon.Text}
             content={password}
             shortcut={{ key: "enter", modifiers: ["cmd", "shift"] }}
@@ -28,7 +28,7 @@ const GeneratePasswordActionPanel = (props: GeneratePasswordActionPanelProps) =>
         </>
       )}
       <Action
-        title="Regenerate password"
+        title="Regenerate Password"
         icon={Icon.ArrowClockwise}
         onAction={regeneratePassword}
         shortcut={{ key: "backspace", modifiers: ["cmd"] }}

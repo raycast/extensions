@@ -1,5 +1,8 @@
+import { homedir } from "os";
 import { URL } from "url";
 import { HistoryItem } from "src/types";
+import { join } from "path";
+import { getPreferenceValues } from "@raycast/api";
 
 export function extractDomainName(urlString: string) {
   try {
@@ -31,4 +34,8 @@ export function groupHistoryByDay(groups: Map<string, HistoryItem[]>, entry: His
   group.push(entry);
   groups.set(date, group);
   return groups;
+}
+
+export function getOrionBasePath() {
+  return join(homedir(), "/Library/Application Support", getPreferenceValues()["orion-rc"] ? "Orion RC" : "Orion");
 }

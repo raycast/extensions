@@ -1,5 +1,9 @@
 # Visual Studio Code - Project Manager Changelog
 
+## [Fixes] - 2023-03-11
+
+- Fixed terminal overrides the default environment variables.
+
 ## [Fixes] - 2022-11-25
 
 - This commit filters out duplicate entries

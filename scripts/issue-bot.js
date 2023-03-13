@@ -93,7 +93,7 @@ module.exports = async ({ github, context, core }) => {
     issue_number: context.payload.issue.number,
     owner: context.repo.owner,
     repo: context.repo.repo,
-    labels: [`extension: ${ext}`],
+    labels: [limitLabelLength(`extension: ${ext}`)],
   });
 
   try {
@@ -184,4 +184,8 @@ async function comment({ github, context, comment }) {
       body: comment,
     });
   }
+}
+
+function limitLabelLength(label) {
+  return label.length > 50 ? label.substring(0, 49) + "…" : label;
 }

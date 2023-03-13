@@ -7,7 +7,7 @@ export async function searchWords(wordToSearch: string, type: SearchType): Promi
   const searchParams = new URLSearchParams({
     language: "en",
     md: "d",
-    max: "25",
+    max: "50",
     [type]: wordToSearch,
   });
 

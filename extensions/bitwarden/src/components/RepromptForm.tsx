@@ -1,7 +1,8 @@
 import { Action, ActionPanel, Form, showToast, Toast } from "@raycast/api";
-import { useSession } from "~/context/session";
+import { Session } from "~/context/session";
 
 export type RepromptFormProps = {
+  session: Session;
   description: string;
   onConfirm: () => void;
 };
@@ -15,8 +16,7 @@ export type RepromptFormProps = {
  * @param props.onConfirm Callback if confirmation is successful.
  */
 const RepromptForm = (props: RepromptFormProps) => {
-  const { description, onConfirm } = props;
-  const session = useSession();
+  const { session, description, onConfirm } = props;
 
   async function onSubmit(values: { password: string }) {
     if (!(await session.confirmMasterPassword(values.password))) {

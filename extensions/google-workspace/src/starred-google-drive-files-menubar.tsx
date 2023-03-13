@@ -20,35 +20,36 @@ function StarredFiles() {
     <MenuBarExtra icon="google-drive.png" tooltip="Your starred Google Drive files" isLoading={isLoading}>
       {hasFiles ? (
         <>
-          <MenuBarExtra.Item
-            title="Open Starred Files in Google Drive"
-            icon="google-drive.png"
-            onAction={() => open("https://drive.google.com/drive/starred", "com.google.Chrome")}
-            shortcut={{ modifiers: ["cmd"], key: "o" }}
-          />
-
-          <MenuBarExtra.Separator />
-
-          {data.files.map((file) => (
+          <MenuBarExtra.Section>
             <MenuBarExtra.Item
-              key={file.id}
-              title={file.name}
-              icon={getFileIconLink(file.mimeType)}
-              onAction={() => {
-                console.log(file);
-                open(file.webViewLink);
-              }}
+              title="Open Starred Files in Google Drive"
+              icon="google-drive.png"
+              onAction={() => open("https://drive.google.com/drive/starred", "com.google.Chrome")}
+              shortcut={{ modifiers: ["cmd"], key: "o" }}
             />
-          ))}
+          </MenuBarExtra.Section>
+
+          <MenuBarExtra.Section>
+            {data.files.map((file) => (
+              <MenuBarExtra.Item
+                key={file.id}
+                title={file.name}
+                icon={getFileIconLink(file.mimeType)}
+                onAction={() => {
+                  console.log(file);
+                  open(file.webViewLink);
+                }}
+              />
+            ))}
+          </MenuBarExtra.Section>
 
           {data.files.length > MAX_ITEMS ? (
-            <>
-              <MenuBarExtra.Separator />
+            <MenuBarExtra.Section>
               <MenuBarExtra.Item
                 icon={Icon.List}
                 title={`You have more than ${MAX_ITEMS} starred files. Use the Raycast command to see them all.`}
               />
-            </>
+            </MenuBarExtra.Section>
           ) : null}
         </>
       ) : (

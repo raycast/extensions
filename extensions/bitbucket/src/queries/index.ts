@@ -17,32 +17,6 @@ const defaults = {
 
 const bitbucket = new Bitbucket(clientOptions);
 
-export async function getRepositories(key: string, page = 1, repositories = []): Promise<Schema.Repository[]> {
-  const { data } = await bitbucket.repositories.list({
-    ...defaults,
-    pagelen: 100,
-    sort: "-updated_on",
-    page: page.toString(),
-    fields: [
-      "values.name",
-      "values.uuid",
-      "values.slug",
-      "values.full_name",
-      "values.links.avatar.href",
-      "values.description",
-      "next",
-    ].join(","),
-  });
-
-  repositories = repositories.concat(data.values as []);
-
-  if (data.next) {
-    return getRepositories(key, page + 1, repositories);
-  }
-
-  return repositories;
-}
-
 export async function getRepositoriesLazy(path: string) {
   const params = new URLSearchParams(path.split("?")[1]);
   const page = params.get("page") ?? "1";
@@ -61,6 +35,7 @@ export async function getRepositoriesLazy(path: string) {
         "values.slug",
         "values.full_name",
         "values.links.avatar.href",
+        "values.links.clone",
         "values.description",
         "next",
       ].join(","),

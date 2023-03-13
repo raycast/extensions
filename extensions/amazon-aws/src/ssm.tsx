@@ -13,7 +13,8 @@ import { resourceToConsoleLink } from "./util";
 
 export default function SSM() {
   const [search, setSearch] = useState<string>("");
-  const { data: parameters, error, isLoading, revalidate } = useCachedPromise(fetchParameters, [search]);
+  const [threshold, setThreshold] = useState<number>(4);
+  const { data: parameters, error, isLoading, revalidate } = useCachedPromise(fetchParameters, [search, threshold]);
 
   return (
     <List
@@ -22,12 +23,17 @@ export default function SSM() {
       searchBarAccessory={<AWSProfileDropdown onProfileSelected={revalidate} />}
       onSearchTextChange={setSearch}
       throttle
+      actions={
+        <ActionPanel>
+          <Action title="Show All" onAction={() => setThreshold(0)} />
+        </ActionPanel>
+      }
     >
-      {search.length < 4 ? (
+      {search.length < threshold ? (
         <List.EmptyView
           title="Missing Search Query"
           icon={Icon.MagnifyingGlass}
-          description="The search will begin when at least 4 characters are provided."
+          description={`The search will begin when at least ${threshold} characters are provided.`}
         />
       ) : error ? (
         <List.EmptyView title={error.name} description={error.message} icon={Icon.Warning} />
@@ -65,23 +71,24 @@ function Parameter({ parameter }: { parameter: ParameterMetadata }) {
 
 async function fetchParameters(
   search: string,
+  threshold: number,
   token?: string,
   accParameters?: ParameterMetadata[]
 ): Promise<ParameterMetadata[]> {
-  if (search.length < 4) return [];
+  if (search.length < threshold) return [];
   if (!process.env.AWS_PROFILE) return [];
 
   const { NextToken, Parameters } = await new SSMClient({}).send(
     new DescribeParametersCommand({
       NextToken: token,
-      ParameterFilters: [{ Key: "Name", Option: "Contains", Values: [search] }],
+      ParameterFilters: search ? [{ Key: "Name", Option: "Contains", Values: [search] }] : undefined,
     })
   );
 
   const combinedLogGroups = [...(accParameters || []), ...(Parameters || [])];
 
   if (NextToken) {
-    return fetchParameters(search, NextToken, combinedLogGroups);
+    return fetchParameters(search, threshold, NextToken, combinedLogGroups);
   }
 
   return combinedLogGroups;

@@ -23,7 +23,7 @@
   ],
   "commands": [
     {
-      "name": "searchVault",
+      "name": "search",
       "title": "Search Vault",
       "subtitle": "Bitwarden",
       "description": "Search all items in the authenticated Bitwarden vault.",
@@ -50,14 +50,14 @@
       ]
     },
     {
-      "name": "generatePassword",
+      "name": "generate-password",
       "title": "Generate Password",
       "subtitle": "Bitwarden",
       "description": "Generate a password using Bitwarden.",
       "mode": "view"
     },
     {
-      "name": "generatePasswordQuick",
+      "name": "generate-password-quick",
       "title": "Generate Password (Quick)",
       "subtitle": "Bitwarden",
       "description": "Generate a password using Bitwarden and copy and/or paste it into the active app right away.",

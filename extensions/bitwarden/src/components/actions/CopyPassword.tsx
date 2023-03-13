@@ -1,5 +1,5 @@
 import { Action, Icon, showHUD } from "@raycast/api";
-import { Item } from "~/types/search";
+import { Item } from "~/types/vault";
 import { copyPassword } from "~/utils/clipboard";
 import useReprompt from "~/utils/hooks/useReprompt";
 

@@ -1,7 +1,7 @@
 import { useNavigation } from "@raycast/api";
 import RepromptForm from "~/components/RepromptForm";
 import { useSession } from "~/context/session";
-import { Item } from "~/types/search";
+import { Item } from "~/types/vault";
 
 export type UseRepromptOptions = {
   item?: Item;
@@ -25,21 +25,13 @@ function useReprompt(action: () => void, options: UseRepromptOptions) {
     item == null ? "." : ` for ${item.name}.`
   }`;
 
-  return () => {
-    if (session.canRepromptBeSkipped()) {
-      action();
-      return;
-    }
+  const handleConfirm = () => {
+    pop();
+    action();
+  };
 
-    push(
-      <RepromptForm
-        description={description}
-        onConfirm={() => {
-          pop();
-          action();
-        }}
-      />
-    );
+  return () => {
+    push(<RepromptForm session={session} description={description} onConfirm={handleConfirm} />);
   };
 }
 

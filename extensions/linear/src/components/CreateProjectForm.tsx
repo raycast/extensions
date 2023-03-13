@@ -3,7 +3,6 @@ import { useForm, FormValidation } from "@raycast/utils";
 
 import useTeams from "../hooks/useTeams";
 import useUsers from "../hooks/useUsers";
-import useMilestones from "../hooks/useMilestones";
 
 import { getLinearClient } from "../helpers/withLinearClient";
 import { getTeamIcon } from "../helpers/teams";
@@ -19,7 +18,6 @@ export type CreateProjectValues = {
   state: string;
   leadId: string;
   memberIds: string[];
-  milestoneId: string;
   startDate: Date | null;
   targetDate: Date | null;
 };
@@ -29,21 +27,19 @@ export default function CreateProjectForm({ draftValues }: { draftValues?: Creat
 
   const { teams, isLoadingTeams } = useTeams();
   const { users, isLoadingUsers } = useUsers();
-  const { milestones, isLoadingMilestones } = useMilestones();
 
   const { handleSubmit, itemProps, focus, reset } = useForm<CreateProjectValues>({
     async onSubmit(values) {
       const toast = await showToast({ style: Toast.Style.Animated, title: "Creating project" });
 
       try {
-        const { success, project } = await linearClient.projectCreate({
+        const { success, project } = await linearClient.createProject({
           teamIds: values.teamIds,
           name: values.name,
           description: values.description,
           state: values.state,
           ...(values.leadId ? { leadId: values.leadId } : {}),
           memberIds: values.memberIds,
-          ...(values.milestoneId ? { milestoneId: values.milestoneId } : {}),
           ...(values.startDate ? { startDate: values.startDate } : {}),
           ...(values.targetDate ? { targetDate: values.targetDate } : {}),
         });
@@ -68,7 +64,6 @@ export default function CreateProjectForm({ draftValues }: { draftValues?: Creat
             description: "",
             leadId: "",
             memberIds: [],
-            milestoneId: "",
             startDate: null,
             targetDate: null,
           });
@@ -91,7 +86,6 @@ export default function CreateProjectForm({ draftValues }: { draftValues?: Creat
       state: draftValues?.state,
       leadId: draftValues?.leadId,
       memberIds: draftValues?.memberIds || [],
-      milestoneId: draftValues?.milestoneId,
       startDate: draftValues?.startDate,
       targetDate: draftValues?.targetDate,
     },
@@ -100,7 +94,7 @@ export default function CreateProjectForm({ draftValues }: { draftValues?: Creat
   return (
     <Form
       enableDrafts={true}
-      isLoading={isLoadingTeams || isLoadingUsers || isLoadingMilestones}
+      isLoading={isLoadingTeams || isLoadingUsers}
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Create Project" onSubmit={handleSubmit} />
@@ -152,18 +146,6 @@ export default function CreateProjectForm({ draftValues }: { draftValues?: Creat
             <Form.TagPicker.Item key={user.id} value={user.id} title={user.name} icon={getUserIcon(user)} />
           ))}
         </Form.TagPicker>
-      ) : null}
-
-      {milestones && milestones.length > 0 ? (
-        <Form.Dropdown title="Milestone" storeValue {...itemProps.milestoneId}>
-          <Form.Dropdown.Item title="Upcoming" value="" icon={Icon.Map} />
-
-          {milestones?.map((milestone) => {
-            return (
-              <Form.Dropdown.Item title={milestone.name} value={milestone.id} key={milestone.id} icon={Icon.Map} />
-            );
-          })}
-        </Form.Dropdown>
       ) : null}
 
       <Form.DatePicker title="Start Date" type={Form.DatePicker.Type.Date} {...itemProps.startDate} />
