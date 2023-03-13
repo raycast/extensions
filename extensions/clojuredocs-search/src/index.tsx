@@ -1,6 +1,7 @@
-import { ActionPanel, Action, List, Detail, Icon } from "@raycast/api";
-import { useFetch } from "@raycast/utils";
+import { useState, useEffect } from "react";
+import { ActionPanel, Action, List, Detail, Icon, Cache, Color } from "@raycast/api";
 import { parseEDNString } from "edn-data";
+import fetch from "node-fetch";
 
 interface DocInfo {
   added: string;
@@ -32,21 +33,33 @@ function getDocList(data: Doc): DocInfo[] {
 }
 
 export default function Command() {
-  const { isLoading, data } = useFetch(
-    "https://github.com/clojure-emacs/clojuredocs-export-edn/raw/master/exports/export.compact.edn",
-    {
-      // to make sure the screen isn't flickering when the searchText changes
-      keepPreviousData: true,
-      parseResponse: async (response) =>
-        getDocList(parseEDNString(await response.text(), { mapAs: "object", keywordAs: "string" }) as Doc),
-    }
-  );
-  // setList(getDocList(data));
+  const cache = new Cache();
+  const cached = cache.get("items");
+  const [result, setResult] = useState({ data: [] as DocInfo[], isLoading: true });
+
+  if (cached) {
+    useEffect(() => {
+      setResult({ data: JSON.parse(cached), isLoading: false });
+    }, [result.isLoading]);
+  } else {
+    useEffect(() => {
+      const fetchData = async () => {
+        const data = await fetch(
+          "https://github.com/clojure-emacs/clojuredocs-export-edn/raw/master/exports/export.compact.min.edn"
+        );
+        const text = await data.text();
+        const res = getDocList(parseEDNString(text, { mapAs: "object", keywordAs: "string" }) as Doc);
+        cache.set("items", JSON.stringify(res));
+        setResult({ data: res, isLoading: false });
+      };
+      fetchData().catch(console.error);
+    }, [result.isLoading]);
+  }
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Search..." throttle>
-      {(data || []).map((result) => (
-        <SearchListItem key={result.ns + "/" + result.name} searchResult={result} />
+    <List searchBarPlaceholder="Search..." isLoading={result.isLoading} throttle>
+      {(result.data || []).map((result, index) => (
+        <SearchListItem key={index} searchResult={result} />
       ))}
     </List>
   );
@@ -55,6 +68,8 @@ export default function Command() {
 const CljDetail = ({ res }: { res: DocInfo }) => {
   const mark = `
    # ${res.ns}/${res.name}
+
+   _${res.type} (since ${res.added})_
 
    ---
 
@@ -68,6 +83,10 @@ const CljDetail = ({ res }: { res: DocInfo }) => {
 
    ${res.examples == null ? "`No examples`" : res.examples?.map((e) => "~~~\n" + e + "\n~~~").join("\n")}
 
+   ###  ${res["see-alsos"] == null ? "0" : res["see-alsos"].length} See Also(s)
+
+   ${res["see-alsos"] == null ? "No see also" : res["see-alsos"]?.map((res) => "`" + res + "`").join(" ")}
+
    ### ${res.notes == null ? "0" : res.notes.length} Note(s)
 
    ${res.notes == null ? "`No notes`" : res.notes?.map((n) => "~~~\n" + n + "\n~~~").join("\n")}
@@ -78,19 +97,6 @@ const CljDetail = ({ res }: { res: DocInfo }) => {
       <Detail
         navigationTitle={res.ns + "/" + res.name}
         markdown={mark}
-        metadata={
-          <Detail.Metadata>
-            <Detail.Metadata.Label title="Type" text={res.type} />
-            <Detail.Metadata.Label title="Available since" text={res.added} />
-            <Detail.Metadata.Link title="Library" text={res.ns} target={res["library-url"]} />
-            <Detail.Metadata.Separator />
-            <Detail.Metadata.TagList title="See also">
-              {(res["see-alsos"] || []).map((result) => (
-                <Detail.Metadata.TagList.Item text={result} color={"#A9A9A9"} />
-              ))}
-            </Detail.Metadata.TagList>
-          </Detail.Metadata>
-        }
         actions={
           <ActionPanel>
             <Action.OpenInBrowser url={"https://clojuredocs.org" + res.href} />
@@ -106,14 +112,12 @@ function SearchListItem({ searchResult }: { searchResult: DocInfo }) {
     <List.Item
       title={searchResult.ns + "/" + searchResult.name}
       subtitle={searchResult.doc}
-      accessoryTitle={searchResult.type}
+      accessories={[
+        { tag: { value: searchResult.type, color: colorType(searchResult.type) }, tooltip: "Tag with tooltip" },
+      ]}
       actions={
         <ActionPanel>
-          <Action.Push
-            title="Go to Detail"
-            icon={Icon.AppWindowSidebarRight}
-            target={<CljDetail res={searchResult} />}
-          />
+          <Action.Push title="Show Details" icon={Icon.AppWindow} target={<CljDetail res={searchResult} />} />
           <ActionPanel.Section>
             <Action.OpenInBrowser url={"https://clojuredocs.org" + searchResult.href} />
           </ActionPanel.Section>
@@ -121,4 +125,17 @@ function SearchListItem({ searchResult }: { searchResult: DocInfo }) {
       }
     />
   );
+}
+
+function colorType(type: string) {
+  switch (type) {
+    case "function":
+      return Color.PrimaryText;
+    case "macro":
+      return Color.Green;
+    case "var":
+      return Color.Blue;
+    default:
+      return Color.Red;
+  }
 }

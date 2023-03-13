@@ -19,8 +19,8 @@ export type Item = {
 export type IntervalFormValues = {
   title: string;
   subtitle: string;
-  warmup: string;
-  cooldown: string;
+  warmup: string | undefined;
+  cooldown: string | undefined;
   high: string;
   low: string;
   sets: string;

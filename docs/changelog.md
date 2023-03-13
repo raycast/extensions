@@ -1,5 +1,22 @@
 # Changelog
 
+## 1.48.0 - 2023-02-22
+
+### ✨ New
+
+- **Clipboard**: Added `transient` option to `Clipboard.copy` method.
+- **Actions**: Added `type` prop to `Action.PickDate` to control the date components to be picked.
+
+### 💎 Improvements
+
+- Improve the time to interaction when launching a command that always renders the same view type.
+
+### 🐞 Fixes
+
+- Changed `Deactivate Command` action shortcut to `⌘ ⌥ ⇧ D`, so it doesn't clash with `Copy Deeplink`
+- Fixed an issue where restarting Raycast would not properly restore menu bar commands that sometimes didn't put anything in the menu bar.
+- Locale: Respect the hourCycle, calendar, and numbering system locale.
+
 ## 1.47.0 - 2023-02-01
 
 ### ✨ New

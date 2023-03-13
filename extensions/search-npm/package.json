@@ -7,7 +7,8 @@
   "icon": "command-icon.png",
   "author": "mrmartineau",
   "contributors": [
-    "reloadedhead"
+    "reloadedhead",
+    "Timon"
   ],
   "license": "MIT",
   "categories": [
@@ -98,8 +99,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.25.0",
-    "@raycast/utils": "^1.4.8",
+    "@raycast/api": "^1.48.5",
+    "@raycast/utils": "^1.5.0",
     "fetch-readme": "^1.0.0",
     "gitlab-url-parse": "^1.0.0",
     "node-fetch": "^3.0.0",

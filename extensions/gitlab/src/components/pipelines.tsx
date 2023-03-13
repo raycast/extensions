@@ -95,7 +95,6 @@ export function PipelineListItem(props: {
 }): JSX.Element {
   const pipeline = props.pipeline;
   const icon = getIcon(pipeline.status);
-  console.log(pipeline);
   const dateStatus = getDateStatus(pipeline);
   return (
     <List.Item

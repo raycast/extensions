@@ -1,8 +1,8 @@
 # Deeplinks
 
-Deeplinks are Raycast-specific URLs which you can use to launch any command, as long as it's installed an enabled in Raycast.
+Deeplinks are Raycast-specific URLs you can use to launch any command, as long as it's installed an enabled in Raycast.
 
-They adhere the following format:
+They adhere to the following format:
 
 ```
 raycast://extensions/<author-or-owner>/<extension-name>/<command-name>
@@ -24,8 +24,9 @@ Whenever a command is launched using a Deeplink, Raycast will ask you to confirm
 
 ## Query Parameters
 
-| Name       | Description                                                                                                                              | Type                                   |
-| :--------- | ---------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------- |
-| launchType | Runs the command in the background, skipping bringing Raycast to the front.                                                              | Either `userInitiated` or `background` |
-| arguments  | If the command acepts [arguments](./arguments.md), they can be passed using this query parameter.                                        | URL-encoded JSON object.               |
-| context    | If the command make use of [LaunchContext](../../api-reference/utilities.md#launchcontext), it can be passed using this query parameter. | URL-encoded JSON object.               |
+| Name         | Description                                                                                                                              | Type                                   |
+| :----------- | ---------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------- |
+| launchType   | Runs the command in the background, skipping bringing Raycast to the front.                                                              | Either `userInitiated` or `background` |
+| arguments    | If the command acepts [arguments](./arguments.md), they can be passed using this query parameter.                                        | URL-encoded JSON object.               |
+| context      | If the command make use of [LaunchContext](../../api-reference/utilities.md#launchcontext), it can be passed using this query parameter. | URL-encoded JSON object.               |
+| fallbackText | Some text to prefill the search bar or first text input of the command                                                                   | `string`                               |

@@ -10,7 +10,7 @@ const competitions = [
     value: "laliga-smartbank",
   },
   {
-    title: "Women's First Division",
+    title: "Liga F",
     value: "primera-division-femenina",
   },
 ];
@@ -33,15 +33,10 @@ export default function CompetitionDropdown(props: {
   selected: string;
   onSelect: React.Dispatch<React.SetStateAction<string>>;
 }) {
-  const DropdownComponent =
-    props.type === "grid" ? Grid.Dropdown : List.Dropdown;
+  const DropdownComponent = props.type === "grid" ? Grid.Dropdown : List.Dropdown;
 
   return (
-    <DropdownComponent
-      tooltip="Filter by Competition"
-      value={props.selected}
-      onChange={props.onSelect}
-    >
+    <DropdownComponent tooltip="Filter by Competition" value={props.selected} onChange={props.onSelect}>
       {Object.entries(seasons)
         .sort((a, b) => Number(b[0]) - Number(a[0]))
         .map(([year, season]) => {
@@ -53,7 +48,6 @@ export default function CompetitionDropdown(props: {
                     key={`${competition.value}-${year}`}
                     value={`${competition.value}-${year}`}
                     title={`${competition.title} ${season}`}
-                    // title={competition.title}
                   />
                 );
               })}

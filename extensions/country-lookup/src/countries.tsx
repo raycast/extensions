@@ -41,6 +41,10 @@ export default function Countries() {
           });
         }
 
+        if (entry.tld?.length) {
+          keywords.push(...entry.tld);
+        }
+
         return (
           <List.Item
             id={entry.cca2}

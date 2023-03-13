@@ -56,9 +56,7 @@
   "dependencies": {
     "@raycast/api": "^1.40.3",
     "@raycast/utils": "^1.4.8",
-    "find-free-port": "^2.0.0",
-    "node-fetch": "^3.2.10",
-    "patch-package": "^6.4.7"
+    "node-fetch": "^3.2.10"
   },
   "devDependencies": {
     "@types/node": "16.10.3",

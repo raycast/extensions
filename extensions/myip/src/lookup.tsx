@@ -1,79 +1,82 @@
-import { ActionPanel, Detail, Action, useNavigation } from "@raycast/api";
+import { ActionPanel, Action, useNavigation, List } from "@raycast/api";
 import axios from "axios";
-import * as cheerio from "cheerio";
 import { useEffect, useState } from "react";
 import { LoadingStatus } from ".";
 
-let isLive = true;
+const showItems: { [key: string]: string } = {
+  ip: "IP Address",
+  city: "City",
+  region: "Region",
+  country_name: "Country",
+  country_code: "Country Code",
+  postal: "Postal Code",
+  in_eu: "European Union",
+  latitude: "Latitude",
+  longitude: "Longitude",
+  timezone: "Time Zone",
+  utc_offset: "UTC Offset",
+  country_calling_code: "Calling Code",
+  currency: "Currency",
+  languages: "Languages",
+  asn: "ASN",
+  org: "Org",
+};
 
-export default function LookUp() {
+export default function LookUp(param: { ip: string }) {
   const [status, setStatus] = useState<LoadingStatus>("loading");
-  const [data, setData] = useState("");
+  const [data, setData] = useState<{ [key: string]: string | number }>({});
   const { pop } = useNavigation();
 
   useEffect(() => {
     async function getIp() {
       try {
-        const { data } = await axios.get(`https://ipaddress.my`);
-
-        const $ = cheerio.load(data);
-        let temp = ``;
-
-        $("tbody").each(function (index, item) {
-          switch (index) {
-            case 1:
-              $("tr", item).each(function (index, item) {
-                temp += `## ${$("td", item).first().text().trim().replace(":", "")}
-`;
-                temp += `${$("td", item).last().text().trim()}
-`;
-              });
-              break;
-            case 2:
-              $("tr", item).each(function (index, item) {
-                temp += `## ${$("td", item).first().text().trim().replace(":", "")}
-`;
-                temp += `${$("td", item).last().text().trim()}
-`;
-              });
-              break;
-            default:
-              break;
-          }
-        });
-
-        if (isLive) {
-          setData(temp);
-          setStatus("success");
-        }
+        const { data } = await axios.get(`https://ipapi.co/${param.ip}/json`);
+        console.log("data", data);
+        setData(data);
+        setStatus("success");
       } catch (error) {
-        if (isLive) {
-          setStatus("failure");
-        }
+        setStatus("failure");
       }
     }
-    isLive = true;
     getIp();
-    return () => {
-      isLive = false;
-    };
   }, []);
 
   return (
-    <Detail
+    <List
       isLoading={status === "loading"}
       navigationTitle="IP Lookup"
-      markdown={data}
       actions={
         <ActionPanel>
           <Action.OpenInBrowser
-            url={"https://ipaddress.my"}
+            url={"https://ipapi.co"}
             onOpen={() => {
               pop();
             }}
           />
         </ActionPanel>
       }
-    />
+    >
+      {Object.keys(data).map(
+        (key) =>
+          Object.prototype.hasOwnProperty.call(showItems, key) && (
+            <List.Item
+              key={key}
+              title={showItems[key]}
+              accessories={[{ text: data[key].toString() }]}
+              actions={
+                <ActionPanel>
+                  <Action.CopyToClipboard title={`Copy to ${showItems[key]}`} content={data[key].toString()} />
+                  <Action.OpenInBrowser
+                    url={`https://ipapi.co/?q=${param.ip}`}
+                    onOpen={() => {
+                      pop();
+                    }}
+                  />
+                </ActionPanel>
+              }
+            />
+          )
+      )}
+    </List>
   );
 }
