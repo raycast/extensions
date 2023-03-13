@@ -1,8 +1,9 @@
 import { environment, showToast, Toast } from "@raycast/api";
 import { readdirSync, writeFileSync, readFileSync, rmSync, existsSync, mkdirSync, PathLike } from "fs";
 import { join } from "path";
+import { z } from "zod";
 import { FMObjectsToXML } from "./FmClipTools";
-import { Location, Snippet, SnippetWithPath, ZSnippet } from "./types";
+import { Location, Snippet, SnippetWithPath, ZLocation, ZSnippet } from "./types";
 import { getLocationPath } from "./use-locations";
 
 function ensureDirSync(path: PathLike) {
@@ -48,17 +49,23 @@ export function loadSnippets(location?: Location): SnippetWithPath[] {
 
   const files = listAllFilesRecursive(path);
   files.forEach((path) => {
-    const data = readFileSync(path, "utf8").toString();
     try {
-      const snippet = ZSnippet.safeParse(JSON.parse(data));
-      if (snippet.success) {
-        snippets.push({ ...snippet.data, path, locId: location?.id ?? "default" });
-      }
+      const snippet = loadSingleSnippet(path);
+      snippets.push({ ...snippet, locId: location?.id ?? "default" });
     } catch {
       return;
     }
   });
   return snippets;
+}
+
+export function loadSingleSnippet(path: string): Omit<SnippetWithPath, "locId"> {
+  const data = readFileSync(path, "utf8").toString();
+  const snippet = ZSnippet.safeParse(JSON.parse(data));
+  if (snippet.success) {
+    return { ...snippet.data, path };
+  }
+  throw new Error("Invalid snippet");
 }
 
 function listAllFilesRecursive(dir: PathLike): string[] {
@@ -73,16 +80,27 @@ function listAllFilesRecursive(dir: PathLike): string[] {
   return fileNames.flat();
 }
 
-export async function saveSnippetFile(data: Snippet, location?: Location): Promise<boolean> {
+export async function saveSnippetFile(data: Snippet, location?: Location | string): Promise<boolean> {
   const parseResult = ZSnippet.safeParse(data);
   if (parseResult.success) {
     const snippet = parseResult.data;
-    const path = location?.path ?? getDefaultPath();
+
+    const path = ZLocation.or(z.string().endsWith(".json"))
+      .transform((v) => {
+        if (typeof v === "string") return v;
+        return join(v.path, `${snippet.id}.json`);
+      })
+      .catch(getDefaultPath())
+      .parse(location);
+
+    console.log(path);
+
+    // const path = typeof location === "string" ? location : location?.path ?? getDefaultPath();
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { locId, ...rest } = snippet; // don't save locId to file
 
-    writeFileSync(join(path, `${snippet.id}.json`), JSON.stringify(rest));
+    writeFileSync(path, JSON.stringify(rest));
     return true;
   }
   console.error(parseResult.error);

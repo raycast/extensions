@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Form, Icon, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Alert, confirmAlert, Form, Icon, showToast, Toast } from "@raycast/api";
 import { FormValidation, useForm } from "@raycast/utils";
 import { detectType } from "../utils/FmClipTools";
 import { v4 as uuidv4 } from "uuid";
@@ -33,10 +33,23 @@ export default function EditSnippet({ snippet, onSubmit }: EditSnippetProps) {
               title="Reload Snippet"
               shortcut={{ key: "r", modifiers: ["cmd"] }}
               icon={Icon.RotateAntiClockwise}
-              onAction={() => {
-                getFromClipboard().then((data) => {
-                  if (data) setSnippetText(data);
-                });
+              onAction={async () => {
+                if (
+                  !snippet.customXML ||
+                  (await confirmAlert({
+                    title: "Custom XML Detected",
+                    message: "If you reload the snippet now, you may overwrite those custom changes. Are you sure?",
+                    primaryAction: {
+                      title: "Reload",
+                      style: Alert.ActionStyle.Destructive,
+                    },
+                    icon: Icon.Code,
+                  }))
+                ) {
+                  getFromClipboard().then((data) => {
+                    if (data) setSnippetText(data);
+                  });
+                }
               }}
             />
           </ActionPanel.Section>
@@ -88,7 +101,7 @@ export function useFormLogic({ onSubmit, snippet }: EditSnippetProps) {
     const success = await saveSnippetFile(
       {
         ...values,
-        tags: values.tags?.split(",") ?? [],
+        tags: typeof values.tags === "string" ? values.tags?.split(",") ?? [] : values.tags,
         snippet: snippetText,
         id,
       },
