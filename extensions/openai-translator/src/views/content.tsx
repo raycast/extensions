@@ -130,6 +130,7 @@ export const ContentView = (props: ContentViewProps) => {
     };
     setTranslatedText("");
     setQuerying(_querying);
+    query.updateText("");
     translate(_querying.query, entrypoint, apikey);
   }
 
@@ -202,7 +203,7 @@ export const ContentView = (props: ContentViewProps) => {
             detail={
               <DetailView
                 text={translatedText}
-                original={query.text}
+                original={querying ? querying.query.text : ""}
                 from={querying ? querying.query.detectFrom : "auto"}
                 mode={querying ? querying.query.mode : "translate"}
                 to={query.to}
