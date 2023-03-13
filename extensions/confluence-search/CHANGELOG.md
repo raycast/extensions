@@ -1,6 +1,8 @@
 # Confluence Search Changelog
 
  ## [Update] - 2023-02-14
+
+- feat: Add functionality to open Confluence page for edit
  - feat: show last modified date
  
  ## [Update] - 2023-02-09
