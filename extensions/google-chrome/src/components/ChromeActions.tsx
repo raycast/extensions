@@ -25,12 +25,12 @@ function NewTabActions({ query }: { query?: string }): ReactElement {
   );
 }
 
-function TabListItemActions({ tab }: { tab: Tab }) {
+function TabListItemActions({ tab, onTabClosed }: { tab: Tab; onTabClosed: () => void }) {
   return (
     <ActionPanel title={tab.title}>
       <GoToTab tab={tab} />
       <Action.CopyToClipboard title="Copy URL" content={tab.url} />
-      <CloseTab tab={tab} />
+      <CloseTab tab={tab} onTabClosed={onTabClosed} />
     </ActionPanel>
   );
 }
@@ -91,10 +91,11 @@ function GoToTab(props: { tab: Tab }) {
   return <ActionPanel.Item title="Open Tab" icon={{ source: Icon.Eye }} onAction={handleAction} />;
 }
 
-function CloseTab(props: { tab: Tab }) {
+function CloseTab(props: { tab: Tab; onTabClosed: () => void }) {
   async function handleAction() {
     await closeActiveTab(props.tab);
     await closeMainWindow();
+    props.onTabClosed();
   }
 
   return (
