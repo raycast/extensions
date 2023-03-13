@@ -18,7 +18,7 @@ export default function UserDetail(props: { user: MixpanelUser }) {
         <ActionPanel>
           <Action.OpenInBrowser
             url={`https://eu.mixpanel.com/project/${prefs.project_id}/view/123/app/profile#distinct_id=${props.user.id}`}
-            title="Open Mixpanel profile"
+            title="Open Mixpanel Profile"
           />
         </ActionPanel>
       }

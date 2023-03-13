@@ -41,7 +41,7 @@ export default function SearchByEmail() {
         id="email_field"
         onChange={setQuery}
         autoFocus={true}
-        title="Email or name"
+        title="Email or Name"
         info="Search a user by his email or name"
       />
     </Form>
