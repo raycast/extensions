@@ -1,6 +1,10 @@
 # Bitwarden Changelog
 
-## [Codebase refactor] - 2023-03-03
+## [New Command] - 2023-03-13
+
+- Added a "Generate Password (Quick)" command that allows to quickly generate a password and copy and/or paste it right away.
+
+## [Codebase Refactor] - 2023-03-03
 
 - Cleanup and reorganization of the whole codebase
 
