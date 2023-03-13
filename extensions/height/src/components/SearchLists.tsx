@@ -34,7 +34,7 @@ export default function SearchLists() {
     filterList(
       listsData.filter(
         (item) =>
-          (listType === "all" || item?.type?.includes(listType)) &&
+          item?.type === listType &&
           item?.archivedAt === null &&
           item?.name?.toLowerCase().includes(searchText?.toLowerCase())
       ) ?? []
