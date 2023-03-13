@@ -1,6 +1,8 @@
-import { Color, Icon, List } from "@raycast/api";
+import { Color, getPreferenceValues, Icon, List } from "@raycast/api";
 import { Issue } from "./types";
 import { getAvatarIcon } from "@raycast/utils";
+
+const { url } = getPreferenceValues();
 
 const numberFormatter = new Intl.NumberFormat(undefined, { notation: "compact" });
 
@@ -68,4 +70,8 @@ export function getIcon(issue: Issue) {
 
 export function getKeywords(issue: Issue) {
   return issue.assignedTo ? [issue.assignedTo.name] : undefined;
+}
+
+export function getBaseUrl() {
+  return url.replace(/\/$/, "") || "https://sentry.io";
 }

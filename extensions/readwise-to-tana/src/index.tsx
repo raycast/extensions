@@ -11,6 +11,7 @@ import Book from './book'
 import Settings from './settings'
 import type { SettingsValues } from './settings'
 import { useBooks } from './useApi'
+import { cleanTitle } from './utils'
 
 export default function Command() {
   const [template, setTemplate] = React.useState<string>('')
@@ -140,7 +141,7 @@ export default function Command() {
           <List.Item
             key={book.id}
             icon={book.cover_image_url}
-            title={book.title}
+            title={cleanTitle(book.title)}
             subtitle={book.author}
             accessories={[
               { text: book.num_highlights.toString(), icon: Icon.Book },

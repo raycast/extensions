@@ -1,5 +1,5 @@
 import { ActionPanel, Detail, OpenInBrowserAction, PushAction } from "@raycast/api";
-import { useCurrenTrackingStatus } from "./useCurrenTrackingStatus";
+import { useCurrenTrackingStatus } from "./useCurrentTrackingStatus";
 import { ComponentEditNote } from "./ComponentEditNote";
 import { useEffect, useState } from "react";
 import { Activity, Tracking } from "./types";

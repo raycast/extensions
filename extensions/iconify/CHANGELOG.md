@@ -1,5 +1,10 @@
 # Changelog
 
+## [Improvements] - 2023-03-06
+
+- Display icons using a `Grid` instead of `List`
+- Add pagination to `View Icons` command
+
 ## [Fix] - 2023-03-01
 
 - Fix the `Search All Icons` command crashing after typing.
