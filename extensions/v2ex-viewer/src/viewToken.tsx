@@ -1,24 +1,25 @@
-import { List, Icon, Detail } from "@raycast/api";
+import { Icon, Detail, Action, ActionPanel } from "@raycast/api";
 import dayjs, { getUnixFromNow } from "@/utils/time";
-import { useFetch } from "@raycast/utils";
+import { useCachedState, useFetch } from "@raycast/utils";
 import { getToken } from "@/utils/preference";
-import { Response, Notification, Token } from "@/types/v2ex";
+import { Response, Token } from "@/types/v2ex";
 import { showLoadingToast, showFailedToast, showSuccessfulToast } from "./utils/toast";
-
-const getDetail = (text: string) => {
-  const regex = text.includes("›")
-    ? /(?<behavior>[^ ]+) › <a[^<>]+?>(?<topicTitle>[^<>]+)/gm
-    : /[^>]+?>(?<topicTitle>[^<>]+)<\/a> \W(?<behavior>[^<>]+)/gm;
-  const match = regex.exec(text);
-  try {
-    return match?.groups;
-  } catch (error) {
-    return null;
-  }
+import { Bold, Code, Heading } from "./utils/markdown";
+const getHiddenToken = (token: string) => {
+  const split = token.split("-");
+  split.forEach((v, i) => {
+    if (i === 0 || i === split.length - 1) {
+      return;
+    }
+    split[i] = v.replace(/./g, "*");
+  });
+  return split.join("-");
 };
 
 export default function Command() {
   const token = getToken();
+  const hiddenToken = getHiddenToken(token);
+  const [hideToken, setHideToken] = useCachedState("HIDE_TOKEN", true);
   const tokenDetail = useFetch<Response<Token>>("https://www.v2ex.com/api/v2/token", {
     headers: {
       Authorization: `Bearer ${token}`,
@@ -35,11 +36,22 @@ export default function Command() {
       showSuccessfulToast({ message: data.message || "" });
     },
   });
-
   return (
     <Detail
-      markdown={token}
-      // navigationTitle="Pikachu"
+      actions={
+        <ActionPanel>
+          <Action.CopyToClipboard title="Copy Token" content={token} />
+          <Action
+            title={(hideToken ? "Show" : "Hide") + " Token"}
+            icon={hideToken ? Icon.Eye : Icon.EyeDisabled}
+            onAction={() => {
+              setHideToken((v) => !v);
+            }}
+          />
+          <Action.OpenInBrowser title="Setting Token" url={"https://v2ex.com/settings/tokens"} icon={Icon.Cog} />
+        </ActionPanel>
+      }
+      markdown={Heading(1, Bold(Code(!hideToken ? token : hiddenToken)))}
       metadata={
         tokenDetail.data?.result && (
           <Detail.Metadata>
@@ -51,7 +63,6 @@ export default function Command() {
             </Detail.Metadata.TagList>
             <Detail.Metadata.Label title="Last used" text={getUnixFromNow(tokenDetail.data.result.last_used)} />
             <Detail.Metadata.Label title="Total used" text={String(tokenDetail.data.result.total_used) + " times"} />
-
             <Detail.Metadata.Separator />
             <Detail.Metadata.Label
               title="Created"

@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, Cache } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import TopicDetail from "@/components/TopicDetail";
 import { getUnixFromNow } from "@/utils/time";
@@ -10,7 +10,6 @@ import { showFailedToast, showLoadingToast, showSuccessfulToast } from "@/utils/
 export default function Command() {
   const token = getToken();
   const nodes = getNodes();
-
   const [node, setNode] = useState<string>();
   const topics = useFetch<Response<Topic[]>>(`https://www.v2ex.com/api/v2/nodes/${node}/topics`, {
     headers: {
@@ -29,6 +28,7 @@ export default function Command() {
     },
   });
   const [showDetails, setShowDetails] = useState(false);
+
   return (
     <List
       isShowingDetail={showDetails}
