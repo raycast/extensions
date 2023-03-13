@@ -2,7 +2,7 @@ import IssueTemplate, { IssueOwnProps } from "@/components/Issue";
 import { RECENT_ISSUES, SEARCH_ISSUES } from "@/queries/issues";
 import { GetIssues } from "@/types";
 import { fetcher, plural } from "@/utils";
-import { List, popToRoot, showToast, ToastStyle } from "@raycast/api";
+import { List, popToRoot, showToast, Toast } from "@raycast/api";
 import { debounce } from "debounce";
 import { useState } from "react";
 import useSWR from "swr";
@@ -35,7 +35,11 @@ export default function Command() {
       setResults(search.nodes);
     } catch (err: any) {
       popToRoot();
-      showToast(ToastStyle.Failure, "Could not get pull requests", err.message);
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Could not get pull requests",
+        message: err.message,
+      });
     } finally {
       setIsLoading(false);
     }
