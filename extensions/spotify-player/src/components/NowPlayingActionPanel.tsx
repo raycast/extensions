@@ -1,13 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  closeMainWindow,
-  Color,
-  Icon,
-  popToRoot,
-  showHUD,
-  Clipboard,
-} from "@raycast/api";
+import { Action, ActionPanel, closeMainWindow, Color, Icon, popToRoot, showHUD, Clipboard } from "@raycast/api";
 import { addToMySavedTracks } from "../api/addToMySavedTracks";
 import { pause } from "../api/pause";
 import { play } from "../api/play";

@@ -26,11 +26,7 @@ function NowPlayingMenuBarCommand() {
 
   useEffect(() => {
     setIsPaused(currentPlayingData?.is_playing === false);
-    if (
-      currentPlayingData &&
-      Object.keys(currentPlayingData).length > 0 &&
-      isTrack(currentPlayingData)
-    ) {
+    if (currentPlayingData && Object.keys(currentPlayingData).length > 0 && isTrack(currentPlayingData)) {
       trackAlreadyLiked(currentPlayingData.item.id);
     }
   }, [currentPlayingData]);
@@ -130,9 +126,7 @@ function NowPlayingMenuBarCommand() {
       <MenuBarExtra.Item
         icon="icon.png"
         title="Open on Spotify"
-        onAction={() =>
-          isSpotifyInstalled ? open(`spotify:track:${trackId}`) : open(external_urls.spotify)
-        }
+        onAction={() => (isSpotifyInstalled ? open(`spotify:track:${trackId}`) : open(external_urls.spotify))}
       />
       <MenuBarExtra.Item
         title="Copy Song URL"

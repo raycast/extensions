@@ -26,11 +26,7 @@ export function ArtistActionPanel({ title, artist }: ArtistActionPanelProps) {
         }}
       />
       {albums && (
-        <Action.Push
-          icon={Icon.AppWindowGrid3x3}
-          title="Discography"
-          target={<AlbumsGrid albums={albums} />}
-        />
+        <Action.Push icon={Icon.AppWindowGrid3x3} title="Discography" target={<AlbumsGrid albums={albums} />} />
       )}
       <Action
         icon={{ source: "radio.png", tintColor: Color.PrimaryText }}

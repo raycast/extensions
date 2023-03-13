@@ -7,8 +7,7 @@ import { containsMySavedTracks } from "./api/containsMySavedTrack";
 import { isTrack } from "./helpers/track";
 
 function NowPlayingCommand() {
-  const { currentPlayingData, currentPlayingError, currentPlayingIsLoading } =
-    useCurrentPlayingTrack();
+  const { currentPlayingData, currentPlayingError, currentPlayingIsLoading } = useCurrentPlayingTrack();
   const [isPaused, setIsPaused] = useState(currentPlayingData?.is_playing === false);
   const [songAlreadyLiked, setSongAlreadyLiked] = useState<boolean | null>(null);
 
@@ -19,11 +18,7 @@ function NowPlayingCommand() {
 
   useEffect(() => {
     setIsPaused(currentPlayingData?.is_playing === false);
-    if (
-      currentPlayingData &&
-      Object.keys(currentPlayingData).length > 0 &&
-      isTrack(currentPlayingData)
-    ) {
+    if (currentPlayingData && Object.keys(currentPlayingData).length > 0 && isTrack(currentPlayingData)) {
       trackAlreadyLiked(currentPlayingData.item.id);
     }
   }, [currentPlayingData]);
@@ -53,10 +48,7 @@ function NowPlayingCommand() {
   if (!isTrack(currentPlayingData)) {
     return (
       <List>
-        <List.EmptyView
-          icon={Icon.ExclamationMark}
-          title="Podcasts are not supported at the moment"
-        />
+        <List.EmptyView icon={Icon.ExclamationMark} title="Podcasts are not supported at the moment" />
       </List>
     );
   }
