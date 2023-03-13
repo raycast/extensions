@@ -13,6 +13,7 @@
     {
       "name": "index",
       "title": "Submit Insight",
+      "subtitle": "Productlane",
       "description": "Quickly submit an insight to Productlane",
       "mode": "view"
     }
