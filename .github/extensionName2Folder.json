@@ -548,6 +548,7 @@
   "orion": "orion",
   "oss-browser": "oss-browser",
   "ossinsight": "ossinsight",
+  "package-tracker": "package-tracker",
   "pagerduty": "pagerduty",
   "palette-colors": "palette-colors",
   "palette-picker": "palette-picker",
