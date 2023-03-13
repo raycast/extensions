@@ -21,7 +21,7 @@ function HistoryItem({ profile, entry: { url, title, id } }: { entry: HistoryEnt
   );
 }
 
-function TabListItem(props: { tab: Tab; useOriginalFavicon: boolean; onTabClosed: () => void }) {
+function TabListItem(props: { tab: Tab; useOriginalFavicon: boolean; onTabClosed?: () => void }) {
   return (
     <List.Item
       title={props.tab.title}

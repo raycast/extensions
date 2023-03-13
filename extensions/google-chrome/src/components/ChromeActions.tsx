@@ -25,7 +25,7 @@ function NewTabActions({ query }: { query?: string }): ReactElement {
   );
 }
 
-function TabListItemActions({ tab, onTabClosed }: { tab: Tab; onTabClosed: () => void }) {
+function TabListItemActions({ tab, onTabClosed }: { tab: Tab; onTabClosed?: () => void }) {
   return (
     <ActionPanel title={tab.title}>
       <GoToTab tab={tab} />
@@ -91,11 +91,11 @@ function GoToTab(props: { tab: Tab }) {
   return <ActionPanel.Item title="Open Tab" icon={{ source: Icon.Eye }} onAction={handleAction} />;
 }
 
-function CloseTab(props: { tab: Tab; onTabClosed: () => void }) {
+function CloseTab(props: { tab: Tab; onTabClosed?: () => void }) {
   async function handleAction() {
     await closeActiveTab(props.tab);
     await closeMainWindow();
-    props.onTabClosed();
+    props.onTabClosed?.();
   }
 
   return (
