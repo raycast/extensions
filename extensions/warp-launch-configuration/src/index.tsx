@@ -46,7 +46,7 @@ export default function Command() {
     if (fileList.length === 0) {
       return showError(
         "No launch configurations found",
-        "You need to create at least one launch configuration before launching https://docs.warp.dev/features/sessions/launch-configurations."
+        "You need to create at least one launch configuration before launching: https://docs.warp.dev/features/sessions/launch-configurations"
       );
     }
 
