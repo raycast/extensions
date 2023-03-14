@@ -15,6 +15,7 @@
     {
       "name": "search-ableton-live-projects.command",
       "title": "Search Recent Projects",
+      "subtitle": "Ableton Live",
       "description": "Search for recent Ableton Live Project.",
       "mode": "view"
     }
