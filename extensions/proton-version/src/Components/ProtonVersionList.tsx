@@ -14,15 +14,26 @@ interface Props {
 }
 
 const ProtonVersionList = ({ data, product, environment }: Props) => {
-  const title = `${data?.version} ${environment === "beta" ? "β" : ""}` ?? "Error while loading data";
-  const githubTagUrl = PROTON_GITHUB_RELEASE_TAG(product, data?.version ?? "");
-  const githubChangeUrl = PROTON_GITHUB_RELEASE_CHANGE(product, data?.version ?? "");
+  if (!data) {
+    return (
+      <List.Item
+        title={getProductNameFromProduct(product)}
+        icon={{ source: getAssetFromProduct(product) }}
+        keywords={getKeywordsFromProduct(product)}
+        subtitle="Loading..."
+      />
+    );
+  }
+
+  const title = `${data.version} ${environment === "beta" ? "β" : ""}`;
+  const githubTagUrl = PROTON_GITHUB_RELEASE_TAG(product, data.version);
+  const githubChangeUrl = PROTON_GITHUB_RELEASE_CHANGE(product, data.version);
 
   return (
     <List.Item
       title={title}
       icon={{ source: getAssetFromProduct(product) }}
-      subtitle={`Deployed ${getFormattedDate(data?.date)} GMT`}
+      subtitle={`Deployed ${getFormattedDate(data.date)} GMT`}
       keywords={getKeywordsFromProduct(product)}
       actions={
         <ActionPanel>
@@ -30,7 +41,7 @@ const ProtonVersionList = ({ data, product, environment }: Props) => {
             <Action.OpenInBrowser title="ProtonMail/WebClients" url={GITHUB_HOME} icon={Icon.House} />
             <Action.OpenInBrowser title="Release link" url={githubTagUrl} icon={Icon.ArrowRight} />
             <Action.OpenInBrowser title="Compare changes" url={githubChangeUrl} icon={Icon.ArrowCounterClockwise} />
-            <Action.Paste title="Copy version number" content={data?.version ?? ""} />
+            <Action.Paste title="Copy version number" content={data.version ?? ""} />
           </ActionPanel.Section>
           <ActionPanel.Section title="Access product">
             <Action.OpenInBrowser
