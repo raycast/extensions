@@ -1,5 +1,11 @@
 # 1Password Changelog
 
+## [Fixes and Enhancements] - 2023-02-10
+
+- Increased maxBuffer since it caused problems if you had more than 2k items in the vault
+- Moved Reset Cache to command instead, so regular users is not confused about it
+- Updated Empty views
+
 ## [CLI support] - 2023-02-06
 
 This new version of the 1Password extension contains the following changes.

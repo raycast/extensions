@@ -5,7 +5,7 @@ import { createScheduledMeeting } from "../api/meetings";
 import { getErrorMessage } from "../helpers/errors";
 
 export type MeetingFormValues = {
-  start_time: Date;
+  start_time: Date | null;
   duration: string;
   topic: string;
   agenda: string;
@@ -25,9 +25,9 @@ export default function MeetingForm({ enableDrafts = false, draftValues }: Meeti
         const payload = {
           topic: values.topic,
           agenda: values.agenda,
-          start_time: format(values.start_time, "yyyy-MM-dd'T'HH:mm:ss"),
           duration: values.duration ? parseInt(values.duration) : 60,
           timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+          ...(values.start_time ? { start_time: format(values.start_time, "yyyy-MM-dd'T'HH:mm:ss") } : {}),
         };
 
         const meeting = await createScheduledMeeting(payload);

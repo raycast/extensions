@@ -1,5 +1,9 @@
 # Wi-Fi Changelog
 
+## [Added keyword] - 2023-02-14
+
+Added keywords so users easier can find it in the store
+
 ## [Fix bug] - 2022-10-14
 
 - Fix the bug that can't remember password

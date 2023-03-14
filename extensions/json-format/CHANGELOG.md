@@ -1,5 +1,9 @@
 # Changelog
 
+## [Format JS Objects] - 2023-02-12
+
+- Ability to format JS Objects
+
 ## [Added Clipboard Copy Paste] - 2023-02-07
 
 - Ability to copy, format and paste from clipboard directly

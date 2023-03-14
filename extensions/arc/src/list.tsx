@@ -1,6 +1,12 @@
 import { Action, ActionPanel, Image, List } from "@raycast/api";
 import { getFavicon, MutatePromise } from "@raycast/utils";
-import { CopyLinkActionSection, EditTabActionSection, OpenLinkActionSections, OpenSpaceAction } from "./actions";
+import {
+  CopyLinkActionSection,
+  EditTabActionSection,
+  OpenLinkActionSections,
+  OpenSpaceAction,
+  CreateQuickLinkActionSection,
+} from "./actions";
 import { HistoryEntry, Space, Suggestion, Tab } from "./types";
 import { getDomain, getLastVisitedAt, getSpaceTitle } from "./utils";
 
@@ -72,6 +78,7 @@ export function TabListItem(props: { tab: Tab; searchText: string; mutate: Mutat
         <ActionPanel>
           <OpenLinkActionSections url={props.tab.url} searchText={props.searchText} />
           <CopyLinkActionSection url={props.tab.url} title={props.tab.title} />
+          <CreateQuickLinkActionSection url={props.tab.url} title={props.tab.title} />
           <EditTabActionSection tab={props.tab} mutate={props.mutate} />
         </ActionPanel>
       }

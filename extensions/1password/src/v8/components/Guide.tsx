@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Detail, Icon, environment, openExtensionPreferences } from "@raycast/api";
 import { join } from "path";
+import resetCache from "../../reset-cache";
 
 const binary = join(environment.assetsPath, "binary-instruction.png");
 const settings = join(environment.assetsPath, "1password-settings.png");
@@ -36,6 +37,7 @@ export function Guide() {
         <ActionPanel>
           <Action icon={Icon.Gear} title="Open Extension Preferences" onAction={openExtensionPreferences} />
           <Action.Open title="Open 1Password Settings" target="onepassword://settings" />
+          <Action title="Reset Cache" icon={Icon.Trash} onAction={() => resetCache()}></Action>
         </ActionPanel>
       }
     />

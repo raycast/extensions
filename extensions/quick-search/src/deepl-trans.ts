@@ -1,10 +1,11 @@
-import { showHUD } from "@raycast/api";
+import { LaunchProps, showHUD } from "@raycast/api";
 import { DeeplOpner } from "./utils/opener";
 import { isNotEmpty, readtext } from "./utils/readtxt";
 
-export default async () => {
+export default async (props: LaunchProps) => {
+  const fallbackText = props.fallbackText;
   try {
-    const text = await readtext();
+    const text = await readtext(fallbackText);
     if (isNotEmpty(text)) {
       await DeeplOpner(text);
       showHUD("🎉 Open Deepl search");

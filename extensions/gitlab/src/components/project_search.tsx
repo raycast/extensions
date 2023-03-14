@@ -7,6 +7,7 @@ import {
   CloneProjectInGitPod,
   CloneProjectInVSCodeAction,
   CopyProjectIDToClipboardAction,
+  CopyCloneUrlToClipboardAction,
   CreateNewProjectIssuePushAction,
   OpenProjectBranchesPushAction,
   OpenProjectIssuesPushAction,
@@ -45,6 +46,7 @@ export function ProjectListItem(props: { project: Project }): JSX.Element {
           </ActionPanel.Section>
           <ActionPanel.Section>
             <CopyProjectIDToClipboardAction project={project} />
+            <CopyCloneUrlToClipboardAction shortcut={{ modifiers: ["cmd"], key: "u" }} project={project} />
           </ActionPanel.Section>
           <ActionPanel.Section>
             <OpenProjectIssuesPushAction project={project} />
