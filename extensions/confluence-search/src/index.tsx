@@ -13,8 +13,14 @@ import fetch, { AbortError, RequestInit, Response } from "node-fetch";
 import { useCallback, useEffect, useRef, useState } from "react";
 import https = require("https");
 
-const prefs: { instanceType: string; user: string; instance: string; unsafeHttps: boolean; token: string, sort: string } =
-  getPreferenceValues();
+const prefs: {
+  instanceType: string;
+  user: string;
+  instance: string;
+  unsafeHttps: boolean;
+  token: string;
+  sort: string;
+} = getPreferenceValues();
 export const confluenceUrl =
   prefs.instanceType == "cloud" ? `https://${prefs.instance}/wiki` : `https://${prefs.instance}`;
 
@@ -93,7 +99,7 @@ function useSearch() {
       cancelRef.current = new AbortController();
       setIsLoading(true);
       try {
-        const response = await searchConfluence(searchText, _type, cancelRef.current.signal);
+        const response: SearchResult[] = await searchConfluence(searchText, _type, cancelRef.current.signal);
         setResults(response);
       } catch (error) {
         if (error instanceof AbortError) {
@@ -194,7 +200,6 @@ function getConfluenceEditUrl(result: SearchResult) {
   return `${confluenceUrl}/pages/editpage.action?pageId=${result.id}`;
 }
 
-
 function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
   return (
     <List.Item
@@ -238,7 +243,7 @@ interface SearchResult {
   icon: string;
   subTitle: string;
   mediaType: string;
-  lastmodified: string;
+  lastModified: string;
 }
 
 interface APIResponse {
