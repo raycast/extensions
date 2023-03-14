@@ -1,6 +1,6 @@
-import { ActionPanel, Action, List, closeMainWindow } from "@raycast/api";
+import { ActionPanel, Action, List, closeMainWindow, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
-import fs from "node:fs";
+import fs from "node:fs/promises";
 import path from "node:path";
 import os from "node:os";
 import { runJxa } from "run-jxa";
@@ -8,26 +8,66 @@ import { runJxa } from "run-jxa";
 export default function Command() {
   const [searchText, setSearchText] = useState("");
   const [results, setResults] = useState<SearchResult[]>([]);
+  const [error, setError] = useState(false);
+
+  const showError = async (title: string, message: string) => {
+    await showToast({
+      style: Toast.Style.Failure,
+      title,
+      message,
+    });
+
+    setError(true);
+  };
+
+  const init = async () => {
+    const configPath = ".warp/launch_configurations";
+    const fullPath = path.join(os.homedir(), configPath);
+
+    const exists = await fs.stat(fullPath).catch(() => false);
+
+    if (exists === false) {
+      return showError("Launch configuration directory missing", `~/${configPath} wasn't found on your computer!`);
+    }
+
+    const files = await fs.readdir(fullPath).catch(() => null);
+
+    if (files === null) {
+      return showError(
+        "Error reading launch configuration directory",
+        "Something went wrong while reading the launch configuration directory."
+      );
+    }
+
+    const fileList = files
+      .filter((file) => file.includes(".yaml"))
+      .map((file) => ({ name: file.replace(".yaml", ""), path: path.join(fullPath, file) }));
+
+    if (fileList.length === 0) {
+      return showError(
+        "No launch configurations found",
+        "You need to create at least one launch configuration before launching https://docs.warp.dev/features/sessions/launch-configurations."
+      );
+    }
+
+    setResults(fileList);
+  };
 
   useEffect(() => {
-    const fullPath = path.join(os.homedir(), ".warp/launch_configurations");
-
-    fs.readdir(fullPath, (error, files) => {
-      if (error) {
-        console.log(error);
-      }
-
-      setResults(files.map((file) => ({ name: file.replace(".yaml", ""), path: path.join(fullPath, file) })));
-    });
+    init();
   }, []);
 
   return (
     <List
-      isLoading={results.length === 0}
+      isLoading={results.length === 0 && !error}
       onSearchTextChange={setSearchText}
       searchBarPlaceholder="Searching for launch configurations..."
       throttle
     >
+      <List.EmptyView
+        title="No launch configurations found"
+        description="You need to create at least one launch configuration before launching https://docs.warp.dev/features/sessions/launch-configurations."
+      />
       <List.Section title="Results" subtitle={results?.length + ""}>
         {results
           ?.filter((f) => f.name.includes(searchText.toLowerCase()))
