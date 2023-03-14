@@ -1,5 +1,5 @@
 import { LocalStorage } from "@raycast/api";
-import { PasswordGeneratorOptions } from "~/types/passwords";
+import { LOCAL_STORAGE_KEY } from "~/constants/general";
 import { DEFAULT_PASSWORD_OPTIONS } from "~/constants/passwords";
 import { PasswordGeneratorOptions } from "~/types/passwords";
 

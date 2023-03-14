@@ -7,6 +7,8 @@ import ShowSecureNoteAction from "~/components/searchVault/actions/ShowSecureNot
 import SearchCommonActions from "~/components/searchVault/actions/CommonActions";
 import CopyUsernameAction from "~/components/searchVault/actions/CopyUsernameAction";
 import CopyTextFieldsActions from "~/components/searchVault/actions/CopyTextFieldsActions";
+import OpenUrlInBrowserAction from "~/components/searchVault/actions/OpenUrlInBrowserAction";
+import ShowCardDetailsAction from "~/components/searchVault/actions/ShowCardDetailsAction";
 
 const { primaryAction } = getPreferenceValues();
 
@@ -19,8 +21,10 @@ const VaultItemActionPanel = () => (
       </ComponentReverser>
       <CopyTotpAction />
       <CopyUsernameAction />
+      <OpenUrlInBrowserAction />
     </ActionPanel.Section>
     <ActionPanel.Section>
+      <ShowCardDetailsAction />
       <ShowSecureNoteAction />
     </ActionPanel.Section>
     <ActionPanel.Section>
