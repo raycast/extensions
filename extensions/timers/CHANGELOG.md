@@ -1,5 +1,11 @@
 # Timers Changelog
 
+## [Alert sound volume customization and pausable stopwatches] - 2023-03-10
+
+- Fix bug where timer completion notification would not send until after timer was dismissed when "Ring Continuously" setting was turned on
+- Add volume customization for the timer alert sound
+- Add ability to pause stopwatches
+
 ## [Added missing 2 minute timer in README] - 2023-01-02
 
 ## [Minor fixes, alert sound preview command] - 2022-12-21

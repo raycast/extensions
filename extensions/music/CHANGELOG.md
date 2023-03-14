@@ -1,5 +1,9 @@
 # Apple Music Changelog
 
+## [Update] - 2023-03-13
+
+- Fixed a localization bug
+
 ## [Update] - 2023-03-01
 
 - Fixed dislike song command

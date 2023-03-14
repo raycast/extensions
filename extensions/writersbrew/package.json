@@ -78,6 +78,20 @@
       "mode": "no-view"
     },
     {
+      "name": "translate-to-tc",
+      "title": "Translate to Traditional Chinese",
+      "subtitle": "Writersbrew",
+      "description": "Translates from any language to traditional chinese.",
+      "mode": "no-view"
+    },
+    {
+      "name": "translate-to-sc",
+      "title": "Translate to Simplified Chinese",
+      "subtitle": "Writersbrew",
+      "description": "Translates from any language to simplified chinese.",
+      "mode": "no-view"
+    },
+    {
       "name": "translate-to-dutch",
       "title": "Translate to Dutch",
       "subtitle": "Writersbrew",

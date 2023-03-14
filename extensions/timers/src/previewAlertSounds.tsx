@@ -1,6 +1,6 @@
-import { Action, ActionPanel, environment, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, environment, getPreferenceValues, Icon, List } from "@raycast/api";
 import { exec } from "child_process";
-import { SoundData } from "./types";
+import { Preferences, SoundData } from "./types";
 
 export default function Command() {
   const soundData: SoundData[] = [
@@ -46,8 +46,9 @@ export default function Command() {
     if (fileName === "speak_timer_name") {
       command = `say "Untitled Timer"`;
     } else {
+      const prefs = getPreferenceValues<Preferences>();
       const selectedSoundPath = `${environment.assetsPath + "/" + fileName}`;
-      command = `afplay "${selectedSoundPath}"`;
+      command = `afplay "${selectedSoundPath}" --volume ${prefs.volumeSetting.replace(",", ".")}`;
     }
     exec(command, (error, stderr) => {
       if (error) {

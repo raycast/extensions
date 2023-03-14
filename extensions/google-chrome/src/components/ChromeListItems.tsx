@@ -21,13 +21,13 @@ function HistoryItem({ profile, entry: { url, title, id } }: { entry: HistoryEnt
   );
 }
 
-function TabListItem(props: { tab: Tab; useOriginalFavicon: boolean }) {
+function TabListItem(props: { tab: Tab; useOriginalFavicon: boolean; onTabClosed?: () => void }) {
   return (
     <List.Item
       title={props.tab.title}
       subtitle={props.tab.urlWithoutScheme()}
       keywords={[props.tab.urlWithoutScheme()]}
-      actions={<ChromeActions.TabList tab={props.tab} />}
+      actions={<ChromeActions.TabList tab={props.tab} onTabClosed={props.onTabClosed} />}
       icon={props.useOriginalFavicon ? props.tab.favicon : props.tab.googleFavicon()}
     />
   );

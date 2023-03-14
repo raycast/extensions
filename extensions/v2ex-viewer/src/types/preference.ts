@@ -1,4 +1,4 @@
 export type Preferences = {
-  token?: string;
+  token: string;
   nodes: string;
 };
