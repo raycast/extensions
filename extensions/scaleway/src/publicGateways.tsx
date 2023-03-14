@@ -1,3 +1,3 @@
-import { PublicGateways } from './publicGateways/PublicGateways'
+import { PublicGateways } from './products/publicGateways/PublicGateways'
 
 export default () => <PublicGateways />

@@ -1,3 +1,3 @@
-import { Registry } from './registry/Registry'
+import { Registry } from './products/registry/Registry'
 
 export default () => <Registry />
