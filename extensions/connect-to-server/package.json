@@ -1,0 +1,46 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "connect-to-server",
+  "title": "Connect to Server",
+  "description": "Connect to server",
+  "icon": "command-icon.png",
+  "author": "CyrusN",
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "items",
+      "type": "textfield",
+      "title": "inline JSON of the locations",
+      "required": true,
+      "description": "A JSON Array with `title` and `link`, please see README for the schema"
+    }
+  ],
+  "commands": [
+    {
+      "name": "index",
+      "title": "Choose Drives",
+      "description": "Connect server",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.48.7"
+  },
+  "devDependencies": {
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
