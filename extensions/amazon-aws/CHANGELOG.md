@@ -1,5 +1,9 @@
 # Amazon AWS Changelog
 
+## [Add Show All Action] - 2023-03-08
+
+- Add "Show All" action to SSM Parameters to bypass the requirement of needing four characters for search.
+
 ## [Fix Profile Dropdown] - 2023-03-04
 
 - Fix profile dropdown issue when reading from credentials file

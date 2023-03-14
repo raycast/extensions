@@ -158,7 +158,7 @@ export default function IssueAttachments({ attachments }: IssueAttachmentsProps)
               <ActionPanel>
                 <Action icon={Icon.Download} title="Download File" onAction={() => downloadSingleFile(attachment)} />
 
-                <Action icon={Icon.Download} title="Download all Files" onAction={downloadAllFiles} />
+                <Action icon={Icon.Download} title="Download All Files" onAction={downloadAllFiles} />
               </ActionPanel>
             }
           />

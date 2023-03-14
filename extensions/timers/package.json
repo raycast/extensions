@@ -216,10 +216,18 @@
       "description": "Whether or not to copy the elapsed time on a stopwatch when it is stopped.",
       "label": "Copy elapsed time",
       "default": false
+    },
+    {
+      "name": "volumeSetting",
+      "type": "textfield",
+      "required": true,
+      "title": "Timer Alert Volume",
+      "description": "Volume of the alert sound. Decimal between 0 and 1.",
+      "default": "1"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.44.0"
+    "@raycast/api": "^1.48.0"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",

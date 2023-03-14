@@ -84,9 +84,11 @@ export default function IssueFormCustomFields({ fields, itemProps, users }: Issu
             break;
           }
           case CustomFieldSchema.userPicker: {
+            // We can't use FormUserDropdown (using an autocomplete URL) here because of a strange OAuth bug
+            // See: https://community.developer.atlassian.com/t/oauth-2-0-is-not-enabled-for-method/60843/6
             const props = itemProps[key] as Form.ItemProps<string>;
             component = (
-              <Form.Dropdown {...props} title="Assignee" storeValue>
+              <Form.Dropdown {...props} title={name} storeValue>
                 <Form.Dropdown.Item title="Unassigned" value="" icon={Icon.Person} />
 
                 {users?.map((user) => {
