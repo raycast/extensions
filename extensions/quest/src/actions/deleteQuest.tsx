@@ -5,7 +5,7 @@ function DeleteQuestAction(props: { onDelete: () => void }) {
     <Action
       icon={Icon.Trash}
       title="Delete Quest"
-      shortcut={{ modifiers: ["ctrl"], key: "x" }}
+      shortcut={{ modifiers: ["cmd"], key: "x" }}
       onAction={props.onDelete}
       style={Action.Style.Destructive}
     />

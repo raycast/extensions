@@ -7,6 +7,7 @@ function EditQuestAction(props: { onCreate: (quest: Omit<Quest, "id">) => void; 
     <Action.Push
       icon={Icon.Pencil}
       title="Edit Quest"
+      shortcut={{ modifiers: ["cmd"], key: "e" }}
       target={<CreateQuestForm onCreate={props.onCreate} quest={props.quest} actionLabel="Update Quest" />}
     />
   );
