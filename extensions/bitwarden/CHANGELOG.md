@@ -4,7 +4,12 @@
 
 - Added a "Generate Password (Quick)" command that allows to quickly generate a password and copy and/or paste it right away.
 
-## [Codebase Refactor] - 2023-03-03
+## [New Vault Item Action] - 2023-03-13
+
+- Added "Show Card Details" action for vault items.
+- Added a new action to the vault items that allows you to open the main URI in the browser.
+
+## [Codebase refactor] - 2023-03-03
 
 - Cleanup and reorganization of the whole codebase
 
