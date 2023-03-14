@@ -24,7 +24,7 @@
           "name": "queryArgument",
           "placeholder": "15+1",
           "type": "text",
-          "required": true
+          "required": false
         }
       ]
     }
