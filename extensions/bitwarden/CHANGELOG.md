@@ -3,6 +3,7 @@
 ## [Codebase refactor] - 2023-03-03
 
 - Cleanup and reorganization of the whole codebase
+- Added a new action to the vault items that allows you to open the main URI in the browser.
 
 ## [Enhancements] - 2023-01-17
 
