@@ -1,6 +1,6 @@
 import { Quest } from "../types";
 
-export default function generateClipboardExport(quest: Quest, options: { type: "markdown" | "jira" }) {
+export function generateClipboardExport(quest: Quest, options: { type: "markdown" | "jira" }) {
   const { title, tasks } = quest;
 
   const tasksString = tasks.map((task) => {

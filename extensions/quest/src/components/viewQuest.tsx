@@ -1,6 +1,6 @@
 import { Action, ActionPanel, List, useNavigation, Icon, showToast, Clipboard } from "@raycast/api";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import generateClipboardExport from "../lib/generateClipboardExport";
+import { generateClipboardExport } from "../lib/util";
 import { Quest } from "../types";
 
 function ViewQuest(props: { quest: Quest; quests: [Quest[], React.Dispatch<React.SetStateAction<Quest[]>>] }) {
