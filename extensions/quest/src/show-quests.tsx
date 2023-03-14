@@ -9,7 +9,7 @@ import CloseQuestAction from "./actions/closeQuest";
 import EmptyView from "./components/emptyView";
 import { nanoid } from "nanoid";
 import { environment } from "@raycast/api";
-import exampleQuests from "../fixtures/exampleQuests";
+import exampleQuests from "./fixtures/exampleQuests";
 import { getProgressIcon } from "@raycast/utils";
 
 type State = {

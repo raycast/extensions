@@ -1,4 +1,4 @@
-import type { Quest } from "../src/types";
+import type { Quest } from "../types";
 import { nanoid } from "nanoid";
 
 const exampleQuests: Quest[] = [
