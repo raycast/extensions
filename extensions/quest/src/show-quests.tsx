@@ -1,4 +1,4 @@
-import { ActionPanel, List, LocalStorage, confirmAlert, Icon } from "@raycast/api";
+import { ActionPanel, List, LocalStorage, confirmAlert, Icon, Alert } from "@raycast/api";
 import { useCallback, useEffect, useState } from "react";
 import { Quest } from "./types";
 import CreateQuestAction from "./actions/createQuest";
@@ -63,18 +63,21 @@ export default function Command() {
 
   const handleDelete = useCallback(
     async (quest: Quest) => {
-      if (
-        await confirmAlert({
-          title: "Delete Quest",
-          message: `Are you sure you want to delete the quest "${quest.title}"?`,
-          icon: Icon.Important,
-        })
-      ) {
-        const newQuests = [...quests];
-        const questIndex = newQuests.findIndex((q) => q.id === quest.id);
-        newQuests.splice(questIndex, 1);
-        setQuests(newQuests);
-      }
+      await confirmAlert({
+        title: "Delete Quest",
+        message: `Are you sure you want to delete the quest "${quest.title}"?`,
+        icon: Icon.Important,
+        primaryAction: {
+          title: "Delete",
+          style: Alert.ActionStyle.Destructive,
+          onAction: () => {
+            const newQuests = [...quests];
+            const questIndex = newQuests.findIndex((q) => q.id === quest.id);
+            newQuests.splice(questIndex, 1);
+            setQuests(newQuests);
+          },
+        },
+      });
     },
     [quests, setQuests]
   );
