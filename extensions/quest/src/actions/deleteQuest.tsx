@@ -7,6 +7,7 @@ function DeleteQuestAction(props: { onDelete: () => void }) {
       title="Delete Quest"
       shortcut={{ modifiers: ["ctrl"], key: "x" }}
       onAction={props.onDelete}
+      style={Action.Style.Destructive}
     />
   );
 }
