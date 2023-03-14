@@ -67,7 +67,7 @@ export default function Command() {
         await confirmAlert({
           title: "Delete Quest",
           message: `Are you sure you want to delete the quest "${quest.title}"?`,
-          icon: Icon.Important
+          icon: Icon.Important,
         })
       ) {
         const newQuests = [...quests];

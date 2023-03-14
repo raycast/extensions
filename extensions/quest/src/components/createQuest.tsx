@@ -39,7 +39,7 @@ function CreateQuestForm(props: { onCreate: (quest: Omit<Quest, "id">) => void; 
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-          <Action.SubmitForm title={actionLabel} onSubmit={handleSubmit} />
+            <Action.SubmitForm title={actionLabel} onSubmit={handleSubmit} />
           </ActionPanel.Section>
           <Action title="Add Task" onAction={addTask} shortcut={{ key: "+", modifiers: ["cmd"] }} />
           <Action title="Remove last Task" onAction={removeTask} shortcut={{ key: "-", modifiers: ["cmd"] }} />
