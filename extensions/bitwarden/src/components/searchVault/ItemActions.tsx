@@ -16,6 +16,7 @@ import SearchCommonActions from "~/components/searchVault/CommonActions";
 import { useBitwarden } from "~/context/bitwarden";
 import { useSession } from "~/context/session";
 import { Item, Reprompt } from "~/types/vault";
+import { getCardDetailsCopyValue, getCardDetailsMarkdown } from "~/utils/cards";
 import { capitalize, codeBlock } from "~/utils/strings";
 
 const { primaryAction } = getPreferenceValues();
@@ -90,6 +91,22 @@ const SearchItemActions = (props: SearchItemActionsProps) => {
         </ActionPanel.Section>
       )}
       <ActionPanel.Section>
+        {!!card && (
+          <Action.Push
+            title="Show Card Details"
+            icon={Icon.CreditCard}
+            target={
+              <Detail
+                markdown={getCardDetailsMarkdown(card)}
+                actions={
+                  <ActionPanel>
+                    <Action.CopyToClipboard title="Copy Card Details" content={getCardDetailsCopyValue(card)} />
+                  </ActionPanel>
+                }
+              />
+            }
+          />
+        )}
         {!!notes && (
           <Action.Push
             title="Show Secure Note"
