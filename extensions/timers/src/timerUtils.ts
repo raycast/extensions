@@ -19,15 +19,16 @@ async function startTimer(timeInSeconds: number, timerName = "Untitled") {
   cmdParts.push(
     `if [ -f "${masterName}" ]; then osascript -e 'display notification "Timer \\"${timerName}\\" complete" with title "Ding!"'`
   );
+  const afplayString = `afplay "${selectedSoundPath}" --volume ${prefs.volumeSetting.replace(",", ".")}`;
   if (prefs.selectedSound === "speak_timer_name") {
     cmdParts.push(`say "${timerName}"`);
   } else {
-    cmdParts.push(`afplay "${selectedSoundPath}" --volume ${prefs.volumeSetting}`);
+    cmdParts.push(afplayString);
   }
   if (prefs.ringContinuously) {
     const dismissFile = `${masterName}`.replace(".timer", ".dismiss");
     writeFileSync(dismissFile, ".dismiss file for Timers");
-    cmdParts.push(`while [ -f "${dismissFile}" ]; do afplay "${selectedSoundPath}"; done`);
+    cmdParts.push(`while [ -f "${dismissFile}" ]; do ${afplayString}; done`);
   }
   cmdParts.push(`rm "${masterName}"; else echo "Timer deleted"; fi`);
   exec(cmdParts.join(" && "), (error, stderr) => {

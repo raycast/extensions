@@ -48,7 +48,7 @@ export default function Command() {
     } else {
       const prefs = getPreferenceValues<Preferences>();
       const selectedSoundPath = `${environment.assetsPath + "/" + fileName}`;
-      command = `afplay "${selectedSoundPath}" --volume ${prefs.volumeSetting}`;
+      command = `afplay "${selectedSoundPath}" --volume ${prefs.volumeSetting.replace(",", ".")}`;
     }
     exec(command, (error, stderr) => {
       if (error) {
