@@ -1,3 +1,4 @@
+import "@total-typescript/ts-reset";
 import { environment, showToast, Toast } from "@raycast/api";
 import { readdirSync, writeFileSync, readFileSync, rmSync, existsSync, mkdirSync, PathLike } from "fs";
 import { join } from "path";
@@ -70,14 +71,18 @@ export function loadSingleSnippet(path: string): Omit<SnippetWithPath, "locId"> 
 
 function listAllFilesRecursive(dir: PathLike): string[] {
   const files = readdirSync(dir, { withFileTypes: true });
-  const fileNames = files.map((file) => {
+
+  let jsonFiles: string[] = [];
+
+  files.forEach((file) => {
     if (file.isDirectory()) {
-      return listAllFilesRecursive(join(dir.toString(), file.name));
-    } else {
-      return join(dir.toString(), file.name);
+      jsonFiles = jsonFiles.concat(listAllFilesRecursive(join(dir.toString(), file.name)));
+    } else if (file.name.endsWith(".json")) {
+      jsonFiles.push(join(dir.toString(), file.name));
     }
   });
-  return fileNames.flat();
+
+  return jsonFiles;
 }
 
 export async function saveSnippetFile(data: Snippet, location?: Location | string): Promise<boolean> {
@@ -90,17 +95,18 @@ export async function saveSnippetFile(data: Snippet, location?: Location | strin
         if (typeof v === "string") return v;
         return join(v.path, `${snippet.id}.json`);
       })
-      .catch(getDefaultPath())
+      .catch(join(getDefaultPath(), `${snippet.id}.json`))
       .parse(location);
-
-    console.log(path);
-
-    // const path = typeof location === "string" ? location : location?.path ?? getDefaultPath();
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { locId, ...rest } = snippet; // don't save locId to file
 
-    writeFileSync(path, JSON.stringify(rest));
+    try {
+      writeFileSync(path, JSON.stringify(rest));
+    } catch (e) {
+      console.error(e);
+      return false;
+    }
     return true;
   }
   console.error(parseResult.error);
