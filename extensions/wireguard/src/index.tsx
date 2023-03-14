@@ -11,7 +11,15 @@ export default function Command() {
 
   sortVPNList(data);
 
-  return (
+  return data?.length === 0 ? (
+    <List>
+      <List.EmptyView
+        title="Something is wrong!"
+        description="Wireguard is not installed or no wireguard list found."
+        icon="☹️"
+      />
+    </List>
+  ) : (
     <List isLoading={isLoading}>
       {data?.map((item, index) => (
         <List.Item

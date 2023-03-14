@@ -5,14 +5,14 @@ export default async () => {
   const GET_VPN_NAMES = `${SHELL_PATH}scutil --nc list | grep "com.wireguard.macos" | awk -F'"' '{print$2}'`;
   const VPNItems: VPN[] = [];
   const VPNList: string = await runScript(GET_VPN_NAMES);
+  if (VPNList === "") {
+    return [];
+  }
   const VPNArray = VPNList.split(/\r?\n/);
-  //console.log(VPNArray.length);
   if (VPNArray.length > 0) {
     for (const VPNName of VPNArray) {
       const isConnected = await getVPNStatusByName(VPNName);
-      //        console.log("isConnected -> " + isConnected);
       const VPNItem: VPN = { name: VPNName, isConnected: isConnected };
-      //console.log(VPNItem);
       VPNItems.push(VPNItem);
     }
   }
