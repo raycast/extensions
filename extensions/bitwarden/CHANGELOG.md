@@ -1,5 +1,9 @@
 # Bitwarden Changelog
 
+## [New Vault Item Action] - 2023-03-13
+
+- Added "Show Card Details" action for vault items.
+
 ## [Codebase refactor] - 2023-03-03
 
 - Cleanup and reorganization of the whole codebase
