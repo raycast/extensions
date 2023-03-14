@@ -9,7 +9,8 @@
     "daniel-stoneuk",
     "pomdtr",
     "andreaselia",
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "eth-p"
   ],
   "license": "MIT",
   "keywords": [
@@ -55,6 +56,37 @@
       "subtitle": "Bitwarden",
       "description": "Generate a password using Bitwarden.",
       "mode": "view"
+    },
+    {
+      "name": "generate-password-quick",
+      "title": "Generate Password (Quick)",
+      "subtitle": "Bitwarden",
+      "description": "Generate a password using Bitwarden and copy and/or paste it into the active app right away.",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "generatePasswordQuickAction",
+          "type": "dropdown",
+          "title": "Action to perform after generating",
+          "description": "The action performed after generating the password.",
+          "required": false,
+          "default": "copyAndPaste",
+          "data": [
+            {
+              "title": "Paste to Active App",
+              "value": "paste"
+            },
+            {
+              "title": "Copy to Clipboard",
+              "value": "copy"
+            },
+            {
+              "title": "Copy and Paste to Active App",
+              "value": "copyAndPaste"
+            }
+          ]
+        }
+      ]
     }
   ],
   "preferences": [

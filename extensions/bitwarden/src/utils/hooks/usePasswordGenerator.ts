@@ -1,10 +1,10 @@
 import { LocalStorage } from "@raycast/api";
 import { useEffect, useReducer } from "react";
-import { DEFAULT_PASSWORD_OPTIONS } from "~/constants/passwords";
 import { LOCAL_STORAGE_KEY } from "~/constants/general";
 import { PasswordGeneratorOptions } from "~/types/passwords";
 import useAbortController from "~/utils/hooks/useAbortController";
 import { useBitwarden } from "~/context/bitwarden";
+import { getPasswordGeneratorOptions } from "~/utils/passwords";
 
 const initialPasswordGeneratorState = {
   options: undefined as PasswordGeneratorOptions | undefined,
@@ -78,11 +78,7 @@ function usePasswordGenerator() {
   };
 
   const restoreStoredOptions = async () => {
-    const storedOptions = await LocalStorage.getItem<string>(LOCAL_STORAGE_KEY.PASSWORD_OPTIONS);
-    const newOptions: PasswordGeneratorOptions = {
-      ...DEFAULT_PASSWORD_OPTIONS,
-      ...(storedOptions ? JSON.parse(storedOptions) : {}),
-    };
+    const newOptions = await getPasswordGeneratorOptions();
     dispatch({ type: "setOptions", options: newOptions });
     await generatePassword(newOptions);
   };

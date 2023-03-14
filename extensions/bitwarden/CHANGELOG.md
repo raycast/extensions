@@ -1,13 +1,14 @@
 # Bitwarden Changelog
 
-## [New Vault Item Action] - 2023-03-13
+## [Updates] - 2023-03-13
 
+- Added a "Generate Password (Quick)" command that allows to quickly generate a password and copy and/or paste it right away.
 - Added "Show Card Details" action for vault items.
+- Added a new action to the vault items that allows you to open the main URI in the browser.
 
 ## [Codebase refactor] - 2023-03-03
 
 - Cleanup and reorganization of the whole codebase
-- Added a new action to the vault items that allows you to open the main URI in the browser.
 
 ## [Enhancements] - 2023-01-17
 
