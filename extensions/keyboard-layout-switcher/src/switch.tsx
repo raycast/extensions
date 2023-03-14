@@ -33,7 +33,7 @@ function toastErrorOptions(message: string, error: string): Toast.Options {
 async function handleLayoutSwitch(source: ILayout) {
   try {
     await source.activate();
-    await Promise.all([showHUD(`Activated ${source.title} Layout`), popToRoot(), closeMainWindow()]);
+    await Promise.all([showHUD(`⌨️ Activated '${source.title}' Layout`), popToRoot(), closeMainWindow()]);
   } catch (e) {
     await showToast(toastErrorOptions("Couldn't Activate Layout", `${e}`));
   }
