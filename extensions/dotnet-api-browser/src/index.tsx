@@ -9,9 +9,9 @@ export default function Command() {
   const { data, isLoading } = useFetch(
     "https://learn.microsoft.com/api/apibrowser/dotnet/search?" +
       new URLSearchParams({
-        "search": searchText,
+        search: searchText,
         "api-version": "0.2",
-        "locale": "en-us" // According to Raycast, we should only support en-US, for now and not use localized requests.
+        locale: "en-us", // According to Raycast, we should only support en-US, for now and not use localized requests.
       }),
     {
       parseResponse: parseFetchResponse,
@@ -51,39 +51,38 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
   );
 }
 
-function itemTypeToIcon(itemType : SearchResultItemType): { value : Image.ImageLike, tooltip: string }  {
+function itemTypeToIcon(itemType: SearchResultItemType): { value: Image.ImageLike; tooltip: string } {
   switch (itemType) {
     case SearchResultItemType.Constructor:
     case SearchResultItemType.Method:
-      return { value: { source: Icon.Box, tintColor: Color.Purple }, tooltip: itemType};
+      return { value: { source: Icon.Box, tintColor: Color.Purple }, tooltip: itemType };
     case SearchResultItemType.Event:
-      return { value: { source: Icon.Bolt, tintColor: Color.Yellow }, tooltip: itemType};
+      return { value: { source: Icon.Bolt, tintColor: Color.Yellow }, tooltip: itemType };
     case SearchResultItemType.Class:
     case SearchResultItemType.Struct:
-      return { value: { source: Icon.Layers, tintColor: Color.Orange }, tooltip: itemType};
+      return { value: { source: Icon.Layers, tintColor: Color.Orange }, tooltip: itemType };
     case SearchResultItemType.Enum:
-      return { value: { source: Icon.List, tintColor: Color.Orange }, tooltip: itemType};
+      return { value: { source: Icon.List, tintColor: Color.Orange }, tooltip: itemType };
     case SearchResultItemType.Namespace:
-      return { value: { source: Icon.Code, tintColor: Color.Green }, tooltip: itemType};
+      return { value: { source: Icon.Code, tintColor: Color.Green }, tooltip: itemType };
     case SearchResultItemType.Property:
     case SearchResultItemType.Field:
-      return { value: { source: Icon.Code, tintColor: Color.Purple }, tooltip: itemType};
+      return { value: { source: Icon.Code, tintColor: Color.Purple }, tooltip: itemType };
     default:
       return { value: Icon.Code, tooltip: itemType };
   }
 }
 
 async function parseFetchResponse(response: Response) {
-  const json = (await response.json()) as
-    | {
-        results: {
-          displayName: string;
-          url: string;
-          itemType: string,
-          description: string;
-        }[],
-        count: number;
-      };
+  const json = (await response.json()) as {
+    results: {
+      displayName: string;
+      url: string;
+      itemType: string;
+      description: string;
+    }[];
+    count: number;
+  };
 
   if (!response.ok) {
     return []; // The search API is super weird about certain inputs. If we get an error assume it's something that can't be searched for.
@@ -99,18 +98,20 @@ async function parseFetchResponse(response: Response) {
   });
 }
 
-function postProcessApiName(item : SearchResult): string {
+function postProcessApiName(item: SearchResult): string {
   const preferences = getPreferenceValues<Preferences>();
 
   if (!preferences.truncate) {
     return item.name;
   }
 
-  let lastDot = item.name.lastIndexOf('.');
+  const lastDot = item.name.lastIndexOf(".");
 
   if (lastDot <= 10) {
     return item.name;
   }
+
+  const secondToLastDot = item.name.lastIndexOf(".", lastDot - 1);
 
   switch (item.itemType) {
     case SearchResultItemType.Class:
@@ -122,7 +123,6 @@ function postProcessApiName(item : SearchResult): string {
     case SearchResultItemType.Method:
     case SearchResultItemType.Property:
     case SearchResultItemType.Event:
-      let secondToLastDot = item.name.lastIndexOf('.', lastDot - 1);
       if (secondToLastDot >= 0) {
         return item.name.substring(secondToLastDot + 1);
       }
@@ -143,7 +143,7 @@ enum SearchResultItemType {
   Enum = "Enum",
   Property = "Property",
   Namespace = "Namespace",
-  Field = "Field"
+  Field = "Field",
 }
 
 interface SearchResult {
@@ -154,5 +154,5 @@ interface SearchResult {
 }
 
 interface Preferences {
-  truncate: boolean
+  truncate: boolean;
 }
