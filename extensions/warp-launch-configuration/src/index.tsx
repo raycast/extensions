@@ -32,7 +32,7 @@ export default function Command() {
 
     const files = await fs.readdir(fullPath).catch(() => null);
 
-    if (files === null) {
+    if (files === null || typeof files === "undefined") {
       return showError(
         "Error reading launch configuration directory",
         "Something went wrong while reading the launch configuration directory."
