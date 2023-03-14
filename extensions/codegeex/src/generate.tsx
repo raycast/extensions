@@ -1,5 +1,4 @@
-import { showToast, Toast, getPreferenceValues, List, ActionPanel, Action, Clipboard } from "@raycast/api";
-import { useState } from "react";
+import { getPreferenceValues, List, ActionPanel, Action } from "@raycast/api";
 import { codeGenerateApi } from "./api";
 import { useSearch, onCopy } from "./hooks";
 
