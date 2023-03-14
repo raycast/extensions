@@ -14,7 +14,7 @@ import {
 import { useEffect, useState } from "react";
 import { dislikeCurrentlyPlayingTrack, likeCurrentlyPlayingTrack, startPlaySimilar } from "./spotify/client";
 import { SpotifyPlayingState, SpotifyState, TrackInfo } from "./spotify/types";
-import { getState, getTrack, nextTrack, pause, play, previousTrack } from "./spotify/applescript";
+import { getState, getTrack, nextTrack, pause, play, previousTrack, skipForward, rewindBackward } from "./spotify/applescript";
 import { SpotifyProvider, useSpotify } from "./utils/context";
 
 function NowPlayingMenuBar() {
@@ -81,10 +81,15 @@ function NowPlayingMenuBar() {
     return null;
   }
 
-  const trackTitle = currentlyPlayingTrack
-    ? `${currentlyPlayingTrack.artist} - ${currentlyPlayingTrack.name}`
-    : undefined;
-
+  let trackTitle: string | undefined = undefined;
+  if (currentlyPlayingTrack?.id.split(':')[1] === 'track') {
+    currentlyPlayingTrack.isPodcast = false
+    trackTitle = `${currentlyPlayingTrack.artist} - ${currentlyPlayingTrack.name}`
+  } else if (currentlyPlayingTrack?.id.split(':')[1] === 'episode') {
+    currentlyPlayingTrack.isPodcast = true
+    trackTitle = `${currentlyPlayingTrack.name}`
+  }
+  console.log(trackTitle, "TRACKKK")
   const optimizeTitle = (title: string | undefined) => {
     if (title === undefined) {
       return title;
@@ -117,18 +122,18 @@ function NowPlayingMenuBar() {
             }}
           />
           <MenuBarExtra.Item
-            icon={Icon.Forward}
-            title={"Next Track"}
+            icon={currentlyPlayingTrack?.isPodcast ? Icon.RotateClockwise : Icon.Forward}
+            title={currentlyPlayingTrack?.isPodcast ? "Skip 15 sec" : "Next Track"}
             onAction={async () => {
-              await nextTrack();
+              currentlyPlayingTrack?.isPodcast ? await skipForward(15) : await nextTrack();
               await fetchPlayerAndTrackState();
             }}
           />
           <MenuBarExtra.Item
-            icon={Icon.Rewind}
-            title={"Previous Track"}
+            icon={currentlyPlayingTrack?.isPodcast ? Icon.RotateAntiClockwise : Icon.Rewind}
+            title={currentlyPlayingTrack?.isPodcast ? "Rewind 15 sec" : "Previous Track"}
             onAction={async () => {
-              await previousTrack();
+              currentlyPlayingTrack?.isPodcast ? await rewindBackward(15) : await previousTrack();
               await fetchPlayerAndTrackState();
             }}
           />
@@ -209,8 +214,9 @@ function NowPlayingMenuBar() {
             </>
           )}
         </>
-      )}
-    </MenuBarExtra>
+      )
+      }
+    </MenuBarExtra >
   );
 }
 

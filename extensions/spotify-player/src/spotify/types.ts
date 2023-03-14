@@ -24,4 +24,5 @@ export interface TrackInfo {
   spotify_url: string;
   starred: boolean;
   track_number: number;
+  isPodcast: boolean;
 }

@@ -71,6 +71,8 @@ tell application "${applicationName}" to set sound volume to (my max(sound volum
   pause: `pause`,
   next: `next track`,
   previous: `previous track`,
+  skipForward: (seconds: number) => `set player position to (player position + ${seconds})`,
+  rewindBackward: (seconds: number) => `set player position to (player position - ${seconds})`,
   jumpTo: (applicationName: string, position: number) =>
     `tell application "${applicationName}" to set player position to ${position}`,
   isRunning: (applicationName: string) => `get running of application "${applicationName}"`,

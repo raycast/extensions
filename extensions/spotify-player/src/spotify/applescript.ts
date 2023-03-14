@@ -42,6 +42,12 @@ export async function nextTrack() {
 export async function previousTrack() {
   await runAppleScript(await buildScriptEnsuringSpotifyIsRunning(scripts.previous));
 }
+export async function skipForward(seconds: number) {
+  await runAppleScript(await buildScriptEnsuringSpotifyIsRunning(scripts.skipForward(seconds)));
+}
+export async function rewindBackward(seconds: number) {
+  await runAppleScript(await buildScriptEnsuringSpotifyIsRunning(scripts.rewindBackward(seconds)));
+}
 export async function volumeUp() {
   const applicationName = await spotifyApplicationName();
   await runAppleScript(scripts.volumeUp(applicationName));
