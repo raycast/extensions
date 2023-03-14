@@ -1,4 +1,4 @@
-import { ActionPanel, Action, List, closeMainWindow, showToast, Toast } from "@raycast/api";
+import { ActionPanel, Action, List, closeMainWindow, showToast, Toast, Icon } from "@raycast/api";
 import { useEffect, useState } from "react";
 import fs from "node:fs/promises";
 import path from "node:path";
@@ -94,6 +94,7 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
           <ActionPanel.Section>
             <Action
               title="Launch"
+              icon={Icon.Terminal}
               onAction={() => {
                 runJxa(appleScript);
                 closeMainWindow();
