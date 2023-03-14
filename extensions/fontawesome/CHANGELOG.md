@@ -1,5 +1,8 @@
 # Font Awesome Changelog
 
+## [Added action] - 2023-02-28
+- Added "Copy FA Glyph" action which copies the unicode font-awesome glyph to clipboard for use with font-awesome font files
+
 ## [Removed HTTP Proxy] - 2023-02-28
 
 - Updated extension to make use of Raycast's image coloring API instead of proxying the HTTP request and modifying the SVG.
