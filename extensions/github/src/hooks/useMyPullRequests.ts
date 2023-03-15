@@ -30,7 +30,6 @@ export function useMyPullRequests(repository: string | null) {
         reviewedByClosedQuery: `is:pr reviewed-by:@me archived:false is:closed ${updatedFilter} ${repositoryFilter}`,
         numberOfOpenItems: 20,
         numberOfClosedItems: 20,
-        avatarSize: 64,
       });
     },
     [repository]

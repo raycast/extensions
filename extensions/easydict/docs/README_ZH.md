@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/Eudic-1664029439.png" height="128">
+  <img src="https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/Eudic-1671180098.png" height="256">
   <h1 align="center">Easydict</h1>
   <h4 align="center"> Easy to look up words or translate text</p>
 <p align="center">🇨🇳 🇺🇸 🇯🇵 🇰🇷 🇫🇷 🇪🇸 🇵🇹 🇮🇹 🇷🇺 🇩🇪 🇸🇦 🇸🇪 🇳🇱 🇷🇴 🇹🇭 🇸🇰 🇭🇺 🇬🇷 🇩🇰 🇫🇮 🇵🇱 🇨🇿 🇹🇷 🇱🇹 🇱🇻 🇺🇦 🇧🇬 🇮🇩 🇲🇾 🇸🇮 🇪🇪 🇻🇳 🇮🇷 🇵🇰 🇹🇱 🇹🇦 🇮🇳 🇵🇭 🇫🇮 🇰🇭 🇱🇦 🇧🇳 🇲🇲 🇳🇴 🇷🇸 🇭🇷 🇲🇳 🇮🇱 </p>
@@ -15,7 +15,7 @@
 
 `Easydict` 是一个简洁易用的 Raycast 词典扩展，可轻松优雅地查找单词或翻译文本，特别针对英语和中文单词进行了优化。开箱即用，能自动识别输入文本语言，目前支持 [Linguee](https://www.linguee.com/) 和[有道词典](https://www.youdao.com/)查询，支持 🍎**苹果系统翻译**，[DeepL](https://www.deepl.com/translator)，[谷歌](https://translate.google.com)，[Bing](https://www.bing.com/translator), [百度](https://fanyi.baidu.com/)，[腾讯](https://fanyi.qq.com/)，[火山](https://translate.volcengine.com/translate)，[有道](https://fanyi.youdao.com/)和[彩云翻译](https://fanyi.caiyunapp.com/#/)。
 
-![easydict-1-1665794507](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/easydict-1-1665794507.png)
+![easydict-1-1671806758](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/easydict-1-1671806758.png)
 
 ## 功能
 
@@ -34,12 +34,25 @@
 - [x] 支持 DeepL，Google，Bing，百度，腾讯，火山，有道和彩云翻译。
 - [x] 支持 48+ 种语言。
 
-下一步：
-
-- [ ] 桌面版 Electron App（构思中）。
-- [ ] 支持查看历史记录。
-
 **如果觉得这个扩展还不错，给个 [Star](https://github.com/tisfeng/Raycast-Easydict) ⭐️ 支持一下吧 (^-^)**
+
+---
+
+## 推荐
+
+我的另一个项目，[Easydict](https://github.com/tisfeng/Easydict) 是一个原生的 macOS 翻译词典 App，一个免费开源版本的 [Bob](https://apps.apple.com/cn/app/id1630034110#?platform=mac)，欢迎尝试。
+
+**查单词**
+![iShot_2023-01-28_17.40.28-1674901716](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/iShot_2023-01-28_17.40.28-1674901716.png)
+
+**翻译文本**
+![iShot_2023-01-28_17.49.53-1674901731](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/iShot_2023-01-28_17.49.53-1674901731.png)
+
+**自动划词查询**
+![iShot_2023-01-20_11.01.35-1674183779](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/iShot_2023-01-20_11.01.35-1674183779.gif)
+
+**OCR 截图翻译**
+![iShot_2023-01-20_11.26.25-1674185209](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/iShot_2023-01-20_11.26.25-1674185209.gif)
 
 ---
 
@@ -388,12 +401,6 @@ Linguee 默认支持系统代理。
 - [DeepL](https://www.deepl.com/translator)
 
 ![A2ECFJ-1664270926](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/A2ECFJ-1664270926.png)
-
-## 友情推荐
-
-[`Bob`](https://bobtranslate.com/) 是一款 macOS 平台 **翻译** 和 **OCR** 软件。
-
-![image-20220620150946277](https://cdn.jsdelivr.net/gh/tisfeng/ImageBed@main/uPic/image-20220620150946277.png)
 
 ## 感谢
 

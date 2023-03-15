@@ -1,19 +1,27 @@
-import { Color, Icon, List } from "@raycast/api";
+import { Color, Icon, List, getPreferenceValues } from "@raycast/api";
 import { MutatePromise } from "@raycast/utils";
 import { format } from "date-fns";
 
-import { RepositoryFieldsFragment } from "../generated/graphql";
+import { ExtendedRepositoryFieldsFragment } from "../generated/graphql";
 import { getGitHubUser } from "../helpers/users";
 
 import RepositoryActions from "./RepositoryActions";
 
 type RepositoryListItemProps = {
-  repository: RepositoryFieldsFragment;
-  onVisit: (repository: RepositoryFieldsFragment) => void;
-  mutateList: MutatePromise<RepositoryFieldsFragment[] | undefined>;
+  repository: ExtendedRepositoryFieldsFragment;
+  onVisit: (repository: ExtendedRepositoryFieldsFragment) => void;
+  mutateList: MutatePromise<ExtendedRepositoryFieldsFragment[] | undefined>;
+};
+
+type SearchRepositoriesPrefs = {
+  includeForks: boolean;
+  includeArchived: boolean;
+  displayOwnerName: boolean;
 };
 
 export default function RepositoryListItem({ repository, mutateList, onVisit }: RepositoryListItemProps) {
+  const preferences = getPreferenceValues<SearchRepositoriesPrefs>();
+
   const owner = getGitHubUser(repository.owner);
   const numberOfStars = repository.stargazerCount;
   const updatedAt = new Date(repository.updatedAt);
@@ -27,7 +35,7 @@ export default function RepositoryListItem({ repository, mutateList, onVisit }: 
 
   if (repository.primaryLanguage) {
     accessories.unshift({
-      text: repository.primaryLanguage.name,
+      tag: repository.primaryLanguage.name,
       tooltip: `Language: ${repository.primaryLanguage.name}`,
     });
   }
@@ -42,7 +50,7 @@ export default function RepositoryListItem({ repository, mutateList, onVisit }: 
   return (
     <List.Item
       icon={owner.icon}
-      title={repository.name}
+      title={`${preferences.displayOwnerName ? `${repository.owner.login}/` : ""}${repository.name}`}
       {...(numberOfStars > 0
         ? {
             subtitle: {

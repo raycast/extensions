@@ -22,13 +22,15 @@ function piholeToggle(action: string, duration?: number) {
 }
 
 export default function () {
-  const { PIHOLE_URL } = getPreferenceValues();
+  const { PIHOLE_URL, API_TOKEN } = getPreferenceValues();
   const [currentStatus, updateCurrentStatus] = useState<string>();
   const [timeoutInfo, updateTimeoutInfo] = useState<string>();
 
   useEffect(() => {
     async function getStatus() {
-      const response = await fetchRequestTimeout(`http://${cleanPiholeURL(PIHOLE_URL)}/admin/api.php?summary`);
+      const response = await fetchRequestTimeout(
+        `http://${cleanPiholeURL(PIHOLE_URL)}/admin/api.php?summary&auth=${API_TOKEN}`
+      );
       if (response == "query-aborted" || response == undefined) {
         updateTimeoutInfo("query-aborted");
       } else {

@@ -1,4 +1,4 @@
-import { Action, ActionPanel, closeMainWindow, List, showToast, Toast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, closeMainWindow, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
 import { flow, pipe } from "fp-ts/lib/function";
 import * as O from "fp-ts/Option";
 import * as S from "fp-ts/string";
@@ -87,7 +87,7 @@ export default function PlayLibraryAlbum() {
 }
 
 function Actions({ name, pop }: { name: string; pop: () => void }) {
-  const title = SFSymbols.PLAY + `  Start Album "${name}"`;
+  const title = `Start Album "${name}"`;
 
   const handleSubmit = (shuffle?: boolean) => async () => {
     await pipe(
@@ -102,8 +102,8 @@ function Actions({ name, pop }: { name: string; pop: () => void }) {
 
   return (
     <ActionPanel>
-      <Action title={title} onAction={handleSubmit(false)} />
-      <Action title={SFSymbols.SHUFFLE + `  Shuffle Album ${name}`} onAction={handleSubmit(true)} />
+      <Action title={title} onAction={handleSubmit(false)} icon={Icon.Play} />
+      <Action title={`Shuffle Album ${name}`} onAction={handleSubmit(true)} icon={Icon.Shuffle} />
     </ActionPanel>
   );
 }

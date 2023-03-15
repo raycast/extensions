@@ -397,6 +397,35 @@ export default function Command() {
 
 <PropsTableFromJSDoc component="Action.ToggleQuickLook" />
 
+### Action.PickDate
+
+Action to pick a date.
+
+#### Example
+
+```typescript
+import { ActionPanel, List, Action } from "@raycast/api";
+
+export default function Command() {
+  return (
+    <List>
+      <List.Item
+        title="Todo"
+        actions={
+          <ActionPanel>
+            <Action.PickDate title="Set Due Date…" />
+          </ActionPanel>
+        }
+      />
+    </List>
+  );
+}
+```
+
+#### Props
+
+<PropsTableFromJSDoc component="Action.PickDate" />
+
 ## Types
 
 ### Snippet
@@ -418,3 +447,14 @@ Defines the visual style of the Action.
 Use [Action.Style.Regular](#action.style) for displaying a regular actions.
 Use [Action.Style.Destructive](#action.style) when your action has something that user should be careful about.
 Use the confirmation [Alert](../feedback/alert.md) if the action is doing something that user cannot revert.
+
+### Action.PickDate.Type
+
+The types of date components the user can pick with an `Action.PickDate`.
+
+#### Enumeration members
+
+| Name     | Description                                                      |
+| -------- | ---------------------------------------------------------------- |
+| DateTime | Hour and second can be picked in addition to year, month and day |
+| Date     | Only year, month, and day can be picked                          |

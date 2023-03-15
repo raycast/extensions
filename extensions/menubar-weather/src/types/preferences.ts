@@ -1,7 +1,11 @@
 export interface Preferences {
-  apiKey: string;
   cityName: string;
   longitude: string;
   latitude: string;
-  unit: string;
+  tempUnits: string;
+  windSpeedUnits: string;
+  precipitationUnits: string;
+  showSun: boolean;
+  showLocation: boolean;
+  showForecast: boolean;
 }

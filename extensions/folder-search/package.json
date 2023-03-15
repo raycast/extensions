@@ -5,6 +5,9 @@
   "description": "Search for folders on your Mac",
   "icon": "folder-search.png",
   "author": "GastroGeek",
+  "contributors": [
+    "omarshahine"
+  ],
   "license": "MIT",
   "categories": [
     "Productivity",
@@ -53,12 +56,15 @@
     "@raycast/api": "^1.39.2",
     "@raycast/utils": "^1.3.3",
     "binary-split": "^1.0.5",
+    "fs-extra": "^11.1.0",
     "run-applescript": "^6.0.0",
     "through2-map": "^3.0.0",
     "yup": "^0.32.11"
   },
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@types/fs-extra": "^9.0.13",
+    "@types/node": "^18.11.10",
+    "@typescript-eslint/eslint-plugin": "^5.45.1",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",

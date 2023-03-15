@@ -6,7 +6,8 @@
   "icon": "icon.png",
   "author": "thomas",
   "contributors": [
-    "mattisssa"
+    "mattisssa",
+    "NoorBayari"
   ],
   "license": "MIT",
   "commands": [
@@ -20,11 +21,20 @@
   ],
   "preferences": [
     {
-      "name": "token",
-      "title": "Auth Token",
-      "type": "password",
       "description": "Auth Token to communicate with Sentry",
-      "required": true
+      "name": "token",
+      "required": true,
+      "title": "Auth Token",
+      "type": "password"
+    },
+    {
+      "description": "URL of the Sentry instance to connect with",
+      "name": "url",
+      "placeholder": "https://sentry.io",
+      "required": false,
+      "default": "https://sentry.io",
+      "title": "Sentry URL",
+      "type": "textfield"
     }
   ],
   "dependencies": {

@@ -5,7 +5,6 @@ import { ProjectResult } from "../api/getProjects";
 
 import useTeams from "../hooks/useTeams";
 import useUsers from "../hooks/useUsers";
-import useMilestones from "../hooks/useMilestones";
 
 import { getLinearClient } from "../helpers/withLinearClient";
 import { getTeamIcon } from "../helpers/teams";
@@ -26,21 +25,19 @@ export default function EditProjectForm({ project, mutateProjects }: EditProject
 
   const { teams, isLoadingTeams } = useTeams();
   const { users, isLoadingUsers } = useUsers();
-  const { milestones, isLoadingMilestones } = useMilestones();
 
   const { handleSubmit, itemProps } = useForm<CreateProjectValues>({
     async onSubmit(values) {
       const toast = await showToast({ style: Toast.Style.Animated, title: "Editing project" });
 
       try {
-        const { success } = await linearClient.projectUpdate(project.id, {
+        const { success } = await linearClient.updateProject(project.id, {
           teamIds: values.teamIds,
           name: values.name,
           description: values.description,
           state: values.state,
           memberIds: values.memberIds,
           ...(values.leadId ? { leadId: values.leadId } : {}),
-          ...(values.milestoneId ? { milestoneId: values.milestoneId } : {}),
           ...(values.startDate ? { startDate: values.startDate } : {}),
           ...(values.targetDate ? { targetDate: values.targetDate } : {}),
         });
@@ -70,7 +67,6 @@ export default function EditProjectForm({ project, mutateProjects }: EditProject
       state: project.state,
       leadId: project.lead?.id,
       memberIds: project.members.nodes.map((p) => p.id) || [],
-      milestoneId: project.milestone?.id,
       startDate: project.startDate ? new Date(project.startDate) : null,
       targetDate: project.targetDate ? new Date(project.targetDate) : null,
     },
@@ -78,7 +74,7 @@ export default function EditProjectForm({ project, mutateProjects }: EditProject
 
   return (
     <Form
-      isLoading={isLoadingTeams || isLoadingUsers || isLoadingMilestones}
+      isLoading={isLoadingTeams || isLoadingUsers}
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Edit Project" onSubmit={handleSubmit} />
@@ -130,18 +126,6 @@ export default function EditProjectForm({ project, mutateProjects }: EditProject
             <Form.TagPicker.Item key={user.id} value={user.id} title={user.name} icon={getUserIcon(user)} />
           ))}
         </Form.TagPicker>
-      ) : null}
-
-      {milestones && milestones.length > 0 ? (
-        <Form.Dropdown title="Milestone" {...itemProps.milestoneId}>
-          <Form.Dropdown.Item title="Upcoming" value="" icon={Icon.Map} />
-
-          {milestones?.map((milestone) => {
-            return (
-              <Form.Dropdown.Item title={milestone.name} value={milestone.id} key={milestone.id} icon={Icon.Map} />
-            );
-          })}
-        </Form.Dropdown>
       ) : null}
 
       <Form.DatePicker title="Start Date" type={Form.DatePicker.Type.Date} {...itemProps.startDate} />

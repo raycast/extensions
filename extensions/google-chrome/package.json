@@ -2,33 +2,42 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "google-chrome",
   "title": "Google Chrome",
-  "description": "Search and open tabs and history in Google Chrome.",
-  "icon": "google_chrome-icon.png",
+  "description": "Search open tabs, bookmarks and history in Google Chrome.",
+  "icon": "chrome-icon.png",
   "author": "Codely",
   "contributors": [
-    "bromanko"
+    "bromanko",
+    "crisboarna",
+    "andreaselia"
   ],
   "license": "MIT",
   "commands": [
     {
-      "name": "google-chrome-go-to-tab",
+      "name": "new-tab",
+      "title": "New Tab",
+      "subtitle": "Google Chrome",
+      "description": "Open a new Google Chrome tab.",
+      "mode": "view"
+    },
+    {
+      "name": "search-tab",
       "title": "Search Tabs",
       "subtitle": "Google Chrome",
       "description": "List all tabs and go to the selected.",
       "mode": "view"
     },
     {
-      "name": "google-chrome-search-history",
+      "name": "search-history",
       "title": "Search History",
       "subtitle": "Google Chrome",
       "description": "Search browser history.",
       "mode": "view"
     },
     {
-      "name": "google-chrome-new-tab",
-      "title": "New Tab",
+      "name": "search-bookmarks",
+      "title": "Search Bookmarks",
       "subtitle": "Google Chrome",
-      "description": "Open a new Google Chrome tab.",
+      "description": "Search browser bookmarks.",
       "mode": "view"
     }
   ],
@@ -37,31 +46,54 @@
       "name": "useOriginalFavicon",
       "title": "Fav icon",
       "label": "Extract the favicon from every open tab",
-      "description": "Before enable this, you should enable 'View > Developer > Allow JavaScript from Apple Events' in every Google Chrome profile.",
+      "description": "Before enable this, you should enable 'View > Developer > Allow JavaScript from Apple Events' in every Chrome profile.",
       "required": false,
       "type": "checkbox",
       "default": false
+    },
+    {
+      "name": "openTabInProfile",
+      "title": "Open Tab In Profile",
+      "type": "dropdown",
+      "required": false,
+      "description": "When 'Default(classic), the tab will be opened in the profile open, or topmost profile window if multiple windows are open. When 'Current Profile', the tab will be opened in the profile specified in the 'Profile' field. When 'Original Profile' it will open in original profile tab is sourced from",
+      "default": "default",
+      "data": [
+        {
+          "title": "Default(classic)",
+          "value": "default"
+        },
+        {
+          "title": "Current Profile",
+          "value": "profile_current"
+        },
+        {
+          "title": "Original Profile",
+          "value": "profile_original"
+        }
+      ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.25.0",
-    "@raycast/utils": "^1.1.0",
-    "run-applescript": "^6.0.0",
-    "sql.js": "^1.6.2"
+    "@raycast/api": "^1.44.0",
+    "@raycast/utils": "^1.4.13",
+    "run-applescript": "6.0.0"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@types/sql.js": "^1.4.3",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
-    "react-devtools": "^4.19.2",
-    "typescript": "^4.4.3"
+    "prettier": "^2.5.1",
+    "typescript": "^4.9.4"
   },
   "scripts": {
     "build": "ray build -e dist",
-    "dev": "ray develop"
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
   }
 }

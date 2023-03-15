@@ -6,7 +6,15 @@ import { tell } from "../apple-script";
 import { ScriptError } from "../models";
 
 export const activate = tell("Music", "activate");
+
+// TODO: Move to [`player-controls.tsx`]
+/**
+ *
+ * Set shuffle status
+ */
 export const setShuffle: RTE.ReaderTaskEither<boolean, ScriptError, string> = pipe(
   R.ask<boolean>(),
   R.map((shuffle) => tell("Music", `set shuffle enabled to ${shuffle.toString()}`))
 );
+
+export const getLibraryName = tell("Music", "get name of source 1");

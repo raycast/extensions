@@ -32,7 +32,7 @@ export function PullRequestForm({ draftValues }: PullRequestFormProps) {
   const { data: repositories } = useMyRepositories();
   const { github } = getGitHubClient();
 
-  const { handleSubmit, itemProps, values, setValue } = useForm<PullRequestFormValues>({
+  const { handleSubmit, itemProps, values, setValue, reset, focus } = useForm<PullRequestFormValues>({
     async onSubmit(values) {
       const toast = await showToast({ style: Toast.Style.Animated, title: "Creating pull request" });
 
@@ -55,7 +55,6 @@ export function PullRequestForm({ draftValues }: PullRequestFormProps) {
             assigneeIds: values.assignees,
             labelsIds: values.labels,
             milestoneId: values.milestone || null,
-            avatarSize: 64,
           });
 
           // It's not possible to add a PR to a project from the initPullRequest call
@@ -82,6 +81,21 @@ export function PullRequestForm({ draftValues }: PullRequestFormProps) {
             };
           }
         }
+
+        reset({
+          title: "",
+          from: "",
+          into: "",
+          draft: false,
+          description: "",
+          reviewers: [],
+          assignees: [],
+          labels: [],
+          projects: [],
+          milestone: "",
+        });
+
+        focus("repository");
       } catch (error) {
         toast.style = Toast.Style.Failure;
         toast.title = "Failed creating pull request";

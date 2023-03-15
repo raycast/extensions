@@ -10,12 +10,12 @@ import {
   isValidTime,
 } from "./PowerUtils";
 import { useInterval } from "usehooks-ts";
-import { ExecError, PowerMointorState } from "../Interfaces";
+import { ExecError, PowerMonitorState } from "../Interfaces";
 
 const PowerMonitor = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<ExecError>();
-  const [state, setState] = useState<PowerMointorState>({
+  const [state, setState] = useState<PowerMonitorState>({
     batteryLevel: "Loading...",
     isCharging: false,
     cycleCount: "Loading...",

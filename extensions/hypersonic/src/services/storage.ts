@@ -1,68 +1,46 @@
 import { LocalStorage } from '@raycast/api'
-import { Todo } from '@/types/todo'
 
-export const loadDatabase = async (): Promise<{
+export type Preferences = {
   databaseUrl: string
+  databaseName: string
   databaseId: string
-}> => {
-  const database: string | undefined = await LocalStorage.getItem(
-    'NOTION_DATABASE'
+  normalizedUrl: string
+  properties: {
+    title: string
+    date: string
+    url?: string
+    status: {
+      type: 'status' | 'checkbox'
+      name: string
+      doneName?: string
+      completedStatuses?: string[]
+      inProgressId?: string
+      notStartedId?: string
+    }
+    tag?: string
+    assignee?: string
+    project?: string
+    relatedDatabase?: {
+      databaseId?: string
+      title?: string
+      status?: {
+        type?: 'status' | 'checkbox'
+        name?: string
+        doneName?: string
+        completedStatuses?: string[]
+      }
+    }
+  }
+}
+
+export const storePreferences = (preferences: Preferences) => {
+  return LocalStorage.setItem('PREFERENCES', JSON.stringify(preferences))
+}
+
+export const loadPreferences = async (): Promise<Preferences> => {
+  const preferences: string | undefined = await LocalStorage.getItem(
+    'PREFERENCES'
   )
-  return JSON.parse(database || '{}')
-}
 
-export const storeDatabase = (database: {
-  databaseUrl: string
-  databaseId: string
-}) => {
-  return LocalStorage.setItem('NOTION_DATABASE', JSON.stringify(database))
-}
-
-export const storeDoneProperty = (data: {
-  doneName: string
-  inProgressId: string
-  type: string
-}) => {
-  return LocalStorage.setItem('DONE_PROPERTY', JSON.stringify(data))
-}
-
-export const loadDoneProperty = async (): Promise<{
-  doneName: string
-  inProgressId: string
-  type: string
-}> => {
-  const data: string | undefined = await LocalStorage.getItem('DONE_PROPERTY')
-
-  return JSON.parse(data || '{}')
-}
-
-export const loadTodos = async () => {
-  const localTodos: string | undefined = await LocalStorage.getItem(
-    'NOTION_TODOS'
-  )
-  return JSON.parse(localTodos || '[]') as Todo[]
-}
-
-export const storeTodos = (todos: any[]) => {
-  return LocalStorage.setItem('NOTION_TODOS', JSON.stringify(todos))
-}
-
-export const storeTodayCoin = (coin: string) => {
-  const today = new Date().toISOString().split('T')[0]
-  return LocalStorage.setItem(`coin-${today}`, coin)
-}
-
-export const loadTodayCoin = () => {
-  const today = new Date().toISOString().split('T')[0]
-  return LocalStorage.getItem(`coin-${today}`)
-}
-
-export const storeHasDoneToday = () => {
-  const today = new Date().toISOString().split('T')[0]
-  return LocalStorage.setItem(`done-${today}`, true)
-}
-
-export const loadHasDoneToday = () => {
-  const today = new Date().toISOString().split('T')[0]
-  return LocalStorage.getItem(`done-${today}`)
+  return JSON.parse(preferences || '{}')
 }

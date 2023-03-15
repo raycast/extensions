@@ -26,7 +26,6 @@ function SearchPullRequests() {
       const result = await github.searchPullRequests({
         query: `is:pr author:@me archived:false ${searchText}`,
         numberOfItems: 50,
-        avatarSize: 64,
       });
 
       return result.search.edges?.map((edge) => edge?.node as PullRequestFieldsFragment);

@@ -1,14 +1,17 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "github-beta",
-  "title": "GitHub Beta",
+  "name": "github",
+  "title": "GitHub",
   "description": "Work with issues, pull requests, manage workflows, search repositories and stay on top of notifications",
   "icon": "icon.png",
   "access": "public",
   "author": "thomaslombart",
   "owner": "raycast",
   "contributors": [
-    "tholanda"
+    "tholanda",
+    "tonka3000",
+    "khasbilegt",
+    "pernielsentikaer"
   ],
   "categories": [
     "Developer Tools",
@@ -19,7 +22,7 @@
     {
       "name": "my-pull-requests",
       "title": "My Pull Requests",
-      "description": "List pull requests you created, particpated or you were mentioned.",
+      "description": "List pull requests you created, participated in, or were mentioned in.",
       "mode": "view"
     },
     {
@@ -59,6 +62,12 @@
       "mode": "view"
     },
     {
+      "name": "create-branch",
+      "title": "Create Branch",
+      "description": "Create a branch in one of your GitHub repositories",
+      "mode": "view"
+    },
+    {
       "name": "search-repositories",
       "title": "Search Repositories",
       "description": "Search in your public or private repositories by name.",
@@ -72,6 +81,22 @@
           "default": true,
           "label": "Include Forks",
           "description": "Includes forked repositories in search results"
+        },
+        {
+          "name": "includeArchived",
+          "type": "checkbox",
+          "required": false,
+          "default": false,
+          "label": "Include Archived",
+          "description": "Includes archived repositories in search results"
+        },
+        {
+          "name": "displayOwnerName",
+          "type": "checkbox",
+          "required": false,
+          "default": false,
+          "label": "Display Owner Names",
+          "description": "Display owner name alongside repository name in search results"
         }
       ]
     },
@@ -90,7 +115,6 @@
     {
       "name": "unread-notifications",
       "title": "Unread Notifications",
-      "subtitle": "GitHub",
       "description": "Shows unread notifications in the macOS menu bar.",
       "mode": "menu-bar",
       "interval": "15m",
@@ -104,6 +128,12 @@
           "required": false
         }
       ]
+    },
+    {
+      "name": "my-discussions",
+      "title": "My Discussions",
+      "description": "Show your Discussions",
+      "mode": "view"
     }
   ],
   "preferences": [
@@ -118,8 +148,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.43.2",
-    "@raycast/utils": "^1.4.8",
+    "@raycast/api": "^1.48.8",
+    "@raycast/utils": "^1.4.15",
     "date-fns": "^2.29.3",
     "graphql-request": "^5.0.0",
     "lodash": "^4.17.21",
@@ -131,14 +161,12 @@
     "@graphql-codegen/typescript": "2.7.3",
     "@graphql-codegen/typescript-graphql-request": "^4.5.5",
     "@graphql-codegen/typescript-operations": "2.5.3",
+    "@raycast/eslint-config": "^1.0.5",
     "@types/lodash": "^4.14.184",
     "@types/node": "^18.7.18",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
     "concurrently": "^7.4.0",
     "dotenv": "^16.0.2",
     "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-import": "^2.26.0",
     "prettier": "^2.5.1",
     "typescript": "^4.4.3"

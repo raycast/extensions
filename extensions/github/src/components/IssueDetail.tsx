@@ -1,4 +1,4 @@
-import { Detail } from "@raycast/api";
+import { Color, Detail } from "@raycast/api";
 import { MutatePromise, useCachedPromise } from "@raycast/utils";
 import { format } from "date-fns";
 
@@ -37,7 +37,7 @@ export default function IssueDetail({ initialIssue, mutateList }: PullRequestDet
     mutate: mutateDetail,
   } = useCachedPromise(
     async (issueId) => {
-      const issueDetails = await github.issueDetails({ nodeId: issueId, avatarSize: 64 });
+      const issueDetails = await github.issueDetails({ nodeId: issueId });
       return issueDetails.node as IssueDetailFieldsFragment;
     },
     [initialIssue.id],
@@ -51,6 +51,7 @@ export default function IssueDetail({ initialIssue, mutateList }: PullRequestDet
 
   const status = getIssueStatus(issue);
   const author = getIssueAuthor(issue);
+  const branch = issue.linkedBranches.nodes?.length ? issue.linkedBranches.nodes[0]?.ref?.name : null;
 
   return (
     <Detail
@@ -64,6 +65,14 @@ export default function IssueDetail({ initialIssue, mutateList }: PullRequestDet
           <Detail.Metadata.TagList title="Status">
             <Detail.Metadata.TagList.Item {...status} />
           </Detail.Metadata.TagList>
+
+          {branch ? (
+            <Detail.Metadata.Label
+              title="Branch"
+              icon={{ source: "branch.svg", tintColor: Color.PrimaryText }}
+              text={branch}
+            />
+          ) : null}
 
           {issue.updatedAt ? (
             <Detail.Metadata.Label title="Updated" text={format(new Date(issue.updatedAt), "dd MMM")} />

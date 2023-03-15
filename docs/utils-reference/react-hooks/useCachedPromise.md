@@ -65,7 +65,8 @@ Returns an object with the [AsyncState](#asyncstate) corresponding to the execut
 import { Detail, ActionPanel, Action } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 
-export default function Command() {
+const Demo = () => {
+  const abortable = useRef<AbortController>();
   const { isLoading, data, revalidate } = useCachedPromise(
     async (url: string) => {
       const response = await fetch(url);
@@ -89,7 +90,7 @@ export default function Command() {
       }
     />
   );
-}
+};
 ```
 
 ## Promise Argument dependent on List search text
@@ -100,17 +101,15 @@ This behaviour can cause some flickering (initial data -> fetched data -> argume
 
 ```tsx
 import { useState } from "react";
-import { List } from "@raycast/api";
+import { List, ActionPanel, Action } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 
-type Item = { id: string; title: string };
-
-export default function Command() {
+const Demo = () => {
   const [searchText, setSearchText] = useState("");
   const { isLoading, data } = useCachedPromise(
     async (url: string) => {
       const response = await fetch(url);
-      const result: Item[] = await response.json();
+      const result = await response.text();
       return result;
     },
     ["https://api.example"],
@@ -122,12 +121,12 @@ export default function Command() {
 
   return (
     <List isLoading={isLoading} searchText={searchText} onSearchTextChange={setSearchText} throttle>
-      {data?.map((item) => (
+      {(data || []).map((item) => (
         <List.Item key={item.id} title={item.title} />
       ))}
     </List>
   );
-}
+};
 ```
 
 ## Mutation and Optimistic Updates
@@ -142,7 +141,7 @@ When doing so, you can specify a `rollbackOnError` function to mutate back the d
 import { Detail, ActionPanel, Action, showToast, Toast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 
-export default function Command() {
+const Demo = () => {
   const { isLoading, data, mutate } = useCachedPromise(
     async (url: string) => {
       const response = await fetch(url);
@@ -174,9 +173,7 @@ export default function Command() {
       // the data will automatically be rolled back to its previous value
       toast.style = Toast.Style.Failure;
       toast.title = "Could not append Foo";
-      if (err instanceof Error) {
-        toast.message = err.message;
-      }
+      toast.message = err.message;
     }
   };
 
@@ -191,7 +188,7 @@ export default function Command() {
       }
     />
   );
-}
+};
 ```
 
 ## Types
@@ -203,7 +200,7 @@ An object corresponding to the execution state of the function.
 ```ts
 // Initial State
 {
-  isLoading: true,
+  isLoading: true, // or `false` if `options.execute` is `false`
   data: undefined,
   error: undefined
 }

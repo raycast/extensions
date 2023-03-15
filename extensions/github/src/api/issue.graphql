@@ -11,7 +11,7 @@ fragment IssueFields on Issue {
     ... on Bot {
       id
       login
-      avatarUrl(size: $avatarSize)
+      avatarUrl(size: 64)
     }
     ... on User {
       ...UserFields
@@ -19,19 +19,31 @@ fragment IssueFields on Issue {
     ... on Mannequin {
       id
       login
-      avatarUrl(size: $avatarSize)
+      avatarUrl(size: 64)
     }
     ... on Organization {
       id
       login
       name
-      avatarUrl(size: $avatarSize)
+      avatarUrl(size: 64)
     }
     ... on EnterpriseUserAccount {
       id
       login
       name
-      avatarUrl(size: $avatarSize)
+      avatarUrl(size: 64)
+    }
+  }
+  linkedBranches(first: 50) {
+    totalCount
+    nodes {
+      ... on LinkedBranch {
+        id
+        ref {
+          id
+          name
+        }
+      }
     }
   }
   milestone {
@@ -39,7 +51,7 @@ fragment IssueFields on Issue {
     title
   }
   repository {
-    ...RepositoryFields
+    ...ShortRepositoryFields
   }
   comments(first: 0) {
     totalCount
@@ -59,7 +71,6 @@ query searchCreatedIssues(
   $createdClosedQuery: String!
   $numberOfOpenItems: Int!
   $numberOfClosedItems: Int!
-  $avatarSize: Int!
 ) {
   createdOpen: search(query: $createdOpenQuery, type: ISSUE, first: $numberOfOpenItems) {
     nodes {
@@ -115,12 +126,7 @@ query repositoryProjectsForIssues($owner: String!, $name: String!, $issueNumber:
   }
 }
 
-query searchOpenIssues(
-  $assignedOpenQuery: String!
-  $mentionedOpenQuery: String!
-  $numberOfOpenItems: Int!
-  $avatarSize: Int!
-) {
+query searchOpenIssues($assignedOpenQuery: String!, $mentionedOpenQuery: String!, $numberOfOpenItems: Int!) {
   assignedOpen: search(query: $assignedOpenQuery, type: ISSUE, first: $numberOfOpenItems) {
     nodes {
       ...IssueFields
@@ -147,7 +153,7 @@ fragment IssueDetailFields on Issue {
     ... on Bot {
       id
       login
-      avatarUrl(size: $avatarSize)
+      avatarUrl(size: 64)
     }
     ... on User {
       ...UserFields
@@ -155,22 +161,22 @@ fragment IssueDetailFields on Issue {
     ... on Mannequin {
       id
       login
-      avatarUrl(size: $avatarSize)
+      avatarUrl(size: 64)
     }
     ... on Organization {
       id
       login
       name
-      avatarUrl(size: $avatarSize)
+      avatarUrl(size: 64)
     }
     ... on EnterpriseUserAccount {
       id
       login
       name
-      avatarUrl(size: $avatarSize)
+      avatarUrl(size: 64)
     }
   }
-  labels(first: 25, orderBy: { field: NAME, direction: ASC }) {
+  labels(first: 50, orderBy: { field: NAME, direction: ASC }) {
     totalCount
     nodes {
       id
@@ -179,12 +185,22 @@ fragment IssueDetailFields on Issue {
       isDefault
     }
   }
+  linkedBranches(first: 50) {
+    totalCount
+    nodes {
+      ... on LinkedBranch {
+        ref {
+          name
+        }
+      }
+    }
+  }
   milestone {
     id
     title
   }
   repository {
-    ...RepositoryFields
+    ...ShortRepositoryFields
   }
   assignees(first: 50) {
     totalCount
@@ -203,13 +219,13 @@ fragment IssueDetailFields on Issue {
   }
 }
 
-query issueDetails($nodeId: ID!, $avatarSize: Int!) {
+query issueDetails($nodeId: ID!) {
   node(id: $nodeId) {
     ...IssueDetailFields
   }
 }
 
-query searchIssues($query: String!, $numberOfItems: Int!, $avatarSize: Int!) {
+query searchIssues($query: String!, $numberOfItems: Int!) {
   search(query: $query, type: ISSUE, first: $numberOfItems) {
     nodes {
       ...IssueFields
@@ -258,7 +274,6 @@ mutation createIssue(
   $assigneeIds: [ID!]!
   $labelIds: [ID!]!
   $milestoneId: ID
-  $avatarSize: Int!
 ) {
   createIssue(
     input: {

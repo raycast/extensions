@@ -18,7 +18,7 @@ export function useSummary() {
       });
 
       const data = await Promise.all(summaries);
-      return { result: data.filter(Boolean) as NonNullable<typeof data[number]>[], ok: true };
+      return { result: data.filter(Boolean) as NonNullable<(typeof data)[number]>[], ok: true };
     }, []),
     toasts: {
       error: (err) => ({

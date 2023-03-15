@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Grid } from "@raycast/api";
 
-export const EmptyView = (): JSX.Element => {
-  return <Grid.EmptyView title="No Pinned or Recent Icons" icon={{ source: "../assets/Icons8-Cloud.svg" }} />;
+export const EmptyView = ({ message }: { message: string }): JSX.Element => {
+  return <Grid.EmptyView title={message} icon={{ source: "../assets/Icons8-Cloud.svg" }} />;
 };
 
 export const InvalidAPIKey = (): JSX.Element => {

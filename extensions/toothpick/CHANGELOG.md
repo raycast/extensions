@@ -1,5 +1,45 @@
 # Toothpick Changelog
 
+## [Partial Device Support Addition] - 2023-02-17
+
+- Added rudimentary mappings for the following devices:
+  - Jabra Elite 85t (custom icon)
+- Cleaned up codebase a little bit
+
+## [Partial Device Support Addition] - 2023-02-10
+
+- Added rudimentary mappings for the following devices:
+  - Google Pixel Buds Pro (custom icon)
+
+## [Partial Device Support Addition] - 2023-01-25
+
+- Added rudimentary mappings for the following devices:
+  - Sony WF-1000XM3 (battery level and custom icon)
+
+## [Partial Device Support Addition] - 2023-01-18
+
+- Added rudimentary mappings for the following devices:
+  - Sony WF-1000XM4 (battery level and custom icon)
+
+## [Partial Device Support Additions] - 2022-12-13
+
+- Added rudimentary mappings for the following devices:
+  - Sony WH-1000XM3 (battery level)
+  - Older Apple Magic Keyboards
+
+## [Toast Status Fix] - 2022-12-12
+
+- Fixed an issue where the 'Connecting...' toast status would not show up
+
+## [Partial Device Support Additions] - 2022-12-04
+
+- Added rudimentary mappings for the following devices:
+  - AirPods Pro 2 (custom icon)
+  - Samsung Galaxy Buds Live (custom icon)
+  - Bose Quiet Comfort 35 II
+  - Sony WH-1000XM4 (battery level)
+  - UGREEN HiTune X6 (custom icon and battery level)
+
 ## [QOL Improvements] - 2022-09-25
 
 - Added 'Connect to' and 'Disconnect from' commands

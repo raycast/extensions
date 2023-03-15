@@ -5,6 +5,7 @@ import { getErrorMessage } from "./utils";
 import fs from "fs";
 import { pipeline } from "stream";
 import util from "util";
+import { Agent } from "https";
 const streamPipeline = util.promisify(pipeline);
 
 function paramString(params: { [key: string]: string }): string {
@@ -32,9 +33,16 @@ export class State {
 export class HomeAssistant {
   public token: string;
   public url: string;
-  constructor(url: string, token: string) {
+  private httpsAgent?: Agent;
+
+  constructor(url: string, token: string, ignoreCerts: boolean) {
     this.token = token;
     this.url = url;
+    if (this.url.startsWith("https://")) {
+      this.httpsAgent = new Agent({
+        rejectUnauthorized: !ignoreCerts,
+      });
+    }
   }
 
   public urlJoin(text: string): string {
@@ -48,6 +56,7 @@ export class HomeAssistant {
     console.log(`send GET request: ${fullUrl}`);
     try {
       const response = await fetch(fullUrl, {
+        agent: this.httpsAgent,
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -69,6 +78,7 @@ export class HomeAssistant {
     console.log(body);
     //try {
     const response = await fetch(fullUrl, {
+      agent: this.httpsAgent,
       method: "POST",
       headers: {
         "Content-Type": "application/json",

@@ -19,7 +19,6 @@ export function useCreatedIssues(repository: string | null) {
         createdClosedQuery: `is:issue author:@me archived:false is:closed ${updatedFilter} ${repositoryFilter}`,
         numberOfOpenItems: 20,
         numberOfClosedItems: 20,
-        avatarSize: 64,
       });
     },
     [repository]

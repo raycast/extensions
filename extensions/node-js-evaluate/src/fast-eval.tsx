@@ -23,7 +23,7 @@ export function FastEval() {
         <List.Item
           title={state?.result ?? "undefined"}
           subtitle={state?.type ?? "undefined"}
-          accessoryTitle="JS Evaluation"
+          accessories={[{text: "JS Evaluation"}]}
           actions={<Actions state={state} />}
           icon="command-icon.png"
         />

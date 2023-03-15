@@ -1,53 +1,29 @@
-import { ActionPanel, List, Detail, Action, confirmAlert, Toast, showToast } from "@raycast/api";
+import { GetQueueAttributesCommand, ListQueuesCommand, PurgeQueueCommand, SQSClient } from "@aws-sdk/client-sqs";
+import { ActionPanel, List, Action, confirmAlert, Toast, showToast, Icon } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import chunk from "lodash/chunk";
-import AWS from "aws-sdk";
-import setupAws from "./util/setupAws";
-
-const preferences = setupAws();
-const sqs = new AWS.SQS({ apiVersion: "2012-11-05" });
+import AWSProfileDropdown from "./components/searchbar/aws-profile-dropdown";
+import { resourceToConsoleLink } from "./util";
 
 export default function SQS() {
-  const { data: queues, error, isLoading } = useCachedPromise(fetchQueues);
-  const { data: attributes, revalidate: revalidateAttributes } = useCachedPromise(fetchQueueAttributes, queues || []);
-
-  if (error) {
-    return (
-      <Detail markdown="No valid [configuration and credential file] (https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html) found in your machine." />
-    );
-  }
+  const { data: queues, error, isLoading, revalidate } = useCachedPromise(fetchQueues);
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Filter queues by name...">
-      {queues?.map((i, k) => (
-        <SQSQueue key={k} queue={i} attributes={attributes?.[i]} onPurge={revalidateAttributes} />
-      ))}
+    <List
+      isLoading={isLoading}
+      searchBarPlaceholder="Filter queues by name..."
+      searchBarAccessory={<AWSProfileDropdown onProfileSelected={revalidate} />}
+    >
+      {error ? (
+        <List.EmptyView title={error.name} description={error.message} icon={Icon.Warning} />
+      ) : (
+        queues?.map((queue) => <SQSQueue key={queue} queue={queue} />)
+      )}
     </List>
   );
 }
 
-function SQSQueue(props: { queue: string; attributes: QueueAttributes | undefined; onPurge: VoidFunction }) {
-  const queue = props.queue;
-  const attr = props.attributes;
-  const displayName = (queue.split("/").at(-1) ?? "").replace(/-/g, " ").replace(/\./g, " ");
-
-  const accessories: List.Item.Accessory[] = [
-    {
-      icon: "📨",
-      text: attr ? attr.ApproximateNumberOfMessages : "...",
-      tooltip: "Approximated Number of Messages",
-    },
-    {
-      icon: "✈️",
-      text: attr ? attr.ApproximateNumberOfMessagesNotVisible : "...",
-      tooltip: "Approximated Number of Messages Not Visible",
-    },
-    {
-      icon: "⏰",
-      text: attr ? new Date(Number.parseInt(attr.CreatedTimestamp) * 1000).toLocaleDateString() : "...",
-      tooltip: "Creation Time",
-    },
-  ];
+function SQSQueue({ queue }: { queue: string }) {
+  const { data: attributes, revalidate } = useCachedPromise(fetchQueueAttributes, [queue]);
 
   function handlePurgeQueueAction() {
     confirmAlert({
@@ -59,51 +35,45 @@ function SQSQueue(props: { queue: string; attributes: QueueAttributes | undefine
           const toast = await showToast({ style: Toast.Style.Animated, title: "Purging queue..." });
 
           try {
-            await sqs.purgeQueue({ QueueUrl: queue }).promise();
+            await new SQSClient({}).send(new PurgeQueueCommand({ QueueUrl: queue }));
             toast.style = Toast.Style.Success;
             toast.title = "Purged queue";
           } catch (err) {
             toast.style = Toast.Style.Failure;
             toast.title = "Failed to purge queue";
           } finally {
-            props.onPurge();
+            revalidate();
           }
         },
       },
     });
   }
 
-  const path =
-    "https://" +
-    preferences.region +
-    ".console.aws.amazon.com/sqs/v2/home?region=" +
-    preferences.region +
-    "#/queues/" +
-    encodeURIComponent(queue);
-
   return (
     <List.Item
       id={queue}
       key={queue}
-      title={displayName ?? ""}
-      icon="sqs.png"
+      title={queue.slice(queue.lastIndexOf("/") + 1)}
+      icon={"aws-icons/sqs.png"}
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser title="Open in Browser" shortcut={{ modifiers: [], key: "enter" }} url={path} />
+          <Action.OpenInBrowser title="Open in Browser" url={resourceToConsoleLink(queue, "AWS::SQS::Queue")} />
+          <Action.CopyToClipboard title="Copy Queue URL" content={queue} />
           <Action.CopyToClipboard title="Copy Path" content={queue} />
-          <Action.SubmitForm
-            title={`Purge Queue (${attr?.ApproximateNumberOfMessages || "..."})`}
-            onSubmit={handlePurgeQueueAction}
-          />
+          <Action icon={Icon.Trash} title="Purge Queue" onAction={handlePurgeQueueAction} />
         </ActionPanel>
       }
-      accessories={accessories}
+      accessories={[
+        { text: attributes?.ApproximateNumberOfMessages || "", tooltip: "Messages available" },
+        { icon: Icon.Message },
+      ]}
     />
   );
 }
 
 async function fetchQueues(token?: string, queues?: string[]): Promise<string[]> {
-  const { NextToken, QueueUrls } = await sqs.listQueues({ NextToken: token }).promise();
+  if (!process.env.AWS_PROFILE) return [];
+  const { NextToken, QueueUrls } = await new SQSClient({}).send(new ListQueuesCommand({ NextToken: token }));
   const combinedQueues = [...(queues ?? []), ...(QueueUrls ?? [])];
 
   if (NextToken) {
@@ -113,39 +83,13 @@ async function fetchQueues(token?: string, queues?: string[]): Promise<string[]>
   return combinedQueues;
 }
 
-async function fetchQueueAttributes(...queueUrls: string[]) {
-  const attributesMap: QueueAttributesMap = {};
+async function fetchQueueAttributes(queueUrl: string) {
+  const { Attributes } = await new SQSClient({}).send(
+    new GetQueueAttributesCommand({
+      QueueUrl: queueUrl,
+      AttributeNames: ["ApproximateNumberOfMessages"],
+    })
+  );
 
-  const queueUrlBatches = chunk(queueUrls, 15);
-
-  for (const queueUrlBatch of queueUrlBatches) {
-    await Promise.all(
-      queueUrlBatch.map(async (queueUrl) => {
-        const { Attributes } = await sqs
-          .getQueueAttributes({
-            QueueUrl: queueUrl,
-            AttributeNames: [
-              "ApproximateNumberOfMessages",
-              "ApproximateNumberOfMessagesNotVisible",
-              "CreatedTimestamp",
-            ],
-          })
-          .promise();
-
-        attributesMap[queueUrl] = Attributes as unknown as QueueAttributes;
-      })
-    );
-  }
-
-  return attributesMap;
-}
-
-interface QueueAttributes {
-  ApproximateNumberOfMessages: string;
-  ApproximateNumberOfMessagesNotVisible: string;
-  CreatedTimestamp: string;
-}
-
-interface QueueAttributesMap {
-  [url: string]: QueueAttributes;
+  return Attributes;
 }

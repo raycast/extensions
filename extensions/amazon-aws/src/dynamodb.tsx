@@ -1,59 +1,50 @@
-import { ActionPanel, List, Detail, Action } from "@raycast/api";
-import AWS from "aws-sdk";
-
-import setupAws from "./util/setupAws";
+import { DynamoDBClient, ListTablesCommand } from "@aws-sdk/client-dynamodb";
+import { ActionPanel, List, Action, Icon } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-
-const preferences = setupAws();
-const dynamoDB = new AWS.DynamoDB();
+import AWSProfileDropdown from "./components/searchbar/aws-profile-dropdown";
+import { resourceToConsoleLink } from "./util";
 
 export default function DynamoDb() {
-  const { data: tables, isLoading, error } = useCachedPromise(fetchTables);
-
-  if (error) {
-    return (
-      <Detail markdown="No valid [configuration and credential file] (https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html) found in your machine." />
-    );
-  }
+  const { data: tables, isLoading, error, revalidate } = useCachedPromise(fetchTables);
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Filter tables by name...">
-      {tables?.map((i, index) => (
-        <DynamoDbTable key={index} tableName={i} />
-      ))}
+    <List
+      isLoading={isLoading}
+      searchBarPlaceholder="Filter tables by name..."
+      searchBarAccessory={<AWSProfileDropdown onProfileSelected={revalidate} />}
+    >
+      {error ? (
+        <List.EmptyView title={error.name} description={error.message} icon={Icon.Warning} />
+      ) : (
+        tables?.map((i, index) => <DynamoDbTable key={index} tableName={i} />)
+      )}
     </List>
   );
 }
 
-function DynamoDbTable({ tableName }: { tableName: AWS.DynamoDB.TableName }) {
+function DynamoDbTable({ tableName }: { tableName: string }) {
   return (
     <List.Item
-      title={tableName || "Unknown Table name"}
-      icon="dynamodb.png"
+      title={tableName || ""}
+      icon={"aws-icons/ddb.png"}
       actions={
         <ActionPanel>
           <Action.OpenInBrowser
             title="Open in Browser"
-            url={
-              "https://" +
-              preferences.region +
-              ".console.aws.amazon.com/dynamodbv2/home?region=" +
-              preferences.region +
-              "#table?initialTagKey=&name=" +
-              tableName +
-              "&tab=overview"
-            }
+            url={resourceToConsoleLink(tableName, "AWS::DynamoDB::Table")}
           />
+          <Action.CopyToClipboard title="Copy Table Name" content={tableName || ""} />
         </ActionPanel>
       }
     />
   );
 }
 
-async function fetchTables(token?: string, accTables?: AWS.DynamoDB.TableName[]): Promise<AWS.DynamoDB.TableName[]> {
-  const { LastEvaluatedTableName, TableNames } = await dynamoDB
-    .listTables({ ExclusiveStartTableName: token })
-    .promise();
+async function fetchTables(token?: string, accTables?: string[]): Promise<string[]> {
+  if (!process.env.AWS_PROFILE) return [];
+  const { LastEvaluatedTableName, TableNames } = await new DynamoDBClient({}).send(
+    new ListTablesCommand({ ExclusiveStartTableName: token })
+  );
   const combinedTables = [...(accTables || []), ...(TableNames || [])];
 
   if (LastEvaluatedTableName) {

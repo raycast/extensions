@@ -227,7 +227,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.38.3",
+    "@raycast/api": "1.44.0",
     "change-case-all": "^1.0.14",
     "execa": "^6.1.0"
   },

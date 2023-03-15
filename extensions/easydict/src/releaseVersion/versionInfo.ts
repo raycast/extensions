@@ -1,8 +1,8 @@
 /*
  * @author: tisfeng
  * @createTime: 2022-07-01 19:05
- * @lastEditor: Tisfeng
- * @lastEditTime: 2022-11-01 22:09
+ * @lastEditor: tisfeng
+ * @lastEditTime: 2023-02-28 21:44
  * @fileName: versionInfo.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -26,28 +26,24 @@ export class Easydict {
   static repo = "Raycast-Easydict";
 
   // * NOTE: this is new version info, don't use it directly. Use getCurrentStoredVersionInfo() instead.
-  version = "2.6.2";
-  buildNumber = 18;
-  versionDate = "2022-11-02";
+  version = "2.7.3";
+  buildNumber = 22;
+  versionDate = "2023-02-28";
   isNeedPrompt = false;
   hasPrompted = false; // * always default false, only show once, then should be set to true.
 
   releaseMarkdown = `
 ## [v${this.version}] - ${this.versionDate}
 
-### 🐞 修复
+### 💎 优化
 
-- 修复了 DeepL 翻译额度超支时会有错误提示问题。
-- 更新法语朗读声音。
-
-#### 如果觉得这个扩展还不错，给个 [Star](https://github.com/tisfeng/Raycast-Easydict) ⭐️ 支持一下吧 (^-^)
+- 当使用 Easydict 作为 Fallback Command 时，优先使用用户输入文本作为查询词（而不是选中文本）。
 
 ---
 
-### 🐞 Fixes
+### 💎 Improvement
 
-- Fixed the problem that an error prompt will appear when DeepL translation quota is exceeded.
-- Updated French say voice.
+- When using Easydict as Fallback Command, use the user input text as the query word (not the selected text).
 `;
 
   getRepoUrl() {

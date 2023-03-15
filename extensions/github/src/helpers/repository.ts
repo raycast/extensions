@@ -38,7 +38,7 @@ import { LocalStorage } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import { useEffect } from "react";
 
-import { RepositoryFieldsFragment } from "../generated/graphql";
+import { ExtendedRepositoryFieldsFragment } from "../generated/graphql";
 
 const VISITED_REPOSITORIES_KEY = "VISITED_REPOSITORIES";
 const VISITED_REPOSITORIES_LENGTH = 25;
@@ -48,14 +48,14 @@ async function loadVisitedRepositories() {
   const item = await LocalStorage.getItem<string>(VISITED_REPOSITORIES_KEY);
   if (item) {
     const parsed = JSON.parse(item);
-    return parsed as RepositoryFieldsFragment[];
+    return parsed as ExtendedRepositoryFieldsFragment[];
   } else {
     return [];
   }
 }
 
 export function useHistory(searchText: string | undefined, searchFilter: string | null) {
-  const [history, setHistory] = useCachedState<RepositoryFieldsFragment[]>("history", []);
+  const [history, setHistory] = useCachedState<ExtendedRepositoryFieldsFragment[]>("history", []);
   const [migratedHistory, setMigratedHistory] = useCachedState<boolean>("migratedHistory", false);
 
   useEffect(() => {
@@ -67,7 +67,7 @@ export function useHistory(searchText: string | undefined, searchFilter: string 
     }
   }, [migratedHistory]);
 
-  function visitRepository(repository: RepositoryFieldsFragment) {
+  function visitRepository(repository: ExtendedRepositoryFieldsFragment) {
     const nextRepositories = [repository, ...(history?.filter((item) => item !== repository) ?? [])].slice(
       0,
       VISITED_REPOSITORIES_LENGTH
@@ -79,7 +79,7 @@ export function useHistory(searchText: string | undefined, searchFilter: string 
   const repositoryFilter = `${searchFilter?.replaceAll(/org:|user:/g, "").replaceAll(" ", "|")}/.*`;
 
   const data = history
-    .filter((r) => r.nameWithOwner.includes(searchText ?? ""))
+    .filter((r) => r.nameWithOwner.toLowerCase().includes(searchText?.toLowerCase() ?? ""))
     .filter((r) => r.nameWithOwner.match(repositoryFilter));
 
   return { data, visitRepository };
