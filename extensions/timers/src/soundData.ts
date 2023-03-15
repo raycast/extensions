@@ -38,4 +38,4 @@ const soundData: SoundData[] = [
     value: "speak_timer_name",
   },
 ];
-export {soundData};
+export { soundData };

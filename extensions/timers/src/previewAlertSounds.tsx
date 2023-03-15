@@ -1,7 +1,7 @@
 import { Action, ActionPanel, environment, getPreferenceValues, List } from "@raycast/api";
 import { exec } from "child_process";
-import { Preferences} from "./types";
-import {soundData} from "./soundData";
+import { Preferences } from "./types";
+import { soundData } from "./soundData";
 
 export default function Command() {
   const playSound = (fileName: string) => {

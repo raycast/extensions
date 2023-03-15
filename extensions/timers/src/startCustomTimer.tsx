@@ -2,7 +2,7 @@ import { Action, ActionPanel, closeMainWindow, Form, getPreferenceValues, Toast 
 import { useState } from "react";
 import { createCustomTimer, ensureCTFileExists, startTimer } from "./timerUtils";
 import { CTInlineArgs, InputField, RayFormEvent, Values } from "./types";
-import {soundData} from "./soundData";
+import { soundData } from "./soundData";
 
 export default function CustomTimerView(props: { arguments: CTInlineArgs }) {
   const hasArgs = Object.values(props.arguments).some((x) => x !== "");
@@ -26,8 +26,8 @@ export default function CustomTimerView(props: { arguments: CTInlineArgs }) {
       const timerName = values.name ? values.name : "Untitled";
       const timeInSeconds = 3600 * Number(values.hours) + 60 * Number(values.minutes) + Number(values.seconds);
       startTimer(timeInSeconds, timerName, values.selectedSound);
-      if (values.willBeSaved) createCustomTimer({ name: values.name, timeInSeconds: timeInSeconds,
-        selectedSound: values.selectedSound });
+      if (values.willBeSaved)
+        createCustomTimer({ name: values.name, timeInSeconds: timeInSeconds, selectedSound: values.selectedSound });
     }
   };
 
@@ -128,12 +128,7 @@ export default function CustomTimerView(props: { arguments: CTInlineArgs }) {
       <Form.Dropdown id="selectedSound" defaultValue="default" title="Sound">
         <Form.Dropdown.Item value="default" title="Default" />
         {soundData.map((item, index) => (
-          <Form.Dropdown.Item
-            key={index}
-            title={item.title}
-            value={item.value}
-            icon={item.icon}
-          />
+          <Form.Dropdown.Item key={index} title={item.title} value={item.value} icon={item.icon} />
         ))}
       </Form.Dropdown>
       <Form.TextField id="name" title="Name" placeholder="Pour Tea" autoFocus={hasArgs} />

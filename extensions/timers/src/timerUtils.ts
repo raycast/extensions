@@ -14,7 +14,9 @@ async function startTimer(timeInSeconds: number, timerName = "Untitled", selecte
   writeFileSync(masterName, timerName);
 
   const prefs = getPreferenceValues<Preferences>();
-  const selectedSoundPath = `${environment.assetsPath + "/" + (selectedSound === "default" ? prefs.selectedSound : selectedSound)}`;
+  const selectedSoundPath = `${
+    environment.assetsPath + "/" + (selectedSound === "default" ? prefs.selectedSound : selectedSound)
+  }`;
   const cmdParts = [`sleep ${timeInSeconds}`];
   cmdParts.push(
     `if [ -f "${masterName}" ]; then osascript -e 'display notification "Timer \\"${timerName}\\" complete" with title "Ding!"'`
