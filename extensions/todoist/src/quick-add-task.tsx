@@ -28,8 +28,6 @@ const command = async (props: { arguments: Arguments }) => {
       text: `${props.arguments.title}${props.arguments.info ? ` ${props.arguments.info}` : ""}`,
     });
 
-    await todoist.updateTask(id, { description: props.arguments.description });
-
     toast.style = Toast.Style.Success;
     toast.title = "Task created";
 
