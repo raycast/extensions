@@ -9,31 +9,40 @@ import CopyUsernameAction from "~/components/searchVault/actions/CopyUsernameAct
 import CopyTextFieldsActions from "~/components/searchVault/actions/CopyTextFieldsActions";
 import OpenUrlInBrowserAction from "~/components/searchVault/actions/OpenUrlInBrowserAction";
 import ShowCardDetailsAction from "~/components/searchVault/actions/ShowCardDetailsAction";
+import { useSelectedVaultItem } from "~/components/searchVault/context/vaultItem";
 
 const { primaryAction } = getPreferenceValues();
 
-const VaultItemActionPanel = () => (
-  <ActionPanel>
-    <ActionPanel.Section>
-      <ComponentReverser reverse={primaryAction === "copy"}>
-        <PastePasswordAction key="paste" />
-        <CopyPasswordAction key="copy" />
-      </ComponentReverser>
-      <CopyTotpAction />
-      <CopyUsernameAction />
-      <OpenUrlInBrowserAction />
-    </ActionPanel.Section>
-    <ActionPanel.Section>
-      <ShowCardDetailsAction />
-      <ShowSecureNoteAction />
-    </ActionPanel.Section>
-    <ActionPanel.Section>
-      <CopyTextFieldsActions />
-    </ActionPanel.Section>
-    <ActionPanel.Section>
-      <SearchCommonActions />
-    </ActionPanel.Section>
-  </ActionPanel>
-);
+const VaultItemActionPanel = () => {
+  const { login, card } = useSelectedVaultItem();
+
+  return (
+    <ActionPanel>
+      {!!login && (
+        <ActionPanel.Section>
+          <ComponentReverser reverse={primaryAction === "copy"}>
+            <PastePasswordAction />
+            <CopyPasswordAction />
+          </ComponentReverser>
+          <CopyTotpAction />
+          <CopyUsernameAction />
+          <OpenUrlInBrowserAction />
+        </ActionPanel.Section>
+      )}
+      {!!card && (
+        <ActionPanel.Section>
+          <ShowCardDetailsAction />
+          <ShowSecureNoteAction />
+        </ActionPanel.Section>
+      )}
+      <ActionPanel.Section>
+        <CopyTextFieldsActions />
+      </ActionPanel.Section>
+      <ActionPanel.Section>
+        <SearchCommonActions />
+      </ActionPanel.Section>
+    </ActionPanel>
+  );
+};
 
 export default VaultItemActionPanel;
