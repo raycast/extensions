@@ -612,6 +612,7 @@
 /extensions/qr-code-scanner                          @StevenRCE0
 /extensions/qrcode-generator                         @Melvynx
 /extensions/quantumcast                              @jcgerhard
+/extensions/quest                                    @zeekrey
 /extensions/quick-access                             @koinzhang
 /extensions/quick-event                              @mblode @bascomb
 /extensions/quick-open-project                       @zerowidth @bjw-s
