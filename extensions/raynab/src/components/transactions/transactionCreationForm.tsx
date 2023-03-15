@@ -1,4 +1,4 @@
-import { formatToYnabPrice, isNumber } from '@lib/utils';
+import { formatToYnabAmount, isNumber } from '@lib/utils';
 import { ActionPanel, Action, Form, Icon, Color, showToast, Toast } from '@raycast/api';
 import { createTransaction } from '@lib/api';
 import { useAccounts } from '@hooks/useAccounts';
@@ -154,7 +154,7 @@ function createTransactionData(values: Values) {
     ...values,
     date: values.date.toISOString(),
     flag_color: values.flag_color || null,
-    amount: formatToYnabPrice(values.amount),
+    amount: formatToYnabAmount(values.amount),
     memo: values.memo || null,
     approved: true,
     cleared: values.cleared ? SaveTransaction.ClearedEnum.Cleared : SaveTransaction.ClearedEnum.Uncleared,

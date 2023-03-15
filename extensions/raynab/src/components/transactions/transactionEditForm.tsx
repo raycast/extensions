@@ -1,4 +1,4 @@
-import { formatToReadablePrice, formatToYnabPrice, isNumber } from '@lib/utils';
+import { formatToReadablePrice, formatToYnabAmount, isNumber } from '@lib/utils';
 import { ActionPanel, Action, Form, Icon, Color, showToast, Toast } from '@raycast/api';
 import { CurrencyFormat, TransactionDetail } from '@srcTypes';
 import { useState } from 'react';
@@ -34,7 +34,7 @@ export function TransactionEditForm({ transaction }: { transaction: TransactionD
       ...values,
       date: values.date.toISOString(),
       flag_color: values.flag_color || null,
-      amount: formatToYnabPrice(amount),
+      amount: formatToYnabAmount(amount),
       memo: values.memo || null,
     };
     const toast = await showToast({ style: Toast.Style.Animated, title: 'Updating Transaction' });

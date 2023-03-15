@@ -1,5 +1,5 @@
 import { Category, CurrencyFormat } from '@srcTypes';
-import { formatToReadablePrice, formatToYnabPrice, isNumber } from '@lib/utils';
+import { formatToReadablePrice, formatToYnabAmount, isNumber } from '@lib/utils';
 import { ActionPanel, Action, Form, Icon, Color, showToast, Toast, confirmAlert } from '@raycast/api';
 import { updateCategory } from '@lib/api';
 import { useLocalStorage } from '@hooks/useLocalStorage';
@@ -17,7 +17,7 @@ export function CategoryEditForm({ category }: { category: Category }) {
   async function handleSubmit(values: Values) {
     if (!isValidFormSubmission(values)) return;
 
-    const submittedValues = { budgeted: formatToYnabPrice(values.budgeted) };
+    const submittedValues = { budgeted: formatToYnabAmount(values.budgeted) };
 
     if (submittedValues.budgeted === category.budgeted) {
       await showToast({

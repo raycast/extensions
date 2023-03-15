@@ -1,11 +1,10 @@
 import { useState } from 'react';
-import { Category as ynabCategory } from 'ynab';
 import { OpenInYnabAction } from '@components/actions';
 import { TransactionCreationForm } from '@components/transactions/transactionCreationForm';
 import { useLocalStorage } from '@hooks/useLocalStorage';
-import { formatToReadablePrice } from '@lib/utils';
-import { Action, ActionPanel, Color, Icon, List } from '@raycast/api';
-import { CurrencyFormat, Category, CategoryGroupWithCategories, BudgetDetailSummary } from '@srcTypes';
+import { assessGoalShape, displayGoalType, formatGoalType, formatToReadablePrice, displayGoalColor } from '@lib/utils';
+import { Action, ActionPanel, Icon, List } from '@raycast/api';
+import type { CurrencyFormat, Category, CategoryGroupWithCategories, BudgetDetailSummary } from '@srcTypes';
 import { BudgetDetails } from './budgetDetails';
 import { CategoryDetails } from './categoryDetails';
 import { CategoryEditForm } from './categoryEditForm';
@@ -44,7 +43,7 @@ export function CategoryGroupSection({
                       value: showProgress
                         ? renderProgressTitle(category)
                         : formatToReadablePrice({ amount: category.balance, currency: activeBudgetCurrency }),
-                      color: getGoalColor(assessGoalShape(category)),
+                      color: displayGoalColor(assessGoalShape(category)),
                     },
                   },
                 ]}
@@ -108,96 +107,4 @@ function renderProgressTitle(category: Category) {
   return `${FULL_SYMBOL.repeat(fullSymbolsCount)}${EMPTY_SYMBOL.repeat(emptySymbolsCount)} ${percentage
     ?.toString()
     .padStart(3, ' ')}%`;
-}
-
-type GoalShape = 'underfunded' | 'funded' | 'overspent' | 'neutral';
-
-function assessGoalShape(category: Category): GoalShape {
-  /*
-    There are multiple types of goals, the goal shape depends on the type
-    As of March 8th 2023, we have the following
-    (TB='Target Category Balance', TBD='Target Category Balance by Date', MF='Monthly Funding', NEED='Plan Your Spending')
-    - TB: Save a certain amount
-    - TBD: Save a certain amount by a certain date -> can be on or off-track
-    - MF: Save a certain amount no matter what
-    - NEED: Save a certain amount, but be able to spend it along the way on a monthly basis
-    - DEBT: More complex. But basically pay the minimum payment (and possibly some extra) every month
-  */
-
-  // No matter the goal type, if the balance is negative, the goal has been overspent
-  if (category.balance < 0) return 'overspent';
-
-  switch (category.goal_type) {
-    case ynabCategory.GoalTypeEnum.TB:
-      return category.goal_percentage_complete === 100
-        ? 'funded'
-        : Number(category.goal_percentage_complete) > 0
-        ? 'underfunded'
-        : 'neutral';
-    case ynabCategory.GoalTypeEnum.TBD:
-    case ynabCategory.GoalTypeEnum.NEED:
-    case ynabCategory.GoalTypeEnum.MF:
-    case ynabCategory.GoalTypeEnum.DEBT:
-      return category.goal_percentage_complete === 100 || category.goal_under_funded === 0 ? 'funded' : 'underfunded';
-    default:
-      break;
-  }
-
-  return 'neutral';
-}
-
-function getGoalColor(goalShape: GoalShape) {
-  switch (goalShape) {
-    case 'neutral':
-      return Color.SecondaryText;
-    case 'funded':
-      return Color.Green;
-    case 'underfunded':
-      return Color.Yellow;
-    case 'overspent':
-      return Color.Red;
-  }
-}
-
-function displayGoalType(category: Category) {
-  switch (category.goal_type) {
-    case ynabCategory.GoalTypeEnum.TB:
-      return Icon.BullsEye;
-    case ynabCategory.GoalTypeEnum.TBD:
-      return Icon.Calendar;
-    case ynabCategory.GoalTypeEnum.NEED:
-      return Icon.Cart;
-    case ynabCategory.GoalTypeEnum.MF:
-      return Icon.Goal;
-    case ynabCategory.GoalTypeEnum.DEBT:
-      return Icon.BankNote;
-    default:
-      return Icon.XMarkCircle;
-  }
-}
-
-function formatGoalType(category: Category, currency: CurrencyFormat): string {
-  if (!category.goal_type) return 'No Goal';
-
-  const target = formatToReadablePrice({ amount: category.goal_target ?? 0, currency });
-
-  switch (category.goal_type) {
-    case ynabCategory.GoalTypeEnum.TB: {
-      return `Budget ${target} anytime`;
-    }
-    case ynabCategory.GoalTypeEnum.TBD: {
-      const deadline = new Intl.DateTimeFormat('en-us', { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(
-        new Date(String(category.goal_target_month))
-      );
-      return `Budget ${target} by ${deadline}`;
-    }
-    case ynabCategory.GoalTypeEnum.NEED:
-      return `Save and spend ${target}`;
-    case ynabCategory.GoalTypeEnum.MF:
-      return `Budget ${target} monthly`;
-    case ynabCategory.GoalTypeEnum.DEBT:
-      return 'Pay down ${target} monthly';
-    default:
-      return 'Goal Unknown';
-  }
 }

@@ -1,6 +1,6 @@
-import { Color } from '@raycast/api';
 import { CurrencyFormat } from '@srcTypes';
-import { TransactionDetail, utils } from 'ynab';
+import { utils } from 'ynab';
+import { isNumber } from './validation';
 
 export function formatToReadablePrice({
   amount,
@@ -32,21 +32,22 @@ export function formatToReadablePrice({
   }
 }
 
-export function formatToYnabPrice(price: string | number) {
-  return Number(price) * 1000;
+/**
+ * Format a number or a valid string input into a currency amount in milliunits.
+ */
+export function formatToYnabAmount(amount: string | number): number {
+  if (typeof amount === 'number' || isNumber(amount)) {
+    return Number(amount) * 1000;
+  } else {
+    throw new Error(`Amount (${amount}) cannot be converted to a number`);
+  }
 }
 
-export function getCurrentMonth() {
+/**
+ * Get the current month according to the UTC time zone.
+ */
+export function getCurrentMonth(): string {
   return new Intl.DateTimeFormat('en-us', { month: 'long', timeZone: 'UTC' }).format(new Date());
-}
-
-const IS_NUMBER_REGEX = /^[+-]?\d+(\.\d+)?$/g;
-export function isNumber(v: string) {
-  if (Number.isNaN(Number(v))) return false;
-
-  if (!IS_NUMBER_REGEX.test(v)) return false;
-
-  return true;
 }
 
 function formatCurrencyPlacement(amount: string, symbol: string, symbol_first: boolean, shouldPrefixSymbol: boolean) {
@@ -54,51 +55,5 @@ function formatCurrencyPlacement(amount: string, symbol: string, symbol_first: b
     return shouldPrefixSymbol ? `-${symbol}${amount.substring(1)}` : `${symbol}${amount}`;
   } else {
     return `${amount}${symbol}`;
-  }
-}
-
-/**
- * Match YNAB flag colors with Raycast colors
- */
-export function getFlagColor(color: TransactionDetail.FlagColorEnum | null | undefined) {
-  const stringColor = color?.toString();
-  switch (stringColor) {
-    case 'red':
-      return Color.Red;
-    case 'green':
-      return Color.Green;
-    case 'purple':
-      return Color.Purple;
-    case 'orange':
-      return Color.Orange;
-    case 'blue':
-      return Color.Blue;
-    default:
-      return;
-  }
-}
-
-/**
- * Return one of the predefined colors from the Raycast API
- * Useful when trying to color a list of items
- */
-export function easyGetColorFromId(id: number) {
-  switch (id % 6) {
-    case 0:
-      return Color.Green;
-    case 1:
-      return Color.Blue;
-    case 2:
-      return Color.Magenta;
-    case 3:
-      return Color.Orange;
-    case 4:
-      return Color.Purple;
-    case 5:
-      return Color.Red;
-    case 6:
-      return Color.Yellow;
-    default:
-      throw `Can't really happen lol`;
   }
 }
