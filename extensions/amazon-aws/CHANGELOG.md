@@ -1,6 +1,6 @@
 # Amazon AWS Changelog
 
-## [Add Profile Script Command]
+## [Add Profile Script Command] - 2023-03-15
 
 - Add "Run Profile Script" command that allows users to list profiles and run a custom script for them.
 
