@@ -1,11 +1,19 @@
-import { ActionPanel, Action, List, getPreferenceValues } from "@raycast/api";
-import { useFetch } from "@raycast/utils";
+import { ActionPanel, Action, List, getPreferenceValues, showToast, Toast, Icon, Image } from "@raycast/api";
+import { getFavicon, useCachedPromise } from "@raycast/utils";
+import fs from "fs/promises";
+import { useRef } from "react";
 import YAML from "yaml";
+import fetch from "cross-fetch";
 
 export default function Command() {
-  const { data, isLoading } = useFetch(getPreferenceValues()["static-mark-yaml-url"], {
-    parseResponse: parseFetchYamlResponse,
-  });
+  const abortable = useRef<AbortController>();
+  const { isLoading, data } = useCachedPromise(
+    parseFetchYamlResponse,
+    [getPreferenceValues()["static-mark-yaml-url"]],
+    {
+      abortable,
+    }
+  );
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search bookmarks...">
@@ -19,13 +27,20 @@ export default function Command() {
 }
 
 function SearchListItem({ searchResult }: { searchResult: LinkResult }) {
+  const parents = [{ text: searchResult.parents.join(" > "), icon: Icon.Folder }];
+
   return (
     <List.Item
       title={searchResult.name}
+      subtitle={searchResult.description}
+      icon={getFavicon(searchResult.url, { mask: Image.Mask.RoundedRectangle, fallback: Icon.Bookmark })}
+      accessories={parents}
+      keywords={searchResult.keywords}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
             <Action.OpenInBrowser title="Open in Browser" url={searchResult.url} />
+            <Action.CopyToClipboard title="Copy Link" content={searchResult.url} />
           </ActionPanel.Section>
         </ActionPanel>
       }
@@ -33,54 +48,129 @@ function SearchListItem({ searchResult }: { searchResult: LinkResult }) {
   );
 }
 
-async function parseFetchYamlResponse(response: Response) {
-  const json = YAML.parse(await response.text());
+async function parseFetchYamlResponse(url: string) {
+  try {
+    let bookmarks = "";
 
-  const linkResults = flattenYaml(json, [], "");
+    if (url.startsWith("http")) {
+      const bookmarksUrlRes = await fetch(url);
+      if (bookmarksUrlRes.status === 404) throw new Error("YAML file not found");
 
-  if (!response.ok || "message" in json) {
-    throw new Error("message" in json ? json.message : response.statusText);
+      bookmarks = await bookmarksUrlRes.text();
+    } else {
+      bookmarks = await fs.readFile(url, "utf8");
+    }
+
+    const json = YAML.parse(bookmarks);
+
+    const linkResults = flattenBookmarks({ json, bookmarksList: [], parents: [] });
+
+    return linkResults;
+  } catch (error) {
+    showToast({
+      style: Toast.Style.Failure,
+      title: "Something went wrong",
+      message: (error as Error).message,
+    });
   }
-
-  return linkResults;
 }
 
-function flattenYaml(json: unknown[], linkResults: LinkResult[], parentKey: string): LinkResult[] {
+function isValidParent(key: string): boolean {
+  return !Number(key) && Number(key) !== 0;
+}
+
+function isValidURL(value: unknown): boolean {
+  return typeof value == "string" && value.startsWith("http");
+}
+
+function getBookmarkUrl(value: unknown): string[] {
+  let urls: string[] = [];
+
+  if (typeof value == "string") {
+    urls = [value];
+  } else if (Array.isArray(value)) {
+    value.forEach((item) => isValidURL(item) && urls.push(item));
+  }
+
+  return urls;
+}
+
+function isValidBookmark(value: unknown): boolean {
+  const urls = getBookmarkUrl(value);
+  return urls.length ? urls[0].startsWith("http") : false;
+}
+
+function getBookmarkDescription(value: unknown): string {
+  let description = "";
+
+  if (typeof value == "string") {
+    description = "";
+  } else if (Array.isArray(value)) {
+    const descriptionsArray: string[] = [];
+    value.forEach((item) => {
+      if (typeof item === "string" && !isValidBookmark(item)) {
+        descriptionsArray.push(item);
+      }
+    });
+
+    description = descriptionsArray.join(" - ").trim();
+  }
+
+  return description;
+}
+
+function flattenBookmarks({ json, bookmarksList, parents }: flattenBookmarksType) {
   for (const [key, value] of Object.entries(json)) {
-    if (typeof value === "string") {
-      let descParent = "";
-      if (parentKey.length > 0) {
-        descParent = parentKey + " > ";
-      }
-      if (key.length > 1 && value.startsWith("http")) {
-        linkResults.push({
-          name: descParent + key,
-          description: descParent + key,
-          url: value,
+    if (isValidBookmark(value)) {
+      const bookmarkUrls = getBookmarkUrl(value);
+      const bookmarkDescription = getBookmarkDescription(value);
+      const bookmarkParents = parents;
+      const bookmarkKeywords = [
+        ...parents.flatMap((parent) => parent.split(" ")),
+        ...(bookmarkDescription.length ? bookmarkDescription.split(" ") : []),
+      ];
+
+      bookmarkUrls.forEach((bookmarkUrl) => {
+        bookmarksList.push({
+          name: key,
+          description: bookmarkDescription,
+          url: bookmarkUrl,
+          parents: bookmarkParents,
+          keywords: bookmarkKeywords,
         });
-      } else if (value.startsWith("http")) {
-        linkResults.push({
-          name: descParent,
-          description: descParent + key,
-          url: value,
+      });
+
+      if (Array.isArray(value)) {
+        const bookmarkChildren: unknown[] = [];
+
+        value.forEach((item) => {
+          typeof item === "object" && bookmarkChildren.push(item);
         });
+
+        const currentParents = [...parents, key];
+
+        flattenBookmarks({ json: bookmarkChildren as unknown[], bookmarksList, parents: currentParents });
       }
-    } else {
-      // Skip virtual parents (0, 1, 2 etc..)
-      let nextParentKeyChain = parentKey;
-      if (key.length > 1 && parentKey.length > 0) {
-        nextParentKeyChain = parentKey + " > " + key;
-      } else if (key.length > 1) {
-        nextParentKeyChain = key;
-      }
-      flattenYaml(value as unknown[], linkResults, nextParentKeyChain);
+    } else if (typeof value !== "string") {
+      const currentParents = isValidParent(key) ? [...parents, key] : [...parents];
+
+      flattenBookmarks({ json: value as unknown[], bookmarksList, parents: currentParents });
     }
   }
-  return linkResults;
+
+  return bookmarksList;
 }
 
-interface LinkResult {
+type flattenBookmarksType = {
+  json: unknown[];
+  bookmarksList: LinkResult[];
+  parents: string[];
+};
+
+type LinkResult = {
   name: string;
   description: string;
   url: string;
-}
+  parents: string[];
+  keywords: string[];
+};

@@ -1,4 +1,4 @@
-import { Action, ActionPanel, closeMainWindow, List, showToast, Toast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, closeMainWindow, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
 import { pipe } from "fp-ts/lib/function";
 import * as O from "fp-ts/Option";
 import * as S from "fp-ts/string";
@@ -7,6 +7,7 @@ import * as TE from "fp-ts/TaskEither";
 import { useCallback, useState } from "react";
 
 import { Track } from "./util/models";
+import { SFSymbols } from "./util/models";
 import { fromEmptyOrNullable } from "./util/option";
 import { parseResult } from "./util/parser";
 import * as music from "./util/scripts";
@@ -57,8 +58,8 @@ export default function PlayLibraryTrack() {
         <List.Item
           key={id}
           title={name}
-          subtitle={artist}
-          accessoryTitle={`💿 ${album}`}
+          subtitle={SFSymbols.ARTIST + ` ${artist}`}
+          accessories={[{ text: SFSymbols.MUSIC_NOTE + ` ${album}` }]}
           icon={{ source: "../assets/icon.png" }}
           actions={<Actions name={name} id={id ?? ""} pop={pop} />}
         />
@@ -83,7 +84,7 @@ function Actions({ name, pop, id }: { id: string; name: string; pop: () => void 
 
   return (
     <ActionPanel>
-      <Action title={title} onAction={handleSubmit} />
+      <Action title={title} onAction={handleSubmit} icon={Icon.Play} />
     </ActionPanel>
   );
 }

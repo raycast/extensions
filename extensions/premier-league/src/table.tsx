@@ -59,14 +59,81 @@ export default function GetTables() {
 
               if (position < startingPosition) {
                 icon = {
-                  source: Icon.ChevronUp,
+                  source: Icon.ChevronUpSmall,
                   tintColor: Color.Green,
                 };
               } else if (position > startingPosition) {
                 icon = {
-                  source: Icon.ChevronDown,
+                  source: Icon.ChevronDownSmall,
                   tintColor: Color.Red,
                 };
+              }
+
+              const accessories: List.Item.Accessory[] = [
+                {
+                  text: {
+                    color: Color.PrimaryText,
+                    value: overall.points.toString(),
+                  },
+                  icon,
+                  tooltip: `Previous Position: ${startingPosition}`,
+                },
+              ];
+
+              if (!showStats) {
+                if (Array.isArray(form)) {
+                  form.reverse().forEach((m) => {
+                    const isHome = m.teams[0].team.shortName === team.shortName;
+
+                    let isWinner;
+                    if (isHome) {
+                      isWinner = m.teams[0].score > m.teams[1].score;
+                    } else {
+                      isWinner = m.teams[0].score < m.teams[1].score;
+                    }
+
+                    let tintColor;
+                    if (m.outcome !== "D") {
+                      tintColor = isWinner ? Color.Green : Color.Red;
+                    } else {
+                      tintColor = Color.SecondaryText;
+                    }
+
+                    accessories.unshift({
+                      icon: {
+                        source: Icon.CircleFilled,
+                        tintColor,
+                      },
+                      tooltip: `${m.teams[0].team.shortName} ${m.teams[0].score} - ${m.teams[1].score} ${m.teams[1].team.shortName}`,
+                    });
+                  });
+                }
+
+                accessories.unshift(
+                  {
+                    icon: Icon.SoccerBall,
+                    text: overall.played.toString(),
+                    tooltip: "Played",
+                  },
+                  {
+                    icon: Icon.Goal,
+                    text: `${overall.goalsFor} - ${overall.goalsAgainst}`,
+                    tooltip: "Goals For - Goals Against",
+                  }
+                );
+
+                if (next) {
+                  const nextTeam = next.teams.find(
+                    (t) => t.team.shortName !== team.shortName
+                  );
+                  accessories.push({
+                    icon: {
+                      source: `https://resources.premierleague.com/premierleague/badges/${nextTeam?.team.altIds.opta}.png`,
+                      fallback: "default.png",
+                    },
+                    tooltip: convertToLocalTime(next.kickoff.label),
+                  });
+                }
               }
 
               return (
@@ -76,10 +143,10 @@ export default function GetTables() {
                   subtitle={team.name}
                   keywords={[team.name, team.shortName, team.club.abbr]}
                   icon={{
-                    source: `https://resources.premierleague.com/premierleague/badges/100/${team.altIds.opta}@x2.png`,
+                    source: `https://resources.premierleague.com/premierleague/badges/${team.altIds.opta}.png`,
                     fallback: "default.png",
                   }}
-                  accessories={[{ text: overall.points.toString() }, { icon }]}
+                  accessories={accessories}
                   detail={
                     <List.Item.Detail
                       metadata={

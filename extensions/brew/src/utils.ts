@@ -40,6 +40,8 @@ export interface Remote<T> {
   url: string;
   cachePath: string;
   value?: T[];
+  /** in flight fetch of the remote */
+  fetch?: Promise<T[]>;
 }
 
 // Top-level object keys which should be parsed from the raw JSON objects.
@@ -67,10 +69,28 @@ const valid_keys = [
   "pinned",
 ];
 
+const maxFetchRetry = 1;
+
 export async function fetchRemote<T>(remote: Remote<T>): Promise<T[]> {
   if (remote.value) {
     return remote.value;
+  } else if (remote.fetch) {
+    return remote.fetch;
+  } else {
+    remote.fetch = _fetchRemote(remote, 0)
+      .then((value) => {
+        remote.value = value;
+        return value;
+      })
+      .finally(() => {
+        remote.fetch = undefined;
+      });
+    return remote.fetch;
   }
+}
+
+async function _fetchRemote<T>(remote: Remote<T>, attempt: number): Promise<T[]> {
+  console.log("fetchRemote:", remote.url);
 
   async function fetchURL(): Promise<void> {
     const response = await fetch(remote.url);
@@ -80,38 +100,53 @@ export async function fetchRemote<T>(remote: Remote<T>): Promise<T[]> {
     await streamPipeline(response.body, fs.createWriteStream(remote.cachePath));
   }
 
-  let cacheInfo: fs.Stats | undefined;
-  let lastModified = 0;
-
-  try {
-    cacheInfo = await stat(remote.cachePath);
-    const response = await fetch(remote.url, { method: "HEAD" });
-    lastModified = Date.parse(response.headers.get("last-modified") ?? "");
-  } catch {
-    console.log("Missed cache:", remote.cachePath); // keep prettier happy :-(
+  async function updateCache(): Promise<void> {
+    let cacheInfo: fs.Stats | undefined;
+    let lastModified = 0;
+    try {
+      cacheInfo = await stat(remote.cachePath);
+      const response = await fetch(remote.url, { method: "HEAD" });
+      lastModified = Date.parse(response.headers.get("last-modified") ?? "");
+    } catch {
+      console.log("Missed cache:", remote.cachePath); // keep prettier happy :-(
+    }
+    if (!cacheInfo || cacheInfo.size == 0 || lastModified > cacheInfo.mtimeMs) {
+      await fetchURL();
+    }
   }
 
-  // We check for a minimum size in case we received some invalid cache due to a previous error
-  if (!cacheInfo || cacheInfo.size < 1024 || lastModified > cacheInfo.mtimeMs) {
-    await fetchURL();
-  }
+  async function readCache(): Promise<T[]> {
+    const keysRe = new RegExp(`\\b(${valid_keys.join("|")})\\b`);
 
-  const keysRe = new RegExp(`\\b(${valid_keys.join("|")})\\b`);
-
-  // stream-json/chain is quite slow, so unfortunately not suitable for real-time queries.
-  // migrating to a sqlite backend _might_ help, although the bootstrap cost
-  // (each time json response changes) will probably be high.
-  const pipeline = chain([fs.createReadStream(remote.cachePath), parser(), filter({ filter: keysRe }), streamArray()]);
-
-  remote.value = [];
-
-  return new Promise((resolve, reject) => {
-    pipeline.on("data", (data) => remote.value?.push(data.value));
-    pipeline.on("end", () => {
-      resolve(remote.value ?? []);
+    return new Promise<T[]>((resolve, reject) => {
+      const value: T[] = [];
+      // stream-json/chain is quite slow, so unfortunately not suitable for real-time queries.
+      // migrating to a sqlite backend _might_ help, although the bootstrap cost
+      // (each time json response changes) will probably be high.
+      const pipeline = chain([
+        fs.createReadStream(remote.cachePath),
+        parser(),
+        filter({ filter: keysRe }),
+        streamArray(),
+      ]);
+      pipeline.on("data", (data) => {
+        value?.push(data.value);
+      });
+      pipeline.on("end", () => {
+        resolve(value);
+      });
+      pipeline.on("error", (err) => {
+        if (attempt < maxFetchRetry) {
+          fs.rmSync(remote.cachePath);
+          _fetchRemote(remote, attempt + 1).then(resolve, reject);
+        } else {
+          reject(err);
+        }
+      });
     });
-    pipeline.on("err", (err) => reject(err));
-  });
+  }
+
+  return updateCache().then(readCache);
 }
 
 /// Toast

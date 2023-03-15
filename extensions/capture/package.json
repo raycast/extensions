@@ -5,6 +5,10 @@
   "description": "Quickly create records in Capture with Raycast.",
   "icon": "command-icon.png",
   "author": "syhchen",
+  "categories": [
+    "Applications",
+    "Productivity"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -22,19 +26,10 @@
       "title": "JWT",
       "description": "Your Capture JWT",
       "placeholder": "Enter your Capture JWT"
-    },
-    {
-      "name": "url",
-      "type": "textfield",
-      "required": true,
-      "title": "URL",
-      "description": "Your Capture URL",
-      "placeholder": "Enter your Capture URL",
-      "default": "https://capture-tool-prod.herokuapp.com/rpc/quickCapture"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.38.0",
+    "@raycast/api": "^1.44.0",
     "node-fetch": "^3.2.9"
   },
   "devDependencies": {

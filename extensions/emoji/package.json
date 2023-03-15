@@ -6,7 +6,8 @@
   "icon": "command-icon.png",
   "author": "FezVrasta",
   "contributors": [
-    "kidonng"
+    "kidonng",
+    "sxn"
   ],
   "license": "MIT",
   "categories": [
@@ -93,10 +94,10 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.38.1",
+    "@raycast/api": "^1.45.1",
+    "cross-fetch": "^3.1.5",
     "emojilib": "^3.0.6",
     "fuse.js": "^6.5.3",
-    "generate-emoji-list": "^1.0.1",
     "raycast-toolkit": "^1.0.3"
   },
   "devDependencies": {

@@ -8,7 +8,8 @@
   "contributors": [
     "marcjulian",
     "GastroGeek",
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "lokot0k"
   ],
   "categories": [
     "Productivity",
@@ -16,6 +17,12 @@
   ],
   "license": "MIT",
   "commands": [
+    {
+      "name": "start2MinuteTimer",
+      "title": "Start 2 Minute Timer",
+      "description": "Set a countdown for 2 minutes.",
+      "mode": "no-view"
+    },
     {
       "name": "start5MinuteTimer",
       "title": "Start 5 Minute Timer",
@@ -128,6 +135,12 @@
       "title": "Dismiss Timer Alert",
       "description": "Stop a ringing alert from a finished timer.",
       "mode": "no-view"
+    },
+    {
+      "name": "previewAlertSounds",
+      "title": "Preview Alert Sounds",
+      "description": "Play samples of different alert sound effects.",
+      "mode": "view"
     }
   ],
   "preferences": [
@@ -204,10 +217,18 @@
       "description": "Whether or not to copy the elapsed time on a stopwatch when it is stopped.",
       "label": "Copy elapsed time",
       "default": false
+    },
+    {
+      "name": "volumeSetting",
+      "type": "textfield",
+      "required": true,
+      "title": "Timer Alert Volume",
+      "description": "Volume of the alert sound. Decimal between 0 and 1.",
+      "default": "1"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.42.0"
+    "@raycast/api": "^1.48.0"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",

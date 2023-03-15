@@ -1,20 +1,19 @@
-import { mapPageToTodo } from '../utils/map-page-to-todo'
 import { Todo } from '@/types/todo'
 import { notion } from '../client'
-import { TodoPage } from '@/types/todo-page'
-import { getPreferenceValues } from '@raycast/api'
+import { loadPreferences } from '@/services/storage'
+import { normalizeTodo } from '../utils/normalize-todo'
 
 export async function createTodo(
-  todo: { title: string; tagId: string | null },
+  todo: Todo,
   databaseId: string
 ): Promise<Todo> {
   const notionClient = await notion()
-  const preferences = getPreferenceValues()
+  const preferences = await loadPreferences()
 
-  const page = await notionClient.pages.create({
+  const data = await notionClient.pages.create({
     parent: { database_id: databaseId },
     properties: {
-      [preferences.property_title]: {
+      [preferences.properties.title]: {
         title: [
           {
             text: {
@@ -23,14 +22,52 @@ export async function createTodo(
           },
         ],
       },
-      [preferences.property_label]: {
-        select: todo.tagId ? { id: todo.tagId } : null,
+      [preferences.properties.date]: {
+        date: todo?.dateValue ? { start: todo.dateValue } : null,
       },
-      [preferences.property_date]: {
-        date: { start: new Date().toISOString().split('T')[0] },
-      },
+      ...(preferences.properties.tag
+        ? {
+            [preferences.properties.tag]: {
+              select: todo?.tag?.id ? { id: todo?.tag?.id } : null,
+            },
+          }
+        : {}),
+      ...(preferences.properties.project
+        ? {
+            [preferences.properties.project]: {
+              relation: todo?.projectId ? [{ id: todo.projectId }] : [],
+            },
+          }
+        : {}),
+      ...(preferences.properties.assignee
+        ? {
+            [preferences.properties.assignee]: {
+              people: todo?.user?.id ? [{ id: todo?.user?.id }] : [],
+            },
+          }
+        : {}),
+      ...(preferences.properties.url
+        ? {
+            [preferences.properties.url]: {
+              url: todo?.contentUrl ? todo.contentUrl : null,
+            },
+          }
+        : {}),
+      ...(preferences.properties.status &&
+      preferences.properties.status.type === 'status'
+        ? {
+            [preferences.properties.status.name]: {
+              status: todo?.status?.id ? { id: todo?.status?.id } : null,
+            },
+          }
+        : {}),
     },
   })
 
-  return mapPageToTodo(page as TodoPage, preferences)
+  const normalizedTodo = normalizeTodo({
+    page: data,
+    preferences: preferences.properties,
+  })
+
+  return normalizedTodo
 }

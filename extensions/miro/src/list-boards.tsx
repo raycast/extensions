@@ -1,11 +1,11 @@
 import * as miro from "./oauth/miro";
-import { Action, ActionPanel, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Icon, Grid, Color, confirmAlert, Alert, showToast, Toast } from "@raycast/api";
 import InviteBoard from "./invite-board";
 import ListMembers from "./list-member";
 import { useCachedPromise } from "@raycast/utils";
 
 export default function ListBoards() {
-  const { isLoading, data, revalidate } = useCachedPromise(
+  const { isLoading, data, mutate } = useCachedPromise(
     async () => {
       await miro.authorize();
       return await miro.fetchItems();
@@ -13,23 +13,17 @@ export default function ListBoards() {
     [],
     {
       initialData: [],
-      onError: async (error) => {
-        console.error(error);
-        await showToast({ style: Toast.Style.Failure, title: String(error) });
-      },
     }
   );
 
-  const { push } = useNavigation();
-
   return (
-    <List isLoading={isLoading}>
+    <Grid isLoading={isLoading}>
       {data.map((item) => {
         return (
-          <List.Item
+          <Grid.Item
             key={item.id}
             id={item.id}
-            icon={Icon.Document}
+            content={item.picture?.imageURL ?? Color.SecondaryText}
             title={item.name}
             subtitle={item.description}
             actions={
@@ -37,27 +31,62 @@ export default function ListBoards() {
                 {item.viewLink && (
                   <>
                     <Action.OpenInBrowser url={item.viewLink} />
-                    <Action.CopyToClipboard title="Copy URL" content={item.viewLink} />
-                    <Action
-                      title="Invite to Board"
-                      icon={Icon.PersonCircle}
-                      onAction={() => push(<InviteBoard id={item.id} />)}
-                      shortcut={{ modifiers: ["cmd"], key: "i" }}
-                    />
-                    <Action
-                      title={"Show board members"}
-                      icon={Icon.PersonCircle}
-                      onAction={() => push(<ListMembers id={item.id} />)}
-                      shortcut={{ modifiers: ["cmd"], key: "m" }}
-                    />
-                    <Action title="Reload" onAction={() => revalidate()} shortcut={{ modifiers: ["cmd"], key: "r" }} />
+                    <Action.CopyToClipboard title="Copy URL to Board" content={item.viewLink} />
                   </>
                 )}
+                <ActionPanel.Section>
+                  <Action.Push
+                    title="Show Board Members"
+                    icon={Icon.Person}
+                    target={<ListMembers board={item} />}
+                    shortcut={{ modifiers: ["cmd"], key: "m" }}
+                  />
+                  <Action.Push
+                    title="Invite to Board"
+                    icon={Icon.AddPerson}
+                    target={<InviteBoard board={item} />}
+                    shortcut={{ modifiers: ["cmd"], key: "i" }}
+                  />
+                </ActionPanel.Section>
+                <ActionPanel.Section>
+                  <Action
+                    title="Delete Board"
+                    icon={Icon.Trash}
+                    style={Action.Style.Destructive}
+                    onAction={() =>
+                      confirmAlert({
+                        title: "Delete Board",
+                        message: "Are you sure you want to delete this board?",
+                        primaryAction: {
+                          title: "Delete",
+                          style: Alert.ActionStyle.Destructive,
+                          onAction: async () => {
+                            const toast = await showToast({ style: Toast.Style.Animated, title: "Deleting board..." });
+                            try {
+                              await mutate(miro.deleteBoard(item.id), {
+                                optimisticUpdate(data) {
+                                  return data.filter((x) => x.id !== item.id);
+                                },
+                              });
+                              toast.title = "🎉 Board deleted!";
+                              toast.style = Toast.Style.Success;
+                            } catch (err) {
+                              console.error(err);
+                              toast.title = "Could not remove member.";
+                              toast.message = String(err);
+                              toast.style = Toast.Style.Failure;
+                            }
+                          },
+                        },
+                      })
+                    }
+                  />
+                </ActionPanel.Section>
               </ActionPanel>
             }
           />
         );
       })}
-    </List>
+    </Grid>
   );
 }

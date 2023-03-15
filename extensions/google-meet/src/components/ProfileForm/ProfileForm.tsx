@@ -27,7 +27,8 @@ export const ProfileForm = ({ onFinish }: ProfileFormProps) => {
     validation: {
       name: FormValidation.Required,
       email: (value) => {
-        const regexp = /^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/;
+        const regexp =
+          /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/;
 
         if (!value) {
           return "The item is required";

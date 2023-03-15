@@ -1,6 +1,15 @@
 # Adhan time Changelog
 
-## [Update] - 2022-11-9
+## [Update] - 2023-01-18
+
+- Preference: Add the option to show hours by the 12 hours system
+- Chore: code refactor
+
+## [Update] - 2022-11-21
+
+- UI: Updated placeholders to be more descriptive
+
+## [Update] - 2022-11-09
 - Added hanfi school calculation as an optional preference
 
 ## [Update] - 2022-11-08

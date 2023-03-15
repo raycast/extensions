@@ -1,4 +1,4 @@
-import { Cache, getPreferenceValues, open, showHUD, showToast } from "@raycast/api";
+import { Cache, closeMainWindow, getPreferenceValues, open, PopToRootType, showHUD, showToast } from "@raycast/api";
 import {
   HistoriesCacheKey,
   LANG_LIST,
@@ -923,6 +923,7 @@ function checkServiceNotSupportLang(
 
 export async function capture(closeWindow: boolean): Promise<string> {
   let capturePath = path.join(os.tmpdir(), TempOCRImgName);
+  closeWindow && (await closeMainWindow({ popToRootType: PopToRootType.Suspended }));
   closeWindow && (await showHUD("Capture the text you want to translate"));
   !closeWindow && (await showToast({ title: "Capture the text you want to translate" }));
   execSync(`/usr/sbin/screencapture -i  ${capturePath}`);

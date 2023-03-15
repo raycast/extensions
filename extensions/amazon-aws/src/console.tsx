@@ -1,8 +1,9 @@
 import { ActionPanel, List, Action } from "@raycast/api";
 import { readFile } from "fs/promises";
 import { useCachedPromise } from "@raycast/utils";
+import { AWS_URL_BASE } from "./constants";
 
-export default function Command() {
+export default function Console() {
   const { data: services, isLoading } = useCachedPromise(loadJSON);
 
   return (
@@ -16,7 +17,7 @@ export default function Command() {
           icon={service.icon.path}
           actions={
             <ActionPanel>
-              <Action.OpenInBrowser url={`https://console.aws.amazon.com${service.arg}`} />
+              <Action.OpenInBrowser url={`${AWS_URL_BASE}${service.arg}`} />
             </ActionPanel>
           }
         />

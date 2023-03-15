@@ -1,6 +1,6 @@
 import { Action, ActionPanel, List } from "@raycast/api";
 import { useState, useEffect } from "react";
-import { groupBy, uniqBy } from "lodash";
+import { groupBy, sortBy, uniqBy } from "lodash";
 import { useMyTasks } from "./hooks/useMyTasks";
 import { useWorkspaces } from "./hooks/useWorkspaces";
 import withAsanaAuth from "./components/withAsanaAuth";
@@ -31,7 +31,7 @@ function MyTasks() {
     return {
       ...section,
       subtitle: tasks.length === 1 ? "1 task" : `${tasks.length} tasks`,
-      tasks: tasksBySection[section.gid],
+      tasks: sortBy(tasksBySection[section.gid], "due_on", "due_at"),
     };
   });
 

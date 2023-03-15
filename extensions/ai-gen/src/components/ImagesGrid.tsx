@@ -1,4 +1,5 @@
 import { CreateImageRequestSizeEnum } from "openai";
+import path from "path";
 import { useEffect } from "react";
 
 import { Grid, getPreferenceValues, showToast, Toast, useNavigation, Icon } from "@raycast/api";
@@ -10,25 +11,36 @@ const NUM_ROWS = 2;
 const MIN_COLS = 3;
 
 export type ImagesGridProps = {
-  prompt: string;
+  prompt?: string;
+  image?: string;
+  mask?: string;
   n: string;
   size: CreateImageRequestSizeEnum;
-} & ({ file?: never; variationCount?: never } | { file: string; variationCount: number });
+  variationCount?: number;
+};
 
 export function ImagesGrid(props: ImagesGridProps) {
-  const { prompt, file, n, size, variationCount = 0 } = props;
+  const { prompt, image, mask, n, size, variationCount = 0 } = props;
+  const isVariation = image && !prompt;
+  const isImageEdit = !!(prompt && image && mask);
 
-  const title = file ? `Variation${variationCount > 1 ? ` ${variationCount}` : ""} on "${prompt}"` : prompt;
+  const title = isVariation
+    ? `Variation${variationCount > 1 ? ` ${variationCount}` : ""} on "${prompt || path.basename(image)}"`
+    : isImageEdit
+    ? `Extend image with "${prompt}"`
+    : prompt;
   const number = parseInt(n, 10);
 
   const { apiKey } = getPreferenceValues();
-  const [results, createImage, createVariation, isLoading] = useOpenAIImageApi({ apiKey });
+  const [results, createImage, createVariation, createImageEdit, isLoading] = useOpenAIImageApi({ apiKey });
 
   useEffect(() => {
-    if (prompt) {
+    if (isImageEdit) {
+      createImageEdit({ prompt, image, mask, size, n: number });
+    } else if (isVariation) {
+      createVariation(image, { n: number, size });
+    } else if (prompt) {
       createImage({ prompt, size, n: number });
-    } else if (file) {
-      createVariation(file, { n: number, size });
     }
   }, []);
 
@@ -67,6 +79,8 @@ export function ImagesGrid(props: ImagesGridProps) {
                   showDetailAction={true}
                   url={urlString}
                   prompt={prompt}
+                  image={image}
+                  mask={mask}
                   size={size}
                   n={n}
                   variationCount={variationCount}

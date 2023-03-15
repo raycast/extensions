@@ -43,6 +43,14 @@ function relativeDate(dateString: string): string {
   return result;
 }
 
+function formatSubtitle(link: Link): string {
+  if (link.comment) {
+    // em space U+2003
+    return link.host + " " + link.comment;
+  }
+  return link.host;
+}
+
 function fullDate(dateString: string): string {
   const date = dayjs(dateString);
   const result = date.calendar(null, {
@@ -157,7 +165,7 @@ export default function LinkItem(props: Props) {
   return (
     <List.Item
       title={item.title}
-      subtitle={item.host}
+      subtitle={formatSubtitle(item)}
       icon={{
         source: iconLink(item.id),
         fallback: Icon.Globe,
@@ -192,6 +200,7 @@ export default function LinkItem(props: Props) {
                         ))}
                       </Detail.Metadata.TagList>
                     )}
+                    {item.comment && <Detail.Metadata.Label title="Comment" text={item.comment} />}
                   </Detail.Metadata>
                 }
                 actions={

@@ -5,11 +5,11 @@ import * as miro from "./oauth/miro";
 
 // change role react component
 export default function ChangeRole({
-  id,
+  board,
   memberId,
   role,
 }: {
-  id: string;
+  board: { id: string };
   memberId: string;
   role: BoardMember["role"];
 }) {
@@ -23,12 +23,17 @@ export default function ChangeRole({
           <Action.SubmitForm
             title="Change Role"
             onSubmit={async (value) => {
+              const toast = await showToast({ style: Toast.Style.Animated, title: "Changing role..." });
               try {
-                await miro.changeBoardMemberRole(id, memberId, value.role);
-                await showToast({ style: Toast.Style.Success, title: "🎉 Changed role!" });
+                await miro.changeBoardMemberRole(board.id, memberId, value.role);
+                toast.title = "🎉 Role changed!";
+                toast.style = Toast.Style.Success;
                 pop();
-              } catch {
-                await showToast({ style: Toast.Style.Failure, title: "Change role failed." });
+              } catch (err) {
+                console.error(err);
+                toast.title = "Could not change the role.";
+                toast.message = String(err);
+                toast.style = Toast.Style.Failure;
               }
             }}
           />

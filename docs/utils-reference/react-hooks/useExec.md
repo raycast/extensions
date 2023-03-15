@@ -174,7 +174,7 @@ const Demo = () => {
   const { isLoading, data, revalidate } = useExec("brew", ["info", "--json=v2", "--installed"]);
   const results = useMemo<{}[]>(() => JSON.parse(data || "[]"), [data]);
 
-  const InstallFoo = async () => {
+  const installFoo = async () => {
     const toast = await showToast({ style: Toast.Style.Animated, title: "Installing Foo" });
     try {
       await mutate(
@@ -208,7 +208,7 @@ const Demo = () => {
           title={item.name}
           actions={
             <ActionPanel>
-              <Action title="Append Foo" onAction={() => appendFoo()} />
+              <Action title="Install Foo" onAction={() => installFoo()} />
             </ActionPanel>
           }
         />
@@ -227,7 +227,7 @@ An object corresponding to the execution state of the function.
 ```ts
 // Initial State
 {
-  isLoading: true,
+  isLoading: true, // or `false` if `options.execute` is `false`
   data: undefined,
   error: undefined
 }

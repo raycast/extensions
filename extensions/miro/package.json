@@ -3,8 +3,11 @@
   "name": "miro",
   "title": "Miro",
   "description": "Create, search and copy link, open Miro boards and more.",
-  "icon": "command-icon.png",
+  "icon": "miro-logo.png",
   "author": "felixhaeberle",
+  "contributors": [
+    "mathieudutour"
+  ],
   "categories": [
     "Productivity",
     "Applications",
@@ -25,21 +28,10 @@
       "mode": "view"
     }
   ],
-  "preferences": [
-    {
-      "name": "team_id",
-      "type": "textfield",
-      "required": true,
-      "title": "Team ID",
-      "description": "Team ID of your Miro team",
-      "placeholder": "Team ID of your Miro team"
-    }
-  ],
   "dependencies": {
     "@mirohq/miro-api": "^1.0.2",
     "@raycast/api": "^1.41.1",
     "@raycast/utils": "^1.4.10",
-    "dotenv": "^16.0.3",
     "node-fetch": "^3.2.10"
   },
   "devDependencies": {

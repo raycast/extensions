@@ -1,5 +1,13 @@
 # Google Workspace Changelog
 
+## [Fix Google Spreadsheets creation command] - 2023-03-12
+
+Fix the `Create Google Spreadsheet` command to use the authenticated user.
+
+## [Open file location in browser] - 2022-12-19
+
+Added an action allowing to open the file's location in Google Drive. This action is similar to the `Show file location` item when selecting a file in Google Drive.
+
 ## [Search on all Drives] - 2022-09-01
 
 Added support to search not only on My Drive but also on Shared Drives.

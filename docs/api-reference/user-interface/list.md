@@ -172,18 +172,52 @@ export default function Command() {
 {% tab title="ListWithDetail.tsx" %}
 
 ```jsx
-import { ActionPanel, List } from "@raycast/api";
-import { usePokemons } from './utils'
+import { useState } from "react";
+import { Action, ActionPanel, List } from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
+
+interface Pokemon {
+  name: string;
+  height: number;
+  weight: number;
+  id: string;
+  types: string[];
+  abilities: Array<{ name: string; isMainSeries: boolean }>;
+}
+
+const pokemons: Pokemon[] = [
+  {
+    name: "bulbasaur",
+    height: 7,
+    weight: 69,
+    id: "001",
+    types: ["Grass", "Poison"],
+    abilities: [
+      { name: "Chlorophyll", isMainSeries: true },
+      { name: "Overgrow", isMainSeries: true },
+    ],
+  },
+  {
+    name: "ivysaur",
+    height: 10,
+    weight: 130,
+    id: "002",
+    types: ["Grass", "Poison"],
+    abilities: [
+      { name: "Chlorophyll", isMainSeries: true },
+      { name: "Overgrow", isMainSeries: true },
+    ],
+  },
+];
 
 export default function Command() {
   const [showingDetail, setShowingDetail] = useState(true);
-
-  const pokemons = usePokemons();
+  const { data, isLoading } = useCachedPromise(() => new Promise<Pokemon[]>((resolve) => resolve(pokemons)));
 
   return (
-    <List isLoading={!pokemons} isShowingDetail={showingDetail}>
-      {pokemons &&
-        pokemons.map((pokemon) => {
+    <List isLoading={isLoading} isShowingDetail={showingDetail}>
+      {data &&
+        data.map((pokemon) => {
           const props: Partial<List.Item.Props> = showingDetail
             ? {
                 detail: (
@@ -194,7 +228,7 @@ export default function Command() {
                   />
                 ),
               }
-            : { accessories: [ { text: pokemon.types.join(" ") } ] };
+            : { accessories: [{ text: pokemon.types.join(" ") }] };
           return (
             <List.Item
               key={pokemon.id}
@@ -211,7 +245,9 @@ export default function Command() {
           );
         })}
     </List>
+  );
 }
+
 ```
 
 {% endtab %}
@@ -283,8 +319,10 @@ A dropdown menu that will be shown in the right-hand-side of the search bar.
 ```typescript
 import { List } from "@raycast/api";
 
-function DrinkDropdown(props: DrinkDropdownProps) {
-  const { isLoading = false, drinkTypes, onDrinkTypeChange } = props;
+type DrinkType = { id: string; name: string };
+
+function DrinkDropdown(props: { drinkTypes: DrinkType[]; onDrinkTypeChange: (newValue: string) => void }) {
+  const { drinkTypes, onDrinkTypeChange } = props;
   return (
     <List.Dropdown
       tooltip="Select Drink Type"
@@ -303,11 +341,11 @@ function DrinkDropdown(props: DrinkDropdownProps) {
 }
 
 export default function Command() {
-  const drinkTypes = [
-    { id: 1, name: "Beer" },
-    { id: 2, name: "Wine" },
+  const drinkTypes: DrinkType[] = [
+    { id: "1", name: "Beer" },
+    { id: "2", name: "Wine" },
   ];
-  const onDrinkTypeChange = (newValue) => {
+  const onDrinkTypeChange = (newValue: string) => {
     console.log(newValue);
   };
   return (
@@ -372,16 +410,18 @@ import { List } from "@raycast/api";
 
 export default function Command() {
   return (
-    <List searchBarAccessory={
-      <List.Dropdown tooltip="Dropdown With Sections">
-        <List.Dropdown.Section title="First Section">
-          <List.Dropdown.Item title="One" value="one" />
-        </List.Dropdown.Section>
-        <List.Dropdown.Section title="Second Section">
-          <List.Dropdown.Item title="Two" value="two" />
-        </List.Dropdown.Section>
-      </List.Dropdown>
-    }>
+    <List
+      searchBarAccessory={
+        <List.Dropdown tooltip="Dropdown With Sections">
+          <List.Dropdown.Section title="First Section">
+            <List.Dropdown.Item title="One" value="one" />
+          </List.Dropdown.Section>
+          <List.Dropdown.Section title="Second Section">
+            <List.Dropdown.Item title="Two" value="two" />
+          </List.Dropdown.Section>
+        </List.Dropdown>
+      }
+    >
       <List.Item title="Item in the Main List" />
     </List>
   );
@@ -471,7 +511,7 @@ When shown, it is recommended not to show any accessories on the `List.Item` and
 #### Example
 
 ```typescript
-import { Icon, List } from "@raycast/api";
+import { List } from "@raycast/api";
 
 export default function Command() {
   return (
@@ -796,7 +836,7 @@ An interface describing an accessory view in a `List.Item`.
 #### Example
 
 ```typescript
-import { Icon, List } from "@raycast/api";
+import { Color, Icon, List } from "@raycast/api";
 
 export default function Command() {
   return (
@@ -805,9 +845,13 @@ export default function Command() {
         title="An Item with Accessories"
         accessories={[
           { text: `An Accessory Text`, icon: Icon.Hammer },
+          { text: { value: `A Colored Accessory Text`, color: Color.Orange }, icon: Icon.Hammer },
           { icon: Icon.Person, tooltip: "A person" },
           { text: "Just Do It!" },
           { date: new Date() },
+          { tag: new Date() },
+          { tag: { value: new Date(), color: Color.Magenta } },
+          { tag: { value: "User", color: Color.Magenta }, tooltip: "Tag with tooltip" },
         ]}
       />
     </List>

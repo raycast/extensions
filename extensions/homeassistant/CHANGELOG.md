@@ -1,5 +1,19 @@
 # Home Assistant Changelog
 
+## [Fix] . 2023-03-15
+
+- Inject https agent only on `https` urls - fix [#5358](https://github.com/raycast/extensions/issues/5358)
+
+## [Fix] - 2023-03-08
+
+- Fixed that some commands didn't fully support ignore certs preference.
+
+## [Weather Menu Bar] - 2022-11-28
+- Add weather entity menubar command
+
+## [Fix Script Edit Action] - 2022-11-19
+- Fix wrong entity id when edit a script
+
 ## [Timestamps] - 2022-11-14
 - Add `last_updated` and `last_changed` states as tooltip as well as to the attributes list
 - Add HACS pending updates to `Updates` command if HACS is installed

@@ -13,8 +13,7 @@ export function XcodeSwiftPackageResolvedEntryList(props: { xcodeProject: XcodeP
     () => XcodeSwiftPackageResolvedService.getPackageResolved(props.xcodeProject),
     [],
     {
-      // eslint-disable-next-line @typescript-eslint/no-empty-function
-      onError: () => {},
+      onError: () => Promise.resolve(),
     }
   );
   return (
