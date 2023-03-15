@@ -1,5 +1,9 @@
 # Readwise to Tana Changelog
 
+## [Add URL mapping for highlights] - 2023-03-15
+
+- Add field mapping for highlight URLs
+
 ## [Fix ordering, clean titles, and handle line breaks] - 2023-03-06
 
 - Reverse order of highlights. This will display and copy them in the order they were added, instead of displaying the latest highlight first.
