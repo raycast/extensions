@@ -14,7 +14,16 @@ import {
 import { useEffect, useState } from "react";
 import { dislikeCurrentlyPlayingTrack, likeCurrentlyPlayingTrack, startPlaySimilar } from "./spotify/client";
 import { SpotifyPlayingState, SpotifyState, TrackInfo } from "./spotify/types";
-import { getState, getTrack, nextTrack, pause, play, previousTrack, skipForward, rewindBackward } from "./spotify/applescript";
+import {
+  getState,
+  getTrack,
+  nextTrack,
+  pause,
+  play,
+  previousTrack,
+  skipForward,
+  rewindBackward,
+} from "./spotify/applescript";
 import { SpotifyProvider, useSpotify } from "./utils/context";
 
 function NowPlayingMenuBar() {
@@ -82,14 +91,13 @@ function NowPlayingMenuBar() {
   }
 
   let trackTitle: string | undefined = undefined;
-  if (currentlyPlayingTrack?.id.split(':')[1] === 'track') {
-    currentlyPlayingTrack.isPodcast = false
-    trackTitle = `${currentlyPlayingTrack.artist} - ${currentlyPlayingTrack.name}`
-  } else if (currentlyPlayingTrack?.id.split(':')[1] === 'episode') {
-    currentlyPlayingTrack.isPodcast = true
-    trackTitle = `${currentlyPlayingTrack.name}`
+  if (currentlyPlayingTrack?.id.split(":")[1] === "track") {
+    currentlyPlayingTrack.isPodcast = false;
+    trackTitle = `${currentlyPlayingTrack.artist} - ${currentlyPlayingTrack.name}`;
+  } else if (currentlyPlayingTrack?.id.split(":")[1] === "episode") {
+    currentlyPlayingTrack.isPodcast = true;
+    trackTitle = `${currentlyPlayingTrack.name}`;
   }
-  console.log(trackTitle, "TRACKKK")
   const optimizeTitle = (title: string | undefined) => {
     if (title === undefined) {
       return title;
@@ -205,7 +213,6 @@ function NowPlayingMenuBar() {
                     }}
                   />
                 </>
-
               )}
             </>
           )}
@@ -220,9 +227,8 @@ function NowPlayingMenuBar() {
             </>
           )}
         </>
-      )
-      }
-    </MenuBarExtra >
+      )}
+    </MenuBarExtra>
   );
 }
 
