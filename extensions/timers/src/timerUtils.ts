@@ -8,13 +8,15 @@ import { formatTime, secondsBetweenDates } from "./formatUtils";
 
 const DATAPATH = environment.supportPath + "/customTimers.json";
 
-async function startTimer(timeInSeconds: number, timerName = "Untitled") {
+async function startTimer(timeInSeconds: number, timerName = "Untitled", selectedSound = "default") {
   const fileName = environment.supportPath + "/" + new Date().toISOString() + "---" + timeInSeconds + ".timer";
   const masterName = fileName.replace(/:/g, "__");
   writeFileSync(masterName, timerName);
 
   const prefs = getPreferenceValues<Preferences>();
-  const selectedSoundPath = `${environment.assetsPath + "/" + prefs.selectedSound}`;
+  const selectedSoundPath = `${
+    environment.assetsPath + "/" + (selectedSound === "default" ? prefs.selectedSound : selectedSound)
+  }`;
   const cmdParts = [`sleep ${timeInSeconds}`];
   cmdParts.push(
     `if [ -f "${masterName}" ]; then osascript -e 'display notification "Timer \\"${timerName}\\" complete" with title "Ding!"'`
