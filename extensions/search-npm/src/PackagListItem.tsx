@@ -59,7 +59,7 @@ export const PackageListItem = ({
       <Action.OpenInBrowser
         key="openChangelog"
         url={changelogUrl}
-        title="Open changelog"
+        title="Open Changelog"
       />
     ) : null,
     npmPackagePage: (
