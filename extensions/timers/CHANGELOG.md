@@ -1,5 +1,9 @@
 # Timers Changelog
 
+## [Enhancement] - 2023-03-15
+
+- Implementation of alert sound choice dropdown when creating/starting custom timer
+
 ## [Alert sound volume customization and pausable stopwatches] - 2023-03-10
 
 - Fix bug where timer completion notification would not send until after timer was dismissed when "Ring Continuously" setting was turned on
