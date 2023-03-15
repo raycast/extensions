@@ -5,10 +5,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "icon": "replicate.png",
   "owner": "replicate",
-  "authors": [
-    "charlieholtz",
-    "KevinBatdorf"
-  ],
+  "author": "charlieholtz",
   "contributors": [
     "bfirsh",
     "KevinBatdorf"
