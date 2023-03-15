@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "time-until-i-do",
-  "title": "Time Until \"I Do\"",
+  "title": "Time Until I Do",
   "description": "Time Until 'The Big Day' is a customizable Raycast extension that helps you keep track of the time left until your upcoming event. Whether you're counting down to a birthday, anniversary, vacation, or any other special occasion, this extension has you covered. Stay motivated and inspired with its daily quotes and focus points. Download now and start counting down to your big day!",
   "icon": "icon.png",
   "author": "MuhaddiMu",
@@ -31,9 +31,8 @@
   "commands": [
     {
       "name": "index",
-      "description": "Time Until \"I Do\"",
-      "title": "⌛ Big Day",
-      "subtitle": "Time Until \"I Do\"",
+      "description": "Time Until I Do",
+      "title": "Big Day Countdown",
       "mode": "view"
     }
   ],
