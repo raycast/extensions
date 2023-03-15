@@ -9,11 +9,12 @@ import capitalize from "capitalize";
 
 export default function getBase(
   props: LaunchProps,
-  mode: TranslateMode = "translate",
+  initialMode: TranslateMode = "translate",
   forceEnableAutoStart = false,
   forceEnableAutoLoadSelected = false,
   forceEnableAutoLoadClipboard = false
 ) {
+  const [mode, setMode] = useState<TranslateMode>(initialMode);
   const [selectedId, setSelectedId] = useState<string>("");
   const query = useQuery({
     initialQuery: props.fallbackText,
@@ -55,7 +56,7 @@ export default function getBase(
         </ActionPanel>
       }
     >
-      <ContentView query={query} history={history} mode={mode} setSelectedId={setSelectedId} />
+      <ContentView query={query} history={history} mode={mode} setMode={setMode} setSelectedId={setSelectedId} />
     </List>
   );
 }

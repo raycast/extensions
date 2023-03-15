@@ -1,4 +1,14 @@
-import { Action, ActionPanel, clearSearchBar, getPreferenceValues, Icon, List, showToast, Toast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Alert,
+  clearSearchBar,
+  getPreferenceValues,
+  Icon,
+  List,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { DetailView } from "./detail";
 import { EmptyView } from "./empty";
 import { translate, TranslateMode, TranslateQuery } from "../providers/openai/translate";
@@ -9,11 +19,13 @@ import { detectLang } from "../providers/openai/lang";
 import { v4 as uuidv4 } from "uuid";
 import capitalize from "capitalize";
 import { getLoadActionSection } from "../actions/load";
+import { getModeActionSection } from "../actions/mode";
 
 export interface ContentViewProps {
   query: QueryHook;
   history: HistoryHook;
   mode: TranslateMode;
+  setMode: (value: TranslateMode) => void;
   setSelectedId: (value: string) => void;
 }
 
@@ -21,12 +33,13 @@ export interface Querying {
   hook: QueryHook;
   query: TranslateQuery;
   id: string;
+  controller: AbortController;
 }
 
 type ViewItem = Querying | Record;
 
 export const ContentView = (props: ContentViewProps) => {
-  const { query, history, mode, setSelectedId } = props;
+  const { query, history, mode, setMode, setSelectedId } = props;
 
   const [data, setData] = useState<ViewItem[]>([]);
   const [querying, setQuerying] = useState<Querying | null>();
@@ -80,6 +93,7 @@ export const ContentView = (props: ContentViewProps) => {
     const detectTo = query.to;
     const _querying: Querying = {
       hook: query,
+      controller,
       query: {
         mode,
         signal,
@@ -152,7 +166,22 @@ export const ContentView = (props: ContentViewProps) => {
     ref.current = translatedText;
   }, [translatedText]);
 
-  const getQueryingActionPanel = () => <ActionPanel></ActionPanel>;
+  const getQueryingActionPanel = () => (
+    <ActionPanel>
+      <ActionPanel.Submenu title="Cancel">
+        <Action
+          title="Abort"
+          icon={Icon.Stop}
+          shortcut={{ modifiers: ["ctrl"], key: "c" }}
+          onAction={() => {
+            if (querying) {
+              querying.controller.abort();
+            }
+          }}
+        />
+      </ActionPanel.Submenu>
+    </ActionPanel>
+  );
 
   const getRecordActionPanel = (record: Record) => (
     <ActionPanel>
@@ -176,8 +205,11 @@ export const ContentView = (props: ContentViewProps) => {
           shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
         />
       </ActionPanel.Section>
-      {getLoadActionSection((str) => {
+      {getLoadActionSection(record, (str) => {
         query.updateText(str);
+      })}
+      {getModeActionSection((mode) => {
+        setMode(mode);
       })}
       <Action
         title="Delete Translation"

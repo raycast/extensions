@@ -26,10 +26,10 @@ export interface TranslateResult {
 const chineseLangs = ["zh", "zh-CN", "zh-TW", "zh-Hans", "zh-Hant", "wyw", "yue"];
 
 export async function translate(query: TranslateQuery, entrypoint: string, apiKey: string) {
-  const headers = {
-    "Content-Type": "application/json",
-    Authorization: `Bearer ${apiKey}`,
-  };
+  const headers =
+    apiKey == "none"
+      ? { "Content-Type": "application/json" }
+      : { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` };
   const fromChinese = chineseLangs.indexOf(query.detectFrom) > 0;
   const toChinese = chineseLangs.indexOf(query.detectTo) > 0;
   let systemPrompt = "You are a translation engine that can only translate text and cannot interpret it.";
