@@ -1,5 +1,10 @@
 # GitLab Changelog
 
+## [Add Retry for Failed Jobs] - 2023-03-15
+
+- Added ability to retry all failed jobs for a pipeline
+- Added ability to retry a single job
+
 ## [Add Group and Project Wikis] - 2023-03-14
 
 - Added wikis for groups and projects
