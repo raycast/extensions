@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "naver-search",
   "title": "Naver Search",
-  "description": "Naver search extension for raycast",
+  "description": "Naver search extension for Raycast",
   "icon": "command-icon.png",
   "author": "magneto",
   "categories": [
