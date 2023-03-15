@@ -81,7 +81,7 @@ export default function TimeUntil() {
       markdown={countdownCopy() + "\n" + "\n\n"} // + FocusPoint()
       actions={
         <ActionPanel>
-          <Action title="⚙️ Open Extension Preferences" onAction={openExtensionPreferences} />
+          <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
         </ActionPanel>
       }
     />
