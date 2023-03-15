@@ -158,7 +158,7 @@ export function JobListItem(props: { job: Job; projectFullPath: string; onRefres
 
 export function JobList(props: {
   projectFullPath: string;
-  pipelineID: string;
+  pipelineID: number;
   pipelineIID?: string | undefined;
   navigationTitle?: string;
 }): JSX.Element {
@@ -201,7 +201,7 @@ interface RESTJob {
 export function useSearch(
   query: string | undefined,
   projectFullPath: string,
-  pipelineID: string,
+  pipelineID: number,
   pipelineIID?: string | undefined
 ): {
   stages?: Record<string, Job[]>;
@@ -332,7 +332,7 @@ export function PipelineJobsListByCommit(props: { project: Project; sha: string 
     return (
       <JobList
         projectFullPath={props.project.fullPath}
-        pipelineID={`${commit.last_pipeline.id}`}
+        pipelineID={commit.last_pipeline.id}
         pipelineIID={commit.last_pipeline.iid ? `${commit.last_pipeline.iid}` : undefined}
       />
     );
