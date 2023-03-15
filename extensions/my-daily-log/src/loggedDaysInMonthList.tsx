@@ -10,7 +10,7 @@ export default function Command() {
   const [items] = useState<LoggedDay[]>(useCase.execute());
   return (
     <List isShowingDetail>
-      {items.map(item => (
+      {items.map((item) => (
         <List.Item key={item.date.toISOString()} title={item.title} detail={<Detail date={item.date} />} />
       ))}
     </List>

@@ -13,8 +13,7 @@ export class JsonDailyLogRepository implements DailyLogRepository {
   }
 
   update(log: DailyLog): void {
-    const logsWithoutUpdated = this.getAllForDate(log.date)
-      .filter((l) => l.id !== log.id);
+    const logsWithoutUpdated = this.getAllForDate(log.date).filter((l) => l.id !== log.id);
     logsWithoutUpdated.push(log);
     this.saveLogs(logsWithoutUpdated, log.date);
   }
@@ -31,16 +30,14 @@ export class JsonDailyLogRepository implements DailyLogRepository {
       return [];
     }
     const logsJson = fs.readFileSync(getJsonDailyLogPath(date), "utf8");
-    return JSON
-      .parse(logsJson)
-      .map((log: any) => new DailyLog(log.id, new Date(log.date), log.title));
+    return JSON.parse(logsJson).map((log: any) => new DailyLog(log.id, new Date(log.date), log.title));
   }
 
   dateContainsLogs(date: Date): boolean {
     return this.getAllForDate(date).length > 0;
   }
 
-  deleteLog(logId: String, date: Date): void {
+  deleteLog(logId: string, date: Date): void {
     const allLogsForDate = this.getAllForDate(date);
     const logsWithoutDeleted = allLogsForDate.filter((log) => log.id !== logId);
     this.saveLogs(logsWithoutDeleted, date);

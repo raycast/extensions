@@ -39,7 +39,7 @@ export class LegacyDailyLogRepository implements DailyLogRepository {
     return this.getAllForDate(date).length > 0;
   }
 
-  deleteLog(logId: String, date: Date): void {
+  deleteLog(logId: string, date: Date): void {
     // Not supported
   }
 

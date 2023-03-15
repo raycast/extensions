@@ -5,7 +5,6 @@ export class GetLoggedDaysUseCase {
   constructor(private repository: LoggedDaysRepository) {}
 
   execute(): LoggedDay[] {
-    return this.repository.getLoggedDays()
-    .sort((a, b) => b.date.getTime() - a.date.getTime());
+    return this.repository.getLoggedDays().sort((a, b) => b.date.getTime() - a.date.getTime());
   }
 }

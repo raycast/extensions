@@ -25,10 +25,15 @@ export default function Command(props: { arguments: DailyLogListArguments }) {
   const [editingItem, setEditingItem] = useState<DailyLog | null>(null);
 
   if (editingItem) {
-    return <EditDailyLogItem item={editingItem} onEdited={() => {
-      setEditingItem(null)
-      setItems(getDailyLogs(date))
-    }} />;
+    return (
+      <EditDailyLogItem
+        item={editingItem}
+        onEdited={() => {
+          setEditingItem(null);
+          setItems(getDailyLogs(date));
+        }}
+      />
+    );
   }
 
   return (
@@ -41,11 +46,7 @@ export default function Command(props: { arguments: DailyLogListArguments }) {
           actions={
             <ActionPanel>
               <ActionPanel.Section>
-                <Action
-                  icon={Icon.Pencil}
-                  title={"Edit log entry"}
-                  onAction={() => setEditingItem(item)}
-                />
+                <Action icon={Icon.Pencil} title={"Edit log entry"} onAction={() => setEditingItem(item)} />
               </ActionPanel.Section>
             </ActionPanel>
           }
@@ -55,10 +56,10 @@ export default function Command(props: { arguments: DailyLogListArguments }) {
   );
 }
 
-function EditDailyLogItem(props: { item: DailyLog, onEdited: (item: DailyLog) => void }) {
+function EditDailyLogItem(props: { item: DailyLog; onEdited: (item: DailyLog) => void }) {
   const editLogAndExit = (title: string): void => {
-    const useCase = editDailyLogUseCaseFactory()
-    const editedItem = new DailyLog(props.item.id, props.item.date, title)
+    const useCase = editDailyLogUseCaseFactory();
+    const editedItem = new DailyLog(props.item.id, props.item.date, title);
     useCase.execute(editedItem);
     showToast(Toast.Style.Success, "Log edited", title);
     props.onEdited(editedItem);
@@ -87,7 +88,8 @@ function EditDailyLogItem(props: { item: DailyLog, onEdited: (item: DailyLog) =>
         id="title"
         title="What did you do?"
         placeholder={randomPlaceholder()}
-        defaultValue={props.item.title} />
+        defaultValue={props.item.title}
+      />
     </Form>
   );
 }

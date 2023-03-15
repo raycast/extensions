@@ -3,12 +3,6 @@ import { JsonLoggedDaysRepository } from "../infrastructure/loggedDays/JsonLogge
 import { LegacyLoggedDaysRepository } from "../infrastructure/loggedDays/LegacyLoggedDaysRepository";
 import { LoggedDaysRepositoryComposer } from "../infrastructure/loggedDays/LoggedDaysRepositoryComposer";
 
-
 export function makeLoggedDaysRepository(): LoggedDaysRepository {
-  return new LoggedDaysRepositoryComposer(
-    [
-      new LegacyLoggedDaysRepository(),
-      new JsonLoggedDaysRepository()
-    ]
-  );
+  return new LoggedDaysRepositoryComposer([new LegacyLoggedDaysRepository(), new JsonLoggedDaysRepository()]);
 }

@@ -3,7 +3,6 @@ import { LoggedDay } from "../../domain/loggedDay/LoggedDay";
 import { LoggedDaysRepository } from "../../domain/loggedDay/LoggedDaysRepository";
 import { getDailyLogsPath } from "../../shared/getDailyLogPath";
 
-
 export class LegacyLoggedDaysRepository implements LoggedDaysRepository {
   getLoggedDays(): LoggedDay[] {
     const dailyLogPath = getDailyLogsPath();

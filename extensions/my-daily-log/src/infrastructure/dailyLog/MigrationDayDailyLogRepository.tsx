@@ -3,10 +3,7 @@ import { DailyLogRepository } from "../../domain/dailyLog/DailyLogRepository";
 import { NewDailyLog } from "../../domain/dailyLog/NewDailyLog";
 
 export class MigrationDayDailyLogRepository implements DailyLogRepository {
-  constructor(
-    private readonly legacy: DailyLogRepository,
-    private readonly repository: DailyLogRepository
-  ) { }
+  constructor(private readonly legacy: DailyLogRepository, private readonly repository: DailyLogRepository) {}
 
   update(log: DailyLog): void {
     if (this.legacy.dateContainsLogs(log.date)) {
@@ -23,7 +20,7 @@ export class MigrationDayDailyLogRepository implements DailyLogRepository {
   }
 
   migrateLogsForDate(date: Date): void {
-    this.legacy.getAllForDate(date).forEach(oldLog => {
+    this.legacy.getAllForDate(date).forEach((oldLog) => {
       this.repository.create(oldLog);
     });
     this.legacy.deleteAllForDate(date);
@@ -40,7 +37,7 @@ export class MigrationDayDailyLogRepository implements DailyLogRepository {
     return this.legacy.dateContainsLogs(date) || this.repository.dateContainsLogs(date);
   }
 
-  deleteLog(logId: String, date: Date): void {
+  deleteLog(logId: string, date: Date): void {
     if (this.legacy.dateContainsLogs(date)) {
       this.migrateLogsForDate(date);
     }

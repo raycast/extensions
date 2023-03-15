@@ -4,10 +4,5 @@ import { LegacyDailyLogRepository } from "../infrastructure/dailyLog/LegacyDaily
 import { MigrationDayDailyLogRepository } from "../infrastructure/dailyLog/MigrationDayDailyLogRepository";
 
 export function makeDailyLogRepository(): DailyLogRepository {
-  return new MigrationDayDailyLogRepository(
-    new LegacyDailyLogRepository(),
-    new JsonDailyLogRepository()
-  );
+  return new MigrationDayDailyLogRepository(new LegacyDailyLogRepository(), new JsonDailyLogRepository());
 }
-
-
