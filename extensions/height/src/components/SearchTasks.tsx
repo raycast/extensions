@@ -31,7 +31,13 @@ export default function SearchTasks({ listId, assignedTasks }: Props = {}) {
     },
   });
 
-  const { fieldTemplatesStatuses, fieldTemplatesIsLoading } = useFieldTemplates();
+  const {
+    fieldTemplatesStatuses,
+    fieldTemplatesPrioritiesObj,
+    fieldTemplatesPriorities,
+    fieldTemplatesDueDate,
+    fieldTemplatesIsLoading,
+  } = useFieldTemplates();
   const { users, usersIsLoading } = useUsers();
   const { tasks, tasksMutate, tasksIsLoading } = useTasks({ listId, assigneeId });
 
@@ -87,7 +93,19 @@ export default function SearchTasks({ listId, assignedTasks }: Props = {}) {
                   getTaskPriorityAccessory(task, theme),
                   ...getAssignedUsers(task.assigneesIds, users),
                 ]}
-                actions={<ActionsTask mutateTask={tasksMutate} task={task} />}
+                actions={
+                  <ActionsTask
+                    task={task}
+                    mutateTask={tasksMutate}
+                    fieldTemplatesStatuses={fieldTemplatesStatuses}
+                    fieldTemplatesPriorities={fieldTemplatesPriorities}
+                    fieldTemplatesPrioritiesObj={fieldTemplatesPrioritiesObj}
+                    fieldTemplatesDueDate={fieldTemplatesDueDate}
+                    lists={lists}
+                    tasks={tasks}
+                    users={users}
+                  />
+                }
               />
             ))}
         </List.Section>

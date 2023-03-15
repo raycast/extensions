@@ -13,11 +13,10 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { ApiTask } from "../api/task";
-import useFieldTemplates from "../hooks/useFieldTemplates";
-import useLists from "../hooks/useLists";
-import useTasks from "../hooks/useTasks";
-import useUsers from "../hooks/useUsers";
+import { FieldTemplateObject, Option } from "../types/fieldTemplate";
+import { ListObject } from "../types/list";
 import { TaskObject } from "../types/task";
+import { UserObject } from "../types/user";
 import { ApiResponse, UseCachedPromiseMutatePromise } from "../types/utils";
 import { getTintColorFromHue, ListColors } from "../utils/list";
 import { getIconByStatusState, getPriorityIcon } from "../utils/task";
@@ -27,19 +26,32 @@ import UpdateTask from "./UpdateTask";
 type Props = {
   task: TaskObject;
   mutateTask: UseCachedPromiseMutatePromise<ApiResponse<TaskObject[]>>;
+  fieldTemplatesStatuses?: Option[];
+  fieldTemplatesPriorities?: Option[];
+  fieldTemplatesPrioritiesObj?: FieldTemplateObject;
+  fieldTemplatesDueDate?: FieldTemplateObject;
+  lists?: ListObject[];
+  tasks?: TaskObject[];
+  users?: UserObject[];
   detailsTaskRevalidate?: () => void;
   detailsPage?: boolean;
 };
 
-export default function ActionsTask({ task, mutateTask, detailsPage, detailsTaskRevalidate }: Props) {
+export default function ActionsTask({
+  task,
+  mutateTask,
+  fieldTemplatesStatuses,
+  fieldTemplatesPriorities,
+  fieldTemplatesPrioritiesObj,
+  fieldTemplatesDueDate,
+  lists,
+  tasks,
+  users,
+  detailsPage,
+  detailsTaskRevalidate,
+}: Props) {
   const { push } = useNavigation();
   const { theme } = environment;
-
-  const { fieldTemplatesStatuses, fieldTemplatesPrioritiesObj, fieldTemplatesPriorities, fieldTemplatesDueDate } =
-    useFieldTemplates();
-  const { lists } = useLists();
-  const { tasks } = useTasks();
-  const { users } = useUsers();
 
   return (
     <ActionPanel>
