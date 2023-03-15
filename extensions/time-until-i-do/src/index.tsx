@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Detail, getPreferenceValues, openExtensionPreferences } from "@raycast/api";
 import moment from "moment";
 import fetch from "node-fetch";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 
 interface Preferences {
   bigDayDate: any;
@@ -9,20 +9,6 @@ interface Preferences {
 }
 
 export default function TimeUntil() {
-  const [quote, setQuote] = useState<string>("");
-
-  useEffect(() => {
-    const getQuote = async () => {
-      const response = await fetch("https://api.forismatic.com/api/1.0/?method=getQuote&format=json&lang=en");
-      const data = (await response.json()) as any;
-      const quote = data.quoteText;
-      const author = data.quoteAuthor;
-      const quoteText = "> 💬 " + quote + "- " + author;
-      setQuote(quoteText);
-    };
-    getQuote();
-  }, []);
-
   const { bigDayDate } = getPreferenceValues<Preferences>();
   const { bigDayName } = getPreferenceValues<Preferences>();
 
@@ -92,7 +78,7 @@ export default function TimeUntil() {
 
   return (
     <Detail
-      markdown={countdownCopy() + "\n" + "\n\n" + quote} // + FocusPoint()
+      markdown={countdownCopy() + "\n" + "\n\n"} // + FocusPoint()
       actions={
         <ActionPanel>
           <Action title="⚙️ Open Extension Preferences" onAction={openExtensionPreferences} />
