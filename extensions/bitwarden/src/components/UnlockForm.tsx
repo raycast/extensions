@@ -58,6 +58,7 @@ const UnlockForm = (props: UnlockFormProps) => {
     >
       {shouldShowServer && <Form.Description title="Server URL" text={serverMessage} />}
       <Form.Description title="Vault Status" text={userMessage} />
+      {bitwarden.lockReason && <Form.Description title="Reason" text={bitwarden.lockReason} />}
       <Form.PasswordField autoFocus id="password" title="Master Password" />
     </Form>
   );

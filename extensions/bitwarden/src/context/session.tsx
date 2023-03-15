@@ -13,7 +13,7 @@ export type Session = {
   isLoading: boolean;
   isLocked: boolean;
   isAuthenticated: boolean;
-  lock: () => Promise<void>;
+  lock: (reason?: string) => Promise<void>;
   logout: () => Promise<void>;
 };
 
@@ -39,7 +39,7 @@ export function SessionProvider(props: SessionProviderProps) {
   const { unlock, children } = props;
   const bitwarden = useBitwarden();
   const [state, setState] = useReducer(
-    (old: SessionState, update: Partial<SessionState>) => ({ ...old, ...update }),
+    (previous: SessionState, next: Partial<SessionState>) => ({ ...previous, ...next }),
     initialState
   );
 
@@ -68,7 +68,7 @@ export function SessionProvider(props: SessionProviderProps) {
       const shouldLock = lastActivityTime != null && timeElapseSinceLastPasswordEnter >= repromptIgnoreDuration;
 
       if (token && shouldLock) {
-        await bitwarden.lock();
+        await bitwarden.lock("Vault timed out due to inactivity");
         await deleteToken();
         return;
       }
@@ -132,7 +132,7 @@ export function SessionProvider(props: SessionProviderProps) {
 
   async function lockVault() {
     const toast = await showToast({ title: "Locking Vault...", style: Toast.Style.Animated });
-    await bitwarden.lock();
+    await bitwarden.lock("Manually locked by the user");
     await deleteToken();
     await toast.hide();
   }

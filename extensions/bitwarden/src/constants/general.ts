@@ -8,6 +8,7 @@ export const LOCAL_STORAGE_KEY = {
   SESSION_TOKEN: "sessionToken",
   SERVER_URL: "cliServer",
   LAST_ACTIVITY_TIME: "lastActivityTime",
+  VAULT_LOCK_REASON: "vaultLockReason",
 };
 
 export const ERRORS = {

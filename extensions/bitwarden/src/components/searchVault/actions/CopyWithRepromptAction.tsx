@@ -1,4 +1,4 @@
-import { Action, Clipboard, closeMainWindow } from "@raycast/api";
+import { Action, Clipboard, closeMainWindow, showHUD } from "@raycast/api";
 import ActionWithReprompt from "~/components/actions/ActionWithReprompt";
 
 export type CopyWithRepromptActionProps = Omit<Action.Props, "onAction"> & {
@@ -10,6 +10,7 @@ function CopyWithRepromptAction(props: CopyWithRepromptActionProps) {
 
   const copyContent = async () => {
     await Clipboard.copy(content);
+    await showHUD("Copied to Clipboard");
     await closeMainWindow();
   };
 

@@ -13,6 +13,7 @@ import { getServerUrlPreference } from "~/utils/preferences";
 export class Bitwarden {
   private env: Record<string, string>;
   private initPromise: Promise<void>;
+  lockReason: string | undefined;
   cliPath: string;
 
   constructor() {
@@ -36,7 +37,10 @@ export class Bitwarden {
     }
 
     // Check the CLI has been configured to use the preference Url
-    this.initPromise = this.checkServerUrl(serverUrl);
+    this.initPromise = (async () => {
+      await this.checkServerUrl(serverUrl);
+      this.lockReason = await LocalStorage.getItem<string>(LOCAL_STORAGE_KEY.VAULT_LOCK_REASON);
+    })();
   }
 
   async initialize() {
@@ -93,6 +97,10 @@ export class Bitwarden {
 
   async login(): Promise<void> {
     await this.exec(["login", "--apikey"]);
+    if (this.lockReason) {
+      await LocalStorage.removeItem(LOCAL_STORAGE_KEY.VAULT_LOCK_REASON);
+      this.lockReason = undefined;
+    }
   }
 
   async logout(): Promise<void> {
@@ -123,8 +131,12 @@ export class Bitwarden {
     return sessionToken;
   }
 
-  async lock(): Promise<void> {
+  async lock(reason?: string): Promise<void> {
     await this.exec(["lock"]);
+    if (reason) {
+      this.lockReason = reason;
+      await LocalStorage.setItem(LOCAL_STORAGE_KEY.VAULT_LOCK_REASON, reason);
+    }
   }
 
   async status(sessionToken?: string): Promise<VaultState> {
