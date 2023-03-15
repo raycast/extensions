@@ -20,7 +20,7 @@
       "placeholder": "YYYY-MM-DD"
     },
     {
-      "title": "Big Day name",
+      "title": "Big Day Name",
       "name": "bigDayName",
       "description": "Enter the name of the big day",
       "type": "textfield",
