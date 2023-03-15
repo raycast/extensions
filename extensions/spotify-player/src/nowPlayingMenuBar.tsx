@@ -17,9 +17,9 @@ import { SpotifyPlayingState, SpotifyState, TrackInfo } from "./spotify/types";
 import {
   getState,
   getTrack,
-  nextTrack,
   pause,
   play,
+  nextTrack,
   previousTrack,
   skipForward,
   rewindBackward,
