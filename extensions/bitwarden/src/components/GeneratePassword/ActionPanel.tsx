@@ -18,6 +18,7 @@ const GeneratePasswordActionPanel = (props: GeneratePasswordActionPanelProps) =>
             icon={Icon.Clipboard}
             content={password}
             shortcut={{ key: "enter", modifiers: ["cmd"] }}
+            transient
           />
           <Action.Paste
             title="Paste Password to Active App"
