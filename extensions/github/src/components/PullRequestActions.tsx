@@ -228,7 +228,7 @@ export default function PullRequestActions({
 
         {viewer ? (
           <Action
-            title={isAssignedToMe ? "Un-assign from Me" : "Assign to Me"}
+            title={isAssignedToMe ? "Un-Assign From Me" : "Assign to Me"}
             icon={viewerUser.icon}
             shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
             onAction={() => (isAssignedToMe ? unassignFromMe(viewer.id) : assignToMe(viewer.id))}
@@ -286,6 +286,12 @@ export default function PullRequestActions({
           content={pullRequest.title}
           title="Copy Pull Request Title"
           shortcut={{ modifiers: ["ctrl", "shift"], key: "," }}
+        />
+
+        <Action.CopyToClipboard
+          content={`[${pullRequest.title}](${pullRequest.permalink})`}
+          title="Copy Markdown URL"
+          shortcut={{ modifiers: ["cmd", "shift"], key: ";" }}
         />
       </ActionPanel.Section>
 

@@ -1,4 +1,4 @@
-import { ActionPanel, Action, Toast, showToast, Color, Icon } from "@raycast/api";
+import { ActionPanel, confirmAlert, Action, Toast, showToast, Color, Icon, Clipboard, Alert } from "@raycast/api";
 import { MutatePromise, useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 
@@ -158,9 +158,73 @@ export default function IssueActions({ issue, mutateList, mutateDetail, children
     }
   }
 
+  async function createLinkedBranch() {
+    try {
+      await showToast({ style: Toast.Style.Animated, title: `Creating branch for issue #${issue.number}` });
+
+      const res = await github.createLinkedBranch({
+        input: { issueId: issue.id, oid: issue.repository.defaultBranchRef?.target?.oid },
+      });
+      const branchName = res.createLinkedBranch?.linkedBranch?.ref?.name;
+      await mutate();
+
+      if (branchName) {
+        await showToast({
+          style: Toast.Style.Success,
+          title: `${branchName} is created`,
+          primaryAction: {
+            title: "Copy Branch Name",
+            shortcut: { modifiers: ["shift", "cmd"], key: "c" },
+            onAction: () => Clipboard.copy(branchName),
+          },
+        });
+      }
+    } catch (error) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed creating a branch",
+        message: getErrorMessage(error),
+      });
+    }
+  }
+
+  async function deleteLinkedBranch(linkedBranchId: string, linkedBranchName: string) {
+    if (
+      await confirmAlert({
+        icon: Icon.Trash,
+        title: "Delete the branch",
+        message: `${linkedBranchName} will be deleted. Are you sure you want to proceed with the action?`,
+        primaryAction: {
+          title: "Confirm",
+          style: Alert.ActionStyle.Destructive,
+        },
+      })
+    ) {
+      try {
+        await showToast({ style: Toast.Style.Animated, title: "Deleting a branch" });
+
+        await github.deleteLinkedBranch({ input: { linkedBranchId } });
+        await mutate();
+
+        await showToast({
+          style: Toast.Style.Success,
+          title: "Deleted the branch",
+        });
+      } catch (error) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Failed deleting the branch",
+          message: getErrorMessage(error),
+        });
+      }
+    }
+  }
+
   const viewerUser = getGitHubUser(viewer);
 
   const isAssignedToMe = issue.assignees.nodes?.some((assignee) => assignee?.isViewer);
+
+  const linkedBranch: any = issue.linkedBranches?.nodes?.length ? issue.linkedBranches.nodes[0] : null;
 
   return (
     <ActionPanel title={`#${issue.number} in ${issue.repository.nameWithOwner}`}>
@@ -171,7 +235,7 @@ export default function IssueActions({ issue, mutateList, mutateDetail, children
       <ActionPanel.Section>
         {viewer ? (
           <Action
-            title={isAssignedToMe ? "Un-assign from Me" : "Assign to Me"}
+            title={isAssignedToMe ? "Un-Assign From Me" : "Assign to Me"}
             icon={viewerUser.icon}
             shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
             onAction={() => (isAssignedToMe ? unassignFromMe(viewer.id) : assignToMe(viewer.id))}
@@ -181,6 +245,15 @@ export default function IssueActions({ issue, mutateList, mutateDetail, children
         <AddAssigneeSubmenu issue={issue} mutate={mutate} />
 
         <AddProjectSubmenu issue={issue} mutate={mutate} />
+
+        {!linkedBranch ? (
+          <Action
+            title={"Create Issue Branch"}
+            icon={{ source: "branch.svg", tintColor: Color.PrimaryText }}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "b" }}
+            onAction={() => createLinkedBranch()}
+          />
+        ) : null}
 
         <SetMilestoneSubmenu issue={issue} mutate={mutate} />
       </ActionPanel.Section>
@@ -207,6 +280,15 @@ export default function IssueActions({ issue, mutateList, mutateDetail, children
               icon={{ source: "skip.svg", tintColor: Color.Red }}
               onAction={closeIssueAsNotPlanned}
             />
+
+            {linkedBranch ? (
+              <Action
+                title={"Delete Issue Branch"}
+                style={Action.Style.Destructive}
+                icon={{ source: "branch.svg", tintColor: Color.Red }}
+                onAction={() => deleteLinkedBranch(linkedBranch.id, linkedBranch.ref.name)}
+              />
+            ) : null}
           </>
         )}
       </ActionPanel.Section>
@@ -229,6 +311,14 @@ export default function IssueActions({ issue, mutateList, mutateDetail, children
           title="Copy Issue Title"
           shortcut={{ modifiers: ["ctrl", "shift"], key: "," }}
         />
+
+        {linkedBranch ? (
+          <Action.CopyToClipboard
+            content={linkedBranch.ref.name}
+            title="Copy Branch Name"
+            shortcut={{ modifiers: ["ctrl", "shift"], key: "." }}
+          />
+        ) : null}
       </ActionPanel.Section>
 
       <ActionPanel.Section>

@@ -1,54 +1,68 @@
-import { ActionPanel, List, Detail, Action, Icon } from "@raycast/api";
-import * as AWS from "aws-sdk";
-import setupAws from "./util/setupAws";
+import { FunctionConfiguration, LambdaClient, ListFunctionsCommand } from "@aws-sdk/client-lambda";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-
-const preferences = setupAws();
+import AWSProfileDropdown from "./components/searchbar/aws-profile-dropdown";
+import CloudwatchLogStreams from "./components/cloudwatch/CloudwatchLogStreams";
+import { resourceToConsoleLink } from "./util";
 
 export default function Lambda() {
-  const { data: functions, error, isLoading } = useCachedPromise(fetchFunctions);
-
-  if (error) {
-    return <Detail markdown="Something went wrong. Try again!" />;
-  }
+  const { data: functions, error, isLoading, revalidate } = useCachedPromise(fetchFunctions);
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Filter functions by name...">
-      {functions?.map((func) => (
-        <LambdaFunction key={func.FunctionName} func={func} />
-      ))}
+    <List
+      isLoading={isLoading}
+      searchBarPlaceholder="Filter functions by name..."
+      searchBarAccessory={<AWSProfileDropdown onProfileSelected={revalidate} />}
+    >
+      {error ? (
+        <List.EmptyView title={error.name} description={error.message} icon={Icon.Warning} />
+      ) : (
+        functions?.map((func) => <LambdaFunction key={func.FunctionName} func={func} />)
+      )}
     </List>
   );
 }
 
-function LambdaFunction({ func }: { func: AWS.Lambda.FunctionConfiguration }) {
+function LambdaFunction({ func }: { func: FunctionConfiguration }) {
   return (
     <List.Item
-      icon="lambda.png"
+      icon={"aws-icons/lam.png"}
       title={func.FunctionName || ""}
       actions={
         <ActionPanel>
           <Action.OpenInBrowser
             title="Open in Browser"
-            url={`https://${preferences.region}.console.aws.amazon.com/lambda/home?region=${preferences.region}#/functions/${func.FunctionName}?tab=monitoring`}
+            url={resourceToConsoleLink(func.FunctionName, "AWS::Lambda::Function")}
           />
-          <Action.CopyToClipboard title="Copy ARN" content={func.FunctionArn || ""} />
-          <Action.CopyToClipboard title="Copy Name" content={func.FunctionName || ""} />
+          <Action.OpenInBrowser
+            icon={Icon.Document}
+            title="Open CloudWatch Log Group"
+            url={resourceToConsoleLink(`/aws/lambda/${func.FunctionName}`, "AWS::Logs::LogGroup")}
+            shortcut={{ modifiers: ["cmd"], key: "l" }}
+          />
+          <Action.Push
+            title={"View Log Streams"}
+            icon={Icon.Eye}
+            shortcut={{ modifiers: ["opt"], key: "l" }}
+            target={<CloudwatchLogStreams logGroupName={`/aws/lambda/${func.FunctionName}`}></CloudwatchLogStreams>}
+          />
+          <ActionPanel.Section title={"Copy"}>
+            <Action.CopyToClipboard title="Copy Function ARN" content={func.FunctionArn || ""} />
+            <Action.CopyToClipboard title="Copy Function Name" content={func.FunctionName || ""} />
+          </ActionPanel.Section>
         </ActionPanel>
       }
-      accessories={[
-        { date: func.LastModified ? new Date(func.LastModified) : undefined },
-        { icon: getRuntimeIcon(func.Runtime || ""), tooltip: func.Runtime || "" },
-      ]}
+      accessories={[{ text: func.Runtime || "" }, { icon: getRuntimeIcon(func.Runtime) }]}
     />
   );
 }
 
 async function fetchFunctions(
   nextMarker?: string,
-  functions?: AWS.Lambda.FunctionList
-): Promise<AWS.Lambda.FunctionList> {
-  const { NextMarker, Functions } = await new AWS.Lambda().listFunctions({ Marker: nextMarker }).promise();
+  functions?: FunctionConfiguration[]
+): Promise<FunctionConfiguration[]> {
+  if (!process.env.AWS_PROFILE) return [];
+  const { NextMarker, Functions } = await new LambdaClient({}).send(new ListFunctionsCommand({ Marker: nextMarker }));
 
   const combinedFunctions = [...(functions || []), ...(Functions || [])];
 
@@ -59,7 +73,11 @@ async function fetchFunctions(
   return combinedFunctions;
 }
 
-const getRuntimeIcon = (runtime: AWS.Lambda.Runtime) => {
+const getRuntimeIcon = (runtime: FunctionConfiguration["Runtime"]) => {
+  if (!runtime) {
+    return Icon.QuestionMark;
+  }
+
   if (runtime.includes("node")) {
     return "lambda-runtime-icons/nodejs.png";
   } else if (runtime.includes("python")) {

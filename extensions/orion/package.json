@@ -29,6 +29,17 @@
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "name": "orion-rc",
+      "title": "Orion",
+      "label": "Use Release Candidate",
+      "description": "Looks in '~/Library/Application Support/Orion RC' instead of '~/Library/Application Support/Orion'",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.39.3",
     "@raycast/utils": "^1.4.7",

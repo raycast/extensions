@@ -20,7 +20,6 @@ export function useOpenIssues(repository: string | null) {
         assignedOpenQuery: `is:issue assignee:@me archived:false is:open ${updatedFilter} ${repositoryFilter}`,
         mentionedOpenQuery: `is:issue mentions:@me archived:false is:open ${updatedFilter} ${repositoryFilter}`,
         numberOfOpenItems: 20,
-        avatarSize: 64,
       });
     },
     [repository]

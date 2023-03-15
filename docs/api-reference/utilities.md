@@ -61,7 +61,32 @@ export default async function Command() {
 
 #### Return
 
-The default [Application](#application) that would open the file. Throws an error if no application was found.
+A Promise that resolves with the default [Application](#application) that would open the file. If no application was found, the promise will be rejected.
+
+### getFrontmostApplication
+
+Returns the frontmost application.
+
+#### Signature
+
+```typescript
+async function getFrontmostApplication(): Promise<Application>;
+```
+
+#### Example
+
+```typescript
+import { getFrontmostApplication } from "@raycast/api";
+
+export default async function Command() => {
+  const defaultApplication = await getFrontmostApplication();
+  console.log(`The frontmost application is: ${frontmostApplication.name}`);
+};
+```
+
+#### Return
+
+A Promise that resolves with the frontmost [Application](#application). If no application was found, the promise will be rejected.
 
 ### showInFinder
 
@@ -156,7 +181,7 @@ A Promise that resolves when the target has been opened.
 
 ### launchCommand
 
-Launches another command of the same extension.
+Launches another command of the same extension. If the command does not exist, or if it's not enabled, an error will be thrown.
 Use this method if your command needs to open another command based on user interaction,
 or when an immediate background refresh should be triggered, for example when a command needs to update an associated menu-bar command.
 
@@ -168,6 +193,7 @@ async function launchCommand(options: {
   type: LaunchType;
   arguments?: Arguments | null;
   context?: LaunchContext | null;
+  fallbackText?: string | null;
 }): Promise<void>;
 ```
 
@@ -176,9 +202,9 @@ async function launchCommand(options: {
 ```typescript
 import { launchCommand, LaunchType } from "@raycast/api";
 
-export default async function Command() {
+export default async function Command() => {
   await launchCommand({ name: "list", type: LaunchType.UserInitiated, context: { foo: "bar" } });
-}
+};
 ```
 
 #### Parameters
@@ -210,6 +236,10 @@ PathLike: string | Buffer | URL;
 
 Supported path types.
 
-### Arguments
+### LaunchContext
 
-Holds the arguments (entered in Raycast Root Search Bar) that are passed to the command. The key is the `name` defined in manifest file and value is the user's input.
+Represents the passed context object of programmatic command launches.
+
+### LaunchOptions
+
+A parameter object used to decide which command should be launched and what data (arguments, context) it should receive.

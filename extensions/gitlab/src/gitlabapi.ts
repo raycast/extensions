@@ -70,6 +70,7 @@ function userFromJson(data: any): User {
 export function dataToProject(project: any): Project {
   return {
     id: project.id,
+    name: project.name,
     name_with_namespace: project.name_with_namespace,
     fullPath: project.path_with_namespace,
     web_url: project.web_url,
@@ -107,6 +108,7 @@ export function jsonDataToMergeRequest(mr: any): MergeRequest {
     sha: mr.sha,
     milestone: mr.milestone ? (mr.milestone as Milestone) : undefined,
     draft: mr.draft,
+    has_conflicts: mr.has_conflicts === true || false,
   };
 }
 
@@ -243,6 +245,28 @@ export class MergeRequest {
   public sha = "";
   public milestone?: Milestone;
   public draft = false;
+  public has_conflicts = false;
+}
+
+export class Pipeline {
+  public id = 0;
+  public iid = "";
+  public projectId = "";
+  public status = "";
+  public ref = "";
+  public sha = "";
+  public before_sha = "";
+  public tag = false;
+  public user?: User;
+  public created_at = "";
+  public updated_at = "";
+  public started_at = "";
+  public finished_at = "";
+  public committed_at = "";
+  public duration = 0;
+  public queued_duration = 0;
+  public coverage = "";
+  public webUrl = "";
 }
 
 export interface TodoGroup {
@@ -266,11 +290,14 @@ export class Todo {
   public project_with_namespace = "";
   public group?: TodoGroup;
   public author?: User = undefined;
+  public created_at = "";
+  public updated_at = "";
 }
 
 export class Project {
   public id = 0;
   public name_with_namespace = "";
+  public name = "";
   public fullPath = "";
   public web_url = "";
   public star_count = 0;
@@ -343,6 +370,10 @@ export class GitLab {
   constructor(url: string, token: string) {
     this.token = token;
     this.url = url;
+  }
+
+  public joinUrl(relativeUrl: string): string {
+    return new URL(relativeUrl, this.url).href;
   }
 
   public async fetch(url: string, params: { [key: string]: string } = {}, all = false): Promise<any> {
@@ -668,6 +699,8 @@ export class GitLab {
         project_with_namespace: issue.project ? issue.project.name_with_namespace : undefined,
         group: issue.group ? (issue.group as TodoGroup) : undefined,
         author: maybeUserFromJson(issue.author),
+        created_at: issue.created_at,
+        updated_at: issue.updated_at,
       }));
     });
 
@@ -705,7 +738,7 @@ export class GitLab {
     const search = params.search;
     delete params.search;
 
-    const dataAll: Group[] = await receiveLargeCachedObject(hashRecord(params, "mygroups"), async () => {
+    const dataAll: Group[] = await receiveLargeCachedObject(hashRecord(params, "usergroups"), async () => {
       return ((await this.fetch(`groups`, params, true)) as Group[]) || [];
     });
     return searchData<Group>(dataAll, { search: search, keys: ["title"], limit: 50 });

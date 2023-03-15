@@ -120,19 +120,21 @@ class Service {
         icons: ids.join(','),
       },
     });
-    return ids.map((id) => {
-      const icon = response.data.icons[id];
-      return {
-        set: {
-          id: setId,
-          title: setTitle,
-        },
-        id,
-        width: response.data.width,
-        height: response.data.height,
-        body: icon.body,
-      };
-    });
+    return ids
+      .filter((id) => response.data.icons[id] !== undefined)
+      .map((id) => {
+        const icon = response.data.icons[id];
+        return {
+          set: {
+            id: setId,
+            title: setTitle,
+          },
+          id,
+          width: response.data.width,
+          height: response.data.height,
+          body: icon.body,
+        };
+      });
   }
 
   async queryIcons(query: string): Promise<Icon[]> {

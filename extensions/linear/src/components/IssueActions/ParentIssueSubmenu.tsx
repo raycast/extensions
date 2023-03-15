@@ -3,7 +3,7 @@ import { useState } from "react";
 
 import { getLastCreatedIssues, IssueResult } from "../../api/getIssues";
 
-import { statusIcons } from "../../helpers/states";
+import { getStatusIcon } from "../../helpers/states";
 
 import useIssues from "../../hooks/useIssues";
 
@@ -64,7 +64,7 @@ export default function ParentIssueSubmenus({
                 key={issue.id}
                 autoFocus={issue.id === parentIssueId}
                 title={`${issue.identifier} - ${issue.title}`}
-                icon={{ source: statusIcons[issue.state.type], tintColor: issue.state.color }}
+                icon={getStatusIcon(issue.state)}
                 onAction={() => setParentIssue(issue)}
               />
             );

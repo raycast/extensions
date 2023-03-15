@@ -1,65 +1,44 @@
-import { showToast, Toast, getPreferenceValues } from "@raycast/api";
-import React, { useEffect, useMemo, useState } from "react";
-import fs from "fs";
+import React, { useReducer } from "react";
 
-import { useNotes } from "../../utils/cache";
-import { Note, Vault, SearchNotePreferences, SearchArguments } from "../../utils/interfaces";
+import { useNotes } from "../../utils/hooks";
+import { Note, Vault, SearchArguments } from "../../utils/interfaces";
 import { NoteList } from "./NoteList";
-import { filterNotes } from "../../utils/search";
-import { MAX_RENDERED_NOTES, NoteAction } from "../../utils/constants";
 import { NoteActions, OpenNoteActions } from "../../utils/actions";
+import { NoteReducer } from "../../utils/data/reducers";
+import { NotesContext, NotesDispatchContext } from "../../utils/utils";
+import { Action, Icon } from "@raycast/api";
+import { renewCache } from "../../utils/data/cache";
 
-export function NoteListObsidian(props: { vault: Vault; showTitle: boolean; searchArguments: SearchArguments }) {
-  const { searchContent } = getPreferenceValues<SearchNotePreferences>();
-
+export function NoteListObsidian(props: {
+  vault: Vault;
+  showTitle: boolean;
+  starred: boolean;
+  searchArguments: SearchArguments;
+}) {
   const { showTitle, vault, searchArguments } = props;
-  const [notes, setNotes] = useState<Note[]>([]);
-  const [allNotes, setAllNotes] = useState<Note[]>([]);
 
-  const [input, setInput] = useState<string>(searchArguments.searchArgument || "");
-  const list = useMemo(() => filterNotes(notes, input, searchContent), [notes, input]);
-
-  function onDelete(note: Note) {
-    setNotes(notes.filter((n) => n.path !== note.path));
-    setAllNotes(allNotes.filter((n) => n.path !== note.path));
-  }
-
-  useEffect(() => {
-    async function fetch() {
-      try {
-        await fs.promises.access(vault.path + "/.");
-        const _notes = useNotes(vault);
-        setNotes(_notes);
-        setAllNotes(_notes);
-      } catch (error) {
-        showToast({
-          title: "The path set in preferences doesn't exist",
-          message: "Please set a valid path in preferences",
-          style: Toast.Style.Failure,
-        });
-      }
-    }
-    fetch();
-  }, []);
+  const [allNotes] = useNotes(vault, props.starred);
+  const [currentViewNoteList, dispatch] = useReducer(NoteReducer, allNotes);
 
   return (
-    <NoteList
-      title={showTitle ? "Search Note in " + vault.name : ""}
-      notes={list.slice(0, MAX_RENDERED_NOTES)}
-      allNotes={allNotes}
-      setNotes={setNotes}
-      vault={vault}
-      onDelete={onDelete}
-      onSearchChange={setInput}
-      searchArguments={searchArguments}
-      action={(note: Note, vault: Vault, actionCallback: (action: NoteAction) => void) => {
-        return (
-          <React.Fragment>
-            <OpenNoteActions note={note} vault={vault} actionCallback={actionCallback} />
-            <NoteActions note={note} vault={vault} actionCallback={actionCallback} />
-          </React.Fragment>
-        );
-      }}
-    />
+    <NotesContext.Provider value={allNotes}>
+      <NotesDispatchContext.Provider value={dispatch}>
+        <NoteList
+          title={showTitle ? `Search Note in ${vault.name}` : ""}
+          notes={currentViewNoteList}
+          vault={vault}
+          searchArguments={searchArguments}
+          action={(note: Note, vault: Vault) => {
+            return (
+              <React.Fragment>
+                <OpenNoteActions note={note} notes={allNotes} vault={vault} />
+                <NoteActions notes={allNotes} note={note} vault={vault} />
+                <Action title="Reload Notes" icon={Icon.ArrowClockwise} onAction={() => renewCache(vault)}></Action>
+              </React.Fragment>
+            );
+          }}
+        />
+      </NotesDispatchContext.Provider>
+    </NotesContext.Provider>
   );
 }

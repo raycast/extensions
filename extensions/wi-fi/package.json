@@ -5,6 +5,10 @@
   "description": "Connect and toggle Wi-Fi via Raycast.",
   "icon": "extension-icon.png",
   "author": "koinzhang",
+  "keywords": [
+    "wifi",
+    "network"
+  ],
   "categories": [
     "System"
   ],

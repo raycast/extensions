@@ -1,119 +1,130 @@
 import fs from "fs";
 import { homedir } from "os";
 import { Readable } from "stream";
-import { ActionPanel, List, Detail, Action, Icon, showToast, Toast } from "@raycast/api";
-import * as AWS from "aws-sdk";
-import setupAws from "./util/setupAws";
+import { ActionPanel, List, Action, Icon, showToast, Toast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-
-const preferences = setupAws();
-const s3 = new AWS.S3();
+import {
+  Bucket,
+  GetObjectCommand,
+  S3Client,
+  ListBucketsCommand,
+  ListObjectsCommand,
+  _Object,
+  GetBucketLocationCommand,
+} from "@aws-sdk/client-s3";
+import AWSProfileDropdown from "./components/searchbar/aws-profile-dropdown";
+import { resourceToConsoleLink } from "./util";
 
 export default function S3() {
-  const { data: buckets, error, isLoading } = useCachedPromise(fetchBuckets);
-
-  if (error) {
-    return <Detail markdown="Something went wrong. Try again!" />;
-  }
+  const { data: buckets, error, isLoading, revalidate } = useCachedPromise(fetchBuckets);
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Filter buckets by name...">
-      {buckets?.map((bucket) => (
-        <S3Bucket key={bucket.Name} bucket={bucket} />
-      ))}
+    <List
+      isLoading={isLoading}
+      searchBarPlaceholder="Filter buckets by name..."
+      searchBarAccessory={<AWSProfileDropdown onProfileSelected={revalidate} />}
+    >
+      {error ? (
+        <List.EmptyView title={error.name} description={error.message} icon={Icon.Warning} />
+      ) : (
+        buckets?.map((bucket) => <S3Bucket key={bucket.Name} bucket={bucket} />)
+      )}
     </List>
   );
 }
 
-function S3Bucket({ bucket }: { bucket: AWS.S3.Bucket }) {
+function S3Bucket({ bucket }: { bucket: Bucket }) {
   return (
     <List.Item
-      icon={Icon.Folder}
+      icon={"aws-icons/s3.png"}
       title={bucket.Name || ""}
       actions={
         <ActionPanel>
           <Action.Push target={<S3BucketObjects bucket={bucket} />} title="List Objects" />
-          <Action.OpenInBrowser
-            title="Open in Browser"
-            url={`https://s3.console.aws.amazon.com/s3/buckets/${bucket.Name || ""}?region=${
-              preferences.region
-            }&tab=objects`}
-          />
+          <Action.OpenInBrowser title="Open in Browser" url={resourceToConsoleLink(bucket.Name, "AWS::S3::Bucket")} />
           <Action.CopyToClipboard title="Copy Name" content={bucket.Name || ""} />
         </ActionPanel>
       }
-      accessories={[{ date: bucket.CreationDate }]}
     />
   );
 }
 
-function S3BucketObjects({ bucket }: { bucket: AWS.S3.Bucket }) {
+function S3BucketObjects({ bucket }: { bucket: Bucket }) {
   const { data: objects, error, isLoading } = useCachedPromise(fetchBucketObjects, [bucket.Name || ""]);
-
-  if (error) {
-    return <Detail markdown="Something went wrong. Try again!" />;
-  }
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Filter objects by name...">
-      {objects?.map((object) => (
-        <List.Item
-          key={object.Key || ""}
-          icon={Icon.Document}
-          title={object.Key || ""}
-          actions={
-            <ActionPanel>
-              <Action.OpenInBrowser
-                title="Open in Browser"
-                url={`https://s3.console.aws.amazon.com/s3/object/${bucket.Name || ""}?region=${
-                  preferences.region
-                }&prefix=${object.Key || ""}`}
-              />
-              <Action.SubmitForm
-                title="Download"
-                onSubmit={async () => {
-                  const toast = await showToast({ style: Toast.Style.Animated, title: "Downloading..." });
+      {error ? (
+        <List.EmptyView title={error.name} description={error.message} icon={Icon.Warning} />
+      ) : (
+        objects?.map((object) => (
+          <List.Item
+            key={object.Key}
+            icon={Icon.Document}
+            title={object.Key || ""}
+            actions={
+              <ActionPanel>
+                <Action.OpenInBrowser
+                  title="Open in Browser"
+                  url={resourceToConsoleLink(`${bucket.Name}/${object.Key}`, "AWS::S3::Object")}
+                />
+                <Action
+                  title="Download"
+                  icon={Icon.Download}
+                  onAction={async () => {
+                    const toast = await showToast({ style: Toast.Style.Animated, title: "Downloading..." });
 
-                  try {
-                    const data = await s3.getObject({ Bucket: bucket.Name || "", Key: object.Key || "" }).promise();
-                    Readable.from(data.Body as Buffer).pipe(
-                      fs.createWriteStream(`${homedir()}/Downloads/${object.Key?.split("/").pop()}`)
-                    );
-                    toast.style = Toast.Style.Success;
-                    toast.title = "Downloaded to Downloads folder";
-                  } catch (err) {
-                    toast.style = Toast.Style.Failure;
-                    toast.title = "Failed to download";
-                  }
-                }}
-              />
-              <Action.CopyToClipboard title="Copy Key" content={object.Key || ""} />
-            </ActionPanel>
-          }
-          accessories={[{ text: humanFileSize(object.Size || 0) }]}
-        />
-      ))}
+                    try {
+                      const data = await new S3Client({}).send(
+                        new GetObjectCommand({ Bucket: bucket.Name, Key: object.Key || "" })
+                      );
+                      if (data.Body instanceof Readable) {
+                        data.Body.pipe(fs.createWriteStream(`${homedir()}/Downloads/${object.Key?.split("/").pop()}`));
+                      } else {
+                        throw new Error("Could not download object");
+                      }
+                      toast.style = Toast.Style.Success;
+                      toast.title = "Downloaded to Downloads folder";
+                    } catch (err) {
+                      toast.style = Toast.Style.Failure;
+                      toast.title = "Failed to download";
+                    }
+                  }}
+                />
+                <Action.CopyToClipboard title="Copy Key" content={object.Key || ""} />
+              </ActionPanel>
+            }
+            accessories={[{ text: humanFileSize(object.Size || 0) }]}
+          />
+        ))
+      )}
     </List>
   );
 }
 
 async function fetchBuckets() {
-  const { Buckets } = await s3.listBuckets().promise();
+  if (!process.env.AWS_PROFILE) return [];
+  const { Buckets } = await new S3Client({}).send(new ListBucketsCommand({}));
 
   return Buckets;
 }
 
 async function fetchBucketObjects(
   bucket: string,
+  _region?: string,
   nextMarker?: string,
-  objects: AWS.S3.Object[] = []
-): Promise<AWS.S3.ObjectList> {
-  const { Contents, NextMarker } = await s3.listObjects({ Bucket: bucket, Marker: nextMarker }).promise();
+  objects: _Object[] = []
+): Promise<_Object[]> {
+  const region =
+    _region || (await new S3Client({}).send(new GetBucketLocationCommand({ Bucket: bucket }))).LocationConstraint;
+  const { Contents, NextMarker } = await new S3Client({ region }).send(
+    new ListObjectsCommand({ Bucket: bucket, Marker: nextMarker })
+  );
 
   const combinedObjects = [...objects, ...(Contents || [])];
 
   if (NextMarker) {
-    return fetchBucketObjects(bucket, NextMarker, combinedObjects);
+    return fetchBucketObjects(bucket, region, NextMarker, combinedObjects);
   }
 
   return combinedObjects;

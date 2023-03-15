@@ -1,70 +1,93 @@
+// Open-Meteo weather
+export interface OpenMeteoWeather {
+  latitude: number;
+  longitude: number;
+  generationtime_ms: number;
+  utc_offset_seconds: number;
+  timezone: string;
+  timezone_abbreviation: string;
+  elevation: number;
+  current_weather: CurrentWeather;
+  hourly_units: HourlyUnits;
+  hourly: Hourly;
+  daily_units: DailyUnits;
+  daily: Daily;
+}
+
+export interface CurrentWeather {
+  temperature: number;
+  windspeed: number;
+  winddirection: number;
+  weathercode: number;
+  time: string;
+}
+
+export interface Daily {
+  time: string[];
+  temperature_2m_max: number[];
+  temperature_2m_min: number[];
+  sunrise: string[];
+  sunset: string[];
+  rain_sum: number[];
+  weathercode: number[];
+  windspeed_10m_max: number[];
+}
+
+export interface DailyUnits {
+  time: string;
+  temperature_2m_max: string;
+  temperature_2m_min: string;
+  sunrise: string;
+  sunset: string;
+  rain_sum: string;
+}
+
+export interface Hourly {
+  time: string[];
+  temperature_2m: number[];
+  relativehumidity_2m: number[];
+  apparent_temperature: number[];
+  precipitation: number[];
+  rain: number[];
+  weathercode: number[];
+  surface_pressure: number[];
+  visibility: number[];
+  winddirection_120m: number[];
+}
+
+export interface HourlyUnits {
+  time: string;
+  temperature_2m: string;
+  relativehumidity_2m: string;
+  apparent_temperature: string;
+  precipitation: string;
+  rain: string;
+  weathercode: string;
+  surface_pressure: string;
+  visibility: string;
+  winddirection_120m: string;
+}
+
+//Open-Meteo Geolocation
+export interface OpenMeteoGeoLocation {
+  results: GeoLocation[];
+  generationtime_ms: number;
+}
+
 export interface GeoLocation {
-  name: string;
-  local_names: { [key: string]: string };
-  lat: number;
-  lon: number;
-  country: string;
-  state: string;
-}
-
-export interface Weather {
-  coord: Coord;
-  weather: WeatherElement[];
-  base: string;
-  main: Main;
-  visibility: number;
-  wind: Wind;
-  rain: Rain;
-  clouds: Clouds;
-  dt: number;
-  sys: Sys;
-  timezone: number;
   id: number;
   name: string;
-  cod: number;
-}
-
-export interface Clouds {
-  all: number;
-}
-
-export interface Coord {
-  lon: number;
-  lat: number;
-}
-
-export interface Main {
-  temp: number;
-  feels_like: number;
-  temp_min: number;
-  temp_max: number;
-  pressure: number;
-  humidity: number;
-  sea_level: number;
-  grnd_level: number;
-}
-
-export interface Rain {
-  "1h": number;
-}
-
-export interface Sys {
-  type: number;
-  id: number;
+  latitude: number;
+  longitude: number;
+  elevation: number;
+  feature_code?: string;
+  country_code?: string;
+  admin1_id?: number;
+  admin2_id?: number;
+  timezone: string;
+  population?: number;
+  country_id?: number;
   country: string;
-  sunrise: number;
-  sunset: number;
-}
-
-export interface WeatherElement {
-  id: number;
-  main: string;
-  description: string;
-  icon: string;
-}
-
-export interface Wind {
-  speed: number;
-  deg: number;
-  gust: number;
+  admin1?: string;
+  admin2?: string;
 }

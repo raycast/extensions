@@ -1,5 +1,7 @@
 # Docker Changelog
 
+## [Added screenshots] - 2022-12-22
+
 ## [Fix] - 2022-08-25
 
 - Fixed issue where default empty setting caused docker client to connect to incorrect address

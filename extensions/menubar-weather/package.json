@@ -12,60 +12,126 @@
       "title": "Menubar Weather",
       "description": "Show current weather on the menu bar",
       "mode": "menu-bar",
-      "interval": "10m"
+      "interval": "30m"
     }
   ],
   "preferences": [
     {
-      "name": "apiKey",
-      "type": "password",
-      "title": "API Key",
-      "description": "OpenWeather api key",
-      "required": true
-    },
-    {
       "name": "cityName",
       "type": "textfield",
       "title": "City",
-      "description": "City name",
-      "required": true
+      "description": "City name. If you need more precise weather data, you can fill in the latitude and longitude in the Preferences Page of the command",
+      "required": true,
+      "placeholder": "City name. For example, New York"
     },
     {
       "name": "longitude",
       "type": "textfield",
       "title": "Longitude",
-      "description": "Longitude. If you need more precise weather information, please fill in the latitude and longitude",
+      "description": "Longitude. If you need more precise weather data, please fill in the latitude and longitude",
       "required": false,
+      "default": "",
       "placeholder": "0.00"
     },
     {
       "name": "latitude",
       "type": "textfield",
       "title": "Latitude",
-      "description": "Latitude. If you need more precise weather information, please fill in the latitude and longitude",
+      "description": "Latitude. If you need more precise weather data, please fill in the latitude and longitude",
       "required": false,
+      "default": "",
       "placeholder": "0.00"
     },
     {
-      "name": "unit",
+      "name": "tempUnits",
       "type": "dropdown",
       "title": "Temperature Unit",
       "description": "Units of temperature",
       "required": true,
+      "default": "celsius",
       "data": [
         {
-          "title": "Fahrenheit",
-          "value": "Imperial"
+          "title": "Celsius",
+          "value": "celsius"
         },
         {
-          "title": "Celsius",
-          "value": "Metric"
+          "title": "Fahrenheit",
+          "value": "fahrenheit"
         }
       ]
+    },
+    {
+      "name": "windSpeedUnits",
+      "type": "dropdown",
+      "title": "Wind Speed Unit",
+      "description": "Units of wind speed",
+      "required": true,
+      "default": "",
+      "data": [
+        {
+          "title": "Km/h",
+          "value": "kmh"
+        },
+        {
+          "title": "m/s",
+          "value": "ms"
+        },
+        {
+          "title": "Mph",
+          "value": "mph"
+        },
+        {
+          "title": "Knots",
+          "value": "kn"
+        }
+      ]
+    },
+    {
+      "name": "precipitationUnits",
+      "type": "dropdown",
+      "title": "Precipitation Unit",
+      "description": "Units of precipitation",
+      "required": true,
+      "default": "mm",
+      "data": [
+        {
+          "title": "Millimeter",
+          "value": "mm"
+        },
+        {
+          "title": "Inch",
+          "value": "inch"
+        }
+      ]
+    },
+    {
+      "name": "showSun",
+      "type": "checkbox",
+      "label": "Sunrise and sunset",
+      "title": "Additional Info",
+      "description": "Show sunrise and sunset",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "showLocation",
+      "type": "checkbox",
+      "label": "Geolocation Information",
+      "description": "Show geolocation information",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "showForecast",
+      "type": "checkbox",
+      "label": "7-day weather forecast",
+      "description": "Show 7-day weather forecast",
+      "required": false,
+      "default": true
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.43.2",
+    "@raycast/api": "^1.44.0",
     "axios": "^1.1.3"
   },
   "devDependencies": {

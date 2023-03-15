@@ -1,6 +1,23 @@
 import { Comment, Cycle, Issue, Project, Team, User, WorkflowState } from "@linear/sdk";
+import { getPreferenceValues } from "@raycast/api";
 import { LabelResult } from "./getLabels";
 import { getLinearClient } from "../helpers/withLinearClient";
+import { getPaginated, PageInfo } from "./pagination";
+
+type Preferences = {
+  limit?: string;
+};
+
+const DEFAULT_PAGE_SIZE = 50;
+const DEFAULT_LIMIT = 50;
+
+function getPageLimits() {
+  const preferences: Preferences = getPreferenceValues();
+  const limit = preferences.limit ? +preferences.limit : DEFAULT_LIMIT;
+  const pageSize = Math.min(DEFAULT_PAGE_SIZE, limit);
+  const pageLimit = Math.floor(limit / pageSize);
+  return { pageSize, pageLimit };
+}
 
 export const IssueFragment = `
   id
@@ -10,6 +27,7 @@ export const IssueFragment = `
   priority
   priorityLabel
   estimate
+  dueDate
   updatedAt
   url
   number
@@ -78,6 +96,7 @@ export type IssueResult = Pick<
   | "priorityLabel"
   | "updatedAt"
   | "estimate"
+  | "dueDate"
   | "number"
 > & {
   assignee?: Pick<User, "id" | "displayName" | "avatarUrl" | "email">;
@@ -201,25 +220,39 @@ export async function getActiveCycleIssues(cycleId?: string) {
   }
 
   const { graphQLClient } = getLinearClient();
-  const { data } = await graphQLClient.rawRequest<
-    { cycle: { issues: { nodes: IssueResult[] } } },
-    Record<string, unknown>
-  >(
-    `
-      query($cycleId: String!) {
-        cycle(id: $cycleId) {
-          issues {
-            nodes {
-              ${IssueFragment}
+
+  const { pageSize, pageLimit } = getPageLimits();
+
+  const nodes = getPaginated(
+    async (cursor) =>
+      graphQLClient.rawRequest<
+        { cycle: { issues: { nodes: IssueResult[]; pageInfo: PageInfo } } },
+        Record<string, unknown>
+      >(
+        `
+          query($cycleId: String!, $cursor: String) {
+            cycle(id: $cycleId) {
+              issues(first: ${pageSize}, after: $cursor) {
+                nodes {
+                  ${IssueFragment}
+                }
+                pageInfo {
+                  hasNextPage
+                  endCursor
+                }
+              }
             }
           }
-        }
-      }
-    `,
-    { cycleId }
+        `,
+        { cycleId, cursor }
+      ),
+    (r) => r.data?.cycle.issues.pageInfo,
+    (accumulator: IssueResult[], currentValue) => accumulator.concat(currentValue.data?.cycle.issues.nodes || []),
+    [],
+    pageLimit
   );
 
-  return data?.cycle.issues.nodes;
+  return nodes;
 }
 
 export async function getProjectIssues(projectId: string) {
@@ -319,7 +352,6 @@ export async function getIssueDetail(issueId: string) {
         issue(id: $issueId) {
           ${IssueFragment}
           description
-          dueDate
         }
       }
     `,

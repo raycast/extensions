@@ -60,6 +60,7 @@ ${scoreCanvas}
       actions={
         <ActionPanel>
           <Action
+            icon={Icon.Trash}
             title={"Clear History Score"}
             onAction={() => {
               alertDialog(

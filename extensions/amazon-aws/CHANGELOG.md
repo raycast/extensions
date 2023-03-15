@@ -1,5 +1,54 @@
 # Amazon AWS Changelog
 
+## [Add Profile Script Command] - 2023-03-15
+
+- Add "Run Profile Script" command that allows users to list profiles and run a custom script for them.
+
+## [Add Show All Action] - 2023-03-08
+
+- Add "Show All" action to SSM Parameters to bypass the requirement of needing four characters for search.
+
+## [Fix Profile Dropdown] - 2023-03-04
+
+- Fix profile dropdown issue when reading from credentials file
+
+## [Renamed command] - 2023-02-03
+
+- Renamed Elasticsearch Service to OpenSearch Service
+
+## [ECS Command] - 2023-01-06
+
+- Added command for forcing a new deployment on a given service
+
+## [CloudFormation Resources List] - 2022-12-25
+
+- Added support for viewing CloudFormation resources from within Raycast ([#4054](https://github.com/raycast/extensions/pull/4054))
+
+## [ECS Command] - 2022-12-14
+
+- Added support for viewing ECS cluster, services, task, task definitions, containers and container logs from within Raycast or the browser
+- Added support for viewing Lambda logs from within Raycast or the browser
+
+## [Secrets Manager Command] - 2022-12-13
+
+- Add "Secrets Manager" command ([#3865](https://github.com/raycast/extensions/pull/3843))
+
+## [CloudWatch & SSM Command] - 2022-12-10
+
+- Add "CloudWatch Log Groups" command ([#3843](https://github.com/raycast/extensions/pull/3843))
+- Add "SSM Parameters" command ([#3843](https://github.com/raycast/extensions/pull/3843))
+
+## [UI/UX Tweaks & Fixes] - 2022-12-09
+
+- Simplify UI/UX using Raycast icons, consistent actions, and more ([#3770](https://github.com/raycast/extensions/pull/3770))
+- Cleanup codebase and improve code readability ([#3770](https://github.com/raycast/extensions/pull/3770))
+- Fix two minor bugs related to data fetching ([#3770](https://github.com/raycast/extensions/pull/3770))
+- Update readme, screenshots and copy ([#3770](https://github.com/raycast/extensions/pull/3770))
+
+## [Support AWS Profile Switch] - 2022-11-30
+
+Add "Profile" select replacing the "Profile" and "Region" setting ([#3612](https://github.com/raycast/extensions/pull/3612))
+
 ## [S3 Command] - 2022-11-18
 
 Added a new command to list S3 buckets and objects ([#3589](https://github.com/raycast/extensions/pull/3589))

@@ -4,11 +4,11 @@ We generally recommend altering this or top_p but not both.
 
 Default: 0.7`;
 
-export const model = `The model which will generate the completion. Some models are more sutiable for certain tasks than others. "text-davinci-002" is the most general and powerful one.`;
+export const model = `The model which will generate the completion. Some models are more sutiable for certain tasks than others. "text-davinci-003" is the most general and powerful one.`;
 
 export const maxTokens = `The maximum number of tokens to generate in the completion.
 
-The token count of your prompt plus this parameter cannot exceed the model's context length. "text-davinci-002" model has a context length of 4096 tokens, while the others have 2048.
+The token count of your prompt plus this parameter cannot exceed the model's context length. "text-davinci-002" and "text-davinci-003" models have a context length of 4000 tokens, while the others have 2048.
 
 Default: 256`;
 

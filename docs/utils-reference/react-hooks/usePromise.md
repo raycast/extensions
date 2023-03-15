@@ -51,11 +51,10 @@ Returns an object with the [AsyncState](#asyncstate) corresponding to the execut
 ## Example
 
 ```tsx
-import { useRef } from "react";
 import { Detail, ActionPanel, Action } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 
-export default function Command() {
+const Demo = () => {
   const abortable = useRef<AbortController>();
   const { isLoading, data, revalidate } = usePromise(
     async (url: string) => {
@@ -80,7 +79,7 @@ export default function Command() {
       }
     />
   );
-}
+};
 ```
 
 ## Mutation and Optimistic Updates
@@ -95,7 +94,7 @@ When doing so, you can specify a `rollbackOnError` function to mutate back the d
 import { Detail, ActionPanel, Action, showToast, Toast } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 
-export default function Command() {
+const Demo = () => {
   const { isLoading, data, mutate } = usePromise(
     async (url: string) => {
       const response = await fetch(url);
@@ -142,7 +141,7 @@ export default function Command() {
       }
     />
   );
-}
+};
 ```
 
 ## Types
@@ -154,7 +153,7 @@ An object corresponding to the execution state of the function.
 ```ts
 // Initial State
 {
-  isLoading: true,
+  isLoading: true, // or `false` if `options.execute` is `false`
   data: undefined,
   error: undefined
 }

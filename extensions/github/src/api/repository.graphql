@@ -1,10 +1,29 @@
-fragment RepositoryFields on Repository {
+fragment ShortRepositoryFields on Repository {
+  id
+  defaultBranchRef {
+    target {
+      oid
+    }
+  }
+  nameWithOwner
+  name
+  owner {
+    login
+    avatarUrl(size: 64)
+  }
+  url
+  mergeCommitAllowed
+  squashMergeAllowed
+  rebaseMergeAllowed
+}
+
+fragment ExtendedRepositoryFields on Repository {
   id
   nameWithOwner
   name
   owner {
     login
-    avatarUrl(size: $avatarSize)
+    avatarUrl(size: 64)
   }
   url
   mergeCommitAllowed
@@ -21,15 +40,16 @@ fragment RepositoryFields on Repository {
   hasIssuesEnabled
   hasWikiEnabled
   hasProjectsEnabled
+  hasDiscussionsEnabled
   releases {
     totalCount
   }
 }
 
-query searchRepositories($query: String!, $numberOfItems: Int!, $avatarSize: Int!) {
+query searchRepositories($query: String!, $numberOfItems: Int!) {
   search(query: $query, first: $numberOfItems, type: REPOSITORY) {
     nodes {
-      ...RepositoryFields
+      ...ExtendedRepositoryFields
     }
   }
 }
@@ -112,6 +132,24 @@ query dataForRepository($owner: String!, $name: String!) {
       about
       title
       body
+    }
+  }
+}
+
+query repositoryIssues($owner: String!, $name: String!) {
+  repository(owner: $owner, name: $name) {
+    url
+    defaultBranchRef {
+      id
+      name
+      target {
+        oid
+      }
+    }
+    issues(first: 50, states: OPEN, orderBy: { field: CREATED_AT, direction: DESC }) {
+      nodes {
+        ...IssueFields
+      }
     }
   }
 }

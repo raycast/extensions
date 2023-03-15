@@ -293,7 +293,7 @@ export async function brewUpgrade(upgradable: Cask | Nameable, cancel?: AbortCon
 }
 
 export async function brewUpgradeAll(greedy: boolean, cancel?: AbortController): Promise<void> {
-  let cmd = `upgrade`;
+  let cmd = `upgrade --ignore-pinned`;
   if (greedy) {
     cmd += " --greedy";
   }

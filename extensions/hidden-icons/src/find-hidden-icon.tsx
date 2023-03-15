@@ -24,7 +24,7 @@ export default function FindHiddenIcon() {
 
   useEffect(() => {
     async function _fetchHistoryScore() {
-      if (isGaming) {
+      if (!isGaming && showScore !== 0) {
         const historyScore = await getHistoryScore();
         push(<ScorePage myScore={{ mode: difficultyMode, score: score }} historyScore={historyScore} />);
       }
@@ -35,8 +35,9 @@ export default function FindHiddenIcon() {
 
   return (
     <Grid
-      itemSize={Grid.ItemSize.Small}
-      enableFiltering={false}
+      columns={8}
+      inset={Grid.Inset.Medium}
+      filtering={false}
       searchBarPlaceholder={`Find the hidden icon in ${allCountDownTime} seconds`}
       searchBarAccessory={
         <Grid.Dropdown
@@ -59,19 +60,19 @@ export default function FindHiddenIcon() {
       {!isGaming ? (
         <Grid.EmptyView
           title={`Press ↩︎ to start game`}
-          icon={"find-icons.png"}
+          icon={"place-holder.png"}
           actions={
             <ActionPanel>
               <Action
                 title={"Start Game"}
-                icon={Icon.Binoculars}
+                icon={Icon.GameController}
                 onAction={() => {
                   setIsGaming(true);
                 }}
               />
               <Action
                 title={"Score History"}
-                icon={Icon.TextDocument}
+                icon={Icon.StarCircle}
                 shortcut={{ modifiers: ["cmd"], key: "h" }}
                 onAction={async () => {
                   const historyScore = await getHistoryScore();

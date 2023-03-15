@@ -1,14 +1,13 @@
 import { showHUD, showInFinder } from "@raycast/api";
-import { getDownloads } from "./utils";
+import { getLatestDownload } from "./utils";
 
 export default async function main() {
-  const downloads = getDownloads();
+  const download = getLatestDownload();
 
-  if (downloads.length < 1) {
+  if (!download) {
     await showHUD("No downloads found");
     return;
   }
 
-  const latestDownload = downloads[0];
-  await showInFinder(latestDownload.path);
+  await showInFinder(download.path);
 }

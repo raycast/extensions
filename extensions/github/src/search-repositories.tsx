@@ -6,21 +6,30 @@ import RepositoryListEmptyView from "./components/RepositoryListEmptyView";
 import RepositoryListItem from "./components/RepositoryListItem";
 import SearchRepositoryDropdown from "./components/SearchRepositoryDropdown";
 import View from "./components/View";
-import { RepositoryFieldsFragment } from "./generated/graphql";
+import { ExtendedRepositoryFieldsFragment } from "./generated/graphql";
 import { useHistory } from "./helpers/repository";
 import { getGitHubClient } from "./helpers/withGithubClient";
+
+type SearchRepositoriesPrefs = {
+  includeForks: boolean;
+  includeArchived: boolean;
+  displayOwnerName: boolean;
+};
 
 function SearchRepositories() {
   const { github } = getGitHubClient();
 
-  const preferences = getPreferenceValues<{ includeForks: boolean }>();
+  const preferences = getPreferenceValues<SearchRepositoriesPrefs>();
 
   const [searchText, setSearchText] = useState("");
   const [searchFilter, setSearchFilter] = useState<string | null>(null);
 
   const { data: history, visitRepository } = useHistory(searchText, searchFilter);
   const query = useMemo(
-    () => `${searchFilter} ${searchText} fork:${preferences.includeForks}`,
+    () =>
+      `${searchFilter} ${searchText} fork:${preferences.includeForks} ${
+        preferences.includeArchived ? "" : "archived:false"
+      }`,
     [searchText, searchFilter]
   );
 
@@ -30,9 +39,9 @@ function SearchRepositories() {
     mutate: mutateList,
   } = useCachedPromise(
     async (query) => {
-      const result = await github.searchRepositories({ query, numberOfItems: 20, avatarSize: 64 });
+      const result = await github.searchRepositories({ query, numberOfItems: 20 });
 
-      return result.search.nodes?.map((node) => node as RepositoryFieldsFragment);
+      return result.search.nodes?.map((node) => node as ExtendedRepositoryFieldsFragment);
     },
     [query],
     { keepPreviousData: true }

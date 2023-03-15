@@ -21,5 +21,5 @@ export const launchChromium = (app: string, profile: string) => {
  * Launch Firefox browsers
  ****************************************************************************/
 export const launchFirefox = (app: string, profile: string) => {
-  exec(`${app} -P --no-remote ${profile}`);
+  exec(`"${app}" -P --no-remote ${profile}`);
 };

@@ -1,11 +1,13 @@
-import { getColor, Project as TProject } from "@doist/todoist-api-typescript";
+import { Project as TProject } from "@doist/todoist-api-typescript";
 import { ActionPanel, Icon, showToast, Toast, List, confirmAlert, Action, Color } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
+
 import { todoist, handleError } from "./api";
 import Project from "./components/Project";
 import ProjectForm from "./components/ProjectForm";
 import View from "./components/View";
 import { isTodoistInstalled } from "./helpers/isTodoistInstalled";
+import { getProjectIcon } from "./helpers/projects";
 
 function Projects() {
   const { data, error, isLoading, mutate } = useCachedPromise(() => todoist.getProjects());
@@ -19,26 +21,26 @@ function Projects() {
   async function toggleFavorite(project: TProject) {
     await showToast({
       style: Toast.Style.Animated,
-      title: project.favorite ? "Removing from favorites" : "Adding to favorites",
+      title: project.isFavorite ? "Removing from favorites" : "Adding to favorites",
     });
 
     try {
-      await todoist.updateProject(project.id, { name: project.name, favorite: !project.favorite });
+      await todoist.updateProject(project.id, { name: project.name, isFavorite: !project.isFavorite });
       await showToast({
         style: Toast.Style.Success,
-        title: project.favorite ? "Removed from favorites" : "Added to favorites",
+        title: project.isFavorite ? "Removed from favorites" : "Added to favorites",
       });
 
       mutate();
     } catch (error) {
       handleError({
         error,
-        title: project.favorite ? "Unable to remove from favorites" : "Unable to add to favorites",
+        title: project.isFavorite ? "Unable to remove from favorites" : "Unable to add to favorites",
       });
     }
   }
 
-  async function deleteProject(id: number) {
+  async function deleteProject(id: string) {
     if (
       await confirmAlert({
         title: "Delete Project",
@@ -63,12 +65,16 @@ function Projects() {
       {projects.map((project) => (
         <List.Item
           key={project.id}
-          icon={project.inboxProject ? Icon.Envelope : { source: Icon.List, tintColor: getColor(project.color).value }}
+          icon={getProjectIcon(project)}
           title={project.name}
-          {...(project.favorite ? { accessoryIcon: { source: Icon.Star, tintColor: Color.Yellow } } : {})}
+          {...(project.isFavorite ? { accessoryIcon: { source: Icon.Star, tintColor: Color.Yellow } } : {})}
           actions={
-            <ActionPanel>
-              <Action.Push icon={Icon.BlankDocument} title="Show Details" target={<Project projectId={project.id} />} />
+            <ActionPanel title={project.name}>
+              <Action.Push
+                icon={Icon.BlankDocument}
+                title="Show Details"
+                target={<Project project={project} projects={projects} />}
+              />
 
               {isTodoistInstalled ? (
                 <Action.Open
@@ -85,7 +91,7 @@ function Projects() {
                 />
               )}
 
-              {!project.inboxProject ? (
+              {!project.isInboxProject ? (
                 <ActionPanel.Section>
                   <Action.Push
                     title="Edit Project"
@@ -95,7 +101,7 @@ function Projects() {
                   />
 
                   <Action
-                    title={project.favorite ? "Remove from Favorites" : "Add to Favorites"}
+                    title={project.isFavorite ? "Remove from Favorites" : "Add to Favorites"}
                     icon={Icon.Star}
                     shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
                     onAction={() => toggleFavorite(project)}
