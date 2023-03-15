@@ -42,7 +42,7 @@ export default async function Command(props: { arguments: { amount: string, hexc
           await showToast({ title: `Added padding to ${selectedImages.length.toString()} ${pluralized}` });
     } catch {
       await showToast({
-        title: `Failed to rotate ${selectedImages.length.toString()} ${pluralized}`,
+        title: `Failed to pad ${selectedImages.length.toString()} ${pluralized}`,
         style: Toast.Style.Failure,
       });
     }
