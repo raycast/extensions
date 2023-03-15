@@ -1,5 +1,17 @@
 # Wikipedia Changelog
 
+## [WikiRaycast] - 2023-02-23
+- Added flag emoji to the language dropdown
+- Added the option to configure `Grid` or `List` view for the `Search Page` command
+- Added the ability to change the page language from the page itself (`⌘ + P`)
+- Show page metadata in the page details view (`⌘ + Enter`)
+- Add new copy to clipboard action in all views
+- New preference to select whether pages should open in the browser or in Raycast
+- Render the full Wikipedia page inside the page details view
+- Added the ability to open page links by clicking or using a `⌘ + O` shortcut in the details view
+- New `Open Page` command to open a page directly
+- Added optional argument to the `Search Page` to prefill the search query
+
 ## [Update and added language] - 2023-01-24
 - Added Italian
 - Added Thumbnail Image in the Search Details page

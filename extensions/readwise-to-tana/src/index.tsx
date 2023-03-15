@@ -11,6 +11,7 @@ import Book from './book'
 import Settings from './settings'
 import type { SettingsValues } from './settings'
 import { useBooks } from './useApi'
+import { cleanTitle } from './utils'
 
 export default function Command() {
   const [template, setTemplate] = React.useState<string>('')
@@ -47,6 +48,7 @@ export default function Command() {
       highlightNote,
       highlightSupertag,
       highlightUpdatedAt,
+      highlightUrl,
       id,
       readwiseUrl,
       source,
@@ -95,6 +97,9 @@ export default function Command() {
     highlights += highlightColor
       ? `{{#if color}}\n    - ${highlightColor}:: {{color}}{{/if}}`
       : ''
+    highlights += highlightUrl
+      ? `{{#if url}}\n    - ${highlightUrl}:: {{url}}{{/if}}`
+      : ''
 
     highlights += '\n{{/each}}'
 
@@ -140,7 +145,7 @@ export default function Command() {
           <List.Item
             key={book.id}
             icon={book.cover_image_url}
-            title={book.title}
+            title={cleanTitle(book.title)}
             subtitle={book.author}
             accessories={[
               { text: book.num_highlights.toString(), icon: Icon.Book },

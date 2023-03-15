@@ -1,9 +1,10 @@
-import { Action, ActionPanel, Icon, Image, List, LocalStorage, Navigation } from "@raycast/api";
-import AddPodcast from "./add-podcast";
+import { Action, ActionPanel, Icon, Image, List, Navigation } from "@raycast/api";
 
 import { usePodcast } from "./hooks/usePodcasts";
 import EpisodeList from "./episode-list";
-import { PODCASTS_FEEDS_KEY } from "./constants";
+import ManagePodcast from "./manage-podcast";
+import { SearchFeeds } from "./search-feeds";
+import { removeFeed } from "./utils";
 
 interface Props {
   feed: string;
@@ -17,11 +18,7 @@ export default function PodcastItem({ feed, onRemovePodcast, onPlay, onClick, on
   const { data: item, error } = usePodcast(feed);
 
   const removePodcast = async (feed: string) => {
-    const feedsValue = await LocalStorage.getItem(PODCASTS_FEEDS_KEY);
-    if (typeof feedsValue !== "string") return;
-
-    const newFeeds = JSON.parse(feedsValue).filter((url: string) => url !== feed);
-    await LocalStorage.setItem(PODCASTS_FEEDS_KEY, JSON.stringify(newFeeds));
+    await removeFeed(feed);
     onRemovePodcast(feed);
   };
 
@@ -58,10 +55,16 @@ export default function PodcastItem({ feed, onRemovePodcast, onPlay, onClick, on
             style={Action.Style.Destructive}
           />
           <Action
+            icon={Icon.PlusCircle}
+            title="Add Podcast"
+            shortcut={{ modifiers: ["cmd"], key: "n" }}
+            onAction={() => onClick(<SearchFeeds onSubmitted={onAddPodcastSubmitted} />)}
+          />
+          <Action
             icon={Icon.Cog}
             title="Manage Podcasts"
             shortcut={{ modifiers: ["cmd"], key: "," }}
-            onAction={() => onClick(<AddPodcast onSubmitted={onAddPodcastSubmitted} />)}
+            onAction={() => onClick(<ManagePodcast onSubmitted={onAddPodcastSubmitted} />)}
           />
         </ActionPanel>
       }

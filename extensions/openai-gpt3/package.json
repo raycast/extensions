@@ -1,11 +1,14 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "openai-gpt3",
-  "version": "1.2.0",
+  "version": "1.4.1",
   "title": "OpenAI GPT3",
   "description": "Interact with OpenAI GPT3 AI",
   "icon": "openai-logo.png",
   "author": "simicvm",
+  "contributors": [
+    "DorukAkinci"
+  ],
   "categories": [
     "Productivity",
     "Fun",
@@ -31,7 +34,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.39.2",
-    "openai": "3.0.0"
+    "openai": "3.2.1"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^5.0.0",
