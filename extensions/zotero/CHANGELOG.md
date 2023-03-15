@@ -1,5 +1,10 @@
 # Zotero Changelog
 
+## [Enhancements] - 2023-03-07
+
+- Updated logo
+- Updated list icons for various types of references included in Zotero (thesis, book, book chapter, journal article, etc.) so that they match the icons used in Zotero desktop app
+
 ## [Added screenshots] - 2022-11-17
 
 ## [Features] - 2023-02-22

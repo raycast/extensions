@@ -2,7 +2,7 @@ import { getApplications, showToast, Toast, open } from "@raycast/api";
 
 async function isBobInstalled() {
   const applications = await getApplications();
-  return applications.some(({ bundleId }) => bundleId === "com.ripperhe.Bob");
+  return applications.some(({ bundleId }) => bundleId === "com.ripperhe.Bob" || bundleId === "com.hezongyidev.Bob");
 }
 
 export async function checkBobInstallation() {

@@ -27,7 +27,9 @@
       "name": "today",
       "title": "Daily Plan",
       "description": "Show today's note",
-      "keywords": ["today"],
+      "keywords": [
+        "today"
+      ],
       "subtitle": "NotePlan 3",
       "mode": "view"
     }
@@ -36,7 +38,7 @@
     {
       "name": "fileExtension",
       "type": "textfield",
-      "required": false,
+      "required": true,
       "title": "File Extension",
       "default": "txt",
       "description": "The file extension you use for notes"

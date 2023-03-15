@@ -27,6 +27,7 @@ export const search = (search: string) => {
 };
 
 export const play = (track: string) => tell("Music", `play track "${track}" of playlist 1`);
+
 export const playById = (id: string) =>
   runScript(`
 	tell application "Music"

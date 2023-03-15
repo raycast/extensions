@@ -46,7 +46,6 @@ export async function createTodo(
             },
           }
         : {}),
-
       ...(preferences.properties.url
         ? {
             [preferences.properties.url]: {
@@ -54,7 +53,8 @@ export async function createTodo(
             },
           }
         : {}),
-      ...(preferences.properties.status
+      ...(preferences.properties.status &&
+      preferences.properties.status.type === 'status'
         ? {
             [preferences.properties.status.name]: {
               status: todo?.status?.id ? { id: todo?.status?.id } : null,
