@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Icon, LocalStorage } from "@raycast/api";
 import { LOCAL_STORAGE_KEY } from "~/constants/general";
+import { getTransientCopyPreference } from "~/utils/preferences";
 
 export type GeneratePasswordActionPanelProps = {
   password: string | undefined;
@@ -18,7 +19,7 @@ const GeneratePasswordActionPanel = (props: GeneratePasswordActionPanelProps) =>
             icon={Icon.Clipboard}
             content={password}
             shortcut={{ key: "enter", modifiers: ["cmd"] }}
-            transient
+            transient={getTransientCopyPreference("password")}
           />
           <Action.Paste
             title="Paste Password to Active App"

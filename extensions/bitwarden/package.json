@@ -47,6 +47,19 @@
               "value": "copy"
             }
           ]
+        },
+        {
+          "name": "transientSearchOption",
+          "type": "dropdown",
+          "required": false,
+          "default": "passwords",
+          "title": "Omit Values from Clipboard History",
+          "description": "Whether the copied values should be omitted from the clipboard history",
+          "data": [
+            {"title": "Always", "value": "always"},
+            {"title": "Only Passwords", "value": "passwords"},
+            {"title": "Never", "value": "never"}
+          ]
         }
       ]
     },
@@ -55,7 +68,21 @@
       "title": "Generate Password",
       "subtitle": "Bitwarden",
       "description": "Generate a password using Bitwarden.",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "transientGenerateOption",
+          "type": "dropdown",
+          "required": false,
+          "default": "passwords",
+          "title": "Omit Values from Clipboard History",
+          "description": "Whether the copied values should be omitted from the clipboard history",
+          "data": [
+            {"title": "Always", "value": "always"},
+            {"title": "Never", "value": "never"}
+          ]
+        }
+      ]
     },
     {
       "name": "generate-password-quick",
@@ -84,6 +111,18 @@
               "title": "Copy and Paste to Active App",
               "value": "copyAndPaste"
             }
+          ]
+        },
+        {
+          "name": "transientGenerateQuickOption",
+          "type": "dropdown",
+          "required": false,
+          "default": "passwords",
+          "title": "Omit Values from Clipboard History",
+          "description": "Whether the copied values should be omitted from the clipboard history",
+          "data": [
+            {"title": "Always", "value": "always"},
+            {"title": "Never", "value": "never"}
           ]
         }
       ]
