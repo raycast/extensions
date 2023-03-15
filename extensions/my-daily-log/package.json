@@ -5,6 +5,7 @@
   "description": "Log what you do every day.",
   "icon": "command-icon.png",
   "author": "frugoman",
+  "owner": "frugoman",
   "license": "MIT",
   "commands": [
     {
