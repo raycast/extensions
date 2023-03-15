@@ -1,5 +1,9 @@
 # GitLab Changelog
 
+## [Add Group and Project Wikis] - 2023-03-14
+
+- Added wikis for groups and projects
+
 ## [Add Copy Clone Url] - 2023-02-24
 
 - Added command to copy clone url of a project to clipboard
