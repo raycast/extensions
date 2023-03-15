@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "github-trending",
-  "title": "GitHub Trending",
+  "title": "GitHub",
   "description": "Quick access to trending repositories on GitHub.",
   "icon": "icon.png",
   "author": "mikqi",
