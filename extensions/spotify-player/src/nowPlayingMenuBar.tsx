@@ -191,16 +191,22 @@ function NowPlayingMenuBar() {
                 title={`Open in Spotify`}
                 onAction={() => open(`${currentlyPlayingTrack.id}`)}
               />
-              <MenuBarExtra.Separator />
-              <MenuBarExtra.Item
-                title="Copy Song Link"
-                icon={Icon.Link}
-                onAction={async () => {
-                  const trackId = currentlyPlayingTrack.id.replace("spotify:track:", "");
-                  Clipboard.copy(`https://open.spotify.com/track/${trackId}`);
-                  showHUD(`♫ Copied URL - ${trackTitle}`);
-                }}
-              />
+              {!currentlyPlayingTrack.isPodcast && (
+                <>
+                  <MenuBarExtra.Separator />
+
+                  <MenuBarExtra.Item
+                    title="Copy Song Link"
+                    icon={Icon.Link}
+                    onAction={async () => {
+                      const trackId = currentlyPlayingTrack.id.replace("spotify:track:", "");
+                      Clipboard.copy(`https://open.spotify.com/track/${trackId}`);
+                      showHUD(`♫ Copied URL - ${trackTitle}`);
+                    }}
+                  />
+                </>
+
+              )}
             </>
           )}
           {!authorized && (
