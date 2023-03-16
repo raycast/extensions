@@ -37,6 +37,7 @@ export default function Command() {
               <Action
                 icon={Icon.DeleteDocument}
                 title="Delete Item"
+                style={Action.Style.Destructive}
                 onAction={() => {
                   clearHistoryItem(item.created);
                   const ls = cache.get("history");
