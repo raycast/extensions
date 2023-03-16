@@ -4,36 +4,26 @@ import { Item, User } from "../types";
 import { ActionID, hrefToOpenInBrowser } from "../utils";
 import resetCache from "../../reset-cache";
 
-export function ItemActionPanel({
-  account,
-  item,
-  actions
-}: {
-  account: User;
-  item: Item;
-  actions: ActionID[];
-}) {
+export function ItemActionPanel({ account, item, actions }: { account: User; item: Item; actions: ActionID[] }) {
   return (
     <ActionPanel>
-      {
-        actions.map((actionId) => {
-          switch (actionId) {
-            case "open-in-1password":
-              return OpenIn1Password(account, item);
-            case "open-in-browser":
-              return OpenInBrowser(item);
-            case "copy-username":
-              return CopyUsername(item);
-            case "copy-password":
-              return CopyPassword(item);
-          }
-        })
-      }
+      {actions.map((actionId) => {
+        switch (actionId) {
+          case "open-in-1password":
+            return OpenIn1Password(account, item);
+          case "open-in-browser":
+            return OpenInBrowser(item);
+          case "copy-username":
+            return CopyUsername(item);
+          case "copy-password":
+            return CopyPassword(item);
+        }
+      })}
       <ActionPanel.Section>
         <Action title="Reset Cache" icon={Icon.Trash} onAction={() => resetCache()}></Action>
       </ActionPanel.Section>
     </ActionPanel>
-  )
+  );
 }
 
 function OpenIn1Password(account: User, item: Item) {
@@ -45,7 +35,7 @@ function OpenIn1Password(account: User, item: Item) {
       application="com.1password.1password"
       shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
     />
-  )
+  );
 }
 
 function OpenInBrowser(item: Item) {
@@ -73,7 +63,7 @@ function CopyUsername(item: Item) {
       field="username"
       shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
     />
-  )
+  );
 }
 
 function CopyPassword(item: Item) {
@@ -85,5 +75,5 @@ function CopyPassword(item: Item) {
       field="password"
       shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
     />
-  )
+  );
 }

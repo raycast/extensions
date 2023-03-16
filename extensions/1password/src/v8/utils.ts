@@ -20,8 +20,7 @@ export const cache = new Cache();
 const preferences = getPreferenceValues<Preferences>();
 
 export const CLI_PATH =
-  preferences.cliPath ||
-  ["/usr/local/bin/op", "/opt/homebrew/bin/op"].find((path) => existsSync(path));
+  preferences.cliPath || ["/usr/local/bin/op", "/opt/homebrew/bin/op"].find((path) => existsSync(path));
 export const CATEGORIES_CACHE_NAME = "@categories";
 export const ITEMS_CACHE_NAME = "@items";
 export const ACCOUNT_CACHE_NAME = "@account";
@@ -36,17 +35,18 @@ export function hrefToOpenInBrowser(item: Item): string | undefined {
 
 export function actionsForItem(item: Item): ActionID[] {
   if (item.category === "LOGIN") {
-      // user-configured primary action first, then secondary action,
-      // then all the actions in the default order,
-      // with duplicates removed
-    return [...new Set<ActionID>([
+    // user-configured primary action first, then secondary action,
+    // then all the actions in the default order,
+    // with duplicates removed
+    return [
+      ...new Set<ActionID>([
         preferences.primaryAction,
         preferences.secondaryAction,
         "open-in-1password",
         "open-in-browser",
         "copy-username",
-        "copy-password"
-      ])
+        "copy-password",
+      ]),
     ];
   } else {
     return ["open-in-1password"];
