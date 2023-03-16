@@ -82,6 +82,18 @@ export class Bitwarden {
     }
   }
 
+  private async setLockReason(reason: string) {
+    this.lockReason = reason;
+    await LocalStorage.setItem(LOCAL_STORAGE_KEY.VAULT_LOCK_REASON, reason);
+  }
+
+  private async clearLockReason(): Promise<void> {
+    if (this.lockReason) {
+      await LocalStorage.removeItem(LOCAL_STORAGE_KEY.VAULT_LOCK_REASON);
+      this.lockReason = undefined;
+    }
+  }
+
   private async exec(args: string[], options?: ExecProps): Promise<ExecaChildProcess> {
     const { abortController, input = "", skipLastActivityUpdate = false } = options ?? {};
     const result = await execa(this.cliPath, args, { env: this.env, input, signal: abortController?.signal });
@@ -97,10 +109,7 @@ export class Bitwarden {
 
   async login(): Promise<void> {
     await this.exec(["login", "--apikey"]);
-    if (this.lockReason) {
-      await LocalStorage.removeItem(LOCAL_STORAGE_KEY.VAULT_LOCK_REASON);
-      this.lockReason = undefined;
-    }
+    await this.clearLockReason();
   }
 
   async logout(): Promise<void> {
@@ -128,15 +137,13 @@ export class Bitwarden {
 
   async unlock(password: string): Promise<string> {
     const { stdout: sessionToken } = await this.exec(["unlock", password, "--raw"]);
+    await this.clearLockReason();
     return sessionToken;
   }
 
   async lock(reason?: string): Promise<void> {
+    if (reason) this.setLockReason(reason);
     await this.exec(["lock"]);
-    if (reason) {
-      this.lockReason = reason;
-      await LocalStorage.setItem(LOCAL_STORAGE_KEY.VAULT_LOCK_REASON, reason);
-    }
   }
 
   async status(sessionToken?: string): Promise<VaultState> {

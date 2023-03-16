@@ -20,8 +20,9 @@ function ActionWithReprompt(props: ActionWithRepromptProps) {
   async function performAction({ password, closeForm }: UserRepromptActionProp) {
     const toast = await showToast(Toast.Style.Animated, "Confirming...");
     try {
-      const vaultItem = await bitwarden.getItem(id, session.token!, { password });
-      if (!vaultItem) throw new Error("Couldn't get item.");
+      if (!session.token) throw new Error("No session token.");
+      const vaultItem = await bitwarden.getItem(id, session.token, { password });
+      if (!vaultItem) throw new Error("Failed to get item.");
       closeForm();
       await onAction?.();
       await toast.hide();
