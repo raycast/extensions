@@ -46,6 +46,7 @@
       "title": "gpt_model",
       "name": "gpt_model",
       "description": "The model name for chatGPT is gpt-3.5-turbo by default.",
+      "placeholder": "gpt-3.5-turbo",
       "type": "textfield",
       "required": false
     },
@@ -53,6 +54,7 @@
       "title": "proxy_url",
       "name": "proxy_url",
       "description": "Reverse proxy address, defaulting to https://api.openai.com",
+      "placeholder": "https://api.openai.com",
       "type": "textfield",
       "required": false
     }
