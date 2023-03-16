@@ -54,7 +54,7 @@
           "required": false,
           "default": "passwords",
           "title": "Copy Values Temporarily",
-          "description": "Whether values like passwords should be copied to the clipboard temporarily, and therefore omitted from the clipboard history",
+          "description": "Whether values should be copied to the clipboard temporarily, and therefore omitted from the clipboard history",
           "data": [
             {"title": "Always", "value": "always"},
             {"title": "Only Passwords", "value": "passwords"},
@@ -74,9 +74,9 @@
           "name": "transientCopyGeneratePassword",
           "type": "dropdown",
           "required": false,
-          "default": "passwords",
+          "default": "always",
           "title": "Copy Values Temporarily",
-          "description": "Whether values like passwords should be copied to the clipboard temporarily, and therefore omitted from the clipboard history",
+          "description": "Whether values should be copied to the clipboard temporarily, and therefore omitted from the clipboard history",
           "data": [
             {"title": "Always", "value": "always"},
             {"title": "Never", "value": "never"}
@@ -117,9 +117,9 @@
           "name": "transientCopyGeneratePasswordQuick",
           "type": "dropdown",
           "required": false,
-          "default": "passwords",
+          "default": "always",
           "title": "Copy Values Temporarily",
-          "description": "Whether values like passwords should be copied to the clipboard temporarily, and therefore omitted from the clipboard history",
+          "description": "Whether values should be copied to the clipboard temporarily, and therefore omitted from the clipboard history",
           "data": [
             {"title": "Always", "value": "always"},
             {"title": "Never", "value": "never"}
