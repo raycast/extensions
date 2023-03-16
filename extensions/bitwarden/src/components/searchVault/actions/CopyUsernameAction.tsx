@@ -1,4 +1,4 @@
-import { Clipboard, Icon } from "@raycast/api";
+import { Clipboard, closeMainWindow, Icon, showHUD } from "@raycast/api";
 import ActionWithReprompt from "~/components/actions/ActionWithReprompt";
 import { useSelectedVaultItem } from "~/components/searchVault/context/vaultItem";
 
@@ -8,7 +8,11 @@ function CopyUsernameAction() {
 
   if (!username) return null;
 
-  const copyUsername = async () => Clipboard.copy(username);
+  const copyUsername = async () => {
+    await Clipboard.copy(username);
+    await closeMainWindow();
+    await showHUD("Copied username to clipboard.");
+  };
 
   return (
     <ActionWithReprompt

@@ -13,16 +13,19 @@ function CopyTextFieldsActions() {
 
   return (
     <>
-      {Object.entries({ notes, ...card, ...identity, ...fieldMap, ...uriMap }).map(([title, content], index) =>
-        content ? (
+      {Object.entries({ notes, ...card, ...identity, ...fieldMap, ...uriMap }).map(([title, content], index) => {
+        if (!content) return null;
+
+        return (
           <CopyWithRepromptAction
             key={`${index}-${title}`}
             title={`Copy ${capitalize(title)}`}
+            name={capitalize(title)}
             icon={Icon.Clipboard}
             content={content}
           />
-        ) : null
-      )}
+        );
+      })}
     </>
   );
 }
