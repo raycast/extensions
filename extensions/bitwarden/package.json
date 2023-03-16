@@ -53,8 +53,8 @@
           "type": "dropdown",
           "required": false,
           "default": "passwords",
-          "title": "Omit Values from Clipboard History",
-          "description": "Whether the copied values should be omitted from the clipboard history",
+          "title": "Copy Values Temporarily",
+          "description": "Whether values like passwords should be copied to the clipboard temporarily, and therefore omitted from the clipboard history",
           "data": [
             {"title": "Always", "value": "always"},
             {"title": "Only Passwords", "value": "passwords"},
@@ -75,8 +75,8 @@
           "type": "dropdown",
           "required": false,
           "default": "passwords",
-          "title": "Omit Values from Clipboard History",
-          "description": "Whether the copied values should be omitted from the clipboard history",
+          "title": "Copy Values Temporarily",
+          "description": "Whether values like passwords should be copied to the clipboard temporarily, and therefore omitted from the clipboard history",
           "data": [
             {"title": "Always", "value": "always"},
             {"title": "Never", "value": "never"}
@@ -118,8 +118,8 @@
           "type": "dropdown",
           "required": false,
           "default": "passwords",
-          "title": "Omit Values from Clipboard History",
-          "description": "Whether the copied values should be omitted from the clipboard history",
+          "title": "Copy Values Temporarily",
+          "description": "Whether values like passwords should be copied to the clipboard temporarily, and therefore omitted from the clipboard history",
           "data": [
             {"title": "Always", "value": "always"},
             {"title": "Never", "value": "never"}
