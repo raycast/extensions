@@ -16,7 +16,6 @@
     {
       "name": "gpt_im",
       "title": "Ask ChatGPT",
-      "subtitle": "Quickly Call ChatGPT API.",
       "description": "Quickly Call ChatGPT API.",
       "mode": "view",
       "arguments": [
@@ -31,7 +30,6 @@
     {
       "name": "gpt_history",
       "title": "View History",
-      "subtitle": "View browsing history.",
       "description": "View browsing history.",
       "mode": "view"
     }
