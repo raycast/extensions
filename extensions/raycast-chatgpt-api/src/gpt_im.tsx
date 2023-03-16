@@ -33,5 +33,5 @@ export default function Command(args: any) {
         });
   }
 
-  return <Detail navigationTitle={`chatGPT`} isLoading={isLoading} markdown={gptResut} />;
+  return <Detail isLoading={isLoading} markdown={gptResut} />;
 }
