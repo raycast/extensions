@@ -31,7 +31,7 @@ function CopyTotpAction() {
       icon={Icon.Clipboard}
       onAction={copyTotp}
       shortcut={{ modifiers: ["cmd"], key: "t" }}
-      repromptDescription={`Copying the TOTP code of <${name}>`}
+      repromptDescription={`Copying the TOTP of <${name}>`}
     />
   );
 }

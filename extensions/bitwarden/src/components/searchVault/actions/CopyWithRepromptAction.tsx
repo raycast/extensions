@@ -3,11 +3,12 @@ import ActionWithReprompt from "~/components/actions/ActionWithReprompt";
 
 export type CopyWithRepromptActionProps = Omit<Action.Props, "onAction"> & {
   name?: string;
+  repromptDescription?: string;
   content: string;
 };
 
 function CopyWithRepromptAction(props: CopyWithRepromptActionProps) {
-  const { name, content, ...componentProps } = props;
+  const { repromptDescription, name, content, ...componentProps } = props;
 
   const copyContent = async () => {
     await Clipboard.copy(content);
@@ -15,7 +16,7 @@ function CopyWithRepromptAction(props: CopyWithRepromptActionProps) {
     await closeMainWindow();
   };
 
-  return <ActionWithReprompt {...componentProps} onAction={copyContent} repromptDescription={componentProps.title} />;
+  return <ActionWithReprompt {...componentProps} onAction={copyContent} repromptDescription={repromptDescription} />;
 }
 
 export default CopyWithRepromptAction;

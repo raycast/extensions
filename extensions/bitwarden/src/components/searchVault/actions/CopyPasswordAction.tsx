@@ -17,7 +17,7 @@ function CopyPasswordAction() {
   return (
     <ActionWithReprompt
       title="Copy Password"
-      icon={Icon.CopyClipboard}
+      icon={Icon.Key}
       onAction={copyPassword}
       repromptDescription={`Copying the password of <${name}>`}
     />

@@ -1,26 +1,33 @@
-import { Action, ActionPanel, Detail, Icon } from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon, useNavigation } from "@raycast/api";
+import ActionWithReprompt from "~/components/actions/ActionWithReprompt";
 import { useSelectedVaultItem } from "~/components/searchVault/context/vaultItem";
 import { getCardDetailsCopyValue, getCardDetailsMarkdown } from "~/utils/cards";
 
 function ShowCardDetailsAction() {
-  const { card } = useSelectedVaultItem();
+  const { push } = useNavigation();
+  const { card, name } = useSelectedVaultItem();
 
   if (!card) return null;
 
+  const showCardDetails = () => {
+    push(
+      <Detail
+        markdown={getCardDetailsMarkdown(card)}
+        actions={
+          <ActionPanel>
+            <Action.CopyToClipboard title="Copy Card Details" content={getCardDetailsCopyValue(card)} />
+          </ActionPanel>
+        }
+      />
+    );
+  };
+
   return (
-    <Action.Push
+    <ActionWithReprompt
       title="Show Card Details"
       icon={Icon.CreditCard}
-      target={
-        <Detail
-          markdown={getCardDetailsMarkdown(card)}
-          actions={
-            <ActionPanel>
-              <Action.CopyToClipboard title="Copy Card Details" content={getCardDetailsCopyValue(card)} />
-            </ActionPanel>
-          }
-        />
-      }
+      onAction={showCardDetails}
+      repromptDescription={`Showing the card details of <${name}>`}
     />
   );
 }

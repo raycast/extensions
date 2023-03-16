@@ -9,7 +9,7 @@ function ShowSecureNoteAction() {
 
   if (!notes) return null;
 
-  const showSecureNote = async () => {
+  const showSecureNote = () => {
     push(
       <Detail
         markdown={codeBlock(notes)}
@@ -27,7 +27,7 @@ function ShowSecureNoteAction() {
       title="Show Secure Note"
       icon={Icon.BlankDocument}
       onAction={showSecureNote}
-      repromptDescription={`Showing the secure note of <${name}>`}
+      repromptDescription={`Showing the note of <${name}>`}
     />
   );
 }

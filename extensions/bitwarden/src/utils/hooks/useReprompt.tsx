@@ -14,7 +14,7 @@ export type UseRepromptOptions = {
  * The password is not confirm in this hook, only passed down to the action.
  */
 function useReprompt(action: UseRepromptAction, options?: UseRepromptOptions) {
-  const { description = "Performing this action" } = options ?? {};
+  const { description = "Performing an action that requires the master password" } = options ?? {};
   const { push, pop } = useNavigation();
   const wasPopped = useRef(false);
 

@@ -4,7 +4,7 @@ import CopyWithRepromptAction from "~/components/searchVault/actions/CopyWithRep
 import { useSelectedVaultItem } from "~/components/searchVault/context/vaultItem";
 
 function CopyTextFieldsActions() {
-  const { login, notes, card, identity, fields } = useSelectedVaultItem();
+  const { login, notes, card, identity, fields, name } = useSelectedVaultItem();
 
   const fieldMap = Object.fromEntries(fields?.map((field) => [field.name, field.value]) || []);
   const uriMap = Object.fromEntries(
@@ -15,14 +15,15 @@ function CopyTextFieldsActions() {
     <>
       {Object.entries({ notes, ...card, ...identity, ...fieldMap, ...uriMap }).map(([title, content], index) => {
         if (!content) return null;
-
+        const capitalizedTitle = capitalize(title);
         return (
           <CopyWithRepromptAction
             key={`${index}-${title}`}
-            title={`Copy ${capitalize(title)}`}
-            name={capitalize(title)}
+            title={`Copy ${capitalizedTitle}`}
+            name={capitalizedTitle}
             icon={Icon.Clipboard}
             content={content}
+            repromptDescription={`Copying the ${capitalizedTitle} of <${name}>`}
           />
         );
       })}
