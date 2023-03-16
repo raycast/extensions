@@ -1,4 +1,8 @@
-export type TransientCopyOption = "always" | "passwords" | "never";
+export type TransientCopyPreferences = {
+  transientCopySearch: "always" | "passwords" | "never";
+  transientCopyGeneratePassword: "always" | "never";
+  transientCopyGeneratePasswordQuick: "always" | "never";
+};
 
 export type Preferences = {
   cliPath: string;
@@ -9,7 +13,4 @@ export type Preferences = {
   serverCertsPath: string;
   repromptIgnoreDuration: string;
   generatePasswordQuickAction: "paste" | "copy" | "copyAndPaste";
-  transientSearchOption: TransientCopyOption;
-  transientGenerateOption: TransientCopyOption;
-  transientGenerateQuickOption: TransientCopyOption;
-};
+} & TransientCopyPreferences;

@@ -1,6 +1,6 @@
 import { environment, getPreferenceValues } from "@raycast/api";
 import { CommandName } from "~/types/general";
-import { Preferences, TransientCopyOption } from "~/types/preferences";
+import { Preferences, TransientCopyPreferences } from "~/types/preferences";
 
 export function getServerUrlPreference(): string {
   const { serverUrl } = getPreferenceValues<Preferences>();
@@ -11,14 +11,16 @@ export function getServerUrlPreference(): string {
 }
 
 const COMMAND_NAME_TO_PREFERENCE_KEY_MAP: Record<CommandName, keyof Preferences> = {
-  search: "transientSearchOption",
-  "generate-password": "transientGenerateOption",
-  "generate-password-quick": "transientGenerateQuickOption",
+  search: "transientCopySearch",
+  "generate-password": "transientCopyGeneratePassword",
+  "generate-password-quick": "transientCopyGeneratePasswordQuick",
 };
+
+type TransientCopyValue = TransientCopyPreferences[keyof TransientCopyPreferences];
 
 export function getTransientCopyPreference(type: "password" | "other"): boolean {
   const preferenceKey = COMMAND_NAME_TO_PREFERENCE_KEY_MAP[environment.commandName as CommandName];
-  const transientPreference = getPreferenceValues<Preferences>()[preferenceKey] as TransientCopyOption;
+  const transientPreference = getPreferenceValues<Preferences>()[preferenceKey] as TransientCopyValue;
   if (transientPreference === "never") return false;
   if (transientPreference === "always") return true;
   if (transientPreference === "passwords") return type === "password";

@@ -49,7 +49,7 @@
           ]
         },
         {
-          "name": "transientSearchOption",
+          "name": "transientCopySearch",
           "type": "dropdown",
           "required": false,
           "default": "passwords",
@@ -71,7 +71,7 @@
       "mode": "view",
       "preferences": [
         {
-          "name": "transientGenerateOption",
+          "name": "transientCopyGeneratePassword",
           "type": "dropdown",
           "required": false,
           "default": "passwords",
@@ -114,7 +114,7 @@
           ]
         },
         {
-          "name": "transientGenerateQuickOption",
+          "name": "transientCopyGeneratePasswordQuick",
           "type": "dropdown",
           "required": false,
           "default": "passwords",
