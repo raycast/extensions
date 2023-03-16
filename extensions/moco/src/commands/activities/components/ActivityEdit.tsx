@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Activity } from "../types";
 import { editActivity } from "../api";
 import { Actions } from "./ActivityList";
+import { toDecimalTime } from "../utils";
 
 interface ActivityEditProps {
   index: number;
@@ -43,7 +44,7 @@ export const ActivityEdit: React.FC<ActivityEditProps> = ({ index, activity, mod
                       ...activity,
                       date: values.date.toISOString().split("T")[0],
                       description: values.description,
-                      hours: values.hours,
+                      hours: values.hours.includes(":") ? toDecimalTime(values.hours) : values.hours,
                     },
                     Actions.update
                   )

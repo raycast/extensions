@@ -1,5 +1,9 @@
 # DevDocs Extension
 
+## [Fix] - 2023-03-14
+
+- Fixed wrong link in `Open in DevDocs`
+
 ## Deeplinks - 2023-02-07
 
 - Add deeplinks support
