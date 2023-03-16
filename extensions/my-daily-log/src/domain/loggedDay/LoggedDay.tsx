@@ -1,9 +1,5 @@
 export class LoggedDay {
-  date: Date;
-
-  constructor(date: Date) {
-    this.date = date;
-  }
+  constructor(public date: Date) {}
 
   get title(): string {
     if (this.date.getDate() === new Date().getDate()) {
