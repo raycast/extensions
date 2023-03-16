@@ -25,7 +25,7 @@ const fetchAccountAPI = async (auth: string, API_URL: string) => {
     }
 
     const { email, plan } = apiResponseJSON.account ?? {};
-    
+
     if (email) {
       await LocalStorage.setItem("improvmx_email", email);
       await LocalStorage.setItem("improvmx_unix_timestamp", Math.floor(Date.now() / 1000));
