@@ -14,11 +14,40 @@ import { LANGUAGES } from '@utils/languages';
 import useOpenAITranslate from '@hooks/useOpenAITranslate';
 import Configuration from '@views/configuration';
 import { getAllParamsFromLocalStorage } from '@utils/parameters';
+import { useForm } from '@raycast/utils';
+
+interface TranslationFormValues {
+  text: string;
+  from: string;
+  to: string;
+}
 
 export default function Translate() {
   const { push } = useNavigation();
   const { data, error, isLoading, translate } = useOpenAITranslate();
   const [isFirstRender, setIsFirstRender] = useState(true);
+  const { handleSubmit, itemProps } = useForm<TranslationFormValues>({
+    onSubmit: async (values) => {
+      const { text, from, to } = values;
+      const parameters = await getAllParamsFromLocalStorage();
+      translate({
+        openAiConfig: {
+          openaiApiKey: getPreferenceValues().openAiApiKey,
+          ...parameters,
+        },
+        text,
+        from,
+        to,
+      });
+    },
+    validation: {
+      text: (value) => {
+        if (!value) {
+          return 'You must provide text for translation';
+        }
+      },
+    },
+  });
 
   useEffect(() => {
     setIsFirstRender(false);
@@ -49,23 +78,7 @@ export default function Translate() {
       actions={
         <ActionPanel title='OpenAI Translate'>
           <ActionPanel.Section>
-            <Action.SubmitForm
-              title='Translate'
-              icon={Icon.Globe}
-              onSubmit={async (values) => {
-                const { text, from, to } = values;
-                const parameters = await getAllParamsFromLocalStorage();
-                translate({
-                  openAiConfig: {
-                    openaiApiKey: getPreferenceValues().openAiApiKey,
-                    ...parameters,
-                  },
-                  text,
-                  from,
-                  to,
-                });
-              }}
-            />
+            <Action.SubmitForm title='Translate' icon={Icon.Globe} onSubmit={handleSubmit} />
             <Action.CopyToClipboard content={data.content?.trim() || ''} />
           </ActionPanel.Section>
           <ActionPanel.Section>
@@ -85,7 +98,7 @@ export default function Translate() {
         </ActionPanel>
       }
     >
-      <Form.TextArea id='text' title='Text' autoFocus={true} />
+      <Form.TextArea title='Text' autoFocus={true} {...itemProps.text} />
       {/* TODO: add token count here */}
       <Form.Dropdown id='from' title='From' storeValue={true}>
         {renderLanguageList()}
