@@ -25,11 +25,17 @@ const fetchAccountAPI = async (auth: string, API_URL: string) => {
     }
 
     const { email, plan } = apiResponseJSON.account ?? {};
-
-    if (email && plan?.name) {
+    
+    if (email) {
       await LocalStorage.setItem("improvmx_email", email);
-      await LocalStorage.setItem("improvmx_plan_name", plan.name);
       await LocalStorage.setItem("improvmx_unix_timestamp", Math.floor(Date.now() / 1000));
+
+      if (plan) {
+        await LocalStorage.setItem("improvmx_plan", plan.name);
+      } else {
+        await LocalStorage.setItem("improvmx_plan", "Free");
+      }
+
       return email;
     } else {
       const errorMessage = "Failed to parse ImprovMX API response";
@@ -37,7 +43,6 @@ const fetchAccountAPI = async (auth: string, API_URL: string) => {
       return;
     }
   } catch (error) {
-    console.log(error);
     showToast(Toast.Style.Failure, "ImprovMX Error", "Failed to fetch account details, please check your API key");
     return;
   }

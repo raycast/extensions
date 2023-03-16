@@ -14,7 +14,7 @@ import {
 
 import fetch from "node-fetch";
 import { useEffect, useState } from "react";
-import { generatePassword } from "./utils";
+import { generatePassword, fetchAccont } from "./utils";
 
 interface Preferences {
   api_token: string;
@@ -62,6 +62,15 @@ export default function createSMTPCredentials() {
   const auth = Buffer.from("api:" + API_TOKEN).toString("base64");
 
   useEffect(() => {
+    async function getPlanName() {
+      await fetchAccont(auth, API_URL);
+      const planName = (await LocalStorage.getItem("improvmx_plan")) as string;
+
+      setState((prevState) => {
+        return { ...prevState, planName: planName };
+      });
+    }
+
     async function getDomains() {
       try {
         const apiResponse = await fetch(API_URL + "domains?=", {
@@ -101,21 +110,6 @@ export default function createSMTPCredentials() {
         await showToast(Toast.Style.Failure, "ImprovMX Error", "Failed to fetch domains. Please try again later.");
 
         return;
-      }
-    }
-
-    async function getPlanName() {
-      const plan_name = (await LocalStorage.getItem<string>("improvmx_plan_name")) as string;
-
-      if (plan_name === null) {
-        setState((prevState) => {
-          return { ...prevState, error: "Failed to fetch plan name. Please try again later." };
-        });
-        return;
-      } else {
-        setState((prevState) => {
-          return { ...prevState, planName: plan_name };
-        });
       }
     }
 
@@ -258,7 +252,9 @@ export default function createSMTPCredentials() {
     });
   };
 
-  return state.error ? (
+  return state.planName === "" ? (
+    <Detail isLoading={true}></Detail>
+  ) : state.error ? (
     <Detail
       markdown={"⚠️" + state.error}
       actions={
@@ -269,10 +265,10 @@ export default function createSMTPCredentials() {
     />
   ) : state.planName === "Free" ? (
     <Detail
-      markdown={"⚠️ You are currently on the free plan. Please upgrade to create SMTP credentials."}
+      markdown={"⚠️ You are currently on a free plan. Please upgrade to create SMTP credentials."}
       actions={upgradeAction}
     />
-  ) : (
+  ) : state.planName && state.planName !== "Free" ? (
     <Form
       isLoading={state.domains === undefined || state.isLoading}
       actions={
@@ -326,5 +322,5 @@ export default function createSMTPCredentials() {
         <Form.Dropdown.Item value="false" title="From any alias on that domain" />
       </Form.Dropdown>
     </Form>
-  );
+  ) : null;
 }

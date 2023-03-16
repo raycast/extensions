@@ -122,7 +122,7 @@ export default function CreateMaskedEmail(props: LaunchProps<{ arguments: Domain
 
   const handleMaskedEmail = async (domain: Domain) => {
     if (domain.banned || domain.active == false) {
-      showToast(Toast.Style.Failure, "Domain not configured properly");
+      showToast(Toast.Style.Failure, "Domain not configured properly. Please configure your DNS settings");
       return;
     }
 
