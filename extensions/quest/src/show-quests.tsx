@@ -1,4 +1,4 @@
-import { ActionPanel, List, LocalStorage, confirmAlert, Icon, Alert } from "@raycast/api";
+import { ActionPanel, List, LocalStorage, confirmAlert, Icon, Alert, Action } from "@raycast/api";
 import { useCallback, useEffect, useState } from "react";
 import { Quest } from "./types";
 import CreateQuestAction from "./actions/createQuest";
@@ -11,6 +11,7 @@ import { nanoid } from "nanoid";
 import { environment } from "@raycast/api";
 import exampleQuests from "./fixtures/exampleQuests";
 import { getProgressIcon } from "@raycast/utils";
+import { sharableQuest } from "./lib/util";
 
 type State = {
   isLoading: boolean;
@@ -102,6 +103,10 @@ export default function Command() {
                   </ActionPanel.Section>
                   <ActionPanel.Section title="Quest">
                     <EditQuestAction onCreate={handleCreate} quest={quest} />
+                    <Action.CopyToClipboard
+                      content={JSON.stringify(sharableQuest(quest))}
+                      shortcut={{ modifiers: ["cmd"], key: "." }}
+                    />
                     <DeleteQuestAction onDelete={() => handleDelete(quest)} />
                   </ActionPanel.Section>
                   <ActionPanel.Section>
