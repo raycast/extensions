@@ -222,7 +222,7 @@ function listDropdownItem(list: ListObject): JSX.Element {
       key={list.id}
       title={list.name}
       icon={{
-        source: list.appearance?.iconUrl ?? "list-icons/list-light.svg",
+        source: list.appearance?.iconUrl ?? "list-icons/list.svg",
         tintColor: getTintColorFromHue(list?.appearance?.hue, ListColors),
       }}
       value={list.id}

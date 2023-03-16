@@ -145,7 +145,7 @@ export default function DetailsTask({ taskId, mutateTask }: Props) {
                     text={list.name}
                     color={getTintColorFromHue(list?.appearance?.hue, ListColors)}
                     icon={{
-                      source: list.appearance?.iconUrl ?? "list-icons/list-light.svg",
+                      source: list.appearance?.iconUrl ?? "list-icons/list.svg",
                       tintColor: getTintColorFromHue(list?.appearance?.hue, ListColors),
                     }}
                   />
@@ -163,7 +163,7 @@ export default function DetailsTask({ taskId, mutateTask }: Props) {
               icon={{
                 source:
                   getListById(task?.parentTasks[0]?.listIds[0], lists, smartLists)?.appearance?.iconUrl ??
-                  "list-icons/list-light.svg",
+                  "list-icons/list.svg",
                 tintColor: getTintColorFromHue(task.lists?.[0]?.appearance?.hue, ListColors),
               }}
             />

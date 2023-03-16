@@ -121,7 +121,7 @@ export default function CreateList({ draftValues }: { draftValues?: CreateTaskFo
             value={list.id}
             title={list.name}
             icon={{
-              source: list.appearance?.iconUrl ?? "list-icons/list-light.svg",
+              source: list.appearance?.iconUrl ?? "list-icons/list.svg",
               tintColor: getTintColorFromHue(list?.appearance?.hue, ListColors),
             }}
           />
@@ -183,7 +183,7 @@ export default function CreateList({ draftValues }: { draftValues?: CreateTaskFo
                 value={task.id}
                 title={task.name}
                 icon={{
-                  source: task.lists?.[0].appearance?.iconUrl ?? "list-icons/list-light.svg",
+                  source: task.lists?.[0].appearance?.iconUrl ?? "list-icons/list.svg",
                   tintColor: getTintColorFromHue(task.lists?.[0]?.appearance?.hue, ListColors),
                 }}
               />

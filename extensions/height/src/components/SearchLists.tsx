@@ -54,7 +54,7 @@ export default function SearchLists() {
           <List.Item
             key={list.id}
             icon={{
-              source: list.appearance?.iconUrl ?? "list-icons/list-light.svg",
+              source: list.appearance?.iconUrl ?? "list-icons/list.svg",
               tintColor: getTintColorFromHue(list?.appearance?.hue, ListColors),
             }}
             title={list.name}
@@ -68,7 +68,7 @@ export default function SearchLists() {
           <List.Item
             key={list.id}
             icon={{
-              source: list.appearance?.iconUrl ?? "list-icons/list-light.svg",
+              source: list.appearance?.iconUrl ?? "list-icons/list.svg",
               tintColor: getTintColorFromHue(list?.appearance?.hue, ListColors),
             }}
             title={list.name}

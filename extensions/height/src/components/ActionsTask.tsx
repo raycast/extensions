@@ -357,7 +357,7 @@ export default function ActionsTask({
                 key={parentTask.id}
                 title={parentTask.name}
                 icon={{
-                  source: parentTask.lists?.[0].appearance?.iconUrl ?? "list-icons/list-light.svg",
+                  source: parentTask.lists?.[0].appearance?.iconUrl ?? "list-icons/list.svg",
                   tintColor: getTintColorFromHue(parentTask.lists?.[0]?.appearance?.hue, ListColors),
                 }}
                 onAction={async () => {
@@ -392,7 +392,7 @@ export default function ActionsTask({
                 key={list.id}
                 title={list.name}
                 icon={{
-                  source: list.appearance?.iconUrl ?? "list-icons/list-light.svg",
+                  source: list.appearance?.iconUrl ?? "list-icons/list.svg",
                   tintColor: getTintColorFromHue(list?.appearance?.hue, ListColors),
                 }}
                 onAction={async () => {
