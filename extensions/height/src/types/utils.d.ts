@@ -1,5 +1,9 @@
 import { useCachedPromise } from "@raycast/utils";
 
+export type Preferences = {
+  apiResultsLimit: string;
+};
+
 export type ApiResponse<T> = {
   list: T;
 };

@@ -1,9 +1,10 @@
+import { getPreferenceValues } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { orderBy } from "lodash-es";
 import { useMemo } from "react";
 import { ApiUrls } from "../api/helpers";
 import { ApiTask } from "../api/task";
-import { UseCachedPromiseOptions } from "../types/utils";
+import { Preferences, UseCachedPromiseOptions } from "../types/utils";
 
 type Props = {
   listId?: string;
@@ -24,11 +25,16 @@ export default function useTasks({ listId, assigneeId, options }: Props = {}) {
 
   const stringifiedFilters = JSON.stringify(filters);
 
-  const order = JSON.stringify([{ column: "createdAt", direction: "DESC" }]);
+  const order = JSON.stringify([
+    { column: "lastActivityAt", direction: "DESC" },
+    { column: "createdAt", direction: "DESC" },
+  ]);
 
   const include = JSON.stringify(["Lists", "ParentTasks"]);
 
-  const endpoint = `${ApiUrls.tasks}?filters=${stringifiedFilters}&order=${order}&include=${include}`;
+  const { apiResultsLimit } = getPreferenceValues<Preferences>();
+
+  const endpoint = `${ApiUrls.tasks}?filters=${stringifiedFilters}&order=${order}&include=${include}&limit=${apiResultsLimit}`;
 
   const { data, error, isLoading, mutate } = useCachedPromise(() => ApiTask.get(endpoint), [], {
     ...options,

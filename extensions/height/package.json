@@ -47,6 +47,38 @@
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "name": "apiResultsLimit",
+      "title": "API Results Limit",
+      "description": "Limit the number of results returned by the API.",
+      "type": "dropdown",
+      "required": false,
+      "default": "100",
+      "data": [
+        {
+          "title": "100",
+          "value": "100"
+        },
+        {
+          "title": "200",
+          "value": "200"
+        },
+        {
+          "title": "300",
+          "value": "300"
+        },
+        {
+          "title": "400",
+          "value": "400"
+        },
+        {
+          "title": "500",
+          "value": "500"
+        }
+      ]
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.48.8",
     "@raycast/utils": "^1.5.2",
