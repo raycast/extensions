@@ -16,8 +16,8 @@ const actions: Record<Preferences["generatePasswordQuickAction"], (password: str
     await Clipboard.paste(password);
   },
   copyAndPaste: async (password) => {
-    await Clipboard.copy(password, { transient: getTransientCopyPreference("password") });
     await Clipboard.paste(password);
+    await Clipboard.copy(password, { transient: getTransientCopyPreference("password") });
     await showHUD("Copied password to clipboard");
   },
 };
