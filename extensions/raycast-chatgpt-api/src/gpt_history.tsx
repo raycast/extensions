@@ -22,7 +22,6 @@ export default function Command() {
     <List
       onSearchTextChange={setSearchText}
       searchBarPlaceholder="Search your chatGPT history"
-      navigationTitle={`chatGPT: history record`}
       isShowingDetail
     >
       {filteredList.map((item: any) => (
