@@ -30,7 +30,7 @@
     },
     {
       "name": "createTodo",
-      "title": "Create a Todo",
+      "title": "Create A Todo",
       "subtitle": "Trello",
       "description": "Search all your open boards",
       "mode": "view"
