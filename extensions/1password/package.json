@@ -95,7 +95,7 @@
       "description": "Secondary action for 1Password login items (v8 only)",
       "name": "secondaryAction",
       "required": false,
-      "default": "open-in-1password",
+      "default": "open-in-browser",
       "title": "Secondary Action",
       "type": "dropdown"
     },
