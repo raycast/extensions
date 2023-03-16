@@ -2,6 +2,7 @@
 
 import { ERRORS } from "~/constants/general";
 
+// This should be updated with the command "name" values in the package.json file
 export type CommandName = "search" | "generate-password" | "generate-password-quick";
 
 export type VaultStatus = "unauthenticated" | "locked" | "unlocked";

@@ -10,17 +10,15 @@ export function getServerUrlPreference(): string {
   return serverUrl;
 }
 
-const COMMAND_NAME_TO_PREFERENCE_KEY_MAP: Record<CommandName, keyof Preferences> = {
+const COMMAND_NAME_TO_PREFERENCE_KEY_MAP: Record<CommandName, keyof TransientCopyPreferences> = {
   search: "transientCopySearch",
   "generate-password": "transientCopyGeneratePassword",
   "generate-password-quick": "transientCopyGeneratePasswordQuick",
 };
 
-type TransientCopyValue = TransientCopyPreferences[keyof TransientCopyPreferences];
-
 export function getTransientCopyPreference(type: "password" | "other"): boolean {
   const preferenceKey = COMMAND_NAME_TO_PREFERENCE_KEY_MAP[environment.commandName as CommandName];
-  const transientPreference = getPreferenceValues<Preferences>()[preferenceKey] as TransientCopyValue;
+  const transientPreference = getPreferenceValues<Preferences>()[preferenceKey];
   if (transientPreference === "never") return false;
   if (transientPreference === "always") return true;
   if (transientPreference === "passwords") return type === "password";
