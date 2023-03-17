@@ -6,6 +6,7 @@ import DeleteQuestAction from "./actions/deleteQuest";
 import StartQuestAction from "./actions/startQuest";
 import EditQuestAction from "./actions/editQuest";
 import CloseQuestAction from "./actions/closeQuest";
+import ShareQuestAction from "./actions/shareQuestAction";
 import EmptyView from "./components/emptyView";
 import { nanoid } from "nanoid";
 import { environment } from "@raycast/api";
@@ -103,10 +104,7 @@ export default function Command() {
                   </ActionPanel.Section>
                   <ActionPanel.Section title="Quest">
                     <EditQuestAction onCreate={handleCreate} quest={quest} />
-                    <Action.CopyToClipboard
-                      content={JSON.stringify(sharableQuest(quest))}
-                      shortcut={{ modifiers: ["cmd"], key: "." }}
-                    />
+                    <ShareQuestAction quest={quest} />
                     <DeleteQuestAction onDelete={() => handleDelete(quest)} />
                   </ActionPanel.Section>
                   <ActionPanel.Section>
@@ -132,6 +130,7 @@ export default function Command() {
                   </ActionPanel.Section>
                   <ActionPanel.Section title="Quest">
                     <EditQuestAction onCreate={handleCreate} quest={quest} />
+                    <ShareQuestAction quest={quest} />
                     <DeleteQuestAction onDelete={() => handleDelete(quest)} />
                   </ActionPanel.Section>
                   <ActionPanel.Section>
