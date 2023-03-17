@@ -11,7 +11,7 @@ function CopyPasswordAction() {
 
   const copyPassword = async () => {
     const { copiedSecurely } = await copyPasswordToClipboard(password);
-    await showHUD(copiedSecurely ? "Copied password to clipboard" : "Copied to clipboard");
+    await showHUD(copiedSecurely ? "Copied password to clipboard" : "Copied to Clipboard");
   };
 
   return (

@@ -1,4 +1,4 @@
-import { Action, Icon, showHUD } from "@raycast/api";
+import { Action, Icon } from "@raycast/api";
 import { capitalize } from "~/utils/strings";
 import CopyWithRepromptAction from "~/components/searchVault/actions/CopyWithRepromptAction";
 import { useSelectedVaultItem } from "~/components/searchVault/context/vaultItem";
@@ -15,25 +15,24 @@ function CopyTextFieldsActions() {
     <>
       {Object.entries(uriMap).map(([title, content], index) => {
         if (!content) return null;
-        const capitalizedTitle = capitalize(title);
+
         return (
           <Action.CopyToClipboard
             key={`${index}-${title}`}
-            title={`Copy ${capitalizedTitle}`}
+            title={`Copy ${title}`}
             icon={Icon.Clipboard}
             content={content}
-            onCopy={() => showHUD(`Copied ${capitalizedTitle} to clipboard.`)}
           />
         );
       })}
       {Object.entries({ notes, ...card, ...identity, ...fieldMap }).map(([title, content], index) => {
         if (!content) return null;
+
         const capitalizedTitle = capitalize(title);
         return (
           <CopyWithRepromptAction
             key={`${index}-${title}`}
             title={`Copy ${capitalizedTitle}`}
-            name={capitalizedTitle}
             icon={Icon.Clipboard}
             content={content}
             repromptDescription={`Copying the ${capitalizedTitle} of <${name}>`}
