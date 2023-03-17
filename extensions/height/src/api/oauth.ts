@@ -62,7 +62,7 @@ async function fetchTokens(authRequest: OAuth.AuthorizationRequest, authCode: st
 }
 
 async function refreshTokens(refreshToken: string): Promise<OAuth.TokenResponse> {
-  const response = await fetch("https:/api.height.app/oauth/tokens", {
+  const response = await fetch("https://api.height.app/oauth/tokens", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
