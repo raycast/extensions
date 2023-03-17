@@ -1,14 +1,15 @@
+import { OpenAITranslateResult } from "./../types";
 /*
  * @author: tisfeng
  * @createTime: 2022-06-26 11:13
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-10-13 22:40
+ * @lastEditTime: 2023-03-17 11:30
  * @fileName: dataManager.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
  */
 
-import { environment } from "@raycast/api";
+import { Toast, environment, showToast } from "@raycast/api";
 import axios from "axios";
 import { getProxyAgent } from "../axiosConfig";
 import { detectLanguage } from "../detectLanauge/detect";
@@ -33,6 +34,7 @@ import { requestCaiyunTextTranslate } from "../translation/caiyun";
 import { requestDeepLTranslate } from "../translation/deepL";
 import { requestGoogleTranslate } from "../translation/google";
 import { requestWebBingTranslate } from "../translation/microsoft/bing";
+import { requestOpenAIStreamTranslate } from "../translation/openai/openai";
 import { requestTencentTranslate } from "../translation/tencent";
 import { requestVolcanoTranslate } from "../translation/volcano/volcanoAPI";
 import {
@@ -158,6 +160,7 @@ export class DataManager {
     this.queryTencentTranslate(queryWordInfo);
     this.queryVolcanoTranslate(queryWordInfo);
     this.queryCaiyunTranslate(queryWordInfo);
+    this.queryOpenAITranslate(queryWordInfo);
 
     this.delayQuery(queryWordInfo);
 
@@ -736,6 +739,69 @@ export class DataManager {
   }
 
   /**
+   * Query OpenAI translate.
+   */
+  private queryOpenAITranslate(queryWordInfo: QueryWordInfo) {
+    // if (myPreferences.enableOpenAITranslate)
+    {
+      const type = TranslationType.OpenAI;
+      this.addQueryToRecordList(type);
+
+      let openAIQueryResult: QueryResult | null = null;
+
+      queryWordInfo.onMessage = (message) => {
+        // console.warn(`onMessage content: ${message.content}`);
+        if (openAIQueryResult) {
+          const openAIResult = openAIQueryResult.sourceResult.result as OpenAITranslateResult;
+          const translatedText = openAIResult.translatedText + message.content;
+          openAIResult.translatedText = translatedText;
+          openAIQueryResult.sourceResult.translations = [translatedText];
+          this.updateTranslationDisplay(openAIQueryResult);
+        }
+      };
+      queryWordInfo.onFinish = (value) => {
+        console.warn(`onFinish content: ${value}`);
+
+        if (value === "stop") {
+          if (openAIQueryResult) {
+            const openAIResult = openAIQueryResult.sourceResult.result as OpenAITranslateResult;
+            let translatedText = openAIResult.translatedText;
+            // If the translated last char contains ["”", '"', "」"], remove it.
+            if (translatedText.length > 0) {
+              const lastChar = translatedText[translatedText.length - 1];
+              if (["”", '"', "」"].includes(lastChar)) {
+                translatedText = translatedText.slice(0, translatedText.length - 1);
+              }
+            }
+
+            openAIResult.translatedText = translatedText;
+            openAIQueryResult.sourceResult.translations = [translatedText];
+            this.updateTranslationDisplay(openAIQueryResult);
+          }
+          this.removeQueryFromRecordList(type);
+        }
+      };
+
+      requestOpenAIStreamTranslate(queryWordInfo)
+        .then((openAITypeResult) => {
+          const queryResult: QueryResult = {
+            type: type,
+            sourceResult: openAITypeResult,
+          };
+
+          openAIQueryResult = queryResult;
+          this.updateTranslationDisplay(queryResult);
+        })
+        .catch((error) => {
+          showErrorToast(error);
+        })
+        .finally(() => {
+          // this.removeQueryFromRecordList(type);
+        });
+    }
+  }
+
+  /**
    * Add query to record list, and update loading status.
    */
   private addQueryToRecordList(type: QueryType) {
@@ -756,6 +822,16 @@ export class DataManager {
     if (!showingLoadingState) {
       console.log("All queries finished.");
       this.abortController = undefined;
+
+      showToast({
+        style: Toast.Style.Success,
+        title: `Finished ✅`,
+      });
+    } else {
+      showToast({
+        style: Toast.Style.Animated,
+        title: `Searching 🔍`,
+      });
     }
   }
 
@@ -796,10 +872,15 @@ export class DataManager {
     }
 
     if (oneLineTranslation) {
+      let key = `${oneLineTranslation}-${type}`;
+      if (type === TranslationType.OpenAI) {
+        // Avoid frequent update cause UI flicker.
+        key = type;
+      }
       const displayItem: ListDisplayItem = {
         displayType: type, // TranslationType
         queryType: type,
-        key: `${oneLineTranslation}-${type}`,
+        key: key,
         title: ` ${oneLineTranslation}`,
         copyText: copyText,
         queryWordInfo: sourceResult.queryWordInfo,

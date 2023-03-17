@@ -2,14 +2,14 @@
  * @author: tisfeng
  * @createTime: 2022-06-26 11:13
  * @lastEditor: tisfeng
- * @lastEditTime: 2023-01-08 17:36
+ * @lastEditTime: 2023-03-17 10:37
  * @fileName: axiosConfig.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
  */
 
 import { LocalStorage, showToast, Toast } from "@raycast/api";
-import axios, { AxiosRequestConfig } from "axios";
+import axios from "axios";
 import EventEmitter from "events";
 import { HttpsProxyAgent } from "hpagent";
 import { getMacSystemProxy } from "mac-system-proxy";
@@ -31,7 +31,7 @@ export let httpsAgent: HttpsProxyAgent | undefined;
 /**
  * Becacuse get system proxy will block 0.4s, we need to get it after finish query.
  */
-export const delayGetSystemProxyTime = 3000;
+export const delayGetSystemProxyTime = 5000;
 
 const systemProxyURLKey = "systemProxyURL";
 
@@ -55,13 +55,14 @@ function configDefaultAxios() {
 
   const requestStartTime = "request-startTime";
 
-  axios.interceptors.request.use(function (config: AxiosRequestConfig) {
+  axios.interceptors.request.use((config) => {
     if (config.headers) {
       config.headers[requestStartTime] = new Date().getTime();
     }
     return config;
   });
-  axios.interceptors.response.use(function (response) {
+
+  axios.interceptors.response.use((response) => {
     if (response.config.headers) {
       const startTime = response.config.headers[requestStartTime] as number;
       const endTime = new Date().getTime();

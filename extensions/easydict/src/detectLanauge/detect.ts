@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-06-24 17:07
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-10-18 10:22
+ * @lastEditTime: 2023-03-17 10:41
  * @fileName: detect.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -178,22 +178,11 @@ function handleDetectedLanguage(detectedLangModel: DetectedLangModel): Promise<D
       }
 
       // If enabled speed first, and API detected two `preferred` language, try to use it.
-      if (detectedIdenticalLanguages.length === 2) {
+      // Perf: To speed up language detection, we use the first detected && preferred language.
+      if (detectedIdenticalLanguages.length === 1) {
         // Mark two identical language as prior.
         detectedLangModel.prior = true;
-
-        const bingType = LanguageDetectType.Bing;
-        const baiduType = LanguageDetectType.Baidu;
-        const volcanoType = LanguageDetectType.Volcano;
-        const containBingDetect = detectedLangModel.type === bingType || apiDetectedListContainsType(bingType);
-        const containBaiduDetect = detectedLangModel.type === baiduType || apiDetectedListContainsType(baiduType);
-        const containVolcanoDetect = detectedLangModel.type === volcanoType || apiDetectedListContainsType(volcanoType);
-        const confirmVolcanoDetect = containVolcanoDetect && detectedLangModel.confirmed;
-        if (
-          (containBingDetect || containBaiduDetect || confirmVolcanoDetect) &&
-          isPreferredLanguage(detectedLangCode) &&
-          myPreferences.enableDetectLanguageSpeedFirst
-        ) {
+        if (isPreferredLanguage(detectedLangCode) && myPreferences.enableDetectLanguageSpeedFirst) {
           detectedLangModel.confirmed = true;
           console.warn(`---> Speed first, API detected 'two' identical 'preferred' language: ${detectedTypes}`);
           console.warn(`detected language: ${JSON.stringify(detectedLangModel, null, 4)}`);
@@ -373,6 +362,7 @@ export function simpleDetectTextLanguage(text: string): DetectedLangModel {
   return detectTypeResult;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function apiDetectedListContainsType(detectedLanguagetype: LanguageDetectType): boolean {
   // console.log(`check if api detected list contains type: ${detectedLanguagetype}`);
   const isContained = apiDetectedLanguageList.find((item) => item.type === detectedLanguagetype);

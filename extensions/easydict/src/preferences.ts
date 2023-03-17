@@ -61,6 +61,9 @@ export interface MyPreferences {
   enableVolcanoTranslate: boolean;
   volcanoAccessKeyId: string;
   volcanoAccessKeySecret: string;
+
+  enableOpenAITranslate: boolean;
+  openAIAPIKey: string;
 }
 
 /**
@@ -129,6 +132,8 @@ export class AppKeyStore {
     myPreferences.volcanoAccessKeySecret.trim().length > 0
       ? myPreferences.volcanoAccessKeySecret.trim()
       : this.defaultVolcanoAccessKey;
+
+  static openAIAPIKey = myPreferences.openAIAPIKey.trim();
 }
 
 export function myDecrypt(ciphertext: string) {
