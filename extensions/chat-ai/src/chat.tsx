@@ -1,6 +1,6 @@
-import { Detail, showToast, Toast, popToRoot, Form, ActionPanel, Action } from "@raycast/api";
+import { showToast, Toast, popToRoot, Form, ActionPanel, Action } from "@raycast/api";
 import { generateAnswer } from "./api";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 type ChatProps = {
   promptField: string;
