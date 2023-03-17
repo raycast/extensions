@@ -1,6 +1,6 @@
 import { getSpotifyClient } from "../helpers/withSpotifyClient";
 
-type SearchProps = { query: string, limit: number }
+type SearchProps = { query: string; limit: number };
 
 export async function search({ query, limit }: SearchProps) {
   const { spotifyClient } = getSpotifyClient();

@@ -24,11 +24,9 @@ function MyLibraryCommand() {
     options: { keepPreviousData: true },
   });
 
-
   if (myLibraryError) {
     showToast(Toast.Style.Failure, "Search has failed", myLibraryError.message);
   }
-
 
   const sharedProps = {
     searchBarPlaceholder: "What do you want to listen to",
@@ -60,7 +58,6 @@ function MyLibraryCommand() {
             <AlbumsSection type="list" limit={6} columns={8} albums={myLibraryData?.albums?.items} />
             <ArtistsSection type="list" limit={6} columns={6} artists={myLibraryData?.artists?.items} />
             <TracksSection limit={6} tracks={myLibraryData?.tracks?.items} />
-
           </>
         )}
 

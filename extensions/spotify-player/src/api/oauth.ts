@@ -2,8 +2,13 @@ import { OAuth } from "@raycast/api";
 import fetch from "node-fetch";
 import { URLSearchParams } from "url";
 
+// Pedro's ID
 const clientId = "b997e8ba5e5f473eb3f846666d85f064";
-const scope = "user-library-modify user-modify-playback-state user-read-currently-playing user-library-read user-follow-read playlist-read-collaborative playlist-read-private";
+
+// Artem's ID
+// const clientId = "7bbb789c01ff44ed842907b7a80c404f";
+const scope =
+  "user-library-modify user-modify-playback-state user-read-currently-playing user-library-read user-follow-read playlist-read-collaborative playlist-read-private";
 
 export const oauthClient = new OAuth.PKCEClient({
   redirectMethod: OAuth.RedirectMethod.Web,

@@ -18,7 +18,7 @@ export function AlbumActionPanel({ album }: AlbumActionPanelProps) {
         title="Play"
         icon={Icon.Play}
         onAction={async () => {
-          await play({ id: album.id, type: 'album' });
+          await play({ id: album.id, type: "album" });
           showHUD(`Playing ${title}`);
         }}
       />

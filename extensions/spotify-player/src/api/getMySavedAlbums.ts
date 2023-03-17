@@ -1,6 +1,6 @@
 import { getSpotifyClient } from "../helpers/withSpotifyClient";
 
-type GetMySavedAlbumsProps = { limit?: number }
+type GetMySavedAlbumsProps = { limit?: number };
 
 export async function getMySavedAlbums({ limit = 20 }: GetMySavedAlbumsProps = {}) {
   const { spotifyClient } = getSpotifyClient();

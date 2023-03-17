@@ -18,7 +18,12 @@ function NowPlayingCommand() {
 
   useEffect(() => {
     setIsPaused(currentPlayingData?.is_playing === false);
-    if (currentPlayingData && currentPlayingData.item && Object.keys(currentPlayingData).length > 0 && isTrack(currentPlayingData)) {
+    if (
+      currentPlayingData &&
+      currentPlayingData.item &&
+      Object.keys(currentPlayingData).length > 0 &&
+      isTrack(currentPlayingData)
+    ) {
       trackAlreadyLiked(currentPlayingData.item.id);
     }
   }, [currentPlayingData]);

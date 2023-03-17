@@ -14,7 +14,7 @@ export function PlaylistActionPanel({ title, playlist }: PlaylistActionPanelProp
         title="Play"
         icon={Icon.Play}
         onAction={async () => {
-          await play({ id: playlist.id, type: 'playlist' });
+          await play({ id: playlist.id, type: "playlist" });
           showHUD(`Playing ${title}`);
         }}
       />

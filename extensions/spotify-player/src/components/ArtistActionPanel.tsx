@@ -20,9 +20,9 @@ export function ArtistActionPanel({ title, artist }: ArtistActionPanelProps) {
         icon={Icon.Play}
         title="Play"
         onAction={async () => {
-          await play({ id: artist.id, type: 'artist' });
+          await play({ id: artist.id, type: "artist" });
           await showHUD(`Playing ${title}`);
-          await launchCommand({ name: 'nowPlayingMenuBar', type: LaunchType.UserInitiated })
+          await launchCommand({ name: "nowPlayingMenuBar", type: LaunchType.UserInitiated });
         }}
       />
       {albums && (

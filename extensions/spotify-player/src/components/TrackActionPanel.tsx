@@ -16,7 +16,7 @@ export function TrackActionPanel({ title, track }: TrackActionPanelProps) {
         icon={Icon.Play}
         title="Play"
         onAction={async () => {
-          await play({ id: track.id, type: 'track' });
+          await play({ id: track.id, type: "track" });
           showHUD(`Playing ${title}`);
         }}
       />

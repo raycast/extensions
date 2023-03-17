@@ -10,10 +10,10 @@ export function AlbumItem({ type, album }: AlbumItemProps) {
   };
 
   const title = album.name;
-  const subtitle = `${album.artists.map((a) => a.name).join(", ")} • ${album.release_date.substring(
+  const subtitle = `${album.artists.map((a) => a.name).join(", ")} · ${album.release_date.substring(
     0,
     4
-  )} • ${album.total_tracks.toString()} songs`;
+  )} · ${album.total_tracks.toString()} songs`;
 
   return (
     <ListOrGridItem

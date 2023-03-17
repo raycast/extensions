@@ -16,7 +16,7 @@ export default async function Command(props: Props) {
     const firstMatch = response?.tracks?.items[0];
 
     if (firstMatch) {
-      await play({ uri: firstMatch.uri });
+      await play({ id: firstMatch.id, type: "track" });
       await showHUD(`Playing ${firstMatch.artists[0].name} - ${firstMatch.name}`);
     } else {
       await showToast(Toast.Style.Failure, "Track not found!");

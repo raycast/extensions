@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Icon, MenuBarExtra, Color, Clipboard, getPreferenceValues } from "@raycast/api";
+import { Icon, MenuBarExtra, Color, Clipboard, getPreferenceValues, launchCommand, LaunchType } from "@raycast/api";
 import { useCurrentPlayingTrack } from "./hooks/useCurrentPlayingTrack";
 import View from "./components/View";
 import { containsMySavedTracks } from "./api/containsMySavedTrack";
@@ -19,21 +19,23 @@ function NowPlayingMenuBarCommand() {
   const [songAlreadyLiked, setSongAlreadyLiked] = useState<boolean | null>(null);
   const preferences = getPreferenceValues();
 
-  // console.log(currentPlayingData)
-
   const trackAlreadyLiked = async (trackId: string) => {
     const songResponse = await containsMySavedTracks({ trackIds: [trackId] });
     setSongAlreadyLiked(songResponse[0]);
   };
 
   if (currentPlayingError) {
-    console.log("NowPlayingMenuBarCommand Error: ", currentPlayingError.message)
     return null;
   }
 
   useEffect(() => {
     setIsPaused(currentPlayingData?.is_playing === false);
-    if (currentPlayingData && currentPlayingData.item && Object.keys(currentPlayingData).length > 0 && isTrack(currentPlayingData)) {
+    if (
+      currentPlayingData &&
+      currentPlayingData.item &&
+      Object.keys(currentPlayingData).length > 0 &&
+      isTrack(currentPlayingData)
+    ) {
       trackAlreadyLiked(currentPlayingData.item.id);
     }
   }, [currentPlayingData]);
@@ -41,20 +43,19 @@ function NowPlayingMenuBarCommand() {
   const isIdle = currentPlayingData && Object.keys(currentPlayingData).length === 0;
 
   if (isIdle) {
-    console.log("isIdle")
+    console.log("isIdle");
     return null;
   }
 
   if (!currentPlayingData || currentPlayingData.item === null) {
-    console.log("!currentPlayingData")
+    console.log("!currentPlayingData");
     return null;
   }
 
   if (!isTrack(currentPlayingData)) {
-    console.log("!isTrack(currentPlayingData)")
+    console.log("!isTrack(currentPlayingData)");
     return null;
   }
-
 
   const { item } = currentPlayingData;
   const { name: trackName, artists, id: trackId, external_urls } = item;
@@ -63,7 +64,6 @@ function NowPlayingMenuBarCommand() {
   const artistId = artists[0]?.id;
 
   const makeTitle = (title: string) => {
-
     const max = Number(preferences.maxTitleLength);
     const showEllipsis = Boolean(preferences.showEllipsis);
 
@@ -72,13 +72,17 @@ function NowPlayingMenuBarCommand() {
     }
 
     return title.substring(0, max).trim() + (showEllipsis ? "…" : "");
-
   };
 
-  const title = makeTitle(`${trackName} by ${artistName}`)
+  const title = makeTitle(`${trackName} · ${artistName}`);
 
   return (
-    <MenuBarExtra isLoading={currentPlayingIsLoading} icon="icon.png" title={title} tooltip={`${trackName} by ${artistName}`}>
+    <MenuBarExtra
+      isLoading={currentPlayingIsLoading}
+      icon="icon.png"
+      title={title}
+      tooltip={`${trackName} by ${artistName}`}
+    >
       {!isPaused && (
         <MenuBarExtra.Item
           icon={Icon.PauseFilled}
