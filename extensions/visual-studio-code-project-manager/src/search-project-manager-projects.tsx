@@ -275,5 +275,5 @@ function isRemoteProject(path: string): boolean {
 function parseRemoteURL(path: string): string {
   path = path.slice(remotePrefix.length);
   const index = path.indexOf("/");
-  return path.slice(0, index) + " " + path.slice(index);
+  return path.slice(0, index) + " " + path.slice(index) + "/";
 }
