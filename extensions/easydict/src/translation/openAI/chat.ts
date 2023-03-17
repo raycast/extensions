@@ -2,8 +2,8 @@
  * @author: tisfeng
  * @createTime: 2023-03-14 22:11
  * @lastEditor: tisfeng
- * @lastEditTime: 2023-03-17 18:39
- * @fileName: openai.ts
+ * @lastEditTime: 2023-03-17 20:16
+ * @fileName: chat.ts
  *
  * Copyright (c) 2023 by ${git_name}, All Rights Reserved.
  */
@@ -11,9 +11,9 @@
 import axios, { AxiosError } from "axios";
 import { httpsAgent } from "../../axiosConfig";
 import { QueryWordInfo } from "../../dictionary/youdao/types";
+import { AppKeyStore } from "../../preferences";
 import { QueryTypeResult, TranslationType } from "../../types";
 import { getTypeErrorInfo } from "../../utils";
-import { AppKeyStore } from "./../../preferences";
 import { fetchSSE } from "./utils";
 
 export function requestOpenAIStreamTranslate(queryWordInfo: QueryWordInfo): Promise<QueryTypeResult> {

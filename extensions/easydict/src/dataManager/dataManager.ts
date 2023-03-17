@@ -34,7 +34,7 @@ import { requestCaiyunTextTranslate } from "../translation/caiyun";
 import { requestDeepLTranslate } from "../translation/deepL";
 import { requestGoogleTranslate } from "../translation/google";
 import { requestWebBingTranslate } from "../translation/microsoft/bing";
-import { requestOpenAIStreamTranslate } from "../translation/openai/openai";
+import { requestOpenAIStreamTranslate } from "../translation/openAI/chat";
 import { requestTencentTranslate } from "../translation/tencent";
 import { requestVolcanoTranslate } from "../translation/volcano/volcanoAPI";
 import {
