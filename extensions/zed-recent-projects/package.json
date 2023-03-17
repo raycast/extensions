@@ -6,8 +6,7 @@
   "icon": "icon.png",
   "author": "ewgenius",
   "categories": [
-    "Developer Tools",
-    "Productivity"
+    "Developer Tools"
   ],
   "license": "MIT",
   "commands": [
