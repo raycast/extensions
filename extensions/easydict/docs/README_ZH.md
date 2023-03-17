@@ -44,7 +44,7 @@
 我的另一个项目，[Easydict](https://github.com/tisfeng/Easydict) 是一个原生的 macOS 翻译词典 App，一个免费开源版本的 [Bob](https://apps.apple.com/cn/app/id1630034110#?platform=mac)，欢迎尝试。
 
 **查单词**
-![iShot_2023-01-28_17.40.28-1674901716](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/iShot_2023-01-28_17.40.28-1674901716.png)
+![iShot_2023-03-17_18.01.22_11zon-1679056100](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/iShot_2023-03-17_18.01.22_11zon-1679056100.jpg)
 
 **翻译文本**
 ![iShot_2023-01-28_17.49.53-1674901731](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/iShot_2023-01-28_17.49.53-1674901731.png)

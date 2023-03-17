@@ -42,10 +42,10 @@
 
 ## Recommendation
 
-My other project, [Easydict](https://github.com/tisfeng/Easydict) is a native macOS dictionary and translation App, a free open source version of [Bob](https://apps.apple.com/cn/app/id1630034110#?platform=mac), feel free to try it!
+My other project, [Easydict](https://github.com/tisfeng/Easydict) is a concise and easy-to-use translation dictionary macOS App that allows you to easily and elegantly look up words or translate text, feel free to try it!
 
 **Look up word**
-![iShot_2023-01-28_17.40.28-1674901716](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/iShot_2023-01-28_17.40.28-1674901716.png)
+![iShot_2023-03-17_18.01.22_11zon-1679056100](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/iShot_2023-03-17_18.01.22_11zon-1679056100.jpg)
 
 **Translate text**
 ![iShot_2023-01-28_17.49.53-1674901731](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/iShot_2023-01-28_17.49.53-1674901731.png)
