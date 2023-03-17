@@ -1,8 +1,9 @@
 import { useCachedPromise } from "@raycast/utils";
-import { getFollowedArtists } from "../api/getFollowedArtists";
-import { getMySavedAlbums } from "../api/getMySavedAlbums";
-import { getMySavedTracks } from "../api/getMySavedTracks";
 import { getUserPlaylists } from "../api/getUserPlaylists";
+import { getMySavedAlbums } from "../api/getMySavedAlbums";
+import { getFollowedArtists } from "../api/getFollowedArtists";
+import { getMySavedTracks } from "../api/getMySavedTracks";
+
 
 type UseMyLibraryProps = {
   options?: {
@@ -12,12 +13,15 @@ type UseMyLibraryProps = {
 };
 
 export function useMyLibrary({ options }: UseMyLibraryProps) {
-  const { data = [], error, isLoading } = useCachedPromise(() => Promise.all([getUserPlaylists(), getMySavedAlbums(), getFollowedArtists(), getMySavedTracks({ limit: 50 })]), [],
+  const { data = [], error, isLoading } = useCachedPromise(() => Promise.all([getUserPlaylists({ limit: 24 }), getMySavedAlbums({ limit: 24 }), getFollowedArtists({ limit: 24 }), getMySavedTracks({ limit: 50 })]), [],
     {
       keepPreviousData: options?.keepPreviousData,
     });
 
   const [playlistData, albumData, artistsData, tracksData] = data;
+
+  const playlists = playlistData
+  const artists = artistsData?.artists
 
   let albums: SpotifyApi.AlbumSearchResponse["albums"] | undefined = undefined
 
@@ -37,10 +41,8 @@ export function useMyLibrary({ options }: UseMyLibraryProps) {
     }
   }
 
-
-
   return {
-    myLibraryData: { playlists: playlistData, artists: artistsData?.artists, albums, tracks },
+    myLibraryData: { playlists, artists, albums, tracks },
     myLibraryError: error,
     myLibraryIsLoading: isLoading,
   };

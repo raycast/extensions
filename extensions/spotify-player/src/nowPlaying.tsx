@@ -18,7 +18,7 @@ function NowPlayingCommand() {
 
   useEffect(() => {
     setIsPaused(currentPlayingData?.is_playing === false);
-    if (currentPlayingData && Object.keys(currentPlayingData).length > 0 && isTrack(currentPlayingData)) {
+    if (currentPlayingData && currentPlayingData.item && Object.keys(currentPlayingData).length > 0 && isTrack(currentPlayingData)) {
       trackAlreadyLiked(currentPlayingData.item.id);
     }
   }, [currentPlayingData]);
@@ -36,7 +36,7 @@ function NowPlayingCommand() {
   if (isIdle) {
     return (
       <List>
-        <List.EmptyView icon={Icon.XMarkCircle} title="Nothing is playing right now" />
+        <List.EmptyView icon={Icon.Music} title="Nothing is playing right now" />
       </List>
     );
   }

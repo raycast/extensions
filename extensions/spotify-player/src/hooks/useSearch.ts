@@ -12,7 +12,7 @@ type UseSearchProps = {
 
 export function useSearch({ query, limit, options }: UseSearchProps) {
   const { data, error, isLoading } = useCachedPromise(
-    (query: string, limit: number) => search(query, limit),
+    (query: string, limit: number) => search({ query, limit }),
     [query, limit],
     {
       execute: options?.execute !== false && !!query && !!limit,

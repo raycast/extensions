@@ -19,9 +19,7 @@ function NowPlayingMenuBarCommand() {
   const [songAlreadyLiked, setSongAlreadyLiked] = useState<boolean | null>(null);
   const preferences = getPreferenceValues();
 
-
-
-
+  // console.log(currentPlayingData)
 
   const trackAlreadyLiked = async (trackId: string) => {
     const songResponse = await containsMySavedTracks({ trackIds: [trackId] });
@@ -29,12 +27,13 @@ function NowPlayingMenuBarCommand() {
   };
 
   if (currentPlayingError) {
+    console.log("NowPlayingMenuBarCommand Error: ", currentPlayingError.message)
     return null;
   }
 
   useEffect(() => {
     setIsPaused(currentPlayingData?.is_playing === false);
-    if (currentPlayingData && Object.keys(currentPlayingData).length > 0 && isTrack(currentPlayingData)) {
+    if (currentPlayingData && currentPlayingData.item && Object.keys(currentPlayingData).length > 0 && isTrack(currentPlayingData)) {
       trackAlreadyLiked(currentPlayingData.item.id);
     }
   }, [currentPlayingData]);
@@ -42,16 +41,20 @@ function NowPlayingMenuBarCommand() {
   const isIdle = currentPlayingData && Object.keys(currentPlayingData).length === 0;
 
   if (isIdle) {
+    console.log("isIdle")
     return null;
   }
 
-  if (!currentPlayingData) {
+  if (!currentPlayingData || currentPlayingData.item === null) {
+    console.log("!currentPlayingData")
     return null;
   }
 
   if (!isTrack(currentPlayingData)) {
+    console.log("!isTrack(currentPlayingData)")
     return null;
   }
+
 
   const { item } = currentPlayingData;
   const { name: trackName, artists, id: trackId, external_urls } = item;
@@ -136,11 +139,6 @@ function NowPlayingMenuBarCommand() {
         />
       )}
       <MenuBarExtra.Item
-        icon="icon.png"
-        title="Open on Spotify"
-        onAction={() => (isSpotifyInstalled ? open(`spotify:track:${trackId}`) : open(external_urls.spotify))}
-      />
-      <MenuBarExtra.Item
         title="Copy Song URL"
         icon={Icon.Link}
         onAction={async () => {
@@ -150,6 +148,11 @@ function NowPlayingMenuBarCommand() {
             text: url,
           });
         }}
+      />
+      <MenuBarExtra.Item
+        icon="icon.png"
+        title="Open on Spotify"
+        onAction={() => (isSpotifyInstalled ? open(`spotify:track:${trackId}`) : open(external_urls.spotify))}
       />
     </MenuBarExtra>
   );

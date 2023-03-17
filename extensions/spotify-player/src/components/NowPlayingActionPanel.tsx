@@ -104,12 +104,6 @@ export function NowPlayingActionPanel({
           }}
         />
       )}
-
-      <Action
-        icon="icon.png"
-        title="Open on Spotify"
-        onAction={() => (isSpotifyInstalled ? open(`spotify:track:${trackId}`) : open(trackUrl))}
-      />
       <Action
         title="Copy Song URL"
         icon={Icon.Link}
@@ -121,6 +115,11 @@ export function NowPlayingActionPanel({
           });
           showHUD(`Copied URL to clipboard`);
         }}
+      />
+      <Action
+        icon="icon.png"
+        title="Open on Spotify"
+        onAction={() => (isSpotifyInstalled ? open(`spotify:track:${trackId}`) : open(trackUrl))}
       />
     </ActionPanel>
   );

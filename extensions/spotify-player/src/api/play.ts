@@ -1,7 +1,5 @@
 import { buildScriptEnsuringSpotifyIsRunning, runAppleScriptSilently } from "../helpers/applescript";
 import { getSpotifyClient } from "../helpers/withSpotifyClient";
-import { getArtistTopTracks } from "./getArtistTopTracks";
-import { getPlaylistTracks } from "./getPlaylistTracks";
 
 type ContextTypes = 'album' | 'artist' | 'playlist' | 'track'
 
@@ -36,34 +34,12 @@ export async function play({ id, type }: PlayProps = {}) {
         return;
       }
 
-      let trackUri = "";
-
-      if (type === 'track') {
-        trackUri = `${uriForType['track']}${id}`;
-
-      } else if (type === 'artist') {
-        // const tracks = await getArtistTopTracks(id);
-        // trackUri = tracks.tracks[0].uri
-        trackUri = `${uriForType['artist']}${id}`
-      } else if (type === 'playlist') {
-        const tracks = await getPlaylistTracks(id)
-        // trackUri = tracks.items[0].track?.uri || ""
-        // console.log(trackUri, `${uriForType['playlist']}${id}`)
-        // const script = buildScriptEnsuringSpotifyIsRunning(`tell application "Spotify" to play track "${trackUri}" in context "${uriForType['playlist']}${id}"`);
-        // await runAppleScriptSilently(script);
-        // return
-        trackUri = `${uriForType['playlist']}${id}`
-        console.log(trackUri)
-
-      }
       const script = buildScriptEnsuringSpotifyIsRunning(`tell application "Spotify"
         launch
         delay 3
-        play track "${trackUri}"
+        play track "${uriForType[type]}${id}"
 end tell`);
       await runAppleScriptSilently(script);
     }
-
-    // console.error(error);
   }
 }

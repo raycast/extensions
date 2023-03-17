@@ -12,7 +12,6 @@ type ArtistActionPanelProps = {
 
 export function ArtistActionPanel({ title, artist }: ArtistActionPanelProps) {
   const { artistAlbumsData } = useArtistAlbums({ artistId: artist.id, limit: 24 });
-
   const albums = artistAlbumsData?.items;
 
   return (
@@ -23,7 +22,7 @@ export function ArtistActionPanel({ title, artist }: ArtistActionPanelProps) {
         onAction={async () => {
           await play({ id: artist.id, type: 'artist' });
           await showHUD(`Playing ${title}`);
-          {/* await launchCommand({ name: 'nowPlayingMenuBar', type: LaunchType.UserInitiated }) */ }
+          await launchCommand({ name: 'nowPlayingMenuBar', type: LaunchType.UserInitiated })
         }}
       />
       {albums && (
@@ -33,8 +32,7 @@ export function ArtistActionPanel({ title, artist }: ArtistActionPanelProps) {
         icon={{ source: "radio.png", tintColor: Color.PrimaryText }}
         title="Start Radio"
         onAction={async () => {
-          const artistId = artist.id.replace("spotify:artist:", "");
-          await startRadio({ artistIds: [artistId] });
+          await startRadio({ artistIds: [artist.id] });
           showHUD(`Playing ${artist.name} Radio`);
         }}
         shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
