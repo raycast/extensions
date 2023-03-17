@@ -26,7 +26,7 @@
           "type": "textfield",
           "required": false,
           "title": "KUBECONFIG enviroment variable path",
-          "description": "$HOME/.kube/config1:$HOME/.kube/config2 (Defaults to $HOME/.kube/config, pls replace $HOME to your user path)"
+          "description": "$HOME/.kube/config1:$HOME/.kube/config2 (Defaults to $HOME/.kube/config, please replace $HOME to your user path)"
         }
       ]
     }
