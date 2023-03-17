@@ -1,4 +1,4 @@
-import { Icon } from "@raycast/api";
+import { Icon, Image } from "@raycast/api";
 import type { Option, StatusState } from "../types/fieldTemplate";
 import { UserObject } from "../types/user";
 
@@ -43,7 +43,10 @@ export function getAssignedUsers(assigneesIds: string[], users: UserObject[] | u
     const foundUser = users?.find((user) => user.id === userId);
 
     return {
-      icon: foundUser?.pictureUrl ?? Icon.Person,
+      icon: {
+        source: foundUser?.pictureUrl ?? Icon.Person,
+        mask: Image.Mask.Circle,
+      },
       tooltip: `${foundUser?.firstname} ${foundUser?.lastname}`,
     };
   });
