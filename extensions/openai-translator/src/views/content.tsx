@@ -28,6 +28,8 @@ export interface ContentViewProps {
   mode: TranslateMode;
   setMode: (value: TranslateMode) => void;
   setSelectedId: (value: string) => void;
+  setIsInit: (value: boolean) => void;
+  setIsEmpty: (value: boolean) => void;
 }
 
 export interface Querying {
@@ -40,26 +42,31 @@ export interface Querying {
 type ViewItem = Querying | Record;
 
 export const ContentView = (props: ContentViewProps) => {
-  const { query, history, mode, setMode, setSelectedId } = props;
+  const { query, history, mode, setMode, setSelectedId, setIsInit, setIsEmpty } = props;
 
-  const [data, setData] = useState<ViewItem[]>([]);
+  const [data, setData] = useState<ViewItem[]>();
   const [querying, setQuerying] = useState<Querying | null>();
   const [translatedText, setTranslatedText] = useState("");
   const { entrypoint, apikey } = getPreferenceValues<{ entrypoint: string; apikey: string }>();
 
   const ref = useRef<string>();
   function updateData() {
-    const sortedResults = history.data.sort(
-      (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-    );
-    if (querying == null) {
-      setData(sortedResults);
-      if (sortedResults.length > 0) {
-        setSelectedId(sortedResults[0].id);
+    console.log("updateData", data, history.data, querying)
+    if(history.data){
+      const sortedResults = history.data.sort(
+        (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      );
+      if (querying == null) {
+        setData(sortedResults);
+        if (sortedResults.length > 0) {
+          setSelectedId(sortedResults[0].id);
+        }
+        setIsInit(false)
+      } else {
+        setData([querying, ...sortedResults]);
+        setSelectedId("querying");
+        setIsInit(false)
       }
-    } else {
-      setData([querying, ...sortedResults]);
-      setSelectedId("querying");
     }
   }
 
@@ -167,6 +174,10 @@ export const ContentView = (props: ContentViewProps) => {
     ref.current = translatedText;
   }, [translatedText]);
 
+  useEffect(() => {
+    setIsEmpty(data == undefined || data.length == 0)
+  })
+
   const getQueryingActionPanel = () => (
     <ActionPanel>
       <ActionPanel.Submenu title="Cancel">
@@ -220,6 +231,7 @@ export const ContentView = (props: ContentViewProps) => {
           shortcut={{ modifiers: ["cmd"], key: "delete" }}
           onAction={() => history.remove(record)}
         />
+        {
         <Action
           title="Clear History"
           icon={Icon.DeleteDocument}
@@ -228,22 +240,22 @@ export const ContentView = (props: ContentViewProps) => {
             if (
               await confirmAlert({
                 title: "Clear History?",
-                message: `${history.data.length} items will be removed.`,
+                message: `${history.data?.length} items will be removed.`,
               })
             ) {
               history.clear();
             }
           }}
-        />
+        />}
       </ActionPanel.Section>
     </ActionPanel>
   );
 
-  return data.length === 0 ? (
+  return data == undefined ? null : data.length === 0 ? (
     <EmptyView />
   ) : (
-    <List.Section title="History" subtitle={history.data.length.toLocaleString()}>
-      {data.map((item, i) => {
+    <List.Section title="History" subtitle={history.data?.length.toLocaleString()}>
+      {data?.map((item, i) => {
         return "query" in item ? (
           <List.Item
             id={item.id}
