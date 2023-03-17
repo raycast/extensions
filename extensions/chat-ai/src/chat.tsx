@@ -8,14 +8,16 @@ type ChatProps = {
 
 export default function Chat() {
   const [prompt, setPrompt] = useState("");
-  const [answer, setAnswer] = useState<string>("");
+  // const [answer, setAnswer] = useState<string>("");
+  const [answers, setAnswers] = useState<string[]>([]);
   const [isLoding, setIsLoading] = useState(false);
 
   async function fetchAnswer(prompt: string) {
     setIsLoading(true);
     try {
       const response = await generateAnswer(prompt);
-      setAnswer(response as string);
+      // setAnswer(response as string);
+      setAnswers((prev) => [response as string, ...prev]);
     } catch (error) {
       if (error instanceof Error) {
         showToast(Toast.Style.Failure, "Error", "Invalid openai api key");
@@ -34,7 +36,6 @@ export default function Chat() {
           <Action.SubmitForm
             onSubmit={(values: ChatProps) => {
               fetchAnswer(values.promptField);
-              setPrompt("");
             }}
           />
         </ActionPanel>
@@ -47,7 +48,10 @@ export default function Chat() {
         value={prompt}
         onChange={setPrompt}
       />
-      {answer.length > 0 && <Form.Description text={answer} />}
+      {/* {answer.length > 0 && (
+          <Form.Description text={answer} />
+      )} */}
+      {answers.length > 0 && answers.map((answer, index) => <Form.Description key={index} text={answer} />)}
     </Form>
   );
 }
