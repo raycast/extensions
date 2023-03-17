@@ -56,15 +56,6 @@
           "description": "When enabled, the Raycast window is closed immediately, allowing you to carry on with other work.",
           "default": false,
           "required": false
-        },
-        {
-          "name": "removeDescription",
-          "type": "checkbox",
-          "title": "Advanced",
-          "label": "Remove description",
-          "description": "When enabled, the description is removed from the task form",
-          "default": false,
-          "required": false
         }
       ],
       "arguments": [
