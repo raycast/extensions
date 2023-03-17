@@ -38,3 +38,19 @@ export const turnOn = async (cliDirectory: string, serialNumber: string): Promis
 export const turnOff = async (cliDirectory: string, serialNumber: string): Promise<void> => {
   await runLitraCommand(cliDirectory, "litra-off", `--serial-number ${serialNumber}`);
 };
+
+export const setTemperatureInKelvin = async (
+  cliDirectory: string,
+  serialNumber: string,
+  temperatureInKelvin: number
+): Promise<void> => {
+  await runLitraCommand(cliDirectory, "litra-temperature-k", `${temperatureInKelvin} --serial-number ${serialNumber}`);
+};
+
+export const setBrightnessPercentage = async (
+  cliDirectory: string,
+  serialNumber: string,
+  brightnessPercentage: number
+): Promise<void> => {
+  await runLitraCommand(cliDirectory, "litra-brightness", `${brightnessPercentage} --serial-number ${serialNumber}`);
+};

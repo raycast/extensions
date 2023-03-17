@@ -46,6 +46,7 @@ const configuration = new Configuration({
 const openai = new OpenAIApi(configuration);
 
 export default function Command() {
+  const maxTokensGPT35Turbo = 4096;
   const maxTokensDavinci = 4000;
   const maxTokensAdaBabbageCurie = 2048;
   const maxTokensCodex = 8000;
@@ -64,7 +65,7 @@ export default function Command() {
   const [maxModelTokens, setMaxModelTokens] = useState<number>(maxTokensDavinci);
 
   const modelLimit = {} as modelTokenLimit;
-  modelLimit["gpt-3.5-turbo"] = maxTokensDavinci;
+  modelLimit["gpt-3.5-turbo"] = maxTokensGPT35Turbo;
   modelLimit["text-davinci-003"] = maxTokensDavinci;
   modelLimit["text-davinci-002"] = maxTokensDavinci;
   modelLimit["text-curie-001"] = maxTokensAdaBabbageCurie;

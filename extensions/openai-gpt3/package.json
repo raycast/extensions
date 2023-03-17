@@ -1,11 +1,14 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "openai-gpt3",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "title": "OpenAI GPT3",
   "description": "Interact with OpenAI GPT3 AI",
   "icon": "openai-logo.png",
   "author": "simicvm",
+  "contributors": [
+    "DorukAkinci"
+  ],
   "categories": [
     "Productivity",
     "Fun",

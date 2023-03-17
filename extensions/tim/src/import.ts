@@ -1,22 +1,9 @@
 import path from "path";
-
 import { Alert, confirmAlert, getSelectedFinderItems, showToast, Toast } from "@raycast/api";
-import { runAppleScript } from "run-applescript";
 
-import { getExportData } from "./export";
-import openTaskManager from "./openTaskManager";
-import { buildScriptEnsuringTimIsRunning, checkIfTimInstalled, showNotInstalledToast } from "./utils";
+import { hasData, importData, installedWrapper, openTaskManager } from "./lib/tim";
 
-async function existsData(): Promise<boolean> {
-  const jsonString = await getExportData();
-  const data = JSON.parse(jsonString);
-  return Object.keys(data.tasks ?? {}).length > 0;
-}
-
-export default async () => {
-  const timAvailable = await checkIfTimInstalled();
-  if (!timAvailable) return showNotInstalledToast();
-
+export default installedWrapper(async () => {
   try {
     showToast({
       title: "Importing data…",
@@ -42,7 +29,7 @@ export default async () => {
     }
 
     if (
-      (await existsData()) &&
+      (await hasData()) &&
       (await confirmAlert({
         title: "Warning",
         message: "If you import this file, current data will be lost!",
@@ -55,8 +42,7 @@ export default async () => {
       return;
     }
 
-    const script = buildScriptEnsuringTimIsRunning(`import (POSIX file "${file.path}")`);
-    await runAppleScript(script);
+    await importData(file.path);
     showToast({
       title: "Success",
       message: "File imported",
@@ -70,4 +56,4 @@ export default async () => {
       style: Toast.Style.Failure,
     });
   }
-};
+});

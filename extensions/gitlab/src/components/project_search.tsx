@@ -7,6 +7,7 @@ import {
   CloneProjectInGitPod,
   CloneProjectInVSCodeAction,
   CopyProjectIDToClipboardAction,
+  CopyCloneUrlToClipboardAction,
   CreateNewProjectIssuePushAction,
   OpenProjectBranchesPushAction,
   OpenProjectIssuesPushAction,
@@ -16,6 +17,7 @@ import {
   OpenProjectPipelinesPushAction,
   OpenProjectSecurityComplianceInBrowserAction,
   OpenProjectSettingsInBrowserAction,
+  OpenProjectWikiInBrowserAction,
   ProjectDefaultActions,
   ShowProjectLabels,
 } from "./project_actions";
@@ -45,6 +47,7 @@ export function ProjectListItem(props: { project: Project }): JSX.Element {
           </ActionPanel.Section>
           <ActionPanel.Section>
             <CopyProjectIDToClipboardAction project={project} />
+            <CopyCloneUrlToClipboardAction shortcut={{ modifiers: ["cmd"], key: "u" }} project={project} />
           </ActionPanel.Section>
           <ActionPanel.Section>
             <OpenProjectIssuesPushAction project={project} />
@@ -52,6 +55,7 @@ export function ProjectListItem(props: { project: Project }): JSX.Element {
             <OpenProjectBranchesPushAction project={project} />
             <OpenProjectPipelinesPushAction project={project} />
             <OpenProjectMilestonesPushAction project={project} />
+            <OpenProjectWikiInBrowserAction project={project} />
             <ShowProjectLabels project={props.project} shortcut={{ modifiers: ["cmd"], key: "l" }} />
           </ActionPanel.Section>
           <ActionPanel.Section title="Open in Browser">

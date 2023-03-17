@@ -8,6 +8,7 @@ import {
 import tinyRelativeDate from 'tiny-relative-date'
 import { CopyInstallCommandActions } from './CopyInstallCommandActions'
 import { parseRepoUrl } from './utils/parseRepoUrl'
+import { getChangeLogUrl } from './utils/getChangelogUrl'
 import { Readme } from './Readme'
 import { NpmObject } from './npmResponse.model'
 
@@ -21,7 +22,11 @@ const scoreToPercentage = (score: number): string => {
 }
 
 interface Preferences {
-  defaultOpenAction: 'openRepository' | 'openHomepage' | 'npmPackagePage'
+  defaultOpenAction:
+    | 'openRepository'
+    | 'openHomepage'
+    | 'openChangelog'
+    | 'npmPackagePage'
 }
 
 export const PackageListItem = ({
@@ -31,6 +36,7 @@ export const PackageListItem = ({
   const { defaultOpenAction }: Preferences = getPreferenceValues()
   const pkg = result.package
   const { owner, name, type } = parseRepoUrl(pkg.links.repository)
+  const changelogUrl = getChangeLogUrl(type, owner, name)
 
   const openActions = {
     openRepository: pkg.links?.repository ? (
@@ -49,6 +55,13 @@ export const PackageListItem = ({
           icon={Icon.Link}
         />
       ) : null,
+    changelogPackagePage: changelogUrl ? (
+      <Action.OpenInBrowser
+        key="openChangelog"
+        url={changelogUrl}
+        title="Open Changelog"
+      />
+    ) : null,
     npmPackagePage: (
       <Action.OpenInBrowser
         key="npmPackagePage"
