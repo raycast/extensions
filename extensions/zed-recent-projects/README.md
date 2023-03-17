@@ -1,1 +1,0 @@
-# zed-recent-projects
