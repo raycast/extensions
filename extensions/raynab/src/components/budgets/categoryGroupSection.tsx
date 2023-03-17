@@ -25,18 +25,17 @@ export function CategoryGroupSection({
         ?.filter((group) => group.name !== 'Internal Master Category')
         ?.map((group) => (
           <List.Section key={group.id} title={group.name} subtitle={`${group.categories.length} Categories`}>
-            {group.categories.map((category) => (
-              // TODO create unique icons for different goal types
+            {group.categories.filter((category) => !category.hidden).map((category) => (
               <List.Item
                 key={category.id}
                 id={category.id}
                 title={category.name}
                 accessories={[
-                  category.goal_type
+                  category.goal_type && !showProgress
                     ? {
-                        icon: displayGoalType(category),
-                        tooltip: formatGoalType(category, activeBudgetCurrency),
-                      }
+                      icon: displayGoalType(category),
+                      tooltip: formatGoalType(category, activeBudgetCurrency),
+                    }
                     : {},
                   {
                     tag: {
