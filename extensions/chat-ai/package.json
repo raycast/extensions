@@ -1,0 +1,51 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "chat-ai",
+  "title": "Chat-ai",
+  "description": "Access gtp-3 in more easier way",
+  "icon": "command-icon.png",
+  "author": "miralsuthar",
+  "categories": [
+    "Applications"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "chat",
+      "title": "chat",
+      "subtitle": "ai",
+      "description": "Enable you start chatting with ai",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.48.8",
+    "node-fetch": "^3.3.1",
+    "openai": "^3.2.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "preferences": [
+    {
+      "name": "OpenaiApiToken",
+      "title": "Openai Api Token",
+      "description": "Your Openai Api Token",
+      "type": "password",
+      "default": "",
+      "required": true
+    }
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
