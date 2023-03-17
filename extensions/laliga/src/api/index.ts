@@ -1,34 +1,35 @@
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
-import { showToast, Toast } from "@raycast/api";
+import { getPreferenceValues, showToast, Toast } from "@raycast/api";
 import {
   LaLigaClub,
   LaLigaClubs,
   LaLigaClubSquad,
   LaLigaMatch,
   LaLigaStanding,
+  LaLigaSubscriptionRounds,
   Match,
+  Round,
   Squad,
   Standing,
   Team,
 } from "../types";
 
 function showFailureToast() {
-  showToast(
-    Toast.Style.Failure,
-    "Something went wrong",
-    "Please try again later"
-  );
+  showToast(Toast.Style.Failure, "Something went wrong", "Please try again later");
 }
 
+const { apikey } = getPreferenceValues();
+
 const endpoint = "https://apim.laliga.com/public-service/api/v1";
+const headers = {
+  "Ocp-Apim-Subscription-Key": apikey,
+};
 
 export const getCurrentGameWeek = async (competition: string) => {
   const config: AxiosRequestConfig = {
     method: "GET",
     url: `${endpoint}/subscriptions/${competition}/current-gameweek`,
-    headers: {
-      "Ocp-Apim-Subscription-Key": "c13c3a8e2f6b46da9c5c425cf61fab3e",
-    },
+    headers,
   };
 
   try {
@@ -53,9 +54,7 @@ export const getTeams = async (season: string): Promise<Team[]> => {
       orderField: "nickname",
       orderType: "ASC",
     },
-    headers: {
-      "Ocp-Apim-Subscription-Key": "c13c3a8e2f6b46da9c5c425cf61fab3e",
-    },
+    headers,
   };
 
   try {
@@ -73,9 +72,7 @@ export const getTeam = async (team: string) => {
   const config: AxiosRequestConfig = {
     method: "GET",
     url: `${endpoint}/teams/${team}`,
-    headers: {
-      "Ocp-Apim-Subscription-Key": "c13c3a8e2f6b46da9c5c425cf61fab3e",
-    },
+    headers,
   };
 
   try {
@@ -89,15 +86,11 @@ export const getTeam = async (team: string) => {
   }
 };
 
-export const getStandings = async (
-  competition: string
-): Promise<Standing[]> => {
+export const getStandings = async (competition: string): Promise<Standing[]> => {
   const config: AxiosRequestConfig = {
     method: "GET",
-    url: `https://apim.laliga.com/webview/api/web/subscriptions/${competition}/standing`,
-    headers: {
-      "Ocp-Apim-Subscription-Key": "ee7fcd5c543f4485ba2a48856fc7ece9",
-    },
+    url: `${endpoint}/subscriptions/${competition}/standing`,
+    headers,
   };
 
   try {
@@ -111,16 +104,18 @@ export const getStandings = async (
   }
 };
 
-export const getMatches = async (
-  competition: string,
-  matchday: number
-): Promise<Match[]> => {
+export const getMatches = async (subscriptionSlug: string, week: number): Promise<Match[]> => {
   const config: AxiosRequestConfig = {
     method: "GET",
-    url: `https://apim.laliga.com/webview/api/web/subscriptions/${competition}/week/${matchday}/matches`,
-    headers: {
-      "Ocp-Apim-Subscription-Key": "ee7fcd5c543f4485ba2a48856fc7ece9",
+    url: `${endpoint}/matches`,
+    params: {
+      subscriptionSlug,
+      week,
+      limit: 100,
+      orderField: "date",
+      orderType: "asc",
     },
+    headers,
   };
 
   try {
@@ -143,10 +138,10 @@ export const getSquad = async (team: string): Promise<Squad[]> => {
       offset: 0,
       orderField: "id",
       orderType: "DESC",
-      seasonYear: "2021",
+      // seasonYear: "2021",
     },
     headers: {
-      "Ocp-Apim-Subscription-Key": "c13c3a8e2f6b46da9c5c425cf61fab3e",
+      "Ocp-Apim-Subscription-Key": apikey,
       "Content-Language": "en",
     },
   };
@@ -155,6 +150,24 @@ export const getSquad = async (team: string): Promise<Squad[]> => {
     const { data }: AxiosResponse<LaLigaClubSquad> = await axios(config);
 
     return data.squads;
+  } catch (e) {
+    showFailureToast();
+
+    return [];
+  }
+};
+
+export const getSubscriptionRounds = async (competition: string): Promise<Round[]> => {
+  const config: AxiosRequestConfig = {
+    method: "GET",
+    url: `${endpoint}/subscriptions/${competition}/rounds`,
+    headers,
+  };
+
+  try {
+    const { data }: AxiosResponse<LaLigaSubscriptionRounds> = await axios(config);
+
+    return data.rounds;
   } catch (e) {
     showFailureToast();
 

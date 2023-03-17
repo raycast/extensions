@@ -8,10 +8,12 @@ export type Preferences = {
   properties: {
     title: string
     date: string
+    url?: string
     status: {
       type: 'status' | 'checkbox'
       name: string
       doneName?: string
+      completedStatuses?: string[]
       inProgressId?: string
       notStartedId?: string
     }
@@ -25,6 +27,7 @@ export type Preferences = {
         type?: 'status' | 'checkbox'
         name?: string
         doneName?: string
+        completedStatuses?: string[]
       }
     }
   }

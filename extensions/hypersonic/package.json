@@ -3,11 +3,11 @@
   "name": "hypersonic",
   "title": "Hypersonic",
   "description": "Fastest Notion to-do app ever",
-  "icon": "extension-icon.png",
+  "icon": "icon-purple.png",
   "author": "reboot.studio",
   "owner": "reboot",
   "access": "public",
-  "version": "2.0.1",
+  "version": "2.0.4",
   "categories": [
     "Developer Tools",
     "Design Tools",
@@ -34,14 +34,16 @@
   "preferences": [],
   "dependencies": {
     "@notionhq/client": "2.2.0",
-    "@raycast/api": "1.44.0",
-    "@raycast/utils": "1.4.11",
+    "@raycast/api": "1.48.5",
+    "@raycast/utils": "1.5.2",
     "chrono-node": "2.4.1",
     "date-fns": "2.29.3",
     "fuse.js": "6.6.2",
+    "lodash": "4.17.21",
     "node-fetch": "3.2.4"
   },
   "devDependencies": {
+    "@types/lodash": "^4.14.191",
     "@types/node": "~16.10.0",
     "@types/react": "^17.0.28",
     "@typescript-eslint/eslint-plugin": "^5.0.0",

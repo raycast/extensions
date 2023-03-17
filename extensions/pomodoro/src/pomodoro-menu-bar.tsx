@@ -45,7 +45,8 @@ export default function TogglePomodoroTimer() {
     setCurrentInterval(undefined);
   }
 
-  let icon = "tomato.png";
+  let icon;
+  icon = { source: { light: "tomato-light.png", dark: "tomato-dark.png" } };
   if (currentInterval) {
     const progressInQuarters = Math.floor(progress(currentInterval) / 25) * 25;
     icon = Icon[(progressInQuarters > 0 ? `CircleProgress${progressInQuarters}` : "Circle") as keyof typeof Icon];

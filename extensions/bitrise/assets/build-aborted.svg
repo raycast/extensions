@@ -1,0 +1,7 @@
+<svg viewBox="0 0 24 24" focusable="false" class="chakra-icon css-wpx21a">
+    <path fill-rule="evenodd" clip-rule="evenodd"
+        d="M0 12c0 6.627 5.373 12 12 12s12-5.373 12-12S18.627 0 12 0 0 5.373 0 12Zm22 0c0 5.523-4.477 10-10 10S2 17.523 2 12 6.477 2 12 2s10 4.477 10 10Z"
+        fill="currentColor"></path>
+    <path fill-rule="evenodd" clip-rule="evenodd"
+        d="m7.757 14.828 7.071-7.07 1.415 1.414-7.071 7.07-1.415-1.414Z" fill="currentColor"></path>
+</svg>

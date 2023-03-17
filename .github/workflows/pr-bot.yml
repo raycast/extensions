@@ -23,7 +23,7 @@ jobs:
         with:
           format: "json"
 
-      - uses: actions/github-script@v5
+      - uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.RAYCAST_BOT_API_ACCESS_TOKEN }}
           script: |

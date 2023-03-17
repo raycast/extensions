@@ -54,14 +54,12 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.40.3",
+    "@raycast/api": "^1.48.0",
     "@raycast/utils": "^1.4.8",
-    "find-free-port": "^2.0.0",
-    "node-fetch": "^3.2.10",
-    "patch-package": "^6.4.7"
+    "node-fetch": "^3.2.10"
   },
   "devDependencies": {
-    "@types/node": "16.10.3",
+    "@types/node": "^18.8.3",
     "@types/react": "18.0.9",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",

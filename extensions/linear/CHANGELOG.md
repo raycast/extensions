@@ -1,6 +1,33 @@
 # Linear Changelog
 
-## [Fix icons] - 2022-20-12
+## [Add multiple attachments when creating an issue] - 2023-02-28
+
+- Add support for multiple attachments in the `Create Issue` command
+- Fixed a bug where the title form field was not focused if the teams field was hidden.
+
+## [Add support for roadmaps] - 2023-02-23
+
+- Add roadmaps dropdown in `Search Projects` command
+- Add target date and teams accessories in `Search Projects` command
+
+## [Adjust colors contrast in light mode] - 2023-02-08
+
+- Adjust color contrast on icons so that they're more visible in light mode
+
+## [Add attachment to Create Issue command] - 2023-01-24
+
+- Add a file picker on the `Create Issue` command to add a single attachment on a newly created Linear issue
+
+## [Add due date action] - 2023-01-19
+
+- Add a new action to set due dates on issues
+- Add due date accessory on issue list items
+
+## [Quick Add Comment to Issue command] - 2023-01-18
+
+- Add a new command allowing you to quickly add a comment to an issue using its issue ID.
+
+## [Fix icons] - 2022-12-20
 
 - Fix a bug where Linear icons would not show up in the list's accessories for projects
 - Fix a bug where Linear icons would not show up if the corresponding icon in the file system doesn't exist

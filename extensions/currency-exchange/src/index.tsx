@@ -1,5 +1,16 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Icon, List, Action, ActionPanel, getPreferenceValues, Toast, showToast, LocalStorage } from "@raycast/api";
+import {
+  Icon,
+  List,
+  Action,
+  ActionPanel,
+  getPreferenceValues,
+  Toast,
+  showToast,
+  LocalStorage,
+  Form,
+  useNavigation,
+} from "@raycast/api";
 import fetch, { Response, AbortError } from "node-fetch";
 import { currencyCode2Name, currencyCode2CountryAndRegion } from "./currency";
 
@@ -7,7 +18,7 @@ const STORAGE_KEY_FROM_CURRENCY_CODE = "fromCurrencyCode";
 const STORAGE_KEY_PINNED_CURRENCY_CODE = "pinnedCurrencyCode";
 
 export default function Command() {
-  const { state, exchange, setState } = useExchange();
+  const { searchText, state, setState, setSearchTextAndExchange } = useSearchText();
 
   useEffect(() => {
     (async () => {
@@ -31,8 +42,9 @@ export default function Command() {
 
   return (
     <List
+      searchText={searchText}
       isLoading={state.isLoading}
-      onSearchTextChange={exchange}
+      onSearchTextChange={setSearchTextAndExchange}
       searchBarPlaceholder={`Input how much ${currencyCode2Name[state.fromCurrencyCode]}`}
       throttle
       searchBarAccessory={
@@ -56,12 +68,17 @@ export default function Command() {
       }
     >
       {state.currencyResult ? (
-        <Exchange currencyResult={state.currencyResult} state={state} setState={setState} />
+        <Exchange
+          currencyResult={state.currencyResult}
+          state={state}
+          setState={setState}
+          setSearchText={setSearchTextAndExchange}
+        />
       ) : (
         <List.EmptyView
           icon={{ source: "../assets/start.png" }}
           title="Type something to get exchange result?"
-          description="Example: '10', '1+2' or '1 in USD'"
+          description="Example: '10', '1+2' '1 in USD' or '5.5 in USD at 2022/9/25'"
         />
       )}
     </List>
@@ -72,10 +89,12 @@ function Exchange({
   currencyResult,
   state,
   setState,
+  setSearchText,
 }: {
   currencyResult: CurrencyResult;
   state: ExchangeState;
   setState: React.Dispatch<React.SetStateAction<ExchangeState>>;
+  setSearchText: (amountExpression: string) => void;
 }) {
   if (currencyResult.result !== "success") {
     const errorMessage = `
@@ -100,13 +119,13 @@ function Exchange({
               <List.Item
                 key={index}
                 title={item.code}
-                subtitle={item.value.toFixed(4)}
-                accessoryTitle={currencyCode2Name[item.code]}
-                accessoryIcon={Icon.Pin}
+                subtitle={item.value !== Number.POSITIVE_INFINITY ? item.value.toFixed(4) : "No Currency"}
+                accessories={[{ text: currencyCode2Name[item.code], icon: Icon.Pin }]}
                 icon={{ source: getFlagEmoji(item.code.substring(0, 2)) }}
                 actions={
                   <ExchangeResultActionPanel
                     setState={setState}
+                    setSearchText={setSearchText}
                     state={state}
                     toCurrencyCode={item.code}
                     copyContent={item.value.toString()}
@@ -119,18 +138,23 @@ function Exchange({
             title={`Exchange from ${state.amount ? parseFloat(state.amount.toFixed(4)) : 0} ${
               currencyCode2Name[state.fromCurrencyCode]
             }`}
-            subtitle={`Currency Rate updated at ${new Date(currencyResult.time_last_update_utc).toLocaleString()}`}
+            subtitle={
+              currencyResult.time_last_update_utc
+                ? `Currency Rate Date is ${new Date(currencyResult.time_last_update_utc).toLocaleString()}`
+                : `History Currency Rate Mode: Date is ${currencyResult.year}/${currencyResult.month}/${currencyResult.day}`
+            }
           >
             {currencyResult.conversion_rate_exchanged?.map((item: ConversionRate, index: number) => (
               <List.Item
                 key={index}
                 title={item.code}
-                subtitle={item.value.toFixed(4)}
-                accessoryTitle={currencyCode2Name[item.code]}
+                subtitle={item.value !== Number.POSITIVE_INFINITY ? item.value.toFixed(4) : "∞"}
+                accessories={[{ text: currencyCode2Name[item.code] }]}
                 icon={{ source: getFlagEmoji(item.code.substring(0, 2)) }}
                 actions={
                   <ExchangeResultActionPanel
                     setState={setState}
+                    setSearchText={setSearchText}
                     state={state}
                     toCurrencyCode={item.code}
                     copyContent={item.value.toString()}
@@ -150,8 +174,10 @@ function ExchangeResultActionPanel(props: {
   copyContent: string;
   state: ExchangeState;
   setState: React.Dispatch<React.SetStateAction<ExchangeState>>;
+  setSearchText: (amountExpression: string) => void;
 }) {
-  const { toCurrencyCode, copyContent, state, setState } = props;
+  const { toCurrencyCode, copyContent, state, setState, setSearchText } = props;
+  const { push } = useNavigation();
   return (
     <ActionPanel>
       <Action.CopyToClipboard content={copyContent} />
@@ -183,8 +209,33 @@ function ExchangeResultActionPanel(props: {
           state.pinnedCurrencyCodes && state.pinnedCurrencyCodes.indexOf(toCurrencyCode) >= 0 ? "Unpin It" : "Pin It"
         }`}
       />
+      <Action
+        title="Set Currency Date"
+        icon={Icon.Clock}
+        onAction={() =>
+          push(<SetCurrencyDateForm amountExpression={state.amountExpression} setSearchText={setSearchText} />)
+        }
+      />
     </ActionPanel>
   );
+}
+
+function useSearchText() {
+  const { state, exchange, setState } = useExchange();
+  const [searchText, setSearchText] = useState("");
+
+  const setSearchTextAndExchange = function setSearchTextAndExchange(amountExpression: string) {
+    setSearchText(amountExpression);
+    exchange(amountExpression);
+  };
+
+  return {
+    searchText: searchText,
+    state: state,
+    exchange: exchange,
+    setState: setState,
+    setSearchTextAndExchange: setSearchTextAndExchange,
+  };
 }
 
 function useExchange() {
@@ -200,6 +251,7 @@ function useExchange() {
     async function exchange(amountExpression: string) {
       let amount = 0;
       let filter = "";
+      let historyDate: Date | null = null;
 
       const matches = /(^[\d().+\-*/^]+)(.*)/.exec(amountExpression);
       console.log(matches);
@@ -211,9 +263,19 @@ function useExchange() {
         }
 
         if (matches[2]) {
-          const filterMatches = /\s+in\s+([a-zA-Z\s]+)/.exec(matches[2]);
+          const historyMatches = /\s+at\s+(\d{4}\/\d{1,2}\/\d{1,2})/.exec(matches[2]);
+          console.log(historyMatches);
+          const historyMatchSize = historyMatches?.length;
+          historyDate =
+            historyMatchSize && historyMatchSize > 1 && historyMatches[1] ? new Date(historyMatches[1]) : null;
+          historyDate = historyDate && !isNaN(historyDate?.getTime()) ? historyDate : null;
+
+          const filterMatches = /\s+in\s+([a-zA-Z\s]*)/.exec(matches[2]);
           console.log(filterMatches);
-          filter = filterMatches ? filterMatches[1] : "";
+          const filterMatchSize = filterMatches?.length;
+          filter = filterMatchSize && filterMatchSize > 0 && filterMatches[1] ? filterMatches[1] : "";
+          //fix when at is matched in keywords
+          filter = filter.replace(/\s+at\s+/, " ").trim();
         }
       }
 
@@ -223,6 +285,7 @@ function useExchange() {
         ...oldState,
         amount: amount,
         filter: filter,
+        historyDate: historyDate,
         isLoading: true,
       }));
       try {
@@ -231,6 +294,7 @@ function useExchange() {
           state.fromCurrencyCode,
           cancelRef.current.signal,
           filter,
+          historyDate,
           state.pinnedCurrencyCodes
         );
         console.log(result?.conversion_rate_exchanged?.at(0));
@@ -280,29 +344,44 @@ async function performExchange(
   fromCode: string,
   signal: AbortSignal,
   filter: string,
+  historyDate: Date | null,
   pinned?: Array<string>
 ): Promise<CurrencyResult | undefined> {
   console.log(`start to exchange | ${fromCode} |${amount}|`);
   if (amount > 0) {
     // check if there's available cache for currency
-    return LocalStorage.getItem<string>("currency")
+    return LocalStorage.getItem<string>(
+      `currency${
+        historyDate ? historyDate.getFullYear() + "-" + (historyDate.getMonth() + 1) + "-" + historyDate.getDate() : ""
+      }`
+    )
       .then((content) => {
         if (content) {
           const cachedData = JSON.parse(content) as CurrencyResult;
           // console.log(cachedData);
-          if (Math.round(Date.now() / 1000) - cachedData.time_next_update_unix < 0) {
+          if (
+            historyDate ||
+            (cachedData.time_next_update_unix && Math.round(Date.now() / 1000) - cachedData.time_next_update_unix < 0)
+          ) {
             // cache valid
             return cachedData;
           }
         }
 
-        return currencyAPI(signal)
+        return currencyAPI(historyDate, signal)
           .then(async (response) => {
             const responseJson = await response.json();
 
             const result = responseJson as CurrencyResult;
             if (result.result === "success") {
-              LocalStorage.setItem("currency", JSON.stringify(responseJson));
+              LocalStorage.setItem(
+                `currency${
+                  historyDate
+                    ? historyDate.getFullYear() + "-" + (historyDate.getMonth() + 1) + "-" + historyDate.getDate()
+                    : ""
+                }`,
+                JSON.stringify(responseJson)
+              );
               return result;
             } else {
               console.log(responseJson);
@@ -312,7 +391,7 @@ async function performExchange(
               ) {
                 throw Error("Invalid API Key, please check!");
               }
-              throw Error(result["error-type"]);
+              throw Error(`exchangerate-api.com: ${result["error-type"]}`);
             }
           })
           .catch((error: Error) => {
@@ -333,14 +412,28 @@ async function performExchange(
   }
 }
 
-function currencyAPI(signal: AbortSignal): Promise<Response> {
+function currencyAPI(historyDate: Date | null, signal: AbortSignal): Promise<Response> {
   const { api_key } = getPreferenceValues();
 
-  return fetch(`https://v6.exchangerate-api.com/v6/${api_key}/latest/USD`, {
-    signal: signal,
-    method: "GET",
-    headers: { "Content-Type": "application/json" },
-  });
+  console.log(
+    `make API call to https://v6.exchangerate-api.com/v6/${api_key}/${historyDate ? "history" : "latest"}/USD${
+      historyDate
+        ? "/" + historyDate.getFullYear() + "/" + (historyDate.getMonth() + 1) + "/" + historyDate.getDate()
+        : ""
+    }`
+  );
+  return fetch(
+    `https://v6.exchangerate-api.com/v6/${api_key}/${historyDate ? "history" : "latest"}/USD${
+      historyDate
+        ? "/" + historyDate.getFullYear() + "/" + (historyDate.getMonth() + 1) + "/" + historyDate.getDate()
+        : ""
+    }`,
+    {
+      signal: signal,
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+    }
+  );
 }
 
 function enrichExchangeData(
@@ -387,6 +480,52 @@ function enrichExchangeData(
   return currencyData as CurrencyResult;
 }
 
+function SetCurrencyDateForm(props: {
+  amountExpression: string | undefined;
+  setSearchText: (amountExpression: string) => void;
+}) {
+  const { setSearchText, amountExpression } = props;
+  const { pop } = useNavigation();
+
+  const regex = /\s+at\s+(\d{4}\/\d{1,2}\/\d{1,2})/;
+
+  const historyMatches = /\s+at\s+(\d{4}\/\d{1,2}\/\d{1,2})/.exec(amountExpression || "");
+  const historyMatchSize = historyMatches?.length;
+  let historyDate =
+    historyMatchSize && historyMatchSize > 1 && historyMatches[1] ? new Date(historyMatches[1]) : undefined;
+  historyDate = historyDate && !isNaN(historyDate?.getTime()) ? historyDate : undefined;
+
+  return (
+    <Form
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm
+            title="Set to Date"
+            onSubmit={(values) => {
+              console.log("onSubmit", values);
+              const historyDate = values.historyDate;
+              amountExpression && historyDate
+                ? setSearchText(
+                    amountExpression.replace(regex, "") +
+                      ` at ${historyDate.getFullYear()}/${historyDate.getMonth() + 1}/${historyDate.getDate()}`
+                  )
+                : null;
+              pop();
+            }}
+          />
+        </ActionPanel>
+      }
+    >
+      <Form.DatePicker
+        id="historyDate"
+        title="Currecy History Date"
+        defaultValue={historyDate}
+        type={Form.DatePicker.Type.Date}
+      />
+    </Form>
+  );
+}
+
 function getFlagEmoji(countryAndRegionCode: string): string {
   const codePoints = countryAndRegionCode
     .toUpperCase()
@@ -414,9 +553,12 @@ interface CurrencyResult {
   conversion_rates: { [key: string]: number };
   conversion_rate_exchanged?: Array<ConversionRate>;
   conversion_rate_pin_exchanged?: Array<ConversionRate>;
-  time_last_update_unix: number;
-  time_next_update_unix: number;
-  time_last_update_utc: string;
+  time_last_update_unix?: number;
+  time_next_update_unix?: number;
+  time_last_update_utc?: string;
+  year?: number;
+  month?: number;
+  day?: number;
 }
 
 interface ConversionRate {

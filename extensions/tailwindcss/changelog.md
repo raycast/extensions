@@ -1,5 +1,12 @@
 # Tailwind CSS Changelog
 
+## [Default Action for Search Classes] - 2023-03-12
+- Add a preference to set the default action for the `Search Classes` command
+
+## [Search Classes command improvements] - 2023-01-21
+- Search by class content instead of only by selector
+- Add an action to copy the class name
+
 ## [Updated CSS classes] - 2022-11-29
 
 ## [Generate all CSS classes] - 2022-11-27

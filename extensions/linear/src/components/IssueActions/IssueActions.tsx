@@ -2,6 +2,7 @@ import { Action, Icon, ActionPanel, showToast, Toast, confirmAlert, Color, useNa
 import { MutatePromise } from "@raycast/utils";
 import { IssuePriorityValue, User } from "@linear/sdk";
 import { IssueUpdateInput } from "@linear/sdk/dist/_generated_documents";
+import { format } from "date-fns";
 
 import { IssueResult, IssueDetailResult } from "../../api/getIssues";
 
@@ -77,7 +78,7 @@ export default function IssueActions({
     try {
       await showToast({ style: Toast.Style.Animated, title: animatedTitle });
 
-      const asyncUpdate = linearClient.issueUpdate(issue.id, payload);
+      const asyncUpdate = linearClient.updateIssue(issue.id, payload);
 
       await Promise.all([
         asyncUpdate,
@@ -150,7 +151,7 @@ export default function IssueActions({
       try {
         await showToast({ style: Toast.Style.Animated, title: "Deleting issue" });
 
-        const asyncUpdate = linearClient.issueDelete(issue.id);
+        const asyncUpdate = linearClient.deleteIssue(issue.id);
 
         if (mutateDetail) {
           pop();
@@ -287,6 +288,57 @@ export default function IssueActions({
     });
   }
 
+  async function setDueDate(dueDate: Date | null) {
+    updateIssue({
+      animatedTitle: dueDate ? "Setting due date" : "Removing due date",
+      payload: { dueDate },
+      optimisticUpdate(issue) {
+        return {
+          ...issue,
+          dueDate,
+        };
+      },
+      rollbackUpdate(issue) {
+        return {
+          ...issue,
+          dueDate: issue.dueDate,
+        };
+      },
+      successTitle: dueDate ? "Set due date" : "Removed due date",
+      successMessage: dueDate ? `${issue.identifier} due date set to ${format(dueDate, "MM/dd/yyyy")}` : "",
+      errorTitle: "Failed to set due date",
+    });
+  }
+
+  async function setReminder(reminderDate: Date | null) {
+    if (!reminderDate) {
+      await showToast({ style: Toast.Style.Failure, title: "Failed setting reminder" });
+      return;
+    }
+
+    try {
+      await showToast({ style: Toast.Style.Animated, title: "Setting reminder" });
+
+      await linearClient.issueReminder(issue.id, reminderDate);
+
+      if (mutateDetail) {
+        pop();
+      }
+
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Reminder set",
+        message: `${issue.identifier} reminder set to ${format(reminderDate, "MM/dd/yyyy")}`,
+      });
+    } catch (error) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to set reminder",
+        message: getErrorMessage(error),
+      });
+    }
+  }
+
   function refresh() {
     if (mutateList) {
       mutateList();
@@ -366,7 +418,7 @@ export default function IssueActions({
 
         {me ? (
           <Action
-            title={isAssignedToMe ? "Un-assign from Me" : "Assign to Me"}
+            title={isAssignedToMe ? "Un-Assign From Me" : "Assign to Me"}
             icon={getUserIcon(me)}
             shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
             onAction={() => setToMe(isAssignedToMe ? null : me)}
@@ -391,6 +443,18 @@ export default function IssueActions({
             })}
           </ActionPanel.Submenu>
         ) : null}
+
+        <Action.PickDate
+          title="Set Due Date"
+          shortcut={{ modifiers: ["opt", "shift"], key: "d" }}
+          onChange={setDueDate}
+        />
+
+        <Action.PickDate
+          title="Set Reminder"
+          shortcut={{ modifiers: ["cmd", "shift"], key: "h" }}
+          onChange={setReminder}
+        />
 
         <LabelSubmenu issue={issue} updateIssue={updateIssue} />
 

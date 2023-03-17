@@ -1,7 +1,15 @@
+import * as fs from "fs";
+import * as https from "https";
+
+import { temporaryFile } from "tempy";
+import * as sound from "sound-play";
+
 import { Languages } from "dictcc";
 import { TranslationInput } from "dictcc";
 
 import { getPreferences, supportedLanguages } from "./preferences";
+
+const TEMP_FILE_PATH = temporaryFile({ extension: "mp3" });
 
 export const getListSubtitle = (loading: boolean, languages: [Languages, Languages] | undefined, totalCount = 0) => {
   const lang1 = supportedLanguages.find((l) => l.value === languages?.[0]);
@@ -43,4 +51,16 @@ export const createInputFromSearchTerm = (searchTerm: string): TranslationInput 
     targetLanguage,
     term,
   };
+};
+
+export const playAudio = (url: string) => {
+  https.get(url, (response) => {
+    const writeStream = fs.createWriteStream(TEMP_FILE_PATH);
+
+    response.pipe(writeStream);
+
+    writeStream.on("finish", () => {
+      sound.play(TEMP_FILE_PATH);
+    });
+  });
 };

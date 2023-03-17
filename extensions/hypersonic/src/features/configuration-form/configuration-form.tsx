@@ -17,6 +17,7 @@ import { useState } from 'react'
 type OnboardFormValues = {
   mainDatabase: string
   titleProperty: string
+  urlProperty: string
   dateProperty: string
   tagsProperty: string
   statusProperty: string
@@ -46,10 +47,12 @@ const normalizeValuesToStore = (
     properties: {
       title: values.titleProperty,
       date: values.dateProperty,
+      url: handleOptionalField(values.urlProperty),
       status: {
         type: status.type,
         name: status.name,
         doneName: status.doneName,
+        completedStatuses: status.completedStatuses,
         inProgressId: status.inProgressId,
         notStartedId: status.notStartedId,
       },
@@ -62,6 +65,7 @@ const normalizeValuesToStore = (
         status: {
           type: projectStatus.type,
           name: projectStatus.name,
+          completedStatuses: projectStatus.completedStatuses,
           doneName: projectStatus.doneName,
         },
       },
@@ -117,6 +121,7 @@ export default function ConfigurationForm({
     initialValues: {
       mainDatabase: '',
       titleProperty: '',
+      urlProperty: '',
       dateProperty: '',
       statusProperty: '',
       tagsProperty: '',
@@ -137,9 +142,10 @@ export default function ConfigurationForm({
       // Set default values
       setValue('titleProperty', database.columns.title[0] || '')
       setValue('dateProperty', database.columns.date[0] || '')
-      setValue('statusProperty', database.columns.status[0]?.value || '')
+      setValue('statusProperty', database.columns.status[0]?.data.name || '')
       setValue('tagsProperty', database.columns.tags[0]?.value || '')
       setValue('assigneeProperty', database.columns.assignee[0]?.value || '')
+      setValue('urlProperty', database.columns.url[0]?.value || '')
       // Handle project property
       const project = database.columns.project[0]?.value || ''
       setValue('projectProperty', project)
@@ -193,7 +199,7 @@ export default function ConfigurationForm({
         value={values.titleProperty}
         onChange={(v) => setValue('titleProperty', v)}
         error={
-          !values.statusProperty && !isLoading && !!database
+          !values.titleProperty && !isLoading && !!database
             ? 'Required'
             : undefined
         }
@@ -214,7 +220,7 @@ export default function ConfigurationForm({
         value={values.dateProperty}
         onChange={(v) => setValue('dateProperty', v)}
         error={
-          !values.statusProperty && !isLoading && !!database
+          !values.dateProperty && !isLoading && !!database
             ? 'Required'
             : undefined
         }
@@ -278,6 +284,22 @@ export default function ConfigurationForm({
         storeValue
       >
         {database?.columns.assignee.map((item, index) => (
+          <Form.Dropdown.Item
+            key={`${item}-${index}`}
+            value={item.value}
+            title={item.name}
+          />
+        ))}
+      </Form.Dropdown>
+      <Form.Dropdown
+        title="URL"
+        id="urlProperty"
+        value={values.urlProperty}
+        onChange={(v) => setValue('urlProperty', v)}
+        info="Attached url"
+        storeValue
+      >
+        {database?.columns?.url?.map((item, index) => (
           <Form.Dropdown.Item
             key={`${item}-${index}`}
             value={item.value}

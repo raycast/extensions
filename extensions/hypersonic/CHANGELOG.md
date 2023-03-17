@@ -1,5 +1,32 @@
 # Hypersonic Changelog
 
+## [2.0.3] - 2023-01-23
+
+#### Updated
+
+- Fixed a bug where users couldn't create tasks when the status property was set to the checkbox type.
+- Improved stability when fetching tasks by adding a new message alert that enables users to restart the database connection if needed.
+
+#### New
+
+- Set status action to mark a task with every status available in notion.
+- Segmented todo list to show tasks with different statuses.
+- Filter by status action to filter tasks by status.
+
+#### Updated
+
+- Improved date picker.
+
+## [2.0.2] - 2022-12-23
+
+#### New
+
+- Url optional parameter that lets users attach a url to a task and open it whenever they want.
+
+#### Updated
+
+- Tag style with the new tag property from raycast.
+
 ## [2.0.1] - 2022-12-08
 
 #### New

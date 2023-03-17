@@ -6,11 +6,23 @@ import { XcodeSimulatorAppAction } from "../models/xcode-simulator/xcode-simulat
 import { XcodeSimulatorAppPrivacyAction } from "../models/xcode-simulator/xcode-simulator-app-privacy-action.model";
 import { XcodeSimulatorAppPrivacyServiceType } from "../models/xcode-simulator/xcode-simulator-app-privacy-service-type.model";
 import { groupBy } from "../shared/group-by";
+import { XcodeService } from "./xcode.service";
+import {
+  XcodeSimulatorOpenUrlError,
+  XcodeSimulatorOpenUrlErrorReason,
+} from "../models/xcode-simulator/xcode-simulator-open-url-error.model";
 
 /**
  * XcodeSimulatorService
  */
 export class XcodeSimulatorService {
+  /**
+   * Launches simulator application
+   */
+  static launchSimulatorApplication(): Promise<void> {
+    return execAsync(`open -b "com.apple.iphonesimulator"`).then();
+  }
+
   /**
    * Retrieve all XcodeSimulatorGroups
    */
@@ -62,8 +74,8 @@ export class XcodeSimulatorService {
    */
   static boot(xcodeSimulator: XcodeSimulator): Promise<void> {
     return execAsync(`xcrun simctl boot ${xcodeSimulator.udid}`).then(() => {
-      // Silently open Simulator application
-      execAsync("open -a simulator");
+      // Silently launch Simulator application
+      XcodeSimulatorService.launchSimulatorApplication();
     });
   }
 
@@ -131,5 +143,47 @@ export class XcodeSimulatorService {
     return execAsync(
       ["xcrun", "simctl", "privacy", xcodeSimulator.udid, action, serviceType, bundleIdentifier].join(" ")
     ).then();
+  }
+
+  /**
+   * Bool value if a given url is valid to be opened in a simulator
+   * @param url The url to validate.
+   */
+  static isValidUrl(url: string): boolean {
+    return /\w+:\/\/+/.test(url);
+  }
+
+  /**
+   * Opens a URL in a Simulator
+   * @param url The url which should be opened
+   * @param simulator The optional Simulator where the url should be opened.
+   */
+  static async openUrl(url: string, simulator?: XcodeSimulator) {
+    // Trim url
+    const trimmedUrl = url.trim();
+    // Check if the url has a valid scheme e.g. (maps://, https://raycast.com)
+    if (!XcodeSimulatorService.isValidUrl(trimmedUrl)) {
+      throw new XcodeSimulatorOpenUrlError(XcodeSimulatorOpenUrlErrorReason.badUrl);
+    }
+    // Check if no simulator is presented
+    if (!simulator) {
+      // Check if Xcode is not installed
+      if (!(await XcodeService.isXcodeInstalled())) {
+        // Throw error
+        throw new XcodeSimulatorOpenUrlError(XcodeSimulatorOpenUrlErrorReason.xcodeInstallationMissing);
+      }
+      // Retrieve all simulators
+      const simulators = await XcodeSimulatorService.xcodeSimulators();
+      // Check if at least one simulator is booted
+      if (!simulators.some((xcodeSimulator) => xcodeSimulator.state === XcodeSimulatorState.booted)) {
+        // Otherwise throw an error
+        throw new XcodeSimulatorOpenUrlError(XcodeSimulatorOpenUrlErrorReason.bootedSimulatorMissing);
+      }
+    }
+    // Open URL in simulator
+    return execAsync(["xcrun", "simctl", "openurl", simulator?.udid ?? "booted", trimmedUrl].join(" ")).then(() => {
+      // Silently launch Simulator application
+      XcodeSimulatorService.launchSimulatorApplication();
+    });
   }
 }

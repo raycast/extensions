@@ -2,7 +2,7 @@ import { GetQueueAttributesCommand, ListQueuesCommand, PurgeQueueCommand, SQSCli
 import { ActionPanel, List, Action, confirmAlert, Toast, showToast, Icon } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import AWSProfileDropdown from "./components/searchbar/aws-profile-dropdown";
-import { AWS_URL_BASE } from "./constants";
+import { resourceToConsoleLink } from "./util";
 
 export default function SQS() {
   const { data: queues, error, isLoading, revalidate } = useCachedPromise(fetchQueues);
@@ -57,13 +57,10 @@ function SQSQueue({ queue }: { queue: string }) {
       icon={"aws-icons/sqs.png"}
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser
-            title="Open in Browser"
-            url={`${AWS_URL_BASE}/sqs/v2/home?region=${process.env.AWS_REGION}#/queues/${encodeURIComponent(queue)}`}
-          />
+          <Action.OpenInBrowser title="Open in Browser" url={resourceToConsoleLink(queue, "AWS::SQS::Queue")} />
           <Action.CopyToClipboard title="Copy Queue URL" content={queue} />
           <Action.CopyToClipboard title="Copy Path" content={queue} />
-          <Action.SubmitForm icon={Icon.Trash} title="Purge Queue" onSubmit={handlePurgeQueueAction} />
+          <Action icon={Icon.Trash} title="Purge Queue" onAction={handlePurgeQueueAction} />
         </ActionPanel>
       }
       accessories={[

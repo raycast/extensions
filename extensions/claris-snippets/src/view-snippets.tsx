@@ -13,13 +13,16 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { deleteSnippetFile, loadAllSnippets } from "./utils/snippets";
-import { Location, snippetTypesMap } from "./utils/types";
+import { Location, Snippet, snippetTypesMap } from "./utils/types";
 import { useCachedPromise, useCachedState } from "@raycast/utils";
 import CreateSnippet from "./create-snippet";
 import { XMLToFMObjects } from "./utils/FmClipTools";
 import { useState, useMemo } from "react";
 import EditSnippet from "./components/edit-snippet";
 import { uniqBy } from "lodash";
+import EditSnippetXML from "./components/edit-snippet-xml";
+import DynamicFieldsList from "./components/dynamic-fields-list";
+import DynamicSnippetForm from "./components/dynamic-snippet.form";
 
 export default function Command() {
   const [locations] = useCachedState<Location[]>("locations", []);
@@ -101,6 +104,7 @@ export default function Command() {
             key={snippet.id}
             id={snippet.id}
             keywords={snippet.tags}
+            accessories={getAccessories(snippet)}
             detail={
               <List.Item.Detail
                 markdown={`${snippet.description === "" ? "*No Description*" : snippet.description}
@@ -133,25 +137,34 @@ ${snippet.snippet}`}
             actions={
               <ActionPanel>
                 <ActionPanel.Section>
-                  <Action
-                    title="Copy Snippet"
-                    icon={Icon.Clipboard}
-                    shortcut={{ key: "c", modifiers: ["cmd"] }}
-                    onAction={async () => {
-                      await Clipboard.copy(snippet.snippet);
-                      try {
-                        XMLToFMObjects();
-                        closeMainWindow();
-                        showHUD("Copied to Clipboard");
-                      } catch (e) {
-                        showToast({
-                          title: "Error",
-                          style: Toast.Style.Failure,
-                          message: e instanceof Error ? e.message : "Unknown error",
-                        });
-                      }
-                    }}
-                  />
+                  {snippet.dynamicFields.length > 0 ? (
+                    <Action.Push
+                      title="Load Snippet Form"
+                      icon={Icon.Clipboard}
+                      shortcut={{ key: "c", modifiers: ["cmd"] }}
+                      target={<DynamicSnippetForm snippet={snippet} />}
+                    />
+                  ) : (
+                    <Action
+                      title="Copy Snippet"
+                      icon={Icon.Clipboard}
+                      shortcut={{ key: "c", modifiers: ["cmd"] }}
+                      onAction={async () => {
+                        await Clipboard.copy(snippet.snippet);
+                        try {
+                          XMLToFMObjects();
+                          closeMainWindow();
+                          showHUD("Copied to Clipboard");
+                        } catch (e) {
+                          showToast({
+                            title: "Error",
+                            style: Toast.Style.Failure,
+                            message: e instanceof Error ? e.message : "Unknown error",
+                          });
+                        }
+                      }}
+                    />
+                  )}
                   <Action.CopyToClipboard
                     title="Copy Raw Text"
                     icon={Icon.Text}
@@ -176,6 +189,12 @@ ${snippet.snippet}`}
                       }
                     />
                   )}
+                  <Action.Push
+                    title="Manage Dynamc Fields"
+                    shortcut={{ key: "d", modifiers: ["opt"] }}
+                    icon={Icon.Stars}
+                    target={<DynamicFieldsList snippet={snippet} revalidate={revalidate} />}
+                  />
                   <Action.Push
                     title="Duplicate Snippet"
                     shortcut={{ key: "d", modifiers: ["cmd"] }}
@@ -203,6 +222,22 @@ ${snippet.snippet}`}
                     icon={Icon.Finder}
                     shortcut={{ key: "r", modifiers: ["cmd", "opt"] }}
                   />
+                  <Action.CopyToClipboard content={snippet.id} title="Copy Snippet ID" icon={Icon.Clipboard} />
+                  {locationMap[snippet.locId]?.git || (
+                    <Action.Push
+                      title="Edit Snippet XML"
+                      icon={Icon.Dna}
+                      target={
+                        <EditSnippetXML
+                          onSubmit={() => {
+                            revalidate();
+                            pop();
+                          }}
+                          snippet={snippet}
+                        />
+                      }
+                    />
+                  )}
                   {/* <Action
                     title="Export Snippet"
                     icon={Icon.Upload}
@@ -237,4 +272,9 @@ ${snippet.snippet}`}
         ))}
     </List>
   );
+}
+
+function getAccessories(snippet: Snippet): List.Item.Accessory[] {
+  if (snippet.dynamicFields.length === 0) return [];
+  return [{ icon: Icon.Stars, text: snippet.dynamicFields.length.toString() }];
 }

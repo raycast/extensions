@@ -6,7 +6,8 @@
   "icon": "icon.png",
   "author": "destiner",
   "contributors": [
-    "kidonng"
+    "kidonng",
+    "sxn"
   ],
   "categories": [
     "Design Tools",
@@ -55,10 +56,12 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.38.1",
-    "axios": "^0.26.1"
+    "@raycast/api": "^1.48.0",
+    "axios": "^0.26.1",
+    "react-hooks-global-state": "^2.1.0"
   },
   "devDependencies": {
+    "@types/node": "^18.8.3",
     "@typescript-eslint/eslint-plugin": "^5.15.0",
     "@typescript-eslint/parser": "^5.15.0",
     "eslint": "^8.11.0",

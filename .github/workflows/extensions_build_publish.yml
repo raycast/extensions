@@ -61,7 +61,7 @@ jobs:
         if: failure() && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
         uses: raycast/github-actions/slack-send@master
         with:
-          webhook: ${{ github.event_name == 'workflow_dispatch' && secrets.SLACK_RELEASE_CHANNEL_WEBHOOK_URL || secrets.SLACK_STORE_REVIEW_CHANNEL_WEBHOOK_URL }}
+          webhook: ${{ github.event_name == 'workflow_dispatch' && secrets.SLACK_RELEASE_CHANNEL_WEBHOOK_URL || secrets.SLACK_STREAM_ERRORS_STORE_PUBLIC }}
           color: "danger"
           text: |
             :no_entry_sign: ${env.GITHUB_WORKFLOW} has failed
