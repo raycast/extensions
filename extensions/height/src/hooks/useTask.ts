@@ -10,7 +10,7 @@ type Props = {
 
 const include = JSON.stringify(["Lists", "ParentTasks"]);
 
-const endpoint = (taskId: string) => `${ApiUrls.tasks}/${taskId}?include=${include}`;
+const endpoint = (taskId: Props["taskId"]) => `${ApiUrls.tasks}/${taskId}?include=${include}`;
 
 export default function useTask({ taskId, options }: Props) {
   const { data, error, isLoading, mutate, revalidate } = useCachedPromise(

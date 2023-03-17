@@ -12,14 +12,18 @@ type Props = {
   options?: UseCachedPromiseOptions<typeof ApiTask.get>;
 };
 
-export default function useTasks({ listId, assigneeId, options }: Props = {}) {
+type EndpointProps = Pick<Props, "listId" | "assigneeId"> & {
+  apiResultsLimit?: Preferences["apiResultsLimit"];
+};
+
+const endpoint = ({ listId, assigneeId, apiResultsLimit }: EndpointProps) => {
   const filters = {};
 
   if (listId) {
     Object.assign(filters, { listIds: { values: [listId] } });
   }
 
-  if (assigneeId !== undefined && assigneeId !== "all") {
+  if (assigneeId && assigneeId !== "all") {
     Object.assign(filters, { assigneesIds: { values: [assigneeId] } });
   }
 
@@ -32,13 +36,19 @@ export default function useTasks({ listId, assigneeId, options }: Props = {}) {
 
   const include = JSON.stringify(["Lists", "ParentTasks"]);
 
+  return `${ApiUrls.tasks}?filters=${stringifiedFilters}&order=${order}&include=${include}&limit=${apiResultsLimit}`;
+};
+
+export default function useTasks({ listId, assigneeId, options }: Props = {}) {
   const { apiResultsLimit } = getPreferenceValues<Preferences>();
 
-  const endpoint = `${ApiUrls.tasks}?filters=${stringifiedFilters}&order=${order}&include=${include}&limit=${apiResultsLimit}`;
-
-  const { data, error, isLoading, mutate } = useCachedPromise(() => ApiTask.get(endpoint), [], {
-    ...options,
-  });
+  const { data, error, isLoading, mutate } = useCachedPromise(
+    (listId, assigneeId, apiResultsLimit) => ApiTask.get(endpoint({ listId, assigneeId, apiResultsLimit })),
+    [listId, assigneeId, apiResultsLimit],
+    {
+      ...options,
+    }
+  );
 
   const { unorderedTasks, orderedTasks } = useMemo(() => {
     const unorderedTasks = data?.list?.filter(
