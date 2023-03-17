@@ -464,10 +464,10 @@ export default function ActionsTask({
           content={task.name}
         />
         <Action.CopyToClipboard
-          title="Copy Task ID With Name"
+          title="Copy Task Name With ID"
           shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
           icon={Icon.CopyClipboard}
-          content={`${task.url.split("/").at(-1) ?? ""} ${task.name}`}
+          content={`${task.name} ${task.url.split("/").at(-1) ?? ""}`}
         />
         <Action.CopyToClipboard
           title="Copy Task URL"

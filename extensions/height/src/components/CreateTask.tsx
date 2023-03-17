@@ -172,7 +172,11 @@ export default function CreateList({ draftValues }: { draftValues?: CreateTaskFo
 
       <Form.DatePicker title="Due Date" {...itemProps.dueDate} />
 
-      <Form.Dropdown title="Parent Task" {...itemProps.parentTaskId}>
+      <Form.Dropdown
+        title="Parent Task"
+        info="The Parent Task depends on the Lists you selected above."
+        {...itemProps.parentTaskId}
+      >
         <Form.Dropdown.Item value="" title="No Task" />
         {tasks
           ?.filter((filteredParentTask) => filteredParentTask.listIds.some((id) => values.listIds.includes(id)))
