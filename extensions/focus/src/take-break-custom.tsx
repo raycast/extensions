@@ -1,4 +1,4 @@
-import { Toast, LaunchProps } from "@raycast/api";
+import { Toast, LaunchProps, open } from "@raycast/api";
 import { getInstallStatus, takeBreakCustom } from "./utils";
 
 interface FocusArguments {
@@ -10,7 +10,7 @@ export default async function (props: LaunchProps<{ arguments: FocusArguments }>
     title: "Starting break",
     style: Toast.Style.Animated,
   });
-  toast.show();
+  await toast.show();
 
   const { minutes } = props.arguments;
 
@@ -18,6 +18,7 @@ export default async function (props: LaunchProps<{ arguments: FocusArguments }>
     toast.title = "Focus is not installed";
     toast.message = "Install Focus app from: https://heyfocus.com";
     toast.style = Toast.Style.Failure;
+    await toast.show();
     return;
   }
 
