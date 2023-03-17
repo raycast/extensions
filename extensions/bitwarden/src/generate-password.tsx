@@ -5,10 +5,10 @@ import usePasswordGenerator from "~/utils/hooks/usePasswordGenerator";
 import { PasswordGeneratorOptions, PasswordOptionsToFieldEntries, PasswordType } from "~/types/passwords";
 import { PASSWORD_OPTIONS_MAP } from "~/constants/passwords";
 import { objectEntries } from "~/utils/objects";
-import FormActionPanel from "~/components/GeneratePassword/ActionPanel";
+import FormActionPanel from "~/components/generatePassword/ActionPanel";
 import { BitwardenProvider } from "~/context/bitwarden";
 import RootErrorBoundary from "~/components/RootErrorBoundary";
-import OptionField from "~/components/GeneratePassword/OptionField";
+import OptionField from "~/components/generatePassword/OptionField";
 
 const FormSpace = () => <Form.Description text="" />;
 

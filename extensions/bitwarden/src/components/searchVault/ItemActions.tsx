@@ -17,6 +17,7 @@ import { useBitwarden } from "~/context/bitwarden";
 import { useSession } from "~/context/session";
 import { Item, Reprompt } from "~/types/vault";
 import { getCardDetailsCopyValue, getCardDetailsMarkdown } from "~/utils/cards";
+import { getTransientCopyPreference } from "~/utils/preferences";
 import { capitalize, codeBlock } from "~/utils/strings";
 
 const { primaryAction } = getPreferenceValues();
@@ -44,7 +45,7 @@ const SearchItemActions = (props: SearchItemActionsProps) => {
     if (session.token) {
       const toast = await showToast(Toast.Style.Success, "Copying TOTP Code...");
       const totp = await bitwarden.getTotp(id, session.token);
-      await Clipboard.copy(totp);
+      await Clipboard.copy(totp, { transient: getTransientCopyPreference("other") });
       await toast.hide();
       await closeMainWindow({ clearRootSearch: true });
     } else {
@@ -88,6 +89,7 @@ const SearchItemActions = (props: SearchItemActionsProps) => {
               content={username}
               icon={Icon.Person}
               shortcut={{ modifiers: ["cmd"], key: "u" }}
+              transient={getTransientCopyPreference("other")}
             />
           )}
           {!!mainUri && (
@@ -110,7 +112,11 @@ const SearchItemActions = (props: SearchItemActionsProps) => {
                 markdown={getCardDetailsMarkdown(card)}
                 actions={
                   <ActionPanel>
-                    <Action.CopyToClipboard title="Copy Card Details" content={getCardDetailsCopyValue(card)} />
+                    <Action.CopyToClipboard
+                      title="Copy Card Details"
+                      content={getCardDetailsCopyValue(card)}
+                      transient={getTransientCopyPreference("other")}
+                    />
                   </ActionPanel>
                 }
               />
@@ -126,7 +132,11 @@ const SearchItemActions = (props: SearchItemActionsProps) => {
                 markdown={codeBlock(notes)}
                 actions={
                   <ActionPanel>
-                    <Action.CopyToClipboard title="Copy Secure Notes" content={notes} />
+                    <Action.CopyToClipboard
+                      title="Copy Secure Notes"
+                      content={notes}
+                      transient={getTransientCopyPreference("other")}
+                    />
                   </ActionPanel>
                 }
               />
@@ -137,7 +147,12 @@ const SearchItemActions = (props: SearchItemActionsProps) => {
       <ActionPanel.Section>
         {Object.entries({ notes, ...card, ...identity, ...fieldMap, ...uriMap }).map(([title, content], index) =>
           content ? (
-            <Action.CopyToClipboard key={`${index}-${title}`} title={`Copy ${capitalize(title)}`} content={content} />
+            <Action.CopyToClipboard
+              key={`${index}-${title}`}
+              title={`Copy ${capitalize(title)}`}
+              content={content}
+              transient={getTransientCopyPreference("password")}
+            />
           ) : null
         )}
       </ActionPanel.Section>
