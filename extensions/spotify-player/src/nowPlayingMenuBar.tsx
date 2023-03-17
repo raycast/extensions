@@ -14,15 +14,23 @@ import { isSpotifyInstalled } from "./helpers/isSpotifyInstalled";
 import { isTrack } from "./helpers/track";
 
 function NowPlayingMenuBarCommand() {
-  const { currentPlayingData } = useCurrentPlayingTrack();
+  const { currentPlayingData, currentPlayingError, currentPlayingIsLoading } = useCurrentPlayingTrack();
   const [isPaused, setIsPaused] = useState(currentPlayingData?.is_playing === false);
   const [songAlreadyLiked, setSongAlreadyLiked] = useState<boolean | null>(null);
   const preferences = getPreferenceValues();
+
+
+
+
 
   const trackAlreadyLiked = async (trackId: string) => {
     const songResponse = await containsMySavedTracks({ trackIds: [trackId] });
     setSongAlreadyLiked(songResponse[0]);
   };
+
+  if (currentPlayingError) {
+    return null;
+  }
 
   useEffect(() => {
     setIsPaused(currentPlayingData?.is_playing === false);
@@ -34,7 +42,7 @@ function NowPlayingMenuBarCommand() {
   const isIdle = currentPlayingData && Object.keys(currentPlayingData).length === 0;
 
   if (isIdle) {
-    null;
+    return null;
   }
 
   if (!currentPlayingData) {
@@ -52,7 +60,8 @@ function NowPlayingMenuBarCommand() {
   const artistId = artists[0]?.id;
 
   const makeTitle = (title: string) => {
-    const max = Number(preferences.maxtitlelength);
+
+    const max = Number(preferences.maxTitleLength);
     const showEllipsis = Boolean(preferences.showEllipsis);
 
     if (Number.isNaN(max) || max <= 0 || title.length <= max) {
@@ -60,10 +69,13 @@ function NowPlayingMenuBarCommand() {
     }
 
     return title.substring(0, max).trim() + (showEllipsis ? "…" : "");
+
   };
 
+  const title = makeTitle(`${trackName} by ${artistName}`)
+
   return (
-    <MenuBarExtra icon="icon.png" title={makeTitle(trackName)} tooltip={trackName}>
+    <MenuBarExtra isLoading={currentPlayingIsLoading} icon="icon.png" title={title} tooltip={`${trackName} by ${artistName}`}>
       {!isPaused && (
         <MenuBarExtra.Item
           icon={Icon.PauseFilled}

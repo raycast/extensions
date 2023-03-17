@@ -3,7 +3,7 @@ import fetch from "node-fetch";
 import { URLSearchParams } from "url";
 
 const clientId = "b997e8ba5e5f473eb3f846666d85f064";
-const scope = "user-library-modify user-modify-playback-state user-read-currently-playing user-library-read";
+const scope = "user-library-modify user-modify-playback-state user-read-currently-playing user-library-read user-follow-read playlist-read-collaborative playlist-read-private";
 
 export const oauthClient = new OAuth.PKCEClient({
   redirectMethod: OAuth.RedirectMethod.Web,

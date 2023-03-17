@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Icon, showHUD } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, launchCommand, LaunchType, showHUD } from "@raycast/api";
 import { isSpotifyInstalled } from "../helpers/isSpotifyInstalled";
 import { AlbumsGrid } from "./AlbumsGrid";
 import { useArtistAlbums } from "../hooks/useArtistAlbums";
@@ -21,8 +21,9 @@ export function ArtistActionPanel({ title, artist }: ArtistActionPanelProps) {
         icon={Icon.Play}
         title="Play"
         onAction={async () => {
-          await play({ contextUri: artist.uri });
-          showHUD(`Playing ${title}`);
+          await play({ id: artist.id, type: 'artist' });
+          await showHUD(`Playing ${title}`);
+          {/* await launchCommand({ name: 'nowPlayingMenuBar', type: LaunchType.UserInitiated }) */ }
         }}
       />
       {albums && (

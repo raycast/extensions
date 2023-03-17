@@ -1,7 +1,7 @@
 import { Grid, List, showToast, Toast } from "@raycast/api";
 import { useState } from "react";
 import View from "./components/View";
-import { useSearch } from "./hooks/useSearch";
+import { useMyLibrary } from "./hooks/useMyLibrary";
 import { ArtistsSection } from "./components/ArtistsSection";
 import { AlbumsSection } from "./components/AlbumsSection";
 import { TracksSection } from "./components/TracksSection";
@@ -9,31 +9,31 @@ import { PlaylistsSection } from "./components/PlaylistsSection";
 
 const filters = {
   all: "All",
-  artists: "Artists",
-  albums: "Albums",
-  tracks: "Songs",
   playlists: "Playlists",
+  albums: "Albums",
+  artists: "Artists",
+  tracks: "Songs",
 };
 
 type FilterValue = keyof typeof filters;
 
-function SearchCommand() {
+function MyLibraryCommand() {
   const [searchText, setSearchText] = useState("");
   const [searchFilter, setSearchFilter] = useState<FilterValue>("all");
-  const { searchData, searchError, searchIsLoading } = useSearch({
-    query: searchText,
-    limit: 32,
+  const { myLibraryData, myLibraryError, myLibraryIsLoading } = useMyLibrary({
     options: { keepPreviousData: true },
   });
 
-  if (searchError) {
-    showToast(Toast.Style.Failure, "Search has failed", searchError.message);
+
+  if (myLibraryError) {
+    showToast(Toast.Style.Failure, "Search has failed", myLibraryError.message);
   }
+
 
   const sharedProps = {
     searchBarPlaceholder: "What do you want to listen to",
     onSearchTextChange: setSearchText,
-    isLoading: searchIsLoading,
+    isLoading: myLibraryIsLoading,
     throttle: true,
     searchText,
   };
@@ -56,14 +56,15 @@ function SearchCommand() {
       >
         {searchFilter === "all" && (
           <>
-            <ArtistsSection type="list" limit={3} columns={6} artists={searchData?.artists?.items} />
-            <AlbumsSection type="list" limit={3} columns={8} albums={searchData?.albums?.items} />
-            <TracksSection limit={6} tracks={searchData?.tracks?.items} />
-            <PlaylistsSection type="list" limit={6} columns={8} playlists={searchData?.playlists?.items} />
+            <PlaylistsSection type="list" limit={6} columns={8} playlists={myLibraryData?.playlists?.items} />
+            <AlbumsSection type="list" limit={6} columns={8} albums={myLibraryData?.albums?.items} />
+            <ArtistsSection type="list" limit={6} columns={6} artists={myLibraryData?.artists?.items} />
+            <TracksSection limit={6} tracks={myLibraryData?.tracks?.items} />
+
           </>
         )}
 
-        {searchFilter === "tracks" && <TracksSection tracks={searchData?.tracks?.items} />}
+        {searchFilter === "tracks" && <TracksSection tracks={myLibraryData?.tracks?.items} />}
       </List>
     );
   }
@@ -83,12 +84,12 @@ function SearchCommand() {
         </Grid.Dropdown>
       }
     >
-      {searchFilter === "artists" && <ArtistsSection type="grid" columns={6} artists={searchData?.artists?.items} />}
+      {searchFilter === "artists" && <ArtistsSection type="grid" columns={6} artists={myLibraryData?.artists?.items} />}
 
-      {searchFilter === "albums" && <AlbumsSection type="grid" columns={6} albums={searchData?.albums?.items} />}
+      {searchFilter === "albums" && <AlbumsSection type="grid" columns={6} albums={myLibraryData?.albums?.items} />}
 
       {searchFilter === "playlists" && (
-        <PlaylistsSection type="grid" columns={6} playlists={searchData?.playlists?.items} />
+        <PlaylistsSection type="grid" columns={6} playlists={myLibraryData?.playlists?.items} />
       )}
     </Grid>
   );
@@ -97,7 +98,7 @@ function SearchCommand() {
 export default function Command() {
   return (
     <View>
-      <SearchCommand />
+      <MyLibraryCommand />
     </View>
   );
 }
