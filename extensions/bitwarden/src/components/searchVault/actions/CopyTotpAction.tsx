@@ -8,7 +8,6 @@ function CopyTotpAction() {
   const { name, login } = useSelectedVaultItem();
   const bitwarden = useBitwarden();
   const session = useSession();
-
   const code = login?.totp;
 
   if (!code) return null;
