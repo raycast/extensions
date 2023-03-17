@@ -6,8 +6,8 @@ ChatGPT integration for Raycast by Ex10si0n
 
 Prompt
 
-![Prompt](img/img1.png)
+![Prompt](metadata/chatgpt-integration-1.png)
 
 Response
 
-![Response](img/img2.png)
+![Response](metadata/chatgpt-integration-2.png)
