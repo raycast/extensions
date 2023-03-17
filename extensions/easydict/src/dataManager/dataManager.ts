@@ -3,13 +3,13 @@ import { OpenAITranslateResult } from "./../types";
  * @author: tisfeng
  * @createTime: 2022-06-26 11:13
  * @lastEditor: tisfeng
- * @lastEditTime: 2023-03-17 11:30
+ * @lastEditTime: 2023-03-17 22:43
  * @fileName: dataManager.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
  */
 
-import { Toast, environment, showToast } from "@raycast/api";
+import { environment } from "@raycast/api";
 import axios from "axios";
 import { getProxyAgent } from "../axiosConfig";
 import { detectLanguage } from "../detectLanauge/detect";
@@ -822,16 +822,6 @@ export class DataManager {
     if (!showingLoadingState) {
       console.log("All queries finished.");
       this.abortController = undefined;
-
-      showToast({
-        style: Toast.Style.Success,
-        title: `Finished ✅`,
-      });
-    } else {
-      showToast({
-        style: Toast.Style.Animated,
-        title: `Searching 🔍`,
-      });
     }
   }
 
