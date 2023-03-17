@@ -223,19 +223,29 @@ export const ContentView = (props: ContentViewProps) => {
       {getModeActionSection((mode) => {
         setMode(mode);
       })}
-      <ActionPanel.Section title="Delete">
+      <ActionPanel.Section title="History">
         <Action
           title="Delete Item"
           icon={Icon.Trash}
           style={Action.Style.Destructive}
-          shortcut={{ modifiers: ["cmd"], key: "delete" }}
-          onAction={() => history.remove(record)}
+          shortcut={{ modifiers: ["ctrl"], key: "x" }}
+          onAction={async () =>{
+            if (
+              await confirmAlert({
+                title: "Remove Item?",
+              })
+            ) {
+              history.remove(record)
+            }
+          }
+          }
         />
         {
         <Action
           title="Clear History"
           icon={Icon.DeleteDocument}
           style={Action.Style.Destructive}
+          shortcut={{ modifiers: ["ctrl", "opt"], key: "x" }}
           onAction={async () => {
             if (
               await confirmAlert({
@@ -261,7 +271,7 @@ export const ContentView = (props: ContentViewProps) => {
             id={item.id}
             key={item.id}
             title={item.query.text}
-            accessories={[{ text: `#${i}` }]}
+            accessories={[{ text: `#${i+1}` }]}
             actions={getQueryingActionPanel()}
             detail={
               <DetailView
