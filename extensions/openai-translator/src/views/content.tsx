@@ -51,8 +51,8 @@ export const ContentView = (props: ContentViewProps) => {
 
   const ref = useRef<string>();
   function updateData() {
-    console.log("updateData", data, history.data, querying)
-    if(history.data){
+    console.log("updateData", data, history.data, querying);
+    if (history.data) {
       const sortedResults = history.data.sort(
         (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
       );
@@ -61,11 +61,11 @@ export const ContentView = (props: ContentViewProps) => {
         if (sortedResults.length > 0) {
           setSelectedId(sortedResults[0].id);
         }
-        setIsInit(false)
+        setIsInit(false);
       } else {
         setData([querying, ...sortedResults]);
         setSelectedId("querying");
-        setIsInit(false)
+        setIsInit(false);
       }
     }
   }
@@ -175,8 +175,8 @@ export const ContentView = (props: ContentViewProps) => {
   }, [translatedText]);
 
   useEffect(() => {
-    setIsEmpty(data == undefined || data.length == 0)
-  })
+    setIsEmpty(data == undefined || data.length == 0);
+  });
 
   const getQueryingActionPanel = () => (
     <ActionPanel>
@@ -229,34 +229,34 @@ export const ContentView = (props: ContentViewProps) => {
           icon={Icon.Trash}
           style={Action.Style.Destructive}
           shortcut={{ modifiers: ["ctrl"], key: "x" }}
-          onAction={async () =>{
+          onAction={async () => {
             if (
               await confirmAlert({
                 title: "Remove Item?",
               })
             ) {
-              history.remove(record)
-            }
-          }
-          }
-        />
-        {
-        <Action
-          title="Clear History"
-          icon={Icon.DeleteDocument}
-          style={Action.Style.Destructive}
-          shortcut={{ modifiers: ["ctrl", "opt"], key: "x" }}
-          onAction={async () => {
-            if (
-              await confirmAlert({
-                title: "Clear History?",
-                message: `${history.data?.length} items will be removed.`,
-              })
-            ) {
-              history.clear();
+              history.remove(record);
             }
           }}
-        />}
+        />
+        {
+          <Action
+            title="Clear History"
+            icon={Icon.DeleteDocument}
+            style={Action.Style.Destructive}
+            shortcut={{ modifiers: ["ctrl", "opt"], key: "x" }}
+            onAction={async () => {
+              if (
+                await confirmAlert({
+                  title: "Clear History?",
+                  message: `${history.data?.length} items will be removed.`,
+                })
+              ) {
+                history.clear();
+              }
+            }}
+          />
+        }
       </ActionPanel.Section>
     </ActionPanel>
   );
@@ -271,7 +271,7 @@ export const ContentView = (props: ContentViewProps) => {
             id={item.id}
             key={item.id}
             title={item.query.text}
-            accessories={[{ text: `#${i+1}` }]}
+            accessories={[{ text: `#${i + 1}` }]}
             actions={getQueryingActionPanel()}
             detail={
               <DetailView

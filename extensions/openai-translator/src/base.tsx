@@ -23,8 +23,8 @@ export default function getBase(
     forceEnableAutoLoadClipboard,
   });
   const history = useHistory();
-  const [isInit, setIsInit] = useState<boolean>(true)
-  const [isEmpty, setIsEmpty] = useState<boolean>(true)
+  const [isInit, setIsInit] = useState<boolean>(true);
+  const [isEmpty, setIsEmpty] = useState<boolean>(true);
   return (
     <List
       searchText={query.text}
@@ -57,7 +57,15 @@ export default function getBase(
         </ActionPanel>
       }
     >
-      <ContentView query={query} history={history} mode={mode} setMode={setMode} setSelectedId={setSelectedId} setIsInit={setIsInit} setIsEmpty={setIsEmpty}/>
+      <ContentView
+        query={query}
+        history={history}
+        mode={mode}
+        setMode={setMode}
+        setSelectedId={setSelectedId}
+        setIsInit={setIsInit}
+        setIsEmpty={setIsEmpty}
+      />
     </List>
   );
 }

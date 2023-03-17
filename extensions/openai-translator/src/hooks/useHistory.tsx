@@ -25,14 +25,13 @@ export function useHistory(): HistoryHook {
   useEffect(() => {
     (async () => {
       const storedHistory = await LocalStorage.getItem<string>("history");
-      setData((storedHistory)? JSON.parse(storedHistory) : [])
+      setData(storedHistory ? JSON.parse(storedHistory) : []);
       setLoading(false);
-    }
-    )();
+    })();
   }, []);
 
   useEffect(() => {
-    if(data){
+    if (data) {
       LocalStorage.setItem("history", JSON.stringify(data));
     }
   }, [data]);
@@ -41,7 +40,7 @@ export function useHistory(): HistoryHook {
     async (record: Record) => {
       // console.log(`add ${record.result.text}`)
       const max = parseInt(maxHistorySize) || 30;
-      if(data){
+      if (data) {
         const slice = data.length > max ? data.slice(data.length - max, data.length) : data;
         setData([...slice, record]);
       }
@@ -51,7 +50,7 @@ export function useHistory(): HistoryHook {
 
   const remove = useCallback(
     async (record: Record) => {
-      if (data){
+      if (data) {
         const toast = await showToast({
           title: "Removing record...",
           style: Toast.Style.Animated,
