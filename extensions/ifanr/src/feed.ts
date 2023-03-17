@@ -2,10 +2,10 @@ import Parser from "rss-parser";
 
 const parser = new Parser<IFeed, IFeedItem>();
 
-const RSS_PATH = "https://www.ifanr.com/feed";
+const RSS = "https://www.ifanr.com/feed";
 
 export async function feed() {
-  const feed = await parser.parseURL(RSS_PATH);
+  const feed = await parser.parseURL(RSS);
   return parse(feed);
 }
 
