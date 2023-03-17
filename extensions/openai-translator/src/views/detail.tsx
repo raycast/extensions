@@ -19,7 +19,7 @@ export const DetailView = (props: DetailViewProps) => {
       markdown={`${text}\n\n\`\`\`\n${original}\n\`\`\``}
       metadata={
         <Detail.Metadata>
-          <Detail.Metadata.Label title="From" text={`${langMap.get(from) || "Auto"}`} />
+          {mode != "what" ? <Detail.Metadata.Label title="From" text={`${langMap.get(from) || "Auto"}`} /> : null}
           <Detail.Metadata.Label title="To" text={`${langMap.get(to)}`} />
           <Detail.Metadata.Label title="Mode" text={capitalize(mode)} />
           {created_at && <Detail.Metadata.Label title="Created At" text={`${created_at}`} />}

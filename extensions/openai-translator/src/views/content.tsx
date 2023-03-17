@@ -3,6 +3,7 @@ import {
   ActionPanel,
   Alert,
   clearSearchBar,
+  confirmAlert,
   getPreferenceValues,
   Icon,
   List,
@@ -211,12 +212,30 @@ export const ContentView = (props: ContentViewProps) => {
       {getModeActionSection((mode) => {
         setMode(mode);
       })}
-      <Action
-        title="Delete Translation"
-        icon={Icon.Trash}
-        shortcut={{ modifiers: ["cmd"], key: "delete" }}
-        onAction={() => history.remove(record)}
-      />
+      <ActionPanel.Section title="Delete">
+        <Action
+          title="Delete Item"
+          icon={Icon.Trash}
+          style={Action.Style.Destructive}
+          shortcut={{ modifiers: ["cmd"], key: "delete" }}
+          onAction={() => history.remove(record)}
+        />
+        <Action
+          title="Clear History"
+          icon={Icon.DeleteDocument}
+          style={Action.Style.Destructive}
+          onAction={async () => {
+            if (
+              await confirmAlert({
+                title: "Clear History?",
+                message: `${history.data.length} items will be removed.`,
+              })
+            ) {
+              history.clear();
+            }
+          }}
+        />
+      </ActionPanel.Section>
     </ActionPanel>
   );
 
