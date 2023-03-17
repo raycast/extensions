@@ -214,6 +214,7 @@ export const ContentView = (props: ContentViewProps) => {
       <Action
         title="Delete Translation"
         icon={Icon.Trash}
+        style={Action.Style.Destructive}
         shortcut={{ modifiers: ["cmd"], key: "delete" }}
         onAction={() => history.remove(record)}
       />
