@@ -41,8 +41,9 @@ export function TransactionItem({ transaction }: { transaction: TransactionDetai
       title={transaction.payee_name ?? transaction.id}
       subtitle={formatToReadablePrice({ amount: transaction.amount, currency })}
       accessories={[
+        transaction.transfer_account_id ? { icon: Icon.Switch, tooltip: 'Transfer' } : {},
         {
-          icon: showFlags ? { source: Icon.Dot, tintColor: getFlagColor(transaction.flag_color) } : undefined
+          icon: showFlags ? { source: Icon.Flag, tintColor: getFlagColor(transaction.flag_color) } : undefined
         },
         {
           text: dayjs(transaction.date).fromNow()
