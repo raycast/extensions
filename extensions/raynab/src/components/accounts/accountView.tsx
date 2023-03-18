@@ -18,18 +18,24 @@ export function AccountView() {
           key={account.id}
           icon={{ source: Icon.Circle, tintColor: account.on_budget ? Color.Green : Color.Red }}
           title={account.name}
-          accessoryTitle={formatToReadablePrice({
-            amount: account.balance,
-            currency: activeBudgetCurrency,
-          })}
-          accessoryIcon={{
-            source: Icon.Link,
-            tintColor: account.direct_import_linked
-              ? account.direct_import_in_error
-                ? Color.Red
-                : Color.Green
-              : Color.SecondaryText,
-          }}
+          accessories={[
+            {
+              text: formatToReadablePrice({
+                amount: account.balance,
+                currency: activeBudgetCurrency
+              })
+            },
+            {
+              icon: {
+                source: Icon.Link,
+                tintColor: account.direct_import_linked
+                  ? account.direct_import_in_error
+                    ? Color.Red
+                    : Color.Green
+                  : Color.SecondaryText,
+              }
+            }
+          ]}
           actions={
             <ActionPanel>
               <Action.Push

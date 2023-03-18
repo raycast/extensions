@@ -67,7 +67,9 @@ function BudgetItem({
     <List.Item
       icon={Icon.Document}
       title={budget.name}
-      accessoryIcon={budget.id === selectedId ? { source: Icon.Checkmark, tintColor: Color.Green } : Icon.Circle}
+      accessories={[
+        { icon: budget.id === selectedId ? { source: Icon.Checkmark, tintColor: Color.Green } : Icon.Circle }
+      ]}
       actions={
         <ActionPanel title="Inspect Budget">
           <Action title="Select Budget" onAction={onToggle} />

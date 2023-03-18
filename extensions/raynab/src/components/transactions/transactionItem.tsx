@@ -40,8 +40,14 @@ export function TransactionItem({ transaction }: { transaction: TransactionDetai
       id={transaction.id}
       title={transaction.payee_name ?? transaction.id}
       subtitle={formatToReadablePrice({ amount: transaction.amount, currency })}
-      accessoryIcon={showFlags ? { source: Icon.Dot, tintColor: getFlagColor(transaction.flag_color) } : undefined}
-      accessoryTitle={dayjs(transaction.date).fromNow()}
+      accessories={[
+        {
+          icon: showFlags ? { source: Icon.Dot, tintColor: getFlagColor(transaction.flag_color) } : undefined
+        },
+        {
+          text: dayjs(transaction.date).fromNow()
+        }
+      ]}
       actions={
         <ActionPanel title="Inspect Transaction">
           <ActionPanel.Section>
