@@ -59,7 +59,7 @@ export function TransactionEditForm({ transaction }: { transaction: TransactionD
     >
       <Form.Description
         title="Edit Transaction"
-        text="Change one or more of the following fields to update the transaction. Amount can be positive or negative."
+        text="Change one or more of the following fields to update the transaction. Amounts can be positive or negative."
       />
       <Form.DatePicker
         id="date"
