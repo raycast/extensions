@@ -1,0 +1,42 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "openai-gpt3-translate",
+  "title": "OpenAI GPT3 Translate",
+  "description": "",
+  "icon": "command-icon.png",
+  "author": "pianweiwan",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Trans",
+      "subtitle": "OpenAI GPT3 Translate",
+      "description": "OpenAI GPT3 Translate",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@microsoft/fetch-event-source": "^2.0.1",
+    "@raycast/api": "^1.48.8",
+    "eventsource": "^2.0.2",
+    "node-fetch": "^3.3.1",
+    "ws": "^8.13.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/eventsource": "^1.1.11",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "@types/ws": "^8.5.4",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
