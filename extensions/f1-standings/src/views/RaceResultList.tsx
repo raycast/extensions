@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Color, List } from "@raycast/api";
 import { useState } from "react";
 import { useFormula1DriverUrl, useRaceResult } from "../hooks";
-import { RaceResult, RaceResultItem } from "../types";
+import { RaceResultItem } from "../types";
 import { getFlag } from "../utils";
 
 interface RaceResultViewProps {
@@ -27,25 +27,40 @@ function RaceResultList({ season, round }: RaceResultViewProps) {
     >
       {raceResult && (
         <List.Section title={`${raceResult.raceName} ${new Date(raceResult.date).toLocaleDateString()}`}>
-          {raceResult.Results.map((item) => (
-            <List.Item
-              id={item.Driver.driverId}
-              key={item.Driver.driverId}
-              icon={{
-                source: item.position + ".png",
-                tintColor: Color.PrimaryText,
-              }}
-              title={getFlag(item.Driver.nationality) + " " + item.Driver.givenName + " " + item.Driver.familyName}
-              subtitle={item.Constructor.name}
-              actions={
-                <ActionPanel title={item.Driver.givenName + " " + item.Driver.familyName}>
-                  <Action.OpenInBrowser title="View on Wikipedia.org" url={item.Driver.url} icon="wikipedia.png" />
-                  {driverUrl && <Action.OpenInBrowser title="View on Formula1.com" url={driverUrl} icon="🏎️" />}
-                </ActionPanel>
-              }
-              accessories={[{ text: String(item.points) }]}
-            />
-          ))}
+          {raceResult.Results.map((item) => {
+            const accessories: List.Item.Accessory[] = [
+              {
+                tag: {
+                  value: `Points: ${item.points}`,
+                  color: Number.parseInt(item.points, 10) > 0 ? Color.Green : Color.SecondaryText,
+                },
+              },
+            ];
+            if (item.status && item.status !== "Finished") {
+              accessories.unshift({
+                tag: { value: item.status, color: item.status.match(/\+\d+ (Lap|Laps)/) ? Color.Yellow : Color.Red },
+              });
+            }
+            return (
+              <List.Item
+                id={item.Driver.driverId}
+                key={item.Driver.driverId}
+                icon={{
+                  source: item.position + ".png",
+                  tintColor: Color.PrimaryText,
+                }}
+                title={getFlag(item.Driver.nationality) + " " + item.Driver.givenName + " " + item.Driver.familyName}
+                subtitle={item.Constructor.name}
+                actions={
+                  <ActionPanel title={item.Driver.givenName + " " + item.Driver.familyName}>
+                    <Action.OpenInBrowser title="View on Wikipedia.org" url={item.Driver.url} icon="wikipedia.png" />
+                    {driverUrl && <Action.OpenInBrowser title="View on Formula1.com" url={driverUrl} icon="🏎️" />}
+                  </ActionPanel>
+                }
+                accessories={accessories}
+              />
+            );
+          })}
         </List.Section>
       )}
     </List>
