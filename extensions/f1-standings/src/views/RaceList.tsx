@@ -143,7 +143,7 @@ function RaceList() {
                       />
                     ) : null}
                     <Action
-                      title={"Add to calendar"}
+                      title={"Add to Calendar"}
                       icon={Icon.Calendar}
                       onAction={() => push(<AddToCalendar race={race} raceDates={raceDates} />)}
                     />
