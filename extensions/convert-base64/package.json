@@ -1,0 +1,66 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "convert-base64",
+  "title": "Convert Base64",
+  "description": "This Raycast extension allows you to easily and quickly encode and decode strings and images to and from Base64 format.",
+  "icon": "command-icon.png",
+  "author": "yuta-ike",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "base64-encode",
+      "title": "Encode to Base64",
+      "subtitle": "encode to base64.",
+      "description": "Encode input data to Base64 format string.",
+      "mode": "view"
+    },
+    {
+      "name": "base64-decode",
+      "title": "Decode from Base64",
+      "subtitle": "decode from base64 string",
+      "description": "Decode from Base64 format string.",
+      "mode": "view"
+    },
+    {
+      "name": "base64-img-encode",
+      "title": "Encode Image to Base64",
+      "subtitle": "encode image to base64 format.",
+      "description": "Encode input image to Basae64 format.",
+      "mode": "view"
+    },
+    {
+      "name": "base64-img-decode",
+      "title": "Decode Image from Base64",
+      "subtitle": "decode image from base64 format.",
+      "description": "Decode Basae64 format to image.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.48.9",
+    "@raycast/utils": "^1.5.2",
+    "base64-img": "^1.0.4",
+    "file-type": "^18.2.1",
+    "image-size": "^1.0.2",
+    "js-base64": "^3.7.5",
+    "run-applescript": "^6.1.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
