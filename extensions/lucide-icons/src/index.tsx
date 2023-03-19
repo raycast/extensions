@@ -1,8 +1,8 @@
-import { useState, useMemo } from "react";
-import { ActionPanel, Action, Grid, environment, Color, Icon } from "@raycast/api";
+import { Action, ActionPanel, Color, environment, Grid, Icon } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import { readdirSync, readFileSync } from "fs";
 import { join } from "path";
+import { useMemo } from "react";
 
 // Lucide's toPascalCase function
 export const toPascalCase = (string: string) => {
@@ -16,17 +16,19 @@ export const toPascalCase = (string: string) => {
 export default function Command() {
   const files = useMemo(
     () =>
-      readdirSync(join(environment.assetsPath, "icons")).map((file) => [
-        join(environment.assetsPath, "icons", file),
-        file.split(".")[0],
-      ]),
+      readdirSync(join(environment.assetsPath, "icons"))
+        .filter((file) => file.endsWith(".svg"))
+        .map((file) => {
+          return [join(environment.assetsPath, "icons", file), file.split(".")[0]];
+        }),
     []
   );
+
   const [color, setColor] = useCachedState<Color>("color", Color.PrimaryText);
-  const [itemSize, setItemSize] = useCachedState<Grid.ItemSize>("size", Grid.ItemSize.Medium);
+  const [columns, setColumns] = useCachedState<number>("size", 8);
 
   return (
-    <Grid itemSize={itemSize} inset={Grid.Inset.Large}>
+    <Grid columns={columns} inset={Grid.Inset.Large}>
       {files.map(([path, name]) => (
         <Grid.Item
           key={name}
@@ -40,17 +42,17 @@ export default function Command() {
               <Action.CopyToClipboard content={`<${toPascalCase(name)} />`} title="Copy Component to Clipboard" />
               <ActionPanel.Section title="Preferences">
                 <ActionPanel.Submenu title="Change Size…" icon={Icon.MagnifyingGlass}>
-                  {Object.entries(Grid.ItemSize).map(([key, size]) => (
-                    <Action key={size} title={key} onAction={() => setItemSize(size)} />
+                  {[4, 6, 8].map((columns) => (
+                    <Action key={columns} title={columns.toString()} onAction={() => setColumns(columns)} />
                   ))}
                 </ActionPanel.Submenu>
                 <ActionPanel.Submenu title="Change Color…" icon={Icon.EyeDropper}>
                   {Object.entries(Color).map(([key, color]) => (
                     <Action
-                      key={color}
+                      key={color.toString()}
                       title={key}
                       icon={{ source: Icon.Circle, tintColor: color }}
-                      onAction={() => setColor(color)}
+                      onAction={() => setColor(color as Color)}
                     />
                   ))}
                 </ActionPanel.Submenu>
