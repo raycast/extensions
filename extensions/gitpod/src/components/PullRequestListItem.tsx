@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, List, open } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, open, getPreferenceValues } from "@raycast/api";
 // import { MutatePromise } from "@raycast/utils";
 import { format } from "date-fns";
 import { useMemo } from "react";
@@ -28,6 +28,7 @@ export default function PullRequestListItem({ pullRequest, viewer }: PullRequest
   const author = getPullRequestAuthor(pullRequest);
   const status = getPullRequestStatus(pullRequest);
   const reviewDecision = getReviewDecision(pullRequest.reviewDecision);
+  const { gitpodDomain } = getPreferenceValues();
 
   const accessories: List.Item.Accessory[] = [
     {
@@ -79,7 +80,7 @@ export default function PullRequestListItem({ pullRequest, viewer }: PullRequest
           <Action
             title="Open PR in Gitpod"
             onAction={() => {
-              open(`https://gitpod.io/#${pullRequest.permalink}`);
+              open(`https://${gitpodDomain}/#${pullRequest.permalink}`);
             }}
           />
           <Action

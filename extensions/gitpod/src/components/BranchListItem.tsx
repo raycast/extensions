@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, List, open } from "@raycast/api";
+import { Action, ActionPanel, Color, List, open, getPreferenceValues } from "@raycast/api";
 
 import { branchStatus, GitpodIcons } from "../../constants";
 import { BranchDetailsFragment, UserFieldsFragment } from "../generated/graphql";
@@ -13,6 +13,7 @@ type BranchItemProps = {
 export default function BranchListItem({ branch, mainBranch, repository }: BranchItemProps) {
   const accessories: List.Item.Accessory[] = [];
   const branchURL = "https://github.com/" + repository + "/tree/" + branch.branchName;
+  const { gitpodDomain } = getPreferenceValues();
 
   if (branch.compData) {
     if (branch.compData.status) {
@@ -66,7 +67,7 @@ export default function BranchListItem({ branch, mainBranch, repository }: Branc
           <Action
             title="Open Branch in Gitpod"
             onAction={() => {
-              open(`https://gitpod.io/#${branchURL}`);
+              open(`https://${gitpodDomain}/#${branchURL}`);
             }}
           />
           <Action

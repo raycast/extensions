@@ -1,4 +1,14 @@
-import { Color, List, ActionPanel, Action, showToast, Toast, open, useNavigation } from "@raycast/api";
+import {
+  Color,
+  List,
+  ActionPanel,
+  Action,
+  showToast,
+  Toast,
+  open,
+  useNavigation,
+  getPreferenceValues,
+} from "@raycast/api";
 import { MutatePromise } from "@raycast/utils";
 
 import { GitpodIcons } from "../../constants";
@@ -17,6 +27,7 @@ export default function RepositoryListItem({ repository, isGitpodified, onVisit 
   const { push } = useNavigation();
   const owner = getGitHubUser(repository.owner);
   const numberOfStars = repository.stargazerCount;
+  const { gitpodDomain } = getPreferenceValues();
 
   const accessories: List.Item.Accessory[] = [
     {
@@ -30,7 +41,7 @@ export default function RepositoryListItem({ repository, isGitpodified, onVisit 
       style: Toast.Style.Success,
     });
     setTimeout(() => {
-      open(`https://gitpod.io/#${repository.url}`);
+      open(`https://${gitpodDomain}/#${repository.url}`);
     }, 1500);
   };
 

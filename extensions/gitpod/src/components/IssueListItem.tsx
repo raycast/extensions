@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, List, open } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, open, getPreferenceValues } from "@raycast/api";
 import { MutatePromise } from "@raycast/utils";
 import { format } from "date-fns";
 
@@ -24,6 +24,7 @@ export default function IssueListItem({ issue }: IssueListItemProps) {
 
   const author = getIssueAuthor(issue);
   const status = getIssueStatus(issue);
+  const { gitpodDomain } = getPreferenceValues();
 
   const accessories: List.Item.Accessory[] = [
     {
@@ -62,7 +63,7 @@ export default function IssueListItem({ issue }: IssueListItemProps) {
           <Action
             title="Open Issue in Gitpod"
             onAction={() => {
-              open(`https://gitpod.io/#${issue.url}`);
+              open(`https://${gitpodDomain}/#${issue.url}`);
             }}
           />
           <Action

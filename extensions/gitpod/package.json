@@ -48,6 +48,15 @@
       "description": "Enter Classic Personal Access Token from Github",
       "type": "password",
       "required": true
+    },
+    {
+      "name": "gitpodDomain",
+      "title": "Gitpod domain",
+      "placeholder": "gitpod.io",
+      "description": "The domain of your Gitpod installation",
+      "type": "textfield",
+      "default": "gitpod.io",
+      "required": false
     }
   ],
   "dependencies": {
