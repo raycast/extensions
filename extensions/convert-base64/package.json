@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "convert-base64",
   "title": "Convert Base64",
-  "description": "This Raycast extension allows you to easily and quickly encode and decode strings and images to and from Base64 format.",
+  "description": "This extension allows you to easily and quickly encode and decode strings and images to and from Base64 format.",
   "icon": "command-icon.png",
   "author": "yuta-ike",
   "categories": [
