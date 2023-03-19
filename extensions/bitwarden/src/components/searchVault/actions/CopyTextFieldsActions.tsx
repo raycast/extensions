@@ -1,7 +1,7 @@
-import { Action, Icon } from "@raycast/api";
+import { Action, Clipboard, closeMainWindow, Icon, showHUD } from "@raycast/api";
 import { capitalize } from "~/utils/strings";
-import CopyWithRepromptAction from "~/components/searchVault/actions/CopyWithRepromptAction";
 import { useSelectedVaultItem } from "~/components/searchVault/context/vaultItem";
+import ActionWithReprompt from "~/components/actions/ActionWithReprompt";
 
 function CopyTextFieldsActions() {
   const { login, notes, card, identity, fields, name } = useSelectedVaultItem();
@@ -10,6 +10,12 @@ function CopyTextFieldsActions() {
   const uriMap = Object.fromEntries(
     login?.uris?.filter((uri) => uri.uri).map((uri, index) => [`URI ${index + 1}`, uri.uri]) || []
   );
+
+  const onRepromptAction = (content: string) => async () => {
+    await Clipboard.copy(content);
+    await showHUD("Copied to Clipboard");
+    await closeMainWindow();
+  };
 
   return (
     <>
@@ -30,11 +36,11 @@ function CopyTextFieldsActions() {
 
         const capitalizedTitle = capitalize(title);
         return (
-          <CopyWithRepromptAction
+          <ActionWithReprompt
             key={`${index}-${title}`}
             title={`Copy ${capitalizedTitle}`}
             icon={Icon.Clipboard}
-            content={content}
+            onAction={onRepromptAction(content)}
             repromptDescription={`Copying the ${capitalizedTitle} of <${name}>`}
           />
         );

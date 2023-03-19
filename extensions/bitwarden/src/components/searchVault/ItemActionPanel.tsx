@@ -1,15 +1,17 @@
 import { ActionPanel, getPreferenceValues } from "@raycast/api";
-import CopyPasswordAction from "~/components/searchVault/actions/CopyPasswordAction";
-import PastePasswordAction from "~/components/searchVault/actions/PastePasswordAction";
 import ComponentReverser from "~/components/ComponentReverser";
-import CopyTotpAction from "~/components/searchVault/actions/CopyTotpAction";
-import ShowSecureNoteAction from "~/components/searchVault/actions/ShowSecureNoteAction";
-import SearchCommonActions from "~/components/searchVault/actions/CommonActions";
-import CopyUsernameAction from "~/components/searchVault/actions/CopyUsernameAction";
-import CopyTextFieldsActions from "~/components/searchVault/actions/CopyTextFieldsActions";
-import OpenUrlInBrowserAction from "~/components/searchVault/actions/OpenUrlInBrowserAction";
-import ShowCardDetailsAction from "~/components/searchVault/actions/ShowCardDetailsAction";
 import { useSelectedVaultItem } from "~/components/searchVault/context/vaultItem";
+import {
+  CopyPasswordAction,
+  CopyTextFieldsActions,
+  CopyTotpAction,
+  CopyUsernameAction,
+  OpenUrlInBrowserAction,
+  PastePasswordAction,
+  SearchCommonActions,
+  ShowCardDetailsAction,
+  ShowSecureNoteAction,
+} from "~/components/searchVault/actions";
 
 const { primaryAction } = getPreferenceValues();
 
