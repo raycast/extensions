@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Color, List } from "@raycast/api";
 import { useState } from "react";
 import { useFormula1DriverUrl, useRaceResult } from "../hooks";
-import { RaceResult, RaceResultItem } from "../types";
+import { RaceResultItem } from "../types";
 import { getFlag } from "../utils";
 
 interface RaceResultViewProps {

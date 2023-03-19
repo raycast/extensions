@@ -31,7 +31,7 @@ function RaceList() {
       isLoading={!season || isLoading}
       selectedItemId={preselectedRound}
       onSelectionChange={(selectedRound) => {
-        if (typeof selectedRound === "undefined") {
+        if (typeof selectedRound === "undefined" || selectedRound === null) {
           return;
         }
         const race = pastRaces[selectedRound] || upcomingRaces[selectedRound];
