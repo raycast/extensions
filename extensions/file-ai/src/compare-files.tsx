@@ -16,7 +16,8 @@ export default function Command() {
     setCommandError("Must select 2 or more files");
   }
 
-  const basePrompt = "Compare and contrast the following files. Format the response as one markdown paragraph.\n";
+  const basePrompt =
+    "Compare and contrast the content, purpose, and significance of the following files. What are the similarities and differences between them? Format the response as one markdown paragraph.\n";
   const fileContentsString = fileContents.join("\n");
 
   const { data, isLoading } = useUnstableAI(basePrompt + fileContentsString, {

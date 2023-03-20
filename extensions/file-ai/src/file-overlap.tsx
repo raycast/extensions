@@ -14,7 +14,8 @@ export default function Command() {
     setCommandError("Must select 2 or more files");
   }
 
-  const basePrompt = "What overlaps in content or ideas exists between the following files?\n";
+  const basePrompt =
+    "What overlaps in content or ideas exists between the following files? What are the similarities?\n";
   const fileContentsString = fileContents.join("\n");
 
   const { data, isLoading } = useUnstableAI(basePrompt + fileContentsString, {

@@ -11,7 +11,7 @@ export default function Command() {
   }, []);
 
   const basePrompt =
-    "Summarize the content of the following files, using the provided file names as headings. Each summary should be at most three sentences long. Format the output as markdown. Do not provide any other commentary. Additional instructions are provided surrounded by <>, like <this>. Here are the texts:\n";
+    "Summarize the content of the following files, using the provided file names as headings. Each summary should be at most four sentences long. Format the output as markdown. Additional instructions are provided surrounded by <>, like <this>. Here are the texts:\n";
   const fileContentsString = fileContents.join("\n");
 
   const { data, isLoading } = useUnstableAI(basePrompt + fileContentsString, {

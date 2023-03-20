@@ -79,6 +79,7 @@ export async function getAudioContents(
   setCommandError: React.Dispatch<React.SetStateAction<string | undefined>>,
   noFileErrorMessage?: string
 ) {
+  /* Gets the spoken word content of an audio file. */
   try {
     const files = await getSelectedFinderItems();
 
@@ -129,16 +130,17 @@ const filterContentString = (content: string): string => {
 const getImageDetails = async (filePath: string): Promise<string> => {
   /* Gets the EXIF data of an image file and any text within it, as well as the associated prompt instructions. */
   const imageText = filterContentString(getImageText(filePath));
-  const imageTextInstructions = `<Based on the following text extracted from the image, what is the primary focus of the image? Remove any noncoherent numbers or symbols.>\n"${imageText}"`;
+  const imageTextInstructions = `<Discuss the meaning and significance of the image based on the following text extracted from it: "${imageText}. Based on that, discuss what the image might be about.">`;
 
   const animalLabels = getImageAnimals(filePath);
-  const imageAnimalsInstructions = `<Summarize the animals appearing in the image: ${animalLabels}>`;
+  const imageAnimalsInstructions = `<Summarize the animals appearing in the image in order of occurrence: ${animalLabels}>`;
 
   const numFaces = parseInt(getImageFaces(filePath));
   const peopleInstructions = `<Based on the number of faces (${numFaces}) in the image, assess whether there is a large group of people, a few people, or a single person in the image.>`;
 
   const exifData = filterContentString(await getFileExifData(filePath));
-  const exifInstruction = `<Based on the following metadata, what are some key characteristics of the file? Include the file's creation date and other details.\n"${exifData}">`;
+  console.log(exifData);
+  const exifInstruction = `<Summarize answers to the following questions based on this EXIF data: ${exifData}. When was the file created and last modified, and what are its dimensions and file size? Infer other questions based on the EXIF data and answer them.>`;
 
   return `${imageText ? `\n${imageTextInstructions}` : ""}${animalLabels ? `\n${imageAnimalsInstructions}` : ""}${
     numFaces > 0 ? `\n${peopleInstructions}` : ""
@@ -248,15 +250,13 @@ const getApplicationDetails = (filePath: string): string => {
   let appDetails = "";
 
   // Include metadata information
-  const metadata = JSON.stringify(fs.statSync(filePath));
-  appDetails += `"Metadata: ${filterContentString(metadata)}\n\n"`;
+  const metadata = filterContentString(JSON.stringify(fs.statSync(filePath)));
 
   // Include plist information
-  const plist = fs.readFileSync(`${filePath}/Contents/Info.plist`).toString();
-  appDetails += `Plist Info: ${filterContentString(plist)}\n\n`;
+  const plist = filterContentString(fs.readFileSync(`${filePath}/Contents/Info.plist`).toString());
 
   // Include general application-focused instructions
-  appDetails += `<In addition, specify the file size, date created, and other metadata info. Describe information provided in the application's plist file. Predict the purpose of the application based on its name, metadata, the information contained in its plist.>`;
+  appDetails += `<Answer the following questions based on the following plist info and metadata.\nPlist info: ${plist}\nMetadata: ${metadata}.\nWhat is this application used for, and what is its significance? When is the file size? When was the file created and last modified? Infer other questions based on the plist info and metadata and answer them.>`;
 
   // Include relevant child files
   const children = fs.readdirSync(`${filePath}/Contents/Resources`);
@@ -274,9 +274,8 @@ const getApplicationDetails = (filePath: string): string => {
 const getMetadataDetails = (filePath: string): string => {
   /* Gets the metadata information of a file and associated prompt instructions. */
   const metadata = filterContentString(JSON.stringify(fs.lstatSync(filePath)));
-  const instruction =
-    "<In addition, specify the file size, date created, and other metadata info. Predict the purpose of the file based on its name, metadata, and file extension, formatted as a 3-sentence paragraph.>";
-  return `${metadata}\n${instruction}`;
+  const instruction = `<Summarize answers to the following questions based on this metadata: ${metadata}. When was the file created and modified, and what is the file size? What is the purpose of the file? If you know of something relevant to the filename and type that might help in determining what the file is about, discuss that. Infer other questions based on the metadata and answer them.`;
+  return `\n${instruction}`;
 };
 
 const getFileExifData = async (filePath: string) => {
@@ -302,12 +301,12 @@ const getPDFText = (filePath: string): string => {
 const getAudioDetails = (filePath: string): string => {
   /* Gets the metadata and sound classifications of an audio file, as well as associated prompt instructions. */
   const metadata = filterContentString(JSON.stringify(fs.lstatSync(filePath)));
-  const metadataInstruction = "<Specify the file size, date created, and other metadata info>";
+  const metadataInstruction = `<Summarize answers to the following questions based on this metadata: ${metadata}. When was the file created and modified, and what is the file size? What is the purpose of the file? If you know of something relevant to the filename that might help in determining what the file is about, discuss that. Infer other questions based on the metadata and sound classifications and answer them.>`;
 
   const soundClassification = filterContentString(getSoundClassification(filePath)).trim();
-  const classificationInstruction = `<In addition, summarize the sequence of sounds in the audio file based on the following list:\n"${soundClassification}".>`;
+  const classificationInstruction = `<Discuss the likely purpose of the audio file based on these classifications of sounds observed in the file: "${soundClassification}".>`;
 
-  return `Metadata:\n${metadata}\n${metadataInstruction}${soundClassification ? `\n${classificationInstruction}` : ""}`;
+  return `${metadataInstruction}${soundClassification ? `\n${classificationInstruction}` : ""}`;
 };
 
 const getSoundClassification = (filePath: string): string => {

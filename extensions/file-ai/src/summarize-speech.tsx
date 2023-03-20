@@ -11,7 +11,7 @@ export default function Command() {
   }, []);
 
   const basePrompt =
-    "Summarize and assess the the following audio transcriptions, using the provided file names as headings. Format the output as markdown. Here are the transcriptions:\n";
+    "Summarize and assess the the following audio transcriptions, using the provided file names as headings. Discuss the meaning and significance of the transcription content. Here are the transcriptions:\n";
 
   const audioContentsString = audioContents.join("\n");
 
