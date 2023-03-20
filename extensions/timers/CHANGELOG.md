@@ -1,5 +1,7 @@
 # Timers Changelog
 
+## [Add volume cap error for alert sound] - 2023-03-19
+
 ## [Enhancement] - 2023-03-15
 
 - Implementation of alert sound choice dropdown when creating/starting custom timer
