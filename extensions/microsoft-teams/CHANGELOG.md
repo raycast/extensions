@@ -1,3 +1,3 @@
-# microsoft-teams Changelog
+# Microsoft Teams Changelog
 
-## [Initial Version] - 2023-03-17
+## [Initial Version] - 2023-03-20
