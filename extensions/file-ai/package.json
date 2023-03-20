@@ -1,0 +1,65 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "file-ai",
+  "title": "File AI",
+  "description": "Summarize files with AI",
+  "icon": "command-icon.png",
+  "author": "HelloImSteven",
+  "categories": [
+    "Productivity",
+    "Data"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "summarize-files",
+      "title": "Summarize Selected Files",
+      "description": "Summarize the contents of the selected files",
+      "mode": "view"
+    },
+    {
+      "name": "compare-files",
+      "title": "Compare Selected Files",
+      "description": "Compare and contrast the contents of the selected files",
+      "mode": "view"
+    },
+    {
+      "name": "file-overlap",
+      "title": "Assess Overlap",
+      "description": "Assess the overlap in content of the selected files",
+      "mode": "view"
+    },
+    {
+      "name": "identify",
+      "title": "Identify Purpose",
+      "description": "Identify the primary purpose of the selected files",
+      "mode": "view"
+    },
+    {
+      "name": "summarize-speech",
+      "title": "Summarize Spoken Audio",
+      "description": "Summarize the spoken words in the selected audio files",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.48.9",
+    "run-applescript": "^6.1.0",
+    "exifr": "^7.1.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
