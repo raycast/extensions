@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Grid } from "@raycast/api";
+import { Action, ActionPanel, Grid, Image } from "@raycast/api";
 import {
   MeetingAction,
   MeetingClient,
@@ -16,98 +16,140 @@ interface State {
 }
 
 interface Item {
-  content: [active: string, inactive?: string];
+  action: MeetingAction;
+  icon: string;
+  iconInactive?: string;
   title: string;
   keywords?: string[];
-  action: MeetingAction;
   state?: SingleMeetingState;
   permission: MeetingPermission;
 }
 
-const items: Item[] = [
+interface Section {
+  title: string;
+  items: Item[];
+}
+
+const sections: Section[] = [
   {
-    content: ["❌", "🎤"],
-    title: "Microphone",
-    keywords: ["microphone", "mute"],
-    action: "toggle-mute",
-    state: "isMuted",
-    permission: "canToggleMute",
+    title: "Actions",
+    items: [
+      {
+        action: "toggle-mute",
+        icon: "action-mic-inactive.png",
+        iconInactive: "action-mic-active.png",
+        title: "Microphone",
+        keywords: ["mute", "unmute"],
+        state: "isMuted",
+        permission: "canToggleMute",
+      },
+      {
+        action: "toggle-video",
+        icon: "action-video-active.png",
+        iconInactive: "action-video-inactive.png",
+        title: "Camera",
+        keywords: ["video"],
+        state: "isCameraOn",
+        permission: "canToggleVideo",
+      },
+      {
+        action: "toggle-background-blur",
+        icon: "action-background-blur-active.png",
+        iconInactive: "action-background-blur-inactive.png",
+        title: "Background Blur",
+        state: "isBackgroundBlurred",
+        permission: "canToggleBlur",
+      },
+      {
+        action: "leave-call",
+        icon: "action-leave-call.png",
+        title: "Leave Call",
+        permission: "canLeave",
+      },
+    ],
   },
   {
-    content: ["📷", "❌"],
-    title: "Camera",
-    action: "toggle-video",
-    state: "isCameraOn",
-    permission: "canToggleVideo",
-  },
-  {
-    content: ["🌁", "❌"],
-    title: "Background blur",
-    action: "toggle-background-blur",
-    state: "isBackgroundBlurred",
-    permission: "canToggleBlur",
-  },
-  {
-    content: ["📞"],
-    title: "Leave Call",
-    action: "leave-call",
-    permission: "canLeave",
-  },
-  {
-    content: ["✋", "❌"],
-    title: "Raise Hand",
-    action: "toggle-hand",
-    state: "isHandRaised",
-    permission: "canToggleHand",
-  },
-  {
-    content: ["😮"],
-    title: "Wow",
-    action: "react-wow",
-    permission: "canReact",
-  },
-  {
-    content: ["👏"],
-    title: "Applause",
-    action: "react-applause",
-    permission: "canReact",
-  },
-  {
-    content: ["❤️"],
-    title: "Love",
-    action: "react-love",
-    permission: "canReact",
-  },
-  {
-    content: ["👍"],
-    title: "Like",
-    action: "react-like",
-    permission: "canReact",
-  },
-  {
-    content: ["😆"],
-    title: "Laugh",
-    action: "react-laugh",
-    permission: "canReact",
+    title: "Reactions",
+    items: [
+      {
+        action: "toggle-hand",
+        icon: "action-raise-hand-active.png",
+        iconInactive: "action-raise-hand-inactive.png",
+        title: "Raise Hand",
+        state: "isHandRaised",
+        permission: "canToggleHand",
+      },
+      {
+        action: "react-like",
+        icon: "action-react-like.png",
+        title: "Like",
+        keywords: ["thumbs", "thumb", "up"],
+        permission: "canReact",
+      },
+      {
+        action: "react-love",
+        icon: "action-react-love.png",
+        title: "Love",
+        keywords: ["heart"],
+        permission: "canReact",
+      },
+      {
+        action: "react-applause",
+        icon: "action-react-applause.png",
+        title: "Applause",
+        permission: "canReact",
+      },
+      {
+        action: "react-laugh",
+        icon: "action-react-laugh.png",
+        title: "Laugh",
+        keywords: ["lol"],
+        permission: "canReact",
+      },
+      {
+        action: "react-wow",
+        icon: "action-react-wow.png",
+        title: "Wow",
+        keywords: ["oh", "omg"],
+        permission: "canReact",
+      },
+    ],
   },
 ];
+const allItems = sections.map((section) => section.items).flat();
 
 const isItemEnabled = (item: Item, state: State) => state.state.isInMeeting && state.permissions[item.permission];
-const itemContent = (item: Item, state: State) => ((item.state && !state.state[item.state]) ? item.content[1] : item.content[0]);
+const itemContent = (item: Item, state: State): Image.ImageLike => {
+  const iconName = item.state && !state.state[item.state] && item.iconInactive ? item.iconInactive : item.icon;
+  return { source: iconName };
+};
 
 function GridItem({ item, meetingState, client }: { item: Item; meetingState: State; client?: MeetingClient }) {
   return (
     <Grid.Item
-      key={item.content[0]}
-      content={itemContent(item, meetingState) ?? ""}
-      title={item.title}
-      keywords={item.keywords}
+      content={itemContent(item, meetingState)}
+      keywords={[item.title, ...(item.keywords ?? [])]}
       actions={
         <ActionPanel>
           <Action title={"Execute"} onAction={() => client?.sendAction(item.action)} />
         </ActionPanel>
       }
     />
+  );
+}
+
+function Section({ section, meetingState, client }: { section: Section; meetingState: State; client?: MeetingClient }) {
+  const availableItems = section.items.filter((item) => isItemEnabled(item, meetingState));
+  return availableItems.length > 0 ? (
+    <Grid.Section title={section.title}>
+      {section.items
+        .filter((item) => isItemEnabled(item, meetingState))
+        .map((item) => (
+          <GridItem key={item.action} item={item} meetingState={meetingState} client={client} />
+        ))}
+    </Grid.Section>
+  ) : (
+    <></>
   );
 }
 
@@ -119,14 +161,18 @@ export default function Command() {
       state: msg.meetingUpdate.meetingState,
       permissions: msg.meetingUpdate.meetingPermissions,
     });
-  const availableItems = meetingState ? items.filter((item) => isItemEnabled(item, meetingState)) : [];
+  const availableItems = meetingState ? allItems.filter((item) => isItemEnabled(item, meetingState)) : [];
   const gridContent =
     meetingState && availableItems.length > 0 ? (
-      availableItems.map((item) => (
-        <GridItem key={item.action} item={item} meetingState={meetingState} client={client} />
+      sections.map((section) => (
+        <Section key={section.title} section={section} meetingState={meetingState} client={client} />
       ))
     ) : (
-      <Grid.EmptyView title="Looks like there's no meeting in progress …" />
+      <Grid.EmptyView
+        icon={{ source: "empty-view.svg" }}
+        title="No Meeting"
+        description="Looks like there's no meeting in progress …"
+      />
     );
 
   useEffect(() => {
@@ -138,7 +184,7 @@ export default function Command() {
   }, []);
 
   return (
-    <Grid isLoading={!meetingState} inset={Grid.Inset.Large}>
+    <Grid isLoading={!meetingState} columns={6} inset={Grid.Inset.Zero}>
       {gridContent}
     </Grid>
   );
