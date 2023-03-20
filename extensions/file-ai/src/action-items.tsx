@@ -3,10 +3,10 @@ import { ERRORTYPE, useFileContents } from "./file-utils";
 import ResponseActions from "./ResponseActions";
 
 export default function Command() {
-  const { selectedFiles, contentPrompts, loading, errorType } = useFileContents();
+  const { selectedFiles, contentPrompts, loading, errorType } = useFileContents(1, undefined, true, true);
 
   const basePrompt =
-    "Compare and contrast the content, purpose, and significance of the following files. What are the similarities and differences between them? Format the response as one markdown paragraph.";
+    "Generate a markdown list of action items from the following files, unique a unique identifier for each item as bold headings. If there are any errors in the files, make action items to fix them. In a sublist of each item, provide a description, priority, estimated level of difficulty, and reasonable duration for the task.";
 
   const contentPromptString = contentPrompts.join("\n");
   const fullPrompt = basePrompt + contentPromptString;
@@ -17,13 +17,13 @@ export default function Command() {
     if (errorType == ERRORTYPE.FINDER_INACTIVE) {
       errorMessage = "Can't get selected files";
     } else if (errorType == ERRORTYPE.MIN_SELECTION_NOT_MET) {
-      errorMessage = "Must select at least 2 files";
+      errorMessage = "Must select at least 1 file";
     } else if (errorType == ERRORTYPE.INPUT_TOO_LONG) {
       errorMessage = "Input too large";
     }
 
     showToast({
-      title: "Failed File Comparison",
+      title: "Failed Action Item Creation",
       message: errorMessage,
       style: Toast.Style.Failure,
     });
@@ -31,17 +31,18 @@ export default function Command() {
     return;
   }
 
-  const text = `# File Comparison\n${data ? data : "Comparing files..."}`;
+  const text = `# Action Items\n${data ? data : "Generating flashcards..."}`;
   return (
     <Detail
       isLoading={loading || isLoading || contentPrompts.length == 0}
       markdown={text}
       actions={
         <ResponseActions
-          commandSummary="Comparison"
+          commandSummary="Action Items"
           responseText={text}
           promptText={fullPrompt}
           reattempt={revalidate}
+          files={selectedFiles}
         />
       }
     />

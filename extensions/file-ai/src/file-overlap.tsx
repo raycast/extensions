@@ -9,7 +9,7 @@ export default function Command() {
 
   const contentPromptString = contentPrompts.join("\n");
   const fullPrompt = basePrompt + contentPromptString;
-  const { data, isLoading } = useUnstableAI(fullPrompt, { execute: contentPrompts.length > 0 });
+  const { data, isLoading, revalidate } = useUnstableAI(fullPrompt, { execute: contentPrompts.length > 0 });
 
   if (errorType) {
     let errorMessage = "";
@@ -35,7 +35,9 @@ export default function Command() {
     <Detail
       isLoading={loading || isLoading || contentPrompts.length == 0}
       markdown={text}
-      actions={<ResponseActions commandSummary="Analysis" responseText={text} promptText={fullPrompt} />}
+      actions={
+        <ResponseActions commandSummary="Analysis" responseText={text} promptText={fullPrompt} reattempt={revalidate} />
+      }
     />
   );
 }

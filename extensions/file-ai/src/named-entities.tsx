@@ -3,10 +3,10 @@ import { ERRORTYPE, useFileContents } from "./file-utils";
 import ResponseActions from "./ResponseActions";
 
 export default function Command() {
-  const { selectedFiles, contentPrompts, loading, errorType } = useFileContents();
+  const { selectedFiles, contentPrompts, loading, errorType } = useFileContents(1, undefined, true, true);
 
   const basePrompt =
-    "Compare and contrast the content, purpose, and significance of the following files. What are the similarities and differences between them? Format the response as one markdown paragraph.";
+    "What are the named entities in the following files, and what are their meanings and purpose? Clarify any abbreviations. Format the response as markdown list of sentences with the entity terms in bold. Use the file names as headings.";
 
   const contentPromptString = contentPrompts.join("\n");
   const fullPrompt = basePrompt + contentPromptString;
@@ -17,13 +17,13 @@ export default function Command() {
     if (errorType == ERRORTYPE.FINDER_INACTIVE) {
       errorMessage = "Can't get selected files";
     } else if (errorType == ERRORTYPE.MIN_SELECTION_NOT_MET) {
-      errorMessage = "Must select at least 2 files";
+      errorMessage = "Must select at least 1 file";
     } else if (errorType == ERRORTYPE.INPUT_TOO_LONG) {
       errorMessage = "Input too large";
     }
 
     showToast({
-      title: "Failed File Comparison",
+      title: "Failed Entity Extraction",
       message: errorMessage,
       style: Toast.Style.Failure,
     });
@@ -31,17 +31,18 @@ export default function Command() {
     return;
   }
 
-  const text = `# File Comparison\n${data ? data : "Comparing files..."}`;
+  const text = `# Named Entities\n${data ? data : "Analyzing files..."}`;
   return (
     <Detail
       isLoading={loading || isLoading || contentPrompts.length == 0}
       markdown={text}
       actions={
         <ResponseActions
-          commandSummary="Comparison"
+          commandSummary="Entities"
           responseText={text}
           promptText={fullPrompt}
           reattempt={revalidate}
+          files={selectedFiles}
         />
       }
     />

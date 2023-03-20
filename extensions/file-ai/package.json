@@ -25,13 +25,13 @@
     },
     {
       "name": "file-overlap",
-      "title": "Assess Overlap",
+      "title": "Assess File Overlap",
       "description": "Assess the overlap in content of the selected files",
       "mode": "view"
     },
     {
       "name": "identify",
-      "title": "Identify Purpose",
+      "title": "Identify Selected Files",
       "description": "Identify the primary purpose of the selected files",
       "mode": "view"
     },
@@ -39,6 +39,44 @@
       "name": "summarize-speech",
       "title": "Summarize Spoken Audio",
       "description": "Summarize the spoken words in the selected audio files",
+      "mode": "view"
+    },
+    {
+      "name": "named-entities",
+      "title": "Extract Named Entities",
+      "description": "Extract and define all named entities within selected files",
+      "mode": "view"
+    },
+    {
+      "name": "find-errors",
+      "title": "Find Errors In Selected Files",
+      "description": "Find errors and inconsistencies in the selected files",
+      "mode": "view"
+    },
+    {
+      "name": "translate",
+      "title": "Translate Selected Files",
+      "description": "Use AI to translate the content of selected files",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "language",
+          "placeholder": "Language",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "flashcards",
+      "title": "Flashcards From Selected Files",
+      "description": "Generate 3 flashcards in question-answer format from the contents of selected files",
+      "mode": "view"
+    },
+    {
+      "name": "action-items",
+      "title": "Action Items From Selected Files",
+      "description": "Generate actions items based on the contents of selected files",
       "mode": "view"
     }
   ],

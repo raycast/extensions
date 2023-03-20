@@ -6,11 +6,11 @@ export default function Command() {
   const { selectedFiles, contentPrompts, loading, errorType } = useFileContents();
 
   const basePrompt =
-    "Summarize the content of the following files, using the file names as headings. Each summary should be at most four sentences long. If the file contains a list, describe the list instead of listing all elements. Infer other questions about the files and answer them without specifying the question. Format the response as markdown. Here are the files:";
+    "Summarize the content of the following files, using the file names as headings. Briefly discuss any lists the files contain instead of listing all elements. Discuss each file's tone and style. Infer questions about the files and answer them without specifying the question. Format the response as markdown paragraphs. Also, give a list of relevant links and a brief description of them.";
 
   const contentPromptString = contentPrompts.join("\n");
   const fullPrompt = basePrompt + contentPromptString;
-  const { data, isLoading } = useUnstableAI(fullPrompt, { execute: contentPrompts.length > 0 });
+  const { data, isLoading, revalidate } = useUnstableAI(fullPrompt, { execute: contentPrompts.length > 0 });
 
   if (errorType) {
     let errorMessage = "";
@@ -36,7 +36,15 @@ export default function Command() {
     <Detail
       isLoading={loading || isLoading || contentPrompts.length == 0}
       markdown={text}
-      actions={<ResponseActions commandSummary="Summary" responseText={text} promptText={fullPrompt} />}
+      actions={
+        <ResponseActions
+          commandSummary="Summary"
+          responseText={text}
+          promptText={fullPrompt}
+          reattempt={revalidate}
+          files={selectedFiles}
+        />
+      }
     />
   );
 }

@@ -6,11 +6,11 @@ export default function Command() {
   const { selectedFiles, contentPrompts, loading, errorType } = useFileContents();
 
   const basePrompt =
-    'Identify the file type, primary purpose, and most significant defining features of the following files. Provide an assessment of the utility of each file. Format the response as a markdown list of no less than 3 items using "## File Type", "## Purpose", "## Defining Features", and "## Potential Usage" as headings. Here are the files:';
+    'Identify the file type and most significant features of the following files based on their content. Discuss the primary purpose of the file based on its content. Categorize the content into relevant topics. Provide an assessment of the file\'s utility as well a list of relevant links and brief descriptions of them. Format the response as a markdown list using "## File Type", "## Topics", "## Defining Features", "## Purpose and Potential Usage", and "## Relevant Links" as headings.';
 
   const contentPromptString = contentPrompts.join("\n");
   const fullPrompt = basePrompt + contentPromptString;
-  const { data, isLoading } = useUnstableAI(fullPrompt, { execute: contentPrompts.length > 0 });
+  const { data, isLoading, revalidate } = useUnstableAI(fullPrompt, { execute: contentPrompts.length > 0 });
 
   if (errorType) {
     let errorMessage = "";
@@ -36,7 +36,14 @@ export default function Command() {
     <Detail
       isLoading={loading || isLoading || contentPrompts.length == 0}
       markdown={text}
-      actions={<ResponseActions commandSummary="Identification" responseText={text} promptText={fullPrompt} />}
+      actions={
+        <ResponseActions
+          commandSummary="Identification"
+          responseText={text}
+          promptText={fullPrompt}
+          reattempt={revalidate}
+        />
+      }
     />
   );
 }
