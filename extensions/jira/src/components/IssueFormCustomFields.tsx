@@ -2,6 +2,7 @@ import { Form, Icon } from "@raycast/api";
 import { useForm } from "@raycast/utils";
 import { Fragment } from "react";
 
+import { Team } from "../api/teams";
 import { User } from "../api/users";
 import { CustomFieldSchema, getCustomFieldsForCreateIssue, Option } from "../helpers/issues";
 
@@ -12,9 +13,10 @@ type IssueFormCustomFieldsProps = {
   fields: ReturnType<typeof getCustomFieldsForCreateIssue>["customFields"];
   itemProps: ReturnType<typeof useForm<IssueFormValues>>["itemProps"];
   users?: User[];
+  teams?: Team[] | null;
 };
 
-export default function IssueFormCustomFields({ fields, itemProps, users }: IssueFormCustomFieldsProps) {
+export default function IssueFormCustomFields({ fields, itemProps, users, teams }: IssueFormCustomFieldsProps) {
   return (
     <>
       {fields.map(({ key, name, fieldSchema, allowedValues }) => {
@@ -100,6 +102,20 @@ export default function IssueFormCustomFields({ fields, itemProps, users }: Issu
                       icon={user.avatarUrls["32x32"]}
                     />
                   );
+                })}
+              </Form.Dropdown>
+            );
+            break;
+          }
+          case CustomFieldSchema.team: {
+            console.log("teams", teams);
+            const props = itemProps[key] as Form.ItemProps<string>;
+            component = (
+              <Form.Dropdown {...props} title={name} storeValue>
+                <Form.Dropdown.Item title="Unassigned" value="" icon={Icon.Person} />
+
+                {teams?.map((team) => {
+                  return <Form.Dropdown.Item key={team.teamId} value={team.teamId} title={team.displayName} />;
                 })}
               </Form.Dropdown>
             );
