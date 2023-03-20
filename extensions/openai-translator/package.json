@@ -106,13 +106,130 @@
           ]
         }
       ]
+    },
+    {
+      "name": "ocr",
+      "title": "Query OCR",
+      "description": "Query text from image",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "mode",
+          "type": "dropdown",
+          "required": false,
+          "title": "Query Mode",
+          "default": "translate",
+          "description": "Choice a mode to query using this command",
+          "data": [
+            {
+              "value": "translate",
+              "title": "Translate"
+            },
+            {
+              "value": "polishing",
+              "title": "Polishing"
+            },
+            {
+              "value": "summarize",
+              "title": "Summarize"
+            },
+            {
+              "value": "what",
+              "title": "What"
+            }
+          ]
+        },
+        {
+          "name": "language",
+          "type": "dropdown",
+          "required": false,
+          "title": "Prefer Language",
+          "default": "en-US",
+          "description": "Prefer language to detect",
+          "data": [
+            {
+              "value": "en-US",
+              "title": "English"
+            },
+            {
+              "value": "fr-FR",
+              "title": "Français"
+            },
+            {
+              "value": "it-IT",
+              "title": "Italiano"
+            },
+            {
+              "value": "de-DE",
+              "title": "English"
+            },
+            {
+              "value": "pt-BR",
+              "title": "Português"
+            },
+            {
+              "value": "zh-Hans",
+              "title": "简体中文"
+            },
+            {
+              "value": "zh-Hant",
+              "title": "正體中文"
+            }
+          ]
+        },
+        {
+          "name": "level",
+          "type": "dropdown",
+          "required": false,
+          "title": "Level",
+          "default": "accurate",
+          "description": "A value that determines whether the request prioritizes accuracy or speed in text recognition.",
+          "data": [
+            {
+              "value": "accurate",
+              "title": "Accurate"
+            },
+            {
+              "value": "fast",
+              "title": "Fast"
+            }
+          ]
+        },
+        {
+          "name": "customWords",
+          "type": "textfield",
+          "required": false,
+          "title": "Custom Words",
+          "default": "",
+          "description": "An array of strings to supplement the recognized languages at the word-recognition stage.",
+          "placeholder": "An array of words split by ', '. ex: a, b, c"
+        },
+        {
+          "name": "callbackType",
+          "type": "dropdown",
+          "required": false,
+          "title": "Callback Type",
+          "default": "deeplink",
+          "description": "Determine how ocr command lauch the query command",
+          "data": [
+            {
+              "value": "deeplink",
+              "title": "Deeplink"
+            },
+            {
+              "value": "launchCommand",
+              "title": "launchCommand"
+            }
+          ]
+        }
+      ]
     }
   ],
   "preferences": [
     {
       "name": "apikey",
       "label": "OpenAI API Key",
-      "description": "Enter your personal OpenAI API Key",
+      "description": "Enter your personal OpenAI API Key,  Type 'none' if your entrypoint do not require an API key.",
       "type": "password",
       "title": "OpenAI API Key",
       "required": true
@@ -120,7 +237,7 @@
     {
       "name": "entrypoint",
       "label": "OpenAI API Entrypoint",
-      "description": "Enter your custom OpenAI entrypoint",
+      "description": "Enter your custom OpenAI entrypoint.",
       "type": "textfield",
       "title": "OpenAI API Entrypoint",
       "default": "https://api.openai.com/v1/chat/completions",
@@ -414,6 +531,7 @@
   },
   "scripts": {
     "build": "ray build -e dist",
+    "build-swift": "swift build --configuration=release --arch arm64 --arch x86_64 && mv .build/apple/Products/Release/ocr assets",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",

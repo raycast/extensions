@@ -51,7 +51,6 @@ export const ContentView = (props: ContentViewProps) => {
 
   const ref = useRef<string>();
   function updateData() {
-    console.log("updateData", data, history.data, querying);
     if (history.data) {
       const sortedResults = history.data.sort(
         (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
@@ -70,7 +69,7 @@ export const ContentView = (props: ContentViewProps) => {
     }
   }
 
-  function onTranslationError(toast: Toast, from: string, title: string, message: string) {
+  function onTranslationError(toast: Toast, from: string, title: string, message: string, img: string | undefined) {
     (toast.title = title), (toast.message = message);
     toast.style = Toast.Style.Failure;
     const record: Record = {
@@ -84,6 +83,7 @@ export const ContentView = (props: ContentViewProps) => {
         text: ref.current ?? "",
         error: message,
       },
+      ocrImg: img,
     };
     history.add(record);
     query.updateQuerying(false);
@@ -99,6 +99,8 @@ export const ContentView = (props: ContentViewProps) => {
     });
     const text = query.text;
     const detectTo = query.to;
+    const img = query.ocrImage;
+
     const _querying: Querying = {
       hook: query,
       controller,
@@ -120,7 +122,7 @@ export const ContentView = (props: ContentViewProps) => {
           toast.title = "Got your translation!";
           toast.style = Toast.Style.Success;
           if (reason !== "stop") {
-            onTranslationError(toast, detectFrom, "Error", `failed：${reason}`);
+            onTranslationError(toast, detectFrom, "Error", `failed：${reason}`, img);
           } else {
             if (ref.current) {
               const newText =
@@ -128,6 +130,7 @@ export const ContentView = (props: ContentViewProps) => {
                   ? ref.current.slice(0, -1)
                   : ref.current;
               setTranslatedText(newText);
+
               const record: Record = {
                 id: uuidv4(),
                 mode,
@@ -138,6 +141,7 @@ export const ContentView = (props: ContentViewProps) => {
                   original: text,
                   text: newText,
                 },
+                ocrImg: img,
               };
               history.add(record);
             }
@@ -145,7 +149,7 @@ export const ContentView = (props: ContentViewProps) => {
           }
         },
         onError: (error) => {
-          onTranslationError(toast, detectFrom, "Error", error);
+          onTranslationError(toast, detectFrom, "Error", error, img);
         },
       },
       id: "querying",
@@ -279,6 +283,7 @@ export const ContentView = (props: ContentViewProps) => {
                 original={querying ? querying.query.text : ""}
                 from={querying ? querying.query.detectFrom : "auto"}
                 mode={querying ? querying.query.mode : "translate"}
+                ocrImg={query.ocrImage}
                 to={query.to}
               />
             }
@@ -298,6 +303,7 @@ export const ContentView = (props: ContentViewProps) => {
                 to={item.result.to}
                 mode={item.mode}
                 created_at={item.created_at}
+                ocrImg={item.ocrImg}
               />
             }
           />

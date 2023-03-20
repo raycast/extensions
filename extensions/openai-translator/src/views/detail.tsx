@@ -10,13 +10,15 @@ export interface DetailViewProps {
   to: string;
   mode: TranslateMode;
   created_at?: string;
+  ocrImg: string | undefined;
 }
 
 export const DetailView = (props: DetailViewProps) => {
-  const { text, original, from, to, mode, created_at } = props;
+  const { text, original, from, to, mode, created_at, ocrImg } = props;
+  const imgMd = ocrImg ? `\n![](${ocrImg})` : "";
   return (
     <List.Item.Detail
-      markdown={`${text}\n\n\`\`\`\n${original}\n\`\`\``}
+      markdown={`${text}\n${imgMd}\n\`\`\`\n${original}\n\`\`\`\n`}
       metadata={
         <Detail.Metadata>
           {mode != "what" ? <Detail.Metadata.Label title="From" text={`${langMap.get(from) || "Auto"}`} /> : null}

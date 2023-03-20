@@ -115,7 +115,7 @@ export async function translate(query: TranslateQuery, entrypoint: string, apiKe
         resp = JSON.parse(msg);
         // eslint-disable-next-line no-empty
       } catch {
-        query.onFinish("stop");
+        //query.onFinish("stop");
         return;
       }
       const { choices } = resp;
