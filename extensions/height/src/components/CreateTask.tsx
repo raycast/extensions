@@ -8,7 +8,6 @@ import {
   LaunchType,
   showToast,
   Toast,
-  List,
 } from "@raycast/api";
 import { useForm } from "@raycast/utils";
 import { useState } from "react";
@@ -122,7 +121,7 @@ export default function CreateList({ draftValues }: { draftValues?: CreateTaskFo
             value={list.id}
             title={list.name}
             icon={{
-              source: list.appearance?.iconUrl ?? "list-icons/list-light.svg",
+              source: list.appearance?.iconUrl ?? "list-icons/list.svg",
               tintColor: getTintColorFromHue(list?.appearance?.hue, ListColors),
             }}
           />
@@ -173,7 +172,11 @@ export default function CreateList({ draftValues }: { draftValues?: CreateTaskFo
 
       <Form.DatePicker title="Due Date" {...itemProps.dueDate} />
 
-      <Form.Dropdown title="Parent Task" {...itemProps.parentTaskId}>
+      <Form.Dropdown
+        title="Parent Task"
+        info="The Parent Task depends on the Lists you selected above."
+        {...itemProps.parentTaskId}
+      >
         <Form.Dropdown.Item value="" title="No Task" />
         {tasks
           ?.filter((filteredParentTask) => filteredParentTask.listIds.some((id) => values.listIds.includes(id)))
@@ -184,7 +187,7 @@ export default function CreateList({ draftValues }: { draftValues?: CreateTaskFo
                 value={task.id}
                 title={task.name}
                 icon={{
-                  source: task.lists?.[0].appearance?.iconUrl ?? "list-icons/list-light.svg",
+                  source: task.lists?.[0].appearance?.iconUrl ?? "list-icons/list.svg",
                   tintColor: getTintColorFromHue(task.lists?.[0]?.appearance?.hue, ListColors),
                 }}
               />
