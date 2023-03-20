@@ -1,0 +1,59 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "oh-dear",
+  "title": "Oh Dear",
+  "description": "Control Oh Dear with your keyboard.",
+  "icon": "oh-dear-icon.png",
+  "author": "lamalamaMark",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "sites",
+      "title": "Show All Sites",
+      "subtitle": "Oh Dear",
+      "description": "Show all sites",
+      "mode": "view"
+    },
+    {
+      "name": "sites-add",
+      "title": "Add Site",
+      "subtitle": "Oh Dear",
+      "description": "Add a new site",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "API_TOKEN",
+      "type": "password",
+      "required": true,
+      "title": "API Token",
+      "description": "Log in to Oh Dear and click on your name followed by API Tokens to setup a token"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.48.9",
+    "@raycast/utils": "^1.5.2",
+    "node-fetch": "^3.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "18.15.4",
+    "@types/react": "18.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.56.0",
+    "@typescript-eslint/parser": "^5.56.0",
+    "eslint": "^8.36.0",
+    "eslint-config-prettier": "^8.8.0",
+    "prettier": "^2.8.5",
+    "typescript": "^5.0.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
