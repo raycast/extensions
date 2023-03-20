@@ -6,20 +6,20 @@ export default function Command() {
   const { selectedFiles, contentPrompts, loading, errorType } = useFileContents();
 
   const basePrompt =
-    'Compare and contrast the content, purpose, and significance of the following files. What are the similarities and differences between them? Format the response as one markdown paragraph.';
+    "Compare and contrast the content, purpose, and significance of the following files. What are the similarities and differences between them? Format the response as one markdown paragraph.";
 
   const contentPromptString = contentPrompts.join("\n");
   const fullPrompt = basePrompt + contentPromptString;
   const { data, isLoading } = useUnstableAI(fullPrompt, { execute: contentPrompts.length > 0 });
 
   if (errorType) {
-    let errorMessage = ""
+    let errorMessage = "";
     if (errorType == ERRORTYPE.FINDER_INACTIVE) {
-        errorMessage = "Can't get selected files"
+      errorMessage = "Can't get selected files";
     } else if (errorType == ERRORTYPE.MIN_SELECTION_NOT_MET) {
-        errorMessage = "Must select at least 2 files"
+      errorMessage = "Must select at least 2 files";
     } else if (errorType == ERRORTYPE.INPUT_TOO_LONG) {
-      errorMessage = "Input too large"
+      errorMessage = "Input too large";
     }
 
     showToast({
@@ -40,4 +40,3 @@ export default function Command() {
     />
   );
 }
-

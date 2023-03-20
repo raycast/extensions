@@ -13,14 +13,14 @@ export default function Command() {
   const { data, isLoading } = useUnstableAI(fullPrompt, { execute: contentPrompts.length > 0 });
 
   if (errorType) {
-    let errorMessage = ""
+    let errorMessage = "";
     if (errorType == ERRORTYPE.FINDER_INACTIVE) {
-        errorMessage = "Can't get selected files"
+      errorMessage = "Can't get selected files";
     } else if (errorType == ERRORTYPE.MIN_SELECTION_NOT_MET) {
-        errorMessage = "Must select at least 1 file"
+      errorMessage = "Must select at least 1 file";
     } else if (errorType == ERRORTYPE.INPUT_TOO_LONG) {
-        errorMessage = "Input too large"
-      }
+      errorMessage = "Input too large";
+    }
 
     showToast({
       title: "Failed File Summarization",
