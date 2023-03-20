@@ -3,7 +3,9 @@ import { runAppleScript } from "run-applescript";
 
 export async function getInstallStatus() {
   const applications = await getApplications();
-  return applications.some(({ bundleId }) => bundleId === "BradJasper.focus");
+  return applications.some(
+    ({ bundleId }) => bundleId === "BradJasper.focus" || bundleId === "com.bradjasper.focus-setapp"
+  );
 }
 
 export async function startFocus() {
