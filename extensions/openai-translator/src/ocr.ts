@@ -25,13 +25,13 @@ function screencapture(file: string) {
 type CallbackType = "deeplink" | "launchCommand";
 
 export default async function Command() {
-  const { mode, language, level, customWords, callbackType } = getPreferenceValues<{
+  const { mode, language, level, customWords } = getPreferenceValues<{
     mode: TranslateMode;
     language: string;
     level: string;
-    customWords: string;
-    callbackType: CallbackType;
+    customWords: string
   }>();
+  const callbackType: CallbackType = "deeplink"
   await closeMainWindow({ clearRootSearch: true });
   const ocrPath = `${environment.assetsPath}/ocr_img`;
   const binary = `${environment.assetsPath}/ocr`;
@@ -57,20 +57,19 @@ export default async function Command() {
     ]);
     if (status != 0) {
       showHUD(`Failed:${stderr ? stderr.toString() : "none"}`);
-    } else {
-      if (callbackType == "launchCommand") {
-        //FIXME lauchCommand always push new instance to ui stack
-        await launchCommand({
-          name: mode,
-          type: LaunchType.UserInitiated,
-          context: {
-            txt: stdout.toString(),
-            mode,
-            img: tmpFile,
-          },
-        });
-      }
-    }
+    }//  else {
+    //   if (callbackType == "launchCommand") {
+    //     await launchCommand({
+    //       name: mode,
+    //       type: LaunchType.UserInitiated,
+    //       context: {
+    //         txt: stdout.toString(),
+    //         mode,
+    //         img: tmpFile,
+    //       },
+    //     });
+    //   }
+    // }
   } else {
     showHUD("Cancel");
   }
