@@ -1,4 +1,4 @@
-import { Form, ActionPanel, Action, popToRoot, LaunchProps, getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { Form, ActionPanel, Action, popToRoot, getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import fetch from "node-fetch";
 import { API_URL } from "./config";
