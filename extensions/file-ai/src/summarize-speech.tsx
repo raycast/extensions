@@ -1,6 +1,7 @@
 import { Detail, popToRoot, showToast, Toast, useUnstableAI } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { getAudioContents } from "./file-utils";
+import ResponseActions from "./ResponseActions";
 
 export default function Command() {
   const [commandError, setCommandError] = useState<string | undefined>();
@@ -30,5 +31,13 @@ export default function Command() {
   }
 
   const text = `# Audio Summarization\n${data ? data : "Loading..."}`;
-  return <Detail isLoading={isLoading || audioContents.length == 0} markdown={text} />;
+  return (
+    <Detail
+      isLoading={isLoading || audioContents.length == 0}
+      markdown={text}
+      actions={
+        <ResponseActions commandSummary="Summary" responseText={text} promptText={basePrompt + audioContentsString} />
+      }
+    />
+  );
 }

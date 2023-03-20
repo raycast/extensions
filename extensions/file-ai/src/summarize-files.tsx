@@ -1,33 +1,42 @@
 import { Detail, popToRoot, showToast, Toast, useUnstableAI } from "@raycast/api";
-import { useEffect, useState } from "react";
-import { getFileContents } from "./file-utils";
+import { ERRORTYPE, useFileContents } from "./file-utils";
+import ResponseActions from "./ResponseActions";
 
 export default function Command() {
-  const [commandError, setCommandError] = useState<string | undefined>();
-  const [fileContents, setFileContents] = useState<string[]>([]);
-
-  useEffect(() => {
-    getFileContents(setCommandError).then(([, contents]) => setFileContents(contents as string[]));
-  }, []);
+  const { selectedFiles, contentPrompts, loading, errorType } = useFileContents();
 
   const basePrompt =
-    "Summarize the content of the following files, using the provided file names as headings. Each summary should be at most four sentences long. Format the output as markdown. Additional instructions are provided surrounded by <>, like <this>. Here are the texts:\n";
-  const fileContentsString = fileContents.join("\n");
+    "Summarize the content of the following files, using the file names as headings. Each summary should be at most four sentences long. If the file contains a list, describe the list instead of listing all elements. Infer other questions about the files and answer them without specifying the question. Format the response as markdown. Here are the files:";
 
-  const { data, isLoading } = useUnstableAI(basePrompt + fileContentsString, {
-    execute: fileContents.length > 0,
-  });
+  const contentPromptString = contentPrompts.join("\n");
+  const fullPrompt = basePrompt + contentPromptString;
+  const { data, isLoading } = useUnstableAI(fullPrompt, { execute: contentPrompts.length > 0 });
 
-  if (commandError) {
+  if (errorType) {
+    let errorMessage = ""
+    if (errorType == ERRORTYPE.FINDER_INACTIVE) {
+        errorMessage = "Can't get selected files"
+    } else if (errorType == ERRORTYPE.MIN_SELECTION_NOT_MET) {
+        errorMessage = "Must select at least 1 file"
+    } else if (errorType == ERRORTYPE.INPUT_TOO_LONG) {
+        errorMessage = "Input too large"
+      }
+
     showToast({
       title: "Failed File Summarization",
-      message: commandError,
+      message: errorMessage,
       style: Toast.Style.Failure,
     });
     popToRoot();
     return;
   }
 
-  const text = `# File Summarization\n${data ? data : "Loading..."}`;
-  return <Detail isLoading={isLoading || fileContents.length == 0} markdown={text} />;
+  const text = `# File Summarization\n${data ? data : "Summarizing files..."}`;
+  return (
+    <Detail
+      isLoading={loading || isLoading || contentPrompts.length == 0}
+      markdown={text}
+      actions={<ResponseActions commandSummary="Summary" responseText={text} promptText={fullPrompt} />}
+    />
+  );
 }
