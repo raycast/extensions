@@ -29,9 +29,9 @@ export default async function Command() {
     mode: TranslateMode;
     language: string;
     level: string;
-    customWords: string
+    customWords: string;
   }>();
-  const callbackType: CallbackType = "deeplink"
+  const callbackType: CallbackType = "deeplink";
   await closeMainWindow({ clearRootSearch: true });
   const ocrPath = `${environment.assetsPath}/ocr_img`;
   const binary = `${environment.assetsPath}/ocr`;
@@ -57,7 +57,7 @@ export default async function Command() {
     ]);
     if (status != 0) {
       showHUD(`Failed:${stderr ? stderr.toString() : "none"}`);
-    }//  else {
+    } //  else {
     //   if (callbackType == "launchCommand") {
     //     await launchCommand({
     //       name: mode,
