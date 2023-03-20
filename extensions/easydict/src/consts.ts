@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-06-24 22:36
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-09-17 23:32
+ * @lastEditTime: 2023-03-20 09:29
  * @fileName: consts.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -14,6 +14,8 @@ export const userAgent =
 export const clipboardQueryTextKey = "clipboardQueryTextKey";
 
 export const isChineseIPKey = "isChineseIP";
+
+export const networkTimeout = 15000;
 
 export enum YoudaoErrorCode {
   Success = "0",

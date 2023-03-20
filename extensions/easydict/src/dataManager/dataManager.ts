@@ -3,7 +3,7 @@ import { OpenAITranslateResult } from "./../types";
  * @author: tisfeng
  * @createTime: 2022-06-26 11:13
  * @lastEditor: tisfeng
- * @lastEditTime: 2023-03-17 22:43
+ * @lastEditTime: 2023-03-20 09:15
  * @fileName: dataManager.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -767,9 +767,11 @@ export class DataManager {
             const openAIResult = openAIQueryResult.sourceResult.result as OpenAITranslateResult;
             let translatedText = openAIResult.translatedText;
             // If the translated last char contains ["”", '"', "」"], remove it.
+            const rightQuotes = ['"', "”", "'", "」"];
             if (translatedText.length > 0) {
-              const lastChar = translatedText[translatedText.length - 1];
-              if (["”", '"', "」"].includes(lastChar)) {
+              const lastQueryTextChar = queryWordInfo.word[queryWordInfo.word.length - 1];
+              const lastTranslatedTextChar = translatedText[translatedText.length - 1];
+              if (!rightQuotes.includes(lastQueryTextChar) && rightQuotes.includes(lastTranslatedTextChar)) {
                 translatedText = translatedText.slice(0, translatedText.length - 1);
               }
             }

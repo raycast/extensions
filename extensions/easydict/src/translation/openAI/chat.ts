@@ -1,8 +1,9 @@
+import { networkTimeout } from "./../../consts";
 /*
  * @author: tisfeng
  * @createTime: 2023-03-14 22:11
  * @lastEditor: tisfeng
- * @lastEditTime: 2023-03-17 20:16
+ * @lastEditTime: 2023-03-20 13:13
  * @fileName: chat.ts
  *
  * Copyright (c) 2023 by ${git_name}, All Rights Reserved.
@@ -16,6 +17,11 @@ import { QueryTypeResult, TranslationType } from "../../types";
 import { getTypeErrorInfo } from "../../utils";
 import { fetchSSE } from "./utils";
 
+const controller = new AbortController();
+const timeout = setTimeout(() => {
+  controller.abort();
+}, networkTimeout); // set timeout to 15s.
+
 export function requestOpenAIStreamTranslate(queryWordInfo: QueryWordInfo): Promise<QueryTypeResult> {
   console.warn(`---> start request OpenAI`);
 
@@ -25,7 +31,8 @@ export function requestOpenAIStreamTranslate(queryWordInfo: QueryWordInfo): Prom
   const message = [
     {
       role: "system",
-      content: "You are a faithful translation assistant that can only translate text and cannot interpret it.",
+      content:
+        "You are a faithful translation assistant that can only translate text and cannot interpret it, only return the translated text.",
     },
     {
       role: "user",
@@ -64,8 +71,10 @@ export function requestOpenAIStreamTranslate(queryWordInfo: QueryWordInfo): Prom
       headers,
       body: JSON.stringify(params),
       agent: httpsAgent,
+      signal: controller.signal,
       onMessage: (msg) => {
         // console.warn(`---> openai msg: ${JSON.stringify(msg)}`);
+        clearTimeout(timeout);
 
         let resp;
         try {
@@ -88,7 +97,15 @@ export function requestOpenAIStreamTranslate(queryWordInfo: QueryWordInfo): Prom
         const { content = "", role } = delta;
         targetTxt = content;
 
-        if (isFirst && targetTxt && ["“", '"', "「"].indexOf(targetTxt[0]) >= 0) {
+        const leftQuotes = ['"', "“", "'", "「"];
+        const firstQueryTextChar = queryWordInfo.word[0];
+        const firstTranslatedTextChar = targetTxt[0];
+        if (
+          isFirst &&
+          !leftQuotes.includes(firstQueryTextChar) &&
+          targetTxt &&
+          leftQuotes.includes(firstTranslatedTextChar)
+        ) {
           targetTxt = targetTxt.slice(1);
         }
 
@@ -120,13 +137,13 @@ export function requestOpenAIStreamTranslate(queryWordInfo: QueryWordInfo): Prom
           return reject(undefined);
         }
 
-        console.error(`---> OpenAI error: ${JSON.stringify(err)}`);
+        // console.error(`---> OpenAI error: ${JSON.stringify(err)}`);
 
         let errorMessage = err.error.message ?? "Unknown error";
-        console.warn(`openAIAPIKey: ${openAIAPIKey}`);
-        if (openAIAPIKey.trim().length === 0) {
-          errorMessage = `No OpenAI API key.`;
+        if (err.name === "AbortError") {
+          errorMessage = `Request timeout.`;
         }
+
         const errorInfo = {
           type: type,
           code: `401`,
@@ -211,16 +228,13 @@ export function requestOpenAITextTranslate(queryWordInfo: QueryWordInfo): Promis
           return reject(undefined);
         }
 
+        if (error.name === "AbortError") {
+          console.log("请求超时");
+        }
+
         console.error(`---> OpenAI translate error: ${error}`);
         console.error("OpenAI error response: ", error.response);
-        let errorInfo = getTypeErrorInfo(type, error);
-        if (openAIAPIKey.trim().length === 0) {
-          errorInfo = {
-            type: type,
-            code: `401`,
-            message: `No OpenAI API key.`,
-          };
-        }
+        const errorInfo = getTypeErrorInfo(type, error);
         reject(errorInfo);
       });
   });
