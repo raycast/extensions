@@ -1,6 +1,6 @@
 # Height Changelog
 
-## [Add OAuth] - 2023-03-13
+## [Add OAuth] - 2023-03-20
 
 Replaced the old authentication system with OAuth.
 
