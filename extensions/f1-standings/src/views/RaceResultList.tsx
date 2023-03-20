@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, List } from "@raycast/api";
+import { Action, ActionPanel, Color, List, Icon } from "@raycast/api";
 import { useState } from "react";
 import { useFormula1DriverUrl, useRaceResult } from "../hooks";
 import { RaceResultItem } from "../types";
@@ -39,6 +39,14 @@ function RaceResultList({ season, round }: RaceResultViewProps) {
             if (item.status && item.status !== "Finished") {
               accessories.unshift({
                 tag: { value: item.status, color: item.status.match(/\+\d+ (Lap|Laps)/) ? Color.Yellow : Color.Red },
+              });
+            }
+            if (item.FastestLap && item.FastestLap.rank === "1") {
+              accessories.unshift({
+                icon: {
+                  source: Icon.Stopwatch,
+                  tintColor: Color.Purple,
+                },
               });
             }
             return (

@@ -1,5 +1,9 @@
 # F1 Standings Changelog
 
+## [🕦 Show Fastest Lap] - 2023-03-20
+
+- If available the fastest lap is now shown in race results
+
 ## [🕦 Show DNFs] - 2023-03-19
 
 - Updates race results page to show not just the number of points a driver's earned, but also their status (`DNF`, `+1 Lap` etc)
