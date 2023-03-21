@@ -6,8 +6,10 @@
   "icon": "extension-icon.png",
   "author": "teziovsky",
   "categories": [
+    "Documentation",
     "Developer Tools",
-    "Productivity"
+    "Productivity",
+    "Web"
   ],
   "license": "MIT",
   "commands": [
