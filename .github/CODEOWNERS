@@ -21,7 +21,7 @@
 /extensions/algolia                                  @valentindotxyz
 /extensions/aliyun-oss                               @yangxyo
 /extensions/alpinejs-doc-search                      @aurawindsurfing
-/extensions/amazon-aws                               @victor-falcon @Hodglim @JonathanWbn @gebeto @momme-rtf @duboiss @hexpl0it @crisboarna @sidhant92 @DorukAkinci
+/extensions/amazon-aws                               @victor-falcon @Hodglim @JonathanWbn @gebeto @momme-rtf @duboiss @hexpl0it @crisboarna @sidhant92 @DorukAkinci @JonathanWbn
 /extensions/amphetamine                              @gstvds
 /extensions/android                                  @MohamedISoliman
 /extensions/android-adb-input                        @STAR-ZERO
@@ -124,6 +124,7 @@
 /extensions/cloudflare                               @Destiner @niklaswa
 /extensions/coda-bookmarks-search                    @allienx
 /extensions/code-stash                               @ben-greenwood
+/extensions/codegeex                                 @MBearo
 /extensions/codegrepper                              @emircanerkul @pernielsentikaer
 /extensions/codesnap                                 @Mokkapps @pernielsentikaer
 /extensions/coffee                                   @mooxl @bibixx @GastroGeek @pernielsentikaer
@@ -210,6 +211,7 @@
 /extensions/doppler-share-secrets                    @thomaspaulmann
 /extensions/dot-new                                  @natterstefan
 /extensions/dota-2                                   @FlorianWendelborn
+/extensions/dotnet-api-browser                       @pernielsentikaer
 /extensions/dotnet-docs-search                       @huseyint
 /extensions/dotween-eases                            @metakirby5
 /extensions/dou-tu                                   @gaoyang
@@ -268,6 +270,7 @@
 /extensions/flutter-documentation-search             @MattisBrizard
 /extensions/flutter-pub-dev-search                   @prasadsunny1
 /extensions/flypy-code-query                         @absir1949
+/extensions/focus                                    @namzo
 /extensions/focustask                                @vojto @pernielsentikaer
 /extensions/folder-search                            @GastroGeek @omarshahine
 /extensions/fontawesome                              @dutzi @DanielFerguson
@@ -438,6 +441,7 @@
 /extensions/life-progress                            @koinzhang
 /extensions/lifx                                     @felixb1010
 /extensions/lightning-time                           @MatthewStanciu
+/extensions/lightshot-gallery                        @feyli
 /extensions/ligue-1                                  @anhthang
 /extensions/linear                                   @thomaslombart @mathieudutour @thomaspaulmann @peduarte @pernielsentikaer
 /extensions/linguee                                  @geekdada
@@ -503,7 +507,8 @@
 /extensions/nativebase-docs                          @ShubhamVerma1811
 /extensions/nato-phonetic-alphabet                   @jesse-c
 /extensions/nature-remo                              @uetchy
-/extensions/nba-game-viewer                          @AbhinavPalacharla @djpowers
+/extensions/naver-search                             @ajchemist
+/extensions/nba-game-viewer                          @AbhinavPalacharla @djpowers @michaelli1324
 /extensions/netease-music                            @chyroc
 /extensions/netlify                                  @Destiner @jonohewitt @jasonbarry @peduarte
 /extensions/network-diagnostics                      @hmarr
@@ -599,8 +604,10 @@
 /extensions/postman                                  @tarikyildizci
 /extensions/premier-league                           @anhthang
 /extensions/prettier                                 @aeither
+/extensions/primer                                   @colebemis
 /extensions/productboard                             @honzatmn
 /extensions/producthunt                              @ragnorc
+/extensions/productlane                              @scopsy @pernielsentikaer
 /extensions/projects                                 @ajaypremshankar
 /extensions/proton-version                           @flavienbonvin @pernielsentikaer
 /extensions/punto                                    @red-avtovo
@@ -611,6 +618,7 @@
 /extensions/qr-code-scanner                          @StevenRCE0
 /extensions/qrcode-generator                         @Melvynx
 /extensions/quantumcast                              @jcgerhard
+/extensions/quest                                    @zeekrey
 /extensions/quick-access                             @koinzhang
 /extensions/quick-event                              @mblode @bascomb
 /extensions/quick-open-project                       @zerowidth @bjw-s
@@ -683,7 +691,7 @@
 /extensions/search-hexpm                             @jordelver
 /extensions/search-mdn                               @krzysztofzuraw @OBQun @k8scat
 /extensions/search-notion                            @sadanand-singh
-/extensions/search-npm                               @mrmartineau @reloadedhead @TimonVS
+/extensions/search-npm                               @mrmartineau @reloadedhead @TimonVS @luisFilipePT
 /extensions/search-regexp                            @musienkoyuriy @pernielsentikaer
 /extensions/search-rubygems                          @aleks
 /extensions/searchcaster                             @gskril @pernielsentikaer
@@ -769,7 +777,8 @@
 /extensions/things                                   @loris
 /extensions/ticktick                                 @viduycheung
 /extensions/tim                                      @tmwrnr
-/extensions/timers                                   @ThatNerdSquared @marcjulianschwarz @GastroGeek @pernielsentikaer
+/extensions/time-until-i-do                          @MuhaddiMu
+/extensions/timers                                   @ThatNerdSquared @marcjulianschwarz @GastroGeek @pernielsentikaer @lokot0k
 /extensions/timeular                                 @kudrykv
 /extensions/timezone-converter                       @joaom182 @pernielsentikaer
 /extensions/tinyfaces-nft                            @peduarte
@@ -829,6 +838,7 @@
 /extensions/vuejs-documentation                      @Dpblandin
 /extensions/vueuse-functions                         @noopurphalak
 /extensions/wakatime                                 @iammola
+/extensions/warp-launch-configuration                @joetannenbaum
 /extensions/wayback-machine                          @pernielsentikaer
 /extensions/weather                                  @tonka3000
 /extensions/web-audit                                @floriandwt

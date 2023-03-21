@@ -1,7 +1,7 @@
-import { Action, Icon, showHUD } from "@raycast/api";
+import { Action, Clipboard, Icon, showHUD } from "@raycast/api";
 import { Item } from "~/types/vault";
-import { copyPassword } from "~/utils/clipboard";
 import useReprompt from "~/utils/hooks/useReprompt";
+import { getTransientCopyPreference } from "~/utils/preferences";
 
 export type CopyPasswordActionProps = {
   content: string;
@@ -12,7 +12,6 @@ export type CopyPasswordActionProps = {
 
 /**
  * Raycast {@link Action} for copying a password to the clipboard.
- * This uses the {@link copyPassword} function to prevent clipboard managers from saving it.
  *
  * @param props.title The action title.
  * @param props.content The password to copy.
@@ -21,8 +20,8 @@ export type CopyPasswordActionProps = {
  */
 const CopyPasswordAction = (props: CopyPasswordActionProps) => {
   async function doCopy() {
-    const { copiedSecurely } = await copyPassword(props.content);
-    await showHUD(copiedSecurely ? "Copied password to clipboard" : "Copied to clipboard");
+    await Clipboard.copy(props.content, { transient: getTransientCopyPreference("password") });
+    await showHUD("Copied password to clipboard");
   }
 
   const reprompt = useReprompt(doCopy, { item: props.item, what: "copy the password" });

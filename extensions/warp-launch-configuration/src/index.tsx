@@ -39,11 +39,9 @@ export default function Command() {
       );
     }
 
-    const regex = /.y(a)?ml$/g;
-
     const fileList = files
-      .filter((file) => file.match(regex))
-      .map((file) => ({ name: file.replace(regex, ""), path: path.join(fullPath, file) }));
+      .filter((file) => file.includes(".yaml"))
+      .map((file) => ({ name: file.replace(".yaml", ""), path: path.join(fullPath, file) }));
 
     if (fileList.length === 0) {
       return showError(

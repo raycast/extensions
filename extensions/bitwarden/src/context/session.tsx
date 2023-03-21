@@ -4,7 +4,8 @@ import { Bitwarden } from "~/api/bitwarden";
 import UnlockForm from "~/components/UnlockForm";
 import { LOCAL_STORAGE_KEY } from "~/constants/general";
 import { useBitwarden } from "~/context/bitwarden";
-import { Preferences, VaultStatus } from "~/types/general";
+import { VaultStatus } from "~/types/general";
+import { Preferences } from "~/types/preferences";
 import { SessionState } from "~/types/session";
 import { hashMasterPasswordForReprompting } from "~/utils/passwords";
 

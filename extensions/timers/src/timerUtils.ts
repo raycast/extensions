@@ -1,4 +1,4 @@
-import { environment, getPreferenceValues, popToRoot, showHUD } from "@raycast/api";
+import { environment, getPreferenceValues, popToRoot, showHUD, showToast, Toast } from "@raycast/api";
 import { exec, execSync } from "child_process";
 import { randomUUID } from "crypto";
 import { existsSync, readdirSync, readFileSync, writeFileSync } from "fs";
@@ -8,13 +8,29 @@ import { formatTime, secondsBetweenDates } from "./formatUtils";
 
 const DATAPATH = environment.supportPath + "/customTimers.json";
 
-async function startTimer(timeInSeconds: number, timerName = "Untitled") {
+const checkForOverlyLoudAlert = (launchedFromMenuBar = false) => {
+  const prefs = getPreferenceValues<Preferences>();
+  if (parseFloat(prefs.volumeSetting) > 5.0) {
+    const errorMsg = "⚠️ Timer alert volume should not be louder than 5 (it can get quite loud!)";
+    if (launchedFromMenuBar) {
+      showHUD(errorMsg);
+    } else {
+      showToast({ style: Toast.Style.Failure, title: errorMsg });
+    }
+    return false;
+  }
+  return true;
+};
+
+async function startTimer(timeInSeconds: number, timerName = "Untitled", selectedSound = "default") {
   const fileName = environment.supportPath + "/" + new Date().toISOString() + "---" + timeInSeconds + ".timer";
   const masterName = fileName.replace(/:/g, "__");
   writeFileSync(masterName, timerName);
 
   const prefs = getPreferenceValues<Preferences>();
-  const selectedSoundPath = `${environment.assetsPath + "/" + prefs.selectedSound}`;
+  const selectedSoundPath = `${
+    environment.assetsPath + "/" + (selectedSound === "default" ? prefs.selectedSound : selectedSound)
+  }`;
   const cmdParts = [`sleep ${timeInSeconds}`];
   cmdParts.push(
     `if [ -f "${masterName}" ]; then osascript -e 'display notification "Timer \\"${timerName}\\" complete" with title "Ding!"'`
@@ -116,6 +132,7 @@ function deleteCustomTimer(ctID: string) {
 }
 
 export {
+  checkForOverlyLoudAlert,
   createCustomTimer,
   deleteCustomTimer,
   ensureCTFileExists,
