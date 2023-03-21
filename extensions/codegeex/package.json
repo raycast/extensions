@@ -8,16 +8,14 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "generate",
-      "title": "Generate",
-      "subtitle": "CodeGeex",
+      "name": "generateform",
+      "title": "Generate Form",
       "description": "Generate code based on description",
       "mode": "view"
     },
     {
       "name": "translate",
       "title": "Translate",
-      "subtitle": "CodeGeex",
       "description": "Translate the selected code",
       "mode": "view",
       "preferences": [

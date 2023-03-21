@@ -7,6 +7,8 @@
 
 ## Install
 
+https://www.raycast.com/MBearo/codegeex
+
 ## How to Use
 
 Copy `ApiKey` and `ApiSecret` from [CodeGeex console](https://tianqi.aminer.cn/open/console/myapps) to COdeGeex-Raycast settings.
