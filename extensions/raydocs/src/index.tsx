@@ -12,11 +12,11 @@ export default function Command() {
   (async function () {
     if (links.length) return;
     const resLinks = await scrapDocs();
+    if (!resLinks) return;
 
     setCategories([...new Set(resLinks?.map((link) => link?.sectionTitle ?? "") ?? [])]);
-    setIsLoading(false);
-    if (!resLinks) return;
     setLinks(resLinks);
+    setIsLoading(false);
   })();
 
   return (
