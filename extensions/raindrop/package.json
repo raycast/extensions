@@ -6,6 +6,9 @@
   "description": "Search your Raindrop.io bookmarks",
   "icon": "raindrop-icon-big.png",
   "author": "lardissone",
+  "contributors": [
+    "shubham"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -20,6 +23,13 @@
       "title": "Search Bookmarks",
       "subtitle": "Raindrop.io",
       "description": "Search bookmarks using operators",
+      "mode": "view"
+    },
+    {
+      "name": "add",
+      "title": "Add Bookmarks",
+      "subtitle": "Raindrop.io",
+      "description": "Add bookmarks to Raindrop",
       "mode": "view"
     }
   ],
@@ -46,7 +56,8 @@
   "dependencies": {
     "@raycast/api": "^1.44.0",
     "@raycast/utils": "^1.4.11",
-    "dayjs": "^1.11.6"
+    "dayjs": "^1.11.6",
+    "node-fetch": "^3.3.1"
   },
   "devDependencies": {
     "@types/node": "18.11.11",

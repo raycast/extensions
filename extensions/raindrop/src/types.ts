@@ -58,6 +58,13 @@ export interface BookmarksResponse {
   items: Bookmark[];
 }
 
+export interface TagsResponse {
+  items: Array<{
+    _id: string;
+    count: number;
+  }>;
+}
+
 export type UserData = {
   // files: unknown;
   // avatar: string;
