@@ -37,7 +37,7 @@ export function codeExplainApi(prompt: string) {
   const { language, comment, apikey, apisecret } = getPreferenceValues();
   return axios({
     method: "post",
-    url: "https://wudao.aminer.cn/os/api/api/v2/multilingual_code_explain",
+    url: "https://wudao.aminer.cn/os/api/api/v2/multilingual_code/explain",
     data: {
       n: 1,
       prompt,
@@ -57,7 +57,7 @@ export function codeExplainFormApi({ prompt, lang, locale }: CodeExplainFormApiP
   const { apikey, apisecret } = getPreferenceValues();
   return axios({
     method: "post",
-    url: "https://wudao.aminer.cn/os/api/api/v2/multilingual_code_explain",
+    url: "https://wudao.aminer.cn/os/api/api/v2/multilingual_code/explain",
     data: {
       n: 1,
       prompt,

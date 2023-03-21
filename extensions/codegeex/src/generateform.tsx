@@ -9,16 +9,16 @@ const languageList = [
   "C#",
   "Java",
   "Python",
-  'HTML',
-  'PHP',
+  "HTML",
+  "PHP",
   "Javascript",
   "TypeScript",
   "Go",
   "Rust",
   "SQL",
-  'Kotlin',
-  'Fortran',
-  'R'
+  "Kotlin",
+  "Fortran",
+  "R",
 ];
 
 export default function Command() {
@@ -43,15 +43,15 @@ export default function Command() {
       toast.title = error.message || "Something went wrong, please try again";
     }
   };
-  const copy = () => onCopy({ rawCode: code || '' });
+  const copy = () => onCopy({ rawCode: code || "" });
   const { language } = getPreferenceValues();
   const fetchSelectedText = async () => {
     const res = await getSelectedText();
-    setCode(res);
-  }
+    setCode(res || "");
+  };
   useEffect(() => {
-    fetchSelectedText()
-  }, [])
+    fetchSelectedText();
+  }, []);
 
   return (
     <Form
@@ -72,7 +72,7 @@ export default function Command() {
         title="Code"
         placeholder="Enter comments/code to allow the CodeGeex to continue"
         value={code}
-        onChange={e => setCode(e)}
+        onChange={(e) => setCode(e)}
       />
     </Form>
   );
