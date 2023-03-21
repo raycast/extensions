@@ -17,3 +17,7 @@ Gain easy access to your excalidraw boards through Raycast!
 4. Select
 
 <img src="./guide/shareableLink.png" width="40%"/>
+
+
+5. Select the `Import Canvas` command in raycast.
+6. Paste the url into the url field and give your canvas a name and description.
