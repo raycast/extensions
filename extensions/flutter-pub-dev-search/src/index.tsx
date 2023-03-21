@@ -1,17 +1,19 @@
 import {
   ActionPanel,
   CopyToClipboardAction,
+  getPreferenceValues,
   List,
   OpenInBrowserAction,
-  showToast,
-  ToastStyle,
   randomId,
+  showToast,
+  ToastStyle
 } from "@raycast/api";
-import { useState, useEffect, useRef } from "react";
 import fetch, { AbortError } from "node-fetch";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 export default function Command() {
   const { state, search } = useSearch();
+  const { primaryAction } = getPreferenceValues<Preference>();
 
   return (
     <List
@@ -22,23 +24,43 @@ export default function Command() {
     >
       <List.Section title="Results" subtitle={state.results.length + ""}>
         {state.results.map((searchResult) => (
-          <SearchListItem key={searchResult.id} searchResult={searchResult} />
+          <SearchListItem key={searchResult.id} searchResult={searchResult} primaryAction={primaryAction} />
         ))}
       </List.Section>
     </List>
   );
 }
 
-function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
-  return (
-    <List.Item
-      title={searchResult.name}
-      actions={
+function SearchListItem({
+  searchResult,
+  primaryAction,
+}: {
+  searchResult: SearchResult, 
+  primaryAction: Preference['primaryAction'],
+}) {
+  const actions = useMemo(() => {
+    if (primaryAction === "copy-install-command") {
+      return (
         <ActionPanel>
           <CopyToClipboardAction title="Copy Install Command" content={`flutter pub add ${searchResult.name}`} />
           <OpenInBrowserAction url={`https://pub.dev/packages/${searchResult.name}`} />
         </ActionPanel>
-      }
+      );
+    } else {
+      return (
+        <ActionPanel>
+        <OpenInBrowserAction url={`https://pub.dev/packages/${searchResult.name}`} />
+          <CopyToClipboardAction title="Copy Install Command" content={`flutter pub add ${searchResult.name}`} />
+        </ActionPanel>
+      );
+    }
+  }, [primaryAction, searchResult.name]);
+
+
+  return (
+    <List.Item
+      title={searchResult.name}
+      actions={actions}
     />
   );
 }
@@ -119,4 +141,8 @@ interface SearchResult {
   id: string;
   name: string;
   url: string;
+}
+
+interface Preference {
+  primaryAction: "copy-install-command" | "open-in-browser";
 }
