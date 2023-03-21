@@ -136,9 +136,11 @@ function InvoiceListItem({ invoice, mutateInvoices }: InvoiceListItemProps) {
       accessories={[
         {
           text: invoice?.invoice_date,
+          tooltip: "Invoice Date",
         },
         {
           text: formatPrice(invoice?.gross_price ?? 0),
+          tooltip: "Gross Price",
         },
       ]}
       actions={
