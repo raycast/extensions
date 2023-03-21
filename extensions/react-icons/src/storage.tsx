@@ -4,8 +4,7 @@ import { IconProps, PinnedMovement } from "./types";
 
 const cache = new Cache();
 
-export const IconStorageActions = (props: IconProps) => {
-  const { icon, category, pinned, recent, movement, refresh } = props;
+export const IconStorageActions = ({ icon, category, pinned, recent, movement, refresh }: IconProps) => {
   return (
     <ActionPanel.Section>
       {pinned && movement && (
@@ -69,7 +68,7 @@ export const IconStorageActions = (props: IconProps) => {
           }}
         />
       )}
-      {props.recent && (
+      {recent && (
         <React.Fragment>
           <Action
             title="Remove Recent Icon"
@@ -97,57 +96,38 @@ export const IconStorageActions = (props: IconProps) => {
   );
 };
 
-export const getRecentIcons = (category?: string): string[] => {
-  if (category) {
-    const json: string | undefined = cache.get(`recent-${category}`);
-    if (!json) return [];
-    return JSON.parse(json);
-  }
-  return [];
+export const getRecentIcons = (category: string): string[] => {
+  const json: string | undefined = cache.get(`recent-${category}`);
+  return json ? JSON.parse(json) : [];
 };
 
-export const getPinnedIcons = (category?: string): string[] => {
-  if (category) {
-    const json: string | undefined = cache.get(`pinned-${category}`);
-    if (!json) return [];
-    return JSON.parse(json);
-  }
-  return [];
-};
-
-const remove = (icons: string[], icon: string): string[] => {
-  return icons.filter((i) => i !== icon);
+export const getPinnedIcons = (category: string): string[] => {
+  const json: string | undefined = cache.get(`pinned-${category}`);
+  return json ? JSON.parse(json) : [];
 };
 
 export const addRecentIcon = (icon: string, category: string) => {
-  let icons = getPinnedIcons(category);
-  if (icons.includes(icon)) return;
-  icons = getRecentIcons(category);
-  icons = remove(icons, icon);
-  icons.unshift(icon);
-  if (icons.length > 1000) icons.pop();
-  cache.set(`recent-${category}`, JSON.stringify(icons));
+  const pinned = getPinnedIcons(category);
+  if (!pinned.includes(icon)) {
+    const recent = getRecentIcons(category);
+    cache.set(`recent-${category}`, JSON.stringify([icon, ...recent.filter((i) => i !== icon)].slice(0, 20)));
+  }
 };
 
 const addPinnedIcon = (icon: string, category: string) => {
   removeRecentIcon(icon, category);
-  let icons = getPinnedIcons(category);
-  icons = remove(icons, icon);
-  icons.unshift(icon);
-  if (icons.length > 1000) icons.pop();
-  cache.set(`pinned-${category}`, JSON.stringify(icons));
+  const pinned = getPinnedIcons(category);
+  cache.set(`pinned-${category}`, JSON.stringify([icon, ...pinned.filter((i) => i !== icon)]));
 };
 
 const removeRecentIcon = (icon: string, category: string) => {
-  let icons = getRecentIcons(category);
-  icons = remove(icons, icon);
-  cache.set(`recent-${category}`, JSON.stringify(icons));
+  const recent = getRecentIcons(category);
+  cache.set(`recent-${category}`, JSON.stringify(recent.filter((i) => i !== icon)));
 };
 
 const removePinnedIcon = (icon: string, category: string) => {
-  let icons = getPinnedIcons(category);
-  icons = remove(icons, icon);
-  cache.set(`pinned-${category}`, JSON.stringify(icons));
+  const pinned = getPinnedIcons(category);
+  cache.set(`pinned-${category}`, JSON.stringify(pinned.filter((i) => i !== icon)));
 };
 
 const clearRecentIcons = (category: string) => {
