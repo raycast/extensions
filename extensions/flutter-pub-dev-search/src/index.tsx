@@ -1,13 +1,12 @@
 import {
+  Action,
   ActionPanel,
-  CopyToClipboardAction,
   getPreferenceValues,
   List,
-  OpenInBrowserAction,
-  randomId,
   showToast,
-  ToastStyle
+  Toast
 } from "@raycast/api";
+import { nanoid } from "nanoid";
 import fetch, { AbortError } from "node-fetch";
 import { useEffect, useMemo, useRef, useState } from "react";
 
@@ -42,20 +41,19 @@ function SearchListItem({
     if (primaryAction === "copy-install-command") {
       return (
         <ActionPanel>
-          <CopyToClipboardAction title="Copy Install Command" content={`flutter pub add ${searchResult.name}`} />
-          <OpenInBrowserAction url={`https://pub.dev/packages/${searchResult.name}`} />
+          <Action.CopyToClipboard title="Copy Install Command" content={`flutter pub add ${searchResult.name}`} />
+          <Action.OpenInBrowser url={`https://pub.dev/packages/${searchResult.name}`} />
         </ActionPanel>
       );
     } else {
       return (
         <ActionPanel>
-        <OpenInBrowserAction url={`https://pub.dev/packages/${searchResult.name}`} />
-          <CopyToClipboardAction title="Copy Install Command" content={`flutter pub add ${searchResult.name}`} />
+          <Action.OpenInBrowser url={`https://pub.dev/packages/${searchResult.name}`} />
+          <Action.CopyToClipboard title="Copy Install Command" content={`flutter pub add ${searchResult.name}`} />
         </ActionPanel>
       );
     }
   }, [primaryAction, searchResult.name]);
-
 
   return (
     <List.Item
@@ -95,7 +93,7 @@ function useSearch() {
         return;
       }
       console.error("search error", error);
-      showToast(ToastStyle.Failure, "Could not perform search", String(error));
+      showToast(Toast.Style.Failure, "Could not perform search", String(error));
     }
   }
 
@@ -125,7 +123,7 @@ async function performSearch(searchText: string, signal: AbortSignal): Promise<S
   return jsonResults.map((jsonResult) => {
     const packageName = jsonResult.package;
     return {
-      id: randomId(),
+      id: nanoid(),
       name: packageName as string,
       url: "https://pub.dev/api/packages/" + (packageName as string),
     };
