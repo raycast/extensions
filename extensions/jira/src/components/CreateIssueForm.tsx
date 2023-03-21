@@ -15,7 +15,6 @@ import { useEffect, useMemo, useState } from "react";
 import { createIssue, getCreateIssueMetadata, Component, Version, addAttachment, Priority } from "../api/issues";
 import { getLabels } from "../api/labels";
 import { getProjects } from "../api/projects";
-import { getTeams } from "../api/teams";
 import { getUsers } from "../api/users";
 import { getErrorMessage } from "../helpers/errors";
 import { CustomFieldSchema, getCustomFieldsForCreateIssue } from "../helpers/issues";
@@ -55,7 +54,6 @@ export default function CreateIssueForm({ draftValues, enableDrafts = true }: Cr
 
   const { data: projects } = useCachedPromise(() => getProjects());
   const { data: users } = useCachedPromise(() => getUsers());
-  const { data: teams } = useCachedPromise(() => getTeams());
   const { data: labels } = useCachedPromise(() => getLabels());
 
   // There's a slight jump on issue types when launching the command since they're
@@ -303,7 +301,7 @@ export default function CreateIssueForm({ draftValues, enableDrafts = true }: Cr
         <>
           <Form.Separator />
 
-          <IssueFormCustomFields fields={otherCustomFields} itemProps={itemProps} users={users} teams={teams} />
+          <IssueFormCustomFields fields={otherCustomFields} itemProps={itemProps} users={users} />
 
           {unknownCustomFields !== "" ? (
             <Form.Description

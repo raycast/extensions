@@ -8,6 +8,7 @@ import { CustomFieldSchema, getCustomFieldsForCreateIssue, Option } from "../hel
 
 import { IssueFormValues } from "./CreateIssueForm";
 import FormSprintDropdown from "./FormSprintDropdown";
+import { FormTeamDropdown } from "./FormTeamDropdown";
 
 type IssueFormCustomFieldsProps = {
   fields: ReturnType<typeof getCustomFieldsForCreateIssue>["customFields"];
@@ -16,7 +17,7 @@ type IssueFormCustomFieldsProps = {
   teams?: Team[] | null;
 };
 
-export default function IssueFormCustomFields({ fields, itemProps, users, teams }: IssueFormCustomFieldsProps) {
+export default function IssueFormCustomFields({ fields, itemProps, users }: IssueFormCustomFieldsProps) {
   return (
     <>
       {fields.map(({ key, name, fieldSchema, allowedValues }) => {
@@ -109,22 +110,7 @@ export default function IssueFormCustomFields({ fields, itemProps, users, teams 
           }
           case CustomFieldSchema.team: {
             const props = itemProps[key] as Form.ItemProps<string>;
-            component = (
-              <Form.Dropdown {...props} title={name} storeValue>
-                <Form.Dropdown.Item title="Unassigned" value="" icon={Icon.TwoPeople} />
-
-                {teams?.map((team) => {
-                  return (
-                    <Form.Dropdown.Item
-                      key={team.teamId}
-                      value={team.teamId}
-                      title={team.displayName}
-                      icon={Icon.TwoPeople}
-                    />
-                  );
-                })}
-              </Form.Dropdown>
-            );
+            component = <FormTeamDropdown {...props} name={name} />;
             break;
           }
         }
