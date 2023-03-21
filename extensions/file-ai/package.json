@@ -42,46 +42,21 @@
       "mode": "view"
     },
     {
-      "name": "named-entities",
-      "title": "Extract Named Entities",
-      "description": "Extract and define all named entities within selected files",
+      "name": "create-command",
+      "title": "Create File AI Command",
+      "description": "Create a custom File AI command accessible via 'Search File AI Commands'",
       "mode": "view"
     },
     {
-      "name": "find-errors",
-      "title": "Find Errors In Selected Files",
-      "description": "Find errors and inconsistencies in the selected files",
-      "mode": "view"
-    },
-    {
-      "name": "translate",
-      "title": "Translate Selected Files",
-      "description": "Use AI to translate the content of selected files",
-      "mode": "view",
-      "arguments": [
-        {
-          "name": "language",
-          "placeholder": "Language",
-          "type": "text",
-          "required": true
-        }
-      ]
-    },
-    {
-      "name": "flashcards",
-      "title": "Flashcards From Selected Files",
-      "description": "Generate 3 flashcards in question-answer format from the contents of selected files",
-      "mode": "view"
-    },
-    {
-      "name": "action-items",
-      "title": "Action Items From Selected Files",
-      "description": "Generate actions items based on the contents of selected files",
+      "name": "search-commands",
+      "title": "Search File AI Commands",
+      "description": "Search custom File AI commands",
       "mode": "view"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.48.9",
+    "@raycast/utils": "^1.5.2",
     "run-applescript": "^6.1.0",
     "exifr": "^7.1.3"
   },

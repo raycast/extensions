@@ -1,9 +1,10 @@
-import { getSelectedFinderItems } from "@raycast/api";
+import { getSelectedFinderItems, LocalStorage } from "@raycast/api";
 import * as fs from "fs";
 import exifr from "exifr";
 import { runAppleScriptSync } from "run-applescript";
 import { audioFileExtensions, imageFileExtensions, textFileExtensions } from "./file-extensions";
 import { useEffect, useState } from "react";
+import { defaultCommands } from "./default-commands";
 
 let maxCharacters = 4000;
 
@@ -12,6 +13,16 @@ export const ERRORTYPE = {
   MIN_SELECTION_NOT_MET: 2,
   INPUT_TOO_LONG: 3,
 };
+
+export async function installDefaults() {
+  const defaultsItem = await LocalStorage.getItem("--defaults-installed");
+  if (!defaultsItem) {
+    Object.entries(defaultCommands).forEach(async (entry) => {
+      await LocalStorage.setItem(entry[0], entry[1]);
+    });
+    await LocalStorage.setItem("--defaults-installed", "true");
+  }
+}
 
 export function useFileContents(
   minFileCount?: number,
@@ -67,9 +78,12 @@ export function useFileContents(
               contents += getApplicationDetails(file.path, skipMetadata);
             } else if (audioFileExtensions.includes(pathLower.split(".").at(-1) as string)) {
               if (skipAudioDetails) {
+                if (!skipMetadata) {
+                  contents += getMetadataDetails(file.path);
+                }
                 contents += getAudioTranscription(file.path);
               } else {
-                contents += getAudioDetails(file.path);
+                contents += getAudioDetails(file.path, skipMetadata);
                 if (fs.lstatSync(file.path).size < 100000) {
                   contents += `<Separately, state and discuss the spoken content of the file: "${getAudioTranscription(
                     file.path
@@ -184,7 +198,7 @@ const getImageDetails = async (filePath: string, skipMetadata?: boolean): Promis
   /* Gets the EXIF data of an image file and any text within it, as well as the associated prompt instructions. */
   const imageText = filterContentString(getImageText(filePath));
   const imageTextInstructions = skipMetadata
-    ? imageText
+    ? `Transcribed text from image: "${imageText}"`
     : `<Discuss the meaning and significance of the image based on the following text extracted from it: "${imageText}. Based on that, discuss what the image might be about. Infer other questions about the text and answer them.">`;
 
   const animalLabels = getImageAnimals(filePath);
@@ -298,7 +312,7 @@ const getSVGDetails = (filePath: string, skipMetadata?: boolean): string => {
 
   // Include SVG content assessment information
   svgDetails += skipMetadata
-    ? filterContentString(fs.readFileSync(filePath).toString())
+    ? `Code for the SVG: "${filterContentString(fs.readFileSync(filePath).toString())}"`
     : `<In addition, specify the file size, date created, and other metadata info. Predict the purpose of the file based on its name, metadata, and file extension. Describe the overall shape of the image resulting from the following code, and predict what object(s) might be represented:>\n${filterContentString(
         fs.readFileSync(filePath).toString()
       )}`;
@@ -330,7 +344,6 @@ const getApplicationDetails = (filePath: string, skipMetadata?: boolean): string
       appDetails += "<Provide a summary of the application's scripting dictionary.>";
     }
   });
-  console.log(appDetails.length);
   return appDetails;
 };
 
@@ -361,10 +374,12 @@ const getPDFText = (filePath: string): string => {
     return (thePDF's |string|()) as text`);
 };
 
-const getAudioDetails = (filePath: string): string => {
+const getAudioDetails = (filePath: string, skipMetadata?: boolean): string => {
   /* Gets the metadata and sound classifications of an audio file, as well as associated prompt instructions. */
-  const metadata = filterContentString(JSON.stringify(fs.lstatSync(filePath)));
-  const metadataInstruction = `<Summarize answers to questions based on this metadata: ${metadata}. What is the file's creation date, modification date, and size? What is its purpose? If you know of something relevant to the filename that might help in determining what the file is about, discuss that. Infer other questions based on the metadata and sound classifications and answer them.>`;
+  const metadata = skipMetadata ? "" : filterContentString(JSON.stringify(fs.lstatSync(filePath)));
+  const metadataInstruction = skipMetadata
+    ? ""
+    : `<Summarize answers to questions based on this metadata: ${metadata}. What is the file's creation date, modification date, and size? What is its purpose? If you know of something relevant to the filename that might help in determining what the file is about, discuss that. Infer other questions based on the metadata and sound classifications and answer them.>`;
 
   const soundClassification = filterContentString(getSoundClassification(filePath).replace("_", "")).trim();
   const classificationInstruction = `<Discuss the likely purpose of the audio file based on these classifications of sounds observed in the file: "${soundClassification}".>`;

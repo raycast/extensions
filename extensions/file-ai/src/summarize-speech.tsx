@@ -1,9 +1,14 @@
 import { Detail, popToRoot, showToast, Toast, useUnstableAI } from "@raycast/api";
-import { ERRORTYPE, useAudioContents } from "./file-utils";
+import { useEffect } from "react";
+import { ERRORTYPE, installDefaults, useAudioContents } from "./file-utils";
 import ResponseActions from "./ResponseActions";
 
 export default function Command() {
   const { selectedFiles, contentPrompts, loading, errorType } = useAudioContents();
+
+  useEffect(() => {
+    installDefaults();
+  }, []);
 
   const basePrompt =
     "Summarize and assess the the following audio files using the file names as headings. Discuss the transcribed text's purpose and significance. Here are the audio transcriptions:";

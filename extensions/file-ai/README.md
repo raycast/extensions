@@ -4,6 +4,10 @@ Summarize, compare, translate, and act on selected files using Raycast AI
 
 ## Commands
 
+- Create File AI Command
+    - Create a custom File AI command accessible via 'Search File AI Commands'
+- Search File AI Commands
+    - Search and run custom File AI commands
 - Summarize Selected Files
     - Summarize the contents of selected text files, PDFs, images, audio files, and more.
 - Compare Selected Files
@@ -14,13 +18,3 @@ Summarize, compare, translate, and act on selected files using Raycast AI
     - Get a quick overview of the purpose and usage of a file.
 - Summarize Spoken Audio
     - Summarize the spoken word content of audio files.
-- Extract Named Entities
-    - Extract and define named entities within selected files"
-- Find Errors In Selected Files
-    - Find errors and inconsistencies in the selected files
-- Translate Selected Files
-    - Use AI to translate the content of selected files
-- Flashcards From Selected Files
-    - Generate flashcards in question-answer format from the contents of selected files
-- Actions Items From Selected Files
-    - Generate actions items based on the contents of selected files

@@ -1,9 +1,14 @@
 import { Detail, popToRoot, showToast, Toast, useUnstableAI } from "@raycast/api";
-import { ERRORTYPE, useFileContents } from "./file-utils";
+import { useEffect } from "react";
+import { ERRORTYPE, installDefaults, useFileContents } from "./file-utils";
 import ResponseActions from "./ResponseActions";
 
 export default function Command() {
   const { selectedFiles, contentPrompts, loading, errorType } = useFileContents();
+
+  useEffect(() => {
+    installDefaults();
+  }, []);
 
   const basePrompt =
     "Summarize the content of the following files, using the file names as headings. Briefly discuss any lists the files contain instead of listing all elements. Discuss each file's tone and style. Infer questions about the files and answer them without specifying the question. Format the response as markdown paragraphs. Also, give a list of relevant links and a brief description of them.";

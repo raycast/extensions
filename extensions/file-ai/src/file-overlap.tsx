@@ -1,9 +1,14 @@
 import { Detail, popToRoot, showToast, Toast, useUnstableAI } from "@raycast/api";
-import { ERRORTYPE, useFileContents } from "./file-utils";
+import { useEffect } from "react";
+import { ERRORTYPE, installDefaults, useFileContents } from "./file-utils";
 import ResponseActions from "./ResponseActions";
 
 export default function Command() {
   const { selectedFiles, contentPrompts, loading, errorType } = useFileContents();
+
+  useEffect(() => {
+    installDefaults();
+  }, []);
 
   const basePrompt = "What overlaps in content or ideas exists between the following files? What are the similarities?";
 
