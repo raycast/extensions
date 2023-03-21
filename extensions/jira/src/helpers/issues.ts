@@ -302,8 +302,8 @@ export function getCustomFieldValue(fieldSchema: CustomFieldSchema, value: unkno
       return { id: typedValue };
     }
     case CustomFieldSchema.team: {
-      const typedValue = value as { title: string; name: string };
-      return { id: typedValue.name };
+      const typedValue = value as string;
+      return typedValue;
     }
     default:
       return null;

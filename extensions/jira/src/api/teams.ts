@@ -1,12 +1,20 @@
 import { request } from "./request";
 
+type TeamResponse = {
+  value: string;
+  displayName: string;
+};
 export type Team = {
   teamId: string;
   displayName: string;
 };
 
 export async function getTeams() {
-  return [];
-  const result = await request<Team[]>("/field/teams-add-on__team-issue-field/option");
-  return result;
+  const response = await request<{ results: TeamResponse[] }>("/jql/autocompletedata/suggestions", {
+    params: { fieldName: "team" },
+  });
+  return response?.results.map((team) => ({
+    teamId: team.value,
+    displayName: team.displayName,
+  }));
 }

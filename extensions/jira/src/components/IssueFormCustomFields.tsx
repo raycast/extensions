@@ -108,14 +108,20 @@ export default function IssueFormCustomFields({ fields, itemProps, users, teams 
             break;
           }
           case CustomFieldSchema.team: {
-            console.log("teams", teams);
             const props = itemProps[key] as Form.ItemProps<string>;
             component = (
               <Form.Dropdown {...props} title={name} storeValue>
-                <Form.Dropdown.Item title="Unassigned" value="" icon={Icon.Person} />
+                <Form.Dropdown.Item title="Unassigned" value="" icon={Icon.TwoPeople} />
 
                 {teams?.map((team) => {
-                  return <Form.Dropdown.Item key={team.teamId} value={team.teamId} title={team.displayName} />;
+                  return (
+                    <Form.Dropdown.Item
+                      key={team.teamId}
+                      value={team.teamId}
+                      title={team.displayName}
+                      icon={Icon.TwoPeople}
+                    />
+                  );
                 })}
               </Form.Dropdown>
             );
