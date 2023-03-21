@@ -1,15 +1,27 @@
-import { ActionPanel, Action, Detail, List, Icon } from "@raycast/api";
+import {
+  ActionPanel,
+  Action,
+  Detail,
+  List,
+  Icon,
+  getPreferenceValues,
+  Toast,
+  showToast,
+} from "@raycast/api";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import localizedFormat from "dayjs/plugin/localizedFormat";
 import { Bookmark } from "../types";
 import { getFavicon } from "@raycast/utils";
+import fetch from "node-fetch";
 
 dayjs.extend(relativeTime);
 dayjs.extend(localizedFormat);
 
 export default function BookmarkItem(props: { bookmark: Bookmark }) {
   const bookmark = props.bookmark;
+
+  const preferences = getPreferenceValues();
 
   const getDetails = () => {
     let md = `# ${bookmark.title}\n`;
@@ -30,6 +42,32 @@ export default function BookmarkItem(props: { bookmark: Bookmark }) {
     return md;
   };
 
+  async function handleDelete() {
+    const toast = await showToast(Toast.Style.Animated, "Deleting Link");
+    try {
+      await fetch(`https://api.raindrop.io/rest/v1/raindrop/${bookmark._id}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${preferences.token}`,
+        },
+      }).then((res) => {
+        if (res.status === 200) {
+          toast.style = Toast.Style.Success;
+          toast.title = "Link Deleted";
+          toast.message = bookmark.link;
+          return res.json();
+        } else {
+          throw new Error("Error deleting link");
+        }
+      });
+    } catch (error) {
+      toast.style = Toast.Style.Failure;
+      toast.title = "Error Deleting Link";
+      // @ts-expect-error - error.message is a string
+      toast.message = error.message;
+    }
+  }
+
   return (
     <List.Item
       id={String(bookmark._id)}
@@ -41,6 +79,7 @@ export default function BookmarkItem(props: { bookmark: Bookmark }) {
       actions={
         <ActionPanel>
           <Action.OpenInBrowser url={bookmark.link} />
+          <Action.SubmitForm onSubmit={handleDelete} title="Delete Bookmark" icon={Icon.Trash} />
           <Action.Push
             title="Show Details"
             icon={Icon.Sidebar}
