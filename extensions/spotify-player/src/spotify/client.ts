@@ -534,6 +534,57 @@ export function usePlaylistSearch(query: string | undefined): Response<SpotifyAp
   return response;
 }
 
+export function useShowSearch(query: string | undefined): Response<SpotifyApi.ShowSearchResponse> {
+  const [response, setResponse] = useState<Response<SpotifyApi.ShowSearchResponse>>({ isLoading: false });
+
+  let cancel = false;
+
+  useEffect(() => {
+    async function fetchData() {
+      await authorizeIfNeeded();
+
+      if (cancel) {
+        return;
+      }
+      if (!query) {
+        setResponse((oldState) => ({ ...oldState, isLoading: false, result: undefined }));
+        return;
+      }
+      setResponse((oldState) => ({ ...oldState, isLoading: true }));
+
+      try {
+        const response =
+          (await spotifyApi
+            .searchShows(query, { limit: 50 })
+            .then((response: { body: any }) => response.body as SpotifyApi.ShowSearchResponse)
+            .catch((error) => {
+              setResponse((oldState) => ({ ...oldState, error: (error as unknown as SpotifyApi.ErrorObject).message }));
+            })) ?? undefined;
+
+        if (!cancel) {
+          setResponse((oldState) => ({ ...oldState, result: response }));
+        }
+      } catch (e: any) {
+        if (!cancel) {
+          setResponse((oldState) => ({ ...oldState, error: (e as unknown as SpotifyApi.ErrorObject).message }));
+        }
+      } finally {
+        if (!cancel) {
+          setResponse((oldState) => ({ ...oldState, isLoading: false }));
+        }
+      }
+    }
+
+    fetchData();
+
+    return () => {
+      cancel = true;
+    };
+  }, [query]);
+
+  return response;
+}
+
 export function useGetFeaturedPlaylists(): Response<SpotifyApi.ListOfFeaturedPlaylistsResponse> {
   const [response, setResponse] = useState<Response<SpotifyApi.ListOfFeaturedPlaylistsResponse>>({ isLoading: true });
 

@@ -12,7 +12,8 @@
     "stuart",
     "tonka3000",
     "dancannon",
-    "sxn"
+    "sxn",
+    "AlanHuang"
   ],
   "commands": [
     {
@@ -95,6 +96,13 @@
       "title": "Search Artists",
       "subtitle": "Spotify",
       "description": "Search Artists in Spotify",
+      "mode": "view"
+    },
+    {
+      "name": "searchShows",
+      "title": "Search Shows",
+      "subtitle": "Spotify",
+      "description": "Search Shows in Spotify",
       "mode": "view"
     },
     {

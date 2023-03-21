@@ -1,5 +1,9 @@
 # Spotify Player Changelog
 
+## [Feature] - 2023-03-21
+
+- Introduce new command "Search Shows"
+
 ## [Fix] - 2023-01-13
 
 - Allow no-view commands (`Like Current Song`, `Dislike Current Song`, `Just Play` and `Star Radio`) to initialize authorization.
