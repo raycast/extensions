@@ -1,16 +1,14 @@
-import { useFetch } from "@raycast/utils";
+import { useCachedPromise } from "@raycast/utils";
 import { useMemo } from "react";
-import { ApiHeaders, ApiUrls } from "../api/helpers";
-import { FieldTemplateObject } from "../types/fieldTemplate";
-import { ApiResponse } from "../types/utils";
+import { ApiFieldTemplates } from "../api/fieldTemplates";
+import { UseCachedPromiseOptions } from "../types/utils";
 
 type Props = {
-  options?: Parameters<typeof useFetch<ApiResponse<FieldTemplateObject[]>>>[1];
+  options?: UseCachedPromiseOptions<typeof ApiFieldTemplates.get>;
 };
 
 export default function useFieldTemplates({ options }: Props = {}) {
-  const { data, error, isLoading, mutate } = useFetch<ApiResponse<FieldTemplateObject[]>>(ApiUrls.fieldTemplates, {
-    headers: ApiHeaders,
+  const { data, error, isLoading, mutate } = useCachedPromise(ApiFieldTemplates.get, [], {
     ...options,
   });
 

@@ -36,10 +36,11 @@
   "dependencies": {
     "@raycast/api": "^1.48.8",
     "@raycast/utils": "^1.4.8",
+    "@total-typescript/ts-reset": "^0.4.2",
     "lodash": "^4.17.21",
     "run-applescript": "^6.0.0",
     "uuid": "^8.3.2",
-    "zod": "^3.18.0"
+    "zod": "^3.21.4"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.5",

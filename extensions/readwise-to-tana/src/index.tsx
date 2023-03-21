@@ -48,6 +48,7 @@ export default function Command() {
       highlightNote,
       highlightSupertag,
       highlightUpdatedAt,
+      highlightUrl,
       id,
       readwiseUrl,
       source,
@@ -95,6 +96,9 @@ export default function Command() {
       : ''
     highlights += highlightColor
       ? `{{#if color}}\n    - ${highlightColor}:: {{color}}{{/if}}`
+      : ''
+    highlights += highlightUrl
+      ? `{{#if url}}\n    - ${highlightUrl}:: {{url}}{{/if}}`
       : ''
 
     highlights += '\n{{/each}}'
