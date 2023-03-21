@@ -20,6 +20,7 @@ export default function LinkItem({ link }: Props) {
       actions={
         <ActionPanel>
           <Action.OpenInBrowser url={link.url.path} />
+          <Action.CopyToClipboard title="Copy URL to Clipboard" content={link.url.path} />
         </ActionPanel>
       }
     />
