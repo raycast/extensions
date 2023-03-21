@@ -1,11 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  getPreferenceValues,
-  List,
-  showToast,
-  Toast
-} from "@raycast/api";
+import { Action, ActionPanel, getPreferenceValues, List, showToast, Toast } from "@raycast/api";
 import { nanoid } from "nanoid";
 import fetch, { AbortError } from "node-fetch";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -34,8 +27,8 @@ function SearchListItem({
   searchResult,
   primaryAction,
 }: {
-  searchResult: SearchResult, 
-  primaryAction: Preference['primaryAction'],
+  searchResult: SearchResult;
+  primaryAction: Preference["primaryAction"];
 }) {
   const actions = useMemo(() => {
     if (primaryAction === "copy-install-command") {
@@ -55,12 +48,7 @@ function SearchListItem({
     }
   }, [primaryAction, searchResult.name]);
 
-  return (
-    <List.Item
-      title={searchResult.name}
-      actions={actions}
-    />
-  );
+  return <List.Item title={searchResult.name} actions={actions} />;
 }
 
 function useSearch() {
