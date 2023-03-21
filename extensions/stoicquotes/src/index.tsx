@@ -2,13 +2,11 @@ import { Action, ActionPanel, Detail, Icon } from '@raycast/api';
 import { useFetch } from '@raycast/utils';
 
 type StoicQuote = {
-  id: number;
-  author_id: number;
-  body: string;
+  text: string;
   author: string;
 };
 
-const endpoint = 'https://stoicquotesapi.com/v1/api/quotes/random';
+const endpoint = 'https://stoic-quotes.com/api/quote';
 
 export default function Command() {
   const { isLoading, data, revalidate } = useFetch<StoicQuote>(endpoint, {
@@ -18,8 +16,8 @@ export default function Command() {
     },
   });
 
-  const markdownQuote = data ? `> ${data.body}\n\n_${data.author}_` : '';
-  const plainTextQuote = data ? `${data.body} - ${data.author}` : '';
+  const markdownQuote = data ? `> ${data.text}\n\n_${data.author}_` : '';
+  const plainTextQuote = data ? `${data.text} - ${data.author}` : '';
 
   const stoicQuote = !isLoading && data ? markdownQuote : 'Loading...';
 
