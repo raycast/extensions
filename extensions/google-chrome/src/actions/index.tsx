@@ -143,3 +143,13 @@ return isInstalled`);
   }
   LocalStorage.setItem("is-installed", true);
 };
+
+export async function createNewWindow(): Promise<void> {
+  await runAppleScript(`
+    tell application "Google Chrome"
+      make new window
+      activate
+    end tell
+    return true
+  `);
+}
