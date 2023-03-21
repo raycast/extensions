@@ -33,7 +33,7 @@ function OpenIn1Password(account: User, item: Item) {
       title="Open In 1Password"
       target={`onepassword://view-item/?a=${account.account_uuid}&v=${item.vault.id}&i=${item.id}`}
       application="com.1password.1password"
-      shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+      shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
     />
   );
 }
@@ -46,7 +46,7 @@ function OpenInBrowser(item: Item) {
         key="open-in-browser"
         title="Open In Browser"
         url={href}
-        shortcut={{ modifiers: ["cmd", "shift"], key: "b" }}
+        shortcut={{ modifiers: ["opt"], key: "return" }}
       />
     );
   } else {
