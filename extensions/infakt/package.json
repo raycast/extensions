@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "infakt",
-  "title": "inFakt",
+  "title": "InFakt",
   "description": "Search, create and manage invoices, clients and products in inFakt directly from Raycast.",
   "icon": "infakt-icon.png",
   "author": "teziovsky",
