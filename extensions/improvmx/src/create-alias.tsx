@@ -117,7 +117,7 @@ export default function createAlias(props: LaunchProps<{ arguments: DomainArgs }
   const handleSumbit = async (values: any) => {
     const { domain, alias } = values;
     const aliasError = alias.length === 0 ? "Alias is required" : "";
-    const domainError = domain.length === 0 ? "Domain is required" : "";
+    const domainError = !domain ? "Domain is required" : "";
     const forwardingEmailError = state.forwardingEmail?.length === 0 ? "Forwarding Email is required" : "";
 
     if (aliasError || domainError || forwardingEmailError) {
