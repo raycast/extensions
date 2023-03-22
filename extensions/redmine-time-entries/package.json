@@ -1,0 +1,53 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "redmine-time-entries",
+  "title": "Redmine",
+  "description": "This extension is created for updating your redmine time entries",
+  "icon": "command-icon.png",
+  "author": "thecoorum",
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "redmineUrl",
+      "title": "Redmine URL",
+      "description": "Redmine URL",
+      "type": "textfield",
+      "required": true
+    },
+    {
+      "name": "redmineApiKey",
+      "title": "Redmine API Key",
+      "description": "Redmine API Key",
+      "type": "password",
+      "required": true
+    }
+  ],
+  "commands": [
+    {
+      "name": "index",
+      "title": "Time Entries",
+      "description": "Update your time entries with this command",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.48.9",
+    "axios": "^1.3.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish",
+    "pull-contribs": "ray pull-contributions"
+  }
+}
