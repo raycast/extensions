@@ -1,10 +1,13 @@
 import { LocalStorage, showToast, Toast } from "@raycast/api";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Conversation, ConversationsHook } from "../type";
+import { useAutoSaveConversation } from "./useAutoSaveConversation";
 
 export function useConversations(): ConversationsHook {
   const [data, setData] = useState<Conversation[]>([]);
   const [isLoading, setLoading] = useState<boolean>(true);
+
+  const isAutoSaveConversation = useAutoSaveConversation();
 
   useEffect(() => {
     (async () => {
@@ -24,6 +27,12 @@ export function useConversations(): ConversationsHook {
   const add = useCallback(
     async (conversation: Conversation) => {
       setData([...data, conversation]);
+      if (!isAutoSaveConversation) {
+        await showToast({
+          title: "Conversation saved!",
+          style: Toast.Style.Success,
+        });
+      }
     },
     [setData, data]
   );

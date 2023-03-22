@@ -31,9 +31,15 @@ export const TextToSpeechAction = ({ content }: { content: string }) => (
   />
 );
 
-export const SaveAnswerAction = ({ onAction }: { onAction: () => void }) => (
-  <Action icon={Icon.Star} title="Save Answer" onAction={onAction} shortcut={{ modifiers: ["cmd"], key: "s" }} />
-);
+export const SaveAction = ({
+  onAction,
+  title,
+  modifiers,
+}: {
+  onAction: () => void;
+  title: string;
+  modifiers: Keyboard.KeyModifier[];
+}) => <Action icon={Icon.Star} title={title} onAction={onAction} shortcut={{ modifiers, key: "s" }} />;
 
 export const SaveAsSnippetAction = ({ text, name }: { text: string; name: string }) => (
   <Action.CreateSnippet

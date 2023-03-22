@@ -93,9 +93,10 @@ export interface QuestionFormProps extends ChangeModelProp {
 export interface ChatViewProps extends ChangeModelProp {
   data: Chat[];
   question: string;
-  model: Model;
+  isAutoSaveConversation: boolean;
+  conversation: Conversation;
   setConversation: Set<Conversation>;
-  use: { chats: ChatHook };
+  use: { chats: ChatHook; conversations: ConversationsHook; savedChats: SavedChatHook };
 }
 
 export interface CreateChatCompletionDeltaResponse {

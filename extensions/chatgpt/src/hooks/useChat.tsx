@@ -22,7 +22,6 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
   const history = useHistory();
   const isAutoTTS = useAutoTTS();
   const proxy = useProxy();
-
   const chatGPT = useChatGPT();
 
   async function ask(question: string, model: Model) {

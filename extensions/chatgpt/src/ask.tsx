@@ -4,10 +4,12 @@ import { v4 as uuidv4 } from "uuid";
 import { PrimaryAction } from "./actions";
 import { FormInputActionSection } from "./actions/form-input";
 import { PreferencesActionSection } from "./actions/preferences";
+import { useAutoSaveConversation } from "./hooks/useAutoSaveConversation";
 import { useChat } from "./hooks/useChat";
 import { useConversations } from "./hooks/useConversations";
 import { DEFAULT_MODEL, useModel } from "./hooks/useModel";
 import { useQuestion } from "./hooks/useQuestion";
+import { useSavedChat } from "./hooks/useSavedChat";
 import { Chat, Conversation, Model } from "./type";
 import { ChatView } from "./views/chat";
 import { ModelDropdown } from "./views/model/dropdown";
@@ -16,7 +18,8 @@ import { QuestionForm } from "./views/question/form";
 export default function Ask(props: { conversation?: Conversation }) {
   const conversations = useConversations();
   const models = useModel();
-
+  const savedChats = useSavedChat();
+  const isAutoSaveConversation = useAutoSaveConversation();
   const chats = useChat<Chat>(props.conversation ? props.conversation.chats : []);
   const question = useQuestion({ initialQuestion: "", disableAutoLoad: props.conversation ? true : false });
 
@@ -39,7 +42,7 @@ export default function Ask(props: { conversation?: Conversation }) {
 
   const [isAutoFullInput] = useState(() => {
     return getPreferenceValues<{
-      isAutoFullInput: string;
+      isAutoFullInput: boolean;
     }>().isAutoFullInput;
   });
 
@@ -67,7 +70,7 @@ export default function Ask(props: { conversation?: Conversation }) {
   }, [models.data, question.data]);
 
   useEffect(() => {
-    if (props.conversation?.id !== conversation.id || conversations.data.length === 0) {
+    if ((props.conversation?.id !== conversation.id || conversations.data.length === 0) && isAutoSaveConversation) {
       conversations.add(conversation);
     }
   }, []);
@@ -150,9 +153,10 @@ export default function Ask(props: { conversation?: Conversation }) {
       <ChatView
         data={chats.data}
         question={question.data}
+        isAutoSaveConversation={isAutoSaveConversation}
         setConversation={setConversation}
-        use={{ chats }}
-        model={conversation.model}
+        use={{ chats, conversations, savedChats }}
+        conversation={conversation}
         models={models.data}
         selectedModel={selectedModelId}
         onModelChange={setSelectedModelId}

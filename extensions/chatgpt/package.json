@@ -76,6 +76,15 @@
       "required": true
     },
     {
+      "name": "isAutoSaveConversation",
+      "label": "Enable auto-save conversation",
+      "description": "Auto-save every conversation that you had with the model",
+      "type": "checkbox",
+      "title": "Auto-save Conversation",
+      "default": true,
+      "required": true
+    },
+    {
       "name": "isAutoLoadText",
       "label": "Enable auto-load selected text",
       "description": "Load selected text from your frontmost application to the question bar automatically",
