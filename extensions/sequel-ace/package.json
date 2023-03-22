@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "sequel-ace",
   "title": "Sequel Ace",
-  "description": "search and connect databases via sequel ace",
+  "description": "search and connect databases in Sequel Ace",
   "icon": "icon.png",
   "author": "nagauta",
   "categories": [
