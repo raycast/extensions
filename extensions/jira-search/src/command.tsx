@@ -31,10 +31,14 @@ export function SearchCommand<FilterType extends string>(
         setIsLoading(false)
       })
       .catch((e) => {
-        setItems([])
-        console.warn(e)
-        if (e instanceof Error) {
-          setError(ErrorText(e.name, e.message))
+        if (e.name === "AbortError") {
+          console.log("Request has been aborted")
+        } else {
+          setItems([])
+          console.warn(e)
+          if (e instanceof Error) {
+            setError(ErrorText(e.name, e.message))
+          }
         }
       })
       .finally(() => {
