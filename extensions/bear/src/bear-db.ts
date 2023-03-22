@@ -31,9 +31,9 @@ SELECT
 FROM
   ZSFNOTE AS notes
 LEFT OUTER JOIN
-  Z_7TAGS AS notes_to_tags ON notes.Z_PK = notes_to_tags.Z_7NOTES
+  Z_5TAGS AS notes_to_tags ON notes.Z_PK = notes_to_tags.Z_5NOTES
 LEFT OUTER JOIN
-  ZSFNOTETAG AS tags ON notes_to_tags.Z_14TAGS = tags.Z_PK
+  ZSFNOTETAG AS tags ON notes_to_tags.Z_13TAGS = tags.Z_PK
 WHERE
   -- When there is a query, filter the body by that query, otherwise
   -- ignore the query
@@ -73,8 +73,8 @@ const SEARCH_BACKLINKS = `
   group_concat(tag.ZTITLE) AS tags
 FROM
 	ZSFNOTE note
-	LEFT OUTER JOIN Z_7TAGS nTag ON note.Z_PK = nTag.Z_7NOTES
-	LEFT OUTER JOIN ZSFNOTETAG tag ON nTag.Z_14TAGS = tag.Z_PK
+	LEFT OUTER JOIN Z_5TAGS nTag ON note.Z_PK = nTag.Z_5NOTES
+	LEFT OUTER JOIN ZSFNOTETAG tag ON nTag.Z_13TAGS = tag.Z_PK
 WHERE
 	note.ZUNIQUEIDENTIFIER in(
 		SELECT
@@ -99,8 +99,8 @@ SELECT DISTINCT
   group_concat(tag.ZTITLE) AS tags
 FROM
 	ZSFNOTE note
-	LEFT OUTER JOIN Z_7TAGS nTag ON note.Z_PK = nTag.Z_7NOTES
-	LEFT OUTER JOIN ZSFNOTETAG tag ON nTag.Z_14TAGS = tag.Z_PK
+	LEFT OUTER JOIN Z_5TAGS nTag ON note.Z_PK = nTag.Z_5NOTES
+	LEFT OUTER JOIN ZSFNOTETAG tag ON nTag.Z_13TAGS = tag.Z_PK
 WHERE
 	note.ZUNIQUEIDENTIFIER in(
 		SELECT
