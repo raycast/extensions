@@ -5,6 +5,7 @@
 - Add export (share quest)
 - Add import (paste from clipboard during quest creation)
 - Add link to quest ideas
+- Add a task filter to quest view
 
 ## 🐣 Hello World - March 12, 2023
 

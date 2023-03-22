@@ -1,11 +1,12 @@
 import { Action, ActionPanel, List, useNavigation, Icon, showToast, Clipboard } from "@raycast/api";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { generateClipboardExport } from "../lib/util";
-import { Quest } from "../types";
+import { Quest, TasksFilter } from "../types";
 
 function ViewQuest(props: { quest: Quest; quests: [Quest[], React.Dispatch<React.SetStateAction<Quest[]>>] }) {
   const quest = props.quest;
   const [quests, setQuests] = props.quests;
+  const [filter, setFilter] = useState<TasksFilter>(TasksFilter.All);
   const { pop } = useNavigation();
 
   const questTasks = useMemo(() => {
@@ -26,6 +27,16 @@ function ViewQuest(props: { quest: Quest; quests: [Quest[], React.Dispatch<React
     },
     [quest.tasks, setTasks]
   );
+
+  const filterTasks = useCallback(() => {
+    if (filter === TasksFilter.Open) {
+      return tasks.filter((task) => !task.isCompleted);
+    }
+    if (filter === TasksFilter.Completed) {
+      return tasks.filter((task) => task.isCompleted);
+    }
+    return tasks;
+  }, [tasks, filter]);
 
   useEffect(() => {
     const newQuests = [...quests];
@@ -67,12 +78,16 @@ function ViewQuest(props: { quest: Quest; quests: [Quest[], React.Dispatch<React
 
   return (
     <List
-      actions={<ActionPanel></ActionPanel>}
       navigationTitle={quest.title}
-      searchBarPlaceholder={quest.title}
-      filtering={false}
+      searchBarAccessory={
+        <List.Dropdown tooltip="Filter View" value={filter} onChange={(value) => setFilter(value as TasksFilter)}>
+          <List.Dropdown.Item title="All" value={TasksFilter.All} icon={Icon.Stop} />
+          <List.Dropdown.Item title="Open" value={TasksFilter.Open} icon={Icon.Circle} />
+          <List.Dropdown.Item title="Completed" value={TasksFilter.Completed} icon={Icon.Checkmark} />
+        </List.Dropdown>
+      }
     >
-      {tasks.map((task, index) => (
+      {filterTasks().map((task, index) => (
         <List.Item
           key={index.toString()}
           icon={task.isCompleted ? Icon.Checkmark : Icon.Circle}

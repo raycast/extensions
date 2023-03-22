@@ -20,3 +20,9 @@ export const ShareableQuest = z.intersection(
 
 export type Quest = z.infer<typeof Quest>;
 export type ShareableQuest = z.infer<typeof ShareableQuest>;
+
+export enum TasksFilter {
+  All = "all",
+  Open = "open",
+  Completed = "completed",
+}
