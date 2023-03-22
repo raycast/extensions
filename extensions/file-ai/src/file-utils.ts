@@ -6,7 +6,7 @@ import { audioFileExtensions, imageFileExtensions, textFileExtensions } from "./
 import { useEffect, useState } from "react";
 import { defaultCommands } from "./default-commands";
 
-let maxCharacters = 4000;
+let maxCharacters = 3500;
 
 export const ERRORTYPE = {
   FINDER_INACTIVE: 1,
@@ -190,7 +190,7 @@ const filterContentString = (content: string, cutoff?: number): string => {
   return content
     .replaceAll(/[^A-Za-z0-9,.?!-_()[]{}@: \n]/g, "")
     .replaceAll('"', "'")
-    .replaceAll(/\s+/g, " ")
+    .replaceAll(/[^\S\r\n]/g, " ")
     .substring(0, cutoff || maxCharacters);
 };
 
@@ -312,9 +312,9 @@ const getSVGDetails = (filePath: string, skipMetadata?: boolean): string => {
 
   // Include SVG content assessment information
   svgDetails += skipMetadata
-    ? `Code for the SVG: "${filterContentString(fs.readFileSync(filePath).toString())}"`
+    ? `Code for the SVG: "${filterContentString(fs.readFileSync(filePath).toString().replaceAll(/\s+/g, " "))}"`
     : `<In addition, specify the file size, date created, and other metadata info. Predict the purpose of the file based on its name, metadata, and file extension. Describe the overall shape of the image resulting from the following code, and predict what object(s) might be represented:>\n${filterContentString(
-        fs.readFileSync(filePath).toString()
+        fs.readFileSync(filePath).toString().replaceAll(/[\s]+/g, " ")
       )}`;
   return svgDetails;
 };

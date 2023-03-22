@@ -12,6 +12,7 @@ export default function Command() {
     /* Add default commands if necessary, then get all commands */
     Promise.resolve(installDefaults()).then(() => {
       Promise.resolve(LocalStorage.allItems()).then((commandData) => {
+        Object.entries(commandData).forEach((cmd) => console.log(cmd));
         const commandDataFiltered = Object.values(commandData).filter(
           (cmd, index) => Object.keys(commandData)[index] != "--defaults-installed"
         );
@@ -88,6 +89,24 @@ export default function Command() {
                 style={Action.Style.Destructive}
                 shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
               />
+              <Action
+                title="Delete All Commands"
+                onAction={async () => {
+                  if (
+                    await confirmAlert({
+                      title: "Delete All Commands",
+                      message: "Are you sure?",
+                      primaryAction: { title: "Delete All", style: Alert.ActionStyle.Destructive },
+                    })
+                  ) {
+                    commands.forEach(async (cmd) => await LocalStorage.removeItem(cmd.name));
+                    setCommands([]);
+                  }
+                }}
+                icon={Icon.Trash}
+                style={Action.Style.Destructive}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+              />
             </ActionPanel.Section>
           </ActionPanel>
         }
@@ -95,7 +114,12 @@ export default function Command() {
     ));
 
   return (
-    <List isLoading={!commands}>
+    <List
+      isLoading={!commands}
+      searchBarPlaceholder={`Search ${
+        !commands || commands.length == 1 ? "commands..." : `${commands.length} commands...`
+      }`}
+    >
       <List.EmptyView title="No Custom File AI Commands" />
       {listItems}
     </List>

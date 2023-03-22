@@ -44,7 +44,15 @@ export default function FileAICommandForm(props: {
     },
     validation: {
       name: FormValidation.Required,
-      prompt: FormValidation.Required,
+      prompt: (value) => {
+        if (!value) {
+          return "Must provide a prompt";
+        }
+
+        if (value.length > 500) {
+          return "Prompt must be 500 characters or fewer";
+        }
+      },
       minNumFiles: (value) => {
         if (!value) {
           return "Must specify minimum number of files";

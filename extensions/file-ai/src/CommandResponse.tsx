@@ -1,6 +1,9 @@
 import { Detail, showToast, Toast, useUnstableAI } from "@raycast/api";
 import { ERRORTYPE, useFileContents } from "./file-utils";
 import ResponseActions from "./ResponseActions";
+import * as os from "os";
+import * as fs from "fs";
+import { useState } from "react";
 
 export default function CommandResponse(props: {
   commandName: string;
@@ -11,14 +14,35 @@ export default function CommandResponse(props: {
   skipAudioDetails?: boolean;
 }) {
   const { commandName, prompt, minNumFiles, acceptedFileExtensions, skipMetadata, skipAudioDetails } = props;
+  const [date, setDate] = useState<Date>(new Date());
   const { selectedFiles, contentPrompts, loading, errorType } = useFileContents(
     minNumFiles,
     acceptedFileExtensions,
     skipMetadata,
     skipAudioDetails
   );
+
   const contentPromptString = contentPrompts.join("\n");
-  const fullPrompt = prompt + contentPromptString;
+  const substitutedPrompt = prompt
+    .replaceAll("{{files}}", selectedFiles ? selectedFiles?.join(", ") : "")
+    .replaceAll("{{contents}}", contentPromptString)
+    .replaceAll("{{user}}", os.userInfo().username)
+    .replaceAll("{{fileNames}}", selectedFiles ? selectedFiles.map((path) => path.split("/").at(-1)).join(", ") : "")
+    .replaceAll("{{date}}", date.toUTCString())
+    .replace(
+      "{{metadata}}",
+      selectedFiles
+        ? selectedFiles
+            .map(
+              (path) =>
+                `${path}:\n${Object.entries(fs.lstatSync(path))
+                  .map((entry) => `${entry[0]}:entry[1]`)
+                  .join("\n")}`
+            )
+            .join("\n\n")
+        : ""
+    );
+  const fullPrompt = (substitutedPrompt + contentPromptString).replace(/{{END}}(\n|.)*/, "");
   const { data, isLoading, revalidate } = useUnstableAI(fullPrompt, { execute: contentPrompts.length > 0 });
 
   if (errorType) {
@@ -38,6 +62,8 @@ export default function CommandResponse(props: {
     });
     return null;
   }
+
+  console.log(fullPrompt.length);
 
   const text = `# ${commandName}\n${data ? data : "Analyzing files..."}`;
   return (
