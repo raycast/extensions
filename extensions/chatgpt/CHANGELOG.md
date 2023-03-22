@@ -1,12 +1,11 @@
 # Changelog
 
-## [Initial release] - 2022-12-10
+## [Initial release] - March 2023
 
-- Ask question through full text input or [search bar input](https://github.com/abielzulio/chatgpt-raycast/commit/e53e3d6284917729064f52583e8a1a39ff1c3176)
-- Save and search your saved generated answer
-- Read and search through questions/answers history
-- Copy either answer or question directly with a hotkey
-- List view as UI for better conversation flow [[@timolins](https://github.com/abielzulio/chatgpt-raycast/commit/e53e3d6284917729064f52583e8a1a39ff1c3176)]
-- Share question and generated answer with [shareg.pt](https://shareg.pt) [[@timolins](https://github.com/abielzulio/chatgpt-raycast/commit/e53e3d6284917729064f52583e8a1a39ff1c3176)]
-- Use native preferences to store the Session token [[@timolins](https://github.com/abielzulio/chatgpt-raycast/commit/e53e3d6284917729064f52583e8a1a39ff1c3176)]
-- Text-to-speech support [[@ivanglushko](https://github.com/abielzulio/chatgpt-raycast/commit/dab566ed8f5f14a74a911395d47c8083b0df54e6)]
+Introducing ChatGPT for Raycast. Interact with OpenAI's ChatGPT straight from your command bar, with 5 commands available:
+
+1. `Ask` Start a new conversation with ChatGPT by asking a question
+2. `Conversations` → Continue recent conversations without losing context
+3. `Models` → Collection of the user's default and custom models
+4. `Saved Answer` → Collection of the user's saved question and its answer
+5. `History`→ Collection of all the user's questions plus the answers
