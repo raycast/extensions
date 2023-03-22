@@ -80,7 +80,7 @@
       "label": "Enable auto-load selected text",
       "description": "Load selected text from your frontmost application to the question bar automatically",
       "type": "checkbox",
-      "title": "Auto-load",
+      "title": "Auto-load Text",
       "default": false,
       "required": false
     },

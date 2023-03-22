@@ -65,7 +65,7 @@ export default function Conversation() {
           onAction={() => conversations.remove(conversation)}
         />
         <DestructiveAction
-          title="Clear History"
+          title="Clear"
           dialog={{
             title: "Are you sure you want to clear your conversations?",
           }}
