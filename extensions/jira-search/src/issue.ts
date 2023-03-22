@@ -116,8 +116,10 @@ export async function searchIssues(query: string, filter?: IssueFilter): Promise
     title: issue.fields.summary,
     subtitle: `${issue.key} · ${issue.fields.issuetype.name}`,
     icon: await jiraImage(issue.fields.issuetype.iconUrl),
-    accessoryIcon: statusIcon(issue.fields.status),
-    accessoryTitle: issue.fields.status.name,
+    accessories: [{
+      tag: issue.fields.status.name,
+      icon: statusIcon(issue.fields.status),
+    }],
     url: `${jiraUrl}/browse/${issue.key}`,
     linkText: `${issue.key}: ${issue.fields.summary}`,
   })
