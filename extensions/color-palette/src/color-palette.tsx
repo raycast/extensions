@@ -11,7 +11,6 @@ import Spectrum from "../assets/Palette_AdobeSpectrum.json";
 import AppleDesign from "../assets/Palette_AppleDesign.json";
 import AntV from "../assets/Palette_AntV.json";
 import SpectrumDV from "../assets/Palette_AdobeSpectrumDV.json";
-import Custom from "../assets/Plaette_Custom.json";
 
 // Define Palette Formate
 type Palette = {
@@ -40,7 +39,6 @@ const cp_spev: Palette[] = SpectrumDV;
 
 // Other Palettes
 const cp_oc: Palette[] = OpenColor;
-const cp_custom: Palette[] = Custom;
 
 // Define Cache of Dynamic Palette
 const paletteKey = "generatedPalette";
@@ -100,8 +98,6 @@ export default function Command() {
                 ? cp_antv
                 : value === "spectrumv"
                 ? cp_spev
-                : value === "custom"
-                ? cp_custom
                 : value === "variants"
                 ? cp_dg
                 : cp_spe
@@ -124,7 +120,6 @@ export default function Command() {
           </Grid.Dropdown.Section>
           <Grid.Dropdown.Section title="Other Palettes">
             <Grid.Dropdown.Item title="OpenColor" value="opencolor" icon="Icon_OpenColor.svg" />
-            <Grid.Dropdown.Item title="Custom" value="custom" icon="Icon_Default.svg" />
           </Grid.Dropdown.Section>
           <Grid.Dropdown.Section title="Dynamic Palettes">
             <Grid.Dropdown.Item title="Color Scheme Variants" value="variants" icon="Icon_Variants.png" />
