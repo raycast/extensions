@@ -27,7 +27,7 @@
       "type": "checkbox"
     },
     {
-      "description": "This flag determines whether\nthe pid of the process should be searched for the query, or only the process name.",
+      "description": "Determines whether the pid of the process should be searched for the query, or only the process name.",
       "label": "Filtering should search process pid",
       "name": "shouldSearchInPid",
       "required": false,
