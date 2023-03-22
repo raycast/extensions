@@ -116,10 +116,12 @@ async function searchIssues(query: string, filter?: IssueFilter): Promise<Result
     title: issue.fields.summary,
     subtitle: `${issue.key} · ${issue.fields.issuetype.name}`,
     icon: await jiraImage(issue.fields.issuetype.iconUrl),
-    accessories: [{
-      tag: issue.fields.status.name,
-      icon: statusIcon(issue.fields.status),
-    }],
+    accessories: [
+      {
+        tag: issue.fields.status.name,
+        icon: statusIcon(issue.fields.status),
+      },
+    ],
     url: `${jiraUrl}/browse/${issue.key}`,
     linkText: `${issue.key}: ${issue.fields.summary}`,
   })
@@ -146,8 +148,8 @@ export default function SearchIssueCommand() {
         { name: "All Issues", value: "allIssues" },
         { name: "Issues in Open sprints", value: "issuesInOpenSprints" },
         { name: "Assigned to Me", value: "myIssues" },
-        { name: "My Issues in Open sprints", value: "myIssuesInOpenSprints" }
-      ]
+        { name: "My Issues in Open sprints", value: "myIssuesInOpenSprints" },
+      ],
     },
     openIssueKey
   )

@@ -37,7 +37,7 @@ export async function jiraFetchObject<Result>(
   }
   cancelLatestFetchObjectRequest()
   abortController = new AbortController()
-  const response = await jiraFetch(path, params, statusErrors, {signal: abortController.signal})
+  const response = await jiraFetch(path, params, statusErrors, { signal: abortController.signal })
   return (await response.json()) as unknown as Result
 }
 
@@ -61,7 +61,7 @@ export async function jiraFetch(
   try {
     const sanitizedPath = path.startsWith("/") ? path.substring(1) : path
     const url = `${jiraUrl}/${sanitizedPath}` + (query.length > 0 ? `?${query}` : "")
-    const response = await fetch(url, requestInit ? {...init, ...requestInit} : init)
+    const response = await fetch(url, requestInit ? { ...init, ...requestInit } : init)
     throwIfResponseNotOkay(response, statusErrors)
     return response
   } catch (error) {
