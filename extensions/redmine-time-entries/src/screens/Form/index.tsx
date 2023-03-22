@@ -73,7 +73,6 @@ export const Form = () => {
 
   useEffect(() => {
     if (preferences?.redmineApiKey && preferences?.redmineUrl && !projects.length) {
-      console.log('call handleFetchProjects with', preferences)
       handleFetchProjects();
     }
   }, [preferences, projects, handleFetchProjects]);
