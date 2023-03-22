@@ -1,5 +1,9 @@
 # Image Modification Changelog
 
+## [Filters] - 2023-03-22
+
+- Add "Apply Image Filter" command
+
 ## [Padding, Bug Fixes] - 2023-03-15
 
 - Added "Pad Images" command.
