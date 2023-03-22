@@ -2,6 +2,7 @@
 
 - Find and open resources (e.g. S3 Bucket, EC2 Instance, DynamoDB Table, CloudWatch Log Group, Parameter Store, Secrets Manager)
 - Shortcut repetitive workflows (e.g. purge SQS queue, download S3 object, copy SSM parameter, copy Secret Manager secret)
+- Run configured scripts for any of your AWS profiles
 - Easily switch between account profiles
 - Zero configuration required
 - Quick access to all services in the AWS Console

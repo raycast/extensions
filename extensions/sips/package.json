@@ -77,6 +77,26 @@
           "required": true
         }
       ]
+    },
+    {
+      "name": "pad",
+      "title": "Pad Images",
+      "description": "Pad images to the specified size using the provided color",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "amount",
+          "placeholder": "Amount",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "hexcolor",
+          "placeholder": "Color",
+          "type": "text",
+          "required": false
+        }
+      ]
     }
   ],
   "dependencies": {

@@ -22,7 +22,7 @@ export async function getAccountsAndPots(): Promise<AccountPots[]> {
     accounts.map((account) => client.getPots({ accountId: account.id }))
   );
   return potsByAccount.map((pots, idx) => {
-    pots = pots.filter((pot) => !pot.deleted);
+    pots = (pots || []).filter((pot) => !pot.deleted);
     return { pots, account: accounts[idx] };
   });
 }

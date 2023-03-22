@@ -7,7 +7,11 @@ export default function EditSnippetXML({ snippet, onSubmit }: EditSnippetProps) 
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm<FormValues> title="Save Snippet" onSubmit={handleSubmit} icon={Icon.Check} />
+          <Action.SubmitForm<FormValues>
+            title="Save Snippet"
+            onSubmit={(values) => handleSubmit({ ...snippet, ...values, customXML: true, snippet: values.snippet })}
+            icon={Icon.Check}
+          />
           <ActionPanel.Section>
             <Action.CopyToClipboard
               title="Copy Raw XML"
