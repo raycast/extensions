@@ -33,7 +33,7 @@ export interface Model {
   created_at: string;
   name: string;
   prompt: string;
-  option: "gpt-3.5-turbo" | "gpt-3.5-turbo-0301" | string;
+  option: "gpt-3.5-turbo" | "gpt-3.5-turbo-0301" | "gpt-4" | "gpt-4-0314" | "gpt-4-32k" | "gpt-4-32k-0314" | string;
   temperature: number;
   pinned: boolean;
 }
