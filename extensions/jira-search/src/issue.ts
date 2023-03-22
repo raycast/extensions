@@ -75,6 +75,7 @@ function buildJql(query: string): string {
   const jqlConditions = [
     inClause("project", projects),
     inClause("issueType", issueTypes),
+    inClause("assignee", assignees),
     ...textTerms.map((term) => `text~"${term}*"`),
   ]
 
@@ -124,7 +125,7 @@ export async function searchIssues(query: string, filter?: IssueFilter): Promise
 }
 
 export default function SearchIssueCommand() {
-  return SearchCommand(searchIssues, "Search issues by text, @project and #issueType", {
+  return SearchCommand(searchIssues, "Search issues by text, @project, #type, ~assignee", {
     tooltip: "Filters",
     values: [
       { name: "All Issues", value: "allIssues" },
