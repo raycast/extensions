@@ -12,6 +12,7 @@ export default async function openWithZed() {
     await saveZedEntries(
       finderItems.map((finderItem) => ({
         uri: `file://${finderItem.path.endsWith("/") ? finderItem.path.slice(0, -1) : finderItem.path}`,
+        lastOpened: Date.now(),
       }))
     );
 

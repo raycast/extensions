@@ -42,18 +42,26 @@ export const withZed = <P extends object>(Component: ComponentType<P>) => {
 };
 
 export function Command() {
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const zed = useContext(ZedContext).zed!;
-  const { entries } = useZedEntries();
+  const { entries, setEntry } = useZedEntries();
 
   return (
     <List>
       {Object.values(entries)
         .filter((e) => existsSync(new URL(e.uri)))
+        .sort((a, b) => (b.lastOpened || 0) - (a.lastOpened || 0))
         .map((e) => {
           const entry = getEntry(e.uri);
           return (
             <EntryItem key={entry.uri} entry={entry} icon={entry.path && { fileIcon: entry.path }}>
-              <Action.Open title="Open in Zed" target={entry.path} application={zed} icon={{ fileIcon: zed.path }} />
+              <Action.Open
+                title="Open in Zed"
+                onOpen={() => setEntry(entry.uri, true)}
+                target={entry.path}
+                application={zed}
+                icon={{ fileIcon: zed.path }}
+              />
               <Action.ShowInFinder path={entry.path} />
             </EntryItem>
           );

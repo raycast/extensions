@@ -29,18 +29,20 @@ export function useZedEntries() {
               ...acc,
               [uri]: {
                 uri,
+                lastOpened: 0,
               },
             };
           }, s)
         )
       ),
 
-    setEntry: (uri: string) =>
+    setEntry: (uri: string, update?: boolean) =>
       setEntries(
         persistEntriesState((s) => ({
           ...s,
           [uri]: {
             uri,
+            lastOpened: update ? Date.now() : 0,
           },
         }))
       ),

@@ -4,6 +4,7 @@ const STORAGE_KEY = "entries";
 
 export interface ZedEntry {
   uri: string;
+  lastOpened: number;
 }
 
 export type ZedEntries = Record<string, ZedEntry>;
