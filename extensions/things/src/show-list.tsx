@@ -56,6 +56,7 @@ function TodoListItem(props: { todo: Todo; refreshTodos: () => void; listName: L
         <ActionPanel>
           <ActionPanel.Section title={`Todo: ${name}`}>
             <Action.OpenInBrowser title="Open in Things" icon={Icon.ArrowRight} url={`things:///show?id=${id}`} />
+            <Action.CopyToClipboard title="Copy URI" content={`things:///show?id=${id}`} />
             {status !== 'completed' && (
               <Action
                 title="Mark as Completed"
@@ -108,6 +109,7 @@ function TodoListItem(props: { todo: Todo; refreshTodos: () => void; listName: L
                 shortcut={{ modifiers: ['cmd'], key: 'o' }}
                 url={`things:///show?id=${project.id}`}
               />
+              <Action.CopyToClipboard title="Copy URI" content={`things:///show?id=${project.id}`} />
             </ActionPanel.Section>
           )}
           {area && (
@@ -118,6 +120,10 @@ function TodoListItem(props: { todo: Todo; refreshTodos: () => void; listName: L
                 shortcut={{ modifiers: ['opt'], key: 'o' }}
                 url={`things:///show?id=${area.id.replace('THMAreaParentSource/', '')}`}
               />
+              <Action.CopyToClipboard
+                title="Copy URI"
+                content={`things:///show?id=${area.id.replace('THMAreaParentSource/', '')}`}
+              />
             </ActionPanel.Section>
           )}
           <ActionPanel.Section title={`List: ${listName}`}>
@@ -127,6 +133,7 @@ function TodoListItem(props: { todo: Todo; refreshTodos: () => void; listName: L
               shortcut={{ modifiers: ['ctrl'], key: 'o' }}
               url={`things:///show?id=${listName.toLowerCase()}`}
             />
+            <Action.CopyToClipboard title="Copy URI" content={`things:///show?id=${listName.toLowerCase()}`} />
             <Action.Push
               title="Add New To-Do"
               icon={Icon.Plus}

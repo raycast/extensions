@@ -5,6 +5,9 @@
   "description": "Create, access, and modify issues and sprints.",
   "icon": "icon.png",
   "author": "thomaslombart",
+  "contributors": [
+    "FezVrasta"
+  ],
   "owner": "raycast",
   "access": "public",
   "categories": [

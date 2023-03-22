@@ -2,7 +2,7 @@
 
 /extensions/1-click-confetti                         @peduarte
 /extensions/1loc                                     @kud @sxn
-/extensions/1password                                @khasbilegt @thomaspaulmann @dteare @pernielsentikaer
+/extensions/1password                                @khasbilegt @thomaspaulmann @dteare @pernielsentikaer @cb372
 /extensions/8ball                                    @Gitsack
 /extensions/Bilibili                                 @Fatpandac
 /extensions/CodeBlocks                               @tisfeng
@@ -368,6 +368,7 @@
 /extensions/imdb                                     @ryan-exe
 /extensions/imessage-2fa                             @yuercl @thomaspaulmann
 /extensions/imgur                                    @BalliAsghar @pernielsentikaer
+/extensions/improvmx                                 @MuhaddiMu
 /extensions/inertiajs-documentation                  @danyelkeddah
 /extensions/initium                                  @toto-minai
 /extensions/inkdrop                                  @yaeda
@@ -384,7 +385,7 @@
 /extensions/iwork                                    @SKaplanOfficial
 /extensions/jenkins                                  @k8scat
 /extensions/jetbrains                                @gdsmith @adrienbaron @dima-m711
-/extensions/jira                                     @thomaslombart
+/extensions/jira                                     @thomaslombart @FezVrasta
 /extensions/jira-search                              @svenwiegand
 /extensions/jira-search-self-hosted                  @emanguy @svenwiegand @koseduhemak @rnprest
 /extensions/jira-time-tracking                       @niallpaterson
@@ -441,6 +442,7 @@
 /extensions/life-progress                            @koinzhang
 /extensions/lifx                                     @felixb1010
 /extensions/lightning-time                           @MatthewStanciu
+/extensions/lightshot-gallery                        @feyli
 /extensions/ligue-1                                  @anhthang
 /extensions/linear                                   @thomaslombart @mathieudutour @thomaspaulmann @peduarte @pernielsentikaer
 /extensions/linguee                                  @geekdada
@@ -550,6 +552,7 @@
 /extensions/open-targets-raycast                     @ireneisdoomed
 /extensions/open-with-app                            @fturcheti @omarshahine @pernielsentikaer
 /extensions/openai-gpt3                              @simicvm @DorukAkinci
+/extensions/openai-translator                        @douo
 /extensions/openfortivpn                             @rafalpetryka
 /extensions/openstreetmap-search                     @crisboarna
 /extensions/openweathermap                           @tonka3000
@@ -773,7 +776,7 @@
 /extensions/text-decorator                           @koinzhang
 /extensions/text-shortcuts                           @koinzhang
 /extensions/the-verge                                @klkvsky @pernielsentikaer
-/extensions/things                                   @loris
+/extensions/things                                   @loris @andreaselia
 /extensions/ticktick                                 @viduycheung
 /extensions/tim                                      @tmwrnr
 /extensions/time-until-i-do                          @MuhaddiMu
