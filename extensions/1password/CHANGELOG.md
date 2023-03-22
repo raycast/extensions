@@ -1,6 +1,6 @@
 # 1Password Changelog
 
-## [Configurable primary/secondary actions] - 2023-03-21
+## [Configurable primary/secondary actions] - 2023-03-22
 
 - Added configuration to customize the primary and secondary actions on Login
   items (1Password v8 only)
