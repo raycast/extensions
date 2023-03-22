@@ -15,4 +15,8 @@ declare global {
     title: string;
     subtitle: string;
   }
+
+  interface Arguments {
+    queryText?: string;
+  }
 }

@@ -3,7 +3,7 @@ import { useMemo, useState } from "react";
 import { FIXED_KEY } from "../configs";
 import { sample } from "../utils/core";
 
-export function useSearch() {
+export function useSearch(queryText: string | undefined) {
   const [searchText, setSearchText] = useState<string>("");
   // const [data, setData] = useState<SearchResult[]>([])
   // const [isLoading, setIsLoading] = useState<boolean>(false)
@@ -16,7 +16,7 @@ export function useSearch() {
       type: "data",
       doctype: "json",
       version: "1.1",
-      q: searchText.length === 0 ? "你好" : searchText,
+      q: queryText ? queryText : searchText.length === 0 ? "你好" : searchText,
     });
 
     return `http://fanyi.youdao.com/openapi.do?${params.toString()}`;

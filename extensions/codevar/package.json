@@ -15,35 +15,75 @@
       "title": "Xt 小驼峰",
       "subtitle": "xt",
       "description": "生成可用的代码变量，小驼峰命名法: xt",
-      "mode": "view"
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "queryText",
+          "placeholder": "请输入需要查询的中文...",
+          "type": "text",
+          "required": true
+        }
+      ]
     },
     {
       "name": "dt",
       "title": "Dt 大驼峰",
       "subtitle": "dt",
       "description": "生成可用的代码变量，大驼峰命名法: dt",
-      "mode": "view"
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "queryText",
+          "placeholder": "请输入需要查询的中文...",
+          "type": "text",
+          "required": true
+        }
+      ]
     },
     {
       "name": "zh",
       "title": "Zh 中划线",
       "subtitle": "zh",
       "description": "生成可用的代码变量，中划线命名法: zh",
-      "mode": "view"
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "queryText",
+          "placeholder": "请输入需要查询的中文...",
+          "type": "text",
+          "required": true
+        }
+      ]
     },
     {
       "name": "xh",
       "title": "Xh 下划线",
       "subtitle": "xh",
       "description": "生成可用的代码变量，下划线命名法: xh",
-      "mode": "view"
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "queryText",
+          "placeholder": "请输入需要查询的中文...",
+          "type": "text",
+          "required": true
+        }
+      ]
     },
     {
       "name": "cl",
       "title": "Cl 常量",
       "subtitle": "cl",
       "description": "生成可用的代码变量，常量命名法: cl",
-      "mode": "view"
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "queryText",
+          "placeholder": "请输入需要查询的中文...",
+          "type": "text",
+          "required": true
+        }
+      ]
     }
   ],
   "dependencies": {
