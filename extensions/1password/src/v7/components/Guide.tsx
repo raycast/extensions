@@ -1,4 +1,5 @@
 import { Action, ActionPanel, Detail, Icon, openExtensionPreferences } from "@raycast/api";
+import resetCache from "../../reset-cache";
 
 const INSTRUCTION = `
 ## ✅ Spotlight and 3rd party app integrations is not enabled
@@ -28,6 +29,7 @@ export function Guide() {
       actions={
         <ActionPanel>
           <Action icon={Icon.Gear} title="Open Extension Preferences" onAction={openExtensionPreferences} />
+          <Action title="Reset Cache" icon={Icon.Trash} onAction={() => resetCache()}></Action>
         </ActionPanel>
       }
     />

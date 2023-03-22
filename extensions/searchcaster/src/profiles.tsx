@@ -1,10 +1,14 @@
 import { Action, ActionPanel, Clipboard, Icon, Image, List, showToast, Toast } from "@raycast/api";
-import { Profile, ProfileActionsProps } from "./types";
-import { useProfileSearch, useFarcasterInstalled, truncateAddress, linkify } from "./utils";
 import { useState } from "react";
 
+import { Profile, ProfileActionsProps } from "./types";
+import { useDebounce } from "./hooks/useDebounce";
+import { useProfileSearch, useFarcasterInstalled, truncateAddress, linkify } from "./utils";
+
 export default function Command() {
-  const [searchText, setSearchText] = useState<string>();
+  const [_searchText, setSearchText] = useState<string>();
+  const searchText = useDebounce(_searchText, 500);
+
   const { data, isLoading } = useProfileSearch(searchText || "");
   const hasFarcaster: boolean = useFarcasterInstalled();
 

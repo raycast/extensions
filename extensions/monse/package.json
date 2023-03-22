@@ -47,6 +47,13 @@
       "subtitle": "Monse",
       "description": "List your latest transactions from your connected accounts.",
       "mode": "view"
+    },
+    {
+      "name": "bank-accounts",
+      "title": "Bank Accounts",
+      "subtitle": "Monse",
+      "description": "List all your bank accounts and current balance",
+      "mode": "view"
     }
   ],
   "dependencies": {

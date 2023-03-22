@@ -1,5 +1,9 @@
 # Search npm Changelog
 
+## [Added open changelog] - 2023-03-15
+
+- Added action to open the package's changelog (only for github)
+
 ## [Fixed Yarn install command] - 2022-11-11
 
 - Fixed yarn install command since it's different than npm/pnpm

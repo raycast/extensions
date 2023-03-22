@@ -1,14 +1,13 @@
 import { MERGE_PR } from "@/queries/pull-requests";
 import { fetcher } from "@/utils";
-import { ActionPanel, Color, KeyboardShortcut, popToRoot, showToast, ToastStyle } from "@raycast/api";
-import React from "react";
+import { Color, popToRoot, showToast, Action, Keyboard, Toast } from "@raycast/api";
 import { useSWRConfig } from "swr";
 
 type MergePROwnProps = {
   id: string;
   method?: "MERGE" | "REBASE" | "SQUASH";
   number: number;
-  shortcut?: KeyboardShortcut;
+  shortcut?: Keyboard.Shortcut;
   title: string;
 };
 
@@ -17,7 +16,10 @@ export default function MergePR(props: MergePROwnProps) {
   const { mutate } = useSWRConfig();
 
   async function mergePR() {
-    showToast(ToastStyle.Animated, "Merging pull request");
+    showToast({
+      style: Toast.Style.Animated,
+      title: "Merging pull request",
+    });
 
     try {
       await fetcher({
@@ -30,19 +32,22 @@ export default function MergePR(props: MergePROwnProps) {
 
       mutate("prs");
       mutate("prs-open");
-      showToast(ToastStyle.Success, `Pull request #${number} merged`);
+      showToast({
+        style: Toast.Style.Success,
+        title: `Pull request #${number} merged`,
+      });
       popToRoot();
     } catch (error: any) {
-      showToast(
-        ToastStyle.Failure,
-        "Failed to merge pull request",
-        error instanceof Error ? error.message : error.toString()
-      );
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to merge pull request",
+        message: error instanceof Error ? error.message : error.toString(),
+      });
     }
   }
 
   return (
-    <ActionPanel.Item
+    <Action
       title={title}
       icon={{
         source: "pull-request-merge.png",

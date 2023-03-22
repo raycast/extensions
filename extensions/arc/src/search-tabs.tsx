@@ -1,4 +1,4 @@
-import { List } from "@raycast/api";
+import { LaunchProps, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { groupBy } from "lodash";
 import { useState } from "react";
@@ -7,8 +7,8 @@ import { TabListItem } from "./list";
 import { getKey, getLocationTitle, getNumberOfTabs, getOrderedLocations } from "./utils";
 import { VersionCheck } from "./version";
 
-function SearchTabs() {
-  const [searchText, setSearchText] = useState("");
+function SearchTabs(props: LaunchProps) {
+  const [searchText, setSearchText] = useState(props.fallbackText ?? "");
   const { data, isLoading, mutate } = useCachedPromise(getTabs);
 
   const orderedLocations = getOrderedLocations();
@@ -35,10 +35,10 @@ function SearchTabs() {
   );
 }
 
-export default function Command() {
+export default function Command(props: LaunchProps) {
   return (
     <VersionCheck>
-      <SearchTabs />
+      <SearchTabs {...props} />
     </VersionCheck>
   );
 }

@@ -1,0 +1,2675 @@
+{
+  "urlset": {
+    "url": [
+      {
+        "loc": "https://supabase.com/docs/faq",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/index",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/support",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/cli",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/database",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/functions",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/getting-started",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/integrations",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/platform",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/realtime",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/resources",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/self-hosting",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/storage",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/handbook/contributing",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/handbook/introduction",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/index",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/auth/auth-captcha",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/auth/auth-email-templates",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/auth/auth-email",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/auth/auth-helpers",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/auth/auth-magic-link",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/auth/auth-mfa",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/auth/managing-user-data",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/auth/overview",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/auth/phone-login",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/auth/row-level-security",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/auth/server-side-rendering",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/auth/social-login",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/cli/local-development",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/cli/managing-environments",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/database/api",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/database/arrays",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/database/connecting-to-postgres",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/database/extensions",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/database/full-text-search",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/database/functions",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/database/json",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/database/managing-passwords",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/database/managing-timezones",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/database/overview",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/database/replication",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/database/sql-to-api",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/database/tables",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/database/testing",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/database/timeouts",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/database/webhooks",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/functions/auth",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/functions/cicd-workflow",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/functions/cors",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/functions/debugging",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/functions/import-maps",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/functions/local-development",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/functions/quickstart",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/functions/schedule-functions",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/functions/secrets",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/getting-started/architecture",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/getting-started/features",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/integrations/appsmith",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/integrations/auth0",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/integrations/authsignal",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/integrations/clerk",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/integrations/dashibase",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/integrations/dhiwise",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/integrations/directus",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/integrations/draftbit",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/integrations/estuary",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/integrations/fezto",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/integrations/flutterflow",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/integrations/illa",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/integrations/integrations",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/integrations/keyri",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/integrations/onesignal",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/integrations/pgmustard",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/integrations/picket",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/integrations/plasmic",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/integrations/polyscale",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/integrations/prisma",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/integrations/sequin",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/integrations/snaplet",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/integrations/stytch",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/integrations/supertokens",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/integrations/vercel",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/integrations/weweb",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/integrations/zuplo",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/platform/access-control",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/platform/backups",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/platform/compute-add-ons",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/platform/custom-domains",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/platform/database-usage",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/platform/going-into-prod",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/platform/http-status-codes",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/platform/logs",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/platform/metrics",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/platform/migrating-and-upgrading-projects",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/platform/network-restrictions",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/platform/performance",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/platform/permissions",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/platform/ssl-enforcement",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/platform/sso",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/platform/troubleshooting",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/realtime/broadcast",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/realtime/postgres-changes",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/realtime/presence",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/realtime/quickstart",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/realtime/rate-limits",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/resources/examples",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/resources/glossary",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/self-hosting/docker",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/storage/access-control",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/storage/cdn",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/storage/image-transformations",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/storage/quickstart",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/storage/storage-sample",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/learn/auth-deep-dive/auth-deep-dive-jwts",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/learn/auth-deep-dive/auth-google-oauth",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/learn/auth-deep-dive/auth-gotrue",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/learn/auth-deep-dive/auth-policies",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/learn/auth-deep-dive/auth-row-level-security",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/auth/auth-helpers/auth-ui",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/auth/auth-helpers/nextjs-server-components",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/auth/auth-helpers/nextjs",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/auth/auth-helpers/remix",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/auth/auth-helpers/sveltekit",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/auth/phone-login/messagebird",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/auth/phone-login/twilio",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/auth/phone-login/vonage",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/auth/social-login/auth-apple",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/auth/social-login/auth-azure",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/auth/social-login/auth-bitbucket",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/auth/social-login/auth-discord",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/auth/social-login/auth-facebook",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/auth/social-login/auth-github",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/auth/social-login/auth-gitlab",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/auth/social-login/auth-google",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/auth/social-login/auth-keycloak",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/auth/social-login/auth-linkedin",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/auth/social-login/auth-notion",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/auth/social-login/auth-slack",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/auth/social-login/auth-spotify",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/auth/social-login/auth-twitch",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/auth/social-login/auth-twitter",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/auth/social-login/auth-workos",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/auth/social-login/auth-zoom",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/database/api/generating-types",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/database/extensions/http",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/database/extensions/hypopg",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/database/extensions/pg-safeupdate",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/database/extensions/pg_graphql",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/database/extensions/pg_hashids",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/database/extensions/pg_jsonschema",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/database/extensions/pg_plan_filter",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/database/extensions/pg_stat_monitor",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/database/extensions/pg_stat_statements",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/database/extensions/pgaudit",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/database/extensions/pgcron",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/database/extensions/pgjwt",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/database/extensions/pgnet",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/database/extensions/pgrepack",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/database/extensions/pgroonga",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/database/extensions/pgrouting",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/database/extensions/pgsodium",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/database/extensions/pgtap",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/database/extensions/pgvector",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/database/extensions/plpgsql_check",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/database/extensions/plv8",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/database/extensions/postgis",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/database/extensions/rum",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/database/extensions/timescaledb",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/database/extensions/uuid-ossp",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/database/extensions/wrappers",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/functions/examples/cloudflare-turnstile",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/functions/examples/connect-to-postgres",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/functions/examples/github-actions",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/functions/examples/og-image",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/functions/examples/storage-caching",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/functions/examples/stripe-webhooks",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/functions/examples/telegram-bot",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/functions/examples/upstash-redis",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/getting-started/quickstarts/flutter",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/getting-started/quickstarts/nextjs",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/getting-started/quickstarts/nuxtjs",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/getting-started/quickstarts/reactjs",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/getting-started/quickstarts/solidjs",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/getting-started/quickstarts/sveltekit",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/getting-started/quickstarts/vue",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/getting-started/tutorials/with-angular",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/getting-started/tutorials/with-expo",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/getting-started/tutorials/with-flutter",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/getting-started/tutorials/with-ionic-angular",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/getting-started/tutorials/with-ionic-react",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/getting-started/tutorials/with-ionic-vue",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/getting-started/tutorials/with-nextjs",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/getting-started/tutorials/with-nuxt-3",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/getting-started/tutorials/with-react",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/getting-started/tutorials/with-redwoodjs",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/getting-started/tutorials/with-solidjs",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/getting-started/tutorials/with-svelte",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/getting-started/tutorials/with-sveltekit",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/getting-started/tutorials/with-vue-3",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/platform/sso/azure",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/platform/sso/gsuite",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/platform/sso/okta",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/resources/migrating-to-supabase/firebase-auth",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/resources/migrating-to-supabase/firebase-storage",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/resources/migrating-to-supabase/firestore-data",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/resources/migrating-to-supabase/heroku",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/resources/migrating-to-supabase/render",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/resources/postgres/dropping-all-tables-in-schema",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/resources/postgres/first-row-in-group",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/resources/postgres/which-version-of-postgres",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/self-hosting/auth/config",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/self-hosting/realtime/config",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/guides/self-hosting/storage/config",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/initializing",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/auth-api",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/auth-signup",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/auth-signinwithpassword",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/auth-signinwithotp",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/auth-signinwithoauth",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/auth-signout",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/auth-verifyotp",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/auth-getsession",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/auth-getuser",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/auth-updateuser",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/auth-setsession",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/auth-refreshsession",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/auth-onauthstatechange",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/auth-mfa-enroll",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/auth-mfa-challenge",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/auth-mfa-verify",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/auth-mfa-challengeandverify",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/auth-mfa-unenroll",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/auth-mfa-getauthenticatorassurancelevel",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/admin-api",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/auth-admin-getuserbyid",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/auth-admin-listusers",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/auth-admin-createuser",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/auth-admin-deleteuser",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/auth-admin-inviteuserbyemail",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/auth-resetpasswordforemail",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/auth-admin-generatelink",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/auth-admin-updateuserbyid",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/auth-admin-mfa-listfactors",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/auth-admin-mfa-deletefactor",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/select",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/insert",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/update",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/upsert",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/delete",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/rpc",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/using-filters",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/eq",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/neq",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/gt",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/gte",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/lt",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/lte",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/like",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/ilike",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/is",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/in",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/contains",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/containedby",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/rangegt",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/rangegte",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/rangelt",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/rangelte",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/rangeadjacent",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/overlaps",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/textsearch",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/match",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/not",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/or",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/filter",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/using-modifiers",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/db-modifiers-select",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/order",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/limit",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/range",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/db-abortsignal",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/single",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/maybesingle",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/db-csv",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/db-returns",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/functions-invoke",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/subscribe",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/getchannels",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/removechannel",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/removeallchannels",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/storage-listbuckets",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/storage-getbucket",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/storage-createbucket",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/storage-emptybucket",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/storage-updatebucket",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/storage-deletebucket",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/storage-from-upload",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/storage-from-update",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/storage-from-move",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/storage-from-copy",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/storage-from-createsignedurl",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/storage-from-createsignedurls",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/storage-from-getpublicurl",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/storage-from-download",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/storage-from-remove",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/storage-from-list",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/v1/initializing",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/v1/auth-signup",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/v1/auth-signin",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/v1/auth-signout",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/v1/auth-session",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/v1/auth-user",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/v1/auth-update",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/v1/auth-setauth",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/v1/auth-onauthstatechange",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/v1/auth-getuser",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/v1/auth-admin-listusers",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/v1/auth-admin-createuser",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/v1/auth-admin-deleteuser",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/v1/auth-admin-inviteuserbyemail",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/v1/auth-api-sendmobileotp",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/v1/auth-resetpasswordforemail",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/v1/auth-admin-generatelink",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/v1/auth-admin-updateuserbyid",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/v1/functions-invoke",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/v1/select",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/v1/insert",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/v1/update",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/v1/upsert",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/v1/delete",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/v1/rpc",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/v1/subscribe",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/v1/removesubscription",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/v1/removeallsubscriptions",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/v1/getsubscriptions",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/v1/storage-listbuckets",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/v1/storage-getbucket",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/v1/storage-createbucket",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/v1/storage-emptybucket",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/v1/storage-updatebucket",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/v1/storage-deletebucket",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/v1/storage-from-upload",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/v1/storage-from-update",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/v1/storage-from-move",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/v1/storage-from-copy",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/v1/storage-from-createsignedurl",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/v1/storage-from-createsignedurls",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/v1/storage-from-getpublicurl",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/v1/storage-from-download",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/v1/storage-from-remove",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/v1/storage-from-list",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/v1/using-modifiers",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/v1/limit",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/v1/order",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/v1/range",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/v1/single",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/v1/maybesingle",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/v1/using-filters",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/v1/or",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/v1/not",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/v1/match",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/v1/eq",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/v1/neq",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/v1/gt",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/v1/gte",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/v1/lt",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/v1/lte",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/v1/like",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/v1/ilike",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/v1/is",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/v1/in",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/v1/contains",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/v1/containedby",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/v1/rangelte",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/v1/rangegt",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/v1/rangegte",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/v1/rangelte",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/v1/rangeadjacent",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/v1/overlaps",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/v1/textsearch",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/javascript/v1/filter",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/initializing",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/auth-signup",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/auth-signinwithpassword",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/auth-signinwithotp",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/auth-signinwithoauth",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/auth-signout",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/auth-verifyotp",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/auth-getsession",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/auth-getuser",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/auth-updateuser",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/auth-onauthstatechange",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/undefined",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/functions-invoke",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/select",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/insert",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/update",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/upsert",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/delete",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/rpc",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/subscribe",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/removechannel",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/removeallchannels",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/getchannels",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/stream",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/storage-listbuckets",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/storage-getbucket",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/storage-createbucket",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/storage-emptybucket",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/storage-updatebucket",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/storage-deletebucket",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/storage-from-upload",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/storage-from-update",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/storage-from-move",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/storage-from-createsignedurl",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/storage-from-getpublicurl",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/storage-from-download",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/storage-from-remove",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/storage-from-list",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/using-modifiers",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/limit",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/order",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/range",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/single",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/using-filters",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/or",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/not",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/match",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/eq",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/neq",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/gt",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/gte",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/lt",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/lte",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/like",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/ilike",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/is",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/in",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/contains",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/containedby",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/rangelt",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/rangegt",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/rangegte",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/rangelte",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/rangeadjacent",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/overlaps",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/textsearch",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/filter",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/installing",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/initializing",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/auth-signup",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/auth-signin",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/auth-signinwithprovider",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/auth-signout",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/auth-session",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/auth-user",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/auth-getsession",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/auth-getuser",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/auth-updateuser",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/auth-onauthstatechange",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/auth-resetpasswordforemail",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/functions-invoke",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/select",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/insert",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/update",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/upsert",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/delete",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/rpc",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/subscribe",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/removesubscription",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/getsubscriptions",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/stream",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/storage-listbuckets",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/storage-getbucket",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/storage-createbucket",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/storage-emptybucket",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/storage-updatebucket",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/storage-deletebucket",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/storage-from-upload",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/storage-from-update",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/storage-from-move",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/storage-from-createsignedurl",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/storage-from-getpublicurl",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/storage-from-download",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/storage-from-remove",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/storage-from-list",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/using-modifiers",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/limit",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/order",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/range",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/single",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/using-filters",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/or",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/not",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/match",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/eq",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/neq",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/gt",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/gte",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/lt",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/lte",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/like",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/ilike",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/is",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/in",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/contains",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/containedby",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/rangelt",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/rangegt",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/rangegte",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/rangelte",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/rangeadjacent",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/overlaps",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/textsearch",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/filter",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/installing",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/initializing",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/auth-signup",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/auth-signin",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/auth-signinwithprovider",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/auth-signout",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/auth-session",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/auth-user",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/auth-getsession",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/auth-getuser",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/auth-updateuser",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/auth-onauthstatechange",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/auth-resetpasswordforemail",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/functions-invoke",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/select",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/insert",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/update",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/upsert",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/delete",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/rpc",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/subscribe",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/removesubscription",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/getsubscriptions",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/stream",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/storage-listbuckets",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/storage-getbucket",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/storage-createbucket",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/storage-emptybucket",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/storage-updatebucket",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/storage-deletebucket",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/storage-from-upload",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/storage-from-update",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/storage-from-move",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/storage-from-createsignedurl",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/storage-from-getpublicurl",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/storage-from-download",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/storage-from-remove",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/storage-from-list",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/using-modifiers",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/limit",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/order",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/range",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/single",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/using-filters",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/or",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/not",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/match",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/eq",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/neq",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/gt",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/gte",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/lt",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/lte",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/like",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/ilike",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/is",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/in",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/contains",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/containedby",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/rangelt",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/rangegt",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/rangegte",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/rangelte",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/rangeadjacent",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/overlaps",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/textsearch",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/dart/v0/filter",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/cli/supabase-vanity-subdomains",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/cli/supabase-vanity-subdomains-get",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/cli/supabase-vanity-subdomains-delete",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/cli/supabase-vanity-subdomains-check-availability",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/cli/supabase-vanity-subdomains-activate",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/cli/supabase-test",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/cli/supabase-test-db",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/cli/supabase-stop",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/cli/supabase-status",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/cli/supabase-start",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/cli/supabase-secrets",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/cli/supabase-secrets-unset",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/cli/supabase-secrets-set",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/cli/supabase-secrets-list",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/cli/supabase-projects",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/cli/supabase-projects-list",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/cli/supabase-projects-create",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/cli/supabase-orgs",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/cli/supabase-orgs-list",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/cli/supabase-network-restrictions",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/cli/supabase-network-restrictions-update",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/cli/supabase-network-restrictions-get",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/cli/supabase-network-bans",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/cli/supabase-network-bans-remove",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/cli/supabase-network-bans-get",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/cli/supabase-migration",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/cli/supabase-migration-repair",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/cli/supabase-migration-new",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/cli/supabase-migration-list",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/cli/supabase-login",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/cli/supabase-link",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/cli/supabase-init",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/cli/supabase-gen",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/cli/supabase-gen-types",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/cli/supabase-gen-types-typescript",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/cli/supabase-functions",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/cli/supabase-functions-serve",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/cli/supabase-functions-new",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/cli/supabase-functions-download",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/cli/supabase-functions-deploy",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/cli/supabase-functions-delete",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/cli/supabase-domains",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/cli/supabase-domains-reverify",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/cli/supabase-domains-get",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/cli/supabase-domains-delete",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/cli/supabase-domains-create",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/cli/supabase-domains-activate",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/cli/supabase-db",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/cli/supabase-db-reset",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/cli/supabase-db-remote",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/cli/supabase-db-remote-commit",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/cli/supabase-db-push",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/cli/supabase-db-lint",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/cli/supabase-db-dump",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/cli/supabase-db-diff",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/cli/supabase-completion",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/cli/supabase-completion-zsh",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/cli/supabase-completion-powershell",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/cli/supabase-completion-fish",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/cli/supabase-completion-bash",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/api/introduction",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/api/list-all-projects",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/api/create-a-project",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/api/list-all-organizations",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/api/create-an-organization",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/api/list-all-secrets",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/api/bulk-create-secrets",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/api/bulk-delete-secrets",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/api/generate-typescript-types",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/api/create-a-function",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/api/list-all-functions",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/api/retrieve-a-function",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/api/update-a-function",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/api/delete-a-function",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/api/retrieve-a-function-body",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/api/gets-projects-custom-hostname-config",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/api/deletes-a-projects-custom-hostname-configuration",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/api/updates-projects-custom-hostname-configuration",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/api/attempts-to-verify-the-dns-configuration-for-projects-custom-hostname-configuration",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/api/activates-a-custom-hostname-for-a-project",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/api/gets-projects-pgsodium-config",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/api/updates-projects-pgsodium-config-updating-the-root_key-can-cause-all-data-encrypted-with-the-older-key-to-become-inaccessible",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/api/gets-projects-network-bans",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/api/remove-network-bans",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/api/gets-projects-network-restrictions",
+        "changefreq": ["weekly", "0.5"]
+      },
+      {
+        "loc": "https://supabase.com/docs/reference/api/updates-projects-network-restrictions",
+        "changefreq": ["weekly", "0.5"]
+      }
+    ],
+    "_xmlns": "http://www.sitemaps.org/schemas/sitemap/0.9"
+  }
+}

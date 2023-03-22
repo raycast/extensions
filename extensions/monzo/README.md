@@ -6,14 +6,14 @@ View your Monzo accounts, pots, and recent transactions.
 
 Due to limitations with Monzo's API, setup has a few steps to it. They aren't complicated, just follow along carefully and you'll be up and running in no time.
 
-If you're comfortable with OAuth API setup, feel free to skip through these steps – all we need is to create a new OAuth client on [Monzo's developer portal](monzo-dev), enter the credentials for it in the extension preferences, and then sign in to the extension with Monzo's OAuth process.
+If you're comfortable with OAuth API setup, feel free to skip through these steps – all we need is to create a new OAuth client on [Monzo's developer portal][monzo-dev], enter the credentials for it in the extension preferences, and then sign in to the extension with Monzo's OAuth process.
 
 #### Step by step
 
-1. Go to the [Monzo developer portal](monzo-dev) and start signing in.
+1. Go to the [Monzo developer portal][monzo-dev] and start signing in.
 2. Enter your email address, and open the link in the login email you receive from Monzo.
 3. _Important!_ Open Monzo on your phone, and approve access for the developer portal.
-4. Head to the [Clients](monzo-clients) page on the developer portal and start creating a new client.
+4. Head to the [Clients][monzo-clients] page on the developer portal and start creating a new client.
 5. Enter the following details
 
 | Field           | Details to enter                                    |

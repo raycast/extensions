@@ -1,5 +1,16 @@
 # 1Password Changelog
 
+## [Configurable primary/secondary actions] - 2023-03-22
+
+- Added configuration to customize the primary and secondary actions on Login
+  items (1Password v8 only)
+
+## [Fixes and Enhancements] - 2023-02-10
+
+- Increased maxBuffer since it caused problems if you had more than 2k items in the vault
+- Moved Reset Cache to command instead, so regular users is not confused about it
+- Updated Empty views
+
 ## [CLI support] - 2023-02-06
 
 This new version of the 1Password extension contains the following changes.

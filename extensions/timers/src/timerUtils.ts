@@ -1,33 +1,53 @@
-import { environment, getPreferenceValues, popToRoot, showHUD } from "@raycast/api";
+import { environment, getPreferenceValues, popToRoot, showHUD, showToast, Toast } from "@raycast/api";
 import { exec, execSync } from "child_process";
 import { randomUUID } from "crypto";
 import { existsSync, readdirSync, readFileSync, writeFileSync } from "fs";
 import { extname } from "path";
 import { CustomTimer, Preferences, Timer } from "./types";
-import { formatTime } from "./formatUtils";
+import { formatTime, secondsBetweenDates } from "./formatUtils";
 
 const DATAPATH = environment.supportPath + "/customTimers.json";
 
-async function startTimer(timeInSeconds: number, timerName = "Untitled") {
+const checkForOverlyLoudAlert = (launchedFromMenuBar = false) => {
+  const prefs = getPreferenceValues<Preferences>();
+  if (parseFloat(prefs.volumeSetting) > 5.0) {
+    const errorMsg = "⚠️ Timer alert volume should not be louder than 5 (it can get quite loud!)";
+    if (launchedFromMenuBar) {
+      showHUD(errorMsg);
+    } else {
+      showToast({ style: Toast.Style.Failure, title: errorMsg });
+    }
+    return false;
+  }
+  return true;
+};
+
+async function startTimer(timeInSeconds: number, timerName = "Untitled", selectedSound = "default") {
   const fileName = environment.supportPath + "/" + new Date().toISOString() + "---" + timeInSeconds + ".timer";
   const masterName = fileName.replace(/:/g, "__");
   writeFileSync(masterName, timerName);
 
   const prefs = getPreferenceValues<Preferences>();
-  const selectedSoundPath = `${environment.assetsPath + "/" + prefs.selectedSound}`;
-  let command = `sleep ${timeInSeconds} && if [ -f "${masterName}" ]; then `;
+  const selectedSoundPath = `${
+    environment.assetsPath + "/" + (selectedSound === "default" ? prefs.selectedSound : selectedSound)
+  }`;
+  const cmdParts = [`sleep ${timeInSeconds}`];
+  cmdParts.push(
+    `if [ -f "${masterName}" ]; then osascript -e 'display notification "Timer \\"${timerName}\\" complete" with title "Ding!"'`
+  );
+  const afplayString = `afplay "${selectedSoundPath}" --volume ${prefs.volumeSetting.replace(",", ".")}`;
   if (prefs.selectedSound === "speak_timer_name") {
-    command += `say "${timerName}"`;
+    cmdParts.push(`say "${timerName}"`);
   } else {
-    command += `afplay "${selectedSoundPath}"`;
+    cmdParts.push(afplayString);
   }
   if (prefs.ringContinuously) {
     const dismissFile = `${masterName}`.replace(".timer", ".dismiss");
     writeFileSync(dismissFile, ".dismiss file for Timers");
-    command += ` && while [ -f "${dismissFile}" ]; do afplay "${selectedSoundPath}"; done`;
+    cmdParts.push(`while [ -f "${dismissFile}" ]; do ${afplayString}; done`);
   }
-  command += ` && osascript -e 'display notification "Timer \\"${timerName}\\" complete" with title "Ding!"' && rm "${masterName}"; else echo "Timer deleted"; fi`;
-  exec(command, (error, stderr) => {
+  cmdParts.push(`rm "${masterName}"; else echo "Timer deleted"; fi`);
+  exec(cmdParts.join(" && "), (error, stderr) => {
     if (error) {
       console.log(`error: ${error.message}`);
       return;
@@ -64,10 +84,7 @@ function getTimers() {
       const timerFileParts = timerFile.split("---");
       timer.secondsSet = Number(timerFileParts[1].split(".")[0]);
       const timeStarted = timerFileParts[0].replace(/__/g, ":");
-      timer.timeLeft = Math.max(
-        0,
-        Math.round(timer.secondsSet - (new Date().getTime() - new Date(timeStarted).getTime()) / 1000)
-      );
+      timer.timeLeft = Math.max(0, Math.round(timer.secondsSet - secondsBetweenDates({ d2: timeStarted })));
       setOfTimers.push(timer);
     }
   });
@@ -97,8 +114,7 @@ function createCustomTimer(newTimer: CustomTimer) {
 
 function readCustomTimers() {
   ensureCTFileExists();
-  const customTimers = JSON.parse(readFileSync(DATAPATH, "utf8"));
-  return customTimers;
+  return JSON.parse(readFileSync(DATAPATH, "utf8"));
 }
 
 function renameCustomTimer(ctID: string, newName: string) {
@@ -116,6 +132,7 @@ function deleteCustomTimer(ctID: string) {
 }
 
 export {
+  checkForOverlyLoudAlert,
   createCustomTimer,
   deleteCustomTimer,
   ensureCTFileExists,

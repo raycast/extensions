@@ -18,12 +18,12 @@ This is a raycast extension with commands for the note taking and knowledge mana
 - [Create Note](https://github.com/marcjulianschwarz/obsidian-raycast#create-note)
 - [Daily Note](https://github.com/marcjulianschwarz/obsidian-raycast#daily-note)
 - [Append to Daily Note](https://github.com/marcjulianschwarz/obsidian-raycast#append-to-daily-note)
-- [Pinned Note](https://github.com/marcjulianschwarz/obsidian-raycast#pinned-notes)
+- [Starred Note](https://github.com/marcjulianschwarz/obsidian-raycast#starred-notes)
 - [Obsidian Menu Bar Item](https://github.com/marcjulianschwarz/obsidian-raycast#obsidian-menu-bar-item)
 
 ## Search Note
 
-This command allows for quick access to all of your notes. By default you can search notes by title. Enabeling content search in the commands preferences allows you to search for notes by their content and title.
+This command allows for quick access to all of your notes. By default you can search notes by title. Enabeling content search in the commands preferences allows you to search for notes by their content and title. If there doesn't exist a note with the title you searched for you can create a new note with that title right from the command.
 Use the tag filter in the top right corner to filter notes based on their tags (both YAML frontmatter and inline tags).
 
 Enabeling `Show Detail` and `Show Metadata` in the extensions preferences will show a sidebar view with the following information:
@@ -61,8 +61,9 @@ Depending on the primary action set in preferences, the keyboard shortcuts can b
 - `opt + v` will paste the notes content to the app you used before raycast
 - `opt + l` will copy a markdown link for the note to your clipboard
 - `opt + u` will copy the obsidian URI for the note to your clipboard (see: [Obsidian URI](https://help.obsidian.md/Advanced+topics/Using+obsidian+URI))
-- `opt + p` will pin an unpinned note
-- `opt + p` will unpin a pinned note
+- `opt + p` will star an unstarred note
+- `opt + p` will unstar a starred note
+- Reload Notes, will reload notes from the vault (useful if you have just created a new note)
 
 The primary action (`enter`) can be changed in the extensions preferences.
 
@@ -71,7 +72,7 @@ The primary action (`enter`) can be changed in the extensions preferences.
 
 ### Quick Look Action
 
-The Quick Look actions will open your note in Raycast itself. From here you can read the note or perform additional actions in the action bar (`cmd + k`).
+The Quick Look actions will open your note in Raycast itself.
 
 <img width="1000" alt="obsidian-5" src="https://user-images.githubusercontent.com/67844154/178248667-6b90bd65-0861-41e4-b68c-256f30d89d1d.png">
 
@@ -132,20 +133,20 @@ This command will append text to the daily note from the selected vault. If a da
 
 It requires the community plugin [Advanced Obsidian URI](https://obsidian.md/plugins?id=obsidian-advanced-uri) and the core plugin "Daily notes" to be installed and enabled.
 
-## Pinned Notes
+## Starred Notes
 
-This command will open a list of your pinned notes. All actions and preferences from the `Search Note` command are available.
+This command will open a list of your starred notes. All actions and preferences from the `Search Note` command are available. Starring or unstarring a note will reflect in Obsidians starred notes. Starring a note in Obsidian will also reflect in Raycast.
 
 Additional actions:
 
-- `opt + r` will reset all pinned notes for the selected vault
+- `opt + r` will reset all starred notes for the selected vault
 
-<img width="1000" alt="Pinned Notes Command" src="https://user-images.githubusercontent.com/67844154/178248422-2668fad8-8936-490b-8cf1-1dea0793712a.png">
+<img width="1000" alt="Starred Notes Command" src="https://user-images.githubusercontent.com/67844154/178248422-2668fad8-8936-490b-8cf1-1dea0793712a.png">
 
 ## Obsidian Menu Bar Item
 
 Use this command to add a menu bar item to the top of the screen (Obsidian icon).
-Clicking it will reveal a list of your vaults. You can view your pinned notes, perform actions on them or open a daily note.
+Clicking it will reveal a list of your vaults. You can view your starred notes, perform actions on them or open a daily note.
 
 <img width="635" alt="Obsidian Menu Bar Item" src="https://user-images.githubusercontent.com/67844154/180802502-3c6243ae-e3f9-4ddc-95ba-f205dab46721.png">
 
@@ -155,13 +156,13 @@ Clicking it will reveal a list of your vaults. You can view your pinned notes, p
 
 - set path/paths to your preferred vault/vaults (comma separated).
   By default, vaults will be detected from `~/Library/Application Support/obsidian/obsidian.json`, which contains all vaults that have been opened with Obsidian before.
-
-### Search Note
-
-- exclude folders, files and paths so they dont show up in the search
+- exclude folders, files and paths so they dont show up in the search (comma separated). Files and Folders that were excluded in Obsidian itself will also be excluded here.
 - hide YAML frontmatter in "Quick Look" and copy/paste
 - hide wikilinks in "Quick Look" and copy/paste
 - hide LaTeX in "Quick Look" and copy/paste
+
+### Search Note
+
 - templates for append actions
 - show note content in detail view
 - show metadata about note in detail view
@@ -170,10 +171,11 @@ Clicking it will reveal a list of your vaults. You can view your pinned notes, p
 
 ### Create Note
 
+- blank note, if enabled, will create a note without any content
+- open note on creation
 - default path where a new note will be created
 - default tag (will be selected by default in the tag picker)
 - list of tags to be suggested in the tag picker (comma separated)
-- open note on creation
 - default note name (if note name is empty)
 - default note content
 - fill form with default values
@@ -184,12 +186,10 @@ Clicking it will reveal a list of your vaults. You can view your pinned notes, p
 - template for the appended text (e.g. could set to `- [ ] ` to create a checklist item)
 - vault in which the Daily Note will be appended (if not set, you will be prompted to select a vault when the command is run)
 - heading in which the appended text will be placed (if not set, the text will be appended to the end of the note)
+- silent mode, if enabled, will not open the note if it is currently not opened in an Obsidian tab or pane (Obsidian has to be running)
 
-### Pinned Notes
+### Starred Notes
 
-- hide YAML frontmatter in "Quick Look" and copy/paste
-- hide wikilinks in "Quick Look" and copy/paste
-- hide LaTeX in "Quick Look" and copy/paste
 - templates for append actions
 - show note content in detail view
 - show metadata about note in detail view
@@ -198,10 +198,6 @@ Clicking it will reveal a list of your vaults. You can view your pinned notes, p
 
 ### Random Note
 
-- exclude folders, files and paths so notes from them won't show up
-- hide YAML frontmatter in "Quick Look" and copy/paste
-- hide wikilinks in "Quick Look" and copy/paste
-- hide LaTeX in "Quick Look" and copy/paste
 - templates for append actions
 - select primary action (for `enter`)
 
@@ -218,3 +214,7 @@ Clicking it will reveal a list of your vaults. You can view your pinned notes, p
 ## Contributions and Credits
 
 Thank you [macedotavares](https://forum.obsidian.md/t/big-sur-icon/8121?u=marcjulian) for letting me use your amazing Obsidian (Big Sur) icon.
+
+## Disclaimer
+
+This project is not affiliated, associated, authorized, endorsed by, or in any way officially connected with Obsidian. The official Obsidian website can be found at https://obsidian.md. "Obsidian" as well as related names, marks, emblems and images are registered trademarks of their respective owners.
