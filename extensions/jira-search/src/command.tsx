@@ -3,6 +3,7 @@ import { useEffect, useState } from "react"
 import { ErrorText } from "./exception"
 
 export type ResultItem = List.Item.Props & {
+  id: string
   url: string
   linkText?: string
 }
@@ -14,7 +15,8 @@ const htmlLink = (item: ResultItem) => `<a href="${item.url}">${item.linkText ??
 export function SearchCommand<FilterType extends string>(
   search: SearchFunction<FilterType>,
   searchBarPlaceholder?: string,
-  filter?: { tooltip: string; persist?: boolean; values: { name: string; value: FilterType }[] }
+  filter?: { tooltip: string; persist?: boolean; values: { name: string; value: FilterType }[] },
+  getPreliminaryResult?: (query: string) => ResultItem | undefined
 ) {
   const [query, setQuery] = useState("")
   const [currentFilter, setCurrentFilter] = useState(filter ? filter.values[0]?.value ?? undefined : undefined)
@@ -46,7 +48,13 @@ export function SearchCommand<FilterType extends string>(
       })
   }, [query, currentFilter])
 
-  const onSearchChange = (newSearch: string) => setQuery(newSearch)
+  const onSearchChange = (newSearch: string) => {
+    const preResult = getPreliminaryResult && getPreliminaryResult(newSearch)
+    if (preResult) {
+      setItems([preResult])
+    }
+    setQuery(newSearch)
+  }
   const buildItem = (item: ResultItem) => (
     <List.Item
       key={item.id}

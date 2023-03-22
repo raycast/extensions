@@ -102,7 +102,7 @@ function jqlFor(query: string, filter?: IssueFilter): string {
   return [filterJql, queryJql].filter(Boolean).join(" AND ")
 }
 
-export async function searchIssues(query: string, filter?: IssueFilter): Promise<ResultItem[]> {
+async function searchIssues(query: string, filter?: IssueFilter): Promise<ResultItem[]> {
   const jql = jqlFor(query, filter)
   console.debug(jql)
 
@@ -126,14 +126,29 @@ export async function searchIssues(query: string, filter?: IssueFilter): Promise
   return result.issues && result.issues.length > 0 ? Promise.all(result.issues.map(mapResult)) : []
 }
 
+function openIssueKey(query: string): ResultItem | undefined {
+  if (isIssueKey(query)) {
+    return {
+      id: query,
+      url: `${jiraUrl}/browse/${query}`,
+      title: `Open issue ${query}`,
+    }
+  }
+}
+
 export default function SearchIssueCommand() {
-  return SearchCommand(searchIssues, "Search issues by text, @project, #type, ~assignee", {
-    tooltip: "Filters",
-    values: [
-      { name: "All Issues", value: "allIssues" },
-      { name: "Issues in Open sprints", value: "issuesInOpenSprints" },
-      { name: "Assigned to Me", value: "myIssues" },
-      { name: "My Issues in Open sprints", value: "myIssuesInOpenSprints" },
-    ],
-  })
+  return SearchCommand(
+    searchIssues,
+    "Search issues by text, @project, #type, ~assignee",
+    {
+      tooltip: "Filters",
+      values: [
+        { name: "All Issues", value: "allIssues" },
+        { name: "Issues in Open sprints", value: "issuesInOpenSprints" },
+        { name: "Assigned to Me", value: "myIssues" },
+        { name: "My Issues in Open sprints", value: "myIssuesInOpenSprints" }
+      ]
+    },
+    openIssueKey
+  )
 }
