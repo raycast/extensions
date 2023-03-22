@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Grid, Cache, Icon } from "@raycast/api";
 import { useState, useEffect, useRef } from "react";
+import { useCachedState } from "@raycast/utils";
 import { generatePalettes } from "./ColorSchemeVariants";
 import OpenColor from "../assets/Plaette_OpenColor.json";
 import AntDesign from "../assets/Palette_AntDesign.json";
@@ -10,7 +11,7 @@ import Spectrum from "../assets/Palette_AdobeSpectrum.json";
 import AppleDesign from "../assets/Palette_AppleDesign.json";
 import AntV from "../assets/Palette_AntV.json";
 import SpectrumDV from "../assets/Palette_AdobeSpectrumDV.json";
-import { useCachedState } from "@raycast/utils";
+import Custom from "../assets/Plaette_Custom.json";
 
 // Define Palette Formate
 type Palette = {
@@ -24,10 +25,6 @@ type Color = {
   name: string;
   hex: string;
 };
-
-// Define Cache of Dynamic Palette
-const paletteKey = "generatedPalette";
-const paletteCache = new Cache();
 
 // Design System Palettes
 const cp_ant: Palette[] = AntDesign;
@@ -43,33 +40,34 @@ const cp_spev: Palette[] = SpectrumDV;
 
 // Other Palettes
 const cp_oc: Palette[] = OpenColor;
+const cp_custom: Palette[] = Custom;
+
+// Define Cache of Dynamic Palette
+const paletteKey = "generatedPalette";
+const paletteCache = new Cache();
+const cachedPalette = paletteCache.get(paletteKey);
+let cachedcp_dg: Palette[];
+
+if (cachedPalette) {
+  cachedcp_dg = JSON.parse(cachedPalette);
+} else {
+  cachedcp_dg = generatePalettes();
+  paletteCache.set(paletteKey, JSON.stringify(cachedcp_dg));
+}
 
 // Main Command
 export default function Command() {
-  const [palette, setpalette] = useCachedState<Palette[]>("palette", cp_spe);
-  const [paletteName, setpaletteName] = useCachedState<string>("paletteName", "chinesetraditionalcolor");
+  const [palette, setPalette] = useCachedState<Palette[]>("palette", cp_spe);
+  const [paletteName, setpaletteName] = useCachedState<string>("paletteName", "spectrum");
   const paletteRef = useRef(paletteName);
 
-  // Load Dynamic Palette(cp_dg) from Cache, or generate a new Palette
-  const [cp_dg, setcp_dg] = useState(() => {
-    const cachedPalette = paletteCache.get(paletteKey);
+  const [cp_dg, setcp_dg] = useState<Palette[]>(cachedcp_dg);
 
-    if (cachedPalette) {
-      try {
-        return JSON.parse(cachedPalette);
-      } catch (error) {
-        console.error("Failed to parse cached palette:", error);
-      }
-    }
-
-    return generatePalettes();
-  });
-  // When cp_dg change, set current Palette to Cache
   useEffect(() => {
+    setcp_dg(cp_dg);
+    setPalette(cp_dg);
     paletteCache.set(paletteKey, JSON.stringify(cp_dg));
   }, [cp_dg]);
-
-  console.log(paletteRef);
 
   return (
     <Grid
@@ -83,7 +81,7 @@ export default function Command() {
           placeholder="Choose Palette"
           storeValue={true}
           onChange={(value) => {
-            setpalette(
+            setPalette(
               value === "opencolor"
                 ? cp_oc
                 : value === "antdesign"
@@ -102,6 +100,8 @@ export default function Command() {
                 ? cp_antv
                 : value === "spectrumv"
                 ? cp_spev
+                : value === "custom"
+                ? cp_custom
                 : value === "variants"
                 ? cp_dg
                 : cp_spe
@@ -124,6 +124,7 @@ export default function Command() {
           </Grid.Dropdown.Section>
           <Grid.Dropdown.Section title="Other Palettes">
             <Grid.Dropdown.Item title="OpenColor" value="opencolor" icon="Icon_OpenColor.svg" />
+            <Grid.Dropdown.Item title="Custom" value="custom" icon="Icon_Default.svg" />
           </Grid.Dropdown.Section>
           <Grid.Dropdown.Section title="Dynamic Palettes">
             <Grid.Dropdown.Item title="Color Scheme Variants" value="variants" icon="Icon_Variants.png" />
@@ -166,10 +167,10 @@ export default function Command() {
                         shortcut={{ modifiers: ["cmd", "opt"], key: "r" }}
                         // Clear cache, Generate a new Palette as cp_dg, Rerender the Palette
                         onAction={() => {
-                          paletteCache.remove(paletteKey);
                           const newcp_dg = generatePalettes();
+                          paletteCache.set(paletteKey, JSON.stringify(newcp_dg));
                           setcp_dg(newcp_dg);
-                          setpalette(newcp_dg);
+                          setPalette(newcp_dg);
                         }}
                       />
                     )}
