@@ -103,7 +103,7 @@ async function performSearch(searchText: string, signal: AbortSignal): Promise<S
       "Content-Type": "application/json",
     },
     body: JSON.stringify(data),
-    signal: signal,
+    signal: signal as any,
   });
 
   const json = (await response.json()) as
