@@ -1,0 +1,49 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "gitlab-cn-docs",
+  "title": "GitLab CN Docs",
+  "description": "Raycast extension to search GitLab Chinese Docs & Handbook.",
+  "icon": "gitlab-icon.png",
+  "author": "guoxudong",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "docs",
+      "title": "Search Chinese documents",
+      "description": "Search JiHu GitLab Docs.",
+      "mode": "view",
+      "icon": "docs-icon.png"
+    },
+    {
+      "name": "handbook",
+      "title": "Search JiHu Handbook",
+      "description": "Search Jihu GitLab Handbook.",
+      "mode": "view",
+      "icon": "handbook-icon.png"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.48.9",
+    "@types/lodash.groupby": "^4.6.7",
+    "apicache": "^1.6.3",
+    "lodash.groupby": "^4.6.0",
+    "node-fetch": "^3.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
