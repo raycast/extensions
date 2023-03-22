@@ -20,6 +20,7 @@ interface Preferences {
   accounts: boolean;
   folders: boolean;
   modificationDate: boolean;
+  openSeparately: boolean;
 }
 
 const preferences: Preferences = getPreferenceValues();
@@ -31,10 +32,14 @@ export default function Command() {
 
   const escapeStringForAppleScript = (str: string) => str.replace('"', '\\"');
 
-  async function openNote(note: NoteItem) {
+  async function openNote(note: NoteItem, separately = false) {
     try {
       runAppleScript(
-        `tell application "Notes" \nshow note "${escapeStringForAppleScript(note.title)}" \nend tell`
+        'tell application "Notes"\n' +
+          `
+        show note "${escapeStringForAppleScript(note.title)}"${separately ? " with separately" : ""}\n` +
+          "activate\n" +
+          "end tell"
       ).then(
         async () => {
           await closeMainWindow();
@@ -137,7 +142,14 @@ export default function Command() {
                 )}
               actions={
                 <ActionPanel title="Actions">
-                  <Action title="Open in Notes" icon={Icon.Document} onAction={() => openNote(note)} />
+                  {preferences.openSeparately || (
+                    <Action title="Open in Notes" icon={Icon.Document} onAction={() => openNote(note, false)} />
+                  )}
+                  <Action
+                    title="Open in a Separate Window"
+                    icon={Icon.Document}
+                    onAction={() => openNote(note, true)}
+                  />
                 </ActionPanel>
               }
             />
