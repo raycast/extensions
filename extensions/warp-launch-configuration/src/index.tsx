@@ -4,6 +4,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import os from "node:os";
 import { runJxa } from "run-jxa";
+import YAML from "yaml";
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
@@ -39,9 +40,17 @@ export default function Command() {
       );
     }
 
-    const fileList = files
-      .filter((file) => file.includes(".yaml"))
-      .map((file) => ({ name: file.replace(".yaml", ""), path: path.join(fullPath, file) }));
+    const fileList = await Promise.all(
+      files
+        .filter((file) => file.match(/.y(a)?ml$/g))
+        .map(async (file) => {
+          const contents = await fs.readFile(path.join(fullPath, file), "utf-8");
+
+          const yaml = YAML.parse(contents);
+
+          return { name: yaml.name, path: path.join(fullPath, file) };
+        })
+    );
 
     if (fileList.length === 0) {
       return showError(
@@ -70,7 +79,7 @@ export default function Command() {
       />
       <List.Section title="Results" subtitle={results?.length + ""}>
         {results
-          ?.filter((f) => f.name.includes(searchText.toLowerCase()))
+          ?.filter((f) => f.name.toLowerCase().includes(searchText.toLowerCase()))
           .map((searchResult) => (
             <SearchListItem key={searchResult.name} searchResult={searchResult} />
           ))}
