@@ -65,7 +65,7 @@ function buildJql(query: string): string {
   const assignees = collectPrefixed("~", terms)
   const unwantedTextTermChars = /[-+!*&]/
   const textTerms = terms
-    .filter((term) => !"@#".includes(term[0]))
+    .filter((term) => !"@#~".includes(term[0]))
     .flatMap((term) => term.split(unwantedTextTermChars))
     .filter((term) => term.length > 0)
 
@@ -82,33 +82,27 @@ function buildJql(query: string): string {
   return jql + " order by lastViewed desc"
 }
 
-function jqlForFilter(filter: IssueFilter) {
+function jqlForFilter(filter?: IssueFilter) {
   switch (filter) {
-    case "allIssues":
-      return ""
     case "issuesInOpenSprints":
       return "sprint in openSprints()"
     case "myIssues":
       return "assignee=currentUser()"
     case "myIssuesInOpenSprints":
       return "assignee=currentUser() AND sprint in openSprints()"
+    default:
+      return undefined
   }
 }
 
 function jqlFor(query: string, filter?: IssueFilter): string {
-  const jql = isIssueKey(query) ? `key=${query}` : buildJql(query)
-
-  if (!filter) return jql
-  const extraJqlForFilter = jqlForFilter(filter)
-
-  const extraOperator = query ? "AND" : ""
-
-  return `${extraJqlForFilter} ${extraOperator} ${jql}`
+  const filterJql = jqlForFilter(filter)
+  const queryJql = isIssueKey(query) ? `key=${query}` : buildJql(query)
+  return [filterJql, queryJql].filter(Boolean).join(" AND ")
 }
 
 export async function searchIssues(query: string, filter?: IssueFilter): Promise<ResultItem[]> {
   const jql = jqlFor(query, filter)
-
   console.debug(jql)
 
   const result = await jiraFetchObject<Issues>(

@@ -22,7 +22,7 @@ export function SearchCommand<FilterType extends string>(
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<ErrorText>()
   useEffect(() => {
-    console.log("currentFilter", currentFilter)
+    console.debug("currentFilter", currentFilter)
     setError(undefined)
     setIsLoading(true)
     search(query, currentFilter)
