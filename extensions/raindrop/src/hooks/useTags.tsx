@@ -12,7 +12,7 @@ export function useTags() {
     },
     keepPreviousData: true,
     onError: () => {
-      showToast(Toast.Style.Failure, "Cannot search tags");
+      showToast(Toast.Style.Failure, "Cannot fetch tags");
     },
   });
 
