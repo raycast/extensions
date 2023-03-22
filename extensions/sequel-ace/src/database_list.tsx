@@ -53,8 +53,8 @@ export default function DatabaseList() {
 }
 
 type ObjType = {
-  [key: string]: ReadonlyArray<plist.PlistObject>
-}
+  [key: string]: ReadonlyArray<plist.PlistObject>;
+};
 
 function readfavorites(sequelAceLocation: string): any[] {
   const connectionsList = plist.parse(fs.readFileSync(sequelAceLocation, "utf8")) as ReadonlyArray<plist.PlistObject>;
