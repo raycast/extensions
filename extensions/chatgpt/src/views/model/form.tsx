@@ -19,9 +19,8 @@ export const ModelForm = (props: { model?: Model; use: { models: ModelHook }; na
     }
   );
 
-  const [error, setError] = useState<{ name: string; prompt: string; option: string; temperature: string }>({
+  const [error, setError] = useState<{ name: string; option: string; temperature: string }>({
     name: "",
-    prompt: "",
     option: "",
     temperature: "",
   });
@@ -76,17 +75,7 @@ export const ModelForm = (props: { model?: Model; use: { models: ModelHook }; na
         title="Prompt"
         placeholder="Describe your prompt"
         defaultValue={data.prompt}
-        error={error.prompt.length > 0 ? error.prompt : undefined}
         onChange={(value) => setData({ ...data, prompt: value })}
-        onBlur={(event) => {
-          if (event.target.value?.length == 0) {
-            setError({ ...error, prompt: "Required" });
-          } else {
-            if (error.prompt && error.prompt.length > 0) {
-              setError({ ...error, prompt: "" });
-            }
-          }
-        }}
       />
       <Form.TextField
         id="temperature"
