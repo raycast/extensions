@@ -3,6 +3,7 @@ import {
   ActionPanel,
   Color,
   getPreferenceValues,
+  LaunchProps,
   List,
   openExtensionPreferences,
   showToast,
@@ -14,8 +15,12 @@ import { Note } from "./bear-db";
 import { useBearDb } from "./hooks";
 import NoteActions from "./note-actions";
 
-export default function SearchNotes() {
-  const [searchQuery, setSearchQuery] = useState<string>("");
+interface SearchNotesArguments {
+  searchQuery?: string;
+}
+export default function SearchNotes(props: LaunchProps<{ arguments: SearchNotesArguments }>) {
+  const { searchQuery: initialSearchQuery } = props.arguments;
+  const [searchQuery, setSearchQuery] = useState(initialSearchQuery ?? "");
   const [db, error] = useBearDb();
   const [searchError, setSearchError] = useState<Error>();
   const [notes, setNotes] = useState<Note[]>();
@@ -41,10 +46,12 @@ export default function SearchNotes() {
   }
 
   const showDetail = (notes ?? []).length > 0 && getPreferenceValues().showPreviewInListView;
+
   return (
     <List
       isLoading={notes == undefined}
       onSearchTextChange={setSearchQuery}
+      searchText={searchQuery}
       searchBarPlaceholder="Search note text or id ..."
       isShowingDetail={showDetail}
       throttle={true}
