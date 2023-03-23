@@ -52,7 +52,7 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
       .createChatCompletion(
         {
           model: model.option,
-          temperature: model.temperature,
+          temperature: Number(model.temperature),
           messages: [...chatTransfomer(data, model.prompt), { role: "user", content: question }],
           stream: useStream,
         },
