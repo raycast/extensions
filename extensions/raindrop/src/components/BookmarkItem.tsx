@@ -8,15 +8,9 @@ import {
   Toast,
   showToast,
 } from "@raycast/api";
-import dayjs from "dayjs";
-import relativeTime from "dayjs/plugin/relativeTime";
-import localizedFormat from "dayjs/plugin/localizedFormat";
 import { Bookmark } from "../types";
 import { getFavicon } from "@raycast/utils";
 import fetch from "node-fetch";
-
-dayjs.extend(relativeTime);
-dayjs.extend(localizedFormat);
 
 export default function BookmarkItem(props: { bookmark: Bookmark }) {
   const bookmark = props.bookmark;
@@ -63,9 +57,19 @@ export default function BookmarkItem(props: { bookmark: Bookmark }) {
     } catch (error) {
       toast.style = Toast.Style.Failure;
       toast.title = "Error Deleting Link";
-      // @ts-expect-error - error.message is a string
       toast.message = error.message;
     }
+  }
+
+  const lastUpdatedDate = new Date(bookmark.lastUpdate);
+  const createdDate = new Date(bookmark.created);
+
+  function accessories() {
+    const accessories = [];
+
+    bookmark.tags.forEach((tag) => accessories.push({ tag: `#${tag}` }));
+    accessories.push({ date: lastUpdatedDate, tooltip: lastUpdatedDate.toLocaleString() });
+    return accessories;
   }
 
   return (
@@ -74,15 +78,15 @@ export default function BookmarkItem(props: { bookmark: Bookmark }) {
       icon={getFavicon(bookmark.link, { fallback: "raindrop-icon.png" })}
       key={bookmark._id}
       title={bookmark.title}
-      subtitle={bookmark.tags.map((tag) => `#${tag}`).join(" ")}
-      accessories={[{ text: dayjs().to(dayjs(bookmark.lastUpdate)) }]}
+      accessories={accessories()}
       actions={
         <ActionPanel>
           <Action.OpenInBrowser url={bookmark.link} />
-          <Action.SubmitForm onSubmit={handleDelete} title="Delete Bookmark" icon={Icon.Trash} />
+          <Action.CopyToClipboard title="Copy URL" content={bookmark.link} />
           <Action.Push
             title="Show Details"
             icon={Icon.Sidebar}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
             target={
               <Detail
                 markdown={getDetails()}
@@ -101,11 +105,11 @@ export default function BookmarkItem(props: { bookmark: Bookmark }) {
                   <Detail.Metadata>
                     <Detail.Metadata.Label
                       title="Created"
-                      text={dayjs(bookmark.created).format("ll")}
+                      text={createdDate.toLocaleDateString()}
                     />
                     <Detail.Metadata.Label
                       title="Last Updated"
-                      text={dayjs(bookmark.lastUpdate).format("ll")}
+                      text={lastUpdatedDate.toLocaleDateString()}
                     />
                     <Detail.Metadata.Label title="Domain" text={bookmark.domain} />
 
@@ -124,7 +128,13 @@ export default function BookmarkItem(props: { bookmark: Bookmark }) {
               />
             }
           />
-          <Action.CopyToClipboard title="Copy URL" content={bookmark.link} />
+          <Action
+            onAction={handleDelete}
+            title="Delete Bookmark"
+            style={Action.Style.Destructive}
+            shortcut={{ modifiers: ["ctrl"], key: "x" }}
+            icon={Icon.Trash}
+          />
         </ActionPanel>
       }
     />
