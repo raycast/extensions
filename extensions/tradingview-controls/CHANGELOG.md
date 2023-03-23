@@ -1,6 +1,6 @@
 # TradingView Controls Changelog
 
-## [0.1.0] - 2023-03-11
+## [0.1.0] - 2023-03-23
 
 Welcome to the inital release of TradingView Controls! With each release, we hope to add new commands as well as bug fixes for existing commands. This changelog will help establish this process.
 
