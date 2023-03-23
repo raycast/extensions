@@ -96,11 +96,11 @@ const Feed = ({ id, title }: { id: IFeed['id']; title: IFeed['title'] }) => {
                         actions={
                           <ActionPanel>
                             <Action.OpenInBrowser url={item.canonicalUrl} />
-                            <Action.SubmitForm
+                            <Action
                               title="Save to Read Later"
                               icon={Icon.Bookmark}
                               shortcut={{ modifiers: ['cmd'], key: 's' }}
-                              onSubmit={() => handleMarkAsSaved(item.id)}
+                              onAction={() => handleMarkAsSaved(item.id)}
                             />
                           </ActionPanel>
                         }
@@ -108,11 +108,11 @@ const Feed = ({ id, title }: { id: IFeed['id']; title: IFeed['title'] }) => {
                     }
                   />
                   <Action.OpenInBrowser url={item.canonicalUrl} />
-                  <Action.SubmitForm
+                  <Action
                     title="Save to Read Later"
                     icon={Icon.Bookmark}
                     shortcut={{ modifiers: ['cmd'], key: 's' }}
-                    onSubmit={() => handleMarkAsSaved(item.id)}
+                    onAction={() => handleMarkAsSaved(item.id)}
                   />
                 </ActionPanel>
               }
