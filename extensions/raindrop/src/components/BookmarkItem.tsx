@@ -7,6 +7,8 @@ import {
   getPreferenceValues,
   Toast,
   showToast,
+  confirmAlert,
+  Alert,
 } from "@raycast/api";
 import { Bookmark } from "../types";
 import { getFavicon } from "@raycast/utils";
@@ -37,28 +39,39 @@ export default function BookmarkItem(props: { bookmark: Bookmark }) {
   };
 
   async function handleDelete() {
-    const toast = await showToast(Toast.Style.Animated, "Deleting Link");
-    try {
-      await fetch(`https://api.raindrop.io/rest/v1/raindrop/${bookmark._id}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${preferences.token}`,
+    const options: Alert.Options = {
+      title: "Delete bookmark",
+      message: "Are you sure you want to delete this bookmark?",
+      primaryAction: {
+        title: "Delete",
+        style: Alert.ActionStyle.Destructive,
+        onAction: async () => {
+          const toast = await showToast(Toast.Style.Animated, "Deleting Link");
+          try {
+            await fetch(`https://api.raindrop.io/rest/v1/raindrop/${bookmark._id}`, {
+              method: "DELETE",
+              headers: {
+                Authorization: `Bearer ${preferences.token}`,
+              },
+            }).then((res) => {
+              if (res.status === 200) {
+                toast.style = Toast.Style.Success;
+                toast.title = "Link Deleted";
+                toast.message = bookmark.link;
+                return res.json();
+              } else {
+                throw new Error("Error deleting link");
+              }
+            });
+          } catch (error) {
+            toast.style = Toast.Style.Failure;
+            toast.title = "Error Deleting Link";
+            toast.message = error.message;
+          }
         },
-      }).then((res) => {
-        if (res.status === 200) {
-          toast.style = Toast.Style.Success;
-          toast.title = "Link Deleted";
-          toast.message = bookmark.link;
-          return res.json();
-        } else {
-          throw new Error("Error deleting link");
-        }
-      });
-    } catch (error) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Error Deleting Link";
-      toast.message = error.message;
-    }
+      },
+    };
+    await confirmAlert(options);
   }
 
   const lastUpdatedDate = new Date(bookmark.lastUpdate);
