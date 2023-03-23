@@ -96,6 +96,7 @@ export default function ProcessList() {
           const pathMatches =
             process.path?.toLowerCase().match(new RegExp(`.+${query}.*\\.[app|framework|prefpane]`, "ig")) != null;
           const pidMatches = process.id.includes(query);
+
           return nameMatches || (shouldIncludePaths && pathMatches) || (shouldIncludePid && pidMatches);
         })
         .sort((a, b) => {
