@@ -15,6 +15,6 @@ export default async () => {
     const titleCaseText = titleCase(clipboardText);
     await Clipboard.paste(titleCaseText);
     popToRoot({ clearSearchBar: true });
-    await showHUD("✍🏻 Pasted as Title Case Text");
+    await showHUD("✍🏻 Pasted as Title Case");
   }
 };

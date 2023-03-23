@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "title-case-generator",
-  "title": "Title Case Generator",
+  "title": "Convert Your Copied Text to Title Case",
   "description": "Title Capitalization Tool",
   "icon": "command-icon.png",
   "author": "Aidenbuis",
@@ -12,7 +12,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "titlecase",
+      "title": "Title Case",
       "description": "A Smart Title Capitalization Tool",
       "mode": "view"
     }
