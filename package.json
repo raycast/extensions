@@ -60,24 +60,6 @@
       "default": true,
       "label": "Show preview in list view",
       "required": false
-    },
-    {
-      "name": "bearVersion",
-      "type": "dropdown",
-      "required": true,
-      "title": "Bear Version",
-      "description": "Select the version of Bear you are using, this will determine how the extension reads the Bear database",
-      "default": "1",
-      "data": [
-        {
-          "title": "Version 1",
-          "value": "1"
-        },
-        {
-          "title": "Version 2",
-          "value": "2"
-        }
-      ]
     }
   ],
   "dependencies": {

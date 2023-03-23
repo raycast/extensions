@@ -1,14 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Color,
-  getPreferenceValues,
-  LaunchProps,
-  List,
-  openExtensionPreferences,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { Color, getPreferenceValues, LaunchProps, List, showToast, Toast } from "@raycast/api";
 import { formatDistanceToNowStrict } from "date-fns";
 import { useEffect, useState } from "react";
 import { Note } from "./bear-db";
@@ -22,22 +12,12 @@ export default function SearchNotes(props: LaunchProps<{ arguments: SearchNotesA
   const { searchQuery: initialSearchQuery } = props.arguments;
   const [searchQuery, setSearchQuery] = useState(initialSearchQuery ?? "");
   const [db, error] = useBearDb();
-  const [searchError, setSearchError] = useState<Error>();
   const [notes, setNotes] = useState<Note[]>();
 
   useEffect(() => {
     if (db != null) {
-      try {
-        const notes = db.getNotes(searchQuery);
-        setNotes(notes);
-      } catch (error) {
-        if (error instanceof Error) {
-          setSearchError(error);
-        } else {
-          throw error;
-        }
-        setNotes([]);
-      }
+      const notes = db.getNotes(searchQuery);
+      setNotes(notes);
     }
   }, [db, searchQuery]);
 
@@ -56,36 +36,32 @@ export default function SearchNotes(props: LaunchProps<{ arguments: SearchNotesA
       isShowingDetail={showDetail}
       throttle={true}
     >
-      {notes?.length === 0 ? (
-        <EmptyView searchError={searchError} />
-      ) : (
-        notes?.map((note) => (
-          <List.Item
-            key={note.id}
-            title={note.title === "" ? "Untitled Note" : note.encrypted ? "🔒 " + note.title : note.title}
-            subtitle={showDetail ? undefined : note.formattedTags}
-            icon={{ source: "command-icon.png" }}
-            keywords={[note.id]}
-            actions={<NoteActions isNotePreview={false} note={note} />}
-            accessories={
-              showDetail
-                ? undefined
-                : [
-                    {
-                      date: note.modifiedAt,
-                      tooltip: `Last modified ${formatDistanceToNowStrict(note.modifiedAt, { addSuffix: true })}`,
-                    },
-                  ]
-            }
-            detail={
-              <List.Item.Detail
-                markdown={note.encrypted ? "*This note's content is encrypted*" : note.text}
-                metadata={<NoteMetadata note={note} />}
-              />
-            }
-          />
-        ))
-      )}
+      {notes?.map((note) => (
+        <List.Item
+          key={note.id}
+          title={note.title === "" ? "Untitled Note" : note.encrypted ? "🔒 " + note.title : note.title}
+          subtitle={showDetail ? undefined : note.formattedTags}
+          icon={{ source: "command-icon.png" }}
+          keywords={[note.id]}
+          actions={<NoteActions isNotePreview={false} note={note} />}
+          accessories={
+            showDetail
+              ? undefined
+              : [
+                  {
+                    date: note.modifiedAt,
+                    tooltip: `Last modified ${formatDistanceToNowStrict(note.modifiedAt, { addSuffix: true })}`,
+                  },
+                ]
+          }
+          detail={
+            <List.Item.Detail
+              markdown={note.encrypted ? "*This note's content is encrypted*" : note.text}
+              metadata={<NoteMetadata note={note} />}
+            />
+          }
+        />
+      ))}
     </List>
   );
 }
@@ -111,37 +87,4 @@ function NoteMetadata({ note }: { note: Note }) {
       <List.Item.Detail.Metadata.Label title="Word count" text={`${note.wordCount} words`} />
     </List.Item.Detail.Metadata>
   );
-}
-
-function EmptyView({ searchError }: { searchError: Error | undefined }) {
-  if (searchError == undefined) return <List.EmptyView />;
-  if (!searchError.message.startsWith("no such table")) throw searchError;
-
-  if (searchError.message.includes("Z_7TAGS")) {
-    return (
-      <List.EmptyView
-        title="Error Searching Notes"
-        description="If you're using version 2 of Bear, you might need to update which Bear version you're using in the extension preferences."
-        actions={
-          <ActionPanel>
-            <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
-          </ActionPanel>
-        }
-      />
-    );
-  } else if (searchError.message.includes("Z_5TAGS")) {
-    return (
-      <List.EmptyView
-        title="Error Searching Notes"
-        description="If you're using version 1 of Bear, you might need to update which Bear version you're using in the extension preferences."
-        actions={
-          <ActionPanel>
-            <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
-          </ActionPanel>
-        }
-      />
-    );
-  } else {
-    throw searchError;
-  }
 }
