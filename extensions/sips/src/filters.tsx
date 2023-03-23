@@ -18,8 +18,8 @@ const initializeFilterScript = (source: string, destination: string, CIFilterNam
 const baseFilterResultScript = `-- Get result & crop to original image size
     set theBounds to current application's NSMakeRect(0, 0, theImage's |size|()'s width, theImage's |size|()'s height)
     set uncroppedOutput to theFilter's valueForKey:(current application's kCIOutputImageKey)
-    set croppedOutput to uncroppedOutput's imageByCroppingToRect:theBounds
-
+    set croppedOutput to uncroppedOutput's imageByCroppingToRect:(uncroppedOutput's extent())
+    
     -- Convert back to NSImage and save to file
     set theRep to current application's NSCIImageRep's imageRepWithCIImage:croppedOutput
     set theResult to current application's NSImage's alloc()'s initWithSize:(theRep's |size|())
