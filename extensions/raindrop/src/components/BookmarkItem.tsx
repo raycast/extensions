@@ -64,9 +64,11 @@ export default function BookmarkItem(props: { bookmark: Bookmark }) {
               }
             });
           } catch (error) {
-            toast.style = Toast.Style.Failure;
-            toast.title = "Error Deleting Link";
-            toast.message = error.message;
+            if (error instanceof Error) {
+              toast.style = Toast.Style.Failure;
+              toast.title = "Error Deleting Link";
+              toast.message = error.message;
+            }
           }
         },
       },
