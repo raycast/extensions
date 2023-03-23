@@ -1,10 +1,11 @@
-import { Action, ActionPanel, Form, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Form, showToast, Toast, useNavigation } from "@raycast/api";
 import { useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { Model, ModelHook } from "../../type";
 
 export const ModelForm = (props: { model?: Model; use: { models: ModelHook }; name?: string }) => {
   const { use } = props;
+  const { pop } = useNavigation();
 
   const [data, setData] = useState<Model>(
     props?.model ?? {
@@ -41,6 +42,7 @@ export const ModelForm = (props: { model?: Model; use: { models: ModelHook }; na
     } else {
       use.models.add({ ...updatedModel, id: data.id, created_at: data.created_at });
     }
+    pop();
   };
 
   const MODEL_OPTIONS = use.models.option;
