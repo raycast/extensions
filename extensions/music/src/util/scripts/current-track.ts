@@ -34,6 +34,28 @@ export const getCurrentTrackRating = pipe(
   TE.map((rating) => Math.round(rating / STAR_VALUE))
 );
 
+const getScriptForAddTo = (playlist: string, library = "source 1") =>
+  `
+tell application "Music"
+	set theName to name of current track
+	set theArtist to artist of current track
+	set theAlbum to album of the current track
+	set existingTracks to get tracks of ${library} whose name is theName and artist is theArtist and album is theAlbum
+	
+	if (count of existingTracks) = 0 then
+		set theCount to count of tracks of ${library}
+		duplicate current track to ${library}
+
+		repeat while theCount = (count of tracks of ${library})
+			delay 1
+		end repeat
+	end if
+	
+	set theTrack to first track of ${library} whose name is theName and artist is theArtist and album is theAlbum
+	duplicate theTrack to playlist ${playlist}
+end tell
+`;
+
 /**
  *
  * Add a track to a playlist
@@ -42,59 +64,17 @@ export const getCurrentTrackRating = pipe(
 export const addToPlaylist = (playlist: string) =>
   pipe(
     getLibraryName,
-    TE.chain((libraryName) =>
-      runScript(
-        `
-tell application "Music"
-	set theName to name of current track
-	set theArtist to artist of current track
-	set theAlbum to album of the current track
-	set existingTracks to get tracks of source 1 whose name is theName and artist is theArtist and album is theAlbum
-	
-	if (count of existingTracks) = 0 then
-		set theCount to count of tracks of source 1
-		duplicate current track to source 1
+    TE.chain((library) => {
+      const playlistName = [library, "Music"].includes(playlist) ? "source 1" : `"${playlist}"`;
 
-		repeat while theCount = (count of tracks of source 1)
-			delay 1
-		end repeat
-	end if
-	
-	set theTrack to first track of source 1 whose name is theName and artist is theArtist and album is theAlbum
-	duplicate theTrack to playlist ${[libraryName, "Music"].includes(playlist) ? 1 : `"${playlist}"`}
-end tell
-`
-      )
-    ),
+      return pipe(getScriptForAddTo(playlistName), runScript);
+    }),
     TE.orElse((err) => {
       console.error(err);
 
       return pipe(
         getLibraryName,
-        TE.chain((libraryName) =>
-          runScript(
-            `
-tell application "Music"
-	set theName to name of current track
-	set theArtist to artist of current track
-	set theAlbum to album of the current track
-	set existingTracks to get tracks of source 1 whose name is theName and artist is theArtist and album is theAlbum
-	
-	if (count of existingTracks) = 0 then
-		set theCount to count of tracks of source 1
-		duplicate current track to source 1
-
-		repeat while theCount = (count of tracks of source 1)
-			delay 1
-		end repeat
-	end if
-	
-	set theTrack to first track of source 1 whose name is theName and artist is theArtist and album is theAlbum
-	duplicate theTrack to playlist "${playlist}"
-end tell
-`
-          )
-        )
+        TE.chain((library) => pipe(getScriptForAddTo(`"${playlist}"`, `"${library}"`), runScript))
       );
     })
   );
