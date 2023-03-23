@@ -2,12 +2,12 @@ import { pipe } from "fp-ts/function";
 import * as R from "fp-ts/Reader";
 import * as RTE from "fp-ts/ReaderTaskEither";
 import * as TE from "fp-ts/TaskEither";
+import { match } from "ts-pattern";
 
+import { getLibraryName } from "./general";
 import { createQueryString, parseQueryString, runScript, tell } from "../apple-script";
 import { STAR_VALUE } from "../costants";
 import { ScriptError, Track } from "../models";
-import { getLibraryName } from "./general";
-import { match } from "ts-pattern";
 
 export const reveal = tell("Music", "reveal current track");
 export const love = tell("Music", "set loved of current track to true");
@@ -135,7 +135,3 @@ export const getCurrentTrack = (): TE.TaskEither<Error, Readonly<Track>> => {
     TE.map(parseQueryString<Track>())
   );
 };
-  
-
- 
- 
