@@ -51,7 +51,15 @@
       "name": "search-commands",
       "title": "Search File AI Commands",
       "description": "Search custom File AI commands",
-      "mode": "view"
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "commandName",
+          "placeholder": "Command Name",
+          "required": false,
+          "type": "text"
+        }
+      ]
     }
   ],
   "dependencies": {

@@ -28,11 +28,13 @@ You can create custom File AI commands, accessed via the "Search File AI Command
 - Assess Academic Validity
 - Compose Response
 - Compose Tweet
+- Condense Files
 - Create Action Items
 - Create Flashcards
 - Create Notes
 - Create Slides
 - Detect Bias
+- Extend Files
 - Extract Emails
 - Extract Named Entities
 - Extract Phone Numbers
@@ -40,18 +42,23 @@ You can create custom File AI commands, accessed via the "Search File AI Command
 - Extract Vocabulary
 - Find Errors
 - Generate Questions
+- Historical Context
 - Identify Gaps
+- Identify Relationships
 - Make Jingle
 - Make Poem
 - Make Song
 - Meeting Agenda
 - Pattern Analysis
+- Pros And Cons
 - Suggest File AI Prompts
 - Suggest Hashtags
+- Suggest Project Ideas
 - Suggest Title
 - Suggest Tools
 - Table Of Contents
 - Translate To English
+- What Is This?
 - Write Abstract
 - Write Caption
 - Write Conclusion

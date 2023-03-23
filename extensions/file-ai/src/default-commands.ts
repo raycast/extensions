@@ -40,7 +40,7 @@ export const defaultCommands = {
   "Pattern Analysis":
     '{"useSoundClassifications":true,"useFileMetadata":false,"minNumFiles":"1","name":"Pattern Analysis","prompt":"Identify and describe any patterns or trends in the content of the following files. Use the file names as headers.","acceptedFileExtensions":"","icon":"line-chart-16"}',
   "Extract Vocabulary":
-    '{"minNumFiles":"1","useFileMetadata":false,"icon":"book-16","name":"Extract Vocabulary","useSoundClassifications":false,"acceptedFileExtensions":"","prompt":"Extract the most difficult vocabulary words from the following files and define them."}',
+    '{"minNumFiles":"1","icon":"book-16","useFileMetadata":false,"acceptedFileExtensions":"","prompt":"Extract the most difficult vocabulary words from the following files and define them. Format the response as a markdown list.","useSoundClassifications":false,"name":"Extract Vocabulary"}',
   "Compose Tweet":
     '{"acceptedFileExtensions":"","useFileMetadata":false,"icon":"bird-16","minNumFiles":"1","prompt":"Compose a tweet based on the following files:","name":"Compose Tweet","useSoundClassifications":true}',
   "Extract Code":
@@ -58,7 +58,7 @@ export const defaultCommands = {
   "Extract Phone Numbers":
     '{"icon":"phone-16","acceptedFileExtensions":"","name":"Extract Phone Numbers","useFileMetadata":false,"useSoundClassifications":false,"prompt":"Identify all phone numbers in the following files and list them using markdown. Include anything that might be a phone number. If possible, provide the name of the person or company to which the phone number belongs.","minNumFiles":"1"}',
   "Create Notes":
-    '{"prompt":"Create concise notes based on the following files. Discuss the meaning and significance of topics mentioned. Discuss any other relevant details and facts about the file. Format the response as a markdown list. Each list item should be 10 words for fewer. ","name":"Create Notes","minNumFiles":"1","acceptedFileExtensions":"","icon":"bullet-points-16","useFileMetadata":false,"useSoundClassifications":true}',
+    '{"icon":"bullet-points-16","useSoundClassifications":true,"acceptedFileExtensions":"","prompt":"I want you to act as a notetaker. I will provide file names and their contents, and you will respond with a multi-level markdown list of well-structured, concise notes. The notes should be in your own words and should make connections between topics and ideas. Each list item should be at most 20 words long. Minimize the notes as much as possible. Here are the files:","name":"Create Notes","minNumFiles":"1","useFileMetadata":false}',
   "Suggest Tools":
     '{"prompt":"Suggest tools to use based on the topics discussed in the following files. Explain why each tool is relevant. Use the file names as headings. Do not provide any commentary other than the list of tools and their explanations.","useFileMetadata":false,"acceptedFileExtensions":"","icon":"wrench-screwdriver-16","name":"Suggest Tools","minNumFiles":"1","useSoundClassifications":false}',
   "Suggest Title":
@@ -69,4 +69,15 @@ export const defaultCommands = {
     '{"name":"Suggest Improvements","minNumFiles":"1","acceptedFileExtensions":"","useFileMetadata":false,"icon":"stars-16","useSoundClassifications":true,"prompt":"Suggest improvements to the content of the following files. Use the file names as headings. Format the response as a markdown list."}',
   "Make Poem":
     '{"name":"Make Poem","acceptedFileExtensions":"","minNumFiles":"1","useFileMetadata":false,"prompt":"Make rhyming poems about the the following files. Be creative and include references to the content and purpose of the file in unexpected ways. Do not summarize the file. Make each poem at least 3 stanzas long, but longer for longer files. Use the file names as markdown headings.","icon":"short-paragraph-16","useSoundClassifications":true}',
+  "Historical Context":
+    '{"acceptedFileExtensions":"","useSoundClassifications":false,"minNumFiles":"1","name":"Historical Context","prompt":"Based on the topics mentioned in the following files, provide a list of the top 5 most significant relevant historical facts. Ensure all facts are truthful. Do not make up anything. Additionally, provide a paragraph discussing a historical fact that relates to the entire content of the file.","useFileMetadata":false,"icon":"rewind-16"}',
+  "Extend File": `{"useFileMetadata":false,"acceptedFileExtensions":"","name":"Extend File","prompt":"Generate new content for the following files using the same style as the rest of the file's content. Explain how the new content fits with the rest. Do not repeat the current content. Use the file names as headings.","minNumFiles":"1","useSoundClassifications":false,"icon":"arrows-expand-16"}`,
+  "Identify Relationships":
+    '{"useFileMetadata":false,"useSoundClassifications":true,"icon":"box-16","acceptedFileExtensions":"","prompt":"In one paragraph, identify any relationships that might exist between the following files based on their content and the topics they mention. Always identify some relationship, even if it is very general. Explain a use for the files together that none of them have individually.","name":"Identify Relationships","minNumFiles":"2"}',
+  "What Is This?":
+    '{"icon":"question-mark-circle-16","name":"What Is This?","useFileMetadata":false,"acceptedFileExtensions":"","minNumFiles":"1","useSoundClassifications":false,"prompt":"Based on the content of the following files, answer this question: What is this? Use the file names as headings."}',
+  "Condense File":
+    '{"name":"Condense File","useFileMetadata":false,"prompt":"Condense the content of the following files as much as possible. Summarize sentences. Use abbreviations where possible. If the response includes any lists, remove them and briefly describe them instead. Condense clarifying language as much as possible. Use the file names as headings.","icon":"arrows-contract-16","acceptedFileExtensions":"","useSoundClassifications":false,"minNumFiles":"1"}',
+  "Suggest Project Ideas":
+    '{"name":"Suggest Project Ideas","useFileMetadata":false,"icon":"hammer-16","prompt":"I want you to act as a project idea generator. I will provide file names and their contents, and you will response with a list of project ideas based on the content of each file. Format the response as a markdown list. Use the file names as headings. Here are the files:","useSoundClassifications":true,"acceptedFileExtensions":"","minNumFiles":"1"}',
 };

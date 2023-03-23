@@ -63,8 +63,6 @@ export default function CommandResponse(props: {
     return null;
   }
 
-  console.log(fullPrompt.length);
-
   const text = `# ${commandName}\n${data ? data : "Analyzing files..."}`;
   return (
     <Detail
