@@ -1,4 +1,5 @@
 import { Action, ActionPanel, Form, showToast, Toast, useNavigation } from "@raycast/api";
+import { useForm, FormValidation } from "@raycast/utils";
 import { useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { Model, ModelHook } from "../../type";
@@ -6,6 +7,49 @@ import { Model, ModelHook } from "../../type";
 export const ModelForm = (props: { model?: Model; use: { models: ModelHook }; name?: string }) => {
   const { use } = props;
   const { pop } = useNavigation();
+
+  const { handleSubmit, itemProps } = useForm<Model>({
+    onSubmit: async (model) => {
+      let updatedModel: Model = { ...model, updated_at: new Date().toISOString() };
+      if (typeof updatedModel.temperature === "string") {
+        updatedModel = { ...updatedModel, temperature: Number(updatedModel.temperature) };
+      }
+      if (props.model) {
+        const toast = await showToast({
+          title: "Update your model...",
+          style: Toast.Style.Animated,
+        });
+        use.models.update({ ...updatedModel, id: props.model.id, created_at: props.model.created_at });
+        toast.title = "Model updated!";
+        toast.style = Toast.Style.Success;
+      } else {
+        await showToast({
+          title: "Save your model...",
+          style: Toast.Style.Animated,
+        });
+        use.models.add({ ...updatedModel, id: data.id, created_at: data.created_at });
+        await showToast({
+          title: "Model saved",
+          style: Toast.Style.Animated,
+        });
+      }
+      pop();
+    },
+    validation: {
+      name: FormValidation.Required,
+      temperature: (value) => {
+        if (value) {
+          if (value < 0) {
+            return "Minimal value is 0";
+          } else if (value > 2) {
+            return "Maximal value is 2";
+          }
+        } else {
+          return FormValidation.Required;
+        }
+      },
+    },
+  });
 
   const [data, setData] = useState<Model>(
     props?.model ?? {
@@ -20,57 +64,22 @@ export const ModelForm = (props: { model?: Model; use: { models: ModelHook }; na
     }
   );
 
-  const [error, setError] = useState<{ name: string; option: string; temperature: string }>({
-    name: "",
-    option: "",
-    temperature: "",
-  });
-
-  const onSubmit = async (model: Model) => {
-    let updatedModel: Model = { ...model, updated_at: new Date().toISOString() };
-    if (typeof updatedModel.temperature === "string") {
-      const toast = await showToast({
-        title: "Update your model...",
-        style: Toast.Style.Animated,
-      });
-      updatedModel = { ...updatedModel, temperature: Number(updatedModel.temperature) };
-      toast.title = "Model updated!";
-      toast.style = Toast.Style.Success;
-    }
-    if (props.model) {
-      use.models.update({ ...updatedModel, id: props.model.id, created_at: props.model.created_at });
-    } else {
-      use.models.add({ ...updatedModel, id: data.id, created_at: data.created_at });
-    }
-    pop();
-  };
-
   const MODEL_OPTIONS = use.models.option;
 
   return (
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Submit" onSubmit={onSubmit} />
+          <Action.SubmitForm title="Submit" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
       <Form.TextField
-        id="name"
         title="Name"
         placeholder="Name your model"
         defaultValue={data.name}
-        error={error.name.length > 0 ? error.name : undefined}
         onChange={(value) => setData({ ...data, name: value })}
-        onBlur={(event) => {
-          if (event.target.value?.length == 0) {
-            setError({ ...error, name: "Required" });
-          } else {
-            if (error.name && error.name.length > 0) {
-              setError({ ...error, name: "" });
-            }
-          }
-        }}
+        {...itemProps.name}
       />
       <Form.TextArea
         id="prompt"
@@ -80,29 +89,13 @@ export const ModelForm = (props: { model?: Model; use: { models: ModelHook }; na
         onChange={(value) => setData({ ...data, prompt: value })}
       />
       <Form.TextField
-        id="temperature"
         title="Temperature"
         placeholder="Set your sampling temperature (0 - 2)"
         defaultValue={data.temperature.toLocaleString()}
-        error={error.temperature.length > 0 ? error.temperature : undefined}
         onChange={(value) => {
           setData({ ...data, temperature: Number(value) });
         }}
-        onBlur={(event) => {
-          if (event.target.value?.length == 0) {
-            setError({ ...error, temperature: "Required" });
-          } else {
-            if (Number(event.target.value ?? 0) < 0) {
-              setError({ ...error, temperature: "Minimal value is 0" });
-            } else if (Number(event.target.value ?? 0) > 2) {
-              setError({ ...error, temperature: "Maximal value is 2" });
-            } else {
-              if (error.temperature && error.temperature.length > 0) {
-                setError({ ...error, temperature: "" });
-              }
-            }
-          }
-        }}
+        {...itemProps.temperature}
       />
       <Form.Dropdown
         id="option"

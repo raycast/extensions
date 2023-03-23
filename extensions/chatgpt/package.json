@@ -177,6 +177,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.47.0",
+    "@raycast/utils": "^1.5.2",
     "@types/uuid": "^9.0.0",
     "openai": "^3.2.1",
     "say": "^0.16.0",
