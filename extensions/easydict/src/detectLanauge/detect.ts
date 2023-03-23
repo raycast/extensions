@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-06-24 17:07
  * @lastEditor: tisfeng
- * @lastEditTime: 2023-03-17 10:41
+ * @lastEditTime: 2023-03-23 17:46
  * @fileName: detect.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -11,7 +11,6 @@
 import { autoDetectLanguageItem, chineseLanguageItem, englishLanguageItem } from "../language/consts";
 import { isValidLangCode } from "../language/languages";
 import { myPreferences } from "../preferences";
-import { appleLanguageDetect } from "../scripts";
 import { baiduWebDetect } from "../translation/baidu/baiduAPI";
 import { bingDetect } from "../translation/microsoft/bing";
 import { hasTencentAppKey, tencentDetect } from "../translation/tencent";
@@ -84,7 +83,7 @@ function getDetectAPIs() {
   // Apple detection is inaccurate, only use it when lacking detect API.
   if (detectActionList.length < 2 && myPreferences.enableAppleLanguageDetect) {
     // Since Apple detect may block the main thread, so we stop it for now and wait for a solution to be found later.
-    detectActionList.push(appleLanguageDetect);
+    // detectActionList.push(appleLanguageDetect);
   }
 
   return detectActionList;
@@ -190,7 +189,7 @@ function handleDetectedLanguage(detectedLangModel: DetectedLangModel): Promise<D
         }
       }
 
-      if (detectedIdenticalLanguages.length >= 3) {
+      if (detectedIdenticalLanguages.length >= 2) {
         detectedLangModel.confirmed = true;
         console.warn(`---> API detected 'three' identical language`);
         console.warn(`detected language: ${JSON.stringify(detectedLangModel, null, 4)}`);

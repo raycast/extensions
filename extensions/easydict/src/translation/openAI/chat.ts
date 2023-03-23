@@ -3,7 +3,7 @@ import { networkTimeout } from "./../../consts";
  * @author: tisfeng
  * @createTime: 2023-03-14 22:11
  * @lastEditor: tisfeng
- * @lastEditTime: 2023-03-20 13:13
+ * @lastEditTime: 2023-03-21 10:19
  * @fileName: chat.ts
  *
  * Copyright (c) 2023 by ${git_name}, All Rights Reserved.
@@ -27,7 +27,7 @@ export function requestOpenAIStreamTranslate(queryWordInfo: QueryWordInfo): Prom
 
   const url = "https://api.openai.com/v1/chat/completions";
   //   const prompt = `translate from English to Chinese:\n\n"No level of alcohol consumption is safe for our health." =>`;
-  const prompt = `translate from ${queryWordInfo.fromLanguage} to ${queryWordInfo.toLanguage}:\n\n"${queryWordInfo.word}"`;
+  const prompt = `translate text from ${queryWordInfo.fromLanguage} to ${queryWordInfo.toLanguage}:\n\n"${queryWordInfo.word}"`;
   const message = [
     {
       role: "system",
