@@ -41,7 +41,6 @@ const AddBookmarks = () => {
             toast.title = "Link Added";
             toast.message = values.link;
             reset({ link: "", collection: "-1", tags: [] });
-            console.log(await res.json());
             return res.json();
           } else {
             throw new Error("Error adding link");
