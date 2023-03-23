@@ -7,6 +7,7 @@ import { createQueryString, parseQueryString, runScript, tell } from "../apple-s
 import { STAR_VALUE } from "../costants";
 import { ScriptError, Track } from "../models";
 import { getLibraryName } from "./general";
+import { match } from "ts-pattern";
 
 export const reveal = tell("Music", "reveal current track");
 export const love = tell("Music", "set loved of current track to true");
@@ -35,26 +36,54 @@ export const getCurrentTrackRating = pipe(
 );
 
 const getScriptForAddTo = (playlist: string, library = "source 1") =>
-  `
+  match(library)
+    .with(
+      "source 1",
+      () =>
+        `
 tell application "Music"
 	set theName to name of current track
 	set theArtist to artist of current track
 	set theAlbum to album of the current track
-	set existingTracks to get tracks of ${library} whose name is theName and artist is theArtist and album is theAlbum
+	set existingTracks to get tracks of source 1 whose name is theName and artist is theArtist and album is theAlbum
 	
 	if (count of existingTracks) = 0 then
-		set theCount to count of tracks of ${library}
-		duplicate current track to ${library}
-
-		repeat while theCount = (count of tracks of ${library})
+		set theCount to count of tracks of source 1
+		duplicate current track to source 1
+		
+		repeat while theCount = (count of tracks of source 1)
 			delay 1
 		end repeat
 	end if
 	
-	set theTrack to first track of ${library} whose name is theName and artist is theArtist and album is theAlbum
-	duplicate theTrack to playlist ${playlist}
+	set theTrack to first track of source 1 whose name is theName and artist is theArtist and album is theAlbum
+	duplicate theTrack to playlist "${playlist}"
 end tell
-`;
+`
+    )
+    .otherwise(
+      () =>
+        `
+tell application "Music"
+	set theName to name of current track
+	set theArtist to artist of current track
+	set theAlbum to album of the current track
+	set existingTracks to get tracks of source "${library}" whose name is theName and artist is theArtist and album is theAlbum
+	
+	if (count of existingTracks) = 0 then
+		set theCount to count of tracks of "${library}"
+		duplicate current track to library playlist "${library}"
+		
+		repeat while theCount = (count of tracks of "${library}")
+			delay 1
+		end repeat
+	end if
+	
+	set theTrack to first track of library playlist "${library}" whose name is theName and artist is theArtist and album is theAlbum
+	duplicate theTrack to playlist "${playlist}"
+end tell
+`
+    );
 
 /**
  *
@@ -64,19 +93,16 @@ end tell
 export const addToPlaylist = (playlist: string) =>
   pipe(
     getLibraryName,
-    TE.chain((library) => {
-      const playlistName = [library, "Music"].includes(playlist) ? "source 1" : `"${playlist}"`;
-
-      return pipe(getScriptForAddTo(playlistName), runScript);
-    }),
-    TE.orElse((err) => {
-      console.error(err);
-
-      return pipe(
-        getLibraryName,
-        TE.chain((library) => pipe(getScriptForAddTo(`"${playlist}"`, `"${library}"`), runScript))
-      );
-    })
+    TE.chain((library) =>
+      pipe(
+        getScriptForAddTo(playlist, library),
+        runScript,
+        TE.orElse((err) => {
+          console.error(err);
+          return pipe(getScriptForAddTo(playlist, "source 1"), runScript);
+        })
+      )
+    )
   );
 
 export const getCurrentTrack = (): TE.TaskEither<Error, Readonly<Track>> => {
@@ -109,3 +135,7 @@ export const getCurrentTrack = (): TE.TaskEither<Error, Readonly<Track>> => {
     TE.map(parseQueryString<Track>())
   );
 };
+  
+
+ 
+ 
