@@ -1,0 +1,42 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "xiaoyuzhou-admin",
+  "title": "小宇宙内部工具",
+  "description": "xiaoyuzhou admin tool",
+  "icon": "cosmos.jpg",
+  "author": "yangmei",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Search",
+      "keywords": ["xyz", "xiaoyuzhou", "admin"],
+      "description": "Template for showing a static list and a detail view",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.48.9",
+    "@raycast/utils": "^1.5.2",
+    "dayjs": "^1.11.7",
+    "got": "^12.6.0",
+    "lodash": "^4.17.21"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/lodash": "^4.14.191",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "format": "prettier --config .prettierrc --write '{src,tests}/**/*.{ts,tsx}'",
+    "publish": "ray publish"
+  }
+}
