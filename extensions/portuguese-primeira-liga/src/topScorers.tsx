@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Icon, Image, List } from "@raycast/api";
 import moment from "moment";
+import { flag } from "country-emoji";
 import { useState } from "react";
 import useTopScorers from "./hooks/useTopScorers";
 
@@ -16,13 +17,21 @@ function getFormattedDate(date: string) {
   return formattedDate.toString();
 }
 
+function getCountryDescription(countryName: string | undefined) {
+  if (countryName == undefined) {
+    return "?";
+  }
+
+  return countryName + " " + flag(countryName);
+}
+
 export default function GetTopScorers() {
   const topScorers = useTopScorers();
   const [showDetails, setShowDetails] = useState<boolean>(false);
   let position = 0;
 
   return (
-    <List isLoading={!topScorers} isShowingDetail={showDetails}>
+    <List isLoading={!topScorers} filtering={false} isShowingDetail={showDetails}>
       {topScorers?.map((ts) => {
         position += 1;
         return (
@@ -42,7 +51,10 @@ export default function GetTopScorers() {
                   <List.Item.Detail.Metadata>
                     <List.Item.Detail.Metadata.Label title="Details" />
                     <List.Item.Detail.Metadata.Label title="Name" text={ts.player.name} />
-                    <List.Item.Detail.Metadata.Label title="Nationality" text={ts.player.nationality || "?"} />
+                    <List.Item.Detail.Metadata.Label
+                      title="Nationality"
+                      text={getCountryDescription(ts.player.nationality)}
+                    />
                     <List.Item.Detail.Metadata.Label
                       title="Date of Birth"
                       text={getFormattedDate(ts.player.dateOfBirth)}
