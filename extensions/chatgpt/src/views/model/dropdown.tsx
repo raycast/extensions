@@ -15,10 +15,19 @@ export const ModelDropdown = (props: ChangeModelProp) => {
       }}
     >
       {defaultModel && <List.Dropdown.Item key={defaultModel.id} title={defaultModel.name} value={defaultModel.id} />}
-      <List.Dropdown.Section title="Custom Models">
-        {separateDefaultModel.map((model) => (
-          <List.Dropdown.Item key={model.id} title={model.name} value={model.id} />
-        ))}
+      <List.Dropdown.Section title="Pinned">
+        {separateDefaultModel
+          .filter((x) => x.pinned)
+          .map((model) => (
+            <List.Dropdown.Item key={model.id} title={model.name} value={model.id} />
+          ))}
+      </List.Dropdown.Section>
+      <List.Dropdown.Section title="Models">
+        {separateDefaultModel
+          .filter((x) => !x.pinned)
+          .map((model) => (
+            <List.Dropdown.Item key={model.id} title={model.name} value={model.id} />
+          ))}
       </List.Dropdown.Section>
     </List.Dropdown>
   );
