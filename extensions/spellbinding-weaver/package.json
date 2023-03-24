@@ -1,0 +1,131 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "spellbinding-weaver",
+  "title": "Spellbinding Weaver - GPT Completion",
+  "description": "Turn command into GPT completion",
+  "icon": "extension_icon.png",
+  "author": "dmsyudha",
+  "categories": [
+    "Productivity",
+    "Developer Tools",
+    "Documentation"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Write Command",
+      "description": "Turn your command into a magical GPT completion",
+      "subtitle": "OpenAI GPT-3",
+      "mode": "view",
+      "preferences": [
+        {
+          "description": "API Key is used to authenticate with OpenAI API",
+          "placeholder": "You can get from https://platform.openai.com/account/api-keys",
+          "name": "openAiApiKey",
+          "required": true,
+          "title": "OpenAI API Key",
+          "type": "password"
+        },
+        {
+          "description": "Temperature is a value between 0 and 1 that controls randomness in the AI's response. Higher values will produce more diverse and creative responses, while lower values will result in more focused and deterministic completions.",
+          "name": "temperature",
+          "required": true,
+          "default": "0.5",
+          "title": "Temperature",
+          "type": "textfield"
+        },
+        {
+          "description": "Max tokens is the maximum number of tokens that the AI will return. This allows you to control the length of the text completion.",
+          "name": "maxTokens",
+          "default": "120",
+          "required": true,
+          "title": "Max Tokens",
+          "type": "textfield"
+        },
+        {
+          "description": "Top P is a value between 0 and 1. A higher value will consider a larger set of tokens, leading to more diverse responses, while a lower value will focus on the most likely tokens.",
+          "name": "topP",
+          "required": true,
+          "default": "1",
+          "title": "Top P",
+          "type": "textfield"
+        },
+        {
+          "description": "Frequency Penalty is a value between 0 and 1. A higher penalty will discourage repetitive phrases, whereas a lower penalty may allow for more repetition.",
+          "name": "frequencyPenalty",
+          "required": true,
+          "default": "1",
+          "title": "Frequency Penalty",
+          "type": "textfield"
+        },
+        {
+          "description": "Presence Penalty is a value between 0 and 1. A higher penalty will discourage the use of prompt content, while a lower penalty may allow for more similar content.",
+          "name": "presencePenalty",
+          "required": true,
+          "default": "0",
+          "title": "Presence Penalty",
+          "type": "textfield"
+        },
+        {
+          "description": "API Key is used to authenticate with OpenAI API",
+          "name": "model",
+          "required": true,
+          "default": "text-davinci-003",
+          "title": "OpenAI Model",
+          "type": "dropdown",
+          "data": [
+            {
+              "title": "Davinci",
+              "value": "davinci"
+            },
+            {
+              "title": "Curie",
+              "value": "curie"
+            },
+            {
+              "title": "Babbage",
+              "value": "babbage"
+            },
+            {
+              "title": "Ada",
+              "value": "ada"
+            },
+            {
+              "title": "Text Davinci 003",
+              "value": "text-davinci-003"
+            },
+            {
+              "title": "Text Davinci 002",
+              "value": "text-davinci-002"
+            },
+            {
+              "title": "Code Davinci 002",
+              "value": "code-davinci-002"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.48.9",
+    "@raycast/utils": "^1.4.8",
+    "openai": "3.2.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
