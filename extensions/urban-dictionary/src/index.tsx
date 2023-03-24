@@ -18,18 +18,19 @@ type Arguments = {
 }
 
 export default function Command(props: { arguments: Arguments }) {
-  const { state, search } = useSearch(
-    'autocomplete-extra',
-    props.arguments.query ?? ''
-  )
+  const [searchText, setSearchText] = useState(props.arguments.query ?? '')
+  const { state, search } = useSearch('autocomplete-extra', searchText)
 
   return (
     <List
       isLoading={state.isLoading}
-      onSearchTextChange={search}
+      onSearchTextChange={(text) => {
+        setSearchText(text)
+        search(text)
+      }}
       searchBarPlaceholder="Search Urban Dictionary..."
       throttle
-      searchText={props.arguments.query}
+      searchText={searchText}
     >
       <List.Section title="Suggestions" subtitle={state.results.length + ''}>
         {state.results.map((searchResult) => (
