@@ -26,14 +26,14 @@ export default function Command() {
   let data = [];
   const [searchText, setSearchText] = useState("");
 
-  if (scanSSHConfig){
+  if (scanSSHConfig && fs.existsSync(`${process.env.HOME}/.ssh/config`)){
       const configs = sshConfig.parse(fs.readFileSync(`${process.env.HOME}/.ssh/config`, { encoding: "utf8" }));
       for (let i = 0; i < configs.length; i++) {
           const item = configs[i];
           if (item.value.toLowerCase().includes(searchText.toLowerCase())) {
               let title = `ssh ${item.value}`
               let user = undefined
-              const userConfig =  item.config.filter((i:any) => i.param === 'User')
+              const userConfig =  item.config.filter((i: { param: string; }) => i.param === 'User')
               if (userConfig && userConfig.length >0){
                   user = userConfig[0].value
                   title = `ssh ${user}@${item.value}`
@@ -65,7 +65,6 @@ export default function Command() {
     }
     return prev;
   }, []);
-
   return (
     <List
       onSearchTextChange={setSearchText}
@@ -91,9 +90,9 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
     <List.Item
       title={searchResult.title}
       subtitle={searchResult.user}
-      accessoryTitle={searchResult.from}
+      accessories={[{text:searchResult.from}]}
       actions={
-        <ActionPanel>
+        <ActionPanel title="SSH/SFTP in raycast/extensions">
           <Action
             title={sshTitle}
             icon={Icon.Terminal}
@@ -113,12 +112,12 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
               open(searchResult.title.replace("ssh ","sftp://"),sftpApp.path);
             }}
           />
-          <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
           <Action.CopyToClipboard
-              title="Copy SSH Command"
-              content={`${searchResult.title}`}
-              shortcut={{ modifiers: ["cmd"], key: "c" }}
+            title="Copy SSH Command"
+            content={`${searchResult.title}`}
+            shortcut={{ modifiers: ["cmd", "ctrl"], key: "c" }}
           />
+          <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
         </ActionPanel>
       }
     />

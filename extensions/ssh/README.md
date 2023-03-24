@@ -9,9 +9,9 @@ Open SSH/SFTP connections from raycast with autosuggestions based on SSH config 
 ## Usage
 The main keyword is ssh:
 - ssh [query] — View and filter known SSH connections.
-  - enter — Open an SSH connection instead.
-  - cmd + enter — Open an SFTP connection instead.
-  - cmd + c - Copy SSH Command
+  - [enter] — Open an SSH connection instead.
+  - [cmd + enter] — Open an SFTP connection instead.
+  - [cmd + control + c] — Copy SSH Command
 
 
 ## Configuration
