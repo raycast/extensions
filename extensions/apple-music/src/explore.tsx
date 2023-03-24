@@ -31,6 +31,7 @@ function LoggedOutView() {
       filtering={false}
       searchBarPlaceholder="Search Apple Music"
       isLoading={isLoadingSearch}
+      throttle={true}
     >
       {results && searchText && <SearchResults results={results} />}
 
