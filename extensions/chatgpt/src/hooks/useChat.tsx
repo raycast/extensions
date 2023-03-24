@@ -97,7 +97,10 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
                   });
                 }, 5);
               } catch (error) {
-                console.error("Could not JSON parse stream message", message, error);
+                toast.title = "Error";
+                toast.message = `Couldn't stream message`;
+                toast.style = Toast.Style.Failure;
+                setLoading(false);
               }
             }
           });
