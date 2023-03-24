@@ -97,6 +97,12 @@
           "required": false
         }
       ]
+    },
+    {
+      "name": "apply-filter",
+      "title": "Apply Image Filter",
+      "description": "Apply filters to images using Apple's CIFilters",
+      "mode": "view"
     }
   ],
   "dependencies": {
