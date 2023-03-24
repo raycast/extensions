@@ -1,6 +1,14 @@
-import { Action, ActionPanel, Form, getPreferenceValues, showToast, Toast } from "@raycast/api";
-import { useCachedState } from "@raycast/utils";
-import { Preferences } from "./types";
+import {
+  Action,
+  ActionPanel,
+  Form,
+  getPreferenceValues,
+  Icon,
+  showToast,
+  Toast,
+} from "@raycast/api";
+import { useCachedState, useForm, FormValidation } from "@raycast/utils";
+import { FormValues, Preferences } from "./types";
 import fetch from "node-fetch";
 
 import { useRequest } from "./hooks/useRequest";
@@ -12,48 +20,58 @@ const AddBookmarks = () => {
   const { collections } = useRequest({ collection });
   const { data: tags } = useTags();
 
-  async function handleAddBookmark(e: Form.Values) {
-    const toast = await showToast(Toast.Style.Animated, "Adding Link");
-    try {
-      fetch("https://api.raindrop.io/rest/v1/raindrop", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${preferences.token}`,
-        },
-        body: JSON.stringify({
-          link: e.link,
-          collectionId: e.collection,
-          tags: e.tags,
-        }),
-      }).then((res) => {
-        if (res.status === 200) {
-          toast.style = Toast.Style.Success;
-          toast.title = "Link Added";
-          toast.message = e.link;
-          return res.json();
-        } else {
-          throw new Error("Error adding link");
+  const { handleSubmit, itemProps, reset } = useForm<FormValues>({
+    async onSubmit(values) {
+      const toast = await showToast(Toast.Style.Animated, "Adding Link");
+      try {
+        fetch("https://api.raindrop.io/rest/v1/raindrop", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${preferences.token}`,
+          },
+          body: JSON.stringify({
+            link: values.link,
+            collectionId: values.collection,
+            tags: values.tags,
+          }),
+        }).then(async (res) => {
+          if (res.status === 200) {
+            toast.style = Toast.Style.Success;
+            toast.title = "Link Added";
+            toast.message = values.link;
+            reset({ link: "", collection: "-1", tags: [] });
+            return res.json();
+          } else {
+            throw new Error("Error adding link");
+          }
+        });
+      } catch (error) {
+        if (error instanceof Error) {
+          toast.style = Toast.Style.Failure;
+          toast.title = "Error Adding Link";
+          toast.message = error.message;
         }
-      });
-    } catch (error) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Error Adding Link";
-      // @ts-expect-error - error.message is a string
-      toast.message = error.message;
-    }
-  }
+      }
+    },
+    validation: {
+      link: FormValidation.Required,
+    },
+    initialValues: {
+      collection: "-1",
+    },
+  });
 
   return (
     <Form
-      actions={[
-        <ActionPanel key={"submit-panel"}>
-          <Action.SubmitForm key={0} onSubmit={handleAddBookmark} />
-        </ActionPanel>,
-      ]}
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm title="Add Bookmark" icon={Icon.PlusCircle} onSubmit={handleSubmit} />
+        </ActionPanel>
+      }
     >
-      <Form.TextField id="link" title="Link" placeholder="Enter Link" />
-      <Form.Dropdown id="collection" title="Collection" defaultValue="-1">
+      <Form.TextField title="Link" placeholder="https://" autoFocus {...itemProps.link} />
+      <Form.Dropdown title="Collection" {...itemProps.collection}>
         <Form.Dropdown.Item key={"-1"} value={"-1"} title={"Unsorted"} />
         {collections.map((collection) => {
           return (
@@ -65,7 +83,7 @@ const AddBookmarks = () => {
           );
         })}
       </Form.Dropdown>
-      <Form.TagPicker id="tags" title="Tags">
+      <Form.TagPicker title="Tags" {...itemProps.tags}>
         {tags?.items?.map((tag) => {
           return <Form.TagPicker.Item key={tag._id} value={tag._id} title={tag._id} />;
         })}

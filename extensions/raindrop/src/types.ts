@@ -98,3 +98,9 @@ export type BookmarksParams = {
   collection: string;
   search?: string;
 };
+
+export interface FormValues {
+  link: string;
+  collection: string;
+  tags: string[];
+}
