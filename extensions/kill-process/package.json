@@ -5,6 +5,9 @@
   "description": "Lists all running processes, ordered by CPU usage and allows killing one",
   "icon": "icon.png",
   "author": "rolandleth",
+  "contributors": [
+    "crazyones110"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -12,6 +15,48 @@
       "title": "Kill Process",
       "description": "Lists all running processes, ordered by CPU usage and allows killing one",
       "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "description": "Some processes are named differently than the app itself. This flag determines whether\nthe path of the process should be searched for the query, or only the process name.",
+      "label": "Filtering should search process paths",
+      "name": "shouldSearchInPaths",
+      "required": false,
+      "title": "Filtering",
+      "type": "checkbox"
+    },
+    {
+      "description": "Determines whether the pid of the process should be searched for the query, or only the process name.",
+      "label": "Filtering should search process pid",
+      "name": "shouldSearchInPid",
+      "required": false,
+      "title": "",
+      "type": "checkbox"
+    },
+    {
+      "description": "Determines whether apps are listed before other results when filtering.",
+      "label": "Prioritize apps when filtering",
+      "name": "shouldPrioritizeAppsWhenFiltering",
+      "required": false,
+      "title": "",
+      "type": "checkbox"
+    },
+    {
+      "description": "Show process PID info.",
+      "label": "Show PID",
+      "name": "shouldShowPID",
+      "required": false,
+      "title": "Display",
+      "type": "checkbox"
+    },
+    {
+      "description": "Show process Path.",
+      "label": "Show Process Path",
+      "name": "shouldShowPath",
+      "required": false,
+      "title": "",
+      "type": "checkbox"
     }
   ],
   "dependencies": {
@@ -30,40 +75,7 @@
   },
   "scripts": {
     "build": "ray build -e dist",
-    "dev": "ray develop"
-  },
-  "preferences": [
-    {
-      "name": "shouldSearchInPaths",
-      "type": "checkbox",
-      "required": false,
-      "title": "Filtering",
-      "label": "Filtering should search process paths",
-      "description": "Some processes are named differently than the app itself. This flag determines whether\nthe path of the process should be searched for the query, or only the process name."
-    },
-    {
-      "name": "shouldPrioritizeAppsWhenFiltering",
-      "type": "checkbox",
-      "required": false,
-      "title": "",
-      "label": "Prioritize apps when filtering",
-      "description": "Determines whether apps are listed before other results when filtering."
-    },
-    {
-      "name": "shouldShowPID",
-      "type": "checkbox",
-      "required": false,
-      "title": "Display",
-      "label": "Show PID",
-      "description": "Show process PID info."
-    },
-    {
-      "name": "shouldShowPath",
-      "type": "checkbox",
-      "required": false,
-      "title": "",
-      "label": "Show Process Path",
-      "description": "Show process Path."
-    }
-  ]
+    "dev": "ray develop",
+    "publish": "ray publish"
+  }
 }

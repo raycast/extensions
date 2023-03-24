@@ -410,7 +410,7 @@
 /extensions/keepassxc                                @zkytech
 /extensions/keyboard-layout-switcher                 @lucaschultz
 /extensions/keyboard-maestro                         @eluce2
-/extensions/kill-process                             @rolandleth
+/extensions/kill-process                             @rolandleth @crazyones110
 /extensions/kinopio-inbox                            @pketh
 /extensions/kinopoisk                                @mattisssa
 /extensions/knowwa                                   @d0utone
@@ -795,6 +795,7 @@
 /extensions/toothpick                                @VladCuciureanu @briankosw
 /extensions/tower                                    @tdwesten
 /extensions/trackflight                              @cojmeister
+/extensions/tradingview-controls                     @jacksonsalopek
 /extensions/transform                                @Idered
 /extensions/transmission                             @FezVrasta
 /extensions/transmit                                 @kennonb
