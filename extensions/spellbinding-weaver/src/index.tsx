@@ -88,7 +88,7 @@ export default function Command() {
   return (
     <List isLoading={isLoading} searchText={searchText} onSearchTextChange={setSearchText}>
       <List.EmptyView
-        icon={{ source: "extension_icon@1024px.png" }}
+        icon={{ source: "sweaver-icon@1024px.png" }}
         title="Type your spell, let the magic happen"
         actions={
           <ActionPanel title="Spellbinding Weaver">

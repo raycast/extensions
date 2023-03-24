@@ -3,7 +3,7 @@
   "name": "spellbinding-weaver",
   "title": "Spellbinding Weaver",
   "description": "Turn command into GPT completion",
-  "icon": "extension_icon.png",
+  "icon": "sweaver-icon.png",
   "author": "dmsyudha",
   "categories": [
     "Productivity",
