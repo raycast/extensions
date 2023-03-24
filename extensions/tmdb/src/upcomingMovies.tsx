@@ -60,7 +60,7 @@ export default function Command() {
             subtitle={
               movie.vote_average
                 ? `${movie.vote_average} ${STAR.repeat(Math.round(movie.vote_average / 2))}`
-                : "No Rating"
+                : "Not Rated"
             }
             actions={
               <ActionPanel>

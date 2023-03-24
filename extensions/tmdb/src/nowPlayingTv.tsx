@@ -58,7 +58,7 @@ export default function Command() {
             content={`https://image.tmdb.org/t/p/w500/${tv.poster_path}`}
             title={tv.name ?? "No title"}
             subtitle={
-              tv.vote_average ? `${tv.vote_average} ${STAR.repeat(Math.round(tv.vote_average / 2))}` : "No Rating"
+              tv.vote_average ? `${tv.vote_average} ${STAR.repeat(Math.round(tv.vote_average / 2))}` : "Not Rated"
             }
             actions={
               <ActionPanel>

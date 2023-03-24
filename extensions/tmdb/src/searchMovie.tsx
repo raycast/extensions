@@ -63,7 +63,7 @@ export default function Command() {
                       text={
                         movie.vote_average
                           ? `${movie.vote_average} ${STAR.repeat(Math.round(movie.vote_average / 2))}`
-                          : "No Rating"
+                          : "Not Rated"
                       }
                     />
                     <List.Item.Detail.Metadata.Label title="Vote Average" text={`${movie.vote_average ?? 0.0}`} />
