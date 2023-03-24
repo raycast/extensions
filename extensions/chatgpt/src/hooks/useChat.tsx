@@ -130,10 +130,15 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
       })
       .catch((err) => {
         toast.title = "Error";
-        if (err instanceof Error) {
-          toast.message = err?.message;
+        if (err) {
+          if (err.response.status === 404) {
+            toast.message = `${model.option} is not supported`;
+          } else {
+            toast.message = err.message;
+          }
         }
         toast.style = Toast.Style.Failure;
+        setLoading(false);
       });
   }
 
