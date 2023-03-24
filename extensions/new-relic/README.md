@@ -20,3 +20,11 @@ can see applicaiton health and golden metrics at a glance
 in Raycast.
 
 Press enter to jump directly to your selected result in New Relic.
+
+## Troubleshooting
+Sometimes the New Relic API Key you provide may be rejected as invalid. You will see an error message
+at the bottom of the Rayast window `Failed to Fetch latest data: Invalid API Key`.
+
+To work around this, you can create a new **User** API Key in New Relic in the [API Keys](https://one.newrelic.com/api-keys) page.
+
+![API Keys](./metadata/create-api-key.jpg)
