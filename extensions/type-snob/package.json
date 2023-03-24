@@ -16,7 +16,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "Copy character",
+      "title": "Copy Character",
       "description": "Copy correct typographic characters, like dashes, quote marks, and other special characters.",
       "mode": "view"
     }
