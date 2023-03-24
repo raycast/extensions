@@ -17,9 +17,11 @@ export interface AppleMusicResource {
   type: "songs" | "albums" | "artists" | "playlists" | "stations";
 }
 
-type AppleMusicWrappedResourceList = {
-  data: AppleMusicResource[];
-} | undefined;
+type AppleMusicWrappedResourceList =
+  | {
+      data: AppleMusicResource[];
+    }
+  | undefined;
 
 export interface AppleMusicSearchResults {
   songs: AppleMusicWrappedResourceList;

@@ -6,7 +6,7 @@ import { AppleMusicRecommendation, AppleMusicSearchResults } from "../types";
 
 export async function fetchAppleMusic(url: string, options: RequestInit = {}) {
   const musicUserToken = await getMusicUserToken();
-  const urlWithStorefront = url.replace("{storefront}", await getStorefront())
+  const urlWithStorefront = url.replace("{storefront}", await getStorefront());
   return fetch(`https://api.music.apple.com${urlWithStorefront}`, {
     ...options,
     headers: {
