@@ -61,7 +61,6 @@ export default function Saved() {
       isLoading={savedChat.isLoading}
       filtering={false}
       throttle={false}
-      navigationTitle={"Saved Answers"}
       selectedItemId={selectedAnswerId || undefined}
       onSelectionChange={(id) => {
         if (id !== selectedAnswerId) {

@@ -18,13 +18,13 @@ export default function Model() {
     <ActionPanel>
       <Action
         title={"Edit Model"}
-        shortcut={{ modifiers: ["cmd"], key: "t" }}
+        shortcut={{ modifiers: ["cmd"], key: "e" }}
         icon={Icon.Text}
         onAction={() => push(<ModelForm model={model} use={{ models }} />)}
       />
       <Action
         title={"Create Model"}
-        shortcut={{ modifiers: ["cmd"], key: "t" }}
+        shortcut={{ modifiers: ["cmd"], key: "n" }}
         icon={Icon.Text}
         onAction={() => push(<ModelForm name={searchText} use={{ models }} />)}
       />
@@ -77,7 +77,6 @@ export default function Model() {
       isLoading={models.isLoading}
       filtering={false}
       throttle={false}
-      navigationTitle={"Models"}
       selectedItemId={selectedModelId || undefined}
       onSelectionChange={(id) => {
         if (id !== selectedModelId) {

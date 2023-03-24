@@ -27,7 +27,7 @@ export const TextToSpeechAction = ({ content }: { content: string }) => (
       say.stop();
       say.speak(content);
     }}
-    shortcut={{ modifiers: ["cmd"], key: "p" }}
+    shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
   />
 );
 
@@ -55,7 +55,7 @@ export const DestructiveAction = ({
   title,
   dialog,
   onAction,
-  shortcut = { modifiers: ["cmd"], key: "delete" },
+  shortcut = { modifiers: ["ctrl"], key: "x" },
 }: {
   icon?: Image.ImageLike;
   title: string;
