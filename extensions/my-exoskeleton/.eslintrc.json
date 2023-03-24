@@ -7,5 +7,5 @@
   },
   "parser": "@typescript-eslint/parser",
   "plugins": ["@typescript-eslint", "react", "prettier"],
-  "extends": ["eslint:recommended", "plugin:@typescript-eslint/recommended", "prettier", "react-app"]
+  "extends": ["eslint:recommended", "plugin:@typescript-eslint/recommended", "prettier"]
 }

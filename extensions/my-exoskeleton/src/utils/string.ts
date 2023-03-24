@@ -1,4 +1,3 @@
-
-export const isString = (target: any): target is String => {
-  return typeof target === 'string';
+export const isString = (target: any): target is string => {
+  return typeof target === 'string'
 }

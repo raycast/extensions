@@ -13,7 +13,7 @@ const isJiraKey = (text: string) => {
   return /^[A-Z]+-\d+$/.test(text)
 }
 
-const fetchIssuesBy = (searchText: string, startIndex: Number = 0): Promise<JiraIssues | void> => {
+const fetchIssuesBy = (searchText: string, startIndex = 0): Promise<JiraIssues | void> => {
   let jql = !searchText
     ? 'reporter+%3D+currentUser()+order+by+created+DESC'
     : `text ~ "${searchText}" order by lastViewed DESC`

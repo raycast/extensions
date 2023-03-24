@@ -3,7 +3,7 @@
   "name": "my-exoskeleton",
   "title": "My Exoskeleton",
   "description": "Development Tools",
-  "icon": "icons/project-manage_2.png",
+  "icon": "icons/command-icon.png",
   "author": "Qlee",
   "categories": [
     "Developer Tools"
@@ -22,14 +22,15 @@
       "description": "GoCD Pipelines List And Details",
       "mode": "view",
       "icon": "icons/command-gocd-icon.png",
-      "preferences": [{
-        "name": "GocdPAT",
-        "title": "GOCD PAT",
-        "description": "GOCD Personal Access Token",
-        "placeholder": "GOCD Personal Access Token",
-        "type": "textfield",
-        "required": true
-      },
+      "preferences": [
+        {
+          "name": "GocdPAT",
+          "title": "GOCD PAT",
+          "description": "GOCD Personal Access Token",
+          "placeholder": "GOCD Personal Access Token",
+          "type": "textfield",
+          "required": true
+        },
         {
           "name": "GoCDBaseUrl",
           "title": "GOCD Base Url",
@@ -37,7 +38,8 @@
           "placeholder": "https://ci.example.com",
           "type": "textfield",
           "required": true
-        }]
+        }
+      ]
     },
     {
       "name": "grafana",
@@ -45,14 +47,15 @@
       "description": "Grafana Quick Link",
       "mode": "view",
       "icon": "icons/command-grafana-icon.png",
-      "preferences": [ {
-        "name": "GrafanaPAT",
-        "title": "Grafana PAT",
-        "description": "Grafana API Keys",
-        "placeholder": "Grafana API Keys",
-        "type": "textfield",
-        "required": true
-      },
+      "preferences": [
+        {
+          "name": "GrafanaPAT",
+          "title": "Grafana PAT",
+          "description": "Grafana API Keys",
+          "placeholder": "Grafana API Keys",
+          "type": "textfield",
+          "required": true
+        },
         {
           "name": "GrafanaBaseUrl",
           "title": "Grafana Base URL",
@@ -60,7 +63,8 @@
           "type": "textfield",
           "placeholder": "https://monitor.example.com",
           "required": true
-        }]
+        }
+      ]
     },
     {
       "name": "dictionary",
@@ -68,28 +72,31 @@
       "description": "Project Dictionary",
       "mode": "view",
       "icon": "icons/dictionary.png",
-      "preferences": [{
-        "name": "dictionaryUrl",
-        "title": "MySQL Connection For Dictionary",
-        "description": "dictionary database url",
-        "placeholder": "mysqlx://username:password@ip:port",
-        "type": "textfield",
-        "required": true
-      }]
+      "preferences": [
+        {
+          "name": "dictionaryUrl",
+          "title": "MySQL Connection For Dictionary",
+          "description": "dictionary database url",
+          "placeholder": "mysqlx://username:password@ip:port",
+          "type": "textfield",
+          "required": true
+        }
+      ]
     },
     {
       "name": "bookmark",
       "title": "Bookmark",
       "description": "Project Bookmark",
       "mode": "view",
-      "preferences": [{
-        "name": "bookmarkSheetIds",
-        "title": "bookmark google sheet id list",
-        "description": "Bookmark google sheet ids",
-        "placeholder": "Enter Your google sheet id",
-        "type": "textfield",
-        "required": true
-      },
+      "preferences": [
+        {
+          "name": "bookmarkSheetIds",
+          "title": "bookmark google sheet id list",
+          "description": "Bookmark google sheet ids",
+          "placeholder": "Enter Your google sheet id",
+          "type": "textfield",
+          "required": true
+        },
         {
           "name": "bookmarkOauthClientKey",
           "title": "Bookmark google oauth client key",
@@ -97,7 +104,8 @@
           "placeholder": "Enter Your oauth client key",
           "type": "textfield",
           "required": true
-        }]
+        }
+      ]
     },
     {
       "name": "jira",
@@ -105,14 +113,15 @@
       "description": "Jira Board Description",
       "mode": "view",
       "icon": "icons/jira-icon.png",
-      "preferences": [{
-        "name": "jiraBaseUrl",
-        "title": "Jira board access base url",
-        "description": "Jira board access base url",
-        "placeholder": "Enter Your JIRA board access base url",
-        "type": "textfield",
-        "required": true
-      },
+      "preferences": [
+        {
+          "name": "jiraBaseUrl",
+          "title": "Jira board access base url",
+          "description": "Jira board access base url",
+          "placeholder": "Enter Your JIRA board access base url",
+          "type": "textfield",
+          "required": true
+        },
         {
           "name": "jiraToken",
           "title": "Jira board access token",
@@ -120,7 +129,8 @@
           "placeholder": "Enter Your JIRA board access key",
           "type": "textfield",
           "required": true
-        }]
+        }
+      ]
     },
     {
       "name": "oauth",
@@ -130,8 +140,7 @@
       "icon": "icons/google.ico"
     }
   ],
-  "preferences": [
-  ],
+  "preferences": [],
   "dependencies": {
     "@mysql/xdevapi": "^8.0.32",
     "@raycast/api": "^1.47.3",
@@ -163,6 +172,7 @@
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-prettier": "^4.2.1",
+    "eslint-plugin-react": "^7.32.2",
     "lodash": "^4.17.21",
     "prettier": "^2.5.1",
     "ts-node": "^10.9.1",
@@ -173,7 +183,6 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "ray publish",
-    "eslint": "eslint --ext .ts --ext .tsx src"
+    "publish": "ray publish"
   }
 }

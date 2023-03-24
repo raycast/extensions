@@ -1,3 +1,3 @@
-import { MyProjectCommand } from "./commands/my-project";
+import { MyProjectCommand } from './commands/my-project'
 
-export default MyProjectCommand;
+export default MyProjectCommand

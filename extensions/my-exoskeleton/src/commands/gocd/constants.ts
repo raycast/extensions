@@ -1,9 +1,9 @@
-import { StageStatus } from "./types";
-import { Color, Icon } from "@raycast/api";
+import { StageStatus } from './types'
+import { Color, Icon } from '@raycast/api'
 
 export const GOCDAcceptHeaders = {
-  v1: { "Accept": "application/vnd.go.cd.v1+json" },
-  v3: { "Accept": "application/vnd.go.cd.v3+json" },
+  v1: { Accept: 'application/vnd.go.cd.v1+json' },
+  v3: { Accept: 'application/vnd.go.cd.v3+json' }
 }
 
 export const IconMap: Record<StageStatus, any> = {
@@ -26,5 +26,5 @@ export const IconMap: Record<StageStatus, any> = {
   Cancelled: {
     source: Icon.Warning,
     tintColor: Color.Yellow
-  },
-};
+  }
+}
