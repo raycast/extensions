@@ -7,7 +7,13 @@ function GlyphSection({ title, glyphs }: { title: string; glyphs: Glyph[] }) {
       {glyphs.map(({ glyph, name, unicodeDescription, codepoint }) => (
         <Grid.Item
           key={name}
-          content={{ tooltip: name, value: { source: `svgs/svg-${name}.svg`, tintColor: Color.PrimaryText } }}
+          content={{
+            tooltip: name,
+            value: {
+              source: `https://raw.githubusercontent.com/gbougakov/inter-svgs/9fba6c5cac248ae9831b4e8cf45f3b6a334bc176/svg-${name}.svg`,
+              tintColor: Color.PrimaryText,
+            },
+          }}
           keywords={[name, unicodeDescription, ...unicodeDescription.split(" "), glyph, title]}
           actions={
             <ActionPanel>
