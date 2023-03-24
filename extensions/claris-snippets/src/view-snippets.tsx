@@ -6,6 +6,7 @@ import {
   closeMainWindow,
   confirmAlert,
   Icon,
+  LaunchProps,
   List,
   showHUD,
   showToast,
@@ -13,19 +14,21 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { deleteSnippetFile, loadAllSnippets } from "./utils/snippets";
-import { Location, Snippet, snippetTypesMap } from "./utils/types";
+import { Location, Snippet, snippetTypesMap, zLaunchContext } from "./utils/types";
 import { useCachedPromise, useCachedState } from "@raycast/utils";
 import CreateSnippet from "./create-snippet";
 import { XMLToFMObjects } from "./utils/FmClipTools";
-import { useState, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import EditSnippet from "./components/edit-snippet";
 import { uniqBy } from "lodash";
 import EditSnippetXML from "./components/edit-snippet-xml";
 import DynamicFieldsList from "./components/dynamic-fields-list";
 import DynamicSnippetForm from "./components/dynamic-snippet.form";
 
-export default function Command() {
+export default function Command(props: LaunchProps) {
   const [locations] = useCachedState<Location[]>("locations", []);
+  const [loadedContext, setLoadedContext] = useState(false);
+  const { push } = useNavigation();
   const locationMap = useMemo(() => {
     const map: Record<string, Location> = {};
     locations.forEach((location) => {
@@ -40,6 +43,45 @@ export default function Command() {
   } = useCachedPromise(async () => loadAllSnippets(locations), [], { initialData: [] });
   const [pathFilter, setPathFilter] = useState<"all" | "default" | Location>("all");
   const { pop } = useNavigation();
+
+  useEffect(() => {
+    if (loadedContext) return;
+    if (isLoading) return;
+    if (snippets.length === 0) return;
+    if (props.launchContext === undefined) return;
+
+    // only run the rest of this function once
+    setLoadedContext(true);
+
+    // try to get info from launch context
+    const parsed = zLaunchContext.safeParse(props.launchContext);
+    if (!parsed.success) {
+      console.error("Failed to parse launch context", parsed.error.issues);
+      return;
+    }
+
+    const ctx = parsed.data;
+    const snippet = snippets.find((o) => o.id === ctx.id);
+    if (!snippet) {
+      console.error("Failed to find snippet for launch context", ctx);
+      return;
+    }
+
+    // inject the values into the snippet's default values
+    Object.entries(ctx.values).forEach(([key, value]) => {
+      const i = snippet.dynamicFields.findIndex((f) => f.name === key);
+      if (i < 0) return;
+      snippet.dynamicFields[i].default = value;
+    });
+
+    if (ctx.showForm) {
+      push(<DynamicSnippetForm snippet={snippet} />);
+    } else {
+      console.log("copying snippet in background", snippet.dynamicFields);
+    }
+
+    // console.log("Launching snippet", snippet.dynamicFields);
+  }, [snippets, isLoading, loadedContext]);
 
   function CreateSnippetAction() {
     return (
