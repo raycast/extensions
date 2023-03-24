@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "auto-keyboard-shortcuts",
-  "title": "Auto Keyboard Shortcuts",
+  "name": "keyboard-shortcut-sequences",
+  "title": "Keyboard Shortcut Sequences",
   "description": "Configure, save, and run sequences of keyboard shortcuts",
   "icon": "command-icon.png",
   "author": "HelloImSteven",
