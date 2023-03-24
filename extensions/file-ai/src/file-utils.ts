@@ -221,47 +221,59 @@ const filterContentString = (content: string, cutoff?: number): string => {
 const getImageDetails = async (filePath: string, skipMetadata?: boolean): Promise<string> => {
   /* Gets the EXIF data of an image file and any text within it, as well as the associated prompt instructions. */
   const imageText = filterContentString(getImageText(filePath));
-  let imageTextInstructions = skipMetadata
-    ? `Transcribed text from image: "${imageText}"`
-    : `<Discuss the meaning and significance of the image based on the following text extracted from it: "${imageText}. Based on that, discuss what the image might be about. Infer addition insights about the image and discuss them.">`;
-
+  const classifications = getImageClassifications(filePath);
   const barcodes = getImageBarcodePayloads(filePath);
-  barcodes.forEach((barcode: string, index: number) => {
-    if (imageTextInstructions.replaceAll(" ", "").indexOf(barcode) != -1) {
-      imageTextInstructions += `<In your discussion, clarify that ${barcode} is a barcode, but still explain any other text.>`;
-    } else {
-      let instructions = `Mention that the image contains ${
-        index == 0 ? "a" : "another"
-      } barcode with a value of ${barcode}.`;
-      if (index == 0) {
-        instructions = `<In addition, ` + instructions.toLowerCase();
-      }
-      imageTextInstructions += `<${instructions}>`;
-    }
-  });
-
-  const QRCodes = getImageQRCodePayloads(filePath);
-  const QRInstructions =
-    QRCodes.join("") == ""
-      ? ""
-      : `\n<The image contains ${QRCodes.length == 0 ? "a" : QRCodes.length} QR code${
-          QRCodes.length == 1 ? "" : "s"
-        } with the following value${QRCodes.length == 1 ? "" : "s"}: ${QRCodes.join(
-          ", "
-        )}. Discuss the meaning and significance of the image based on these values.>\n`;
-
+  const rects = barcodes.length == 1 ? [] : getImageRects(filePath);
   const animalLabels = getImageAnimals(filePath);
+  const numFaces = parseInt(getImageFaces(filePath));
+  const exifData = skipMetadata ? `` : filterContentString(await getFileExifData(filePath));
+
+  let imageTextInstructions = imageText
+    ? `<Based on the following transcribed text from the image, what is the image about, in simple terms, and what is its significance? Here's the text: "${imageText}">.`
+    : "";
+
+  const imageClassificationInstructions =
+    classifications && barcodes.join("") == ""
+      ? `Based on on the following approximate labels and the file name, what is might be the meaning of the image, in simple terms? Here are the labels: "${classifications}". Creatively summarize the labels instead of listing them.>`
+      : "";
+
+  if (barcodes.join("") != "") {
+    barcodes.forEach((barcode: string, index: number) => {
+      if (imageTextInstructions.replaceAll(" ", "").indexOf(barcode) != -1) {
+        imageTextInstructions += `<In your discussion, clarify that ${barcode} is a barcode or QR code, but still explain any other text.>`;
+      } else {
+        let instructions = `Mention that the image contains ${
+          index == 0 ? "a" : "another"
+        } barcode or QR code with a value of ${barcode}.`;
+        if (index == 0) {
+          instructions = `<In addition, ` + instructions;
+        }
+        imageTextInstructions += `<${instructions} `;
+      }
+    });
+    imageTextInstructions += imageText
+      ? "In simple terms, explain how the values relate to the text within the image, filling gaps in knowledge where necessary.>"
+      : "";
+  }
+
+  const rectInstructions =
+    rects.join("") == ""
+      ? ""
+      : `\n<The image contains${rects.length == 0 ? " a" : ""} rectangle${
+          rects.length == 1 ? "" : "s"
+        } defined by the following coordinates:\n${rects.map((rectCoords: string, index: number) => {
+          return `\tRectangle #${index + 1}: ${rectCoords}\n\n`;
+        })}Based on the sizes, general positions, and number of rectangles, what might the image be about, in simple terms? Do not mention the names of the rectangles or their exact coordinates.`;
+
   const imageAnimalsInstructions = `<Summarize the animals appearing in the image in order of occurrence: ${animalLabels}>`;
 
-  const numFaces = parseInt(getImageFaces(filePath));
-  const peopleInstructions = `<Based on the number of faces (${numFaces}) in the image, assess whether there is a large group of people, a few people, or a single person in the image.>`;
+  const peopleInstructions = `<Based on the number of faces (${numFaces}) in the image, assess whether there is a large group of people, a few people, or a single person.>`;
 
-  const exifData = skipMetadata ? `` : filterContentString(await getFileExifData(filePath));
   const exifInstruction = skipMetadata
     ? ``
-    : `<Summarize answers to the following questions based on this EXIF data: ${exifData}. When was the file created and last modified, and what are its dimensions and file size? Infer additional insights about the EXIF data and discuss them.>`;
+    : `<Infer additional insights about the EXIF data and discuss them. When was the file created and last modified, and what are its dimensions and file size? Here is the EXIF data: ${exifData}>`;
 
-  return `${imageText ? `\n${imageTextInstructions}` : ""}${QRInstructions}${
+  return `${imageClassificationInstructions}\n${imageTextInstructions}${rectInstructions}${
     animalLabels ? `\n${imageAnimalsInstructions}` : ""
   }${numFaces > 0 ? `\n${peopleInstructions}` : ""}\n${exifInstruction}`;
 };
@@ -320,31 +332,6 @@ const getImageBarcodePayloads = (filePath: string): string[] => {
     return getBarcodePayload("${filePath}")`).split(", ");
 };
 
-const getImageQRCodePayloads = (filePath: string): string[] => {
-  /* Extracts the payload text of all QR codes in an image */
-  return runAppleScriptSync(`use framework "CoreImage"
-
-    on getQRPayload(imagePath)
-      set theImage to current application's NSImage's alloc()'s initWithContentsOfFile:imagePath
-      set theCIImage to current application's CIImage's imageWithData:(theImage's TIFFRepresentation())
-      set theDetector to my (CIDetector's detectorOfType:(my CIDetectorTypeQRCode) context:(my CIContext's context()) options:(missing value))
-      
-      set theFeatures to theDetector's featuresInImage:theCIImage
-      
-      set theResult to ""
-      repeat with theFeature in theFeatures
-        set theResult to theResult & theFeature's messageString() & ", "
-      end repeat
-      
-      if length of theResult > 0 then
-        set theResult to text 1 thru ((length of theResult) - 2) of theResult
-      end if
-      return theResult
-    end getQRPayload
-    
-    return getQRPayload("${filePath}")`).split(", ");
-};
-
 const getImageAnimals = (filePath: string): string => {
   /* Extracts labels for cats and dogs in image files. */
   return runAppleScriptSync(`use framework "Vision"
@@ -374,6 +361,42 @@ const getImageAnimals = (filePath: string): string => {
     end getImageAnimals
     
     return getImageAnimals("${filePath}")`);
+};
+
+const getImageRects = (filePath: string): string[] => {
+  /* Gets a list of coordinate points of rectangles in an image */
+  return runAppleScriptSync(`use framework "Vision"
+
+    on getImageRectangles(imagePath)
+      -- Get image content
+      set theImage to current application's NSImage's alloc()'s initWithContentsOfFile:imagePath
+      
+      -- Set up request handler using image's raw data
+      set requestHandler to current application's VNImageRequestHandler's alloc()'s initWithData:(theImage's TIFFRepresentation()) options:(current application's NSDictionary's alloc()'s init())
+      
+      -- Initialize rectangles request
+      set rectRequest to current application's VNDetectRectanglesRequest's alloc()'s init()
+      rectRequest's setMaximumObservations:0
+      
+      -- Perform the requests and get the results
+      requestHandler's performRequests:(current application's NSArray's arrayWithObject:(rectRequest)) |error|:(missing value)
+      set rectResults to rectRequest's results()
+      
+      -- Obtain and return the coordinates of each rectangle
+      set imgWidth to theImage's |size|()'s width
+      set imgHeight to theImage's |size|()'s height
+      set theResult to {}
+      repeat with observation in rectResults
+        set bottomLeft to (("Coordinate 1:(" & observation's bottomLeft()'s x as text) & "," & observation's bottomLeft()'s y as text) & ") "
+        set bottomRight to (("Coordinate 2:(" & observation's bottomRight()'s x as text) & "," & observation's bottomRight()'s y as text) & ") "
+        set topRight to (("Coordinate 3:(" & observation's topRight()'s x as text) & "," & observation's topRight()'s y as text) & ") "
+        set topLeft to (("Coordinate 4:(" & observation's topLeft()'s x as text) & "," & observation's topLeft()'s y as text) & ") "
+        copy bottomLeft & bottomRight & topRight & topLeft to end of theResult
+      end repeat
+      return theResult
+    end getImageRectangles
+    
+    return getImageRectangles("${filePath}")`).split(", ");
 };
 
 const getImageFaces = (filePath: string): string => {
@@ -466,15 +489,11 @@ const getFileExifData = async (filePath: string) => {
 
 const getPDFText = (filePath: string): string => {
   /* Gets the visible text of a PDF. */
-  return runAppleScriptSync(`use framework "Foundation"
-    use framework "Quartz"
-    
-    set thePDF to "${filePath}"
-    set pageNumber to 0
-    
-    set theURL to current application's |NSURL|'s fileURLWithPath:thePDF
-    set thePDF to current application's PDFDocument's alloc()'s initWithURL:theURL
-    return (thePDF's |string|()) as text`);
+  return runAppleScriptSync(`use framework "Quartz"
+  set thePDF to "${filePath}"
+  set theURL to current application's |NSURL|'s fileURLWithPath:thePDF
+  set thePDF to current application's PDFDocument's alloc()'s initWithURL:theURL
+  return (thePDF's |string|()) as text`);
 };
 
 const getAudioDetails = (filePath: string, skipMetadata?: boolean): string => {
@@ -488,6 +507,39 @@ const getAudioDetails = (filePath: string, skipMetadata?: boolean): string => {
   const classificationInstruction = `<Discuss the likely purpose of the audio file based on these classifications of sounds observed in the file: "${soundClassification}".>`;
 
   return `${metadataInstruction}${soundClassification ? `\n${classificationInstruction}` : ""}`;
+};
+
+const getImageClassifications = (filePath: string): string => {
+  /* Gets classification labels for objects in the image */
+  return runAppleScriptSync(`use framework "Vision"
+
+  property confidenceThreshold : 0.7
+  
+  on getImageClassifications(imagePath)
+    -- Get image content
+    set theImage to current application's NSImage's alloc()'s initWithContentsOfFile:imagePath
+    
+    -- Set up request handler using image's raw data
+    set requestHandler to current application's VNImageRequestHandler's alloc()'s initWithData:(theImage's TIFFRepresentation()) options:(current application's NSDictionary's alloc()'s init())
+    
+    -- Initialize classification request
+    set rectRequest to current application's VNClassifyImageRequest's alloc()'s init()
+    
+    -- Perform the requests and get the results
+    requestHandler's performRequests:(current application's NSArray's arrayWithObject:(rectRequest)) |error|:(missing value)
+    set rectResults to rectRequest's results()
+    
+    -- Obtain and return the classifications
+    set theResult to {}
+    repeat with observation in rectResults
+      if observation's confidence() > confidenceThreshold then
+        copy observation's identifier() as text to end of theResult
+      end if
+    end repeat
+    return theResult
+  end getImageClassifications
+  
+  return getImageClassifications("${filePath}")`);
 };
 
 const getSoundClassification = (filePath: string): string => {

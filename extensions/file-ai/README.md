@@ -35,6 +35,7 @@ You can create custom File AI commands, accessed via the "Search File AI Command
 - Create Slides
 - Detect Bias
 - Extend Files
+- Extract Code
 - Extract Emails
 - Extract Named Entities
 - Extract Phone Numbers
@@ -53,6 +54,7 @@ You can create custom File AI commands, accessed via the "Search File AI Command
 - Pros And Cons
 - Suggest File AI Prompts
 - Suggest Hashtags
+- Suggest Improvements
 - Suggest Project Ideas
 - Suggest Title
 - Suggest Tools

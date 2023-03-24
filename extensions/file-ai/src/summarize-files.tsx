@@ -11,7 +11,7 @@ export default function Command() {
   }, []);
 
   const basePrompt =
-    "Summarize the content of the following files, using the file names as headings. Briefly discuss any lists the files contain instead of listing all elements. Discuss each file's tone and style. Infer questions about the files and answer them without specifying the question. Format the response as markdown paragraphs. Also, give a list of relevant links and a brief description of them.";
+    "Summarize the content of the following files, using the file names as headings. Briefly discuss any lists the files contain instead of listing all elements. Based on all the information I've given you, what are other things you infer about the file or its topic, in simple terms? Format the response as markdown paragraphs. Also, give a list of relevant links and a brief description of them.";
 
   const contentPromptString = contentPrompts.join("\n");
   const fullPrompt = basePrompt + contentPromptString;
