@@ -1,31 +1,31 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "palette-colors",
-  "title": "Palette Colors",
-  "description": "Pick nice palette colors directly from Raycast",
-  "icon": "command-icon.png",
-  "author": "douglas-pires",
+  "name": "color-palette",
+  "title": "Color Palette",
+  "description": "Your Global Color Palettes",
+  "icon": "Logo_ColorPalette.png",
+  "author": "Forest1037",
   "categories": [
-    "Productivity",
-    "Design Tools",
-    "Developer Tools"
+    "Design Tools"
   ],
   "license": "MIT",
   "commands": [
     {
-      "name": "index",
-      "title": "Palette Colors",
-      "description": "An extension to pick colors from a randomly generated palette",
+      "name": "color-palette",
+      "title": "Color Palette",
+      "subtitle": "Your Global Color Palettes",
+      "description": "Choose palette from built-in popular color palettes; Preview the appearance, name and HSL value of each color; Copy the color value (Hex or RGB or HSL) to your clipboard.",
       "mode": "view"
     }
   ],
   "dependencies": {
-    "@adobe/leonardo-contrast-colors": "1.0.0-alpha.13",
-    "@raycast/api": "^1.40.3",
+    "@adobe/leonardo-contrast-colors": "^1.0.0-alpha.13",
+    "@raycast/api": "^1.47.3",
+    "@raycast/utils": "^1.5.2",
     "color-scheme": "^1.0.1"
   },
   "devDependencies": {
-    "@types/node": "16.10.3",
+    "@types/node": "18.8.3",
     "@types/react": "18.0.9",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
