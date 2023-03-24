@@ -122,6 +122,27 @@ function getItemZotUrl(item: RefData): string {
   return `zotero://select/items/${item.library ? item.library : 0}_${item.key}`;
 }
 
+function getItemIcon(item: RefData): string {
+  switch (item.type) {
+    case "book":
+      return "book.png";
+    case "bookSection":
+      return "bookSection.png";
+    case "journalArticle":
+      return "journalArticle.png";
+    case "thesis":
+      return "thesis.png";
+    case "blogPost":
+      return "blogPost.png";
+    case "conferencePaper":
+      return "conferencePaper.png";
+    case "document":
+      return "document.png";
+    default:
+      return "zotero.png";
+  }
+}
+
 function getItemDetail(item: RefData): string {
   const title = item.title;
   const creators = item.creators;
@@ -175,7 +196,7 @@ export const View = ({ sectionNames, queryResults, isLoading, onSearchTextChange
                 key={item.key}
                 id={`${item.id}`}
                 title={item.title + (urls.includes(item.url) ? " (visited)" : "")}
-                icon={`${item.type.toLowerCase() === "book" ? "doc.png" : "paper.png"}`}
+                icon={getItemIcon(item)}
                 detail={<List.Item.Detail markdown={getItemDetail(item)} />}
                 actions={
                   <ActionPanel>

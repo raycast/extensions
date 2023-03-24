@@ -29,30 +29,34 @@ const kindToString = (kind: PlaylistKind) => {
   }
 };
 
-export default function PlaySelected() {
+export default function AddToPlaylist() {
+  const [isLoading, setIsLoading] = useState(false);
   const [playlists, setPlaylists] = useState<PlaylistSections | null>(null);
   const { pop } = useNavigation();
 
   useEffect(() => {
     pipe(
-      PlaylistKind.USER,
-      music.playlists.getPlaylists,
+      music.playlists.getPlaylists(PlaylistKind.USER),
       TE.mapLeft((e) => {
         console.error(e);
         showToast(Toast.Style.Failure, "Could not get your playlists");
+        setIsLoading(false);
       }),
       TE.map(
         flow(
           parseResult<Playlist>(),
           (data) => A.groupBy<Playlist>((playlist) => playlist.kind?.split(" ")?.[0] ?? "Other")(data),
-          setPlaylists
+          (data) => {
+            setPlaylists(data);
+            setIsLoading(false);
+          }
         )
       )
     )();
   }, []);
 
   return (
-    <List isLoading={playlists === null} searchBarPlaceholder="Search A Playlist">
+    <List isLoading={playlists === null || isLoading} searchBarPlaceholder="Search A Playlist">
       {Object.entries(playlists ?? {})
         .filter(([section]) => section !== "library")
         .map(([section, data]) => (
@@ -61,12 +65,16 @@ export default function PlaySelected() {
               <List.Item
                 key={playlist.id}
                 title={playlist.name}
-                accessoryTitle={
-                  SFSymbols.PLAYLIST +
-                  ` ${playlist.count}   ` +
-                  SFSymbols.TIME +
-                  ` ${Math.floor(Number(playlist.duration) / 60)} min`
-                }
+                accessories={[
+                  {
+                    icon: Icon.Music,
+                    text: `${playlist.count}`,
+                  },
+                  {
+                    icon: Icon.Clock,
+                    text: `${Math.floor(Number(playlist.duration) / 60)} min`,
+                  },
+                ]}
                 icon={{ source: "../assets/icon.png" }}
                 actions={<Actions playlist={playlist} pop={pop} />}
               />

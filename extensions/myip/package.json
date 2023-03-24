@@ -5,11 +5,14 @@
   "description": "My IP information",
   "icon": "icon.png",
   "author": "Kang",
-  "license": "MIT",
+  "contributors": [
+    "iwyvi"
+  ],
   "categories": [
     "System",
     "Web"
   ],
+  "license": "MIT",
   "commands": [
     {
       "name": "index",
@@ -22,24 +25,22 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.30.3",
+    "@raycast/api": "^1.48.8",
     "axios": "^0.26.1",
-    "cheerio": "^1.0.0-rc.10",
-    "ip": "^1.1.5"
+    "cheerio": "1.0.0-rc.12",
+    "ip": "^1.1.8"
   },
   "devDependencies": {
+    "@raycast/eslint-config": "^1.0.5",
     "@types/ip": "^1.1.0",
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
+    "@types/node": "^18.8.3",
     "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
     "react-devtools": "^4.19.2",
     "typescript": "^4.4.3"
   },
   "scripts": {
     "build": "ray build -e dist",
-    "dev": "ray develop"
+    "dev": "ray develop",
+    "publish": "ray publish"
   }
 }

@@ -23,7 +23,7 @@ const FormSprintDropdown = forwardRef((props: FormSprintDropdownProps, ref: Forw
       <Form.Dropdown.Item title="No Sprint" value="" />
 
       {sprints?.map((sprint) => {
-        return <Form.Dropdown.Item key={sprint.id} title={sprint.name} value={`${sprint.id}`} />;
+        return <Form.Dropdown.Item key={sprint.id} title={`${sprint.name} (${sprint.state})`} value={`${sprint.id}`} />;
       })}
     </Form.Dropdown>
   );
