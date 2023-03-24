@@ -8,3 +8,5 @@ Atlassian's Confluence extension, allowing you to:
  - `Recent` for super snappy access to pages you've viewed
  - `Create Page`, `Create Blog`
  - `Switch Site` to allow to change connected Confluence site
+
+ We’d like to acknowledge, and say thanks for, the excellent prior work of daviddkkim who built the original version of this extension that we have replaced.”
