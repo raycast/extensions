@@ -91,7 +91,7 @@ export default function Command() {
         icon={{ source: "extension_icon@1024px.png" }}
         title="Type your spell, let the magic happen"
         actions={
-          <ActionPanel title="#1 in raycast/extensions">
+          <ActionPanel title="Spellbinding Weaver">
             <Action title="Do the magic" onAction={() => handleSubmit(searchText)} />
             <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
           </ActionPanel>
