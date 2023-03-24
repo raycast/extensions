@@ -12,8 +12,8 @@
   "commands": [
     {
       "name": "index",
-      "title": "G̙͖̬̳̜͛̓͘e̶̟ͧ͗n̷̳̤̉ͩ̓͗̈́̇ͪ͡ē̵̫͓̳̹̊ṟ̷ͩ͋a̱̟͍͉̼͖ͤͫͥ̒̿́t̪̥̼͍͖͓̳͒ͫ͂̐ͪ̿e̒̒͏̬̰̠̖̝̘̯ͅ",
-      "description": "Convert text to Z̬͚̭̤͓̟͖͐͒ȃ̮̙̯͈͍͇͒ͤ̓ͤ́ͨͅͅl̷̐̍̃̊͏̝ğ̡̪̪͓͈͙̘̽͐͒̆́ö̮̳̪̯̟̩̭̎ͮ̇̿̀͢ ̥͎̂̿͋͋́̀̕͢T̴̷̳̟̟͎͛͌̔̈̇̓ę̠̊͑͊̉̽̓̑̒x̸̠̭͎͍̋̏̇ͯ͋̍ͣt̷̶̤͇̠̜̩̯̦͑̈́ͤ̿͛ͤ̀",
+      "title": "Generate",
+      "description": "Convert text to Zalgo text",
       "mode": "view"
     }
   ],

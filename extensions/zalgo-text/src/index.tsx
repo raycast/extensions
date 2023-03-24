@@ -23,7 +23,7 @@ export default function Command() {
         }
       >
         <Form.Description text="Provide the text you'd like to convert to Zalgo" />
-        <Form.TextField id="textfield" title="Text field" placeholder="Enter text" defaultValue="Raycast is cool!" />
+        <Form.TextField id="textfield" title="Text" placeholder="Enter text" defaultValue="Raycast is cool!" />
       </Form>
     </>
   );
