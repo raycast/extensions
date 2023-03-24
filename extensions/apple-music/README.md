@@ -2,6 +2,8 @@
 
 A Raycast extension that allows you to explore the Apple Music catalog. Pairs nicely with the [Music Control](https://www.raycast.com/fedevitaledev/music) extension.
 
+_This is not a product by Apple, it is not affiliated with Apple and is not endorsed by Apple._
+
 Log in to see your personal recommendations and listen to your personal radio station in one keystroke, or search for your favorite artists, albums, songs, and playlists.
 
 ## Explore
