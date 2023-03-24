@@ -143,12 +143,33 @@ export default function Command() {
             subtitle={modified}
             actions={
               <ActionPanel>
-                <Action title="Copy to Clipboard" icon={Icon.Clipboard} onAction={() => copyToClipboard(modified)} />
-                <Action
-                  title={`Paste in ${frontmostAppName}`}
-                  icon={Icon.BlankDocument}
-                  onAction={() => paste(modified, frontmostAppName)}
-                />
+                {preferences["defaultAction"] == "copy" ? (
+                  <>
+                    <Action
+                      title="Copy to Clipboard"
+                      icon={Icon.Clipboard}
+                      onAction={() => copyToClipboard(modified)}
+                    />
+                    <Action
+                      title={`Paste in ${frontmostAppName}`}
+                      icon={Icon.BlankDocument}
+                      onAction={() => paste(modified, frontmostAppName)}
+                    />
+                  </>
+                ) : (
+                  <>
+                    <Action
+                      title={`Paste in ${frontmostAppName}`}
+                      icon={Icon.BlankDocument}
+                      onAction={() => paste(modified, frontmostAppName)}
+                    />
+                    <Action
+                      title="Copy to Clipboard"
+                      icon={Icon.Clipboard}
+                      onAction={() => copyToClipboard(modified)}
+                    />
+                  </>
+                )}
               </ActionPanel>
             }
           />

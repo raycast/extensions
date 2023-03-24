@@ -2,7 +2,7 @@
   <img src="assets/icon.png" height="128">
 </p>
 
-All the information of LaLiga Santander, LaLiga SmartBank, and Primera División Femenina: schedules, results, standings, news, statistics, and much more in [Raycast](https://raycast.com/)
+All the information of LaLiga Santander, LaLiga SmartBank, and Liga F: schedules, results, standings, news, statistics, and much more in [Raycast](https://raycast.com/)
 
 ![Example](./metadata/laliga-1.png)
 

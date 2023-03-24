@@ -157,7 +157,7 @@ An object corresponding to the execution state of the function.
 ```ts
 // Initial State
 {
-  isLoading: true,
+  isLoading: true, // or `false` if `options.execute` is `false`
   data: undefined,
   error: undefined
 }

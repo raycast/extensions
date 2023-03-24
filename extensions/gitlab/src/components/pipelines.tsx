@@ -4,10 +4,11 @@ import { getCIRefreshInterval, getGitLabGQL } from "../common";
 import { gql } from "@apollo/client";
 import { capitalizeFirstLetter, getErrorMessage, getIdFromGqlId, now, showErrorToast } from "../utils";
 import { JobList } from "./jobs";
-import { RefreshPipelinesAction } from "./pipeline_actions";
+import { PipelineItemActions } from "./pipeline_actions";
 import useInterval from "use-interval";
 import { GitLabOpenInBrowserAction } from "./actions";
 import { GitLabIcons } from "../icons";
+import { Pipeline } from "../gitlabapi";
 
 /* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/explicit-module-boundary-types */
 
@@ -18,6 +19,9 @@ const GET_PIPELINES = gql`
         nodes {
           id
           iid
+          project {
+            id
+          }
           status
           active
           path
@@ -88,14 +92,13 @@ function getDateStatus(pipeline: any): {
 }
 
 export function PipelineListItem(props: {
-  pipeline: any;
+  pipeline: Pipeline;
   projectFullPath: string;
   onRefreshPipelines: () => void;
   navigationTitle?: string;
 }): JSX.Element {
   const pipeline = props.pipeline;
   const icon = getIcon(pipeline.status);
-  console.log(pipeline);
   const dateStatus = getDateStatus(pipeline);
   return (
     <List.Item
@@ -133,7 +136,7 @@ export function PipelineListItem(props: {
             <GitLabOpenInBrowserAction url={pipeline.webUrl} />
           </ActionPanel.Section>
           <ActionPanel.Section>
-            <RefreshPipelinesAction onRefreshPipelines={props.onRefreshPipelines} />
+            <PipelineItemActions pipeline={props.pipeline} />
           </ActionPanel.Section>
         </ActionPanel>
       }
@@ -206,6 +209,7 @@ export function useSearch(
         const glData: Record<string, any>[] = data.data.project.pipelines.nodes.map((p: any) => ({
           id: getIdFromGqlId(p.id),
           iid: `${p.iid}`,
+          projectId: getIdFromGqlId(p.project.id),
           status: p.status,
           active: p.active,
           webUrl: `${getGitLabGQL().url}${p.path}`,

@@ -1,3 +1,3 @@
-import { ElasticMetal } from './elasticMetal/ElasticMetal'
+import { ElasticMetal } from './products/elasticMetal/ElasticMetal'
 
 export default () => <ElasticMetal />

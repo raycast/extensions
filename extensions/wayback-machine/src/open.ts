@@ -30,7 +30,8 @@ export default async function main(props: LaunchProps<{ arguments: WaybackArgume
     }
     const archive = await res.json();
     if (archive.archived_snapshots?.closest?.url) {
-      await open(archive.archived_snapshots?.closest?.url);
+      const url = new URL(archive.archived_snapshots.closest.url);
+      await open(`https://${url.host}${url.pathname}`);
     } else {
       return showHUD("❌ No archived version found");
     }
