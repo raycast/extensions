@@ -110,11 +110,7 @@ export default function Command() {
   const shortcuts = getNewRelicShortcuts(searchText);
 
   return (
-    <List
-      isLoading={isLoading}
-      onSearchTextChange={setSearchText}
-      searchBarPlaceholder="Search New Relic..."
-      throttle>
+    <List isLoading={isLoading} onSearchTextChange={setSearchText} searchBarPlaceholder="Search New Relic..." throttle>
       <List.Section title="New Relic Capabilities">{shortcuts}</List.Section>
       <List.Section title="New Relic Entities" subtitle={data?.length + " items"}>
         {data?.map((searchResult: Entity) => (
