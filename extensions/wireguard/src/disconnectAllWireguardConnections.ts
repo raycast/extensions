@@ -10,6 +10,6 @@ export default async () => {
       await disconnectVPNByName(VPNName);
     }
   } else {
-    await closeMainWindow();
+    await closeMainWindow({ clearRootSearch: true });
   }
 };
