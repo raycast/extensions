@@ -61,6 +61,13 @@
       "description": "Save the currently selected URL",
       "mode": "no-view",
       "icon": "reader-logo.png"
+    },
+    {
+      "name": "save-clipboard",
+      "title": "Save Clipboard",
+      "description": "Save a URL from the clipboard",
+      "mode": "no-view",
+      "icon": "reader-logo.png"
     }
   ],
   "dependencies": {
