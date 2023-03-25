@@ -68,6 +68,13 @@
       "description": "Save a URL from the clipboard",
       "mode": "no-view",
       "icon": "reader-logo.png"
+    },
+    {
+      "name": "search",
+      "title": "Search",
+      "description": "Search Reader Library",
+      "mode": "no-view",
+      "icon": "reader-logo.png"
     }
   ],
   "dependencies": {
