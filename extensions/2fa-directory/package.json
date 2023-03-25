@@ -4,7 +4,7 @@
   "title": "2FA Directory",
   "description": "View a list of 2FA enabled sites.",
   "icon": "command-icon.png",
-  "author": "dre",
+  "author": "andreaselia",
   "categories": [
     "Applications",
     "Data",
