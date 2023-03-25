@@ -190,3 +190,5 @@ ORDER BY
 	note.ZMODIFICATIONDATE DESC
 LIMIT 400
 `;
+
+export const TABLE_EXISTS = `SELECT name FROM sqlite_master WHERE type='table' AND name=:name`; 

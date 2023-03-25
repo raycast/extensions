@@ -1,8 +1,8 @@
-import { Cache, environment } from "@raycast/api";
+import { environment } from "@raycast/api";
 import { readFileSync } from "fs";
 import { homedir } from "os";
 import path from "path";
-import initSqlJs, { Database, ParamsObject, Statement } from "sql.js";
+import initSqlJs, { Database, ParamsObject } from "sql.js";
 import {
   SEARCH_BACKLINKS_V1,
   SEARCH_BACKLINKS_V2,
@@ -10,6 +10,7 @@ import {
   SEARCH_LINKS_V2,
   SEARCH_NOTES_V1,
   SEARCH_NOTES_V2,
+  TABLE_EXISTS,
 } from "./db-queries";
 
 export interface Note {
@@ -53,7 +54,6 @@ function formatTags(tags: string[]): string {
 
 export class BearDb {
   database: Database;
-  cache: Cache;
 
   static searchNotesQueries = {
     v1: SEARCH_NOTES_V1,
@@ -72,7 +72,6 @@ export class BearDb {
 
   constructor(database: Database) {
     this.database = database;
-    this.cache = new Cache();
   }
 
   close() {
@@ -95,22 +94,23 @@ export class BearDb {
     };
   }
 
+  tableExists(tableName: string): boolean {
+    const statement = this.database.prepare(TABLE_EXISTS);
+    statement.bind({ ":name": tableName });
+    const result = statement.step();
+    statement.free();
+    return result;
+  }
+
+  getBearVersion(): number {
+    const z5TagsExist = this.tableExists("Z_5TAGS");
+    return z5TagsExist ? 2 : 1;
+  }
+
   getNotes(searchQuery: string): Note[] {
-    let statement: Statement;
-    try {
-      const bearVersion = parseInt(this.cache.get("bearVersion") ?? "1");
-      statement = this.database.prepare(
-        bearVersion === 2 ? BearDb.searchNotesQueries.v2 : BearDb.searchNotesQueries.v1
-      );
-    } catch (error) {
-      if (error instanceof Error && error.message === "no such table: Z_7TAGS") {
-        statement = this.database.prepare(BearDb.searchNotesQueries.v2);
-        this.cache.set("bearVersion", "2");
-      } else if (error instanceof Error && error.message === "no such table: Z_5TAGS") {
-        statement = this.database.prepare(BearDb.searchNotesQueries.v1);
-        this.cache.set("bearVersion", "1");
-      } else throw error;
-    }
+    const statement = this.database.prepare(
+      this.getBearVersion() === 2 ? BearDb.searchNotesQueries.v2 : BearDb.searchNotesQueries.v1
+    );
     statement.bind({ ":query": searchQuery });
     const results: Note[] = [];
     while (statement.step()) {
@@ -124,9 +124,8 @@ export class BearDb {
   }
 
   getBacklinks(noteID: string): Note[] {
-    const bearVersion = parseInt(this.cache.get("bearVersion") ?? "1");
     const statement = this.database.prepare(
-      bearVersion === 1 ? BearDb.getNoteBacklinksQueries.v1 : BearDb.getNoteBacklinksQueries.v2
+      this.getBearVersion() === 2 ? BearDb.getNoteBacklinksQueries.v2 : BearDb.getNoteBacklinksQueries.v1
     );
     statement.bind({ ":id": noteID });
 
@@ -142,9 +141,8 @@ export class BearDb {
   }
 
   getNoteLinks(noteID: string): Note[] {
-    const bearVersion = parseInt(this.cache.get("bearVersion") ?? "1");
     const statement = this.database.prepare(
-      bearVersion === 1 ? BearDb.getNoteLinksQueries.v1 : BearDb.getNoteLinksQueries.v2
+      this.getBearVersion() === 2 ? BearDb.getNoteLinksQueries.v2 : BearDb.getNoteLinksQueries.v1
     );
     statement.bind({ ":id": noteID });
 
