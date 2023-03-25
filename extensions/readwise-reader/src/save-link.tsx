@@ -1,5 +1,5 @@
-import { LaunchProps, showHUD } from "@raycast/api";
-import { saveURL } from "./api/save";
+import { LaunchProps } from "@raycast/api";
+import { handleSave } from "./utils/handleSave";
 
 interface SaveArguments {
   url: string;
@@ -7,11 +7,5 @@ interface SaveArguments {
 
 export default async function Main(props: LaunchProps<{ arguments: SaveArguments }>) {
   const { url } = props.arguments;
-  try {
-    await saveURL(url);
-    await showHUD("✅ Saved to Reader");
-  } catch (error) {
-    await showHUD(`❌ ${(error as Error).message}`);
-    return;
-  }
+  await handleSave(url);
 }

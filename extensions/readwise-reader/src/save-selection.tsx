@@ -1,13 +1,7 @@
-import { getSelectedText, showHUD } from "@raycast/api";
-import { saveURL } from "./api/save";
+import { getSelectedText } from "@raycast/api";
+import { handleSave } from "./utils/handleSave";
 
 export default async function Main() {
   const url = await getSelectedText();
-  try {
-    await saveURL(url);
-    await showHUD("✅ Saved to Reader");
-  } catch (error) {
-    await showHUD(`❌ ${(error as Error).message}`);
-    return;
-  }
+  await handleSave(url);
 }
