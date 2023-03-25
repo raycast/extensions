@@ -9,7 +9,7 @@ import { useFetch } from "@raycast/utils";
 
 const DeploymentsList = ({ projectId }: { projectId?: string }) => {
   const { user, selectedTeam } = useVercel();
-  const url = getFetchDeploymentsURL(selectedTeam?.id, projectId);
+  const url = getFetchDeploymentsURL(selectedTeam, projectId);
 
   const { isLoading, data, revalidate } = useFetch<{
     deployments: Deployment[];
@@ -42,7 +42,7 @@ const DeploymentsList = ({ projectId }: { projectId?: string }) => {
             title={`${getCommitMessage(deployment)}`}
             icon={StateIcon(deployment.readyState ? deployment.readyState : deployment.state)}
             subtitle={`${!projectId ? ` ${deployment.name}` : ""}`}
-            keywords={[deployment.name, getCommitMessage(deployment) || "", branchName]}
+            keywords={[deployment.name, getCommitMessage(deployment) || "", branchName || ""]}
             key={deployment.uid}
             actions={
               <ActionPanel>
@@ -64,7 +64,7 @@ const DeploymentsList = ({ projectId }: { projectId?: string }) => {
                   <Action.OpenInBrowser
                     title={`Visit on Vercel`}
                     url={getDeploymentURL(
-                      selectedTeam ? selectedTeam.name : user.username,
+                      selectedTeam || user.username,
                       deployment.name,
                       /* @ts-expect-error Property id does not exist on type Deployment */
                       deployment.id || deployment.uid

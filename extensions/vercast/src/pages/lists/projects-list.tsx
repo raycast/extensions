@@ -12,7 +12,7 @@ import EnvironmentVariables from "./environment-variables-list";
 
 const ProjectListSection = () => {
   const { selectedTeam, user } = useVercel();
-  const url = getFetchProjectsURL(selectedTeam?.id);
+  const url = getFetchProjectsURL(selectedTeam);
 
   const { isLoading, data, revalidate } = useFetch<{
     projects: Project[];

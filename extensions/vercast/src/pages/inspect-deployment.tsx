@@ -8,7 +8,7 @@ import { FetchHeaders, getDeploymentURL, getFetchDeploymentBuildsURL } from "../
 
 type Props = {
   deployment: Deployment;
-  selectedTeam?: Team;
+  selectedTeam?: string;
   username?: User["username"];
 };
 
@@ -32,7 +32,7 @@ const InspectDeployment = ({ deployment, selectedTeam, username }: Props) => {
   // }, [deployment]);
 
   // @ts-expect-error Property 'id' does not exist on type 'Deployment'.
-  const url = getFetchDeploymentBuildsURL(deployment.uid || deployment.id, selectedTeam?.id, 1);
+  const url = getFetchDeploymentBuildsURL(deployment.uid || deployment.id, selectedTeam, 1);
 
   const { isLoading, data } = useFetch<{
     builds: Build[];
@@ -69,9 +69,9 @@ const InspectDeployment = ({ deployment, selectedTeam, username }: Props) => {
     // @ts-expect-error Property 'inspectorURL' does not exist on type 'Deployment'.
     if (deployment.inspectorURL) return deployment.inspectorURL;
 
-    const name = selectedTeam ? selectedTeam.name : username;
+    const teamId = selectedTeam || username;
 
-    if (!name) {
+    if (!teamId) {
       showToast({
         title: "Error",
         message: "Could not determine team or user name",
@@ -80,7 +80,7 @@ const InspectDeployment = ({ deployment, selectedTeam, username }: Props) => {
     }
 
     // @ts-expect-error Property 'id' does not exist on type 'Deployment'.
-    return getDeploymentURL(name, deployment.name, deployment.uid || deployment.id);
+    return getDeploymentURL(teamId, deployment.name, deployment.uid || deployment.id);
   };
 
   return (
