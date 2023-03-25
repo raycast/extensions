@@ -24,13 +24,14 @@ function useReprompt(action: () => void | Promise<void>, options?: UseRepromptOp
       await showToast(Toast.Style.Failure, "Failed to unlock vault", "Check your credentials");
       return;
     }
-    await action();
     pop();
+
+    /* using a setTimeout here fixes a bug where the RepromptForm flashes when you pop back to the previous screen. 
+    This comes with the trade-off of a tiny visible delay between the RepromptForm pop and the action pushing a new screen */
+    setTimeout(action, 1);
   }
 
-  return () => {
-    push(<RepromptForm description={description} onConfirm={handleConfirm} />);
-  };
+  return () => push(<RepromptForm description={description} onConfirm={handleConfirm} />);
 }
 
 export default useReprompt;
