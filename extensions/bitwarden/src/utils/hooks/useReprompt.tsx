@@ -1,8 +1,8 @@
-import { useNavigation } from "@raycast/api";
-import { useRef } from "react";
+import { showToast, Toast, useNavigation } from "@raycast/api";
 import RepromptForm from "~/components/RepromptForm";
+import { useSession } from "~/context/session";
 
-export type UserRepromptActionProp = { password: string; closeForm: () => void };
+export type UserRepromptActionProp = { closeForm: () => void };
 export type UseRepromptAction = (props: UserRepromptActionProp) => boolean | Promise<boolean>;
 
 export type UseRepromptOptions = {
@@ -13,18 +13,18 @@ export type UseRepromptOptions = {
  * Returns a function for an Action that will navigate to the {@link RepromptForm}.
  * The password is not confirm in this hook, only passed down to the action.
  */
-function useReprompt(action: UseRepromptAction, options?: UseRepromptOptions) {
+function useReprompt(action: () => void | Promise<void>, options?: UseRepromptOptions) {
   const { description = "Performing an action that requires the master password" } = options ?? {};
+  const session = useSession();
   const { push, pop } = useNavigation();
-  const wasPopped = useRef(false);
 
   async function handleConfirm(password: string) {
-    await action({ password, closeForm });
-    if (!wasPopped.current) pop();
-  }
-
-  function closeForm() {
-    wasPopped.current = true;
+    const isPasswordCorrect = await session.confirmMasterPassword(password);
+    if (!isPasswordCorrect) {
+      await showToast(Toast.Style.Failure, "Failed to unlock vault", "Check your credentials");
+      return;
+    }
+    await action();
     pop();
   }
 

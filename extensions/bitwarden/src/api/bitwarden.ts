@@ -30,13 +30,9 @@ export class Bitwarden {
       BW_CLIENTSECRET: clientSecret.trim(),
       BW_CLIENTID: clientId.trim(),
       PATH: dirname(process.execPath),
+      ...(serverUrl && serverCertsPath ? { NODE_EXTRA_CA_CERTS: serverCertsPath } : {}),
     };
 
-    if (serverUrl && serverCertsPath) {
-      this.env["NODE_EXTRA_CA_CERTS"] = serverCertsPath;
-    }
-
-    // Check the CLI has been configured to use the preference Url
     this.initPromise = (async () => {
       await this.checkServerUrl(serverUrl);
       this.lockReason = await LocalStorage.getItem<string>(LOCAL_STORAGE_KEY.VAULT_LOCK_REASON);
@@ -49,6 +45,7 @@ export class Bitwarden {
   }
 
   async checkServerUrl(serverUrl: string): Promise<void> {
+    // Check the CLI has been configured to use the preference Url
     const cliServer = (await LocalStorage.getItem<string>(LOCAL_STORAGE_KEY.SERVER_URL)) || "";
     if (cliServer === serverUrl) return;
 
@@ -155,19 +152,6 @@ export class Bitwarden {
     const args = options ? getPasswordGeneratingArgs(options) : [];
     const { stdout } = await this.exec(["generate", ...args], { abortController });
     return stdout;
-  }
-
-  async getItem(
-    itemId: string,
-    token: string,
-    options?: { password?: string; abortController?: AbortController }
-  ): Promise<Item> {
-    const { password, abortController } = options ?? {};
-    const { stdout } = await this.exec(["get", "item", "--session", token, itemId], {
-      input: password,
-      abortController,
-    });
-    return JSON.parse(stdout);
   }
 }
 

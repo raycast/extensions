@@ -3,5 +3,6 @@ export interface SessionState {
   readonly isLoading: boolean;
   readonly isLocked: boolean;
   readonly isAuthenticated: boolean;
+  readonly passwordHash: string | undefined;
   readonly lastActivityTime: Date | undefined;
 }

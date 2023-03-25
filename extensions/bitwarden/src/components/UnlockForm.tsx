@@ -2,9 +2,10 @@ import { Action, ActionPanel, Form, showToast, Toast } from "@raycast/api";
 import { useRef, useState } from "react";
 import { useBitwarden } from "~/context/bitwarden";
 import useVaultMessages from "~/utils/hooks/useVaultMessages";
+import { hashMasterPasswordForReprompting } from "~/utils/passwords";
 
 export type UnlockFormProps = {
-  onUnlock: (token: string) => void;
+  onUnlock: (token: string, passwordHash: string) => void;
 };
 
 /** Form for unlocking or logging in to the Bitwarden vault. */
@@ -15,14 +16,14 @@ const UnlockForm = (props: UnlockFormProps) => {
   const { userMessage, serverMessage, shouldShowServer } = useVaultMessages();
   const lockReason = useRef(bitwarden.lockReason).current;
 
-  async function onSubmit(values: { password: string }) {
-    if (values.password.length == 0) {
-      showToast(Toast.Style.Failure, "Failed to unlock vault.", "Missing password.");
+  async function onSubmit({ password }: { password: string }) {
+    if (password.length == 0) {
+      showToast(Toast.Style.Failure, "Failed to unlock vault", "Missing password");
       return;
     }
     try {
       setLoading(true);
-      const toast = await showToast(Toast.Style.Animated, "Unlocking Vault...", "Please wait.");
+      const toast = await showToast(Toast.Style.Animated, "Unlocking Vault...", "Please wait");
       const state = await bitwarden.status();
       if (state.status == "unauthenticated") {
         try {
@@ -30,16 +31,17 @@ const UnlockForm = (props: UnlockFormProps) => {
         } catch (error) {
           showToast(
             Toast.Style.Failure,
-            "Failed to unlock vault.",
+            "Failed to unlock vault",
             `Please check your ${shouldShowServer ? "Server URL, " : ""}API Key and Secret.`
           );
           return;
         }
       }
-      const sessionToken = await bitwarden.unlock(values.password);
+      const sessionToken = await bitwarden.unlock(password);
+      const passwordHash = await hashMasterPasswordForReprompting(password);
 
       toast.hide();
-      onUnlock(sessionToken);
+      onUnlock(sessionToken, passwordHash);
     } catch (error) {
       showToast(Toast.Style.Failure, "Failed to unlock vault", "Check your credentials");
     } finally {

@@ -1,5 +1,7 @@
 import { PassphraseOptions, PasswordGeneratorOptions, PasswordOptionField, PasswordOptions } from "~/types/passwords";
 
+export const REPROMPT_HASH_SALT = "foobarbazzybaz";
+
 export const DEFAULT_PASSWORD_OPTIONS: PasswordGeneratorOptions = {
   lowercase: true,
   uppercase: true,
