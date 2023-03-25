@@ -1,5 +1,6 @@
 import { Action, Icon } from "@raycast/api";
 import { useSelectedVaultItem } from "~/components/searchVault/context/vaultItem";
+import { getTransientCopyPreference } from "~/utils/preferences";
 
 function CopyUsernameAction() {
   const { login } = useSelectedVaultItem();
@@ -13,6 +14,7 @@ function CopyUsernameAction() {
       icon={Icon.Person}
       content={username}
       shortcut={{ modifiers: ["cmd"], key: "u" }}
+      transient={getTransientCopyPreference("other")}
     />
   );
 }

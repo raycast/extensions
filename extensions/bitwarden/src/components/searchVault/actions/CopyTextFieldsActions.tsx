@@ -2,6 +2,7 @@ import { Action, Clipboard, closeMainWindow, Icon, showHUD } from "@raycast/api"
 import { capitalize } from "~/utils/strings";
 import { useSelectedVaultItem } from "~/components/searchVault/context/vaultItem";
 import ActionWithReprompt from "~/components/actions/ActionWithReprompt";
+import { getTransientCopyPreference } from "~/utils/preferences";
 
 function CopyTextFieldsActions() {
   const { login, notes, card, identity, fields, name } = useSelectedVaultItem();
@@ -12,7 +13,7 @@ function CopyTextFieldsActions() {
   );
 
   const onRepromptAction = (content: string) => async () => {
-    await Clipboard.copy(content);
+    await Clipboard.copy(content, { transient: getTransientCopyPreference("other") });
     await showHUD("Copied to Clipboard");
     await closeMainWindow();
   };
@@ -28,6 +29,7 @@ function CopyTextFieldsActions() {
             title={`Copy ${title}`}
             icon={Icon.Clipboard}
             content={content}
+            transient={getTransientCopyPreference("other")}
           />
         );
       })}

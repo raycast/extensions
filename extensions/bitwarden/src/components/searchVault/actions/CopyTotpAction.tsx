@@ -3,6 +3,7 @@ import ActionWithReprompt from "~/components/actions/ActionWithReprompt";
 import { useBitwarden } from "~/context/bitwarden";
 import { useSession } from "~/context/session";
 import { useSelectedVaultItem } from "~/components/searchVault/context/vaultItem";
+import { getTransientCopyPreference } from "~/utils/preferences";
 
 function CopyTotpAction() {
   const { name, login } = useSelectedVaultItem();
@@ -16,7 +17,7 @@ function CopyTotpAction() {
     if (session.token) {
       const toast = await showToast(Toast.Style.Success, "Copying TOTP Code...");
       const totp = await bitwarden.getTotp(code, session.token);
-      await Clipboard.copy(totp);
+      await Clipboard.copy(totp, { transient: getTransientCopyPreference("other") });
       await toast.hide();
       await closeMainWindow({ clearRootSearch: true });
     } else {
