@@ -78,6 +78,11 @@ export function GroupListItem(props: { group: any }): JSX.Element {
               target={<MilestoneList group={group} />}
             />
             <GitLabOpenInBrowserAction
+              title="Wiki"
+              icon={{ source: GitLabIcons.wiki, tintColor: Color.PrimaryText }}
+              url={webUrl(props.group, "-/wikis")}
+            />
+            <GitLabOpenInBrowserAction
               title="Labels"
               icon={{ source: GitLabIcons.labels, tintColor: Color.PrimaryText }}
               url={webUrl(props.group, "-/labels")}

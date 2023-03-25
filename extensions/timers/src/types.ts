@@ -22,11 +22,13 @@ export interface Values {
   seconds: string;
   name: string;
   willBeSaved: boolean;
+  selectedSound: string;
 }
 
 export interface CustomTimer {
   name: string;
   timeInSeconds: number;
+  selectedSound: string;
 }
 
 export interface Preferences {

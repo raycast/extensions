@@ -77,6 +77,32 @@
           "required": true
         }
       ]
+    },
+    {
+      "name": "pad",
+      "title": "Pad Images",
+      "description": "Pad images to the specified size using the provided color",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "amount",
+          "placeholder": "Amount",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "hexcolor",
+          "placeholder": "Color",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "apply-filter",
+      "title": "Apply Image Filter",
+      "description": "Apply filters to images using Apple's CIFilters",
+      "mode": "view"
     }
   ],
   "dependencies": {

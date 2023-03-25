@@ -1,7 +1,7 @@
-import { Icon, showHUD } from "@raycast/api";
+import { Clipboard, Icon, showHUD } from "@raycast/api";
 import ActionWithReprompt from "~/components/actions/ActionWithReprompt";
 import { useSelectedVaultItem } from "~/components/searchVault/context/vaultItem";
-import { copyPassword as copyPasswordToClipboard } from "~/utils/clipboard";
+import { getTransientCopyPreference } from "~/utils/preferences";
 
 function CopyPasswordAction() {
   const { login, name } = useSelectedVaultItem();
@@ -10,8 +10,8 @@ function CopyPasswordAction() {
   if (!password) return null;
 
   const copyPassword = async () => {
-    const { copiedSecurely } = await copyPasswordToClipboard(password);
-    await showHUD(copiedSecurely ? "Copied password to clipboard" : "Copied to Clipboard");
+    await Clipboard.copy(password, { transient: getTransientCopyPreference("password") });
+    await showHUD("Copied password to clipboard");
   };
 
   return (

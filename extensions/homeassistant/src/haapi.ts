@@ -33,14 +33,16 @@ export class State {
 export class HomeAssistant {
   public token: string;
   public url: string;
-  private httpsAgent: Agent;
+  private httpsAgent?: Agent;
 
   constructor(url: string, token: string, ignoreCerts: boolean) {
     this.token = token;
     this.url = url;
-    this.httpsAgent = new Agent({
-      rejectUnauthorized: !ignoreCerts,
-    });
+    if (this.url.startsWith("https://")) {
+      this.httpsAgent = new Agent({
+        rejectUnauthorized: !ignoreCerts,
+      });
+    }
   }
 
   public urlJoin(text: string): string {
