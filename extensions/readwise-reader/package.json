@@ -54,6 +54,13 @@
           "required": true
         }
       ]
+    },
+    {
+      "name": "save-selection",
+      "title": "Save Selection",
+      "description": "Save the currently selected URL",
+      "mode": "no-view",
+      "icon": "reader-logo.png"
     }
   ],
   "dependencies": {
