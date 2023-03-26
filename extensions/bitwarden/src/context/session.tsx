@@ -73,11 +73,14 @@ export function SessionProvider(props: SessionProviderProps) {
       let lastActivityTime: Date | undefined;
       if (!token || !passwordHash) throw new ShouldLockVaultError();
 
-      if (lastActivityTimeString) {
+      if (lastActivityTimeString && vaultTimeoutMs >= 0) {
+        const lockReason = "Vault timed out due to inactivity";
+        if (vaultTimeoutMs === 0) throw new ShouldLockVaultError(lockReason);
+
         lastActivityTime = new Date(lastActivityTimeString);
         const timeElapseSinceLastPasswordEnter = lastActivityTime ? Date.now() - lastActivityTime.getTime() : 0;
         if (lastActivityTime != null && timeElapseSinceLastPasswordEnter >= vaultTimeoutMs) {
-          throw new ShouldLockVaultError("Vault timed out due to inactivity");
+          throw new ShouldLockVaultError(lockReason);
         }
       }
 
