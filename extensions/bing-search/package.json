@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "bing-search",
-  "title": "bing-search",
+  "title": "Bing Search",
   "description": "Bing search with autosuggestions",
   "icon": "command-icon.png",
   "author": "maver1ck",

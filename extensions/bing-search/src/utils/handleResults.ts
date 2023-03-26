@@ -39,16 +39,13 @@ export function getStaticResult(searchText: string): SearchResult[] {
 }
 
 export async function getAutoSearchResults(searchText: string, signal: any): Promise<SearchResult[]> {
-  const response = await fetch(
-    `https://www.bing.com/asjson.aspx?query=${encodeURIComponent(searchText)}`,
-    {
-      method: "get",
-      signal: signal,
-      headers: {
-        "Content-Type": "text/plain; charset=UTF-8",
-      },
-    }
-  );
+  const response = await fetch(`https://www.bing.com/asjson.aspx?query=${encodeURIComponent(searchText)}`, {
+    method: "get",
+    signal: signal,
+    headers: {
+      "Content-Type": "text/plain; charset=UTF-8",
+    },
+  });
 
   if (!response.ok) {
     return Promise.reject(response.statusText);
@@ -62,13 +59,12 @@ export async function getAutoSearchResults(searchText: string, signal: any): Pro
 
   json[1].map((item: string, i: number) => {
     results.push({
-        id: nanoid(),
-        query: item,
-        description: `Search Bing for '${item}'`,
-        url: `https://www.bing.com/search?q=${encodeURIComponent(item)}`,
+      id: nanoid(),
+      query: item,
+      description: `Search Bing for '${item}'`,
+      url: `https://www.bing.com/search?q=${encodeURIComponent(item)}`,
     });
-    }
-  );
+  });
 
   return results;
 }
