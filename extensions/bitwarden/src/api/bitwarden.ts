@@ -1,10 +1,10 @@
 import { environment, getPreferenceValues, LocalStorage, showToast, Toast } from "@raycast/api";
-import { execa, ExecaChildProcess } from "execa";
+import { execa, ExecaChildProcess, ExecaError, ExecaSyncError } from "execa";
 import { existsSync } from "fs";
 import { dirname } from "path/posix";
 import { CLINotFoundError } from "~/components/RootErrorBoundary";
 import { LOCAL_STORAGE_KEY, DEFAULT_SERVER_URL } from "~/constants/general";
-import { VaultState } from "~/types/general";
+import { VaultState, VaultStatus } from "~/types/general";
 import { Preferences } from "~/types/preferences";
 import { PasswordGeneratorOptions } from "~/types/passwords";
 import { Item } from "~/types/vault";
@@ -147,6 +147,17 @@ export class Bitwarden {
   async status(sessionToken?: string): Promise<VaultState> {
     const { stdout } = await this.exec(sessionToken == null ? ["status"] : ["status", "--session", sessionToken]);
     return JSON.parse(stdout);
+  }
+
+  async checkLockStatus(sessionToken?: string): Promise<VaultStatus> {
+    try {
+      await this.exec(["unlock", "--check", ...(sessionToken != null ? ["--session", sessionToken] : [])]);
+      return "unlocked";
+    } catch (error) {
+      const errorMessage = (error as ExecaError).stderr;
+      if (errorMessage === "Vault is locked.") return "locked";
+      return "unauthenticated";
+    }
   }
 
   async generatePassword(options?: PasswordGeneratorOptions, abortController?: AbortController): Promise<string> {

@@ -1,10 +1,8 @@
-import { Detail, getPreferenceValues, LocalStorage, showToast, Toast } from "@raycast/api";
+import { Detail, getPreferenceValues, LocalStorage } from "@raycast/api";
 import { createContext, PropsWithChildren, useContext, useEffect, useMemo, useReducer } from "react";
-import { Bitwarden } from "~/api/bitwarden";
 import UnlockForm from "~/components/UnlockForm";
 import { LOCAL_STORAGE_KEY } from "~/constants/general";
 import { useBitwarden } from "~/context/bitwarden";
-import { VaultStatus } from "~/types/general";
 import { Preferences } from "~/types/preferences";
 import { SessionState } from "~/types/session";
 import { hashMasterPasswordForReprompting } from "~/utils/passwords";
@@ -35,13 +33,6 @@ export type SessionProviderProps = PropsWithChildren<{
   unlock?: boolean;
 }>;
 
-class ShouldLockVaultError extends Error {
-  constructor(message?: string) {
-    super(message);
-    this.name = "ShouldLockVaultError";
-  }
-}
-
 /**
  * Component which provides a session via the {@link useSession} hook.
  * @param props.unlock If true, an unlock form will be displayed if the vault is locked or unauthenticated.
@@ -61,6 +52,17 @@ export function SessionProvider(props: SessionProviderProps) {
     loadSavedSession();
   }, [bitwarden]);
 
+  useEffect(() => {
+    // check if the vault is locked or unauthenticated in the background
+    if (!state.token) return;
+    const checkVaultStatus = async () => {
+      const status = await bitwarden.checkLockStatus(state.token);
+      if (status === "unauthenticated") return await handleLogout();
+      if (status === "locked") return await handleLock();
+    };
+    checkVaultStatus();
+  }, [state.token]);
+
   async function loadSavedSession() {
     try {
       const vaultTimeoutMs = +getPreferenceValues<Preferences>().repromptIgnoreDuration;
@@ -71,71 +73,35 @@ export function SessionProvider(props: SessionProviderProps) {
       ]);
 
       let lastActivityTime: Date | undefined;
-      if (!token || !passwordHash) throw new ShouldLockVaultError();
+      if (!token || !passwordHash) throw new NoAuthenticationError();
 
       if (lastActivityTimeString && vaultTimeoutMs >= 0) {
         const lockReason = "Vault timed out due to inactivity";
-        if (vaultTimeoutMs === 0) throw new ShouldLockVaultError(lockReason);
+        if (vaultTimeoutMs === 0) throw new VaultTimedOutError(lockReason);
 
         lastActivityTime = new Date(lastActivityTimeString);
         const timeElapseSinceLastPasswordEnter = lastActivityTime ? Date.now() - lastActivityTime.getTime() : 0;
         if (lastActivityTime != null && timeElapseSinceLastPasswordEnter >= vaultTimeoutMs) {
-          throw new ShouldLockVaultError(lockReason);
+          throw new VaultTimedOutError(lockReason);
         }
       }
 
-      await update({ token, passwordHash, lastActivityTime });
+      setState({ token, passwordHash, lastActivityTime, isAuthenticated: true, isLocked: false });
     } catch (error) {
-      const reason = error instanceof ShouldLockVaultError ? error.message : undefined;
+      const reason = error instanceof VaultTimedOutError ? error.message : undefined;
       const { status } = await bitwarden.status();
-      await deleteToken();
+      await clearSessionStorage();
       if (status !== "unauthenticated") {
         await bitwarden.lock(reason);
       }
     }
   }
 
-  /**
-   * Determines the current status of the session.
-   *
-   * This is done by trying to get the list of items and seeing how the command responds to that.
-   * Note: Cannot use `bw status` due to a bug.
-   *
-   * @see https://github.com/bitwarden/clients/issues/2729
-   * @see https://github.com/raycast/extensions/pull/3413#discussion_r1014624155
-   */
-  async function getSessionStatus(api: Bitwarden, token: string | undefined): Promise<VaultStatus> {
-    if (token == null) return "unauthenticated";
-
-    try {
-      await api.listItems(token ?? "");
-      return "unlocked";
-    } catch {
-      // Failed. Probably locked.
-      return "locked";
-    }
-  }
-
-  /**
-   * Refresh the state of the session provider.
-   * This updates the component state.
-   *
-   * @param newState The state to update.
-   */
-  async function update(newState: Partial<SessionState>): Promise<void> {
-    let updatedState = { ...newState };
-    if ("token" in newState) {
-      const status = await getSessionStatus(bitwarden, newState.token);
-
-      updatedState = {
-        ...newState,
-        isLoading: false,
-        isLocked: status === "locked" || status === "unauthenticated",
-        isAuthenticated: status !== "unauthenticated",
-      };
-    }
-
-    setState(updatedState);
+  async function clearSessionStorage() {
+    await Promise.all([
+      LocalStorage.removeItem(LOCAL_STORAGE_KEY.SESSION_TOKEN),
+      LocalStorage.removeItem(LOCAL_STORAGE_KEY.REPROMPT_HASH),
+    ]);
   }
 
   async function handleUnlock(token: string, passwordHash: string) {
@@ -143,29 +109,19 @@ export function SessionProvider(props: SessionProviderProps) {
       LocalStorage.setItem(LOCAL_STORAGE_KEY.SESSION_TOKEN, token),
       LocalStorage.setItem(LOCAL_STORAGE_KEY.REPROMPT_HASH, passwordHash),
     ]);
-    await update({ token, passwordHash });
+    setState({ token, passwordHash, isLocked: false });
   }
 
-  async function deleteToken() {
-    await Promise.all([
-      LocalStorage.removeItem(LOCAL_STORAGE_KEY.SESSION_TOKEN),
-      LocalStorage.removeItem(LOCAL_STORAGE_KEY.REPROMPT_HASH),
-    ]);
-    await update({ token: undefined, passwordHash: undefined });
+  async function handleLock(reason?: string) {
+    await bitwarden.lock(reason);
+    await clearSessionStorage();
+    setState({ token: undefined, passwordHash: undefined, isLocked: true });
   }
 
-  async function lockVault() {
-    const toast = await showToast({ title: "Locking Vault...", style: Toast.Style.Animated });
-    await bitwarden.lock("Manually locked by the user");
-    await deleteToken();
-    await toast.hide();
-  }
-
-  async function logoutVault() {
-    const toast = await showToast({ title: "Logging Out...", style: Toast.Style.Animated });
+  async function handleLogout() {
     await bitwarden.logout();
-    await deleteToken();
-    await toast.hide();
+    await clearSessionStorage();
+    setState({ token: undefined, passwordHash: undefined, isAuthenticated: false });
   }
 
   async function confirmMasterPassword(password: string): Promise<boolean> {
@@ -180,11 +136,11 @@ export function SessionProvider(props: SessionProviderProps) {
       isAuthenticated: state.isAuthenticated,
       isLocked: state.isLocked,
       active,
-      lock: lockVault,
-      logout: logoutVault,
+      lock: handleLock,
+      logout: handleLogout,
       confirmMasterPassword,
     }),
-    [state, active, lockVault, logoutVault, confirmMasterPassword]
+    [state, active, handleLock, handleLogout, confirmMasterPassword]
   );
 
   if (state.isLoading) return <Detail isLoading />;
@@ -196,6 +152,19 @@ export function SessionProvider(props: SessionProviderProps) {
       {needsUnlockForm && unlock ? <UnlockForm onUnlock={handleUnlock} /> : state.token ? children : null}
     </SessionContext.Provider>
   );
+}
+
+class NoAuthenticationError extends Error {
+  constructor(message?: string) {
+    super(message);
+    this.name = "NoAuthenticationError";
+  }
+}
+class VaultTimedOutError extends Error {
+  constructor(message?: string) {
+    super(message);
+    this.name = "ShouldLockVaultError";
+  }
 }
 
 export function useSession(): Session {

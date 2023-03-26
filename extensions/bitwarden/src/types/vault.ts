@@ -13,7 +13,7 @@ export interface Item {
   login?: Login;
   collectionIds: string[];
   revisionDate: string;
-  identity?: { [key: string]: null | string };
+  identity?: Identity;
   fields?: Field[];
   passwordHistory?: PasswordHistory[];
   secureNote?: SecureNote;
@@ -27,19 +27,22 @@ export interface Folder {
 }
 
 export interface Identity {
-  name: string;
-  identity: string;
-  title: string;
-  firstName: string;
-  lastName: string;
-  address1: string;
-  city: string;
-  postalCode: number;
-  country: string;
-  company: string;
-  email: string;
-  phone: number;
-  username: string;
+  middleName: string | null;
+  lastName: string | null;
+  address1: string | null;
+  address2: string | null;
+  address3: string | null;
+  city: string | null;
+  state: string | null;
+  postalCode: string | null;
+  country: string | null;
+  company: string | null;
+  email: string | null;
+  phone: string | null;
+  ssn: string | null;
+  username: string | null;
+  passportNumber: string | null;
+  licenseNumber: string | null;
 }
 
 export interface Card {
@@ -78,3 +81,21 @@ export const enum Reprompt {
   NO = 0,
   REQUIRED = 1,
 }
+
+export type CacheFolder = Pick<Folder, "object" | "id" | "name">;
+
+export type CacheVaultList = {
+  items: Item[];
+  folders: Folder[];
+};
+
+export type CacheItem = Pick<
+  Item,
+  "object" | "id" | "organizationId" | "folderId" | "type" | "name" | "login" | "revisionDate" | "favorite"
+> & {
+  hasNotes: boolean;
+  revisionDate: string;
+  identity?: string[];
+  fields?: string[];
+  card?: string[];
+};
