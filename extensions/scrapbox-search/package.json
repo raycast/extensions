@@ -5,7 +5,6 @@
   "description": "Search Scrapbox pages and open quickly.",
   "icon": "command-icon.png",
   "author": "zett-8",
-  "owner": "zett",
   "categories": [
     "Documentation",
     "Productivity",
