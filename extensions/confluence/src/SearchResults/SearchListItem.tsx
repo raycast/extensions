@@ -1,4 +1,4 @@
-import { List, Icon, Color } from "@raycast/api";
+import { List, Icon, Color, Image } from "@raycast/api";
 import { SearchResult } from "../api/confluence";
 
 export function SearchListItem({ searchResult, actions }: { searchResult: SearchResult; actions: React.ReactNode }) {
@@ -14,7 +14,14 @@ export function SearchListItem({ searchResult, actions }: { searchResult: Search
     });
   }
 
-  const { lastSeenAt, modifiedAt } = searchResult;
+  const { lastSeenAt, modifiedAt, author } = searchResult;
+
+  if (author) {
+    accessories.push({
+      icon: { source: author.profilePicture, mask: Image.Mask.Circle },
+      tooltip: `Created by ${author.name}`,
+    });
+  }
 
   if (lastSeenAt) {
     const modifiedSinceLastSeen = modifiedAt && lastSeenAt < modifiedAt;
