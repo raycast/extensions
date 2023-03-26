@@ -1,5 +1,6 @@
 import { Cache, showToast, Toast } from "@raycast/api";
 import { createContext, PropsWithChildren, useContext, useEffect, useMemo, useReducer } from "react";
+import { useVaultItemPublisher } from "~/components/searchVault/context/vaultListeners";
 import { useBitwarden } from "~/context/bitwarden";
 import { useSession } from "~/context/session";
 import { Folder, Item } from "~/types/vault";
@@ -33,6 +34,7 @@ const getCachesItemsAndFolders = (): { items: Item[]; folders: Folder[] } => {
 export const VaultProvider = ({ children }: PropsWithChildren) => {
   const session = useSession();
   const bitwarden = useBitwarden();
+  const publishItems = useVaultItemPublisher();
   const [state, setState] = useReducer(
     (previous: VaultState, next: Partial<VaultState>) => ({ ...previous, ...next }),
     { ...initialState, ...getCachesItemsAndFolders() }
@@ -56,6 +58,7 @@ export const VaultProvider = ({ children }: PropsWithChildren) => {
         bitwarden.listFolders(sessionToken),
         bitwarden.listItems(sessionToken),
       ]);
+      publishItems(items);
 
       const cacheItems = prepareItemsForCache(items);
       const cacheFolders = prepareFoldersForCache(folders);

@@ -54,8 +54,12 @@ function SessionProvider(props: SessionProviderProps) {
     try {
       const { shouldLockVault, lockReason, ...savedSession } = await getSavedSession();
       dispatch({ type: "loadSavedState", shouldLockVault, ...savedSession });
+
       if (shouldLockVault) {
-        await bitwarden.lock(lockReason);
+        const { status } = await bitwarden.status();
+        if (status !== "unauthenticated") {
+          await bitwarden.lock(lockReason);
+        }
         await Storage.clearSession();
       }
     } catch (error) {

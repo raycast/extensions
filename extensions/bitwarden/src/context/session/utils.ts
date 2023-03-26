@@ -35,7 +35,13 @@ export const useSessionReducer = () => {
         return { ...state, token: undefined, passwordHash: undefined, isLoading: false, isLocked: true };
       }
       case "unlock": {
-        return { ...state, token: action.token, passwordHash: action.passwordHash, isLocked: false };
+        return {
+          ...state,
+          token: action.token,
+          passwordHash: action.passwordHash,
+          isLocked: false,
+          isAuthenticated: true,
+        };
       }
       case "logout": {
         return { ...state, token: undefined, passwordHash: undefined, isAuthenticated: false };
