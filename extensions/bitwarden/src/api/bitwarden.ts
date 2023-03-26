@@ -1,5 +1,5 @@
 import { environment, getPreferenceValues, LocalStorage, showToast, Toast } from "@raycast/api";
-import { execa, ExecaChildProcess, ExecaError, ExecaSyncError } from "execa";
+import { execa, ExecaChildProcess, ExecaError } from "execa";
 import { existsSync } from "fs";
 import { dirname } from "path/posix";
 import { CLINotFoundError } from "~/components/RootErrorBoundary";

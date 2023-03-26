@@ -1,10 +1,10 @@
 import { Cache, showToast, Toast } from "@raycast/api";
-import { useCachedState } from "@raycast/utils";
 import { createContext, PropsWithChildren, useContext, useEffect, useMemo, useReducer } from "react";
 import { useBitwarden } from "~/context/bitwarden";
 import { useSession } from "~/context/session";
 import { Folder, Item } from "~/types/vault";
 import { prepareFoldersForCache, prepareItemsForCache } from "~/utils/cache";
+import { captureException } from "~/utils/development";
 
 export type VaultState = {
   items: Item[];
@@ -65,8 +65,9 @@ export const VaultProvider = ({ children }: PropsWithChildren) => {
 
       items.sort(favoriteItemsFirstSorter);
       setState({ isLoading: false, items, folders });
-    } catch {
-      showToast(Toast.Style.Failure, "Failed to load vault.");
+    } catch (error) {
+      await showToast(Toast.Style.Failure, "Failed to load vault.");
+      captureException("Failed to load vault items", error);
     }
   }
 

@@ -1,6 +1,7 @@
-import { Clipboard, closeMainWindow, getPreferenceValues, showHUD, showToast, Toast } from "@raycast/api";
+import { Clipboard, closeMainWindow, environment, getPreferenceValues, showHUD, showToast, Toast } from "@raycast/api";
 import { Bitwarden } from "~/api/bitwarden";
 import { Preferences } from "~/types/preferences";
+import { captureException } from "~/utils/development";
 import { getPasswordGeneratorOptions } from "~/utils/passwords";
 import { getTransientCopyPreference } from "~/utils/preferences";
 
@@ -29,9 +30,10 @@ async function generatePasswordQuickCommand() {
     const options = await getPasswordGeneratorOptions();
     const password = await bitwarden.generatePassword(options);
     await actions[generatePasswordQuickAction](password);
-  } catch {
+  } catch (error) {
     toast.style = Toast.Style.Failure;
     toast.message = "Failed to generate";
+    captureException("Failed to generate password", error);
   }
 }
 
