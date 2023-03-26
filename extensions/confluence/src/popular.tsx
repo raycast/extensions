@@ -1,3 +1,5 @@
+import "./util/fetchPolyfill";
+
 import { Color, Icon, Image, List } from "@raycast/api";
 import { useState } from "react";
 import { useAuthorizeSite } from "./util/hooks";

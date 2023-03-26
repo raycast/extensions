@@ -1,3 +1,5 @@
+import "./util/fetchPolyfill";
+
 import { List, Color } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { useAuthorizeSite } from "./util/hooks";

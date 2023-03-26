@@ -1,3 +1,4 @@
+import "./util/fetchPolyfill";
 import { useState, useEffect } from "react";
 import { ActionPanel, Action, Detail, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
 import { setActiveSite, Site } from "./api/site";
