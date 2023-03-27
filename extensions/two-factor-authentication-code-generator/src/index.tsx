@@ -8,7 +8,7 @@ import {
   useNavigation,
   getPreferenceValues,
   LocalStorage,
-  Toast,
+  Toast
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { decode } from "hi-base32";
