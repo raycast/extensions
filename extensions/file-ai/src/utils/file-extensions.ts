@@ -1,4 +1,5 @@
 export const textFileExtensions = [
+  "rtf",
   "1",
   "1in",
   "1m",

@@ -60,6 +60,26 @@
           "type": "text"
         }
       ]
+    },
+    {
+      "name": "chat",
+      "title": "File AI Chat",
+      "description": "Start an interactive chat with the context of selected files provided'",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "initialQuery",
+          "placeholder": "Initial Query",
+          "required": false,
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "name": "import-commands",
+      "title": "Import Custom File AI Commands",
+      "description": "Import custom File AI commands from a JSON string",
+      "mode": "view"
     }
   ],
   "dependencies": {

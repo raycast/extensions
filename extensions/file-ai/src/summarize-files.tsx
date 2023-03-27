@@ -1,7 +1,8 @@
 import { Detail, popToRoot, showToast, Toast, useUnstableAI } from "@raycast/api";
 import { useEffect } from "react";
-import { ERRORTYPE, installDefaults, useFileContents } from "./file-utils";
+import { ERRORTYPE, installDefaults, useFileContents } from "./utils/file-utils";
 import ResponseActions from "./ResponseActions";
+import { imageFileExtensions } from "./utils/file-extensions";
 
 export default function Command() {
   const { selectedFiles, contentPrompts, loading, errorType } = useFileContents();
@@ -10,8 +11,17 @@ export default function Command() {
     installDefaults();
   }, []);
 
-  const basePrompt =
-    "Summarize the content of the following files, using the file names as headings. Briefly discuss any lists the files contain instead of listing all elements. Based on all the information I've given you, what are other things you infer about the file or its topic, in simple terms? Format the response as markdown paragraphs. Also, give a list of relevant links and a brief description of them.";
+  const matchAnyImageExtensions = `/(\\.${imageFileExtensions.join("|\\.")})/`;
+  const svgSelected = selectedFiles?.join("").toLowerCase().includes(".svg");
+  const imageSelected = selectedFiles?.join("").toLowerCase().search(matchAnyImageExtensions) != -1;
+
+  const basePrompt = `I want you to derive insights from information I provide about the content of files. You will respond with a descriptive discussion of the file, its main topics, and its significance. You will use all information provided to infer more insights. Provide several insights derived from metadata or EXIF data. Give an overview of lists, content, the position of objects and rectangles, etc. without listing specific details. Do not mention coordinates. Don't mention that information is provided. Don't repeat yourself. Don't list properties without describing their value. ${
+    imageSelected
+      ? "Discuss the payload of any barcodes or QR codes. For images, use the general size and arrangement of objects to help predict what the file is about."
+      : ""
+  } ${
+    svgSelected ? "For SVGs, predict what object(s) the overall code will render as." : ""
+  } Draw connections between different pieces of information and discuss the significance of any relationships therein. Use the file names as markdown headings. Limit your discussion to one short paragraph. At the end, you will include a list of relevant links formatted as a markdown list. \nHere are the files:\n###\n`;
 
   const contentPromptString = contentPrompts.join("\n");
   const fullPrompt = basePrompt + contentPromptString;

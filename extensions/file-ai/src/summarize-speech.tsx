@@ -1,6 +1,6 @@
 import { Detail, popToRoot, showToast, Toast, useUnstableAI } from "@raycast/api";
 import { useEffect } from "react";
-import { ERRORTYPE, installDefaults, useAudioContents } from "./file-utils";
+import { ERRORTYPE, installDefaults, useAudioContents } from "./utils/file-utils";
 import ResponseActions from "./ResponseActions";
 
 export default function Command() {

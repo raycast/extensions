@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { installDefaults } from "./file-utils";
+import { installDefaults } from "./utils/file-utils";
 import FileAICommandForm from "./FileAICommandForm";
 
 export default function Command() {

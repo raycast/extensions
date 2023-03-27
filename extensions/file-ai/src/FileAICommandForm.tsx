@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Form, showToast, Icon, LocalStorage, useNavigation } from "@raycast/api";
 import { useForm, FormValidation } from "@raycast/utils";
-import { Command } from "./types";
+import { Command } from "./utils/types";
 
 interface CommandFormValues {
   name: string;
@@ -59,7 +59,7 @@ export default function FileAICommandForm(props: {
         }
 
         const num = parseInt(value);
-        if (!num) {
+        if (num == undefined || num < 0) {
           return "Invalid number";
         }
       },

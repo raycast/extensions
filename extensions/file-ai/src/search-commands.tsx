@@ -1,13 +1,16 @@
-import { Action, ActionPanel, Alert, confirmAlert, Icon, List, LocalStorage } from "@raycast/api";
+import { Action, ActionPanel, Alert, Clipboard, confirmAlert, Icon, List, LocalStorage, showHUD } from "@raycast/api";
 import { useEffect, useState } from "react";
 import CommandResponse from "./CommandResponse";
-import { installDefaults } from "./file-utils";
+import { installDefaults } from "./utils/file-utils";
 import FileAICommandForm from "./FileAICommandForm";
-import { Command } from "./types";
+import { Command } from "./utils/types";
 
 export default function Command(props: { arguments: { commandName: string } }) {
   const { commandName } = props.arguments;
   const [commands, setCommands] = useState<Command[]>();
+  const [searchText, setSearchText] = useState<string | undefined>(
+    commandName == undefined ? undefined : commandName.trim()
+  );
 
   useEffect(() => {
     /* Add default commands if necessary, then get all commands */
@@ -80,6 +83,19 @@ export default function Command(props: { arguments: { commandName: string } }) {
                 content={JSON.stringify(command)}
                 shortcut={{ modifiers: ["cmd", "shift"], key: "j" }}
               />
+              <Action
+                title="Export All Commands"
+                icon={Icon.CopyClipboard}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
+                onAction={async () => {
+                  Promise.resolve(
+                    LocalStorage.allItems().then((items) => {
+                      delete items["--defaults-installed"];
+                      Clipboard.copy(JSON.stringify(items)).then(() => showHUD("Copied All File AI Commads"));
+                    })
+                  );
+                }}
+              />
             </ActionPanel.Section>
 
             <ActionPanel.Section title="Command Controls">
@@ -143,7 +159,9 @@ export default function Command(props: { arguments: { commandName: string } }) {
   return (
     <List
       isLoading={!commands}
-      searchText={commandName != "" ? commandName : undefined}
+      searchText={searchText}
+      onSearchTextChange={(text) => setSearchText(text)}
+      filtering={true}
       searchBarPlaceholder={`Search ${
         !commands || commands.length == 1 ? "commands..." : `${commands.length} commands...`
       }`}

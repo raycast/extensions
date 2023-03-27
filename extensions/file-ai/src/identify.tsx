@@ -1,10 +1,10 @@
 import { Detail, popToRoot, showToast, Toast, useUnstableAI } from "@raycast/api";
 import { useEffect } from "react";
-import { ERRORTYPE, installDefaults, useFileContents } from "./file-utils";
+import { ERRORTYPE, installDefaults, useFileContents } from "./utils/file-utils";
 import ResponseActions from "./ResponseActions";
 
 export default function Command() {
-  const { selectedFiles, contentPrompts, loading, errorType } = useFileContents();
+  const { contentPrompts, loading, errorType } = useFileContents();
 
   useEffect(() => {
     installDefaults();

@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, Keyboard } from "@raycast/api";
+import { Action, ActionPanel, Icon, Keyboard, launchCommand, LaunchType } from "@raycast/api";
 
 export default function ResponseActions(props: {
   commandSummary: string;
@@ -14,7 +14,7 @@ export default function ResponseActions(props: {
         <Action.CopyToClipboard
           title={`Copy ${commandSummary} To Clipboard`}
           content={responseText}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+          shortcut={{ modifiers: ["cmd"], key: "c" }}
         />
         <Action.CopyToClipboard
           title={`Copy Prompt To Clipboard`}
@@ -26,6 +26,20 @@ export default function ResponseActions(props: {
           onAction={reattempt}
           icon={Icon.ArrowClockwise}
           shortcut={{ modifiers: ["cmd"], key: "r" }}
+        />
+        <Action
+          title="Open Chat"
+          onAction={() => {
+            launchCommand({
+              name: "chat",
+              arguments: {
+                initialQuery: `Your last response: "${responseText}" {Summarize your last response.}`,
+              },
+              type: LaunchType.UserInitiated,
+            });
+          }}
+          icon={Icon.Message}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
         />
       </ActionPanel.Section>
 
