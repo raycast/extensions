@@ -18,6 +18,7 @@ export async function getCurrentlyPlaying() {
   }
 
   // Sometimes the `getMePlayerCurrentlyPlaying` doesn't return anything. This happens after some minutes of inactivity. So we fallback to the AppleScript API, to get the ID of the currently playing track/episode. We can then use the ID to fetch the track/episode data from the Spotify API.
+  // https://community.spotify.com/t5/Spotify-for-Developers/API-get-currently-playing-track-return-empty/td-p/4956929
   if (isSpotifyInstalled) {
     const script = `if application "Spotify" is running then
   tell application "Spotify"
