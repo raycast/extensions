@@ -11,17 +11,18 @@ export default async function Command(props: { arguments: { degrees: string } })
     return;
   }
 
+  const toast = await showToast({ title: "Rotation in progress...", style: Toast.Style.Animated });
+
   if (selectedImages) {
     const pluralized = `image${selectedImages.length === 1 ? "" : "s"}`;
     try {
       const pathStrings = '"' + selectedImages.join('" "') + '"';
       execSync(`sips --rotate ${degrees} ${pathStrings}`);
-      await showToast({ title: `Rotated ${selectedImages.length.toString()} ${pluralized} by ${degrees} degrees` });
+      toast.title = `Rotated ${selectedImages.length.toString()} ${pluralized} by ${degrees} degrees`;
+      toast.style = Toast.Style.Success;
     } catch {
-      await showToast({
-        title: `Failed to rotate ${selectedImages.length.toString()} ${pluralized}`,
-        style: Toast.Style.Failure,
-      });
+      toast.title = `Failed to rotate ${selectedImages.length.toString()} ${pluralized}`;
+      toast.style = Toast.Style.Failure;
     }
   }
 }

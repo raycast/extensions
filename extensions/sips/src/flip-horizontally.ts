@@ -10,17 +10,18 @@ export default async function Command() {
     return;
   }
 
+  const toast = await showToast({ title: "Flipping in progress...", style: Toast.Style.Animated });
+
   if (selectedImages) {
     const pluralized = `image${selectedImages.length === 1 ? "" : "s"}`;
     try {
       const pathStrings = '"' + selectedImages.join('" "') + '"';
       execSync(`sips --flip horizontal ${pathStrings}`);
-      await showToast({ title: `Flipped ${selectedImages.length.toString()} ${pluralized} horizontally` });
+      toast.title = `Flipped ${selectedImages.length.toString()} ${pluralized} horizontally`;
+      toast.style = Toast.Style.Success;
     } catch {
-      await showToast({
-        title: `Failed to flip ${selectedImages.length.toString()} ${pluralized}`,
-        style: Toast.Style.Failure,
-      });
+      toast.title = `Failed to flip ${selectedImages.length.toString()} ${pluralized}`;
+      toast.style = Toast.Style.Failure;
     }
   }
 }

@@ -18,6 +18,8 @@ export default async function Command(props: { arguments: { scaleFactor: string 
     return;
   }
 
+  const toast = await showToast({ title: "Scaling in progress...", style: Toast.Style.Animated });
+
   if (selectedImages) {
     const pluralized = `image${selectedImages.length === 1 ? "" : "s"}`;
     try {
@@ -31,13 +33,12 @@ export default async function Command(props: { arguments: { scaleFactor: string 
         execSync(`sips --resampleHeightWidth ${oldHeight * scaleNumber} ${oldWidth * scaleNumber} "${imagePath}"`);
       }
 
-      await showToast({ title: `Scaled ${selectedImages.length.toString()} ${pluralized}` });
+      toast.title = `Scaled ${selectedImages.length.toString()} ${pluralized}`;
+      toast.style = Toast.Style.Success;
     } catch (error) {
       console.log(error);
-      await showToast({
-        title: `Failed to scale ${selectedImages.length.toString()} ${pluralized}`,
-        style: Toast.Style.Failure,
-      });
+      toast.title = `Failed to scale ${selectedImages.length.toString()} ${pluralized}`;
+      toast.style = Toast.Style.Failure;
     }
   }
 }

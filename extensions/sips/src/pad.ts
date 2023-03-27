@@ -26,6 +26,8 @@ export default async function Command(props: { arguments: { amount: string; hexc
     return;
   }
 
+  const toast = await showToast({ title: "Padding in progress...", style: Toast.Style.Animated });
+
   if (selectedImages) {
     const pluralized = `image${selectedImages.length === 1 ? "" : "s"}`;
     try {
@@ -43,12 +45,11 @@ export default async function Command(props: { arguments: { amount: string; hexc
         );
       }
 
-      await showToast({ title: `Added padding to ${selectedImages.length.toString()} ${pluralized}` });
+      toast.title = `Added padding to ${selectedImages.length.toString()} ${pluralized}`;
+      toast.style = Toast.Style.Success;
     } catch {
-      await showToast({
-        title: `Failed to pad ${selectedImages.length.toString()} ${pluralized}`,
-        style: Toast.Style.Failure,
-      });
+      toast.title = `Failed to pad ${selectedImages.length.toString()} ${pluralized}`;
+      toast.style = Toast.Style.Failure;
     }
   }
 }

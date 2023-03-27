@@ -28,6 +28,8 @@ export default async function Command(props: { arguments: { width: string; heigh
     return;
   }
 
+  const toast = await showToast({ title: "Resizing in progress...", style: Toast.Style.Animated });
+
   if (selectedImages) {
     const pluralized = `image${selectedImages.length === 1 ? "" : "s"}`;
     try {
@@ -41,13 +43,12 @@ export default async function Command(props: { arguments: { width: string; heigh
         execSync(`sips --resampleHeightWidth ${heightInt} ${widthInt} ${pathStrings}`);
       }
 
-      await showToast({ title: `Resized ${selectedImages.length.toString()} ${pluralized}` });
+      toast.title = `Resized ${selectedImages.length.toString()} ${pluralized}`;
+      toast.style = Toast.Style.Success;
     } catch (error) {
       console.log(error);
-      await showToast({
-        title: `Failed to resize ${selectedImages.length.toString()} ${pluralized}`,
-        style: Toast.Style.Failure,
-      });
+      toast.title = `Failed to resize ${selectedImages.length.toString()} ${pluralized}`;
+      toast.style = Toast.Style.Failure;
     }
   }
 }
