@@ -1,11 +1,9 @@
-import { ActionPanel, showToast, Toast, Detail, List, Color, Action, Icon, useNavigation } from "@raycast/api";
+import { ActionPanel, showToast, Toast, List, Color, Action, Icon, useNavigation } from "@raycast/api";
 import { useEffect, useState } from "react";
 import TransferDetails from "../components/TransferDetails";
 import FileBrowser from "./FileBrowser";
 import PutioAPI, { Transfer } from "@putdotio/api-client";
 import useInterval from "../hooks/useInterval";
-import formatString from "../utils/formatString";
-import formatDate from "../utils/formatDate";
 import timeDifference from "../utils/timeDifference";
 import changeTimezone from "../utils/changeTimezone";
 import formatSize from "../utils/formatSize";
@@ -19,7 +17,7 @@ function TransferList() {
   const [error, setError] = useState<Error>();
   const { push } = useNavigation();
 
-  useHandleError(error!);
+  useHandleError(error ? error : Error());
 
   //
   // Get list of transfers
@@ -61,7 +59,7 @@ function TransferList() {
 
       // Query for a list of transfers
       putioAPI.Transfers.Cancel([cancelTransferId])
-        .then((t) => {
+        .then(() => {
           setCancelTransferId(undefined); // Clear the delete transfer id.
           showToast({
             style: Toast.Style.Success,
@@ -81,6 +79,7 @@ function TransferList() {
       {transfers &&
         Object.values(transfers).map((transfer) => {
           let icon = null;
+          let downloadPercent = "";
           switch (transfer.status) {
             case "PREPARING_DOWNLOAD":
             case "DOWNLOADING":
@@ -109,7 +108,7 @@ function TransferList() {
           if (isShowingDetail == false) {
             switch (transfer.status) {
               case "DOWNLOADING":
-                const downloadPercent = parseFloat(String((transfer.downloaded / transfer.size) * 100)).toFixed(1);
+                downloadPercent = parseFloat(String((transfer.downloaded / transfer.size) * 100)).toFixed(1);
                 accessories.push({ text: `${downloadPercent}%` });
                 break;
               default:

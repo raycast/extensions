@@ -1,8 +1,7 @@
 import { Fragment } from "react";
-import { Color, Icon, List } from "@raycast/api";
+import { Icon, List } from "@raycast/api";
 import formatDate from "../utils/formatDate";
 import formatSize from "../utils/formatSize";
-import PutioAPI, { Transfer } from "@putdotio/api-client";
 import timeDifference from "../utils/timeDifference";
 import changeTimezone from "../utils/changeTimezone";
 
@@ -15,16 +14,16 @@ function TransferDetails({ transferDetails }: { transferDetails: Transfer }) {
           <List.Item.Detail.Metadata.Label title="Transfer Details" />
           <List.Item.Detail.Metadata.Separator />
           <Fragment key="name">
-            <List.Item.Detail.Metadata.Label title="Name" text={transferDetails.name!} icon={Icon.Document} />
+            <List.Item.Detail.Metadata.Label title="Name" text={transferDetails.name ? transferDetails.name : "(unknown)"} icon={Icon.Document} />
             <List.Item.Detail.Metadata.Separator />
           </Fragment>
           {(transferDetails.status == "COMPLETED" || transferDetails.status == "SEEDING") && (
             <Fragment key="finishedAt">
               <List.Item.Detail.Metadata.Label
                 title="Finished"
-                text={`${formatDate(new Date(transferDetails.finished_at!))} (${timeDifference(
+                text={`${formatDate(new Date(transferDetails.finished_at))} (${timeDifference(
                   now,
-                  new Date(transferDetails.finished_at!)
+                  new Date(transferDetails.finished_at)
                 )})`}
                 icon={Icon.Calendar}
               />
@@ -47,7 +46,7 @@ function TransferDetails({ transferDetails }: { transferDetails: Transfer }) {
             <Fragment key="downloaded">
               <List.Item.Detail.Metadata.Label
                 title="Downloaded"
-                text={`${formatSize(transferDetails.downloaded!, true, 2)}`}
+                text={`${formatSize(transferDetails.downloaded, true, 2)}`}
                 icon={Icon.Download}
               />
               <List.Item.Detail.Metadata.Separator />

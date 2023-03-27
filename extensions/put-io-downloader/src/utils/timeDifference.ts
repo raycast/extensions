@@ -1,5 +1,3 @@
-import { time } from "console";
-
 const timeDifference = (current: Date, previous: Date) => {
   const msPerMinute = 60 * 1000;
   const msPerHour = msPerMinute * 60;

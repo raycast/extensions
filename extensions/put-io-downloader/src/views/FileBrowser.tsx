@@ -1,14 +1,13 @@
-import { ActionPanel, showToast, Toast, showHUD, Detail, List, Action, Icon, useNavigation } from "@raycast/api";
+import { ActionPanel, showToast, Toast, Detail, List, Action, Icon, useNavigation } from "@raycast/api";
 import { useEffect, useState } from "react";
 import FileDetails from "../components/FileDetails";
 import formatString from "../utils/formatString";
-import formatDate from "../utils/formatDate";
 import formatSize from "../utils/formatSize";
 import changeTimezone from "../utils/changeTimezone";
 import timeDifference from "../utils/timeDifference";
-import PutioAPI, { IFile, Transfer } from "@putdotio/api-client";
+import PutioAPI, { IFile } from "@putdotio/api-client";
 import { preferences } from "../preferences";
-import { create } from "domain";
+import { exec } from "child_process";
 
 function FileBrowser({ parent_file_id }: { parent_file_id: number }) {
   // State vars and handlers
@@ -16,11 +15,9 @@ function FileBrowser({ parent_file_id }: { parent_file_id: number }) {
   const [fileUrl, setFileUrl] = useState<string>();
   const [files, setFiles] = useState<IFile[]>();
   const [selectedFileId, setSelectedFileId] = useState<number>();
-  const [downloadType, setDownloadType] = useState<string>();
   const [fileAction, setFileAction] = useState<number>();
   const [isShowingDetail, setIsShowingDetail] = useState(false);
   const [error, setError] = useState<Error>();
-  const { exec } = require("child_process");
   const { push } = useNavigation();
 
   useEffect(() => {
@@ -83,8 +80,8 @@ function FileBrowser({ parent_file_id }: { parent_file_id: number }) {
           setFileUrl(t.data.url);
         })
         .catch((e) => {
-          // console.log('An error occurred while fetching file URL: ', e)
-          // setError(new Error("Error fetching file URL details. Check your Client ID and OAuth Token settings."))
+          console.log('An error occurred while fetching file URL: ', e)
+          setError(new Error("Error fetching file URL details. Check your Client ID and OAuth Token settings."))
         });
     }
   }, [selectedFileId]);
@@ -93,18 +90,18 @@ function FileBrowser({ parent_file_id }: { parent_file_id: number }) {
   // Handle initiating file actions
   useEffect(() => {
     if (fileUrl !== undefined && fileAction !== undefined) {
-      let cmd = null;
+      let cmd = "";
       console.log("Preparing action #%d on %s", fileAction, fileUrl);
       switch (fileAction) {
         case 1:
-          cmd = formatString(preferences.actionCommand1!, fileUrl);
+          cmd = formatString(preferences.actionCommand1 ? preferences.actionCommand1 : "(no command defined)", fileUrl);
           break;
         case 2:
-          cmd = formatString(preferences.actionCommand2!, fileUrl);
+          cmd = formatString(preferences.actionCommand2 ? preferences.actionCommand2 : "(no command defined)", fileUrl);
           break;
       }
       console.log("Executing command: ", cmd);
-      exec(cmd, (error: { message: any }, stdout: any, stderr: any) => {
+      exec(cmd, (error: Error | null, stdout: string, stderr: string) => {
         if (error) {
           console.log(`error: ${error.message}`);
           showToast({
@@ -163,7 +160,7 @@ function FileBrowser({ parent_file_id }: { parent_file_id: number }) {
             accessories.push({ text: formatSize(file.size, true, 1) });
             // created_at is in UTC so we need to provide a UTC relative date for comparison.
             const now = changeTimezone(new Date(), "UTC");
-            const created_at = new Date(file.created_at!);
+            const created_at = new Date(file.created_at);
             if (created_at <= now) {
               accessories.push({ text: timeDifference(now, created_at) });
             }

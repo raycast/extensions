@@ -1,5 +1,3 @@
-import internal from "stream";
-
 /**
  * Format bytes as human-readable text.
  *
