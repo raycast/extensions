@@ -9,7 +9,8 @@
     "marcjulian",
     "GastroGeek",
     "pernielsentikaer",
-    "lokot0k"
+    "lokot0k",
+    "iamharbie"
   ],
   "categories": [
     "Productivity",
@@ -75,27 +76,7 @@
       "name": "startCustomTimer",
       "title": "Start Custom Timer",
       "description": "Set a countdown for a custom amount of time.",
-      "mode": "view",
-      "arguments": [
-        {
-          "name": "hours",
-          "placeholder": "hours",
-          "required": false,
-          "type": "text"
-        },
-        {
-          "name": "minutes",
-          "placeholder": "minutes",
-          "required": false,
-          "type": "text"
-        },
-        {
-          "name": "seconds",
-          "placeholder": "seconds",
-          "required": false,
-          "type": "text"
-        }
-      ]
+      "mode": "view"
     },
     {
       "name": "manageTimers",
@@ -108,21 +89,13 @@
       "title": "Timers Menu Bar",
       "description": "View, start, or stop existing countdown timers from the Menu Bar.",
       "mode": "menu-bar",
-      "interval": "10s"
+      "interval": "1s"
     },
     {
       "name": "startStopwatch",
       "title": "Start Stopwatch",
       "description": "Start a stopwatch",
-      "mode": "no-view",
-      "arguments": [
-        {
-          "name": "name",
-          "placeholder": "stopwatch name",
-          "required": false,
-          "type": "text"
-        }
-      ]
+      "mode": "no-view"
     },
     {
       "name": "manageStopwatches",
@@ -145,12 +118,6 @@
   ],
   "preferences": [
     {
-      "name": "selectedSound",
-      "type": "dropdown",
-      "required": true,
-      "title": "Selected Sound",
-      "description": "Sound played when a timer finishes.",
-      "default": "Submarine",
       "data": [
         {
           "title": "Alarm Clock",
@@ -180,15 +147,15 @@
           "title": "Speak Timer Name",
           "value": "speak_timer_name"
         }
-      ]
+      ],
+      "default": "Submarine",
+      "description": "Sound played when a timer finishes.",
+      "name": "selectedSound",
+      "required": true,
+      "title": "Selected Sound",
+      "type": "dropdown"
     },
     {
-      "name": "newTimerInputOrder",
-      "type": "dropdown",
-      "required": true,
-      "title": "New Timer Input Order",
-      "description": "Order for input fields in new timer form.",
-      "default": "Hours , Minutes, Seconds",
       "data": [
         {
           "title": "Hours, Minutes, Seconds",
@@ -198,33 +165,39 @@
           "title": "Seconds, Minutes, Hours",
           "value": "ssmmhh"
         }
-      ]
+      ],
+      "default": "Hours , Minutes, Seconds",
+      "description": "Order for input fields in new timer form.",
+      "name": "newTimerInputOrder",
+      "required": true,
+      "title": "New Timer Input Order",
+      "type": "dropdown"
     },
     {
-      "name": "ringContinuously",
-      "type": "checkbox",
-      "required": true,
-      "title": "Timer Alert Type",
+      "default": false,
       "description": "Whether or not to play the timer alert sound continuously until dismissed.",
       "label": "Ring Continuously",
-      "default": false
+      "name": "ringContinuously",
+      "required": true,
+      "title": "Timer Alert Type",
+      "type": "checkbox"
     },
     {
-      "name": "copyOnSwStop",
-      "type": "checkbox",
-      "required": true,
-      "title": "Copy on Stopwatch Stop",
+      "default": false,
       "description": "Whether or not to copy the elapsed time on a stopwatch when it is stopped.",
       "label": "Copy elapsed time",
-      "default": false
+      "name": "copyOnSwStop",
+      "required": true,
+      "title": "Copy on Stopwatch Stop",
+      "type": "checkbox"
     },
     {
+      "default": "1",
+      "description": "Volume of the alert sound. Decimal between 0 and 1.",
       "name": "volumeSetting",
-      "type": "textfield",
       "required": true,
       "title": "Timer Alert Volume",
-      "description": "Volume of the alert sound. Decimal between 0 and 1.",
-      "default": "1"
+      "type": "textfield"
     }
   ],
   "dependencies": {
