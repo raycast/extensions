@@ -1,6 +1,6 @@
 import { showToast, Toast } from "@raycast/api";
 import { execSync } from "child_process";
-import { getSelectedImages } from "./utils";
+import { execSIPSCommandOnWebP, getSelectedImages } from "./utils";
 
 export default async function Command(props: { arguments: { amount: string; hexcolor: string } }) {
   const { amount, hexcolor } = props.arguments;
@@ -38,11 +38,20 @@ export default async function Command(props: { arguments: { amount: string; hexc
         const oldWidth = parseInt(resultArr[4]);
         const oldHeight = parseInt(resultArr[8]);
 
-        execSync(
-          `sips --padToHeightWidth ${oldHeight + padAmount} ${
-            oldWidth + padAmount
-          } --padColor ${hexString} "${imagePath}"`
-        );
+        if (imagePath.toLowerCase().endsWith(".webp")) {
+          // Convert to PNG, applying padding, then restore to WebP
+          execSIPSCommandOnWebP(
+            `sips --padToHeightWidth ${oldHeight + padAmount} ${oldWidth + padAmount} --padColor ${hexString}`,
+            imagePath
+          );
+        } else {
+          // Run command normally
+          execSync(
+            `sips --padToHeightWidth ${oldHeight + padAmount} ${
+              oldWidth + padAmount
+            } --padColor ${hexString} "${imagePath}"`
+          );
+        }
       }
 
       toast.title = `Added padding to ${selectedImages.length.toString()} ${pluralized}`;

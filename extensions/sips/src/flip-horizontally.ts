@@ -1,6 +1,6 @@
 import { showToast, Toast } from "@raycast/api";
 import { execSync } from "child_process";
-import { getSelectedImages } from "./utils";
+import { execSIPSCommandOnWebP, getSelectedImages } from "./utils";
 
 export default async function Command() {
   const selectedImages = await getSelectedImages();
@@ -16,7 +16,21 @@ export default async function Command() {
     const pluralized = `image${selectedImages.length === 1 ? "" : "s"}`;
     try {
       const pathStrings = '"' + selectedImages.join('" "') + '"';
-      execSync(`sips --flip horizontal ${pathStrings}`);
+      if (pathStrings.toLowerCase().includes("webp")) {
+        // Handle each image individually
+        selectedImages.forEach((imgPath) => {
+          if (imgPath.toLowerCase().endsWith("webp")) {
+            // Convert to PNG, flip and restore to WebP
+            execSIPSCommandOnWebP("sips --flip horizontal", imgPath);
+          } else {
+            // Run command as normal
+            execSync(`sips --flip horizontal "${imgPath}"`);
+          }
+        });
+      } else {
+        // Flip all images at once
+        execSync(`sips --flip horizontal ${pathStrings}`);
+      }
       toast.title = `Flipped ${selectedImages.length.toString()} ${pluralized} horizontally`;
       toast.style = Toast.Style.Success;
     } catch {

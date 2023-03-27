@@ -1,11 +1,17 @@
-import { getFrontmostApplication, getPreferenceValues } from "@raycast/api";
+import { environment, getFrontmostApplication, getPreferenceValues } from "@raycast/api";
+import { exec, execSync } from "child_process";
 import { runAppleScript } from "run-applescript";
 
 interface Preferences {
   preferredFileManager: string;
 }
 
-const getSelectedFinderImages = async(): Promise<string> => {
+/**
+ * Gets currently selected images in Finder.
+ *
+ * @returns A promise resolving to the comma-separated list of images as a string.
+ */
+const getSelectedFinderImages = async (): Promise<string> => {
   return runAppleScript(
     `set imageTypes to {"PNG", "JPG", "JPEG", "TIF", "HEIF", "GIF", "ICO", "ICNS", "ASTC", "BMP", "DDS", "EXR", "JP2", "KTX", "Portable Bitmap", "Adobe Photoshop", "PVR", "TGA", "WebP"}
 
@@ -34,8 +40,13 @@ const getSelectedFinderImages = async(): Promise<string> => {
       end if
     end tell`
   );
-}
+};
 
+/**
+ * Gets currently selected images in Path Finder.
+ *
+ * @returns A promise resolving to the comma-separated list of images as a string.
+ */
 const getSelectedPathFinderImages = async (): Promise<string> => {
   return runAppleScript(
     `set imageTypes to {"PNG", "JPG", "JPEG", "TIF", "HEIF", "GIF", "ICO", "ICNS", "ASTC", "BMP", "DDS", "EXR", "JP2", "KTX", "Portable Bitmap", "Adobe Photoshop", "PVR", "TGA", "WebP"}
@@ -65,54 +76,68 @@ const getSelectedPathFinderImages = async (): Promise<string> => {
       end if
     end tell`
   );
-}
+};
 
-export const getSelectedImages = async () => {
-  const selectedImages: string[] = []
+/**
+ * Gets selected images in the preferred file manager application.
+ *
+ * @returns A promise resolving to the list of selected image paths.
+ */
+export const getSelectedImages = async (): Promise<string[]> => {
+  const selectedImages: string[] = [];
 
   // Get name of preferred file manager
-  const extensionPreferences = getPreferenceValues<Preferences>()
-  const fileManager = extensionPreferences.preferredFileManager
-  let preferredFileManagerError = false
+  const extensionPreferences = getPreferenceValues<Preferences>();
+  const fileManager = extensionPreferences.preferredFileManager;
+  let preferredFileManagerError = false;
 
-  let activeApp = fileManager
+  let activeApp = fileManager;
   try {
-    activeApp = (await getFrontmostApplication()).name
+    activeApp = (await getFrontmostApplication()).name;
   } catch {
-    console.log("Couldn't get frontmost application")
+    console.log("Couldn't get frontmost application");
   }
-
-  console.log(activeApp)
 
   // Attempt to get selected images from Path Finder
   try {
     if (activeApp == "Path Finder" && fileManager == "Path Finder") {
-      const pathFinderImages = (await getSelectedPathFinderImages()).split(", ")
+      const pathFinderImages = (await getSelectedPathFinderImages()).split(", ");
       pathFinderImages.forEach((imgPath) => {
         if (!selectedImages.includes(imgPath)) {
-          selectedImages.push(imgPath)
+          selectedImages.push(imgPath);
         }
-      })
+      });
     }
   } catch (error) {
-    console.log("Couldn't get images from Path Finder")
-    preferredFileManagerError = true
+    console.log("Couldn't get images from Path Finder");
+    preferredFileManagerError = true;
   }
 
   // Get selected images from Finder -- use as fallback for desktop selections & on error
-  const finderImages = (await getSelectedFinderImages()).split(", ")
+  const finderImages = (await getSelectedFinderImages()).split(", ");
   if (activeApp == "Finder" || fileManager == "Finder" || preferredFileManagerError) {
-    selectedImages.push(...finderImages)
+    selectedImages.push(...finderImages);
   } else {
     // Add desktop selections
     finderImages.forEach((imgPath) => {
       if (imgPath.split("/").at(-2) == "Desktop" && !selectedImages.includes(imgPath)) {
-        selectedImages.push(imgPath)
+        selectedImages.push(imgPath);
       }
-    })
+    });
   }
 
-  console.log(selectedImages)
-
   return selectedImages;
+};
+
+/**
+ * Executes a SIPS command on a WebP image, using a temporary PNG in the process.
+ *
+ * @param command The SIPS command to execute.
+ * @param webpPath The path of the webP image.
+ */
+export const execSIPSCommandOnWebP = async (command: string, webpPath: string) => {
+  const newPath = `${environment.supportPath}/tmp.png`;
+  execSync(
+    `${environment.assetsPath}/webp/dwebp "${webpPath}" -o "${newPath}" && ${command} "${newPath}" && ${environment.assetsPath}/webp/cwebp "${newPath}" -o "${webpPath}" ; rm "${newPath}"`
+  );
 };

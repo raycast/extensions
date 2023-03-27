@@ -44,7 +44,7 @@ export default function Command() {
 
         if (desiredType === "WEBP") {
           execSync(`${environment.assetsPath}/webp/cwebp "${item}" -o "${newPath}"`);
-        } else if (pathComponents.at(-1) == "WEBP") {
+        } else if (pathComponents.at(-1)?.toLowerCase() == "webp") {
           execSync(`${environment.assetsPath}/webp/dwebp "${item}" -o "${newPath}"`);
         } else {
           execSync(`sips --setProperty format ${desiredType.toLowerCase()} "${item}" --out "${newPath}"`);

@@ -1,6 +1,6 @@
 import { showToast, Toast } from "@raycast/api";
 import { execSync } from "child_process";
-import { getSelectedImages } from "./utils";
+import { execSIPSCommandOnWebP, getSelectedImages } from "./utils";
 
 export default async function Command(props: { arguments: { scaleFactor: string } }) {
   const { scaleFactor } = props.arguments;
@@ -30,7 +30,15 @@ export default async function Command(props: { arguments: { scaleFactor: string 
         const oldWidth = parseInt(resultArr[4]);
         const oldHeight = parseInt(resultArr[8]);
 
-        execSync(`sips --resampleHeightWidth ${oldHeight * scaleNumber} ${oldWidth * scaleNumber} "${imagePath}"`);
+        if (imagePath.toLowerCase().endsWith("webp")) {
+          // Convert to PNG, scale, the restore to WebP
+          execSIPSCommandOnWebP(
+            `sips --resampleHeightWidth ${oldHeight * scaleNumber} ${oldWidth * scaleNumber}`,
+            imagePath
+          );
+        } else {
+          execSync(`sips --resampleHeightWidth ${oldHeight * scaleNumber} ${oldWidth * scaleNumber} "${imagePath}"`);
+        }
       }
 
       toast.title = `Scaled ${selectedImages.length.toString()} ${pluralized}`;
