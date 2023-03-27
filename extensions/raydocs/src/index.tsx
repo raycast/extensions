@@ -2,7 +2,7 @@ import { List } from "@raycast/api";
 import { useState } from "react";
 import LinkItem from "./components/LinkItem";
 import { Link } from "./types";
-import { scrapDocs } from "./utils";
+import { getLinks } from "./utils";
 
 export default function Command() {
   const [isLoading, setIsLoading] = useState(false);
@@ -11,7 +11,7 @@ export default function Command() {
 
   (async function () {
     if (links.length) return;
-    const resLinks = await scrapDocs();
+    const resLinks = await getLinks();
     if (!resLinks) return;
 
     setCategories([...new Set(resLinks?.map((link) => link?.sectionTitle ?? "") ?? [])]);

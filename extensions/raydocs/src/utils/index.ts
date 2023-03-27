@@ -8,7 +8,7 @@ const docsUrl = "https://developers.raycast.com";
 const linksUrl = "https://raw.githubusercontent.com/raycast/extensions/gh-pages/SUMMARY.md";
 const converter = new showdown.Converter();
 
-export async function scrapDocs() {
+export async function getLinks() {
   try {
     const res = await fetch(linksUrl).then((res) => res.text());
 
