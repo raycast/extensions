@@ -80,8 +80,8 @@ function FileBrowser({ parent_file_id }: { parent_file_id: number }) {
           setFileUrl(t.data.url);
         })
         .catch((e) => {
-          console.log('An error occurred while fetching file URL: ', e)
-          setError(new Error("Error fetching file URL details. Check your Client ID and OAuth Token settings."))
+          console.log("An error occurred while fetching file URL: ", e);
+          setError(new Error("Error fetching file URL details. Check your Client ID and OAuth Token settings."));
         });
     }
   }, [selectedFileId]);

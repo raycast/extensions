@@ -14,7 +14,11 @@ function TransferDetails({ transferDetails }: { transferDetails: Transfer }) {
           <List.Item.Detail.Metadata.Label title="Transfer Details" />
           <List.Item.Detail.Metadata.Separator />
           <Fragment key="name">
-            <List.Item.Detail.Metadata.Label title="Name" text={transferDetails.name ? transferDetails.name : "(unknown)"} icon={Icon.Document} />
+            <List.Item.Detail.Metadata.Label
+              title="Name"
+              text={transferDetails.name ? transferDetails.name : "(unknown)"}
+              icon={Icon.Document}
+            />
             <List.Item.Detail.Metadata.Separator />
           </Fragment>
           {(transferDetails.status == "COMPLETED" || transferDetails.status == "SEEDING") && (
