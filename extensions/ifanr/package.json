@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ifanr",
-  "title": "Making the Future Within Reach",
-  "description": "Making the future within reach",
+  "title": "ifanr",
+  "description": "Read the latest news from ifanr",
   "icon": "icon.png",
   "author": "madcodelife",
   "categories": [
@@ -12,8 +12,9 @@
   "commands": [
     {
       "name": "index",
-      "title": "ifanr",
-      "description": "Making the future within reach",
+      "title": "Read Latest News",
+      "subtitle": "ifanr",
+      "description": "Read the latest from ifanr",
       "mode": "view"
     }
   ],

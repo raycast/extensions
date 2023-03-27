@@ -1,41 +1,43 @@
-import { useRef } from "react";
 import { ActionPanel, List, Action, Icon } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
-
-import { feed } from "./feed";
+import { useFetch } from "@raycast/utils";
+import Parser from "rss-parser";
 import { getIcon } from "./utils";
+import { IListItem } from "./type";
 
 export default function Command() {
-  const abortable = useRef<AbortController>();
+  const { isLoading, data } = useFetch("https://www.ifanr.com/feed", {
+    async parseResponse(response) {
+      if (!response.ok) {
+        throw new Error(response.statusText);
+      }
 
-  const { isLoading, data } = usePromise(
-    async () => {
-      const result = await feed();
-      return result;
+      const data = await response.text();
+      if (data !== undefined) {
+        const parser: Parser = new Parser();
+        const feed = await parser.parseString(data as string);
+
+        return { items: feed.items as IListItem[] };
+      }
+      return { items: [] };
     },
-    [],
-    {
-      abortable,
-    }
-  );
+  });
 
   return (
     <List isLoading={isLoading}>
-      {data &&
-        data.map((item, index) => (
-          <List.Item
-            icon={getIcon(index + 1)}
-            key={index}
-            title={item.title}
-            accessories={[{ text: item.author, icon: Icon.Person }]}
-            actions={
-              <ActionPanel>
-                <Action.OpenInBrowser url={item.url} />
-                <Action.CopyToClipboard content={item.url} />
-              </ActionPanel>
-            }
-          />
-        ))}
+      {data?.items.map((item, index) => (
+        <List.Item
+          icon={getIcon(index + 1)}
+          key={index}
+          title={item.title}
+          accessories={[{ text: item.author, icon: Icon.Person }]}
+          actions={
+            <ActionPanel>
+              <Action.OpenInBrowser url={item.url} />
+              <Action.CopyToClipboard content={item.url} />
+            </ActionPanel>
+          }
+        />
+      ))}
     </List>
   );
 }
