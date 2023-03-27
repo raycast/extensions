@@ -8,7 +8,7 @@ import {
   useNavigation,
   getPreferenceValues,
   LocalStorage,
-  Toast
+  Toast,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { decode } from "hi-base32";
@@ -33,7 +33,7 @@ export default function AppsView() {
   >([]);
   const { defaultAction } = getPreferenceValues();
 
-  async function updateApps () {
+  async function updateApps() {
     const _apps = await LocalStorage.allItems();
     setApps(
       Object.keys(_apps)
@@ -43,8 +43,11 @@ export default function AppsView() {
           return {
             name,
             key: _apps[name].toString(),
-            time: `${Math.floor(token.options.period - (new Date().getTime() / 1000) % token.options.period)}`,
-            percent: (Math.floor(token.options.period - (new Date().getTime() / 1000) % token.options.period) / token.options.period) * 100,
+            time: `${Math.floor(token.options.period - ((new Date().getTime() / 1000) % token.options.period))}`,
+            percent:
+              (Math.floor(token.options.period - ((new Date().getTime() / 1000) % token.options.period)) /
+                token.options.period) *
+              100,
             code: generateTOTP(token.secret, token.options).toString().padStart(token.options.digits, "0"),
           };
         })
@@ -83,13 +86,21 @@ export default function AppsView() {
           subtitle={a.code}
           key={a.name}
           accessories={[
-            { icon: { source: (
-              +a.percent > 75 ? Icon.CircleProgress100 : 
-              +a.percent > 50 ? Icon.CircleProgress75 :
-              +a.percent > 25 ? Icon.CircleProgress50 :
-              (+a.time > 0) ? Icon.CircleProgress25 :
-              Icon.Circle
-            ) }, tooltip: a.time }
+            {
+              icon: {
+                source:
+                  +a.percent > 75
+                    ? Icon.CircleProgress100
+                    : +a.percent > 50
+                    ? Icon.CircleProgress75
+                    : +a.percent > 25
+                    ? Icon.CircleProgress50
+                    : +a.time > 0
+                    ? Icon.CircleProgress25
+                    : Icon.Circle,
+              },
+              tooltip: a.time,
+            },
           ]}
           actions={
             <ActionPanel>
