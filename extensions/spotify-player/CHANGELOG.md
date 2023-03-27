@@ -1,8 +1,50 @@
 # Spotify Player Changelog
 
-## [Fix] - 2023-03-07
+## [Version 2] - 2023-03-27
 
-- Fix crash due to `null` playlists being returned by the API.
+### Spotify Player v2
+
+Spotify Player first launched in October 2021. It was one of our first extensions, and to this day it stands as one of the most popular in the store. Since then, we've learned a lot, received plenty of feedback, and released new, more performant APIs.
+
+So now it's time for a refresher ✨
+
+Spotify Player v2 is a complete re-write, focusing on performance, maintainability, and user experience. One of our main goals was to keep the list of commands to a minimum but still allow users to tailor their own experience. This way, both new users of Raycast, as well as more advanced ones, can make the most of Spotify Player.
+
+#### New Commands
+
+- **Search:** A single unified search command. Use this to search for artists, albums, songs, playlists, podcasts, and episodes. Use the dropdown menu to filter your search to a specific category. Each category offers contextual actions, so you can dive deeper into the search.
+- **Your Library:** Use this to see your saved artists, albums, songs, playlists, and podcasts. Similar to the "Search" command, it includes a category dropdown and contextual actions.
+- **Quick Actions:** This is a list of lots of Spotify actions. For example: Play/Pause, Like/Dislike current song, Change Volume, and more. If you'd like to have any of these available as a Root Command, you can create Quicklinks via the actions menu (⌘ K).
+
+#### New Features
+
+- Extension icon
+- Menu Bar icon
+- "Transfer Playback" action, available in "Now Playing"/"Menu Bar Player"
+- "Add to Playlist" action, available in "Now Playing"/"Menu Bar Player"
+- Support Podcasts and Episodes in "Now Playing"/"Menu Bar Player"
+- Support searching for Podcasts and Episodes
+- "Max Title Length" now has a default value of 30
+
+#### Removed Commands
+
+- **Just Play:** Use "Search" instead. If you'd like quick access to search, you can assign it a hotkey
+- **Search Artists:** Use "Search" instead. You can use the dropdown menu to narrow your search to artists only
+- **Search Albums:** Use "Search" instead. You can use the dropdown menu to narrow your search to albums only
+- **Search Tracks:** Use "Search" instead. You can use the dropdown menu to narrow your search to songs only
+- **Search Playlists:** Use "Search" instead. You can use the dropdown menu to narrow your search to playlists only
+- **Start Radio:** Available as an action under "Now Playing"/"Menu Bar Player" or in "Quick Actions"
+- **Like Current Song:** Available as an action under "Now Playing"/"Menu Bar Player" or in "Quick Actions"
+- **Dislike Current Song:** Available as an action under "Now Playing"/"Menu Bar Player" or in "Quick Actions"
+- **Dislike Current Song:** Available as an action under "Now Playing"/"Menu Bar Player" or in "Quick Actions"
+- **Browse All:** Use the Spotify App instead
+- **Featured Playlists:** Use the Spotify App instead
+
+#### Removed features
+
+- **"Close Window on Action" Preference:** This has been taken into account when building each feature, ensuring a consistent experience for everyone
+
+We hope you enjoy the new and improved Spotify Player Extension — we've [obsessed over every detail](https://twitter.com/peduarte/status/1638101325312577536).
 
 ## [Fix] - 2023-01-13
 
