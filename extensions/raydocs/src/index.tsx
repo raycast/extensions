@@ -5,7 +5,7 @@ import { Link } from "./types";
 import { getLinks } from "./utils";
 
 export default function Command() {
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [links, setLinks] = useState<Link[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
 
