@@ -31,7 +31,9 @@ function NowPlayingMenuBarCommand() {
   const { currentPlayingData, currentPlayingIsLoading, currentPlayingRevalidate } = useCurrentlyPlaying();
   const { myDevicesData } = useMyDevices();
   const { myPlaylistsData } = useMyPlaylists();
-  const { containsMySavedTracksData } = useContainsMyLikedTracks({ trackIds: [currentPlayingData?.item?.id || ""] });
+  const { containsMySavedTracksData } = useContainsMyLikedTracks({
+    trackIds: currentPlayingData?.item?.id ? [currentPlayingData?.item?.id] : [],
+  });
 
   const trackAlreadyLiked = containsMySavedTracksData?.[0];
   const isPaused = currentPlayingData?.is_playing === false;
