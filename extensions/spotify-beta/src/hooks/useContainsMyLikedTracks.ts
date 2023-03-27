@@ -9,7 +9,7 @@ type UseContainsMyLikedTracksProps = {
 };
 
 export function useContainsMyLikedTracks({ trackIds, options }: UseContainsMyLikedTracksProps) {
-  const { data, error, isLoading } = useCachedPromise(
+  const { data, error, isLoading, revalidate } = useCachedPromise(
     (trackIds: string[]) => containsMySavedTracks({ trackIds }),
     [trackIds],
     {
@@ -21,5 +21,6 @@ export function useContainsMyLikedTracks({ trackIds, options }: UseContainsMyLik
     containsMySavedTracksData: data,
     containsMySavedTracksError: error,
     containsMySavedTracksIsLoading: isLoading,
+    containsMySavedTracksRevalidate: revalidate,
   };
 }

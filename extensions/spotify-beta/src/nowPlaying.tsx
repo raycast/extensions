@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import {
   Icon,
   Detail,
@@ -13,7 +12,6 @@ import {
 } from "@raycast/api";
 import { useCurrentlyPlaying } from "./hooks/useCurrentlyPlaying";
 import { View } from "./components/View";
-import { containsMySavedTracks } from "./api/containsMySavedTrack";
 import { useMyDevices } from "./hooks/useMyDevices";
 import { EpisodeObject, TrackObject } from "./helpers/spotify.api";
 import { pause } from "./api/pause";
@@ -27,31 +25,21 @@ import { transferMyPlayback } from "./api/transferMyPlayback";
 import { isSpotifyInstalled } from "./helpers/isSpotifyInstalled";
 import { useMyPlaylists } from "./hooks/useMyPlaylists";
 import { addToPlaylist } from "./api/addToPlaylist";
+import { useContainsMyLikedTracks } from "./hooks/useContainsMyLikedTracks";
+import { usePlaybackState } from "./hooks/usePlaybackState";
 
 function NowPlayingCommand() {
   const { currentPlayingData, currentPlayingIsLoading } = useCurrentlyPlaying();
+  const { playbackStateData, playbackStateIsLoading, revalidatePlaybackState } = usePlaybackState();
   const { myDevicesData } = useMyDevices();
   const { myPlaylistsData } = useMyPlaylists();
-  const [isPaused, setIsPaused] = useState(currentPlayingData?.is_playing === false);
-  const [trackAlreadyLiked, setTrackAlreadyLiked] = useState<boolean | null>(null);
+  const { containsMySavedTracksData, containsMySavedTracksRevalidate } = useContainsMyLikedTracks({
+    trackIds: currentPlayingData?.item?.id ? [currentPlayingData?.item?.id] : [],
+  });
 
+  const trackAlreadyLiked = containsMySavedTracksData?.[0];
+  const isPaused = playbackStateData?.is_playing === false;
   const isTrack = currentPlayingData?.currently_playing_type !== "episode";
-
-  const getTrackAlreadyLiked = async (trackId: string) => {
-    const songResponse = await containsMySavedTracks({ trackIds: [trackId] });
-    setTrackAlreadyLiked(songResponse[0]);
-  };
-
-  useEffect(() => {
-    setIsPaused(currentPlayingData?.is_playing === false);
-    if (currentPlayingData?.item && isTrack) {
-      getTrackAlreadyLiked(currentPlayingData?.item?.id || "");
-    }
-  }, [currentPlayingData]);
-
-  if (currentPlayingIsLoading) {
-    return <Detail isLoading />;
-  }
 
   if (!currentPlayingData || !currentPlayingData.item) {
     return (
@@ -101,9 +89,10 @@ by ${artistName}
               await removeFromMySavedTracks({
                 trackIds: trackId ? [trackId] : [],
               });
-              await closeMainWindow();
-              await popToRoot();
-              showHUD(`Disliked ${name}`);
+              await containsMySavedTracksRevalidate();
+              // await closeMainWindow();
+              // await popToRoot();
+              // showHUD(`Disliked ${name}`);
             }}
           />
         )}
@@ -115,9 +104,10 @@ by ${artistName}
               await addToMySavedTracks({
                 trackIds: trackId ? [trackId] : [],
               });
-              await closeMainWindow();
-              await popToRoot();
-              showHUD(`Liked ${name}`);
+              await containsMySavedTracksRevalidate();
+              // await closeMainWindow();
+              // await popToRoot();
+              // showHUD(`Liked ${name}`);
             }}
           />
         )}
@@ -182,6 +172,7 @@ ${description}
     <Detail
       markdown={markdown}
       metadata={metadata}
+      isLoading={currentPlayingIsLoading || playbackStateIsLoading}
       actions={
         <ActionPanel>
           {!isPaused && (
@@ -190,8 +181,9 @@ ${description}
               title="Pause"
               onAction={async () => {
                 await pause();
-                await closeMainWindow();
-                await popToRoot();
+                await revalidatePlaybackState();
+                // await closeMainWindow();
+                // await popToRoot();
               }}
             />
           )}
@@ -201,8 +193,9 @@ ${description}
               title="Play"
               onAction={async () => {
                 await play();
-                await closeMainWindow();
-                await popToRoot();
+                await revalidatePlaybackState();
+                // await closeMainWindow();
+                // await popToRoot();
               }}
             />
           )}
