@@ -9,7 +9,6 @@ import {
   getPreferenceValues,
   LocalStorage,
   Toast,
-  Color,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { decode } from "hi-base32";
