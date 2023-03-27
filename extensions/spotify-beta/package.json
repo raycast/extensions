@@ -4,9 +4,16 @@
   "title": "Spotify Beta",
   "description": "Spotify's most common features, now at your fingertips. Search for music and podcasts, browse your library, and control the playback. Glance at what's currently playing directly from the menu bar.",
   "icon": "extension-icon.png",
-  "owner": "raycast",
-  "author": "peduarte",
-  "access": "public",
+  "author": "mattisssa",
+  "contributors": [
+    "peduarte",
+    "sxn",
+    "dillionverma",
+    "andreaselia",
+    "stuart",
+    "tonka3000",
+    "dancannon"
+  ],
   "license": "MIT",
   "commands": [
     {

@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import {
   Icon,
   MenuBarExtra,
@@ -10,7 +9,6 @@ import {
   showHUD,
   Color,
 } from "@raycast/api";
-import { containsMySavedTracks } from "./api/containsMySavedTrack";
 import { pause } from "./api/pause";
 import { play } from "./api/play";
 import { skipToNext } from "./api/skipToNext";
@@ -26,28 +24,18 @@ import { View } from "./components/View";
 import { EpisodeObject, TrackObject } from "./helpers/spotify.api";
 import { useMyPlaylists } from "./hooks/useMyPlaylists";
 import { addToPlaylist } from "./api/addToPlaylist";
+import { useContainsMyLikedTracks } from "./hooks/useContainsMyLikedTracks";
 
 function NowPlayingMenuBarCommand() {
+  const preferences = getPreferenceValues();
   const { currentPlayingData, currentPlayingIsLoading, currentPlayingRevalidate } = useCurrentlyPlaying();
   const { myDevicesData } = useMyDevices();
   const { myPlaylistsData } = useMyPlaylists();
-  const [isPaused, setIsPaused] = useState(currentPlayingData?.is_playing === false);
-  const [trackAlreadyLiked, setTrackAlreadyLiked] = useState<boolean | null>(null);
-  const preferences = getPreferenceValues();
+  const { containsMySavedTracksData } = useContainsMyLikedTracks({ trackIds: [currentPlayingData?.item?.id || ""] });
 
+  const trackAlreadyLiked = containsMySavedTracksData?.[0];
+  const isPaused = currentPlayingData?.is_playing === false;
   const isTrack = currentPlayingData?.currently_playing_type !== "episode";
-
-  const getTrackAlreadyLiked = async (trackId: string) => {
-    const songResponse = await containsMySavedTracks({ trackIds: [trackId] });
-    setTrackAlreadyLiked(songResponse[0]);
-  };
-
-  useEffect(() => {
-    setIsPaused(currentPlayingData?.is_playing === false);
-    if (currentPlayingData?.item && isTrack) {
-      getTrackAlreadyLiked(currentPlayingData?.item?.id || "");
-    }
-  }, [currentPlayingData]);
 
   if (!currentPlayingData || !currentPlayingData.item) {
     return <NothingPlaying isLoading={currentPlayingIsLoading} />;

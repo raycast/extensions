@@ -10,6 +10,8 @@ const clientId = "b997e8ba5e5f473eb3f846666d85f064";
 const scope = [
   "playlist-read-collaborative",
   "playlist-read-private",
+  "playlist-modify-public",
+  "playlist-modify-private",
   "user-follow-read",
   "user-library-modify",
   "user-library-read",

@@ -32,6 +32,8 @@ In order to use this extension, you'll need to authenticate with Spotify. This e
 
 - `playlist-read-collaborative`: To fetch your playlists, including collaborative ones.
 - `playlist-read-private`: To fetch your playlists, including private ones.
+- `playlist-modify-private`: To update your playlist, including private ones.
+- `playlist-modify-public`: To update your playlist.
 - `user-follow-read`: To fetch your followed artists.
 - `user-library-modify`: To update your liked songs/episodes.
 - `user-library-read`: To fetch your liked songs, artists, albums, podcasts, and episodes.
