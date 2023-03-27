@@ -1,5 +1,6 @@
 import { Fragment } from "react";
 import { Icon, List } from "@raycast/api";
+import Transfer from "@putdotio/api-client";
 import formatDate from "../utils/formatDate";
 import formatSize from "../utils/formatSize";
 import timeDifference from "../utils/timeDifference";
