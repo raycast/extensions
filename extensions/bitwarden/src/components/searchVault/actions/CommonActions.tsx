@@ -2,9 +2,11 @@ import { Action, Color, Icon } from "@raycast/api";
 import { useSession } from "~/context/session";
 import { useVault } from "~/context/vault";
 
-const SearchCommonActions = () => {
+function SearchCommonActions() {
   const vault = useVault();
   const session = useSession();
+
+  const handleLockVault = () => session.lock("Manually locked by the user");
 
   return (
     <>
@@ -18,10 +20,10 @@ const SearchCommonActions = () => {
         icon={{ source: "sf_symbols_lock.svg", tintColor: Color.PrimaryText }} // Does not immediately follow theme
         title="Lock Vault"
         shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
-        onAction={session.lock}
+        onAction={handleLockVault}
       />
       <Action title="Logout" icon={Icon.XMarkCircle} onAction={session.logout} />
     </>
   );
-};
+}
 export default SearchCommonActions;

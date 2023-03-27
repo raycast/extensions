@@ -149,17 +149,20 @@
       "name": "repromptIgnoreDuration",
       "type": "dropdown",
       "required": false,
-      "title": "Skip Reprompt",
-      "description": "Skip re-prompting for this long after entering the master password.",
-      "default": "60000",
+      "title": "Vault Timeout",
+      "description": "The amount of time before the password must be re-entered to access the vault again.",
+      "default": "900000",
       "data": [
-        {"title": "Never", "value": "0"},
+        {"title": "Immediately", "value": "0"},
         {"title": "1 Minute", "value": "60000"},
         {"title": "5 Minutes", "value": "300000"},
         {"title": "15 Minutes", "value": "900000"},
+        {"title": "30 Minutes", "value": "1800000"},
         {"title": "1 Hour", "value": "3600000"},
+        {"title": "4 Hours", "value": "14400000"},
         {"title": "8 Hours", "value": "28800000"},
-        {"title": "1 Day", "value": "86400000"}
+        {"title": "1 Day", "value": "86400000"},
+        {"title": "Never", "value": "-1"}
       ]
     },
     {

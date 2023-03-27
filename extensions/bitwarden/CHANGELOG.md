@@ -1,5 +1,10 @@
 # Bitwarden Changelog
 
+## [Vault Timeout and Reprompting] - 2023-03-25
+
+- Added a Vault Timeout options that locks your vault after a certain time of inactivity
+- Added password reprompt for Notes, Cards and Identity details
+
 ## [Copy Enhancement] - 2023-03-16
 
 - Change copy actions to use the transient flag
