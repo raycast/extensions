@@ -1,6 +1,6 @@
 import { Fragment } from "react";
 import { Icon, List } from "@raycast/api";
-import Transfer from "@putdotio/api-client";
+import PutioAPI, { Transfer } from "@putdotio/api-client";
 import formatDate from "../utils/formatDate";
 import formatSize from "../utils/formatSize";
 import timeDifference from "../utils/timeDifference";
@@ -26,9 +26,9 @@ function TransferDetails({ transferDetails }: { transferDetails: Transfer }) {
             <Fragment key="finishedAt">
               <List.Item.Detail.Metadata.Label
                 title="Finished"
-                text={`${formatDate(new Date(transferDetails.finished_at))} (${timeDifference(
+                text={`${formatDate(new Date(String(transferDetails.finished_at)))} (${timeDifference(
                   now,
-                  new Date(transferDetails.finished_at)
+                  new Date(String(transferDetails.finished_at))
                 )})`}
                 icon={Icon.Calendar}
               />
