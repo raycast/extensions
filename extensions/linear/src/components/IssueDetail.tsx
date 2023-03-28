@@ -1,4 +1,4 @@
-import { Detail, ActionPanel } from "@raycast/api";
+import { Detail, ActionPanel, List } from "@raycast/api";
 import { MutatePromise } from "@raycast/utils";
 import { IssuePriorityValue, User } from "@linear/sdk";
 
@@ -78,6 +78,14 @@ export default function IssueDetail({ issue: existingIssue, mutateList, prioriti
                 ) : (
                   <Detail.Metadata.Label title="Labels" text="No Labels" />
                 )}
+
+                {!!issue.relations && issue.relations.nodes.length > 0 ? (                  
+                  <Detail.Metadata.TagList title="Related">
+                    {issue.relations.nodes.map(({ id, relatedIssue }) => (
+                      <Detail.Metadata.TagList.Item key={id} text={relatedIssue.title} />
+                    ))}
+                  </Detail.Metadata.TagList>
+                ) : null}
 
                 {issue.dueDate ? (
                   <Detail.Metadata.Label

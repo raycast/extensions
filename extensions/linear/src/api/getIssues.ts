@@ -1,4 +1,4 @@
-import { Comment, Cycle, Issue, Project, Team, User, WorkflowState } from "@linear/sdk";
+import { Comment, Cycle, Issue, IssueRelation, Project, Team, User, WorkflowState } from "@linear/sdk";
 import { getPreferenceValues } from "@raycast/api";
 import { LabelResult } from "./getLabels";
 import { getLinearClient } from "../helpers/withLinearClient";
@@ -342,16 +342,40 @@ export async function getComments(issueId: string) {
   return data.issue.comments.nodes;
 }
 
-export type IssueDetailResult = IssueResult & Pick<Issue, "description" | "dueDate">;
+export type IssueDetailResult = IssueResult & Pick<Issue, "description" | "dueDate">
+  & { relations:
+      { nodes: [
+        Pick<IssueRelation, "id" | "type"> & { 
+          "relatedIssue": Pick<Issue, "identifier" | "title"> & { 
+            "state": Pick<WorkflowState, "type" | "color"> 
+          }
+        }
+      ]}
+    };
 
 export async function getIssueDetail(issueId: string) {
   const { graphQLClient } = getLinearClient();
+  
   const { data } = await graphQLClient.rawRequest<{ issue: IssueDetailResult }, Record<string, unknown>>(
     `
       query($issueId: String!) {
         issue(id: $issueId) {
           ${IssueFragment}
           description
+          relations {
+            nodes {
+              type
+              relatedIssue {
+                id
+                identifier
+                title
+                state {
+                  color
+                  type
+                }
+              }
+            }
+          }
         }
       }
     `,
