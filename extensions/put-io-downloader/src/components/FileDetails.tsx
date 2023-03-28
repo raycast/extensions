@@ -1,7 +1,7 @@
 import { Color, Detail, Icon } from "@raycast/api";
 import formatDate from "../utils/formatDate";
 import formatSize from "../utils/formatSize";
-import IFile from "@putdotio/api-client";
+import PutioAPI, { IFile } from "@putdotio/api-client";
 
 function FileDetails({ file }: { file: IFile }) {
   return (
