@@ -3,7 +3,7 @@ import { networkTimeout } from "./../../consts";
  * @author: tisfeng
  * @createTime: 2023-03-14 22:11
  * @lastEditor: tisfeng
- * @lastEditTime: 2023-03-21 10:19
+ * @lastEditTime: 2023-03-28 18:38
  * @fileName: chat.ts
  *
  * Copyright (c) 2023 by ${git_name}, All Rights Reserved.
@@ -26,13 +26,14 @@ export function requestOpenAIStreamTranslate(queryWordInfo: QueryWordInfo): Prom
   console.warn(`---> start request OpenAI`);
 
   const url = "https://api.openai.com/v1/chat/completions";
-  //   const prompt = `translate from English to Chinese:\n\n"No level of alcohol consumption is safe for our health." =>`;
-  const prompt = `translate text from ${queryWordInfo.fromLanguage} to ${queryWordInfo.toLanguage}:\n\n"${queryWordInfo.word}"`;
+
+  const prompt = `translate the following ${queryWordInfo.fromLanguage} text to ${queryWordInfo.toLanguage}, :\n\n${queryWordInfo.word} `;
+  console.warn(`---> prompt: ${prompt}`);
   const message = [
     {
       role: "system",
       content:
-        "You are a faithful translation assistant that can only translate text and cannot interpret it, only return the translated text.",
+        "You are a faithful translation assistant that can only translate text and cannot interpret it, you can only return the translated text, do not show additional descriptions and annotations.",
     },
     {
       role: "user",
@@ -64,6 +65,8 @@ export function requestOpenAIStreamTranslate(queryWordInfo: QueryWordInfo): Prom
   let resultText = "";
   let targetTxt = "";
   let openAIResult: QueryTypeResult;
+
+  console.warn(`---> openai agent: ${JSON.stringify(httpsAgent)}`);
 
   return new Promise((resolve, reject) => {
     fetchSSE(`${url}`, {
@@ -133,13 +136,15 @@ export function requestOpenAIStreamTranslate(queryWordInfo: QueryWordInfo): Prom
       },
       onError: (err) => {
         if (err.message === "canceled") {
-          console.log(`---> caiyun canceled`);
+          console.log(`---> OpenAI canceled`);
           return reject(undefined);
         }
 
-        // console.error(`---> OpenAI error: ${JSON.stringify(err)}`);
+        console.error(`---> OpenAI error: ${JSON.stringify(err)}`);
 
-        let errorMessage = err.error.message ?? "Unknown error";
+        let errorMessage = err.error?.message ?? "Unknown error";
+        console.warn(`---> OpenAI error: ${errorMessage}`);
+
         if (err.name === "AbortError") {
           errorMessage = `Request timeout.`;
         }

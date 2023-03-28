@@ -3,7 +3,7 @@ import { OpenAITranslateResult } from "./../types";
  * @author: tisfeng
  * @createTime: 2022-06-26 11:13
  * @lastEditor: tisfeng
- * @lastEditTime: 2023-03-20 09:15
+ * @lastEditTime: 2023-03-28 18:41
  * @fileName: dataManager.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -796,8 +796,10 @@ export class DataManager {
         })
         .catch((error) => {
           showErrorToast(error);
+          this.removeQueryFromRecordList(type);
         })
         .finally(() => {
+          // Since it is stream, we need to remove it when finished or error.
           // this.removeQueryFromRecordList(type);
         });
     }

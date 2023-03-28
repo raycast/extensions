@@ -26,18 +26,18 @@ export class Easydict {
   static repo = "Raycast-Easydict";
 
   // * NOTE: this is new version info, don't use it directly. Use getCurrentStoredVersionInfo() instead.
-  version = "2.8.0";
-  buildNumber = 23;
-  versionDate = "2023-03-17";
-  isNeedPrompt = true;
+  version = "2.8.1";
+  buildNumber = 24;
+  versionDate = "2023-03-28";
+  isNeedPrompt = false;
   hasPrompted = false; // * always default false, only show once, then should be set to true.
 
   releaseMarkdown = `
 ## [v${this.version}] - ${this.versionDate}
 
-### ✨ 新功能
+### 🐞 修复
 
-- 支持 OpenAI ChatGPT 翻译。
+- 修复请求 OpenAI 可能报错崩溃问题。
 
 #### 如果觉得这个扩展还不错，给个 [Star](https://github.com/tisfeng/Raycast-Easydict) ⭐️ 支持一下吧 (^-^)
 
@@ -49,9 +49,8 @@ export class Easydict {
 
 ---
 
-### ✨ Features
-
-- Support OpenAI ChatGPT translation.
+### 🐞 Fixes
+- Fixed the crash problem when requesting OpenAI translation.
 `;
 
   getRepoUrl() {

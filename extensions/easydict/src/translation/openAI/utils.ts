@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2023-03-14 21:55
  * @lastEditor: tisfeng
- * @lastEditTime: 2023-03-17 20:20
+ * @lastEditTime: 2023-03-28 11:10
  * @fileName: utils.ts
  *
  * Copyright (c) 2023 by ${git_name}, All Rights Reserved.
@@ -20,22 +20,26 @@ interface FetchSSEOptions extends RequestInit {
 
 export async function fetchSSE(input: string, options: FetchSSEOptions) {
   const { onMessage, onError, ...fetchOptions } = options;
-  const resp = await fetch(input, fetchOptions);
-  if (resp.status !== 200) {
-    onError(await resp.json());
-    return;
-  }
-  const parser = createParser((event) => {
-    if (event.type === "event") {
-      onMessage(event.data);
+  try {
+    const resp = await fetch(input, fetchOptions);
+    if (resp.status !== 200) {
+      onError(await resp.json());
+      return;
     }
-  });
-  if (resp.body) {
-    for await (const chunk of resp.body) {
-      if (chunk) {
-        const str = new TextDecoder().decode(chunk as ArrayBuffer);
-        parser.feed(str);
+    const parser = createParser((event) => {
+      if (event.type === "event") {
+        onMessage(event.data);
+      }
+    });
+    if (resp.body) {
+      for await (const chunk of resp.body) {
+        if (chunk) {
+          const str = new TextDecoder().decode(chunk as ArrayBuffer);
+          parser.feed(str);
+        }
       }
     }
+  } catch (error) {
+    onError(error);
   }
 }
