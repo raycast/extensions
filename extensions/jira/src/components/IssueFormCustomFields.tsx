@@ -2,16 +2,19 @@ import { Form, Icon } from "@raycast/api";
 import { useForm } from "@raycast/utils";
 import { Fragment } from "react";
 
+import { Team } from "../api/teams";
 import { User } from "../api/users";
 import { CustomFieldSchema, getCustomFieldsForCreateIssue, Option } from "../helpers/issues";
 
 import { IssueFormValues } from "./CreateIssueForm";
 import FormSprintDropdown from "./FormSprintDropdown";
+import { FormTeamDropdown } from "./FormTeamDropdown";
 
 type IssueFormCustomFieldsProps = {
   fields: ReturnType<typeof getCustomFieldsForCreateIssue>["customFields"];
   itemProps: ReturnType<typeof useForm<IssueFormValues>>["itemProps"];
   users?: User[];
+  teams?: Team[] | null;
 };
 
 export default function IssueFormCustomFields({ fields, itemProps, users }: IssueFormCustomFieldsProps) {
@@ -103,6 +106,11 @@ export default function IssueFormCustomFields({ fields, itemProps, users }: Issu
                 })}
               </Form.Dropdown>
             );
+            break;
+          }
+          case CustomFieldSchema.team: {
+            const props = itemProps[key] as Form.ItemProps<string>;
+            component = <FormTeamDropdown {...props} name={name} />;
             break;
           }
         }

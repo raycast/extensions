@@ -2,7 +2,7 @@ import { runAppleScript } from "run-applescript";
 
 export const getSelectedImages = async () => {
   const selectedImages = await runAppleScript(
-    `set imageTypes to {"PNG", "JPG", "JPEG", "TIF", "HEIC", "GIF", "ICO", "ICNS", "ASTC", "BMP", "DDS", "EXR", "JP2", "KTX", "PBM", "PSD", "PVR", "TGA"}
+    `set imageTypes to {"PNG", "JPG", "JPEG", "TIF", "HEIF", "GIF", "ICO", "ICNS", "ASTC", "BMP", "DDS", "EXR", "JP2", "KTX", "Portable Bitmap", "Adobe Photoshop", "PVR", "TGA"}
 
     tell application "Finder"
       set theSelection to selection

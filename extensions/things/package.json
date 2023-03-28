@@ -6,6 +6,9 @@
   "description": "Search and manage your Things To-Dos from Raycast",
   "icon": "things-icon.png",
   "author": "loris",
+  "contributors": [
+    "andreaselia"
+  ],
   "license": "MIT",
   "commands": [
     {

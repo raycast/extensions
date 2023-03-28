@@ -2,16 +2,8 @@
 
 import { ERRORS } from "~/constants/general";
 
-export type Preferences = {
-  cliPath: string;
-  clientId: string;
-  clientSecret: string;
-  fetchFavicons: boolean;
-  serverUrl: string;
-  serverCertsPath: string;
-  repromptIgnoreDuration: string;
-  generatePasswordQuickAction: "paste" | "copy" | "copyAndPaste";
-};
+// This should be updated with the command "name" values in the package.json file
+export type CommandName = "search" | "generate-password" | "generate-password-quick";
 
 export type VaultStatus = "unauthenticated" | "locked" | "unlocked";
 export type VaultState = {

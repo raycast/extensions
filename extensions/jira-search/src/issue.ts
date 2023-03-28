@@ -65,7 +65,7 @@ function buildJql(query: string): string {
   const assignees = collectPrefixed("~", terms)
   const unwantedTextTermChars = /[-+!*&]/
   const textTerms = terms
-    .filter((term) => !"@#".includes(term[0]))
+    .filter((term) => !"@#~".includes(term[0]))
     .flatMap((term) => term.split(unwantedTextTermChars))
     .filter((term) => term.length > 0)
 
@@ -75,6 +75,7 @@ function buildJql(query: string): string {
   const jqlConditions = [
     inClause("project", projects),
     inClause("issueType", issueTypes),
+    inClause("assignee", assignees),
     ...textTerms.map((term) => `text~"${term}*"`),
   ]
 
@@ -82,61 +83,74 @@ function buildJql(query: string): string {
   return jql + " order by lastViewed desc"
 }
 
-function jqlForFilter(filter: IssueFilter) {
+function jqlForFilter(filter?: IssueFilter) {
   switch (filter) {
-    case "allIssues":
-      return ""
     case "issuesInOpenSprints":
       return "sprint in openSprints()"
     case "myIssues":
       return "assignee=currentUser()"
     case "myIssuesInOpenSprints":
       return "assignee=currentUser() AND sprint in openSprints()"
+    default:
+      return undefined
   }
 }
 
 function jqlFor(query: string, filter?: IssueFilter): string {
-  const jql = isIssueKey(query) ? `key=${query}` : buildJql(query)
-
-  if (!filter) return jql
-  const extraJqlForFilter = jqlForFilter(filter)
-
-  const extraOperator = query ? "AND" : ""
-
-  return `${extraJqlForFilter} ${extraOperator} ${jql}`
+  const filterJql = jqlForFilter(filter)
+  const queryJql = isIssueKey(query) ? `key=${query}` : buildJql(query)
+  return [filterJql, queryJql].filter(Boolean).join(" AND ")
 }
 
-export async function searchIssues(query: string, filter?: IssueFilter): Promise<ResultItem[]> {
+async function searchIssues(query: string, filter?: IssueFilter): Promise<ResultItem[]> {
   const jql = jqlFor(query, filter)
-
   console.debug(jql)
 
   const result = await jiraFetchObject<Issues>(
     "/rest/api/3/search",
     { jql, fields },
-    { 400: ErrorText("Invalid Query", "Unknown project or issue type") }
+    { 400: ErrorText("Invalid Query", "Unknown project, issue type or assignee") }
   )
   const mapResult = async (issue: Issue): Promise<ResultItem> => ({
     id: issue.id,
     title: issue.fields.summary,
     subtitle: `${issue.key} · ${issue.fields.issuetype.name}`,
     icon: await jiraImage(issue.fields.issuetype.iconUrl),
-    accessoryIcon: statusIcon(issue.fields.status),
-    accessoryTitle: issue.fields.status.name,
+    accessories: [
+      {
+        tag: issue.fields.status.name,
+        icon: statusIcon(issue.fields.status),
+      },
+    ],
     url: `${jiraUrl}/browse/${issue.key}`,
     linkText: `${issue.key}: ${issue.fields.summary}`,
   })
   return result.issues && result.issues.length > 0 ? Promise.all(result.issues.map(mapResult)) : []
 }
 
+function openIssueKey(query: string): ResultItem | undefined {
+  if (isIssueKey(query)) {
+    return {
+      id: query,
+      url: `${jiraUrl}/browse/${query}`,
+      title: `Open issue ${query}`,
+    }
+  }
+}
+
 export default function SearchIssueCommand() {
-  return SearchCommand(searchIssues, "Search issues by text, @project and #issueType", {
-    tooltip: "Filters",
-    values: [
-      { name: "All Issues", value: "allIssues" },
-      { name: "Issues in Open sprints", value: "issuesInOpenSprints" },
-      { name: "Assigned to Me", value: "myIssues" },
-      { name: "My Issues in Open sprints", value: "myIssuesInOpenSprints" },
-    ],
-  })
+  return SearchCommand(
+    searchIssues,
+    "Search issues by text, @project, #type, ~assignee",
+    {
+      tooltip: "Filters",
+      values: [
+        { name: "All Issues", value: "allIssues" },
+        { name: "Issues in Open sprints", value: "issuesInOpenSprints" },
+        { name: "Assigned to Me", value: "myIssues" },
+        { name: "My Issues in Open sprints", value: "myIssuesInOpenSprints" },
+      ],
+    },
+    openIssueKey
+  )
 }

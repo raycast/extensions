@@ -1,5 +1,9 @@
 # Changelog
 
+## [New Logo] - 2023-03-07
+
+- Updated the logo to match the refreshed brand assets
+
 ## [New Commands and Improvements] - 2023-01-16
 
 - Added `Find Local Sites` command.
