@@ -31,7 +31,7 @@ export default function LatestBookmarks() {
     defaultCollection
   );
 
-  const { isLoading, bookmarks, collections } = useRequest({ collection });
+  const { isLoading, bookmarks, collections, revalidate } = useRequest({ collection });
 
   const onCollectionChange = (value: string) => {
     if (collection !== value) {
@@ -54,7 +54,7 @@ export default function LatestBookmarks() {
       }
     >
       {bookmarks?.items?.map((bookmark: Bookmark) => (
-        <BookmarkItem key={bookmark._id} bookmark={bookmark} />
+        <BookmarkItem key={bookmark._id} bookmark={bookmark} revalidate={revalidate} />
       ))}
     </List>
   );
