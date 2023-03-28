@@ -8,8 +8,9 @@ import open from 'open'
 import destroyer from 'server-destroy'
 import { isString } from './string'
 import { isNil } from 'lodash'
+import { ConfigCenterPreference } from "./index";
 
-const { bookmarkOauthClientKey } = getPreferenceValues<BookmarkPreference>()
+const { oauthClientKey } = getPreferenceValues<ConfigCenterPreference>()
 
 const refresh_token_path = environment.assetsPath + '/google-refresh-auth-token.json'
 const normal_token_path = environment.assetsPath + '/google-normal-auth-token.json'
@@ -17,7 +18,7 @@ const scope = 'https://www.googleapis.com/auth/spreadsheets.readonly'
 const listen_port = 50000
 const tokenKey = 'refreshToken'
 const GoogleAuthenticated = () => {
-  const client_keys = JSON.parse(bookmarkOauthClientKey)
+  const client_keys = JSON.parse(oauthClientKey)
   return new Promise((resolve, reject) => {
     // create an oAuth client to authorize the API call.  Secrets are kept in a `keys.json` file,
     // which should be downloaded from the Google Developers Console.
@@ -79,7 +80,7 @@ const getOAuthClient = async () => {
   if (client === null) {
     try {
       const token = await getGoogleOAuthToken()
-      const clientKeys = JSON.parse(bookmarkOauthClientKey)
+      const clientKeys = JSON.parse(oauthClientKey)
       client = new OAuth2Client(clientKeys.web.client_id, clientKeys.web.client_secret, clientKeys.web.redirect_uris[0])
       client.setCredentials(token)
     } catch (e) {

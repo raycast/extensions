@@ -21,91 +21,36 @@
       "title": "GoCD Pipeline",
       "description": "GoCD Pipelines List And Details",
       "mode": "view",
-      "icon": "icons/command-gocd-icon.png",
-      "preferences": [
-        {
-          "name": "GocdPAT",
-          "title": "GOCD PAT",
-          "description": "GOCD Personal Access Token",
-          "placeholder": "GOCD Personal Access Token",
-          "type": "textfield",
-          "required": true
-        },
-        {
-          "name": "GoCDBaseUrl",
-          "title": "GOCD Base Url",
-          "description": "GOCD Base Url",
-          "placeholder": "https://ci.example.com",
-          "type": "textfield",
-          "required": true
-        }
-      ]
+      "icon": "icons/command-gocd-icon.png"
     },
     {
       "name": "grafana",
       "title": "Grafana",
       "description": "Grafana Quick Link",
       "mode": "view",
-      "icon": "icons/command-grafana-icon.png",
-      "preferences": [
-        {
-          "name": "GrafanaPAT",
-          "title": "Grafana PAT",
-          "description": "Grafana API Keys",
-          "placeholder": "Grafana API Keys",
-          "type": "textfield",
-          "required": true
-        },
-        {
-          "name": "GrafanaBaseUrl",
-          "title": "Grafana Base URL",
-          "description": "Grafana Base Url",
-          "type": "textfield",
-          "placeholder": "https://monitor.example.com",
-          "required": true
-        }
-      ]
+      "icon": "icons/command-grafana-icon.png"
     },
     {
       "name": "dictionary",
       "title": "Dictionary",
       "description": "Project Dictionary",
       "mode": "view",
-      "icon": "icons/dictionary.png",
-      "preferences": [
-        {
-          "name": "dictionaryUrl",
-          "title": "MySQL Connection For Dictionary",
-          "description": "dictionary database url",
-          "placeholder": "mysqlx://username:password@ip:port",
-          "type": "textfield",
-          "required": true
-        }
-      ]
+      "icon": "icons/dictionary.png"
+    },
+    {
+      "name": "ticket-library",
+      "title": "Ticket Library",
+      "description": "Operation Ticket Library",
+      "mode": "view",
+      "icon": "icons/ticket-library.png"
     },
     {
       "name": "bookmark",
       "title": "Bookmark",
       "description": "Project Bookmark",
       "mode": "view",
-      "preferences": [
-        {
-          "name": "bookmarkSheetIds",
-          "title": "bookmark google sheet id list",
-          "description": "Bookmark google sheet ids",
-          "placeholder": "Enter Your google sheet id",
-          "type": "textfield",
-          "required": true
-        },
-        {
-          "name": "bookmarkOauthClientKey",
-          "title": "Bookmark google oauth client key",
-          "description": "Bookmark google  oauth client key",
-          "placeholder": "Enter Your oauth client key",
-          "type": "textfield",
-          "required": true
-        }
-      ]
+      "icon": "icons/bookmark.png",
+      "preferences": []
     },
     {
       "name": "jira",
@@ -140,7 +85,32 @@
       "icon": "icons/google.ico"
     }
   ],
-  "preferences": [],
+  "preferences": [
+    {
+      "name": "configurationId",
+      "title": "Configuration Center google sheet id",
+      "description": "Bookmark google sheet ids",
+      "placeholder": "Enter Your google sheet id",
+      "type": "textfield",
+      "required": true
+    },
+    {
+      "name": "secondConfigurationId",
+      "title": "Configuration Center google sheet id for yoursekf",
+      "description": "Bookmark google sheet ids",
+      "placeholder": "Enter Your google sheet id",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "oauthClientKey",
+      "title": "google oauth client key",
+      "description": "google oauth client key",
+      "placeholder": "Enter Your oauth client key",
+      "type": "textfield",
+      "required": true
+    }
+  ],
   "dependencies": {
     "@mysql/xdevapi": "^8.0.32",
     "@raycast/api": "^1.47.3",

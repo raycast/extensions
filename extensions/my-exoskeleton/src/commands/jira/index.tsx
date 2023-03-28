@@ -56,15 +56,34 @@ export function JiraCommand() {
     })
   }
 
+  const removeRedundantSymbols = (description: string) => {
+    return description
+      .replaceAll('{}', '')
+      .replaceAll('{*}', '')
+      .replaceAll(/{color:#\d+}/g, '')
+      .replaceAll(/{color}/g, '')
+  }
+
+  const parseFontColor = (description: string) => {
+    const startRegex = /{code:\w+}/g
+    const endRegex = /{code}/g
+
+    return description
+      .replace(startRegex, (origin) => {
+        return '```' + origin.slice(origin.indexOf(':') + 1, -1)
+      })
+      .replace(endRegex, () => '\n```')
+  }
+
   const IssueDetail = (props: { jiraIssue: JiraIssue; link: string }) => {
     const detailField = props.jiraIssue.fields
-    console.log(detailField.creator, detailField.assignee)
     const attachmentPool: { [p: string]: string } = Object.fromEntries(
       detailField.attachment?.map(({ filename, content }) => [filename, content])
     )
     let description = detailField.description
     description = parseImageLink(description, attachmentPool)
-    description = description.replaceAll('{}', '').replaceAll('{*}', '')
+    description = parseFontColor(description)
+    description = removeRedundantSymbols(description)
 
     const markdown = `## ${detailField.summary}\n\n---\n${description}`
 

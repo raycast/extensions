@@ -1,14 +1,12 @@
-import axios, { CreateAxiosDefaults } from 'axios'
+import axios, { CreateAxiosDefaults, AxiosInstance } from 'axios'
 
 const defaultOptions: CreateAxiosDefaults = {
   timeout: 60 * 1000
 }
 
-export function initHttpClient(options?: CreateAxiosDefaults) {
-  const instance = axios.create({
+export function initHttpClient(options?: CreateAxiosDefaults): AxiosInstance {
+  return axios.create({
     ...defaultOptions,
     ...options
   })
-
-  return instance
 }

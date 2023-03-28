@@ -1,12 +1,13 @@
 import moment from 'moment'
-import { ActionPanel, List, Action, getPreferenceValues, Toast, showToast, Icon, Color } from '@raycast/api'
-import { useEffect, useState } from 'react'
+import { ActionPanel, List, Action, Toast, showToast, Icon, Color } from '@raycast/api'
+import { useEffect, useMemo, useState } from 'react'
 import { isEmpty, findIndex, orderBy, first, reject } from 'lodash'
-import { getDashboard } from '../../apis/gocd'
 import { Pipeline, Stage } from '../../apis/types/gocd.type'
 import { getItem, removeCache, setItem, StoreKeys } from '../../store'
 import { PipelineDetails } from './Details'
 import { getStageIconByStatus } from '../../utils/gocd'
+import { withConfig } from '../../utils/configurationCenter'
+import { buildGoCDClient } from '../../apis/gocd'
 
 interface StarPipelineItem {
   name: string
@@ -15,15 +16,6 @@ interface StarPipelineItem {
 
 function getCurrentTimestamp() {
   return new Date().getTime()
-}
-
-async function getPipelines(): Promise<Pipeline[]> {
-  const { data } = await getDashboard()
-  const {
-    _embedded: { pipelines }
-  } = data
-
-  return pipelines
 }
 
 function recordCurrentPipelineIsVisited(pipeline: Pipeline, callback?: (value?: Pipeline[]) => void) {
@@ -149,20 +141,29 @@ function isCurrentStatus(pipeline: Pipeline, currentStatus: string) {
   return false
 }
 
-function getPipelineUrlByName(pipelineName: string) {
-  const { baseUrl } = getPreferenceValues()
-  return `${baseUrl}/go/pipeline/activity/${pipelineName}`
-}
-
-export function GoCDPipelineCommand() {
+export const GoCDPipelineCommand = withConfig(({ configurations: { gocdPAT, gocdBaseUrl } }) => {
   const [keyword, setKeyword] = useState('')
   const [pipelines, setPipelines] = useState<Pipeline[]>([])
   const [visitedPipelines, setStarPipelines] = useState<Pipeline[]>([])
   const [selectedStatus, setStatus] = useState('')
+  const gocdClient = useMemo(() => buildGoCDClient(gocdBaseUrl, gocdPAT), [gocdPAT, gocdBaseUrl])
 
   useEffect(() => {
     loadData()
-  }, [])
+  }, [gocdClient])
+
+  async function getPipelines(): Promise<Pipeline[]> {
+    const { data } = await gocdClient.getDashboard()
+    const {
+      _embedded: { pipelines }
+    } = data
+
+    return pipelines
+  }
+
+  function getPipelineUrlByName(pipelineName: string) {
+    return `${gocdBaseUrl}/go/pipeline/activity/${pipelineName}`
+  }
 
   function filterByKeywordAndStatus(pipeline: Pipeline) {
     return pipeline.name.includes(keyword) && isCurrentStatus(pipeline, selectedStatus)
@@ -298,4 +299,4 @@ export function GoCDPipelineCommand() {
       <List.Section title="All">{pipelines.filter(filterByKeywordAndStatus).map(renderListItem)}</List.Section>
     </List>
   )
-}
+})
