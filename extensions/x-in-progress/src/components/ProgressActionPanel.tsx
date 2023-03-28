@@ -8,6 +8,7 @@ type ProgressActionPanelProps = {
   onEditProgress?: any;
   onAddProgress?: any;
   onDeteleProgress?: any;
+  onPinProgress?: any;
 };
 
 export default function ProgressActionPanel(props: ProgressActionPanelProps) {
@@ -19,6 +20,13 @@ export default function ProgressActionPanel(props: ProgressActionPanelProps) {
           icon={Icon.AppWindowSidebarLeft}
           onAction={() => {
             props.onShowDetails?.();
+          }}
+        />
+        <Action
+          title={props.progress.pinned ? "Unpin it" : "Pin it"}
+          icon={Icon.Pin}
+          onAction={() => {
+            props.onPinProgress?.(props.progress);
           }}
         />
         <Action

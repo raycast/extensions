@@ -10,6 +10,7 @@ export type Progress = {
   startDate: Date;
   endDate: Date;
   getProgressNumberFn?: any;
+  pinned?: boolean;
   type?: "default" | "user";
 };
 

@@ -87,6 +87,26 @@ export default function XInProgress() {
     [userProgress]
   );
 
+  const onPinProgress = useCallback(
+    async (currentProgress: Progress) => {
+      const newUserProgress = userProgress.map((progress) => {
+        if (progress.title === currentProgress.title) {
+          return { ...progress, pinned: !progress.pinned };
+        }
+        return progress;
+      });
+      setUserProgress(newUserProgress);
+
+      await showToast({
+        style: Toast.Style.Success,
+        title: `"${currentProgress.title}" is ${currentProgress.pinned ? "unpinned" : "pinned"}!`,
+      });
+
+      await launchCommand({ name: "index", type: LaunchType.UserInitiated });
+    },
+    [userProgress]
+  );
+
   const onAddProgress = useCallback(async () => {
     navigation.push(
       <AddProgressForm
@@ -131,8 +151,48 @@ export default function XInProgress() {
     [userProgress]
   );
 
+  const renderProgress = useCallback(
+    (progress: Progress) => {
+      const progressNumber = getProgressNumber(progress);
+      const subtitle = getProgressSubtitle(progressNumber);
+      return (
+        <List.Item
+          key={progress.key}
+          title={progress.title}
+          icon={getIcon(progressNumber)}
+          subtitle={subtitle}
+          detail={<ProgressDetail progress={progress} />}
+          actions={
+            <ProgressActionPanel
+              progress={progress}
+              onShowDetails={onShowDetails}
+              onChangeShowFromMenuBar={() => onChangeShowFromMenuBar(progress)}
+              onEditProgress={onEditProgress}
+              onAddProgress={onAddProgress}
+              onDeteleProgress={onDeleteProgress}
+              onPinProgress={onPinProgress}
+            />
+          }
+        />
+      );
+    },
+    [
+      getProgressNumber,
+      getProgressSubtitle,
+      getIcon,
+      onShowDetails,
+      onChangeShowFromMenuBar,
+      onEditProgress,
+      onAddProgress,
+      onDeleteProgress,
+      onPinProgress,
+    ]
+  );
+
   return (
     <List navigationTitle="X In Progress" isShowingDetail={isShowingDetail}>
+      <List.Section title="Pinned Progress">{userProgress.filter((p) => p.pinned).map(renderProgress)}</List.Section>
+
       <List.Section title={`🔵 ${getYear()}`}>
         {userProgress.length == 0 ? (
           <List.Item
@@ -145,29 +205,7 @@ export default function XInProgress() {
             }
           />
         ) : (
-          userProgress.map((progress) => {
-            const progressNumber = getProgressNumber(progress);
-            const subtitle = getProgressSubtitle(progressNumber);
-            return (
-              <List.Item
-                key={progress.key}
-                title={progress.title}
-                icon={getIcon(progressNumber)}
-                subtitle={subtitle}
-                detail={<ProgressDetail progress={progress} />}
-                actions={
-                  <ProgressActionPanel
-                    progress={progress}
-                    onShowDetails={onShowDetails}
-                    onChangeShowFromMenuBar={() => onChangeShowFromMenuBar(progress)}
-                    onEditProgress={onEditProgress}
-                    onAddProgress={onAddProgress}
-                    onDeteleProgress={onDeleteProgress}
-                  />
-                }
-              />
-            );
-          })
+          userProgress.filter((p) => !p.pinned).map(renderProgress)
         )}
       </List.Section>
     </List>
