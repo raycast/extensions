@@ -15,7 +15,13 @@ export function TracksSection({ tracks, limit }: TracksSectionProps) {
   return (
     <List.Section title="Songs">
       {items?.map((track) => (
-        <TrackListItem key={track.id} track={track} album={track.album} showGoToAlbum />
+        <TrackListItem
+          key={track.id}
+          track={track}
+          album={track.album}
+          playingContext={track.album?.uri}
+          showGoToAlbum
+        />
       ))}
     </List.Section>
   );

@@ -3,7 +3,7 @@ import { HttpError } from "oazapfts";
 type ErrorObj = {
   status: number;
   message: string;
-  reason: string;
+  reason?: string;
 };
 
 export function getError(error: unknown): ErrorObj {

@@ -1,11 +1,11 @@
 import { getSpotifyClient } from "../helpers/withSpotifyClient";
 
 type AddToQueueProps = {
-  trackUri: string;
+  uri: string;
 };
 
-export async function addToQueue({ trackUri }: AddToQueueProps) {
+export async function addToQueue({ uri }: AddToQueueProps) {
   const { spotifyClient } = getSpotifyClient();
-  const response = await spotifyClient.postMePlayerQueue(trackUri);
+  const response = await spotifyClient.postMePlayerQueue(uri);
   return response;
 }

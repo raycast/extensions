@@ -2,7 +2,7 @@ import { Action, ActionPanel, Icon, showHUD, showToast } from "@raycast/api";
 import { addToQueue } from "../api/addTrackToQueue";
 import { play } from "../api/play";
 import { SimplifiedEpisodeObject } from "../helpers/spotify.api";
-import { isSpotifyInstalled } from "../helpers/isSpotifyInstalled";
+import { FooterAction } from "./FooterAction";
 
 type EpisodeActionPanelProps = {
   title: string;
@@ -28,24 +28,7 @@ export function EpisodeActionPanel({ title, episode }: EpisodeActionPanelProps) 
           showToast({ title: "Added to queue", message: title });
         }}
       />
-      <ActionPanel.Section>
-        <Action.CopyToClipboard
-          icon={Icon.Link}
-          title="Copy URL"
-          content={{
-            html: `<a href="${episode?.external_urls?.spotify}" title="${title}">${title}</a>`,
-            text: episode?.external_urls?.spotify,
-          }}
-        />
-        {isSpotifyInstalled ? (
-          <Action.Open icon="spotify-icon.png" title="Open on Spotify" target={episode.uri || "spotify"} />
-        ) : (
-          <Action.OpenInBrowser
-            title="Open on Spotify Web"
-            url={episode?.external_urls?.spotify || "https://play.spotify.com"}
-          />
-        )}
-      </ActionPanel.Section>
+      <FooterAction url={episode?.external_urls?.spotify} uri={episode.uri} title={title} />
     </ActionPanel>
   );
 }

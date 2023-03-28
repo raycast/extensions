@@ -15,6 +15,17 @@
     "dancannon"
   ],
   "license": "MIT",
+  "preferences": [
+    {
+      "name": "closeWindowOnAction",
+      "title": "Close window on action",
+      "description": "Close the Raycast window after performing an action",
+      "type": "checkbox",
+      "label": "Enabled",
+      "default": false,
+      "required": false
+    }
+  ],
   "commands": [
     {
       "name": "search",
@@ -35,18 +46,7 @@
       "title": "Now Playing",
       "subtitle": "Spotify",
       "description": "See what's currently playing. Use the actions (⌘ K) for further actions, such as Play/Pause, Like/Dislike, Skip, Start Radio, Add to Playlist, Connect Device and more.",
-      "mode": "view",
-      "preferences": [
-        {
-          "name": "closeWindowOnAction",
-          "title": "Close window on action",
-          "description": "Close the Raycast window after performing an action",
-          "type": "checkbox",
-          "label": "Enabled",
-          "default": false,
-          "required": false
-        }
-      ]
+      "mode": "view"
     },
     {
       "name": "nowPlayingMenuBar",

@@ -1,11 +1,11 @@
 import { Action, ActionPanel, Icon, showHUD } from "@raycast/api";
 import { play } from "../api/play";
-import { isSpotifyInstalled } from "../helpers/isSpotifyInstalled";
 import { SimplifiedPlaylistObject } from "../helpers/spotify.api";
+import { FooterAction } from "./FooterAction";
 import { TracksList } from "./TracksList";
 
 type PlaylistActionPanelProps = {
-  title?: string;
+  title: string;
   playlist: SimplifiedPlaylistObject;
 };
 
@@ -26,24 +26,7 @@ export function PlaylistActionPanel({ title, playlist }: PlaylistActionPanelProp
         shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
         target={<TracksList playlist={playlist} />}
       />
-      <ActionPanel.Section>
-        <Action.CopyToClipboard
-          icon={Icon.Link}
-          title="Copy URL"
-          content={{
-            html: `<a href="${playlist?.external_urls?.spotify}" title="${title}">${title}</a>`,
-            text: playlist?.external_urls?.spotify,
-          }}
-        />
-        {isSpotifyInstalled ? (
-          <Action.Open icon="spotify-icon.png" title="Open on Spotify" target={playlist.uri ?? "spotify"} />
-        ) : (
-          <Action.OpenInBrowser
-            title="Open on Spotify Web"
-            url={playlist.external_urls?.spotify ?? "https://play.spotify.com"}
-          />
-        )}
-      </ActionPanel.Section>
+      <FooterAction url={playlist?.external_urls?.spotify} uri={playlist.uri} title={title} />
     </ActionPanel>
   );
 }

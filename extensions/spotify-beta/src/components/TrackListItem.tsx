@@ -12,7 +12,7 @@ type TrackListItemProps = {
 
 export default function TrackListItem({ track, album, showGoToAlbum, playingContext }: TrackListItemProps) {
   const title = track.name || "";
-  const subtitle = track?.artists?.[0].name;
+  const subtitle = track?.artists?.map((a) => a.name).join(", ");
 
   let icon: Image.ImageLike | undefined = undefined;
   if (album?.images) {

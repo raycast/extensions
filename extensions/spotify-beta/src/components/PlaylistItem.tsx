@@ -9,7 +9,7 @@ type PlaylistItemProps = {
 };
 
 export default function PlaylistItem({ type, playlist }: PlaylistItemProps) {
-  const title = playlist.name;
+  const title = playlist.name as string;
   const subtitle = playlist?.owner?.display_name ?? undefined;
   const imageURL = playlist?.images?.[playlist.images.length - 1]?.url;
   const icon: Image.ImageLike = {

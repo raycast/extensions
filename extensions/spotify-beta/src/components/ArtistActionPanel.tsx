@@ -1,12 +1,12 @@
 import { Action, ActionPanel, Icon, showHUD } from "@raycast/api";
 import { ArtistObject } from "../helpers/spotify.api";
-import { isSpotifyInstalled } from "../helpers/isSpotifyInstalled";
 import { AlbumsGrid } from "./AlbumsGrid";
 import { useArtistAlbums } from "../hooks/useArtistAlbums";
 import { play } from "../api/play";
 import { startRadio } from "../api/startRadio";
 import { useArtistTopTracks } from "../hooks/useArtistTopTracks";
 import { TracksList } from "./TracksList";
+import { FooterAction } from "./FooterAction";
 
 type ArtistActionPanelProps = {
   title: string;
@@ -14,7 +14,7 @@ type ArtistActionPanelProps = {
 };
 
 export function ArtistActionPanel({ title, artist }: ArtistActionPanelProps) {
-  const { artistAlbumsData } = useArtistAlbums({ artistId: artist.id, limit: 24 });
+  const { artistAlbumsData } = useArtistAlbums({ artistId: artist.id });
   const { artistTopTracksData } = useArtistTopTracks({ artistId: artist.id });
   const albums = artistAlbumsData?.items;
 
@@ -46,24 +46,7 @@ export function ArtistActionPanel({ title, artist }: ArtistActionPanelProps) {
           showHUD(`Playing ${artist.name} Radio`);
         }}
       />
-      <ActionPanel.Section>
-        <Action.CopyToClipboard
-          icon={Icon.Link}
-          title="Copy URL"
-          content={{
-            html: `<a href="${artist?.external_urls?.spotify}" title="${title}">${title}</a>`,
-            text: artist?.external_urls?.spotify,
-          }}
-        />
-        {isSpotifyInstalled ? (
-          <Action.Open icon="spotify-icon.png" title="Open on Spotify" target={artist?.uri || "spotify"} />
-        ) : (
-          <Action.OpenInBrowser
-            title="Open on Spotify Web"
-            url={artist?.external_urls?.spotify || "https://play.spotify.com"}
-          />
-        )}
-      </ActionPanel.Section>
+      <FooterAction url={artist?.external_urls?.spotify} uri={artist.uri} title={title} />
     </ActionPanel>
   );
 }

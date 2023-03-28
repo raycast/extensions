@@ -7,7 +7,6 @@ import {
   popToRoot,
   showHUD,
   Color,
-  Clipboard,
   showToast,
   Toast,
   getPreferenceValues,
@@ -24,14 +23,14 @@ import { startRadio } from "./api/startRadio";
 import { removeFromMySavedTracks } from "./api/removeFromMySavedTracks";
 import { addToMySavedTracks } from "./api/addToMySavedTracks";
 import { transferMyPlayback } from "./api/transferMyPlayback";
-import { isSpotifyInstalled } from "./helpers/isSpotifyInstalled";
 import { useMyPlaylists } from "./hooks/useMyPlaylists";
 import { useMe } from "./hooks/useMe";
-import { addToPlaylist } from "./api/addToPlaylist";
 import { useContainsMyLikedTracks } from "./hooks/useContainsMyLikedTracks";
 import { usePlaybackState } from "./hooks/usePlaybackState";
 import { formatMs } from "./helpers/formatMs";
 import { TracksList } from "./components/TracksList";
+import { AddToPlaylistAction } from "./components/AddToPlaylistAction";
+import { FooterAction } from "./components/FooterAction";
 
 function NowPlayingCommand() {
   const { currentPlayingData, currentPlayingIsLoading, currentPlayingRevalidate } = useCurrentlyPlaying();
@@ -224,7 +223,7 @@ ${description}
                   await popToRoot();
                   return;
                 }
-                const toast = await showToast({ title: "Pausing", style: Toast.Style.Animated });
+                const toast = await showToast({ title: "Pausing...", style: Toast.Style.Animated });
                 await pause();
                 await playbackStateRevalidate();
                 toast.title = "Paused";
@@ -243,7 +242,7 @@ ${description}
                   await popToRoot();
                   return;
                 }
-                const toast = await showToast({ title: "Playing", style: Toast.Style.Animated });
+                const toast = await showToast({ title: "Playing...", style: Toast.Style.Animated });
                 await play();
                 await playbackStateRevalidate();
                 toast.title = "Playing";
@@ -252,30 +251,14 @@ ${description}
             />
           )}
           {actions}
-          <ActionPanel.Submenu icon={Icon.List} title="Add to Playlist">
-            {myPlaylistsData?.items
-              ?.filter((playlist) => playlist.owner?.id === meData?.id || playlist.collaborative)
-              .map((playlist) => {
-                return (
-                  <Action
-                    key={playlist.id}
-                    title={playlist.name as string}
-                    onAction={async () => {
-                      await addToPlaylist({
-                        playlistId: playlist.id as string,
-                        trackUris: [uri as string],
-                      });
-                      if (closeWindowOnAction) {
-                        await showHUD(`Added to ${playlist.name}`);
-                        await popToRoot();
-                        return;
-                      }
-                      await showToast({ title: `Added to ${playlist.name}` });
-                    }}
-                  />
-                );
-              })}
-          </ActionPanel.Submenu>
+          {myPlaylistsData?.items && meData && uri && (
+            <AddToPlaylistAction
+              playlists={myPlaylistsData.items}
+              meData={meData}
+              uri={uri}
+              closeWindowOnAction={closeWindowOnAction}
+            />
+          )}
           <ActionPanel.Submenu icon={Icon.Mobile} title="Connect Device">
             {myDevicesData?.devices?.map((device) => (
               <Action
@@ -296,28 +279,7 @@ ${description}
               />
             ))}
           </ActionPanel.Submenu>
-          <ActionPanel.Section>
-            <Action
-              title="Copy URL"
-              icon={Icon.Link}
-              onAction={async () => {
-                await Clipboard.copy({
-                  html: `<a href=${external_urls?.spotify}>${title}</a>`,
-                  text: external_urls?.spotify,
-                });
-                showHUD("Copied URL to clipboard");
-              }}
-            />
-
-            {isSpotifyInstalled ? (
-              <Action.Open icon="spotify-icon.png" title="Open on Spotify" target={uri || "spotify"} />
-            ) : (
-              <Action.OpenInBrowser
-                title="Open on Spotify Web"
-                url={external_urls?.spotify || "https://play.spotify.com"}
-              />
-            )}
-          </ActionPanel.Section>
+          <FooterAction url={external_urls?.spotify} uri={uri} title={title} />
         </ActionPanel>
       }
     />
