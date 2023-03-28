@@ -2,10 +2,15 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "search-npm",
   "title": "Search npm Packages",
-  "description": "Search for npm package information from npms.io",
+  "description": "Search for npm package information",
   "subtitle": "npm",
   "icon": "command-icon.png",
   "author": "mrmartineau",
+  "contributors": [
+    "reloadedhead",
+    "Timon",
+    "luisFilipePT"
+  ],
   "license": "MIT",
   "categories": [
     "Developer Tools"
@@ -15,7 +20,7 @@
       "name": "index",
       "title": "Search Packages",
       "subtitle": "npm",
-      "description": "Search for npm package information from npms.io. Also view bundlephobia.com cost, the package's README and Snyk vulnerability info",
+      "description": "Search for npm package information. Also view bundlephobia.com cost, the package's README and Snyk vulnerability info",
       "mode": "view"
     },
     {
