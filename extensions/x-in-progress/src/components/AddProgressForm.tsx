@@ -85,7 +85,7 @@ export default function AddProgressForm(props: AddProgressFormProps) {
           } else if (new Date(startDate).getTime() >= new Date(formValue.endDate as Date).getTime()) {
             setError({ ...error, startDateError: "The start date must earlier than end date!" });
           } else {
-            setError({ ...error, startDateError: undefined });
+            setError({ ...error, startDateError: undefined, endDateError: undefined });
           }
           setFormValue({ ...formValue, startDate: startDate as Date });
         }}
@@ -98,10 +98,12 @@ export default function AddProgressForm(props: AddProgressFormProps) {
         onChange={(endDate) => {
           if (!endDate) {
             setError({ ...error, endDateError: "The field should't be empty!" });
+          } else if (!formValue.startDate) {
+            setError({ ...error, startDateError: "The field should't be empty!", endDateError: undefined });
           } else if (new Date(endDate).getTime() <= new Date(formValue.startDate as Date).getTime()) {
             setError({ ...error, endDateError: "The start date must earlier than end date!" });
           } else {
-            setError({ ...error, endDateError: undefined });
+            setError({ ...error, endDateError: undefined, startDateError: undefined });
           }
           setFormValue({ ...formValue, endDate: endDate as Date });
         }}
