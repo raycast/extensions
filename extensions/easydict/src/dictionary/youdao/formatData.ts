@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-08-03 00:02
  * @lastEditor: tisfeng
- * @lastEditTime: 2023-02-22 10:29
+ * @lastEditTime: 2023-03-17 23:31
  * @fileName: formatData.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -40,13 +40,18 @@ export function formatYoudaoDictionaryResult(
   const usPhonetic = youdaoResult.basic?.["us-phonetic"]; // may be two phonetic "trænzˈleɪʃn; trænsˈleɪʃn"
   const phonetic = usPhonetic || youdaoResult.basic?.phonetic;
   const phoneticText = phonetic ? `[${phonetic}]` : undefined;
+
+  // get no more than 6 exam types
+  const examTypes = youdaoResult.basic?.exam_type?.slice(-6);
+  console.warn(`examTypes: ${examTypes}`);
+
   const queryWordInfo: QueryWordInfo = {
     word: youdaoResult.query,
     phonetic: phoneticText,
     fromLanguage: from,
     toLanguage: to,
     isWord: youdaoResult.isWord,
-    examTypes: youdaoResult.basic?.exam_type,
+    examTypes: examTypes,
     speechUrl: youdaoResult.speakUrl,
   };
 
@@ -494,7 +499,7 @@ export function formateYoudaoWebDictionaryModel(model: YoudaoWebDictionaryModel)
     // console.log(`ec, explanations: ${JSON.stringify(explanations, null, 4)}`);
 
     isWord = wordItem !== undefined; // Todo: need to check more.
-    examTypes = model.ec.exam_type;
+    examTypes = model.ec.exam_type?.slice(-6);
     speechUrl = audioUrl;
     forms = wordItem?.wfs;
   }

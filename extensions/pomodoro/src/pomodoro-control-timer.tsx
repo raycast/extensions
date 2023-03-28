@@ -1,7 +1,6 @@
-import { Detail, launchCommand, environment, LaunchType, closeMainWindow, popToRoot, List, Icon } from "@raycast/api";
-
+import { Detail, launchCommand, LaunchType, closeMainWindow, popToRoot, List, Icon } from "@raycast/api";
 import { ActionPanel, Action } from "@raycast/api";
-
+import { exec } from "child_process";
 import {
   continueInterval,
   createInterval,
@@ -14,10 +13,16 @@ import {
 
 const createAction = (action: () => void) => () => {
   action();
-  launchCommand({
-    name: "pomodoro-menu-bar",
-    type: LaunchType.UserInitiated,
-  });
+
+  try {
+    launchCommand({
+      name: "pomodoro-menu-bar",
+      type: LaunchType.UserInitiated,
+    });
+  } catch (error) {
+    console.error(error);
+  }
+
   popToRoot();
   closeMainWindow();
 };
@@ -99,6 +104,10 @@ const ActionsList = () => {
 };
 
 const EndOfInterval = () => {
+  if (preferences.sound) {
+    exec(`afplay /System/Library/Sounds/${preferences.sound}.aiff -v 10 && $$`);
+  }
+
   return (
     <Detail
       navigationTitle={`Interval completed`}
@@ -126,6 +135,6 @@ const EndOfInterval = () => {
   );
 };
 
-export default function Command() {
-  return environment.launchContext?.currentInterval ? <EndOfInterval /> : <ActionsList />;
+export default function Command(props: { launchContext?: { currentInterval: string } }) {
+  return props.launchContext?.currentInterval ? <EndOfInterval /> : <ActionsList />;
 }

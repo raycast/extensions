@@ -1,12 +1,22 @@
 # Bitwarden Changelog
 
+## [Vault Timeout and Reprompting] - 2023-03-25
+
+- Added a Vault Timeout options that locks your vault after a certain time of inactivity
+- Added password reprompt for Notes, Cards and Identity details
+
+## [Copy Enhancement] - 2023-03-16
+
+- Change copy actions to use the transient flag
+- Added options to choose, per command, if values should be copied as transient
+
 ## [Updates] - 2023-03-13
 
 - Added a "Generate Password (Quick)" command that allows to quickly generate a password and copy and/or paste it right away.
 - Added "Show Card Details" action for vault items.
 - Added a new action to the vault items that allows you to open the main URI in the browser.
 
-## [Codebase refactor] - 2023-03-03
+## [Codebase Refactor] - 2023-03-03
 
 - Cleanup and reorganization of the whole codebase
 

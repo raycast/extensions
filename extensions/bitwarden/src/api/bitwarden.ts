@@ -4,7 +4,8 @@ import { existsSync } from "fs";
 import { dirname } from "path/posix";
 import { CLINotFoundError } from "~/components/RootErrorBoundary";
 import { LOCAL_STORAGE_KEY, DEFAULT_SERVER_URL } from "~/constants/general";
-import { Preferences, VaultState } from "~/types/general";
+import { VaultState } from "~/types/general";
+import { Preferences } from "~/types/preferences";
 import { PasswordGeneratorOptions } from "~/types/passwords";
 import { Item } from "~/types/vault";
 import { getPasswordGeneratingArgs } from "~/utils/passwords";
@@ -13,6 +14,7 @@ import { getServerUrlPreference } from "~/utils/preferences";
 export class Bitwarden {
   private env: Record<string, string>;
   private initPromise: Promise<void>;
+  lockReason: string | undefined;
   cliPath: string;
 
   constructor() {
@@ -29,14 +31,13 @@ export class Bitwarden {
       BW_CLIENTSECRET: clientSecret.trim(),
       BW_CLIENTID: clientId.trim(),
       PATH: dirname(process.execPath),
+      ...(serverUrl && serverCertsPath ? { NODE_EXTRA_CA_CERTS: serverCertsPath } : {}),
     };
 
-    if (serverUrl && serverCertsPath) {
-      this.env["NODE_EXTRA_CA_CERTS"] = serverCertsPath;
-    }
-
-    // Check the CLI has been configured to use the preference Url
-    this.initPromise = this.checkServerUrl(serverUrl);
+    this.initPromise = (async () => {
+      await this.checkServerUrl(serverUrl);
+      this.lockReason = await LocalStorage.getItem<string>(LOCAL_STORAGE_KEY.VAULT_LOCK_REASON);
+    })();
   }
 
   async initialize() {
@@ -45,6 +46,7 @@ export class Bitwarden {
   }
 
   async checkServerUrl(serverUrl: string): Promise<void> {
+    // Check the CLI has been configured to use the preference Url
     const cliServer = (await LocalStorage.getItem<string>(LOCAL_STORAGE_KEY.SERVER_URL)) || "";
     if (cliServer === serverUrl) return;
 
@@ -56,8 +58,8 @@ export class Bitwarden {
     });
     try {
       try {
-        await this.exec(["logout"]);
-      } catch (error) {
+        await this.logout();
+      } catch {
         // It doesn't matter if we weren't logged in.
       }
       // If URL is empty, set it to the default
@@ -78,9 +80,25 @@ export class Bitwarden {
     }
   }
 
-  private async exec(args: string[], options: { abortController?: AbortController } = {}): Promise<ExecaChildProcess> {
-    const { abortController } = options;
-    return execa(this.cliPath, args, { env: this.env, input: "", signal: abortController?.signal });
+  private async setLockReason(reason: string) {
+    this.lockReason = reason;
+    await LocalStorage.setItem(LOCAL_STORAGE_KEY.VAULT_LOCK_REASON, reason);
+  }
+
+  private async clearLockReason(): Promise<void> {
+    if (this.lockReason) {
+      await LocalStorage.removeItem(LOCAL_STORAGE_KEY.VAULT_LOCK_REASON);
+      this.lockReason = undefined;
+    }
+  }
+
+  private async exec(args: string[], options?: ExecProps): Promise<ExecaChildProcess> {
+    const { abortController, input = "", skipLastActivityUpdate = false } = options ?? {};
+    const result = await execa(this.cliPath, args, { env: this.env, input, signal: abortController?.signal });
+    if (!skipLastActivityUpdate) {
+      await LocalStorage.setItem(LOCAL_STORAGE_KEY.LAST_ACTIVITY_TIME, new Date().toISOString());
+    }
+    return result;
   }
 
   async sync(sessionToken: string): Promise<void> {
@@ -89,6 +107,7 @@ export class Bitwarden {
 
   async login(): Promise<void> {
     await this.exec(["login", "--apikey"]);
+    await this.clearLockReason();
   }
 
   async logout(): Promise<void> {
@@ -116,10 +135,12 @@ export class Bitwarden {
 
   async unlock(password: string): Promise<string> {
     const { stdout: sessionToken } = await this.exec(["unlock", password, "--raw"]);
+    await this.clearLockReason();
     return sessionToken;
   }
 
-  async lock(): Promise<void> {
+  async lock(reason?: string): Promise<void> {
+    if (reason) this.setLockReason(reason);
     await this.exec(["lock"]);
   }
 
@@ -134,3 +155,9 @@ export class Bitwarden {
     return stdout;
   }
 }
+
+type ExecProps = {
+  abortController?: AbortController;
+  skipLastActivityUpdate?: boolean;
+  input?: string;
+};
