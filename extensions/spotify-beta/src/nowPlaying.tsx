@@ -245,24 +245,28 @@ ${description}
           )}
           {actions}
           <ActionPanel.Submenu icon={Icon.List} title="Add to Playlist">
-            {myPlaylistsData?.items?.map((playlist) => (
-              <Action
-                key={playlist.id}
-                title={playlist.name as string}
-                onAction={async () => {
-                  await addToPlaylist({
-                    playlistId: playlist.id as string,
-                    trackUris: [uri as string],
-                  });
-                  if (closeWindowOnAction) {
-                    await showHUD(`Added to ${playlist.name}`);
-                    await popToRoot();
-                    return;
-                  }
-                  await showToast({ title: `Added to ${playlist.name}` });
-                }}
-              />
-            ))}
+            {myPlaylistsData?.items
+              ?.filter((playlist) => playlist.owner?.display_name !== "Spotify")
+              .map((playlist) => {
+                return (
+                  <Action
+                    key={playlist.id}
+                    title={playlist.name as string}
+                    onAction={async () => {
+                      await addToPlaylist({
+                        playlistId: playlist.id as string,
+                        trackUris: [uri as string],
+                      });
+                      if (closeWindowOnAction) {
+                        await showHUD(`Added to ${playlist.name}`);
+                        await popToRoot();
+                        return;
+                      }
+                      await showToast({ title: `Added to ${playlist.name}` });
+                    }}
+                  />
+                );
+              })}
           </ActionPanel.Submenu>
           <ActionPanel.Submenu icon={Icon.Mobile} title="Connect Device">
             {myDevicesData?.devices?.map((device) => (
