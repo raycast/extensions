@@ -31,6 +31,7 @@ import { addToPlaylist } from "./api/addToPlaylist";
 import { useContainsMyLikedTracks } from "./hooks/useContainsMyLikedTracks";
 import { usePlaybackState } from "./hooks/usePlaybackState";
 import { formatMs } from "./helpers/formatMs";
+import { TracksList } from "./components/TracksList";
 
 function NowPlayingCommand() {
   const { currentPlayingData, currentPlayingIsLoading, currentPlayingRevalidate } = useCurrentlyPlaying();
@@ -174,6 +175,11 @@ by ${artistName}
             await showToast({ title: "Playing Radio" });
             await currentPlayingRevalidate();
           }}
+        />
+        <Action.Push
+          icon={Icon.AppWindowList}
+          title="Go to Album"
+          target={<TracksList album={album} showGoToAlbum={false} />}
         />
       </>
     );

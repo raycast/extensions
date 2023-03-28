@@ -1,17 +1,11 @@
-import dayjs from "dayjs";
-import duration from "dayjs/plugin/duration";
+export function formatMs(milliseconds: number) {
+  const hours = Math.floor(milliseconds / 3600000);
+  const minutes = Math.floor((milliseconds % 3600000) / 60000);
+  const seconds = Math.floor((milliseconds % 60000) / 1000);
 
-dayjs.extend(duration);
-
-export function formatMs(ms: number) {
-  const d = dayjs.duration(ms);
-  const hours = d.hours();
-  const minutes = d.minutes();
-  const seconds = d.seconds();
-
-  const formattedHours = hours > 0 ? `${hours}:` : "";
-  const formattedMinutes = hours > 0 ? String(minutes).padStart(2, "0") : minutes;
-  const formattedSeconds = String(seconds).padStart(2, "0");
+  const formattedHours = hours > 0 ? `${hours.toString().padStart(2, "0")}:` : "";
+  const formattedMinutes = minutes.toString().padStart(2, "0");
+  const formattedSeconds = seconds.toString().padStart(2, "0");
 
   return `${formattedHours}${formattedMinutes}:${formattedSeconds}`;
 }
