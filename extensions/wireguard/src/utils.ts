@@ -4,6 +4,7 @@ import { VPN } from "./type";
 import util from "util";
 
 export const SHELL_PATH = "/usr/sbin/";
+export const CMD_PATH = "/usr/sbin/scutil";
 
 export async function runScript(command: string): Promise<string> {
   const execAsync = util.promisify(exec);

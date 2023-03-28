@@ -17,6 +17,13 @@
       "subtitle": "Control Wireguard",
       "description": "Control wireguard connections.",
       "mode": "view"
+    },
+    {
+      "name": "disconnectAllWireguardConnections",
+      "title": "Disconnect All Connections",
+      "subtitle": "Wireguard",
+      "description": "Disconnect all wireguard connections.",
+      "mode": "no-view"
     }
   ],
   "dependencies": {
