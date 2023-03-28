@@ -4,6 +4,7 @@
   "description": "Replicate is a tool for creating and sharing machine learning models. This extension allows you to create and view your predictions in Raycast.",
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "icon": "replicate.png",
+  "owner": "replicate",
   "author": "KevinBatdorf",
   "contributors": [
     "bfirsh",
@@ -17,7 +18,7 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "index",
+      "name": "replicate",
       "title": "Replicate",
       "subtitle": "Run models in the cloud",
       "description": "Run models in the cloud",
