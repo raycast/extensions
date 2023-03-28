@@ -26,11 +26,11 @@ import { addToMySavedTracks } from "./api/addToMySavedTracks";
 import { transferMyPlayback } from "./api/transferMyPlayback";
 import { isSpotifyInstalled } from "./helpers/isSpotifyInstalled";
 import { useMyPlaylists } from "./hooks/useMyPlaylists";
+import { useMe } from "./hooks/useMe";
 import { addToPlaylist } from "./api/addToPlaylist";
 import { useContainsMyLikedTracks } from "./hooks/useContainsMyLikedTracks";
 import { usePlaybackState } from "./hooks/usePlaybackState";
 import { msToHMS } from "./helpers/track";
-import { useMe } from "./hooks/useMe";
 
 function NowPlayingCommand() {
   const { currentPlayingData, currentPlayingIsLoading, currentPlayingRevalidate } = useCurrentlyPlaying();
@@ -248,7 +248,7 @@ ${description}
           {actions}
           <ActionPanel.Submenu icon={Icon.List} title="Add to Playlist">
             {myPlaylistsData?.items
-              ?.filter((playlist) => playlist.owner?.id === meData?.id)
+              ?.filter((playlist) => playlist.owner?.id === meData?.id || playlist.collaborative)
               .map((playlist) => {
                 return (
                   <Action

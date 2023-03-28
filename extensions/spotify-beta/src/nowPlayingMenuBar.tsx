@@ -26,6 +26,7 @@ import { useMyPlaylists } from "./hooks/useMyPlaylists";
 import { addToPlaylist } from "./api/addToPlaylist";
 import { useContainsMyLikedTracks } from "./hooks/useContainsMyLikedTracks";
 import { usePlaybackState } from "./hooks/usePlaybackState";
+import { useMe } from "./hooks/useMe";
 
 function NowPlayingMenuBarCommand() {
   const preferences = getPreferenceValues<{ maxTextLength?: boolean; showEllipsis?: boolean }>();
@@ -33,6 +34,7 @@ function NowPlayingMenuBarCommand() {
   const { playbackStateData, playbackStateIsLoading, playbackStateRevalidate } = usePlaybackState();
   const { myDevicesData } = useMyDevices();
   const { myPlaylistsData } = useMyPlaylists();
+  const { meData } = useMe();
   const { containsMySavedTracksData, containsMySavedTracksRevalidate } = useContainsMyLikedTracks({
     trackIds: currentPlayingData?.item?.id ? [currentPlayingData?.item?.id] : [],
   });
@@ -157,24 +159,26 @@ function NowPlayingMenuBarCommand() {
       )}
       {menuItems}
       <MenuBarExtra.Submenu icon={Icon.List} title="Add to Playlist">
-        {myPlaylistsData?.items?.map((playlist) => {
-          return (
-            playlist.name &&
-            playlist.id && (
-              <MenuBarExtra.Item
-                key={playlist.id}
-                title={playlist.name}
-                onAction={async () => {
-                  await addToPlaylist({
-                    playlistId: playlist.id as string,
-                    trackUris: [uri as string],
-                  });
-                  showHUD(`Added to ${playlist.name}`);
-                }}
-              />
-            )
-          );
-        })}
+        {myPlaylistsData?.items
+          ?.filter((playlist) => playlist.owner?.id === meData?.id || playlist.collaborative)
+          .map((playlist) => {
+            return (
+              playlist.name &&
+              playlist.id && (
+                <MenuBarExtra.Item
+                  key={playlist.id}
+                  title={playlist.name}
+                  onAction={async () => {
+                    await addToPlaylist({
+                      playlistId: playlist.id as string,
+                      trackUris: [uri as string],
+                    });
+                    showHUD(`Added to ${playlist.name}`);
+                  }}
+                />
+              )
+            );
+          })}
       </MenuBarExtra.Submenu>
       {myDevicesData?.devices && (
         <MenuBarExtra.Submenu icon={Icon.Mobile} title="Connect Device">

@@ -33,7 +33,6 @@ function SearchCommand() {
   const [searchFilter, setSearchFilter] = useState<FilterValue>("all");
   const { searchData, searchIsLoading } = useSearch({
     query: searchText,
-    limit: 32,
     options: { keepPreviousData: true },
   });
 

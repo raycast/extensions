@@ -3,7 +3,7 @@ import { getSpotifyClient } from "../helpers/withSpotifyClient";
 
 type GetMySavedShowsProps = { limit?: number };
 
-export async function getMySavedShows({ limit = 20 }: GetMySavedShowsProps = {}) {
+export async function getMySavedShows({ limit = 50 }: GetMySavedShowsProps = {}) {
   const { spotifyClient } = getSpotifyClient();
   const response = await spotifyClient.getMeShows({ limit });
 
