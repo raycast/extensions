@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
-import { List } from "@raycast/api";
+import { ActionPanel, List, Action, Icon } from "@raycast/api";
 import { ActivityListItem } from "./ActivityListItem";
 import { fetchUser } from "../../user/api";
 import { User } from "../../user/types";
 import { fetchActivities } from "../api";
 import { Activity } from "../types";
+import { ActivityStart } from "./ActivityStart";
 
 export enum Actions {
   update,
@@ -58,10 +59,28 @@ export const ActivityList = ({ projectID = null }: { projectID?: number | null }
   }
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Filter tasks by name..." isShowingDetail={true}>
+    <List
+      isLoading={isLoading}
+      searchBarPlaceholder="Filter tasks by name..."
+      isShowingDetail={true}
+      actions={
+        <ActionPanel>
+          <Action.Push title="New Activity" target={<ActivityStart projectID={projectID} />} />
+        </ActionPanel>
+      }
+    >
       {activities.map((activity, index) => (
         <ActivityListItem key={index} index={index} activity={activity} modifyActivity={modifyActivity} />
       ))}
+      <List.Item
+        title="New Activity"
+        icon={Icon.Plus}
+        actions={
+          <ActionPanel>
+            <Action.Push title="New Activity" target={<ActivityStart />} />
+          </ActionPanel>
+        }
+      />
     </List>
   );
 };

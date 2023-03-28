@@ -4,6 +4,8 @@
 
 - Added new calendar format
 
+## [Made file extension preference required ] - 2023-03-07
+
 ## [Fixes] - 2023-02-16
 - Fix searching when installed NotePlan version is distributed through SetApp (#4816)
 

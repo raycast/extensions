@@ -34,6 +34,15 @@
       "description": "Password from LastPass account",
       "title": "Password",
       "required": true
+    },
+    {
+      "name": "syncRate",
+      "type": "dropdown",
+      "description": "How often do you want to refresh LastPass vault",
+      "title": "Refresh Rate",
+      "required": true,
+      "data": [{"title": "Always", "value": "0"}, {"title": "Every day", "value": "86400000"}, {"title": "Every Week", "value": "604800000"}],
+      "default": "0"
     }
   ],
   "dependencies": {

@@ -1,0 +1,130 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "sips",
+  "title": "Image Modification",
+  "description": "Rotate, flip, resize, and convert images using SIPS",
+  "icon": "command-icon.png",
+  "author": "HelloImSteven",
+  "categories": [
+    "Media",
+    "Productivity",
+    "Design Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "flip-horizontally",
+      "title": "Flip Images Horizontally",
+      "description": "Flip the selected images horizontally",
+      "mode": "no-view"
+    },
+    {
+      "name": "flip-vertically",
+      "title": "Flip Images Vertically",
+      "description": "Flip the selected images vertically",
+      "mode": "no-view"
+    },
+    {
+      "name": "rotate",
+      "title": "Rotate Images",
+      "description": "Rotate the selected images by the specified amount of degrees",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "degrees",
+          "placeholder": "Degrees",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "convert",
+      "title": "Convert Images",
+      "description": "Convert the selected images to the specified format",
+      "mode": "view"
+    },
+    {
+      "name": "resize",
+      "title": "Resize Images",
+      "description": "Resize the selected images to the specified width and/or height",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "width",
+          "placeholder": "Width",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "height",
+          "placeholder": "Height",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "scale",
+      "title": "Scale Images",
+      "description": "Scale the selected images by the provided factor",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "scaleFactor",
+          "placeholder": "Scale Factor",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "pad",
+      "title": "Pad Images",
+      "description": "Pad images to the specified size using the provided color",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "amount",
+          "placeholder": "Amount",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "hexcolor",
+          "placeholder": "Color",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "apply-filter",
+      "title": "Apply Image Filter",
+      "description": "Apply filters to images using Apple's CIFilters",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.48.1",
+    "@raycast/utils": "^1.4.18",
+    "run-applescript": "^6.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

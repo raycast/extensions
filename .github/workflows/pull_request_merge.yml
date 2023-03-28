@@ -52,7 +52,6 @@ jobs:
             if [[ "$can_modify" == "false" ]]; then
               error="Edits from maintainers are disabled."
               echo $error
-              # echo "::set-output name=error::$error"
               exit 1
             fi
 

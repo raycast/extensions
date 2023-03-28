@@ -6,6 +6,7 @@ export default function ProcessList() {
   const [state, setState] = useState<Process[]>([]);
   const [query, setQuery] = useState<string | undefined>(undefined);
   const shouldIncludePaths = (preferences.shouldSearchInPaths?.value as boolean) ?? false;
+  const shouldIncludePid = (preferences.shouldSearchInPid?.value as boolean) ?? false;
   const shouldPrioritizeAppsWhenFiltering = (preferences.shouldPrioritizeAppsWhenFiltering?.value as boolean) ?? false;
   const shouldShowPID = (preferences.shouldShowPID?.value as boolean) ?? false;
   const shouldShowPath = (preferences.shouldShowPath?.value as boolean) ?? false;
@@ -94,8 +95,9 @@ export default function ProcessList() {
           const nameMatches = process.name.toLowerCase().includes(query.toLowerCase());
           const pathMatches =
             process.path?.toLowerCase().match(new RegExp(`.+${query}.*\\.[app|framework|prefpane]`, "ig")) != null;
+          const pidMatches = process.id.includes(query);
 
-          return nameMatches || (shouldIncludePaths && pathMatches);
+          return nameMatches || (shouldIncludePaths && pathMatches) || (shouldIncludePid && pidMatches);
         })
         .sort((a, b) => {
           // If this flag is true, we bring apps to the top, but only if we have a query.
