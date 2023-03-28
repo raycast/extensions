@@ -87,8 +87,11 @@ export function SessionProvider(props: SessionProviderProps) {
       await update({ token, passwordHash, lastActivityTime });
     } catch (error) {
       const reason = error instanceof ShouldLockVaultError ? error.message : undefined;
-      await bitwarden.lock(reason);
+      const { status } = await bitwarden.status();
       await deleteToken();
+      if (status !== "unauthenticated") {
+        await bitwarden.lock(reason);
+      }
     }
   }
 
