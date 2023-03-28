@@ -1,5 +1,16 @@
 import { useEffect } from "react";
-import { Action, ActionPanel, LaunchProps, List, showHUD, Icon, environment, Clipboard } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  LaunchProps,
+  List,
+  showHUD,
+  Icon,
+  environment,
+  Clipboard,
+  Image,
+  Color,
+} from "@raycast/api";
 import { play } from "./api/play";
 import { addToMySavedTracks } from "./api/addToMySavedTracks";
 import { removeFromMySavedTracks } from "./api/removeFromMySavedTracks";
@@ -37,7 +48,7 @@ type Action = {
   name: Actions;
   title: string;
   description: string;
-  icon?: Icon | string;
+  icon?: Icon | Image.ImageLike;
   onAction: (action?: string) => Promise<void>;
 };
 
@@ -83,7 +94,10 @@ function QuickActionsCommand(props: Props) {
       name: "togglePlayPause",
       title: "Toggle Play/Pause",
       description: "Toggle play/pause the currently playing song/episode",
-      icon: "play-pause-16.svg",
+      icon: {
+        source: "play-pause-16.svg",
+        tintColor: Color.PrimaryText,
+      },
       onAction: async () => {
         const isPlaying = currentPlayingData?.is_playing;
         if (isPlaying) {
