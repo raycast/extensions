@@ -306,6 +306,7 @@
 /extensions/gitlab-docs                              @saschaeggi
 /extensions/gitmoji                                  @ricoberger
 /extensions/gitpod                                   @henit-chobisa @Palanikannan1437
+/extensions/glyph-search                             @gbougakov
 /extensions/go-package-search                        @bstncartwright @k8scat
 /extensions/google-books                             @Ali-Parandeh
 /extensions/google-chrome                            @rgomezcasas @bromanko @crisboarna @andreaselia
