@@ -5,7 +5,7 @@ import { SimplifiedShowObject } from "../helpers/spotify.api";
 type ShowsSectionProps = {
   type: "list" | "grid";
   shows: SimplifiedShowObject[] | undefined;
-  columns: number;
+  columns?: number;
   limit?: number;
 };
 

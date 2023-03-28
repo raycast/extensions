@@ -4,6 +4,7 @@ import { getMySavedAlbums } from "../api/getMySavedAlbums";
 import { getFollowedArtists } from "../api/getFollowedArtists";
 import { getMySavedTracks } from "../api/getMySavedTracks";
 import { getMySavedShows } from "../api/getMySavedShows";
+import { getMySavedEpisodes } from "../api/getMySavedEpisodes";
 
 type UseMyLibraryProps = {
   options?: {
@@ -25,6 +26,7 @@ export function useYourLibrary({ options }: UseMyLibraryProps) {
         getFollowedArtists({ limit: 50 }),
         getMySavedTracks({ limit: 50 }),
         getMySavedShows({ limit: 24 }),
+        getMySavedEpisodes({ limit: 24 }),
       ]),
     [],
     {
@@ -32,7 +34,7 @@ export function useYourLibrary({ options }: UseMyLibraryProps) {
     }
   );
 
-  const [playlistsData, albumsData, artistsData, tracksData, showsData] = data;
+  const [playlistsData, albumsData, artistsData, tracksData, showsData, episodesData] = data;
 
   return {
     myLibraryData: {
@@ -41,6 +43,7 @@ export function useYourLibrary({ options }: UseMyLibraryProps) {
       artists: artistsData,
       tracks: tracksData,
       shows: showsData,
+      episodes: episodesData,
     },
     myLibraryError: error,
     myLibraryIsLoading: isLoading,

@@ -5,7 +5,7 @@ import { SimplifiedAlbumObject } from "../helpers/spotify.api";
 type AlbumsSectionProps = {
   type: "list" | "grid";
   albums: SimplifiedAlbumObject[] | undefined;
-  columns: number;
+  columns?: number;
   limit?: number;
 };
 

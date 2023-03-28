@@ -6,7 +6,7 @@ import { ListOrGridSection } from "./ListOrGridSection";
 type ArtistsSectionProps = {
   type: "list" | "grid";
   limit?: number;
-  columns: number;
+  columns?: number;
   artists: ArtistObject[] | undefined;
 };
 

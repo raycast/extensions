@@ -1,0 +1,19 @@
+import { SimplifiedEpisodeObject } from "../helpers/spotify.api";
+import { getSpotifyClient } from "../helpers/withSpotifyClient";
+
+type GetMySavedEpisodesProps = { limit?: number };
+
+export async function getMySavedEpisodes({ limit = 20 }: GetMySavedEpisodesProps = {}) {
+  const { spotifyClient } = getSpotifyClient();
+  const response = await spotifyClient.getMeEpisodes({ limit });
+
+  // Normalize the response to match the SimplifiedEpisodeObject type
+  // because the Spotify API returns a SavedEpisodeObject type
+  const shows = (response?.items ?? []).map((episodeItem) => {
+    return {
+      ...episodeItem.episode,
+    };
+  });
+
+  return { items: shows as SimplifiedEpisodeObject[] };
+}

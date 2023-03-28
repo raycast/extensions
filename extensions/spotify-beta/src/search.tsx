@@ -113,11 +113,11 @@ function SearchCommand() {
       >
         {searchFilter === "all" && (
           <>
-            <ArtistsSection type="list" limit={3} columns={5} artists={searchData?.artists?.items} />
+            <ArtistsSection type="list" limit={3} artists={searchData?.artists?.items} />
             <TracksSection limit={6} tracks={searchData?.tracks?.items} />
-            <AlbumsSection type="list" limit={6} columns={8} albums={searchData?.albums?.items} />
-            <PlaylistsSection type="list" limit={6} columns={8} playlists={searchData?.playlists?.items} />
-            <ShowsSection type="list" limit={3} columns={8} shows={searchData?.shows?.items} />
+            <AlbumsSection type="list" limit={6} albums={searchData?.albums?.items} />
+            <PlaylistsSection type="list" limit={6} playlists={searchData?.playlists?.items} />
+            <ShowsSection type="list" limit={3} shows={searchData?.shows?.items} />
             <EpisodesSection limit={3} episodes={searchData?.episodes?.items} />
           </>
         )}
@@ -125,9 +125,7 @@ function SearchCommand() {
         {searchFilter === "tracks" && <TracksSection tracks={searchData?.tracks?.items} />}
         {searchFilter === "episodes" && <EpisodesSection episodes={searchData?.episodes?.items} />}
 
-        {searchFilter === "playlists" && (
-          <PlaylistsSection type="list" columns={6} playlists={searchData?.playlists?.items} />
-        )}
+        {searchFilter === "playlists" && <PlaylistsSection type="list" playlists={searchData?.playlists?.items} />}
       </List>
     );
   }
@@ -149,9 +147,9 @@ function SearchCommand() {
     >
       {searchFilter === "artists" && <ArtistsSection type="grid" columns={5} artists={searchData?.artists?.items} />}
 
-      {searchFilter === "albums" && <AlbumsSection type="grid" columns={6} albums={searchData?.albums?.items} />}
+      {searchFilter === "albums" && <AlbumsSection type="grid" columns={5} albums={searchData?.albums?.items} />}
 
-      {searchFilter === "shows" && <ShowsSection type="grid" columns={6} shows={searchData?.shows?.items} />}
+      {searchFilter === "shows" && <ShowsSection type="grid" columns={5} shows={searchData?.shows?.items} />}
     </Grid>
   );
 }

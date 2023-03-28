@@ -5,7 +5,7 @@ import PlaylistItem from "./PlaylistItem";
 type PlaylistsSectionProps = {
   type: "list" | "grid";
   playlists: SimplifiedPlaylistObject[] | undefined;
-  columns: number;
+  columns?: number;
   limit?: number;
 };
 

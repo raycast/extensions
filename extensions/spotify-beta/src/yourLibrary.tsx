@@ -7,6 +7,7 @@ import { AlbumsSection } from "./components/AlbumsSection";
 import { TracksSection } from "./components/TracksSection";
 import { PlaylistsSection } from "./components/PlaylistsSection";
 import { ShowsSection } from "./components/ShowsSection";
+import { EpisodesSection } from "./components/EpisodessSection";
 
 const filters = {
   all: "All",
@@ -15,6 +16,7 @@ const filters = {
   artists: "Artists",
   tracks: "Songs",
   shows: "Podcasts",
+  episodes: "Episodes",
 };
 
 type FilterValue = keyof typeof filters;
@@ -30,7 +32,12 @@ function YourLibraryCommand() {
     isLoading: myLibraryIsLoading,
   };
 
-  if (searchFilter === "all" || searchFilter === "tracks" || searchFilter === "playlists") {
+  if (
+    searchFilter === "all" ||
+    searchFilter === "tracks" ||
+    searchFilter === "playlists" ||
+    searchFilter === "episodes"
+  ) {
     return (
       <List
         {...sharedProps}
@@ -48,19 +55,19 @@ function YourLibraryCommand() {
       >
         {searchFilter === "all" && (
           <>
-            <PlaylistsSection type="list" limit={6} columns={8} playlists={myLibraryData?.playlists?.items} />
-            <AlbumsSection type="list" limit={6} columns={8} albums={myLibraryData?.albums?.items} />
-            <ArtistsSection type="list" limit={6} columns={5} artists={myLibraryData?.artists?.items} />
+            <PlaylistsSection type="list" limit={6} playlists={myLibraryData?.playlists?.items} />
+            <AlbumsSection type="list" limit={6} albums={myLibraryData?.albums?.items} />
+            <ArtistsSection type="list" limit={6} artists={myLibraryData?.artists?.items} />
             <TracksSection limit={6} tracks={myLibraryData?.tracks?.items} />
-            <ShowsSection type="list" limit={6} columns={8} shows={myLibraryData?.shows?.items} />
+            <ShowsSection type="list" limit={6} shows={myLibraryData?.shows?.items} />
+            <EpisodesSection limit={3} episodes={myLibraryData?.episodes?.items} />
           </>
         )}
 
         {searchFilter === "tracks" && <TracksSection tracks={myLibraryData?.tracks?.items} />}
+        {searchFilter === "episodes" && <EpisodesSection episodes={myLibraryData?.episodes?.items} />}
 
-        {searchFilter === "playlists" && (
-          <PlaylistsSection type="list" columns={6} playlists={myLibraryData?.playlists?.items} />
-        )}
+        {searchFilter === "playlists" && <PlaylistsSection type="list" playlists={myLibraryData?.playlists?.items} />}
       </List>
     );
   }
@@ -82,9 +89,9 @@ function YourLibraryCommand() {
     >
       {searchFilter === "artists" && <ArtistsSection type="grid" columns={5} artists={myLibraryData?.artists?.items} />}
 
-      {searchFilter === "albums" && <AlbumsSection type="grid" columns={6} albums={myLibraryData?.albums?.items} />}
+      {searchFilter === "albums" && <AlbumsSection type="grid" columns={5} albums={myLibraryData?.albums?.items} />}
 
-      {searchFilter === "shows" && <ShowsSection type="grid" columns={6} shows={myLibraryData?.shows?.items} />}
+      {searchFilter === "shows" && <ShowsSection type="grid" columns={5} shows={myLibraryData?.shows?.items} />}
     </Grid>
   );
 }
