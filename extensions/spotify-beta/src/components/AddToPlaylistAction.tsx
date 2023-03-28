@@ -1,5 +1,6 @@
-import { Action, ActionPanel, Icon, popToRoot, showHUD, showToast } from "@raycast/api";
+import { Action, ActionPanel, Icon, popToRoot, showHUD, showToast, Toast } from "@raycast/api";
 import { addToPlaylist } from "../api/addToPlaylist";
+import { getError } from "../helpers/getError";
 import { PrivateUserObject, SimplifiedPlaylistObject } from "../helpers/spotify.api";
 
 type AddToPlaylistActionProps = {
@@ -20,16 +21,25 @@ export function AddToPlaylistAction({ playlists, meData, uri, closeWindowOnActio
               key={playlist.id}
               title={playlist.name as string}
               onAction={async () => {
-                await addToPlaylist({
-                  playlistId: playlist.id as string,
-                  trackUris: [uri as string],
-                });
-                if (closeWindowOnAction) {
-                  await showHUD(`Added to ${playlist.name}`);
-                  await popToRoot();
-                  return;
+                try {
+                  await addToPlaylist({
+                    playlistId: playlist.id as string,
+                    trackUris: [uri],
+                  });
+                  if (closeWindowOnAction) {
+                    await showHUD(`Added to ${playlist.name}`);
+                    await popToRoot();
+                    return;
+                  }
+                  await showToast({ title: `Added to ${playlist.name}` });
+                } catch (err) {
+                  const error = getError(err);
+                  showToast({
+                    title: "Error adding song to playlist",
+                    message: error.message,
+                    style: Toast.Style.Failure,
+                  });
                 }
-                await showToast({ title: `Added to ${playlist.name}` });
               }}
             />
           );
