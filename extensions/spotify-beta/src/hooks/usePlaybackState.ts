@@ -16,6 +16,6 @@ export function usePlaybackState({ options }: UsePlaybackStateProps = {}) {
     playbackStateData: data,
     playbackStateError: error,
     playbackStateIsLoading: isLoading,
-    revalidatePlaybackState: revalidate,
+    playbackStateRevalidate: revalidate,
   };
 }

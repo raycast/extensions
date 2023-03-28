@@ -65,7 +65,7 @@ function QuickActionsCommand(props: Props) {
   const { extensionName, commandName, isDevelopment } = environment;
 
   const { currentPlayingData, currentPlayingRevalidate } = useCurrentlyPlaying();
-  const { playbackStateData, revalidatePlaybackState } = usePlaybackState();
+  const { playbackStateData, playbackStateRevalidate } = usePlaybackState();
   const isTrack = currentPlayingData?.currently_playing_type !== "episode";
   const trackId = currentPlayingData?.item?.id;
 
@@ -195,7 +195,7 @@ function QuickActionsCommand(props: Props) {
       onAction: async () => {
         try {
           await changeVolume(0);
-          await revalidatePlaybackState();
+          await playbackStateRevalidate();
           await showHUD("Volume changed");
         } catch (error) {
           await showHUD("No active device");
@@ -210,7 +210,7 @@ function QuickActionsCommand(props: Props) {
       onAction: async () => {
         try {
           await changeVolume(33);
-          await revalidatePlaybackState();
+          await playbackStateRevalidate();
           await showHUD("Volume changed");
         } catch (error) {
           await showHUD("No active device");
@@ -225,7 +225,7 @@ function QuickActionsCommand(props: Props) {
       onAction: async () => {
         try {
           await changeVolume(66);
-          await revalidatePlaybackState();
+          await playbackStateRevalidate();
           await showHUD("Volume changed");
         } catch (error) {
           await showHUD("No active device");
@@ -240,7 +240,7 @@ function QuickActionsCommand(props: Props) {
       onAction: async () => {
         try {
           await changeVolume(100);
-          await revalidatePlaybackState();
+          await playbackStateRevalidate();
           await showHUD("Volume changed");
         } catch (error) {
           await showHUD("No active device");
@@ -260,7 +260,7 @@ function QuickActionsCommand(props: Props) {
         try {
           await changeVolume(Math.min(volume + 10, 100));
           await showHUD("Volume changed");
-          await revalidatePlaybackState();
+          await playbackStateRevalidate();
         } catch (error) {
           await showHUD("No active device");
         }
@@ -279,7 +279,7 @@ function QuickActionsCommand(props: Props) {
         try {
           await changeVolume(Math.max(volume - 10, 0));
           await showHUD("Volume changed");
-          await revalidatePlaybackState();
+          await playbackStateRevalidate();
         } catch (error) {
           await showHUD("No active device");
         }
@@ -295,7 +295,7 @@ function QuickActionsCommand(props: Props) {
         try {
           await shuffle(!shuffleState);
           await showHUD(`Shuffle is ${shuffleState ? "off" : "on"}`);
-          await revalidatePlaybackState();
+          await playbackStateRevalidate();
         } catch (error) {
           await showHUD("No active device");
         }
@@ -311,7 +311,7 @@ function QuickActionsCommand(props: Props) {
         try {
           await repeat(repeatState === "off" ? "context" : "off");
           await showHUD(`Repeat is ${repeatState === "off" ? "on" : "off"}`);
-          await revalidatePlaybackState();
+          await playbackStateRevalidate();
         } catch (error) {
           await showHUD("No active device");
         }

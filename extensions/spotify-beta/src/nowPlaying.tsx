@@ -30,12 +30,14 @@ import { addToPlaylist } from "./api/addToPlaylist";
 import { useContainsMyLikedTracks } from "./hooks/useContainsMyLikedTracks";
 import { usePlaybackState } from "./hooks/usePlaybackState";
 import { msToHMS } from "./helpers/track";
+import { useMe } from "./hooks/useMe";
 
 function NowPlayingCommand() {
   const { currentPlayingData, currentPlayingIsLoading, currentPlayingRevalidate } = useCurrentlyPlaying();
-  const { playbackStateData, playbackStateIsLoading, revalidatePlaybackState } = usePlaybackState();
+  const { playbackStateData, playbackStateIsLoading, playbackStateRevalidate } = usePlaybackState();
   const { myDevicesData } = useMyDevices();
   const { myPlaylistsData } = useMyPlaylists();
+  const { meData } = useMe();
   const { containsMySavedTracksData, containsMySavedTracksRevalidate } = useContainsMyLikedTracks({
     trackIds: currentPlayingData?.item?.id ? [currentPlayingData?.item?.id] : [],
   });
@@ -218,7 +220,7 @@ ${description}
                 }
                 const toast = await showToast({ title: "Pausing", style: Toast.Style.Animated });
                 await pause();
-                await revalidatePlaybackState();
+                await playbackStateRevalidate();
                 toast.title = "Paused";
                 toast.style = Toast.Style.Success;
               }}
@@ -237,7 +239,7 @@ ${description}
                 }
                 const toast = await showToast({ title: "Playing", style: Toast.Style.Animated });
                 await play();
-                await revalidatePlaybackState();
+                await playbackStateRevalidate();
                 toast.title = "Playing";
                 toast.style = Toast.Style.Success;
               }}
@@ -246,7 +248,7 @@ ${description}
           {actions}
           <ActionPanel.Submenu icon={Icon.List} title="Add to Playlist">
             {myPlaylistsData?.items
-              ?.filter((playlist) => playlist.owner?.display_name !== "Spotify")
+              ?.filter((playlist) => playlist.owner?.id === meData?.id)
               .map((playlist) => {
                 return (
                   <Action

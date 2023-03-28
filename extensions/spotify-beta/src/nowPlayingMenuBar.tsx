@@ -30,7 +30,7 @@ import { usePlaybackState } from "./hooks/usePlaybackState";
 function NowPlayingMenuBarCommand() {
   const preferences = getPreferenceValues<{ maxTextLength?: boolean; showEllipsis?: boolean }>();
   const { currentPlayingData, currentPlayingIsLoading, currentPlayingRevalidate } = useCurrentlyPlaying();
-  const { playbackStateData, playbackStateIsLoading, revalidatePlaybackState } = usePlaybackState();
+  const { playbackStateData, playbackStateIsLoading, playbackStateRevalidate } = usePlaybackState();
   const { myDevicesData } = useMyDevices();
   const { myPlaylistsData } = useMyPlaylists();
   const { containsMySavedTracksData, containsMySavedTracksRevalidate } = useContainsMyLikedTracks({
@@ -141,7 +141,7 @@ function NowPlayingMenuBarCommand() {
           title="Pause"
           onAction={async () => {
             await pause();
-            await revalidatePlaybackState();
+            await playbackStateRevalidate();
           }}
         />
       )}
@@ -151,7 +151,7 @@ function NowPlayingMenuBarCommand() {
           title="Play"
           onAction={async () => {
             await play();
-            await revalidatePlaybackState();
+            await playbackStateRevalidate();
           }}
         />
       )}
