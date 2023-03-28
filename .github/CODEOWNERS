@@ -516,6 +516,7 @@
 /extensions/netlify                                  @Destiner @jonohewitt @jasonbarry @peduarte
 /extensions/network-diagnostics                      @hmarr
 /extensions/network-speed                            @koinzhang
+/extensions/new-relic                                @cirne
 /extensions/new-york-times                           @Antonwy
 /extensions/next-run                                 @jonathangiardino
 /extensions/nextcloud                                @uetchy
