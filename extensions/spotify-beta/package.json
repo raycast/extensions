@@ -70,6 +70,7 @@
           "description": "If the title is longer than the maximum length, show an ellipsis",
           "type": "checkbox",
           "label": "Enabled",
+          "default": true,
           "required": false
         }
       ]
