@@ -30,7 +30,7 @@ import { useMe } from "./hooks/useMe";
 import { addToPlaylist } from "./api/addToPlaylist";
 import { useContainsMyLikedTracks } from "./hooks/useContainsMyLikedTracks";
 import { usePlaybackState } from "./hooks/usePlaybackState";
-import { msToHMS } from "./helpers/track";
+import { formatMs } from "./helpers/formatMs";
 
 function NowPlayingCommand() {
   const { currentPlayingData, currentPlayingIsLoading, currentPlayingRevalidate } = useCurrentlyPlaying();
@@ -80,7 +80,7 @@ by ${artistName}
     metadata = (
       <Detail.Metadata>
         <Detail.Metadata.Label title="Track" text={name} />
-        {duration_ms && <Detail.Metadata.Label title="Duration" text={msToHMS(duration_ms)} />}
+        {duration_ms && <Detail.Metadata.Label title="Duration" text={formatMs(duration_ms)} />}
         {artists && artists.length > 1 && (
           <Detail.Metadata.Label title="Artists" text={artists.map((a) => a.name).join(", ")} />
         )}

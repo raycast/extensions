@@ -1,6 +1,6 @@
 import { Image, List } from "@raycast/api";
+import { formatMs } from "../helpers/formatMs";
 import { SimplifiedAlbumObject, SimplifiedTrackObject } from "../helpers/spotify.api";
-import { msToHMS } from "../helpers/track";
 import { TrackActionPanel } from "./TrackActionPanel";
 
 type TrackListItemProps = {
@@ -26,7 +26,7 @@ export default function TrackListItem({ track, album, showGoToAlbum, playingCont
       icon={icon}
       title={title}
       subtitle={subtitle}
-      accessories={[{ text: track.duration_ms ? msToHMS(track.duration_ms) : undefined }]}
+      accessories={[{ text: track.duration_ms ? formatMs(track.duration_ms) : undefined }]}
       actions={
         <TrackActionPanel
           title={title}

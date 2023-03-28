@@ -1,6 +1,6 @@
 import { Image, List } from "@raycast/api";
+import { formatMs } from "../helpers/formatMs";
 import { ShowBase, SimplifiedEpisodeObject } from "../helpers/spotify.api";
-import { msToHMS } from "../helpers/track";
 import { EpisodeActionPanel } from "./EpisodeActionPanel";
 
 type EpisodeListItemProps = {
@@ -26,7 +26,7 @@ export default function EpisodeListItem({ episode, show }: EpisodeListItemProps)
     <List.Item
       icon={icon}
       title={title}
-      accessories={[{ text: episode.duration_ms ? msToHMS(episode.duration_ms) : undefined }]}
+      accessories={[{ text: episode.duration_ms ? formatMs(episode.duration_ms) : undefined }]}
       actions={<EpisodeActionPanel title={title} episode={episode} />}
     />
   );
