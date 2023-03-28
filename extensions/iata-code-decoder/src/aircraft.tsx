@@ -124,7 +124,7 @@ async function performSearch(searchText: string, signal: AbortSignal): Promise<A
   const params = new URLSearchParams();
   params.append("query", searchText);
 
-  const response = await fetch("https://iata-code-decoder-api.onrender.com/aircraft" + "?" + params.toString(), {
+  const response = await fetch("https://iata-code-decoder-api.timrogers.co.uk/aircraft" + "?" + params.toString(), {
     method: "get",
     // Typescript's idea of an AbortSignal and node-fetch's idea of an AbortSignal
     // don't seem to match. This handles it.
