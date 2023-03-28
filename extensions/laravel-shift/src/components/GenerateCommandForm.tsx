@@ -66,6 +66,10 @@ export function GenerateCommandForm(): JSX.Element {
           copyToClipboard(shiftCommand).then(() => showToast(Toast.Style.Success, "Command copied to clipboard"));
         }}
       />
+
+      <Form.Separator />
+
+      <Form.Description text="To change the Docker Token or Git author, head over to Extensions -> Laravel Shift." />
     </Form>
   );
 }
