@@ -3,10 +3,10 @@ import { ArtistObject } from "../helpers/spotify.api";
 import { AlbumsGrid } from "./AlbumsGrid";
 import { useArtistAlbums } from "../hooks/useArtistAlbums";
 import { play } from "../api/play";
-import { startRadio } from "../api/startRadio";
 import { useArtistTopTracks } from "../hooks/useArtistTopTracks";
 import { TracksList } from "./TracksList";
 import { FooterAction } from "./FooterAction";
+import { StartRadioAction } from "../api/StartRadioAction";
 
 type ArtistActionPanelProps = {
   title: string;
@@ -38,14 +38,7 @@ export function ArtistActionPanel({ title, artist }: ArtistActionPanelProps) {
       {albums && (
         <Action.Push icon={Icon.AppWindowGrid3x3} title="Show Albums" target={<AlbumsGrid albums={albums} />} />
       )}
-      <Action
-        icon={Icon.Music}
-        title="Start Radio"
-        onAction={async () => {
-          await startRadio({ artistIds: [artist.id as string] });
-          showHUD(`Playing ${artist.name} Radio`);
-        }}
-      />
+      <StartRadioAction artistId={artist.id} />
       <FooterAction url={artist?.external_urls?.spotify} uri={artist.uri} title={title} />
     </ActionPanel>
   );

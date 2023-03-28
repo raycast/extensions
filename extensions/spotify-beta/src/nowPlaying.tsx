@@ -10,6 +10,8 @@ import {
   showToast,
   Toast,
   getPreferenceValues,
+  launchCommand,
+  LaunchType,
 } from "@raycast/api";
 import { useCurrentlyPlaying } from "./hooks/useCurrentlyPlaying";
 import { View } from "./components/View";
@@ -19,7 +21,6 @@ import { pause } from "./api/pause";
 import { play } from "./api/play";
 import { skipToNext } from "./api/skipToNext";
 import { skipToPrevious } from "./api/skipToPrevious";
-import { startRadio } from "./api/startRadio";
 import { removeFromMySavedTracks } from "./api/removeFromMySavedTracks";
 import { addToMySavedTracks } from "./api/addToMySavedTracks";
 import { transferMyPlayback } from "./api/transferMyPlayback";
@@ -31,6 +32,7 @@ import { formatMs } from "./helpers/formatMs";
 import { TracksList } from "./components/TracksList";
 import { AddToPlaylistAction } from "./components/AddToPlaylistAction";
 import { FooterAction } from "./components/FooterAction";
+import { StartRadioAction } from "./api/StartRadioAction";
 
 function NowPlayingCommand() {
   const { currentPlayingData, currentPlayingIsLoading, currentPlayingRevalidate } = useCurrentlyPlaying();
@@ -49,8 +51,33 @@ function NowPlayingCommand() {
 
   if (!currentPlayingData || !currentPlayingData.item) {
     return (
-      <List>
-        <List.EmptyView icon={Icon.Music} title="Nothing is playing right now" />
+      <List isLoading={currentPlayingIsLoading}>
+        <List.EmptyView
+          icon={Icon.Music}
+          title="Nothing is playing right now"
+          actions={
+            <ActionPanel>
+              <Action
+                icon={Icon.Book}
+                title="Your Library"
+                onAction={() => launchCommand({ name: "yourLibrary", type: LaunchType.UserInitiated })}
+              />
+              <Action
+                title="Search"
+                icon={Icon.MagnifyingGlass}
+                onAction={() => launchCommand({ name: "search", type: LaunchType.UserInitiated })}
+              />
+              <Action
+                icon={Icon.Repeat}
+                title="Refresh"
+                onAction={async () => {
+                  currentPlayingRevalidate();
+                }}
+                shortcut={{ modifiers: ["cmd"], key: "r" }}
+              />
+            </ActionPanel>
+          }
+        />
       </List>
     );
   }
@@ -158,23 +185,7 @@ by ${artistName}
             await currentPlayingRevalidate();
           }}
         />
-        <Action
-          icon={Icon.Music}
-          title="Start Radio"
-          onAction={async () => {
-            await startRadio({
-              trackIds: trackId ? [trackId] : undefined,
-              artistIds: artistId ? [artistId] : undefined,
-            });
-            if (closeWindowOnAction) {
-              await showHUD("Playing Radio");
-              await popToRoot();
-              return;
-            }
-            await showToast({ title: "Playing Radio" });
-            await currentPlayingRevalidate();
-          }}
-        />
+        <StartRadioAction trackId={trackId} artistId={artistId} revalidate={currentPlayingRevalidate} />
         <Action.Push
           icon={Icon.AppWindowList}
           title="Go to Album"
@@ -252,12 +263,7 @@ ${description}
           )}
           {actions}
           {myPlaylistsData?.items && meData && uri && (
-            <AddToPlaylistAction
-              playlists={myPlaylistsData.items}
-              meData={meData}
-              uri={uri}
-              closeWindowOnAction={closeWindowOnAction}
-            />
+            <AddToPlaylistAction playlists={myPlaylistsData.items} meData={meData} uri={uri} />
           )}
           <ActionPanel.Submenu icon={Icon.Mobile} title="Connect Device">
             {myDevicesData?.devices?.map((device) => (

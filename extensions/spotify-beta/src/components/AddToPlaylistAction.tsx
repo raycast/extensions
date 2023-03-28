@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, popToRoot, showHUD, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, getPreferenceValues, Icon, popToRoot, showHUD, showToast, Toast } from "@raycast/api";
 import { addToPlaylist } from "../api/addToPlaylist";
 import { getError } from "../helpers/getError";
 import { PrivateUserObject, SimplifiedPlaylistObject } from "../helpers/spotify.api";
@@ -7,10 +7,11 @@ type AddToPlaylistActionProps = {
   playlists: SimplifiedPlaylistObject[];
   meData: PrivateUserObject;
   uri: string;
-  closeWindowOnAction?: boolean;
 };
 
-export function AddToPlaylistAction({ playlists, meData, uri, closeWindowOnAction }: AddToPlaylistActionProps) {
+export function AddToPlaylistAction({ playlists, meData, uri }: AddToPlaylistActionProps) {
+  const { closeWindowOnAction } = getPreferenceValues<{ closeWindowOnAction?: boolean }>();
+
   return (
     <ActionPanel.Submenu icon={Icon.List} title="Add to Playlist">
       {playlists
@@ -34,7 +35,7 @@ export function AddToPlaylistAction({ playlists, meData, uri, closeWindowOnActio
                   await showToast({ title: `Added to ${playlist.name}` });
                 } catch (err) {
                   const error = getError(err);
-                  showToast({
+                  await showToast({
                     title: "Error adding song to playlist",
                     message: error.message,
                     style: Toast.Style.Failure,

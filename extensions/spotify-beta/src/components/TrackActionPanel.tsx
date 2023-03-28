@@ -1,7 +1,5 @@
 import { Action, ActionPanel, getPreferenceValues, Icon, popToRoot, showHUD, showToast, Toast } from "@raycast/api";
-import { addToQueue } from "../api/addTrackToQueue";
 import { play } from "../api/play";
-import { startRadio } from "../api/startRadio";
 import { SimplifiedAlbumObject, SimplifiedTrackObject } from "../helpers/spotify.api";
 import { TracksList } from "./TracksList";
 import { useMyPlaylists } from "../hooks/useMyPlaylists";
@@ -9,6 +7,7 @@ import { useMe } from "../hooks/useMe";
 import { AddToPlaylistAction } from "./AddToPlaylistAction";
 import { FooterAction } from "./FooterAction";
 import { AddToQueueAction } from "./AddtoQueueAction";
+import { StartRadioAction } from "../api/StartRadioAction";
 
 type TrackActionPanelProps = {
   title: string;
@@ -49,27 +48,10 @@ export function TrackActionPanel({ title, track, album, showGoToAlbum, playingCo
           target={<TracksList album={album} showGoToAlbum={false} />}
         />
       )}
-      <Action
-        icon={Icon.Music}
-        title="Start Radio"
-        onAction={async () => {
-          await startRadio({ trackIds: [track.id as string] });
-          if (closeWindowOnAction) {
-            await showHUD(`Playing ${title} Radio`);
-            await popToRoot();
-            return;
-          }
-          await showToast({ title: `Playing ${title} Radio` });
-        }}
-      />
+      <StartRadioAction trackId={track.id} />
       {track.uri && <AddToQueueAction uri={track.uri} title={title} closeWindowOnAction={closeWindowOnAction} />}
       {myPlaylistsData?.items && meData && track.uri && (
-        <AddToPlaylistAction
-          playlists={myPlaylistsData.items}
-          meData={meData}
-          uri={track.uri}
-          closeWindowOnAction={closeWindowOnAction}
-        />
+        <AddToPlaylistAction playlists={myPlaylistsData.items} meData={meData} uri={track.uri} />
       )}
       <FooterAction url={track?.external_urls?.spotify} uri={track.uri} title={title} />
     </ActionPanel>
