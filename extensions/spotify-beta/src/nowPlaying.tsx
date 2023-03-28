@@ -29,6 +29,7 @@ import { useMyPlaylists } from "./hooks/useMyPlaylists";
 import { addToPlaylist } from "./api/addToPlaylist";
 import { useContainsMyLikedTracks } from "./hooks/useContainsMyLikedTracks";
 import { usePlaybackState } from "./hooks/usePlaybackState";
+import { msToHMS } from "./helpers/track";
 
 function NowPlayingCommand() {
   const { currentPlayingData, currentPlayingIsLoading, currentPlayingRevalidate } = useCurrentlyPlaying();
@@ -61,7 +62,7 @@ function NowPlayingCommand() {
   let actions: JSX.Element | null = null;
 
   if (isTrack) {
-    const { album, artists, id: trackId } = item as TrackObject;
+    const { album, artists, id: trackId, duration_ms } = item as TrackObject;
     const albumName = album?.name;
     const albumImage = album?.images[0].url;
     const artistName = artists?.[0]?.name;
@@ -77,7 +78,11 @@ by ${artistName}
     metadata = (
       <Detail.Metadata>
         <Detail.Metadata.Label title="Track" text={name} />
-        <Detail.Metadata.Label title="Artist" text={artistName} />
+        {duration_ms && <Detail.Metadata.Label title="Duration" text={msToHMS(duration_ms)} />}
+        {artists && artists.length > 1 && (
+          <Detail.Metadata.Label title="Artists" text={artists.map((a) => a.name).join(", ")} />
+        )}
+        {artists && artists.length === 1 && <Detail.Metadata.Label title="Artist" text={artistName} />}
         <Detail.Metadata.Label title="Album" text={albumName} />
       </Detail.Metadata>
     );
