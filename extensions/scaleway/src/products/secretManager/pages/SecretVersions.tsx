@@ -1,9 +1,10 @@
-import { Action, ActionPanel, List, Clipboard, showToast, Toast } from '@raycast/api'
-import { Errors, Secret } from '@scaleway/sdk'
+import { Action, ActionPanel, Clipboard, List, Toast, showToast } from '@raycast/api'
+import type { Secret } from '@scaleway/sdk'
+import { Errors } from '@scaleway/sdk'
+import { toByteArray } from 'base64-js'
 import { useAPI } from 'src/providers'
 import { useSecretVersionsQuery } from '../queries'
 import { getVersionStatusIcon } from '../status'
-import { toByteArray } from 'base64-js'
 
 type SecretVersionsProps = {
   secret: Secret.v1alpha1.Secret

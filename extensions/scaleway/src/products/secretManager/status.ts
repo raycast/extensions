@@ -1,5 +1,5 @@
 import { Color, Icon } from '@raycast/api'
-import { Secret } from '@scaleway/sdk'
+import type { Secret } from '@scaleway/sdk'
 
 export const VERSION_STATUSES: Record<
   Secret.v1alpha1.SecretVersionStatus,

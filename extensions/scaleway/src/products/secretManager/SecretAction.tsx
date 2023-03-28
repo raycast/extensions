@@ -1,7 +1,7 @@
 import { Action, ActionPanel } from '@raycast/api'
 import type { Secret } from '@scaleway/sdk'
-import { getSecretUrl } from './urls'
 import { SecretVersions } from './pages'
+import { getSecretUrl } from './urls'
 
 type SecretActionProps = {
   secret: Secret.v1alpha1.Secret

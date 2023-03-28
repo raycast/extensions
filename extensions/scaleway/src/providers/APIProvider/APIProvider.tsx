@@ -19,13 +19,13 @@ import {
   RDB,
   Redis,
   Registry,
+  Secret,
   TransactionalEmail,
   VPC,
   VPCGW,
   Webhosting,
   createClient,
   enableConsoleLogger,
-  Secret,
 } from '@scaleway/sdk'
 import type { ReactNode } from 'react'
 import { createContext, useContext, useMemo } from 'react'
