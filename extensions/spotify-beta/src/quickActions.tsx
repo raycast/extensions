@@ -54,7 +54,7 @@ type Action = {
 
 function createDeeplink(extensionName: string, commandName: string, actionName: string, isDevelopment: boolean) {
   const protocol = isDevelopment ? "raycastinternal://" : "raycast://";
-  const baseLink = `${protocol}extensions/raycast/${extensionName}/${commandName}`;
+  const baseLink = `${protocol}extensions/mattisssa/${extensionName}/${commandName}`;
   const context = encodeURIComponent(JSON.stringify({ action: actionName }));
   const deeplink = `${baseLink}?launchContext=${context}`;
   return deeplink;
