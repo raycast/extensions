@@ -25,22 +25,24 @@ import { EpisodeObject, TrackObject } from "./helpers/spotify.api";
 import { useMyPlaylists } from "./hooks/useMyPlaylists";
 import { addToPlaylist } from "./api/addToPlaylist";
 import { useContainsMyLikedTracks } from "./hooks/useContainsMyLikedTracks";
+import { usePlaybackState } from "./hooks/usePlaybackState";
 
 function NowPlayingMenuBarCommand() {
-  const preferences = getPreferenceValues();
+  const preferences = getPreferenceValues<{ maxTextLength?: boolean; showEllipsis?: boolean }>();
   const { currentPlayingData, currentPlayingIsLoading, currentPlayingRevalidate } = useCurrentlyPlaying();
+  const { playbackStateData, playbackStateIsLoading, revalidatePlaybackState } = usePlaybackState();
   const { myDevicesData } = useMyDevices();
   const { myPlaylistsData } = useMyPlaylists();
-  const { containsMySavedTracksData } = useContainsMyLikedTracks({
+  const { containsMySavedTracksData, containsMySavedTracksRevalidate } = useContainsMyLikedTracks({
     trackIds: currentPlayingData?.item?.id ? [currentPlayingData?.item?.id] : [],
   });
 
   const trackAlreadyLiked = containsMySavedTracksData?.[0];
-  const isPaused = currentPlayingData?.is_playing === false;
+  const isPaused = !currentPlayingData?.is_playing || !playbackStateData?.is_playing;
   const isTrack = currentPlayingData?.currently_playing_type !== "episode";
 
   if (!currentPlayingData || !currentPlayingData.item) {
-    return <NothingPlaying isLoading={currentPlayingIsLoading} />;
+    return <NothingPlaying isLoading={currentPlayingIsLoading || playbackStateIsLoading} />;
   }
 
   const formatTitle = (title: string) => {
@@ -76,6 +78,7 @@ function NowPlayingMenuBarCommand() {
               await removeFromMySavedTracks({
                 trackIds: trackId ? [trackId] : [],
               });
+              await containsMySavedTracksRevalidate();
             }}
           />
         )}
@@ -87,6 +90,7 @@ function NowPlayingMenuBarCommand() {
               await addToMySavedTracks({
                 trackIds: trackId ? [trackId] : [],
               });
+              await containsMySavedTracksRevalidate();
             }}
           />
         )}
@@ -105,7 +109,7 @@ function NowPlayingMenuBarCommand() {
           shortcut={{ modifiers: ["cmd"], key: "arrowLeft" }}
           onAction={async () => {
             await skipToPrevious();
-            currentPlayingRevalidate();
+            await currentPlayingRevalidate();
           }}
         />
         <MenuBarExtra.Item
@@ -128,7 +132,7 @@ function NowPlayingMenuBarCommand() {
 
   return (
     <MenuBarExtra
-      isLoading={currentPlayingIsLoading}
+      isLoading={currentPlayingIsLoading || playbackStateIsLoading}
       icon={{ source: { dark: "menu-icon-dark.svg", light: "menu-icon-light.svg" } }}
       title={formatTitle(title)}
       tooltip={title}
@@ -139,6 +143,7 @@ function NowPlayingMenuBarCommand() {
           title="Pause"
           onAction={async () => {
             await pause();
+            await revalidatePlaybackState();
           }}
         />
       )}
@@ -148,6 +153,7 @@ function NowPlayingMenuBarCommand() {
           title="Play"
           onAction={async () => {
             await play();
+            await revalidatePlaybackState();
           }}
         />
       )}

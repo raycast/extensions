@@ -4,11 +4,13 @@ import {
   List,
   ActionPanel,
   Action,
-  closeMainWindow,
   popToRoot,
   showHUD,
   Color,
   Clipboard,
+  showToast,
+  Toast,
+  getPreferenceValues,
 } from "@raycast/api";
 import { useCurrentlyPlaying } from "./hooks/useCurrentlyPlaying";
 import { View } from "./components/View";
@@ -29,16 +31,17 @@ import { useContainsMyLikedTracks } from "./hooks/useContainsMyLikedTracks";
 import { usePlaybackState } from "./hooks/usePlaybackState";
 
 function NowPlayingCommand() {
-  const { currentPlayingData, currentPlayingIsLoading } = useCurrentlyPlaying();
+  const { currentPlayingData, currentPlayingIsLoading, currentPlayingRevalidate } = useCurrentlyPlaying();
   const { playbackStateData, playbackStateIsLoading, revalidatePlaybackState } = usePlaybackState();
   const { myDevicesData } = useMyDevices();
   const { myPlaylistsData } = useMyPlaylists();
   const { containsMySavedTracksData, containsMySavedTracksRevalidate } = useContainsMyLikedTracks({
     trackIds: currentPlayingData?.item?.id ? [currentPlayingData?.item?.id] : [],
   });
+  const { closeWindowOnAction } = getPreferenceValues<{ closeWindowOnAction?: boolean }>();
 
   const trackAlreadyLiked = containsMySavedTracksData?.[0];
-  const isPaused = playbackStateData?.is_playing === false;
+  const isPaused = !currentPlayingData?.is_playing || !playbackStateData?.is_playing;
   const isTrack = currentPlayingData?.currently_playing_type !== "episode";
 
   if (!currentPlayingData || !currentPlayingData.item) {
@@ -89,10 +92,13 @@ by ${artistName}
               await removeFromMySavedTracks({
                 trackIds: trackId ? [trackId] : [],
               });
+              if (closeWindowOnAction) {
+                await showHUD(`Disliked ${name}`);
+                await popToRoot();
+                return;
+              }
+              await showToast({ title: `Disliked ${name}` });
               await containsMySavedTracksRevalidate();
-              // await closeMainWindow();
-              // await popToRoot();
-              // showHUD(`Disliked ${name}`);
             }}
           />
         )}
@@ -104,10 +110,13 @@ by ${artistName}
               await addToMySavedTracks({
                 trackIds: trackId ? [trackId] : [],
               });
+              if (closeWindowOnAction) {
+                await showHUD(`Liked ${name}`);
+                await popToRoot();
+                return;
+              }
+              await showToast({ title: `Liked ${name}` });
               await containsMySavedTracksRevalidate();
-              // await closeMainWindow();
-              // await popToRoot();
-              // showHUD(`Liked ${name}`);
             }}
           />
         )}
@@ -117,8 +126,13 @@ by ${artistName}
           shortcut={{ modifiers: ["cmd"], key: "arrowRight" }}
           onAction={async () => {
             await skipToNext();
-            await closeMainWindow();
-            await popToRoot();
+            if (closeWindowOnAction) {
+              await showHUD("Skipped to next");
+              await popToRoot();
+              return;
+            }
+            await showToast({ title: "Skipped to next" });
+            await currentPlayingRevalidate();
           }}
         />
 
@@ -128,8 +142,13 @@ by ${artistName}
           shortcut={{ modifiers: ["cmd"], key: "arrowLeft" }}
           onAction={async () => {
             await skipToPrevious();
-            await closeMainWindow();
-            await popToRoot();
+            if (closeWindowOnAction) {
+              await showHUD("Skipped to previous");
+              await popToRoot();
+              return;
+            }
+            await showToast({ title: "Skipped to previous" });
+            await currentPlayingRevalidate();
           }}
         />
         <Action
@@ -140,7 +159,13 @@ by ${artistName}
               trackIds: trackId ? [trackId] : undefined,
               artistIds: artistId ? [artistId] : undefined,
             });
-            showHUD(`Playing Radio`);
+            if (closeWindowOnAction) {
+              await showHUD("Playing Radio");
+              await popToRoot();
+              return;
+            }
+            await showToast({ title: "Playing Radio" });
+            await currentPlayingRevalidate();
           }}
         />
       </>
@@ -180,10 +205,17 @@ ${description}
               icon={Icon.Pause}
               title="Pause"
               onAction={async () => {
+                if (closeWindowOnAction) {
+                  await pause();
+                  await showHUD("Paused");
+                  await popToRoot();
+                  return;
+                }
+                const toast = await showToast({ title: "Pausing", style: Toast.Style.Animated });
                 await pause();
                 await revalidatePlaybackState();
-                // await closeMainWindow();
-                // await popToRoot();
+                toast.title = "Paused";
+                toast.style = Toast.Style.Success;
               }}
             />
           )}
@@ -192,10 +224,17 @@ ${description}
               icon={Icon.Play}
               title="Play"
               onAction={async () => {
+                if (closeWindowOnAction) {
+                  await play();
+                  await showHUD("Playing");
+                  await popToRoot();
+                  return;
+                }
+                const toast = await showToast({ title: "Playing", style: Toast.Style.Animated });
                 await play();
                 await revalidatePlaybackState();
-                // await closeMainWindow();
-                // await popToRoot();
+                toast.title = "Playing";
+                toast.style = Toast.Style.Success;
               }}
             />
           )}
@@ -210,9 +249,12 @@ ${description}
                     playlistId: playlist.id as string,
                     trackUris: [uri as string],
                   });
-                  await closeMainWindow();
-                  await popToRoot();
-                  showHUD(`Added to ${playlist.name}`);
+                  if (closeWindowOnAction) {
+                    await showHUD(`Added to ${playlist.name}`);
+                    await popToRoot();
+                    return;
+                  }
+                  await showToast({ title: `Added to ${playlist.name}` });
                 }}
               />
             ))}
@@ -227,9 +269,12 @@ ${description}
                   if (device.id) {
                     await transferMyPlayback(device.id);
                   }
-                  await closeMainWindow();
-                  await popToRoot();
-                  showHUD(`Connected to ${device.name}`);
+                  if (closeWindowOnAction) {
+                    await showHUD(`Connected to ${device.name}`);
+                    await popToRoot();
+                    return;
+                  }
+                  await showToast({ title: `Connected to ${device.name}` });
                 }}
               />
             ))}
