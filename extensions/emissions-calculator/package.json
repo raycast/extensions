@@ -5,6 +5,9 @@
   "description": "Calculate the carbon emissions for the given distance and mode of transport.",
   "icon": "command-icon.png",
   "author": "andreaselia",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "categories": [
     "Data"
   ],
