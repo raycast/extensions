@@ -1,0 +1,41 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "wireguard-manager",
+  "title": "WireGuard Manager",
+  "description": "Manage WireGuard Connections",
+  "icon": "wireguard.png",
+  "author": "ventrue",
+  "owner": "bytetrance",
+  "access": "public",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Connection Manager",
+      "description": "Manage WireGuard Connections",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.48.9",
+    "@raycast/utils": "^1.5.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^8.36.0",
+    "prettier": "^2.8.7",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
