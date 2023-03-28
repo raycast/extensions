@@ -37,9 +37,8 @@ export async function getCurrentlyPlaying() {
     const parsedResponse = JSON.parse(scriptResponse);
 
     if (parsedResponse?.uri) {
-      const type = parsedResponse.uri.includes("episode") ? "episode" : "track";
-      const id = parsedResponse.uri.split(":")[2];
-      console.log(parsedResponse, id, type);
+      // A uri looks like this: spotify:track:6v3KW9xbzN5yKLt9YKDYA2 or spotify:episode:6v3KW9xbzN5yKLt9YKDYA2
+      const [_, type, id] = parsedResponse.uri.split(":");
       if (type === "episode") {
         const showResponse = await getEpisode(id);
         return {
