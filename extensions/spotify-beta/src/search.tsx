@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Action, ActionPanel, Grid, Icon, List, LocalStorage } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
+import { useCachedPromise } from "@raycast/utils";
 import { useSearch } from "./hooks/useSearch";
 import { View } from "./components/View";
 import { ArtistsSection } from "./components/ArtistsSection";
@@ -28,7 +28,7 @@ function SearchCommand() {
     data: recentSearchesData,
     isLoading: recentSearchIsLoading,
     revalidate: recentSearchRevalidate,
-  } = usePromise(() => LocalStorage.getItem<string>("recent-searches"));
+  } = useCachedPromise(() => LocalStorage.getItem<string>("recent-searches"));
   const [searchText, setSearchText] = useState("");
   const [searchFilter, setSearchFilter] = useState<FilterValue>("all");
   const { searchData, searchIsLoading } = useSearch({

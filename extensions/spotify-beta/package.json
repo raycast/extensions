@@ -91,6 +91,7 @@
     "run-applescript": "^6.1.0"
   },
   "devDependencies": {
+    "@raycast/eslint-config": "^1.0.5",
     "@types/node": "~18.15.10",
     "@types/react": "^18.0.29",
     "@typescript-eslint/eslint-plugin": "^5.56.0",
