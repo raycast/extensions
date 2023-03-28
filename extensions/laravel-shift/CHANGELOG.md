@@ -1,3 +1,5 @@
 # Laravel Shift Changelog
 
-## [Initial Version] - 2023-03-12
+## [Initial Version] - {PR_MERGE_DATE}
+
+- Initial release of Laravel Shift
