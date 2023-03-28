@@ -132,14 +132,20 @@
       "description": "Get information about transactionalEmail domains",
       "mode": "view",
       "icon": "transactionalEmail.webp"
-    }
-    ,
+    },
     {
       "name": "webhosting",
       "title": "Web Hosting",
       "description": "Get information about webhosting",
       "mode": "view",
       "icon": "webhosting.webp"
+    },
+    {
+      "name": "secretManager",
+      "title": "Secret Manager",
+      "description": "Get information about your Secret Manager secrets",
+      "mode": "view",
+      "icon": "secretManager.webp"
     }
   ],
   "dependencies": {
@@ -147,6 +153,7 @@
     "@scaleway/configuration-loader": "1.0.0",
     "@scaleway/sdk": "1.2.0",
     "@scaleway/use-dataloader": "4.0.0",
+    "base64-js": "^1.5.1",
     "cross-fetch": "^3.1.5",
     "react": "18.2.0"
   },
