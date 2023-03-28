@@ -14,7 +14,6 @@ export async function getOpenTabs(useOriginalFavicon: boolean): Promise<Tab[]> {
   const openTabs = await runAppleScript(`
       set _output to ""
       tell application "Brave Browser"
-        activate
         set _window_index to 1
         repeat with w in windows
           set _tab_index to 1

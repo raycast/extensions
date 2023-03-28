@@ -1,5 +1,8 @@
 # Brave Changelog
 
+## [Bug Fixes] - 2023-03-28
+- Fix errors caused by not providing default profile list for cached state
+
 ## [Profiles support] - 2023-01-25
 
 - Added support for profiles across all commands

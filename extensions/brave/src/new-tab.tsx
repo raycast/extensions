@@ -22,7 +22,7 @@ function orderByLastVisited(targetId: string, container?: HistoryContainer[]): H
 
 export default function Command() {
   const [searchText, setSearchText] = useState<string>();
-  const [profiles] = useCachedState<BraveProfile[]>(BRAVE_PROFILES_KEY);
+  const [profiles] = useCachedState<BraveProfile[]>(BRAVE_PROFILES_KEY, [{ name: "Person 1", id: "Default" }]);
   const [profile] = useCachedState(BRAVE_PROFILE_KEY, DEFAULT_BRAVE_PROFILE_ID);
   const profileHistories = profiles?.map((p) => ({ ...useHistorySearch(p.id, searchText), profile: p }));
   const { data: dataTab, isLoading: isLoadingTab, errorView: errorViewTab } = useTabSearch();
