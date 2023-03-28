@@ -1,8 +1,12 @@
 # Laravel Shift for Docker
 
-_Generate any of the Docker Shifts for Laravel, PHP, Django, and Tailwind using Raycast._
+_Generate any of the Docker Shifts for Laravel, Lumen, PHP, Django, and Tailwind using Raycast._
 
 ![Raycast](./media/laravel-shift-cover.png)
+
+## Requirements
+
+- A Shift Token is required to complete the setup step.
 
 ## Usage
 
