@@ -7,6 +7,7 @@ type ContextTypes = "album" | "artist" | "playlist" | "track" | "show" | "episod
 type PlayProps = {
   id?: string | undefined;
   type?: ContextTypes | undefined;
+  contextUri?: string;
 };
 
 const uriForType: Record<ContextTypes, string> = {
@@ -18,14 +19,21 @@ const uriForType: Record<ContextTypes, string> = {
   episode: "spotify:episode:",
 };
 
-export async function play({ id, type }: PlayProps = {}) {
+export async function play({ id, type, contextUri }: PlayProps = {}) {
   const { spotifyClient } = getSpotifyClient();
 
   try {
     if (!type || !id) {
       await spotifyClient.putMePlayerPlay();
     } else if (type === "track") {
-      await spotifyClient.putMePlayerPlay({ uris: [`${uriForType["track"]}${id}`] });
+      if (contextUri) {
+        await spotifyClient.putMePlayerPlay({
+          context_uri: contextUri,
+          offset: { uri: `${uriForType["track"]}${id}` },
+        });
+      } else {
+        await spotifyClient.putMePlayerPlay({ uris: [`${uriForType["track"]}${id}`] });
+      }
     } else if (type === "episode") {
       await spotifyClient.putMePlayerPlay({ uris: [`${uriForType["episode"]}${id}`] });
     } else {
@@ -34,7 +42,7 @@ export async function play({ id, type }: PlayProps = {}) {
   } catch (err) {
     const error = getError(err);
 
-    if (error.reason.includes("NO_ACTIVE_DEVICE")) {
+    if (error?.reason?.includes("NO_ACTIVE_DEVICE")) {
       if (!type || !id) {
         const script = buildScriptEnsuringSpotifyIsRunning("play");
         await runAppleScriptSilently(script);

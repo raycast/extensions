@@ -11,16 +11,17 @@ type TrackActionPanelProps = {
   track: SimplifiedTrackObject;
   album?: SimplifiedAlbumObject;
   showGoToAlbum?: boolean;
+  playingContext?: string;
 };
 
-export function TrackActionPanel({ title, track, album, showGoToAlbum }: TrackActionPanelProps) {
+export function TrackActionPanel({ title, track, album, showGoToAlbum, playingContext }: TrackActionPanelProps) {
   return (
     <ActionPanel>
       <Action
         icon={Icon.Play}
         title="Play"
         onAction={async () => {
-          await play({ id: track.id, type: "track" });
+          await play({ id: track.id, type: "track", contextUri: playingContext });
           showHUD(`Playing ${title}`);
         }}
       />

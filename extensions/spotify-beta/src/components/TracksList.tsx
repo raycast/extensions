@@ -34,6 +34,7 @@ export function TracksList({ album, playlist, tracks, showGoToAlbum }: TracksLis
         songs.map((track, index) => (
           <TrackListItem
             key={`${track.id}${index}`}
+            playingContext={album?.uri || playlist?.uri}
             track={track}
             album={album || track.album}
             showGoToAlbum={showGoToAlbum}

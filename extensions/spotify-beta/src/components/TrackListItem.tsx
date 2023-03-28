@@ -7,9 +7,10 @@ type TrackListItemProps = {
   track: SimplifiedTrackObject;
   album?: SimplifiedAlbumObject;
   showGoToAlbum?: boolean;
+  playingContext?: string;
 };
 
-export default function TrackListItem({ track, album, showGoToAlbum }: TrackListItemProps) {
+export default function TrackListItem({ track, album, showGoToAlbum, playingContext }: TrackListItemProps) {
   const title = track.name || "";
   const subtitle = track?.artists?.[0].name;
 
@@ -26,7 +27,15 @@ export default function TrackListItem({ track, album, showGoToAlbum }: TrackList
       title={title}
       subtitle={subtitle}
       accessories={[{ text: track.duration_ms ? msToHMS(track.duration_ms) : undefined }]}
-      actions={<TrackActionPanel title={title} track={track} album={album} showGoToAlbum={showGoToAlbum} />}
+      actions={
+        <TrackActionPanel
+          title={title}
+          track={track}
+          album={album}
+          showGoToAlbum={showGoToAlbum}
+          playingContext={playingContext}
+        />
+      }
     />
   );
 }
