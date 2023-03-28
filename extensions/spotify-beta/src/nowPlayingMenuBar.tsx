@@ -97,7 +97,6 @@ function NowPlayingMenuBarCommand() {
         <MenuBarExtra.Item
           icon={Icon.Forward}
           title="Next"
-          shortcut={{ modifiers: ["cmd"], key: "arrowRight" }}
           onAction={async () => {
             await skipToNext();
             await currentPlayingRevalidate();
@@ -106,7 +105,6 @@ function NowPlayingMenuBarCommand() {
         <MenuBarExtra.Item
           icon={Icon.Rewind}
           title="Previous"
-          shortcut={{ modifiers: ["cmd"], key: "arrowLeft" }}
           onAction={async () => {
             await skipToPrevious();
             await currentPlayingRevalidate();
