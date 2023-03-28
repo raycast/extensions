@@ -1,4 +1,4 @@
-import { Form, ActionPanel, Action, showToast, Clipboard, getPreferenceValues, Toast } from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, Clipboard, getPreferenceValues, Toast, open } from "@raycast/api";
 import { authorize } from "./oauth";
 import View from "./view";
 import { submitInsight } from "./productlane.api";
@@ -27,13 +27,21 @@ function SubmitInsight() {
       });
 
       const insight = await submitInsight(values);
-
-      Clipboard.copy(`https://productlane.io/feedback/${insight.result.id}`);
+      const feedbackUrl = `https://productlane.io/feedback/${insight.result.id}`;
+      Clipboard.copy(feedbackUrl);
 
       reset({ text: "", email: preferences.email, painLevel: "UNKNOWN", state: "NEW" });
       toast.title = "Submitted insight";
       toast.style = Toast.Style.Success;
       toast.message = "Copied insight URL to Clipboard";
+      toast.primaryAction = {
+        title: "Open Insight",
+        shortcut: { modifiers: ["cmd", "shift"], key: "o" },
+        onAction: async () => {
+          open(feedbackUrl);
+          await toast.hide();
+        },
+      };
     },
     validation: {
       text: FormValidation.Required,

@@ -113,6 +113,8 @@ const StateIcon = (state?: DeploymentState) => {
       return { source: Icon.Dot, tintColor: Color.PrimaryText };
     case "ERROR":
       return { source: Icon.ExclamationMark, tintColor: Color.Red };
+    case "QUEUED":
+      return { source: Icon.Dot, tintColor: Color.SecondaryText };
     default:
       return Icon.QuestionMark;
   }

@@ -1,5 +1,11 @@
 # `Easydict` Changelog
 
+## [v2.8.0] - 2023-03-17
+
+### ✨ Features
+
+- Support OpenAI ChatGPT translation.
+
 ## [v2.7.3] - 2023-02-28
 
 ### 💎 Improvement
