@@ -29,11 +29,11 @@ export default function Command() {
           icon={getIcon(index + 1)}
           key={index}
           title={item.title}
-          accessories={[{ text: item.author, icon: Icon.Person }]}
+          accessories={[{ text: item.creator, icon: Icon.Person }]}
           actions={
             <ActionPanel>
-              <Action.OpenInBrowser url={item.url} />
-              <Action.CopyToClipboard content={item.url} />
+              <Action.OpenInBrowser url={item.link} />
+              <Action.CopyToClipboard content={item.link} />
             </ActionPanel>
           }
         />
