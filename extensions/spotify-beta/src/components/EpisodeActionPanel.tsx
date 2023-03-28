@@ -1,7 +1,7 @@
-import { Action, ActionPanel, Icon, showHUD, showToast } from "@raycast/api";
-import { addToQueue } from "../api/addTrackToQueue";
+import { Action, ActionPanel, Icon, showHUD } from "@raycast/api";
 import { play } from "../api/play";
 import { SimplifiedEpisodeObject } from "../helpers/spotify.api";
+import { AddToQueueAction } from "./AddtoQueueAction";
 import { FooterAction } from "./FooterAction";
 
 type EpisodeActionPanelProps = {
@@ -20,14 +20,7 @@ export function EpisodeActionPanel({ title, episode }: EpisodeActionPanelProps) 
           showHUD(`Playing ${title}`);
         }}
       />
-      <Action
-        icon={Icon.Plus}
-        title="Add To Queue"
-        onAction={async () => {
-          await addToQueue({ trackUri: episode.uri as string });
-          showToast({ title: "Added to queue", message: title });
-        }}
-      />
+      <AddToQueueAction uri={episode.uri} title={title} />
       <FooterAction url={episode?.external_urls?.spotify} uri={episode.uri} title={title} />
     </ActionPanel>
   );
