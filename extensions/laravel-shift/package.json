@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "laravel-shift",
-  "title": "Laravel Shift",
+  "title": "Laravel Shift for Docker",
   "description": "Run any of the Shifts for Laravel, Lumen, PHP, Django, and Tailwind completely locally using Raycast.",
   "icon": "command-icon.png",
   "author": "denniseilander",
@@ -14,8 +14,8 @@
     {
       "name": "generate-shift",
       "title": "Generate Shift Command",
-      "subtitle": "Laravel Shift",
-      "description": "Easily generate a Shift Command",
+      "subtitle": "Laravel Shift for Docker",
+      "description": "Easily generate a Docker Shift Command",
       "mode": "view"
     }
   ],

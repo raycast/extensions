@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { copyToClipboard, getShiftGroups } from "../helpers/shifts";
 import { buildDockerCommand } from "../helpers/command";
-import { Action, ActionPanel, Form, Icon, showToast, Toast } from "@raycast/api";
+import {Action, ActionPanel, Form, Icon, showHUD, showToast, Toast} from "@raycast/api";
 import { Command, Group, Shift } from "../types/shifts";
 import { homedir } from "os";
 import { FormValues } from "../types/shifts";
@@ -14,7 +14,8 @@ export function GenerateCommandForm(): JSX.Element {
   function handleSubmit(values: FormValues) {
     buildDockerCommand(values).then(function (command: Command) {
       setShiftCommand(command);
-      copyToClipboard(command).then(() => showToast(Toast.Style.Success, "Command copied to clipboard"));
+      // copyToClipboard(command).then(() => showToast(Toast.Style.Success, "Command copied to clipboard"));
+      copyToClipboard(command).then(() => showHUD("Shift Command copied to clipboard"));
     });
   }
 
@@ -22,7 +23,7 @@ export function GenerateCommandForm(): JSX.Element {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Generate Shift Command" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
