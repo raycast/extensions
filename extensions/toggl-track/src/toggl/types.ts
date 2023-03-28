@@ -23,6 +23,7 @@ export interface TimeEntry {
   id: number;
   project_id: number;
   start: string;
+  duration: number;
   tags: string[];
   workspace_id: number;
 }

@@ -7,17 +7,9 @@
   "author": "thomas",
   "owner": "the-browser-company",
   "access": "public",
-  "categories": [
-    "Web",
-    "Applications",
-    "Productivity"
-  ],
+  "categories": ["Web", "Applications", "Productivity"],
   "license": "MIT",
-  "contributors": [
-    "pomdtr",
-    "zach",
-    "ankitchouhan1020"
-  ],
+  "contributors": ["pomdtr", "zach", "ankitchouhan1020", "pernielsentikaer"],
   "commands": [
     {
       "name": "search-history",
@@ -32,6 +24,31 @@
       "description": "Create and open a new window",
       "mode": "no-view",
       "subtitle": "Arc"
+    },
+    {
+      "name": "new-little-arc",
+      "title": "Open New Little Arc Window",
+      "description": "Create and open a new little arc window",
+      "mode": "no-view",
+      "subtitle": "Arc",
+      "preferences": [
+        {
+          "name": "url",
+          "title": "URL",
+          "description": "The URL to open in the new tab",
+          "type": "textfield",
+          "required": false,
+          "default": "https://google.com"
+        }
+      ],
+      "arguments": [
+        {
+          "name": "url",
+          "placeholder": "URL",
+          "type": "text",
+          "required": false
+        }
+      ]
     },
     {
       "name": "search-spaces",
@@ -167,7 +184,7 @@
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
+    "prettier": "^2.8.4",
     "typescript": "^4.4.3"
   },
   "scripts": {

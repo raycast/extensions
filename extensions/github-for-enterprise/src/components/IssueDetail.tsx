@@ -1,5 +1,4 @@
-import { ActionPanel, Color, copyTextToClipboard, Detail, OpenInBrowserAction } from "@raycast/api";
-import React from "react";
+import { ActionPanel, Color, Detail, Action, Clipboard } from "@raycast/api";
 import CloseIssue from "./CloseIssue";
 import { IssueOwnProps } from "./Issue";
 import ReopenIssue from "./ReopenIssue";
@@ -16,24 +15,24 @@ export default function IssueDetail(props: IssueDetailOwnProps) {
       actions={
         <ActionPanel title={`#${number} in ${repository.nameWithOwner}`}>
           <ActionPanel.Section>
-            <OpenInBrowserAction url={url} />
+            <Action.OpenInBrowser url={url} />
           </ActionPanel.Section>
           <ActionPanel.Section>
-            <ActionPanel.Item
+            <Action
               title="Copy Issue Number"
               icon={{
                 source: "doc-on-clipboard-16",
                 tintColor: Color.PrimaryText,
               }}
-              onAction={() => copyTextToClipboard(`${number}`)}
+              onAction={() => Clipboard.copy(`${number}`)}
             />
-            <ActionPanel.Item
+            <Action
               title="Copy Issue URL"
               icon={{
                 source: "doc-on-clipboard-16",
                 tintColor: Color.PrimaryText,
               }}
-              onAction={() => copyTextToClipboard(url)}
+              onAction={() => Clipboard.copy(url)}
             />
           </ActionPanel.Section>
           <ActionPanel.Section>

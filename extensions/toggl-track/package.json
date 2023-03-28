@@ -4,12 +4,19 @@
   "title": "Toggl Track",
   "description": "Start and stop time entries with Toggl Track",
   "icon": "command-icon.png",
-  "author": "franzwilhelm",
-  "license": "MIT",
-  "contributors": [
-      "bkeys818",
-      "rogatty"
+  "keywords": [
+    "toggl",
+    "track",
+    "time",
+    "entry"
   ],
+  "author": "franzwilhelm",
+  "contributors": [
+    "bkeys818",
+    "rogatty",
+    "michaelfaisst"
+  ],
+  "license": "MIT",
   "commands": [
     {
       "name": "index",
@@ -21,22 +28,16 @@
   ],
   "preferences": [
     {
+      "description": "The API token for your Toggl account.",
       "name": "togglApiToken",
-      "type": "password",
+      "placeholder": "Can be found at https://track.toggl.com/profile",
       "required": true,
       "title": "Toggl API Token",
-      "placeholder": "Can be found at https://track.toggl.com/profile",
-      "description": "The API token for your Toggl account."
+      "type": "password"
     }
   ],
-  "keywords": [
-    "toggl",
-    "track",
-    "time",
-    "entry"
-  ],
   "dependencies": {
-    "@raycast/api": "^1.27.0",
+    "@raycast/api": "^1.48.5",
     "dayjs": "^1.10.7",
     "node-fetch": "^3.2.0"
   },

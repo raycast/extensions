@@ -281,7 +281,8 @@
     "immint023",
     "duboiss",
     "metakirby5",
-    "macbookandrew"
+    "macbookandrew",
+    "shaoye"
   ],
   "dependencies": {
     "@apollo/client": "^3.4.8",

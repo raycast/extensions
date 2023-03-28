@@ -228,7 +228,8 @@
     "@raycast/api": "^1.47.2",
     "fp-ts": "^2.12.1",
     "io-ts": "^2.2.19",
-    "run-applescript": "^6.0.0"
+    "run-applescript": "^6.0.0",
+    "ts-pattern": "^4.2.1"
   },
   "devDependencies": {
     "@rawnly/eslint-config-ts": "^0.0.2",

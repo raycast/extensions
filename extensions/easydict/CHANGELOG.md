@@ -1,5 +1,17 @@
 # `Easydict` Changelog
 
+## [v2.8.0] - 2023-03-17
+
+### ✨ Features
+
+- Support OpenAI ChatGPT translation.
+
+## [v2.7.3] - 2023-02-28
+
+### 💎 Improvement
+
+- When using Easydict as Fallback Command, use the user input text as the query word (not the selected text).
+
 ## [v2.7.2] - 2023-01-17
 
 ### 🐞 Fixes

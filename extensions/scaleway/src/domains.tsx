@@ -1,3 +1,3 @@
-import { Domains } from './domains/Domains'
+import { Domains } from './products/domains/Domains'
 
 export default () => <Domains />

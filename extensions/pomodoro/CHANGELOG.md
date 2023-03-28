@@ -1,5 +1,9 @@
 # Pomodoro Changelog
 
+## [Enhancement] - 2023-03-23
+
+Added possibility to play completion sound
+
 ## [Enhancement] - 2023-02-20
 
 Added possibility to use 90 minutes sessions

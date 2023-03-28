@@ -42,7 +42,6 @@ function SubmitInsight() {
           await toast.hide();
         },
       };
-
     },
     validation: {
       text: FormValidation.Required,

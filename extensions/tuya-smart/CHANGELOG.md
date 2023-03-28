@@ -1,5 +1,9 @@
 # Tuya Smart Changelog
 
+## [Enhancement] - 2023-02-28
+
+- Added commands to set Status and Work Mode for Light Source devices.
+
 ## [Fix Action] - 2023-02-12
 
 - Fixed Pin Device Action

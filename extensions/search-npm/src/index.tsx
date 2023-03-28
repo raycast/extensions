@@ -11,6 +11,7 @@ export default function PackageList() {
       /\s/g,
       '+',
     )}`,
+    { execute: searchTerm.trim() !== '' },
   )
 
   return (

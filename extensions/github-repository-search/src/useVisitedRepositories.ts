@@ -32,7 +32,7 @@ export function useVisitedRepositories() {
   }, []);
 
   function visitRepository(repository: Repository) {
-    const nextRepositories = [repository, ...(repositories?.filter((item) => item !== repository) ?? [])].slice(
+    const nextRepositories = [repository, ...(repositories?.filter((item) => item.id !== repository.id) ?? [])].slice(
       0,
       VISITED_REPOSITORIES_LENGTH
     );
