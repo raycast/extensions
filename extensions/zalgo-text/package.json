@@ -12,7 +12,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "Generate",
+      "title": "Generate Zalgo Text",
       "description": "Convert text to Zalgo text",
       "mode": "view"
     }

@@ -10,21 +10,19 @@ export default function Command() {
     const zalgodText = zalgo(values.textfield);
 
     Clipboard.copy(zalgodText);
-    await showToast({ title: "Copied to clipboard", message: zalgodText });
+    await showToast({ title: "Copied to clipboard" });
   }
 
   return (
-    <>
-      <Form
-        actions={
-          <ActionPanel>
-            <Action.SubmitForm onSubmit={handleSubmit} />
-          </ActionPanel>
-        }
-      >
-        <Form.Description text="Provide the text you'd like to convert to Zalgo" />
-        <Form.TextField id="textfield" title="Text" placeholder="Enter text" defaultValue="Raycast is cool!" />
-      </Form>
-    </>
+  <Form
+    actions={
+      <ActionPanel>
+        <Action.SubmitForm onSubmit={handleSubmit} />
+      </ActionPanel>
+    }
+  >
+    <Form.Description text="Provide the text you'd like to convert to Zalgo" />
+    <Form.TextField id="textfield" title="Text" placeholder="Enter text" defaultValue="Raycast is cool!" />
+  </Form>
   );
 }
