@@ -14,15 +14,15 @@ export default function Command() {
   }
 
   return (
-  <Form
-    actions={
-      <ActionPanel>
-        <Action.SubmitForm onSubmit={handleSubmit} />
-      </ActionPanel>
-    }
-  >
-    <Form.Description text="Provide the text you'd like to convert to Zalgo" />
-    <Form.TextField id="textfield" title="Text" placeholder="Enter text" defaultValue="Raycast is cool!" />
-  </Form>
+    <Form
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm onSubmit={handleSubmit} />
+        </ActionPanel>
+      }
+    >
+      <Form.Description text="Provide the text you'd like to convert to Zalgo" />
+      <Form.TextField id="textfield" title="Text" placeholder="Enter text" defaultValue="Raycast is cool!" />
+    </Form>
   );
 }
