@@ -1,4 +1,4 @@
-import {Command, FormValues, Options, Preferences} from "../types/shifts";
+import { Command, FormValues, Options, Preferences } from "../types/shifts";
 import { getPreferenceValues } from "@raycast/api";
 
 export async function buildDockerCommand(values: FormValues): Promise<Command> {

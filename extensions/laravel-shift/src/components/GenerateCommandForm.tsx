@@ -1,8 +1,8 @@
-import React, {useState} from "react";
+import React, { useState } from "react";
 import { copyToClipboard, getShiftGroups } from "../helpers/shifts";
 import { buildDockerCommand } from "../helpers/command";
-import { Action, ActionPanel, Form, showToast, Toast } from "@raycast/api";
-import {Command, Group, Shift} from "../types/shifts";
+import { Action, ActionPanel, Form, Icon, showToast, Toast } from "@raycast/api";
+import { Command, Group, Shift } from "../types/shifts";
 import { homedir } from "os";
 import { FormValues } from "../types/shifts";
 
