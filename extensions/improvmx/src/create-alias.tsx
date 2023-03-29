@@ -33,6 +33,7 @@ interface State {
   isLoading: false;
   forwardingEmailError: string;
   isRequireUpgrade: boolean;
+  defaultValue: string;
 }
 
 interface DomainArgs {
@@ -51,6 +52,7 @@ export default function createAlias(props: LaunchProps<{ arguments: DomainArgs }
       forwardingEmailError: "",
       isLoading: false,
       isRequireUpgrade: false,
+      defaultValue: "",
     }),
     API_TOKEN = getPreferenceValues<Preferences>().api_token,
     API_URL = "https://api.improvmx.com/v3/";
@@ -81,7 +83,7 @@ export default function createAlias(props: LaunchProps<{ arguments: DomainArgs }
         const domains = response as { domains: Array<Domain> };
 
         setState((prevState) => {
-          return { ...prevState, domains: domains.domains, error: "" };
+          return { ...prevState, domains: domains.domains, error: "", defaultValue: propDomain };
         });
       } catch (error) {
         setState((prevState) => {
@@ -234,7 +236,7 @@ export default function createAlias(props: LaunchProps<{ arguments: DomainArgs }
         id="domain"
         title="Domain"
         placeholder="Select a domain"
-        defaultValue={propDomain}
+        defaultValue={state.defaultValue}
         error={state.domainError}
       >
         {state.domains
