@@ -1,11 +1,10 @@
 import { Action, ActionPanel, Icon, List, Toast } from "@raycast/api";
-import { setScene, useHue } from "./lib/hue";
+import { setScene } from "./lib/hue";
 import { MutatePromise } from "@raycast/utils";
 import { Group, Scene, SendHueMessage } from "./lib/types";
 import UnlinkAction from "./components/UnlinkAction";
 import ManageHueBridge from "./components/ManageHueBridge";
 import { useHue } from "./lib/useHue";
-import { Api } from "node-hue-api/dist/esm/api/Api";
 import Style = Toast.Style;
 
 export default function SetScene() {

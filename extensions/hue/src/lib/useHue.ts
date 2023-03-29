@@ -1,11 +1,9 @@
-import { useMemo } from "react";
 import { useCachedPromise } from "@raycast/utils";
 import { Group, HueMessage, Light, Scene, SendHueMessage } from "./types";
 import { useDeepMemo } from "@raycast/utils/dist/useDeepMemo";
 import manageHueBridgeMachine from "./manageHueBridgeMachine";
 import { useMachine } from "@xstate/react";
 import { handleError } from "./hue";
-import { Api } from "node-hue-api/dist/esm/api/Api";
 import getAuthenticatedApi from "./getAuthenticatedApi";
 
 // TODO: Replace with Hue API V2 (for which there is no library yet) to enable more features.
@@ -14,22 +12,6 @@ import getAuthenticatedApi from "./getAuthenticatedApi";
 //  This happens for example when holding or successively using the 'Increase' or 'Decrease Brightness' action.
 //  This is especially noticeable on groups, since those API calls take longer than those for individual lights.
 export function useHue() {
-  const hueBridgeMachine = useDeepMemo(() =>
-    manageHueBridgeMachine(() => {
-      revalidateLights();
-      revalidateGroups();
-      revalidateScenes();
-    })
-  );
-
-  const [hueBridgeState, send] = useMachine(hueBridgeMachine);
-
-  const sendHueMessage: SendHueMessage = (message: HueMessage) => {
-    send(message.toUpperCase());
-  };
-
-  const authenticatedApi: Promise<Api> = useMemo(async () => await getAuthenticatedApi(), []);
-
   const {
     isLoading: isLoadingLights,
     data: lights,
@@ -37,7 +19,8 @@ export function useHue() {
     revalidate: revalidateLights,
   } = useCachedPromise(
     async () => {
-      const lights = await (await authenticatedApi).lights.getAll();
+      const api = await getAuthenticatedApi();
+      const lights = await api.lights.getAll();
       return lights.map((light) => light["data"] as Light).filter((light) => light != null);
     },
     [],
@@ -55,7 +38,8 @@ export function useHue() {
     revalidate: revalidateGroups,
   } = useCachedPromise(
     async () => {
-      const groups = await (await authenticatedApi).groups.getAll();
+      const api = await getAuthenticatedApi();
+      const groups = await api.groups.getAll();
       return groups.map((group) => group["data"] as Group).filter((group) => group != null);
     },
     [],
@@ -73,7 +57,8 @@ export function useHue() {
     revalidate: revalidateScenes,
   } = useCachedPromise(
     async () => {
-      const scenes = await (await authenticatedApi).scenes.getAll();
+      const api = await getAuthenticatedApi();
+      const scenes = await api.scenes.getAll();
       return scenes.map((scene) => scene["data"] as Scene).filter((scene) => scene != null);
     },
     [],
@@ -84,10 +69,23 @@ export function useHue() {
     }
   );
 
+  const hueBridgeMachine = useDeepMemo(() =>
+    manageHueBridgeMachine(() => {
+      revalidateLights();
+      revalidateGroups();
+      revalidateScenes();
+    })
+  );
+
+  const [hueBridgeState, send] = useMachine(hueBridgeMachine);
+
+  const sendHueMessage: SendHueMessage = (message: HueMessage) => {
+    send(message.toUpperCase());
+  };
+
   return {
     hueBridgeState,
     sendHueMessage,
-    apiPromise: authenticatedApi,
     isLoading: hueBridgeState.context.shouldDisplay || isLoadingLights || isLoadingGroups || isLoadingScenes,
     lights,
     mutateLights,

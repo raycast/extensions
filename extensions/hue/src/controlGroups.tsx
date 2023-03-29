@@ -20,6 +20,7 @@ import ManageHueBridge from "./components/ManageHueBridge";
 import UnlinkAction from "./components/UnlinkAction";
 import { useHue } from "./lib/useHue";
 import Style = Toast.Style;
+import { useHue } from "./lib/useHue";
 
 export default function Command() {
   const { hueBridgeState, sendHueMessage, apiPromise, isLoading, groups, mutateGroups, scenes } = useHue();

@@ -18,6 +18,7 @@ import UnlinkAction from "./components/UnlinkAction";
 import { useHue } from "./lib/useHue";
 import { Api } from "node-hue-api/dist/esm/api/Api";
 import Style = Toast.Style;
+import { useHue } from "./lib/useHue";
 
 export default function ControlLights() {
   const { hueBridgeState, sendHueMessage, apiPromise, isLoading, lights, mutateLights, groups } = useHue();
