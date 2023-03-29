@@ -6,7 +6,7 @@ import { useSelectedVaultItem } from "~/components/searchVault/context/vaultItem
 import { getTransientCopyPreference } from "~/utils/preferences";
 
 function CopyTotpAction() {
-  const { name, login } = useSelectedVaultItem();
+  const { id, name, login } = useSelectedVaultItem();
   const bitwarden = useBitwarden();
   const session = useSession();
   const code = login?.totp;
@@ -16,7 +16,7 @@ function CopyTotpAction() {
   const copyTotp = async () => {
     if (session.token) {
       const toast = await showToast(Toast.Style.Success, "Copying TOTP Code...");
-      const totp = await bitwarden.getTotp(code, session.token);
+      const totp = await bitwarden.getTotp(id, session.token);
       await Clipboard.copy(totp, { transient: getTransientCopyPreference("other") });
       await toast.hide();
       await closeMainWindow({ clearRootSearch: true });
