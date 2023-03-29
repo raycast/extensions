@@ -17,6 +17,12 @@
       "mode": "view"
     },
     {
+      "name": "api-hub",
+      "title": "API Hub",
+      "description": "API Hub for project",
+      "mode": "view"
+    },
+    {
       "name": "gocd-pipelines",
       "title": "GoCD Pipeline",
       "description": "GoCD Pipelines List And Details",
@@ -83,6 +89,13 @@
       "description": "Google Oauth",
       "mode": "view",
       "icon": "icons/google.ico"
+    },
+    {
+      "name": "sync-configuration",
+      "title": "Sync Configuration",
+      "description": "Sync configuration from google sheet",
+      "mode": "view",
+      "icon": "icons/cloud-sync.png"
     }
   ],
   "preferences": [
@@ -150,6 +163,7 @@
   },
   "scripts": {
     "build": "ray build -e dist -o dist",
+    "build:local": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",

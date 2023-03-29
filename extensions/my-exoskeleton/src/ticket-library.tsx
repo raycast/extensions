@@ -1,3 +1,3 @@
-import { TicketLibraryCommand } from "./commands/ticket-library";
+import { TicketLibraryCommand } from './commands/ticket-library'
 
 export default TicketLibraryCommand

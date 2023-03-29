@@ -1,3 +1,2 @@
-import { ApiHub } from "./commands/api-hub";
-
-export default ApiHub;
+import { ApiHub } from './commands/api-hub'
+export default ApiHub

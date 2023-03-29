@@ -1,15 +1,17 @@
-import { Action, ActionPanel, getPreferenceValues, List, useNavigation } from '@raycast/api'
-import React, { useState } from 'react'
+import { Action, ActionPanel, List, useNavigation } from '@raycast/api'
+import React, { FC, useState } from 'react'
 import GoCDPipelines from '../../gocd-pipelines'
 import { Shortcuts } from '../../constants/shortcut'
 import GrafanaIndex from '../../grafana'
 import Bookmark from '../../bookmark'
 import { DictionaryCommand } from '../dictionary'
 import { DictionaryLoadCommand } from '../dictionary/DictionaryLoad'
+import { withConfig } from '../../utils/configurationCenter'
+import { SyncConfiguration } from '../sycn-configuration'
 
-export function MyProjectCommand() {
+export const MyProjectCommand: FC = withConfig(({ configurations }) => {
   const { push } = useNavigation()
-  const { GrafanaBaseUrl, GoCDBaseUrl } = getPreferenceValues()
+  const { grafanaBaseUrl, gocdBaseUrl } = configurations
   const [keyword, setKeyword] = useState('')
 
   const items = [
@@ -27,7 +29,7 @@ export function MyProjectCommand() {
       actions: (
         <ActionPanel>
           <Action title="Search Pipelines" onAction={() => push(<GoCDPipelines />)} />
-          <Action.OpenInBrowser title="Open GOCD" url={GoCDBaseUrl} />
+          <Action.OpenInBrowser title="Open GOCD" url={gocdBaseUrl} />
         </ActionPanel>
       )
     },
@@ -39,7 +41,7 @@ export function MyProjectCommand() {
           <Action.OpenInBrowser
             title="Open Grafana"
             shortcut={Shortcuts.link}
-            url={`${GrafanaBaseUrl}/grafana/?search=open&orgId=1`}
+            url={`${grafanaBaseUrl}/grafana/?search=open&orgId=1`}
           />
         </ActionPanel>
       )
@@ -49,6 +51,14 @@ export function MyProjectCommand() {
       actions: (
         <ActionPanel>
           <Action title="Go to bookmark" onAction={() => push(<Bookmark />)} />
+        </ActionPanel>
+      )
+    },
+    {
+      title: 'Sync Configuration',
+      actions: (
+        <ActionPanel>
+          <Action title="Go to sync configuration" onAction={() => push(<SyncConfiguration />)} />
         </ActionPanel>
       )
     }
@@ -63,4 +73,4 @@ export function MyProjectCommand() {
         ))}
     </List>
   )
-}
+})

@@ -1,9 +1,7 @@
-import {
-  CollectionDocuments
-} from "@mysql/xdevapi/types/lib/DevAPI/CollectionAdd";
+import { CollectionDocuments } from '@mysql/xdevapi/types/lib/DevAPI/CollectionAdd'
 
-export const SCHEMA_NAME = 'sn-connector-dataset';
-export const COLLECTION_NAME = 'trello_sync_data';
+export const SCHEMA_NAME = 'sn-connector-dataset'
+export const COLLECTION_NAME = 'trello_sync_data'
 interface TicketData {
   group: string
   ticket: string

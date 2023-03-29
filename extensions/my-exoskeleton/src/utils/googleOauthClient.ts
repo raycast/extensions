@@ -8,7 +8,7 @@ import open from 'open'
 import destroyer from 'server-destroy'
 import { isString } from './string'
 import { isNil } from 'lodash'
-import { ConfigCenterPreference } from "./index";
+import { ConfigCenterPreference } from './index'
 
 const { oauthClientKey } = getPreferenceValues<ConfigCenterPreference>()
 

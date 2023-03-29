@@ -1,9 +1,11 @@
 import { fetchSheetValues } from '../apis/bookmark'
 import { useCachedPromise, usePromise } from '@raycast/utils'
-import { Detail, getPreferenceValues, List } from '@raycast/api'
+import { Detail, getPreferenceValues, LocalStorage } from '@raycast/api'
 import { ConfigCenterPreference } from './index'
-import { FC } from 'react'
-import { isNil } from 'lodash'
+import { FC, useMemo } from 'react'
+import { isEmpty, isNil, isUndefined } from 'lodash'
+import { isString } from './string'
+import { json } from 'stream/consumers'
 
 export interface Configurations {
   dictionarySource: string
@@ -16,12 +18,11 @@ export interface Configurations {
   gocdBaseUrl: string
 }
 
-export const getConfigurations = async () => {
-  const { configurationId } = getPreferenceValues<ConfigCenterPreference>()
+const getConfigurationBySpreadsheetId = async (spreadsheetId: string) => {
   const {
     data: { valueRanges }
-  } = await fetchSheetValues(configurationId, ['source!A2:B'])
-  const configurations = valueRanges
+  } = await fetchSheetValues(spreadsheetId, ['source!A2:B'])
+  return valueRanges
     .flatMap((v) => v.values)
     .reduce(
       (map, [name, value]) => ({
@@ -30,9 +31,32 @@ export const getConfigurations = async () => {
       }),
       {} as Configurations
     )
-  console.log('configs', JSON.stringify(configurations))
+}
+const fetchConfigurations = async (configId: string, secondConfigId: string | null) => {
+  const configurations = await getConfigurationBySpreadsheetId(configId)
+  if (isString(secondConfigId) && secondConfigId !== '') {
+    const secondConfig = await getConfigurationBySpreadsheetId(secondConfigId)
+    Object.assign(configurations, secondConfig)
+  }
   return configurations
 }
+
+const configurationKey = 'configuration'
+export const syncConfigurations = async (configId: string, secondConfigId: string | null) => {
+  const config = await fetchConfigurations(configId, secondConfigId)
+  await LocalStorage.setItem(configurationKey, JSON.stringify(config))
+  return config
+}
+
+export const getConfigurations = async (configId: string, secondConfigId: string | null) => {
+  const configContent = await LocalStorage.getItem(configurationKey)
+  if (isString(configContent)) {
+    return JSON.parse(configContent)
+  }
+  return syncConfigurations(configId, secondConfigId)
+}
+
+export const Loading = `<img src="images/loading.gif" width="350" height="350" />`
 
 export interface ConfigProp {
   configurations: Configurations
@@ -47,17 +71,11 @@ type DiffMap<T, K> = {
 export const withConfig =
   <T extends ConfigProp>(Component: FC<T>) =>
   (props: DiffMap<T, ConfigProp>) => {
-    const { isLoading, data } = useCachedPromise(getConfigurations, [], { keepPreviousData: true })
-    if (!isNil(data)) {
-      const componentProps = { ...(props || {}), configurations: data } as T
-      return <Component {...componentProps} />
+    const { configurationId, secondConfigurationId } = getPreferenceValues<ConfigCenterPreference>()
+    const { data } = usePromise(getConfigurations, [configurationId, secondConfigurationId])
+    if (isEmpty(data)) {
+      return <Detail isLoading markdown={Loading} />
     }
-    return (
-      <Detail
-        isLoading={isLoading}
-        markdown={`
-  <img src="images/loading.gif" />
-  `}
-      />
-    )
+    const componentProps = { ...(props || {}), configurations: data } as T
+    return <Component {...componentProps} />
   }
