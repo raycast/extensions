@@ -9,7 +9,6 @@ import {
   setScene,
   turnGroupOff,
   turnGroupOn,
-  useHue,
 } from "./lib/hue";
 import { MutatePromise } from "@raycast/utils";
 import { CssColor, Group, Room, Scene, SendHueMessage } from "./lib/types";
@@ -19,6 +18,7 @@ import { hexToXy } from "./lib/colors";
 import ManageHueBridge from "./components/ManageHueBridge";
 import UnlinkAction from "./components/UnlinkAction";
 import Style = Toast.Style;
+import { useHue } from "./lib/useHue";
 
 export default function Command() {
   const { hueBridgeState, sendHueMessage, isLoading, groups, mutateGroups, scenes } = useHue();

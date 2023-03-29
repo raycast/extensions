@@ -25,7 +25,7 @@ export interface HueContext {
 /**
  * @see https://stately.ai/viz/ee0edf94-7a82-4d65-a6a8-324e2f1eca49
  */
-export function manageHueBridgeMachine(revalidateResources: () => void) {
+export default function manageHueBridgeMachine(revalidateResources: () => void) {
   return createMachine<HueContext>(
     {
       id: "manage-hue-bridge",

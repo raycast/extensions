@@ -8,7 +8,6 @@ import {
   setLightBrightness,
   setLightColor,
   toggleLight,
-  useHue,
 } from "./lib/hue";
 import { getIconForColor, getLightIcon } from "./lib/utils";
 import { MutatePromise } from "@raycast/utils";
@@ -17,6 +16,7 @@ import { BRIGHTNESS_MAX, BRIGHTNESS_MIN, BRIGHTNESSES, COLOR_TEMP_MAX, COLOR_TEM
 import ManageHueBridge from "./components/ManageHueBridge";
 import UnlinkAction from "./components/UnlinkAction";
 import Style = Toast.Style;
+import { useHue } from "./lib/useHue";
 
 export default function ControlLights() {
   const { hueBridgeState, sendHueMessage, isLoading, lights, mutateLights, groups } = useHue();
