@@ -9,6 +9,7 @@ import { SpotifyContentLink, SpotifyMetadataType } from "./@types/global";
 
 import { SITE_URL, API_URL, SPOTIFY_LINK_REGEX } from "./constants";
 import { playAudio } from "./utils/audio";
+import { cacheLastSearch, getLastSearch } from "./utils/cache";
 
 const spotifyContentLinksTitles = {
   [SpotifyContentLink.Youtube]: "YouTube",
@@ -32,17 +33,17 @@ export default function Command() {
   const [spotifyContent, setSpotifyContent] = useState<SpotifyContent>();
 
   const fetchSpotifyContent = useCallback(
-    async (text: string) => {
-      setSearchText(text);
+    async (spotifyLink: string) => {
+      setSearchText(spotifyLink);
 
-      if (!text) {
+      if (!spotifyLink) {
         return;
       }
 
       setIsLoading(true);
 
       try {
-        const request = await fetch(`${API_URL}?spotifyLink=${text}`);
+        const request = await fetch(`${API_URL}?spotifyLink=${spotifyLink}`);
         const spotifyContent = (await request.json()) as SpotifyContent & ApiError;
 
         if (request.status !== 200) {
@@ -50,6 +51,7 @@ export default function Command() {
         }
 
         setSpotifyContent(spotifyContent);
+        cacheLastSearch(spotifyLink, spotifyContent);
       } catch (error) {
         showToast(Toast.Style.Failure, "Error", (error as Error).message);
       }
@@ -64,7 +66,14 @@ export default function Command() {
       const clipboardText = await Clipboard.readText();
 
       if (clipboardText && SPOTIFY_LINK_REGEX.test(clipboardText)) {
-        fetchSpotifyContent(clipboardText);
+        await fetchSpotifyContent(clipboardText);
+        return;
+      }
+
+      const lastSearch = getLastSearch();
+      if (lastSearch) {
+        setSpotifyContent(lastSearch.spotifyContent);
+        setSearchText(lastSearch.spotifyLink);
       }
     })();
   }, [fetchSpotifyContent]);
@@ -75,7 +84,7 @@ export default function Command() {
     <List
       isLoading={isLoading}
       searchText={searchText}
-      onSearchTextChange={(text) => fetchSpotifyContent(text)}
+      onSearchTextChange={(spotifyLink) => fetchSpotifyContent(spotifyLink)}
       throttle
     >
       <List.EmptyView

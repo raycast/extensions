@@ -30,6 +30,11 @@ export interface SpotifyContent {
   };
 }
 
+export interface CacheData {
+  spotifyLink: string;
+  spotifyContent: SpotifyContent;
+}
+
 export interface ApiError {
   error: string;
 }

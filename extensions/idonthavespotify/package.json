@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "idonthavespotify",
   "title": "I Don't Have Spotify",
-  "description": "Convert Spotify Links to YouTube, Apple Music, Tidal and Soundcloud",
+  "description": "Find Spotify Links to YouTube, Apple Music, Tidal and Soundcloud",
   "version": "1.0.0",
   "author": "sjdonado",
   "icon": "icon.png",
@@ -12,9 +12,9 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "convert",
-      "title": "Convert Spotify Link",
-      "description": "Paste a Spotify Link and convert it to YouTube, Apple Music, Tidal and Soundcloud",
+      "name": "search",
+      "title": "Paste Spotify Link",
+      "description": "Get YouTube, Apple Music, Tidal and Soundcloud links",
       "mode": "view"
     }
   ],
