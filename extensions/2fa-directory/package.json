@@ -5,6 +5,9 @@
   "description": "View a list of 2FA enabled sites.",
   "icon": "command-icon.png",
   "author": "andreaselia",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "categories": [
     "Applications",
     "Data",
