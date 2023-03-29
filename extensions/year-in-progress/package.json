@@ -1,16 +1,23 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "x-in-progress",
-  "title": "X In Progress",
-  "description": "Show progress of the X(day/week/month/...)",
-  "icon": "x-in-progress-icon.png",
-  "author": "anothertempore",
+  "name": "year-in-progress",
+  "title": "Year in Progress",
+  "description": "Stay motivated by see the progress of the year.",
+  "icon": "icon.png",
+  "author": "thomas",
   "categories": [
     "Productivity",
     "Fun"
   ],
   "license": "MIT",
   "commands": [
+    {
+      "name": "year-in-progress",
+      "title": "Year in Progress",
+      "description": "Displays the year in progress inline.",
+      "mode": "no-view",
+      "interval": "4h"
+    },
     {
       "name": "index",
       "title": "Show X In Progress In Menu Bar",

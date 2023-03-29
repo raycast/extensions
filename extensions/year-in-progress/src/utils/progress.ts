@@ -54,6 +54,7 @@ function getYearProgress(): Progress {
     endDate: getYearProgressDate().endDate,
     getProgressNumberFn: getYearProgressNumber,
     type: "default",
+    pinned: true,
   };
 }
 
@@ -87,6 +88,7 @@ function getQuarterProgress(): Progress {
     endDate: getQuarterProgressDate().endDate,
     getProgressNumberFn: getQuarterProgressNumber,
     type: "default",
+    pinned: true,
   };
 }
 
