@@ -1,5 +1,9 @@
 # Hidden Icons Changelog
 
+## [Update UX] - {PR_MERGE_DATE}
+
+- When you break the record (confetti celebration), you can still see the score
+
 ## [Update Raycast API] - 2022-12-05
 
 - Update Raycast API version to 1.44.0
