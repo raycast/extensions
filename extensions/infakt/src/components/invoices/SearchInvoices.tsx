@@ -156,7 +156,7 @@ function InvoiceListItem({ invoice, mutateInvoices }: InvoiceListItemProps) {
             />
             {!invoice?.paid_date ? (
               <Action.PickDate
-                title="Set As Paid..."
+                title="Set as Paid..."
                 icon={Icon.BankNote}
                 shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
                 onChange={async (date) => {
