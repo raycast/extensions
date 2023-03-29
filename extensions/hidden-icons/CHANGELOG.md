@@ -1,6 +1,6 @@
 # Hidden Icons Changelog
 
-## [Update UX] - {PR_MERGE_DATE}
+## [Update UX] - 2023-03-29
 
 - When you break the record (confetti celebration), you can still see the score
 
