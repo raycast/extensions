@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "easydict",
   "title": "Easy Dictionary",
-  "description": "Easily look up words or translate text, support 48+ languages, support Linguee and Youdao dictionary, support DeepL, Google, Bing, Apple, Baidu, Tencent, Volcano, Youdao and Caiyun translation.",
+  "description": "Easily look up words or translate text, support 48+ languages, support Linguee and Youdao dictionary, support OpenAI ChatGPT, DeepL, Google, Bing, Apple, Baidu, Tencent, Volcano, Youdao and Caiyun translation.",
   "icon": "Eudic.png",
   "author": "isfeng",
   "license": "MIT",
@@ -41,7 +41,7 @@
     "baidu",
     "tencent",
     "eudic",
-    "caiyun"
+    "chatgpt"
   ],
   "dependencies": {
     "@raycast/api": "^1.48.0",
@@ -517,7 +517,7 @@
       "label": "Show Open in Eudic First",
       "required": false,
       "description": "If enabled and Eudic is installed, `Open in Eudic` action will be shown in the first, otherwise `Copy Text` will be shown.",
-      "default": true
+      "default": false
     },
     {
       "name": "enableDetectLanguageSpeedFirst",
@@ -592,7 +592,7 @@
       "label": "OpenAI Translate",
       "required": false,
       "description": "Turn on/off OpenAI Translate. Use system proxy by default. App Key is required.",
-      "default": true
+      "default": false
     },
     {
       "type": "checkbox",
@@ -600,7 +600,7 @@
       "label": "DeepL Translate",
       "required": false,
       "description": "Turn on/off DeepL Translate. Use system proxy by default. App Key is required.",
-      "default": true
+      "default": false
     },
     {
       "name": "enableGoogleTranslate",
@@ -624,7 +624,7 @@
       "label": "Baidu Translate",
       "required": false,
       "description": "Turn on/off Baidu Translate. App Key is required.",
-      "default": true
+      "default": false
     },
     {
       "name": "enableTencentTranslate",
