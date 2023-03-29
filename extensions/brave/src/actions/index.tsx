@@ -36,23 +36,29 @@ export async function getOpenTabs(useOriginalFavicon: boolean): Promise<Tab[]> {
     .filter((line) => line.length !== 0)
     .map((line) => Tab.parse(line));
 }
+
 export async function openNewTab({
   url,
   query,
   profileCurrent,
   profileOriginal,
   openTabInProfile,
+  newWindow,
 }: {
   url?: string;
   query?: string;
   profileCurrent: string;
   profileOriginal?: string;
   openTabInProfile: SettingsProfileOpenBehaviour;
+  newWindow?: boolean;
 }): Promise<boolean | string> {
   setTimeout(() => {
     popToRoot({ clearSearchBar: true });
   }, 3000);
-  await Promise.all([closeMainWindow({ clearRootSearch: true }), checkAppInstalled()]);
+  const installed = await checkAppInstalled();
+  if (installed) {
+    closeMainWindow({ clearRootSearch: true });
+  }
 
   let script = "";
 
@@ -68,6 +74,7 @@ export async function openNewTab({
       script =
         `
     tell application "Brave Browser"
+      ${newWindow ? "make new window" : ""}
       activate
       tell window 1
           set newTab to make new tab ` +
@@ -77,6 +84,7 @@ export async function openNewTab({
           ? 'with properties {URL:"https://www.google.com/search?q=' + query + '"}'
           : "") +
         ` 
+        ${newWindow ? "close tab 1" : ""}
       end tell
     end tell
     return true
@@ -94,6 +102,14 @@ export async function openNewTab({
   return await runAppleScript(script);
 }
 
+export async function closeTab(tabIndex: number): Promise<void> {
+  await runAppleScript(`tell application "Brave Browser"
+    tell window 1
+      delete tab ${tabIndex}
+    end tell
+  end tell`);
+}
+
 export async function setActiveTab(tab: Tab): Promise<void> {
   await runAppleScript(`
     tell application "Brave Browser"
@@ -105,7 +121,7 @@ export async function setActiveTab(tab: Tab): Promise<void> {
   `);
 }
 
-const checkAppInstalled = async () => {
+const checkAppInstalled = async (): Promise<boolean> => {
   const appInstalled = await runAppleScript(`
 set isInstalled to false
 try
@@ -117,4 +133,5 @@ return isInstalled`);
   if (appInstalled === "false") {
     throw new Error(NOT_INSTALLED_MESSAGE);
   }
+  return true;
 };

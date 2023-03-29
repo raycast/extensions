@@ -8,23 +8,26 @@ import { useCachedState } from "@raycast/utils";
 import { BRAVE_PROFILE_KEY, BRAVE_PROFILES_KEY, DEFAULT_BRAVE_PROFILE_ID } from "./constants";
 import BraveProfileDropDown from "./components/BraveProfileDropdown";
 
-type HistoryContainer = {
-  profile: BraveProfile;
-} & SearchResult<HistoryEntry>;
+function orderByLastVisited(targetId: string, container?: SearchResult<HistoryEntry>[]): SearchResult<HistoryEntry>[] {
+  if (!container?.length) {
+    return [];
+  }
 
-function orderByLastVisited(targetId: string, container?: HistoryContainer[]): HistoryContainer[] {
   const element = container?.findIndex((e) => e.profile.id === targetId);
   if (element && container) {
     container.unshift(container.splice(element, 1)[0]);
   }
+
   return container ?? [];
 }
 
 export default function Command() {
   const [searchText, setSearchText] = useState<string>();
-  const [profiles] = useCachedState<BraveProfile[]>(BRAVE_PROFILES_KEY, [{ name: "Person 1", id: "Default" }]);
-  const [profile] = useCachedState(BRAVE_PROFILE_KEY, DEFAULT_BRAVE_PROFILE_ID);
-  const profileHistories = profiles?.map((p) => ({ ...useHistorySearch(p.id, searchText), profile: p }));
+  const [profiles] = useCachedState<BraveProfile[]>(BRAVE_PROFILES_KEY, [
+    { name: "Default", id: DEFAULT_BRAVE_PROFILE_ID },
+  ]);
+  const [profile] = useCachedState<string>(BRAVE_PROFILE_KEY, DEFAULT_BRAVE_PROFILE_ID);
+  const profileHistories = useHistorySearch(profiles, searchText);
   const { data: dataTab, isLoading: isLoadingTab, errorView: errorViewTab } = useTabSearch();
   const { useOriginalFavicon } = getPreferenceValues<Preferences>();
 

@@ -1,9 +1,15 @@
 # Brave Changelog
 
-## [Bug Fixes] - 2023-03-28
-- Fix errors caused by not providing default profile list for cached state
+## [Bug Fixes & New Actions] - 2023-03-28
 
-## [Profiles support] - 2023-01-25
+- Fix errors caused by inconsistent number of hooks
+- Fix "Search Brave History" not properly switching between profiles
+- Fix "Open Empty Tab" action not working
+- Improve speed of searching bookmarks, fixing appearance of search not working if there are many bookmarks
+- Add "Move To New Window" action for tabs
+- Add "Open In New Window" action for history and bookmark items
+
+## [Profiles Support] - 2023-01-25
 
 - Added support for profiles across all commands
 - Added support for opening tabs in different profiles

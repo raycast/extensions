@@ -1,27 +1,22 @@
 import { List } from "@raycast/api";
-import { useState, ReactElement } from "react";
+import { ReactElement, useEffect } from "react";
 import { BraveListItems } from "./components";
 import { useBookmarkSearch } from "./hooks/useBookmarkSearch";
 import { useCachedState } from "@raycast/utils";
-import { BRAVE_PROFILE_KEY, DEFAULT_BRAVE_PROFILE_ID } from "./constants";
+import { BRAVE_PROFILE_KEY, DEFAULT_BRAVE_PROFILE_ID, NoBookmarksText } from "./constants";
 import BraveProfileDropDown from "./components/BraveProfileDropdown";
 
 export default function Command(): ReactElement {
-  const [searchText, setSearchText] = useState<string>();
   const [profile] = useCachedState(BRAVE_PROFILE_KEY, DEFAULT_BRAVE_PROFILE_ID);
-  const { data, isLoading, errorView, revalidate } = useBookmarkSearch(searchText);
+  const { data, isLoading, revalidate } = useBookmarkSearch();
 
-  if (errorView) {
-    return errorView as ReactElement;
-  }
+  useEffect(() => {
+    revalidate?.(profile);
+  }, [profile]);
 
   return (
-    <List
-      onSearchTextChange={setSearchText}
-      isLoading={isLoading}
-      throttle={true}
-      searchBarAccessory={<BraveProfileDropDown onProfileSelected={revalidate} />}
-    >
+    <List filtering={true} isLoading={isLoading} searchBarAccessory={<BraveProfileDropDown />}>
+      <List.EmptyView title={NoBookmarksText} icon={{ source: "empty-view.png" }} />
       {data?.map((e) => (
         <BraveListItems.TabHistory entry={e} key={e.id} profile={profile} />
       ))}

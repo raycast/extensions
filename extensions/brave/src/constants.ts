@@ -15,11 +15,7 @@ If you have [Homebrew](https://brew.sh/) installed then press ⏎ (Enter Key) to
 [![Brave](https://brave.com/static-assets/images/brave-logo.svg)]()
 `;
 
-export const NoBookmarksText = `
-# 🚨Error: Brave browser has no bookmarks. Please add some bookmarks to continue using this command.
-
-[![Brave](https://brave.com/static-assets/images/brave-logo.svg)]()
-`;
+export const NoBookmarksText = `This profile has no bookmarks.`;
 
 export const UnknownErrorText = `
 # 🚨Error: Something happened while trying to run your command
