@@ -1,6 +1,6 @@
 # Menubar Weather Changelog
 
-## [Update UI] - {PR_MERGE_DATE}
+## [Update UI] - 2023-03-29
 
 - Add wind direction display
 
