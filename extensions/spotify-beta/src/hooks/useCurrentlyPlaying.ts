@@ -5,9 +5,9 @@ export function useCurrentlyPlaying() {
   const { data, error, isLoading, revalidate } = useCachedPromise(() => getCurrentlyPlaying());
 
   return {
-    currentPlayingData: data,
-    currentPlayingError: error,
-    currentPlayingIsLoading: isLoading,
-    currentPlayingRevalidate: revalidate,
+    currentlyPlayingData: data,
+    currentlyPlayingError: error,
+    currentlyPlayingIsLoading: isLoading,
+    currentlyPlayingRevalidate: revalidate,
   };
 }

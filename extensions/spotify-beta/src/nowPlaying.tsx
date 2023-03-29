@@ -8,7 +8,6 @@ import {
   showHUD,
   Color,
   showToast,
-  Toast,
   getPreferenceValues,
   launchCommand,
   LaunchType,
@@ -17,8 +16,6 @@ import { useCurrentlyPlaying } from "./hooks/useCurrentlyPlaying";
 import { View } from "./components/View";
 import { useMyDevices } from "./hooks/useMyDevices";
 import { EpisodeObject, TrackObject } from "./helpers/spotify.api";
-import { pause } from "./api/pause";
-import { play } from "./api/play";
 import { skipToNext } from "./api/skipToNext";
 import { skipToPrevious } from "./api/skipToPrevious";
 import { removeFromMySavedTracks } from "./api/removeFromMySavedTracks";
@@ -33,25 +30,27 @@ import { TracksList } from "./components/TracksList";
 import { AddToPlaylistAction } from "./components/AddToPlaylistAction";
 import { FooterAction } from "./components/FooterAction";
 import { StartRadioAction } from "./api/StartRadioAction";
+import { PlayAction } from "./components/PlayAction";
+import { PauseAction } from "./components/PauseAction";
 
 function NowPlayingCommand() {
-  const { currentPlayingData, currentPlayingIsLoading, currentPlayingRevalidate } = useCurrentlyPlaying();
+  const { currentlyPlayingData, currentlyPlayingIsLoading, currentlyPlayingRevalidate } = useCurrentlyPlaying();
   const { playbackStateData, playbackStateIsLoading, playbackStateRevalidate } = usePlaybackState();
   const { myDevicesData } = useMyDevices();
   const { myPlaylistsData } = useMyPlaylists();
   const { meData } = useMe();
   const { containsMySavedTracksData, containsMySavedTracksRevalidate } = useContainsMyLikedTracks({
-    trackIds: currentPlayingData?.item?.id ? [currentPlayingData?.item?.id] : [],
+    trackIds: currentlyPlayingData?.item?.id ? [currentlyPlayingData?.item?.id] : [],
   });
   const { closeWindowOnAction } = getPreferenceValues<{ closeWindowOnAction?: boolean }>();
 
   const trackAlreadyLiked = containsMySavedTracksData?.[0];
-  const isPaused = !currentPlayingData?.is_playing || !playbackStateData?.is_playing;
-  const isTrack = currentPlayingData?.currently_playing_type !== "episode";
+  const isPaused = !currentlyPlayingData?.is_playing || !playbackStateData?.is_playing;
+  const isTrack = currentlyPlayingData?.currently_playing_type !== "episode";
 
-  if (!currentPlayingData || !currentPlayingData.item) {
+  if (!currentlyPlayingData || !currentlyPlayingData.item) {
     return (
-      <List isLoading={currentPlayingIsLoading}>
+      <List isLoading={currentlyPlayingIsLoading}>
         <List.EmptyView
           icon={Icon.Music}
           title="Nothing is playing right now"
@@ -71,7 +70,7 @@ function NowPlayingCommand() {
                 icon={Icon.Repeat}
                 title="Refresh"
                 onAction={async () => {
-                  currentPlayingRevalidate();
+                  currentlyPlayingRevalidate();
                 }}
                 shortcut={{ modifiers: ["cmd"], key: "r" }}
               />
@@ -82,13 +81,13 @@ function NowPlayingCommand() {
     );
   }
 
-  const { item } = currentPlayingData;
+  const { item } = currentlyPlayingData;
   const { name, external_urls, uri } = item;
 
   let title = "";
   let markdown;
   let metadata: JSX.Element | null = null;
-  let actions: JSX.Element | null = null;
+  let trackOrEpisodeActions: JSX.Element | null = null;
 
   if (isTrack) {
     const { album, artists, id: trackId, duration_ms } = item as TrackObject;
@@ -116,7 +115,7 @@ by ${artistName}
       </Detail.Metadata>
     );
 
-    actions = (
+    trackOrEpisodeActions = (
       <>
         {trackAlreadyLiked && (
           <Action
@@ -167,7 +166,7 @@ by ${artistName}
               return;
             }
             await showToast({ title: "Skipped to next" });
-            await currentPlayingRevalidate();
+            await currentlyPlayingRevalidate();
           }}
         />
 
@@ -183,10 +182,10 @@ by ${artistName}
               return;
             }
             await showToast({ title: "Skipped to previous" });
-            await currentPlayingRevalidate();
+            await currentlyPlayingRevalidate();
           }}
         />
-        <StartRadioAction trackId={trackId} artistId={artistId} revalidate={currentPlayingRevalidate} />
+        <StartRadioAction trackId={trackId} artistId={artistId} revalidate={currentlyPlayingRevalidate} />
         <Action.Push
           icon={Icon.AppWindowGrid3x3}
           title="Go to Album"
@@ -221,48 +220,12 @@ ${description}
     <Detail
       markdown={markdown}
       metadata={metadata}
-      isLoading={currentPlayingIsLoading || playbackStateIsLoading}
+      isLoading={currentlyPlayingIsLoading || playbackStateIsLoading}
       actions={
         <ActionPanel>
-          {!isPaused && (
-            <Action
-              icon={Icon.Pause}
-              title="Pause"
-              onAction={async () => {
-                if (closeWindowOnAction) {
-                  await pause();
-                  await showHUD("Paused");
-                  await popToRoot();
-                  return;
-                }
-                const toast = await showToast({ title: "Pausing...", style: Toast.Style.Animated });
-                await pause();
-                await playbackStateRevalidate();
-                toast.title = "Paused";
-                toast.style = Toast.Style.Success;
-              }}
-            />
-          )}
-          {isPaused && (
-            <Action
-              icon={Icon.Play}
-              title="Play"
-              onAction={async () => {
-                if (closeWindowOnAction) {
-                  await play();
-                  await showHUD("Playing");
-                  await popToRoot();
-                  return;
-                }
-                const toast = await showToast({ title: "Playing...", style: Toast.Style.Animated });
-                await play();
-                await playbackStateRevalidate();
-                toast.title = "Playing";
-                toast.style = Toast.Style.Success;
-              }}
-            />
-          )}
-          {actions}
+          {!isPaused && <PauseAction revalidate={playbackStateRevalidate} />}
+          {isPaused && <PlayAction revalidate={playbackStateRevalidate} />}
+          {trackOrEpisodeActions}
           {myPlaylistsData?.items && meData && uri && (
             <AddToPlaylistAction playlists={myPlaylistsData.items} meData={meData} uri={uri} />
           )}

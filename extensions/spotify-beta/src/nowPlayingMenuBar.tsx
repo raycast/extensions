@@ -30,21 +30,21 @@ import { useMe } from "./hooks/useMe";
 
 function NowPlayingMenuBarCommand() {
   const preferences = getPreferenceValues<{ maxTextLength?: boolean; showEllipsis?: boolean }>();
-  const { currentPlayingData, currentPlayingIsLoading, currentPlayingRevalidate } = useCurrentlyPlaying();
+  const { currentlyPlayingData, currentlyPlayingIsLoading, currentlyPlayingRevalidate } = useCurrentlyPlaying();
   const { playbackStateData, playbackStateIsLoading, playbackStateRevalidate } = usePlaybackState();
   const { myDevicesData } = useMyDevices();
   const { myPlaylistsData } = useMyPlaylists();
   const { meData } = useMe();
   const { containsMySavedTracksData, containsMySavedTracksRevalidate } = useContainsMyLikedTracks({
-    trackIds: currentPlayingData?.item?.id ? [currentPlayingData?.item?.id] : [],
+    trackIds: currentlyPlayingData?.item?.id ? [currentlyPlayingData?.item?.id] : [],
   });
 
   const trackAlreadyLiked = containsMySavedTracksData?.[0];
-  const isPaused = !currentPlayingData?.is_playing || !playbackStateData?.is_playing;
-  const isTrack = currentPlayingData?.currently_playing_type !== "episode";
+  const isPaused = !currentlyPlayingData?.is_playing || !playbackStateData?.is_playing;
+  const isTrack = currentlyPlayingData?.currently_playing_type !== "episode";
 
-  if (!currentPlayingData || !currentPlayingData.item) {
-    return <NothingPlaying isLoading={currentPlayingIsLoading || playbackStateIsLoading} />;
+  if (!currentlyPlayingData || !currentlyPlayingData.item) {
+    return <NothingPlaying isLoading={currentlyPlayingIsLoading || playbackStateIsLoading} />;
   }
 
   const formatTitle = (title: string) => {
@@ -58,7 +58,7 @@ function NowPlayingMenuBarCommand() {
     return title.substring(0, max).trim() + (showEllipsis ? "…" : "");
   };
 
-  const { item } = currentPlayingData;
+  const { item } = currentlyPlayingData;
   const { name, external_urls, uri } = item;
 
   let title = "";
@@ -101,7 +101,7 @@ function NowPlayingMenuBarCommand() {
           title="Next"
           onAction={async () => {
             await skipToNext();
-            await currentPlayingRevalidate();
+            await currentlyPlayingRevalidate();
           }}
         />
         <MenuBarExtra.Item
@@ -109,7 +109,7 @@ function NowPlayingMenuBarCommand() {
           title="Previous"
           onAction={async () => {
             await skipToPrevious();
-            await currentPlayingRevalidate();
+            await currentlyPlayingRevalidate();
           }}
         />
         <MenuBarExtra.Item
@@ -132,7 +132,7 @@ function NowPlayingMenuBarCommand() {
 
   return (
     <MenuBarExtra
-      isLoading={currentPlayingIsLoading || playbackStateIsLoading}
+      isLoading={currentlyPlayingIsLoading || playbackStateIsLoading}
       icon={{ source: { dark: "menu-icon-dark.svg", light: "menu-icon-light.svg" } }}
       title={formatTitle(title)}
       tooltip={title}

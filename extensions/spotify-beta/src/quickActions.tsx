@@ -64,10 +64,10 @@ function QuickActionsCommand(props: Props) {
   const action = props.launchContext?.action;
   const { extensionName, commandName, isDevelopment } = environment;
 
-  const { currentPlayingData, currentPlayingRevalidate } = useCurrentlyPlaying();
+  const { currentlyPlayingData, currentlyPlayingRevalidate } = useCurrentlyPlaying();
   const { playbackStateData, playbackStateRevalidate } = usePlaybackState();
-  const isTrack = currentPlayingData?.currently_playing_type !== "episode";
-  const trackId = currentPlayingData?.item?.id;
+  const isTrack = currentlyPlayingData?.currently_playing_type !== "episode";
+  const trackId = currentlyPlayingData?.item?.id;
 
   const actions: Action[] = [
     {
@@ -99,14 +99,14 @@ function QuickActionsCommand(props: Props) {
         tintColor: Color.PrimaryText,
       },
       onAction: async () => {
-        const isPlaying = currentPlayingData?.is_playing;
+        const isPlaying = currentlyPlayingData?.is_playing;
         if (isPlaying) {
           await pause();
-          await currentPlayingRevalidate();
+          await currentlyPlayingRevalidate();
           await showHUD("Paused");
         } else {
           await play();
-          await currentPlayingRevalidate();
+          await currentlyPlayingRevalidate();
           await showHUD("Playing");
         }
       },
@@ -122,7 +122,7 @@ function QuickActionsCommand(props: Props) {
             await addToMySavedTracks({
               trackIds: trackId ? [trackId] : [],
             });
-            await showHUD(`Liked ${currentPlayingData?.item.name}`);
+            await showHUD(`Liked ${currentlyPlayingData?.item.name}`);
           } catch (error) {
             await showHUD("Nothing is currently playing");
           }
@@ -142,7 +142,7 @@ function QuickActionsCommand(props: Props) {
             await removeFromMySavedTracks({
               trackIds: trackId ? [trackId] : [],
             });
-            await showHUD(`Disliked ${currentPlayingData?.item.name}`);
+            await showHUD(`Disliked ${currentlyPlayingData?.item.name}`);
           } catch (error) {
             await showHUD("Nothing is currently playing");
           }
@@ -343,9 +343,9 @@ function QuickActionsCommand(props: Props) {
       description: "Copy the URL of the currently playing song/episode",
       icon: Icon.Link,
       onAction: async () => {
-        if (currentPlayingData?.item) {
-          const external_urls = currentPlayingData.item.external_urls;
-          const title = currentPlayingData.item.name;
+        if (currentlyPlayingData?.item) {
+          const external_urls = currentlyPlayingData.item.external_urls;
+          const title = currentlyPlayingData.item.name;
           await Clipboard.copy({
             html: `<a href=${external_urls?.spotify}>${title}</a>`,
             text: external_urls?.spotify,
