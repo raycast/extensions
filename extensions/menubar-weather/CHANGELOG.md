@@ -1,5 +1,9 @@
 # Menubar Weather Changelog
 
+## [Update UI] - {PR_MERGE_DATE}
+
+- Add wind direction display
+
 ## [Fix bug] - 2022-12-13
 
 - Fix the bug of pop-up Toast error when refreshing in the background
