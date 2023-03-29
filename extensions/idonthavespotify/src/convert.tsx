@@ -8,6 +8,7 @@ import type { SpotifyContent, ApiError } from "./@types/global";
 import { SpotifyContentLink, SpotifyMetadataType } from "./@types/global";
 
 import { SITE_URL, API_URL, SPOTIFY_LINK_REGEX } from "./constants";
+import { playAudio } from "./utils/audio";
 
 const spotifyContentLinksTitles = {
   [SpotifyContentLink.Youtube]: "YouTube",
@@ -68,6 +69,8 @@ export default function Command() {
     })();
   }, [fetchSpotifyContent]);
 
+  const isRecommended = (key: string) => key === SpotifyContentLink.Youtube;
+
   return (
     <List
       isLoading={isLoading}
@@ -90,21 +93,29 @@ export default function Command() {
               actions={
                 <ActionPanel>
                   <Action.OpenInBrowser url={`${SITE_URL}?id=${spotifyContent.id}`} />
+                  {spotifyContent.audio && (
+                    <Action
+                      title="Play Audio Preview"
+                      icon={Icon.Play}
+                      onAction={() => playAudio(spotifyContent.audio ?? "")}
+                    />
+                  )}
                 </ActionPanel>
               }
             />
           </List.Section>
-          <List.Section title="Links">
+          <List.Section title="Listen on">
             {Object.entries(spotifyContent.links).map(([key, link]) => (
               <List.Item
                 key={key}
                 icon={Icon.Link}
                 title={spotifyContentLinksTitles[key as SpotifyContentLink]}
                 subtitle={link}
-                accessories={[{ text: key === SpotifyContentLink.Youtube ? "Recommended" : "" }]}
+                accessories={[{ text: isRecommended(key) ? "Recommended" : "" }]}
                 actions={
                   <ActionPanel>
                     <Action.OpenInBrowser url={link} />
+                    <Action.CopyToClipboard title="Copy Link" content={link} />
                   </ActionPanel>
                 }
               />

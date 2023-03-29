@@ -4,3 +4,4 @@
 
 - Paste or copy from Clipboard a Spotify Link
 - Click on Link to Open in Browser
+- Play Audio Preview
