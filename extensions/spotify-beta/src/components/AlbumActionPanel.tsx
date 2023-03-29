@@ -1,7 +1,7 @@
-import { Action, ActionPanel, Icon, showHUD } from "@raycast/api";
-import { play } from "../api/play";
+import { Action, ActionPanel, Icon } from "@raycast/api";
 import { SimplifiedAlbumObject } from "../helpers/spotify.api";
 import { FooterAction } from "./FooterAction";
+import { PlayAction } from "./PlayAction";
 import { TracksList } from "./TracksList";
 
 type AlbumActionPanelProps = { album: SimplifiedAlbumObject };
@@ -11,14 +11,7 @@ export function AlbumActionPanel({ album }: AlbumActionPanelProps) {
 
   return (
     <ActionPanel>
-      <Action
-        title="Play"
-        icon={Icon.Play}
-        onAction={async () => {
-          await play({ id: album.id, type: "album" });
-          showHUD(`Playing ${title}`);
-        }}
-      />
+      <PlayAction id={album.id} type="album" />
       <Action.Push
         icon={Icon.AppWindowList}
         title="Show Songs"

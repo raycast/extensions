@@ -1,5 +1,4 @@
-import { Action, ActionPanel, getPreferenceValues, Icon, popToRoot, showHUD, showToast, Toast } from "@raycast/api";
-import { play } from "../api/play";
+import { Action, ActionPanel, Icon } from "@raycast/api";
 import { SimplifiedAlbumObject, SimplifiedTrackObject } from "../helpers/spotify.api";
 import { TracksList } from "./TracksList";
 import { useMyPlaylists } from "../hooks/useMyPlaylists";
@@ -8,6 +7,7 @@ import { AddToPlaylistAction } from "./AddToPlaylistAction";
 import { FooterAction } from "./FooterAction";
 import { AddToQueueAction } from "./AddtoQueueAction";
 import { StartRadioAction } from "../api/StartRadioAction";
+import { PlayAction } from "./PlayAction";
 
 type TrackActionPanelProps = {
   title: string;
@@ -21,26 +21,9 @@ export function TrackActionPanel({ title, track, album, showGoToAlbum, playingCo
   const { myPlaylistsData } = useMyPlaylists();
   const { meData } = useMe();
 
-  const { closeWindowOnAction } = getPreferenceValues<{ closeWindowOnAction?: boolean }>();
-
   return (
     <ActionPanel>
-      <Action
-        icon={Icon.Play}
-        title="Play"
-        onAction={async () => {
-          if (closeWindowOnAction) {
-            await play({ id: track.id, type: "track", contextUri: playingContext });
-            await showHUD(`Playing ${title}`);
-            await popToRoot();
-            return;
-          }
-          const toast = await showToast({ title: "Playing...", style: Toast.Style.Animated });
-          await play({ id: track.id, type: "track", contextUri: playingContext });
-          toast.title = `Playing ${title}`;
-          toast.style = Toast.Style.Success;
-        }}
-      />
+      <PlayAction id={track.id as string} type="track" playingContext={playingContext} />
       {album && showGoToAlbum && (
         <Action.Push
           icon={Icon.AppWindowList}
@@ -49,7 +32,7 @@ export function TrackActionPanel({ title, track, album, showGoToAlbum, playingCo
         />
       )}
       <StartRadioAction trackId={track.id} />
-      {track.uri && <AddToQueueAction uri={track.uri} title={title} closeWindowOnAction={closeWindowOnAction} />}
+      {track.uri && <AddToQueueAction uri={track.uri} title={title} />}
       {myPlaylistsData?.items && meData && track.uri && (
         <AddToPlaylistAction playlists={myPlaylistsData.items} meData={meData} uri={track.uri} />
       )}

@@ -1,7 +1,7 @@
-import { Action, ActionPanel, Icon, showHUD } from "@raycast/api";
-import { play } from "../api/play";
+import { Action, ActionPanel, Icon } from "@raycast/api";
 import { SimplifiedPlaylistObject } from "../helpers/spotify.api";
 import { FooterAction } from "./FooterAction";
+import { PlayAction } from "./PlayAction";
 import { TracksList } from "./TracksList";
 
 type PlaylistActionPanelProps = {
@@ -12,14 +12,7 @@ type PlaylistActionPanelProps = {
 export function PlaylistActionPanel({ title, playlist }: PlaylistActionPanelProps) {
   return (
     <ActionPanel>
-      <Action
-        title="Play"
-        icon={Icon.Play}
-        onAction={async () => {
-          await play({ id: playlist.id, type: "playlist" });
-          showHUD(`Playing ${title}`);
-        }}
-      />
+      <PlayAction id={playlist.id as string} type="playlist" />
       <Action.Push
         icon={Icon.AppWindowList}
         title="Show Songs"

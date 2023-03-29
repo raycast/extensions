@@ -1,12 +1,12 @@
-import { Action, ActionPanel, Icon, showHUD } from "@raycast/api";
+import { Action, ActionPanel, Icon } from "@raycast/api";
 import { ArtistObject } from "../helpers/spotify.api";
 import { AlbumsGrid } from "./AlbumsGrid";
 import { useArtistAlbums } from "../hooks/useArtistAlbums";
-import { play } from "../api/play";
 import { useArtistTopTracks } from "../hooks/useArtistTopTracks";
 import { TracksList } from "./TracksList";
 import { FooterAction } from "./FooterAction";
 import { StartRadioAction } from "../api/StartRadioAction";
+import { PlayAction } from "./PlayAction";
 
 type ArtistActionPanelProps = {
   title: string;
@@ -20,14 +20,7 @@ export function ArtistActionPanel({ title, artist }: ArtistActionPanelProps) {
 
   return (
     <ActionPanel>
-      <Action
-        icon={Icon.Play}
-        title="Play"
-        onAction={async () => {
-          await play({ id: artist.id, type: "artist" });
-          await showHUD(`Playing ${title}`);
-        }}
-      />
+      <PlayAction id={artist.id as string} type="artist" />
       {artistTopTracksData && (
         <Action.Push
           icon={Icon.List}

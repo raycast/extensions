@@ -136,6 +136,7 @@ by ${artistName}
             }}
           />
         )}
+
         {!trackAlreadyLiked && (
           <Action
             icon={Icon.Heart}
@@ -187,7 +188,7 @@ by ${artistName}
         />
         <StartRadioAction trackId={trackId} artistId={artistId} revalidate={currentPlayingRevalidate} />
         <Action.Push
-          icon={Icon.AppWindowList}
+          icon={Icon.AppWindowGrid3x3}
           title="Go to Album"
           target={<TracksList album={album} showGoToAlbum={false} />}
         />
