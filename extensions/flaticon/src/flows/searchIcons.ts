@@ -1,5 +1,6 @@
 import { Token, tokenAuthHeader, tokenValid } from '../entities/Token';
 import { FlatIcon } from '../entities/FlatIcon';
+import fetch from 'cross-fetch';
 
 export const searchIcons = async (token: Token, search: string): Promise<{ list: FlatIcon[]; error?: Error }> => {
   if (!tokenValid(token)) return { list: [] };

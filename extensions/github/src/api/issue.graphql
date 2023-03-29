@@ -34,6 +34,18 @@ fragment IssueFields on Issue {
       avatarUrl(size: 64)
     }
   }
+  linkedBranches(first: 50) {
+    totalCount
+    nodes {
+      ... on LinkedBranch {
+        id
+        ref {
+          id
+          name
+        }
+      }
+    }
+  }
   milestone {
     id
     title
@@ -171,6 +183,16 @@ fragment IssueDetailFields on Issue {
       name
       color
       isDefault
+    }
+  }
+  linkedBranches(first: 50) {
+    totalCount
+    nodes {
+      ... on LinkedBranch {
+        ref {
+          name
+        }
+      }
     }
   }
   milestone {

@@ -3,7 +3,7 @@ import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 import AWSProfileDropdown from "./components/searchbar/aws-profile-dropdown";
-import { AWS_URL_BASE } from "./constants";
+import { resourceToConsoleLink } from "./util";
 
 export default function CloudWatch() {
   const [search, setSearch] = useState<string>("");
@@ -41,9 +41,7 @@ function LogGroupEntry({ logGroup }: { logGroup: LogGroup }) {
         <ActionPanel>
           <Action.OpenInBrowser
             title="Open Log Group"
-            url={`${AWS_URL_BASE}/cloudwatch/home?region=${
-              process.env.AWS_REGION
-            }#logsV2:log-groups/log-group/${encodeURIComponent(logGroup.logGroupName || "")}`}
+            url={resourceToConsoleLink(logGroup.logGroupName, "AWS::Logs::LogGroup")}
           />
           <Action.CopyToClipboard title="Copy Log Group Name" content={logGroup.logGroupName || ""} />
         </ActionPanel>

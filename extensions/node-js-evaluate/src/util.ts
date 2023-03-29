@@ -1,4 +1,5 @@
 import { State } from "./types";
+import stringify from "json-stringify-safe";
 
 export function doEval(state: State, long = false): State {
   let evalResult, result, type;
@@ -22,14 +23,13 @@ export function doEval(state: State, long = false): State {
   type ||= toType(evalResult);
 
   if (!isPrimitive(evalResult as never)) {
-    console.log(evalResult);
-    result = JSON.stringify(
+    result = stringify(
       evalResult,
       (_, value) => {
-        if (isPrimitive(value as never) && JSON.stringify(value) === "null") return value?.toString() ?? value;
+        if (isPrimitive(value as never) && stringify(value) === "null") return value?.toString() ?? value;
         return value;
       },
-      long ? 2 : undefined
+      long ? 4 : undefined
     );
   }
 

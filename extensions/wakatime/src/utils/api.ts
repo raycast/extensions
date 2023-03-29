@@ -30,8 +30,9 @@ async function routeHandler<T extends object>(endpoint: string): Promise<Types.R
  * that can be used in the Authorization header
  * @returns A string that is the base64 encoded version of the API key.
  */
+// Regex adapted from - https://github.com/wakatime/vscode-wakatime/blob/140fd7018fa3499eac9ee2c6289747d255982dfd/src/utils.ts#L12-L15
 function getAuthToken() {
-  const API_KEY_REGEX = /^[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i;
+  const API_KEY_REGEX = /^(waka_)?[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i;
   const { apiKey } = getPreferenceValues<{ apiKey?: string }>();
 
   if (!apiKey) return;

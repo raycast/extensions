@@ -2,25 +2,36 @@ import { Preferences } from '@/services/storage'
 import { Todo } from '@/types/todo'
 import { User } from '@/types/user'
 import { formatNotionUrl } from './format-notion-url'
-import { getTitleUrl } from './get-title-url'
+import { getContentUrl } from './get-content-url'
 import { normalizeTag } from './normalize-tag'
 import { normalizeUser } from './normalize-user'
 
 export const normalizeTodo = ({
   page,
   preferences,
-  inProgressId = null,
 }: {
   page: any
   preferences: Preferences['properties']
-  inProgressId?: string | null
 }): Todo => {
   const dateValue = page.properties[preferences.date]?.date?.start || null
 
+  const urlProperty = preferences?.url
+    ? page.properties[preferences.url]?.url
+    : null
+
+  const contentUrl = getContentUrl(
+    page.properties[preferences.title]?.title[0]?.text?.content,
+    urlProperty
+  )
+
+  const title =
+    page.properties[preferences.title]?.title[0]?.text?.content || 'Untitled'
+
+  const titleWithGlyph = contentUrl ? `${title} ↗` : title
+
   return {
     id: page.id,
-    title:
-      page.properties[preferences.title]?.title[0]?.text?.content || 'Untitled',
+    title: titleWithGlyph,
     tag: preferences.tag
       ? page.properties[preferences.tag].select
         ? normalizeTag(page.properties[preferences.tag].select)
@@ -28,11 +39,10 @@ export const normalizeTodo = ({
       : null,
     url: formatNotionUrl(page.url),
     shareUrl: page.url,
-    contentUrl: getTitleUrl(
-      page.properties[preferences.title]?.title[0]?.text?.content
-    ),
-    inProgress:
-      page.properties[preferences.status.name]?.status?.id === inProgressId,
+    contentUrl,
+    status: {
+      ...page.properties[preferences.status.name]?.status,
+    },
     projectId: preferences.project
       ? page.properties[preferences.project]?.relation[0]?.id
       : null,

@@ -5,6 +5,9 @@
   "description": "Keyboard-first HTTP client",
   "icon": "app-icon.png",
   "author": "jonathangiardino",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "categories": [
     "Productivity",
     "Developer Tools"
@@ -27,7 +30,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.38.3",
+    "@raycast/api": "^1.42.0",
     "@raycast/utils": "^1.1.0",
     "axios": "^0.27.2",
     "curl-string": "^1.1.1"

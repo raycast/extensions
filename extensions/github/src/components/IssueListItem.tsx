@@ -1,4 +1,4 @@
-import { Action, Icon, List } from "@raycast/api";
+import { Action, Color, Icon, List } from "@raycast/api";
 import { MutatePromise } from "@raycast/utils";
 import { format } from "date-fns";
 
@@ -43,6 +43,13 @@ export default function IssueListItem({ issue, viewer, mutateList }: IssueListIt
     accessories.unshift({
       text: `${issue.comments.totalCount}`,
       icon: Icon.Bubble,
+    });
+  }
+
+  if (issue.linkedBranches?.nodes?.length) {
+    accessories.unshift({
+      icon: { source: "branch.svg", tintColor: Color.SecondaryText },
+      tooltip: issue.linkedBranches.nodes[0]?.ref?.name,
     });
   }
 

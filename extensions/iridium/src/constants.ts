@@ -1,4 +1,8 @@
-export const defaultIridiumProfilePath = ["Application Support", "Iridium", "Default"];
+export const defaultIridiumProfilePath = ["Application Support", "Iridium"];
+export const defaultIridiumStatePath = ["Application Support", "Iridium", "Local State"];
+export const DEFAULT_IRIDIUM_PROFILE_ID = "Default";
+export const IRIDIUM_PROFILE_KEY = "IRIDIUM_PROFILE_KEY";
+export const IRIDIUM_PROFILES_KEY = "IRIDIUM_PROFILES_KEY";
 
 export const DownloadText = `
   # 🚨Error: Iridium browser is not installed

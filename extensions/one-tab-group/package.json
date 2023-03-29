@@ -1,0 +1,53 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "one-tab-group",
+  "title": "One Tab Group",
+  "description": "Search One Tab Group on Raycast",
+  "icon": "icon-512.png",
+  "author": "xiaoluoboding",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Search Browser Tabs & Groups",
+      "subtitle": "One Tab Group",
+      "description": "Your all-in-one browser tab/tab group manager.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.45.2",
+    "axios": "^1.2.2",
+    "dayjs": "^1.11.7"
+  },
+  "preferences": [
+    {
+      "name": "licenseKey",
+      "type": "password",
+      "required": true,
+      "title": "License key",
+      "description": "Your Pro/Lifetime license key",
+      "placeholder": "Enter your Pro/Lifetime license key"
+    }
+  ],
+  "devDependencies": {
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

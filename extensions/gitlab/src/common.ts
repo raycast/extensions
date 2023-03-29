@@ -111,3 +111,8 @@ export function getListDetailsPreference(): boolean {
   }
   return false;
 }
+
+export function getExcludeTodoAuthorUsernamesPreference(): string[] {
+  const pref = getPreferenceValues();
+  return pref.excludeTodoAuthorUsernames?.split(",").map((u: string) => u.trim()) || [];
+}

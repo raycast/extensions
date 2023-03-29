@@ -16,11 +16,11 @@ type ProjectIssuesProps = {
   me: User | undefined;
 };
 
-export default function ProjectIssues({ projectId, teamId, priorities, me, users }: ProjectIssuesProps) {
+export default function ProjectIssues({ projectId, priorities, me, users }: ProjectIssuesProps) {
   const { issues, isLoadingIssues, mutateList } = useIssues(getProjectIssues, [projectId]);
 
   return (
-    <List isLoading={isLoadingIssues} searchBarPlaceholder="Filter by key, title, status, assignee or priority">
+    <List isLoading={isLoadingIssues} searchBarPlaceholder="Filter by ID, title, status, assignee or priority">
       <List.EmptyView
         title="No issues"
         description="There are no issues in the project."
@@ -28,9 +28,7 @@ export default function ProjectIssues({ projectId, teamId, priorities, me, users
           <ActionPanel>
             <Action.Push
               title="Create Issue"
-              target={
-                <CreateIssueForm projectId={projectId} teamId={teamId} priorities={priorities} users={users} me={me} />
-              }
+              target={<CreateIssueForm projectId={projectId} priorities={priorities} users={users} me={me} />}
             />
           </ActionPanel>
         }

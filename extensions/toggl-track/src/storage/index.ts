@@ -1,6 +1,6 @@
 import dayjs from "dayjs";
 import api from "../toggl";
-import { Client, Project, Tag, TimeEntry, Workspace } from "../toggl/types";
+import { Client, Me, Project, Tag, TimeEntry, Workspace } from "../toggl/types";
 import persistedStorage from "./persistedStorage";
 import { TogglStorage } from "./types";
 
@@ -18,6 +18,11 @@ function allWorkspacesFetch<T>(workSpaceFunction: (workspaceId: number) => Promi
 }
 
 export const storage: TogglStorage = {
+  me: persistedStorage({
+    key: "me",
+    fetch: api.getMe,
+    expirySeconds: 3600,
+  }),
   projects: persistedStorage({
     key: "projects",
     fetch: allWorkspacesFetch(api.getWorkspaceProjects),
@@ -55,6 +60,7 @@ export const storage: TogglStorage = {
 };
 
 export type StorageValues = {
+  me: Me | null;
   projects: Project[];
   workspaces: Workspace[];
   clients: Client[];
@@ -65,6 +71,7 @@ export type StorageValues = {
 
 export async function getStorage(): Promise<StorageValues> {
   return {
+    me: await storage.me.get(),
     projects: await storage.projects.get(),
     workspaces: await storage.workspaces.get(),
     clients: await storage.clients.get(),
@@ -76,6 +83,7 @@ export async function getStorage(): Promise<StorageValues> {
 
 export async function refreshStorage(): Promise<void> {
   await Promise.all([
+    storage.me.refresh(),
     storage.projects.refresh(),
     storage.workspaces.refresh(),
     storage.clients.refresh(),

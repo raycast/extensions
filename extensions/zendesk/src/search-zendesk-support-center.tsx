@@ -119,9 +119,7 @@ export default function ZendeskSearch() {
               detail={<List.Item.Detail markdown={item.body} />}
               actions={
                 <ActionPanel>
-                  <Action.OpenInBrowser
-                    url={`https://${supportCenter}/hc/${selectedLocale?.locale}/articles/${item.id}`}
-                  />
+                  <Action.OpenInBrowser url={item.url} />
                   <Action.CopyToClipboard content={item.url} />
                   <Action.Paste content={item.url} shortcut={{ modifiers: ["cmd"], key: "." }} />
                 </ActionPanel>

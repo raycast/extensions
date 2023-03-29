@@ -4,4 +4,5 @@ export interface Preferences {
   showClock: boolean;
   rememberTag: boolean;
   hour24: boolean;
+  dateFormat: string;
 }

@@ -1,5 +1,8 @@
 # Cleanshot X Changelog
 
+## [Corrected title] - 2023-01-11
+- Corrected the title of the extension to match the application.
+
 ## [Rename text recognition to Capture Text (OCR)] - 2022-11-30
 
 ## [Remove Dependency on Open Package] - 2022-09-02

@@ -2,6 +2,8 @@ name: Issue Bot
 on:
   issues:
     types: [opened, edited]
+  issue_comment:
+    types: [created, edited]
 
 jobs:
   issue_bot:

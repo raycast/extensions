@@ -5,7 +5,7 @@ export default async () => {
   try {
     execSync("ps aux | pgrep caffeinate");
 
-    await stopCaffeinate(true, "Your Mac is now deffeinated");
+    await stopCaffeinate(true, "Your Mac is now decaffeinated");
   } catch (error) {
     await startCaffeinate(true, "Your Mac is now caffeinated");
   }

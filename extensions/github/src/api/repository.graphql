@@ -1,5 +1,10 @@
 fragment ShortRepositoryFields on Repository {
   id
+  defaultBranchRef {
+    target {
+      oid
+    }
+  }
   nameWithOwner
   name
   owner {
@@ -127,6 +132,24 @@ query dataForRepository($owner: String!, $name: String!) {
       about
       title
       body
+    }
+  }
+}
+
+query repositoryIssues($owner: String!, $name: String!) {
+  repository(owner: $owner, name: $name) {
+    url
+    defaultBranchRef {
+      id
+      name
+      target {
+        oid
+      }
+    }
+    issues(first: 50, states: OPEN, orderBy: { field: CREATED_AT, direction: DESC }) {
+      nodes {
+        ...IssueFields
+      }
     }
   }
 }

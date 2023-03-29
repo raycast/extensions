@@ -16,7 +16,6 @@ const ONBOARDING_DATA: OnboardingTodo[] = [
     url: '',
     shareUrl: '',
     contentUrl: '',
-    inProgress: false,
     completed: false,
   },
   {
@@ -26,7 +25,6 @@ const ONBOARDING_DATA: OnboardingTodo[] = [
     url: '',
     shareUrl: '',
     contentUrl: '',
-    inProgress: false,
     completed: false,
   },
   {
@@ -36,28 +34,15 @@ const ONBOARDING_DATA: OnboardingTodo[] = [
     url: '',
     shareUrl: '',
     contentUrl: '',
-    inProgress: false,
     completed: false,
   },
   {
     id: '5',
-    title: `📺 Press ⌘ + E to learn the rest of the tricks`,
+    title: `📺 Press ⌘ + E to learn the rest of the tricks ↗`,
     tag: null,
     url: '',
     shareUrl: '',
     contentUrl: 'https://www.loom.com/share/1f4c369a32794c779458bbfbcdf27494',
-    inProgress: false,
-    completed: false,
-  },
-  {
-    id: '6',
-    title: `👉 If you don’t have a database yet, you can use this template (⌘ + E)`,
-    tag: null,
-    url: '',
-    shareUrl: '',
-    contentUrl:
-      'https://reboot-studio.notion.site/85dd2134f0cc4cc5b1f5ac7aab3ecbae?v=ee2ec2d05a8449b4a58a6f954ce5e250',
-    inProgress: false,
     completed: false,
   },
   {
@@ -68,7 +53,6 @@ const ONBOARDING_DATA: OnboardingTodo[] = [
     url: '',
     shareUrl: '',
     contentUrl: '',
-    inProgress: false,
     completed: false,
   },
 ]
@@ -108,7 +92,6 @@ export const useOnboarding = () => {
       url: '',
       shareUrl: '',
       contentUrl: '',
-      inProgress: false,
       completed: false,
     }
 

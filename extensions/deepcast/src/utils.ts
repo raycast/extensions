@@ -56,6 +56,7 @@ const source_languages = {
   SL: "Slovenian",
   ES: "Spanish",
   SV: "Swedish",
+  UK: "Ukrainian",
 };
 
 const target_languages = {
@@ -85,6 +86,7 @@ const target_languages = {
   SL: "Slovenian",
   ES: "Spanish",
   SV: "Swedish",
+  UK: "Ukrainian",
 };
 
 export { source_languages, target_languages, translate };

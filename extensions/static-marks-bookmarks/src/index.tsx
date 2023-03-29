@@ -3,6 +3,7 @@ import { getFavicon, useCachedPromise } from "@raycast/utils";
 import fs from "fs/promises";
 import { useRef } from "react";
 import YAML from "yaml";
+import fetch from "cross-fetch";
 
 export default function Command() {
   const abortable = useRef<AbortController>();

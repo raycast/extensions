@@ -1,5 +1,59 @@
 # `Easydict` Changelog
 
+## [v2.8.1] - 2023-03-28
+
+### 🐞 Fixes
+
+- Fixed the crash problem when requesting OpenAI translation.
+
+## [v2.8.0] - 2023-03-17
+
+### ✨ Features
+
+- Support OpenAI ChatGPT translation.
+
+![OpenAI](https://user-images.githubusercontent.com/25194972/225886686-b99e5a97-6269-489d-b0bb-40be6d7d1d32.png)
+
+## [v2.7.3] - 2023-02-28
+
+### 💎 Improvement
+
+- When using Easydict as Fallback Command, use the user input text as the query word (not the selected text).
+
+## [v2.7.2] - 2023-01-17
+
+### 🐞 Fixes
+
+- Fixed Bing translation failed.
+
+## [v2.7.1] - 2023-01-08
+
+### 💎 Improvement
+
+- Improved the way to get the system proxy.
+
+### 🐞 Fixes
+
+- Fixed some known issues.
+
+## [v2.7.0] - 2022-12-16
+
+### 💎 Improvement
+
+- Improved the display of word exam collection level, use tag label display.
+
+### 🐞 Fixes
+
+- Fixed the problem that the input text was not displayed when querying from arguments.
+
+## [v2.6.2] - 2022-11-02
+
+### 🐞 Fixes
+
+- Fixed unexpected error when DeepL translation quota is exceeded.
+
+## [v2.6.1] - 2022-10-26
+
 ### 💎 Improvement
 
 - Optimized code.

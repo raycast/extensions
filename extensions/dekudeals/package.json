@@ -3,6 +3,7 @@
   "name": "dekudeals",
   "title": "DekuDeals",
   "description": "Search for deals on DekuDeals.com",
+  "version": "1.1.0",
   "icon": "icon.png",
   "author": "rrroyal",
   "categories": [
@@ -19,16 +20,16 @@
         {
           "name": "token",
           "type": "password",
-          "required": false,
-          "title": "API token",
-          "description": "DekuDeals API token",
-          "placeholder": "API token"
+          "required": true,
+          "title": "API Token",
+          "description": "DekuDeals API token (rack.session)",
+          "placeholder": "token"
         }
       ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.35.1",
+    "@raycast/api": "^1.44.0",
     "node-fetch": "^3.0.0",
     "node-html-parser": "^5.3.3"
   },

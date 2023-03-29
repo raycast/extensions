@@ -2,9 +2,12 @@ import { Task } from "@doist/todoist-api-typescript";
 import { Color, confirmAlert, Icon, MenuBarExtra, open, showHUD } from "@raycast/api";
 import { MutatePromise } from "@raycast/utils";
 import removeMarkdown from "remove-markdown";
+
 import { todoist } from "../api";
 import { priorities } from "../constants";
 import { isTodoistInstalled } from "../helpers/isTodoistInstalled";
+import { useFocusedTask } from "../hooks/useFocusedTask";
+
 import View from "./View";
 
 interface MenubarTaskProps {
@@ -13,6 +16,8 @@ interface MenubarTaskProps {
 }
 
 const MenubarTask = ({ task, mutateTasks }: MenubarTaskProps) => {
+  const { focusedTask, unfocusTask, focusTask } = useFocusedTask();
+
   const priority = priorities.find((p) => p.value === task.priority);
 
   async function completeTask(task: Task) {
@@ -21,6 +26,10 @@ const MenubarTask = ({ task, mutateTasks }: MenubarTaskProps) => {
       await todoist.closeTask(task.id);
       await showHUD("Task completed 🙌");
       mutateTasks();
+
+      if (focusedTask.id === task.id) {
+        unfocusTask();
+      }
     } catch (error) {
       showHUD("Unable to complete task ❌");
     }
@@ -80,6 +89,12 @@ const MenubarTask = ({ task, mutateTasks }: MenubarTaskProps) => {
         title={removeMarkdown(task.content)}
         icon={priority && priority.value === 1 ? Icon.Circle : { source: Icon.Circle, tintColor: priority?.color }}
       >
+        {focusedTask.id !== task.id ? (
+          <MenuBarExtra.Item title="Focus Task" onAction={() => focusTask(task)} icon={Icon.Center} />
+        ) : (
+          <MenuBarExtra.Item title="Unfocus Task" onAction={() => unfocusTask()} icon={Icon.MinusCircle} />
+        )}
+
         <MenuBarExtra.Item title="Complete Task" onAction={() => completeTask(task)} icon={Icon.Checkmark} />
         <MenuBarExtra.Item
           title="Open in Todoist"

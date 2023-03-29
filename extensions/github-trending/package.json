@@ -1,0 +1,50 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "github-trending",
+  "title": "GitHub Trending",
+  "description": "Quick access to trending repositories on GitHub.",
+  "icon": "icon.png",
+  "author": "mikqi",
+  "categories": [
+    "Developer Tools",
+    "Web",
+    "News",
+    "Productivity"
+  ],
+  "keywords": [
+    "github",
+    "trending"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Trending Repositories",
+      "subtitle": "GitHub",
+      "description": "Quick access to trending repositories on GitHub.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.47.3",
+    "@raycast/utils": "^1.4.8",
+    "trending-github": "^2.0.7"
+  },
+  "devDependencies": {
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

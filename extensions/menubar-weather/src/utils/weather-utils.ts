@@ -2,7 +2,7 @@ import { getPreferenceValues, Icon } from "@raycast/api";
 import { Preferences } from "../types/preferences";
 import { isEmpty } from "./common-utils";
 import { getOpenMeteoLocation, getOpenMeteoWeather } from "./axios-utils";
-import { GeoLocation } from "../types/types";
+import { Daily, GeoLocation } from "../types/types";
 
 export const {
   cityName,
@@ -54,6 +54,7 @@ export async function getCurWeather() {
     weatherData = await getOpenMeteoWeather(geoLocation.longitude.toString(), geoLocation.latitude.toString());
   }
 
+  console.debug(weatherData);
   return { weather: weatherData, geoLocation: geoLocation };
 }
 
@@ -169,3 +170,74 @@ export function getWeatherDescription(weatherCode: number | undefined) {
       };
   }
 }
+
+const windAngle2Direction = (windAngle: number) => {
+  if ((windAngle >= 0 && windAngle < 11.25) || (windAngle >= 348.75 && windAngle <= 360)) {
+    return { icon: "↓", symbol: "N", direction: "North" };
+  }
+
+  if (windAngle >= 11.25 && windAngle < 33.75) {
+    return { icon: "↙", symbol: "NNE", direction: "North-Northeast" };
+  }
+  if (windAngle >= 33.75 && windAngle < 56.75) {
+    return { icon: "↙", symbol: "NE", direction: "Northeast" };
+  }
+  if (windAngle >= 56.75 && windAngle < 78.75) {
+    return { icon: "↙", symbol: "ENE", direction: "East-Northeast" };
+  }
+
+  if (windAngle >= 78.75 && windAngle < 101.25) {
+    return { icon: "←", symbol: "E", direction: "East" };
+  }
+
+  if (windAngle >= 101.25 && windAngle < 123.75) {
+    return { icon: "↖", symbol: "ESE", direction: "East-Southeast" };
+  }
+  if (windAngle >= 123.75 && windAngle < 146.25) {
+    return { icon: "↖", symbol: "SE", direction: "Southeast" };
+  }
+  if (windAngle >= 146.25 && windAngle < 168.75) {
+    return { icon: "↖", symbol: "SSE", direction: "South-Southeast" };
+  }
+
+  if (windAngle >= 168.75 && windAngle < 191.25) {
+    return { icon: "↑", symbol: "S", direction: "South" };
+  }
+
+  if (windAngle >= 191.25 && windAngle < 213.75) {
+    return { icon: "↗", symbol: "SSW", direction: "South-Southwest" };
+  }
+  if (windAngle >= 213.75 && windAngle < 236.25) {
+    return { icon: "↗", symbol: "SW", direction: "Southwest" };
+  }
+  if (windAngle >= 236.25 && windAngle < 258.75) {
+    return { icon: "↗", symbol: "WSW", direction: "West-Southwest" };
+  }
+
+  if (windAngle >= 258.75 && windAngle < 281.25) {
+    return { icon: "→", symbol: "W", direction: "West" };
+  }
+
+  if (windAngle >= 281.25 && windAngle < 303.75) {
+    return { icon: "↘", symbol: "WNW", direction: "West-Northwest" };
+  }
+  if (windAngle >= 303.75 && windAngle < 326.25) {
+    return { icon: "↘", symbol: "NW", direction: "Northwest" };
+  }
+  if (windAngle >= 326.25 && windAngle < 348.75) {
+    return { icon: "↘", symbol: "NNW", direction: "North-Northwest" };
+  }
+  return { icon: "⏺", symbol: "C", direction: "" };
+};
+export const windDirection = (windAngle: number) => {
+  const windDirectionInfo = windAngle2Direction(windAngle);
+  return `${windDirectionInfo.icon} ${windDirectionInfo.direction}(${windDirectionInfo.symbol})`;
+};
+
+export const windDirectionSimple = (daily: Daily, index: number) => {
+  if (typeof daily.winddirection_10m_dominant !== "undefined" && daily.winddirection_10m_dominant !== null) {
+    const windDirectionInfo = windAngle2Direction(daily.winddirection_10m_dominant[index]);
+    return `    ${windDirectionInfo.icon} (${windDirectionInfo.symbol})`;
+  }
+  return "";
+};

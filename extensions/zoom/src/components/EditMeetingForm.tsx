@@ -20,7 +20,7 @@ export default function MeetingForm({ meeting, mutate }: EditMeetingFormProps) {
 
   const startTimeRef = useRef<Form.DatePicker>(null);
 
-  const [startTime, setStartTime] = useState(new Date(meeting.start_time));
+  const [startTime, setStartTime] = useState<Date | null>(new Date(meeting.start_time));
   const [duration, setDuration] = useState(String(meeting.duration));
   const [topic, setTopic] = useState(meeting.topic);
   const [agenda, setAgenda] = useState(meeting.agenda);

@@ -1,5 +1,4 @@
-import { copyTextToClipboard, getPreferenceValues, showToast, ToastStyle } from "@raycast/api";
-import { runAppleScript } from "run-applescript";
+import { Clipboard, getPreferenceValues, showToast, Toast } from "@raycast/api";
 import fetch, { Headers } from "node-fetch";
 
 function getErrorMessage(error: unknown) {
@@ -8,14 +7,14 @@ function getErrorMessage(error: unknown) {
 }
 
 async function reportError({ message }: { message: string }) {
-  await showToast(ToastStyle.Failure, "Error", message.toString());
+  await showToast(Toast.Style.Failure, "Error", message.toString());
 }
 
 export default async function () {
   try {
     const { accessToken } = getPreferenceValues();
-    const clipboard = await runAppleScript("the clipboard");
-    if (clipboard.length === 0) {
+    const clipboard = await Clipboard.readText();
+    if (!clipboard) {
       return await reportError(new Error("Clipboard is empty"));
     }
 
@@ -38,8 +37,8 @@ export default async function () {
       return await reportError(new Error("Invalid URL String"));
     }
 
-    await copyTextToClipboard(link);
-    await showToast(ToastStyle.Success, "Success", "Copied shortened URL to clipboard");
+    await Clipboard.copy(link);
+    await showToast(Toast.Style.Success, "Success", "Copied shortened URL to clipboard");
   } catch (error: unknown) {
     await reportError({ message: getErrorMessage(error) });
   }

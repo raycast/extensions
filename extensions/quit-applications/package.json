@@ -5,6 +5,9 @@
   "description": "Quit appplications directly from Raycast",
   "icon": "quit-app.png",
   "author": "mackopes",
+  "contributors": [
+    "jrnxf"
+  ],
   "categories": [
     "System",
     "Productivity"

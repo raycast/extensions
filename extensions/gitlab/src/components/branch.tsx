@@ -32,7 +32,7 @@ export function BranchListItem(props: { branch: any; project: Project }) {
     states.push("[protected]");
   }
   const { commitStatus } = useCommitStatus(project.id, branch?.commit?.id);
-  const statusIcon = commitStatus ? getCIJobStatusIcon(commitStatus.status) : undefined;
+  const statusIcon = commitStatus ? getCIJobStatusIcon(commitStatus.status, commitStatus.allow_failure) : undefined;
 
   return (
     <List.Item

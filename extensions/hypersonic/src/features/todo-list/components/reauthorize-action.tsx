@@ -1,6 +1,6 @@
 import { reauthorize } from '@/services/notion/oauth/reauthorize'
 import { Action } from '@raycast/api'
-import { getNotionIcon } from '@/utils/get-notion-icon'
+import { notion } from '@/utils/icons'
 
 export function ReauthorizeAction() {
   const handleAuthorize = () => {
@@ -9,7 +9,7 @@ export function ReauthorizeAction() {
 
   return (
     <Action
-      icon={{ source: getNotionIcon() }}
+      icon={{ source: notion }}
       title={'Reconnect Notion'}
       onAction={handleAuthorize}
       shortcut={{ modifiers: ['cmd', 'shift'], key: 'a' }}

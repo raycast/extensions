@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-09-17 10:35
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-10-17 20:33
+ * @lastEditTime: 2023-03-17 10:12
  * @fileName: bing.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -252,10 +252,10 @@ function parseBingConfig(html: string): BingConfig | undefined {
   const IG = html.match(/IG:"(.*?)"/)?.[1];
   // data-iid="translator.5023"
   const IID = html.match(/data-iid="(.*?)"/)?.[1];
-  // var params_RichTranslateHelper = [1663259642763, "ETrbGhqGa5PwV8WL3sTYSBxsYRagh5bl", 3600000, true, null, false, "必应翻译", false, false, null, null];
-  const params_RichTranslateHelper = html.match(/var params_RichTranslateHelper = (.*?);/)?.[1];
-  if (IG && params_RichTranslateHelper) {
-    const paramsArray = JSON.parse(params_RichTranslateHelper);
+  // var params_AbusePreventionHelper = [1663259642763, "ETrbGhqGa5PwV8WL3sTYSBxsYRagh5bl", 3600000, true, null, false, "必应翻译", false, false, null, null];
+  const params_AbusePreventionHelper = html.match(/var params_AbusePreventionHelper = (.*?);/)?.[1];
+  if (IG && params_AbusePreventionHelper) {
+    const paramsArray = JSON.parse(params_AbusePreventionHelper);
     const [key, token, expirationInterval] = paramsArray;
     const config: BingConfig = {
       IG: IG,

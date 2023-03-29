@@ -3,6 +3,7 @@ export interface Preferences {
   city: string;
   calculation_methods: string;
   hanfi: boolean;
+  twelve_hours_system: boolean;
 }
 export type Prayers = {
   Fajr: string;

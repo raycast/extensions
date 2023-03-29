@@ -2,9 +2,8 @@ import { FunctionConfiguration, LambdaClient, ListFunctionsCommand } from "@aws-
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import AWSProfileDropdown from "./components/searchbar/aws-profile-dropdown";
-import { AWS_URL_BASE } from "./constants";
 import CloudwatchLogStreams from "./components/cloudwatch/CloudwatchLogStreams";
-import { getTaskCWLogsGroupUrl } from "./actions";
+import { resourceToConsoleLink } from "./util";
 
 export default function Lambda() {
   const { data: functions, error, isLoading, revalidate } = useCachedPromise(fetchFunctions);
@@ -33,12 +32,12 @@ function LambdaFunction({ func }: { func: FunctionConfiguration }) {
         <ActionPanel>
           <Action.OpenInBrowser
             title="Open in Browser"
-            url={`${AWS_URL_BASE}/lambda/home?region=${process.env.AWS_REGION}#/functions/${func.FunctionName}?tab=monitoring`}
+            url={resourceToConsoleLink(func.FunctionName, "AWS::Lambda::Function")}
           />
           <Action.OpenInBrowser
             icon={Icon.Document}
             title="Open CloudWatch Log Group"
-            url={getTaskCWLogsGroupUrl(encodeURIComponent(`/aws/lambda/${func.FunctionName}`))}
+            url={resourceToConsoleLink(`/aws/lambda/${func.FunctionName}`, "AWS::Logs::LogGroup")}
             shortcut={{ modifiers: ["cmd"], key: "l" }}
           />
           <Action.Push

@@ -1,18 +1,16 @@
 import { ActionPanel, Form, Action, useNavigation, showToast, Toast, Icon, confirmAlert } from "@raycast/api";
 import fs from "fs";
-import { useState } from "react";
-import { NoteAction } from "../utils/constants";
+import { NoteReducerAction, NoteReducerActionType } from "../utils/data/reducers";
 import { Note, Vault } from "../utils/interfaces";
-import { applyTemplates, getNoteFileContent } from "../utils/utils";
+import { applyTemplates } from "../utils/utils";
 
 interface FormValue {
   content: string;
 }
 
-export function EditNote(props: { note: Note; vault: Vault; actionCallback: (action: NoteAction) => void }) {
-  const { note, actionCallback } = props;
+export function EditNote(props: { note: Note; vault: Vault; dispatch: (action: NoteReducerAction) => void }) {
+  const { note, vault } = props;
   const { pop } = useNavigation();
-  const [defaultContent] = useState(getNoteFileContent(note.path, false));
 
   async function writeToNote(form: FormValue) {
     let content = form.content;
@@ -26,7 +24,7 @@ export function EditNote(props: { note: Note; vault: Vault; actionCallback: (act
     if (await confirmAlert(options)) {
       fs.writeFileSync(note.path, content);
       showToast({ title: "Edited note", style: Toast.Style.Success });
-      actionCallback(NoteAction.Edit);
+      props.dispatch({ type: NoteReducerActionType.Update, payload: { note: note, vault: vault } });
       pop();
     }
   }
@@ -45,7 +43,7 @@ export function EditNote(props: { note: Note; vault: Vault; actionCallback: (act
         id="content"
         placeholder={"Text"}
         enableMarkdown={true}
-        defaultValue={defaultContent}
+        defaultValue={note.content}
       />
     </Form>
   );

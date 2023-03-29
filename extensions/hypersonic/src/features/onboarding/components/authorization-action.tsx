@@ -1,7 +1,7 @@
 import { useAuth } from '@/features/auth/use-auth'
 import { Action } from '@raycast/api'
 import { authorize } from '@/services/notion/oauth/authorize'
-import { getNotionIcon } from '@/utils/get-notion-icon'
+import { notion } from '@/utils/icons'
 
 export function AuthorizationAction({
   onAuthorize,
@@ -22,7 +22,7 @@ export function AuthorizationAction({
 
   return (
     <Action
-      icon={{ source: getNotionIcon() }}
+      icon={{ source: notion }}
       title={'Authorize'}
       onAction={handleAuthorize}
       shortcut={{ modifiers: ['cmd', 'shift'], key: 'a' }}

@@ -11,7 +11,7 @@ export async function isSpotifyInstalled() {
 }
 
 export function trackTitle(track: SpotifyApi.TrackObjectSimplified): string {
-  return `${track.artists[0].name} – ${track.name}`;
+  return `${track.artists[0].name} - ${track.name}`;
 }
 
 export async function spotifyApplicationName(): Promise<string> {

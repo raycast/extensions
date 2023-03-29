@@ -1,58 +1,13 @@
-import mapAppleDevice from "../mappers/apple";
-import mapGenericDevice from "../mappers/generic";
+import { resolve } from "path";
 import { readFileSync } from "fs";
 import { runAppleScriptSync } from "run-applescript";
-import { Device, RawDeviceData } from "../types";
-import { resolve } from "path";
-import mapSonyDevice from "src/mappers/sony";
-import mapBoseDevice from "src/mappers/bose";
-import mapSamsungDevice from "src/mappers/samsung";
-import mapUgreenDevice from "src/mappers/ugreen";
+import { Device, RawDeviceData } from "../types/device";
+import { mapDevice } from "../mappers/devices";
 
 export function getDevices(): Device[] {
   const devicesData = _fetchRawDevicesData();
   const mappedDevices = devicesData.map((deviceData) => _mapDevice(deviceData));
   return mappedDevices;
-}
-
-export function openConnection(deviceMacAddress: string) {
-  const formattedMacAddress = deviceMacAddress.toUpperCase().replaceAll(":", "-");
-  const script = readFileSync(resolve(__dirname, "assets/scripts/connectDevice.applescript")).toString();
-  const getFirstMatchingDeviceScript = readFileSync(
-    resolve(__dirname, "assets/scripts/getFirstMatchingDevice.applescript")
-  ).toString();
-  const result = runAppleScriptSync(
-    `
-    use framework "IOBluetooth"\n
-    use scripting additions\n
-    \n
-    ${getFirstMatchingDeviceScript}\n
-    \n
-    ${script}\n
-    \n
-    return connectDevice(getFirstMatchingDevice("${formattedMacAddress}"))`
-  );
-  if (result !== "0") throw "Failed to connect device.";
-}
-
-export function closeConnection(deviceMacAddress: string) {
-  const formattedMacAddress = deviceMacAddress.toUpperCase().replaceAll(":", "-");
-  const script = readFileSync(resolve(__dirname, "assets/scripts/disconnectDevice.applescript")).toString();
-  const getFirstMatchingDeviceScript = readFileSync(
-    resolve(__dirname, "assets/scripts/getFirstMatchingDevice.applescript")
-  ).toString();
-  const result = runAppleScriptSync(
-    `
-    use framework "IOBluetooth"\n
-    use scripting additions\n
-    \n
-    ${getFirstMatchingDeviceScript}\n
-    \n
-    ${script}\n
-    \n
-    disconnectDevice(getFirstMatchingDevice("${formattedMacAddress}"))`
-  );
-  if (result !== "0") throw "Failed to disconnect device.";
 }
 
 function _fetchRawDevicesData(): RawDeviceData[] {
@@ -131,27 +86,8 @@ function _injectIoRegBatteryLevel(device: RawDeviceData) {
 }
 
 function _mapDevice(deviceData: RawDeviceData): Device {
-  // Initialize generic device object
-  let device = mapGenericDevice(deviceData);
-
-  // Map device by vendor
-  switch (device.vendorId) {
-    case "0x004C":
-      device = mapAppleDevice(device, deviceData);
-      break;
-    case "0x054C":
-      device = mapSonyDevice(device, deviceData);
-      break;
-    case "0x009E":
-      device = mapBoseDevice(device);
-      break;
-    case "0x0075":
-      device = mapSamsungDevice(device);
-      break;
-    case "0x005D":
-      device = mapUgreenDevice(device, deviceData);
-      break;
-  }
+  // Initialize device object
+  const device = mapDevice(deviceData);
 
   // Modify icon path to reflect connection state
   // Not nice but the cleanest solution until a better solution

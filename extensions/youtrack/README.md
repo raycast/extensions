@@ -42,7 +42,7 @@ Raycast extension to browse YouTrack issues.
   - Open the issue in browser
   - Copy the issue ID – so you can mention it in your commit message
   - Customize the search query
-- ... potentially, more – request it [here](https://github.com/raycast/extensions/issues/new?assignees=&labels=extension%2C+feature+request&template=extension_feature_request.md&title=)
+- ... potentially, more – request it [here](https://github.com/raycast/extensions/issues/new?template=extension_feature_request.yml&extension-url=https%3A%2F%2Fraycast.com%2Ftiulpin%2Fyoutrack&title=%5BYouTrack%5D+...)
 
 ## How to get the access token for the YouTrack REST API
 

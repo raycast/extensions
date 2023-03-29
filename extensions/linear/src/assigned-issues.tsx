@@ -20,7 +20,7 @@ function AssignedIssues() {
   return (
     <List
       isLoading={isLoadingIssues || isLoadingMe || isLoadingPriorities || isLoadingMe || isLoadingUsers}
-      searchBarPlaceholder="Filter by key, title, status, assignee or priority"
+      searchBarPlaceholder="Filter by ID, title, status, assignee or priority"
       filtering={{ keepSectionOrder: true }}
     >
       <List.EmptyView

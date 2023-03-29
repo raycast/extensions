@@ -37,8 +37,7 @@ You can filter your task by user, project or label. Combining multiple filter yo
 ### List of commands
 
 - Press `↵` to complete a task or create a new one.
-- Press `⌘ + ↵` to mark a task as in progress.
-- Press `⌘ + ↵` to mark a task as not started.
+- Press `⌘ + ↵` to set a status.
 - Press `⌘ + F` to filter your tasks.
 - Press `⌘ + D` to add a due date.
 - Press `⌘ + L` to add a label.

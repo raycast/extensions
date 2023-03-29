@@ -4,8 +4,10 @@ import { run } from "./utils";
 const command = async () => {
   const keyLight = await KeyLight.discover();
   const brightness = await keyLight.decreaseBrightness();
-  const formattedBrightness = brightness.toLocaleString("en", { maximumFractionDigits: 0 });
-  return `Decreased brightness to ${formattedBrightness}%`;
+
+  return brightness
+    ? `Decreased brightness to ${brightness.toLocaleString("en", { maximumFractionDigits: 0 })}%`
+    : "Error decreasing brightness";
 };
 
 export default run(command);

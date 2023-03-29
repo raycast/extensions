@@ -13,7 +13,7 @@ Before considering OAuth, first check if your provider supports PKCE. You can us
 The OAuth flow from an extension looks like this:
 
 1. The extension initiates the OAuth flow and starts authorization
-2. Raycast shows the OAuth overlay ("Connect to provider...")
+2. Raycast shows the OAuth overlay ("Connect to provider…")
 3. The user opens the provider's consent page in the web browser
 4. After the user consent, the provider redirects back to Raycast
 5. Raycast opens the extension where authorization is completed
@@ -42,7 +42,7 @@ const client = new OAuth.PKCEClient({
   redirectMethod: OAuth.RedirectMethod.Web,
   providerName: "Twitter",
   providerIcon: "twitter-logo.png",
-  description: "Connect your Twitter account...",
+  description: "Connect your Twitter account…",
 });
 ```
 
@@ -175,7 +175,7 @@ const client = new OAuth.PKCEClient({
   redirectMethod: OAuth.RedirectMethod.Web,
   providerName: "Twitter",
   providerIcon: "twitter-logo.png",
-  description: "Connect your Twitter account...",
+  description: "Connect your Twitter account…",
 });
 ```
 

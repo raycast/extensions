@@ -48,6 +48,7 @@ Raycast extension to search for npm packages
 
 - open the package's repository (if it is known)
 - open the package's homepage (if it is known)
+- open the package's changelog (if it is known)
 - open the package's npm page
 - open the package's Skypack.dev page
 - open a npms.io search results page based on the search term

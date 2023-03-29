@@ -13,7 +13,7 @@ Warning: Please comply with the [OpenAI Content policy](https://beta.openai.com/
 
 To use this extension, you must have an OpenAI API account, obtain your API key, and add it during the extension configuration screen.
 
-You can find your API key in "View API keys" under your profile settings.
+You can find your API key in ["View API keys"](https://platform.openai.com/account/api-keys) under your profile settings.
 
 The interface of the extension follows the interface of the OpenAI Playground.
 
@@ -44,6 +44,17 @@ You can set different parameters for the AI model:
 `Frequency Penalty`: controls how repetitive responses can get. Increasing the parameter lowers the chance of repetition.
 
 `Probability Penalty`: controls how novel responses can get. Increasing the parameter raises the chance for novel answers.
+
+### Supported AI Models
+
+1. `gpt-3.5-turbo`
+2. `text-davinci-003`
+3. `text-davinci-002`
+4. `text-curie-001`
+5. `text-babbage-001`
+6. `text-ada-001`
+7. `code-davinci-002`
+8. `code-cushman-001`
 
 ## Token Count
 

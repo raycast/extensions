@@ -1,6 +1,6 @@
 import { runAppleScript } from "run-applescript";
 import { closeMainWindow, popToRoot } from "@raycast/api";
-import { Tab } from "../interfaces";
+import { SettingsProfileOpenBehaviour, Tab } from "../interfaces";
 import { NOT_INSTALLED_MESSAGE } from "../constants";
 
 export async function getOpenTabs(useOriginalFavicon: boolean): Promise<Tab[]> {
@@ -37,41 +37,61 @@ export async function getOpenTabs(useOriginalFavicon: boolean): Promise<Tab[]> {
     .map((line) => Tab.parse(line));
 }
 
-export async function openNewTab(queryText: string | null | undefined): Promise<boolean | string> {
-  popToRoot();
-  closeMainWindow({ clearRootSearch: true });
+export async function openNewTab({
+  url,
+  query,
+  profileCurrent,
+  profileOriginal,
+  openTabInProfile,
+}: {
+  url?: string;
+  query?: string;
+  profileCurrent: string;
+  profileOriginal?: string;
+  openTabInProfile: SettingsProfileOpenBehaviour;
+}): Promise<boolean | string> {
+  setTimeout(() => {
+    popToRoot({ clearSearchBar: true });
+  }, 3000);
+  await Promise.all([closeMainWindow({ clearRootSearch: true }), checkAppInstalled()]);
 
-  const script =
+  let script = "";
+  const applicationName = "Iridium";
+
+  const getOpenInProfileCommand = (profile: string) =>
     `
-    tell application "Iridium"
+    set profile to quoted form of "${profile}"
+    set link to quoted form of "${url ? url : "about:blank"}"
+    do shell script "open -na '${applicationName}' --args --profile-directory=" & profile & " " & link
+  `;
+
+  switch (openTabInProfile) {
+    case SettingsProfileOpenBehaviour.Default:
+      script =
+        `
+    tell application "${applicationName}"
       activate
       tell window 1
           set newTab to make new tab ` +
-    (queryText ? 'with properties {URL:"https://www.google.com/search?q=' + queryText + '"}' : "") +
-    ` 
+        (url
+          ? `with properties {URL:"${url}"}`
+          : query
+          ? 'with properties {URL:"https://www.google.com/search?q=' + query + '"}'
+          : "") +
+        ` 
       end tell
     end tell
     return true
   `;
-
-  await checkAppInstalled();
-
-  return await runAppleScript(script);
-}
-
-export async function openNewHistoryTab(url: string): Promise<boolean | string> {
-  popToRoot();
-  closeMainWindow({ clearRootSearch: true });
-
-  const script = `
-    tell application "Iridium"
-      activate
-      tell window 1
-          set newTab to make new tab with properties {URL:"${url}"}
-      end tell
-    end tell
-    return true
-  `;
+      break;
+    case SettingsProfileOpenBehaviour.ProfileCurrent:
+      script = getOpenInProfileCommand(profileCurrent);
+      break;
+    case SettingsProfileOpenBehaviour.ProfileOriginal:
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      script = getOpenInProfileCommand(profileOriginal!);
+      break;
+  }
 
   return await runAppleScript(script);
 }

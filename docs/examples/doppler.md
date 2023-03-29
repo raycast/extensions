@@ -25,7 +25,7 @@ import got from "got";
 export default function Command() {
   return (
     <Form>
-      <Form.TextArea id="secret" title="Secret" placeholder="Enter sensitive data to securely share..." />
+      <Form.TextArea id="secret" title="Secret" placeholder="Enter sensitive data to securely share…" />
       <Form.Dropdown id="expireViews" title="Expire After Views" storeValue>
         <Form.Dropdown.Item value="1" title="1 View" />
         <Form.Dropdown.Item value="2" title="2 Views" />
@@ -125,7 +125,7 @@ export default function Command() {
         </ActionPanel>
       }
     >
-      <Form.TextArea id="secret" title="Secret" placeholder="Enter sensitive data to securely share..." />
+      <Form.TextArea id="secret" title="Secret" placeholder="Enter sensitive data to securely share…" />
       <Form.Dropdown id="expireViews" title="Expire After Views" storeValue>
         <Form.Dropdown.Item value="1" title="1 View" />
         <Form.Dropdown.Item value="2" title="2 Views" />

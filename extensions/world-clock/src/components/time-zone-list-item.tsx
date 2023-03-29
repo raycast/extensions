@@ -11,7 +11,6 @@ import {
 } from "../utils/common-utils";
 import { ActionOnTimezone } from "./action-on-timezone";
 import { ActionOnStarredTimezone } from "./action-on-starred-timezone";
-import Mask = Image.Mask;
 import { getAvatarIcon } from "@raycast/utils";
 
 export function TimeZoneListItem(props: {

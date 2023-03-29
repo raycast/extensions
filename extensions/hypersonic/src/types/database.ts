@@ -7,6 +7,7 @@ type Status = {
   type: 'status' | 'checkbox'
   name: string
   doneName?: string
+  completedStatuses?: string[]
   inProgressId?: string
   notStartedId?: string
 }
@@ -34,5 +35,6 @@ export type Database = {
     project: TypeWithValue<Relation>[]
     assignee: OptionalColumn[]
     tags: OptionalColumn[]
+    url: OptionalColumn[]
   }
 }

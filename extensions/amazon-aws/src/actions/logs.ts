@@ -97,7 +97,3 @@ const getMiliSecondsSinceEpoch = (defaultLogsStartTime: LogStartTimes) => {
   }
   return milisecondsSinceEpoch;
 };
-
-export function getTaskCWLogsGroupUrl(logGroupName: string) {
-  return `${AWS_URL_BASE}/cloudwatch/home?region=${process.env.AWS_REGION}#logsV2:log-groups/log-group/${logGroupName}`;
-}

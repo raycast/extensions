@@ -1,5 +1,15 @@
 # Apple Notes Changelog
 
+## [Fix] - 2023-02-20
+
+- Added error handling when Raycast doesn't have Accessibility/Automation permission.
+
+## [Improvements] - 2023-1-30
+
+- Added fallback behaviour to create notes with the input text.
+- Added a workaround to activate the window if there isn't one.
+- Updated Raycast API to the latest.
+
 ## [Fix] - 2022-12-11
 
 - Correct issue where searching for notes with quotes in titles failed

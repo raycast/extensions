@@ -1,72 +1,26 @@
 import { List, ActionPanel } from "@raycast/api";
-import React, { useState } from "react";
+import React from "react";
 import fs from "fs";
 
-import { Note, Vault, SearchNotePreferences } from "../../utils/interfaces";
-import {
-  readingTime,
-  wordCount,
-  trimPath,
-  createdDateFor,
-  fileSizeFor,
-  getNoteFileContent,
-  filterContent,
-} from "../../utils/utils";
-import { isNotePinned } from "../../utils/pinNoteUtils";
-import { NoteAction } from "../../utils/constants";
-import { deleteNoteFromCache, renewCache, updateNoteInCache } from "../../utils/cache";
-import { tagsForNotes, yamlPropertyForString } from "../../utils/yaml";
+import { Note, Vault } from "../../utils/interfaces";
+import { readingTime, wordCount, trimPath, createdDateFor, fileSizeFor, filterContent } from "../../utils/utils";
+import { renewCache } from "../../utils/data/cache";
+import { yamlPropertyForString } from "../../utils/yaml";
+import { SearchNotePreferences } from "../../utils/preferences";
 
 export function NoteListItem(props: {
   note: Note;
   vault: Vault;
   key: string;
   pref: SearchNotePreferences;
-  action?: (note: Note, vault: Vault, actionCallback: (action: NoteAction) => void) => React.ReactFragment;
-  onDelete?: (note: Note, vault: Vault) => void;
+  action?: (note: Note, vault: Vault) => React.ReactFragment;
 }) {
-  const { note, vault, pref, onDelete, action } = props;
-  const [content, setContent] = useState(note.content);
-  const [pinned, setPinned] = useState(isNotePinned(note, vault));
+  const { note, vault, pref, action } = props;
 
   const noteHasBeenMoved = !fs.existsSync(note.path);
 
   if (noteHasBeenMoved) {
     renewCache(vault);
-  }
-
-  function reloadContent() {
-    const newContent = getNoteFileContent(note.path);
-    note.content = newContent;
-    setContent(newContent);
-  }
-
-  function reloadTags() {
-    const newTags = tagsForNotes([note]);
-    note.tags = newTags;
-  }
-
-  function actionCallback(action: NoteAction) {
-    switch (+action) {
-      case NoteAction.Pin:
-        setPinned(!pinned);
-        break;
-      case NoteAction.Delete:
-        if (onDelete) {
-          onDelete(note, vault);
-        }
-        deleteNoteFromCache(vault, note);
-        break;
-      case NoteAction.Edit:
-        reloadContent();
-        reloadTags();
-        updateNoteInCache(vault, note);
-        break;
-      case NoteAction.Append:
-        reloadContent();
-        reloadTags();
-        updateNoteInCache(vault, note);
-    }
   }
 
   function TagList() {
@@ -95,18 +49,18 @@ export function NoteListItem(props: {
   return !noteHasBeenMoved ? (
     <List.Item
       title={note.title}
-      accessories={[{ text: pinned ? "⭐️" : "" }]}
+      accessories={[{ text: note.starred ? "⭐" : "" }]}
       detail={
         <List.Item.Detail
-          markdown={filterContent(content)}
+          markdown={filterContent(note.content)}
           metadata={
             pref.showMetadata ? (
               <List.Item.Detail.Metadata>
-                <List.Item.Detail.Metadata.Label title="Character Count" text={content.length.toString()} />
-                <List.Item.Detail.Metadata.Label title="Word Count" text={wordCount(content).toString()} />
+                <List.Item.Detail.Metadata.Label title="Character Count" text={note.content.length.toString()} />
+                <List.Item.Detail.Metadata.Label title="Word Count" text={wordCount(note.content).toString()} />
                 <List.Item.Detail.Metadata.Label
                   title="Reading Time"
-                  text={readingTime(content).toString() + " min read"}
+                  text={readingTime(note.content).toString() + " min read"}
                 />
                 <TagList />
                 <Link />
@@ -129,7 +83,7 @@ export function NoteListItem(props: {
       }
       actions={
         <ActionPanel>
-          <React.Fragment>{action && action(note, vault, actionCallback)}</React.Fragment>
+          <React.Fragment>{action && action(note, vault)}</React.Fragment>
         </ActionPanel>
       }
     />

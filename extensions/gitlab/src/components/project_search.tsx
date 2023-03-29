@@ -7,6 +7,8 @@ import {
   CloneProjectInGitPod,
   CloneProjectInVSCodeAction,
   CopyProjectIDToClipboardAction,
+  CopyCloneUrlToClipboardAction,
+  CreateNewProjectIssuePushAction,
   OpenProjectBranchesPushAction,
   OpenProjectIssuesPushAction,
   OpenProjectLabelsInBrowserAction,
@@ -15,6 +17,7 @@ import {
   OpenProjectPipelinesPushAction,
   OpenProjectSecurityComplianceInBrowserAction,
   OpenProjectSettingsInBrowserAction,
+  OpenProjectWikiInBrowserAction,
   ProjectDefaultActions,
   ShowProjectLabels,
 } from "./project_actions";
@@ -28,7 +31,10 @@ export function ProjectListItem(props: { project: Project }): JSX.Element {
   }
   accessories.push({
     text: project.star_count.toString(),
-    icon: { source: Icon.Star, tintColor: Color.Yellow },
+    icon: {
+      source: Icon.Star,
+      tintColor: project.star_count > 0 ? Color.Yellow : null,
+    },
     tooltip: `Number of stars: ${project.star_count}`,
   });
   return (
@@ -44,6 +50,7 @@ export function ProjectListItem(props: { project: Project }): JSX.Element {
           </ActionPanel.Section>
           <ActionPanel.Section>
             <CopyProjectIDToClipboardAction project={project} />
+            <CopyCloneUrlToClipboardAction shortcut={{ modifiers: ["cmd"], key: "u" }} project={project} />
           </ActionPanel.Section>
           <ActionPanel.Section>
             <OpenProjectIssuesPushAction project={project} />
@@ -51,9 +58,11 @@ export function ProjectListItem(props: { project: Project }): JSX.Element {
             <OpenProjectBranchesPushAction project={project} />
             <OpenProjectPipelinesPushAction project={project} />
             <OpenProjectMilestonesPushAction project={project} />
+            <OpenProjectWikiInBrowserAction project={project} />
             <ShowProjectLabels project={props.project} shortcut={{ modifiers: ["cmd"], key: "l" }} />
           </ActionPanel.Section>
           <ActionPanel.Section title="Open in Browser">
+            <CreateNewProjectIssuePushAction project={project} />
             <OpenProjectLabelsInBrowserAction project={project} />
             <OpenProjectSecurityComplianceInBrowserAction project={project} />
             <OpenProjectSettingsInBrowserAction project={project} />

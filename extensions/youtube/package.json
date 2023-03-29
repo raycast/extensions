@@ -5,6 +5,9 @@
   "description": "Search Videos, Channels, and more...",
   "icon": "youtube.png",
   "author": "tonka3000",
+  "contributors": [
+    "HelloImSteven"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -12,14 +15,30 @@
       "title": "Search Videos",
       "subtitle": "YouTube",
       "description": "Search YouTube Videos",
-      "mode": "view"
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Search Query",
+          "required": false,
+          "type": "text"
+        }
+      ]
     },
     {
       "name": "search-channel",
       "title": "Search Channels",
       "subtitle": "YouTube",
       "description": "Search YouTube Channels",
-      "mode": "view"
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Search Query",
+          "required": false,
+          "type": "text"
+        }
+      ]
     },
     {
       "name": "popular-videos",

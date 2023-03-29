@@ -59,7 +59,7 @@ Raycast auto-terminates the command if it exceeds its maximum execution time. If
 
 For local commands under development, errors are shown as usual via the console. Two developer actions in root search help you to run and debug scheduled commands:
 
-- Run in Background: this immediately runs the command with `environment.launchType` set to `LaunchType.background`.
+- Run in Background: this immediately runs the command with `environment.launchType` set to `LaunchType.Background`.
 - Show Error: if the command could not be loaded or an uncaught runtime exception was thrown, the full error can be shown in the Raycast error overlay for development. This action is also shown to users of the installed Store command and provides actions to copy and report the error on the production error overlay.
 
 ![](../../.gitbook/assets/background-refresh-error.png)

@@ -13,28 +13,28 @@
   "commands": [
     {
       "name": "gen",
-      "title": "Generate Temporary Email",
+      "title": "Create Account",
       "subtitle": "Mailsy",
       "description": "Create a new email address",
       "mode": "no-view"
     },
     {
       "name": "mails",
-      "title": "Fetch Emails",
+      "title": "Fetch Mails",
       "subtitle": "Mailsy",
       "description": "Fetch all emails",
       "mode": "view"
     },
     {
       "name": "delete",
-      "title": "Delete Temporary Email Account",
+      "title": "Delete Account",
       "subtitle": "Mailsy",
       "description": "Delete a email address",
       "mode": "no-view"
     },
     {
       "name": "info",
-      "title": "Temporary Account Information",
+      "title": "About",
       "subtitle": "Mailsy",
       "description": "About Temporary Email",
       "mode": "view"

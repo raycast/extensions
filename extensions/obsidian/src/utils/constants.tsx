@@ -1,5 +1,3 @@
-import { Grid } from "@raycast/api";
-
 //--------------------------------------------------------------------------------
 // All important constants for all commands should be defined here.
 //--------------------------------------------------------------------------------
@@ -10,10 +8,11 @@ export const BYTES_PER_MEGABYTE = BYTES_PER_KILOBYTE ** 2;
 export const BYTES_PER_GIGABYTE = BYTES_PER_MEGABYTE ** 2;
 
 export enum NoteAction {
-  Pin,
   Edit,
   Delete,
   Append,
+  Star,
+  Unstar,
 }
 
 export enum PrimaryAction {
@@ -120,10 +119,10 @@ export const AUDIO_FILE_EXTENSIONS = [
   "xm",
 ];
 
-export const IMAGE_SIZE_MAPPING: Map<string, Grid.ItemSize> = new Map([
-  ["small", Grid.ItemSize.Small],
-  ["large", Grid.ItemSize.Large],
-  ["medium", Grid.ItemSize.Medium],
+export const IMAGE_SIZE_MAPPING: Map<string, number> = new Map([
+  ["small", 8],
+  ["large", 3],
+  ["medium", 5],
 ]);
 
 export const ObsidianIconWhiteBold = { source: "obsidian-icon-white-bold.svg" };

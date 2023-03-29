@@ -1,0 +1,85 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "gitpod",
+  "title": "Gitpod",
+  "description": "A blazingly fast way to work with Gitpod",
+  "icon": "logo-mark.png",
+  "author": "henitchobisa",
+  "contributors": [
+    "Palanikannan1437"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "open_in_gitpod",
+      "title": "Open in Gitpod",
+      "subtitle": "Gitpod",
+      "description": "Open any GitHub Repository's Branch, Pull Request or Issue in Gitpod",
+      "mode": "view",
+      "keywords": [
+        "gitpod",
+        "gp",
+        "Open in Gitpod"
+      ]
+    },
+    {
+      "name": "menubar",
+      "title": "Recent Repositories",
+      "subtitle": "Gitpod",
+      "description": "A Menubar Icon for faster access to recently visited Repositories",
+      "mode": "menu-bar",
+      "keywords": [
+        "gitpod",
+        "gp",
+        "recent repositories",
+        "menubar"
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "personalAccessToken",
+      "title": "Personal Access Token",
+      "placeholder": "Visit https://github.com/settings/tokens",
+      "description": "Enter Classic Personal Access Token from Github",
+      "type": "password",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@graphql-codegen/cli": "^2.16.2",
+    "@graphql-codegen/typescript-graphql-request": "^4.5.8",
+    "@graphql-codegen/typescript-operations": "^2.5.11",
+    "@raycast/api": "^1.45.2",
+    "@raycast/utils": "^1.4.14",
+    "date-fns": "^2.29.3",
+    "graphql-request": "^5.1.0",
+    "lodash": "^4.17.21",
+    "node-fetch": "^3.3.0",
+    "octokit": "^2.0.10"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.14.191",
+    "@types/node": "^18.8.3",
+    "@types/react": "18.0.9",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-import": "^2.26.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish",
+    "generate": "graphql-codegen --config codegen.ts"
+  }
+}

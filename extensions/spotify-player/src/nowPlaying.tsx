@@ -104,7 +104,7 @@ function NowPlaying() {
   };
 
   const trackTitle =
-    installed && currentlyPlayingTrack ? `${currentlyPlayingTrack.artist} – ${currentlyPlayingTrack.name}` : undefined;
+    installed && currentlyPlayingTrack ? `${currentlyPlayingTrack.artist} - ${currentlyPlayingTrack.name}` : undefined;
 
   if (currentSpotifyState?.state == SpotifyPlayingState.Stopped)
     return <NowPlayingEmptyDetail title="Not Playing" showLoadingImage={false} />;
@@ -163,7 +163,7 @@ function NowPlaying() {
                   if (currentlyPlayingTrack && currentlyPlayingTrack.id) {
                     const trackId = currentlyPlayingTrack.id.replace("spotify:track:", "");
                     await startPlaySimilar({ seed_tracks: trackId });
-                    showHUD(`♫ Playing Similar – ♫ ${trackTitle}`);
+                    showHUD(`♫ Playing Similar - ♫ ${trackTitle}`);
                   }
                 }}
               />
@@ -180,7 +180,7 @@ function NowPlaying() {
                     try {
                       const response = await likeCurrentlyPlayingTrack();
                       if (response?.result) {
-                        const title = `${response.result.artist} – ${response.result.name}`;
+                        const title = `${response.result.artist} - ${response.result.name}`;
                         showHUD(`💚 ${title}`);
                       }
                     } catch (err) {
@@ -206,7 +206,7 @@ function NowPlaying() {
                 onAction={async () => {
                   const trackId = currentlyPlayingTrack.id.replace("spotify:track:", "");
                   Clipboard.copy(`https://open.spotify.com/track/${trackId}`);
-                  showHUD(`♫ Copied URL – ${trackTitle}`);
+                  showHUD(`♫ Copied URL - ${trackTitle}`);
                 }}
               />
             </ActionPanel.Section>

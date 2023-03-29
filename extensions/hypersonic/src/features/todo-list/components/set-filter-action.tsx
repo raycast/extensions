@@ -1,4 +1,5 @@
 import { Project } from '@/types/project'
+import { Status } from '@/types/status'
 import { Tag } from '@/types/tag'
 import { User } from '@/types/user'
 import { Action, ActionPanel, Color, Icon, Image } from '@raycast/api'
@@ -8,7 +9,12 @@ type SetLabelActionProps = {
   users: User[]
   tags: Tag[]
   projects: Project[]
-  onSetFilter: (filter: any, type: string) => void
+  statuses: Status[]
+  hasStatusProperty: boolean
+  onSetFilter: (
+    filter: any,
+    type: 'status' | 'projectId' | 'tag' | 'user'
+  ) => void
 }
 
 export function SetFilter({
@@ -16,6 +22,8 @@ export function SetFilter({
   tags,
   projects,
   onSetFilter,
+  hasStatusProperty,
+  statuses,
 }: SetLabelActionProps) {
   return (
     <ActionPanel.Submenu
@@ -47,21 +55,35 @@ export function SetFilter({
               source: data.icon ? data.icon : getAvatarIcon(data.title),
             }}
             title={data.title}
-            onAction={() => onSetFilter(data.id, 'project')}
+            onAction={() => onSetFilter(data.id, 'projectId')}
           />
         ))}
       </ActionPanel.Section>
-      {tags.map((data) => (
-        <Action
-          key={data.id}
-          icon={{
-            source: 'dot.png',
-            tintColor: data.color,
-          }}
-          title={data.name}
-          onAction={() => onSetFilter(data, 'tag')}
-        />
-      ))}
+      <ActionPanel.Section>
+        {tags.map((data) => (
+          <Action
+            key={data.id}
+            icon={{
+              source: 'dot.png',
+              tintColor: data.color,
+            }}
+            title={data.name}
+            onAction={() => onSetFilter(data, 'tag')}
+          />
+        ))}
+      </ActionPanel.Section>
+      {hasStatusProperty &&
+        statuses?.map((data) => (
+          <Action
+            key={data.id}
+            icon={{
+              source: data.icon,
+              tintColor: data.color,
+            }}
+            title={data.name}
+            onAction={() => onSetFilter(data, 'status')}
+          />
+        ))}
     </ActionPanel.Submenu>
   )
 }

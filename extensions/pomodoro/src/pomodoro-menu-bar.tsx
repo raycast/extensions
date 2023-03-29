@@ -1,6 +1,5 @@
 import { MenuBarExtra, Icon, launchCommand, LaunchType } from "@raycast/api";
 import { useState } from "react";
-
 import {
   createInterval,
   getCurrentInterval,
@@ -20,11 +19,16 @@ export default function TogglePomodoroTimer() {
   const [currentInterval, setCurrentInterval] = useState<Interval | undefined>(getCurrentInterval());
 
   if (currentInterval && progress(currentInterval) >= 100) {
-    launchCommand({
-      name: "pomodoro-control-timer",
-      type: LaunchType.UserInitiated,
-      context: { currentInterval },
-    });
+    try {
+      launchCommand({
+        name: "pomodoro-control-timer",
+        type: LaunchType.UserInitiated,
+        context: { currentInterval },
+      });
+    } catch (error) {
+      console.error(error);
+    }
+
     resetInterval();
   }
 
@@ -45,7 +49,8 @@ export default function TogglePomodoroTimer() {
     setCurrentInterval(undefined);
   }
 
-  let icon = "tomato.png";
+  let icon;
+  icon = { source: { light: "tomato-light.png", dark: "tomato-dark.png" } };
   if (currentInterval) {
     const progressInQuarters = Math.floor(progress(currentInterval) / 25) * 25;
     icon = Icon[(progressInQuarters > 0 ? `CircleProgress${progressInQuarters}` : "Circle") as keyof typeof Icon];

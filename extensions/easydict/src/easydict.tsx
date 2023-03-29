@@ -2,22 +2,31 @@
  * @author: tisfeng
  * @createTime: 2022-06-23 14:19
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-10-26 21:47
+ * @lastEditTime: 2023-03-17 22:48
  * @fileName: easydict.tsx
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
  */
 
-import { getSelectedText, Icon, List } from "@raycast/api";
+import { Icon, LaunchProps, List, getSelectedText } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { configAxiosProxy, delayGetSystemProxy } from "./axiosConfig";
-import { checkIfPreferredLanguagesConflict, getListItemIcon, getWordAccessories, ListActionPanel } from "./components";
+import { ListActionPanel, checkIfPreferredLanguagesConflict, getListItemIcon, getWordAccessories } from "./components";
 import { DataManager } from "./dataManager/dataManager";
 import { QueryWordInfo } from "./dictionary/youdao/types";
 import { LanguageItem } from "./language/type";
 import { myPreferences, preferredLanguage1 } from "./preferences";
 import { DisplaySection } from "./types";
 import { checkIfInstalledEudic, checkIfNeedShowReleasePrompt, trimTextLength } from "./utils";
+
+const disableConsoleLog = false;
+
+if (disableConsoleLog) {
+  // Since too many logs will cause bugs, we need to disable the console.log in development. Ref: https://github.com/raycast/extensions/pull/3917#issuecomment-1370771358
+  console.log = function () {
+    // do nothing
+  };
+}
 
 console.log(`enter easydict.tsx`);
 
@@ -27,14 +36,14 @@ interface EasydictArguments {
   queryText?: string;
 }
 
-export default function (props: { arguments: EasydictArguments }) {
+export default function (props: LaunchProps<{ arguments: EasydictArguments }>) {
   const isConflict = checkIfPreferredLanguagesConflict();
   if (isConflict) {
     return isConflict;
   }
 
   const { queryText } = props.arguments;
-  const trimQueryText = queryText ? trimTextLength(queryText) : undefined;
+  const trimQueryText = queryText ? trimTextLength(queryText) : props.fallbackText;
 
   const [isLoadingState, setLoadingState] = useState<boolean>(false);
   const [isShowingDetail, setIsShowingDetail] = useState<boolean>(false);
@@ -91,6 +100,7 @@ export default function (props: { arguments: EasydictArguments }) {
     if (inputText === undefined) {
       setup();
     }
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [inputText]);
 
@@ -98,21 +108,23 @@ export default function (props: { arguments: EasydictArguments }) {
    * Do something setup when the extension is activated. Only run once.
    */
   function setup() {
-    console.log(`setup when extension is activated.`);
+    // console.log(`setup when extension is activated.`);
 
     if (trimQueryText?.length) {
-      console.log(`---> arguments queryText: ${trimQueryText}`);
+      console.warn(`---> arguments queryText: ${trimQueryText}`);
     }
 
     const startTime = Date.now();
 
+    const userInputText = trimQueryText;
+
     // If enabled system proxy, we need to wait for the system proxy to be ready.
     if (myPreferences.enableSystemProxy) {
       // If has arguments, use arguments text as input text first.
-      if (trimQueryText?.length) {
+      if (userInputText?.length) {
         configAxiosProxy().then(() => {
           console.log(`after config proxy`);
-          updateInputTextAndQueryText(trimQueryText, false);
+          updateInputTextAndQueryText(userInputText as string, false);
         });
       } else if (myPreferences.enableAutomaticQuerySelectedText) {
         Promise.all([getSelectedText(), configAxiosProxy()])
@@ -132,16 +144,16 @@ export default function (props: { arguments: EasydictArguments }) {
         configAxiosProxy();
       }
     } else {
-      if (trimQueryText?.length) {
-        updateInputTextAndQueryText(trimQueryText, false);
+      if (userInputText?.length) {
+        updateInputTextAndQueryText(userInputText, false);
       } else if (myPreferences.enableAutomaticQuerySelectedText) {
         querySelecedtText().then(() => {
           console.log(`after query selected text`);
         });
       }
-
-      delayGetSystemProxy();
     }
+
+    delayGetSystemProxy();
 
     checkIfInstalledEudic().then((isInstalled) => {
       setIsInstalledEudic(isInstalled);
@@ -221,6 +233,7 @@ export default function (props: { arguments: EasydictArguments }) {
   }
 
   function onInputChange(text: string) {
+    // console.warn(`onInputChange: ${text}`);
     updateInputTextAndQueryText(text, true);
   }
 
