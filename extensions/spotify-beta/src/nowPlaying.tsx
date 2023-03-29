@@ -11,6 +11,7 @@ import {
   getPreferenceValues,
   launchCommand,
   LaunchType,
+  Toast,
 } from "@raycast/api";
 import { useCurrentlyPlaying } from "./hooks/useCurrentlyPlaying";
 import { View } from "./components/View";
@@ -122,16 +123,21 @@ by ${artistName}
             icon={Icon.HeartDisabled}
             title="Dislike"
             onAction={async () => {
-              await removeFromMySavedTracks({
-                trackIds: trackId ? [trackId] : [],
-              });
               if (closeWindowOnAction) {
-                await showHUD(`Disliked ${name}`);
+                await removeFromMySavedTracks({
+                  trackIds: trackId ? [trackId] : [],
+                });
+                await showHUD("Disliked");
                 await popToRoot();
                 return;
               }
-              await showToast({ title: `Disliked ${name}` });
+              const toast = await showToast({ title: "Disliking...", style: Toast.Style.Animated });
+              await removeFromMySavedTracks({
+                trackIds: trackId ? [trackId] : [],
+              });
               await containsMySavedTracksRevalidate();
+              toast.title = "Disliked";
+              toast.style = Toast.Style.Success;
             }}
           />
         )}
@@ -141,16 +147,21 @@ by ${artistName}
             icon={Icon.Heart}
             title="Like"
             onAction={async () => {
-              await addToMySavedTracks({
-                trackIds: trackId ? [trackId] : [],
-              });
               if (closeWindowOnAction) {
-                await showHUD(`Liked ${name}`);
+                await addToMySavedTracks({
+                  trackIds: trackId ? [trackId] : [],
+                });
+                await showHUD("Liked");
                 await popToRoot();
                 return;
               }
-              await showToast({ title: `Liked ${name}` });
+              const toast = await showToast({ title: "Liking...", style: Toast.Style.Animated });
+              await addToMySavedTracks({
+                trackIds: trackId ? [trackId] : [],
+              });
               await containsMySavedTracksRevalidate();
+              toast.title = "Liked";
+              toast.style = Toast.Style.Success;
             }}
           />
         )}
