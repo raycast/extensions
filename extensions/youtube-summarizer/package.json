@@ -1,0 +1,53 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "youtube-summarizer",
+  "title": "YouTube Summarizer",
+  "description": "Summarize videos using Raycast AI",
+  "icon": "youtube.png",
+  "author": "vimtor",
+  "categories": [
+    "Data",
+    "Productivity",
+    "Applications"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Summarize Video",
+      "subtitle": "YouTube",
+      "description": "Summarizes video from URL",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "url",
+          "type": "text",
+          "placeholder": "youtube.com/watch?v=",
+          "description": "URL of the video to summarize",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.49.0",
+    "youtube-transcript": "^1.0.5",
+    "langchain": "^0.0.43",
+    "ytdl-core": "^4.11.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
