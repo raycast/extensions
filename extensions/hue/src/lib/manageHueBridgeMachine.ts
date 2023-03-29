@@ -30,6 +30,7 @@ export function manageHueBridgeMachine(revalidateResources: () => void) {
     {
       id: "manage-hue-bridge",
       initial: "loadCredentials",
+      predictableActionArguments: true,
       context: {
         bridgeIpAddress: undefined,
         bridgeUsername: undefined,
