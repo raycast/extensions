@@ -1,5 +1,5 @@
 export interface IListItem {
   title: string;
-  url: string;
-  author: string;
+  link: string;
+  creator: string;
 }
