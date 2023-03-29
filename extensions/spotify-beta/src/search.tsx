@@ -113,7 +113,7 @@ function SearchCommand() {
         {searchFilter === "all" && (
           <>
             <ArtistsSection type="list" limit={3} artists={searchData?.artists?.items} />
-            <TracksSection limit={6} tracks={searchData?.tracks?.items} />
+            <TracksSection limit={4} tracks={searchData?.tracks?.items} />
             <AlbumsSection type="list" limit={6} albums={searchData?.albums?.items} />
             <PlaylistsSection type="list" limit={6} playlists={searchData?.playlists?.items} />
             <ShowsSection type="list" limit={3} shows={searchData?.shows?.items} />

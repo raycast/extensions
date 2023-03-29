@@ -2,10 +2,10 @@ import { Action, getPreferenceValues, Icon, popToRoot, showHUD, showToast, Toast
 import { pause } from "../api/pause";
 
 type PauseActionProps = {
-  revalidate?: () => void;
+  onPause?: () => void;
 };
 
-export function PauseAction({ revalidate }: PauseActionProps) {
+export function PauseAction({ onPause }: PauseActionProps) {
   const { closeWindowOnAction } = getPreferenceValues<{ closeWindowOnAction?: boolean }>();
 
   return (
@@ -21,8 +21,8 @@ export function PauseAction({ revalidate }: PauseActionProps) {
         }
         const toast = await showToast({ title: "Pausing...", style: Toast.Style.Animated });
         await pause();
-        if (revalidate) {
-          await revalidate();
+        if (onPause) {
+          await onPause();
         }
         toast.title = "Paused";
         toast.style = Toast.Style.Success;

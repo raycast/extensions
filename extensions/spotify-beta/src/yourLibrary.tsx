@@ -58,14 +58,16 @@ function YourLibraryCommand() {
             <PlaylistsSection type="list" limit={6} playlists={myLibraryData?.playlists?.items} />
             <AlbumsSection type="list" limit={6} albums={myLibraryData?.albums?.items} />
             <ArtistsSection type="list" limit={6} artists={myLibraryData?.artists?.items} />
-            <TracksSection limit={6} tracks={myLibraryData?.tracks?.items} />
+            <TracksSection limit={6} tracks={myLibraryData?.tracks?.items} title="Liked Songs" />
             <ShowsSection type="list" limit={6} shows={myLibraryData?.shows?.items} />
-            <EpisodesSection limit={3} episodes={myLibraryData?.episodes?.items} />
+            <EpisodesSection limit={6} episodes={myLibraryData?.episodes?.items} title="Saved Episodes" />
           </>
         )}
 
-        {searchFilter === "tracks" && <TracksSection tracks={myLibraryData?.tracks?.items} />}
-        {searchFilter === "episodes" && <EpisodesSection episodes={myLibraryData?.episodes?.items} />}
+        {searchFilter === "tracks" && <TracksSection tracks={myLibraryData?.tracks?.items} title="Liked Songs" />}
+        {searchFilter === "episodes" && (
+          <EpisodesSection episodes={myLibraryData?.episodes?.items} title="Saved Episodes" />
+        )}
 
         {searchFilter === "playlists" && <PlaylistsSection type="list" playlists={myLibraryData?.playlists?.items} />}
       </List>

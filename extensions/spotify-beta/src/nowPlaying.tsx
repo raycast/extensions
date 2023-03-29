@@ -234,8 +234,8 @@ ${description}
       isLoading={currentlyPlayingIsLoading || playbackStateIsLoading}
       actions={
         <ActionPanel>
-          {!isPaused && <PauseAction revalidate={playbackStateRevalidate} />}
-          {isPaused && <PlayAction revalidate={playbackStateRevalidate} />}
+          {!isPaused && <PauseAction onPause={() => playbackStateRevalidate()} />}
+          {isPaused && <PlayAction onPlay={() => playbackStateRevalidate()} />}
           {trackOrEpisodeActions}
           {myPlaylistsData?.items && meData && uri && (
             <AddToPlaylistAction playlists={myPlaylistsData.items} meData={meData} uri={uri} />

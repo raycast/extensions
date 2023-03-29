@@ -5,15 +5,16 @@ import TrackListItem from "./TrackListItem";
 type TracksSectionProps = {
   tracks: SimplifiedTrackObject[] | undefined;
   limit?: number;
+  title?: string;
 };
 
-export function TracksSection({ tracks, limit }: TracksSectionProps) {
+export function TracksSection({ tracks, limit, title = "Songs" }: TracksSectionProps) {
   if (!tracks) return null;
 
   const items = tracks.slice(0, limit || tracks.length);
 
   return (
-    <List.Section title="Songs">
+    <List.Section title={title}>
       {items?.map((track) => (
         <TrackListItem
           key={track.id}
