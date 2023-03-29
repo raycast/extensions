@@ -1,5 +1,5 @@
+import { LocalStorage, showToast, Toast } from "@raycast/api"
 import { exec as execCallback } from "child_process"
-import { LocalStorage, showToast, Toast, ToastStyle } from "@raycast/api"
 
 export interface Connection {
     name: string
