@@ -220,8 +220,35 @@
       ]
     }
   ],
+  "preferences": [
+    {
+      "name": "showBrowser",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "title": "Recommended Apps",
+      "label": "Browser",
+      "description": "Whether to show the browser in the recommended apps"
+    },
+    {
+      "name": "showEmail",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Email Client",
+      "description": "Whether to show the email client in the recommended apps"
+    },
+    {
+      "name": "showOther",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Other Apps",
+      "description": "Whether to show other apps in the recommended apps"
+    }
+  ],
   "dependencies": {
-    "@raycast/api": "^1.41.1"
+    "@raycast/api": "^1.48.9"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",
