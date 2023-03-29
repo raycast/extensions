@@ -26,7 +26,7 @@ const scope = [
 export const oauthClient = new OAuth.PKCEClient({
   redirectMethod: OAuth.RedirectMethod.Web,
   providerName: "Spotify",
-  providerIcon: "spotify-icon.png",
+  providerIcon: "spotify-icon.svg",
   description: "Connect your Spotify account",
   providerId: "spotify",
 });

@@ -19,7 +19,7 @@ export function FooterAction({ url, uri, title }: FooterActionProps) {
         }}
       />
       {isSpotifyInstalled ? (
-        <Action.Open icon="spotify-icon.png" title="Open on Spotify" target={uri || "spotify"} />
+        <Action.Open icon="spotify-icon.svg" title="Open on Spotify" target={uri || "spotify"} />
       ) : (
         <Action.OpenInBrowser title="Open on Spotify Web" url={url || "https://play.spotify.com"} />
       )}

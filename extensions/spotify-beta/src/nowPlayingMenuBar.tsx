@@ -210,7 +210,7 @@ function NowPlayingMenuBarCommand() {
           }}
         />
         <MenuBarExtra.Item
-          icon="spotify-icon.png"
+          icon="spotify-icon.svg"
           title="Open on Spotify"
           onAction={() =>
             isSpotifyInstalled ? open(uri || "spotify") : open(external_urls?.spotify || "https://play.spotify.com")
@@ -239,7 +239,7 @@ function NothingPlaying({ title = "Nothing is playing right now", isLoading }: {
         <MenuBarExtra.Section>
           <MenuBarExtra.Item
             title="Open Spotify"
-            icon="spotify-icon.png"
+            icon="spotify-icon.svg"
             onAction={() => (isSpotifyInstalled ? open("spotify:") : open("https://play.spotify.com"))}
           />
         </MenuBarExtra.Section>

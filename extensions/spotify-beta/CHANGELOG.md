@@ -40,10 +40,6 @@ Spotify Player v2 is a complete re-write, focusing on performance, maintainabili
 - **Browse All:** Use the Spotify App instead
 - **Featured Playlists:** Use the Spotify App instead
 
-#### Removed features
-
-- **"Close Window on Action" Preference:** This has been taken into account when building each feature, ensuring a consistent experience for everyone
-
 We hope you enjoy the new and improved Spotify Player Extension — we've [obsessed over every detail](https://twitter.com/peduarte/status/1638101325312577536).
 
 ## [Fix] - 2023-01-13
