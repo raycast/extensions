@@ -19,6 +19,7 @@ import { CouldNotConnectToHueBridgeError, NoHueBridgeConfiguredError } from "./e
 import { getTransitionTimeInMs } from "./utils";
 import { useMachine } from "@xstate/react";
 import { manageHueBridgeMachine } from "./manageHueBridgeMachine";
+import { useDeepMemo } from "@raycast/utils/dist/useDeepMemo";
 import Style = Toast.Style;
 
 let _api: Api;
@@ -105,13 +106,15 @@ export function useHue() {
     }
   );
 
-  const [hueBridgeState, send] = useMachine(
+  const hueBridgeMachine = useDeepMemo(() =>
     manageHueBridgeMachine(() => {
       revalidateLights();
       revalidateGroups();
       revalidateScenes();
     })
   );
+
+  const [hueBridgeState, send] = useMachine(hueBridgeMachine);
 
   const sendHueMessage: SendHueMessage = (message: "link" | "retry" | "done" | "unlink") => {
     send(message.toUpperCase());
