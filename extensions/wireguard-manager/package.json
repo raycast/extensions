@@ -5,7 +5,6 @@
   "description": "Manage WireGuard Connections",
   "icon": "wireguard.png",
   "author": "ventrue",
-  "owner": "bytetrance",
   "access": "public",
   "categories": [
     "Productivity"
