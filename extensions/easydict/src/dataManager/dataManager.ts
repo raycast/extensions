@@ -742,8 +742,7 @@ export class DataManager {
    * Query OpenAI translate.
    */
   private queryOpenAITranslate(queryWordInfo: QueryWordInfo) {
-    // if (myPreferences.enableOpenAITranslate)
-    {
+    if (myPreferences.enableOpenAITranslate) {
       const type = TranslationType.OpenAI;
       this.addQueryToRecordList(type);
 
