@@ -6,7 +6,8 @@
   "icon": "imgur.png",
   "author": "BalliAsghar",
   "contributors": [
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "Cau"
   ],
   "categories": [
     "Applications",
@@ -31,18 +32,19 @@
   ],
   "preferences": [
     {
-      "name": "clientID",
-      "title": "Client ID",
-      "description": "You can get your own Client ID from https://api.imgur.com/oauth2/addclient",
       "default": "aee191b1f4042c1",
-      "type": "textfield",
-      "required": false
+      "description": "You can get your own Client ID from https://api.imgur.com/oauth2/addclient",
+      "name": "clientID",
+      "required": false,
+      "title": "Client ID",
+      "type": "textfield"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.46.0",
     "axios": "^1.2.3",
     "form-data": "^4.0.0",
+    "imgur": "^2.2.0",
     "mime-types": "^2.1.35"
   },
   "devDependencies": {
