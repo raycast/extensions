@@ -4,7 +4,6 @@ import {
   adjustColorTemperature,
   calculateAdjustedBrightness,
   calculateAdjustedColorTemperature,
-  SendHueMessage,
   setGroupBrightness,
   setGroupColor,
   setScene,
@@ -13,7 +12,7 @@ import {
   useHue,
 } from "./lib/hue";
 import { MutatePromise } from "@raycast/utils";
-import { CssColor, Group, Room, Scene } from "./lib/types";
+import { CssColor, Group, Room, Scene, SendHueMessage } from "./lib/types";
 import { getIconForColor, getLightIcon } from "./lib/utils";
 import { BRIGHTNESS_MAX, BRIGHTNESS_MIN, BRIGHTNESSES, COLOR_TEMP_MAX, COLOR_TEMP_MIN, COLORS } from "./lib/constants";
 import { hexToXy } from "./lib/colors";

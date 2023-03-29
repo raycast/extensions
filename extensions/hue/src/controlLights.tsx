@@ -5,7 +5,6 @@ import {
   adjustColorTemperature,
   calculateAdjustedBrightness,
   calculateAdjustedColorTemperature,
-  SendHueMessage,
   setLightBrightness,
   setLightColor,
   toggleLight,
@@ -13,7 +12,7 @@ import {
 } from "./lib/hue";
 import { getIconForColor, getLightIcon } from "./lib/utils";
 import { MutatePromise } from "@raycast/utils";
-import { CssColor, Group, Light } from "./lib/types";
+import { CssColor, Group, Light, SendHueMessage } from "./lib/types";
 import { BRIGHTNESS_MAX, BRIGHTNESS_MIN, BRIGHTNESSES, COLOR_TEMP_MAX, COLOR_TEMP_MIN, COLORS } from "./lib/constants";
 import ManageHueBridge from "./components/ManageHueBridge";
 import UnlinkAction from "./components/UnlinkAction";

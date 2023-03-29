@@ -1,5 +1,5 @@
 import { Action, Alert, confirmAlert, Icon } from "@raycast/api";
-import { SendHueMessage } from "../lib/hue";
+import { SendHueMessage } from "../lib/types";
 import ActionStyle = Alert.ActionStyle;
 
 export default function UnlinkAction(props: { sendHueMessage: SendHueMessage }) {

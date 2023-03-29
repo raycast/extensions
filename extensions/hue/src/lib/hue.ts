@@ -2,7 +2,7 @@ import { discovery, v3 } from "node-hue-api";
 import { Api } from "node-hue-api/dist/esm/api/Api";
 import { LocalStorage, showToast, Toast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { Group, Light, Scene } from "./types";
+import { Group, HueMessage, Light, Scene, SendHueMessage } from "./types";
 import { hexToXy } from "./colors";
 import {
   APP_NAME,
@@ -40,8 +40,6 @@ export async function getAuthenticatedApi(): Promise<Api> {
 
   return _api;
 }
-
-export type SendHueMessage = (message: "link" | "retry" | "done" | "unlink") => void;
 
 // TODO: Replace with Hue API V2 (for which there is no library yet) to enable more features.
 //  An example is lights have types (e.g. ‘Desk Lamp’ or ‘Ceiling Fixture’) which can be used to display relevant icons instead of circles.
@@ -116,7 +114,7 @@ export function useHue() {
 
   const [hueBridgeState, send] = useMachine(hueBridgeMachine);
 
-  const sendHueMessage: SendHueMessage = (message: "link" | "retry" | "done" | "unlink") => {
+  const sendHueMessage: SendHueMessage = (message: HueMessage) => {
     send(message.toUpperCase());
   };
 
