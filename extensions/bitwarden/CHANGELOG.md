@@ -1,5 +1,9 @@
 # Bitwarden Changelog
 
+## [Fix] - 2023-03-29
+
+- Fix copy TOTP action
+
 ## [Vault Timeout and Reprompting] - 2023-03-25
 
 - Added a Vault Timeout options that locks your vault after a certain time of inactivity
