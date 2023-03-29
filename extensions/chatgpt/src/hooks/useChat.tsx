@@ -68,6 +68,7 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
               .toString()
               .split("\n")
               .filter((line: string) => line.trim() !== "");
+
             for (const line of lines) {
               const message = line.replace(/^data: /, "");
               if (message === "[DONE]") {
@@ -134,8 +135,8 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
       .catch((err) => {
         toast.title = "Error";
         if (err) {
-          if (err.response.status === 404) {
-            toast.message = `${model.option} is not supported`;
+          if (err?.response?.data?.error?.message) {
+            toast.message = err.response.data.error.message;
           } else {
             toast.message = err.message;
           }
