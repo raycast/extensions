@@ -15,7 +15,7 @@ const getHistoryQuery = (table: string, date_field: string, terms: string[]) =>
              datetime(${date_field} / 1000000 + (strftime('%s', '1601-01-01')), 'unixepoch', 'localtime') as lastVisited
       FROM ${table}
       WHERE ${whereClauses(table, terms)}
-      ORDER BY ${date_field} DESC LIMIT 30;`;
+      ORDER BY ${date_field} DESC LIMIT 100;`;
 
 export function useHistorySearch(profiles: BraveProfile[], query?: string): SearchResult<HistoryEntry>[] {
   const [profileHistories, setProfileHistories] = useState<{ [id: string]: SearchResult<HistoryEntry> }>({});

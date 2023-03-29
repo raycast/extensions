@@ -44,6 +44,7 @@ export async function openNewTab({
   profileOriginal,
   openTabInProfile,
   newWindow,
+  incognito,
 }: {
   url?: string;
   query?: string;
@@ -51,6 +52,7 @@ export async function openNewTab({
   profileOriginal?: string;
   openTabInProfile: SettingsProfileOpenBehaviour;
   newWindow?: boolean;
+  incognito?: boolean;
 }): Promise<boolean | string> {
   setTimeout(() => {
     popToRoot({ clearSearchBar: true });
@@ -75,6 +77,7 @@ export async function openNewTab({
         `
     tell application "Brave Browser"
       ${newWindow ? "make new window" : ""}
+      ${incognito ? `make new window with properties {mode: "incognito"}` : ""}
       activate
       tell window 1
           set newTab to make new tab ` +
@@ -84,7 +87,7 @@ export async function openNewTab({
           ? 'with properties {URL:"https://www.google.com/search?q=' + query + '"}'
           : "") +
         ` 
-        ${newWindow ? "close tab 1" : ""}
+        ${newWindow || incognito ? "close tab 1" : ""}
       end tell
     end tell
     return true

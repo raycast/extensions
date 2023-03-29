@@ -44,9 +44,14 @@ export default function Command() {
     >
       <List.Section key={"new-tab"} title={"New Tab"}>
         <List.Item
-          title={!searchText ? "Open Empty Tab" : `Search "${searchText}"`}
+          title={!searchText ? "Open New Tab" : `Search "${searchText}"`}
           icon={{ source: !searchText ? Icon.Plus : Icon.MagnifyingGlass }}
           actions={<BraveActions.NewTab query={searchText} />}
+        />
+        <List.Item
+          title={!searchText ? "Open New Incognito Tab" : `Search "${searchText}" In Incognito`}
+          icon={{ source: !searchText ? Icon.Plus : Icon.MagnifyingGlass }}
+          actions={<BraveActions.NewTab query={searchText} incognito={true} />}
         />
       </List.Section>
       <List.Section key={"open-tabs"} title={"Open Tabs - All"}>

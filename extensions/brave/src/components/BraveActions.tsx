@@ -11,15 +11,15 @@ export class BraveActions {
   public static TabHistory = HistoryItemActions;
 }
 
-function NewTabActions({ query }: { query?: string }): ReactElement {
+function NewTabActions({ query, incognito }: { query?: string; incognito?: boolean }): ReactElement {
   const { openTabInProfile } = getPreferenceValues<Preferences>();
   const [profileCurrent] = useCachedState(BRAVE_PROFILE_KEY, DEFAULT_BRAVE_PROFILE_ID);
 
   return (
     <ActionPanel title="New Tab">
       <Action
-        onAction={() => openNewTab({ query, profileCurrent, openTabInProfile })}
-        title={query ? `Search "${query}"` : "Open Empty Tab"}
+        onAction={() => openNewTab({ query, profileCurrent, openTabInProfile, incognito })}
+        title={query ? `Search "${query}"` : "Open New Tab"}
         icon={Icon.Globe}
       />
     </ActionPanel>
@@ -39,6 +39,14 @@ function TabListItemActions({ tab }: { tab: Tab }) {
         onAction={async () => {
           await closeTab(tab.tabIndex);
           await openNewTab({ url: tab.url, profileCurrent, openTabInProfile, newWindow: true });
+        }}
+      />
+      <Action
+        title="Move To Incognito Window"
+        icon={Icon.EyeDisabled}
+        onAction={async () => {
+          await closeTab(tab.tabIndex);
+          await openNewTab({ url: tab.url, profileCurrent, openTabInProfile, incognito: true });
         }}
       />
       <Action.CopyToClipboard title="Copy URL" content={tab.url} />
@@ -70,6 +78,13 @@ function HistoryItemActions({
         icon={Icon.Window}
         onAction={async () =>
           await openNewTab({ url, profileOriginal, profileCurrent, openTabInProfile, newWindow: true })
+        }
+      />
+      <Action
+        title="Open In Incognito Window"
+        icon={Icon.EyeDisabled}
+        onAction={async () =>
+          await openNewTab({ url, profileOriginal, profileCurrent, openTabInProfile, incognito: true })
         }
       />
       <ActionPanel.Section title={"Open in profile"}>
