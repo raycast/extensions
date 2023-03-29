@@ -15,6 +15,8 @@ import { useEffect, useState } from "react";
 import { getPreferenceValues } from "@raycast/api";
 import { ImgurClient } from "imgur";
 import path from "path";
+import mime from "mime-types";
+import { ALOWED_IMGUR_CONTENT_TYPES } from "./common/constants";
 
 const { clientID } = getPreferenceValues();
 const imgurClient = new ImgurClient({ clientId: clientID });
@@ -60,8 +62,20 @@ export type StoreData = UploadResponse | AlbumGroup;
 
 export default function CommandView() {
   const [albumTitle, setAlbumTitle] = useState<string>("");
-  const [mediaPaths, setMediaPaths] = useState<Array<string>>([]);
+  const [mediaPaths, _setMediaPaths] = useState<Array<string>>([]);
   const [uploading, setUploading] = useState<boolean>(false);
+
+  const setMediaPaths = (paths: Array<string> | ((values: Array<string>) => Array<string>)) => {
+    const values = typeof paths === "function" ? paths(mediaPaths) : paths;
+
+    _setMediaPaths(
+      values.filter(
+        (mediaPath) =>
+          path.basename(mediaPath).includes(".") &&
+          ALOWED_IMGUR_CONTENT_TYPES.find((item) => item === mime.lookup(path.basename(mediaPath)))
+      )
+    );
+  };
 
   /**
    * Load initial environment selected finder items
@@ -207,6 +221,7 @@ export default function CommandView() {
         allowMultipleSelection={true}
         value={mediaPaths}
         onChange={setMediaPaths}
+        canChooseDirectories={false}
       />
     </Form>
   );
