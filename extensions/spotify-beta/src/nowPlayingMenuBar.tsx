@@ -186,10 +186,14 @@ function NowPlayingMenuBarCommand() {
             <MenuBarExtra.Item
               key={device.id}
               title={device.name as string}
-              icon={device.is_active ? Icon.SpeakerOn : { source: Icon.SpeakerOff, tintColor: Color.SecondaryText }}
+              icon={
+                device.is_active
+                  ? { source: Icon.SpeakerOn, tintColor: Color.Green }
+                  : { source: Icon.SpeakerOff, tintColor: Color.SecondaryText }
+              }
               onAction={async () => {
                 if (device.id) {
-                  await transferMyPlayback(device.id);
+                  await transferMyPlayback(device.id, isPaused ? false : true);
                 }
                 await showHUD(`Connected to ${device.name}`);
               }}
