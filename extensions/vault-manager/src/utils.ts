@@ -105,6 +105,7 @@ export async function getVaultClient(): Promise<NodeVault.client> {
   }
 
   // get token if needed
+  let token;
   if (!tokenCache) {
     if (preferences.loginMethod === "ldap") {
       if (!preferences.ldap || !preferences.password) {
@@ -126,22 +127,18 @@ export async function getVaultClient(): Promise<NodeVault.client> {
         token: body.auth.client_token,
         expiration: Date.now() + body.auth.lease_duration * 1000,
       };
+      // and save it
+      cache.set(VAULT_TOKEN_CACHE_KEY, JSON.stringify(tokenCache));
+      console.info("Logged successfully, saving token in cache");
+      token = tokenCache.token;
     } else if (preferences.loginMethod === "token") {
       if (!preferences.token) {
         throw new ConfigurationError("Token method needs token to be set in preferences");
       }
-      const expiration = new Date();
-      expiration.setFullYear(expiration.getFullYear() + 1);
-      tokenCache = {
-        token: preferences.token,
-        expiration: expiration.getTime(),
-      };
+      token = preferences.token;
     } else {
       throw new Error("Unknown login method");
     }
-    // and save it
-    cache.set(VAULT_TOKEN_CACHE_KEY, JSON.stringify(tokenCache));
-    console.info("Logged successfully, saving token in cache");
   }
 
   // return node vault client
@@ -149,7 +146,7 @@ export async function getVaultClient(): Promise<NodeVault.client> {
     apiVersion: "v1",
     endpoint: vaultUrl,
     namespace: getVaultNamespace(),
-    token: tokenCache.token,
+    token: token,
   });
 }
 
