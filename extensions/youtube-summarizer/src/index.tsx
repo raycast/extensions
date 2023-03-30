@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { YoutubeTranscript } from "youtube-transcript";
+import {useEffect, useState} from "react";
+import {YoutubeTranscript} from "youtube-transcript";
 import {
   Action,
   ActionPanel,
@@ -14,7 +14,7 @@ import {
 import ytdl from "ytdl-core";
 
 export async function getVideoSections(text: string) {
-  const chunks = text.match(/.{1,6000}/g) || [];
+  const chunks = text.match(/.{1,5000}/g) || [];
   const jobs = chunks.map((chunk) => {
     return unstable_AI.ask(`${chunk}\n\n---\n\nSummarize the above segment of YouTube video transcriptions.`);
   });
@@ -29,7 +29,7 @@ async function summarizeVideo(url: string) {
     .join(" ")
     .replaceAll("\n", " ");
 
-  if (fullTranscript.length < 6000) {
+  if (fullTranscript.length < 5000) {
     return fullTranscript;
   }
 
@@ -40,12 +40,23 @@ async function getVideoInfo(url: string) {
   const information = await ytdl.getBasicInfo(url);
   const title = information.videoDetails.title;
   const author = information.videoDetails.author.name;
-  return { title, author };
+  return {title, author};
 }
 
 export default function Command(props: { arguments: { url: string } }) {
   const [sections, setSections] = useState("");
   const [metadata, setMetadata] = useState<null | { title: string; author: string }>(null);
+  const isGenerating = !!sections && !!metadata;
+  const {
+    data: summary,
+    isLoading,
+    revalidate,
+  } = useUnstableAI(
+    `${sections}---\n\nSummarize the above YouTube video segments from a video titled "${metadata?.title}" by ${metadata?.author}.`,
+    {
+      execute: isGenerating
+    }
+  );
 
   if (!props.arguments.url || !ytdl.validateURL(props.arguments.url)) {
     showToast({
@@ -62,38 +73,22 @@ export default function Command(props: { arguments: { url: string } }) {
     getVideoInfo(props.arguments.url).then(setMetadata);
   }, []);
 
-  if (!sections || !metadata) {
-    return <Detail markdown={`# ${metadata?.title ?? ""}`} isLoading />;
-  }
-
-  return <Summary sections={sections} title={metadata.title} author={metadata.author} />;
-}
-
-function Summary({ sections, title, author }: { sections: string; title: string; author: string }) {
-  const {
-    data: summary,
-    isLoading,
-    revalidate,
-  } = useUnstableAI(
-    `${sections}---\n\nSummarize the above YouTube video segments from a video titled "${title}" by ${author}.`
-  );
-
   return (
     <Detail
-      markdown={`# ${title}\n\n${summary}`}
-      isLoading={isLoading}
+      markdown={`# ${metadata?.title ?? ""}\n\n${summary}`}
+      isLoading={!isGenerating || isLoading}
       actions={
         <ActionPanel>
-          <Action.CopyToClipboard title="Copy Summary" content={summary} />
-          <Action.Paste content={summary} />
+          <Action.CopyToClipboard title="Copy Summary" content={summary}/>
+          <Action.Paste content={summary}/>
           <Action
             title="Regenerate Summary"
             onAction={revalidate}
             icon={Icon.ArrowCounterClockwise}
-            shortcut={{ key: "r", modifiers: ["cmd"] }}
+            shortcut={{key: "r", modifiers: ["cmd"]}}
           />
         </ActionPanel>
       }
     />
-  );
+  )
 }
