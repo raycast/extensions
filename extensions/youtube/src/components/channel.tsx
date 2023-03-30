@@ -1,11 +1,25 @@
-import { ActionPanel, Color, Detail, Icon, Image, List, Grid, Action, showToast, Toast } from "@raycast/api";
+import {
+  ActionPanel,
+  Color,
+  Detail,
+  Icon,
+  Image,
+  List,
+  Grid,
+  Action,
+  showToast,
+  Toast,
+  getPreferenceValues,
+} from "@raycast/api";
 import React from "react";
 import { compactNumberFormat, formatDate, getErrorMessage } from "../lib/utils";
-import { Channel, getChannel, getPrimaryActionPreference, PrimaryAction, useRefresher } from "../lib/youtubeapi";
+import { Channel, getChannel, useRefresher } from "../lib/youtubeapi";
 import { OpenChannelInBrowser, SearchChannelVideosAction, ShowRecentPlaylistVideosAction } from "./actions";
 import { addRecentChannel } from "./recent_channels";
-import { getViewLayout } from "./listgrid";
 import he from "he";
+import { ViewLayout, PrimaryAction, Preferences } from "../lib/types";
+
+const { view, primaryaction } = getPreferenceValues<Preferences>();
 
 export function ChannelItemDetail(props: { channel: Channel; isLoading?: boolean | undefined }): JSX.Element {
   const channel = props.channel;
@@ -14,7 +28,6 @@ export function ChannelItemDetail(props: { channel: Channel; isLoading?: boolean
   let mdParts = [];
   if (channel) {
     statistics = channel.statistics;
-    console.log(statistics);
     channelId = channel.id;
     const desc = channel.description || "No description";
     const title = channel.title;
@@ -76,8 +89,13 @@ export function ChannelItemDetail(props: { channel: Channel; isLoading?: boolean
   );
 }
 
-export function ChannelItem(props: { channel: Channel; actions?: JSX.Element | undefined }): JSX.Element {
-  const channel = props.channel;
+export function ChannelItem({
+  channel,
+  actions,
+}: {
+  channel: Channel;
+  actions?: JSX.Element | undefined;
+}): JSX.Element {
   const channelId = channel.id;
   const title = he.decode(channel.title);
   let parts: string[] = [];
@@ -90,38 +108,31 @@ export function ChannelItem(props: { channel: Channel; actions?: JSX.Element | u
   }
   const thumbnail = channel.thumbnails?.high?.url || "";
 
-  const mainActions = (): JSX.Element => {
+  const Actions = (): JSX.Element => {
     const showDetail = (
       <Action.Push
         title="Show Details"
         target={<ChannelItemDetail channel={channel} />}
         icon={{ source: Icon.List, tintColor: Color.PrimaryText }}
-        onPush={async () => await addRecentChannel(channel)}
+        onPush={() => addRecentChannel(channel)}
       />
     );
     const openBrowser = <OpenChannelInBrowser channelId={channel.id} channel={channel} />;
-
-    if (getPrimaryActionPreference() === PrimaryAction.Browser) {
-      return (
-        <React.Fragment>
-          {openBrowser}
-          {showDetail}
-        </React.Fragment>
-      );
-    } else {
-      return (
-        <React.Fragment>
-          {showDetail}
-          {openBrowser}
-        </React.Fragment>
-      );
-    }
-  };
-
-  const Actions = (): JSX.Element => {
     return (
       <ActionPanel>
-        <ActionPanel.Section>{mainActions()}</ActionPanel.Section>
+        <ActionPanel.Section>
+          {primaryaction === PrimaryAction.OpenInBrowser ? (
+            <React.Fragment>
+              {openBrowser}
+              {showDetail}
+            </React.Fragment>
+          ) : (
+            <React.Fragment>
+              {showDetail}
+              {openBrowser}
+            </React.Fragment>
+          )}
+        </ActionPanel.Section>
         <ActionPanel.Section>
           <SearchChannelVideosAction channel={channel} />
           <ShowRecentPlaylistVideosAction
@@ -130,12 +141,12 @@ export function ChannelItem(props: { channel: Channel; actions?: JSX.Element | u
             playlistId={channel.relatedPlaylists?.uploads}
           />
         </ActionPanel.Section>
-        <ActionPanel.Section>{props.actions}</ActionPanel.Section>
+        {actions}
       </ActionPanel>
     );
   };
 
-  return getViewLayout() === "list" ? (
+  return view === ViewLayout.List ? (
     <List.Item
       key={channelId}
       title={title}
