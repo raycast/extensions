@@ -72,5 +72,4 @@ function convert(input: string) {
 
 function isExecuteable(input: string) {
   return /\([\s\S]*?\)|[\w$]\s*`[\s\S]*?`/.test(input);
-
 }
