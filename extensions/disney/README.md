@@ -1,3 +1,3 @@
 # Disney
 
-Because why not?
+Explore information about your beloved Disney characters by searching for them.
