@@ -3,5 +3,5 @@ import { VaultTree } from "./components/tree";
 import { VaultNamespace } from "./components/namespace";
 
 export default function Vault() {
-  return !getVaultNamespace() ? <VaultNamespace /> : <VaultTree path={"/"} />;
+  return getVaultNamespace() === undefined ? <VaultNamespace /> : <VaultTree path={"/"} />;
 }

@@ -18,7 +18,7 @@ export function VaultNamespace() {
         </ActionPanel>
       }
     >
-      <Form.TextField id="namespace" title="Namespace" storeValue />
+      <Form.TextField id="namespace" title="Namespace (optional)" storeValue />
     </Form>
   );
 }

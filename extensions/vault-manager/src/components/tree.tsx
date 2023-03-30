@@ -1,7 +1,27 @@
 import { useCallback, useState } from "react";
 import { DeleteMode, VaultListEntry } from "../interfaces";
-import { addToFavorites, callDelete, callTree, deleteEnabled, getTechnicalPaths, removeFromFavorites } from "../utils";
-import { Action, ActionPanel, Alert, Color, confirmAlert, Detail, Icon, List, showToast, Toast } from "@raycast/api";
+import {
+  addToFavorites,
+  callDelete,
+  callTree,
+  ConfigurationError,
+  deleteEnabled,
+  getTechnicalPaths,
+  removeFromFavorites,
+} from "../utils";
+import {
+  Action,
+  ActionPanel,
+  Alert,
+  Color,
+  confirmAlert,
+  Detail,
+  Icon,
+  List,
+  openCommandPreferences,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { Back, Configuration, CopyToken, OpenVault, Reload, Root } from "./actions";
 import { VaultDisplay } from "./display";
 import { useCachedState, usePromise } from "@raycast/utils";
@@ -17,6 +37,11 @@ export function VaultTree(props: { path: string }) {
     try {
       setKeys(await callTree(props.path));
     } catch (e: unknown) {
+      if (e instanceof ConfigurationError) {
+        console.error(e);
+        await openCommandPreferences();
+        return;
+      }
       setError(e);
       throw e;
     }
