@@ -12,7 +12,8 @@
     "stuart",
     "tonka3000",
     "dancannon",
-    "sxn"
+    "sxn",
+    "jabrah29"
   ],
   "commands": [
     {
@@ -29,6 +30,13 @@
           "required": true
         }
       ]
+    },
+    {
+      "name": "likedSongs",
+      "title": "View Liked Songs",
+      "description": "Shows user's liked songs",
+      "subtitle": "Spotify",
+      "mode": "view"
     },
     {
       "name": "nowPlaying",

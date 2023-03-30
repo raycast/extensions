@@ -1,5 +1,9 @@
 # Spotify Player Changelog
 
+## [Feature] - 2023-03-30
+
+- Add Liked Songs section
+
 ## [Fix] - 2023-03-07
 
 - Fix crash due to `null` playlists being returned by the API.
