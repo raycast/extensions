@@ -324,7 +324,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.48.9",
+    "@raycast/api": "^1.49.0",
     "fs-extra": "^10.1.0",
     "node-fetch": "^3.3.0",
     "pexels": "^1.4.0",
