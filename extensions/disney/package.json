@@ -2,11 +2,15 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "disney",
   "title": "Disney",
-  "description": "Because why not?",
+  "description": "Explore information about your beloved Disney characters by searching for them.",
   "icon": "command-icon.png",
-  "author": "dre",
+  "author": "andreaselia",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "categories": [
-    "Fun"
+    "Fun",
+    "Data"
   ],
   "license": "MIT",
   "commands": [
@@ -15,6 +19,16 @@
       "title": "Search Disney Characters",
       "description": "Search through a list of all Disney characters.",
       "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "showImages",
+      "label": "Show Images",
+      "description": "Show images for each character when browsing through characters.",
+      "type": "checkbox",
+      "default": true,
+      "required": false
     }
   ],
   "dependencies": {
