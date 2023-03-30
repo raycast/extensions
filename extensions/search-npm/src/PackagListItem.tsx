@@ -100,7 +100,7 @@ export const PackageListItem = ({
       <Action.OpenInBrowser
         key="npmPackagePage"
         url={pkg.links.npm}
-        title="Npm Package Page"
+        title="npm Package Page"
         icon={{
           source: 'command-icon.png',
         }}
@@ -171,7 +171,7 @@ export const PackageListItem = ({
             {searchTerm ? (
               <Action.OpenInBrowser
                 url={`https://www.npmjs.com/search?q=${searchTerm}`}
-                title="Npm Search Results"
+                title="npm Search Results"
               />
             ) : null}
           </ActionPanel.Section>
