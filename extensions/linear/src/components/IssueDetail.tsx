@@ -79,11 +79,23 @@ export default function IssueDetail({ issue: existingIssue, mutateList, prioriti
                   <Detail.Metadata.Label title="Labels" text="No Labels" />
                 )}
 
-                {!!issue.relations && issue.relations.nodes.length > 0 ? (                  
+                {!!issue.relations && issue.relations.nodes.filter((node) => node.type == "related").length > 0 ? (
                   <Detail.Metadata.TagList title="Related">
-                    {issue.relations.nodes.map(({ id, relatedIssue }) => (
-                      <Detail.Metadata.TagList.Item key={id} text={relatedIssue.title} />
-                    ))}
+                    {issue.relations.nodes
+                      .filter((node) => node.type == "related")
+                      .map(({ id, relatedIssue }) => (
+                        <Detail.Metadata.TagList.Item key={id} text={relatedIssue.title} />
+                      ))}
+                  </Detail.Metadata.TagList>
+                ) : null}
+
+                {!!issue.relations && issue.relations.nodes.filter((node) => node.type == "duplicate").length > 0 ? (
+                  <Detail.Metadata.TagList title="Duplicates">
+                    {issue.relations.nodes
+                      .filter((node) => node.type == "duplicate")
+                      .map(({ id, relatedIssue }) => (
+                        <Detail.Metadata.TagList.Item key={id} text={relatedIssue.title} />
+                      ))}
                   </Detail.Metadata.TagList>
                 ) : null}
 
