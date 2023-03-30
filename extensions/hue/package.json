@@ -61,18 +61,16 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.48.9",
+    "@raycast/api": "^1.49.0",
     "@raycast/utils": "^1.5.2",
     "@types/node-localstorage": "^1.3.0",
-    "xstate": "^4.37.1",
     "@xstate/react": "^3.2.1",
-    "node-hue-api": "^5.0.0-beta.15"
+    "node-hue-api": "^5.0.0-beta.15",
+    "xstate": "^4.37.1"
   },
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^5.57.0",
-    "@typescript-eslint/parser": "^5.57.0",
+    "@raycast/eslint-config": "^1.0.5",
     "eslint": "^8.37.0",
-    "eslint-config-prettier": "^8.8.0",
     "prettier": "^2.8.7",
     "typescript": "^5.0.2"
   },
