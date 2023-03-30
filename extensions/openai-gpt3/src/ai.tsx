@@ -64,7 +64,7 @@ export default function Command() {
   const [maxModelTokens, setMaxModelTokens] = useState<number>(maxTokensDavinci);
 
   const modelLimit = {} as modelTokenLimit;
-  modelLimit["gpt-4"] = maxTokensGPT35Turbo;
+  modelLimit["gpt-4"] = maxTokensGPT4;
   modelLimit["gpt-3.5-turbo"] = maxTokensGPT35Turbo;
   modelLimit["text-davinci-003"] = maxTokensDavinci;
   modelLimit["text-davinci-002"] = maxTokensDavinci;
@@ -211,7 +211,7 @@ export default function Command() {
             <Action icon={Icon.Book} title="Classification" onAction={() => updatePromptAndTokens(example.classify)} />
             <Action icon={Icon.Book} title="Chat" onAction={() => updatePromptAndTokens(example.chat)} />
           </ActionPanel.Submenu>
-          <Action.OpenInBrowser title="Check Examples at OpenAI Website" url="https://beta.openai.com/examples" />
+          <Action.OpenInBrowser title="Check Examples at OpenAI Website" url="https://platform.openai.com/examples" />
           <Action title="Change API Key" icon={Icon.Key} onAction={() => openCommandPreferences()} />
         </ActionPanel>
       }
