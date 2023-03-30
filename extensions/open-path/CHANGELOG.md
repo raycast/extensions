@@ -1,6 +1,6 @@
 # Open Path Changelog
 
-## [Optimize Path Logic] - {PR_MERGE_DATE}
+## [Optimize Path Logic] - 2023-03-30
 
 - Optimize the judgment logic of opening path
 
