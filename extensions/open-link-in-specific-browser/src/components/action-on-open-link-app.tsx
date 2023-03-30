@@ -101,6 +101,9 @@ export function ActionOnOpenLinkApp(props: {
           </>
         )}
       </ActionPanel.Section>
+      <ActionPanel.Section>
+        <Action.ToggleQuickLook shortcut={{ modifiers: ["cmd"], key: "y" }} />
+      </ActionPanel.Section>
       <ActionOpenPreferences />
     </ActionPanel>
   );
