@@ -20,7 +20,7 @@ export function useModel(): ModelHook {
 
   const gpt = useChatGPT();
 
-  const [option, setOption] = useState<Model["option"][]>(["gpt-3.5-turbo", "gpt-3.5-turbo-0301"]);
+  const [option, setOption] = useState<Model["option"][]>(["gpt-3.5-turbo", "gpt-3.5-turbo-0301", "gpt-4"]);
 
   useEffect(() => {
     gpt.listModels().then((res) => {
