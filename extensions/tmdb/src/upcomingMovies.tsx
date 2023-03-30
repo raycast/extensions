@@ -14,7 +14,7 @@ export default function Command() {
 
   const fetchMovie = async (page: string) => {
     moviedb
-      .movieNowPlaying({ page: Number(page) })
+      .upcomingMovies({ page: Number(page) })
       .then((res: any) => {
         setMovies(res.results);
         setIsLoading(false);
