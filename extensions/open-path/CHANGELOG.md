@@ -1,5 +1,9 @@
 # Open Path Changelog
 
+## [Optimize Path Logic] - {PR_MERGE_DATE}
+
+- Optimize the judgment logic of opening path
+
 ## [Update Raycast API] - 2022-12-05
 
 - Update Raycast API version to 1.44.0
