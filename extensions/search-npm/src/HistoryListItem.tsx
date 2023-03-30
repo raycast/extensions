@@ -26,20 +26,21 @@ export const HistoryListItem = ({
       actions={
         <ActionPanel>
           <Action
-            title="Search for this package"
+            title="Search Package"
             onAction={() => setSearchTerm(item.term)}
             icon={Icon.MagnifyingGlass}
           />
           <Action
-            title="Remove this item from history"
+            title="Remove From History"
             onAction={async () => {
               const history = await removeItemFromHistory(item)
               setHistory(history)
             }}
             icon={Icon.XMarkCircle}
+            style={Action.Style.Destructive}
           />
           <Action
-            title="Clear all items from history"
+            title="Clear All Items From History"
             shortcut={{ modifiers: ['cmd'], key: 'backspace' }}
             onAction={async () => {
               await removeAllItemsFromHistory()
@@ -47,6 +48,7 @@ export const HistoryListItem = ({
               setHistory(history)
             }}
             icon={Icon.XMarkCircleFilled}
+            style={Action.Style.Destructive}
           />
         </ActionPanel>
       }

@@ -24,7 +24,7 @@
       "mode": "view"
     },
     {
-      "name": "faves",
+      "name": "favorites",
       "title": "View favorites",
       "subtitle": "npm",
       "description": "View your favorite packages",

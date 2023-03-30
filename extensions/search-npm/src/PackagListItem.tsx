@@ -14,15 +14,20 @@ import { getChangeLogUrl } from './utils/getChangelogUrl'
 import { Readme } from './Readme'
 import { Package } from './npmResponse.model'
 import { addToHistory, HistoryItem } from './utils/history-storage'
-import { addFave, removeItemFromFaves } from './utils/favorite-storage'
+import {
+  addFavorite,
+  removeAllItemsFromFavorites,
+  removeItemFromFavorites,
+} from './utils/favorite-storage'
+import Favorites from './favorites'
 
 interface PackageListItemProps {
   result: Package
   searchTerm?: string
   setHistory?: React.Dispatch<React.SetStateAction<HistoryItem[]>>
-  isFaved: boolean
+  isFavorited: boolean
   handleFaveChange?: () => Promise<void>
-  isInFaveList?: boolean
+  isViewingFavorites?: boolean
 }
 
 export interface Preferences {
@@ -34,9 +39,9 @@ export const PackageListItem = ({
   result,
   searchTerm,
   setHistory,
-  isFaved,
+  isFavorited,
   handleFaveChange,
-  isInFaveList,
+  isViewingFavorites,
 }: PackageListItemProps): JSX.Element => {
   const { defaultOpenAction }: Preferences = getPreferenceValues()
   const pkg = result
@@ -50,12 +55,17 @@ export const PackageListItem = ({
   }
 
   const handleAddToFaves = async () => {
-    await addFave(result)
+    await addFavorite(result)
     showToast(Toast.Style.Success, `Added ${result.name} to faves`)
     handleFaveChange?.()
   }
   const handleRemoveFromFaves = async () => {
-    await removeItemFromFaves(result)
+    await removeItemFromFavorites(result)
+    showToast(Toast.Style.Success, `Removed ${result.name} from faves`)
+    handleFaveChange?.()
+  }
+  const handleRemoveAllFaves = async () => {
+    await removeAllItemsFromFavorites()
     showToast(Toast.Style.Success, `Removed ${result.name} from faves`)
     handleFaveChange?.()
   }
@@ -90,7 +100,7 @@ export const PackageListItem = ({
       <Action.OpenInBrowser
         key="npmPackagePage"
         url={pkg.links.npm}
-        title="npm Package Page"
+        title="Npm Package Page"
         icon={{
           source: 'command-icon.png',
         }}
@@ -113,7 +123,7 @@ export const PackageListItem = ({
       tooltip: pkg?.keywords?.length ? pkg.keywords.join(', ') : '',
     },
   ]
-  if (!isInFaveList) {
+  if (!isViewingFavorites) {
     accessories.unshift(
       {
         text: `v${pkg.version}`,
@@ -124,6 +134,11 @@ export const PackageListItem = ({
         tooltip: `Last updated: ${tinyRelativeDate(new Date(pkg.date))}`,
       },
     )
+    if (isFavorited) {
+      accessories.unshift({
+        icon: Icon.Star,
+      })
+    }
   }
 
   return (
@@ -156,31 +171,47 @@ export const PackageListItem = ({
             {searchTerm ? (
               <Action.OpenInBrowser
                 url={`https://www.npmjs.com/search?q=${searchTerm}`}
-                title="npm Search Results"
+                title="Npm Search Results"
               />
             ) : null}
           </ActionPanel.Section>
           <ActionPanel.Section title="Actions">
-            {isFaved ? (
+            {isFavorited ? (
               <Action
-                title="Remove from faves"
+                title="Remove From Favorites"
                 onAction={handleRemoveFromFaves}
                 icon={Icon.StarDisabled}
                 shortcut={{ modifiers: ['cmd', 'shift'], key: 's' }}
+                style={Action.Style.Destructive}
               />
             ) : (
               <Action
-                title="Add to faves"
+                title="Add to Favorites"
                 onAction={handleAddToFaves}
                 icon={Icon.Star}
                 shortcut={{ modifiers: ['cmd', 'shift'], key: 's' }}
+              />
+            )}
+            {isViewingFavorites ? (
+              <Action
+                title="Remove All Favorites"
+                onAction={handleRemoveAllFaves}
+                icon={Icon.Trash}
+                shortcut={{ modifiers: ['cmd', 'shift'], key: 'backspace' }}
+                style={Action.Style.Destructive}
+              />
+            ) : (
+              <Action.Push
+                title="View Favorites"
+                target={<Favorites />}
+                icon={Icon.ArrowRight}
               />
             )}
           </ActionPanel.Section>
           <ActionPanel.Section title="Info">
             {type === 'github' && owner && name ? (
               <Action.Push
-                title="View readme"
+                title="View README"
                 target={<Readme user={owner} repo={name} />}
                 icon={Icon.Paragraph}
               />

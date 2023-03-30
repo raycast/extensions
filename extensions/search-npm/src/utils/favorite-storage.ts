@@ -4,15 +4,15 @@ import { Package } from '../npmResponse.model'
 
 const LOCAL_STORAGE_KEY = 'npm-faves'
 
-export const getFaves = async (): Promise<Package[]> => {
+export const getFavorites = async (): Promise<Package[]> => {
   const favesFromStorage = await LocalStorage.getItem<string>(LOCAL_STORAGE_KEY)
   const faves: Package[] = JSON.parse(favesFromStorage ?? '[]')
   const favesWithoutDuplicates = dedupe(faves)
   return favesWithoutDuplicates
 }
 
-export const addFave = async (item: Package) => {
-  const faves = await getFaves()
+export const addFavorite = async (item: Package) => {
+  const faves = await getFavorites()
   const favesWithNewItem = [item, ...faves]
   const updatedFavesList = [...new Set(favesWithNewItem)]
 
@@ -20,7 +20,7 @@ export const addFave = async (item: Package) => {
     LOCAL_STORAGE_KEY,
     JSON.stringify(updatedFavesList),
   )
-  return await getFaves()
+  return await getFavorites()
 }
 
 const removeMatchingItemFromArray = (
@@ -37,17 +37,17 @@ const removeMatchingItemFromArray = (
   }
   return arr
 }
-export const removeItemFromFaves = async (item: Package) => {
-  const faves = await getFaves()
+export const removeItemFromFavorites = async (item: Package) => {
+  const faves = await getFavorites()
   const updatedFavesList = removeMatchingItemFromArray(faves, item)
   await LocalStorage.setItem(
     LOCAL_STORAGE_KEY,
     JSON.stringify(updatedFavesList),
   )
-  return await getFaves()
+  return await getFavorites()
 }
 
-export const removeAllItemsFromFaves = async () => {
+export const removeAllItemsFromFavorites = async () => {
   await LocalStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify([]))
-  return await getFaves()
+  return await getFavorites()
 }
