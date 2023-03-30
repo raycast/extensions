@@ -6,7 +6,7 @@ import { useMe } from "../hooks/useMe";
 import { AddToPlaylistAction } from "./AddToPlaylistAction";
 import { FooterAction } from "./FooterAction";
 import { AddToQueueAction } from "./AddtoQueueAction";
-import { StartRadioAction } from "../api/StartRadioAction";
+import { StartRadioAction } from "./StartRadioAction";
 import { PlayAction } from "./PlayAction";
 
 type TrackActionPanelProps = {

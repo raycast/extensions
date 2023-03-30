@@ -30,7 +30,7 @@ import { formatMs } from "./helpers/formatMs";
 import { TracksList } from "./components/TracksList";
 import { AddToPlaylistAction } from "./components/AddToPlaylistAction";
 import { FooterAction } from "./components/FooterAction";
-import { StartRadioAction } from "./api/StartRadioAction";
+import { StartRadioAction } from "./components/StartRadioAction";
 import { PlayAction } from "./components/PlayAction";
 import { PauseAction } from "./components/PauseAction";
 

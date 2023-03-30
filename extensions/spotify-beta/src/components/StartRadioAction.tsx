@@ -1,5 +1,5 @@
 import { Action, getPreferenceValues, Icon, popToRoot, showHUD, showToast, Toast } from "@raycast/api";
-import { startRadio } from "./startRadio";
+import { startRadio } from "../api/startRadio";
 
 type StartRadioActionProps = {
   trackId?: string;
