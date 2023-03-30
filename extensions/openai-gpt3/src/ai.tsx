@@ -49,8 +49,6 @@ export default function Command() {
   const maxTokensGPT35Turbo = 4096;
   const maxTokensDavinci = 4000;
   const maxTokensAdaBabbageCurie = 2048;
-  const maxTokensCodex = 8000;
-  const maxTokensCushman = 2048;
   const [textPrompt, setTextPrompt] = useState("");
   const [answer, setAnswer] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -71,8 +69,6 @@ export default function Command() {
   modelLimit["text-curie-001"] = maxTokensAdaBabbageCurie;
   modelLimit["text-babbage-001"] = maxTokensAdaBabbageCurie;
   modelLimit["text-ada-001"] = maxTokensAdaBabbageCurie;
-  modelLimit["code-davinci-002"] = maxTokensCodex;
-  modelLimit["code-cushman-001"] = maxTokensCushman;
 
   function dropPromptErrorIfNeeded() {
     if (promptError && promptError.length > 0) {
