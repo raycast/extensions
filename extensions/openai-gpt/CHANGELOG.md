@@ -1,7 +1,8 @@
 # AI Assistant Changelog
 
-## [Version: 1.4.2] - 2023-03-30
+## [Version: 1.5.0] - 2023-03-30
 
+- Change name from `OpenAI GPT3` to `OpenAI GPT`
 - Add support for `gpt-4` model
 - Remove support for `code-cushman-001` and `code-davinci-002` models
 - Update README.md

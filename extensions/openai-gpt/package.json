@@ -1,9 +1,9 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "openai-gpt3",
-  "version": "1.4.1",
-  "title": "OpenAI GPT3",
-  "description": "Interact with OpenAI GPT3 AI",
+  "name": "openai-gpt",
+  "version": "1.5.0",
+  "title": "OpenAI GPT",
+  "description": "Interact with OpenAI GPT AI",
   "icon": "openai-logo.png",
   "author": "simicvm",
   "contributors": [
@@ -18,8 +18,8 @@
   "commands": [
     {
       "name": "ai",
-      "title": "Query OpenAI GPT3",
-      "description": "Interact with OpenAI GPT3 AI",
+      "title": "Query OpenAI GPT",
+      "description": "Interact with OpenAI GPT AI",
       "mode": "view",
       "preferences": [
         {
