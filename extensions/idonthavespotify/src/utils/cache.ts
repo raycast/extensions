@@ -1,4 +1,5 @@
 import { Cache } from "@raycast/api";
+
 import { CacheData, SpotifyContent } from "../@types/global";
 
 const cache = new Cache();

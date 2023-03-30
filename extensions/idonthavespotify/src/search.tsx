@@ -4,12 +4,12 @@ import { useState, useCallback, useEffect } from "react";
 import { Action, ActionPanel, Icon, List, showToast, Toast, Clipboard } from "@raycast/api";
 
 import type { SpotifyContent, ApiError } from "./@types/global";
-
 import { SpotifyContentLink, SpotifyMetadataType } from "./@types/global";
 
 import { SITE_URL, API_URL, SPOTIFY_LINK_REGEX } from "./constants";
-import { playAudio } from "./utils/audio";
+
 import { cacheLastSearch, getLastSearch } from "./utils/cache";
+import { playAudio, stopAudio } from "./utils/audio";
 
 const spotifyContentLinksTitles = {
   [SpotifyContentLink.Youtube]: "YouTube",
@@ -87,10 +87,7 @@ export default function Command() {
       onSearchTextChange={(spotifyLink) => fetchSpotifyContent(spotifyLink)}
       throttle
     >
-      <List.EmptyView
-        icon={{ source: "../assets/small-icon.png" }}
-        title="Paste a Spotify Link https://open.spotify.com/track/..."
-      />
+      <List.EmptyView title="Paste a Spotify Link https://open.spotify.com/track/..." />
       {spotifyContent && (
         <>
           <List.Section title={spotifyContentTypesTitles[spotifyContent.type]}>
@@ -103,11 +100,19 @@ export default function Command() {
                 <ActionPanel>
                   <Action.OpenInBrowser url={`${SITE_URL}?id=${spotifyContent.id}`} />
                   {spotifyContent.audio && (
-                    <Action
-                      title="Play Audio Preview"
-                      icon={Icon.Play}
-                      onAction={() => playAudio(spotifyContent.audio ?? "")}
-                    />
+                    <>
+                      <Action
+                        title="Play Audio Preview"
+                        icon={Icon.Play}
+                        onAction={() => playAudio(spotifyContent.audio ?? "")}
+                      />
+                      <Action
+                        title="Stop Audio Preview"
+                        icon={Icon.Play}
+                        onAction={() => stopAudio()}
+                        shortcut={{ modifiers: ["cmd"], key: "." }}
+                      />
+                    </>
                   )}
                 </ActionPanel>
               }

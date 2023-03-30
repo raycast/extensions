@@ -21,13 +21,13 @@
   "dependencies": {
     "@raycast/api": "^1.40.0",
     "@raycast/utils": "^1.4.8",
-    "@types/sound-play": "^1.1.0",
     "node-fetch": "^3.3.1",
-    "sound-play": "^1.1.0",
+    "play-sound": "^1.1.5",
     "tempy": "^3.0.0"
   },
   "devDependencies": {
     "@types/node": "16.10.3",
+    "@types/play-sound": "^1.1.0",
     "@types/react": "18.0.9",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
