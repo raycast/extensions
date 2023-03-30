@@ -1,4 +1,4 @@
-import { ActionPanel, Action, List, Clipboard, Icon, closeMainWindow, showHUD } from "@raycast/api";
+import { ActionPanel, Action, List } from "@raycast/api";
 import { PathLike } from "fs";
 import { useState } from "react";
 import { downloadsFolder, getDownloads } from "./utils";
@@ -39,14 +39,10 @@ export default function Command() {
               <ActionPanel.Section>
                 <Action.Open title="Open File" target={download.path} />
                 <Action.ShowInFinder path={download.path} />
-                <Action
+                <Action.CopyToClipboard
                   title="Copy File"
+                  content={{ file: download.path }}
                   shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
-                  icon={Icon.Clipboard}
-                  onAction={() => {
-                    Clipboard.copy({ file: download.path });
-                    showHUD(`Copied ${download.file}`);
-                  }}
                 />
               </ActionPanel.Section>
               <ActionPanel.Section>
