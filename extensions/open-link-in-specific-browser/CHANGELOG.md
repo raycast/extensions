@@ -1,6 +1,6 @@
 # Open Link in Specific Browser Changelog
 
-## [Fix Bug] - {PR_MERGE_DATE}
+## [Fix Bug] - 2023-03-30
 
 - Fix the bug that Safari don't show up
 - Add setting item, you can choose to hide recommended apps
