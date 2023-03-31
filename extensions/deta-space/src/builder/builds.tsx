@@ -42,7 +42,7 @@ function Build({ build }: { build: Build }) {
         return Color.Red;
       case "running":
       case "pending":
-        return Color.Yellow
+        return Color.Yellow;
     }
   };
 
