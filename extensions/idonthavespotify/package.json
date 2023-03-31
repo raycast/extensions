@@ -13,7 +13,8 @@
   "commands": [
     {
       "name": "search",
-      "title": "Paste Spotify Link",
+      "title": "Find Alternative sources",
+      "subtitle": "I Don't Have Spotify",
       "description": "Get YouTube, Apple Music, Tidal and Soundcloud links",
       "mode": "view"
     }
