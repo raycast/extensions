@@ -5,6 +5,9 @@
   "description": "Manage files from Raycast",
   "icon": "command-icon.png",
   "author": "es183923",
+  "contributors": [
+    "BalliAsghar"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -17,62 +20,62 @@
   ],
   "preferences": [
     {
-      "name": "startDirectory",
-      "type": "textfield",
       "default": "~",
+      "description": "Starting directory for the command. ~ is expanded into your home directory",
+      "name": "startDirectory",
       "required": true,
       "title": "Start Directory",
-      "description": "Starting directory for the command. ~ is expanded into your home directory"
+      "type": "textfield"
     },
     {
-      "name": "caseSensitive",
-      "type": "checkbox",
       "default": false,
+      "description": "Show files and directories with uppercase letters before ones with lowercase letters",
+      "label": "Case Sensitive",
+      "name": "caseSensitive",
       "required": true,
       "title": "Appearance",
-      "description": "Show files and directories with uppercase letters before ones with lowercase letters",
-      "label": "Case Sensitive"
+      "type": "checkbox"
     },
     {
-      "name": "directoriesFirst",
-      "type": "checkbox",
       "default": false,
-      "required": true,
-      "title": "",
       "description": "Show directories before other files",
-      "label": "Directories First"
-    },
-    {
-      "name": "showDots",
-      "type": "checkbox",
-      "default": false,
+      "label": "Directories First",
+      "name": "directoriesFirst",
       "required": true,
       "title": "",
+      "type": "checkbox"
+    },
+    {
+      "default": false,
       "description": "Show dotfiles (files and directories that start with a .)",
-      "label": "Show Dotfiles"
+      "label": "Show Dotfiles",
+      "name": "showDots",
+      "required": true,
+      "title": "",
+      "type": "checkbox"
     },
     {
-      "name": "showFilePermissions",
-      "type": "checkbox",
       "default": false,
+      "description": "Show the permissions of files",
+      "label": "Show File Permissions",
+      "name": "showFilePermissions",
       "required": true,
       "title": "",
-      "description": "Show the permissions of files",
-      "label": "Show File Permissions"
+      "type": "checkbox"
     },
     {
-      "name": "showFileSize",
-      "type": "checkbox",
       "default": true,
+      "description": "Show file size",
+      "label": "Show File Size",
+      "name": "showFileSize",
       "required": true,
       "title": "",
-      "description": "Show file size",
-      "label": "Show File Size"
+      "type": "checkbox"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.25.4",
-    "filesize": "^8.0.6"
+    "@raycast/api": "^1.49.0",
+    "filesize": "^10.0.7"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",
