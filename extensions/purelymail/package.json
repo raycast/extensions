@@ -1,0 +1,99 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "purelymail",
+  "title": "Purelymail",
+  "description": "Interact with Purelymail with the help of Raycast",
+  "icon": "purelymail.png",
+  "author": "xmok",
+  "categories": [
+    "Communication"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "api_token",
+      "title": "Purelymail API Token",
+      "description": "Before you can start using this command, you'll need to add your API key. You can find this at https://purelymail.com/manage/account",
+      "type": "password",
+      "required": true
+    }
+  ],
+  "commands": [
+    {
+      "name": "list-domains",
+      "title": "List Domains",
+      "subtitle": "Purelymail",
+      "description": "List domains in your Purelymail account",
+      "mode": "view"
+    },
+    {
+      "name": "add-domain",
+      "title": "Add Domain",
+      "subtitle": "Purelymail",
+      "description": "Add a new domain to your ImprovMX account",
+      "mode": "view"
+    },
+    {
+      "name": "get-ownership-code",
+      "title": "Get Ownership Code",
+      "subtitle": "Purelymail",
+      "description": "Add these records to your domain's DNS records",
+      "mode": "view"
+    },
+    {
+      "name": "update-domain-settings",
+      "title": "Update Domain Settings",
+      "subtitle": "Purelymail",
+      "description": "Updates settings for an existing owned domain",
+      "mode": "view"
+    },
+    {
+      "name": "create-user",
+      "title": "Create User",
+      "subtitle": "Purelymail",
+      "description": "Creates a new user",
+      "mode": "view"
+    },
+    {
+      "name": "delete-user",
+      "title": "Delete User",
+      "subtitle": "Purelymail",
+      "description": "Deletes a user",
+      "mode": "view"
+    },
+    {
+      "name": "list-routing-rules",
+      "title": "List Routing Rules",
+      "subtitle": "Purelymail",
+      "description": "Lists all routing rules active under your account",
+      "mode": "view"
+    },
+    {
+      "name": "create-routing-rule",
+      "title": "Create Routing Rule",
+      "subtitle": "Purelymail",
+      "description": "Routing rule must not have the same user/prefix as any other existing rules for the domain",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.48.9",
+    "@raycast/utils": "^1.5.2",
+    "node-fetch": "^3.3.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

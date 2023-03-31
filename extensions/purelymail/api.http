@@ -1,0 +1,17 @@
+POST https://purelymail.com/api/v0/addDomain
+Content-Type: application/json
+Purelymail-Api-Token: pm-live-6d3cc713-4230-42c3-8c08-b21819f21c
+
+{
+    "domainName": ""
+}
+
+###
+
+POST https://purelymail.com/api/v0/listDomains
+Content-Type: application/json
+Purelymail-Api-Token: pm-live-6d3cc713-4230-42c3-8c08-b21819f21c16
+
+{
+    "includeShared": false
+}
