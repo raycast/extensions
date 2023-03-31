@@ -1,5 +1,5 @@
 import { buildScriptEnsuringSpotifyIsRunning, runAppleScriptSilently } from "../helpers/applescript";
-import { getError } from "../helpers/getError";
+import { getErrorMessage } from "../helpers/getError";
 import { getSpotifyClient } from "../helpers/withSpotifyClient";
 
 type ContextTypes = "album" | "artist" | "playlist" | "track" | "show" | "episode";
@@ -40,24 +40,25 @@ export async function play({ id, type, contextUri }: PlayProps = {}) {
       await spotifyClient.putMePlayerPlay({ context_uri: `${uriForType[type]}${id}` });
     }
   } catch (err) {
-    const error = getError(err);
+    const error = getErrorMessage(err);
 
-    if (error?.reason?.includes("NO_ACTIVE_DEVICE")) {
-      if (!type || !id) {
-        const script = buildScriptEnsuringSpotifyIsRunning("play");
-        await runAppleScriptSilently(script);
-        return;
-      }
+    // if (error?.toLocaleLowerCase().includes("no active device")) {
+    //   if (!type || !id) {
+    //     const script = buildScriptEnsuringSpotifyIsRunning("play");
+    //     await runAppleScriptSilently(script);
+    //     return;
+    //   }
 
-      const script = buildScriptEnsuringSpotifyIsRunning(`tell application "Spotify"
-        launch
-        delay 3
-        play track "${uriForType[type]}${id}"
-end tell`);
-      await runAppleScriptSilently(script);
-      return;
-    }
+    //   const script = buildScriptEnsuringSpotifyIsRunning(`tell application "Spotify"
+    //         launch
+    //         delay 3
+    //         play track "${uriForType[type]}${id}"
+    // end tell`);
+    //   await runAppleScriptSilently(script);
+    //   return;
+    // }
 
-    console.log("play error", error);
+    console.log("play.ts Error: ", error);
+    throw new Error(error);
   }
 }

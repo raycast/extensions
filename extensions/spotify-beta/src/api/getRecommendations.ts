@@ -1,3 +1,4 @@
+import { getErrorMessage } from "../helpers/getError";
 import { getSpotifyClient } from "../helpers/withSpotifyClient";
 
 type GetRecommendatons = {
@@ -7,9 +8,15 @@ type GetRecommendatons = {
 
 export async function getRecommendations({ trackIds, artistIds }: GetRecommendatons) {
   const { spotifyClient } = getSpotifyClient();
-  const response = await spotifyClient.getRecommendations({
-    seedTracks: trackIds.join(),
-    seedArtists: artistIds?.join(),
-  });
-  return response;
+  try {
+    const response = await spotifyClient.getRecommendations({
+      seedTracks: trackIds.join(),
+      seedArtists: artistIds?.join(),
+    });
+    return response;
+  } catch (err) {
+    const error = getErrorMessage(err);
+    console.log("getRecommendations.ts Error:", error);
+    throw new Error(error);
+  }
 }

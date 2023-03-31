@@ -1,5 +1,5 @@
 import { useCachedPromise } from "@raycast/utils";
-import { getMe } from "../helpers/spotify.api";
+import { getMe } from "../api/getMe";
 
 type UseMeProps = {
   options?: {

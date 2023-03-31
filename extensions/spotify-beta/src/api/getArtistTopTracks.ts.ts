@@ -1,5 +1,6 @@
 import { getSpotifyClient } from "../helpers/withSpotifyClient";
-import { getMe } from "../helpers/spotify.api";
+import { getErrorMessage } from "../helpers/getError";
+import { getMe } from "./getMe";
 
 type GetAlbumTracksProps = {
   artistId: string;
@@ -7,7 +8,14 @@ type GetAlbumTracksProps = {
 
 export async function getArtistTopTracks({ artistId }: GetAlbumTracksProps) {
   const { spotifyClient } = getSpotifyClient();
-  const me = await getMe();
-  const response = await spotifyClient.getArtistsByIdTopTracks(artistId, { market: me.country });
-  return response;
+
+  try {
+    const me = await getMe();
+    const response = await spotifyClient.getArtistsByIdTopTracks(artistId, { market: me.country });
+    return response;
+  } catch (err) {
+    const error = getErrorMessage(err);
+    console.log("getArtistTopTracks.ts Error:", error);
+    throw new Error(error);
+  }
 }

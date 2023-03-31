@@ -33,6 +33,13 @@ import { FooterAction } from "./components/FooterAction";
 import { StartRadioAction } from "./components/StartRadioAction";
 import { PlayAction } from "./components/PlayAction";
 import { PauseAction } from "./components/PauseAction";
+import { useEffect } from "react";
+import { getCurrentlyPlaying } from "./api/getCurrentlyPlaying";
+import { getPlaybackState } from "./api/getPlaybackState";
+import { getMyDevices } from "./api/getMyDevices";
+import { getMyPlaylists } from "./api/getMyPlaylists";
+import { getError, getErrorMessage } from "./helpers/getError";
+import { useCurrentlyPlayingUri } from "./hooks/useCurrentlyPlayingUri";
 
 function NowPlayingCommand() {
   const { currentlyPlayingData, currentlyPlayingIsLoading, currentlyPlayingRevalidate } = useCurrentlyPlaying();
@@ -196,7 +203,7 @@ by ${artistName}
             await currentlyPlayingRevalidate();
           }}
         />
-        <StartRadioAction trackId={trackId} artistId={artistId} revalidate={currentlyPlayingRevalidate} />
+        <StartRadioAction trackId={trackId} artistId={artistId} onRadioStarted={() => currentlyPlayingRevalidate()} />
         <Action.Push
           icon={Icon.AppWindowGrid3x3}
           title="Go to Album"
@@ -270,6 +277,7 @@ ${description}
 export default function Command() {
   return (
     <View>
+      {/* <NowPlayingCommand /> */}
       <NowPlayingCommand />
     </View>
   );

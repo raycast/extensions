@@ -8,6 +8,7 @@ import {
   open,
   showHUD,
   Color,
+  LaunchProps,
 } from "@raycast/api";
 import { pause } from "./api/pause";
 import { play } from "./api/play";
@@ -27,24 +28,58 @@ import { addToPlaylist } from "./api/addToPlaylist";
 import { useContainsMyLikedTracks } from "./hooks/useContainsMyLikedTracks";
 import { usePlaybackState } from "./hooks/usePlaybackState";
 import { useMe } from "./hooks/useMe";
+import { useEffect, useRef } from "react";
+import { useCachedState } from "@raycast/utils";
+import { useCurrentlyPlayingUri } from "./hooks/useCurrentlyPlayingUri";
 
-function NowPlayingMenuBarCommand() {
+function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
   const preferences = getPreferenceValues<{ maxTextLength?: boolean; showEllipsis?: boolean }>();
-  const { currentlyPlayingData, currentlyPlayingIsLoading, currentlyPlayingRevalidate } = useCurrentlyPlaying();
-  const { playbackStateData, playbackStateIsLoading, playbackStateRevalidate } = usePlaybackState();
-  const { myDevicesData } = useMyDevices();
-  const { myPlaylistsData } = useMyPlaylists();
-  const { meData } = useMe();
+
+  // First we get the currently playing URI using `useCurrentlyPlayingUri` (this prioritises AppleScript over the API)
+  const { currentlyPlayingUriData, currentlyPlayingUriIsLoading } = useCurrentlyPlayingUri();
+
+  // Then we store it in a state using `useCachedState` (this will persist the value between launches)
+  const [currentUri, setCurrentUri] = useCachedState<string | undefined>(
+    "currentlyPlayingUri",
+    currentlyPlayingUriData
+  );
+
+  // We use a ref to store the value of `shouldExecute` so that it doesn't trigger a re-render
+  const shouldExecute = useRef(false);
+
+  // We conditionally set `shouldExecute` to true if the currently playing URI has changed
+  const { currentlyPlayingData, currentlyPlayingIsLoading, currentlyPlayingRevalidate } = useCurrentlyPlaying({
+    options: { execute: shouldExecute.current },
+  });
+  const { playbackStateData, playbackStateIsLoading, playbackStateRevalidate } = usePlaybackState({
+    options: { execute: launchType === LaunchType.UserInitiated },
+  });
+
+  // The hooks below will only execute when the Menu Bar is opened
+  const { myDevicesData } = useMyDevices({ options: { execute: launchType === LaunchType.UserInitiated } });
+  const { myPlaylistsData } = useMyPlaylists({ options: { execute: launchType === LaunchType.UserInitiated } });
+  const { meData } = useMe({ options: { execute: launchType === LaunchType.UserInitiated } });
   const { containsMySavedTracksData, containsMySavedTracksRevalidate } = useContainsMyLikedTracks({
     trackIds: currentlyPlayingData?.item?.id ? [currentlyPlayingData?.item?.id] : [],
+    options: { execute: launchType === LaunchType.UserInitiated },
   });
+
+  // We use `useEffect` to update the currently playing URI state when the currently playing URI changes
+  useEffect(() => {
+    if (currentlyPlayingUriData !== currentUri) {
+      setCurrentUri(currentlyPlayingUriData);
+      shouldExecute.current = true;
+    }
+  }, [currentUri, currentlyPlayingUriData]);
 
   const trackAlreadyLiked = containsMySavedTracksData?.[0];
   const isPaused = !currentlyPlayingData?.is_playing || !playbackStateData?.is_playing;
   const isTrack = currentlyPlayingData?.currently_playing_type !== "episode";
 
   if (!currentlyPlayingData || !currentlyPlayingData.item) {
-    return <NothingPlaying isLoading={currentlyPlayingIsLoading || playbackStateIsLoading} />;
+    return (
+      <NothingPlaying isLoading={currentlyPlayingIsLoading || currentlyPlayingUriIsLoading || playbackStateIsLoading} />
+    );
   }
 
   const formatTitle = (title: string) => {
@@ -132,7 +167,7 @@ function NowPlayingMenuBarCommand() {
 
   return (
     <MenuBarExtra
-      isLoading={currentlyPlayingIsLoading || playbackStateIsLoading}
+      isLoading={currentlyPlayingIsLoading || currentlyPlayingUriIsLoading || playbackStateIsLoading}
       icon={{ source: { dark: "menu-icon-dark.svg", light: "menu-icon-light.svg" } }}
       title={formatTitle(title)}
       tooltip={title}
@@ -252,10 +287,10 @@ function NothingPlaying({ title = "Nothing is playing right now", isLoading }: {
   );
 }
 
-export default function Command() {
+export default function Command(props: LaunchProps) {
   return (
     <View>
-      <NowPlayingMenuBarCommand />
+      <NowPlayingMenuBarCommand {...props} />
     </View>
   );
 }

@@ -1,3 +1,4 @@
+import { getErrorMessage } from "../helpers/getError";
 import { getSpotifyClient } from "../helpers/withSpotifyClient";
 
 type ContainsMySavedTracksProps = {
@@ -6,6 +7,14 @@ type ContainsMySavedTracksProps = {
 
 export async function containsMySavedTracks({ trackIds }: ContainsMySavedTracksProps) {
   const { spotifyClient } = getSpotifyClient();
-  const response = await spotifyClient.getMeTracksContains(trackIds.join());
-  return response;
+
+  try {
+    console.log("Calling the Spotify API...");
+    const response = await spotifyClient.getMeTracksContains(trackIds.join());
+    return response;
+  } catch (err) {
+    const error = getErrorMessage(err);
+    console.log("containsMySavedTracks.ts Error:", error);
+    throw new Error(error);
+  }
 }

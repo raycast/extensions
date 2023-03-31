@@ -1,3 +1,4 @@
+import { getErrorMessage } from "../helpers/getError";
 import { getSpotifyClient } from "../helpers/withSpotifyClient";
 
 type AddToQueueProps = {
@@ -6,6 +7,13 @@ type AddToQueueProps = {
 
 export async function addToQueue({ uri }: AddToQueueProps) {
   const { spotifyClient } = getSpotifyClient();
-  const response = await spotifyClient.postMePlayerQueue(uri);
-  return response;
+
+  try {
+    const response = await spotifyClient.postMePlayerQueue(uri);
+    return response;
+  } catch (err) {
+    const error = getErrorMessage(err);
+    console.log("addToQueue.ts Error:", error);
+    throw new Error(error);
+  }
 }

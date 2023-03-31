@@ -1,8 +1,16 @@
 import { useCachedPromise } from "@raycast/utils";
 import { getCurrentlyPlaying } from "../api/getCurrentlyPlaying";
 
-export function useCurrentlyPlaying() {
-  const { data, error, isLoading, revalidate } = useCachedPromise(() => getCurrentlyPlaying());
+type UseCurrentlyPlayingProps = {
+  options?: {
+    execute?: boolean;
+  };
+};
+
+export function useCurrentlyPlaying({ options }: UseCurrentlyPlayingProps = {}) {
+  const { data, error, isLoading, revalidate } = useCachedPromise(() => getCurrentlyPlaying(), [], {
+    execute: options?.execute !== false,
+  });
 
   return {
     currentlyPlayingData: data,

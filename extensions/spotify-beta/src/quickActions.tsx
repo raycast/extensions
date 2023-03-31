@@ -24,6 +24,7 @@ import { startRadio } from "./api/startRadio";
 import { View } from "./components/View";
 import { useCurrentlyPlaying } from "./hooks/useCurrentlyPlaying";
 import { usePlaybackState } from "./hooks/usePlaybackState";
+import { getError, getErrorMessage } from "./helpers/getError";
 
 type Actions =
   | "play"
@@ -66,6 +67,8 @@ function QuickActionsCommand(props: Props) {
 
   const { currentlyPlayingData, currentlyPlayingRevalidate } = useCurrentlyPlaying();
   const { playbackStateData, playbackStateRevalidate } = usePlaybackState();
+  const nothingIsPlaying = !currentlyPlayingData || !currentlyPlayingData?.item;
+  const isPlaying = currentlyPlayingData?.is_playing;
   const isTrack = currentlyPlayingData?.currently_playing_type !== "episode";
   const trackId = currentlyPlayingData?.item?.id;
 
@@ -76,8 +79,18 @@ function QuickActionsCommand(props: Props) {
       description: "Play the currently paused song/episode",
       icon: Icon.Play,
       onAction: async () => {
-        await play();
-        await showHUD("Playing");
+        if (isPlaying) {
+          return await showHUD("Playing");
+        }
+
+        try {
+          await play();
+          await playbackStateRevalidate();
+          await showHUD("Playing");
+        } catch (err) {
+          const error = getErrorMessage(err);
+          await showHUD(error);
+        }
       },
     },
     {
@@ -86,8 +99,22 @@ function QuickActionsCommand(props: Props) {
       description: "Pause the currently playing song/episode",
       icon: Icon.Pause,
       onAction: async () => {
-        await pause();
-        await showHUD("Paused");
+        if (nothingIsPlaying) {
+          return await showHUD("Nothing is currently playing");
+        }
+
+        if (!isPlaying) {
+          return await showHUD("Paused");
+        }
+
+        try {
+          await pause();
+          await playbackStateRevalidate();
+          await showHUD("Paused");
+        } catch (err) {
+          const error = getErrorMessage(err);
+          await showHUD(error);
+        }
       },
     },
     {
@@ -99,15 +126,24 @@ function QuickActionsCommand(props: Props) {
         tintColor: Color.PrimaryText,
       },
       onAction: async () => {
-        const isPlaying = currentlyPlayingData?.is_playing;
         if (isPlaying) {
-          await pause();
-          await currentlyPlayingRevalidate();
-          await showHUD("Paused");
+          try {
+            await pause();
+            await currentlyPlayingRevalidate();
+            await showHUD("Paused");
+          } catch (err) {
+            const error = getError(err);
+            await showHUD(error.message);
+          }
         } else {
-          await play();
-          await currentlyPlayingRevalidate();
-          await showHUD("Playing");
+          try {
+            await play();
+            await currentlyPlayingRevalidate();
+            await showHUD("Playing");
+          } catch (err) {
+            const error = getError(err);
+            await showHUD(error.message);
+          }
         }
       },
     },
@@ -117,17 +153,21 @@ function QuickActionsCommand(props: Props) {
       description: "Like the current track",
       icon: Icon.Heart,
       onAction: async () => {
-        if (isTrack) {
-          try {
-            await addToMySavedTracks({
-              trackIds: trackId ? [trackId] : [],
-            });
-            await showHUD(`Liked ${currentlyPlayingData?.item.name}`);
-          } catch (error) {
-            await showHUD("Nothing is currently playing");
-          }
-        } else {
-          await showHUD("Liking episodes is not supported yet");
+        if (nothingIsPlaying) {
+          return await showHUD("Nothing is currently playing");
+        }
+
+        if (!isTrack) {
+          return await showHUD("Liking episodes is not supported yet");
+        }
+
+        try {
+          await addToMySavedTracks({
+            trackIds: trackId ? [trackId] : [],
+          });
+          await showHUD(`Liked ${currentlyPlayingData?.item.name}`);
+        } catch (error) {
+          await showHUD("Nothing is currently playing");
         }
       },
     },
@@ -137,17 +177,21 @@ function QuickActionsCommand(props: Props) {
       description: "Dislike the current track",
       icon: Icon.HeartDisabled,
       onAction: async () => {
-        if (isTrack) {
-          try {
-            await removeFromMySavedTracks({
-              trackIds: trackId ? [trackId] : [],
-            });
-            await showHUD(`Disliked ${currentlyPlayingData?.item.name}`);
-          } catch (error) {
-            await showHUD("Nothing is currently playing");
-          }
-        } else {
-          await showHUD("Disliking episodes is not supported yet");
+        if (nothingIsPlaying) {
+          return await showHUD("Nothing is currently playing");
+        }
+
+        if (!isTrack) {
+          return await showHUD("Liking episodes is not supported yet");
+        }
+
+        try {
+          await removeFromMySavedTracks({
+            trackIds: trackId ? [trackId] : [],
+          });
+          await showHUD(`Disliked ${currentlyPlayingData?.item.name}`);
+        } catch (error) {
+          await showHUD("Nothing is currently playing");
         }
       },
     },
@@ -157,6 +201,10 @@ function QuickActionsCommand(props: Props) {
       description: "Skip to the next track",
       icon: Icon.Forward,
       onAction: async () => {
+        if (nothingIsPlaying) {
+          return await showHUD("Nothing is currently playing");
+        }
+
         if (isTrack) {
           try {
             await skipToNext();
@@ -175,6 +223,10 @@ function QuickActionsCommand(props: Props) {
       description: "Skip to the previous track",
       icon: Icon.Rewind,
       onAction: async () => {
+        if (nothingIsPlaying) {
+          return await showHUD("Nothing is currently playing");
+        }
+
         if (isTrack) {
           try {
             await skipToPrevious();
@@ -323,17 +375,22 @@ function QuickActionsCommand(props: Props) {
       description: "Start radio based on the currently playing song",
       icon: Icon.Music,
       onAction: async () => {
-        if (isTrack && trackId) {
-          try {
-            await startRadio({
-              trackIds: trackId ? [trackId] : undefined,
-            });
-            await showHUD("Playing radio");
-          } catch (error) {
-            await showHUD("Nothing is currently playing");
-          }
-        } else {
-          await showHUD("Radio based on episodes isn't available yet");
+        if (nothingIsPlaying) {
+          return await showHUD("Nothing is currently playing");
+        }
+
+        if (!isTrack && !trackId) {
+          return await showHUD("Radio based on episodes isn't available yet");
+        }
+
+        try {
+          await startRadio({
+            trackIds: trackId ? [trackId] : undefined,
+          });
+          await showHUD("Playing Radio");
+        } catch (err) {
+          const error = getErrorMessage(err);
+          await showHUD(error);
         }
       },
     },
@@ -343,17 +400,17 @@ function QuickActionsCommand(props: Props) {
       description: "Copy the URL of the currently playing song/episode",
       icon: Icon.Link,
       onAction: async () => {
-        if (currentlyPlayingData?.item) {
-          const external_urls = currentlyPlayingData.item.external_urls;
-          const title = currentlyPlayingData.item.name;
-          await Clipboard.copy({
-            html: `<a href=${external_urls?.spotify}>${title}</a>`,
-            text: external_urls?.spotify,
-          });
-          showHUD("Copied URL to clipboard");
-        } else {
-          await showHUD("No URL to copy");
+        if (nothingIsPlaying) {
+          return await showHUD("Nothing is currently playing");
         }
+
+        const external_urls = currentlyPlayingData.item.external_urls;
+        const title = currentlyPlayingData.item.name;
+        await Clipboard.copy({
+          html: `<a href=${external_urls?.spotify}>${title}</a>`,
+          text: external_urls?.spotify,
+        });
+        showHUD("Copied URL to clipboard");
       },
     },
   ];
