@@ -241,24 +241,26 @@ ${description}
             <AddToPlaylistAction playlists={myPlaylistsData.items} meData={meData} uri={uri} />
           )}
           <ActionPanel.Submenu icon={Icon.Mobile} title="Connect Device">
-            {myDevicesData?.devices?.map((device) => (
-              <Action
-                key={device.id}
-                title={device.name as string}
-                icon={device.is_active ? Icon.SpeakerOn : { source: Icon.SpeakerOff, tintColor: Color.SecondaryText }}
-                onAction={async () => {
-                  if (device.id) {
-                    await transferMyPlayback(device.id);
-                  }
-                  if (closeWindowOnAction) {
-                    await showHUD(`Connected to ${device.name}`);
-                    await popToRoot();
-                    return;
-                  }
-                  await showToast({ title: `Connected to ${device.name}` });
-                }}
-              />
-            ))}
+            {myDevicesData?.devices
+              ?.filter((device) => device.is_restricted)
+              .map((device) => (
+                <Action
+                  key={device.id}
+                  title={device.name as string}
+                  icon={device.is_active ? Icon.SpeakerOn : { source: Icon.SpeakerOff, tintColor: Color.SecondaryText }}
+                  onAction={async () => {
+                    if (device.id) {
+                      await transferMyPlayback(device.id);
+                    }
+                    if (closeWindowOnAction) {
+                      await showHUD(`Connected to ${device.name}`);
+                      await popToRoot();
+                      return;
+                    }
+                    await showToast({ title: `Connected to ${device.name}` });
+                  }}
+                />
+              ))}
           </ActionPanel.Submenu>
           <FooterAction url={external_urls?.spotify} uri={uri} title={title} />
         </ActionPanel>

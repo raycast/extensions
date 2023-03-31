@@ -217,23 +217,25 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
       </MenuBarExtra.Submenu>
       {myDevicesData?.devices && (
         <MenuBarExtra.Submenu icon={Icon.Mobile} title="Connect Device">
-          {myDevicesData?.devices?.map((device) => (
-            <MenuBarExtra.Item
-              key={device.id}
-              title={device.name as string}
-              icon={
-                device.is_active
-                  ? { source: Icon.SpeakerOn, tintColor: Color.Green }
-                  : { source: Icon.SpeakerOff, tintColor: Color.SecondaryText }
-              }
-              onAction={async () => {
-                if (device.id) {
-                  await transferMyPlayback(device.id, isPaused ? false : true);
+          {myDevicesData?.devices
+            ?.filter((device) => device.is_restricted)
+            .map((device) => (
+              <MenuBarExtra.Item
+                key={device.id}
+                title={device.name as string}
+                icon={
+                  device.is_active
+                    ? { source: Icon.SpeakerOn, tintColor: Color.Green }
+                    : { source: Icon.SpeakerOff, tintColor: Color.SecondaryText }
                 }
-                await showHUD(`Connected to ${device.name}`);
-              }}
-            />
-          ))}
+                onAction={async () => {
+                  if (device.id) {
+                    await transferMyPlayback(device.id, isPaused ? false : true);
+                  }
+                  await showHUD(`Connected to ${device.name}`);
+                }}
+              />
+            ))}
         </MenuBarExtra.Submenu>
       )}
       <MenuBarExtra.Section>
