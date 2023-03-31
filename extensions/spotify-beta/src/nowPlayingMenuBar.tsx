@@ -218,7 +218,7 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
       {myDevicesData?.devices && (
         <MenuBarExtra.Submenu icon={Icon.Mobile} title="Connect Device">
           {myDevicesData?.devices
-            ?.filter((device) => device.is_restricted)
+            ?.filter((device) => !device.is_restricted)
             .map((device) => (
               <MenuBarExtra.Item
                 key={device.id}
