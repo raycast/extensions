@@ -53,17 +53,19 @@ type Action = {
   onAction: (action?: string) => Promise<void>;
 };
 
-function createDeeplink(extensionName: string, commandName: string, actionName: string, isDevelopment: boolean) {
-  const protocol = isDevelopment ? "raycastinternal://" : "raycast://";
+function createDeeplink(extensionName: string, commandName: string, actionName: string, raycastVersion: string) {
+  const protocol = raycastVersion.includes("alpha") ? "raycastinternal://" : "raycast://";
   const baseLink = `${protocol}extensions/mattisssa/${extensionName}/${commandName}`;
   const context = encodeURIComponent(JSON.stringify({ action: actionName }));
   const deeplink = `${baseLink}?launchContext=${context}`;
   return deeplink;
 }
 
+console.log(environment);
+
 function QuickActionsCommand(props: Props) {
   const action = props.launchContext?.action;
-  const { extensionName, commandName, isDevelopment } = environment;
+  const { extensionName, commandName, raycastVersion } = environment;
 
   const { currentlyPlayingData, currentlyPlayingRevalidate } = useCurrentlyPlaying();
   const { playbackStateData, playbackStateRevalidate } = usePlaybackState();
@@ -442,7 +444,7 @@ function QuickActionsCommand(props: Props) {
               <Action.CreateQuicklink
                 title="Create Quicklink"
                 quicklink={{
-                  link: createDeeplink(extensionName, commandName, action.name, isDevelopment),
+                  link: createDeeplink(extensionName, commandName, action.name, raycastVersion),
                   name: `Spotify ${action.title}`,
                 }}
               />
