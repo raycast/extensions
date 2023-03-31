@@ -35,6 +35,7 @@ export default function Command() {
                   {item.isHistory && (
                     <Action
                       title="Remove From History"
+                      style={Action.Style.Destructive}
                       onAction={async () => {
                         await deleteHistoryItem(item);
                       }}
@@ -45,6 +46,7 @@ export default function Command() {
 
                   <Action
                     title="Clear All History"
+                    style={Action.Style.Destructive}
                     onAction={async () => {
                       await deleteAllHistory();
                     }}
