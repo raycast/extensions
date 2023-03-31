@@ -31,7 +31,7 @@
           "title": "Auth Token",
           "description": "Your Scrapbox auth token",
           "type": "textfield",
-          "required": false
+          "required": true
         },
         {
           "name": "defaultPage",
