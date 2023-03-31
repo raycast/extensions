@@ -12,7 +12,7 @@ import {
   COLOR_TEMPERATURE_STEP,
 } from "./constants";
 import { getTransitionTimeInMs } from "./utils";
-import getAuthenticatedApi from "./getAuthenticatedApi";
+import { Api } from "node-hue-api/dist/esm/api/Api";
 import Style = Toast.Style;
 import getAuthenticatedApi from "./getAuthenticatedApi";
 

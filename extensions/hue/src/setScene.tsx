@@ -5,6 +5,7 @@ import { Group, Scene, SendHueMessage } from "./lib/types";
 import UnlinkAction from "./components/UnlinkAction";
 import ManageHueBridge from "./components/ManageHueBridge";
 import { useHue } from "./lib/useHue";
+import { Api } from "node-hue-api/dist/esm/api/Api";
 import Style = Toast.Style;
 
 export default function SetScene() {
