@@ -342,20 +342,22 @@ export async function getComments(issueId: string) {
   return data.issue.comments.nodes;
 }
 
-export type IssueDetailResult = IssueResult & Pick<Issue, "description" | "dueDate">
-  & { relations:
-      { nodes: [
-        Pick<IssueRelation, "id" | "type"> & { 
-          "relatedIssue": Pick<Issue, "identifier" | "title"> & { 
-            "state": Pick<WorkflowState, "type" | "color"> 
-          }
+export type IssueDetailResult = IssueResult &
+  Pick<Issue, "description" | "dueDate"> & {
+    relations: {
+      nodes: [
+        Pick<IssueRelation, "id" | "type"> & {
+          relatedIssue: Pick<Issue, "identifier" | "title"> & {
+            state: Pick<WorkflowState, "type" | "color">;
+          };
         }
-      ]}
+      ];
     };
+  };
 
 export async function getIssueDetail(issueId: string) {
   const { graphQLClient } = getLinearClient();
-  
+
   const { data } = await graphQLClient.rawRequest<{ issue: IssueDetailResult }, Record<string, unknown>>(
     `
       query($issueId: String!) {
@@ -364,6 +366,7 @@ export async function getIssueDetail(issueId: string) {
           description
           relations {
             nodes {
+              id
               type
               relatedIssue {
                 id
