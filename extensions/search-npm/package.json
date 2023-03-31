@@ -25,7 +25,7 @@
     },
     {
       "name": "favorites",
-      "title": "View favorites",
+      "title": "View Favorites",
       "subtitle": "npm",
       "description": "View your favorite packages",
       "mode": "view"
@@ -108,7 +108,7 @@
     {
       "name": "historyCount",
       "type": "textfield",
-      "title": "History count",
+      "title": "History Count",
       "description": "How many items to store in your history",
       "required": false,
       "default": "30",
