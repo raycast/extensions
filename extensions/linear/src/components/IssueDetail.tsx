@@ -79,26 +79,6 @@ export default function IssueDetail({ issue: existingIssue, mutateList, prioriti
                   <Detail.Metadata.Label title="Labels" text="No Labels" />
                 )}
 
-                {!!issue.relations && issue.relations.nodes.filter((node) => node.type == "related").length > 0 ? (
-                  <Detail.Metadata.TagList title="Related">
-                    {issue.relations.nodes
-                      .filter((node) => node.type == "related")
-                      .map(({ id, relatedIssue }) => (
-                        <Detail.Metadata.TagList.Item key={id} text={relatedIssue.title} />
-                      ))}
-                  </Detail.Metadata.TagList>
-                ) : null}
-
-                {!!issue.relations && issue.relations.nodes.filter((node) => node.type == "duplicate").length > 0 ? (
-                  <Detail.Metadata.TagList title="Duplicates">
-                    {issue.relations.nodes
-                      .filter((node) => node.type == "duplicate")
-                      .map(({ id, relatedIssue }) => (
-                        <Detail.Metadata.TagList.Item key={id} text={relatedIssue.title} />
-                      ))}
-                  </Detail.Metadata.TagList>
-                ) : null}
-
                 {issue.dueDate ? (
                   <Detail.Metadata.Label
                     title="Due Date"
@@ -130,6 +110,26 @@ export default function IssueDetail({ issue: existingIssue, mutateList, prioriti
                       : { source: { light: "light/backlog.svg", dark: "dark/backlog.svg" } }
                   }
                 />
+
+                {!!issue.relations && issue.relations.nodes.filter((node) => node.type == "related").length > 0 ? (
+                  <Detail.Metadata.TagList title="Related">
+                    {issue.relations.nodes
+                      .filter((node) => node.type == "related")
+                      .map(({ id, relatedIssue }) => (
+                        <Detail.Metadata.TagList.Item key={id} text={relatedIssue.identifier} />
+                      ))}
+                  </Detail.Metadata.TagList>
+                ) : null}
+
+                {!!issue.relations && issue.relations.nodes.filter((node) => node.type == "duplicate").length > 0 ? (
+                  <Detail.Metadata.TagList title="Duplicates">
+                    {issue.relations.nodes
+                      .filter((node) => node.type == "duplicate")
+                      .map(({ id, relatedIssue }) => (
+                        <Detail.Metadata.TagList.Item key={id} text={relatedIssue.identifier} />
+                      ))}
+                  </Detail.Metadata.TagList>
+                ) : null}
               </Detail.Metadata>
             ),
             actions: (
