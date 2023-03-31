@@ -28,35 +28,26 @@ type DriveResponse = {
   drives: Drive[];
 };
 
-function BaseList(props: { collection: Collection }) {
-  const { data } = useSpace<BaseResponse>(`/collections/${props.collection.id}/bases`);
-
-  return (
-    <List.Section title="Bases">
-      {data?.bases.map((base) => (
-        <BaseItem key={base.name} base={base} />
-      ))}
-    </List.Section>
-  );
-}
-
-function DriveList(props: { collection: Collection }) {
-  const { data } = useSpace<DriveResponse>(`/collections/${props.collection.id}/drives`);
-
-  return (
-    <List.Section title="Drives">
-      {data?.drives.map((drive) => (
-        <DriveItem key={drive.name} drive={drive} />
-      ))}
-    </List.Section>
-  );
-}
-
 export function BrowseCollection(props: { collection: Collection }) {
+  const { data: baseData, isLoading: isBaseLoading } = useSpace<BaseResponse>(
+    `/collections/${props.collection.id}/bases`
+  );
+  const { data: driveData, isLoading: isDriveLoading } = useSpace<DriveResponse>(
+    `/collections/${props.collection.id}/drives`
+  );
   return (
-    <List navigationTitle={props.collection.name}>
-      <BaseList collection={props.collection} />
-      <DriveList collection={props.collection} />
+    <List isLoading={isBaseLoading || isDriveLoading} navigationTitle={props.collection.name}>
+      <List.Section title="Bases">
+        {baseData?.bases?.map((base) => (
+          <BaseItem key={base.name} base={base} />
+        ))}
+      </List.Section>
+
+      <List.Section title="Drives">
+        {driveData?.drives.map((drive) => (
+          <DriveItem key={drive.name} drive={drive} />
+        ))}
+      </List.Section>
     </List>
   );
 }
