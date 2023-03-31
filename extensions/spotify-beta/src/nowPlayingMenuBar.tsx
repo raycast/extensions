@@ -31,6 +31,7 @@ import { useMe } from "./hooks/useMe";
 import { useEffect, useRef } from "react";
 import { useCachedState } from "@raycast/utils";
 import { useCurrentlyPlayingUri } from "./hooks/useCurrentlyPlayingUri";
+import { formatTitle } from "./helpers/formatTitle";
 
 function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
   const preferences = getPreferenceValues<{ maxTextLength?: boolean; showEllipsis?: boolean }>();
@@ -81,17 +82,6 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
       <NothingPlaying isLoading={currentlyPlayingIsLoading || currentlyPlayingUriIsLoading || playbackStateIsLoading} />
     );
   }
-
-  const formatTitle = (title: string) => {
-    const max = Number(preferences.maxTextLength);
-    const showEllipsis = Boolean(preferences.showEllipsis);
-
-    if (Number.isNaN(max) || max < 0 || title.length <= max) {
-      return title;
-    }
-
-    return title.substring(0, max).trim() + (showEllipsis ? "…" : "");
-  };
 
   const { item } = currentlyPlayingData;
   const { name, external_urls, uri } = item;
@@ -169,7 +159,7 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
     <MenuBarExtra
       isLoading={currentlyPlayingIsLoading || currentlyPlayingUriIsLoading || playbackStateIsLoading}
       icon={{ source: { dark: "menu-icon-dark.svg", light: "menu-icon-light.svg" } }}
-      title={formatTitle(title)}
+      title={formatTitle(title, Number(preferences.maxTextLength), preferences.showEllipsis)}
       tooltip={title}
     >
       {!isPaused && (
@@ -238,6 +228,18 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
             ))}
         </MenuBarExtra.Submenu>
       )}
+      <MenuBarExtra.Section>
+        <MenuBarExtra.Item
+          icon={Icon.ArrowsExpand}
+          title="Now Playing"
+          onAction={() =>
+            launchCommand({
+              name: "nowPlaying",
+              type: LaunchType.UserInitiated,
+            })
+          }
+        />
+      </MenuBarExtra.Section>
       <MenuBarExtra.Section>
         <MenuBarExtra.Item
           title="Copy URL"
