@@ -30,6 +30,24 @@
       "placeholder": "Your Docker token"
     },
     {
+      "name": "gitAuthorName",
+      "title": "Git Author Name",
+      "description": "The name of the Git author",
+      "type": "textfield",
+      "required": false,
+      "default": "",
+      "placeholder": "The name of the Git author"
+    },
+    {
+      "name": "gitAuthorEmail",
+      "title": "Git Author Email",
+      "description": "The email address of the Git author",
+      "type": "textfield",
+      "required": false,
+      "default": "",
+      "placeholder": "The email address of the Git author"
+    },
+    {
       "name": "mountOption",
       "title": "Mount Option",
       "description": "The mount option to use",
@@ -48,22 +66,13 @@
       ]
     },
     {
-      "name": "gitAuthorName",
-      "title": "Git Author Name",
-      "description": "The name of the Git author",
-      "type": "textfield",
-      "required": false,
-      "default": "",
-      "placeholder": "The name of the Git author"
-    },
-    {
-      "name": "gitAuthorEmail",
-      "title": "Git Author Email",
-      "description": "The email address of the Git author",
-      "type": "textfield",
-      "required": false,
-      "default": "",
-      "placeholder": "The email address of the Git author"
+      "name": "closeAfterCopy",
+      "title": "Close the window after copying the command",
+      "label": "Enabled",
+      "description": "Close the window after copying the command",
+      "type": "checkbox",
+      "required": true,
+      "default": false
     }
   ],
   "dependencies": {

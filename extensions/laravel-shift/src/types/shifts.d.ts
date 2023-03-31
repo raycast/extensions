@@ -10,9 +10,10 @@ export declare type FormValues = {
 
 interface Preferences {
   dockerToken: string;
-  mountOption: string;
   gitAuthorEmail: string;
   gitAuthorName: string;
+  mountOption: string;
+  closeAfterCopy: boolean;
 }
 
 export declare type Group = {
