@@ -1,5 +1,3 @@
 import useATPRankings from "./useATPRankings";
 
-export {
-  useATPRankings,
-};
+export { useATPRankings };
