@@ -61,8 +61,6 @@ function createDeeplink(extensionName: string, commandName: string, actionName: 
   return deeplink;
 }
 
-console.log(environment);
-
 function QuickActionsCommand(props: Props) {
   const action = props.launchContext?.action;
   const { extensionName, commandName, raycastVersion } = environment;
