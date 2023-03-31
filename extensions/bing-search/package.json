@@ -13,7 +13,6 @@
     {
       "name": "search",
       "title": "Bing Search",
-      "subtitle": "Bing Search",
       "description": "Bing search with autosuggestions",
       "mode": "view"
     }
