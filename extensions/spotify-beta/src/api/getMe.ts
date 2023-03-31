@@ -5,7 +5,6 @@ export async function getMe() {
   const { spotifyClient } = getSpotifyClient();
 
   try {
-    console.log("Calling the Spotify API...");
     const response = await spotifyClient.getMe();
     return response;
   } catch (err) {

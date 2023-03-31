@@ -6,7 +6,6 @@ export async function getPlaybackState() {
   const { spotifyClient } = getSpotifyClient();
 
   try {
-    console.log("Calling the Spotify API...");
     const response = await spotifyClient.getMePlayer({ additionalTypes: "episode" });
     // Type is coming back as `unknown` for some reason
     return response as CurrentlyPlayingContextObject;

@@ -9,7 +9,6 @@ export async function containsMySavedTracks({ trackIds }: ContainsMySavedTracksP
   const { spotifyClient } = getSpotifyClient();
 
   try {
-    console.log("Calling the Spotify API...");
     const response = await spotifyClient.getMeTracksContains(trackIds.join());
     return response;
   } catch (err) {

@@ -30,7 +30,6 @@ export async function getCurrentlyPlayingUri() {
       return parsedResponse.uri as string;
     } else {
       try {
-        console.log("Calling the Spotify API...");
         const response = await spotifyClient.getMePlayerCurrentlyPlaying({ additionalTypes: "episode" });
 
         if (response) {

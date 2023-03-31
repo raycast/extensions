@@ -7,7 +7,6 @@ export async function getMyPlaylists({ limit = 50 }: GetMySavedAlbumsProps = {})
   const { spotifyClient } = getSpotifyClient();
 
   try {
-    console.log("Calling the Spotify API...");
     const response = await spotifyClient.getMePlaylists({ limit });
     return response;
   } catch (err) {
