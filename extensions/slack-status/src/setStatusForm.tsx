@@ -12,9 +12,9 @@ enum StatusFormMode {
 export function SetCustomStatusForm(props: {
   slackClient: SlackClient;
   currentStatusResponseState: SlackStatusResponseState;
+  initialValues?: SlackStatusPreset;
 }) {
   const { pop } = useNavigation();
-  function handleSubmit(values: FormValues) {
   function handleSubmit(values: Form.Values) {
     console.log(values);
     if (!validateForm(values)) {
@@ -35,7 +35,7 @@ export function SetCustomStatusForm(props: {
       }
     );
   }
-  return <StatusForm mode={StatusFormMode.SetCustomStatus} onSubmit={handleSubmit} />;
+  return <StatusForm mode={StatusFormMode.SetCustomStatus} preset={props.initialValues} onSubmit={handleSubmit} />;
 }
 
 export function CreateStatusPresetForm(props: { onCompletion: (preset: SlackStatusPreset) => void }) {

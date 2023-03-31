@@ -8,6 +8,7 @@ import {
   useNavigation,
   Action,
   Toast,
+  LaunchProps,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { slackEmojiCodeMap } from "./emojiCodes";
@@ -33,18 +34,39 @@ const noStatusState: CurrentStatusState = {
   isError: false,
 };
 
+type LaunchContext = {
+  status?: string;
+  emoji?: string;
+  duration?: number;
+};
+
 // Main
 
-export default function Command() {
+export default function Command(props: LaunchProps) {
   const accessToken = preferences.accessToken?.value as string;
   const slackClient = new SlackClient(accessToken);
-  return <StatusesList slackClient={slackClient} />;
+  return <StatusesList slackClient={slackClient} launchContext={props.launchContext as LaunchContext} />;
 }
 
-function StatusesList(props: { slackClient: SlackClient }) {
+function StatusesList(props: { slackClient: SlackClient; launchContext: LaunchContext }) {
   const currentStatusResponseState = useState<SlackStatusResponse>();
   const statusPresetsListState = useStoredPresets();
   const statusPresets = statusPresetsListState[0];
+
+  if (props.launchContext.status || props.launchContext.emoji || props.launchContext.duration) {
+    const initialValues: SlackStatusPreset = {
+      title: props.launchContext.status ?? "",
+      emojiCode: props.launchContext.emoji ?? ":speech_balloon:",
+      defaultDuration: props.launchContext.duration ?? 0,
+    };
+    return (
+      <SetCustomStatusForm
+        slackClient={props.slackClient}
+        initialValues={initialValues}
+        currentStatusResponseState={currentStatusResponseState}
+      />
+    );
+  }
 
   return (
     <List>
