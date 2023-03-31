@@ -1,4 +1,4 @@
-import { showToast, ToastStyle } from "@raycast/api";
+import { showToast, Toast } from "@raycast/api";
 import { WebAPICallError, WebClient } from "@slack/web-api";
 import { slackEmojiCodeMap } from "./emojiCodes";
 import { SlackStatusPreset, SlackStatusResponseState } from "./interfaces";
@@ -39,7 +39,11 @@ export class SlackClient {
         setCurrentStatusResponse({
           error: error,
         });
-        showToast(ToastStyle.Failure, "Failed to fetch status", error.message);
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Failed to fetch status",
+          message: error.message,
+        });
       });
   }
 
@@ -50,19 +54,29 @@ export class SlackClient {
       status_emoji: "",
     };
     const setCurrentStatusResponse = currentStatusResponseState[1];
-    showToast(ToastStyle.Animated, "Clearing status...");
+    showToast({
+      style: Toast.Style.Animated,
+      title: "Clearing status...",
+    });
     this.apiClient.users.profile
       .set({
         profile: JSON.stringify(profile),
       })
       .then((response) => {
         if (response.ok) {
-          showToast(ToastStyle.Success, "Status cleared");
+          showToast({
+            style: Toast.Style.Success,
+            title: "Status cleared",
+          });
           setCurrentStatusResponse({});
         }
       })
       .catch((error: WebAPICallError) => {
-        showToast(ToastStyle.Failure, "Failed to clear status", error.message);
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Failed to clear status",
+          message: error.message,
+        });
       });
   }
 
@@ -85,7 +99,10 @@ export class SlackClient {
       status_expiration: expirationTimestamp,
       status_emoji: statusPreset.emojiCode,
     };
-    showToast(ToastStyle.Animated, "Setting status...");
+    showToast({
+      style: Toast.Style.Animated,
+      title: "Setting status...",
+    });
     this.apiClient.users.profile
       .set({
         profile: JSON.stringify(profile),
@@ -94,7 +111,11 @@ export class SlackClient {
         if (response.ok) {
           const emoji = slackEmojiCodeMap[statusPreset.emojiCode] ?? "💬";
           const message = `${emoji} ${statusPreset.title}`;
-          showToast(ToastStyle.Success, "Status updated", message);
+          showToast({
+            style: Toast.Style.Success,
+            title: "Status updated",
+            message: message,
+          });
           setCurrentStatusResponse({
             status: {
               emojiCode: statusPreset.emojiCode,
@@ -108,7 +129,11 @@ export class SlackClient {
         }
       })
       .catch((error: WebAPICallError) => {
-        showToast(ToastStyle.Failure, "Failed to update status", error.message);
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Failed to update status",
+          message: error.message,
+        });
         if (onCompletion) {
           onCompletion(false);
         }

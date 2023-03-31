@@ -1,4 +1,4 @@
-import { ImageLike } from "@raycast/api";
+import { Image } from "@raycast/api";
 import { WebAPICallError } from "@slack/web-api";
 
 export interface SlackStatus {
@@ -14,7 +14,7 @@ export interface SlackStatusResponse {
 
 export interface CurrentStatusState {
   status?: SlackStatus;
-  icon?: ImageLike;
+  icon?: Image.ImageLike;
   title: string;
   subtitle?: string;
   isError: boolean;

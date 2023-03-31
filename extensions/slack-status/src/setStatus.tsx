@@ -1,4 +1,14 @@
-import { ActionPanel, environment, Icon, List, preferences, showToast, ToastStyle, useNavigation } from "@raycast/api";
+import {
+  ActionPanel,
+  environment,
+  Icon,
+  List,
+  preferences,
+  showToast,
+  useNavigation,
+  Action,
+  Toast,
+} from "@raycast/api";
 import { useEffect, useState } from "react";
 import { slackEmojiCodeMap } from "./emojiCodes";
 import {
@@ -200,7 +210,7 @@ function SetCustomStatusAction(props: {
 }) {
   const { push } = useNavigation();
   return (
-    <ActionPanel.Item
+    <Action
       id="setCustomStatus"
       title="Set Custom Status"
       icon={Icon.Message}
@@ -219,10 +229,10 @@ function SetCustomStatusAction(props: {
 
 function ClearStatusAction(props: { slackClient: SlackClient; currentStatusResponseState: SlackStatusResponseState }) {
   return (
-    <ActionPanel.Item
+    <Action
       id="clearStatus"
       title="Clear Status"
-      icon={Icon.XmarkCircle}
+      icon={Icon.XMarkCircle}
       onAction={() => props.slackClient.clearStatus(props.currentStatusResponseState)}
     />
   );
@@ -234,7 +244,7 @@ function SetStatusAction(props: {
   currentStatusResponseState: SlackStatusResponseState;
 }) {
   return (
-    <ActionPanel.Item
+    <Action
       id="setStatus"
       title="Set Status"
       icon={Icon.Pencil}
@@ -264,7 +274,7 @@ function SetStatusWithDuration(props: {
         const title = titleDurationPair[0];
         const duration = titleDurationPair[1];
         return (
-          <ActionPanel.Item
+          <Action
             key={title}
             id={title}
             title={title}
@@ -281,7 +291,7 @@ function SetStatusWithDuration(props: {
 
 function DeletePresetAction(props: { statusPresetsListState: SlackStatusPresetsListState; index: number }) {
   return (
-    <ActionPanel.Item
+    <Action
       id="deletePreset"
       title="Delete Preset"
       icon={Icon.Trash}
@@ -299,7 +309,7 @@ function DeletePresetAction(props: { statusPresetsListState: SlackStatusPresetsL
 function CreatePresetAction(props: { statusPresetsListState: SlackStatusPresetsListState }) {
   const { push, pop } = useNavigation();
   return (
-    <ActionPanel.Item
+    <Action
       id="createPreset"
       title="Create Status Preset"
       icon={Icon.Document}
@@ -313,7 +323,11 @@ function CreatePresetAction(props: { statusPresetsListState: SlackStatusPresetsL
               setPresets(newPresets);
               const emoji = slackEmojiCodeMap[preset.emojiCode] ?? "💬";
               const message = `${emoji} ${preset.title}`;
-              showToast(ToastStyle.Success, "Preset created", message);
+              showToast({
+                style: Toast.Style.Success,
+                title: "Preset created",
+                message: message,
+              });
               pop();
             }}
           />
@@ -327,7 +341,7 @@ function EditPresetAction(props: { statusPresetsListState: SlackStatusPresetsLis
   const { push, pop } = useNavigation();
   const [presets, setPresets] = props.statusPresetsListState;
   return (
-    <ActionPanel.Item
+    <Action
       id="editPreset"
       title="Edit Preset"
       icon={Icon.Pencil}
@@ -342,7 +356,11 @@ function EditPresetAction(props: { statusPresetsListState: SlackStatusPresetsLis
               setPresets(newPresets);
               const emoji = slackEmojiCodeMap[preset.emojiCode] ?? "💬";
               const message = `${emoji} ${preset.title}`;
-              showToast(ToastStyle.Success, "Preset updated", message);
+              showToast({
+                style: Toast.Style.Success,
+                title: "Preset updated",
+                message: message,
+              });
               pop();
             }}
           />
