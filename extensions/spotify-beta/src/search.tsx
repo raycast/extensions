@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, ComponentProps } from "react";
 import { Action, ActionPanel, Grid, Icon, List, LocalStorage } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useSearch } from "./hooks/useSearch";
@@ -48,7 +48,7 @@ function SearchCommand() {
     }
   }, [searchText, searchIsLoading]);
 
-  const sharedProps = {
+  const sharedProps: ComponentProps<typeof List> = {
     searchBarPlaceholder: "What do you want to listen to",
     onSearchTextChange: setSearchText,
     isLoading: searchIsLoading || recentSearchIsLoading,
