@@ -1,6 +1,6 @@
 # Apple Notes Changelog
 
-## [Improvements] - 2023-3-23
+## [Improvements] - 2023-03-31
 
 - Added the function to open notes in separate windows. 
 
@@ -8,7 +8,7 @@
 
 - Added error handling when Raycast doesn't have Accessibility/Automation permission.
 
-## [Improvements] - 2023-1-30
+## [Improvements] - 2023-01-30
 
 - Added fallback behaviour to create notes with the input text.
 - Added a workaround to activate the window if there isn't one.
