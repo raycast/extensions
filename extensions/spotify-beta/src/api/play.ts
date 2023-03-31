@@ -42,21 +42,21 @@ export async function play({ id, type, contextUri }: PlayProps = {}) {
   } catch (err) {
     const error = getErrorMessage(err);
 
-    // if (error?.toLocaleLowerCase().includes("no active device")) {
-    //   if (!type || !id) {
-    //     const script = buildScriptEnsuringSpotifyIsRunning("play");
-    //     await runAppleScriptSilently(script);
-    //     return;
-    //   }
+    if (error?.toLocaleLowerCase().includes("no active device")) {
+      if (!type || !id) {
+        const script = buildScriptEnsuringSpotifyIsRunning("play");
+        await runAppleScriptSilently(script);
+        return;
+      }
 
-    //   const script = buildScriptEnsuringSpotifyIsRunning(`tell application "Spotify"
-    //         launch
-    //         delay 3
-    //         play track "${uriForType[type]}${id}"
-    // end tell`);
-    //   await runAppleScriptSilently(script);
-    //   return;
-    // }
+      const script = buildScriptEnsuringSpotifyIsRunning(`tell application "Spotify"
+            launch
+            delay 3
+            play track "${uriForType[type]}${id}"
+    end tell`);
+      await runAppleScriptSilently(script);
+      return;
+    }
 
     console.log("play.ts Error: ", error);
     throw new Error(error);
