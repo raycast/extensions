@@ -4,7 +4,6 @@ import { BRIDGE_IP_ADDRESS_KEY, BRIDGE_USERNAME_KEY } from "./constants";
 import { CouldNotConnectToHueBridgeError, NoHueBridgeConfiguredError } from "./errors";
 import { v3 } from "node-hue-api";
 
-// TODO: Use global state to avoid creating a new API instance on every call.
 export default async function getAuthenticatedApi(): Promise<Api> {
   const bridgeIpAddress = await LocalStorage.getItem<string>(BRIDGE_IP_ADDRESS_KEY);
   const bridgeUsername = await LocalStorage.getItem<string>(BRIDGE_USERNAME_KEY);

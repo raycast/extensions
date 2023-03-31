@@ -15,11 +15,12 @@ import { CssColor, Group, Light, SendHueMessage } from "./lib/types";
 import { BRIGHTNESS_MAX, BRIGHTNESS_MIN, BRIGHTNESSES, COLOR_TEMP_MAX, COLOR_TEMP_MIN, COLORS } from "./lib/constants";
 import ManageHueBridge from "./components/ManageHueBridge";
 import UnlinkAction from "./components/UnlinkAction";
-import Style = Toast.Style;
 import { useHue } from "./lib/useHue";
+import { Api } from "node-hue-api/dist/esm/api/Api";
+import Style = Toast.Style;
 
 export default function ControlLights() {
-  const { hueBridgeState, sendHueMessage, isLoading, lights, mutateLights, groups } = useHue();
+  const { hueBridgeState, sendHueMessage, apiPromise, isLoading, lights, mutateLights, groups } = useHue();
 
   const manageHueBridgeElement: JSX.Element | null = ManageHueBridge(hueBridgeState, sendHueMessage);
   if (manageHueBridgeElement !== null) return manageHueBridgeElement;
@@ -40,6 +41,7 @@ export default function ControlLights() {
 
           return (
             <Group
+              apiPromise={apiPromise}
               key={group.id}
               lights={groupLights}
               group={group}
@@ -54,6 +56,7 @@ export default function ControlLights() {
 }
 
 function Group(props: {
+  apiPromise: Promise<Api>;
   lights: Light[];
   group: Group;
   mutateLights: MutatePromise<Light[]>;
@@ -64,6 +67,7 @@ function Group(props: {
       {props.lights.map(
         (light: Light): JSX.Element => (
           <Light
+            apiPromise={props.apiPromise}
             key={light.id}
             light={light}
             group={props.group}
@@ -77,6 +81,7 @@ function Group(props: {
 }
 
 function Light(props: {
+  apiPromise: Promise<Api>;
   light: Light;
   group: Group;
   mutateLights: MutatePromise<Light[]>;
@@ -90,18 +95,23 @@ function Light(props: {
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <ToggleLightAction light={props.light} onToggle={() => handleToggle(props.light, props.mutateLights)} />
+            <ToggleLightAction
+              light={props.light}
+              onToggle={() => handleToggle(props.apiPromise, props.light, props.mutateLights)}
+            />
             <SetBrightnessAction
               light={props.light}
-              onSet={(percentage: number) => handleSetBrightness(props.light, props.mutateLights, percentage)}
+              onSet={(percentage: number) =>
+                handleSetBrightness(props.apiPromise, props.light, props.mutateLights, percentage)
+              }
             />
             <IncreaseBrightnessAction
               light={props.light}
-              onIncrease={() => handleIncreaseBrightness(props.light, props.mutateLights)}
+              onIncrease={() => handleIncreaseBrightness(props.apiPromise, props.light, props.mutateLights)}
             />
             <DecreaseBrightnessAction
               light={props.light}
-              onDecrease={() => handleDecreaseBrightness(props.light, props.mutateLights)}
+              onDecrease={() => handleDecreaseBrightness(props.apiPromise, props.light, props.mutateLights)}
             />
           </ActionPanel.Section>
 
@@ -109,19 +119,19 @@ function Light(props: {
             {props.light.state.colormode == "xy" && (
               <SetColorAction
                 light={props.light}
-                onSet={(color: CssColor) => handleSetColor(props.light, props.mutateLights, color)}
+                onSet={(color: CssColor) => handleSetColor(props.apiPromise, props.light, props.mutateLights, color)}
               />
             )}
             {props.light.state.colormode == "ct" && (
               <IncreaseColorTemperatureAction
                 light={props.light}
-                onIncrease={() => handleIncreaseColorTemperature(props.light, props.mutateLights)}
+                onIncrease={() => handleIncreaseColorTemperature(props.apiPromise, props.light, props.mutateLights)}
               />
             )}
             {props.light.state.colormode == "ct" && (
               <DecreaseColorTemperatureAction
                 light={props.light}
-                onDecrease={() => handleDecreaseColorTemperature(props.light, props.mutateLights)}
+                onDecrease={() => handleDecreaseColorTemperature(props.apiPromise, props.light, props.mutateLights)}
               />
             )}
           </ActionPanel.Section>
@@ -234,11 +244,11 @@ function RefreshAction(props: { onRefresh: () => void }) {
   );
 }
 
-async function handleToggle(light: Light, mutateLights: MutatePromise<Light[]>) {
+async function handleToggle(apiPromise: Promise<Api>, light: Light, mutateLights: MutatePromise<Light[]>) {
   const toast = new Toast({ title: "" });
 
   try {
-    await mutateLights(toggleLight(light), {
+    await mutateLights(toggleLight(apiPromise, light), {
       optimisticUpdate(lights) {
         return lights?.map((it) => (it.id === light.id ? { ...it, state: { ...it.state, on: !light.state.on } } : it));
       },
@@ -255,12 +265,17 @@ async function handleToggle(light: Light, mutateLights: MutatePromise<Light[]>) 
   }
 }
 
-async function handleSetBrightness(light: Light, mutateLights: MutatePromise<Light[]>, percentage: number) {
+async function handleSetBrightness(
+  api: Promise<Api>,
+  light: Light,
+  mutateLights: MutatePromise<Light[]>,
+  percentage: number
+) {
   const toast = new Toast({ title: "" });
   const brightness = (percentage / 100) * 253 + 1;
 
   try {
-    await mutateLights(setLightBrightness(light, brightness), {
+    await mutateLights(setLightBrightness(api, light, brightness), {
       optimisticUpdate(lights) {
         return lights.map((it) =>
           it.id === light.id ? { ...it, state: { ...it.state, on: true, bri: brightness } } : it
@@ -279,11 +294,11 @@ async function handleSetBrightness(light: Light, mutateLights: MutatePromise<Lig
   }
 }
 
-async function handleIncreaseBrightness(light: Light, mutateLights: MutatePromise<Light[]>) {
+async function handleIncreaseBrightness(api: Promise<Api>, light: Light, mutateLights: MutatePromise<Light[]>) {
   const toast = new Toast({ title: "" });
 
   try {
-    await mutateLights(adjustBrightness(light, "increase"), {
+    await mutateLights(adjustBrightness(api, light, "increase"), {
       optimisticUpdate(lights) {
         return lights?.map((it) =>
           it.id === light.id
@@ -304,11 +319,11 @@ async function handleIncreaseBrightness(light: Light, mutateLights: MutatePromis
   }
 }
 
-async function handleDecreaseBrightness(light: Light, mutateLights: MutatePromise<Light[]>) {
+async function handleDecreaseBrightness(api: Promise<Api>, light: Light, mutateLights: MutatePromise<Light[]>) {
   const toast = new Toast({ title: "" });
 
   try {
-    await mutateLights(adjustBrightness(light, "decrease"), {
+    await mutateLights(adjustBrightness(api, light, "decrease"), {
       optimisticUpdate(lights) {
         return lights.map((it) =>
           it.id === light.id
@@ -329,11 +344,11 @@ async function handleDecreaseBrightness(light: Light, mutateLights: MutatePromis
   }
 }
 
-async function handleSetColor(light: Light, mutateLights: MutatePromise<Light[]>, color: CssColor) {
+async function handleSetColor(api: Promise<Api>, light: Light, mutateLights: MutatePromise<Light[]>, color: CssColor) {
   const toast = new Toast({ title: "" });
 
   try {
-    await mutateLights(setLightColor(light, color.value), {
+    await mutateLights(setLightColor(api, light, color.value), {
       optimisticUpdate(lights) {
         return lights.map((it) =>
           it.id === light.id ? { ...it, state: { ...it.state, on: true, xy: hexToXy(color.value) } } : it
@@ -352,11 +367,11 @@ async function handleSetColor(light: Light, mutateLights: MutatePromise<Light[]>
   }
 }
 
-async function handleIncreaseColorTemperature(light: Light, mutateLights: MutatePromise<Light[]>) {
+async function handleIncreaseColorTemperature(api: Promise<Api>, light: Light, mutateLights: MutatePromise<Light[]>) {
   const toast = new Toast({ title: "" });
 
   try {
-    await mutateLights(adjustColorTemperature(light, "increase"), {
+    await mutateLights(adjustColorTemperature(api, light, "increase"), {
       optimisticUpdate(lights) {
         return lights?.map((it) =>
           it.id === light.id
@@ -377,11 +392,11 @@ async function handleIncreaseColorTemperature(light: Light, mutateLights: Mutate
   }
 }
 
-async function handleDecreaseColorTemperature(light: Light, mutateLights: MutatePromise<Light[]>) {
+async function handleDecreaseColorTemperature(api: Promise<Api>, light: Light, mutateLights: MutatePromise<Light[]>) {
   const toast = new Toast({ title: "" });
 
   try {
-    await mutateLights(adjustColorTemperature(light, "decrease"), {
+    await mutateLights(adjustColorTemperature(api, light, "decrease"), {
       optimisticUpdate(lights) {
         return lights.map((it) =>
           it.id === light.id

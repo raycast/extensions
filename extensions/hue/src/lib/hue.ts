@@ -12,8 +12,9 @@ import {
   COLOR_TEMPERATURE_STEP,
 } from "./constants";
 import { getTransitionTimeInMs } from "./utils";
-import getAuthenticatedApi from "./getAuthenticatedApi";
+import { Api } from "node-hue-api/dist/esm/api/Api";
 import Style = Toast.Style;
+import getAuthenticatedApi from "./getAuthenticatedApi";
 
 export function handleError(error: Error): void {
   console.debug({ name: error.name, message: error.message });
@@ -85,29 +86,29 @@ export async function turnOffAllLights() {
   }
 }
 
-export async function toggleLight(light: Light) {
-  const api = await getAuthenticatedApi();
+export async function toggleLight(apiPromise: Promise<Api>, light: Light) {
+  const api = await apiPromise;
   await api.lights.setLightState(light.id, {
     on: !light.state.on,
     transitiontime: getTransitionTimeInMs(),
   });
 }
 
-export async function turnGroupOn(group: Group) {
-  const api = await getAuthenticatedApi();
+export async function turnGroupOn(apiPromise: Promise<Api>, group: Group) {
+  const api = await apiPromise;
   await api.groups.setGroupState(
     group.id,
     new v3.model.lightStates.GroupLightState().on().transitiontime(getTransitionTimeInMs())
   );
 }
 
-export async function turnGroupOff(group: Group) {
-  const api = await getAuthenticatedApi();
+export async function turnGroupOff(apiPromise: Promise<Api>, group: Group) {
+  const api = await apiPromise;
   await api.groups.setGroupState(group.id, new v3.model.lightStates.GroupLightState().off());
 }
 
-export async function setLightBrightness(light: Light, percentage: number) {
-  const api = await getAuthenticatedApi();
+export async function setLightBrightness(apiPromise: Promise<Api>, light: Light, percentage: number) {
+  const api = await apiPromise;
   const newLightState = new v3.model.lightStates.LightState()
     .on()
     .bri(percentage)
@@ -115,8 +116,8 @@ export async function setLightBrightness(light: Light, percentage: number) {
   await api.lights.setLightState(light.id, newLightState);
 }
 
-export async function setGroupBrightness(group: Group, percentage: number) {
-  const api = await getAuthenticatedApi();
+export async function setGroupBrightness(apiPromise: Promise<Api>, group: Group, percentage: number) {
+  const api = await apiPromise;
   const newLightState = new v3.model.lightStates.GroupLightState()
     .on()
     .bri(percentage)
@@ -124,15 +125,15 @@ export async function setGroupBrightness(group: Group, percentage: number) {
   await api.groups.setGroupState(group.id, newLightState);
 }
 
-export async function setLightColor(light: Light, color: string) {
-  const api = await getAuthenticatedApi();
+export async function setLightColor(apiPromise: Promise<Api>, light: Light, color: string) {
+  const api = await apiPromise;
   const xy = hexToXy(color);
   const newLightState = new v3.model.lightStates.LightState().on().xy(xy).transitiontime(getTransitionTimeInMs());
   await api.lights.setLightState(light.id, newLightState);
 }
 
-export async function setGroupColor(group: Group, color: string) {
-  const api = await getAuthenticatedApi();
+export async function setGroupColor(apiPromise: Promise<Api>, group: Group, color: string) {
+  const api = await apiPromise;
   const xy = hexToXy(color);
   const newLightState = new v3.model.lightStates.GroupLightState().on().xy(xy).transitiontime(getTransitionTimeInMs());
   await api.groups.setGroupState(group.id, newLightState);
@@ -151,8 +152,12 @@ export function calculateAdjustedBrightness(entity: Light | Group, direction: "i
   return Math.min(Math.max(BRIGHTNESS_MIN, newBrightness), BRIGHTNESS_MAX);
 }
 
-export async function adjustBrightness(entity: Light | Group, direction: "increase" | "decrease") {
-  const api = await getAuthenticatedApi();
+export async function adjustBrightness(
+  apiPromise: Promise<Api>,
+  entity: Light | Group,
+  direction: "increase" | "decrease"
+) {
+  const api = await apiPromise;
   const delta = direction === "increase" ? BRIGHTNESS_STEP : -BRIGHTNESS_STEP;
 
   if ("action" in entity) {
@@ -186,8 +191,12 @@ export function calculateAdjustedColorTemperature(entity: Light | Group, directi
   return Math.min(Math.max(COLOR_TEMP_MIN, newColorTemperature), COLOR_TEMP_MAX);
 }
 
-export async function adjustColorTemperature(entity: Light | Group, direction: "increase" | "decrease") {
-  const api = await getAuthenticatedApi();
+export async function adjustColorTemperature(
+  apiPromise: Promise<Api>,
+  entity: Light | Group,
+  direction: "increase" | "decrease"
+) {
+  const api = await apiPromise;
   const delta = direction === "increase" ? -COLOR_TEMPERATURE_STEP : COLOR_TEMPERATURE_STEP;
 
   if ("action" in entity) {
@@ -205,8 +214,8 @@ export async function adjustColorTemperature(entity: Light | Group, direction: "
   }
 }
 
-export async function setScene(scene: Scene) {
-  const api = await getAuthenticatedApi();
+export async function setScene(apiPromise: Promise<Api>, scene: Scene) {
+  const api = await apiPromise;
   await api.groups.setGroupState(
     0,
     new v3.model.lightStates.GroupLightState().scene(scene.id).transitiontime(getTransitionTimeInMs())

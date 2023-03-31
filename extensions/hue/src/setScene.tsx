@@ -5,10 +5,11 @@ import { Group, Scene, SendHueMessage } from "./lib/types";
 import UnlinkAction from "./components/UnlinkAction";
 import ManageHueBridge from "./components/ManageHueBridge";
 import { useHue } from "./lib/useHue";
+import { Api } from "node-hue-api/dist/esm/api/Api";
 import Style = Toast.Style;
 
 export default function SetScene() {
-  const { isLoading, groups, mutateGroups, scenes, hueBridgeState, sendHueMessage } = useHue();
+  const { hueBridgeState, sendHueMessage, apiPromise, isLoading, groups, mutateGroups, scenes } = useHue();
 
   const manageHueBridgeElement: JSX.Element | null = ManageHueBridge(hueBridgeState, sendHueMessage);
   if (manageHueBridgeElement !== null) return manageHueBridgeElement;
@@ -29,6 +30,7 @@ export default function SetScene() {
 
           return (
             <Group
+              apiPromise={apiPromise}
               key={group.id}
               group={group}
               scenes={groupScenes}
@@ -43,6 +45,7 @@ export default function SetScene() {
 }
 
 function Group(props: {
+  apiPromise: Promise<Api>;
   group: Group;
   scenes: Scene[];
   mutateGroups: MutatePromise<Group[]>;
@@ -53,6 +56,7 @@ function Group(props: {
       {props.scenes.map(
         (scene: Scene): JSX.Element => (
           <Scene
+            apiPromise={props.apiPromise}
             key={scene.id}
             group={props.group}
             scene={scene}
@@ -66,6 +70,7 @@ function Group(props: {
 }
 
 function Scene(props: {
+  apiPromise: Promise<Api>;
   group: Group;
   scene: Scene;
   mutateGroups: MutatePromise<Group[]>;
@@ -80,7 +85,7 @@ function Scene(props: {
           <SetSceneAction
             group={props.group}
             scene={props.scene}
-            onSet={() => handleSetScene(props.group, props.scene, props.mutateGroups)}
+            onSet={() => handleSetScene(props.apiPromise, props.group, props.scene, props.mutateGroups)}
           />
           <ActionPanel.Section>
             <UnlinkAction sendHueMessage={props.sendHueMessage} />
@@ -95,11 +100,16 @@ function SetSceneAction(props: { group: Group; scene: Scene; onSet: () => void }
   return <Action title="Set Scene" icon={Icon.Image} onAction={() => props.onSet()} />;
 }
 
-async function handleSetScene(group: Group, scene: Scene, mutateGroups: MutatePromise<Group[]>) {
+async function handleSetScene(
+  apiPromise: Promise<Api>,
+  group: Group,
+  scene: Scene,
+  mutateGroups: MutatePromise<Group[]>
+) {
   const toast = new Toast({ title: "" });
 
   try {
-    await mutateGroups(setScene(scene));
+    await mutateGroups(setScene(apiPromise, scene));
 
     toast.style = Style.Success;
     toast.title = `Scene ${scene.name} set`;
