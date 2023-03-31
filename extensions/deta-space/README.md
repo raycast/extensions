@@ -1,4 +1,4 @@
-# Teletype
+# Deta Space
 
 Use [Deta Space](https://deta.space) directly from Raycast
 
