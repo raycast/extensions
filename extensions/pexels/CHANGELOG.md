@@ -1,6 +1,6 @@
 # Pexels Changelog
 
-## [Add New Command] - {PR_MERGE_DATE}
+## [Add New Command] - 2023-03-31
 
 - Add Search Videos command
 
