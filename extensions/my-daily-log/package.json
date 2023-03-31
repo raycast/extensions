@@ -43,7 +43,7 @@
     },
     {
       "name": "summaryOfAMonth",
-      "title": "Summary of a Month",
+      "title": "Summary Of A Month",
       "description": "Summary of what you did in a given month",
       "mode": "view"
     },
