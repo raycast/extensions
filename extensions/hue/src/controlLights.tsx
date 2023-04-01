@@ -16,9 +16,11 @@ import Style = Toast.Style;
 export default function ControlLights() {
   const { hueBridgeState, sendHueMessage, isLoading, lights, mutateLights, rooms } = useHue();
 
+  // This element handles any scenario that involves the Bridge not being ready
   const manageHueBridgeElement: JSX.Element | null = ManageHueBridge(hueBridgeState, sendHueMessage);
   if (manageHueBridgeElement !== null) return manageHueBridgeElement;
 
+  // If we get here, the Bridge is ready
   const hueClient = hueBridgeState.context.hueClient;
   if (hueClient === undefined) {
     throw new Error("Hue client is undefined");

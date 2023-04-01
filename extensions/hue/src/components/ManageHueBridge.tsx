@@ -1,7 +1,5 @@
 import { Action, ActionPanel, Alert, confirmAlert, Detail, Icon, List, Toast } from "@raycast/api";
-import { AnyEventObject, BaseActionObject, ResolveTypegenMeta, ServiceMap, State, TypegenDisabled } from "xstate";
-import { HueContext } from "../lib/hueBridgeMachine";
-import { SendHueMessage } from "../lib/types";
+import { HueBridgeState } from "../lib/hueBridgeMachine";
 import {
   discoveringMessage,
   failedToConnectMessage,
@@ -10,19 +8,13 @@ import {
   linkWithBridgeMessage,
   noBridgeFoundMessage,
 } from "../lib/markdown";
+import { SendHueMessage } from "../lib/useHue";
 import ActionStyle = Alert.ActionStyle;
 import Style = Toast.Style;
 
-// TODO: Rename this to something more appropriate
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export default function ManageHueBridge(
-  hueBridgeState: State<
-    HueContext,
-    AnyEventObject,
-    any,
-    { value: any; context: HueContext },
-    ResolveTypegenMeta<TypegenDisabled, AnyEventObject, BaseActionObject, ServiceMap>
-  >,
+  hueBridgeState: HueBridgeState,
   sendHueMessage: SendHueMessage
 ): JSX.Element | null {
   const unlinkSavedBridge = async () => {

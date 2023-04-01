@@ -1,12 +1,7 @@
-import { useMemo } from "react";
 import { useCachedPromise } from "@raycast/utils";
-import hueBridgeMachine from "./hueBridgeMachine";
-import { useMachine } from "@xstate/react";
+import { useHueBridgeMachine } from "./hueBridgeMachine";
 import { handleError } from "./hue";
-import { Api } from "node-hue-api/dist/esm/api/Api";
-import getAuthenticatedApi from "./getAuthenticatedApi";
 import { Light, Room, Scene } from "./types";
-import { useDeepMemo } from "@raycast/utils/dist/useDeepMemo";
 
 export type HueMessage = "LINK" | "RETRY" | "DONE" | "UNLINK";
 export type SendHueMessage = (message: HueMessage) => void;
@@ -15,21 +10,11 @@ export type SendHueMessage = (message: HueMessage) => void;
 //  This happens for example when holding or successively using the 'Increase' or 'Decrease Brightness' action.
 //  This is especially noticeable on rooms, since those API calls take longer than those for individual lights.
 export function useHue() {
-  const machine = useDeepMemo(() =>
-    hueBridgeMachine(() => {
-      revalidateLights();
-      revalidateRooms();
-      revalidateScenes();
-    })
-  );
-
-  // TODO: Combine into 'useHueBridge' hook
-  const [hueBridgeState, send] = useMachine(machine);
-  const sendHueMessage: SendHueMessage = (message: HueMessage) => {
-    send(message.toUpperCase());
-  };
-
-  const authenticatedApi: Promise<Api> = useMemo(async () => await getAuthenticatedApi(), []);
+  const { hueBridgeState, sendHueMessage } = useHueBridgeMachine(() => {
+    revalidateLights();
+    revalidateRooms();
+    revalidateScenes();
+  });
 
   const {
     isLoading: isLoadingLights,
@@ -42,7 +27,7 @@ export function useHue() {
         throw new Error("Hue client is undefined");
       }
 
-      return hueBridgeState.context.hueClient?.getLights();
+      return hueBridgeState.context.hueClient.getLights();
     },
     [],
     {
@@ -64,7 +49,7 @@ export function useHue() {
         throw new Error("Hue client is undefined");
       }
 
-      return hueBridgeState.context.hueClient?.getRooms();
+      return hueBridgeState.context.hueClient.getRooms();
     },
     [],
     {
@@ -86,7 +71,7 @@ export function useHue() {
         throw new Error("Hue client is undefined");
       }
 
-      return hueBridgeState.context.hueClient?.getScenes();
+      return hueBridgeState.context.hueClient.getScenes();
     },
     [],
     {
@@ -101,7 +86,6 @@ export function useHue() {
   return {
     hueBridgeState,
     sendHueMessage,
-    apiPromise: authenticatedApi,
     isLoading: isLoadingLights || isLoadingRooms || isLoadingScenes,
     lights,
     mutateLights,

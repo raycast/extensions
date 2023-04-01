@@ -1,9 +1,29 @@
-import { assign, createMachine } from "xstate";
+import {
+  AnyEventObject,
+  assign,
+  BaseActionObject,
+  createMachine,
+  ResolveTypegenMeta,
+  ServiceMap,
+  State,
+  TypegenDisabled,
+} from "xstate";
 import { discoverBridgeUsingMdns, discoverBridgeUsingNupnp, getUsernameFromBridge } from "./hue";
 import { LocalStorage } from "@raycast/api";
 import { v3 } from "node-hue-api";
 import { BRIDGE_ID, BRIDGE_IP_ADDRESS_KEY, BRIDGE_USERNAME_KEY } from "./constants";
 import HueClient from "./HueClient";
+import { useDeepMemo } from "@raycast/utils/dist/useDeepMemo";
+import { useMachine } from "@xstate/react";
+import { HueMessage, SendHueMessage } from "./useHue";
+
+export type HueBridgeState = State<
+  HueContext,
+  AnyEventObject,
+  any,
+  { value: any; context: HueContext },
+  ResolveTypegenMeta<TypegenDisabled, AnyEventObject, BaseActionObject, ServiceMap>
+>;
 
 export type HueContext = {
   bridgeIpAddress?: string;
@@ -12,10 +32,24 @@ export type HueContext = {
   hueClient?: HueClient;
 };
 
+export function useHueBridgeMachine(onLinked: () => void) {
+  const machine = useDeepMemo(() => hueBridgeMachine(onLinked));
+
+  const [hueBridgeState, send] = useMachine(machine);
+  const sendHueMessage: SendHueMessage = (message: HueMessage) => {
+    send(message.toUpperCase());
+  };
+
+  return {
+    hueBridgeState,
+    sendHueMessage,
+  };
+}
+
 /**
  * @see https://stately.ai/viz/ee0edf94-7a82-4d65-a6a8-324e2f1eca49
  */
-export default function hueBridgeMachine(onLinked: () => void) {
+function hueBridgeMachine(onLinked: () => void) {
   return createMachine<HueContext>({
     id: "manage-hue-bridge",
     initial: "loadingCredentials",
