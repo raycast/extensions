@@ -13,7 +13,7 @@ import {
 import { promisify } from "node:util";
 import { exec as _exec } from "node:child_process";
 import { filesize } from "filesize";
-import { existsSync, lstatSync, readdirSync, readlinkSync, unlinkSync } from "node:fs";
+import { existsSync, lstatSync, readdirSync, readlinkSync } from "node:fs";
 import { resolve } from "node:path";
 import { homedir } from "node:os";
 import { useState } from "react";
@@ -48,9 +48,30 @@ export async function deleteFile(filePath: string, fileName: string, refresh: ()
       title: "Delete",
       style: Alert.ActionStyle.Destructive,
       onAction: async () => {
-        unlinkSync(filePath);
+        await runShellScript(`rm -f ${filePath}`);
         refresh();
         showToast(Toast.Style.Success, "File Deleted", `${fileName}`);
+      },
+    },
+  };
+
+  await confirmAlert(options);
+
+  return;
+}
+
+export async function deleteDirectory(folderPath: string, folderName: string, refresh: () => void) {
+  const options: Alert.Options = {
+    title: "Delete Directory?",
+    message: `Are you sure you want to delete ${folderName}?`,
+    icon: Icon.Eraser,
+    primaryAction: {
+      title: "Delete",
+      style: Alert.ActionStyle.Destructive,
+      onAction: async () => {
+        await runShellScript(`rm -rf ${folderPath}`);
+        refresh();
+        showToast(Toast.Style.Success, "Directory Deleted", `${folderName}`);
       },
     },
   };
@@ -79,7 +100,7 @@ export function getStartDirectory(): string {
   return resolve(startDirectory);
 }
 
-export function DirectoryItem(props: { fileData: FileDataType }) {
+export function DirectoryItem(props: { fileData: FileDataType; refresh: () => void }) {
   const preferences: PreferencesType = getPreferenceValues();
   const filePath = `${props.fileData.path}/${props.fileData.name}`;
   return (
@@ -96,6 +117,23 @@ export function DirectoryItem(props: { fileData: FileDataType }) {
             title="Copy Directory Path"
             content={`${filePath}/`}
             shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+          />
+          <Action.Trash
+            title="Move to Trash"
+            shortcut={{ modifiers: ["cmd"], key: "t" }}
+            paths={filePath}
+            onTrash={() => {
+              showToast(Toast.Style.Success, "Moved to Trash", `Directory: ${filePath}`);
+              props.refresh();
+            }}
+          />
+
+          <Action
+            title="Delete Directory"
+            icon={Icon.Trash}
+            style={Action.Style.Destructive}
+            shortcut={{ modifiers: ["cmd"], key: "d" }}
+            onAction={() => deleteDirectory(filePath, props.fileData.name, props.refresh)}
           />
         </ActionPanel>
       }
@@ -182,6 +220,13 @@ export function SymlinkItem(props: { fileData: FileDataType; refresh: () => void
               content={filePath}
               shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
             />
+            <Action
+              title="Delete Symlink Directory"
+              icon={Icon.Trash}
+              style={Action.Style.Destructive}
+              shortcut={{ modifiers: ["cmd"], key: "d" }}
+              onAction={() => deleteDirectory(filePath, props.fileData.name, props.refresh)}
+            />
           </ActionPanel>
         }
       />
@@ -207,17 +252,8 @@ export function SymlinkItem(props: { fileData: FileDataType; refresh: () => void
               content={originalPath}
               shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
             />
-            <Action.Trash
-              title="Move to Trash"
-              shortcut={{ modifiers: ["cmd"], key: "t" }}
-              paths={filePath}
-              onTrash={() => {
-                showToast(Toast.Style.Success, "Moved to Trash", `File: ${filePath}`);
-                props.refresh();
-              }}
-            />
             <Action
-              title="Delete File"
+              title="Delete Symlink File"
               icon={Icon.Trash}
               style={Action.Style.Destructive}
               shortcut={{ modifiers: ["cmd"], key: "d" }}
@@ -233,7 +269,7 @@ export function SymlinkItem(props: { fileData: FileDataType; refresh: () => void
 export function createItem(fileData: FileDataType, refresh: () => void) {
   const filePath = `${fileData.path}/${fileData.name}`;
   if (fileData.type === "directory") {
-    return <DirectoryItem fileData={fileData} key={filePath} />;
+    return <DirectoryItem fileData={fileData} key={filePath} refresh={refresh} />;
   } else if (fileData.type === "file") {
     return <FileItem fileData={fileData} key={filePath} refresh={refresh} />;
   } else if (fileData.type === "symlink") {
