@@ -322,12 +322,12 @@ const Details = (props: { url: string; title: string }) => {
   });
   markdown = "";
   markdown =
-    "\# " +
+    "# " +
     props.title +
     "\n" +
     mdSynonyms +
     nhm
-      .translate(html.replace(toc, "").replace(/\#cite_\D*\d*/gm, '"'))
+      .translate(html.replace(toc, "").replace(/#cite_\D*\d*/gm, '"'))
       .replace(/]\(\//gm, "](https://flexikon.doccheck.com/"); // ÜBERSCHRIFT + ```SYNONYME``` -TOC + ARTIKEL (Entfernung von Akern, relative zu absoluten Links)
 
   return (
