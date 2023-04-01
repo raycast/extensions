@@ -17,7 +17,7 @@ function TransferList() {
   const [error, setError] = useState<Error>();
   const { push } = useNavigation();
 
-  useHandleError(error ? error : Error());
+  useHandleError(error);
 
   //
   // Get list of transfers
@@ -159,9 +159,10 @@ function TransferList() {
 }
 
 // Handle errors by showing the toast.
-function useHandleError(error: Error) {
+function useHandleError(error?: Error) {
   useEffect(() => {
     if (error) {
+      console.log("Have an error: ", error);
       showToast({
         style: Toast.Style.Failure,
         title: "Something went wrong",

@@ -80,8 +80,8 @@ function FileBrowser({ parent_file_id }: { parent_file_id: number }) {
           setFileUrl(t.data.url);
         })
         .catch((e) => {
-          console.log("An error occurred while fetching file URL: ", e);
-          setError(new Error("Error fetching file URL details. Check your Client ID and OAuth Token settings."));
+          // console.log("An error occurred while fetching file URL: ", e);
+          // setError(new Error("Error fetching file URL details. Check your Client ID and OAuth Token settings."));
         });
     }
   }, [selectedFileId]);
@@ -91,7 +91,6 @@ function FileBrowser({ parent_file_id }: { parent_file_id: number }) {
   useEffect(() => {
     if (fileUrl !== undefined && fileAction !== undefined) {
       let cmd = "";
-      console.log("Preparing action #%d on %s", fileAction, fileUrl);
       switch (fileAction) {
         case 1:
           cmd = formatString(preferences.actionCommand1 ? preferences.actionCommand1 : "(no command defined)", fileUrl);
@@ -100,7 +99,6 @@ function FileBrowser({ parent_file_id }: { parent_file_id: number }) {
           cmd = formatString(preferences.actionCommand2 ? preferences.actionCommand2 : "(no command defined)", fileUrl);
           break;
       }
-      console.log("Executing command: ", cmd);
       exec(cmd, (error: Error | null, stdout: string, stderr: string) => {
         if (error) {
           console.log(`error: ${error.message}`);
