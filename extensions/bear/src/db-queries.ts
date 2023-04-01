@@ -191,4 +191,4 @@ ORDER BY
 LIMIT 400
 `;
 
-export const TABLE_EXISTS = `SELECT name FROM sqlite_master WHERE type='table' AND name=:name`; 
+export const TABLE_EXISTS = `SELECT name FROM sqlite_master WHERE type='table' AND name=:name`;
