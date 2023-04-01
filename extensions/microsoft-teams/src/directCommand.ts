@@ -1,4 +1,4 @@
-import { MeetingAction, meetingClient, UpdateMessage } from "./teams/meetingClient";
+import { MeetingAction, asyncMeetingClient, UpdateMessage } from "./teams/meetingClient";
 import { showHUD } from "@raycast/api";
 
 export async function directCommand(
@@ -6,7 +6,10 @@ export async function directCommand(
   hudTitle?: (msg: UpdateMessage) => string,
   hudErrorTitle = "No Meeting"
 ) {
-  const client = await meetingClient();
+  const onError = () => {
+    showHUD("Cannot connect to Microsoft Teams");
+  };
+  const client = await asyncMeetingClient(onError);
   try {
     const state = await client.sendActionAndRequestMeetingState(action);
     if (hudTitle) {

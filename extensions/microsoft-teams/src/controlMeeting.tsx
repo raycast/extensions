@@ -15,6 +15,29 @@ interface State {
   permissions: MeetingPermissions;
 }
 
+const emptyState: State = {
+  state: {
+    isBackgroundBlurred: false,
+    isCameraOn: false,
+    isHandRaised: false,
+    isMuted: false,
+    isInMeeting: false,
+    isRecordingOn: false,
+  },
+  permissions: {
+    canLeave: false,
+    canReact: false,
+    canStopSharing: false,
+    canToggleBlur: false,
+    canToggleChat: false,
+    canToggleHand: false,
+    canToggleMute: false,
+    canToggleRecord: false,
+    canToggleShareTray: false,
+    canToggleVideo: false,
+  },
+};
+
 interface Item {
   action: MeetingAction;
   icon: string;
@@ -176,10 +199,16 @@ export default function Command() {
     );
 
   useEffect(() => {
-    const c: MeetingClient = new MeetingClient(() => {
-      setClient(c);
-      c.requestMeetingState();
-    }, updateState);
+    const c: MeetingClient = new MeetingClient({
+      onConnected: () => {
+        setClient(c);
+        c.requestMeetingState();
+      },
+      onMessage: updateState,
+      onError: () => {
+        setMeetingState(emptyState);
+      },
+    });
     return () => c.close();
   }, []);
 

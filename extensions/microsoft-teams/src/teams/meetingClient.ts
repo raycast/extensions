@@ -1,4 +1,4 @@
-import { WebSocket, MessageEvent } from "ws";
+import { WebSocket, ErrorEvent, MessageEvent } from "ws";
 import { prefs } from "./preferences";
 
 const host = "127.0.0.1";
@@ -109,16 +109,19 @@ class Deferred<T> {
   }
 }
 
+interface MeetingClientProps {
+  onConnected?: (msg?: UpdateMessage) => void;
+  onMessage?: (msg: UpdateMessage) => void;
+  onError?: (event: ErrorEvent) => void;
+  onClose?: () => void;
+}
+
 export class MeetingClient {
   private readonly ws: WebSocket;
   private readonly updateMessageDeferred: Deferred<UpdateMessage>[] = [];
   private readonly messageCallback: ((msg: UpdateMessage) => void) | undefined;
 
-  public constructor(
-    onConnected: (msg?: UpdateMessage) => void,
-    onMessage?: (msg: UpdateMessage) => void,
-    onClose?: () => void
-  ) {
+  public constructor(props: MeetingClientProps) {
     const queryParams = {
       "protocol-version": apiVersion,
       manufacturer,
@@ -130,16 +133,17 @@ export class MeetingClient {
     const params = paramNames.map((key) => `${key}=${encodeURI(queryParams[key])}`).join("&");
     const url = `ws://${host}:${port}?token=${prefs.apiToken}&${params}`;
     console.debug(`Connecting to ${url} …`);
-    this.messageCallback = onMessage;
+    this.messageCallback = props.onMessage;
     this.ws = new WebSocket(url);
     this.ws.onopen = () => {
       console.debug("websocket connected");
-      onConnected();
+      props.onConnected?.();
     };
     this.ws.onclose = () => {
       console.log("websocket closed");
-      onClose?.();
+      props.onClose?.();
     };
+    this.ws.onerror = props.onError ?? null;
     this.ws.onmessage = (event: MessageEvent) => this.onMessage(event);
   }
 
@@ -195,8 +199,11 @@ export class MeetingClient {
   }
 }
 
-export async function meetingClient(): Promise<MeetingClient> {
+export async function asyncMeetingClient(onError?: (event: ErrorEvent) => void): Promise<MeetingClient> {
   const deferred = new Deferred<MeetingClient>();
-  const client: MeetingClient = new MeetingClient(() => deferred.resolve(client));
+  const client: MeetingClient = new MeetingClient({
+    onConnected: () => deferred.resolve(client),
+    onError,
+  });
   return deferred.promise;
 }
