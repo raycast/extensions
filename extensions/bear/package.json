@@ -17,7 +17,15 @@
       "title": "Search Notes",
       "subtitle": "Bear",
       "description": "Search and open Bear notes",
-      "mode": "view"
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "searchQuery",
+          "placeholder": "Search Query",
+          "type": "text",
+          "required": false
+        }
+      ]
     },
     {
       "name": "new-note",
