@@ -4,6 +4,7 @@
 
 - Add support for Bear 2
 - Add _Search Query_ argument to _Search Notes_ command
+- Fixed a bug where the _Copy Unique Identifier_ action copied `note.id` instead of the note id
 
 ## [Fix crash] - 2022-11-29
 
