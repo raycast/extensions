@@ -55,6 +55,7 @@ function getYearProgress(): Progress {
     getProgressNumberFn: getYearProgressNumber,
     type: "default",
     pinned: true,
+    editable: false,
   };
 }
 
@@ -89,6 +90,7 @@ function getQuarterProgress(): Progress {
     getProgressNumberFn: getQuarterProgressNumber,
     type: "default",
     pinned: true,
+    editable: false,
   };
 }
 
@@ -112,6 +114,7 @@ function getMonthProgress(): Progress {
     endDate: getMonthProgressDate().endDate,
     getProgressNumberFn: getMonthProgressNumber,
     type: "default",
+    editable: false,
   };
 }
 
@@ -135,6 +138,7 @@ function getWeekProgress(): Progress {
     endDate: getWeekProgressDate().endDate,
     getProgressNumberFn: getWeekProgressNumber,
     type: "default",
+    editable: false,
   };
 }
 
@@ -158,6 +162,7 @@ function getDayProgress(): Progress {
     endDate: getDayProgressDate().endDate,
     getProgressNumberFn: getDayprogressNumber,
     type: "default",
+    editable: false,
   };
 }
 

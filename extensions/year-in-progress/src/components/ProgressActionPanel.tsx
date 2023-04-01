@@ -36,13 +36,15 @@ export default function ProgressActionPanel(props: ProgressActionPanelProps) {
             props.onChangeShowFromMenuBar?.();
           }}
         />
-        <Action
-          title="Edit Progress"
-          icon={Icon.Pencil}
-          onAction={() => {
-            props.onEditProgress?.(props.progress);
-          }}
-        />
+        {props.progress.editable && (
+          <Action
+            title="Edit Progress"
+            icon={Icon.Pencil}
+            onAction={() => {
+              props.onEditProgress?.(props.progress);
+            }}
+          />
+        )}
       </ActionPanel.Section>
       <ActionPanel.Section>
         <Action

@@ -12,6 +12,7 @@ export type Progress = {
   getProgressNumberFn?: any;
   pinned?: boolean;
   type?: "default" | "user";
+  editable?: boolean;
 };
 
 export type ProgressBarOptions = {
