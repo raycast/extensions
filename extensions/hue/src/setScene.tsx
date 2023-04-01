@@ -6,10 +6,9 @@ import UnlinkAction from "./components/UnlinkAction";
 import ManageHueBridge from "./components/ManageHueBridge";
 import { useHue } from "./lib/useHue";
 import { Api } from "node-hue-api/dist/esm/api/Api";
-import View from "./components/View";
 import Style = Toast.Style;
 
-function SetScene() {
+export default function SetScene() {
   const { hueBridgeState, sendHueMessage, apiPromise, isLoading, groups, mutateGroups, scenes } = useHue();
 
   const manageHueBridgeElement: JSX.Element | null = ManageHueBridge(hueBridgeState, sendHueMessage);
@@ -42,14 +41,6 @@ function SetScene() {
         });
       })}
     </List>
-  );
-}
-
-export default function Command() {
-  return (
-    <View>
-      <SetScene />
-    </View>
   );
 }
 

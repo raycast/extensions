@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Alert, confirmAlert, Detail, Icon, Toast } from "@raycast/api";
+import { Action, ActionPanel, Alert, confirmAlert, Detail, Icon, List, Toast } from "@raycast/api";
 import { AnyEventObject, BaseActionObject, ResolveTypegenMeta, ServiceMap, State, TypegenDisabled } from "xstate";
 import { HueContext } from "../lib/hueBridgeMachine";
 import { SendHueMessage } from "../lib/types";
@@ -13,6 +13,7 @@ import {
 import ActionStyle = Alert.ActionStyle;
 import Style = Toast.Style;
 
+// TODO: Rename this to something more appropriate
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export default function ManageHueBridge(
   hueBridgeState: State<
@@ -27,7 +28,7 @@ export default function ManageHueBridge(
   const unlinkSavedBridge = async () => {
     await confirmAlert({
       title: "Are you sure you want to unlink the configured Hue Bridge?",
-      primaryAction: { title: "Remove", style: ActionStyle.Destructive, onAction: () => sendHueMessage("unlink") },
+      primaryAction: { title: "Remove", style: ActionStyle.Destructive, onAction: () => sendHueMessage("UNLINK") },
     });
   };
 
@@ -36,17 +37,19 @@ export default function ManageHueBridge(
   const toast = new Toast({ style: Style.Animated, title: "" });
 
   switch (hueBridgeState.value) {
+    case "loadingCredentials":
+    case "discoveringUsingPublicApi":
     case "connecting":
-      return <Detail isLoading />;
+      return <List isLoading />;
       break;
     case "failedToConnect":
       contextActions = [
-        <Action key="retryConnect" title="Retry" onAction={() => sendHueMessage("retry")} icon={Icon.Repeat} />,
+        <Action key="retryConnect" title="Retry" onAction={() => sendHueMessage("RETRY")} icon={Icon.Repeat} />,
         <Action title="Unlink Saved Hue Bridge" onAction={unlinkSavedBridge} icon={Icon.Trash} />,
       ];
       markdown = failedToConnectMessage;
       break;
-    case "discovering":
+    case "discoveringUsingMdns":
       markdown = discoveringMessage;
       toast.title = "Discovering Hue Bridges…";
       toast.show().then();
@@ -57,7 +60,7 @@ export default function ManageHueBridge(
       break;
     case "linkWithBridge":
       contextActions = [
-        <Action key="link" title="Link With Hue Bridge" onAction={() => sendHueMessage("link")} icon={Icon.Plug} />,
+        <Action key="link" title="Link With Hue Bridge" onAction={() => sendHueMessage("LINK")} icon={Icon.Plug} />,
       ];
       markdown = linkWithBridgeMessage;
       toast.hide().then();
@@ -69,14 +72,14 @@ export default function ManageHueBridge(
       break;
     case "failedToLink":
       contextActions = [
-        <Action key="retryLink" title="Retry" onAction={() => sendHueMessage("retry")} icon={Icon.Repeat} />,
+        <Action key="retryLink" title="Retry" onAction={() => sendHueMessage("RETRY")} icon={Icon.Repeat} />,
       ];
       markdown = failedToLinkMessage;
       toast.hide().then();
       break;
     case "linked":
       contextActions = [
-        <Action key="done" title="Done" onAction={() => sendHueMessage("done")} icon={Icon.Check} />,
+        <Action key="done" title="Done" onAction={() => sendHueMessage("DONE")} icon={Icon.Check} />,
         <Action key="unlink" title="Unlink Saved Hue Bridge" onAction={unlinkSavedBridge} icon={Icon.Trash} />,
       ];
       markdown = linkedMessage;
@@ -91,5 +94,4 @@ export default function ManageHueBridge(
       markdown={markdown}
       actions={<ActionPanel>{contextActions}</ActionPanel>}
     />;
-
 }

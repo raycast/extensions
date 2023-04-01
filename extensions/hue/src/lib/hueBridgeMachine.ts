@@ -1,5 +1,5 @@
 import { assign, createMachine } from "xstate";
-import { discoverBridge, getUsernameFromBridge } from "./hue";
+import { discoverBridgeUsingMdns, discoverBridgeUsingNupnp, getUsernameFromBridge } from "./hue";
 import { LocalStorage } from "@raycast/api";
 import { v3 } from "node-hue-api";
 import { BRIDGE_ID, BRIDGE_IP_ADDRESS_KEY, BRIDGE_USERNAME_KEY } from "./constants";
@@ -16,21 +16,16 @@ export type HueContext = {
  * @see https://stately.ai/viz/ee0edf94-7a82-4d65-a6a8-324e2f1eca49
  */
 export default function hueBridgeMachine(
-  bridgeIpAddress: string | undefined,
-  bridgeId: string | undefined,
-  bridgeUsername: string | undefined,
   onLinked: () => void
 ) {
-  const bridgeIsConfigured = bridgeIpAddress !== undefined && bridgeId !== undefined && bridgeUsername !== undefined;
-
   return createMachine<HueContext>({
     id: "manage-hue-bridge",
-    initial: bridgeIsConfigured ? "connecting" : "discovering",
+    initial: "loadingCredentials",
     predictableActionArguments: true,
     context: {
-      bridgeIpAddress: bridgeIpAddress,
-      bridgeId: bridgeId,
-      bridgeUsername: bridgeUsername,
+      bridgeIpAddress: undefined,
+      bridgeId: undefined,
+      bridgeUsername: undefined,
       hueClient: undefined,
     },
     on: {
@@ -39,6 +34,33 @@ export default function hueBridgeMachine(
       },
     },
     states: {
+      loadingCredentials: {
+        invoke: {
+          id: "loadingCredentials",
+          src: async () => {
+            const bridgeIpAddress = await LocalStorage.getItem<string>(BRIDGE_IP_ADDRESS_KEY);
+            const bridgeId = await LocalStorage.getItem<string>(BRIDGE_ID);
+            const bridgeUsername = await LocalStorage.getItem<string>(BRIDGE_USERNAME_KEY);
+
+            if (bridgeIpAddress === undefined || bridgeId === undefined || bridgeUsername === undefined) {
+              throw Error("No Hue Bridge credentials found");
+            }
+
+            return { bridgeIpAddress, bridgeId, bridgeUsername };
+          },
+          onDone: {
+            actions: assign({
+              bridgeIpAddress: (context, event) => event.data.bridgeIpAddress,
+              bridgeId: (context, event) => event.data.bridgeId,
+              bridgeUsername: (context, event) => event.data.bridgeUsername,
+            }),
+            target: "connecting",
+          },
+          onError: {
+            target: "discoveringUsingPublicApi",
+          }
+        },
+      },
       connecting: {
         invoke: {
           id: "connecting",
@@ -67,10 +89,23 @@ export default function hueBridgeMachine(
           },
         },
       },
-      discovering: {
+      discoveringUsingPublicApi: {
         invoke: {
-          id: "discoverBridge",
-          src: discoverBridge,
+          id: "discoverBridgeUsingNupnp",
+          src: discoverBridgeUsingNupnp,
+          onDone: {
+            actions: assign({ bridgeIpAddress: (context, event) => event.data }),
+            target: "linkWithBridge",
+          },
+          onError: {
+            target: "discoveringUsingMdns",
+          },
+        },
+      },
+      discoveringUsingMdns: {
+        invoke: {
+          id: "discoverBridgeUsingMdns",
+          src: discoverBridgeUsingMdns,
           onDone: {
             actions: assign({ bridgeIpAddress: (context, event) => event.data }),
             target: "linkWithBridge",
@@ -83,7 +118,7 @@ export default function hueBridgeMachine(
       noBridgeFound: {
         on: {
           RETRY: {
-            target: "discovering",
+            target: "discoveringUsingPublicApi",
           },
         },
       },
@@ -132,7 +167,7 @@ export default function hueBridgeMachine(
       },
       linked: {
         invoke: {
-          id: "saveCredentials",
+          id: "linked",
           src: async (context) => {
             if (context.bridgeIpAddress === undefined) throw Error("No bridge IP address");
             if (context.bridgeId === undefined) throw Error("No bridge ID");
@@ -159,7 +194,7 @@ export default function hueBridgeMachine(
             await LocalStorage.clear();
           },
           onDone: {
-            target: "discovering",
+            target: "discoveringUsingPublicApi",
           },
         },
       },

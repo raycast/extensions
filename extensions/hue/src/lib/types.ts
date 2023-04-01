@@ -1,7 +1,7 @@
 // noinspection SpellCheckingInspection
 // https://developers.meethue.com/develop/hue-api/
 
-export type HueMessage = "link" | "retry" | "done" | "unlink";
+export type HueMessage = "LINK" | "RETRY" | "DONE" | "UNLINK";
 export type SendHueMessage = (message: HueMessage) => void;
 
 export type id = string | number;

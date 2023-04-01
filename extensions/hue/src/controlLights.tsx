@@ -1,5 +1,5 @@
 import { ActionPanel, Icon, List, Toast } from "@raycast/api";
-import { adjustBrightness, adjustColorTemperature, setLightBrightness, setLightColor, toggleLight, } from "./lib/hue";
+import { adjustBrightness, adjustColorTemperature, setLightBrightness, setLightColor } from "./lib/hue";
 import { getIconForColor } from "./lib/utils";
 import { MutatePromise } from "@raycast/utils";
 import { Light } from "./lib/hueV2Types";
@@ -9,10 +9,10 @@ import ManageHueBridge from "./components/ManageHueBridge";
 import UnlinkAction from "./components/UnlinkAction";
 import { useHue } from "./lib/useHue";
 import { Api } from "node-hue-api/dist/esm/api/Api";
-import View from "./components/View";
+import HueClient from "./lib/HueClient";
 import Style = Toast.Style;
 
-function ControlLights() {
+export default function ControlLights() {
   const { hueBridgeState, sendHueMessage, apiPromise, isLoading, lights, mutateLights, groups } = useHue();
 
   const manageHueBridgeElement: JSX.Element | null = ManageHueBridge(hueBridgeState, sendHueMessage);
@@ -23,11 +23,16 @@ function ControlLights() {
   const zones = groups.filter((group: Group) => group.type === "Zone") as Group[];
   const groupTypes = Array.of(rooms, entertainmentAreas, zones);
 
+  const hueClient = hueBridgeState.context.hueClient;
+  if (hueClient === undefined) {
+    throw new Error("Hue client is undefined");
+  }
+
   return (
     <List isLoading={isLoading}>
       {lights.map((light: Light): JSX.Element => {
         return <Light
-          apiPromise={apiPromise}
+          hueClient={hueClient}
           key={light.id}
           light={light}
           mutateLights={mutateLights}
@@ -37,41 +42,33 @@ function ControlLights() {
     </List>
   );
 
-  return (
-    <List isLoading={isLoading}>
-      {groupTypes.map((groupType: Group[]): JSX.Element[] => {
-        return groupType.map((group: Group) => {
-          const groupLights =
-            lights.filter((light: Light) => {
-              return group.lights.includes(`${light.id}`);
-            }) ?? [];
-
-          return (
-            <Group
-              apiPromise={apiPromise}
-              key={group.id}
-              lights={groupLights}
-              group={group}
-              mutateLights={mutateLights}
-              sendHueMessage={sendHueMessage}
-            />
-          );
-        });
-      })}
-    </List>
-  );
-}
-
-export default function Command() {
-  return (
-    <View>
-      <ControlLights />
-    </View>
-  );
+  // return (
+  //   <List isLoading={isLoading}>
+  //     {groupTypes.map((groupType: Group[]): JSX.Element[] => {
+  //       return groupType.map((group: Group) => {
+  //         const groupLights =
+  //           lights.filter((light: Light) => {
+  //             return group.lights.includes(`${light.id}`);
+  //           }) ?? [];
+  //
+  //         return (
+  //           <Group
+  //             hueClient={hueClient}
+  //             key={group.id}
+  //             lights={groupLights}
+  //             group={group}
+  //             mutateLights={mutateLights}
+  //             sendHueMessage={sendHueMessage}
+  //           />
+  //         );
+  //       });
+  //     })}
+  //   </List>
+  // );
 }
 
 function Group(props: {
-  apiPromise: Promise<Api>;
+  hueClient: HueClient;
   lights: Light[];
   group: Group;
   mutateLights: MutatePromise<Light[]>;
@@ -82,7 +79,7 @@ function Group(props: {
       {props.lights.map(
         (light: Light): JSX.Element => (
           <Light
-            apiPromise={props.apiPromise}
+            hueClient={props.hueClient}
             key={light.id}
             light={light}
             // group={props.group}
@@ -96,7 +93,7 @@ function Group(props: {
 }
 
 function Light(props: {
-  apiPromise: Promise<Api>;
+  hueClient: HueClient;
   light: Light;
   // group?: Group;
   mutateLights: MutatePromise<Light[]>;
@@ -112,21 +109,21 @@ function Light(props: {
           <ActionPanel.Section>
             <ToggleLightAction
               light={props.light}
-              onToggle={() => handleToggle(props.apiPromise, props.light, props.mutateLights)}
+              onToggle={() => handleToggle(props.hueClient, props.light, props.mutateLights)}
             />
             <SetBrightnessAction
               light={props.light}
-              onSet={(percentage: number) =>
-                handleSetBrightness(props.apiPromise, props.light, props.mutateLights, percentage)
-              }
+              // onSet={(percentage: number) =>
+              //   handleSetBrightness(props.apiPromise, props.light, props.mutateLights, percentage)
+              // }
             />
             <IncreaseBrightnessAction
               light={props.light}
-              onIncrease={() => handleIncreaseBrightness(props.apiPromise, props.light, props.mutateLights)}
+              // onIncrease={() => handleIncreaseBrightness(hueClient, props.light, props.mutateLights)}
             />
             <DecreaseBrightnessAction
               light={props.light}
-              onDecrease={() => handleDecreaseBrightness(props.apiPromise, props.light, props.mutateLights)}
+              // onDecrease={() => handleDecreaseBrightness(hueClient, props.light, props.mutateLights)}
             />
           </ActionPanel.Section>
 
@@ -135,19 +132,19 @@ function Light(props: {
             {props.light.state.colormode == "xy" && (
               <SetColorAction
                 light={props.light}
-                onSet={(color: CssColor) => handleSetColor(props.apiPromise, props.light, props.mutateLights, color)}
+                onSet={(color: CssColor) => handleSetColor(hueClient, props.light, props.mutateLights, color)}
               />
             )}
             {props.light.state.colormode == "ct" && (
               <IncreaseColorTemperatureAction
                 light={props.light}
-                onIncrease={() => handleIncreaseColorTemperature(props.apiPromise, props.light, props.mutateLights)}
+                onIncrease={() => handleIncreaseColorTemperature(hueClient, props.light, props.mutateLights)}
               />
             )}
             {props.light.state.colormode == "ct" && (
               <DecreaseColorTemperatureAction
                 light={props.light}
-                onDecrease={() => handleDecreaseColorTemperature(props.apiPromise, props.light, props.mutateLights)}
+                onDecrease={() => handleDecreaseColorTemperature(hueClient, props.light, props.mutateLights)}
               />
             )}
 */}
@@ -173,7 +170,7 @@ function ToggleLightAction({ light, onToggle }: { light: Light; onToggle?: () =>
   );
 }
 
-function SetBrightnessAction(props: { light: Light; onSet: (percentage: number) => void }) {
+function SetBrightnessAction(props: { light: Light; onSet?: (percentage: number) => void }) {
   return (
     <ActionPanel.Submenu
       title="Set Brightness"
@@ -184,7 +181,7 @@ function SetBrightnessAction(props: { light: Light; onSet: (percentage: number) 
         <ActionPanel.Item
           key={brightness}
           title={`${brightness}% Brightness`}
-          onAction={() => props.onSet(brightness)}
+          // onAction={() => props.onSet(brightness)}
         />
       ))}
     </ActionPanel.Submenu>
@@ -261,11 +258,11 @@ function RefreshAction(props: { onRefresh: () => void }) {
   );
 }
 
-async function handleToggle(apiPromise: Promise<Api>, light: Light, mutateLights: MutatePromise<Light[]>) {
+async function handleToggle(hueClient: HueClient, light: Light, mutateLights: MutatePromise<Light[]>) {
   const toast = new Toast({ title: "" });
 
   try {
-    await mutateLights(toggleLight(apiPromise, light), {
+    await mutateLights(hueClient.toggleLight(light), {
       optimisticUpdate(lights) {
         return lights?.map((it) => (it.id === light.id ? { ...it, on: { on: !light.on.on } } : it));
       },

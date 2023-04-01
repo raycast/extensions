@@ -2,16 +2,16 @@
 
 import https from "https";
 import fs from "fs";
-import { environment, getPreferenceValues } from "@raycast/api";
+import { environment } from "@raycast/api";
 import axios, { AxiosRequestConfig, Method } from "axios";
 import { Light } from "./hueV2Types";
 
 export default class HueClient {
-  bridgeIpAddress: string;
-  bridgeId: string;
-  bridgeUsername: string;
-  httpsAgent: https.Agent;
-  config: AxiosRequestConfig;
+  public bridgeIpAddress: string;
+  public bridgeId: string;
+  public bridgeUsername: string;
+  private readonly httpsAgent: https.Agent;
+  private readonly config: AxiosRequestConfig;
 
   constructor(
     bridgeIpAddress: string,

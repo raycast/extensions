@@ -7,6 +7,7 @@ export function mapRange(value: number, from: [number, number], to: [number, num
   return to[0] + ((value - from[0]) * (to[1] - to[0])) / (from[1] - from[0]);
 }
 
+// TODO: Use light type (e.g. ‘Desk Lamp’ or ‘Ceiling Fixture’) to display relevant icons instead of circles.
 export function getLightIcon(lightState: LightState) {
   const progress = lightState.on ? mapRange(lightState.bri, [1, 254], [0.1, 1]) : 0;
   const color = getRgbFrom(lightState);

@@ -20,9 +20,8 @@ import ManageHueBridge from "./components/ManageHueBridge";
 import UnlinkAction from "./components/UnlinkAction";
 import { useHue } from "./lib/useHue";
 import Style = Toast.Style;
-import View from "./components/View";
 
-function ControlGroups() {
+export default function ControlGroups() {
   const { hueBridgeState, sendHueMessage, apiPromise, isLoading, groups, mutateGroups, scenes } = useHue();
 
   const manageHueBridgeElement: JSX.Element | null = ManageHueBridge(hueBridgeState, sendHueMessage);
@@ -86,14 +85,6 @@ function ControlGroups() {
         </List.Section>
       )}
     </List>
-  );
-}
-
-export default function Command() {
-  return (
-    <View>
-      <ControlGroups />
-    </View>
   );
 }
 
@@ -291,10 +282,10 @@ async function handleTurnAllOn(apiPromise: Promise<Api>, group: Group, mutateGro
         return groups.map((it) =>
           it.id === group.id
             ? {
-                ...it,
-                state: { any_on: true, all_on: true },
-                action: { ...it.action, on: true },
-              }
+              ...it,
+              state: { any_on: true, all_on: true },
+              action: { ...it.action, on: true },
+            }
             : it
         );
       },
@@ -320,10 +311,10 @@ async function handleTurnAllOff(apiPromise: Promise<Api>, group: Group, mutateGr
         return groups?.map((it) =>
           it.id === group.id
             ? {
-                ...it,
-                state: { any_on: false, all_on: false },
-                action: { ...it.action, on: false },
-              }
+              ...it,
+              state: { any_on: false, all_on: false },
+              action: { ...it.action, on: false },
+            }
             : it
         );
       },

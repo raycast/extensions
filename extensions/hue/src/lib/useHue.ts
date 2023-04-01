@@ -1,14 +1,13 @@
 import { useMemo } from "react";
 import { useCachedPromise } from "@raycast/utils";
 import { Group, HueMessage, Scene, SendHueMessage } from "./types";
-import { useDeepMemo } from "@raycast/utils/dist/useDeepMemo";
 import hueBridgeMachine from "./hueBridgeMachine";
 import { useMachine } from "@xstate/react";
 import { handleError } from "./hue";
 import { Api } from "node-hue-api/dist/esm/api/Api";
 import getAuthenticatedApi from "./getAuthenticatedApi";
 import { Light } from "./hueV2Types";
-import { getHueClient } from "./withHueClient";
+import { useDeepMemo } from "@raycast/utils/dist/useDeepMemo";
 
 // TODO: Rapid successive calls to mutate functions will result in the optimistic updates and API results being out of sync.
 //  This happens for example when holding or successively using the 'Increase' or 'Decrease Brightness' action.
@@ -22,8 +21,8 @@ export function useHue() {
     })
   );
 
+  // TODO: Combine into 'useHueBridge' hook
   const [hueBridgeState, send] = useMachine(machine);
-
   const sendHueMessage: SendHueMessage = (message: HueMessage) => {
     send(message.toUpperCase());
   };
@@ -36,12 +35,19 @@ export function useHue() {
     mutate: mutateLights,
     revalidate: revalidateLights,
   } = useCachedPromise(
-    async () => await getHueClient().getLights(),
+    async () => {
+      if (hueBridgeState.context.hueClient === undefined) {
+        throw new Error("Hue client is undefined");
+      }
+
+      return hueBridgeState.context.hueClient?.getLights();
+    },
     [],
     {
       keepPreviousData: true,
       initialData: [] as Light[],
       onError: handleError,
+      execute: hueBridgeState.context.hueClient !== undefined,
     }
   );
 
@@ -52,8 +58,7 @@ export function useHue() {
     revalidate: revalidateGroups,
   } = useCachedPromise(
     async () => {
-      const groups = await (await authenticatedApi).groups.getAll();
-      return groups.map((group) => group["data"] as Group).filter((group) => group != null);
+      return [];
     },
     [],
     {
@@ -70,8 +75,7 @@ export function useHue() {
     revalidate: revalidateScenes,
   } = useCachedPromise(
     async () => {
-      const scenes = await (await authenticatedApi).scenes.getAll();
-      return scenes.map((scene) => scene["data"] as Scene).filter((scene) => scene != null);
+      return [];
     },
     [],
     {
@@ -85,7 +89,7 @@ export function useHue() {
     hueBridgeState,
     sendHueMessage,
     apiPromise: authenticatedApi,
-    isLoading: hueBridgeState.context.shouldDisplay || isLoadingLights || isLoadingGroups || isLoadingScenes,
+    isLoading: isLoadingLights || isLoadingGroups || isLoadingScenes,
     lights,
     mutateLights,
     groups,
