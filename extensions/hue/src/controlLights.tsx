@@ -246,17 +246,20 @@ async function handleToggle(hueClient: HueClient, light: Light, mutateLights: Mu
   try {
     await mutateLights(hueClient.toggleLight(light), {
       optimisticUpdate(lights) {
-        return lights?.map((it) => (it.id === light.id ? { ...it, on: { on: !light.on.on } } : it));
+        return lights.map((it) => (it.id !== light.id) ? it : {
+          ...it,
+          on: { on: !light.on.on }
+        });
       },
     });
 
     toast.style = Style.Success;
-    toast.title = light.on.on ? "Turned light off" : "Turned light on";
+    toast.title = light.on.on ? `Turned ${light.metadata.name} off` : `Turned ${light.metadata.name} on`;
     await toast.show();
   } catch (e) {
     console.error(e);
     toast.style = Style.Failure;
-    toast.title = light.on.on ? "Failed turning light off" : "Failed turning light on";
+    toast.title = light.on.on ? `Failed turning ${light.metadata.name} off` : `Failed turning ${light.metadata.name} on`;
     toast.message = e instanceof Error ? e.message : undefined;
     await toast.show();
   }
