@@ -33,12 +33,12 @@ export default function Command() {
 
             $("#topArticlesSection .row > a, #topArticlesSection .is-grid > a").each((i, el) => {
               const title = $(el).find("h3").text().trim();
-              const url = $(el).attr("href") ?? '';
+              const url = $(el).attr("href") ?? "";
               const imageUrl = $(el).find("img").attr("src") ? $(el).find("img").attr("src")!.replace(" ", "") : "";
               const description = $(el).find("p").text().trim();
               const title_alias: string[] = [];
-              const date_publish ='';
-              const author ='';
+              const date_publish = "";
+              const author = "";
               topArticles.push({ title, url, imageUrl, description, title_alias, date_publish, author });
             });
 
@@ -64,7 +64,7 @@ export default function Command() {
                 title_alias: [],
                 imageUrl: "",
                 date_publish: "",
-                author: ""
+                author: "",
               },
             ]);
           }
