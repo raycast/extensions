@@ -15,7 +15,7 @@ export default function SearchBooks() {
   return (
     <List
       throttle
-      isShowingDetail={showDetail}
+      isShowingDetail={!!term && showDetail}
       isLoading={isLoading}
       onSearchTextChange={setTerm}
       searchBarPlaceholder={`Search ${media === "ebook" ? "books" : "audiobooks"} by title...`}
@@ -26,9 +26,12 @@ export default function SearchBooks() {
         </List.Dropdown>
       }
     >
-      {books?.map((item: any) => {
-        return <BookItem key={item.trackId} item={item} />;
-      })}
+      {!term && books.length === 0 && <List.EmptyView title="Search for books" icon="empty.png" />}
+      {books
+        ?.filter((item: any) => !!item)
+        .map((item: any) => (
+          <BookItem key={item.trackId} item={item} />
+        ))}
     </List>
   );
 }
