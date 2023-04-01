@@ -254,7 +254,7 @@ const Details = (props: { url: string; title: string }) => {
   website = cheerio.load(data);
 
   const relateArticle = website(".collapsible-article").map((i, section) => {
-    let articles = website(section).find(".collapsible-content");
+    const articles = website(section).find(".collapsible-content");
     return articles.html();
   });
 
@@ -314,7 +314,7 @@ const Details = (props: { url: string; title: string }) => {
   website("#toc").each(function (i, link) {
     toc += website(link).html();
   });
-  
+
   // remove synonyms
   let markdown = "";
   synonyms.split("\n").forEach((element) => {
@@ -322,7 +322,7 @@ const Details = (props: { url: string; title: string }) => {
   });
   markdown = "";
   markdown =
-    "# " +
+    "\# " +
     props.title +
     "\n" +
     mdSynonyms +
