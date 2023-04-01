@@ -3,7 +3,7 @@
   "name": "piratebay",
   "title": "The Pirate Bay",
   "description": "Search Piratebay",
-  "icon": "command-icon.png",
+  "icon": "piratebay.png",
   "author": "spacedog",
   "categories": [
     "Web"
@@ -19,7 +19,7 @@
     {
       "name": "page",
       "title": "Search By Page",
-      "description": "Nach der Suche können die Suchergebnissseiten ausgewählt werden.",
+      "description": "After the search, the search result pages can be selected.",
       "mode": "view"
     }
   ],
