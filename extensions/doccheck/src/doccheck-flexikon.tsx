@@ -5,6 +5,16 @@ import { useEffect, useState } from "react";
 import { useFetch } from "@raycast/utils";
 import { NodeHtmlMarkdown } from "node-html-markdown";
 
+type Result = {
+  title: string;
+  url: string;
+  imageUrl: string;
+  description: string;
+  title_alias: string[];
+  date_publish: string;
+  author: string;
+};
+
 export default function Command() {
   const [query, setQuery] = useState<null | string>(null);
   const [state, setState] = useState<Result[]>([]);
@@ -19,15 +29,17 @@ export default function Command() {
           .get("https://flexikon.doccheck.com/de/")
           .then((response) => {
             const $ = cheerio.load(response.data);
-            const topArticles = [];
+            const topArticles: Result[] = [];
 
             $("#topArticlesSection .row > a, #topArticlesSection .is-grid > a").each((i, el) => {
               const title = $(el).find("h3").text().trim();
-              const url = $(el).attr("href");
-              const imageUrl = $(el).find("img").attr("src").replace(" ", "");
+              const url = $(el).attr("href") ?? '';
+              const imageUrl = $(el).find("img").attr("src") ? $(el).find("img").attr("src")!.replace(" ", "") : "";
               const description = $(el).find("p").text().trim();
-              const title_alias = [];
-              topArticles.push({ title, url, imageUrl, description, title_alias });
+              const title_alias: string[] = [];
+              const date_publish ='';
+              const author ='';
+              topArticles.push({ title, url, imageUrl, description, title_alias, date_publish, author });
             });
 
             setEntries(topArticles);
@@ -36,6 +48,7 @@ export default function Command() {
             console.log(error);
           });
       } else {
+        setEntries([]);
         try {
           const response = await axios.get(
             `https://search.doccheck.com/doccheck-portal/search?q=${query}&language=de&start=0&facetq=content_type:flexikon`
@@ -49,6 +62,9 @@ export default function Command() {
                 url: "",
                 description: "Drücke ⏎ um den Suchbegriff auf AMBOSS im Browser zu suchen",
                 title_alias: [],
+                imageUrl: "",
+                date_publish: "",
+                author: ""
               },
             ]);
           }
@@ -82,7 +98,7 @@ export default function Command() {
         isLoading={loading}
         searchBarPlaceholder="Search entry..."
       >
-        <List.Section title={!query ? "Top Artikel" : "Results"} subtitle={""}>
+        <List.Section title={!query ? "Top Artikel" : "XXX"} subtitle={""}>
           {entries.map((entry) => {
             if (entry.description) {
               return (
@@ -91,7 +107,7 @@ export default function Command() {
                   title={entry.title}
                   icon={entry.imageUrl}
                   subtitle={entry.description}
-                  actions={EntryActions(entry.url, entry.title, query)}
+                  actions={EntryActions(entry.url, entry.title, query!)}
                 />
               );
             } else if (entry.imageUrl) {
@@ -101,7 +117,7 @@ export default function Command() {
                   title={entry.title}
                   icon={entry.imageUrl}
                   subtitle={entry.url}
-                  actions={EntryActions(entry.url, entry.title, query)}
+                  actions={EntryActions(entry.url, entry.title, query!)}
                 />
               );
             }
@@ -134,7 +150,7 @@ export default function Command() {
                     <Action.Open
                       icon={Icon.Uppercase}
                       title="Suchbegriff als AMBOSS-Suche"
-                      target={"https://next.amboss.com/de/search?q=" + encodeURI(entry.query) + "&v=overview"}
+                      target={"https://next.amboss.com/de/search?q=" + encodeURI(query) + "&v=overview"}
                     />
                     <Action.Open
                       icon={Icon.MagnifyingGlass}
@@ -243,7 +259,6 @@ function EntryActions(url: string, title: string, query: string) {
 // 			/>
 
 const Details = (props: { url: string; title: string }) => {
-  let website = "";
   const [searchText, setSearchText] = useState("");
   const { isLoading, data } = useFetch(props.url, {
     // to make sure the screen isn't flickering when the searchText changes
@@ -251,28 +266,28 @@ const Details = (props: { url: string; title: string }) => {
     initialData: "",
   });
 
-  website = cheerio.load(data);
+  const $ = cheerio.load(String(data));
 
-  const relateArticle = website(".collapsible-article").map((i, section) => {
-    const articles = website(section).find(".collapsible-content");
+  const relateArticle = $(".collapsible-article").map((i, section) => {
+    const articles = $(section).find(".collapsible-content");
     return articles.html();
   });
 
   // Synonyme
   let mdSynonyms = "";
   let synonyms = "";
-  website(".mw-parser-output")
+  $(".mw-parser-output")
     .find("i")
     .each(function (i, link) {
-      synonyms += website(link).html() + "\n";
+      synonyms += $(link).html() + "\n";
     });
 
   // erster <i></i> im Artikel - zum Abgleich ob es Synonyme gibt oder nicht
   let notSynonyms = "";
-  website(".collapsible")
+  $(".collapsible")
     .find("i")
     .each(function (i, link) {
-      notSynonyms += website(link).html() + "\n";
+      notSynonyms += $(link).html() + "\n";
     });
   // 	notSynonyms = notSynonyms.trim();
   synonyms = synonyms.replace(notSynonyms, "");
@@ -307,12 +322,12 @@ const Details = (props: { url: string; title: string }) => {
     /* customCodeBlockTranslators (optional) */ undefined
   );
   let html = "";
-  website(".mw-parser-output").each(function (i, link) {
-    html += website(link).html();
+  $(".mw-parser-output").each(function (i, link) {
+    html += $(link).html();
   });
   let toc = "";
-  website("#toc").each(function (i, link) {
-    toc += website(link).html();
+  $("#toc").each(function (i, link) {
+    toc += $(link).html();
   });
 
   // remove synonyms
