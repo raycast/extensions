@@ -1,6 +1,6 @@
 import { ActionPanel, Icon, List, Toast } from "@raycast/api";
 import { adjustBrightness, adjustColorTemperature, setLightBrightness, setLightColor } from "./lib/hue";
-import { getIconForColor } from "./lib/utils";
+import { getIconForColor, getLightIcon } from "./lib/utils";
 import { MutatePromise } from "@raycast/utils";
 import { Light, ResourceIdentifier, Room } from "./lib/types";
 import { BRIGHTNESS_MAX, BRIGHTNESSES, COLORS } from "./lib/constants";
@@ -80,7 +80,7 @@ function Light(props: {
   return (
     <List.Item
       title={props.light.metadata.name}
-      // icon={getLightIcon(props.light.state)}
+      icon={getLightIcon(props.light)}
       // keywords={[props.group.name]}
       actions={
         <ActionPanel>

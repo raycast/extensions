@@ -1,18 +1,18 @@
-import { getPreferenceValues, Icon, Image } from "@raycast/api";
-import { getRgbFrom } from "./colors";
-import { CssColor, LightState } from "./types";
-import { getProgressIcon } from "@raycast/utils";
+import { Color, environment, getPreferenceValues, Icon, Image } from "@raycast/api";
+import { Light } from "./types";
 
 export function mapRange(value: number, from: [number, number], to: [number, number]) {
   return to[0] + ((value - from[0]) * (to[1] - to[0])) / (from[1] - from[0]);
 }
 
-// TODO: Use light type (e.g. ‘Desk Lamp’ or ‘Ceiling Fixture’) to display relevant icons instead of circles.
-export function getLightIcon(lightState: LightState) {
-  const progress = lightState.on ? mapRange(lightState.bri, [1, 254], [0.1, 1]) : 0;
-  const color = getRgbFrom(lightState);
+export function getLightIcon(light: Light) {
+  // TODO: Use dimming state and color(_temperature) to determine icon color
+  // const color = getRgbFrom(lightState);
 
-  return getProgressIcon(progress, color);
+  return {
+    source: `icons/${light.metadata.archetype}.png`,
+    tintColor: light.on.on ? "white" : "gray",
+  };
 }
 
 export function getIconForColor(color: CssColor): Image {
