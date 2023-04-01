@@ -3,13 +3,12 @@ import axios from "axios";
 import cheerio from "cheerio";
 import { useEffect, useState } from "react";
 import { useFetch } from "@raycast/utils";
-import { NodeHtmlMarkdown, NodeHtmlMarkdownOptions } from "node-html-markdown";
+import { NodeHtmlMarkdown } from "node-html-markdown";
 
 export default function Command() {
   const [query, setQuery] = useState<null | string>(null);
   const [state, setState] = useState<Result[]>([]);
   const [entries, setEntries] = useState([]);
-  const [articles, setArticles] = useState([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -244,7 +243,7 @@ function EntryActions(url: string, title: string, query: string) {
 // 			/>
 
 const Details = (props: { url: string; title: string }) => {
-  var website = "";
+  let website = "";
   const [searchText, setSearchText] = useState("");
   const { isLoading, data } = useFetch(props.url, {
     // to make sure the screen isn't flickering when the searchText changes
@@ -260,8 +259,8 @@ const Details = (props: { url: string; title: string }) => {
   });
 
   // Synonyme
-  var mdSynonyms = "";
-  var synonyms = "";
+  let mdSynonyms = "";
+  let synonyms = "";
   website(".mw-parser-output")
     .find("i")
     .each(function (i, link) {
@@ -269,7 +268,7 @@ const Details = (props: { url: string; title: string }) => {
     });
 
   // erster <i></i> im Artikel - zum Abgleich ob es Synonyme gibt oder nicht
-  var notSynonyms = "";
+  let notSynonyms = "";
   website(".collapsible")
     .find("i")
     .each(function (i, link) {
@@ -307,21 +306,21 @@ const Details = (props: { url: string; title: string }) => {
     /* customTransformers (optional) */ undefined,
     /* customCodeBlockTranslators (optional) */ undefined
   );
-  var html = "";
+  let html = "";
   website(".mw-parser-output").each(function (i, link) {
     html += website(link).html();
   });
-  var toc = "";
+  let toc = "";
   website("#toc").each(function (i, link) {
     toc += website(link).html();
   });
-
+  
   // remove synonyms
-  markdown = "";
+  let markdown = "";
   synonyms.split("\n").forEach((element) => {
     html = html.replace(element, "");
   });
-  var markdown = "";
+  markdown = "";
   markdown =
     "# " +
     props.title +
