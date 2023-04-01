@@ -1,4 +1,10 @@
-import { ActionPanel, List, OpenInBrowserAction, showToast, ToastStyle } from "@raycast/api";
+import {
+  ActionPanel,
+  List,
+  OpenInBrowserAction,
+  showToast,
+  ToastStyle,
+} from "@raycast/api";
 import { useState, useEffect } from "react";
 import { environment, preferences } from "@raycast/api";
 import fs from "fs";
@@ -8,6 +14,7 @@ import Binance from "node-binance-api";
 const binance = new Binance().options({
   APIKEY: preferences.binance_api_key.value as string,
   APISECRET: preferences.binance_api_secret.value as string,
+  family: 4,
 });
 
 export interface PortfolioState {
@@ -54,7 +61,11 @@ function CurrencyItem(props: { portfolioEntry: PortfolioEntry }) {
       icon={portfolioEntry.icon}
       actions={
         <ActionPanel>
-          <OpenInBrowserAction title="Trade on Binance.com" url={tradeURL} icon="binance-logo.png" />
+          <OpenInBrowserAction
+            title="Trade on Binance.com"
+            url={tradeURL}
+            icon="binance-logo.png"
+          />
         </ActionPanel>
       }
     />
@@ -62,7 +73,10 @@ function CurrencyItem(props: { portfolioEntry: PortfolioEntry }) {
 }
 
 export function usePortfolio() {
-  const [state, setState] = useState<PortfolioState>({ portfolio: null, isLoading: true });
+  const [state, setState] = useState<PortfolioState>({
+    portfolio: null,
+    isLoading: true,
+  });
 
   useEffect(() => {
     fetchPortfolio();
@@ -78,25 +92,35 @@ export function usePortfolio() {
       const balance: Balance = await binance.balance();
       const prices: PriceRecord = await binance.prices();
 
-      const portfolio: PortfolioEntry[] = Object.keys(balance).flatMap((currency: Currency) => {
-        const available = balance[currency].available;
-        const usdPriceFromAPI = prices[currency.concat("USDT")];
-        const tradeToCurrency = !isNaN(usdPriceFromAPI) ? "USDT" : currency == "USDT" ? null : "BTC";
-        const usdPrice = !isNaN(usdPriceFromAPI) ? usdPriceFromAPI : currency == "USDT" ? 1 : 0;
-        const usdValue = available * usdPrice;
-        let icon = `currency/${currency.toLowerCase()}.png`;
-        if (!fs.existsSync(path.join(environment.assetsPath, icon))) {
-          icon = `currency/generic.png`;
+      const portfolio: PortfolioEntry[] = Object.keys(balance).flatMap(
+        (currency: Currency) => {
+          const available = balance[currency].available;
+          const usdPriceFromAPI = prices[currency.concat("USDT")];
+          const tradeToCurrency = !isNaN(usdPriceFromAPI)
+            ? "USDT"
+            : currency == "USDT"
+            ? null
+            : "BTC";
+          const usdPrice = !isNaN(usdPriceFromAPI)
+            ? usdPriceFromAPI
+            : currency == "USDT"
+            ? 1
+            : 0;
+          const usdValue = available * usdPrice;
+          let icon = `currency/${currency.toLowerCase()}.png`;
+          if (!fs.existsSync(path.join(environment.assetsPath, icon))) {
+            icon = `currency/generic.png`;
+          }
+          return {
+            currency: currency,
+            available: available,
+            usdPrice: usdPrice,
+            usdValue: usdValue,
+            tradeToCurrency: tradeToCurrency,
+            icon: icon,
+          } as PortfolioEntry;
         }
-        return {
-          currency: currency,
-          available: available,
-          usdPrice: usdPrice,
-          usdValue: usdValue,
-          tradeToCurrency: tradeToCurrency,
-          icon: icon,
-        } as PortfolioEntry;
-      });
+      );
       setState((oldState) => ({
         ...oldState,
         isLoading: false,
@@ -149,7 +173,9 @@ function subtitleFor(portfolioEntry: PortfolioEntry): string {
 
   let subtitle = `${displayNumber(portfolioEntry.usdPrice)}$`;
   if (portfolioEntry.available != 0) {
-    subtitle += ` * ${displayNumber(portfolioEntry.available)} = ${displayNumber(portfolioEntry.usdValue)} $`;
+    subtitle += ` * ${displayNumber(
+      portfolioEntry.available
+    )} = ${displayNumber(portfolioEntry.usdValue)} $`;
   }
 
   return subtitle;
