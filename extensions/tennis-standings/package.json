@@ -1,11 +1,10 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "tennis-world",
-  "title": "Tennis World",
+  "name": "tennis-standings",
+  "title": "Tennis Standings",
   "description": "- Shows the ATP live rankings\n- Shows player details\n- Shows H2H",
   "icon": "command-icon.png",
   "author": "Maverick",
-  "owner": "codeunity",
   "categories": [
     "Fun"
   ],

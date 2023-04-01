@@ -1,4 +1,4 @@
-# Tennis World
+# Tennis Standings
 
 - Shows the ATP live rankings
 - TODO: Shows player details
