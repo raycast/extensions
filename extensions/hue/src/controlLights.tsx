@@ -32,14 +32,16 @@ export default function ControlLights() {
             return room.children.map((child: ResourceIdentifier) => child.rid).includes(`${light.owner.rid}`);
           }) ?? [];
 
-        return <Group
-          hueClient={hueClient}
-          key={room.id}
-          lights={roomLights}
-          room={room}
-          mutateLights={mutateLights}
-          sendHueMessage={sendHueMessage}
-        />;
+        return (
+          <Group
+            hueClient={hueClient}
+            key={room.id}
+            lights={roomLights}
+            room={room}
+            mutateLights={mutateLights}
+            sendHueMessage={sendHueMessage}
+          />
+        );
       })}
     </List>
   );

@@ -10,14 +10,12 @@ export type HueContext = {
   bridgeId?: string;
   bridgeUsername?: string;
   hueClient?: HueClient;
-}
+};
 
 /**
  * @see https://stately.ai/viz/ee0edf94-7a82-4d65-a6a8-324e2f1eca49
  */
-export default function hueBridgeMachine(
-  onLinked: () => void
-) {
+export default function hueBridgeMachine(onLinked: () => void) {
   return createMachine<HueContext>({
     id: "manage-hue-bridge",
     initial: "loadingCredentials",
@@ -58,7 +56,7 @@ export default function hueBridgeMachine(
           },
           onError: {
             target: "discoveringUsingPublicApi",
-          }
+          },
         },
       },
       connecting: {
@@ -66,9 +64,13 @@ export default function hueBridgeMachine(
           id: "connecting",
           src: async (context) => {
             // We have already validated that these values are defined, but TypeScript doesn't know that
-            if (context.bridgeIpAddress === undefined) throw Error("No bridge IP address");
-            if (context.bridgeId === undefined) throw Error("No bridge ID");
-            if (context.bridgeUsername === undefined) throw Error("No bridge username");
+            if (
+              context.bridgeIpAddress === undefined ||
+              context.bridgeId === undefined ||
+              context.bridgeUsername === undefined
+            ) {
+              throw Error("Invalid state");
+            }
 
             return new HueClient(context.bridgeIpAddress, context.bridgeId, context.bridgeUsername);
           },
@@ -138,7 +140,7 @@ export default function hueBridgeMachine(
 
             // Get bridge ID using the new credentials
             const api = await v3.api.createLocal(context.bridgeIpAddress).connect(username);
-            const configuration = (await api.configuration.getConfiguration());
+            const configuration = await api.configuration.getConfiguration();
 
             return { id: configuration.bridgeid, username };
           },
@@ -148,9 +150,9 @@ export default function hueBridgeMachine(
               bridgeId: (context, event) => event.data.id,
               bridgeUsername: (context, event) => event.data.username,
               hueClient: (context, event) => {
-                if (context.bridgeIpAddress === undefined) throw Error("No bridge IP address");
+                if (context.bridgeIpAddress === undefined) throw Error("Invalid state");
                 return new HueClient(context.bridgeIpAddress, event.data.id, event.data.username);
-              }
+              },
             }),
           },
           onError: {

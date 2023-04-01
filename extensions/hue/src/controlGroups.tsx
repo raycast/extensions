@@ -282,10 +282,10 @@ async function handleTurnAllOn(apiPromise: Promise<Api>, group: Group, mutateGro
         return groups.map((it) =>
           it.id === group.id
             ? {
-              ...it,
-              state: { any_on: true, all_on: true },
-              action: { ...it.action, on: true },
-            }
+                ...it,
+                state: { any_on: true, all_on: true },
+                action: { ...it.action, on: true },
+              }
             : it
         );
       },
@@ -311,10 +311,10 @@ async function handleTurnAllOff(apiPromise: Promise<Api>, group: Group, mutateGr
         return groups?.map((it) =>
           it.id === group.id
             ? {
-              ...it,
-              state: { any_on: false, all_on: false },
-              action: { ...it.action, on: false },
-            }
+                ...it,
+                state: { any_on: false, all_on: false },
+                action: { ...it.action, on: false },
+              }
             : it
         );
       },

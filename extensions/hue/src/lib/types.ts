@@ -15,7 +15,8 @@ export type ResourceIdentifier = {
   /**
    * The type of the referenced resource
    */
-  rtype: "device"
+  rtype:
+    | "device"
     | "bridge_home"
     | "room"
     | "zone"
@@ -46,7 +47,7 @@ export type ResourceIdentifier = {
     | "geofence_client"
     | "geolocation"
     | "smart_scene";
-}
+};
 
 /**
  * Not all properties are included in this type definition.
@@ -87,7 +88,8 @@ export type Light = {
     /**
      * Light archetype
      */
-    archetype: "unknown_archetype"
+    archetype:
+      | "unknown_archetype"
       | "classic_bulb"
       | "sultan_bulb"
       | "flood_bulb"
@@ -139,7 +141,7 @@ export type Light = {
     /**
      * The fixed mired value of the white lamp
      */
-    fixed_mired?: number,
+    fixed_mired?: number;
   };
   on: {
     /**
@@ -150,7 +152,7 @@ export type Light = {
   dimming?: Dimming;
   color_temperature: ColorTemperature;
   color: Color;
-}
+};
 
 export type Dimming = {
   /**
@@ -167,7 +169,7 @@ export type Dimming = {
    * Percentage of the maximum lumen the device outputs on minimum brightness.
    */
   min_dim_level?: number;
-}
+};
 
 export type ColorTemperature = {
   /**
@@ -194,7 +196,7 @@ export type ColorTemperature = {
      */
     mirek_maximum: number;
   };
-}
+};
 
 export type Color = {
   /**
@@ -214,7 +216,7 @@ export type Color = {
      * Y position in the color gamut
      */
     y: number;
-  }
+  };
 
   /**
    * Color gamut of color bulb.
@@ -239,7 +241,7 @@ export type Color = {
        * Y position in the color gamut
        */
       y: number;
-    },
+    };
 
     /**
      * CIE XY gamut position
@@ -258,7 +260,7 @@ export type Color = {
        * Y position in the color gamut
        */
       y: number;
-    },
+    };
 
     /**
      * CIE XY gamut position
@@ -277,8 +279,8 @@ export type Color = {
        * Y position in the color gamut
        */
       y: number;
-    }
-  }
+    };
+  };
 
   /**
    * The gamut types supported by hue
@@ -289,7 +291,7 @@ export type Color = {
    * - other: Color gamut of non-hue products with non-hue gamuts resp w/o gamut
    */
   gamut_type: "A" | "B" | "C" | "other";
-}
+};
 
 export type Scene = {
   /**
@@ -332,7 +334,7 @@ export type Scene = {
    * If the group is changed (e.g. light added/removed) the scene is updated.
    */
   group: ResourceIdentifier;
-}
+};
 
 export type ActionElement = {
   /**
@@ -378,7 +380,7 @@ export type ActionElement = {
          * Y position in the color gamut
          */
         y: number;
-      }
+      };
     };
 
     color_temperature?: {
@@ -390,7 +392,7 @@ export type ActionElement = {
       mirek: number;
     };
   };
-}
+};
 
 export type Room = {
   /**
@@ -443,7 +445,8 @@ export type Room = {
     /**
      * Possible archetypes of a room
      */
-    archetype: "living_room"
+    archetype:
+      | "living_room"
       | "kitchen"
       | "dining"
       | "bedroom"
@@ -484,4 +487,4 @@ export type Room = {
       | "pool"
       | "other";
   };
-}
+};

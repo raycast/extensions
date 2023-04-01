@@ -8,7 +8,7 @@ import {
   failedToLinkMessage,
   linkedMessage,
   linkWithBridgeMessage,
-  noBridgeFoundMessage
+  noBridgeFoundMessage,
 } from "../lib/markdown";
 import ActionStyle = Alert.ActionStyle;
 import Style = Toast.Style;
@@ -87,11 +87,7 @@ export default function ManageHueBridge(
       break;
   }
 
-  return hueBridgeState.value === "connected"
-    ? null
-    : <Detail
-      key={`${hueBridgeState.value}`}
-      markdown={markdown}
-      actions={<ActionPanel>{contextActions}</ActionPanel>}
-    />;
+  return hueBridgeState.value === "connected" ? null : (
+    <Detail key={`${hueBridgeState.value}`} markdown={markdown} actions={<ActionPanel>{contextActions}</ActionPanel>} />
+  );
 }
