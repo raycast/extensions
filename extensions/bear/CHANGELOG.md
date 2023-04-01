@@ -1,5 +1,10 @@
 # Bear Changelog
 
+## [Add support for Bear 2] - 2023-04-01
+
+- Add support for Bear 2
+- Add _Search Query_ argument to _Search Notes_ command
+
 ## [Fix crash] - 2022-11-29
 
 - Fix a crash that occurred when a note's text is `null`.
