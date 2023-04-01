@@ -8,7 +8,7 @@ import { NodeHtmlMarkdown } from "node-html-markdown";
 export default function Command() {
   const [query, setQuery] = useState<null | string>(null);
   const [state, setState] = useState<Result[]>([]);
-  const [entries, setEntries] = useState([]);
+  const [entries, setEntries] = useState<Result[]>([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
