@@ -20,8 +20,9 @@ import ManageHueBridge from "./components/ManageHueBridge";
 import UnlinkAction from "./components/UnlinkAction";
 import { useHue } from "./lib/useHue";
 import Style = Toast.Style;
+import View from "./components/View";
 
-export default function Command() {
+function ControlGroups() {
   const { hueBridgeState, sendHueMessage, apiPromise, isLoading, groups, mutateGroups, scenes } = useHue();
 
   const manageHueBridgeElement: JSX.Element | null = ManageHueBridge(hueBridgeState, sendHueMessage);
@@ -85,6 +86,14 @@ export default function Command() {
         </List.Section>
       )}
     </List>
+  );
+}
+
+export default function Command() {
+  return (
+    <View>
+      <ControlGroups />
+    </View>
   );
 }
 

@@ -19,6 +19,7 @@ import getAuthenticatedApi from "./getAuthenticatedApi";
 import { Light } from "./hueV2Types";
 import axios from "axios";
 import Style = Toast.Style;
+import { getHueClient } from "./withHueClient";
 
 export function handleError(error: Error): void {
   console.debug({ name: error.name, message: error.message });
@@ -91,22 +92,7 @@ export async function turnOffAllLights() {
 }
 
 export async function toggleLight(apiPromise: Promise<Api>, light: Light) {
-  const bridgeIpAddress = await LocalStorage.getItem<string>(BRIDGE_IP_ADDRESS_KEY);
-  const bridgeUsername = await LocalStorage.getItem<string>(BRIDGE_USERNAME_KEY);
-  const response = await axios.put(`https://${bridgeIpAddress}/clip/v2/resource/light/${light.id}`, {
-    "on": {
-      "on": !light.on.on
-    }
-  }, {
-    headers: {
-      "hue-application-key": bridgeUsername,
-    },
-  });
-
-  // await api.lights.setLightState(light.id, {
-  //   on: !light.on.on,
-  //   transitiontime: getTransitionTimeInMs(),
-  // });
+  await getHueClient().toggleLight(light);
 }
 
 export async function turnGroupOn(apiPromise: Promise<Api>, group: Group) {

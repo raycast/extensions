@@ -9,9 +9,10 @@ import ManageHueBridge from "./components/ManageHueBridge";
 import UnlinkAction from "./components/UnlinkAction";
 import { useHue } from "./lib/useHue";
 import { Api } from "node-hue-api/dist/esm/api/Api";
+import View from "./components/View";
 import Style = Toast.Style;
 
-export default function ControlLights() {
+function ControlLights() {
   const { hueBridgeState, sendHueMessage, apiPromise, isLoading, lights, mutateLights, groups } = useHue();
 
   const manageHueBridgeElement: JSX.Element | null = ManageHueBridge(hueBridgeState, sendHueMessage);
@@ -58,6 +59,14 @@ export default function ControlLights() {
         });
       })}
     </List>
+  );
+}
+
+export default function Command() {
+  return (
+    <View>
+      <ControlLights />
+    </View>
   );
 }
 
