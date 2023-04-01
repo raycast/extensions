@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { useCachedPromise } from "@raycast/utils";
 import { Group, HueMessage, Scene, SendHueMessage } from "./types";
 import { useDeepMemo } from "@raycast/utils/dist/useDeepMemo";
-import manageHueBridgeMachine from "./manageHueBridgeMachine";
+import hueBridgeMachine from "./hueBridgeMachine";
 import { useMachine } from "@xstate/react";
 import { handleError } from "./hue";
 import { Api } from "node-hue-api/dist/esm/api/Api";
@@ -14,15 +14,15 @@ import { getHueClient } from "./withHueClient";
 //  This happens for example when holding or successively using the 'Increase' or 'Decrease Brightness' action.
 //  This is especially noticeable on groups, since those API calls take longer than those for individual lights.
 export function useHue() {
-  const hueBridgeMachine = useDeepMemo(() =>
-    manageHueBridgeMachine(() => {
+  const machine = useDeepMemo(() =>
+    hueBridgeMachine(() => {
       revalidateLights();
       revalidateGroups();
       revalidateScenes();
     })
   );
 
-  const [hueBridgeState, send] = useMachine(hueBridgeMachine);
+  const [hueBridgeState, send] = useMachine(machine);
 
   const sendHueMessage: SendHueMessage = (message: HueMessage) => {
     send(message.toUpperCase());

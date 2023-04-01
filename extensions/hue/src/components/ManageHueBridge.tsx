@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Alert, confirmAlert, Detail, Icon, Toast } from "@raycast/api";
 import { AnyEventObject, BaseActionObject, ResolveTypegenMeta, ServiceMap, State, TypegenDisabled } from "xstate";
-import { HueContext } from "../lib/manageHueBridgeMachine";
+import { HueContext } from "../lib/hueBridgeMachine";
 import { SendHueMessage } from "../lib/types";
 import {
   discoveringMessage,

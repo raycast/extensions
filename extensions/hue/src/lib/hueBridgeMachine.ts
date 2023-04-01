@@ -15,7 +15,7 @@ export type HueContext = {
 /**
  * @see https://stately.ai/viz/ee0edf94-7a82-4d65-a6a8-324e2f1eca49
  */
-export default function manageHueBridgeMachine(
+export default function hueBridgeMachine(
   bridgeIpAddress: string | undefined,
   bridgeId: string | undefined,
   bridgeUsername: string | undefined,
