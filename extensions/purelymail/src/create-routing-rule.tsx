@@ -7,7 +7,7 @@ import {
   Action,
   Form,
   popToRoot,
-  Icon
+  Icon,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { createRoutingRule, getDomains } from "./utils/api";
@@ -30,42 +30,42 @@ interface State {
 
 export default function CreateRoutingRule() {
   const [state, setState] = useState<State>({
-      domains: undefined,
-      error: "",
-      isLoading: false,
-      domainName: "",
-      prefix: true,
-      matchUser: "",
-      targetAddresses: "",
-      domainNameError: "",
-      prefixError: "",
-      matchUserError: "",
-      targetAddressesError: "",
-    });
+    domains: undefined,
+    error: "",
+    isLoading: false,
+    domainName: "",
+    prefix: true,
+    matchUser: "",
+    targetAddresses: "",
+    domainNameError: "",
+    prefixError: "",
+    matchUserError: "",
+    targetAddressesError: "",
+  });
 
-    useEffect(() => {
-      async function getFromApi() {
-        const response: Response = await getDomains(true);
-  
-        switch (response.type) {
-          case "error":
-            setState((prevState) => {
-              return { ...prevState, error: response.message, isLoading: false };
-            });
-            break;
-          
-          case "success":
-            setState((prevState) => {
-              return { ...prevState, error: "", domains: response.result.domains };
-            });
-            break;
-  
-          default:
-            break;
-        }
+  useEffect(() => {
+    async function getFromApi() {
+      const response: Response = await getDomains(true);
+
+      switch (response.type) {
+        case "error":
+          setState((prevState) => {
+            return { ...prevState, error: response.message, isLoading: false };
+          });
+          break;
+
+        case "success":
+          setState((prevState) => {
+            return { ...prevState, error: "", domains: response.result.domains };
+          });
+          break;
+
+        default:
+          break;
       }
-      getFromApi();
-    }, [])
+    }
+    getFromApi();
+  }, []);
 
   const showError = async () => {
     if (state.error) {
@@ -78,39 +78,39 @@ export default function CreateRoutingRule() {
     setState((prevState: State) => {
       return { ...prevState, domainName: val, domainNameError: error };
     });
-  }
+  };
   const onPrefixChange = (val: boolean) => {
     const error = val ? "" : state.prefixError;
     setState((prevState: State) => {
       return { ...prevState, prefix: val, prefixError: error };
     });
-  }
+  };
   const onMatchUserChange = (val: string) => {
     const error = val ? "" : state.matchUserError;
     setState((prevState: State) => {
       return { ...prevState, matchUser: val, matchUserError: error };
     });
-  }
+  };
   const onTargetAddressesChange = (val: string) => {
     const error = val ? "" : state.targetAddressesError;
     setState((prevState: State) => {
       return { ...prevState, targetAddresses: val, targetAddressesError: error };
     });
-  }
+  };
 
   type Values = {
     domainName: string;
     prefix: boolean;
     matchUser: string;
     targetAddresses: string;
-  }
+  };
   const handleSubmit = async (values: Values) => {
     const { domainName, prefix, matchUser, targetAddresses } = values;
     const domainError = !domainName ? "Domain is required" : "";
-    const prefixError = prefix!==true && prefix!==false ? "Prefix is required" : "";
+    const prefixError = prefix !== true && prefix !== false ? "Prefix is required" : "";
     const matchUserError = !matchUser ? "Match User is required" : "";
     const targetAddressesError = !targetAddresses ? "Target Addresses are required" : "";
-    
+
     if (domainError || prefixError || matchUserError || targetAddressesError) {
       setState((prevState) => {
         return { ...prevState, domainError, prefixError, matchUserError, targetAddressesError };
@@ -122,12 +122,12 @@ export default function CreateRoutingRule() {
     setState((prevState: State) => {
       return { ...prevState, isLoading: true };
     });
-    
+
     const formData: CreateRoutingRequest = {
       domainName,
       prefix,
       matchUser,
-      targetAddresses: targetAddresses.split(','),
+      targetAddresses: targetAddresses.split(","),
     };
     const response = await createRoutingRule(formData);
     switch (response.type) {
@@ -136,15 +136,12 @@ export default function CreateRoutingRule() {
           return { ...prevState, error: response.message, isLoading: false };
         });
         break;
-      
+
       case "success":
         setState((prevState) => {
           return { ...prevState, error: "", isLoading: false };
         });
-        await showToast(
-          Toast.Style.Success,
-          "Rule Created"
-        );
+        await showToast(Toast.Style.Success, "Rule Created");
         await popToRoot({
           clearSearchBar: true,
         });
@@ -163,7 +160,7 @@ export default function CreateRoutingRule() {
   const description = () => {
     let from = "FROM: ";
     const { domainName, prefix, matchUser, targetAddresses } = state;
-    const targets = targetAddresses.toString().replaceAll(' ', '').replaceAll(',', ' AND ');
+    const targets = targetAddresses.toString().replaceAll(" ", "").replaceAll(",", " AND ");
 
     if (!prefix && matchUser) {
       from += `EXACT ADDRESS '${matchUser}@${domainName}'`;
@@ -176,7 +173,7 @@ export default function CreateRoutingRule() {
 
 TO: '${targets}'`;
     return from + to;
-  }
+  };
 
   return state.error ? (
     <Detail
@@ -192,7 +189,11 @@ TO: '${targets}'`;
       isLoading={state.domains === undefined || state.isLoading}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Create Routing Rule" icon={Icon.Check} onSubmit={(values: Values) => handleSubmit(values)} />
+          <Action.SubmitForm
+            title="Create Routing Rule"
+            icon={Icon.Check}
+            onSubmit={(values: Values) => handleSubmit(values)}
+          />
         </ActionPanel>
       }
     >
@@ -204,20 +205,24 @@ TO: '${targets}'`;
         value={state.domainName}
         onChange={onDomainNameChange}
       >
-        {state.domains
-          ?.map((domain) => (
-            <Form.Dropdown.Item key={domain.name} value={domain.name} title={domain.name} icon={getFavicon(`https://${domain.name}`)} />
-          ))}
+        {state.domains?.map((domain) => (
+          <Form.Dropdown.Item
+            key={domain.name}
+            value={domain.name}
+            title={domain.name}
+            icon={getFavicon(`https://${domain.name}`)}
+          />
+        ))}
       </Form.Dropdown>
-      
+
       <Form.Checkbox
-          id="prefix"
-          key="prefix"
-          label="Prefix"
-          info="Leave this unchecked for 'EXACT ADDRESS' matching"
-          error={state.prefixError}
-          value={state.prefix}
-          onChange={onPrefixChange}
+        id="prefix"
+        key="prefix"
+        label="Prefix"
+        info="Leave this unchecked for 'EXACT ADDRESS' matching"
+        error={state.prefixError}
+        value={state.prefix}
+        onChange={onPrefixChange}
       />
 
       <Form.TextField

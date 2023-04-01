@@ -8,7 +8,7 @@ import {
   Form,
   LaunchProps,
   popToRoot,
-  Icon
+  Icon,
 } from "@raycast/api";
 import { useForm, FormValidation } from "@raycast/utils";
 import { useEffect, useState } from "react";
@@ -32,12 +32,12 @@ export default function CreateUser(props: LaunchProps<{ arguments: DomainArgs }>
   const propDomain = props.arguments.domain;
 
   const [state, setState] = useState<State>({
-      domains: undefined,
-      error: "",
-      forwardingEmail: "",
-      domainError: "",
-      isLoading: false,
-    });
+    domains: undefined,
+    error: "",
+    forwardingEmail: "",
+    domainError: "",
+    isLoading: false,
+  });
 
   useEffect(() => {
     async function getFromApi() {
@@ -49,7 +49,7 @@ export default function CreateUser(props: LaunchProps<{ arguments: DomainArgs }>
             return { ...prevState, error: response.message, isLoading: false };
           });
           break;
-        
+
         case "success":
           setState((prevState) => {
             return { ...prevState, error: "", domains: response.result.domains };
@@ -70,7 +70,7 @@ export default function CreateUser(props: LaunchProps<{ arguments: DomainArgs }>
         return { ...prevState, isLoading: true };
       });
 
-      const filledFields = Object.entries(values).filter(([, val]) => val !== '');
+      const filledFields = Object.entries(values).filter(([, val]) => val !== "");
       const mapped = Object.fromEntries(filledFields);
 
       const { userName, domainName, password } = values;
@@ -78,50 +78,46 @@ export default function CreateUser(props: LaunchProps<{ arguments: DomainArgs }>
         userName,
         domainName,
         password,
-        ...mapped
+        ...mapped,
       };
-      
-      const response = await createUser(formData);
-        switch (response.type) {
-          case "error":
-            await showToast(Toast.Style.Failure, "Purelymail Error", response.message);
-            setState((prevState) => {
-              return { ...prevState, isLoading: false };
-            });
-            break;
-          
-          case "success":
-            setState((prevState) => {
-              return { ...prevState, isLoading: false };
-            });
-            await showToast(
-              Toast.Style.Success,
-              "User Created",
-              `USER: ${userName}@${domainName}`
-            );
-            await popToRoot({
-              clearSearchBar: true,
-            });
-            break;
 
-          default:
-            setState((prevState) => {
-              return { ...prevState, isLoading: false };
-            });
-            break;
-        }
+      const response = await createUser(formData);
+      switch (response.type) {
+        case "error":
+          await showToast(Toast.Style.Failure, "Purelymail Error", response.message);
+          setState((prevState) => {
+            return { ...prevState, isLoading: false };
+          });
+          break;
+
+        case "success":
+          setState((prevState) => {
+            return { ...prevState, isLoading: false };
+          });
+          await showToast(Toast.Style.Success, "User Created", `USER: ${userName}@${domainName}`);
+          await popToRoot({
+            clearSearchBar: true,
+          });
+          break;
+
+        default:
+          setState((prevState) => {
+            return { ...prevState, isLoading: false };
+          });
+          break;
+      }
     },
     validation: {
       userName: FormValidation.Required,
       domainName: FormValidation.Required,
-      password: FormValidation.Required
+      password: FormValidation.Required,
     },
     initialValues: {
       domainName: propDomain || undefined,
       enablePasswordReset: true,
       enableSearchIndexing: true,
       sendWelcomeEmail: true,
-    }
+    },
   });
 
   const showError = async () => {
@@ -146,52 +142,33 @@ export default function CreateUser(props: LaunchProps<{ arguments: DomainArgs }>
       isLoading={state.domains === undefined || state.isLoading}
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Create User" onSubmit={handleSubmit}
-            icon={Icon.AddPerson}
-          />
+          <Action.SubmitForm title="Create User" onSubmit={handleSubmit} icon={Icon.AddPerson} />
         </ActionPanel>
       }
     >
-      <Form.Dropdown
-        title="Domain"
-        placeholder="Select a domain"
-        {...itemProps.domainName}
-      >
-        {state.domains
-          ?.map((domain) => (
-            <Form.Dropdown.Item key={domain.name} value={domain.name} title={domain.name} icon={getFavicon(`https://${domain.name}`)} />
-          ))}
+      <Form.Dropdown title="Domain" placeholder="Select a domain" {...itemProps.domainName}>
+        {state.domains?.map((domain) => (
+          <Form.Dropdown.Item
+            key={domain.name}
+            value={domain.name}
+            title={domain.name}
+            icon={getFavicon(`https://${domain.name}`)}
+          />
+        ))}
       </Form.Dropdown>
-      
-      <Form.TextField
-          title="Username"
-          placeholder="Enter a username"
-          {...itemProps.userName}
-      />
 
-      <Form.PasswordField
-          title="Password"
-          placeholder="Enter password"
-          {...itemProps.password}
-      />
+      <Form.TextField title="Username" placeholder="Enter a username" {...itemProps.userName} />
+
+      <Form.PasswordField title="Password" placeholder="Enter password" {...itemProps.password} />
 
       <Form.Separator />
-      <Form.TextField
-        title="Recovery Email"
-        placeholder="Enter Recovery Email"
-        {...itemProps.recoveryEmail}
-      />
+      <Form.TextField title="Recovery Email" placeholder="Enter Recovery Email" {...itemProps.recoveryEmail} />
       <Form.TextField
         title="Recovery Email Description"
         placeholder="Recovery Email Description"
         {...itemProps.recoveryEmailDescription}
       />
-      <Form.TextField
-        title="Recovery Phone"
-        placeholder="Enter Recovery Phone"
-        {...itemProps.recoveryPhone}
-      />
+      <Form.TextField title="Recovery Phone" placeholder="Enter Recovery Phone" {...itemProps.recoveryPhone} />
       <Form.TextField
         title="Recovery Phone Description"
         placeholder="Recovery Phone Description"
@@ -207,10 +184,7 @@ export default function CreateUser(props: LaunchProps<{ arguments: DomainArgs }>
         info="If disabled, inbox search functionality will be limited and some space will be saved."
         {...itemProps.enableSearchIndexing}
       />
-      <Form.Checkbox
-        label="Send Welcome Email"
-        {...itemProps.sendWelcomeEmail}
-      />
+      <Form.Checkbox label="Send Welcome Email" {...itemProps.sendWelcomeEmail} />
     </Form>
   );
 }

@@ -8,7 +8,7 @@ import {
   Form,
   LaunchProps,
   popToRoot,
-  Icon
+  Icon,
 } from "@raycast/api";
 import { useForm, FormValidation, getFavicon } from "@raycast/utils";
 import { useEffect, useState } from "react";
@@ -35,15 +35,15 @@ export default function UpdateDomainSettings(props: LaunchProps<{ arguments: Dom
   const propDomain = props.arguments.domain;
 
   const [state, setState] = useState<State>({
-      domains: undefined,
-      error: "",
-      forwardingEmail: "",
-      domainError: "",
-      isLoading: false,
+    domains: undefined,
+    error: "",
+    forwardingEmail: "",
+    domainError: "",
+    isLoading: false,
 
-      allowAccountReset: false,
-      symbolicSubaddressing: false,
-      recheckDns: false,
+    allowAccountReset: false,
+    symbolicSubaddressing: false,
+    recheckDns: false,
   });
 
   useEffect(() => {
@@ -56,7 +56,7 @@ export default function UpdateDomainSettings(props: LaunchProps<{ arguments: Dom
             return { ...prevState, error: response.message, isLoading: false };
           });
           break;
-        
+
         case "success":
           setState((prevState) => {
             return { ...prevState, error: "", domains: response.result.domains };
@@ -77,7 +77,7 @@ export default function UpdateDomainSettings(props: LaunchProps<{ arguments: Dom
         return { ...prevState, isLoading: true };
       });
 
-      const response = await updateDomainSettings({...values});
+      const response = await updateDomainSettings({ ...values });
       switch (response.type) {
         case "error":
           await showToast(Toast.Style.Failure, "Purelymail Error", response.message);
@@ -85,16 +85,12 @@ export default function UpdateDomainSettings(props: LaunchProps<{ arguments: Dom
             return { ...prevState, isLoading: false };
           });
           return;
-        
+
         case "success":
           setState((prevState) => {
             return { ...prevState, isLoading: false };
           });
-          await showToast(
-            Toast.Style.Success,
-            "Domain Settings Updated",
-            "DOMAIN: " + values.name
-          );
+          await showToast(Toast.Style.Success, "Domain Settings Updated", "DOMAIN: " + values.name);
           await popToRoot({
             clearSearchBar: true,
           });
@@ -111,8 +107,8 @@ export default function UpdateDomainSettings(props: LaunchProps<{ arguments: Dom
       name: FormValidation.Required,
     },
     initialValues: {
-      name: state.domains?.length ? propDomain : undefined
-    }
+      name: state.domains?.length ? propDomain : undefined,
+    },
   });
 
   const showError = async () => {
@@ -122,9 +118,9 @@ export default function UpdateDomainSettings(props: LaunchProps<{ arguments: Dom
   };
 
   const handleDomainChange = (newDomain: string) => {
-    setValue("allowAccountReset", state.domains?.find(d => d.name===newDomain)?.allowAccountReset || false);
-    setValue("symbolicSubaddressing", state.domains?.find(d => d.name===newDomain)?.symbolicSubaddressing || false);
-  }
+    setValue("allowAccountReset", state.domains?.find((d) => d.name === newDomain)?.allowAccountReset || false);
+    setValue("symbolicSubaddressing", state.domains?.find((d) => d.name === newDomain)?.symbolicSubaddressing || false);
+  };
 
   showError();
 
@@ -146,16 +142,15 @@ export default function UpdateDomainSettings(props: LaunchProps<{ arguments: Dom
         </ActionPanel>
       }
     >
-      <Form.Dropdown
-        title="Domain"
-        placeholder="Select a domain"
-        {...itemProps.name}
-        onChange={handleDomainChange}
-      >
-        {state.domains
-          ?.map((domain) => (
-            <Form.Dropdown.Item key={domain.name} value={domain.name} title={domain.name} icon={getFavicon(`https://${domain.name}`)} />
-          ))}
+      <Form.Dropdown title="Domain" placeholder="Select a domain" {...itemProps.name} onChange={handleDomainChange}>
+        {state.domains?.map((domain) => (
+          <Form.Dropdown.Item
+            key={domain.name}
+            value={domain.name}
+            title={domain.name}
+            icon={getFavicon(`https://${domain.name}`)}
+          />
+        ))}
       </Form.Dropdown>
 
       <Form.Checkbox
@@ -168,9 +163,7 @@ export default function UpdateDomainSettings(props: LaunchProps<{ arguments: Dom
         info={`If enabled, everything after a symbol character in an email address will be ignored`}
         {...itemProps.symbolicSubaddressing}
       />
-      <Form.Checkbox label="Recheck DNS"
-        {...itemProps.recheckDns}
-      />
+      <Form.Checkbox label="Recheck DNS" {...itemProps.recheckDns} />
     </Form>
   );
 }

@@ -26,7 +26,7 @@ export default function Command() {
             return { ...prevState, error: response.message, isLoading: false };
           });
           break;
-        
+
         case "success":
           setState((prevState) => {
             return { ...prevState, error: "", code: response.result.code };
@@ -43,17 +43,17 @@ export default function Command() {
 
     getFromApi();
   }, []);
-  
+
   const required = [
     { type: "MX", host: "", value: "mailserver.purelymail.com." },
     { type: "TXT", host: "", value: "v=spf1 include:_spf.purelymail.com ~all" },
-  ]
+  ];
   const optional = [
     { type: "CNAME", host: "purelymail1._domainkey", value: "key1.dkimroot.purelymail.com." },
     { type: "CNAME", host: "purelymail2._domainkey", value: "key2.dkimroot.purelymail.com." },
     { type: "CNAME", host: "purelymail3._domainkey", value: "key3.dkimroot.purelymail.com." },
     { type: "CNAME", host: "_dmarc", value: "dmarcroot.purelymail.com." },
-  ]
+  ];
   return state.error ? (
     <Detail
       markdown={"⚠️" + state.error}
@@ -66,19 +66,21 @@ export default function Command() {
   ) : (
     <List isLoading={state.code === "" || state.isLoading}>
       <List.Section title="Required">
-        {required.map(r => (
+        {required.map((r) => (
           <List.Item
             key={r.value}
             title={r.value}
-            subtitle={'HOST: ' + (r.host || '(Empty)')}
-            accessories={[
-              { tag: r.type },
-            ]}
+            subtitle={"HOST: " + (r.host || "(Empty)")}
+            accessories={[{ tag: r.type }]}
             actions={
               <ActionPanel title="Copy">
                 <Action.CopyToClipboard title="Copy Value" content={r.value} />
                 <Action.CopyToClipboard title="Copy Host" content={r.host} />
-                <Action.CopyToClipboard title="Copy Type" content={r.type} shortcut={{ modifiers: ["cmd"], key: "t" }} />
+                <Action.CopyToClipboard
+                  title="Copy Type"
+                  content={r.type}
+                  shortcut={{ modifiers: ["cmd"], key: "t" }}
+                />
               </ActionPanel>
             }
           />
@@ -88,9 +90,7 @@ export default function Command() {
             key={state.code}
             title={state.code}
             subtitle="HOST: (Empty)"
-            accessories={[
-              { tag: "TXT" },
-            ]}
+            accessories={[{ tag: "TXT" }]}
             actions={
               <ActionPanel title="Copy">
                 <Action.CopyToClipboard title="Copy Value" content={state.code} />
@@ -102,14 +102,12 @@ export default function Command() {
         )}
       </List.Section>
       <List.Section title="Optional">
-        {optional.map(r => (
+        {optional.map((r) => (
           <List.Item
             key={r.value}
             title={r.value}
-            subtitle={'HOST: ' + r.host || '(Empty)'}
-            accessories={[
-              { tag: r.type },
-            ]}
+            subtitle={"HOST: " + r.host || "(Empty)"}
+            accessories={[{ tag: r.type }]}
             actions={
               <ActionPanel title="Copy">
                 <Action.CopyToClipboard title="Copy Value" content={r.value} />
