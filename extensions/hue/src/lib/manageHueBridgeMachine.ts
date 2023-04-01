@@ -1,243 +1,168 @@
 import { assign, createMachine } from "xstate";
 import { discoverBridge, getUsernameFromBridge } from "./hue";
-import { LocalStorage, Toast } from "@raycast/api";
-import {
-  discoveringMessage,
-  failedToConnectMessage,
-  failedToLinkMessage,
-  linkedMessage,
-  linkWithBridgeMessage,
-  noBridgeFoundMessage,
-} from "./markdown";
+import { LocalStorage } from "@raycast/api";
 import { v3 } from "node-hue-api";
 import { BRIDGE_ID, BRIDGE_IP_ADDRESS_KEY, BRIDGE_USERNAME_KEY } from "./constants";
-import Style = Toast.Style;
+import HueClient from "./HueClient";
 
-export interface HueContext {
+export type HueContext = {
   bridgeIpAddress?: string;
   bridgeId?: string;
   bridgeUsername?: string;
-  shouldDisplay: boolean;
-  markdown?: string;
-  actions: Element[];
-  toast: Toast;
+  hueClient?: HueClient;
 }
 
 /**
  * @see https://stately.ai/viz/ee0edf94-7a82-4d65-a6a8-324e2f1eca49
  */
-export default function manageHueBridgeMachine(revalidateResources: () => void) {
-  return createMachine<HueContext>(
-    {
-      id: "manage-hue-bridge",
-      initial: "loadCredentials",
-      predictableActionArguments: true,
-      context: {
-        bridgeIpAddress: undefined,
-        bridgeUsername: undefined,
-        shouldDisplay: false,
-        markdown: undefined,
-        actions: [],
-        toast: new Toast({ style: Style.Animated, title: "" }),
-      },
-      on: {
-        UNLINK: {
-          target: "unlinking",
-        },
-      },
-      states: {
-        loadCredentials: {
-          invoke: {
-            id: "loadCredentials",
-            src: async () => {
-              const bridgeIpAddress = await LocalStorage.getItem<string>(BRIDGE_IP_ADDRESS_KEY);
-              const bridgeUsername = await LocalStorage.getItem<string>(BRIDGE_USERNAME_KEY);
-              if (bridgeIpAddress === undefined) throw Error("No bridge IP address stored");
-              if (bridgeUsername === undefined) throw Error("No bridge IP username stored");
-              return { bridgeIpAddress, bridgeUsername };
-            },
-            onDone: {
-              target: "connecting",
-              actions: [
-                assign({ bridgeIpAddress: (context, event) => event.data.bridgeIpAddress }),
-                assign({ bridgeUsername: (context, event) => event.data.bridgeUsername }),
-              ],
-            },
-            onError: {
-              target: "discovering",
-            },
-          },
-        },
-        discovering: {
-          entry: "showDiscovering",
-          exit: "hideToast",
-          invoke: {
-            id: "discoverBridge",
-            src: discoverBridge,
-            onDone: {
-              // TODO: Handle finding multiple bridges by offering the user to select one
-              actions: assign({ bridgeIpAddress: (context, event) => event.data }),
-              target: "linkWithBridge",
-            },
-            onError: {
-              target: "noBridgeFound",
-            },
-          },
-        },
-        noBridgeFound: {
-          entry: "showNoBridgeFound",
-          on: {
-            RETRY: {
-              target: "discovering",
-            },
-          },
-        },
-        linkWithBridge: {
-          entry: "showLinkWithBridge",
-          on: {
-            LINK: {
-              target: "linking",
-            },
-          },
-        },
-        linking: {
-          entry: "showLinking",
-          exit: "hideToast",
-          invoke: {
-            id: "linking",
-            src: async (context) => {
-              if (context.bridgeIpAddress === undefined) throw Error("No bridge IP address");
-              const username = await getUsernameFromBridge(context.bridgeIpAddress);
+export default function manageHueBridgeMachine(
+  bridgeIpAddress: string | undefined,
+  bridgeId: string | undefined,
+  bridgeUsername: string | undefined,
+  onLinked: () => void
+) {
+  const bridgeIsConfigured = bridgeIpAddress !== undefined && bridgeId !== undefined && bridgeUsername !== undefined;
 
-              // Get bridge ID using the new credentials
-              const api = await v3.api.createLocal(context.bridgeIpAddress).connect(username);
-              const configuration = (await api.configuration.getConfiguration());
+  return createMachine<HueContext>({
+    id: "manage-hue-bridge",
+    initial: bridgeIsConfigured ? "connecting" : "discovering",
+    predictableActionArguments: true,
+    context: {
+      bridgeIpAddress: bridgeIpAddress,
+      bridgeId: bridgeId,
+      bridgeUsername: bridgeUsername,
+      hueClient: undefined,
+    },
+    on: {
+      UNLINK: {
+        target: "unlinking",
+      },
+    },
+    states: {
+      connecting: {
+        invoke: {
+          id: "connecting",
+          src: async (context) => {
+            // We have already validated that these values are defined, but TypeScript doesn't know that
+            if (context.bridgeIpAddress === undefined) throw Error("No bridge IP address");
+            if (context.bridgeId === undefined) throw Error("No bridge ID");
+            if (context.bridgeUsername === undefined) throw Error("No bridge username");
 
-              return { id: configuration.bridgeid, username };
-            },
-            onDone: {
-              target: "linked",
-              actions: assign({
-                bridgeId: (context, event) => event.data.id,
-                bridgeUsername: (context, event) => event.data.username
-              }),
-            },
-            onError: {
-              target: "failedToLink",
-            },
+            return new HueClient(context.bridgeIpAddress, context.bridgeId, context.bridgeUsername);
+          },
+          onDone: {
+            actions: assign({ hueClient: (context, event) => event.data }),
+            target: "connected",
+          },
+          onError: {
+            target: "failedToConnect",
           },
         },
-        failedToLink: {
-          entry: "showFailedToLink",
-          on: {
-            RETRY: {
-              target: "linking",
-            },
+      },
+      connected: {},
+      failedToConnect: {
+        on: {
+          RETRY: {
+            target: "connecting",
           },
         },
-        linked: {
-          entry: "showLinked",
-          exit: "stopShowing",
-          invoke: {
-            id: "saveCredentials",
-            src: async (context) => {
-              if (context.bridgeIpAddress === undefined) throw Error("No bridge IP address");
-              if (context.bridgeId === undefined) throw Error("No bridge ID");
-              if (context.bridgeUsername === undefined) throw Error("No bridge username");
-              LocalStorage.setItem(BRIDGE_IP_ADDRESS_KEY, context.bridgeIpAddress).then();
-              LocalStorage.setItem(BRIDGE_ID, context.bridgeId).then();
-              LocalStorage.setItem(BRIDGE_USERNAME_KEY, context.bridgeUsername).then();
-              revalidateResources();
-            },
+      },
+      discovering: {
+        invoke: {
+          id: "discoverBridge",
+          src: discoverBridge,
+          onDone: {
+            actions: assign({ bridgeIpAddress: (context, event) => event.data }),
+            target: "linkWithBridge",
           },
-          on: {
-            DONE: {
-              target: "connecting",
-            },
+          onError: {
+            target: "noBridgeFound",
           },
         },
-        connecting: {
-          invoke: {
-            id: "connectToBridge",
-            src: async (context) => {
-              if (context.bridgeIpAddress === undefined) throw Error("No bridge IP address");
-              await v3.api.createLocal(context.bridgeIpAddress).connect(context.bridgeUsername);
-            },
-            onDone: {
-              target: "connected",
-            },
-            onError: {
-              target: "failedToConnect",
-            },
+      },
+      noBridgeFound: {
+        on: {
+          RETRY: {
+            target: "discovering",
           },
         },
-        failedToConnect: {
-          entry: "showFailedToConnect",
-          on: {
-            RETRY: {
-              target: "connecting",
-            },
+      },
+      linkWithBridge: {
+        on: {
+          LINK: {
+            target: "linking",
           },
         },
-        connected: {},
-        unlinking: {
-          invoke: {
-            id: "unlinking",
-            src: async (context) => {
-              context.bridgeIpAddress = undefined;
-              context.bridgeId = undefined;
-              context.bridgeUsername = undefined;
-              await LocalStorage.clear();
-            },
-            onDone: {
-              target: "discovering",
-            },
+      },
+      linking: {
+        invoke: {
+          id: "linking",
+          src: async (context) => {
+            if (context.bridgeIpAddress === undefined) throw Error("No bridge IP address");
+            const username = await getUsernameFromBridge(context.bridgeIpAddress);
+
+            // Get bridge ID using the new credentials
+            const api = await v3.api.createLocal(context.bridgeIpAddress).connect(username);
+            const configuration = (await api.configuration.getConfiguration());
+
+            return { id: configuration.bridgeid, username };
+          },
+          onDone: {
+            target: "linked",
+            actions: assign({
+              bridgeId: (context, event) => event.data.id,
+              bridgeUsername: (context, event) => event.data.username,
+              hueClient: (context, event) => {
+                if (context.bridgeIpAddress === undefined) throw Error("No bridge IP address");
+                return new HueClient(context.bridgeIpAddress, event.data.id, event.data.username);
+              }
+            }),
+          },
+          onError: {
+            target: "failedToLink",
+          },
+        },
+      },
+      failedToLink: {
+        on: {
+          RETRY: {
+            target: "linking",
+          },
+        },
+      },
+      linked: {
+        invoke: {
+          id: "saveCredentials",
+          src: async (context) => {
+            if (context.bridgeIpAddress === undefined) throw Error("No bridge IP address");
+            if (context.bridgeId === undefined) throw Error("No bridge ID");
+            if (context.bridgeUsername === undefined) throw Error("No bridge username");
+            LocalStorage.setItem(BRIDGE_IP_ADDRESS_KEY, context.bridgeIpAddress).then();
+            LocalStorage.setItem(BRIDGE_ID, context.bridgeId).then();
+            LocalStorage.setItem(BRIDGE_USERNAME_KEY, context.bridgeUsername).then();
+            onLinked();
+          },
+        },
+        on: {
+          DONE: {
+            target: "connecting",
+          },
+        },
+      },
+      unlinking: {
+        invoke: {
+          id: "unlinking",
+          src: async (context) => {
+            context.bridgeIpAddress = undefined;
+            context.bridgeId = undefined;
+            context.bridgeUsername = undefined;
+            await LocalStorage.clear();
+          },
+          onDone: {
+            target: "discovering",
           },
         },
       },
     },
-    {
-      actions: {
-        showDiscovering: async (context) => {
-          context.shouldDisplay = true;
-          context.markdown = discoveringMessage;
-          context.toast.style = Style.Animated;
-          context.toast.title = "Discovering…";
-          context.toast.show().then();
-        },
-        showLinking: async (context) => {
-          context.toast.style = Style.Animated;
-          context.toast.title = "Linking…";
-          context.toast.show().then();
-        },
-        showLinkWithBridge: (context) => {
-          context.shouldDisplay = true;
-          context.markdown = linkWithBridgeMessage;
-        },
-        showNoBridgeFound: (context) => {
-          context.shouldDisplay = true;
-          context.markdown = noBridgeFoundMessage;
-        },
-        showFailedToConnect: (context) => {
-          context.shouldDisplay = true;
-          context.markdown = failedToConnectMessage;
-        },
-        showFailedToLink: (context) => {
-          context.shouldDisplay = true;
-          context.markdown = failedToLinkMessage;
-        },
-        showLinked: (context) => {
-          context.shouldDisplay = true;
-          context.markdown = linkedMessage;
-        },
-        stopShowing: (context) => {
-          context.shouldDisplay = false;
-          context.markdown = undefined;
-        },
-        hideToast: async (context) => {
-          context.toast.hide().then();
-        },
-      },
-    }
-  );
+  });
 }
