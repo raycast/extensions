@@ -1,5 +1,5 @@
 import { assign, createMachine } from "xstate";
-import { discoverBridge, linkWithBridge } from "./hue";
+import { discoverBridge, getUsernameFromBridge } from "./hue";
 import { LocalStorage, Toast } from "@raycast/api";
 import {
   discoveringMessage,
@@ -10,11 +10,12 @@ import {
   noBridgeFoundMessage,
 } from "./markdown";
 import { v3 } from "node-hue-api";
-import { BRIDGE_IP_ADDRESS_KEY, BRIDGE_USERNAME_KEY } from "./constants";
+import { BRIDGE_ID, BRIDGE_IP_ADDRESS_KEY, BRIDGE_USERNAME_KEY } from "./constants";
 import Style = Toast.Style;
 
 export interface HueContext {
   bridgeIpAddress?: string;
+  bridgeId?: string;
   bridgeUsername?: string;
   shouldDisplay: boolean;
   markdown?: string;
@@ -106,11 +107,20 @@ export default function manageHueBridgeMachine(revalidateResources: () => void) 
             id: "linking",
             src: async (context) => {
               if (context.bridgeIpAddress === undefined) throw Error("No bridge IP address");
-              return await linkWithBridge(context.bridgeIpAddress);
+              const username = await getUsernameFromBridge(context.bridgeIpAddress);
+
+              // Get bridge ID using the new credentials
+              const api = await v3.api.createLocal(context.bridgeIpAddress).connect(username);
+              const configuration = (await api.configuration.getConfiguration());
+
+              return { id: configuration.bridgeid, username };
             },
             onDone: {
               target: "linked",
-              actions: assign({ bridgeUsername: (context, event) => event.data }),
+              actions: assign({
+                bridgeId: (context, event) => event.data.id,
+                bridgeUsername: (context, event) => event.data.username
+              }),
             },
             onError: {
               target: "failedToLink",
@@ -132,8 +142,10 @@ export default function manageHueBridgeMachine(revalidateResources: () => void) 
             id: "saveCredentials",
             src: async (context) => {
               if (context.bridgeIpAddress === undefined) throw Error("No bridge IP address");
+              if (context.bridgeId === undefined) throw Error("No bridge ID");
               if (context.bridgeUsername === undefined) throw Error("No bridge username");
               LocalStorage.setItem(BRIDGE_IP_ADDRESS_KEY, context.bridgeIpAddress).then();
+              LocalStorage.setItem(BRIDGE_ID, context.bridgeId).then();
               LocalStorage.setItem(BRIDGE_USERNAME_KEY, context.bridgeUsername).then();
               revalidateResources();
             },
@@ -149,7 +161,6 @@ export default function manageHueBridgeMachine(revalidateResources: () => void) 
             id: "connectToBridge",
             src: async (context) => {
               if (context.bridgeIpAddress === undefined) throw Error("No bridge IP address");
-              if (context.bridgeUsername === undefined) throw Error("No bridge username");
               await v3.api.createLocal(context.bridgeIpAddress).connect(context.bridgeUsername);
             },
             onDone: {
@@ -174,6 +185,7 @@ export default function manageHueBridgeMachine(revalidateResources: () => void) 
             id: "unlinking",
             src: async (context) => {
               context.bridgeIpAddress = undefined;
+              context.bridgeId = undefined;
               context.bridgeUsername = undefined;
               await LocalStorage.clear();
             },

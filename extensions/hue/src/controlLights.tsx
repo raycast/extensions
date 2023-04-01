@@ -1,18 +1,10 @@
 import { ActionPanel, Icon, List, Toast } from "@raycast/api";
-import { hexToXy } from "./lib/colors";
-import {
-  adjustBrightness,
-  adjustColorTemperature,
-  calculateAdjustedBrightness,
-  calculateAdjustedColorTemperature,
-  setLightBrightness,
-  setLightColor,
-  toggleLight,
-} from "./lib/hue";
-import { getIconForColor, getLightIcon } from "./lib/utils";
+import { adjustBrightness, adjustColorTemperature, setLightBrightness, setLightColor, toggleLight, } from "./lib/hue";
+import { getIconForColor } from "./lib/utils";
 import { MutatePromise } from "@raycast/utils";
-import { CssColor, Group, Light, SendHueMessage } from "./lib/types";
-import { BRIGHTNESS_MAX, BRIGHTNESS_MIN, BRIGHTNESSES, COLOR_TEMP_MAX, COLOR_TEMP_MIN, COLORS } from "./lib/constants";
+import { Light } from "./lib/hueV2Types";
+import { CssColor, Group, SendHueMessage } from "./lib/types";
+import { BRIGHTNESS_MAX, BRIGHTNESSES, COLORS } from "./lib/constants";
 import ManageHueBridge from "./components/ManageHueBridge";
 import UnlinkAction from "./components/UnlinkAction";
 import { useHue } from "./lib/useHue";
@@ -29,6 +21,20 @@ export default function ControlLights() {
   const entertainmentAreas = groups.filter((group: Group) => group.type === "Entertainment") as Group[];
   const zones = groups.filter((group: Group) => group.type === "Zone") as Group[];
   const groupTypes = Array.of(rooms, entertainmentAreas, zones);
+
+  return (
+    <List isLoading={isLoading}>
+      {lights.map((light: Light): JSX.Element => {
+        return <Light
+          apiPromise={apiPromise}
+          key={light.id}
+          light={light}
+          mutateLights={mutateLights}
+          sendHueMessage={sendHueMessage}
+        />;
+      })}
+    </List>
+  );
 
   return (
     <List isLoading={isLoading}>
@@ -70,7 +76,7 @@ function Group(props: {
             apiPromise={props.apiPromise}
             key={light.id}
             light={light}
-            group={props.group}
+            // group={props.group}
             mutateLights={props.mutateLights}
             sendHueMessage={props.sendHueMessage}
           />
@@ -83,15 +89,15 @@ function Group(props: {
 function Light(props: {
   apiPromise: Promise<Api>;
   light: Light;
-  group: Group;
+  // group?: Group;
   mutateLights: MutatePromise<Light[]>;
   sendHueMessage: SendHueMessage;
 }) {
   return (
     <List.Item
-      title={props.light.name}
-      icon={getLightIcon(props.light.state)}
-      keywords={[props.group.name]}
+      title={props.light.metadata.name}
+      // icon={getLightIcon(props.light.state)}
+      // keywords={[props.group.name]}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
@@ -116,6 +122,7 @@ function Light(props: {
           </ActionPanel.Section>
 
           <ActionPanel.Section>
+            {/*
             {props.light.state.colormode == "xy" && (
               <SetColorAction
                 light={props.light}
@@ -134,6 +141,7 @@ function Light(props: {
                 onDecrease={() => handleDecreaseColorTemperature(props.apiPromise, props.light, props.mutateLights)}
               />
             )}
+*/}
           </ActionPanel.Section>
 
           <ActionPanel.Section>
@@ -149,8 +157,8 @@ function Light(props: {
 function ToggleLightAction({ light, onToggle }: { light: Light; onToggle?: () => void }) {
   return (
     <ActionPanel.Item
-      title={light.state.on ? "Turn Off" : "Turn On"}
-      icon={light.state.on ? Icon.LightBulbOff : Icon.LightBulb}
+      title={light.on.on ? "Turn Off" : "Turn On"}
+      icon={light.on.on ? Icon.LightBulbOff : Icon.LightBulb}
       onAction={onToggle}
     />
   );
@@ -175,7 +183,7 @@ function SetBrightnessAction(props: { light: Light; onSet: (percentage: number) 
 }
 
 function IncreaseBrightnessAction(props: { light: Light; onIncrease?: () => void }) {
-  return props.light.state.bri < BRIGHTNESS_MAX ? (
+  return props.light.dimming.brightness < BRIGHTNESS_MAX ? (
     <ActionPanel.Item
       title="Increase Brightness"
       shortcut={{ modifiers: ["cmd", "shift"], key: "arrowUp" }}
@@ -186,7 +194,7 @@ function IncreaseBrightnessAction(props: { light: Light; onIncrease?: () => void
 }
 
 function DecreaseBrightnessAction(props: { light: Light; onDecrease?: () => void }) {
-  return props.light.state.bri > BRIGHTNESS_MIN ? (
+  return props.light.dimming.brightness > props.light.dimming.min_dim_level ? (
     <ActionPanel.Item
       title="Decrease Brightness"
       shortcut={{ modifiers: ["cmd", "shift"], key: "arrowDown" }}
@@ -212,7 +220,7 @@ function SetColorAction(props: { light: Light; onSet: (color: CssColor) => void 
 }
 
 function IncreaseColorTemperatureAction(props: { light: Light; onIncrease?: () => void }) {
-  return props.light.state.bri > COLOR_TEMP_MIN ? (
+  return props.light.color_temperature.mirek > props.light.color_temperature.mirek_schema.mirek_minimum ? (
     <ActionPanel.Item
       title="Increase Color Temperature"
       shortcut={{ modifiers: ["cmd", "shift"], key: "arrowRight" }}
@@ -223,7 +231,7 @@ function IncreaseColorTemperatureAction(props: { light: Light; onIncrease?: () =
 }
 
 function DecreaseColorTemperatureAction(props: { light: Light; onDecrease?: () => void }) {
-  return props.light.state.bri < COLOR_TEMP_MAX ? (
+  return props.light.color_temperature.mirek < props.light.color_temperature.mirek_schema.mirek_maximum ? (
     <ActionPanel.Item
       title="Decrease Color Temperature"
       shortcut={{ modifiers: ["cmd", "shift"], key: "arrowLeft" }}
@@ -250,16 +258,17 @@ async function handleToggle(apiPromise: Promise<Api>, light: Light, mutateLights
   try {
     await mutateLights(toggleLight(apiPromise, light), {
       optimisticUpdate(lights) {
-        return lights?.map((it) => (it.id === light.id ? { ...it, state: { ...it.state, on: !light.state.on } } : it));
+        return lights?.map((it) => (it.id === light.id ? { ...it, on: { on: !light.on.on } } : it));
       },
     });
 
     toast.style = Style.Success;
-    toast.title = light.state.on ? "Turned light off" : "Turned light on";
+    toast.title = light.on.on ? "Turned light off" : "Turned light on";
     await toast.show();
   } catch (e) {
+    console.error(e);
     toast.style = Style.Failure;
-    toast.title = light.state.on ? "Failed turning light off" : "Failed turning light on";
+    toast.title = light.on.on ? "Failed turning light off" : "Failed turning light on";
     toast.message = e instanceof Error ? e.message : undefined;
     await toast.show();
   }
@@ -276,11 +285,11 @@ async function handleSetBrightness(
 
   try {
     await mutateLights(setLightBrightness(api, light, brightness), {
-      optimisticUpdate(lights) {
-        return lights.map((it) =>
-          it.id === light.id ? { ...it, state: { ...it.state, on: true, bri: brightness } } : it
-        );
-      },
+      // optimisticUpdate(lights) {
+      //   return lights.map((it) =>
+      //     it.id === light.id ? { ...it, state: { ...it.on, on: true, bri: brightness } } : it
+      //   );
+      // },
     });
 
     toast.style = Style.Success;
@@ -299,13 +308,13 @@ async function handleIncreaseBrightness(api: Promise<Api>, light: Light, mutateL
 
   try {
     await mutateLights(adjustBrightness(api, light, "increase"), {
-      optimisticUpdate(lights) {
-        return lights?.map((it) =>
-          it.id === light.id
-            ? { ...it, state: { ...it.state, on: true, bri: calculateAdjustedBrightness(light, "increase") } }
-            : it
-        );
-      },
+      // optimisticUpdate(lights) {
+      //   return lights?.map((it) =>
+      //     it.id === light.id
+      //       ? { ...it, on: { ...it.on, on: true, bri: calculateAdjustedBrightness(light, "increase") } }
+      //       : it
+      //   );
+      // },
     });
 
     toast.style = Style.Success;
@@ -324,13 +333,13 @@ async function handleDecreaseBrightness(api: Promise<Api>, light: Light, mutateL
 
   try {
     await mutateLights(adjustBrightness(api, light, "decrease"), {
-      optimisticUpdate(lights) {
-        return lights.map((it) =>
-          it.id === light.id
-            ? { ...it, state: { ...it.state, on: true, bri: calculateAdjustedBrightness(light, "decrease") } }
-            : it
-        );
-      },
+      // optimisticUpdate(lights) {
+      //   return lights.map((it) =>
+      //     it.id === light.id
+      //       ? { ...it, state: { ...it.state, on: true, bri: calculateAdjustedBrightness(light, "decrease") } }
+      //       : it
+      //   );
+      // },
     });
 
     toast.style = Style.Success;
@@ -349,11 +358,11 @@ async function handleSetColor(api: Promise<Api>, light: Light, mutateLights: Mut
 
   try {
     await mutateLights(setLightColor(api, light, color.value), {
-      optimisticUpdate(lights) {
-        return lights.map((it) =>
-          it.id === light.id ? { ...it, state: { ...it.state, on: true, xy: hexToXy(color.value) } } : it
-        );
-      },
+      // optimisticUpdate(lights) {
+      //   return lights.map((it) =>
+      //     it.id === light.id ? { ...it, state: { ...it.state, on: true, xy: hexToXy(color.value) } } : it
+      //   );
+      // },
     });
 
     toast.style = Style.Success;
@@ -372,13 +381,13 @@ async function handleIncreaseColorTemperature(api: Promise<Api>, light: Light, m
 
   try {
     await mutateLights(adjustColorTemperature(api, light, "increase"), {
-      optimisticUpdate(lights) {
-        return lights?.map((it) =>
-          it.id === light.id
-            ? { ...it, state: { ...it.state, ct: calculateAdjustedColorTemperature(light, "increase") } }
-            : it
-        );
-      },
+      // optimisticUpdate(lights) {
+      //   return lights?.map((it) =>
+      //     it.id === light.id
+      //       ? { ...it, state: { ...it.state, ct: calculateAdjustedColorTemperature(light, "increase") } }
+      //       : it
+      //   );
+      // },
     });
 
     toast.style = Style.Success;
@@ -397,13 +406,13 @@ async function handleDecreaseColorTemperature(api: Promise<Api>, light: Light, m
 
   try {
     await mutateLights(adjustColorTemperature(api, light, "decrease"), {
-      optimisticUpdate(lights) {
-        return lights.map((it) =>
-          it.id === light.id
-            ? { ...it, state: { ...it.state, ct: calculateAdjustedColorTemperature(light, "decrease") } }
-            : it
-        );
-      },
+      // optimisticUpdate(lights) {
+      //   return lights.map((it) =>
+      //     it.id === light.id
+      //       ? { ...it, state: { ...it.state, ct: calculateAdjustedColorTemperature(light, "decrease") } }
+      //       : it
+      //   );
+      // },
     });
 
     toast.style = Style.Success;

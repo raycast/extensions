@@ -1,9 +1,11 @@
 import { discovery, v3 } from "node-hue-api";
-import { showToast, Toast } from "@raycast/api";
-import { Group, Light, Scene } from "./types";
+import { LocalStorage, showToast, Toast } from "@raycast/api";
+import { Group, Scene } from "./types";
 import { hexToXy } from "./colors";
 import {
   APP_NAME,
+  BRIDGE_IP_ADDRESS_KEY,
+  BRIDGE_USERNAME_KEY,
   BRIGHTNESS_MAX,
   BRIGHTNESS_MIN,
   BRIGHTNESS_STEP,
@@ -13,8 +15,10 @@ import {
 } from "./constants";
 import { getTransitionTimeInMs } from "./utils";
 import { Api } from "node-hue-api/dist/esm/api/Api";
-import Style = Toast.Style;
 import getAuthenticatedApi from "./getAuthenticatedApi";
+import { Light } from "./hueV2Types";
+import axios from "axios";
+import Style = Toast.Style;
 
 export function handleError(error: Error): void {
   console.debug({ name: error.name, message: error.message });
@@ -67,7 +71,7 @@ export async function discoverBridge(): Promise<string> {
   }
 }
 
-export async function linkWithBridge(ipAddress: string): Promise<string> {
+export async function getUsernameFromBridge(ipAddress: string): Promise<string> {
   // Create an unauthenticated instance of the Hue API so that we can create a new user
   const unauthenticatedApi = await v3.api.createLocal(ipAddress).connect();
   const createdUser = await unauthenticatedApi.users.createUser(APP_NAME, "");
@@ -87,11 +91,22 @@ export async function turnOffAllLights() {
 }
 
 export async function toggleLight(apiPromise: Promise<Api>, light: Light) {
-  const api = await apiPromise;
-  await api.lights.setLightState(light.id, {
-    on: !light.state.on,
-    transitiontime: getTransitionTimeInMs(),
+  const bridgeIpAddress = await LocalStorage.getItem<string>(BRIDGE_IP_ADDRESS_KEY);
+  const bridgeUsername = await LocalStorage.getItem<string>(BRIDGE_USERNAME_KEY);
+  const response = await axios.put(`https://${bridgeIpAddress}/clip/v2/resource/light/${light.id}`, {
+    "on": {
+      "on": !light.on.on
+    }
+  }, {
+    headers: {
+      "hue-application-key": bridgeUsername,
+    },
   });
+
+  // await api.lights.setLightState(light.id, {
+  //   on: !light.on.on,
+  //   transitiontime: getTransitionTimeInMs(),
+  // });
 }
 
 export async function turnGroupOn(apiPromise: Promise<Api>, group: Group) {
@@ -140,12 +155,12 @@ export async function setGroupColor(apiPromise: Promise<Api>, group: Group, colo
 }
 
 export function calculateAdjustedBrightness(entity: Light | Group, direction: "increase" | "decrease") {
-  let brightness;
-  if ("action" in entity) {
-    brightness = entity.action.bri;
-  } else {
-    brightness = entity.state.bri;
-  }
+  const brightness = 100;
+  // if ("action" in entity) {
+  //   brightness = entity.action.bri;
+  // } else {
+  //   brightness = entity.state.bri;
+  // }
 
   const newBrightness = direction === "increase" ? brightness + BRIGHTNESS_STEP : brightness - BRIGHTNESS_STEP;
 
@@ -176,14 +191,14 @@ export async function adjustBrightness(
 }
 
 export function calculateAdjustedColorTemperature(entity: Light | Group, direction: "increase" | "decrease") {
-  let colorTemperature;
-  if ("action" in entity) {
-    if (entity.action.colormode !== "ct") throw new Error("Light is not in color temperature mode");
-    colorTemperature = entity.action.ct;
-  } else {
-    if (entity.state.colormode !== "ct") throw new Error("Light is not in color temperature mode");
-    colorTemperature = entity.state.ct;
-  }
+  const colorTemperature = 295;
+  // if ("action" in entity) {
+  //   if (entity.action.colormode !== "ct") throw new Error("Light is not in color temperature mode");
+  //   colorTemperature = entity.action.ct;
+  // } else {
+  //   if (entity.state.colormode !== "ct") throw new Error("Light is not in color temperature mode");
+  //   colorTemperature = entity.state.ct;
+  // }
 
   const newColorTemperature =
     direction === "increase" ? colorTemperature - COLOR_TEMPERATURE_STEP : colorTemperature + COLOR_TEMPERATURE_STEP;
