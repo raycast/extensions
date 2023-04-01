@@ -4,7 +4,7 @@ import https from "https";
 import fs from "fs";
 import { environment } from "@raycast/api";
 import axios, { AxiosRequestConfig, Method } from "axios";
-import { Light } from "./hueV2Types";
+import { Light, Room, Scene } from "./hueV2Types";
 
 export default class HueClient {
   public bridgeIpAddress: string;
@@ -59,6 +59,14 @@ export default class HueClient {
 
   public async getLights(): Promise<Light[]> {
     return this.request("GET", "/clip/v2/resource/light");
+  }
+
+  public async getScenes(): Promise<Scene[]> {
+    return this.request("GET", "/clip/v2/resource/scene");
+  }
+
+  public async getRooms(): Promise<Room[]> {
+    return this.request("GET", "/clip/v2/resource/room");
   }
 
   public async toggleLight(light: Light): Promise<any> {

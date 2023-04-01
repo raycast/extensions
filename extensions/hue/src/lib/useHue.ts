@@ -1,22 +1,22 @@
 import { useMemo } from "react";
 import { useCachedPromise } from "@raycast/utils";
-import { Group, HueMessage, Scene, SendHueMessage } from "./types";
+import { HueMessage, Scene, SendHueMessage } from "./types";
 import hueBridgeMachine from "./hueBridgeMachine";
 import { useMachine } from "@xstate/react";
 import { handleError } from "./hue";
 import { Api } from "node-hue-api/dist/esm/api/Api";
 import getAuthenticatedApi from "./getAuthenticatedApi";
-import { Light } from "./hueV2Types";
+import { Light, Room } from "./hueV2Types";
 import { useDeepMemo } from "@raycast/utils/dist/useDeepMemo";
 
 // TODO: Rapid successive calls to mutate functions will result in the optimistic updates and API results being out of sync.
 //  This happens for example when holding or successively using the 'Increase' or 'Decrease Brightness' action.
-//  This is especially noticeable on groups, since those API calls take longer than those for individual lights.
+//  This is especially noticeable on rooms, since those API calls take longer than those for individual lights.
 export function useHue() {
   const machine = useDeepMemo(() =>
     hueBridgeMachine(() => {
       revalidateLights();
-      revalidateGroups();
+      revalidateRooms();
       revalidateScenes();
     })
   );
@@ -52,19 +52,24 @@ export function useHue() {
   );
 
   const {
-    isLoading: isLoadingGroups,
-    data: groups,
-    mutate: mutateGroups,
-    revalidate: revalidateGroups,
+    isLoading: isLoadingRooms,
+    data: rooms,
+    mutate: mutateRooms,
+    revalidate: revalidateRooms,
   } = useCachedPromise(
     async () => {
-      return [];
+      if (hueBridgeState.context.hueClient === undefined) {
+        throw new Error("Hue client is undefined");
+      }
+
+      return hueBridgeState.context.hueClient?.getRooms();
     },
     [],
     {
       keepPreviousData: true,
-      initialData: [] as Group[],
+      initialData: [] as Room[],
       onError: handleError,
+      execute: hueBridgeState.context.hueClient !== undefined,
     }
   );
 
@@ -75,25 +80,31 @@ export function useHue() {
     revalidate: revalidateScenes,
   } = useCachedPromise(
     async () => {
-      return [];
+      if (hueBridgeState.context.hueClient === undefined) {
+        throw new Error("Hue client is undefined");
+      }
+
+      return hueBridgeState.context.hueClient?.getScenes();
     },
     [],
     {
       keepPreviousData: true,
       initialData: [] as Scene[],
       onError: handleError,
+      execute: hueBridgeState.context.hueClient !== undefined,
     }
   );
 
+  // TODO: Add zones
   return {
     hueBridgeState,
     sendHueMessage,
     apiPromise: authenticatedApi,
-    isLoading: isLoadingLights || isLoadingGroups || isLoadingScenes,
+    isLoading: isLoadingLights || isLoadingRooms || isLoadingScenes,
     lights,
     mutateLights,
-    groups,
-    mutateGroups,
+    rooms,
+    mutateRooms,
     scenes,
     mutateScenes,
   };
