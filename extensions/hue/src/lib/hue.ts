@@ -1,6 +1,5 @@
 import { discovery, v3 } from "node-hue-api";
 import { showToast, Toast } from "@raycast/api";
-import { Group, Scene } from "./types";
 import { hexToXy } from "./colors";
 import {
   APP_NAME,
@@ -14,7 +13,7 @@ import {
 import { getTransitionTimeInMs } from "./utils";
 import { Api } from "node-hue-api/dist/esm/api/Api";
 import getAuthenticatedApi from "./getAuthenticatedApi";
-import { Light } from "./hueV2Types";
+import { Light, Scene } from "./types";
 import Style = Toast.Style;
 
 export function handleError(error: Error): void {

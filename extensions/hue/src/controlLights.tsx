@@ -2,18 +2,19 @@ import { ActionPanel, Icon, List, Toast } from "@raycast/api";
 import { adjustBrightness, adjustColorTemperature, setLightBrightness, setLightColor } from "./lib/hue";
 import { getIconForColor } from "./lib/utils";
 import { MutatePromise } from "@raycast/utils";
-import { Light, ResourceIdentifier, Room } from "./lib/hueV2Types";
-import { CssColor, Group, SendHueMessage } from "./lib/types";
+import { Light, ResourceIdentifier, Room } from "./lib/types";
 import { BRIGHTNESS_MAX, BRIGHTNESSES, COLORS } from "./lib/constants";
 import ManageHueBridge from "./components/ManageHueBridge";
 import UnlinkAction from "./components/UnlinkAction";
-import { useHue } from "./lib/useHue";
+import { SendHueMessage, useHue } from "./lib/useHue";
 import { Api } from "node-hue-api/dist/esm/api/Api";
 import HueClient from "./lib/HueClient";
 import Style = Toast.Style;
 
+// TODO: Add support for grouped lights
+//   Show grouped lights first and offer to 'enter' the group to see the individual lights
 export default function ControlLights() {
-  const { hueBridgeState, sendHueMessage, apiPromise, isLoading, lights, mutateLights, rooms } = useHue();
+  const { hueBridgeState, sendHueMessage, isLoading, lights, mutateLights, rooms } = useHue();
 
   const manageHueBridgeElement: JSX.Element | null = ManageHueBridge(hueBridgeState, sendHueMessage);
   if (manageHueBridgeElement !== null) return manageHueBridgeElement;

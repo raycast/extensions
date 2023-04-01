@@ -4,7 +4,7 @@ import https from "https";
 import fs from "fs";
 import { environment } from "@raycast/api";
 import axios, { AxiosRequestConfig, Method } from "axios";
-import { Light, Room, Scene } from "./hueV2Types";
+import { Light, Room, Scene } from "./types";
 
 export default class HueClient {
   public bridgeIpAddress: string;

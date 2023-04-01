@@ -1,13 +1,15 @@
 import { useMemo } from "react";
 import { useCachedPromise } from "@raycast/utils";
-import { HueMessage, Scene, SendHueMessage } from "./types";
 import hueBridgeMachine from "./hueBridgeMachine";
 import { useMachine } from "@xstate/react";
 import { handleError } from "./hue";
 import { Api } from "node-hue-api/dist/esm/api/Api";
 import getAuthenticatedApi from "./getAuthenticatedApi";
-import { Light, Room } from "./hueV2Types";
+import { Light, Room, Scene } from "./types";
 import { useDeepMemo } from "@raycast/utils/dist/useDeepMemo";
+
+export type HueMessage = "LINK" | "RETRY" | "DONE" | "UNLINK";
+export type SendHueMessage = (message: HueMessage) => void;
 
 // TODO: Rapid successive calls to mutate functions will result in the optimistic updates and API results being out of sync.
 //  This happens for example when holding or successively using the 'Increase' or 'Decrease Brightness' action.
@@ -95,7 +97,7 @@ export function useHue() {
     }
   );
 
-  // TODO: Add zones
+  // TODO: Add zones and grouped lights
   return {
     hueBridgeState,
     sendHueMessage,
