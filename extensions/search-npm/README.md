@@ -8,7 +8,7 @@
     Search npm
   </h1>
 
-Raycast extension to search for npm packages
+Raycast extension to search and favorite npm packages
 
   <p>
     <a href="https://www.raycast.com/mrmartineau/search-npm">
@@ -51,7 +51,6 @@ Raycast extension to search for npm packages
 - open the package's changelog (if it is known)
 - open the package's npm page
 - open the package's Skypack.dev page
-- open a npms.io search results page based on the search term
 
 #### Info
 
@@ -59,6 +58,10 @@ Raycast extension to search for npm packages
 - view the package's bundle cost on [bundlephobia.com](https://bundlephobia.com). hit <kbd>cmd + shift + enter</kbd>
 - view the package's [Snyk](https://snyk.io) vulnerability report
 - view the package source code on [GitHub.dev](https://github.dev) & [CodeSandbox](https://codesandbox.io)
+
+#### Actions
+
+- add/remove package to/from favorites
 
 #### Copy
 
@@ -72,6 +75,7 @@ Raycast extension to search for npm packages
 - choose your default package manager. `yarn`, `npm` or `pnpm`
 - choose your secondary package manager. `yarn`, `npm` or `pnpm`
 - choose the default "open" action for a package: "open repository", "open homepage" or "open npm package page" or "open Skypack package page"
+- choose how many history items to show
 
 ### Screencast
 
@@ -81,4 +85,4 @@ https://user-images.githubusercontent.com/64883/166630703-962ac4de-5da5-40f6-889
 
 ### Options
 
-<img width="310" alt="image" src="https://user-images.githubusercontent.com/64883/166630716-8d9eb232-4278-42a0-9237-96da2242e2af.png">
+<img width="311" alt="image" src="https://user-images.githubusercontent.com/64883/228140967-2fe2a8cf-77cf-4f7c-9bbd-3bfcae380d52.png">

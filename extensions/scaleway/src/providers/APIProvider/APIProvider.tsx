@@ -19,6 +19,7 @@ import {
   RDB,
   Redis,
   Registry,
+  Secret,
   TransactionalEmail,
   VPC,
   VPCGW,
@@ -53,6 +54,7 @@ type APIContextValue = {
   relationalDatabaseV1: RDB.v1.API
   transactionalEmailV1alpha1: TransactionalEmail.v1alpha1.API
   webhostingV1alpha1: Webhosting.v1alpha1.API
+  secretManager: Secret.v1alpha1.API
 }
 
 const APIContext = createContext<APIContextValue | undefined>(undefined)
@@ -95,6 +97,7 @@ export const APIProvider = ({ children }: APIProviderProps) => {
       relationalDatabaseV1: new RDB.v1.API(client),
       transactionalEmailV1alpha1: new TransactionalEmail.v1alpha1.API(client),
       webhostingV1alpha1: new Webhosting.v1alpha1.API(client),
+      secretManager: new Secret.v1alpha1.API(client),
     }
   }, [])
 

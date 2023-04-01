@@ -10,6 +10,7 @@ export const SEARCH_ENGINE = {
 
 export const suggestApps = [
   { path: "/Applications/Safari.app", type: AppType.BROWSER, rank: 1 },
+  { path: "/System/Volumes/Preboot/Cryptexes/App/System/Applications/Safari.app", type: AppType.BROWSER, rank: 1 },
   { path: "/Applications/Google Chrome.app", type: AppType.BROWSER, rank: 2 },
   { path: "/Applications/Microsoft Edge.app", type: AppType.BROWSER, rank: 3 },
   { path: "/Applications/Firefox.app", type: AppType.BROWSER, rank: 4 },
@@ -31,11 +32,10 @@ export const suggestApps = [
   { path: "/Applications/Mimestream.app", type: AppType.EMAIL_CLIENT, rank: 105 },
   { path: "/Applications/Edison Mail.app", type: AppType.EMAIL_CLIENT, rank: 106 },
 
-  { path: "/System/Applications/App Store.app", type: AppType.OTHER, rank: 201 },
-  { path: "/Applications/Downie 4.app", type: AppType.OTHER, rank: 202 },
-  { path: "/Applications/IINA.app", type: AppType.OTHER, rank: 203 },
-  { path: "/Applications/Motrix.app", type: AppType.OTHER, rank: 204 },
-  { path: "/Applications/Thunder.app", type: AppType.OTHER, rank: 205 },
+  { path: "/Applications/Downie 4.app", type: AppType.OTHER, rank: 201 },
+  { path: "/Applications/IINA.app", type: AppType.OTHER, rank: 202 },
+  { path: "/Applications/Motrix.app", type: AppType.OTHER, rank: 203 },
+  { path: "/Applications/Thunder.app", type: AppType.OTHER, rank: 204 },
 ];
 
 export enum CacheKey {
