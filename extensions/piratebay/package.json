@@ -6,7 +6,8 @@
   "icon": "piratebay.png",
   "author": "spacedog",
   "categories": [
-    "Web"
+    "Web",
+    "Productivity"
   ],
   "license": "MIT",
   "commands": [
@@ -23,7 +24,7 @@
       "mode": "view"
     }
   ],
-    "preferences": [
+  "preferences": [
     {
       "name": "instance",
       "type": "textfield",
@@ -39,15 +40,33 @@
       "title": "Sort by",
       "description": "Select how the results should be sorted.",
       "placeholder": "http://mypiratebay.com/",
-      "data": [{"title": "Default", "value": "99"}, {"title": "Size", "value": "5"}, {"title": "Seeders", "value": "7"}, {"title": "Leechers", "value": "9"}, {"title": "UploadedBy", "value": "11"}]
+      "data": [
+        {
+          "title": "Default",
+          "value": "99"
+        },
+        {
+          "title": "Size",
+          "value": "5"
+        },
+        {
+          "title": "Seeders",
+          "value": "7"
+        },
+        {
+          "title": "Leechers",
+          "value": "9"
+        },
+        {
+          "title": "UploadedBy",
+          "value": "11"
+        }
+      ]
     }
   ],
-  "categories": [
-    "Web",
-    "Productivity"
-  ],
   "dependencies": {
-    "@raycast/api": "^1.48.9"
+    "@raycast/api": "^1.48.9",
+    "cheerio": "^1.0.0-rc.12"
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.5",

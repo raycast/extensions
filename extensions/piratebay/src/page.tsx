@@ -204,7 +204,6 @@ function EntryActions(name: string, file: string, link: string, tag: string) {
 }
 
 const Details = (props: {name: string; file: string, link: string, tag: string}) => {
-	var website = "";
 	const [searchText, setSearchText] = useState("");
 	const { isLoading, data } = useFetch(props.link, {
 		// to make sure the screen isn't flickering when the searchText changes
@@ -212,40 +211,39 @@ const Details = (props: {name: string; file: string, link: string, tag: string})
 		initialData: "",
 	});
 
-	website = cheerio.load(data)
+  const $ = cheerio.load(String(data));
 	
 	// ÜBERSCHRIFT
-	var markdown = "# " + props.name + "\n";
+	let markdown = "# " + props.name + "\n";
 
 	// Parse NFO
-	var nfo = "";
-	website(".nfo").find("pre").each(function(i, link) {
-		nfo += website(link).text();
+	let nfo = "";
+	$(".nfo").find("pre").each(function(i, link) {
+		nfo += $(link).text();
 	});
 	
 	// NFO
 	//sobald Daten da sind, werden sie in markdown überführt
 	if (nfo) {
-		markdown += nfo.split('~').join('').split('`').join('').replace(/(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig, "[$1]($1)");
-		// image urls:.replace(/https?:\/\/.*\.(?:png|jpg|gif)/ig,'[![]($&)]($&)')
+		markdown += nfo.split('~').join('').split('`').join('').replace(/(\b(https?|ftp|file):\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig, "[$1]($1)");
 	}
 	
-	var latestComment = "";
-	if (website("#comments").find(".comment").last().text().replace(/\n/, '')) {
-		latestComment = website("#comments").find(".comment").last().text().replace(/^\s+|\s+$/g, '');
+	let latestComment = "";
+	if ($("#comments").find(".comment").last().text().replace(/\n/, '')) {
+		latestComment = $("#comments").find(".comment").last().text().replace(/^\s+|\s+$/g, '');
 	} else {
 		latestComment = '<no comments>'
 	}
 	
 		const titles = [];
-	website("#details").find("dt").each(function(i, link) {
-		titles.push((website(link).text()));
-// 		nfo += website(link).text();
+	$("#details").find("dt").each(function(i, link) {
+		titles.push(($(link).text()));
+// 		nfo += $(link).text();
 	});
 	const values = [];
-	website("#details").find("dd").each(function(i, link) {
-		values.push((website(link).text().replace(/\n/g, '').replace(/\t/g, '')));
-// 		nfo += website(link).text();
+	$("#details").find("dd").each(function(i, link) {
+		values.push(($(link).text().replace(/\n/g, '').replace(/\t/g, '')));
+// 		nfo += $(link).text();
 	});
 	
 	const details = [];
@@ -268,7 +266,7 @@ const Details = (props: {name: string; file: string, link: string, tag: string})
 						<Detail.Metadata.Label title="Type" text={details.find(detail => detail.title == 'Type').value} />
 						<Detail.Metadata.Label title="Files" text={details.find(detail => detail.title == 'Files').value} />
 						<Detail.Metadata.Label title="Size" text={details.find(detail => detail.title == 'Size').value} />
-						<Detail.Metadata.Label title="Info Hash" text={website(".col2").last().html().replace(/.*dd>$/mg, '').replace(/.*dt>$/mg, '').replace(/.*a>$/mg, '').replace(/.*span>$/mg, '').replace(/.*br>$/mg, '').replace(/\s/g, '').replace(/.*i>/mg, '')} />
+						<Detail.Metadata.Label title="Info Hash" text={$(".col2").last().html().replace(/.*dd>$/mg, '').replace(/.*dt>$/mg, '').replace(/.*a>$/mg, '').replace(/.*span>$/mg, '').replace(/.*br>$/mg, '').replace(/\s/g, '').replace(/.*i>/mg, '')} />
 						<Detail.Metadata.Label title="Uploaded" text={new Date(details.find(detail => detail.title == 'Uploaded').value).toLocaleDateString("de-DE", { day: '2-digit', month: '2-digit', year: 'numeric' })} />
 						<Detail.Metadata.Label title="By" text={details.find(detail => detail.title == 'By').value} />
 						<Detail.Metadata.TagList title="Tag">
@@ -302,7 +300,7 @@ const Details = (props: {name: string; file: string, link: string, tag: string})
 						<Detail.Metadata.Label title="Type" text={details.find(detail => detail.title == 'Type').value} />
 						<Detail.Metadata.Label title="Files" text={details.find(detail => detail.title == 'Files').value} />
 						<Detail.Metadata.Label title="Size" text={details.find(detail => detail.title == 'Size').value} />
-						<Detail.Metadata.Label title="Info Hash" text={website(".col2").last().html().replace(/.*dd>$/mg, '').replace(/.*dt>$/mg, '').replace(/.*a>$/mg, '').replace(/.*span>$/mg, '').replace(/.*br>$/mg, '').replace(/\s/g, '').replace(/.*i>/mg, '')} />
+						<Detail.Metadata.Label title="Info Hash" text={$(".col2").last().html().replace(/.*dd>$/mg, '').replace(/.*dt>$/mg, '').replace(/.*a>$/mg, '').replace(/.*span>$/mg, '').replace(/.*br>$/mg, '').replace(/\s/g, '').replace(/.*i>/mg, '')} />
 						<Detail.Metadata.Label title="Uploaded" text={new Date(details.find(detail => detail.title == 'Uploaded').value).toLocaleDateString("de-DE", { day: '2-digit', month: '2-digit', year: 'numeric' })} />
 						<Detail.Metadata.Label title="By" text={details.find(detail => detail.title == 'By').value} />
 						<Detail.Metadata.TagList title="Tag">
@@ -336,7 +334,7 @@ const Details = (props: {name: string; file: string, link: string, tag: string})
 						<Detail.Metadata.Label title="Type" text={details.find(detail => detail.title == 'Type').value} />
 						<Detail.Metadata.Label title="Files" text={details.find(detail => detail.title == 'Files').value} />
 						<Detail.Metadata.Label title="Size" text={details.find(detail => detail.title == 'Size').value} />
-						<Detail.Metadata.Label title="Info Hash" text={website(".col2").last().html().replace(/.*dd>$/mg, '').replace(/.*dt>$/mg, '').replace(/.*a>$/mg, '').replace(/.*span>$/mg, '').replace(/.*br>$/mg, '').replace(/\s/g, '').replace(/.*i>/mg, '')} />
+						<Detail.Metadata.Label title="Info Hash" text={$(".col2").last().html().replace(/.*dd>$/mg, '').replace(/.*dt>$/mg, '').replace(/.*a>$/mg, '').replace(/.*span>$/mg, '').replace(/.*br>$/mg, '').replace(/\s/g, '').replace(/.*i>/mg, '')} />
 						<Detail.Metadata.Label title="Uploaded" text={new Date(details.find(detail => detail.title == 'Uploaded').value).toLocaleDateString("de-DE", { day: '2-digit', month: '2-digit', year: 'numeric' })} />
 						<Detail.Metadata.Label title="By" text={details.find(detail => detail.title == 'By').value} />
 						<Detail.Metadata.Label title="Seeders" text={details.find(detail => detail.title == 'Seeders').value} />
