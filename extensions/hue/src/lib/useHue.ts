@@ -6,9 +6,6 @@ import { Light, Room, Scene } from "./types";
 export type HueMessage = "LINK" | "RETRY" | "DONE" | "UNLINK";
 export type SendHueMessage = (message: HueMessage) => void;
 
-// TODO: Rapid successive calls to mutate functions will result in the optimistic updates and API results being out of sync.
-//  This happens for example when holding or successively using the 'Increase' or 'Decrease Brightness' action.
-//  This is especially noticeable on rooms, since those API calls take longer than those for individual lights.
 export function useHue() {
   const { hueBridgeState, sendHueMessage } = useHueBridgeMachine(() => {
     revalidateLights();
