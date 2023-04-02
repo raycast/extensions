@@ -1,6 +1,7 @@
-import { Action, ActionPanel, Form, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Clipboard, Form, Icon, showToast, Toast } from "@raycast/api";
 import { useRef, useState } from "react";
 import { useBitwarden } from "~/context/bitwarden";
+import { treatError } from "~/utils/debug";
 import useVaultMessages from "~/utils/hooks/useVaultMessages";
 import { hashMasterPasswordForReprompting } from "~/utils/passwords";
 
@@ -14,54 +15,81 @@ const UnlockForm = (props: UnlockFormProps) => {
   const bitwarden = useBitwarden();
   const [isLoading, setLoading] = useState(false);
   const { userMessage, serverMessage, shouldShowServer } = useVaultMessages();
-  const lockReason = useRef(bitwarden.lockReason).current;
+  const lockReasonRef = useRef(bitwarden.lockReason).current;
+  const [unlockError, setUnlockError] = useState<string | undefined>(undefined);
+
+  const handleUnlockError = (error: unknown, password: string) => {
+    setUnlockError(treatError(error, { omitSensitiveValue: password }));
+  };
 
   async function onSubmit({ password }: { password: string }) {
     if (password.length == 0) {
       showToast(Toast.Style.Failure, "Failed to unlock vault", "Missing password");
       return;
     }
+    const toast = await showToast(Toast.Style.Animated, "Unlocking Vault...", "Please wait");
     try {
       setLoading(true);
-      const toast = await showToast(Toast.Style.Animated, "Unlocking Vault...", "Please wait");
+      setUnlockError(undefined);
       const state = await bitwarden.status();
       if (state.status == "unauthenticated") {
         try {
           await bitwarden.login();
         } catch (error) {
-          showToast(
+          await showToast(
             Toast.Style.Failure,
             "Failed to unlock vault",
             `Please check your ${shouldShowServer ? "Server URL, " : ""}API Key and Secret.`
           );
+          handleUnlockError(error, password);
           return;
         }
       }
       const sessionToken = await bitwarden.unlock(password);
       const passwordHash = await hashMasterPasswordForReprompting(password);
 
-      toast.hide();
       onUnlock(sessionToken, passwordHash);
+      await toast.hide();
     } catch (error) {
-      showToast(Toast.Style.Failure, "Failed to unlock vault", "Check your credentials");
+      await showToast(Toast.Style.Failure, "Failed to unlock vault", "Please check your credentials");
+      handleUnlockError(error, password);
     } finally {
       setLoading(false);
     }
   }
+
+  const copyUnlockError = async () => {
+    if (!unlockError) return;
+    await Clipboard.copy(unlockError);
+    await showToast(Toast.Style.Success, "Error copied to clipboard");
+  };
 
   return (
     <Form
       actions={
         <ActionPanel>
           {!isLoading && (
-            <Action.SubmitForm title="Unlock" onSubmit={onSubmit} shortcut={{ key: "enter", modifiers: [] }} />
+            <Action.SubmitForm
+              icon={Icon.LockUnlocked}
+              title="Unlock"
+              onSubmit={onSubmit}
+              shortcut={{ key: "enter", modifiers: [] }}
+            />
+          )}
+          {!!unlockError && (
+            <Action
+              onAction={copyUnlockError}
+              title="Copy Last Error"
+              icon={Icon.Bug}
+              style={Action.Style.Destructive}
+            />
           )}
         </ActionPanel>
       }
     >
       {shouldShowServer && <Form.Description title="Server URL" text={serverMessage} />}
       <Form.Description title="Vault Status" text={userMessage} />
-      {lockReason && <Form.Description title="Reason" text={lockReason} />}
+      {lockReasonRef && <Form.Description title="Reason" text={lockReasonRef} />}
       <Form.PasswordField autoFocus id="password" title="Master Password" />
     </Form>
   );
