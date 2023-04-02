@@ -1,25 +1,49 @@
 import { getSelectedText, Clipboard, Toast, showToast, getPreferenceValues } from "@raycast/api";
 import got from "got";
 
+
 interface Preferences {
   key: string;
   pro: boolean;
 }
-const translate = async (target: string) => {
-  const preferences: Preferences = getPreferenceValues();
-  const key = preferences.key;
-  const pro = preferences.pro;
+
+export function getPreferences() {
+  return getPreferenceValues<Preferences>()
+}
+
+export async function sendTranslateRequest({
+  text: initialText,
+  sourceLanguage,
+  targetLanguage,
+}: {
+  text?: string,
+  sourceLanguage?: string,
+  targetLanguage: string,
+}) {
   try {
-    const text = await getSelectedText();
+    const text = initialText || await getSelectedText();
+
+    const { key, pro } = getPreferences();
+
     try {
-      const response = await got(
-        `https://api${pro ? "" : "-free"}.deepl.com/v2/translate?auth_key=${key}&text=${text}&target_lang=${target}`
-      );
-      const translation = JSON.parse(response.body).translations[0].text;
+      const { translations: [{ text: translation }] } = await got.post(
+        `https://api${pro ? "" : "-free"}.deepl.com/v2/translate`,
+        {
+          headers: {
+            Authorization: `DeepL-Auth-Key ${key}`
+          },
+          json: {
+            text: [text],
+            source_lang: sourceLanguage,
+            target_lang: targetLanguage,
+          }
+        }
+      ).json<{ translations: { text: string }[] }>();
       await Clipboard.copy(translation);
       await showToast(Toast.Style.Success, "The translation was copied to your clipboard.");
-    } catch (e) {
-      console.log(e);
+      return translation;
+    } catch (error) {
+      console.error(error);
       await showToast(
         Toast.Style.Failure,
         "Something went wrong",
@@ -29,9 +53,14 @@ const translate = async (target: string) => {
   } catch (error) {
     await showToast(Toast.Style.Failure, "Please select the text to be translated");
   }
+}
+
+
+export async function translate(target: string) {
+  await sendTranslateRequest({ targetLanguage: target });
 };
 
-const source_languages = {
+export const source_languages = {
   BG: "Bulgarian",
   ZH: "Chinese",
   CS: "Czech",
@@ -58,8 +87,10 @@ const source_languages = {
   SV: "Swedish",
   UK: "Ukrainian",
 };
+export type SourceLanguage = keyof typeof source_languages;
 
-const target_languages = {
+
+export const target_languages = {
   BG: "Bulgarian",
   ZH: "Chinese",
   CS: "Czech",
@@ -88,5 +119,4 @@ const target_languages = {
   SV: "Swedish",
   UK: "Ukrainian",
 };
-
-export { source_languages, target_languages, translate };
+export type TargetLanguage = keyof typeof target_languages;
