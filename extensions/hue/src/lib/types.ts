@@ -5,6 +5,18 @@
  *
  * Not all information is included in this file. Only the information that is used by this project.
  */
+
+///////////////////////
+// Non-Hue API types //
+///////////////////////
+export type CssColor = {
+  name: string;
+  value: string;
+};
+
+///////////////////
+// Hue API types //
+///////////////////
 export type ResourceIdentifier = {
   /**
    * string (pattern: ^[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}$)
@@ -47,6 +59,22 @@ export type ResourceIdentifier = {
     | "geofence_client"
     | "geolocation"
     | "smart_scene";
+};
+
+export type Xy = {
+  /**
+   * number (0 - 1)
+   *
+   * X position in the color gamut
+   */
+  x: number;
+
+  /**
+   * number (0 - 1)
+   *
+   * Y position in the color gamut
+   */
+  y: number;
 };
 
 /**
@@ -202,21 +230,7 @@ export type Color = {
   /**
    * CIE XY gamut position
    */
-  xy: {
-    /**
-     * number (0 - 1)
-     *
-     * X position in the color gamut
-     */
-    x: number;
-
-    /**
-     * number (0 - 1)
-     *
-     * Y position in the color gamut
-     */
-    y: number;
-  };
+  xy: Xy;
 
   /**
    * Color gamut of color bulb.

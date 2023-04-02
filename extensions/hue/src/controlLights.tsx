@@ -1,14 +1,21 @@
 import { ActionPanel, Icon, List, Toast } from "@raycast/api";
-import { adjustBrightness, adjustColorTemperature, setLightBrightness, setLightColor } from "./lib/hue";
-import { getIconForColor, getLightIcon } from "./lib/utils";
+import {
+  adjustBrightness,
+  adjustColorTemperature,
+  getIconForColor,
+  getLightIcon,
+  setLightBrightness,
+  setLightColor,
+} from "./lib/utils";
 import { MutatePromise } from "@raycast/utils";
 import { Light, ResourceIdentifier, Room } from "./lib/types";
-import { BRIGHTNESS_MAX, BRIGHTNESSES, COLORS } from "./lib/constants";
+import { BRIGHTNESS_MAX, BRIGHTNESSES } from "./lib/constants";
 import ManageHueBridge from "./components/ManageHueBridge";
 import UnlinkAction from "./components/UnlinkAction";
 import { SendHueMessage, useHue } from "./lib/useHue";
 import { Api } from "node-hue-api/dist/esm/api/Api";
 import HueClient from "./lib/HueClient";
+import { COLORS } from "./lib/colors";
 import Style = Toast.Style;
 
 // TODO: Add support for grouped lights
@@ -246,9 +253,12 @@ async function handleToggle(hueClient: HueClient, light: Light, mutateLights: Mu
   try {
     await mutateLights(hueClient.toggleLight(light), {
       optimisticUpdate(lights) {
-        return lights.map((it) => (it.id !== light.id) ? it : {
-          ...it,
-          on: { on: !light.on.on }
+        return lights.map((it) => {
+          if (it.id !== light.id) return it;
+          return {
+            ...it,
+            on: { on: !light.on.on },
+          };
         });
       },
     });
@@ -259,7 +269,9 @@ async function handleToggle(hueClient: HueClient, light: Light, mutateLights: Mu
   } catch (e) {
     console.error(e);
     toast.style = Style.Failure;
-    toast.title = light.on.on ? `Failed turning ${light.metadata.name} off` : `Failed turning ${light.metadata.name} on`;
+    toast.title = light.on.on
+      ? `Failed turning ${light.metadata.name} off`
+      : `Failed turning ${light.metadata.name} on`;
     toast.message = e instanceof Error ? e.message : undefined;
     await toast.show();
   }

@@ -1,5 +1,5 @@
 import { closeMainWindow, showHUD } from "@raycast/api";
-import { turnOffAllLights } from "./lib/hue";
+import { turnOffAllLights } from "./lib/utils";
 import { CouldNotConnectToHueBridgeError, NoHueBridgeConfiguredError } from "./lib/errors";
 
 export default async () => {

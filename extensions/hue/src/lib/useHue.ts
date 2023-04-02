@@ -1,6 +1,6 @@
 import { useCachedPromise } from "@raycast/utils";
 import { useHueBridgeMachine } from "./hueBridgeMachine";
-import { handleError } from "./hue";
+import { handleError } from "./utils";
 import { Light, Room, Scene } from "./types";
 
 export type HueMessage = "LINK" | "RETRY" | "DONE" | "UNLINK";

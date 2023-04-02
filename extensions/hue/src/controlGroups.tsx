@@ -4,18 +4,19 @@ import {
   adjustColorTemperature,
   calculateAdjustedBrightness,
   calculateAdjustedColorTemperature,
+  getIconForColor,
+  getLightIcon,
   setGroupBrightness,
   setGroupColor,
   setScene,
   turnGroupOff,
   turnGroupOn,
-} from "./lib/hue";
+} from "./lib/utils";
 import { Api } from "node-hue-api/dist/esm/api/Api";
 import { MutatePromise } from "@raycast/utils";
 import { CssColor, Group, Room, Scene, SendHueMessage } from "./lib/types";
-import { getIconForColor, getLightIcon } from "./lib/utils";
-import { BRIGHTNESS_MAX, BRIGHTNESS_MIN, BRIGHTNESSES, COLOR_TEMP_MAX, COLOR_TEMP_MIN, COLORS } from "./lib/constants";
-import { hexToXy } from "./lib/colors";
+import { BRIGHTNESS_MAX, BRIGHTNESS_MIN, BRIGHTNESSES, COLOR_TEMP_MAX, COLOR_TEMP_MIN } from "./lib/constants";
+import { COLORS, hexToXy } from "./lib/colors";
 import ManageHueBridge from "./components/ManageHueBridge";
 import UnlinkAction from "./components/UnlinkAction";
 import { useHue } from "./lib/useHue";

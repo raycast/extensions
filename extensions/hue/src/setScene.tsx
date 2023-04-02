@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Icon, List, Toast } from "@raycast/api";
-import { setScene } from "./lib/hue";
+import { setScene } from "./lib/utils";
 import { MutatePromise } from "@raycast/utils";
 import { Group, Scene, SendHueMessage } from "./lib/types";
 import UnlinkAction from "./components/UnlinkAction";
