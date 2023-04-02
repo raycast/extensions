@@ -81,7 +81,7 @@ export default function SequenceForm(props: {
         title="Keystrokes"
         placeholder="Keys to stroke"
         defaultValue={shortcutKeys[index]}
-        info="The non-modifier keys to stroke as one contiguous string, e.g. TEXT"
+        info="The non-modifier keys to stroke as one contiguous string. For example, for the keyboard shortcut Command+A, the keystroke would be A. For Shift+Command+D, the keyboard would be D. This can also be an ASCII key code, e.g. 'ASCII character 31'"
         onChange={(value) => {
           const newShortcutKeys = [...shortcutKeys];
           newShortcutKeys[index] = value || "";
