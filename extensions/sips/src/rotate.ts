@@ -1,6 +1,6 @@
 import { showToast, Toast } from "@raycast/api";
 import { execSync } from "child_process";
-import { execSIPSCommandOnWebP, getSelectedImages } from "./utils";
+import { execSIPSCommandOnSVG, execSIPSCommandOnWebP, getSelectedImages } from "./utils";
 
 export default async function Command(props: { arguments: { degrees: string } }) {
   const { degrees } = props.arguments;
@@ -17,12 +17,15 @@ export default async function Command(props: { arguments: { degrees: string } })
     const pluralized = `image${selectedImages.length === 1 ? "" : "s"}`;
     try {
       const pathStrings = '"' + selectedImages.join('" "') + '"';
-      if (pathStrings.toLowerCase().includes("webp")) {
+      if (pathStrings.toLowerCase().includes("webp") || pathStrings.toLowerCase().includes("svg")) {
         // Handle each image individually
         selectedImages.forEach((imgPath) => {
           if (imgPath.toLowerCase().endsWith("webp")) {
             // Convert to PNG, flip and restore to WebP
             execSIPSCommandOnWebP(`sips --rotate ${degrees}`, imgPath);
+          } else if (imgPath.toLowerCase().endsWith("svg")) {
+            // Convert to PNG, flip and restore to SVG
+            execSIPSCommandOnSVG(`sips --rotate ${degrees}`, imgPath);
           } else {
             // Run command as normal
             execSync(`sips --rotate ${degrees} "${imgPath}"`);

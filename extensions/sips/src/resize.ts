@@ -1,6 +1,6 @@
 import { showToast, Toast } from "@raycast/api";
 import { execSync } from "child_process";
-import { execSIPSCommandOnWebP, getSelectedImages } from "./utils";
+import { execSIPSCommandOnSVG, execSIPSCommandOnWebP, getSelectedImages } from "./utils";
 
 export default async function Command(props: { arguments: { width: string; height: string } }) {
   const { width, height } = props.arguments;
@@ -34,7 +34,7 @@ export default async function Command(props: { arguments: { width: string; heigh
     const pluralized = `image${selectedImages.length === 1 ? "" : "s"}`;
     try {
       const pathStrings = '"' + selectedImages.join('" "') + '"';
-      if (pathStrings.toLocaleLowerCase().includes("webp")) {
+      if (pathStrings.toLocaleLowerCase().includes("webp") || pathStrings.toLocaleLowerCase().includes("svg")) {
         // Handle each image individually
         selectedImages.forEach((imgPath) => {
           if (imgPath.toLowerCase().endsWith(".webp")) {
@@ -46,6 +46,17 @@ export default async function Command(props: { arguments: { width: string; heigh
               execSIPSCommandOnWebP(`sips --resampleHeight ${heightInt}`, imgPath);
             } else {
               execSIPSCommandOnWebP(`sips --resampleHeightWidth ${heightInt} ${widthInt}`, imgPath);
+            }
+          }
+          if (imgPath.toLowerCase().endsWith(".svg")) {
+            // Convert to PNG, rotate and restore to WebP
+            execSIPSCommandOnSVG("sips --rotate ${degrees}", imgPath);
+            if (widthInt != -1 && heightInt == -1) {
+              execSIPSCommandOnSVG(`sips --resampleWidth ${widthInt}`, imgPath);
+            } else if (widthInt == -1 && heightInt != -1) {
+              execSIPSCommandOnSVG(`sips --resampleHeight ${heightInt}`, imgPath);
+            } else {
+              execSIPSCommandOnSVG(`sips --resampleHeightWidth ${heightInt} ${widthInt}`, imgPath);
             }
           } else {
             // Execute command as normal

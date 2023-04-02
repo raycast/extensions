@@ -1,6 +1,6 @@
 import { environment, getFrontmostApplication, getPreferenceValues } from "@raycast/api";
-import { exec, execSync } from "child_process";
-import { runAppleScript } from "run-applescript";
+import { execSync } from "child_process";
+import { runAppleScript, runAppleScriptSync } from "run-applescript";
 
 interface Preferences {
   preferredFileManager: string;
@@ -13,7 +13,7 @@ interface Preferences {
  */
 const getSelectedFinderImages = async (): Promise<string> => {
   return runAppleScript(
-    `set imageTypes to {"PNG", "JPG", "JPEG", "TIF", "HEIF", "GIF", "ICO", "ICNS", "ASTC", "BMP", "DDS", "EXR", "JP2", "KTX", "Portable Bitmap", "Adobe Photoshop", "PVR", "TGA", "WebP"}
+    `set imageTypes to {"PNG", "JPG", "JPEG", "TIF", "HEIF", "GIF", "ICO", "ICNS", "ASTC", "BMP", "DDS", "EXR", "JP2", "KTX", "Portable Bitmap", "Adobe Photoshop", "PVR", "TGA", "WebP", "SVG"}
 
     tell application "Finder"
       set theSelection to selection
@@ -49,7 +49,7 @@ const getSelectedFinderImages = async (): Promise<string> => {
  */
 const getSelectedPathFinderImages = async (): Promise<string> => {
   return runAppleScript(
-    `set imageTypes to {"PNG", "JPG", "JPEG", "TIF", "HEIF", "GIF", "ICO", "ICNS", "ASTC", "BMP", "DDS", "EXR", "JP2", "KTX", "Portable Bitmap", "Adobe Photoshop", "PVR", "TGA", "WebP"}
+    `set imageTypes to {"PNG", "JPG", "JPEG", "TIF", "HEIF", "GIF", "ICO", "ICNS", "ASTC", "BMP", "DDS", "EXR", "JP2", "KTX", "Portable Bitmap", "Adobe Photoshop", "PVR", "TGA", "WebP", "SVG"}
 
     tell application "Path Finder"
       set theSelection to selection
@@ -137,7 +137,38 @@ export const getSelectedImages = async (): Promise<string[]> => {
  */
 export const execSIPSCommandOnWebP = async (command: string, webpPath: string) => {
   const newPath = `${environment.supportPath}/tmp.png`;
+  execSync(`chmod +x ${environment.assetsPath}/webp/dwebp`);
+  execSync(`chmod +x ${environment.assetsPath}/webp/cwebp`);
   execSync(
     `${environment.assetsPath}/webp/dwebp "${webpPath}" -o "${newPath}" && ${command} "${newPath}" && ${environment.assetsPath}/webp/cwebp "${newPath}" -o "${webpPath}" ; rm "${newPath}"`
+  );
+};
+
+export const convertSVG = (targetType: string, svgPath: string, newPath: string) => {
+  runAppleScriptSync(`use framework "Foundation"
+
+  -- Load SVG image from file
+  set svgFilePath to "${svgPath}"
+  set svgData to current application's NSData's alloc()'s initWithContentsOfFile:svgFilePath
+  
+  -- Create image from SVG data
+  set svgImage to current application's NSImage's alloc()'s initWithData:svgData
+  
+  -- Convert image to PNG data
+  set tiffData to svgImage's TIFFRepresentation()
+  set theBitmap to current application's NSBitmapImageRep's alloc()'s initWithData:tiffData
+  set pngData to theBitmap's representationUsingType:(current application's NSBitmapImageFileType${targetType}) |properties|:(missing value)
+  
+  -- Save PNG data to file
+  set pngFilePath to "${newPath}"
+  pngData's writeToFile:pngFilePath atomically:true`);
+};
+
+export const execSIPSCommandOnSVG = async (command: string, svgPath: string) => {
+  const newPath = `${environment.supportPath}/tmp.bmp`;
+  convertSVG("BMP", svgPath, newPath);
+  execSync(`chmod +x ${environment.assetsPath}/potrace/potrace`);
+  execSync(
+    `${command} "${newPath}" && ${environment.assetsPath}/potrace/potrace -s --tight -o "${svgPath}" "${newPath}"; rm "${newPath}"`
   );
 };
