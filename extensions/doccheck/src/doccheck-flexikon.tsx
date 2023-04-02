@@ -279,7 +279,7 @@ const Details = (props: { url: string; title: string }) => {
   $(".mw-parser-output")
     .find("i")
     .each(function (i, link) {
-      synonyms += $(link).html() + "\n";
+      synonyms += $(link).text() + "\n";
     });
 
   // erster <i></i> im Artikel - zum Abgleich ob es Synonyme gibt oder nicht
@@ -287,7 +287,7 @@ const Details = (props: { url: string; title: string }) => {
   $(".collapsible")
     .find("i")
     .each(function (i, link) {
-      notSynonyms += $(link).html() + "\n";
+      notSynonyms += $(link).text() + "\n";
     });
   // 	notSynonyms = notSynonyms.trim();
   synonyms = synonyms.replace(notSynonyms, "");
