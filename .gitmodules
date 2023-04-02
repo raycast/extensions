@@ -1,0 +1,3 @@
+[submodule "linkding"]
+	path = linkding
+	url = https://github.com/InteractiveNinja/raycast-linkding
