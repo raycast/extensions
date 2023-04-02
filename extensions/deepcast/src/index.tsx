@@ -1,12 +1,6 @@
 import { Form, ActionPanel, Action, showToast, Toast, Icon } from "@raycast/api";
 import { useState } from "react";
-import {
-  SourceLanguage,
-  TargetLanguage,
-  sendTranslateRequest,
-  source_languages,
-  target_languages,
-} from "./utils";
+import { SourceLanguage, TargetLanguage, sendTranslateRequest, source_languages, target_languages } from "./utils";
 
 interface Values {
   key?: string;
