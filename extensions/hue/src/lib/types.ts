@@ -180,6 +180,14 @@ export type Light = {
   dimming?: Dimming;
   color_temperature: ColorTemperature;
   color: Color;
+  dynamics: {
+    /**
+     * integer
+     *
+     * Duration of a light transition or timed effects in ms.
+     */
+    duration: number;
+  };
 };
 
 export type Dimming = {

@@ -279,7 +279,11 @@ async function handleSetBrightness(
   try {
     hueClient.setBrightness(light, percentage).then(() => mutateLights());
     await mutateLights(hueClient.setBrightness(light, percentage), {
-      optimisticUpdate: (lights) => lights.update(light, { dimming: { brightness: percentage } }),
+      optimisticUpdate: (lights) =>
+        lights.update(light, {
+          on: { on: true },
+          dimming: { brightness: percentage },
+        }),
     });
 
     toast.style = Style.Success;
@@ -302,7 +306,11 @@ async function handleIncreaseBrightness(hueClient: HueClient, light: Light, muta
 
   try {
     await mutateLights(hueClient.setBrightness(light, newBrightness), {
-      optimisticUpdate: (lights) => lights.update(light, { dimming: { brightness: newBrightness } }),
+      optimisticUpdate: (lights) =>
+        lights.update(light, {
+          on: { on: true },
+          dimming: { brightness: newBrightness },
+        }),
     });
 
     toast.style = Style.Success;

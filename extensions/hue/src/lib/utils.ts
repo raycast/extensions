@@ -176,7 +176,7 @@ export function calculateAdjustedBrightness(light: Light, direction: "increase" 
     throw new Error("Light does not support dimming");
   }
 
-  const newBrightness = light.dimming.brightness + direction === "increase" ? BRIGHTNESS_STEP : -BRIGHTNESS_STEP;
+  const newBrightness = light.dimming.brightness + (direction === "increase" ? BRIGHTNESS_STEP : -BRIGHTNESS_STEP);
   const minBrightness = light.dimming.min_dim_level ?? BRIGHTNESS_MIN;
 
   return Math.clamp(newBrightness, minBrightness, BRIGHTNESS_MAX);

@@ -68,19 +68,21 @@ export default class HueClient {
   }
 
   public async toggleLight(light: Light): Promise<any> {
-    // Setting transition time when turning a light on causes the light to turn on at 1% brightness.
     return await this.request("PUT", `clip/v2/resource/light/${light.id}`, {
       on: {
         on: !light.on.on,
       },
+      // TODO: Figure out why transition time causes the light to turn on at 1% brightness
+      // dynamics: {
+      //   duration: parseInt(getPreferenceValues().transitionTime),
+      // }
     });
   }
 
   public async setBrightness(light: Light, brightness: number): Promise<any> {
     return await this.request("PUT", `clip/v2/resource/light/${light.id}`, {
-      dimming: {
-        brightness: brightness,
-      },
+      ...(light.on.on ? {} : { on: { on: true } }),
+      dimming: { brightness: brightness },
     });
   }
 }

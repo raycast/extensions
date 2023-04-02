@@ -187,6 +187,8 @@ function logShadeRgb(r: number, g: number, b: number, percentage: number) {
  */
 export function cieToRgb(xy: Xy, brightness = 100) {
   // TODO: Fix not handling some colors well (e.g. 'Maroon' turns purple)
+  // TODO: Replace with code from
+  //  https://developers.meethue.com/develop/application-design-guidance/color-conversion-formulas-rgb-to-xy-and-back/
 
   //Set to maximum brightness if no custom value was given (Not the slick ECMAScript 6 way for compatibility reasons)
   if (brightness === undefined) {
