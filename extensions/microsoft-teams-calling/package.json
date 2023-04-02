@@ -1,6 +1,6 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "microsoft-teams-desktop",
+  "name": "microsoft-teams-calling",
   "title": "Microsoft Teams Meeting",
   "description": "Control your meeting with the keyboard, even when Microsoft Teams is in the background. Toggle microphone, camera and background blur and send reactions.",
   "icon": "teams.png",
