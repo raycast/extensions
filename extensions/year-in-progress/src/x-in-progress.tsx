@@ -116,6 +116,7 @@ export default function XInProgress() {
               ...values,
               key: values.title,
               type: "user",
+              editable: true,
             };
             setUserProgress([...userProgress, newProgress]);
             navigation.pop();

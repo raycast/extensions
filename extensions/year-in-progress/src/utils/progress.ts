@@ -173,7 +173,9 @@ export function getProgress(startDate: Date, endDate: Date) {
 
   const progress = (currentTime - startTime) / (endTime - startTime);
 
-  return progress >= 1 ? 100 : Math.floor(progress * 100);
+  if (progress >= 1) return 100;
+  if (progress <= 0) return 0;
+  return Math.floor(progress * 100);
 }
 
 export function getDefaultProgress() {
