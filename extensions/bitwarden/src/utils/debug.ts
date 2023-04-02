@@ -1,4 +1,5 @@
 import { ExecaError } from "execa";
+import { isObject } from "~/utils/objects";
 
 export function treatError(error: unknown, options?: { omitSensitiveValue: string }) {
   try {
@@ -6,7 +7,9 @@ export function treatError(error: unknown, options?: { omitSensitiveValue: strin
     let errorString: string | undefined;
     if (execaError?.stderr) {
       errorString = execaError.stderr;
-    } else if (typeof error === "object" && error !== null && !Array.isArray(error)) {
+    } else if (error instanceof Error) {
+      errorString = `${error.name}: ${error.message}`;
+    } else if (isObject(error)) {
       errorString = JSON.stringify(error);
     } else {
       errorString = `${error}`;

@@ -19,7 +19,8 @@ const UnlockForm = (props: UnlockFormProps) => {
   const [unlockError, setUnlockError] = useState<string | undefined>(undefined);
 
   const handleUnlockError = (error: unknown, password: string) => {
-    setUnlockError(treatError(error, { omitSensitiveValue: password }));
+    const value = treatError(error, { omitSensitiveValue: password });
+    if (value) setUnlockError(value);
   };
 
   async function onSubmit({ password }: { password: string }) {
