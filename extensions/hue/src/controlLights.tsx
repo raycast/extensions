@@ -1,19 +1,17 @@
 import { ActionPanel, Icon, List, Toast } from "@raycast/api";
 import {
-  adjustBrightness,
   adjustColorTemperature,
+  calculateAdjustedBrightness,
   getIconForColor,
   getLightIcon,
-  setLightBrightness,
   setLightColor,
 } from "./lib/utils";
 import { MutatePromise } from "@raycast/utils";
-import { Light, ResourceIdentifier, Room } from "./lib/types";
+import { CssColor, Light, ResourceIdentifier, Room } from "./lib/types";
 import { BRIGHTNESS_MAX, BRIGHTNESSES } from "./lib/constants";
 import ManageHueBridge from "./components/ManageHueBridge";
 import UnlinkAction from "./components/UnlinkAction";
 import { SendHueMessage, useHue } from "./lib/useHue";
-import { Api } from "node-hue-api/dist/esm/api/Api";
 import HueClient from "./lib/HueClient";
 import { COLORS } from "./lib/colors";
 import Style = Toast.Style;
@@ -102,17 +100,17 @@ function Light(props: {
             />
             <SetBrightnessAction
               light={props.light}
-              // onSet={(percentage: number) =>
-              //   handleSetBrightness(props.apiPromise, props.light, props.mutateLights, percentage)
-              // }
+              onSet={(percentage: number) =>
+                handleSetBrightness(props.hueClient, props.light, props.mutateLights, percentage)
+              }
             />
             <IncreaseBrightnessAction
               light={props.light}
-              // onIncrease={() => handleIncreaseBrightness(hueClient, props.light, props.mutateLights)}
+              onIncrease={() => handleIncreaseBrightness(props.hueClient, props.light, props.mutateLights)}
             />
             <DecreaseBrightnessAction
               light={props.light}
-              // onDecrease={() => handleDecreaseBrightness(hueClient, props.light, props.mutateLights)}
+              onDecrease={() => handleDecreaseBrightness(props.hueClient, props.light, props.mutateLights)}
             />
           </ActionPanel.Section>
 
@@ -159,7 +157,7 @@ function ToggleLightAction({ light, onToggle }: { light: Light; onToggle?: () =>
   );
 }
 
-function SetBrightnessAction(props: { light: Light; onSet?: (percentage: number) => void }) {
+function SetBrightnessAction(props: { light: Light; onSet: (percentage: number) => void }) {
   return (
     <ActionPanel.Submenu
       title="Set Brightness"
@@ -170,15 +168,15 @@ function SetBrightnessAction(props: { light: Light; onSet?: (percentage: number)
         <ActionPanel.Item
           key={brightness}
           title={`${brightness}% Brightness`}
-          // onAction={() => props.onSet(brightness)}
+          onAction={() => props.onSet(brightness)}
         />
       ))}
     </ActionPanel.Submenu>
   );
 }
 
-function IncreaseBrightnessAction(props: { light: Light; onIncrease?: () => void }) {
-  return props.light.dimming.brightness < BRIGHTNESS_MAX ? (
+function IncreaseBrightnessAction(props: { light: Light; onIncrease: () => void }) {
+  return props.light.dimming?.brightness && props.light.dimming.brightness < BRIGHTNESS_MAX ? (
     <ActionPanel.Item
       title="Increase Brightness"
       shortcut={{ modifiers: ["cmd", "shift"], key: "arrowUp" }}
@@ -188,8 +186,9 @@ function IncreaseBrightnessAction(props: { light: Light; onIncrease?: () => void
   ) : null;
 }
 
-function DecreaseBrightnessAction(props: { light: Light; onDecrease?: () => void }) {
-  return props.light.dimming.brightness > props.light.dimming.min_dim_level ? (
+function DecreaseBrightnessAction(props: { light: Light; onDecrease: () => void }) {
+  return props.light.dimming !== undefined &&
+    props.light.dimming.brightness > (props.light.dimming.min_dim_level ?? 0) ? (
     <ActionPanel.Item
       title="Decrease Brightness"
       shortcut={{ modifiers: ["cmd", "shift"], key: "arrowDown" }}
@@ -252,15 +251,7 @@ async function handleToggle(hueClient: HueClient, light: Light, mutateLights: Mu
 
   try {
     await mutateLights(hueClient.toggleLight(light), {
-      optimisticUpdate(lights) {
-        return lights.map((it) => {
-          if (it.id !== light.id) return it;
-          return {
-            ...it,
-            on: { on: !light.on.on },
-          };
-        });
-      },
+      optimisticUpdate: (lights) => lights.update(light, { on: { on: !light.on.on } }),
     });
 
     toast.style = Style.Success;
@@ -278,85 +269,79 @@ async function handleToggle(hueClient: HueClient, light: Light, mutateLights: Mu
 }
 
 async function handleSetBrightness(
-  api: Promise<Api>,
+  hueClient: HueClient,
   light: Light,
   mutateLights: MutatePromise<Light[]>,
   percentage: number
 ) {
   const toast = new Toast({ title: "" });
-  const brightness = (percentage / 100) * 253 + 1;
 
   try {
-    await mutateLights(setLightBrightness(api, light, brightness), {
-      // optimisticUpdate(lights) {
-      //   return lights.map((it) =>
-      //     it.id === light.id ? { ...it, state: { ...it.on, on: true, bri: brightness } } : it
-      //   );
-      // },
+    hueClient.setBrightness(light, percentage).then(() => mutateLights());
+    await mutateLights(hueClient.setBrightness(light, percentage), {
+      optimisticUpdate: (lights) => lights.update(light, { dimming: { brightness: percentage } }),
     });
 
     toast.style = Style.Success;
-    toast.title = `Set brightness to ${(percentage / 100).toLocaleString("en", { style: "percent" })}`;
+    toast.title = `Set brightness of ${light.metadata.name} to ${(percentage / 100).toLocaleString("en", {
+      style: "percent",
+    })}`;
     await toast.show();
   } catch (e) {
+    console.error(e);
     toast.style = Style.Failure;
-    toast.title = "Failed setting brightness";
+    toast.title = `Failed setting brightness of ${light.metadata.name}`;
     toast.message = e instanceof Error ? e.message : undefined;
     await toast.show();
   }
 }
 
-async function handleIncreaseBrightness(api: Promise<Api>, light: Light, mutateLights: MutatePromise<Light[]>) {
+async function handleIncreaseBrightness(hueClient: HueClient, light: Light, mutateLights: MutatePromise<Light[]>) {
   const toast = new Toast({ title: "" });
+  const newBrightness = calculateAdjustedBrightness(light, "increase");
 
   try {
-    await mutateLights(adjustBrightness(api, light, "increase"), {
-      // optimisticUpdate(lights) {
-      //   return lights?.map((it) =>
-      //     it.id === light.id
-      //       ? { ...it, on: { ...it.on, on: true, bri: calculateAdjustedBrightness(light, "increase") } }
-      //       : it
-      //   );
-      // },
+    await mutateLights(hueClient.setBrightness(light, newBrightness), {
+      optimisticUpdate: (lights) => lights.update(light, { dimming: { brightness: newBrightness } }),
     });
 
     toast.style = Style.Success;
-    toast.title = "Increased brightness";
+    toast.title = `Increased brightness of ${light.metadata.name}`;
     await toast.show();
   } catch (e) {
     toast.style = Style.Failure;
-    toast.title = "Failed increasing brightness";
+    toast.title = `Failed increasing brightness of ${light.metadata.name}`;
     toast.message = e instanceof Error ? e.message : undefined;
     await toast.show();
   }
 }
 
-async function handleDecreaseBrightness(api: Promise<Api>, light: Light, mutateLights: MutatePromise<Light[]>) {
+async function handleDecreaseBrightness(hueClient: HueClient, light: Light, mutateLights: MutatePromise<Light[]>) {
   const toast = new Toast({ title: "" });
+  const newBrightness = calculateAdjustedBrightness(light, "decrease");
 
   try {
-    await mutateLights(adjustBrightness(api, light, "decrease"), {
-      // optimisticUpdate(lights) {
-      //   return lights.map((it) =>
-      //     it.id === light.id
-      //       ? { ...it, state: { ...it.state, on: true, bri: calculateAdjustedBrightness(light, "decrease") } }
-      //       : it
-      //   );
-      // },
+    await mutateLights(hueClient.setBrightness(light, newBrightness), {
+      optimisticUpdate: (lights) => lights.update(light, { dimming: { brightness: newBrightness } }),
     });
 
     toast.style = Style.Success;
-    toast.title = "Decreased brightness";
+    toast.title = `Decreased brightness of ${light.metadata.name}`;
     await toast.show();
   } catch (e) {
     toast.style = Style.Failure;
-    toast.title = "Failed decreasing brightness";
+    toast.title = `Failed decreasing brightness of ${light.metadata.name}`;
     toast.message = e instanceof Error ? e.message : undefined;
     await toast.show();
   }
 }
 
-async function handleSetColor(api: Promise<Api>, light: Light, mutateLights: MutatePromise<Light[]>, color: CssColor) {
+async function handleSetColor(
+  hueClient: HueClient,
+  light: Light,
+  mutateLights: MutatePromise<Light[]>,
+  color: CssColor
+) {
   const toast = new Toast({ title: "" });
 
   try {
@@ -379,7 +364,11 @@ async function handleSetColor(api: Promise<Api>, light: Light, mutateLights: Mut
   }
 }
 
-async function handleIncreaseColorTemperature(api: Promise<Api>, light: Light, mutateLights: MutatePromise<Light[]>) {
+async function handleIncreaseColorTemperature(
+  hueClient: HueClient,
+  light: Light,
+  mutateLights: MutatePromise<Light[]>
+) {
   const toast = new Toast({ title: "" });
 
   try {
@@ -404,7 +393,11 @@ async function handleIncreaseColorTemperature(api: Promise<Api>, light: Light, m
   }
 }
 
-async function handleDecreaseColorTemperature(api: Promise<Api>, light: Light, mutateLights: MutatePromise<Light[]>) {
+async function handleDecreaseColorTemperature(
+  hueClient: HueClient,
+  light: Light,
+  mutateLights: MutatePromise<Light[]>
+) {
   const toast = new Toast({ title: "" });
 
   try {

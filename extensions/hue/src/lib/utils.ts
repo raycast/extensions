@@ -11,6 +11,33 @@ import {
   COLOR_TEMP_MIN,
   COLOR_TEMPERATURE_STEP,
 } from "./constants";
+import HueClient from "./HueClient";
+
+declare global {
+  interface Array<T> {
+    update(object: T, changes: object): Array<T>;
+  }
+}
+
+Array.prototype.update = function (object, changes) {
+  return this.map((it) => {
+    if (it.id !== object.id) return it;
+    return {
+      ...it,
+      ...changes,
+    };
+  });
+};
+
+declare global {
+  interface Math {
+    clamp(value: number, min: number, max: number): number;
+  }
+}
+
+Math.clamp = function (value, min, max) {
+  return Math.min(Math.max(value, min), max);
+};
 
 export function mapRange(value: number, from: [number, number], to: [number, number]) {
   return to[0] + ((value - from[0]) * (to[1] - to[0])) / (from[1] - from[0]);
@@ -108,7 +135,7 @@ export async function turnOffAllLights() {
   }
 }
 
-export async function turnGroupOn(apiPromise: Promise<Api>, group: Group) {
+export async function turnGroupOn(hueClient: HueClient, group: Group) {
   const api = await apiPromise;
   await api.groups.setGroupState(
     group.id,
@@ -116,21 +143,12 @@ export async function turnGroupOn(apiPromise: Promise<Api>, group: Group) {
   );
 }
 
-export async function turnGroupOff(apiPromise: Promise<Api>, group: Group) {
+export async function turnGroupOff(hueClient: HueClient, group: Group) {
   const api = await apiPromise;
   await api.groups.setGroupState(group.id, new v3.model.lightStates.GroupLightState().off());
 }
 
-export async function setLightBrightness(apiPromise: Promise<Api>, light: Light, percentage: number) {
-  const api = await apiPromise;
-  const newLightState = new v3.model.lightStates.LightState()
-    .on()
-    .bri(percentage)
-    .transitiontime(getTransitionTimeInMs());
-  await api.lights.setLightState(light.id, newLightState);
-}
-
-export async function setGroupBrightness(apiPromise: Promise<Api>, group: Group, percentage: number) {
+export async function setGroupBrightness(hueClient: HueClient, group: Group, percentage: number) {
   const api = await apiPromise;
   const newLightState = new v3.model.lightStates.GroupLightState()
     .on()
@@ -139,54 +157,29 @@ export async function setGroupBrightness(apiPromise: Promise<Api>, group: Group,
   await api.groups.setGroupState(group.id, newLightState);
 }
 
-export async function setLightColor(apiPromise: Promise<Api>, light: Light, color: string) {
+export async function setLightColor(hueClient: HueClient, light: Light, color: string) {
   const api = await apiPromise;
   const xy = hexToXy(color);
   const newLightState = new v3.model.lightStates.LightState().on().xy(xy).transitiontime(getTransitionTimeInMs());
   await api.lights.setLightState(light.id, newLightState);
 }
 
-export async function setGroupColor(apiPromise: Promise<Api>, group: Group, color: string) {
+export async function setGroupColor(hueClient: HueClient, group: Group, color: string) {
   const api = await apiPromise;
   const xy = hexToXy(color);
   const newLightState = new v3.model.lightStates.GroupLightState().on().xy(xy).transitiontime(getTransitionTimeInMs());
   await api.groups.setGroupState(group.id, newLightState);
 }
 
-export function calculateAdjustedBrightness(entity: Light | Group, direction: "increase" | "decrease") {
-  const brightness = 100;
-  // if ("action" in entity) {
-  //   brightness = entity.action.bri;
-  // } else {
-  //   brightness = entity.state.bri;
-  // }
-
-  const newBrightness = direction === "increase" ? brightness + BRIGHTNESS_STEP : brightness - BRIGHTNESS_STEP;
-
-  return Math.min(Math.max(BRIGHTNESS_MIN, newBrightness), BRIGHTNESS_MAX);
-}
-
-export async function adjustBrightness(
-  apiPromise: Promise<Api>,
-  entity: Light | Group,
-  direction: "increase" | "decrease"
-) {
-  const api = await apiPromise;
-  const delta = direction === "increase" ? BRIGHTNESS_STEP : -BRIGHTNESS_STEP;
-
-  if ("action" in entity) {
-    const newLightState = new v3.model.lightStates.GroupLightState()
-      .on()
-      .bri_inc(delta)
-      .transitiontime(getTransitionTimeInMs());
-    await api.groups.setGroupState(entity.id, newLightState);
-  } else {
-    const newLightState = new v3.model.lightStates.LightState()
-      .on()
-      .bri_inc(delta)
-      .transitiontime(getTransitionTimeInMs());
-    await api.lights.setLightState(entity.id, newLightState);
+export function calculateAdjustedBrightness(light: Light, direction: "increase" | "decrease") {
+  if (!light.dimming) {
+    throw new Error("Light does not support dimming");
   }
+
+  const newBrightness = light.dimming.brightness + direction === "increase" ? BRIGHTNESS_STEP : -BRIGHTNESS_STEP;
+  const minBrightness = light.dimming.min_dim_level ?? BRIGHTNESS_MIN;
+
+  return Math.clamp(newBrightness, minBrightness, BRIGHTNESS_MAX);
 }
 
 export function calculateAdjustedColorTemperature(entity: Light | Group, direction: "increase" | "decrease") {
@@ -206,7 +199,7 @@ export function calculateAdjustedColorTemperature(entity: Light | Group, directi
 }
 
 export async function adjustColorTemperature(
-  apiPromise: Promise<Api>,
+  hueClient: HueClient,
   entity: Light | Group,
   direction: "increase" | "decrease"
 ) {
@@ -228,7 +221,7 @@ export async function adjustColorTemperature(
   }
 }
 
-export async function setScene(apiPromise: Promise<Api>, scene: Scene) {
+export async function setScene(hueClient: HueClient, scene: Scene) {
   const api = await apiPromise;
   await api.groups.setGroupState(
     0,

@@ -6,6 +6,9 @@ import { environment } from "@raycast/api";
 import axios, { AxiosRequestConfig, Method } from "axios";
 import { Light, Room, Scene } from "./types";
 
+// TODO: Implement rate limiting of max 10 requests per second for lights and
+//  1 request per second for groups and scenes
+// TODO: Use HTTP/2 (https://iotech.blog/posts/philips-http2/)
 export default class HueClient {
   public bridgeIpAddress: string;
   public bridgeId: string;
@@ -69,6 +72,14 @@ export default class HueClient {
     return await this.request("PUT", `clip/v2/resource/light/${light.id}`, {
       on: {
         on: !light.on.on,
+      },
+    });
+  }
+
+  public async setBrightness(light: Light, brightness: number): Promise<any> {
+    return await this.request("PUT", `clip/v2/resource/light/${light.id}`, {
+      dimming: {
+        brightness: brightness,
       },
     });
   }
