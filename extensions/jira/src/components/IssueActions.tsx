@@ -132,7 +132,7 @@ export default function IssueActions({
         <ChangeAssigneeSubmenu issue={issue} mutate={mutateWithOptimisticUpdate} />
 
         <Action
-          title={isAssignedToMe ? "Un-assign from Me" : "Assign to Me"}
+          title={isAssignedToMe ? "Un-Assign From Me" : "Assign to Me"}
           icon={myself.avatarUrls["32x32"]}
           shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
           onAction={assignToMe}

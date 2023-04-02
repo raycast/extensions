@@ -179,6 +179,8 @@ export type CustomField = {
   key: string;
   allowedValues: unknown[];
   autoCompleteUrl?: string;
+  hasDefaultValue?: boolean;
+  defaultValue?: unknown;
 };
 
 export type IssueTypeWithCustomFields = IssueType & {

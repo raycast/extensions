@@ -1,3 +1,4 @@
+import { Color } from "@raycast/api";
 import { ListColor, ListHue, ListObject } from "../types/list";
 
 export const ListIcons = [
@@ -90,10 +91,10 @@ export const ListIcons = [
 
 export const ListColors = [
   {
-    name: "White",
+    name: "Default",
     value: "",
     icon: "list-color",
-    tintColor: "hsl(0, 0%, 100%)",
+    tintColor: Color.PrimaryText,
   },
   {
     name: "Tomato",
@@ -217,5 +218,5 @@ export function getListById(listId: string, lists: ListObject[] | undefined, sma
 
 export function getTintColorFromHue(hue: ListHue | number | null | undefined, colors: ListColor) {
   const parsedHue = typeof hue === "number" ? String(hue) : typeof hue === "string" ? hue : "";
-  return colors.find((color) => color.value === parsedHue)?.tintColor;
+  return colors?.find((color) => color.value === parsedHue)?.tintColor;
 }

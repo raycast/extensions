@@ -13,6 +13,7 @@ export type SettingsValues = {
   highlightNote: string
   highlightSupertag: string
   highlightUpdatedAt: string
+  highlightUrl: string
   id: string
   readwiseUrl: string
   source: string
@@ -114,6 +115,7 @@ export default function Settings({ handleSave, template }: SettingsProps) {
         storeValue
       />
       <Form.TextField id="highlightColor" title="Color" storeValue />
+      <Form.TextField id="highlightUrl" title="URL" storeValue />
       <Form.TextField
         id="highlightHighlightedAt"
         title="Highlighted At"

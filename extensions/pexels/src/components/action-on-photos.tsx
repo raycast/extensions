@@ -7,8 +7,8 @@ import { ActionToPexels } from "./action-to-pexels";
 import { Photo } from "pexels";
 import { ActionOpenPreferences } from "./action-open-preferences";
 
-export function ActionOnPhotos(props: { pexelsPhoto: Photo }) {
-  const { pexelsPhoto } = props;
+export function ActionOnPhotos(props: { item: Photo }) {
+  const { item } = props;
   return (
     <ActionPanel>
       <Action
@@ -19,34 +19,34 @@ export function ActionOnPhotos(props: { pexelsPhoto: Photo }) {
           let url: string;
           switch (downloadSize) {
             case "tiny":
-              url = pexelsPhoto.src.tiny;
+              url = item.src.tiny;
               break;
             case "portrait":
-              url = pexelsPhoto.src.portrait;
+              url = item.src.portrait;
               break;
             case "landscape":
-              url = pexelsPhoto.src.landscape;
+              url = item.src.landscape;
               break;
             case "small":
-              url = pexelsPhoto.src.small;
+              url = item.src.small;
               break;
             case "medium":
-              url = pexelsPhoto.src.medium;
+              url = item.src.medium;
               break;
             case "large":
-              url = pexelsPhoto.src.large;
+              url = item.src.large;
               break;
             case "large2x":
-              url = pexelsPhoto.src.large2x;
+              url = item.src.large2x;
               break;
             case "original":
-              url = pexelsPhoto.src.original;
+              url = item.src.original;
               break;
             default:
-              url = pexelsPhoto.src.original;
+              url = item.src.original;
               break;
           }
-          const name = buildImageName(pexelsPhoto.src.original, downloadSize);
+          const name = buildImageName(item.src.original, downloadSize);
           await downloadPhoto(url, name);
         }}
       />
@@ -54,25 +54,30 @@ export function ActionOnPhotos(props: { pexelsPhoto: Photo }) {
         icon={Icon.Desktop}
         title={"Set Desktop Wallpaper"}
         onAction={() => {
-          setWallpaper(pexelsPhoto.src.original).then(() => "");
+          setWallpaper(item.src.original).then(() => "");
         }}
       />
       <ActionPanel.Section>
         <Action.CopyToClipboard
           title={"Copy Photo Link"}
-          content={pexelsPhoto.url}
+          content={item.url}
           shortcut={{ modifiers: ["shift", "cmd"], key: "," }}
         />
         <Action.CopyToClipboard
           title={"Copy Photo Color"}
-          content={(pexelsPhoto as PexelsPhoto).avg_color}
+          content={(item as PexelsPhoto).avg_color}
           shortcut={{ modifiers: ["shift", "cmd"], key: "." }}
         />
         <Action.CopyToClipboard
           title={"Copy Photo Description"}
-          content={(pexelsPhoto as PexelsPhoto).alt}
+          content={(item as PexelsPhoto).alt}
           shortcut={{ modifiers: ["ctrl", "cmd"], key: "." }}
         />
+        <Action.CopyToClipboard title={"Copy User Link"} content={item.photographer_url} />
+        <Action.CopyToClipboard title={"Copy User Name"} content={item.photographer} />
+      </ActionPanel.Section>
+
+      <ActionPanel.Section>
         <ActionToPexels />
       </ActionPanel.Section>
 

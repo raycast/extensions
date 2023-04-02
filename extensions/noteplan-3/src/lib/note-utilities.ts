@@ -73,17 +73,33 @@ export const getNoteTitle = (note: NoteEntry) => {
   };
 
   if (note.type == NoteType.Calendar) {
-    if (note.fileName.match(/\d{4}-W\d{1,2}/)) {
+    if (note.fileName.match(/^\d{4}-W\d{1,2}$/)) {
       const parts = note.fileName.split("-W");
-      return `Week ${parts[1]}, ${parts[0]}`;
+      return `Week: W${parts[1]}, ${parts[0]}`;
+    }
+    if (note.fileName.match(/^\d{4}-\d{1,2}$/)) {
+      const parts = note.fileName.split("-");
+      const month = Intl.DateTimeFormat("en", { month: "long" }).format(new Date(parts[1]));
+      return `Month: ${month} ${parts[0]}`;
+    }
+    if (note.fileName.match(/^\d{4}-Q\d$/)) {
+      const parts = note.fileName.split("-Q");
+      return `Quarter: Q${parts[1]} ${parts[0]}`;
+    }
+    if (note.fileName.match(/^\d{4}$/)) {
+      return `Year: ${note.fileName}`;
     }
     const date = parseDate(note.fileName, "yyyyMMdd", new Date());
-    return formatRelative(date, new Date(), {
-      locale: {
-        ...enGB,
-        formatRelative: (token: keyof typeof formatRelativeLocale) => formatRelativeLocale[token],
-      },
-    });
+    try {
+      return formatRelative(date, new Date(), {
+        locale: {
+          ...enGB,
+          formatRelative: (token: keyof typeof formatRelativeLocale) => formatRelativeLocale[token],
+        },
+      });
+    } catch (err) {
+      // fall through to default
+    }
   }
 
   return note.fileName;
