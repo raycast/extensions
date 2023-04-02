@@ -6,6 +6,7 @@
 - Add ability to convert SVG to various image types
 - Add ability to convert images to SVG using Potrace
 - Add ability to convert PDF to various other image types
+- Add ability to rotate and flip PDFs
 - Add 13 new filters:
     - Circular Screen
     - Circular Wrap
