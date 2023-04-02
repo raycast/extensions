@@ -14,8 +14,8 @@ import { Bookmark } from "../types";
 import { getFavicon } from "@raycast/utils";
 import fetch from "node-fetch";
 
-export default function BookmarkItem(props: { bookmark: Bookmark }) {
-  const bookmark = props.bookmark;
+export default function BookmarkItem(props: { bookmark: Bookmark; revalidate: () => void }) {
+  const { bookmark, revalidate } = props;
 
   const preferences = getPreferenceValues();
 
@@ -58,6 +58,7 @@ export default function BookmarkItem(props: { bookmark: Bookmark }) {
                 toast.style = Toast.Style.Success;
                 toast.title = "Link Deleted";
                 toast.message = bookmark.link;
+                revalidate();
                 return res.json();
               } else {
                 throw new Error("Error deleting link");
