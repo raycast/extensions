@@ -1,14 +1,13 @@
 import { getSelectedText, Clipboard, Toast, showToast, getPreferenceValues } from "@raycast/api";
 import got from "got";
 
-
 interface Preferences {
   key: string;
   pro: boolean;
 }
 
 export function getPreferences() {
-  return getPreferenceValues<Preferences>()
+  return getPreferenceValues<Preferences>();
 }
 
 export async function sendTranslateRequest({
@@ -16,29 +15,30 @@ export async function sendTranslateRequest({
   sourceLanguage,
   targetLanguage,
 }: {
-  text?: string,
-  sourceLanguage?: string,
-  targetLanguage: string,
+  text?: string;
+  sourceLanguage?: string;
+  targetLanguage: string;
 }) {
   try {
-    const text = initialText || await getSelectedText();
+    const text = initialText || (await getSelectedText());
 
     const { key, pro } = getPreferences();
 
     try {
-      const { translations: [{ text: translation }] } = await got.post(
-        `https://api${pro ? "" : "-free"}.deepl.com/v2/translate`,
-        {
+      const {
+        translations: [{ text: translation }],
+      } = await got
+        .post(`https://api${pro ? "" : "-free"}.deepl.com/v2/translate`, {
           headers: {
-            Authorization: `DeepL-Auth-Key ${key}`
+            Authorization: `DeepL-Auth-Key ${key}`,
           },
           json: {
             text: [text],
             source_lang: sourceLanguage,
             target_lang: targetLanguage,
-          }
-        }
-      ).json<{ translations: { text: string }[] }>();
+          },
+        })
+        .json<{ translations: { text: string }[] }>();
       await Clipboard.copy(translation);
       await showToast(Toast.Style.Success, "The translation was copied to your clipboard.");
       return translation;
@@ -55,10 +55,9 @@ export async function sendTranslateRequest({
   }
 }
 
-
 export async function translate(target: string) {
   await sendTranslateRequest({ targetLanguage: target });
-};
+}
 
 export const source_languages = {
   BG: "Bulgarian",
@@ -88,7 +87,6 @@ export const source_languages = {
   UK: "Ukrainian",
 };
 export type SourceLanguage = keyof typeof source_languages;
-
 
 export const target_languages = {
   BG: "Bulgarian",

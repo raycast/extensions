@@ -1,6 +1,12 @@
 import { Form, ActionPanel, Action, showToast, Toast, Icon } from "@raycast/api";
-import { useEffect, useState } from "react";
-import { SourceLanguage, TargetLanguage, getPreferences, sendTranslateRequest, source_languages, target_languages } from "./utils";
+import { useState } from "react";
+import {
+  SourceLanguage,
+  TargetLanguage,
+  sendTranslateRequest,
+  source_languages,
+  target_languages,
+} from "./utils";
 
 interface Values {
   key?: string;
@@ -59,7 +65,9 @@ const Command = () => {
     // Slicing to handle cases such as "EN-GB", "EN-US", "PT-PT", "PT-BR", ...
     const newSourceValue = targetLanguage.slice(0, 2) as SourceLanguage;
     // Picking the first occurrence of a target language that starts with the source language (always 2 chars)
-    const newTargetValue = Object.keys(target_languages).find((key) => key.startsWith(sourceLanguage)) as TargetLanguage;
+    const newTargetValue = Object.keys(target_languages).find((key) =>
+      key.startsWith(sourceLanguage)
+    ) as TargetLanguage;
 
     if (newTargetValue != undefined) {
       // Set the new language values
@@ -93,14 +101,26 @@ const Command = () => {
     >
       <>
         <Form.TextArea id="text" placeholder="Enter or paste text here" value={sourceText} onChange={setSourceText} />
-        <Form.Dropdown id="from" value={sourceLanguage} onChange={value => setSourceLanguage(value as SourceLanguage)} storeValue={true} title="From">
+        <Form.Dropdown
+          id="from"
+          value={sourceLanguage}
+          onChange={(value) => setSourceLanguage(value as SourceLanguage)}
+          storeValue={true}
+          title="From"
+        >
           <Form.Dropdown.Item value="" title="Detect" />
           {Object.entries(source_languages).map(([value, title]) => (
             <Form.Dropdown.Item value={value} title={title} key={value} />
           ))}
         </Form.Dropdown>
         <Form.Separator />
-        <Form.Dropdown id="to" value={targetLanguage} onChange={value => setTargetLanguage(value as TargetLanguage)} storeValue={true} title="To">
+        <Form.Dropdown
+          id="to"
+          value={targetLanguage}
+          onChange={(value) => setTargetLanguage(value as TargetLanguage)}
+          storeValue={true}
+          title="To"
+        >
           {Object.entries(target_languages).map(([value, title]) => (
             <Form.Dropdown.Item value={value} title={title} key={value} />
           ))}
