@@ -1,6 +1,6 @@
 import { showToast, Toast } from "@raycast/api";
 import { execSync } from "child_process";
-import { execSIPSCommandOnSVG, execSIPSCommandOnWebP, getSelectedImages } from "./utils";
+import { Direction, execSIPSCommandOnSVG, execSIPSCommandOnWebP, flipPDF, getSelectedImages } from "./utils";
 
 export default async function Command() {
   const selectedImages = await getSelectedImages();
@@ -16,7 +16,11 @@ export default async function Command() {
     const pluralized = `image${selectedImages.length === 1 ? "" : "s"}`;
     try {
       const pathStrings = '"' + selectedImages.join('" "') + '"';
-      if (pathStrings.toLowerCase().includes("webp") || pathStrings.toLowerCase().includes("svg")) {
+      if (
+        pathStrings.toLowerCase().includes("webp") ||
+        pathStrings.toLowerCase().includes("svg") ||
+        pathStrings.toLowerCase().includes("pdf")
+      ) {
         // Handle each image individually
         selectedImages.forEach((imgPath) => {
           if (imgPath.toLowerCase().endsWith("webp")) {
@@ -25,6 +29,9 @@ export default async function Command() {
           } else if (imgPath.toLowerCase().endsWith("svg")) {
             // Convert to PNG, flip, and restore to SVG
             execSIPSCommandOnSVG("sips --flip horizontal", imgPath);
+          } else if (imgPath.toLowerCase().endsWith("pdf")) {
+            // Flip each page of PDF
+            flipPDF(imgPath, Direction.HORIZONTAL);
           } else {
             // Run command as normal
             execSync(`sips --flip horizontal "${imgPath}"`);

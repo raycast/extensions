@@ -1,6 +1,6 @@
 import { List, ActionPanel, showToast, Action, Toast, environment } from "@raycast/api";
 import { execSync } from "child_process";
-import { convertSVG, getSelectedImages } from "./utils";
+import { convertPDF, convertSVG, getSelectedImages } from "./utils";
 
 const FORMATS = [
   "ASTC",
@@ -51,7 +51,6 @@ export default function Command() {
         } else if (desiredType == "SVG") {
           const bmpPath = `${environment.supportPath}/tmp.bmp`;
           execSync(`chmod +x ${environment.assetsPath}/potrace/potrace`);
-          console.log("hi");
           if (pathComponents.at(-1)?.toLowerCase() == "webp") {
             const pngPath = `${environment.supportPath}/tmp.png`;
             execSync(`chmod +x ${environment.assetsPath}/webp/dwebp`);
@@ -67,6 +66,12 @@ export default function Command() {
         } else if (pathComponents.at(-1)?.toLowerCase() == "webp") {
           execSync(`chmod +x ${environment.assetsPath}/webp/dwebp`);
           execSync(`${environment.assetsPath}/webp/dwebp "${item}" -o "${newPath}"`);
+        } else if (pathComponents.at(-1)?.toLowerCase() == "pdf") {
+          const itemName = item.split("/").at(-1);
+          const folderName = `${itemName?.substring(0, itemName.lastIndexOf("."))} ${desiredType}`;
+          const folderPath = `${item.split("/").slice(0, -1).join("/") + "/" + folderName}`;
+          execSync(`mkdir "${folderPath}"`);
+          convertPDF(desiredType, item, folderPath);
         } else {
           execSync(`sips --setProperty format ${desiredType.toLowerCase()} "${item}" --out "${newPath}"`);
         }

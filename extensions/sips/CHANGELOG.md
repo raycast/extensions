@@ -3,8 +3,9 @@
 ## [Optimize Images, SVG Conversion, More Filters] - 2023-04-03
 
 - Add "Optimize Images" command
-- Add ability to convert SVG to various types
+- Add ability to convert SVG to various image types
 - Add ability to convert images to SVG using Potrace
+- Add ability to convert PDF to various other image types
 - Add 13 new filters:
     - Circular Screen
     - Circular Wrap

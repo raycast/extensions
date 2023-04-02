@@ -9,6 +9,7 @@ Rotate, flip, scale, resize, convert, and apply filters to selected images.
     - SVG conversion supported by [Potrace](https://potrace.sourceforge.net)
 - Rotate, flip, scale, resize, and pad images by applying SIPS commands
 - Apply filters and distortions such as Bokeh Blur, Noir, X-Ray, and more
+- Rotate and flip the pages of PDFs
 - Optimize images using JPEG compression, [svgo](https://github.com/svg/svgo), and other strategies
 
 ## Commands
