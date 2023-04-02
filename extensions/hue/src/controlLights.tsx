@@ -1,12 +1,5 @@
 import { ActionPanel, Icon, List, Toast } from "@raycast/api";
-import {
-  adjustColorTemperature,
-  calculateAdjustedBrightness,
-  getIconForColor,
-  getLightIcon,
-  setLightColor,
-} from "./lib/utils";
-import { MutatePromise } from "@raycast/utils";
+import { calculateAdjustedBrightness, getIconForColor, getLightIcon, setLightColor } from "./lib/utils";
 import { CssColor, Light, ResourceIdentifier, Room } from "./lib/types";
 import { BRIGHTNESS_MAX, BRIGHTNESSES } from "./lib/constants";
 import ManageHueBridge from "./components/ManageHueBridge";
@@ -14,6 +7,7 @@ import UnlinkAction from "./components/UnlinkAction";
 import { SendHueMessage, useHue } from "./lib/useHue";
 import HueClient from "./lib/HueClient";
 import { COLORS } from "./lib/colors";
+import React from "react";
 import Style = Toast.Style;
 
 // TODO: Add support for grouped lights
@@ -45,7 +39,7 @@ export default function ControlLights() {
             key={room.id}
             lights={roomLights}
             room={room}
-            mutateLights={setLights}
+            setLights={setLights}
             sendHueMessage={sendHueMessage}
           />
         );
@@ -58,7 +52,7 @@ function Group(props: {
   hueClient: HueClient;
   lights: Light[];
   room: Room;
-  mutateLights: MutatePromise<Light[]>;
+  setLights: React.Dispatch<React.SetStateAction<Light[]>>;
   sendHueMessage: SendHueMessage;
 }) {
   return (
@@ -70,7 +64,7 @@ function Group(props: {
             key={light.id}
             light={light}
             room={props.room}
-            mutateLights={props.setLights}
+            setLights={props.setLights}
             sendHueMessage={props.sendHueMessage}
           />
         )
@@ -83,7 +77,7 @@ function Light(props: {
   hueClient: HueClient;
   light: Light;
   room?: Room;
-  mutateLights: MutatePromise<Light[]>;
+  setLights: React.Dispatch<React.SetStateAction<Light[]>>;
   sendHueMessage: SendHueMessage;
 }) {
   return (
@@ -119,26 +113,26 @@ function Light(props: {
             {props.light.state.colormode == "xy" && (
               <SetColorAction
                 light={props.light}
-                onSet={(color: CssColor) => handleSetColor(hueClient, props.light, props.mutateLights, color)}
+                onSet={(color: CssColor) => handleSetColor(hueClient, props.light, props.setLights, color)}
               />
             )}
             {props.light.state.colormode == "ct" && (
               <IncreaseColorTemperatureAction
                 light={props.light}
-                onIncrease={() => handleIncreaseColorTemperature(hueClient, props.light, props.mutateLights)}
+                onIncrease={() => handleIncreaseColorTemperature(hueClient, props.light, props.setLights)}
               />
             )}
             {props.light.state.colormode == "ct" && (
               <DecreaseColorTemperatureAction
                 light={props.light}
-                onDecrease={() => handleDecreaseColorTemperature(hueClient, props.light, props.mutateLights)}
+                onDecrease={() => handleDecreaseColorTemperature(hueClient, props.light, props.setLights)}
               />
             )}
 */}
           </ActionPanel.Section>
 
           <ActionPanel.Section>
-            <RefreshAction onRefresh={() => props.setLights()} />
+            {/*<RefreshAction onRefresh={() => props.setLights} />*/}
             <UnlinkAction sendHueMessage={props.sendHueMessage} />
           </ActionPanel.Section>
         </ActionPanel>
@@ -246,12 +240,18 @@ function RefreshAction(props: { onRefresh: () => void }) {
   );
 }
 
-async function handleToggle(hueClient: HueClient, light: Light, mutateLights: MutatePromise<Light[]>) {
+async function handleToggle(
+  hueClient: HueClient,
+  light: Light,
+  setLights: React.Dispatch<React.SetStateAction<Light[]>>
+) {
   const toast = new Toast({ title: "" });
 
   try {
-    await mutateLights(hueClient.toggleLight(light), {
-      optimisticUpdate: (lights) => lights.updateItem(light, { on: { on: !light.on.on } }),
+    await hueClient.toggleLight(light);
+
+    setLights((prevState) => {
+      return prevState.updateItem(light, { on: { on: !light.on.on } });
     });
 
     toast.style = Style.Success;
@@ -271,19 +271,18 @@ async function handleToggle(hueClient: HueClient, light: Light, mutateLights: Mu
 async function handleSetBrightness(
   hueClient: HueClient,
   light: Light,
-  mutateLights: MutatePromise<Light[]>,
+  setLights: React.Dispatch<React.SetStateAction<Light[]>>,
   percentage: number
 ) {
   const toast = new Toast({ title: "" });
 
   try {
-    hueClient.setBrightness(light, percentage).then(() => mutateLights());
-    await mutateLights(hueClient.setBrightness(light, percentage), {
-      optimisticUpdate: (lights) =>
-        lights.updateItem(light, {
-          on: { on: true },
-          dimming: { brightness: percentage },
-        }),
+    await hueClient.setBrightness(light, percentage);
+    setLights((prevState) => {
+      return prevState.updateItem(light, {
+        on: { on: true },
+        dimming: { brightness: percentage },
+      });
     });
 
     toast.style = Style.Success;
@@ -300,21 +299,27 @@ async function handleSetBrightness(
   }
 }
 
-async function handleIncreaseBrightness(hueClient: HueClient, light: Light, mutateLights: MutatePromise<Light[]>) {
+async function handleIncreaseBrightness(
+  hueClient: HueClient,
+  light: Light,
+  setLights: React.Dispatch<React.SetStateAction<Light[]>>
+) {
   const toast = new Toast({ title: "" });
   const newBrightness = calculateAdjustedBrightness(light, "increase");
 
   try {
-    await mutateLights(hueClient.setBrightness(light, newBrightness), {
-      optimisticUpdate: (lights) =>
-        lights.updateItem(light, {
-          on: { on: true },
-          dimming: { brightness: newBrightness },
-        }),
+    await hueClient.setBrightness(light, newBrightness);
+    setLights((prevState) => {
+      return prevState.updateItem(light, {
+        on: { on: true },
+        dimming: { brightness: newBrightness },
+      });
     });
 
     toast.style = Style.Success;
-    toast.title = `Increased brightness of ${light.metadata.name}`;
+    toast.title = `Increased brightness of ${light.metadata.name} to ${(newBrightness / 100).toLocaleString("en", {
+      style: "percent",
+    })}`;
     await toast.show();
   } catch (e) {
     toast.style = Style.Failure;
@@ -324,17 +329,27 @@ async function handleIncreaseBrightness(hueClient: HueClient, light: Light, muta
   }
 }
 
-async function handleDecreaseBrightness(hueClient: HueClient, light: Light, mutateLights: MutatePromise<Light[]>) {
+async function handleDecreaseBrightness(
+  hueClient: HueClient,
+  light: Light,
+  setLights: React.Dispatch<React.SetStateAction<Light[]>>
+) {
   const toast = new Toast({ title: "" });
   const newBrightness = calculateAdjustedBrightness(light, "decrease");
 
   try {
-    await mutateLights(hueClient.setBrightness(light, newBrightness), {
-      optimisticUpdate: (lights) => lights.updateItem(light, { dimming: { brightness: newBrightness } }),
+    await hueClient.setBrightness(light, newBrightness);
+    setLights((prevState) => {
+      return prevState.updateItem(light, {
+        on: { on: true },
+        dimming: { brightness: newBrightness },
+      });
     });
 
     toast.style = Style.Success;
-    toast.title = `Decreased brightness of ${light.metadata.name}`;
+    toast.title = `Decreased brightness of ${light.metadata.name} to ${(newBrightness / 100).toLocaleString("en", {
+      style: "percent",
+    })}`;
     await toast.show();
   } catch (e) {
     toast.style = Style.Failure;
@@ -347,19 +362,19 @@ async function handleDecreaseBrightness(hueClient: HueClient, light: Light, muta
 async function handleSetColor(
   hueClient: HueClient,
   light: Light,
-  mutateLights: MutatePromise<Light[]>,
+  setLights: React.Dispatch<React.SetStateAction<Light[]>>,
   color: CssColor
 ) {
   const toast = new Toast({ title: "" });
 
   try {
-    await mutateLights(setLightColor(api, light, color.value), {
-      // optimisticUpdate(lights) {
-      //   return lights.map((it) =>
-      //     it.id === light.id ? { ...it, state: { ...it.state, on: true, xy: hexToXy(color.value) } } : it
-      //   );
-      // },
-    });
+    // await setLights(setLightColor(api, light, color.value), {
+    //   optimisticUpdate(lights) {
+    //     return lights.map((it) =>
+    //       it.id === light.id ? { ...it, state: { ...it.state, on: true, xy: hexToXy(color.value) } } : it
+    //     );
+    //   },
+    // });
 
     toast.style = Style.Success;
     toast.title = `Set color to ${color.name}`;
@@ -375,20 +390,20 @@ async function handleSetColor(
 async function handleIncreaseColorTemperature(
   hueClient: HueClient,
   light: Light,
-  mutateLights: MutatePromise<Light[]>
+  setLights: React.Dispatch<React.SetStateAction<Light[]>>
 ) {
   const toast = new Toast({ title: "" });
 
   try {
-    await mutateLights(adjustColorTemperature(api, light, "increase"), {
-      // optimisticUpdate(lights) {
-      //   return lights?.map((it) =>
-      //     it.id === light.id
-      //       ? { ...it, state: { ...it.state, ct: calculateAdjustedColorTemperature(light, "increase") } }
-      //       : it
-      //   );
-      // },
-    });
+    // await setLights(adjustColorTemperature(api, light, "increase"), {
+    //   optimisticUpdate(lights) {
+    //     return lights?.map((it) =>
+    //       it.id === light.id
+    //         ? { ...it, state: { ...it.state, ct: calculateAdjustedColorTemperature(light, "increase") } }
+    //         : it
+    //     );
+    //   },
+    // });
 
     toast.style = Style.Success;
     toast.title = "Increased color temperature";
@@ -404,20 +419,20 @@ async function handleIncreaseColorTemperature(
 async function handleDecreaseColorTemperature(
   hueClient: HueClient,
   light: Light,
-  mutateLights: MutatePromise<Light[]>
+  setLights: React.Dispatch<React.SetStateAction<Light[]>>
 ) {
   const toast = new Toast({ title: "" });
 
   try {
-    await mutateLights(adjustColorTemperature(api, light, "decrease"), {
-      // optimisticUpdate(lights) {
-      //   return lights.map((it) =>
-      //     it.id === light.id
-      //       ? { ...it, state: { ...it.state, ct: calculateAdjustedColorTemperature(light, "decrease") } }
-      //       : it
-      //   );
-      // },
-    });
+    // await setLights(adjustColorTemperature(api, light, "decrease"), {
+    //   optimisticUpdate(lights) {
+    //     return lights.map((it) =>
+    //       it.id === light.id
+    //         ? { ...it, state: { ...it.state, ct: calculateAdjustedColorTemperature(light, "decrease") } }
+    //         : it
+    //     );
+    //   },
+    // });
 
     toast.style = Style.Success;
     toast.title = "Decreased color temperature";

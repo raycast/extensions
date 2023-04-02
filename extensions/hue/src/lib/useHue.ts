@@ -1,85 +1,56 @@
 import { useEffect } from "react";
-import { useCachedPromise, useCachedState } from "@raycast/utils";
+import { useCachedState } from "@raycast/utils";
 import { useHueBridgeMachine } from "./hueBridgeMachine";
-import { handleError } from "./utils";
-import { Light, Room, Scene } from "./types";
+import { GroupedLight, Light, Room, Scene, Zone } from "./types";
 
 export type HueMessage = "LINK" | "RETRY" | "DONE" | "UNLINK";
 export type SendHueMessage = (message: HueMessage) => void;
 
 export function useHue() {
   const [lights, setLights] = useCachedState("lights", [] as Light[]);
+  const [groupedLights, setGroupedLights] = useCachedState("groupedLights", [] as GroupedLight[]);
+  const [rooms, setRooms] = useCachedState("rooms", [] as Room[]);
+  const [zones, setZones] = useCachedState("zones", [] as Zone[]);
+  const [scenes, setScenes] = useCachedState("scenes", [] as Scene[]);
 
-  const { hueBridgeState, sendHueMessage } = useHueBridgeMachine(setLights);
+  const { hueBridgeState, sendHueMessage } = useHueBridgeMachine(
+    setLights,
+    setGroupedLights,
+    setRooms,
+    setZones,
+    setScenes
+  );
 
   useEffect(() => {
-    const fetchData = async () => {
-      const lights = await hueBridgeState.context.hueClient?.getLights();
-      if (lights === undefined) {
-        throw new Error("Lights are undefined");
-      }
-      setLights(lights);
-    };
-
     if (hueBridgeState.context.hueClient !== undefined) {
-      fetchData().then();
+      (async () => {
+        if (hueBridgeState.context.hueClient === undefined) {
+          throw new Error("Lights are undefined");
+        }
+
+        // TODO: Execute these in parallel
+        setLights(await hueBridgeState.context.hueClient.getLights());
+        setGroupedLights(await hueBridgeState.context.hueClient.getGroupedLights());
+        setRooms(await hueBridgeState.context.hueClient.getRooms());
+        setZones(await hueBridgeState.context.hueClient.getZones());
+        setScenes(await hueBridgeState.context.hueClient.getScenes());
+      })();
     }
   }, [hueBridgeState.context.hueClient]);
 
-  const {
-    isLoading: isLoadingRooms,
-    data: rooms,
-    mutate: mutateRooms,
-    revalidate: revalidateRooms,
-  } = useCachedPromise(
-    async () => {
-      if (hueBridgeState.context.hueClient === undefined) {
-        throw new Error("Hue client is undefined");
-      }
-
-      return hueBridgeState.context.hueClient.getRooms();
-    },
-    [],
-    {
-      keepPreviousData: true,
-      initialData: [] as Room[],
-      onError: handleError,
-      execute: hueBridgeState.context.hueClient !== undefined,
-    }
-  );
-
-  const {
-    isLoading: isLoadingScenes,
-    data: scenes,
-    mutate: mutateScenes,
-    revalidate: revalidateScenes,
-  } = useCachedPromise(
-    async () => {
-      if (hueBridgeState.context.hueClient === undefined) {
-        throw new Error("Hue client is undefined");
-      }
-
-      return hueBridgeState.context.hueClient.getScenes();
-    },
-    [],
-    {
-      keepPreviousData: true,
-      initialData: [] as Scene[],
-      onError: handleError,
-      execute: hueBridgeState.context.hueClient !== undefined,
-    }
-  );
-
-  // TODO: Add zones and grouped lights
   return {
     hueBridgeState,
     sendHueMessage,
-    isLoading: !lights.length || isLoadingRooms || isLoadingScenes,
+    isLoading: !lights.length || !rooms.length || !scenes.length,
     lights,
-    setLights: setLights,
+    setLights,
+    groupedLights,
+    setGroupedLights,
     rooms,
-    mutateRooms,
+    setRooms,
+    zones,
+    setZones,
     scenes,
-    mutateScenes,
+    setScenes,
   };
 }

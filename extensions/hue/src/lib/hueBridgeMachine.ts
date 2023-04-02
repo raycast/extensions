@@ -16,7 +16,7 @@ import HueClient from "./HueClient";
 import { useDeepMemo } from "@raycast/utils/dist/useDeepMemo";
 import { useMachine } from "@xstate/react";
 import { HueMessage, SendHueMessage } from "./useHue";
-import { Light } from "./types";
+import { GroupedLight, Light, Room, Scene, Zone } from "./types";
 import React from "react";
 
 export type HueBridgeState = State<
@@ -34,8 +34,14 @@ export type HueContext = {
   hueClient?: HueClient;
 };
 
-export function useHueBridgeMachine(setLights: React.Dispatch<React.SetStateAction<Light[]>>) {
-  const machine = useDeepMemo(() => hueBridgeMachine(setLights));
+export function useHueBridgeMachine(
+  setLights: React.Dispatch<React.SetStateAction<Light[]>>,
+  setGroupedLights: React.Dispatch<React.SetStateAction<GroupedLight[]>>,
+  setRooms: React.Dispatch<React.SetStateAction<Room[]>>,
+  setZones: React.Dispatch<React.SetStateAction<Zone[]>>,
+  setScenes: React.Dispatch<React.SetStateAction<Scene[]>>
+) {
+  const machine = useDeepMemo(() => hueBridgeMachine(setLights, setGroupedLights, setRooms, setZones, setScenes));
 
   const [hueBridgeState, send] = useMachine(machine);
   const sendHueMessage: SendHueMessage = (message: HueMessage) => {
@@ -51,7 +57,13 @@ export function useHueBridgeMachine(setLights: React.Dispatch<React.SetStateActi
 /**
  * @see https://stately.ai/viz/ee0edf94-7a82-4d65-a6a8-324e2f1eca49
  */
-function hueBridgeMachine(setLights: React.Dispatch<React.SetStateAction<Light[]>>) {
+function hueBridgeMachine(
+  setLights: React.Dispatch<React.SetStateAction<Light[]>>,
+  setGroupedLights: React.Dispatch<React.SetStateAction<GroupedLight[]>>,
+  setRooms: React.Dispatch<React.SetStateAction<Room[]>>,
+  setZones: React.Dispatch<React.SetStateAction<Zone[]>>,
+  setScenes: React.Dispatch<React.SetStateAction<Scene[]>>
+) {
   return createMachine<HueContext>({
     id: "manage-hue-bridge",
     initial: "loadingCredentials",
@@ -108,7 +120,16 @@ function hueBridgeMachine(setLights: React.Dispatch<React.SetStateAction<Light[]
               throw Error("Invalid state");
             }
 
-            return new HueClient(setLights, context.bridgeIpAddress, context.bridgeId, context.bridgeUsername);
+            return new HueClient(
+              context.bridgeIpAddress,
+              context.bridgeId,
+              context.bridgeUsername,
+              setLights,
+              setGroupedLights,
+              setRooms,
+              setZones,
+              setScenes
+            );
           },
           onDone: {
             actions: assign({ hueClient: (context, event) => event.data }),
@@ -187,7 +208,16 @@ function hueBridgeMachine(setLights: React.Dispatch<React.SetStateAction<Light[]
               bridgeUsername: (context, event) => event.data.username,
               hueClient: (context, event) => {
                 if (context.bridgeIpAddress === undefined) throw Error("Invalid state");
-                return new HueClient(setLights, context.bridgeIpAddress, event.data.id, event.data.username);
+                return new HueClient(
+                  context.bridgeIpAddress,
+                  event.data.id,
+                  event.data.username,
+                  setLights,
+                  setGroupedLights,
+                  setRooms,
+                  setZones,
+                  setScenes
+                );
               },
             }),
           },

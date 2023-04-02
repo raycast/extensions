@@ -117,6 +117,7 @@ export type Light = {
      * Human-readable name of the resource
      */
     name: string;
+
     /**
      * Light archetype
      */
@@ -170,20 +171,148 @@ export type Light = {
       | "pendant_spot"
       | "ceiling_horizontal"
       | "ceiling_tube";
+
     /**
      * The fixed mired value of the white lamp
      */
     fixed_mired?: number;
   };
+
   on: {
     /**
      * On/Off state of the light
      */
     on: boolean;
   };
-  dimming?: Dimming;
-  color_temperature: ColorTemperature;
-  color: Color;
+
+  dimming?: {
+    /**
+     * number (maximum: 100)
+     *
+     * Brightness percentage
+     *
+     * Value cannot be 0. Writing 0 changes it to the lowest possible brightness.
+     */
+    brightness: number;
+
+    /**
+     * integer (0 - 100)
+     *
+     * Percentage of the maximum lumen the device outputs on minimum brightness.
+     */
+    min_dim_level?: number;
+  };
+
+  color_temperature: {
+    /**
+     * integer (153 - 500)
+     *
+     * Color temperature in mirek or null when the light color is not on the ct spectrum.
+     */
+    mirek: number;
+
+    /**
+     * Indication whether the value presented in mirek is valid
+     */
+    mirek_valid: boolean;
+
+    mirek_schema: {
+      /**
+       * integer (153 - 500)
+       *
+       * Minimum color temperature this light supports
+       */
+      mirek_minimum: number;
+
+      /**
+       * integer (153 - 500)
+       *
+       * Maximum color temperature this light supports
+       */
+      mirek_maximum: number;
+    };
+  };
+
+  color: {
+    /**
+     * CIE XY gamut position
+     */
+    xy: Xy;
+
+    /**
+     * Color gamut of color bulb.
+     * Some bulbs do not properly return the Gamut information.
+     * In this case this is not present.
+     */
+    gamut?: {
+      /**
+       * CIE XY gamut position
+       */
+      red: {
+        /**
+         * number (0 - 1)
+         *
+         * X position in the color gamut
+         */
+        x: number;
+
+        /**
+         * number (0 - 1)
+         *
+         * Y position in the color gamut
+         */
+        y: number;
+      };
+
+      /**
+       * CIE XY gamut position
+       */
+      green: {
+        /**
+         * number (0 - 1)
+         *
+         * X position in the color gamut
+         */
+        x: number;
+
+        /**
+         * number (0 - 1)
+         *
+         * Y position in the color gamut
+         */
+        y: number;
+      };
+
+      /**
+       * CIE XY gamut position
+       */
+      blue: {
+        /**
+         * number (0 - 1)
+         *
+         * X position in the color gamut
+         */
+        x: number;
+
+        /**
+         * number (0 - 1)
+         *
+         * Y position in the color gamut
+         */
+        y: number;
+      };
+    };
+
+    /**
+     * The gamut types supported by hue
+     *
+     * - A:     Gamut of early Philips color-only products
+     * - B:     Limited gamut of first Hue color products
+     * - C:     Richer color gamut of Hue white and color ambiance products
+     * - other: Color gamut of non-hue products with non-hue gamuts resp w/o gamut
+     */
+    gamut_type: "A" | "B" | "C" | "other";
+  };
   dynamics: {
     /**
      * integer
@@ -194,129 +323,57 @@ export type Light = {
   };
 };
 
-export type Dimming = {
+export type GroupedLight = {
   /**
-   * number (maximum: 100)
+   * Type of the supported resources
+   */
+  type?: "light";
+
+  /**
+   * string (pattern: ^[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}$)
    *
-   * Brightness percentage
+   * Unique identifier representing a specific resource instance.
+   */
+  id: string;
+
+  /**
+   * Clip v1 resource identifier.
+   */
+  id_v1?: string;
+
+  /**
+   * Owner of the service
    *
-   * Value cannot be 0. Writing 0 changes it to the lowest possible brightness.
+   * In case the owner service is deleted, the service also gets deleted.
    */
-  brightness: number;
+  owner: ResourceIdentifier;
+
   /**
-   * integer (0 - 100)
+   * Joined on control & aggregated on state.
    *
-   * Percentage of the maximum lumen the device outputs on minimum brightness.
+   * “on” is true if any light in the group is on
    */
-  min_dim_level?: number;
-};
-
-export type ColorTemperature = {
-  /**
-   * integer (153 - 500)
-   *
-   * Color temperature in mirek or null when the light color is not on the ct spectrum.
-   */
-  mirek: number;
-  /**
-   * Indication whether the value presented in mirek is valid
-   */
-  mirek_valid: boolean;
-  mirek_schema: {
+  on?: {
     /**
-     * integer (153 - 500)
-     *
-     * Minimum color temperature this light supports
+     * On/Off state of the light group
      */
-    mirek_minimum: number;
-    /**
-     * integer (153 - 500)
-     *
-     * Maximum color temperature this light supports
-     */
-    mirek_maximum: number;
-  };
-};
-
-export type Color = {
-  /**
-   * CIE XY gamut position
-   */
-  xy: Xy;
-
-  /**
-   * Color gamut of color bulb.
-   * Some bulbs do not properly return the Gamut information.
-   * In this case this is not present.
-   */
-  gamut?: {
-    /**
-     * CIE XY gamut position
-     */
-    red: {
-      /**
-       * number (0 - 1)
-       *
-       * X position in the color gamut
-       */
-      x: number;
-
-      /**
-       * number (0 - 1)
-       *
-       * Y position in the color gamut
-       */
-      y: number;
-    };
-
-    /**
-     * CIE XY gamut position
-     */
-    green: {
-      /**
-       * number (0 - 1)
-       *
-       * X position in the color gamut
-       */
-      x: number;
-
-      /**
-       * number (0 - 1)
-       *
-       * Y position in the color gamut
-       */
-      y: number;
-    };
-
-    /**
-     * CIE XY gamut position
-     */
-    blue: {
-      /**
-       * number (0 - 1)
-       *
-       * X position in the color gamut
-       */
-      x: number;
-
-      /**
-       * number (0 - 1)
-       *
-       * Y position in the color gamut
-       */
-      y: number;
-    };
+    on: boolean;
   };
 
   /**
-   * The gamut types supported by hue
+   * Joined dimming control
    *
-   * - A:     Gamut of early Philips color-only products
-   * - B:     Limited gamut of first Hue color products
-   * - C:     Richer color gamut of Hue white and color ambiance products
-   * - other: Color gamut of non-hue products with non-hue gamuts resp w/o gamut
+   * “dimming.brightness” contains average brightness of group containing
+   * turned-on lights only.
    */
-  gamut_type: "A" | "B" | "C" | "other";
+  dimming?: {
+    /**
+     * Brightness percentage
+     *
+     * Value cannot be 0, writing 0 changes it to the lowest possible brightness
+     */
+    brightness: number;
+  };
 };
 
 export type Scene = {
@@ -420,7 +477,7 @@ export type ActionElement = {
   };
 };
 
-export type Room = {
+type Group = {
   /**
    * Type of the supported resources
    */
@@ -515,17 +572,19 @@ export type Room = {
   };
 };
 
+export type Room = { type?: "room" } & Group;
+export type Zone = { type?: "zone" } & Group;
+
 export type UpdateEvent = {
   /**
    * The creation time of the update event, represented as an ISO 8601 string.
    */
   creationtime: string;
 
-  // TODO: Expand this to include additional types
   /**
    * The data of the update event, represented as an array of API objects.
    */
-  data: (Light | Room)[];
+  data: (Light | GroupedLight | Room | Zone | Scene)[];
 
   /**
    * A unique identifier for the update event, represented as a UUID string.
