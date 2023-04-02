@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "microsoft-teams",
-  "title": "Microsoft Teams",
+  "name": "microsoft-teams-desktop",
+  "title": "Microsoft Teams Meeting",
   "description": "Control your meeting with the keyboard, even when Microsoft Teams is in the background. Toggle microphone, camera and background blur and send reactions.",
   "icon": "teams.png",
   "author": "sven",
@@ -14,14 +14,12 @@
     {
       "name": "controlMeeting",
       "title": "Control Meeting",
-      "subtitle": "Microsoft Teams Meeting",
       "description": "All available commands in one place.",
       "mode": "view"
     },
     {
       "name": "toggleMute",
       "title": "Toggle Microphone",
-      "subtitle": "Microsoft Teams Meeting",
       "description": "Toggle your microphone (mute/unmute)",
       "icon": "mute.png",
       "mode": "no-view"
@@ -29,7 +27,6 @@
     {
       "name": "toggleVideo",
       "title": "Toggle Camera",
-      "subtitle": "Microsoft Teams Meeting",
       "description": "Toggle your camera",
       "icon": "video.png",
       "mode": "no-view"
@@ -37,7 +34,6 @@
     {
       "name": "leaveCall",
       "title": "Leave Call",
-      "subtitle": "Microsoft Teams Meeting",
       "description": "Leave the current call",
       "icon": "leave-call.png",
       "mode": "no-view"
