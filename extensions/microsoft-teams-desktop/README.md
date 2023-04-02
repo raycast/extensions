@@ -1,4 +1,4 @@
-# Microsoft Teams
+# Microsoft Teams Meeting
 With this [Raycast](https://raycast.com/) extension you can control a Microsoft Teams Meeting using your keyboard – no matter whether Microsoft Teams is currently the focused app or not. You can also define global hotkeys to toggle microphone and camera. 
 
 ![Screenshot of the Control Meeting command](metadata/microsoft-teams-1.png)
