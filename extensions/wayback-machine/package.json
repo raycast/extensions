@@ -2,9 +2,12 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "wayback-machine",
   "title": "Wayback Machine",
-  "description": "Quickly open webpages in Wayback Machine",
+  "description": "Quickly open and save webpages in Wayback Machine",
   "icon": "518x0w.png",
   "author": "pernielsentikaer",
+  "contributors": [
+    "andreaselia"
+  ],
   "categories": [
     "Web",
     "Developer Tools"
@@ -15,6 +18,20 @@
       "name": "open",
       "title": "Open in Wayback Machine",
       "description": "Open a webpage in Wayback Machine",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "url",
+          "placeholder": "https://www.raycast.com",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "save",
+      "title": "Save to Wayback Machine",
+      "description": "Save a webpage to Wayback Machine",
       "mode": "no-view",
       "arguments": [
         {
