@@ -52,4 +52,3 @@ export async function failIfNotOk(response: Response, requestName?: string) {
 export async function bodyOf<T>(response: Response): Promise<T> {
   return (await response.json()) as T;
 }
-

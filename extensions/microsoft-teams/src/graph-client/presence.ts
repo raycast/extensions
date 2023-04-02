@@ -14,20 +14,23 @@ function activityFor(availability: Availability): Activity {
 }
 
 function readableAvailability(availability: Availability) {
-  return availability.replaceAll(/([A-Z])/g, " $1").toLowerCase().trim()
+  return availability
+    .replaceAll(/([A-Z])/g, " $1")
+    .toLowerCase()
+    .trim();
 }
 
 interface Presence {
-  id: string
-  availability: string
-  activity: string
+  id: string;
+  availability: string;
+  activity: string;
 }
 
-async function getPresence(){
+async function getPresence() {
   const response = await get({
     path: "/me/presence",
-  })
-  return bodyOf<Presence>(response)
+  });
+  return bodyOf<Presence>(response);
 }
 
 async function setPreferredPresence(availability: Availability) {
@@ -48,8 +51,8 @@ export async function clearPreferredPresence() {
 }
 
 export async function getAvailability() {
-  const presence = await getPresence()
-  return presence.availability
+  const presence = await getPresence();
+  return presence.availability;
 }
 
 export async function setAvailability(availability?: Availability) {
@@ -60,11 +63,11 @@ export async function setAvailability(availability?: Availability) {
   }
   switch (availability) {
     case undefined:
-      return await showHUD("Reset availability to default")
+      return await showHUD("Reset availability to default");
     case "Busy":
     case "DoNotDisturb":
-      return await showHUD(`Set status to »${readableAvailability(availability)}« for 1 day`)
+      return await showHUD(`Set status to »${readableAvailability(availability)}« for 1 day`);
     default:
-      return await showHUD(`Set status to »${readableAvailability(availability)}« for 7 days`)
+      return await showHUD(`Set status to »${readableAvailability(availability)}« for 7 days`);
   }
 }

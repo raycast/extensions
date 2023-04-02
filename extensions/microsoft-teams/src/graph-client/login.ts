@@ -64,7 +64,7 @@ async function requestTokens(options: RequestTokenWithCode | RequestTokenWithRef
     form.append("code", options.authorizationCode);
     form.append("code_verifier", options.authRequest.codeVerifier);
     form.append("redirect_uri", options.authRequest.redirectURI);
-    form.append("scope", scope)
+    form.append("scope", scope);
   } else {
     form.append("refresh_token", options.refreshToken);
   }
