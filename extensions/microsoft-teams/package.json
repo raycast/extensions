@@ -12,6 +12,12 @@
   "license": "MIT",
   "commands": [
     {
+      "name": "setPresence",
+      "title": "Set Presence",
+      "description": "Set your Microsoft Teams presence.",
+      "mode": "view"
+    },
+    {
       "name": "controlMeeting",
       "title": "Control Meeting",
       "subtitle": "Microsoft Teams Meeting",
@@ -45,6 +51,20 @@
   ],
   "preferences": [
     {
+      "type": "textfield",
+      "name": "tenantId",
+      "title": "Tenant ID",
+      "description": "The \"Directory (tenant) ID\" (see extension's documentation)",
+      "required": true
+    },
+    {
+      "type": "textfield",
+      "name": "clientId",
+      "title": "Client ID",
+      "description": "The \"Application (client) ID\" (see extension's documentation)",
+      "required": true
+    },
+    {
       "name": "apiToken",
       "title": "API Token",
       "description": "Get this from your Teams client in Settings → Privacy → Manage API",
@@ -55,6 +75,7 @@
   "dependencies": {
     "@raycast/api": "^1.48.9",
     "@raycast/utils": "^1.5.2",
+    "node-fetch": "^3.3.1",
     "ws": "^8.13.0"
   },
   "devDependencies": {

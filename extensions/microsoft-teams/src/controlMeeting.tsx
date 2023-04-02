@@ -7,7 +7,7 @@ import {
   MeetingState,
   SingleMeetingState,
   UpdateMessage,
-} from "./teams/meetingClient";
+} from "./meeting-client/meetingClient";
 import { useEffect, useState } from "react";
 
 interface State {

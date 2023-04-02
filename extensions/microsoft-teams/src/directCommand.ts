@@ -1,4 +1,4 @@
-import { MeetingAction, asyncMeetingClient, UpdateMessage } from "./teams/meetingClient";
+import { MeetingAction, asyncMeetingClient, UpdateMessage } from "./meeting-client/meetingClient";
 import { showHUD } from "@raycast/api";
 
 export async function directCommand(

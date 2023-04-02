@@ -1,5 +1,5 @@
 import { WebSocket, ErrorEvent, MessageEvent } from "ws";
-import { prefs } from "./preferences";
+import { prefs } from "../preferences";
 
 const host = "127.0.0.1";
 const port = 8124;
@@ -43,6 +43,7 @@ export interface UpdateMessage {
   };
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function isUpdateMessage(msg: any): msg is UpdateMessage {
   return "meetingUpdate" in msg;
 }
@@ -98,7 +99,7 @@ class Deferred<T> {
   readonly promise: Promise<T>;
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   resolve: (result: T) => void = () => {};
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  // eslint-disable-next-line @typescript-eslint/no-empty-function, @typescript-eslint/no-explicit-any
   reject: (reason?: any) => void = () => {};
 
   constructor() {

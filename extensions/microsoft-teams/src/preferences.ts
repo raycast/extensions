@@ -1,6 +1,8 @@
 import { getPreferenceValues } from "@raycast/api";
 
 interface Preferences {
+  tenantId: string;
+  clientId: string;
   apiToken: string;
 }
 
