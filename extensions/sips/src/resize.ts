@@ -49,7 +49,7 @@ export default async function Command(props: { arguments: { width: string; heigh
             }
           }
           if (imgPath.toLowerCase().endsWith(".svg")) {
-            // Convert to PNG, rotate and restore to WebP
+            // Convert to PNG, resize, and restore to WebP
             execSIPSCommandOnSVG("sips --rotate ${degrees}", imgPath);
             if (widthInt != -1 && heightInt == -1) {
               execSIPSCommandOnSVG(`sips --resampleWidth ${widthInt}`, imgPath);

@@ -24,7 +24,7 @@ export default async function Command(props: { arguments: { degrees: string } })
             // Convert to PNG, flip and restore to WebP
             execSIPSCommandOnWebP(`sips --rotate ${degrees}`, imgPath);
           } else if (imgPath.toLowerCase().endsWith("svg")) {
-            // Convert to PNG, flip and restore to SVG
+            // Convert to PNG, rotate, and restore to SVG
             execSIPSCommandOnSVG(`sips --rotate ${degrees}`, imgPath);
           } else {
             // Run command as normal

@@ -23,7 +23,7 @@ export default async function Command() {
             // Convert to PNG, flip and restore to WebP
             execSIPSCommandOnWebP("sips --flip horizontal", imgPath);
           } else if (imgPath.toLowerCase().endsWith("svg")) {
-            // Convert to PNG, flip and restore to SVG
+            // Convert to PNG, flip, and restore to SVG
             execSIPSCommandOnSVG("sips --flip horizontal", imgPath);
           } else {
             // Run command as normal

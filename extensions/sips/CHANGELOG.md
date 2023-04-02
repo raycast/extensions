@@ -1,8 +1,8 @@
 # Image Modification Changelog
 
-## [Bug Fixes & More Filters] - 2023-04-03
+## [Optimize Images, SVG Conversion, More Filters] - 2023-04-03
 
-- Fix WebP operations failing due to insufficient permission
+- Add "Optimize Images" command
 - Add ability to convert SVG to various types
 - Add ability to convert images to SVG using Potrace
 - Add 13 new filters:
@@ -19,6 +19,7 @@
     - Minimum Components
     - Posterize
     - Sharpen Luminance
+- Fix WebP operations failing due to insufficient permission
 
 ## [WebP Support] - 2023-03-29
 

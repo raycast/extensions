@@ -46,17 +46,27 @@ export default function Command() {
         if (desiredType === "WEBP") {
           execSync(`chmod +x ${environment.assetsPath}/webp/cwebp`);
           execSync(`${environment.assetsPath}/webp/cwebp "${item}" -o "${newPath}"`);
-        } else if (pathComponents.at(-1)?.toLowerCase() == "webp") {
-          execSync(`chmod +x ${environment.assetsPath}/webp/dwebp`);
-          execSync(`${environment.assetsPath}/webp/dwebp "${item}" -o "${newPath}"`);
         } else if (pathComponents.at(-1)?.toLowerCase() == "svg") {
           convertSVG(desiredType, item, newPath);
         } else if (desiredType == "SVG") {
           const bmpPath = `${environment.supportPath}/tmp.bmp`;
           execSync(`chmod +x ${environment.assetsPath}/potrace/potrace`);
-          execSync(
-            `sips --setProperty format "bmp" "${item}" --out "${bmpPath}" && ${environment.assetsPath}/potrace/potrace -s --tight -o "${newPath}" "${bmpPath}" && rm "${bmpPath}"`
-          );
+          console.log("hi");
+          if (pathComponents.at(-1)?.toLowerCase() == "webp") {
+            const pngPath = `${environment.supportPath}/tmp.png`;
+            execSync(`chmod +x ${environment.assetsPath}/webp/dwebp`);
+            execSync(`${environment.assetsPath}/webp/dwebp "${item}" -o "${pngPath}"`);
+            execSync(
+              `sips --setProperty format "bmp" "${pngPath}" --out "${bmpPath}" && ${environment.assetsPath}/potrace/potrace -s --tight -o "${newPath}" "${bmpPath}"; rm "${bmpPath}"; open "${pngPath}"; rm "${pngPath}"`
+            );
+          } else {
+            execSync(
+              `sips --setProperty format "bmp" "${item}" --out "${bmpPath}" && ${environment.assetsPath}/potrace/potrace -s --tight -o "${newPath}" "${bmpPath}"; rm "${bmpPath}"`
+            );
+          }
+        } else if (pathComponents.at(-1)?.toLowerCase() == "webp") {
+          execSync(`chmod +x ${environment.assetsPath}/webp/dwebp`);
+          execSync(`${environment.assetsPath}/webp/dwebp "${item}" -o "${newPath}"`);
         } else {
           execSync(`sips --setProperty format ${desiredType.toLowerCase()} "${item}" --out "${newPath}"`);
         }
