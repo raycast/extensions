@@ -2,6 +2,14 @@
 
 Rotate, flip, scale, resize, convert, and apply filters to selected images in Finder.
 
+## Features
+
+- Convert between many different image formats, including WebP and SVG
+    - WebP conversion supported by [cwebp and dwebp](https://developers.google.com/speed/webp/docs/precompiled)
+    - SVG conversion supported by [Potrace](https://potrace.sourceforge.net)
+- Rotate, flip, scale, resize, and pad images by applying SIPS commands
+- Apply filters and distortions such as Bokeh Blur, Noir, X-Ray, and more
+
 ## Commands
 
 - Convert Images

@@ -69,16 +69,34 @@ export const filters: {
     CIFilterName: "CIBoxBlur",
   },
   {
-    name: "Comic",
-    description: "Makes images look like comic book drawings",
-    applyMethod: applyBasicFilter,
-    CIFilterName: "CIComicEffect",
-  },
-  {
     name: "Chrome",
     description: "Increase brightness and saturation",
     applyMethod: applyBasicFilter,
     CIFilterName: "CIPhotoEffectChrome",
+  },
+  {
+    name: "Circular Screen",
+    description: "Simulates a circular-shaped halftone screen",
+    applyMethod: applyBasicFilter,
+    CIFilterName: "CICircularScreen",
+  },
+  {
+    name: "Circular Wrap",
+    description: "Wraps an image around a transparent circle",
+    applyMethod: applyBasicFilter,
+    CIFilterName: "CICircularWrap",
+  },
+  {
+    name: "CMYK Halftone",
+    description: "Creates a halftoned rendition of an image using cyan, magenta, yellow, and black",
+    applyMethod: applyBasicFilter,
+    CIFilterName: "CICMYKHalftone",
+  },
+  {
+    name: "Comic",
+    description: "Makes images look like comic book drawings",
+    applyMethod: applyBasicFilter,
+    CIFilterName: "CIComicEffect",
   },
   {
     name: "Crystallize",
@@ -97,6 +115,24 @@ export const filters: {
     description: "Blur effect that uses a disc-shaped convolution kernel",
     applyMethod: applyBasicFilter,
     CIFilterName: "CIDiscBlur",
+  },
+  {
+    name: "Dither",
+    description: "Adds noise to reduce distortion",
+    applyMethod: applyBasicFilter,
+    CIFilterName: "CIDither",
+  },
+  {
+    name: "Document Enhancement",
+    description: "Removes unwanted shadows, whitens background, and enhances contrast",
+    applyMethod: applyBasicFilter,
+    CIFilterName: "CIDocumentEnhancer",
+  },
+  {
+    name: "Dot Screen",
+    description: "Simulates the dot pattern of a halftone screen",
+    applyMethod: applyBasicFilter,
+    CIFilterName: "CIDotScreen",
   },
   {
     name: "Edges",
@@ -129,6 +165,12 @@ export const filters: {
     CIFilterName: "CIGloom",
   },
   {
+    name: "Hatched Screen",
+    description: "Simulates the hatched pattern of a halftone screen",
+    applyMethod: applyBasicFilter,
+    CIFilterName: "CIHatchedScreen",
+  },
+  {
     name: "Hexagonal Pixellate",
     description: "Pixellates images using hexagons",
     applyMethod: applyBasicFilter,
@@ -147,16 +189,40 @@ export const filters: {
     CIFilterName: "CIColorInvert",
   },
   {
+    name: "Kaleidoscope",
+    description: "Creates a kaleidoscopic image by applying 12-way symmetry",
+    applyMethod: applyBasicFilter,
+    CIFilterName: "CIKaleidoscope",
+  },
+  {
     name: "Line Overlay",
     description: "Black woodblock cutout effect",
     applyMethod: applyBasicFilter,
     CIFilterName: "CILineOverlay",
   },
   {
+    name: "Line Screen",
+    description: "Simulates the line pattern of a halftone screen",
+    applyMethod: applyBasicFilter,
+    CIFilterName: "CILineScreen",
+  },
+  {
+    name: "Maximum Component",
+    description: "Converts image to grayscale using the maximum of the three color components",
+    applyMethod: applyBasicFilter,
+    CIFilterName: "CIMaximumComponent",
+  },
+  {
     name: "Median",
     description: "Reduces noise by calculating median pixel values",
     applyMethod: applyBasicFilter,
     CIFilterName: "CILineOverlay",
+  },
+  {
+    name: "Minimum Component",
+    description: "Converts image to grayscale using the minimum of the three color components",
+    applyMethod: applyBasicFilter,
+    CIFilterName: "CIMinimumComponent",
   },
   {
     name: "Mono",
@@ -189,6 +255,12 @@ export const filters: {
     CIFilterName: "CIPixellate",
   },
   {
+    name: "Posterize",
+    description: "Flattens colors",
+    applyMethod: applyBasicFilter,
+    CIFilterName: "CIColorPosterize",
+  },
+  {
     name: "Pointillize",
     description: "Pixellates images with dots",
     applyMethod: applyBasicFilter,
@@ -205,6 +277,12 @@ export const filters: {
     description: "Maps all colors to shades of brown",
     applyMethod: applyBasicFilter,
     CIFilterName: "CISepiaTone",
+  },
+  {
+    name: "Sharpen Luminance",
+    description: "Increases detailed by sharpening based on luminance",
+    applyMethod: applyBasicFilter,
+    CIFilterName: "CISharpenLuminance",
   },
   {
     name: "Thermal",

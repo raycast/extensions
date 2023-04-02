@@ -1,5 +1,25 @@
 # Image Modification Changelog
 
+## [Bug Fixes & More Filters] - 2023-04-03
+
+- Fix WebP operations failing due to insufficient permission
+- Add ability to convert SVG to various types
+- Add ability to convert images to SVG using Potrace
+- Add 13 new filters:
+    - Circular Screen
+    - Circular Wrap
+    - CMYK Halftone
+    - Dither
+    - Document Enhancement
+    - Dot Screen
+    - Hatched Screen
+    - Kaleidoscope
+    - Line Screen
+    - Maximum Component
+    - Minimum Components
+    - Posterize
+    - Sharpen Luminance
+
 ## [WebP Support] - 2023-03-29
 
 - Add WebP conversion support

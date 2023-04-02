@@ -15,5 +15,5 @@ export default function Command() {
     />
   ));
 
-  return <List>{listItems}</List>;
+  return <List searchBarPlaceholder="Search filters...">{listItems}</List>;
 }
