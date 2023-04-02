@@ -19,7 +19,7 @@ import Style = Toast.Style;
 // TODO: Add support for grouped lights
 //   Show grouped lights first and offer to 'enter' the group to see the individual lights
 export default function ControlLights() {
-  const { hueBridgeState, sendHueMessage, isLoading, lights, mutateLights, rooms } = useHue();
+  const { hueBridgeState, sendHueMessage, isLoading, lights, setLights, rooms } = useHue();
 
   // This element handles any scenario that involves the Bridge not being ready
   const manageHueBridgeElement: JSX.Element | null = ManageHueBridge(hueBridgeState, sendHueMessage);
@@ -45,7 +45,7 @@ export default function ControlLights() {
             key={room.id}
             lights={roomLights}
             room={room}
-            mutateLights={mutateLights}
+            mutateLights={setLights}
             sendHueMessage={sendHueMessage}
           />
         );
@@ -70,7 +70,7 @@ function Group(props: {
             key={light.id}
             light={light}
             room={props.room}
-            mutateLights={props.mutateLights}
+            mutateLights={props.setLights}
             sendHueMessage={props.sendHueMessage}
           />
         )
@@ -96,21 +96,21 @@ function Light(props: {
           <ActionPanel.Section>
             <ToggleLightAction
               light={props.light}
-              onToggle={() => handleToggle(props.hueClient, props.light, props.mutateLights)}
+              onToggle={() => handleToggle(props.hueClient, props.light, props.setLights)}
             />
             <SetBrightnessAction
               light={props.light}
               onSet={(percentage: number) =>
-                handleSetBrightness(props.hueClient, props.light, props.mutateLights, percentage)
+                handleSetBrightness(props.hueClient, props.light, props.setLights, percentage)
               }
             />
             <IncreaseBrightnessAction
               light={props.light}
-              onIncrease={() => handleIncreaseBrightness(props.hueClient, props.light, props.mutateLights)}
+              onIncrease={() => handleIncreaseBrightness(props.hueClient, props.light, props.setLights)}
             />
             <DecreaseBrightnessAction
               light={props.light}
-              onDecrease={() => handleDecreaseBrightness(props.hueClient, props.light, props.mutateLights)}
+              onDecrease={() => handleDecreaseBrightness(props.hueClient, props.light, props.setLights)}
             />
           </ActionPanel.Section>
 
@@ -138,7 +138,7 @@ function Light(props: {
           </ActionPanel.Section>
 
           <ActionPanel.Section>
-            <RefreshAction onRefresh={() => props.mutateLights()} />
+            <RefreshAction onRefresh={() => props.setLights()} />
             <UnlinkAction sendHueMessage={props.sendHueMessage} />
           </ActionPanel.Section>
         </ActionPanel>
@@ -251,7 +251,7 @@ async function handleToggle(hueClient: HueClient, light: Light, mutateLights: Mu
 
   try {
     await mutateLights(hueClient.toggleLight(light), {
-      optimisticUpdate: (lights) => lights.update(light, { on: { on: !light.on.on } }),
+      optimisticUpdate: (lights) => lights.updateItem(light, { on: { on: !light.on.on } }),
     });
 
     toast.style = Style.Success;
@@ -280,7 +280,7 @@ async function handleSetBrightness(
     hueClient.setBrightness(light, percentage).then(() => mutateLights());
     await mutateLights(hueClient.setBrightness(light, percentage), {
       optimisticUpdate: (lights) =>
-        lights.update(light, {
+        lights.updateItem(light, {
           on: { on: true },
           dimming: { brightness: percentage },
         }),
@@ -307,7 +307,7 @@ async function handleIncreaseBrightness(hueClient: HueClient, light: Light, muta
   try {
     await mutateLights(hueClient.setBrightness(light, newBrightness), {
       optimisticUpdate: (lights) =>
-        lights.update(light, {
+        lights.updateItem(light, {
           on: { on: true },
           dimming: { brightness: newBrightness },
         }),
@@ -330,7 +330,7 @@ async function handleDecreaseBrightness(hueClient: HueClient, light: Light, muta
 
   try {
     await mutateLights(hueClient.setBrightness(light, newBrightness), {
-      optimisticUpdate: (lights) => lights.update(light, { dimming: { brightness: newBrightness } }),
+      optimisticUpdate: (lights) => lights.updateItem(light, { dimming: { brightness: newBrightness } }),
     });
 
     toast.style = Style.Success;

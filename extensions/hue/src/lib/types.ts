@@ -14,6 +14,10 @@ export type CssColor = {
   value: string;
 };
 
+export interface HasId {
+  id: number;
+}
+
 ///////////////////
 // Hue API types //
 ///////////////////
@@ -509,4 +513,27 @@ export type Room = {
       | "pool"
       | "other";
   };
+};
+
+export type UpdateEvent = {
+  /**
+   * The creation time of the update event, represented as an ISO 8601 string.
+   */
+  creationtime: string;
+
+  // TODO: Expand this to include additional types
+  /**
+   * The data of the update event, represented as an array of API objects.
+   */
+  data: (Light | Room)[];
+
+  /**
+   * A unique identifier for the update event, represented as a UUID string.
+   */
+  id: string;
+
+  /**
+   * The type of the event, in this case, it is 'update'.
+   */
+  type: "update";
 };

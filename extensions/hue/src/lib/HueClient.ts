@@ -2,7 +2,7 @@
 
 import fs from "fs";
 import { environment } from "@raycast/api";
-import { Light, Room, Scene } from "./types";
+import { Light, Room, Scene, UpdateEvent } from "./types";
 import {
   ClientHttp2Session,
   connect,
@@ -12,8 +12,10 @@ import {
   OutgoingHttpHeaders,
   sensitiveHeaders,
 } from "http2";
+import React from "react";
 
-const { HTTP2_HEADER_METHOD, HTTP2_HEADER_PATH } = constants;
+const DATA_PREFIX = "data: ";
+const { HTTP2_HEADER_METHOD, HTTP2_HEADER_PATH, HTTP2_HEADER_ACCEPT } = constants;
 
 type Response = {
   headers: IncomingHttpHeaders & IncomingHttpStatusHeader;
@@ -29,12 +31,19 @@ export default class HueClient {
   public bridgeIpAddress: string;
   public bridgeId: string;
   public bridgeUsername: string;
+  private readonly setLights: React.Dispatch<React.SetStateAction<Light[]>>;
   private readonly http2Session: ClientHttp2Session;
 
-  constructor(bridgeIpAddress: string, bridgeId: string, bridgeUsername: string) {
+  constructor(
+    setLights: React.Dispatch<React.SetStateAction<Light[]>>,
+    bridgeIpAddress: string,
+    bridgeId: string,
+    bridgeUsername: string
+  ) {
     this.bridgeIpAddress = bridgeIpAddress;
     this.bridgeId = bridgeId;
     this.bridgeUsername = bridgeUsername;
+    this.setLights = setLights;
     this.http2Session = connect(`https://${bridgeIpAddress}`, {
       ca: fs.readFileSync(environment.assetsPath + "/philips-hue-cert.pem"),
       checkServerIdentity: (hostname, cert) => {
@@ -45,6 +54,7 @@ export default class HueClient {
         }
       },
     });
+    this.listenToEventSource();
   }
 
   public async getLights(): Promise<Light[]> {
@@ -164,5 +174,52 @@ export default class HueClient {
 
       stream.end();
     });
+  }
+
+  private listenToEventSource(): void {
+    const stream = this.http2Session.request({
+      [HTTP2_HEADER_METHOD]: "GET",
+      [HTTP2_HEADER_PATH]: "/eventstream/clip/v2",
+      // This is also possible: [HTTP2_HEADER_PATH]: "/eventstream/clip/v2/resource/light",
+      [HTTP2_HEADER_ACCEPT]: "text/event-stream",
+      "hue-application-key": this.bridgeUsername,
+      [sensitiveHeaders]: ["hue-application-key"],
+    });
+
+    stream.setEncoding("utf8");
+
+    stream.on("data", (data) => {
+      const lines = data.split("\n");
+
+      for (const line of lines) {
+        const dataPrefixIndex = line.indexOf(DATA_PREFIX);
+        if (dataPrefixIndex === -1) continue;
+
+        const dataString: string = line.substring(dataPrefixIndex + DATA_PREFIX.length);
+        const updateEvents: UpdateEvent[] = JSON.parse(dataString);
+
+        updateEvents.forEach((updateEvent) => {
+          const lights = updateEvent.data
+            .filter((resource) => resource.type === "light")
+            .map((resource) => resource as Light);
+
+          console.log(lights);
+
+          this.setLights((prevState: Light[]) => {
+            return prevState.updateItems(prevState, lights);
+          });
+        });
+      }
+    });
+
+    stream.on("end", () => {
+      stream.close();
+    });
+
+    stream.on("error", (error) => {
+      console.error(error);
+      stream.close();
+    });
+    stream.end();
   }
 }

@@ -16,6 +16,8 @@ import HueClient from "./HueClient";
 import { useDeepMemo } from "@raycast/utils/dist/useDeepMemo";
 import { useMachine } from "@xstate/react";
 import { HueMessage, SendHueMessage } from "./useHue";
+import { Light } from "./types";
+import React from "react";
 
 export type HueBridgeState = State<
   HueContext,
@@ -32,8 +34,8 @@ export type HueContext = {
   hueClient?: HueClient;
 };
 
-export function useHueBridgeMachine(onLinked: () => void) {
-  const machine = useDeepMemo(() => hueBridgeMachine(onLinked));
+export function useHueBridgeMachine(setLights: React.Dispatch<React.SetStateAction<Light[]>>) {
+  const machine = useDeepMemo(() => hueBridgeMachine(setLights));
 
   const [hueBridgeState, send] = useMachine(machine);
   const sendHueMessage: SendHueMessage = (message: HueMessage) => {
@@ -49,7 +51,7 @@ export function useHueBridgeMachine(onLinked: () => void) {
 /**
  * @see https://stately.ai/viz/ee0edf94-7a82-4d65-a6a8-324e2f1eca49
  */
-function hueBridgeMachine(onLinked: () => void) {
+function hueBridgeMachine(setLights: React.Dispatch<React.SetStateAction<Light[]>>) {
   return createMachine<HueContext>({
     id: "manage-hue-bridge",
     initial: "loadingCredentials",
@@ -106,7 +108,7 @@ function hueBridgeMachine(onLinked: () => void) {
               throw Error("Invalid state");
             }
 
-            return new HueClient(context.bridgeIpAddress, context.bridgeId, context.bridgeUsername);
+            return new HueClient(setLights, context.bridgeIpAddress, context.bridgeId, context.bridgeUsername);
           },
           onDone: {
             actions: assign({ hueClient: (context, event) => event.data }),
@@ -185,7 +187,7 @@ function hueBridgeMachine(onLinked: () => void) {
               bridgeUsername: (context, event) => event.data.username,
               hueClient: (context, event) => {
                 if (context.bridgeIpAddress === undefined) throw Error("Invalid state");
-                return new HueClient(context.bridgeIpAddress, event.data.id, event.data.username);
+                return new HueClient(setLights, context.bridgeIpAddress, event.data.id, event.data.username);
               },
             }),
           },
@@ -211,7 +213,6 @@ function hueBridgeMachine(onLinked: () => void) {
             LocalStorage.setItem(BRIDGE_IP_ADDRESS_KEY, context.bridgeIpAddress).then();
             LocalStorage.setItem(BRIDGE_ID, context.bridgeId).then();
             LocalStorage.setItem(BRIDGE_USERNAME_KEY, context.bridgeUsername).then();
-            onLinked();
           },
         },
         on: {

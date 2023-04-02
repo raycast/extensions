@@ -14,18 +14,24 @@ import {
 import HueClient from "./HueClient";
 
 declare global {
-  interface Array<T> {
-    update(object: T, changes: object): Array<T>;
+  interface Array<T extends { id: string }> {
+    updateItem(item: T, changes: object): Array<T>;
+
+    updateItems(array: T[], newObjects: T[]): T[];
   }
 }
 
-Array.prototype.update = function (object, changes) {
+Array.prototype.updateItem = function (item, changes) {
   return this.map((it) => {
-    if (it.id !== object.id) return it;
-    return {
-      ...it,
-      ...changes,
-    };
+    if (it.id !== item.id) return it;
+    return { ...it, ...changes };
+  });
+};
+
+Array.prototype.updateItems = function (array, newItems) {
+  return array.map((item) => {
+    const foundItem = newItems.find((newItem) => newItem.id === item.id);
+    return foundItem ? Object.assign({}, item, foundItem) : item;
   });
 };
 

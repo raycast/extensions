@@ -1,4 +1,5 @@
-import { useCachedPromise } from "@raycast/utils";
+import { useEffect } from "react";
+import { useCachedPromise, useCachedState } from "@raycast/utils";
 import { useHueBridgeMachine } from "./hueBridgeMachine";
 import { handleError } from "./utils";
 import { Light, Room, Scene } from "./types";
@@ -7,33 +8,23 @@ export type HueMessage = "LINK" | "RETRY" | "DONE" | "UNLINK";
 export type SendHueMessage = (message: HueMessage) => void;
 
 export function useHue() {
-  const { hueBridgeState, sendHueMessage } = useHueBridgeMachine(() => {
-    revalidateLights();
-    revalidateRooms();
-    revalidateScenes();
-  });
+  const [lights, setLights] = useCachedState("lights", [] as Light[]);
 
-  const {
-    isLoading: isLoadingLights,
-    data: lights,
-    mutate: mutateLights,
-    revalidate: revalidateLights,
-  } = useCachedPromise(
-    async () => {
-      if (hueBridgeState.context.hueClient === undefined) {
-        throw new Error("Hue client is undefined");
+  const { hueBridgeState, sendHueMessage } = useHueBridgeMachine(setLights);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const lights = await hueBridgeState.context.hueClient?.getLights();
+      if (lights === undefined) {
+        throw new Error("Lights are undefined");
       }
+      setLights(lights);
+    };
 
-      return hueBridgeState.context.hueClient.getLights();
-    },
-    [],
-    {
-      keepPreviousData: true,
-      initialData: [] as Light[],
-      onError: handleError,
-      execute: hueBridgeState.context.hueClient !== undefined,
+    if (hueBridgeState.context.hueClient !== undefined) {
+      fetchData().then();
     }
-  );
+  }, [hueBridgeState.context.hueClient]);
 
   const {
     isLoading: isLoadingRooms,
@@ -83,9 +74,9 @@ export function useHue() {
   return {
     hueBridgeState,
     sendHueMessage,
-    isLoading: isLoadingLights || isLoadingRooms || isLoadingScenes,
+    isLoading: !lights.length || isLoadingRooms || isLoadingScenes,
     lights,
-    mutateLights,
+    setLights: setLights,
     rooms,
     mutateRooms,
     scenes,
