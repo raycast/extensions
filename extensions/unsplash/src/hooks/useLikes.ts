@@ -1,26 +1,13 @@
-import { getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { showToast, Toast } from "@raycast/api";
 import { useState } from "react";
-import fetch from "node-fetch";
 import useSWR from "swr";
+import { getUserLikes } from "@/functions/getUserLikes";
 
 export const useLikes = () => {
-  const { accessKey, username } = getPreferenceValues();
-
-  if (!username) {
-    showToast(Toast.Style.Failure, "Username is missing.", "Please set a username from extension settings.");
-  }
-
   const [loading, setLoading] = useState(true);
   const [likes, setLikes] = useState<LikesResult[]>([]);
 
-  const fetcher = (url: string) =>
-    fetch(url, {
-      headers: {
-        Authorization: `Client-ID ${accessKey}`,
-      },
-    }).then((r) => r.json() as Promise<LikesResult[]>);
-
-  useSWR<LikesResult[]>(`https://api.unsplash.com/users/${username}/likes`, fetcher, {
+  useSWR<LikesResult[]>(`get-user-likes`, getUserLikes, {
     onSuccess: (data) => {
       if ((data as Errors).errors) {
         setLoading(false);
