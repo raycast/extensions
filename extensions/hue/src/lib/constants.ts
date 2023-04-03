@@ -3,11 +3,9 @@ export const BRIDGE_ID = "bridgeId";
 export const BRIDGE_IP_ADDRESS_KEY = "bridgeIpAddress";
 export const BRIDGE_USERNAME_KEY = "bridgeUsername";
 
-// TODO: Remove now that V2 API uses 0-100% values
-export const BRIGHTNESSES = [1].concat(Array.from(Array(10).keys()).map((i) => i * 10 + 10)).reverse();
-export const BRIGHTNESS_STEP = 10;
-export const BRIGHTNESS_MAX = 100;
-export const BRIGHTNESS_MIN = 0;
+export const BRIGHTNESSES = [1, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
+export const LOWEST_BRIGHTNESS = BRIGHTNESSES[0];
+export const HIGHEST_BRIGHTNESS = BRIGHTNESSES[BRIGHTNESSES.length - 1];
 export const COLOR_TEMPERATURE_STEP = (500.0 - 153.0) / 10.0;
 export const COLOR_TEMP_MAX = 500;
 export const COLOR_TEMP_MIN = 153;

@@ -1,7 +1,7 @@
 import { ActionPanel, Icon, List, Toast } from "@raycast/api";
-import { calculateAdjustedBrightness, getIconForColor, getLightIcon } from "./lib/utils";
+import { calculateAdjustedBrightness, getClosestBrightness, getIconForColor, getLightIcon } from "./lib/utils";
 import { CssColor, Group, Light } from "./lib/types";
-import { BRIGHTNESS_MAX, BRIGHTNESSES } from "./lib/constants";
+import { BRIGHTNESSES, HIGHEST_BRIGHTNESS, LOWEST_BRIGHTNESS } from "./lib/constants";
 import ManageHueBridge from "./components/ManageHueBridge";
 import UnlinkAction from "./components/UnlinkAction";
 import { SendHueMessage, useHue } from "./lib/useHue";
@@ -153,26 +153,33 @@ function SetBrightnessAction(props: { light: Light; onSet: (percentage: number) 
 }
 
 function IncreaseBrightnessAction(props: { light: Light; onIncrease: () => void }) {
-  return props.light.dimming?.brightness && props.light.dimming.brightness < BRIGHTNESS_MAX ? (
+  if (props.light.dimming === undefined || getClosestBrightness(props.light.dimming.brightness) >= HIGHEST_BRIGHTNESS) {
+    return null;
+  }
+
+  return (
     <ActionPanel.Item
       title="Increase Brightness"
       shortcut={{ modifiers: ["cmd", "shift"], key: "arrowUp" }}
       icon={Icon.Plus}
       onAction={props.onIncrease}
     />
-  ) : null;
+  );
 }
 
 function DecreaseBrightnessAction(props: { light: Light; onDecrease: () => void }) {
-  return props.light.dimming !== undefined &&
-  props.light.dimming.brightness > (props.light.dimming.min_dim_level ?? 0) ? (
+  if (props.light.dimming === undefined || getClosestBrightness(props.light.dimming.brightness) <= LOWEST_BRIGHTNESS) {
+    return null;
+  }
+
+  return (
     <ActionPanel.Item
       title="Decrease Brightness"
       shortcut={{ modifiers: ["cmd", "shift"], key: "arrowDown" }}
       icon={Icon.Minus}
       onAction={props.onDecrease}
     />
-  ) : null;
+  );
 }
 
 function SetColorAction(props: { light: Light; onSet: (color: CssColor) => void }) {
@@ -282,10 +289,11 @@ async function handleIncreaseBrightness(
   light: Light,
 ) {
   const toast = new Toast({ title: "" });
-  const adjustedBrightness = calculateAdjustedBrightness(light, "increase");
 
   try {
     if (hueClient === undefined) throw new Error("Not connected to Hue Bridge.");
+    if (light.dimming === undefined) throw new Error("Light does not support dimming.");
+    const adjustedBrightness = calculateAdjustedBrightness(light.dimming.brightness, "increase");
     await hueClient.updateLight(light, {
       ...(light.on.on ? {} : { on: { on: true } }),
       dimming: { brightness: adjustedBrightness },
@@ -309,10 +317,11 @@ async function handleDecreaseBrightness(
   light: Light,
 ) {
   const toast = new Toast({ title: "" });
-  const adjustedBrightness = calculateAdjustedBrightness(light, "decrease");
 
   try {
     if (hueClient === undefined) throw new Error("Not connected to Hue Bridge.");
+    if (light.dimming === undefined) throw new Error("Light does not support dimming.");
+    const adjustedBrightness = calculateAdjustedBrightness(light.dimming.brightness, "decrease");
     await hueClient.updateLight(light, {
       ...(light.on.on ? {} : { on: { on: true } }),
       dimming: { brightness: adjustedBrightness },

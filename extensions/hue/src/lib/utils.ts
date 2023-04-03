@@ -177,15 +177,24 @@ export async function setGroupColor(hueClient: HueClient, group: Group, color: s
   await api.groups.setGroupState(group.id, newLightState);
 }
 
-export function calculateAdjustedBrightness(light: Light, direction: "increase" | "decrease") {
-  if (!light.dimming) {
-    throw new Error("Light does not support dimming");
-  }
+/**
+ * Because the Hue API does not return the exact brightness value that was set,
+ * we need to find the closest brightness so that we can update the UI accordingly.
+ */
+export function getClosestBrightness(brightness: number) {
+  return BRIGHTNESSES.reduce((prev, curr) => {
+    return Math.abs(curr - brightness) < Math.abs(prev - brightness) ? curr : prev;
+  });
+}
 
-  const newBrightness = light.dimming.brightness + (direction === "increase" ? BRIGHTNESS_STEP : -BRIGHTNESS_STEP);
-  const minBrightness = light.dimming.min_dim_level ?? BRIGHTNESS_MIN;
+export function calculateAdjustedBrightness(brightness: number, direction: "increase" | "decrease") {
+  const closestBrightness = getClosestBrightness(brightness);
 
-  return Math.clamp(newBrightness, minBrightness, BRIGHTNESS_MAX);
+  return (
+    (direction === "increase" ? BRIGHTNESSES : [...BRIGHTNESSES].reverse()).find((b) => {
+      return direction === "increase" ? b > closestBrightness : b < closestBrightness;
+    }) ?? closestBrightness
+  );
 }
 
 export function calculateAdjustedColorTemperature(entity: Light | Group, direction: "increase" | "decrease") {
