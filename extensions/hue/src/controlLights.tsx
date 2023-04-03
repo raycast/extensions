@@ -1,5 +1,5 @@
 import { ActionPanel, Icon, List, Toast } from "@raycast/api";
-import { calculateAdjustedBrightness, getIconForColor, getLightIcon, setLightColor } from "./lib/utils";
+import { calculateAdjustedBrightness, getIconForColor, getLightIcon } from "./lib/utils";
 import { CssColor, Light, ResourceIdentifier, Room } from "./lib/types";
 import { BRIGHTNESS_MAX, BRIGHTNESSES } from "./lib/constants";
 import ManageHueBridge from "./components/ManageHueBridge";
@@ -16,14 +16,8 @@ export default function ControlLights() {
   const { hueBridgeState, sendHueMessage, isLoading, lights, setLights, rooms } = useHue();
 
   // This element handles any scenario that involves the Bridge not being ready
-  const manageHueBridgeElement: JSX.Element | null = ManageHueBridge(hueBridgeState, sendHueMessage);
+  const manageHueBridgeElement = ManageHueBridge(hueBridgeState, sendHueMessage);
   if (manageHueBridgeElement !== null) return manageHueBridgeElement;
-
-  // If we get here, the Bridge is ready
-  const hueClient = hueBridgeState.context.hueClient;
-  if (hueClient === undefined) {
-    throw new Error("Hue client is undefined");
-  }
 
   return (
     <List isLoading={isLoading}>
@@ -35,7 +29,7 @@ export default function ControlLights() {
 
         return (
           <Group
-            hueClient={hueClient}
+            hueClient={hueBridgeState.context.hueClient}
             key={room.id}
             lights={roomLights}
             room={room}
@@ -49,7 +43,7 @@ export default function ControlLights() {
 }
 
 function Group(props: {
-  hueClient: HueClient;
+  hueClient?: HueClient;
   lights: Light[];
   room: Room;
   setLights: React.Dispatch<React.SetStateAction<Light[]>>;
@@ -74,7 +68,7 @@ function Group(props: {
 }
 
 function Light(props: {
-  hueClient: HueClient;
+  hueClient?: HueClient;
   light: Light;
   room?: Room;
   setLights: React.Dispatch<React.SetStateAction<Light[]>>;
@@ -241,13 +235,14 @@ function RefreshAction(props: { onRefresh: () => void }) {
 }
 
 async function handleToggle(
-  hueClient: HueClient,
+  hueClient: HueClient | undefined,
   light: Light,
   setLights: React.Dispatch<React.SetStateAction<Light[]>>
 ) {
   const toast = new Toast({ title: "" });
 
   try {
+    if (hueClient === undefined) throw new Error("Not connected to Hue Bridge.");
     await hueClient.toggleLight(light);
 
     setLights((prevState) => {
@@ -269,7 +264,7 @@ async function handleToggle(
 }
 
 async function handleSetBrightness(
-  hueClient: HueClient,
+  hueClient: HueClient | undefined,
   light: Light,
   setLights: React.Dispatch<React.SetStateAction<Light[]>>,
   percentage: number
@@ -277,6 +272,7 @@ async function handleSetBrightness(
   const toast = new Toast({ title: "" });
 
   try {
+    if (hueClient === undefined) throw new Error("Not connected to Hue Bridge.");
     await hueClient.setBrightness(light, percentage);
     setLights((prevState) => {
       return prevState.updateItem(light, {
@@ -300,7 +296,7 @@ async function handleSetBrightness(
 }
 
 async function handleIncreaseBrightness(
-  hueClient: HueClient,
+  hueClient: HueClient | undefined,
   light: Light,
   setLights: React.Dispatch<React.SetStateAction<Light[]>>
 ) {
@@ -308,6 +304,7 @@ async function handleIncreaseBrightness(
   const newBrightness = calculateAdjustedBrightness(light, "increase");
 
   try {
+    if (hueClient === undefined) throw new Error("Not connected to Hue Bridge.");
     await hueClient.setBrightness(light, newBrightness);
     setLights((prevState) => {
       return prevState.updateItem(light, {
@@ -330,7 +327,7 @@ async function handleIncreaseBrightness(
 }
 
 async function handleDecreaseBrightness(
-  hueClient: HueClient,
+  hueClient: HueClient | undefined,
   light: Light,
   setLights: React.Dispatch<React.SetStateAction<Light[]>>
 ) {
@@ -338,6 +335,7 @@ async function handleDecreaseBrightness(
   const newBrightness = calculateAdjustedBrightness(light, "decrease");
 
   try {
+    if (hueClient === undefined) throw new Error("Not connected to Hue Bridge.");
     await hueClient.setBrightness(light, newBrightness);
     setLights((prevState) => {
       return prevState.updateItem(light, {
@@ -360,7 +358,7 @@ async function handleDecreaseBrightness(
 }
 
 async function handleSetColor(
-  hueClient: HueClient,
+  hueClient: HueClient | undefined,
   light: Light,
   setLights: React.Dispatch<React.SetStateAction<Light[]>>,
   color: CssColor
@@ -388,7 +386,7 @@ async function handleSetColor(
 }
 
 async function handleIncreaseColorTemperature(
-  hueClient: HueClient,
+  hueClient: HueClient | undefined,
   light: Light,
   setLights: React.Dispatch<React.SetStateAction<Light[]>>
 ) {
@@ -417,7 +415,7 @@ async function handleIncreaseColorTemperature(
 }
 
 async function handleDecreaseColorTemperature(
-  hueClient: HueClient,
+  hueClient: HueClient | undefined,
   light: Light,
   setLights: React.Dispatch<React.SetStateAction<Light[]>>
 ) {

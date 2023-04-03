@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Alert, confirmAlert, Detail, Icon, List, Toast } from "@raycast/api";
+import { Action, ActionPanel, Alert, confirmAlert, Detail, Icon, Toast } from "@raycast/api";
 import { HueBridgeState } from "../lib/hueBridgeMachine";
 import {
   discoveringMessage,
@@ -11,6 +11,9 @@ import {
 import { SendHueMessage } from "../lib/useHue";
 import ActionStyle = Alert.ActionStyle;
 import Style = Toast.Style;
+import { interpret } from "xstate";
+import { hue } from "node-hue-api/lib/model/lightstate/stateParameters";
+import * as util from "util";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export default function ManageHueBridge(
@@ -31,9 +34,14 @@ export default function ManageHueBridge(
   switch (hueBridgeState.value) {
     case "loadingCredentials":
     case "discoveringUsingPublicApi":
+    case "connected":
+      return null;
     case "connecting":
-      return <List isLoading />;
+      toast.message = "Connecting to Hue Bridge…";
+      toast.show().then();
+      return null;
     case "failedToConnect":
+      toast.hide().then();
       contextActions = [
         <Action key="retryConnect" title="Retry" onAction={() => sendHueMessage("RETRY")} icon={Icon.Repeat} />,
         <Action key="unlink" title="Unlink Saved Hue Bridge" onAction={unlinkSavedBridge} icon={Icon.Trash} />,

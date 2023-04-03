@@ -9,15 +9,14 @@ import {
   TypegenDisabled,
 } from "xstate";
 import { discoverBridgeUsingMdns, discoverBridgeUsingNupnp, getUsernameFromBridge } from "./utils";
-import { LocalStorage } from "@raycast/api";
+import { LocalStorage, Toast } from "@raycast/api";
 import { v3 } from "node-hue-api";
 import { BRIDGE_ID, BRIDGE_IP_ADDRESS_KEY, BRIDGE_USERNAME_KEY } from "./constants";
 import HueClient from "./HueClient";
-import { useDeepMemo } from "@raycast/utils/dist/useDeepMemo";
 import { useMachine } from "@xstate/react";
 import { HueMessage, SendHueMessage } from "./useHue";
 import { GroupedLight, Light, Room, Scene, Zone } from "./types";
-import React from "react";
+import React, { useMemo } from "react";
 
 export type HueBridgeState = State<
   HueContext,
@@ -41,7 +40,7 @@ export function useHueBridgeMachine(
   setZones: React.Dispatch<React.SetStateAction<Zone[]>>,
   setScenes: React.Dispatch<React.SetStateAction<Scene[]>>
 ) {
-  const machine = useDeepMemo(() => hueBridgeMachine(setLights, setGroupedLights, setRooms, setZones, setScenes));
+  const machine = useMemo(() => hueBridgeMachine(setLights, setGroupedLights, setRooms, setZones, setScenes), []);
 
   const [hueBridgeState, send] = useMachine(machine);
   const sendHueMessage: SendHueMessage = (message: HueMessage) => {
@@ -120,7 +119,7 @@ function hueBridgeMachine(
               throw Error("Invalid state");
             }
 
-            return await HueClient.createInstance(
+            const hueClient = await HueClient.createInstance(
               context.bridgeIpAddress,
               context.bridgeId,
               context.bridgeUsername,
@@ -130,6 +129,10 @@ function hueBridgeMachine(
               setZones,
               setScenes
             );
+
+            new Toast({ title: "" }).hide().then();
+
+            return hueClient;
           },
           onDone: {
             actions: assign({ hueClient: (context, event) => event.data }),
