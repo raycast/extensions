@@ -1,4 +1,4 @@
-import { Detail, ActionPanel, List } from "@raycast/api";
+import { Detail, ActionPanel } from "@raycast/api";
 import { MutatePromise } from "@raycast/utils";
 import { IssuePriorityValue, User } from "@linear/sdk";
 
@@ -36,8 +36,8 @@ export default function IssueDetail({ issue: existingIssue, mutateList, prioriti
 
   const cycle = issue?.cycle ? formatCycle(issue.cycle) : null;
 
-  const relatedIssues = !!issue.relations ? issue.relations.nodes.filter((node) => node.type == "related") : null;
-  const duplicateIssues = !!issue.relations ? issue.relations.nodes.filter((node) => node.type == "duplicate") : null;
+  const relatedIssues = issue.relations ? issue.relations.nodes.filter((node) => node.type == "related") : null;
+  const duplicateIssues = issue.relations ? issue.relations.nodes.filter((node) => node.type == "duplicate") : null;
   
   return (
     <Detail
