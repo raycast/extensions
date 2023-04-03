@@ -8,6 +8,7 @@ export const useSearch = <T extends "collections" | "photos">(
   orientation: "all" | "landscape" | "portrait" | "squarish"
 ) => {
   const [state, setState] = useState<SearchState<T>>({ results: [], isLoading: true });
+  const [lastSearch, setLastSearch] = useState("");
   const cancelRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
@@ -17,6 +18,11 @@ export const useSearch = <T extends "collections" | "photos">(
       cancelRef.current?.abort();
     };
   }, []);
+
+  useEffect(() => {
+    if (lastSearch === "") return;
+    search(lastSearch);
+  }, [orientation]);
 
   const search = async (searchText: string) => {
     cancelRef.current?.abort();
@@ -56,6 +62,8 @@ export const useSearch = <T extends "collections" | "photos">(
       if (errors?.length) {
         showToast(Toast.Style.Failure, `Failed to fetch ${type}.`, errors?.join("\n"));
       }
+
+      setLastSearch(searchText);
 
       setState((oldState) => ({
         ...oldState,
