@@ -56,7 +56,7 @@ export default function Command() {
             execSync(`chmod +x ${environment.assetsPath}/webp/dwebp`);
             execSync(`${environment.assetsPath}/webp/dwebp "${item}" -o "${pngPath}"`);
             execSync(
-              `sips --setProperty format "bmp" "${pngPath}" --out "${bmpPath}" && ${environment.assetsPath}/potrace/potrace -s --tight -o "${newPath}" "${bmpPath}"; rm "${bmpPath}"; open "${pngPath}"; rm "${pngPath}"`
+              `sips --setProperty format "bmp" "${pngPath}" --out "${bmpPath}" && ${environment.assetsPath}/potrace/potrace -s --tight -o "${newPath}" "${bmpPath}"; rm "${bmpPath}"; rm "${pngPath}"`
             );
           } else {
             execSync(
