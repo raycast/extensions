@@ -323,58 +323,6 @@ export type Light = {
   };
 };
 
-export type GroupedLight = {
-  /**
-   * Type of the supported resources
-   */
-  type?: "light";
-
-  /**
-   * string (pattern: ^[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}$)
-   *
-   * Unique identifier representing a specific resource instance.
-   */
-  id: string;
-
-  /**
-   * Clip v1 resource identifier.
-   */
-  id_v1?: string;
-
-  /**
-   * Owner of the service
-   *
-   * In case the owner service is deleted, the service also gets deleted.
-   */
-  owner: ResourceIdentifier;
-
-  /**
-   * Joined on control & aggregated on state.
-   *
-   * “on” is true if any light in the group is on
-   */
-  on?: {
-    /**
-     * On/Off state of the light group
-     */
-    on: boolean;
-  };
-
-  /**
-   * Joined dimming control
-   *
-   * “dimming.brightness” contains average brightness of group containing
-   * turned-on lights only.
-   */
-  dimming?: {
-    /**
-     * Brightness percentage
-     *
-     * Value cannot be 0, writing 0 changes it to the lowest possible brightness
-     */
-    brightness: number;
-  };
-};
 
 export type Scene = {
   /**
@@ -395,7 +343,63 @@ export type Scene = {
   /**
    * List of actions to be executed synchronously on recall
    */
-  actions: ActionElement[];
+  actions: {
+    /**
+     * The identifier of the light to execute the action on
+     */
+    target: ResourceIdentifier;
+
+    /**
+     * The action to be executed on recall
+     */
+    action: {
+      on?: {
+        /**
+         * On/Off state of the light
+         */
+        on: boolean;
+      };
+
+      dimming?: {
+        /**
+         * Brightness percentage, value cannot be 0.
+         *
+         * Writing 0 changes it to the lowest possible brightness.
+         */
+        brightness: number;
+      };
+
+      color?: {
+        /**
+         * CIE XY gamut position
+         */
+        xy: {
+          /**
+           * number (0 - 1)
+           *
+           * X position in the color gamut
+           */
+          x: number;
+
+          /**
+           * number (0 - 1)
+           *
+           * Y position in the color gamut
+           */
+          y: number;
+        };
+      };
+
+      color_temperature?: {
+        /**
+         * integer (153 - 500)
+         *
+         * Color temperature in mirek or null when the light color is not on the ct spectrum.
+         */
+        mirek: number;
+      };
+    };
+  }[];
   metadata: {
     /**
      * Human-readable name of the resource
@@ -417,64 +421,6 @@ export type Scene = {
    * If the group is changed (e.g. light added/removed) the scene is updated.
    */
   group: ResourceIdentifier;
-};
-
-export type ActionElement = {
-  /**
-   * The identifier of the light to execute the action on
-   */
-  target: ResourceIdentifier;
-
-  /**
-   * The action to be executed on recall
-   */
-  action: {
-    on?: {
-      /**
-       * On/Off state of the light
-       */
-      on: boolean;
-    };
-
-    dimming?: {
-      /**
-       * Brightness percentage, value cannot be 0.
-       *
-       * Writing 0 changes it to the lowest possible brightness.
-       */
-      brightness: number;
-    };
-
-    color?: {
-      /**
-       * CIE XY gamut position
-       */
-      xy: {
-        /**
-         * number (0 - 1)
-         *
-         * X position in the color gamut
-         */
-        x: number;
-
-        /**
-         * number (0 - 1)
-         *
-         * Y position in the color gamut
-         */
-        y: number;
-      };
-    };
-
-    color_temperature?: {
-      /**
-       * integer (153 - 500)
-       *
-       * Color temperature in mirek or null when the light color is not on the ct spectrum.
-       */
-      mirek: number;
-    };
-  };
 };
 
 type Group = {
@@ -584,7 +530,7 @@ export type UpdateEvent = {
   /**
    * The data of the update event, represented as an array of API objects.
    */
-  data: (Light | GroupedLight | Room | Zone | Scene)[];
+  data: (Light | Room | Zone | Scene)[];
 
   /**
    * A unique identifier for the update event, represented as a UUID string.

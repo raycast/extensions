@@ -1,25 +1,18 @@
 import { useEffect } from "react";
 import { useCachedState } from "@raycast/utils";
 import { useHueBridgeMachine } from "./hueBridgeMachine";
-import { GroupedLight, Light, Room, Scene, Zone } from "./types";
+import { Light, Room, Scene, Zone } from "./types";
 
 export type HueMessage = "LINK" | "RETRY" | "DONE" | "UNLINK";
 export type SendHueMessage = (message: HueMessage) => void;
 
 export function useHue() {
   const [lights, setLights] = useCachedState("lights", [] as Light[]);
-  const [groupedLights, setGroupedLights] = useCachedState("groupedLights", [] as GroupedLight[]);
   const [rooms, setRooms] = useCachedState("rooms", [] as Room[]);
   const [zones, setZones] = useCachedState("zones", [] as Zone[]);
   const [scenes, setScenes] = useCachedState("scenes", [] as Scene[]);
 
-  const { hueBridgeState, sendHueMessage } = useHueBridgeMachine(
-    setLights,
-    setGroupedLights,
-    setRooms,
-    setZones,
-    setScenes
-  );
+  const { hueBridgeState, sendHueMessage } = useHueBridgeMachine(setLights, setRooms, setZones, setScenes);
 
   useEffect(() => {
     if (hueBridgeState.context.hueClient !== undefined) {
@@ -31,7 +24,6 @@ export function useHue() {
         // Executing these in parallel causes the API to return an error as if one of the endpoints is not found.
         // Since we're using HTTP/2 we can just execute them sequentially, and it's faster anyway.
         setLights(await hueBridgeState.context.hueClient.getLights());
-        setGroupedLights(await hueBridgeState.context.hueClient.getGroupedLights());
         setRooms(await hueBridgeState.context.hueClient.getRooms());
         setZones(await hueBridgeState.context.hueClient.getZones());
         setScenes(await hueBridgeState.context.hueClient.getScenes());
@@ -45,8 +37,6 @@ export function useHue() {
     isLoading: !lights.length || !rooms.length || !scenes.length,
     lights,
     setLights,
-    groupedLights,
-    setGroupedLights,
     rooms,
     setRooms,
     zones,

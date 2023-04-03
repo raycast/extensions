@@ -2,7 +2,7 @@
 
 import fs from "fs";
 import { environment } from "@raycast/api";
-import { GroupedLight, Light, Room, Scene, UpdateEvent, Zone } from "./types";
+import { Light, Room, Scene, UpdateEvent, Zone } from "./types";
 import {
   ClientHttp2Session,
   connect,
@@ -34,7 +34,6 @@ export default class HueClient {
   public bridgeId: string;
   public bridgeUsername: string;
   private readonly setLights: React.Dispatch<React.SetStateAction<Light[]>>;
-  private readonly setGroupedLights: React.Dispatch<React.SetStateAction<GroupedLight[]>>;
   private readonly setRooms: React.Dispatch<React.SetStateAction<Room[]>>;
   private readonly setZones: React.Dispatch<React.SetStateAction<Zone[]>>;
   private readonly setScenes: React.Dispatch<React.SetStateAction<Scene[]>>;
@@ -47,7 +46,6 @@ export default class HueClient {
     bridgeUsername: string,
     http2Session: ClientHttp2Session,
     setLights: React.Dispatch<React.SetStateAction<Light[]>>,
-    setGroupedLights: React.Dispatch<React.SetStateAction<GroupedLight[]>>,
     setRooms: React.Dispatch<React.SetStateAction<Room[]>>,
     setZones: React.Dispatch<React.SetStateAction<Zone[]>>,
     setScenes: React.Dispatch<React.SetStateAction<Scene[]>>
@@ -57,7 +55,6 @@ export default class HueClient {
     this.bridgeIpAddress = bridgeIpAddress;
     this.bridgeId = bridgeId;
     this.setLights = setLights;
-    this.setGroupedLights = setGroupedLights;
     this.setRooms = setRooms;
     this.setZones = setZones;
     this.setScenes = setScenes;
@@ -69,7 +66,6 @@ export default class HueClient {
     bridgeId: string,
     bridgeUsername: string,
     setLights: React.Dispatch<React.SetStateAction<Light[]>>,
-    setGroupedLights: React.Dispatch<React.SetStateAction<GroupedLight[]>>,
     setRooms: React.Dispatch<React.SetStateAction<Room[]>>,
     setZones: React.Dispatch<React.SetStateAction<Zone[]>>,
     setScenes: React.Dispatch<React.SetStateAction<Scene[]>>
@@ -105,7 +101,6 @@ export default class HueClient {
       bridgeUsername,
       http2Session,
       setLights,
-      setGroupedLights,
       setRooms,
       setZones,
       setScenes
@@ -116,14 +111,6 @@ export default class HueClient {
     const response = await this.makeRequest({
       [HTTP2_HEADER_METHOD]: "GET",
       [HTTP2_HEADER_PATH]: "/clip/v2/resource/light",
-    });
-    return response.data.data;
-  }
-
-  public async getGroupedLights(): Promise<GroupedLight[]> {
-    const response = await this.makeRequest({
-      [HTTP2_HEADER_METHOD]: "GET",
-      [HTTP2_HEADER_PATH]: "/clip/v2/resource/grouped_light",
     });
     return response.data.data;
   }

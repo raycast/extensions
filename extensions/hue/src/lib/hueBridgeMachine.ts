@@ -15,7 +15,7 @@ import { BRIDGE_ID, BRIDGE_IP_ADDRESS_KEY, BRIDGE_USERNAME_KEY } from "./constan
 import HueClient from "./HueClient";
 import { useMachine } from "@xstate/react";
 import { HueMessage, SendHueMessage } from "./useHue";
-import { GroupedLight, Light, Room, Scene, Zone } from "./types";
+import { Light, Room, Scene, Zone } from "./types";
 import React, { useMemo } from "react";
 
 export type HueBridgeState = State<
@@ -35,12 +35,11 @@ export type HueContext = {
 
 export function useHueBridgeMachine(
   setLights: React.Dispatch<React.SetStateAction<Light[]>>,
-  setGroupedLights: React.Dispatch<React.SetStateAction<GroupedLight[]>>,
   setRooms: React.Dispatch<React.SetStateAction<Room[]>>,
   setZones: React.Dispatch<React.SetStateAction<Zone[]>>,
   setScenes: React.Dispatch<React.SetStateAction<Scene[]>>
 ) {
-  const machine = useMemo(() => hueBridgeMachine(setLights, setGroupedLights, setRooms, setZones, setScenes), []);
+  const machine = useMemo(() => hueBridgeMachine(setLights, setRooms, setZones, setScenes), []);
 
   const [hueBridgeState, send] = useMachine(machine);
   const sendHueMessage: SendHueMessage = (message: HueMessage) => {
@@ -58,7 +57,6 @@ export function useHueBridgeMachine(
  */
 function hueBridgeMachine(
   setLights: React.Dispatch<React.SetStateAction<Light[]>>,
-  setGroupedLights: React.Dispatch<React.SetStateAction<GroupedLight[]>>,
   setRooms: React.Dispatch<React.SetStateAction<Room[]>>,
   setZones: React.Dispatch<React.SetStateAction<Zone[]>>,
   setScenes: React.Dispatch<React.SetStateAction<Scene[]>>
@@ -124,7 +122,6 @@ function hueBridgeMachine(
               context.bridgeId,
               context.bridgeUsername,
               setLights,
-              setGroupedLights,
               setRooms,
               setZones,
               setScenes
@@ -206,7 +203,6 @@ function hueBridgeMachine(
               configuration.bridgeid,
               username,
               setLights,
-              setGroupedLights,
               setRooms,
               setZones,
               setScenes
