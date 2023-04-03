@@ -6,15 +6,14 @@ const { accessKey } = getPreferenceValues<UnsplashPreferences>();
 
 export const apiRequest = async <T>(path: string, options?: RequestInit) => {
   const tokens = await client.getTokens();
+  let accessToken = tokens?.accessToken;
 
-  if (!tokens?.accessToken) {
+  if (!accessToken) {
     await doAuth();
-  }
-
-  if (tokens?.accessToken) {
-    if (tokens.refreshToken && tokens.isExpired()) {
-      await client.setTokens(await refreshTokens(tokens.refreshToken));
-    }
+    accessToken = (await client.getTokens())?.accessToken;
+  } else if (tokens?.refreshToken && tokens?.isExpired()) {
+    await client.setTokens(await refreshTokens(tokens.refreshToken));
+    accessToken = (await client.getTokens())?.accessToken;
   }
 
   const url = path.startsWith("https://api.unsplash.com/") ? path : `https://api.unsplash.com${path}`;
@@ -22,7 +21,7 @@ export const apiRequest = async <T>(path: string, options?: RequestInit) => {
   const response = await fetch(url, {
     ...options,
     headers: {
-      Authorization: `Bearer ${tokens?.accessToken}`,
+      Authorization: `Bearer ${accessToken}`,
       ...options?.headers,
     },
   }).then(async (res) => res.json() as Promise<T>);
