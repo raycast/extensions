@@ -13,6 +13,7 @@ import {
   sensitiveHeaders,
 } from "http2";
 import React from "react";
+import HueApiRateLimiter from "./HueApiRateLimiter";
 
 const DATA_PREFIX = "data: ";
 const CONNECTION_TIMEOUT_MS = 5000;
@@ -38,6 +39,7 @@ export default class HueClient {
   private readonly setZones: React.Dispatch<React.SetStateAction<Zone[]>>;
   private readonly setScenes: React.Dispatch<React.SetStateAction<Scene[]>>;
   private readonly http2Session: ClientHttp2Session;
+  private readonly rateLimiter = new HueApiRateLimiter();
 
   private constructor(
     bridgeIpAddress: string,
@@ -111,7 +113,7 @@ export default class HueClient {
   }
 
   public async getLights(): Promise<Light[]> {
-    const response = await this.executeRequest({
+    const response = await this.makeRequest({
       [HTTP2_HEADER_METHOD]: "GET",
       [HTTP2_HEADER_PATH]: "/clip/v2/resource/light",
     });
@@ -119,7 +121,7 @@ export default class HueClient {
   }
 
   public async getGroupedLights(): Promise<GroupedLight[]> {
-    const response = await this.executeRequest({
+    const response = await this.makeRequest({
       [HTTP2_HEADER_METHOD]: "GET",
       [HTTP2_HEADER_PATH]: "/clip/v2/resource/grouped_light",
     });
@@ -127,7 +129,7 @@ export default class HueClient {
   }
 
   public async getScenes(): Promise<Scene[]> {
-    const response = await this.executeRequest({
+    const response = await this.makeRequest({
       [HTTP2_HEADER_METHOD]: "GET",
       [HTTP2_HEADER_PATH]: "/clip/v2/resource/scene",
     });
@@ -135,7 +137,7 @@ export default class HueClient {
   }
 
   public async getRooms(): Promise<Room[]> {
-    const response = await this.executeRequest({
+    const response = await this.makeRequest({
       [HTTP2_HEADER_METHOD]: "GET",
       [HTTP2_HEADER_PATH]: "/clip/v2/resource/room",
     });
@@ -143,7 +145,7 @@ export default class HueClient {
   }
 
   public async getZones(): Promise<Zone[]> {
-    const response = await this.executeRequest({
+    const response = await this.makeRequest({
       [HTTP2_HEADER_METHOD]: "GET",
       [HTTP2_HEADER_PATH]: "/clip/v2/resource/zone",
     });
@@ -151,7 +153,7 @@ export default class HueClient {
   }
 
   public async toggleLight(light: Light): Promise<any> {
-    const response = await this.executeRequest(
+    const response = await this.makeRequest(
       {
         [HTTP2_HEADER_METHOD]: "PUT",
         [HTTP2_HEADER_PATH]: `/clip/v2/resource/light/${light.id}`,
@@ -166,7 +168,7 @@ export default class HueClient {
   }
 
   public async setBrightness(light: Light, brightness: number): Promise<any> {
-    const response = await this.executeRequest(
+    const response = await this.makeRequest(
       {
         [HTTP2_HEADER_METHOD]: "PUT",
         [HTTP2_HEADER_PATH]: `/clip/v2/resource/light/${light.id}`,
@@ -180,8 +182,12 @@ export default class HueClient {
     return response.data.data;
   }
 
-  private executeRequest(headers: OutgoingHttpHeaders, body?: any): Promise<Response> {
+  private makeRequest(headers: OutgoingHttpHeaders, body?: any): Promise<Response> {
     return new Promise((resolve, reject) => {
+      if (!this.rateLimiter.canMakeRequest(headers[HTTP2_HEADER_PATH] as string)) {
+        return reject(new Error("Rate limit exceeded."));
+      }
+
       const stream = this.http2Session.request({
         ...headers,
         "hue-application-key": this.bridgeUsername,
