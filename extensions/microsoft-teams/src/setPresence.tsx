@@ -22,16 +22,16 @@ const presences: Presence[] = [
   { label: "Clear Presence", icon: { source: Icon.Undo } },
 ];
 
-function PresenceItem({ presence, isCurrent, onSet }: { presence: Presence; isCurrent: boolean, onSet: () => void }) {
+function PresenceItem({ presence, isCurrent, onSet }: { presence: Presence; isCurrent: boolean; onSet: () => void }) {
   const onAction = async () => {
-    await setAvailability(presence.availability)
-    onSet()
-  }
+    await setAvailability(presence.availability);
+    onSet();
+  };
   return (
     <List.Item
       title={presence.label}
       icon={presence.icon}
-      accessories={isCurrent ? [{ tag: "current" }] : undefined}
+      accessories={isCurrent ? [{ tag: "Active", icon: Icon.Check }] : undefined}
       actions={
         <ActionPanel>
           <Action title={"Set Presence"} onAction={onAction} />
