@@ -18,17 +18,7 @@ export interface HasId {
   id: number;
 }
 
-export type Method =
-  | "GET"
-  | "DELETE"
-  | "HEAD"
-  | "OPTIONS"
-  | "POST"
-  | "PUT"
-  | "PATCH"
-  | "PURGE"
-  | "LINK"
-  | "UNLINK";
+export type Method = "GET" | "DELETE" | "HEAD" | "OPTIONS" | "POST" | "PUT" | "PATCH" | "PURGE" | "LINK" | "UNLINK";
 
 ///////////////////
 // Hue API types //

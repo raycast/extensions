@@ -2,15 +2,7 @@ import { getPreferenceValues, Icon, Image, showToast, Toast } from "@raycast/api
 import { CssColor, Light, Scene } from "./types";
 import { discovery, v3 } from "node-hue-api";
 import { hexToXy } from "./colors";
-import {
-  APP_NAME,
-  BRIGHTNESS_MAX,
-  BRIGHTNESS_MIN,
-  BRIGHTNESS_STEP,
-  COLOR_TEMP_MAX,
-  COLOR_TEMP_MIN,
-  COLOR_TEMPERATURE_STEP,
-} from "./constants";
+import { APP_NAME, BRIGHTNESSES, COLOR_TEMP_MAX, COLOR_TEMP_MIN, COLOR_TEMPERATURE_STEP } from "./constants";
 import HueClient from "./HueClient";
 
 declare global {

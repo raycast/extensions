@@ -39,12 +39,7 @@ export default function ControlLights() {
   );
 }
 
-function Group(props: {
-  hueClient?: HueClient;
-  lights: Light[];
-  group: Group;
-  sendHueMessage: SendHueMessage;
-}) {
+function Group(props: { hueClient?: HueClient; lights: Light[]; group: Group; sendHueMessage: SendHueMessage }) {
   return (
     <List.Section key={props.group.id} title={props.group.metadata.name}>
       {props.lights.map(
@@ -62,12 +57,7 @@ function Group(props: {
   );
 }
 
-function Light(props: {
-  hueClient?: HueClient;
-  light: Light;
-  group?: Group;
-  sendHueMessage: SendHueMessage;
-}) {
+function Light(props: { hueClient?: HueClient; light: Light; group?: Group; sendHueMessage: SendHueMessage }) {
   return (
     <List.Item
       title={props.light.metadata.name}
@@ -80,9 +70,7 @@ function Light(props: {
             <ToggleLightAction light={props.light} onToggle={() => handleToggle(props.hueClient, props.light)} />
             <SetBrightnessAction
               light={props.light}
-              onSet={(percentage: number) =>
-                handleSetBrightness(props.hueClient, props.light, percentage)
-              }
+              onSet={(percentage: number) => handleSetBrightness(props.hueClient, props.light, percentage)}
             />
             <IncreaseBrightnessAction
               light={props.light}
@@ -255,11 +243,7 @@ async function handleToggle(hueClient: HueClient | undefined, light: Light) {
   }
 }
 
-async function handleSetBrightness(
-  hueClient: HueClient | undefined,
-  light: Light,
-  brightness: number
-) {
+async function handleSetBrightness(hueClient: HueClient | undefined, light: Light, brightness: number) {
   const toast = new Toast({ title: "" });
 
   try {
@@ -284,10 +268,7 @@ async function handleSetBrightness(
   }
 }
 
-async function handleIncreaseBrightness(
-  hueClient: HueClient | undefined,
-  light: Light,
-) {
+async function handleIncreaseBrightness(hueClient: HueClient | undefined, light: Light) {
   const toast = new Toast({ title: "" });
 
   try {
@@ -312,10 +293,7 @@ async function handleIncreaseBrightness(
   }
 }
 
-async function handleDecreaseBrightness(
-  hueClient: HueClient | undefined,
-  light: Light,
-) {
+async function handleDecreaseBrightness(hueClient: HueClient | undefined, light: Light) {
   const toast = new Toast({ title: "" });
 
   try {
@@ -340,11 +318,7 @@ async function handleDecreaseBrightness(
   }
 }
 
-async function handleSetColor(
-  hueClient: HueClient | undefined,
-  light: Light,
-  color: CssColor
-) {
+async function handleSetColor(hueClient: HueClient | undefined, light: Light, color: CssColor) {
   const toast = new Toast({ title: "" });
 
   try {
@@ -372,10 +346,7 @@ async function handleSetColor(
   }
 }
 
-async function handleIncreaseColorTemperature(
-  hueClient: HueClient | undefined,
-  light: Light,
-) {
+async function handleIncreaseColorTemperature(hueClient: HueClient | undefined, light: Light) {
   const toast = new Toast({ title: "" });
 
   try {
@@ -400,10 +371,7 @@ async function handleIncreaseColorTemperature(
   }
 }
 
-async function handleDecreaseColorTemperature(
-  hueClient: HueClient | undefined,
-  light: Light,
-) {
+async function handleDecreaseColorTemperature(hueClient: HueClient | undefined, light: Light) {
   const toast = new Toast({ title: "" });
 
   try {
