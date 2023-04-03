@@ -28,10 +28,9 @@ const Unsplash: React.FC = () => {
 };
 
 const SearchListItem: React.FC<SearchListItemProps> = ({ item }) => {
-  const [title, image, avatar] = [
+  const [title, image] = [
     item.title || item.description || item.user.name || "No Name",
     item.urls?.thumb || item.urls?.small || item.urls?.regular,
-    item.user?.profile_image?.small,
   ];
 
   const mimicItem: SearchResult = {
