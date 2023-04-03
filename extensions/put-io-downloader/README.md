@@ -27,7 +27,7 @@ Once the extension is installed and configured, you can use the following comman
 
 - Browse Files: Browse your Put.io files and folders, and perform actions on them.
 - Browse Transfers: View your active and completed transfers, and manage them.
-- For customizable actions, you can customize them via the Raycast Preferences > Extensions > Put.io. Enter the title of the action (e.g. 'Send to Google Drive'), the enter the local command to execute. Include `{0}` in the command and trhe extension will automatically populate it with the file URL when executing the action.
+- For customizable actions, you can customize them via the Raycast Preferences > Extensions > Put.io. Enter the title of the action (e.g. 'Send to Google Drive', or 'Download to local machine'), the enter the local command to execute. Include `{0}` in the command and trhe extension will automatically populate it with the file URL when executing the action.
 
 ## Contributing
 
