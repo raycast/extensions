@@ -18,42 +18,41 @@ const UnlockForm = (props: UnlockFormProps) => {
   const lockReasonRef = useRef(bitwarden.lockReason).current;
   const [unlockError, setUnlockError] = useState<string | undefined>(undefined);
 
-  const handleUnlockError = (error: unknown, password: string) => {
-    const value = treatError(error, { omitSensitiveValue: password });
-    if (value) setUnlockError(value);
-  };
-
   async function onSubmit({ password }: { password: string }) {
-    if (password.length == 0) {
-      showToast(Toast.Style.Failure, "Failed to unlock vault", "Missing password");
-      return;
-    }
+    if (password.length == 0) return;
     const toast = await showToast(Toast.Style.Animated, "Unlocking Vault...", "Please wait");
     try {
       setLoading(true);
       setUnlockError(undefined);
+
       const state = await bitwarden.status();
       if (state.status == "unauthenticated") {
         try {
           await bitwarden.login();
         } catch (error) {
+          const { displayableError, treatedError } = getUsefulError(error, password);
           await showToast(
             Toast.Style.Failure,
-            "Failed to unlock vault",
-            `Please check your ${shouldShowServer ? "Server URL, " : ""}API Key and Secret.`
+            "Failed to log in",
+            displayableError ?? `Please check your ${shouldShowServer ? "Server URL, " : ""}API Key and Secret.`
           );
-          handleUnlockError(error, password);
+          setUnlockError(treatedError);
           return;
         }
       }
+
       const sessionToken = await bitwarden.unlock(password);
       const passwordHash = await hashMasterPasswordForReprompting(password);
-
       onUnlock(sessionToken, passwordHash);
       await toast.hide();
     } catch (error) {
-      await showToast(Toast.Style.Failure, "Failed to unlock vault", "Please check your credentials");
-      handleUnlockError(error, password);
+      const { displayableError, treatedError } = getUsefulError(error, password);
+      await showToast(
+        Toast.Style.Failure,
+        "Failed to unlock vault",
+        displayableError ?? "Please check your credentials"
+      );
+      setUnlockError(treatedError);
     } finally {
       setLoading(false);
     }
@@ -95,5 +94,16 @@ const UnlockForm = (props: UnlockFormProps) => {
     </Form>
   );
 };
+
+function getUsefulError(error: unknown, password: string) {
+  const treatedError = treatError(error, { omitSensitiveValue: password });
+  let displayableError: string | undefined;
+  if (/Invalid master password/i.test(treatedError)) {
+    displayableError = "Invalid master password";
+  } else if (/Invalid API Key/i.test(treatedError)) {
+    displayableError = "Invalid Client ID or Secret";
+  }
+  return { displayableError, treatedError };
+}
 
 export default UnlockForm;
