@@ -18,9 +18,9 @@ type Result = {
   size: string;
   source: string;
   commentsCount: string;
-  comments: Boolean;
-  vip: Boolean;
-  trusted: Boolean;
+  comments: boolean;
+  vip: boolean;
+  trusted: boolean;
   magnet: string;
 };
 
@@ -108,19 +108,19 @@ async function search(
 
   $("table[id='searchResult'] tr").each(function (this: cheerio.Element) {
     const icons: string[] = [];
-    var hasComments = $(this)
+    let hasComments = $(this)
       .find("td")
       .find("img")
       .each(function (i: number, link: cheerio.Element) {
         icons.push($(link).attr("src")?.split("/")?.pop()?.replace(/\..*/g, "") ?? "");
       });
-    var commentsCount = "";
+    let commentsCount = "";
     if (icons.includes("icon_comment")) {
-      var hasComments = $(this)
+      let hasComments = $(this)
         .find("td")
         .find("img")
         .each(function (i: number, link: cheerio.Element) {
-          var icon = $(link).attr("title");
+          let icon = $(link).attr("title");
           if (icon !== undefined && icon !== "") {
             commentsCount += $(link)
               .attr("title")
@@ -513,7 +513,7 @@ const Details = (props: { name: string; magnet: string; link: string; tag: strin
       .join("")
       .split("`")
       .join("")
-      .replace(/(\b(https?|ftp|magnet):\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/gi, "[$1]($1)");
+      .replace(/(\b(https?|ftp|magnet):\/[-A-Z0-9+&@#%?=~_|!:,.;]*[-A-Z0-9+&@#%=~_|])/gi, "[$1]($1)");
   }
 
   let latestComment = "";

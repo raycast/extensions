@@ -204,5 +204,3 @@ export const categories = [
 		title: '	Other Other'
 	},
 ];
-
-export default categories;

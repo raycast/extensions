@@ -17,9 +17,9 @@ type Result = {
   size: string;
   source: string;
   commentsCount: string;
-  comments: Boolean;
-  vip: Boolean;
-  trusted: Boolean;
+  comments: boolean;
+  vip: boolean;
+  trusted: boolean;
   magnet: string;
 };
 
@@ -526,7 +526,7 @@ const Details = (props: { name: string; magnet: string; link: string; tag: strin
       .join("")
       .split("`")
       .join("")
-      .replace(/(\b(https?|ftp|magnet):\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/gi, "[$1]($1)");
+      .replace(/(\b(https?|ftp|magnet):\/[-A-Z0-9+&@#%?=~_|!:,.;]*[-A-Z0-9+&@#%=~_|])/gi, "[$1]($1)");
   }
 
   let latestComment = "";
