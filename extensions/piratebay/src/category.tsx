@@ -1,4 +1,3 @@
-// just for this stupid PR check, so I can delete files arrrrrg
 import { Icon, Color, Detail, List, showToast, Toast, Action, ActionPanel, preferences } from "@raycast/api";
 import cheerio from "cheerio";
 import { useEffect, useState } from "react";
