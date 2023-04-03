@@ -3,6 +3,7 @@
 /extensions/1-click-confetti                         @peduarte
 /extensions/1loc                                     @kud @sxn
 /extensions/1password                                @khasbilegt @thomaspaulmann @dteare @pernielsentikaer @cb372
+/extensions/2fa-directory                            @andreaselia @pernielsentikaer
 /extensions/8ball                                    @Gitsack
 /extensions/Bilibili                                 @Fatpandac
 /extensions/CodeBlocks                               @tisfeng
@@ -64,6 +65,7 @@
 /extensions/bibmanager                               @AaronDavidSchneider
 /extensions/bike                                     @SKaplanOfficial
 /extensions/binance                                  @grzegorzkrukowski
+/extensions/bing-search                              @maver1ck
 /extensions/bing-wallpaper                           @koinzhang
 /extensions/bitbucket                                @Lp-Francois @esarmstrong @itsrifat
 /extensions/bitbucket-search-self-hosted             @yuercl
@@ -200,6 +202,7 @@
 /extensions/discord                                  @Aayush9029
 /extensions/discord-timestamps                       @thewilloftheshadow @feyli
 /extensions/discordjs-documentation                  @mah51
+/extensions/disney                                   @andreaselia @pernielsentikaer
 /extensions/displayplacer                            @eluce2
 /extensions/dlmoji                                   @Hydrapse
 /extensions/dock                                     @pradeepb28
@@ -367,6 +370,7 @@
 /extensions/iconify                                  @Destiner @kidonng @sxn
 /extensions/iconpark                                 @koinzhang
 /extensions/icons8                                   @yug2005
+/extensions/idonthavespotify                         @sjdonado
 /extensions/ifanr                                    @madcodelife
 /extensions/ihosts                                   @404J
 /extensions/imdb                                     @ryan-exe
@@ -650,6 +654,7 @@
 /extensions/raycast-icons                            @PitNikola @peduarte
 /extensions/raycast-wallpaper                        @koinzhang
 /extensions/raycast-wemo                             @IAmNatch
+/extensions/raydocs                                  @teziovsky
 /extensions/raynab                                   @gogocharli
 /extensions/react-docs                               @webdiego
 /extensions/react-icons                              @yug2005
@@ -670,7 +675,7 @@
 /extensions/remember-the-date                        @pernielsentikaer
 /extensions/remove-background                        @maantje @FezVrasta
 /extensions/render                                   @Destiner
-/extensions/replicate                                @KevinBatdorf @bfirsh
+/extensions/replicate                                @KevinBatdorf @bfirsh @cbh123
 /extensions/rescuetime-focus-session-trigger         @tuortheblessed
 /extensions/resmo                                    @ozgunarslantas
 /extensions/restore-photo                            @peduarte
@@ -688,6 +693,7 @@
 /extensions/salesforce-search                        @svenwiegand
 /extensions/savvycal                                 @keturiosakys @pernielsentikaer @derrickreimer @vimtor
 /extensions/scaleway                                 @philibea @flozdra
+/extensions/scrapbox-search                          @zett-8
 /extensions/scrcpy                                   @zcfan
 /extensions/screen-saver                             @koinzhang
 /extensions/screen-sharing-recents                   @m-hall
@@ -706,6 +712,7 @@
 /extensions/semantic-scholar                         @blainerothrock
 /extensions/send-to-flomo                            @ahonn @fankaidev @pernielsentikaer
 /extensions/sentry                                   @thomaspaulmann @mattisssa @NoorBayari
+/extensions/sequel-ace                               @nagauta
 /extensions/serverless-framework-docs                @yemilgr
 /extensions/session                                  @jamesjlyons @pernielsentikaer
 /extensions/sf-symbols-search                        @peteschaffner
@@ -793,7 +800,7 @@
 /extensions/tinyfaces-nft                            @peduarte
 /extensions/tinypng                                  @kawamataryo
 /extensions/tldr                                     @pomdtr
-/extensions/tmdb                                     @Aayush9029
+/extensions/tmdb                                     @Aayush9029 @andreaselia
 /extensions/todo-list                                @maggie-j-liu
 /extensions/todoist                                  @thomaslombart @AnishDe12020 @kud
 /extensions/toggl-track                              @franzwilhelm @bkeys818 @rogatty @michaelfaisst

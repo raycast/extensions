@@ -1,6 +1,6 @@
 import { showToast, Toast } from "@raycast/api";
 import { execSync } from "child_process";
-import { getSelectedImages } from "./utils";
+import { execSIPSCommandOnWebP, getSelectedImages } from "./utils";
 
 export default async function Command(props: { arguments: { width: string; height: string } }) {
   const { width, height } = props.arguments;
@@ -28,26 +28,53 @@ export default async function Command(props: { arguments: { width: string; heigh
     return;
   }
 
+  const toast = await showToast({ title: "Resizing in progress...", style: Toast.Style.Animated });
+
   if (selectedImages) {
     const pluralized = `image${selectedImages.length === 1 ? "" : "s"}`;
     try {
       const pathStrings = '"' + selectedImages.join('" "') + '"';
-
-      if (widthInt != -1 && heightInt == -1) {
-        execSync(`sips --resampleWidth ${widthInt} ${pathStrings}`);
-      } else if (widthInt == -1 && heightInt != -1) {
-        execSync(`sips --resampleHeight ${heightInt} ${pathStrings}`);
+      if (pathStrings.toLocaleLowerCase().includes("webp")) {
+        // Handle each image individually
+        selectedImages.forEach((imgPath) => {
+          if (imgPath.toLowerCase().endsWith(".webp")) {
+            // Convert to PNG, rotate and restore to WebP
+            execSIPSCommandOnWebP("sips --rotate ${degrees}", imgPath);
+            if (widthInt != -1 && heightInt == -1) {
+              execSIPSCommandOnWebP(`sips --resampleWidth ${widthInt}`, imgPath);
+            } else if (widthInt == -1 && heightInt != -1) {
+              execSIPSCommandOnWebP(`sips --resampleHeight ${heightInt}`, imgPath);
+            } else {
+              execSIPSCommandOnWebP(`sips --resampleHeightWidth ${heightInt} ${widthInt}`, imgPath);
+            }
+          } else {
+            // Execute command as normal
+            if (widthInt != -1 && heightInt == -1) {
+              execSync(`sips --resampleWidth ${widthInt} "${imgPath}"`);
+            } else if (widthInt == -1 && heightInt != -1) {
+              execSync(`sips --resampleHeight ${heightInt} "${imgPath}"`);
+            } else {
+              execSync(`sips --resampleHeightWidth ${heightInt} ${widthInt} "${imgPath}"`);
+            }
+          }
+        });
       } else {
-        execSync(`sips --resampleHeightWidth ${heightInt} ${widthInt} ${pathStrings}`);
+        // Run commands on all images at once
+        if (widthInt != -1 && heightInt == -1) {
+          execSync(`sips --resampleWidth ${widthInt} ${pathStrings}`);
+        } else if (widthInt == -1 && heightInt != -1) {
+          execSync(`sips --resampleHeight ${heightInt} ${pathStrings}`);
+        } else {
+          execSync(`sips --resampleHeightWidth ${heightInt} ${widthInt} ${pathStrings}`);
+        }
       }
 
-      await showToast({ title: `Resized ${selectedImages.length.toString()} ${pluralized}` });
+      toast.title = `Resized ${selectedImages.length.toString()} ${pluralized}`;
+      toast.style = Toast.Style.Success;
     } catch (error) {
       console.log(error);
-      await showToast({
-        title: `Failed to resize ${selectedImages.length.toString()} ${pluralized}`,
-        style: Toast.Style.Failure,
-      });
+      toast.title = `Failed to resize ${selectedImages.length.toString()} ${pluralized}`;
+      toast.style = Toast.Style.Failure;
     }
   }
 }
