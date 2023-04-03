@@ -48,7 +48,7 @@ export async function deleteFile(filePath: string, fileName: string, refresh: ()
       title: "Delete",
       style: Alert.ActionStyle.Destructive,
       onAction: async () => {
-        await runShellScript(`rm -f ${filePath}`);
+        await runShellScript(`rm -rf "${filePath}"`);
         refresh();
         showToast(Toast.Style.Success, "File Deleted", `${fileName}`);
       },
@@ -69,7 +69,7 @@ export async function deleteDirectory(folderPath: string, folderName: string, re
       title: "Delete",
       style: Alert.ActionStyle.Destructive,
       onAction: async () => {
-        await runShellScript(`rm -rf ${folderPath}`);
+        await runShellScript(`rm -rf "${folderPath}"`);
         refresh();
         showToast(Toast.Style.Success, "Directory Deleted", `${folderName}`);
       },
