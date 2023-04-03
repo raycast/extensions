@@ -58,7 +58,7 @@ export function getStaticResult(searchText: string): SearchResult[] {
 
   let description = ""; // Default description if no prefix is found
   let url = ""; // Default URL if no prefix is found
-let bang = "";
+  let bang = "";
   if (searchText.startsWith("!")) {
     const parts = searchText.split(" ");
     bang = parts[0].substring(1); // remove the "!" prefix from the bang
@@ -77,7 +77,7 @@ let bang = "";
       }
     }
   }
-  
+
   if (!url) {
     description = `Search DuckDuckGo for '${searchText}'`; // Default description if no prefix is found
     url = `https://duckduckgo.com/?q=${encodeURIComponent(searchText)}`;
@@ -91,7 +91,7 @@ let bang = "";
       url,
     },
   ];
-  
+
   return result;
 }
 
@@ -112,10 +112,10 @@ export async function getAutoSearchResults(searchText: string, signal: any): Pro
 
   const results: SearchResult[] = [];
 
-json.map((item: any) => {
+  json.map((item: any) => {
     let bang = "";
     const searchText = item.phrase;
-  
+
     if (searchText.substring(0, 1) == "!") {
       if (searchText.charAt(searchText.length - 1) == " " && searchText.split(" ").length == 2) {
         // "!g "
