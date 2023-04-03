@@ -23,7 +23,6 @@ export default function Command() {
 
   useEffect(() => {
     async function fetch() {
-      
       setLoading(true);
       if (!query) {
         setState([]);
