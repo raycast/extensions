@@ -221,17 +221,6 @@ function DecreaseColorTemperatureAction(props: { light: Light; onDecrease?: () =
   );
 }
 
-function RefreshAction(props: { onRefresh: () => void }) {
-  return (
-    <ActionPanel.Item
-      title="Refresh"
-      icon={Icon.ArrowClockwise}
-      shortcut={{ modifiers: ["cmd"], key: "r" }}
-      onAction={props.onRefresh}
-    />
-  );
-}
-
 async function handleToggle(hueClient: HueClient | undefined, light: Light) {
   const toast = new Toast({ title: "" });
 

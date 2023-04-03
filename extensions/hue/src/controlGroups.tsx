@@ -159,7 +159,6 @@ function Group(props: {
           </ActionPanel.Section>
 
           <ActionPanel.Section>
-            <RefreshAction onRefresh={() => props.mutateGroups()} />
             <UnlinkAction sendHueMessage={props.sendHueMessage} />
           </ActionPanel.Section>
         </ActionPanel>
@@ -261,17 +260,6 @@ function DecreaseColorTemperatureAction(props: { group: Group; onDecrease?: () =
       onAction={props.onDecrease}
     />
   ) : null;
-}
-
-function RefreshAction(props: { onRefresh: () => void }) {
-  return (
-    <ActionPanel.Item
-      title="Refresh"
-      icon={Icon.ArrowClockwise}
-      shortcut={{ modifiers: ["cmd"], key: "r" }}
-      onAction={props.onRefresh}
-    />
-  );
 }
 
 async function handleTurnAllOn(apiPromise: Promise<Api>, group: Group, mutateGroups: MutatePromise<Group[]>) {
