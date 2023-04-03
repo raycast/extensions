@@ -13,7 +13,7 @@ import { promises as fs } from "fs";
 import { LocalStorage } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 
-const checkoutLocation = getPreferenceValues()["checkoutLocation"]
+const checkoutLocation = getPreferenceValues()["checkoutLocation"];
 
 async function getEditor(rootPath: string) {
     return await LocalStorage.getItem<string>(`preferred-editor:${rootPath}`);

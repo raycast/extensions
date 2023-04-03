@@ -3,7 +3,7 @@ import { ActionPanel, Action, Icon, Image } from "@raycast/api";
 
 export default function ToolsSection({
     tools,
-    onVisisted
+    onVisisted,
 }: {
     tools: ServiceToolFragment[] | null | undefined;
     onVisisted: () => void;

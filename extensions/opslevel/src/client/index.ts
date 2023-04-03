@@ -4,7 +4,7 @@ import { setContext } from "@apollo/client/link/context";
 import fetch from "cross-fetch";
 import { GetAllServicesQuery, ServiceFragment } from "./gql-types";
 export * from "./gql-types.d";
-import { readFile } from 'fs/promises';
+import { readFile } from "fs/promises";
 import { GetAllServices } from "./get-all-services";
 
 const preferenceValues = getPreferenceValues();

@@ -3,7 +3,7 @@ import { ContactFragment, ContactType } from "./client";
 
 export default function ContactSection({
     contacts,
-    onVisisted
+    onVisisted,
 }: {
     contacts: ContactFragment[] | null | undefined;
     onVisisted: () => void;

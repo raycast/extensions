@@ -70,14 +70,14 @@ function SearchListItem({
                 mask: Image.Mask.Circle,
             },
             tooltip: "On call",
-            text: "Jane Smith"// service.onCalls?.nodes[0]?.name,
+            text: "Jane Smith", // service.onCalls?.nodes[0]?.name,
         });
     }
 
     const firstRepo = service.defaultServiceRepository?.repository.url;
     const visit = () => onVisisted(service);
-    const contacts = service.owner?.contacts as ContactFragment[]
-    const tools = service.tools?.nodes as ServiceToolFragment[]
+    const contacts = service.owner?.contacts as ContactFragment[];
+    const tools = service.tools?.nodes as ServiceToolFragment[];
 
     return (
         <List.Item
