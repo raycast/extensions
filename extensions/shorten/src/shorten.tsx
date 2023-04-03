@@ -8,6 +8,7 @@ import {
   openCommandPreferences,
   showToast,
 } from "@raycast/api";
+import { isValidUrl } from "../utils/url";
 import { exec } from "child_process";
 import path from "path";
 import { useState } from "react";
@@ -21,12 +22,21 @@ type TData = {
 };
 
 export default function Command() {
-  const [url, setUrl] = useState<string>("https://www.raycast.com/");
+  const [url, setUrl] = useState<string>("");
   const preferences = getPreferenceValues<TShortenerPath>();
 
   const netlifyShortenerPath = path.join(preferences.netlifyshortener, "/node_modules/netlify-shortener/dist/index.js");
 
-  const handleShortener = (values: TData) => {
+  const handleShortener = async (values: TData) => {
+    if (!isValidUrl(values.url)) {
+      await showToast({
+        title: "Error",
+        message: "Invalid url",
+        style: Toast.Style.Failure,
+      });
+      return;
+    }
+
     exec(`node ${netlifyShortenerPath} ${values.url}`, async (error, stdout, stderr) => {
       if (error) {
         await showToast({
@@ -58,11 +68,11 @@ export default function Command() {
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Shorten" onSubmit={(values: TData) => handleShortener(values)} />
-          <Action title="Change directory" onAction={() => openCommandPreferences()} />
+          <Action title="Change Directory" onAction={() => openCommandPreferences()} />
         </ActionPanel>
       }
     >
-      <Form.TextArea id="url" defaultValue={url} title="Url" />
+      <Form.TextArea id="url" defaultValue={url} title="Url" placeholder="Type your url" onChange={(e) => setUrl(e)} />
     </Form>
   );
 }
