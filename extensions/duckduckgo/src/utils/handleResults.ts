@@ -112,7 +112,7 @@ export async function getAutoSearchResults(searchText: string, signal: any): Pro
 
   const results: SearchResult[] = [];
 
-  json.map((item: any) => {
+  (json as Array<any>).map((item: any) => {
     let bang = "";
     const searchText = item.phrase;
 
