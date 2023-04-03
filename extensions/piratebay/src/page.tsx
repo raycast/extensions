@@ -106,7 +106,7 @@ async function search(q = "", { fetch = nodeFetch, baseURL = "", page = 0, categ
         .find("td")
         .find("img")
         .each(function (i: number, link: cheerio.Element) {
-          let icon = $(link).attr("title");
+          const icon = $(link).attr("title");
           if (icon !== undefined && icon !== "") {
             commentsCount += $(link)
               .attr("title")
@@ -524,7 +524,7 @@ const Details = (props: { name: string; magnet: string; link: string; tag: strin
       .split("`")
       .join("")
       .replace(
-        /((?:(?:https?|ftp|file):\/\/|www\.|ftp\.)(?:\([-A-Z0-9+&@#\/%=~_|$?!:,.]*\)|[-A-Z0-9+&@#\/%=~_|$?!:,.])*(?:\([-A-Z0-9+&@#\/%=~_|$?!:,.]*\)|[A-Z0-9+&@#\/%=~_|$]))/gim,
+        /(https?:\/\/(?:www\.|(?!www))[^\s\.]+\.[^\s]{2,}|www\.[^\s]+\.[^\s]{2,})/igm,
         "[$1]($1)"
       );
   }
