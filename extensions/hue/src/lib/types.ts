@@ -18,6 +18,18 @@ export interface HasId {
   id: number;
 }
 
+export type Method =
+  | "GET"
+  | "DELETE"
+  | "HEAD"
+  | "OPTIONS"
+  | "POST"
+  | "PUT"
+  | "PATCH"
+  | "PURGE"
+  | "LINK"
+  | "UNLINK";
+
 ///////////////////
 // Hue API types //
 ///////////////////
@@ -233,11 +245,11 @@ export type Light = {
     };
   };
 
-  color: {
+  color?: {
     /**
      * CIE XY gamut position
      */
-    xy: Xy;
+    xy?: Xy;
 
     /**
      * Color gamut of color bulb.
@@ -306,12 +318,15 @@ export type Light = {
     /**
      * The gamut types supported by hue
      *
+     * Can only be read, not written. Hence, it is not required.
+     * TODO: Maybe make separate type for this?
+     *
      * - A:     Gamut of early Philips color-only products
      * - B:     Limited gamut of first Hue color products
      * - C:     Richer color gamut of Hue white and color ambiance products
      * - other: Color gamut of non-hue products with non-hue gamuts resp w/o gamut
      */
-    gamut_type: "A" | "B" | "C" | "other";
+    gamut_type?: "A" | "B" | "C" | "other";
   };
   dynamics: {
     /**

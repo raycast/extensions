@@ -2,14 +2,13 @@
 
 import fs from "fs";
 import { environment } from "@raycast/api";
-import { Light, Room, Scene, UpdateEvent, Zone } from "./types";
+import { Light, Method, Room, Scene, UpdateEvent, Zone } from "./types";
 import {
   ClientHttp2Session,
   connect,
   constants,
   IncomingHttpHeaders,
   IncomingHttpStatusHeader,
-  OutgoingHttpHeaders,
   sensitiveHeaders,
 } from "http2";
 import React from "react";
@@ -108,77 +107,50 @@ export default class HueClient {
   }
 
   public async getLights(): Promise<Light[]> {
-    const response = await this.makeRequest({
-      [HTTP2_HEADER_METHOD]: "GET",
-      [HTTP2_HEADER_PATH]: "/clip/v2/resource/light",
-    });
+    const response = await this.makeRequest("GET", "/clip/v2/resource/light");
     return response.data.data;
   }
 
   public async getScenes(): Promise<Scene[]> {
-    const response = await this.makeRequest({
-      [HTTP2_HEADER_METHOD]: "GET",
-      [HTTP2_HEADER_PATH]: "/clip/v2/resource/scene",
-    });
+    const response = await this.makeRequest("GET", "/clip/v2/resource/scene");
     return response.data.data;
   }
 
   public async getRooms(): Promise<Room[]> {
-    const response = await this.makeRequest({
-      [HTTP2_HEADER_METHOD]: "GET",
-      [HTTP2_HEADER_PATH]: "/clip/v2/resource/room",
-    });
+    const response = await this.makeRequest("GET", "/clip/v2/resource/room");
     return response.data.data;
   }
 
   public async getZones(): Promise<Zone[]> {
-    const response = await this.makeRequest({
-      [HTTP2_HEADER_METHOD]: "GET",
-      [HTTP2_HEADER_PATH]: "/clip/v2/resource/zone",
-    });
+    const response = await this.makeRequest("GET", "/clip/v2/resource/zone");
     return response.data.data;
   }
 
-  public async toggleLight(light: Light) {
-    const oldState = light;
-    const newState = {
-      on: { on: !light.on.on },
-      // TODO: Figure out why transition time causes the light to turn on at 1% brightness
-      // dynamics: { duration: getTransitionTimeInMs() },
-    };
-
-    this.setLights((lights) => lights.updateItem(light, newState));
-
-    await this.makeRequest(
-      {
-        [HTTP2_HEADER_METHOD]: "PUT",
-        [HTTP2_HEADER_PATH]: `/clip/v2/resource/light/${light.id}`,
-      },
-      newState
-    ).catch((e) => {
-      this.setLights((lights) => lights.updateItem(light, oldState));
+  public async updateLight(light: Light, properties: Partial<Light>): Promise<any> {
+    this.setLights((lights) => lights.updateItem(light, properties));
+    const response = await this.makeRequest("PUT", `/clip/v2/resource/light/${light.id}`, properties).catch((e) => {
+      this.setLights((lights) => lights.updateItem(light, light));
       throw e;
     });
+
+    return response.data.data;
   }
 
   public async setBrightness(light: Light, brightness: number): Promise<any> {
-    const response = await this.makeRequest(
-      {
-        [HTTP2_HEADER_METHOD]: "PUT",
-        [HTTP2_HEADER_PATH]: `/clip/v2/resource/light/${light.id}`,
-      },
-      {
-        ...(light.on.on ? {} : { on: { on: true } }),
-        dimming: { brightness: brightness },
-      }
-    );
+    const response = await this.makeRequest("PUT", `/clip/v2/resource/light/${light.id}`, {
+      ...(light.on.on ? {} : { on: { on: true } }),
+      dimming: { brightness: brightness },
+    }).catch((e) => {
+      this.setLights((lights) => lights.updateItem(light, light));
+      throw e;
+    });
 
     return response.data.data;
   }
 
-  private makeRequest(headers: OutgoingHttpHeaders, body?: any): Promise<Response> {
+  private makeRequest(method: Method, path: string, body?: any): Promise<Response> {
     return new Promise((resolve, reject) => {
-      if (!this.rateLimiter.canMakeRequest(headers[HTTP2_HEADER_PATH] as string)) {
+      if (!this.rateLimiter.canMakeRequest(path)) {
         // TODO: Queue instead of drop, since groups of lights are updated one light at a time.
         //   This means that if a user is e.g. changing the brightness of more than 10 lights at once,
         //   the rate limiter will drop all but the first 10 requests.
@@ -189,7 +161,8 @@ export default class HueClient {
       }
 
       const stream = this.http2Session.request({
-        ...headers,
+        [HTTP2_HEADER_METHOD]: method,
+        [HTTP2_HEADER_PATH]: path,
         "hue-application-key": this.bridgeUsername,
         [sensitiveHeaders]: ["hue-application-key"],
       });

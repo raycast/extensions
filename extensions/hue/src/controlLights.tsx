@@ -6,12 +6,12 @@ import ManageHueBridge from "./components/ManageHueBridge";
 import UnlinkAction from "./components/UnlinkAction";
 import { SendHueMessage, useHue } from "./lib/useHue";
 import HueClient from "./lib/HueClient";
-import { COLORS } from "./lib/colors";
+import { COLORS, hexToXy } from "./lib/colors";
 import React from "react";
 import Style = Toast.Style;
 
 export default function ControlLights() {
-  const { hueBridgeState, sendHueMessage, isLoading, lights, setLights, rooms, zones } = useHue();
+  const { hueBridgeState, sendHueMessage, isLoading, lights, rooms, zones } = useHue();
 
   const groups = ([] as Group[]).concat(rooms).concat(zones);
 
@@ -31,7 +31,6 @@ export default function ControlLights() {
             key={group.id}
             lights={roomLights}
             group={group}
-            setLights={setLights}
             sendHueMessage={sendHueMessage}
           />
         );
@@ -44,7 +43,6 @@ function Group(props: {
   hueClient?: HueClient;
   lights: Light[];
   group: Group;
-  setLights: React.Dispatch<React.SetStateAction<Light[]>>;
   sendHueMessage: SendHueMessage;
 }) {
   return (
@@ -56,7 +54,6 @@ function Group(props: {
             key={light.id}
             light={light}
             group={props.group}
-            setLights={props.setLights}
             sendHueMessage={props.sendHueMessage}
           />
         )
@@ -69,7 +66,6 @@ function Light(props: {
   hueClient?: HueClient;
   light: Light;
   group?: Group;
-  setLights: React.Dispatch<React.SetStateAction<Light[]>>;
   sendHueMessage: SendHueMessage;
 }) {
   return (
@@ -81,47 +77,42 @@ function Light(props: {
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <ToggleLightAction
-              light={props.light}
-              onToggle={() => handleToggle(props.hueClient, props.light)}
-            />
+            <ToggleLightAction light={props.light} onToggle={() => handleToggle(props.hueClient, props.light)} />
             <SetBrightnessAction
               light={props.light}
               onSet={(percentage: number) =>
-                handleSetBrightness(props.hueClient, props.light, props.setLights, percentage)
+                handleSetBrightness(props.hueClient, props.light, percentage)
               }
             />
             <IncreaseBrightnessAction
               light={props.light}
-              onIncrease={() => handleIncreaseBrightness(props.hueClient, props.light, props.setLights)}
+              onIncrease={() => handleIncreaseBrightness(props.hueClient, props.light)}
             />
             <DecreaseBrightnessAction
               light={props.light}
-              onDecrease={() => handleDecreaseBrightness(props.hueClient, props.light, props.setLights)}
+              onDecrease={() => handleDecreaseBrightness(props.hueClient, props.light)}
             />
           </ActionPanel.Section>
 
           <ActionPanel.Section>
-            {/*
-            {props.light.state.colormode == "xy" && (
+            {props.light.color !== undefined && (
               <SetColorAction
                 light={props.light}
-                onSet={(color: CssColor) => handleSetColor(hueClient, props.light, props.setLights, color)}
+                onSet={(color: CssColor) => handleSetColor(props.hueClient, props.light, color)}
               />
             )}
-            {props.light.state.colormode == "ct" && (
+            {props.light.color_temperature !== undefined && (
               <IncreaseColorTemperatureAction
                 light={props.light}
-                onIncrease={() => handleIncreaseColorTemperature(hueClient, props.light, props.setLights)}
+                onIncrease={() => handleIncreaseColorTemperature(props.hueClient, props.light)}
               />
             )}
-            {props.light.state.colormode == "ct" && (
+            {props.light.color_temperature !== undefined && (
               <DecreaseColorTemperatureAction
                 light={props.light}
-                onDecrease={() => handleDecreaseColorTemperature(hueClient, props.light, props.setLights)}
+                onDecrease={() => handleDecreaseColorTemperature(props.hueClient, props.light)}
               />
             )}
-*/}
           </ActionPanel.Section>
 
           <ActionPanel.Section>
@@ -232,15 +223,16 @@ function RefreshAction(props: { onRefresh: () => void }) {
   );
 }
 
-async function handleToggle(
-  hueClient: HueClient | undefined,
-  light: Light,
-) {
+async function handleToggle(hueClient: HueClient | undefined, light: Light) {
   const toast = new Toast({ title: "" });
 
   try {
     if (hueClient === undefined) throw new Error("Not connected to Hue Bridge.");
-    await hueClient.toggleLight(light);
+    await hueClient.updateLight(light, {
+      on: { on: !light.on.on },
+      // TODO: Figure out why transition time causes the light to turn on at 1% brightness
+      // dynamics: { duration: getTransitionTimeInMs() },
+    });
 
     toast.style = Style.Success;
     toast.title = light.on.on ? `Turned ${light.metadata.name} off` : `Turned ${light.metadata.name} on`;
@@ -259,23 +251,20 @@ async function handleToggle(
 async function handleSetBrightness(
   hueClient: HueClient | undefined,
   light: Light,
-  setLights: React.Dispatch<React.SetStateAction<Light[]>>,
-  percentage: number
+  brightness: number
 ) {
   const toast = new Toast({ title: "" });
 
   try {
     if (hueClient === undefined) throw new Error("Not connected to Hue Bridge.");
-    await hueClient.setBrightness(light, percentage);
-    setLights((prevState) => {
-      return prevState.updateItem(light, {
-        on: { on: true },
-        dimming: { brightness: percentage },
-      });
+    await hueClient.updateLight(light, {
+      // TODO: Why not just use light.on.on here?
+      ...(light.on.on ? {} : { on: { on: true } }),
+      dimming: { brightness: brightness },
     });
 
     toast.style = Style.Success;
-    toast.title = `Set brightness of ${light.metadata.name} to ${(percentage / 100).toLocaleString("en", {
+    toast.title = `Set brightness of ${light.metadata.name} to ${(brightness / 100).toLocaleString("en", {
       style: "percent",
     })}`;
     await toast.show();
@@ -291,23 +280,19 @@ async function handleSetBrightness(
 async function handleIncreaseBrightness(
   hueClient: HueClient | undefined,
   light: Light,
-  setLights: React.Dispatch<React.SetStateAction<Light[]>>
 ) {
   const toast = new Toast({ title: "" });
-  const newBrightness = calculateAdjustedBrightness(light, "increase");
+  const adjustedBrightness = calculateAdjustedBrightness(light, "increase");
 
   try {
     if (hueClient === undefined) throw new Error("Not connected to Hue Bridge.");
-    await hueClient.setBrightness(light, newBrightness);
-    setLights((prevState) => {
-      return prevState.updateItem(light, {
-        on: { on: true },
-        dimming: { brightness: newBrightness },
-      });
+    await hueClient.updateLight(light, {
+      ...(light.on.on ? {} : { on: { on: true } }),
+      dimming: { brightness: adjustedBrightness },
     });
 
     toast.style = Style.Success;
-    toast.title = `Increased brightness of ${light.metadata.name} to ${(newBrightness / 100).toLocaleString("en", {
+    toast.title = `Increased brightness of ${light.metadata.name} to ${(adjustedBrightness / 100).toLocaleString("en", {
       style: "percent",
     })}`;
     await toast.show();
@@ -322,23 +307,19 @@ async function handleIncreaseBrightness(
 async function handleDecreaseBrightness(
   hueClient: HueClient | undefined,
   light: Light,
-  setLights: React.Dispatch<React.SetStateAction<Light[]>>
 ) {
   const toast = new Toast({ title: "" });
-  const newBrightness = calculateAdjustedBrightness(light, "decrease");
+  const adjustedBrightness = calculateAdjustedBrightness(light, "decrease");
 
   try {
     if (hueClient === undefined) throw new Error("Not connected to Hue Bridge.");
-    await hueClient.setBrightness(light, newBrightness);
-    setLights((prevState) => {
-      return prevState.updateItem(light, {
-        on: { on: true },
-        dimming: { brightness: newBrightness },
-      });
+    await hueClient.updateLight(light, {
+      ...(light.on.on ? {} : { on: { on: true } }),
+      dimming: { brightness: adjustedBrightness },
     });
 
     toast.style = Style.Success;
-    toast.title = `Decreased brightness of ${light.metadata.name} to ${(newBrightness / 100).toLocaleString("en", {
+    toast.title = `Decreased brightness of ${light.metadata.name} to ${(adjustedBrightness / 100).toLocaleString("en", {
       style: "percent",
     })}`;
     await toast.show();
@@ -353,12 +334,16 @@ async function handleDecreaseBrightness(
 async function handleSetColor(
   hueClient: HueClient | undefined,
   light: Light,
-  setLights: React.Dispatch<React.SetStateAction<Light[]>>,
   color: CssColor
 ) {
   const toast = new Toast({ title: "" });
 
   try {
+    if (hueClient === undefined) throw new Error("Not connected to Hue Bridge.");
+    await hueClient.updateLight(light, {
+      on: { on: true },
+      color: { xy: hexToXy(color.value) },
+    });
     // await setLights(setLightColor(api, light, color.value), {
     //   optimisticUpdate(lights) {
     //     return lights.map((it) =>
@@ -368,7 +353,7 @@ async function handleSetColor(
     // });
 
     toast.style = Style.Success;
-    toast.title = `Set color to ${color.name}`;
+    toast.title = `Set color of ${light.metadata.name} to ${color.name}`;
     await toast.show();
   } catch (e) {
     toast.style = Style.Failure;
@@ -381,7 +366,6 @@ async function handleSetColor(
 async function handleIncreaseColorTemperature(
   hueClient: HueClient | undefined,
   light: Light,
-  setLights: React.Dispatch<React.SetStateAction<Light[]>>
 ) {
   const toast = new Toast({ title: "" });
 
@@ -397,11 +381,11 @@ async function handleIncreaseColorTemperature(
     // });
 
     toast.style = Style.Success;
-    toast.title = "Increased color temperature";
+    toast.title = `Increased color temperature of ${light.metadata.name}`;
     await toast.show();
   } catch (e) {
     toast.style = Style.Failure;
-    toast.title = "Failed increasing color temperature";
+    toast.title = `Failed increasing color temperature of ${light.metadata.name}`;
     toast.message = e instanceof Error ? e.message : undefined;
     await toast.show();
   }
@@ -410,7 +394,6 @@ async function handleIncreaseColorTemperature(
 async function handleDecreaseColorTemperature(
   hueClient: HueClient | undefined,
   light: Light,
-  setLights: React.Dispatch<React.SetStateAction<Light[]>>
 ) {
   const toast = new Toast({ title: "" });
 
