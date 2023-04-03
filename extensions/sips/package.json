@@ -5,32 +5,15 @@
   "description": "Rotate, flip, resize, and convert images using SIPS",
   "icon": "command-icon.png",
   "author": "HelloImSteven",
+  "contributors": [
+    "arronhunt"
+  ],
   "categories": [
     "Media",
     "Productivity",
     "Design Tools"
   ],
   "license": "MIT",
-  "preferences": [
-    {
-      "name": "preferredFileManager",
-      "description": "The preferred file manager to obtain selected images from. Finder will always be used as a fallback.",
-      "type": "dropdown",
-      "data": [
-        {
-          "title": "Finder",
-          "value": "Finder"
-        },
-        {
-          "title": "Path Finder",
-          "value": "Path Finder"
-        }
-      ],
-      "default": "Finder",
-      "required": false,
-      "title": "Preferred File Manager"
-    }
-  ],
   "commands": [
     {
       "name": "flip-horizontally",
@@ -48,15 +31,7 @@
       "name": "rotate",
       "title": "Rotate Images",
       "description": "Rotate the selected images by the specified amount of degrees",
-      "mode": "no-view",
-      "arguments": [
-        {
-          "name": "degrees",
-          "placeholder": "Degrees",
-          "type": "text",
-          "required": true
-        }
-      ]
+      "mode": "no-view"
     },
     {
       "name": "convert",
@@ -68,55 +43,19 @@
       "name": "resize",
       "title": "Resize Images",
       "description": "Resize the selected images to the specified width and/or height",
-      "mode": "no-view",
-      "arguments": [
-        {
-          "name": "width",
-          "placeholder": "Width",
-          "type": "text",
-          "required": false
-        },
-        {
-          "name": "height",
-          "placeholder": "Height",
-          "type": "text",
-          "required": false
-        }
-      ]
+      "mode": "no-view"
     },
     {
       "name": "scale",
       "title": "Scale Images",
       "description": "Scale the selected images by the provided factor",
-      "mode": "no-view",
-      "arguments": [
-        {
-          "name": "scaleFactor",
-          "placeholder": "Scale Factor",
-          "type": "text",
-          "required": true
-        }
-      ]
+      "mode": "no-view"
     },
     {
       "name": "pad",
       "title": "Pad Images",
       "description": "Pad images to the specified size using the provided color",
-      "mode": "no-view",
-      "arguments": [
-        {
-          "name": "amount",
-          "placeholder": "Amount",
-          "type": "text",
-          "required": true
-        },
-        {
-          "name": "hexcolor",
-          "placeholder": "Color",
-          "type": "text",
-          "required": false
-        }
-      ]
+      "mode": "no-view"
     },
     {
       "name": "apply-filter",
@@ -125,8 +64,28 @@
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "data": [
+        {
+          "title": "Finder",
+          "value": "Finder"
+        },
+        {
+          "title": "Path Finder",
+          "value": "Path Finder"
+        }
+      ],
+      "default": "Finder",
+      "description": "The preferred file manager to obtain selected images from. Finder will always be used as a fallback.",
+      "name": "preferredFileManager",
+      "required": false,
+      "title": "Preferred File Manager",
+      "type": "dropdown"
+    }
+  ],
   "dependencies": {
-    "@raycast/api": "^1.48.1",
+    "@raycast/api": "^1.48.8",
     "@raycast/utils": "^1.4.18",
     "run-applescript": "^6.1.0"
   },

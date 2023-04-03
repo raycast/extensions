@@ -21,3 +21,5 @@ Rotate, flip, scale, resize, convert, and apply filters to selected images in Fi
     - Pad images by the specified number of pixels using the provided color (defaults to white).
 - Apply Image Filter
     - Apply various filters to the provided images using Apple's CIFilters
+
+Filter thumbnail image credit: https://unsplash.com/photos/UBA_W3_LsOk
