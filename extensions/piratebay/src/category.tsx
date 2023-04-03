@@ -1,7 +1,7 @@
 import { Icon, Color, Detail, List, showToast, Toast, Action, ActionPanel, preferences } from "@raycast/api";
+import { useFetch } from "@raycast/utils";
 import cheerio from "cheerio";
 import { useEffect, useState } from "react";
-import { useFetch } from "@raycast/utils";
 import nodeFetch from "node-fetch";
 
 type Result = {
@@ -691,10 +691,9 @@ function EntryActions(name: string, magnet: string, link: string, tag: string) {
 
 const Details = (props: { name: string; magnet: string; link: string; tag: string }) => {
   const [searchText, setSearchText] = useState("");
-  const { isLoading, data } = useFetch(props.link, {
+  const { isLoading, data, revalidate } = useFetch(props.link, {
     // to make sure the screen isn't flickering when the searchText changes
     keepPreviousData: true,
-    initialData: "",
   });
 
   const $ = cheerio.load(String(data));
