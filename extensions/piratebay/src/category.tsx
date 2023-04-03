@@ -2,8 +2,6 @@ import { Icon, Color, Detail, List, showToast, Toast, Action, ActionPanel, prefe
 import cheerio from "cheerio";
 import { useEffect, useState } from "react";
 import { useFetch } from "@raycast/utils";
-// import { search } from "./piratebay-search";
-import { categories } from "./categories";
 import nodeFetch from "node-fetch";
 
 type Result = {

@@ -3,7 +3,6 @@ import cheerio from "cheerio";
 import { useEffect, useState } from "react";
 import { useFetch } from "@raycast/utils";
 import nodeFetch from "node-fetch";
-// import { search, searchPages } from './piratebay-search';
 
 type Result = {
   name: string;
