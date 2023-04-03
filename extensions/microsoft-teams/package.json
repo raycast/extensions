@@ -21,16 +21,16 @@
   "preferences": [
     {
       "type": "textfield",
-      "name": "tenantId",
-      "title": "Directory ID",
-      "description": "The \"Directory (tenant) ID\" (see extension's documentation)",
+      "name": "clientId",
+      "title": "Application ID",
+      "description": "The \"Application (client) ID\" (see extension's documentation)",
       "required": true
     },
     {
       "type": "textfield",
-      "name": "clientId",
-      "title": "Application ID",
-      "description": "The \"Application (client) ID\" (see extension's documentation)",
+      "name": "tenantId",
+      "title": "Directory ID",
+      "description": "The \"Directory (tenant) ID\" (see extension's documentation)",
       "required": true
     }
   ],
