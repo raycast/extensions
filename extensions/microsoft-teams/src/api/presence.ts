@@ -66,8 +66,8 @@ export async function setAvailability(availability?: Availability) {
       return await showHUD("Reset availability to default");
     case "Busy":
     case "DoNotDisturb":
-      return await showHUD(`Set status to »${readableAvailability(availability)}« for 1 day`);
+      return await showHUD(`Set status to "${readableAvailability(availability)}" (expires in 1 day)`);
     default:
-      return await showHUD(`Set status to »${readableAvailability(availability)}« for 7 days`);
+      return await showHUD(`Set status to "${readableAvailability(availability)}" (expires in 7 days)`);
   }
 }
