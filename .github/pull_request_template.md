@@ -4,7 +4,7 @@
 
 ## Screencast
 
-<!-- If you add a new extension or command, include a screencast (or screenshot for straightforward changes). A good screencast will make the review much faster - especially if your extension requires registration in other services.  -->
+<!-- Include a screencast (or screenshot for straightforward changes) if you add a new extension or command. A good screencast will make the review much faster - especially if your extension requires registration in other services. -->
 
 ## Checklist
 
