@@ -111,11 +111,9 @@ export default function IssueDetail({ issue: existingIssue, mutateList, prioriti
                   }
                 />
 
-                {!!issue.relations && issue.relations.nodes.filter((node) => node.type == "related").length > 0 ? (
+                {relatedIssues.length > 0 ? (
                   <Detail.Metadata.TagList title="Related">
-                    {issue.relations.nodes
-                      .filter((node) => node.type == "related")
-                      .map(({ id, relatedIssue }) => (
+                    {relatedIssues.map(({ id, relatedIssue }) => (
                         <Detail.Metadata.TagList.Item key={id} text={relatedIssue.identifier} />
                       ))}
                   </Detail.Metadata.TagList>
