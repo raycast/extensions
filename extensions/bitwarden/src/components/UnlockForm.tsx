@@ -19,7 +19,7 @@ const UnlockForm = (props: UnlockFormProps) => {
   const [unlockError, setUnlockError] = useState<string | undefined>(undefined);
 
   async function onSubmit({ password }: { password: string }) {
-    if (password.length == 0) return;
+    if (password.length === 0) return;
     const toast = await showToast(Toast.Style.Animated, "Unlocking Vault...", "Please wait");
     try {
       setLoading(true);
