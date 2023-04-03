@@ -1,12 +1,12 @@
 import fetch, { FormData } from "node-fetch";
 import { OAuth } from "@raycast/api";
-import { prefs } from "../preferences";
+import { prefs } from "./preferences";
 
 const scope = "offline_access user.read Presence.ReadWrite";
 const oauthClient = new OAuth.PKCEClient({
   redirectMethod: OAuth.RedirectMethod.Web,
   providerName: "Microsoft",
-  providerIcon: "teams.png",
+  providerIcon: "microsoft.png",
   description: "Connect your Microsoft account …",
 });
 

@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Color, Icon, Image, List } from "@raycast/api";
-import { Availability, getAvailability, setAvailability } from "./graph-client/presence";
+import { Availability, getAvailability, setAvailability } from "./api/presence";
 import { usePromise } from "@raycast/utils";
 
 interface Presence {
@@ -22,7 +22,11 @@ const presences: Presence[] = [
   { label: "Clear Presence", icon: { source: Icon.Undo } },
 ];
 
-function PresenceItem({ presence, isCurrent }: { presence: Presence; isCurrent: boolean }) {
+function PresenceItem({ presence, isCurrent, onSet }: { presence: Presence; isCurrent: boolean, onSet: () => void }) {
+  const onAction = async () => {
+    await setAvailability(presence.availability)
+    onSet()
+  }
   return (
     <List.Item
       title={presence.label}
@@ -30,7 +34,7 @@ function PresenceItem({ presence, isCurrent }: { presence: Presence; isCurrent: 
       accessories={isCurrent ? [{ tag: "current" }] : undefined}
       actions={
         <ActionPanel>
-          <Action title={"Set Presence"} onAction={() => setAvailability(presence.availability)} />
+          <Action title={"Set Presence"} onAction={onAction} />
         </ActionPanel>
       }
     />
@@ -38,14 +42,15 @@ function PresenceItem({ presence, isCurrent }: { presence: Presence; isCurrent: 
 }
 
 export default function SetPresence() {
-  const { isLoading, data: currentAccessibility } = usePromise(getAvailability);
+  const { isLoading, data: currentAvailability, revalidate } = usePromise(getAvailability);
   return (
     <List isLoading={isLoading}>
       {presences.map((presence) => (
         <PresenceItem
           key={presence.label}
           presence={presence}
-          isCurrent={presence.availability === currentAccessibility}
+          isCurrent={currentAvailability !== undefined && presence.availability === currentAvailability}
+          onSet={revalidate}
         />
       ))}
     </List>
