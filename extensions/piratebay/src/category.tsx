@@ -513,10 +513,7 @@ const Details = (props: { name: string; magnet: string; link: string; tag: strin
       .join("")
       .split("`")
       .join("")
-      .replace(
-        /(https?:\/\/(?:www\.|(?!www))[^\s\.]+\.[^\s]{2,}|www\.[^\s]+\.[^\s]{2,})/igm,
-        "[$1]($1)"
-      );
+      .replace(/(https?:\/\/(?:www\.|(?!www))[^\s.]+\.[^\s]{2,}|www\.[^\s]+\.[^\s]{2,})/gim, "[$1]($1)");
   }
 
   let latestComment = "";

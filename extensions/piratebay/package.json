@@ -68,7 +68,8 @@
     "@raycast/api": "^1.48.9",
     "@types/cheerio": "^0.22.31",
     "cheerio": "^1.0.0-rc.12",
-    "jquery": "^3.6.4"
+    "jquery": "^3.6.4",
+    "ray": "^0.0.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.5",
