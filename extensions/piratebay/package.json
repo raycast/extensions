@@ -65,7 +65,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.48.9",
+    "@raycast/api": "^1.48.8",
     "@raycast/utils": "^1.5.2",
     "@types/cheerio": "^0.22.31",
     "cheerio": "^1.0.0-rc.12",
