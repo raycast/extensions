@@ -26,7 +26,8 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.49.1",
-    "nanoid": "^4.0.2"
+    "nanoid": "^4.0.2",
+    "node-fetch": "^3.3.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.5",
