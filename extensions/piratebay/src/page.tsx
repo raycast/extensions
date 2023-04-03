@@ -2,7 +2,7 @@ import { Icon, Color, Detail, List, showToast, Toast, Action, ActionPanel, prefe
 import cheerio from "cheerio";
 import { useEffect, useState } from "react";
 import { useFetch } from "@raycast/utils";
-import nodeFetch from "node-fetch";
+import nodeFetch from "node-fetch"; //
 
 type Result = {
   name: string;
