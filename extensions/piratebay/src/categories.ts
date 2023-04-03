@@ -9,23 +9,23 @@ export const categories = [
   },
   {
     value: "101",
-    title: "    Music",
+    title: "-Music",
   },
   {
     value: "102",
-    title: "    Audio books",
+    title: "-Audio books",
   },
   {
     value: "103",
-    title: "    Sound clips",
+    title: "-Sound clips",
   },
   {
     value: "104",
-    title: "    FLAC",
+    title: "-FLAC",
   },
   {
     value: "199",
-    title: "    Other Audio",
+    title: "-Other Audio",
   },
   {
     value: "200",
@@ -33,43 +33,43 @@ export const categories = [
   },
   {
     value: "201",
-    title: "    Movies",
+    title: "-Movies",
   },
   {
     value: "202",
-    title: "    Movies DVDR",
+    title: "-Movies DVDR",
   },
   {
     value: "203",
-    title: "    Music videos",
+    title: "-Music videos",
   },
   {
     value: "204",
-    title: "    Movie clips",
+    title: "-Movie clips",
   },
   {
     value: "205",
-    title: "    TV shows",
+    title: "-TV shows",
   },
   {
     value: "206",
-    title: "    Handheld Videos",
+    title: "-Handheld Videos",
   },
   {
     value: "207",
-    title: "    HD - Movies",
+    title: "-HD - Movies",
   },
   {
     value: "208",
-    title: "    HD - TV shows",
+    title: "-HD - TV shows",
   },
   {
     value: "209",
-    title: "    3D",
+    title: "-3D",
   },
   {
     value: "299",
-    title: "    Other Movies",
+    title: "-Other Movies",
   },
   {
     value: "300",
@@ -77,31 +77,31 @@ export const categories = [
   },
   {
     value: "301",
-    title: "    Windows",
+    title: "-Windows",
   },
   {
     value: "302",
-    title: "    Mac Apps",
+    title: "-Mac Apps",
   },
   {
     value: "303",
-    title: "    UNIX",
+    title: "-UNIX",
   },
   {
     value: "304",
-    title: "    Handheld Apps",
+    title: "-Handheld Apps",
   },
   {
     value: "305",
-    title: "    iOS (iPad/iPhone) Apps",
+    title: "-iOS (iPad/iPhone) Apps",
   },
   {
     value: "306",
-    title: "    Android",
+    title: "-Android",
   },
   {
     value: "399",
-    title: "    Other OS",
+    title: "-Other OS",
   },
   {
     value: "400",
@@ -109,39 +109,39 @@ export const categories = [
   },
   {
     value: "401",
-    title: "    PC",
+    title: "-PC",
   },
   {
     value: "402",
-    title: "    Mac Games",
+    title: "-Mac Games",
   },
   {
     value: "403",
-    title: "    PSx",
+    title: "-PSx",
   },
   {
     value: "404",
-    title: "    XBOX360",
+    title: "-XBOX360",
   },
   {
     value: "405",
-    title: "    Wii",
+    title: "-Wii",
   },
   {
     value: "406",
-    title: "    Handheld Games",
+    title: "-Handheld Games",
   },
   {
     value: "407",
-    title: "    iOS (iPad/iPhone) Games",
+    title: "-iOS (iPad/iPhone) Games",
   },
   {
     value: "408",
-    title: "    Android",
+    title: "-Android",
   },
   {
     value: "499",
-    title: "    Other Games",
+    title: "-Other Games",
   },
   {
     value: "500",
@@ -149,31 +149,31 @@ export const categories = [
   },
   {
     value: "501",
-    title: "    Movies (Porn)",
+    title: "-Movies (Porn)",
   },
   {
     value: "502",
-    title: "    Movies DVDR (Porn)",
+    title: "-Movies DVDR (Porn)",
   },
   {
     value: "503",
-    title: "    Pictures (Porn)",
+    title: "-Pictures (Porn)",
   },
   {
     value: "504",
-    title: "    Games (Porn)",
+    title: "-Games (Porn)",
   },
   {
     value: "505",
-    title: "    HD - Movies (Porn)",
+    title: "-HD - Movies (Porn)",
   },
   {
     value: "506",
-    title: "    Movie clips (Porn)",
+    title: "-Movie clips (Porn)",
   },
   {
     value: "599",
-    title: "    Other Porn",
+    title: "-Other Porn",
   },
   {
     value: "600",
@@ -181,26 +181,26 @@ export const categories = [
   },
   {
     value: "601",
-    title: "    E-books",
+    title: "-E-books",
   },
   {
     value: "602",
-    title: "    Comics",
+    title: "-Comics",
   },
   {
     value: "603",
-    title: "    Pictures",
+    title: "-Pictures",
   },
   {
     value: "604",
-    title: "    Covers",
+    title: "-Covers",
   },
   {
     value: "605",
-    title: "    Physibles",
+    title: "-Physibles",
   },
   {
     value: "699",
-    title: "    Other Other",
+    title: "-Other Other",
   },
 ];
