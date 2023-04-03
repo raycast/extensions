@@ -1,6 +1,6 @@
 import { ActionPanel, Icon, List, Toast } from "@raycast/api";
 import { calculateAdjustedBrightness, getIconForColor, getLightIcon } from "./lib/utils";
-import { CssColor, Light, ResourceIdentifier, Room } from "./lib/types";
+import { CssColor, Group, Light } from "./lib/types";
 import { BRIGHTNESS_MAX, BRIGHTNESSES } from "./lib/constants";
 import ManageHueBridge from "./components/ManageHueBridge";
 import UnlinkAction from "./components/UnlinkAction";
@@ -11,25 +11,26 @@ import React from "react";
 import Style = Toast.Style;
 
 export default function ControlLights() {
-  const { hueBridgeState, sendHueMessage, isLoading, lights, setLights, rooms } = useHue();
+  const { hueBridgeState, sendHueMessage, isLoading, lights, setLights, rooms, zones } = useHue();
+
+  const groups = ([] as Group[]).concat(rooms).concat(zones);
 
   const manageHueBridgeElement = ManageHueBridge(hueBridgeState, sendHueMessage);
   if (manageHueBridgeElement !== null) return manageHueBridgeElement;
 
   return (
     <List isLoading={isLoading}>
-      {rooms.map((room: Room) => {
-        const roomLights =
-          lights.filter((light: Light) => {
-            return room.children.map((child: ResourceIdentifier) => child.rid).includes(`${light.owner.rid}`);
-          }) ?? [];
+      {groups.map((group: Group) => {
+        const roomLights = lights.filter((light: Light) =>
+          group.children.some((child) => [light.id, light.owner.rid].includes(child.rid))
+        );
 
         return (
           <Group
             hueClient={hueBridgeState.context.hueClient}
-            key={room.id}
+            key={group.id}
             lights={roomLights}
-            room={room}
+            group={group}
             setLights={setLights}
             sendHueMessage={sendHueMessage}
           />
@@ -42,19 +43,19 @@ export default function ControlLights() {
 function Group(props: {
   hueClient?: HueClient;
   lights: Light[];
-  room: Room;
+  group: Group;
   setLights: React.Dispatch<React.SetStateAction<Light[]>>;
   sendHueMessage: SendHueMessage;
 }) {
   return (
-    <List.Section key={props.room.id} title={props.room.metadata.name}>
+    <List.Section key={props.group.id} title={props.group.metadata.name}>
       {props.lights.map(
         (light: Light): JSX.Element => (
           <Light
             hueClient={props.hueClient}
             key={light.id}
             light={light}
-            room={props.room}
+            group={props.group}
             setLights={props.setLights}
             sendHueMessage={props.sendHueMessage}
           />
@@ -67,7 +68,7 @@ function Group(props: {
 function Light(props: {
   hueClient?: HueClient;
   light: Light;
-  room?: Room;
+  group?: Group;
   setLights: React.Dispatch<React.SetStateAction<Light[]>>;
   sendHueMessage: SendHueMessage;
 }) {
@@ -75,7 +76,8 @@ function Light(props: {
     <List.Item
       title={props.light.metadata.name}
       icon={getLightIcon(props.light)}
-      // keywords={[props.group.name]}
+      subtitle={props.light.owner.rtype}
+      keywords={[props.group?.metadata?.name ?? ""]}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
@@ -123,7 +125,6 @@ function Light(props: {
           </ActionPanel.Section>
 
           <ActionPanel.Section>
-            {/*<RefreshAction onRefresh={() => props.setLights} />*/}
             <UnlinkAction sendHueMessage={props.sendHueMessage} />
           </ActionPanel.Section>
         </ActionPanel>
@@ -173,7 +174,7 @@ function IncreaseBrightnessAction(props: { light: Light; onIncrease: () => void 
 
 function DecreaseBrightnessAction(props: { light: Light; onDecrease: () => void }) {
   return props.light.dimming !== undefined &&
-    props.light.dimming.brightness > (props.light.dimming.min_dim_level ?? 0) ? (
+  props.light.dimming.brightness > (props.light.dimming.min_dim_level ?? 0) ? (
     <ActionPanel.Item
       title="Decrease Brightness"
       shortcut={{ modifiers: ["cmd", "shift"], key: "arrowDown" }}

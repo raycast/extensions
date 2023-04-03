@@ -323,7 +323,6 @@ export type Light = {
   };
 };
 
-
 export type Scene = {
   /**
    * Type of the supported resources
@@ -423,11 +422,11 @@ export type Scene = {
   group: ResourceIdentifier;
 };
 
-type Group = {
+export type Group = {
   /**
    * Type of the supported resources
    */
-  type?: "room";
+  type?: "room" | "zone";
 
   /**
    * Unique identifier representing a specific resource instance
