@@ -1,4 +1,5 @@
 import { ActionPanel, Icon, useNavigation, getPreferenceValues, Action } from "@raycast/api";
+import { likeOrDislike } from "@/functions/utils";
 
 // Functions
 import { saveImage } from "@/functions/saveImage";
@@ -7,7 +8,6 @@ import { copyFileToClipboard } from "@/functions/copyFileToClipboard";
 
 // Components
 import Details from "@/views/Details";
-import React from "react";
 
 // Types
 interface BaseProps {
@@ -15,7 +15,7 @@ interface BaseProps {
   details?: boolean;
 }
 
-export const Actions: React.FC<BaseProps> = ({ details = false, item }) => (
+export const Actions: React.FC<BaseProps> = ({ details, item }) => (
   <ActionPanel>
     <Sections details={details} item={item} />
   </ActionPanel>
@@ -33,9 +33,17 @@ export const Sections: React.FC<BaseProps> = ({ details = false, item }) => {
   };
 
   return (
-    <React.Fragment>
+    <>
       <ActionPanel.Section>
         {details && <Action title="Show Details" icon={Icon.List} onAction={() => push(<Details result={item} />)} />}
+
+        <Action
+          title={`${item.liked_by_user ? "Unlike" : "Like"} Photo`}
+          icon={Icon.Heart}
+          style={item.liked_by_user ? Action.Style.Destructive : Action.Style.Regular}
+          shortcut={{ modifiers: ["cmd"], key: "l" }}
+          onAction={() => likeOrDislike(item.id, item.liked_by_user)}
+        />
 
         {item.links?.html && <Action.OpenInBrowser url={item.links.html} title="Open Original" />}
 
@@ -49,9 +57,9 @@ export const Sections: React.FC<BaseProps> = ({ details = false, item }) => {
         )}
       </ActionPanel.Section>
 
-      <ActionPanel.Section title="Image">
-        {imageUrl && (
-          <React.Fragment>
+      {imageUrl && (
+        <>
+          <ActionPanel.Section title="Image">
             <Action
               title="Copy to Clipboard"
               icon={Icon.Clipboard}
@@ -60,21 +68,30 @@ export const Sections: React.FC<BaseProps> = ({ details = false, item }) => {
             />
 
             <Action
-              title="Set as Desktop Wallpaper"
+              title="Download Image"
+              icon={Icon.Desktop}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+              onAction={() => saveImage({ url: imageUrl, id: String(item.id) })}
+            />
+          </ActionPanel.Section>
+
+          <ActionPanel.Section title="Set as Wallpaper On">
+            <Action
+              title="Current Monitor"
               icon={Icon.Desktop}
               shortcut={{ modifiers: ["cmd", "shift"], key: "w" }}
               onAction={() => setWallpaper({ url: imageUrl, id: String(item.id) })}
             />
 
             <Action
-              title="Download Image"
+              title="Every Monitor"
               icon={Icon.Desktop}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
-              onAction={() => saveImage({ url: imageUrl, id: String(item.id) })}
+              shortcut={{ modifiers: ["shift", "opt"], key: "w" }}
+              onAction={() => setWallpaper({ url: imageUrl, id: String(item.id), every: true })}
             />
-          </React.Fragment>
-        )}
-      </ActionPanel.Section>
+          </ActionPanel.Section>
+        </>
+      )}
 
       <ActionPanel.Section title="Links">
         {item.links?.html && (
@@ -93,7 +110,7 @@ export const Sections: React.FC<BaseProps> = ({ details = false, item }) => {
           />
         )}
       </ActionPanel.Section>
-    </React.Fragment>
+    </>
   );
 };
 
