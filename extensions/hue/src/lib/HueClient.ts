@@ -172,6 +172,12 @@ export default class HueClient {
   private makeRequest(headers: OutgoingHttpHeaders, body?: any): Promise<Response> {
     return new Promise((resolve, reject) => {
       if (!this.rateLimiter.canMakeRequest(headers[HTTP2_HEADER_PATH] as string)) {
+        // TODO: Queue instead of drop, since groups of lights are updated one light at a time.
+        //   This means that if a user is e.g. changing the brightness of more than 10 lights at once,
+        //   the rate limiter will drop all but the first 10 requests.
+        //   The rate limiter was added to prevent 429 errors when the user is rapidly changing the brightness
+        //   of a light, e.g. by holding down the brightness up hotkey.
+        //   To prevent a clogged queue from holding down such a hotkey we can add a rate limiter to these actions.
         return reject(new Error("Rate limit exceeded."));
       }
 

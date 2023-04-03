@@ -9,7 +9,7 @@ type Timestamps = number[];
  * The Hue API has a rate limit of 10 requests per second for lights and 1 request per second for all other endpoints.
  */
 export default class HueApiRateLimiter {
-  private requests: Map<Endpoint, Timestamps>;
+  private readonly requests: Map<Endpoint, Timestamps>;
 
   constructor() {
     this.requests = new Map();
