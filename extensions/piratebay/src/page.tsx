@@ -2,7 +2,7 @@ import { Icon, Color, Detail, List, showToast, Toast, Action, ActionPanel, prefe
 import cheerio from "cheerio";
 import { useEffect, useState } from "react";
 import { useFetch } from "@raycast/utils";
-const nodeFetch = require("node-fetch");
+import nodeFetch from "node-fetch";
 // import { search, searchPages } from './piratebay-search';
 
 type Result = {
@@ -71,10 +71,7 @@ async function searchPages(q = "", { fetch = nodeFetch, baseURL = "", sortby = "
   return pages;
 }
 
-async function search(
-  q = "",
-  { fetch = nodeFetch, baseURL = "", page = 0, category = 0, sortby = "7" } = {}
-) {
+async function search(q = "", { fetch = nodeFetch, baseURL = "", page = 0, category = 0, sortby = "7" } = {}) {
   if (!fetch) {
     throw new Error("piratebay-search: No fetch implementation provided");
   }
@@ -97,19 +94,19 @@ async function search(
 
   $("table[id='searchResult'] tr").each(function (this: cheerio.Element) {
     const icons: string[] = [];
-    var hasComments = $(this)
+    const hasComments = $(this)
       .find("td")
       .find("img")
       .each(function (i: number, link: cheerio.Element) {
         icons.push($(link).attr("src")?.split("/")?.pop()?.replace(/\..*/g, "") ?? "");
       });
-    var commentsCount = "";
+    let commentsCount = "";
     if (icons.includes("icon_comment")) {
-      var hasComments = $(this)
+      $(this)
         .find("td")
         .find("img")
         .each(function (i: number, link: cheerio.Element) {
-          var icon = $(link).attr("title");
+          let icon = $(link).attr("title");
           if (icon !== undefined && icon !== "") {
             commentsCount += $(link)
               .attr("title")
@@ -526,7 +523,10 @@ const Details = (props: { name: string; magnet: string; link: string; tag: strin
       .join("")
       .split("`")
       .join("")
-      .replace(/(\b(https?|ftp|magnet):\/[-A-Z0-9+&@#%?=~_|!:,.;]*[-A-Z0-9+&@#%=~_|])/gi, "[$1]($1)");
+      .replace(
+        /((?:(?:https?|ftp|file):\/\/|www\.|ftp\.)(?:\([-A-Z0-9+&@#\/%=~_|$?!:,.]*\)|[-A-Z0-9+&@#\/%=~_|$?!:,.])*(?:\([-A-Z0-9+&@#\/%=~_|$?!:,.]*\)|[A-Z0-9+&@#\/%=~_|$]))/gim,
+        "[$1]($1)"
+      );
   }
 
   let latestComment = "";
@@ -602,11 +602,14 @@ const Details = (props: { name: string; magnet: string; link: string; tag: strin
                 title="Uploaded"
                 text={
                   (details.find((detail) => detail.title === "Uploaded")?.value ?? "") &&
-                  new Date(details.find((detail) => detail.title === "Uploaded")?.value!).toLocaleDateString("de-DE", {
-                    day: "2-digit",
-                    month: "2-digit",
-                    year: "numeric",
-                  })
+                  new Date(details.find((detail) => detail.title === "Uploaded")?.value ?? "").toLocaleDateString(
+                    "de-DE",
+                    {
+                      day: "2-digit",
+                      month: "2-digit",
+                      year: "numeric",
+                    }
+                  )
                 }
               />
               <Detail.Metadata.Label title="By" text={details.find((detail) => detail.title === "By")?.value ?? ""} />
@@ -686,11 +689,14 @@ const Details = (props: { name: string; magnet: string; link: string; tag: strin
                 title="Uploaded"
                 text={
                   (details.find((detail) => detail.title === "Uploaded")?.value ?? "") &&
-                  new Date(details.find((detail) => detail.title === "Uploaded")?.value!).toLocaleDateString("de-DE", {
-                    day: "2-digit",
-                    month: "2-digit",
-                    year: "numeric",
-                  })
+                  new Date(details.find((detail) => detail.title === "Uploaded")?.value ?? "").toLocaleDateString(
+                    "de-DE",
+                    {
+                      day: "2-digit",
+                      month: "2-digit",
+                      year: "numeric",
+                    }
+                  )
                 }
               />
               <Detail.Metadata.Label title="By" text={details.find((detail) => detail.title === "By")?.value ?? ""} />
@@ -770,11 +776,14 @@ const Details = (props: { name: string; magnet: string; link: string; tag: strin
                 title="Uploaded"
                 text={
                   (details.find((detail) => detail.title === "Uploaded")?.value ?? "") &&
-                  new Date(details.find((detail) => detail.title === "Uploaded")?.value!).toLocaleDateString("de-DE", {
-                    day: "2-digit",
-                    month: "2-digit",
-                    year: "numeric",
-                  })
+                  new Date(details.find((detail) => detail.title === "Uploaded")?.value ?? "").toLocaleDateString(
+                    "de-DE",
+                    {
+                      day: "2-digit",
+                      month: "2-digit",
+                      year: "numeric",
+                    }
+                  )
                 }
               />
               <Detail.Metadata.Label title="By" text={details.find((detail) => detail.title === "By")?.value ?? ""} />

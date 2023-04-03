@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useFetch } from "@raycast/utils";
 // import { search } from "./piratebay-search";
 import { categories } from "./categories";
-const nodeFetch = require("node-fetch");
+import nodeFetch from "node-fetch";
 
 type Result = {
   name: string;
@@ -108,7 +108,7 @@ async function search(
 
   $("table[id='searchResult'] tr").each(function (this: cheerio.Element) {
     const icons: string[] = [];
-    let hasComments = $(this)
+    const hasComments = $(this)
       .find("td")
       .find("img")
       .each(function (i: number, link: cheerio.Element) {
@@ -116,11 +116,11 @@ async function search(
       });
     let commentsCount = "";
     if (icons.includes("icon_comment")) {
-      let hasComments = $(this)
+      $(this)
         .find("td")
         .find("img")
         .each(function (i: number, link: cheerio.Element) {
-          let icon = $(link).attr("title");
+          const icon = $(link).attr("title");
           if (icon !== undefined && icon !== "") {
             commentsCount += $(link)
               .attr("title")
@@ -513,7 +513,10 @@ const Details = (props: { name: string; magnet: string; link: string; tag: strin
       .join("")
       .split("`")
       .join("")
-      .replace(/(\b(https?|ftp|magnet):\/[-A-Z0-9+&@#%?=~_|!:,.;]*[-A-Z0-9+&@#%=~_|])/gi, "[$1]($1)");
+      .replace(
+        /((?:(?:https?|ftp|file):\/\/|www\.|ftp\.)(?:\([-A-Z0-9+&@#\/%=~_|$?!:,.]*\)|[-A-Z0-9+&@#\/%=~_|$?!:,.])*(?:\([-A-Z0-9+&@#\/%=~_|$?!:,.]*\)|[A-Z0-9+&@#\/%=~_|$]))/gim,
+        "[$1]($1)"
+      );
   }
 
   let latestComment = "";
@@ -589,11 +592,14 @@ const Details = (props: { name: string; magnet: string; link: string; tag: strin
                 title="Uploaded"
                 text={
                   (details.find((detail) => detail.title === "Uploaded")?.value ?? "") &&
-                  new Date(details.find((detail) => detail.title === "Uploaded")?.value!).toLocaleDateString("de-DE", {
-                    day: "2-digit",
-                    month: "2-digit",
-                    year: "numeric",
-                  })
+                  new Date(details.find((detail) => detail.title === "Uploaded")?.value ?? "").toLocaleDateString(
+                    "de-DE",
+                    {
+                      day: "2-digit",
+                      month: "2-digit",
+                      year: "numeric",
+                    }
+                  )
                 }
               />
               <Detail.Metadata.Label title="By" text={details.find((detail) => detail.title === "By")?.value ?? ""} />
@@ -673,11 +679,14 @@ const Details = (props: { name: string; magnet: string; link: string; tag: strin
                 title="Uploaded"
                 text={
                   (details.find((detail) => detail.title === "Uploaded")?.value ?? "") &&
-                  new Date(details.find((detail) => detail.title === "Uploaded")?.value!).toLocaleDateString("de-DE", {
-                    day: "2-digit",
-                    month: "2-digit",
-                    year: "numeric",
-                  })
+                  new Date(details.find((detail) => detail.title === "Uploaded")?.value ?? "").toLocaleDateString(
+                    "de-DE",
+                    {
+                      day: "2-digit",
+                      month: "2-digit",
+                      year: "numeric",
+                    }
+                  )
                 }
               />
               <Detail.Metadata.Label title="By" text={details.find((detail) => detail.title === "By")?.value ?? ""} />
@@ -757,11 +766,14 @@ const Details = (props: { name: string; magnet: string; link: string; tag: strin
                 title="Uploaded"
                 text={
                   (details.find((detail) => detail.title === "Uploaded")?.value ?? "") &&
-                  new Date(details.find((detail) => detail.title === "Uploaded")?.value!).toLocaleDateString("de-DE", {
-                    day: "2-digit",
-                    month: "2-digit",
-                    year: "numeric",
-                  })
+                  new Date(details.find((detail) => detail.title === "Uploaded")?.value ?? "").toLocaleDateString(
+                    "de-DE",
+                    {
+                      day: "2-digit",
+                      month: "2-digit",
+                      year: "numeric",
+                    }
+                  )
                 }
               />
               <Detail.Metadata.Label title="By" text={details.find((detail) => detail.title === "By")?.value ?? ""} />
