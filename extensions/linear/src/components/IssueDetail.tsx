@@ -38,7 +38,7 @@ export default function IssueDetail({ issue: existingIssue, mutateList, prioriti
 
   const relatedIssues = issue.relations ? issue.relations.nodes.filter((node) => node.type == "related") : null;
   const duplicateIssues = issue.relations ? issue.relations.nodes.filter((node) => node.type == "duplicate") : null;
-  
+
   return (
     <Detail
       markdown={markdown}
