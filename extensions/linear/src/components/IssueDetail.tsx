@@ -36,6 +36,9 @@ export default function IssueDetail({ issue: existingIssue, mutateList, prioriti
 
   const cycle = issue?.cycle ? formatCycle(issue.cycle) : null;
 
+  const relatedIssues = !!issue.relations ? issue.relations.nodes.filter((node) => node.type == "related") : null;
+  const duplicateIssues = !!issue.relations ? issue.relations.nodes.filter((node) => node.type == "duplicate") : null;
+  
   return (
     <Detail
       markdown={markdown}
@@ -111,21 +114,19 @@ export default function IssueDetail({ issue: existingIssue, mutateList, prioriti
                   }
                 />
 
-                {relatedIssues.length > 0 ? (
+                {!!relatedIssues && relatedIssues.length > 0 ? (
                   <Detail.Metadata.TagList title="Related">
                     {relatedIssues.map(({ id, relatedIssue }) => (
-                        <Detail.Metadata.TagList.Item key={id} text={relatedIssue.identifier} />
-                      ))}
+                      <Detail.Metadata.TagList.Item key={id} text={relatedIssue.identifier} />
+                    ))}
                   </Detail.Metadata.TagList>
                 ) : null}
 
-                {!!issue.relations && issue.relations.nodes.filter((node) => node.type == "duplicate").length > 0 ? (
+                {!!duplicateIssues && duplicateIssues.length > 0 ? (
                   <Detail.Metadata.TagList title="Duplicates">
-                    {issue.relations.nodes
-                      .filter((node) => node.type == "duplicate")
-                      .map(({ id, relatedIssue }) => (
-                        <Detail.Metadata.TagList.Item key={id} text={relatedIssue.identifier} />
-                      ))}
+                    {duplicateIssues.map(({ id, relatedIssue }) => (
+                      <Detail.Metadata.TagList.Item key={id} text={relatedIssue.identifier} />
+                    ))}
                   </Detail.Metadata.TagList>
                 ) : null}
               </Detail.Metadata>
