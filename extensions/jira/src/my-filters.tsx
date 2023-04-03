@@ -8,9 +8,12 @@ import StatusIssueList from "./components/StatusIssueList";
 import { withJiraCredentials } from "./helpers/withJiraCredentials";
 
 export function MyFilters() {
-  const { data: filters } = useCachedPromise(() => getFilters());
-
+  const [query, setQuery] = useState("");
   const [filterId, setFilterId] = useState("");
+
+  const { data: filters, isLoading: isLoadingFilters } = useCachedPromise((query) => getFilters(query), [query], {
+    keepPreviousData: true,
+  });
 
   const {
     data: issues,
@@ -30,7 +33,14 @@ export function MyFilters() {
   );
 
   const searchBarAccessory = filters ? (
-    <List.Dropdown tooltip="Filter issues by filters" onChange={setFilterId} storeValue>
+    <List.Dropdown
+      tooltip="Filter issues by filters"
+      onChange={setFilterId}
+      storeValue
+      isLoading={isLoadingFilters}
+      onSearchTextChange={setQuery}
+      throttle
+    >
       {filters?.map((filter) => {
         return <List.Dropdown.Item key={filter.id} title={filter.name} value={filter.id} />;
       })}
