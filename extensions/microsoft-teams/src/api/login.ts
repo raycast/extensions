@@ -74,8 +74,6 @@ async function requestTokens(options: RequestTokenWithCode | RequestTokenWithRef
   });
   const tokenSet = (await response.json()) as OAuth.TokenResponse;
   console.log(tokenSet);
-  console.log(tokenSet.access_token);
-  console.log(tokenSet.refresh_token);
   await oauthClient.setTokens(tokenSet);
   return tokenSet.access_token;
 }
