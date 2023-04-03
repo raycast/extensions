@@ -15,6 +15,7 @@ import {
 import React from "react";
 
 const DATA_PREFIX = "data: ";
+const CONNECTION_TIMEOUT_MS = 5000;
 const { HTTP2_HEADER_METHOD, HTTP2_HEADER_PATH, HTTP2_HEADER_ACCEPT } = constants;
 
 type Response = {
@@ -38,7 +39,30 @@ export default class HueClient {
   private readonly setScenes: React.Dispatch<React.SetStateAction<Scene[]>>;
   private readonly http2Session: ClientHttp2Session;
 
-  constructor(
+  private constructor(
+    bridgeIpAddress: string,
+    bridgeId: string,
+    bridgeUsername: string,
+    http2Session: ClientHttp2Session,
+    setLights: React.Dispatch<React.SetStateAction<Light[]>>,
+    setGroupedLights: React.Dispatch<React.SetStateAction<GroupedLight[]>>,
+    setRooms: React.Dispatch<React.SetStateAction<Room[]>>,
+    setZones: React.Dispatch<React.SetStateAction<Zone[]>>,
+    setScenes: React.Dispatch<React.SetStateAction<Scene[]>>
+  ) {
+    this.bridgeUsername = bridgeUsername;
+    this.http2Session = http2Session;
+    this.bridgeIpAddress = bridgeIpAddress;
+    this.bridgeId = bridgeId;
+    this.setLights = setLights;
+    this.setGroupedLights = setGroupedLights;
+    this.setRooms = setRooms;
+    this.setZones = setZones;
+    this.setScenes = setScenes;
+    this.listenToEventSource();
+  }
+
+  public static async createInstance(
     bridgeIpAddress: string,
     bridgeId: string,
     bridgeUsername: string,
@@ -48,25 +72,42 @@ export default class HueClient {
     setZones: React.Dispatch<React.SetStateAction<Zone[]>>,
     setScenes: React.Dispatch<React.SetStateAction<Scene[]>>
   ) {
-    this.bridgeIpAddress = bridgeIpAddress;
-    this.bridgeId = bridgeId;
-    this.bridgeUsername = bridgeUsername;
-    this.setLights = setLights;
-    this.setGroupedLights = setGroupedLights;
-    this.setRooms = setRooms;
-    this.setZones = setZones;
-    this.setScenes = setScenes;
-    this.http2Session = connect(`https://${bridgeIpAddress}`, {
-      ca: fs.readFileSync(environment.assetsPath + "/philips-hue-cert.pem"),
-      checkServerIdentity: (hostname, cert) => {
-        if (cert.subject.CN === bridgeId?.toLowerCase()) {
-          return;
-        } else {
-          return new Error("Server identity check failed. CN does not match bridgeId.");
-        }
-      },
+    const http2Session = await new Promise<ClientHttp2Session>((resolve, reject) => {
+      const session = connect(`https://${bridgeIpAddress}`, {
+        ca: fs.readFileSync(environment.assetsPath + "/philips-hue-cert.pem"),
+        checkServerIdentity: (hostname, cert) => {
+          if (cert.subject.CN === bridgeId.toLowerCase()) {
+            return;
+          } else {
+            return new Error("Server identity check failed. CN does not match bridgeId.");
+          }
+        },
+      });
+
+      session.setTimeout(CONNECTION_TIMEOUT_MS, () => {
+        reject(new Error("Connection timed out."));
+      });
+
+      session.once("connect", () => {
+        resolve(session);
+      });
+
+      session.once("error", (error) => {
+        reject(error);
+      });
     });
-    this.listenToEventSource();
+
+    return new HueClient(
+      bridgeIpAddress,
+      bridgeId,
+      bridgeUsername,
+      http2Session,
+      setLights,
+      setGroupedLights,
+      setRooms,
+      setZones,
+      setScenes
+    );
   }
 
   public async getLights(): Promise<Light[]> {

@@ -6,30 +6,12 @@ const failureImagePath = pathToFileURL(`${environment.assetsPath}/bridge-failure
 const connectImagePath = pathToFileURL(`${environment.assetsPath}/bridge-connect.png`).href;
 const buttonImagePath = pathToFileURL(`${environment.assetsPath}/bridge-button.png`).href;
 
-export const noBridgeConfiguredMessage = `
-# No Hue Bridge Configured
-
-![Not Found](${connectImagePath})
-
-Please use the ‘Manage Hue Bridge’ command to link your Hue Bridge.
-`;
-
 export const discoveringMessage = `
 # Connecting to Hue Bridge
 
 ![Not Found](${connectImagePath})
 
 Please wait while discovering a Hue Bridge.
-`;
-
-export const bridgeNotFoundMessage = `
-# Could not find the Hue Bridge
-
-![Failure](${failureImagePath})
-
-Please check your network connection and make sure you are connected to the same network as your Hue Bridge.
-
-You can remove your saved Hue Bridge from the ‘Manage Hue Bridge’ command.
 `;
 
 export const noBridgeFoundMessage = `

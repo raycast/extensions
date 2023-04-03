@@ -33,11 +33,10 @@ export default function ManageHueBridge(
     case "discoveringUsingPublicApi":
     case "connecting":
       return <List isLoading />;
-      break;
     case "failedToConnect":
       contextActions = [
         <Action key="retryConnect" title="Retry" onAction={() => sendHueMessage("RETRY")} icon={Icon.Repeat} />,
-        <Action title="Unlink Saved Hue Bridge" onAction={unlinkSavedBridge} icon={Icon.Trash} />,
+        <Action key="unlink" title="Unlink Saved Hue Bridge" onAction={unlinkSavedBridge} icon={Icon.Trash} />,
       ];
       markdown = failedToConnectMessage;
       break;

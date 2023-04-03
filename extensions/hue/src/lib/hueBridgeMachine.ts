@@ -120,7 +120,7 @@ function hueBridgeMachine(
               throw Error("Invalid state");
             }
 
-            return new HueClient(
+            return await HueClient.createInstance(
               context.bridgeIpAddress,
               context.bridgeId,
               context.bridgeUsername,
@@ -198,27 +198,25 @@ function hueBridgeMachine(
             // Get bridge ID using the new credentials
             const api = await v3.api.createLocal(context.bridgeIpAddress).connect(username);
             const configuration = await api.configuration.getConfiguration();
+            const hueClient = await HueClient.createInstance(
+              context.bridgeIpAddress,
+              configuration.bridgeid,
+              username,
+              setLights,
+              setGroupedLights,
+              setRooms,
+              setZones,
+              setScenes
+            );
 
-            return { id: configuration.bridgeid, username };
+            return { bridgeId: configuration.bridgeid, bridgeUsername: username, hueClient };
           },
           onDone: {
             target: "linked",
             actions: assign({
-              bridgeId: (context, event) => event.data.id,
-              bridgeUsername: (context, event) => event.data.username,
-              hueClient: (context, event) => {
-                if (context.bridgeIpAddress === undefined) throw Error("Invalid state");
-                return new HueClient(
-                  context.bridgeIpAddress,
-                  event.data.id,
-                  event.data.username,
-                  setLights,
-                  setGroupedLights,
-                  setRooms,
-                  setZones,
-                  setScenes
-                );
-              },
+              bridgeId: (context, event) => event.data.bridgeId,
+              bridgeUsername: (context, event) => event.data.bridgeUsername,
+              hueClient: (context, event) => event.data.hueClient,
             }),
           },
           onError: {
