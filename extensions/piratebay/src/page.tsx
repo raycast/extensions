@@ -135,7 +135,7 @@ async function search(q = "", { fetch = nodeFetch, baseURL = "", page = 0, categ
       torrents.push(torrent);
     }
   });
-  return torrents;
+  return torrents; 
 }
 
 export default function Command() {
