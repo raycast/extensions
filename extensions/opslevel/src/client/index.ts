@@ -1,10 +1,9 @@
 import { getPreferenceValues } from "@raycast/api";
-import { ApolloClient, InMemoryCache, createHttpLink, gql } from "@apollo/client";
+import { ApolloClient, InMemoryCache, createHttpLink } from "@apollo/client";
 import { setContext } from "@apollo/client/link/context";
 import fetch from "cross-fetch";
 import { GetAllServicesQuery, ServiceFragment } from "./gql-types";
 export * from "./gql-types.d";
-import { readFile } from "fs/promises";
 import { GetAllServices } from "./get-all-services";
 
 const preferenceValues = getPreferenceValues();
