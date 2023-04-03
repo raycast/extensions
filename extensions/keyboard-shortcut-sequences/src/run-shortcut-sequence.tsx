@@ -97,7 +97,11 @@ export default function Command(props: { arguments: { sequenceName: string } }) 
   ));
 
   return (
-    <List searchBarPlaceholder="Search shortcut sequences..." searchText={sequenceName ? sequenceName : undefined} isLoading={sequences == undefined}>
+    <List
+      searchBarPlaceholder="Search shortcut sequences..."
+      searchText={sequenceName ? sequenceName : undefined}
+      isLoading={sequences == undefined}
+    >
       <List.EmptyView title="No Shortcut Sequences" icon={{ source: "no-view.png" }} />
       {listItems}
     </List>

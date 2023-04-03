@@ -202,7 +202,7 @@ export default function SequenceForm(props: {
         id="sequenceDescriptionField"
         title="Description (Optional)"
         defaultValue={sequence ? sequence.description : undefined}
-        placeholder="This short sequence is for..."
+        placeholder="This shortcut sequence is for..."
         info="A description of this shortcut sequence to help you and others know what it does."
       />
 
