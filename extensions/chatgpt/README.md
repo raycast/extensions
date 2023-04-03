@@ -44,7 +44,7 @@ Automatically save all the question and answer so you can go back digging for th
 
 # How to use
 
-This package requires a valid `Secret Key` from [OpenAI](https://platform.openai.com/account/api-keys) with a `pay-as-you-go` plan account (**will not work if you're on a `free-tier` account**).
+This package requires a valid `Secret Key` from [OpenAI](https://platform.openai.com/account/api-keys) with a `pay-as-you-go` plan account (**you'll get a `429` error if you're on a `free-tier` account**).
 
 ![Initial set-up](metadata/6.png)
 
