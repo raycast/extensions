@@ -1,5 +1,5 @@
 import { getPreferenceValues, Icon, Image, showToast, Toast } from "@raycast/api";
-import { CssColor, Light, Scene } from "./types";
+import { CssColor, Group, Light, Scene } from "./types";
 import { discovery, v3 } from "node-hue-api";
 import { hexToXy } from "./colors";
 import { APP_NAME, BRIGHTNESSES, MIREK_MAX, MIREK_MIN, MIREK_STEP } from "./constants";
@@ -13,14 +13,14 @@ declare global {
   }
 }
 
-Array.prototype.updateItem = function (item, changes) {
+Array.prototype.updateItem = function(item, changes) {
   return this.map((it) => {
     if (it.id !== item.id) return it;
     return { ...it, ...changes };
   });
 };
 
-Array.prototype.updateItems = function (array, newItems) {
+Array.prototype.updateItems = function(array, newItems) {
   return array.map((item) => {
     const foundItem = newItems.find((newItem) => newItem.id === item.id);
     return foundItem ? Object.assign({}, item, foundItem) : item;
@@ -33,7 +33,7 @@ declare global {
   }
 }
 
-Math.clamp = function (value, min, max) {
+Math.clamp = function(value, min, max) {
   return Math.min(Math.max(value, min), max);
 };
 
@@ -41,7 +41,7 @@ export function mapRange(value: number, from: [number, number], to: [number, num
   return to[0] + ((value - from[0]) * (to[1] - to[0])) / (from[1] - from[0]);
 }
 
-export function getLightIcon(light: Light) {
+export function getLightIcon(light: Light): Image {
   // TODO: Use dimming state and color(_temperature) to determine icon color
   // const color = getRgbFrom(lightState);
 
@@ -49,6 +49,13 @@ export function getLightIcon(light: Light) {
     source: `icons/${light.metadata.archetype}.png`,
     tintColor: light.on.on ? "white" : "gray",
   };
+}
+
+export function getGroupIcon(group: Group): Image {
+  return {
+    source: `icons/${group.metadata.archetype}.png`,
+    // tintColor: group.on ? "white" : "gray",
+  }
 }
 
 export function getIconForColor(color: CssColor): Image {
@@ -123,50 +130,50 @@ export async function getUsernameFromBridge(ipAddress: string): Promise<string> 
 }
 
 export async function turnOffAllLights() {
-  const api = await getAuthenticatedApi();
-  const lights = await api.lights.getAll();
-  for await (const light of lights) {
-    await api.lights.setLightState(
-      light.id,
-      new v3.model.lightStates.LightState().off().transitiontime(getTransitionTimeInMs())
-    );
-  }
+  // const api = await getAuthenticatedApi();
+  // const lights = await api.lights.getAll();
+  // for await (const light of lights) {
+  //   await api.lights.setLightState(
+  //     light.id,
+  //     new v3.model.lightStates.LightState().off().transitiontime(getTransitionTimeInMs())
+  //   );
+  // }
 }
 
 export async function turnGroupOn(hueClient: HueClient, group: Group) {
-  const api = await apiPromise;
-  await api.groups.setGroupState(
-    group.id,
-    new v3.model.lightStates.GroupLightState().on().transitiontime(getTransitionTimeInMs())
-  );
+  // const api = await apiPromise;
+  // await api.groups.setGroupState(
+  //   group.id,
+  //   new v3.model.lightStates.GroupLightState().on().transitiontime(getTransitionTimeInMs())
+  // );
 }
 
 export async function turnGroupOff(hueClient: HueClient, group: Group) {
-  const api = await apiPromise;
-  await api.groups.setGroupState(group.id, new v3.model.lightStates.GroupLightState().off());
+  // const api = await apiPromise;
+  // await api.groups.setGroupState(group.id, new v3.model.lightStates.GroupLightState().off());
 }
 
 export async function setGroupBrightness(hueClient: HueClient, group: Group, percentage: number) {
-  const api = await apiPromise;
-  const newLightState = new v3.model.lightStates.GroupLightState()
-    .on()
-    .bri(percentage)
-    .transitiontime(getTransitionTimeInMs());
-  await api.groups.setGroupState(group.id, newLightState);
+  // const api = await apiPromise;
+  // const newLightState = new v3.model.lightStates.GroupLightState()
+  //   .on()
+  //   .bri(percentage)
+  //   .transitiontime(getTransitionTimeInMs());
+  // await api.groups.setGroupState(group.id, newLightState);
 }
 
 export async function setLightColor(hueClient: HueClient, light: Light, color: string) {
-  const api = await apiPromise;
-  const xy = hexToXy(color);
-  const newLightState = new v3.model.lightStates.LightState().on().xy(xy).transitiontime(getTransitionTimeInMs());
-  await api.lights.setLightState(light.id, newLightState);
+  // const api = await apiPromise;
+  // const xy = hexToXy(color);
+  // const newLightState = new v3.model.lightStates.LightState().on().xy(xy).transitiontime(getTransitionTimeInMs());
+  // await api.lights.setLightState(light.id, newLightState);
 }
 
 export async function setGroupColor(hueClient: HueClient, group: Group, color: string) {
-  const api = await apiPromise;
-  const xy = hexToXy(color);
-  const newLightState = new v3.model.lightStates.GroupLightState().on().xy(xy).transitiontime(getTransitionTimeInMs());
-  await api.groups.setGroupState(group.id, newLightState);
+  // const api = await apiPromise;
+  // const xy = hexToXy(color);
+  // const newLightState = new v3.model.lightStates.GroupLightState().on().xy(xy).transitiontime(getTransitionTimeInMs());
+  // await api.groups.setGroupState(group.id, newLightState);
 }
 
 /**
@@ -194,33 +201,10 @@ export function calculateAdjustedColorTemperature(mirek: number, direction: "inc
   return Math.min(Math.max(MIREK_MIN, newColorTemperature), MIREK_MAX);
 }
 
-export async function adjustColorTemperature(
-  hueClient: HueClient,
-  entity: Light | Group,
-  direction: "increase" | "decrease"
-) {
-  const api = await apiPromise;
-  const delta = direction === "increase" ? -MIREK_STEP : MIREK_STEP;
-
-  if ("action" in entity) {
-    const newLightState = new v3.model.lightStates.GroupLightState()
-      .on()
-      .ct_inc(delta)
-      .transitiontime(getTransitionTimeInMs());
-    await api.groups.setGroupState(entity.id, newLightState);
-  } else {
-    const newLightState = new v3.model.lightStates.LightState()
-      .on()
-      .ct_inc(delta)
-      .transitiontime(getTransitionTimeInMs());
-    await api.lights.setLightState(entity.id, newLightState);
-  }
-}
-
 export async function setScene(hueClient: HueClient, scene: Scene) {
-  const api = await apiPromise;
-  await api.groups.setGroupState(
-    0,
-    new v3.model.lightStates.GroupLightState().scene(scene.id).transitiontime(getTransitionTimeInMs())
-  );
+  // const api = await apiPromise;
+  // await api.groups.setGroupState(
+  //   0,
+  //   new v3.model.lightStates.GroupLightState().scene(scene.id).transitiontime(getTransitionTimeInMs())
+  // );
 }

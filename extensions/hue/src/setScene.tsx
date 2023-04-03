@@ -1,40 +1,33 @@
 import { Action, ActionPanel, Icon, List, Toast } from "@raycast/api";
-import { setScene } from "./lib/utils";
-import { MutatePromise } from "@raycast/utils";
-import { Group, Scene, SendHueMessage } from "./lib/types";
+import { Group, Scene } from "./lib/types";
 import UnlinkAction from "./components/UnlinkAction";
 import ManageHueBridge from "./components/ManageHueBridge";
-import { useHue } from "./lib/useHue";
-import { Api } from "node-hue-api/dist/esm/api/Api";
+import { SendHueMessage, useHue } from "./lib/useHue";
+import HueClient from "./lib/HueClient";
 import Style = Toast.Style;
 
 export default function SetScene() {
-  const { hueBridgeState, sendHueMessage, apiPromise, isLoading, groups, mutateGroups, scenes } = useHue();
+  const { hueBridgeState, sendHueMessage, isLoading, rooms, zones, scenes } = useHue();
 
   const manageHueBridgeElement: JSX.Element | null = ManageHueBridge(hueBridgeState, sendHueMessage);
   if (manageHueBridgeElement !== null) return manageHueBridgeElement;
 
-  const rooms = groups.filter((group) => group.type === "Room") as Group[];
-  const entertainmentAreas = groups.filter((group) => group.type === "Entertainment") as Group[];
-  const zones = groups.filter((group) => group.type === "Zone") as Group[];
-  const groupTypes = Array.of(rooms, entertainmentAreas, zones);
+  const groupTypes = [rooms, zones];
 
   return (
     <List isLoading={isLoading}>
       {groupTypes.map((groupType: Group[]): JSX.Element[] => {
         return groupType.map((group: Group): JSX.Element => {
-          const groupScenes =
-            scenes.filter((scene: Scene) => {
-              return scene.group == group.id;
-            }) ?? [];
+          // const groupScenes = scenes.filter((scene: Scene) => {
+          //   return scene.group == group.id;
+          // }) ?? [];
 
           return (
             <Group
-              apiPromise={apiPromise}
+              hueClient={hueBridgeState.context.hueClient}
               key={group.id}
               group={group}
-              scenes={groupScenes}
-              mutateGroups={mutateGroups}
+              scenes={[]}
               sendHueMessage={sendHueMessage}
             />
           );
@@ -45,22 +38,20 @@ export default function SetScene() {
 }
 
 function Group(props: {
-  apiPromise: Promise<Api>;
+  hueClient?: HueClient;
   group: Group;
   scenes: Scene[];
-  mutateGroups: MutatePromise<Group[]>;
   sendHueMessage: SendHueMessage;
 }) {
   return (
-    <List.Section key={props.group.id} title={props.group.name} subtitle={props.group.type}>
+    <List.Section key={props.group.id} title={props.group.metadata.name} subtitle={props.group.type}>
       {props.scenes.map(
         (scene: Scene): JSX.Element => (
           <Scene
-            apiPromise={props.apiPromise}
+            hueClient={props.hueClient}
             key={scene.id}
             group={props.group}
             scene={scene}
-            mutateGroups={props.mutateGroups}
             sendHueMessage={props.sendHueMessage}
           />
         )
@@ -70,22 +61,21 @@ function Group(props: {
 }
 
 function Scene(props: {
-  apiPromise: Promise<Api>;
+  hueClient?: HueClient;
   group: Group;
   scene: Scene;
-  mutateGroups: MutatePromise<Group[]>;
   sendHueMessage: SendHueMessage;
 }) {
   return (
     <List.Item
-      title={props.scene.name}
-      keywords={[props.group.name]}
+      title={props.scene.metadata.name}
+      keywords={[props.group.metadata.name]}
       actions={
         <ActionPanel>
           <SetSceneAction
             group={props.group}
             scene={props.scene}
-            onSet={() => handleSetScene(props.apiPromise, props.group, props.scene, props.mutateGroups)}
+            onSet={() => handleSetScene(props.hueClient, props.group, props.scene)}
           />
           <ActionPanel.Section>
             <UnlinkAction sendHueMessage={props.sendHueMessage} />
@@ -101,18 +91,17 @@ function SetSceneAction(props: { group: Group; scene: Scene; onSet: () => void }
 }
 
 async function handleSetScene(
-  apiPromise: Promise<Api>,
+  hueClient: HueClient | undefined,
   group: Group,
   scene: Scene,
-  mutateGroups: MutatePromise<Group[]>
 ) {
   const toast = new Toast({ title: "" });
 
   try {
-    await mutateGroups(setScene(apiPromise, scene));
+    // await mutateGroups(setScene(apiPromise, scene));
 
     toast.style = Style.Success;
-    toast.title = `Scene ${scene.name} set`;
+    toast.title = `Scene ${scene.metadata.name} set`;
     await toast.show();
   } catch (e) {
     toast.style = Style.Failure;

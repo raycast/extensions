@@ -1,67 +1,38 @@
 import { ActionPanel, Icon, List, Toast } from "@raycast/api";
-import {
-  adjustBrightness,
-  adjustColorTemperature,
-  calculateAdjustedBrightness,
-  calculateAdjustedColorTemperature,
-  getIconForColor,
-  getLightIcon,
-  setGroupBrightness,
-  setGroupColor,
-  setScene,
-  turnGroupOff,
-  turnGroupOn,
-} from "./lib/utils";
-import { Api } from "node-hue-api/dist/esm/api/Api";
-import { MutatePromise } from "@raycast/utils";
-import { CssColor, Room, Scene } from "./lib/types";
-import { BRIGHTNESSES, MIREK_MAX, MIREK_MIN } from "./lib/constants";
-import { COLORS, hexToXy } from "./lib/colors";
+import { getGroupIcon, getIconForColor, } from "./lib/utils";
+import { CssColor, Group, Room, Scene } from "./lib/types";
+import { BRIGHTNESSES } from "./lib/constants";
+import { COLORS } from "./lib/colors";
 import ManageHueBridge from "./components/ManageHueBridge";
-import UnlinkAction from "./components/UnlinkAction";
-import { useHue } from "./lib/useHue";
+import { SendHueMessage, useHue } from "./lib/useHue";
+import HueClient from "./lib/HueClient";
 import Style = Toast.Style;
 
 export default function ControlGroups() {
-  const { hueBridgeState, sendHueMessage, apiPromise, isLoading, groups, mutateGroups, scenes } = useHue();
+  const { hueBridgeState, sendHueMessage, isLoading, rooms, zones, scenes } = useHue();
 
   const manageHueBridgeElement: JSX.Element | null = ManageHueBridge(hueBridgeState, sendHueMessage);
   if (manageHueBridgeElement !== null) return manageHueBridgeElement;
 
-  const rooms: Room[] = groups.filter((group: Group) => group.type == "Room") as Room[];
-  const entertainmentAreas: Group[] = groups.filter((group: Group) => group.type == "Entertainment");
-  const zones: Group[] = groups.filter((group: Group) => group.type == "Zone");
+  const groups = ([] as Group[]).concat(rooms, zones);
+
+  // TODO: Add preference for room/zone grouping
+  //  - Rooms first
+  //  - Zones first
+  //  - Mixed
 
   return (
     <List isLoading={isLoading}>
       {rooms.length > 0 && (
         <List.Section title="Rooms">
           {rooms.map((room: Room) => {
-            const roomScenes = scenes.filter((scene: Scene) => scene.group == room.id);
+            const roomScenes = scenes.filter((scene: Scene) => scene.group.rid == room.id);
             return (
               <Group
-                apiPromise={apiPromise}
+                hueClient={hueBridgeState.context.hueClient}
                 key={room.id}
                 group={room}
-                mutateGroups={mutateGroups}
                 scenes={roomScenes}
-                sendHueMessage={sendHueMessage}
-              />
-            );
-          })}
-        </List.Section>
-      )}
-      {entertainmentAreas.length > 0 && (
-        <List.Section title="Entertainment Areas">
-          {zones.map((entertainmentArea: Group) => {
-            const entertainmentAreaScenes = scenes.filter((scene: Scene) => scene.group == entertainmentArea.id);
-            return (
-              <Group
-                apiPromise={apiPromise}
-                key={entertainmentArea.id}
-                group={entertainmentArea}
-                mutateGroups={mutateGroups}
-                scenes={entertainmentAreaScenes}
                 sendHueMessage={sendHueMessage}
               />
             );
@@ -71,13 +42,12 @@ export default function ControlGroups() {
       {zones.length > 0 && (
         <List.Section title="Zones">
           {zones.map((zone: Group) => {
-            const zoneScenes = scenes.filter((scene: Scene) => scene.group == zone.id);
+            const zoneScenes = scenes.filter((scene: Scene) => scene.group.rid == zone.id);
             return (
               <Group
-                apiPromise={apiPromise}
+                hueClient={hueBridgeState.context.hueClient}
                 key={zone.id}
                 group={zone}
-                mutateGroups={mutateGroups}
                 scenes={zoneScenes}
                 sendHueMessage={sendHueMessage}
               />
@@ -90,25 +60,25 @@ export default function ControlGroups() {
 }
 
 function Group(props: {
-  apiPromise: Promise<Api>;
+  hueClient?: HueClient;
   group: Group;
-  mutateGroups: MutatePromise<Group[]>;
   scenes?: Scene[];
   sendHueMessage: SendHueMessage;
 }) {
   return (
     <List.Item
       key={props.group.id}
-      title={props.group.name}
-      icon={getLightIcon(props.group.action)}
+      title={props.group.metadata.name}
+      icon={getGroupIcon(props.group)}
+      /*
       actions={
         <ActionPanel>
           {!props.group.state.all_on && (
-            <TurnAllOnAction onTurnAllOn={() => handleTurnAllOn(props.apiPromise, props.group, props.mutateGroups)} />
+            <TurnAllOnAction onTurnAllOn={() => handleTurnAllOn(props.hueClient, props.group)} />
           )}
           {props.group.state.any_on && (
             <TurnAllOffAction
-              onTurnAllOff={() => handleTurnAllOff(props.apiPromise, props.group, props.mutateGroups)}
+              onTurnAllOff={() => handleTurnAllOff(props.hueClient, props.group)}
             />
           )}
           {(props.scenes?.length ?? 0) > 0 && (
@@ -116,7 +86,7 @@ function Group(props: {
               group={props.group}
               scenes={props.scenes ?? []}
               onSetScene={(scene: Scene) =>
-                scene && handleSetScene(props.apiPromise, props.group, scene, props.mutateGroups)
+                scene && handleSetScene(props.hueClient, props.group, scene)
               }
             />
           )}
@@ -124,36 +94,35 @@ function Group(props: {
           <ActionPanel.Section>
             <SetBrightnessAction
               group={props.group}
-              onSet={(percentage: number) =>
-                handleSetBrightness(props.apiPromise, props.group, props.mutateGroups, percentage)
+              onSet={(percentage: number) => handleSetBrightness(props.hueClient, props.group, percentage)
               }
             />
             <IncreaseBrightnessAction
               group={props.group}
-              onIncrease={() => handleIncreaseBrightness(props.apiPromise, props.group, props.mutateGroups)}
+              onIncrease={() => handleIncreaseBrightness(props.hueClient, props.group)}
             />
             <DecreaseBrightnessAction
               group={props.group}
-              onDecrease={() => handleDecreaseBrightness(props.apiPromise, props.group, props.mutateGroups)}
+              onDecrease={() => handleDecreaseBrightness(props.hueClient, props.group)}
             />
           </ActionPanel.Section>
           <ActionPanel.Section>
             {props.group.action.colormode == "xy" && (
               <SetColorAction
                 group={props.group}
-                onSet={(color: CssColor) => handleSetColor(props.apiPromise, props.group, props.mutateGroups, color)}
+                onSet={(color: CssColor) => handleSetColor(props.hueClient, props.group)}
               />
             )}
             {props.group.action.colormode == "ct" && (
               <IncreaseColorTemperatureAction
                 group={props.group}
-                onIncrease={() => handleIncreaseColorTemperature(props.apiPromise, props.group, props.mutateGroups)}
+                onIncrease={() => handleIncreaseColorTemperature(props.hueClient, props.group)}
               />
             )}
             {props.group.action.colormode == "ct" && (
               <DecreaseColorTemperatureAction
                 group={props.group}
-                onDecrease={() => handleDecreaseColorTemperature(props.apiPromise, props.group, props.mutateGroups)}
+                onDecrease={() => handleDecreaseColorTemperature(props.hueClient, props.group)}
               />
             )}
           </ActionPanel.Section>
@@ -163,6 +132,7 @@ function Group(props: {
           </ActionPanel.Section>
         </ActionPanel>
       }
+      */
     />
   );
 }
@@ -179,7 +149,11 @@ function SetSceneAction(props: { group: Group; scenes: Scene[]; onSetScene: (sce
   return (
     <ActionPanel.Submenu title="Set Scene" icon={Icon.Image}>
       {props.scenes.map((scene: Scene) => (
-        <ActionPanel.Item key={scene.id} title={scene.name} onAction={() => props.onSetScene(scene)} />
+        <ActionPanel.Item
+          key={scene.id}
+          title={scene.metadata.name}
+          // icon={scene.metadata.image}
+          onAction={() => props.onSetScene(scene)} />
       ))}
     </ActionPanel.Submenu>
   );
@@ -204,25 +178,33 @@ function SetBrightnessAction(props: { group: Group; onSet: (percentage: number) 
 }
 
 function IncreaseBrightnessAction(props: { group: Group; onIncrease?: () => void }) {
-  return props.group.action.bri < BRIGHTNESS_MAX ? (
+  // if (props.group.action.bri >= BRIGHTNESS_MAX) {
+  //   return null;
+  // }
+
+  return (
     <ActionPanel.Item
       title="Increase Brightness"
       shortcut={{ modifiers: ["cmd", "shift"], key: "arrowUp" }}
       icon={Icon.Plus}
       onAction={props.onIncrease}
     />
-  ) : null;
+  );
 }
 
 function DecreaseBrightnessAction(props: { group: Group; onDecrease?: () => void }) {
-  return props.group.action.bri > BRIGHTNESS_MIN ? (
+  // if (props.group.action.bri <= BRIGHTNESS_MIN) {
+  //   return null;
+  // }
+
+  return (
     <ActionPanel.Item
       title="Decrease Brightness"
       shortcut={{ modifiers: ["cmd", "shift"], key: "arrowDown" }}
       icon={Icon.Minus}
       onAction={props.onDecrease}
     />
-  ) : null;
+  );
 }
 
 function SetColorAction(props: { group: Group; onSet: (color: CssColor) => void }) {
@@ -241,44 +223,52 @@ function SetColorAction(props: { group: Group; onSet: (color: CssColor) => void 
 }
 
 function IncreaseColorTemperatureAction(props: { group: Group; onIncrease?: () => void }) {
-  return props.group.action.bri > MIREK_MIN ? (
+  // if (props.group.action.ct >= MIREK_MIN) {
+  //   return null;
+  // }
+
+  return (
     <ActionPanel.Item
       title="Increase Color Temperature"
       shortcut={{ modifiers: ["cmd", "shift"], key: "arrowRight" }}
       icon={Icon.Plus}
       onAction={props.onIncrease}
     />
-  ) : null;
+  );
 }
 
 function DecreaseColorTemperatureAction(props: { group: Group; onDecrease?: () => void }) {
-  return props.group.action.bri < MIREK_MAX ? (
+  // if (props.group.action.ct <= MIREK_MIN) {
+  //   return null;
+  // }
+
+  return (
     <ActionPanel.Item
       title="Decrease Color Temperature"
       shortcut={{ modifiers: ["cmd", "shift"], key: "arrowLeft" }}
       icon={Icon.Minus}
       onAction={props.onDecrease}
     />
-  ) : null;
+  );
 }
 
-async function handleTurnAllOn(apiPromise: Promise<Api>, group: Group, mutateGroups: MutatePromise<Group[]>) {
+async function handleTurnAllOn(hueClient: HueClient | undefined, group: Group) {
   const toast = new Toast({ title: "" });
 
   try {
-    await mutateGroups(turnGroupOn(apiPromise, group), {
-      optimisticUpdate(groups) {
-        return groups.map((it) =>
-          it.id === group.id
-            ? {
-                ...it,
-                state: { any_on: true, all_on: true },
-                action: { ...it.action, on: true },
-              }
-            : it
-        );
-      },
-    });
+    // await mutateGroups(turnGroupOn(apiPromise, group), {
+    //   optimisticUpdate(groups) {
+    //     return groups.map((it) =>
+    //       it.id === group.id
+    //         ? {
+    //           ...it,
+    //           state: { any_on: true, all_on: true },
+    //           action: { ...it.action, on: true },
+    //         }
+    //         : it
+    //     );
+    //   },
+    // });
 
     toast.style = Style.Success;
     toast.title = "Turned group on";
@@ -291,23 +281,23 @@ async function handleTurnAllOn(apiPromise: Promise<Api>, group: Group, mutateGro
   }
 }
 
-async function handleTurnAllOff(apiPromise: Promise<Api>, group: Group, mutateGroups: MutatePromise<Group[]>) {
+async function handleTurnAllOff(hueClient: HueClient | undefined, group: Group) {
   const toast = new Toast({ title: "" });
 
   try {
-    await mutateGroups(turnGroupOff(apiPromise, group), {
-      optimisticUpdate(groups) {
-        return groups?.map((it) =>
-          it.id === group.id
-            ? {
-                ...it,
-                state: { any_on: false, all_on: false },
-                action: { ...it.action, on: false },
-              }
-            : it
-        );
-      },
-    });
+    // await mutateGroups(turnGroupOff(apiPromise, group), {
+    //   optimisticUpdate(groups) {
+    //     return groups?.map((it) =>
+    //       it.id === group.id
+    //         ? {
+    //           ...it,
+    //           state: { any_on: false, all_on: false },
+    //           action: { ...it.action, on: false },
+    //         }
+    //         : it
+    //     );
+    //   },
+    // });
 
     toast.style = Style.Success;
     toast.title = "Turned group off";
@@ -321,18 +311,17 @@ async function handleTurnAllOff(apiPromise: Promise<Api>, group: Group, mutateGr
 }
 
 async function handleSetScene(
-  apiPromise: Promise<Api>,
+  hueClient: HueClient | undefined,
   group: Group,
   scene: Scene,
-  mutateGroups: MutatePromise<Group[]>
 ) {
   const toast = new Toast({ title: "" });
 
   try {
-    await mutateGroups(setScene(apiPromise, scene));
+    // await mutateGroups(setScene(apiPromise, scene));
 
     toast.style = Style.Success;
-    toast.title = `Scene ${scene.name} set`;
+    toast.title = `Scene ${scene.metadata.name} set`;
     await toast.show();
   } catch (e) {
     toast.style = Style.Failure;
@@ -343,22 +332,21 @@ async function handleSetScene(
 }
 
 async function handleSetBrightness(
-  apiPromise: Promise<Api>,
+  hueClient: HueClient | undefined,
   group: Group,
-  mutateGroups: MutatePromise<Group[]>,
   percentage: number
 ) {
   const toast = new Toast({ title: "" });
   const brightness = (percentage / 100) * 253 + 1;
 
   try {
-    await mutateGroups(setGroupBrightness(apiPromise, group, brightness), {
-      optimisticUpdate(rooms) {
-        return rooms.map((it) =>
-          it.id === group.id ? { ...it, state: { ...it.state, on: true, bri: brightness } } : it
-        );
-      },
-    });
+    // await mutateGroups(setGroupBrightness(apiPromise, group, brightness), {
+    //   optimisticUpdate(rooms) {
+    //     return rooms.map((it) =>
+    //       it.id === group.id ? { ...it, state: { ...it.state, on: true, bri: brightness } } : it
+    //     );
+    //   },
+    // });
 
     toast.style = Style.Success;
     toast.title = `Set brightness to ${(percentage / 100).toLocaleString("en", { style: "percent" })}`;
@@ -371,19 +359,19 @@ async function handleSetBrightness(
   }
 }
 
-async function handleIncreaseBrightness(apiPromise: Promise<Api>, group: Group, mutateGroups: MutatePromise<Group[]>) {
+async function handleIncreaseBrightness(hueClient: HueClient | undefined, group: Group) {
   const toast = new Toast({ title: "" });
 
   try {
-    await mutateGroups(adjustBrightness(apiPromise, group, "increase"), {
-      optimisticUpdate(rooms) {
-        return rooms?.map((it) =>
-          it.id === group.id
-            ? { ...it, action: { ...it.action, on: true, bri: calculateAdjustedBrightness(group, "increase") } }
-            : it
-        );
-      },
-    });
+    // await mutateGroups(adjustBrightness(apiPromise, group, "increase"), {
+    //   optimisticUpdate(rooms) {
+    //     return rooms?.map((it) =>
+    //       it.id === group.id
+    //         ? { ...it, action: { ...it.action, on: true, bri: calculateAdjustedBrightness(group, "increase") } }
+    //         : it
+    //     );
+    //   },
+    // });
 
     toast.style = Style.Success;
     toast.title = "Increased brightness";
@@ -396,19 +384,19 @@ async function handleIncreaseBrightness(apiPromise: Promise<Api>, group: Group, 
   }
 }
 
-async function handleDecreaseBrightness(apiPromise: Promise<Api>, group: Group, mutateGroups: MutatePromise<Group[]>) {
+async function handleDecreaseBrightness(hueClient: HueClient | undefined, group: Group) {
   const toast = new Toast({ title: "" });
 
   try {
-    await mutateGroups(adjustBrightness(apiPromise, group, "decrease"), {
-      optimisticUpdate(rooms) {
-        return rooms.map((it) =>
-          it.id === group.id
-            ? { ...it, action: { ...it.action, on: true, bri: calculateAdjustedBrightness(group, "decrease") } }
-            : it
-        );
-      },
-    });
+    // await mutateGroups(adjustBrightness(apiPromise, group, "decrease"), {
+    //   optimisticUpdate(rooms) {
+    //     return rooms.map((it) =>
+    //       it.id === group.id
+    //         ? { ...it, action: { ...it.action, on: true, bri: calculateAdjustedBrightness(group, "decrease") } }
+    //         : it
+    //     );
+    //   },
+    // });
 
     toast.style = Style.Success;
     toast.title = "Decreased brightness";
@@ -422,21 +410,20 @@ async function handleDecreaseBrightness(apiPromise: Promise<Api>, group: Group, 
 }
 
 async function handleSetColor(
-  apiPromise: Promise<Api>,
+  hueClient: HueClient | undefined,
   group: Group,
-  mutateGroups: MutatePromise<Group[]>,
   color: CssColor
 ) {
   const toast = new Toast({ title: "" });
 
   try {
-    await mutateGroups(setGroupColor(apiPromise, group, color.value), {
-      optimisticUpdate(rooms) {
-        return rooms.map((it) =>
-          it.id === group.id ? { ...it, state: { ...it.state, on: true, xy: hexToXy(color.value) } } : it
-        );
-      },
-    });
+    // await mutateGroups(setGroupColor(apiPromise, group, color.value), {
+    //   optimisticUpdate(rooms) {
+    //     return rooms.map((it) =>
+    //       it.id === group.id ? { ...it, state: { ...it.state, on: true, xy: hexToXy(color.value) } } : it
+    //     );
+    //   },
+    // });
 
     toast.style = Style.Success;
     toast.title = `Set color to ${color.name}`;
@@ -450,22 +437,21 @@ async function handleSetColor(
 }
 
 async function handleIncreaseColorTemperature(
-  apiPromise: Promise<Api>,
+  hueClient: HueClient | undefined,
   group: Group,
-  mutateGroups: MutatePromise<Group[]>
 ) {
   const toast = new Toast({ title: "" });
 
   try {
-    await mutateGroups(adjustColorTemperature(apiPromise, group, "increase"), {
-      optimisticUpdate(rooms) {
-        return rooms?.map((it) =>
-          it.id === group.id
-            ? { ...it, state: { ...it.state, ct: calculateAdjustedColorTemperature(group, "increase") } }
-            : it
-        );
-      },
-    });
+    // await mutateGroups(adjustColorTemperature(apiPromise, group, "increase"), {
+    //   optimisticUpdate(rooms) {
+    //     return rooms?.map((it) =>
+    //       it.id === group.id
+    //         ? { ...it, state: { ...it.state, ct: calculateAdjustedColorTemperature(group, "increase") } }
+    //         : it
+    //     );
+    //   },
+    // });
 
     toast.style = Style.Success;
     toast.title = "Increased color temperature";
@@ -479,22 +465,21 @@ async function handleIncreaseColorTemperature(
 }
 
 async function handleDecreaseColorTemperature(
-  apiPromise: Promise<Api>,
+  hueClient: HueClient | undefined,
   group: Group,
-  mutateGroups: MutatePromise<Group[]>
 ) {
   const toast = new Toast({ title: "" });
 
   try {
-    await mutateGroups(adjustColorTemperature(apiPromise, group, "decrease"), {
-      optimisticUpdate(rooms) {
-        return rooms.map((it) =>
-          it.id === group.id
-            ? { ...it, state: { ...it.state, ct: calculateAdjustedColorTemperature(group, "decrease") } }
-            : it
-        );
-      },
-    });
+    // await mutateGroups(adjustColorTemperature(apiPromise, group, "decrease"), {
+    //   optimisticUpdate(rooms) {
+    //     return rooms.map((it) =>
+    //       it.id === group.id
+    //         ? { ...it, state: { ...it.state, ct: calculateAdjustedColorTemperature(group, "decrease") } }
+    //         : it
+    //     );
+    //   },
+    // });
 
     toast.style = Style.Success;
     toast.title = "Decreased color temperature";

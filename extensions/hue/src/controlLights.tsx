@@ -7,7 +7,7 @@ import {
   getLightIcon,
 } from "./lib/utils";
 import { CssColor, Group, Light } from "./lib/types";
-import { BRIGHTNESSES, HIGHEST_BRIGHTNESS, LOWEST_BRIGHTNESS, MIREK_MAX, MIREK_MIN } from "./lib/constants";
+import { BRIGHTNESSES, BRIGHTNESS_MAX, BRIGHTNESS_MIN, MIREK_MAX, MIREK_MIN } from "./lib/constants";
 import ManageHueBridge from "./components/ManageHueBridge";
 import UnlinkAction from "./components/UnlinkAction";
 import { SendHueMessage, useHue } from "./lib/useHue";
@@ -19,7 +19,7 @@ import Style = Toast.Style;
 export default function ControlLights() {
   const { hueBridgeState, sendHueMessage, isLoading, lights, rooms, zones } = useHue();
 
-  const groups = ([] as Group[]).concat(rooms).concat(zones);
+  const groups = ([] as Group[]).concat(rooms, zones);
 
   const manageHueBridgeElement = ManageHueBridge(hueBridgeState, sendHueMessage);
   if (manageHueBridgeElement !== null) return manageHueBridgeElement;
@@ -68,7 +68,6 @@ function Light(props: { hueClient?: HueClient; light: Light; group?: Group; send
     <List.Item
       title={props.light.metadata.name}
       icon={getLightIcon(props.light)}
-      subtitle={props.light.owner.rtype}
       keywords={[props.group?.metadata?.name ?? ""]}
       actions={
         <ActionPanel>
@@ -147,7 +146,7 @@ function SetBrightnessAction(props: { light: Light; onSet: (percentage: number) 
 }
 
 function IncreaseBrightnessAction(props: { light: Light; onIncrease: () => void }) {
-  if (props.light.dimming === undefined || getClosestBrightness(props.light.dimming.brightness) >= HIGHEST_BRIGHTNESS) {
+  if (props.light.dimming === undefined || getClosestBrightness(props.light.dimming.brightness) >= BRIGHTNESS_MAX) {
     return null;
   }
 
@@ -162,7 +161,7 @@ function IncreaseBrightnessAction(props: { light: Light; onIncrease: () => void 
 }
 
 function DecreaseBrightnessAction(props: { light: Light; onDecrease: () => void }) {
-  if (props.light.dimming === undefined || getClosestBrightness(props.light.dimming.brightness) <= LOWEST_BRIGHTNESS) {
+  if (props.light.dimming === undefined || getClosestBrightness(props.light.dimming.brightness) <= BRIGHTNESS_MIN) {
     return null;
   }
 
@@ -326,17 +325,12 @@ async function handleSetColor(hueClient: HueClient | undefined, light: Light, co
 
   try {
     if (hueClient === undefined) throw new Error("Not connected to Hue Bridge.");
+    if (light.color === undefined) throw new Error("Light does not support colors.");
+
     await hueClient.updateLight(light, {
       on: { on: true },
       color: { xy: hexToXy(color.value) },
     });
-    // await setLights(setLightColor(api, light, color.value), {
-    //   optimisticUpdate(lights) {
-    //     return lights.map((it) =>
-    //       it.id === light.id ? { ...it, state: { ...it.state, on: true, xy: hexToXy(color.value) } } : it
-    //     );
-    //   },
-    // });
 
     toast.style = Style.Success;
     toast.title = `Set color of ${light.metadata.name} to ${color.name}`;
