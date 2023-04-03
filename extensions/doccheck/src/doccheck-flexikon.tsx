@@ -23,6 +23,8 @@ export default function Command() {
 
   useEffect(() => {
     async function fetch() {
+      
+      setLoading(true);
       if (!query) {
         setState([]);
         await axios
@@ -41,8 +43,8 @@ export default function Command() {
               const author = "";
               topArticles.push({ title, url, imageUrl, description, title_alias, date_publish, author });
             });
-
             setEntries(topArticles);
+            setLoading(false);
           })
           .catch((error) => {
             console.log(error);
