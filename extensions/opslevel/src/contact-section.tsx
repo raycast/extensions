@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Keyboard } from "@raycast/api";
-import { ContactFragment, ContactType } from "./client/gql/graphql";
+import { ContactFragment, ContactType } from "./client";
 
 export default function ContactSection({
     contacts,

@@ -1,4 +1,4 @@
-import { ServiceToolFragment } from "./client/gql/graphql";
+import { ServiceToolFragment } from "./client";
 import { ActionPanel, Action, Icon, Image } from "@raycast/api";
 
 export default function ToolsSection({

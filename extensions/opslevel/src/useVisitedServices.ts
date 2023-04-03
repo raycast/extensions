@@ -1,6 +1,6 @@
 import { LocalStorage } from "@raycast/api";
 import { useState, useEffect } from "react";
-import { ServiceFragment } from "./client/gql/graphql";
+import { ServiceFragment } from "./client";
 
 
 const VISITED_SERVICES_KEY = "VISITED_SERVICES";

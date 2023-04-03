@@ -1,6 +1,6 @@
 import { ActionPanel, Action, List, showToast, Toast, Icon, Image } from "@raycast/api";
 import { useState } from "react";
-import { ContactFragment, ServiceFragment, ServiceToolFragment } from "./client/gql/graphql";
+import { ContactFragment, ServiceFragment, ServiceToolFragment } from "./client";
 import { LaunchProps } from "@raycast/api";
 import OpenRepoInEditorAction from "./clone-action";
 import { useCachedPromise } from "@raycast/utils";
@@ -81,8 +81,8 @@ function SearchListItem({
 
     return (
         <List.Item
-            title={service.name.replace("pleo", "acme").replace("Pleo", "Acme").trim()}
-            subtitle={service?.description?.replace("pleo", "acme")?.replace("Pleo", "Acme").trim() ?? ""}
+            title={service.name}
+            subtitle={service?.description ?? ""}
             accessories={accessories}
             keywords={[
                 service.name,

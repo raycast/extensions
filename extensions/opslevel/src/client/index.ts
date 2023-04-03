@@ -1,10 +1,11 @@
 import { getPreferenceValues } from "@raycast/api";
-import { ApolloClient, InMemoryCache, createHttpLink } from "@apollo/client";
+import { ApolloClient, InMemoryCache, createHttpLink, gql } from "@apollo/client";
 import { setContext } from "@apollo/client/link/context";
 import fetch from "cross-fetch";
-import { Get_All_ServicesQuery, ServiceFragment } from "./gql/graphql";
-
-import { GET_ALL_SERVICES } from "./queries";
+import { GetAllServicesQuery, ServiceFragment } from "./gql-types";
+export * from "./gql-types.d";
+import { readFile } from 'fs/promises';
+import { GetAllServices } from "./get-all-services";
 
 const preferenceValues = getPreferenceValues();
 const httpLink = createHttpLink({
@@ -33,8 +34,8 @@ export async function fetchServices(): Promise<ServiceFragment[]> {
     let hasNextPage = false;
     let cursor: string | null | undefined = null;
     do {
-        const result = await apolloClient.query({ query: GET_ALL_SERVICES, variables: { cursor } });
-        const data = result.data as Get_All_ServicesQuery;
+        const result = await apolloClient.query({ query: GetAllServices, variables: { cursor } });
+        const data = result.data as GetAllServicesQuery;
         services.push(...(data.account.servicesV2.nodes as ServiceFragment[]));
         hasNextPage = data.account.servicesV2.pageInfo.hasNextPage;
         cursor = data.account.servicesV2.pageInfo.endCursor;
