@@ -2,7 +2,7 @@ import { getPreferenceValues, Icon, Image, showToast, Toast } from "@raycast/api
 import { CssColor, Light, Scene } from "./types";
 import { discovery, v3 } from "node-hue-api";
 import { hexToXy } from "./colors";
-import { APP_NAME, BRIGHTNESSES, COLOR_TEMP_MAX, COLOR_TEMP_MIN, COLOR_TEMPERATURE_STEP } from "./constants";
+import { APP_NAME, BRIGHTNESSES, MIREK_MAX, MIREK_MIN, MIREK_STEP } from "./constants";
 import HueClient from "./HueClient";
 
 declare global {
@@ -189,20 +189,9 @@ export function calculateAdjustedBrightness(brightness: number, direction: "incr
   );
 }
 
-export function calculateAdjustedColorTemperature(entity: Light | Group, direction: "increase" | "decrease") {
-  const colorTemperature = 295;
-  // if ("action" in entity) {
-  //   if (entity.action.colormode !== "ct") throw new Error("Light is not in color temperature mode");
-  //   colorTemperature = entity.action.ct;
-  // } else {
-  //   if (entity.state.colormode !== "ct") throw new Error("Light is not in color temperature mode");
-  //   colorTemperature = entity.state.ct;
-  // }
-
-  const newColorTemperature =
-    direction === "increase" ? colorTemperature - COLOR_TEMPERATURE_STEP : colorTemperature + COLOR_TEMPERATURE_STEP;
-
-  return Math.min(Math.max(COLOR_TEMP_MIN, newColorTemperature), COLOR_TEMP_MAX);
+export function calculateAdjustedColorTemperature(mirek: number, direction: "increase" | "decrease") {
+  const newColorTemperature = direction === "increase" ? mirek - MIREK_STEP : mirek + MIREK_STEP;
+  return Math.min(Math.max(MIREK_MIN, newColorTemperature), MIREK_MAX);
 }
 
 export async function adjustColorTemperature(
@@ -211,7 +200,7 @@ export async function adjustColorTemperature(
   direction: "increase" | "decrease"
 ) {
   const api = await apiPromise;
-  const delta = direction === "increase" ? -COLOR_TEMPERATURE_STEP : COLOR_TEMPERATURE_STEP;
+  const delta = direction === "increase" ? -MIREK_STEP : MIREK_STEP;
 
   if ("action" in entity) {
     const newLightState = new v3.model.lightStates.GroupLightState()

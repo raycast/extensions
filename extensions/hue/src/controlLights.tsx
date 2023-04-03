@@ -1,7 +1,13 @@
 import { ActionPanel, Icon, List, Toast } from "@raycast/api";
-import { calculateAdjustedBrightness, getClosestBrightness, getIconForColor, getLightIcon } from "./lib/utils";
+import {
+  calculateAdjustedBrightness,
+  calculateAdjustedColorTemperature,
+  getClosestBrightness,
+  getIconForColor,
+  getLightIcon,
+} from "./lib/utils";
 import { CssColor, Group, Light } from "./lib/types";
-import { BRIGHTNESSES, HIGHEST_BRIGHTNESS, LOWEST_BRIGHTNESS } from "./lib/constants";
+import { BRIGHTNESSES, HIGHEST_BRIGHTNESS, LOWEST_BRIGHTNESS, MIREK_MAX, MIREK_MIN } from "./lib/constants";
 import ManageHueBridge from "./components/ManageHueBridge";
 import UnlinkAction from "./components/UnlinkAction";
 import { SendHueMessage, useHue } from "./lib/useHue";
@@ -186,25 +192,33 @@ function SetColorAction(props: { light: Light; onSet: (color: CssColor) => void 
 }
 
 function IncreaseColorTemperatureAction(props: { light: Light; onIncrease?: () => void }) {
-  return props.light.color_temperature.mirek > props.light.color_temperature.mirek_schema.mirek_minimum ? (
+  if (props.light.color_temperature.mirek <= (props.light.color_temperature.mirek_schema?.mirek_minimum ?? MIREK_MIN)) {
+    return null;
+  }
+
+  return (
     <ActionPanel.Item
       title="Increase Color Temperature"
       shortcut={{ modifiers: ["cmd", "shift"], key: "arrowRight" }}
       icon={Icon.Plus}
       onAction={props.onIncrease}
     />
-  ) : null;
+  );
 }
 
 function DecreaseColorTemperatureAction(props: { light: Light; onDecrease?: () => void }) {
-  return props.light.color_temperature.mirek < props.light.color_temperature.mirek_schema.mirek_maximum ? (
+  if (props.light.color_temperature.mirek >= (props.light.color_temperature.mirek_schema?.mirek_maximum ?? MIREK_MAX)) {
+    return null;
+  }
+
+  return (
     <ActionPanel.Item
       title="Decrease Color Temperature"
       shortcut={{ modifiers: ["cmd", "shift"], key: "arrowLeft" }}
       icon={Icon.Minus}
       onAction={props.onDecrease}
     />
-  ) : null;
+  );
 }
 
 function RefreshAction(props: { onRefresh: () => void }) {
@@ -350,15 +364,13 @@ async function handleIncreaseColorTemperature(hueClient: HueClient | undefined, 
   const toast = new Toast({ title: "" });
 
   try {
-    // await setLights(adjustColorTemperature(api, light, "increase"), {
-    //   optimisticUpdate(lights) {
-    //     return lights?.map((it) =>
-    //       it.id === light.id
-    //         ? { ...it, state: { ...it.state, ct: calculateAdjustedColorTemperature(light, "increase") } }
-    //         : it
-    //     );
-    //   },
-    // });
+    if (hueClient === undefined) throw new Error("Not connected to Hue Bridge.");
+    if (light.color_temperature === undefined) throw new Error("Light does not support color temperature.");
+    const adjustedColorTemperature = calculateAdjustedColorTemperature(light.color_temperature.mirek, "increase");
+    await hueClient.updateLight(light, {
+      on: { on: true },
+      color_temperature: { mirek: adjustedColorTemperature },
+    });
 
     toast.style = Style.Success;
     toast.title = `Increased color temperature of ${light.metadata.name}`;
@@ -375,15 +387,13 @@ async function handleDecreaseColorTemperature(hueClient: HueClient | undefined, 
   const toast = new Toast({ title: "" });
 
   try {
-    // await setLights(adjustColorTemperature(api, light, "decrease"), {
-    //   optimisticUpdate(lights) {
-    //     return lights.map((it) =>
-    //       it.id === light.id
-    //         ? { ...it, state: { ...it.state, ct: calculateAdjustedColorTemperature(light, "decrease") } }
-    //         : it
-    //     );
-    //   },
-    // });
+    if (hueClient === undefined) throw new Error("Not connected to Hue Bridge.");
+    if (light.color_temperature === undefined) throw new Error("Light does not support color temperature.");
+    const adjustedColorTemperature = calculateAdjustedColorTemperature(light.color_temperature.mirek, "decrease");
+    await hueClient.updateLight(light, {
+      on: { on: true },
+      color_temperature: { mirek: adjustedColorTemperature },
+    });
 
     toast.style = Style.Success;
     toast.title = "Decreased color temperature";

@@ -214,11 +214,17 @@ export type Light = {
     mirek: number;
 
     /**
+     * Can only be read, not written. Hence, it is not required.
+     * TODO: Maybe make separate type for this?
      * Indication whether the value presented in mirek is valid
      */
-    mirek_valid: boolean;
+    mirek_valid?: boolean;
 
-    mirek_schema: {
+    /**
+     * Can only be read, not written. Hence, it is not required.
+     * TODO: Maybe make separate type for this?
+     */
+    mirek_schema?: {
       /**
        * integer (153 - 500)
        *

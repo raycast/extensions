@@ -14,8 +14,8 @@ import {
 } from "./lib/utils";
 import { Api } from "node-hue-api/dist/esm/api/Api";
 import { MutatePromise } from "@raycast/utils";
-import { CssColor, Group, Room, Scene, SendHueMessage } from "./lib/types";
-import { BRIGHTNESS_MAX, BRIGHTNESS_MIN, BRIGHTNESSES, COLOR_TEMP_MAX, COLOR_TEMP_MIN } from "./lib/constants";
+import { CssColor, Room, Scene } from "./lib/types";
+import { BRIGHTNESSES, MIREK_MAX, MIREK_MIN } from "./lib/constants";
 import { COLORS, hexToXy } from "./lib/colors";
 import ManageHueBridge from "./components/ManageHueBridge";
 import UnlinkAction from "./components/UnlinkAction";
@@ -242,7 +242,7 @@ function SetColorAction(props: { group: Group; onSet: (color: CssColor) => void 
 }
 
 function IncreaseColorTemperatureAction(props: { group: Group; onIncrease?: () => void }) {
-  return props.group.action.bri > COLOR_TEMP_MIN ? (
+  return props.group.action.bri > MIREK_MIN ? (
     <ActionPanel.Item
       title="Increase Color Temperature"
       shortcut={{ modifiers: ["cmd", "shift"], key: "arrowRight" }}
@@ -253,7 +253,7 @@ function IncreaseColorTemperatureAction(props: { group: Group; onIncrease?: () =
 }
 
 function DecreaseColorTemperatureAction(props: { group: Group; onDecrease?: () => void }) {
-  return props.group.action.bri < COLOR_TEMP_MAX ? (
+  return props.group.action.bri < MIREK_MAX ? (
     <ActionPanel.Item
       title="Decrease Color Temperature"
       shortcut={{ modifiers: ["cmd", "shift"], key: "arrowLeft" }}
