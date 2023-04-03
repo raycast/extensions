@@ -45,11 +45,13 @@
   "dependencies": {
     "@raycast/api": "^1.42.2",
     "@raycast/utils": "^1.4.10",
-    "fs": "0.0.1-security"
+    "fs": "0.0.1-security",
+    "uuid": "^9.0.0"
   },
   "devDependencies": {
     "@types/node": "18.8.3",
     "@types/react": "18.0.9",
+    "@types/uuid": "^9.0.1",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",

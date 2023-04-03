@@ -12,14 +12,7 @@ import {
 import { FormValidation, useCachedPromise, useCachedState, useForm } from "@raycast/utils";
 import { useEffect, useMemo, useState } from "react";
 
-import {
-  getIssuePriorities,
-  createIssue,
-  getCreateIssueMetadata,
-  Component,
-  Version,
-  addAttachment,
-} from "../api/issues";
+import { createIssue, getCreateIssueMetadata, Component, Version, addAttachment, Priority } from "../api/issues";
 import { getLabels } from "../api/labels";
 import { getProjects } from "../api/projects";
 import { getUsers } from "../api/users";
@@ -27,6 +20,7 @@ import { getErrorMessage } from "../helpers/errors";
 import { CustomFieldSchema, getCustomFieldsForCreateIssue } from "../helpers/issues";
 
 import FormParentDropdown from "./FormParentDropdown";
+import FormUserDropdown from "./FormUserDropdown";
 import IssueDetail from "./IssueDetail";
 import IssueFormCustomFields from "./IssueFormCustomFields";
 
@@ -60,7 +54,6 @@ export default function CreateIssueForm({ draftValues, enableDrafts = true }: Cr
 
   const { data: projects } = useCachedPromise(() => getProjects());
   const { data: users } = useCachedPromise(() => getUsers());
-  const { data: priorities } = useCachedPromise(() => getIssuePriorities());
   const { data: labels } = useCachedPromise(() => getLabels());
 
   // There's a slight jump on issue types when launching the command since they're
@@ -70,7 +63,7 @@ export default function CreateIssueForm({ draftValues, enableDrafts = true }: Cr
   const [customFieldInitialValues, setCustomFieldInitialValues] = useState({});
   const [customFieldsValidation, setCustomFieldsValidation] = useState({});
 
-  const { handleSubmit, itemProps, values, reset, focus } = useForm<IssueFormValues>({
+  const { handleSubmit, itemProps, values, setValue, reset, focus } = useForm<IssueFormValues>({
     async onSubmit(values) {
       const toast = await showToast({ style: Toast.Style.Animated, title: "Creating issue" });
 
@@ -164,12 +157,20 @@ export default function CreateIssueForm({ draftValues, enableDrafts = true }: Cr
 
   // We only query one project in the getCreateIssueMetadata call
   // It's safe to assume the issue types will always correspond to the first element
-  const issueTypes = issueMetadata?.[0].issuetypes;
+  const issueTypes = issueMetadata?.[0]?.issuetypes;
 
   const selectedIssueType = issueTypes?.find((issueType) => issueType.id === values.issueTypeId);
 
   const epicsOnly = !selectedIssueType?.subtask;
-  const issueLinksAutocompleteUrl = selectedIssueType?.fields.issuelinks.autoCompleteUrl;
+  const issueLinksAutocompleteUrl = selectedIssueType?.fields.issuelinks?.autoCompleteUrl;
+
+  const priorityField = selectedIssueType?.fields.priority;
+  useEffect(() => {
+    if (priorityField?.hasDefaultValue) {
+      setValue("priorityId", (priorityField.defaultValue as Priority).id);
+    }
+  }, [priorityField]);
+  const priorities = priorityField?.allowedValues as Priority[];
 
   const components = selectedIssueType?.fields.components?.allowedValues as Component[];
   const fixVersions = selectedIssueType?.fields.fixVersions?.allowedValues as Version[];
@@ -252,20 +253,11 @@ export default function CreateIssueForm({ draftValues, enableDrafts = true }: Cr
         enableMarkdown
       />
 
-      <Form.Dropdown {...itemProps.assigneeId} title="Assignee" storeValue>
-        <Form.Dropdown.Item title="Unassigned" value="" icon={Icon.Person} />
-
-        {users?.map((user) => {
-          return (
-            <Form.Dropdown.Item
-              key={user.accountId}
-              value={user.accountId}
-              title={user.displayName}
-              icon={user.avatarUrls["32x32"]}
-            />
-          );
-        })}
-      </Form.Dropdown>
+      <FormUserDropdown
+        {...itemProps.assigneeId}
+        title="Assignee"
+        autocompleteUrl={selectedIssueType?.fields.assignee.autoCompleteUrl}
+      />
 
       <Form.Dropdown {...itemProps.priorityId} title="Priority">
         {priorities?.map((priority) => {

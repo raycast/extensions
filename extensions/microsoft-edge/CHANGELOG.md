@@ -1,5 +1,9 @@
 # Microsoft Edge Changelog
 
+## [Enhancement] - 2023-03-22
+
+- add useDev support Microsoft Edge Dev
+
 ## [Profiles support] - 2023-01-25
 
 - Added support for profiles across all commands

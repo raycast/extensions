@@ -1,5 +1,10 @@
 # 1Password Changelog
 
+## [Configurable primary/secondary actions] - 2023-03-22
+
+- Added configuration to customize the primary and secondary actions on Login
+  items (1Password v8 only)
+
 ## [Fixes and Enhancements] - 2023-02-10
 
 - Increased maxBuffer since it caused problems if you had more than 2k items in the vault

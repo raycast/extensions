@@ -54,7 +54,7 @@ function EntryItem({ entry, slug }: { entry: Entry; slug: string }) {
           <Action.Open
             icon="devdocs.png"
             title="Open in DevDocs"
-            target={`$https://devdocs.io/${slug}/${entry.path}`}
+            target={`https://devdocs.io/${slug}/${entry.path}`}
             application="DevDocs"
           />
         </ActionPanel>

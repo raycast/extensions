@@ -1,3 +1,3 @@
-import { LoadBalancer } from './loadBalancer/LB'
+import { LoadBalancer } from './products/loadBalancer/LB'
 
 export default () => <LoadBalancer />

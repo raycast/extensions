@@ -134,6 +134,23 @@ new Promise((resolve, reject) => {
                 stream.stdout.pipe(process.stdout);
               })
             : Promise.resolve(),
+          fs.existsSync(path.join(migrationToolFolder, migration, "json.ts"))
+            ? new Promise((resolve, reject) => {
+                let stream = exec(
+                  `find "${extensionPath}" \\( -name '*.json' \\) -not -path "*/node_modules/*" | xargs "${jscodeshift}" --verbose=2 --extensions=tsx,ts,jsx,js --parser=tsx -t ./${migration}/json.ts`,
+                  { cwd: migrationToolFolder },
+                  (err, stdout, stderr) => {
+                    if (err) {
+                      reject(stderr);
+                    } else {
+                      resolve();
+                    }
+                  }
+                );
+
+                stream.stdout.pipe(process.stdout);
+              })
+            : Promise.resolve(),
           fs.existsSync(path.join(migrationToolFolder, migration, "command.sh"))
             ? new Promise((resolve, reject) => {
                 let stream = exec(

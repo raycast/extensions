@@ -44,6 +44,11 @@ export default function IssueDetailCustomFields({ fields }: IssueDetailCustomFie
             component = <Detail.Metadata.Label title={name} text={String(typedValue)} />;
             break;
           }
+          case CustomFieldSchema.team: {
+            const typedValue = value as { name: string };
+            component = <Detail.Metadata.Label title={name} text={typedValue.name} />;
+            break;
+          }
           case CustomFieldSchema.labels: {
             const typedValue = value as string[];
             component = (

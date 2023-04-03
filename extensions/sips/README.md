@@ -1,6 +1,6 @@
 # Image Modification
 
-Rotate, flip, scale, resize, and convert selected images in Finder.
+Rotate, flip, scale, resize, convert, and apply filters to selected images in Finder.
 
 ## Commands
 
@@ -17,3 +17,7 @@ Rotate, flip, scale, resize, and convert selected images in Finder.
     - Rotate images clockwise by the specified amount.
 - Scale Images [Scale Factor]
     - Scale images proportionally by the specified factor.
+- Pad Images [Amount] [Color]
+    - Pad images by the specified number of pixels using the provided color (defaults to white).
+- Apply Image Filter
+    - Apply various filters to the provided images using Apple's CIFilters

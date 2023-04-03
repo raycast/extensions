@@ -29,6 +29,8 @@ export interface Node {
   topics: number;
   created: number;
   last_modified: number;
+  // V1
+  avatar_mini: string;
 }
 export interface Member {
   id: number;
@@ -39,6 +41,10 @@ export interface Member {
   url: string;
   avatar: string;
   created: number;
+  // V1
+  avatar_mini: string;
+  avatar_normal: string;
+  avatar_large: string;
 }
 export interface Reply {
   id: number;

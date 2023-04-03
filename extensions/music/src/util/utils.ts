@@ -42,7 +42,9 @@ export function displayError(error: Error | ScriptError) {
       title: "Report Issue",
       onAction: async () => {
         await open(
-          "https://github.com/raycast/extensions/issues/new?template=extension_bug_report.yml&extension-url=https%3A%2F%2Fraycast.com%2Ffedevitaledev%2Fmusic&title=%5BMusic%5D+..."
+          `https://github.com/raycast/extensions/issues/new?template=extension_bug_report.yml&extension-url=https%3A%2F%2Fraycast.com%2Ffedevitaledev%2Fmusic&description=${encodeURIComponent(
+            error.message
+          )}&title=${encodeURIComponent("[Music]: ")}`
         );
 
         await showHUD(`Thanks for reporting this bug!`);

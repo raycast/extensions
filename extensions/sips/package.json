@@ -11,6 +11,26 @@
     "Design Tools"
   ],
   "license": "MIT",
+  "preferences": [
+    {
+      "name": "preferredFileManager",
+      "description": "The preferred file manager to obtain selected images from. Finder will always be used as a fallback.",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "Finder",
+          "value": "Finder"
+        },
+        {
+          "title": "Path Finder",
+          "value": "Path Finder"
+        }
+      ],
+      "default": "Finder",
+      "required": false,
+      "title": "Preferred File Manager"
+    }
+  ],
   "commands": [
     {
       "name": "flip-horizontally",
@@ -77,6 +97,32 @@
           "required": true
         }
       ]
+    },
+    {
+      "name": "pad",
+      "title": "Pad Images",
+      "description": "Pad images to the specified size using the provided color",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "amount",
+          "placeholder": "Amount",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "hexcolor",
+          "placeholder": "Color",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "apply-filter",
+      "title": "Apply Image Filter",
+      "description": "Apply filters to images using Apple's CIFilters",
+      "mode": "view"
     }
   ],
   "dependencies": {

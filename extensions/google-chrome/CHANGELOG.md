@@ -1,5 +1,9 @@
 # Google Chrome Changelog
 
+## [Tab closing] - 2023-03-10
+
+- Add the ability to close tabs
+
 ## [Performances improve] - 2023-01-26
 
 - Improved getting open tabs speed

@@ -5,6 +5,13 @@
   "description": "Generate a Discord timestamp",
   "icon": "command-icon.png",
   "author": "theshadowdev",
+  "contributors": [
+    "feyli"
+  ],
+  "categories": [
+    "Communication",
+    "Developer Tools"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -16,12 +23,6 @@
   ],
   "preferences": [
     {
-      "name": "defaultAction",
-      "description": "Set the default action",
-      "type": "dropdown",
-      "required": false,
-      "title": "Default Action",
-      "default": "copy",
       "data": [
         {
           "title": "Copy",
@@ -31,23 +32,24 @@
           "title": "Paste",
           "value": "paste"
         }
-      ]
+      ],
+      "default": "copy",
+      "description": "Set the default action",
+      "name": "defaultAction",
+      "required": false,
+      "title": "Default Action",
+      "type": "dropdown"
     }
   ],
-  "categories": [
-    "Communication",
-    "Developer Tools"
-  ],
   "dependencies": {
-    "@raycast/api": "^1.47.3"
+    "@raycast/api": "^1.48.8",
+    "@raycast/utils": "^1.5.2"
   },
   "devDependencies": {
+    "@raycast/eslint-config": "^1.0.5",
     "@types/node": "18.8.3",
     "@types/react": "18.0.9",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
     "prettier": "^2.5.1",
     "typescript": "^4.4.3"
   },

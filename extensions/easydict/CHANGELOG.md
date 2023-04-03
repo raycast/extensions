@@ -1,5 +1,19 @@
 # `Easydict` Changelog
 
+## [v2.8.1] - 2023-03-28
+
+### 🐞 Fixes
+
+- Fixed the crash problem when requesting OpenAI translation.
+
+## [v2.8.0] - 2023-03-17
+
+### ✨ Features
+
+- Support OpenAI ChatGPT translation.
+
+![OpenAI](https://user-images.githubusercontent.com/25194972/225886686-b99e5a97-6269-489d-b0bb-40be6d7d1d32.png)
+
 ## [v2.7.3] - 2023-02-28
 
 ### 💎 Improvement

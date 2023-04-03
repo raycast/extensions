@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { getCIRefreshInterval, getGitLabGQL, gitlab } from "../common";
 import { gql } from "@apollo/client";
 import { getErrorMessage, getIdFromGqlId, now, showErrorToast } from "../utils";
-import { RefreshJobsAction } from "./job_actions";
+import { RefreshJobsAction, RetryJobAction } from "./job_actions";
 import useInterval from "use-interval";
 import { GitLabOpenInBrowserAction } from "./actions";
 import { Project } from "../gitlabapi";
@@ -11,6 +11,7 @@ import { GitLabIcons } from "../icons";
 
 export interface Job {
   id: string;
+  projectId: number;
   name: string;
   status: string;
   allowFailure: boolean;
@@ -29,6 +30,11 @@ const GET_PIPELINE_JOBS = gql`
                 name
                 status
                 allowFailure
+                pipeline {
+                  project {
+                    id
+                  }
+                }
               }
             }
           }
@@ -149,6 +155,7 @@ export function JobListItem(props: { job: Job; projectFullPath: string; onRefres
           </ActionPanel.Section>
           <ActionPanel.Section>
             <RefreshJobsAction onRefreshJobs={props.onRefreshJobs} />
+            <RetryJobAction job={props.job} />
           </ActionPanel.Section>
         </ActionPanel>
       }
@@ -158,7 +165,7 @@ export function JobListItem(props: { job: Job; projectFullPath: string; onRefres
 
 export function JobList(props: {
   projectFullPath: string;
-  pipelineID: string;
+  pipelineID: number;
   pipelineIID?: string | undefined;
   navigationTitle?: string;
 }): JSX.Element {
@@ -192,6 +199,7 @@ export function JobList(props: {
 
 interface RESTJob {
   id: number;
+  pipeline: Pipeline;
   status: string;
   stage: string;
   name: string;
@@ -201,7 +209,7 @@ interface RESTJob {
 export function useSearch(
   query: string | undefined,
   projectFullPath: string,
-  pipelineID: string,
+  pipelineID: number,
   pipelineIID?: string | undefined
 ): {
   stages?: Record<string, Job[]>;
@@ -246,6 +254,7 @@ export function useSearch(
             for (const job of stage.jobs.nodes) {
               stages[stage.name].push({
                 id: job.id,
+                projectId: getIdFromGqlId(job.pipeline.project.id),
                 name: job.name,
                 status: job.status,
                 allowFailure: job.allowFailure,
@@ -268,6 +277,7 @@ export function useSearch(
             }
             stages[job.stage].push({
               id: `${job.id}`,
+              projectId: job.pipeline.project_id,
               name: job.name,
               status: job.status,
               allowFailure: job.allowFailure,
@@ -332,7 +342,7 @@ export function PipelineJobsListByCommit(props: { project: Project; sha: string 
     return (
       <JobList
         projectFullPath={props.project.fullPath}
-        pipelineID={`${commit.last_pipeline.id}`}
+        pipelineID={commit.last_pipeline.id}
         pipelineIID={commit.last_pipeline.iid ? `${commit.last_pipeline.iid}` : undefined}
       />
     );
