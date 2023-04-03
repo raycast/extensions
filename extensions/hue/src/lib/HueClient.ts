@@ -139,19 +139,26 @@ export default class HueClient {
     return response.data.data;
   }
 
-  public async toggleLight(light: Light): Promise<any> {
-    const response = await this.makeRequest(
+  public async toggleLight(light: Light) {
+    const oldState = light;
+    const newState = {
+      on: { on: !light.on.on },
+      // TODO: Figure out why transition time causes the light to turn on at 1% brightness
+      // dynamics: { duration: getTransitionTimeInMs() },
+    };
+
+    this.setLights((lights) => lights.updateItem(light, newState));
+
+    await this.makeRequest(
       {
         [HTTP2_HEADER_METHOD]: "PUT",
         [HTTP2_HEADER_PATH]: `/clip/v2/resource/light/${light.id}`,
       },
-      {
-        on: { on: !light.on.on },
-        // TODO: Figure out why transition time causes the light to turn on at 1% brightness
-        // dynamics: { duration: getTransitionTimeInMs() },
-      }
-    );
-    return response.data.data;
+      newState
+    ).catch((e) => {
+      this.setLights((lights) => lights.updateItem(light, oldState));
+      throw e;
+    });
   }
 
   public async setBrightness(light: Light, brightness: number): Promise<any> {

@@ -83,7 +83,7 @@ function Light(props: {
           <ActionPanel.Section>
             <ToggleLightAction
               light={props.light}
-              onToggle={() => handleToggle(props.hueClient, props.light, props.setLights)}
+              onToggle={() => handleToggle(props.hueClient, props.light)}
             />
             <SetBrightnessAction
               light={props.light}
@@ -235,17 +235,12 @@ function RefreshAction(props: { onRefresh: () => void }) {
 async function handleToggle(
   hueClient: HueClient | undefined,
   light: Light,
-  setLights: React.Dispatch<React.SetStateAction<Light[]>>
 ) {
   const toast = new Toast({ title: "" });
 
   try {
     if (hueClient === undefined) throw new Error("Not connected to Hue Bridge.");
     await hueClient.toggleLight(light);
-
-    setLights((prevState) => {
-      return prevState.updateItem(light, { on: { on: !light.on.on } });
-    });
 
     toast.style = Style.Success;
     toast.title = light.on.on ? `Turned ${light.metadata.name} off` : `Turned ${light.metadata.name} on`;
