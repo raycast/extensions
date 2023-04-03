@@ -13,7 +13,6 @@ import Style = Toast.Style;
 export default function ControlLights() {
   const { hueBridgeState, sendHueMessage, isLoading, lights, setLights, rooms } = useHue();
 
-  // This element handles any scenario that involves the Bridge not being ready
   const manageHueBridgeElement = ManageHueBridge(hueBridgeState, sendHueMessage);
   if (manageHueBridgeElement !== null) return manageHueBridgeElement;
 

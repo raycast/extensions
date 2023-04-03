@@ -11,11 +11,13 @@ import {
 import { SendHueMessage } from "../lib/useHue";
 import ActionStyle = Alert.ActionStyle;
 import Style = Toast.Style;
-import { interpret } from "xstate";
-import { hue } from "node-hue-api/lib/model/lightstate/stateParameters";
-import * as util from "util";
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
+/**
+ * ManageHueBridge is a component that renders a view based on the current state of the Hue Bridge machine.
+ *
+ * When the machine is in a state that requires user interaction, it will render a Detail view,
+ * otherwise it will return null.
+ */
 export default function ManageHueBridge(
   hueBridgeState: HueBridgeState,
   sendHueMessage: SendHueMessage
