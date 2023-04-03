@@ -1,7 +1,7 @@
-import { Action, Clipboard, Icon, Keyboard, showToast, Toast } from '@raycast/api';
-import { execFileSync } from 'child_process';
+import { Action, Clipboard, Icon, Keyboard, showToast, Toast } from "@raycast/api";
+import { execFileSync } from "child_process";
 
-import { CLI_PATH, titleCaseWord } from '../utils';
+import { CLI_PATH, titleCaseWord } from "../utils";
 
 async function copyPassword(password: string): Promise<boolean> {
   const applescript = `
