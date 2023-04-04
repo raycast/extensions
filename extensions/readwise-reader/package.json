@@ -13,9 +13,9 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "open-new",
-      "title": "Open New",
-      "description": "Opens Reader to new page",
+      "name": "open-inbox",
+      "title": "Open Inbox",
+      "description": "Opens Reader Inbox",
       "mode": "no-view",
       "icon": "reader-logo.png"
     },
