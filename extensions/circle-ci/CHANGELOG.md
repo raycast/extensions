@@ -1,4 +1,4 @@
-# Circle CI Changelog
+# CircleCI Changelog
 
 ## [Fix] - 2023-03-10
 

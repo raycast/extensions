@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "circle-ci",
-  "title": "Circle CI Workflows",
-  "description": "This extension shows a list of your latest Circle CI workflows.\n\nIt requires a Circle CI API token which you can get on https://app.circleci.com/settings/user/tokens.\n.",
+  "title": "CircleCI Workflows",
+  "description": "This extension shows a list of your latest CircleCI workflows.\n\nIt requires a CircleCI API token which you can get on https://app.circleci.com/settings/user/tokens.\n.",
   "icon": "circle-logo.png",
   "author": "qeude",
   "contributors": [
@@ -13,7 +13,7 @@
     {
       "name": "command-project-search",
       "title": "Project Search",
-      "subtitle": "Circle CI",
+      "subtitle": "CircleCI",
       "description": "List CircleCI projects and quickly navigate to them.",
       "mode": "view"
     }
@@ -23,7 +23,7 @@
       "name": "apiKey",
       "type": "password",
       "required": true,
-      "title": "Circle CI API token",
+      "title": "CircleCI API token",
       "description": "Get it on https://app.circleci.com/settings/user/tokens"
     }
   ],
