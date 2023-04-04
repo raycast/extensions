@@ -37,6 +37,7 @@ export type PreferencesType = {
   showFilePermissions: boolean;
   showFileSize: boolean;
   startDirectory: string;
+  showDeleteOption: boolean;
 };
 
 export async function deleteFile(filePath: string, fileName: string, refresh: () => void) {
@@ -128,13 +129,15 @@ export function DirectoryItem(props: { fileData: FileDataType; refresh: () => vo
             }}
           />
 
-          <Action
-            title="Delete Directory"
-            icon={Icon.Trash}
-            style={Action.Style.Destructive}
-            shortcut={{ modifiers: ["cmd"], key: "d" }}
-            onAction={() => deleteDirectory(filePath, props.fileData.name, props.refresh)}
-          />
+          {preferences.showDeleteOption && (
+            <Action
+              title="Delete Directory"
+              icon={Icon.Trash}
+              style={Action.Style.Destructive}
+              shortcut={{ modifiers: ["cmd"], key: "d" }}
+              onAction={() => deleteDirectory(filePath, props.fileData.name, props.refresh)}
+            />
+          )}
         </ActionPanel>
       }
     />
@@ -176,13 +179,15 @@ export function FileItem(props: { fileData: FileDataType; refresh: () => void })
               props.refresh();
             }}
           />
-          <Action
-            title="Delete File"
-            icon={Icon.Trash}
-            style={Action.Style.Destructive}
-            shortcut={{ modifiers: ["cmd"], key: "d" }}
-            onAction={() => deleteFile(filePath, props.fileData.name, props.refresh)}
-          />
+          {preferences.showDeleteOption && (
+            <Action
+              title="Delete File"
+              icon={Icon.Trash}
+              style={Action.Style.Destructive}
+              shortcut={{ modifiers: ["cmd"], key: "d" }}
+              onAction={() => deleteFile(filePath, props.fileData.name, props.refresh)}
+            />
+          )}
         </ActionPanel>
       }
     />
@@ -220,13 +225,15 @@ export function SymlinkItem(props: { fileData: FileDataType; refresh: () => void
               content={filePath}
               shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
             />
-            <Action
-              title="Delete Symlink Directory"
-              icon={Icon.Trash}
-              style={Action.Style.Destructive}
-              shortcut={{ modifiers: ["cmd"], key: "d" }}
-              onAction={() => deleteDirectory(filePath, props.fileData.name, props.refresh)}
-            />
+            {preferences.showDeleteOption && (
+              <Action
+                title="Delete Symlink Directory"
+                icon={Icon.Trash}
+                style={Action.Style.Destructive}
+                shortcut={{ modifiers: ["cmd"], key: "d" }}
+                onAction={() => deleteDirectory(filePath, props.fileData.name, props.refresh)}
+              />
+            )}
           </ActionPanel>
         }
       />
@@ -252,13 +259,15 @@ export function SymlinkItem(props: { fileData: FileDataType; refresh: () => void
               content={originalPath}
               shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
             />
-            <Action
-              title="Delete Symlink File"
-              icon={Icon.Trash}
-              style={Action.Style.Destructive}
-              shortcut={{ modifiers: ["cmd"], key: "d" }}
-              onAction={() => deleteFile(filePath, props.fileData.name, props.refresh)}
-            />
+            {preferences.showDeleteOption && (
+              <Action
+                title="Delete Symlink File"
+                icon={Icon.Trash}
+                style={Action.Style.Destructive}
+                shortcut={{ modifiers: ["cmd"], key: "d" }}
+                onAction={() => deleteFile(filePath, props.fileData.name, props.refresh)}
+              />
+            )}
           </ActionPanel>
         }
       />

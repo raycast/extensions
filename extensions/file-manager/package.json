@@ -71,6 +71,15 @@
       "required": true,
       "title": "",
       "type": "checkbox"
+    },
+    {
+      "default": false,
+      "description": "Show Delete Option",
+      "label": "Show Delete Option",
+      "name": "showDeleteOption",
+      "required": true,
+      "title": "",
+      "type": "checkbox"
     }
   ],
   "dependencies": {
