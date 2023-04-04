@@ -148,7 +148,7 @@ export function hexToXy(color: string): Xy {
 }
 
 export function getRgbFrom(light: Light): string {
-  if (light.color !== undefined) {
+  if (light.color?.xy !== undefined) {
     return cieToRgb(light.color.xy, light.dimming?.brightness);
   } else if (light.color_temperature !== undefined) {
     return ctToRgb(light.color_temperature.mirek, light.dimming?.brightness);
