@@ -2,7 +2,6 @@ import { getPreferenceValues, LocalStorage } from "@raycast/api";
 import { nanoid } from "nanoid";
 import { Preferences, SearchResult } from "./types";
 import fetch from "node-fetch";
-import iconv from "iconv-lite";
 
 const BANGS: Record<string, { name: string; url: string }> = {
   g: { name: "Google", url: "https://google.com/search?q=" },
