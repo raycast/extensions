@@ -12,7 +12,7 @@ import {
   sensitiveHeaders,
 } from "http2";
 import React from "react";
-import HueApiRateLimiter from "./HueApiRateLimiter";
+import RateLimitedQueue from "./RateLimitedQueue";
 
 const DATA_PREFIX = "data: ";
 const CONNECTION_TIMEOUT_MS = 5000;
@@ -38,7 +38,7 @@ export default class HueClient {
   private readonly setZones: React.Dispatch<React.SetStateAction<Zone[]>>;
   private readonly setScenes: React.Dispatch<React.SetStateAction<Scene[]>>;
   private readonly http2Session: ClientHttp2Session;
-  private readonly rateLimiter = new HueApiRateLimiter();
+  private readonly rateLimitedQueue = new RateLimitedQueue();
 
   private constructor(
     bridgeIpAddress: string,
@@ -148,7 +148,7 @@ export default class HueClient {
 
   public async updateGroupedLight(groupedLight: GroupedLight, properties: Partial<Light>): Promise<any> {
     this.setGroupedLights((groupedLights) => groupedLights.updateItem(groupedLight, properties));
-    const response = await this.makeRequest(
+    const request = async () => await this.makeRequest(
       "PUT",
       `/clip/v2/resource/grouped_light/${groupedLight.id}`,
       properties
@@ -156,6 +156,8 @@ export default class HueClient {
       this.setGroupedLights((groupedLights) => groupedLights.updateItem(groupedLight, groupedLight));
       throw e;
     });
+
+    const response = await this.rateLimitedQueue.enqueueRequest(request);
 
     return response.data.data;
   }
@@ -181,13 +183,6 @@ export default class HueClient {
 
   private makeRequest(method: Method, path: string, body?: any): Promise<Response> {
     return new Promise((resolve, reject) => {
-      if (!this.rateLimiter.canMakeRequest(path)) {
-        // TODO: Queue requests instead of dropping them.
-        //   To prevent a clogged queue from holding down such a hotkey we can add a rate limiter to these actions
-        //   instead of to the entire client.
-        return reject(new Error("Rate limit exceeded."));
-      }
-
       const stream = this.http2Session.request({
         [HTTP2_HEADER_METHOD]: method,
         [HTTP2_HEADER_PATH]: path,
@@ -226,7 +221,7 @@ export default class HueClient {
           if (response.headers[":status"] !== 200 && response.headers["content-type"] === "text/html") {
             const errorMatch = data.match(/(?<=<div class="error">)(.*?)(?=<\/div>)/);
             if (errorMatch && errorMatch[0]) {
-              console.error(response.headers, errorMatch[0]);
+              console.error({ headers: response.headers, message: errorMatch[0] });
               reject(new Error(errorMatch[0]));
             }
           }
@@ -235,7 +230,7 @@ export default class HueClient {
 
           if (response.data.errors != null && response.data.errors.length > 0) {
             const errorMessage = response.data.errors.map((error) => error.description).join(", ");
-            console.error(response.headers, errorMessage);
+            console.error({ headers: response.headers, message: errorMessage });
             reject(new Error(errorMessage));
           }
 
