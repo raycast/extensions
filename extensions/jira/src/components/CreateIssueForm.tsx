@@ -269,7 +269,7 @@ export default function CreateIssueForm({ draftValues, enableDrafts = true }: Cr
       <FormUserDropdown
         {...itemProps.assigneeId}
         title="Assignee"
-        autocompleteUrl={selectedIssueType?.fields.assignee.autoCompleteUrl}
+        autocompleteUrl={selectedIssueType?.fields.assignee?.autoCompleteUrl}
       />
 
       <Form.Dropdown {...itemProps.priorityId} title="Priority">
