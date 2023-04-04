@@ -4,7 +4,7 @@ import { CssColor, Group, GroupedLight, Room, Scene } from "./lib/types";
 import { BRIGHTNESSES } from "./lib/constants";
 import { COLORS } from "./lib/colors";
 import ManageHueBridge from "./components/ManageHueBridge";
-import { SendHueMessage, useHue } from "./lib/useHue";
+import { SendHueMessage, useHue } from "./hooks/useHue";
 import HueClient from "./lib/HueClient";
 import { getProgressIcon } from "@raycast/utils";
 import Style = Toast.Style;

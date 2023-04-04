@@ -2,7 +2,7 @@ import { Action, ActionPanel, Icon, List, Toast } from "@raycast/api";
 import { Group, Scene } from "./lib/types";
 import UnlinkAction from "./components/UnlinkAction";
 import ManageHueBridge from "./components/ManageHueBridge";
-import { SendHueMessage, useHue } from "./lib/useHue";
+import { SendHueMessage, useHue } from "./hooks/useHue";
 import HueClient from "./lib/HueClient";
 import Style = Toast.Style;
 

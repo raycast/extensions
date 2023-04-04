@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   AnyEventObject,
   assign,
@@ -13,10 +14,8 @@ import { LocalStorage, Toast } from "@raycast/api";
 import { v3 } from "node-hue-api";
 import { BRIDGE_ID, BRIDGE_IP_ADDRESS_KEY, BRIDGE_USERNAME_KEY } from "./constants";
 import HueClient from "./HueClient";
-import { useMachine } from "@xstate/react";
-import { HueMessage, SendHueMessage } from "./useHue";
 import { GroupedLight, Light, Room, Scene, Zone } from "./types";
-import React, { useMemo } from "react";
+import React from "react";
 
 export type HueBridgeState = State<
   HueContext,
@@ -33,30 +32,10 @@ export type HueContext = {
   hueClient?: HueClient;
 };
 
-export function useHueBridgeMachine(
-  setLights: React.Dispatch<React.SetStateAction<Light[]>>,
-  setGroupedLights: React.Dispatch<React.SetStateAction<GroupedLight[]>>,
-  setRooms: React.Dispatch<React.SetStateAction<Room[]>>,
-  setZones: React.Dispatch<React.SetStateAction<Zone[]>>,
-  setScenes: React.Dispatch<React.SetStateAction<Scene[]>>
-) {
-  const machine = useMemo(() => hueBridgeMachine(setLights, setGroupedLights, setRooms, setZones, setScenes), []);
-
-  const [hueBridgeState, send] = useMachine(machine);
-  const sendHueMessage: SendHueMessage = (message: HueMessage) => {
-    send(message.toUpperCase());
-  };
-
-  return {
-    hueBridgeState,
-    sendHueMessage,
-  };
-}
-
 /**
  * @see https://stately.ai/viz/ee0edf94-7a82-4d65-a6a8-324e2f1eca49
  */
-function hueBridgeMachine(
+export default function hueBridgeMachine(
   setLights: React.Dispatch<React.SetStateAction<Light[]>>,
   setGroupedLights: React.Dispatch<React.SetStateAction<GroupedLight[]>>,
   setRooms: React.Dispatch<React.SetStateAction<Room[]>>,

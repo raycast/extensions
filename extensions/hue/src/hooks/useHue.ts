@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useCachedState } from "@raycast/utils";
-import { useHueBridgeMachine } from "./hueBridgeMachine";
-import { GroupedLight, Light, Room, Scene, Zone } from "./types";
+import { GroupedLight, Light, Room, Scene, Zone } from "../lib/types";
+import { useHueBridgeMachine } from "./useHueBridgeMachine";
 
 export type HueMessage = "LINK" | "RETRY" | "DONE" | "UNLINK";
 export type SendHueMessage = (message: HueMessage) => void;

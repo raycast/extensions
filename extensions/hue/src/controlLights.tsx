@@ -10,7 +10,7 @@ import { CssColor, Group, Light } from "./lib/types";
 import { BRIGHTNESS_MAX, BRIGHTNESS_MIN, BRIGHTNESSES, MIREK_MAX, MIREK_MIN } from "./lib/constants";
 import ManageHueBridge from "./components/ManageHueBridge";
 import UnlinkAction from "./components/UnlinkAction";
-import { SendHueMessage, useHue } from "./lib/useHue";
+import { SendHueMessage, useHue } from "./hooks/useHue";
 import HueClient from "./lib/HueClient";
 import { COLORS, hexToXy } from "./lib/colors";
 import React from "react";
