@@ -216,16 +216,24 @@ export default class HueClient {
         stream.close();
 
         try {
+          if (response.headers[":status"] !== 200 && response.headers["content-type"] === "text/html") {
+            const errorMatch = data.match(/(?<=<div class="error">)(.*?)(?=<\/div>)/);
+            if (errorMatch && errorMatch[0]) {
+              console.error(response.headers, errorMatch[0]);
+              reject(new Error(errorMatch[0]));
+            }
+          }
+
           response.data = JSON.parse(data);
 
           if (response.data.errors != null && response.data.errors.length > 0) {
             const errorMessage = response.data.errors.map((error) => error.description).join(", ");
-            new Error(errorMessage);
+            console.error(response.headers, errorMessage);
+            reject(new Error(errorMessage));
           }
 
           resolve(response);
         } catch (e) {
-          console.error(response.headers, data);
           reject(e);
         }
       });
