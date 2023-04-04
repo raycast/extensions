@@ -7,7 +7,7 @@ import {
   getLightIcon,
 } from "./lib/utils";
 import { CssColor, Group, Light } from "./lib/types";
-import { BRIGHTNESSES, BRIGHTNESS_MAX, BRIGHTNESS_MIN, MIREK_MAX, MIREK_MIN } from "./lib/constants";
+import { BRIGHTNESS_MAX, BRIGHTNESS_MIN, BRIGHTNESSES, MIREK_MAX, MIREK_MIN } from "./lib/constants";
 import ManageHueBridge from "./components/ManageHueBridge";
 import UnlinkAction from "./components/UnlinkAction";
 import { SendHueMessage, useHue } from "./lib/useHue";
@@ -119,12 +119,12 @@ function Light(props: { hueClient?: HueClient; light: Light; group?: Group; send
   );
 }
 
-function ToggleLightAction({ light, onToggle }: { light: Light; onToggle?: () => void }) {
+function ToggleLightAction(props: { light: Light; onToggle?: () => void }) {
   return (
     <ActionPanel.Item
-      title={light.on.on ? "Turn Off" : "Turn On"}
-      icon={light.on.on ? Icon.LightBulbOff : Icon.LightBulb}
-      onAction={onToggle}
+      title={`Turn ${props.light.metadata.name} ${props.light.on?.on ? "Off" : "On"}`}
+      icon={props.light.on?.on ? Icon.LightBulbOff : Icon.LightBulb}
+      onAction={props.onToggle}
     />
   );
 }

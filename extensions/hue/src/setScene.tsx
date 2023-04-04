@@ -37,12 +37,7 @@ export default function SetScene() {
   );
 }
 
-function Group(props: {
-  hueClient?: HueClient;
-  group: Group;
-  scenes: Scene[];
-  sendHueMessage: SendHueMessage;
-}) {
+function Group(props: { hueClient?: HueClient; group: Group; scenes: Scene[]; sendHueMessage: SendHueMessage }) {
   return (
     <List.Section key={props.group.id} title={props.group.metadata.name} subtitle={props.group.type}>
       {props.scenes.map(
@@ -60,12 +55,7 @@ function Group(props: {
   );
 }
 
-function Scene(props: {
-  hueClient?: HueClient;
-  group: Group;
-  scene: Scene;
-  sendHueMessage: SendHueMessage;
-}) {
+function Scene(props: { hueClient?: HueClient; group: Group; scene: Scene; sendHueMessage: SendHueMessage }) {
   return (
     <List.Item
       title={props.scene.metadata.name}
@@ -90,11 +80,7 @@ function SetSceneAction(props: { group: Group; scene: Scene; onSet: () => void }
   return <Action title="Set Scene" icon={Icon.Image} onAction={() => props.onSet()} />;
 }
 
-async function handleSetScene(
-  hueClient: HueClient | undefined,
-  group: Group,
-  scene: Scene,
-) {
+async function handleSetScene(hueClient: HueClient | undefined, group: Group, scene: Scene) {
   const toast = new Toast({ title: "" });
 
   try {

@@ -1,7 +1,6 @@
 import { getPreferenceValues, Icon, Image, showToast, Toast } from "@raycast/api";
 import { CssColor, Group, Light, Scene } from "./types";
 import { discovery, v3 } from "node-hue-api";
-import { hexToXy } from "./colors";
 import { APP_NAME, BRIGHTNESSES, MIREK_MAX, MIREK_MIN, MIREK_STEP } from "./constants";
 import HueClient from "./HueClient";
 
@@ -13,14 +12,14 @@ declare global {
   }
 }
 
-Array.prototype.updateItem = function(item, changes) {
+Array.prototype.updateItem = function (item, changes) {
   return this.map((it) => {
     if (it.id !== item.id) return it;
     return { ...it, ...changes };
   });
 };
 
-Array.prototype.updateItems = function(array, newItems) {
+Array.prototype.updateItems = function (array, newItems) {
   return array.map((item) => {
     const foundItem = newItems.find((newItem) => newItem.id === item.id);
     return foundItem ? Object.assign({}, item, foundItem) : item;
@@ -33,9 +32,21 @@ declare global {
   }
 }
 
-Math.clamp = function(value, min, max) {
+Math.clamp = function (value, min, max) {
   return Math.min(Math.max(value, min), max);
 };
+
+export function getGroupLights(group: Group, lights: Light[]): Light[] {
+  return lights.filter((light) =>
+    group.children.some((resource) => {
+      return resource.rid === light.id || resource.rid === light.owner.rid;
+    })
+  );
+}
+
+export function getGroupOnState(group: Group, lights: Light[]): boolean {
+  return getGroupLights(group, lights).some((light) => light.on.on);
+}
 
 export function mapRange(value: number, from: [number, number], to: [number, number]) {
   return to[0] + ((value - from[0]) * (to[1] - to[0])) / (from[1] - from[0]);
@@ -55,7 +66,7 @@ export function getGroupIcon(group: Group): Image {
   return {
     source: `icons/${group.metadata.archetype}.png`,
     // tintColor: group.on ? "white" : "gray",
-  }
+  };
 }
 
 export function getIconForColor(color: CssColor): Image {

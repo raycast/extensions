@@ -1,6 +1,6 @@
 import { ActionPanel, Icon, List, Toast } from "@raycast/api";
-import { getGroupIcon, getIconForColor, } from "./lib/utils";
-import { CssColor, Group, Room, Scene } from "./lib/types";
+import { getIconForColor } from "./lib/utils";
+import { CssColor, Group, GroupedLight, Room, Scene } from "./lib/types";
 import { BRIGHTNESSES } from "./lib/constants";
 import { COLORS } from "./lib/colors";
 import ManageHueBridge from "./components/ManageHueBridge";
@@ -9,7 +9,7 @@ import HueClient from "./lib/HueClient";
 import Style = Toast.Style;
 
 export default function ControlGroups() {
-  const { hueBridgeState, sendHueMessage, isLoading, rooms, zones, scenes } = useHue();
+  const { hueBridgeState, sendHueMessage, isLoading, groupedLights, rooms, zones, scenes } = useHue();
 
   const manageHueBridgeElement: JSX.Element | null = ManageHueBridge(hueBridgeState, sendHueMessage);
   if (manageHueBridgeElement !== null) return manageHueBridgeElement;
@@ -27,10 +27,16 @@ export default function ControlGroups() {
         <List.Section title="Rooms">
           {rooms.map((room: Room) => {
             const roomScenes = scenes.filter((scene: Scene) => scene.group.rid == room.id);
+            const groupedLight = groupedLights.find(
+              (groupedLight) =>
+                groupedLight.id === room.services.find((resource) => resource.rtype === "grouped_light")?.rid
+            );
+
             return (
               <Group
                 hueClient={hueBridgeState.context.hueClient}
                 key={room.id}
+                groupedLight={groupedLight}
                 group={room}
                 scenes={roomScenes}
                 sendHueMessage={sendHueMessage}
@@ -61,6 +67,7 @@ export default function ControlGroups() {
 
 function Group(props: {
   hueClient?: HueClient;
+  groupedLight?: GroupedLight;
   group: Group;
   scenes?: Scene[];
   sendHueMessage: SendHueMessage;
@@ -69,33 +76,31 @@ function Group(props: {
     <List.Item
       key={props.group.id}
       title={props.group.metadata.name}
-      icon={getGroupIcon(props.group)}
-      /*
+      subtitle={props.group.metadata.archetype}
+      // icon={getGroupIcon(props.group)}
+      icon={Icon.LightBulb}
       actions={
-        <ActionPanel>
-          {!props.group.state.all_on && (
-            <TurnAllOnAction onTurnAllOn={() => handleTurnAllOn(props.hueClient, props.group)} />
-          )}
-          {props.group.state.any_on && (
-            <TurnAllOffAction
-              onTurnAllOff={() => handleTurnAllOff(props.hueClient, props.group)}
+        props.groupedLight && (
+          <ActionPanel>
+            <ToggleGroupAction
+              hueClient={props.hueClient}
+              group={props.group}
+              groupedLight={props.groupedLight}
+              onToggle={() => handleToggle(props.hueClient, props.groupedLight, props.group)}
             />
-          )}
+            {/*
           {(props.scenes?.length ?? 0) > 0 && (
             <SetSceneAction
               group={props.group}
               scenes={props.scenes ?? []}
-              onSetScene={(scene: Scene) =>
-                scene && handleSetScene(props.hueClient, props.group, scene)
-              }
+              onSetScene={(scene: Scene) => scene && handleSetScene(props.hueClient, props.group, scene)}
             />
           )}
 
           <ActionPanel.Section>
             <SetBrightnessAction
               group={props.group}
-              onSet={(percentage: number) => handleSetBrightness(props.hueClient, props.group, percentage)
-              }
+              onSet={(percentage: number) => handleSetBrightness(props.hueClient, props.group, percentage)}
             />
             <IncreaseBrightnessAction
               group={props.group}
@@ -130,19 +135,27 @@ function Group(props: {
           <ActionPanel.Section>
             <UnlinkAction sendHueMessage={props.sendHueMessage} />
           </ActionPanel.Section>
-        </ActionPanel>
+*/}
+          </ActionPanel>
+        )
       }
-      */
     />
   );
 }
 
-function TurnAllOnAction({ onTurnAllOn }: { onTurnAllOn?: () => void }) {
-  return <ActionPanel.Item title="Turn All On" icon={Icon.LightBulb} onAction={onTurnAllOn} />;
-}
-
-function TurnAllOffAction({ onTurnAllOff }: { onTurnAllOff?: () => void }) {
-  return <ActionPanel.Item title="Turn All Off" icon={Icon.LightBulbOff} onAction={onTurnAllOff} />;
+function ToggleGroupAction(props: {
+  hueClient?: HueClient;
+  group: Group;
+  groupedLight: GroupedLight;
+  onToggle: () => void;
+}) {
+  return (
+    <ActionPanel.Item
+      title={`Turn ${props.group.metadata.name} ${props.groupedLight.on?.on ? "Off" : "On"}`}
+      icon={props.groupedLight.on?.on ? Icon.LightBulbOff : Icon.LightBulb}
+      onAction={props.onToggle}
+    />
+  );
 }
 
 function SetSceneAction(props: { group: Group; scenes: Scene[]; onSetScene: (scene: Scene) => void }) {
@@ -153,7 +166,8 @@ function SetSceneAction(props: { group: Group; scenes: Scene[]; onSetScene: (sce
           key={scene.id}
           title={scene.metadata.name}
           // icon={scene.metadata.image}
-          onAction={() => props.onSetScene(scene)} />
+          onAction={() => props.onSetScene(scene)}
+        />
       ))}
     </ActionPanel.Submenu>
   );
@@ -252,69 +266,31 @@ function DecreaseColorTemperatureAction(props: { group: Group; onDecrease?: () =
   );
 }
 
-async function handleTurnAllOn(hueClient: HueClient | undefined, group: Group) {
+async function handleToggle(hueClient: HueClient | undefined, groupedLight: GroupedLight | undefined, group: Group) {
   const toast = new Toast({ title: "" });
 
   try {
-    // await mutateGroups(turnGroupOn(apiPromise, group), {
-    //   optimisticUpdate(groups) {
-    //     return groups.map((it) =>
-    //       it.id === group.id
-    //         ? {
-    //           ...it,
-    //           state: { any_on: true, all_on: true },
-    //           action: { ...it.action, on: true },
-    //         }
-    //         : it
-    //     );
-    //   },
-    // });
+    if (hueClient === undefined) throw new Error("Not connected to Hue Bridge.");
+    if (groupedLight === undefined) throw new Error("Light group not found.");
+    await hueClient.updateGroupedLight(groupedLight, {
+      on: { on: !groupedLight.on?.on },
+    });
 
     toast.style = Style.Success;
-    toast.title = "Turned group on";
+    toast.title = groupedLight.on?.on ? `Turned ${group.metadata.name} off` : `Turned ${group.metadata.name} on`;
     await toast.show();
   } catch (e) {
+    console.error(e);
     toast.style = Style.Failure;
-    toast.title = "Failed turning group on";
+    toast.title = groupedLight?.on?.on
+      ? `Failed turning ${group.metadata.name} off`
+      : `Failed turning ${group.metadata.name} on`;
     toast.message = e instanceof Error ? e.message : undefined;
     await toast.show();
   }
 }
 
-async function handleTurnAllOff(hueClient: HueClient | undefined, group: Group) {
-  const toast = new Toast({ title: "" });
-
-  try {
-    // await mutateGroups(turnGroupOff(apiPromise, group), {
-    //   optimisticUpdate(groups) {
-    //     return groups?.map((it) =>
-    //       it.id === group.id
-    //         ? {
-    //           ...it,
-    //           state: { any_on: false, all_on: false },
-    //           action: { ...it.action, on: false },
-    //         }
-    //         : it
-    //     );
-    //   },
-    // });
-
-    toast.style = Style.Success;
-    toast.title = "Turned group off";
-    await toast.show();
-  } catch (e) {
-    toast.style = Style.Failure;
-    toast.title = "Failed turning group off";
-    toast.message = e instanceof Error ? e.message : undefined;
-    await toast.show();
-  }
-}
-
-async function handleSetScene(
-  hueClient: HueClient | undefined,
-  group: Group,
-  scene: Scene,
-) {
+async function handleSetScene(hueClient: HueClient | undefined, group: Group, scene: Scene) {
   const toast = new Toast({ title: "" });
 
   try {
@@ -331,11 +307,7 @@ async function handleSetScene(
   }
 }
 
-async function handleSetBrightness(
-  hueClient: HueClient | undefined,
-  group: Group,
-  percentage: number
-) {
+async function handleSetBrightness(hueClient: HueClient | undefined, group: Group, percentage: number) {
   const toast = new Toast({ title: "" });
   const brightness = (percentage / 100) * 253 + 1;
 
@@ -409,11 +381,7 @@ async function handleDecreaseBrightness(hueClient: HueClient | undefined, group:
   }
 }
 
-async function handleSetColor(
-  hueClient: HueClient | undefined,
-  group: Group,
-  color: CssColor
-) {
+async function handleSetColor(hueClient: HueClient | undefined, group: Group, color: CssColor) {
   const toast = new Toast({ title: "" });
 
   try {
@@ -436,10 +404,7 @@ async function handleSetColor(
   }
 }
 
-async function handleIncreaseColorTemperature(
-  hueClient: HueClient | undefined,
-  group: Group,
-) {
+async function handleIncreaseColorTemperature(hueClient: HueClient | undefined, group: Group) {
   const toast = new Toast({ title: "" });
 
   try {
@@ -464,10 +429,7 @@ async function handleIncreaseColorTemperature(
   }
 }
 
-async function handleDecreaseColorTemperature(
-  hueClient: HueClient | undefined,
-  group: Group,
-) {
+async function handleDecreaseColorTemperature(hueClient: HueClient | undefined, group: Group) {
   const toast = new Toast({ title: "" });
 
   try {

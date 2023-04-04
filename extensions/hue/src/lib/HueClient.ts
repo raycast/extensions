@@ -146,6 +146,20 @@ export default class HueClient {
     return response.data.data;
   }
 
+  public async updateGroupedLight(groupedLight: GroupedLight, properties: Partial<Light>): Promise<any> {
+    this.setGroupedLights((groupedLights) => groupedLights.updateItem(groupedLight, properties));
+    const response = await this.makeRequest(
+      "PUT",
+      `/clip/v2/resource/grouped_light/${groupedLight.id}`,
+      properties
+    ).catch((e) => {
+      this.setGroupedLights((groupedLights) => groupedLights.updateItem(groupedLight, groupedLight));
+      throw e;
+    });
+
+    return response.data.data;
+  }
+
   public async setBrightness(light: Light, brightness: number): Promise<any> {
     const response = await this.makeRequest("PUT", `/clip/v2/resource/light/${light.id}`, {
       ...(light.on.on ? {} : { on: { on: true } }),
