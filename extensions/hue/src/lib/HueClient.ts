@@ -2,7 +2,7 @@
 
 import fs from "fs";
 import { environment } from "@raycast/api";
-import { GroupedLight, Light, Method, Room, Scene, SceneRequest, UpdateEvent, Zone } from "./types";
+import { GroupedLight, Light, LightRequest, Method, Room, Scene, SceneRequest, UpdateEvent, Zone } from "./types";
 import {
   ClientHttp2Session,
   connect,
@@ -26,8 +26,6 @@ type Response = {
   };
 };
 
-// TODO: Implement rate limiting of max 10 requests per second for lights and
-//  1 request per second for groups and scenes
 export default class HueClient {
   public bridgeIpAddress: string;
   public bridgeId: string;
@@ -136,7 +134,7 @@ export default class HueClient {
     return response.data.data;
   }
 
-  public async updateLight(light: Light, properties: Partial<Light>): Promise<any> {
+  public async updateLight(light: Light, properties: LightRequest): Promise<any> {
     this.setLights((lights) => lights.updateItem(light, properties));
     const response = await this.makeRequest("PUT", `/clip/v2/resource/light/${light.id}`, properties).catch((e) => {
       this.setLights((lights) => lights.updateItem(light, light));
@@ -162,18 +160,6 @@ export default class HueClient {
   public async updateScene(scene: Scene, properties: SceneRequest): Promise<any> {
     // TODO: Update all lights that are defined in the actions object and undo on error
     const response = await this.makeRequest("PUT", `/clip/v2/resource/scene/${scene.id}`, properties);
-
-    return response.data.data;
-  }
-
-  public async setBrightness(light: Light, brightness: number): Promise<any> {
-    const response = await this.makeRequest("PUT", `/clip/v2/resource/light/${light.id}`, {
-      ...(light.on.on ? {} : { on: { on: true } }),
-      dimming: { brightness: brightness },
-    }).catch((e) => {
-      this.setLights((lights) => lights.updateItem(light, light));
-      throw e;
-    });
 
     return response.data.data;
   }

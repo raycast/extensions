@@ -15,13 +15,6 @@ export default function ControlGroups() {
   const manageHueBridgeElement: JSX.Element | null = ManageHueBridge(hueBridgeState, sendHueMessage);
   if (manageHueBridgeElement !== null) return manageHueBridgeElement;
 
-  const groups = ([] as Group[]).concat(rooms, zones);
-
-  // TODO: Add preference for room/zone grouping
-  //  - Rooms first
-  //  - Zones first
-  //  - Mixed
-
   return (
     <List isLoading={isLoading}>
       {rooms.length > 0 && (

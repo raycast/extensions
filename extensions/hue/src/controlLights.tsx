@@ -18,8 +18,6 @@ import { getProgressIcon } from "@raycast/utils";
 import useInputRateLimiter from "./hooks/useInputRateLimiter";
 import Style = Toast.Style;
 
-// TODO: Add support for grouped lights
-//   Show grouped lights first and offer to 'enter' the group to see the individual lights
 export default function ControlLights() {
   const { hueBridgeState, sendHueMessage, isLoading, lights, rooms, zones } = useHue();
   const rateLimiter = useInputRateLimiter(10, 1000);
@@ -270,8 +268,7 @@ async function handleSetBrightness(hueClient: HueClient | undefined, light: Ligh
   try {
     if (hueClient === undefined) throw new Error("Not connected to Hue Bridge.");
     await hueClient.updateLight(light, {
-      // TODO: Why not just use light.on.on here?
-      ...(light.on.on ? {} : { on: { on: true } }),
+      on: { on: true },
       dimming: { brightness: brightness },
     });
 
@@ -305,7 +302,7 @@ async function handleIncreaseBrightness(
     const adjustedBrightness = calculateAdjustedBrightness(light.dimming.brightness, "increase");
 
     await hueClient.updateLight(light, {
-      ...(light.on.on ? {} : { on: { on: true } }),
+      on: { on: true },
       dimming: { brightness: adjustedBrightness },
     });
 
@@ -338,7 +335,9 @@ async function handleDecreaseBrightness(
     const adjustedBrightness = calculateAdjustedBrightness(light.dimming.brightness, "decrease");
 
     await hueClient.updateLight(light, {
-      ...(light.on.on ? {} : { on: { on: true } }),
+      on: { on: true },
+      // dimming_delta exists, but manually calculating the new value
+      // enables the usage of the value in the optimistic update.
       dimming: { brightness: adjustedBrightness },
     });
 
@@ -395,6 +394,8 @@ async function handleIncreaseColorTemperature(
 
     await hueClient.updateLight(light, {
       on: { on: true },
+      // color_temperature_delta exists, but manually calculating the new value
+      // enables the usage of the value in the optimistic update.
       color_temperature: { mirek: adjustedColorTemperature },
     });
 

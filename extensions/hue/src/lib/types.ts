@@ -23,6 +23,57 @@ export type Method = "GET" | "DELETE" | "HEAD" | "OPTIONS" | "POST" | "PUT" | "P
 ///////////////////
 // Hue API types //
 ///////////////////
+
+type LightArchetype =
+  | "unknown_archetype"
+  | "classic_bulb"
+  | "sultan_bulb"
+  | "flood_bulb"
+  | "spot_bulb"
+  | "candle_bulb"
+  | "luster_bulb"
+  | "pendant_round"
+  | "pendant_long"
+  | "ceiling_round"
+  | "ceiling_square"
+  | "floor_shade"
+  | "floor_lantern"
+  | "table_shade"
+  | "recessed_ceiling"
+  | "recessed_floor"
+  | "single_spot"
+  | "double_spot"
+  | "table_wash"
+  | "wall_lantern"
+  | "wall_shade"
+  | "flexible_lamp"
+  | "ground_spot"
+  | "wall_spot"
+  | "plug"
+  | "hue_go"
+  | "hue_lightstrip"
+  | "hue_iris"
+  | "hue_bloom"
+  | "bollard"
+  | "wall_washer"
+  | "hue_play"
+  | "vintage_bulb"
+  | "vintage_candle_bulb"
+  | "ellipse_bulb"
+  | "triangle_bulb"
+  | "small_globe_bulb"
+  | "large_globe_bulb"
+  | "edison_bulb"
+  | "christmas_tree"
+  | "string_light"
+  | "hue_centris"
+  | "hue_lightstrip_tv"
+  | "hue_lightstrip_pc"
+  | "hue_tube"
+  | "hue_signe"
+  | "pendant_spot"
+  | "ceiling_horizontal"
+  | "ceiling_tube";
 export type ResourceIdentifier = {
   /**
    * string (pattern: ^[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}$)
@@ -123,56 +174,7 @@ export type Light = {
     /**
      * Light archetype
      */
-    archetype:
-      | "unknown_archetype"
-      | "classic_bulb"
-      | "sultan_bulb"
-      | "flood_bulb"
-      | "spot_bulb"
-      | "candle_bulb"
-      | "luster_bulb"
-      | "pendant_round"
-      | "pendant_long"
-      | "ceiling_round"
-      | "ceiling_square"
-      | "floor_shade"
-      | "floor_lantern"
-      | "table_shade"
-      | "recessed_ceiling"
-      | "recessed_floor"
-      | "single_spot"
-      | "double_spot"
-      | "table_wash"
-      | "wall_lantern"
-      | "wall_shade"
-      | "flexible_lamp"
-      | "ground_spot"
-      | "wall_spot"
-      | "plug"
-      | "hue_go"
-      | "hue_lightstrip"
-      | "hue_iris"
-      | "hue_bloom"
-      | "bollard"
-      | "wall_washer"
-      | "hue_play"
-      | "vintage_bulb"
-      | "vintage_candle_bulb"
-      | "ellipse_bulb"
-      | "triangle_bulb"
-      | "small_globe_bulb"
-      | "large_globe_bulb"
-      | "edison_bulb"
-      | "christmas_tree"
-      | "string_light"
-      | "hue_centris"
-      | "hue_lightstrip_tv"
-      | "hue_lightstrip_pc"
-      | "hue_tube"
-      | "hue_signe"
-      | "pendant_spot"
-      | "ceiling_horizontal"
-      | "ceiling_tube";
+    archetype: LightArchetype;
 
     /**
      * The fixed mired value of the white lamp
@@ -335,6 +337,94 @@ export type Light = {
   };
 };
 
+export type LightRequest = {
+  /**
+   * Type of the supported resources
+   */
+  type?: "light";
+
+  metadata?: {
+    /**
+     * minLength: 1, maxLength: 32
+     *
+     * Human-readable name of the resource
+     */
+    name: string;
+
+    /**
+     * Light archetype
+     */
+    archetype: LightArchetype;
+  };
+
+  on?: {
+    /**
+     * On/Off state of the light
+     */
+    on?: boolean;
+  };
+
+  dimming?: {
+    /**
+     * number (maximum: 100)
+     *
+     * Brightness percentage
+     *
+     * Value cannot be 0. Writing 0 changes it to the lowest possible brightness.
+     */
+    brightness?: number;
+  };
+
+  dimming_delta?: {
+    action: "up" | "down" | "stop";
+
+    /**
+     * number (maximum: 100)
+     *
+     * Brightness percentage of full-scale increase delta to current dimlevel.
+     *
+     * Clip at Max-level or Min-level.
+     */
+    brightness_delta?: number;
+  };
+
+  color_temperature?: {
+    /**
+     * integer (153 - 500)
+     *
+     * Color temperature in mirek or null when the light color is not on the ct spectrum.
+     */
+    mirek?: number;
+  };
+
+  color_temperature_delta?: {
+    action: "up" | "down" | "stop";
+
+    /**
+     * integer (maximum: 347)
+     *
+     * Mirek delta to current mirek. Clip at mirek_minimum and mirek_maximum of mirek_schema.
+     */
+    mirek_delta?: number;
+  };
+
+  color?: {
+    /**
+     * CIE XY gamut position
+     */
+    xy?: Xy;
+  };
+
+  dynamics?: {
+    /**
+     * integer
+     *
+     * Duration of a light transition or timed effects in ms.
+     */
+    duration?: number;
+  };
+};
+
 export type GroupedLight = {
   /**
    * Type of the supported resources
@@ -356,14 +446,14 @@ export type GroupedLight = {
   /**
    * Owner of the service
    *
-   * In case the owner service is deleted, the service also gets deleted.
+   * If the owner service is deleted, the service also gets deleted.
    */
   owner: ResourceIdentifier;
 
   /**
    * Joined on control & aggregated on state.
    *
-   * “on” is true if any light in the group is on
+   * “on” is true if any light in the group is on.
    */
   on?: {
     /**
