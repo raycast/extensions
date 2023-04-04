@@ -16,6 +16,8 @@ import { COLORS, hexToXy } from "./lib/colors";
 import React from "react";
 import Style = Toast.Style;
 
+// TODO: Add support for grouped lights
+//   Show grouped lights first and offer to 'enter' the group to see the individual lights
 export default function ControlLights() {
   const { hueBridgeState, sendHueMessage, isLoading, lights, rooms, zones } = useHue();
 

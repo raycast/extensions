@@ -334,6 +334,59 @@ export type Light = {
   };
 };
 
+export type GroupedLight = {
+  /**
+   * Type of the supported resources
+   */
+  type?: "light";
+
+  /**
+   * string (pattern: ^[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}$)
+   *
+   * Unique identifier representing a specific resource instance.
+   */
+  id: string;
+
+  /**
+   * Clip v1 resource identifier.
+   */
+  id_v1?: string;
+
+  /**
+   * Owner of the service
+   *
+   * In case the owner service is deleted, the service also gets deleted.
+   */
+  owner: ResourceIdentifier;
+
+  /**
+   * Joined on control & aggregated on state.
+   *
+   * “on” is true if any light in the group is on
+   */
+  on?: {
+    /**
+     * On/Off state of the light group
+     */
+    on: boolean;
+  };
+
+  /**
+   * Joined dimming control
+   *
+   * “dimming.brightness” contains average brightness of group containing
+   * turned-on lights only.
+   */
+  dimming?: {
+    /**
+     * Brightness percentage
+     *
+     * Value cannot be 0, writing 0 changes it to the lowest possible brightness
+     */
+    brightness: number;
+  };
+};
+
 export type Scene = {
   /**
    * Type of the supported resources
@@ -540,7 +593,7 @@ export type UpdateEvent = {
   /**
    * The data of the update event, represented as an array of API objects.
    */
-  data: (Light | Room | Zone | Scene)[];
+  data: (Light | GroupedLight | Room | Zone | Scene)[];
 
   /**
    * A unique identifier for the update event, represented as a UUID string.
