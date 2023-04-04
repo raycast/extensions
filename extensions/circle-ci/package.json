@@ -6,7 +6,8 @@
   "icon": "circle-logo.png",
   "author": "qeude",
   "contributors": [
-    "bgnfu7re"
+    "bgnfu7re",
+    "jns"
   ],
   "license": "MIT",
   "commands": [
@@ -20,11 +21,20 @@
   ],
   "preferences": [
     {
+      "description": "Get it on https://app.circleci.com/settings/user/tokens",
       "name": "apiKey",
-      "type": "password",
       "required": true,
       "title": "CircleCI API token",
-      "description": "Get it on https://app.circleci.com/settings/user/tokens"
+      "type": "password"
+    },
+    {
+      "name": "myPipelines",
+      "required": false,
+      "title": "Pipeline filtering",
+      "type": "checkbox",
+      "default": false,
+      "description": "Only my pipelines",
+      "label": "Only my pipelines"
     }
   ],
   "dependencies": {
