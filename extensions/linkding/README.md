@@ -3,6 +3,7 @@
 Uses Raycast to search through Linking Bookmarks.
 
 ## Screenshots
+
 ![raycast-linkding-1.png](metadata/raycast-linkding-1.png)
 ![raycast-linkding-2.png](metadata/raycast-linkding-2.png)
 
