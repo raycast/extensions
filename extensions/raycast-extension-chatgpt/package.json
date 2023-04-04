@@ -171,7 +171,6 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "postinstall": "husky install",
     "publish": "ray publish"
   },
   "title": "Raycast GPT"
