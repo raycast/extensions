@@ -1,5 +1,6 @@
 import { ActionPanel, Icon, useNavigation, getPreferenceValues, Action } from "@raycast/api";
 import { likeOrDislike } from "@/functions/utils";
+import { useState } from "react";
 
 // Functions
 import { saveImage } from "@/functions/saveImage";
@@ -13,19 +14,28 @@ import Details from "@/views/Details";
 interface BaseProps {
   item: SearchResult;
   details?: boolean;
+  unlike?: React.Dispatch<React.SetStateAction<string[]>>;
 }
 
-export const Actions: React.FC<BaseProps> = ({ details, item }) => (
+export const Actions = ({ details, item, unlike }: BaseProps) => (
   <ActionPanel>
-    <Sections details={details} item={item} />
+    <Sections details={details} item={item} unlike={unlike} />
   </ActionPanel>
 );
 
-export const Sections: React.FC<BaseProps> = ({ details = false, item }) => {
+export const Sections = ({ details = false, item, unlike }: BaseProps) => {
   const { push } = useNavigation();
   const { downloadSize } = getPreferenceValues<UnsplashPreferences>();
+  const [liked, setLiked] = useState(item.liked_by_user);
 
   const imageUrl = item.urls?.raw || item.urls?.full || item.urls?.regular || item.urls?.small;
+
+  const handleLike = async () => {
+    await likeOrDislike(item.id, liked);
+
+    if (liked && unlike) unlike((p) => [...p, String(item.id)]);
+    setLiked(!liked);
+  };
 
   const clipboardCopyUrl = {
     url: item.urls?.[downloadSize] || imageUrl,
@@ -38,11 +48,11 @@ export const Sections: React.FC<BaseProps> = ({ details = false, item }) => {
         {details && <Action title="Show Details" icon={Icon.List} onAction={() => push(<Details result={item} />)} />}
 
         <Action
-          title={`${item.liked_by_user ? "Unlike" : "Like"} Photo`}
+          title={`${liked ? "Unlike" : "Like"} Photo`}
           icon={Icon.Heart}
-          style={item.liked_by_user ? Action.Style.Destructive : Action.Style.Regular}
+          style={liked ? Action.Style.Destructive : Action.Style.Regular}
           shortcut={{ modifiers: ["cmd"], key: "l" }}
-          onAction={() => likeOrDislike(item.id, item.liked_by_user)}
+          onAction={handleLike}
         />
 
         {item.links?.html && <Action.OpenInBrowser url={item.links.html} title="Open Original" />}
