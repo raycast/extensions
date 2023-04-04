@@ -148,14 +148,11 @@ export default class HueClient {
 
   public async updateGroupedLight(groupedLight: GroupedLight, properties: Partial<Light>): Promise<any> {
     this.setGroupedLights((groupedLights) => groupedLights.updateItem(groupedLight, properties));
-    const request = async () => await this.makeRequest(
-      "PUT",
-      `/clip/v2/resource/grouped_light/${groupedLight.id}`,
-      properties
-    ).catch((e) => {
-      this.setGroupedLights((groupedLights) => groupedLights.updateItem(groupedLight, groupedLight));
-      throw e;
-    });
+    const request = async () =>
+      await this.makeRequest("PUT", `/clip/v2/resource/grouped_light/${groupedLight.id}`, properties).catch((e) => {
+        this.setGroupedLights((groupedLights) => groupedLights.updateItem(groupedLight, groupedLight));
+        throw e;
+      });
 
     const response = await this.rateLimitedQueue.enqueueRequest(request);
 
@@ -269,16 +266,36 @@ export default class HueClient {
         const dataString: string = line.substring(dataPrefixIndex + DATA_PREFIX.length);
         const updateEvents: UpdateEvent[] = JSON.parse(dataString);
 
-        updateEvents.forEach((updateEvent) => {
-          // TODO: support other resource types
-          const lights = updateEvent.data
-            .filter((resource) => resource.type === "light")
-            .map((resource) => resource as Light);
-
-          this.setLights((prevState: Light[]) => {
-            return prevState.updateItems(prevState, lights);
-          });
-        });
+        updateEvents.forEach((updateEvent) =>
+          updateEvent.data.forEach((resource) => {
+            switch (resource.type) {
+              case "light":
+                this.setLights((prevState: Light[]) => {
+                  return prevState.updateItem(resource as Light, resource);
+                });
+                break;
+              case "grouped_light":
+                this.setGroupedLights((prevState: GroupedLight[]) => {
+                  return prevState.updateItem(resource as GroupedLight, resource);
+                });
+                break;
+              case "room":
+                this.setRooms((prevState: Room[]) => {
+                  return prevState.updateItem(resource as Room, resource);
+                });
+                break;
+              case "zone":
+                this.setZones((prevState: Zone[]) => {
+                  return prevState.updateItem(resource as Zone, resource);
+                });
+                break;
+              case "scene":
+                this.setScenes((prevState: Scene[]) => {
+                  return prevState.updateItem(resource as Scene, resource);
+                });
+            }
+          })
+        );
       }
     });
 

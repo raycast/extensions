@@ -339,7 +339,7 @@ export type GroupedLight = {
   /**
    * Type of the supported resources
    */
-  type?: "light";
+  type?: "grouped_light";
 
   /**
    * string (pattern: ^[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}$)
