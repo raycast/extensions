@@ -1,4 +1,4 @@
-import { ActionPanel, Icon, List, Toast } from "@raycast/api";
+import { ActionPanel, Color, Icon, List, Toast } from "@raycast/api";
 import {
   calculateAdjustedBrightness,
   calculateAdjustedColorTemperature,
@@ -14,6 +14,7 @@ import { SendHueMessage, useHue } from "./lib/useHue";
 import HueClient from "./lib/HueClient";
 import { COLORS, hexToXy } from "./lib/colors";
 import React from "react";
+import { getProgressIcon } from "@raycast/utils";
 import Style = Toast.Style;
 
 // TODO: Add support for grouped lights
@@ -133,7 +134,7 @@ function SetBrightnessAction(props: { light: Light; onSet: (percentage: number) 
   return (
     <ActionPanel.Submenu
       title="Set Brightness"
-      icon={Icon.CircleProgress}
+      icon={getProgressIcon((props.light.dimming?.brightness ?? 0) / 100, Color.PrimaryText)}
       shortcut={{ modifiers: ["cmd", "shift"], key: "b" }}
     >
       {BRIGHTNESSES.map((brightness) => (

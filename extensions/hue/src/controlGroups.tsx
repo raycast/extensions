@@ -1,4 +1,4 @@
-import { ActionPanel, Icon, List, Toast } from "@raycast/api";
+import { ActionPanel, Color, Icon, List, Toast } from "@raycast/api";
 import { getIconForColor } from "./lib/utils";
 import { CssColor, Group, GroupedLight, Room, Scene } from "./lib/types";
 import { BRIGHTNESSES } from "./lib/constants";
@@ -6,6 +6,7 @@ import { COLORS } from "./lib/colors";
 import ManageHueBridge from "./components/ManageHueBridge";
 import { SendHueMessage, useHue } from "./lib/useHue";
 import HueClient from "./lib/HueClient";
+import { getProgressIcon } from "@raycast/utils";
 import Style = Toast.Style;
 
 export default function ControlGroups() {
@@ -86,7 +87,7 @@ function Group(props: {
               hueClient={props.hueClient}
               group={props.group}
               groupedLight={props.groupedLight}
-              onToggle={() => handleToggle(props.hueClient, props.groupedLight, props.group)}
+              onToggle={() => handleToggle(props.hueClient, props.group, props.groupedLight)}
             />
             {/*
           {(props.scenes?.length ?? 0) > 0 && (
@@ -96,21 +97,24 @@ function Group(props: {
               onSetScene={(scene: Scene) => scene && handleSetScene(props.hueClient, props.group, scene)}
             />
           )}
+            */}
 
-          <ActionPanel.Section>
-            <SetBrightnessAction
-              group={props.group}
-              onSet={(percentage: number) => handleSetBrightness(props.hueClient, props.group, percentage)}
-            />
-            <IncreaseBrightnessAction
-              group={props.group}
-              onIncrease={() => handleIncreaseBrightness(props.hueClient, props.group)}
-            />
-            <DecreaseBrightnessAction
-              group={props.group}
-              onDecrease={() => handleDecreaseBrightness(props.hueClient, props.group)}
-            />
-          </ActionPanel.Section>
+            <ActionPanel.Section>
+              <SetBrightnessAction
+                group={props.group}
+                groupedLight={props.groupedLight}
+                onSet={(brightness: number) => handleSetBrightness(props.hueClient, props.group, props.groupedLight, brightness)}
+              />
+              <IncreaseBrightnessAction
+                group={props.group}
+                onIncrease={() => handleIncreaseBrightness(props.hueClient, props.group)}
+              />
+              <DecreaseBrightnessAction
+                group={props.group}
+                onDecrease={() => handleDecreaseBrightness(props.hueClient, props.group)}
+              />
+            </ActionPanel.Section>
+            {/*
           <ActionPanel.Section>
             {props.group.action.colormode == "xy" && (
               <SetColorAction
@@ -173,11 +177,12 @@ function SetSceneAction(props: { group: Group; scenes: Scene[]; onSetScene: (sce
   );
 }
 
-function SetBrightnessAction(props: { group: Group; onSet: (percentage: number) => void }) {
+function SetBrightnessAction(props: { group: Group; groupedLight: GroupedLight; onSet: (brightness: number) => void }) {
   return (
     <ActionPanel.Submenu
       title="Set Brightness"
-      icon={Icon.CircleProgress}
+      // This should be 0-100, but the API returns 0-254
+      icon={getProgressIcon((props.groupedLight.dimming?.brightness ?? 0) / 254, Color.PrimaryText)}
       shortcut={{ modifiers: ["cmd", "shift"], key: "b" }}
     >
       {BRIGHTNESSES.map((brightness) => (
@@ -266,7 +271,7 @@ function DecreaseColorTemperatureAction(props: { group: Group; onDecrease?: () =
   );
 }
 
-async function handleToggle(hueClient: HueClient | undefined, groupedLight: GroupedLight | undefined, group: Group) {
+async function handleToggle(hueClient: HueClient | undefined, group: Group, groupedLight: GroupedLight | undefined) {
   const toast = new Toast({ title: "" });
 
   try {
@@ -307,25 +312,24 @@ async function handleSetScene(hueClient: HueClient | undefined, group: Group, sc
   }
 }
 
-async function handleSetBrightness(hueClient: HueClient | undefined, group: Group, percentage: number) {
+async function handleSetBrightness(hueClient: HueClient | undefined, group: Group, groupedLight: GroupedLight | undefined, percentage: number) {
   const toast = new Toast({ title: "" });
   const brightness = (percentage / 100) * 253 + 1;
 
   try {
-    // await mutateGroups(setGroupBrightness(apiPromise, group, brightness), {
-    //   optimisticUpdate(rooms) {
-    //     return rooms.map((it) =>
-    //       it.id === group.id ? { ...it, state: { ...it.state, on: true, bri: brightness } } : it
-    //     );
-    //   },
-    // });
+    if (hueClient === undefined) throw new Error("Not connected to Hue Bridge.");
+    if (groupedLight === undefined) throw new Error("Light group not found.");
+    await hueClient.updateGroupedLight(groupedLight, {
+      ...(groupedLight.on?.on ? {} : { on: { on: true } }),
+      dimming: { brightness: brightness },
+    });
 
     toast.style = Style.Success;
-    toast.title = `Set brightness to ${(percentage / 100).toLocaleString("en", { style: "percent" })}`;
+    toast.title = `Set brightness of ${group.metadata.name} to ${(percentage / 100).toLocaleString("en", { style: "percent" })}.`;
     await toast.show();
   } catch (e) {
     toast.style = Style.Failure;
-    toast.title = "Failed setting brightness";
+    toast.title = `Failed setting brightness of ${group.metadata.name}.`;
     toast.message = e instanceof Error ? e.message : undefined;
     await toast.show();
   }
