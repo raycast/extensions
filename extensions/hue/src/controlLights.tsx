@@ -15,12 +15,14 @@ import HueClient from "./lib/HueClient";
 import { COLORS, hexToXy } from "./lib/colors";
 import React from "react";
 import { getProgressIcon } from "@raycast/utils";
+import useInputRateLimiter from "./hooks/useInputRateLimiter";
 import Style = Toast.Style;
 
 // TODO: Add support for grouped lights
 //   Show grouped lights first and offer to 'enter' the group to see the individual lights
 export default function ControlLights() {
   const { hueBridgeState, sendHueMessage, isLoading, lights, rooms, zones } = useHue();
+  const rateLimiter = useInputRateLimiter(10, 1000);
 
   const groups = ([] as Group[]).concat(rooms, zones);
 
@@ -41,6 +43,7 @@ export default function ControlLights() {
             lights={roomLights}
             group={group}
             sendHueMessage={sendHueMessage}
+            rateLimiter={rateLimiter}
           />
         );
       })}
@@ -48,7 +51,13 @@ export default function ControlLights() {
   );
 }
 
-function Group(props: { hueClient?: HueClient; lights: Light[]; group: Group; sendHueMessage: SendHueMessage }) {
+function Group(props: {
+  hueClient?: HueClient;
+  lights: Light[];
+  group: Group;
+  sendHueMessage: SendHueMessage;
+  rateLimiter: ReturnType<typeof useInputRateLimiter>;
+}) {
   return (
     <List.Section key={props.group.id} title={props.group.metadata.name}>
       {props.lights.map(
@@ -59,6 +68,7 @@ function Group(props: { hueClient?: HueClient; lights: Light[]; group: Group; se
             light={light}
             group={props.group}
             sendHueMessage={props.sendHueMessage}
+            rateLimiter={props.rateLimiter}
           />
         )
       )}
@@ -66,7 +76,13 @@ function Group(props: { hueClient?: HueClient; lights: Light[]; group: Group; se
   );
 }
 
-function Light(props: { hueClient?: HueClient; light: Light; group?: Group; sendHueMessage: SendHueMessage }) {
+function Light(props: {
+  hueClient?: HueClient;
+  light: Light;
+  group?: Group;
+  sendHueMessage: SendHueMessage;
+  rateLimiter: ReturnType<typeof useInputRateLimiter>;
+}) {
   return (
     <List.Item
       title={props.light.metadata.name}
@@ -82,11 +98,11 @@ function Light(props: { hueClient?: HueClient; light: Light; group?: Group; send
             />
             <IncreaseBrightnessAction
               light={props.light}
-              onIncrease={() => handleIncreaseBrightness(props.hueClient, props.light)}
+              onIncrease={() => handleIncreaseBrightness(props.hueClient, props.rateLimiter, props.light)}
             />
             <DecreaseBrightnessAction
               light={props.light}
-              onDecrease={() => handleDecreaseBrightness(props.hueClient, props.light)}
+              onDecrease={() => handleDecreaseBrightness(props.hueClient, props.rateLimiter, props.light)}
             />
           </ActionPanel.Section>
 
@@ -100,13 +116,13 @@ function Light(props: { hueClient?: HueClient; light: Light; group?: Group; send
             {props.light.color_temperature !== undefined && (
               <IncreaseColorTemperatureAction
                 light={props.light}
-                onIncrease={() => handleIncreaseColorTemperature(props.hueClient, props.light)}
+                onIncrease={() => handleIncreaseColorTemperature(props.hueClient, props.rateLimiter, props.light)}
               />
             )}
             {props.light.color_temperature !== undefined && (
               <DecreaseColorTemperatureAction
                 light={props.light}
-                onDecrease={() => handleDecreaseColorTemperature(props.hueClient, props.light)}
+                onDecrease={() => handleDecreaseColorTemperature(props.hueClient, props.rateLimiter, props.light)}
               />
             )}
           </ActionPanel.Section>
@@ -273,13 +289,21 @@ async function handleSetBrightness(hueClient: HueClient | undefined, light: Ligh
   }
 }
 
-async function handleIncreaseBrightness(hueClient: HueClient | undefined, light: Light) {
+async function handleIncreaseBrightness(
+  hueClient: HueClient | undefined,
+  rateLimiter: ReturnType<typeof useInputRateLimiter>,
+  light: Light
+) {
+  const { canExecute } = rateLimiter;
   const toast = new Toast({ title: "" });
 
   try {
     if (hueClient === undefined) throw new Error("Not connected to Hue Bridge.");
     if (light.dimming === undefined) throw new Error("Light does not support dimming.");
+    if (!canExecute()) return;
+
     const adjustedBrightness = calculateAdjustedBrightness(light.dimming.brightness, "increase");
+
     await hueClient.updateLight(light, {
       ...(light.on.on ? {} : { on: { on: true } }),
       dimming: { brightness: adjustedBrightness },
@@ -298,13 +322,21 @@ async function handleIncreaseBrightness(hueClient: HueClient | undefined, light:
   }
 }
 
-async function handleDecreaseBrightness(hueClient: HueClient | undefined, light: Light) {
+async function handleDecreaseBrightness(
+  hueClient: HueClient | undefined,
+  rateLimiter: ReturnType<typeof useInputRateLimiter>,
+  light: Light
+) {
+  const { canExecute } = rateLimiter;
   const toast = new Toast({ title: "" });
 
   try {
     if (hueClient === undefined) throw new Error("Not connected to Hue Bridge.");
     if (light.dimming === undefined) throw new Error("Light does not support dimming.");
+    if (!canExecute()) return;
+
     const adjustedBrightness = calculateAdjustedBrightness(light.dimming.brightness, "decrease");
+
     await hueClient.updateLight(light, {
       ...(light.on.on ? {} : { on: { on: true } }),
       dimming: { brightness: adjustedBrightness },
@@ -346,13 +378,21 @@ async function handleSetColor(hueClient: HueClient | undefined, light: Light, co
   }
 }
 
-async function handleIncreaseColorTemperature(hueClient: HueClient | undefined, light: Light) {
+async function handleIncreaseColorTemperature(
+  hueClient: HueClient | undefined,
+  rateLimiter: ReturnType<typeof useInputRateLimiter>,
+  light: Light
+) {
+  const { canExecute } = rateLimiter;
   const toast = new Toast({ title: "" });
 
   try {
     if (hueClient === undefined) throw new Error("Not connected to Hue Bridge.");
     if (light.color_temperature === undefined) throw new Error("Light does not support color temperature.");
+    if (!canExecute()) return;
+
     const adjustedColorTemperature = calculateAdjustedColorTemperature(light.color_temperature.mirek, "increase");
+
     await hueClient.updateLight(light, {
       on: { on: true },
       color_temperature: { mirek: adjustedColorTemperature },
@@ -369,13 +409,23 @@ async function handleIncreaseColorTemperature(hueClient: HueClient | undefined, 
   }
 }
 
-async function handleDecreaseColorTemperature(hueClient: HueClient | undefined, light: Light) {
+async function handleDecreaseColorTemperature(
+  hueClient: HueClient | undefined,
+  rateLimiter: ReturnType<typeof useInputRateLimiter>,
+  light: Light
+) {
+  const { canExecute } = rateLimiter;
+
   const toast = new Toast({ title: "" });
 
   try {
     if (hueClient === undefined) throw new Error("Not connected to Hue Bridge.");
     if (light.color_temperature === undefined) throw new Error("Light does not support color temperature.");
+    if (!canExecute()) return;
+
     const adjustedColorTemperature = calculateAdjustedColorTemperature(light.color_temperature.mirek, "decrease");
+
+    canExecute();
     await hueClient.updateLight(light, {
       on: { on: true },
       color_temperature: { mirek: adjustedColorTemperature },
