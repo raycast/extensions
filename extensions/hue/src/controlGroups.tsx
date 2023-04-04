@@ -89,21 +89,18 @@ function Group(props: {
               groupedLight={props.groupedLight}
               onToggle={() => handleToggle(props.hueClient, props.group, props.groupedLight)}
             />
-            {/*
-          {(props.scenes?.length ?? 0) > 0 && (
             <SetSceneAction
               group={props.group}
               scenes={props.scenes ?? []}
               onSetScene={(scene: Scene) => scene && handleSetScene(props.hueClient, props.group, scene)}
             />
-          )}
-            */}
-
             <ActionPanel.Section>
               <SetBrightnessAction
                 group={props.group}
                 groupedLight={props.groupedLight}
-                onSet={(brightness: number) => handleSetBrightness(props.hueClient, props.group, props.groupedLight, brightness)}
+                onSet={(brightness: number) =>
+                  handleSetBrightness(props.hueClient, props.group, props.groupedLight, brightness)
+                }
               />
               <IncreaseBrightnessAction
                 group={props.group}
@@ -163,6 +160,10 @@ function ToggleGroupAction(props: {
 }
 
 function SetSceneAction(props: { group: Group; scenes: Scene[]; onSetScene: (scene: Scene) => void }) {
+  if (props.scenes.length === 0) {
+    return null;
+  }
+
   return (
     <ActionPanel.Submenu title="Set Scene" icon={Icon.Image}>
       {props.scenes.map((scene: Scene) => (
@@ -299,7 +300,9 @@ async function handleSetScene(hueClient: HueClient | undefined, group: Group, sc
   const toast = new Toast({ title: "" });
 
   try {
-    // await mutateGroups(setScene(apiPromise, scene));
+    if (hueClient === undefined) throw new Error("Not connected to Hue Bridge.");
+
+    await hueClient.updateScene(scene, { recall: { action: "active" } });
 
     toast.style = Style.Success;
     toast.title = `Scene ${scene.metadata.name} set`;
@@ -312,7 +315,12 @@ async function handleSetScene(hueClient: HueClient | undefined, group: Group, sc
   }
 }
 
-async function handleSetBrightness(hueClient: HueClient | undefined, group: Group, groupedLight: GroupedLight | undefined, percentage: number) {
+async function handleSetBrightness(
+  hueClient: HueClient | undefined,
+  group: Group,
+  groupedLight: GroupedLight | undefined,
+  percentage: number
+) {
   const toast = new Toast({ title: "" });
   const brightness = (percentage / 100) * 253 + 1;
 
@@ -325,7 +333,9 @@ async function handleSetBrightness(hueClient: HueClient | undefined, group: Grou
     });
 
     toast.style = Style.Success;
-    toast.title = `Set brightness of ${group.metadata.name} to ${(percentage / 100).toLocaleString("en", { style: "percent" })}.`;
+    toast.title = `Set brightness of ${group.metadata.name} to ${(percentage / 100).toLocaleString("en", {
+      style: "percent",
+    })}.`;
     await toast.show();
   } catch (e) {
     toast.style = Style.Failure;

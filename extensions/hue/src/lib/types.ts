@@ -324,6 +324,7 @@ export type Light = {
      */
     gamut_type?: "A" | "B" | "C" | "other";
   };
+
   dynamics: {
     /**
      * integer
@@ -463,6 +464,7 @@ export type Scene = {
       };
     };
   }[];
+
   metadata: {
     /**
      * Human-readable name of the resource
@@ -474,7 +476,7 @@ export type Scene = {
      *
      * Only accepting “rtype”: “public_image” on creation
      */
-    image: ResourceIdentifier;
+    image?: ResourceIdentifier;
   };
 
   /**
@@ -484,6 +486,68 @@ export type Scene = {
    * If the group is changed (e.g. light added/removed) the scene is updated.
    */
   group: ResourceIdentifier;
+
+  /**
+   * Group of colors that describe the palette of colors to be used when playing dynamics
+   */
+  palette?: {
+    /**
+     * minItems: 0 - maxItems: 9
+     */
+    color: {
+      /**
+       * CIE XY gamut position
+       */
+      xy: Xy;
+
+      dimming: {
+        /**
+         * Brightness percentage. value cannot be 0, writing 0 changes it to lowest possible brightness
+         */
+        brightness: number;
+      };
+    }[];
+  };
+};
+
+export type SceneRequest = {
+  /**
+   * Type of the supported resources
+   */
+  type?: "scene";
+
+  recall?: {
+    /**
+     * When writing active, the actions in the scene are executed on the target.
+     *
+     * dynamic_palette starts dynamic scene with colors in the Palette object.
+     */
+    action?: "active" | "dynamic_palette" | "static";
+
+    /**
+     * When writing active, the actions in the scene are executed on the target.
+     *
+     * dynamic_palette starts dynamic scene with colors in the Palette object.
+     */
+    status?: "active" | "dynamic_palette";
+
+    /**
+     * Transition to the scene within the timeframe given by duration
+     */
+    duration?: number;
+
+    /**
+     * Override the scene dimming/brightness
+     */
+    dimming?: {
+      /**
+       * integer (0 - 100)
+       *
+       * Brightness percentage. value cannot be 0, writing 0 changes it to lowest possible brightness
+       */
+      brightness?: number;
+    };
+  };
 };
 
 export type Group = {

@@ -2,7 +2,7 @@
 
 import fs from "fs";
 import { environment } from "@raycast/api";
-import { GroupedLight, Light, Method, Room, Scene, UpdateEvent, Zone } from "./types";
+import { GroupedLight, Light, Method, Room, Scene, SceneRequest, UpdateEvent, Zone } from "./types";
 import {
   ClientHttp2Session,
   connect,
@@ -156,6 +156,13 @@ export default class HueClient {
       this.setGroupedLights((groupedLights) => groupedLights.updateItem(groupedLight, groupedLight));
       throw e;
     });
+
+    return response.data.data;
+  }
+
+  public async updateScene(scene: Scene, properties: SceneRequest): Promise<any> {
+    // TODO: Update all lights that are defined in the actions object and undo on error
+    const response = await this.makeRequest("PUT", `/clip/v2/resource/scene/${scene.id}`, properties);
 
     return response.data.data;
   }
