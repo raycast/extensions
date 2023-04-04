@@ -1,3 +1,0 @@
-[submodule "extensions/linkding"]
-	path = extensions/linkding
-	url = https://github.com/InteractiveNinja/raycast-linkding-ext
