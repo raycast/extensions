@@ -29,7 +29,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.48.9",
+    "@raycast/api": "^1.49.1",
     "@raycast/utils": "^1.5.2",
     "cross-fetch": "^3.1.5",
     "gpt-3-encoder": "latitudegames/GPT-3-Encoder#pull/33/head",

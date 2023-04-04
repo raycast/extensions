@@ -104,10 +104,10 @@
     tiny-glob "^0.2.9"
     tslib "^2.4.0"
 
-"@raycast/api@^1.48.9":
-  version "1.48.9"
-  resolved "https://registry.yarnpkg.com/@raycast/api/-/api-1.48.9.tgz#132600e8ccc64703947d72599a127396f2224e82"
-  integrity sha512-SF5TphkWErWy5g4VK8fY0GoVjqfpHIsUSwhtoFg06N3Mz2pUEzAqxACZCzUVq0JDc6JO2iBYgdN4C97gUNfeKw==
+"@raycast/api@^1.49.1":
+  version "1.49.1"
+  resolved "https://registry.yarnpkg.com/@raycast/api/-/api-1.49.1.tgz#ad004b16faf9de9f89d9dac769268f663f2e48d6"
+  integrity sha512-f2Ktmzglw9JwO6FyYfS3S53BYROXEkjKFaPaJ2RH9jc5H7gX/Yll1h/qaQzjI+chCxbNkfvZVhRqGBIORegRJw==
   dependencies:
     "@types/node" "18.8.3"
     "@types/react" "18.0.9"
