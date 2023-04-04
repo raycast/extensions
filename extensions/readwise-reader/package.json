@@ -75,6 +75,13 @@
       "description": "Search Reader Library",
       "mode": "no-view",
       "icon": "reader-logo.png"
+    },
+    {
+      "name": "open-shortlist",
+      "title": "Open Shortlist",
+      "description": "Opens Reader to the shortlist page",
+      "mode": "no-view",
+      "icon": "reader-logo.png"
     }
   ],
   "dependencies": {
