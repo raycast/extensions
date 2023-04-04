@@ -1,11 +1,14 @@
 # Microsoft Teams
 With this [Raycast](https://raycast.com/) extension you can control and navigate Microsoft Teams.
 
-![Screenshot of the set presence command](metadata/microsoft-teams-1.png)
+![Screenshot of the "set presence" command](metadata/microsoft-teams-1.png)
+
+![Screenshot of the "find chat" command](metadata/microsoft-teams-2.png)
 
 These features are currently available:
 
 - Set your presence
+- Find chats by name or member and open them in Teams
 
 ## Setup
 When starting the extension for the first time it will ask you for two IDs: The **Application ID** and the **Directory ID**. Your organization's Microsoft admin should be able to provide you these IDs after following the admin setup guide provided below. After you've entered them you'll be able to login with your Microsoft account.
@@ -27,7 +30,12 @@ These are the steps:
 5. In the newly created app registration, navigate to **API permissions**:
    ![Screenshot of API permissions](media/api-permissions.png)
    1. Click **+ Add a permission**, select **Microsoft Graph** → **Delegated permissions**, search for "presence", check `Presence.ReadWrite` and click **Add permissions**.
-   2. Repeat the same steps to add the permission `offline_access`.
+   2. Repeat the same steps to get this list of permissions:
+      - `Channel.ReadBasic.All`
+      - `Chat.Read`
+      - `offline_access`
+      - `Presence.ReadWrite`
+      - `User.Read.All`
    3. Click the button **Grant admin consent for undefined** to give these permissions to your users in the name of your organization. 
    
       There's nothing to fear here: Even with these permissions, your users will only be able to access things they are allowed to see.

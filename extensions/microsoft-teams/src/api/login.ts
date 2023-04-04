@@ -1,6 +1,7 @@
 import fetch, { FormData } from "node-fetch";
 import { OAuth } from "@raycast/api";
 import { prefs } from "./preferences";
+import { cacheCurrentUserId } from "./user";
 
 const scope = "offline_access user.read Presence.ReadWrite";
 const oauthClient = new OAuth.PKCEClient({
@@ -75,6 +76,7 @@ async function requestTokens(options: RequestTokenWithCode | RequestTokenWithRef
   const tokenSet = (await response.json()) as OAuth.TokenResponse;
   console.log(tokenSet);
   await oauthClient.setTokens(tokenSet);
+  await cacheCurrentUserId();
   return tokenSet.access_token;
 }
 

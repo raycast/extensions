@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "microsoft-teams",
   "title": "Microsoft Teams",
-  "description": "Set your Microsoft Teams presence via Raycast.",
+  "description": "Control and navigate Microsoft Teams via Raycast.",
   "icon": "teams.png",
   "author": "sven",
   "categories": [
@@ -12,8 +12,16 @@
   "license": "MIT",
   "commands": [
     {
+      "name": "findChat",
+      "title": "Find Chat",
+      "icon": "chat.png",
+      "description": "Find a chat by title.",
+      "mode": "view"
+    },
+    {
       "name": "setPresence",
       "title": "Set Presence",
+      "icon": "presence.png",
       "description": "Set your Microsoft Teams presence.",
       "mode": "view"
     }
@@ -32,6 +40,24 @@
       "title": "Directory ID",
       "description": "The \"Directory (tenant) ID\" (see extension's documentation)",
       "required": true
+    },
+    {
+      "type": "dropdown",
+      "name": "urlTarget",
+      "title": "Open in",
+      "description": "Where to open objects: In the Teams web app or the desktop app?",
+      "required": true,
+      "data": [
+        {
+          "title": "Web App",
+          "value": "web"
+        },
+        {
+          "title": "Desktop App",
+          "value": "desktop"
+        }
+      ],
+      "default": "desktop"
     }
   ],
   "dependencies": {

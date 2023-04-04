@@ -2,4 +2,7 @@
 
 ## [Initial Version] - 2023-04-02
 
-Set presence.
+Initial features:
+
+- Set presence
+- Find chat
