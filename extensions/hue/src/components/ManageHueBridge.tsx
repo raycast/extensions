@@ -88,7 +88,7 @@ export default function ManageHueBridge(
       break;
   }
 
-  return hueBridgeState.value === "connected" ? null : (
+  return (
     <Detail key={`${hueBridgeState.value}`} markdown={markdown} actions={<ActionPanel>{contextActions}</ActionPanel>} />
   );
 }
