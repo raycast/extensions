@@ -13,7 +13,7 @@ interface SearchListItemProps {
   searchResult: SearchResult;
 }
 
-const Unsplash: React.FC = () => {
+const UnsplashImages: React.FC = () => {
   const [orientation, setOrientation] = useState<"all" | "landscape" | "portrait" | "squarish">("landscape");
   const { state, search } = useSearch("photos", orientation);
   const itemSize = getGridItemSize();
@@ -65,4 +65,4 @@ const SearchListItem: React.FC<SearchListItemProps> = ({ searchResult }) => {
   return <Grid.Item content={image} title={gridItemTitle} actions={<Actions item={searchResult} details />} />;
 };
 
-export default Unsplash;
+export default UnsplashImages;
