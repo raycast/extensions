@@ -3,6 +3,9 @@
 ## [Add search command] - 2023-4-2
 
 - Add `Search` command
+- Add `Open Shortlist` command
+- Rename `Open New` command to `Open Inbox`
+- Set `saved_using` to `raycast` when saving to enable custom filter views
 
 ## [Add ability to save links] - 2023-3-22
 
