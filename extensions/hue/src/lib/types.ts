@@ -14,6 +14,12 @@ export type CssColor = {
   value: string;
 };
 
+export type Rgb = {
+  r: number;
+  g: number;
+  b: number;
+};
+
 export interface HasId {
   id: number;
 }
@@ -597,7 +603,7 @@ export type Scene = {
            */
           brightness: number;
         };
-      }
+      };
     }[];
 
     /**
@@ -619,7 +625,7 @@ export type Scene = {
          * integer (153 - 500)
          */
         mirek: number;
-      },
+      };
 
       dimming: {
         /**

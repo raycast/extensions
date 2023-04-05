@@ -3,7 +3,6 @@ import React, { useEffect, useState } from "react";
 import { createGradientUri } from "./lib/colors";
 
 export default function Command() {
-
   const [gradientOne, setGradientOne] = useState("");
   const [gradientTwo, setGradientTwo] = useState("");
 

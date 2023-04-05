@@ -1,6 +1,5 @@
-import { environment } from "@raycast/api";
 import { mapRange } from "./utils";
-import { CssColor, Light, Xy } from "./types";
+import { CssColor, Rgb, Xy } from "./types";
 import chroma from "chroma-js";
 import Jimp from "jimp";
 
@@ -137,7 +136,7 @@ export const COLORS: CssColor[] = [
   { name: "White", value: "#ffffff" },
   { name: "White Smoke", value: "#f5f5f5" },
   { name: "Yellow", value: "#ffff00" },
-  { name: "Yellow Green", value: "#9acd32" }
+  { name: "Yellow Green", value: "#9acd32" },
 ];
 
 export function hexToXy(color: string): Xy {
@@ -145,21 +144,7 @@ export function hexToXy(color: string): Xy {
   const [red, green, blue] = result
     ? [parseInt(result[1], 16), parseInt(result[2], 16), parseInt(result[3], 16)]
     : [0, 0, 0];
-  // const [red, green, blue] = hexToRgb(color);
   return rgbToCie(red, green, blue);
-}
-
-export function getRgbFrom(light: Light): string {
-  if (light.color?.xy !== undefined) {
-    return cieToRgbString(light.color.xy, light.dimming?.brightness);
-  } else if (light.color_temperature !== undefined) {
-    return ctToRgb(light.color_temperature.mirek, light.dimming?.brightness);
-  } else {
-    const brightness = (light.dimming?.brightness ?? 100) / 100;
-    return environment.theme == "dark"
-      ? `rgb(${logShadeRgb(255, 255, 255, -brightness)})`
-      : `rgb(${logShadeRgb(0, 0, 0, brightness)})`;
-  }
 }
 
 /**
@@ -187,7 +172,7 @@ function logShadeRgb(r: number, g: number, b: number, percentage: number) {
  * @param {number} brightness
  * @returns {string}
  */
-export function cieToRgb(xy: Xy, brightness = 100) {
+export function cieToRgb(xy: Xy, brightness = 100): Rgb {
   // TODO: Fix not handling some colors well (e.g. 'Maroon' turns purple)
   // TODO: Replace with code from
   //  https://developers.meethue.com/develop/application-design-guidance/color-conversion-formulas-rgb-to-xy-and-back/
@@ -202,12 +187,12 @@ export function cieToRgb(xy: Xy, brightness = 100) {
   const X: number = (Y / xy.y) * xy.x;
   const Z: number = (Y / xy.y) * z;
 
-  //Convert to RGB using Wide RGB D65 conversion
+  // Convert to RGB using Wide RGB D65 conversion
   let red: number = X * 1.656492 - Y * 0.354851 - Z * 0.255038;
   let green: number = -X * 0.707196 + Y * 1.655397 + Z * 0.036152;
   let blue: number = X * 0.051713 - Y * 0.121364 + Z * 1.01153;
 
-  //If red, green or blue is larger than 1.0 set it back to the maximum of 1.0
+  // If red, green or blue is larger than 1.0 set it back to the maximum of 1.0.
   if (red > blue && red > green && red > 1.0) {
     green = green / red;
     blue = blue / red;
@@ -239,7 +224,7 @@ export function cieToRgb(xy: Xy, brightness = 100) {
   return {
     r: Math.floor(red),
     g: Math.floor(green),
-    b: Math.floor(blue)
+    b: Math.floor(blue),
   };
 }
 
@@ -250,16 +235,18 @@ export function cieToRgbString(xy: Xy, brightness = 100) {
 
 export function cieToRgbHexString(xy: Xy, brightness = 100) {
   const rgb = cieToRgb(xy, brightness);
-  return `#${rgb.r.toString(16).padStart(2, "0")}${rgb.g.toString(16).padStart(2, "0")}${rgb.b.toString(16).padStart(2, "0")}`;
+  return `#${rgb.r.toString(16).padStart(2, "0")}${rgb.g.toString(16).padStart(2, "0")}${rgb.b
+    .toString(16)
+    .padStart(2, "0")}`;
 }
 
 /**
  * Converts a CT to an RGB string
  * @param {number} mireds Philips Hue CT value
- * @param {number} brightness Brightness of the light (1-254)
+ * @param {number} brightness Brightness of the light (1-100)
  * @returns {string} RGB string
  */
-export function ctToRgb(mireds: number, brightness = 100): string {
+export function mirekToRgb(mireds: number, brightness = 100): Rgb {
   const hecTemp = 20000.0 / mireds;
 
   let red: number, green: number, blue: number;
@@ -274,9 +261,25 @@ export function ctToRgb(mireds: number, brightness = 100): string {
     blue = 255;
   }
 
-  const [shadedRed, shadedGreen, shadedBlue] = logShadeRgb(red, green, blue, mapRange(brightness, [1, 254], [-0.9, 0]));
+  const [shadedRed, shadedGreen, shadedBlue] = logShadeRgb(red, green, blue, mapRange(brightness, [1, 100], [-0.9, 0]));
 
-  return `rgb(${shadedRed},${shadedGreen},${shadedBlue})`;
+  return {
+    r: shadedRed,
+    g: shadedGreen,
+    b: shadedBlue,
+  };
+}
+
+export function mirekToRgbString(mireds: number, brightness = 100) {
+  const rgb = mirekToRgb(mireds, brightness);
+  return `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
+}
+
+export function mirekToRgbHexString(mireds: number, brightness = 100) {
+  const rgb = mirekToRgb(mireds, brightness);
+  return `#${rgb.r.toString(16).padStart(2, "0")}${rgb.g.toString(16).padStart(2, "0")}${rgb.b
+    .toString(16)
+    .padStart(2, "0")}`;
 }
 
 /**
@@ -313,27 +316,16 @@ export function hexStringToHexNumber(hex: string): number {
 
 export function createGradientUri(colors: string[], width: number, height: number): Promise<string> {
   return new Promise((resolve, reject) => {
-    const scale = chroma
-      .scale(colors)
-      .mode("oklab")
-      .correctLightness()
-      .colors(width, null);
-
-    const matrix = [...Array(height)].map((_, index) => {
-      const factor = (index / height) * 1.2;
-      return scale.map((color) => chroma(color).darken(factor * factor)
-      );
-    });
-
     new Jimp(width, height, (err, image) => {
       if (err) reject(err);
+      const scale = chroma.scale(colors).mode("oklab").correctLightness();
 
-      const chromaColors = scale.map(color => chroma(color));
-
-      image.scan(0, 0, width, height, (x, y, idx) => {
+      image.scan(0, 0, width, height, (x, y) => {
         const factor = (y / height) * 1.2;
-        const color = chromaColors[x].darken(factor * factor);
-        image.setPixelColor(hexStringToHexNumber(color.hex()), x, y);
+        const color = scale(x / width)
+          .darken(factor * factor)
+          .hex();
+        image.setPixelColor(hexStringToHexNumber(color), x, y);
       });
 
       image.getBase64(Jimp.MIME_PNG, (err, base64) => {

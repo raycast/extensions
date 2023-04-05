@@ -5,31 +5,30 @@ import ManageHueBridge from "./components/ManageHueBridge";
 import { SendHueMessage, useHue } from "./hooks/useHue";
 import HueClient from "./lib/HueClient";
 import { useEffect, useState } from "react";
-import { cieToRgbHexString, createGradientUri } from "./lib/colors";
+import { cieToRgbHexString, createGradientUri, mirekToRgbHexString } from "./lib/colors";
 import Style = Toast.Style;
 
 type ResourceId = string;
 type GradientUri = string;
 
-const placeholderXy = { x: 0.2, y: 0.3 };
-
 function getColorsFromScene(scene: Scene): string[] {
   if (scene.palette !== undefined) {
     if (scene.palette.color?.length ?? 0 > 0) {
       return scene.palette.color.map((color) => {
+        // TODO: Determine brightness from dimming
         return cieToRgbHexString(color.color.xy);
       });
     }
     if (scene.palette.color_temperature?.length ?? 0 > 0) {
       return scene.palette.color_temperature.map((color) => {
-        // TODO: Implement
-        return '#d3d3d3';
+        // TODO: Determine brightness from dimming
+        return mirekToRgbHexString(color.color_temperature.mirek);
       });
     }
     if (scene.palette.dimming?.length ?? 0 > 0) {
       return scene.palette.dimming.map((color) => {
         // TODO: Implement
-        return '#d3d3d3';
+        return "#d3d3d3";
       });
     }
   }
@@ -41,10 +40,11 @@ function getColorsFromScene(scene: Scene): string[] {
       })
       .map((action) => {
         if (action.action.color_temperature?.mirek !== undefined) {
+          // TODO: Determine brightness from dimming
           return cieToRgbHexString({ x: 0.2, y: 0.2 });
         }
         if (action.action.color?.xy !== undefined) {
-          console.log(action.action.color.xy);
+          // TODO: Determine brightness from dimming
           return cieToRgbHexString(action.action.color.xy);
         }
         throw new Error("Invalid state.");
@@ -56,7 +56,7 @@ function getColorsFromScene(scene: Scene): string[] {
 
 export default function SetScene() {
   const { hueBridgeState, sendHueMessage, isLoading, rooms, zones, scenes } = useHue();
-  const [gradients, setGradients] = useState(new Map<ResourceId, GradientUri>);
+  const [gradients, setGradients] = useState(new Map<ResourceId, GradientUri>());
 
   useEffect(() => {
     scenes.forEach(async (scene: Scene) => {
@@ -79,9 +79,10 @@ export default function SetScene() {
     <Grid isLoading={isLoading} aspectRatio="16/9">
       {groupTypes.map((groupType: Group[]): JSX.Element[] => {
         return groupType.map((group: Group): JSX.Element => {
-          const groupScenes = scenes.filter((scene: Scene) => {
-            return scene.group.rid == group.id;
-          }) ?? [];
+          const groupScenes =
+            scenes.filter((scene: Scene) => {
+              return scene.group.rid == group.id;
+            }) ?? [];
 
           return (
             <Group
