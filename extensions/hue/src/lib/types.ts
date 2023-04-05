@@ -609,16 +609,6 @@ export type Scene = {
     /**
      * minItems: 0 - maxItems: 1
      */
-    dimming: {
-      /**
-       * Brightness percentage. value cannot be 0, writing 0 changes it to the lowest possible brightness
-       */
-      brightness: number;
-    }[];
-
-    /**
-     * minItems: 0 - maxItems: 1
-     */
     color_temperature: {
       color_temperature: {
         /**
@@ -633,6 +623,16 @@ export type Scene = {
          */
         brightness: number;
       };
+    }[];
+
+    /**
+     * minItems: 0 - maxItems: 1
+     */
+    dimming: {
+      /**
+       * Brightness percentage. value cannot be 0, writing 0 changes it to the lowest possible brightness
+       */
+      brightness: number;
     }[];
   };
 };
