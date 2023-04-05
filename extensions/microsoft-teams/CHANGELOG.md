@@ -5,4 +5,5 @@
 Initial features:
 
 - Set presence
+- Set status
 - Find chat

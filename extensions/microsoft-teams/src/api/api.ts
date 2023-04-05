@@ -3,23 +3,27 @@ import { graphClient } from "./login";
 import { URLSearchParams } from "url";
 
 type QueryParams = { [key: string]: string };
-const baseUrl = "https://graph.microsoft.com/v1.0";
+const baseUrl = "https://graph.microsoft.com/";
+const apiVersionDefault = "v1.0";
 
 interface Request {
   path: string;
+  apiVersion?: typeof apiVersionDefault | "beta";
   queryParams?: QueryParams;
   body?: Record<string, unknown>;
 }
 
-function apiUrl(path: string, queryParams?: { [key: string]: string }): string {
-  const params = new URLSearchParams(queryParams).toString();
-  return baseUrl + path + (params.length > 0 ? `?${params}` : "");
+function apiUrl(request: Request): string {
+  const params = new URLSearchParams(request.queryParams).toString();
+  const apiBaseUrl = baseUrl + (request.apiVersion ?? apiVersionDefault);
+  return apiBaseUrl + request.path + (params.length > 0 ? `?${params}` : "");
 }
 
 export async function apiRequest(method: string, options: Request): Promise<Response> {
-  console.log(method);
+  const url = apiUrl(options);
+  console.log(`${method} ${url}`);
   console.log(options);
-  const response = await fetch(apiUrl(options.path, options.queryParams), {
+  const response = await fetch(url, {
     method,
     headers: {
       Authorization: `Bearer ${await graphClient.accessToken()}`,

@@ -1,13 +1,14 @@
 # Microsoft Teams
-With this [Raycast](https://raycast.com/) extension you can control and navigate Microsoft Teams.
+Easily manage your Microsoft Teams presence and status message with this [Raycast](https://raycast.com/) extension. Search chats and open them with a keystroke in the Teams app.
 
 ![Screenshot of the "set presence" command](metadata/microsoft-teams-1.png)
-
-![Screenshot of the "find chat" command](metadata/microsoft-teams-2.png)
+![Screenshot of the "set status" command](metadata/microsoft-teams-2.png)
+![Screenshot of the "find chat" command](metadata/microsoft-teams-3.png)
 
 These features are currently available:
 
 - Set your presence
+- Set your status
 - Find chats by name or member and open them in Teams
 
 ## Setup

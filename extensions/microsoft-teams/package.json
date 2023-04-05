@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "microsoft-teams",
   "title": "Microsoft Teams",
-  "description": "Control and navigate Microsoft Teams via Raycast.",
+  "description": "Easily manage your Microsoft Teams presence and status message with this Raycast extension. Search chats and open them in with a keystroke in the Teams app.",
   "icon": "teams.png",
   "author": "sven",
   "categories": [
@@ -23,6 +23,13 @@
       "title": "Set Presence",
       "icon": "presence.png",
       "description": "Set your Microsoft Teams presence.",
+      "mode": "view"
+    },
+    {
+      "name": "setStatus",
+      "title": "Set Status",
+      "icon": "status.png",
+      "description": "Set your Microsoft Teams status message (and optionally your presence).",
       "mode": "view"
     }
   ],
@@ -63,6 +70,8 @@
   "dependencies": {
     "@raycast/api": "^1.48.9",
     "@raycast/utils": "^1.5.2",
+    "@types/luxon": "^3.3.0",
+    "luxon": "^3.3.0",
     "node-fetch": "^3.3.1"
   },
   "devDependencies": {

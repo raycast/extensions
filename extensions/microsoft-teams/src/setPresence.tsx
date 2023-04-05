@@ -2,13 +2,13 @@ import { Action, ActionPanel, Color, Icon, Image, List } from "@raycast/api";
 import { Availability, getAvailability, setAvailability } from "./api/presence";
 import { usePromise } from "@raycast/utils";
 
-interface Presence {
+export interface Presence {
   label: string;
   availability?: Availability;
-  icon: Image;
+  icon?: Image;
 }
 
-const presences: Presence[] = [
+export const presences: Presence[] = [
   { label: "Available", availability: "Available", icon: { source: Icon.CheckCircle, tintColor: Color.Green } },
   { label: "Busy", availability: "Busy", icon: { source: Icon.CircleFilled, tintColor: Color.Red } },
   {
