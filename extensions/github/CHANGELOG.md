@@ -1,8 +1,9 @@
 # GitHub Changelog
 
-## [Fix read notifications comment ID] - 2023-04-05
+## [Notifications fixes] - 2023-04-05
 
-- Add `issuecomment` prefix to read notifications
+- Add `issuecomment` prefix to read notifications 
+- Don't show success toast when opening a notification
 
 ## [Clear form fields] - 2023-01-19
 
