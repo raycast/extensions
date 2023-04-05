@@ -161,14 +161,20 @@ async function handleSetScene(hueClient: HueClient | undefined, group: Group, sc
   const toast = new Toast({ title: "" });
 
   try {
-    // await mutateGroups(setScene(apiPromise, scene));
+    if (hueClient === undefined) throw new Error("Hue client not initialized.");
+
+    await hueClient.updateScene(scene, {
+      recall: {
+        action: "active",
+      },
+    });
 
     toast.style = Style.Success;
-    toast.title = `Scene ${scene.metadata.name} set`;
+    toast.title = `Scene ${scene.metadata.name} set for ${group.metadata.name}.`;
     await toast.show();
   } catch (e) {
     toast.style = Style.Failure;
-    toast.title = "Failed setting scene";
+    toast.title = `Failed setting scene ${scene.metadata.name} for ${group.metadata.name}.`;
     toast.message = e instanceof Error ? e.message : undefined;
     await toast.show();
   }
