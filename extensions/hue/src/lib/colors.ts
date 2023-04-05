@@ -305,10 +305,11 @@ export function createGradientPngUri(colors: string[], width: number, height: nu
 
       image.scan(0, 0, width, height, (x, y) => {
         const factor = (y / height) * 1.2;
-        const color = scale(x / width)
+        const rgba = scale(x / width)
           .darken(factor * factor)
-          .hex();
-        image.setPixelColor(hexStringToHexNumber(color), x, y);
+          .rgba(true);
+
+        image.setPixelColor(Jimp.rgbaToInt(rgba[0], rgba[1], rgba[2], 255 * rgba[3]), x, y);
       });
 
       image.getBase64(Jimp.MIME_PNG, (err, base64) => {
