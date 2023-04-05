@@ -585,10 +585,41 @@ export type Scene = {
      * minItems: 0 - maxItems: 9
      */
     color: {
+      color: {
+        /**
+         * CIE XY gamut position
+         */
+        xy: Xy;
+
+        dimming: {
+          /**
+           * Brightness percentage. value cannot be 0, writing 0 changes it to lowest possible brightness
+           */
+          brightness: number;
+        };
+      }
+    }[];
+
+    /**
+     * minItems: 0 - maxItems: 1
+     */
+    dimming: {
       /**
-       * CIE XY gamut position
+       * Brightness percentage. value cannot be 0, writing 0 changes it to lowest possible brightness
        */
-      xy: Xy;
+      brightness: number;
+    }[];
+
+    /**
+     * minItems: 0 - maxItems: 1
+     */
+    color_temperature: {
+      color_temperature: {
+        /**
+         * integer (153 - 500)
+         */
+        mirek: number;
+      },
 
       dimming: {
         /**

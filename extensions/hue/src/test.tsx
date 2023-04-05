@@ -1,42 +1,6 @@
 import { Grid } from "@raycast/api";
-import Jimp from "jimp";
-import chroma from "chroma-js";
 import React, { useEffect, useState } from "react";
-
-function hexStringToHexNumber(hex: string): number {
-  return parseInt(hex.slice(1) + "FF", 16);
-}
-
-function createGradientUri(colors: string[], width: number, height: number): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const scale = chroma
-      .scale(colors)
-      .mode("oklab")
-      .correctLightness()
-      .colors(width, null);
-
-    const matrix = [...Array(height)].map((_, index) => {
-      const factor = (index / height) * 1.2;
-      return scale.map((color) => chroma(color).darken(factor * factor)
-      );
-    });
-
-    new Jimp(width, height, (err, image) => {
-      if (err) reject(err);
-
-      matrix.forEach((row, y) => {
-        row.forEach((color, x) => {
-          image.setPixelColor(hexStringToHexNumber(color.hex()), x, y);
-        });
-      });
-
-      image.getBase64(Jimp.MIME_PNG, (err, base64) => {
-        if (err) reject(err);
-        resolve(base64);
-      });
-    });
-  });
-}
+import { createGradientUri } from "./lib/colors";
 
 export default function Command() {
 

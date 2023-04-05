@@ -1,65 +1,141 @@
-import { Action, ActionPanel, Icon, List, Toast } from "@raycast/api";
+import { Action, ActionPanel, Grid, Icon, Toast } from "@raycast/api";
 import { Group, Scene } from "./lib/types";
 import UnlinkAction from "./components/UnlinkAction";
 import ManageHueBridge from "./components/ManageHueBridge";
 import { SendHueMessage, useHue } from "./hooks/useHue";
 import HueClient from "./lib/HueClient";
+import { useEffect, useState } from "react";
+import { cieToRgbHexString, createGradientUri } from "./lib/colors";
 import Style = Toast.Style;
+
+type ResourceId = string;
+type GradientUri = string;
+
+const placeholderXy = { x: 0.2, y: 0.3 };
+
+function getColorsFromScene(scene: Scene): string[] {
+  if (scene.palette !== undefined) {
+    if (scene.palette.color?.length ?? 0 > 0) {
+      return scene.palette.color.map((color) => {
+        return cieToRgbHexString(color.color.xy);
+      });
+    }
+    if (scene.palette.color_temperature?.length ?? 0 > 0) {
+      return scene.palette.color_temperature.map((color) => {
+        // TODO: Implement
+        return '#d3d3d3';
+      });
+    }
+    if (scene.palette.dimming?.length ?? 0 > 0) {
+      return scene.palette.dimming.map((color) => {
+        // TODO: Implement
+        return '#d3d3d3';
+      });
+    }
+  }
+
+  if (scene.actions !== undefined) {
+    return scene.actions
+      .filter((action) => {
+        return action.action.color !== undefined || action.action.color_temperature !== undefined;
+      })
+      .map((action) => {
+        if (action.action.color_temperature?.mirek !== undefined) {
+          return cieToRgbHexString({ x: 0.2, y: 0.2 });
+        }
+        if (action.action.color?.xy !== undefined) {
+          console.log(action.action.color.xy);
+          return cieToRgbHexString(action.action.color.xy);
+        }
+        throw new Error("Invalid state.");
+      });
+  }
+
+  return [];
+}
 
 export default function SetScene() {
   const { hueBridgeState, sendHueMessage, isLoading, rooms, zones, scenes } = useHue();
+  const [gradients, setGradients] = useState(new Map<ResourceId, GradientUri>);
+
+  useEffect(() => {
+    scenes.forEach(async (scene: Scene) => {
+      const colors = getColorsFromScene(scene);
+
+      if (colors.length === 0) {
+        return;
+      }
+
+      const gradientUri = await createGradientUri(colors, 269, 154);
+      setGradients((gradients) => gradients.set(scene.id, gradientUri));
+    });
+  }, []);
 
   const manageHueBridgeElement: JSX.Element | null = ManageHueBridge(hueBridgeState, sendHueMessage);
   if (manageHueBridgeElement !== null) return manageHueBridgeElement;
-
   const groupTypes = [rooms, zones];
 
   return (
-    <List isLoading={isLoading}>
+    <Grid isLoading={isLoading} aspectRatio="16/9">
       {groupTypes.map((groupType: Group[]): JSX.Element[] => {
         return groupType.map((group: Group): JSX.Element => {
-          // const groupScenes = scenes.filter((scene: Scene) => {
-          //   return scene.group == group.id;
-          // }) ?? [];
+          const groupScenes = scenes.filter((scene: Scene) => {
+            return scene.group.rid == group.id;
+          }) ?? [];
 
           return (
             <Group
-              hueClient={hueBridgeState.context.hueClient}
               key={group.id}
               group={group}
-              scenes={[]}
+              scenes={groupScenes}
+              gradients={gradients}
+              hueClient={hueBridgeState.context.hueClient}
               sendHueMessage={sendHueMessage}
             />
           );
         });
       })}
-    </List>
+    </Grid>
   );
 }
 
-function Group(props: { hueClient?: HueClient; group: Group; scenes: Scene[]; sendHueMessage: SendHueMessage }) {
+function Group(props: {
+  group: Group;
+  scenes: Scene[];
+  gradients: Map<ResourceId, GradientUri>;
+  hueClient?: HueClient;
+  sendHueMessage: SendHueMessage;
+}) {
   return (
-    <List.Section key={props.group.id} title={props.group.metadata.name} subtitle={props.group.type}>
+    <Grid.Section key={props.group.id} title={props.group.metadata.name}>
       {props.scenes.map(
         (scene: Scene): JSX.Element => (
           <Scene
-            hueClient={props.hueClient}
             key={scene.id}
             group={props.group}
             scene={scene}
+            gradient={props.gradients.get(scene.id)}
+            hueClient={props.hueClient}
             sendHueMessage={props.sendHueMessage}
           />
         )
       )}
-    </List.Section>
+    </Grid.Section>
   );
 }
 
-function Scene(props: { hueClient?: HueClient; group: Group; scene: Scene; sendHueMessage: SendHueMessage }) {
+function Scene(props: {
+  scene: Scene;
+  group: Group;
+  gradient: GradientUri | undefined;
+  sendHueMessage: SendHueMessage;
+  hueClient?: HueClient;
+}) {
   return (
-    <List.Item
+    <Grid.Item
       title={props.scene.metadata.name}
       keywords={[props.group.metadata.name]}
+      content={props.gradient ?? Icon.XMarkCircle}
       actions={
         <ActionPanel>
           <SetSceneAction

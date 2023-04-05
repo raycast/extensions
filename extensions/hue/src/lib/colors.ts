@@ -1,6 +1,8 @@
 import { environment } from "@raycast/api";
 import { mapRange } from "./utils";
 import { CssColor, Light, Xy } from "./types";
+import chroma from "chroma-js";
+import Jimp from "jimp";
 
 export const COLORS: CssColor[] = [
   { name: "Alice Blue", value: "#f0f8ff" },
@@ -135,7 +137,7 @@ export const COLORS: CssColor[] = [
   { name: "White", value: "#ffffff" },
   { name: "White Smoke", value: "#f5f5f5" },
   { name: "Yellow", value: "#ffff00" },
-  { name: "Yellow Green", value: "#9acd32" },
+  { name: "Yellow Green", value: "#9acd32" }
 ];
 
 export function hexToXy(color: string): Xy {
@@ -149,7 +151,7 @@ export function hexToXy(color: string): Xy {
 
 export function getRgbFrom(light: Light): string {
   if (light.color?.xy !== undefined) {
-    return cieToRgb(light.color.xy, light.dimming?.brightness);
+    return cieToRgbString(light.color.xy, light.dimming?.brightness);
   } else if (light.color_temperature !== undefined) {
     return ctToRgb(light.color_temperature.mirek, light.dimming?.brightness);
   } else {
@@ -234,7 +236,21 @@ export function cieToRgb(xy: Xy, brightness = 100) {
   if (isNaN(green)) green = 0;
   if (isNaN(blue)) blue = 0;
 
-  return `rgb(${Math.floor(red)},${Math.floor(green)},${Math.floor(blue)})`;
+  return {
+    r: Math.floor(red),
+    g: Math.floor(green),
+    b: Math.floor(blue)
+  };
+}
+
+export function cieToRgbString(xy: Xy, brightness = 100) {
+  const rgb = cieToRgb(xy, brightness);
+  return `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
+}
+
+export function cieToRgbHexString(xy: Xy, brightness = 100) {
+  const rgb = cieToRgb(xy, brightness);
+  return `#${rgb.r.toString(16).padStart(2, "0")}${rgb.g.toString(16).padStart(2, "0")}${rgb.b.toString(16).padStart(2, "0")}`;
 }
 
 /**
@@ -289,4 +305,41 @@ export function rgbToCie(red: number, green: number, blue: number): Xy {
   if (isNaN(y)) y = 0;
 
   return { x, y };
+}
+
+export function hexStringToHexNumber(hex: string): number {
+  return parseInt(hex.slice(1) + "FF", 16);
+}
+
+export function createGradientUri(colors: string[], width: number, height: number): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const scale = chroma
+      .scale(colors)
+      .mode("oklab")
+      .correctLightness()
+      .colors(width, null);
+
+    const matrix = [...Array(height)].map((_, index) => {
+      const factor = (index / height) * 1.2;
+      return scale.map((color) => chroma(color).darken(factor * factor)
+      );
+    });
+
+    new Jimp(width, height, (err, image) => {
+      if (err) reject(err);
+
+      const chromaColors = scale.map(color => chroma(color));
+
+      image.scan(0, 0, width, height, (x, y, idx) => {
+        const factor = (y / height) * 1.2;
+        const color = chromaColors[x].darken(factor * factor);
+        image.setPixelColor(hexStringToHexNumber(color.hex()), x, y);
+      });
+
+      image.getBase64(Jimp.MIME_PNG, (err, base64) => {
+        if (err) reject(err);
+        resolve(base64);
+      });
+    });
+  });
 }
