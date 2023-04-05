@@ -164,7 +164,7 @@ export type Light = {
   /**
    * Owner of the service
    *
-   * In case the owner service is deleted, the service also gets deleted.
+   * If the owner service is deleted, the service also gets deleted.
    */
   owner: ResourceIdentifier;
 
@@ -234,14 +234,14 @@ export type Light = {
      */
     mirek_schema?: {
       /**
-       * integer (153 - 500)
+       * integer (153 – 500)
        *
        * Minimum color temperature this light supports
        */
       mirek_minimum: number;
 
       /**
-       * integer (153 - 500)
+       * integer (153 – 500)
        *
        * Maximum color temperature this light supports
        */
@@ -266,14 +266,14 @@ export type Light = {
        */
       red: {
         /**
-         * number (0 - 1)
+         * number (0 – 1)
          *
          * X position in the color gamut
          */
         x: number;
 
         /**
-         * number (0 - 1)
+         * number (0 – 1)
          *
          * Y position in the color gamut
          */
@@ -285,14 +285,14 @@ export type Light = {
        */
       green: {
         /**
-         * number (0 - 1)
+         * number (0 – 1)
          *
          * X position in the color gamut
          */
         x: number;
 
         /**
-         * number (0 - 1)
+         * number (0 – 1)
          *
          * Y position in the color gamut
          */
@@ -304,14 +304,14 @@ export type Light = {
        */
       blue: {
         /**
-         * number (0 - 1)
+         * number (0 – 1)
          *
          * X position in the color gamut
          */
         x: number;
 
         /**
-         * number (0 - 1)
+         * number (0 – 1)
          *
          * Y position in the color gamut
          */
@@ -387,7 +387,7 @@ export type LightRequest = {
     /**
      * number (maximum: 100)
      *
-     * Brightness percentage of full-scale increase delta to current dimlevel.
+     * Brightness percentage of full-scale increase delta to current dimming level.
      *
      * Clip at Max-level or Min-level.
      */
@@ -409,7 +409,7 @@ export type LightRequest = {
     /**
      * integer (maximum: 347)
      *
-     * mired delta to current mired. Clip at mired_minimum and mired_maximum of mired_schema.
+     * The mired delta to current mired. Clip at mired_minimum and mired_maximum of mired_schema.
      */
     mirek_delta?: number;
   };
@@ -535,14 +535,14 @@ export type Scene = {
          */
         xy: {
           /**
-           * number (0 - 1)
+           * number (0 – 1)
            *
            * X position in the color gamut
            */
           x: number;
 
           /**
-           * number (0 - 1)
+           * number (0 – 1)
            *
            * Y position in the color gamut
            */
@@ -568,7 +568,7 @@ export type Scene = {
     name: string;
 
     /**
-     * Reference with unique identifier for the image representing the scene
+     * Reference with a unique identifier for the image representing the scene
      *
      * Only accepting “rtype”: “public_image” on creation
      */
@@ -599,7 +599,7 @@ export type Scene = {
 
         dimming: {
           /**
-           * Brightness percentage. value cannot be 0, writing 0 changes it to lowest possible brightness
+           * Brightness percentage. value cannot be 0, writing 0 changes it to the lowest possible brightness
            */
           brightness: number;
         };
@@ -611,7 +611,7 @@ export type Scene = {
      */
     dimming: {
       /**
-       * Brightness percentage. value cannot be 0, writing 0 changes it to lowest possible brightness
+       * Brightness percentage. value cannot be 0, writing 0 changes it to the lowest possible brightness
        */
       brightness: number;
     }[];
@@ -629,7 +629,7 @@ export type Scene = {
 
       dimming: {
         /**
-         * Brightness percentage. value cannot be 0, writing 0 changes it to lowest possible brightness
+         * Brightness percentage. value cannot be 0, writing 0 changes it to the lowest possible brightness
          */
         brightness: number;
       };
@@ -647,14 +647,14 @@ export type SceneRequest = {
     /**
      * When writing active, the actions in the scene are executed on the target.
      *
-     * dynamic_palette starts dynamic scene with colors in the Palette object.
+     * dynamic_palette starts a dynamic scene with colors in the Palette object.
      */
     action?: "active" | "dynamic_palette" | "static";
 
     /**
      * When writing active, the actions in the scene are executed on the target.
      *
-     * dynamic_palette starts dynamic scene with colors in the Palette object.
+     * dynamic_palette starts a dynamic scene with colors in the Palette object.
      */
     status?: "active" | "dynamic_palette";
 
@@ -668,9 +668,9 @@ export type SceneRequest = {
      */
     dimming?: {
       /**
-       * integer (0 - 100)
+       * integer (0 – 100)
        *
-       * Brightness percentage. value cannot be 0, writing 0 changes it to lowest possible brightness
+       * Brightness percentage. value cannot be 0, writing 0 changes it to the lowest possible brightness
        */
       brightness?: number;
     };
@@ -707,7 +707,7 @@ export type Group = {
    * - This includes all services of a device grouped in the group hierarchy
    *   given by child relation
    *
-   * Aggregation is per service type, i.e. every service type which can be
+   * Aggregation is per service type, i.e. every service type, which can be
    * grouped has a corresponding definition of grouped type.
    *
    * Supported types:
