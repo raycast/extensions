@@ -29717,7 +29717,7 @@ export type PullRequestDetailsFieldsFragment = {
         | { __typename?: "EnterpriseUserAccount"; id: string; login: string; name?: string | null; avatarUrl: any }
         | { __typename?: "Mannequin"; id: string; login: string; avatarUrl: any }
         | { __typename?: "Organization"; id: string; login: string; name?: string | null; avatarUrl: any }
-        | { __typename?: "User"; id: string; login: string; name?: string | null; avatarUrl: any }
+        | { __typename?: "User"; id: string; avatarUrl: any; name?: string | null; login: string; isViewer: boolean }
         | null;
     } | null> | null;
   } | null;
@@ -29978,7 +29978,14 @@ export type PullRequestDetailsQuery = {
                 }
               | { __typename?: "Mannequin"; id: string; login: string; avatarUrl: any }
               | { __typename?: "Organization"; id: string; login: string; name?: string | null; avatarUrl: any }
-              | { __typename?: "User"; id: string; login: string; name?: string | null; avatarUrl: any }
+              | {
+                  __typename?: "User";
+                  id: string;
+                  avatarUrl: any;
+                  name?: string | null;
+                  login: string;
+                  isViewer: boolean;
+                }
               | null;
           } | null> | null;
         } | null;
@@ -30992,6 +30999,42 @@ export type UserFieldsFragment = {
   isViewer: boolean;
 };
 
+type AuthorFields_Bot_Fragment = { __typename?: "Bot"; id: string; login: string; avatarUrl: any };
+
+type AuthorFields_EnterpriseUserAccount_Fragment = {
+  __typename?: "EnterpriseUserAccount";
+  id: string;
+  login: string;
+  name?: string | null;
+  avatarUrl: any;
+};
+
+type AuthorFields_Mannequin_Fragment = { __typename?: "Mannequin"; id: string; login: string; avatarUrl: any };
+
+type AuthorFields_Organization_Fragment = {
+  __typename?: "Organization";
+  id: string;
+  login: string;
+  name?: string | null;
+  avatarUrl: any;
+};
+
+type AuthorFields_User_Fragment = {
+  __typename?: "User";
+  id: string;
+  avatarUrl: any;
+  name?: string | null;
+  login: string;
+  isViewer: boolean;
+};
+
+export type AuthorFieldsFragment =
+  | AuthorFields_Bot_Fragment
+  | AuthorFields_EnterpriseUserAccount_Fragment
+  | AuthorFields_Mannequin_Fragment
+  | AuthorFields_Organization_Fragment
+  | AuthorFields_User_Fragment;
+
 export type GetViewerQueryVariables = Exact<{ [key: string]: never }>;
 
 export type GetViewerQuery = {
@@ -31069,6 +31112,36 @@ export const UserFieldsFragmentDoc = gql`
     isViewer
   }
 `;
+export const AuthorFieldsFragmentDoc = gql`
+  fragment AuthorFields on Actor {
+    ... on Bot {
+      id
+      login
+      avatarUrl(size: 64)
+    }
+    ... on User {
+      ...UserFields
+    }
+    ... on Mannequin {
+      id
+      login
+      avatarUrl(size: 64)
+    }
+    ... on Organization {
+      id
+      login
+      name
+      avatarUrl(size: 64)
+    }
+    ... on EnterpriseUserAccount {
+      id
+      login
+      name
+      avatarUrl(size: 64)
+    }
+  }
+  ${UserFieldsFragmentDoc}
+`;
 export const IssueFieldsFragmentDoc = gql`
   fragment IssueFields on Issue {
     id
@@ -31080,31 +31153,7 @@ export const IssueFieldsFragmentDoc = gql`
     stateReason
     updatedAt
     author {
-      ... on Bot {
-        id
-        login
-        avatarUrl(size: 64)
-      }
-      ... on User {
-        ...UserFields
-      }
-      ... on Mannequin {
-        id
-        login
-        avatarUrl(size: 64)
-      }
-      ... on Organization {
-        id
-        login
-        name
-        avatarUrl(size: 64)
-      }
-      ... on EnterpriseUserAccount {
-        id
-        login
-        name
-        avatarUrl(size: 64)
-      }
+      ...AuthorFields
     }
     linkedBranches(first: 50) {
       totalCount
@@ -31137,8 +31186,9 @@ export const IssueFieldsFragmentDoc = gql`
       }
     }
   }
-  ${UserFieldsFragmentDoc}
+  ${AuthorFieldsFragmentDoc}
   ${ShortRepositoryFieldsFragmentDoc}
+  ${UserFieldsFragmentDoc}
 `;
 export const IssueDetailFieldsFragmentDoc = gql`
   fragment IssueDetailFields on Issue {
@@ -31152,31 +31202,7 @@ export const IssueDetailFieldsFragmentDoc = gql`
     stateReason
     updatedAt
     author {
-      ... on Bot {
-        id
-        login
-        avatarUrl(size: 64)
-      }
-      ... on User {
-        ...UserFields
-      }
-      ... on Mannequin {
-        id
-        login
-        avatarUrl(size: 64)
-      }
-      ... on Organization {
-        id
-        login
-        name
-        avatarUrl(size: 64)
-      }
-      ... on EnterpriseUserAccount {
-        id
-        login
-        name
-        avatarUrl(size: 64)
-      }
+      ...AuthorFields
     }
     labels(first: 50, orderBy: { field: NAME, direction: ASC }) {
       totalCount
@@ -31220,8 +31246,9 @@ export const IssueDetailFieldsFragmentDoc = gql`
       }
     }
   }
-  ${UserFieldsFragmentDoc}
+  ${AuthorFieldsFragmentDoc}
   ${ShortRepositoryFieldsFragmentDoc}
+  ${UserFieldsFragmentDoc}
 `;
 export const PullRequestFieldsFragmentDoc = gql`
   fragment PullRequestFields on PullRequest {
@@ -31247,31 +31274,7 @@ export const PullRequestFieldsFragmentDoc = gql`
       name
     }
     author {
-      ... on Bot {
-        id
-        login
-        avatarUrl(size: 64)
-      }
-      ... on User {
-        ...UserFields
-      }
-      ... on Mannequin {
-        id
-        login
-        avatarUrl(size: 64)
-      }
-      ... on Organization {
-        id
-        login
-        name
-        avatarUrl(size: 64)
-      }
-      ... on EnterpriseUserAccount {
-        id
-        login
-        name
-        avatarUrl(size: 64)
-      }
+      ...AuthorFields
     }
     comments(first: 0) {
       totalCount
@@ -31309,6 +31312,7 @@ export const PullRequestFieldsFragmentDoc = gql`
     }
   }
   ${ShortRepositoryFieldsFragmentDoc}
+  ${AuthorFieldsFragmentDoc}
   ${UserFieldsFragmentDoc}
 `;
 export const PullRequestDetailsFieldsFragmentDoc = gql`
@@ -31350,31 +31354,7 @@ export const PullRequestDetailsFieldsFragmentDoc = gql`
       }
     }
     author {
-      ... on Bot {
-        id
-        login
-        avatarUrl(size: 64)
-      }
-      ... on User {
-        ...UserFields
-      }
-      ... on Mannequin {
-        id
-        login
-        avatarUrl(size: 64)
-      }
-      ... on Organization {
-        id
-        login
-        name
-        avatarUrl(size: 64)
-      }
-      ... on EnterpriseUserAccount {
-        id
-        login
-        name
-        avatarUrl(size: 64)
-      }
+      ...AuthorFields
     }
     comments(first: 0) {
       totalCount
@@ -31407,34 +31387,7 @@ export const PullRequestDetailsFieldsFragmentDoc = gql`
       nodes {
         state
         author {
-          ... on Bot {
-            id
-            login
-            avatarUrl(size: 64)
-          }
-          ... on User {
-            id
-            login
-            name
-            avatarUrl(size: 64)
-          }
-          ... on Mannequin {
-            id
-            login
-            avatarUrl(size: 64)
-          }
-          ... on Organization {
-            id
-            login
-            name
-            avatarUrl(size: 64)
-          }
-          ... on EnterpriseUserAccount {
-            id
-            login
-            name
-            avatarUrl(size: 64)
-          }
+          ...AuthorFields
         }
       }
     }
@@ -31455,6 +31408,7 @@ export const PullRequestDetailsFieldsFragmentDoc = gql`
     }
   }
   ${ShortRepositoryFieldsFragmentDoc}
+  ${AuthorFieldsFragmentDoc}
   ${UserFieldsFragmentDoc}
 `;
 export const PullRequestCommitFieldsFragmentDoc = gql`
