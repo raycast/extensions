@@ -139,6 +139,9 @@ export const COLORS: CssColor[] = [
   { name: "Yellow Green", value: "#9acd32" },
 ];
 
+/**
+ * Converts a hex color string to a CIE (x, y) color.
+ */
 export function hexToXy(color: string): Xy {
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(color);
   const [red, green, blue] = result
@@ -149,10 +152,10 @@ export function hexToXy(color: string): Xy {
 
 /**
  * Converts a CIE (x, y) color to an RGB color string.
+ *
  * @link https://github.com/diyhue/diyHueUI/blob/97d2c53b0ab053dc44b1de6b499724652a14b504/src/color.js
  * @param {Xy} xy
- * @param {number} brightness
- * @returns {string}
+ * @param brightness Brightness of the light (0 – 100)
  */
 export function cieToRgb(xy: Xy, brightness = 100): Rgb {
   // TODO: Fix not handling some colors well (e.g. 'Maroon' turns purple)
@@ -224,6 +227,7 @@ export function xyToRgbHexString(xy: Xy, brightness = 100) {
 
 /**
  * Converts color temperature in mireds to an RGB object
+ *
  * @param {number} mireds Philips Hue color temperature value (153-500)
  * @param {number} brightness Brightness of the light (1-100)
  * @returns {string} RGB string
@@ -290,10 +294,6 @@ export function rgbToCie(red: number, green: number, blue: number): Xy {
   if (isNaN(y)) y = 0;
 
   return { x, y };
-}
-
-export function hexStringToHexNumber(hex: string): number {
-  return parseInt(hex.slice(1) + "FF", 16);
 }
 
 export function createGradientPngUri(colors: string[], width: number, height: number): Promise<string> {

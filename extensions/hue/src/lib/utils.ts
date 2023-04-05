@@ -1,8 +1,7 @@
 import { getPreferenceValues, Icon, Image, showToast, Toast } from "@raycast/api";
-import { CssColor, Group, Light, Scene } from "./types";
+import { CssColor, Group, Light } from "./types";
 import { discovery, v3 } from "node-hue-api";
 import { APP_NAME, BRIGHTNESSES, MIRED_MAX, MIRED_MIN, MIRED_STEP } from "./constants";
-import HueClient from "./HueClient";
 import Style = Toast.Style;
 
 declare global {
@@ -130,6 +129,7 @@ export async function getUsernameFromBridge(ipAddress: string): Promise<string> 
 
   return createdUser.username;
 }
+
 /**
  * Because the Hue API does not return the exact brightness value that was set,
  * we need to find the closest brightness so that we can update the UI accordingly.
