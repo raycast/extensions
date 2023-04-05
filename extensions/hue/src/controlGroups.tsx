@@ -236,7 +236,7 @@ function SetColorAction(props: { group: Group; onSet: (color: CssColor) => void 
 }
 
 function IncreaseColorTemperatureAction(props: { group: Group; onIncrease?: () => void }) {
-  // if (props.group.action.ct >= MIREK_MIN) {
+  // if (props.group.action.ct >= MIRED_MIN) {
   //   return null;
   // }
 
@@ -251,7 +251,7 @@ function IncreaseColorTemperatureAction(props: { group: Group; onIncrease?: () =
 }
 
 function DecreaseColorTemperatureAction(props: { group: Group; onDecrease?: () => void }) {
-  // if (props.group.action.ct <= MIREK_MIN) {
+  // if (props.group.action.ct <= MIRED_MIN) {
   //   return null;
   // }
 

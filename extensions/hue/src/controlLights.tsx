@@ -7,7 +7,7 @@ import {
   getLightIcon,
 } from "./lib/utils";
 import { CssColor, Group, Light } from "./lib/types";
-import { BRIGHTNESS_MAX, BRIGHTNESS_MIN, BRIGHTNESSES, MIREK_MAX, MIREK_MIN } from "./lib/constants";
+import { BRIGHTNESS_MAX, BRIGHTNESS_MIN, BRIGHTNESSES, MIRED_MAX, MIRED_MIN } from "./lib/constants";
 import ManageHueBridge from "./components/ManageHueBridge";
 import UnlinkAction from "./components/UnlinkAction";
 import { SendHueMessage, useHue } from "./hooks/useHue";
@@ -208,7 +208,7 @@ function SetColorAction(props: { light: Light; onSet: (color: CssColor) => void 
 }
 
 function IncreaseColorTemperatureAction(props: { light: Light; onIncrease?: () => void }) {
-  if (props.light.color_temperature.mirek <= (props.light.color_temperature.mirek_schema?.mirek_minimum ?? MIREK_MIN)) {
+  if (props.light.color_temperature.mirek <= (props.light.color_temperature.mirek_schema?.mirek_minimum ?? MIRED_MIN)) {
     return null;
   }
 
@@ -223,7 +223,7 @@ function IncreaseColorTemperatureAction(props: { light: Light; onIncrease?: () =
 }
 
 function DecreaseColorTemperatureAction(props: { light: Light; onDecrease?: () => void }) {
-  if (props.light.color_temperature.mirek >= (props.light.color_temperature.mirek_schema?.mirek_maximum ?? MIREK_MAX)) {
+  if (props.light.color_temperature.mirek >= (props.light.color_temperature.mirek_schema?.mirek_maximum ?? MIRED_MAX)) {
     return null;
   }
 

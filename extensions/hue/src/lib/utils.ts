@@ -1,7 +1,7 @@
 import { getPreferenceValues, Icon, Image, showToast, Toast } from "@raycast/api";
 import { CssColor, Group, Light, Scene } from "./types";
 import { discovery, v3 } from "node-hue-api";
-import { APP_NAME, BRIGHTNESSES, MIREK_MAX, MIREK_MIN, MIREK_STEP } from "./constants";
+import { APP_NAME, BRIGHTNESSES, MIRED_MAX, MIRED_MIN, MIRED_STEP } from "./constants";
 import HueClient from "./HueClient";
 import Style = Toast.Style;
 
@@ -150,7 +150,7 @@ export function calculateAdjustedBrightness(brightness: number, direction: "incr
   );
 }
 
-export function calculateAdjustedColorTemperature(mirek: number, direction: "increase" | "decrease") {
-  const newColorTemperature = direction === "increase" ? mirek - MIREK_STEP : mirek + MIREK_STEP;
-  return Math.min(Math.max(MIREK_MIN, newColorTemperature), MIREK_MAX);
+export function calculateAdjustedColorTemperature(mired: number, direction: "increase" | "decrease") {
+  const newColorTemperature = direction === "increase" ? mired - MIRED_STEP : mired + MIRED_STEP;
+  return Math.min(Math.max(MIRED_MIN, newColorTemperature), MIRED_MAX);
 }

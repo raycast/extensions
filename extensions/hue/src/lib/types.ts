@@ -217,14 +217,14 @@ export type Light = {
     /**
      * integer (153 - 500)
      *
-     * Color temperature in mirek or null when the light color is not on the ct spectrum.
+     * Color temperature in mired or null when the light color is not on the ct spectrum.
      */
     mirek: number;
 
     /**
      * Can only be read, not written. Hence, it is not required.
      * TODO: Maybe make separate type for this?
-     * Indication whether the value presented in mirek is valid
+     * Indication whether the value presented in mired is valid
      */
     mirek_valid?: boolean;
 
@@ -398,7 +398,7 @@ export type LightRequest = {
     /**
      * integer (153 - 500)
      *
-     * Color temperature in mirek or null when the light color is not on the ct spectrum.
+     * Color temperature in mired or null when the light color is not on the ct spectrum.
      */
     mirek?: number;
   };
@@ -409,7 +409,7 @@ export type LightRequest = {
     /**
      * integer (maximum: 347)
      *
-     * Mirek delta to current mirek. Clip at mirek_minimum and mirek_maximum of mirek_schema.
+     * mired delta to current mired. Clip at mired_minimum and mired_maximum of mired_schema.
      */
     mirek_delta?: number;
   };
@@ -554,7 +554,7 @@ export type Scene = {
         /**
          * integer (153 - 500)
          *
-         * Color temperature in mirek or null when the light color is not on the ct spectrum.
+         * Color temperature in mired or null when the light color is not on the ct spectrum.
          */
         mirek: number;
       };

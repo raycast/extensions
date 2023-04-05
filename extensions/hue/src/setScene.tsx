@@ -5,13 +5,12 @@ import ManageHueBridge from "./components/ManageHueBridge";
 import { SendHueMessage, useHue } from "./hooks/useHue";
 import HueClient from "./lib/HueClient";
 import { useEffect, useState } from "react";
-import { createGradientPngUri, mirekToHexString, xyToRgbHexString } from "./lib/colors";
+import { createGradientPngUri, miredToHexString, xyToRgbHexString } from "./lib/colors";
+import { MIRED_DEFAULT } from "./lib/constants";
 import Style = Toast.Style;
 
 type ResourceId = string;
 type GradientUri = string;
-
-const DIMMING_ONLY_MIRED_VALUE = 350;
 
 function getColorsFromScene(scene: Scene): string[] {
   if (scene.palette !== undefined) {
@@ -22,12 +21,12 @@ function getColorsFromScene(scene: Scene): string[] {
     }
     if (scene.palette.color_temperature?.length ?? 0 > 0) {
       return scene.palette.color_temperature.map((color_temperature) => {
-        return mirekToHexString(color_temperature.color_temperature.mirek, color_temperature.dimming.brightness);
+        return miredToHexString(color_temperature.color_temperature.mirek, color_temperature.dimming.brightness);
       });
     }
     if (scene.palette.dimming?.length ?? 0 > 0) {
       return scene.palette.dimming.map((dimming) => {
-        return mirekToHexString(DIMMING_ONLY_MIRED_VALUE, dimming.brightness);
+        return miredToHexString(MIRED_DEFAULT, dimming.brightness);
       });
     }
   }
@@ -39,7 +38,7 @@ function getColorsFromScene(scene: Scene): string[] {
       })
       .map((action) => {
         if (action.action.color_temperature?.mirek !== undefined) {
-          return mirekToHexString(action.action.color_temperature.mirek, action.action.dimming?.brightness);
+          return miredToHexString(action.action.color_temperature.mirek, action.action.dimming?.brightness);
         }
         if (action.action.color?.xy !== undefined) {
           return xyToRgbHexString(action.action.color.xy, action.action.dimming?.brightness);

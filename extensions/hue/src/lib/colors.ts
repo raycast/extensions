@@ -1,10 +1,7 @@
 import { CssColor, Rgb, Xy } from "./types";
 import chroma from "chroma-js";
 import Jimp from "jimp";
-
-// The output with the given mirek is too warm, so we add an arbitrary value to make it cooler
-const MIREK_ADJUSTMENT = -50;
-const DARKEN_FACTOR = 3;
+import { CHROMA_DARKEN_FACTOR, MIRED_ADJUSTMENT } from "./constants";
 
 export const COLORS: CssColor[] = [
   { name: "Alice Blue", value: "#f0f8ff" },
@@ -226,39 +223,41 @@ export function xyToRgbHexString(xy: Xy, brightness = 100) {
 }
 
 /**
- * Converts a CT to an RGB object
- * @param {number} mireds Philips Hue CT value
+ * Converts color temperature in mireds to an RGB object
+ * @param {number} mireds Philips Hue color temperature value (153-500)
  * @param {number} brightness Brightness of the light (1-100)
  * @returns {string} RGB string
  */
-export function mirekToRgb(mireds: number, brightness = 100): Rgb {
-  const hecTemp = 1_000_000 / (mireds + MIREK_ADJUSTMENT);
+export function miredToRgb(mireds: number, brightness = 100): Rgb {
+  const hecTemp = 1_000_000 / (mireds + MIRED_ADJUSTMENT);
 
   const [r, g, b] = chroma
     .temperature(hecTemp)
-    .darken((1 - brightness / 100) * DARKEN_FACTOR)
+    .darken((1 - brightness / 100) * CHROMA_DARKEN_FACTOR)
     .rgb();
 
   return { r, g, b };
 }
 
 /**
- * Converts a CT to an RGB string
- * @param {number} mireds Philips Hue CT value
+ * Converts color temperature in mireds to an RGB string
+ *
+ * @param {number} mireds Philips Hue color temperature value (153-500)
  * @param {number} brightness Brightness of the light (1-100)
  */
-export function mirekToRgbString(mireds: number, brightness = 100) {
-  const rgb = mirekToRgb(mireds, brightness);
+export function miredToRgbString(mireds: number, brightness = 100) {
+  const rgb = miredToRgb(mireds, brightness);
   return `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
 }
 
 /**
- * Converts a CT to a hex color string
- * @param mireds
- * @param brightness
+ * Converts color temperature in mireds to a hex string
+ *
+ * @param {number} mireds Philips Hue color temperature value (153-500)
+ * @param brightness Brightness of the light (1-100)
  */
-export function mirekToHexString(mireds: number, brightness = 100) {
-  const rgb = mirekToRgb(mireds, brightness);
+export function miredToHexString(mireds: number, brightness = 100) {
+  const rgb = miredToRgb(mireds, brightness);
   const r = rgb.r.toString(16).padStart(2, "0");
   const g = rgb.g.toString(16).padStart(2, "0");
   const b = rgb.b.toString(16).padStart(2, "0");
@@ -309,7 +308,7 @@ export function createGradientPngUri(colors: string[], width: number, height: nu
           .darken(factor * factor)
           .rgba(true);
 
-        image.setPixelColor(Jimp.rgbaToInt(rgba[0], rgba[1], rgba[2], 255 * rgba[3]), x, y);
+        image.setPixelColor(Jimp.rgbaToInt(rgba[0], rgba[1], rgba[2], 254 * rgba[3]), x, y);
       });
 
       image.getBase64(Jimp.MIME_PNG, (err, base64) => {
