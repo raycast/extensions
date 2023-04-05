@@ -1,6 +1,7 @@
 import { Action, ActionPanel, Color, Icon, Image, List } from "@raycast/api";
 import { Availability, getAvailability, setAvailability } from "./api/presence";
 import { usePromise } from "@raycast/utils";
+import { catchAndToastError } from "./api/util";
 
 export interface Presence {
   label: string;
@@ -23,10 +24,10 @@ export const presences: Presence[] = [
 ];
 
 function PresenceItem({ presence, isCurrent, onSet }: { presence: Presence; isCurrent: boolean; onSet: () => void }) {
-  const onAction = async () => {
+  const onAction = async () => catchAndToastError(async () => {
     await setAvailability(presence.availability);
     onSet();
-  };
+  });
   return (
     <List.Item
       title={presence.label}
@@ -41,8 +42,12 @@ function PresenceItem({ presence, isCurrent, onSet }: { presence: Presence; isCu
   );
 }
 
+async function fetchAvailability() {
+  return await catchAndToastError(getAvailability, undefined);
+}
+
 export default function SetPresence() {
-  const { isLoading, data: currentAvailability, revalidate } = usePromise(getAvailability);
+  const { isLoading, data: currentAvailability, revalidate } = usePromise(fetchAvailability);
   return (
     <List isLoading={isLoading}>
       {presences.map((presence) => (

@@ -1,4 +1,4 @@
-import { bodyOf, get, post } from "./api";
+import { bodyOf, failIfNotOk, get, post } from "./api";
 import { showHUD } from "@raycast/api";
 
 export type Availability = "Available" | "Busy" | "DoNotDisturb" | "BeRightBack" | "Away" | "Offline";
@@ -30,24 +30,27 @@ async function getPresence() {
   const response = await get({
     path: "/me/presence",
   });
+  await failIfNotOk(response, "Getting presence");
   return bodyOf<Presence>(response);
 }
 
 async function setPreferredPresence(availability: Availability) {
-  await post({
+  const response = await post({
     path: "/me/presence/setUserPreferredPresence",
     body: {
       availability,
       activity: activityFor(availability),
     },
   });
+  await failIfNotOk(response, "Setting presence");
 }
 
 export async function clearPreferredPresence() {
-  await post({
+  const response = await post({
     path: "/me/presence/clearUserPreferredPresence",
     body: {},
   });
+  await failIfNotOk(response, "Clearing presence");
 }
 
 export async function getAvailability() {
