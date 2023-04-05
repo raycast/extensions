@@ -2,7 +2,8 @@ import { Detail } from "@raycast/api";
 import { createContext, PropsWithChildren, useContext, useEffect, useMemo, useRef } from "react";
 import UnlockForm from "~/components/UnlockForm";
 import { useBitwarden } from "~/context/bitwarden";
-import { getSavedSession, Storage, useSessionReducer } from "~/context/session/utils";
+import { useSessionReducer } from "~/context/session/reducer";
+import { getSavedSession, Storage } from "~/context/session/utils";
 import { captureException } from "~/utils/development";
 import { hashMasterPasswordForReprompting } from "~/utils/passwords";
 
