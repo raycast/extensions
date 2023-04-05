@@ -52,17 +52,11 @@ export const VaultProvider = ({ children }: PropsWithChildren) => {
         bitwarden.listItems(sessionToken),
         bitwarden.listFolders(sessionToken),
       ]);
-
       items.sort(favoriteItemsFirstSorter);
       setState({ isLoading: false, items, folders });
 
       publishItems(items);
-
-      try {
-        cacheVault(items, folders);
-      } catch (error) {
-        captureException("Failed to cache vault", error);
-      }
+      cacheVault(items, folders);
     } catch (error) {
       await showToast(Toast.Style.Failure, "Failed to load vault.");
       captureException("Failed to load vault items", error);

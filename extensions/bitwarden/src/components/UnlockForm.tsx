@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Form, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, showToast, Toast } from "@raycast/api";
 import { useRef, useState } from "react";
 import { useBitwarden } from "~/context/bitwarden";
 import { captureException } from "~/utils/development";
@@ -6,15 +6,17 @@ import useVaultMessages from "~/utils/hooks/useVaultMessages";
 
 export type UnlockFormProps = {
   onUnlock: (password: string) => Promise<void>;
+  lockReason?: string;
 };
 
 /** Form for unlocking or logging in to the Bitwarden vault. */
 const UnlockForm = (props: UnlockFormProps) => {
-  const { onUnlock } = props;
+  const { onUnlock, lockReason: lockReasonProp } = props;
+
   const bitwarden = useBitwarden();
   const [isLoading, setLoading] = useState(false);
   const { userMessage, serverMessage, shouldShowServer } = useVaultMessages();
-  const lockReason = useRef(bitwarden.lockReason).current;
+  const lockReason = useRef(lockReasonProp ?? bitwarden.lockReason).current;
 
   async function onSubmit({ password }: { password: string }) {
     if (password.length == 0) {
@@ -53,14 +55,19 @@ const UnlockForm = (props: UnlockFormProps) => {
       actions={
         <ActionPanel>
           {!isLoading && (
-            <Action.SubmitForm title="Unlock" onSubmit={onSubmit} shortcut={{ key: "enter", modifiers: [] }} />
+            <Action.SubmitForm
+              title="Unlock"
+              onSubmit={onSubmit}
+              icon={Icon.LockUnlocked}
+              shortcut={{ key: "enter", modifiers: [] }}
+            />
           )}
         </ActionPanel>
       }
     >
       {shouldShowServer && <Form.Description title="Server URL" text={serverMessage} />}
       <Form.Description title="Vault Status" text={userMessage} />
-      {lockReason && <Form.Description title="Reason" text={lockReason} />}
+      {!!lockReason && <Form.Description title="Reason" text={lockReason} />}
       <Form.PasswordField autoFocus id="password" title="Master Password" />
     </Form>
   );

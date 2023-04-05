@@ -11,10 +11,11 @@ const initialState: SessionState = {
   isAuthenticated: false,
   passwordHash: undefined,
   lastActivityTime: undefined,
+  lockReason: undefined,
 };
 
 type SessionReducerActions =
-  | { type: "lock" }
+  | { type: "lock"; lockReason?: string }
   | { type: "unlock"; token: string; passwordHash: string }
   | { type: "logout" }
   | { type: "vaultTimeout" }
@@ -24,15 +25,22 @@ type SessionReducerActions =
       passwordHash?: string;
       lastActivityTime?: Date;
       shouldLockVault?: boolean;
+      lockReason?: string;
     }
   | { type: "failedLoadSavedState" };
 
 export const useSessionReducer = () => {
   return useReducer((state: SessionState, action: SessionReducerActions): SessionState => {
-    console.log({ state, action });
     switch (action.type) {
       case "lock": {
-        return { ...state, token: undefined, passwordHash: undefined, isLoading: false, isLocked: true };
+        return {
+          ...state,
+          token: undefined,
+          passwordHash: undefined,
+          isLoading: false,
+          isLocked: true,
+          lockReason: action.lockReason,
+        };
       }
       case "unlock": {
         return {
@@ -41,6 +49,7 @@ export const useSessionReducer = () => {
           passwordHash: action.passwordHash,
           isLocked: false,
           isAuthenticated: true,
+          lockReason: undefined,
         };
       }
       case "logout": {
@@ -59,6 +68,7 @@ export const useSessionReducer = () => {
           isLoading: false,
           isLocked: action.shouldLockVault || !hasToken,
           isAuthenticated: hasToken,
+          lockReason: action.lockReason,
         };
       }
       case "failedLoadSavedState": {
