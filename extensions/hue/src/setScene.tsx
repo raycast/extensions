@@ -132,7 +132,7 @@ function Scene(props: {
     <Grid.Item
       title={props.scene.metadata.name}
       keywords={[props.group.metadata.name]}
-      content={props.gradient ?? Icon.XMarkCircle}
+      content={props.gradient ?? ""}
       actions={
         <ActionPanel>
           <SetSceneAction
