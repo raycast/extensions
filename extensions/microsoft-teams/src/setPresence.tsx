@@ -24,10 +24,11 @@ export const presences: Presence[] = [
 ];
 
 function PresenceItem({ presence, isCurrent, onSet }: { presence: Presence; isCurrent: boolean; onSet: () => void }) {
-  const onAction = async () => catchAndToastError(async () => {
-    await setAvailability(presence.availability);
-    onSet();
-  });
+  const onAction = async () =>
+    catchAndToastError(async () => {
+      await setAvailability(presence.availability);
+      onSet();
+    });
   return (
     <List.Item
       title={presence.label}

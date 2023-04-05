@@ -46,10 +46,11 @@ export default function SetStatus() {
       return true;
     }, false);
   };
-  const resetStatus = async () => catchAndToastError(async () => {
-    await clearStatus();
-    await showHUD("Cleared status");
-  });
+  const resetStatus = async () =>
+    catchAndToastError(async () => {
+      await clearStatus();
+      await showHUD("Cleared status");
+    });
   return (
     <Form
       actions={
