@@ -1,0 +1,3 @@
+# linkding
+
+extension for linkding
