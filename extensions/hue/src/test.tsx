@@ -1,14 +1,14 @@
 import { Grid } from "@raycast/api";
 import React, { useEffect, useState } from "react";
-import { createGradientUri } from "./lib/colors";
+import { createGradientPngUri } from "./lib/colors";
 
 export default function Command() {
   const [gradientOne, setGradientOne] = useState("");
   const [gradientTwo, setGradientTwo] = useState("");
 
   useEffect(() => {
-    createGradientUri(["blue", "orange"], 269, 154).then((data) => setGradientOne(data));
-    createGradientUri(["orange"], 269, 153).then((data) => setGradientTwo(data));
+    createGradientPngUri(["blue", "orange"], 269, 154).then((data) => setGradientOne(data));
+    createGradientPngUri(["orange"], 269, 153).then((data) => setGradientTwo(data));
   }, []);
 
   return (

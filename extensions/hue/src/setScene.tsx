@@ -5,7 +5,7 @@ import ManageHueBridge from "./components/ManageHueBridge";
 import { SendHueMessage, useHue } from "./hooks/useHue";
 import HueClient from "./lib/HueClient";
 import { useEffect, useState } from "react";
-import { cieToRgbHexString, createGradientUri, mirekToRgbHexString } from "./lib/colors";
+import { createGradientPngUri, mirekToHexString, xyToRgbHexString } from "./lib/colors";
 import Style = Toast.Style;
 
 type ResourceId = string;
@@ -16,13 +16,13 @@ function getColorsFromScene(scene: Scene): string[] {
     if (scene.palette.color?.length ?? 0 > 0) {
       return scene.palette.color.map((color) => {
         // TODO: Determine brightness from dimming
-        return cieToRgbHexString(color.color.xy);
+        return xyToRgbHexString(color.color.xy);
       });
     }
     if (scene.palette.color_temperature?.length ?? 0 > 0) {
-      return scene.palette.color_temperature.map((color) => {
         // TODO: Determine brightness from dimming
-        return mirekToRgbHexString(color.color_temperature.mirek);
+      return scene.palette.color_temperature.map((color_temperature) => {
+        return mirekToHexString(color_temperature.color_temperature.mirek);
       });
     }
     if (scene.palette.dimming?.length ?? 0 > 0) {
@@ -41,11 +41,11 @@ function getColorsFromScene(scene: Scene): string[] {
       .map((action) => {
         if (action.action.color_temperature?.mirek !== undefined) {
           // TODO: Determine brightness from dimming
-          return cieToRgbHexString({ x: 0.2, y: 0.2 });
+          return mirekToHexString(action.action.color_temperature.mirek);
         }
         if (action.action.color?.xy !== undefined) {
           // TODO: Determine brightness from dimming
-          return cieToRgbHexString(action.action.color.xy);
+          return xyToRgbHexString(action.action.color.xy);
         }
         throw new Error("Invalid state.");
       });
@@ -64,7 +64,7 @@ export default function SetScene() {
         const colors = getColorsFromScene(scene);
 
         if (colors.length > 0) {
-          const gradientUri = await createGradientUri(colors, 269, 154);
+          const gradientUri = await createGradientPngUri(colors, 269, 154);
           setGradients((gradients) => new Map(gradients).set(scene.id, gradientUri));
         }
       }
@@ -81,7 +81,7 @@ export default function SetScene() {
         return groupType.map((group: Group): JSX.Element => {
           const groupScenes =
             scenes.filter((scene: Scene) => {
-              return scene.group.rid == group.id;
+              return scene.group.rid === group.id;
             }) ?? [];
 
           return (

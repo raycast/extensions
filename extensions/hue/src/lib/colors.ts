@@ -148,24 +148,6 @@ export function hexToXy(color: string): Xy {
 }
 
 /**
- * Lightens or darkens a color by a percentage.
- * @link https://stackoverflow.com/questions/5560248/programmatically-lighten-or-darken-a-hex-color-or-rgb-and-blend-colors
- * @param r
- * @param g
- * @param b
- * @param percentage
- */
-function logShadeRgb(r: number, g: number, b: number, percentage: number) {
-  const multiplier = percentage < 0 ? 0 : percentage * 255 ** 2;
-  const signedPercentage = percentage < 0 ? 1 + percentage : 1 - percentage;
-
-  const R = Math.round((signedPercentage * r ** 2 + multiplier) ** 0.5);
-  const G = Math.round((signedPercentage * g ** 2 + multiplier) ** 0.5);
-  const B = Math.round((signedPercentage * b ** 2 + multiplier) ** 0.5);
-  return [R, G, B];
-}
-
-/**
  * Converts a CIE (x, y) color to an RGB color string.
  * @link https://github.com/diyhue/diyHueUI/blob/97d2c53b0ab053dc44b1de6b499724652a14b504/src/color.js
  * @param {Xy} xy
@@ -233,7 +215,7 @@ export function cieToRgbString(xy: Xy, brightness = 100) {
   return `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
 }
 
-export function cieToRgbHexString(xy: Xy, brightness = 100) {
+export function xyToRgbHexString(xy: Xy, brightness = 100) {
   const rgb = cieToRgb(xy, brightness);
   return `#${rgb.r.toString(16).padStart(2, "0")}${rgb.g.toString(16).padStart(2, "0")}${rgb.b
     .toString(16)
@@ -270,16 +252,27 @@ export function mirekToRgb(mireds: number, brightness = 100): Rgb {
   };
 }
 
+/**
+ * Converts a CT to an RGB string
+ * @param {number} mireds Philips Hue CT value
+ * @param {number} brightness Brightness of the light (1-100)
+ */
 export function mirekToRgbString(mireds: number, brightness = 100) {
   const rgb = mirekToRgb(mireds, brightness);
   return `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
 }
 
-export function mirekToRgbHexString(mireds: number, brightness = 100) {
+/**
+ * Converts a CT to a hex color string
+ * @param mireds
+ * @param brightness
+ */
+export function mirekToHexString(mireds: number, brightness = 100) {
   const rgb = mirekToRgb(mireds, brightness);
-  return `#${rgb.r.toString(16).padStart(2, "0")}${rgb.g.toString(16).padStart(2, "0")}${rgb.b
-    .toString(16)
-    .padStart(2, "0")}`;
+  const r = rgb.r.toString(16).padStart(2, "0");
+  const g = rgb.g.toString(16).padStart(2, "0");
+  const b = rgb.b.toString(16).padStart(2, "0");
+  return `#${r}${g}${b}`;
 }
 
 /**
@@ -314,7 +307,7 @@ export function hexStringToHexNumber(hex: string): number {
   return parseInt(hex.slice(1) + "FF", 16);
 }
 
-export function createGradientUri(colors: string[], width: number, height: number): Promise<string> {
+export function createGradientPngUri(colors: string[], width: number, height: number): Promise<string> {
   return new Promise((resolve, reject) => {
     new Jimp(width, height, (err, image) => {
       if (err) reject(err);

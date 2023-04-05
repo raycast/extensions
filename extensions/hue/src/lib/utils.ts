@@ -3,6 +3,7 @@ import { CssColor, Group, Light, Scene } from "./types";
 import { discovery, v3 } from "node-hue-api";
 import { APP_NAME, BRIGHTNESSES, MIREK_MAX, MIREK_MIN, MIREK_STEP } from "./constants";
 import HueClient from "./HueClient";
+import Style = Toast.Style;
 
 declare global {
   interface Array<T extends { id: string }> {
@@ -44,14 +45,6 @@ export function getGroupLights(group: Group, lights: Light[]): Light[] {
   );
 }
 
-export function getGroupOnState(group: Group, lights: Light[]): boolean {
-  return getGroupLights(group, lights).some((light) => light.on.on);
-}
-
-export function mapRange(value: number, from: [number, number], to: [number, number]) {
-  return to[0] + ((value - from[0]) * (to[1] - to[0])) / (from[1] - from[0]);
-}
-
 export function getLightIcon(light: Light): Image {
   // TODO: Use dimming state and color(_temperature) to determine icon color
   // const color = getRgbFrom(lightState);
@@ -76,8 +69,6 @@ export function getIconForColor(color: CssColor): Image {
 export function getTransitionTimeInMs(): number {
   return Math.round(parseInt(getPreferenceValues().transitionTime) / 100);
 }
-
-import Style = Toast.Style;
 
 export function handleError(error: Error): void {
   console.debug({ name: error.name, message: error.message });
@@ -139,54 +130,6 @@ export async function getUsernameFromBridge(ipAddress: string): Promise<string> 
 
   return createdUser.username;
 }
-
-export async function turnOffAllLights() {
-  // const api = await getAuthenticatedApi();
-  // const lights = await api.lights.getAll();
-  // for await (const light of lights) {
-  //   await api.lights.setLightState(
-  //     light.id,
-  //     new v3.model.lightStates.LightState().off().transitiontime(getTransitionTimeInMs())
-  //   );
-  // }
-}
-
-export async function turnGroupOn(hueClient: HueClient, group: Group) {
-  // const api = await apiPromise;
-  // await api.groups.setGroupState(
-  //   group.id,
-  //   new v3.model.lightStates.GroupLightState().on().transitiontime(getTransitionTimeInMs())
-  // );
-}
-
-export async function turnGroupOff(hueClient: HueClient, group: Group) {
-  // const api = await apiPromise;
-  // await api.groups.setGroupState(group.id, new v3.model.lightStates.GroupLightState().off());
-}
-
-export async function setGroupBrightness(hueClient: HueClient, group: Group, percentage: number) {
-  // const api = await apiPromise;
-  // const newLightState = new v3.model.lightStates.GroupLightState()
-  //   .on()
-  //   .bri(percentage)
-  //   .transitiontime(getTransitionTimeInMs());
-  // await api.groups.setGroupState(group.id, newLightState);
-}
-
-export async function setLightColor(hueClient: HueClient, light: Light, color: string) {
-  // const api = await apiPromise;
-  // const xy = hexToXy(color);
-  // const newLightState = new v3.model.lightStates.LightState().on().xy(xy).transitiontime(getTransitionTimeInMs());
-  // await api.lights.setLightState(light.id, newLightState);
-}
-
-export async function setGroupColor(hueClient: HueClient, group: Group, color: string) {
-  // const api = await apiPromise;
-  // const xy = hexToXy(color);
-  // const newLightState = new v3.model.lightStates.GroupLightState().on().xy(xy).transitiontime(getTransitionTimeInMs());
-  // await api.groups.setGroupState(group.id, newLightState);
-}
-
 /**
  * Because the Hue API does not return the exact brightness value that was set,
  * we need to find the closest brightness so that we can update the UI accordingly.
@@ -210,12 +153,4 @@ export function calculateAdjustedBrightness(brightness: number, direction: "incr
 export function calculateAdjustedColorTemperature(mirek: number, direction: "increase" | "decrease") {
   const newColorTemperature = direction === "increase" ? mirek - MIREK_STEP : mirek + MIREK_STEP;
   return Math.min(Math.max(MIREK_MIN, newColorTemperature), MIREK_MAX);
-}
-
-export async function setScene(hueClient: HueClient, scene: Scene) {
-  // const api = await apiPromise;
-  // await api.groups.setGroupState(
-  //   0,
-  //   new v3.model.lightStates.GroupLightState().scene(scene.id).transitiontime(getTransitionTimeInMs())
-  // );
 }

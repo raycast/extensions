@@ -1,11 +1,10 @@
 import { closeMainWindow, showHUD } from "@raycast/api";
-import { turnOffAllLights } from "./lib/utils";
 import { CouldNotConnectToHueBridgeError, NoHueBridgeConfiguredError } from "./lib/errors";
 
 export default async () => {
   try {
     await closeMainWindow();
-    await turnOffAllLights();
+    // TODO: Turn off all lights
     await showHUD("Turned off all lights");
   } catch (error) {
     if (error instanceof NoHueBridgeConfiguredError) return showHUD("No Hue bridge configured");
