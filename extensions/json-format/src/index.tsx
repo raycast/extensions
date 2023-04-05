@@ -1,36 +1,71 @@
-import { popToRoot, ActionPanel, Icon, Form, Action } from '@raycast/api';
+import {
+  ActionPanel,
+  Icon,
+  Form,
+  Action,
+  showToast,
+  Toast,
+} from '@raycast/api';
+import { useState } from 'react';
 
-import { formatJS } from './utils';
+import { copyFormattedJs, formatJS } from './utils';
 
 interface FormInput {
   input: string;
+  result: string;
 }
 
 export default function main() {
+  const [input, setInput] = useState<string>('');
+  const [result, setResult] = useState<string>('');
+
   return (
     <Form
       actions={
         <ActionPanel>
-          <FormatAction />
+          <Action.SubmitForm
+            title="Format"
+            icon={Icon.Clipboard}
+            onSubmit={async (values: FormInput) => {
+              const out = formatJS(values.input);
+              await copyFormattedJs(out);
+            }}
+          />
+          <Action.SubmitForm
+            title="View Result"
+            icon={Icon.Checkmark}
+            onSubmit={async (values: FormInput) => {
+              const out = formatJS(values.input);
+              try {
+                JSON.parse(out);
+              } catch (err) {
+                await showToast({
+                  style: Toast.Style.Failure,
+                  title: 'Invalid input',
+                });
+                return;
+              }
+
+              setResult(out);
+            }}
+          />
         </ActionPanel>
       }
     >
-      <Form.TextArea id="input" title="Input" placeholder="Paste JSON here…" />
+      <Form.TextField
+        id="input"
+        title="Input"
+        placeholder="Paste JSON here…"
+        value={input}
+        onChange={setInput}
+      />
+      <Form.TextArea
+        id="result"
+        title="Result"
+        placeholder="Command + Shift + Enter to view result..."
+        value={result}
+        onChange={setResult}
+      />
     </Form>
-  );
-}
-
-function FormatAction() {
-  async function handleSubmit(values: FormInput) {
-    const { input } = values;
-    await formatJS(input);
-  }
-
-  return (
-    <Action.SubmitForm
-      icon={Icon.Checkmark}
-      title="Format"
-      onSubmit={handleSubmit}
-    />
   );
 }
