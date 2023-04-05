@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "linkding",
-  "title": "linkding",
+  "title": "Linkding",
   "description": "This is a companion extension for the linkding bookmark service",
   "icon": "command-icon.png",
   "author": "alanlang",
@@ -12,8 +12,8 @@
   "commands": [
     {
       "name": "index",
-      "title": "Search bookmarks in linkding",
-      "description": "Search bookmarks in linkding",
+      "title": "Search Bookmarks in Linkding",
+      "description": "Search Bookmarks in Linkding",
       "mode": "view"
     }
   ],
