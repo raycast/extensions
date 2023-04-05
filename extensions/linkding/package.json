@@ -1,0 +1,57 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "linkding",
+  "title": "linkding",
+  "description": "This is a companion extension for the linkding bookmark service",
+  "icon": "command-icon.png",
+  "author": "alanlang",
+  "categories": [
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Search bookmarks in linkding",
+      "description": "Search bookmarks in linkding",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "baseURL",
+      "label": "linkding url",
+      "description": "Enter your linkding URL",
+      "type": "textfield",
+      "title": "BaseURL",
+      "required": true
+    },
+    {
+      "name": "token",
+      "title": "Token",
+      "description": "Enter your linkding token",
+      "type": "password",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.49.1",
+    "@raycast/utils": "^1.4.8"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "version": "0.0.1"
+}
