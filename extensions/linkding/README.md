@@ -2,7 +2,7 @@
 <h1 align="center">linkding</h1>
 
 <h3 align="center">
-extension for <a href="https://github.com/sissbruecker/linkding">linkding</a>
+The extension for <a href="https://github.com/sissbruecker/linkding">linkding</a>
 </h3>
 
 ![screnshot](./metadata/1.png)
