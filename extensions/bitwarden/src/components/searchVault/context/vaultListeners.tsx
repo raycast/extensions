@@ -36,7 +36,7 @@ const VaultListenersProvider = ({ children }: { children: ReactNode }) => {
 export const useVaultItemPublisher = () => {
   const context = useContext(VaultListenersContext);
   if (context == null) {
-    throw new Error("useGetItemPublisher must be used within a GetVaultItemProvider");
+    throw new Error("useVaultItemPublisher must be used within a VaultListenersProvider");
   }
   return context.publishItems;
 };
@@ -46,7 +46,7 @@ export const useVaultItemSubscriber = () => {
   const context = useContext(VaultListenersContext);
 
   if (context == null) {
-    throw new Error("useGetItemSubscriber must be used within a GetVaultItemProvider");
+    throw new Error("useVaultItemSubscriber must be used within a VaultListenersProvider");
   }
 
   return (itemId: string) => {
