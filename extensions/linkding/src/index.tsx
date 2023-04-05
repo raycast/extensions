@@ -37,10 +37,12 @@ export default function Command() {
 }
 
 function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
+  const title = searchResult.title.length === 0 ? searchResult.website_title : searchResult.title;
+  const subtitle = searchResult.description.length === 0 ? searchResult.description : searchResult.website_description;
   return (
     <List.Item
-      title={searchResult.title}
-      subtitle={searchResult.description}
+      title={title}
+      subtitle={subtitle}
       actions={
         <ActionPanel>
           <ActionPanel.Section>

@@ -5,6 +5,8 @@
 extension for <a href="https://github.com/sissbruecker/linkding">linkding</a>
 </h3>
 
+![screnshot](./metadata/1.png)
+
 # Preferences
 
 | Properties               | Label                  | Value                               | Required | Default | Description                                                                                                      |
