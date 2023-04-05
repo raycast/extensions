@@ -13,6 +13,8 @@ export type Id = string;
 export type GradientUri = string;
 export type GradientCache = Map<Id, GradientUri>;
 
+export type ParsedUpdateEvent = { key: number; value: UpdateEvent };
+
 export type CssColor = {
   name: string;
   value: string;
@@ -788,7 +790,7 @@ export type UpdateEvent = {
   /**
    * The data of the update event, represented as an array of API objects.
    */
-  data: (Light | GroupedLight | Room | Zone | Scene)[];
+  data: Partial<Light | GroupedLight | Room | Zone | Scene>[];
 
   /**
    * A unique identifier for the update event, represented as a UUID string.

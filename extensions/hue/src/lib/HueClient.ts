@@ -2,7 +2,7 @@
 
 import fs from "fs";
 import { environment } from "@raycast/api";
-import { GroupedLight, Light, LightRequest, Method, Room, Scene, SceneRequest, UpdateEvent, Zone } from "./types";
+import { GroupedLight, Light, LightRequest, Method, ParsedUpdateEvent, Room, Scene, SceneRequest, Zone } from "./types";
 import {
   ClientHttp2Session,
   connect,
@@ -13,6 +13,8 @@ import {
 } from "http2";
 import React from "react";
 import RateLimitedQueue from "./RateLimitedQueue";
+import StreamArray from "stream-json/streamers/StreamArray";
+import Chain from "stream-chain";
 
 const DATA_PREFIX = "data: ";
 const CONNECTION_TIMEOUT_MS = 5000;
@@ -240,59 +242,74 @@ export default class HueClient {
       [sensitiveHeaders]: ["hue-application-key"],
     });
 
+    let parser: Chain | null = null;
+
+    const onParsedUpdateEvent = ({ value: updateEvent }: ParsedUpdateEvent) => {
+      updateEvent.data.forEach((resource) => {
+        switch (resource.type) {
+          case "light":
+            this.setLights((prevState) => prevState.updateItem(resource as Light, resource));
+            break;
+          case "grouped_light":
+            this.setGroupedLights((prevState) => prevState.updateItem(resource as GroupedLight, resource));
+            break;
+          case "room":
+            this.setRooms((prevState) => prevState.updateItem(resource as Room, resource));
+            break;
+          case "zone":
+            this.setZones((prevState) => prevState.updateItem(resource as Zone, resource));
+            break;
+          case "scene":
+            this.setScenes((prevState) => prevState.updateItem(resource as Scene, resource));
+        }
+      });
+
+      // Set parser to null so that a new parser is created on the next event.
+      // This is necessary because the parser can only be used once.
+      // If the parser encounters a new JSON array, it will throw an error
+      // because two successive arrays is not valid JSON.
+      parser = null;
+    };
+
     stream.setEncoding("utf8");
 
-    stream.on("data", (data) => {
-      const lines = data.split("\n");
+    stream.on("data", (chunk) => {
+      parser ??= createNewParser(parser, onParsedUpdateEvent);
+
+      const lines = chunk.split("\n");
 
       for (const line of lines) {
         const dataPrefixIndex = line.indexOf(DATA_PREFIX);
         if (dataPrefixIndex === -1) continue;
-
         const dataString: string = line.substring(dataPrefixIndex + DATA_PREFIX.length);
-        const updateEvents: UpdateEvent[] = JSON.parse(dataString);
-
-        updateEvents.forEach((updateEvent) =>
-          updateEvent.data.forEach((resource) => {
-            switch (resource.type) {
-              case "light":
-                this.setLights((prevState: Light[]) => {
-                  return prevState.updateItem(resource as Light, resource);
-                });
-                break;
-              case "grouped_light":
-                this.setGroupedLights((prevState: GroupedLight[]) => {
-                  return prevState.updateItem(resource as GroupedLight, resource);
-                });
-                break;
-              case "room":
-                this.setRooms((prevState: Room[]) => {
-                  return prevState.updateItem(resource as Room, resource);
-                });
-                break;
-              case "zone":
-                this.setZones((prevState: Zone[]) => {
-                  return prevState.updateItem(resource as Zone, resource);
-                });
-                break;
-              case "scene":
-                this.setScenes((prevState: Scene[]) => {
-                  return prevState.updateItem(resource as Scene, resource);
-                });
-            }
-          })
-        );
+        parser.write(dataString);
       }
     });
 
     stream.on("end", () => {
+      parser?.end();
       stream.close();
     });
 
     stream.on("error", (error) => {
       console.error(error);
+      parser?.end();
       stream.close();
     });
-    stream.end();
   }
+}
+
+function createNewParser(parser: Chain | null, callback: (data: ParsedUpdateEvent) => void): Chain {
+  parser = StreamArray.withParser();
+
+  parser.on("data", (data) => {
+    callback(data);
+    parser = null;
+  });
+
+  parser.on("error", (err) => {
+    console.error(`Parser error: ${err}`);
+  });
+
+  return parser;
 }
