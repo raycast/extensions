@@ -59,17 +59,17 @@ export default function SetScene() {
   const [gradients, setGradients] = useState(new Map<ResourceId, GradientUri>());
 
   useEffect(() => {
-    scenes.forEach(async (scene: Scene) => {
-      const colors = getColorsFromScene(scene);
+    (async () => {
+      for (const scene of scenes) {
+        const colors = getColorsFromScene(scene);
 
-      if (colors.length === 0) {
-        return;
+        if (colors.length > 0) {
+          const gradientUri = await createGradientUri(colors, 269, 154);
+          setGradients((gradients) => new Map(gradients).set(scene.id, gradientUri));
+        }
       }
-
-      const gradientUri = await createGradientUri(colors, 269, 154);
-      setGradients((gradients) => gradients.set(scene.id, gradientUri));
-    });
-  }, []);
+    })();
+  }, [scenes]);
 
   const manageHueBridgeElement: JSX.Element | null = ManageHueBridge(hueBridgeState, sendHueMessage);
   if (manageHueBridgeElement !== null) return manageHueBridgeElement;
