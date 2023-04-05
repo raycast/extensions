@@ -44,14 +44,14 @@ Automatically save all the question and answer so you can go back digging for th
 
 # Models availability
 
-### GPT-3
+### GPT-3.5
 
 - `gpt-3.5-turbo`
 - `gpt-3.5-turbo-0301`
 
 ### GPT-4
 
-GPT-4 models availability depends on your developer account. You need access to the GPT-4 API key through OpenAI's waitlist from [here](https://openai.com/waitlist/gpt-4-api) to see the GPT-4 model option.
+GPT-4 model availability depends on your developer account. You need access to the GPT-4 API key through OpenAI's waitlist from [here](https://openai.com/waitlist/gpt-4-api) to see the GPT-4 model option.
 
 # How to use
 
