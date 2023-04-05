@@ -38,7 +38,7 @@ export default function Command() {
 
 function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
   const title = searchResult.title.length === 0 ? searchResult.website_title : searchResult.title;
-  const subtitle = searchResult.description.length === 0 ? searchResult.description : searchResult.website_description;
+  const subtitle = searchResult.description.length === 0 ? searchResult.website_description : searchResult.description;
   return (
     <List.Item
       title={title}
