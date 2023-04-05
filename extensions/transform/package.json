@@ -84,6 +84,13 @@
       "mode": "view"
     },
     {
+      "name": "json-to-js-object",
+      "title": "JSON to JS Object",
+      "subtitle": "Transform",
+      "description": "Transform JSON to JS Object",
+      "mode": "view"
+    },
+    {
       "name": "json-to-jsdoc",
       "title": "JSON to JSDoc",
       "subtitle": "Transform",
