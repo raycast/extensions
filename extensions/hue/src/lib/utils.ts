@@ -166,7 +166,7 @@ export function getColorsFromScene(scene: Scene): string[] {
     }) || []),
     ...(scene.palette?.dimming?.map((dimming) => {
       return miredToHexString(MIRED_DEFAULT, dimming.brightness);
-    }) || [])
+    }) || []),
   ];
 
   const actionColors =

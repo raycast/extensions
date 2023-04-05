@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Grid, Icon, Toast } from "@raycast/api";
+import { Action, ActionPanel, Cache, Grid, Icon, Toast } from "@raycast/api";
 import { Group, Scene } from "./lib/types";
 import UnlinkAction from "./components/UnlinkAction";
 import ManageHueBridge from "./components/ManageHueBridge";
@@ -12,6 +12,8 @@ import Style = Toast.Style;
 type ResourceId = string;
 type GradientUri = string;
 
+const cache = new Cache({ namespace: "hue-scenes" });
+
 export default function SetScene() {
   const { hueBridgeState, sendHueMessage, isLoading, rooms, zones, scenes } = useHue();
   const [gradients, setGradients] = useState(new Map<ResourceId, GradientUri>());
@@ -21,8 +23,24 @@ export default function SetScene() {
       for (const scene of scenes) {
         const colors = getColorsFromScene(scene);
 
-        if (colors.length > 0) {
+        if (colors.length === 0) {
+          continue;
+        }
+
+        // create hash from colors
+        const key = colors.reduce((acc, color) => {
+          return acc + color;
+        });
+
+        // TODO: Fix flicker when loading from cache
+        const cached = cache.get(key);
+
+        if (cached) {
+          console.log(`Cache hit for scene ${scene.id} (${scene.metadata.name})`);
+          setGradients((gradients) => new Map(gradients).set(scene.id, JSON.parse(cached)));
+        } else {
           const gradientUri = await createGradientPngUri(colors, 269, 154);
+          cache.set(key, JSON.stringify(gradientUri));
           setGradients((gradients) => new Map(gradients).set(scene.id, gradientUri));
         }
       }
