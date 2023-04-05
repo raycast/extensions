@@ -15,14 +15,12 @@ function getColorsFromScene(scene: Scene): string[] {
   if (scene.palette !== undefined) {
     if (scene.palette.color?.length ?? 0 > 0) {
       return scene.palette.color.map((color) => {
-        // TODO: Determine brightness from dimming
-        return xyToRgbHexString(color.color.xy);
+        return xyToRgbHexString(color.color.xy, color.color.dimming.brightness);
       });
     }
     if (scene.palette.color_temperature?.length ?? 0 > 0) {
-        // TODO: Determine brightness from dimming
       return scene.palette.color_temperature.map((color_temperature) => {
-        return mirekToHexString(color_temperature.color_temperature.mirek);
+        return mirekToHexString(color_temperature.color_temperature.mirek, color_temperature.dimming.brightness);
       });
     }
     if (scene.palette.dimming?.length ?? 0 > 0) {
@@ -40,12 +38,10 @@ function getColorsFromScene(scene: Scene): string[] {
       })
       .map((action) => {
         if (action.action.color_temperature?.mirek !== undefined) {
-          // TODO: Determine brightness from dimming
-          return mirekToHexString(action.action.color_temperature.mirek);
+          return mirekToHexString(action.action.color_temperature.mirek, action.action.dimming?.brightness);
         }
         if (action.action.color?.xy !== undefined) {
-          // TODO: Determine brightness from dimming
-          return xyToRgbHexString(action.action.color.xy);
+          return xyToRgbHexString(action.action.color.xy, action.action.dimming?.brightness);
         }
         throw new Error("Invalid state.");
       });

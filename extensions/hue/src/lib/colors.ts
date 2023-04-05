@@ -1,7 +1,10 @@
-import { mapRange } from "./utils";
 import { CssColor, Rgb, Xy } from "./types";
 import chroma from "chroma-js";
 import Jimp from "jimp";
+
+// The output with the given mirek is too warm, so we add an arbitrary value to make it cooler
+const MIREK_ADJUSTMENT = -50;
+const DARKEN_FACTOR = 3;
 
 export const COLORS: CssColor[] = [
   { name: "Alice Blue", value: "#f0f8ff" },
@@ -223,33 +226,20 @@ export function xyToRgbHexString(xy: Xy, brightness = 100) {
 }
 
 /**
- * Converts a CT to an RGB string
+ * Converts a CT to an RGB object
  * @param {number} mireds Philips Hue CT value
  * @param {number} brightness Brightness of the light (1-100)
  * @returns {string} RGB string
  */
 export function mirekToRgb(mireds: number, brightness = 100): Rgb {
-  const hecTemp = 20000.0 / mireds;
+  const hecTemp = 1_000_000 / (mireds + MIREK_ADJUSTMENT);
 
-  let red: number, green: number, blue: number;
+  const [r, g, b] = chroma
+    .temperature(hecTemp)
+    .darken((1 - brightness / 100) * DARKEN_FACTOR)
+    .rgb();
 
-  if (hecTemp <= 66) {
-    red = 255;
-    green = 99.4708025861 * Math.log(hecTemp) - 161.1195681661;
-    blue = hecTemp <= 19 ? 0 : 138.5177312231 * Math.log(hecTemp - 10) - 305.0447927307;
-  } else {
-    red = 329.698727446 * Math.pow(hecTemp - 60, -0.1332047592);
-    green = 288.1221695283 * Math.pow(hecTemp - 60, -0.0755148492);
-    blue = 255;
-  }
-
-  const [shadedRed, shadedGreen, shadedBlue] = logShadeRgb(red, green, blue, mapRange(brightness, [1, 100], [-0.9, 0]));
-
-  return {
-    r: shadedRed,
-    g: shadedGreen,
-    b: shadedBlue,
-  };
+  return { r, g, b };
 }
 
 /**
