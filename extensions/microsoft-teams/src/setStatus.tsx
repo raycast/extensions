@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Form } from "@raycast/api";
+import { Action, ActionPanel, Form, showHUD } from "@raycast/api";
 import { clearStatus, setStatus } from "./api/status";
 import { useState } from "react";
 import { DateTime } from "luxon";
@@ -46,12 +46,16 @@ export default function SetStatus() {
       return true;
     }, false);
   };
+  const resetStatus = async () => catchAndToastError(async () => {
+    await clearStatus();
+    await showHUD("Cleared status");
+  });
   return (
     <Form
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Update Status" onSubmit={updateStatus} />
-          <Action title="Clear Status" onAction={clearStatus} />
+          <Action title="Clear Status" onAction={resetStatus} />
         </ActionPanel>
       }
     >
