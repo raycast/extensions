@@ -1,7 +1,8 @@
 import { getPreferenceValues, Icon, Image, showToast, Toast } from "@raycast/api";
-import { CssColor, Group, Light } from "./types";
+import { CssColor, Group, Light, Scene } from "./types";
 import { discovery, v3 } from "node-hue-api";
-import { APP_NAME, BRIGHTNESSES, MIRED_MAX, MIRED_MIN, MIRED_STEP } from "./constants";
+import { APP_NAME, BRIGHTNESSES, MIRED_DEFAULT, MIRED_MAX, MIRED_MIN, MIRED_STEP } from "./constants";
+import { miredToHexString, xyToRgbHexString } from "./colors";
 import Style = Toast.Style;
 
 declare global {
@@ -153,4 +154,33 @@ export function calculateAdjustedBrightness(brightness: number, direction: "incr
 export function calculateAdjustedColorTemperature(mired: number, direction: "increase" | "decrease") {
   const newColorTemperature = direction === "increase" ? mired - MIRED_STEP : mired + MIRED_STEP;
   return Math.min(Math.max(MIRED_MIN, newColorTemperature), MIRED_MAX);
+}
+
+export function getColorsFromScene(scene: Scene): string[] {
+  const paletteColors = [
+    ...(scene.palette?.color?.map((color) => {
+      return xyToRgbHexString(color.color.xy, color.color.dimming?.brightness);
+    }) || []),
+    ...(scene.palette?.color_temperature?.map((color_temperature) => {
+      return miredToHexString(color_temperature.color_temperature.mirek, color_temperature.dimming.brightness);
+    }) || []),
+    ...(scene.palette?.dimming?.map((dimming) => {
+      return miredToHexString(MIRED_DEFAULT, dimming.brightness);
+    }) || [])
+  ];
+
+  const actionColors =
+    scene.actions
+      ?.filter((action) => action.action.color || action.action.color_temperature || action.action.dimming)
+      .map((action) => {
+        if (action.action.color_temperature?.mirek) {
+          return miredToHexString(action.action.color_temperature.mirek, action.action.dimming?.brightness);
+        }
+        if (action.action.color?.xy) {
+          return xyToRgbHexString(action.action.color.xy, action.action.dimming?.brightness);
+        }
+        throw new Error("Invalid state.");
+      }) || [];
+
+  return paletteColors.length > 0 ? paletteColors : actionColors;
 }

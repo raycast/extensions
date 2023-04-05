@@ -5,41 +5,12 @@ import ManageHueBridge from "./components/ManageHueBridge";
 import { SendHueMessage, useHue } from "./hooks/useHue";
 import HueClient from "./lib/HueClient";
 import { useEffect, useState } from "react";
-import { createGradientPngUri, miredToHexString, xyToRgbHexString } from "./lib/colors";
-import { MIRED_DEFAULT } from "./lib/constants";
+import { createGradientPngUri } from "./lib/colors";
+import { getColorsFromScene } from "./lib/utils";
 import Style = Toast.Style;
 
 type ResourceId = string;
 type GradientUri = string;
-
-function getColorsFromScene(scene: Scene): string[] {
-  const paletteColors = [
-    ...(scene.palette?.color?.map((color) => {
-      return xyToRgbHexString(color.color.xy, color.color.dimming?.brightness);
-    }) || []),
-    ...(scene.palette?.color_temperature?.map((color_temperature) => {
-      return miredToHexString(color_temperature.color_temperature.mirek, color_temperature.dimming.brightness);
-    }) || []),
-    ...(scene.palette?.dimming?.map((dimming) => {
-      return miredToHexString(MIRED_DEFAULT, dimming.brightness);
-    }) || []),
-  ];
-
-  const actionColors =
-    scene.actions
-      ?.filter((action) => action.action.color || action.action.color_temperature || action.action.dimming)
-      .map((action) => {
-        if (action.action.color_temperature?.mirek) {
-          return miredToHexString(action.action.color_temperature.mirek, action.action.dimming?.brightness);
-        }
-        if (action.action.color?.xy) {
-          return xyToRgbHexString(action.action.color.xy, action.action.dimming?.brightness);
-        }
-        throw new Error("Invalid state.");
-      }) || [];
-
-  return paletteColors.length > 0 ? paletteColors : actionColors;
-}
 
 export default function SetScene() {
   const { hueBridgeState, sendHueMessage, isLoading, rooms, zones, scenes } = useHue();
