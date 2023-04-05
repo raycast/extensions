@@ -11,11 +11,13 @@ import Style = Toast.Style;
 type ResourceId = string;
 type GradientUri = string;
 
+const DIMMING_ONLY_MIRED_VALUE = 350;
+
 function getColorsFromScene(scene: Scene): string[] {
   if (scene.palette !== undefined) {
     if (scene.palette.color?.length ?? 0 > 0) {
       return scene.palette.color.map((color) => {
-        return xyToRgbHexString(color.color.xy, color.color.dimming.brightness);
+        return xyToRgbHexString(color.color.xy, color.color.dimming?.brightness);
       });
     }
     if (scene.palette.color_temperature?.length ?? 0 > 0) {
@@ -24,9 +26,8 @@ function getColorsFromScene(scene: Scene): string[] {
       });
     }
     if (scene.palette.dimming?.length ?? 0 > 0) {
-      return scene.palette.dimming.map((color) => {
-        // TODO: Implement
-        return "#d3d3d3";
+      return scene.palette.dimming.map((dimming) => {
+        return mirekToHexString(DIMMING_ONLY_MIRED_VALUE, dimming.brightness);
       });
     }
   }
