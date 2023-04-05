@@ -18,4 +18,4 @@ export const MIRED_ADJUSTMENT = -50;
 /**
  * We darken colors by 1 / <1 – 100> times this factor using chroma.js
  */
-export const CHROMA_DARKEN_FACTOR = 3;
+export const CHROMA_DARKEN_FACTOR = 2.5;
