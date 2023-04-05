@@ -3,23 +3,30 @@ import Jimp from "jimp";
 import chroma from "chroma-js";
 import React, { useEffect, useState } from "react";
 
+function hexStringToHexNumber(hex: string): number {
+  return parseInt(hex.slice(1) + "FF", 16);
+}
+
 function createGradientUri(colors: string[], width: number, height: number): Promise<string> {
   return new Promise((resolve, reject) => {
-    const scale = chroma.scale(colors).colors(width);
+    const scale = chroma
+      .scale(colors)
+      .mode("oklab")
+      .correctLightness()
+      .colors(width, null);
 
-    const hexValues = scale.map((color) => {
-      const hex = chroma(color).hex();
-      return parseInt(hex.slice(1) + "FF", 16);
+    const matrix = [...Array(height)].map((_, index) => {
+      const factor = (index / height) * 1.2;
+      return scale.map((color) => chroma(color).darken(factor * factor)
+      );
     });
-
-    const matrix = [...Array(height)].map(() => hexValues);
 
     new Jimp(width, height, (err, image) => {
       if (err) reject(err);
 
       matrix.forEach((row, y) => {
         row.forEach((color, x) => {
-          image.setPixelColor(color, x, y);
+          image.setPixelColor(hexStringToHexNumber(color.hex()), x, y);
         });
       });
 
@@ -37,8 +44,8 @@ export default function Command() {
   const [gradientTwo, setGradientTwo] = useState("");
 
   useEffect(() => {
-    createGradientUri(["blue", "orange"], 259, 141).then((data) => setGradientOne(data));
-    createGradientUri(["blue", "orange"], 259, 259).then((data) => setGradientTwo(data));
+    createGradientUri(["blue", "orange"], 269, 154).then((data) => setGradientOne(data));
+    createGradientUri(["orange"], 269, 153).then((data) => setGradientTwo(data));
   }, []);
 
   return (
