@@ -3,6 +3,8 @@ import { createCipheriv, createDecipheriv, createHash, randomBytes } from "crypt
 import { useMemo } from "react";
 import { Preferences } from "~/types/preferences";
 
+const ALGORITHM = "aes-256-cbc";
+
 export type EncryptedContent = { iv: string; content: string };
 
 /** Encrypts and decrypts data using the user's client secret */
@@ -12,13 +14,13 @@ export function useContentEncryptor() {
 
   const encrypt = (data: string): EncryptedContent => {
     const ivBuffer = randomBytes(16);
-    const cipher = createCipheriv("aes-256-cbc", cipherKeyBuffer, ivBuffer);
+    const cipher = createCipheriv(ALGORITHM, cipherKeyBuffer, ivBuffer);
     const encryptedContentBuffer = Buffer.concat([cipher.update(data), cipher.final()]);
     return { iv: ivBuffer.toString("hex"), content: encryptedContentBuffer.toString("hex") };
   };
 
   const decrypt = (data: EncryptedContent): string => {
-    const decipher = createDecipheriv("aes-256-cbc", cipherKeyBuffer, Buffer.from(data.iv, "hex"));
+    const decipher = createDecipheriv(ALGORITHM, cipherKeyBuffer, Buffer.from(data.iv, "hex"));
     const decryptedContentBuffer = Buffer.concat([decipher.update(Buffer.from(data.content, "hex")), decipher.final()]);
     return decryptedContentBuffer.toString();
   };

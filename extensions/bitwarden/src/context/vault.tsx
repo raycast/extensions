@@ -1,12 +1,11 @@
-import { Cache, showToast, Toast } from "@raycast/api";
+import { showToast, Toast } from "@raycast/api";
 import { createContext, PropsWithChildren, useContext, useEffect, useMemo, useReducer } from "react";
 import { useVaultItemPublisher } from "~/components/searchVault/context/vaultListeners";
 import { useBitwarden } from "~/context/bitwarden";
 import { useSession } from "~/context/session";
-import { CacheVaultList, Folder, Item } from "~/types/vault";
-import { prepareFoldersForCache, prepareItemsForCache } from "~/utils/cache";
+import { Folder, Item } from "~/types/vault";
 import { captureException } from "~/utils/development";
-import { useContentEncryptor } from "~/utils/hooks/useContentEncryptor";
+import useCachedVault from "~/components/searchVault/utils/useVaultCache";
 
 export type VaultState = {
   items: Item[];
@@ -49,16 +48,21 @@ export const VaultProvider = ({ children }: PropsWithChildren) => {
 
   async function loadItems(sessionToken: string) {
     try {
-      const [folders, items] = await Promise.all([
-        bitwarden.listFolders(sessionToken),
+      const [items, folders] = await Promise.all([
         bitwarden.listItems(sessionToken),
+        bitwarden.listFolders(sessionToken),
       ]);
 
       items.sort(favoriteItemsFirstSorter);
       setState({ isLoading: false, items, folders });
 
       publishItems(items);
-      cacheVault(items, folders);
+
+      try {
+        cacheVault(items, folders);
+      } catch (error) {
+        captureException("Failed to cache vault", error);
+      }
     } catch (error) {
       await showToast(Toast.Style.Failure, "Failed to load vault.");
       captureException("Failed to load vault items", error);
@@ -87,42 +91,6 @@ export const VaultProvider = ({ children }: PropsWithChildren) => {
 
   return <VaultContext.Provider value={memoizedValue}>{children}</VaultContext.Provider>;
 };
-
-function useCachedVault() {
-  const { encrypt, decrypt } = useContentEncryptor();
-
-  const getCachedVault = () => {
-    try {
-      const cache = new Cache();
-      const cachedIv = cache.get("iv");
-      const cachedEncryptedVault = cache.get("vault");
-      if (!cachedIv || !cachedEncryptedVault) throw new Error("No cached vault found");
-
-      const decryptedVault = decrypt({ content: cachedEncryptedVault, iv: cachedIv });
-      return JSON.parse<CacheVaultList>(decryptedVault);
-    } catch (error) {
-      captureException("Failed to decrypt cached vault", error);
-      return { items: [], folders: [] };
-    }
-  };
-
-  const cacheVault = (items: Item[], folders: Folder[]) => {
-    try {
-      const cacheItems = prepareItemsForCache(items);
-      const cacheFolders = prepareFoldersForCache(folders);
-      const vaultToEncrypt = JSON.stringify({ items: cacheItems, folders: cacheFolders });
-      const encryptedVault = encrypt(vaultToEncrypt);
-
-      const cache = new Cache();
-      cache.set("vault", encryptedVault.content);
-      cache.set("iv", encryptedVault.iv);
-    } catch (error) {
-      captureException("Failed to cache vault", error);
-    }
-  };
-
-  return { getCachedVault, cacheVault };
-}
 
 function favoriteItemsFirstSorter(a: Item, b: Item) {
   if (a.favorite && b.favorite) return 0;
