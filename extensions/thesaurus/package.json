@@ -3,7 +3,7 @@
   "name": "thesaurus",
   "title": "Thesaurus",
   "description": "Search Merrian-Webster's Thesaurus",
-  "icon": "icon.png",
+  "icon": "extension_icon.png",
   "author": "ABukSwienty",
   "categories": [
     "Web",

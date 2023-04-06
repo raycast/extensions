@@ -15,12 +15,6 @@ const constants = {
     thesaurus: "https://www.merriam-webster.com/thesaurus/",
     dictionary: "https://www.merriam-webster.com/dictionary/",
   },
-  wordStrength: {
-    1: "#d1d5db",
-    2: "#6b7280",
-    3: "#374151",
-    4: "#16a34a",
-  },
 };
 
 export default constants;

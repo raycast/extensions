@@ -1,18 +1,25 @@
-import { Action, ActionPanel, Detail, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Detail, Icon, List } from "@raycast/api";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { shallow } from "zustand/shallow";
 import wordCacheHandler from "../cache";
-import constants from "../constants";
 import scraper from "../scraper";
 import useStore from "../store";
 import WordList from "./word-list";
 
 const strengthColor = (strength: number) => {
-  if (strength === 1) return constants.wordStrength[1];
-  if (strength === 2) return constants.wordStrength[2];
-  if (strength === 3) return constants.wordStrength[3];
-  if (strength === 4) return constants.wordStrength[4];
-  return constants.wordStrength[1];
+  if (strength === 1) return Color.Red;
+  if (strength === 2) return Color.Orange;
+  if (strength === 3) return Color.Yellow;
+  if (strength === 4) return Color.Green;
+  return Color.Green;
+};
+
+const tagColor = (word: { strength: number }) => {
+  return {
+    adjustContrast: true,
+    dark: strengthColor(word.strength),
+    light: strengthColor(word.strength),
+  };
 };
 
 const LookUpContent = ({ word }: { word: string }) => {
@@ -96,7 +103,7 @@ const LookUpContent = ({ word }: { word: string }) => {
                       }
                     />
                   )}
-                  {value.link && <Action.OpenInBrowser url={value.link} />}
+                  {value.link && <Action.OpenInBrowser shortcut={{ modifiers: ["cmd"], key: "o" }} url={value.link} />}
                 </ActionPanel>
               }
               detail={
@@ -110,26 +117,24 @@ const LookUpContent = ({ word }: { word: string }) => {
                       )}
                       <Detail.Metadata.Separator />
                       {value.synonyms.length > 0 && (
-                        <Detail.Metadata.TagList title="Synonyms">
-                          {value.synonyms.map((synonym, index) => (
-                            <Detail.Metadata.TagList.Item
-                              key={index}
-                              text={synonym.word}
-                              color={strengthColor(synonym.strength)}
-                            />
-                          ))}
-                        </Detail.Metadata.TagList>
+                        <>
+                          <List.Item.Detail.Metadata.Label title="Synonyms:" />
+                          <Detail.Metadata.TagList title="">
+                            {value.synonyms.map((synonym, index) => (
+                              <Detail.Metadata.TagList.Item key={index} text={synonym.word} color={tagColor(synonym)} />
+                            ))}
+                          </Detail.Metadata.TagList>
+                        </>
                       )}
                       {value.antonyms.length > 0 && (
-                        <Detail.Metadata.TagList title="Antonyms">
-                          {value.antonyms.map((antonym, index) => (
-                            <Detail.Metadata.TagList.Item
-                              key={index}
-                              text={antonym.word}
-                              color={strengthColor(antonym.strength)}
-                            />
-                          ))}
-                        </Detail.Metadata.TagList>
+                        <>
+                          <List.Item.Detail.Metadata.Label title="Antonyms:" />
+                          <Detail.Metadata.TagList title="">
+                            {value.antonyms.map((antonym, index) => (
+                              <Detail.Metadata.TagList.Item key={index} text={antonym.word} color={tagColor(antonym)} />
+                            ))}
+                          </Detail.Metadata.TagList>
+                        </>
                       )}
                     </Detail.Metadata>
                   }

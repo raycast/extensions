@@ -25,6 +25,7 @@ const WordList = ({
   );
 
   const copyTitle = `Copy ${type}`;
+
   return (
     <List>
       <List.Section title={asIn} subtitle={definition}>
@@ -44,7 +45,11 @@ const WordList = ({
                     pop();
                   }}
                 />
-                <Action.OpenInBrowser title="View Definition" url={`${constants.links.dictionary}${word}`} />
+                <Action.OpenInBrowser
+                  shortcut={{ modifiers: ["cmd"], key: "o" }}
+                  title="View Definition"
+                  url={`${constants.links.dictionary}${word.word}`}
+                />
               </ActionPanel>
             }
           />

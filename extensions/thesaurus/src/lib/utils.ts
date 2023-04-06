@@ -53,9 +53,10 @@ export const validQuery = ($: CheerioAPI) => {
 /**
  * If the user misspelled a word, the html will contain a div with the class spelling-suggestions. This function will check if the div exists and return the suggestions.
  * @param $ CheerioAPI
+ * @param term string
  * @returns undefined | Result with status NOT_FOUND and suggestions
  */
-export const handleSpellingMistake = ($: CheerioAPI) => {
+export const handleSpellingMistake = ($: CheerioAPI, term: string) => {
   const suggestions = $(".spelling-suggestions");
   if (suggestions.length === 0) return;
   const result: Result = {
@@ -64,7 +65,10 @@ export const handleSpellingMistake = ($: CheerioAPI) => {
   };
   suggestions.each((i, el) => {
     const suggestion = $(el).text().trim();
-    if (suggestion) result.suggestions.push(suggestion);
+
+    // removing the search term from the suggestions
+    const isSameAsTerm = suggestion.toLowerCase() === term.trim().toLowerCase();
+    if (suggestion && !isSameAsTerm) result.suggestions.push(suggestion);
   });
   return result;
 };

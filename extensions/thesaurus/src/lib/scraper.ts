@@ -123,7 +123,7 @@ const scraper = async (word: string) => {
   } catch (error) {
     if (isAxiosError(error)) {
       const $ = load(error.response?.data);
-      const suggestions = handleSpellingMistake($);
+      const suggestions = handleSpellingMistake($, word);
       if (suggestions) return suggestions;
     }
     if (error instanceof Error)
