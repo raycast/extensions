@@ -42,8 +42,8 @@ export type PreferencesType = {
 
 export async function deleteFile(filePath: string, fileName: string, refresh: () => void) {
   const options: Alert.Options = {
-    title: "Delete File?",
-    message: `Are you sure you want to delete ${fileName}?`,
+    title: "Permanently Delete File?",
+    message: `Are you sure you want to delete ${fileName}? This action cannot be undone.`,
     icon: Icon.Eraser,
     primaryAction: {
       title: "Delete",
