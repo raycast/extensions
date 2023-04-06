@@ -225,7 +225,7 @@ export function SymlinkItem(props: { fileData: FileDataType; refresh: () => void
               content={filePath}
               shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
             />
-            {preferences.showDeleteOption && (
+            {preferences.showDeleteActions && (
               <Action
                 title="Delete Symlink Directory"
                 icon={Icon.Trash}
