@@ -1,8 +1,17 @@
-import { readFileSync } from "fs";
-import path from "path";
-import { homedir } from "os";
 import { environment } from "@raycast/api";
+import { readFileSync } from "fs";
+import { homedir } from "os";
+import path from "path";
 import initSqlJs, { Database, ParamsObject } from "sql.js";
+import {
+  SEARCH_BACKLINKS_V1,
+  SEARCH_BACKLINKS_V2,
+  SEARCH_LINKS_V1,
+  SEARCH_LINKS_V2,
+  SEARCH_NOTES_V1,
+  SEARCH_NOTES_V2,
+  TABLE_EXISTS,
+} from "./db-queries";
 
 export interface Note {
   id: string;
@@ -18,103 +27,8 @@ export interface Note {
 
 const BEAR_DB_PATH =
   homedir() + "/Library/Group Containers/9K33E3U3T4.net.shinyfrog.bear/Application Data/database.sqlite";
+
 const BEAR_EPOCH = 978307200; // Start of 2001 as a timestamp
-const SEARCH_NOTES_QUERY = `
-SELECT
-  notes.ZUNIQUEIDENTIFIER AS id,
-  notes.ZTITLE AS title,
-  notes.ZTEXT AS text,
-  notes.ZMODIFICATIONDATE AS modified_at,
-  notes.ZCREATIONDATE AS created_at,
-  group_concat(tags.ZTITLE) AS tags,
-  notes.ZENCRYPTED AS encrypted
-FROM
-  ZSFNOTE AS notes
-LEFT OUTER JOIN
-  Z_7TAGS AS notes_to_tags ON notes.Z_PK = notes_to_tags.Z_7NOTES
-LEFT OUTER JOIN
-  ZSFNOTETAG AS tags ON notes_to_tags.Z_14TAGS = tags.Z_PK
-WHERE
-  -- When there is a query, filter the body by that query, otherwise
-  -- ignore the query
-  (
-    lower(notes.ZTITLE) LIKE lower('%' || :query || '%')
-    OR lower(notes.ZTEXT) LIKE lower('%' || :query || '%')
-    OR :query = ''
-    OR lower(notes.ZUNIQUEIDENTIFIER) LIKE lower('%' || :query || '%')
-  )
-  -- Ignore trashed, archived, and empty notes
-  AND notes.ZARCHIVED = 0
-  AND notes.ZTRASHED = 0
-  AND (
-    notes.ZTEXT IS NOT NULL
-    OR notes.ZENCRYPTED = 1
-  )
-GROUP BY
-  notes.ZUNIQUEIDENTIFIER
-ORDER BY
-  -- Sort title matches ahead of body matches
-  CASE WHEN (
-    lower(notes.ZTITLE) like lower('%' || :query || '%')
-    OR :query = ''
-  ) THEN 0 ELSE 1 END,
-  -- When there are multiple title matches, sort by last modified
-  notes.ZMODIFICATIONDATE DESC
-LIMIT
-  20
-`;
-
-const SEARCH_BACKLINKS = `
-  SELECT DISTINCT
-  note.ZUNIQUEIDENTIFIER AS id,
-  note.ZTITLE AS title,
-  note.ZTEXT AS text,
-  note.ZMODIFICATIONDATE AS modified_at,
-  group_concat(tag.ZTITLE) AS tags
-FROM
-	ZSFNOTE note
-	LEFT OUTER JOIN Z_7TAGS nTag ON note.Z_PK = nTag.Z_7NOTES
-	LEFT OUTER JOIN ZSFNOTETAG tag ON nTag.Z_14TAGS = tag.Z_PK
-WHERE
-	note.ZUNIQUEIDENTIFIER in(
-		SELECT
-			src.ZUNIQUEIDENTIFIER FROM ZSFNOTE src
-			JOIN Z_7LINKEDNOTES lnk ON lnk.Z_7LINKEDBYNOTES = src.Z_PK
-			JOIN ZSFNOTE trgt ON lnk.Z_7LINKEDNOTES = trgt.Z_PK
-		WHERE
-			trgt.ZUNIQUEIDENTIFIER LIKE :id )
-GROUP BY
-	note.ZUNIQUEIDENTIFIER
-ORDER BY
-	note.ZMODIFICATIONDATE DESC
-LIMIT 400
-`;
-
-const SEARCH_NOTE_LINKS = `
-SELECT DISTINCT
-  note.ZUNIQUEIDENTIFIER AS id,
-  note.ZTITLE AS title,
-  note.ZTEXT AS text,
-  note.ZMODIFICATIONDATE AS modified_at,
-  group_concat(tag.ZTITLE) AS tags
-FROM
-	ZSFNOTE note
-	LEFT OUTER JOIN Z_7TAGS nTag ON note.Z_PK = nTag.Z_7NOTES
-	LEFT OUTER JOIN ZSFNOTETAG tag ON nTag.Z_14TAGS = tag.Z_PK
-WHERE
-	note.ZUNIQUEIDENTIFIER in(
-		SELECT
-			trgt.ZUNIQUEIDENTIFIER FROM ZSFNOTE src
-			JOIN Z_7LINKEDNOTES lnk ON lnk.Z_7LINKEDBYNOTES = src.Z_PK
-			JOIN ZSFNOTE trgt ON lnk.Z_7LINKEDNOTES = trgt.Z_PK
-		WHERE
-			src.ZUNIQUEIDENTIFIER LIKE :id )
-GROUP BY
-	note.ZUNIQUEIDENTIFIER
-ORDER BY
-	note.ZMODIFICATIONDATE DESC
-LIMIT 400
-`;
 
 export async function loadDatabase(): Promise<BearDb> {
   const wasmBinary = readFileSync(path.join(environment.assetsPath, "sql-wasm.wasm"));
@@ -141,6 +55,21 @@ function formatTags(tags: string[]): string {
 export class BearDb {
   database: Database;
 
+  static searchNotesQueries = {
+    v1: SEARCH_NOTES_V1,
+    v2: SEARCH_NOTES_V2,
+  };
+
+  static getNoteLinksQueries = {
+    v1: SEARCH_LINKS_V1,
+    v2: SEARCH_LINKS_V2,
+  };
+
+  static getNoteBacklinksQueries = {
+    v1: SEARCH_BACKLINKS_V1,
+    v2: SEARCH_BACKLINKS_V2,
+  };
+
   constructor(database: Database) {
     this.database = database;
   }
@@ -165,10 +94,24 @@ export class BearDb {
     };
   }
 
-  getNotes(searchQuery: string): Note[] {
-    const statement = this.database.prepare(SEARCH_NOTES_QUERY);
-    statement.bind({ ":query": searchQuery });
+  tableExists(tableName: string): boolean {
+    const statement = this.database.prepare(TABLE_EXISTS);
+    statement.bind({ ":name": tableName });
+    const result = statement.step();
+    statement.free();
+    return result;
+  }
 
+  getBearVersion(): number {
+    const z5TagsExist = this.tableExists("Z_5TAGS");
+    return z5TagsExist ? 2 : 1;
+  }
+
+  getNotes(searchQuery: string): Note[] {
+    const statement = this.database.prepare(
+      this.getBearVersion() === 2 ? BearDb.searchNotesQueries.v2 : BearDb.searchNotesQueries.v1
+    );
+    statement.bind({ ":query": searchQuery });
     const results: Note[] = [];
     while (statement.step()) {
       const row = statement.getAsObject();
@@ -181,7 +124,9 @@ export class BearDb {
   }
 
   getBacklinks(noteID: string): Note[] {
-    const statement = this.database.prepare(SEARCH_BACKLINKS);
+    const statement = this.database.prepare(
+      this.getBearVersion() === 2 ? BearDb.getNoteBacklinksQueries.v2 : BearDb.getNoteBacklinksQueries.v1
+    );
     statement.bind({ ":id": noteID });
 
     const results: Note[] = [];
@@ -196,7 +141,9 @@ export class BearDb {
   }
 
   getNoteLinks(noteID: string): Note[] {
-    const statement = this.database.prepare(SEARCH_NOTE_LINKS);
+    const statement = this.database.prepare(
+      this.getBearVersion() === 2 ? BearDb.getNoteLinksQueries.v2 : BearDb.getNoteLinksQueries.v1
+    );
     statement.bind({ ":id": noteID });
 
     const results: Note[] = [];

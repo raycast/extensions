@@ -33,3 +33,5 @@ Rotate, flip, scale, resize, convert, and apply filters to selected images.
     - Rotate images clockwise by the specified amount.
 - Scale Images [Scale Factor]
     - Scale images proportionally by the specified factor.
+
+Filter thumbnail image credit: https://unsplash.com/photos/UBA_W3_LsOk
