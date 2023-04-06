@@ -32,7 +32,7 @@ const formatDueDate = (dueDate: string) => {
 const statusIcons = {
   open: Icon.Circle,
   completed: Icon.Checkmark,
-  canceled: Icon.XMarkCircle,
+  canceled: Icon.XmarkCircle,
 };
 
 function TodoListItem(props: { todo: Todo; refreshTodos: () => void; listName: ListName }) {
@@ -56,7 +56,6 @@ function TodoListItem(props: { todo: Todo; refreshTodos: () => void; listName: L
         <ActionPanel>
           <ActionPanel.Section title={`Todo: ${name}`}>
             <Action.OpenInBrowser title="Open in Things" icon={Icon.ArrowRight} url={`things:///show?id=${id}`} />
-            <Action.CopyToClipboard title="Copy URI" content={`things:///show?id=${id}`} />
             {status !== 'completed' && (
               <Action
                 title="Mark as Completed"
@@ -87,6 +86,7 @@ function TodoListItem(props: { todo: Todo; refreshTodos: () => void; listName: L
                 }}
               />
             )}
+            <Action.CopyToClipboard title="Copy URI" content={`things:///show?id=${id}`} />
             <Action
               title="Delete"
               icon={Icon.Trash}
