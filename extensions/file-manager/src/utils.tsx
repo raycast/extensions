@@ -37,7 +37,7 @@ export type PreferencesType = {
   showFilePermissions: boolean;
   showFileSize: boolean;
   startDirectory: string;
-  showDeleteOption: boolean;
+  showDeleteActions: boolean;
 };
 
 export async function deleteFile(filePath: string, fileName: string, refresh: () => void) {
