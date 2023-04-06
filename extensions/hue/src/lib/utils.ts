@@ -45,12 +45,11 @@ export function getGroupLights(group: Group, lights: Light[]): Light[] {
 }
 
 export function getLightIcon(light: Light): Image {
-  // TODO: Use dimming state and color(_temperature) to determine icon color
-  // const color = getRgbFrom(lightState);
+  const color = getColorFromLight(light);
 
   return {
     source: `icons/${light.metadata.archetype}.png`,
-    tintColor: light.on.on ? "white" : "gray",
+    tintColor: light.on.on ? color : "gray",
   };
 }
 
@@ -152,7 +151,17 @@ export function calculateAdjustedBrightness(brightness: number, direction: "incr
 
 export function calculateAdjustedColorTemperature(mired: number, direction: "increase" | "decrease") {
   const newColorTemperature = direction === "increase" ? mired - MIRED_STEP : mired + MIRED_STEP;
-  return Math.min(Math.max(MIRED_MIN, newColorTemperature), MIRED_MAX);
+  return Math.round(Math.min(Math.max(MIRED_MIN, newColorTemperature), MIRED_MAX));
+}
+
+export function getColorFromLight(light: Light): string {
+  if (light.color?.xy) {
+    return xyToRgbHexString(light.color.xy, light.dimming?.brightness);
+  }
+  if (light.color_temperature?.mirek) {
+    return miredToHexString(light.color_temperature.mirek, light.dimming?.brightness);
+  }
+  return miredToHexString(MIRED_DEFAULT, light.dimming?.brightness);
 }
 
 export function getColorsFromScene(scene: Scene): string[] {
