@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Alert, confirmAlert, Detail, Icon } from "@raycast/api";
 import { AnyEventObject, BaseActionObject, ResolveTypegenMeta, ServiceMap, State, TypegenDisabled } from "xstate";
 import { HueContext } from "../lib/manageHueBridgeMachine";
-import { SendHueMessage } from "../lib/hue";
+import { SendHueMessage } from "../lib/types";
 import ActionStyle = Alert.ActionStyle;
 
 /* eslint-disable @typescript-eslint/no-explicit-any */

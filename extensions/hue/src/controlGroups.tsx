@@ -4,25 +4,25 @@ import {
   adjustColorTemperature,
   calculateAdjustedBrightness,
   calculateAdjustedColorTemperature,
-  SendHueMessage,
   setGroupBrightness,
   setGroupColor,
   setScene,
   turnGroupOff,
   turnGroupOn,
-  useHue,
 } from "./lib/hue";
+import { Api } from "node-hue-api/dist/esm/api/Api";
 import { MutatePromise } from "@raycast/utils";
-import { CssColor, Group, Room, Scene } from "./lib/types";
+import { CssColor, Group, Room, Scene, SendHueMessage } from "./lib/types";
 import { getIconForColor, getLightIcon } from "./lib/utils";
 import { BRIGHTNESS_MAX, BRIGHTNESS_MIN, BRIGHTNESSES, COLOR_TEMP_MAX, COLOR_TEMP_MIN, COLORS } from "./lib/constants";
 import { hexToXy } from "./lib/colors";
 import ManageHueBridge from "./components/ManageHueBridge";
 import UnlinkAction from "./components/UnlinkAction";
+import { useHue } from "./lib/useHue";
 import Style = Toast.Style;
 
 export default function Command() {
-  const { hueBridgeState, sendHueMessage, isLoading, groups, mutateGroups, scenes } = useHue();
+  const { hueBridgeState, sendHueMessage, apiPromise, isLoading, groups, mutateGroups, scenes } = useHue();
 
   const manageHueBridgeElement: JSX.Element | null = ManageHueBridge(hueBridgeState, sendHueMessage);
   if (manageHueBridgeElement !== null) return manageHueBridgeElement;
@@ -39,6 +39,7 @@ export default function Command() {
             const roomScenes = scenes.filter((scene: Scene) => scene.group == room.id);
             return (
               <Group
+                apiPromise={apiPromise}
                 key={room.id}
                 group={room}
                 mutateGroups={mutateGroups}
@@ -55,6 +56,7 @@ export default function Command() {
             const entertainmentAreaScenes = scenes.filter((scene: Scene) => scene.group == entertainmentArea.id);
             return (
               <Group
+                apiPromise={apiPromise}
                 key={entertainmentArea.id}
                 group={entertainmentArea}
                 mutateGroups={mutateGroups}
@@ -71,6 +73,7 @@ export default function Command() {
             const zoneScenes = scenes.filter((scene: Scene) => scene.group == zone.id);
             return (
               <Group
+                apiPromise={apiPromise}
                 key={zone.id}
                 group={zone}
                 mutateGroups={mutateGroups}
@@ -86,6 +89,7 @@ export default function Command() {
 }
 
 function Group(props: {
+  apiPromise: Promise<Api>;
   group: Group;
   mutateGroups: MutatePromise<Group[]>;
   scenes?: Scene[];
@@ -99,50 +103,56 @@ function Group(props: {
       actions={
         <ActionPanel>
           {!props.group.state.all_on && (
-            <TurnAllOnAction onTurnAllOn={() => handleTurnAllOn(props.group, props.mutateGroups)} />
+            <TurnAllOnAction onTurnAllOn={() => handleTurnAllOn(props.apiPromise, props.group, props.mutateGroups)} />
           )}
           {props.group.state.any_on && (
-            <TurnAllOffAction onTurnAllOff={() => handleTurnAllOff(props.group, props.mutateGroups)} />
+            <TurnAllOffAction
+              onTurnAllOff={() => handleTurnAllOff(props.apiPromise, props.group, props.mutateGroups)}
+            />
           )}
           {(props.scenes?.length ?? 0) > 0 && (
             <SetSceneAction
               group={props.group}
               scenes={props.scenes ?? []}
-              onSetScene={(scene: Scene) => scene && handleSetScene(props.group, scene, props.mutateGroups)}
+              onSetScene={(scene: Scene) =>
+                scene && handleSetScene(props.apiPromise, props.group, scene, props.mutateGroups)
+              }
             />
           )}
 
           <ActionPanel.Section>
             <SetBrightnessAction
               group={props.group}
-              onSet={(percentage: number) => handleSetBrightness(props.group, props.mutateGroups, percentage)}
+              onSet={(percentage: number) =>
+                handleSetBrightness(props.apiPromise, props.group, props.mutateGroups, percentage)
+              }
             />
             <IncreaseBrightnessAction
               group={props.group}
-              onIncrease={() => handleIncreaseBrightness(props.group, props.mutateGroups)}
+              onIncrease={() => handleIncreaseBrightness(props.apiPromise, props.group, props.mutateGroups)}
             />
             <DecreaseBrightnessAction
               group={props.group}
-              onDecrease={() => handleDecreaseBrightness(props.group, props.mutateGroups)}
+              onDecrease={() => handleDecreaseBrightness(props.apiPromise, props.group, props.mutateGroups)}
             />
           </ActionPanel.Section>
           <ActionPanel.Section>
             {props.group.action.colormode == "xy" && (
               <SetColorAction
                 group={props.group}
-                onSet={(color: CssColor) => handleSetColor(props.group, props.mutateGroups, color)}
+                onSet={(color: CssColor) => handleSetColor(props.apiPromise, props.group, props.mutateGroups, color)}
               />
             )}
             {props.group.action.colormode == "ct" && (
               <IncreaseColorTemperatureAction
                 group={props.group}
-                onIncrease={() => handleIncreaseColorTemperature(props.group, props.mutateGroups)}
+                onIncrease={() => handleIncreaseColorTemperature(props.apiPromise, props.group, props.mutateGroups)}
               />
             )}
             {props.group.action.colormode == "ct" && (
               <DecreaseColorTemperatureAction
                 group={props.group}
-                onDecrease={() => handleDecreaseColorTemperature(props.group, props.mutateGroups)}
+                onDecrease={() => handleDecreaseColorTemperature(props.apiPromise, props.group, props.mutateGroups)}
               />
             )}
           </ActionPanel.Section>
@@ -263,11 +273,11 @@ function RefreshAction(props: { onRefresh: () => void }) {
   );
 }
 
-async function handleTurnAllOn(group: Group, mutateGroups: MutatePromise<Group[]>) {
+async function handleTurnAllOn(apiPromise: Promise<Api>, group: Group, mutateGroups: MutatePromise<Group[]>) {
   const toast = new Toast({ title: "" });
 
   try {
-    await mutateGroups(turnGroupOn(group), {
+    await mutateGroups(turnGroupOn(apiPromise, group), {
       optimisticUpdate(groups) {
         return groups.map((it) =>
           it.id === group.id
@@ -292,11 +302,11 @@ async function handleTurnAllOn(group: Group, mutateGroups: MutatePromise<Group[]
   }
 }
 
-async function handleTurnAllOff(group: Group, mutateGroups: MutatePromise<Group[]>) {
+async function handleTurnAllOff(apiPromise: Promise<Api>, group: Group, mutateGroups: MutatePromise<Group[]>) {
   const toast = new Toast({ title: "" });
 
   try {
-    await mutateGroups(turnGroupOff(group), {
+    await mutateGroups(turnGroupOff(apiPromise, group), {
       optimisticUpdate(groups) {
         return groups?.map((it) =>
           it.id === group.id
@@ -321,11 +331,16 @@ async function handleTurnAllOff(group: Group, mutateGroups: MutatePromise<Group[
   }
 }
 
-async function handleSetScene(group: Group, scene: Scene, mutateGroups: MutatePromise<Group[]>) {
+async function handleSetScene(
+  apiPromise: Promise<Api>,
+  group: Group,
+  scene: Scene,
+  mutateGroups: MutatePromise<Group[]>
+) {
   const toast = new Toast({ title: "" });
 
   try {
-    await mutateGroups(setScene(scene));
+    await mutateGroups(setScene(apiPromise, scene));
 
     toast.style = Style.Success;
     toast.title = `Scene ${scene.name} set`;
@@ -338,12 +353,17 @@ async function handleSetScene(group: Group, scene: Scene, mutateGroups: MutatePr
   }
 }
 
-async function handleSetBrightness(group: Group, mutateGroups: MutatePromise<Group[]>, percentage: number) {
+async function handleSetBrightness(
+  apiPromise: Promise<Api>,
+  group: Group,
+  mutateGroups: MutatePromise<Group[]>,
+  percentage: number
+) {
   const toast = new Toast({ title: "" });
   const brightness = (percentage / 100) * 253 + 1;
 
   try {
-    await mutateGroups(setGroupBrightness(group, brightness), {
+    await mutateGroups(setGroupBrightness(apiPromise, group, brightness), {
       optimisticUpdate(rooms) {
         return rooms.map((it) =>
           it.id === group.id ? { ...it, state: { ...it.state, on: true, bri: brightness } } : it
@@ -362,11 +382,11 @@ async function handleSetBrightness(group: Group, mutateGroups: MutatePromise<Gro
   }
 }
 
-async function handleIncreaseBrightness(group: Group, mutateGroups: MutatePromise<Group[]>) {
+async function handleIncreaseBrightness(apiPromise: Promise<Api>, group: Group, mutateGroups: MutatePromise<Group[]>) {
   const toast = new Toast({ title: "" });
 
   try {
-    await mutateGroups(adjustBrightness(group, "increase"), {
+    await mutateGroups(adjustBrightness(apiPromise, group, "increase"), {
       optimisticUpdate(rooms) {
         return rooms?.map((it) =>
           it.id === group.id
@@ -387,11 +407,11 @@ async function handleIncreaseBrightness(group: Group, mutateGroups: MutatePromis
   }
 }
 
-async function handleDecreaseBrightness(group: Group, mutateGroups: MutatePromise<Group[]>) {
+async function handleDecreaseBrightness(apiPromise: Promise<Api>, group: Group, mutateGroups: MutatePromise<Group[]>) {
   const toast = new Toast({ title: "" });
 
   try {
-    await mutateGroups(adjustBrightness(group, "decrease"), {
+    await mutateGroups(adjustBrightness(apiPromise, group, "decrease"), {
       optimisticUpdate(rooms) {
         return rooms.map((it) =>
           it.id === group.id
@@ -412,11 +432,16 @@ async function handleDecreaseBrightness(group: Group, mutateGroups: MutatePromis
   }
 }
 
-async function handleSetColor(group: Group, mutateGroups: MutatePromise<Group[]>, color: CssColor) {
+async function handleSetColor(
+  apiPromise: Promise<Api>,
+  group: Group,
+  mutateGroups: MutatePromise<Group[]>,
+  color: CssColor
+) {
   const toast = new Toast({ title: "" });
 
   try {
-    await mutateGroups(setGroupColor(group, color.value), {
+    await mutateGroups(setGroupColor(apiPromise, group, color.value), {
       optimisticUpdate(rooms) {
         return rooms.map((it) =>
           it.id === group.id ? { ...it, state: { ...it.state, on: true, xy: hexToXy(color.value) } } : it
@@ -435,11 +460,15 @@ async function handleSetColor(group: Group, mutateGroups: MutatePromise<Group[]>
   }
 }
 
-async function handleIncreaseColorTemperature(group: Group, mutateGroups: MutatePromise<Group[]>) {
+async function handleIncreaseColorTemperature(
+  apiPromise: Promise<Api>,
+  group: Group,
+  mutateGroups: MutatePromise<Group[]>
+) {
   const toast = new Toast({ title: "" });
 
   try {
-    await mutateGroups(adjustColorTemperature(group, "increase"), {
+    await mutateGroups(adjustColorTemperature(apiPromise, group, "increase"), {
       optimisticUpdate(rooms) {
         return rooms?.map((it) =>
           it.id === group.id
@@ -460,11 +489,15 @@ async function handleIncreaseColorTemperature(group: Group, mutateGroups: Mutate
   }
 }
 
-async function handleDecreaseColorTemperature(group: Group, mutateGroups: MutatePromise<Group[]>) {
+async function handleDecreaseColorTemperature(
+  apiPromise: Promise<Api>,
+  group: Group,
+  mutateGroups: MutatePromise<Group[]>
+) {
   const toast = new Toast({ title: "" });
 
   try {
-    await mutateGroups(adjustColorTemperature(group, "decrease"), {
+    await mutateGroups(adjustColorTemperature(apiPromise, group, "decrease"), {
       optimisticUpdate(rooms) {
         return rooms.map((it) =>
           it.id === group.id
