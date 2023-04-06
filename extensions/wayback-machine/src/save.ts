@@ -1,4 +1,4 @@
-import { LaunchProps, closeMainWindow, getSelectedText, showHUD } from "@raycast/api";
+import { LaunchProps, closeMainWindow, getSelectedText, showHUD, showToast, Toast } from "@raycast/api";
 import fetch from "cross-fetch";
 
 type WaybackArguments = {
@@ -6,8 +6,6 @@ type WaybackArguments = {
 };
 
 export default async function main(props: LaunchProps<{ arguments: WaybackArguments }>) {
-  closeMainWindow();
-
   const { url } = props.arguments;
   let selectedText: string | undefined;
 
@@ -23,13 +21,21 @@ export default async function main(props: LaunchProps<{ arguments: WaybackArgume
     return showHUD("❌ No domain found");
   }
 
+  const toast = await showToast({
+    style: Toast.Style.Animated,
+    title: "Saving to Wayback Machine",
+  });
+
   try {
     const res = await fetch(`https://web.archive.org/save/${webpageUrl}`);
     if (res.status >= 400) {
-      return showHUD("❌ Bad response from server");
+      toast.style = Toast.Style.Failure;
+      toast.title = "Failed to save to Wayback Machine";
     }
-    return showHUD("✅ Website successfully archived");
+    toast.style = Toast.Style.Success;
+    toast.title = "Saved to Wayback Machine";
   } catch (err) {
-    return showHUD(`❌ An error occurred, try again later`);
+    toast.style = Toast.Style.Failure;
+    toast.title = "Failed to save to Wayback Machine";
   }
 }
