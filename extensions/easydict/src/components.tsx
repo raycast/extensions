@@ -1,8 +1,8 @@
 /*
  * @author: tisfeng
  * @createTime: 2022-06-26 11:13
- * @lastEditor: Tisfeng
- * @lastEditTime: 2022-12-16 17:24
+ * @lastEditor: tisfeng
+ * @lastEditTime: 2023-03-16 23:10
  * @fileName: components.tsx
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -256,7 +256,7 @@ function playSoundIcon(lightTintColor: string) {
  */
 export function getListItemIcon(listItem: ListDisplayItem): Image.ImageLike {
   const { displayType } = listItem;
-  // console.log(`---> get list type: ${displayType}`);
+  // console.warn(`---> get list type: ${displayType}`);
 
   let itemIcon: Image.ImageLike = {
     source: Icon.Dot,
@@ -383,7 +383,7 @@ export function getYoudaoListItemIcon(youdaoListType: YoudaoDictionaryListItemTy
 function getQueryTypeIcon(queryType: QueryType): Image.ImageLike {
   return {
     source: `${queryType}.png`,
-    mask: Image.Mask.RoundedRectangle,
+    // mask: Image.Mask.RoundedRectangle, // !!!: mask may cause rendering issue, like flickering.
   };
 }
 
