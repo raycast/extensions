@@ -266,10 +266,9 @@ export default class HueClient {
         return scenes.updateItems(updatedScenes as Partial<Scene>[]);
       });
 
-      // Set parser to null so that a new parser is created on the next event.
-      // This is necessary because the parser can only be used once.
       // If the parser encounters a new JSON array, it will throw an error
       // because two successive arrays is not valid JSON.
+      // To prevent this, a new parser is created for each new array.
       parser = null;
     };
 
