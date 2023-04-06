@@ -1,6 +1,7 @@
 import { Form, ActionPanel, Action, showToast, useNavigation } from "@raycast/api";
 import { saveCanvas, getNewSlashDate, canvasTitleExists, canvasUrlExists } from "./utils/utils";
 import { useState, useEffect } from "react";
+import { useForm, FormValidation } from "@raycast/utils";
 import ImportAgain from "./import-again";
 
 type Values = {
@@ -11,34 +12,42 @@ type Values = {
 };
 
 export default function Command() {
-  const [titleError, setTitleError] = useState<string | undefined>();
-  const [urlError, setUrlError] = useState<string | undefined>();
   const [checked, setChecked] = useState<boolean>(false);
 
-  const [titleText, setTitleText] = useState<string | undefined>();
   const [urlText, setUrlText] = useState<string | undefined>();
 
   const [submittedAgain, setSubmittedAgain] = useState<boolean>(false);
 
-  function dropTitleError() {
-    if (titleError && titleError.length > 0) {
-      setTitleError(undefined);
-    }
-  }
-  function dropUrlError() {
-    if (urlError) {
-      setUrlError(undefined);
-    }
-  }
+  const [urlExists, setUrlExists] = useState<boolean>(false);
 
   const { push, pop } = useNavigation();
-  async function handleSubmit(values: Values) {
-    if (!urlError && !titleError) {
-      await saveCanvas({ ...values, dateCreated: getNewSlashDate() });
+
+  async function saveCavnasWrap(values: Values) {
+    await saveCanvas({ ...values, dateCreated: getNewSlashDate() });
+  }
+
+  const { handleSubmit, itemProps } = useForm<Values>({
+    onSubmit(values) {
+      saveCavnasWrap(values);
       showToast({ title: "Imported canvas!", message: "See other commands to view it." });
       pop();
-    }
-  }
+    },
+    validation: {
+      title: FormValidation.Required,
+      url: (url) => {
+        if (!url?.includes("excalidraw.com")) {
+          return "Invalid Excalidraw URL!";
+        } else if (!url?.includes("https://")) {
+          return "Must include 'https://'!";
+        } else if (urlExists) {
+          return "Already in use!";
+        } else {
+          return undefined;
+        }
+      },
+      description: FormValidation.Required,
+    },
+  });
 
   useEffect(() => {
     if (checked) {
@@ -53,29 +62,12 @@ export default function Command() {
     }
   }, [submittedAgain]);
 
+  async function checkURL() {
+    setUrlExists(await canvasUrlExists(urlText ?? ""));
+  }
   useEffect(() => {
-    async function checkForErrors() {
-      if (titleText?.length == 0) {
-        setTitleError("Title can't be empty!");
-      } else if (await canvasTitleExists(titleText ?? "")) {
-        setTitleError("Already in use!");
-      } else {
-        dropTitleError();
-      }
-
-      if (!urlText?.includes("excalidraw.com")) {
-        setUrlError("Invalid Excalidraw URL!");
-      } else if (!urlText?.includes("https://")) {
-        setUrlError("Must include 'https://'!");
-      } else if (await canvasUrlExists(urlText ?? "")) {
-        setUrlError("Already in use!");
-      } else {
-        dropUrlError();
-      }
-    }
-
-    checkForErrors();
-  }, [urlText, titleText]);
+    checkURL();
+  }, [urlText]);
 
   return (
     <Form
@@ -89,38 +81,14 @@ export default function Command() {
       <Form.Separator />
       <Form.Checkbox id="resaving" label="Are you resaving a link?" value={checked} onChange={setChecked} />;
       <Form.TextField
-        error={titleError}
-        value={titleText}
-        onChange={setTitleText}
-        onBlur={async (event) => {
-          if (event.target.value?.length == 0) {
-            setTitleError("Title can't be empty!");
-          } else if (await canvasTitleExists(event.target.value ?? "")) {
-            setTitleError("Already in use!");
-          } else {
-            dropTitleError();
-          }
-        }}
+        {...itemProps.title}
         id="title"
         title="Canvas Title"
         placeholder="Give your canvas a name..."
         defaultValue=""
       />
       <Form.TextField
-        error={urlError}
-        onChange={setUrlText}
-        value={urlText}
-        onBlur={async (event) => {
-          if (!event.target.value?.includes("excalidraw.com")) {
-            setUrlError("Invalid Excalidraw URL!");
-          } else if (!event.target.value?.includes("https://")) {
-            setUrlError("Must include 'https://'!");
-          } else if (await canvasUrlExists(event.target.value ?? "")) {
-            setUrlError("Already in use!");
-          } else {
-            dropUrlError();
-          }
-        }}
+        {...itemProps.url}
         id="url"
         title="Canvas URL"
         placeholder="Paste the URL of your canvas..."
@@ -128,6 +96,7 @@ export default function Command() {
       />
       {/* <Form.Separator /> */}
       <Form.TextArea
+        {...itemProps.description}
         id="description"
         title="Canvas Description"
         placeholder="Type a short description of this canvas..."
