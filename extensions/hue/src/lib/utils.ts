@@ -1,29 +1,28 @@
 import { getPreferenceValues, Icon, Image, showToast, Toast } from "@raycast/api";
-import { CssColor, Group, Light, Scene } from "./types";
+import { CssColor, Group, HasId, Id, Light, Scene } from "./types";
 import { discovery, v3 } from "node-hue-api";
 import { APP_NAME, BRIGHTNESSES, MIRED_DEFAULT, MIRED_MAX, MIRED_MIN, MIRED_STEP } from "./constants";
 import { miredToHexString, xyToRgbHexString } from "./colors";
 import Style = Toast.Style;
 
 declare global {
-  interface Array<T extends { id: string }> {
-    updateItem(item: T, changes: object): Array<T>;
+  interface Array<T extends HasId> {
+    updateItem(id: Id, changes: object): T[];
 
-    updateItems(array: T[], newObjects: T[]): T[];
+    updateItems(newItems: Partial<T>[]): T[];
   }
 }
 
-Array.prototype.updateItem = function (item, changes) {
-  return this.map((it) => {
-    if (it.id !== item.id) return it;
-    return { ...it, ...changes };
+Array.prototype.updateItem = function (id, changes) {
+  return this.map((item) => {
+    return id !== item.id ? item : { ...item, ...changes };
   });
 };
 
-Array.prototype.updateItems = function (array, newItems) {
-  return array.map((item) => {
+Array.prototype.updateItems = function (newItems) {
+  return this.map((item) => {
     const foundItem = newItems.find((newItem) => newItem.id === item.id);
-    return foundItem ? Object.assign({}, item, foundItem) : item;
+    return foundItem ? { ...item, ...foundItem } : item;
   });
 };
 

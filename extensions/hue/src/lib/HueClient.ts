@@ -137,9 +137,9 @@ export default class HueClient {
   }
 
   public async updateLight(light: Light, properties: LightRequest): Promise<any> {
-    this.setLights((lights) => lights.updateItem(light, properties));
+    this.setLights((lights) => lights.updateItem(light.id, properties));
     const response = await this.makeRequest("PUT", `/clip/v2/resource/light/${light.id}`, properties).catch((e) => {
-      this.setLights((lights) => lights.updateItem(light, light));
+      this.setLights((lights) => lights.updateItem(light.id, light));
       throw e;
     });
 
@@ -147,10 +147,10 @@ export default class HueClient {
   }
 
   public async updateGroupedLight(groupedLight: GroupedLight, properties: Partial<Light>): Promise<any> {
-    this.setGroupedLights((groupedLights) => groupedLights.updateItem(groupedLight, properties));
+    this.setGroupedLights((groupedLights) => groupedLights.updateItem(groupedLight.id, properties));
     const request = async () =>
       await this.makeRequest("PUT", `/clip/v2/resource/grouped_light/${groupedLight.id}`, properties).catch((e) => {
-        this.setGroupedLights((groupedLights) => groupedLights.updateItem(groupedLight, groupedLight));
+        this.setGroupedLights((groupedLights) => groupedLights.updateItem(groupedLight.id, groupedLight));
         throw e;
       });
 
@@ -245,23 +245,25 @@ export default class HueClient {
     let parser: Chain | null = null;
 
     const onParsedUpdateEvent = ({ value: updateEvent }: ParsedUpdateEvent) => {
-      updateEvent.data.forEach((resource) => {
-        switch (resource.type) {
-          case "light":
-            this.setLights((prevState) => prevState.updateItem(resource as Light, resource));
-            break;
-          case "grouped_light":
-            this.setGroupedLights((prevState) => prevState.updateItem(resource as GroupedLight, resource));
-            break;
-          case "room":
-            this.setRooms((prevState) => prevState.updateItem(resource as Room, resource));
-            break;
-          case "zone":
-            this.setZones((prevState) => prevState.updateItem(resource as Zone, resource));
-            break;
-          case "scene":
-            this.setScenes((prevState) => prevState.updateItem(resource as Scene, resource));
-        }
+      this.setLights((lights) => {
+        const updatedLights = updateEvent.data.filter((resource) => resource.type === "light");
+        return lights.updateItems(updatedLights as Partial<Light>[]);
+      });
+      this.setGroupedLights((groupedLights) => {
+        const updatedGroupedLights = updateEvent.data.filter((resource) => resource.type === "grouped_light");
+        return groupedLights.updateItems(updatedGroupedLights as Partial<GroupedLight>[]);
+      });
+      this.setRooms((rooms) => {
+        const updatedRooms = updateEvent.data.filter((resource) => resource.type === "room");
+        return rooms.updateItems(updatedRooms as Partial<Room>[]);
+      });
+      this.setZones((zones) => {
+        const updatedZones = updateEvent.data.filter((resource) => resource.type === "zone");
+        return zones.updateItems(updatedZones as Partial<Zone>[]);
+      });
+      this.setScenes((scenes) => {
+        const updatedScenes = updateEvent.data.filter((resource) => resource.type === "scene");
+        return scenes.updateItems(updatedScenes as Partial<Scene>[]);
       });
 
       // Set parser to null so that a new parser is created on the next event.

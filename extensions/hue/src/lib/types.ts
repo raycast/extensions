@@ -9,7 +9,7 @@
 ///////////////////////
 // Non-Hue API types //
 ///////////////////////
-export type Id = string;
+export type Id = string | number;
 export type GradientUri = string;
 export type GradientCache = Map<Id, GradientUri>;
 
@@ -27,7 +27,7 @@ export type Rgb = {
 };
 
 export interface HasId {
-  id: number;
+  id: Id;
 }
 
 export type Method = "GET" | "DELETE" | "HEAD" | "OPTIONS" | "POST" | "PUT" | "PATCH" | "PURGE" | "LINK" | "UNLINK";
