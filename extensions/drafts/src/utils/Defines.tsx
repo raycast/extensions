@@ -21,6 +21,11 @@ type QuickLinkDefinition = {
   link: string;
 };
 
+export const StorageDefines = {
+  RECENT_TAGS: "recent_tags",
+  RECENT_TAGS_MAX: 10
+}
+
 export const QuicklinkDefinitions: QuickLinkDefinition[] = [
   {
     name: "CREATE_DRAFT",
