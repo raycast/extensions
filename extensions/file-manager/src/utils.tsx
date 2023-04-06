@@ -129,7 +129,7 @@ export function DirectoryItem(props: { fileData: FileDataType; refresh: () => vo
             }}
           />
 
-          {preferences.showDeleteOption && (
+          {preferences.showDeleteActions && (
             <Action
               title="Delete Directory"
               icon={Icon.Trash}
