@@ -5,6 +5,9 @@
   "description": "Rotate, flip, resize, and convert images using SIPS",
   "icon": "command-icon.png",
   "author": "HelloImSteven",
+  "contributors": [
+    "arronhunt"
+  ],
   "categories": [
     "Media",
     "Productivity",
@@ -126,7 +129,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.48.1",
+    "@raycast/api": "^1.48.8",
     "@raycast/utils": "^1.4.18",
     "run-applescript": "^6.1.0"
   },

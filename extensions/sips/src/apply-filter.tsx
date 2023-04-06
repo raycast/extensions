@@ -1,12 +1,13 @@
-import { Action, ActionPanel, List } from "@raycast/api";
+import { Action, ActionPanel, Grid } from "@raycast/api";
 import { applyFilter, filters } from "./filters";
 
 export default function Command() {
-  const listItems = filters.map((filter) => (
-    <List.Item
+  const gridItems = filters.map((filter) => (
+    <Grid.Item
       title={filter.name}
       subtitle={filter.description}
       key={filter.name}
+      content={{ source: filter.thumbnail }}
       actions={
         <ActionPanel>
           <Action title={`Apply ${filter.name} Filter`} onAction={async () => await applyFilter(filter)} />
@@ -15,5 +16,5 @@ export default function Command() {
     />
   ));
 
-  return <List>{listItems}</List>;
+  return <Grid>{gridItems}</Grid>;
 }
