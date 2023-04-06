@@ -9,6 +9,9 @@ import {
   Action,
   Toast,
   LaunchProps,
+  Clipboard,
+  closeMainWindow,
+  showHUD,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { slackEmojiCodeMap } from "./emojiCodes";
@@ -24,6 +27,7 @@ import { durationToString, keyForStatusPreset, statusExpirationText } from "./ut
 import { SlackClient } from "./slackClient";
 import { CreateStatusPresetForm, EditStatusPresetForm, SetCustomStatusForm } from "./setStatusForm";
 import { mkdirSync, readFileSync, writeFileSync } from "fs";
+import { PopToRootType } from "@raycast/api";
 
 // Consts
 
@@ -210,6 +214,9 @@ function SetStatusPresetListItem(props: {
             <EditPresetAction statusPresetsListState={props.statusPresetsListState} index={props.presetIndex} />
             <DeletePresetAction statusPresetsListState={props.statusPresetsListState} index={props.presetIndex} />
           </ActionPanel.Section>
+          <ActionPanel.Section>
+            <CopyDeeplinkAction preset={props.statusPreset} />
+          </ActionPanel.Section>
           <ActionPanel.Section key="global">
             <CreatePresetAction statusPresetsListState={props.statusPresetsListState} />
             <SetCustomStatusAction
@@ -379,6 +386,28 @@ function EditPresetAction(props: { statusPresetsListState: SlackStatusPresetsLis
             }}
           />
         );
+      }}
+    />
+  );
+}
+
+function CopyDeeplinkAction(props: { preset: SlackStatusPreset }) {
+  return (
+    <Action
+      title="Copy Deeplink"
+      icon={Icon.Clipboard}
+      shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+      onAction={() => {
+        const params = new URLSearchParams();
+        const launchContext = {
+          status: props.preset.title,
+          emoji: props.preset.emojiCode,
+          duration: props.preset.defaultDuration,
+        };
+        params.append("launchContext", JSON.stringify(launchContext));
+        Clipboard.copy(`raycast://extensions/petr/slack-status/setStatus?${params}`);
+        closeMainWindow({ popToRootType: PopToRootType.Immediate });
+        showHUD("Copied deeplink to clipboard");
       }}
     />
   );
