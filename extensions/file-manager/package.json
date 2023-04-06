@@ -74,9 +74,9 @@
     },
     {
       "default": false,
-      "description": "Show Delete Option",
-      "label": "Show Delete Option",
-      "name": "showDeleteOption",
+      "description": "Show Delete Actions",
+      "label": "Show Delete Actions",
+      "name": "showDeleteActions",
       "required": true,
       "title": "",
       "type": "checkbox"
