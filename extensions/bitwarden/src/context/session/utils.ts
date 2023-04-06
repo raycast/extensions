@@ -1,5 +1,6 @@
 import { getPreferenceValues, LocalStorage } from "@raycast/api";
 import { LOCAL_STORAGE_KEY } from "~/constants/general";
+import { VAULT_TIMEOUT } from "~/constants/preferences";
 import { Preferences } from "~/types/preferences";
 import { SessionState } from "~/types/session";
 
@@ -42,6 +43,7 @@ export async function getSavedSession(): Promise<SavedSessionState> {
   if (!token || !passwordHash) return { ...loadedState, shouldLockVault: true };
   loadedState.token = token;
   loadedState.passwordHash = passwordHash;
+  console.log({ token, passwordHash, lastActivityTimeString });
 
   if (!lastActivityTimeString) return { ...loadedState, shouldLockVault: false };
 
@@ -49,7 +51,10 @@ export async function getSavedSession(): Promise<SavedSessionState> {
   loadedState.lastActivityTime = lastActivityTime;
 
   const vaultTimeoutMs = +getPreferenceValues<Preferences>().repromptIgnoreDuration;
-  if (vaultTimeoutMs === 0) return { ...loadedState, shouldLockVault: true, lockReason: VAULT_TIMEOUT_MESSAGE };
+  if (vaultTimeoutMs === VAULT_TIMEOUT.NEVER) return { ...loadedState, shouldLockVault: false };
+  if (vaultTimeoutMs === VAULT_TIMEOUT.IMMEDIATELY) {
+    return { ...loadedState, shouldLockVault: true, lockReason: VAULT_TIMEOUT_MESSAGE };
+  }
 
   if (lastActivityTime != null) {
     const timeElapseSinceLastPasswordEnter = Date.now() - lastActivityTime.getTime();

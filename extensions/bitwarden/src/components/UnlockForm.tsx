@@ -1,8 +1,11 @@
-import { Action, ActionPanel, Form, Icon, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Form, getPreferenceValues, Icon, showToast, Toast } from "@raycast/api";
 import { useRef, useState } from "react";
+import { VAULT_TIMEOUT_MS_TO_LABEL } from "~/constants/preferences";
 import { useBitwarden } from "~/context/bitwarden";
+import { Preferences } from "~/types/preferences";
 import { captureException } from "~/utils/development";
 import useVaultMessages from "~/utils/hooks/useVaultMessages";
+import { getLabelForTimeoutPreference } from "~/utils/preferences";
 
 export type UnlockFormProps = {
   onUnlock: (password: string) => Promise<void>;
@@ -67,10 +70,28 @@ const UnlockForm = (props: UnlockFormProps) => {
     >
       {shouldShowServer && <Form.Description title="Server URL" text={serverMessage} />}
       <Form.Description title="Vault Status" text={userMessage} />
-      {!!lockReason && <Form.Description title="Reason" text={lockReason} />}
       <Form.PasswordField autoFocus id="password" title="Master Password" />
+      {!!lockReason && (
+        <>
+          <Form.Description title="ℹ️" text={lockReason} />
+          <TimeoutInfoDescription />
+        </>
+      )}
     </Form>
   );
 };
+
+function TimeoutInfoDescription() {
+  const vaultTimeoutMs = getPreferenceValues<Preferences>().repromptIgnoreDuration;
+  const timeoutLabel = getLabelForTimeoutPreference(vaultTimeoutMs);
+
+  if (!timeoutLabel) return null;
+  return (
+    <Form.Description
+      title=""
+      text={`Timeout is set to ${timeoutLabel}, this can be configured in the extension settings`}
+    />
+  );
+}
 
 export default UnlockForm;
