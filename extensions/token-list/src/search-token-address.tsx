@@ -93,36 +93,40 @@ export default function Command() {
       onSearchTextChange={doSearch}
       isLoading={loading}
     >
-      {items.map((token, index) => (
-        <List.Item
-          key={index}
-          title={token.name}
-          subtitle={token.symbol.toUpperCase()}
-          accessories={[
-            ...Object.keys(token.platforms)
-              .slice(0, 3)
-              .map<List.Item.Accessory>((platform) => ({
-                tag: platform,
-              })),
-            {
-              text: `${Object.keys(token.platforms).length} chains`,
-            },
-          ]}
-          actions={
-            <ActionPanel>
-              <Action.Push
-                title="View Token Addresses"
-                target={<TokenInfo name={token.name} platforms={token.platforms} />}
-              />
-              <Action.CopyToClipboard
-                title="Copy Token Addresses as JSON"
-                content={JSON.stringify(token.platforms)}
-                shortcut={{ modifiers: ["cmd"], key: "enter" }}
-              />
-            </ActionPanel>
-          }
-        />
-      ))}
+      {items.length === 0 ? (
+        <List.EmptyView title="Enter token name or symbol"></List.EmptyView>
+      ) : (
+        items.map((token, index) => (
+          <List.Item
+            key={index}
+            title={token.name}
+            subtitle={token.symbol.toUpperCase()}
+            accessories={[
+              ...Object.keys(token.platforms)
+                .slice(0, 3)
+                .map<List.Item.Accessory>((platform) => ({
+                  tag: platform,
+                })),
+              {
+                text: `${Object.keys(token.platforms).length} chains`,
+              },
+            ]}
+            actions={
+              <ActionPanel>
+                <Action.Push
+                  title="View Token Addresses"
+                  target={<TokenInfo name={token.name} platforms={token.platforms} />}
+                />
+                <Action.CopyToClipboard
+                  title="Copy Token Addresses as JSON"
+                  content={JSON.stringify(token.platforms)}
+                  shortcut={{ modifiers: ["cmd"], key: "enter" }}
+                />
+              </ActionPanel>
+            }
+          />
+        ))
+      )}
     </List>
   );
 }
