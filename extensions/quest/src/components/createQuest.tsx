@@ -1,12 +1,27 @@
-import { Action, ActionPanel, Form, useNavigation } from "@raycast/api";
-import { useCallback, useState } from "react";
+import { Action, ActionPanel, Form, useNavigation, showToast, Toast } from "@raycast/api";
+import { useCallback, useEffect, useState } from "react";
+import { checkClipboardContent } from "../lib/util";
 import { Quest } from "../types";
 
 function CreateQuestForm(props: { onCreate: (quest: Omit<Quest, "id">) => void; quest?: Quest; actionLabel: string }) {
   const { pop } = useNavigation();
   const { onCreate, quest, actionLabel } = props;
 
-  const [tasks, setTasks] = useState<string[]>(quest?.tasks.map((task) => task.name) ?? ["Task 1"]);
+  const [title, setTitle] = useState<Quest["title"]>(quest?.title ?? "");
+  const [tasks, setTasks] = useState<string[]>(quest?.tasks.map((task) => task.name) ?? [""]);
+
+  useEffect(() => {
+    checkClipboardContent().then(async (_quest) => {
+      if (_quest) {
+        await showToast({
+          style: Toast.Style.Success,
+          title: "Imported from clipboard!",
+        });
+        setTitle(_quest.title);
+        setTasks(_quest.tasks.map((task) => task.name));
+      }
+    });
+  }, []);
 
   const handleSubmit = useCallback(
     ({ title, ...tasks }: { title: string }) => {
@@ -26,12 +41,21 @@ function CreateQuestForm(props: { onCreate: (quest: Omit<Quest, "id">) => void; 
   );
 
   function addTask() {
-    setTasks((previous) => [...previous, `Task ${previous.length + 1}`]);
+    setTasks((previous) => [...previous, ""]);
   }
 
   function removeTask() {
     setTasks((previous) => previous.slice(0, -1));
     // Fixme: Should set focus on one of the remaining tasks
+  }
+
+  function handleTasksChange(value: string, index: number) {
+    const nextTasks = tasks.map((_task, _index) => {
+      if (_index === index) return value;
+      else return _task;
+    });
+
+    setTasks(nextTasks);
   }
 
   return (
@@ -46,9 +70,23 @@ function CreateQuestForm(props: { onCreate: (quest: Omit<Quest, "id">) => void; 
         </ActionPanel>
       }
     >
-      <Form.TextField id="title" key="title" defaultValue={quest?.title ?? "Quest"} title="Title" />
+      <Form.TextField
+        id="title"
+        key="title"
+        title="Title"
+        value={title}
+        onChange={setTitle}
+        placeholder="Quest Title"
+      />
       {tasks.map((task, index) => (
-        <Form.TextField key={index.toString()} id={index.toString()} title={task} placeholder={task} />
+        <Form.TextField
+          key={index.toString()}
+          id={index.toString()}
+          title={`Task ${index + 1}`}
+          placeholder="Task"
+          value={task}
+          onChange={(value) => handleTasksChange(value, index)}
+        />
       ))}
     </Form>
   );

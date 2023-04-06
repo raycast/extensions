@@ -1,5 +1,9 @@
 # IATA Code Decoder Changelog
 
+## [v1.2.2] - 2023-03-28
+
+* Point to new API host for source data
+
 ## [v1.2.1] - 2023-03-21
 
 * Bump dependencies

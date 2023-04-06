@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-06-24 17:07
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-10-18 10:22
+ * @lastEditTime: 2023-03-23 17:46
  * @fileName: detect.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -11,7 +11,6 @@
 import { autoDetectLanguageItem, chineseLanguageItem, englishLanguageItem } from "../language/consts";
 import { isValidLangCode } from "../language/languages";
 import { myPreferences } from "../preferences";
-import { appleLanguageDetect } from "../scripts";
 import { baiduWebDetect } from "../translation/baidu/baiduAPI";
 import { bingDetect } from "../translation/microsoft/bing";
 import { hasTencentAppKey, tencentDetect } from "../translation/tencent";
@@ -84,7 +83,7 @@ function getDetectAPIs() {
   // Apple detection is inaccurate, only use it when lacking detect API.
   if (detectActionList.length < 2 && myPreferences.enableAppleLanguageDetect) {
     // Since Apple detect may block the main thread, so we stop it for now and wait for a solution to be found later.
-    detectActionList.push(appleLanguageDetect);
+    // detectActionList.push(appleLanguageDetect);
   }
 
   return detectActionList;
@@ -178,22 +177,11 @@ function handleDetectedLanguage(detectedLangModel: DetectedLangModel): Promise<D
       }
 
       // If enabled speed first, and API detected two `preferred` language, try to use it.
-      if (detectedIdenticalLanguages.length === 2) {
+      // Perf: To speed up language detection, we use the first detected && preferred language.
+      if (detectedIdenticalLanguages.length === 1) {
         // Mark two identical language as prior.
         detectedLangModel.prior = true;
-
-        const bingType = LanguageDetectType.Bing;
-        const baiduType = LanguageDetectType.Baidu;
-        const volcanoType = LanguageDetectType.Volcano;
-        const containBingDetect = detectedLangModel.type === bingType || apiDetectedListContainsType(bingType);
-        const containBaiduDetect = detectedLangModel.type === baiduType || apiDetectedListContainsType(baiduType);
-        const containVolcanoDetect = detectedLangModel.type === volcanoType || apiDetectedListContainsType(volcanoType);
-        const confirmVolcanoDetect = containVolcanoDetect && detectedLangModel.confirmed;
-        if (
-          (containBingDetect || containBaiduDetect || confirmVolcanoDetect) &&
-          isPreferredLanguage(detectedLangCode) &&
-          myPreferences.enableDetectLanguageSpeedFirst
-        ) {
+        if (isPreferredLanguage(detectedLangCode) && myPreferences.enableDetectLanguageSpeedFirst) {
           detectedLangModel.confirmed = true;
           console.warn(`---> Speed first, API detected 'two' identical 'preferred' language: ${detectedTypes}`);
           console.warn(`detected language: ${JSON.stringify(detectedLangModel, null, 4)}`);
@@ -201,7 +189,7 @@ function handleDetectedLanguage(detectedLangModel: DetectedLangModel): Promise<D
         }
       }
 
-      if (detectedIdenticalLanguages.length >= 3) {
+      if (detectedIdenticalLanguages.length >= 2) {
         detectedLangModel.confirmed = true;
         console.warn(`---> API detected 'three' identical language`);
         console.warn(`detected language: ${JSON.stringify(detectedLangModel, null, 4)}`);
@@ -373,6 +361,7 @@ export function simpleDetectTextLanguage(text: string): DetectedLangModel {
   return detectTypeResult;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function apiDetectedListContainsType(detectedLanguagetype: LanguageDetectType): boolean {
   // console.log(`check if api detected list contains type: ${detectedLanguagetype}`);
   const isContained = apiDetectedLanguageList.find((item) => item.type === detectedLanguagetype);

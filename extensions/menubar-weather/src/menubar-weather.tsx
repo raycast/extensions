@@ -9,6 +9,8 @@ import {
   showForecast,
   showLocation,
   showSun,
+  windDirection,
+  windDirectionSimple,
 } from "./utils/weather-utils";
 import { OPEN_METEO } from "./utils/axios-utils";
 
@@ -132,6 +134,14 @@ export default function MenubarWeather() {
                     subtitle={` ${weather?.current_weather.windspeed}${windUint}`}
                     onAction={async () => {
                       await Clipboard.copy(`${weather?.current_weather.windspeed}${windUint}`);
+                    }}
+                  />
+                  <MenuBarExtra.Item
+                    title={"Direction"}
+                    icon={Icon.Flag}
+                    subtitle={` ${windDirection(weather?.current_weather.winddirection)}`}
+                    onAction={async () => {
+                      await Clipboard.copy(`${windDirection(weather?.current_weather.winddirection)}`);
                     }}
                   />
                 </MenuBarExtra.Section>
@@ -274,9 +284,12 @@ export default function MenubarWeather() {
                     <MenuBarExtra.Item
                       key={index + weather?.daily?.time[index] + weather?.daily?.windspeed_10m_max[index]}
                       icon={getDateIcon(weather?.daily?.time[index].substring(8))}
-                      title={` ${value}${windUint}`}
+                      title={` ${value}${windUint}${windDirectionSimple(weather?.daily, index)}`}
                       onAction={async () => {
-                        await Clipboard.copy(weather?.daily?.time[index] + ` ${value}${windUint}`);
+                        await Clipboard.copy(
+                          weather?.daily?.time[index] +
+                            ` ${value}${windUint}${windDirectionSimple(weather?.daily, index)}`
+                        );
                       }}
                     />
                   );
