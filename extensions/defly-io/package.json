@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "defly-io",
-  "title": "Defly.io Server Info",
+  "title": "Defly.io",
   "description": "Get defly.io teams and defuse info",
   "icon": "command-icon.png",
   "author": "isra",
@@ -25,7 +25,7 @@
         },
         {
           "name": "port",
-          "placeholder": "port",
+          "placeholder": "Port",
           "type": "text",
           "required": false
         }

@@ -19,7 +19,7 @@ type Team = {
     hex: string;
     ID: number;
   };
-}
+};
 
 const regions = [
   {
@@ -164,7 +164,7 @@ function getDeflyUrl(region: string): string {
     } else if (port.endsWith("2")) {
       deflyUrl += "#2-";
     } else if (port.endsWith("9")) {
-      return "https://defly.io/"
+      return "https://defly.io/";
     }
     if (regionId === "use") {
       deflyUrl += "use4:";
@@ -197,7 +197,7 @@ function escapeMarkdown(text: string): string {
   return escapedText;
 }
 
-function Dropdown(props: { onValueChange: (newValue: string) => void, region: string }) {
+function Dropdown(props: { onValueChange: (newValue: string) => void; region: string }) {
   return (
     <List.Dropdown
       value={props.region}
@@ -214,7 +214,13 @@ function Dropdown(props: { onValueChange: (newValue: string) => void, region: st
                 <List.Dropdown.Item
                   key={`?region=${region.id}&port=${port.value}`}
                   value={`?region=${region.id}&port=${port.value}`}
-                  keywords={[region.name, port.name, (port.name.match(/\(([^)]+)\)/) || [])[1], region.id, region.id + port.value]}
+                  keywords={[
+                    region.name,
+                    port.name,
+                    (port.name.match(/\(([^)]+)\)/) || [])[1],
+                    region.id,
+                    region.id + port.value,
+                  ]}
                   title={region.name + " - " + port.name}
                 />
               );
@@ -228,7 +234,7 @@ function Dropdown(props: { onValueChange: (newValue: string) => void, region: st
 
 function Main(props: { region: string; onValueChange: (newValue: string) => void }) {
   const [showingDetail, setShowingDetail] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
 
   const {
     data: teams,
@@ -249,9 +255,7 @@ function Main(props: { region: string; onValueChange: (newValue: string) => void
   const filteredTeams = teams?.filter((team) => {
     if (searchQuery === "") return true;
     const lowerCaseQuery = searchQuery.toLowerCase();
-    return team.players.some((player) =>
-      player.name.toLowerCase().includes(lowerCaseQuery)
-    );
+    return team.players.some((player) => player.name.toLowerCase().includes(lowerCaseQuery));
   });
 
   return (
@@ -273,28 +277,30 @@ function Main(props: { region: string; onValueChange: (newValue: string) => void
         filteredTeams.map((team) => {
           const itemProps: Partial<List.Item.Props> = showingDetail
             ? {
-              detail: (
-                <List.Item.Detail
-                  markdown={`# ${team.team.color}\n${team.mapPercent.toFixed(
-                    2
-                  )}%\n${team.players
-                    .map((player) => {
-                      const playerName = escapeMarkdown(player.name);
-                      return `- ${playerName} ${player.badge
-                          ? `<img src="https://defly.io/img/badges/${player.badge}.png" alt="Badge ${player.badge}" title="Badge ${player.badge}" height="16">`
-                          : ""
+                detail: (
+                  <List.Item.Detail
+                    markdown={`# ${team.team.color}\n${team.mapPercent.toFixed(2)}%\n${team.players
+                      .map((player) => {
+                        const playerName = escapeMarkdown(player.name);
+                        return `- ${playerName} ${
+                          player.badge
+                            ? `<img src="https://defly.io/img/badges/${player.badge}.png" alt="Badge ${player.badge}" title="Badge ${player.badge}" height="16">`
+                            : ""
                         }`;
-                    })
-                    .join("\n")}`}
-                />
-              ),
-            }
+                      })
+                      .join("\n")}`}
+                  />
+                ),
+              }
             : { accessories: [{ text: team.players.map((player) => player.name).join(", ") }] };
           return (
             <List.Item
               key={team.team.ID}
               title={team.team.color}
-              icon={{ source: team.available ? Icon.CircleFilled : Icon.XMarkCircleFilled, tintColor: `#${team.team.hex}` }}
+              icon={{
+                source: team.available ? Icon.CircleFilled : Icon.XMarkCircleFilled,
+                tintColor: `#${team.team.hex}`,
+              }}
               subtitle={`${team.players.length}/${team.maxSize} - ${team.mapPercent.toFixed(2)}%`}
               {...itemProps}
               actions={
@@ -308,9 +314,14 @@ function Main(props: { region: string; onValueChange: (newValue: string) => void
                     content={getDeflyUrl(props.region)}
                     shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
                   />
-                  <Action title="Toggle Detail" onAction={() => setShowingDetail(!showingDetail)} shortcut={{
-                    modifiers: ["cmd", "shift"], key: "d",
-                  }} />
+                  <Action
+                    title="Toggle Detail"
+                    onAction={() => setShowingDetail(!showingDetail)}
+                    shortcut={{
+                      modifiers: ["cmd", "shift"],
+                      key: "d",
+                    }}
+                  />
                 </ActionPanel>
               }
             />
@@ -319,21 +330,25 @@ function Main(props: { region: string; onValueChange: (newValue: string) => void
     </List>
   );
 }
-export default function Command(props: LaunchProps<{
-  arguments: {
-    region: string;
-    port: string;
-  }
-}>) {
-  const [selectedRegion, setSelectedRegion] = useState<string>('?region=use&port=3005');
+export default function Command(
+  props: LaunchProps<{
+    arguments: {
+      region: string;
+      port: string;
+    };
+  }>
+) {
+  const [selectedRegion, setSelectedRegion] = useState<string>("?region=use&port=3005");
 
   useEffect(() => {
     const fetchStoredRegion = async () => {
-      const storedRegion = await LocalStorage.getItem('selectedRegion');
-       if (props.arguments.region && props.arguments.port) {
-        const newRegion = `?region=${props.arguments.region.toLowerCase().trim()}&port=${props.arguments.port.toLowerCase().trim()}`;
+      const storedRegion = await LocalStorage.getItem("selectedRegion");
+      if (props.arguments.region && props.arguments.port) {
+        const newRegion = `?region=${props.arguments.region.toLowerCase().trim()}&port=${props.arguments.port
+          .toLowerCase()
+          .trim()}`;
         setSelectedRegion(newRegion);
-        LocalStorage.setItem('selectedRegion', newRegion);
+        LocalStorage.setItem("selectedRegion", newRegion);
       } else if (storedRegion) {
         setSelectedRegion(storedRegion as string);
       }
@@ -341,13 +356,12 @@ export default function Command(props: LaunchProps<{
     fetchStoredRegion();
   }, [props.arguments.region, props.arguments.port]);
 
-
   return (
     <Main
       region={selectedRegion}
       onValueChange={(newValue) => {
         setSelectedRegion(newValue);
-        LocalStorage.setItem('selectedRegion', newValue);
+        LocalStorage.setItem("selectedRegion", newValue);
       }}
     />
   );
