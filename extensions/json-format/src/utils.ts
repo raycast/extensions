@@ -23,13 +23,7 @@ export function formatJS(text: string) {
 }
 
 export async function copyFormattedJs(result: string) {
-  try {
-    JSON.parse(result);
-  } catch (err) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: 'Invalid input',
-    });
+  if (!(await validJson(result))) {
     return;
   }
 
@@ -40,6 +34,21 @@ export async function copyFormattedJs(result: string) {
     await Clipboard.copy(result);
     await showHUD('✅ Copied succesfully!');
   }
+}
+
+export async function validJson(input: string) {
+  try {
+    JSON.parse(input);
+  } catch (err) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: input ? 'Invalid input' : 'Empty input',
+    });
+
+    return false;
+  }
+
+  return true;
 }
 
 interface Preferences {

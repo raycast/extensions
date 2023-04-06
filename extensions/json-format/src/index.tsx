@@ -1,14 +1,7 @@
-import {
-  ActionPanel,
-  Icon,
-  Form,
-  Action,
-  showToast,
-  Toast,
-} from '@raycast/api';
+import { ActionPanel, Icon, Form, Action } from '@raycast/api';
 import { useState } from 'react';
 
-import { copyFormattedJs, formatJS } from './utils';
+import { copyFormattedJs, formatJS, validJson } from './utils';
 
 interface FormInput {
   input: string;
@@ -36,13 +29,8 @@ export default function main() {
             icon={Icon.Checkmark}
             onSubmit={async (values: FormInput) => {
               const out = formatJS(values.input);
-              try {
-                JSON.parse(out);
-              } catch (err) {
-                await showToast({
-                  style: Toast.Style.Failure,
-                  title: 'Invalid input',
-                });
+
+              if (!(await validJson(out))) {
                 return;
               }
 
