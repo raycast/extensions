@@ -7,9 +7,13 @@ import HueClient from "./lib/HueClient";
 import useSceneGradients from "./hooks/useSceneGradients";
 import Style = Toast.Style;
 
+// Exact dimensions of a 16:9 Raycast 5 column grid item.
+const GRID_ITEM_WIDTH = 271;
+const GRID_ITEM_HEIGHT = 153;
+
 export default function SetScene() {
   const { hueBridgeState, sendHueMessage, isLoading, rooms, zones, scenes } = useHue();
-  const { gradients } = useSceneGradients(scenes, 269, 154);
+  const { gradients } = useSceneGradients(scenes, GRID_ITEM_WIDTH, GRID_ITEM_HEIGHT);
   const groupTypes = [rooms, zones];
 
   const manageHueBridgeElement: JSX.Element | null = ManageHueBridge(hueBridgeState, sendHueMessage);
