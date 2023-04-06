@@ -3,7 +3,7 @@ import {
   environment,
   Icon,
   List,
-  preferences,
+  getPreferenceValues,
   showToast,
   useNavigation,
   Action,
@@ -24,7 +24,6 @@ import { durationToString, keyForStatusPreset, statusExpirationText } from "./ut
 import { SlackClient } from "./slackClient";
 import { CreateStatusPresetForm, EditStatusPresetForm, SetCustomStatusForm } from "./setStatusForm";
 import { mkdirSync, readFileSync, writeFileSync } from "fs";
-("./setStatusForm");
 
 // Consts
 
@@ -43,9 +42,9 @@ type LaunchContext = {
 // Main
 
 export default function Command(props: LaunchProps) {
-  const accessToken = preferences.accessToken?.value as string;
+  const accessToken = getPreferenceValues<{ accessToken: string }>().accessToken;
   const slackClient = new SlackClient(accessToken);
-  return <StatusesList slackClient={slackClient} launchContext={props.launchContext as LaunchContext} />;
+  return <StatusesList slackClient={slackClient} launchContext={(props.launchContext ?? {}) as LaunchContext} />;
 }
 
 function StatusesList(props: { slackClient: SlackClient; launchContext: LaunchContext }) {
@@ -70,14 +69,14 @@ function StatusesList(props: { slackClient: SlackClient; launchContext: LaunchCo
 
   return (
     <List>
-      <List.Section id="currentStatusSection" key="currentStatusSection" title="Current Status">
+      <List.Section title="Current Status">
         <CurrentStatusItem
           slackClient={props.slackClient}
           currentStatusResponseState={currentStatusResponseState}
           statusPresetsListState={statusPresetsListState}
         />
       </List.Section>
-      <List.Section id="presets" key="presets" title="Presets">
+      <List.Section title="Presets">
         {statusPresets.map((status, index) => (
           <SetStatusPresetListItem
             key={keyForStatusPreset(status)}
@@ -233,7 +232,6 @@ function SetCustomStatusAction(props: {
   const { push } = useNavigation();
   return (
     <Action
-      id="setCustomStatus"
       title="Set Custom Status"
       icon={Icon.Message}
       shortcut={{ modifiers: ["cmd"], key: "n" }}
@@ -252,7 +250,6 @@ function SetCustomStatusAction(props: {
 function ClearStatusAction(props: { slackClient: SlackClient; currentStatusResponseState: SlackStatusResponseState }) {
   return (
     <Action
-      id="clearStatus"
       title="Clear Status"
       icon={Icon.XMarkCircle}
       onAction={() => props.slackClient.clearStatus(props.currentStatusResponseState)}
@@ -267,7 +264,6 @@ function SetStatusAction(props: {
 }) {
   return (
     <Action
-      id="setStatus"
       title="Set Status"
       icon={Icon.Pencil}
       onAction={() => props.slackClient.setStatusFromPreset(props.statusPreset, props.currentStatusResponseState)}
@@ -298,7 +294,6 @@ function SetStatusWithDuration(props: {
         return (
           <Action
             key={title}
-            id={title}
             title={title}
             icon={Icon.Clock}
             onAction={() =>
@@ -314,7 +309,6 @@ function SetStatusWithDuration(props: {
 function DeletePresetAction(props: { statusPresetsListState: SlackStatusPresetsListState; index: number }) {
   return (
     <Action
-      id="deletePreset"
       title="Delete Preset"
       icon={Icon.Trash}
       shortcut={{ modifiers: ["ctrl"], key: "x" }}
@@ -332,7 +326,6 @@ function CreatePresetAction(props: { statusPresetsListState: SlackStatusPresetsL
   const { push, pop } = useNavigation();
   return (
     <Action
-      id="createPreset"
       title="Create Status Preset"
       icon={Icon.Document}
       shortcut={{ modifiers: ["cmd", "shift"], key: "n" }}
@@ -364,7 +357,6 @@ function EditPresetAction(props: { statusPresetsListState: SlackStatusPresetsLis
   const [presets, setPresets] = props.statusPresetsListState;
   return (
     <Action
-      id="editPreset"
       title="Edit Preset"
       icon={Icon.Pencil}
       shortcut={{ modifiers: ["cmd"], key: "e" }}
