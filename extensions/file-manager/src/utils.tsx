@@ -179,7 +179,7 @@ export function FileItem(props: { fileData: FileDataType; refresh: () => void })
               props.refresh();
             }}
           />
-          {preferences.showDeleteOption && (
+          {preferences.showDeleteActions && (
             <Action
               title="Delete File"
               icon={Icon.Trash}
