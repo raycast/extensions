@@ -3,7 +3,7 @@
 ## [Allow to Preview Formatted JSON] - 2023-04-04
 
 - Ability to view formated JSON
-- Added new command to either view formatted JSON or Copy formatted JSON
+- Added new action to view formatted JSON
 
 ## [Format JS Objects] - 2023-02-12
 
