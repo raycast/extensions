@@ -4,29 +4,34 @@ import { BRIDGE_ID, BRIDGE_IP_ADDRESS_KEY, BRIDGE_USERNAME_KEY } from "./lib/con
 import HueClient from "./lib/HueClient";
 
 export default async () => {
-  await closeMainWindow();
+  closeMainWindow().then();
 
-  try {
-    const [bridgeIpAddress, bridgeId, bridgeUsername] = await Promise.all([
-      LocalStorage.getItem<string>(BRIDGE_IP_ADDRESS_KEY),
-      LocalStorage.getItem<string>(BRIDGE_ID),
-      LocalStorage.getItem<string>(BRIDGE_USERNAME_KEY),
-    ]);
+  await Promise.all([
+    LocalStorage.getItem<string>(BRIDGE_IP_ADDRESS_KEY),
+    LocalStorage.getItem<string>(BRIDGE_ID),
+    LocalStorage.getItem<string>(BRIDGE_USERNAME_KEY),
+  ])
+    .then(async ([bridgeIpAddress, bridgeId, bridgeUsername]) => {
+      if (bridgeIpAddress === undefined || bridgeId === undefined || bridgeUsername === undefined) {
+        throw new NoHueBridgeConfiguredError();
+      }
 
-    if (bridgeIpAddress === undefined || bridgeId === undefined || bridgeUsername === undefined) {
-      throw Error("No Hue Bridge credentials found");
-    }
+      const hueClient = await HueClient.createInstance(bridgeIpAddress, bridgeId, bridgeUsername);
+      return hueClient.getLights().then((lights) => ({ hueClient, lights }));
+    })
+    .then(({ hueClient, lights }) => {
+      const promises = lights.map((light) => {
+        return hueClient.updateLight(light, { on: { on: false } });
+      });
 
-    const hueClient = await HueClient.createInstance(bridgeIpAddress, bridgeId, bridgeUsername);
-    const lights = await hueClient.getLights();
-    lights.forEach((light) => {
-      hueClient.updateLight(light, { on: { on: false } });
+      return Promise.all(promises);
+    })
+    .then(() => {
+      return showHUD("Turned off all lights");
+    })
+    .catch((error) => {
+      if (error instanceof NoHueBridgeConfiguredError) return showHUD("No Hue bridge configured");
+      if (error instanceof CouldNotConnectToHueBridgeError) return showHUD("Could not connect to the Hue bridge");
+      return showHUD("Failed turning off all lights");
     });
-
-    await showHUD("Turned off all lights");
-  } catch (error) {
-    if (error instanceof NoHueBridgeConfiguredError) return showHUD("No Hue bridge configured");
-    if (error instanceof CouldNotConnectToHueBridgeError) return showHUD("Could not connect to the Hue bridge");
-    return showHUD("Failed turning off all lights");
-  }
 };
