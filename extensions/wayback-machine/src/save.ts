@@ -15,16 +15,18 @@ export default async function main(props: LaunchProps<{ arguments: WaybackArgume
     console.error(error);
   }
 
-  const urlRegex = /(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_+.~#?&//=]*)/;
-  const webpageUrl: string | undefined = url || selectedText;
-  if (webpageUrl === undefined || !urlRegex.test(webpageUrl)) {
-    return;
-  }
-
   const toast = await showToast({
     style: Toast.Style.Animated,
     title: "Saving to Wayback Machine",
   });
+
+  const urlRegex = /(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_+.~#?&//=]*)/;
+  const webpageUrl: string | undefined = url || selectedText;
+  if (webpageUrl === undefined || !urlRegex.test(webpageUrl)) {
+    toast.style = Toast.Style.Failure;
+    toast.title = "No domain found";
+    return;
+  }
 
   try {
     const res = await fetch(`https://web.archive.org/save/${webpageUrl}`);
