@@ -16,5 +16,5 @@ export default function Command() {
     />
   ));
 
-  return <Grid>{gridItems}</Grid>;
+  return <Grid searchBarPlaceholder="Search filters...">{gridItems}</Grid>;
 }
