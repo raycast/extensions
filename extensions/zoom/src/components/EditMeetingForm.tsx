@@ -20,7 +20,7 @@ export default function MeetingForm({ meeting, mutate }: EditMeetingFormProps) {
 
   const startTimeRef = useRef<Form.DatePicker>(null);
 
-  const [startTime, setStartTime] = useState(new Date(meeting.start_time));
+  const [startTime, setStartTime] = useState<Date | null>(new Date(meeting.start_time));
   const [duration, setDuration] = useState(String(meeting.duration));
   const [topic, setTopic] = useState(meeting.topic);
   const [agenda, setAgenda] = useState(meeting.agenda);
@@ -30,8 +30,7 @@ export default function MeetingForm({ meeting, mutate }: EditMeetingFormProps) {
       return;
     }
 
-    const toast = new Toast({ style: Toast.Style.Animated, title: "Updating meeting" });
-    await toast.show();
+    const toast = await showToast({ style: Toast.Style.Animated, title: "Updating meeting" });
 
     try {
       const payload = {
@@ -52,15 +51,14 @@ export default function MeetingForm({ meeting, mutate }: EditMeetingFormProps) {
         },
       });
 
-      await showToast({ style: Toast.Style.Success, title: "Updated meeting" });
+      toast.style = Toast.Style.Success;
+      toast.title = "Updated meeting";
 
-      await pop();
+      pop();
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to update meeting",
-        message: getErrorMessage(error),
-      });
+      toast.style = Toast.Style.Failure;
+      toast.title = "Failed to update meeting";
+      toast.message = getErrorMessage(error);
     }
   }
 

@@ -10,6 +10,7 @@ import {
   closeMainWindow,
   showToast,
   Toast,
+  getFrontmostApplication,
 } from "@raycast/api";
 import * as changeCase from "change-case-all";
 import { execa } from "execa";
@@ -77,7 +78,7 @@ async function readContent(preferredSource: string) {
   }
 }
 
-export default function changeChase() {
+export default function Command() {
   const data: { type: CaseType; func: (input: string, options?: object) => string }[] = [
     { type: "Camel Case", func: changeCase.camelCase },
     { type: "Capital Case", func: changeCase.capitalCase },
@@ -103,9 +104,17 @@ export default function changeChase() {
   ];
 
   const [clipboard, setClipboard] = useState<string>("");
+  const [frontmostAppName, setFrontmostAppName] = useState<string>("Active App");
 
   const preferences = getPreferenceValues();
   const preferredSource = preferences["source"];
+
+  useEffect(() => {
+    (async () => {
+      const { name } = await getFrontmostApplication();
+      setFrontmostAppName(name);
+    })();
+  }, []);
 
   useEffect(() => {
     readContent(preferredSource)
@@ -134,8 +143,33 @@ export default function changeChase() {
             subtitle={modified}
             actions={
               <ActionPanel>
-                <Action title="Copy to Clipboard" icon={Icon.Clipboard} onAction={() => copyToClipboard(modified)} />
-                <Action title="Paste in Active App" icon={Icon.TextDocument} onAction={() => paste(modified)} />
+                {preferences["defaultAction"] == "copy" ? (
+                  <>
+                    <Action
+                      title="Copy to Clipboard"
+                      icon={Icon.Clipboard}
+                      onAction={() => copyToClipboard(modified)}
+                    />
+                    <Action
+                      title={`Paste in ${frontmostAppName}`}
+                      icon={Icon.BlankDocument}
+                      onAction={() => paste(modified, frontmostAppName)}
+                    />
+                  </>
+                ) : (
+                  <>
+                    <Action
+                      title={`Paste in ${frontmostAppName}`}
+                      icon={Icon.BlankDocument}
+                      onAction={() => paste(modified, frontmostAppName)}
+                    />
+                    <Action
+                      title="Copy to Clipboard"
+                      icon={Icon.Clipboard}
+                      onAction={() => copyToClipboard(modified)}
+                    />
+                  </>
+                )}
               </ActionPanel>
             }
           />
@@ -151,8 +185,8 @@ export async function copyToClipboard(content: string) {
   await closeMainWindow();
 }
 
-export async function paste(content: string) {
-  await showHUD("Pasted in Active App");
+export async function paste(content: string, appName: string) {
+  await showHUD(`Pasted in ${appName}`);
   await Clipboard.paste(content);
   await closeMainWindow();
 }

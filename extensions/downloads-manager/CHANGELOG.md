@@ -1,5 +1,14 @@
 # Downloads Manager Changelog
 
+## [Add new action] - 2023-03-30
+
+- Added the action `Copy File` for the `Manage Downloads` command
+
+## [New preference] - 2023-01-23
+
+- Added quick look to `Manage Downloads` command
+- Added preference to customize downloads folder
+
 ## [Add new commands] - 2022-10-08
 
 - Added the command `Copy Latest Download`, which copies the latest download to the clipboard.

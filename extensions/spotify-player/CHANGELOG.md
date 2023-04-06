@@ -1,5 +1,29 @@
 # Spotify Player Changelog
 
+## [Fix] - 2023-03-07
+
+- Fix crash due to `null` playlists being returned by the API.
+
+## [Fix] - 2023-01-13
+
+- Allow no-view commands (`Like Current Song`, `Dislike Current Song`, `Just Play` and `Star Radio`) to initialize authorization.
+
+## [Feature] - 2022-12-06
+
+- Change background refresh interval to keep the menu bar in a more updated state
+
+## [Feature] - 2022-11-17
+
+- Add preference to show ellipsis when menu bar title is truncated.
+
+## [Fix] - 2022-11-14
+
+- Fixed a bug that caused `Like Current Song` and `Dislike Current Song` to not function properly.
+
+## [Fix] - 2022-10-28
+
+- Fixed a bug that caused the menubar command to not function properly.
+
 ## [Feature] - 2022-10-07
 
 - Implemented add track to queue, can be located in Search Tracks view
@@ -24,7 +48,7 @@
 ## [Features & Bug Fixes] - 2022-07-27
 
 - Added Play Shuffled actions to `Search Playlist`, `Search Albums` commands
-- Supported start cross-device playing. Means that if you have the music playing not on your machine – the play actions will trigger playing music whenever you have it.
+- Supported start cross-device playing. Means that if you have the music playing not on your machine - the play actions will trigger playing music whenever you have it.
 - Fixed flickering for menu bar items
 
 ## [Features & Bug Fixes] - 2022-07-30

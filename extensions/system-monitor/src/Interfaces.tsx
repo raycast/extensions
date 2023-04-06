@@ -13,6 +13,7 @@ export interface NetworkMonitorState {
 
 export interface CpuMonitorState {
   cpu: string;
+  uptime: string;
   avgLoad: string[];
   topProcess: string[][];
 }
@@ -25,7 +26,7 @@ export interface MemoryMonitorState {
   topProcess: string[][];
 }
 
-export interface PowerMointorState {
+export interface PowerMonitorState {
   batteryLevel: string;
   isCharging: boolean;
   cycleCount: string;

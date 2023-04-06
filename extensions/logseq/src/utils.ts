@@ -42,12 +42,20 @@ export const validateUserConfigGraphPath = () => {
   return validateFolderPath(getUserConfiguredGraphPath());
 };
 
-const parseJournalFileNameFromLogseqConfig = () => {
+const parseLogseqConfig = () => {
   const logseqConfigPath = path.join(getUserConfiguredGraphPath(), "/logseq/config.edn");
+  return fs.promises
+    .readFile(logseqConfigPath, { encoding: "utf8" })
+    .then((content) => parseEDNString(content.toString(), { mapAs: "object", keywordAs: "string" }));
+};
+
+export const getPreferredFormat = () => {
+  return parseLogseqConfig().then((v: any) => v["preferred-format"] || "md");
+};
+
+const parseJournalFileNameFromLogseqConfig = () => {
   return (
-    fs.promises
-      .readFile(logseqConfigPath, { encoding: "utf8" })
-      .then((content) => parseEDNString(content.toString(), { mapAs: "object", keywordAs: "string" }))
+    parseLogseqConfig()
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .then((v: any) => ({
         fileFormat: v["preferred-format"] === "org" ? ".org" : ".md",
@@ -98,7 +106,7 @@ export const getFilesInDir = async (dirPath: string) => {
 
 export const formatResult = (result: string) => {
   const title = result.split("/");
-  return decodeURIComponent(title[title.length - 1]);
+  return title[title.length - 1];
 };
 
 export const formatFilePath = (pageName: string) => {

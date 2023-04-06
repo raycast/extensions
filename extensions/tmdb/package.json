@@ -5,6 +5,9 @@
   "description": "Browse through hundreds of thousands of movies and tv shows, see new releases, parental guide and much more.",
   "icon": "command-icon.png",
   "author": "Aayush9029",
+  "contributors": [
+    "andreaselia"
+  ],
   "categories": [
     "Media",
     "Other"
@@ -38,6 +41,13 @@
       "subtitle": "The Movie Database",
       "description": "View details, ratings, etc. for TV shows that are on air!",
       "mode": "view"
+    },
+    {
+      "name": "upcomingMovies",
+      "title": "Upcoming Movies",
+      "subtitle": "The Movie Database",
+      "description": "View details, ratings, etc. for upcoming movies!",
+      "mode": "view"
     }
   ],
   "preferences": [
@@ -51,11 +61,11 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.37.1",
+    "@raycast/api": "^1.42.0",
     "moviedb-promise": "^3.1.15"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
+    "@types/node": "^18.8.3",
     "@types/react": "^17.0.28",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",

@@ -32,7 +32,7 @@ const useSql = <Result>(path: string, query: string) => {
           databaseRef.current = await loadDatabase(path);
         } catch (e) {
           if (e instanceof Error && e.message.includes("operation not permitted")) {
-            setError(new PermissionError("You do not have permission to access the database."));
+            setError(new PermissionError("You do not have permission to access the database.", "fullDiskAccess"));
           } else {
             setError(e as Error);
           }
@@ -53,7 +53,7 @@ const useSql = <Result>(path: string, query: string) => {
       } catch (e) {
         console.error(e);
         if (error instanceof Error && error.message.includes("operation not permitted")) {
-          setError(new PermissionError("You do not have permission to access the database."));
+          setError(new PermissionError("You do not have permission to access the database.", "fullDiskAccess"));
         } else {
           setError(e as Error);
         }

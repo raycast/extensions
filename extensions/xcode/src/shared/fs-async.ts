@@ -35,3 +35,8 @@ export const readFileAsync = fs.promises.readFile;
  * Write file
  */
 export const writeFileAsync = fs.promises.writeFile;
+
+/**
+ * Delete file
+ */
+export const deleteFileAsync = fs.promises.rm;

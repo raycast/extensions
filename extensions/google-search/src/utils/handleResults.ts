@@ -1,9 +1,17 @@
-import { getLocalStorageItem, randomId } from "@raycast/api";
-import { SearchResult } from "./types";
+import { getPreferenceValues, LocalStorage } from "@raycast/api";
+import { nanoid } from "nanoid";
+import { Preferences, SearchResult } from "./types";
 import fetch from "node-fetch";
+import iconv from "iconv-lite";
 
 export async function getSearchHistory(): Promise<SearchResult[]> {
-  const historyString = (await getLocalStorageItem("history")) as string;
+  const { rememberSearchHistory } = getPreferenceValues<Preferences>();
+
+  if (!rememberSearchHistory) {
+    return [];
+  }
+
+  const historyString = (await LocalStorage.getItem("history")) as string;
 
   if (historyString === undefined) {
     return [];
@@ -13,7 +21,24 @@ export async function getSearchHistory(): Promise<SearchResult[]> {
   return items;
 }
 
-export async function getSearchResults(searchText: string, signal: AbortSignal): Promise<SearchResult[]> {
+export function getStaticResult(searchText: string): SearchResult[] {
+  if (!searchText) {
+    return [];
+  }
+
+  const result: SearchResult[] = [
+    {
+      id: nanoid(),
+      query: searchText,
+      description: `Search Google for '${searchText}'`,
+      url: `https://www.google.com/search?q=${encodeURIComponent(searchText)}`,
+    },
+  ];
+
+  return result;
+}
+
+export async function getAutoSearchResults(searchText: string, signal: any): Promise<SearchResult[]> {
   const response = await fetch(
     `https://suggestqueries.google.com/complete/search?hl=en-us&output=chrome&q=${encodeURIComponent(searchText)}`,
     {
@@ -30,38 +55,30 @@ export async function getSearchResults(searchText: string, signal: AbortSignal):
   }
 
   const buffer = await response.arrayBuffer();
-  const decoder = new TextDecoder("iso-8859-1");
-  const text = decoder.decode(buffer);
+  const text = iconv.decode(Buffer.from(buffer), "iso-8859-1");
   const json = JSON.parse(text);
 
-  const results: SearchResult[] = [
-    {
-      id: randomId(),
-      query: searchText,
-      description: `Search Google for '${searchText}'`,
-      url: `https://www.google.com/search?q=${encodeURIComponent(searchText)}`,
-    },
-  ];
+  const results: SearchResult[] = [];
 
   json[1].map((item: string, i: number) => {
     const type = json[4]["google:suggesttype"][i];
     const description = json[2][i];
 
     if (type === "NAVIGATION") {
-      results[i + 1] = {
-        id: randomId(),
+      results.push({
+        id: nanoid(),
         query: description.length > 0 ? description : item,
         description: `Open URL for '${item}'`,
         url: item,
         isNavigation: true,
-      };
+      });
     } else if (type === "QUERY") {
-      results[i + 1] = {
-        id: randomId(),
+      results.push({
+        id: nanoid(),
         query: item,
         description: `Search Google for '${item}'`,
         url: `https://www.google.com/search?q=${encodeURIComponent(item)}`,
-      };
+      });
     }
   });
 

@@ -1,6 +1,10 @@
 # Figma Files Changelog
 
-## [Fixes] 2022-09-23
+## [Fixes] - 2022-12-20
+
+- Fixed a bug that caused the extension to crash if a project didn't have any files
+
+## [Fixes] - 2022-09-23
 
 - Fixed a bug where it always tried to open files in the desktop app, even though Figma was not installed.
 - Fixed a endless loop causing the CPU to spike while having extension open.

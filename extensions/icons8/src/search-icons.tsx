@@ -1,7 +1,7 @@
 import { Grid, Color } from "@raycast/api";
 import React, { useEffect, useState } from "react";
 import { getPinnedIcons, getRecentIcons, getPinnedMovement } from "./utils/storage";
-import { defaultOptions, getStoredOptions, setStoredOptions } from "./utils/options";
+import { getStoredOptions, setStoredOptions } from "./utils/options";
 import { EmptyView, InvalidAPIKey } from "./components/empty-view";
 import { allStylesImage, gridSize } from "./utils/utils";
 import { getIcons, getStyles } from "./hooks/api";
@@ -11,66 +11,50 @@ import { defaultStyles } from "./utils/utils";
 
 export default function SearchIcons() {
   const [searchText, setSearchText] = useState("");
-  const [icons, setIcons] = useState<Icon8[] | null>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const [style, setStyle] = useState<string | undefined>();
-  const [styles, setStyles] = useState<Style[] | null>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [styles, setStyles] = useState<Style[] | undefined>([]);
+  const [options, setOptions] = useState<Options>(getStoredOptions());
 
-  useEffect(() => {
-    const fetchStyles = async () => {
-      await getStoredIcons();
-      setIsLoading(false);
-      setStyles(await getStyles());
-    };
-    fetchStyles();
-  }, []);
-
-  const [pinnedIcons, setPinnedIcons] = useState<Icon8[]>();
-  const [recentIcons, setRecentIcons] = useState<Icon8[]>();
-
-  const getStoredIcons = async () => {
-    setPinnedIcons(await getPinnedIcons(style));
-    setRecentIcons(await getRecentIcons(style));
-  };
+  const [icons, setIcons] = useState<Icon8[] | undefined>(undefined);
+  const [pinnedIcons, setPinnedIcons] = useState<Icon8[]>(getPinnedIcons());
+  const [recentIcons, setRecentIcons] = useState<Icon8[]>(getRecentIcons());
 
   const [refresh, setRefresh] = useState(false);
   const refreshIcons = () => setRefresh(!refresh);
 
   useEffect(() => {
-    getStoredIcons();
-  }, [refresh, style]);
-
-  const fetchIcons = async () => {
-    if (searchText) {
-      setIsLoading(true);
-      const icons = await getIcons(searchText, style);
-      setIcons(icons);
-      setIsLoading(false);
-    } else {
-      setIcons([]);
-    }
-  };
-
-  useEffect(() => {
-    fetchIcons();
-  }, [searchText, style]);
-
-  const [options, setOptions] = useState<Options>(defaultOptions);
-
-  useEffect(() => {
-    const getOptions = async () => setOptions(await getStoredOptions());
-    getOptions();
+    (async () => {
+      setStyles(await getStyles());
+    })();
   }, []);
 
   useEffect(() => {
-    const storeOptions = async () => {
-      if (options) await setStoredOptions(options);
-    };
-    storeOptions();
+    setPinnedIcons(getPinnedIcons(style));
+    setRecentIcons(getRecentIcons(style));
+  }, [refresh, style]);
+
+  useEffect(() => {
+    (async () => {
+      if (searchText) {
+        setIsLoading(true);
+        setIcons(await getIcons(searchText, style));
+        setIsLoading(false);
+      } else {
+        setIcons(undefined);
+      }
+    })();
+  }, [searchText, style]);
+
+  useEffect(() => {
+    setStoredOptions(options);
   }, [options]);
 
-  return styles ? (
+  if (styles === undefined) {
+    return <InvalidAPIKey />;
+  }
+  return (
     <Grid
       isLoading={isLoading}
       itemSize={gridSize}
@@ -79,43 +63,35 @@ export default function SearchIcons() {
       searchBarPlaceholder="Search Icons"
       throttle={true}
       searchBarAccessory={
-        styles ? (
-          <Grid.Dropdown
-            tooltip="Styles"
-            defaultValue={style}
-            onChange={(value: string) => {
-              if (value) setStyle(value);
-              else setStyle(undefined);
-            }}
-          >
-            <Grid.Dropdown.Section>
-              <Grid.Dropdown.Item title="All Styles" value={""} icon={{ source: allStylesImage }} />
-            </Grid.Dropdown.Section>
-            <Grid.Dropdown.Section>
-              {styles &&
-                styles.map((style) => (
-                  <Grid.Dropdown.Item
-                    key={style.code}
-                    title={style.title}
-                    value={style.code}
-                    icon={{
-                      source: style.url,
-                      tintColor: defaultStyles[style.title] ? Color.PrimaryText : null,
-                    }}
-                  />
-                ))}
-            </Grid.Dropdown.Section>
-          </Grid.Dropdown>
-        ) : null
+        <Grid.Dropdown
+          tooltip="Icon Styles"
+          defaultValue={style}
+          onChange={(value: string) => setStyle(value ? value : undefined)}
+        >
+          <Grid.Dropdown.Item title="All Styles" value={""} icon={{ source: allStylesImage }} />
+          <Grid.Dropdown.Section>
+            {styles.map((style) => (
+              <Grid.Dropdown.Item
+                key={style.code}
+                title={style.title}
+                value={style.code}
+                icon={{
+                  source: style.url,
+                  tintColor: defaultStyles[style.title] ? Color.PrimaryText : null,
+                }}
+              />
+            ))}
+          </Grid.Dropdown.Section>
+        </Grid.Dropdown>
       }
     >
-      {(!icons || icons?.length === 0) &&
-        (pinnedIcons?.length === 0 && recentIcons?.length === 0 ? (
-          <EmptyView />
+      {icons === undefined ? (
+        pinnedIcons.length === 0 && recentIcons.length === 0 ? (
+          <EmptyView message="No Pinned or Recent Icons" />
         ) : (
           <React.Fragment>
             <Grid.Section title="Pinned Icons">
-              {pinnedIcons?.map((icon: Icon8, index: number) => {
+              {pinnedIcons.map((icon: Icon8, index: number) => {
                 const movement = getPinnedMovement(pinnedIcons, icon.id);
                 return (
                   <Icon8Item
@@ -145,19 +121,21 @@ export default function SearchIcons() {
               ))}
             </Grid.Section>
           </React.Fragment>
-        ))}
-      {icons?.map((icon: Icon8, index: number) => (
-        <Icon8Item
-          key={index}
-          icon={icon}
-          platform={style}
-          refresh={refreshIcons}
-          options={options}
-          setOptions={setOptions}
-        />
-      ))}
+        )
+      ) : icons.length === 0 ? (
+        <EmptyView message={`No Results for "${searchText}"`} />
+      ) : (
+        icons.map((icon: Icon8, index: number) => (
+          <Icon8Item
+            key={index}
+            icon={icon}
+            platform={style}
+            refresh={refreshIcons}
+            options={options}
+            setOptions={setOptions}
+          />
+        ))
+      )}
     </Grid>
-  ) : (
-    <InvalidAPIKey />
   );
 }

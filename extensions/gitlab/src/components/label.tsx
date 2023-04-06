@@ -40,6 +40,7 @@ export function LabelList(props: {
   onSearchTextChange?: ((text: string) => void) | undefined;
   isLoading?: boolean | undefined;
   throttle?: boolean | undefined;
+  navigationTitle?: string;
 }): JSX.Element {
   return (
     <List
@@ -47,6 +48,7 @@ export function LabelList(props: {
       onSearchTextChange={props.onSearchTextChange}
       isLoading={props.isLoading}
       throttle={props.throttle}
+      navigationTitle={props.navigationTitle}
     >
       <List.Section title={props.title}>
         {props.labels.map((l) => (

@@ -12,15 +12,15 @@ export function XcodeSwiftPackageResolvedEntryList(props: { xcodeProject: XcodeP
   const packageResolved = usePromise(
     () => XcodeSwiftPackageResolvedService.getPackageResolved(props.xcodeProject),
     [],
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
-    { onError: () => {} }
+    {
+      onError: () => Promise.resolve(),
+    }
   );
   return (
     <List
       navigationTitle={`${props.xcodeProject.name} Swift Package Dependencies`}
       isShowingDetail={!!packageResolved.data?.entries.length}
       isLoading={packageResolved.isLoading}
-      searchBarPlaceholder="Search Swift Package Dependencies"
     >
       {packageResolved.data && packageResolved.data.entries.length ? (
         <XcodeSwiftPackageResolvedEntryListSection
@@ -43,16 +43,14 @@ function XcodeSwiftPackageResolvedEntryListSection(props: {
 }) {
   return (
     <List.Section>
-      {props.packageResolved.entries.map((entry) => {
-        return (
-          <XcodeSwiftPackageResolvedEntryListItem
-            key={entry.location}
-            xcodeProject={props.xcodeProject}
-            packageResolvedPath={props.packageResolved.path}
-            entry={entry}
-          />
-        );
-      })}
+      {props.packageResolved.entries.map((entry) => (
+        <XcodeSwiftPackageResolvedEntryListItem
+          key={entry.location}
+          xcodeProject={props.xcodeProject}
+          packageResolvedPath={props.packageResolved.path}
+          entry={entry}
+        />
+      ))}
     </List.Section>
   );
 }

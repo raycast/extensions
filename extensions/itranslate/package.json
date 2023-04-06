@@ -437,6 +437,40 @@
       ]
     },
     {
+      "name": "googleFreeTimeout",
+      "type": "dropdown",
+      "required": false,
+      "title": "Google(Free) API Timeout",
+      "description": "Select timeout of Google(Free) API",
+      "default": "2000",
+      "data": [
+        {
+          "title": "none",
+          "value": "0"
+        },
+        {
+          "title": "1000ms",
+          "value": "1000"
+        },
+        {
+          "title": "2000ms",
+          "value": "2000"
+        },
+        {
+          "title": "3000ms",
+          "value": "3000"
+        },
+        {
+          "title": "4000ms",
+          "value": "4000"
+        },
+        {
+          "title": "5000ms",
+          "value": "5000"
+        }
+      ]
+    },
+    {
       "name": "googleApiKey",
       "type": "password",
       "required": false,
@@ -1255,13 +1289,13 @@
       "type": "checkbox",
       "required": false,
       "label": "Close window when capture",
-      "description": "Close the main Raycast window when capture. \n⚠️In two cases, it should be unchecked:\n• The value of 'POP to Root Search' in Raycast Preferences is 'Immediately'\n• This command is activated by Hotkey",
+      "description": "Close the main Raycast window when capture",
       "default": false
     }
   ],
   "dependencies": {
     "@alicloud/pop-core": "^1.7.12",
-    "@raycast/api": "^1.38.2",
+    "@raycast/api": "^1.44.0",
     "@vitalets/google-translate-api": "^8.0.0",
     "axios": "^0.25.0",
     "form-data": "^4.0.0",

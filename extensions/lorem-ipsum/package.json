@@ -7,7 +7,8 @@
   "author": "AntonNiklasson",
   "license": "MIT",
   "contributors": [
-    "GastroGeek"
+    "GastroGeek",
+    "enkia"
   ],
   "categories": [
     "Data",
@@ -19,6 +20,7 @@
     "generator",
     "paragraphs",
     "sentences",
+    "words",
     "text",
     "lorem",
     "ipsum"
@@ -44,6 +46,21 @@
       "title": "Generate Sentences",
       "subtitle": "Lorem Ipsum",
       "description": "Generate random sentences and copy them to the clipboard",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "numberOfLoremIpsumsToGenerate",
+          "type": "text",
+          "required": false,
+          "placeholder": "1"
+        }
+      ]
+    },
+    {
+      "name": "words",
+      "title": "Generate Words",
+      "subtitle": "Lorem Ipsum",
+      "description": "Generate random words and copy them to the clipboard",
       "mode": "no-view",
       "arguments": [
         {

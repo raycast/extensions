@@ -1,12 +1,14 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "savvycal",
-  "title": "Savvycal",
-  "description": "Interact with your Savvycal links",
+  "title": "SavvyCal",
+  "description": "Interact with your SavvyCal links",
   "icon": "savvycal-icon.png",
   "author": "laurynas",
   "contributors": [
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "derrickreimer",
+    "vimtor"
   ],
   "categories": [
     "Productivity"
@@ -16,8 +18,8 @@
     {
       "name": "listSchedulingLinks",
       "title": "List Scheduling Links",
-      "subtitle": "Savvycal",
-      "description": "List all your Savvycal links",
+      "subtitle": "SavvyCal",
+      "description": "List all your SavvyCal links",
       "mode": "view"
     }
   ],
@@ -25,7 +27,7 @@
     {
       "name": "SavvycalToken",
       "title": "Personal Access Token",
-      "description": "Add your Savvycal Personal Access Token",
+      "description": "Add your SavvyCal Personal Access Token",
       "type": "password",
       "default": "",
       "required": true

@@ -9,12 +9,12 @@ export type UpdateIssuePayload = {
   labelIds: string[];
   priority: number;
   teamId: string;
+  dueDate: Date | null;
   estimate?: number;
   assigneeId?: string;
   cycleId?: string;
   projectId?: string;
   parentId?: string;
-  dueDate?: Date;
 };
 
 export async function updateIssue(issueId: Issue["id"], payload: UpdateIssuePayload) {

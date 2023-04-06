@@ -1,6 +1,17 @@
-import { Action, ActionPanel, Alert, confirmAlert, Form, Icon, List, useNavigation } from "@raycast/api";
+import { useState } from "react";
+import {
+  Action,
+  ActionPanel,
+  Alert,
+  confirmAlert,
+  Form,
+  Icon,
+  List,
+  showToast,
+  Toast,
+  useNavigation,
+} from "@raycast/api";
 import { FormValidation, useForm } from "@raycast/utils";
-import { SelectFolder } from "./utils/selectFolder";
 import { v4 as uuidv4 } from "uuid";
 import { existsSync } from "fs";
 import type { Location } from "./utils/types";
@@ -11,7 +22,7 @@ type FormValues = Location & { locType: "local" | "git" };
 
 export default function Command() {
   const [locations, setLocations] = useLocations();
-  const { push, pop } = useNavigation();
+  const { pop } = useNavigation();
 
   function DeleteLocationAction({ id, onDelete }: { id: string; onDelete?: () => void }) {
     return (
@@ -41,21 +52,29 @@ export default function Command() {
       onSubmit: async (data) => {
         data.id = location.id ?? uuidv4();
         data.git = Boolean(data.locType === "git");
+        const toast = await showToast(Toast.Style.Animated, "Saving Snippet Location", "Please wait...");
 
         if (data.git) {
+          // form is not using FilePicker component here, so can trust the path is `string`
           try {
             await refreshGitLocation(data);
           } catch (e) {
             console.error(e);
             const msg = typeof e === "string" ? e : "Unknown error with git";
             setValidationError("path", msg);
+            toast.hide();
             return;
           }
+        } else {
+          // form is using file picker, so path will come in as `string[]`
+          data.path = data.path[0];
         }
 
         locations.findIndex((l) => l.id === data.id) === -1
           ? setLocations((locations) => [...locations, data])
           : setLocations((locations) => locations.map((l) => (l.id === data.id ? data : l)));
+
+        toast.hide();
 
         pop();
       },
@@ -76,9 +95,27 @@ export default function Command() {
           <Form.Dropdown.Item value="local" title="My Computer" />
           <Form.Dropdown.Item value="git" title="Git Repository" />
         </Form.Dropdown>
-        <Form.TextField {...itemProps.path} title={values.locType === "local" ? "Path" : "Git URL"} />
+        {values.locType === "local" && (
+          <>
+            <Form.FilePicker
+              id={itemProps.path.id}
+              value={itemProps.path.value ? [itemProps.path.value] : []}
+              onChange={(val) => itemProps.path.onChange && itemProps.path.onChange(val[0])}
+              error={itemProps.path.error}
+              allowMultipleSelection={false}
+              canChooseDirectories
+              canChooseFiles={false}
+              title="Folder"
+            />
+            <Form.Description
+              title="WARNING"
+              text="The enitre contents of this folder will be scanned for snippets. Select a folder that will only contain snippets for better performance."
+            />
+          </>
+        )}
         {values.locType === "git" && (
           <>
+            <Form.TextField {...itemProps.path} title="Git URL" info="The URL of the git repository" />
             <Form.Description text="Any snippets found in this git repository will be available to you" />
             <Form.Description text="The Git URL must be publically accessible or contain credentials in the URL." />
           </>
@@ -94,21 +131,6 @@ export default function Command() {
         shortcut={{ key: "n", modifiers: ["cmd"] }}
         icon={Icon.NewFolder}
         target={<EditLocationForm location={{}} />}
-      />
-    );
-    // remove the applescript filepicker since it doesn't work with pop to root search set to immediately
-    // https://raycastcommunity.slack.com/archives/C01AC2X0GMN/p1664542350911429?thread_ts=1653409347.925799&cid=C01AC2X0GMN
-    return (
-      <SelectFolder
-        title="Add Location"
-        prompt="Select a folder to add"
-        shortcut={{ key: "n", modifiers: ["cmd"] }}
-        icon={Icon.NewFolder}
-        onSelect={(path) => {
-          if (path) {
-            push(<EditLocationForm location={{ path }} />);
-          }
-        }}
       />
     );
   }

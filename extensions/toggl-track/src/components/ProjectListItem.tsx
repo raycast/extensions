@@ -1,4 +1,4 @@
-import { List, Icon, ActionPanel, PushAction } from "@raycast/api";
+import { List, Icon, ActionPanel, Action } from "@raycast/api";
 import { AppContextProvider } from "../context";
 import { Project } from "../toggl/types";
 import CreateTimeEntryForm from "./CreateTimeEntryForm";
@@ -14,14 +14,14 @@ export default function ProjectListItem({
 }) {
   return (
     <List.Item
-      icon={{ source: Icon.Circle, tintColor: project?.hex_color }}
+      icon={{ source: Icon.Circle, tintColor: project?.color }}
       title={project?.name || "No project"}
       subtitle={subtitle}
       accessoryTitle={accessoryTitle}
       keywords={subtitle?.split(" ") || []}
       actions={
         <ActionPanel>
-          <PushAction
+          <Action.Push
             title="Create Time Entry"
             icon={Icon.Clock}
             target={

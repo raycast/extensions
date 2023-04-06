@@ -1,5 +1,9 @@
 # Common Directory Changelog
 
+## [Extension Optimization] - 2022-11-17
+
+- Some small optimizations
+
 ## [Extension Optimization] - 2022-10-13
 
 - Some small optimizations

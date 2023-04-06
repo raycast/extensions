@@ -1,6 +1,21 @@
 # Quick Access Changelog
 
-## [Add actions to Menu Bar command] - {PR_MERGE_DATE}
+## [Add new layout options] - 2022-10-15
+
+- Add new layout options: List or Grid
+
+## [New feature: Pin Files] - 2022-10-14
+
+- Add Pin Files feature: Now you can pin the file by **Pin** command
+- Update command name: Pin Folder -> **Pin**, Search Pinned Folder -> **Search Pins**
+- Update Menubar command, add more actions: Open, Show, Unpin pinned files or folders
+
+## [Add new actions] - 2022-10-14
+
+- Optimize Menubar command, add more actions
+- Add new action for Search Pinned Folder command: Paste File to the current selection of the frontmost application
+
+## [Add actions to Menu Bar command] - 2022-09-28
 
 - Add new actions to menu bar commands: Copy or Open
 

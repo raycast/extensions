@@ -130,7 +130,7 @@ export default function Command() {
                             showHiddenFiles(filePaths.join(" "));
                             await LocalStorage.clear();
                             setRefresh(refreshNumber());
-                            await showToast(Toast.Style.Success, "Success!", "All Files have been unhidden.");
+                            await showToast(Toast.Style.Success, "Success!", "All files have been unhidden.");
                           }
                         );
                       }}

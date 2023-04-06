@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-09-26 15:52
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-09-30 20:58
+ * @lastEditTime: 2023-03-17 23:21
  * @fileName: volcanoAPI.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -66,8 +66,15 @@ export function requestVolcanoTranslate(queryWordInfo: QueryWordInfo): Promise<Q
     axios
       .post(url, params, config)
       .then((res) => {
+        // log res
+        console.warn(`Volcano Translate res: ${JSON.stringify(res.data, null, 4)}`);
+
         const volcanoResult = res.data as VolcanoTranslateResult;
-        const volcanoError = volcanoResult.ResponseMetaData.Error;
+
+        console.warn(`ResponseMetaData: ${JSON.stringify(volcanoResult.ResponseMetadata, null, 4)}`);
+
+        const volcanoError = volcanoResult.ResponseMetadata?.Error;
+
         if (volcanoError) {
           console.error(`Volcano translate error: ${JSON.stringify(volcanoResult)}`);
           const errorInfo: RequestErrorInfo = {
@@ -75,20 +82,23 @@ export function requestVolcanoTranslate(queryWordInfo: QueryWordInfo): Promise<Q
             code: volcanoError.Code || "",
             message: volcanoError.Message || "",
           };
-          return reject(errorInfo);
+          reject(errorInfo);
+          return;
         }
 
-        const translations = volcanoResult.TranslationList[0].Translation.split("\n");
-        const result: QueryTypeResult = {
-          type: type,
-          result: volcanoResult,
-          translations: translations,
-          queryWordInfo: queryWordInfo,
-        };
-        resolve(result);
+        if (volcanoResult.TranslationList) {
+          const translations = volcanoResult.TranslationList[0].Translation.split("\n");
+          const result: QueryTypeResult = {
+            type: type,
+            result: volcanoResult,
+            translations: translations,
+            queryWordInfo: queryWordInfo,
+          };
+          resolve(result);
 
-        console.log(`Volcano Translate: ${translations}`);
-        console.warn(`Volcano Translate cost time: ${res.headers[requestCostTime]} ms`);
+          console.log(`Volcano Translate: ${translations}`);
+          console.warn(`Volcano Translate cost time: ${res.headers[requestCostTime]} ms`);
+        }
       })
       .catch((error) => {
         if (error.message === "canceled") {
@@ -151,20 +161,20 @@ export function volcanoDetect(text: string): Promise<DetectedLangModel> {
           return reject(errorInfo);
         }
 
-        const detectedVolcanoLanguage = volcanoDetectResult.DetectedLanguageList[0];
-        const volcanoLangCode = detectedVolcanoLanguage.Language;
+        const detectedLanguage = volcanoDetectResult.DetectedLanguageList[0];
+        const volcanoLangCode = detectedLanguage.Language;
         const youdaoLangCode = getYoudaoLangCodeFromVolcanoCode(volcanoLangCode);
-        const isConfirmed = detectedVolcanoLanguage.Confidence > 0.5;
-        const detectedLanguage: DetectedLangModel = {
+        const isConfirmed = detectedLanguage.Confidence > 0.5;
+        const detectedLanguageModel: DetectedLangModel = {
           type: type,
           sourceLangCode: volcanoLangCode,
           youdaoLangCode: youdaoLangCode,
           confirmed: isConfirmed,
           result: volcanoDetectResult,
         };
-        resolve(detectedLanguage);
+        resolve(detectedLanguageModel);
 
-        console.log(`Volcano detect: ${JSON.stringify(detectedVolcanoLanguage)}, youdaoLangCode: ${youdaoLangCode}`);
+        console.warn(`Volcano detect language: ${JSON.stringify(detectedLanguage)}, youdaoLangCode: ${youdaoLangCode}`);
         console.warn(`Volcano detect cost time: ${res.headers[requestCostTime]} ms`);
       })
       .catch((error) => {

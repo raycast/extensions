@@ -29,7 +29,3 @@ export enum ItemSource {
   ENTER = "Enter",
   NULL = "",
 }
-
-export enum LocalStorageKey {
-  CUSTOM_APPS = "Custom Apps",
-}

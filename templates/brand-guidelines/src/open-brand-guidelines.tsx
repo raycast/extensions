@@ -15,8 +15,8 @@ export default function Command() {
     .filter((item) => statSync(item).isDirectory());
 
   return (
-    <Grid>
-      <Grid.Section title="Colors">
+    <Grid columns={3}>
+      <Grid.Section title="Colors" columns={6}>
         {colors.map((color) => (
           <ColorItem key={color.name} color={color} />
         ))}
@@ -60,7 +60,7 @@ function ColorItem(props: { color: Color }) {
   return (
     <Grid.Item
       title={props.color.name}
-      subtitle={props.color.name}
+      subtitle={props.color.value}
       content={{
         color: {
           light: props.color.value,
@@ -70,7 +70,7 @@ function ColorItem(props: { color: Color }) {
       }}
       actions={
         <ActionPanel>
-          <Action.CopyToClipboard content={props.color.name} />
+          <Action.CopyToClipboard content={props.color.value} />
         </ActionPanel>
       }
     />

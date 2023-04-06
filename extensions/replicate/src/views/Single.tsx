@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Detail, Icon } from "@raycast/api";
-import { copyImage, makeTitle } from "../utils/helpers";
+import { copyImage, makeTitle, saveImage } from "../utils/helpers";
 import { Prediction } from "../types";
 
 export const Single = ({ prediction }: { prediction: Prediction }) => {
@@ -16,10 +16,11 @@ export const Single = ({ prediction }: { prediction: Prediction }) => {
       markdown={markdown}
       actions={
         <ActionPanel>
+          <Action icon={Icon.SaveDocument} title="Save Image" onAction={() => saveImage(output[0])} />
           <Action icon={Icon.Image} title="Copy Image" onAction={() => copyImage(output[0])} />
           <Action.OpenInBrowser
             icon={Icon.Globe}
-            title="Open on Replicate.com"
+            title="Open on Replicate"
             url={`https://replicate.com/p/${id.split("-")[0]}`}
           />
           {input?.prompt && (

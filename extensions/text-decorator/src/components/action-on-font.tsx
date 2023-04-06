@@ -38,7 +38,7 @@ export function ActionOnFont(props: {
             title={"Toggle Details"}
             shortcut={{ modifiers: ["shift", "ctrl"], key: "d" }}
             onAction={async () => {
-              await LocalStorage.setItem(LocalStorageKey.DETAIL_KEY, !showDetail);
+              await LocalStorage.setItem(LocalStorageKey.DETAIL_KEY, JSON.stringify(!showDetail));
               setRefresh(Date.now());
             }}
           />

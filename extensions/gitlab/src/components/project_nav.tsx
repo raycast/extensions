@@ -64,7 +64,7 @@ function webUrl(project: Project, partial: string) {
 export function ProjectNavMenusList(props: { project: Project }): JSX.Element {
   const project = props.project;
   return (
-    <List navigationTitle="Project Menus">
+    <List navigationTitle={`${project.name_with_namespace}`}>
       <ProjectNavMenuItem
         title="Issues"
         url={webUrl(project, "-/issues")}
@@ -81,29 +81,34 @@ export function ProjectNavMenusList(props: { project: Project }): JSX.Element {
         title="Branches"
         url={webUrl(project, "-/branches")}
         icon={{ source: GitLabIcons.branches, tintColor: Color.PrimaryText }}
-        target={<BranchList project={project} />}
+        target={<BranchList project={project} navigationTitle={project.name_with_namespace} />}
       />
       <ProjectNavMenuItem
         title="Commits"
         url={webUrl(project, "-/commits")}
         icon={{ source: GitLabIcons.commit, tintColor: Color.PrimaryText }}
-        target={<ProjectCommitList projectID={project.id} />}
+        target={<ProjectCommitList projectID={project.id} navigationTitle={project.name_with_namespace} />}
       />
       <ProjectNavMenuItem
         title="Pipelines"
         url={webUrl(project, "-/pipelines")}
         icon={{ source: GitLabIcons.ci, tintColor: Color.PrimaryText }}
-        target={<PipelineList projectFullPath={project.fullPath} />}
+        target={<PipelineList projectFullPath={project.fullPath} navigationTitle={project.name_with_namespace} />}
       />
       <ProjectNavMenuItem
         title="Milestones"
         icon={{ source: GitLabIcons.milestone, tintColor: Color.PrimaryText }}
-        target={<MilestoneList project={project} />}
+        target={<MilestoneList project={project} navigationTitle={project.name_with_namespace} />}
+      />
+      <ProjectNavMenuBrowserItem
+        title="Wiki"
+        icon={{ source: GitLabIcons.wiki, tintColor: Color.PrimaryText }}
+        url={webUrl(project, "-/wikis")}
       />
       <ProjectNavMenuItem
         title="Labels"
         icon={{ source: GitLabIcons.labels, tintColor: Color.PrimaryText }}
-        target={<ProjectLabelList project={project} />}
+        target={<ProjectLabelList project={project} navigationTitle={project.name_with_namespace} />}
       />
       <ProjectNavMenuBrowserItem
         title="Security & Compliance"

@@ -1,18 +1,8 @@
 import { useLayoutEffect, useState } from "react";
-import {
-  ActionPanel,
-  Action,
-  Grid,
-  getPreferenceValues,
-  Icon,
-  showToast,
-  Toast,
-  List,
-  openCommandPreferences,
-} from "@raycast/api";
+import { ActionPanel, Action, Grid, getPreferenceValues, Icon, List, openCommandPreferences } from "@raycast/api";
 import { Prediction, PredictionResponse } from "../types";
 import { PREDICTIONS_URL } from "../constants";
-import { buildPredictionsList, copyImage, showAuthError } from "../utils/helpers";
+import { buildPredictionsList, copyImage, showAuthError, saveImage } from "../utils/helpers";
 import { Single } from "./Single";
 import fetch from "node-fetch";
 
@@ -22,7 +12,7 @@ type Props = {
 };
 export const GridView = ({ isLoading, onSearchTextChange }: Props) => {
   const [predictions, setData] = useState<Prediction[]>();
-  const [itemSize, setItemSize] = useState<Grid.ItemSize>(Grid.ItemSize.Medium);
+  const [columns, setColumns] = useState("6");
   const [error, setError] = useState("");
   const { token } = getPreferenceValues();
   const headers = { Authorization: `Token ${token}` };
@@ -65,10 +55,10 @@ export const GridView = ({ isLoading, onSearchTextChange }: Props) => {
         <List.EmptyView
           icon={{ source: "🚀" }}
           title="No Predictions found"
-          description="Create one now at replicate.com"
+          description="Find models to run at replicate.com/explore"
           actions={
             <ActionPanel>
-              <Action.OpenInBrowser icon={Icon.Globe} url="https://replicate.com/" />
+              <Action.OpenInBrowser icon={Icon.Globe} url="https://replicate.com/explore" />
             </ActionPanel>
           }
         />
@@ -79,22 +69,15 @@ export const GridView = ({ isLoading, onSearchTextChange }: Props) => {
   return (
     <Grid
       onSearchTextChange={onSearchTextChange}
-      itemSize={itemSize}
+      columns={Number(columns)}
       inset={undefined}
-      enableFiltering={false}
       searchBarPlaceholder="Search your prompts"
       isLoading={!predictions || isLoading}
       searchBarAccessory={
-        <Grid.Dropdown
-          tooltip="Grid Item Size"
-          storeValue
-          onChange={(newValue) => {
-            setItemSize(newValue as Grid.ItemSize);
-          }}
-        >
-          <Grid.Dropdown.Item title="Large" value={Grid.ItemSize.Large} />
-          <Grid.Dropdown.Item title="Medium" value={Grid.ItemSize.Medium} />
-          <Grid.Dropdown.Item title="Small" value={Grid.ItemSize.Small} />
+        <Grid.Dropdown tooltip="Select image size" storeValue={true} defaultValue={columns} onChange={setColumns}>
+          <Grid.Dropdown.Item title="Large" value="4" />
+          <Grid.Dropdown.Item title="Medium" value="6" />
+          <Grid.Dropdown.Item title="Small" value="8" />
         </Grid.Dropdown>
       }
     >
@@ -111,10 +94,11 @@ export const GridView = ({ isLoading, onSearchTextChange }: Props) => {
             actions={
               <ActionPanel>
                 <Action.Push icon={Icon.Sidebar} title="View" target={<Single prediction={prediction} />} />
-                <Action icon={Icon.Image} title="Copy Image" onAction={() => copyImage(output[0])} />
+                <Action icon={Icon.SaveDocument} title="Save Image" onAction={() => saveImage(output[0])} />
+                <Action icon={Icon.CopyClipboard} title="Copy Image" onAction={() => copyImage(output[0])} />
                 <Action.OpenInBrowser
                   icon={Icon.Globe}
-                  title="Open on Replicate.com"
+                  title="Open on Replicate"
                   url={`https://replicate.com/p/${id.split("-")[0]}`}
                 />
                 {input?.prompt && (

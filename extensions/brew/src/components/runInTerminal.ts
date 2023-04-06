@@ -1,7 +1,7 @@
 import { closeMainWindow } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
 
-export function runCommandInTerminal(command: string) {
+export function runCommandInTerminal(command: string): void {
   runAppleScript(`
     tell application "Terminal"
       do script "${command}"

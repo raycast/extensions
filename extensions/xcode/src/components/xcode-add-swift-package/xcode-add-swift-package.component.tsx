@@ -12,7 +12,6 @@ export function XcodeAddSwiftPackage(props: { url: string }): JSX.Element {
   const navigation = useNavigation();
   return (
     <XcodeProjectList
-      key="select-xcode-project"
       navigationTitle="Select Xcode Project"
       searchBarPlaceholder="Select Xcode Project"
       projectTypeFilter={(projectType) =>
@@ -20,7 +19,7 @@ export function XcodeAddSwiftPackage(props: { url: string }): JSX.Element {
       }
       actions={(xcodeProject) => [
         <Action
-          key="add-swift-package"
+          key={xcodeProject.filePath}
           title="Add Swift Package"
           icon={Icon.Plus}
           onAction={() => {

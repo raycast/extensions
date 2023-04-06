@@ -10,7 +10,7 @@ import { Preferences } from "./types/preferences";
 import { ActionOnFont } from "./components/action-on-font";
 
 export default function DecorateTextWithFont() {
-  const { itemLayout, itemSize } = getPreferenceValues<Preferences>();
+  const { itemLayout, columns } = getPreferenceValues<Preferences>();
   const [refresh, setRefresh] = useState<number>(0);
 
   const { showDetail, detailLoading } = getIsShowDetail(refresh);
@@ -48,7 +48,7 @@ export default function DecorateTextWithFont() {
     <Grid
       isLoading={detailLoading || itemLoading || starLoading}
       searchBarPlaceholder={"Search fonts, *font is the default font of 𝐃𝐞𝐜𝐨𝐫𝐚𝐭𝐞 𝐓𝐞𝐱𝐭 command"}
-      itemSize={itemSize as Grid.ItemSize}
+      columns={parseInt(columns)}
     >
       <EmptyView layout={itemLayout} />
       {fontFamily.map((value) => {

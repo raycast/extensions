@@ -5,7 +5,7 @@ import TimeAgo from "javascript-time-ago";
 
 const preferences: Preferences = getPreferenceValues();
 export const gridSize: Grid.ItemSize = preferences.gridSize as Grid.ItemSize;
-export const numRecent: number = preferences.numRecent;
+export const numRecent = preferences.numRecentRows * (gridSize === Grid.ItemSize.Small ? 8 : 5);
 export const previewSize = gridSize === "small" ? "128" : "256";
 
 TimeAgo.addDefaultLocale(en);
@@ -59,9 +59,9 @@ export const allStylesImage = "https://maxst.icons8.com/vue-static/icon/all-styl
 
 // boolean represents whether the preview image for the style requires color tint
 export const defaultStyles: { [key: string]: boolean } = {
-  iOS: true,
-  "iOS Filled": true,
-  "iOS Glyph": true,
+  "iOS 16": true,
+  "iOS 16 Filled": true,
+  "iOS 16 Glyph": true,
   "Material Filled": true,
   "Material Outlined": true,
   "Material Rounded": true,
@@ -106,4 +106,9 @@ export const defaultStyles: { [key: string]: boolean } = {
   Bubbles: false,
   "Hand Drawn": true,
   "Color Hand Drawn": false,
+  "Tiny Color": false,
+  Laces: true,
+  Arcade: false,
+  Avantgarde: false,
+  Parakeet: false,
 };

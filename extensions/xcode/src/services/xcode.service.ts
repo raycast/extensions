@@ -20,6 +20,13 @@ export class XcodeService {
   }
 
   /**
+   * Xcode Developer Documentation URL Scheme
+   */
+  static get developerDocumentationURLScheme(): string {
+    return "x-xcode-documentation://";
+  }
+
+  /**
    * Retrieve boolean if Xcode is installed
    */
   static async isXcodeInstalled(): Promise<boolean> {

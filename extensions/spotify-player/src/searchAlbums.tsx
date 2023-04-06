@@ -1,27 +1,16 @@
 import { Grid, showToast, Toast } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useAlbumSearch } from "./spotify/client";
-import { isSpotifyInstalled } from "./utils";
 import AlbumGridItem from "./components/AlbumGridItem";
+import { SpotifyProvider } from "./utils/context";
 
-export default function SearchAlbums() {
+function SearchAlbums() {
   const [searchText, setSearchText] = useState<string>();
-  const [spotifyInstalled, setSpotifyInstalled] = useState<boolean>(false);
   const response = useAlbumSearch(searchText);
 
   if (response.error) {
     showToast(Toast.Style.Failure, "Search has failed", response.error);
   }
-
-  useEffect(() => {
-    async function checkForSpotify() {
-      const spotifyIsInstalled = await isSpotifyInstalled();
-
-      setSpotifyInstalled(spotifyIsInstalled);
-    }
-
-    checkForSpotify();
-  }, []);
 
   return (
     <Grid
@@ -32,8 +21,14 @@ export default function SearchAlbums() {
       itemSize={Grid.ItemSize.Large}
     >
       {response.result?.albums.items.map((a) => (
-        <AlbumGridItem key={a.id} album={a} spotifyInstalled={spotifyInstalled} />
+        <AlbumGridItem key={a.id} album={a} />
       ))}
     </Grid>
   );
 }
+
+export default () => (
+  <SpotifyProvider>
+    <SearchAlbums />
+  </SpotifyProvider>
+);

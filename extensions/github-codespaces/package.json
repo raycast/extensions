@@ -23,7 +23,7 @@
 			"subtitle": "GitHub Codespaces",
 			"description": "See your active codespaces at a glance",
 			"mode": "menu-bar",
-			"interval": "5m"
+			"interval": "1m"
 		}
 	],
 	"preferences": [
@@ -47,6 +47,10 @@
 				{
 					"title": "Web editor",
 					"value": "web"
+				},
+				{
+					"title": "SSH",
+					"value": "ssh"
 				}
 			],
 			"required": false

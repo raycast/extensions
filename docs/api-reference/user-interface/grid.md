@@ -21,8 +21,8 @@ The search bar allows users to interact quickly with grid items. By default, [Gr
 
 ### Custom filtering
 
-Sometimes, you may not want to rely on Raycast's filtering, but use/implement your own. If that's the case, you can set the `Grid`'s `enableFiltering` [prop](#props) to false, and the items displayed will be independent of the search bar's text.
-Note that `enableFiltering` is also implicitly set to false if an `onSearchTextChange` listener is specified. If you want to specify a change listener and _still_ take advantage of Raycast's built-in filtering, you can explicitly set `enableFiltering` to true.
+Sometimes, you may not want to rely on Raycast's filtering, but use/implement your own. If that's the case, you can set the `Grid`'s `filtering` [prop](#props) to false, and the items displayed will be independent of the search bar's text.
+Note that `filtering` is also implicitly set to false if an `onSearchTextChange` listener is specified. If you want to specify a change listener and _still_ take advantage of Raycast's built-in filtering, you can explicitly set `filtering` to true.
 
 ```typescript
 import { useEffect, useState } from "react";
@@ -45,7 +45,7 @@ export default function Command() {
     <Grid
       columns={5}
       inset={Grid.Inset.Large}
-      enableFiltering={false}
+      filtering={false}
       onSearchTextChange={setSearchText}
       navigationTitle="Search Emoji"
       searchBarPlaceholder="Search your favorite emoji"
@@ -65,7 +65,7 @@ Other times, you may want the content of the search bar to be updated by the ext
 To do so, you can use the `searchText` [prop](#props).
 
 ```typescript
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Action, ActionPanel, Grid } from "@raycast/api";
 
 const items = [
@@ -183,6 +183,7 @@ export default function CommandWithCustomEmptyView() {
   }>({ searchText: "", items: [] });
 
   useEffect(() => {
+    console.log("Running effect after state.searchText changed. Current value:", JSON.stringify(state.searchText));
     // perform an API call that eventually populates `items`.
   }, [state.searchText]);
 
@@ -278,7 +279,7 @@ export default function Command() {
       }
     >
       {(items[type] || []).map((item) => (
-        <Grid.Item content={item.content} keywords={item.keywords} />
+        <Grid.Item key={`${item.content}`} content={item.content} keywords={item.keywords} />
       ))}
     </Grid>
   );
@@ -380,6 +381,7 @@ export default function CommandWithCustomEmptyView() {
   }>({ searchText: "", items: [] });
 
   useEffect(() => {
+    console.log("Running effect after state.searchText changed. Current value:", JSON.stringify(state.searchText));
     // perform an API call that eventually populates `items`.
   }, [state.searchText]);
 

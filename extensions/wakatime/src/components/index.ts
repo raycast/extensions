@@ -1,2 +1,2 @@
 export { LeaderBoardItem } from "./Leaderboard";
-export { RangeStatsList, ProjectsStatsList } from "./Summary";
+export { ActivityChange, ProjectsStatsList, RangeStatsList } from "./Summary";

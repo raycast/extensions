@@ -1,0 +1,70 @@
+{
+	"$schema": "https://www.raycast.com/schemas/extension.json",
+	"name": "markdown-blog",
+	"title": "Markdown Blog Manager",
+	"description": "Create, browse and edit your file based Markdown blog.",
+	"icon": "mark.png",
+	"author": "pyronaur",
+	"categories": [
+		"Productivity"
+	],
+	"license": "MIT",
+	"commands": [
+		{
+			"name": "manage-posts",
+			"title": "Markdown Posts",
+			"description": "Browse and edit your posts in your Markdown blog.",
+			"mode": "view",
+			"icon": "mark.png"
+		},
+		{
+			"name": "new-post",
+			"title": "New Markdown Post",
+			"description": "Create a new Markdown blog post.",
+			"mode": "view",
+			"icon": "mark-plus.png"
+		}
+	],
+	"preferences": [
+		{
+			"name": "draftsPath",
+			"title": "Drafts Path",
+			"description": "Directory where the drafts are stored.",
+			"type": "textfield",
+			"required": true,
+			"placeholder": "e.g. ~/Documents/Blog/Drafts"
+		},
+		{
+			"name": "publicPath",
+			"title": "Public Path",
+			"description": "Directory where published posts are stored.",
+			"type": "textfield",
+			"required": true,
+			"placeholder": "e.g. ~/Documents/Blog/Content"
+		}
+	],
+	"dependencies": {
+		"@raycast/api": "^1.42.2",
+		"@raycast/utils": "^1.4.10",
+		"fs-extra": "^10.1.0",
+		"globby": "^13.1.2"
+	},
+	"devDependencies": {
+		"@types/fs-extra": "^9.0.13",
+		"@types/node": "18.11.9",
+		"@types/react": "18.0.24",
+		"@typescript-eslint/eslint-plugin": "^5.42.0",
+		"@typescript-eslint/parser": "^5.42.0",
+		"eslint": "^8.26.0",
+		"eslint-config-prettier": "^8.5.0",
+		"prettier": "^2.7.1",
+		"typescript": "^4.8.4"
+	},
+	"scripts": {
+		"build": "ray build -e dist",
+		"dev": "ray develop",
+		"fix-lint": "ray lint --fix",
+		"lint": "ray lint",
+		"publish": "ray publish"
+	}
+}

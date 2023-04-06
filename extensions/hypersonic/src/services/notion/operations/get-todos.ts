@@ -1,83 +1,103 @@
-import { getPreferenceValues } from '@raycast/api'
 import { Todo } from '@/types/todo'
 import { notion } from '../client'
-import { loadDoneProperty, loadTodos, storeTodos } from '@/services/storage'
-import { mapPageToTodo } from '../utils/map-page-to-todo'
-import { checkColumnHeaders } from '../utils/check-column-headers'
+import { loadPreferences } from '@/services/storage'
+import { normalizeTodo } from '../utils/normalize-todo'
+import { Filter } from '@/types/filter'
 
-export async function getTodos(databaseId: string): Promise<Todo[]> {
+export async function getTodos({
+  databaseId,
+  filter,
+}: {
+  databaseId: string
+  filter: Filter
+}): Promise<Todo[]> {
   const notionClient = await notion()
-  const preferences = getPreferenceValues()
-  const status = await loadDoneProperty()
+  const preferences = await loadPreferences()
+  const status = preferences.properties.status
 
-  if (!status?.type) {
-    throw new Error(
-      'Status or checkbox property not found, please check your preferences'
-    )
+  let donePropertyQuery: any = [
+    { property: status.name, checkbox: { equals: false } },
+  ]
+
+  if (status.type === 'status') {
+    // Make it compatible with the old version without groups
+    donePropertyQuery = [
+      {
+        property: status.name,
+        status: { does_not_equal: status.doneName },
+      },
+    ]
+
+    if (status.completedStatuses && status.completedStatuses.length > 0) {
+      donePropertyQuery = status.completedStatuses.map((completeStatus) => ({
+        property: status.name,
+        status: { does_not_equal: completeStatus },
+      }))
+    }
   }
 
-  const donePropertyQuery =
-    status.type === 'checkbox'
-      ? { checkbox: { equals: false } }
-      : { status: { does_not_equal: status.doneName } }
+  const dynamicFiltersQuery = [
+    ...(filter?.projectId && preferences.properties.project
+      ? [
+          {
+            property: preferences.properties.project,
+            relation: { contains: filter.projectId },
+          },
+        ]
+      : []),
+    ...(filter?.user?.id && preferences.properties.assignee
+      ? [
+          {
+            property: preferences.properties.assignee,
+            people: { contains: filter.user.id },
+          },
+        ]
+      : []),
+    ...(filter?.tag?.id && preferences.properties.tag
+      ? [
+          {
+            property: preferences.properties.tag,
+            select: { equals: filter.tag.name },
+          },
+        ]
+      : []),
+    ...(filter?.status?.id && preferences.properties.status.type === 'status'
+      ? [
+          {
+            property: status.name,
+            status: { equals: filter.status.name },
+          },
+        ]
+      : []),
+  ]
 
   const response = await notionClient.databases.query({
     database_id: databaseId,
     filter: {
       and: [
-        {
-          property: preferences.property_done,
-          ...donePropertyQuery,
-        },
-        {
-          or: [
-            {
-              property: preferences.property_date,
-              date: {
-                before: new Date().toISOString(),
-              },
-            },
-            {
-              property: preferences.property_date,
-              date: {
-                is_empty: true,
-              },
-            },
-          ],
-        },
+        ...(!filter.status?.id ? donePropertyQuery : []),
+        ...dynamicFiltersQuery,
       ],
     },
     sorts: [
+      { property: status.name, direction: 'descending' },
+      {
+        property: preferences.properties.date,
+        direction: 'ascending',
+      },
       {
         timestamp: 'created_time',
-        direction: 'ascending',
+        direction: 'descending',
       },
     ],
   })
 
-  checkColumnHeaders(response.results[0], preferences)
-
   const todos = response.results.map((page) =>
-    mapPageToTodo(page, preferences, status.inProgressId)
+    normalizeTodo({
+      page,
+      preferences: preferences.properties,
+    })
   )
 
-  const localTodos = await loadTodos()
-
-  const sortedTodos = todos
-    .map((todo: any) => {
-      const localTodoIndex = localTodos?.findIndex((t) => t.id === todo.id)
-
-      if (localTodoIndex !== -1) {
-        todo.position = localTodoIndex
-      } else {
-        todo.position = 0
-      }
-
-      return todo
-    })
-    .sort((a, b) => a.position - b.position)
-
-  await storeTodos(sortedTodos)
-
-  return sortedTodos
+  return todos
 }

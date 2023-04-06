@@ -18,7 +18,8 @@ export function ScriptRunAction(props: { state: State }): JSX.Element | null {
 export function ScriptEditInBrowserAction(props: { state: State }): JSX.Element | null {
   const s = props.state;
   if (s.entity_id.startsWith("script")) {
-    const url = ha.urlJoin(`config/script/edit/${s.entity_id}`);
+    const editId = s.entity_id.substring("script.".length);
+    const url = ha.urlJoin(`config/script/edit/${editId}`);
     return (
       <Action.OpenInBrowser url={url} title="Edit" icon={Icon.Pencil} shortcut={{ modifiers: ["cmd"], key: "e" }} />
     );

@@ -15,7 +15,7 @@ npx ray migrate
 or
 
 ```bash
-npx @raycast/migration .
+npx @raycast/migration@latest .
 ```
 
 It will detect the version of the API you were previously using and apply all the migrations that have been available since.

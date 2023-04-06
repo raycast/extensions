@@ -1,98 +1,112 @@
-import got from "got";
-import dayjs from "dayjs";
-import relativeTime from "dayjs/plugin/relativeTime";
-import { getPreferenceValues, MenuBarExtra, open } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
-import { Draft } from "./interfaces/draft";
-import { Preferences } from "./interfaces/preferences";
-
-dayjs.extend(relativeTime);
-
-interface ScheduledPostItemProps {
-  draft: Draft;
-}
-
-const sortAscByDateFn = (draftA: Draft, draftB: Draft): number => {
-  return new Date(draftA.scheduled_date).getTime() - new Date(draftB.scheduled_date).getTime();
-};
-
-const ScheduledPostItem = (props: ScheduledPostItemProps) => {
-  const MAX_TITLE_LENGTH = 24;
-
-  const timeUntilPost = dayjs().to(dayjs(props.draft.scheduled_date));
-  const title =
-    props.draft.text_first_tweet.length > 0
-      ? props.draft.text_first_tweet.slice(0, MAX_TITLE_LENGTH - timeUntilPost.length)
-      : "";
-
-  return (
-    <MenuBarExtra.Item
-      key={props.draft.id}
-      title={`${title}... (${timeUntilPost})`}
-      onAction={() => open(`https://typefully.com/?d=${props.draft.id}`)}
-    />
-  );
-};
+import { Clipboard, MenuBarExtra, open, openCommandPreferences } from "@raycast/api";
+import {
+  getFlattenInboxNotifications,
+  getMenuBarExtraItemShortcut,
+  getMenuBarExtraItemDraftTitle,
+  getMenuBarExtraTitle,
+  getMenuBarExtraItemNotificationSubtitle,
+  getMenuBarExtraItemNotificationTitle,
+  getRelativeDate,
+  getTypefullyIcon,
+  sortByCreated,
+  sortByScheduled,
+  getMenuBarItemNotificationTooltip,
+  getFlattenAcivityNotifications,
+  getMenuBarExtraNotificationKey,
+  getMenuBarExtraItemIcon,
+} from "./utils";
+import { useNotifications, useScheduledDrafts } from "./typefully";
 
 export default function Command() {
-  const preferences = getPreferenceValues<Preferences>();
-  const { isLoading, data } = useCachedPromise(
-    async (url: string): Promise<Array<Draft>> => {
-      const drafts: Array<Draft> = await got
-        .get(url, {
-          headers: {
-            "X-API-KEY": `Bearer ${preferences.token}`,
-          },
-          responseType: "json",
-        })
-        .json();
+  const { data: notifications, isLoading: isLoadingNotifications } = useNotifications();
+  const { data: scheduledDrafts, isLoading: isLoadingScheduledDrafts } = useScheduledDrafts();
 
-      const sortedDraftsByDate = drafts.sort((a: Draft, b: Draft) => {
-        return new Date(a.scheduled_date).getTime() - new Date(b.scheduled_date).getTime();
-      });
-
-      return sortedDraftsByDate;
-    },
-    ["https://api.typefully.com/v1/drafts/recently-scheduled"],
-    {
-      keepPreviousData: true,
-    }
-  );
+  const inbox = getFlattenInboxNotifications(notifications);
+  const activity = getFlattenAcivityNotifications(notifications);
 
   return (
     <MenuBarExtra
-      icon={{
-        source: {
-          light: "black-feather.svg",
-          dark: "white-feather.svg",
-        },
-      }}
-      tooltip="Your Pull Requests"
-      title={data && data.length > 0 ? data.length.toString() : undefined}
-      isLoading={isLoading}
+      icon={getTypefullyIcon(inbox.length > 0)}
+      title={getMenuBarExtraTitle(inbox, scheduledDrafts)}
+      isLoading={isLoadingNotifications || isLoadingScheduledDrafts}
     >
-      {/* Quick Links */}
-      <MenuBarExtra.Item title="Quick Links" />
-      <MenuBarExtra.Item title="Open Typefully" onAction={() => open("https://typefully.com")} />
-      <MenuBarExtra.Item title="Open Twitter" onAction={() => open("https://twitter.com")} />
-
-      <MenuBarExtra.Separator />
-
-      {/* Scheduled Posts */}
-      <MenuBarExtra.Item title="Upcoming Scheduled Posts" />
-      {data === undefined || data.length === 0 ? (
-        <MenuBarExtra.Item title="No posts found. 😔" />
-      ) : (
-        data
-          .sort(sortAscByDateFn)
-          .slice(0, 5)
-          .map((draft) => <ScheduledPostItem key={draft.id} draft={draft} />)
-      )}
-
-      {/* Optional extra, if there are > 5 posts */}
-      {data !== undefined && data.length > 5 && (
-        <MenuBarExtra.Item title="... more posts later" onAction={() => open(`https://typefully.com/`)} />
-      )}
+      <MenuBarExtra.Section>
+        <MenuBarExtra.Item
+          title="Open Typefully"
+          shortcut={{ modifiers: ["cmd"], key: "o" }}
+          onAction={() => open("https://typefully.com")}
+        />
+        <MenuBarExtra.Item
+          title="Open Twitter"
+          shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
+          onAction={() => open("https://twitter.com")}
+        />
+      </MenuBarExtra.Section>
+      {inbox && inbox.length > 0 ? (
+        <MenuBarExtra.Section title="Inbox">
+          {inbox
+            ?.slice(0, 9)
+            ?.sort(sortByCreated)
+            .map((notification, index) => (
+              <MenuBarExtra.Item
+                key={getMenuBarExtraNotificationKey(notification)}
+                icon={getMenuBarExtraItemIcon(notification)}
+                title={getMenuBarExtraItemNotificationTitle(notification)}
+                subtitle={getMenuBarExtraItemNotificationSubtitle(notification)}
+                tooltip={getMenuBarItemNotificationTooltip(notification)}
+                shortcut={getMenuBarExtraItemShortcut(index, ["ctrl"])}
+                onAction={() => open(notification.url)}
+              />
+            ))}
+        </MenuBarExtra.Section>
+      ) : null}
+      {scheduledDrafts && scheduledDrafts.length > 0 ? (
+        <MenuBarExtra.Section title="Queue">
+          {scheduledDrafts
+            ?.slice(0, 9)
+            ?.sort(sortByScheduled)
+            .map((draft, index) => (
+              <MenuBarExtra.Item
+                key={draft.id}
+                title={getMenuBarExtraItemDraftTitle(draft)}
+                subtitle={getRelativeDate(draft)}
+                tooltip={draft.text}
+                shortcut={getMenuBarExtraItemShortcut(index, ["cmd"])}
+                onAction={async (event) => {
+                  if (event.type === "left-click") {
+                    await open(`https://typefully.com/?d=${draft.id}`);
+                  } else {
+                    await Clipboard.copy(`https://typefully.com/?d=${draft.id}`);
+                  }
+                }}
+              />
+            ))}
+        </MenuBarExtra.Section>
+      ) : null}
+      <MenuBarExtra.Section>
+        {activity && activity.length > 0 ? (
+          <MenuBarExtra.Submenu title="Activity">
+            {activity
+              ?.slice(0, 9)
+              ?.sort(sortByCreated)
+              .map((notification) => (
+                <MenuBarExtra.Item
+                  key={getMenuBarExtraNotificationKey(notification)}
+                  icon={getMenuBarExtraItemIcon(notification)}
+                  title={getMenuBarExtraItemNotificationTitle(notification)}
+                  subtitle={getMenuBarExtraItemNotificationSubtitle(notification)}
+                  tooltip={getMenuBarItemNotificationTooltip(notification)}
+                  onAction={() => open(notification.url)}
+                />
+              ))}
+          </MenuBarExtra.Submenu>
+        ) : null}
+        <MenuBarExtra.Item
+          title="Configure Command"
+          shortcut={{ modifiers: ["cmd"], key: "," }}
+          onAction={openCommandPreferences}
+        />
+      </MenuBarExtra.Section>
     </MenuBarExtra>
   );
 }

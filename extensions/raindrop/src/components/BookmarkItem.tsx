@@ -37,7 +37,7 @@ export default function BookmarkItem(props: { bookmark: Bookmark }) {
       key={bookmark._id}
       title={bookmark.title}
       subtitle={bookmark.tags.map((tag) => `#${tag}`).join(" ")}
-      accessoryTitle={dayjs().to(dayjs(bookmark.lastUpdate))}
+      accessories={[{ text: dayjs().to(dayjs(bookmark.lastUpdate)) }]}
       actions={
         <ActionPanel>
           <Action.OpenInBrowser url={bookmark.link} />

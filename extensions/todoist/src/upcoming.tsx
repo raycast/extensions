@@ -1,8 +1,9 @@
 import { useCachedPromise } from "@raycast/utils";
-import TaskList from "./components/TaskList";
-import { getSectionsWithDueDates } from "./helpers/sections";
+
 import { handleError, todoist } from "./api";
+import TaskList from "./components/TaskList";
 import View from "./components/View";
+import { getSectionsWithDueDates } from "./helpers/sections";
 
 function Upcoming() {
   const {

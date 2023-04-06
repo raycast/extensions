@@ -1,19 +1,19 @@
-import { Cycle } from "@linear/sdk";
+import { Cycle as LinearCycle } from "@linear/sdk";
 import { Image } from "@raycast/api";
 import { format, isAfter, isBefore } from "date-fns";
 
 const aWeek = 7 * 24 * 60 * 60 * 1000;
 
-export type FormattedCycle = (Cycle | Pick<Cycle, "id" | "number" | "startsAt" | "endsAt" | "completedAt">) & {
+type Cycle = Pick<LinearCycle, "id" | "number" | "startsAt" | "endsAt" | "completedAt">;
+
+export type FormattedCycle = (LinearCycle | Cycle) & {
   isActive: boolean;
   isNext: boolean;
   icon: Image.Source;
   title: string;
 };
 
-export function formatCycle(
-  cycle: Cycle | Pick<Cycle, "id" | "number" | "startsAt" | "endsAt" | "completedAt">
-): FormattedCycle {
+export function formatCycle(cycle: LinearCycle | Cycle): FormattedCycle {
   const now = Date.now();
   const nextWeek = Date.now() + aWeek;
   const startDate = new Date(cycle.startsAt);
@@ -30,6 +30,6 @@ export function formatCycle(
   return { ...cycle, isActive, isNext, icon, title };
 }
 
-export function getCycleOptions(cycles: Cycle[]) {
+export function getCycleOptions(cycles: LinearCycle[]) {
   return cycles.filter((cycle) => isAfter(new Date(cycle.endsAt), Date.now())).map(formatCycle);
 }

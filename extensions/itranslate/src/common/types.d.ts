@@ -3,6 +3,7 @@ interface IPreferences {
   langSecond: string;
   defaultServiceProvider: TransServiceProviderTp;
   googleFreeTLD: GoogleFreeAPITLD;
+  googleFreeTimeout: number;
   googleApiKey: string;
   disableGoogleCould: boolean;
   deeplAuthKey: string;

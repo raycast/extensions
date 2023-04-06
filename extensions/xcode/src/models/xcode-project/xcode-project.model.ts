@@ -13,6 +13,10 @@ export interface XcodeProject {
    */
   type: XcodeProjectType;
   /**
+   * The directory path
+   */
+  directoryPath: string;
+  /**
    * The file path
    */
   filePath: string;

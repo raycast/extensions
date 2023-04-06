@@ -6,8 +6,8 @@ import { ChannelItem } from "./channel";
 import { ListOrGrid, getViewLayout, getGridItemSize } from "./listgrid";
 import { RecentChannels, PinChannel } from "./recent_channels";
 
-export function SearchChannelList() {
-  const [searchText, setSearchText] = useState<string>();
+export function SearchChannelList(props: { searchQuery?: string | undefined }) {
+  const [searchText, setSearchText] = useState<string>(props.searchQuery || "");
   const { data, error, isLoading } = useRefresher<Channel[] | undefined>(async () => {
     if (searchText) {
       return await searchChannels(searchText);
@@ -19,13 +19,14 @@ export function SearchChannelList() {
   }
   const layout = getViewLayout();
   const itemSize = getGridItemSize();
-  if (data) {
+  if (props.searchQuery || data) {
     return (
       <ListOrGrid
         layout={layout}
         itemSize={itemSize}
         isLoading={isLoading}
         onSearchTextChange={setSearchText}
+        searchText={searchText}
         throttle={true}
       >
         {data?.map((c) => (

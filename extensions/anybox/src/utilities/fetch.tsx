@@ -54,7 +54,7 @@ export async function checkForAnyboxInstallation() {
 }
 
 function request(path: string, method: string, body?: any, closeWindow = false) {
-  return fetch(`http://localhost:6391/${path}`, {
+  return fetch(`http://127.0.0.1:6391/${path}`, {
     method,
     body: JSON.stringify(body),
     headers: {

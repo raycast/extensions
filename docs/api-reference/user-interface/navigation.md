@@ -18,7 +18,7 @@ function useNavigation(): Navigation;
 #### Example
 
 ```typescript
-import { ActionPanel, Detail, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Detail, useNavigation } from "@raycast/api";
 
 function Ping() {
   const { push } = useNavigation();
@@ -28,7 +28,7 @@ function Ping() {
       markdown="Ping"
       actions={
         <ActionPanel>
-          <ActionPanel.Item title="Push" onAction={() => push(<Pong />)} />
+          <Action title="Push" onAction={() => push(<Pong />)} />
         </ActionPanel>
       }
     />
@@ -43,7 +43,7 @@ function Pong() {
       markdown="Pong"
       actions={
         <ActionPanel>
-          <ActionPanel.Item title="Pop" onAction={pop} />
+          <Action title="Pop" onAction={pop} />
         </ActionPanel>
       }
     />

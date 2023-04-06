@@ -50,7 +50,7 @@ const actionablePullRequests = () => {
 export default actionablePullRequests;
 
 const getTitle = (updatedPulls: PullRequestShort[]) =>
-  updatedPulls.length === 0 ? `All good` : `${updatedPulls.length} PR${updatedPulls.length > 1 ? "s" : ""} to check`;
+  updatedPulls.length > 0 ? `${updatedPulls.length} PR${updatedPulls.length > 1 ? "s" : ""}` : undefined;
 
 const getIcon = (updatedPulls: PullRequestShort[]) => ({
   source: "icon.png",

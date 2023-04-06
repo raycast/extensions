@@ -1,5 +1,16 @@
 # Changelog
 
+## [Code Search History and improved search results metadata](https://github.com/raycast/extensions/pull/4018) - 2022-12-23
+
+- **search-history**: Introduce 'Code Search History' command - unique searches are now stored locally, and past searches can now be listed in this new command ([#19](https://github.com/bobheadxi/raycast-sourcegraph/pull/19))
+- **search**: Improved metadata display for repository and symbol results.
+- **all**: When a custom Sourcegraph instance is configured, the instance's URL will now be configured as the command subtitle for the relevant command variants.
+
+## [Search API capabilities updates](https://github.com/raycast/extensions/pull/3789) - 2022-12-05
+
+- **search**: Improved support for some new API capabilities.
+- **internal**: Various dependency updates.
+
 ## [Updated iconography, search improvements](https://github.com/raycast/extensions/pull/2430) - 2022-08-04
 
 - **all**: Iconography has been updated throughout the extension.

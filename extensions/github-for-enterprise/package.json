@@ -6,7 +6,9 @@
   "author": "Kinbaum",
   "license": "MIT",
   "contributors": [
-    "emanguy"
+    "emanguy",
+    "LunaticMuch",
+    "pernielsentikaer"
   ],
   "commands": [
     {
@@ -81,26 +83,25 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.25.4",
+    "@raycast/api": "^1.47.3",
     "debounce": "^1.2.1",
-    "fuse.js": "^6.4.6",
-    "graphql": "^15.6.1",
-    "graphql-request": "^3.6.1",
+    "fuse.js": "^6.6.2",
+    "graphql": "^16.6.0",
+    "graphql-request": "^5.1.0",
     "gray-matter": "^4.0.3",
-    "swr": "^1.0.1",
+    "swr": "^2.0.3",
     "timeago.js": "^4.0.2"
   },
   "devDependencies": {
     "@types/debounce": "^1.2.1",
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-next": "^11.1.2",
-    "eslint-config-prettier": "^8.3.0",
-    "react-devtools": "^4.19.2",
-    "typescript": "^4.4.3"
+    "@types/node": "^18.8.3",
+    "@typescript-eslint/eslint-plugin": "^5.51.0",
+    "@typescript-eslint/parser": "^5.51.0",
+    "eslint": "^8.33.0",
+    "eslint-config-next": "^13.1.6",
+    "eslint-config-prettier": "^8.6.0",
+    "react-devtools": "^4.27.1",
+    "typescript": "^4.9.5"
   },
   "scripts": {
     "build": "ray build -e dist",
