@@ -1,4 +1,4 @@
-import { LaunchProps, closeMainWindow, getSelectedText, showHUD, showToast, Toast } from "@raycast/api";
+import { LaunchProps, getSelectedText, showToast, Toast } from "@raycast/api";
 import fetch from "cross-fetch";
 
 type WaybackArguments = {
@@ -18,7 +18,7 @@ export default async function main(props: LaunchProps<{ arguments: WaybackArgume
   const urlRegex = /(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_+.~#?&//=]*)/;
   const webpageUrl: string | undefined = url || selectedText;
   if (webpageUrl === undefined || !urlRegex.test(webpageUrl)) {
-    return showHUD("❌ No domain found");
+    return;
   }
 
   const toast = await showToast({
