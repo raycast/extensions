@@ -5,7 +5,7 @@ import JSON5 from "json5";
 export default () => {
   const formProps = useForm({
     transform: async (value: string) => {
-      return JSON.stringify(JSON5.parse(value), null, 2);
+      return JSON5.stringify(JSON.parse(value), null, 2);
     },
   });
 
