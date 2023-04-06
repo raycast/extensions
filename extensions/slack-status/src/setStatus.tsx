@@ -28,6 +28,7 @@ import { SlackClient } from "./slackClient";
 import { CreateStatusPresetForm, EditStatusPresetForm, SetCustomStatusForm } from "./setStatusForm";
 import { mkdirSync, readFileSync, writeFileSync } from "fs";
 import { PopToRootType } from "@raycast/api";
+import { popToRoot } from "@raycast/api";
 
 // Consts
 
@@ -40,7 +41,7 @@ const noStatusState: CurrentStatusState = {
 type LaunchContext = {
   status?: string;
   emoji?: string;
-  duration?: number;
+  duration?: string;
 };
 
 // Main
@@ -60,8 +61,15 @@ function StatusesList(props: { slackClient: SlackClient; launchContext: LaunchCo
     const initialValues: SlackStatusPreset = {
       title: props.launchContext.status ?? "",
       emojiCode: props.launchContext.emoji ?? ":speech_balloon:",
-      defaultDuration: props.launchContext.duration ?? 0,
+      defaultDuration: Number.parseInt(props.launchContext.duration ?? "0", 10),
     };
+    if (statusPresets.map((preset) => JSON.stringify(preset)).includes(JSON.stringify(initialValues))) {
+      props.slackClient.setStatusFromPreset(initialValues, currentStatusResponseState, undefined, (isSucess) => {
+        if (isSucess) {
+          popToRoot();
+        }
+      });
+    }
     return (
       <SetCustomStatusForm
         slackClient={props.slackClient}
@@ -398,14 +406,16 @@ function CopyDeeplinkAction(props: { preset: SlackStatusPreset }) {
       icon={Icon.Clipboard}
       shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
       onAction={() => {
-        const params = new URLSearchParams();
         const launchContext = {
           status: props.preset.title,
           emoji: props.preset.emojiCode,
           duration: props.preset.defaultDuration,
         };
-        params.append("launchContext", JSON.stringify(launchContext));
-        Clipboard.copy(`raycast://extensions/petr/slack-status/setStatus?${params}`);
+        Clipboard.copy(
+          `raycast://extensions/petr/slack-status/setStatus?launchContext=${encodeURIComponent(
+            JSON.stringify(launchContext)
+          )}`
+        );
         closeMainWindow({ popToRootType: PopToRootType.Immediate });
         showHUD("Copied deeplink to clipboard");
       }}

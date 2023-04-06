@@ -1,8 +1,8 @@
 # Slack Status Changelog
 
-## [Prefill Form from Launch Context] - 2023-04-06
+## [Add `Copy Deeplink` Preset Action] - 2023-04-06
 
-If the command is launched with `status`, `emoji` or `duration` context variables, it will directly show the form, prefilled.
+Adds a `Copy Deeplink` action to presets, which can be used to directly activate a preset if one exists, or open the prefilled form if one doesn't.
 
 ## [Minor Tweaks] - 2021-11-04
 
