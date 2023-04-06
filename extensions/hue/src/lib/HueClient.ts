@@ -32,24 +32,25 @@ export default class HueClient {
   public bridgeIpAddress: string;
   public bridgeId: string;
   public bridgeUsername: string;
-  private readonly setLights: React.Dispatch<React.SetStateAction<Light[]>>;
-  private readonly setGroupedLights: React.Dispatch<React.SetStateAction<GroupedLight[]>>;
-  private readonly setRooms: React.Dispatch<React.SetStateAction<Room[]>>;
-  private readonly setZones: React.Dispatch<React.SetStateAction<Zone[]>>;
-  private readonly setScenes: React.Dispatch<React.SetStateAction<Scene[]>>;
+  private readonly setLights?: React.Dispatch<React.SetStateAction<Light[]>>;
+  private readonly setGroupedLights?: React.Dispatch<React.SetStateAction<GroupedLight[]>>;
+  private readonly setRooms?: React.Dispatch<React.SetStateAction<Room[]>>;
+  private readonly setZones?: React.Dispatch<React.SetStateAction<Zone[]>>;
+  private readonly setScenes?: React.Dispatch<React.SetStateAction<Scene[]>>;
   private readonly http2Session: ClientHttp2Session;
-  private readonly rateLimitedQueue = new RateLimitedQueue();
+  private readonly lightsQueue = new RateLimitedQueue(10);
+  private readonly groupedLightsQueue = new RateLimitedQueue(1, 1);
 
   private constructor(
     bridgeIpAddress: string,
     bridgeId: string,
     bridgeUsername: string,
     http2Session: ClientHttp2Session,
-    setLights: React.Dispatch<React.SetStateAction<Light[]>>,
-    setGroupedLights: React.Dispatch<React.SetStateAction<GroupedLight[]>>,
-    setRooms: React.Dispatch<React.SetStateAction<Room[]>>,
-    setZones: React.Dispatch<React.SetStateAction<Zone[]>>,
-    setScenes: React.Dispatch<React.SetStateAction<Scene[]>>
+    setLights?: React.Dispatch<React.SetStateAction<Light[]>>,
+    setGroupedLights?: React.Dispatch<React.SetStateAction<GroupedLight[]>>,
+    setRooms?: React.Dispatch<React.SetStateAction<Room[]>>,
+    setZones?: React.Dispatch<React.SetStateAction<Zone[]>>,
+    setScenes?: React.Dispatch<React.SetStateAction<Scene[]>>
   ) {
     this.bridgeUsername = bridgeUsername;
     this.http2Session = http2Session;
@@ -67,11 +68,11 @@ export default class HueClient {
     bridgeIpAddress: string,
     bridgeId: string,
     bridgeUsername: string,
-    setLights: React.Dispatch<React.SetStateAction<Light[]>>,
-    setGroupedLights: React.Dispatch<React.SetStateAction<GroupedLight[]>>,
-    setRooms: React.Dispatch<React.SetStateAction<Room[]>>,
-    setZones: React.Dispatch<React.SetStateAction<Zone[]>>,
-    setScenes: React.Dispatch<React.SetStateAction<Scene[]>>
+    setLights?: React.Dispatch<React.SetStateAction<Light[]>>,
+    setGroupedLights?: React.Dispatch<React.SetStateAction<GroupedLight[]>>,
+    setRooms?: React.Dispatch<React.SetStateAction<Room[]>>,
+    setZones?: React.Dispatch<React.SetStateAction<Zone[]>>,
+    setScenes?: React.Dispatch<React.SetStateAction<Scene[]>>
   ) {
     const http2Session = await new Promise<ClientHttp2Session>((resolve, reject) => {
       const session = connect(`https://${bridgeIpAddress}`, {
@@ -137,24 +138,31 @@ export default class HueClient {
   }
 
   public async updateLight(light: Light, properties: LightRequest): Promise<any> {
-    this.setLights((lights) => lights.updateItem(light.id, properties));
-    const response = await this.makeRequest("PUT", `/clip/v2/resource/light/${light.id}`, properties).catch((e) => {
-      this.setLights((lights) => lights.updateItem(light.id, light));
-      throw e;
-    });
+    this.setLights?.((lights) => lights.updateItem(light.id, properties));
+    const request = async () => {
+      return await this.makeRequest("PUT", `/clip/v2/resource/light/${light.id}`, properties).catch((e) => {
+        this.setLights?.((lights) => lights.updateItem(light.id, light));
+        throw e;
+      });
+    };
+
+    const response = await this.lightsQueue.enqueueRequest(request);
 
     return response.data.data;
   }
 
   public async updateGroupedLight(groupedLight: GroupedLight, properties: Partial<Light>): Promise<any> {
-    this.setGroupedLights((groupedLights) => groupedLights.updateItem(groupedLight.id, properties));
-    const request = async () =>
-      await this.makeRequest("PUT", `/clip/v2/resource/grouped_light/${groupedLight.id}`, properties).catch((e) => {
-        this.setGroupedLights((groupedLights) => groupedLights.updateItem(groupedLight.id, groupedLight));
-        throw e;
-      });
+    this.setGroupedLights?.((groupedLights) => groupedLights.updateItem(groupedLight.id, properties));
+    const request = async () => {
+      return await this.makeRequest("PUT", `/clip/v2/resource/grouped_light/${groupedLight.id}`, properties).catch(
+        (e) => {
+          this.setGroupedLights?.((groupedLights) => groupedLights.updateItem(groupedLight.id, groupedLight));
+          throw e;
+        }
+      );
+    };
 
-    const response = await this.rateLimitedQueue.enqueueRequest(request);
+    const response = await this.groupedLightsQueue.enqueueRequest(request);
 
     return response.data.data;
   }
@@ -245,23 +253,23 @@ export default class HueClient {
     let parser: Chain | null = null;
 
     const onParsedUpdateEvent = ({ value: updateEvent }: ParsedUpdateEvent) => {
-      this.setLights((lights) => {
+      this.setLights?.((lights) => {
         const updatedLights = updateEvent.data.filter((resource) => resource.type === "light");
         return lights.updateItems(updatedLights as Partial<Light>[]);
       });
-      this.setGroupedLights((groupedLights) => {
+      this.setGroupedLights?.((groupedLights) => {
         const updatedGroupedLights = updateEvent.data.filter((resource) => resource.type === "grouped_light");
         return groupedLights.updateItems(updatedGroupedLights as Partial<GroupedLight>[]);
       });
-      this.setRooms((rooms) => {
+      this.setRooms?.((rooms) => {
         const updatedRooms = updateEvent.data.filter((resource) => resource.type === "room");
         return rooms.updateItems(updatedRooms as Partial<Room>[]);
       });
-      this.setZones((zones) => {
+      this.setZones?.((zones) => {
         const updatedZones = updateEvent.data.filter((resource) => resource.type === "zone");
         return zones.updateItems(updatedZones as Partial<Zone>[]);
       });
-      this.setScenes((scenes) => {
+      this.setScenes?.((scenes) => {
         const updatedScenes = updateEvent.data.filter((resource) => resource.type === "scene");
         return scenes.updateItems(updatedScenes as Partial<Scene>[]);
       });

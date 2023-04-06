@@ -1,13 +1,18 @@
 export default class RateLimitedQueue {
   private queue: (() => Promise<void>)[] = [];
   private isProcessing = false;
-  private readonly intervalMs = 1000; // 1 request per second
+  private readonly requestsPerSecond;
+  private readonly maxQueueLength;
   private lastRequestTimestamp = 0;
-  private maxQueueLength = 1;
+
+  constructor(requestsPerSecond: number, maxQueueLength?: number | undefined) {
+    this.requestsPerSecond = requestsPerSecond;
+    this.maxQueueLength = maxQueueLength;
+  }
 
   async enqueueRequest<T>(request: () => Promise<T>): Promise<T> {
     return new Promise((resolve, reject) => {
-      if (this.queue.length > this.maxQueueLength) {
+      if (this.maxQueueLength && this.queue.length > this.maxQueueLength) {
         // Silently drop request
         return;
       }
@@ -38,7 +43,7 @@ export default class RateLimitedQueue {
     this.isProcessing = true;
     const currentTime = Date.now();
     const timeSinceLastRequest = currentTime - this.lastRequestTimestamp;
-    const delay = Math.max(0, this.intervalMs - timeSinceLastRequest);
+    const delay = Math.max(0, 1000 / this.requestsPerSecond - timeSinceLastRequest);
 
     setTimeout(() => {
       const request = this.queue.shift();

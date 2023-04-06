@@ -62,9 +62,11 @@ export default function hueBridgeMachine(
         invoke: {
           id: "loadingCredentials",
           src: async () => {
-            const bridgeIpAddress = await LocalStorage.getItem<string>(BRIDGE_IP_ADDRESS_KEY);
-            const bridgeId = await LocalStorage.getItem<string>(BRIDGE_ID);
-            const bridgeUsername = await LocalStorage.getItem<string>(BRIDGE_USERNAME_KEY);
+            const [bridgeIpAddress, bridgeId, bridgeUsername] = await Promise.all([
+              LocalStorage.getItem<string>(BRIDGE_IP_ADDRESS_KEY),
+              LocalStorage.getItem<string>(BRIDGE_ID),
+              LocalStorage.getItem<string>(BRIDGE_USERNAME_KEY),
+            ]);
 
             if (bridgeIpAddress === undefined || bridgeId === undefined || bridgeUsername === undefined) {
               throw Error("No Hue Bridge credentials found");
