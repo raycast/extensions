@@ -147,7 +147,7 @@ export function hexToXy(color: string): Xy {
   const [red, green, blue] = result
     ? [parseInt(result[1], 16), parseInt(result[2], 16), parseInt(result[3], 16)]
     : [0, 0, 0];
-  return rgbToCie(red, green, blue);
+  return rgbToXy(red, green, blue);
 }
 
 /**
@@ -157,7 +157,7 @@ export function hexToXy(color: string): Xy {
  * @param {Xy} xy
  * @param brightness Brightness of the light (0 – 100)
  */
-export function cieToRgb(xy: Xy, brightness = 100): Rgb {
+export function xyToRgb(xy: Xy, brightness = 100): Rgb {
   // TODO: Fix not handling some colors well (e.g. 'Maroon' turns purple)
   // TODO: Replace with code from
   //  https://developers.meethue.com/develop/application-design-guidance/color-conversion-formulas-rgb-to-xy-and-back/
@@ -213,16 +213,17 @@ export function cieToRgb(xy: Xy, brightness = 100): Rgb {
   };
 }
 
-export function cieToRgbString(xy: Xy, brightness = 100) {
-  const rgb = cieToRgb(xy, brightness);
+export function xyToRgbString(xy: Xy, brightness = 100) {
+  const rgb = xyToRgb(xy, brightness);
   return `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
 }
 
 export function xyToRgbHexString(xy: Xy, brightness = 100) {
-  const rgb = cieToRgb(xy, brightness);
-  return `#${rgb.r.toString(16).padStart(2, "0")}${rgb.g.toString(16).padStart(2, "0")}${rgb.b
-    .toString(16)
-    .padStart(2, "0")}`;
+  const { r, g, b } = xyToRgb(xy, brightness);
+  const redHex = r.toString(16).padStart(2, "0");
+  const greenHex = g.toString(16).padStart(2, "0");
+  const blueHex = b.toString(16).padStart(2, "0");
+  return `#${redHex}${greenHex}${blueHex}`;
 }
 
 /**
@@ -261,11 +262,11 @@ export function miredToRgbString(mireds: number, brightness = 100) {
  * @param brightness Brightness of the light (1-100)
  */
 export function miredToHexString(mireds: number, brightness = 100) {
-  const rgb = miredToRgb(mireds, brightness);
-  const r = rgb.r.toString(16).padStart(2, "0");
-  const g = rgb.g.toString(16).padStart(2, "0");
-  const b = rgb.b.toString(16).padStart(2, "0");
-  return `#${r}${g}${b}`;
+  const { r, g, b } = miredToRgb(mireds, brightness);
+  const redHex = r.toString(16).padStart(2, "0");
+  const greenHex = g.toString(16).padStart(2, "0");
+  const blueHex = b.toString(16).padStart(2, "0");
+  return `#${redHex}${greenHex}${blueHex}`;
 }
 
 /**
@@ -275,7 +276,7 @@ export function miredToHexString(mireds: number, brightness = 100) {
  * @param {number} blue
  * @returns {Xy}
  */
-export function rgbToCie(red: number, green: number, blue: number): Xy {
+export function rgbToXy(red: number, green: number, blue: number): Xy {
   //Apply a gamma correction to the RGB values, which makes the color more vivid and more the like the color displayed on the screen of your device
   red = red > 0.04045 ? Math.pow((red + 0.055) / (1.0 + 0.055), 2.4) : red / 12.92;
   green = green > 0.04045 ? Math.pow((green + 0.055) / (1.0 + 0.055), 2.4) : green / 12.92;
