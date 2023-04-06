@@ -65,6 +65,7 @@
 /extensions/bibmanager                               @AaronDavidSchneider
 /extensions/bike                                     @SKaplanOfficial
 /extensions/binance                                  @grzegorzkrukowski
+/extensions/bing-search                              @maver1ck
 /extensions/bing-wallpaper                           @koinzhang
 /extensions/bitbucket                                @Lp-Francois @esarmstrong @itsrifat
 /extensions/bitbucket-search-self-hosted             @yuercl
@@ -312,7 +313,7 @@
 /extensions/glyph-search                             @gbougakov
 /extensions/go-package-search                        @bstncartwright @k8scat
 /extensions/google-books                             @Ali-Parandeh
-/extensions/google-chrome                            @rgomezcasas @bromanko @crisboarna @andreaselia
+/extensions/google-chrome                            @rgomezcasas @bromanko @crisboarna @andreaselia @karolre
 /extensions/google-chrome-profiles                   @frouo
 /extensions/google-cloud-platform-search             @klaa97
 /extensions/google-drive                             @vishaltelangre @nametake @daniel-stoneuk
@@ -366,9 +367,10 @@
 /extensions/hyper-focus                              @iloveitaly @pernielsentikaer
 /extensions/hypersonic                               @prrrcl
 /extensions/iata-code-decoder                        @timrogers
-/extensions/iconify                                  @Destiner @kidonng @sxn
+/extensions/iconify                                  @Destiner @kidonng @sxn @robertvanhoesel
 /extensions/iconpark                                 @koinzhang
 /extensions/icons8                                   @yug2005
+/extensions/idonthavespotify                         @sjdonado
 /extensions/ifanr                                    @madcodelife
 /extensions/ihosts                                   @404J
 /extensions/imdb                                     @ryan-exe
@@ -691,6 +693,7 @@
 /extensions/salesforce-search                        @svenwiegand
 /extensions/savvycal                                 @keturiosakys @pernielsentikaer @derrickreimer @vimtor
 /extensions/scaleway                                 @philibea @flozdra
+/extensions/scrapbox-search                          @zett-8
 /extensions/scrcpy                                   @zcfan
 /extensions/screen-saver                             @koinzhang
 /extensions/screen-sharing-recents                   @m-hall
@@ -787,6 +790,7 @@
 /extensions/text-decorator                           @koinzhang
 /extensions/text-shortcuts                           @koinzhang
 /extensions/the-verge                                @klkvsky @pernielsentikaer
+/extensions/thesaurus                                @ABukSwienty
 /extensions/things                                   @loris @andreaselia
 /extensions/ticktick                                 @viduycheung
 /extensions/tim                                      @tmwrnr

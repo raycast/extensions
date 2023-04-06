@@ -11,6 +11,26 @@
     "Design Tools"
   ],
   "license": "MIT",
+  "preferences": [
+    {
+      "name": "preferredFileManager",
+      "description": "The preferred file manager to obtain selected images from. Finder will always be used as a fallback.",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "Finder",
+          "value": "Finder"
+        },
+        {
+          "title": "Path Finder",
+          "value": "Path Finder"
+        }
+      ],
+      "default": "Finder",
+      "required": false,
+      "title": "Preferred File Manager"
+    }
+  ],
   "commands": [
     {
       "name": "flip-horizontally",

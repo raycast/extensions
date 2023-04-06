@@ -13,8 +13,8 @@ type GetProjectsResponse = {
   values: Project[];
 };
 
-export async function getProjects() {
-  const params = { maxResults: "100" };
+export async function getProjects(query: string) {
+  const params = { maxResults: "100", query };
 
   const result = await request<GetProjectsResponse>("/project/search", { params });
   return result?.values;

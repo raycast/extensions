@@ -257,6 +257,8 @@ export const applyFilter = async (filter: {
     return;
   }
 
+  const toast = await showToast({ title: "Filtering in progress...", style: Toast.Style.Animated });
+
   const pluralized = `image${selectedImages.length === 1 ? "" : "s"}`;
   try {
     selectedImages.forEach(async (imageFilePath) => {
@@ -264,14 +266,11 @@ export const applyFilter = async (filter: {
       const newPath = pathComponents.slice(0, -1).join(".") + ".png";
       await filter.applyMethod(imageFilePath, newPath, filter.CIFilterName);
     });
-    await showToast({
-      title: `Applied ${filter.name} Filter To ${selectedImages.length.toString()} ${pluralized}`,
-    });
+    toast.title = `Applied ${filter.name} Filter To ${selectedImages.length.toString()} ${pluralized}`;
+    toast.style = Toast.Style.Success;
   } catch (error) {
     console.log(error);
-    await showToast({
-      title: `Failed To Apply Filter`,
-      style: Toast.Style.Failure,
-    });
+    toast.title = `Failed To Apply Filter`;
+    toast.style = Toast.Style.Failure;
   }
 };

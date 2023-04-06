@@ -1,6 +1,6 @@
 import { showToast, Toast } from "@raycast/api";
 import { execSync } from "child_process";
-import { getSelectedImages } from "./utils";
+import { execSIPSCommandOnWebP, getSelectedImages } from "./utils";
 
 export default async function Command(props: { arguments: { degrees: string } }) {
   const { degrees } = props.arguments;
@@ -11,17 +11,32 @@ export default async function Command(props: { arguments: { degrees: string } })
     return;
   }
 
+  const toast = await showToast({ title: "Rotation in progress...", style: Toast.Style.Animated });
+
   if (selectedImages) {
     const pluralized = `image${selectedImages.length === 1 ? "" : "s"}`;
     try {
       const pathStrings = '"' + selectedImages.join('" "') + '"';
-      execSync(`sips --rotate ${degrees} ${pathStrings}`);
-      await showToast({ title: `Rotated ${selectedImages.length.toString()} ${pluralized} by ${degrees} degrees` });
+      if (pathStrings.toLowerCase().includes("webp")) {
+        // Handle each image individually
+        selectedImages.forEach((imgPath) => {
+          if (imgPath.toLowerCase().endsWith("webp")) {
+            // Convert to PNG, flip and restore to WebP
+            execSIPSCommandOnWebP(`sips --rotate ${degrees}`, imgPath);
+          } else {
+            // Run command as normal
+            execSync(`sips --rotate ${degrees} "${imgPath}"`);
+          }
+        });
+      } else {
+        // Flip all images at once
+        execSync(`sips --rotate ${degrees} ${pathStrings}`);
+      }
+      toast.title = `Rotated ${selectedImages.length.toString()} ${pluralized} by ${degrees} degrees`;
+      toast.style = Toast.Style.Success;
     } catch {
-      await showToast({
-        title: `Failed to rotate ${selectedImages.length.toString()} ${pluralized}`,
-        style: Toast.Style.Failure,
-      });
+      toast.title = `Failed to rotate ${selectedImages.length.toString()} ${pluralized}`;
+      toast.style = Toast.Style.Failure;
     }
   }
 }
