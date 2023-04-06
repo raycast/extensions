@@ -63,8 +63,8 @@ export async function deleteFile(filePath: string, fileName: string, refresh: ()
 
 export async function deleteDirectory(folderPath: string, folderName: string, refresh: () => void) {
   const options: Alert.Options = {
-    title: "Delete Directory?",
-    message: `Are you sure you want to delete ${folderName}?`,
+    title: "Permanently Delete Directory?",
+    message: `Are you sure you want to delete ${folderName}? This action cannot be undone.`,
     icon: Icon.Eraser,
     primaryAction: {
       title: "Delete",
