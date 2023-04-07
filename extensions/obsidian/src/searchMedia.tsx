@@ -3,7 +3,7 @@ import { List } from "@raycast/api";
 import { useObsidianVaults } from "./utils/utils";
 import { VaultSelection } from "./components/VaultSelection";
 import { MediaSearchArguments, Vault } from "./utils/interfaces";
-import { NoVaultFoundMessage } from "./components/NoVaultFoundMessage";
+import { NoVaultFoundMessage } from "./components/Notifications/NoVaultFoundMessage";
 import { noVaultPathsToast } from "./components/Toasts";
 import { MediaGrid } from "./components/MediaGrid";
 

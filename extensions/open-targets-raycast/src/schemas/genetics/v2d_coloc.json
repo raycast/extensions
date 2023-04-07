@@ -1,0 +1,118 @@
+{
+  "fields": [
+    {
+      "metadata": {},
+      "name": "coloc_n_vars",
+      "nullable": true,
+      "type": "integer"
+    },
+    { "metadata": {}, "name": "coloc_h0", "nullable": true, "type": "double" },
+    { "metadata": {}, "name": "coloc_h1", "nullable": true, "type": "double" },
+    { "metadata": {}, "name": "coloc_h2", "nullable": true, "type": "double" },
+    { "metadata": {}, "name": "coloc_h3", "nullable": true, "type": "double" },
+    { "metadata": {}, "name": "coloc_h4", "nullable": true, "type": "double" },
+    { "metadata": {}, "name": "left_type", "nullable": true, "type": "string" },
+    {
+      "metadata": {},
+      "name": "left_study",
+      "nullable": true,
+      "type": "string"
+    },
+    {
+      "metadata": {},
+      "name": "left_chrom",
+      "nullable": true,
+      "type": "string"
+    },
+    { "metadata": {}, "name": "left_pos", "nullable": true, "type": "integer" },
+    { "metadata": {}, "name": "left_ref", "nullable": true, "type": "string" },
+    { "metadata": {}, "name": "left_alt", "nullable": true, "type": "string" },
+    {
+      "metadata": {},
+      "name": "right_type",
+      "nullable": true,
+      "type": "string"
+    },
+    {
+      "metadata": {},
+      "name": "right_study",
+      "nullable": true,
+      "type": "string"
+    },
+    {
+      "metadata": {},
+      "name": "right_bio_feature",
+      "nullable": true,
+      "type": "string"
+    },
+    {
+      "metadata": {},
+      "name": "right_phenotype",
+      "nullable": true,
+      "type": "string"
+    },
+    {
+      "metadata": {},
+      "name": "right_chrom",
+      "nullable": true,
+      "type": "string"
+    },
+    {
+      "metadata": {},
+      "name": "right_pos",
+      "nullable": true,
+      "type": "integer"
+    },
+    { "metadata": {}, "name": "right_ref", "nullable": true, "type": "string" },
+    { "metadata": {}, "name": "right_alt", "nullable": true, "type": "string" },
+    {
+      "metadata": {},
+      "name": "coloc_h4_h3",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {},
+      "name": "coloc_log2_h4_h3",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {},
+      "name": "is_flipped",
+      "nullable": true,
+      "type": "boolean"
+    },
+    {
+      "metadata": {},
+      "name": "right_gene_id",
+      "nullable": true,
+      "type": "string"
+    },
+    {
+      "metadata": {},
+      "name": "left_var_right_study_beta",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {},
+      "name": "left_var_right_study_se",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {},
+      "name": "left_var_right_study_pval",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {},
+      "name": "left_var_right_isCC",
+      "nullable": true,
+      "type": "boolean"
+    }
+  ],
+  "type": "struct"
+}

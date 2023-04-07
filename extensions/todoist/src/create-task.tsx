@@ -1,25 +1,27 @@
+import { AddTaskArgs, getColorByKey, Task } from "@doist/todoist-api-typescript";
 import { ActionPanel, Form, Icon, useNavigation, open, Toast, Action, Color } from "@raycast/api";
-import { AddTaskArgs, getColor, Task } from "@doist/todoist-api-typescript";
 import { FormValidation, MutatePromise, useCachedPromise, useForm } from "@raycast/utils";
+
 import { handleError, todoist } from "./api";
+import TaskDetail from "./components/TaskDetail";
+import View from "./components/View";
 import { priorities } from "./constants";
 import { getAPIDate } from "./helpers/dates";
 import { isTodoistInstalled } from "./helpers/isTodoistInstalled";
-import TaskDetail from "./components/TaskDetail";
-import View from "./components/View";
+import { getProjectIcon } from "./helpers/projects";
 
 type CreateTaskValues = {
   content: string;
   description: string;
-  dueDate: Date;
+  dueDate: Date | null;
   priority: string;
   projectId: string;
   sectionId: string;
-  labelIds: string[];
+  labels: string[];
 };
 
 type CreateTaskProps = {
-  fromProjectId?: number;
+  fromProjectId?: string;
   mutateTasks?: MutatePromise<Task[] | undefined>;
   draftValues?: CreateTaskValues;
 };
@@ -32,11 +34,13 @@ export default function CreateTask({ fromProjectId, mutateTasks, draftValues }: 
     isLoading: isLoadingProjects,
     error: getProjectsError,
   } = useCachedPromise(() => todoist.getProjects());
+
   const {
     data: sections,
     isLoading: isLoadingSections,
     error: getSectionsError,
   } = useCachedPromise(() => todoist.getSections());
+
   const {
     data: labels,
     isLoading: isLoadingLabels,
@@ -70,15 +74,15 @@ export default function CreateTask({ fromProjectId, mutateTasks, draftValues }: 
       }
 
       if (values.projectId) {
-        body.projectId = parseInt(values.projectId);
+        body.projectId = values.projectId;
       }
 
       if (values.sectionId) {
-        body.sectionId = parseInt(values.sectionId);
+        body.sectionId = values.sectionId;
       }
 
-      if (values.labelIds && values.labelIds.length > 0) {
-        body.labelIds = values.labelIds.map((id) => parseInt(id));
+      if (values.labels && values.labels.length > 0) {
+        body.labels = values.labels;
       }
 
       const toast = new Toast({ style: Toast.Style.Animated, title: "Creating task" });
@@ -111,11 +115,11 @@ export default function CreateTask({ fromProjectId, mutateTasks, draftValues }: 
         reset({
           content: "",
           description: "",
-          dueDate: undefined,
+          dueDate: null,
           priority: String(lowestPriority.value),
           projectId: "",
           sectionId: "",
-          labelIds: [],
+          labels: [],
         });
 
         focus("content");
@@ -134,7 +138,7 @@ export default function CreateTask({ fromProjectId, mutateTasks, draftValues }: 
         ? String(fromProjectId)
         : "",
       sectionId: draftValues?.sectionId ? String(draftValues?.sectionId) : "",
-      labelIds: draftValues?.labelIds,
+      labels: draftValues?.labels,
     },
     validation: {
       content: FormValidation.Required,
@@ -152,7 +156,7 @@ export default function CreateTask({ fromProjectId, mutateTasks, draftValues }: 
             <Action.SubmitForm title="Create Task" onSubmit={handleSubmit} icon={Icon.Plus} />
           </ActionPanel>
         }
-        enableDrafts
+        enableDrafts={!fromProjectId}
       >
         <Form.TextField {...itemProps.content} title="Title" placeholder="Buy fruits" />
 
@@ -182,12 +186,12 @@ export default function CreateTask({ fromProjectId, mutateTasks, draftValues }: 
           <Form.Dropdown {...itemProps.projectId} title="Project">
             <Form.Dropdown.Item title="No project" value="" icon={Icon.List} />
 
-            {projects.map(({ id, name, color, inboxProject }) => (
+            {projects.map((project) => (
               <Form.Dropdown.Item
-                key={id}
-                value={String(id)}
-                icon={inboxProject ? Icon.Envelope : { source: Icon.List, tintColor: getColor(color).value }}
-                title={name}
+                key={project.id}
+                value={String(project.id)}
+                icon={getProjectIcon(project)}
+                title={project.name}
               />
             ))}
           </Form.Dropdown>
@@ -213,13 +217,13 @@ export default function CreateTask({ fromProjectId, mutateTasks, draftValues }: 
         ) : null}
 
         {labels && labels.length > 0 ? (
-          <Form.TagPicker {...itemProps.labelIds} title="Labels">
+          <Form.TagPicker {...itemProps.labels} title="Labels">
             {labels.map(({ id, name, color }) => (
               <Form.TagPicker.Item
                 key={id}
-                value={String(id)}
+                value={name}
                 title={name}
-                icon={{ source: Icon.Tag, tintColor: getColor(color).value }}
+                icon={{ source: Icon.Tag, tintColor: getColorByKey(color).hexValue }}
               />
             ))}
           </Form.TagPicker>

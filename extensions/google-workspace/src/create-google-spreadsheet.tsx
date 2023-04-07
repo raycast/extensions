@@ -1,7 +1,7 @@
-import { open, closeMainWindow, popToRoot } from "@raycast/api";
+import { createDocFromUrl } from "./helpers/docs";
 
+// The command doesn't have a title argument because
+// Google doesn't seem to support this search query parameter
 export default async function Command() {
-  await open("https://docs.google.com/spreadsheets/create");
-  await closeMainWindow();
-  await popToRoot();
+  await createDocFromUrl("spreadsheets");
 }

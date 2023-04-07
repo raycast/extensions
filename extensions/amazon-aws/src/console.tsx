@@ -1,33 +1,14 @@
 import { ActionPanel, List, Action } from "@raycast/api";
-import { useEffect, useState } from "react";
-import { readFileSync } from "fs";
+import { readFile } from "fs/promises";
+import { useCachedPromise } from "@raycast/utils";
+import { AWS_URL_BASE } from "./constants";
 
-export default function Command() {
-  const [state, setState] = useState<{ services: AWSService[]; loaded: boolean }>({
-    services: [],
-    loaded: false,
-  });
-
-  useEffect(() => {
-    async function loadJSON() {
-      const services = JSON.parse(readFileSync(`${__dirname}/assets/aws-services.json`, "utf8"))
-        .items.filter((service: AWSService) => {
-          return !!service.title; // Only include services that have a title
-        })
-        .sort((a: AWSService, b: AWSService) => (a.title > b.title ? 1 : b.title > a.title ? -1 : 0));
-
-      setState({
-        loaded: true,
-        services,
-      });
-    }
-
-    loadJSON();
-  }, []);
+export default function Console() {
+  const { data: services, isLoading } = useCachedPromise(loadJSON);
 
   return (
-    <List isLoading={!state.loaded} searchBarPlaceholder="Filter services by name...">
-      {state.services.map((service) => (
+    <List isLoading={isLoading} searchBarPlaceholder="Filter services by name...">
+      {services?.map((service) => (
         <List.Item
           id={service.uid}
           key={service.uid}
@@ -36,7 +17,7 @@ export default function Command() {
           icon={service.icon.path}
           actions={
             <ActionPanel>
-              <Action.OpenInBrowser url={`https://console.aws.amazon.com${service.arg}`} />
+              <Action.OpenInBrowser url={`${AWS_URL_BASE}${service.arg}`} />
             </ActionPanel>
           }
         />
@@ -56,3 +37,14 @@ type AWSService = {
 type AWSIcon = {
   path: string;
 };
+
+async function loadJSON() {
+  const file = await readFile(`${__dirname}/assets/aws-services.json`, "utf8");
+  const services = (JSON.parse(file).items as AWSService[])
+    .filter((service) => {
+      return !!service.title; // Only include services that have a title
+    })
+    .sort((a, b) => (a.title > b.title ? 1 : b.title > a.title ? -1 : 0));
+
+  return services;
+}

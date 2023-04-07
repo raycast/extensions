@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-08-03 00:02
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-09-14 23:34
+ * @lastEditTime: 2023-03-17 23:31
  * @fileName: formatData.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -14,7 +14,9 @@ import {
   BaikeSummary,
   ExplanationItem,
   KeyValueItem,
+  ModernChineseDataList,
   QueryWordInfo,
+  Sense,
   WordExplanation,
   WordForms,
   YoudaoDictionaryFormatResult,
@@ -35,17 +37,21 @@ export function formatYoudaoDictionaryResult(
   }
 
   const [from, to] = youdaoResult.l.split("2"); // from2to
-  let usPhonetic = youdaoResult.basic?.["us-phonetic"]; // may be two phonetic "trænzˈleɪʃn; trænsˈleɪʃn"
-  usPhonetic = usPhonetic?.split("; ")[1] || usPhonetic;
+  const usPhonetic = youdaoResult.basic?.["us-phonetic"]; // may be two phonetic "trænzˈleɪʃn; trænsˈleɪʃn"
   const phonetic = usPhonetic || youdaoResult.basic?.phonetic;
   const phoneticText = phonetic ? `[${phonetic}]` : undefined;
+
+  // get no more than 6 exam types
+  const examTypes = youdaoResult.basic?.exam_type?.slice(-6);
+  console.warn(`examTypes: ${examTypes}`);
+
   const queryWordInfo: QueryWordInfo = {
     word: youdaoResult.query,
     phonetic: phoneticText,
     fromLanguage: from,
     toLanguage: to,
     isWord: youdaoResult.isWord,
-    examTypes: youdaoResult.basic?.exam_type,
+    examTypes: examTypes,
     speechUrl: youdaoResult.speakUrl,
   };
 
@@ -87,18 +93,17 @@ export function formatYoudaoDictionaryResult(
  * Update Youdao dictionary display result.
  */
 export function updateYoudaoDictionaryDisplay(
-  formatResult: YoudaoDictionaryFormatResult | undefined
+  youdaoResult: YoudaoDictionaryFormatResult | undefined
 ): DisplaySection[] | undefined {
-  if (!formatResult) {
+  if (!youdaoResult) {
     return;
   }
 
   const displaySections: Array<DisplaySection> = [];
 
-  const queryWordInfo = formatResult.queryWordInfo;
+  const queryWordInfo = youdaoResult.queryWordInfo;
   const youdaoDictionaryType = DicionaryType.Youdao;
-  const oneLineTranslation = formatResult.translation.split("\n").join(", ");
-  const phoneticText = queryWordInfo.phonetic;
+  const oneLineTranslation = youdaoResult.translation.split("\n").join(", ");
   const subtitle = queryWordInfo.word.split("\n").join(" ");
 
   // 1. Translation.
@@ -113,7 +118,7 @@ export function updateYoudaoDictionaryDisplay(
     copyText: oneLineTranslation,
     queryWordInfo: queryWordInfo,
     accessoryItem: {
-      phonetic: phoneticText,
+      phonetic: queryWordInfo.phonetic,
       examTypes: queryWordInfo.examTypes,
     },
   };
@@ -123,12 +128,108 @@ export function updateYoudaoDictionaryDisplay(
     items: [translationItem],
   });
 
-  // 2. Explanation.
+  // 2. Modern Chinese dictionary.
+  const modernChineseDict = youdaoResult.modernChineseDict;
+  const modernChineseDictType = YoudaoDictionaryListItemType.ModernChineseDict;
+
+  console.log(`Modern Chinese dictionary`);
+
+  if (modernChineseDict?.length) {
+    const modernChineseDictItems: ListDisplayItem[] = [];
+    modernChineseDict.forEach((phoneticDict) => {
+      const placeholder = `~`;
+      console.log(`forms: ${JSON.stringify(phoneticDict, null, 4)}`);
+      const pinyin = phoneticDict.pinyin ? `${phoneticDict.pinyin}` : "";
+      const accessoryItem = translationItem.accessoryItem;
+      if (pinyin && accessoryItem && !accessoryItem.phonetic) {
+        accessoryItem.phonetic = `/ ${pinyin} /`;
+      }
+
+      if (phoneticDict.sense?.length) {
+        let lastCat: string | undefined;
+        const senseGroups: Sense[][] = [];
+
+        const copyFormsSense = JSON.parse(JSON.stringify(phoneticDict.sense)) as Sense[];
+        console.log(`copyFormsSense: ${JSON.stringify(copyFormsSense, null, 4)}`);
+
+        // * group senses by category
+        let group: Sense[] = [];
+        while (copyFormsSense.length > 0) {
+          const senseItem = copyFormsSense.shift();
+          if (senseItem) {
+            const cat = senseItem.cat;
+            if (cat !== lastCat) {
+              if (group.length) {
+                senseGroups.push(group);
+              }
+              group = [];
+              group.push(senseItem);
+              lastCat = cat;
+            } else {
+              group.push(senseItem);
+            }
+          }
+        }
+        senseGroups.push(group);
+        console.log(`senseGroups: ${JSON.stringify(senseGroups, null, 4)}`);
+
+        let markdown = pinyin;
+        let subtitle = "";
+        senseGroups.forEach((groups) => {
+          console.log(`group: ${JSON.stringify(groups, null, 4)}`);
+
+          const firstGroup = groups[0];
+          const cat = firstGroup.cat;
+          let catText = cat ? `${cat} ` : "";
+          if (!cat && firstGroup.def) {
+            catText = placeholder;
+          }
+
+          markdown += `\n\n${catText}`;
+          subtitle += catText;
+
+          const defExampleMarkdown = "" + getDefExampleMarkdown(groups, placeholder);
+          markdown += `${defExampleMarkdown}`;
+
+          let subtitleText = defExampleMarkdown.replaceAll("\n", " ");
+          subtitleText = subtitleText.replaceAll("`", "");
+          subtitle += subtitleText;
+        });
+
+        const title = pinyin ? `${pinyin}` : "";
+        const copyText = `${title}  ${subtitle}`;
+        console.log(`markdown: ${markdown}`);
+        console.log(`copyText: ${copyText}`);
+
+        const displayItem: ListDisplayItem = {
+          displayType: modernChineseDictType,
+          queryType: youdaoDictionaryType,
+          key: copyText,
+          title: title,
+          subtitle: subtitle,
+          queryWordInfo: queryWordInfo,
+          tooltip: modernChineseDictType,
+          copyText: copyText,
+          detailsMarkdown: markdown,
+        };
+        modernChineseDictItems.push(displayItem);
+      }
+    });
+
+    if (modernChineseDictItems?.length) {
+      displaySections.push({
+        type: modernChineseDictType,
+        items: modernChineseDictItems,
+      });
+    }
+  }
+
+  // 3. Explanation.
   const explanationType = YoudaoDictionaryListItemType.Explanation;
-  const explanationItems = formatResult.explanations?.map((explanation, i) => {
+  const explanationItems = youdaoResult.explanations?.map((explanation, i) => {
     const title = explanation.title;
-    const subtitle = explanation.subtitle;
-    const copyText = `${title} ${subtitle}`;
+    const subtitle = explanation.subtitle ? ` ${explanation.subtitle}` : "";
+    const copyText = `${title}${subtitle}`;
 
     const displayItem: ListDisplayItem = {
       displayType: explanationType,
@@ -149,9 +250,9 @@ export function updateYoudaoDictionaryDisplay(
     });
   }
 
-  // 3. Forms.
+  // 4. Forms.
   const formsType = YoudaoDictionaryListItemType.Forms;
-  const wfs = formatResult.forms?.map((wfItem) => {
+  const wfs = youdaoResult.forms?.map((wfItem) => {
     return wfItem.wf?.name + ": " + wfItem.wf?.value;
   });
   // [ 复数: goods   比较级: better   最高级: best ]
@@ -173,10 +274,10 @@ export function updateYoudaoDictionaryDisplay(
     });
   }
 
-  // 4. Web Translation.
-  if (formatResult.webTranslation) {
-    const webResultKey = formatResult.webTranslation.key;
-    const webResultValue = formatResult.webTranslation.value.join("；");
+  // 5. Web Translation.
+  if (youdaoResult.webTranslation) {
+    const webResultKey = youdaoResult.webTranslation.key;
+    const webResultValue = youdaoResult.webTranslation.value.join("；");
     const copyText = `${webResultKey} ${webResultValue}`;
 
     const webTranslationItem: ListDisplayItem = {
@@ -195,8 +296,8 @@ export function updateYoudaoDictionaryDisplay(
     });
   }
 
-  // 5. Web Phrases.
-  const webPhraseItems = formatResult.webPhrases?.map((phrase, i) => {
+  // 6. Web Phrases.
+  const webPhraseItems = youdaoResult.webPhrases?.map((phrase, i) => {
     const phraseKey = phrase.key;
     const phraseValue = phrase.value.join("；");
     const copyText = `${phraseKey} ${phraseValue}`;
@@ -220,10 +321,10 @@ export function updateYoudaoDictionaryDisplay(
     });
   }
 
-  // 6. Baike.
+  // 7. Baike.
   const baikeType = YoudaoDictionaryListItemType.Baike;
-  const baikeKey = formatResult.baike?.key || "";
-  const summary = formatResult.baike?.summary || "";
+  const baikeKey = youdaoResult.baike?.key || "";
+  const summary = youdaoResult.baike?.summary || "";
   const baikeText = `${baikeKey} ${summary}`;
   const baikeItem: ListDisplayItem = {
     displayType: baikeType,
@@ -242,10 +343,10 @@ export function updateYoudaoDictionaryDisplay(
     });
   }
 
-  // 7. Wikipedia.
+  // 8. Wikipedia.
   const wikipediaType = YoudaoDictionaryListItemType.Wikipedia;
-  const wikipediaKey = formatResult.wikipedia?.key || "";
-  const wikipediaSummary = formatResult.wikipedia?.summary || "";
+  const wikipediaKey = youdaoResult.wikipedia?.key || "";
+  const wikipediaSummary = youdaoResult.wikipedia?.summary || "";
   const wikipediaText = `${wikipediaKey} ${wikipediaSummary}`;
   const wikipediaItem: ListDisplayItem = {
     displayType: wikipediaType,
@@ -284,8 +385,12 @@ export function hasYoudaoDictionaryEntries(formatResult: YoudaoDictionaryFormatR
   }
 
   return (
-    (formatResult.explanations || formatResult.forms || formatResult.webPhrases || formatResult.webTranslation) !==
-    undefined
+    (formatResult.explanations ||
+      formatResult.forms ||
+      formatResult.webPhrases ||
+      formatResult.webTranslation ||
+      formatResult.baike ||
+      formatResult.wikipedia) !== undefined
   );
 }
 
@@ -294,27 +399,12 @@ export function hasYoudaoDictionaryEntries(formatResult: YoudaoDictionaryFormatR
  *
  * Todo: support more dictionary, currently only support English <--> Chinese.
  */
-export function formateYoudaoWebDictionaryModel(
-  model: YoudaoWebDictionaryModel
-): YoudaoDictionaryFormatResult | undefined {
-  // if has no web translation, means no dictionary entries.
-  if (!model.web_trans?.["web-translation"]?.length) {
-    console.log("No Youdao dictionary entries.");
-    return;
-  }
-
+export function formateYoudaoWebDictionaryModel(model: YoudaoWebDictionaryModel): YoudaoDictionaryFormatResult {
   const [from, to] = getFromToLanguage(model);
   const input = model.input;
   let isWord = false;
-  let phonetic: string | undefined;
+  let phoneticText: string | undefined;
   let speechUrl: string | undefined;
-
-  const simpleWord = model.simple?.word;
-  if (simpleWord?.length) {
-    const word = simpleWord[0];
-    phonetic = word.usphone || word.phone;
-  }
-  const phoneticText = phonetic ? ` [${phonetic}]` : undefined;
 
   let translation = "";
   let examTypes: string[] | undefined;
@@ -322,6 +412,7 @@ export function formateYoudaoWebDictionaryModel(
 
   // get baike info.
   let baike: BaikeSummary | undefined;
+  // Todo: use baidu baike api to get baike info.
   const baikeSummarys = model.baike?.summarys;
   if (baikeSummarys?.length) {
     baike = baikeSummarys[0];
@@ -332,6 +423,12 @@ export function formateYoudaoWebDictionaryModel(
   const wikipediaDigests = model.wikipedia_digest?.summarys;
   if (wikipediaDigests?.length) {
     wikipediaDigest = wikipediaDigests[0];
+  }
+
+  let newChineseDataList: ModernChineseDataList[] | undefined;
+  const dataList = model.newhh?.dataList;
+  if (dataList?.length) {
+    newChineseDataList = formatNewChineseDict(dataList);
   }
 
   // format web translation.
@@ -377,9 +474,13 @@ export function formateYoudaoWebDictionaryModel(
   if (model.ec) {
     const wordItem = model.ec.word?.length ? model.ec.word[0] : undefined;
 
+    // * Don't use simpleWord, because it maybe has multiple phonetics, eg: "record".
+    phoneticText = getPhoneticDisplayText(wordItem?.usphone);
+
     // Word audio: https://dict.youdao.com/dictvoice?audio=good&type=2
     const usspeech = wordItem?.usspeech; // "good&type=2"
     const audioUrl = usspeech ? `https://dict.youdao.com/dictvoice?audio=${usspeech}` : undefined;
+    console.log(`${input}, audioUrl: ${audioUrl}`);
 
     explanations.length = 0;
     const trs = wordItem?.trs;
@@ -395,10 +496,10 @@ export function formateYoudaoWebDictionaryModel(
         }
       }
     }
-    // console.log(`ec, explanations: ${JSON.stringify(explanations, null, 2)}`);
+    // console.log(`ec, explanations: ${JSON.stringify(explanations, null, 4)}`);
 
-    isWord = wordItem !== undefined;
-    examTypes = model.ec.exam_type;
+    isWord = wordItem !== undefined; // Todo: need to check more.
+    examTypes = model.ec.exam_type?.slice(-6);
     speechUrl = audioUrl;
     forms = wordItem?.wfs;
   }
@@ -407,6 +508,8 @@ export function formateYoudaoWebDictionaryModel(
   if (model.ce) {
     const wordItem = model.ce.word?.length ? model.ce.word[0] : undefined;
     isWord = wordItem !== undefined;
+
+    phoneticText = getPhoneticDisplayText(wordItem?.phone);
 
     explanations.length = 0;
     const trs = wordItem?.trs;
@@ -429,7 +532,7 @@ export function formateYoudaoWebDictionaryModel(
         }
       }
     }
-    // console.log(`ce, explanations: ${JSON.stringify(explanations, null, 2)}`);
+    // console.log(`ce, explanations: ${JSON.stringify(explanations, null, 4)}`);
   }
 
   const queryWordInfo: QueryWordInfo = {
@@ -441,7 +544,7 @@ export function formateYoudaoWebDictionaryModel(
     speechUrl: speechUrl,
     isWord: isWord,
   };
-  // console.log(`format queryWordInfo: ${JSON.stringify(queryWordInfo, null, 2)}`);
+  // console.log(`format queryWordInfo: ${JSON.stringify(queryWordInfo, null, 4)}`);
 
   const formateResult: YoudaoDictionaryFormatResult = {
     queryWordInfo: queryWordInfo,
@@ -452,9 +555,11 @@ export function formateYoudaoWebDictionaryModel(
     webPhrases: webPhrases,
     baike: baike,
     wikipedia: wikipediaDigest,
+    modernChineseDict: newChineseDataList,
   };
+
   queryWordInfo.hasDictionaryEntries = hasYoudaoDictionaryEntries(formateResult);
-  // console.log(`Youdao format result: ${JSON.stringify(formateResult, null, 2)}`);
+  // console.log(`Youdao format result: ${JSON.stringify(formateResult, null, 4)}`);
 
   return formateResult;
 }
@@ -462,14 +567,123 @@ export function formateYoudaoWebDictionaryModel(
 /**
  * Get Youdao from to language.
  */
-export function getFromToLanguage(model: YoudaoWebDictionaryModel): [from: string, to: string] {
-  let from = chineseLanguageItem.youdaoId;
-  let to = chineseLanguageItem.youdaoId;
-  const guessLanguage = model.meta.guessLanguage;
+function getFromToLanguage(model: YoudaoWebDictionaryModel): [from: string, to: string] {
+  let from = chineseLanguageItem.youdaoLangCode;
+  let to = chineseLanguageItem.youdaoLangCode;
+  // * Note: guessLanguage may be incorrect, eg: 鶗鴂 --> eng
+  const guessLanguage = model.meta?.guessLanguage;
   if (guessLanguage === "zh") {
     to = model.le;
   } else {
     from = model.le;
   }
   return [from, to];
+}
+
+/**
+ * Get word phonetic display text. eg: gʊd --> / gʊd /
+ */
+function getPhoneticDisplayText(phonetic: string | undefined): string | undefined {
+  const phoneticText = phonetic ? `/ ${phonetic} /` : undefined;
+  return phoneticText;
+}
+
+/**
+ * Format New Chinese dictionary.
+ */
+export function formatNewChineseDict(dataList: ModernChineseDataList[]): ModernChineseDataList[] | undefined {
+  if (!dataList.length) {
+    return;
+  }
+
+  const newDataList: ModernChineseDataList[] = JSON.parse(JSON.stringify(dataList));
+  if (newDataList.length) {
+    for (const dict of newDataList) {
+      const senseList = dict.sense;
+      if (senseList?.length) {
+        for (const sense of senseList) {
+          sense.examples = removeExamplesHtmlTag(sense.examples);
+
+          if (sense.subsense?.length) {
+            for (const subsense of sense.subsense) {
+              subsense.examples = removeExamplesHtmlTag(subsense.examples);
+            }
+          }
+        }
+      }
+    }
+  }
+  return newDataList;
+}
+
+/**
+ * Remove self html tag.
+ */
+function removeSelfHtmlTag(text: string): string {
+  // return text.replace(/<[^>]+>/g, "");
+  return text.replaceAll(/<self>|<\/self>/g, "");
+}
+
+/**
+ * Remove examples html tag.
+ */
+function removeExamplesHtmlTag(examples: string[] | undefined): string[] {
+  const newExamples: string[] = [];
+  if (examples?.length) {
+    for (const example of examples) {
+      const newExmple = removeSelfHtmlTag(example);
+      newExamples.push(newExmple);
+    }
+  }
+  return newExamples;
+}
+
+/**
+ * Get defExample markdown from senseList.
+ *
+ * Test: 艾, 为, 的, 帝
+ */
+function getDefExampleMarkdown(senseList: Sense[], word: string, preText = "\n\n", tag?: number): string {
+  let markdown = "";
+  senseList.forEach((senseItem, i) => {
+    console.log(`senseItem: ${JSON.stringify(senseItem, null, 4)}`);
+    let defExampleText = preText;
+    const tagText = tag ? `${tag}.` : "";
+    defExampleText += tagText;
+    const { def, examples } = senseItem;
+    let defText = "";
+    if (Array.isArray(def)) {
+      const defList = def;
+      defText = def?.length ? defList.join("; ") : "";
+    } else {
+      const defString = def as string;
+      defText = defString;
+    }
+    defText = defText ? ` ${defText}` : "";
+
+    // handle special case, eg. 为
+    if (!defText.length && senseItem.subsense?.length) {
+      defText = ` ${word}`;
+    }
+    console.log(`defText: ${defText}`);
+
+    const example = examples?.map((item) => `\`${item}\``).join("/");
+    const exampleText = example ? `：${example}  ` : "";
+
+    if (defText.length || exampleText.length) {
+      defExampleText += `${i + 1}.${defText}${exampleText}`;
+    }
+
+    console.log(`defExampleText: ${defExampleText}`);
+    const subsensesList = senseItem.subsense;
+    if (subsensesList?.length) {
+      const subsenseDefExampleText = getDefExampleMarkdown(subsensesList, word, "\n", i + 1);
+      console.log(`subsenseDefExampleText: ${subsenseDefExampleText}`);
+      defExampleText += "  " + subsenseDefExampleText + "";
+    }
+
+    markdown += defExampleText;
+  });
+
+  return markdown;
 }

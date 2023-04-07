@@ -4,6 +4,7 @@ import {
   Alert,
   Color,
   confirmAlert,
+  environment,
   getPreferenceValues,
   Icon,
   List,
@@ -209,7 +210,7 @@ export function Folder(props: { path: string }) {
         </ActionPanel>
       }
     >
-      <List.EmptyView title="No Data" />
+      <List.EmptyView title="No Data" icon={{ source: `no-view@${environment.theme}.png` }} />
       {bookmarksState.length > 0 && preferences.stickBookmark && !props.path && (
         <List.Section title="Bookmarks">
           {bookmarksState.map((bookmark) =>

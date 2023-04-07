@@ -10,7 +10,7 @@ description: Tips to guarantee a good user experience for your extensions.
 
 Network requests can fail, permissions to files can be missing… More generally, errors happen. By default, we handle every unhandled exception or unresolved Promise and show error screens. However, you should handle the "expected" error cases for your command. You should aim not to disrupt the user's flow just because something went wrong. For example, if a network request fails but you can read the cache, show the cache. A user might not need the fresh data straight away. In most cases, it's best to show a `Toast` with information about the error.
 
-Here is an example on how to show a toast for an error:
+Here is an example of how to show a toast for an error:
 
 ```typescript
 import { Detail, showToast, Toast } from "@raycast/api";
@@ -51,7 +51,7 @@ Ideally, your extension doesn't depend on any runtime dependencies. In reality, 
 
 When commands need to load big data sets, it's best to inform the user about this. To keep your command snappy, it's important to render a React component as quickly as possible.
 
-You can start with an empty list or a static form and then load the data to fill the view. To make the user aware of the loading process, you can use the `isLoading` prop on all top-level components, e.g. [`<Detail>`](../api-reference/user-interface/detail.md), [`<Form>`](../api-reference/user-interface/form.md) or [`<List>`](../api-reference/user-interface/list.md).
+You can start with an empty list or a static form and then load the data to fill the view. To make the user aware of the loading process, you can use the `isLoading` prop on all top-level components, e.g. [`<Detail>`](../api-reference/user-interface/detail.md), [`<Form>`](../api-reference/user-interface/form.md), [`<Grid>`](../api-reference/user-interface/grid.md), or [`<List>`](../api-reference/user-interface/list.md).
 
 Here is an example to show the loading indicator in a list:
 

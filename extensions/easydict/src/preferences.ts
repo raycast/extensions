@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-08-05 10:36
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-09-19 16:47
+ * @lastEditTime: 2023-03-17 23:36
  * @fileName: preferences.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -10,11 +10,11 @@
 
 import { environment, getPreferenceValues } from "@raycast/api";
 import CryptoJS from "crypto-js";
-import { getLanguageItemFromYoudaoId } from "./language/languages";
+import { getLanguageItemFromYoudaoCode } from "./language/languages";
 
 export const myPreferences: MyPreferences = getPreferenceValues();
-export const preferredLanguage1 = getLanguageItemFromYoudaoId(myPreferences.language1);
-export const preferredLanguage2 = getLanguageItemFromYoudaoId(myPreferences.language2);
+export const preferredLanguage1 = getLanguageItemFromYoudaoCode(myPreferences.language1);
+export const preferredLanguage2 = getLanguageItemFromYoudaoCode(myPreferences.language2);
 export const preferredLanguages = [preferredLanguage1, preferredLanguage2];
 // console.log("myPreferences: ", myPreferences);
 
@@ -25,9 +25,9 @@ export interface MyPreferences {
   enableAutomaticPlayWordAudio: boolean;
   enableSelectTargetLanguage: boolean;
   servicesOrder: string;
-  enableOpenInEudic: boolean;
+  showOpenInEudicFirst: boolean;
   enableSystemProxy: boolean;
-  enableLanguageDetectionSpeedFirst: boolean;
+  enableDetectLanguageSpeedFirst: boolean;
 
   enableYoudaoDictionary: boolean;
   enableYoudaoTranslate: boolean;
@@ -57,6 +57,13 @@ export interface MyPreferences {
 
   enableCaiyunTranslate: boolean;
   caiyunToken: string;
+
+  enableVolcanoTranslate: boolean;
+  volcanoAccessKeyId: string;
+  volcanoAccessKeySecret: string;
+
+  enableOpenAITranslate: boolean;
+  openAIAPIKey: string;
 }
 
 /**
@@ -64,7 +71,7 @@ export interface MyPreferences {
  *
  * * NOTE: Please apply for your own keys as much as possible. Please do not abuse them, otherwise I have to revoke them 😑。
  */
-export class KeyStore {
+export class AppKeyStore {
   private static defaultEncryptedBaiduAppId = "U2FsdGVkX1/QHkSw+8qxr99vLkSasBfBRmA6Kb5nMyjP8IJazM9DcOpd3cOY6/il";
   private static defaultEncryptedBaiduAppSecret = "U2FsdGVkX1+a2LbZ0+jntJTQjpPKUNWGrlr4NSBOwmlah7iP+w2gefq1UpCan39J";
   private static defaultBaiduAppId = myDecrypt(this.defaultEncryptedBaiduAppId);
@@ -83,6 +90,13 @@ export class KeyStore {
 
   private static defaultEncryptedCaiyunToken = "U2FsdGVkX1+ihWvHkAfPMrWHju5Kg4EXAm1AVbXazEeHaXE1jdeUzZZrhjdKmS6u";
   private static defaultCaiyunToken = myDecrypt(this.defaultEncryptedCaiyunToken);
+
+  private static defaultEncryptedVolcanoAccessKeyId =
+    "U2FsdGVkX1/hnsLekyaJC6ZRHhl2zF+DY3qIpKakBl+VzCNJmfTf7gWlzBDM/XRv4lREJR6cXNup5/27M3CxcQ==";
+  private static defaultEncryptedVolcanoSecrectAccessKey =
+    "U2FsdGVkX18WjU7IuyZYfezclJHCuufVQR0tWprs/kFI51/Hm2aPLSrYRVOGdNGtrleSGyaixypEKiku8vYejn9GbQxlHmbwN+Pj34Kxup4=";
+  private static defaultVolcanoAccessId = myDecrypt(this.defaultEncryptedVolcanoAccessKeyId);
+  private static defaultVolcanoAccessKey = myDecrypt(this.defaultEncryptedVolcanoSecrectAccessKey);
 
   // youdao app id and appsecret
   static youdaoAppId = myPreferences.youdaoAppId.trim().length > 0 ? myPreferences.youdaoAppId.trim() : undefined;
@@ -107,8 +121,18 @@ export class KeyStore {
 
   static userDeepLAuthKey = myPreferences.deepLAuthKey.trim();
 
-  static caiyunToken =
-    myPreferences.caiyunToken.trim().length > 0 ? myPreferences.caiyunToken.trim() : this.defaultCaiyunToken;
+  static caiyunToken = myPreferences.caiyunToken.trim();
+
+  static volcanoSecretId =
+    myPreferences.volcanoAccessKeyId.trim().length > 0
+      ? myPreferences.volcanoAccessKeyId.trim()
+      : this.defaultVolcanoAccessId;
+  static volcanoSecretKey =
+    myPreferences.volcanoAccessKeySecret.trim().length > 0
+      ? myPreferences.volcanoAccessKeySecret.trim()
+      : this.defaultVolcanoAccessKey;
+
+  static openAIAPIKey = myPreferences.openAIAPIKey.trim();
 }
 
 export function myDecrypt(ciphertext: string) {

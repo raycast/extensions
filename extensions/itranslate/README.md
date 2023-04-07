@@ -1,7 +1,7 @@
 <h1 align="center">
   <strong>iTranslate</strong>
 </h1>
-<p align="center">A translation extension that can customize translation service providers and support multiple languages</p>
+<p align="center">Translate words or sentences, support 36 languages, OCR, history record and translating into multiple languages at the same time</p>
 
 <p align="center">
   <a title="Install iTranslate Raycast Extension" href="https://www.raycast.com/JinShi/itranslate#install">
@@ -18,6 +18,7 @@
 5. Support record translation history
 6. Support TTS(TextToSpeech)
 7. Support translate into multiple languages at the same time
+8. Support translate text in screenshots or images by OCR
 
 ## How to get the AppId and AppKey?
 
@@ -36,3 +37,13 @@ You can click the link below to enter the official website to apply for the appl
 ## Thanks
 
 Inspired by [raycast-Parrot](https://github.com/Haojen/raycast-Parrot)
+
+---
+
+<p align="center">If you enjoy using iTranslate and/or want to support me to develop, you can buy me a coffee ☕!</p>
+
+<p align="center">
+  <a title="Buy Me A Coffee" href="https://www.buymeacoffee.com/J404">
+    <img height="64" style="height: 64px" src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png">
+  </a>          
+</p>

@@ -1,7 +1,8 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
-  "display": "Node 16",
+  "display": "Node 18.10",
   "include": ["src/**/*"],
+  "exclude": ["src/translation/**/*"],
   "compilerOptions": {
     "lib": ["es2021", "dom"],
     "module": "commonjs",
@@ -12,6 +13,8 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "jsx": "react-jsx",
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "allowJs": true,
+    "outDir": "./dist"
   }
 }

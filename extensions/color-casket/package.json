@@ -5,6 +5,10 @@
   "description": "Handy Color Utilities",
   "icon": "command-icon.png",
   "author": "slava.razum",
+  "contributors": [
+    "fe9lix",
+    "pernielsentikaer"
+  ],
   "categories": [
     "Design Tools",
     "Developer Tools",
@@ -38,7 +42,7 @@
         "pipette",
         "color casket"
       ],
-      "mode": "view"
+      "mode": "no-view"
     }
   ],
   "preferences": [
@@ -70,7 +74,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.39.3",
+    "@raycast/api": "^1.42.0",
     "color-convert": "^2.0.1",
     "is-valid-css-color": "^2.0.3",
     "javascript-time-ago": "^2.3.13",
@@ -78,7 +82,7 @@
   },
   "devDependencies": {
     "@types/color-convert": "^2.0.0",
-    "@types/node": "~16.10.0",
+    "@types/node": "^18.8.3",
     "@types/react": "^17.0.28",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",

@@ -18,6 +18,6 @@ export interface Docset {
   iconPath?: string;
 }
 
-export interface DashArgumentes {
+export interface DashArguments {
   searchstring: string;
 }

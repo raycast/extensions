@@ -7,13 +7,11 @@ function KanjiListItemDetail({ kanjiResult }: { kanjiResult: KanjiResult }) {
   const { literal, onyomi, kunyomi, stroke_count, jlpt, grade, stroke_frames } = kanjiResult;
   const jotobaURL = `https://jotoba.de`;
 
-  const onTitle =
-    kanjiDetailsTitleDisplayType === "jp" ? "音読み" : kanjiDetailsTitleDisplayType === "kana" ? "オン" : "onyomi";
+  const onTitle = { short: "on", long: "on readings", romaji: "onyomi" }[kanjiDetailsTitleDisplayType] ?? "";
 
   const parsedOnReadings = ((onyomi && parseReadings(onyomi, true)) || []) as string[];
 
-  const kunTitle =
-    kanjiDetailsTitleDisplayType === "jp" ? "訓読み" : kanjiDetailsTitleDisplayType === "kana" ? "くん" : "kunyomi";
+  const kunTitle = { short: "kun", long: "kun readings", romaji: "kunyomi" }[kanjiDetailsTitleDisplayType] ?? "";
 
   const parsedKunReadings = ((kunyomi && parseReadings(kunyomi, true)) || []) as string[];
 
@@ -22,12 +20,12 @@ function KanjiListItemDetail({ kanjiResult }: { kanjiResult: KanjiResult }) {
       markdown={`# ${literal}\n ![Illustration](${jotobaURL}${stroke_frames})`}
       metadata={
         <List.Item.Detail.Metadata>
-          <List.Item.Detail.Metadata.TagList title={onTitle}>
+          <List.Item.Detail.Metadata.TagList title={onTitle.toUpperCase()}>
             {parsedOnReadings.map((on) => (
               <List.Item.Detail.Metadata.TagList.Item key={nanoid()} text={on} />
             ))}
           </List.Item.Detail.Metadata.TagList>
-          <List.Item.Detail.Metadata.TagList title={kunTitle}>
+          <List.Item.Detail.Metadata.TagList title={kunTitle.toUpperCase()}>
             {parsedKunReadings.map((kun) => (
               <List.Item.Detail.Metadata.TagList.Item key={nanoid()} text={kun} />
             ))}

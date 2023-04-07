@@ -2,18 +2,10 @@ import { runAppleScript } from "run-applescript";
 import { DirectoryInfo, DirectoryType } from "../types/types";
 import { isEmpty } from "./common-utils";
 import * as path from "path";
-
-const scriptCopyFile = (path: string) => {
-  return `tell app "Finder" to set the clipboard to (POSIX file "${path}")`;
-};
+import { Clipboard } from "@raycast/api";
 
 export const copyFileByPath = async (path: string) => {
-  try {
-    await runAppleScript(scriptCopyFile(path));
-    return "";
-  } catch (e) {
-    return String(e);
-  }
+  await Clipboard.copy({ file: path });
 };
 
 const scriptFinderInsertLocation = `
@@ -64,7 +56,7 @@ export const getOpenFinderWindowPath = async () => {
         id: value,
         name: path.parse(value).base,
         path: value,
-        type: DirectoryType.DIRECTORY,
+        type: DirectoryType.FOLDER,
         valid: true,
         rank: 1,
         date: new Date().getTime(),

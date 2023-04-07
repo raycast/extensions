@@ -3,11 +3,13 @@ import { useEffect, useState } from "react";
 import { runAppleScript } from "run-applescript";
 import { Date as Sugar } from "sugar";
 import { NoteItem } from "./types";
+import { PermissionErrorTypes, testPermissionErrorType } from "./errors";
 
 export const useAppleScriptNotes = (showModifiedAt: boolean) => {
   const [appleScriptState, setAppleScriptState] = useState({
     notes: [] as NoteItem[],
     isLoading: true,
+    error: null as PermissionErrorTypes | null,
   });
 
   function parseNotes(result: string) {
@@ -60,7 +62,7 @@ export const useAppleScriptNotes = (showModifiedAt: boolean) => {
     if (!atLeastOneId) {
       return;
     }
-    setAppleScriptState({ notes: notes, isLoading: false });
+    setAppleScriptState({ notes: notes, isLoading: false, error: null });
   }
 
   async function checkCachedNotes() {
@@ -90,31 +92,45 @@ export const useAppleScriptNotes = (showModifiedAt: boolean) => {
   }
 
   async function fetchItems() {
-    const result = await runAppleScript(
-      'set output to ""\n' +
-        'tell application "Notes"\n' +
-        "  repeat with theAccount in every account\n" +
-        "    set theAccountName to the name of theAccount\n" +
-        '    set output to output & "account: " & theAccountName & "\n"\n' +
-        "    repeat with theFolder in every folder in theAccount\n" +
-        "      set theFolderName to the name of theFolder\n" +
-        '      set output to output & "folder: " & theFolderName & "\n"\n' +
-        "      repeat with theNote in every note in theFolder\n" +
-        "        set theNoteID to the id of theNote\n" +
-        "        set theNoteName to the name of theNote\n" +
-        (showModifiedAt ? "set theNoteDate to the modification date of theNote\n" : "") +
-        '        set output to output & "id: " & theNoteID & "\n"\n' +
-        (showModifiedAt ? 'set output to output & "date: " & theNoteDate & "\n"\n' : "") +
-        '        set output to output & "title: " & theNoteName & "\n"\n' +
-        "      end repeat\n" +
-        "    end repeat\n" +
-        "  end repeat\n" +
-        "end tell\n" +
-        "return output"
-    );
-    parseNotes(result);
+    try {
+      const result = await runAppleScript(
+        'set output to ""\n' +
+          'tell application "Notes"\n' +
+          "  repeat with theAccount in every account\n" +
+          "    set theAccountName to the name of theAccount\n" +
+          '    set output to output & "account: " & theAccountName & "\n"\n' +
+          "    repeat with theFolder in every folder in theAccount\n" +
+          "      set theFolderName to the name of theFolder\n" +
+          '      set output to output & "folder: " & theFolderName & "\n"\n' +
+          "      repeat with theNote in every note in theFolder\n" +
+          "        set theNoteID to the id of theNote\n" +
+          "        set theNoteName to the name of theNote\n" +
+          (showModifiedAt ? "set theNoteDate to the modification date of theNote\n" : "") +
+          '        set output to output & "id: " & theNoteID & "\n"\n' +
+          (showModifiedAt ? 'set output to output & "date: " & theNoteDate & "\n"\n' : "") +
+          '        set output to output & "title: " & theNoteName & "\n"\n' +
+          "      end repeat\n" +
+          "    end repeat\n" +
+          "  end repeat\n" +
+          "end tell\n" +
+          "return output"
+      );
+      parseNotes(result);
 
-    await LocalStorage.setItem("notes", result);
+      await LocalStorage.setItem("notes", result);
+    } catch (error) {
+      const parsedError = testPermissionErrorType(error);
+      if (parsedError !== "unknown") {
+        setAppleScriptState((prevState) => {
+          return {
+            ...prevState,
+            error: parsedError,
+          };
+        });
+      } else {
+        throw error;
+      }
+    }
   }
 
   useEffect(() => {

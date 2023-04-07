@@ -6,13 +6,20 @@ import {
   Action,
   Icon,
   openCommandPreferences,
+  environment,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { TransAPIErrCode } from "./const";
-import { checkService, fetchMultipleTransAPIs, getLang, getMultipleLangs, saveHistory } from "./itranslate.shared";
-import { TranslateError, TranslateNotSupport } from "./TranslateError";
-import { TranslateHistory } from "./TranslateHistory";
-import { TranslateResult } from "./TranslateResult";
+import { TransAPIErrCode } from "./common/const";
+import {
+  checkService,
+  fetchMultipleTransAPIs,
+  getLang,
+  getMultipleLangs,
+  saveHistory,
+} from "./common/itranslate.shared";
+import { TranslateError, TranslateNotSupport } from "./components/TranslateError";
+import { TranslateHistory } from "./components/TranslateHistory";
+import { TranslateResult } from "./components/TranslateResult";
 
 let delayFetchTranslateAPITimer: NodeJS.Timeout;
 
@@ -83,7 +90,6 @@ export default function Command() {
         from: getLang(""),
         to: lang,
         res: "",
-        start: new Date().getTime(),
         origin: contentToTrans,
       });
     }
@@ -91,13 +97,11 @@ export default function Command() {
     updateShowDetail(true);
     transPromises.forEach(async (promise) => {
       const transResult = await promise;
-      transResult.end = new Date().getTime();
       updateTransResultsState((origins) => {
         let hasLoading = false;
         const transResultsNew = origins.map((origin) => {
           let toPush: ITranslateRes;
           if (origin.to === transResult.to) {
-            transResult.start = origin.start;
             toPush = transResult;
           } else {
             toPush = origin;
@@ -182,7 +186,7 @@ export default function Command() {
       onSearchTextChange={onInputChange}
       actions={ListActions()}
     >
-      <List.EmptyView title="Type something to translate..." />
+      <List.EmptyView title="Type something to translate..." icon={{ source: `no-view@${environment.theme}.png` }} />
       {transResultsState.length > 0 &&
         transResultsState.map((trans) => {
           return (
@@ -191,7 +195,8 @@ export default function Command() {
                 <TranslateError transRes={trans} />
               )}
               {trans.code === TransAPIErrCode.NotSupport && <TranslateNotSupport transRes={trans} />}
-              {trans.code === TransAPIErrCode.Success && <TranslateResult transRes={trans} />}
+              {trans.code === TransAPIErrCode.Success && <TranslateResult transRes={trans} fromMultiple={true} />}
+              {trans.code === TransAPIErrCode.Loading && <TranslateResult transRes={trans} fromMultiple={true} />}
             </List.Section>
           );
         })}

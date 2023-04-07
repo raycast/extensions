@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-06-26 11:13
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-09-19 22:31
+ * @lastEditTime: 2022-09-29 23:37
  * @fileName: scripts.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -12,9 +12,9 @@ import { showToast, Toast } from "@raycast/api";
 import { exec, execFile } from "child_process";
 import { execa } from "execa";
 import querystring from "node:querystring";
-import { DetectedLanguageModel, LanguageDetectType } from "./detectLanauge/types";
+import { DetectedLangModel, LanguageDetectType } from "./detectLanauge/types";
 import { QueryWordInfo } from "./dictionary/youdao/types";
-import { getAppleLanguageId, getYoudaoLanguageIdFromAppleId } from "./language/languages";
+import { getAppleLangCode, getYoudaoLangCodeFromAppleCode } from "./language/languages";
 import { RequestErrorInfo, RequestType, TranslationType } from "./types";
 
 const execCommandTimeout = 10000; // 10s
@@ -33,8 +33,8 @@ export function appleTranslate(
 
   const { word, fromLanguage, toLanguage } = queryTextInfo;
   const startTime = new Date().getTime();
-  const appleFromLanguageId = getAppleLanguageId(fromLanguage);
-  const appleToLanguageId = getAppleLanguageId(toLanguage);
+  const appleFromLanguageId = getAppleLangCode(fromLanguage);
+  const appleToLanguageId = getAppleLangCode(toLanguage);
   const type = TranslationType.Apple;
 
   if (!appleFromLanguageId || !appleToLanguageId) {
@@ -92,7 +92,7 @@ export function appleTranslate(
           // console.log(`error: ${JSON.stringify(error, null, 4)}`)
           reject(undefined);
         } else {
-          console.error(`apple error: ${JSON.stringify(error, null, 4)}`);
+          console.error(`apple translate error: ${JSON.stringify(error, null, 4)}`);
           console.warn(`Apple translate error: ${appleScript}`);
           const errorInfo: RequestErrorInfo = {
             type: type,
@@ -117,7 +117,7 @@ export function appleLanguageDetect(
   text: string,
   abortController?: AbortController,
   timeout = execCommandTimeout
-): Promise<DetectedLanguageModel> {
+): Promise<DetectedLangModel> {
   console.log(`start apple detect: ${text}`);
   const startTime = new Date().getTime();
   const appleScript = getShortcutsScript("Easydict-LanguageDetect-V1.2.0", text);
@@ -131,16 +131,16 @@ export function appleLanguageDetect(
     // * This code is synchronous, it will cost ~0.4s
     execa("osascript", ["-e", appleScript], { signal: abortController?.signal })
       .then((result) => {
-        const appleLanguageId = result.stdout.trim(); // will be "" when detect language is not support, eg. ꯅꯨꯄꯤꯃꯆꯥ
-        console.warn(`apple detect language: ${appleLanguageId}, cost: ${new Date().getTime() - startTime} ms`);
-        const youdaoLanguageId = getYoudaoLanguageIdFromAppleId(appleLanguageId);
-        const detectTypeResult: DetectedLanguageModel = {
+        const appleLangCode = result.stdout.trim(); // will be "" when detect language is not support, eg. ꯅꯨꯄꯤꯃꯆꯥ
+        console.warn(`apple detect language: ${appleLangCode}, cost: ${new Date().getTime() - startTime} ms`);
+        const youdaoLangCode = getYoudaoLangCodeFromAppleCode(appleLangCode);
+        const detectTypeResult: DetectedLangModel = {
           type: type,
-          sourceLanguageId: appleLanguageId,
-          youdaoLanguageId: youdaoLanguageId,
+          sourceLangCode: appleLangCode,
+          youdaoLangCode: youdaoLangCode,
           confirmed: false,
         };
-        console.warn(`final apple detect language: ${appleLanguageId}, youdaoId: ${youdaoLanguageId}`);
+        console.warn(`final apple detect language: ${appleLangCode}, youdaoId: ${youdaoLangCode}`);
         resolve(detectTypeResult);
       })
       .catch((error) => {
@@ -166,7 +166,7 @@ export function appleLanguageDetect(
 }
 
 function abortCommand(type: RequestType, abortController?: AbortController): RequestErrorInfo | undefined {
-  console.log(`timeout, abortExecaCommand: ${type}, abortController: ${JSON.stringify(abortController, null, 2)}`);
+  console.log(`timeout, abortExecaCommand: ${type}, abortController: ${JSON.stringify(abortController, null, 4)}`);
 
   if (abortController) {
     abortController?.abort();

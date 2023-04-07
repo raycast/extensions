@@ -1,0 +1,62 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "shell-buddy",
+  "title": "Shell Buddy",
+  "description": "Converts natural language prompts to shell commands with AI",
+  "icon": "command-icon.png",
+  "author": "jebraat",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Convert Prompt",
+      "subtitle": "Shell Buddy",
+      "description": "The command will convert a text prompt to a shell command",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "prompt",
+          "placeholder": "Natural Language Prompt",
+          "type": "text",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "license",
+      "type": "textfield",
+      "required": true,
+      "title": "License Key",
+      "description": "Your Shell Buddy License Key",
+      "placeholder": "XXXXXXXX-XXXXXXXX-XXXXXXXX-XXXXXXXX"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.39.3",
+    "node-fetch": "^3.2.10",
+    "raycast-toolkit": "^1.0.6",
+    "run-applescript": "^6.0.0",
+    "shell-env": "^4.0.1"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

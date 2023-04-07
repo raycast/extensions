@@ -16,7 +16,7 @@ export default function Command() {
     const nextWeek = new Date(
       new Date().getTime() + Math.floor(prefrences.futureDays) * 24 * 60 * 60 * 1000
     ).toDateString();
-    const url = `http://${prefrences.host}:${prefrences.port}/api/calendar?apikey=${prefrences.apiKey}&start=${currentDate}&end=${nextWeek}`;
+    const url = `${prefrences.http}://${prefrences.host}:${prefrences.port}${prefrences.base}/api/calendar?apikey=${prefrences.apiKey}&start=${currentDate}&end=${nextWeek}`;
     console.log(url);
     fetch(url)
       .then((res) => res.json())

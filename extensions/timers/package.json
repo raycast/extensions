@@ -8,7 +8,8 @@
   "contributors": [
     "marcjulian",
     "GastroGeek",
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "lokot0k"
   ],
   "categories": [
     "Productivity",
@@ -16,6 +17,12 @@
   ],
   "license": "MIT",
   "commands": [
+    {
+      "name": "start2MinuteTimer",
+      "title": "Start 2 Minute Timer",
+      "description": "Set a countdown for 2 minutes.",
+      "mode": "no-view"
+    },
     {
       "name": "start5MinuteTimer",
       "title": "Start 5 Minute Timer",
@@ -101,7 +108,7 @@
       "title": "Timers Menu Bar",
       "description": "View, start, or stop existing countdown timers from the Menu Bar.",
       "mode": "menu-bar",
-      "interval": "1m"
+      "interval": "10s"
     },
     {
       "name": "startStopwatch",
@@ -128,6 +135,12 @@
       "title": "Dismiss Timer Alert",
       "description": "Stop a ringing alert from a finished timer.",
       "mode": "no-view"
+    },
+    {
+      "name": "previewAlertSounds",
+      "title": "Preview Alert Sounds",
+      "description": "Play samples of different alert sound effects.",
+      "mode": "view"
     }
   ],
   "preferences": [
@@ -204,18 +217,24 @@
       "description": "Whether or not to copy the elapsed time on a stopwatch when it is stopped.",
       "label": "Copy elapsed time",
       "default": false
+    },
+    {
+      "name": "volumeSetting",
+      "type": "textfield",
+      "required": true,
+      "title": "Timer Alert Volume",
+      "description": "Volume of the alert sound. Decimal between 0 and 1.",
+      "default": "1"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.38.3"
+    "@raycast/api": "^1.48.8"
   },
   "devDependencies": {
+    "@raycast/eslint-config": "^1.0.5",
     "@types/node": "~16.10.0",
     "@types/react": "^17.0.48",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
     "typescript": "^4.4.3"
   },
   "scripts": {

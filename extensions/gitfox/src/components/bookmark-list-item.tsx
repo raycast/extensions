@@ -7,8 +7,8 @@ export default function BookmarkListItem(props: { bookmark: Bookmark }) {
 
   return (
     <List.Item
-      id={bookmark.RepositoryIdentifier}
-      title={bookmark.Name}
+      id={bookmark.id}
+      title={bookmark.name}
       icon={{ source: "repository-30.png", tintColor: Color.Yellow }}
       accessoryTitle={bookmark.getBranch}
       accessoryIcon={{ source: "merge-git-30.png", tintColor: Color.SecondaryText }}
@@ -36,7 +36,7 @@ export default function BookmarkListItem(props: { bookmark: Bookmark }) {
           <ActionPanel.Section>
             <Action.CopyToClipboard
               title="Copy Name"
-              content={bookmark.Name}
+              content={bookmark.name}
               shortcut={{ modifiers: ["cmd"], key: "." }}
             />
             <Action.CopyToClipboard

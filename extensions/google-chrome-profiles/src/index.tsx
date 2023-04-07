@@ -13,7 +13,7 @@ import {
   Profile,
 } from "./util/types";
 import getPrefs from "./util/preferences";
-import { createBookmarkListItem, matchSearchText, isValidUrl } from "./util/util";
+import { createBookmarkListItem, matchSearchText, isValidUrl, formatAsUrl } from "./util/util";
 
 export default function Command() {
   const [localState, setLocalState] = useState<GoogleChromeLocalState>();
@@ -169,14 +169,21 @@ function ListBookmarks(props: { profile: Profile }) {
 
   const tabsOnTop = [
     searchText
-      ? createBookmarkListItem(newTabUrlWithQuery(searchText), "Search")
+      ? (function () {
+          const searchTextAsURL = formatAsUrl(searchText);
+          if (searchText.includes(".") && isValidUrl(searchTextAsURL)) {
+            return createBookmarkListItem(searchTextAsURL, "Go to");
+          } else {
+            return createBookmarkListItem(newTabUrlWithQuery(searchText), "Search input text");
+          }
+        })()
       : createBookmarkListItem(getPrefs().newBlankTabURL, "Blank"),
   ].concat(
     clipboard
       ? [
           isValidUrl(clipboard)
-            ? createBookmarkListItem(clipboard, "Open URL from Clipboard")
-            : createBookmarkListItem(newTabUrlWithQuery(clipboard), "Use text from Clipboard"),
+            ? createBookmarkListItem(clipboard, "Go to the URL in the clipboard")
+            : createBookmarkListItem(newTabUrlWithQuery(clipboard), "Search text in the clipboard"),
         ]
       : []
   );

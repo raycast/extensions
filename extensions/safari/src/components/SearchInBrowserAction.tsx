@@ -1,6 +1,6 @@
 import { ActionPanel, closeMainWindow, Icon, Action } from "@raycast/api";
 
-import { executeJxa } from "../utils";
+import { executeJxa, safariAppIdentifier } from "../utils";
 
 const searchInBrowser = async (searchText?: string) => {
   if (!searchText) {
@@ -9,7 +9,7 @@ const searchInBrowser = async (searchText?: string) => {
   }
 
   executeJxa(`
-      const safari = Application("Safari");
+      const safari = Application("${safariAppIdentifier}");
       safari.searchTheWeb({ for: "${searchText}" });
       safari.activate();
   `);

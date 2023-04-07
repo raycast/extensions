@@ -2,11 +2,11 @@ import { URL } from "url";
 
 import { Action, showToast, Toast } from "@raycast/api";
 
-import { executeJxa } from "../utils";
+import { executeJxa, safariAppIdentifier } from "../utils";
 
 const addToReadingList = async (url: string) =>
   executeJxa(`
-const safari = Application("Safari");
+const safari = Application("${safariAppIdentifier}");
 safari.addReadingListItem("${url}")
 `);
 

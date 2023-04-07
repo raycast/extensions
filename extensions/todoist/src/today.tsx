@@ -1,10 +1,17 @@
-import { getPreferenceValues, List } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
-import { partitionTasksWithOverdue, getSectionsWithPriorities, getSectionsWithLabels } from "./helpers/sections";
+import { List } from "@raycast/api";
+import { useCachedPromise, useCachedState } from "@raycast/utils";
+
 import { todoist, handleError } from "./api";
-import { SectionWithTasks, TodayGroupBy } from "./types";
 import TaskList from "./components/TaskList";
 import View from "./components/View";
+import {
+  getSectionsWithProjects,
+  GroupByOption,
+  partitionTasksWithOverdue,
+  SectionWithTasks,
+  todayGroupByOptions,
+} from "./helpers/groupBy";
+import { getSectionsWithPriorities, getSectionsWithLabels } from "./helpers/sections";
 
 function Today() {
   const {
@@ -13,18 +20,18 @@ function Today() {
     error: getTasksError,
     mutate: mutateTasks,
   } = useCachedPromise(() => todoist.getTasks({ filter: "today|overdue" }));
+
   const {
     data: projects,
     isLoading: isLoadingProjects,
     error: getProjectsError,
   } = useCachedPromise(() => todoist.getProjects());
+
   const {
     data: labels,
     isLoading: isLoadingLabels,
     error: getLabelsError,
   } = useCachedPromise(() => todoist.getLabels());
-
-  const preferences = getPreferenceValues();
 
   if (getTasksError) {
     handleError({ error: getTasksError, title: "Unable to get tasks" });
@@ -38,35 +45,33 @@ function Today() {
     handleError({ error: getLabelsError, title: "Unable to get labels" });
   }
 
+  const [groupBy, setGroupBy] = useCachedState<GroupByOption>("todoist.todaygroupby", "default");
+
   let sections: SectionWithTasks[] = [];
 
-  if (preferences.todayGroupBy === TodayGroupBy.default) {
-    const [overdue, today] = partitionTasksWithOverdue(tasks || []);
+  switch (groupBy) {
+    case "default": {
+      const [overdue, today] = partitionTasksWithOverdue(tasks || []);
 
-    sections = [{ name: "Today", tasks: today }];
+      sections = [{ name: "Today", tasks: today }];
 
-    if (overdue.length > 0) {
-      sections.unshift({
-        name: "Overdue",
-        tasks: overdue,
-      });
+      if (overdue.length > 0) {
+        sections.unshift({
+          name: "Overdue",
+          tasks: overdue,
+        });
+      }
+      break;
     }
-  }
-
-  if (preferences.todayGroupBy === TodayGroupBy.priority) {
-    sections = getSectionsWithPriorities(tasks || []);
-  }
-
-  if (preferences.todayGroupBy === TodayGroupBy.project) {
-    sections =
-      projects?.map((project) => ({
-        name: project.name,
-        tasks: tasks?.filter((task) => task.projectId === project.id) || [],
-      })) || [];
-  }
-
-  if (preferences.todayGroupBy === TodayGroupBy.label) {
-    sections = getSectionsWithLabels({ tasks: tasks || [], labels: labels || [] });
+    case "priority":
+      sections = getSectionsWithPriorities(tasks || []);
+      break;
+    case "project":
+      sections = getSectionsWithProjects({ tasks: tasks || [], projects: projects || [] });
+      break;
+    case "label":
+      sections = getSectionsWithLabels({ tasks: tasks || [], labels: labels || [] });
+      break;
   }
 
   return tasks?.length === 0 ? (
@@ -78,6 +83,7 @@ function Today() {
       sections={sections}
       isLoading={isLoadingTasks || isLoadingProjects || isLoadingLabels}
       projects={projects}
+      groupBy={{ value: groupBy, setValue: setGroupBy, options: todayGroupByOptions }}
       mutateTasks={mutateTasks}
     />
   );

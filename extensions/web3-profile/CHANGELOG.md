@@ -1,5 +1,9 @@
 # Rainbow Profile Changelog
 
+## [Fix] - 2022-10-07
+
+- Fixed a check that was making the Detail View crash in some rare scenarios
+
 ## [Enhancements] - 2022-09-07
 
 - Improve search UX in Profile Detail view [#2823](https://github.com/raycast/extensions/issues/2823)

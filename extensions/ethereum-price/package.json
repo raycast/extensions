@@ -11,12 +11,12 @@
   "license": "MIT",
   "preferences": [
     {
-      "name": "hideIcon",
-      "description": "Hide icon from the menu bar",
+      "name": "compactMode",
+      "description": "Takes up less space. Hides icon, uses the Eth Symbol and truncates the price.",
       "type": "checkbox",
       "required": false,
-      "default": false,
-      "label": "Hide icon"
+      "default": true,
+      "label": "Compact mode"
     }
   ],
   "commands": [
@@ -31,7 +31,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.39.3",
-    "@raycast/utils": "^1.4.0"
+    "@raycast/utils": "^1.4.8"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",

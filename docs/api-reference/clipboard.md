@@ -8,12 +8,12 @@ The action [`Action.CopyToClipboard`](user-interface/actions.md#action.copytocli
 
 ### Clipboard.copy
 
-Copies text to the clipboard.
+Copies text or a file to the clipboard.
 
 #### Signature
 
 ```typescript
-async function copy(text: string): Promise<void>;
+async function copy(content: string | number | Content, options?: CopyOptions): Promise<void>;
 ```
 
 #### Example
@@ -21,9 +21,27 @@ async function copy(text: string): Promise<void>;
 ```typescript
 import { Clipboard } from "@raycast/api";
 
-export default async () => {
+export default async function Command() {
+  // copy some text
   await Clipboard.copy("https://raycast.com");
-};
+
+  const textContent: Clipboard.Content = {
+    text: "https://raycast.com",
+  };
+  await Clipboard.copy(textContent);
+
+  // copy a file
+  const file = "/path/to/file.pdf";
+  try {
+    const fileContent: Clipboard.Content = { file };
+    await Clipboard.copy(fileContent);
+  } catch (error) {
+    console.log(`Could not copy file '${file}'. Reason: ${error}`);
+  }
+
+// copy transient data
+  await Clipboard.copy("my-secret-password", { transient: true })
+}
 ```
 
 #### Parameters
@@ -32,16 +50,16 @@ export default async () => {
 
 #### Return
 
-A Promise that resolves when the text is copied to the clipboard.
+A Promise that resolves when the content is copied to the clipboard.
 
 ### Clipboard.paste
 
-Pastes text to the current selection of the frontmost application.
+Pastes text or a file to the current selection of the frontmost application.
 
 #### Signature
 
 ```typescript
-async function paste(text: string): Promise<void>;
+async function paste(content: string | Content): Promise<void>;
 ```
 
 #### Example
@@ -49,9 +67,9 @@ async function paste(text: string): Promise<void>;
 ```typescript
 import { Clipboard } from "@raycast/api";
 
-export default async () => {
+export default async function Command() {
   await Clipboard.paste("I really like Raycast's API");
-};
+}
 ```
 
 #### Parameters
@@ -60,7 +78,7 @@ export default async () => {
 
 #### Return
 
-A Promise that resolves when the text is pasted.
+A Promise that resolves when the content is pasted.
 
 ### Clipboard.clear
 
@@ -77,14 +95,41 @@ async function clear(): Promise<void>;
 ```typescript
 import { Clipboard } from "@raycast/api";
 
-export default async () => {
+export default async function Command() {
   await Clipboard.clear();
-};
+}
 ```
 
 #### Return
 
 A Promise that resolves when the clipboard is cleared.
+
+### Clipboard.read
+
+Reads the clipboard content as plain text, file name, or HTML.
+
+#### Signature
+
+```typescript
+async function read(): Promise<ReadContent>;
+```
+
+#### Example
+
+```typescript
+import { Clipboard } from "@raycast/api";
+
+export default async () => {
+  const { text, file, html } = await Clipboard.read();
+  console.log(text);
+  console.log(file);
+  console.log(html);
+};
+```
+
+#### Return
+
+A promise that resolves when the clipboard content was read as plain text, file name, or HTML.
 
 ### Clipboard.readText
 
@@ -101,12 +146,53 @@ async function readText(): Promise<string | undefined>;
 ```typescript
 import { Clipboard } from "@raycast/api";
 
-export default async () => {
+export default async function Command() {
   const text = await Clipboard.readText();
   console.log(text);
-};
+}
 ```
 
 #### Return
 
 A promise that resolves when the clipboard content was read as plain text.
+
+## Types
+
+### Clipboard.Content
+
+Type of content that is copied and pasted to and from the Clipboard
+
+```typescript
+type Content =
+  | {
+      text: string;
+    }
+  | {
+      file: PathLike;
+    };
+```
+
+### Clipboard.ReadContent
+
+Type of content that is read from the Clipboard
+
+```typescript
+type Content =
+  | {
+      text: string;
+    }
+  | {
+      file?: string;
+    }
+  | {
+      html?: string;
+    };
+```
+
+### Clipboard.CopyOptions
+
+Type of options passed to `Clipboard.copy`.
+
+```typescript
+type CopyOptions = { transient: boolean }
+```

@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-08-12 18:34
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-08-15 23:42
+ * @lastEditTime: 2022-09-27 16:37
  * @fileName: franc.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -10,8 +10,8 @@
 
 import { francAll } from "franc";
 import { languageItemList } from "../language/consts";
-import { getLanguageItemFromFrancId, getLanguageItemFromYoudaoId } from "../language/languages";
-import { DetectedLanguageModel, LanguageDetectType } from "./types";
+import { getLanguageItemFromFrancCode, getLanguageItemFromYoudaoCode } from "../language/languages";
+import { DetectedLangModel, LanguageDetectType } from "./types";
 import { isPreferredLanguage } from "./utils";
 
 /**
@@ -25,21 +25,21 @@ import { isPreferredLanguage } from "./utils";
  * @reutn confirmed: Only mark confirmed = true when > confirmedConfidence && is preferred language.
  * @return detectedLanguageId: The first language id when language is confirmed. If not confirmed, it will be detectedLanguageArray[0].
  */
-export function francLangaugeDetect(text: string, confirmedConfidence = 0.8): DetectedLanguageModel {
+export function francLangaugeDetect(text: string, confirmedConfidence = 0.8): DetectedLangModel {
   const startTime = new Date().getTime();
   console.log(`start franc detect: ${text}`);
   let detectedLanguageId = "auto"; // 'und', language code that stands for undetermined.
   let confirmed = false;
 
   // get all franc language id from languageItemList
-  const onlyFrancLanguageIdList = languageItemList.map((item) => item.francId);
+  const onlyFrancLanguageIdList = languageItemList.map((item) => item.francLangCode);
   const francDetectLanguageList = francAll(text, { minLength: 2, only: onlyFrancLanguageIdList });
   console.log(`franc detect cost time: ${new Date().getTime() - startTime} ms`);
 
   const detectedYoudaoLanguageArray: [string, number][] = francDetectLanguageList.map((languageTuple) => {
     const [francLanguageId, confidence] = languageTuple;
     // * NOTE: when francLanguageId = 'und' or detected unsupported language, the youdaoLanguageId will be 'auto'
-    const youdaoLanguageId = getLanguageItemFromFrancId(francLanguageId).youdaoId;
+    const youdaoLanguageId = getLanguageItemFromFrancCode(francLanguageId).youdaoLangCode;
     return [youdaoLanguageId, confidence];
   });
 
@@ -65,10 +65,10 @@ export function francLangaugeDetect(text: string, confirmedConfidence = 0.8): De
     [detectedLanguageId] = detectedYoudaoLanguageArray[0];
   }
 
-  const detectTypeResult: DetectedLanguageModel = {
+  const detectTypeResult: DetectedLangModel = {
     type: LanguageDetectType.Franc,
-    sourceLanguageId: getLanguageItemFromYoudaoId(detectedLanguageId).francId,
-    youdaoLanguageId: detectedLanguageId,
+    sourceLangCode: getLanguageItemFromYoudaoCode(detectedLanguageId).francLangCode,
+    youdaoLangCode: detectedLanguageId,
     confirmed: confirmed,
     detectedLanguageArray: detectedYoudaoLanguageArray,
   };

@@ -23,7 +23,7 @@
 			"subtitle": "GitHub Codespaces",
 			"description": "See your active codespaces at a glance",
 			"mode": "menu-bar",
-			"interval": "5m"
+			"interval": "1m"
 		}
 	],
 	"preferences": [
@@ -47,6 +47,10 @@
 				{
 					"title": "Web editor",
 					"value": "web"
+				},
+				{
+					"title": "SSH",
+					"value": "ssh"
 				}
 			],
 			"required": false
@@ -62,7 +66,7 @@
 	"dependencies": {
 		"@octokit/types": "^7.3.1",
 		"@raycast/api": "^1.39.3",
-		"@raycast/utils": "^1.3.1",
+		"@raycast/utils": "^1.4.8",
 		"node-fetch": "^3.2.10",
 		"ts-pattern": "^4.0.5"
 	},

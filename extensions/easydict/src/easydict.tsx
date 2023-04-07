@@ -2,16 +2,16 @@
  * @author: tisfeng
  * @createTime: 2022-06-23 14:19
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-09-18 17:07
+ * @lastEditTime: 2023-03-17 22:48
  * @fileName: easydict.tsx
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
  */
 
-import { getSelectedText, Icon, List } from "@raycast/api";
+import { Icon, LaunchProps, List, getSelectedText } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { configAxiosProxy } from "./axiosConfig";
-import { checkIfPreferredLanguagesConflict, getListItemIcon, getWordAccessories, ListActionPanel } from "./components";
+import { configAxiosProxy, delayGetSystemProxy } from "./axiosConfig";
+import { ListActionPanel, checkIfPreferredLanguagesConflict, getListItemIcon, getWordAccessories } from "./components";
 import { DataManager } from "./dataManager/dataManager";
 import { QueryWordInfo } from "./dictionary/youdao/types";
 import { LanguageItem } from "./language/type";
@@ -19,13 +19,31 @@ import { myPreferences, preferredLanguage1 } from "./preferences";
 import { DisplaySection } from "./types";
 import { checkIfInstalledEudic, checkIfNeedShowReleasePrompt, trimTextLength } from "./utils";
 
+const disableConsoleLog = false;
+
+if (disableConsoleLog) {
+  // Since too many logs will cause bugs, we need to disable the console.log in development. Ref: https://github.com/raycast/extensions/pull/3917#issuecomment-1370771358
+  console.log = function () {
+    // do nothing
+  };
+}
+
+console.log(`enter easydict.tsx`);
+
 const dataManager = new DataManager();
 
-export default function () {
+interface EasydictArguments {
+  queryText?: string;
+}
+
+export default function (props: LaunchProps<{ arguments: EasydictArguments }>) {
   const isConflict = checkIfPreferredLanguagesConflict();
   if (isConflict) {
     return isConflict;
   }
+
+  const { queryText } = props.arguments;
+  const trimQueryText = queryText ? trimTextLength(queryText) : props.fallbackText;
 
   const [isLoadingState, setLoadingState] = useState<boolean>(false);
   const [isShowingDetail, setIsShowingDetail] = useState<boolean>(false);
@@ -38,7 +56,9 @@ export default function () {
   });
 
   /**
-   * use to display input text
+   * Use to display input text.
+   *
+   * * Note: default value should be undefined, it used to call setup function.
    */
   const [inputText, setInputText] = useState<string>();
   /**
@@ -80,6 +100,7 @@ export default function () {
     if (inputText === undefined) {
       setup();
     }
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [inputText]);
 
@@ -87,26 +108,52 @@ export default function () {
    * Do something setup when the extension is activated. Only run once.
    */
   function setup() {
-    console.log(`setup when extension is activated.`);
+    // console.log(`setup when extension is activated.`);
+
+    if (trimQueryText?.length) {
+      console.warn(`---> arguments queryText: ${trimQueryText}`);
+    }
+
     const startTime = Date.now();
 
-    // In this case, must wait for the proxy to be configured before request.
-    if (myPreferences.enableAutomaticQuerySelectedText && myPreferences.enableSystemProxy) {
-      Promise.all([getSelectedText(), configAxiosProxy()])
-        .then(([selectedText]) => {
-          console.log(`after config proxy, getSelectedText: ${selectedText}`);
-          console.log(`config proxy and get text cost time: ${Date.now() - startTime} ms`);
-          updateInputTextAndQueryText(trimTextLength(selectedText), false);
-        })
-        .catch((error) => {
-          console.log(`set up, config proxy error: ${error}`);
-          tryQuerySelecedtText();
+    const userInputText = trimQueryText;
+
+    // If enabled system proxy, we need to wait for the system proxy to be ready.
+    if (myPreferences.enableSystemProxy) {
+      // If has arguments, use arguments text as input text first.
+      if (userInputText?.length) {
+        configAxiosProxy().then(() => {
+          console.log(`after config proxy`);
+          updateInputTextAndQueryText(userInputText as string, false);
         });
-    } else if (myPreferences.enableAutomaticQuerySelectedText) {
-      tryQuerySelecedtText();
-    } else if (myPreferences.enableSystemProxy) {
-      configAxiosProxy();
+      } else if (myPreferences.enableAutomaticQuerySelectedText) {
+        Promise.all([getSelectedText(), configAxiosProxy()])
+          .then(([selectedText]) => {
+            console.log(`after config proxy, getSelectedText: ${selectedText}`);
+            console.log(`config proxy and get text cost time: ${Date.now() - startTime} ms`);
+            updateInputTextAndQueryText(trimTextLength(selectedText), false);
+          })
+          .catch((error) => {
+            console.error(`set up, config proxy error: ${error}`);
+            querySelecedtText().then(() => {
+              console.log(`after query selected text`);
+              delayGetSystemProxy();
+            });
+          });
+      } else {
+        configAxiosProxy();
+      }
+    } else {
+      if (userInputText?.length) {
+        updateInputTextAndQueryText(userInputText, false);
+      } else if (myPreferences.enableAutomaticQuerySelectedText) {
+        querySelecedtText().then(() => {
+          console.log(`after query selected text`);
+        });
+      }
     }
+
+    delayGetSystemProxy();
 
     checkIfInstalledEudic().then((isInstalled) => {
       setIsInstalledEudic(isInstalled);
@@ -116,14 +163,20 @@ export default function () {
   /**
    * Try to detect the selected text, if detect success, then query the selected text.
    */
-  function tryQuerySelecedtText() {
-    getSelectedText()
-      .then((selectedText) => {
-        selectedText = trimTextLength(selectedText);
-        console.log(`getSelectedText: ${selectedText}`); // cost about 20 ms
-        updateInputTextAndQueryText(selectedText, false);
-      })
-      .catch((e) => e);
+  function querySelecedtText(): Promise<void> {
+    return new Promise((resolve) => {
+      getSelectedText()
+        .then((selectedText) => {
+          selectedText = trimTextLength(selectedText);
+          console.warn(`getSelectedText: ${selectedText}`); // cost about 20 ms
+          updateInputTextAndQueryText(selectedText, false);
+          resolve();
+        })
+        .catch((error) => {
+          console.log(`getSelectedText error: ${error}`);
+          resolve();
+        });
+    });
   }
 
   /**
@@ -132,21 +185,21 @@ export default function () {
    * Todo: move it to dataManager.
    */
   const updateSelectedTargetLanguageItem = (selectedLanguageItem: LanguageItem) => {
-    console.log(
-      `selected language: ${selectedLanguageItem.youdaoId}, current target language: ${userSelectedTargetLanguageItem.youdaoId}`
-    );
-    if (selectedLanguageItem.youdaoId === userSelectedTargetLanguageItem.youdaoId) {
+    console.log(`selected language: ${selectedLanguageItem.youdaoLangCode}`);
+    console.log(`current target language: ${userSelectedTargetLanguageItem.youdaoLangCode}`);
+
+    if (selectedLanguageItem.youdaoLangCode === userSelectedTargetLanguageItem.youdaoLangCode) {
       return;
     }
 
-    console.log(`updateSelectedTargetLanguageItem: ${selectedLanguageItem.youdaoId}`);
+    console.log(`updateSelectedTargetLanguageItem: ${selectedLanguageItem.youdaoLangCode}`);
     setAutoSelectedTargetLanguageItem(selectedLanguageItem);
     setUserSelectedTargetLanguageItem(selectedLanguageItem);
 
     const queryWordInfo: QueryWordInfo = {
       word: searchText,
-      fromLanguage: currentFromLanguageItem.youdaoId,
-      toLanguage: selectedLanguageItem.youdaoId,
+      fromLanguage: currentFromLanguageItem.youdaoLangCode,
+      toLanguage: selectedLanguageItem.youdaoLangCode,
     };
 
     // Clean up previous query results immediately before new query.
@@ -174,12 +227,13 @@ export default function () {
     // Only different input text, then clear old results before new input text query.
     if (trimText !== searchText) {
       dataManager.clearQueryResult();
-      const toLanguage = userSelectedTargetLanguageItem.youdaoId;
+      const toLanguage = userSelectedTargetLanguageItem.youdaoLangCode;
       dataManager.delayQueryText(trimText, toLanguage, isDelay);
     }
   }
 
   function onInputChange(text: string) {
+    // console.warn(`onInputChange: ${text}`);
     updateInputTextAndQueryText(text, true);
   }
 
@@ -207,12 +261,12 @@ export default function () {
                   title={item.title}
                   subtitle={item.subtitle}
                   accessories={getWordAccessories(item)}
-                  detail={<List.Item.Detail markdown={item.translationMarkdown} />}
+                  detail={<List.Item.Detail markdown={item.detailsMarkdown} />}
                   actions={
                     <ListActionPanel
                       displayItem={item}
                       isShowingReleasePrompt={isShowingReleasePrompt}
-                      isInstalledEudic={isInstalledEudic && myPreferences.enableOpenInEudic}
+                      isInstalledEudic={isInstalledEudic}
                       onLanguageUpdate={updateSelectedTargetLanguageItem}
                     />
                   }
@@ -226,17 +280,3 @@ export default function () {
     </List>
   );
 }
-
-/**
- * Easter egg: if you use PopClip and have added a shortcut for `Easydict`, such as `Cmd + E`, then you can use PopClip to quickly open Easydict!
- * 
- * Reference: https://github.com/pilotmoon/PopClip-Extensions#extension-snippets-examples
- * 
- * Usage: select following text, then PopClip will show "Install Easydict", click it! 
-
-  # popclip
-  name: Easydict
-  icon: search E
-  key combo: command E
-
- */

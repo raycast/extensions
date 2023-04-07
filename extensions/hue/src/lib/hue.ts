@@ -1,13 +1,9 @@
 import { discovery, v3 } from "node-hue-api";
-import { Api } from "node-hue-api/dist/esm/api/Api";
-import { LocalStorage, showToast, Toast } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { showToast, Toast } from "@raycast/api";
 import { Group, Light, Scene } from "./types";
 import { hexToXy } from "./colors";
 import {
   APP_NAME,
-  BRIDGE_IP_ADDRESS_KEY,
-  BRIDGE_USERNAME_KEY,
   BRIGHTNESS_MAX,
   BRIGHTNESS_MIN,
   BRIGHTNESS_STEP,
@@ -15,122 +11,12 @@ import {
   COLOR_TEMP_MIN,
   COLOR_TEMPERATURE_STEP,
 } from "./constants";
-import { CouldNotConnectToHueBridgeError, NoHueBridgeConfiguredError } from "./errors";
 import { getTransitionTimeInMs } from "./utils";
-import { useMachine } from "@xstate/react";
-import { manageHueBridgeMachine } from "./manageHueBridgeMachine";
+import { Api } from "node-hue-api/dist/esm/api/Api";
 import Style = Toast.Style;
+import getAuthenticatedApi from "./getAuthenticatedApi";
 
-let _api: Api;
-
-export async function getAuthenticatedApi(): Promise<Api> {
-  if (_api) return _api;
-
-  const bridgeIpAddress = await LocalStorage.getItem<string>(BRIDGE_IP_ADDRESS_KEY);
-  const bridgeUsername = await LocalStorage.getItem<string>(BRIDGE_USERNAME_KEY);
-
-  if (!bridgeIpAddress || !bridgeUsername) throw new NoHueBridgeConfiguredError();
-
-  try {
-    _api = await v3.api.createLocal(bridgeIpAddress).connect(bridgeUsername);
-  } catch (error) {
-    throw new CouldNotConnectToHueBridgeError();
-  }
-
-  return _api;
-}
-
-export type SendHueMessage = (message: "link" | "retry" | "done" | "unlink") => void;
-
-// TODO: Replace with Hue API V2 (for which there is no library yet) to enable more features.
-//  An example is lights have types (e.g. ‘Desk Lamp’ or ‘Ceiling Fixture’) which can be used to display relevant icons instead of circles.
-// TODO: Rapid successive calls to mutate functions will result in the optimistic updates and API results being out of sync.
-//  This happens for example when holding or successively using the 'Increase' or 'Decrease Brightness' action.
-//  This is especially noticeable on groups, since those API calls take longer than those for individual lights.
-export function useHue() {
-  const {
-    isLoading: isLoadingLights,
-    data: lights,
-    mutate: mutateLights,
-    revalidate: revalidateLights,
-  } = useCachedPromise(
-    async () => {
-      const api = await getAuthenticatedApi();
-      const lights = await api.lights.getAll();
-      return lights.map((light) => light["data"] as Light).filter((light) => light != null);
-    },
-    [],
-    {
-      keepPreviousData: true,
-      initialData: [] as Light[],
-      onError: handleError,
-    }
-  );
-
-  const {
-    isLoading: isLoadingGroups,
-    data: groups,
-    mutate: mutateGroups,
-    revalidate: revalidateGroups,
-  } = useCachedPromise(
-    async () => {
-      const api = await getAuthenticatedApi();
-      const groups = await api.groups.getAll();
-      return groups.map((group) => group["data"] as Group).filter((group) => group != null);
-    },
-    [],
-    {
-      keepPreviousData: true,
-      initialData: [] as Group[],
-      onError: handleError,
-    }
-  );
-
-  const {
-    isLoading: isLoadingScenes,
-    data: scenes,
-    mutate: mutateScenes,
-    revalidate: revalidateScenes,
-  } = useCachedPromise(
-    async () => {
-      const api = await getAuthenticatedApi();
-      const scenes = await api.scenes.getAll();
-      return scenes.map((scene) => scene["data"] as Scene).filter((scene) => scene != null);
-    },
-    [],
-    {
-      keepPreviousData: true,
-      initialData: [] as Scene[],
-      onError: handleError,
-    }
-  );
-
-  const [hueBridgeState, send] = useMachine(
-    manageHueBridgeMachine(() => {
-      revalidateLights();
-      revalidateGroups();
-      revalidateScenes();
-    })
-  );
-
-  const sendHueMessage: SendHueMessage = (message: "link" | "retry" | "done" | "unlink") => {
-    send(message.toUpperCase());
-  };
-
-  return {
-    hueBridgeState,
-    sendHueMessage,
-    isLoading: hueBridgeState.context.shouldDisplay || isLoadingLights || isLoadingGroups || isLoadingScenes,
-    lights,
-    mutateLights,
-    groups,
-    mutateGroups,
-    scenes,
-    mutateScenes,
-  };
-}
-
-function handleError(error: Error): void {
+export function handleError(error: Error): void {
   console.debug({ name: error.name, message: error.message });
   console.error(error);
 
@@ -191,7 +77,6 @@ export async function linkWithBridge(ipAddress: string): Promise<string> {
 
 export async function turnOffAllLights() {
   const api = await getAuthenticatedApi();
-
   const lights = await api.lights.getAll();
   for await (const light of lights) {
     await api.lights.setLightState(
@@ -201,29 +86,29 @@ export async function turnOffAllLights() {
   }
 }
 
-export async function toggleLight(light: Light) {
-  const api = await getAuthenticatedApi();
+export async function toggleLight(apiPromise: Promise<Api>, light: Light) {
+  const api = await apiPromise;
   await api.lights.setLightState(light.id, {
     on: !light.state.on,
     transitiontime: getTransitionTimeInMs(),
   });
 }
 
-export async function turnGroupOn(group: Group) {
-  const api = await getAuthenticatedApi();
+export async function turnGroupOn(apiPromise: Promise<Api>, group: Group) {
+  const api = await apiPromise;
   await api.groups.setGroupState(
     group.id,
     new v3.model.lightStates.GroupLightState().on().transitiontime(getTransitionTimeInMs())
   );
 }
 
-export async function turnGroupOff(group: Group) {
-  const api = await getAuthenticatedApi();
+export async function turnGroupOff(apiPromise: Promise<Api>, group: Group) {
+  const api = await apiPromise;
   await api.groups.setGroupState(group.id, new v3.model.lightStates.GroupLightState().off());
 }
 
-export async function setLightBrightness(light: Light, percentage: number) {
-  const api = await getAuthenticatedApi();
+export async function setLightBrightness(apiPromise: Promise<Api>, light: Light, percentage: number) {
+  const api = await apiPromise;
   const newLightState = new v3.model.lightStates.LightState()
     .on()
     .bri(percentage)
@@ -231,8 +116,8 @@ export async function setLightBrightness(light: Light, percentage: number) {
   await api.lights.setLightState(light.id, newLightState);
 }
 
-export async function setGroupBrightness(group: Group, percentage: number) {
-  const api = await getAuthenticatedApi();
+export async function setGroupBrightness(apiPromise: Promise<Api>, group: Group, percentage: number) {
+  const api = await apiPromise;
   const newLightState = new v3.model.lightStates.GroupLightState()
     .on()
     .bri(percentage)
@@ -240,15 +125,15 @@ export async function setGroupBrightness(group: Group, percentage: number) {
   await api.groups.setGroupState(group.id, newLightState);
 }
 
-export async function setLightColor(light: Light, color: string) {
-  const api = await getAuthenticatedApi();
+export async function setLightColor(apiPromise: Promise<Api>, light: Light, color: string) {
+  const api = await apiPromise;
   const xy = hexToXy(color);
   const newLightState = new v3.model.lightStates.LightState().on().xy(xy).transitiontime(getTransitionTimeInMs());
   await api.lights.setLightState(light.id, newLightState);
 }
 
-export async function setGroupColor(group: Group, color: string) {
-  const api = await getAuthenticatedApi();
+export async function setGroupColor(apiPromise: Promise<Api>, group: Group, color: string) {
+  const api = await apiPromise;
   const xy = hexToXy(color);
   const newLightState = new v3.model.lightStates.GroupLightState().on().xy(xy).transitiontime(getTransitionTimeInMs());
   await api.groups.setGroupState(group.id, newLightState);
@@ -267,8 +152,12 @@ export function calculateAdjustedBrightness(entity: Light | Group, direction: "i
   return Math.min(Math.max(BRIGHTNESS_MIN, newBrightness), BRIGHTNESS_MAX);
 }
 
-export async function adjustBrightness(entity: Light | Group, direction: "increase" | "decrease") {
-  const api = await getAuthenticatedApi();
+export async function adjustBrightness(
+  apiPromise: Promise<Api>,
+  entity: Light | Group,
+  direction: "increase" | "decrease"
+) {
+  const api = await apiPromise;
   const delta = direction === "increase" ? BRIGHTNESS_STEP : -BRIGHTNESS_STEP;
 
   if ("action" in entity) {
@@ -302,8 +191,12 @@ export function calculateAdjustedColorTemperature(entity: Light | Group, directi
   return Math.min(Math.max(COLOR_TEMP_MIN, newColorTemperature), COLOR_TEMP_MAX);
 }
 
-export async function adjustColorTemperature(entity: Light | Group, direction: "increase" | "decrease") {
-  const api = await getAuthenticatedApi();
+export async function adjustColorTemperature(
+  apiPromise: Promise<Api>,
+  entity: Light | Group,
+  direction: "increase" | "decrease"
+) {
+  const api = await apiPromise;
   const delta = direction === "increase" ? -COLOR_TEMPERATURE_STEP : COLOR_TEMPERATURE_STEP;
 
   if ("action" in entity) {
@@ -321,8 +214,8 @@ export async function adjustColorTemperature(entity: Light | Group, direction: "
   }
 }
 
-export async function setScene(scene: Scene) {
-  const api = await getAuthenticatedApi();
+export async function setScene(apiPromise: Promise<Api>, scene: Scene) {
+  const api = await apiPromise;
   await api.groups.setGroupState(
     0,
     new v3.model.lightStates.GroupLightState().scene(scene.id).transitiontime(getTransitionTimeInMs())

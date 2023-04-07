@@ -1,10 +1,12 @@
-import { Action, ActionPanel, Icon, List, confirmAlert, showToast, Toast, Color } from "@raycast/api";
 import { Comment, Task } from "@doist/todoist-api-typescript";
+import { Action, ActionPanel, Icon, List, confirmAlert, showToast, Toast, Color } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { formatDistanceToNow } from "date-fns";
-import TaskCommentForm from "./TaskCommentForm";
-import { todoist, handleError } from "../api";
 import removeMarkdown from "remove-markdown";
+
+import { todoist, handleError } from "../api";
+
+import TaskCommentForm from "./TaskCommentForm";
 
 interface TaskCommentsProps {
   task: Task;
@@ -43,13 +45,13 @@ export default function TaskComments({ task }: TaskCommentsProps) {
   }
 
   return (
-    <List isShowingDetail isLoading={isLoading}>
+    <List isShowingDetail isLoading={isLoading} navigationTitle={`${task.content} - Comments`}>
       {data?.map((comment, index) => (
         <List.Item
           key={comment.id}
           keywords={removeMarkdown(comment.content).split(" ")}
           title={`Comment #${index + 1}`}
-          subtitle={formatDistanceToNow(new Date(comment.posted), { addSuffix: true })}
+          subtitle={formatDistanceToNow(new Date(comment.postedAt), { addSuffix: true })}
           detail={<List.Item.Detail markdown={comment.content} />}
           actions={
             <ActionPanel>

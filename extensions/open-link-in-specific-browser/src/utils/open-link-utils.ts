@@ -2,7 +2,7 @@ import { ItemInput } from "./input-utils";
 import { urlBuilder } from "./common-utils";
 import { getPreferenceValues, Icon, LocalStorage, open, popToRoot, showHUD } from "@raycast/api";
 import { Preferences } from "../types/preferences";
-import { SEARCH_ENGINE } from "./constants";
+import { CacheKey, SEARCH_ENGINE } from "./constants";
 import { ItemType, OpenLinkApplication } from "../types/types";
 import React from "react";
 
@@ -10,14 +10,19 @@ import React from "react";
 export const searchBarPlaceholder = (inputText: ItemInput) => {
   switch (inputText.type) {
     case ItemType.TEXT:
-      return "Search " + inputText.type.toLowerCase() + " in";
+      return "Search 「 " + searchContent(inputText) + " 」 in";
     case ItemType.URL:
-      return "Open " + inputText.type.toLowerCase() + " in";
+      return "Open 「 " + searchContent(inputText) + " 」 in";
     case ItemType.EMAIL:
-      return "Email " + inputText.type.toLowerCase() + " in";
+      return "Email 「 " + searchContent(inputText) + " 」 in";
     case ItemType.NULL:
       return "Detect link by pressing ⏎";
   }
+};
+
+export const searchContent = (inputText: ItemInput) => {
+  const suffix = inputText.content.length >= 40 ? " ..." : "";
+  return inputText.content.substring(0, 40) + suffix;
 };
 //list item
 export const actionTitle = (inputText: ItemInput, applicationName: string) => {
@@ -72,7 +77,11 @@ export async function actionOnApplicationItem(
 
 export async function openSurfboard(url: string, path: string) {
   try {
-    await open(url, path);
+    if (path === "/Applications/MenubarX.app") {
+      await open(`menubarx://open/?xurl=${url}&xwidth=375&xheight=667&xbar=1`);
+    } else {
+      await open(url, path);
+    }
   } catch (e) {
     await showHUD("Error Input!");
   }
@@ -170,7 +179,7 @@ export async function upBrowserRank(
     }
   });
   boardsSort(browsers, itemInput);
-  await LocalStorage.setItem("boards", JSON.stringify(browsers));
+  await LocalStorage.setItem(CacheKey.PREFERRED_APP, JSON.stringify(browsers));
 }
 
 export async function clearRank(surfApplication: OpenLinkApplication, surfApplications: OpenLinkApplication[]) {
@@ -182,7 +191,7 @@ export async function clearRank(surfApplication: OpenLinkApplication, surfApplic
   surfApplications.sort(function (a, b) {
     return b.name.toUpperCase() < a.name.toUpperCase() ? 1 : -1;
   });
-  await LocalStorage.setItem("boards", JSON.stringify(surfApplications));
+  await LocalStorage.setItem(CacheKey.PREFERRED_APP, JSON.stringify(surfApplications));
   return [...surfApplications];
 }
 
@@ -195,7 +204,7 @@ export async function clearAllRank(surfApplications: OpenLinkApplication[]) {
   surfApplications.sort(function (a, b) {
     return b.name.toUpperCase() < a.name.toUpperCase() ? 1 : -1;
   });
-  await LocalStorage.setItem("boards", JSON.stringify(surfApplications));
+  await LocalStorage.setItem(CacheKey.PREFERRED_APP, JSON.stringify(surfApplications));
   return [...surfApplications];
 }
 

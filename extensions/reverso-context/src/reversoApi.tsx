@@ -4,8 +4,6 @@ import { LangCode, UsageExample } from "./domain";
 import { buildTText, reversoQuery } from "./utils";
 
 export async function getUsageExamples(text: string, sLang: LangCode, tLang: LangCode): Promise<UsageExample[]> {
-  console.log("getUsageExamples: started");
-
   let resp: AxiosResponse<{ list: { s_text: string; t_text: string; ref: string; url: string }[] }>;
   try {
     resp = await axios.post(
@@ -34,8 +32,6 @@ export async function getUsageExamples(text: string, sLang: LangCode, tLang: Lan
     showToast(Toast.Style.Failure, "Can't find examples: ", err.message);
     return [];
   }
-
-  console.log(`getUsageExamples: fetched ${resp.data.list.length}`);
 
   return resp.data.list.map((e) => ({
     sExample: e.s_text,

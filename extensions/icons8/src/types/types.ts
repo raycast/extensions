@@ -2,7 +2,7 @@ export interface Preferences {
   apiKey: string;
   gridSize: string;
   numResults: number;
-  numRecent: number;
+  numRecentRows: number;
 }
 
 export interface Icon8 {

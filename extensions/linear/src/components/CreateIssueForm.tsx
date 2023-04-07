@@ -1,10 +1,21 @@
 import { useEffect } from "react";
-import { Clipboard, Form, ActionPanel, Action, Icon, Toast, getPreferenceValues, useNavigation } from "@raycast/api";
+import {
+  Clipboard,
+  Form,
+  ActionPanel,
+  Action,
+  Icon,
+  Toast,
+  getPreferenceValues,
+  useNavigation,
+  showToast,
+} from "@raycast/api";
 import { useForm, FormValidation } from "@raycast/utils";
 import { IssuePriorityValue, User } from "@linear/sdk";
 
-import { getLastCreatedIssues } from "../api/getIssues";
+import { getLastCreatedIssues, IssueResult } from "../api/getIssues";
 import { createIssue, CreateIssuePayload } from "../api/createIssue";
+import { createAttachment } from "../api/attachments";
 
 import useLabels from "../hooks/useLabels";
 import useStates from "../hooks/useStates";
@@ -14,7 +25,7 @@ import useIssues from "../hooks/useIssues";
 import useProjects from "../hooks/useProjects";
 
 import { getEstimateScale } from "../helpers/estimates";
-import { getOrderedStates, statusIcons } from "../helpers/states";
+import { getOrderedStates, getStatusIcon } from "../helpers/states";
 import { getErrorMessage } from "../helpers/errors";
 import { priorityIcons } from "../helpers/priorities";
 import { getUserIcon } from "../helpers/users";
@@ -39,7 +50,7 @@ type CreateIssueFormProps = {
 };
 
 export type CreateIssueValues = {
-  teamId?: string;
+  teamId: string;
   title: string;
   description: string;
   stateId: string;
@@ -47,23 +58,41 @@ export type CreateIssueValues = {
   assigneeId: string;
   labelIds: string[];
   estimate: string;
-  dueDate: Date;
+  dueDate: Date | null;
   cycleId: string;
   projectId: string;
   parentId: string;
+  attachments: string[];
 };
+
+type Preferences = {
+  signature: boolean;
+  autofocusField: "teamId" | "title";
+  copyToastAction: "id" | "url" | "title";
+};
+
+function getCopyToastAction(copyToastAction: Preferences["copyToastAction"], issue: IssueResult) {
+  if (copyToastAction === "url") {
+    return { title: "Copy Issue URL", onAction: () => Clipboard.copy(issue.url) };
+  }
+
+  if (copyToastAction === "title") {
+    return { title: "Copy Issue Title", onAction: () => Clipboard.copy(issue.title) };
+  }
+
+  return { title: "Copy Issue ID", onAction: () => Clipboard.copy(issue.identifier) };
+}
 
 export default function CreateIssueForm(props: CreateIssueFormProps) {
   const { push } = useNavigation();
-  const { signature } = getPreferenceValues<{ signature: boolean }>();
+  const { signature, autofocusField, copyToastAction } = getPreferenceValues<Preferences>();
 
   const { teams, isLoadingTeams } = useTeams();
   const hasMoreThanOneTeam = teams && teams.length > 1;
 
   const { handleSubmit, itemProps, values, setValue, focus, reset, setValidationError } = useForm<CreateIssueValues>({
     async onSubmit(values) {
-      const toast = new Toast({ style: Toast.Style.Animated, title: "Creating issue" });
-      await toast.show();
+      const toast = await showToast({ style: Toast.Style.Animated, title: "Creating issue" });
 
       let payloadDescription = values.description || "";
       if (signature) {
@@ -114,9 +143,8 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
           };
 
           toast.secondaryAction = {
-            title: "Copy Issue Key",
             shortcut: { modifiers: ["cmd", "shift"], key: "c" },
-            onAction: () => Clipboard.copy(issue.identifier),
+            ...getCopyToastAction(copyToastAction, issue),
           };
 
           reset({
@@ -124,11 +152,33 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
             description: "",
             estimate: "",
             labelIds: [],
-            dueDate: undefined,
+            dueDate: null,
             parentId: "",
+            attachments: [],
           });
 
-          focus("title");
+          hasMoreThanOneTeam ? focus(autofocusField) : focus("title");
+
+          if (values.attachments.length > 0) {
+            const attachmentWord = values.attachments.length === 1 ? "attachment" : "attachments";
+
+            try {
+              toast.message = `Uploading ${attachmentWord}…`;
+              await Promise.all(
+                values.attachments.map((attachment) =>
+                  createAttachment({
+                    issueId: issue.id,
+                    url: attachment,
+                  })
+                )
+              );
+              toast.message = `Successfully uploaded ${attachmentWord}`;
+            } catch (error) {
+              toast.style = Toast.Style.Failure;
+              toast.title = `Failed uploading ${attachmentWord}`;
+              toast.message = getErrorMessage(error);
+            }
+          }
         }
       } catch (error) {
         toast.style = Toast.Style.Failure;
@@ -211,7 +261,12 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
         </>
       ) : null}
 
-      <Form.TextField title="Title" placeholder="Issue title" autoFocus {...itemProps.title} />
+      <Form.TextField
+        title="Title"
+        placeholder="Issue title"
+        {...(autofocusField === "title" ? { autoFocus: true } : {})}
+        {...itemProps.title}
+      />
 
       <Form.TextArea
         title="Description"
@@ -224,12 +279,7 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
         {hasStates
           ? orderedStates.map((state) => {
               return (
-                <Form.Dropdown.Item
-                  title={state.name}
-                  value={state.id}
-                  key={state.id}
-                  icon={{ source: statusIcons[state.type], tintColor: state.color }}
-                />
+                <Form.Dropdown.Item title={state.name} value={state.id} key={state.id} icon={getStatusIcon(state)} />
               );
             })
           : null}
@@ -344,12 +394,16 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
                 title={`${issue.identifier} - ${issue.title}`}
                 value={issue.id}
                 key={issue.id}
-                icon={{ source: statusIcons[issue.state.type], tintColor: issue.state.color }}
+                icon={getStatusIcon(issue.state)}
               />
             );
           })}
         </Form.Dropdown>
       ) : null}
+
+      <Form.Separator />
+
+      <Form.FilePicker title="Attachment" {...itemProps.attachments} />
     </Form>
   );
 }

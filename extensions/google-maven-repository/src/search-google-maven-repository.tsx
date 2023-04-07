@@ -16,7 +16,7 @@ export default function SearchGoogleMavenRepository(props: { arguments: Reposito
 
   const emptyViewTitle = () => {
     if (searchContent.length < 4) {
-      return "Welcome to Google's Maven Repository";
+      return "Google Maven Repository";
     }
     if (loading) {
       return "Loading...";
@@ -24,7 +24,7 @@ export default function SearchGoogleMavenRepository(props: { arguments: Reposito
     if (artifactInfo.artifactInfo.length === 0 && !isEmpty(searchContent)) {
       return "No Artifacts";
     }
-    return "Welcome to Google's Maven Repository";
+    return "Google Maven Repository";
   };
 
   return (
@@ -49,7 +49,7 @@ export default function SearchGoogleMavenRepository(props: { arguments: Reposito
         description={
           searchContent.length < 4 && !isEmpty(searchContent)
             ? "You must enter at least 4 characters when searching..."
-            : " "
+            : "Welcome to Google Maven Repository"
         }
       />
       {artifactInfo.artifactInfo.map((artifacts, artifactsIndex) => {

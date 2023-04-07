@@ -1,5 +1,5 @@
 import Config from "../Config";
-import { List } from "@raycast/api";
+import { Action, ActionPanel, List, openExtensionPreferences } from "@raycast/api";
 import { DailyNoteRef } from "./DailyNoteRef";
 import { Shortcut } from "./Shortcut";
 
@@ -12,10 +12,22 @@ type DailyNotesParams = {
 
 export const DailyNotes = ({ appExists, config, query, date }: DailyNotesParams) => {
   if (!appExists || !config) {
-    return <List.EmptyView title="Craft not installed" icon={"command-icon-small.png"} />;
+    return (
+      <List.EmptyView
+        actions={
+          <ActionPanel>
+            <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
+          </ActionPanel>
+        }
+        title="No results"
+        description="Selecting Craft application in preferences might help"
+        icon={"command-icon-small.png"}
+      />
+    );
   }
 
   const space = config.primarySpace();
+
   if (!space) {
     return (
       <List.EmptyView

@@ -62,7 +62,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.39.3",
-    "@raycast/utils": "^1.4.0",
+    "@raycast/utils": "^1.4.8",
     "he": "^1.2.0",
     "node-fetch": "^3.2.10",
     "uuid": "^9.0.0",

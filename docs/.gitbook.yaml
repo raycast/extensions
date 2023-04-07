@@ -3,3 +3,5 @@ redirects:
   api-reference/arguments: information/arguments.md
   api-reference/user-interface/menu-bar-extra: api-reference/menu-bar-commands.md
   api-reference/menu-bar-extra: api-reference/menu-bar-commands.md
+  information/arguments: information/lifecycle/arguments.md
+  information/background-refresh: information/lifecycle/background-refresh.md

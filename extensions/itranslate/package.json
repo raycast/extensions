@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "itranslate",
   "title": "iTranslate",
-  "description": "A translation extension that can customize translation service providers and support multiple languages",
+  "description": "Translate words or sentences, support 36 languages, OCR, history record and translating into multiple languages at the same time.",
   "icon": "itranslate-icon.png",
   "author": "JinShi",
   "categories": [
@@ -15,7 +15,7 @@
       "name": "itranslate",
       "title": "Translate",
       "subtitle": "iTranslate",
-      "description": "translate everything ~",
+      "description": "translate words or sentences",
       "icon": "itranslate-icon.png",
       "mode": "view",
       "keywords": [
@@ -53,6 +53,20 @@
         "itranslate",
         "multiple",
         "mul"
+      ]
+    },
+    {
+      "name": "ocr",
+      "title": "Translate by OCR",
+      "subtitle": "iTranslate",
+      "description": "translate text in screenshots or images by OCR",
+      "icon": "itranslate-icon.png",
+      "mode": "view",
+      "keywords": [
+        "translate by OCR",
+        "translate",
+        "itranslate",
+        "OCR"
       ]
     }
   ],
@@ -375,7 +389,7 @@
           "value": "google"
         },
         {
-          "title": "Google(Could Translation)",
+          "title": "Google Could Translation",
           "value": "googleCouldTranslation"
         },
         {
@@ -410,7 +424,7 @@
       "required": false,
       "title": "Google(Free) API TLD",
       "description": "Select top level domain of Google(Free) API",
-      "default": "cn",
+      "default": "com",
       "data": [
         {
           "title": "com",
@@ -419,6 +433,40 @@
         {
           "title": "cn",
           "value": "cn"
+        }
+      ]
+    },
+    {
+      "name": "googleFreeTimeout",
+      "type": "dropdown",
+      "required": false,
+      "title": "Google(Free) API Timeout",
+      "description": "Select timeout of Google(Free) API",
+      "default": "2000",
+      "data": [
+        {
+          "title": "none",
+          "value": "0"
+        },
+        {
+          "title": "1000ms",
+          "value": "1000"
+        },
+        {
+          "title": "2000ms",
+          "value": "2000"
+        },
+        {
+          "title": "3000ms",
+          "value": "3000"
+        },
+        {
+          "title": "4000ms",
+          "value": "4000"
+        },
+        {
+          "title": "5000ms",
+          "value": "5000"
         }
       ]
     },
@@ -796,7 +844,7 @@
           "value": "google"
         },
         {
-          "title": "Google(Could Translation)",
+          "title": "Google Could Translation",
           "value": "googleCouldTranslation"
         },
         {
@@ -1113,13 +1161,146 @@
       "label": "Welsh",
       "description": "Welsh option",
       "default": false
+    },
+    {
+      "name": "ocrServiceProvider",
+      "type": "dropdown",
+      "required": false,
+      "title": "OCR Service Provider",
+      "description": "Select OCR service provider",
+      "default": "spaceOCR",
+      "data": [
+        {
+          "title": "OCRSpace API",
+          "value": "spaceOCR"
+        },
+        {
+          "title": "Google Could Vision",
+          "value": "googleOCR"
+        },
+        {
+          "title": "Microsoft Azure Computer Vision",
+          "value": "microsoftAzureOCR"
+        },
+        {
+          "title": "Youdao OCR",
+          "value": "youdaoOCR"
+        },
+        {
+          "title": "Baidu OCR",
+          "value": "baiduOCR"
+        },
+        {
+          "title": "Tencent OCR",
+          "value": "tencentOCR"
+        }
+      ]
+    },
+    {
+      "name": "spaceOCRApiKey",
+      "type": "password",
+      "required": false,
+      "title": "OCRSpace API Key(English only)",
+      "description": "OCRSpace API Key(There is a built-in api key, you can apply your own to avoid rate limit)",
+      "placeholder": "EnterOCR Space API Key"
+    },
+    {
+      "name": "googleOCRApiKey",
+      "type": "password",
+      "required": false,
+      "title": "Google Could Vision API Key",
+      "description": "Google Could Vision API Key",
+      "placeholder": "Enter Google Could Vision API Key"
+    },
+    {
+      "name": "microsoftOCRResourceName",
+      "type": "textfield",
+      "required": false,
+      "title": "Microsoft Azure Computer Vision Resource Name",
+      "description": "Microsoft Azure Computer Vision Resource Name",
+      "placeholder": "Enter Microsoft Azure Computer Vision Resource Name"
+    },
+    {
+      "name": "microsoftOCRAccessKey",
+      "type": "password",
+      "required": false,
+      "title": "Microsoft Azure Cognitive Service API Key",
+      "description": "Microsoft Azure Cognitive Service API Key",
+      "placeholder": "Enter Microsoft Azure Cognitive Service API Key"
+    },
+    {
+      "name": "youdaoOCRAppId",
+      "type": "password",
+      "required": false,
+      "title": "Youdao OCR App ID",
+      "description": "Youdao OCR App ID",
+      "placeholder": "Enter Youdao OCR App ID"
+    },
+    {
+      "name": "youdaoOCRAppKey",
+      "type": "password",
+      "required": false,
+      "title": "Youdao OCR App Secret",
+      "description": "Youdao OCR App Secret",
+      "placeholder": "Enter Youdao OCR App Secret"
+    },
+    {
+      "name": "baiduOCRApiKey",
+      "type": "password",
+      "required": false,
+      "title": "Baidu OCR API Key",
+      "description": "Baidu OCR API Key",
+      "placeholder": "Enter Baidu OCR API Key"
+    },
+    {
+      "name": "baiduOCRSecretKey",
+      "type": "password",
+      "required": false,
+      "title": "Baidu OCR Secret Key",
+      "description": "Baidu OCR Secret Key",
+      "placeholder": "Baidu OCR Secret Key"
+    },
+    {
+      "name": "tencentOCRSecretId",
+      "type": "password",
+      "required": false,
+      "title": "Tencent OCR Secret ID",
+      "description": "Tencent OCR Secret ID",
+      "placeholder": "Enter Tencent OCR Secret ID"
+    },
+    {
+      "name": "tencentOCRSecretKey",
+      "type": "password",
+      "required": false,
+      "title": "Tencent OCR Secret Key",
+      "description": "Tencent OCR Secret Key",
+      "placeholder": "Enter Tencent OCR Secret Key"
+    },
+    {
+      "name": "captureOnActivated",
+      "type": "checkbox",
+      "required": false,
+      "label": "Capture when activated",
+      "description": "Capture immediately when the command is active",
+      "default": true
+    },
+    {
+      "name": "closeOnCapture",
+      "type": "checkbox",
+      "required": false,
+      "label": "Close window when capture",
+      "description": "Close the main Raycast window when capture",
+      "default": false
     }
   ],
   "dependencies": {
     "@alicloud/pop-core": "^1.7.12",
-    "@raycast/api": "^1.38.2",
+    "@raycast/api": "^1.44.0",
     "@vitalets/google-translate-api": "^8.0.0",
-    "axios": "^0.25.0"
+    "axios": "^0.25.0",
+    "form-data": "^4.0.0",
+    "markdown-escape": "^1.1.0",
+    "raycast-toolkit": "^1.0.6"
   },
   "keywords": [
     "itranslate",
@@ -1129,6 +1310,7 @@
     "翻译"
   ],
   "devDependencies": {
+    "@types/markdown-escape": "^1.1.0",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",

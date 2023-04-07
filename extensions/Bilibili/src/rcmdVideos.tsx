@@ -21,7 +21,7 @@ export default function Command() {
       onSelectionChange={(id) => {
         setCountSet(countSet.add(id));
 
-        if (countSet.size % 20 === 0) setIdx(idx + 1);
+        if (countSet.size % 16 === 0) setIdx(idx + 1);
       }}
     >
       {rcmdVideos?.map((item) => (

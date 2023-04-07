@@ -1,12 +1,14 @@
 import {
   Action,
   ActionPanel,
+  Application,
   Color,
   getPreferenceValues,
   Icon,
   Image,
   Keyboard,
   List,
+  open,
   showToast,
   Toast,
 } from "@raycast/api";
@@ -88,6 +90,25 @@ export default function Main(): ReactElement {
                       shortcut={{ modifiers: ["shift"], key: "return" }}
                     />
                   )}
+                  <Action
+                    title="Open in All Applications"
+                    icon={Icon.ChevronUp}
+                    onAction={() => {
+                      // checking for app != null to not open in default app
+                      function openIn(application?: Application | string) {
+                        if (application != null) {
+                          open(repo.fullPath, application);
+                        }
+                      }
+                      // awaiting all opens doesn't seem to work
+                      // it gets stuck when opening with Finder
+                      openIn(preferences.openWith1.bundleId);
+                      openIn(preferences.openWith2.bundleId);
+                      openIn(preferences.openWith3?.bundleId);
+                      openIn(preferences.openWith4?.bundleId);
+                      openIn(preferences.openWith5?.bundleId);
+                    }}
+                  />
                   <Action.OpenWith path={repo.fullPath} shortcut={{ modifiers: ["cmd"], key: "o" }} />
                 </ActionPanel.Section>
                 <ActionPanel.Section>

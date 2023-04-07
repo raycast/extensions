@@ -76,7 +76,7 @@ function Actions({ item, onItemRemove }: { item: Site; onItemRemove: (item: Site
       <ActionPanel>
         <Action.OpenInBrowser
           title="Open in Oh Dear"
-          url={`${ohdearUrl}/sites/${item.id}`}
+          url={`${ohdearUrl}/sites/${item.id}/active-checks`}
           shortcut={{ modifiers: ["cmd"], key: "o" }}
         />
         <Action.OpenInBrowser title="Open in Browser" url={item.url} shortcut={{ modifiers: ["cmd"], key: "i" }} />

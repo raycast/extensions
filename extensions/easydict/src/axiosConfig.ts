@@ -1,39 +1,69 @@
+import { networkTimeout } from "./consts";
 /*
  * @author: tisfeng
  * @createTime: 2022-06-26 11:13
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-09-18 16:45
+ * @lastEditTime: 2023-03-20 09:29
  * @fileName: axiosConfig.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
  */
 
-import { environment, showToast, Toast } from "@raycast/api";
-import axios, { AxiosRequestConfig } from "axios";
-import { HttpsProxyAgent, HttpsProxyAgentOptions } from "https-proxy-agent";
+import { LocalStorage, showToast, Toast } from "@raycast/api";
+import axios from "axios";
+import EventEmitter from "events";
+import { HttpsProxyAgent } from "hpagent";
 import { getMacSystemProxy } from "mac-system-proxy";
-import { myPreferences } from "./preferences";
+
+EventEmitter.defaultMaxListeners = 15; // default is 10.
 
 /**
- * Caclulate axios request cost time.
+ * * Note: this function should be called as early as possible.
+ */
+configDefaultAxios();
+
+/**
+ * Calculate axios request cost time.
  */
 export const requestCostTime = "requestCostTime";
 
-configDefaultAxios();
+export let httpsAgent: HttpsProxyAgent | undefined;
 
+/**
+ * Becacuse get system proxy will block 0.4s, we need to get it after finish query.
+ */
+export const delayGetSystemProxyTime = 5000;
+
+const systemProxyURLKey = "systemProxyURL";
+
+/**
+ * Delay get system proxy, every start app will get system proxy.
+ */
+export function delayGetSystemProxy() {
+  setTimeout(() => {
+    getSystemProxyURL();
+  }, delayGetSystemProxyTime);
+}
+
+/**
+ * Config default axios: timeout, interceptors.
+ */
 function configDefaultAxios() {
-  // Set axios timeout to 15s, since we start a loading when request is sent.
-  axios.defaults.timeout = 15000;
+  console.log(`configDefaultAxios`);
+
+  // Set axios timeout to 15s, since we start a loading when request is sent, we need to cancel it when timeout.
+  axios.defaults.timeout = networkTimeout;
 
   const requestStartTime = "request-startTime";
 
-  axios.interceptors.request.use(function (config: AxiosRequestConfig) {
+  axios.interceptors.request.use((config) => {
     if (config.headers) {
       config.headers[requestStartTime] = new Date().getTime();
     }
     return config;
   });
-  axios.interceptors.response.use(function (response) {
+
+  axios.interceptors.response.use((response) => {
     if (response.config.headers) {
       const startTime = response.config.headers[requestStartTime] as number;
       const endTime = new Date().getTime();
@@ -44,77 +74,174 @@ function configDefaultAxios() {
 }
 
 /**
- * Check if need to use proxy. if yes, config axios proxy, if no, clear proxy config.
+ * Config axios default proxy.
  *
- * * Note: get system proxy need ~0.4s
+ * * Since directly use system proxy will block thread, we try to get proxy url from local storage first.
  */
 export function configAxiosProxy(): Promise<void> {
-  console.log(`---> configUserAxiosProxy`);
+  console.log(`---> configAxiosProxy`);
+
+  return new Promise((resolve) => {
+    getProxyURL()
+      .then((proxyURL) => {
+        configAxiosAgent(proxyURL);
+        resolve();
+      })
+      .catch((error) => {
+        const errorString = JSON.stringify(error) || "";
+        console.error(`---> configAxiosProxy error: ${errorString}`);
+        showToast({
+          style: Toast.Style.Failure,
+          title: `Config proxy error`,
+          message: errorString,
+        });
+        resolve();
+      });
+  });
+}
+
+/**
+ * Config axios agent with proxy url.
+ */
+export function configAxiosAgent(proxyURL: string | undefined): void {
+  console.log(`---> configAxiosAgent: ${proxyURL}`);
+  if (!proxyURL) {
+    axios.defaults.httpsAgent = undefined;
+    return;
+  }
+
+  const httpsAgent = new HttpsProxyAgent({
+    keepAlive: true,
+    proxy: proxyURL,
+  });
+  axios.defaults.httpsAgent = httpsAgent;
+}
+
+/**
+ * Get system proxy URL, and save it to local storage.
+ *
+ * * Note: get system proxy can block ~0.4s, so should call it at the right time.
+ */
+export function getSystemProxyURL(): Promise<string | undefined> {
+  console.warn(`---> start getSystemProxyURL`);
 
   return new Promise((resolve, reject) => {
-    if (myPreferences.enableSystemProxy) {
-      /**
-       * * Note: need to set env.PATH manually, otherwise will get error: "Error: spawn scutil ENOENT"
-       * Detail:  https://github.com/httptoolkit/mac-system-proxy/issues/1
-       */
+    const env = process.env;
+    // console.warn(`---> env: ${JSON.stringify(env, null, 4)}`);
 
-      const env = process.env;
-      // Raycast default "PATH": "/usr/bin:undefined"
-      // console.log(`---> env: ${JSON.stringify(env, null, 2)}`);
+    // Remove previous system proxy URL.
+    LocalStorage.removeItem(systemProxyURLKey);
 
-      // env.PATH = "/usr/sbin"; // $ where scutil
-      env.PATH = "/usr/sbin:/usr/bin:/bin:/sbin";
-      // console.log(`---> env: ${JSON.stringify(env, null, 2)}`);
-
-      if (environment.isDevelopment) {
-        /**
-         * handle error: unable to verify the first certificate.
-         *
-         * Ref: https://stackoverflow.com/questions/31673587/error-unable-to-verify-the-first-certificate-in-nodejs
-         */
-        // env["NODE_TLS_REJECT_UNAUTHORIZED"] = "0";
-      }
-
-      const startTime = Date.now();
-      getMacSystemProxy()
-        .then((systemProxy) => {
-          if (systemProxy) {
-            // console.log(`---> get system proxy: ${JSON.stringify(systemProxy, null, 2)}`);
-            if (systemProxy.HTTPEnable) {
-              const proxyOptions: HttpsProxyAgentOptions = {
-                host: systemProxy.HTTPProxy,
-                port: systemProxy.HTTPPort,
-              };
-              const httpsAgent = new HttpsProxyAgent(proxyOptions);
-              // httpsAgent.options.ca = require("ssl-root-cas/latest").create();
-              axios.defaults.httpsAgent = httpsAgent;
-              // set proxy to env, so we can use it in other modules.
-              env.PROXY = `http://${systemProxy.HTTPProxy}:${systemProxy.HTTPPort}`;
-              console.log(`---> use http system proxy: ${JSON.stringify(proxyOptions, null, 4)}`);
-              console.log(`get system proxy cost: ${Date.now() - startTime} ms`);
-
-              resolve();
-            }
-          }
-        })
-        .catch((err) => {
-          console.error(`---> get system proxy error: ${JSON.stringify(err, null, 2)}`);
-          showToast({
-            style: Toast.Style.Failure,
-            title: `Get system proxy error`,
-            message: `${JSON.stringify(err)}`,
-          });
-          reject(err);
-        })
-        .finally(() => {
-          // ! need to reset env.PATH, otherwise, will throw error: '/bin/sh: osascript: command not found'
-          delete env.PATH; // env.PATH = "/usr/sbin:/usr/bin:/bin:/sbin";
-        });
-    } else {
-      console.log("disable system proxy");
-      axios.defaults.httpsAgent = undefined;
-      delete process.env.PROXY;
-      resolve();
+    // 1.Try to get system proxy from env.HTTP_PROXY first, the value is set by Raycast if user enabled "Web Proxy" in Preferences.
+    const HTTP_PROXY = env.HTTP_PROXY;
+    if (HTTP_PROXY) {
+      console.warn(`---> get system proxy from env.HTTP_PROXY: ${HTTP_PROXY}`);
+      LocalStorage.setItem(systemProxyURLKey, HTTP_PROXY);
+      resolve(HTTP_PROXY);
+      return;
     }
+
+    /**
+     * * Note: need to set env.PATH manually, otherwise will get error: "Error: spawn scutil ENOENT"
+     * Detail:  https://github.com/httptoolkit/mac-system-proxy/issues/1
+     */
+
+    // Raycast default "PATH": "/usr/bin:undefined"
+    // env.PATH = "/usr/sbin"; // $ where scutil
+    env.PATH = "/usr/sbin:/usr/bin:/bin:/sbin";
+
+    // 2.Use mac-system-proxy to get system proxy.
+    const startTime = Date.now();
+
+    // * This function is sync and will block ~0.4s, even it's a promise.
+    getMacSystemProxy()
+      .then((systemProxy) => {
+        // console.log(`---> get system proxy: ${JSON.stringify(systemProxy, null, 4)}`);
+        if (!systemProxy.HTTPEnable || !systemProxy.HTTPProxy) {
+          console.log(`---> no system http proxy`);
+          return resolve(undefined);
+        }
+
+        const proxyURL = `http://${systemProxy.HTTPProxy}:${systemProxy.HTTPPort}`;
+        console.warn(`---> get system proxy url: ${proxyURL}`);
+        console.log(`get system proxy cost: ${Date.now() - startTime} ms`);
+        LocalStorage.setItem(systemProxyURLKey, proxyURL);
+        resolve(proxyURL);
+      })
+      .catch((err) => {
+        // console.error(`---> get system proxy error: ${JSON.stringify(err, null, 4)}`);
+        reject(err);
+      })
+      .finally(() => {
+        // ! need to reset env.PATH, otherwise, will throw error: '/bin/sh: osascript: command not found'
+        delete env.PATH; // env.PATH = "/usr/sbin:/usr/bin:/bin:/sbin";
+      });
+  });
+}
+
+/**
+ * Get proxy agent.
+ *
+ * * Note: this function will block ~0.4s, so should call it at the right time.
+ */
+export function getProxyAgent(): Promise<HttpsProxyAgent | undefined> {
+  console.log(`---> start getProxyAgent`);
+
+  if (httpsAgent) {
+    console.log(`---> return cached httpsAgent`);
+    return Promise.resolve(httpsAgent);
+  }
+
+  return new Promise((resolve) => {
+    console.log(`---> getProxyAgent`);
+
+    getProxyURL()
+      .then((systemProxyURL) => {
+        if (!systemProxyURL) {
+          console.log(`---> no system proxy url, use direct agent`);
+          return resolve(undefined);
+        }
+
+        console.log(`---> get system proxy url: ${systemProxyURL}`);
+        const agent = new HttpsProxyAgent({
+          keepAlive: true,
+          proxy: systemProxyURL,
+        });
+
+        httpsAgent = agent;
+        resolve(agent);
+      })
+      .catch((error) => {
+        console.error(`---> get system proxy url error: ${error}`);
+        httpsAgent = undefined;
+        resolve(undefined);
+      });
+  });
+}
+
+/**
+ * Get proxy url from local storage first. If not exist, get it from system.
+ */
+export async function getProxyURL(): Promise<string | undefined> {
+  console.log(`start getStoredProxyURL`);
+
+  const systemProxyURL = await LocalStorage.getItem<string>(systemProxyURLKey);
+  if (systemProxyURL) {
+    console.log(`---> get Stored Proxy URL: ${systemProxyURL}`);
+    return systemProxyURL;
+  }
+
+  console.log(`---> getProxyURL: undefined`);
+
+  return new Promise((resolve) => {
+    getSystemProxyURL()
+      .then((proxyURL) => {
+        resolve(proxyURL);
+      })
+      .catch((error) => {
+        const errorString = JSON.stringify(error) || "";
+        console.error(`---> getProxyURL error: ${errorString}`);
+        resolve(undefined);
+      });
   });
 }

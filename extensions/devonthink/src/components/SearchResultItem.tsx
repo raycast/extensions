@@ -33,7 +33,6 @@ const searchResultMetadataItems = (result: SearchResult) => {
         <Tag key={tag} text={tag} />
       ))}
     </TagList>,
-    <MyLabel key="geolocation" propKey="propertyGeolocation" title="Geolocation" text={result.geolocation} />,
     <MyLink key="url" propKey="propertyUrl" title="URL" text={getDomain(result.url)} target={result.url} />,
     <MyLabel
       key="creationDate"

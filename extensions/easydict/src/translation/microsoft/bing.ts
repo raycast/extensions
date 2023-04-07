@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-09-17 10:35
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-09-20 10:51
+ * @lastEditTime: 2023-03-17 10:12
  * @fileName: bing.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -14,16 +14,15 @@ import qs from "qs";
 import { requestCostTime } from "../../axiosConfig";
 import { checkIfIpInChina } from "../../checkIP";
 import { isChineseIPKey, userAgent } from "../../consts";
+import { DetectedLangModel, LanguageDetectType } from "../../detectLanauge/types";
 import { QueryWordInfo } from "../../dictionary/youdao/types";
-import { getBingLanguageId, getYoudaoLanguageIdFromBingId } from "../../language/languages";
-import { QueryTypeResult } from "../../types";
+import { autoDetectLanguageItem, englishLanguageItem } from "../../language/consts";
+import { getBingLangCode, getYoudaoLangCodeFromBingCode } from "../../language/languages";
+import { QueryTypeResult, RequestErrorInfo, TranslationType } from "../../types";
 import { getTypeErrorInfo } from "../../utils";
-import { DetectedLanguageModel, LanguageDetectType } from "./../../detectLanauge/types";
-import { autoDetectLanguageItem, englishLanguageItem } from "./../../language/consts";
-import { RequestErrorInfo, TranslationType } from "./../../types";
 import { BingConfig, BingTranslateResult } from "./types";
 
-console.log(`enter microsoft.ts`);
+console.log(`enter bing.ts`);
 
 const bingConfigKey = "BingConfig";
 
@@ -46,8 +45,8 @@ export async function requestWebBingTranslate(queryWordInfo: QueryWordInfo): Pro
   console.log(`start requestWebBingTranslate`);
 
   const { fromLanguage, toLanguage, word } = queryWordInfo;
-  const fromLang = getBingLanguageId(fromLanguage);
-  const toLang = getBingLanguageId(toLanguage);
+  const fromLang = getBingLangCode(fromLanguage);
+  const toLang = getBingLangCode(toLanguage);
 
   const type = TranslationType.Bing;
 
@@ -89,7 +88,7 @@ export async function requestWebBingTranslate(queryWordInfo: QueryWordInfo): Pro
   }
 
   const url = `https://${bingTld}.bing.com/ttranslatev3?isVertical=1&IG=${IG}&IID=${IIDString}`;
-  console.log(`bing url: ${url}`);
+  // console.log(`bing url: ${url}`);
 
   const config: AxiosRequestConfig = {
     method: "post",
@@ -104,7 +103,7 @@ export async function requestWebBingTranslate(queryWordInfo: QueryWordInfo): Pro
     axios(config)
       .then(function (response) {
         const responseData = response.data;
-        console.log(`bing cost time: ${response.headers[requestCostTime]}`);
+        console.warn(`bing translate cost time: ${response.headers[requestCostTime]}`);
 
         // If bing translate response is empty, may be ip has been changed, bing tld is not correct, so check ip again, then request again.
         if (!responseData) {
@@ -125,16 +124,16 @@ export async function requestWebBingTranslate(queryWordInfo: QueryWordInfo): Pro
             });
           });
         } else {
-          console.log(`bing response data: ${JSON.stringify(responseData, null, 4)}`);
+          console.log(`bing response: ${JSON.stringify(responseData, null, 4)}`);
           const bingTranslateResult = responseData[0] as BingTranslateResult;
           const translations = bingTranslateResult.translations[0].text.split("\n");
           const detectedLanguage = bingTranslateResult.detectedLanguage.language;
           const toLanguage = bingTranslateResult.translations[0].to;
-          console.warn(`bing translate: ${translations}, from: ${detectedLanguage} -> ${toLanguage}`);
+          console.log(`bing translate: ${translations}, from: ${detectedLanguage} -> ${toLanguage}`);
 
           const result: QueryTypeResult = {
             type: type,
-            wordInfo: queryWordInfo,
+            queryWordInfo: queryWordInfo,
             result: bingTranslateResult,
             translations: translations,
           };
@@ -157,13 +156,13 @@ export async function requestWebBingTranslate(queryWordInfo: QueryWordInfo): Pro
 /**
  * Bing language detect, use bing translate `audo-detect`.
  */
-export async function bingLanguageDetect(text: string): Promise<DetectedLanguageModel> {
-  console.log(`start bingLanguageDetect`);
+export async function bingDetect(text: string): Promise<DetectedLangModel> {
+  console.log(`start bingDetect`);
 
   const queryWordInfo: QueryWordInfo = {
     word: text,
-    fromLanguage: autoDetectLanguageItem.bingId,
-    toLanguage: englishLanguageItem.bingId,
+    fromLanguage: autoDetectLanguageItem.bingLangCode,
+    toLanguage: englishLanguageItem.bingLangCode,
   };
   const type = LanguageDetectType.Bing;
 
@@ -172,13 +171,13 @@ export async function bingLanguageDetect(text: string): Promise<DetectedLanguage
       .then((result) => {
         const bingTranslateResult = result.result as BingTranslateResult;
         const detectedLanguageCode = bingTranslateResult.detectedLanguage.language;
-        const youdaoLangCode = getYoudaoLanguageIdFromBingId(detectedLanguageCode);
-        console.log(`bing detect: ${youdaoLangCode}`);
+        const youdaoLangCode = getYoudaoLangCodeFromBingCode(detectedLanguageCode);
+        console.warn(`bing detect language: ${detectedLanguageCode}, youdaoLangCode: ${youdaoLangCode}`);
 
-        const detectedLanguageResult: DetectedLanguageModel = {
+        const detectedLanguageResult: DetectedLangModel = {
           type: type,
-          sourceLanguageId: detectedLanguageCode,
-          youdaoLanguageId: youdaoLangCode,
+          sourceLangCode: detectedLanguageCode,
+          youdaoLangCode: youdaoLangCode,
           confirmed: false,
           result: bingTranslateResult,
         };
@@ -253,10 +252,10 @@ function parseBingConfig(html: string): BingConfig | undefined {
   const IG = html.match(/IG:"(.*?)"/)?.[1];
   // data-iid="translator.5023"
   const IID = html.match(/data-iid="(.*?)"/)?.[1];
-  // var params_RichTranslateHelper = [1663259642763, "ETrbGhqGa5PwV8WL3sTYSBxsYRagh5bl", 3600000, true, null, false, "必应翻译", false, false, null, null];
-  const params_RichTranslateHelper = html.match(/var params_RichTranslateHelper = (.*?);/)?.[1];
-  if (IG && params_RichTranslateHelper) {
-    const paramsArray = JSON.parse(params_RichTranslateHelper);
+  // var params_AbusePreventionHelper = [1663259642763, "ETrbGhqGa5PwV8WL3sTYSBxsYRagh5bl", 3600000, true, null, false, "必应翻译", false, false, null, null];
+  const params_AbusePreventionHelper = html.match(/var params_AbusePreventionHelper = (.*?);/)?.[1];
+  if (IG && params_AbusePreventionHelper) {
+    const paramsArray = JSON.parse(params_AbusePreventionHelper);
     const [key, token, expirationInterval] = paramsArray;
     const config: BingConfig = {
       IG: IG,

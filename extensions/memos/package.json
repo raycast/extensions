@@ -1,0 +1,88 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "memos",
+  "title": "Memos",
+  "description": "Manage Your Memos",
+  "icon": "logo.png",
+  "author": "JakeYu",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "sendMemo",
+      "title": "Send Memo",
+      "description": "Send your thoughts to Memos",
+      "mode": "no-view",
+      "subtitle": "Memos",
+      "arguments": [
+        {
+          "name": "text",
+          "placeholder": "Text",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "openMemoWebsite",
+      "title": "Open Website",
+      "description": "Open Memos Website",
+      "mode": "no-view",
+      "subtitle": "Memos",
+      "icon": "logo.png"
+    },
+    {
+      "name": "sendMemoForm",
+      "title": "Send Memo Form",
+      "description": "Edit memo Detail",
+      "mode": "view",
+      "subtitle": "Memos",
+      "icon": "logo.png"
+    },
+    {
+      "name": "memosList",
+      "title": "Memos List",
+      "description": "Show Memos List",
+      "mode": "view",
+      "subtitle": "Memos"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.47.3",
+    "@raycast/utils": "^1.4.16",
+    "axios": "^1.3.2",
+    "form-data": "^4.0.0",
+    "mime": "^3.0.0",
+    "qs": "^6.11.0",
+    "url-parse": "^1.5.10"
+  },
+  "devDependencies": {
+    "@types/mime": "^3.0.1",
+    "@types/node": "18.8.3",
+    "@types/qs": "^6.9.7",
+    "@types/react": "18.0.9",
+    "@types/url-parse": "^1.4.8",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  },
+  "preferences": [
+    {
+      "name": "openApi",
+      "description": "Your Open API URL can be found in memo settings.",
+      "placeholder": "https://demo.usememos.com/api/memo?openId=",
+      "type": "textfield",
+      "required": true,
+      "title": "Open Api"
+    }
+  ]
+}

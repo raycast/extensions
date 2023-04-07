@@ -17,7 +17,6 @@ export function XcodeProjectListItem(props: {
   const navigation = useNavigation();
   return (
     <List.Item
-      key={props.project.filePath}
       title={props.project.name}
       subtitle={tildify(props.project.filePath)}
       accessories={[{ text: XcodeProjectTypeName(props.project.type) }]}
@@ -29,16 +28,14 @@ export function XcodeProjectListItem(props: {
           {!props.actions ? (
             <Action.Open
               application={XcodeService.bundleIdentifier}
-              key="open-with-xcode"
               title="Open with Xcode"
               target={props.project.filePath}
               icon={Icon.Hammer}
               onOpen={navigation.pop}
             />
           ) : undefined}
-          {!props.actions ? <Action.ShowInFinder key="show-in-finder" path={props.project.filePath} /> : undefined}
+          {!props.actions ? <Action.ShowInFinder path={props.project.filePath} /> : undefined}
           <Action
-            key="favorite"
             title={props.isFavorite ? "Remove from Favorites" : "Add to Favorites"}
             icon={props.isFavorite ? Icon.StarDisabled : Icon.Star}
             onAction={props.onToggleFavoriteAction}

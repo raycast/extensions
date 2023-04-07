@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-08-17 17:41
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-09-19 01:24
+ * @lastEditTime: 2023-03-15 17:45
  * @fileName: utils.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -11,16 +11,30 @@
 import { hasLingueeDictionaryEntries } from "../dictionary/linguee/parse";
 import { LingueeDictionaryResult } from "../dictionary/linguee/types";
 import { hasYoudaoDictionaryEntries } from "../dictionary/youdao/formatData";
-import { QueryWordInfo, YoudaoDictionaryFormatResult } from "../dictionary/youdao/types";
+import { QueryWordInfo, YoudaoDictionaryFormatResult, YoudaoDictionaryListItemType } from "../dictionary/youdao/types";
 import { getYoudaoWebDictionaryURL } from "../dictionary/youdao/utils";
+import { chineseLanguageItem, englishLanguageItem } from "../language/consts";
 import {
-  getLanguageItemFromYoudaoId,
+  getLanguageItemFromYoudaoCode,
   maxLineLengthOfChineseTextDisplay,
   maxLineLengthOfEnglishTextDisplay,
 } from "../language/languages";
-import { KeyStore, myPreferences } from "../preferences";
-import { DicionaryType, QueryResult, QueryTypeResult, TranslationItem, TranslationType } from "../types";
-import { checkIsDictionaryType, checkIsTranslationType, checkIsWord } from "../utils";
+import { AppKeyStore, myPreferences } from "../preferences";
+import {
+  DicionaryType,
+  ListDisplayItem,
+  QueryResult,
+  QueryTypeResult,
+  TranslationItem,
+  TranslationType,
+} from "../types";
+import {
+  checkIsDictionaryType,
+  checkIsLingueeListItem,
+  checkIsTranslationType,
+  checkIsWord,
+  checkIsYoudaoDictionaryListItem,
+} from "../utils";
 
 /**
  * Sort query results by designated order.
@@ -53,12 +67,14 @@ export function getSortOrder(): string[] {
     DicionaryType.Youdao,
     DicionaryType.Linguee,
 
+    TranslationType.OpenAI,
     TranslationType.DeepL,
     TranslationType.Google,
     TranslationType.Bing,
     TranslationType.Apple,
     TranslationType.Baidu,
     TranslationType.Tencent,
+    TranslationType.Volcano,
     TranslationType.Youdao,
     TranslationType.Caiyun,
   ];
@@ -100,16 +116,18 @@ export function getSortOrder(): string[] {
 /**
  * Determine whether the title of the result exceeds the maximum value of one line.
  */
-export function isTranslationTooLong(translation: string, toLanguage: string): boolean {
-  const isChineseTextResult = toLanguage === "zh-CHS";
-  const isEnglishTextResult = toLanguage === "en";
+export function isTextOneLineTooLong(text: string, textLanguage: string): boolean {
+  const isChineseText = textLanguage === chineseLanguageItem.youdaoLangCode;
+  const isEnglishText = textLanguage === englishLanguageItem.youdaoLangCode;
+  // console.log(`check if text too long, ${textLanguage}, ${text.length}`);
+
   let isTooLong = false;
-  const textLength = translation.length;
-  if (isChineseTextResult) {
+  const textLength = text.length;
+  if (isChineseText) {
     if (textLength > maxLineLengthOfChineseTextDisplay) {
       isTooLong = true;
     }
-  } else if (isEnglishTextResult) {
+  } else if (isEnglishText) {
     if (textLength > maxLineLengthOfEnglishTextDisplay) {
       isTooLong = true;
     }
@@ -117,7 +135,7 @@ export function isTranslationTooLong(translation: string, toLanguage: string): b
     isTooLong = true;
   }
   if (isTooLong) {
-    console.log(`---> check is too long: ${isTooLong}, length: ${translation.length}`);
+    console.log(`---> check is too long: ${isTooLong}, ${textLanguage}, length: ${text.length}`);
   }
   return isTooLong;
 }
@@ -131,7 +149,7 @@ export function checkIfShowTranslationDetail(queryResults: QueryResult[]): boole
   let isShowDetail = false;
   for (const queryResult of queryResults) {
     const sourceResult = queryResult.sourceResult;
-    const wordInfo = sourceResult.wordInfo;
+    const wordInfo = sourceResult.queryWordInfo;
     const isDictionaryType = checkIsDictionaryType(queryResult.type);
     if (isDictionaryType) {
       if (wordInfo.hasDictionaryEntries) {
@@ -141,7 +159,7 @@ export function checkIfShowTranslationDetail(queryResults: QueryResult[]): boole
     } else {
       // check if translation is too long
       const oneLineTranslation = sourceResult?.oneLineTranslation || "";
-      const isTooLong = isTranslationTooLong(oneLineTranslation, wordInfo.toLanguage);
+      const isTooLong = isTextOneLineTooLong(oneLineTranslation, wordInfo.toLanguage);
       if (isTooLong) {
         isShowDetail = true;
         break;
@@ -184,31 +202,110 @@ export function checkIfDictionaryHasEntries(dictionaryResult: QueryResult): bool
  * * Since language title is too long for detail page, so we use short emoji instead.  eg. zh-CHS --> en, return: 🇨🇳 --> 🇬🇧
  */
 export function getFromToLanguageTitle(from: string, to: string, onlyEmoji = false) {
-  const fromLanguageItem = getLanguageItemFromYoudaoId(from);
-  const toLanguageItem = getLanguageItemFromYoudaoId(to);
+  const fromLanguageItem = getLanguageItemFromYoudaoCode(from);
+  const toLanguageItem = getLanguageItemFromYoudaoCode(to);
   const fromToEmoji = `${fromLanguageItem.emoji} --> ${toLanguageItem.emoji}`;
-  const fromToLanguageNameAndEmoji = `${fromLanguageItem.englishName}${fromLanguageItem.emoji} --> ${toLanguageItem.englishName}${toLanguageItem.emoji}`;
+  const fromToLanguageNameAndEmoji = `${fromLanguageItem.langEnglishName}${fromLanguageItem.emoji} --> ${toLanguageItem.langEnglishName}${toLanguageItem.emoji}`;
   return onlyEmoji ? fromToEmoji : fromToLanguageNameAndEmoji;
 }
 
 /**
- * Format translation to markdown.
+ * Get show more detail markdown.
  */
-export function formatTranslationToMarkdown(sourceResult: QueryTypeResult) {
-  const { type, translations, wordInfo } = sourceResult;
+export function getShowMoreDetailMarkdown(displayItem: ListDisplayItem) {
+  console.log(`getShowMoreDetailMarkdown`);
+
+  const { queryType, displayType, title, subtitle, copyText, detailsMarkdown } = displayItem;
+  const { word, fromLanguage, toLanguage } = displayItem.queryWordInfo;
+
+  const type = queryType.toString();
+  const fromToLang = getFromToLanguageTitle(fromLanguage, toLanguage);
+  const fromToTitle = `${type}  (${fromToLang})`;
+
+  console.log(`fromToTitle: ${fromToTitle}`);
+  console.log(`word: ${word}`);
+  console.log(`title: ${title}`);
+  console.log(`copyText: ${copyText}`);
+
+  let markdown = "";
+
+  // Translate type
+  if (checkIsTranslationType(queryType)) {
+    markdown += `## ${fromToTitle} \n`;
+    // * Note: word may contain wrap character, so we need to handle it.
+    word.split("\n").forEach((line) => {
+      markdown += `### ${line} \n`;
+    });
+    markdown += `----\n`;
+    copyText.split("\n").forEach((line) => {
+      markdown += `${line} \n\n`;
+    });
+    console.log(`markdown: ${markdown}`);
+
+    return markdown;
+  }
+
+  let queryWord = word;
+  let explanation = title;
+
+  // Linguee dictionary
+  if (checkIsLingueeListItem(displayItem)) {
+    queryWord = word;
+    explanation = displayItem.copyText;
+  }
+
+  // Youdao dictionary
+  if (checkIsYoudaoDictionaryListItem(displayItem)) {
+    queryWord = word;
+    explanation = subtitle ? `${title} ${subtitle}` : title;
+    if (subtitle?.startsWith(title)) {
+      explanation = subtitle;
+    }
+    // if subtitle starts with "title", use subtitle
+    if (subtitle) {
+      const reg = /"(.*)"/;
+      const match = reg.exec(subtitle);
+      if (match) {
+        const startWord = match[1];
+        if (startWord === title) {
+          explanation = subtitle;
+        }
+      }
+    }
+    if (displayType === YoudaoDictionaryListItemType.ModernChineseDict) {
+      explanation = detailsMarkdown || copyText;
+    }
+  }
+
+  markdown = `
+## ${fromToTitle} 
+### ${queryWord}
+----
+${explanation}
+`;
+  console.log(`markdown: ${markdown}`);
+
+  return markdown;
+}
+
+/**
+ * Get translation markdown.
+ */
+function getTranslationMarkdown(sourceResult: QueryTypeResult) {
+  const { type, translations, queryWordInfo: wordInfo } = sourceResult;
   const oneLineTranslation = translations.join("\n");
   if (oneLineTranslation.trim().length === 0) {
     return "";
   }
 
-  const string = oneLineTranslation.replace(/\n/g, "\n\n");
+  const text = oneLineTranslation.replace(/\n/g, "\n\n");
   const fromTo = getFromToLanguageTitle(wordInfo.fromLanguage, wordInfo.toLanguage, true);
 
   const markdown = `
-  ## ${type}   (${fromTo})
-  ---  
-  ${string}
-  `;
+## ${type}   (${fromTo})
+----  
+${text}
+`;
   return markdown;
 }
 
@@ -227,7 +324,7 @@ export function updateTranslationMarkdown(queryResult: QueryResult, queryResults
     const isTranslationType = checkIsTranslationType(type);
     if (sourceResult && isTranslationType) {
       const type = sourceResult.type as TranslationType;
-      const markdownTranslation = formatTranslationToMarkdown(sourceResult);
+      const markdownTranslation = getTranslationMarkdown(sourceResult);
       translations.push({ type: type, text: markdownTranslation });
     }
   }
@@ -245,7 +342,7 @@ export function updateTranslationMarkdown(queryResult: QueryResult, queryResults
 
   const listDiplayItem = displaySections[0].items;
   if (listDiplayItem?.length) {
-    listDiplayItem[0].translationMarkdown = markdown;
+    listDiplayItem[0].detailsMarkdown = markdown;
   }
 }
 
@@ -263,8 +360,8 @@ export function checkIfEnableYoudaoDictionary(queryWordInfo: QueryWordInfo) {
 /**
  * Check if enable Youdao API translation.
  */
-export function hasYoudaoAPI() {
-  if (KeyStore.youdaoAppId) {
+export function hasYoudaoAppKey() {
+  if (AppKeyStore.youdaoAppId && AppKeyStore.youdaoAppSecret) {
     return true;
   }
   return false;

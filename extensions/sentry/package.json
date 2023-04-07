@@ -6,7 +6,8 @@
   "icon": "icon.png",
   "author": "thomas",
   "contributors": [
-    "mattisssa"
+    "mattisssa",
+    "NoorBayari"
   ],
   "license": "MIT",
   "commands": [
@@ -20,16 +21,25 @@
   ],
   "preferences": [
     {
-      "name": "token",
-      "title": "Auth Token",
-      "type": "password",
       "description": "Auth Token to communicate with Sentry",
-      "required": true
+      "name": "token",
+      "required": true,
+      "title": "Auth Token",
+      "type": "password"
+    },
+    {
+      "description": "URL of the Sentry instance to connect with",
+      "name": "url",
+      "placeholder": "https://sentry.io",
+      "required": false,
+      "default": "https://sentry.io",
+      "title": "Sentry URL",
+      "type": "textfield"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.31.0",
-    "@raycast/utils": "^1.1.0",
+    "@raycast/utils": "^1.4.8",
     "node-fetch": "^3.2.10"
   },
   "devDependencies": {

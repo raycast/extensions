@@ -111,7 +111,7 @@ export const RecentChannelActions = (props: { channel: Channel; refresh: boolean
           props.setRefresh(!props.refresh);
           showToast(Toast.Style.Success, "Removed From Recent Channels");
         }}
-        icon={{ source: Icon.XmarkCircle, tintColor: Color.PrimaryText }}
+        icon={{ source: Icon.XMarkCircle, tintColor: Color.PrimaryText }}
         shortcut={{ modifiers: ["cmd"], key: "r" }}
       />
       <Action
@@ -146,7 +146,7 @@ export const PinnedChannelActions = (props: { channel: Channel; refresh: boolean
           props.setRefresh(!props.refresh);
           showToast(Toast.Style.Success, "Removed From Pinned Channels");
         }}
-        icon={{ source: Icon.XmarkCircle, tintColor: Color.PrimaryText }}
+        icon={{ source: Icon.XMarkCircle, tintColor: Color.PrimaryText }}
         shortcut={{ modifiers: ["cmd"], key: "r" }}
       />
       <Action

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { State } from "./types";
-import { ActionPanel, Detail, List, PushAction } from "@raycast/api";
+import { Action, ActionPanel, Detail, List } from "@raycast/api";
 import { doEval } from "./util";
 import { Actions } from "./actions";
 
@@ -16,10 +16,10 @@ export function SlowEval() {
       {(state?.query?.length ?? 0) === 0 ? null : (
         <List.Item
           title={`Evaluate: ${state?.query}`}
-          accessoryTitle="⏎  to evaluate"
+          accessories={[{text: "⏎  to evaluate"}]}
           actions={
             <ActionPanel title="Evaluation result">
-              <PushAction title="Show Evaluation" icon="command-icon.png" target={<EvalResult state={state} />} />
+              <Action.Push title="Show Evaluation" icon="command-icon.png" target={<EvalResult state={state} />} />
             </ActionPanel>
           }
           icon="command-icon.png"
