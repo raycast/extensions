@@ -15,8 +15,8 @@ import HueClient from "./lib/HueClient";
 import React from "react";
 import { getProgressIcon } from "@raycast/utils";
 import useInputRateLimiter from "./hooks/useInputRateLimiter";
-import Style = Toast.Style;
 import { hexToXy } from "./lib/colors";
+import Style = Toast.Style;
 
 export default function ControlLights() {
   const { hueBridgeState, sendHueMessage, isLoading, lights, rooms, zones } = useHue();

@@ -4,9 +4,9 @@ import { discovery, v3 } from "node-hue-api";
 import { APP_NAME, BRIGHTNESSES, MIRED_DEFAULT, MIRED_MAX, MIRED_MIN, MIRED_STEP } from "./constants";
 import Jimp from "jimp";
 import chroma from "chroma-js";
-import Style = Toast.Style;
 
 import { miredToHexString, xyToRgbHexString } from "./colors";
+import Style = Toast.Style;
 
 declare global {
   interface Array<T extends HasId> {
@@ -144,9 +144,10 @@ export function getClosestBrightness(brightness: number) {
 
 export function calculateAdjustedBrightness(brightness: number, direction: "increase" | "decrease") {
   const closestBrightness = getClosestBrightness(brightness);
+  const sortedBrightnesses = direction === "decrease" ? BRIGHTNESSES : [...BRIGHTNESSES].reverse();
 
   return (
-    (direction === "increase" ? BRIGHTNESSES : [...BRIGHTNESSES].reverse()).find((b) => {
+    sortedBrightnesses.find((b) => {
       return direction === "increase" ? b > closestBrightness : b < closestBrightness;
     }) ?? closestBrightness
   );
