@@ -2,8 +2,11 @@ import { getPreferenceValues, Icon, Image, showToast, Toast } from "@raycast/api
 import { CssColor, Group, HasId, Id, Light, Scene } from "./types";
 import { discovery, v3 } from "node-hue-api";
 import { APP_NAME, BRIGHTNESSES, MIRED_DEFAULT, MIRED_MAX, MIRED_MIN, MIRED_STEP } from "./constants";
-import { miredToHexString, xyToRgbHexString } from "./colors";
+import Jimp from "jimp";
+import chroma from "chroma-js";
 import Style = Toast.Style;
+
+import { miredToHexString, xyToRgbHexString } from "./colors";
 
 declare global {
   interface Array<T extends HasId> {
@@ -191,4 +194,27 @@ export function getColorsFromScene(scene: Scene): string[] {
       }) || [];
 
   return paletteColors.length > 0 ? paletteColors : actionColors;
+}
+
+export function createGradientPngUri(colors: string[], width: number, height: number): Promise<string> {
+  return new Promise((resolve, reject) => {
+    new Jimp(width, height, (err, image) => {
+      if (err) reject(err);
+      const scale = chroma.scale(colors);
+
+      image.scan(0, 0, width, height, (x, y) => {
+        const factor = (y / height) * 1.2;
+        const rgba = scale(x / width)
+          .darken(factor * factor)
+          .rgba(true);
+
+        image.setPixelColor(Jimp.rgbaToInt(rgba[0], rgba[1], rgba[2], 254 * rgba[3]), x, y);
+      });
+
+      image.getBase64(Jimp.MIME_PNG, (err, base64) => {
+        if (err) reject(err);
+        resolve(base64);
+      });
+    });
+  });
 }

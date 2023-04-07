@@ -1,10 +1,9 @@
 import { useMemo, useState } from "react";
-import { getColorsFromScene } from "../lib/utils";
-import { createGradientPngUri } from "../lib/colors";
+import { createGradientPngUri, getColorsFromScene } from "../lib/utils";
 import { GradientCache, GradientUri, Id, Scene } from "../lib/types";
 import { Cache } from "@raycast/api";
 
-const gradientCache = new Cache({ namespace: "hue-scenes" });
+const gradientCache = new Cache({ namespace: "hue-scene-gradients" });
 
 export default function useSceneGradients(scenes: Scene[], width: number, height: number) {
   const [gradients, setGradients] = useState<GradientCache>(new Map<Id, GradientUri>());

@@ -1,6 +1,8 @@
 import { Grid } from "@raycast/api";
 import React, { useEffect, useState } from "react";
-import { createGradientPngUri } from "./lib/colors";
+
+import { createGradientPngUri } from "./lib/utils";
+import { rgbToXyAndBrightness, xyToRgb } from "./lib/colors";
 
 export default function Command() {
   const [gradientOne, setGradientOne] = useState("");

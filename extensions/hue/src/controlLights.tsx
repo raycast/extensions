@@ -7,16 +7,16 @@ import {
   getLightIcon,
 } from "./lib/utils";
 import { CssColor, Group, Light } from "./lib/types";
-import { BRIGHTNESS_MAX, BRIGHTNESS_MIN, BRIGHTNESSES, MIRED_MAX, MIRED_MIN } from "./lib/constants";
+import { BRIGHTNESS_MAX, BRIGHTNESS_MIN, BRIGHTNESSES, COLORS, MIRED_MAX, MIRED_MIN } from "./lib/constants";
 import ManageHueBridge from "./components/ManageHueBridge";
 import UnlinkAction from "./components/UnlinkAction";
 import { SendHueMessage, useHue } from "./hooks/useHue";
 import HueClient from "./lib/HueClient";
-import { COLORS, hexToXy } from "./lib/colors";
 import React from "react";
 import { getProgressIcon } from "@raycast/utils";
 import useInputRateLimiter from "./hooks/useInputRateLimiter";
 import Style = Toast.Style;
+import { hexToXy } from "./lib/colors";
 
 export default function ControlLights() {
   const { hueBridgeState, sendHueMessage, isLoading, lights, rooms, zones } = useHue();
@@ -361,9 +361,13 @@ async function handleSetColor(hueClient: HueClient | undefined, light: Light, co
     if (hueClient === undefined) throw new Error("Not connected to Hue Bridge.");
     if (light.color === undefined) throw new Error("Light does not support colors.");
 
+    const { xy, brightness } = hexToXy(color.value);
+
+    // Darker colors will result in a lower brightness value to better match the color.
     await hueClient.updateLight(light, {
       on: { on: true },
-      color: { xy: hexToXy(color.value) },
+      color: { xy: xy },
+      dimming: { brightness: brightness },
     });
 
     toast.style = Style.Success;

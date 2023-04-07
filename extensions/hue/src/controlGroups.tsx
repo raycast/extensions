@@ -1,8 +1,7 @@
 import { ActionPanel, Color, Icon, List, Toast } from "@raycast/api";
 import { getIconForColor } from "./lib/utils";
 import { CssColor, Group, GroupedLight, Room, Scene } from "./lib/types";
-import { BRIGHTNESSES } from "./lib/constants";
-import { COLORS } from "./lib/colors";
+import { BRIGHTNESSES, COLORS } from "./lib/constants";
 import ManageHueBridge from "./components/ManageHueBridge";
 import { SendHueMessage, useHue } from "./hooks/useHue";
 import HueClient from "./lib/HueClient";

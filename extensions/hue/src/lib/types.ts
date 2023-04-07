@@ -20,6 +20,9 @@ export type CssColor = {
   value: string;
 };
 
+/**
+ * RGB values are in the range 0-255.
+ */
 export type Rgb = {
   r: number;
   g: number;
