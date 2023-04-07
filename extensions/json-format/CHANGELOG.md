@@ -4,6 +4,7 @@
 
 - Ability to view formated JSON
 - Added new action to view formatted JSON
+- Ability to recognize invalid input
 
 ## [Format JS Objects] - 2023-02-12
 

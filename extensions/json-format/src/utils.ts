@@ -29,8 +29,9 @@ export function formatJS(text: string) {
     indent_with_tabs: indent === 'tab',
   };
 
-  const out = beautify(trimmedText, options);
-  return out;
+  const output = beautify(trimmedText, options);
+
+  return output;
 }
 
 export async function copyFormattedJs(result: string) {

@@ -20,9 +20,10 @@ export default function main() {
             title="Format"
             icon={Icon.Clipboard}
             onSubmit={async (values: FormInput) => {
-              const out = formatJS(values.input);
-              if (out) {
-                await copyFormattedJs(out);
+              const output = formatJS(values.input);
+
+              if (output) {
+                await copyFormattedJs(output);
               }
             }}
           />
@@ -30,10 +31,10 @@ export default function main() {
             title="View Result"
             icon={Icon.Checkmark}
             onSubmit={async (values: FormInput) => {
-              const out = formatJS(values.input);
+              const output = formatJS(values.input);
 
-              if (out) {
-                setResult(out);
+              if (output) {
+                setResult(output);
               }
             }}
           />
