@@ -12,7 +12,14 @@ export function formatJS(text: string) {
   const indent = getIndentation();
   const trimmedText = text.trim();
 
-  if (!validJson(trimmedText)) {
+  try {
+    JSON.parse(trimmedText);
+  } catch (err) {
+    showToast({
+      style: Toast.Style.Failure,
+      title: trimmedText ? 'Invalid input' : 'Empty input',
+    });
+
     return null;
   }
 
@@ -34,21 +41,6 @@ export async function copyFormattedJs(result: string) {
     await Clipboard.copy(result);
     await showHUD('✅ Copied succesfully!');
   }
-}
-
-export function validJson(input: string) {
-  try {
-    JSON.parse(input);
-  } catch (err) {
-    showToast({
-      style: Toast.Style.Failure,
-      title: input ? 'Invalid input' : 'Empty input',
-    });
-
-    return false;
-  }
-
-  return true;
 }
 
 interface Preferences {
