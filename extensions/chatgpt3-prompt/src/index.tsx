@@ -22,7 +22,7 @@ export default function Command() {
       setIsLoading(true);
       try {
         const response = await axios.get(
-          "https://raw.githubusercontent.com/f/awesome-chatgpt-prompts/main/prompts.csv"
+          "https://github.com/PlexPt/awesome-chatgpt-prompts-zh/blob/main/prompts-zh.json"
         );
         parse(response.data, { columns: true }, (err, records) => {
           setData(records);
