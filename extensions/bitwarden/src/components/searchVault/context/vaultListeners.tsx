@@ -35,19 +35,15 @@ const VaultListenersProvider = ({ children }: { children: ReactNode }) => {
 
 export const useVaultItemPublisher = () => {
   const context = useContext(VaultListenersContext);
-  if (context == null) {
-    throw new Error("useVaultItemPublisher must be used within a VaultListenersProvider");
-  }
+  if (context == null) throw new Error("useVaultItemPublisher must be used within a VaultListenersProvider");
+
   return context.publishItems;
 };
 
 /** Allows you to subscribe to a specific item and get notified when it changes. */
 export const useVaultItemSubscriber = () => {
   const context = useContext(VaultListenersContext);
-
-  if (context == null) {
-    throw new Error("useVaultItemSubscriber must be used within a VaultListenersProvider");
-  }
+  if (context == null) throw new Error("useVaultItemSubscriber must be used within a VaultListenersProvider");
 
   return (itemId: string) => {
     return new Promise<Item>((resolve) => {

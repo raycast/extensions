@@ -1,6 +1,5 @@
 import { Action, ActionPanel, Form, getPreferenceValues, Icon, showToast, Toast } from "@raycast/api";
 import { useRef, useState } from "react";
-import { VAULT_TIMEOUT_MS_TO_LABEL } from "~/constants/preferences";
 import { useBitwarden } from "~/context/bitwarden";
 import { Preferences } from "~/types/preferences";
 import { captureException } from "~/utils/development";

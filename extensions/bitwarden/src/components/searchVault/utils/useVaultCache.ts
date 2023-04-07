@@ -14,7 +14,7 @@ function useCachedVault() {
       const cachedEncryptedVault = cache.get("vault");
       if (!cachedIv || !cachedEncryptedVault) throw new Error("No cached vault found");
 
-      const decryptedVault = decrypt({ content: cachedEncryptedVault, iv: cachedIv });
+      const decryptedVault = decrypt(cachedEncryptedVault, cachedIv);
       return JSON.parse<CacheVaultList>(decryptedVault);
     } catch (error) {
       captureException("Failed to decrypt cached vault", error);
@@ -24,11 +24,11 @@ function useCachedVault() {
 
   const cacheVault = (items: Item[], folders: Folder[]) => {
     try {
-      const cacheItems = prepareItemsForCache(items);
-      const cacheFolders = prepareFoldersForCache(folders);
-      const vaultToEncrypt = JSON.stringify({ items: cacheItems, folders: cacheFolders });
+      const vaultToEncrypt = JSON.stringify({
+        items: prepareItemsForCache(items),
+        folders: prepareFoldersForCache(folders),
+      });
       const encryptedVault = encrypt(vaultToEncrypt);
-
       const cache = new Cache();
       cache.set("vault", encryptedVault.content);
       cache.set("iv", encryptedVault.iv);
@@ -41,11 +41,30 @@ function useCachedVault() {
 }
 
 function prepareItemsForCache(items: Item[]): Item[] {
-  return items.map(prepareItemForCache);
+  return items.map((item) => ({
+    object: item.object,
+    id: item.id,
+    organizationId: item.organizationId,
+    folderId: item.folderId,
+    type: item.type,
+    name: item.name,
+    revisionDate: item.revisionDate,
+    favorite: item.favorite,
+    reprompt: item.reprompt,
+    // sensitive data below
+    collectionIds: [],
+    notes: item.notes != null ? HIDDEN_PLACEHOLDER : item.notes,
+    passwordHistory: undefined,
+    secureNote: undefined,
+    login: cleanLogin(item.login),
+    identity: hideStringProperties(item.identity),
+    fields: cleanFields(item.fields),
+    card: hideStringProperties(item.card),
+  }));
 }
 
 function prepareFoldersForCache(folders: Folder[]): Folder[] {
-  return folders.map(prepareFolderForCache);
+  return folders.map((folder) => ({ object: folder.object, id: folder.id, name: folder.name }));
 }
 
 function cleanLogin(login: Item["login"]): Item["login"] {
@@ -69,33 +88,6 @@ function hideStringProperties<T extends RecordOfAny | undefined>(obj: T): T {
     }
   }
   return cleanObj as T;
-}
-
-function prepareItemForCache(item: Item): Item {
-  return {
-    object: item.object,
-    id: item.id,
-    organizationId: item.organizationId,
-    folderId: item.folderId,
-    type: item.type,
-    name: item.name,
-    revisionDate: item.revisionDate,
-    favorite: item.favorite,
-    reprompt: item.reprompt,
-    // sensitive data below
-    collectionIds: [],
-    notes: item.notes != null ? HIDDEN_PLACEHOLDER : item.notes,
-    passwordHistory: undefined,
-    secureNote: undefined,
-    login: cleanLogin(item.login),
-    identity: hideStringProperties(item.identity),
-    fields: cleanFields(item.fields),
-    card: hideStringProperties(item.card),
-  };
-}
-
-function prepareFolderForCache(folder: Folder): Folder {
-  return { object: folder.object, id: folder.id, name: folder.name };
 }
 
 export default useCachedVault;

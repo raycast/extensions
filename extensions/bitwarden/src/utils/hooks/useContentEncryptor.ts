@@ -19,9 +19,9 @@ export function useContentEncryptor() {
     return { iv: ivBuffer.toString("hex"), content: encryptedContentBuffer.toString("hex") };
   };
 
-  const decrypt = (data: EncryptedContent): string => {
-    const decipher = createDecipheriv(ALGORITHM, cipherKeyBuffer, Buffer.from(data.iv, "hex"));
-    const decryptedContentBuffer = Buffer.concat([decipher.update(Buffer.from(data.content, "hex")), decipher.final()]);
+  const decrypt = (content: string, iv: string): string => {
+    const decipher = createDecipheriv(ALGORITHM, cipherKeyBuffer, Buffer.from(iv, "hex"));
+    const decryptedContentBuffer = Buffer.concat([decipher.update(Buffer.from(content, "hex")), decipher.final()]);
     return decryptedContentBuffer.toString();
   };
 
