@@ -32,7 +32,7 @@ function SearchCommonActions() {
         shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
         onAction={handleLock}
       />
-      <Action title="Logout" icon={Icon.XMarkCircle} onAction={handleLogoutVault} />
+      <Action style={Action.Style.Destructive} title="Logout" icon={Icon.Logout} onAction={handleLogoutVault} />
     </>
   );
 }

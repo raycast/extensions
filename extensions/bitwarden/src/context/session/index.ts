@@ -1,2 +1,2 @@
-export { default as SessionProvider } from "./session";
+export { SessionProvider } from "./session";
 export * from "./session";

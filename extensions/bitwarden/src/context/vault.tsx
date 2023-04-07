@@ -99,5 +99,3 @@ export const useVault = () => {
 
   return context;
 };
-
-export default VaultContext;

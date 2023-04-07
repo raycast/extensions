@@ -1,6 +1,6 @@
-import { Cache } from "@raycast/api";
 import { HIDDEN_PLACEHOLDER } from "~/constants/general";
 import { CacheVaultList, Folder, Item } from "~/types/vault";
+import { Cache } from "~/utils/cache";
 import { captureException } from "~/utils/development";
 import { useContentEncryptor } from "~/utils/hooks/useContentEncryptor";
 
@@ -9,10 +9,9 @@ function useCachedVault() {
 
   const getCachedVault = () => {
     try {
-      const cache = new Cache();
-      const cachedIv = cache.get("iv");
-      const cachedEncryptedVault = cache.get("vault");
-      if (!cachedIv || !cachedEncryptedVault) throw new Error("No cached vault found");
+      const cachedIv = Cache.get("iv");
+      const cachedEncryptedVault = Cache.get("vault");
+      if (!cachedIv || !cachedEncryptedVault) return;
 
       const decryptedVault = decrypt(cachedEncryptedVault, cachedIv);
       return JSON.parse<CacheVaultList>(decryptedVault);
@@ -29,9 +28,8 @@ function useCachedVault() {
         folders: prepareFoldersForCache(folders),
       });
       const encryptedVault = encrypt(vaultToEncrypt);
-      const cache = new Cache();
-      cache.set("vault", encryptedVault.content);
-      cache.set("iv", encryptedVault.iv);
+      Cache.set("vault", encryptedVault.content);
+      Cache.set("iv", encryptedVault.iv);
     } catch (error) {
       captureException("Failed to cache vault", error);
     }

@@ -43,7 +43,6 @@ export async function getSavedSession(): Promise<SavedSessionState> {
   if (!token || !passwordHash) return { ...loadedState, shouldLockVault: true };
   loadedState.token = token;
   loadedState.passwordHash = passwordHash;
-  console.log({ token, passwordHash, lastActivityTimeString });
 
   if (!lastActivityTimeString) return { ...loadedState, shouldLockVault: false };
 

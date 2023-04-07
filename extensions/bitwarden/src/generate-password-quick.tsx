@@ -1,4 +1,4 @@
-import { Clipboard, closeMainWindow, environment, getPreferenceValues, showHUD, showToast, Toast } from "@raycast/api";
+import { Clipboard, closeMainWindow, getPreferenceValues, showHUD, showToast, Toast } from "@raycast/api";
 import { Bitwarden } from "~/api/bitwarden";
 import { Preferences } from "~/types/preferences";
 import { captureException } from "~/utils/development";

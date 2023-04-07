@@ -4,6 +4,7 @@ import UnlockForm from "~/components/UnlockForm";
 import { useBitwarden } from "~/context/bitwarden";
 import { useSessionReducer } from "~/context/session/reducer";
 import { getSavedSession, Storage } from "~/context/session/utils";
+import { Cache } from "~/utils/cache";
 import { captureException } from "~/utils/development";
 import { hashMasterPasswordForReprompting } from "~/utils/passwords";
 
@@ -28,7 +29,7 @@ export type SessionProviderProps = PropsWithChildren<{
  * Component which provides a session via the {@link useSession} hook.
  * @param props.unlock If true, an unlock form will be displayed if the vault is locked or unauthenticated.
  */
-function SessionProvider(props: SessionProviderProps) {
+export function SessionProvider(props: SessionProviderProps) {
   const bitwarden = useBitwarden();
   const [state, dispatch] = useSessionReducer();
   const isInitialized = useRef(false);
@@ -86,6 +87,7 @@ function SessionProvider(props: SessionProviderProps) {
   async function handleLogout() {
     await bitwarden.logout();
     await Storage.clearSession();
+    Cache.clear();
     dispatch({ type: "logout" });
   }
 
@@ -127,5 +129,3 @@ export function useSession(): Session {
 
   return session;
 }
-
-export default SessionProvider;
