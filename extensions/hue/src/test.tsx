@@ -1,8 +1,7 @@
-import { Grid } from "@raycast/api";
+import { Color, Grid } from "@raycast/api";
 import React, { useEffect, useState } from "react";
 
 import { createGradientPngUri } from "./lib/utils";
-import { rgbToXyAndBrightness, xyToRgb } from "./lib/colors";
 
 export default function Command() {
   const [gradientOne, setGradientOne] = useState("");
@@ -17,6 +16,7 @@ export default function Command() {
     <Grid aspectRatio="16/9">
       <Grid.Item title={"Gradient Image One"} content={gradientOne} />
       <Grid.Item title={"Gradient Image Two"} content={gradientTwo} />
+      <Grid.Item title={"Primary Text Color"} content={{ color: Color.PrimaryText }} />
     </Grid>
   );
 }

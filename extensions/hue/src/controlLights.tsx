@@ -145,6 +145,7 @@ function ToggleLightAction(props: { light: Light; onToggle?: () => void }) {
 }
 
 function SetBrightnessAction(props: { light: Light; onSet: (percentage: number) => void }) {
+  // TODO: Figure out why Color.PrimaryText is black instead of white in dark mode
   return (
     <ActionPanel.Submenu
       title="Set Brightness"
