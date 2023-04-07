@@ -42,3 +42,10 @@ In order to use this extension, you'll need to authenticate with Spotify. This e
 - `user-read-playback-state`: To fetch playback state, such as volume, shuffle, repeat, and more.
 - `user-read-private`: To fetch your country code, so we can display songs available in your location only.
 - `user-top-read`: To fetch your top artists and tracks.
+
+---
+
+To do
+
+- [ ] Paginate views (artists, songs, albums, playlists, podcasts, episodes, etc.)
+- [ ] Prioritise AppleScript (when possible) if Spotify is running
