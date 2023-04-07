@@ -49,7 +49,7 @@
       "label": "Extract the favicon from every open tab",
       "name": "useOriginalFavicon",
       "required": false,
-      "title": "Fav icon",
+      "title": "Favicon",
       "type": "checkbox"
     },
     {
