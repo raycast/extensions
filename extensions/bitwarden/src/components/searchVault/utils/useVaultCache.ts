@@ -74,7 +74,12 @@ function cleanLogin(login: Item["login"]): Item["login"] {
 function cleanFields(fields: Item["fields"]): Item["fields"] {
   if (!fields) return undefined;
   // leave name because it's necessary to display in the list
-  return fields.map((field) => ({ name: field.name, value: HIDDEN_PLACEHOLDER, type: field.type }));
+  return fields.map((field) => ({
+    name: field.name,
+    value: HIDDEN_PLACEHOLDER,
+    type: field.type,
+    linkedId: field.linkedId,
+  }));
 }
 
 function hideStringProperties<T extends RecordOfAny | undefined>(obj: T): T {
