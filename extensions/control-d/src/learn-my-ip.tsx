@@ -22,7 +22,7 @@ const LearnMyIP = () => {
     }
 
     await learnIP(selectedDevice);
-    
+
     await showHUD("IP learned ✅");
   };
 

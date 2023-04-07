@@ -49,6 +49,7 @@
     "preferences": [
         {
             "name": "api-key",
+            "title": "API Key",
             "description": "Your Control D API key.",
             "type": "password",
             "required": true
