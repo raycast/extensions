@@ -36,7 +36,7 @@ export class Tab {
     public readonly title: string,
     public readonly url: string,
     public readonly favicon: string,
-    public readonly windowsIndex: number,
+    public readonly windowsId: number,
     public readonly tabIndex: number
   ) {}
 
@@ -47,7 +47,7 @@ export class Tab {
   }
 
   key(): string {
-    return `${this.windowsIndex}${Tab.TAB_CONTENTS_SEPARATOR}${this.tabIndex}`;
+    return `${this.windowsId}${Tab.TAB_CONTENTS_SEPARATOR}${this.tabIndex}`;
   }
 
   urlWithoutScheme(): string {
