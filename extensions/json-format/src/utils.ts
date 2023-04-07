@@ -12,6 +12,10 @@ export function formatJS(text: string) {
   const indent = getIndentation();
   const trimmedText = text.trim();
 
+  if (!validJson(trimmedText)) {
+    return null;
+  }
+
   const options = {
     indent_size: indent === 'tab' ? 1 : parseInt(indent, 10),
     space_in_empty_paren: true,
@@ -23,10 +27,6 @@ export function formatJS(text: string) {
 }
 
 export async function copyFormattedJs(result: string) {
-  if (!(await validJson(result))) {
-    return;
-  }
-
   if (autoPasteEnabled()) {
     await Clipboard.paste(result);
     await showHUD('✅ Pasted succesfully!');
@@ -36,11 +36,11 @@ export async function copyFormattedJs(result: string) {
   }
 }
 
-export async function validJson(input: string) {
+export function validJson(input: string) {
   try {
     JSON.parse(input);
   } catch (err) {
-    await showToast({
+    showToast({
       style: Toast.Style.Failure,
       title: input ? 'Invalid input' : 'Empty input',
     });

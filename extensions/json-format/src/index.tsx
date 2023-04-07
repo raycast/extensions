@@ -1,7 +1,7 @@
 import { ActionPanel, Icon, Form, Action } from '@raycast/api';
 import { useState } from 'react';
 
-import { copyFormattedJs, formatJS, validJson } from './utils';
+import { copyFormattedJs, formatJS } from './utils';
 
 interface FormInput {
   input: string;
@@ -21,7 +21,9 @@ export default function main() {
             icon={Icon.Clipboard}
             onSubmit={async (values: FormInput) => {
               const out = formatJS(values.input);
-              await copyFormattedJs(out);
+              if (out) {
+                await copyFormattedJs(out);
+              }
             }}
           />
           <Action.SubmitForm
@@ -30,11 +32,9 @@ export default function main() {
             onSubmit={async (values: FormInput) => {
               const out = formatJS(values.input);
 
-              if (!(await validJson(out))) {
-                return;
+              if (out) {
+                setResult(out);
               }
-
-              setResult(out);
             }}
           />
         </ActionPanel>

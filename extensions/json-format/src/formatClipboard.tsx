@@ -3,5 +3,7 @@ import { formatJS, copyFormattedJs } from './utils';
 
 export default async () => {
   const out = formatJS((await Clipboard.readText()) || '');
-  await copyFormattedJs(out);
+  if (out) {
+    await copyFormattedJs(out);
+  }
 };
