@@ -1,5 +1,5 @@
 import { HIDDEN_PLACEHOLDER } from "~/constants/general";
-import { CacheVaultList, Folder, Item } from "~/types/vault";
+import { Folder, Item, Vault } from "~/types/vault";
 import { Cache } from "~/utils/cache";
 import { captureException } from "~/utils/development";
 import { useContentEncryptor } from "~/utils/hooks/useContentEncryptor";
@@ -14,7 +14,7 @@ function useCachedVault() {
       if (!cachedIv || !cachedEncryptedVault) return;
 
       const decryptedVault = decrypt(cachedEncryptedVault, cachedIv);
-      return JSON.parse<CacheVaultList>(decryptedVault);
+      return JSON.parse<Vault>(decryptedVault);
     } catch (error) {
       captureException("Failed to decrypt cached vault", error);
       return { items: [], folders: [] };

@@ -3,12 +3,12 @@ import { PasswordHistory } from "~/types/passwords";
 export interface Item {
   object: "item";
   id: string;
-  organizationId: null | string;
-  folderId: null;
-  type: 1 | 2 | 3 | 4;
+  organizationId: string | null;
+  folderId: string | null;
+  type: ItemType;
   reprompt: Reprompt;
   name: string;
-  notes: null | string;
+  notes: string | null;
   favorite: boolean;
   login?: Login;
   collectionIds: string[];
@@ -20,8 +20,15 @@ export interface Item {
   card?: Card;
 }
 
+export const enum ItemType {
+  LOGIN = 1,
+  NOTE = 2,
+  CARD = 3,
+  IDENTITY = 4,
+}
+
 export interface Folder {
-  object: string;
+  object: "folder";
   id: string;
   name: string;
 }
@@ -54,23 +61,40 @@ export interface Card {
   code: string | null;
 }
 
+export const enum FieldType {
+  TEXT = 0,
+  HIDDEN = 1,
+  BOOLEAN = 2,
+  LINKED = 3,
+}
+
 export interface Field {
   name: string;
   value: string;
-  type: number;
+  type: FieldType;
+  linkedId: number | null;
 }
 
 export interface Login {
-  username: null | string;
-  password: null | string;
-  totp: null;
-  passwordRevisionDate: null | string;
+  username: string | null;
+  password: string | null;
+  totp: string | null;
+  passwordRevisionDate: string | null;
   uris?: Uris[];
 }
 
+export const enum UriMatch {
+  BASE_DOMAIN = 0,
+  HOST = 1,
+  STARTS_WITH = 2,
+  EXACT = 3,
+  REGULAR_EXPRESSION = 4,
+  NEVER = 5,
+}
+
 export interface Uris {
-  match: null;
-  uri: null | string;
+  match: UriMatch | null;
+  uri: string | null;
 }
 
 export interface SecureNote {
@@ -82,20 +106,7 @@ export const enum Reprompt {
   REQUIRED = 1,
 }
 
-export type CacheFolder = Pick<Folder, "object" | "id" | "name">;
-
-export type CacheVaultList = {
+export type Vault = {
   items: Item[];
   folders: Folder[];
-};
-
-export type CacheItem = Pick<
-  Item,
-  "object" | "id" | "organizationId" | "folderId" | "type" | "name" | "login" | "revisionDate" | "favorite"
-> & {
-  hasNotes: boolean;
-  revisionDate: string;
-  identity?: string[];
-  fields?: string[];
-  card?: string[];
 };

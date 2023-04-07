@@ -3,13 +3,11 @@ import { createContext, PropsWithChildren, useContext, useEffect, useMemo, useRe
 import { useVaultItemPublisher } from "~/components/searchVault/context/vaultListeners";
 import { useBitwarden } from "~/context/bitwarden";
 import { useSession } from "~/context/session";
-import { Folder, Item } from "~/types/vault";
+import { Item, Vault } from "~/types/vault";
 import { captureException } from "~/utils/development";
 import useCachedVault from "~/components/searchVault/utils/useVaultCache";
 
-export type VaultState = {
-  items: Item[];
-  folders: Folder[];
+export type VaultState = Vault & {
   isLoading: boolean;
   isLocked: boolean;
 };
