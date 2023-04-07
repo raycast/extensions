@@ -8,7 +8,8 @@
   "contributors": [
     "otakustay",
     "EmersonEmerson",
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "arronhunt"
   ],
   "categories": [
     "Design Tools"
@@ -34,12 +35,6 @@
       "mode": "view",
       "preferences": [
         {
-          "name": "primaryAction",
-          "type": "dropdown",
-          "description": "The primary action to perform on a selected color.",
-          "required": false,
-          "title": "Primary Action",
-          "default": "copy",
           "data": [
             {
               "title": "Paste to Active App",
@@ -49,19 +44,19 @@
               "title": "Copy to Clipboard",
               "value": "copy"
             }
-          ]
+          ],
+          "default": "copy",
+          "description": "The primary action to perform on a selected color.",
+          "name": "primaryAction",
+          "required": false,
+          "title": "Primary Action",
+          "type": "dropdown"
         }
       ]
     }
   ],
   "preferences": [
     {
-      "name": "colorFormat",
-      "type": "dropdown",
-      "description": "The color format to use when copying/pasting colors.",
-      "required": false,
-      "title": "Color Format",
-      "default": "hex",
       "data": [
         {
           "title": "HEX - #FF6363",
@@ -82,12 +77,22 @@
         {
           "title": "HSLA - hsla(0, 100%, 69%, 1)",
           "value": "hsla"
+        },
+        {
+          "title": "HSVA - hsva(0, 100%, 100%, 1)",
+          "value": "hsva"
         }
-      ]
+      ],
+      "default": "hex",
+      "description": "The color format to use when copying/pasting colors.",
+      "name": "colorFormat",
+      "required": false,
+      "title": "Color Format",
+      "type": "dropdown"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.46.0",
+    "@raycast/api": "^1.48.8",
     "@raycast/utils": "^1.4.7",
     "@types/execa": "^2.0.0",
     "color-convert": "^2.0.1",

@@ -1,6 +1,6 @@
 import { List, ActionPanel, showToast, Action, Toast, environment } from "@raycast/api";
 import { execSync } from "child_process";
-import { getSelectedImages } from "./utils";
+import { convertPDF, convertSVG, getSelectedImages } from "./utils";
 
 const FORMATS = [
   "ASTC",
@@ -23,6 +23,7 @@ const FORMATS = [
   "TGA",
   "TIFF",
   "WEBP",
+  "SVG",
 ];
 
 export default function Command() {
@@ -43,9 +44,34 @@ export default function Command() {
         const newPath = pathComponents.slice(0, -1).join("") + "." + desiredType.toLowerCase();
 
         if (desiredType === "WEBP") {
+          execSync(`chmod +x ${environment.assetsPath}/webp/cwebp`);
           execSync(`${environment.assetsPath}/webp/cwebp "${item}" -o "${newPath}"`);
+        } else if (pathComponents.at(-1)?.toLowerCase() == "svg") {
+          convertSVG(desiredType, item, newPath);
+        } else if (desiredType == "SVG") {
+          const bmpPath = `${environment.supportPath}/tmp.bmp`;
+          execSync(`chmod +x ${environment.assetsPath}/potrace/potrace`);
+          if (pathComponents.at(-1)?.toLowerCase() == "webp") {
+            const pngPath = `${environment.supportPath}/tmp.png`;
+            execSync(`chmod +x ${environment.assetsPath}/webp/dwebp`);
+            execSync(`${environment.assetsPath}/webp/dwebp "${item}" -o "${pngPath}"`);
+            execSync(
+              `sips --setProperty format "bmp" "${pngPath}" --out "${bmpPath}" && ${environment.assetsPath}/potrace/potrace -s --tight -o "${newPath}" "${bmpPath}"; rm "${bmpPath}"; rm "${pngPath}"`
+            );
+          } else {
+            execSync(
+              `sips --setProperty format "bmp" "${item}" --out "${bmpPath}" && ${environment.assetsPath}/potrace/potrace -s --tight -o "${newPath}" "${bmpPath}"; rm "${bmpPath}"`
+            );
+          }
         } else if (pathComponents.at(-1)?.toLowerCase() == "webp") {
+          execSync(`chmod +x ${environment.assetsPath}/webp/dwebp`);
           execSync(`${environment.assetsPath}/webp/dwebp "${item}" -o "${newPath}"`);
+        } else if (pathComponents.at(-1)?.toLowerCase() == "pdf") {
+          const itemName = item.split("/").at(-1);
+          const folderName = `${itemName?.substring(0, itemName.lastIndexOf("."))} ${desiredType}`;
+          const folderPath = `${item.split("/").slice(0, -1).join("/") + "/" + folderName}`;
+          execSync(`mkdir "${folderPath}"`);
+          convertPDF(desiredType, item, folderPath);
         } else {
           execSync(`sips --setProperty format ${desiredType.toLowerCase()} "${item}" --out "${newPath}"`);
         }

@@ -1,5 +1,9 @@
 # 1Password Changelog
 
+## [Bug fixes] - 2023-04-03
+
+- Fixed newline in clipboard copied values
+
 ## [Configurable primary/secondary actions] - 2023-03-22
 
 - Added configuration to customize the primary and secondary actions on Login
@@ -16,12 +20,14 @@
 This new version of the 1Password extension contains the following changes.
 
 ### 1Password 8
+
 - Filter by categories
 - opbookmark is removed
 - Copying of item fields
 - Create new items (TBD)
 
 ### 1Password 7
+
 - Better caching
 - Beautiful icons instead of emojis
 - Cleaner code
