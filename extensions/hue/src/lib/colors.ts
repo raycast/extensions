@@ -129,7 +129,7 @@ export function miredToRgb(mireds: number, brightness = 100): Rgb {
 
   const [r, g, b] = chroma
     .temperature(hecTemp)
-    .darken((1 - brightness / 100) * COLOR_TEMPERATURE_DARKEN_FACTOR)
+    .darken(1 - brightness / 100)
     .rgb();
 
   return { r, g, b };

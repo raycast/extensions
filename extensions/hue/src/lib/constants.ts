@@ -16,10 +16,6 @@ export const MIRED_DEFAULT = 357;
  * The mired from Hue's API is too warm, so we make it cooler by an arbitrary amount
  */
 export const MIRED_ADJUSTMENT = -50;
-/**
- * We darken color temperatures by 1 / <1 – 100> times this factor using chroma.js
- */
-export const COLOR_TEMPERATURE_DARKEN_FACTOR = 2.5;
 export const COLORS: CssColor[] = [
   { name: "Alice Blue", value: "#f0f8ff" },
   { name: "Antique White", value: "#faebd7" },

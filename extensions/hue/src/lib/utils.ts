@@ -159,11 +159,11 @@ export function calculateAdjustedColorTemperature(mired: number, direction: "inc
 }
 
 export function getColorFromLight(light: Light): string {
-  if (light.color?.xy) {
-    return xyToRgbHexString(light.color.xy, light.dimming?.brightness);
-  }
   if (light.color_temperature?.mirek) {
     return miredToHexString(light.color_temperature.mirek, light.dimming?.brightness);
+  }
+  if (light.color?.xy) {
+    return xyToRgbHexString(light.color.xy, light.dimming?.brightness);
   }
   return miredToHexString(MIRED_DEFAULT, light.dimming?.brightness);
 }
@@ -204,9 +204,9 @@ export function createGradientPngUri(colors: string[], width: number, height: nu
       const scale = chroma.scale(colors);
 
       image.scan(0, 0, width, height, (x, y) => {
-        const factor = (y / height) * 1.2;
+        const factor = (y / height) * 2.3;
         const rgba = scale(x / width)
-          .darken(factor * factor)
+          .darken(factor * (factor * 0.5))
           .rgba(true);
 
         image.setPixelColor(Jimp.rgbaToInt(rgba[0], rgba[1], rgba[2], 254 * rgba[3]), x, y);
