@@ -1,23 +1,45 @@
-import { ActionPanel, Color, Icon, List, Toast } from "@raycast/api";
-import { getIconForColor } from "./lib/utils";
-import { CssColor, Group, GroupedLight, Room, Scene } from "./lib/types";
+import { ActionPanel, Color, Grid, Icon, Toast } from "@raycast/api";
+import { getColorFromLight, getIconForColor } from "./lib/utils";
+import { CssColor, Group, GroupedLight, Id, Palette, Room, Scene, Zone } from "./lib/types";
 import { BRIGHTNESSES, COLORS } from "./lib/constants";
 import ManageHueBridge from "./components/ManageHueBridge";
 import { SendHueMessage, useHue } from "./hooks/useHue";
 import HueClient from "./lib/HueClient";
 import { getProgressIcon } from "@raycast/utils";
+import { useMemo, useState } from "react";
+import useGradientUris from "./hooks/useGradientUris";
 import Style = Toast.Style;
 
+// Exact dimensions of a 16:9 Raycast 5 column grid item.
+const GRID_ITEM_WIDTH = 271;
+const GRID_ITEM_HEIGHT = 153;
+
 export default function ControlGroups() {
-  const { hueBridgeState, sendHueMessage, isLoading, groupedLights, rooms, zones, scenes } = useHue();
+  const { hueBridgeState, sendHueMessage, isLoading, lights, groupedLights, rooms, zones, scenes } = useHue();
+  const [palettes, setPalettes] = useState(new Map<Id, Palette>([]));
+  const { gradientUris } = useGradientUris(palettes, GRID_ITEM_WIDTH, GRID_ITEM_HEIGHT);
+
+  useMemo(() => {
+    const groups = [...rooms, ...zones];
+    const palettes = new Map<Id, Palette>(
+      groups.map((group) => [
+        group.id,
+        lights
+          .filter((light) => group.children.some((child) => child.rid === light.id || child.rid === light.owner.rid))
+          .map((light) => getColorFromLight(light)),
+      ])
+    );
+
+    setPalettes(palettes);
+  }, [rooms, zones, groupedLights]);
 
   const manageHueBridgeElement: JSX.Element | null = ManageHueBridge(hueBridgeState, sendHueMessage);
   if (manageHueBridgeElement !== null) return manageHueBridgeElement;
 
   return (
-    <List isLoading={isLoading}>
+    <Grid isLoading={isLoading} aspectRatio="16/9">
       {rooms.length > 0 && (
-        <List.Section title="Rooms">
+        <Grid.Section title="Rooms">
           {rooms.map((room: Room) => {
             const roomScenes = scenes.filter((scene: Scene) => scene.group.rid == room.id);
             const groupedLight = groupedLights.find(
@@ -32,15 +54,16 @@ export default function ControlGroups() {
                 groupedLight={groupedLight}
                 group={room}
                 scenes={roomScenes}
+                gradientUri={gradientUris.get(room.id)}
                 sendHueMessage={sendHueMessage}
               />
             );
           })}
-        </List.Section>
+        </Grid.Section>
       )}
       {zones.length > 0 && (
-        <List.Section title="Zones">
-          {zones.map((zone: Group) => {
+        <Grid.Section title="Zones">
+          {zones.map((zone: Zone) => {
             const zoneScenes = scenes.filter((scene: Scene) => scene.group.rid == zone.id);
             return (
               <Group
@@ -48,13 +71,14 @@ export default function ControlGroups() {
                 key={zone.id}
                 group={zone}
                 scenes={zoneScenes}
+                gradientUri={gradientUris.get(zone.id)}
                 sendHueMessage={sendHueMessage}
               />
             );
           })}
-        </List.Section>
+        </Grid.Section>
       )}
-    </List>
+    </Grid>
   );
 }
 
@@ -63,15 +87,14 @@ function Group(props: {
   groupedLight?: GroupedLight;
   group: Group;
   scenes?: Scene[];
+  gradientUri?: string;
   sendHueMessage: SendHueMessage;
 }) {
   return (
-    <List.Item
+    <Grid.Item
       key={props.group.id}
       title={props.group.metadata.name}
-      subtitle={props.group.metadata.archetype}
-      // icon={getGroupIcon(props.group)}
-      icon={Icon.LightBulb}
+      content={props.groupedLight?.on?.on ? props.gradientUri ?? "" : ""}
       actions={
         props.groupedLight && (
           <ActionPanel>

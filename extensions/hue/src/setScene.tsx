@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Grid, Icon, Toast } from "@raycast/api";
-import { GradientCache, GradientUri, Group, Id, Palette, Scene } from "./lib/types";
+import { GradientUriCache, GradientUri, Group, Id, Palette, Scene } from "./lib/types";
 import UnlinkAction from "./components/UnlinkAction";
 import ManageHueBridge from "./components/ManageHueBridge";
 import { SendHueMessage, useHue } from "./hooks/useHue";
@@ -16,7 +16,7 @@ const GRID_ITEM_HEIGHT = 153;
 export default function SetScene() {
   const { hueBridgeState, sendHueMessage, isLoading, rooms, zones, scenes } = useHue();
   const [palettes, setPalettes] = useState(new Map<Id, Palette>([]));
-  const { gradients } = useGradients(palettes, GRID_ITEM_WIDTH, GRID_ITEM_HEIGHT);
+  const { gradientUris } = useGradients(palettes, GRID_ITEM_WIDTH, GRID_ITEM_HEIGHT);
   const groupTypes = [rooms, zones];
 
   useMemo(() => {
@@ -40,7 +40,7 @@ export default function SetScene() {
               key={group.id}
               group={group}
               scenes={groupScenes}
-              gradients={gradients}
+              gradientUris={gradientUris}
               hueClient={hueBridgeState.context.hueClient}
               sendHueMessage={sendHueMessage}
             />
@@ -54,7 +54,7 @@ export default function SetScene() {
 function Group(props: {
   group: Group;
   scenes: Scene[];
-  gradients: GradientCache;
+  gradientUris: GradientUriCache;
   hueClient?: HueClient;
   sendHueMessage: SendHueMessage;
 }) {
@@ -66,7 +66,7 @@ function Group(props: {
             key={scene.id}
             group={props.group}
             scene={scene}
-            gradient={props.gradients.get(scene.id)}
+            gradientUris={props.gradientUris.get(scene.id)}
             hueClient={props.hueClient}
             sendHueMessage={props.sendHueMessage}
           />
@@ -79,7 +79,7 @@ function Group(props: {
 function Scene(props: {
   scene: Scene;
   group: Group;
-  gradient: GradientUri | undefined;
+  gradientUris: GradientUri | undefined;
   sendHueMessage: SendHueMessage;
   hueClient?: HueClient;
 }) {
@@ -88,7 +88,7 @@ function Scene(props: {
     <Grid.Item
       title={activeEmoji + props.scene.metadata.name}
       keywords={[props.group.metadata.name]}
-      content={props.gradient ?? ""}
+      content={props.gradientUris ?? ""}
       actions={
         <ActionPanel>
           <SetSceneAction

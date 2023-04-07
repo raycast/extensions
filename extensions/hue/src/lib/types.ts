@@ -12,7 +12,7 @@
 export type Id = string | number;
 export type Palette = string[];
 export type GradientUri = string;
-export type GradientCache = Map<Id, GradientUri>;
+export type GradientUriCache = Map<Id, GradientUri>;
 
 export type ParsedUpdateEvent = { key: number; value: UpdateEvent };
 

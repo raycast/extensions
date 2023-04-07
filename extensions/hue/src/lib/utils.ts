@@ -1,5 +1,5 @@
 import { getPreferenceValues, Icon, Image, showToast, Toast } from "@raycast/api";
-import { CssColor, Palette, Group, HasId, Id, Light, Scene } from "./types";
+import { CssColor, Group, HasId, Id, Light, Palette, Scene } from "./types";
 import { discovery, v3 } from "node-hue-api";
 import { APP_NAME, BRIGHTNESSES, MIRED_DEFAULT, MIRED_MAX, MIRED_MIN, MIRED_STEP } from "./constants";
 import Jimp from "jimp";
