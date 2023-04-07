@@ -63,7 +63,7 @@ async function calculateResult() {
   const numbersStr = subject.text
     .split("\n")
     // remove group separators
-    .map((n) => n.replace(groupSeparator, ""))
+    .map((n) => n.replaceAll(groupSeparator, ""))
     // remove non-numbers
     .filter((n) => {
       try {
