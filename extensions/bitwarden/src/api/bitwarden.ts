@@ -7,7 +7,7 @@ import { LOCAL_STORAGE_KEY, DEFAULT_SERVER_URL } from "~/constants/general";
 import { VaultState, VaultStatus } from "~/types/general";
 import { Preferences } from "~/types/preferences";
 import { PasswordGeneratorOptions } from "~/types/passwords";
-import { Item } from "~/types/vault";
+import { Folder, Item } from "~/types/vault";
 import { getPasswordGeneratingArgs } from "~/utils/passwords";
 import { getServerUrlPreference } from "~/utils/preferences";
 
@@ -121,10 +121,9 @@ export class Bitwarden {
     return items.filter((item: Item) => !!item.name);
   }
 
-  async listFolders(sessionToken: string): Promise<Item[]> {
+  async listFolders(sessionToken: string): Promise<Folder[]> {
     const { stdout } = await this.exec(["list", "folders", "--session", sessionToken]);
-    const folders = JSON.parse<Item[]>(stdout);
-    return folders;
+    return JSON.parse<Folder[]>(stdout);
   }
 
   async getTotp(id: string, sessionToken: string): Promise<string> {
