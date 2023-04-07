@@ -1,10 +1,12 @@
 import { Action, ActionPanel, Grid, Icon, Toast } from "@raycast/api";
-import { GradientCache, GradientUri, Group, Scene } from "./lib/types";
+import { GradientCache, GradientUri, Group, Id, Palette, Scene } from "./lib/types";
 import UnlinkAction from "./components/UnlinkAction";
 import ManageHueBridge from "./components/ManageHueBridge";
 import { SendHueMessage, useHue } from "./hooks/useHue";
 import HueClient from "./lib/HueClient";
-import useSceneGradients from "./hooks/useSceneGradients";
+import useGradients from "./hooks/useGradientUris";
+import { getColorsFromScene } from "./lib/utils";
+import { useMemo, useState } from "react";
 import Style = Toast.Style;
 
 // Exact dimensions of a 16:9 Raycast 5 column grid item.
@@ -13,8 +15,13 @@ const GRID_ITEM_HEIGHT = 153;
 
 export default function SetScene() {
   const { hueBridgeState, sendHueMessage, isLoading, rooms, zones, scenes } = useHue();
-  const { gradients } = useSceneGradients(scenes, GRID_ITEM_WIDTH, GRID_ITEM_HEIGHT);
+  const [palettes, setPalettes] = useState(new Map<Id, Palette>([]));
+  const { gradients } = useGradients(palettes, GRID_ITEM_WIDTH, GRID_ITEM_HEIGHT);
   const groupTypes = [rooms, zones];
+
+  useMemo(() => {
+    setPalettes(new Map<Id, Palette>(scenes.map((scene) => [scene.id, getColorsFromScene(scene)])));
+  }, [scenes]);
 
   const manageHueBridgeElement: JSX.Element | null = ManageHueBridge(hueBridgeState, sendHueMessage);
   if (manageHueBridgeElement !== null) return manageHueBridgeElement;

@@ -10,6 +10,7 @@
 // Non-Hue API types //
 ///////////////////////
 export type Id = string | number;
+export type Palette = string[];
 export type GradientUri = string;
 export type GradientCache = Map<Id, GradientUri>;
 

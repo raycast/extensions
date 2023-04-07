@@ -1,5 +1,5 @@
 import { getPreferenceValues, Icon, Image, showToast, Toast } from "@raycast/api";
-import { CssColor, Group, HasId, Id, Light, Scene } from "./types";
+import { CssColor, Palette, Group, HasId, Id, Light, Scene } from "./types";
 import { discovery, v3 } from "node-hue-api";
 import { APP_NAME, BRIGHTNESSES, MIRED_DEFAULT, MIRED_MAX, MIRED_MIN, MIRED_STEP } from "./constants";
 import Jimp from "jimp";
@@ -168,7 +168,7 @@ export function getColorFromLight(light: Light): string {
   return miredToHexString(MIRED_DEFAULT, light.dimming?.brightness);
 }
 
-export function getColorsFromScene(scene: Scene): string[] {
+export function getColorsFromScene(scene: Scene): Palette {
   const paletteColors = [
     ...(scene.palette?.color?.map((color) => {
       return xyToRgbHexString(color.color.xy, color.color.dimming?.brightness);
