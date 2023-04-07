@@ -76,9 +76,10 @@ function Scene(props: {
   sendHueMessage: SendHueMessage;
   hueClient?: HueClient;
 }) {
+  const activeEmoji = !(props.scene.status?.active === "inactive") ? "💡 " : "";
   return (
     <Grid.Item
-      title={props.scene.metadata.name}
+      title={activeEmoji + props.scene.metadata.name}
       keywords={[props.group.metadata.name]}
       content={props.gradient ?? ""}
       actions={

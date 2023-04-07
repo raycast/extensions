@@ -644,6 +644,13 @@ export type Scene = {
       brightness: number;
     }[];
   };
+
+  /**
+   * Undocumented, but present in the API
+   */
+  status: {
+    active: "static" | "dynamic" | "inactive";
+  };
 };
 
 export type SceneRequest = {
