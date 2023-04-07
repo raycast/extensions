@@ -232,6 +232,69 @@ const mathAndNumberChars: Character[] = [
   },
 ];
 
+const superscriptChars: Character[] = [
+  {
+    label: "Superscript 1",
+    value: "¹",
+    example: "x¹",
+    html: "&sup1;",
+  },
+  {
+    label: "Superscript 2",
+    value: "²",
+    example: "x²",
+    html: "&sup2;",
+  },
+  {
+    label: "Superscript 3",
+    value: "³",
+    example: "x³",
+    html: "&sup3;",
+  },
+  {
+    label: "Superscript 4",
+    value: "⁴",
+    example: "x⁴",
+    html: "&#8308;",
+  },
+  {
+    label: "Superscript 5",
+    value: "⁵",
+    example: "x⁵",
+    html: "&#8309;",
+  },
+  {
+    label: "Superscript 6",
+    value: "⁶",
+    example: "x⁶",
+    html: "&#8310;",
+  },
+  {
+    label: "Superscript 7",
+    value: "⁷",
+    example: "x⁷",
+    html: "&#8311;",
+  },
+  {
+    label: "Superscript 8",
+    value: "⁸",
+    example: "x⁸",
+    html: "&#8312;",
+  },
+  {
+    label: "Superscript 9",
+    value: "⁹",
+    example: "x⁹",
+    html: "&#8313;",
+  },
+  {
+    label: "Superscript 0",
+    value: "⁰",
+    example: "x⁰",
+    html: "&#8304;",
+  },
+];
+
 const symbolChars: Character[] = [
   {
     label: "Section",
@@ -325,6 +388,10 @@ export const characterSections: Array<{
   {
     title: "Math and Numbers",
     characters: mathAndNumberChars,
+  },
+  {
+    title: "Superscript",
+    characters: superscriptChars,
   },
   {
     title: "Symbols",
