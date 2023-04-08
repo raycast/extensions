@@ -3,16 +3,15 @@ import { XMLParser } from "fast-xml-parser";
 import { useFetch, Response } from "@raycast/utils";
 import { ActionPanel, Action, List, Icon } from "@raycast/api";
 
-// TODO: create preference to select Browser?
-
 export default function Command() {
   const [searchText, setSearchText] = useState("");
 
   if (searchText.length === 0) {
-    // TODO: show dict.cc `ListWithEmptyView`
+    // Don't fire search if query is empty
+    // https://github.com/rhubarbgroup/raycast-wordpress-docs/issues/1
   }
 
-  const query = searchText.length === 0 ? "foobar" : searchText;
+  const query = searchText.length === 0 ? "get_" : searchText;
 
   const { data, isLoading } = useFetch(`https://developer.wordpress.org/search/${query}/feed/rss/`, {
     parseResponse: parseFetchResponse,
@@ -44,6 +43,7 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
         <ActionPanel>
           <ActionPanel.Section>
             <Action.OpenInBrowser title="Open in Browser" url={searchResult.url} />
+            <Action.CopyToClipboard title="Copy URL to Clipboard" content={searchResult.url} />
           </ActionPanel.Section>
         </ActionPanel>
       }
