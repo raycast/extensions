@@ -3,7 +3,7 @@
 ## [Fix & Feature] - April, 9 2023
 
 - Feature: Pause history
-- Fix: Handle `429` error code
+- Fix: Handle the `429` error code
 
 ## [Fix] - April, 4 2023
 
