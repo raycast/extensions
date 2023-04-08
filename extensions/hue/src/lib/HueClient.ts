@@ -146,11 +146,11 @@ export default class HueClient {
   }
 
   public async updateGroupedLight(groupedLight: GroupedLight, properties: Partial<Light>): Promise<any> {
-    this.setGroupedLights?.((groupedLights) => groupedLights.updateItem(groupedLight.id, properties));
+    this.setGroupedLights?.((groupedLights) => groupedLights.updateItem(groupedLight, properties));
     const request = async () => {
       return await this.makeRequest("PUT", `/clip/v2/resource/grouped_light/${groupedLight.id}`, properties).catch(
         (e) => {
-          this.setGroupedLights?.((groupedLights) => groupedLights.updateItem(groupedLight.id, groupedLight));
+          this.setGroupedLights?.((groupedLights) => groupedLights.updateItem(groupedLight, groupedLight));
           throw e;
         }
       );

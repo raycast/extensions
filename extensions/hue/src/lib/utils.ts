@@ -1,5 +1,5 @@
 import { getPreferenceValues, Icon, Image, showToast, Toast } from "@raycast/api";
-import { CssColor, Group, HasId, Id, Light, Palette, Scene } from "./types";
+import { CssColor, Group, HasId, Light, Palette, Scene } from "./types";
 import { discovery, v3 } from "node-hue-api";
 import { APP_NAME, BRIGHTNESSES, MIRED_DEFAULT, MIRED_MAX, MIRED_MIN, MIRED_STEP } from "./constants";
 import Jimp from "jimp";
@@ -11,22 +11,32 @@ import Style = Toast.Style;
 
 declare global {
   interface Array<T extends HasId> {
-    updateItem(id: Id, changes: object): T[];
+    /**
+     * The <code>updateItem</code> method <strong>creates a new array</strong> with the <code>changes</code> applied to
+     * the array element that matches the <code>id</code> of the given <code>item</code>.
+     */
+    updateItem(item: Partial<T>, changes: Partial<T>): T[];
 
-    updateItems(newItems: Partial<T>[]): T[];
+    /**
+     * The <code>replaceItems</code> method <strong>creates a new array</strong> where array elements are replaced with
+     * the <code>newItems</code> if the <code>id</code> matches. If <code>changes</code> are provided, they are applied
+     * to the <code>items</code> that are replaced.
+     *
+     * If the <code>id</code> does not match, the original array element is kept. No new array elements are added.
+     */
+    updateItems(items: Partial<T>[], changes?: Partial<T>): T[];
   }
 }
 
-Array.prototype.updateItem = function (id, changes) {
-  return this.map((item) => {
-    return id !== item.id ? item : { ...item, ...changes };
-  });
+Array.prototype.updateItem = function (item, changes) {
+  console.log(item.color);
+  return this.map((it) => (it.id !== item.id ? it : { ...it, ...item, ...changes }));
 };
 
-Array.prototype.updateItems = function (newItems) {
-  return this.map((item) => {
-    const foundItem = newItems.find((newItem) => newItem.id === item.id);
-    return foundItem ? { ...item, ...foundItem } : item;
+Array.prototype.updateItems = function (items, changes) {
+  return this.map((it) => {
+    const item = items.find((item) => item.id === it.id);
+    return !item ? it : { ...it, ...item, ...changes };
   });
 };
 
@@ -226,9 +236,11 @@ export function optimisticUpdate<T extends HasId>(
   updateToStateItem: Partial<T>,
   setState: React.Dispatch<React.SetStateAction<T[]>>
 ): () => void {
-  setState((prevState: T[]) => prevState.updateItem(stateItem.id, updateToStateItem));
+  setState((prevState: T[]) => {
+    return prevState.updateItem(stateItem, updateToStateItem);
+  });
 
   return (): void => {
-    setState((prevState: T[]): T[] => prevState.updateItem(stateItem.id, stateItem));
+    setState((prevState: T[]): T[] => prevState.updateItem(stateItem, stateItem));
   };
 }
