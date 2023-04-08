@@ -1,5 +1,5 @@
 import { Action, Alert, confirmAlert, Icon } from "@raycast/api";
-import { SendHueMessage } from "../lib/types";
+import { SendHueMessage } from "../hooks/useHue";
 import ActionStyle = Alert.ActionStyle;
 
 export default function UnlinkAction(props: { sendHueMessage: SendHueMessage }) {
@@ -13,7 +13,7 @@ export default function UnlinkAction(props: { sendHueMessage: SendHueMessage }) 
           primaryAction: {
             title: "Remove",
             style: ActionStyle.Destructive,
-            onAction: () => props.sendHueMessage("unlink"),
+            onAction: () => props.sendHueMessage("UNLINK"),
           },
         })
       }
