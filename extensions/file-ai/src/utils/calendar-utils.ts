@@ -10,7 +10,7 @@ import { runAppleScript } from "run-applescript";
 export const filterString = (str: string, cutoff?: number): string => {
   /* Removes unnecessary/invalid characters from strings. */
   return str
-    .replaceAll(/[^A-Za-z0-9,.?!\-()[\]{}@: \n]/g, "")
+    .replaceAll(/[^A-Za-z0-9,.?!\-()/[\]{}@: \n]/g, "")
     .replaceAll('"', "'")
     .replaceAll(/[^\S\r\n]/g, " ")
     .substring(0, cutoff || 3000);

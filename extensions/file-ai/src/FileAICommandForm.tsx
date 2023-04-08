@@ -19,6 +19,8 @@ export default function FileAICommandForm(props: {
   const { oldData, setCommands } = props;
   const { pop } = useNavigation();
 
+  let maxPromptLength = oldData?.minNumFiles == "0" ? 3000 : 500
+
   const { handleSubmit, itemProps } = useForm<CommandFormValues>({
     async onSubmit(values) {
       await LocalStorage.setItem(values.name, JSON.stringify(values));
@@ -48,9 +50,9 @@ export default function FileAICommandForm(props: {
         if (!value) {
           return "Must provide a prompt";
         }
-
-        if (value.length > 500) {
-          return "Prompt must be 500 characters or fewer";
+        
+        if (value.length > maxPromptLength) {
+          return `Prompt must be ${maxPromptLength} characters or fewer`;
         }
       },
       minNumFiles: (value) => {
@@ -92,6 +94,12 @@ export default function FileAICommandForm(props: {
       <Form.TextArea
         title="Minimum File Count"
         placeholder="Minimum number of files required"
+        onChange={(value) => {
+          const intVal = parseInt(value)
+          if (intVal == 0) {
+            maxPromptLength = 3000
+          }
+        }}
         {...itemProps.minNumFiles}
       />
 

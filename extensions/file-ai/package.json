@@ -77,7 +77,7 @@
     },
     {
       "name": "import-commands",
-      "title": "Import Custom File AI Commands",
+      "title": "Import File AI Commands",
       "description": "Import custom File AI commands from a JSON string",
       "mode": "view"
     }

@@ -20,7 +20,7 @@ Make custom commands that act on selected files using Raycast AI, making use of 
     - Summarize the spoken word content of audio files.
 - File AI Chat
     - Start a back-and-forth conversation with AI with selected files provided as context.
-- Import Custom File AI Commands
+- Import File AI Commands
     - Add custom commands from a JSON string.
 
 ## Custom Commands

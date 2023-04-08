@@ -107,7 +107,7 @@ export function useFileContents(
             if (!pathLower.includes(".app") && fs.lstatSync(file).isDirectory()) {
               contents += getDirectoryDetails(file);
             } else if (pathLower.includes(".pdf")) {
-              contents += `"${filterContentString(getPDFText(file))}"`;
+              contents += `"${filterContentString(await getPDFText(file))}"`;
             } else if (imageFileExtensions.includes(pathLower.split(".").at(-1) as string)) {
               contents += await getImageDetails(file, skipMetadata);
             } else if (pathLower.includes(".app")) {
@@ -442,13 +442,16 @@ const getFileExifData = async (filePath: string) => {
   return JSON.stringify({ ...exifData, ...metadata });
 };
 
-const getPDFText = (filePath: string): string => {
+const getPDFText = async (filePath: string): Promise<string> => {
   /* Gets the visible text of a PDF. */
-  return runAppleScriptSync(`use framework "Quartz"
+  const rawText = await runAppleScript(`use framework "Quartz"
   set thePDF to "${filePath}"
   set theURL to current application's |NSURL|'s fileURLWithPath:thePDF
   set thePDF to current application's PDFDocument's alloc()'s initWithURL:theURL
   return (thePDF's |string|()) as text`);
+
+  const imageText = await getImageDetails(filePath, true)
+  return `${rawText} ${imageText}`
 };
 
 const getAudioDetails = (filePath: string, skipMetadata?: boolean): string => {
