@@ -6,6 +6,7 @@ import {
   open,
   showHUD,
 } from "@raycast/api";
+import { useEffect, useState } from "react";
 
 const useDemoDayCountdown = () => {
   const getCountdown = (endDate: Date) => {
@@ -13,7 +14,10 @@ const useDemoDayCountdown = () => {
     const totalMilliseconds = endDate.getTime() - now.getTime();
 
     if (totalMilliseconds <= 0) {
-      return { fullCountdown: "0 days, 0 hours, 0 minutes, 0 seconds", formattedCountdown: "0 days, 0 hours" };
+      return {
+        title: "good luck builder.",
+        fullCountdown: "0 days, 0 hours, 0 minutes, 0 seconds",
+      };
     }
 
     const seconds = Math.floor(totalMilliseconds / 1000);
@@ -21,25 +25,36 @@ const useDemoDayCountdown = () => {
     const hours = Math.floor(minutes / 60);
     const days = Math.floor(hours / 24);
 
+    const formattedCountdown =
+      days === 0 ? `${hours} hours, ${minutes % 60} minutes` : `${days} days, ${hours % 24} hours`;
+
+    const title = `${formattedCountdown} until demo day`;
     const fullCountdown = `${days} days, ${hours % 24} hours, ${minutes % 60} minutes, ${seconds % 60} seconds`;
-    let formattedCountdown = "";
 
-    if (days === 0) {
-      formattedCountdown = `${hours} hours, ${minutes % 60} minutes`;
-    } else {
-      formattedCountdown = `${days} days, ${hours % 24} hours`;
-    }
-
-    return { fullCountdown, formattedCountdown };
+    return { title, fullCountdown };
   };
 
   const endDate = new Date(Date.UTC(2023, 4, 21, 17, 30)); // May 21, 2023, 10:30 AM PT (17:30 UTC)
-  const { fullCountdown, formattedCountdown } = getCountdown(endDate);
-  const title =
-    formattedCountdown === "0 days, 0 hours" ? "good luck builder." : `${formattedCountdown} until demo day`;
+  const initialCountdown = getCountdown(endDate);
+
+  const [title, setTitle] = useState(initialCountdown.title);
+  const [fullCountdown, setFullCountdown] = useState(initialCountdown.fullCountdown);
+
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      const updatedCountdown = getCountdown(endDate);
+      setTitle(updatedCountdown.title);
+      setFullCountdown(updatedCountdown.fullCountdown);
+    }, 1000);
+
+    return () => {
+      clearInterval(intervalId);
+    };
+  }, []);
 
   return { title, fullCountdown };
 };
+
 
 export default function Command() {
   const { title, fullCountdown } = useDemoDayCountdown();
@@ -85,7 +100,7 @@ export default function Command() {
     <MenuBarExtra icon={Icon.Clock} title={title}>
       <MenuBarExtra.Section title="welcome to s3." />
       <MenuBarExtra.Item
-        title={`${fullCountdown} until demo day.`}
+        title={fullCountdown}
         icon={Icon.Clock}
         onAction={() => {
           Clipboard.copy(`${fullCountdown} until n&w s3 demo day.`);
