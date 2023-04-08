@@ -1,0 +1,49 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "remove-decorators",
+  "title": "Remove decorators",
+  "description": "Just remove ugly decorators",
+  "icon": "extension-icon.png",
+  "author": "Pawel-Kica",
+  "categories": [
+    "Developer Tools",
+    "Data",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "removeDecoratorsClipboard",
+      "title": "Remove decorators clipboard",
+      "description": "Remove decorators from text stored in clipboard and copies it back",
+      "mode": "no-view"
+    },
+    {
+      "name": "index",
+      "title": "Remove decorators",
+      "description": "Just remove decorators",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.49.2",
+    "latest": "^0.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "16.10.3",
+    "@types/react": "18.0.9",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
