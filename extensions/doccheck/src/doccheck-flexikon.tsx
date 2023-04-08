@@ -169,11 +169,18 @@ export default function Command() {
                 key={entry.url}
                 title={entry.title}
                 accessories={[
-                  { tag: { value: entry.title_alias[0], color: Color.Red }, tooltip: "Tag with tooltip" },
-                  { tag: { value: entry.title_alias[1], color: Color.Red }, tooltip: "Tag with tooltip" },
-                  { tag: { value: entry.title_alias[2], color: Color.Red }, tooltip: "Tag with tooltip" },
-                  { icon: Icon.Person, text: entry.author },
-                  { tag: new Date(entry.date_publish) },
+                  { tag: { value: entry.title_alias[0], color: Color.Red }, tooltip: entry.title_alias[0] },
+                  { tag: { value: entry.title_alias[1], color: Color.Red }, tooltip: entry.title_alias[1] },
+                  { tag: { value: entry.title_alias[2], color: Color.Red }, tooltip: entry.title_alias[2] },
+                  { icon: Icon.Person, text: entry.author, tooltip: entry.author},
+                  { tag: new Date(entry.date_publish), tooltip: new Date(entry.date_publish).toLocaleDateString(
+                      "de-DE",
+                      {
+                        day: "2-digit",
+                        month: "2-digit",
+                        year: "numeric",
+                      }
+                    ) },
                 ]}
                 actions={EntryActions(entry.url, entry.title, query)}
               />
@@ -184,10 +191,17 @@ export default function Command() {
                 key={entry.url}
                 title={entry.title}
                 accessories={[
-                  { tag: { value: entry.title_alias[0], color: Color.Red }, tooltip: "Tag with tooltip" },
-                  { tag: { value: entry.title_alias[1], color: Color.Red }, tooltip: "Tag with tooltip" },
-                  { icon: Icon.Person, text: entry.author },
-                  { tag: new Date(entry.date_publish) },
+                  { tag: { value: entry.title_alias[0], color: Color.Red }, tooltip: entry.title_alias[0] },
+                  { tag: { value: entry.title_alias[1], color: Color.Red }, tooltip: entry.title_alias[1] },
+                  { icon: Icon.Person, text: entry.author, tooltip: entry.author},
+                  { tag: new Date(entry.date_publish), tooltip: new Date(entry.date_publish).toLocaleDateString(
+                      "de-DE",
+                      {
+                        day: "2-digit",
+                        month: "2-digit",
+                        year: "numeric",
+                      }
+                    ) },
                 ]}
                 actions={EntryActions(entry.url, entry.title, query)}
               />
@@ -198,9 +212,16 @@ export default function Command() {
                 key={entry.url}
                 title={entry.title}
                 accessories={[
-                  { tag: { value: entry.title_alias[0], color: Color.Red }, tooltip: "Tag with tooltip" },
-                  { icon: Icon.Person, text: entry.author },
-                  { tag: new Date(entry.date_publish) },
+                  { tag: { value: entry.title_alias[0], color: Color.Red }, tooltip: entry.title_alias[0] },
+                  { icon: Icon.Person, text: entry.author, tooltip: entry.author},
+                  { tag: new Date(entry.date_publish), tooltip: new Date(entry.date_publish).toLocaleDateString(
+                      "de-DE",
+                      {
+                        day: "2-digit",
+                        month: "2-digit",
+                        year: "numeric",
+                      }
+                    ) },
                 ]}
                 actions={EntryActions(entry.url, entry.title, query)}
               />
@@ -210,7 +231,16 @@ export default function Command() {
               <List.Item
                 key={entry.url}
                 title={entry.title}
-                accessories={[{ icon: Icon.Person, text: entry.author }, { tag: new Date(entry.date_publish) }]}
+                accessories={[
+                  { icon: Icon.Person, text: entry.author, tooltip: entry.author},
+                  { tag: new Date(entry.date_publish), tooltip: new Date(entry.date_publish).toLocaleDateString(
+                      "de-DE",
+                      {
+                        day: "2-digit",
+                        month: "2-digit",
+                        year: "numeric",
+                      }
+                    ) },]}
                 actions={EntryActions(entry.url, entry.title, query)}
               />
             );
@@ -253,12 +283,6 @@ function EntryActions(url: string, title: string, query: string) {
   );
 }
 
-// 			<Action.Push
-// 				icon={Icon.Document}
-// 				title="Read Document"
-// 				target={<Details url={url} />}
-// 			/>
-
 const Details = (props: { url: string; title: string }) => {
   const [searchText, setSearchText] = useState("");
   const { isLoading, data } = useFetch(props.url, {
@@ -280,7 +304,7 @@ const Details = (props: { url: string; title: string }) => {
   $(".mw-parser-output")
     .find("i")
     .each(function (i, link) {
-      synonyms += $(link).text() + "\n";
+      synonyms += $(link).html() + "\n";
     });
 
   // erster <i></i> im Artikel - zum Abgleich ob es Synonyme gibt oder nicht
@@ -288,7 +312,7 @@ const Details = (props: { url: string; title: string }) => {
   $(".collapsible")
     .find("i")
     .each(function (i, link) {
-      notSynonyms += $(link).text() + "\n";
+      notSynonyms += $(link).html() + "\n";
     });
   // 	notSynonyms = notSynonyms.trim();
   synonyms = synonyms.replace(notSynonyms, "");
