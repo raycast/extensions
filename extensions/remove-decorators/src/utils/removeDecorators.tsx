@@ -10,7 +10,7 @@ async function removeDecorators(codeStr: string) {
   let newCodeStr = "";
 
   for (const line of lines) {
-    if (!line.includes("@")) {
+    if (!line.includes("@") && !line.includes("import")) {
       newCodeStr += line + "\n";
     }
   }
