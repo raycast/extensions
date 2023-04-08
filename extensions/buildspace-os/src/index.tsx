@@ -1,13 +1,10 @@
-import { useState } from "react";
 import {
   Clipboard,
   Icon,
   MenuBarExtra,
   confirmAlert,
-  copyTextToClipboard,
   open,
   showHUD,
-  showToast,
 } from "@raycast/api";
 
 const useDemoDayCountdown = () => {
