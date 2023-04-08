@@ -19,7 +19,7 @@ export default function Command() {
   const [query, setQuery] = useState<null | string>(null);
   const [state, setState] = useState<Result[]>([]);
   const [entries, setEntries] = useState<Result[]>([]);
-  const [loading, setLoading] = useState(false);//
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     async function fetch() {
@@ -172,15 +172,15 @@ export default function Command() {
                   { tag: { value: entry.title_alias[0], color: Color.Red }, tooltip: entry.title_alias[0] },
                   { tag: { value: entry.title_alias[1], color: Color.Red }, tooltip: entry.title_alias[1] },
                   { tag: { value: entry.title_alias[2], color: Color.Red }, tooltip: entry.title_alias[2] },
-                  { icon: Icon.Person, text: entry.author, tooltip: entry.author},
-                  { tag: new Date(entry.date_publish), tooltip: new Date(entry.date_publish).toLocaleDateString(
-                      "de-DE",
-                      {
-                        day: "2-digit",
-                        month: "2-digit",
-                        year: "numeric",
-                      }
-                    ) },
+                  { icon: Icon.Person, text: entry.author, tooltip: entry.author },
+                  {
+                    tag: new Date(entry.date_publish),
+                    tooltip: new Date(entry.date_publish).toLocaleDateString("de-DE", {
+                      day: "2-digit",
+                      month: "2-digit",
+                      year: "numeric",
+                    }),
+                  },
                 ]}
                 actions={EntryActions(entry.url, entry.title, query)}
               />
@@ -193,15 +193,15 @@ export default function Command() {
                 accessories={[
                   { tag: { value: entry.title_alias[0], color: Color.Red }, tooltip: entry.title_alias[0] },
                   { tag: { value: entry.title_alias[1], color: Color.Red }, tooltip: entry.title_alias[1] },
-                  { icon: Icon.Person, text: entry.author, tooltip: entry.author},
-                  { tag: new Date(entry.date_publish), tooltip: new Date(entry.date_publish).toLocaleDateString(
-                      "de-DE",
-                      {
-                        day: "2-digit",
-                        month: "2-digit",
-                        year: "numeric",
-                      }
-                    ) },
+                  { icon: Icon.Person, text: entry.author, tooltip: entry.author },
+                  {
+                    tag: new Date(entry.date_publish),
+                    tooltip: new Date(entry.date_publish).toLocaleDateString("de-DE", {
+                      day: "2-digit",
+                      month: "2-digit",
+                      year: "numeric",
+                    }),
+                  },
                 ]}
                 actions={EntryActions(entry.url, entry.title, query)}
               />
@@ -213,15 +213,15 @@ export default function Command() {
                 title={entry.title}
                 accessories={[
                   { tag: { value: entry.title_alias[0], color: Color.Red }, tooltip: entry.title_alias[0] },
-                  { icon: Icon.Person, text: entry.author, tooltip: entry.author},
-                  { tag: new Date(entry.date_publish), tooltip: new Date(entry.date_publish).toLocaleDateString(
-                      "de-DE",
-                      {
-                        day: "2-digit",
-                        month: "2-digit",
-                        year: "numeric",
-                      }
-                    ) },
+                  { icon: Icon.Person, text: entry.author, tooltip: entry.author },
+                  {
+                    tag: new Date(entry.date_publish),
+                    tooltip: new Date(entry.date_publish).toLocaleDateString("de-DE", {
+                      day: "2-digit",
+                      month: "2-digit",
+                      year: "numeric",
+                    }),
+                  },
                 ]}
                 actions={EntryActions(entry.url, entry.title, query)}
               />
@@ -232,15 +232,16 @@ export default function Command() {
                 key={entry.url}
                 title={entry.title}
                 accessories={[
-                  { icon: Icon.Person, text: entry.author, tooltip: entry.author},
-                  { tag: new Date(entry.date_publish), tooltip: new Date(entry.date_publish).toLocaleDateString(
-                      "de-DE",
-                      {
-                        day: "2-digit",
-                        month: "2-digit",
-                        year: "numeric",
-                      }
-                    ) },]}
+                  { icon: Icon.Person, text: entry.author, tooltip: entry.author },
+                  {
+                    tag: new Date(entry.date_publish),
+                    tooltip: new Date(entry.date_publish).toLocaleDateString("de-DE", {
+                      day: "2-digit",
+                      month: "2-digit",
+                      year: "numeric",
+                    }),
+                  },
+                ]}
                 actions={EntryActions(entry.url, entry.title, query)}
               />
             );
