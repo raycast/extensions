@@ -7,7 +7,8 @@
   "author": "jmaeso",
   "contributors": [
     "GastroGeek",
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "LunaticMuch"
   ],
   "license": "MIT",
   "commands": [
@@ -23,36 +24,48 @@
           "placeholder": "1",
           "required": false
         }
-      ],
-      "preferences": [
+      ]
+    },
+    {
+      "name": "generateV5",
+      "title": "Generate V5 UUIDs",
+      "description": "Copy generated UUIDs V5 to the clipboard",
+      "mode": "no-view",
+      "arguments": [
         {
-          "name": "upperCaseLetters",
-          "type": "checkbox",
-          "required": false,
-          "default": false,
-          "title": "Options",
-          "label": "Uppercase Letters",
-          "description": "Should letters be uppercased?"
+          "name": "name",
+          "type": "text",
+          "placeholder": "UUID Name",
+          "required": true
         },
         {
-          "name": "defaultAction",
-          "description": "Set the default action",
-          "type": "dropdown",
-          "required": false,
-          "title": "Default Action",
-          "default": "copy",
-          "data": [
-            {
-              "title": "Copy",
-              "value": "copy"
-            },
-            {
-              "title": "Paste",
-              "value": "paste"
-            }
-          ]
+          "name": "numberOfUUIDsToGenerate",
+          "type": "text",
+          "placeholder": "1",
+          "required": false
         }
-      ]
+      ],
+      "preferences": [
+      {
+        "name": "uuidNamespace",
+        "type": "textfield",
+        "required": false,
+        "default": "",
+        "title": "UUID v5 Namespace",
+        "label": "Namespace",
+        "description": "The namespace for UUID v5"
+      }]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "upperCaseLetters",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "title": "Options",
+      "label": "Uppercase Letters",
+      "description": "Should letters be uppercased?"
     }
   ],
   "dependencies": {
