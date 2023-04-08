@@ -90,11 +90,11 @@ function Light(props: {
             />
             <IncreaseBrightnessAction
               light={props.light}
-              onIncrease={() => handleIncreaseBrightness(props.useHue, props.rateLimiter, props.light)}
+              onIncrease={() => handleBrightnessChange(props.useHue, props.rateLimiter, props.light, "increase")}
             />
             <DecreaseBrightnessAction
               light={props.light}
-              onDecrease={() => handleDecreaseBrightness(props.useHue, props.rateLimiter, props.light)}
+              onDecrease={() => handleBrightnessChange(props.useHue, props.rateLimiter, props.light, "decrease")}
             />
           </ActionPanel.Section>
 
@@ -108,13 +108,17 @@ function Light(props: {
             {props.light.color_temperature !== undefined && (
               <IncreaseColorTemperatureAction
                 light={props.light}
-                onIncrease={() => handleIncreaseColorTemperature(props.useHue, props.rateLimiter, props.light)}
+                onIncrease={() =>
+                  handleColorTemperatureChange(props.useHue, props.rateLimiter, props.light, "increase")
+                }
               />
             )}
             {props.light.color_temperature !== undefined && (
               <DecreaseColorTemperatureAction
                 light={props.light}
-                onDecrease={() => handleDecreaseColorTemperature(props.useHue, props.rateLimiter, props.light)}
+                onDecrease={() =>
+                  handleColorTemperatureChange(props.useHue, props.rateLimiter, props.light, "decrease")
+                }
               />
             )}
           </ActionPanel.Section>
@@ -307,10 +311,11 @@ async function handleSetBrightness(
   }
 }
 
-async function handleIncreaseBrightness(
+async function handleBrightnessChange(
   { hueBridgeState, setLights }: ReturnType<typeof useHue>,
   rateLimiter: ReturnType<typeof useInputRateLimiter>,
-  light: Light
+  light: Light,
+  direction: "increase" | "decrease"
 ) {
   const { canExecute } = rateLimiter;
   const toast = new Toast({ title: "" });
@@ -320,7 +325,7 @@ async function handleIncreaseBrightness(
     if (light.dimming === undefined) throw new Error("Light does not support dimming.");
     if (!canExecute()) return;
 
-    const adjustedBrightness = calculateAdjustedBrightness(light.dimming.brightness, "increase");
+    const adjustedBrightness = calculateAdjustedBrightness(light.dimming.brightness, direction);
     const changes = {
       on: { on: true },
       // dimming_delta exists, but manually calculating the new value
@@ -335,53 +340,17 @@ async function handleIncreaseBrightness(
     });
 
     toast.style = Style.Success;
-    toast.title = `Increased brightness of ${light.metadata.name} to ${(adjustedBrightness / 100).toLocaleString("en", {
+    toast.title = `${direction === "increase" ? "Increased" : "Decreased"} brightness of ${light.metadata.name} to ${(
+      adjustedBrightness / 100
+    ).toLocaleString("en", {
       style: "percent",
     })}`;
     await toast.show();
   } catch (e) {
     toast.style = Style.Failure;
-    toast.title = `Failed increasing brightness of ${light.metadata.name}`;
-    toast.message = e instanceof Error ? e.message : undefined;
-    await toast.show();
-  }
-}
-
-async function handleDecreaseBrightness(
-  { hueBridgeState, setLights }: ReturnType<typeof useHue>,
-  rateLimiter: ReturnType<typeof useInputRateLimiter>,
-  light: Light
-) {
-  const { canExecute } = rateLimiter;
-  const toast = new Toast({ title: "" });
-
-  try {
-    if (hueBridgeState.context.hueClient === undefined) throw new Error("Not connected to Hue Bridge.");
-    if (light.dimming === undefined) throw new Error("Light does not support dimming.");
-    if (!canExecute()) return;
-
-    const adjustedBrightness = calculateAdjustedBrightness(light.dimming.brightness, "decrease");
-    const changes = {
-      on: { on: true },
-      // dimming_delta exists, but manually calculating the new value
-      // enables the usage of the value in the optimistic update.
-      dimming: { brightness: adjustedBrightness },
-    };
-
-    const undoOptimisticUpdate = optimisticUpdate(light, changes, setLights);
-    await hueBridgeState.context.hueClient.updateLight(light, changes).catch((e) => {
-      undoOptimisticUpdate();
-      throw e;
-    });
-
-    toast.style = Style.Success;
-    toast.title = `Decreased brightness of ${light.metadata.name} to ${(adjustedBrightness / 100).toLocaleString("en", {
-      style: "percent",
-    })}`;
-    await toast.show();
-  } catch (e) {
-    toast.style = Style.Failure;
-    toast.title = `Failed decreasing brightness of ${light.metadata.name}`;
+    toast.title = `Failed ${direction === "increase" ? "increasing" : "decreasing"} brightness of ${
+      light.metadata.name
+    }`;
     toast.message = e instanceof Error ? e.message : undefined;
     await toast.show();
   }
@@ -420,12 +389,14 @@ async function handleSetColor({ hueBridgeState, setLights }: ReturnType<typeof u
   }
 }
 
-async function handleIncreaseColorTemperature(
+async function handleColorTemperatureChange(
   { hueBridgeState, setLights }: ReturnType<typeof useHue>,
   rateLimiter: ReturnType<typeof useInputRateLimiter>,
-  light: Light
+  light: Light,
+  direction: "increase" | "decrease"
 ) {
   const { canExecute } = rateLimiter;
+
   const toast = new Toast({ title: "" });
 
   try {
@@ -433,7 +404,7 @@ async function handleIncreaseColorTemperature(
     if (light.color_temperature === undefined) throw new Error("Light does not support color temperature.");
     if (!canExecute()) return;
 
-    const adjustedColorTemperature = calculateAdjustedColorTemperature(light.color_temperature.mirek, "increase");
+    const adjustedColorTemperature = calculateAdjustedColorTemperature(light.color_temperature.mirek, direction);
     const changes = {
       on: { on: true },
       // color_temperature_delta exists, but manually calculating the new value
@@ -448,50 +419,13 @@ async function handleIncreaseColorTemperature(
     });
 
     toast.style = Style.Success;
-    toast.title = `Increased color temperature of ${light.metadata.name}`;
+    toast.title = `${direction === "increase" ? "Increased" : "Decreased"} color temperature of ${light.metadata.name}`;
     await toast.show();
   } catch (e) {
     toast.style = Style.Failure;
-    toast.title = `Failed increasing color temperature of ${light.metadata.name}`;
-    toast.message = e instanceof Error ? e.message : undefined;
-    await toast.show();
-  }
-}
-
-async function handleDecreaseColorTemperature(
-  { hueBridgeState, setLights }: ReturnType<typeof useHue>,
-  rateLimiter: ReturnType<typeof useInputRateLimiter>,
-  light: Light
-) {
-  const { canExecute } = rateLimiter;
-
-  const toast = new Toast({ title: "" });
-
-  try {
-    if (hueBridgeState.context.hueClient === undefined) throw new Error("Not connected to Hue Bridge.");
-    if (light.color_temperature === undefined) throw new Error("Light does not support color temperature.");
-    if (!canExecute()) return;
-
-    const adjustedColorTemperature = calculateAdjustedColorTemperature(light.color_temperature.mirek, "decrease");
-    const changes = {
-      on: { on: true },
-      // color_temperature_delta exists, but manually calculating the new value
-      // enables the usage of the value in the optimistic update.
-      color_temperature: { mirek: adjustedColorTemperature },
-    };
-
-    const undoOptimisticUpdate = optimisticUpdate(light, changes, setLights);
-    await hueBridgeState.context.hueClient.updateLight(light, changes).catch((e) => {
-      undoOptimisticUpdate();
-      throw e;
-    });
-
-    toast.style = Style.Success;
-    toast.title = "Decreased color temperature";
-    await toast.show();
-  } catch (e) {
-    toast.style = Style.Failure;
-    toast.title = "Failed decreasing color temperature";
+    toast.title = `Failed ${direction === "increase" ? "increasing" : "decreasing"} color temperature of ${
+      light.metadata.name
+    }`;
     toast.message = e instanceof Error ? e.message : undefined;
     await toast.show();
   }
