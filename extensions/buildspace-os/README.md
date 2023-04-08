@@ -1,3 +1,3 @@
-# buildspace demo day countdown
+# buildspace os for raycast
 
-get a countdown to the buildspace demo day in your menu bar
+get info about buildspace n&w s3 at a glance in your menu bar
