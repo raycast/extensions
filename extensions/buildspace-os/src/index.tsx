@@ -1,11 +1,4 @@
-import {
-  Clipboard,
-  Icon,
-  MenuBarExtra,
-  confirmAlert,
-  open,
-  showHUD,
-} from "@raycast/api";
+import { Clipboard, Icon, MenuBarExtra, confirmAlert, open, showHUD } from "@raycast/api";
 import { useEffect, useState } from "react";
 
 const useDemoDayCountdown = () => {
@@ -54,7 +47,6 @@ const useDemoDayCountdown = () => {
 
   return { title, fullCountdown };
 };
-
 
 export default function Command() {
   const { title, fullCountdown } = useDemoDayCountdown();
