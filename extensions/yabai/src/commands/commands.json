@@ -1,0 +1,107 @@
+[
+  {
+    "title": "Enable Yabai",
+    "description": "Enable Yabai in the current space.",
+    "shellCommand": "yabai -m space --layout bsp || yabai -m space balance"
+  },
+  {
+    "title": "Disable Yabai",
+    "description": "Disable Yabai in the current space.",
+    "shellCommand": "yabai -m space --layout float"
+  },
+  {
+    "title": "Toggle Window Float Mode",
+    "description": "Toggle float mode for the currently focused window.",
+    "shellCommand": "yabai -m window --toggle float; yabai -m window --resize abs:500:800"
+  },
+  {
+    "title": "Toggle Full-Screen Mode",
+    "description": "Toggle full-screen mode for the currently focused window.",
+    "shellCommand": "yabai -m window --toggle zoom-fullscreen"
+  },
+  {
+    "title": "Toggle Native Full-Screen Mode",
+    "description": "Toggle native full-screen mode for the currently focused window.",
+    "shellCommand": "yabai -m window --toggle native-fullscreen"
+  },
+  {
+    "title": "Focus Next Window",
+    "description": "Focus the next window on the current desktop.",
+    "shellCommand": "yabai -m window --focus next"
+  },
+  {
+    "title": "Focus Previous Window",
+    "description": "Focus the previous window on the current desktop.",
+    "shellCommand": "yabai -m window --focus prev"
+  },
+  {
+    "title": "Swap Window Position",
+    "description": "Swap the position of the currently focused window and the next window in the stack.",
+    "shellCommand": "yabai -m window --swap next"
+  },
+  {
+    "title": "Rotate Windows Clockwise",
+    "description": "Rotate the position of all windows on the current desktop clockwise.",
+    "shellCommand": "yabai -m space --rotate 90"
+  },
+  {
+    "title": "Rotate Windows Anti-Clockwise",
+    "description": "Rotate the position of all windows on the current desktop anti-clockwise.",
+    "shellCommand": "yabai -m space --rotate 270"
+  },
+  {
+    "title": "Move Window Left",
+    "description": "Move the currently focused window one space to the left.",
+    "shellCommand": "yabai -m window --warp west"
+  },
+  {
+    "title": "Move Window Right",
+    "description": "Move the currently focused window one space to the right.",
+    "shellCommand": "yabai -m window --warp east"
+  },
+  {
+    "title": "Move Window Up",
+    "description": "Move the currently focused window one space up.",
+    "shellCommand": "yabai -m window --warp north"
+  },
+  {
+    "title": "Move Window Down",
+    "description": "Move the currently focused window one space down.",
+    "shellCommand": "yabai -m window --warp south"
+  },
+  {
+    "title": "Move Window to Next Display",
+    "description": "Move the currently focused window to the next display.",
+    "shellCommand": "yabai -m window --display next"
+  },
+  {
+    "title": "Move Window to Previous Display",
+    "description": "Move the currently focused window to the previous display.",
+    "shellCommand": "yabai -m window --display prev"
+  },
+  {
+    "title": "Move Window to Next Space",
+    "description": "Move the currently focused window to the next space.",
+    "shellCommand": "yabai -m window --space next"
+  },
+  {
+    "title": "Move Window to Previous Space",
+    "description": "Move the currently focused window to the previous space.",
+    "shellCommand": "yabai -m window --space prev"
+  },
+  {
+    "title": "Equalise Window Sizes",
+    "description": "Equalise the size of all windows on the current desktop.",
+    "shellCommand": "yabai -m space --balance"
+  },
+  {
+    "title": "Mirror X-Axis",
+    "description": "Mirror the layout of all windows on the current desktop along the x-axis.",
+    "shellCommand": "yabai -m space --mirror x-axis"
+  },
+  {
+    "title": "Mirror Y-Axis",
+    "description": "Mirror the layout of all windows on the current desktop along the y-axis.",
+    "shellCommand": "yabai -m space --mirror y-axis"
+  }
+]

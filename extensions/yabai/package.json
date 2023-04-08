@@ -1,0 +1,78 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "yabai",
+  "title": "Yabai",
+  "description": "Access any yabai command and view its hotkey.",
+  "icon": "extension_icon.png",
+  "author": "boyesjo",
+  "categories": [
+    "System",
+    "Applications",
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Yabai",
+      "subtitle": "All actions",
+      "description": "List all avaiable actions, do them and check their hotkeys.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.48.9",
+    "child_process": "^1.0.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  },
+  "preferences": [
+    {
+      "name": "yabaiPath",
+      "title": "Yabai Path",
+      "description": "Path to yabai executable. Defaults to Homebrew installation.",
+      "type": "file",
+      "required": false
+    },
+    {
+      "name": "showHotkeys",
+      "title": "Hotkeys",
+      "label": "Display hotkeys as they are in SKHD config.",
+      "description": "Show SKHD hotkeys for each action.",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "skhdPath",
+      "title": "SKHD config file",
+      "description": "Path to SKHD config file. Defaults to ~/.config/skhd/skhdrc.",
+      "type": "file",
+      "required": false,
+      "default": "~/.config/skhd/skhdrc",
+      "placeholder": "~/.config/skhd/skhdrc"
+    },
+    {
+      "name": "hyperkey",
+      "title": "Hyperkey",
+      "description": "Optional hyperkey for displaying hotkeys.",
+      "type": "textfield",
+      "required": false,
+      "default": "rctrl + ralt + rcmd"
+    }
+  ]
+}

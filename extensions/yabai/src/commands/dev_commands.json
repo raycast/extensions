@@ -1,0 +1,22 @@
+[
+  {
+    "title": "Version",
+    "description": "Show version",
+    "shellCommand": "yabai -v"
+  },
+  {
+    "title": "Command not found",
+    "description": "Run a command than zsh will not find",
+    "shellCommand": "nonexistentcommand"
+  },
+  {
+    "title": "Yabai error",
+    "description": "Run a command that will cause yabai to error",
+    "shellCommand": "yabai -m query --windows --space 9999999"
+  },
+  {
+    "title": "Hello World",
+    "description": "Run a command that will succeed",
+    "shellCommand": "echo 'Hello World'"
+  }
+]
