@@ -137,16 +137,10 @@ export default class HueClient {
     return response.data.data;
   }
 
-  public async updateLight(light: Light, properties: LightRequest): Promise<any> {
-    this.setLights?.((lights) => lights.updateItem(light.id, properties));
-    const request = async () => {
-      return await this.makeRequest("PUT", `/clip/v2/resource/light/${light.id}`, properties).catch((e) => {
-        this.setLights?.((lights) => lights.updateItem(light.id, light));
-        throw e;
-      });
-    };
-
-    const response = await this.lightsQueue.enqueueRequest(request);
+  public async updateLight(light: Light, properties: LightRequest): Promise<Partial<Light>[]> {
+    const response = await this.lightsQueue.enqueueRequest(() =>
+      this.makeRequest("PUT", `/clip/v2/resource/light/${light.id}`, properties)
+    );
 
     return response.data.data;
   }

@@ -6,6 +6,7 @@ import Jimp from "jimp";
 import chroma from "chroma-js";
 
 import { miredToHexString, xyToRgbHexString } from "./colors";
+import React from "react";
 import Style = Toast.Style;
 
 declare global {
@@ -218,4 +219,16 @@ export function createGradientPngUri(colors: string[], width: number, height: nu
       });
     });
   });
+}
+
+export function optimisticUpdate<T extends HasId>(
+  stateItem: T,
+  updateToStateItem: Partial<T>,
+  setState: React.Dispatch<React.SetStateAction<T[]>>
+): () => void {
+  setState((prevState: T[]) => prevState.updateItem(stateItem.id, updateToStateItem));
+
+  return (): void => {
+    setState((prevState: T[]): T[] => prevState.updateItem(stateItem.id, stateItem));
+  };
 }
