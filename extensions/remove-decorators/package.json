@@ -3,7 +3,7 @@
   "name": "remove-decorators",
   "title": "Remove Decorators",
   "description": "Just remove ugly decorators",
-  "icon": "extension-icon.png",
+  "icon": "extension_icon.png",
   "author": "Pawel-Kica",
   "categories": [
     "Developer Tools",
