@@ -131,7 +131,7 @@ export const getCurrentURL = async (browserName: string): Promise<string> => {
  * @param URL The URL to get the HTML of.
  * @returns The HTML as a string.
  */
-const getURLHTML = (URL: string): string => {
+export const getURLHTML = (URL: string): string => {
   return runAppleScriptSync(`use framework "Foundation"
 
     set theResult to ""
@@ -164,12 +164,19 @@ const getURLHTML = (URL: string): string => {
 };
 
 /**
+ * A JSON object returned by {@link getJSONResponse}.
+ */
+interface JSONObject {
+  [key: string]: string | JSONObject;
+}
+
+/**
  * Gets the JSON objects returned from a URL.
  *
  * @param URL The url to a .json document.
- * @returns The JSON obejct.
+ * @returns The JSON as a {@link JSONObject}.
  */
-export const getJSONResponse = (URL: string): JSON => {
+export const getJSONResponse = (URL: string): JSONObject => {
   const raw = getURLHTML(URL);
   return JSON.parse(raw);
 };
@@ -310,4 +317,14 @@ export const getLastEmail = async (): Promise<string> => {
       return "Subject: " & messageSubject & "\\nFrom: " & messageSender & "\\nContent: " & messageContent
     end tell
   end try`);
+};
+
+export const getWeatherData = (days: number): JSONObject => {
+  const jsonObj = getJSONResponse("https://get.geojs.io/v1/ip/geo.json");
+  const latitude = jsonObj["latitude"];
+  const longitude = jsonObj["longitude"];
+  const timezone = (jsonObj["timezone"] as string).replace("/", "%2F");
+  return getJSONResponse(
+    `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&daily=weathercode,temperature_2m_max,temperature_2m_min,sunrise,sunset,uv_index_max,rain_sum,snowfall_sum,precipitation_hours&current_weather=true&windspeed_unit=ms&forecast_days=${days.toString()}&timezone=${timezone}`
+  );
 };

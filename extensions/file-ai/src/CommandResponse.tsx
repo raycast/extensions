@@ -30,6 +30,8 @@ import {
   getInstalledApplications,
   getLastEmail,
   getSafariTopSites,
+  getJSONResponse,
+  getWeatherData,
 } from "./utils/context-utils";
 
 export default function CommandResponse(props: {
@@ -55,6 +57,9 @@ export default function CommandResponse(props: {
   const [installedApps, setInstalledApps] = useState<string>();
   const [fileAICommands, setFileAICommands] = useState<string>();
   const [safariTopSites, setSafariTopSites] = useState<string>();
+  const [location, setLocation] = useState<string>();
+  const [todayWeather, setTodayWeather] = useState<string>();
+  const [weekWeather, setWeekWeather] = useState<string>();
 
   /* Calendar Data State */
   const [currentTime] = useState<string>(getCurrentTime());
@@ -83,6 +88,7 @@ export default function CommandResponse(props: {
     ) {
       Promise.resolve(getFrontmostApplication()).then((app) => {
         setCurrentApplication(app.name);
+        console.log(`Current app: ${app.name}`)
         if (prompt.includes("{{currentURL}}") && SupportedBrowsers.includes(app.name)) {
           Promise.resolve(getCurrentURL(app.name)).then((URL) => setCurrentURL(URL));
         } else {
@@ -133,6 +139,25 @@ export default function CommandResponse(props: {
 
     if (prompt.includes("{{safariTopSites}}")) {
       Promise.resolve(getSafariTopSites()).then((sites) => setSafariTopSites(sites));
+    }
+
+    if (prompt.includes("{{location}}")) {
+      Promise.resolve(getJSONResponse("https://get.geojs.io/v1/ip/geo.json")).then((jsonObj) => {
+        const city = jsonObj["city"]
+        const region = jsonObj["region"]
+        const country = jsonObj["country"]
+        setLocation(`${city}, ${region}, ${country}`)
+      });
+    }
+
+    if (prompt.includes("{{todayWeather}}")) {
+      const weatherObj = getWeatherData(1)
+      setTodayWeather(weatherObj as unknown as string)
+    }
+
+    if (prompt.includes("{{weekWeather}}")) {
+      const weatherObj = getWeatherData(7)
+      setWeekWeather(weatherObj as unknown as string)
     }
 
     /* Calendar Data Retrieval */
@@ -206,6 +231,9 @@ export default function CommandResponse(props: {
     (!prompt.includes("{{lastEmail}}") || lastEmail != undefined) &&
     (!prompt.includes("{{fileAICommands}}") || fileAICommands != undefined) &&
     (!prompt.includes("{{safariTopSites}}") || safariTopSites != undefined) &&
+    (!prompt.includes("{{location}}") || location != undefined) &&
+    (!prompt.includes("{{todayWeather}}") || todayWeather != undefined) &&
+    (!prompt.includes("{{weekWeather}}") || weekWeather != undefined) &&
     (!prompt.includes("{{installedApps}}") || installedApps != undefined)
   ) {
     setLoadingData(false);
@@ -256,6 +284,9 @@ export default function CommandResponse(props: {
     .replaceAll("{{installedApps}}", installedApps == undefined ? "" : installedApps)
     .replaceAll("{{fileAICommands}}", fileAICommands == undefined ? "" : fileAICommands)
     .replaceAll("{{topSites}}", safariTopSites == undefined ? "" : safariTopSites)
+    .replaceAll("{{location}}", location == undefined ? "" : location)
+    .replaceAll("{{todayWeather}}", todayWeather == undefined ? "" : todayWeather)
+    .replaceAll("{{weekWeather}}", weekWeather == undefined ? "" : weekWeather)
 
     /* System Data Substitutions */
     .replaceAll("{{user}}", os.userInfo().username)

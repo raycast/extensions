@@ -50,9 +50,11 @@ You can create custom File AI commands, accessed via the "Search File AI Command
 - Historical Context
 - Identify Gaps
 - Identify Relationships
+- Location Significance
 - Make Jingle
 - Make Poem
 - Make Song
+- Metadata Analysis
 - Meeting Agenda
 - Pattern Analysis
 - Pros And Cons
@@ -68,8 +70,8 @@ You can create custom File AI commands, accessed via the "Search File AI Command
 - Summarize Clipboard
 - Summarize Current Tab
 - Summarize Last Email
-- Today's Agenda
 - Table Of Contents
+- Today's Agenda
 - Translate To English
 - What Is This?
 - Write Abstract
@@ -82,13 +84,22 @@ You can create custom File AI commands, accessed via the "Search File AI Command
 
 When creating custom commands, you can use placeholders in your prompts that will be substituted with relevant information whenever you run the command. These placeholders range from simple information, like the current date, to complex data retrieval operations such as getting the content of the most recent email. Placeholders are a powerful way to add context to your File AI prompts. The valid placeholders are as follows:
 
-#### File Data Placeholders
+#### API Data Placeholders
 | Placeholder | Replaced With |
 | --- | --- |
-| `{{contents}}` | The contents of the selected files |
-| `{{files}}` | Replaced with the list of selected file paths |
-| `{{fileNames}}` | Replaced with the list of selected file names |
-| `{{metadata}}` | Replaced with the metadata of each file as a list below the file path |
+| `{{location}}` | Your current location in city, region, country format, obtained from [geojs.io](https://get.geojs.io) |
+| `{{todayWeather}}` | The weather forecast for today, obtained from [open-meteo.com](https://open-meteo.com) |
+| `{{weekWeather}}` | The weather forecast for the next week, obtained from [open-meteo.com](https://open-meteo.com) |
+
+#### Application Data Placeholders
+| Placeholder | Replaced With |
+| --- | --- |
+| `{{installedApps}}` | The list of installed applications |
+| `{{lastEmail}}` | The subject, sender, and content of the most recently received email in Mail.app |
+| `{{lastNote}}` | The text of the most recently edited note in Notes.app |
+| `{{musicTracks}}` | The list of track titles in Music.app |
+| `{{safariTopSites}}` | Your list of top visited sites in Safari |
+| `{{selectedText}}` | The currently selected text |
 
 #### Calendar Data Placeholders
 | Placeholder | Replaced With |
@@ -104,29 +115,31 @@ When creating custom commands, you can use placeholders in your prompts that wil
 | `{{monthReminders}}` | Upcoming reminders over the next month |
 | `{{yearReminders}}` | Upcoming reminders over the next year |
 
+#### Context Data Placeholders
+| Placeholder | Replaced With |
+| --- | --- |
+| `{{clipboardText}}` | The text of the clipboard |
+| `{{currentApplication}}` | The name of the current application |
+| `{{currentTabText}}` | The text content of the active tab of the active browser |
+| `{{currentTrack}}` | The title of the track/stream currently playing in Music.app |
+| `{{currentURL}}` | The current URL of the active tab of the active browser |
+| `{{fileAICommands}}` | The list of all custom File AI commands |
+
+#### File Data Placeholders
+| Placeholder | Replaced With |
+| --- | --- |
+| `{{contents}}` | The contents of the selected files |
+| `{{fileNames}}` | Replaced with the list of selected file names |
+| `{{files}}` | Replaced with the list of selected file paths |
+| `{{metadata}}` | Replaced with the metadata of each file as a list below the file path |
+
 #### System Data Placeholders
 | Placeholder | Replaced With |
 | --- | --- |
-| `{{user}}` | Replaced with the logged in user's username |
 | `{{homedir}}` | The user's home directory |
+| `{{user}}` | Replaced with the logged in user's username |
 
-### Context Data Placeholders
-| Placeholder | Replaced With |
-| --- | --- |
-| `{{currentApplication}}` | The name of the current application |
-| `{{selectedText}}` | The currently selected text |
-| `{{currentURL}}` | The current URL of the active tab of the active browser |
-| `{{currentTabText}}` | The text content of the active tab of the active browser |
-| `{{clipboardText}}` | The text of the clipboard |
-| `{{currentTrack}}` | The title of the track/stream currently playing in Music.app |
-| `{{musicTracks}}` | The list of track titles in Music.app |
-| `{{lastNote}}` | The text of the most recently edited note in Notes.app |
-| `{{lastEmail}}` | The subject, sender, and content of the most recently received email in Mail.app |
-| `{{installedApps}}` | The list of installed applications |
-| `{{fileAICommands}}` | The list of all custom File AI commands |
-| `{{safariTopSites}}` | Your list of top visited sites in Safari |
-
-### Other Placeholders
+#### Other Placeholders
 | Placeholder | Replaced With |
 | --- | --- |
 | `{{END}}` | Marks the end of a prompt -- no content, metadata, or instructions will be appended after |
