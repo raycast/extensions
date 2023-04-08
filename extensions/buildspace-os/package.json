@@ -4,8 +4,7 @@
   "title": "buildspace os",
   "description": "use a mini version of the buildspace os in your menu bar",
   "icon": "command-icon.png",
-  "author": "landonsmile",
-  "owner": "landonsmile",
+  "author": "landon",
   "categories": [
     "Fun"
   ],
