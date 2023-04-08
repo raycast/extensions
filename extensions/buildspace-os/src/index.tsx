@@ -1,5 +1,14 @@
 import { useState } from "react";
-import { Icon, MenuBarExtra, confirmAlert, open } from "@raycast/api";
+import {
+  Clipboard,
+  Icon,
+  MenuBarExtra,
+  confirmAlert,
+  copyTextToClipboard,
+  open,
+  showHUD,
+  showToast,
+} from "@raycast/api";
 
 const useDemoDayCountdown = () => {
   const getCountdown = (endDate: Date) => {
@@ -7,7 +16,7 @@ const useDemoDayCountdown = () => {
     const totalMilliseconds = endDate.getTime() - now.getTime();
 
     if (totalMilliseconds <= 0) {
-      return "0 days, 0 hours";
+      return { fullCountdown: "0 days, 0 hours, 0 minutes, 0 seconds", formattedCountdown: "0 days, 0 hours" };
     }
 
     const seconds = Math.floor(totalMilliseconds / 1000);
@@ -15,6 +24,7 @@ const useDemoDayCountdown = () => {
     const hours = Math.floor(minutes / 60);
     const days = Math.floor(hours / 24);
 
+    const fullCountdown = `${days} days, ${hours % 24} hours, ${minutes % 60} minutes, ${seconds % 60} seconds`;
     let formattedCountdown = "";
 
     if (days === 0) {
@@ -23,19 +33,20 @@ const useDemoDayCountdown = () => {
       formattedCountdown = `${days} days, ${hours % 24} hours`;
     }
 
-    return formattedCountdown;
+    return { fullCountdown, formattedCountdown };
   };
 
   const endDate = new Date(Date.UTC(2023, 4, 21, 17, 30)); // May 21, 2023, 10:30 AM PT (17:30 UTC)
-  const cntdown = getCountdown(endDate);
-  const title = cntdown === "0 days, 0 hours" ? "good luck builder." : `${cntdown} until demo day`;
+  const { fullCountdown, formattedCountdown } = getCountdown(endDate);
+  const title =
+    formattedCountdown === "0 days, 0 hours" ? "good luck builder." : `${formattedCountdown} until demo day`;
 
-  return title;
+  return { title, fullCountdown };
 };
 
 export default function Command() {
-  const title = useDemoDayCountdown();
-  const [enableImages, setEnableImages] = useState<boolean>(false);
+  const { title, fullCountdown } = useDemoDayCountdown();
+  const enableImages = false;
   const images: { title: string; image: string }[] = [
     {
       title: "one",
@@ -76,6 +87,14 @@ export default function Command() {
   return (
     <MenuBarExtra icon={Icon.Clock} title={title}>
       <MenuBarExtra.Section title="welcome to s3." />
+      <MenuBarExtra.Item
+        title={`${fullCountdown} until demo day.`}
+        icon={Icon.Clock}
+        onAction={() => {
+          Clipboard.copy(`${fullCountdown} until n&w s3 demo day.`);
+          showHUD("copied the countdown to your clipboard. good luck builder 🫡");
+        }}
+      />
       <MenuBarExtra.Submenu title="images" icon={Icon.Image}>
         {enableImages
           ? images.map((image) => (
