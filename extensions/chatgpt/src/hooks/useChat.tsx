@@ -19,6 +19,12 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
     }>().useStream;
   });
 
+  const [isHistoryPaused] = useState<boolean>(() => {
+    return getPreferenceValues<{
+      isHistoryPaused: boolean;
+    }>().isHistoryPaused;
+  });
+
   const history = useHistory();
   const isAutoTTS = useAutoTTS();
   const proxy = useProxy();
@@ -77,7 +83,9 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
                 toast.title = "Got your answer!";
                 toast.style = Toast.Style.Success;
 
-                history.add(chat);
+                if (!isHistoryPaused) {
+                  history.add(chat);
+                }
                 return;
               }
               try {
@@ -128,7 +136,9 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
               });
             });
 
-            history.add(chat);
+            if (!isHistoryPaused) {
+              history.add(chat);
+            }
           }
         }
       })

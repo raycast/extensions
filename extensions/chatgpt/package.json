@@ -87,6 +87,15 @@
       "required": true
     },
     {
+      "name": "isHistoryPaused",
+      "label": "Enable pause history",
+      "description": "Pause the history of the conversation",
+      "type": "checkbox",
+      "title": "Pause History",
+      "default": true,
+      "required": false
+    },
+    {
       "name": "isAutoLoadText",
       "label": "Enable auto-load selected text",
       "description": "Load selected text from your frontmost application to the question bar automatically",
