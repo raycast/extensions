@@ -371,7 +371,7 @@ async function handleSetColor({ hueBridgeState, setLights }: ReturnType<typeof u
       on: { on: true },
       color: { xy: xy },
       dimming: { brightness: brightness },
-    };
+    } as Partial<Light>;
 
     const undoOptimisticUpdate = optimisticUpdate(light, changes, setLights);
     await hueBridgeState.context.hueClient.updateLight(light, changes).catch((e) => {
@@ -411,7 +411,7 @@ async function handleColorTemperatureChange(
       // color_temperature_delta exists, but manually calculating the new value
       // enables the usage of the value in the optimistic update.
       color_temperature: { mirek: adjustedColorTemperature },
-    };
+    } as Partial<Light>;
 
     const undoOptimisticUpdate = optimisticUpdate(light, changes, setLights);
     await hueBridgeState.context.hueClient.updateLight(light, changes).catch((e) => {
