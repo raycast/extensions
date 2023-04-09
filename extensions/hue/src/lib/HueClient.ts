@@ -158,23 +158,14 @@ export default class HueClient {
   }
 
   public async updateGroupedLight(groupedLight: GroupedLight, properties: Partial<GroupedLight>): Promise<any> {
-    this.setGroupedLights?.((groupedLights) => groupedLights.updateItem(groupedLight, properties));
-    const request = async () => {
-      return await this.makeRequest("PUT", `/clip/v2/resource/grouped_light/${groupedLight.id}`, properties).catch(
-        (e) => {
-          this.setGroupedLights?.((groupedLights) => groupedLights.updateItem(groupedLight, groupedLight));
-          throw e;
-        }
-      );
-    };
-
-    const response = await this.groupedLightsQueue.enqueueRequest(request);
+    const response = await this.groupedLightsQueue.enqueueRequest(() =>
+      this.makeRequest("PUT", `/clip/v2/resource/grouped_light/${groupedLight.id}`, properties)
+    );
 
     return response.data.data;
   }
 
   public async updateScene(scene: Scene, properties: SceneRequest): Promise<any> {
-    // TODO: Update all lights that are defined in the actions object and undo on error
     const response = await this.makeRequest("PUT", `/clip/v2/resource/scene/${scene.id}`, properties);
 
     return response.data.data;
@@ -264,35 +255,35 @@ export default class HueClient {
           return resource.type === "light";
         }) as (Partial<Light> & HasId)[];
 
-        return lights.updateItems(lightUpdates.mergeObjectsById());
+        return lights.replaceItems(lightUpdates.mergeObjectsById());
       });
 
       this.setGroupedLights?.((groupedLights) => {
         const updatedGroupedLights = updateEvent.data.filter((resource) => {
           return resource.type === "grouped_light";
         }) as (Partial<GroupedLight> & HasId)[];
-        return groupedLights.updateItems(updatedGroupedLights);
+        return groupedLights.replaceItems(updatedGroupedLights);
       });
 
       this.setRooms?.((rooms) => {
         const updatedRooms = updateEvent.data.filter((resource) => {
           return resource.type === "room";
         }) as (Partial<Room> & HasId)[];
-        return rooms.updateItems(updatedRooms);
+        return rooms.replaceItems(updatedRooms);
       });
 
       this.setZones?.((zones) => {
         const updatedZones = updateEvent.data.filter((resource) => {
           return resource.type === "zone";
         }) as (Partial<Zone> & HasId)[];
-        return zones.updateItems(updatedZones);
+        return zones.replaceItems(updatedZones);
       });
 
       this.setScenes?.((scenes) => {
         const updatedScenes = updateEvent.data.filter((resource) => {
           return resource.type === "scene";
         }) as (Partial<Scene> & HasId)[];
-        return scenes.updateItems(updatedScenes);
+        return scenes.replaceItems(updatedScenes);
       });
 
       // If the parser encounters a new JSON array, it will throw an error

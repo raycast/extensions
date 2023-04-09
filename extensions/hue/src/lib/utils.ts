@@ -1,5 +1,5 @@
 import { getPreferenceValues, Icon, Image, showToast, Toast } from "@raycast/api";
-import { CssColor, Group, HasId, Light, Palette, Scene } from "./types";
+import { CssColor, Group, HasId, Id, Light, Palette, Scene } from "./types";
 import { discovery, v3 } from "node-hue-api";
 import { APP_NAME, BRIGHTNESSES, MIRED_DEFAULT, MIRED_MAX, MIRED_MIN, MIRED_STEP } from "./constants";
 import Jimp from "jimp";
@@ -8,7 +8,7 @@ import { miredToHexString, xyToRgbHexString } from "./colors";
 import React from "react";
 import Style = Toast.Style;
 
-export function getGroupLights(group: Group, lights: Light[]): Light[] {
+export function getLightsFromGroup(lights: Light[], group: Group): Light[] {
   return lights.filter((light) =>
     group.children.some((resource) => {
       return resource.rid === light.id || resource.rid === light.owner.rid;
@@ -191,14 +191,33 @@ export function createGradientPngUri(colors: string[], width: number, height: nu
 
 export function optimisticUpdate<T extends HasId>(
   stateItem: T,
-  updateToStateItem: Partial<T>,
+  changes: Partial<T>,
   setState: React.Dispatch<React.SetStateAction<T[]>>
 ): () => void {
+  let undoState: T[];
+
   setState((prevState: T[]) => {
-    return prevState.updateItem(stateItem, updateToStateItem);
+    undoState = prevState;
+    return prevState.updateItem(stateItem.id, changes);
   });
 
   return (): void => {
-    setState((prevState: T[]): T[] => prevState.updateItem(stateItem, stateItem));
+    setState(undoState);
+  };
+}
+
+export function optimisticUpdates<T extends HasId>(
+  changes: Map<Id, Partial<T>>,
+  setState: React.Dispatch<React.SetStateAction<T[]>>
+): () => void {
+  let undoState: T[];
+
+  setState((prevState: T[]) => {
+    undoState = prevState;
+    return prevState.updateItems(changes);
+  });
+
+  return (): void => {
+    setState(undoState);
   };
 }

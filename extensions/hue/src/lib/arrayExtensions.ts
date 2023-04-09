@@ -1,4 +1,4 @@
-import { HasId } from "./types";
+import { HasId, Id } from "./types";
 
 export {};
 
@@ -8,16 +8,19 @@ declare global {
      * The <code>updateItem</code> method <strong>creates a new array</strong> with the <code>changes</code> applied to
      * the array element that matches the <code>id</code> of the given <code>item</code>.
      */
-    updateItem(item: Partial<T>, changes: Partial<T>): T[];
+    updateItem(item: Id, changes: Partial<T>): T[];
 
     /**
      * The <code>replaceItems</code> method <strong>creates a new array</strong> where array elements are replaced with
-     * the <code>newItems</code> if the <code>id</code> matches. If <code>changes</code> are provided, they are applied
-     * to the <code>items</code> that are replaced.
-     *
-     * If the <code>id</code> does not match, the original array element is kept. No new array elements are added.
+     * the <code>newItems</code> if the <code>id</code> matches.
      */
-    updateItems(items: Partial<T>[], changes?: Partial<T>): T[];
+    replaceItems(items: Partial<T>[]): T[];
+
+    /**
+     * The <code>replaceItems</code> method <strong>creates a new array</strong> where array elements are updated with
+     * the <code>changes</code> if the <code>id</code> matches.
+     */
+    updateItems(itemChanges: Map<Id, Partial<T>>): T[];
 
     /**
      * The <code>mergeObjectsById</code> method <strong>creates a new array</strong> where all objects with the same
@@ -28,16 +31,25 @@ declare global {
 }
 
 if (!Array.prototype.updateItem) {
-  Array.prototype.updateItem = function (item, changes) {
-    return this.map((it) => (it.id !== item.id ? it : { ...it, ...item, ...changes }));
+  Array.prototype.updateItem = function (id, changes) {
+    return this.map((it) => (it.id !== id ? it : { ...it, ...changes }));
   };
 }
 
 if (!Array.prototype.updateItems) {
-  Array.prototype.updateItems = function (items, changes) {
+  Array.prototype.updateItems = function <T extends HasId>(changes: Map<Id, Partial<T>>): T[] {
+    return this.map((it) => {
+      const change = changes.get(it.id);
+      return !change ? it : { ...it, ...change };
+    });
+  };
+}
+
+if (!Array.prototype.replaceItems) {
+  Array.prototype.replaceItems = function (items) {
     return this.map((it) => {
       const item = items.find((item) => item.id === it.id);
-      return !item ? it : { ...it, ...item, ...changes };
+      return !item ? it : { ...it, ...item };
     });
   };
 }

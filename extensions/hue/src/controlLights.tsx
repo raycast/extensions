@@ -5,6 +5,7 @@ import {
   getClosestBrightness,
   getIconForColor,
   getLightIcon,
+  getLightsFromGroup,
   optimisticUpdate,
 } from "./lib/utils";
 import "./lib/arrayExtensions";
@@ -32,12 +33,14 @@ export default function ControlLights() {
   return (
     <List isLoading={isLoading}>
       {groups.map((group: Group) => {
-        const roomLights = lights.filter((light: Light) =>
-          group.children.some((child) => [light.id, light.owner.rid].includes(child.rid))
-        );
-
         return (
-          <Group key={group.id} group={group} lights={roomLights} useHue={useHueObject} rateLimiter={rateLimiter} />
+          <Group
+            key={group.id}
+            group={group}
+            lights={getLightsFromGroup(lights, group)}
+            useHue={useHueObject}
+            rateLimiter={rateLimiter}
+          />
         );
       })}
     </List>
@@ -242,12 +245,11 @@ async function handleToggle(
   rateLimiter: ReturnType<typeof useInputRateLimiter>,
   light: Light
 ) {
-  const { canExecute } = rateLimiter;
   const toast = new Toast({ title: "" });
 
   try {
     if (hueBridgeState.context.hueClient === undefined) throw new Error("Not connected to Hue Bridge.");
-    if (!canExecute()) return;
+    if (!rateLimiter.canExecute()) return;
 
     const changes = {
       on: {
@@ -318,13 +320,12 @@ async function handleBrightnessChange(
   light: Light,
   direction: "increase" | "decrease"
 ) {
-  const { canExecute } = rateLimiter;
   const toast = new Toast({ title: "" });
 
   try {
     if (hueBridgeState.context.hueClient === undefined) throw new Error("Not connected to Hue Bridge.");
     if (light.dimming === undefined) throw new Error("Light does not support dimming.");
-    if (!canExecute()) return;
+    if (!rateLimiter.canExecute()) return;
 
     const adjustedBrightness = calculateAdjustedBrightness(light.dimming.brightness, direction);
     const changes = {
@@ -396,14 +397,12 @@ async function handleColorTemperatureChange(
   light: Light,
   direction: "increase" | "decrease"
 ) {
-  const { canExecute } = rateLimiter;
-
   const toast = new Toast({ title: "" });
 
   try {
     if (hueBridgeState.context.hueClient === undefined) throw new Error("Not connected to Hue Bridge.");
     if (light.color_temperature === undefined) throw new Error("Light does not support color temperature.");
-    if (!canExecute()) return;
+    if (!rateLimiter.canExecute()) return;
 
     const adjustedColorTemperature = calculateAdjustedColorTemperature(light.color_temperature.mirek, direction);
     const changes = {
