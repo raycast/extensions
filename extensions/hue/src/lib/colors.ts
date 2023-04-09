@@ -101,12 +101,13 @@ export function xyBriToRgb({ x, y }: Xy, brightness = 100): Rgb {
     blue = blue / max;
   }
 
+  const [r, g, b] = chroma
+    .rgb(Math.round(red * 255), Math.round(green * 255), Math.round(blue * 255))
+    .darken(1 - brightness / 100)
+    .rgb();
+
   // Round the values to the nearest integer and divide by the brightness
-  return {
-    r: Math.round(red * 255 * (brightness / 100)),
-    g: Math.round(green * 255 * (brightness / 100)),
-    b: Math.round(blue * 255 * (brightness / 100)),
-  };
+  return { r, g, b };
 }
 
 export function xyToRgbHexString(xy: Xy, brightness = 100) {
