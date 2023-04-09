@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "pubmed",
   "title": "PubMed",
-  "description": "",
+  "description": "Search the National Library of Medicine",
   "icon": "pubmed.png",
   "author": "spacedog",
   "license": "MIT",

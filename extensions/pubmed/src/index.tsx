@@ -1,11 +1,8 @@
 import { Icon, Color, ActionPanel, Detail, List, Action, showToast, Toast, preferences } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { get } from "https";
 import { useFetch } from "@raycast/utils";
-import { escape } from "querystring";
 import fetch from "node-fetch";
 import cheerio from "cheerio";
-const axios = require("axios");
 import { NodeHtmlMarkdown } from "node-html-markdown";
 
 interface Article {
@@ -501,12 +498,12 @@ const Details = (props: { article: Article; query: string }) => {
 
   let copyright = "";
   $("#copyright").each(function (i, link) {
-    abstract += $(link).html();
+    copyright += $(link).html();
   });
 
   let conflict = "";
   $("#conflict-of-interest").each(function (i, link) {
-    abstract += $(link).html();
+    conflict += $(link).html();
   });
 
   const affiliations = $(".affiliations").length ? $(".affiliations").html() : "";
