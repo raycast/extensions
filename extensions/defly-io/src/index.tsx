@@ -263,7 +263,8 @@ function Main(props: { region: string; onValueChange: (newValue: string) => void
       isLoading={isLoading}
       isShowingDetail={showingDetail}
       searchBarPlaceholder="Search players..."
-      onSearchTextChange={(query) => setSearchQuery(query)}
+      navigationTitle={`Defly.io teams (${filteredTeams?.map(i=>i.players.length).reduce((a, b) => a+b as 1) || 'No'} players)`}
+      onSearchTextChange={(query) => setSearchQuery(query)}      
       searchBarAccessory={
         <Dropdown
           region={props.region}
