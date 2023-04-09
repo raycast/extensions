@@ -41,3 +41,14 @@ if (!Array.prototype.updateItems) {
     });
   };
 }
+
+if (!Array.prototype.mergeObjectsById) {
+  Array.prototype.mergeObjectsById = function () {
+    return Object.values(
+      this.reduce((acc, obj) => {
+        acc[obj.id] = !acc[obj.id] ? obj : { ...acc[obj.id], ...obj };
+        return acc;
+      }, {})
+    );
+  };
+}

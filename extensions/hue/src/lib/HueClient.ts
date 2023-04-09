@@ -2,7 +2,18 @@
 
 import fs from "fs";
 import { environment } from "@raycast/api";
-import { GroupedLight, Light, LightRequest, Method, ParsedUpdateEvent, Room, Scene, SceneRequest, Zone } from "./types";
+import {
+  GroupedLight,
+  HasId,
+  Light,
+  LightRequest,
+  Method,
+  ParsedUpdateEvent,
+  Room,
+  Scene,
+  SceneRequest,
+  Zone,
+} from "./types";
 import {
   ClientHttp2Session,
   connect,
@@ -249,24 +260,39 @@ export default class HueClient {
 
     const onParsedUpdateEvent = ({ value: updateEvent }: ParsedUpdateEvent) => {
       this.setLights?.((lights) => {
-        const updatedLights = updateEvent.data.filter((resource) => resource.type === "light");
-        return lights.updateItems(updatedLights as Partial<Light>[]);
+        const lightUpdates = updateEvent.data.filter((resource) => {
+          return resource.type === "light";
+        }) as (Partial<Light> & HasId)[];
+
+        return lights.updateItems(lightUpdates.mergeObjectsById());
       });
+
       this.setGroupedLights?.((groupedLights) => {
-        const updatedGroupedLights = updateEvent.data.filter((resource) => resource.type === "grouped_light");
-        return groupedLights.updateItems(updatedGroupedLights as Partial<GroupedLight>[]);
+        const updatedGroupedLights = updateEvent.data.filter((resource) => {
+          return resource.type === "grouped_light";
+        }) as (Partial<GroupedLight> & HasId)[];
+        return groupedLights.updateItems(updatedGroupedLights);
       });
+
       this.setRooms?.((rooms) => {
-        const updatedRooms = updateEvent.data.filter((resource) => resource.type === "room");
-        return rooms.updateItems(updatedRooms as Partial<Room>[]);
+        const updatedRooms = updateEvent.data.filter((resource) => {
+          return resource.type === "room";
+        }) as (Partial<Room> & HasId)[];
+        return rooms.updateItems(updatedRooms);
       });
+
       this.setZones?.((zones) => {
-        const updatedZones = updateEvent.data.filter((resource) => resource.type === "zone");
-        return zones.updateItems(updatedZones as Partial<Zone>[]);
+        const updatedZones = updateEvent.data.filter((resource) => {
+          return resource.type === "zone";
+        }) as (Partial<Zone> & HasId)[];
+        return zones.updateItems(updatedZones);
       });
+
       this.setScenes?.((scenes) => {
-        const updatedScenes = updateEvent.data.filter((resource) => resource.type === "scene");
-        return scenes.updateItems(updatedScenes as Partial<Scene>[]);
+        const updatedScenes = updateEvent.data.filter((resource) => {
+          return resource.type === "scene";
+        }) as (Partial<Scene> & HasId)[];
+        return scenes.updateItems(updatedScenes);
       });
 
       // If the parser encounters a new JSON array, it will throw an error
