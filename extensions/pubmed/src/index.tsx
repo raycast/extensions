@@ -67,7 +67,7 @@ export default function Command() {
               trendingPmidsList.push(pmid);
             });
 
-            if (trendingPmidsList.length != "0") {
+            if (trendingPmidsList.length !== 0) {
               // const ids = searchJson.esearchresult.idlist[0].split(",");
               // const idList = escape(ids.join(","));
 
