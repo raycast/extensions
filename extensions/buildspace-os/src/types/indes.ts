@@ -1,10 +1,10 @@
 export interface Images {
-    title: string;
-    image: string;
+  title: string;
+  image: string;
 }
 
 export interface Events {
-    date: string;
-    event: string;
-    rsvp: string;
+  date: string;
+  event: string;
+  rsvp: string;
 }

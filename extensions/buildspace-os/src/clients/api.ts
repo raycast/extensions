@@ -1,7 +1,7 @@
-import axios from 'axios';
+import axios from "axios";
 
 const apiInstance = axios.create({
-  baseURL: 'https://buildspace-os-api.withportals.xyz',
+  baseURL: "https://buildspace-os-api.withportals.xyz",
 });
 
 export { apiInstance };

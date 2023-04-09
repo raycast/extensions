@@ -43,59 +43,56 @@ export default function Command() {
 
   useEffect(() => {
     const fetchCachedData = async () => {
-      const cachedImages = cache.get('images');
-      const cachedEvents = cache.get('events');
-      const cachedImagesEnabled = cache.get('imagesEnabled');
+      const cachedImages = cache.get("images");
+      const cachedEvents = cache.get("events");
+      const cachedImagesEnabled = cache.get("imagesEnabled");
 
-      if(cachedImages) {
+      if (cachedImages) {
         try {
           const imgs: Images[] = JSON.parse(cachedImages);
-          setImages(imgs)
-        }
-        catch(e) {
-          console.error(`Unable to parse cachedImages into our Images interface`)
+          setImages(imgs);
+        } catch (e) {
+          console.error(`Unable to parse cachedImages into our Images interface`);
         }
       }
 
-      if(cachedEvents) {
+      if (cachedEvents) {
         try {
           const evnts: Events[] = JSON.parse(cachedEvents);
-          setEvents(evnts)
-        }
-        catch(e) {
-          console.error(`Unable to parse cachedImages into our Images interface`)
+          setEvents(evnts);
+        } catch (e) {
+          console.error(`Unable to parse cachedImages into our Images interface`);
         }
       }
 
-      if(cachedImagesEnabled) {
+      if (cachedImagesEnabled) {
         try {
           const enabled: boolean = cachedImagesEnabled === "true";
-          setImagesEnabled(enabled)
-        }
-        catch(e) {
-          console.error(`Unable to parse cachedImages into our Images interface`)
+          setImagesEnabled(enabled);
+        } catch (e) {
+          console.error(`Unable to parse cachedImages into our Images interface`);
         }
       }
-    }
+    };
 
     const fetchData = async () => {
       try {
-        const cacheTTL = cache.get('ttl');
+        const cacheTTL = cache.get("ttl");
 
-        if((cacheTTL && new Date().getTime() > Number(cacheTTL)) || !cacheTTL) {
+        if ((cacheTTL && new Date().getTime() > Number(cacheTTL)) || !cacheTTL) {
           const imagesEnabledResponse = await apiInstance.get<boolean>(`/api/imagesEnabled`);
           setImagesEnabled(imagesEnabledResponse.data);
-          cache.set('imagesEnabled', String(imagesEnabledResponse.data));
-  
+          cache.set("imagesEnabled", String(imagesEnabledResponse.data));
+
           const imagesResponse = await apiInstance.get("/api/images");
           setImages(imagesResponse.data);
-          cache.set('images', JSON.stringify(imagesResponse.data));
-  
+          cache.set("images", JSON.stringify(imagesResponse.data));
+
           const eventsResponse = await apiInstance.get("/api/events");
           setEvents(eventsResponse.data);
-          cache.set('events', JSON.stringify(eventsResponse.data));
+          cache.set("events", JSON.stringify(eventsResponse.data));
 
-          cache.set('ttl', String(new Date().getTime() + 300000));
+          cache.set("ttl", String(new Date().getTime() + 300000));
         }
       } catch (error) {
         setImagesEnabled(false);
@@ -104,7 +101,7 @@ export default function Command() {
         console.error("Error fetching data:", error);
       }
     };
-    
+
     fetchCachedData();
     fetchData();
   }, []);
