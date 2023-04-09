@@ -1,6 +1,7 @@
 import { Clipboard, Icon, MenuBarExtra, confirmAlert, open, showHUD } from "@raycast/api";
 import { useEffect, useState } from "react";
-
+import { Events, Images } from "./types/indes";
+import { apiInstance } from "./clients/api";
 const useDemoDayCountdown = () => {
   const getCountdown = (endDate: Date) => {
     const now = new Date();
@@ -30,63 +31,36 @@ const useDemoDayCountdown = () => {
   const endDate = new Date(Date.UTC(2023, 4, 21, 17, 30)); // May 21, 2023, 10:30 AM PT (17:30 UTC)
   const initialCountdown = getCountdown(endDate);
 
-  const [title, setTitle] = useState(initialCountdown.title);
-  const [fullCountdown, setFullCountdown] = useState(initialCountdown.fullCountdown);
-
-  useEffect(() => {
-    const intervalId = setInterval(() => {
-      const updatedCountdown = getCountdown(endDate);
-      setTitle(updatedCountdown.title);
-      setFullCountdown(updatedCountdown.fullCountdown);
-    }, 1000);
-
-    return () => {
-      clearInterval(intervalId);
-    };
-  }, []);
-
-  return { title, fullCountdown };
+  return { title: initialCountdown.title, fullCountdown: initialCountdown.fullCountdown };
 };
 
 export default function Command() {
   const { title, fullCountdown } = useDemoDayCountdown();
-  const enableImages = false;
-  const images: { title: string; image: string }[] = [
-    {
-      title: "one",
-      image: "http://example.com",
-    },
-    {
-      title: "two",
-      image: "http://example.com",
-    },
-    {
-      title: "three",
-      image: "http://example.com",
-    },
-    {
-      title: "four",
-      image: "http://example.com",
-    },
-  ];
+  const [imagesEnabled, setImagesEnabled] = useState<boolean>(false);
+  const [images, setImages] = useState<Images[]>([]);
+  const [events, setEvents] = useState<Events[]>([]);
 
-  const upcomingEvents: { date: string; event: string; rsvp: string }[] = [
-    {
-      date: "april 8",
-      event: "ideas 101 w/ farza",
-      rsvp: "https://lu.ma/26hnwhzm",
-    },
-    {
-      date: "april 10",
-      event: "building w/ shaan puri",
-      rsvp: "https://lu.ma/6vgyneo4",
-    },
-    {
-      date: "april 12",
-      event: "life & lexica w/ sharif",
-      rsvp: "https://lu.ma/8s7zlrgc",
-    },
-  ];
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const imagesEnabledResponse = await apiInstance.get<boolean>(`/api/imagesEnabled`);
+        setImagesEnabled(imagesEnabledResponse.data);
+
+        const imagesResponse = await apiInstance.get("/api/images");
+        setImages(imagesResponse.data);
+
+        const eventsResponse = await apiInstance.get("/api/events");
+        setEvents(eventsResponse.data);
+      } catch (error) {
+        setImagesEnabled(false);
+        setImages([]);
+        setEvents([]);
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   return (
     <MenuBarExtra icon={Icon.Clock} title={title}>
@@ -100,7 +74,7 @@ export default function Command() {
         }}
       />
       <MenuBarExtra.Submenu title="images" icon={Icon.Image}>
-        {enableImages
+        {imagesEnabled
           ? images.map((image) => (
               <MenuBarExtra.Item
                 key={image.title}
@@ -113,7 +87,7 @@ export default function Command() {
       </MenuBarExtra.Submenu>
       <MenuBarExtra.Submenu title="recordings" icon={Icon.Video}></MenuBarExtra.Submenu>
       <MenuBarExtra.Submenu title="upcoming events" icon={Icon.Calendar}>
-        {upcomingEvents.map((event) => (
+        {events.map((event) => (
           <MenuBarExtra.Item
             key={event.event}
             title={`${event.date} - ${event.event}`}
