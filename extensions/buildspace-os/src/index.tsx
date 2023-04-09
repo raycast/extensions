@@ -1,4 +1,4 @@
-import { Clipboard, Icon, MenuBarExtra, confirmAlert, open, showHUD } from "@raycast/api";
+import { Cache, Clipboard, Icon, MenuBarExtra, confirmAlert, open, showHUD } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { Events, Images } from "./types/indes";
 import { apiInstance } from "./clients/api";
@@ -36,21 +36,67 @@ const useDemoDayCountdown = () => {
 
 export default function Command() {
   const { title, fullCountdown } = useDemoDayCountdown();
+  const cache = new Cache();
   const [imagesEnabled, setImagesEnabled] = useState<boolean>(false);
   const [images, setImages] = useState<Images[]>([]);
   const [events, setEvents] = useState<Events[]>([]);
 
   useEffect(() => {
+    const fetchCachedData = async () => {
+      const cachedImages = cache.get('images');
+      const cachedEvents = cache.get('events');
+      const cachedImagesEnabled = cache.get('imagesEnabled');
+
+      if(cachedImages) {
+        try {
+          const imgs: Images[] = JSON.parse(cachedImages);
+          setImages(imgs)
+        }
+        catch(e) {
+          console.error(`Unable to parse cachedImages into our Images interface`)
+        }
+      }
+
+      if(cachedEvents) {
+        try {
+          const evnts: Events[] = JSON.parse(cachedEvents);
+          setEvents(evnts)
+        }
+        catch(e) {
+          console.error(`Unable to parse cachedImages into our Images interface`)
+        }
+      }
+
+      if(cachedImagesEnabled) {
+        try {
+          const enabled: boolean = cachedImagesEnabled === "true";
+          setImagesEnabled(enabled)
+        }
+        catch(e) {
+          console.error(`Unable to parse cachedImages into our Images interface`)
+        }
+      }
+    }
+
     const fetchData = async () => {
       try {
-        const imagesEnabledResponse = await apiInstance.get<boolean>(`/api/imagesEnabled`);
-        setImagesEnabled(imagesEnabledResponse.data);
+        const cacheTTL = cache.get('ttl');
 
-        const imagesResponse = await apiInstance.get("/api/images");
-        setImages(imagesResponse.data);
+        if((cacheTTL && new Date().getTime() > Number(cacheTTL)) || !cacheTTL) {
+          const imagesEnabledResponse = await apiInstance.get<boolean>(`/api/imagesEnabled`);
+          setImagesEnabled(imagesEnabledResponse.data);
+          cache.set('imagesEnabled', String(imagesEnabledResponse.data));
+  
+          const imagesResponse = await apiInstance.get("/api/images");
+          setImages(imagesResponse.data);
+          cache.set('images', JSON.stringify(imagesResponse.data));
+  
+          const eventsResponse = await apiInstance.get("/api/events");
+          setEvents(eventsResponse.data);
+          cache.set('events', JSON.stringify(eventsResponse.data));
 
-        const eventsResponse = await apiInstance.get("/api/events");
-        setEvents(eventsResponse.data);
+          cache.set('ttl', String(new Date().getTime() + 300000));
+        }
       } catch (error) {
         setImagesEnabled(false);
         setImages([]);
@@ -58,7 +104,8 @@ export default function Command() {
         console.error("Error fetching data:", error);
       }
     };
-
+    
+    fetchCachedData();
     fetchData();
   }, []);
 
@@ -102,6 +149,7 @@ export default function Command() {
           confirmAlert({ title: "this file is locked. please contact the owner for access. owner: alec dilanchian" })
         }
       />
+      <MenuBarExtra.Item title="clear cache" onAction={() => cache.clear()} />
     </MenuBarExtra>
   );
 }
