@@ -182,7 +182,7 @@ export default function Command() {
         title="chai_recipe"
         icon={Icon.Stars}
         onAction={() =>
-          confirmAlert({ title: "this file is locked. please contact the owner for access. owner: alec dilanchian" })
+          showHUD("this file is locked. please contact the owner for access. owner: alec dilanchian")
         }
       />
     </MenuBarExtra>
