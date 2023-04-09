@@ -1,9 +1,7 @@
-import { Icon, Color, Detail, List, showToast, Toast, Action, ActionPanel } from "@raycast/api";
+import { Icon, Color, List, showToast, Toast, Action, ActionPanel } from "@raycast/api";
 import axios from "axios";
 import cheerio from "cheerio";
 import { useEffect, useState } from "react";
-import { useFetch } from "@raycast/utils";
-import { NodeHtmlMarkdown } from "node-html-markdown";
 import DocCheckPage from "./doccheck-page";
 
 type Result = {

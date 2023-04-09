@@ -1,8 +1,10 @@
-import { Action, ActionPanel, getPreferenceValues, Icon, popToRoot, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Detail, getPreferenceValues, Icon, popToRoot, showToast, Toast } from "@raycast/api";
 import { useCachedPromise, useCachedState, usePromise } from "@raycast/utils";
 import Style = Toast.Style;
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { useFetch } from "@raycast/utils";
 import cheerio from "cheerio";
+import { NodeHtmlMarkdown } from "node-html-markdown";
 
 const preferences = getPreferenceValues();
 
