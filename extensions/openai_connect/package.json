@@ -1,0 +1,79 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "openai_connect",
+  "title": "OpenAI Connect",
+  "description": "Give you access to OpenAI API without your efforts",
+  "icon": "command-icon.png",
+  "author": "Maszz",
+  "categories": [
+    "Productivity",
+    "Developer Tools",
+    "Other",
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "chat",
+      "title": "OpenAI Chat",
+      "subtitle": "OpenAI API",
+      "description": "list ChatGPT via Raycast",
+      "mode": "view"
+    },
+    {
+      "name": "conversationList",
+      "title": "Conversation List",
+      "subtitle": "OpenAI API",
+      "description": "History of your conversation with gpt",
+      "mode": "view"
+    },
+    {
+      "name": "history",
+      "title": "History",
+      "subtitle": "OpenAI API",
+      "description": "History of your chat with gpt",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "openAiApiKey",
+      "title": "OpenAI API Key",
+      "description": "API Key is used to authenticate with OpenAI API",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "useStream",
+      "label": "Enable streaming",
+      "description": "Stream the completions of the generated answer",
+      "type": "checkbox",
+      "title": "Stream Completion",
+      "default": true,
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.49.2",
+    "@types/uuid": "^9.0.1",
+    "openai": "^3.2.1",
+    "react": "^18.2.0",
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "eslint-plugin-prettier": "^4.2.1",
+    "prettier": "2.8.7",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint && eslint .",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
