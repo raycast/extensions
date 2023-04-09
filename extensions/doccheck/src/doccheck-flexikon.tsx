@@ -256,7 +256,11 @@ export default function Command() {
 function EntryActions(url: string, title: string, query: string) {
   return (
     <ActionPanel>
-      <Action.Push icon={Icon.Book} title="Eintrag lesen" target={<DocCheckPage prevtitle={''} prevurl={''} title={title} url={url} />} />
+      <Action.Push
+        icon={Icon.Book}
+        title="Eintrag lesen"
+        target={<DocCheckPage prevtitle={""} prevurl={""} title={title} url={url} />}
+      />
       <Action.Open
         icon={Icon.Globe}
         title="Eintrag im Browser öffnen"
