@@ -90,6 +90,7 @@ type LightArchetype =
   | "pendant_spot"
   | "ceiling_horizontal"
   | "ceiling_tube";
+
 export type ResourceIdentifier = {
   /**
    * string (pattern: ^[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}$)
@@ -97,6 +98,7 @@ export type ResourceIdentifier = {
    * The unique ide of the referenced resource
    */
   rid: string;
+
   /**
    * The type of the referenced resource
    */
@@ -232,17 +234,11 @@ export type Light = {
     mirek: number;
 
     /**
-     * Can only be read, not written. Hence, it is not required.
-     * TODO: Maybe make separate type for this?
      * Indication whether the value presented in mired is valid
      */
-    mirek_valid?: boolean;
+    mirek_valid: boolean;
 
-    /**
-     * Can only be read, not written. Hence, it is not required.
-     * TODO: Maybe make separate type for this?
-     */
-    mirek_schema?: {
+    mirek_schema: {
       /**
        * integer (153 – 500)
        *
@@ -333,14 +329,13 @@ export type Light = {
      * The gamut types supported by hue
      *
      * Can only be read, not written. Hence, it is not required.
-     * TODO: Maybe make separate type for this?
      *
      * - A:     Gamut of early Philips color-only products
      * - B:     Limited gamut of first Hue color products
      * - C:     Richer color gamut of Hue white and color ambiance products
      * - other: Color gamut of non-hue products with non-hue gamuts resp w/o gamut
      */
-    gamut_type?: "A" | "B" | "C" | "other";
+    gamut_type: "A" | "B" | "C" | "other";
   };
 
   dynamics: {
