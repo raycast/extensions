@@ -146,7 +146,6 @@ export default function Command() {
           confirmAlert({ title: "this file is locked. please contact the owner for access. owner: alec dilanchian" })
         }
       />
-      <MenuBarExtra.Item title="clear cache" onAction={() => cache.clear()} />
     </MenuBarExtra>
   );
 }
