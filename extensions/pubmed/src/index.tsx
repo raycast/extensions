@@ -60,7 +60,7 @@ export default function Command() {
           if (trendinghResponse.ok) {
             const searchTrending = await trendinghResponse.text();
             const $ = cheerio.load(searchTrending);
-            const trendingPmidsList = [];
+            const trendingPmidsList: string[] = [];
 
             $(".docsum-wrap").each((index, element) => {
               const pmid = $(element).find(".docsum-pmid").text();
@@ -152,7 +152,7 @@ export default function Command() {
               setLoading(false);
             }
           } else {
-            throw new Error(`Error fetching search data: ${searchResponse.status}`);
+            throw new Error(`Error fetching search data: ${trendinghResponse.status}`);
           }
         } catch (error) {
           console.error(error);
