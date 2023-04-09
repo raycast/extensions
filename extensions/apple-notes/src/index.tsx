@@ -177,7 +177,6 @@ export default function Command() {
                         icon={Icon.Document}
                         onAction={() => {
                           openNote(note, false);
-                          console.log(note);
                         }}
                       />
                     )}
@@ -225,7 +224,7 @@ export default function Command() {
               .map((note) => (
                 <List.Item
                   key={note.id}
-                  icon="notes-icon.png"
+                  icon={{ source: Icon.Trash, tintColor: "#777777" }}
                   title={note.title || ""}
                   subtitle={note.snippet}
                   keywords={[`${note.folder}`, `${note.account}`].concat(note.snippet ? [note.snippet] : [])}
@@ -262,7 +261,6 @@ export default function Command() {
                           icon={Icon.Document}
                           onAction={() => {
                             openNote(note, false);
-                            console.log(note);
                           }}
                         />
                       )}
@@ -278,18 +276,6 @@ export default function Command() {
                           restoreNote(note);
                         }}
                       />
-                      <ActionPanel.Section title="Copy Actions">
-                        <Action.CopyToClipboard
-                          title="Copy Note URL"
-                          icon={Icon.Link}
-                          content={`notes://showNote?identifier=${note.UUID}`}
-                        />
-                        <Action.CopyToClipboard
-                          title="Copy Mobile Note URL"
-                          icon={Icon.Link}
-                          content={`mobilenotes://showNote?identifier=${note.UUID}`}
-                        />
-                      </ActionPanel.Section>
                     </ActionPanel>
                   }
                 />
