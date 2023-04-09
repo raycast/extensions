@@ -1,5 +1,9 @@
 # DocCheck Changelog
 
+## [Version 1.1.1] - 2023-04-09
+
+- NEW: go back to search if there is no prevous article
+
 ## [Version 1.1] - 2023-04-09
 
 - NEW: Open article directly in Raycast using deeplinks (you can even go back one time!)

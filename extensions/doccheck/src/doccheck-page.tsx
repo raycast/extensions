@@ -99,7 +99,7 @@ export default function DocCheckPage(props: { prevtitle: string; prevurl: string
         "raycast://extensions/spacedog/doccheck/open-page?arguments=" +
         encodeURI(JSON.stringify({ title: props.prevtitle, url: props.prevurl })) +
         ")"
-      : "";
+      : "[← Suche](" + "raycast://extensions/spacedog/doccheck/doccheck-flexikon)";
   markdown +=
     "# " +
     props.title +
