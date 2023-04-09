@@ -15,6 +15,7 @@ import React from "react";
 import RateLimitedQueue from "./RateLimitedQueue";
 import StreamArray from "stream-json/streamers/StreamArray";
 import Chain from "stream-chain";
+import "./arrayExtensions";
 
 const DATA_PREFIX = "data: ";
 const CONNECTION_TIMEOUT_MS = 5000;

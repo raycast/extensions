@@ -7,6 +7,7 @@ import HueClient from "./lib/HueClient";
 import useGradients from "./hooks/useGradientUris";
 import { getColorsFromScene } from "./lib/utils";
 import { useMemo, useState } from "react";
+import "./lib/arrayExtensions";
 import Style = Toast.Style;
 
 // Exact dimensions of a 16:9 Raycast 5 column grid item.

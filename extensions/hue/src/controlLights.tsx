@@ -7,6 +7,7 @@ import {
   getLightIcon,
   optimisticUpdate,
 } from "./lib/utils";
+import "./lib/arrayExtensions";
 import { CssColor, Group, Light } from "./lib/types";
 import { BRIGHTNESS_MAX, BRIGHTNESS_MIN, BRIGHTNESSES, COLORS, MIRED_MAX, MIRED_MIN } from "./lib/constants";
 import ManageHueBridge from "./components/ManageHueBridge";

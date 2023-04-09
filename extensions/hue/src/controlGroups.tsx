@@ -8,6 +8,7 @@ import HueClient from "./lib/HueClient";
 import { getProgressIcon } from "@raycast/utils";
 import { useMemo, useState } from "react";
 import useGradientUris from "./hooks/useGradientUris";
+import "./lib/arrayExtensions";
 import Style = Toast.Style;
 
 // Exact dimensions of a 16:9 Raycast 5 column grid item.

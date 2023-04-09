@@ -4,51 +4,9 @@ import { discovery, v3 } from "node-hue-api";
 import { APP_NAME, BRIGHTNESSES, MIRED_DEFAULT, MIRED_MAX, MIRED_MIN, MIRED_STEP } from "./constants";
 import Jimp from "jimp";
 import chroma from "chroma-js";
-
 import { miredToHexString, xyToRgbHexString } from "./colors";
 import React from "react";
 import Style = Toast.Style;
-
-declare global {
-  interface Array<T extends HasId> {
-    /**
-     * The <code>updateItem</code> method <strong>creates a new array</strong> with the <code>changes</code> applied to
-     * the array element that matches the <code>id</code> of the given <code>item</code>.
-     */
-    updateItem(item: Partial<T>, changes: Partial<T>): T[];
-
-    /**
-     * The <code>replaceItems</code> method <strong>creates a new array</strong> where array elements are replaced with
-     * the <code>newItems</code> if the <code>id</code> matches. If <code>changes</code> are provided, they are applied
-     * to the <code>items</code> that are replaced.
-     *
-     * If the <code>id</code> does not match, the original array element is kept. No new array elements are added.
-     */
-    updateItems(items: Partial<T>[], changes?: Partial<T>): T[];
-  }
-}
-
-Array.prototype.updateItem = function (item, changes) {
-  console.log(item.color);
-  return this.map((it) => (it.id !== item.id ? it : { ...it, ...item, ...changes }));
-};
-
-Array.prototype.updateItems = function (items, changes) {
-  return this.map((it) => {
-    const item = items.find((item) => item.id === it.id);
-    return !item ? it : { ...it, ...item, ...changes };
-  });
-};
-
-declare global {
-  interface Math {
-    clamp(value: number, min: number, max: number): number;
-  }
-}
-
-Math.clamp = function (value, min, max) {
-  return Math.min(Math.max(value, min), max);
-};
 
 export function getGroupLights(group: Group, lights: Light[]): Light[] {
   return lights.filter((light) =>
