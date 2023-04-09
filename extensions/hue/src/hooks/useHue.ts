@@ -42,7 +42,7 @@ export function useHue() {
   return {
     hueBridgeState,
     sendHueMessage,
-    isLoading: !lights.length || !rooms.length || !scenes.length,
+    isLoading: !lights.length || !rooms.length || !zones.length || !scenes.length,
     lights,
     setLights,
     groupedLights,

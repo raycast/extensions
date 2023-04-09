@@ -1,5 +1,5 @@
 import { Rgb, Xy } from "./types";
-import { COLOR_TEMPERATURE_DARKEN_FACTOR, MIRED_ADJUSTMENT } from "./constants";
+import { MIRED_ADJUSTMENT } from "./constants";
 import chroma from "chroma-js";
 
 // TODO: RGB and color temperature lights do not end up with the same RGB values

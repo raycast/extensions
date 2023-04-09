@@ -145,7 +145,7 @@ export default class HueClient {
     return response.data.data;
   }
 
-  public async updateGroupedLight(groupedLight: GroupedLight, properties: Partial<Light>): Promise<any> {
+  public async updateGroupedLight(groupedLight: GroupedLight, properties: Partial<GroupedLight>): Promise<any> {
     this.setGroupedLights?.((groupedLights) => groupedLights.updateItem(groupedLight, properties));
     const request = async () => {
       return await this.makeRequest("PUT", `/clip/v2/resource/grouped_light/${groupedLight.id}`, properties).catch(
