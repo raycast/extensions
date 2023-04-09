@@ -1,5 +1,11 @@
 import { ActionPanel, Color, Grid, Icon, Toast } from "@raycast/api";
-import { getColorFromLight, getIconForColor, optimisticUpdate, optimisticUpdates } from "./lib/utils";
+import {
+  getColorFromLight,
+  getIconForColor,
+  getLightsFromGroup,
+  optimisticUpdate,
+  optimisticUpdates,
+} from "./lib/utils";
 import { CssColor, Group, GroupedLight, Id, Light, Palette, Room, Scene, Zone } from "./lib/types";
 import { BRIGHTNESS_MAX, BRIGHTNESSES, COLORS } from "./lib/constants";
 import ManageHueBridge from "./components/ManageHueBridge";
@@ -26,12 +32,7 @@ export default function ControlGroups() {
   useMemo(() => {
     const groups = [...rooms, ...zones];
     const palettes = new Map<Id, Palette>(
-      groups.map((group) => [
-        group.id,
-        lights
-          .filter((light) => group.children.some((child) => child.rid === light.id || child.rid === light.owner.rid))
-          .map((light) => getColorFromLight(light)),
-      ])
+      groups.map((group) => [group.id, getLightsFromGroup(lights, group).map((light) => getColorFromLight(light))])
     );
 
     setPalettes(palettes);
@@ -46,6 +47,7 @@ export default function ControlGroups() {
         <Grid.Section title="Rooms">
           {rooms.map((room: Room) => {
             const roomScenes = scenes.filter((scene: Scene) => scene.group.rid == room.id);
+            const groupLights = getLightsFromGroup(lights, room);
             const groupedLight = groupedLights.find(
               (groupedLight) =>
                 groupedLight.id === room.services.find((resource) => resource.rtype === "grouped_light")?.rid
@@ -54,6 +56,7 @@ export default function ControlGroups() {
             return (
               <Group
                 key={room.id}
+                lights={groupLights}
                 groupedLight={groupedLight}
                 group={room}
                 scenes={roomScenes}
@@ -68,11 +71,19 @@ export default function ControlGroups() {
       {zones.length > 0 && (
         <Grid.Section title="Zones">
           {zones.map((zone: Zone) => {
+            const groupLights = getLightsFromGroup(lights, zone);
             const zoneScenes = scenes.filter((scene: Scene) => scene.group.rid == zone.id);
+            const groupedLight = groupedLights.find(
+              (groupedLight) =>
+                groupedLight.id === zone.services.find((resource) => resource.rtype === "grouped_light")?.rid
+            );
+
             return (
               <Group
                 key={zone.id}
                 group={zone}
+                lights={groupLights}
+                groupedLight={groupedLight}
                 scenes={zoneScenes}
                 gradientUri={gradientUris.get(zone.id)}
                 useHue={useHueObject}
@@ -87,17 +98,31 @@ export default function ControlGroups() {
 }
 
 function Group(props: {
+  lights: Light[];
   groupedLight?: GroupedLight;
   group: Group;
-  scenes?: Scene[];
+  scenes: Scene[];
   gradientUri?: string;
   useHue: ReturnType<typeof useHue>;
   rateLimiter: ReturnType<typeof useInputRateLimiter>;
 }) {
+  const lightsOnCount = props.lights.filter((light) => light.on.on).length;
+  let lightStatusText;
+  if (lightsOnCount === 0) {
+    lightStatusText = "All lights are off";
+  } else if (lightsOnCount === props.lights.length) {
+    lightStatusText = "All lights are on";
+  } else if (lightsOnCount === 1) {
+    lightStatusText = "1 light is on";
+  } else {
+    lightStatusText = `${lightsOnCount} lights are on`;
+  }
+
   return (
     <Grid.Item
       key={props.group.id}
       title={props.group.metadata.name}
+      subtitle={lightStatusText}
       content={props.groupedLight?.on?.on ? props.gradientUri ?? "" : ""}
       actions={
         props.groupedLight && (
