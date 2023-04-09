@@ -181,9 +181,7 @@ export default function Command() {
       <MenuBarExtra.Item
         title="chai_recipe"
         icon={Icon.Stars}
-        onAction={() =>
-          showHUD("this file is locked. please contact the owner for access. owner: alec dilanchian")
-        }
+        onAction={() => showHUD("this file is locked. please contact the owner for access. owner: alec dilanchian")}
       />
     </MenuBarExtra>
   );
