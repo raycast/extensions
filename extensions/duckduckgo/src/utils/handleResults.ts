@@ -64,7 +64,9 @@ export function getStaticResult(searchText: string): SearchResult[] {
     if (parts.length == 1 || parts[1] == "") {
       // Only "!*" or "!* "
       if (bang in BANGS) {
-        description = `Go to ${BANGS[bang].name} (open '${BANGS[bang].url.split("/")[2].replace('www.', '')}' in Browser)`;
+        description = `Go to ${BANGS[bang].name} (open '${BANGS[bang].url
+          .split("/")[2]
+          .replace("www.", "")}' in Browser)`;
         url = "https://" + `${BANGS[bang].url.split("/")[2]}`;
       }
     } else {
@@ -123,7 +125,9 @@ export async function getAutoSearchResults(searchText: string, signal: any): Pro
           results.push({
             id: nanoid(),
             query: item.phrase,
-            description: `Go to ${BANGS[bang].name} (open '${BANGS[bang].url.split("/")[2].replace('www.', '')}' in Browser)`,
+            description: `Go to ${BANGS[bang].name} (open '${BANGS[bang].url
+              .split("/")[2]
+              .replace("www.", "")}' in Browser)`,
             url: "https://" + `${BANGS[bang].url.split("/")[2]}`,
           });
         }
