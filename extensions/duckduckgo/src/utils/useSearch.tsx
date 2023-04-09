@@ -54,7 +54,6 @@ export function useSearch() {
         //
         //         console.error("Search error", error);
         //         showToast(Toast.Style.Failure, "Could not perform search", String(error));
-      } finally {
       }
     };
 
@@ -68,7 +67,7 @@ export function useSearch() {
     );
     if (
       autoResults.length > 0 ||
-      /^https?:\/\/[\w\-]+(\.[\w\-]+)+\/?$/.test(staticResults[0] ? staticResults[0].url : "") ||
+      /^https?:\/\/[\w-]+(\.[\w-]+)+\/?$/.test(staticResults[0] ? staticResults[0].url : "") ||
       searchText.trim() === "" ||
       searchText === "!"
     ) {
