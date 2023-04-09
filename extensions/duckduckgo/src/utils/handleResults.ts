@@ -64,15 +64,15 @@ export function getStaticResult(searchText: string): SearchResult[] {
     if (parts.length == 1 || parts[1] == "") {
       // Only "!*" or "!* "
       if (bang in BANGS) {
-        description = `Go to ${BANGS[bang].name} (open '${BANGS[bang].url.split("/")[2]}' in Browser)`;
+        description = `Go to ${BANGS[bang].name} (open '${BANGS[bang].url.split("/")[2].replace('www.', '')}' in Browser)`;
         url = "https://" + `${BANGS[bang].url.split("/")[2]}`;
       }
     } else {
       // "!* search_query"
-      const searchQuery = encodeURIComponent(parts.slice(1).join(" "));
+      const searchQuery = parts.slice(1).join(" ");
       if (bang in BANGS) {
-        description = `Search ${BANGS[bang].name} for '${searchText}'`;
-        url = `${BANGS[bang].url}${searchQuery}`;
+        description = `Search ${BANGS[bang].name} for '${searchQuery}'`;
+        url = `${BANGS[bang].url}${encodeURIComponent(searchQuery)}`;
       }
     }
   }
@@ -123,7 +123,7 @@ export async function getAutoSearchResults(searchText: string, signal: any): Pro
           results.push({
             id: nanoid(),
             query: item.phrase,
-            description: `Go to ${BANGS[bang].name} (open '${BANGS[bang].url.split("/")[2]}' in Browser)`,
+            description: `Go to ${BANGS[bang].name} (open '${BANGS[bang].url.split("/")[2].replace('www.', '')}' in Browser)`,
             url: "https://" + `${BANGS[bang].url.split("/")[2]}`,
           });
         }

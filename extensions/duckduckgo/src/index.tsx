@@ -1,5 +1,5 @@
 import { ActionPanel, closeMainWindow, Action, Icon, List, open } from "@raycast/api";
-import { getIcon } from "./utils/resultUtils";
+import { getFavicon } from "@raycast/utils";
 import { useSearch } from "./utils/useSearch";
 
 export default function Command() {
@@ -13,7 +13,11 @@ export default function Command() {
             key={item.id}
             title={item.query}
             subtitle={item.description}
-            icon={getIcon(item)}
+            icon={
+              item.url.split("/")[2] === "duckduckgo.com"
+                ? { source: Icon.MagnifyingGlass }
+                : getFavicon("https://" + item.url.split("/")[2])
+            }
             actions={
               <ActionPanel>
                 <ActionPanel.Section title="Result">
