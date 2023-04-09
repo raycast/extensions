@@ -45,7 +45,7 @@
       "arguments": [
         {
           "name": "prevurl",
-          "placeholder": "Previous article URL",
+          "placeholder": "Previous-URL",
           "type": "text",
           "required": false
         },
