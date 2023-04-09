@@ -44,12 +44,6 @@
       "mode": "view",
       "arguments": [
         {
-          "name": "prevtitle",
-          "placeholder": "Title",
-          "type": "text",
-          "required": false
-        },
-        {
           "name": "prevurl",
           "placeholder": "URL",
           "type": "text",

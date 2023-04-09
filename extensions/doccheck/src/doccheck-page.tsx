@@ -1,15 +1,12 @@
-import { Action, ActionPanel, Detail, getPreferenceValues, Icon, popToRoot, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, getPreferenceValues, Icon, popToRoot, showToast, Toast } from "@raycast/api";
 import { useCachedPromise, useCachedState, usePromise } from "@raycast/utils";
 import Style = Toast.Style;
-import { useEffect, useState } from "react";
-import { useFetch } from "@raycast/utils";
+import { useEffect } from "react";
 import cheerio from "cheerio";
-import { NodeHtmlMarkdown } from "node-html-markdown";
 
 const preferences = getPreferenceValues();
 
 export default function DocCheckPage(props: { prevtitle: string; prevurl: string; title: string; url: string }) {
-  console.log(props.prevtitle, props.prevurl);
   const [searchText, setSearchText] = useState("");
   const { isLoading, data } = useFetch(props.url, {
     // to make sure the screen isn't flickering when the searchText changes
@@ -92,7 +89,7 @@ export default function DocCheckPage(props: { prevtitle: string; prevurl: string
   });
 
   markdown = "";
-  let goback =
+  const goback =
     props.prevurl != undefined && props.prevurl != "" && preferences.openIn != "browser"
       ? "[← " +
         props.prevtitle +
@@ -118,15 +115,15 @@ export default function DocCheckPage(props: { prevtitle: string; prevurl: string
         preferences.openIn === "browser"
           ? markdown.replace(/]\(\//gm, "](https://flexikon.doccheck.com/")
           : markdown.replace(/\[(.*?)\]\((\/.*?) "(.*?)"\)/g, function (match, p1, p2, p3) {
-              var url = "https://flexikon.doccheck.com" + p2;
-              var args = {
+              const url = "https://flexikon.doccheck.com" + p2;
+              const args = {
                 prevtitle: props.title,
                 prevurl: props.url,
                 title: p3,
                 url: url,
               };
               // console.log(args)
-              var query = encodeURIComponent(JSON.stringify(args));
+              const query = encodeURIComponent(JSON.stringify(args));
               return "[" + p1 + "](raycast://extensions/spacedog/doccheck/open-page?arguments=" + query + ")";
             })
       }
