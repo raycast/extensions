@@ -4,6 +4,7 @@ import cheerio from "cheerio";
 import { useEffect, useState } from "react";
 import { useFetch } from "@raycast/utils";
 import { NodeHtmlMarkdown } from "node-html-markdown";
+import DocCheckPage from "./doccheck-page";
 
 type Result = {
   title: string;
@@ -255,7 +256,7 @@ export default function Command() {
 function EntryActions(url: string, title: string, query: string) {
   return (
     <ActionPanel>
-      <Action.Push icon={Icon.Book} title="Eintrag lesen" target={<Details url={url} title={title} />} />
+      <Action.Push icon={Icon.Book} title="Eintrag lesen" target={<DocCheckPage prevtitle={''} prevurl={''} title={title} url={url} />} />
       <Action.Open
         icon={Icon.Globe}
         title="Eintrag im Browser öffnen"
@@ -283,115 +284,3 @@ function EntryActions(url: string, title: string, query: string) {
     </ActionPanel>
   );
 }
-
-const Details = (props: { url: string; title: string }) => {
-  const [searchText, setSearchText] = useState("");
-  const { isLoading, data } = useFetch(props.url, {
-    // to make sure the screen isn't flickering when the searchText changes
-    keepPreviousData: true,
-    initialData: "",
-  });
-
-  const $ = cheerio.load(String(data));
-
-  const relateArticle = $(".collapsible-article").map((i, section) => {
-    const articles = $(section).find(".collapsible-content");
-    return articles.html();
-  });
-
-  // Synonyme
-  let mdSynonyms = "";
-  let synonyms = "";
-  $(".mw-parser-output")
-    .find("i")
-    .each(function (i, link) {
-      synonyms += $(link).html() + "\n";
-    });
-
-  // erster <i></i> im Artikel - zum Abgleich ob es Synonyme gibt oder nicht
-  let notSynonyms = "";
-  $(".collapsible")
-    .find("i")
-    .each(function (i, link) {
-      notSynonyms += $(link).html() + "\n";
-    });
-  // 	notSynonyms = notSynonyms.trim();
-  synonyms = synonyms.replace(notSynonyms, "");
-
-  // SYNONYME
-  if (synonyms) {
-    // es gibt Synonyme oder Erklärungen unter der Überschrift
-    mdSynonyms =
-      "```\n" +
-      synonyms
-        .trim()
-        .split("<br>")
-        .join("")
-        .split("</b>\n")
-        .join(" ")
-        .split("<b>")
-        .join("")
-        .split("</b>")
-        .join("")
-        .split("<sup>")
-        .join("")
-        .split("</sup>")
-        .join("") +
-      "\n" +
-      "``` " +
-      "\n";
-  }
-
-  const nhm = new NodeHtmlMarkdown(
-    /* options (optional) */ {},
-    /* customTransformers (optional) */ undefined,
-    /* customCodeBlockTranslators (optional) */ undefined
-  );
-  let html = "";
-  $(".mw-parser-output").each(function (i, link) {
-    html += $(link).html();
-  });
-  let toc = "";
-  $("#toc").each(function (i, link) {
-    toc += $(link).html();
-  });
-
-  // remove synonyms
-  let markdown = "";
-  synonyms.split("\n").forEach((element) => {
-    html = html.replace(element, "");
-  });
-  markdown = "";
-  markdown =
-    "# " +
-    props.title +
-    "\n" +
-    mdSynonyms +
-    nhm
-      .translate(html.replace(toc, "").replace(/#cite_\D*\d*/gm, '"'))
-      .replace(/]\(\//gm, "](https://flexikon.doccheck.com/"); // ÜBERSCHRIFT + ```SYNONYME``` -TOC + ARTIKEL (Entfernung von Akern, relative zu absoluten Links)
-
-  return (
-    <Detail
-      navigationTitle={`DocCheck - ${props.title}`}
-      isLoading={isLoading}
-      markdown={markdown}
-      actions={
-        <ActionPanel>
-          <Action.Open
-            icon={Icon.Globe}
-            title="Eintrag im Browser öffnen"
-            target={props.url}
-            shortcut={{ modifiers: ["cmd"], key: "enter" }}
-          />
-          <Action.Open
-            icon={Icon.Uppercase}
-            title="Eintrag als AMBOSS-Suche"
-            target={"https://next.amboss.com/de/search?q=" + encodeURI(props.title) + "&v=overview"}
-            shortcut={{ modifiers: ["opt"], key: "enter" }}
-          />
-        </ActionPanel>
-      }
-    />
-  );
-};

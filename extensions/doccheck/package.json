@@ -9,12 +9,65 @@
     "Web"
   ],
   "license": "MIT",
+  "preferences": [
+    {
+      "name": "openIn",
+      "title": "Open In",
+      "description": "Where to open the DocCheck page by default",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "Browser",
+          "value": "browser"
+        },
+        {
+          "title": "Raycast",
+          "value": "raycast"
+        }
+      ],
+      "default": "raycast",
+      "required": false
+    }
+  ],
   "commands": [
     {
       "name": "doccheck-flexikon",
       "title": "Search Flexikon",
       "description": "Search through DocCheck Flexikon for medical terms and definitions",
       "mode": "view"
+    },
+    {
+      "name": "open-page",
+      "title": "Open Page",
+      "subtitle": "DocCheck",
+      "description": "Open DocCheck page in Raycast",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "prevtitle",
+          "placeholder": "Title",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "prevurl",
+          "placeholder": "URL",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "title",
+          "placeholder": "Title",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "url",
+          "placeholder": "URL",
+          "type": "text",
+          "required": true
+        }
+      ]
     }
   ],
   "dependencies": {
