@@ -405,7 +405,7 @@ export default function Command() {
 }
 
 function EntryActions(article: Article, query: string, sortBy: string) {
-  if (preferences.scihubinstance.value != undefined && preferences.scihubinstance.value != '' && article.doi) {
+  if (preferences.scihubinstance.value != undefined && preferences.scihubinstance.value != "" && article.doi) {
     return (
       <ActionPanel>
         <Action.Push icon={Icon.Book} title="Read abstract" target={<Details article={article} query={query} />} />
@@ -451,7 +451,7 @@ function EntryActions(article: Article, query: string, sortBy: string) {
 }
 
 function EntryActionsDetail(article: Article) {
-  if (preferences.scihubinstance.value != undefined && preferences.scihubinstance.value != '' && article.doi) {
+  if (preferences.scihubinstance.value != undefined && preferences.scihubinstance.value != "" && article.doi) {
     return (
       <ActionPanel>
         <Action.Open icon={Icon.Globe} title="Open article in Browser" target={article.url} />
