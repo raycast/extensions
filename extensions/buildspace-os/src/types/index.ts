@@ -8,3 +8,8 @@ export interface Events {
   event: string;
   rsvp: string;
 }
+
+export interface Videos {
+  title: string;
+  link: string;
+}

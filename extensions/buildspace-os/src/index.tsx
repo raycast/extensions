@@ -1,6 +1,6 @@
 import { Cache, Clipboard, Icon, MenuBarExtra, confirmAlert, open, showHUD } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { Events, Images } from "./types/indes";
+import { Events, Images, Videos } from "./types";
 import { apiInstance } from "./clients/api";
 const useDemoDayCountdown = () => {
   const getCountdown = (endDate: Date) => {
@@ -38,15 +38,17 @@ export default function Command() {
   const { title, fullCountdown } = useDemoDayCountdown();
   const cache = new Cache();
   const [imagesEnabled, setImagesEnabled] = useState<boolean>(false);
+  const [videosEnabled, setVideosEnabled] = useState<boolean>(false);
   const [images, setImages] = useState<Images[]>([]);
   const [events, setEvents] = useState<Events[]>([]);
-
+  const [videos, setVideos] = useState<Videos[]>([]);
   useEffect(() => {
     const fetchCachedData = async () => {
       const cachedImages = cache.get("images");
       const cachedEvents = cache.get("events");
+      const cachedVideos = cache.get("videos");
       const cachedImagesEnabled = cache.get("imagesEnabled");
-
+      const cachedVideosEnabled = cache.get("videosEnabled");
       if (cachedImages) {
         try {
           const imgs: Images[] = JSON.parse(cachedImages);
@@ -61,7 +63,16 @@ export default function Command() {
           const evnts: Events[] = JSON.parse(cachedEvents);
           setEvents(evnts);
         } catch (e) {
-          console.error(`Unable to parse cachedImages into our Images interface`);
+          console.error(`Unable to parse cachedEvents into our Events interface`);
+        }
+      }
+
+      if (cachedVideos) {
+        try {
+          const vids: Videos[] = JSON.parse(cachedVideos);
+          setVideos(vids);
+        } catch (e) {
+          console.error(`Unable to parse cachedVides into our Videos interface`);
         }
       }
 
@@ -70,7 +81,16 @@ export default function Command() {
           const enabled: boolean = cachedImagesEnabled === "true";
           setImagesEnabled(enabled);
         } catch (e) {
-          console.error(`Unable to parse cachedImages into our Images interface`);
+          console.error(`Unable to parse cachedImagesEnabled into a boolean`);
+        }
+      }
+
+      if (cachedVideosEnabled) {
+        try {
+          const enabled: boolean = cachedVideosEnabled === "true";
+          setVideosEnabled(enabled);
+        } catch (e) {
+          console.error(`Unable to parse cachedVideosEnabled into a boolean`);
         }
       }
     };
@@ -84,6 +104,10 @@ export default function Command() {
           setImagesEnabled(imagesEnabledResponse.data);
           cache.set("imagesEnabled", String(imagesEnabledResponse.data));
 
+          const videosEnabledResponse = await apiInstance.get<boolean>("/api/videosEnabled");
+          setVideosEnabled(videosEnabledResponse.data);
+          cache.set("videosEnabled", String(videosEnabledResponse.data));
+
           const imagesResponse = await apiInstance.get("/api/images");
           setImages(imagesResponse.data);
           cache.set("images", JSON.stringify(imagesResponse.data));
@@ -91,6 +115,10 @@ export default function Command() {
           const eventsResponse = await apiInstance.get("/api/events");
           setEvents(eventsResponse.data);
           cache.set("events", JSON.stringify(eventsResponse.data));
+
+          const videosResponse = await apiInstance.get("/api/videos");
+          setVideos(videosResponse.data);
+          cache.set("videos", JSON.stringify(videosResponse.data));
 
           cache.set("ttl", String(new Date().getTime() + 300000));
         }
@@ -129,7 +157,18 @@ export default function Command() {
             ))
           : null}
       </MenuBarExtra.Submenu>
-      <MenuBarExtra.Submenu title="recordings" icon={Icon.Video}></MenuBarExtra.Submenu>
+      <MenuBarExtra.Submenu title="recordings" icon={Icon.Video}>
+        {videosEnabled
+          ? videos.map((video) => (
+              <MenuBarExtra.Item
+                key={video.link}
+                title={video.title}
+                icon={Icon.Video}
+                onAction={() => open(video.link)}
+              />
+            ))
+          : null}
+      </MenuBarExtra.Submenu>
       <MenuBarExtra.Submenu title="upcoming events" icon={Icon.Calendar}>
         {events.map((event) => (
           <MenuBarExtra.Item
