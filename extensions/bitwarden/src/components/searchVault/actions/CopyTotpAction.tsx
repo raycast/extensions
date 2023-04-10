@@ -1,4 +1,4 @@
-import { Clipboard, closeMainWindow, Icon, showToast, Toast } from "@raycast/api";
+import { Clipboard, closeMainWindow, Icon, showHUD, showToast, Toast } from "@raycast/api";
 import ActionWithReprompt from "~/components/actions/ActionWithReprompt";
 import { useBitwarden } from "~/context/bitwarden";
 import { useSession } from "~/context/session";
@@ -15,11 +15,17 @@ function CopyTotpAction() {
 
   const copyTotp = async () => {
     if (session.token) {
-      const toast = await showToast(Toast.Style.Success, "Copying TOTP Code...");
-      const totp = await bitwarden.getTotp(id, session.token);
-      await Clipboard.copy(totp, { transient: getTransientCopyPreference("other") });
-      await toast.hide();
-      await closeMainWindow({ clearRootSearch: true });
+      const toast = await showToast(Toast.Style.Animated, "Copying TOTP Code...");
+      try {
+        const totp = await bitwarden.getTotp(id, session.token);
+        await Clipboard.copy(totp, { transient: getTransientCopyPreference("other") });
+        await showHUD("Copied to clipboard.");
+        await toast.hide();
+        await closeMainWindow({ clearRootSearch: true });
+      } catch (error) {
+        toast.style = Toast.Style.Failure;
+        toast.title = "Failed to copy TOTP";
+      }
     } else {
       showToast(Toast.Style.Failure, "Failed to fetch TOTP.");
     }
