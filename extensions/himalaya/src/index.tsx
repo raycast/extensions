@@ -224,8 +224,8 @@ export default function ListEnvelopes() {
               actions={
                 <ActionPanel title="Envelope">
                   <Action.CopyToClipboard title="Copy ID to Clipboard" content={envelope.id} />
-                  {markUnreadAction(envelope)}
-                  {markReadAction(envelope)}
+                  {envelope.flags.includes(Flag.Seen) && markUnreadAction(envelope)}
+                  {!envelope.flags.includes(Flag.Seen) && markReadAction(envelope)}
                   {moveToSelectedAction(envelope)}
                   {moveToTrashAction(envelope)}
                 </ActionPanel>
