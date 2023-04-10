@@ -72,7 +72,7 @@ export default function AddNewTorrent() {
             prompt="Please select a .torrent file"
             type="torrent"
             shortcut={{ key: "o", modifiers: ["cmd"] }}
-            onSelect={setInput}
+            onSelect={(file) => file && setInput(file)}
           />
           <ActionPanel.Submenu icon={Icon.Text} title="Insert Quick Path" shortcut={{ key: "q", modifiers: ["cmd"] }}>
             {preferences.quickPaths
