@@ -306,7 +306,7 @@ export default function Command() {
     >
       <List.Section
         title={!query ? "Trending" : "Results"}
-        subtitle={(count && query) ? count.replace(/\B(?=(\d{3})+(?!\d))/g, ".") : ""}
+        subtitle={count && query ? count.replace(/\B(?=(\d{3})+(?!\d))/g, ".") : ""}
       >
         {entries.map((entry) => {
           if (entry.pmc && entry.doi) {
