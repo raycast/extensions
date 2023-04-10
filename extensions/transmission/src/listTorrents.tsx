@@ -273,20 +273,19 @@ function TorrentListItem({
               `)}
             metadata={
               <Detail.Metadata>
-                <Detail.Metadata.Label
-                  title="Pieces"
-                  text={`${torrent.pieceCount} / ${prettyBytes(torrent.pieceSize)}`}
-                />
-                <Detail.Metadata.Label title="Hash" text={torrent.hashString} />
-                <Detail.Metadata.Label title="Private" text={torrent.isPrivate ? "Yes" : "No"} />
-                {torrent.creator && <Detail.Metadata.Label title="Creator" text={torrent.creator} />}
-                {torrent.dateCreated > 0 && (
-                  <Detail.Metadata.Label title="Created On" text={formatDate(torrent.dateCreated)} />
+                {preferences.showFilesAboveTorrentInfo ? (
+                  <>
+                    <FileList torrent={torrent} />
+                    <Detail.Metadata.Separator />
+                    <TorrentInfo torrent={torrent} />
+                  </>
+                ) : (
+                  <>
+                    <TorrentInfo torrent={torrent} />
+                    <Detail.Metadata.Separator />
+                    <FileList torrent={torrent} />
+                  </>
                 )}
-                <Detail.Metadata.Label title="Directory" text={torrent.downloadDir} />
-                {torrent.comment && <Detail.Metadata.Label title="Comment" text={torrent.comment} />}
-                <Detail.Metadata.Separator />
-                <FileList torrent={torrent} />
                 <Detail.Metadata.Separator />
                 <TrackerList torrent={torrent} />
               </Detail.Metadata>
@@ -378,6 +377,20 @@ function TorrentListItem({
         </ActionPanel>
       }
     />
+  );
+}
+
+function TorrentInfo({ torrent }): { torrent: Torrent } {
+  return (
+    <>
+      <Detail.Metadata.Label title="Pieces" text={`${torrent.pieceCount} / ${prettyBytes(torrent.pieceSize)}`} />
+      <Detail.Metadata.Label title="Hash" text={torrent.hashString} />
+      <Detail.Metadata.Label title="Private" text={torrent.isPrivate ? "Yes" : "No"} />
+      {torrent.creator && <Detail.Metadata.Label title="Creator" text={torrent.creator} />}
+      {torrent.dateCreated > 0 && <Detail.Metadata.Label title="Created On" text={formatDate(torrent.dateCreated)} />}
+      <Detail.Metadata.Label title="Directory" text={torrent.downloadDir} />
+      {torrent.comment && <Detail.Metadata.Label title="Comment" text={torrent.comment} />}
+    </>
   );
 }
 
