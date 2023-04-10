@@ -7,27 +7,29 @@ export enum SpotifyMetadataType {
   Show = "website",
 }
 
-export enum SpotifyContentLink {
+export enum SpotifyContentLinkType {
   Youtube = "youtube",
   AppleMusic = "appleMusic",
   Tidal = "tidal",
   SoundCloud = "soundCloud",
+  Deezer = "deezer",
+}
+
+export interface SpotifyContentLink {
+  type: SpotifyContentLinkType;
+  url: string;
+  isVerified?: boolean;
 }
 
 export interface SpotifyContent {
   id: string;
+  type: SpotifyMetadataType;
   title: string;
   description: string;
-  type: SpotifyMetadataType;
   image: string;
   audio?: string;
   source: string;
-  links: {
-    [SpotifyContentLink.Youtube]: string;
-    [SpotifyContentLink.AppleMusic]: string;
-    [SpotifyContentLink.Tidal]: string;
-    [SpotifyContentLink.SoundCloud]: string;
-  };
+  links: SpotifyContentLink[];
 }
 
 export interface CacheData {

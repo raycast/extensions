@@ -4,7 +4,7 @@ import { useState, useCallback, useEffect } from "react";
 import { Action, ActionPanel, Icon, List, showToast, Toast, Clipboard } from "@raycast/api";
 
 import type { SpotifyContent, ApiError } from "./@types/global";
-import { SpotifyContentLink, SpotifyMetadataType } from "./@types/global";
+import { SpotifyContentLinkType, SpotifyMetadataType } from "./@types/global";
 
 import { SITE_URL, API_URL, SPOTIFY_LINK_REGEX } from "./constants";
 
@@ -12,10 +12,11 @@ import { cacheLastSearch, getLastSearch } from "./utils/cache";
 import { playAudio, stopAudio } from "./utils/audio";
 
 const spotifyContentLinksTitles = {
-  [SpotifyContentLink.Youtube]: "YouTube",
-  [SpotifyContentLink.AppleMusic]: "Apple Music",
-  [SpotifyContentLink.Tidal]: "Tidal",
-  [SpotifyContentLink.SoundCloud]: "SoundCloud",
+  [SpotifyContentLinkType.Youtube]: "YouTube",
+  [SpotifyContentLinkType.Deezer]: "Deezer",
+  [SpotifyContentLinkType.AppleMusic]: "Apple Music",
+  [SpotifyContentLinkType.Tidal]: "Tidal",
+  [SpotifyContentLinkType.SoundCloud]: "SoundCloud",
 };
 
 const spotifyContentTypesTitles = {
@@ -43,7 +44,7 @@ export default function Command() {
       setIsLoading(true);
 
       try {
-        const request = await fetch(`${API_URL}?spotifyLink=${spotifyLink}`);
+        const request = await fetch(`${API_URL}?spotifyLink=${spotifyLink}&v=2`);
         const spotifyContent = (await request.json()) as SpotifyContent & ApiError;
 
         if (request.status !== 200) {
