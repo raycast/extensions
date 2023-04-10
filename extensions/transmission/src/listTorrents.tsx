@@ -262,7 +262,7 @@ function TorrentListItem({
       accessories={!isShowingDetail ? downloadStats.map(({ text, icon }) => ({ text, icon })) : undefined}
       detail={
         isShowingDetail && (
-          <Detail
+          <List.Item.Detail
             isLoading={cellImage.loading}
             markdown={dedent(`
                 # ${downloadStats.map(({ textIcon, text }) => [textIcon, text.trim()].join(" ").trim()).join(" - ")}
