@@ -361,18 +361,20 @@ async function handleSetScene(
     if (hueBridgeState.context.hueClient === undefined) throw new Error("Not connected to Hue Bridge.");
     if (!rateLimiter.canExecute()) return;
 
-    const changes = new Map<Id, Partial<Light>>(
+    const changesToLights = new Map(
       lights
         .filter((light) =>
           scene.actions.some((action) => action.target.rid === light.id || action.target.rid === light.owner.rid)
         )
         .map((light): [Id, Partial<Light>] => {
-          const action = scene.actions.find((action) => action.target.rid === light.id);
+          const action = scene.actions.find(
+            (action) => action.target.rid === light.id || action.target.rid === light.owner.rid
+          );
           return [light.id, (action?.action ?? {}) as Partial<Light>];
         })
     );
 
-    const undoOptimisticUpdates = optimisticUpdates(changes, setLights);
+    const undoOptimisticUpdates = optimisticUpdates(changesToLights, setLights);
     await hueBridgeState.context.hueClient
       .updateScene(scene, {
         recall: { action: "active" },
@@ -398,23 +400,30 @@ async function handleSetBrightness(
   rateLimiter: ReturnType<typeof useInputRateLimiter>,
   group: Group,
   groupedLight: GroupedLight | undefined,
-  percentage: number
+  brightness: number
 ) {
   const toast = new Toast({ title: "" });
-  const brightness = (percentage / 100) * 253 + 1;
 
   try {
     if (hueBridgeState.context.hueClient === undefined) throw new Error("Not connected to Hue Bridge.");
     if (groupedLight === undefined) throw new Error("Light group not found.");
     if (!rateLimiter.canExecute()) return;
 
-    await hueBridgeState.context.hueClient.updateGroupedLight(groupedLight, {
+    const changes = {
       ...(groupedLight.on?.on ? {} : { on: { on: true } }),
       dimming: { brightness: brightness },
+    };
+
+    const changesToLights = new Map(getLightsFromGroup(lights, group).map((light) => [light.id, changes]));
+
+    const undoOptimisticUpdates = optimisticUpdates(changesToLights, setLights);
+    await hueBridgeState.context.hueClient.updateGroupedLight(groupedLight, changes).catch((e: Error) => {
+      undoOptimisticUpdates();
+      throw e;
     });
 
     toast.style = Style.Success;
-    toast.title = `Set brightness of ${group.metadata.name} to ${(percentage / 100).toLocaleString("en", {
+    toast.title = `Set brightness of ${group.metadata.name} to ${(brightness / 100).toLocaleString("en", {
       style: "percent",
     })}.`;
     await toast.show();
