@@ -47,6 +47,8 @@ function prepareItemsForCache(items: Item[]): Item[] {
     type: item.type,
     name: item.name,
     revisionDate: item.revisionDate,
+    creationDate: item.creationDate,
+    deletedDate: item.deletedDate,
     favorite: item.favorite,
     reprompt: item.reprompt,
     // sensitive data below

@@ -13,6 +13,8 @@ export interface Item {
   login?: Login;
   collectionIds: string[];
   revisionDate: string;
+  creationDate: string;
+  deletedDate: string | null;
   identity?: Identity;
   fields?: Field[];
   passwordHistory?: PasswordHistory[];
