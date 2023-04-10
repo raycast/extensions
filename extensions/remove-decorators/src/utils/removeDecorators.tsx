@@ -9,8 +9,10 @@ async function removeDecorators(codeStr: string) {
   const lines = codeStr.split("\n");
   let newCodeStr = "";
 
+  const regex = /^$/;
+
   for (const line of lines) {
-    if (!line.includes("@") && !line.includes("import")) {
+    if (!line.includes("@") && !line.includes("import") && !regex.test(line)) {
       newCodeStr += line + "\n";
     }
   }
