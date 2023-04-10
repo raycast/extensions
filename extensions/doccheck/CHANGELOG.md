@@ -1,5 +1,9 @@
 # DocCheck Changelog
 
+## [Version 1.1.2] - 2023-04-10
+
+- Fix: der Artikel [Medizinische Abkürzungen](https://flexikon.doccheck.com/de/Medizinische_Abkürzungen) wird nun nicht mehr direkt angezeigt, da die Tabelle darin offenbar zu lang ist
+
 ## [Version 1.1.1] - 2023-04-09
 
 - NEW: go back to search if there is no prevous article

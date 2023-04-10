@@ -18,11 +18,6 @@ export default function DocCheckPage(props: { prevtitle: string; prevurl: string
 
   const $ = cheerio.load(String(data));
 
-  const relateArticle = $(".collapsible-article").map((i, section) => {
-    const articles = $(section).find(".collapsible-content");
-    return articles.html();
-  });
-
   // Synonyme
   let mdSynonyms = "";
   let synonyms = "";
@@ -77,7 +72,7 @@ export default function DocCheckPage(props: { prevtitle: string; prevurl: string
   );
   let html = "";
   $(".mw-parser-output").each(function (i, link) {
-    html += $(link).html();
+    html += props.title === "Medizinische Abkürzungen" ? "<br><em>Dieser Artikel enthält eine zu lange Tabelle und kann in Raycast nicht angezeigt werden</em>" : $(link).html();
   });
   let toc = "";
   $("#toc").each(function (i, link) {
@@ -111,7 +106,7 @@ export default function DocCheckPage(props: { prevtitle: string; prevurl: string
 
   return (
     <Detail
-      navigationTitle={`DocCheck - ${props.title}`}
+      navigationTitle={props.title}
       isLoading={isLoading}
       markdown={
         preferences.openIn === "browser"
