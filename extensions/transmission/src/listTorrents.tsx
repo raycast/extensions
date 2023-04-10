@@ -27,7 +27,7 @@ import { formatDate } from "./utils/date";
 import { useAllTorrents, useMutateTorrent, useSessionStats, isLocalTransmission } from "./modules/client";
 import { renderPieces } from "./utils/renderCells";
 import { useAsync } from "react-use";
-import { type SessionStats, TorrentStatus, type Torrent } from "./types";
+import { SessionStats, TorrentStatus, Torrent } from "./types";
 import { formatStatus, statusIcon } from "./utils/status";
 import { TorrentConfiguration } from "./components/TorrentConfiguration";
 import path from "path";
@@ -262,8 +262,7 @@ function TorrentListItem({
       accessories={!isShowingDetail ? downloadStats.map(({ text, icon }) => ({ text, icon })) : undefined}
       detail={
         isShowingDetail && (
-          <List.Item.Detail
-            markdown={details.value ?? `\`\`\`\n${details.error}\n\`\`\``}
+          <Detail
             isLoading={cellImage.loading}
             markdown={dedent(`
                 # ${downloadStats.map(({ textIcon, text }) => [textIcon, text.trim()].join(" ").trim()).join(" - ")}
@@ -380,7 +379,7 @@ function TorrentListItem({
   );
 }
 
-function TorrentInfo({ torrent }): { torrent: Torrent } {
+function TorrentInfo({ torrent }: { torrent: Torrent }) {
   return (
     <>
       <Detail.Metadata.Label title="Pieces" text={`${torrent.pieceCount} / ${prettyBytes(torrent.pieceSize)}`} />
@@ -394,35 +393,43 @@ function TorrentInfo({ torrent }): { torrent: Torrent } {
   );
 }
 
-function FileList({ torrent }): { torrent: Torrent } {
-  return torrent.files.map((file, key) => (
-    <Detail.Metadata.Label
-      text={file.name}
-      title={`${((100 / file.length) * file.bytesCompleted).toFixed(2)}% - ${prettyBytes(file.length)}`}
-      key={key}
-    />
-  ));
+function FileList({ torrent }: { torrent: Torrent }) {
+  return (
+    <>
+      {torrent.files.map((file, key) => (
+        <Detail.Metadata.Label
+          text={file.name}
+          title={`${((100 / file.length) * file.bytesCompleted).toFixed(2)}% - ${prettyBytes(file.length)}`}
+          key={key}
+        />
+      ))}
+    </>
+  );
 }
 
-function TrackerList({ torrent }): { torrent: Torrent } {
-  return torrent.trackers
-    .reduce<Array<Torrent["trackerStats"]>>((acc, tracker) => {
-      acc[tracker.tier] = (acc[tracker.tier] || []).concat(
-        torrent.trackerStats.find(({ announce }) => announce === tracker.announce) as Torrent["trackerStats"][0]
-      );
-      return acc;
-    }, [])
-    .map((trackers) => {
-      return trackers.map((tracker, key) => (
-        <Fragment key={key}>
-          <Detail.Metadata.Label title={tracker.host} text={`Tier ${trackers[0].tier + 1}`} />
-          <Detail.Metadata.Label title="Last Announce" text={formatDate(tracker.lastAnnounceTime)} />
-          <Detail.Metadata.Label title="Last Scape" text={formatDate(tracker.lastScrapeTime)} />
-          <Detail.Metadata.Label title="Seeders" text={`${tracker.seederCount}`} />
-          <Detail.Metadata.Label title="Leechers" text={`${tracker.leecherCount}`} />
-          <Detail.Metadata.Label title="Downloaded" text={`${tracker.downloadCount}`} />
-          <Detail.Metadata.Separator />
-        </Fragment>
-      ));
-    });
+function TrackerList({ torrent }: { torrent: Torrent }) {
+  return (
+    <>
+      {torrent.trackers
+        .reduce<Array<Torrent["trackerStats"]>>((acc, tracker) => {
+          acc[tracker.tier] = (acc[tracker.tier] || []).concat(
+            torrent.trackerStats.find(({ announce }) => announce === tracker.announce) as Torrent["trackerStats"][0]
+          );
+          return acc;
+        }, [])
+        .map((trackers) => {
+          return trackers.map((tracker, key) => (
+            <Fragment key={key}>
+              <Detail.Metadata.Label title={tracker.host} text={`Tier ${trackers[0].tier + 1}`} />
+              <Detail.Metadata.Label title="Last Announce" text={formatDate(tracker.lastAnnounceTime)} />
+              <Detail.Metadata.Label title="Last Scape" text={formatDate(tracker.lastScrapeTime)} />
+              <Detail.Metadata.Label title="Seeders" text={`${tracker.seederCount}`} />
+              <Detail.Metadata.Label title="Leechers" text={`${tracker.leecherCount}`} />
+              <Detail.Metadata.Label title="Downloaded" text={`${tracker.downloadCount}`} />
+              <Detail.Metadata.Separator />
+            </Fragment>
+          ));
+        })}
+    </>
+  );
 }
