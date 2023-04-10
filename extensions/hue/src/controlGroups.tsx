@@ -1,4 +1,4 @@
-import { ActionPanel, Color, Grid, Icon, Toast } from "@raycast/api";
+import { ActionPanel, Color, Grid, Icon, Image, Toast } from "@raycast/api";
 import {
   calculateAdjustedBrightness,
   getClosestBrightness,
@@ -44,7 +44,7 @@ export default function ControlGroups() {
   if (manageHueBridgeElement !== null) return manageHueBridgeElement;
 
   return (
-    <Grid isLoading={isLoading} aspectRatio="16/9">
+    <Grid isLoading={isLoading} aspectRatio="16/9" fit={Grid.Fit.Fill}>
       {rooms.length > 0 && (
         <Grid.Section title="Rooms">
           {rooms.map((room: Room) => {
@@ -120,12 +120,21 @@ function Group(props: {
     lightStatusText = `${lightsOnCount} lights are on`;
   }
 
+  const content = props.groupedLight?.on?.on
+    ? props.gradientUri ?? ""
+    : ({
+        source: {
+          light: "group-off.png",
+          dark: "group-off@dark.png",
+        },
+      } as Image);
+
   return (
     <Grid.Item
       key={props.group.id}
       title={props.group.metadata.name}
       subtitle={lightStatusText}
-      content={props.groupedLight?.on?.on ? props.gradientUri ?? "" : ""}
+      content={content}
       actions={
         props.groupedLight && (
           <ActionPanel>
@@ -360,6 +369,7 @@ async function handleToggle(
       on: { on: !groupedLight.on?.on },
     };
 
+    // TODO: Optimistic update lights
     const undoOptimisticUpdate = optimisticUpdate(groupedLight, changes, setGroupedLights);
     await hueBridgeState.context.hueClient.updateGroupedLight(groupedLight, changes).catch((e: Error) => {
       undoOptimisticUpdate();
