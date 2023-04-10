@@ -72,7 +72,10 @@ export default function DocCheckPage(props: { prevtitle: string; prevurl: string
   );
   let html = "";
   $(".mw-parser-output").each(function (i, link) {
-    html += props.title === "Medizinische Abkürzungen" ? "<br><em>Dieser Artikel enthält eine zu lange Tabelle und kann in Raycast nicht angezeigt werden</em>" : $(link).html();
+    html +=
+      props.title === "Medizinische Abkürzungen"
+        ? "<br><em>Dieser Artikel enthält eine zu lange Tabelle und kann in Raycast nicht angezeigt werden</em>"
+        : $(link).html();
   });
   let toc = "";
   $("#toc").each(function (i, link) {
