@@ -170,7 +170,8 @@ export function createGradientPngUri(colors: string[], width: number, height: nu
   return new Promise((resolve, reject) => {
     new Jimp(width, height, (err, image) => {
       if (err) reject(err);
-      const scale = chroma.scale(colors);
+
+      const scale = chroma.scale(colors).gamma(0.5);
 
       image.scan(0, 0, width, height, (x, y) => {
         const factor = (y / height) * 2.3;
