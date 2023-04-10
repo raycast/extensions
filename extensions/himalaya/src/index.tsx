@@ -44,7 +44,7 @@ interface State {
 }
 
 export default function ListEnvelopes() {
-  const [state, setState] = useState({
+  const [state, setState] = useState<State>({
     isLoading: true,
     envelopes: [],
     folders: [],
@@ -68,18 +68,6 @@ export default function ListEnvelopes() {
 
   const accessories = (envelope: Envelope) => {
     const accessories = [];
-
-    if (envelope.flags.includes(Flag.Seen)) {
-      accessories.push({
-        icon: Icon.Circle,
-      });
-    }
-
-    if (!envelope.flags.includes(Flag.Seen)) {
-      accessories.push({
-        icon: Icon.CircleFilled,
-      });
-    }
 
     if (envelope.flags.includes(Flag.Answered)) {
       accessories.push({
@@ -220,6 +208,7 @@ export default function ListEnvelopes() {
               id={envelope.id}
               key={envelope.id}
               title={envelope.subject}
+              icon={envelope.flags.includes(Flag.Seen) ? Icon.Circle : Icon.CircleFilled}
               accessories={accessories(envelope)}
               actions={
                 <ActionPanel title="Envelope">
