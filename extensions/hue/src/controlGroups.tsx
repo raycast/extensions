@@ -4,6 +4,7 @@ import {
   getClosestBrightness,
   getColorFromLight,
   getLightsFromGroup,
+  getTransitionTimeInMs,
   optimisticUpdate,
   optimisticUpdates,
 } from "./lib/utils";
@@ -290,6 +291,8 @@ async function handleToggle(
 
     const changes = {
       on: { on: !groupedLight.on?.on },
+      dynamics: { duration: getTransitionTimeInMs() },
+      ...(groupedLight.dimming ? { dimming: { brightness: groupedLight.dimming?.brightness } } : {}),
     };
 
     // TODO: Update zones
@@ -332,8 +335,9 @@ async function handleSetBrightness(
     if (!rateLimiter.canExecute()) return;
 
     const changes = {
-      ...(groupedLight.on?.on ? {} : { on: { on: true } }),
+      on: { on: true },
       dimming: { brightness: brightness },
+      dynamics: { duration: getTransitionTimeInMs() },
     };
 
     const changesToLights = new Map(groupLights.map((light) => [light.id, changes]));
@@ -378,6 +382,7 @@ async function handleBrightnessChange(
       // dimming_delta exists, but manually calculating the new value
       // enables the usage of the value in the optimistic update.
       dimming: { brightness: adjustedBrightness },
+      dynamics: { duration: getTransitionTimeInMs() },
     };
 
     const changesToLights = new Map(getLightsFromGroup(lights, group).map((light) => [light.id, changes]));

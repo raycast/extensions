@@ -335,7 +335,7 @@ export type Light = {
      * - C:     Richer color gamut of Hue white and color ambiance products
      * - other: Color gamut of non-hue products with non-hue gamuts resp w/o gamut
      */
-    gamut_type: "A" | "B" | "C" | "other";
+    gamut_type?: "A" | "B" | "C" | "other";
   };
 
   dynamics: {

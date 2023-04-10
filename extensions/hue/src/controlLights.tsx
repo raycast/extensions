@@ -6,6 +6,7 @@ import {
   getIconForColor,
   getLightIcon,
   getLightsFromGroup,
+  getTransitionTimeInMs,
   optimisticUpdate,
 } from "./lib/utils";
 import "./lib/arrayExtensions";
@@ -252,11 +253,9 @@ async function handleToggle(
     if (!rateLimiter.canExecute()) return;
 
     const changes = {
-      on: {
-        on: !light.on.on,
-        // TODO: Figure out why transition time causes the light to turn on at 1% brightness
-        // dynamics: { duration: getTransitionTimeInMs() },
-      },
+      on: { on: !light.on.on },
+      dynamics: { duration: getTransitionTimeInMs() },
+      ...(light.dimming ? { dimming: { brightness: light.dimming?.brightness } } : {}),
     };
 
     const undoOptimisticUpdate = optimisticUpdate(light, changes, setLights);
@@ -292,6 +291,7 @@ async function handleSetBrightness(
     const changes = {
       on: { on: true },
       dimming: { brightness: brightness },
+      dynamics: { duration: getTransitionTimeInMs() },
     };
 
     const undoOptimisticUpdate = optimisticUpdate(light, changes, setLights);
@@ -333,6 +333,7 @@ async function handleBrightnessChange(
       // dimming_delta exists, but manually calculating the new value
       // enables the usage of the value in the optimistic update.
       dimming: { brightness: adjustedBrightness },
+      dynamics: { duration: getTransitionTimeInMs() },
     };
 
     const undoOptimisticUpdate = optimisticUpdate(light, changes, setLights);
@@ -372,7 +373,8 @@ async function handleSetColor({ hueBridgeState, setLights }: ReturnType<typeof u
       on: { on: true },
       color: { xy: xy },
       dimming: { brightness: brightness },
-    } as Partial<Light>;
+      dynamics: { duration: getTransitionTimeInMs() },
+    };
 
     const undoOptimisticUpdate = optimisticUpdate(light, changes, setLights);
     await hueBridgeState.context.hueClient.updateLight(light, changes).catch((e) => {
@@ -410,6 +412,7 @@ async function handleColorTemperatureChange(
       // color_temperature_delta exists, but manually calculating the new value
       // enables the usage of the value in the optimistic update.
       color_temperature: { mirek: adjustedColorTemperature },
+      dynamics: { duration: getTransitionTimeInMs() },
     } as Partial<Light>;
 
     const undoOptimisticUpdate = optimisticUpdate(light, changes, setLights);

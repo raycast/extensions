@@ -37,7 +37,7 @@ export function getIconForColor(color: CssColor): Image {
 }
 
 export function getTransitionTimeInMs(): number {
-  return Math.round(parseInt(getPreferenceValues().transitionTime) / 100);
+  return Math.round(parseInt(getPreferenceValues().transitionTime));
 }
 
 export function handleError(error: Error): void {

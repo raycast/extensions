@@ -5,7 +5,7 @@ import ManageHueBridge from "./components/ManageHueBridge";
 import { SendHueMessage, useHue } from "./hooks/useHue";
 import HueClient from "./lib/HueClient";
 import useGradients from "./hooks/useGradientUris";
-import { getColorsFromScene } from "./lib/utils";
+import { getColorsFromScene, getTransitionTimeInMs } from "./lib/utils";
 import { useMemo, useState } from "react";
 import "./lib/arrayExtensions";
 import Style = Toast.Style;
@@ -145,6 +145,7 @@ async function handleSetScene(hueClient: HueClient | undefined, group: Group, sc
     await hueClient.updateScene(scene, {
       recall: {
         action: "active",
+        duration: getTransitionTimeInMs(),
       },
     });
 
