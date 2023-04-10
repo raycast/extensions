@@ -1,6 +1,8 @@
-import fse from "fs-extra";
-import { LocalStorage } from "@raycast/api";
+import { getPreferenceValues, LocalStorage, showHUD } from "@raycast/api";
 import Values = LocalStorage.Values;
+import { fetchItemInputClipboardFirst, fetchItemInputSelectedFirst } from "./input-item";
+import { homedir } from "os";
+import fse from "fs-extra";
 
 export interface Preference extends Values {
   trimText: boolean;
@@ -23,6 +25,18 @@ export const checkIsFile = (path: string) => {
   }
 };
 
+export const isFileOrFolderPath = (path: string) => {
+  return path.startsWith("file:///") || path.startsWith("~/") || path.startsWith(homedir());
+};
+
+export const getPathFromSelectionOrClipboard = async (priorityDetection: string) => {
+  if (priorityDetection === "selected") {
+    return await fetchItemInputSelectedFirst();
+  } else {
+    return await fetchItemInputClipboardFirst();
+  }
+};
+
 export function isEmail(text: string): boolean {
   const regex = /^[\da-zA-Z_.-]+@[\da-zA-Z_.-]+([.][a-zA-Z]+){1,2}$/;
   return regex.test(text);
@@ -30,10 +44,10 @@ export function isEmail(text: string): boolean {
 
 export function isUrl(text: string): boolean {
   const regex = /^((http|https|ftp):\/\/)?((?:[\w-]+\.)+[a-z\d]+)((?:\/[^/?#]*)+)?(\?[^#]+)?(#.+)?$/i;
-  return regex.test(text) || isIP(text);
+  return regex.test(text) || isIPUrl(text);
 }
 
-export function isIP(text: string): boolean {
+export function isIPUrl(text: string): boolean {
   return /^(http:\/\/)?(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$/.test(
     text
   );
@@ -79,5 +93,12 @@ export const searchUrlBuilder = (searchEngine: string, text: string) => {
     default: {
       return `${searchEngines[0].value}${encodeURIComponent(text)}`;
     }
+  }
+};
+
+export const showHud = async (icon: string, content: string) => {
+  const { isShowHud } = getPreferenceValues<Preference>();
+  if (isShowHud) {
+    await showHUD(icon + " " + content);
   }
 };

@@ -7,7 +7,9 @@
   "author": "Codely",
   "contributors": [
     "bromanko",
-    "crisboarna"
+    "crisboarna",
+    "andreaselia",
+    "KarolRe"
   ],
   "license": "MIT",
   "commands": [
@@ -49,6 +51,28 @@
       "required": false,
       "type": "checkbox",
       "default": false
+    },
+    {
+      "name": "openTabInProfile",
+      "title": "Open Tab In Profile",
+      "type": "dropdown",
+      "required": false,
+      "description": "When 'Default(classic), the tab will be opened in the profile open, or topmost profile window if multiple windows are open. When 'Current Profile', the tab will be opened in the profile specified in the 'Profile' field. When 'Original Profile' it will open in original profile tab is sourced from",
+      "default": "default",
+      "data": [
+        {
+          "title": "Default(classic)",
+          "value": "default"
+        },
+        {
+          "title": "Current Profile",
+          "value": "profile_current"
+        },
+        {
+          "title": "Original Profile",
+          "value": "profile_original"
+        }
+      ]
     }
   ],
   "dependencies": {

@@ -14,9 +14,11 @@
 
 ## What is Easydict? [【中文介绍】](https://github.com/tisfeng/Raycast-Easydict/blob/main/docs/README_ZH.md)
 
-`Easydict` is an easy dictionary, for looking up words or translating text easily. Use it out of the box, automatically detect the input text language, and support [Linguee](https://www.linguee.com/) and [Youdao Dictionary](https://www.youdao.com/), **🍎 MacOS system translation**, [DeepL](https://www.deepl.com/translator), [Google](https://translate.google.com), [Bing](https://www.bing.com/translator), [Baidu](https://fanyi.baidu.com/), [Tencent](https://fanyi.qq.com/), [Volcano](https://translate.volcengine.com/translate), [Youdao](https://fanyi.youdao.com/), and [Caiyun](https://fanyi.caiyunapp.com/#/) translation.
+`Easydict` is an easy dictionary, for looking up words or translating text easily. Use it out of the box, automatically detect the input text language, and support [Linguee](https://www.linguee.com/) and [Youdao Dictionary](https://www.youdao.com/), support OpenAI ChatGPT, **🍎 MacOS system translation**, [DeepL](https://www.deepl.com/translator), [Google](https://translate.google.com), [Bing](https://www.bing.com/translator), [Baidu](https://fanyi.baidu.com/), [Tencent](https://fanyi.qq.com/), [Volcano](https://translate.volcengine.com/translate), [Youdao](https://fanyi.youdao.com/), and [Caiyun](https://fanyi.caiyunapp.com/#/) translation.
 
 ![easydict-1-1671806758](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/easydict-1-1671806758.png)
+
+![OpenAI-Translate-1679670891](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/OpenAI-Translate-1679670891.gif)
 
 ## Features
 
@@ -28,11 +30,12 @@
 - [x] Support automatic playback of word pronunciation. Use `Cmd + S` to play the pronunciation of words manually.
 - [x] Support Youdao Text to Speech(TTS).
 - [x] Support to sort query results manually.
-- [x] Support Arguments.
+- [x] Support [Arguments](https://developers.raycast.com/information/lifecycle/arguments).
+- [x] Support [Fallback Commands](https://manual.raycast.com/fallback-commands).
 - [x] Support system proxy.
 - [x] Support Linguee and Youdao Dictionary.
 - [x] Support macOS system translation. (_Please see [How to use 🍎 macOS system translation in Easydict?](https://github.com/tisfeng/Raycast-Easydict/blob/main/docs/How-to-use-macOS%F0%9F%8D%8Esystem-translation-in-Easydict.md)_)
-- [x] Support DeepL, Google, Bing, Baidu, Tencent, Volcano, Youdao, and Caiyun translation.
+- [x] Support OpenAI ChatGPT, DeepL, Google, Bing, Baidu, Tencent, Volcano, Youdao, and Caiyun translation.
 - [x] Support 48+ languages.
 
 **_If you like this extension, please give it a [Star](https://github.com/tisfeng/Raycast-Easydict) ⭐️, thanks!_**
@@ -41,9 +44,19 @@
 
 ## Recommendation
 
-My other project, [Easydict](https://github.com/tisfeng/Easydict) is a native macOS translation dictionary App, a free open source version of [Bob](https://apps.apple.com/cn/app/id1630034110#?platform=mac), feel free to try it!
+My other project, [Easydict](https://github.com/tisfeng/Easydict) is a concise and easy-to-use translation dictionary macOS App that allows you to easily and elegantly look up words or translate text, feel free to try it!
 
-![iShot_2023-01-07_19.33.01的副本-1673091295](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/iShot_2023-01-07_19.33.01的副本-1673091295.png)
+**Look up word**
+![iShot_2023-03-17_18.01.22_11zon-1679056100](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/iShot_2023-03-17_18.01.22_11zon-1679056100.jpg)
+
+**Translate text**
+![iShot_2023-01-28_17.49.53-1674901731](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/iShot_2023-01-28_17.49.53-1674901731.png)
+
+**Auto select translate**
+![iShot_2023-01-20_11.01.35-1674183779](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/iShot_2023-01-20_11.01.35-1674183779.gif)
+
+**OCR screenshot translate**
+![iShot_2023-01-20_11.26.25-1674185209](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/iShot_2023-01-20_11.26.25-1674185209.gif)
 
 ---
 

@@ -1,5 +1,9 @@
 # Spotify Player Changelog
 
+## [Fix] - 2023-03-07
+
+- Fix crash due to `null` playlists being returned by the API.
+
 ## [Fix] - 2023-01-13
 
 - Allow no-view commands (`Like Current Song`, `Dislike Current Song`, `Just Play` and `Star Radio`) to initialize authorization.

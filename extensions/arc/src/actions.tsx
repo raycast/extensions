@@ -78,6 +78,7 @@ function OpenInNewIncognitoWindowAction(props: { url: string }) {
 function OpenInLittleArc(props: { url: string }) {
   async function handleAction() {
     try {
+      await closeMainWindow();
       await makeNewLittleArcWindow(props.url);
     } catch (e) {
       await showFailureToast(e, { title: "Failed opening link in Little Arc window" });
@@ -309,6 +310,17 @@ export function EditTabActionSection(props: { tab: Tab; mutate: MutatePromise<Ta
     <ActionPanel.Section>
       <ReloadTabAction tab={props.tab} />
       <CloseTabAction tab={props.tab} mutate={props.mutate} />
+    </ActionPanel.Section>
+  );
+}
+
+export function CreateQuickLinkActionSection(props: { url: string; title?: string }) {
+  return (
+    <ActionPanel.Section>
+      <Action.CreateQuicklink
+        quicklink={{ link: props.url, name: props.title, application: "Arc" }}
+        shortcut={{ modifiers: ["cmd"], key: "s" }}
+      />
     </ActionPanel.Section>
   );
 }

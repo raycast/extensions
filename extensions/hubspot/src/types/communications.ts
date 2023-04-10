@@ -1,9 +1,9 @@
 export interface Data {
-  results: Comunnication[];
+  results: Communication[];
   paging: Paging;
 }
 
-export interface Comunnication {
+export interface Communication {
   id: string;
   properties: Properties;
 }

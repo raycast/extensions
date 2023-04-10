@@ -1,12 +1,14 @@
-import { ActionPanel, Form, Icon, useNavigation, open, Toast, Action, Color } from "@raycast/api";
 import { AddTaskArgs, getColorByKey, Task } from "@doist/todoist-api-typescript";
+import { ActionPanel, Form, Icon, useNavigation, open, Toast, Action, Color } from "@raycast/api";
 import { FormValidation, MutatePromise, useCachedPromise, useForm } from "@raycast/utils";
+
 import { handleError, todoist } from "./api";
+import TaskDetail from "./components/TaskDetail";
+import View from "./components/View";
 import { priorities } from "./constants";
 import { getAPIDate } from "./helpers/dates";
 import { isTodoistInstalled } from "./helpers/isTodoistInstalled";
-import TaskDetail from "./components/TaskDetail";
-import View from "./components/View";
+import { getProjectIcon } from "./helpers/projects";
 
 type CreateTaskValues = {
   content: string;
@@ -32,11 +34,13 @@ export default function CreateTask({ fromProjectId, mutateTasks, draftValues }: 
     isLoading: isLoadingProjects,
     error: getProjectsError,
   } = useCachedPromise(() => todoist.getProjects());
+
   const {
     data: sections,
     isLoading: isLoadingSections,
     error: getSectionsError,
   } = useCachedPromise(() => todoist.getSections());
+
   const {
     data: labels,
     isLoading: isLoadingLabels,
@@ -182,12 +186,12 @@ export default function CreateTask({ fromProjectId, mutateTasks, draftValues }: 
           <Form.Dropdown {...itemProps.projectId} title="Project">
             <Form.Dropdown.Item title="No project" value="" icon={Icon.List} />
 
-            {projects.map(({ id, name, color, isInboxProject }) => (
+            {projects.map((project) => (
               <Form.Dropdown.Item
-                key={id}
-                value={String(id)}
-                icon={isInboxProject ? Icon.Envelope : { source: Icon.List, tintColor: getColorByKey(color).hexValue }}
-                title={name}
+                key={project.id}
+                value={String(project.id)}
+                icon={getProjectIcon(project)}
+                title={project.name}
               />
             ))}
           </Form.Dropdown>

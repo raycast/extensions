@@ -2,7 +2,7 @@ import {
   Action,
   ActionPanel,
   Color,
-  List,
+  Grid,
   getPreferenceValues,
 } from '@raycast/api';
 import { useState } from 'react';
@@ -36,8 +36,14 @@ function Command() {
   }
 
   return (
-    <List throttle isLoading={isLoading} onSearchTextChange={queryIcons}>
-      <List.EmptyView
+    <Grid
+      throttle
+      columns={8}
+      inset={Grid.Inset.Medium}
+      isLoading={isLoading}
+      onSearchTextChange={queryIcons}
+    >
+      <Grid.EmptyView
         title="No results"
         description={getEmptyViewDescription(query, isLoading)}
       />
@@ -52,8 +58,8 @@ function Command() {
           <Action.CopyToClipboard title="Copy SVG" content={svgIcon} />
         );
         return (
-          <List.Item
-            icon={{
+          <Grid.Item
+            content={{
               source: dataURIIcon,
               tintColor: body.includes('currentColor')
                 ? Color.PrimaryText // Monochrome icon
@@ -61,11 +67,7 @@ function Command() {
             }}
             key={`${setId}:${id}`}
             title={id}
-            accessories={[
-              {
-                text: setName,
-              },
-            ]}
+            subtitle={setName}
             actions={
               <ActionPanel>
                 {primaryAction === 'paste' ? (
@@ -92,7 +94,7 @@ function Command() {
           />
         );
       })}
-    </List>
+    </Grid>
   );
 }
 

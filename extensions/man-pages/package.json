@@ -10,6 +10,17 @@
     "Documentation"
   ],
   "license": "MIT",
+  "preferences": [
+    {
+      "name": "manPageDirectories",
+      "description": "The directories to crawl for man page entries, separated by commas.",
+      "placeholder": "/usr/share/man/, /opt/homebrew/share/man/, /usr/local/man/",
+      "type": "textfield",
+      "default": "/usr/share/man/, /opt/homebrew/share/man/, /usr/local/man/",
+      "required": false,
+      "title": "Man Page Directories"
+    }
+  ],
   "commands": [
     {
       "name": "search-man-pages",
@@ -30,6 +41,12 @@
       "title": "Random Man Page",
       "description": "View the man page for a randomly selected terminal command.",
       "mode": "view"
+    },
+    {
+      "name": "reload-man-page-entries",
+      "title": "Reload Man Page Entries",
+      "description": "Force update the man page cache to reflect recent command additions and removals.",
+      "mode": "no-view"
     }
   ],
   "dependencies": {
@@ -38,11 +55,14 @@
     "shell-env": "^4.0.1"
   },
   "devDependencies": {
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
     "prettier": "^2.5.1",
+    "react-devtools": "^4.24.6",
     "typescript": "^4.4.3"
   },
   "scripts": {

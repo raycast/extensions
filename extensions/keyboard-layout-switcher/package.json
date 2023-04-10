@@ -2,17 +2,24 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "input-switcher",
   "title": "Keyboard Layout Switcher",
-  "description": "Show the active keyboard layout and switch to other available layouts",
+  "description": "Extension to switch keyboard layouts",
   "icon": "command-icon.png",
   "author": "lucaschultz",
   "license": "MIT",
   "commands": [
     {
-      "name": "index",
+      "name": "switch",
       "title": "Switch Layouts",
       "subtitle": "Keyboard",
       "description": "Show the active keyboard layout and switch to other available layouts",
       "mode": "view"
+    },
+    {
+      "name": "toggle",
+      "title": "Toggle Next Layout",
+      "subtitle": "Keyboard",
+      "description": "Toggle to the next keyboard layout",
+      "mode": "no-view"
     }
   ],
   "dependencies": {

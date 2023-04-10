@@ -1,9 +1,8 @@
 import { useEffect, useState } from 'react';
-import { Action, ActionPanel, Clipboard, environment, getPreferenceValues, Grid, showHUD } from '@raycast/api';
+import { Action, ActionPanel, Clipboard, Color, getPreferenceValues, Grid, showHUD } from '@raycast/api';
 import { useFetch } from '@raycast/utils';
 import fetch from 'node-fetch';
 import { ApiResponse, Icon, IconStyle, Preferences } from './types';
-import useServer from './use-server';
 
 const iconQuery = `
 query {
@@ -48,13 +47,10 @@ function prettyPrintIconStyle(iconStyle: IconStyle) {
 }
 
 export default function Command() {
-  const port = useServer();
   const { iconStyle } = getPreferenceValues<Preferences>();
 
-  const getSvgUrl = (icon: Icon, iconStyle: IconStyle, isDark?: boolean): string => {
-    return `http://localhost:${port}/${getLibraryType(icon, iconStyle)}/${icon.id}.svg?dark=${
-      isDark ? 'true' : 'false'
-    }`;
+  const getSvgUrl = (icon: Icon, iconStyle: IconStyle): string => {
+    return `https://site-assets.fontawesome.com/releases/v6.2.0/svgs/${getLibraryType(icon, iconStyle)}/${icon.id}.svg`;
   };
 
   const { isLoading, data } = useFetch<ApiResponse>('https://api.fontawesome.com', {
@@ -110,16 +106,24 @@ export default function Command() {
   };
 
   const copyFASlugToClipboard = async (icon: Icon) => {
-    // Copy SVG to clipboard
+    // Copy icon name to clipboard
     await Clipboard.copy(icon.id);
 
     // Notify the user
     await showHUD('Copied Slug to clipboard!');
   };
 
+  const copyFAGlyphToClipboard = async (icon: Icon) => {
+    // Convert the unicode to a string and copy it to the clipboard
+    await Clipboard.copy(String.fromCharCode(parseInt(icon.unicode, 16)));
+
+    // Notify the user
+    await showHUD('Copied Glyph to clipboard!');
+  };
+
   return (
     <Grid
-      itemSize={Grid.ItemSize.Small}
+      columns={8}
       inset={Grid.Inset.Large}
       enableFiltering={false}
       isLoading={isLoading}
@@ -131,7 +135,10 @@ export default function Command() {
         <Grid.Item
           key={icon.id}
           title={icon.label}
-          content={getSvgUrl(icon, 'regular', environment.theme === 'dark')}
+          content={{
+            source: getSvgUrl(icon, 'regular'),
+            tintColor: Color.PrimaryText,
+          }}
           actions={
             <ActionPanel>
               <Action
@@ -140,6 +147,7 @@ export default function Command() {
                 onAction={() => copySvgToClipboard(icon, iconStyle)}
               />
               <Action title={`Copy FA Slug`} icon="copy-clipboard-16" onAction={() => copyFASlugToClipboard(icon)} />
+              <Action title={`Copy FA Glyph`} icon="copy-clipboard-16" onAction={() => copyFAGlyphToClipboard(icon)} />
               <Action.OpenInBrowser
                 title="Open In Browser"
                 url={`https://fontawesome.com/icons/${icon.id}?s=solid&f=classic`}

@@ -37,6 +37,7 @@
     "@types/linkify-it": "^3.0.2",
     "@types/node": "^18.7.14",
     "@types/react": "^18.0.18",
+    "got": "^12.5.3",
     "linkify-it": "^4.0.1",
     "tlds": "^1.236.0"
   },

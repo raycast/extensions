@@ -1,21 +1,15 @@
-import { useCachedPromise } from '@raycast/utils'
+import { useCachedPromise, usePromise } from '@raycast/utils'
 import { getDatabases } from '../operations/get-databases'
 
 export function useDatabases() {
-  const { data, error, isLoading, mutate, revalidate } = useCachedPromise(
-    async () => {
+  const { data, error, isLoading, mutate, revalidate } =
+    usePromise(async () => {
       const databases = await getDatabases()
       return databases
-    },
-    [],
-    {
-      initialData: [],
-      keepPreviousData: true,
-    }
-  )
+    }, [])
 
   return {
-    databases: data,
+    databases: data || [],
     error,
     isLoading,
     mutate,

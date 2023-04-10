@@ -1,5 +1,9 @@
 # Bitfinex Changelog
 
+## [Bugfix] - 2023-01-31
+
+- Fixed a bug in Edit Offer
+
 ## [Bug fixes] - 2022-12-22
 
 - Fix the sending of unnecessary notifications in the cron job

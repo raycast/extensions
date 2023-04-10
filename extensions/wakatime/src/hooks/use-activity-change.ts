@@ -1,6 +1,6 @@
-import { subDays } from "date-fns";
 import { useCallback } from "react";
 import { List, Icon } from "@raycast/api";
+import { format, subDays } from "date-fns";
 
 import { useBase } from "./base";
 import { getSummary, getDuration } from "../utils";
@@ -11,7 +11,10 @@ export function useActivityChange() {
       const summary = await getSummary("Last 1 Day", subDays(new Date(), 1));
       if (!summary.ok) throw new Error(summary.error);
 
-      const { today, yesterday } = summary.result.data.reduce((acc, cur) => {
+      const todayKey = format(new Date(), "E MMM do yyyy").toLowerCase();
+      const yesterdayKey = format(subDays(new Date(), 1), "E MMM do yyyy").toLowerCase();
+
+      const { [todayKey]: today, [yesterdayKey]: yesterday } = summary.result.data.reduce((acc, cur) => {
         return {
           ...acc,
           [cur.range.text.toLowerCase()]: {
@@ -88,7 +91,7 @@ export function useActivityChange() {
 }
 
 type SummaryData = {
-  [K in "today" | "yesterday"]: {
+  [K: string]: {
     seconds: number;
     languages: { [K: string]: number };
   };

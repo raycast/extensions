@@ -46,8 +46,16 @@ export function Onboarding() {
           <List.Item
             key={todo.id}
             icon={{
-              source: todo.completed ? Icon.Checkmark : Icon.Circle,
-              tintColor: todo.completed ? Color.Green : 'none',
+              source: todo.completed ? 'completed.svg' : 'pending.svg',
+              tintColor: todo.completed
+                ? {
+                    light: '#0CA16C',
+                    dark: '#49BC99',
+                  }
+                : {
+                    light: '#93959C',
+                    dark: '#666666',
+                  },
             }}
             title={todo.title}
             accessories={createAccessoriesArray({

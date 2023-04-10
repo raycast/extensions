@@ -4,7 +4,9 @@ import { SFSymbols } from "./util/models";
 import * as music from "./util/scripts";
 import { handleTaskEitherError } from "./util/utils";
 
-export default pipe(
-  music.currentTrack.dislike,
-  handleTaskEitherError(SFSymbols.WARNING + " Could not dislike the track", SFSymbols.DISLIKE + " Disliked")
-);
+export default async () => {
+  await pipe(
+    music.currentTrack.dislike,
+    handleTaskEitherError(SFSymbols.WARNING + " Could not dislike the track", SFSymbols.DISLIKE + " Disliked")
+  )();
+};

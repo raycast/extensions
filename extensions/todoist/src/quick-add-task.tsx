@@ -1,6 +1,7 @@
 import { Clipboard, closeMainWindow, getPreferenceValues, open, Toast } from "@raycast/api";
-import { isTodoistInstalled, checkTodoistApp } from "./helpers/isTodoistInstalled";
+
 import { handleError, todoist } from "./api";
+import { isTodoistInstalled, checkTodoistApp } from "./helpers/isTodoistInstalled";
 
 type Arguments = {
   title: string;

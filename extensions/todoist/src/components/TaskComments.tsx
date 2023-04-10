@@ -1,10 +1,12 @@
-import { Action, ActionPanel, Icon, List, confirmAlert, showToast, Toast, Color } from "@raycast/api";
 import { Comment, Task } from "@doist/todoist-api-typescript";
+import { Action, ActionPanel, Icon, List, confirmAlert, showToast, Toast, Color } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { formatDistanceToNow } from "date-fns";
-import TaskCommentForm from "./TaskCommentForm";
-import { todoist, handleError } from "../api";
 import removeMarkdown from "remove-markdown";
+
+import { todoist, handleError } from "../api";
+
+import TaskCommentForm from "./TaskCommentForm";
 
 interface TaskCommentsProps {
   task: Task;

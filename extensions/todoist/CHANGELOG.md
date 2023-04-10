@@ -1,5 +1,18 @@
 # Todoist Changelog
 
+## [Add various actions and new completed tasks command] - 2023-01-20
+
+- Add new command to see your completed tasks
+- Add new `Show Project` action
+- Add `Duplicate Task` action
+- Add `Move to Project` action
+- Add `Show Project` action
+- Remove `Group By` preferences in favor of an action
+- Support lots more dates when scheduling tasks (thanks to the new `Action.PickDate` component)
+- Use consistent project icons throughout all the commands
+
+⚠️ If you were using the `Group By` preference, it's been replaced by a list item action. Now, select any item in the today or project list and press `⌥` + `⇧` + `G` to configure your view.
+
 ## [Menu bar fix] - 2023-01-10
 
 - Fix focused task when not listed in menubar

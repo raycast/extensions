@@ -1,0 +1,149 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "prettier",
+  "title": "Prettier Markdown",
+  "description": "Format code with Prettier",
+  "icon": "prettier-logo.png",
+  "author": "lin",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Format Code",
+      "description": "Apply Prettier to Clipboard content",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "parser",
+      "type": "dropdown",
+      "title": "Select parser",
+      "description": "Specify which parser to use.",
+      "data": [
+        {
+          "title": "flow",
+          "value": "flow"
+        },
+        {
+          "title": "babel",
+          "value": "babel"
+        },
+        {
+          "title": "babel-flow",
+          "value": "babel-flow"
+        },
+        {
+          "title": "babel-ts",
+          "value": "babel-ts"
+        },
+        {
+          "title": "typescript",
+          "value": "typescript"
+        },
+        {
+          "title": "acorn",
+          "value": "acorn"
+        },
+        {
+          "title": "espree",
+          "value": "espree"
+        },
+        {
+          "title": "meriyah",
+          "value": "meriyah"
+        },
+        {
+          "title": "css",
+          "value": "css"
+        },
+        {
+          "title": "less",
+          "value": "less"
+        },
+        {
+          "title": "scss",
+          "value": "scss"
+        },
+        {
+          "title": "json",
+          "value": "json"
+        },
+        {
+          "title": "json5",
+          "value": "json5"
+        },
+        {
+          "title": "json-stringify",
+          "value": "json-stringify"
+        },
+        {
+          "title": "graphql",
+          "value": "graphql"
+        },
+        {
+          "title": "markdown",
+          "value": "markdown"
+        },
+        {
+          "title": "mdx",
+          "value": "mdx"
+        },
+        {
+          "title": "vue",
+          "value": "vue"
+        },
+        {
+          "title": "yaml",
+          "value": "yaml"
+        },
+        {
+          "title": "glimmer",
+          "value": "glimmer"
+        },
+        {
+          "title": "html",
+          "value": "html"
+        },
+        {
+          "title": "angular",
+          "value": "angular"
+        },
+        {
+          "title": "lwc",
+          "value": "lwc"
+        },
+        {
+          "title": "doc-explorer",
+          "value": "doc-explorer"
+        }
+      ],
+      "default": "babel",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.46.1"
+  },
+  "devDependencies": {
+    "@types/node": "18.8.3",
+    "@types/prettier": "^2.7.2",
+    "@types/react": "18.0.9",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.8.3",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

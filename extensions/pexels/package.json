@@ -115,6 +115,57 @@
       ]
     },
     {
+      "name": "search-videos",
+      "title": "Search Videos",
+      "subtitle": "Pexels",
+      "description": "Search videos on Pexels.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "columns",
+          "type": "dropdown",
+          "description": "Set the number of columns of the video items. (Only works with Grid layout)",
+          "required": false,
+          "title": "Video Item Coloums",
+          "default": "5",
+          "data": [
+            {
+              "title": "1",
+              "value": "1"
+            },
+            {
+              "title": "2",
+              "value": "2"
+            },
+            {
+              "title": "3",
+              "value": "3"
+            },
+            {
+              "title": "4",
+              "value": "4"
+            },
+            {
+              "title": "5",
+              "value": "5"
+            },
+            {
+              "title": "6",
+              "value": "6"
+            },
+            {
+              "title": "7",
+              "value": "7"
+            },
+            {
+              "title": "8",
+              "value": "8"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "name": "search-collections",
       "title": "Search Collections",
       "subtitle": "Pexels",
@@ -273,7 +324,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.44.0",
+    "@raycast/api": "^1.49.0",
     "fs-extra": "^10.1.0",
     "node-fetch": "^3.3.0",
     "pexels": "^1.4.0",

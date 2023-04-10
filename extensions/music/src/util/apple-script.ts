@@ -1,5 +1,3 @@
-import { URLSearchParams } from "url";
-
 import { pipe } from "fp-ts/lib/function";
 import * as TE from "fp-ts/TaskEither";
 import { runAppleScript } from "run-applescript";
@@ -20,14 +18,14 @@ export const tell = (application: string, command: string) =>
 /**
  * Transforms an object to a querystring concatened in apple-script.
  * @example
- *  objectToString({
+ *  createQueryString({
  *     id: 'trackId',
  *     name: 'trackName',
- *  }) // => "id=" & trackId & "name=" & trackName"
+ *  }) // => "id=" & trackId & "&name=" & trackName"
  */
 export const createQueryString = <T extends object>(obj: T): string => {
   return Object.entries(obj).reduce((acc, [key, value], i) => {
-    const keyvalue = `"${i > 0 ? "&" : ""}${key}=" & ${value}`;
+    const keyvalue = `"${i > 0 ? "$BREAK" : ""}${key}=" & ${value}`;
 
     if (!acc) return keyvalue;
 
@@ -35,5 +33,8 @@ export const createQueryString = <T extends object>(obj: T): string => {
   }, "");
 };
 
-// prettier-ignore
-export const parseQueryString = <T = any>() => (querystring: string): T => Object.fromEntries(new URLSearchParams(querystring)) as unknown as T
+export const parseQueryString =
+  <T>() =>
+  (query: string): T => {
+    return Object.fromEntries(query.split("$BREAK").map((item) => item.split("="))) as unknown as T;
+  };

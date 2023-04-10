@@ -1,10 +1,13 @@
-import { ActionPanel, Detail, Icon } from "@raycast/api";
 import { Task, colors } from "@doist/todoist-api-typescript";
+import { ActionPanel, Detail, Icon } from "@raycast/api";
 import { MutatePromise, useCachedPromise } from "@raycast/utils";
 import { format } from "date-fns";
-import { displayDueDate } from "../helpers/dates";
-import { priorities } from "../constants";
+
 import { todoist, handleError } from "../api";
+import { priorities } from "../constants";
+import { displayDueDate } from "../helpers/dates";
+import { getProjectIcon } from "../helpers/projects";
+
 import TaskActions from "./TaskActions";
 
 interface TaskDetailProps {
@@ -19,16 +22,19 @@ export default function TaskDetail({ taskId, mutateTasks }: TaskDetailProps): JS
     error: getTaskError,
     mutate: mutateTaskDetail,
   } = useCachedPromise((taskId) => todoist.getTask(taskId), [taskId]);
+
   const {
     data: projects,
     isLoading: isLoadingProjects,
     error: getProjectsError,
   } = useCachedPromise(() => todoist.getProjects());
+
   const {
     data: labels,
     isLoading: isLoadingLabels,
     error: getLabelsError,
   } = useCachedPromise(() => todoist.getLabels());
+
   const {
     data: comments,
     isLoading: isLoadingComments,
@@ -80,11 +86,9 @@ export default function TaskDetail({ taskId, mutateTasks }: TaskDetailProps): JS
             markdown: `# ${task?.content}\n\n${task?.description}`,
             metadata: (
               <Detail.Metadata>
-                <Detail.Metadata.Label
-                  title="Project"
-                  text={project?.name}
-                  icon={project?.isInboxProject ? Icon.Envelope : Icon.List}
-                />
+                {project ? (
+                  <Detail.Metadata.Label title="Project" text={project.name} icon={getProjectIcon(project)} />
+                ) : null}
 
                 <Detail.Metadata.Label title="Due Date" text={displayedDate} icon={Icon.Calendar} />
 
@@ -122,6 +126,7 @@ export default function TaskDetail({ taskId, mutateTasks }: TaskDetailProps): JS
                 <TaskActions
                   task={task}
                   fromDetail={true}
+                  projects={projects}
                   mutateTasks={mutateTasks}
                   mutateTaskDetail={mutateTaskDetail}
                   mutateComments={mutateComments}

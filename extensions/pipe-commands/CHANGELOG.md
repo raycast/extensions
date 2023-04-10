@@ -1,5 +1,13 @@
 # Pipe Commands Changelog
 
+## [File/Tab input] - 2022-10-04
+
+### Added
+
+- Add support for file and tab input
+- New directive `@raycast.inputType` and `@raycast.outputType` to specify the input and output for `pipe` mode
+- `silent` mode now supports setting the `@raycast.argument1` type to `file` or `tab`
+
 ## [Added new pipe commands] - 2022-09-26
 
 - Added new pipe command: convert newline to spaces
@@ -7,6 +15,7 @@
 ## [Added new pipe commands] - 2022-09-19
 
 Adding two new pipe command scripts:
+
 - Reverse lines
 - Convert newlines to spaces
 

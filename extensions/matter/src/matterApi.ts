@@ -1,6 +1,6 @@
 import fetch from "node-fetch";
 import { getPreferenceValues } from "@raycast/api";
-import { Preferences } from "./types";
+import { Items, Preferences } from "./types";
 
 async function getQueue() {
   const url = "https://web.getmatter.com/api/library_items/queue_feed?page=1";
@@ -15,9 +15,28 @@ async function getQueue() {
 
   try {
     const response = await fetch(url, options);
+    return (await response.json()) as Items;
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+async function getFavorites() {
+  const url = "https://web.getmatter.com/api/library_items/favorites_feed?page=1";
+  const token = getPreferenceValues<Preferences>().matterToken;
+  const options = {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  };
+
+  try {
+    const response = await fetch(url, options);
     return await response.json();
   } catch (error) {
-    console.log(error);
+    console.error(error);
   }
 }
 
@@ -42,8 +61,8 @@ async function setFavorite(contentId: string, isFavorited: boolean) {
     const response = await fetch(url, options);
     return await response.json();
   } catch (error) {
-    console.log(error);
+    console.error(error);
   }
 }
 
-export { getQueue, setFavorite };
+export { getQueue, getFavorites, setFavorite };

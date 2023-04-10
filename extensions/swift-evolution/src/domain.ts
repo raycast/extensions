@@ -55,12 +55,12 @@ function convertToViewModel(proposals: ProposalJson[]): ProposalViewModel[] {
       const viewModel: ProposalViewModel = {
         id: json.id,
         authors: json.authors.map((x) => ({ ...x, name: x.name.trim() })),
+        implementations: getImplementations(json),
         reviewManagerName: json.reviewManager.name.trim(),
         reviewManagerProfileLink: json.reviewManager.link,
         link: "https://github.com/apple/swift-evolution/blob/main/proposals/" + json.link,
         markdownLink: "https://raw.githubusercontent.com/apple/swift-evolution/main/proposals/" + json.link,
         keywords: getKeywords(json),
-        repos: getRepos(json),
         status: statusToViewModelMap.get(json.status.state)?.status ?? json.status.state,
         statusColor: statusToViewModelMap.get(json.status.state)?.statusColor ?? "blue",
         title: json.title.trim(),
@@ -69,6 +69,7 @@ function convertToViewModel(proposals: ProposalJson[]): ProposalViewModel[] {
           json.status.start !== undefined && json.status.end !== undefined
             ? convertStartEndToScheduled(json.status.start, json.status.end)
             : undefined,
+        isNew: isNew(json),
       };
       return viewModel;
     })
@@ -104,6 +105,25 @@ function getRepos(proposal: ProposalJson): string[] {
     repos.push(repo);
     return repos;
   }, [] as string[]);
+}
+
+function getImplementations(proposal: ProposalJson): { title: string; url: string }[] {
+  const implementations = proposal.implementation ?? [];
+  return implementations.map((x) => {
+    return {
+      title: `${x.repository}#${x.id}`,
+      url: `https://github.com/apple/swift/pull/${x.id}`,
+    };
+  });
+}
+
+function isNew(proposal: ProposalJson): boolean {
+  if (proposal.status.start === undefined) return false;
+  const sevenDaysAgo = new Date();
+  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+  const start = new Date(proposal.status.start);
+  console.log(start.valueOf() - sevenDaysAgo.valueOf());
+  return start > sevenDaysAgo && start < new Date();
 }
 
 function convertStartEndToScheduled(startDate: string, endDate: string): string {

@@ -1,11 +1,13 @@
-import { getColorByKey, Project as TProject } from "@doist/todoist-api-typescript";
+import { Project as TProject } from "@doist/todoist-api-typescript";
 import { ActionPanel, Icon, showToast, Toast, List, confirmAlert, Action, Color } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
+
 import { todoist, handleError } from "./api";
 import Project from "./components/Project";
 import ProjectForm from "./components/ProjectForm";
 import View from "./components/View";
 import { isTodoistInstalled } from "./helpers/isTodoistInstalled";
+import { getProjectIcon } from "./helpers/projects";
 
 function Projects() {
   const { data, error, isLoading, mutate } = useCachedPromise(() => todoist.getProjects());
@@ -63,19 +65,16 @@ function Projects() {
       {projects.map((project) => (
         <List.Item
           key={project.id}
-          icon={
-            project.isInboxProject
-              ? Icon.Envelope
-              : {
-                  source: project.viewStyle === "list" ? Icon.List : Icon.BarChart,
-                  tintColor: getColorByKey(project.color).hexValue,
-                }
-          }
+          icon={getProjectIcon(project)}
           title={project.name}
           {...(project.isFavorite ? { accessoryIcon: { source: Icon.Star, tintColor: Color.Yellow } } : {})}
           actions={
             <ActionPanel title={project.name}>
-              <Action.Push icon={Icon.BlankDocument} title="Show Details" target={<Project project={project} />} />
+              <Action.Push
+                icon={Icon.BlankDocument}
+                title="Show Details"
+                target={<Project project={project} projects={projects} />}
+              />
 
               {isTodoistInstalled ? (
                 <Action.Open

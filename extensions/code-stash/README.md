@@ -11,3 +11,5 @@ This is a simple extension to temporarily stash code that you do not need at tha
 - Create new stash: <kbd>⌘</kbd><kbd>N</kbd>
 - Edit selected stash: <kbd>⌘</kbd><kbd>E</kbd>
 - Delete selected stash: <kbd>⌃</kbd><kbd>X</kbd>
+- Export all stashes: <kbd>⌃</kbd>⇧<kbd>E</kbd>
+- Import stashes: <kbd>⌘</kbd><kbd>I</kbd>

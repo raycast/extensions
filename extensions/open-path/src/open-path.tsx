@@ -1,96 +1,72 @@
-import { getPreferenceValues, open, showHUD, showInFinder } from "@raycast/api";
-import { fetchItemInputClipboardFirst, fetchItemInputSelectedFirst } from "./utils/input-item";
-import { checkIsFile, isEmail, isEmpty, isUrl, Preference, searchUrlBuilder, urlBuilder } from "./utils/common-utils";
+import { getPreferenceValues, open } from "@raycast/api";
+import {
+  getPathFromSelectionOrClipboard,
+  isEmail,
+  isEmpty,
+  isFileOrFolderPath,
+  Preference,
+  showHud,
+} from "./utils/common-utils";
 import fse from "fs-extra";
 import { homedir } from "os";
-import { URL } from "url";
 import { isIPv4 } from "net";
+import { filePathOperation, OpenURL } from "./utils/path-utils";
 
 export default async () => {
-  const { trimText, isShowHud, fileOperation, priorityDetection, searchEngine } = getPreferenceValues<Preference>();
+  const { trimText, fileOperation, priorityDetection, searchEngine } = getPreferenceValues<Preference>();
 
-  const _getText = await getPath(priorityDetection);
+  const _getText = await getPathFromSelectionOrClipboard(priorityDetection);
   const path = trimText ? _getText.trim() : _getText;
 
   if (isEmpty(path)) {
-    await showHud(isShowHud, "No path detected");
-    return "";
-  }
-  if (fse.pathExistsSync(path)) {
-    await filePathOperation(path, fileOperation, isShowHud);
+    await showHud("⭕️", "Nothing detected");
     return;
   }
 
+  // Open file, folder
+  if (fse.pathExistsSync(path)) {
+    await filePathOperation(path, fileOperation);
+    return;
+  }
+  // open ~/file, ~/folder
+  const homedirPath = path.startsWith("~/") ? path.replace("~", homedir()) : path;
+  if (fse.pathExistsSync(homedirPath)) {
+    await filePathOperation(homedirPath, fileOperation);
+    return;
+  }
+  // Re-judge, if path is similar to file path and does not exist then error is reported
+  if (isFileOrFolderPath(path)) {
+    await showHud("🚫", "Error Path: " + path);
+    return;
+  }
+
+  //Open IP
   if (isIPv4(path)) {
     if (path == "127.0.0.1") {
       await open("http://www." + path);
     } else {
       await open("http://" + path);
     }
-    console.info("open: IP address");
-    await showHud(isShowHud, "Open IP: " + path);
+    console.info("open: IP " + path);
+    await showHud("🔗", "Open IP: " + path);
     return;
   }
 
+  // Open Email
   if (isEmail(path)) {
     await open("mailto:" + path);
-    console.info("open: email");
-    await showHud(isShowHud, "Send Email: " + path);
+    console.info("open: email " + path);
+    await showHud("📧", "Send Email: " + path);
+    return;
+  }
+  // Open Email(mailto:)
+  if (path.startsWith("mailto:")) {
+    await open(path);
+    console.info("open: email " + path);
+    await showHud("📧", "Send Email: " + path);
     return;
   }
 
-  try {
-    await open(new URL(path).toString());
-    console.info("open: URL");
-    await showHud(isShowHud, "Open URL: " + path);
-  } catch (e) {
-    await reOpenURL(fileOperation, isShowHud, path, searchEngine);
-    console.error(String(e));
-  }
-};
-
-const showHud = async (showHud: boolean, content: string) => {
-  if (showHud) {
-    await showHUD(content);
-  }
-};
-
-const getPath = async (priorityDetection: string) => {
-  if (priorityDetection === "selected") {
-    return await fetchItemInputSelectedFirst();
-  } else {
-    return await fetchItemInputClipboardFirst();
-  }
-};
-
-export const filePathOperation = async (path: string, fileOperation: string, isShowHud: boolean) => {
-  if (fileOperation === "showInFinder" && checkIsFile(path)) {
-    await showInFinder(path);
-    console.info("showInFinder(finalPath)");
-    await showHud(isShowHud, "Show in Finder: " + path);
-  } else {
-    await open(path);
-    console.info("open(finalPath)");
-    await showHud(isShowHud, "Open Path: " + path);
-  }
-};
-
-const reOpenURL = async (fileOperation: string, isShowHud: boolean, rawPath: string, searchEngine: string) => {
-  let finalPath = rawPath;
-  if (rawPath.startsWith("~/")) {
-    finalPath = rawPath.replace("~", homedir());
-  }
-  if (!fse.pathExistsSync(finalPath)) {
-    if (isUrl(rawPath)) {
-      await open(urlBuilder("https://", rawPath));
-      console.info('open(urlBuilder("https://", rawPath))');
-      await showHud(isShowHud, "Open URL: " + rawPath);
-    } else {
-      await open(searchUrlBuilder(searchEngine, rawPath));
-      console.info("open(searchUrlBuilder(searchEngine, rawPath))");
-      await showHud(isShowHud, "Search: " + rawPath);
-    }
-  } else {
-    await filePathOperation(finalPath, fileOperation, isShowHud);
-  }
+  // Open Url or Search Text
+  await OpenURL(fileOperation, path, searchEngine);
 };

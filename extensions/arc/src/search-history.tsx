@@ -1,4 +1,4 @@
-import { Icon, List } from "@raycast/api";
+import { Icon, LaunchProps, List } from "@raycast/api";
 import { useState } from "react";
 import { historyDatabasePath, getHistoryQuery } from "./sql";
 import { HistoryEntry } from "./types";
@@ -6,8 +6,8 @@ import { VersionCheck } from "./version";
 import { HistoryEntryListItem } from "./list";
 import { useSQL } from "@raycast/utils";
 
-function SearchHistory() {
-  const [searchText, setSearchText] = useState("");
+function SearchHistory(props: LaunchProps) {
+  const [searchText, setSearchText] = useState(props.fallbackText ?? "");
   const { data, isLoading, permissionView } = useSQL<HistoryEntry>(historyDatabasePath, getHistoryQuery(searchText));
 
   if (permissionView) {
@@ -29,10 +29,10 @@ function SearchHistory() {
   );
 }
 
-export default function Command() {
+export default function Command(props: LaunchProps) {
   return (
     <VersionCheck>
-      <SearchHistory />
+      <SearchHistory {...props} />
     </VersionCheck>
   );
 }

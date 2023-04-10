@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { ActionPanel, Color, List, showToast, Action, Image, Toast } from "@raycast/api";
+import { ActionPanel, Color, List, showToast, Action, Image, Toast, Icon } from "@raycast/api";
 import useSWR, { SWRConfig } from "swr";
 import { Schema } from "bitbucket";
 
-import { getRepositories, getRepositoriesLazy } from "../../queries";
+import { getRepositoriesLazy } from "../../queries";
 import { Repository } from "./interface";
 import { icon } from "../../helpers/icon";
-import { cacheConfig, REPOSITORIES_CACHE_KEY } from "../../helpers/cache";
+import { cacheConfig } from "../../helpers/cache";
 import { ShowPipelinesActions, ShowPullRequestsActions } from "./actions";
 
 export function SearchRepositories() {
@@ -14,24 +14,6 @@ export function SearchRepositories() {
     <SWRConfig value={cacheConfig}>
       <SearchListLazy />
     </SWRConfig>
-  );
-}
-
-function SearchList(): JSX.Element {
-  const { data, error, isValidating } = useSWR(REPOSITORIES_CACHE_KEY, getRepositories);
-
-  if (error) {
-    showToast({ style: Toast.Style.Failure, title: "Failed loading repositories", message: error.message });
-  }
-
-  return (
-    <List isLoading={isValidating} searchBarPlaceholder="Search by name...">
-      <List.Section title="Repositories" subtitle={data?.length.toString()}>
-        {data?.map(toRepository).map((repo: Repository) => (
-          <SearchListItem key={repo.uuid} repo={repo} />
-        ))}
-      </List.Section>
-    </List>
   );
 }
 
@@ -77,6 +59,10 @@ function toRepository(repo: Schema.Repository): Repository {
     avatarUrl: repo.links?.avatar?.href as string,
     description: (repo.description as string) || "",
     url: `https://bitbucket.org/${repo.full_name}`,
+    clone: {
+      ssh: repo.links?.clone?.find((l) => l.name === "ssh")?.href,
+      https: repo.links?.clone?.find((l) => l.name === "https")?.href,
+    },
   };
 }
 
@@ -113,6 +99,23 @@ function SearchListItem({ repo }: { repo: Repository }): JSX.Element {
                 tintColor: Color.PrimaryText,
               }}
             />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Copy Links">
+            <Action.CopyToClipboard title={"Copy Repository link"} content={repo.url} icon={Icon.CopyClipboard} />
+            {repo.clone.ssh ? (
+              <Action.CopyToClipboard
+                title={"Copy Git Clone Command (SSH)"}
+                content={`git clone ${repo.clone.ssh}`}
+                icon={Icon.CopyClipboard}
+              />
+            ) : null}
+            {repo.clone.https ? (
+              <Action.CopyToClipboard
+                title={"Copy Git Clone Command (HTTPS)"}
+                content={`git clone ${repo.clone.https}`}
+                icon={Icon.CopyClipboard}
+              />
+            ) : null}
           </ActionPanel.Section>
           <ActionPanel.Section title="Details">
             <ShowPipelinesActions repo={repo} />

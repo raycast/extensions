@@ -2,10 +2,22 @@ import { ReactNode } from "react";
 import { Image } from "@raycast/api";
 import { getFavicon } from "@raycast/utils";
 
+export interface Preferences {
+  readonly useOriginalFavicon: boolean;
+  readonly openTabInProfile: SettingsProfileOpenBehaviour;
+}
+
+export enum SettingsProfileOpenBehaviour {
+  Default = "default",
+  ProfileCurrent = "profile_current",
+  ProfileOriginal = "profile_original",
+}
+
 export interface SearchResult<T> {
   readonly isLoading: boolean;
   readonly errorView?: ReactNode;
   readonly data?: T[];
+  readonly revalidate?: (profileId: string) => void;
 }
 
 export interface HistoryEntry {
@@ -24,7 +36,7 @@ export class Tab {
     public readonly title: string,
     public readonly url: string,
     public readonly favicon: string,
-    public readonly windowsIndex: number,
+    public readonly windowsId: number,
     public readonly tabIndex: number
   ) {}
 
@@ -35,7 +47,7 @@ export class Tab {
   }
 
   key(): string {
-    return `${this.windowsIndex}${Tab.TAB_CONTENTS_SEPARATOR}${this.tabIndex}`;
+    return `${this.windowsId}${Tab.TAB_CONTENTS_SEPARATOR}${this.tabIndex}`;
   }
 
   urlWithoutScheme(): string {
@@ -74,4 +86,9 @@ export interface ExecError extends Error {
   code: number;
   stdout: string;
   stderr: string;
+}
+
+export interface ChromeProfile {
+  readonly name: string;
+  readonly id: string;
 }

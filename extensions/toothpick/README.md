@@ -4,11 +4,11 @@
 </p>
 
 <p align="center">
-  <a aria-label="Follow me on Twitter" href="https://twitter.com/briankosw">
-    <img alt="" src="https://img.shields.io/badge/Follow%20@briankosw-black.svg?style=for-the-badge&logo=Twitter">
-  </a>
-  <a aria-label="Follow me on Twitter" href="https://twitter.com/VladCuciureanu_">
+  <a aria-label="Follow Vlad on Twitter" href="https://twitter.com/VladCuciureanu_">
     <img alt="" src="https://img.shields.io/badge/Follow%20@VladCuciureanu-black.svg?style=for-the-badge&logo=Twitter">
+  </a>
+  <a aria-label="Follow Brian on Twitter" href="https://twitter.com/briankosw">
+    <img alt="" src="https://img.shields.io/badge/Follow%20@briankosw-black.svg?style=for-the-badge&logo=Twitter">
   </a>
 </p>
 
@@ -19,7 +19,7 @@ Connecting to your Bluetooth devices <!--and changing your AirPods' noise-cancel
 
 ## Getting Started
 
-Visit this extension's [store page](https://www.raycast.com/briankosw/toothpick) to get started.<br/>
+Visit this extension's [store page](https://www.raycast.com/VladCuciureanu/toothpick) to get started.<br/>
 After installing, follow the instructions on screen, and you should be good to go!
 
 ## Feedback
@@ -51,7 +51,6 @@ If you have any of the devices below <i>or</i> wish to have any unlisted device 
 
 ### Wanted devices
 
-- Sony WF-1000XM3
 - Beats X
 - Beats Solo 3
 - Beats Solo Pro

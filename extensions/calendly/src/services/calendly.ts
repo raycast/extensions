@@ -156,6 +156,7 @@ export function useEventTypes(): { eventTypes: CalendlyEventType[]; isLoading: b
       const data = await calendlyAPI<CalendlyEventTypeResponse>({
         url: `https://api.calendly.com/event_types`,
         params: { user: user?.uri },
+        data: { count: 100 },
       });
       return data.data.collection.filter((e) => e.active);
     },

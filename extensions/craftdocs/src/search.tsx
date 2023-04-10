@@ -4,7 +4,15 @@ import ListBlocks from "./components/ListBlocks";
 import useAppExists, { UseAppExists } from "./hooks/useAppExists";
 import useConfig, { UseConfig } from "./hooks/useConfig";
 import useDB, { UseDB } from "./hooks/useDB";
-import { getPreferenceValues, List, showToast, Toast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  getPreferenceValues,
+  List,
+  showToast,
+  Toast,
+  openExtensionPreferences,
+} from "@raycast/api";
 import useDocumentSearch from "./hooks/useDocumentSearch";
 import ListDocBlocks from "./components/ListDocBlocks";
 import Style = Toast.Style;
@@ -75,7 +83,19 @@ const handleDetailedView = ({ appExists, db, query, setQuery, config }: ViewPara
 };
 
 const NoResults = () => (
-  <List>
-    <List.EmptyView title="No results" icon={"command-icon-small.png"} />
-  </List>
+  <>
+    <List
+      actions={
+        <ActionPanel>
+          <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
+        </ActionPanel>
+      }
+    >
+      <List.EmptyView
+        title="No results"
+        description="Selecting Craft application in preferences might help"
+        icon={"command-icon-small.png"}
+      />
+    </List>
+  </>
 );

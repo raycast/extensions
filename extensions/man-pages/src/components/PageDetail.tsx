@@ -3,7 +3,6 @@ import { runCommand, openInTerminal } from "../utils";
 
 export const PageDetail = ({ command, commandDetails }: { command: string; commandDetails: string }) => {
   // Divide content into sections and cleanse content
-  const title = (commandDetails.split("\n")[0].match(/[A-Za-z.]+/g) || ["MAN"])[0];
   const sections = commandDetails.split("\n\n").slice(1);
   const text = sections
     .map((section: string) => {
@@ -20,12 +19,22 @@ export const PageDetail = ({ command, commandDetails }: { command: string; comma
       isLoading={!commandDetails}
       actions={
         <ActionPanel>
-          <Action.CopyToClipboard title="Copy Entry to Clipboard" content={text} />
-          <Action title="Open in Terminal" icon={Icon.Terminal} onAction={() => openInTerminal(command)} />
-          <Action.OpenInBrowser url={`https://manpages.org/${command}`} />
+          <Action.CopyToClipboard
+            title="Copy Entry to Clipboard"
+            content={text}
+            shortcut={{ modifiers: ["cmd"], key: "c" }}
+          />
+          <Action
+            title="Open in Terminal"
+            icon={Icon.Terminal}
+            shortcut={{ modifiers: ["cmd"], key: "t" }}
+            onAction={() => openInTerminal(command)}
+          />
+          <Action.OpenInBrowser url={`https://manpages.org/${command}`} shortcut={{ modifiers: ["cmd"], key: "b" }} />
           <Action
             title="View as PDF in Preview"
             icon={Icon.Document}
+            shortcut={{ modifiers: ["cmd"], key: "p" }}
             onAction={() => {
               runCommand(`sw_vers -productVersion`, (os_version) => {
                 if (parseFloat(os_version) < 13.0) {

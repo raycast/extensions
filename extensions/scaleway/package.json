@@ -132,26 +132,42 @@
       "description": "Get information about transactionalEmail domains",
       "mode": "view",
       "icon": "transactionalEmail.webp"
+    },
+    {
+      "name": "webhosting",
+      "title": "Web Hosting",
+      "description": "Get information about webhosting",
+      "mode": "view",
+      "icon": "webhosting.webp"
+    },
+    {
+      "name": "secretManager",
+      "title": "Secret Manager",
+      "description": "Get information about your Secret Manager secrets",
+      "mode": "view",
+      "icon": "secretManager.webp"
     }
   ],
   "dependencies": {
-    "@raycast/api": "1.45.2",
-    "@scaleway/configuration-loader": "0.1.0-beta.6",
-    "@scaleway/sdk": "0.1.0-beta.30",
-    "@scaleway/use-dataloader": "2.16.7",
+    "@raycast/api": "1.48.7",
+    "@scaleway/configuration-loader": "1.0.0",
+    "@scaleway/sdk": "1.2.0",
+    "@scaleway/use-dataloader": "4.0.0",
+    "base64-js": "^1.5.1",
+    "cross-fetch": "^3.1.5",
     "react": "18.2.0"
   },
   "devDependencies": {
-    "@scaleway/eslint-config-react": "3.13.3",
+    "@scaleway/eslint-config-react": "3.15.3",
     "@scaleway/tsconfig": "1.1.0",
-    "@types/node": "18.11.18",
-    "@types/react": "18.0.26",
-    "@typescript-eslint/eslint-plugin": "5.48.0",
-    "@typescript-eslint/parser": "5.48.0",
-    "eslint": "8.31.0",
-    "eslint-config-prettier": "8.6.0",
-    "prettier": "2.8.1",
-    "typescript": "4.9.4"
+    "@types/node": "18.14.6",
+    "@types/react": "18.0.28",
+    "@typescript-eslint/eslint-plugin": "5.54.1",
+    "@typescript-eslint/parser": "5.54.1",
+    "eslint": "8.35.0",
+    "eslint-config-prettier": "8.7.0",
+    "prettier": "2.8.4",
+    "typescript": "4.9.5"
   },
   "preferences": [
     {
@@ -202,8 +218,7 @@
   ],
   "scripts": {
     "lint": "ray lint",
-    "lint:fix": "eslint . --fix --quiet --debug",
-    "build": "ray build -e dist",
+    "build": "ray build -e dist -o build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix"
   }

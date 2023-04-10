@@ -17,7 +17,6 @@ import { updateTodoTag } from '@/services/notion/operations/update-todo-tag'
 import { updateTodoDate } from '@/services/notion/operations/update-todo-date'
 import { deleteTodo } from '@/services/notion/operations/delete-todo'
 import { useTodos } from '@/services/notion/hooks/use-todos'
-import { inProgressTodo } from '@/services/notion/operations/in-progress-todo'
 import { useProjects } from '@/services/notion/hooks/use-projects'
 import { updateTodoProject } from '@/services/notion/operations/update-todo-project'
 import { useUsers } from '@/services/notion/hooks/use-users'
@@ -28,26 +27,31 @@ import { useLocalPreferences } from '@/services/notion/hooks/use-local-preferenc
 import { useFilter } from '@/services/notion/hooks/use-filter'
 import { autocomplete } from '../utils/autocomplete'
 import { toISOStringWithTimezone } from '../utils/to-iso-string-with-time-zone'
-import { refreshMenuBar } from './refresh-menu-bar'
+import { refreshMenuBar } from '../utils/refresh-menu-bar'
 import { optimisticSorting } from '../utils/optimistic-sorting'
 import { useIsNotionInstalled } from '@/services/notion/hooks/use-is-notion-installed'
-import { notStartedTodo } from '@/services/notion/operations/not-started-todo'
+import { useStatuses } from '@/services/notion/hooks/use-get-statuses'
+import { setStatusTodo } from '@/services/notion/operations/set-status-todo'
+import { Status } from '@/types/status'
 
 export function useTodoList() {
   const [newTodo, setNewTodo] = useState<Todo | null>(null)
   const [searchText, setSearchText] = useState<string>('')
   const { filterTodo, setFilterTodo } = useFilter()
-  const { preferences, revalidate: mutatePreferences } = useLocalPreferences()
+
+  const { preferences, revalidatePreferences } = useLocalPreferences()
+  const { statuses } = useStatuses(preferences.databaseName)
   const { todos, isLoading, mutate } = useTodos({
     databaseId: preferences.databaseId,
     filter: filterTodo,
   })
 
-  const {
-    data: { projects, projectsById },
-  } = useProjects(preferences.properties?.relatedDatabase?.databaseId)
+  const { projects, projectsById } = useProjects(
+    preferences.properties?.relatedDatabase?.databaseId
+  )
   const { tags } = useTags(preferences.databaseName)
   const { users } = useUsers()
+
   const isNotionInstalled = useIsNotionInstalled()
 
   const handleComplete = async (todo: Todo) => {
@@ -69,45 +73,35 @@ export function useTodoList() {
     }
   }
 
-  const handleInProgress = async (todo: Todo) => {
+  const handleSetStatus = async (todo: Todo, status: Status) => {
     try {
       if (todo.id.includes('fake-id-')) return null
 
-      await mutate(inProgressTodo(todo.id), {
+      await mutate(setStatusTodo(todo.id, status.id), {
         optimisticUpdate(data) {
           if (!data) return data
+
+          if (filterTodo.status && filterTodo.status.id !== status.id) {
+            return data.filter((t) => t.id !== todo.id)
+          } else if (
+            preferences?.properties?.status?.completedStatuses &&
+            preferences.properties.status.completedStatuses.includes(
+              status.name
+            )
+          ) {
+            return data.filter((t) => t.id !== todo.id)
+          }
+
           const todos = data.map((t) =>
-            t.id === todo.id ? { ...todo, inProgress: true } : t
+            t.id === todo.id ? { ...todo, status } : t
           )
 
-          return optimisticSorting(todos)
+          return todos
         },
         shouldRevalidateAfter: true,
       })
 
-      showToast(Toast.Style.Success, 'Marked as In Progress')
-    } catch (e: any) {
-      showToast(Toast.Style.Failure, e?.message)
-    }
-  }
-
-  const handleNotStarted = async (todo: Todo) => {
-    try {
-      if (todo.id.includes('fake-id-')) return null
-
-      await mutate(notStartedTodo(todo.id), {
-        optimisticUpdate(data) {
-          if (!data) return data
-          const todos = data.map((t) =>
-            t.id === todo.id ? { ...todo, inProgress: false } : t
-          )
-
-          return optimisticSorting(todos)
-        },
-        shouldRevalidateAfter: true,
-      })
-
-      showToast(Toast.Style.Success, 'Marked as Not Started')
+      showToast(Toast.Style.Success, `Marked as ${status.name}`)
     } catch (e: any) {
       showToast(Toast.Style.Failure, e?.message)
     }
@@ -153,7 +147,7 @@ export function useTodoList() {
             }
 
             const todos = [optimisticTodo, ...data]
-            return optimisticSorting(todos)
+            return todos
           },
           shouldRevalidateAfter: true,
         }
@@ -163,7 +157,7 @@ export function useTodoList() {
       refreshMenuBar()
 
       if (action === 'SHARE') {
-        await Clipboard.copy(createdTodo.shareUrl)
+        await Clipboard.copy(`Added to Hypersonic: ${createdTodo.shareUrl}`)
         await showHUD('Copied to Clipboard')
       }
 
@@ -254,13 +248,12 @@ export function useTodoList() {
             t.id === todo.id
               ? {
                   ...todo,
-                  dateValue: dateValue,
-                  date: new Date(dateValue || ''),
+                  dateValue: dateValue || null,
+                  date: dateValue ? new Date(dateValue) : null,
                 }
               : t
           )
-
-          return optimisticSorting(todos)
+          return todos
         },
         shouldRevalidateAfter: true,
       })
@@ -306,6 +299,8 @@ export function useTodoList() {
     let date = null
     let dateValue = null
     let contentUrl = null
+    let status =
+      statuses && statuses.length > 0 ? statuses[statuses.length - 1] : null
 
     const projectMatch = text.match(/ #(\w+)/)
     const userMatch = text.match(/ @(\w+)/)
@@ -366,6 +361,10 @@ export function useTodoList() {
       contentUrl = urlMatch[0]
     }
 
+    if (filterTodo.status) {
+      status = filterTodo.status
+    }
+
     // Clean all values matching from text and previous white space as title constant
     const title = text
       .replace(projectMatch ? projectMatch[0] : '', '')
@@ -391,25 +390,18 @@ export function useTodoList() {
       user,
       date,
       contentUrl,
-      inProgress: false,
+      status: status,
       dateValue,
     })
   }
 
-  const handleSetFilter = (filter: any, type: string) => {
+  const handleSetFilter = (
+    filter: any,
+    type: 'status' | 'projectId' | 'tag' | 'user'
+  ) => {
     const newFilterTodo = { ...filterTodo }
 
-    if (type === 'tag') {
-      newFilterTodo['tag'] = filter
-    }
-
-    if (type === 'project') {
-      newFilterTodo['projectId'] = filter
-    }
-
-    if (type === 'user') {
-      newFilterTodo['user'] = filter
-    }
+    newFilterTodo[type] = filter
 
     if (filterTodo?.projectId === filter) {
       newFilterTodo['projectId'] = null
@@ -423,6 +415,10 @@ export function useTodoList() {
       newFilterTodo['user'] = null
     }
 
+    if (filterTodo?.status?.id === filter?.id) {
+      newFilterTodo['status'] = null
+    }
+
     setFilterTodo(newFilterTodo)
     refreshMenuBar()
   }
@@ -432,6 +428,7 @@ export function useTodoList() {
       tag: null,
       projectId: null,
       user: null,
+      status: null,
     })
     refreshMenuBar()
   }
@@ -439,15 +436,19 @@ export function useTodoList() {
   const filteredTodos = useMemo(() => {
     if (searchText) {
       const key = searchText.toUpperCase()
-      return todos.filter((item) => item.title.toUpperCase().includes(key))
+      const filteredTodos = todos.filter((item) =>
+        item.title.toUpperCase().includes(key)
+      )
+      return optimisticSorting(filteredTodos)
     }
 
-    return todos
+    return optimisticSorting(todos)
   }, [todos, searchText])
 
   return {
     todos: filteredTodos,
     tags: tags,
+    statuses,
     notionDbUrl: isNotionInstalled
       ? preferences.normalizedUrl
       : preferences.databaseUrl,
@@ -458,8 +459,7 @@ export function useTodoList() {
     loading: isLoading,
     handleCreate,
     handleComplete,
-    handleInProgress,
-    handleNotStarted,
+    handleSetStatus,
     handleSetTag,
     handleSetDate,
     handleDelete,
@@ -474,7 +474,7 @@ export function useTodoList() {
     filterTodo,
     resetFilter,
     searchText,
-    mutatePreferences,
+    mutatePreferences: revalidatePreferences,
     isNotionInstalled,
   }
 }

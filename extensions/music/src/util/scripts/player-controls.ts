@@ -20,6 +20,23 @@ const setVolume = pipe(
 );
 
 const getVolume: TE.TaskEither<ScriptError, number> = pipe(tell("Music", "get sound volume"), TE.map(parseInt));
+const getShuffleStatus = pipe(
+  tell("Music", "get shuffle enabled"),
+  TE.map((s) => s === "true")
+);
+const setShuffleStatus = pipe(
+  RTE.ask<boolean>(),
+  RTE.chainTaskEitherK((isEnabled) => tell("Music", `set shuffle enabled to ${isEnabled.toString()}`))
+);
+
+export const shuffle = {
+  get: getShuffleStatus,
+  set: setShuffleStatus,
+  toggle: pipe(
+    getShuffleStatus,
+    TE.chain((enabled) => setShuffleStatus(!enabled))
+  ),
+};
 
 export const volume = {
   set: setVolume,

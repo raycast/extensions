@@ -1,10 +1,12 @@
+import { AddProjectArgs, colors, Project as TProject, ProjectViewStyle } from "@doist/todoist-api-typescript";
 import { ActionPanel, Action, Toast, Form, Icon, showToast, open, useNavigation } from "@raycast/api";
 import { FormValidation, MutatePromise, useCachedPromise, useForm } from "@raycast/utils";
-import { AddProjectArgs, colors, Project as TProject, ProjectViewStyle } from "@doist/todoist-api-typescript";
+
 import { handleError, todoist } from "../api";
 import { isTodoistInstalled } from "../helpers/isTodoistInstalled";
-import View from "./View";
+
 import Project from "./Project";
+import View from "./View";
 
 interface ProjectFormProps {
   project?: TProject;
@@ -72,7 +74,7 @@ export default function ProjectForm({ project, mutate }: ProjectFormProps) {
           toast.primaryAction = {
             title: "Open Project",
             shortcut: { modifiers: ["cmd"], key: "o" },
-            onAction: () => push(<Project project={project} />),
+            onAction: () => push(<Project project={project} projects={projects} />),
           };
           toast.secondaryAction = {
             title: `Open Project ${isTodoistInstalled ? "in Todoist" : "in Browser"}`,

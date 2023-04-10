@@ -248,6 +248,27 @@ export class MergeRequest {
   public has_conflicts = false;
 }
 
+export class Pipeline {
+  public id = 0;
+  public iid = "";
+  public projectId = "";
+  public status = "";
+  public ref = "";
+  public sha = "";
+  public before_sha = "";
+  public tag = false;
+  public user?: User;
+  public created_at = "";
+  public updated_at = "";
+  public started_at = "";
+  public finished_at = "";
+  public committed_at = "";
+  public duration = 0;
+  public queued_duration = 0;
+  public coverage = "";
+  public webUrl = "";
+}
+
 export interface TodoGroup {
   id: number;
   name: string;

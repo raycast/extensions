@@ -1,8 +1,9 @@
 import { ActionPanel, Form, Action, useNavigation, getPreferenceValues, Keyboard } from "@raycast/api";
 
-import NoteCreator from "../utils/NoteCreator";
-import { NoteFormPreferences, FormValue, Vault } from "../utils/interfaces";
-import { renewCache } from "../utils/cache";
+import NoteCreator from "../utils/data/creator";
+import { FormValue, Vault } from "../utils/interfaces";
+import { renewCache } from "../utils/data/cache";
+import { NoteFormPreferences } from "../utils/preferences";
 
 export function CreateNoteForm(props: { vault: Vault; showTitle: boolean }) {
   const { vault, showTitle } = props;

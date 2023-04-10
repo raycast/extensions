@@ -6,7 +6,8 @@
   "icon": "icon.png",
   "author": "asubbotin",
   "contributors": [
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "brodelp"
   ],
   "keywords": [
     "pomodoro",
@@ -97,6 +98,10 @@
         {
           "value": "60",
           "title": "60:00"
+        },
+        {
+          "value": "90",
+          "title": "90:00"
         }
       ]
     },
@@ -231,18 +236,50 @@
           "title": "60:00"
         }
       ]
+    },
+    {
+      "name": "completionImage",
+      "type": "textfield",
+      "required": false,
+      "title": "Image Markdown Link",
+      "description": "Image on interval completion, URL",
+      "default": "![The Best Thank You GIF by SWR3](https://media0.giphy.com/media/ZBn3ZRvCbWz2PS3Rbg/200.gif)"
+    },
+    {
+      "name": "sound",
+      "description": "Play sound",
+      "type": "dropdown",
+      "required": false,
+      "title": "Play Completion Sound",
+      "default": "",
+      "data": [
+        {
+          "title": "No Sound",
+          "value": ""
+        },
+        {
+          "title": "Submarine",
+          "value": "Submarine"
+        },
+        {
+          "title": "Tink",
+          "value": "Tink"
+        },
+        {
+          "title": "Ping",
+          "value": "Ping"
+        }
+      ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.45.0"
+    "@raycast/api": "^1.48.8"
   },
   "devDependencies": {
+    "@raycast/eslint-config": "^1.0.5",
     "@types/node": "18.8.3",
     "@types/react": "18.0.9",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
     "prettier": "^2.5.1",
     "typescript": "^4.4.3"
   },
