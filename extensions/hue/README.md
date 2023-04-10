@@ -10,5 +10,5 @@ Please follow the instructions in the Manage Hue Bridge command.
 
 ## Icons
 
-The icons used in the extension are from
+The icons used in the “Control Lights” command are from
 the [Philips Hue Icon Pack](https://developers.meethue.com/develop/application-design-guidance/icon-pack/).
