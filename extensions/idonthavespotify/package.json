@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "idonthavespotify",
   "title": "I Don't Have Spotify",
-  "description": "Find Spotify Links to YouTube, Apple Music, Tidal and Soundcloud",
+  "description": "Find Spotify Links to YouTube, Deezer, Apple Music, Tidal and Soundcloud",
   "version": "1.0.0",
   "author": "sjdonado",
   "icon": "icon.png",
@@ -15,7 +15,7 @@
       "name": "search",
       "title": "Find Alternative Sources",
       "subtitle": "I Don't Have Spotify",
-      "description": "Get YouTube, Apple Music, Tidal and Soundcloud links",
+      "description": "Get YouTube, Deezer, Apple Music, Tidal and Soundcloud links",
       "mode": "view"
     }
   ],
