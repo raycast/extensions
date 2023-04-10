@@ -1,5 +1,7 @@
 import { ActionPanel, Color, Grid, Icon, Toast } from "@raycast/api";
 import {
+  calculateAdjustedBrightness,
+  getClosestBrightness,
   getColorFromLight,
   getIconForColor,
   getLightsFromGroup,
@@ -7,7 +9,7 @@ import {
   optimisticUpdates,
 } from "./lib/utils";
 import { CssColor, Group, GroupedLight, Id, Light, Palette, Room, Scene, Zone } from "./lib/types";
-import { BRIGHTNESS_MAX, BRIGHTNESSES, COLORS } from "./lib/constants";
+import { BRIGHTNESS_MAX, BRIGHTNESS_MIN, BRIGHTNESSES, COLORS } from "./lib/constants";
 import ManageHueBridge from "./components/ManageHueBridge";
 import { useHue } from "./hooks/useHue";
 import { getProgressIcon } from "@raycast/utils";
@@ -56,7 +58,7 @@ export default function ControlGroups() {
             return (
               <Group
                 key={room.id}
-                lights={groupLights}
+                groupLights={groupLights}
                 groupedLight={groupedLight}
                 group={room}
                 scenes={roomScenes}
@@ -82,7 +84,7 @@ export default function ControlGroups() {
               <Group
                 key={zone.id}
                 group={zone}
-                lights={groupLights}
+                groupLights={groupLights}
                 groupedLight={groupedLight}
                 scenes={zoneScenes}
                 gradientUri={gradientUris.get(zone.id)}
@@ -98,7 +100,7 @@ export default function ControlGroups() {
 }
 
 function Group(props: {
-  lights: Light[];
+  groupLights: Light[];
   groupedLight?: GroupedLight;
   group: Group;
   scenes: Scene[];
@@ -106,11 +108,11 @@ function Group(props: {
   useHue: ReturnType<typeof useHue>;
   rateLimiter: ReturnType<typeof useInputRateLimiter>;
 }) {
-  const lightsOnCount = props.lights.filter((light) => light.on.on).length;
+  const lightsOnCount = props.groupLights.filter((light) => light.on.on).length;
   let lightStatusText;
   if (lightsOnCount === 0) {
     lightStatusText = "All lights are off";
-  } else if (lightsOnCount === props.lights.length) {
+  } else if (lightsOnCount === props.groupLights.length) {
     lightStatusText = "All lights are on";
   } else if (lightsOnCount === 1) {
     lightStatusText = "1 light is on";
@@ -130,7 +132,7 @@ function Group(props: {
             <ToggleGroupAction
               group={props.group}
               groupedLight={props.groupedLight}
-              onToggle={() => handleToggle(props.useHue, props.rateLimiter, props.group, props.groupedLight)}
+              onToggle={() => handleToggle(props.useHue, props.rateLimiter, props.groupedLight, props.group)}
             />
             {/* TODO: Disable, hide or replace with no-op "There are no scenes for this room/zone" when that's the case */}
             <SetSceneAction
@@ -143,21 +145,42 @@ function Group(props: {
                 group={props.group}
                 groupedLight={props.groupedLight}
                 onSet={(brightness: number) =>
-                  handleSetBrightness(props.useHue, props.rateLimiter, props.group, props.groupedLight, brightness)
+                  handleSetBrightness(
+                    props.useHue,
+                    props.rateLimiter,
+                    props.groupLights,
+                    props.groupedLight,
+                    props.group,
+                    brightness
+                  )
                 }
               />
               <IncreaseBrightnessAction
                 group={props.group}
                 groupedLight={props.groupedLight}
                 onIncrease={() =>
-                  handleBrightnessChange(props.useHue, props.rateLimiter, props.group, props.groupedLight, "increase")
+                  handleBrightnessChange(
+                    props.useHue,
+                    props.rateLimiter,
+                    props.groupLights,
+                    props.groupedLight,
+                    props.group,
+                    "increase"
+                  )
                 }
               />
               <DecreaseBrightnessAction
                 group={props.group}
                 groupedLight={props.groupedLight}
                 onDecrease={() =>
-                  handleBrightnessChange(props.useHue, props.rateLimiter, props.group, props.groupedLight, "decrease")
+                  handleBrightnessChange(
+                    props.useHue,
+                    props.rateLimiter,
+                    props.groupLights,
+                    props.groupedLight,
+                    props.group,
+                    "decrease"
+                  )
                 }
               />
             </ActionPanel.Section>
@@ -239,10 +262,14 @@ function SetBrightnessAction(props: { group: Group; groupedLight: GroupedLight; 
 }
 
 function IncreaseBrightnessAction(props: { group: Group; groupedLight: GroupedLight; onIncrease: () => void }) {
-  if (props.groupedLight.dimming?.brightness ?? 0 >= BRIGHTNESS_MAX) {
+  if (
+    props.groupedLight.dimming === undefined ||
+    getClosestBrightness(props.groupedLight.dimming.brightness) >= BRIGHTNESS_MAX
+  ) {
     return null;
   }
 
+  // TODO: Why does this shortcut not work, but Increase Brightness for Light does?
   return (
     <ActionPanel.Item
       title="Increase Brightness"
@@ -254,10 +281,14 @@ function IncreaseBrightnessAction(props: { group: Group; groupedLight: GroupedLi
 }
 
 function DecreaseBrightnessAction(props: { group: Group; groupedLight: GroupedLight; onDecrease: () => void }) {
-  if (props.groupedLight.dimming?.brightness ?? 0 <= BRIGHTNESS_MAX) {
+  if (
+    props.groupedLight.dimming === undefined ||
+    getClosestBrightness(props.groupedLight.dimming.brightness) <= BRIGHTNESS_MIN
+  ) {
     return null;
   }
 
+  // TODO: Why does this shortcut not work, but Decrease Brightness for Light does?
   return (
     <ActionPanel.Item
       title="Decrease Brightness"
@@ -316,8 +347,8 @@ function DecreaseColorTemperatureAction(props: { group: Group; onDecrease?: () =
 async function handleToggle(
   { hueBridgeState, setGroupedLights }: ReturnType<typeof useHue>,
   rateLimiter: ReturnType<typeof useInputRateLimiter>,
-  group: Group,
-  groupedLight: GroupedLight | undefined
+  groupedLight: GroupedLight | undefined,
+  group: Group
 ) {
   const toast = new Toast({ title: "" });
 
@@ -396,10 +427,11 @@ async function handleSetScene(
 }
 
 async function handleSetBrightness(
-  { hueBridgeState, lights, setLights }: ReturnType<typeof useHue>,
+  { hueBridgeState, setLights }: ReturnType<typeof useHue>,
   rateLimiter: ReturnType<typeof useInputRateLimiter>,
-  group: Group,
+  groupLights: Light[],
   groupedLight: GroupedLight | undefined,
+  group: Group,
   brightness: number
 ) {
   const toast = new Toast({ title: "" });
@@ -414,8 +446,7 @@ async function handleSetBrightness(
       dimming: { brightness: brightness },
     };
 
-    const changesToLights = new Map(getLightsFromGroup(lights, group).map((light) => [light.id, changes]));
-
+    const changesToLights = new Map(groupLights.map((light) => [light.id, changes]));
     const undoOptimisticUpdates = optimisticUpdates(changesToLights, setLights);
     await hueBridgeState.context.hueClient.updateGroupedLight(groupedLight, changes).catch((e: Error) => {
       undoOptimisticUpdates();
@@ -436,10 +467,11 @@ async function handleSetBrightness(
 }
 
 async function handleBrightnessChange(
-  { hueBridgeState, setLights }: ReturnType<typeof useHue>,
+  { hueBridgeState, lights, setLights }: ReturnType<typeof useHue>,
   rateLimiter: ReturnType<typeof useInputRateLimiter>,
-  group: Group,
+  groupLights: Light[],
   groupedLight: GroupedLight | undefined,
+  group: Group,
   direction: "increase" | "decrease"
 ) {
   const toast = new Toast({ title: "" });
@@ -449,22 +481,34 @@ async function handleBrightnessChange(
     if (groupedLight === undefined) throw new Error("Light group not found.");
     if (!rateLimiter.canExecute()) return;
 
-    // await mutateGroups(adjustBrightness(apiPromise, group, "increase"), {
-    //   optimisticUpdate(rooms) {
-    //     return rooms?.map((it) =>
-    //       it.id === group.id
-    //         ? { ...it, action: { ...it.action, on: true, bri: calculateAdjustedBrightness(group, "increase") } }
-    //         : it
-    //     );
-    //   },
-    // });
+    const adjustedBrightness = calculateAdjustedBrightness(groupedLight.dimming?.brightness ?? 0, direction);
+
+    const changes = {
+      on: { on: true },
+      // dimming_delta exists, but manually calculating the new value
+      // enables the usage of the value in the optimistic update.
+      dimming: { brightness: adjustedBrightness },
+    };
+
+    const changesToLights = new Map(getLightsFromGroup(lights, group).map((light) => [light.id, changes]));
+    const undoOptimisticUpdates = optimisticUpdates(changesToLights, setLights);
+    await hueBridgeState.context.hueClient.updateGroupedLight(groupedLight, changes).catch((e: Error) => {
+      undoOptimisticUpdates();
+      throw e;
+    });
 
     toast.style = Style.Success;
-    toast.title = "Increased brightness";
+    toast.title = `${direction === "increase" ? "Increased" : "Decreased"} brightness of ${group.metadata.name} to ${(
+      adjustedBrightness / 100
+    ).toLocaleString("en", {
+      style: "percent",
+    })}`;
     await toast.show();
   } catch (e) {
     toast.style = Style.Failure;
-    toast.title = "Failed increasing brightness";
+    toast.title = `Failed ${direction === "increase" ? "increasing" : "decreasing"} brightness of ${
+      group.metadata.name
+    }`;
     toast.message = e instanceof Error ? e.message : undefined;
     await toast.show();
   }
