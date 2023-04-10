@@ -11,6 +11,9 @@
     "Media",
     "Productivity"
   ],
+  "contributors": [
+    "danpalmer"
+  ],
   "commands": [
     {
       "name": "listTorrents",
