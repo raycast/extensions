@@ -1,7 +1,9 @@
 import { Action, ActionPanel, List, showToast, Toast } from "@raycast/api";
-import { useExec } from "@raycast/utils";
-import { useMemo, useState } from "react";
-import { spawn } from "node:child_process";
+import { useState, useEffect } from "react";
+import child_process = require("node:child_process");
+import util = require("node:util");
+
+const exec: any = util.promisify(child_process.exec);
 
 const PATH = "/usr/bin:/bin:/usr/sbin:/opt/homebrew/bin:/opt/homebrew/sbin";
 
@@ -30,76 +32,24 @@ interface Envelope {
 
 interface State {
   isLoading: boolean;
-  isShowingDetail: boolean;
+  envelopes: Envelope[];
 }
-export default function Command() {
-  const [state] = useState({
-    isLoading: false,
-    isShowingDetail: false,
+
+export default function ListEnvelopes() {
+  const [state, setState] = useState({
+    isLoading: true,
+    envelopes: [],
   } as State);
 
-  const exec = useExec("himalaya", ["-o", "json", "list", "-s", "100"], {
-    shell: false,
-    env: {
-      PATH: PATH,
-    },
-    onError: (error: Error): void => {
-      showToast({
-        style: Toast.Style.Failure,
-        title: `Couldn't fetch envelopes: ${error}`,
-      });
-    },
-  });
+  useEffect(() => {
+    async function fetch() {
+      const envelopes = await listEnvelopes();
 
-  const results = useMemo<any[]>(() => JSON.parse(exec.data || "[]"), [exec.data]);
-
-  const envelopes: Envelope[] = results.map((result) => {
-    const envelope: Envelope = {
-      id: result.id,
-      internal_id: result.internal_id,
-      message_id: result.message_id,
-      flags: result.flags.map((flag: string) => flag as Flag),
-      from: {
-        name: result.from.name,
-        addr: result.from.addr,
-      },
-      subject: result.subject,
-      date: new Date(result.date),
-    };
-
-    return envelope;
-  });
-
-  const now = new Date();
-  const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString().substring(0, 10);
-  const today = now.toISOString().substring(0, 10);
-
-  const groups = envelopes.reduce((acc, val) => {
-    const s = val.date.toISOString().substring(0, 10);
-
-    const date = (() => {
-      switch (s) {
-        case today:
-          return "Today";
-        case yesterday:
-          return "Yesterday";
-        default:
-          return s;
-      }
-    })();
-
-    const envelopes: Envelope[] | undefined = acc.get(date);
-
-    if (envelopes) {
-      // Get and update the list
-      envelopes.push(val);
-      acc.set(date, envelopes);
-    } else {
-      acc.set(date, [val]);
+      setState((previous) => ({ ...previous, envelopes: envelopes, isLoading: false }));
     }
 
-    return acc;
-  }, new Map<string, Envelope[]>());
+    fetch();
+  }, []);
 
   const accessories = (envelope: Envelope) => {
     const accessories = [];
@@ -153,35 +103,23 @@ export default function Command() {
             title: "Marking as unread",
           });
 
-          const cmd = spawn("himalaya", ["flag", "remove", envelope.id, "--", "seen"], {
-            env: {
-              PATH: PATH,
-            },
-          });
+          try {
+            const { stdout, _stderr } = await exec(`"himalaya" flag remove ${envelope.id} -- seen`, {
+              env: {
+                PATH: PATH,
+              },
+            });
 
-          cmd.stdout.on("data", (_data) => {
             toast.style = Toast.Style.Success;
             toast.title = "Marked unread";
-          });
 
-          cmd.stderr.on("data", (data) => {
-            console.error(`stderr: ${data}`);
-
+            setState((previous) => ({ ...previous, isLoading: true }));
+            const envelopes = await listEnvelopes();
+            setState((previous) => ({ ...previous, envelopes: envelopes, isLoading: false }));
+          } catch (error) {
             toast.style = Toast.Style.Failure;
-            toast.title = `Failed to mark unread: ${data}`;
-          });
-
-          cmd.on("close", (code) => {
-            if (code == 0) {
-              toast.style = Toast.Style.Success;
-              toast.title = "Marked unread";
-            } else {
-              console.error(`child process exited with code ${code}`);
-
-              toast.style = Toast.Style.Failure;
-              toast.title = `Failed to mark seen: ${code}`;
-            }
-          });
+            toast.title = `Failed to mark unread: ${error}`;
+          }
         }}
       />
     );
@@ -201,35 +139,23 @@ export default function Command() {
             title: "Marking as read",
           });
 
-          const cmd = spawn("himalaya", ["flag", "add", envelope.id, "--", "seen"], {
-            env: {
-              PATH: PATH,
-            },
-          });
+          try {
+            const { stdout, _stderr } = await exec(`"himalaya" flag add ${envelope.id} -- seen`, {
+              env: {
+                PATH: PATH,
+              },
+            });
 
-          cmd.stdout.on("data", (_data) => {
             toast.style = Toast.Style.Success;
             toast.title = "Marked read";
-          });
 
-          cmd.stderr.on("data", (data) => {
-            console.error(`stderr: ${data}`);
-
+            setState((previous) => ({ ...previous, isLoading: true }));
+            const envelopes = await listEnvelopes();
+            setState((previous) => ({ ...previous, envelopes: envelopes, isLoading: false }));
+          } catch (error) {
             toast.style = Toast.Style.Failure;
-            toast.title = `Failed to mark read: ${data}`;
-          });
-
-          cmd.on("close", (code) => {
-            if (code == 0) {
-              toast.style = Toast.Style.Success;
-              toast.title = "Marked read";
-            } else {
-              console.error(`child process exited with code ${code}`);
-
-              toast.style = Toast.Style.Failure;
-              toast.title = `Failed to mark seen: ${code}`;
-            }
-          });
+            toast.title = `Failed to mark read: ${error}`;
+          }
         }}
       />
     );
@@ -249,77 +175,134 @@ export default function Command() {
             title: "Moving to trash",
           });
 
-          const cmd = spawn("himalaya", ["delete", envelope.id], {
-            env: {
-              PATH: PATH,
-            },
-          });
+          try {
+            const { stdout, _stderr } = await exec(`"himalaya" delete ${envelope.id}`, {
+              env: {
+                PATH: PATH,
+              },
+            });
 
-          cmd.stdout.on("data", (_data) => {
             toast.style = Toast.Style.Success;
             toast.title = "Moved to trash";
-          });
 
-          cmd.stderr.on("data", (data) => {
-            console.error(`stderr: ${data}`);
-
+            setState((previous) => ({ ...previous, isLoading: true }));
+            const envelopes = await listEnvelopes();
+            setState((previous) => ({ ...previous, envelopes: envelopes, isLoading: false }));
+          } catch (error) {
             toast.style = Toast.Style.Failure;
-            toast.title = `Failed to move to trash: ${data}`;
-          });
-
-          cmd.on("close", (code) => {
-            if (code == 0) {
-              toast.style = Toast.Style.Success;
-              toast.title = "Moved to trash";
-            } else {
-              console.error(`child process exited with code ${code}`);
-
-              toast.style = Toast.Style.Failure;
-              toast.title = `Failed to move to trash: ${code}`;
-            }
-          });
+            toast.title = `Failed to move to trash: ${error}`;
+          }
         }}
       />
     );
   };
 
-  // {!envelope.flags.includes(Flag.Seen) && }
-  // {envelope.flags.includes(Flag.Seen) }
-
-  const sections = Array.from(groups.entries()).map(([date, group]) => {
-    const items = group.map((envelope) => {
-      const item = (
-        <List.Item
-          id={envelope.id}
-          key={envelope.id}
-          title={envelope.subject}
-          accessories={accessories(envelope)}
-          actions={
-            <ActionPanel title="Envelope">
-              <Action.CopyToClipboard title="Copy ID to Clipboard" content={envelope.id} />
-              {markUnreadAction(envelope)}
-              {markReadAction(envelope)}
-              {moveToTrashAction(envelope)}
-            </ActionPanel>
-          }
-        />
-      );
-
-      return item;
-    });
-
-    const section = (
-      <List.Section title={date} key={date}>
-        {items}
-      </List.Section>
-    );
-
-    return section;
-  });
-
   return (
-    <List isLoading={exec.isLoading} isShowingDetail={state.isShowingDetail}>
-      {sections}
+    <List isLoading={state.isLoading}>
+      {Array.from(group_envelopes_by_date(state.envelopes).entries()).map(([date, group]) => {
+        const items = group.map((envelope) => {
+          const item = (
+            <List.Item
+              id={envelope.id}
+              key={envelope.id}
+              title={envelope.subject}
+              accessories={accessories(envelope)}
+              actions={
+                <ActionPanel title="Envelope">
+                  <Action.CopyToClipboard title="Copy ID to Clipboard" content={envelope.id} />
+                  {markUnreadAction(envelope)}
+                  {markReadAction(envelope)}
+                  {moveToTrashAction(envelope)}
+                </ActionPanel>
+              }
+            />
+          );
+
+          return item;
+        });
+
+        const section = (
+          <List.Section title={date} key={date}>
+            {items}
+          </List.Section>
+        );
+
+        return section;
+      })}
     </List>
   );
+}
+
+const group_envelopes_by_date = (envelopes: Envelope[]) => {
+  const now = new Date();
+  const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString().substring(0, 10);
+  const today = now.toISOString().substring(0, 10);
+
+  const groups = envelopes.reduce((acc, val) => {
+    const date = val.date.toISOString().substring(0, 10);
+
+    const date_distance = (() => {
+      switch (date) {
+        case today:
+          return "Today";
+        case yesterday:
+          return "Yesterday";
+        default:
+          return date;
+      }
+    })();
+
+    const envelopes: Envelope[] | undefined = acc.get(date_distance);
+
+    if (envelopes) {
+      // Get and update_distance the list
+      envelopes.push(val);
+      acc.set(date_distance, envelopes);
+    } else {
+      acc.set(date_distance, [val]);
+    }
+
+    return acc;
+  }, new Map<string, Envelope[]>());
+
+  return groups;
+};
+
+async function listEnvelopes(): Promise<Envelope[]> {
+  const { stdout, stderr } = await exec('"himalaya" -o json list -s 100', {
+    env: {
+      PATH: PATH,
+    },
+  });
+
+  if (stdout) {
+    const results = JSON.parse(stdout);
+
+    const envelopes: Envelope[] = results.map((result: any) => {
+      const envelope: Envelope = {
+        id: result.id,
+        internal_id: result.internal_id,
+        message_id: result.message_id,
+        flags: result.flags.map((flag: string) => flag as Flag),
+        from: {
+          name: result.from.name,
+          addr: result.from.addr,
+        },
+        subject: result.subject,
+        date: new Date(result.date),
+      };
+
+      return envelope;
+    });
+
+    return envelopes;
+  }
+
+  if (stderr) {
+    console.log(stderr);
+
+    return [];
+  }
+
+  throw new Error("No results from stdout or stderr");
 }
