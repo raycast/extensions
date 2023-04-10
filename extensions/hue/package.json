@@ -47,13 +47,6 @@
       "subtitle": "Hue",
       "description": "Turn off all the lights",
       "mode": "no-view"
-    },
-    {
-      "name": "test",
-      "title": "Test",
-      "subtitle": "Hue",
-      "description": "Test command",
-      "mode": "view"
     }
   ],
   "preferences": [
