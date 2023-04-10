@@ -54,6 +54,7 @@ export default function Command() {
         setSpotifyContent(spotifyContent);
         cacheLastSearch(spotifyLink, spotifyContent);
       } catch (error) {
+        console.error(error);
         showToast(Toast.Style.Failure, "Error", (error as Error).message);
       }
 
@@ -78,8 +79,6 @@ export default function Command() {
       }
     })();
   }, [fetchSpotifyContent]);
-
-  const isRecommended = (key: string) => key === SpotifyContentLink.Youtube;
 
   return (
     <List
@@ -120,17 +119,17 @@ export default function Command() {
             />
           </List.Section>
           <List.Section title="Listen on">
-            {Object.entries(spotifyContent.links).map(([key, link]) => (
+            {spotifyContent.links.map(({ type, url, isVerified }) => (
               <List.Item
-                key={key}
+                key={type}
                 icon={Icon.Link}
-                title={spotifyContentLinksTitles[key as SpotifyContentLink]}
-                subtitle={link}
-                accessories={[{ text: isRecommended(key) ? "Recommended" : "" }]}
+                title={spotifyContentLinksTitles[type as SpotifyContentLinkType]}
+                subtitle={url}
+                accessories={[{ text: isVerified ? "Verified" : "" }]}
                 actions={
                   <ActionPanel>
-                    <Action.OpenInBrowser url={link} />
-                    <Action.CopyToClipboard title="Copy Link" content={link} />
+                    <Action.OpenInBrowser url={url} />
+                    <Action.CopyToClipboard title="Copy Link" content={url} />
                   </ActionPanel>
                 }
               />
