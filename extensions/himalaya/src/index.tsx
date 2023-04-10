@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Form, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Detail, Form, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
 import { useForm, FormValidation } from "@raycast/utils";
 import { useState, useEffect } from "react";
 import child_process = require("node:child_process");
@@ -52,6 +52,11 @@ export default function ListEnvelopes() {
 
   useEffect(() => {
     async function fetch() {
+      setState((previous: State) => ({
+        ...previous,
+        isLoading: true,
+      }));
+
       const envelopes = await listEnvelopes();
       const folders = await listFolders();
 
@@ -87,118 +92,6 @@ export default function ListEnvelopes() {
     return accessories;
   };
 
-  const markUnreadAction = (envelope: Envelope) => {
-    return (
-      <Action
-        title="Mark Unread"
-        style={Action.Style.Regular}
-        icon={Icon.CircleFilled}
-        onAction={async () => {
-          const toast = await showToast({
-            style: Toast.Style.Animated,
-            title: "Marking as unread",
-          });
-
-          try {
-            const { stdout, _stderr } = await exec(`"himalaya" flag remove ${envelope.id} -- seen`, {
-              env: {
-                PATH: PATH,
-              },
-            });
-
-            toast.style = Toast.Style.Success;
-            toast.title = "Marked unread";
-
-            setState((previous: State) => ({ ...previous, isLoading: true }));
-            const envelopes = await listEnvelopes();
-            setState((previous: State) => ({ ...previous, envelopes: envelopes, isLoading: false }));
-          } catch (error) {
-            toast.style = Toast.Style.Failure;
-            toast.title = `Failed to mark unread: ${error}`;
-          }
-        }}
-      />
-    );
-  };
-
-  const markReadAction = (envelope: Envelope) => {
-    return (
-      <Action
-        title="Mark Read"
-        style={Action.Style.Regular}
-        icon={Icon.Circle}
-        onAction={async () => {
-          const toast = await showToast({
-            style: Toast.Style.Animated,
-            title: "Marking as read",
-          });
-
-          try {
-            const { stdout, _stderr } = await exec(`"himalaya" flag add ${envelope.id} -- seen`, {
-              env: {
-                PATH: PATH,
-              },
-            });
-
-            toast.style = Toast.Style.Success;
-            toast.title = "Marked read";
-
-            setState((previous: State) => ({ ...previous, isLoading: true }));
-            const envelopes = await listEnvelopes();
-            setState((previous: State) => ({ ...previous, envelopes: envelopes, isLoading: false }));
-          } catch (error) {
-            toast.style = Toast.Style.Failure;
-            toast.title = `Failed to mark read: ${error}`;
-          }
-        }}
-      />
-    );
-  };
-
-  const moveToSelectedAction = (envelope: Envelope) => {
-    return (
-      <Action.Push
-        title="Move to Selected"
-        icon={Icon.Folder}
-        target={<MoveToSelectedForm folders={state.folders} envelope={envelope} setState={setState} />}
-      />
-    );
-  };
-
-  const moveToTrashAction = (envelope: Envelope) => {
-    return (
-      <Action
-        title="Move to Trash"
-        style={Action.Style.Destructive}
-        icon={Icon.Trash}
-        onAction={async () => {
-          const toast = await showToast({
-            style: Toast.Style.Animated,
-            title: "Moving to trash",
-          });
-
-          try {
-            const { stdout, _stderr } = await exec(`"himalaya" delete ${envelope.id}`, {
-              env: {
-                PATH: PATH,
-              },
-            });
-
-            toast.style = Toast.Style.Success;
-            toast.title = "Moved to trash";
-
-            setState((previous) => ({ ...previous, isLoading: true }));
-            const envelopes = await listEnvelopes();
-            setState((previous) => ({ ...previous, envelopes: envelopes, isLoading: false }));
-          } catch (error) {
-            toast.style = Toast.Style.Failure;
-            toast.title = `Failed to move to trash: ${error}`;
-          }
-        }}
-      />
-    );
-  };
-
   return (
     <List isLoading={state.isLoading}>
       {Array.from(group_envelopes_by_date(state.envelopes).entries()).map(([date, group]) => {
@@ -212,11 +105,12 @@ export default function ListEnvelopes() {
               accessories={accessories(envelope)}
               actions={
                 <ActionPanel title="Envelope">
+                  {readAction(envelope, state, setState)}
+                  {envelope.flags.includes(Flag.Seen) && markUnreadAction(envelope, state, setState)}
+                  {!envelope.flags.includes(Flag.Seen) && markReadAction(envelope, state, setState)}
+                  {moveToSelectedAction(envelope, state, setState)}
+                  {moveToTrashAction(envelope, state, setState)}
                   <Action.CopyToClipboard title="Copy ID to Clipboard" content={envelope.id} />
-                  {envelope.flags.includes(Flag.Seen) && markUnreadAction(envelope)}
-                  {!envelope.flags.includes(Flag.Seen) && markReadAction(envelope)}
-                  {moveToSelectedAction(envelope)}
-                  {moveToTrashAction(envelope)}
                 </ActionPanel>
               }
             />
@@ -402,3 +296,194 @@ function MoveToSelectedForm(props: { folders: Folder[]; envelope: Envelope; setS
     </Form>
   );
 }
+
+function ReadDetail(props: { envelope: Envelope }) {
+  const [state, setState] = useState({
+    isLoading: true,
+    email: null,
+  });
+
+  useEffect(() => {
+    async function fetch() {
+      setState((previous) => ({
+        ...previous,
+        isLoading: true,
+      }));
+
+      const email = await readEmail(props.envelope);
+
+      setState((previous) => ({
+        ...previous,
+        isLoading: false,
+        email: email,
+      }));
+    }
+
+    fetch();
+  }, []);
+
+  const markdown = state.email;
+
+  return (
+    <Detail
+      isLoading={state.isLoading}
+      navigationTitle={props.envelope.subject}
+      markdown={markdown}
+      actions={
+        <ActionPanel title="Envelope">
+          <Action.CopyToClipboard title="Copy ID to Clipboard" content={props.envelope.id} />
+        </ActionPanel>
+      }
+      metadata={
+        <Detail.Metadata>
+          <Detail.Metadata.Label title="Name" text={props.envelope.from.name} />
+          <Detail.Metadata.Label title="Email" text={props.envelope.from.addr} />
+          <Detail.Metadata.Separator />
+          <Detail.Metadata.Label title="Date" text={props.envelope.date.toISOString()} />
+          <Detail.Metadata.Separator />
+          <Detail.Metadata.TagList title="Flags">
+            {props.envelope.flags.map((flag) => (
+              <Detail.Metadata.TagList.Item text={flag} />
+            ))}
+          </Detail.Metadata.TagList>
+        </Detail.Metadata>
+      }
+    />
+  );
+}
+
+async function readEmail(envelope: Envelope): Promise<any> {
+  const { stdout, stderr } = await exec(`"himalaya" read --mime-type plain ${envelope.id}`, {
+    env: {
+      PATH: PATH,
+    },
+  });
+
+  if (stdout) {
+    return stdout;
+  }
+
+  if (stderr) {
+    console.log(stderr);
+
+    return stderr;
+  }
+
+  throw new Error("No results from stdout or stderr");
+}
+
+const markUnreadAction = (envelope: Envelope, state: State, setState: any) => {
+  return (
+    <Action
+      title="Mark Unread"
+      style={Action.Style.Regular}
+      icon={Icon.CircleFilled}
+      onAction={async () => {
+        const toast = await showToast({
+          style: Toast.Style.Animated,
+          title: "Marking as unread",
+        });
+
+        try {
+          const { stdout, _stderr } = await exec(`"himalaya" flag remove ${envelope.id} -- seen`, {
+            env: {
+              PATH: PATH,
+            },
+          });
+
+          toast.style = Toast.Style.Success;
+          toast.title = "Marked unread";
+
+          setState((previous: State) => ({ ...previous, isLoading: true }));
+          const envelopes = await listEnvelopes();
+          setState((previous: State) => ({ ...previous, envelopes: envelopes, isLoading: false }));
+        } catch (error) {
+          toast.style = Toast.Style.Failure;
+          toast.title = `Failed to mark unread: ${error}`;
+        }
+      }}
+    />
+  );
+};
+
+const markReadAction = (envelope: Envelope, state: State, setState: any) => {
+  return (
+    <Action
+      title="Mark Read"
+      style={Action.Style.Regular}
+      icon={Icon.Circle}
+      onAction={async () => {
+        const toast = await showToast({
+          style: Toast.Style.Animated,
+          title: "Marking as read",
+        });
+
+        try {
+          const { stdout, _stderr } = await exec(`"himalaya" flag add ${envelope.id} -- seen`, {
+            env: {
+              PATH: PATH,
+            },
+          });
+
+          toast.style = Toast.Style.Success;
+          toast.title = "Marked read";
+
+          setState((previous: State) => ({ ...previous, isLoading: true }));
+          const envelopes = await listEnvelopes();
+          setState((previous: State) => ({ ...previous, envelopes: envelopes, isLoading: false }));
+        } catch (error) {
+          toast.style = Toast.Style.Failure;
+          toast.title = `Failed to mark read: ${error}`;
+        }
+      }}
+    />
+  );
+};
+
+const moveToSelectedAction = (envelope: Envelope, state: State, setState: any) => {
+  return (
+    <Action.Push
+      title="Move to Selected"
+      icon={Icon.Folder}
+      target={<MoveToSelectedForm folders={state.folders} envelope={envelope} setState={setState} />}
+    />
+  );
+};
+
+const readAction = (envelope: Envelope, state: State, setState: any) => {
+  return <Action.Push title="Read" icon={Icon.Eye} target={<ReadDetail envelope={envelope} />} />;
+};
+
+const moveToTrashAction = (envelope: Envelope, state: State, setState: any) => {
+  return (
+    <Action
+      title="Move to Trash"
+      style={Action.Style.Destructive}
+      icon={Icon.Trash}
+      onAction={async () => {
+        const toast = await showToast({
+          style: Toast.Style.Animated,
+          title: "Moving to trash",
+        });
+
+        try {
+          const { stdout, _stderr } = await exec(`"himalaya" delete ${envelope.id}`, {
+            env: {
+              PATH: PATH,
+            },
+          });
+
+          toast.style = Toast.Style.Success;
+          toast.title = "Moved to trash";
+
+          setState((previous: State) => ({ ...previous, isLoading: true }));
+          const envelopes = await listEnvelopes();
+          setState((previous: State) => ({ ...previous, envelopes: envelopes, isLoading: false }));
+        } catch (error) {
+          toast.style = Toast.Style.Failure;
+          toast.title = `Failed to move to trash: ${error}`;
+        }
+      }}
+    />
+  );
+};
