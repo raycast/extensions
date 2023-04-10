@@ -1,4 +1,5 @@
-import { Action, ActionPanel, Icon, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
+import { useForm, FormValidation } from "@raycast/utils";
 import { useState, useEffect } from "react";
 import child_process = require("node:child_process");
 import util = require("node:util");
@@ -30,22 +31,36 @@ interface Envelope {
   date: Date;
 }
 
+interface Folder {
+  delim: string;
+  name: string;
+  desc: string;
+}
+
 interface State {
   isLoading: boolean;
   envelopes: Envelope[];
+  folders: Folder[];
 }
 
 export default function ListEnvelopes() {
   const [state, setState] = useState({
     isLoading: true,
     envelopes: [],
+    folders: [],
   } as State);
 
   useEffect(() => {
     async function fetch() {
       const envelopes = await listEnvelopes();
+      const folders = await listFolders();
 
-      setState((previous) => ({ ...previous, envelopes: envelopes, isLoading: false }));
+      setState((previous: State) => ({
+        ...previous,
+        envelopes: envelopes,
+        folders: folders,
+        isLoading: false,
+      }));
     }
 
     fetch();
@@ -106,9 +121,9 @@ export default function ListEnvelopes() {
             toast.style = Toast.Style.Success;
             toast.title = "Marked unread";
 
-            setState((previous) => ({ ...previous, isLoading: true }));
+            setState((previous: State) => ({ ...previous, isLoading: true }));
             const envelopes = await listEnvelopes();
-            setState((previous) => ({ ...previous, envelopes: envelopes, isLoading: false }));
+            setState((previous: State) => ({ ...previous, envelopes: envelopes, isLoading: false }));
           } catch (error) {
             toast.style = Toast.Style.Failure;
             toast.title = `Failed to mark unread: ${error}`;
@@ -140,14 +155,24 @@ export default function ListEnvelopes() {
             toast.style = Toast.Style.Success;
             toast.title = "Marked read";
 
-            setState((previous) => ({ ...previous, isLoading: true }));
+            setState((previous: State) => ({ ...previous, isLoading: true }));
             const envelopes = await listEnvelopes();
-            setState((previous) => ({ ...previous, envelopes: envelopes, isLoading: false }));
+            setState((previous: State) => ({ ...previous, envelopes: envelopes, isLoading: false }));
           } catch (error) {
             toast.style = Toast.Style.Failure;
             toast.title = `Failed to mark read: ${error}`;
           }
         }}
+      />
+    );
+  };
+
+  const moveToSelectedAction = (envelope: Envelope) => {
+    return (
+      <Action.Push
+        title="Move to Selected"
+        icon={Icon.Folder}
+        target={<MoveToSelectedForm folders={state.folders} envelope={envelope} setState={setState} />}
       />
     );
   };
@@ -201,6 +226,7 @@ export default function ListEnvelopes() {
                   <Action.CopyToClipboard title="Copy ID to Clipboard" content={envelope.id} />
                   {markUnreadAction(envelope)}
                   {markReadAction(envelope)}
+                  {moveToSelectedAction(envelope)}
                   {moveToTrashAction(envelope)}
                 </ActionPanel>
               }
@@ -294,4 +320,96 @@ async function listEnvelopes(): Promise<Envelope[]> {
   }
 
   throw new Error("No results from stdout or stderr");
+}
+
+async function listFolders(): Promise<Folder[]> {
+  const { stdout, stderr } = await exec('"himalaya" -o json folder list', {
+    env: {
+      PATH: PATH,
+    },
+  });
+
+  if (stdout) {
+    const results = JSON.parse(stdout);
+
+    const folders: Folder[] = results.map((result: any) => {
+      const folder: Folder = {
+        delim: result.delim,
+        name: result.name,
+        desc: result.desc,
+      };
+
+      return folder;
+    });
+
+    return folders;
+  }
+
+  if (stderr) {
+    console.log(stderr);
+
+    return [];
+  }
+
+  throw new Error("No results from stdout or stderr");
+}
+
+interface MoveToSelectedFormValues {
+  folder: string;
+}
+
+function MoveToSelectedForm(props: { folders: Folder[]; envelope: Envelope; setState: any }) {
+  const { pop } = useNavigation();
+
+  const { handleSubmit, itemProps } = useForm<MoveToSelectedFormValues>({
+    async onSubmit(values) {
+      const toast = await showToast({
+        style: Toast.Style.Animated,
+        title: `Moving envelope to folder ${values.folder}`,
+      });
+
+      try {
+        const { stdout, _stderr } = await exec(`"himalaya" move ${values.folder} -- ${props.envelope.id}`, {
+          env: {
+            PATH: PATH,
+          },
+        });
+
+        toast.style = Toast.Style.Success;
+        toast.title = `Moved envelope to folder ${values.folder}`;
+
+        props.setState((previous: State) => ({ ...previous, isLoading: true }));
+        const envelopes = await listEnvelopes();
+        props.setState((previous: State) => ({ ...previous, envelopes: envelopes, isLoading: false }));
+
+        pop();
+      } catch (error) {
+        toast.style = Toast.Style.Failure;
+        toast.title = `Failed to move envelope: ${error}`;
+
+        pop();
+      }
+    },
+    initialValues: {
+      folder: props.folders[0].name,
+    },
+    validation: {
+      folder: FormValidation.Required,
+    },
+  });
+  return (
+    <Form
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm title="Submit" onSubmit={handleSubmit} />
+        </ActionPanel>
+      }
+    >
+      <Form.Dropdown title="Folder" {...itemProps.folder}>
+        {props.folders.map((folder) => {
+          return <Form.Dropdown.Item value={folder.name} title={folder.name} key={folder.name} />;
+        })}
+      </Form.Dropdown>
+    </Form>
+  );
 }
