@@ -1,15 +1,14 @@
-import { ActionPanel, Color, Grid, Icon, Image, Toast } from "@raycast/api";
+import { ActionPanel, Color, Grid, Icon, Image, Toast, useNavigation } from "@raycast/api";
 import {
   calculateAdjustedBrightness,
   getClosestBrightness,
   getColorFromLight,
-  getIconForColor,
   getLightsFromGroup,
   optimisticUpdate,
   optimisticUpdates,
 } from "./lib/utils";
-import { CssColor, Group, GroupedLight, Id, Light, Palette, Room, Scene, Zone } from "./lib/types";
-import { BRIGHTNESS_MAX, BRIGHTNESS_MIN, BRIGHTNESSES, COLORS } from "./lib/constants";
+import { Group, GroupedLight, Id, Light, Palette, Room, Zone } from "./lib/types";
+import { BRIGHTNESS_MAX, BRIGHTNESS_MIN, BRIGHTNESSES } from "./lib/constants";
 import ManageHueBridge from "./components/ManageHueBridge";
 import { useHue } from "./hooks/useHue";
 import { getProgressIcon } from "@raycast/utils";
@@ -18,6 +17,7 @@ import useGradientUris from "./hooks/useGradientUris";
 import "./lib/arrayExtensions";
 import useInputRateLimiter from "./hooks/useInputRateLimiter";
 import UnlinkAction from "./components/UnlinkAction";
+import SetScene from "./setScene";
 import Style = Toast.Style;
 
 // Exact dimensions of a 16:9 Raycast 5 column grid item.
@@ -26,7 +26,7 @@ const GRID_ITEM_HEIGHT = 153;
 
 export default function ControlGroups() {
   const useHueObject = useHue();
-  const { hueBridgeState, sendHueMessage, isLoading, lights, groupedLights, rooms, zones, scenes } = useHueObject;
+  const { hueBridgeState, sendHueMessage, isLoading, lights, groupedLights, rooms, zones } = useHueObject;
   const rateLimiter = useInputRateLimiter(10, 1000);
   const [palettes, setPalettes] = useState(new Map<Id, Palette>([]));
   const { gradientUris } = useGradientUris(palettes, GRID_ITEM_WIDTH, GRID_ITEM_HEIGHT);
@@ -48,7 +48,6 @@ export default function ControlGroups() {
       {rooms.length > 0 && (
         <Grid.Section title="Rooms">
           {rooms.map((room: Room) => {
-            const roomScenes = scenes.filter((scene: Scene) => scene.group.rid == room.id);
             const groupLights = getLightsFromGroup(lights, room);
             const groupedLight = groupedLights.find(
               (groupedLight) =>
@@ -61,7 +60,6 @@ export default function ControlGroups() {
                 groupLights={groupLights}
                 groupedLight={groupedLight}
                 group={room}
-                scenes={roomScenes}
                 gradientUri={gradientUris.get(room.id)}
                 useHue={useHueObject}
                 rateLimiter={rateLimiter}
@@ -74,7 +72,6 @@ export default function ControlGroups() {
         <Grid.Section title="Zones">
           {zones.map((zone: Zone) => {
             const groupLights = getLightsFromGroup(lights, zone);
-            const zoneScenes = scenes.filter((scene: Scene) => scene.group.rid == zone.id);
             const groupedLight = groupedLights.find(
               (groupedLight) =>
                 groupedLight.id === zone.services.find((resource) => resource.rtype === "grouped_light")?.rid
@@ -86,7 +83,6 @@ export default function ControlGroups() {
                 group={zone}
                 groupLights={groupLights}
                 groupedLight={groupedLight}
-                scenes={zoneScenes}
                 gradientUri={gradientUris.get(zone.id)}
                 useHue={useHueObject}
                 rateLimiter={rateLimiter}
@@ -103,7 +99,6 @@ function Group(props: {
   groupLights: Light[];
   groupedLight?: GroupedLight;
   group: Group;
-  scenes: Scene[];
   gradientUri?: string;
   useHue: ReturnType<typeof useHue>;
   rateLimiter: ReturnType<typeof useInputRateLimiter>;
@@ -143,12 +138,7 @@ function Group(props: {
               groupedLight={props.groupedLight}
               onToggle={() => handleToggle(props.useHue, props.rateLimiter, props.groupedLight, props.group)}
             />
-            {/* TODO: Disable, hide or replace with no-op "There are no scenes for this room/zone" when that's the case */}
-            <SetSceneAction
-              group={props.group}
-              scenes={props.scenes ?? []}
-              onSetScene={(scene: Scene) => handleSetScene(props.useHue, props.rateLimiter, props.group, scene)}
-            />
+            <SetSceneAction group={props.group} useHue={props.useHue} />
             <ActionPanel.Section>
               <SetBrightnessAction
                 group={props.group}
@@ -214,18 +204,15 @@ function ToggleGroupAction(props: { group: Group; groupedLight: GroupedLight; on
   );
 }
 
-// TODO: Navigate to a scene picker
-function SetSceneAction(props: { group: Group; scenes: Scene[]; onSetScene: (scene: Scene) => void }) {
-  if (props.scenes.length === 0) {
-    return null;
-  }
+function SetSceneAction(props: { group: Group; useHue: ReturnType<typeof useHue> }) {
+  const { push } = useNavigation();
 
   return (
-    <ActionPanel.Submenu title="Set Scene" icon={Icon.Image}>
-      {props.scenes.map((scene: Scene) => (
-        <ActionPanel.Item key={scene.id} title={scene.metadata.name} onAction={() => props.onSetScene(scene)} />
-      ))}
-    </ActionPanel.Submenu>
+    <ActionPanel.Item
+      title="Set Scene"
+      icon={Icon.Image}
+      onAction={() => push(<SetScene group={props.group} useHue={props.useHue} />)}
+    />
   );
 }
 
@@ -318,52 +305,6 @@ async function handleToggle(
     toast.title = groupedLight?.on?.on
       ? `Failed turning ${group.metadata.name} off`
       : `Failed turning ${group.metadata.name} on`;
-    toast.message = e instanceof Error ? e.message : undefined;
-    await toast.show();
-  }
-}
-
-async function handleSetScene(
-  { hueBridgeState, lights, setLights }: ReturnType<typeof useHue>,
-  rateLimiter: ReturnType<typeof useInputRateLimiter>,
-  group: Group,
-  scene: Scene
-) {
-  const toast = new Toast({ title: "" });
-
-  try {
-    if (hueBridgeState.context.hueClient === undefined) throw new Error("Not connected to Hue Bridge.");
-    if (!rateLimiter.canExecute()) return;
-
-    const changesToLights = new Map(
-      lights
-        .filter((light) =>
-          scene.actions.some((action) => action.target.rid === light.id || action.target.rid === light.owner.rid)
-        )
-        .map((light): [Id, Partial<Light>] => {
-          const action = scene.actions.find(
-            (action) => action.target.rid === light.id || action.target.rid === light.owner.rid
-          );
-          return [light.id, (action?.action ?? {}) as Partial<Light>];
-        })
-    );
-
-    const undoOptimisticUpdates = optimisticUpdates(changesToLights, setLights);
-    await hueBridgeState.context.hueClient
-      .updateScene(scene, {
-        recall: { action: "active" },
-      })
-      .catch((e: Error) => {
-        undoOptimisticUpdates();
-        throw e;
-      });
-
-    toast.style = Style.Success;
-    toast.title = `Scene ${scene.metadata.name} set`;
-    await toast.show();
-  } catch (e) {
-    toast.style = Style.Failure;
-    toast.title = "Failed set scene";
     toast.message = e instanceof Error ? e.message : undefined;
     await toast.show();
   }

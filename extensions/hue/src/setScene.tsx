@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Grid, Icon, Toast } from "@raycast/api";
-import { GradientUriCache, GradientUri, Group, Id, Palette, Scene } from "./lib/types";
+import { GradientUri, GradientUriCache, Group, Id, Palette, Scene } from "./lib/types";
 import UnlinkAction from "./components/UnlinkAction";
 import ManageHueBridge from "./components/ManageHueBridge";
 import { SendHueMessage, useHue } from "./hooks/useHue";
@@ -14,8 +14,8 @@ import Style = Toast.Style;
 const GRID_ITEM_WIDTH = 271;
 const GRID_ITEM_HEIGHT = 153;
 
-export default function SetScene() {
-  const { hueBridgeState, sendHueMessage, isLoading, rooms, zones, scenes } = useHue();
+export default function SetScene(props: { group?: Group; useHue?: ReturnType<typeof useHue> }) {
+  const { hueBridgeState, sendHueMessage, isLoading, rooms, zones, scenes } = props.useHue ?? useHue();
   const [palettes, setPalettes] = useState(new Map<Id, Palette>([]));
   const { gradientUris } = useGradients(palettes, GRID_ITEM_WIDTH, GRID_ITEM_HEIGHT);
   const groupTypes = [rooms, zones];
@@ -27,29 +27,55 @@ export default function SetScene() {
   const manageHueBridgeElement: JSX.Element | null = ManageHueBridge(hueBridgeState, sendHueMessage);
   if (manageHueBridgeElement !== null) return manageHueBridgeElement;
 
-  return (
-    <Grid isLoading={isLoading} aspectRatio="16/9">
-      {groupTypes.map((groupType: Group[]): JSX.Element[] => {
-        return groupType.map((group: Group): JSX.Element => {
-          const groupScenes =
-            scenes.filter((scene: Scene) => {
-              return scene.group.rid === group.id;
-            }) ?? [];
+  if (props.group !== undefined) {
+    const group = props.group;
+    const groupScenes =
+      scenes.filter((scene: Scene) => {
+        return scene.group.rid === group.id;
+      }) ?? [];
 
-          return (
-            <Group
+    return (
+      <Grid navigationTitle={`Set Scene for ${props.group.metadata.name}`} isLoading={isLoading} aspectRatio="16/9">
+        <Grid.Section title={group.metadata.name}>
+          {groupScenes.map((groupScene) => (
+            <Scene
               key={group.id}
+              scene={groupScene}
               group={group}
-              scenes={groupScenes}
-              gradientUris={gradientUris}
+              gradientUri={gradientUris.get(groupScene.id)}
               hueClient={hueBridgeState.context.hueClient}
               sendHueMessage={sendHueMessage}
             />
+          ))}
           );
-        });
-      })}
-    </Grid>
-  );
+        </Grid.Section>
+      </Grid>
+    );
+  } else {
+    return (
+      <Grid isLoading={isLoading} aspectRatio="16/9">
+        {groupTypes.map((groupType: Group[]): JSX.Element[] => {
+          return groupType.map((group: Group): JSX.Element => {
+            const groupScenes =
+              scenes.filter((scene: Scene) => {
+                return scene.group.rid === group.id;
+              }) ?? [];
+
+            return (
+              <Group
+                key={group.id}
+                group={group}
+                scenes={groupScenes}
+                gradientUris={gradientUris}
+                hueClient={hueBridgeState.context.hueClient}
+                sendHueMessage={sendHueMessage}
+              />
+            );
+          });
+        })}
+      </Grid>
+    );
+  }
 }
 
 function Group(props: {
@@ -67,7 +93,7 @@ function Group(props: {
             key={scene.id}
             group={props.group}
             scene={scene}
-            gradientUris={props.gradientUris.get(scene.id)}
+            gradientUri={props.gradientUris.get(scene.id)}
             hueClient={props.hueClient}
             sendHueMessage={props.sendHueMessage}
           />
@@ -80,7 +106,7 @@ function Group(props: {
 function Scene(props: {
   scene: Scene;
   group: Group;
-  gradientUris: GradientUri | undefined;
+  gradientUri: GradientUri | undefined;
   sendHueMessage: SendHueMessage;
   hueClient?: HueClient;
 }) {
@@ -89,7 +115,7 @@ function Scene(props: {
     <Grid.Item
       title={activeEmoji + props.scene.metadata.name}
       keywords={[props.group.metadata.name]}
-      content={props.gradientUris ?? ""}
+      content={props.gradientUri ?? ""}
       actions={
         <ActionPanel>
           <SetSceneAction
