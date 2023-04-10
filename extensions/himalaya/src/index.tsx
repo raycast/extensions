@@ -1,4 +1,4 @@
-import { Action, ActionPanel, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, showToast, Toast } from "@raycast/api";
 import { useState, useEffect } from "react";
 import child_process = require("node:child_process");
 import util = require("node:util");
@@ -56,24 +56,19 @@ export default function ListEnvelopes() {
 
     if (envelope.flags.includes(Flag.Seen)) {
       accessories.push({
-        icon: { source: { light: "envelope.open-light-Regular-S.png", dark: "envelope.open-dark-Regular-S.png" } },
+        icon: Icon.Circle,
       });
     }
 
     if (!envelope.flags.includes(Flag.Seen)) {
       accessories.push({
-        icon: { source: { light: "envelope.badge-light-Regular-S.png", dark: "envelope.badge-dark-Regular-S.png" } },
+        icon: Icon.CircleFilled,
       });
     }
 
     if (envelope.flags.includes(Flag.Answered)) {
       accessories.push({
-        icon: {
-          source: {
-            light: "arrowshape.turn.up.left-light-Regular-S.png",
-            dark: "arrowshape.turn.up.left-dark-Regular-S.png",
-          },
-        },
+        icon: Icon.Reply,
       });
     }
 
@@ -83,7 +78,7 @@ export default function ListEnvelopes() {
       text: {
         value: `${envelope.from.name} <${envelope.from.addr}>`,
       },
-      icon: { source: "person-Regular-S.png" },
+      icon: Icon.Person,
     });
 
     return accessories;
@@ -94,9 +89,7 @@ export default function ListEnvelopes() {
       <Action
         title="Mark Unread"
         style={Action.Style.Regular}
-        icon={{
-          source: { light: "envelope.badge-light-Regular-S.png", dark: "envelope.badge-dark-Regular-S.png" },
-        }}
+        icon={Icon.CircleFilled}
         onAction={async () => {
           const toast = await showToast({
             style: Toast.Style.Animated,
@@ -130,9 +123,7 @@ export default function ListEnvelopes() {
       <Action
         title="Mark Read"
         style={Action.Style.Regular}
-        icon={{
-          source: { light: "envelope.open-light-Regular-S.png", dark: "envelope.open-dark-Regular-S.png" },
-        }}
+        icon={Icon.Circle}
         onAction={async () => {
           const toast = await showToast({
             style: Toast.Style.Animated,
@@ -166,9 +157,7 @@ export default function ListEnvelopes() {
       <Action
         title="Move to Trash"
         style={Action.Style.Destructive}
-        icon={{
-          source: { light: "envelope-light-Regular-S.png", dark: "envelope-dark-Regular-S.png" },
-        }}
+        icon={Icon.Trash}
         onAction={async () => {
           const toast = await showToast({
             style: Toast.Style.Animated,
