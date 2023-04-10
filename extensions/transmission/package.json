@@ -73,7 +73,7 @@
       "title": "Password",
       "required": false,
       "description": "The password to use for authentication",
-      "type": "textfield",
+      "type": "password",
       "default": ""
     },
     {
