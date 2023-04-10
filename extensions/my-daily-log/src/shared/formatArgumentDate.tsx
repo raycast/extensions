@@ -1,7 +1,7 @@
 import { showToast, Toast } from "@raycast/api";
 
 export function formatArgumentDate(date: string): Date {
-  if (!date) {
+  if (!date || date === "") {
     return new Date();
   }
   if (date.toLowerCase() === "today" || date.toLowerCase() === "t") {

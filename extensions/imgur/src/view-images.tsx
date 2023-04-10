@@ -1,6 +1,6 @@
 import { Detail, Grid, LocalStorage, ActionPanel, Action, Icon, Toast, showToast } from "@raycast/api";
 import { useMemo, useState } from "react";
-import { UploadResponse } from "./index";
+import { StoreData, UploadResponse } from "./index";
 import { writeFile } from "fs/promises";
 import axios from "axios";
 import { homedir } from "os";
@@ -21,7 +21,7 @@ export default function Command() {
           actions={
             <ActionPanel>
               <Action.Push title="Details" target={<MetaData {...item} />} icon={{ source: Icon.Info }} />
-              <Download url={item.link} filename={item.title} />
+              <Download url={item.link} filename={item.title ?? ""} />
               <Action.OpenInBrowser url={item.link} />
               <Action.CopyToClipboard title="Copy Link" content={item.link} />
             </ActionPanel>
@@ -39,7 +39,13 @@ const useHistory = (term: string) => {
 
   useMemo(() => {
     const getHistory = async () => {
-      const history = JSON.parse((await LocalStorage.getItem("history")) || "[]");
+      const storageHistory: StoreData[] = JSON.parse((await LocalStorage.getItem("history")) || "[]");
+      /**
+       * Future update can group albums pictures
+       * Workaround this to not break current history
+       */
+      const history = storageHistory.map((item) => ("album" in item ? item.images : item)).flat();
+
       if (!history) {
         setError("No history found");
         setLoading(false);
@@ -48,7 +54,7 @@ const useHistory = (term: string) => {
 
       if (term) {
         const filtered = history.filter((item: UploadResponse) =>
-          item.title.toLowerCase().includes(term.toLowerCase())
+          item.title?.toLowerCase().includes(term.toLowerCase())
         );
         setHistory(filtered);
         setLoading(false);
@@ -81,7 +87,7 @@ const MetaData = (item: UploadResponse) => {
       }
       actions={
         <ActionPanel>
-          <Download url={item.link} filename={item.title} />
+          <Download url={item.link} filename={item.title ?? ""} />
           <Action.OpenInBrowser url={item.link} />
           <Action.CopyToClipboard title="Copy Link" content={item.link} />
         </ActionPanel>

@@ -17,6 +17,7 @@ export const ListItem = (props: {
     icon={getDomainFavicon(props.url)}
     title={props.name}
     detail={<AccountDetail getData={props.getDetails} />}
+    keywords={[props.id]}
     actions={
       <ActionPanel>
         <ActionPanel.Section>

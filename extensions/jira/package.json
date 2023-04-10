@@ -1,10 +1,13 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "jira-beta",
-  "title": "Jira Beta",
+  "name": "jira",
+  "title": "Jira",
   "description": "Create, access, and modify issues and sprints.",
   "icon": "icon.png",
   "author": "thomaslombart",
+  "contributors": [
+    "FezVrasta"
+  ],
   "owner": "raycast",
   "access": "public",
   "categories": [

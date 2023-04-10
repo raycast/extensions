@@ -1,5 +1,13 @@
 # Apple Music Changelog
 
+## [Fix] - 2023-03-23
+
+- Added fallback scripts to commands that were interacting with the library.
+
+## [Update] - 2023-03-13
+
+- Fixed a localization bug
+
 ## [Update] - 2023-03-01
 
 - Fixed dislike song command

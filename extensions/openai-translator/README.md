@@ -2,7 +2,8 @@
 
 [Raycast](https://www.raycast.com/) extension for translation based on ChatGPT API.
 
-https://user-images.githubusercontent.com/743074/226975894-de840861-d1c9-4c9e-8fe1-636f568570fe.mov
+Quick Tips and Tricks:
+[![Quick Tips and Tricks for Raycast OpenAI Translator](https://img.youtube.com/vi/2tW9iKz2nT0/maxresdefault.jpg)](https://www.youtube.com/watch?v=2tW9iKz2nT0)
 
 # Insipired By
 
@@ -73,7 +74,7 @@ Thanks to [yetone/openai-translator](https://github.com/yetone/openai-translator
 - [x] Stream text display
 - [x] Manually specify text language (automatic detection is not reliable when mixing multiple languages)
 - [x] Custom API Entrypoint
-- [ ] Proxy
+- [X] Proxy
 - [ ] i18n
 - [ ] TTS
 

@@ -5,5 +5,8 @@
 - Add SOCKS5 proxy suppoort
 - Add Connection timeout
 - Improve network reliability
+- "Word" mode
+- Sync prompts from original openai translator
+
 
 ## [Initial Version] - 2023-03-10

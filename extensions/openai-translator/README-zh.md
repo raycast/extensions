@@ -72,7 +72,7 @@ npm install && npm run dev
 - [x] 流式文本显示
 - [x] 手动指定文本语言（自动检测在混合有多语言字符的情况下还不太靠谱）
 - [x] 自定义 API URL
-- [ ] Proxy
+- [x] Proxy
 - [ ] i18n
 - [ ] TTS
 

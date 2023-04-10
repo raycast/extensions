@@ -100,6 +100,11 @@ export function ProjectNavMenusList(props: { project: Project }): JSX.Element {
         icon={{ source: GitLabIcons.milestone, tintColor: Color.PrimaryText }}
         target={<MilestoneList project={project} navigationTitle={project.name_with_namespace} />}
       />
+      <ProjectNavMenuBrowserItem
+        title="Wiki"
+        icon={{ source: GitLabIcons.wiki, tintColor: Color.PrimaryText }}
+        url={webUrl(project, "-/wikis")}
+      />
       <ProjectNavMenuItem
         title="Labels"
         icon={{ source: GitLabIcons.labels, tintColor: Color.PrimaryText }}

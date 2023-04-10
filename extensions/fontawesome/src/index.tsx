@@ -106,16 +106,24 @@ export default function Command() {
   };
 
   const copyFASlugToClipboard = async (icon: Icon) => {
-    // Copy SVG to clipboard
+    // Copy icon name to clipboard
     await Clipboard.copy(icon.id);
 
     // Notify the user
     await showHUD('Copied Slug to clipboard!');
   };
 
+  const copyFAGlyphToClipboard = async (icon: Icon) => {
+    // Convert the unicode to a string and copy it to the clipboard
+    await Clipboard.copy(String.fromCharCode(parseInt(icon.unicode, 16)));
+
+    // Notify the user
+    await showHUD('Copied Glyph to clipboard!');
+  };
+
   return (
     <Grid
-      itemSize={Grid.ItemSize.Small}
+      columns={8}
       inset={Grid.Inset.Large}
       enableFiltering={false}
       isLoading={isLoading}
@@ -139,6 +147,7 @@ export default function Command() {
                 onAction={() => copySvgToClipboard(icon, iconStyle)}
               />
               <Action title={`Copy FA Slug`} icon="copy-clipboard-16" onAction={() => copyFASlugToClipboard(icon)} />
+              <Action title={`Copy FA Glyph`} icon="copy-clipboard-16" onAction={() => copyFAGlyphToClipboard(icon)} />
               <Action.OpenInBrowser
                 title="Open In Browser"
                 url={`https://fontawesome.com/icons/${icon.id}?s=solid&f=classic`}

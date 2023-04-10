@@ -52,7 +52,13 @@ export default function CreateIssueForm({ draftValues, enableDrafts = true }: Cr
   const { push } = useNavigation();
   const { signature } = getPreferenceValues<Preferences>();
 
-  const { data: projects } = useCachedPromise(() => getProjects());
+  const [projectQuery, setProjectQuery] = useState("");
+  const { data: projects, isLoading: isLoadingProjects } = useCachedPromise(
+    (query) => getProjects(query),
+    [projectQuery],
+    { keepPreviousData: true }
+  );
+
   const { data: users } = useCachedPromise(() => getUsers());
   const { data: labels } = useCachedPromise(() => getLabels());
 
@@ -203,7 +209,14 @@ export default function CreateIssueForm({ draftValues, enableDrafts = true }: Cr
       }
       enableDrafts={enableDrafts}
     >
-      <Form.Dropdown {...itemProps.projectId} title="Project" storeValue>
+      <Form.Dropdown
+        {...itemProps.projectId}
+        title="Project"
+        isLoading={isLoadingProjects}
+        storeValue
+        onSearchTextChange={setProjectQuery}
+        throttle
+      >
         {projects?.map((project) => {
           return (
             <Form.Dropdown.Item
@@ -256,7 +269,7 @@ export default function CreateIssueForm({ draftValues, enableDrafts = true }: Cr
       <FormUserDropdown
         {...itemProps.assigneeId}
         title="Assignee"
-        autocompleteUrl={selectedIssueType?.fields.assignee.autoCompleteUrl}
+        autocompleteUrl={selectedIssueType?.fields.assignee?.autoCompleteUrl}
       />
 
       <Form.Dropdown {...itemProps.priorityId} title="Priority">

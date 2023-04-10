@@ -31,7 +31,11 @@ const remotePrefix = "vscode-remote://";
 function getProjectEntries(): ProjectEntry[] {
   const storagePath = getPreferencesPath() || STORAGE;
   const savedProjectsFile = `${storagePath}/projects.json`;
-  const cachedProjectsFiles = [`${storagePath}/projects_cache_git.json`, `${storagePath}/projects_cache_any.json`];
+  const cachedProjectsFiles = [
+    `${storagePath}/projects_cache_git.json`,
+    `${storagePath}/projects_cache_any.json`,
+    `${storagePath}/projects_cache_vscode.json`,
+  ];
 
   let projectEntries: ProjectEntry[] = [];
   if (existsSync(savedProjectsFile)) {
@@ -275,5 +279,5 @@ function isRemoteProject(path: string): boolean {
 function parseRemoteURL(path: string): string {
   path = path.slice(remotePrefix.length);
   const index = path.indexOf("/");
-  return path.slice(0, index) + " " + path.slice(index);
+  return path.slice(0, index) + " " + path.slice(index) + "/";
 }

@@ -1,5 +1,13 @@
 # Amazon AWS Changelog
 
+## [Add Profile Script Command] - 2023-03-15
+
+- Add "Run Profile Script" command that allows users to list profiles and run a custom script for them.
+
+## [Add Show All Action] - 2023-03-08
+
+- Add "Show All" action to SSM Parameters to bypass the requirement of needing four characters for search.
+
 ## [Fix Profile Dropdown] - 2023-03-04
 
 - Fix profile dropdown issue when reading from credentials file
