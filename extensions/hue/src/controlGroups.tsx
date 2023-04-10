@@ -193,28 +193,6 @@ function Group(props: {
                 }
               />
             </ActionPanel.Section>
-            {/*
-            <ActionPanel.Section>
-              {props.group.action.colormode == "xy" && (
-                <SetColorAction
-                  group={props.group}
-                  onSet={(color: CssColor) => handleSetColor(props.hueClient, props.group)}
-                />
-              )}
-              {props.group.action.colormode == "ct" && (
-                <IncreaseColorTemperatureAction
-                  group={props.group}
-                  onIncrease={() => handleIncreaseColorTemperature(props.hueClient, props.group)}
-                />
-              )}
-              {props.group.action.colormode == "ct" && (
-                <DecreaseColorTemperatureAction
-                  group={props.group}
-                  onDecrease={() => handleDecreaseColorTemperature(props.hueClient, props.group)}
-                />
-              )}
-            </ActionPanel.Section>
-*/}
 
             <ActionPanel.Section>
               <UnlinkAction sendHueMessage={props.useHue.sendHueMessage} />
@@ -302,51 +280,6 @@ function DecreaseBrightnessAction(props: { group: Group; groupedLight: GroupedLi
     <ActionPanel.Item
       title="Decrease Brightness"
       shortcut={{ modifiers: ["cmd", "shift"], key: "arrowDown" }}
-      icon={Icon.Minus}
-      onAction={props.onDecrease}
-    />
-  );
-}
-
-function SetColorAction(props: { group: Group; onSet: (color: CssColor) => void }) {
-  return (
-    <ActionPanel.Submenu title="Set Color" icon={Icon.Swatch} shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}>
-      {COLORS.map((color) => (
-        <ActionPanel.Item
-          key={color.name}
-          title={color.name}
-          icon={getIconForColor(color)}
-          onAction={() => props.onSet(color)}
-        />
-      ))}
-    </ActionPanel.Submenu>
-  );
-}
-
-function IncreaseColorTemperatureAction(props: { group: Group; onIncrease?: () => void }) {
-  // if (props.group.action.ct >= MIRED_MIN) {
-  //   return null;
-  // }
-
-  return (
-    <ActionPanel.Item
-      title="Increase Color Temperature"
-      shortcut={{ modifiers: ["cmd", "shift"], key: "arrowRight" }}
-      icon={Icon.Plus}
-      onAction={props.onIncrease}
-    />
-  );
-}
-
-function DecreaseColorTemperatureAction(props: { group: Group; onDecrease?: () => void }) {
-  // if (props.group.action.ct <= MIRED_MIN) {
-  //   return null;
-  // }
-
-  return (
-    <ActionPanel.Item
-      title="Decrease Color Temperature"
-      shortcut={{ modifiers: ["cmd", "shift"], key: "arrowLeft" }}
       icon={Icon.Minus}
       onAction={props.onDecrease}
     />
@@ -523,58 +456,3 @@ async function handleBrightnessChange(
     await toast.show();
   }
 }
-
-/*
-async function handleSetColor(hueClient: HueClient | undefined, group: Group, color: CssColor) {
-  const toast = new Toast({ title: "" });
-
-  try {
-    // await mutateGroups(setGroupColor(apiPromise, group, color.value), {
-    //   optimisticUpdate(rooms) {
-    //     return rooms.map((it) =>
-    //       it.id === group.id ? { ...it, state: { ...it.state, on: true, xy: hexToXy(color.value) } } : it
-    //     );
-    //   },
-    // });
-
-    toast.style = Style.Success;
-    toast.title = `Set color to ${color.name}`;
-    await toast.show();
-  } catch (e) {
-    toast.style = Style.Failure;
-    toast.title = "Failed setting color";
-    toast.message = e instanceof Error ? e.message : undefined;
-    await toast.show();
-  }
-}
-
-async function handleChangeColorTemperature(
-  hueClient: HueClient | undefined,
-  group: Group,
-  groupedLight: GroupedLight,
-  direction: "increase" | "decrease"
-) {
-  const toast = new Toast({ title: "" });
-
-  try {
-    // await mutateGroups(adjustColorTemperature(apiPromise, group, "increase"), {
-    //   optimisticUpdate(rooms) {
-    //     return rooms?.map((it) =>
-    //       it.id === group.id
-    //         ? { ...it, state: { ...it.state, ct: calculateAdjustedColorTemperature(group, "increase") } }
-    //         : it
-    //     );
-    //   },
-    // });
-
-    toast.style = Style.Success;
-    toast.title = "Increased color temperature";
-    await toast.show();
-  } catch (e) {
-    toast.style = Style.Failure;
-    toast.title = "Failed increasing color temperature";
-    toast.message = e instanceof Error ? e.message : undefined;
-    await toast.show();
-  }
-}
-*/
