@@ -2,8 +2,6 @@ import { Rgb, Xy } from "./types";
 import { MIRED_ADJUSTMENT } from "./constants";
 import chroma from "chroma-js";
 
-// TODO: RGB and color temperature lights do not end up with the same RGB values
-
 /**
  * Converts an RGB value to a CIE (x, y) color representation
  *

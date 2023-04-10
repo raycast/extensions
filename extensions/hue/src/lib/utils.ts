@@ -68,7 +68,6 @@ export async function discoverBridgeUsingNupnp(): Promise<string> {
 
   console.info("Discovered Hue Bridge using MeetHue's public API:", hueApiResults[0].ipaddress);
 
-  // TODO: Handle finding multiple bridges by offering the user to select one
   return hueApiResults[0].ipaddress;
 }
 
