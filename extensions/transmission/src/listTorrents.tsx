@@ -21,7 +21,7 @@ import prettyBytes from "pretty-bytes";
 import { usePersistentState } from "raycast-toolkit";
 import { truncate } from "./utils/string";
 import { padList } from "./utils/list";
-import { useAllTorrents, useMutateTorrent, useSessionStats } from "./modules/client";
+import { useAllTorrents, useMutateTorrent, useSessionStats, isLocalTransmission } from "./modules/client";
 import { renderDetails } from "./utils/renderDetails";
 import { useAsync } from "react-use";
 import { type SessionStats, TorrentStatus, type Torrent } from "./types";
@@ -299,11 +299,13 @@ function TorrentListItem({
                 onAction={() => onRemove(torrent)}
               />
             </ActionPanel.Submenu>
-            <Action.Open
-              title="Open Download Folder"
-              shortcut={{ key: "d", modifiers: ["cmd"] }}
-              target={torrent.downloadDir}
-            />
+            {isLocalTransmission() ? (
+              <Action.Open
+                title="Open Download Folder"
+                shortcut={{ key: "d", modifiers: ["cmd"] }}
+                target={torrent.downloadDir}
+              />
+            ) : null}
             {files.length >= 1 ? (
               <ActionPanel.Submenu
                 icon={Icon.Upload}
