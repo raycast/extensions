@@ -4,6 +4,11 @@ export interface Command {
   icon: string;
   minNumFiles: string;
   acceptedFileExtensions: string;
-  useFileMetadata: boolean;
-  useSoundClassifications: boolean;
+  useMetadata: boolean;
+  useAudioDetails: boolean;
+  useSoundClassification: boolean;
+  useSubjectClassification: boolean;
+  useRectangleDetection: boolean;
+  useBarcodeDetection: boolean;
+  useFaceDetection: boolean;
 }

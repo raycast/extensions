@@ -5,7 +5,17 @@ import ResponseActions from "./ResponseActions";
 import { imageFileExtensions } from "./utils/file-extensions";
 
 export default function Command() {
-  const { selectedFiles, contentPrompts, loading, errorType } = useFileContents();
+  const { selectedFiles, contentPrompts, loading, errorType } = useFileContents({
+    minNumFiles: 1,
+    acceptedFileExtensions: undefined,
+    useMetadata: true,
+    useAudioDetails: false,
+    useSoundClassification: true,
+    useSubjectClassification: true,
+    useRectangleDetection: true,
+    useBarcodeDetection: true,
+    useFaceDetection: true,
+  });
 
   useEffect(() => {
     installDefaults();

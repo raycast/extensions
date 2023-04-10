@@ -191,7 +191,7 @@ export const getTextOfWebpage = async (URL: string): Promise<string> => {
   const html = getURLHTML(URL);
   const filteredString = html
     .replaceAll(
-      /(<head>[\S\s\n\r]*?<\/head>|<script[\s\S\n\r]+?<\/script>|<style[\s\S\n\r]+?<\/style>|<a [\s\S\n\r]+?<\/a>|<nav[\s\S\n\r]+?<\/nav>|<link[\s\S\n\r]+?<\/link>|<form[\s\S\n\r]+?<\/form>|<button[\s\S\n\r]+?<\/button>|<!--[\s\S\n\r]+?-->|<select[\s\S\n\r]+?<\/select>|<[\s\n\r\S]+?>)/g,
+      /(<head>[\S\s\n\r]*?<\/head>|<script[\s\S\n\r]+?<\/script>|<style[\s\S\n\r]+?<\/style>|<nav[\s\S\n\r]+?<\/nav>|<link[\s\S\n\r]+?<\/link>|<form[\s\S\n\r]+?<\/form>|<button[\s\S\n\r]+?<\/button>|<!--[\s\S\n\r]+?-->|<select[\s\S\n\r]+?<\/select>|<[\s\n\r\S]+?>)/g,
       " "
     )
     .replaceAll(/[\s\n\r]+/g, " ")

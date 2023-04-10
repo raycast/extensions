@@ -14,7 +14,16 @@ import { ERRORTYPE, useFileContents } from "./utils/file-utils";
 
 export default function Command(props: { arguments: { initialQuery: string } }) {
   const { initialQuery } = props.arguments;
-  const { selectedFiles, contentPrompts, errorType } = useFileContents();
+  const { selectedFiles, contentPrompts, errorType } = useFileContents({
+    minNumFiles: 0,
+    acceptedFileExtensions: undefined,
+    useMetadata: true,
+    useAudioDetails: true,
+    useSubjectClassification: true,
+    useRectangleDetection: true,
+    useBarcodeDetection: true,
+    useFaceDetection: true,
+  });
   const [query, setQuery] = useState<string>();
   const [response, setResponse] = useState<string>();
   const [previousResponse, setPreviousResponse] = useState<string>();

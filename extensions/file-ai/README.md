@@ -10,14 +10,6 @@ Make custom commands that act on selected files using Raycast AI, making use of 
     - Search and run custom File AI commands
 - Summarize Selected Files
     - Summarize the contents of selected text files, PDFs, images, audio files, and more.
-- Compare Selected Files
-    - Compare and contrast the contents of selected files.
-- Assess File Overlap
-    - Assess the overlap in ideas between the contents of two or more selected files.
-- Identify Selected Files
-    - Get a quick overview of the purpose and usage of a file.
-- Summarize Spoken Audio
-    - Summarize the spoken word content of audio files.
 - File AI Chat
     - Start a back-and-forth conversation with AI with selected files provided as context.
 - Import File AI Commands
@@ -30,6 +22,8 @@ You can create custom File AI commands, accessed via the "Search File AI Command
 ### Default Custom Commands
 
 - Assess Academic Validity
+- Assess File Overlap
+- Compare Selected Files
 - Compose Response
 - Compose Tweet
 - Condense Files
@@ -44,12 +38,14 @@ You can create custom File AI commands, accessed via the "Search File AI Command
 - Extract Named Entities
 - Extract Phone Numbers
 - Extract URLs
+- Extract Visible Text
 - Extract Vocabulary
 - Find Errors
 - Generate Questions
 - Historical Context
 - Identify Gaps
 - Identify Relationships
+- Identify Selected Files
 - Location Significance
 - Make Jingle
 - Make Poem
@@ -70,6 +66,7 @@ You can create custom File AI commands, accessed via the "Search File AI Command
 - Summarize Clipboard
 - Summarize Current Tab
 - Summarize Last Email
+- Summarize Spoken Audio
 - Table Of Contents
 - Today's Agenda
 - Translate To English
@@ -83,6 +80,10 @@ You can create custom File AI commands, accessed via the "Search File AI Command
 ### Placeholders
 
 When creating custom commands, you can use placeholders in your prompts that will be substituted with relevant information whenever you run the command. These placeholders range from simple information, like the current date, to complex data retrieval operations such as getting the content of the most recent email. Placeholders are a powerful way to add context to your File AI prompts. The valid placeholders are as follows:
+
+### URL Placeholders
+
+You can instruct File AI to extract text from any webpage by using the {{URL}} placeholder. For example, `{{http://68k.news}}` would be replaced with the visible text of the 68k News homepage. You can use this to interface between files, data, webpages, and APIs.
 
 #### API Data Placeholders
 | Placeholder | Replaced With |

@@ -18,30 +18,6 @@
       "mode": "view"
     },
     {
-      "name": "compare-files",
-      "title": "Compare Selected Files",
-      "description": "Compare and contrast the contents of the selected files",
-      "mode": "view"
-    },
-    {
-      "name": "file-overlap",
-      "title": "Assess File Overlap",
-      "description": "Assess the overlap in content of the selected files",
-      "mode": "view"
-    },
-    {
-      "name": "identify",
-      "title": "Identify Selected Files",
-      "description": "Identify the primary purpose of the selected files",
-      "mode": "view"
-    },
-    {
-      "name": "summarize-speech",
-      "title": "Summarize Spoken Audio",
-      "description": "Summarize the spoken words in the selected audio files",
-      "mode": "view"
-    },
-    {
       "name": "create-command",
       "title": "Create File AI Command",
       "description": "Create a custom File AI command accessible via 'Search File AI Commands'",

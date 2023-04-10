@@ -31,14 +31,20 @@ export default function Command(props: { arguments: { commandName: string } }) {
       <CommandResponse
         commandName={command.name}
         prompt={command.prompt}
-        minNumFiles={parseInt(command.minNumFiles)}
-        acceptedFileExtensions={
-          command.acceptedFileExtensions.trim().length > 0
-            ? command.acceptedFileExtensions.split(",").map((value) => value.trim())
-            : undefined
-        }
-        skipMetadata={!command.useFileMetadata}
-        skipAudioDetails={!command.useSoundClassifications}
+        options={{
+          minNumFiles: parseInt(command.minNumFiles),
+          acceptedFileExtensions:
+            command.acceptedFileExtensions.trim().length > 0
+              ? command.acceptedFileExtensions.split(",").map((value) => value.trim())
+              : undefined,
+          useMetadata: command.useMetadata,
+          useSoundClassification: command.useSoundClassification,
+          useAudioDetails: command.useAudioDetails,
+          useBarcodeDetection: command.useBarcodeDetection,
+          useFaceDetection: command.useFaceDetection,
+          useRectangleDetection: command.useRectangleDetection,
+          useSubjectClassification: command.useSubjectClassification,
+        }}
       />
     );
   }
@@ -58,14 +64,20 @@ export default function Command(props: { arguments: { commandName: string } }) {
                 <CommandResponse
                   commandName={command.name}
                   prompt={command.prompt}
-                  minNumFiles={parseInt(command.minNumFiles)}
-                  acceptedFileExtensions={
-                    command.acceptedFileExtensions.trim().length > 0
-                      ? command.acceptedFileExtensions.split(",").map((value) => value.trim())
-                      : undefined
-                  }
-                  skipMetadata={!command.useFileMetadata}
-                  skipAudioDetails={!command.useSoundClassifications}
+                  options={{
+                    minNumFiles: parseInt(command.minNumFiles),
+                    acceptedFileExtensions:
+                      command.acceptedFileExtensions.trim().length > 0
+                        ? command.acceptedFileExtensions.split(",").map((value) => value.trim())
+                        : undefined,
+                    useMetadata: command.useMetadata,
+                    useSoundClassification: command.useSoundClassification,
+                    useAudioDetails: command.useAudioDetails,
+                    useBarcodeDetection: command.useBarcodeDetection,
+                    useFaceDetection: command.useFaceDetection,
+                    useRectangleDetection: command.useRectangleDetection,
+                    useSubjectClassification: command.useSubjectClassification,
+                  }}
                 />
               }
               icon={Icon.ArrowRight}

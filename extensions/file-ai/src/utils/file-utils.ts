@@ -62,24 +62,31 @@ async function getSelectedFiles(): Promise<string> {
 end tell`);
 }
 
-export function useFileContents(
-  minFileCount?: number,
-  acceptedFileExtensions?: string[],
-  skipMetadata?: boolean,
-  skipAudioDetails?: boolean
-) {
+export interface CommandOptions {
+  minNumFiles?: number;
+  acceptedFileExtensions?: string[];
+  useMetadata?: boolean;
+  useSoundClassification?: boolean;
+  useAudioDetails?: boolean;
+  useSubjectClassification?: boolean;
+  useRectangleDetection?: boolean;
+  useBarcodeDetection?: boolean;
+  useFaceDetection?: boolean;
+}
+
+export function useFileContents(options: CommandOptions) {
   const [selectedFiles, setSelectedFiles] = useState<string[]>();
   const [contentPrompts, setContentPrompts] = useState<string[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [errorType, setErrorType] = useState<number>();
 
-  const validExtensions = acceptedFileExtensions ? acceptedFileExtensions : [];
+  const validExtensions = options.acceptedFileExtensions ? options.acceptedFileExtensions : [];
 
   useEffect(() => {
     getSelectedFiles()
       .then((files) => {
         // Raise error if too few files are selected
-        if (files.split(", ").length < (minFileCount || 1)) {
+        if (files.split(", ").length < (options.minNumFiles || 1)) {
           setErrorType(ERRORTYPE.MIN_SELECTION_NOT_MET);
           return;
         }
@@ -109,29 +116,29 @@ export function useFileContents(
             } else if (pathLower.includes(".pdf")) {
               contents += `"${filterContentString(await getPDFText(file))}"`;
             } else if (imageFileExtensions.includes(pathLower.split(".").at(-1) as string)) {
-              contents += await getImageDetails(file, skipMetadata);
+              contents += await getImageDetails(file, options);
             } else if (pathLower.includes(".app")) {
-              contents += getApplicationDetails(file, skipMetadata);
+              contents += getApplicationDetails(file, options.useMetadata);
             } else if (
               !pathLower.split("/").at(-1)?.includes(".") ||
               textFileExtensions.includes(pathLower.split(".").at(-1) as string)
             ) {
               contents += `"${filterContentString(fs.readFileSync(file).toString())}"`;
+              if (options.useMetadata) {
+                contents += filterContentString(getMetadataDetails(file));
+              }
             } else if (pathLower.includes(".svg")) {
-              contents += getSVGDetails(file, skipMetadata);
+              contents += getSVGDetails(file, options.useMetadata);
             } else if (audioFileExtensions.includes(pathLower.split(".").at(-1) as string)) {
-              if (skipAudioDetails) {
-                if (!skipMetadata) {
+              if (options.useAudioDetails) {
+                if (options.useMetadata) {
                   contents += getMetadataDetails(file);
                 }
-                contents += getAudioTranscription(file);
-              } else {
-                contents += getAudioDetails(file, skipMetadata);
-                if (fs.lstatSync(file).size < 100000) {
-                  contents += `<Spoken Content: "${getAudioTranscription(file)}"`;
-                }
+                contents += `<Spoken Content: "${getAudioTranscription(file)}"`;
+              } else if (options.useSoundClassification) {
+                contents += getAudioDetails(file, options.useMetadata);
               }
-            } else if (!skipMetadata) {
+            } else if (options.useMetadata) {
               contents += getMetadataDetails(file);
             }
 
@@ -237,10 +244,10 @@ const filterContentString = (content: string, cutoff?: number): string => {
     .substring(0, cutoff || maxCharacters);
 };
 
-const getImageDetails = async (filePath: string, skipMetadata?: boolean): Promise<string> => {
-  const imageVisionInstructions = getImageVisionDetails(filePath);
-  const exifData = skipMetadata ? `` : filterContentString(await getFileExifData(filePath));
-  const exifInstruction = skipMetadata ? `` : `<EXIF data: ###${exifData}###>`;
+const getImageDetails = async (filePath: string, options: CommandOptions): Promise<string> => {
+  const imageVisionInstructions = getImageVisionDetails(filePath, options);
+  const exifData = options.useMetadata ? filterContentString(await getFileExifData(filePath)) : ``;
+  const exifInstruction = options.useMetadata ? `<EXIF data: ###${exifData}###>` : ``;
   return `${imageVisionInstructions}${exifInstruction}`;
 };
 
@@ -249,7 +256,7 @@ const getDirectoryDetails = (filePath: string): string => {
   return `This is a folder containing the following files: ${children.join(", ")}`;
 };
 
-const getImageVisionDetails = (filePath: string): string => {
+const getImageVisionDetails = (filePath: string, options: CommandOptions): string => {
   return runAppleScriptSync(`use framework "Vision"
 
   set confidenceThreshold to 0.7
@@ -289,6 +296,9 @@ const getImageVisionDetails = (filePath: string): string => {
     set theText to theText & ((first item in (observation's topCandidates:1))'s |string|() as text) & ", "
   end repeat
   
+  ${
+    options.useSubjectClassification
+      ? `-- Extract subject classifications
   set classificationResults to classificationRequest's results()
   set classifications to {}
   repeat with observation in classificationResults
@@ -296,18 +306,7 @@ const getImageVisionDetails = (filePath: string): string => {
       copy observation's identifier() as text to end of classifications
     end if
   end repeat
-  
-  -- Extract barcode text results
-  set barcodeResults to barcodeRequest's results()
-  set barcodeText to ""
-  repeat with observation in barcodeResults
-    set barcodeText to barcodeText & (observation's payloadStringValue() as text) & ", "
-  end repeat
-  
-  if length of barcodeText > 0 then
-    set barcodeText to text 1 thru ((length of barcodeText) - 2) of barcodeText
-  end if
-  
+
   -- Extract animal detection results
   set animalResults to animalRequest's results()
   set theAnimals to ""
@@ -319,13 +318,36 @@ const getImageVisionDetails = (filePath: string): string => {
   
   if theAnimals is not "" then
     set theAnimals to text 1 thru -3 of theAnimals
-  end if
+  end if`
+      : ``
+  }
   
-  -- Extract number of faces detected
+  ${
+    options.useBarcodeDetection
+      ? `-- Extract barcode text results
+  set barcodeResults to barcodeRequest's results()
+  set barcodeText to ""
+  repeat with observation in barcodeResults
+    set barcodeText to barcodeText & (observation's payloadStringValue() as text) & ", "
+  end repeat
+  
+  if length of barcodeText > 0 then
+    set barcodeText to text 1 thru ((length of barcodeText) - 2) of barcodeText
+  end if`
+      : ``
+  }
+  
+  ${
+    options.useFaceDetection
+      ? `-- Extract number of faces detected
   set faceResults to faceRequest's results()
-  set numFaces to count of faceResults
+  set numFaces to count of faceResults`
+      : ``
+  }
   
-  -- Extract rectangle coordinates
+  ${
+    options.useRectangleDetection
+      ? `-- Extract rectangle coordinates
   set rectResults to rectRequest's results()
   set imgWidth to theImage's |size|()'s width
   set imgHeight to theImage's |size|()'s height
@@ -336,22 +358,38 @@ const getImageVisionDetails = (filePath: string): string => {
     set topRight to (("Coordinate 3:(" & observation's topRight()'s x as text) & "," & observation's topRight()'s y as text) & ") "
     set topLeft to (("Coordinate 4:(" & observation's topLeft()'s x as text) & "," & observation's topLeft()'s y as text) & ") "
     copy bottomLeft & bottomRight & topRight & topLeft to end of rectResult
-  end repeat
+  end repeat`
+      : ``
+  }
   
   set promptText to ""
   if theText is not "" then
     set promptText to "<Transcribed text of the image: \\"" & theText & "\\".>"
   end if
   
-  if length of classifications > 0 and barcodeText is "" then
+  ${
+    options.useSubjectClassification
+      ? `if length of classifications > 0 then
     set promptText to promptText & "<Identified objects: " & classifications & ">"
   end if
-
-  if barcodeText is not "" then
-    set promptText to promptText & "<Barcode or QR code payloads: " & barcodeText & ">"
-  end if
   
-  if (count of rectResult) > 0 then
+  if theAnimals is not "" then
+    set promptText to promptText & "<Animals represented: " & theAnimals & ">"
+  end if`
+      : ``
+  }
+
+  ${
+    options.useBarcodeDetection
+      ? `if barcodeText is not "" then
+    set promptText to promptText & "<Barcode or QR code payloads: " & barcodeText & ">"
+  end if`
+      : ``
+  }
+  
+  ${
+    options.useRectangleDetection
+      ? `if (count of rectResult) > 0 then
     set promptText to promptText & "<Boundaries of rectangles: ###"
     set theIndex to 1
     repeat with rectCoords in rectResult
@@ -360,25 +398,27 @@ const getImageVisionDetails = (filePath: string): string => {
       set theIndex to theIndex + 1
     end repeat
     set promptText to promptText & "###>"
-  end if
+  end if`
+      : ``
+  }
   
-  if theAnimals is not "" then
-    set promptText to promptText & "<Animals represented: " & theAnimals & ">"
-  end if
-  
-  if numFaces > 0 then
+  ${
+    options.useFaceDetection
+      ? `if numFaces > 0 then
     set promptText to promptText & "<Number of faces: " & numFaces & ">"
-  end if
+  end if`
+      : ``
+  }
 
   return promptText`);
 };
 
-const getSVGDetails = (filePath: string, skipMetadata?: boolean): string => {
+const getSVGDetails = (filePath: string, useMetadata?: boolean): string => {
   /* Gets the metadata, code, instructions for detailing SVG files. */
   let svgDetails = "";
 
   // Include metadata information
-  if (!skipMetadata) {
+  if (useMetadata) {
     const metadata = JSON.stringify(fs.statSync(filePath));
     svgDetails += `"Metadata: ###${filterContentString(metadata)}###"\n`;
   }
@@ -395,12 +435,12 @@ const getSVGDetails = (filePath: string, skipMetadata?: boolean): string => {
   return svgDetails;
 };
 
-const getApplicationDetails = (filePath: string, skipMetadata?: boolean): string => {
+const getApplicationDetails = (filePath: string, useMetadata?: boolean): string => {
   /* Gets the metadata, plist, and scripting dictionary information about an application (.app). */
   let appDetails = "";
 
   // Include metadata information
-  const metadata = skipMetadata ? `` : filterContentString(JSON.stringify(fs.statSync(filePath)));
+  const metadata = useMetadata ? filterContentString(JSON.stringify(fs.statSync(filePath))) : ``;
 
   // Include plist information
   const plist = filterContentString(
@@ -412,7 +452,7 @@ const getApplicationDetails = (filePath: string, skipMetadata?: boolean): string
   );
 
   // Include general application-focused instructions
-  if (!skipMetadata) {
+  if (useMetadata) {
     appDetails += `<Plist info: ###${plist}###\nMetadata: ###${metadata}###`;
   }
 
@@ -450,14 +490,14 @@ const getPDFText = async (filePath: string): Promise<string> => {
   set thePDF to current application's PDFDocument's alloc()'s initWithURL:theURL
   return (thePDF's |string|()) as text`);
 
-  const imageText = await getImageDetails(filePath, true)
-  return `${rawText} ${imageText}`
+  const imageText = await getImageDetails(filePath, {});
+  return `${rawText} ${imageText}`;
 };
 
-const getAudioDetails = (filePath: string, skipMetadata?: boolean): string => {
+const getAudioDetails = (filePath: string, useMetadata?: boolean): string => {
   /* Gets the metadata and sound classifications of an audio file, as well as associated prompt instructions. */
-  const metadata = skipMetadata ? "" : filterContentString(JSON.stringify(fs.lstatSync(filePath)));
-  const metadataInstruction = skipMetadata ? "" : `<Metadata: ###${metadata}###>`;
+  const metadata = useMetadata ? filterContentString(JSON.stringify(fs.lstatSync(filePath))) : ``;
+  const metadataInstruction = useMetadata ? `<Metadata: ###${metadata}###>` : ``;
 
   const soundClassification = filterContentString(getSoundClassification(filePath).replace("_", "")).trim();
   const classificationInstruction = `<Sound classifications: "${soundClassification}".>`;
