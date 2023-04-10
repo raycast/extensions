@@ -136,7 +136,9 @@ function Group(props: {
             <ToggleGroupAction
               group={props.group}
               groupedLight={props.groupedLight}
-              onToggle={() => handleToggle(props.useHue, props.rateLimiter, props.groupedLight, props.group)}
+              onToggle={() =>
+                handleToggle(props.useHue, props.rateLimiter, props.groupLights, props.groupedLight, props.group)
+              }
             />
             <SetSceneAction group={props.group} useHue={props.useHue} />
             <ActionPanel.Section>
@@ -274,8 +276,9 @@ function DecreaseBrightnessAction(props: { group: Group; groupedLight: GroupedLi
 }
 
 async function handleToggle(
-  { hueBridgeState, setGroupedLights }: ReturnType<typeof useHue>,
+  { hueBridgeState, setLights, setGroupedLights }: ReturnType<typeof useHue>,
   rateLimiter: ReturnType<typeof useInputRateLimiter>,
+  groupLights: Light[],
   groupedLight: GroupedLight | undefined,
   group: Group
 ) {
@@ -289,10 +292,13 @@ async function handleToggle(
       on: { on: !groupedLight.on?.on },
     };
 
-    // TODO: Optimistic update lights
-    const undoOptimisticUpdate = optimisticUpdate(groupedLight, changes, setGroupedLights);
+    // TODO: Update zones
+    const changesToLights = new Map(groupLights.map((light) => [light.id, changes]));
+    const undoOptimisticLightsUpdate = optimisticUpdates(changesToLights, setLights);
+    const undoOptimisticGroupedLightUpdate = optimisticUpdate(groupedLight, changes, setGroupedLights);
     await hueBridgeState.context.hueClient.updateGroupedLight(groupedLight, changes).catch((e: Error) => {
-      undoOptimisticUpdate();
+      undoOptimisticLightsUpdate();
+      undoOptimisticGroupedLightUpdate();
       throw e;
     });
 
