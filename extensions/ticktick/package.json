@@ -1,0 +1,56 @@
+{
+  "name": "ticktick",
+  "title": "TickTick",
+  "description": "Check and search tasks in TickTick via Raycast",
+  "icon": "tick-logo.png",
+  "author": "appest",
+  "license": "MIT",
+  "categories": [
+    "Productivity"
+  ],
+  "commands": [
+    {
+      "name": "index",
+      "title": "Today Tasks",
+      "subtitle": "TickTick",
+      "description": "Show today to-do tasks.",
+      "mode": "view"
+    },
+    {
+      "name": "next7Days",
+      "title": "Next 7 Days Tasks",
+      "subtitle": "TickTick",
+      "description": "Show next 7 days to-do tasks.",
+      "mode": "view"
+    },
+    {
+      "name": "search",
+      "title": "Search Tasks",
+      "subtitle": "TickTick",
+      "description": "Search tasks.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.36.0",
+    "moment": "^2.29.1",
+    "run-applescript": "^6.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@types/sql.js": "^1.4.3",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-html": "^6.2.0",
+    "eslint-plugin-react-hooks": "^4.2.0",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint"
+  }
+}

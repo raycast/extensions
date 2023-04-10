@@ -1,0 +1,52 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "search-mdn",
+  "title": "Search MDN",
+  "description": "Search MDN Web Docs",
+  "icon": "icon.png",
+  "author": "krzysztofzuraw",
+  "contributors": [
+    "OBQun",
+    "k8scat"
+  ],
+  "categories": [
+    "Productivity",
+    "Developer Tools",
+    "Web",
+    "Documentation"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Search Web Docs",
+      "subtitle": "MDN",
+      "description": "Search MDN Web Docs",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.40.1",
+    "@raycast/utils": "^1.4.8",
+    "axios": "^0.23.0",
+    "url-join": "4.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@types/url-join": "4.0.1",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "ray publish"
+  }
+}

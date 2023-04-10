@@ -1,0 +1,82 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "notion",
+  "title": "Notion",
+  "description": "Fastest way to search and create Notion page.",
+  "icon": "notion-logo.png",
+  "author": "HenriChabrand",
+  "license": "MIT",
+  "contributors": [
+    "mathieudutour",
+    "metakirby5"
+  ],
+  "categories": [
+    "Applications",
+    "Productivity"
+  ],
+  "commands": [
+    {
+      "name": "create-database-page",
+      "title": "Create Database Page",
+      "subtitle": "Notion",
+      "description": "Create a page in a Notion database.",
+      "mode": "view"
+    },
+    {
+      "name": "search-page",
+      "title": "Search Notion",
+      "description": "Search for Notion databases and pages.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "notion_token",
+      "type": "password",
+      "title": "Notion Token",
+      "required": false,
+      "description": "In Notion go to Settings & Members > Integration > Develop your own > New integration",
+      "placeholder": "secret_1l3892KIWCJHJVikbiyJ7",
+      "link": "https://www.notion.so/my-integrations"
+    },
+    {
+      "name": "open_in",
+      "type": "dropdown",
+      "title": "Open in...",
+      "required": false,
+      "default": "app",
+      "data": [
+        {
+          "title": "Notion Application",
+          "value": "app"
+        },
+        {
+          "title": "Default Browser",
+          "value": "web"
+        }
+      ],
+      "description": "Choose where to open Notion page."
+    }
+  ],
+  "dependencies": {
+    "@notionhq/client": "^1.0.0",
+    "@raycast/api": "^1.37.0",
+    "@tryfabric/martian": "^1.2.4",
+    "jotai": "^1.7.3",
+    "moment": "^2.29.4",
+    "node-fetch": "^3.2.6",
+    "notion-to-md": "^2.5.1"
+  },
+  "devDependencies": {
+    "@types/node-fetch": "^2.6.2",
+    "@typescript-eslint/eslint-plugin": "^4.28.5",
+    "@typescript-eslint/parser": "^4.28.5",
+    "eslint": "^7.31.0",
+    "eslint-config-prettier": "^8.3.0",
+    "typescript": "^4.3.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop"
+  }
+}

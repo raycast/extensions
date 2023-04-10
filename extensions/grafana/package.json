@@ -1,0 +1,73 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "grafana",
+  "title": "Grafana Search",
+  "description": "Connect to the grafana API",
+  "icon": "grafana-logo.png",
+  "author": "Francois",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "searchDashboards",
+      "title": "Search Dashboards",
+      "subtitle": "Grafana",
+      "description": "Showing grafana results on dashboard search",
+      "mode": "view"
+    },
+    {
+      "name": "searchAnnotations",
+      "title": "Search Annotations",
+      "subtitle": "Grafana",
+      "description": "Showing & managing grafana annotations",
+      "mode": "view"
+    },
+    {
+      "name": "createAnnotation",
+      "title": "Create Annotation",
+      "subtitle": "Grafana",
+      "description": "Create a grafana annotation",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "rootApiUrl",
+      "type": "textfield",
+      "title": "Root API URL (without the trailing slash)",
+      "required": true,
+      "default": "https://organization.grafana.net",
+      "description": "Grafana root URL",
+      "placeholder": "https://organization.grafana.net"
+    },
+    {
+      "name": "apikey",
+      "type": "password",
+      "title": "API-key",
+      "required": true,
+      "default": "",
+      "description": "Grafana API key",
+      "placeholder": "bXlzZWNyZXRhcGlrZXk="
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.38.1",
+    "@raycast/utils": "^1.4.8",
+    "node-fetch": "^3.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "react-devtools": "^4.21.0",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

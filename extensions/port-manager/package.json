@@ -1,0 +1,53 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "port-manager",
+  "title": "Port Manager",
+  "description": "Find open ports and close them",
+  "categories": [
+    "Developer Tools",
+    "Productivity",
+    "System"
+  ],
+  "icon": "command-icon.png",
+  "author": "lucaschultz",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "open-ports",
+      "title": "Kill Port",
+      "description": "Show and Close Opened Ports",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "sudo",
+      "type": "checkbox",
+      "required": false,
+      "title": "Use Sudo",
+      "description": "See raycast.com/lucaschultz/port-manager",
+      "default": false,
+      "label": "Run lsof and kill commands as sudo"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.35.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

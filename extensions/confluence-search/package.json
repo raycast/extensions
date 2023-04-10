@@ -1,0 +1,94 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "confluence-search",
+  "title": "Confluence Search",
+  "description": "Search through Confluence",
+  "icon": "confluence-icon.png",
+  "author": "daviddkkim",
+  "contributors": [
+    "lr1980"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Search Wiki",
+      "subtitle": "Confluence",
+      "description": "Showing search results in Confleunce Wiki",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "instanceType",
+      "type": "dropdown",
+      "required": true,
+      "title": "Confluence instance type",
+      "description": "Cloud or on-premise",
+      "data": [
+        {
+          "value": "cloud",
+          "title": "Cloud"
+        },
+        {
+          "value": "on-premise",
+          "title": "On-premise"
+        }
+      ]
+    },
+    {
+      "name": "instance",
+      "type": "textfield",
+      "required": true,
+      "title": "Domain",
+      "description": "Domain of your Atlassian instance",
+      "placeholder": "my.atlassian.net"
+    },
+    {
+      "name": "unsafeHttps",
+      "type": "checkbox",
+      "required": false,
+      "title": "Unsafe HTTPS",
+      "description": "Activate unsafe HTTPS mode for self-signed certificates",
+      "default": false,
+      "label": "Enable"
+    },
+    {
+      "name": "user",
+      "type": "textfield",
+      "required": false,
+      "title": "Username (cloud only)",
+      "description": "Your Account",
+      "placeholder": "me@company.com"
+    },
+    {
+      "name": "token",
+      "type": "password",
+      "required": true,
+      "title": "API Token",
+      "description": "Your Atlassian API token.",
+      "link": "https://confluence.atlassian.com/enterprise/using-personal-access-tokens-1026032365.html",
+      "placeholder": "Enter your Atlassian API token."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.27.0",
+    "node-fetch": "^3.0.0",
+    "prettier": "^2.5.1"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint"
+  }
+}

@@ -1,0 +1,81 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "kill-process",
+  "title": "Kill Process",
+  "description": "Lists all running processes, ordered by CPU usage and allows killing one",
+  "icon": "icon.png",
+  "author": "rolandleth",
+  "contributors": [
+    "crazyones110"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Kill Process",
+      "description": "Lists all running processes, ordered by CPU usage and allows killing one",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "description": "Some processes are named differently than the app itself. This flag determines whether\nthe path of the process should be searched for the query, or only the process name.",
+      "label": "Filtering should search process paths",
+      "name": "shouldSearchInPaths",
+      "required": false,
+      "title": "Filtering",
+      "type": "checkbox"
+    },
+    {
+      "description": "Determines whether the pid of the process should be searched for the query, or only the process name.",
+      "label": "Filtering should search process pid",
+      "name": "shouldSearchInPid",
+      "required": false,
+      "title": "",
+      "type": "checkbox"
+    },
+    {
+      "description": "Determines whether apps are listed before other results when filtering.",
+      "label": "Prioritize apps when filtering",
+      "name": "shouldPrioritizeAppsWhenFiltering",
+      "required": false,
+      "title": "",
+      "type": "checkbox"
+    },
+    {
+      "description": "Show process PID info.",
+      "label": "Show PID",
+      "name": "shouldShowPID",
+      "required": false,
+      "title": "Display",
+      "type": "checkbox"
+    },
+    {
+      "description": "Show process Path.",
+      "label": "Show Process Path",
+      "name": "shouldShowPath",
+      "required": false,
+      "title": "",
+      "type": "checkbox"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.25.0",
+    "node-fetch": "^3.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "publish": "ray publish"
+  }
+}

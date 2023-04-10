@@ -1,0 +1,130 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "lark-applink",
+  "title": "Lark AppLink",
+  "description": "Open Lark AppLink",
+  "icon": "logo.png",
+  "author": "chyroc",
+  "categories": [
+    "Applications"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "open_calender",
+      "title": "Open Lark Calender",
+      "subtitle": "Lark AppLink",
+      "description": "Open Lark Calender",
+      "mode": "no-view"
+    },
+    {
+      "name": "open_calender_account",
+      "title": "Open Lark Calender Account",
+      "subtitle": "Lark AppLink",
+      "description": "Open Lark Calender Account",
+      "mode": "no-view"
+    },
+    {
+      "name": "open_calender_create",
+      "title": "Open Lark Calender Create",
+      "subtitle": "Lark AppLink",
+      "description": "Open Lark Calender Create",
+      "mode": "no-view"
+    },
+    {
+      "name": "open_calender_view_meeting",
+      "title": "Open Lark Calender View With Meeting Mode",
+      "subtitle": "Lark AppLink",
+      "description": "Open Lark Calender View With Meeting Mode",
+      "mode": "no-view"
+    },
+    {
+      "name": "open_calender_view_week",
+      "title": "Open Lark Calender View With Week Mode",
+      "subtitle": "Lark AppLink",
+      "description": "Open Lark Calender View With Week Mode",
+      "mode": "no-view"
+    },
+    {
+      "name": "open_chat",
+      "title": "Open Lark Chat",
+      "subtitle": "Lark AppLink",
+      "description": "Open Lark Chat",
+      "mode": "no-view"
+    },
+    {
+      "name": "open_lark_app",
+      "title": "Open Lark App",
+      "subtitle": "Lark AppLink",
+      "description": "Open Lark App",
+      "mode": "no-view"
+    },
+    {
+      "name": "open_todo",
+      "title": "Open Lark TODO",
+      "subtitle": "Lark AppLink",
+      "description": "Open Lark TODO",
+      "mode": "no-view"
+    },
+    {
+      "name": "open_todo_tab_all",
+      "title": "Open Lark TODO Tab With All Mode",
+      "subtitle": "Lark AppLink",
+      "description": "Open Lark TODO Tab With All Mode",
+      "mode": "no-view"
+    },
+    {
+      "name": "open_todo_tab_assign_from_me",
+      "title": "Open Lark TODO Tab With Assign From Me Mode",
+      "subtitle": "Lark AppLink",
+      "description": "Open Lark TODO Tab With Assign From Me Mode",
+      "mode": "no-view"
+    },
+    {
+      "name": "open_todo_tab_followed",
+      "title": "Open Lark TODO Tab With Followed Mode",
+      "subtitle": "Lark AppLink",
+      "description": "Open Lark TODO Tab With Followed Mode",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "type",
+      "type": "dropdown",
+      "required": true,
+      "title": "Type",
+      "description": "Your app type",
+      "data": [
+        {
+          "title": "Feishu",
+          "value": "feishu"
+        },
+        {
+          "title": "Lark",
+          "value": "lark"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.32.1"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

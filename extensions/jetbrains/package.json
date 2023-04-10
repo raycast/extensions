@@ -1,0 +1,104 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "jetbrains",
+  "title": "JetBrains Toolbox Recent Projects",
+  "description": "Search and open JetBrains Toolbox projects",
+  "icon": "jb.png",
+  "author": "gdsmith",
+  "contributors": [
+    "adrienbaron",
+    "dima-m711"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "recent",
+      "title": "Search Recent Projects",
+      "subtitle": "JetBrains Toolbox",
+      "description": "Search and open JetBrains Toolbox projects",
+      "mode": "view"
+    },
+    {
+      "name": "recentMenu",
+      "title": "Open Recent Projects",
+      "subtitle": "JetBrains Toolbox",
+      "description": "Open JetBrains Toolbox projects",
+      "mode": "menu-bar"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "bin",
+      "type": "textfield",
+      "required": false,
+      "title": "Shell scripts location",
+      "description": "Where are JetBrains Tools 'shell scripts' are installed (in Toolbox → Settings → Tools)",
+      "default": "/usr/local/bin",
+      "placeholder": "/usr/local/bin"
+    },
+    {
+      "name": "toolsInstall",
+      "type": "textfield",
+      "required": false,
+      "title": "Tools Install location",
+      "description": "What is the JetBrains Tools install Location? (in Toolbox → Settings → Tools)",
+      "default": "~/Library/Application Support/JetBrains/Toolbox",
+      "placeholder": "~/Library/Application Support/JetBrains/Toolbox"
+    },
+    {
+      "name": "fallback",
+      "type": "checkbox",
+      "required": false,
+      "title": "Use protocol urls if missing shell scripts",
+      "description": "Try to use the jetbrain://app-name protocol url to open projects if tools are not installed (not recommended)",
+      "default": false,
+      "label": "Enabled"
+    },
+    {
+      "name": "historic",
+      "type": "checkbox",
+      "required": false,
+      "title": "Use historic project files",
+      "description": "Add projects from previous app installs",
+      "default": false,
+      "label": "Use all"
+    }
+  ],
+  "keywords": [
+    "IntelliJ IDEA",
+    "PyCharm",
+    "WebStorm",
+    "PhpStorm",
+    "Rider",
+    "CLion",
+    "Datalore",
+    "DataSpell",
+    "DataGrip",
+    "RubyMine",
+    "AppCode",
+    "GoLand"
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.38.1",
+    "fast-glob": "^3.2.7",
+    "raycast-hooks": "^1.0.4",
+    "which": "^2.0.2",
+    "xml2js": "^0.4.23"
+  },
+  "devDependencies": {
+    "@types/glob": "^7.1.4",
+    "@types/which": "^2.0.1",
+    "@types/xml2js": "^0.4.9",
+    "@typescript-eslint/eslint-plugin": "^4.28.5",
+    "@typescript-eslint/parser": "^4.28.5",
+    "eslint": "^7.31.0",
+    "eslint-config-prettier": "^8.3.0",
+    "typescript": "^4.3.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

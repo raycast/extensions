@@ -1,0 +1,61 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "tower",
+  "title": "Tower Repositories",
+  "description": "Navigate and open your repositories in Tower.",
+  "icon": "icon.png",
+  "author": "tdwesten",
+  "version": "1.1.2",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "command-my-repositiories",
+      "title": "My Repositories",
+      "subtitle": "Tower",
+      "description": "Navigate and open your repositories in Tower.",
+      "keywords": [
+        "tower",
+        "repositories",
+        "repository",
+        "repo"
+      ],
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "towerCliPath",
+      "title": "Tower CLI path",
+      "description": "Your local Tower CLI path",
+      "link": "https://www.git-tower.com/help/guides/integration/cli-tool/mac",
+      "type": "textfield",
+      "default": "/usr/local/bin/gittower",
+      "value": "/usr/local/bin/gittower",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.28.0",
+    "node-git-current-branch": "^2.0.1",
+    "plist": "^3.0.4",
+    "tildify": "^3.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/plist": "^3.0.2",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.12.0",
+    "@typescript-eslint/parser": "^5.12.0",
+    "eslint": "^8.9.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "react-devtools": "^4.23.0",
+    "typescript": "^4.5.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

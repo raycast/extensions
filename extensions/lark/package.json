@@ -1,0 +1,79 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "lark",
+  "title": "Lark Documents",
+  "version": "0.0.8",
+  "description": "Quickly search documents from Feishu/Lark.",
+  "icon": "logo.png",
+  "author": "tmk",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-docs",
+      "title": "Search Documents",
+      "subtitle": "Lark",
+      "description": "Search and open documents in browser",
+      "keywords": [
+        "lark",
+        "feishu",
+        "docs",
+        "document"
+      ],
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "type",
+      "type": "dropdown",
+      "required": true,
+      "title": "Type",
+      "description": "Your app type",
+      "data": [
+        {
+          "title": "Feishu",
+          "value": "feishu"
+        },
+        {
+          "title": "Lark",
+          "value": "lark"
+        }
+      ]
+    },
+    {
+      "name": "recentListCount",
+      "type": "textfield",
+      "required": false,
+      "title": "Recent List Count",
+      "description": "Items count when fetching recent list",
+      "placeholder": "Enter recent list count",
+      "default": "15"
+    }
+  ],
+  "scripts": {
+    "lint": "ray lint",
+    "build": "ray build -e dist",
+    "dev": "ray develop"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.35.2",
+    "dayjs": "^1.11.2",
+    "got": "^12.1.0",
+    "qrcode": "^1.5.0",
+    "string": "^3.3.3",
+    "tough-cookie": "^4.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "~17.0.35",
+    "@types/qrcode": "^1.4.2",
+    "@types/react": "^18.0.9",
+    "@types/string": "^0.0.31",
+    "@types/tough-cookie": "^4.0.2",
+    "@typescript-eslint/eslint-plugin": "^5.26.0",
+    "@typescript-eslint/parser": "^5.26.0",
+    "eslint": "^8.16.0",
+    "eslint-config-prettier": "^8.5.0",
+    "react-devtools": "^4.24.6",
+    "typescript": "^4.7.2"
+  }
+}

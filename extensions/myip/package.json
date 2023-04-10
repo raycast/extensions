@@ -1,0 +1,46 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "myip",
+  "title": "MyIP",
+  "description": "My IP information",
+  "icon": "icon.png",
+  "author": "Kang",
+  "contributors": [
+    "iwyvi"
+  ],
+  "categories": [
+    "System",
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Show IP Address",
+      "description": "My IP information",
+      "keywords": [
+        "internet"
+      ],
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.48.8",
+    "axios": "^0.26.1",
+    "cheerio": "1.0.0-rc.12",
+    "ip": "^1.1.8"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.5",
+    "@types/ip": "^1.1.0",
+    "@types/node": "^18.8.3",
+    "eslint": "^7.32.0",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "publish": "ray publish"
+  }
+}

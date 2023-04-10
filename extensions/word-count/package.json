@@ -1,0 +1,47 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "word-count",
+  "title": "Word Count",
+  "description": "Count the number of characters, words, sentences, and paragraphs in some text.",
+  "icon": "word-count.png",
+  "access": "public",
+  "author": "itsmingjie",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "count",
+      "title": "Count",
+      "subtitle": "Word Count",
+      "description": "Count the number of characters, words, sentences, and paragraphs in some text.",
+      "mode": "view",
+      "keywords": [
+        "word",
+        "character",
+        "sentence",
+        "paragraph"
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.38.2",
+    "react": "^18.2.0"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

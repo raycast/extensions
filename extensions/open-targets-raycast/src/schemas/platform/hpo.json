@@ -1,0 +1,37 @@
+{
+  "fields": [
+    {
+      "metadata": {},
+      "name": "dbXRefs",
+      "nullable": true,
+      "type": { "containsNull": true, "elementType": "string", "type": "array" }
+    },
+    {
+      "metadata": {},
+      "name": "description",
+      "nullable": true,
+      "type": "string"
+    },
+    { "metadata": {}, "name": "id", "nullable": true, "type": "string" },
+    { "metadata": {}, "name": "name", "nullable": true, "type": "string" },
+    {
+      "metadata": {},
+      "name": "namespace",
+      "nullable": true,
+      "type": { "containsNull": true, "elementType": "string", "type": "array" }
+    },
+    {
+      "metadata": {},
+      "name": "obsolete_terms",
+      "nullable": true,
+      "type": { "containsNull": true, "elementType": "string", "type": "array" }
+    },
+    {
+      "metadata": {},
+      "name": "parents",
+      "nullable": true,
+      "type": { "containsNull": true, "elementType": "string", "type": "array" }
+    }
+  ],
+  "type": "struct"
+}

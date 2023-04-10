@@ -1,0 +1,51 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "1-click-confetti",
+  "title": "1-Click Confetti",
+  "description": "Confetti Gun with just 1 click.",
+  "icon": "icon-confetti.png",
+  "author": "peduarte",
+  "categories": [
+    "Fun"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "confettiSound",
+      "description": "Play sound when confetti is fired",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "Enable sound"
+    }
+  ],
+  "commands": [
+    {
+      "name": "index",
+      "title": "Confetti in Menu Bar",
+      "description": "Confetti Gun with just 1 click.",
+      "mode": "menu-bar"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.39.3",
+    "@raycast/utils": "^1.4.1"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

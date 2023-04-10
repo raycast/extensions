@@ -1,0 +1,53 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "todo-list",
+  "title": "Todo List",
+  "description": "Manage your todo list quickly by adding items and marking items as completed.",
+  "icon": "command-icon.png",
+  "author": "maggie",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Manage Todo List",
+      "description": "Create and delete items, mark them as completed and pin important tasks.",
+      "mode": "view"
+    },
+    {
+      "name": "menu_bar",
+      "title": "Todo List",
+      "description": "See your Todos at a glance",
+      "mode": "menu-bar"
+    }
+  ],
+  "categories": [
+    "Applications",
+    "Productivity"
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.38.1",
+    "@raycast/utils": "^1.1.0",
+    "dayjs": "^1.10.7",
+    "jotai": "^1.4.0",
+    "lodash": "^4.17.21",
+    "url-regex-safe": "^3.0.0"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.14.175",
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@types/url-regex-safe": "^1.0.0",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

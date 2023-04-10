@@ -1,0 +1,310 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "homeassistant",
+  "title": "Home Assistant",
+  "version": "1.2.4",
+  "author": "tonka3000",
+  "contributors": [
+    "altrdev",
+    "rspeicher"
+  ],
+  "license": "MIT",
+  "description": "Home Assistant remote control. Control your house with Raycast 🚀",
+  "icon": "home-assistant.png",
+  "commands": [
+    {
+      "name": "index",
+      "title": "All Entities",
+      "subtitle": "Home Assistant",
+      "description": "Get/Set states of Home Assistant entities",
+      "mode": "view"
+    },
+    {
+      "name": "covers",
+      "title": "Covers",
+      "subtitle": "Home Assistant",
+      "description": "Get/Set states of Home Assistant covers",
+      "mode": "view"
+    },
+    {
+      "name": "fans",
+      "title": "Fans",
+      "subtitle": "Home Assistant",
+      "description": "Get/Set states of Home Assistant fans",
+      "mode": "view"
+    },
+    {
+      "name": "lights",
+      "title": "Lights",
+      "subtitle": "Home Assistant",
+      "description": "Get/Set states of Home Assistant lights",
+      "mode": "view"
+    },
+    {
+      "name": "persons",
+      "title": "Persons",
+      "subtitle": "Home Assistant",
+      "description": "Get/Set states of Home Assistant persons",
+      "mode": "view"
+    },
+    {
+      "name": "sensors",
+      "title": "Sensors",
+      "subtitle": "Home Assistant",
+      "description": "Get/Set states of Home Assistant sensors",
+      "mode": "view"
+    },
+    {
+      "name": "binarysensors",
+      "title": "Binary Sensors",
+      "subtitle": "Home Assistant",
+      "description": "Get/Set states of Home Assistant binary sensors",
+      "mode": "view"
+    },
+    {
+      "name": "mediaplayers",
+      "title": "Mediaplayers",
+      "subtitle": "Home Assistant",
+      "description": "Get/Set states of Home Assistant mediaplayers",
+      "mode": "view"
+    },
+    {
+      "name": "automations",
+      "title": "Automations",
+      "subtitle": "Home Assistant",
+      "description": "Home Assistant automations",
+      "mode": "view"
+    },
+    {
+      "name": "dashboard",
+      "title": "Dashboard",
+      "subtitle": "Home Assistant",
+      "description": "Open Home Assistant dashboard",
+      "mode": "no-view"
+    },
+    {
+      "name": "climate",
+      "title": "Climate",
+      "subtitle": "Home Assistant",
+      "description": "Get/Set states of Home Assistant climate entities",
+      "mode": "view"
+    },
+    {
+      "name": "attributes",
+      "title": "All Entities With Attributes",
+      "subtitle": "Home Assistant",
+      "description": "Query Home Assistant entity attributes",
+      "mode": "view"
+    },
+    {
+      "name": "batteries",
+      "title": "Batteries",
+      "subtitle": "Home Assistant",
+      "description": "Query Batteries",
+      "mode": "view"
+    },
+    {
+      "name": "motions",
+      "title": "Motions",
+      "subtitle": "Home Assistant",
+      "description": "Query Motion Sensors",
+      "mode": "view"
+    },
+    {
+      "name": "vacuums",
+      "title": "Vacuum Cleaners",
+      "subtitle": "Home Assistant",
+      "description": "Query Vacuum Cleaners",
+      "mode": "view"
+    },
+    {
+      "name": "cameras",
+      "title": "Cameras",
+      "subtitle": "Home Assistant",
+      "description": "Query Cameras",
+      "mode": "view"
+    },
+    {
+      "name": "scripts",
+      "title": "Scripts",
+      "subtitle": "Home Assistant",
+      "description": "Query Scripts",
+      "mode": "view"
+    },
+    {
+      "name": "buttons",
+      "title": "Buttons",
+      "subtitle": "Home Assistant",
+      "description": "Query Buttons",
+      "mode": "view"
+    },
+    {
+      "name": "scenes",
+      "title": "Scenes",
+      "subtitle": "Home Assistant",
+      "description": "Query Scenes",
+      "mode": "view"
+    },
+    {
+      "name": "switches",
+      "title": "Switches",
+      "subtitle": "Home Assistant",
+      "description": "Get/Set states of Home Assistant Switches",
+      "mode": "view"
+    },
+    {
+      "name": "helpers",
+      "title": "Helpers",
+      "subtitle": "Home Assistant",
+      "description": "Get/Set states of Home Assistant Helpers",
+      "mode": "view"
+    },
+    {
+      "name": "updates",
+      "title": "Updates",
+      "subtitle": "Home Assistant",
+      "description": "Get/Set states of Home Assistant Entity Updates",
+      "mode": "view"
+    },
+    {
+      "name": "doors",
+      "title": "Doors",
+      "subtitle": "Home Assistant",
+      "description": "Get/Set states of Home Assistant Entity with device class door",
+      "mode": "view"
+    },
+    {
+      "name": "weather",
+      "title": "Weather",
+      "subtitle": "Home Assistant",
+      "description": "Get Weather states of Home Assistant Entity Weather",
+      "mode": "view"
+    },
+    {
+      "name": "windows",
+      "title": "Windows",
+      "subtitle": "Home Assistant",
+      "description": "Get/Set states of Home Assistant Entity with device class window",
+      "mode": "view"
+    },
+    {
+      "name": "notificationmenu",
+      "title": "Notifications Menu",
+      "description": "Display Persistent Notifications in the MenuBar",
+      "mode": "menu-bar",
+      "subtitle": "Home Assistant",
+      "interval": "1m",
+      "preferences": [
+        {
+          "name": "showcount",
+          "description": "Show Notification Count in Menu",
+          "type": "checkbox",
+          "label": "Show Notification Count in Menubar",
+          "required": false,
+          "default": false
+        }
+      ]
+    },
+    {
+      "name": "zones",
+      "title": "Zones",
+      "description": "Get states about Zones",
+      "mode": "view",
+      "subtitle": "Home Assistant"
+    },
+    {
+      "name": "weathermenu",
+      "title": "Weather Menu Bar",
+      "description": "Display Weather entity in the Menu Bar",
+      "mode": "menu-bar",
+      "interval": "15m",
+      "preferences": [
+        {
+          "name": "entity",
+          "description": "Weather Entity ID which will be shown",
+          "type": "textfield",
+          "required": false,
+          "title": "Weather Entity",
+          "placeholder": "weather.home"
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "instance",
+      "type": "textfield",
+      "required": true,
+      "title": "Home Assistant URL",
+      "description": "URL of your Home Assistant instance",
+      "placeholder": "http://homeassistant.local:8123"
+    },
+    {
+      "name": "token",
+      "type": "password",
+      "required": true,
+      "title": "API Token",
+      "description": "Your Home Assistant long-lived access token",
+      "placeholder": "Enter your Home Assistant long-lived access token"
+    },
+    {
+      "name": "ignorecerts",
+      "type": "checkbox",
+      "label": "Ignore Certificates",
+      "required": false,
+      "default": false,
+      "title": "Network Settings",
+      "description": "Ignore Certificates",
+      "placeholder": "Ignore Certificates"
+    },
+    {
+      "name": "showEntityId",
+      "type": "checkbox",
+      "label": "Show Entity IDs",
+      "required": false,
+      "default": false,
+      "title": "Style",
+      "description": "Show Entity IDs as subtitle"
+    },
+    {
+      "name": "camerarefreshinterval",
+      "type": "textfield",
+      "required": false,
+      "default": "3000",
+      "title": "Camera Refresh Interval (ms)",
+      "description": "Refresh interval in ms for camera streams. Values < 2000 are not recommended. 0 mean no auto refresh at all",
+      "placeholder": "3000"
+    }
+  ],
+  "categories": [
+    "Other"
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.42.0",
+    "home-assistant-js-websocket": "^5.11.1",
+    "javascript-time-ago": "^2.5.9",
+    "lodash-es": "^4.17.21",
+    "node-fetch": "^2.6.1",
+    "open": "^8.3.0",
+    "url-join": "^4.0.1",
+    "ws": "^8.2.3"
+  },
+  "devDependencies": {
+    "@types/lodash-es": "^4.17.6",
+    "@types/node": "^18.8.3",
+    "@types/node-fetch": "^2.5.12",
+    "@types/url-join": "^4.0.1",
+    "@types/ws": "^8.2.0",
+    "@typescript-eslint/eslint-plugin": "^4.28.5",
+    "@typescript-eslint/parser": "^4.28.5",
+    "eslint": "^7.31.0",
+    "eslint-config-prettier": "^8.3.0",
+    "typescript": "^4.3.5"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build -e dist",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

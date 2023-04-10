@@ -1,0 +1,115 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "microsoft-edge",
+  "title": "Microsoft Edge",
+  "description": "Search open tabs, bookmarks, collections and history in Microsoft Edge.",
+  "icon": "microsoft-edge-icon.png",
+  "author": "KartikKumarSahoo",
+  "contributors": [
+    "bromanko",
+    "crisboarna"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-bookmarks",
+      "title": "Search Bookmarks",
+      "subtitle": "Microsoft Edge",
+      "description": "Search Microsoft Edge browser bookmarks.",
+      "mode": "view"
+    },
+    {
+      "name": "search-tab",
+      "title": "Search Tabs",
+      "subtitle": "Microsoft Edge",
+      "description": "List all tabs and go to the selected.",
+      "mode": "view"
+    },
+    {
+      "name": "search-history",
+      "title": "Search History",
+      "subtitle": "Microsoft Edge",
+      "description": "Search browser history.",
+      "mode": "view"
+    },
+    {
+      "name": "search-collections",
+      "title": "Search Collections",
+      "subtitle": "Microsoft Edge",
+      "description": "Search Microsoft Edge browser collections.",
+      "mode": "view"
+    },
+    {
+      "name": "new-tab",
+      "title": "New Tab",
+      "subtitle": "Microsoft Edge",
+      "description": "Open a new Microsoft Edge tab.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "useDev",
+      "title": "Use Dev",
+      "label": "use Microsoft Edge Dev",
+      "description": "use Microsoft Edge Dev",
+      "required": false,
+      "type": "checkbox",
+      "default": false
+    },
+    {
+      "name": "useOriginalFavicon",
+      "title": "Fav icon",
+      "label": "Extract the favicon from every open tab",
+      "description": "Before enable this, you should enable 'Tools > Developer > Allow JavaScript from Apple Events' in every Microsoft Edge profile.",
+      "required": false,
+      "type": "checkbox",
+      "default": false
+    },
+    {
+      "name": "openTabInProfile",
+      "title": "Open Tab In Profile",
+      "type": "dropdown",
+      "required": false,
+      "description": "When 'Default(classic), the tab will be opened in the profile open, or topmost profile window if multiple windows are open. When 'Current Profile', the tab will be opened in the profile specified in the 'Profile' field. When 'Original Profile' it will open in original profile tab is sourced from",
+      "default": "default",
+      "data": [
+        {
+          "title": "Default(classic)",
+          "value": "default"
+        },
+        {
+          "title": "Current Profile",
+          "value": "profile_current"
+        },
+        {
+          "title": "Original Profile",
+          "value": "profile_original"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.44.0",
+    "@raycast/utils": "^1.4.13",
+    "run-applescript": "6.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.9.4"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  },
+  "repository": "git@github.com:raycast/extensions.git"
+}

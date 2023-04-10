@@ -1,0 +1,61 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "tableplus",
+  "title": "TablePlus",
+  "description": "Search and open database connections in TablePlus",
+  "version": "1.2.1",
+  "icon": "icon.png",
+  "author": "pernielsentikaer",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "database_list",
+      "title": "Search Databases",
+      "subtitle": "TablePlus",
+      "description": "List all databases",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "path",
+      "type": "textfield",
+      "required": false,
+      "title": "TablePlus data directory",
+      "placeholder": "Leave blank for default location",
+      "description": "If you moved the data directory\r\n(must be full-paths or tidle-prefixed ones)"
+    },
+    {
+      "name": "showConnectionDriver",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "title": "Show Connection Driver",
+      "description": "Show Connection Driver",
+      "label": "Show Connection Driver in List"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.45.0",
+    "plist": "^3.0.4"
+  },
+  "devDependencies": {
+    "@types/expand-tilde": "^2.0.0",
+    "@types/node": "^18.8.3",
+    "@types/plist": "^3.0.2",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "expand-tilde": "^2.0.2",
+    "prettier": "^2.5.1",
+    "react-devtools": "^4.21.0",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

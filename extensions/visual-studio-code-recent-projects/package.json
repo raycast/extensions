@@ -1,0 +1,113 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "visual-studio-code",
+  "title": "Visual Studio Code Recent Projects",
+  "description": "Search and open recent projects from Visual Studio Code.",
+  "icon": "icon.png",
+  "author": "thomas",
+  "contributors": [
+    "iainsimmons",
+    "macbookandrew",
+    "cy-98",
+    "immint023",
+    "pernielsentikaer",
+    "elijahs"
+  ],
+  "keywords": [
+    "vscode"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Search Recent Projects",
+      "subtitle": "Visual Studio Code",
+      "description": "Search and open recent projects from Visual Studio Code.",
+      "mode": "view"
+    },
+    {
+      "name": "open-with-vscode",
+      "title": "Open With Visual Studio Code",
+      "subtitle": "Visual Studio Code",
+      "description": "Opens the currently selected Finder item with Visual Studio Code.",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "build",
+      "type": "dropdown",
+      "required": false,
+      "title": "Build",
+      "default": "Code",
+      "description": "Select which build of Visual Studio Code to use when searching for recent projects",
+      "data": [
+        {
+          "value": "Code",
+          "title": "Visual Studio Code"
+        },
+        {
+          "value": "Code - Insiders",
+          "title": "Visual Studio Code - Insiders"
+        },
+        {
+          "value": "VSCodium",
+          "title": "VSCodium"
+        }
+      ]
+    },
+    {
+      "name": "layout",
+      "title": "View Layout",
+      "type": "dropdown",
+      "required": false,
+      "default": "list",
+      "description": "Select the layout of the view",
+      "data": [
+        {
+          "value": "list",
+          "title": "List"
+        },
+        {
+          "value": "grid",
+          "title": "Grid"
+        }
+      ]
+    },
+    {
+      "name": "keepSectionOrder",
+      "type": "checkbox",
+      "title": "Advanced",
+      "required": false,
+      "label": "Keep Section Order",
+      "default": false,
+      "description": "Keep the order of the sections while searching folders, files, etc."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.35.0",
+    "@raycast/utils": "^1.4.0",
+    "lodash.get": "^4.4.2",
+    "prettier": "^2.8.1",
+    "sql.js": "^1.6.2",
+    "tildify": "^3.0.0"
+  },
+  "devDependencies": {
+    "@types/lodash.get": "^4.4.7",
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@types/sql.js": "^1.4.3",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-react": "^7.26.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build -e dist",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

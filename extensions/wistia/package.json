@@ -1,0 +1,55 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "wistia",
+  "title": "Wistia",
+  "description": "Search Wistia Medias and Projects",
+  "icon": "wistia-logo.png",
+  "author": "darin",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "my-medias",
+      "title": "My Medias",
+      "subtitle": "Wistia",
+      "description": "Search videos in your Wistia account",
+      "mode": "view"
+    },
+    {
+      "name": "my-projects",
+      "title": "My Projects",
+      "subtitle": "Wistia",
+      "description": "Search projects in your Wistia account",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.26.3",
+    "lodash.groupby": "^4.6.0",
+    "node-fetch": "^3.1.0"
+  },
+  "devDependencies": {
+    "@types/lodash.groupby": "^4.6.6",
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "react-devtools": "^4.21.0",
+    "typescript": "^4.4.3"
+  },
+  "preferences": [
+    {
+      "name": "wistiaApiToken",
+      "title": "Wistia API Token",
+      "description": "Your Wistia API Token",
+      "type": "password",
+      "default": "",
+      "required": true
+    }
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop"
+  }
+}

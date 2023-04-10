@@ -1,0 +1,57 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "geohash-encode-decode",
+  "title": "Geohash",
+  "description": "Encode coordinates as geohash, or decode a geohash and get useful info",
+  "icon": "command-icon.png",
+  "author": "alrico88",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "encode-coordinates",
+      "title": "Encode as Geohash",
+      "description": "Enter a latitude and longitude and get that point's representation as a geohash for any precision",
+      "mode": "view"
+    },
+    {
+      "name": "decode-geohash",
+      "title": "Decode Geohash",
+      "description": "Enter a geohash and get insights such as the GeoJSON or WKT Polygon representation, centroid, neighbors, and more",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "label": "Close on Action",
+      "description": "Close extension on action execution (Copy to Clipboard / Open in Browser)",
+      "default": true,
+      "type": "checkbox",
+      "name": "closeOnAction",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.27.0",
+    "@sindresorhus/is": "^4.2.1",
+    "geohash-to-geojson": "^4.1.0",
+    "ngeohash": "^0.6.3",
+    "wkt-parser-helper": "^4.0.1"
+  },
+  "devDependencies": {
+    "@types/ngeohash": "^0.6.4",
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint"
+  }
+}

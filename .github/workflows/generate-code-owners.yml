@@ -1,0 +1,45 @@
+name: Update CODEOWNERs
+
+on:
+  push:
+    paths:
+      - "extensions/**/package.json"
+    branches: [main, master]
+  workflow_dispatch:
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    if: github.repository == 'raycast/extensions'
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: raycast/github-actions/setup-node@master
+
+      - name: Generate
+        working-directory: scripts
+        run: ./generate-code-owners.js
+
+      - name: Commit
+        uses: raycast/github-actions/git-commit@master
+        with:
+          repo_dir: ${{ github.workspace }}
+          message: "Update CODEOWNERs"
+
+      - name: Notify Failure to Slack
+        if: failure()
+        uses: edge/simple-slack-notify@master
+        with:
+          color: "danger"
+          text: ":no_entry_sign: ${env.GITHUB_WORKFLOW} has failed"
+          fields: |
+            [
+              { "title": "Action logs:", "value": "${env.GITHUB_SERVER_URL}/${env.GITHUB_REPOSITORY}/actions/runs/${env.GITHUB_RUN_ID}"},
+              { "title": "Commit:", "value": "${env.GITHUB_SERVER_URL}/${env.GITHUB_REPOSITORY}/commit/${ env.GITHUB_SHA }"}
+            ]
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_RELEASE_CHANNEL_WEBHOOK_URL }}

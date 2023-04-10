@@ -1,0 +1,52 @@
+{
+	"$schema": "https://www.raycast.com/schemas/extension.json",
+	"author": "FlorianWendelborn",
+	"categories": [
+		"Data",
+		"Fun"
+	],
+	"commands": [
+		{
+			"description": "View a list of Dota 2 heroes.",
+			"mode": "view",
+			"name": "command-heroes",
+			"subtitle": "Dota 2",
+			"title": "View Heroes"
+		},
+		{
+			"description": "View a list of Dota 2 items.",
+			"mode": "view",
+			"name": "command-items",
+			"subtitle": "Dota 2",
+			"title": "View Items"
+		}
+	],
+	"dependencies": {
+		"@metatypes/typography": "^0.5.0",
+		"@raycast/api": "^1.39.3",
+		"axios": "^0.27.2",
+		"lodash.startcase": "^4.4.0",
+		"zod": "^3.19.0"
+	},
+	"description": "View various data about Dota 2, like heroes and their stats.",
+	"devDependencies": {
+		"@types/lodash.startcase": "^4.4.7",
+		"@types/node": "~18.7.16",
+		"@types/react": "^18.0.19",
+		"@typescript-eslint/eslint-plugin": "^5.36.2",
+		"@typescript-eslint/parser": "^5.36.2",
+		"eslint": "^8.23.0",
+		"eslint-config-prettier": "^8.5.0",
+		"react-devtools": "^4.25.0",
+		"typescript": "^4.8.3"
+	},
+	"icon": "icon.png",
+	"license": "MIT",
+	"name": "dota-2",
+	"preferences": [],
+	"scripts": {
+		"build": "ray build -e dist",
+		"dev": "ray develop"
+	},
+	"title": "Dota 2"
+}

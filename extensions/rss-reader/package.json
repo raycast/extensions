@@ -1,0 +1,57 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "rss-reader",
+  "title": "RSS Reader",
+  "description": "Browse latest news from your favourite sources",
+  "icon": "command-icon.png",
+  "author": "fuksman",
+  "license": "MIT",
+  "contributors": [
+    "pernielsentikaer",
+    "pomdtr"
+  ],
+  "commands": [
+    {
+      "name": "feeds",
+      "title": "View Subscriptions",
+      "subtitle": "RSS",
+      "description": "Manage your favourite sources and read stories",
+      "mode": "view"
+    },
+    {
+      "name": "subscription-form",
+      "title": "Add Subscription",
+      "subtitle": "RSS",
+      "description": "Subscribe to a new sources",
+      "mode": "view"
+    },
+    {
+      "name": "stories",
+      "title": "Read All Stories",
+      "subtitle": "RSS",
+      "description": "Get the latest from all your favourite sources at once",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.39.0",
+    "@raycast/utils": "^1.4.11",
+    "javascript-time-ago": "^2.3.9",
+    "nanoid": "^4.0.0",
+    "node-fetch": "^3.0.0",
+    "node-html-markdown": "^1.2.0",
+    "rss-parser": "^3.12.0"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.4"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop"
+  }
+}

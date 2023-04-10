@@ -1,0 +1,90 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "trello",
+  "title": "Trello",
+  "description": "Raycast extension for showing, searching, and interacting with cards from Trello",
+  "icon": "command-icon.png",
+  "author": "ChrisChinchilla",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Fetch Todos",
+      "subtitle": "Trello",
+      "description": "Fetch all assigned todos",
+      "mode": "view"
+    },
+    {
+      "name": "searchTodos",
+      "title": "Search Todos",
+      "subtitle": "Trello",
+      "description": "Search all todos across all your boards",
+      "mode": "view"
+    },
+    {
+      "name": "searchBoards",
+      "title": "Search Boards",
+      "subtitle": "Trello",
+      "description": "Search all your open boards",
+      "mode": "view"
+    },
+    {
+      "name": "createTodo",
+      "title": "Create a Todo",
+      "subtitle": "Trello",
+      "description": "Search all your open boards",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "username",
+      "type": "textfield",
+      "required": true,
+      "title": "Trello Username",
+      "description": "Trello Username",
+      "link": "https://developer.atlassian.com/cloud/trello/guides/rest-api/api-introduction/",
+      "placeholder": "Trello username"
+    },
+    {
+      "name": "token",
+      "type": "password",
+      "required": true,
+      "title": "Personal Access Token",
+      "description": "Trello Access token",
+      "link": "https://developer.atlassian.com/cloud/trello/guides/rest-api/api-introduction/",
+      "placeholder": "Trello Access token"
+    },
+    {
+      "name": "apitoken",
+      "type": "textfield",
+      "required": true,
+      "title": "API Token",
+      "description": "Application Trello API token",
+      "link": "https://developer.atlassian.com/cloud/trello/guides/rest-api/api-introduction/",
+      "placeholder": "13f8c59607ba6d82531d3db5f46999c1",
+      "default": "13f8c59607ba6d82531d3db5f46999c1"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.47.3"
+  },
+  "devDependencies": {
+    "@types/node": "~18.11.18",
+    "@types/react": "^18.0.26",
+    "@typescript-eslint/eslint-plugin": "^5.48.1",
+    "@typescript-eslint/parser": "^5.48.1",
+    "eslint": "^8.31.0",
+    "eslint-config-prettier": "^8.6.0",
+    "node-fetch": "^3.3.0",
+    "prettier": "2.8.2",
+    "react-devtools": "^4.27.1",
+    "typescript": "^4.9.4"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix"
+  }
+}

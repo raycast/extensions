@@ -1,0 +1,61 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "whatsapp",
+  "title": "WhatsApp",
+  "description": "Open WhatsApp chats",
+  "icon": "whatsapp.png",
+  "author": "vimtor",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "open-chat",
+      "title": "Open Chat",
+      "subtitle": "WhatsApp",
+      "description": "Open quickly added WhatsApp chats",
+      "mode": "view"
+    },
+    {
+      "name": "add-chat",
+      "title": "Add Chat",
+      "subtitle": "WhatsApp",
+      "description": "Add WhatsApp chats to open them later",
+      "mode": "view"
+    },
+    {
+      "name": "add-existing-group",
+      "title": "Add Existing Group",
+      "subtitle": "WhatsApp",
+      "description": "Add existing WhatsApp groups to open them later",
+      "mode": "view"
+    }
+  ],
+  "categories": [
+    "Applications",
+    "Communication",
+    "Productivity"
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.48.8",
+    "@raycast/utils": "^1.5.2",
+    "nanoid": "^4.0.1",
+    "fromnow": "^3.0.1",
+    "phone": "^3.1.35"
+  },
+  "devDependencies": {
+    "@types/node": "^18.15.0",
+    "@types/react": "^18.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "react-devtools": "^4.19.2",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

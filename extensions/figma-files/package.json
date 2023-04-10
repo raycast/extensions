@@ -1,0 +1,65 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "figma-files-raycast-extension",
+  "title": "Figma File Search",
+  "description": "Lists Figma files allowing you to search and navigate to them.",
+  "icon": "command-icon.png",
+  "author": "michaelschultz",
+  "contributors": [
+    "pernielsentikaer"
+  ],
+  "version": "1.2.0",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Search Files",
+      "subtitle": "Figma",
+      "description": "Lists Figma files allowing you to search and navigate to them.",
+      "mode": "view"
+    },
+    {
+      "name": "menu-bar",
+      "title": "Quicklook",
+      "subtitle": "Figma",
+      "description": "See your Figma most recent files at a glance",
+      "mode": "menu-bar",
+      "interval": "2h"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "PERSONAL_ACCESS_TOKEN",
+      "type": "password",
+      "required": true,
+      "title": "Personal Access Token",
+      "description": "Log in to Figma and click settings to setup a token"
+    },
+    {
+      "name": "TEAM_ID",
+      "type": "password",
+      "required": true,
+      "title": "Team ID",
+      "description": "Find this in the url after navigating to your team page"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.39.1",
+    "node-fetch": "^3.2.10"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "eslint src --fix"
+  }
+}

@@ -1,0 +1,112 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "coffee",
+  "title": "Coffee",
+  "description": "Prevent the sleep function on your mac",
+  "icon": "logo.png",
+  "author": "mooxl",
+  "contributors": [
+    "bibixx",
+    "GastroGeek",
+    "pernielsentikaer"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "caffeinate",
+      "title": "Caffeinate",
+      "subtitle": "Coffee",
+      "description": "Prevent your Mac from sleeping",
+      "mode": "no-view"
+    },
+    {
+      "name": "decaffeinate",
+      "title": "Decaffeinate",
+      "subtitle": "Coffee",
+      "description": "Turn off the caffeine",
+      "mode": "no-view"
+    },
+    {
+      "name": "caffeinateWhile",
+      "title": "Caffeinate While",
+      "subtitle": "Coffee",
+      "description": "Prevent your Mac from sleeping while an certain app is running",
+      "mode": "view"
+    },
+    {
+      "name": "index",
+      "title": "Caffeinate Status Menubar",
+      "subtitle": "Coffee",
+      "description": "Get the status of the current caffeination in your menubar",
+      "mode": "menu-bar",
+      "interval": "1m"
+    },
+    {
+      "name": "caffeinateToggle",
+      "title": "Toggle Caffeinate",
+      "subtitle": "Coffee",
+      "description": "Toggle caffeination",
+      "mode": "no-view"
+    },
+    {
+      "name": "caffeinateFor",
+      "title": "Caffeinate For",
+      "subtitle": "Coffee",
+      "description": "Prevent your Mac from sleeping for a certain time",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "preventDisplay",
+      "description": "Prevent the display from sleeping",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "title": "Options",
+      "placeholder": "Prevent Display Sleep",
+      "label": "Prevent Display Sleep"
+    },
+    {
+      "name": "preventSystem",
+      "description": "Prevent the system from sleeping",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "title": "Options",
+      "placeholder": "Prevent System Sleep",
+      "label": "Prevent System Sleep"
+    },
+    {
+      "name": "preventDisk",
+      "description": "Prevent the disc from sleeping",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "title": "Options",
+      "placeholder": "Prevent Disk Sleep",
+      "label": "Prevent Disk Sleep"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.44.0",
+    "@raycast/utils": "^1.4.11",
+    "run-applescript": "^6.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

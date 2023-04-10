@@ -1,0 +1,145 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "search-npm",
+  "title": "Search npm Packages",
+  "description": "Search for npm package information",
+  "subtitle": "npm",
+  "icon": "command-icon.png",
+  "author": "mrmartineau",
+  "contributors": [
+    "reloadedhead",
+    "Timon",
+    "luisFilipePT"
+  ],
+  "license": "MIT",
+  "categories": [
+    "Developer Tools"
+  ],
+  "commands": [
+    {
+      "name": "index",
+      "title": "Search Packages",
+      "subtitle": "npm",
+      "description": "Search for npm package information. Also view bundlephobia.com cost, the package's README and Snyk vulnerability info",
+      "mode": "view"
+    },
+    {
+      "name": "favorites",
+      "title": "View Favorites",
+      "subtitle": "npm",
+      "description": "View your favorite packages",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "defaultCopyAction",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "yarn",
+          "value": "yarn"
+        },
+        {
+          "title": "npm",
+          "value": "npm"
+        },
+        {
+          "title": "pnpm",
+          "value": "pnpm"
+        }
+      ],
+      "title": "Default Package Manager",
+      "description": "The package manager to use by default",
+      "required": false,
+      "default": "npm",
+      "value": "npm"
+    },
+    {
+      "name": "secondaryCopyAction",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "yarn",
+          "value": "yarn"
+        },
+        {
+          "title": "npm",
+          "value": "npm"
+        },
+        {
+          "title": "pnpm",
+          "value": "pnpm"
+        }
+      ],
+      "title": "Secondary Package Manager",
+      "description": "The secondary package manager to use",
+      "required": false,
+      "default": "yarn",
+      "value": "yarn"
+    },
+    {
+      "name": "defaultOpenAction",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "Open Repository",
+          "value": "openRepository"
+        },
+        {
+          "title": "Open Homepage",
+          "value": "openHomepage"
+        },
+        {
+          "title": "npm Package Page",
+          "value": "npmPackagePage"
+        },
+        {
+          "title": "Skypack.dev Package Page",
+          "value": "skypackPackagePage"
+        }
+      ],
+      "title": "Default Open Action",
+      "description": "How to open the selected package when Enter is pressed",
+      "required": false,
+      "default": "openRepository",
+      "value": "openRepository"
+    },
+    {
+      "name": "historyCount",
+      "type": "textfield",
+      "title": "History Count",
+      "description": "How many items to store in your history",
+      "required": false,
+      "default": "30",
+      "value": "30"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.48.9",
+    "@raycast/utils": "^1.5.2",
+    "dedupe": "^4.0.2",
+    "fetch-readme": "^1.0.0",
+    "gitlab-url-parse": "^1.0.0",
+    "parse-github-url": "^1.0.2",
+    "tiny-relative-date": "^1.3.0",
+    "use-debounce": "^9.0.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.5",
+    "@types/node": "^18.15.6",
+    "@types/parse-github-url": "^1.0.0",
+    "@types/react": "^18.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.56.0",
+    "@typescript-eslint/parser": "^5.56.0",
+    "eslint": "^8.36.0",
+    "eslint-config-prettier": "^8.8.0",
+    "react-devtools": "^4.27.3",
+    "typescript": "^5.0.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint"
+  }
+}

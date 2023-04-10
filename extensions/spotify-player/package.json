@@ -1,0 +1,166 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "spotify-player",
+  "title": "Spotify Player",
+  "description": "Search and Play Spotify music from Raycast, and control your library with convenient commands.",
+  "icon": "icon.png",
+  "author": "mattisssa",
+  "license": "MIT",
+  "contributors": [
+    "dillionverma",
+    "andreaselia",
+    "stuart",
+    "tonka3000",
+    "dancannon",
+    "sxn"
+  ],
+  "commands": [
+    {
+      "name": "justPlay",
+      "title": "Just Play",
+      "subtitle": "Spotify",
+      "description": "Starts the song by query straightway in Spotify",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Track / Artist",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "nowPlaying",
+      "title": "Now Playing",
+      "description": "Shows currently playing song",
+      "subtitle": "Spotify",
+      "mode": "view"
+    },
+    {
+      "name": "nowPlayingMenuBar",
+      "title": "Menu Bar Player",
+      "description": "Shows currently playing song in the Subtitle and in the Menu Bar. It also automatically refreshes in the background once per minute.",
+      "subtitle": "Spotify",
+      "mode": "menu-bar",
+      "interval": "10s",
+      "preferences": [
+        {
+          "name": "maxtitlelength",
+          "description": "Max Menubar title length. Leave empty for no limitation.",
+          "type": "textfield",
+          "required": false,
+          "title": "Max. Menubar Title length"
+        },
+        {
+          "name": "showEllipsis",
+          "description": "Check to show ellipsis if title is longer than the max length.",
+          "type": "checkbox",
+          "title": "Show Ellipsis",
+          "label": "Show ellipsis (...) if title is truncated.",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "playSimilar",
+      "title": "Start Radio",
+      "subtitle": "Spotify",
+      "description": "Starts playing similar tracks to the currently playing. The command initiate the Song's Radio",
+      "mode": "no-view"
+    },
+    {
+      "name": "searchTracks",
+      "title": "Search Tracks",
+      "subtitle": "Spotify",
+      "description": "Search & Play tracks in Spotify",
+      "mode": "view"
+    },
+    {
+      "name": "searchAlbums",
+      "title": "Search Albums",
+      "subtitle": "Spotify",
+      "description": "Search & Play albums in Spotify",
+      "mode": "view"
+    },
+    {
+      "name": "searchPlaylists",
+      "title": "Search Playlists",
+      "subtitle": "Spotify",
+      "description": "Search & Play playlists in Spotify",
+      "mode": "view"
+    },
+    {
+      "name": "searchArtists",
+      "title": "Search Artists",
+      "subtitle": "Spotify",
+      "description": "Search Artists in Spotify",
+      "mode": "view"
+    },
+    {
+      "name": "featuredPlaylists",
+      "title": "Featured Playlists",
+      "subtitle": "Spotify",
+      "description": "View featured playlists in Spotify",
+      "mode": "view"
+    },
+    {
+      "name": "browseAll",
+      "title": "Browse All",
+      "subtitle": "Spotify",
+      "description": "Browse genres in Spotify",
+      "mode": "view"
+    },
+    {
+      "name": "likeCurrentSong",
+      "subtitle": "Spotify",
+      "title": "Like Current Song",
+      "description": "Likes currently playing song",
+      "mode": "no-view"
+    },
+    {
+      "name": "dislikeCurrentSong",
+      "subtitle": "Spotify",
+      "title": "Dislike Current Song",
+      "description": "Dislikes currently playing song",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "closeWindowOnAction",
+      "type": "checkbox",
+      "label": "Yes/No",
+      "required": false,
+      "default": true,
+      "title": "Close Window On Action",
+      "description": "If checked then the Raycast window will be closed on action (Play/Pause)"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "1.38.1",
+    "lodash": "^4.17.21",
+    "node-fetch": "^3.2.3",
+    "run-applescript": "^6.0.0",
+    "spotify-web-api-node": "^5.0.2"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.14.180",
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@types/spotify-web-api-node": "^5.0.7",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.6.2",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

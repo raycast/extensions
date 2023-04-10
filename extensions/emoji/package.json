@@ -1,0 +1,115 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "emoji",
+  "title": "Emoji Search",
+  "description": "Finds emojis and inserts or copies them.",
+  "icon": "command-icon.png",
+  "author": "FezVrasta",
+  "contributors": [
+    "kidonng",
+    "sxn"
+  ],
+  "license": "MIT",
+  "categories": [
+    "System",
+    "Media"
+  ],
+  "commands": [
+    {
+      "name": "emoji",
+      "title": "Search Emoji",
+      "description": "Finds emojis and inserts or copies them.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "primaryAction",
+      "type": "dropdown",
+      "required": false,
+      "title": "Primary action",
+      "description": "Primary action to use",
+      "default": "paste",
+      "data": [
+        {
+          "title": "Paste to Active App",
+          "value": "paste"
+        },
+        {
+          "title": "Copy to Clipboard",
+          "value": "copy"
+        }
+      ]
+    },
+    {
+      "name": "unicodeVersion",
+      "type": "dropdown",
+      "required": false,
+      "title": "Unicode Version",
+      "description": "Unicode version to use (default: 14.0)",
+      "default": "14.0",
+      "data": [
+        {
+          "title": "14.0",
+          "value": "14.0"
+        },
+        {
+          "title": "13.1",
+          "value": "13.1"
+        },
+        {
+          "title": "13.0",
+          "value": "13.0"
+        },
+        {
+          "title": "12.1",
+          "value": "12.1"
+        },
+        {
+          "title": "12.0",
+          "value": "12.0"
+        },
+        {
+          "title": "11.0",
+          "value": "11.0"
+        },
+        {
+          "title": "5.0",
+          "value": "5.0"
+        },
+        {
+          "title": "4.0",
+          "value": "4.0"
+        }
+      ]
+    },
+    {
+      "name": "shortCodes",
+      "type": "checkbox",
+      "required": false,
+      "title": "Shortcodes",
+      "label": "Add Shortcodes",
+      "default": false,
+      "description": "Add short codes to the emojis (e.g. zap for ⚡️) which can be used in platforms like GitHub and Slack."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.45.1",
+    "cross-fetch": "^3.1.5",
+    "emojilib": "^3.0.6",
+    "fuse.js": "^6.5.3",
+    "raycast-toolkit": "^1.0.3"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.6.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop"
+  }
+}

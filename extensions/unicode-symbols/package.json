@@ -1,0 +1,53 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "unicode-symbols",
+  "title": "Unicode Symbols Search",
+  "description": "Browse and copy-paste common Unicode symbols.",
+  "icon": "command-icon.png",
+  "author": "mmazzarolo",
+  "contributors": [
+    "FezVrasta",
+    "pernielsentikaer"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Search Unicode Symbol",
+      "description": "Browse and copy-paste common Unicode symbols.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "searchResultLimitStr",
+      "title": "Search results limit",
+      "description": "Maximum number of items shown in the list. The lower the number of shown items is, the faster they'll be retrieved. Defaults to 100. Supports up to 1000 items.",
+      "type": "textfield",
+      "default": "100",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.42.0",
+    "fuse.js": "^6.4.6"
+  },
+  "devDependencies": {
+    "@types/node": "^18.8.3",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "react-devtools": "^4.19.2",
+    "ts-node": "^10.4.0",
+    "typescript": "^4.4.3",
+    "unidata": "^13.0.0"
+  },
+  "scripts": {
+    "prebuild": "ts-node ./scripts/generate-dataset.ts",
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "generate-dataset": "ts-node ./scripts/generate-dataset.ts",
+    "lint": "ray lint"
+  }
+}

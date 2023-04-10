@@ -1,0 +1,92 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "bear",
+  "title": "Bear Notes",
+  "description": "Control Bear with Raycast",
+  "icon": "command-icon.png",
+  "author": "hmarr",
+  "contributors": [
+    "lucaschultz",
+    "diokhan",
+    "ron-myers"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Search Notes",
+      "subtitle": "Bear",
+      "description": "Search and open Bear notes",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "searchQuery",
+          "placeholder": "Search Query",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "new-note",
+      "title": "Create Note",
+      "subtitle": "Bear",
+      "description": "Create a new bear note",
+      "mode": "view"
+    },
+    {
+      "name": "grab-url",
+      "title": "Web Capture",
+      "subtitle": "Bear",
+      "description": "Create a new bear note from a web capture",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "focusCursorAtEnd",
+      "title": "Opening Notes",
+      "description": "Opens the note in edit mode, placing the cursor at the end of the note",
+      "type": "checkbox",
+      "default": false,
+      "label": "Focus cursor at end of the note",
+      "required": false
+    },
+    {
+      "name": "showPreviewInListView",
+      "title": "Notes List",
+      "description": "Shows a preview of the note to the right of the note list",
+      "type": "checkbox",
+      "default": true,
+      "label": "Show preview in list view",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.42.0",
+    "@types/commonmark": "^0.27.5",
+    "commonmark": "^0.30.0",
+    "date-fns": "^2.29.3",
+    "open": "^8.4.0",
+    "sql.js": "^1.8.0"
+  },
+  "devDependencies": {
+    "@types/node": "^18.8.3",
+    "@types/react": "^18.0.21",
+    "@types/sql.js": "^1.4.4",
+    "@typescript-eslint/eslint-plugin": "^5.38.1",
+    "@typescript-eslint/parser": "^5.38.1",
+    "eslint": "^8.24.0",
+    "eslint-config-prettier": "^8.5.0",
+    "prettier": "^2.7.1",
+    "react-devtools": "^4.26.0",
+    "typescript": "^4.8.4"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "prettier": "prettier --write . && prettier --check .",
+    "update-sqlite-wasm": "cp node_modules/sql.js/dist/sql-wasm.wasm assets/sql-wasm.wasm"
+  }
+}

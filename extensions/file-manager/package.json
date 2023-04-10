@@ -1,0 +1,103 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "file-manager",
+  "title": "File Manager",
+  "description": "Manage files from Raycast",
+  "icon": "command-icon.png",
+  "author": "es183923",
+  "contributors": [
+    "BalliAsghar"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "manage-files",
+      "title": "Manage Files",
+      "subtitle": "Files",
+      "description": "Traverse the file system and create files in Raycast",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "default": "~",
+      "description": "Starting directory for the command. ~ is expanded into your home directory",
+      "name": "startDirectory",
+      "required": true,
+      "title": "Start Directory",
+      "type": "textfield"
+    },
+    {
+      "default": false,
+      "description": "Show files and directories with uppercase letters before ones with lowercase letters",
+      "label": "Case Sensitive",
+      "name": "caseSensitive",
+      "required": true,
+      "title": "Appearance",
+      "type": "checkbox"
+    },
+    {
+      "default": false,
+      "description": "Show directories before other files",
+      "label": "Directories First",
+      "name": "directoriesFirst",
+      "required": true,
+      "title": "",
+      "type": "checkbox"
+    },
+    {
+      "default": false,
+      "description": "Show dotfiles (files and directories that start with a .)",
+      "label": "Show Dotfiles",
+      "name": "showDots",
+      "required": true,
+      "title": "",
+      "type": "checkbox"
+    },
+    {
+      "default": false,
+      "description": "Show the permissions of files",
+      "label": "Show File Permissions",
+      "name": "showFilePermissions",
+      "required": true,
+      "title": "",
+      "type": "checkbox"
+    },
+    {
+      "default": true,
+      "description": "Show file size",
+      "label": "Show File Size",
+      "name": "showFileSize",
+      "required": true,
+      "title": "",
+      "type": "checkbox"
+    },
+    {
+      "default": false,
+      "description": "Show Delete Actions",
+      "label": "Show Delete Actions",
+      "name": "showDeleteActions",
+      "required": true,
+      "title": "",
+      "type": "checkbox"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.49.0",
+    "filesize": "^10.0.7"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop"
+  }
+}

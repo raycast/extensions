@@ -1,0 +1,340 @@
+{
+  "Prologue": [
+    {
+      "title": "Release Notes",
+      "url": "https://laravel.com/docs/7.x/releases"
+    },
+    {
+      "title": "Upgrade Guide",
+      "url": "https://laravel.com/docs/7.x/upgrade"
+    },
+    {
+      "title": "Contribution Guide",
+      "url": "https://laravel.com/docs/7.x/contributions"
+    },
+    {
+      "title": "API Documentation",
+      "url": "https://laravel.com/api/7.x"
+    }
+  ],
+  "Getting Started": [
+    {
+      "title": "Installation",
+      "url": "https://laravel.com/docs/7.x/installation"
+    },
+    {
+      "title": "Configuration",
+      "url": "https://laravel.com/docs/7.x/configuration"
+    },
+    {
+      "title": "Directory Structure",
+      "url": "https://laravel.com/docs/7.x/structure"
+    },
+    {
+      "title": "Homestead",
+      "url": "https://laravel.com/docs/7.x/homestead"
+    },
+    {
+      "title": "Valet",
+      "url": "https://laravel.com/docs/7.x/valet"
+    },
+    {
+      "title": "Deployment",
+      "url": "https://laravel.com/docs/7.x/deployment"
+    }
+  ],
+  "Architecture Concepts": [
+    {
+      "title": "Request Lifecycle",
+      "url": "https://laravel.com/docs/7.x/lifecycle"
+    },
+    {
+      "title": "Service Container",
+      "url": "https://laravel.com/docs/7.x/container"
+    },
+    {
+      "title": "Service Providers",
+      "url": "https://laravel.com/docs/7.x/providers"
+    },
+    {
+      "title": "Facades",
+      "url": "https://laravel.com/docs/7.x/facades"
+    },
+    {
+      "title": "Contracts",
+      "url": "https://laravel.com/docs/7.x/contracts"
+    }
+  ],
+  "The Basics": [
+    {
+      "title": "Routing",
+      "url": "https://laravel.com/docs/7.x/routing"
+    },
+    {
+      "title": "Middleware",
+      "url": "https://laravel.com/docs/7.x/middleware"
+    },
+    {
+      "title": "CSRF Protection",
+      "url": "https://laravel.com/docs/7.x/csrf"
+    },
+    {
+      "title": "Controllers",
+      "url": "https://laravel.com/docs/7.x/controllers"
+    },
+    {
+      "title": "Requests",
+      "url": "https://laravel.com/docs/7.x/requests"
+    },
+    {
+      "title": "Responses",
+      "url": "https://laravel.com/docs/7.x/responses"
+    },
+    {
+      "title": "Views",
+      "url": "https://laravel.com/docs/7.x/views"
+    },
+    {
+      "title": "URL Generation",
+      "url": "https://laravel.com/docs/7.x/urls"
+    },
+    {
+      "title": "Session",
+      "url": "https://laravel.com/docs/7.x/session"
+    },
+    {
+      "title": "Validation",
+      "url": "https://laravel.com/docs/7.x/validation"
+    },
+    {
+      "title": "Error Handling",
+      "url": "https://laravel.com/docs/7.x/errors"
+    },
+    {
+      "title": "Logging",
+      "url": "https://laravel.com/docs/7.x/logging"
+    }
+  ],
+  "Frontend": [
+    {
+      "title": "Blade Templates",
+      "url": "https://laravel.com/docs/7.x/blade"
+    },
+    {
+      "title": "Localization",
+      "url": "https://laravel.com/docs/7.x/localization"
+    },
+    {
+      "title": "Frontend Scaffolding",
+      "url": "https://laravel.com/docs/7.x/frontend"
+    },
+    {
+      "title": "Compiling Assets",
+      "url": "https://laravel.com/docs/7.x/mix"
+    }
+  ],
+  "Security": [
+    {
+      "title": "Authentication",
+      "url": "https://laravel.com/docs/7.x/authentication"
+    },
+    {
+      "title": "Authorization",
+      "url": "https://laravel.com/docs/7.x/authorization"
+    },
+    {
+      "title": "Email Verification",
+      "url": "https://laravel.com/docs/7.x/verification"
+    },
+    {
+      "title": "Encryption",
+      "url": "https://laravel.com/docs/7.x/encryption"
+    },
+    {
+      "title": "Hashing",
+      "url": "https://laravel.com/docs/7.x/hashing"
+    },
+    {
+      "title": "Password Reset",
+      "url": "https://laravel.com/docs/7.x/passwords"
+    }
+  ],
+  "Digging Deeper": [
+    {
+      "title": "Artisan Console",
+      "url": "https://laravel.com/docs/7.x/artisan"
+    },
+    {
+      "title": "Broadcasting",
+      "url": "https://laravel.com/docs/7.x/broadcasting"
+    },
+    {
+      "title": "Cache",
+      "url": "https://laravel.com/docs/7.x/cache"
+    },
+    {
+      "title": "Collections",
+      "url": "https://laravel.com/docs/7.x/collections"
+    },
+    {
+      "title": "Events",
+      "url": "https://laravel.com/docs/7.x/events"
+    },
+    {
+      "title": "File Storage",
+      "url": "https://laravel.com/docs/7.x/filesystem"
+    },
+    {
+      "title": "Helpers",
+      "url": "https://laravel.com/docs/7.x/helpers"
+    },
+    {
+      "title": "HTTP Client",
+      "url": "https://laravel.com/docs/7.x/http-client"
+    },
+    {
+      "title": "Mail",
+      "url": "https://laravel.com/docs/7.x/mail"
+    },
+    {
+      "title": "Notifications",
+      "url": "https://laravel.com/docs/7.x/notifications"
+    },
+    {
+      "title": "Package Development",
+      "url": "https://laravel.com/docs/7.x/packages"
+    },
+    {
+      "title": "Queues",
+      "url": "https://laravel.com/docs/7.x/queues"
+    },
+    {
+      "title": "Task Scheduling",
+      "url": "https://laravel.com/docs/7.x/scheduling"
+    }
+  ],
+  "Database": [
+    {
+      "title": "Getting Started",
+      "url": "https://laravel.com/docs/7.x/database"
+    },
+    {
+      "title": "Query Builder",
+      "url": "https://laravel.com/docs/7.x/queries"
+    },
+    {
+      "title": "Pagination",
+      "url": "https://laravel.com/docs/7.x/pagination"
+    },
+    {
+      "title": "Migrations",
+      "url": "https://laravel.com/docs/7.x/migrations"
+    },
+    {
+      "title": "Seeding",
+      "url": "https://laravel.com/docs/7.x/seeding"
+    },
+    {
+      "title": "Redis",
+      "url": "https://laravel.com/docs/7.x/redis"
+    }
+  ],
+  "Eloquent ORM": [
+    {
+      "title": "Getting Started",
+      "url": "https://laravel.com/docs/7.x/eloquent"
+    },
+    {
+      "title": "Relationships",
+      "url": "https://laravel.com/docs/7.x/eloquent-relationships"
+    },
+    {
+      "title": "Collections",
+      "url": "https://laravel.com/docs/7.x/eloquent-collections"
+    },
+    {
+      "title": "Mutators",
+      "url": "https://laravel.com/docs/7.x/eloquent-mutators"
+    },
+    {
+      "title": "API Resources",
+      "url": "https://laravel.com/docs/7.x/eloquent-resources"
+    },
+    {
+      "title": "Serialization",
+      "url": "https://laravel.com/docs/7.x/eloquent-serialization"
+    }
+  ],
+  "Testing": [
+    {
+      "title": "Getting Started",
+      "url": "https://laravel.com/docs/7.x/testing"
+    },
+    {
+      "title": "HTTP Tests",
+      "url": "https://laravel.com/docs/7.x/http-tests"
+    },
+    {
+      "title": "Console Tests",
+      "url": "https://laravel.com/docs/7.x/console-tests"
+    },
+    {
+      "title": "Browser Tests",
+      "url": "https://laravel.com/docs/7.x/dusk"
+    },
+    {
+      "title": "Database",
+      "url": "https://laravel.com/docs/7.x/database-testing"
+    },
+    {
+      "title": "Mocking",
+      "url": "https://laravel.com/docs/7.x/mocking"
+    }
+  ],
+  "Official Packages": [
+    {
+      "title": "Cashier (Stripe)",
+      "url": "https://laravel.com/docs/7.x/billing"
+    },
+    {
+      "title": "Cashier (Paddle)",
+      "url": "https://laravel.com/docs/7.x/cashier-paddle"
+    },
+    {
+      "title": "Cashier (Mollie)",
+      "url": "https://github.com/laravel/cashier-mollie"
+    },
+    {
+      "title": "Dusk",
+      "url": "https://laravel.com/docs/7.x/dusk"
+    },
+    {
+      "title": "Envoy",
+      "url": "https://laravel.com/docs/7.x/envoy"
+    },
+    {
+      "title": "Horizon",
+      "url": "https://laravel.com/docs/7.x/horizon"
+    },
+    {
+      "title": "Passport",
+      "url": "https://laravel.com/docs/7.x/passport"
+    },
+    {
+      "title": "Sanctum",
+      "url": "https://laravel.com/docs/7.x/sanctum"
+    },
+    {
+      "title": "Scout",
+      "url": "https://laravel.com/docs/7.x/scout"
+    },
+    {
+      "title": "Socialite",
+      "url": "https://laravel.com/docs/7.x/socialite"
+    },
+    {
+      "title": "Telescope",
+      "url": "https://laravel.com/docs/7.x/telescope"
+    }
+  ]
+}

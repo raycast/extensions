@@ -1,0 +1,67 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "calendar",
+  "title": "Quick Calendar",
+  "description": "View calendar month-by-month",
+  "icon": "command-icon.png",
+  "author": "fuksman",
+  "categories": ["Productivity"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Quick Calendar",
+      "description": "Shows calendar for a month",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "weekStart",
+      "type": "dropdown",
+      "required": true,
+      "title": "First Day of Week",
+      "data": [
+        {
+          "title": "Monday",
+          "value": "1"
+        },
+        {
+          "title": "Sunday",
+          "value": "0"
+        }
+      ],
+      "description": "First Day of Week",
+      "default": "1"
+    },
+    {
+      "name": "showWeeks",
+      "type": "checkbox",
+      "required": true,
+      "label": "Show week numbers",
+      "title": "Week numbers",
+      "description": "Indicated if it is necessary to show week numbers",
+      "default": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.25.3",
+    "calendar": "^0.1.1",
+    "weeknumber": "^1.2.1"
+  },
+  "devDependencies": {
+    "@types/calendar": "^0.1.2",
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop"
+  }
+}
