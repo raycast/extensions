@@ -119,6 +119,9 @@ export default function Command() {
             />
           </List.Section>
           <List.Section title="Listen on">
+            {spotifyContent.links.length === 0 && (
+              <List.Item key="no-links" icon={Icon.Info} title="Not available on other platforms" />
+            )}
             {spotifyContent.links.map(({ type, url, isVerified }) => (
               <List.Item
                 key={type}
