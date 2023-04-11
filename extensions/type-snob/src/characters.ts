@@ -397,7 +397,6 @@ const miscChars: Character[] = [
   },
 ];
 
-
 export const characterSections: Array<{
   title: string;
   characters: Character[];
