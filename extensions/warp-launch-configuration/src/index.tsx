@@ -5,6 +5,7 @@ import path from "node:path";
 import os from "node:os";
 import { runJxa } from "run-jxa";
 import YAML from "yaml";
+import { exec } from "node:child_process";
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
@@ -104,9 +105,11 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
             <Action
               title="Launch"
               icon={Icon.Terminal}
-              onAction={() => {
-                runJxa(appleScript);
-                closeMainWindow();
+              onAction={async () => {
+                exec("open -a Warp.app", () => {
+                  runJxa(appleScript);
+                  closeMainWindow();
+                });
               }}
             />
           </ActionPanel.Section>

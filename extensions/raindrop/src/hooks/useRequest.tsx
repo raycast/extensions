@@ -11,7 +11,11 @@ export function useRequest({ collection = "0", search = "" }: BookmarksParams) {
   const [collections, setCollections] = useCachedState<CollectionItem[]>("collections", []);
 
   const { isLoading: isLoadingUserData, data: userData } = useUser();
-  const { isLoading: isLoadingBookmarks, data: bookmarks } = useBookmarks({ collection, search });
+  const {
+    isLoading: isLoadingBookmarks,
+    data: bookmarks,
+    revalidate,
+  } = useBookmarks({ collection, search });
   const { isLoading: isLoadingCollections, data: collectionsData } = useCollections();
 
   useEffect(() => {
@@ -26,5 +30,5 @@ export function useRequest({ collection = "0", search = "" }: BookmarksParams) {
     }
   }, [isLoadingUserData, isLoadingBookmarks, isLoadingCollections]);
 
-  return { isLoading, bookmarks, collections };
+  return { isLoading, bookmarks, collections, revalidate };
 }

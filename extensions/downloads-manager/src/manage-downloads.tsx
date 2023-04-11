@@ -39,6 +39,11 @@ export default function Command() {
               <ActionPanel.Section>
                 <Action.Open title="Open File" target={download.path} />
                 <Action.ShowInFinder path={download.path} />
+                <Action.CopyToClipboard
+                  title="Copy File"
+                  content={{ file: download.path }}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                />
               </ActionPanel.Section>
               <ActionPanel.Section>
                 <Action.OpenWith path={download.path} shortcut={{ modifiers: ["cmd"], key: "o" }} />

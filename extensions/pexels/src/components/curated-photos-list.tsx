@@ -28,7 +28,7 @@ export function CuratedPhotosList(props: {
     >
       <PexelsEmptyView title={"No Photos"} layout={"List"} />
       {pexelsPhotos?.photos.map((value, index) => (
-        <PhotosListItem key={index} pexelsPhoto={value} index={index} />
+        <PhotosListItem key={index} item={value} index={index} />
       ))}
     </List>
   );

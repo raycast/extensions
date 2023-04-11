@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-08-17 17:41
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-10-13 22:50
+ * @lastEditTime: 2023-03-15 17:45
  * @fileName: utils.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -67,6 +67,7 @@ export function getSortOrder(): string[] {
     DicionaryType.Youdao,
     DicionaryType.Linguee,
 
+    TranslationType.OpenAI,
     TranslationType.DeepL,
     TranslationType.Google,
     TranslationType.Bing,

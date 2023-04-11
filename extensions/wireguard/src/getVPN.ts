@@ -1,5 +1,5 @@
 import { VPN } from "./type";
-import { runScript, SHELL_PATH } from "./utils";
+import { CMD_PATH, runScript, SHELL_PATH } from "./utils";
 
 export default async () => {
   const GET_VPN_NAMES = `${SHELL_PATH}scutil --nc list | grep "com.wireguard.macos" | awk -F'"' '{print$2}'`;
@@ -22,7 +22,7 @@ export default async () => {
 export async function getVPNStatusByName(VPNName: string) {
   let isConnected = false;
   if (VPNName?.length > 0) {
-    const GET_VPN_STATUS = `${SHELL_PATH}scutil --nc status ${VPNName} | head -n 1 | grep -i "connected"`;
+    const GET_VPN_STATUS = `${SHELL_PATH}scutil --nc status "${VPNName}" | head -n 1 | grep -i "connected"`;
     const VPNStatus: string = await runScript(GET_VPN_STATUS);
     //console.log("VPNStatus -> >" + VPNStatus + "<");
     if (VPNStatus === "Connected") {
@@ -30,4 +30,10 @@ export async function getVPNStatusByName(VPNName: string) {
     }
   }
   return isConnected;
+}
+
+export async function getConnectedVPN() {
+  const GET_CONNECTED_VPN = `${CMD_PATH} --nc list | grep "com.wireguard.macos" | grep "(Connected)" | awk -F '"' '{print$2}'`;
+  const VPNName = await runScript(GET_CONNECTED_VPN);
+  return VPNName;
 }

@@ -43,7 +43,7 @@ export default function Command() {
         return (
           <Grid.Item
             key={formattedColor}
-            content={{ color: formattedColor }}
+            content={{ color: { light: formattedColor, dark: formattedColor, adjustContrast: false } }}
             title={formattedColor}
             subtitle={new Date(historyItem.date).toLocaleString(undefined, {
               dateStyle: "medium",
