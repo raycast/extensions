@@ -2,7 +2,7 @@ import { DynamoDBClient, ListTablesCommand } from "@aws-sdk/client-dynamodb";
 import { ActionPanel, List, Action, Icon } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import AWSProfileDropdown from "./components/searchbar/aws-profile-dropdown";
-import { resourceToConsoleLink } from "./util";
+import { isReadyToFetch, resourceToConsoleLink } from "./util";
 
 export default function DynamoDb() {
   const { data: tables, isLoading, error, revalidate } = useCachedPromise(fetchTables);
@@ -41,7 +41,7 @@ function DynamoDbTable({ tableName }: { tableName: string }) {
 }
 
 async function fetchTables(token?: string, accTables?: string[]): Promise<string[]> {
-  if (!process.env.AWS_PROFILE) return [];
+  if (!isReadyToFetch()) return [];
   const { LastEvaluatedTableName, TableNames } = await new DynamoDBClient({}).send(
     new ListTablesCommand({ ExclusiveStartTableName: token })
   );
