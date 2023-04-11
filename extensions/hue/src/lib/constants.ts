@@ -4,6 +4,7 @@ export const APP_NAME = "raycast_hue_extension";
 export const BRIDGE_ID = "bridgeId";
 export const BRIDGE_IP_ADDRESS_KEY = "bridgeIpAddress";
 export const BRIDGE_USERNAME_KEY = "bridgeUsername";
+export const BRIDGE_CERT_FINGERPRINT = "bridgeCertFingerprint";
 
 export const BRIGHTNESSES = [100, 90, 80, 70, 60, 50, 40, 30, 20, 10, 1];
 export const BRIGHTNESS_MIN = BRIGHTNESSES[BRIGHTNESSES.length - 1];

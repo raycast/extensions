@@ -12,7 +12,7 @@ import {
 import { discoverBridgeUsingMdns, discoverBridgeUsingNupnp, getUsernameFromBridge } from "./utils";
 import { LocalStorage, Toast } from "@raycast/api";
 import { v3 } from "node-hue-api";
-import { BRIDGE_ID, BRIDGE_IP_ADDRESS_KEY, BRIDGE_USERNAME_KEY } from "./constants";
+import { BRIDGE_CERT_FINGERPRINT, BRIDGE_ID, BRIDGE_IP_ADDRESS_KEY, BRIDGE_USERNAME_KEY } from "./constants";
 import HueClient from "./HueClient";
 import { GroupedLight, Light, Room, Scene, Zone } from "./types";
 import React from "react";
@@ -29,6 +29,7 @@ export type HueContext = {
   bridgeIpAddress?: string;
   bridgeId?: string;
   bridgeUsername?: string;
+  bridgeCertFingerprint?: string;
   hueClient?: HueClient;
 };
 
@@ -62,23 +63,25 @@ export default function hueBridgeMachine(
         invoke: {
           id: "loadingCredentials",
           src: async () => {
-            const [bridgeIpAddress, bridgeId, bridgeUsername] = await Promise.all([
+            const [bridgeIpAddress, bridgeId, bridgeUsername, bridgeCertFingerprint] = await Promise.all([
               LocalStorage.getItem<string>(BRIDGE_IP_ADDRESS_KEY),
               LocalStorage.getItem<string>(BRIDGE_ID),
               LocalStorage.getItem<string>(BRIDGE_USERNAME_KEY),
+              LocalStorage.getItem<string>(BRIDGE_CERT_FINGERPRINT),
             ]);
 
             if (bridgeIpAddress === undefined || bridgeId === undefined || bridgeUsername === undefined) {
               throw Error("No Hue Bridge credentials found");
             }
 
-            return { bridgeIpAddress, bridgeId, bridgeUsername };
+            return { bridgeIpAddress, bridgeId, bridgeUsername, bridgeCertFingerprint };
           },
           onDone: {
             actions: assign({
               bridgeIpAddress: (context, event) => event.data.bridgeIpAddress,
               bridgeId: (context, event) => event.data.bridgeId,
               bridgeUsername: (context, event) => event.data.bridgeUsername,
+              bridgeCertFingerprint: (context, event) => event.data.bridgeCertFingerprint,
             }),
             target: "connecting",
           },
@@ -106,6 +109,7 @@ export default function hueBridgeMachine(
               context.bridgeIpAddress,
               context.bridgeId,
               context.bridgeUsername,
+              context.bridgeCertFingerprint,
               setLights,
               setGroupedLights,
               setRooms,
@@ -191,6 +195,7 @@ export default function hueBridgeMachine(
               context.bridgeIpAddress,
               configuration.bridgeid,
               username,
+              undefined,
               setLights,
               setGroupedLights,
               setRooms,

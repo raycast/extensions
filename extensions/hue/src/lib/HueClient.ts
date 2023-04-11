@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import fs from "fs";
-import { environment } from "@raycast/api";
+import { environment, LocalStorage } from "@raycast/api";
 import {
   GroupedLight,
   HasId,
@@ -27,6 +27,8 @@ import RateLimitedQueue from "./RateLimitedQueue";
 import StreamArray from "stream-json/streamers/StreamArray";
 import Chain from "stream-chain";
 import "./arrayExtensions";
+import * as tls from "tls";
+import { BRIDGE_CERT_FINGERPRINT } from "./constants";
 
 const DATA_PREFIX = "data: ";
 const CONNECTION_TIMEOUT_MS = 5000;
@@ -44,6 +46,7 @@ export default class HueClient {
   public bridgeIpAddress: string;
   public bridgeId: string;
   public bridgeUsername: string;
+  public bridgeCertFingerprint?: string;
   private readonly setLights?: React.Dispatch<React.SetStateAction<Light[]>>;
   private readonly setGroupedLights?: React.Dispatch<React.SetStateAction<GroupedLight[]>>;
   private readonly setRooms?: React.Dispatch<React.SetStateAction<Room[]>>;
@@ -57,6 +60,7 @@ export default class HueClient {
     bridgeIpAddress: string,
     bridgeId: string,
     bridgeUsername: string,
+    bridgeCertFingerprint: string | undefined,
     http2Session: ClientHttp2Session,
     setLights?: React.Dispatch<React.SetStateAction<Light[]>>,
     setGroupedLights?: React.Dispatch<React.SetStateAction<GroupedLight[]>>,
@@ -67,6 +71,7 @@ export default class HueClient {
     this.bridgeUsername = bridgeUsername;
     this.http2Session = http2Session;
     this.bridgeIpAddress = bridgeIpAddress;
+    this.bridgeCertFingerprint = bridgeCertFingerprint;
     this.bridgeId = bridgeId;
     this.setLights = setLights;
     this.setGroupedLights = setGroupedLights;
@@ -80,6 +85,7 @@ export default class HueClient {
     bridgeIpAddress: string,
     bridgeId: string,
     bridgeUsername: string,
+    bridgeCertFingerprint: string | undefined,
     setLights?: React.Dispatch<React.SetStateAction<Light[]>>,
     setGroupedLights?: React.Dispatch<React.SetStateAction<GroupedLight[]>>,
     setRooms?: React.Dispatch<React.SetStateAction<Room[]>>,
@@ -90,10 +96,37 @@ export default class HueClient {
       const session = connect(`https://${bridgeIpAddress}`, {
         ca: fs.readFileSync(environment.assetsPath + "/philips-hue-cert.pem"),
         checkServerIdentity: (hostname, cert) => {
-          if (cert.subject.CN === bridgeId.toLowerCase()) {
-            return;
+          /*
+           * If both the certificate issuer’s Common Name field, and the certificate subject’s Common Name field are
+           * equal to the Bridge ID, the Bridge is running an older firmware version.
+           * In that case, we need to store the certificate’s fingerprint and check future connections against it.
+           * Source: https://developers.meethue.com/develop/application-design-guidance/using-https/#Self-signed%20certificates
+           */
+          if (cert.issuer.CN === bridgeId.toLowerCase() && cert.subject.CN === bridgeId.toLowerCase()) {
+            if (bridgeCertFingerprint !== undefined && bridgeCertFingerprint !== cert.fingerprint) {
+              return new Error(
+                "Server identity check failed. Fingerprint does not match known fingerprint. " +
+                  "If you trust this certificate, please unlink and relink your Bridge."
+              );
+            } else {
+              LocalStorage.setItem(BRIDGE_CERT_FINGERPRINT, cert.fingerprint);
+            }
+
+            // Certificate is deemed valid, even though it is self-signed.
+            return undefined;
+          }
+
+          /**
+           * In case of a more up-to-date firmware version, we need to check the certificate’s Common Name field against
+           * the bridgeId and check the certificate against the Hue Bridge Root CA.
+           */
+          if (cert.subject.CN === bridgeId.toLowerCase() && cert.issuer.CN === "root-bridge") {
+            tls.checkServerIdentity(hostname, cert);
           } else {
-            return new Error("Server identity check failed. CN does not match bridgeId.");
+            return new Error(
+              "Server identity check failed. Certificate subject’s Common Name does not match bridgeId " +
+                "or certificate issuer’s Common Name does not match “root-bridge”."
+            );
           }
         },
       });
@@ -115,6 +148,7 @@ export default class HueClient {
       bridgeIpAddress,
       bridgeId,
       bridgeUsername,
+      bridgeCertFingerprint,
       http2Session,
       setLights,
       setGroupedLights,
