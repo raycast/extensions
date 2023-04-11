@@ -9,6 +9,7 @@
     "bromanko",
     "crisboarna",
     "andreaselia",
+    "rtyke",
     "KarolRe",
     "Aiee"
   ],
@@ -41,6 +42,13 @@
       "subtitle": "Google Chrome",
       "description": "Search browser bookmarks.",
       "mode": "view"
+    },
+    {
+      "name": "new-window",
+      "title": "Create New Window",
+      "subtitle": "Google Chrome",
+      "description": "Create New Window.",
+      "mode": "no-view"
     }
   ],
   "preferences": [

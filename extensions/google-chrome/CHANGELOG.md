@@ -4,6 +4,10 @@
 
 - Added support to match url in bookmark and history search
 
+## [New Window] - 2023-03-22
+
+- Add the ability to create new window
+
 ## [Tab closing] - 2023-03-10
 
 - Add the ability to close tabs
