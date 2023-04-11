@@ -73,8 +73,8 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
     }
   }, [currentUri, currentlyPlayingUriData]);
 
+  const isPlaying = currentlyPlayingData?.is_playing || playbackStateData?.is_playing;
   const trackAlreadyLiked = containsMySavedTracksData?.[0];
-  const isPaused = !currentlyPlayingData?.is_playing || !playbackStateData?.is_playing;
   const isTrack = currentlyPlayingData?.currently_playing_type !== "episode";
 
   if (!currentlyPlayingData || !currentlyPlayingData.item) {
@@ -162,7 +162,7 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
       title={formatTitle(title, Number(preferences.maxTextLength), preferences.showEllipsis)}
       tooltip={title}
     >
-      {!isPaused && (
+      {isPlaying && (
         <MenuBarExtra.Item
           icon={Icon.Pause}
           title="Pause"
@@ -172,7 +172,7 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
           }}
         />
       )}
-      {isPaused && (
+      {!isPlaying && (
         <MenuBarExtra.Item
           icon={Icon.Play}
           title="Play"
@@ -220,7 +220,7 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
                 }
                 onAction={async () => {
                   if (device.id) {
-                    await transferMyPlayback(device.id, isPaused ? false : true);
+                    await transferMyPlayback(device.id, isPlaying ? true : false);
                   }
                   await showHUD(`Connected to ${device.name}`);
                 }}

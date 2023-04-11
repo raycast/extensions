@@ -46,7 +46,7 @@ function NowPlayingCommand() {
   const { closeWindowOnAction } = getPreferenceValues<{ closeWindowOnAction?: boolean }>();
 
   const trackAlreadyLiked = containsMySavedTracksData?.[0];
-  const isPaused = !currentlyPlayingData?.is_playing || !playbackStateData?.is_playing;
+  const isPlaying = playbackStateData?.is_playing;
   const isTrack = currentlyPlayingData?.currently_playing_type !== "episode";
 
   if (!currentlyPlayingData || !currentlyPlayingData.item) {
@@ -234,8 +234,8 @@ ${description}
       isLoading={currentlyPlayingIsLoading || playbackStateIsLoading}
       actions={
         <ActionPanel>
-          {!isPaused && <PauseAction onPause={() => playbackStateRevalidate()} />}
-          {isPaused && <PlayAction onPlay={() => playbackStateRevalidate()} />}
+          {isPlaying && <PauseAction onPause={() => playbackStateRevalidate()} />}
+          {!isPlaying && <PlayAction onPlay={() => playbackStateRevalidate()} />}
           {trackOrEpisodeActions}
           {myPlaylistsData?.items && meData && uri && (
             <AddToPlaylistAction playlists={myPlaylistsData.items} meData={meData} uri={uri} />
