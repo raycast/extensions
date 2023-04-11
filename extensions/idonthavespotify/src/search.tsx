@@ -4,7 +4,7 @@ import { useState, useCallback, useEffect } from "react";
 import { Action, ActionPanel, Icon, List, showToast, Toast, Clipboard } from "@raycast/api";
 
 import type { SpotifyContent, ApiError } from "./@types/global";
-import { SpotifyContentLink, SpotifyMetadataType } from "./@types/global";
+import { SpotifyContentLinkType, SpotifyMetadataType } from "./@types/global";
 
 import { SITE_URL, API_URL, SPOTIFY_LINK_REGEX } from "./constants";
 
@@ -12,10 +12,11 @@ import { cacheLastSearch, getLastSearch } from "./utils/cache";
 import { playAudio, stopAudio } from "./utils/audio";
 
 const spotifyContentLinksTitles = {
-  [SpotifyContentLink.Youtube]: "YouTube",
-  [SpotifyContentLink.AppleMusic]: "Apple Music",
-  [SpotifyContentLink.Tidal]: "Tidal",
-  [SpotifyContentLink.SoundCloud]: "SoundCloud",
+  [SpotifyContentLinkType.Youtube]: "YouTube",
+  [SpotifyContentLinkType.Deezer]: "Deezer",
+  [SpotifyContentLinkType.AppleMusic]: "Apple Music",
+  [SpotifyContentLinkType.Tidal]: "Tidal",
+  [SpotifyContentLinkType.SoundCloud]: "SoundCloud",
 };
 
 const spotifyContentTypesTitles = {
@@ -43,7 +44,7 @@ export default function Command() {
       setIsLoading(true);
 
       try {
-        const request = await fetch(`${API_URL}?spotifyLink=${spotifyLink}`);
+        const request = await fetch(`${API_URL}?spotifyLink=${spotifyLink}&v=2`);
         const spotifyContent = (await request.json()) as SpotifyContent & ApiError;
 
         if (request.status !== 200) {
@@ -53,6 +54,7 @@ export default function Command() {
         setSpotifyContent(spotifyContent);
         cacheLastSearch(spotifyLink, spotifyContent);
       } catch (error) {
+        console.error(error);
         showToast(Toast.Style.Failure, "Error", (error as Error).message);
       }
 
@@ -77,8 +79,6 @@ export default function Command() {
       }
     })();
   }, [fetchSpotifyContent]);
-
-  const isRecommended = (key: string) => key === SpotifyContentLink.Youtube;
 
   return (
     <List
@@ -119,17 +119,20 @@ export default function Command() {
             />
           </List.Section>
           <List.Section title="Listen on">
-            {Object.entries(spotifyContent.links).map(([key, link]) => (
+            {spotifyContent.links.length === 0 && (
+              <List.Item key="no-links" icon={Icon.Info} title="Not available on other platforms" />
+            )}
+            {spotifyContent.links.map(({ type, url, isVerified }) => (
               <List.Item
-                key={key}
+                key={type}
                 icon={Icon.Link}
-                title={spotifyContentLinksTitles[key as SpotifyContentLink]}
-                subtitle={link}
-                accessories={[{ text: isRecommended(key) ? "Recommended" : "" }]}
+                title={spotifyContentLinksTitles[type as SpotifyContentLinkType]}
+                subtitle={url}
+                accessories={[{ text: isVerified ? "Verified" : "" }]}
                 actions={
                   <ActionPanel>
-                    <Action.OpenInBrowser url={link} />
-                    <Action.CopyToClipboard title="Copy Link" content={link} />
+                    <Action.OpenInBrowser url={url} />
+                    <Action.CopyToClipboard title="Copy Link" content={url} />
                   </ActionPanel>
                 }
               />

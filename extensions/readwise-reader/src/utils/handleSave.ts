@@ -1,5 +1,6 @@
 import { showHUD } from "@raycast/api";
 import { saveURL } from "../api/save";
+import handleError from "./handleError";
 
 export async function handleSave(url: string | undefined) {
   if (!url) {
@@ -11,7 +12,6 @@ export async function handleSave(url: string | undefined) {
     await saveURL(url);
     await showHUD("✅ Saved to Reader");
   } catch (error) {
-    await showHUD(`❌ ${(error as Error).message}`);
-    return;
+    handleError(error as Error);
   }
 }

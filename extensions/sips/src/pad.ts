@@ -1,6 +1,6 @@
 import { showToast, Toast } from "@raycast/api";
 import { execSync } from "child_process";
-import { execSIPSCommandOnWebP, getSelectedImages } from "./utils";
+import { execSIPSCommandOnSVG, execSIPSCommandOnWebP, getSelectedImages } from "./utils";
 
 export default async function Command(props: { arguments: { amount: string; hexcolor: string } }) {
   const { amount, hexcolor } = props.arguments;
@@ -39,8 +39,15 @@ export default async function Command(props: { arguments: { amount: string; hexc
         const oldHeight = parseInt(resultArr[8]);
 
         if (imagePath.toLowerCase().endsWith(".webp")) {
-          // Convert to PNG, applying padding, then restore to WebP
+          // Convert to PNG, apply padding, then restore to WebP
           execSIPSCommandOnWebP(
+            `sips --padToHeightWidth ${oldHeight + padAmount} ${oldWidth + padAmount} --padColor ${hexString}`,
+            imagePath
+          );
+        }
+        if (imagePath.toLowerCase().endsWith(".svg")) {
+          // Convert to PNG, apply padding, then restore to SVG
+          execSIPSCommandOnSVG(
             `sips --padToHeightWidth ${oldHeight + padAmount} ${oldWidth + padAmount} --padColor ${hexString}`,
             imagePath
           );
