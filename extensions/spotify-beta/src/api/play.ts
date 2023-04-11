@@ -53,8 +53,9 @@ export async function play({ id, type, contextUri }: PlayProps = {}) {
         const script = buildScriptEnsuringSpotifyIsRunning(`play track "${uriForType[type]}${id}"`);
         await runAppleScriptSilently(script);
       } else {
+        // For albums/artists/etc we seem to need a delay. Trying 1 second.
         const script = buildScriptEnsuringSpotifyIsRunning(`
-          delay 3
+          delay 1
           play track "${uriForType[type]}${id}"`);
         await runAppleScriptSilently(script);
       }
