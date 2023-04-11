@@ -21,6 +21,7 @@ export interface CpuMonitorState {
 export interface MemoryMonitorState {
   freeDisk: string;
   totalDisk: string;
+  totalMem: string;
   freeMem: string;
   freeMemPercentage: string;
   topProcess: string[][];
