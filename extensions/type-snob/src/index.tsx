@@ -1,77 +1,96 @@
-import { ActionPanel, Action, List } from "@raycast/api";
+import { ActionPanel, Action, List, Icon, Detail } from "@raycast/api";
+import { Character, characterSections } from "./characters";
 
-interface Character {
-  label: string;
-  value: string;
-  description?: string;
-  keywords?: string[];
+const DEBUG = false;
+
+/**
+ * Form the Details view of a selected character
+ */
+function getDetailMarkdown(char: Character) {
+  let detail = `# ${char.value}\n---\n## ${char.label}`;
+
+  if (char.example) {
+    detail += `\n> Example: ${char.example}`;
+  }
+
+  return detail;
 }
 
-// Useful reference: https://www.typewolf.com/cheatsheet
-const characters: Character[] = [
-  {
-    label: "Em Dash",
-    value: "—",
-  },
-  {
-    label: "En Dash",
-    value: "–",
-  },
-  {
-    label: "Figure Dash",
-    value: "‒",
-    keywords: ["Number", "Dash"],
-  },
-  { label: "Minus", value: "−", keywords: ["Minus"] },
-  { label: "Opening Double Quote", value: "“", keywords: ["Left"] },
-  { label: "Closing Double Quote", value: "”", keywords: ["Right"] },
-  {
-    label: "Opening Single Quote",
-    value: "‘",
-    keywords: ["Left"],
-  },
-  {
-    label: "Closing Single Quote & Apostrophe",
-    value: "’",
-    keywords: ["Apostrophe", "Right"],
-  },
-  { label: "Prime (Feet)", value: "′", keywords: ["Feet"] },
-  { label: "Double Prime (Inches)", value: "″", keywords: ["Inches"] },
-  { label: "Ellipsis", value: "…" },
-  { label: "Left arrow", value: "←" },
-  { label: "Right arrow", value: "→" },
-  { label: "Up arrow", value: "↑" },
-  { label: "Down arrow", value: "↓" },
-  { label: "Multiplication", value: "×", keywords: ["Multiply", "Times"] },
-  { label: "Division", value: "÷", keywords: ["Divide"] },
-  { label: "Plus/Minus", value: "±" },
-  { label: "Less Than or Equal To", value: "≤" },
-  { label: "Greater Than or Equal To", value: "≥" },
-  { label: "Not Equal To", value: "≠" },
-  { label: "Almost equal", value: "≈" },
-  { label: "Cents", value: "¢" },
-  { label: "Degree", value: "°" },
-  { label: "Registered", value: "®" },
-  { label: "Copyright", value: "©" },
-  { label: "Trademark", value: "™" },
-];
+/**
+ * Combine different properties to support fuzzy search
+ */
+function getKeywords(char: Character) {
+  const definedKeywords = char.keywords ?? [];
+
+  const keywords = [
+    char.value,
+    char.html.replace(/&|;/g, ""),
+    ...char.label.split(/\s/),
+    ...definedKeywords,
+  ];
+
+  return keywords;
+}
 
 export default function Command() {
+  if (DEBUG) return <Debug />;
+
   return (
-    <List>
-      {characters.map((char) => (
-        <List.Item
-          key={char.label}
-          title={char.value}
-          subtitle={char.label}
-          keywords={[...char.label.split(/\s/), ...(char.keywords ?? [])]}
-          actions={
-            <ActionPanel>
-              <Action.CopyToClipboard content={char.value} />
-            </ActionPanel>
-          }
-        />
+    <List isShowingDetail>
+      {characterSections.map((section) => (
+        <List.Section title={section.title} key={section.title}>
+          {section.characters.map((char) => (
+            <List.Item
+              key={char.label}
+              title={char.icons ? char.label : char.value}
+              subtitle={char.icons ? undefined : char.label}
+              icon={char.icons ? { source: char.icons } : undefined}
+              keywords={getKeywords(char)}
+              detail={
+                <List.Item.Detail
+                  markdown={getDetailMarkdown(char)}
+                  metadata={
+                    <List.Item.Detail.Metadata>
+                      <List.Item.Detail.Metadata.Label
+                        title="HTML"
+                        text={char.html}
+                      />
+                    </List.Item.Detail.Metadata>
+                  }
+                />
+              }
+              actions={
+                <ActionPanel>
+                  <Action.CopyToClipboard content={char.value} />
+                  <Action.Paste content={char.value} />
+                  {char.html && (
+                    <Action.CopyToClipboard
+                      title="Copy HTML"
+                      content={char.html}
+                      icon={Icon.Code}
+                      shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
+                    />
+                  )}
+                </ActionPanel>
+              }
+            />
+          ))}
+        </List.Section>
       ))}
     </List>
   );
+}
+
+/**
+ * Debug whether the content (some of which is AI-generated) looks correct
+ */
+function Debug() {
+  const entities = characterSections
+    .reduce((acc: Character[], section) => {
+      return [...acc, ...section.characters];
+    }, [])
+    .map((char) => char.html)
+    .join("\n");
+
+  return <Detail markdown={entities} />;
 }
