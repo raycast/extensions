@@ -1,6 +1,5 @@
-// src/ClearDownloads.tsx
 import { useEffect } from "react";
-import { List, Icon, useNavigation, showHUD } from "@raycast/api";
+import { useNavigation, showHUD } from "@raycast/api";
 import * as fs from "fs/promises";
 import * as path from "path";
 
