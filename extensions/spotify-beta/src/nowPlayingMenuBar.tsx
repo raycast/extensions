@@ -73,7 +73,7 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
     }
   }, [currentUri, currentlyPlayingUriData]);
 
-  const isPlaying = currentlyPlayingData?.is_playing || playbackStateData?.is_playing;
+  const isPlaying = playbackStateData?.is_playing;
   const trackAlreadyLiked = containsMySavedTracksData?.[0];
   const isTrack = currentlyPlayingData?.currently_playing_type !== "episode";
 
