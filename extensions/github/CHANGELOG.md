@@ -1,5 +1,10 @@
 # GitHub Changelog
 
+## [Notifications fixes] - 2023-04-05
+
+- Add `issuecomment` prefix to read notifications 
+- Don't show success toast when opening a notification
+
 ## [Clear form fields] - 2023-01-19
 
 - Clear form fields when creating an issue

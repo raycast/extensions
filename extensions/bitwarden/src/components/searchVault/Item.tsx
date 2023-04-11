@@ -1,35 +1,34 @@
-import { ActionPanel, Color, getPreferenceValues, Icon, List } from "@raycast/api";
+import { Color, getPreferenceValues, Icon, List } from "@raycast/api";
 import { useMemo } from "react";
-import SearchItemActions from "~/components/searchVault/ItemActions";
+import VaultItemActionPanel from "~/components/searchVault/ItemActionPanel";
+import VaultItemContext from "~/components/searchVault/context/vaultItem";
 import { Folder, Item } from "~/types/vault";
 import { extractKeywords, faviconUrl } from "~/utils/search";
 
 const { fetchFavicons } = getPreferenceValues();
 
-export type SearchItemProps = {
+export type VaultItemProps = {
   item: Item;
   folder: Folder | undefined;
 };
 
-const SearchItem = (props: SearchItemProps) => {
+const VaultItem = (props: VaultItemProps) => {
   const { item, folder } = props;
 
   const keywords = useMemo(() => extractKeywords(item), [item]);
 
   return (
-    <List.Item
-      id={item.id}
-      title={item.name}
-      keywords={keywords}
-      accessories={getAccessories(item, folder)}
-      icon={getIcon(item)}
-      subtitle={item.login?.username || undefined}
-      actions={
-        <ActionPanel>
-          <SearchItemActions item={item} />
-        </ActionPanel>
-      }
-    />
+    <VaultItemContext.Provider value={item}>
+      <List.Item
+        id={item.id}
+        title={item.name}
+        keywords={keywords}
+        accessories={getAccessories(item, folder)}
+        icon={getIcon(item)}
+        subtitle={item.login?.username || undefined}
+        actions={<VaultItemActionPanel />}
+      />
+    </VaultItemContext.Provider>
   );
 };
 
@@ -64,4 +63,4 @@ function getAccessories(item: Item, folder: Folder | undefined) {
   return accessories;
 }
 
-export default SearchItem;
+export default VaultItem;
