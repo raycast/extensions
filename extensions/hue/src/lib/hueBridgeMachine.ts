@@ -191,6 +191,12 @@ export default function hueBridgeMachine(
             // Get bridge ID using the new credentials
             const api = await v3.api.createLocal(context.bridgeIpAddress).connect(username);
             const configuration = await api.configuration.getConfiguration();
+
+            // Set the new credentials. They will be unset if the linking fails.
+            LocalStorage.setItem(BRIDGE_IP_ADDRESS_KEY, context.bridgeIpAddress).then();
+            LocalStorage.setItem(BRIDGE_ID_KEY, configuration.bridgeid).then();
+            LocalStorage.setItem(BRIDGE_USERNAME_KEY, username).then();
+
             const hueClient = await HueClient.createInstance(
               context.bridgeIpAddress,
               configuration.bridgeid,
@@ -206,7 +212,7 @@ export default function hueBridgeMachine(
             return { bridgeId: configuration.bridgeid, bridgeUsername: username, hueClient };
           },
           onDone: {
-            target: "linked",
+            target: "connecting",
             actions: assign({
               bridgeId: (context, event) => event.data.bridgeId,
               bridgeUsername: (context, event) => event.data.bridgeUsername,
@@ -214,7 +220,10 @@ export default function hueBridgeMachine(
             }),
           },
           onError: {
-            actions: (_, event) => console.error(event.data),
+            actions: (_, event) => {
+              console.error(event.data);
+              LocalStorage.clear().then();
+            },
             target: "failedToLink",
           },
         },
@@ -223,24 +232,6 @@ export default function hueBridgeMachine(
         on: {
           RETRY: {
             target: "linking",
-          },
-        },
-      },
-      linked: {
-        invoke: {
-          id: "linked",
-          src: async (context) => {
-            if (context.bridgeIpAddress === undefined) throw Error("No bridge IP address");
-            if (context.bridgeId === undefined) throw Error("No bridge ID");
-            if (context.bridgeUsername === undefined) throw Error("No bridge username");
-            LocalStorage.setItem(BRIDGE_IP_ADDRESS_KEY, context.bridgeIpAddress).then();
-            LocalStorage.setItem(BRIDGE_ID_KEY, context.bridgeId).then();
-            LocalStorage.setItem(BRIDGE_USERNAME_KEY, context.bridgeUsername).then();
-          },
-        },
-        on: {
-          DONE: {
-            target: "connecting",
           },
         },
       },
