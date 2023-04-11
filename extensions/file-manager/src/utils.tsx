@@ -246,13 +246,11 @@ export function SymlinkItem(props: { fileData: FileDataType; refresh: () => void
         title={props.fileData.name}
         icon={{ fileIcon: filePath }}
         subtitle={preferences.showFilePermissions ? props.fileData.permissions : ""}
-        accessories={originalFileData === undefined 
-          ? [
-              {
-                icon: { source: "link-slash-solid.svg", tintColor: Color.Red },
-              },
-            ]
-          : []}
+        accessories={
+          !originalFileData
+            ? [{ icon: { source: Icon.ExclamationMark, tintColor: Color.Red }, tooltip: "Broken Symlink" }]
+            : []
+        }
 	actions={
           <ActionPanel>
                        {originalFileData && (
