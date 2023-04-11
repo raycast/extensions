@@ -33,11 +33,10 @@ import { FooterAction } from "./components/FooterAction";
 import { StartRadioAction } from "./components/StartRadioAction";
 import { PlayAction } from "./components/PlayAction";
 import { PauseAction } from "./components/PauseAction";
-import { getPlaybackState } from "./api/getPlaybackState";
 
 function NowPlayingCommand() {
   const { currentlyPlayingData, currentlyPlayingIsLoading, currentlyPlayingRevalidate } = useCurrentlyPlaying();
-  const { playbackStateData, playbackStateIsLoading, playbackStateMutate } = usePlaybackState();
+  const { playbackStateData, playbackStateIsLoading, playbackStateRevalidate } = usePlaybackState();
   const { myDevicesData } = useMyDevices();
   const { myPlaylistsData } = useMyPlaylists();
   const { meData } = useMe();
@@ -46,8 +45,8 @@ function NowPlayingCommand() {
   });
   const { closeWindowOnAction } = getPreferenceValues<{ closeWindowOnAction?: boolean }>();
 
-  const isPlaying = playbackStateData?.is_playing;
   const trackAlreadyLiked = containsMySavedTracksData?.[0];
+  const isPaused = !currentlyPlayingData?.is_playing || !playbackStateData?.is_playing;
   const isTrack = currentlyPlayingData?.currently_playing_type !== "episode";
 
   if (!currentlyPlayingData || !currentlyPlayingData.item) {
@@ -235,28 +234,8 @@ ${description}
       isLoading={currentlyPlayingIsLoading || playbackStateIsLoading}
       actions={
         <ActionPanel>
-          {isPlaying && (
-            <PauseAction
-              onPause={async () =>
-                await playbackStateMutate(getPlaybackState(), {
-                  optimisticUpdate(data) {
-                    return { ...data, is_playing: false };
-                  },
-                })
-              }
-            />
-          )}
-          {!isPlaying && (
-            <PlayAction
-              onPlay={async () =>
-                await playbackStateMutate(getPlaybackState(), {
-                  optimisticUpdate(data) {
-                    return { ...data, is_playing: true };
-                  },
-                })
-              }
-            />
-          )}
+          {!isPaused && <PauseAction onPause={() => playbackStateRevalidate()} />}
+          {isPaused && <PlayAction onPlay={() => playbackStateRevalidate()} />}
           {trackOrEpisodeActions}
           {myPlaylistsData?.items && meData && uri && (
             <AddToPlaylistAction playlists={myPlaylistsData.items} meData={meData} uri={uri} />

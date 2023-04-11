@@ -10,32 +10,25 @@ export async function getCurrentlyPlayingUri() {
   const isSpotifyInstalled = await checkSpotifyApp();
 
   if (isSpotifyInstalled) {
-    const script = `
-    if application "Spotify" is not running then
-        return "Not running"
-    end if
-  
-    property currentUri : "Unknown URI"
-    property playerState : "stopped"
-  
+    const script = `if application "Spotify" is running then
     tell application "Spotify"
-        try
-            set currentUri to id of the current track
-            set playerState to player state as string
-        end try
+      set cstate to "{"
+      set cstate to cstate & "\\"uri\\": \\"" & current track's id & "\\""
+      set cstate to cstate & ",\\"state\\": \\"" & player state & "\\""
+      set cstate to cstate & "}"
+
+      return cstate
     end tell
-  
-    if playerState is "playing" then
-        return currentUri
-    else if playerState is "paused" then
-        return currentUri
     else
-        return "Not playing"
+      set cstate to "{}"
     end if`;
 
     const scriptResponse = await runAppleScript(script);
+    const parsedResponse = JSON.parse(scriptResponse);
 
-    if (scriptResponse === "Not running") {
+    if (parsedResponse?.uri) {
+      return parsedResponse.uri as string;
+    } else {
       try {
         const response = await spotifyClient.getMePlayerCurrentlyPlaying({ additionalTypes: "episode" });
 
@@ -48,10 +41,6 @@ export async function getCurrentlyPlayingUri() {
         console.log("getCurrentlyPlayingUri.ts Error:", error);
         throw new Error(error);
       }
-    } else if (scriptResponse === "Not playing") {
-      return undefined;
-    } else {
-      return scriptResponse;
     }
   }
 }

@@ -32,13 +32,13 @@ import { useEffect, useRef } from "react";
 import { useCachedState } from "@raycast/utils";
 import { useCurrentlyPlayingUri } from "./hooks/useCurrentlyPlayingUri";
 import { formatTitle } from "./helpers/formatTitle";
-import { getPlaybackState } from "./api/getPlaybackState";
 
 function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
   const preferences = getPreferenceValues<{ maxTextLength?: boolean; showEllipsis?: boolean }>();
 
   // First we get the currently playing URI using `useCurrentlyPlayingUri` (this prioritises AppleScript over the API)
   const { currentlyPlayingUriData, currentlyPlayingUriIsLoading } = useCurrentlyPlayingUri();
+
   // Then we store it in a state using `useCachedState` (this will persist the value between launches)
   const [currentUri, setCurrentUri] = useCachedState<string | undefined>(
     "currentlyPlayingUri",
@@ -52,7 +52,7 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
   const { currentlyPlayingData, currentlyPlayingIsLoading, currentlyPlayingRevalidate } = useCurrentlyPlaying({
     options: { execute: shouldExecute.current },
   });
-  const { playbackStateData, playbackStateIsLoading, playbackStateMutate } = usePlaybackState({
+  const { playbackStateData, playbackStateIsLoading, playbackStateRevalidate } = usePlaybackState({
     options: { execute: launchType === LaunchType.UserInitiated },
   });
 
@@ -74,10 +74,10 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
   }, [currentUri, currentlyPlayingUriData]);
 
   const trackAlreadyLiked = containsMySavedTracksData?.[0];
-  const isPlaying = playbackStateData?.is_playing;
+  const isPaused = !currentlyPlayingData?.is_playing || !playbackStateData?.is_playing;
   const isTrack = currentlyPlayingData?.currently_playing_type !== "episode";
 
-  if (!currentUri || !currentlyPlayingData || !currentlyPlayingData.item) {
+  if (!currentlyPlayingData || !currentlyPlayingData.item) {
     return (
       <NothingPlaying isLoading={currentlyPlayingIsLoading || currentlyPlayingUriIsLoading || playbackStateIsLoading} />
     );
@@ -162,31 +162,23 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
       title={formatTitle(title, Number(preferences.maxTextLength), preferences.showEllipsis)}
       tooltip={title}
     >
-      {isPlaying && (
+      {!isPaused && (
         <MenuBarExtra.Item
           icon={Icon.Pause}
           title="Pause"
           onAction={async () => {
             await pause();
-            await playbackStateMutate(getPlaybackState(), {
-              optimisticUpdate(data) {
-                return { ...data, is_playing: false };
-              },
-            });
+            await playbackStateRevalidate();
           }}
         />
       )}
-      {!isPlaying && (
+      {isPaused && (
         <MenuBarExtra.Item
           icon={Icon.Play}
           title="Play"
           onAction={async () => {
             await play();
-            await playbackStateMutate(getPlaybackState(), {
-              optimisticUpdate(data) {
-                return { ...data, is_playing: true };
-              },
-            });
+            await playbackStateRevalidate();
           }}
         />
       )}
@@ -228,7 +220,7 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
                 }
                 onAction={async () => {
                   if (device.id) {
-                    await transferMyPlayback(device.id, isPlaying ? true : false);
+                    await transferMyPlayback(device.id, isPaused ? false : true);
                   }
                   await showHUD(`Connected to ${device.name}`);
                 }}
