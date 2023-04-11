@@ -88,7 +88,7 @@ export function OtpList(props: { isLogin: boolean | undefined; setLogin: (login:
           issuer: i.issuer,
           logo: i.logo,
           digits: i.digits,
-          generate: () => seed ? generateTOTP(seed, { digits: i.digits, period: 30 }) : CORRUPTED,
+          generate: () => (seed ? generateTOTP(seed, { digits: i.digits, period: 30 }) : CORRUPTED),
         };
       });
       const apps: Otp[] = appsResponse.apps.map((i) => {
