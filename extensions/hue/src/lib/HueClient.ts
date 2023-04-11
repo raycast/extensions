@@ -28,7 +28,9 @@ import StreamArray from "stream-json/streamers/StreamArray";
 import Chain from "stream-chain";
 import "./arrayExtensions";
 import * as tls from "tls";
-import { BRIDGE_CERT_FINGERPRINT } from "./constants";
+import { BRIDGE_CERT_FINGERPRINT, BRIDGE_ID, BRIDGE_IP_ADDRESS_KEY } from "./constants";
+import { LookupAddress, LookupOptions } from "dns";
+import "./dnsShim";
 
 const DATA_PREFIX = "data: ";
 const CONNECTION_TIMEOUT_MS = 5000;
@@ -85,7 +87,7 @@ export default class HueClient {
     bridgeIpAddress: string,
     bridgeId: string,
     bridgeUsername: string,
-    bridgeCertFingerprint: string | undefined,
+    bridgeCertFingerprint: string | undefined = undefined,
     setLights?: React.Dispatch<React.SetStateAction<Light[]>>,
     setGroupedLights?: React.Dispatch<React.SetStateAction<GroupedLight[]>>,
     setRooms?: React.Dispatch<React.SetStateAction<Room[]>>,
@@ -93,7 +95,7 @@ export default class HueClient {
     setScenes?: React.Dispatch<React.SetStateAction<Scene[]>>
   ) {
     const http2Session = await new Promise<ClientHttp2Session>((resolve, reject) => {
-      const session = connect(`https://${bridgeIpAddress}`, {
+      const session = connect(`https://${bridgeId}`, {
         ca: fs.readFileSync(environment.assetsPath + "/philips-hue-cert.pem"),
         checkServerIdentity: (hostname, cert) => {
           /*
