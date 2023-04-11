@@ -1,6 +1,6 @@
 import { closeMainWindow, LocalStorage, showHUD } from "@raycast/api";
 import { CouldNotConnectToHueBridgeError, NoHueBridgeConfiguredError } from "./lib/errors";
-import { BRIDGE_ID, BRIDGE_IP_ADDRESS_KEY, BRIDGE_USERNAME_KEY } from "./lib/constants";
+import { BRIDGE_ID_KEY, BRIDGE_IP_ADDRESS_KEY, BRIDGE_USERNAME_KEY } from "./lib/constants";
 import HueClient from "./lib/HueClient";
 
 export default async () => {
@@ -8,7 +8,7 @@ export default async () => {
 
   await Promise.all([
     LocalStorage.getItem<string>(BRIDGE_IP_ADDRESS_KEY),
-    LocalStorage.getItem<string>(BRIDGE_ID),
+    LocalStorage.getItem<string>(BRIDGE_ID_KEY),
     LocalStorage.getItem<string>(BRIDGE_USERNAME_KEY),
   ])
     .then(async ([bridgeIpAddress, bridgeId, bridgeUsername]) => {

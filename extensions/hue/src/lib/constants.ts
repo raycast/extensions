@@ -1,7 +1,7 @@
 import { CssColor } from "./types";
 
 export const APP_NAME = "raycast_hue_extension";
-export const BRIDGE_ID = "bridgeId";
+export const BRIDGE_ID_KEY = "bridgeId";
 export const BRIDGE_IP_ADDRESS_KEY = "bridgeIpAddress";
 export const BRIDGE_USERNAME_KEY = "bridgeUsername";
 export const BRIDGE_CERT_FINGERPRINT = "bridgeCertFingerprint";

@@ -1,6 +1,6 @@
 import { LookupAddress } from "dns";
 import { LocalStorage } from "@raycast/api";
-import { BRIDGE_ID, BRIDGE_IP_ADDRESS_KEY } from "./constants";
+import { BRIDGE_ID_KEY, BRIDGE_IP_ADDRESS_KEY } from "./constants";
 import dns from "dns";
 
 // A shim to override the DNS lookup for the Hue bridge ID to the IP address
@@ -18,7 +18,7 @@ dns.lookup = async (
 ) => {
   const [bridgeIpAddress, bridgeId] = await Promise.all([
     LocalStorage.getItem<string>(BRIDGE_IP_ADDRESS_KEY),
-    LocalStorage.getItem<string>(BRIDGE_ID),
+    LocalStorage.getItem<string>(BRIDGE_ID_KEY),
   ]);
 
   if (bridgeIpAddress !== undefined && hostname.toLowerCase() === bridgeId?.toLowerCase()) {

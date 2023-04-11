@@ -12,7 +12,7 @@ import {
 import { discoverBridgeUsingMdns, discoverBridgeUsingNupnp, getUsernameFromBridge } from "./utils";
 import { LocalStorage, Toast } from "@raycast/api";
 import { v3 } from "node-hue-api";
-import { BRIDGE_CERT_FINGERPRINT, BRIDGE_ID, BRIDGE_IP_ADDRESS_KEY, BRIDGE_USERNAME_KEY } from "./constants";
+import { BRIDGE_CERT_FINGERPRINT, BRIDGE_ID_KEY, BRIDGE_IP_ADDRESS_KEY, BRIDGE_USERNAME_KEY } from "./constants";
 import HueClient from "./HueClient";
 import { GroupedLight, Light, Room, Scene, Zone } from "./types";
 import React from "react";
@@ -65,7 +65,7 @@ export default function hueBridgeMachine(
           src: async () => {
             const [bridgeIpAddress, bridgeId, bridgeUsername, bridgeCertFingerprint] = await Promise.all([
               LocalStorage.getItem<string>(BRIDGE_IP_ADDRESS_KEY),
-              LocalStorage.getItem<string>(BRIDGE_ID),
+              LocalStorage.getItem<string>(BRIDGE_ID_KEY),
               LocalStorage.getItem<string>(BRIDGE_USERNAME_KEY),
               LocalStorage.getItem<string>(BRIDGE_CERT_FINGERPRINT),
             ]);
@@ -234,7 +234,7 @@ export default function hueBridgeMachine(
             if (context.bridgeId === undefined) throw Error("No bridge ID");
             if (context.bridgeUsername === undefined) throw Error("No bridge username");
             LocalStorage.setItem(BRIDGE_IP_ADDRESS_KEY, context.bridgeIpAddress).then();
-            LocalStorage.setItem(BRIDGE_ID, context.bridgeId).then();
+            LocalStorage.setItem(BRIDGE_ID_KEY, context.bridgeId).then();
             LocalStorage.setItem(BRIDGE_USERNAME_KEY, context.bridgeUsername).then();
           },
         },

@@ -28,7 +28,7 @@ import StreamArray from "stream-json/streamers/StreamArray";
 import Chain from "stream-chain";
 import "./arrayExtensions";
 import * as tls from "tls";
-import { BRIDGE_CERT_FINGERPRINT, BRIDGE_ID, BRIDGE_IP_ADDRESS_KEY } from "./constants";
+import { BRIDGE_CERT_FINGERPRINT, BRIDGE_ID_KEY, BRIDGE_IP_ADDRESS_KEY } from "./constants";
 import { LookupAddress, LookupOptions } from "dns";
 import "./dnsShim";
 
