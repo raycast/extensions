@@ -83,19 +83,20 @@ export default function OtpListItem({ index, item, basis, timeLeft, refresh, set
       keywords={[subtitle]}
       actions={
         <ActionPanel>
-          {otp == CORRUPTED ?
+          {otp == CORRUPTED ? (
             <Action.OpenInBrowser title="Submit Issue" url="https://github.com/raycast/extensions/issues/new/choose" />
-            : <>
-                <PrimaryAction pin={otp ?? ""} id={item.id} index={index} setOtpList={setOtpList} />
-                <SecondaryAction pin={otp ?? ""} id={item.id} index={index} setOtpList={setOtpList} />
-                <Action
-                  title={"Sync"}
-                  icon={Icon.ArrowClockwise}
-                  shortcut={{ modifiers: ["cmd"], key: "r" }}
-                  onAction={() => refresh()}
-                />
+          ) : (
+            <>
+              <PrimaryAction pin={otp ?? ""} id={item.id} index={index} setOtpList={setOtpList} />
+              <SecondaryAction pin={otp ?? ""} id={item.id} index={index} setOtpList={setOtpList} />
+              <Action
+                title={"Sync"}
+                icon={Icon.ArrowClockwise}
+                shortcut={{ modifiers: ["cmd"], key: "r" }}
+                onAction={() => refresh()}
+              />
             </>
-          }
+          )}
         </ActionPanel>
       }
       accessories={[
@@ -105,10 +106,10 @@ export default function OtpListItem({ index, item, basis, timeLeft, refresh, set
           icon: {
             source: {
               light: `${environment.assetsPath}/${icondir}/light/${pie}.png`,
-              dark: `${environment.assetsPath}/${icondir}/dark/${pie}.png`
-            }
-          }
-        }
+              dark: `${environment.assetsPath}/${icondir}/dark/${pie}.png`,
+            },
+          },
+        },
       ]}
     />
   );
