@@ -1,11 +1,13 @@
-import { Grid, getPreferenceValues } from "@raycast/api";
+import { Grid, getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { join } from "path";
 import { homedir } from "os";
+import { apiRequest } from "@/functions/apiRequest";
 
-const preferences: any = getPreferenceValues();
+const preferences = getPreferenceValues<UnsplashPreferences>();
 
 export const getGridItemSize = (): Grid.ItemSize => {
   const { gridItemSize } = preferences;
+
   if (gridItemSize == "small") return Grid.ItemSize.Small;
   else if (gridItemSize == "large") return Grid.ItemSize.Large;
   else return Grid.ItemSize.Medium;
@@ -26,4 +28,20 @@ export const resolveHome = (filepath: string) => {
     return join(homedir(), filepath.slice(1));
   }
   return filepath;
+};
+
+export const likeOrDislike = async (id: number, liked?: boolean) => {
+  const toast = await showToast(Toast.Style.Animated, "Liking photo...");
+
+  try {
+    await apiRequest(`/photos/${id}/like`, {
+      method: liked ? "DELETE" : "POST",
+    });
+
+    toast.style = Toast.Style.Success;
+    toast.title = `Photo ${liked ? "unliked" : "liked"}!`;
+  } catch (err) {
+    toast.style = Toast.Style.Failure;
+    toast.title = "An error occured";
+  }
 };
