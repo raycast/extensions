@@ -240,7 +240,7 @@ export function SymlinkItem(props: { fileData: FileDataType; refresh: () => void
       />
     );
   } else {
-   return (
+    return (
       <List.Item
         id={filePath}
         title={props.fileData.name}
@@ -251,9 +251,9 @@ export function SymlinkItem(props: { fileData: FileDataType; refresh: () => void
             ? [{ icon: { source: Icon.ExclamationMark, tintColor: Color.Red }, tooltip: "Broken Symlink" }]
             : []
         }
-	actions={
+        actions={
           <ActionPanel>
-                       {originalFileData && (
+            {originalFileData && (
               <>
                 <Action.Open title="Open File" target={originalPath} />
                 <Action.OpenWith path={filePath} shortcut={{ modifiers: ["cmd"], key: "o" }} />
