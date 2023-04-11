@@ -21,8 +21,7 @@ dns.lookup = async (
     LocalStorage.getItem<string>(BRIDGE_ID_KEY),
   ]);
 
-  if (bridgeIpAddress !== undefined && hostname.toLowerCase() === bridgeId?.toLowerCase()) {
-    console.log(`dns.lookup: ${hostname} -> ${bridgeIpAddress}`);
+  if (hostname.toLowerCase() === bridgeId?.toLowerCase() && bridgeIpAddress !== undefined) {
     callback(null, bridgeIpAddress, 4);
   } else {
     dnsLookup(hostname, family, callback);
