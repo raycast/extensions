@@ -1,15 +1,23 @@
-import { ActionPanel, Action, Detail, List, Icon } from "@raycast/api";
-import dayjs from "dayjs";
-import relativeTime from "dayjs/plugin/relativeTime";
-import localizedFormat from "dayjs/plugin/localizedFormat";
+import {
+  ActionPanel,
+  Action,
+  Detail,
+  List,
+  Icon,
+  getPreferenceValues,
+  Toast,
+  showToast,
+  confirmAlert,
+  Alert,
+} from "@raycast/api";
 import { Bookmark } from "../types";
 import { getFavicon } from "@raycast/utils";
+import fetch from "node-fetch";
 
-dayjs.extend(relativeTime);
-dayjs.extend(localizedFormat);
+export default function BookmarkItem(props: { bookmark: Bookmark; revalidate: () => void }) {
+  const { bookmark, revalidate } = props;
 
-export default function BookmarkItem(props: { bookmark: Bookmark }) {
-  const bookmark = props.bookmark;
+  const preferences = getPreferenceValues();
 
   const getDetails = () => {
     let md = `# ${bookmark.title}\n`;
@@ -30,20 +38,71 @@ export default function BookmarkItem(props: { bookmark: Bookmark }) {
     return md;
   };
 
+  async function handleDelete() {
+    const options: Alert.Options = {
+      title: "Delete bookmark",
+      message: "Are you sure you want to delete this bookmark?",
+      primaryAction: {
+        title: "Delete",
+        style: Alert.ActionStyle.Destructive,
+        onAction: async () => {
+          const toast = await showToast(Toast.Style.Animated, "Deleting Link");
+          try {
+            await fetch(`https://api.raindrop.io/rest/v1/raindrop/${bookmark._id}`, {
+              method: "DELETE",
+              headers: {
+                Authorization: `Bearer ${preferences.token}`,
+              },
+            }).then((res) => {
+              if (res.status === 200) {
+                toast.style = Toast.Style.Success;
+                toast.title = "Link Deleted";
+                toast.message = bookmark.link;
+                revalidate();
+                return res.json();
+              } else {
+                throw new Error("Error deleting link");
+              }
+            });
+          } catch (error) {
+            if (error instanceof Error) {
+              toast.style = Toast.Style.Failure;
+              toast.title = "Error Deleting Link";
+              toast.message = error.message;
+            }
+          }
+        },
+      },
+    };
+    await confirmAlert(options);
+  }
+
+  const lastUpdatedDate = new Date(bookmark.lastUpdate);
+  const createdDate = new Date(bookmark.created);
+
+  function accessories() {
+    const accessories = [];
+
+    bookmark.tags.forEach((tag) => accessories.push({ tag: `#${tag}` }));
+    accessories.push({ date: lastUpdatedDate, tooltip: lastUpdatedDate.toLocaleString() });
+    return accessories;
+  }
+
   return (
     <List.Item
       id={String(bookmark._id)}
       icon={getFavicon(bookmark.link, { fallback: "raindrop-icon.png" })}
       key={bookmark._id}
       title={bookmark.title}
-      subtitle={bookmark.tags.map((tag) => `#${tag}`).join(" ")}
-      accessories={[{ text: dayjs().to(dayjs(bookmark.lastUpdate)) }]}
+      accessories={accessories()}
       actions={
         <ActionPanel>
           <Action.OpenInBrowser url={bookmark.link} />
+          <Action.CopyToClipboard title="Copy URL" content={bookmark.link} />
           <Action.Push
             title="Show Details"
             icon={Icon.Sidebar}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
             target={
               <Detail
                 markdown={getDetails()}
@@ -62,11 +121,11 @@ export default function BookmarkItem(props: { bookmark: Bookmark }) {
                   <Detail.Metadata>
                     <Detail.Metadata.Label
                       title="Created"
-                      text={dayjs(bookmark.created).format("ll")}
+                      text={createdDate.toLocaleDateString()}
                     />
                     <Detail.Metadata.Label
                       title="Last Updated"
-                      text={dayjs(bookmark.lastUpdate).format("ll")}
+                      text={lastUpdatedDate.toLocaleDateString()}
                     />
                     <Detail.Metadata.Label title="Domain" text={bookmark.domain} />
 
@@ -85,7 +144,13 @@ export default function BookmarkItem(props: { bookmark: Bookmark }) {
               />
             }
           />
-          <Action.CopyToClipboard title="Copy URL" content={bookmark.link} />
+          <Action
+            onAction={handleDelete}
+            title="Delete Bookmark"
+            style={Action.Style.Destructive}
+            shortcut={{ modifiers: ["ctrl"], key: "x" }}
+            icon={Icon.Trash}
+          />
         </ActionPanel>
       }
     />
