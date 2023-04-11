@@ -1,4 +1,5 @@
-import { buildScriptEnsuringSpotifyIsRunning, runAppleScriptSilently } from "../helpers/applescript";
+import { runAppleScript } from "run-applescript";
+import { buildScriptEnsuringSpotifyIsRunning } from "../helpers/applescript";
 import { getErrorMessage } from "../helpers/getError";
 import { getSpotifyClient } from "../helpers/withSpotifyClient";
 
@@ -12,7 +13,7 @@ export async function skipToNext() {
 
     if (error?.toLocaleLowerCase().includes("restricted device")) {
       const script = buildScriptEnsuringSpotifyIsRunning("next track");
-      await runAppleScriptSilently(script);
+      await runAppleScript(script);
       return;
     }
 

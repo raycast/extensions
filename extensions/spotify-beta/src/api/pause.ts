@@ -1,4 +1,5 @@
-import { buildScriptEnsuringSpotifyIsRunning, runAppleScriptSilently } from "../helpers/applescript";
+import { runAppleScript } from "run-applescript";
+import { buildScriptEnsuringSpotifyIsRunning } from "../helpers/applescript";
 import { getErrorMessage } from "../helpers/getError";
 import { getSpotifyClient } from "../helpers/withSpotifyClient";
 
@@ -11,7 +12,7 @@ export async function pause() {
 
     if (error?.toLocaleLowerCase().includes("restricted device")) {
       const script = buildScriptEnsuringSpotifyIsRunning("pause");
-      await runAppleScriptSilently(script);
+      await runAppleScript(script);
       return;
     }
     console.log("pause.ts Error: ", error);

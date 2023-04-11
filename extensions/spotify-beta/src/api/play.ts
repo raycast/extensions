@@ -1,4 +1,5 @@
-import { buildScriptEnsuringSpotifyIsRunning, runAppleScriptSilently } from "../helpers/applescript";
+import { runAppleScript } from "run-applescript";
+import { buildScriptEnsuringSpotifyIsRunning } from "../helpers/applescript";
 import { getErrorMessage } from "../helpers/getError";
 import { getSpotifyClient } from "../helpers/withSpotifyClient";
 
@@ -48,16 +49,16 @@ export async function play({ id, type, contextUri }: PlayProps = {}) {
     ) {
       if (!type || !id) {
         const script = buildScriptEnsuringSpotifyIsRunning("play");
-        await runAppleScriptSilently(script);
+        await runAppleScript(script);
       } else if (type === "track") {
         const script = buildScriptEnsuringSpotifyIsRunning(`play track "${uriForType[type]}${id}"`);
-        await runAppleScriptSilently(script);
+        await runAppleScript(script);
       } else {
         // For albums/artists/etc we seem to need a delay. Trying 1 second.
         const script = buildScriptEnsuringSpotifyIsRunning(`
           delay 1
           play track "${uriForType[type]}${id}"`);
-        await runAppleScriptSilently(script);
+        await runAppleScript(script);
       }
 
       return;
