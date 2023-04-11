@@ -3,12 +3,14 @@ import { makeNewLittleArcWindow } from "./arc";
 import { newTabPreferences } from "./preferences";
 import { NewLittleArcArguments } from "./types";
 
+const DEFAULT_PAGE = "arc://newtab";
+
 export default async function command(props: LaunchProps<{ arguments: NewLittleArcArguments }>) {
   const { url } = props.arguments;
 
   try {
-    const urlRegex = /(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_+.~#?&//=]*)/;
-    const newTabUrl = url || newTabPreferences.url;
+    const urlRegex = /^(.+?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._+~#=]{2,256}(\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_+.~#?&//=]*))?/;
+    const newTabUrl = url || newTabPreferences.url || DEFAULT_PAGE;
 
     if (newTabUrl === undefined || newTabUrl === "") {
       return await showHUD("❌ No URL found");
@@ -18,8 +20,8 @@ export default async function command(props: LaunchProps<{ arguments: NewLittleA
       return await showHUD("❌ Invalid URL provided");
     }
 
-    // Append https:// if not http OR https is present
-    const openURL = !/^https?:\/\//i.test(newTabUrl) ? "https://" + newTabUrl : newTabUrl;
+    // Append https:// if protocol is present
+    const openURL = !/^\S+?:\/\//i.test(newTabUrl) ? "https://" + newTabUrl : newTabUrl;
 
     await closeMainWindow();
     await makeNewLittleArcWindow(openURL);
