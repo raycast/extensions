@@ -21,7 +21,7 @@ function useVaultMessages() {
 
   if (vaultState) {
     const { status, userEmail, serverUrl } = vaultState;
-    userMessage = status == "unauthenticated" ? "Logged out" : `Locked (${userEmail})`;
+    userMessage = status == "unauthenticated" ? "❌ Logged out" : `🔒 Locked (${userEmail})`;
     if (serverUrl) {
       serverMessage = serverUrl || "";
     } else if ((!serverUrl && shouldShowServer) || (serverUrl && !shouldShowServer)) {
