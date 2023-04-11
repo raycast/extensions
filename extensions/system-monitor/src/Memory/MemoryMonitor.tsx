@@ -22,7 +22,6 @@ export default function MemoryMonitor() {
       .then((newTopProcess) => {
         getFreeDiskSpace()
           .then((newFreeDisk) => {
-                topProcess: newTopProcess,
             getMemoryUsage().then((memoryUsage) => {
               const memTotal: number = memoryUsage.memTotal;
               const memUsed: number = memoryUsage.memUsed;
@@ -35,6 +34,7 @@ export default function MemoryMonitor() {
                   totalMem: Math.round(memTotal / 1024).toString(),
                   freeMemPercentage: Math.round((freeMem * 100) / memTotal).toString(),
                   freeMem: Math.round(freeMem / 1024).toString(),
+                  topProcess: newTopProcess,
                 };
               });
               setIsLoading(false);
