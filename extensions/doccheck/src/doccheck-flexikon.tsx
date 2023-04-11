@@ -106,7 +106,7 @@ export default function Command() {
                   key={entry.url}
                   title={entry.title}
                   icon={entry.imageUrl}
-                  subtitle={{value: entry.description, tooltip: entry.description}}
+                  subtitle={{ value: entry.description, tooltip: entry.description }}
                   actions={EntryActions(entry.url, entry.title, query!)}
                 />
               );
