@@ -83,6 +83,7 @@ export default function hueBridgeMachine(
             target: "connecting",
           },
           onError: {
+            actions: (_, event) => console.error(event.data),
             target: "discoveringUsingPublicApi",
           },
         },
@@ -120,6 +121,7 @@ export default function hueBridgeMachine(
             target: "connected",
           },
           onError: {
+            actions: (_, event) => console.error(event.data),
             target: "failedToConnect",
           },
         },
@@ -141,6 +143,7 @@ export default function hueBridgeMachine(
             target: "linkWithBridge",
           },
           onError: {
+            actions: (_, event) => console.error(event.data),
             target: "discoveringUsingMdns",
           },
         },
@@ -154,6 +157,7 @@ export default function hueBridgeMachine(
             target: "linkWithBridge",
           },
           onError: {
+            actions: (_, event) => console.error(event.data),
             target: "noBridgeFound",
           },
         },
@@ -204,6 +208,7 @@ export default function hueBridgeMachine(
             }),
           },
           onError: {
+            actions: (_, event) => console.error(event.data),
             target: "failedToLink",
           },
         },
