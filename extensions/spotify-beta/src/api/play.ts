@@ -42,7 +42,10 @@ export async function play({ id, type, contextUri }: PlayProps = {}) {
   } catch (err) {
     const error = getErrorMessage(err);
 
-    if (error?.toLocaleLowerCase().includes("no active device")) {
+    if (
+      error?.toLocaleLowerCase().includes("no active device") ||
+      error?.toLocaleLowerCase().includes("restricted device")
+    ) {
       if (!type || !id) {
         const script = buildScriptEnsuringSpotifyIsRunning("play");
         await runAppleScriptSilently(script);
