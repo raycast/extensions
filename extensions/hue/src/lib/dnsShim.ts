@@ -1,7 +1,6 @@
-import { LookupAddress } from "dns";
+import dns, { LookupAddress, LookupOptions } from "dns";
 import { LocalStorage } from "@raycast/api";
 import { BRIDGE_ID_KEY, BRIDGE_IP_ADDRESS_KEY } from "./constants";
-import dns from "dns";
 
 // A shim to override the DNS lookup for the Hue bridge ID to the IP address
 // This is needed to silence the following warning:
@@ -13,7 +12,7 @@ const dnsLookup = dns.lookup;
 // @ts-ignore
 dns.lookup = async (
   hostname: string,
-  family: number,
+  options: LookupOptions,
   callback: (err: NodeJS.ErrnoException | null, address: string | LookupAddress[], family: number) => void
 ) => {
   const [bridgeIpAddress, bridgeId] = await Promise.all([
@@ -21,9 +20,12 @@ dns.lookup = async (
     LocalStorage.getItem<string>(BRIDGE_ID_KEY),
   ]);
 
+  console.log(`DNS lookup for ${hostname} (bridgeId: ${bridgeId}, bridgeIpAddress: ${bridgeIpAddress})`);
+
   if (hostname.toLowerCase() === bridgeId?.toLowerCase() && bridgeIpAddress !== undefined) {
+    console.log(`Overriding DNS lookup for ${hostname} to ${bridgeIpAddress}`);
     callback(null, bridgeIpAddress, 4);
   } else {
-    dnsLookup(hostname, family, callback);
+    dnsLookup(hostname, options, callback);
   }
 };
