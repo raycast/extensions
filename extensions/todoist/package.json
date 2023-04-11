@@ -60,19 +60,14 @@
       ],
       "arguments": [
         {
-          "name": "title",
-          "placeholder": "Title",
+          "name": "text",
+          "placeholder": "Title/info (today 5pm p2)",
           "type": "text",
           "required": true
         },
         {
           "name": "description",
           "placeholder": "Description",
-          "type": "text"
-        },
-        {
-          "name": "info",
-          "placeholder": "#Work p2 tom +Bob",
           "type": "text"
         }
       ]
