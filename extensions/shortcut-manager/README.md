@@ -16,4 +16,5 @@
 - I intend to introduce many small features that will improve user flow and overall ease of use.
 - Additionally, I plan to pull user-defined hotkeys from the applications we support directly into our extension.
 - This will significantly reduce the amount of manual labor required to manage hotkeys, making the overall experience smoother and more user-friendly.
+
 - Finally, if anyone would like to contribute to the project, your contributions would be welcomed and appreciated.
