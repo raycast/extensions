@@ -20,8 +20,6 @@ dns.lookup = async (
     LocalStorage.getItem<string>(BRIDGE_ID_KEY),
   ]);
 
-  console.log(`DNS lookup for ${hostname} (bridgeId: ${bridgeId}, bridgeIpAddress: ${bridgeIpAddress})`);
-
   if (hostname.toLowerCase() === bridgeId?.toLowerCase() && bridgeIpAddress !== undefined) {
     console.log(`Overriding DNS lookup for ${hostname} to ${bridgeIpAddress}`);
     callback(null, bridgeIpAddress, 4);
