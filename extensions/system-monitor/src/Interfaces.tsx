@@ -34,3 +34,8 @@ export interface PowerMonitorState {
   maxBatteryCapacity: string;
   batteryTime: string;
 }
+
+export interface MemoryInterface {
+  memTotal: number;
+  memUsed: number;
+}
