@@ -83,7 +83,8 @@ export default function hueBridgeMachine(
             target: "connecting",
           },
           onError: {
-            actions: (_, event) => console.error(event.data),
+            // This is expected if the user has not yet linked their bridge
+            actions: (_, event) => console.info(event.data.message),
             target: "discoveringUsingPublicApi",
           },
         },
