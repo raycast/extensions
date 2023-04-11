@@ -10,6 +10,7 @@ type PlayActionProps = {
 
 export function PlayAction({ id, type, playingContext, onPlay }: PlayActionProps) {
   const { closeWindowOnAction } = getPreferenceValues<{ closeWindowOnAction?: boolean }>();
+  console.log({ closeWindowOnAction });
 
   return (
     <Action

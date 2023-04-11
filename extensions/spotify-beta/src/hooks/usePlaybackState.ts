@@ -8,7 +8,7 @@ type UsePlaybackStateProps = {
 };
 
 export function usePlaybackState({ options }: UsePlaybackStateProps = {}) {
-  const { data, error, isLoading, revalidate } = useCachedPromise(() => getPlaybackState(), [], {
+  const { data, error, isLoading, revalidate, mutate } = useCachedPromise(() => getPlaybackState(), [], {
     execute: options?.execute !== false,
   });
 
@@ -17,5 +17,6 @@ export function usePlaybackState({ options }: UsePlaybackStateProps = {}) {
     playbackStateError: error,
     playbackStateIsLoading: isLoading,
     playbackStateRevalidate: revalidate,
+    playbackStateMutate: mutate,
   };
 }
