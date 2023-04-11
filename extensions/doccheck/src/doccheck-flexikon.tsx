@@ -98,7 +98,7 @@ export default function Command() {
         isLoading={loading}
         searchBarPlaceholder="Search entry..."
       >
-        <List.Section title={!query ? "Top Artikel" : "XXX"} subtitle={""}>
+        <List.Section title={!query ? "Top Artikel" : ""} subtitle={""}>
           {entries.map((entry) => {
             if (entry.description) {
               return (
@@ -106,7 +106,7 @@ export default function Command() {
                   key={entry.url}
                   title={entry.title}
                   icon={entry.imageUrl}
-                  subtitle={entry.description}
+                  subtitle={{value: entry.description, tooltip: entry.description}}
                   actions={EntryActions(entry.url, entry.title, query!)}
                 />
               );
