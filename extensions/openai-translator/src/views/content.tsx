@@ -14,6 +14,7 @@ import { DetailView } from "./detail";
 import { EmptyView } from "./empty";
 import { translate, TranslateMode, TranslateQuery } from "../providers/openai/translate";
 import { QueryHook } from "../hooks/useQuery";
+import { useProxy } from "../hooks/useProxy";
 import { useHistory, Record, HistoryHook } from "../hooks/useHistory";
 import { useEffect, useRef, useState } from "react";
 import { detectLang } from "../providers/openai/lang";
@@ -43,12 +44,15 @@ type ViewItem = Querying | Record;
 
 export const ContentView = (props: ContentViewProps) => {
   const { query, history, mode, setMode, setSelectedId, setIsInit, setIsEmpty } = props;
-
+  const agent = useProxy();
   const [data, setData] = useState<ViewItem[]>();
   const [querying, setQuerying] = useState<Querying | null>();
   const [translatedText, setTranslatedText] = useState("");
-  const { entrypoint, apikey } = getPreferenceValues<{ entrypoint: string; apikey: string }>();
-
+  const { entrypoint, apikey, apiModel } = getPreferenceValues<{
+    entrypoint: string;
+    apikey: string;
+    apiModel: string;
+  }>();
   const ref = useRef<string>();
   function updateData() {
     if (history.data) {
@@ -107,6 +111,7 @@ export const ContentView = (props: ContentViewProps) => {
       query: {
         mode,
         signal,
+        agent,
         text,
         detectFrom,
         detectTo,
@@ -157,7 +162,7 @@ export const ContentView = (props: ContentViewProps) => {
     setTranslatedText("");
     setQuerying(_querying);
     query.updateText("");
-    translate(_querying.query, entrypoint, apikey);
+    translate(_querying.query, entrypoint, apikey, apiModel);
   }
 
   useEffect(() => {
