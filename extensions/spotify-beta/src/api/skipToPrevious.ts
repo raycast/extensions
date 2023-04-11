@@ -1,3 +1,4 @@
+import { buildScriptEnsuringSpotifyIsRunning, runAppleScriptSilently } from "../helpers/applescript";
 import { getErrorMessage } from "../helpers/getError";
 import { getSpotifyClient } from "../helpers/withSpotifyClient";
 
@@ -8,6 +9,13 @@ export async function skipToPrevious() {
     await spotifyClient.postMePlayerPrevious();
   } catch (err) {
     const error = getErrorMessage(err);
+
+    if (error?.toLocaleLowerCase().includes("restricted device")) {
+      const script = buildScriptEnsuringSpotifyIsRunning("previous track");
+      await runAppleScriptSilently(script);
+      return;
+    }
+
     console.log("skipToPrevious.ts Error:", error);
     throw new Error(error);
   }

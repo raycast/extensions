@@ -49,15 +49,16 @@ export async function play({ id, type, contextUri }: PlayProps = {}) {
       if (!type || !id) {
         const script = buildScriptEnsuringSpotifyIsRunning("play");
         await runAppleScriptSilently(script);
-        return;
+      } else if (type === "track") {
+        const script = buildScriptEnsuringSpotifyIsRunning(`play track "${uriForType[type]}${id}"`);
+        await runAppleScriptSilently(script);
+      } else {
+        const script = buildScriptEnsuringSpotifyIsRunning(`
+          delay 3
+          play track "${uriForType[type]}${id}"`);
+        await runAppleScriptSilently(script);
       }
 
-      const script = buildScriptEnsuringSpotifyIsRunning(`tell application "Spotify"
-            launch
-            delay 3
-            play track "${uriForType[type]}${id}"
-    end tell`);
-      await runAppleScriptSilently(script);
       return;
     }
 
