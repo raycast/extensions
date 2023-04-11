@@ -80,8 +80,8 @@ export default function MemoryMonitor() {
   return (
     <>
       <List.Item
-        accessoryTitle={isLoading ? "Loading..." : `${state.freeMemPercentage}% (~ ${state.freeMem} GB)`}
         title="📝  Memory"
+        accessories={[{ text: isLoading ? "Loading..." : `${state.freeMemPercentage}% (~ ${state.freeMem} GB)` }]}
         detail={
           <List.Item.Detail
             metadata={
