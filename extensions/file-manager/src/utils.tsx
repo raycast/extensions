@@ -255,12 +255,12 @@ export function SymlinkItem(props: { fileData: FileDataType; refresh: () => void
           : []}
 	actions={
           <ActionPanel>
-            { originalFileData !== undefined &&
-                <>
-		  <Action.Open title="Open File" target={originalPath} />
-                  <Action.OpenWith path={filePath} shortcut={{ modifiers: ["cmd"], key: "o" }} />
-                </>
-            }
+                       {originalFileData && (
+              <>
+                <Action.Open title="Open File" target={originalPath} />
+                <Action.OpenWith path={filePath} shortcut={{ modifiers: ["cmd"], key: "o" }} />
+              </>
+            )}
             <Action.CopyToClipboard
               title="Copy Symlink Path"
               content={filePath}
