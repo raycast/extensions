@@ -201,7 +201,7 @@ export function SymlinkItem(props: { fileData: FileDataType; refresh: () => void
   const a = readlinkSync(filePath);
   const originalPath = a.startsWith("/") ? a : `${props.fileData.path}/${a}`;
   const originalFileData = lstatSync(originalPath, { throwIfNoEntry: false });
-  if (originalFileData !== undefined && originalFileData.isDirectory()) {
+  if (originalFileData?.isDirectory() ?? false) {
     return (
       <List.Item
         id={filePath}
