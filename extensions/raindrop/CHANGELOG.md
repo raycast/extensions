@@ -1,5 +1,9 @@
 # Raindrop.io Extension Changelog
 
+## [Enhancements] - 2023-04-11
+
+- Added possibility to add and delete bookmarks.
+
 ## [Fixes] - 2023-01-02
 
 - Added a fix where some accounts with no collections or groups without collections failed to display results.

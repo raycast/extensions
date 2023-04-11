@@ -1,5 +1,10 @@
 # Bitwarden Changelog
 
+## [Improvement] - 2023-04-03
+
+- Display better login/unlock error messages
+- Allow to copy the last login/unlock error to debug issues
+
 ## [Fix] - 2023-03-29
 
 - Fix copy TOTP action
