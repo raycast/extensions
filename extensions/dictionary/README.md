@@ -4,19 +4,23 @@ Search any word with multiple online dictionaries or translation engines in one 
 
 ## Features
 
-- The extension is powerful and lightweight with no dependencies. It is built with the official Raycast [api](https://www.npmjs.com/package/@raycast/api) and [utils](https://www.npmjs.com/package/@raycast/utils).
-- Search across multiple online dictionaries and translate engines, currently including
-  - Google Translation
-  - Urban Dictionary
-  - Google Cloud Translation API(`google api key` required)
-  - Youdao API(`Youdao Client ID` and `Youdao Secret` required)
-- Provides command `Search from Cursor Selection` to quickly look up your currently selected words. Feel free to bind a hotkey like double <kbd>⌘ cmd</kbd> for quick access.
-- View related definitions and example sentences when available.
-- Supports auto reverse(fallback) search, whenever the detected input matches the default language.
-- Access TTS(Text-to-Speech) for the following engines:
-  - Google Translation
-  - Youdao
-- [Bonus] You can configure this extension directly from the command line in an old-fashioned way!
+The extension is powerful and lightweight with no dependencies. It is built with the official Raycast [API](https://www.npmjs.com/package/@raycast/api) and [utils](https://www.npmjs.com/package/@raycast/utils).
+
+Search across multiple online dictionaries and translation engines, currently including:
+- Google Translation
+- Urban Dictionary
+- Google Cloud Translation API (`Google API key` required)
+- Youdao API (`Youdao Client ID` and `Youdao Secret` required)
+
+It provides the command `Search from Cursor Selection` to quickly look up your currently selected words. Feel free to bind a hotkey, such as double <kbd>⌘ cmd</kbd>, for quick access.
+
+View related definitions and example sentences when available. It also supports auto reverse (fallback) search, whenever the detected input matches the default language.
+
+Access TTS (Text-to-Speech) for the following engines:
+- Google Translation
+- Youdao
+
+As a bonus, you can configure this extension directly from the command line in an old-fashioned way!
 
 ## Feedback & Contributing
 
