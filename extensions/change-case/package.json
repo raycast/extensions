@@ -21,8 +21,8 @@
     {
       "name": "source",
       "type": "dropdown",
-      "title": "Preferred source",
-      "description": "Choose a preferred text source. If not available, both are tried.",
+      "title": "Preferred Source",
+      "description": "Choose a preferred text source. If no text is selected, clipboard is used.",
       "data": [
         {
           "title": "Selected",
@@ -34,6 +34,24 @@
         }
       ],
       "default": "selected",
+      "required": false
+    },
+    { 
+      "name": "action",
+      "type": "dropdown",
+      "title": "Primary Action",
+      "description": "Choose whether the primary action should copy or paste the output.",
+      "data": [
+        {
+          "title": "Copy",
+          "value": "copy"
+        },
+        {
+          "title": "Paste",
+          "value": "paste"
+        }
+      ],
+      "default": "paste",
       "required": false
     },
     {

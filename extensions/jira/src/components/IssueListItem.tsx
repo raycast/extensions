@@ -16,7 +16,7 @@ export default function IssueListItem({ issue, mutate }: IssueListItemProps) {
   const updatedAt = new Date(issue.fields.updated);
   const assignee = issue.fields.assignee;
 
-  const keywords = [issue.key, issue.fields.status.name, issue.fields.issuetype.name, issue.fields.priority.name];
+  const keywords = [issue.key, issue.fields.status?.name, issue.fields.issuetype?.name, issue.fields.priority?.name];
 
   if (issue.fields.assignee) {
     keywords.push(issue.fields.assignee.displayName);
@@ -26,13 +26,13 @@ export default function IssueListItem({ issue, mutate }: IssueListItemProps) {
     <List.Item
       key={issue.id}
       keywords={keywords}
-      icon={{ value: issue.fields.issuetype.iconUrl, tooltip: `Issue Type: ${issue.fields.issuetype.name}` }}
+      icon={{ value: issue.fields.issuetype.iconUrl, tooltip: `Issue Type: ${issue.fields.issuetype?.name}` }}
       title={issue.fields.summary}
       subtitle={issue.key}
       accessories={[
         {
           text: {
-            value: issue.fields.status.name,
+            value: issue.fields.status?.name,
             color: getStatusColor(issue.fields.status.statusCategory.colorName),
           },
         },
@@ -41,7 +41,7 @@ export default function IssueListItem({ issue, mutate }: IssueListItemProps) {
           tooltip: `Assignee: ${assignee ? assignee.displayName : "Unassigned"}`,
         },
         { date: updatedAt, tooltip: format(updatedAt, "EEEE d MMMM yyyy 'at' HH:mm") },
-        { icon: issue.fields.priority.iconUrl, tooltip: `Priority: ${issue.fields.priority.name}` },
+        { icon: issue.fields.priority.iconUrl, tooltip: `Priority: ${issue.fields.priority?.name}` },
       ]}
       actions={<IssueActions issue={issue} mutate={mutate} showDetailsAction={true} />}
     />
