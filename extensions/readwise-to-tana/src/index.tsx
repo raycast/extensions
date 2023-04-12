@@ -49,6 +49,7 @@ export default function Command() {
       highlightSupertag,
       highlightUpdatedAt,
       highlightUrl,
+      highlightTags,
       id,
       readwiseUrl,
       source,
@@ -85,11 +86,9 @@ export default function Command() {
     highlights += highlightLocation
       ? `{{#if location}}\n    - ${highlightLocation}:: {{location}}{{/if}}`
       : ''
-    highlights += '\n{{#each note}}'
-    highlights += highlightNote
-      ? `{{#if this}}    - ${highlightNote}:: {{this}}{{/if}}`
-      : '{{#if this}}    - {{this}}{{/if}}'
-    highlights += '\n{{/each}}'
+    highlights += highlightTags
+      ? `{{#if tags}}\n    - ${highlightTags}:: {{tags}}{{/if}}`
+      : ''
     highlights += highlightUpdatedAt
       ? `{{#if updated}}\n    - ${highlightUpdatedAt}:: [[{{updated}}]]{{/if}}`
       : ''
@@ -102,6 +101,11 @@ export default function Command() {
     highlights += highlightUrl
       ? `{{#if url}}\n    - ${highlightUrl}:: {{url}}{{/if}}`
       : ''
+    highlights += '\n{{#each note}}'
+    highlights += highlightNote
+      ? `{{#if this}}    - ${highlightNote}:: {{this}}{{/if}}`
+      : '{{#if this}}    - {{this}}{{/if}}'
+    highlights += '\n{{/each}}'
 
     highlights += '\n{{/each}}'
 

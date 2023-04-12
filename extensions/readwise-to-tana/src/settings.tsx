@@ -1,6 +1,5 @@
 import { Action, ActionPanel, Form } from '@raycast/api'
 import Handlebars from 'handlebars'
-import { Book, Highlight } from './useApi'
 
 export type SettingsValues = {
   author: string
@@ -12,6 +11,7 @@ export type SettingsValues = {
   highlightLocation: string
   highlightNote: string
   highlightSupertag: string
+  highlightTags: string
   highlightUpdatedAt: string
   highlightUrl: string
   id: string
@@ -56,9 +56,16 @@ export default function Settings({ handleSave, template }: SettingsProps) {
         note: 'This is a note\n\nwith multiple lines',
         id: 3,
       },
+      {
+        text: 'Highlight with a note and tags',
+        note: 'This is a note',
+        tags: [{ name: 'tag1' }, { name: 'tag2' }],
+        id: 4,
+      },
     ].map((highlight) => ({
       ...highlight,
       note: highlight.note?.split('\n').filter((line) => line) ?? [],
+      tags: highlight.tags?.map((tag) => tag.name).join(', ') ?? [],
     })),
   }
   const output = h(exampleBook)
@@ -124,6 +131,7 @@ export default function Settings({ handleSave, template }: SettingsProps) {
         storeValue
       />
       <Form.TextField id="highlightColor" title="Color" storeValue />
+      <Form.TextField id="highlightTags" title="Tags" storeValue />
       <Form.TextField id="highlightUrl" title="URL" storeValue />
       <Form.TextField
         id="highlightHighlightedAt"
