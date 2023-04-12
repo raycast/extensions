@@ -51,7 +51,6 @@ Returns an object with the [AsyncState](#asyncstate) corresponding to the execut
 ## Example
 
 ```tsx
-import { useRef } from "react";
 import { Detail, ActionPanel, Action } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 
