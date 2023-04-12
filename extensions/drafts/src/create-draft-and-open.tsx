@@ -12,46 +12,45 @@ interface CommandForm {
   tags: string;
 }
 
-async function addTagsToRecentTags(tags:String[]) {
-    const storedValue:String|undefined = await LocalStorage.getItem<string>(StorageDefines.RECENT_TAGS)
-    let storedTags:String[] = []
-    if(storedValue){
-     storedTags = storedValue.split(",")  
+async function addTagsToRecentTags(tags: string[]) {
+  const storedValue: string | undefined = await LocalStorage.getItem<string>(StorageDefines.RECENT_TAGS);
+  let storedTags: string[] = [];
+  if (storedValue) {
+    storedTags = storedValue.split(",");
+  }
+  const maxTags: number = StorageDefines.RECENT_TAGS_MAX;
+  const commonTags: string[] = storedTags.filter((value) => tags.includes(value));
+  const uncommonTagsNew: string[] = tags.filter((value) => !commonTags.includes(value));
+  const uncommonTagsOld: string[] = storedTags.filter((value) => !commonTags.includes(value));
+  const allTags: string[] = [...commonTags, ...uncommonTagsNew, ...uncommonTagsOld];
+  const tagsToStore: string[] = [];
+  while (tagsToStore.length < maxTags) {
+    if (allTags[0]) {
+      tagsToStore.push(allTags[0]);
+      allTags.shift();
+    } else {
+      break;
     }
-    const maxTags:Number = StorageDefines.RECENT_TAGS_MAX
-    const commonTags:String[] = storedTags.filter(value => tags.includes(value));
-    const uncommonTagsNew:String[] = tags.filter(value => !commonTags.includes(value));
-    const uncommonTagsOld:String[] = storedTags.filter(value => !commonTags.includes(value));
-    const allTags :String[] = [...commonTags, ...uncommonTagsNew, ... uncommonTagsOld];
-    let tagsToStore:String[] = []
-    while (tagsToStore.length < maxTags) {
-      if(allTags[0]){
-        tagsToStore.push(allTags[0])
-        allTags.shift()
-      } else {
-        break;
-      }
-    }
-    // now store the tags
-    await LocalStorage.setItem(StorageDefines.RECENT_TAGS,tagsToStore.join(","))
+  }
+  // now store the tags
+  await LocalStorage.setItem(StorageDefines.RECENT_TAGS, tagsToStore.join(","));
 }
 
 export default function Command() {
   // app installation check (shows Toast if Drafts is not installed)
   checkAppInstallation();
-  
+
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [recentTags, setRecentTags] = useState<String[]>([]);
-  
+  const [recentTags, setRecentTags] = useState<string[]>([]);
+
   async function getRecentTags() {
-      const storedValue:String|undefined = await LocalStorage.getItem<string>(StorageDefines.RECENT_TAGS)
-      let storedTags:String[] = []
-      if(storedValue){
-       storedTags = storedValue.split(",")  
-       setRecentTags(storedTags);
-      }
-      setIsLoading(false);
-      
+    const storedValue: string | undefined = await LocalStorage.getItem<string>(StorageDefines.RECENT_TAGS);
+    let storedTags: string[] = [];
+    if (storedValue) {
+      storedTags = storedValue.split(",");
+      setRecentTags(storedTags);
+    }
+    setIsLoading(false);
   }
   if (recentTags.length == 0) {
     getRecentTags();
@@ -66,15 +65,15 @@ export default function Command() {
       });
       return;
     }
-    
+
     const callbackUrl = new CallbackUrl(CallbackBasUrls.CREATE_DRAFT);
     if (values.tags != "") {
       const tags = values.tags.split(",");
-      addTagsToRecentTags(tags)
+      addTagsToRecentTags(tags);
       tags.map((tag) => callbackUrl.addParam({ name: "tag", value: tag }));
     }
-    if(values.recentTags.length > 0){
-      const tags:string[] = values.recentTags;
+    if (values.recentTags.length > 0) {
+      const tags: string[] = values.recentTags;
       tags.map((tag) => callbackUrl.addParam({ name: "tag", value: tag }));
     }
     callbackUrl.addParam({ name: "text", value: values.content });
@@ -93,11 +92,18 @@ export default function Command() {
       }
     >
       <Form.TextArea id="content" title="Content" placeholder="Enter content" defaultValue="" autoFocus={true} />
-      <Form.TagPicker id="recentTags" title="Recent Tags" defaultValue={[]} placeholder="Press Enter to search and select recent tags">
-        {
-          recentTags.map((tag, index) => {return <Form.TagPicker.Item key={"recentTag" + index.toString()} title={tag.toString()} value={tag.toString()} />})
-        }
-      </Form.TagPicker>    
+      <Form.TagPicker
+        id="recentTags"
+        title="Recent Tags"
+        defaultValue={[]}
+        placeholder="Press Enter to search and select recent tags"
+      >
+        {recentTags.map((tag, index) => {
+          return (
+            <Form.TagPicker.Item key={"recentTag" + index.toString()} title={tag.toString()} value={tag.toString()} />
+          );
+        })}
+      </Form.TagPicker>
       <Form.TextField id="tags" title="tags" placeholder="Enter comma separated tags" defaultValue="" />
     </Form>
   );

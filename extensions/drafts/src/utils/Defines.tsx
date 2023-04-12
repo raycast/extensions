@@ -23,8 +23,8 @@ type QuickLinkDefinition = {
 
 export const StorageDefines = {
   RECENT_TAGS: "recent_tags",
-  RECENT_TAGS_MAX: 10
-}
+  RECENT_TAGS_MAX: 10,
+};
 
 export const QuicklinkDefinitions: QuickLinkDefinition[] = [
   {
