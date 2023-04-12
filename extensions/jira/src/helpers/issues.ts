@@ -71,11 +71,6 @@ export function getIssueDescription(description: string) {
         prefix: "```\n",
         postfix: "\n```",
       },
-      // Raycast doesn't support tables in Markdown, so let's remove
-      // it from the end result.
-      table: {
-        content: "",
-      },
     }
   );
 
