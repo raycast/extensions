@@ -1,12 +1,5 @@
 import DocCheckPage from "./doccheck-page";
 
-export default function OpenPage(props: { arguments: { prevurl: string; title: string; url: string } }) {
-  return (
-    <DocCheckPage
-      prevtitle={decodeURI(props.arguments?.prevurl?.split("/").pop()?.replace(/_/gm, " ") ?? "")}
-      prevurl={props.arguments.prevurl}
-      title={props.arguments.title}
-      url={props.arguments.url}
-    />
-  );
+export default function OpenPage(props: { arguments: { title: string; prevurl: string; query: string } }) {
+  return <DocCheckPage url={props.arguments.url} prevurl={props.arguments.prevurl} query={props.arguments.query} />;
 }

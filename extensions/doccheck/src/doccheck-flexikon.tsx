@@ -257,7 +257,7 @@ function EntryActions(url: string, title: string, query: string) {
       <Action.Push
         icon={Icon.Book}
         title="Eintrag lesen"
-        target={<DocCheckPage prevtitle={""} prevurl={""} title={title} url={url} />}
+        target={<DocCheckPage url={url} prevurl={""} query={query} />}
       />
       <Action.Open
         icon={Icon.Globe}

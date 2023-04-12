@@ -8,7 +8,16 @@ import { NodeHtmlMarkdown } from "node-html-markdown";
 
 const preferences = getPreferenceValues();
 
-export default function DocCheckPage(props: { prevtitle: string; prevurl: string; title: string; url: string }) {
+export default function DocCheckPage(props: { url: string; prevurl: string; query: string }) {
+  const prevtitle = decodeURI(props.prevurl?.split("/").pop()?.replace(/_/gm, " ") ?? "");
+  const urlTitle = decodeURI(
+    props.url
+      ?.split("/")
+      .pop()
+      ?.replace(/_/gm, " ")
+      .replace(/.*\?title=(.*?)&.*/gm, `$1: Hier fehlt dein Wissen! Schreib diesen Artikel...`)
+  );
+
   const [searchText, setSearchText] = useState("");
   const { isLoading, data } = useFetch(props.url, {
     // to make sure the screen isn't flickering when the searchText changes
@@ -70,13 +79,19 @@ export default function DocCheckPage(props: { prevtitle: string; prevurl: string
     /* customTransformers (optional) */ undefined,
     /* customCodeBlockTranslators (optional) */ undefined
   );
-  let html = "";
+
+  console.log($(".mw-page-title-main").html(), "sdsadsad", urlTitle);
+
+  let title = $(".mw-page-title-main").html() != undefined ? $(".mw-page-title-main").html() : urlTitle ?? "";
+
+  let html = isLoading ? "<br><em>Artikel wird geladen…</em>" : "";
   $(".mw-parser-output").each(function (i, link) {
     html +=
-      props.title === "Medizinische Abkürzungen"
+      title === "Medizinische Abkürzungen"
         ? "<br><em>Dieser Artikel enthält eine zu lange Tabelle und kann in Raycast nicht angezeigt werden</em>"
         : $(link).html();
   });
+
   let toc = "";
   $("#toc").each(function (i, link) {
     toc += $(link).html();
@@ -88,19 +103,25 @@ export default function DocCheckPage(props: { prevtitle: string; prevurl: string
     html = html.replace(element, "");
   });
 
-  markdown = "";
+  const query = props.query ? props.query : "";
+  const queryText = props.query ? ` "` + props.query + `"` : "";
+  markdown = title ? "# " + title : "# " + urlTitle;
   const goback =
     props.prevurl != undefined && props.prevurl != "" && preferences.openIn != "browser"
       ? "[← " +
-        props.prevtitle +
+        prevtitle +
         "](" +
         "raycast://extensions/spacedog/doccheck/open-page?arguments=" +
-        encodeURI(JSON.stringify({ title: props.prevtitle, url: props.prevurl })) +
+        encodeURI(JSON.stringify({ url: props.prevurl, query: props.query })) +
         ")"
-      : "[← Suche](" + "raycast://extensions/spacedog/doccheck/doccheck-flexikon)";
+      : "[← Suche" +
+        queryText +
+        "](" +
+        "raycast://extensions/spacedog/doccheck/doccheck-flexikon?fallbackText=" +
+        query +
+        ")";
+  console.log(goback, props.query);
   markdown +=
-    "# " +
-    props.title +
     "\n" +
     goback +
     "\n" +
@@ -109,7 +130,7 @@ export default function DocCheckPage(props: { prevtitle: string; prevurl: string
 
   return (
     <Detail
-      navigationTitle={props.title}
+      navigationTitle={urlTitle}
       isLoading={isLoading}
       markdown={
         preferences.openIn === "browser"
@@ -117,10 +138,9 @@ export default function DocCheckPage(props: { prevtitle: string; prevurl: string
           : markdown.replace(/\[(.*?)\]\((\/.*?) "(.*?)"\)/g, function (match, p1, p2, p3) {
               const url = "https://flexikon.doccheck.com" + p2;
               const args = {
-                prevtitle: props.title,
-                prevurl: props.url,
-                title: p3,
                 url: url,
+                prevurl: props.url,
+                query: props.query,
               };
               // console.log(args)
               const query = encodeURIComponent(JSON.stringify(args));
@@ -138,7 +158,7 @@ export default function DocCheckPage(props: { prevtitle: string; prevurl: string
           <Action.Open
             icon={Icon.Uppercase}
             title="Eintrag als AMBOSS-Suche"
-            target={"https://next.amboss.com/de/search?q=" + encodeURI(props.title) + "&v=overview"}
+            target={"https://next.amboss.com/de/search?q=" + encodeURI(urlTitle) + "&v=overview"}
             shortcut={{ modifiers: ["opt"], key: "enter" }}
           />
         </ActionPanel>

@@ -44,22 +44,22 @@
       "mode": "view",
       "arguments": [
         {
+          "name": "url",
+          "placeholder": "URL",
+          "type": "text",
+          "required": true
+        },
+        {
           "name": "prevurl",
           "placeholder": "Previous article URL",
           "type": "text",
           "required": false
         },
         {
-          "name": "title",
-          "placeholder": "Title",
+          "name": "query",
+          "placeholder": "Searchquery",
           "type": "text",
-          "required": true
-        },
-        {
-          "name": "url",
-          "placeholder": "URL",
-          "type": "text",
-          "required": true
+          "required": false
         }
       ]
     }
