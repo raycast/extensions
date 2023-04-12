@@ -52,7 +52,7 @@
       "name": "youdaoapiClientId",
       "type": "textfield",
       "required": false,
-      "description": "It's for using Youdao Api only.",
+      "description": "The client ID to use the Youdao API",
       "title": "Youdao Client ID"
     }
   ],
