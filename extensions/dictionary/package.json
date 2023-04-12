@@ -46,7 +46,7 @@
       "type": "password",
       "required": false,
       "description": "The client secret to use the Youdao API",
-      "title": "Youdao Secret [optional]"
+      "title": "Youdao Secret Key"
     },
     {
       "name": "youdaoapiClientId",
