@@ -1,6 +1,6 @@
 # Web Dictionaries
 
-Search any words with multiple online dictionaries or translation engines in one place -- lightweight, zero dependencies.
+Search any word with multiple online dictionaries or translation engines in one place—lightweight, zero dependencies.
 
 ## Features
 
