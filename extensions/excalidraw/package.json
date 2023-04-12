@@ -5,6 +5,9 @@
   "description": "allow easy access to your excalidraw boards from Raycast!",
   "icon": "icon.png",
   "author": "slyguy5646",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "license": "MIT",
   "categories": [
     "Productivity",

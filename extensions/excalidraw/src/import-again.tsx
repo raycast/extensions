@@ -80,22 +80,21 @@ export default function ImportAgain({ submitted, setSubmitted }: ImportAgainProp
         </ActionPanel>
       }
     >
-      <Form.Checkbox id="resaving" label="Are you resaving a link?" value={checked} onChange={setChecked} />;
+      <Form.Checkbox id="resaving" label="Are you resaving a link?" value={checked} onChange={setChecked} />
       <Form.Dropdown
         error={titleError}
         id="title"
         title="Select previous title"
-        defaultValue=""
-        value={selectedTitle}
+        defaultValue={selectedTitle}
         onChange={setSelectedTitle}
       >
-        {titleOptions.map((title) => (
-          <Form.Dropdown.Item value={title} title={title} />
+        {titleOptions.map((title, index) => (
+          <Form.Dropdown.Item key={index} value={title} title={title} />
         ))}
       </Form.Dropdown>
       <Form.TextField
         error={urlError}
-        value={urlText}
+        defaultValue={urlText}
         onChange={setUrlText}
         onBlur={async (event) => {
           if (!event.target.value?.includes("excalidraw.com")) {
@@ -109,14 +108,13 @@ export default function ImportAgain({ submitted, setSubmitted }: ImportAgainProp
         id="url"
         title="New Canvas URL"
         placeholder="Paste the new URL of this canvas..."
-        defaultValue=""
       />
       {/* <Form.Separator /> */}
       <Form.TextArea
         id="description"
         title="Canvas Description"
         placeholder="Type a short description of this canvas..."
-        value={selectedDescription}
+        defaultValue={selectedDescription}
       />
     </Form>
   );

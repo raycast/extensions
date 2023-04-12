@@ -79,28 +79,15 @@ export default function Command() {
     >
       <Form.Description text="Note: Excalidraw canvases (for now) are read only and 'saving' it here will only allow you to access it. If you make changes at one of these links, you will need to resave it by checking the box below and updating the URL for a given title/canvas." />
       <Form.Separator />
-      <Form.Checkbox id="resaving" label="Are you resaving a link?" value={checked} onChange={setChecked} />;
-      <Form.TextField
-        {...itemProps.title}
-        id="title"
-        title="Canvas Title"
-        placeholder="Give your canvas a name..."
-        defaultValue=""
-      />
-      <Form.TextField
-        {...itemProps.url}
-        id="url"
-        title="Canvas URL"
-        placeholder="Paste the URL of your canvas..."
-        defaultValue=""
-      />
+      <Form.Checkbox id="resaving" label="Are you resaving a link?" value={checked} onChange={setChecked} />
+      <Form.TextField {...itemProps.title} id="title" title="Canvas Title" placeholder="Give your canvas a name..." />
+      <Form.TextField {...itemProps.url} id="url" title="Canvas URL" placeholder="Paste the URL of your canvas..." />
       {/* <Form.Separator /> */}
       <Form.TextArea
         {...itemProps.description}
         id="description"
         title="Canvas Description"
         placeholder="Type a short description of this canvas..."
-        defaultValue=""
       />
     </Form>
   );
