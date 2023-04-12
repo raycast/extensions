@@ -1,0 +1,44 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "priviliges",
+  "title": "Priviliges",
+  "description": "Grant and revoke admin permission with SAP Priviliges (https://github.com/SAP/macOS-enterprise-privileges). Not affiliated with SAP.",
+  "icon": "priviliges.png",
+  "author": "ph00lt0",
+  "categories": [
+    "Security"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "grant",
+      "title": "Grant admin priviliges",
+      "description": "Grant admin permission with SAP Priviliges",
+      "mode": "no-view"
+    },
+    {
+      "name": "revoke",
+      "title": "Revoke admin priviliges",
+      "description": "Revoke admin permission with SAP Priviliges",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.49.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
