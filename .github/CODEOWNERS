@@ -252,6 +252,7 @@
 /extensions/ethereum-price                           @peduarte
 /extensions/ethereum-utils                           @Destiner
 /extensions/everhour                                 @farisaziz12 @ahoereth
+/extensions/excalidraw                               @slyguy5646 @pernielsentikaer
 /extensions/f1-standings                             @csigritz @sxn @qeude
 /extensions/facetime                                 @ron-myers
 /extensions/fantastical                              @devahschaefers
@@ -463,7 +464,7 @@
 /extensions/logitech-litra                           @timrogers
 /extensions/logseq                                   @futantan @sawhney17
 /extensions/lorem-ipsum                              @AntonNiklasson @GastroGeek @enkia
-/extensions/lucide-icons                             @gBasil
+/extensions/lucide-icons                             @gBasil @aeither
 /extensions/lyrics                                   @ajzbc
 /extensions/m3o                                      @andreaselia
 /extensions/macupdater                               @karlsander
@@ -487,6 +488,7 @@
 /extensions/menubar-weather                          @koinzhang
 /extensions/microsoft-azure                          @crisboarna
 /extensions/microsoft-edge                           @KartikKumarSahoo @bromanko @crisboarna
+/extensions/microsoft-teams-calling                  @svenwiegand
 /extensions/miro                                     @felixhaeberle @mathieudutour
 /extensions/mixpanel                                 @smsimone
 /extensions/mlb-scores                               @jso8910
@@ -561,7 +563,7 @@
 /extensions/open-path                                @koinzhang
 /extensions/open-targets-raycast                     @ireneisdoomed
 /extensions/open-with-app                            @fturcheti @omarshahine @pernielsentikaer
-/extensions/openai-gpt3                              @simicvm @DorukAkinci
+/extensions/openai-gpt                               @simicvm @DorukAkinci
 /extensions/openai-translator                        @douo
 /extensions/openfortivpn                             @rafalpetryka
 /extensions/openstreetmap-search                     @crisboarna
@@ -750,6 +752,7 @@
 /extensions/spatie-documentation                     @danyelkeddah
 /extensions/specify                                  @AllanMichay
 /extensions/speedtest                                @tonka3000
+/extensions/spotify-beta                             @mattisssa @peduarte @sxn @dillionverma @andreaselia @stuart @tonka3000 @dancannon
 /extensions/spotify-controls                         @thomaspaulmann @altrdev @ron-myers @sandypockets @Kenan7 @dmacdermott @pernielsentikaer
 /extensions/spotify-player                           @mattisssa @dillionverma @andreaselia @stuart @tonka3000 @dancannon @sxn
 /extensions/ssh-manager                              @scopsy
@@ -858,7 +861,7 @@
 /extensions/vueuse-functions                         @noopurphalak
 /extensions/wakatime                                 @iammola
 /extensions/warp-launch-configuration                @joetannenbaum
-/extensions/wayback-machine                          @pernielsentikaer
+/extensions/wayback-machine                          @pernielsentikaer @andreaselia
 /extensions/weather                                  @tonka3000
 /extensions/web-audit                                @floriandwt
 /extensions/web3-profile                             @peduarte

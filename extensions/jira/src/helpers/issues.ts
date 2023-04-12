@@ -45,6 +45,7 @@ export function getIssueListSections(issues?: Issue[]) {
     // a known key, assign it to unknown by default
     return StatusCategoryKey.unknown;
   });
+
   return statusCategoryKeyOrder
     .filter((categoryKey) => {
       const issues = issuesByStatusCategoryKey[categoryKey];
@@ -70,11 +71,6 @@ export function getIssueDescription(description: string) {
       pre: {
         prefix: "```\n",
         postfix: "\n```",
-      },
-      // Raycast doesn't support tables in Markdown, so let's remove
-      // it from the end result.
-      table: {
-        content: "",
       },
     }
   );
