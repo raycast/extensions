@@ -1,7 +1,17 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { copyToClipboard, getShiftGroups } from "../helpers/shifts";
 import { buildDockerCommand } from "../helpers/command";
-import { Action, ActionPanel, Form, getPreferenceValues, Icon, showHUD, showToast, Toast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Form,
+  getPreferenceValues,
+  Icon,
+  openExtensionPreferences,
+  showHUD,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { Command, Group, Preferences, Shift } from "../types/shifts";
 import { homedir } from "os";
 import { FormValues } from "../types/shifts";
@@ -10,10 +20,9 @@ export function GenerateCommandForm(): JSX.Element {
   const [shiftCode, setShiftCode] = useState<string>("10");
   const [projectPath, setProjectPath] = useState<string>("${PWD}");
   const [shiftCommand, setShiftCommand] = useState<string>("");
+  const preferences = getPreferenceValues<Preferences>();
 
   function handleSubmit(values: FormValues) {
-    const preferences = getPreferenceValues<Preferences>();
-
     buildDockerCommand(values).then(function (command: Command) {
       setShiftCommand(command);
       copyToClipboard(command).then(function () {
@@ -29,7 +38,13 @@ export function GenerateCommandForm(): JSX.Element {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Generate Shift Command" onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Generate Shift Command" icon={Icon.Wand} onSubmit={handleSubmit} />
+          <Action
+            title="Open Preferences"
+            shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
+            icon={Icon.Gear}
+            onAction={() => openExtensionPreferences()}
+          />
         </ActionPanel>
       }
     >
@@ -43,11 +58,11 @@ export function GenerateCommandForm(): JSX.Element {
         onChange={setShiftCode}
       >
         {getShiftGroups().map((group: Group) => (
-          <Form.DropdownSection key={group.name} title={group.name}>
+          <Form.Dropdown.Section key={group.name} title={group.name}>
             {group.shifts.map((code: Shift) => (
               <Form.Dropdown.Item key={code.code} value={code.code} title={`[${code.name}] - ${code.description}`} />
             ))}
-          </Form.DropdownSection>
+          </Form.Dropdown.Section>
         ))}
       </Form.Dropdown>
 
@@ -62,21 +77,23 @@ export function GenerateCommandForm(): JSX.Element {
         onChange={setProjectPath}
       />
 
-      <Form.TextArea
-        id="shiftCommand"
-        title="Shift Command"
-        value={shiftCommand}
-        placeholder="Shift command will appear here"
-        info="The generated Shift Command."
-        onChange={setShiftCommand}
-        onFocus={() => {
-          copyToClipboard(shiftCommand).then(() => showToast(Toast.Style.Success, "Command copied to clipboard"));
-        }}
-      />
+      {!preferences.closeAfterCopy && (
+        <Form.TextArea
+          id="shiftCommand"
+          title="Shift Command"
+          value={shiftCommand}
+          placeholder="Shift command will appear here"
+          info="The generated Shift Command."
+          onChange={setShiftCommand}
+          onFocus={() => {
+            copyToClipboard(shiftCommand).then(() => showToast(Toast.Style.Success, "Command copied to clipboard"));
+          }}
+        />
+      )}
 
       <Form.Separator />
 
-      <Form.Description text="To change the Docker Token or Git author, head over to Extensions -> Laravel Shift." />
+      <Form.Description text="Press ⌘+⇧+, to change settings" />
     </Form>
   );
 }
