@@ -9,14 +9,11 @@ import { NodeHtmlMarkdown } from "node-html-markdown";
 const preferences = getPreferenceValues();
 
 export default function DocCheckPage(props: { url: string; prevurl: string; query: string }) {
-  const prevtitle = decodeURI(props.prevurl?.split("/").pop()?.replace(/_/gm, " ") ?? "");
-  const urlTitle = decodeURI(
-    props.url
-      ?.split("/")
-      .pop()
-      ?.replace(/_/gm, " ")
-      .replace(/.*\?title=(.*?)&.*/gm, `$1: Hier fehlt dein Wissen! Schreib diesen Artikel...`)
-  );
+  const prevtitle = decodeURI(props.prevurl?.split("/").pop()).replace(/_/gm, " ") ?? "";
+  const urlTitle = decodeURI(props.url?.split("/").pop())
+    .replace(/_/gm, " ")
+    .replace(/.*\?title=(.*?)&.*/gm, `$1: Hier fehlt dein Wissen! Schreib diesen Artikel...`);
+  console.log(urlTitle);
 
   const [searchText, setSearchText] = useState("");
   const { isLoading, data } = useFetch(props.url, {
@@ -80,9 +77,7 @@ export default function DocCheckPage(props: { url: string; prevurl: string; quer
     /* customCodeBlockTranslators (optional) */ undefined
   );
 
-  console.log($(".mw-page-title-main").html(), "sdsadsad", urlTitle);
-
-  let title = $(".mw-page-title-main").html() != undefined ? $(".mw-page-title-main").html() : urlTitle ?? "";
+  const title = $(".mw-page-title-main").html() != undefined ? $(".mw-page-title-main").html() : urlTitle ?? "";
 
   let html = isLoading ? "<br><em>Artikel wird geladen…</em>" : "";
   $(".mw-parser-output").each(function (i, link) {
@@ -120,7 +115,6 @@ export default function DocCheckPage(props: { url: string; prevurl: string; quer
         "raycast://extensions/spacedog/doccheck/doccheck-flexikon?fallbackText=" +
         query +
         ")";
-  console.log(goback, props.query);
   markdown +=
     "\n" +
     goback +
@@ -142,7 +136,6 @@ export default function DocCheckPage(props: { url: string; prevurl: string; quer
                 prevurl: props.url,
                 query: props.query,
               };
-              // console.log(args)
               const query = encodeURIComponent(JSON.stringify(args));
               return "[" + p1 + "](raycast://extensions/spacedog/doccheck/open-page?arguments=" + query + ")";
             })
@@ -157,7 +150,7 @@ export default function DocCheckPage(props: { url: string; prevurl: string; quer
           />
           <Action.Open
             icon={Icon.Uppercase}
-            title="Eintrag als AMBOSS-Suche"
+            title="Eintragtitel als AMBOSS-Suche"
             target={"https://next.amboss.com/de/search?q=" + encodeURI(urlTitle) + "&v=overview"}
             shortcut={{ modifiers: ["opt"], key: "enter" }}
           />

@@ -16,7 +16,6 @@ type Result = {
 
 export default function Command() {
   const [query, setQuery] = useState<null | string>(null);
-  const [state, setState] = useState<Result[]>([]);
   const [entries, setEntries] = useState<Result[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -24,7 +23,7 @@ export default function Command() {
     async function fetch() {
       setLoading(true);
       if (!query) {
-        setState([]);
+        setEntries([]);
         await axios
           .get("https://flexikon.doccheck.com/de/")
           .then((response) => {
@@ -34,8 +33,8 @@ export default function Command() {
             $("#topArticlesSection .row > a, #topArticlesSection .is-grid > a").each((i, el) => {
               const title = $(el).find("h3").text().trim();
               const url = $(el).attr("href") ?? "";
-              const imageUrl = $(el).find("img").attr("src") ? $(el).find("img").attr("src")!.replace(" ", "") : "";
-              const description = $(el).find("p").text().trim();
+              const imageUrl = $(el).find("img").attr("src") ?? "";
+              const description = $(el).find("p").text().trim() ?? "";
               const title_alias: string[] = [];
               const date_publish = "";
               const author = "";
