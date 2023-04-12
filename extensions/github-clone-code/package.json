@@ -1,0 +1,70 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "github-clone-code",
+  "title": "GitHub Clone & Code",
+  "description": "Open a GitHub repository in VS Code, cloning it if not present locally.",
+  "icon": "icon.png",
+  "author": "daquinoaldo",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "clonePath",
+      "default": "~/GitHub",
+      "description": "Path in which cloning repository.",
+      "required": true,
+      "title": "Clone path",
+      "type": "textfield"
+    },
+    {
+      "name": "editorCommand",
+      "default": "code",
+      "description": "Command to open the editor.",
+      "required": true,
+      "title": "Editor command",
+      "type": "textfield"
+    },
+    {
+      "name": "token",
+      "description": "GitHub personal access token.",
+      "required": true,
+      "title": "Personal access token",
+      "type": "password"
+    }
+  ],
+  "commands": [
+    {
+      "name": "index",
+      "title": "GitHub Clone & Code",
+      "subtitle": "Open repository in your IDE",
+      "description": "Open a GitHub repository in your preferred text editor, cloning it if not present locally.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.48.9",
+    "@raycast/utils": "^1.5.2",
+    "octokit": "^2.0.14"
+  },
+  "devDependencies": {
+    "@types/node": "18.15.3",
+    "@types/react": "18.0.28",
+    "@types/shelljs": "^0.8.11",
+    "@typescript-eslint/eslint-plugin": "^5.55.0",
+    "@typescript-eslint/parser": "^5.55.0",
+    "eslint": "^8.36.0",
+    "eslint-config-prettier": "^8.7.0",
+    "prettier": "^2.8.4",
+    "typescript": "^5.0.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
