@@ -28,7 +28,7 @@
     },
     {
       "name": "fromSelected",
-      "title": "Search From Crsor Selection",
+      "title": "Search From Cursor Selection",
       "description": "Search your current cursor-selected words.",
       "mode": "view"
     }
