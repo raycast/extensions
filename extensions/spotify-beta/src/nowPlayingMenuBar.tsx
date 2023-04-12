@@ -9,6 +9,7 @@ import {
   showHUD,
   Color,
   LaunchProps,
+  openCommandPreferences,
 } from "@raycast/api";
 import { pause } from "./api/pause";
 import { play } from "./api/play";
@@ -260,6 +261,13 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
           }
         />
       </MenuBarExtra.Section>
+      <MenuBarExtra.Section>
+        <MenuBarExtra.Item
+          title="Configure Command"
+          shortcut={{ modifiers: ["cmd"], key: "," }}
+          onAction={openCommandPreferences}
+        />
+      </MenuBarExtra.Section>
     </MenuBarExtra>
   );
 }
@@ -267,7 +275,9 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
 function NothingPlaying({ title = "Nothing is playing right now", isLoading }: { title?: string; isLoading: boolean }) {
   return (
     <MenuBarExtra icon={{ source: { dark: "menu-icon-dark.svg", light: "menu-icon-light.svg" } }} isLoading={isLoading}>
-      <MenuBarExtra.Item title={title} />
+      <MenuBarExtra.Section>
+        <MenuBarExtra.Item title={title} />
+      </MenuBarExtra.Section>
       <MenuBarExtra.Section>
         <MenuBarExtra.Item
           title="Your library"
@@ -279,13 +289,20 @@ function NothingPlaying({ title = "Nothing is playing right now", isLoading }: {
           icon={Icon.MagnifyingGlass}
           onAction={() => launchCommand({ name: "search", type: LaunchType.UserInitiated })}
         />
-        <MenuBarExtra.Section>
-          <MenuBarExtra.Item
-            title="Open Spotify"
-            icon="spotify-icon.svg"
-            onAction={() => (isSpotifyInstalled ? open("spotify:") : open("https://play.spotify.com"))}
-          />
-        </MenuBarExtra.Section>
+      </MenuBarExtra.Section>
+      <MenuBarExtra.Section>
+        <MenuBarExtra.Item
+          title="Open Spotify"
+          icon="spotify-icon.svg"
+          onAction={() => (isSpotifyInstalled ? open("spotify:") : open("https://play.spotify.com"))}
+        />
+      </MenuBarExtra.Section>
+      <MenuBarExtra.Section>
+        <MenuBarExtra.Item
+          title="Configure Command"
+          shortcut={{ modifiers: ["cmd"], key: "," }}
+          onAction={openCommandPreferences}
+        />
       </MenuBarExtra.Section>
     </MenuBarExtra>
   );
