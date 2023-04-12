@@ -1,5 +1,9 @@
 export function formatTitle(title: string, max: number, showEllipsis = true) {
-  if (Number.isNaN(max) || max < 0 || title.length <= max) {
+  if (max === 0) {
+    return "";
+  }
+
+  if (title.length <= max) {
     return title;
   }
 
