@@ -96,7 +96,7 @@ export default class HueClient {
     const http2Session = await new Promise<ClientHttp2Session>((resolve, reject) => {
       // Connect to the Hue Bridge using the Bridge ID as the hostname, which we then resolve to the Bridge IP address.
       const session = connect(`https://${bridgeId}`, {
-        ca: fs.readFileSync(environment.assetsPath + "/philips-hue-cert.pem"),
+        ca: fs.readFileSync(environment.assetsPath + "/huebridge_cacert.pem"),
         checkServerIdentity: (hostname, cert) => {
           /*
            * If both the certificate issuer’s Common Name field, and the certificate subject’s Common Name field are
