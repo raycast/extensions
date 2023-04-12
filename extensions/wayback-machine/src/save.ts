@@ -34,7 +34,6 @@ async function savePage(webpageUrl: string) {
     const res = await fetch(`https://web.archive.org/save/${webpageUrl}`);
 
     if (res.status >= 400) {
-      console.log(await res.text());
       toast.style = Toast.Style.Failure;
       toast.title = "Failed to save to Wayback Machine";
       return;
