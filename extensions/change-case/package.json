@@ -13,7 +13,7 @@
     {
       "name": "change-case",
       "title": "Change Case",
-      "description": "Change the text in the clipboard",
+      "description": "Change the case of the selected text or text in the clipboard",
       "mode": "view"
     }
   ],
@@ -53,24 +53,6 @@
       ],
       "default": "paste",
       "required": false
-    },
-    {
-      "name": "defaultAction",
-      "type": "dropdown",
-      "title": "Default action",
-      "description": "Default action.",
-      "required": false,
-      "default": "copy",
-      "data": [
-        {
-          "title": "Copy to Clipboard",
-          "value": "copy"
-        },
-        {
-          "title": "Paste to Active App",
-          "value": "paste"
-        }
-      ]
     },
     {
       "name": "CamelCase",
