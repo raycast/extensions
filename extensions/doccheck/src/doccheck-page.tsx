@@ -105,7 +105,7 @@ export default function DocCheckPage(props: { prevtitle: string; prevurl: string
     goback +
     "\n" +
     mdSynonyms +
-    nhm.translate(html.replace(toc, "").replace(/#cite_\D*\d*/gm, '"')); // ÜBERSCHRIFT + ```SYNONYME``` -TOC + ARTIKEL (Entfernung von Akern, relative zu absoluten Links)
+    nhm.translate(html.replace(toc, "").replace(/#cite_\D*\d*/gm, '"')).replace(/\s{94}\|\n/gm, `\n`); // ÜBERSCHRIFT + ```SYNONYME``` -TOC + ARTIKEL (Entfernung von Ankern, relative zu absoluten Links, Entfernung einiger Tabellenenden wie bei DDx in "Scharlach")
 
   return (
     <Detail
