@@ -55,6 +55,10 @@ export default function Book({ id, template }: BookProps) {
       title: cleanTitle(book.title),
       highlights: highlights.map((highlight) => ({
         ...highlight,
+        text: highlight.text
+          .split('\n')
+          .filter((text) => text)
+          .join(' '),
         updated: formatDate(highlight.updated),
         highlighted_at: formatDate(highlight.highlighted_at),
         note: (highlight.note ?? '').split('\n').filter((note) => note),
