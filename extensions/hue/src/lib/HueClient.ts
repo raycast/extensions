@@ -111,11 +111,16 @@ export default class HueClient {
             } else {
               if (bridgeCertFingerprint !== cert.fingerprint) {
                 return new Error(
-                  "Server identity check failed. Fingerprint does not match known fingerprint. " +
+                  "Server identity check failed. " +
+                    "Fingerprint does not match known fingerprint. " +
                     "If you trust this certificate, please unlink and relink your Bridge."
                 );
               }
-              console.log("Fingerprint matches known fingerprint. Continuing connection.");
+              console.log(
+                "Self-signed Hue Bridge certificate detected. " +
+                  "Certificate fingerprint matches known fingerprint. " +
+                  "Continuing connection."
+              );
             }
 
             // Certificate is deemed valid, even though it is self-signed.
