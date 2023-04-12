@@ -5,6 +5,9 @@
   "description": "Send and search Tweets",
   "icon": "twitter.png",
   "author": "tonka3000",
+  "contributors": [
+    "peduarte"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -41,7 +44,7 @@
       "name": "appkey",
       "type": "password",
       "title": "API-key",
-      "required": true,
+      "required": false,
       "default": "",
       "description": "Twitter API API-key"
     },
@@ -49,7 +52,7 @@
       "name": "appsecret",
       "type": "password",
       "title": "App secret",
-      "required": true,
+      "required": false,
       "default": "",
       "description": "Twitter API App secret"
     },
@@ -57,7 +60,7 @@
       "name": "accesstoken",
       "type": "password",
       "title": "Access token",
-      "required": true,
+      "required": false,
       "default": "",
       "description": "Twitter API access token"
     },
@@ -65,7 +68,7 @@
       "name": "accesssecret",
       "type": "password",
       "title": "Access secret",
-      "required": true,
+      "required": false,
       "default": "",
       "description": "Twitter API access secret"
     },
@@ -80,9 +83,9 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.33.0",
+    "@raycast/api": "^1.36.0",
     "node-fetch": "^3.0.0",
-    "twitter-api-v2": "^1.12.0"
+    "twitter-api-v2": "^1.12.2"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",

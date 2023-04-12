@@ -1,32 +1,26 @@
-import { Icon, LocalStorage } from "@raycast/api";
+import { Color, Icon, LocalStorage } from "@raycast/api";
 import { buildRegexp, calculateCharacter, camelCaseToOtherCase, isEmpty, regexPunctuation } from "./utils";
-import { Md5 } from "ts-md5/dist/md5";
+import { Md5 } from "ts-md5";
 
-enum Tags {
+import title from "title";
+
+export enum Tags {
   ANNOTATION = "Annotation",
   CASE = "Case",
   CODER = "Coder",
+  DELETION = "Deletion",
   FORMAT = "Format",
   MARKDOWN = "Markdown",
+  REPLACEMENT = "Replacement",
   TIME = "Time",
-  UNKNOWN = "Unknown",
+  OTHER = "Other",
 }
 
 export const tags = Object.values(Tags);
 
-export const icons = [
-  Icon.TextDocument,
-  Icon.Calendar,
-  Icon.Clock,
-  Icon.Envelope,
-  Icon.Globe,
-  Icon.Link,
-  Icon.List,
-  Icon.Pencil,
-  Icon.Star,
-  Icon.Terminal,
-  Icon.Trash,
-];
+export const icons = Object.entries(Icon);
+
+export const iconColors = Object.entries(Color);
 
 enum Cases {
   UPPER = "UPPER CASE",
@@ -39,6 +33,7 @@ enum Cases {
   CAMEL_TO_SNAKE = "camelCase to snake_case",
   CAMEL_TO_KEBAB = "camelCase to kebab-case",
 }
+
 export const cases = Object.values(Cases);
 
 enum Coders {
@@ -52,6 +47,7 @@ enum Coders {
   ENCODER_ESCAPE = "Encoder Escape",
   DECODER_ESCAPE = "Decoder Escape",
 }
+
 export const coders = Object.values(Coders);
 
 enum Transform {
@@ -68,12 +64,14 @@ export interface ShortcutInfo {
   name: string;
   id: string;
   icon: Icon;
+  iconColor?: Color;
   source: ShortcutSource; //0 from default, 1 from user
   visibility: boolean;
   tag: string[];
 }
+
 export enum ShortcutSource {
-  buildIn = "Build-in",
+  BUILD_IN = "Build-in",
   USER = "User",
 }
 
@@ -85,6 +83,7 @@ export enum TactionType {
   CASE = "Name Case",
   TRANSFORM = "Transform",
 }
+
 export interface Taction {
   type: TactionType;
   content: string[];
@@ -95,7 +94,15 @@ export class Shortcut {
   tactions: Taction[];
 
   constructor(
-    info = { name: "", id: "", icon: icons[0], source: ShortcutSource.USER, visibility: true, tag: [] as string[] },
+    info: ShortcutInfo = {
+      name: "",
+      id: "",
+      iconColor: Color.Blue,
+      icon: icons[0][1],
+      source: ShortcutSource.USER,
+      visibility: true,
+      tag: [] as string[],
+    },
     tactions: Taction[] = []
   ) {
     this.info = info;
@@ -145,10 +152,10 @@ export function checkAffix(affix: Taction[]) {
 
 export async function createShortcut(info: ShortcutInfo, tactions: Taction[], shortcuts: Shortcut[]) {
   if (info.tag.length == 0) {
-    info.tag = [tags[tags.length - 1]];
+    info.tag = [Tags.OTHER];
   }
   tactions = handleLiveTemplate(tactions);
-  if (info.id.length > 0) {
+  if (!isEmpty(info.id) && info.id.length > 0) {
     shortcuts.map((value, index) => {
       if (value.info.id == info.id) {
         shortcuts[index] = new Shortcut(info, tactions);
@@ -159,7 +166,7 @@ export async function createShortcut(info: ShortcutInfo, tactions: Taction[], sh
     info.id = "user_" + new Date().getTime();
     info.source = ShortcutSource.USER;
     const _shortcut = new Shortcut(info, tactions);
-    shortcuts.push(_shortcut);
+    shortcuts.unshift(_shortcut);
   }
   await LocalStorage.setItem("shortcuts", JSON.stringify(shortcuts));
 }
@@ -318,7 +325,7 @@ function tactionCase(input: string, taction: Taction) {
       return input.toLowerCase();
     }
     case Cases.TITLE: {
-      return input.replace(input[0], input[0].toUpperCase());
+      return title(input);
     }
     case Cases.CAMEL: {
       const inputArray = input.toLowerCase().split(regexPunctuation);

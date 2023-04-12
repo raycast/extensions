@@ -1,12 +1,15 @@
-import { List } from "@raycast/api";
+import { getPreferenceValues, Grid, List } from "@raycast/api";
 import React, { useState } from "react";
 import { searchPhotos } from "./hooks/hooks";
 import { PhotosListItem } from "./components/photos-list-item";
 import { PexelsEmptyView } from "./components/pexels-empty-view";
 import { isEmpty } from "./utils/common-utils";
-import { SearchRequest } from "./utils/types";
+import { SearchRequest } from "./types/types";
+import { Preferences } from "./types/preferences";
+import { PhotosGridItem } from "./components/photos-grid-item";
 
 export default function SearchPhotos() {
+  const preferences = getPreferenceValues<Preferences>();
   const [searchContent, setSearchContent] = useState<string>("");
   const [searchRequest, setSearchRequest] = useState<SearchRequest>({ searchContent: searchContent, page: 1 });
   const { pexelsPhotos, loading } = searchPhotos(searchRequest);
@@ -21,7 +24,7 @@ export default function SearchPhotos() {
     return "Welcome to Pexels";
   };
 
-  return (
+  return preferences.layout === "List" ? (
     <List
       isShowingDetail={pexelsPhotos?.photos.length !== 0}
       isLoading={loading}
@@ -40,10 +43,36 @@ export default function SearchPhotos() {
       }}
       throttle={true}
     >
-      <PexelsEmptyView title={emptyViewTitle()} />
+      <PexelsEmptyView title={emptyViewTitle()} layout={preferences.layout} />
       {pexelsPhotos?.photos.map((value, index) => (
-        <PhotosListItem key={index} pexelsPhoto={value} index={index} />
+        <PhotosListItem key={index} item={value} index={index} />
       ))}
     </List>
+  ) : (
+    <Grid
+      columns={parseInt(preferences.columns)}
+      isLoading={loading}
+      aspectRatio={"3/2"}
+      fit={Grid.Fit.Fill}
+      searchBarPlaceholder={"Search photos"}
+      onSearchTextChange={(newValue) => {
+        setSearchRequest({ searchContent: newValue, page: 1 });
+        setSearchContent(newValue);
+      }}
+      onSelectionChange={(id) => {
+        if (typeof id !== "undefined") {
+          const _id = pexelsPhotos?.photos.length - 1 + "_" + pexelsPhotos?.photos[pexelsPhotos.photos.length - 1]?.id;
+          if (id === _id) {
+            setSearchRequest({ searchContent: searchContent, page: searchRequest.page + 1 });
+          }
+        }
+      }}
+      throttle={true}
+    >
+      <PexelsEmptyView title={emptyViewTitle()} layout={preferences.layout} />
+      {pexelsPhotos?.photos.map((value, index) => (
+        <PhotosGridItem key={index} item={value} index={index} />
+      ))}
+    </Grid>
   );
 }

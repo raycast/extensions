@@ -1,35 +1,43 @@
-import { List, Icon, ImageMask } from "@raycast/api";
+import { getGridItemSize, showImageTitle, toTitleCase } from "@/functions/utils";
+import { useMemo, useState } from "react";
+import { Grid } from "@raycast/api";
 
 // Hooks
-import { useLikes } from "./hooks/useLikes";
+import { useLikes } from "@/hooks/useLikes";
 
 // Components
-import Actions from "./components/Actions";
+import Actions from "@/components/Actions";
 
 // Types
 interface SearchListItemProps {
   item: LikesResult;
+  unlike: React.Dispatch<React.SetStateAction<string[]>>;
 }
 
-const Unsplash: React.FC = () => {
+const UnsplashLikes = () => {
   const { loading, likes } = useLikes();
+  const itemSize = getGridItemSize();
+  const [unliked, setUnliked] = useState<string[]>([]);
+
+  const filteredLikes = useMemo(() => {
+    return likes?.filter((like) => !unliked.includes(String(like.id))) || [];
+  }, [unliked, likes]);
 
   return (
-    <List isLoading={loading} searchBarPlaceholder="Search your likes...">
-      <List.Section title="Results" subtitle={String(likes?.length)}>
-        {likes?.map((like) => (
-          <SearchListItem key={like.id} item={like} />
+    <Grid isLoading={loading} itemSize={itemSize} searchBarPlaceholder="Search your likes...">
+      <Grid.Section title="Results" subtitle={String(filteredLikes?.length)}>
+        {filteredLikes?.map((like) => (
+          <SearchListItem key={like.id} item={like} unlike={setUnliked} />
         ))}
-      </List.Section>
-    </List>
+      </Grid.Section>
+    </Grid>
   );
 };
 
-const SearchListItem: React.FC<SearchListItemProps> = ({ item }) => {
-  const [title, image, avatar] = [
+const SearchListItem = ({ item, unlike }: SearchListItemProps) => {
+  const [title, image] = [
     item.title || item.description || item.user.name || "No Name",
     item.urls?.thumb || item.urls?.small || item.urls?.regular,
-    item.user?.profile_image?.small,
   ];
 
   const mimicItem: SearchResult = {
@@ -38,15 +46,11 @@ const SearchListItem: React.FC<SearchListItemProps> = ({ item }) => {
     alt_description: "",
   };
 
+  const gridItemTitle = showImageTitle() ? toTitleCase(title) : "";
+
   return (
-    <List.Item
-      title={title}
-      icon={image}
-      accessoryTitle={item.user.name}
-      accessoryIcon={{ source: avatar || Icon.Person, mask: ImageMask.Circle }}
-      actions={<Actions item={mimicItem} details />}
-    />
+    <Grid.Item content={image} title={gridItemTitle} actions={<Actions item={mimicItem} unlike={unlike} details />} />
   );
 };
 
-export default Unsplash;
+export default UnsplashLikes;

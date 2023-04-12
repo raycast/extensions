@@ -3,13 +3,14 @@ import fetch from "node-fetch";
 import path from "path";
 import differenceInDays from "date-fns/differenceInDays";
 
-import { getPreferenceValues, environment } from "@raycast/api";
+import { getPreferenceValues, environment, Grid } from "@raycast/api";
 
 export const API_KEY = "apiKey";
-export const SHOW_PREVIEW = "showGifPreview";
 export const MAX_RESULTS = "maxResults";
 export const DEFAULT_ACTION = "defaultAction";
 export const LAYOUT = "layoutType";
+export const GRID_ITEM_SIZE = "gridItemSize";
+export const GRID_TRENDING_ITEM_SIZE = "gridTrendingItemSize";
 
 export const CONFIG_URL = "https://cdn.joe.sh/gif-search/config.json";
 
@@ -63,10 +64,6 @@ export async function getAPIKey(serviceName: ServiceName, forceRefresh?: boolean
   return apiKey;
 }
 
-export function getShowPreview(): boolean {
-  return getPrefs()[SHOW_PREVIEW];
-}
-
 export function getDefaultAction(): string {
   return getPrefs()[DEFAULT_ACTION];
 }
@@ -114,4 +111,18 @@ export const LAYOUT_TYPE: { [type: string]: LayoutType } = {
 
 export function getLayoutType() {
   return getPrefs()[LAYOUT];
+}
+
+export const GRID_SIZE: { [key: string]: Grid.ItemSize } = {
+  small: Grid.ItemSize.Small,
+  medium: Grid.ItemSize.Medium,
+  large: Grid.ItemSize.Large,
+};
+
+export function getGridItemSize() {
+  return GRID_SIZE[getPrefs()[GRID_ITEM_SIZE]];
+}
+
+export function getGridTrendingItemSize() {
+  return GRID_SIZE[getPrefs()[GRID_TRENDING_ITEM_SIZE]];
 }

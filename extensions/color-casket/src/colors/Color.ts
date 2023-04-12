@@ -1,20 +1,26 @@
+import { Keyboard } from "@raycast/api";
+import { HEX, HSL, KEYWORD, RGB } from "color-convert/conversions";
 import { HEXColor, RGBColor, HSLColor, KeywordColor } from "./index";
-
-export type Variants = {
-  hex: HEXColor;
-  rgb: RGBColor;
-  hsl: HSLColor;
-  keyword: KeywordColor;
-};
 
 export class InvalidColor extends Error {}
 
-export type AvailableColor = HSLColor | RGBColor | HEXColor | KeywordColor;
+export type AvailableColorValue = HEX | RGB | HSL | KEYWORD;
+export type AvailableColor = HEXColor | RGBColor | HSLColor | KeywordColor;
+export enum ColorType {
+  HEX = "HEX",
+  RGB = "RGB",
+  HSL = "HSL",
+  KEYWORD = "Keyword",
+}
 
 export default abstract class Color<T> {
+  public abstract type: string;
+
   public static validator: (value: string) => boolean;
 
   public static prepareValue: <T>(value: string) => T;
+
+  public abstract readonly shortcut: Keyboard.Shortcut;
 
   protected value: T;
 
@@ -25,10 +31,6 @@ export default abstract class Color<T> {
   abstract get alternatives(): AvailableColor[];
 
   abstract stringValue(): string;
-
-  public get type() {
-    return this.constructor.name.replace("Color", "");
-  }
 
   public serialize() {
     return { value: this.stringValue() };

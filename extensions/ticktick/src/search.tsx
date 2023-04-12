@@ -1,6 +1,6 @@
 import { List } from "@raycast/api";
 import React, { useMemo, useState } from "react";
-import { getTaskDetailMarkdownContent } from "./service/task";
+import { getTaskCopyContent, getTaskDetailMarkdownContent } from "./service/task";
 import useStartApp from "./hooks/useStartApp";
 import TaskItem from "./components/taskItem";
 import useSearchTasks from "./hooks/useSearchTasks";
@@ -59,7 +59,9 @@ const TickTickSearch: React.FC<Record<string, never>> = () => {
         title={task.title}
         projectId={task.projectId}
         priority={task.priority}
+        tags={task.tags}
         detailMarkdown={getTaskDetailMarkdownContent(task)}
+        copyContent={getTaskCopyContent(task)}
       />
     ));
   }, [projectFilter, searchTasks]);

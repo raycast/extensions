@@ -14,6 +14,7 @@ const taskObject2Task = (object: Record<string, unknown>): Task => {
     projectId: object.projectId as Task["projectId"],
     items: object.items as Task["items"],
     kind: object.kind as Task["kind"],
+    tags: (object.tags || []) as Task["tags"],
   };
 };
 
@@ -151,5 +152,36 @@ export const getProjects = async () => {
   } catch (e) {
     errorHandler(e);
     return [];
+  }
+};
+
+export const addTask = async (data: {
+  projectId: string;
+  title: string;
+  description: string;
+  dueDate?: string;
+  isAllDay: boolean;
+}) => {
+  const { projectId, title, description, dueDate, isAllDay } = data;
+  const installed = await checkAppInstalled();
+  if (!installed) return undefined;
+
+  try {
+    const result = (await runAppleScript(`
+    set result to ""
+    tell application "TickTick"
+      set result to add task to list "${projectId}" title "${title}" description "${description}"${
+      dueDate ? ` due date "${dueDate}"` : ""
+    } from "raycast" ${isAllDay ? "with" : "without"} allday
+    end tell
+
+  `)) as string;
+    if (result === "missing value") {
+      return false;
+    }
+    if (result === "true") return true;
+    return false;
+  } catch (e) {
+    return undefined;
   }
 };

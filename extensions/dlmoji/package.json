@@ -1,0 +1,111 @@
+{
+    "$schema": "https://www.raycast.com/schemas/extension.json",
+    "name": "dlmoji",
+    "title": "DLmoji",
+    "description": "Semantic search for Emojis, powered by Deep Learning and intelligent APIs",
+    "icon": "dlmoji-icon.png",
+    "author": "Hydrapse",
+    "license": "MIT",
+    "commands": [
+        {
+            "name": "dlmoji",
+            "title": "Get Emoji",
+            "subtitle": "DLmoji",
+            "description": "Semantic search for Emojis, powered by Deep Learning and intelligent APIs",
+            "mode": "view"
+        }
+    ],
+    "categories": [
+        "Fun",
+        "Documentation",
+        "Web"
+    ],
+    "preferences": [
+        {
+            "title": "API Selection",
+            "name": "useEmojiTranslate",
+            "type": "checkbox",
+            "label": "Emoji Translate",
+            "required": false,
+            "default": true,
+            "description": "Translate Human Language to Emoji"
+        },
+        {
+            "name": "useBidirectTranslate",
+            "type": "checkbox",
+            "label": "EMOJIALL Bidirectional Translate",
+            "required": false,
+            "default": true,
+            "description": "Translate Emoji to Human Language"
+        },
+        {
+            "name": "useEmojiAll",
+            "type": "checkbox",
+            "label": "EMOJIALL Emoji Dictionary",
+            "required": false,
+            "default": true,
+            "description": "Emoji search, meaning, examples and usage"
+        },
+        {
+            "title": "Others",
+            "name": "isAutomaticPaste",
+            "type": "checkbox",
+            "label": "Automatic Paste",
+            "required": false,
+            "default": true,
+            "description": "When you copy automatic paste to focus"
+        },
+        {
+            "title": "Deepmoji Service URL",
+            "name": "deepmojiURL",
+            "type": "textfield",
+            "required": false,
+            "description": "Your Deepmoji web service URL",
+            "default": ""
+        },
+        {
+            "title": "Baidu App ID",
+            "name": "baiduAppId",
+            "type": "textfield",
+            "required": false,
+            "description": "Your Baidu App ID",
+            "default": ""
+        },
+        {
+            "title": "Baidu App Secret",
+            "name": "baiduAppSecret",
+            "type": "textfield",
+            "required": false,
+            "description": "Your Baidu App Secret",
+            "default": ""
+        }
+    ],
+    "dependencies": {
+        "@raycast/api": "^1.31.0",
+        "axios": "^0.25.0",
+        "cheerio": "^1.0.0-rc.12",
+        "crypto-js": "^4.1.1",
+        "form-data": "^4.0.0",
+        "html-entities": "^2.3.3",
+        "lodash": "^4.17.21",
+        "prettier": "^2.7.1"
+    },
+    "devDependencies": {
+        "@types/crypto-js": "^4.1.1",
+        "@types/lodash": "^4.14.182",
+        "@types/node": "~16.10.0",
+        "@types/react": "^17.0.28",
+        "@typescript-eslint/eslint-plugin": "^5.0.0",
+        "@typescript-eslint/parser": "^5.0.0",
+        "eslint": "^7.32.0",
+        "eslint-config-prettier": "^8.3.0",
+        "react-devtools": "^4.19.2",
+        "typescript": "^4.4.3"
+    },
+    "scripts": {
+        "build": "ray build -e dist",
+        "dev": "ray develop",
+        "lint": "ray lint",
+        "fix": "prettier --write ."
+    }
+}

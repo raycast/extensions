@@ -1,15 +1,13 @@
-import Dockerode from '@priithaamer/dockerode';
-import { ActionPanel, Color, Icon, List, PushAction } from '@raycast/api';
-import { useMemo } from 'react';
+import { Action, ActionPanel, Color, Icon, List } from '@raycast/api';
 import { useDocker } from './docker';
+import { useDockerode } from './docker/dockerode';
 import { formatBytes, imageTitle } from './docker/image';
 import ErrorDetail from './error_detail';
 import ImageDetail from './image_detail';
 import { withToast } from './ui/toast';
 
 export default function ImageList() {
-  const docker = useMemo(() => new Dockerode(), []);
-
+  const docker = useDockerode();
   const { useImages } = useDocker(docker);
   const { images, isLoading, error, removeImage } = useImages();
 
@@ -27,13 +25,13 @@ export default function ImageList() {
           accessoryTitle={formatBytes(image.Size) ?? ''}
           actions={
             <ActionPanel title={imageTitle(image)}>
-              <PushAction
+              <Action.Push
                 title="Inspect"
                 icon={{ source: Icon.Binoculars }}
                 shortcut={{ modifiers: ['cmd'], key: 'i' }}
                 target={<ImageDetail imageId={image.Id} />}
               />
-              <ActionPanel.Item
+              <Action
                 title="Remove Image"
                 icon={{ source: Icon.Trash, tintColor: Color.Red }}
                 shortcut={{ modifiers: ['cmd', 'shift'], key: 'x' }}

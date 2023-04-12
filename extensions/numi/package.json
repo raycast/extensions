@@ -1,0 +1,61 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "numi",
+  "title": "Numi",
+  "description": "Query Numi from Raycast",
+  "icon": "numi-icon.png",
+  "author": "andresmorelos",
+  "categories": [
+    "Productivity",
+    "Data"
+  ],
+  "contributors": [
+    "pernielsentikaer"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Query Numi",
+      "description": "Query Numi right from Raycast",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "queryArgument",
+          "placeholder": "15+1",
+          "type": "text",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "max_history_elemets",
+      "type": "textfield",
+      "required": false,
+      "title": "Maximum number of history elements",
+      "placeholder": "10",
+      "description": "The number of elements to save on the history",
+      "default": "10"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.37.0",
+    "@raycast/utils": "^1.5.2"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

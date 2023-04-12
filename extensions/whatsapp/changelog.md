@@ -1,10 +1,9 @@
-# Whatsapp Changelog
+# WhatsApp Changelog
 
-## [Empty Screen] - 2022-03-26
-Add empty screen for the `Open Chat` command to avoid confusions
+## [Upgrade dependencies] - 2023-03-12
+- Migrate local storage to `@raycast/utils`
+- Upgrade `phone` lib to improve phone number validation
+- Add alert modal to `Delete Chat` subcommand
 
-## [Categories & Screenshots] - 2022-03-12
-Add categories and screenshots for the store
-
-## [Added Whatsapp] - 2021-12-06
-Initial version code
+## [Added WhatsApp extension] - 2021-12-06
+- Initial version code

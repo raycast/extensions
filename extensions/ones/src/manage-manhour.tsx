@@ -1,4 +1,5 @@
-import { render } from "@raycast/api";
 import { ManageManhour } from "./manhour";
 
-render(<ManageManhour />);
+export default function Command() {
+  return <ManageManhour />;
+}

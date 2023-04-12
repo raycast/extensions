@@ -2,7 +2,7 @@ import PRTemplate from "@/components/PullRequest";
 import { GET_OPEN_PRS } from "@/queries/pull-requests";
 import { GetPullRequests } from "@/types";
 import { fetcher, plural } from "@/utils";
-import { List, popToRoot, showToast, ToastStyle } from "@raycast/api";
+import { List, popToRoot, showToast, Toast } from "@raycast/api";
 import Fuse from "fuse.js";
 import { useCallback, useMemo, useState } from "react";
 import useSWR from "swr";
@@ -40,7 +40,11 @@ export default function Command() {
 
   if (error) {
     popToRoot();
-    showToast(ToastStyle.Failure, "Could not get pull requests", error.message);
+    showToast({
+      style: Toast.Style.Failure,
+      title: "Could not get pull requests",
+      message: error.message,
+    });
   }
 
   return (

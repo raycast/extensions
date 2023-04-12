@@ -1,0 +1,84 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "hue",
+  "title": "Hue",
+  "description": "Quickly and easily control Philips Hue lights",
+  "icon": "command-icon.png",
+  "author": "pindab0ter",
+  "contributors": [
+    "thomas",
+    "robert"
+  ],
+  "license": "MIT",
+  "categories": [
+    "Applications",
+    "Other"
+  ],
+  "commands": [
+    {
+      "name": "controlLights",
+      "title": "Control Lights",
+      "subtitle": "Hue",
+      "description": "List, search and control lights",
+      "mode": "view"
+    },
+    {
+      "name": "controlGroups",
+      "title": "Control Groups",
+      "subtitle": "Hue",
+      "keywords": [
+        "room",
+        "zone",
+        "entertainment"
+      ],
+      "description": "List, search and control rooms, zones and entertainment areas",
+      "mode": "view"
+    },
+    {
+      "name": "setScene",
+      "title": "Set Scene",
+      "subtitle": "Hue",
+      "description": "List, search and set scenes",
+      "mode": "view"
+    },
+    {
+      "name": "turnOffAllLights",
+      "title": "Turn Off All Lights",
+      "subtitle": "Hue",
+      "description": "Turn off all the lights",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "transitionTime",
+      "title": "Transition Time",
+      "description": "The time in milliseconds that the transition will take, rounded to 100ms.",
+      "placeholder": "400",
+      "type": "textfield",
+      "default": "400",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.49.0",
+    "@raycast/utils": "^1.5.2",
+    "@types/node-localstorage": "^1.3.0",
+    "@xstate/react": "^3.2.1",
+    "node-hue-api": "^5.0.0-beta.15",
+    "xstate": "^4.37.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.5",
+    "eslint": "^8.37.0",
+    "prettier": "^2.8.7",
+    "typescript": "^5.0.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

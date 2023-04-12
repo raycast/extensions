@@ -1,6 +1,6 @@
 import { getSelectedFinderItems, LocalStorage } from "@raycast/api";
 import fse from "fs-extra";
-import { DirectoryInfo, DirectoryType, FileType } from "../types/types";
+import { DirectoryInfo, FileType } from "../types/types";
 import { imgExt } from "./constants";
 import { parse } from "path";
 import { getFinderInsertLocation } from "./applescript-utils";
@@ -29,16 +29,13 @@ export const fetchDirectoryPath = async () => {
     const selectedDirectory = await fetchFileSystemItem();
     if (selectedDirectory.length > 0) {
       selectedDirectory.forEach((value) => {
-        if (isDirectory(value.path)) {
-          directoryPath.push(value.path);
-        }
+        directoryPath.push(value.path);
       });
     } else {
       directoryPath.push(await getFinderInsertLocation());
     }
     return directoryPath;
   } catch (e) {
-    directoryPath.push(await getFinderInsertLocation());
     return directoryPath;
   }
 };
@@ -51,22 +48,6 @@ export const isDirectory = (path: string) => {
     console.error(String(e));
     return false;
   }
-};
-
-export const isDirectoryOrFile = (path: string) => {
-  try {
-    const stat = fse.lstatSync(path);
-    if (stat.isDirectory()) {
-      return DirectoryType.DIRECTORY;
-    }
-    if (stat.isFile()) {
-      return DirectoryType.FILE;
-    }
-  } catch (e) {
-    console.error(String(e));
-    return DirectoryType.FILE;
-  }
-  return DirectoryType.FILE;
 };
 
 export const isDirectoryOrFileForFile = (path: string) => {
@@ -188,4 +169,14 @@ export function formatBytes(sizeInBytes: number) {
   }
 
   return `${sizeInBytes.toFixed(1)} ${units[unitIndex]}`;
+}
+
+export function directory2File(directory: DirectoryInfo) {
+  return {
+    id: directory.id,
+    name: directory.name,
+    path: directory.path,
+    type: FileType.FILE,
+    modifyTime: directory.date,
+  };
 }

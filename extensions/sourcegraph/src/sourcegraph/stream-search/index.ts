@@ -1,6 +1,6 @@
 import EventSource from "eventsource";
 
-import { getMatchUrl, SearchEvent, SearchMatch, LATEST_VERSION } from "./stream";
+import { getMatchUrl, SearchEvent, SearchMatch, AlertKind, LATEST_VERSION } from "./stream";
 import { LinkBuilder, Sourcegraph } from "..";
 
 export interface SearchResult {
@@ -21,6 +21,7 @@ export interface Suggestion {
 export interface Alert {
   title: string;
   description?: string;
+  kind?: AlertKind;
 }
 
 export interface Progress {
@@ -36,7 +37,7 @@ export interface SearchHandlers {
   onProgress: (progress: Progress) => void;
 }
 
-export type PatternType = "literal" | "regexp" | "structural";
+export type PatternType = "literal" | "regexp" | "structural" | "lucky";
 
 export async function performSearch(
   abort: AbortSignal,
@@ -55,13 +56,17 @@ export async function performSearch(
     ["q", query],
     ["v", LATEST_VERSION],
     ["t", patternType],
-    ["display", "1500"],
+    ["display", "200"],
   ]);
   const requestURL = link.new(src, "/.api/search/stream", parameters);
-  const stream = src.token
-    ? new EventSource(requestURL, { headers: { Authorization: `token ${src.token}` } })
-    : new EventSource(requestURL);
+  const headers: { [key: string]: string } = {
+    "X-Requested-With": "Raycast-Sourcegraph",
+  };
+  if (src.token) {
+    headers["Authorization"] = `token ${src.token}`;
+  }
 
+  const stream = new EventSource(requestURL, { headers });
   return new Promise((resolve) => {
     /**
      * All events that indicate the end of the request should use this to resolve.
@@ -90,7 +95,7 @@ export async function performSearch(
             case "content":
               // Line number appears 0-indexed, for ease of use increment it so links
               // aren't off by 1.
-              match.lineMatches.forEach((l) => {
+              match.lineMatches?.forEach((l) => {
                 l.lineNumber += 1;
               });
               break;
@@ -117,8 +122,7 @@ export async function performSearch(
           .filter((s) => s.count > 1)
           .map((f) => {
             return {
-              title: `Filter for '${f.label}'`,
-              description: `${f.count} matches`,
+              title: f.label,
               query: { addition: f.value },
             };
           }),
@@ -157,7 +161,17 @@ export async function performSearch(
           event.data.proposedQueries.map((p) => {
             return {
               title: p.description || event.data.title,
-              description: !p.description ? event.data.title : "",
+              description: p.annotations
+                ?.map((annotation) => {
+                  switch (annotation.name) {
+                    case "ResultCount":
+                      return `${annotation.value} results`;
+                    default:
+                      return undefined;
+                  }
+                })
+                .filter((desc) => !!desc)
+                .join(", "),
               query: p.query,
             };
           }),

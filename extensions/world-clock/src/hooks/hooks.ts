@@ -1,9 +1,14 @@
 import { useCallback, useEffect, useState } from "react";
 import axios from "axios";
-import { IP_GEOLOCATION_API, LOCALSTORAGE_KEY, TIMEZONE_BASE_URL } from "../utils/costants";
+import { IP_GEOLOCATION_API, localStorageKey, TIMEZONE_BASE_URL } from "../utils/costants";
 import { LocalStorage, showToast, Toast } from "@raycast/api";
 import { IPGeolocation, TimeInfo, Timezone } from "../types/types";
-import { calculateDateTimeByOffset, calculateTimeInfoByOffset, isEmpty } from "../utils/common-utils";
+import {
+  calculateDateTimeByOffset,
+  calculateTimeInfoByOffset,
+  getStarredTimezones,
+  isEmpty,
+} from "../utils/common-utils";
 import { isIPv4 } from "net";
 import { axiosGetIpTime } from "../utils/axios-utils";
 import Style = Toast.Style;
@@ -19,39 +24,54 @@ export const getAllTimezones = (refresh: number, timezone: string) => {
       setOldTimezone(timezone);
       const _starTimezones = [...starTimezones];
       _starTimezones.forEach((value) => {
-        value.date_time = calculateDateTimeByOffset(value.utc_offset).date_time;
-        value.unixtime = calculateDateTimeByOffset(value.utc_offset).unixtime;
+        const { date_time, unixtime } = calculateDateTimeByOffset(value.utc_offset);
+        value.date_time = date_time;
+        value.unixtime = unixtime;
       });
       setStarTimezones(_starTimezones);
       return;
     }
     setLoading(true);
 
-    axios({
-      method: "GET",
-      url: TIMEZONE_BASE_URL,
-    })
-      .then(async (axiosResponse) => {
-        const _localStorage = await LocalStorage.getItem<string>(LOCALSTORAGE_KEY);
-        const _starTimezones = typeof _localStorage === "undefined" ? [] : (JSON.parse(_localStorage) as Timezone[]);
+    const _localStorage = await LocalStorage.getItem<string>(localStorageKey.TIMEZONE_CACHE);
+    const _timezoneCache = typeof _localStorage === "undefined" ? [] : (JSON.parse(_localStorage) as string[]);
 
-        const allTimeZone = axiosResponse.data as string[];
-        _starTimezones.forEach((value) => {
-          const index = allTimeZone.indexOf(value.timezone);
-          if (index !== -1) allTimeZone.splice(index, 1);
-
-          value.date_time = calculateDateTimeByOffset(value.utc_offset).date_time;
-          value.unixtime = calculateDateTimeByOffset(value.utc_offset).unixtime;
-        });
-
-        setStarTimezones(_starTimezones);
-        setTimezones(allTimeZone);
-        setLoading(false);
+    if (_timezoneCache.length === 0) {
+      //init cache
+      axios({
+        method: "GET",
+        url: TIMEZONE_BASE_URL,
       })
-      .catch((reason) => {
-        showToast(Style.Failure, String(reason));
-        setLoading(false);
-      });
+        .then(async (axiosResponse) => {
+          const _starTimezones = await getStarredTimezones();
+          setStarTimezones(_starTimezones);
+          setTimezones(await buildStarTimezone(axiosResponse.data as string[]));
+          setLoading(false);
+
+          await LocalStorage.setItem(localStorageKey.TIMEZONE_CACHE, JSON.stringify(axiosResponse.data));
+        })
+        .catch((reason) => {
+          showToast(Style.Failure, String(reason));
+          setLoading(false);
+        });
+    } else {
+      const _starTimezones = await getStarredTimezones();
+      setStarTimezones(_starTimezones);
+      setTimezones(await buildStarTimezone(_timezoneCache));
+      setLoading(false);
+
+      //update cache
+      axios({
+        method: "GET",
+        url: TIMEZONE_BASE_URL,
+      })
+        .then(async (axiosResponse) => {
+          await LocalStorage.setItem(localStorageKey.TIMEZONE_CACHE, JSON.stringify(axiosResponse.data));
+        })
+        .catch((reason) => {
+          console.error(String(reason));
+        });
+    }
   }, [refresh, timezone]);
 
   useEffect(() => {
@@ -61,13 +81,79 @@ export const getAllTimezones = (refresh: number, timezone: string) => {
   return { starTimezones: starTimezones, timezones: timezones, loading: loading };
 };
 
+export const getStarTimezones = () => {
+  const [starTimezones, setStarTimezones] = useState<Timezone[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+
+    const _localStorage = await LocalStorage.getItem<string>(localStorageKey.TIMEZONE_CACHE);
+    const _timezoneCache = typeof _localStorage === "undefined" ? [] : (JSON.parse(_localStorage) as string[]);
+
+    if (_timezoneCache.length === 0) {
+      //init cache
+      axios({
+        method: "GET",
+        url: TIMEZONE_BASE_URL,
+      })
+        .then(async (axiosResponse) => {
+          const _starTimezones = await getStarredTimezones();
+          setStarTimezones(_starTimezones);
+          setLoading(false);
+
+          await LocalStorage.setItem(localStorageKey.TIMEZONE_CACHE, JSON.stringify(axiosResponse.data));
+        })
+        .catch((reason) => {
+          showToast(Style.Failure, String(reason));
+          setLoading(false);
+        });
+    } else {
+      const _starTimezones = await getStarredTimezones();
+      setStarTimezones(_starTimezones);
+      setLoading(false);
+
+      //update cache
+      axios({
+        method: "GET",
+        url: TIMEZONE_BASE_URL,
+      })
+        .then(async (axiosResponse) => {
+          await LocalStorage.setItem(localStorageKey.TIMEZONE_CACHE, JSON.stringify(axiosResponse.data));
+        })
+        .catch((reason) => {
+          console.error(String(reason));
+        });
+    }
+  }, []);
+
+  useEffect(() => {
+    void fetchData();
+  }, [fetchData]);
+
+  return { starTimezones: starTimezones, loading: loading };
+};
+
+const buildStarTimezone = async (allTimezone: string[]) => {
+  const _localStorage = await LocalStorage.getItem<string>(localStorageKey.STAR_TIMEZONE);
+  const _starTimezones = typeof _localStorage === "undefined" ? [] : (JSON.parse(_localStorage) as Timezone[]);
+
+  _starTimezones.forEach((value) => {
+    const index = allTimezone.indexOf(value.timezone);
+    if (index !== -1) allTimezone.splice(index, 1);
+    value.date_time = calculateDateTimeByOffset(value.utc_offset).date_time;
+    value.unixtime = calculateDateTimeByOffset(value.utc_offset).unixtime;
+  });
+  return allTimezone;
+};
+
 export const getRegionTime = (timezone: string) => {
   const [timeInfo, setTimeInfo] = useState<TimeInfo>({} as TimeInfo);
   const [loading, setLoading] = useState<boolean>(true);
 
   const fetchData = useCallback(async () => {
-    setLoading(true);
     if (isEmpty(timezone)) return;
+    setLoading(true);
 
     axios({
       method: "GET",
@@ -75,8 +161,9 @@ export const getRegionTime = (timezone: string) => {
     })
       .then((axiosResponse) => {
         const _timeInfo = axiosResponse.data as TimeInfo;
-        _timeInfo.datetime = calculateTimeInfoByOffset(_timeInfo.unixtime, _timeInfo.utc_offset).date_time;
-        _timeInfo.utc_datetime = calculateTimeInfoByOffset(_timeInfo.unixtime, _timeInfo.utc_offset).utc_datetime;
+        const { dateTime, utc_datetime } = calculateTimeInfoByOffset(_timeInfo.unixtime, _timeInfo.utc_offset);
+        _timeInfo.datetime = dateTime;
+        _timeInfo.utc_datetime = utc_datetime;
 
         setTimeInfo(_timeInfo);
         setLoading(false);
@@ -92,6 +179,22 @@ export const getRegionTime = (timezone: string) => {
   }, [fetchData]);
 
   return { timeInfo: timeInfo, detailLoading: loading };
+};
+//get if show detail
+export const getIsShowDetail = (refreshDetail: number) => {
+  const [showDetail, setShowDetail] = useState<boolean>(true);
+
+  const fetchData = useCallback(async () => {
+    const localStorage = await LocalStorage.getItem<boolean>(localStorageKey.SHOW_DETAILS);
+    const _showDetailKey = typeof localStorage === "undefined" ? true : localStorage;
+    setShowDetail(_showDetailKey);
+  }, [refreshDetail]);
+
+  useEffect(() => {
+    void fetchData();
+  }, [fetchData]);
+
+  return { showDetail: showDetail };
 };
 
 export const getIpTime = (searchContent: string) => {

@@ -8,7 +8,8 @@ import {
   popToRoot,
   showHUD,
   showToast,
-  ToastStyle,
+  Toast,
+  Action,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 import {
@@ -47,7 +48,7 @@ export function useAudioDevices(type: "input" | "output") {
 
     fetchDevices()
       .then(setAudioDevices)
-      .catch((err) => showToast(ToastStyle.Failure, `There was an error fetching the audio devices.`, err.message))
+      .catch((err) => showToast(Toast.Style.Failure, `There was an error fetching the audio devices.`, err.message))
       .finally(() => setIsLoading(false));
   }, [type]);
 
@@ -75,22 +76,26 @@ export function DeviceList({ type }: DeviceListProps) {
             title={d.name}
             subtitle={subtitle(d)}
             icon={deviceIcon(d)}
-            accessoryIcon={d.uid === data.current.uid ? Icon.Checkmark : undefined}
             actions={
               <ActionPanel>
                 <SetAudioDeviceAction device={d} type={type} />
-                <ActionPanel.Item
+                <Action
                   title={`Copy Device Name to Clipboard`}
                   onAction={async () => {
                     await Clipboard.copy(d.name);
                     await showToast({
-                      style: ToastStyle.Success,
+                      style: Toast.Style.Success,
                       title: "Device name copied to the clipboard",
                     });
                   }}
                 />
               </ActionPanel>
             }
+            accessories={[
+              {
+                icon: d.uid === data.current.uid ? Icon.Checkmark : undefined,
+              },
+            ]}
           />
         ))}
     </List>
@@ -104,7 +109,7 @@ type SetAudioDeviceActionProps = {
 
 function SetAudioDeviceAction({ device, type }: SetAudioDeviceActionProps) {
   return (
-    <ActionPanel.Item
+    <Action
       title={`Select ${device.name}`}
       onAction={async () => {
         try {
@@ -115,7 +120,7 @@ function SetAudioDeviceAction({ device, type }: SetAudioDeviceActionProps) {
         } catch (e) {
           console.log(e);
           showToast(
-            ToastStyle.Failure,
+            Toast.Style.Failure,
             `Error!`,
             `There was an error setting the active ${type} audio device to ${device.name}`
           );

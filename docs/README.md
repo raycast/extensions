@@ -32,5 +32,6 @@ A quick overview about where to find what in our docs:
 - [**Examples:**](examples/doppler.md) Kickstart your extension by using an open-source example and learn as you go.
 - [**Information:**](information/best-practices.md) Get the background knowledge to master your understanding of our platform.
 - [**API Reference:**](api-reference/clipboard.md) Go into details with the API reference that includes code snippets.
+- [**Utilities:**](utils-reference/getting-started.md) A set of utilities to streamline common patterns and operations used in extensions.
 
 Now, let's build 💪

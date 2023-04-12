@@ -1,6 +1,6 @@
 <p align="center">
   <img src="assets/command-icon.png" height="128">
-   <h1 align="center">Unsplash</h1>
+  <h1 align="center">Unsplash</h1>
 </p>
 
 A [Raycast](https://raycast.com/) extension that lets you communicate with Unsplash's API and gives you access to some functions.
@@ -9,20 +9,20 @@ A [Raycast](https://raycast.com/) extension that lets you communicate with Unspl
    <video src="https://user-images.githubusercontent.com/13917975/151459995-19c353cf-33b2-427c-b50b-2670bc059566.mp4" />
 </p>
 
-### Configuration
+### Installation
 
 You will need some additional steps to install this plugin.
 
-- Unsplash API key, you can get one from [here](https://unsplash.com/developers) (only the "Public access" permission is enough)
-- Install the extension from [Raycast Store](https://www.raycast.com/eggsy/unsplash)
-- Type `Unsplash` to display all available options
-- Choose one and fill in the blanks with the details
-  - **Access Key**: Your Unsplash API key (**required**)
-  - **Username**: Username of the person you want to list likes of.
-  - **Orientation**: The orientation of the images on results. (Default: `all`)
-  - **Download Size**: The sizes when downloading, copying, and saving image to disk. (Default: `full`)
-  - **Custom Collections**: The collection IDs you want to get random images out of while setting a random wallpaper. The list should be comma & space seperated as in `ID1, ID2, ID3, etc.`. (Default: [`4324303`](https://unsplash.com/collections/4324303), [`8647859`](https://unsplash.com/collections/8647859), [`298137`](https://unsplash.com/collections/298137), [`2476111`](https://unsplash.com/collections/2476111), [`1065976`](https://unsplash.com/collections/1065976), [`3430431`](https://unsplash.com/collections/3430431), [`1114848`](https://unsplash.com/collections/1114848), [`2063295`](https://unsplash.com/collections/2063295), [`9389477`](https://unsplash.com/collections/9389477), [`932210`](https://unsplash.com/collections/932210))
-  - **Include Default Collections**: When you set custom collections, you can choose to include the default collections as well. (Default: `no`)
+- Create an app on [Unsplash developers page](https://unsplash.com/developers).
+- Copy your access key and secret key.
+- Scroll down to the "Redirect URI & Permissions" section:
+  - Set the "Redirect URI" field to: `https://raycast.com/redirect`
+  - Choose "Public access", "Write likes access" and "Read user access" permissions.
+  - It should look [like this](https://i.imgur.com/ZV6G9mi.png).
+- Save your settings.
+- Install the Unsplash extension.
+- Enter your access key and secret key in the extension settings.
+- When you run a command for the first time you'll be asked to authorize.
 
 ### FAQ
 
@@ -36,7 +36,7 @@ You will need some additional steps to install this plugin.
 
 **Q:** Where does it save the downloaded images?
 
-**A:** It uses your Application Support directory, which should be at `~/Library/Application Support/com.raycast.macos/extensions/unsplash/`.
+**A:** It uses your Application Support directory as default, which should be at `~/Library/Application Support/com.raycast.macos/extensions/unsplash/`.
 
 ---
 
@@ -49,6 +49,12 @@ You will need some additional steps to install this plugin.
 **Q:** Couldn't set the wallpaper using "Set Random Wallpaper" because I rejected the permission request!
 
 **A:** If you accidentally rejected the initial permission request window, or didn't realize it was from this extension, you'll have to go to your **System Preferences > Security & Privacy > Privacy > Automation** and grant/tick the **System Events** permission to Raycast.
+
+---
+
+**Q:** Why do we need to authorize?
+
+**A:** This enables us to get a bearer token with permissions that'll let us access more features of the Unsplash API (e.g. like, dislike, get current user).
 
 ---
 

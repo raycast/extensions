@@ -1,5 +1,9 @@
 # Hide Files Changelog
 
+## [Update UI] - 2022-10-21
+
+- Update empty view icon
+
 ## [Optimize the icon clarity] - 2022-05-24
 
 - Optimize the icon clarity

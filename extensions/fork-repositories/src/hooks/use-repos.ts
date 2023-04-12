@@ -1,40 +1,29 @@
-import { useEffect, useRef, useState } from "react";
-import { existsSync, readFileSync } from "fs";
+import { existsSync, readFileSync } from "node:fs";
+import { useCachedPromise } from "@raycast/utils";
 
 const useRepos = (repoFilePath: string): [Repo[], boolean] => {
-  const [state, setState] = useState<{ isLoading: boolean; repos: Repo[] }>({ isLoading: true, repos: [] });
-  const isMounted = useRef(true);
-  useEffect(() => {
-    setState((previous) => ({ ...previous, isLoading: true }));
-
-    if (!existsSync(repoFilePath)) {
-      if (isMounted.current) {
-        setState((previous) => ({ ...previous, isLoading: false }));
+  const { data, isLoading } = useCachedPromise(
+    async (path) => {
+      if (!existsSync(path)) {
+        return [];
       }
-      return;
-    }
-    const repoFile: RepoFile = JSON.parse(readFileSync(repoFilePath).toString());
-    if (!Array.isArray(repoFile?.repositories)) {
-      if (isMounted.current) {
-        setState((previous) => ({ ...previous, isLoading: false }));
-      }
-      return;
-    }
-    if (isMounted.current) {
-      setState({
-        repos: repoFile.repositories
+      try {
+        const repoFile: RepoFile = JSON.parse(readFileSync(path).toString());
+        if (!Array.isArray(repoFile?.repositories)) {
+          return [];
+        }
+        return repoFile.repositories
           .filter((repo) => existsSync(repo.path))
-          .sort((a, b) => a.name.localeCompare(b.name)),
-        isLoading: false,
-      });
-    }
-
-    return function cleanup() {
-      isMounted.current = false;
-    };
-  }, [repoFilePath]);
-
-  return [state.repos, state.isLoading];
+          .sort((a, b) => a.name.localeCompare(b.name));
+      } catch (error) {
+        console.error(error);
+        return [];
+      }
+    },
+    [repoFilePath],
+    { initialData: [], keepPreviousData: true }
+  );
+  return [data, isLoading];
 };
 
 export { useRepos };

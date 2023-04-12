@@ -1,30 +1,17 @@
-import { getPreferenceValues, showToast, ToastStyle } from "@raycast/api";
+import { showToast, Toast, LocalStorage } from "@raycast/api";
+import { apiRequest } from "@/functions/apiRequest";
 import { useState } from "react";
-import fetch from "node-fetch";
 import useSWR from "swr";
 
 export const useLikes = () => {
-  const { accessKey, username } = getPreferenceValues();
-
-  if (!username) {
-    showToast(ToastStyle.Failure, "Username is missing.", "Please set a username from extension settings.");
-  }
-
   const [loading, setLoading] = useState(true);
   const [likes, setLikes] = useState<LikesResult[]>([]);
 
-  const fetcher = (url: string) =>
-    fetch(url, {
-      headers: {
-        Authorization: `Client-ID ${accessKey}`,
-      },
-    }).then((r) => r.json() as Promise<LikesResult[]>);
-
-  useSWR<LikesResult[]>(`https://api.unsplash.com/users/${username}/likes`, fetcher, {
+  useSWR<LikesResult[]>(`get-user-likes`, getUserLikes, {
     onSuccess: (data) => {
       if ((data as Errors).errors) {
         setLoading(false);
-        showToast(ToastStyle.Failure, "Failed to fetch likes.", (data as Errors).errors?.join("\n"));
+        showToast(Toast.Style.Failure, "Failed to fetch likes.", (data as Errors).errors?.join("\n"));
       } else {
         setLikes(data);
       }
@@ -32,7 +19,7 @@ export const useLikes = () => {
       setLoading(false);
     },
     onError: (error) => {
-      showToast(ToastStyle.Failure, "Something went wrong.", String(error));
+      showToast(Toast.Style.Failure, "Something went wrong.", String(error));
       setLoading(false);
     },
   });
@@ -41,6 +28,19 @@ export const useLikes = () => {
     loading,
     likes,
   };
+};
+
+export const getUserLikes = async () => {
+  let username = await LocalStorage.getItem("username");
+
+  if (!username) {
+    const user = await apiRequest<User>("/me");
+    LocalStorage.setItem("username", user.username);
+    username = user.username;
+  }
+
+  const likes = await apiRequest<LikesResult[]>(`/users/${username}/likes`);
+  return likes;
 };
 
 export default useLikes;

@@ -6,6 +6,9 @@
   "description": "Search and manage your Things To-Dos from Raycast",
   "icon": "things-icon.png",
   "author": "loris",
+  "contributors": [
+    "andreaselia"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -49,6 +52,34 @@
       "subtitle": "Things",
       "description": "Create To-Dos in any list",
       "mode": "view"
+    },
+    {
+      "name": "show-today-in-menu-bar",
+      "title": "Show Today in Menu Bar",
+      "subtitle": "Things",
+      "description": "See your Today list in MacOS menu-bar",
+      "mode": "menu-bar",
+      "interval": "5m"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "thingsAppIdentifier",
+      "type": "dropdown",
+      "required": false,
+      "title": "Things version switcher",
+      "description": "Switch between Things or Things Beta",
+      "default": "com.culturedcode.ThingsMac",
+      "data": [
+        {
+          "value": "com.culturedcode.ThingsMac",
+          "title": "Things"
+        },
+        {
+          "value": "com.culturedcode.ThingsMac.beta",
+          "title": "Things Beta"
+        }
+      ]
     }
   ],
   "dependencies": {

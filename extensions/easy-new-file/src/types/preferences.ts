@@ -1,4 +1,7 @@
 export interface Preferences {
+  layout: string;
+  columns: string;
+  itemInset: string;
   createdActions: string;
   showDocument: boolean;
   showCode: boolean;

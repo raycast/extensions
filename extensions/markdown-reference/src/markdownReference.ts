@@ -123,14 +123,14 @@ const markdownReference = [
       {
         name: "Alternative H1 Syntax",
         description: "Alternatively, on the line below the text, add any number of == characters for heading level 1.",
-        markdown: "Heading level 1\n===============\n",
+        markdown: "Heading level 1\n\n===============\n",
         html: "<h1>Heading level 1</h1>",
       },
 
       {
         name: "Alternative H2 Syntax",
         description: "Alternatively, on the line below the text, add any number of -- characters for heading level 2.",
-        markdown: "Heading level 2\n---------------\n",
+        markdown: "Heading level 2\n\n---------------\n",
         html: "<h2>Heading level 2</h2>",
       },
     ],
@@ -316,6 +316,27 @@ const markdownReference = [
         markdown:
           "- First item\n- Second item\n- Third item\n\n&nbsp;&nbsp;&nbsp;&nbsp;- Indented item\n\n&nbsp;&nbsp;&nbsp;&nbsp;- Indented item\n- Fourth item\n",
         html: "<ul><li>First item</li><li>Second item</li><li>Third item<ul><li>Indented item</li><li>Indented item</li></ul></li><li>Fourth item</li></ul>",
+      },
+    ],
+    additional_examples: [],
+  },
+  {
+    name: "Strikethrough",
+    description: "To create a strikethrough effect, add `~~` before and directly after a block of text",
+    examples: [
+      {
+        markdown: "I am ~~unable~~ able to do this!",
+      },
+    ],
+    additional_examples: [],
+  },
+  {
+    name: "Tables",
+    description:
+      "Tables are created using pipes, underscored, and hyphens. Hyphens are used to separate rows, and pipes are used to separate columns.",
+    examples: [
+      {
+        markdown: "| Syntax | Description |\n\n| --- | --- |\n\n| Header | Title |\n\n| Paragraph | Text |\n\n",
       },
     ],
     additional_examples: [],

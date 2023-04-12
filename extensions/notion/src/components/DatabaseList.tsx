@@ -24,6 +24,7 @@ export function DatabaseList(props: { databasePage: Page }): JSX.Element {
     (databasePage.icon_emoji ? databasePage.icon_emoji + " " : "") +
     (databasePage.title ? databasePage.title : "Untitled");
 
+  const [sort, setSort] = useState<"last_edited_time" | "created_time">("last_edited_time");
   const [{ value: recentlyOpenedPages }, storeRecentlyOpenedPage] = useAtom(recentlyOpenedPagesAtom);
   const [databasePages, setDatabasePages] = useState<Page[]>(
     recentlyOpenedPages.filter((page) => page.parent_database_id === databaseId)
@@ -57,14 +58,14 @@ export function DatabaseList(props: { databasePage: Page }): JSX.Element {
     const getDatabasePages = async () => {
       setIsLoading(true);
 
-      const fetchedDatabasePages = await queryDatabase(databaseId, searchText);
+      const fetchedDatabasePages = await queryDatabase(databaseId, searchText, sort);
       if (fetchedDatabasePages.length) {
         setDatabasePages(fetchedDatabasePages);
       }
       setIsLoading(false);
     };
     getDatabasePages();
-  }, [searchText]);
+  }, [searchText, sort]);
 
   // Handle save new database view
   function saveDatabaseView(newDatabaseView: DatabaseView): void {
@@ -98,6 +99,16 @@ export function DatabaseList(props: { databasePage: Page }): JSX.Element {
       searchBarPlaceholder="Filter pages"
       navigationTitle={" →  " + (viewTitle ? viewTitle : databaseName)}
       onSearchTextChange={setSearchText}
+      searchBarAccessory={
+        <List.Dropdown
+          tooltip="Sort by"
+          storeValue
+          onChange={(newValue) => setSort(newValue as "last_edited_time" | "created_time")}
+        >
+          <List.Dropdown.Item title="Last Edited At" value="last_edited_time" />
+          <List.Dropdown.Item title="Last Created At" value="created_time" />
+        </List.Dropdown>
+      }
       throttle
       actions={
         <ActionPanel>
@@ -184,6 +195,7 @@ export function DatabaseList(props: { databasePage: Page }): JSX.Element {
         onPageCreated={(page) => setDatabasePages((state) => state.concat([page]))}
         onPageUpdated={(page) => setDatabasePages((state) => state.map((x) => (x.id === page.id ? page : x)))}
         saveDatabaseView={saveDatabaseView}
+        sort={sort}
       />
     </List>
   );

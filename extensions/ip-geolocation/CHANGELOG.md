@@ -1,5 +1,19 @@
 # IP Geolocation Changelog
 
+## [Update UI] - 2023-02-07
+
+- Now command: Copy Local IP Address
+- Now display IPv4 and IPv6 information separately
+
+## [Update UI] - 2022-12-05
+
+- Update UI: new extension icon, new information icon
+- Update Raycast API version to 1.44.0
+
+## [Support arguments for command] - 2022-08-07
+
+- Support arguments for command so that you can enter values right from Root Search before opening the command
+
 ## [Update command name] - 2022-05-27
 
 - Update command name

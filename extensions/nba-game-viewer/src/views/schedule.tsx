@@ -1,20 +1,13 @@
-import { List, Toast, showToast } from "@raycast/api";
-import { Day } from "../types/schedule.types";
+import { List } from "@raycast/api";
 import useSchedule from "../hooks/useSchedule";
 import DayComponent from "../components/Day";
-import { useState } from "react";
 
 const Schedue = () => {
-  const data = useSchedule();
-
-  if (data.error) {
-    showToast(Toast.Style.Failure, "Failed to get schedule");
-    data.loading = false;
-  }
+  const { data, isLoading } = useSchedule();
 
   return (
-    <List isLoading={data.loading}>
-      {data.schedule.map((day: Day) => (
+    <List isLoading={isLoading}>
+      {data?.map((day) => (
         <DayComponent key={day.date} day={day} />
       ))}
     </List>

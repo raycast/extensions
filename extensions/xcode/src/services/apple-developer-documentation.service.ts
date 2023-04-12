@@ -1,6 +1,6 @@
 import fetch from "node-fetch";
 import { AppleDeveloperDocumentationEntry } from "../models/apple-developer-documentation/apple-developer-documentation-entry.model";
-import { joinPathComponents } from "../shared/join-path-components";
+import { URL } from "url";
 
 /**
  * AppleDeveloperDocumentationService
@@ -9,27 +9,33 @@ export class AppleDeveloperDocumentationService {
   /**
    * The host URL
    */
-  private hostUrl = "https://developer.apple.com";
+  private static hostUrl = "https://developer.apple.com";
 
   /**
-   * Search Developer Documentation by search text
-   * @param searchText The search text
+   * Search Developer Documentation
+   * @param query The search query
+   * @param abortSignal The optional AbortSignal
    */
-  async search(searchText: string): Promise<AppleDeveloperDocumentationEntry[]> {
+  static async search(query: string, abortSignal?: AbortSignal): Promise<AppleDeveloperDocumentationEntry[]> {
+    // Check if query is falsely
+    if (!query) {
+      // Return empty results
+      return [];
+    }
+    // Initialize URL
+    const url = new URL(AppleDeveloperDocumentationService.hostUrl);
+    url.pathname = "search/search_data.php";
+    url.searchParams.append("q", query);
+    url.searchParams.append("results", "500");
     // Fetch Documentation Response
-    const response = await fetch(
-      joinPathComponents(
-        this.hostUrl,
-        `/search/search_data.php?q=${encodeURIComponent(searchText)}&results=500&group=documentation`
-      ),
-      {
-        method: "GET",
-        headers: {
-          // Important search_data endpoint requires a refer HTTP header
-          Referer: this.hostUrl,
-        },
-      }
-    );
+    const response = await fetch(url.toString(), {
+      method: "GET",
+      headers: {
+        // Important search_data endpoint requires a refer HTTP header
+        Referer: AppleDeveloperDocumentationService.hostUrl,
+      },
+      signal: abortSignal as any,
+    });
     // Retrieve search response as JSON
     const searchResponse = (await response.json()) as AppleDeveloperDocumentationSearchResponse;
     // Initialize Documentation Entries
@@ -37,7 +43,7 @@ export class AppleDeveloperDocumentationService {
     // For each Entry
     for (const entry of entries) {
       // Update URL
-      entry.url = joinPathComponents(this.hostUrl, entry.url);
+      entry.url = [AppleDeveloperDocumentationService.hostUrl, entry.url].join(entry.url.startsWith("/") ? "" : "/");
     }
     // Return Documentation Entries
     return entries;

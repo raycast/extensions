@@ -28,7 +28,7 @@ export function UserListItem(props: { user: User }): JSX.Element {
     <List.Item
       id={user.id.toString()}
       title={user.name}
-      subtitle={"#" + user.username}
+      subtitle={user.username}
       icon={{ source: user.avatar_url, mask: Image.Mask.Circle }}
       actions={
         <ActionPanel>
@@ -89,4 +89,8 @@ export function useSearch(query: string | undefined): {
   }, [query]);
 
   return { users, error, isLoading };
+}
+
+export function userIcon(user: User): Image.ImageLike {
+  return { source: user.avatar_url, mask: Image.Mask.Circle };
 }

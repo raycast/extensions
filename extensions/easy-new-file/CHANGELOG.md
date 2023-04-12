@@ -1,5 +1,28 @@
 # Easy New File Changelog
 
+## [Fix text error] - 2023-02-07
+
+- Fix text error in preferences
+
+## [Fix bug] - 2022-11-01
+
+- Fix the bug that RTF files cannot be opened normally
+
+## [Update UI] - 2022-10-20
+
+- Update UI
+
+## [Add text field validation] - 2022-07-04
+
+- Add text field validation
+- Add template preview
+
+## [Add new file layout options] - 2022-06-13
+
+- Add new file layout options: List or Grid
+- Optimize file icons
+- Add three new file types
+
 ## [Add New File with Text command] - 2022-06-04
 
 - Add **New File with Text** command: Create a new file with selected or clipboard text now.

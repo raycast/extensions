@@ -1,101 +1,92 @@
-import { getPreferenceValues, showToast, ToastStyle } from "@raycast/api";
+import { showToast, Toast } from "@raycast/api";
 import { useEffect, useRef, useState } from "react";
-import fetch, { AbortError } from "node-fetch";
+import { AbortError } from "node-fetch";
+import { apiRequest } from "@/functions/apiRequest";
 
-export const useSearch = <T extends "collections" | "photos">(type: T) => {
-  const { accessKey, orientation } = getPreferenceValues();
-
+export const useSearch = <T extends "collections" | "photos">(
+  type: T,
+  orientation: "all" | "landscape" | "portrait" | "squarish"
+) => {
   const [state, setState] = useState<SearchState<T>>({ results: [], isLoading: true });
+  const [lastSearch, setLastSearch] = useState("");
   const cancelRef = useRef<AbortController | null>(null);
 
-  try {
-    if (!accessKey) throw new Error("Missing API key.");
+  useEffect(() => {
+    search("");
 
-    useEffect(() => {
-      search("");
-
-      return () => {
-        cancelRef.current?.abort();
-      };
-    }, []);
-
-    const search = async (searchText: string) => {
+    return () => {
       cancelRef.current?.abort();
-      cancelRef.current = new AbortController();
+    };
+  }, []);
 
-      try {
-        if (searchText === "") {
-          setState((oldState) => ({
-            ...oldState,
-            isLoading: false,
-          }));
+  useEffect(() => {
+    if (lastSearch === "") return;
+    search(lastSearch);
+  }, [orientation]);
 
-          return;
-        }
+  const search = async (searchText: string) => {
+    cancelRef.current?.abort();
+    cancelRef.current = new AbortController();
 
-        setState((oldState) => ({
-          ...oldState,
-          isLoading: true,
-        }));
-
-        const { errors, results } = (await performSearch({
-          accessKey,
-          signal: cancelRef.current?.signal,
-
-          // Text
-          searchText,
-
-          // Options
-          options: {
-            orientation,
-            type: type || "photos",
-          },
-        })) as {
-          errors?: string[];
-          results: T extends "collections" ? CollectionResult[] : SearchResult[];
-        };
-
-        if (errors?.length) {
-          showToast(ToastStyle.Failure, `Failed to fetch ${type}.`, errors?.join("\n"));
-        }
-
+    try {
+      if (searchText === "") {
         setState((oldState) => ({
           ...oldState,
           isLoading: false,
-          results: results || [],
         }));
-      } catch (error) {
-        if (error instanceof AbortError) {
-          return;
-        }
 
-        showToast(ToastStyle.Failure, "Could not perform search", String(error));
+        return;
       }
-    };
 
-    return {
-      state,
-      search,
-    };
-  } catch (error) {
-    console.error(error);
+      setState((oldState) => ({
+        ...oldState,
+        isLoading: true,
+      }));
 
-    const result = {
-      search: () => ({}),
-      state: {
-        results: [],
+      const { errors, results } = (await performSearch({
+        signal: cancelRef.current?.signal,
+
+        // Text
+        searchText,
+
+        // Options
+        options: {
+          orientation,
+          type: type || "photos",
+        },
+      })) as {
+        errors?: string[];
+        results: T extends "collections" ? CollectionResult[] : SearchResult[];
+      };
+
+      if (errors?.length) {
+        showToast(Toast.Style.Failure, `Failed to fetch ${type}.`, errors?.join("\n"));
+      }
+
+      setLastSearch(searchText);
+
+      setState((oldState) => ({
+        ...oldState,
         isLoading: false,
-      },
-    };
+        results: results || [],
+      }));
+    } catch (error) {
+      if (error instanceof AbortError) {
+        return;
+      }
 
-    showToast(ToastStyle.Failure, "Something went wrong", String(error));
-    return result;
-  }
+      showToast(Toast.Style.Failure, "Could not perform search", String(error));
+    }
+  };
+
+  return {
+    state,
+    search,
+  };
 };
 
 // Perform Search
 interface PerformSearchProps {
-  accessKey: string;
   signal: AbortSignal;
   searchText: string;
   options: {
@@ -111,7 +102,6 @@ type SearchOrCollectionResult<T extends PerformSearchProps> = T extends { option
 export const performSearch = async <T extends PerformSearchProps>({
   searchText,
   options,
-  accessKey,
   signal,
 }: PerformSearchProps): Promise<{ errors?: string[]; results: SearchOrCollectionResult<T> }> => {
   const searchParams = new URLSearchParams({
@@ -122,16 +112,12 @@ export const performSearch = async <T extends PerformSearchProps>({
 
   if (options.orientation !== "all") searchParams.append("orientation", options.orientation);
 
-  const { errors, results } = await fetch(
-    `https://api.unsplash.com/search/${options.type}?${searchParams.toString()}`,
+  const { errors, results } = await apiRequest<{ errors?: string[]; results: SearchOrCollectionResult<T> }>(
+    `/search/${options.type}?${searchParams.toString()}`,
     {
-      method: "GET",
       signal,
-      headers: {
-        Authorization: `Client-ID ${accessKey}`,
-      },
     }
-  ).then((res) => res.json() as Promise<{ errors?: string[]; results: SearchOrCollectionResult<T> }>);
+  );
 
   return {
     results,

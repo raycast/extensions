@@ -1,7 +1,9 @@
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
-import React, { useState } from "react";
+import { Action, ActionPanel, List } from "@raycast/api";
+import { useState } from "react";
 import { getIpTime } from "./hooks/hooks";
-import { isEmpty } from "./utils/common-utils";
+import { buildDayAndNightIcon, isEmpty } from "./utils/common-utils";
+import { ActionOpenCommandPreferences } from "./components/action-open-command-preferences";
+import { ListEmptyView } from "./components/list-empty-view";
 
 export default function QueryIpTime() {
   const [searchContent, setSearchContent] = useState<string>("");
@@ -26,12 +28,17 @@ export default function QueryIpTime() {
       }}
       throttle={true}
     >
-      <List.EmptyView title={emptyViewTitle()} icon={Icon.Clock} />
+      <ListEmptyView title={emptyViewTitle()} command={false} extension={true} />
       {timeInfo.map((value, index) => {
         return (
           <List.Item
             key={index}
-            icon={{ source: { light: "timezone.png", dark: "timezone@dark.png" } }}
+            icon={{
+              source: {
+                light: buildDayAndNightIcon(timeInfo[0][1], true),
+                dark: buildDayAndNightIcon(timeInfo[0][1], false),
+              },
+            }}
             title={value[0]}
             subtitle={value[1]}
             actions={
@@ -41,6 +48,7 @@ export default function QueryIpTime() {
                   title={`Copy All Info`}
                   content={JSON.stringify(Object.fromEntries(timeInfo), null, 1)}
                 />
+                <ActionOpenCommandPreferences command={false} extension={true} />
               </ActionPanel>
             }
           />

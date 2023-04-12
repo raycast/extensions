@@ -1,34 +1,31 @@
-import { List, ActionPanel, Action, Detail, showToast, Toast, closeMainWindow, open, popToRoot } from "@raycast/api";
+import { Action, ActionPanel, closeMainWindow, List, open, popToRoot } from "@raycast/api";
 
-import { Vault } from "./utils/interfaces";
-import { vaultPluginCheck, parseVaults } from "./utils/utils";
-
-const getTarget = (vaultName: string) => {
-  return "obsidian://advanced-uri?vault=" + encodeURIComponent(vaultName) + "&daily=true";
-};
+import { getObsidianTarget, ObsidianTargetType, useObsidianVaults, vaultPluginCheck } from "./utils/utils";
+import { NoVaultFoundMessage } from "./components/Notifications/NoVaultFoundMessage";
+import { vaultsWithoutAdvancedURIToast } from "./components/Toasts";
+import AdvancedURIPluginNotInstalled from "./components/Notifications/AdvancedURIPluginNotInstalled";
 
 export default function Command() {
-  const vaults = parseVaults();
+  const { vaults, ready } = useObsidianVaults();
+
+  if (!ready) {
+    return <List isLoading={true}></List>;
+  } else if (vaults.length === 0) {
+    return <NoVaultFoundMessage />;
+  }
 
   const [vaultsWithPlugin, vaultsWithoutPlugin] = vaultPluginCheck(vaults, "obsidian-advanced-uri");
 
   if (vaultsWithoutPlugin.length > 0) {
-    showToast({
-      title: "Vaults without Daily Note plugin:",
-      message: vaultsWithoutPlugin.map((vault: Vault) => vault.name).join(", "),
-      style: Toast.Style.Failure,
-    });
+    vaultsWithoutAdvancedURIToast(vaultsWithoutPlugin);
   }
-
   if (vaultsWithPlugin.length == 0) {
-    const text =
-      "# Advanced URI plugin not installed.\nThis command requires the [Advanced URI plugin](https://obsidian.md/plugins?id=obsidian-advanced-uri) for Obsidian.  \n  \n Install it through the community plugins list.";
-
-    return <Detail navigationTitle="Advanced URI plugin not installed" markdown={text} />;
+    return <AdvancedURIPluginNotInstalled />;
   }
 
   if (vaultsWithPlugin.length == 1) {
-    open(getTarget(vaultsWithPlugin[0].name));
+    const target = getObsidianTarget({ type: ObsidianTargetType.DailyNote, vault: vaultsWithPlugin[0] });
+    open(target);
     popToRoot();
     closeMainWindow();
   }
@@ -41,7 +38,10 @@ export default function Command() {
           key={vault.key}
           actions={
             <ActionPanel>
-              <Action.Open title="Daily Note" target={getTarget(vault.name)} />
+              <Action.Open
+                title="Daily Note"
+                target={getObsidianTarget({ type: ObsidianTargetType.DailyNote, vault: vault })}
+              />
             </ActionPanel>
           }
         />

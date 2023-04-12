@@ -1,41 +1,59 @@
-import { List } from "@raycast/api";
+import { Grid, List } from "@raycast/api";
 
-export const competitions = [
+const competitions = [
   {
-    title: "LaLiga Santander 2021/22",
-    value: "laliga-santander-2021",
+    title: "LaLiga Santander",
+    value: "laliga-santander",
   },
   {
-    title: "LaLiga SmartBank 2021/22",
-    value: "laliga-smartbank-2021",
+    title: "LaLiga SmartBank",
+    value: "laliga-smartbank",
   },
   {
-    title: "Women's First Division 2021/22",
-    value: "primera-division-femenina-2021",
+    title: "Liga F",
+    value: "primera-division-femenina",
   },
 ];
 
+const seasons = {
+  2013: "2013/14",
+  2014: "2014/15",
+  2015: "2015/16",
+  2016: "2016/17",
+  2017: "2017/18",
+  2018: "2018/19",
+  2019: "2019/20",
+  2020: "2020/21",
+  2021: "2021/22",
+  2022: "2022/23",
+};
+
 export default function CompetitionDropdown(props: {
+  type?: string;
   selected: string;
   onSelect: React.Dispatch<React.SetStateAction<string>>;
 }) {
+  const DropdownComponent = props.type === "grid" ? Grid.Dropdown : List.Dropdown;
+
   return (
-    <List.Dropdown
-      tooltip="Filter by Competition"
-      value={props.selected}
-      onChange={props.onSelect}
-    >
-      <List.Dropdown.Section>
-        {competitions.map((competition) => {
+    <DropdownComponent tooltip="Filter by Competition" value={props.selected} onChange={props.onSelect}>
+      {Object.entries(seasons)
+        .sort((a, b) => Number(b[0]) - Number(a[0]))
+        .map(([year, season]) => {
           return (
-            <List.Dropdown.Item
-              key={competition.value}
-              value={competition.value}
-              title={competition.title}
-            />
+            <DropdownComponent.Section key={year} title={season}>
+              {competitions.map((competition) => {
+                return (
+                  <DropdownComponent.Item
+                    key={`${competition.value}-${year}`}
+                    value={`${competition.value}-${year}`}
+                    title={`${competition.title} ${season}`}
+                  />
+                );
+              })}
+            </DropdownComponent.Section>
           );
         })}
-      </List.Dropdown.Section>
-    </List.Dropdown>
+    </DropdownComponent>
   );
 }

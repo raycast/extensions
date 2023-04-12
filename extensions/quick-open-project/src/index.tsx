@@ -22,6 +22,7 @@ import gh = require("parse-github-url");
 
 interface Preferences {
   paths: string;
+  includeWorkspaces: boolean;
   editorApp: Application;
   terminalApp: Application;
 }
@@ -107,7 +108,13 @@ function searchProjects(query?: string): {
         }
         return sync(base + "/*");
       })
-      .filter((path) => statSync(path)?.isDirectory())
+      .filter(
+        (path) =>
+          statSync(path)?.isDirectory() ||
+          (getPreferenceValues<Preferences>().includeWorkspaces &&
+            statSync(path)?.isFile() &&
+            path.endsWith(".code-workspace"))
+      )
       .map((path) => new Project(path))
       .sort((a, b) => (a.displayPath.toLowerCase > b.displayPath.toLowerCase ? -1 : 1));
     return projects;

@@ -15,6 +15,11 @@ export interface FileInfo {
   modifyTime: number;
 }
 
+export interface FolderPageItem {
+  name: string;
+  isFolder: boolean;
+}
+
 export interface DirectoryWithFileInfo {
   directory: DirectoryInfo;
   files: FileInfo[];
@@ -25,7 +30,13 @@ export enum FileType {
   FILE = "File",
   IMAGE = "Image",
 }
+
 export enum DirectoryType {
-  DIRECTORY = "Directory",
+  FOLDER = "Folder",
   FILE = "File",
+}
+
+export enum Layout {
+  GRID = "Grid",
+  LIST = "List",
 }

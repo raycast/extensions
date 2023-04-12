@@ -17,7 +17,34 @@
       "title": "Upload Images",
       "subtitle": "SM.MS",
       "description": "Upload images to SM.MS and get the link to the image.",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "uploadMode",
+          "type": "dropdown",
+          "required": false,
+          "title": "Upload Mode",
+          "description": "Select the default upload mode: Path Mode, URL Mode.",
+          "default": "true",
+          "data": [
+            {
+              "title": "Path Mode",
+              "value": "true"
+            },
+            {
+              "title": "URL Mode",
+              "value": "false"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "upload-image-from-clipboard",
+      "title": "Upload Image From Clipboard",
+      "subtitle": "SM.MS",
+      "description": "Upload image from clipboard to SM.MS and get the link to the image.",
+      "mode": "no-view"
     },
     {
       "name": "delete-images",
@@ -49,19 +76,36 @@
       "title": "API secret token",
       "description": "SM.MS API secret token.",
       "default": ""
+    },
+    {
+      "name": "domain",
+      "type": "dropdown",
+      "required": true,
+      "title": "SM.MS domain",
+      "description": "Select the domain name to visit, mainland China users select smms.app.",
+      "default": "smms.app",
+      "data": [
+        {
+          "title": "sm.ms",
+          "value": "sm.ms"
+        },
+        {
+          "title": "smms.app",
+          "value": "smms.app"
+        }
+      ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.33.2",
+    "@raycast/api": "^1.47.1",
     "axios": "^0.27.2",
+    "file-uri-to-path": "^2.0.0",
     "form-data": "^4.0.0",
     "fs-extra": "^10.1.0",
     "run-applescript": "^6.0.0"
   },
   "devDependencies": {
     "@types/fs-extra": "^9.0.13",
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",

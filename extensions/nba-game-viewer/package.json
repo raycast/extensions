@@ -5,6 +5,10 @@
   "description": "View upcoming NBA games and NBA team standings",
   "icon": "command-icon.png",
   "author": "AbhinavPalacharla",
+  "contributors": [
+    "djpowers",
+    "michaelli"
+  ],
   "categories": [
     "Fun"
   ],
@@ -13,20 +17,28 @@
     {
       "name": "upcoming-games",
       "title": "View Upcoming Games",
-      "description": "Fetches upcoming NBA games",
       "subtitle": "NBA",
+      "description": "Fetches upcoming NBA games",
       "mode": "view"
     },
     {
       "name": "standings",
       "title": "View Standings",
-      "description": "Fetches NBA standings",
       "subtitle": "NBA",
+      "description": "Fetches NBA standings",
+      "mode": "view"
+    },
+    {
+      "name": "headlines",
+      "title": "View Headlines",
+      "subtitle": "NBA",
+      "description": "Fetches NBA league headlines from ESPN",
       "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.35.1",
+    "@raycast/api": "^1.37.0",
+    "@raycast/utils": "^1.1.0",
     "axios": "^0.27.2"
   },
   "devDependencies": {

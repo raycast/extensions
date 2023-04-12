@@ -5,6 +5,10 @@
   "description": "Allows you to see your daily plan, search notes and launch straight into NotePlan.",
   "icon": "command-icon.png",
   "author": "shakedlokits",
+  "contributors": [
+    "lukerandall",
+    "pr1mal"
+  ],
   "categories": [
     "Productivity",
     "Applications",
@@ -23,9 +27,39 @@
       "name": "today",
       "title": "Daily Plan",
       "description": "Show today's note",
-      "keywords": ["today"],
+      "keywords": [
+        "today"
+      ],
       "subtitle": "NotePlan 3",
       "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "fileExtension",
+      "type": "textfield",
+      "required": true,
+      "title": "File Extension",
+      "default": "txt",
+      "description": "The file extension you use for notes"
+    },
+    {
+      "name": "installationSource",
+      "type": "dropdown",
+      "required": true,
+      "description": "NotePlan installation source - App Store or SetApp",
+      "title": "Installation Source",
+      "default": "appstore",
+      "data": [
+        {
+          "title": "Mac AppStore",
+          "value": "appstore"
+        },
+        {
+          "title": "SetApp",
+          "value": "setapp"
+        }
+      ]
     }
   ],
   "dependencies": {

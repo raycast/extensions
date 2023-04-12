@@ -1,4 +1,11 @@
-import { Color, Detail, getPreferenceValues } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Color,
+  Detail,
+  getPreferenceValues,
+  Icon,
+} from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
 import json2md from "json2md";
 import { getPokemon } from "../api";
@@ -7,6 +14,8 @@ import {
   PokemonV2Pokemonspeciesname,
   PokemonV2PokemonspecyElement,
 } from "../types";
+import PokemonMoves from "./move";
+import PokedexEntries from "./dex";
 
 const { language } = getPreferenceValues();
 
@@ -24,24 +33,24 @@ enum GrowthRate {
 }
 
 const typeColor: { [key: string]: string } = {
-  Normal: "#a8a77a",
-  Fire: "#ee8130",
-  Water: "#6390f0",
-  Electric: "#f7d02c",
-  Grass: "#7ac74c",
-  Ice: "#96d9d6",
-  Fighting: "#c22e28",
-  Poison: "#a33ea1",
-  Ground: "#e2bf65",
-  Flying: "#a98ff3",
-  Psychic: "#f95587",
-  Bug: "#a6b91a",
-  Rock: "#b6a136",
-  Ghost: "#735797",
-  Dragon: "#6f35fc",
-  Dark: "#705746",
-  Steel: "#b7b7ce",
-  Fairy: "#d685ad",
+  normal: "#a8a77a",
+  fire: "#ee8130",
+  water: "#6390f0",
+  electric: "#f7d02c",
+  grass: "#7ac74c",
+  ice: "#96d9d6",
+  fighting: "#c22e28",
+  poison: "#a33ea1",
+  ground: "#e2bf65",
+  flying: "#a98ff3",
+  psychic: "#f95587",
+  bug: "#a6b91a",
+  rock: "#b6a136",
+  ghost: "#735797",
+  dragon: "#6f35fc",
+  dark: "#705746",
+  steel: "#b7b7ce",
+  fairy: "#d685ad",
 };
 
 function random(lower: number, upper: number) {
@@ -117,14 +126,39 @@ export default function PokemonDetail(props: { id?: number }) {
     const pkmNumber = pokemon.id.toString().padStart(3, "0");
 
     // excluding forms that unavailable in pokemon.com
-    let forms = pokemon_v2_pokemonspecy.pokemon_v2_pokemons;
+    let pokemons = pokemon_v2_pokemonspecy.pokemon_v2_pokemons;
     let formNames: string[] = [];
+    let varieties: string[] = [];
     switch (pokemon.id) {
       case 25:
         formNames = ["pikachu", "pikachu-gmax"];
         break;
       case 555:
         formNames = ["darmanitan-standard", "darmanitan-galar-standard"];
+        break;
+      case 666:
+        varieties = [
+          "meadow",
+          "continental",
+          "garden",
+          "elegant",
+          "marine",
+          "high-plains",
+          "river",
+        ];
+        break;
+      // case 668:
+      //   // male, female
+      //   break
+      case 670:
+        formNames = ["floette"];
+        varieties = ["red"];
+        break;
+      case 671:
+        varieties = ["red"];
+        break;
+      case 676:
+        varieties = ["natural", "heart", "star", "diamond"];
         break;
       case 744:
         formNames = ["rockruff"];
@@ -151,8 +185,28 @@ export default function PokemonDetail(props: { id?: number }) {
     }
 
     if (formNames.length) {
-      forms = forms.filter((f) => formNames.includes(f.name));
+      pokemons = pokemons.filter((p) => formNames.includes(p.name));
     }
+
+    const forms: { name: string; type: string; img: string }[] = [];
+    pokemons.forEach((p, pIdx) => {
+      let pokemonForms = p.pokemon_v2_pokemonforms;
+      if (varieties.length) {
+        pokemonForms = pokemonForms.filter((f) =>
+          varieties.includes(f.form_name)
+        );
+      }
+      pokemonForms.forEach((f, fIdx) => {
+        forms.push({
+          name:
+            f.pokemon_v2_pokemonformnames[0]?.name || nameByLang[language].name,
+          type: p.pokemon_v2_pokemontypes
+            .map((n) => n.pokemon_v2_type.pokemon_v2_typenames[0].name)
+            .join(", "),
+          img: formImg(pokemon.id, pIdx + fIdx),
+        });
+      });
+    });
 
     let gender;
     if (pokemon_v2_pokemonspecy.gender_rate === -1) {
@@ -186,12 +240,10 @@ export default function PokemonDetail(props: { id?: number }) {
           : "",
       },
       {
-        img: [
-          {
-            title: nameByLang[language].name,
-            source: `https://assets.pokemon.com/assets/cms2/img/pokedex/detail/${pkmNumber}.png`,
-          },
-        ],
+        img: {
+          title: nameByLang[language].name,
+          source: `https://assets.pokemon.com/assets/cms2/img/pokedex/detail/${pkmNumber}.png`,
+        },
       },
       {
         h2: "Training",
@@ -218,7 +270,11 @@ export default function PokemonDetail(props: { id?: number }) {
       },
       {
         p: `_Egg groups:_ ${pokemon_v2_pokemonegggroups
-          .map((g) => g.pokemon_v2_egggroup.pokemon_v2_egggroupnames[0].name)
+          .map(
+            (g) =>
+              g.pokemon_v2_egggroup.pokemon_v2_egggroupnames[0]?.name ||
+              g.pokemon_v2_egggroup.name
+          )
           .join(", ")}`,
       },
       {
@@ -231,73 +287,49 @@ export default function PokemonDetail(props: { id?: number }) {
         h2: forms.length > 1 ? "Forms" : "",
       },
       ...(forms.length > 1
-        ? forms.map((p, idx) => {
+        ? forms.map((f) => {
             return [
-              {
-                h3:
-                  p.pokemon_v2_pokemonforms[0].pokemon_v2_pokemonformnames[0]
-                    ?.name || nameByLang[language].name,
-              },
-              {
-                p:
-                  "_Type:_ " +
-                  p.pokemon_v2_pokemontypes
-                    .map((n) => n.pokemon_v2_type.pokemon_v2_typenames[0].name)
-                    .join(", "),
-              },
+              { h3: f.name },
+              { p: "_Type:_ " + f.type },
               {
                 img: [
                   {
-                    title:
-                      p.pokemon_v2_pokemonforms[0]
-                        .pokemon_v2_pokemonformnames[0]?.name ||
-                      nameByLang[language].name,
-                    source: formImg(pokemon.id, idx),
+                    title: f.name,
+                    source: f.img,
                   },
                 ],
               },
             ];
           })
         : []),
-      {
-        h2: "Evolutions",
-      },
-      {
-        p:
-          pokemon_v2_evolutionchain.pokemon_v2_pokemonspecies.length < 2
-            ? "_This Pokémon does not evolve._"
-            : "",
-      },
-      ...evolutions(pokemon_v2_evolutionchain.pokemon_v2_pokemonspecies).map(
-        (evolution) => ({
-          p: evolution
-            .map((specy) => {
-              return `![${
-                specy.pokemon_v2_pokemonspeciesnames[0].name
-              }](https://assets.pokemon.com/assets/cms2/img/pokedex/detail/${specy.id
-                .toString()
-                .padStart(3, "0")}.png)`;
-            })
-            .join(" "),
-        })
-      ),
-      {
-        h2: "Pokédex entries",
-      },
-      ...pokemon_v2_pokemonspeciesflavortexts
-        .filter((f) => f.pokemon_v2_version.pokemon_v2_versionnames.length)
-        .map((flavor) => {
-          return {
-            p: `**${
-              flavor.pokemon_v2_version.pokemon_v2_versionnames[0].name
-            }:** ${flavor.flavor_text
-              .split("\n")
-              .join(" ")
-              .split("")
-              .join(" ")}`,
-          };
-        }),
     ];
+
+    if (pokemon_v2_evolutionchain?.pokemon_v2_pokemonspecies.length) {
+      data.push(
+        {
+          h2: "Evolutions",
+        },
+        {
+          p:
+            pokemon_v2_evolutionchain.pokemon_v2_pokemonspecies.length < 2
+              ? "_This Pokémon does not evolve._"
+              : "",
+        },
+        ...evolutions(pokemon_v2_evolutionchain.pokemon_v2_pokemonspecies).map(
+          (evolution) => ({
+            p: evolution
+              .map((specy) => {
+                return `![${
+                  specy.pokemon_v2_pokemonspeciesnames[0].name
+                }](https://assets.pokemon.com/assets/cms2/img/pokedex/detail/${specy.id
+                  .toString()
+                  .padStart(3, "0")}.png)`;
+              })
+              .join(" "),
+          })
+        )
+      );
+    }
 
     return data;
   }, [pokemon]);
@@ -322,7 +354,7 @@ export default function PokemonDetail(props: { id?: number }) {
             <Detail.Metadata.Link
               title="Bulbapedia"
               text={englishName}
-              target={`https://bulbapedia.bulbagarden.net/wiki/${englishName}_(Pok%C3%A9mon)}`}
+              target={`https://bulbapedia.bulbagarden.net/wiki/${englishName}_(Pok%C3%A9mon)`}
             />
             <Detail.Metadata.Separator />
             <Detail.Metadata.Label
@@ -339,9 +371,7 @@ export default function PokemonDetail(props: { id?: number }) {
                   <Detail.Metadata.TagList.Item
                     key={t.pokemon_v2_type.pokemon_v2_typenames[0].name}
                     text={t.pokemon_v2_type.pokemon_v2_typenames[0].name}
-                    color={
-                      typeColor[t.pokemon_v2_type.pokemon_v2_typenames[0].name]
-                    }
+                    color={typeColor[t.pokemon_v2_type.name]}
                   />
                 );
               })}
@@ -352,7 +382,9 @@ export default function PokemonDetail(props: { id?: number }) {
                   <Detail.Metadata.TagList.Item
                     key={t.pokemon_v2_ability.pokemon_v2_abilitynames[0].name}
                     text={t.pokemon_v2_ability.pokemon_v2_abilitynames[0].name}
-                    color={t.is_hidden ? Color.Brown : Color.Blue}
+                    color={
+                      t.is_hidden ? Color.SecondaryText : Color.PrimaryText
+                    }
                   />
                 );
               })}
@@ -368,6 +400,38 @@ export default function PokemonDetail(props: { id?: number }) {
               );
             })}
           </Detail.Metadata>
+        )
+      }
+      actions={
+        pokemon && (
+          <ActionPanel>
+            <Action.Push
+              title="Pokédex Entries"
+              icon={Icon.List}
+              target={
+                <PokedexEntries
+                  name={nameByLang[language].name}
+                  dex_numbers={
+                    pokemon.pokemon_v2_pokemonspecy.pokemon_v2_pokemondexnumbers
+                  }
+                  entries={
+                    pokemon.pokemon_v2_pokemonspecy
+                      .pokemon_v2_pokemonspeciesflavortexts
+                  }
+                />
+              }
+            />
+            <Action.Push
+              title="Learnset"
+              icon={Icon.List}
+              target={
+                <PokemonMoves
+                  name={nameByLang[language].name}
+                  moves={pokemon.pokemon_v2_pokemonmoves}
+                />
+              }
+            />
+          </ActionPanel>
         )
       }
     />

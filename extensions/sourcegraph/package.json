@@ -16,28 +16,29 @@
     "sourcegraph",
     "search",
     "code",
-    "codesearch"
+    "codesearch",
+    "code search"
   ],
   "preferences": [
     {
       "name": "cloudToken",
-      "title": "Sourcegraph Cloud: Access token",
-      "description": "Available under 'Profile' -> 'Access token' on Sourcegraph Cloud",
+      "title": "Sourcegraph.com: Access token",
+      "description": "Available under 'Profile' -> 'Access token' on Sourcegraph.com",
       "required": false,
       "type": "password"
     },
     {
       "name": "customInstance",
-      "title": "Sourcegraph Self-Hosted: Instance URL",
-      "description": "Required to use the Sourcegraph Self-Hosted commands - URL of the Sourcegraph instance you want to connect to",
+      "title": "Sourcegraph Instance: Instance URL",
+      "description": "Required to use use 'Sourcegraph Instance' commands - URL of the Sourcegraph instance you want to connect to",
       "placeholder": "https://sourcegraph.my-company.com",
       "required": false,
       "type": "textfield"
     },
     {
       "name": "customInstanceToken",
-      "title": "Sourcegraph Self-Hosted: Access token",
-      "description": "Required to use the Sourcegraph Self-Hosted commands - available under 'Profile' -> 'Access token' on the Sourcegraph instance",
+      "title": "Sourcegraph Instance: Access token",
+      "description": "Required to use 'Sourcegraph Instance' commands - available under 'Profile' -> 'Access token' on the Sourcegraph instance",
       "required": false,
       "type": "password"
     },
@@ -53,17 +54,17 @@
   ],
   "commands": [
     {
-      "name": "searchCloud",
+      "name": "searchDotCom",
       "title": "Search Code",
-      "subtitle": "Sourcegraph Cloud",
-      "description": "Search your code and 2M+ public repositories.",
+      "subtitle": "Sourcegraph.com",
+      "description": "Search 2M+ public repositories on Sourcegraph.com",
       "mode": "view",
       "keywords": [
         "sourcegraph",
         "search",
         "code",
-        "src",
-        "cloud"
+        "code search",
+        "src"
       ],
       "preferences": [
         {
@@ -77,18 +78,18 @@
       ]
     },
     {
-      "name": "searchSelfHosted",
+      "name": "searchInstance",
       "icon": "logo-bw.png",
       "title": "Search Code",
-      "subtitle": "Sourcegraph Self-Hosted",
-      "description": "Search code on a self-hosted Sourcegraph instance.",
+      "subtitle": "Sourcegraph Instance",
+      "description": "Search code on a Sourcegraph instance.",
       "mode": "view",
       "keywords": [
         "sourcegraph",
         "search",
         "code",
-        "src",
-        "selfhosted"
+        "code search",
+        "src"
       ],
       "preferences": [
         {
@@ -102,79 +103,108 @@
       ]
     },
     {
-      "name": "findNotebooksCloud",
+      "name": "searchHistoryDotCom",
+      "title": "Code Search History",
+      "subtitle": "Sourcegraph.com",
+      "description": "Browse and launch recent code searches.",
+      "mode": "view",
+      "keywords": [
+        "sourcegraph",
+        "search",
+        "code",
+        "search code",
+        "history",
+        "recent"
+      ]
+    },
+    {
+      "name": "searchHistoryInstance",
+      "icon": "logo-bw.png",
+      "title": "Code Search History",
+      "subtitle": "Sourcegraph Instance",
+      "description": "Browse and launch recent code searches.",
+      "mode": "view",
+      "keywords": [
+        "sourcegraph",
+        "search",
+        "code",
+        "search code",
+        "history",
+        "recent"
+      ]
+    },
+    {
+      "name": "findNotebooksDotCom",
       "title": "Find Search Notebooks",
-      "subtitle": "Sourcegraph Cloud",
-      "description": "Browse search notebooks on Sourcegraph Cloud.",
+      "subtitle": "Sourcegraph.com",
+      "description": "Browse search notebooks on Sourcegraph.com.",
       "mode": "view",
       "keywords": [
         "sourcegraph",
         "search",
         "notebook",
-        "snb",
-        "cloud"
+        "snb"
       ],
       "preferences": []
     },
     {
-      "name": "findNotebooksSelfHosted",
+      "name": "findNotebooksInstance",
       "icon": "logo-bw.png",
       "title": "Find Search Notebooks",
-      "subtitle": "Sourcegraph Self-Hosted",
-      "description": "Browse search notebooks on a self-hosted Sourcegraph instance.",
+      "subtitle": "Sourcegraph Instance",
+      "description": "Browse search notebooks on a Sourcegraph instance.",
       "mode": "view",
       "keywords": [
         "sourcegraph",
         "search",
         "notebook",
-        "snb",
-        "selfhosted"
+        "snb"
       ],
       "preferences": []
     },
     {
-      "name": "manageBatchChangesSelfHosted",
+      "name": "manageBatchChangesInstance",
       "icon": "logo-bw.png",
       "title": "Manage Batch Changes",
-      "subtitle": "Sourcegraph Self-Hosted",
-      "description": "Manage batch changes on a self-hosted Sourcegraph instance.",
+      "subtitle": "Sourcegraph Instance",
+      "description": "Manage batch changes on a Sourcegraph instance.",
       "mode": "view",
       "keywords": [
         "sourcegraph",
         "batch",
         "changes",
-        "bc",
-        "selfhosted"
+        "bc"
       ],
       "preferences": []
     }
   ],
   "dependencies": {
-    "@apollo/client": "^3.6.5",
-    "@raycast/api": "^1.35.2",
+    "@apollo/client": "^3.7.3",
+    "@raycast/api": "^1.45.1",
+    "@raycast/utils": "^1.4.14",
     "cross-fetch": "^3.1.5",
     "eventsource": "^2.0.2",
-    "graphql": "^14.7.0",
-    "luxon": "^2.4.0",
-    "nanoid": "^3.3.4"
+    "graphql": "^16.6.0",
+    "luxon": "^3.1.1",
+    "nanoid": "^4.0.0"
   },
   "devDependencies": {
-    "@graphql-codegen/cli": "2.6.2",
-    "@graphql-codegen/fragment-matcher": "3.2.1",
-    "@graphql-codegen/introspection": "2.1.1",
-    "@graphql-codegen/typescript": "2.4.11",
-    "@graphql-codegen/typescript-operations": "2.4.0",
-    "@graphql-codegen/typescript-react-apollo": "3.2.14",
-    "@types/eventsource": "^1.1.8",
-    "@types/luxon": "^2.3.1",
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.38",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^8.12.0",
+    "@graphql-codegen/cli": "^2.16.1",
+    "@graphql-codegen/fragment-matcher": "^3.3.3",
+    "@graphql-codegen/introspection": "^2.2.3",
+    "@graphql-codegen/typescript": "^2.8.5",
+    "@graphql-codegen/typescript-operations": "^2.5.10",
+    "@graphql-codegen/typescript-react-apollo": "^3.3.7",
+    "@types/eventsource": "^1.1.10",
+    "@types/luxon": "^3.1.0",
+    "@types/node": "~18.11.10",
+    "@types/react": "^18.0.26",
+    "@typescript-eslint/eslint-plugin": "^5.47.0",
+    "@typescript-eslint/parser": "^5.47.0",
+    "eslint": "^8.30.0",
     "eslint-config-prettier": "^8.5.0",
-    "prettier": "^2.6.1",
-    "typescript": "^4.5.4"
+    "prettier": "^2.8.1",
+    "typescript": "^4.9.4"
   },
   "scripts": {
     "build": "ray build -e dist",

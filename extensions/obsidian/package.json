@@ -7,6 +7,9 @@
   "categories": [
     "Productivity"
   ],
+  "contributes": [
+    "iancanderson"
+  ],
   "license": "MIT",
   "preferences": [
     {
@@ -14,8 +17,38 @@
       "type": "textfield",
       "placeholder": "path/to/vault",
       "title": "Path to Vault",
-      "required": true,
+      "required": false,
       "description": "Specify the path or multiple paths (comma separated) to your vault/vaults"
+    },
+    {
+      "name": "excludedFolders",
+      "type": "textfield",
+      "placeholder": "folder1, folder2, ...",
+      "title": "Exclude following folders",
+      "required": false,
+      "description": "Specify which folders to exclude (comma separated)"
+    },
+    {
+      "name": "removeYAML",
+      "title": "Remove content",
+      "label": "Hide YAML frontmatter",
+      "type": "checkbox",
+      "required": false,
+      "description": "Hide YAML frontmatter for copying and viewing notes"
+    },
+    {
+      "name": "removeLatex",
+      "label": "Hide LaTeX",
+      "type": "checkbox",
+      "required": false,
+      "description": "Hide LaTeX (surrounded by $$ or $) for copying and viewing notes"
+    },
+    {
+      "name": "removeLinks",
+      "label": "Hide Links",
+      "type": "checkbox",
+      "required": false,
+      "description": "Hide links for copying and viewing notes"
     }
   ],
   "commands": [
@@ -25,43 +58,34 @@
       "subtitle": "Obsidian",
       "description": "Search, open, view, copy, paste and edit any note in Obsidian.",
       "mode": "view",
+      "arguments": [
+        {
+          "name": "searchArgument",
+          "placeholder": "Note",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "tagArgument",
+          "placeholder": "Tag",
+          "type": "text",
+          "required": false
+        }
+      ],
       "preferences": [
         {
-          "name": "excludedFolders",
+          "name": "appendTemplate",
           "type": "textfield",
-          "placeholder": "folder1, folder2, ...",
-          "title": "Exclude following folders",
+          "title": "Template for Append action",
           "required": false,
-          "description": "Specify which folders to exclude (comma separated)"
+          "description": "Specify a template for Append action (e.g. '- {content}')"
         },
         {
-          "name": "removeYAML",
-          "title": "Remove content",
-          "label": "Hide YAML frontmatter",
-          "type": "checkbox",
-          "required": false,
-          "description": "Hide YAML frontmatter for copying and viewing notes"
-        },
-        {
-          "name": "removeLatex",
-          "label": "Hide LaTeX",
-          "type": "checkbox",
-          "required": false,
-          "description": "Hide LaTeX (surrounded by $$ or $) for copying and viewing notes"
-        },
-        {
-          "name": "removeLinks",
-          "label": "Hide Links",
-          "type": "checkbox",
-          "required": false,
-          "description": "Hide links for copying and viewing notes"
-        },
-        {
-          "name": "appendPrefix",
+          "name": "appendSelectedTemplate",
           "type": "textfield",
-          "title": "Prefix for Append action",
+          "title": "Template for Append Selected Text action",
           "required": false,
-          "description": "Specify a prefix for Append action (e.g. '-')"
+          "description": "Specify a template for Append Selected Text action (e.g. '- {content}')"
         },
         {
           "name": "showDetail",
@@ -71,6 +95,24 @@
           "required": false,
           "description": "Show the notes content in a detail view",
           "default": true
+        },
+        {
+          "name": "showMetadata",
+          "type": "checkbox",
+          "label": "Show Metadata",
+          "title": "Show Metadata",
+          "required": false,
+          "description": "Show the notes metadata in a detail view (only works when Show Detail is enabled)",
+          "default": false
+        },
+        {
+          "name": "searchContent",
+          "type": "checkbox",
+          "label": "Search Content",
+          "title": "Search Content",
+          "required": false,
+          "description": "Use the content of notes for searching",
+          "default": false
         },
         {
           "name": "primaryAction",
@@ -87,6 +129,96 @@
             {
               "title": "Open in Obsidian",
               "value": "obsidian"
+            },
+            {
+              "title": "Open in new Pane",
+              "value": "newpane"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "starredNotesCommand",
+      "title": "Starred Notes",
+      "subtitle": "Obsidian",
+      "description": "Search, open, view, copy, paste and edit starred notes in Obsidian.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "searchArgument",
+          "placeholder": "Note",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "tagArgument",
+          "placeholder": "Tag",
+          "type": "text",
+          "required": false
+        }
+      ],
+      "preferences": [
+        {
+          "name": "appendTemplate",
+          "type": "textfield",
+          "title": "Template for Append action",
+          "required": false,
+          "description": "Specify a template for Append action (e.g. '- {content}')"
+        },
+        {
+          "name": "appendSelectedTemplate",
+          "type": "textfield",
+          "title": "Template for Append Selected Text action",
+          "required": false,
+          "description": "Specify a template for Append Selected Text action (e.g. '- {content}')"
+        },
+        {
+          "name": "showDetail",
+          "type": "checkbox",
+          "label": "Show Detail",
+          "title": "Show Detail",
+          "required": false,
+          "description": "Show the notes content in a detail view",
+          "default": true
+        },
+        {
+          "name": "showMetadata",
+          "type": "checkbox",
+          "label": "Show Metadata",
+          "title": "Show Metadata",
+          "required": false,
+          "description": "Show the notes metadata in a detail view (only works when Show Detail is enabled)",
+          "default": false
+        },
+        {
+          "name": "searchContent",
+          "type": "checkbox",
+          "label": "Search Content",
+          "title": "Search Content",
+          "required": false,
+          "description": "Use the content of notes for searching",
+          "default": false
+        },
+        {
+          "name": "primaryAction",
+          "type": "dropdown",
+          "title": "Primary Action",
+          "required": false,
+          "description": "Select a primary action to be executed on enter",
+          "defaultValue": "quicklook",
+          "data": [
+            {
+              "title": "Quick Look",
+              "value": "quicklook"
+            },
+            {
+              "title": "Open in Obsidian",
+              "value": "obsidian"
+            },
+            {
+              "title": "Open in new Pane",
+              "value": "newpane"
             }
           ]
         }
@@ -98,6 +230,53 @@
       "subtitle": "Obsidian",
       "description": "Open a vault in Obsidian.",
       "mode": "view"
+    },
+    {
+      "name": "dailyNoteAppendCommand",
+      "title": "Append to Daily Note",
+      "subtitle": "Obsidian",
+      "description": "Append text to your daily note",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "text",
+          "placeholder": "Take out the trash",
+          "type": "text",
+          "required": true
+        }
+      ],
+      "preferences": [
+        {
+          "name": "appendTemplate",
+          "type": "textfield",
+          "title": "Template for Daily Note Append action",
+          "required": false,
+          "description": "Specify a template for Daily Note Append action (e.g. '- {content}')"
+        },
+        {
+          "name": "vaultName",
+          "type": "textfield",
+          "title": "Name of Obsidian vault where note is",
+          "required": false,
+          "description": "Name of Obsidian vault where note is"
+        },
+        {
+          "name": "heading",
+          "type": "textfield",
+          "title": "Name of heading in note in which to append",
+          "required": false,
+          "description": "If no heading is set, text will be appended to the end of the daily note"
+        },
+        {
+          "name": "silent",
+          "type": "checkbox",
+          "label": "Silent Mode",
+          "title": "Silent Mode",
+          "required": false,
+          "description": "Don't open daily note when appending to the daily note.",
+          "default": true
+        }
+      ]
     },
     {
       "name": "dailyNoteCommand",
@@ -114,28 +293,13 @@
       "mode": "view",
       "preferences": [
         {
-          "name": "prefPath",
-          "type": "textfield",
-          "placeholder": "path/to/note",
-          "title": "Default Path",
+          "name": "blankNote",
+          "type": "checkbox",
+          "label": "Blank Note",
+          "title": "Blank Note",
           "required": false,
-          "description": "The default path where a new note will be created"
-        },
-        {
-          "name": "prefTag",
-          "type": "textfield",
-          "placeholder": "untagged",
-          "title": "Default Tag",
-          "required": false,
-          "description": "The default selected tag"
-        },
-        {
-          "name": "tags",
-          "type": "textfield",
-          "placeholder": "tag1, tag2, tag3, ...",
-          "title": "Tags",
-          "required": false,
-          "description": "The tags which will be suggested on note creation"
+          "description": "Create a blank note",
+          "default": false
         },
         {
           "name": "openOnCreate",
@@ -147,6 +311,15 @@
           "description": "Open the created note in Obsidian"
         },
         {
+          "name": "prefPath",
+          "type": "textfield",
+          "placeholder": "path/to/note",
+          "title": "Default Path",
+          "required": false,
+          "description": "The default path where a new note will be created",
+          "default": ""
+        },
+        {
           "name": "prefNoteName",
           "type": "textfield",
           "title": "Default Note Name",
@@ -155,59 +328,71 @@
           "default": "Untitled"
         },
         {
+          "name": "prefNoteContent",
+          "type": "textfield",
+          "title": "Default Note Content",
+          "required": false,
+          "description": "The default note content (supports templates)",
+          "default": ""
+        },
+        {
+          "name": "fillFormWithDefaults",
+          "type": "checkbox",
+          "label": "Fill form with defaults",
+          "title": "Fill form with defaults",
+          "required": false,
+          "default": false,
+          "description": "Fill form with default values"
+        },
+        {
+          "name": "prefTag",
+          "type": "textfield",
+          "placeholder": "untagged",
+          "title": "Default Tag",
+          "required": false,
+          "description": "The default selected tag",
+          "default": ""
+        },
+        {
+          "name": "tags",
+          "type": "textfield",
+          "placeholder": "tag1, tag2, tag3, ...",
+          "title": "Tags",
+          "required": false,
+          "description": "The tags which will be suggested on note creation",
+          "default": ""
+        },
+        {
           "name": "folderActions",
           "type": "textfield",
           "placeholder": "folder1, folder2, folder3, ...",
           "title": "Folder Actions",
           "required": false,
-          "description": "Add actions to folders (comma separated)"
+          "description": "Add actions to folders (comma separated)",
+          "default": ""
         }
       ]
     },
     {
-      "name": "pinnedNotesCommand",
-      "title": "Pinned Notes",
+      "name": "randomNoteCommand",
+      "title": "Random Note",
       "subtitle": "Obsidian",
-      "description": "Search, open, view, copy, paste and edit pinned notes.",
+      "description": "Open random note",
       "mode": "view",
       "preferences": [
         {
-          "name": "removeYAML",
-          "title": "Remove content",
-          "label": "Hide YAML frontmatter",
-          "type": "checkbox",
-          "required": false,
-          "description": "Hide YAML frontmatter for copying and viewing notes"
-        },
-        {
-          "name": "removeLatex",
-          "label": "Hide LaTeX",
-          "type": "checkbox",
-          "required": false,
-          "description": "Hide LaTeX (surrounded by $$ or $) for copying and viewing notes"
-        },
-        {
-          "name": "removeLinks",
-          "label": "Hide Links",
-          "type": "checkbox",
-          "required": false,
-          "description": "Hide links for copying and viewing notes"
-        },
-        {
-          "name": "appendPrefix",
+          "name": "appendTemplate",
           "type": "textfield",
-          "title": "Prefix for Append action",
+          "title": "Template for Append action",
           "required": false,
-          "description": "Specify a prefix for Append action (e.g. '-')"
+          "description": "Specify a template for Append action (e.g. '- {content}')"
         },
         {
-          "name": "showDetail",
-          "type": "checkbox",
-          "label": "Show Detail",
-          "title": "Show Detail",
+          "name": "appendSelectedTemplate",
+          "type": "textfield",
+          "title": "Template for Append Selected Text action",
           "required": false,
-          "description": "Show the notes content in a detail view",
-          "default": true
+          "description": "Specify a template for Append Selected Text action (e.g. '- {content}')"
         },
         {
           "name": "primaryAction",
@@ -224,18 +409,85 @@
             {
               "title": "Open in Obsidian",
               "value": "obsidian"
+            },
+            {
+              "title": "Open in new Pane",
+              "value": "newpane"
             }
           ]
         }
       ]
+    },
+    {
+      "name": "searchMedia",
+      "title": "Search Media",
+      "subtitle": "Obsidian",
+      "description": "Search for media in your vault",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "searchArgument",
+          "placeholder": "Name",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "typeArgument",
+          "placeholder": "Type",
+          "type": "text",
+          "required": false
+        }
+      ],
+      "preferences": [
+        {
+          "name": "excludedFolders",
+          "type": "textfield",
+          "placeholder": "folder1, folder2, ...",
+          "title": "Exclude following folders",
+          "required": false,
+          "description": "Specify which folders to exclude (comma separated)"
+        },
+        {
+          "name": "imageSize",
+          "type": "dropdown",
+          "title": "Image Size",
+          "required": false,
+          "description": "Select the image size to display",
+          "defaultValue": "medium",
+          "data": [
+            {
+              "title": "Small",
+              "value": "small"
+            },
+            {
+              "title": "Medium",
+              "value": "medium"
+            },
+            {
+              "title": "Large",
+              "value": "large"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "obsidianMenuBar",
+      "title": "Obsidian Menu Bar",
+      "subtitle": "Obsidian",
+      "description": "See your pinned notes at a glance and control actions from the menu bar.",
+      "mode": "menu-bar"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.31.0"
+    "@raycast/api": "^1.47.0",
+    "@types/uuid": "^8.3.4",
+    "uuid": "^8.3.2",
+    "yaml": "^2.1.1"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",
-    "@types/react": "^17.0.43",
+    "@types/react": "^17.0.52",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",

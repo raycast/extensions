@@ -1,5 +1,13 @@
 # Placeholder Changelog
 
+## [Update Raycast API] - 2022-12-05
+
+- Update Raycast API version to 1.44.0
+
+## [Add new image layout options] - 2022-10-15
+
+- Add new image layout options: List or Grid.
+
 ## [Fix text error] - 2022-06-04
 
 - Fix text error

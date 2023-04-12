@@ -1,7 +1,7 @@
 # Drafts
 
 This extension integrates Raycast with [Drafts](https://getdrafts.com).  
-Created by [@FlohGro](https://social.lol/@flohgro) ([Website](https://flohgro.com/)).
+Created by [@FlohGro](https://twitter.com/FlohGro) ([Website](https://flohgro.com/)).
 
 It supports the following features as commands:
 
@@ -62,6 +62,5 @@ If this eXtension is valuable for and you'd like to thank me you can support me 
 
 - [buymeacoffee](https://www.buymeacoffee.com/flohgro)
 - [patreon](https://www.patreon.com/flohgro)
-- [ko-fi](https://ko-fi.com/flohgro)
 
 If you find any issues or have additional requests you can reach out to me on [Twitter](https://twitter.com/FlohGro) or via [e-mail](mailto:hi@flohgro.com)

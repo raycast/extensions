@@ -1,6 +1,8 @@
 import { format, parse } from "date-fns";
 
-export const getFlagEmoji = (isoCode: string) => {
+export const getFlagEmoji = (isoCode?: string) => {
+  if (!isoCode) return "🏴";
+
   if (isoCode === "GB-ENG") {
     return "🏴󠁧󠁢󠁥󠁮󠁧󠁿";
   }
@@ -21,7 +23,7 @@ export const getFlagEmoji = (isoCode: string) => {
 };
 
 export const convertToLocalTime = (label?: string, outputFormat?: string) => {
-  if (!label) return undefined;
+  if (!label || label.length === 15) return undefined;
 
   const time = label.replace("BST", "+01:00").replace("GMT", "+00:00");
 

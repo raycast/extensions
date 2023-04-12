@@ -5,6 +5,12 @@
   "description": "Search and open projects from Visual Studio Code Project Manager",
   "icon": "command-icon.png",
   "author": "MarkusLanger",
+  "contributors": [
+    "GastroGeek",
+    "4very",
+    "TobiasYin",
+    "yossizahn"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -73,13 +79,16 @@
         {
           "value": "Code - Insiders",
           "title": "Visual Studio Code - Insiders"
+        },
+        {
+          "value": "VSCodium",
+          "title": "VSCodium"
         }
       ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "1.33.2",
-    "open": "^8.4.0",
+    "@raycast/api": "1.48.8",
     "parse-git-config": "^3.0.0",
     "tildify": "^3.0.0"
   },

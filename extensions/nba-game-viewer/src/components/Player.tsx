@@ -5,7 +5,7 @@ import generatePlayerAccessories from "../utils/generatePlayerAccessories";
 type PropTypes = {
   player: Player;
   isShowingDetail: boolean;
-  setIsShowingDetail: any;
+  setIsShowingDetail: (show: boolean) => void;
 };
 
 const PlayerComponent = ({ player, isShowingDetail, setIsShowingDetail }: PropTypes) => {
@@ -13,12 +13,16 @@ const PlayerComponent = ({ player, isShowingDetail, setIsShowingDetail }: PropTy
     <List.Item
       key={player.id}
       title={player.fullName}
-      icon={player.headshot}
-      subtitle={player.position}
+      icon={player.headshot ?? Icon.PersonCircle}
+      subtitle={isShowingDetail ? undefined : player.position}
       accessories={generatePlayerAccessories(player)}
       detail={
         <List.Item.Detail
-          markdown={`<img src="${player.headshot}" alt="drawing" width="250"/>`}
+          markdown={
+            player.headshot
+              ? `<img src="${player.headshot}" alt="Photo of ${player.fullName}" width="250"/>`
+              : undefined
+          }
           metadata={
             <List.Item.Detail.Metadata>
               <List.Item.Detail.Metadata.Label title="Name" text={player.fullName} />
@@ -44,13 +48,13 @@ const PlayerComponent = ({ player, isShowingDetail, setIsShowingDetail }: PropTy
       }
       actions={
         <ActionPanel title="Player Actions">
-          <Action.OpenInBrowser title="View Player on ESPN" url={player.link} />
           <Action
-            title="Toggle Player Info"
+            title={isShowingDetail ? "Hide Player Info" : "Show Player Info"}
             icon={Icon.Sidebar}
             shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
             onAction={() => setIsShowingDetail(!isShowingDetail)}
           />
+          <Action.OpenInBrowser title="View Player on ESPN" url={player.link} />
         </ActionPanel>
       }
     />

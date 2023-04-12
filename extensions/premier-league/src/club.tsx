@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Detail, List, Icon } from "@raycast/api";
+import { Action, ActionPanel, Detail, Grid, Icon } from "@raycast/api";
 import json2md from "json2md";
 import { useState } from "react";
 import { useClubs, useSeasons } from "./hooks";
@@ -6,6 +6,7 @@ import Player from "./player";
 import { TeamTeam } from "./types";
 
 function ClubProfile(props: TeamTeam) {
+  const { metadata } = props;
   return (
     <Detail
       navigationTitle={`${props.name} | Club`}
@@ -13,8 +14,7 @@ function ClubProfile(props: TeamTeam) {
         { h1: props.name },
         {
           img: {
-            // source: `https://resources.premierleague.com/premierleague/badges/${props.altIds.opta}.svg`,
-            source: `https://resources.premierleague.com/premierleague/badges/100/${props.altIds.opta}@x2.png`,
+            source: `https://resources.premierleague.com/premierleague/badges/${props.altIds.opta}.png`,
           },
         },
       ])}
@@ -25,6 +25,36 @@ function ClubProfile(props: TeamTeam) {
             title="Capacity"
             text={props.grounds[0].capacity?.toString()}
           />
+
+          <Detail.Metadata.Separator />
+          {metadata.communities_twitter && (
+            <Detail.Metadata.Link
+              title="Twitter"
+              text={metadata.communities_twitter}
+              target={metadata.communities_twitter}
+            />
+          )}
+          {metadata.communities_facebook && (
+            <Detail.Metadata.Link
+              title="Facebook"
+              text={metadata.communities_facebook}
+              target={metadata.communities_facebook}
+            />
+          )}
+          {metadata.communities_instagram && (
+            <Detail.Metadata.Link
+              title="Instagram"
+              text={metadata.communities_instagram}
+              target={metadata.communities_instagram}
+            />
+          )}
+          {metadata.communities_youtube && (
+            <Detail.Metadata.Link
+              title="YouTube"
+              text={metadata.communities_youtube}
+              target={metadata.communities_youtube}
+            />
+          )}
         </Detail.Metadata>
       }
       actions={
@@ -53,43 +83,40 @@ export default function Club() {
   const clubs = useClubs(selectedSeason);
 
   return (
-    <List
+    <Grid
       throttle
       isLoading={!clubs}
+      inset={Grid.Inset.Medium}
       searchBarAccessory={
-        <List.Dropdown
+        <Grid.Dropdown
           tooltip="Filter by Season"
           value={selectedSeason}
           onChange={setSeason}
         >
-          <List.Dropdown.Section>
+          <Grid.Dropdown.Section>
             {seasons.map((season) => {
               return (
-                <List.Dropdown.Item
+                <Grid.Dropdown.Item
                   key={season.id}
                   value={season.id.toString()}
                   title={season.label}
                 />
               );
             })}
-          </List.Dropdown.Section>
-        </List.Dropdown>
+          </Grid.Dropdown.Section>
+        </Grid.Dropdown>
       }
     >
       {clubs?.map((team) => {
         return (
-          <List.Item
+          <Grid.Item
             key={team.id}
             title={team.name}
-            subtitle={team.shortName}
-            icon={{
-              source: `https://resources.premierleague.com/premierleague/badges/${team.altIds.opta}.svg`,
+            subtitle={team.grounds[0].name}
+            content={{
+              source: `https://resources.premierleague.com/premierleague/badges/${team.altIds.opta}.png`,
               fallback: "default.png",
             }}
-            accessories={[
-              { text: team.grounds[0].name },
-              { icon: "stadium.svg" },
-            ]}
             actions={
               <ActionPanel>
                 <Action.Push
@@ -102,6 +129,6 @@ export default function Club() {
           />
         );
       })}
-    </List>
+    </Grid>
   );
 }

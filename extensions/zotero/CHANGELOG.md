@@ -1,5 +1,28 @@
 # Zotero Changelog
 
+## [Enhancements] - 2023-03-07
+
+- Updated logo
+- Updated list icons for various types of references included in Zotero (thesis, book, book chapter, journal article, etc.) so that they match the icons used in Zotero desktop app
+
+## [Added screenshots] - 2022-11-17
+
+## [Features] - 2023-02-22
+
+- Added: Action to copy title to Clipboard, with keyboard shortcut `⌘.`
+- Added: Action to copy authors to Clipboard, with keyboard shortcut `⌘⇧.`
+- Added: Action to copy DOI to Clipboard (when available), with keyboard shortcut `⌘⇧D`
+- Added: Action to copy Zotero URL to Clipboard, with keyboard shortcut `⌘⇧C`
+- Changed: _Open Original Link_ Action shortcut to `⌘⇧O`
+- Fixed: Corrected publication date format
+- Fixed: Not showing both URL and DOI when DOI is available
+
+## [Features] - 2022-06-08
+
+- Add additional CSL formats
+- Use independent CSL formats from extension directly rather than relying upon installed ones only
+- Querying much more complex and complete now. Adds support for searching title, abstract, tags, date and authors. Different words are searched independently in OR sense. AND search is also supported by replacing "spaces" with "+" chars.
+
 ## [Features] - 2022-05-25
 
 - Adds Action to copy reference citations using CSA styles to Clipboard

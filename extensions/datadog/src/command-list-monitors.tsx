@@ -8,9 +8,52 @@ import {
   UNKNOWN,
   WARN,
 } from "@datadog/datadog-api-client/dist/packages/datadog-api-client-v1/models/MonitorOverallStates";
-import { ActionPanel, List, OpenInBrowserAction } from "@raycast/api";
-import { useMonitors } from "./useMonitors";
+import { Action, ActionPanel, List } from "@raycast/api";
+import { useState } from "react";
 import { linkDomain } from "./util";
+import { useMonitors } from "./useMonitors";
+import { MonitorSearchResponse } from "@datadog/datadog-api-client/dist/packages/datadog-api-client-v1/models/MonitorSearchResponse";
+import { MonitorSearchResult } from "@datadog/datadog-api-client/dist/packages/datadog-api-client-v1/models/MonitorSearchResult";
+
+// noinspection JSUnusedGlobalSymbols
+export default function CommandListMonitors() {
+  const [query, setQuery] = useState("");
+  const { monitorResponse, monitorsAreLoading } = useMonitors(query);
+
+  return (
+    <List isLoading={monitorsAreLoading} onSearchTextChange={setQuery} throttle>
+      <List.Section title={availableMonitorsSummary(monitorResponse)}>
+        {monitorResponse && monitorResponse.monitors ? monitorResponse.monitors.map(mapMonitor) : null}
+      </List.Section>
+    </List>
+  );
+}
+
+const mapMonitor = ({ id, name, query, tags, status }: MonitorSearchResult) => (
+  <List.Item
+    key={id}
+    title={name || query || ""}
+    subtitle={tags?.join(", ")}
+    accessories={[{ text: status, icon: { source: statusIcon(status) } }]}
+    actions={
+      <ActionPanel>
+        <Action.OpenInBrowser url={`https://${linkDomain()}/monitors/${id}`} />
+      </ActionPanel>
+    }
+  />
+);
+
+type OptionalMonitorSearchResponse = MonitorSearchResponse | undefined;
+
+const availableMonitorsSummary = (monitorResponse: OptionalMonitorSearchResponse) =>
+  `Available monitors ${totalCount(monitorResponse)}, ${countSummary(monitorResponse)}`;
+
+const totalCount = (monitorResponse: OptionalMonitorSearchResponse) => monitorResponse?.metadata?.totalCount;
+
+const countSummary = (monitorResponse: OptionalMonitorSearchResponse) =>
+  monitorResponse?.counts?.status
+    ? monitorResponse.counts.status.map(({ count, name }) => `${count} ${name}`).join(", ")
+    : "";
 
 const statusIcon = (status: MonitorOverallStates | undefined) => {
   const icon = (name: string, themable = false) => {
@@ -40,28 +83,3 @@ const statusIcon = (status: MonitorOverallStates | undefined) => {
 
   return { light: "", dark: "" };
 };
-
-// noinspection JSUnusedGlobalSymbols
-export default function CommandListMonitors() {
-  const { monitors, monitorsAreLoading } = useMonitors();
-
-  return (
-    <List isLoading={monitorsAreLoading}>
-      {monitors.map(monitor => (
-        <List.Item
-          key={monitor.id}
-          icon={{ source: { light: "icon@light.png", dark: "icon@dark.png" } }}
-          title={monitor.name || monitor.query}
-          subtitle={monitor.tags?.join(", ")}
-          accessoryTitle={monitor.overallState}
-          accessoryIcon={{ source: statusIcon(monitor.overallState) }}
-          actions={
-            <ActionPanel>
-              <OpenInBrowserAction url={`https://${linkDomain()}/monitors/${monitor.id}`} />
-            </ActionPanel>
-          }
-        />
-      ))}
-    </List>
-  );
-}

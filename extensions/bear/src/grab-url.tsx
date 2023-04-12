@@ -1,4 +1,4 @@
-import { ActionPanel, Form, Icon, popToRoot, showToast, SubmitFormAction, ToastStyle } from "@raycast/api";
+import { ActionPanel, Action, Form, Icon, popToRoot, showToast, Toast } from "@raycast/api";
 import open from "open";
 
 interface FormValues {
@@ -10,7 +10,7 @@ interface FormValues {
 function GrabUrlAction() {
   async function handleSubmit({ url, tags, pin }: FormValues) {
     if (!url) {
-      showToast(ToastStyle.Failure, "URL is required");
+      showToast(Toast.Style.Failure, "URL is required");
       return;
     }
     open(
@@ -22,7 +22,7 @@ function GrabUrlAction() {
     await popToRoot({ clearSearchBar: true });
   }
 
-  return <SubmitFormAction icon={Icon.Globe} title="Capture in New Note" onSubmit={handleSubmit} />;
+  return <Action.SubmitForm icon={Icon.Globe} title="Capture in New Note" onSubmit={handleSubmit} />;
 }
 
 export default function GrabUrl() {

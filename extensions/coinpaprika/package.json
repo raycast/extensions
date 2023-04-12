@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "coinpaprika",
   "title": "Coinpaprika",
-  "description": "Cryptocurrency Rates & Statistics",
+  "description": "Cryptocurrency Prices & Statistics",
   "icon": "cp_logo.png",
   "author": "gumbleliks",
   "categories": [
@@ -13,7 +13,7 @@
   "commands": [
     {
       "name": "coinpaprika",
-      "title": "Check Crypto Rates & Statistics",
+      "title": "Check Crypto Prices & Statistics",
       "subtitle": "Coinpaprika",
       "description": "Cryptocurrency Research Platform",
       "mode": "view"
