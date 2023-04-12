@@ -57,7 +57,7 @@ export const useBook = (id: string) => {
 
 export const useHighlights = (bookId: string) => {
   const { data, isLoading } = useFetch<{ results: Highlight[] }>(
-    `${baseUrl}/highlights?book_id=${bookId}`,
+    `${baseUrl}/highlights?book_id=${bookId}&page_size=1000`,
     getHeaders()
   )
 
