@@ -2,7 +2,7 @@
 
 ## [Add supertags depending on source category, highlight tags, reset sync of one source] - 2023-04-12
 
-- Add ability to set different supertags for articles, books, podcasts, supplementals, and tweets
+- Add the ability to set different supertags for articles, books, podcasts, supplementals, and tweets
 - Display and export highlight tags
 - Reset synchronization history of a specific source
 
