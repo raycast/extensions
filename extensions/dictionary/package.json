@@ -53,7 +53,7 @@
       "type": "textfield",
       "required": false,
       "description": "It's for using Youdao Api only.",
-      "title": "Youdao Client ID [optional]"
+      "title": "Youdao Client ID"
     }
   ],
   "dependencies": {
