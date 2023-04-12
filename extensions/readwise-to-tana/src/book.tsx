@@ -50,6 +50,7 @@ export default function Book({ id, template }: BookProps) {
   const h = Handlebars.compile(template)
   const allHighlights = h({
     ...book,
+    title: cleanTitle(book.title),
     highlights: highlights.map((highlight) => ({
       ...highlight,
       updated: formatDate(highlight.updated),
