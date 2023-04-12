@@ -5,9 +5,8 @@ import { VideoItem } from "./video";
 import { ListOrGrid } from "./listgrid";
 import { Preferences } from "../lib/types";
 
-const { griditemsize } = getPreferenceValues<Preferences>();
-
 export function PlaylistList(props: { playlistId: string }) {
+  const { griditemsize } = getPreferenceValues<Preferences>();
   const playlistId = props.playlistId;
   const { data, error, isLoading } = useRefresher<Video[] | undefined>(async () => {
     return await getPlaylistVideos(playlistId);

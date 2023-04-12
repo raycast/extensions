@@ -9,8 +9,6 @@ import fs from "fs";
 import he from "he";
 import { ViewLayout, PrimaryAction, Preferences } from "../lib/types";
 
-const { view, primaryaction } = getPreferenceValues<Preferences>();
-
 function videoUrl(videoId: string | null | undefined): string | undefined {
   if (videoId) {
     return `https://youtube.com/watch?v=${videoId}`;
@@ -144,6 +142,7 @@ export function VideoItemDetail({ video }: { video: Video }): JSX.Element {
 }
 
 export function VideoItem({ video, actions }: { video: Video; actions?: JSX.Element | undefined }): JSX.Element {
+  const { view, primaryaction } = getPreferenceValues<Preferences>();
   let parts: string[] = [];
   if (video.statistics) {
     parts = [`${compactNumberFormat(parseInt(video.statistics.viewCount))} views · ${formatDate(video.publishedAt)}`];

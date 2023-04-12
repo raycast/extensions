@@ -19,8 +19,6 @@ import { addRecentChannel } from "./recent_channels";
 import he from "he";
 import { ViewLayout, PrimaryAction, Preferences } from "../lib/types";
 
-const { view, primaryaction } = getPreferenceValues<Preferences>();
-
 export function ChannelItemDetail(props: { channel: Channel; isLoading?: boolean | undefined }): JSX.Element {
   const channel = props.channel;
   let statistics;
@@ -96,6 +94,7 @@ export function ChannelItem({
   channel: Channel;
   actions?: JSX.Element | undefined;
 }): JSX.Element {
+  const { view, primaryaction } = getPreferenceValues<Preferences>();
   const channelId = channel.id;
   const title = he.decode(channel.title);
   let parts: string[] = [];

@@ -7,9 +7,8 @@ import { ChannelItem } from "./channel";
 import { ListOrGrid, ListOrGridEmptyView, ListOrGridSection } from "./listgrid";
 import * as cache from "./recent_channels";
 
-const { griditemsize, showRecentChannels } = getPreferenceValues<Preferences>();
-
 export function SearchChannelList({ searchQuery }: { searchQuery?: string | undefined }) {
+  const { griditemsize, showRecentChannels } = getPreferenceValues<Preferences>();
   const [searchText, setSearchText] = useState<string>(searchQuery || "");
   const { data, error, isLoading } = useRefresher<Channel[] | undefined>(async () => {
     if (searchText) {

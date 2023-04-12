@@ -6,9 +6,8 @@ import { ListOrGrid } from "./listgrid";
 import { Preferences } from "../lib/types";
 import { addPinnedVideo } from "./recent_videos";
 
-const { griditemsize } = getPreferenceValues<Preferences>();
-
 export function PopularVideoList() {
+  const { griditemsize } = getPreferenceValues<Preferences>();
   const { data, error, isLoading } = useRefresher<Video[] | undefined>(async () => {
     return await getPopularVideos();
   }, []);

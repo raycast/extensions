@@ -7,9 +7,8 @@ import { ListOrGrid, ListOrGridEmptyView, ListOrGridSection } from "./listgrid";
 import * as cache from "./recent_videos";
 import { Preferences } from "../lib/types";
 
-const { griditemsize, showRecentVideos } = getPreferenceValues<Preferences>();
-
 export function SearchVideoList({ channelId, searchQuery }: { channelId?: string; searchQuery?: string | undefined }) {
+  const { griditemsize, showRecentVideos } = getPreferenceValues<Preferences>();
   const [searchText, setSearchText] = useState<string>(searchQuery || "");
   const { data, error, isLoading } = useRefresher<Video[] | undefined>(
     async () => (searchText ? await searchVideos(searchText, channelId) : undefined),
