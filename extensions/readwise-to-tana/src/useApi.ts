@@ -15,6 +15,11 @@ export type Book = {
   title: string
 }
 
+type Tag = {
+  id: number
+  name: string
+}
+
 export type Highlight = {
   color?: string
   highlighted_at?: string | null
@@ -22,6 +27,7 @@ export type Highlight = {
   location?: string
   location_type?: string
   note?: string
+  tags: Tag[]
   text: string
   updated: string
   url?: string | null

@@ -59,8 +59,6 @@ export default function Book({ id, template }: BookProps) {
     })),
   })
 
-  console.log(allHighlights)
-
   const handleCopyAll = async () => {
     const currentTime = new Date().toISOString()
     const ids = highlights.map(({ id }) => id)
