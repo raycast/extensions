@@ -8,7 +8,7 @@ export type AuthValues = {
 export type Preferences = {
   redmineUrl: string;
   redmineApiKey: string;
-}
+};
 
 export type Project = {
   id: number;
