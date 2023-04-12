@@ -85,9 +85,11 @@ export default function Command() {
     highlights += highlightLocation
       ? `{{#if location}}\n    - ${highlightLocation}:: {{location}}{{/if}}`
       : ''
+    highlights += '\n{{#each note}}'
     highlights += highlightNote
-      ? `{{#if note}}\n    - ${highlightNote}:: {{note}}{{/if}}`
-      : '{{#if note}}\n    - **Note:** {{note}}{{/if}}'
+      ? `{{#if this}}    - ${highlightNote}:: {{this}}{{/if}}`
+      : '{{#if this}}    - {{this}}{{/if}}'
+    highlights += '\n{{/each}}'
     highlights += highlightUpdatedAt
       ? `{{#if updated}}\n    - ${highlightUpdatedAt}:: [[{{updated}}]]{{/if}}`
       : ''

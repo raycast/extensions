@@ -30,7 +30,7 @@ type SettingsProps = {
 
 export default function Settings({ handleSave, template }: SettingsProps) {
   const h = Handlebars.compile(template)
-  const output = h({
+  const exampleBook = {
     author: 'Sönke Ahrens',
     category: 'book',
     cover_image_url: 'https://example.com/image.png',
@@ -51,8 +51,17 @@ export default function Settings({ handleSave, template }: SettingsProps) {
         note: 'This is a note',
         id: 2,
       },
-    ],
-  } as Book & { highlights: Highlight[] })
+      {
+        text: 'Highlight with a multiline note',
+        note: 'This is a note\n\nwith multiple lines',
+        id: 3,
+      },
+    ].map((highlight) => ({
+      ...highlight,
+      note: highlight.note?.split('\n').filter((line) => line) ?? [],
+    })),
+  }
+  const output = h(exampleBook)
 
   return (
     <Form
@@ -111,7 +120,7 @@ export default function Settings({ handleSave, template }: SettingsProps) {
       <Form.TextField
         id="highlightNote"
         title="Note"
-        info="A child node with '**Note:** {{note}}' will be added if this is omitted"
+        info="If this is omitted the note will be added as a child node of the highlight."
         storeValue
       />
       <Form.TextField id="highlightColor" title="Color" storeValue />

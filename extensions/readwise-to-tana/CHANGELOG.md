@@ -3,6 +3,7 @@
 ## [Add supertags depending on source category] - 2023-04-12
 
 - Fix: Handle unparsed apostrophes in titles when copying, for example "What&#39;s" -> "What's".
+- Fix: Multiline notes should be handled better and remove the unnecessary extra "Note:" child.
 - Fix: We only fetched the first 100 highlights, so if you had more, they weren't included in the copy. To ensure all highlights are captured, fetch up to 1000 (Readwise's max page size).
 
 ## [Add URL mapping for highlights] - 2023-03-15
