@@ -34,12 +34,12 @@ export function TransactionItem({ transaction, initiator, actions }: Props) {
 
   const initiatorIcon = initiator
     ? {
-      icon: getAvatarIcon(`${initiator.first_name} ${initiator.last_name}`, {
-        background: "#555555",
-        gradient: false,
-      }),
-      tooltip: `Made by ${initiator.first_name} ${initiator.last_name}`,
-    }
+        icon: getAvatarIcon(`${initiator.first_name} ${initiator.last_name}`, {
+          background: "#555555",
+          gradient: false,
+        }),
+        tooltip: `Made by ${initiator.first_name} ${initiator.last_name}`,
+      }
     : null;
 
   const noteIcon = transaction.note ? { icon: Icon.Document, tooltip: transaction.note } : null;
