@@ -5,8 +5,13 @@
   "description": "Run any of the Shifts for Laravel, Lumen, PHP, Django, and Tailwind completely locally using Raycast.",
   "icon": "command-icon.png",
   "author": "denniseilander",
-  "contributors": ["pernielsentikaer"],
-  "categories": ["Developer Tools", "Productivity"],
+  "contributors": [
+    "pernielsentikaer"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
   "license": "MIT",
   "commands": [
     {
