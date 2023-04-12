@@ -95,6 +95,7 @@ export default class HueClient {
   ) {
     function getCertificate(host: string): Promise<tls.PeerCertificate> {
       return new Promise((resolve, reject) => {
+        console.log("Getting certificate for", host, "…");
         const socket = tls.connect(
           {
             host: host,
@@ -102,11 +103,13 @@ export default class HueClient {
             rejectUnauthorized: false,
           },
           () => {
+            console.log("Connection established, getting certificate…");
             resolve(socket.getPeerCertificate());
           }
         );
 
         socket.on("error", (error) => {
+          console.error("Error while getting certificate:", error);
           reject(error);
         });
       });
@@ -115,7 +118,9 @@ export default class HueClient {
     let cert: string | undefined;
     // TODO: Only do this if the certificate is self-signed
     const peerCertificate = await getCertificate(bridgeIpAddress);
+    console.log("Peer certificate:", peerCertificate);
     if (peerCertificate.issuer.CN === bridgeId.toLowerCase()) {
+      console.log(`Certificate belongs to Hue Bridge with id "${bridgeId}", converting to PEM format…`);
       const insertNewlines = (str: string): string => {
         const regex = new RegExp(`(.{64})`, "g");
         return str.replace(regex, "$1\n");
@@ -124,6 +129,11 @@ export default class HueClient {
       cert = `-----BEGIN CERTIFICATE-----\n${insertNewlines(base64)}\n-----END CERTIFICATE-----\n`;
     }
 
+    if (cert) {
+      console.log("Connecting to Hue Bridge using self-signed certificate…");
+    } else {
+      console.log("Connecting to Hue Bridge and checking it's certificate against the Hue Bridge root CA…");
+    }
     const http2Session = await new Promise<ClientHttp2Session>((resolve, reject) => {
       // Connect to the Hue Bridge using the Bridge ID as the hostname, which we then resolve to the Bridge IP address.
       const session = connect(`https://${bridgeId}`, {
@@ -163,7 +173,7 @@ export default class HueClient {
            * the bridgeId and check the certificate against the Hue Bridge Root CA.
            */
           if (cert.subject.CN === bridgeId.toLowerCase() && cert.issuer.CN === "root-bridge") {
-            tls.checkServerIdentity(hostname, cert);
+            return undefined;
           } else {
             return new Error(
               "Server identity check failed. Certificate subject’s Common Name does not match bridgeId " +
