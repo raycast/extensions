@@ -103,6 +103,16 @@ export default function Book({ id, template }: BookProps) {
     setLastSynced(currentTime)
   }
 
+  const clearSyncHistory = async () => {
+    const ids = highlights.map(({ id }) => id)
+
+    for (const id of ids) {
+      await LocalStorage.removeItem(id.toString())
+    }
+
+    setSyncedItems({})
+  }
+
   return (
     <List
       navigationTitle={cleanTitle(book.title)}
@@ -118,6 +128,7 @@ export default function Book({ id, template }: BookProps) {
             key={highlight.id}
             allHighlights={allHighlights}
             allUnsyncedHighlights={allUnsyncedHighlights}
+            clearSyncHistory={clearSyncHistory}
             highlight={highlight}
             handleCopyAll={handleCopyAll}
             handleCopyUnsynced={handleCopyUnsynced}
