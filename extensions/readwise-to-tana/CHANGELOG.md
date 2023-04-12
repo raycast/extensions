@@ -2,10 +2,12 @@
 
 ## [Add supertags depending on source category and highlight tags] - 2023-04-12
 
+- Add ability to set different supertags for articles, books, podcasts, supplementals, and tweets.
 - Display and export highlight tags
 - Fix: Handle unparsed apostrophes in titles when copying, for example "What&#39;s" -> "What's".
 - Fix: Multiline notes should be handled better and remove the unnecessary extra "Note:" child.
 - Fix: We only fetched the first 100 highlights, so if you had more, they weren't included in the copy. To ensure all highlights are captured, fetch up to 1000 (Readwise's max page size).
+- **Important:** Re-save your current template to include the new template features.
 
 ## [Add URL mapping for highlights] - 2023-03-15
 

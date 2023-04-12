@@ -53,15 +53,41 @@ export default function Command() {
       id,
       readwiseUrl,
       source,
-      supertag,
+      articleSupertag,
+      bookSupertag,
+      podcastSupertag,
+      supplementalSupertag,
+      tweetSupertag,
       title,
       url,
     } = values
     let t = '%%tana%%'
 
-    t += supertag
-      ? `\n- {{title}} #${supertag.replaceAll('#', '')}`
+    t += '{{#ifeq category "articles"}}'
+    t += articleSupertag
+      ? `\n- {{title}} #${articleSupertag.replaceAll('#', '')}`
       : '\n- {{title}}'
+    t += '{{/ifeq}}'
+    t += '{{#ifeq category "books"}}'
+    t += bookSupertag
+      ? `\n- {{title}} #${bookSupertag.replaceAll('#', '')}`
+      : '\n- {{title}}'
+    t += '{{/ifeq}}'
+    t += '{{#ifeq category "podcasts"}}'
+    t += podcastSupertag
+      ? `\n- {{title}} #${podcastSupertag.replaceAll('#', '')}`
+      : '\n- {{title}}'
+    t += '{{/ifeq}}'
+    t += '{{#ifeq category "supplementals"}}'
+    t += supplementalSupertag
+      ? `\n- {{title}} #${supplementalSupertag.replaceAll('#', '')}`
+      : '\n- {{title}}'
+    t += '{{/ifeq}}'
+    t += '{{#ifeq category "tweets"}}'
+    t += tweetSupertag
+      ? `\n- {{title}} #${tweetSupertag.replaceAll('#', '')}`
+      : '\n- {{title}}'
+    t += '{{/ifeq}}'
 
     t += author
       ? `\n  - ${author}:: {{author}}${

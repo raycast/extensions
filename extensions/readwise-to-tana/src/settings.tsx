@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Form } from '@raycast/api'
 import Handlebars from 'handlebars'
+import { ifeq } from './helpers'
 
 export type SettingsValues = {
   author: string
@@ -17,7 +18,11 @@ export type SettingsValues = {
   id: string
   readwiseUrl: string
   source: string
-  supertag: string
+  articleSupertag: string
+  bookSupertag: string
+  podcastSupertag: string
+  supplementalSupertag: string
+  tweetSupertag: string
   template: string
   title: string
   url: string
@@ -32,7 +37,7 @@ export default function Settings({ handleSave, template }: SettingsProps) {
   const h = Handlebars.compile(template)
   const exampleBook = {
     author: 'Sönke Ahrens',
-    category: 'book',
+    category: 'books',
     cover_image_url: 'https://example.com/image.png',
     id: '1',
     num_highlights: 2,
@@ -68,7 +73,11 @@ export default function Settings({ handleSave, template }: SettingsProps) {
       tags: highlight.tags?.map((tag) => tag.name).join(', ') ?? [],
     })),
   }
-  const output = h(exampleBook)
+  const output = h(exampleBook, {
+    helpers: {
+      ifeq,
+    },
+  })
 
   return (
     <Form
@@ -83,8 +92,32 @@ export default function Settings({ handleSave, template }: SettingsProps) {
         text="Readwise fields -> Tana fields (leave blank to omit from output). The name of the node will always be the source's title."
       />
       <Form.TextField
-        id="supertag"
-        title="Supertag"
+        id="articleSupertag"
+        title="Article Supertag"
+        info="# can be omitted"
+        storeValue
+      />
+      <Form.TextField
+        id="bookSupertag"
+        title="Book Supertag"
+        info="# can be omitted"
+        storeValue
+      />
+      <Form.TextField
+        id="podcastSupertag"
+        title="Podcast Supertag"
+        info="# can be omitted"
+        storeValue
+      />
+      <Form.TextField
+        id="supplementalSupertag"
+        title="Supplemental Supertag"
+        info="# can be omitted"
+        storeValue
+      />
+      <Form.TextField
+        id="tweetSupertag"
+        title="Tweet Supertag"
         info="# can be omitted"
         storeValue
       />
