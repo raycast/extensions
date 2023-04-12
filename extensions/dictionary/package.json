@@ -38,7 +38,7 @@
       "name": "googlapiKey",
       "type": "password",
       "required": false,
-      "description": "It's for using Google Translation Api only.",
+      "description": "The API key to use the Google Translation API",
       "title": "Google Api key [optional]"
     },
     {
