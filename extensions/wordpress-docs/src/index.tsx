@@ -6,15 +6,9 @@ import { ActionPanel, Action, List, Icon } from "@raycast/api";
 export default function Command() {
   const [searchText, setSearchText] = useState("");
 
-  if (searchText.length === 0) {
-    // Don't fire search if query is empty
-    // https://github.com/rhubarbgroup/raycast-wordpress-docs/issues/1
-  }
-
-  const query = searchText.length === 0 ? "get_" : searchText;
-
-  const { data, isLoading } = useFetch(`https://developer.wordpress.org/search/${query}/feed/rss/`, {
+  const { data, isLoading } = useFetch(`https://developer.wordpress.org/search/${searchText}/feed/rss/`, {
     parseResponse: parseFetchResponse,
+    execute: searchText.length > 0,
   });
 
   return (
@@ -24,11 +18,15 @@ export default function Command() {
       searchBarPlaceholder="Search WordPress code reference..."
       throttle
     >
-      <List.Section title="Results" subtitle={data?.length + ""}>
-        {data?.map((searchResult: SearchResult) => (
-          <SearchListItem key={searchResult.name} searchResult={searchResult} />
-        ))}
-      </List.Section>
+      {searchText.length > 0 ? (
+        <List.Section title="Results" subtitle={data?.length + ""}>
+          {data?.map((searchResult: SearchResult) => (
+            <SearchListItem key={searchResult.name} searchResult={searchResult} />
+          ))}
+        </List.Section>
+      ) : (
+        <List.EmptyView title={"Type to search"} />
+      )}
     </List>
   );
 }
