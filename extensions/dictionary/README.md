@@ -20,5 +20,4 @@ Search any word with multiple online dictionaries or translation engines in one 
 
 ## Feedback & Contributing
 
-Have Questions, feature requests and bug reports? please leave your feedback.
-Additionally, the extension is designed to be scalable, modular and easily adaptable. Welcome to contribute by adding new dictionary services or enhancing existing features.
+Do you have questions, feature requests, or bug reports? Please leave your feedback. Additionally, the extension is designed to be scalable, modular, and easily adaptable. We welcome contributions by adding new dictionary services or enhancing existing features.
