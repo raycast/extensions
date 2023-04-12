@@ -101,7 +101,7 @@ function Projects() {
                   />
 
                   <Action
-                    title={project.isFavorite ? "Remove from Favorites" : "Add to Favorites"}
+                    title={project.isFavorite ? "Remove From Favorites" : "Add to Favorites"}
                     icon={Icon.Star}
                     shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
                     onAction={() => toggleFavorite(project)}
