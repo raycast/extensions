@@ -104,13 +104,15 @@ export default class HueClient {
            * Source: https://developers.meethue.com/develop/application-design-guidance/using-https/#Self-signed%20certificates
            */
           if (cert.issuer.CN === bridgeId.toLowerCase() && cert.subject.CN === bridgeId.toLowerCase()) {
-            if (bridgeCertFingerprint !== undefined && bridgeCertFingerprint !== cert.fingerprint) {
-              return new Error(
-                "Server identity check failed. Fingerprint does not match known fingerprint. " +
-                  "If you trust this certificate, please unlink and relink your Bridge."
-              );
-            } else {
+            if (bridgeCertFingerprint === undefined) {
               LocalStorage.setItem(BRIDGE_CERT_FINGERPRINT, cert.fingerprint);
+            } else {
+              if (bridgeCertFingerprint !== cert.fingerprint) {
+                return new Error(
+                  "Server identity check failed. Fingerprint does not match known fingerprint. " +
+                    "If you trust this certificate, please unlink and relink your Bridge."
+                );
+              }
             }
 
             // Certificate is deemed valid, even though it is self-signed.

@@ -70,6 +70,7 @@ export default function hueBridgeMachine(
               LocalStorage.getItem<string>(BRIDGE_CERT_FINGERPRINT),
             ]);
 
+            // Bridge certificate fingerprint is only required for Bridges with self-signed certificates
             if (bridgeIpAddress === undefined || bridgeId === undefined || bridgeUsername === undefined) {
               throw Error("No Hue Bridge credentials found");
             }
