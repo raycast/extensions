@@ -29,7 +29,7 @@
     {
       "name": "fromSelected",
       "title": "Search From Crsor Selection",
-      "description": "search your current cursor selected words.",
+      "description": "Search your current cursor-selected words.",
       "mode": "view"
     }
   ],
