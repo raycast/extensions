@@ -8,6 +8,7 @@ import {
   getPreferenceValues,
   Icon,
   openExtensionPreferences,
+  popToRoot,
   showHUD,
   showToast,
   Toast,
@@ -43,7 +44,10 @@ export function GenerateCommandForm(): JSX.Element {
             title="Open Preferences"
             shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
             icon={Icon.Gear}
-            onAction={() => openExtensionPreferences()}
+            onAction={() => {
+              openExtensionPreferences();
+              popToRoot();
+            }}
           />
         </ActionPanel>
       }
