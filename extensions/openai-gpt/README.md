@@ -1,15 +1,15 @@
-# OpenAI GPT3
+# OpenAI GPT
 
 <p align="center">
    <img src="assets/openai-logo.png" height="128">
-   <h1 align="center">OpenAI GPT3</h1>
+   <h1 align="center">OpenAI GPT</h1>
  </p>
 
 ## Overview
 
-A [Raycast](https://raycast.com/) extension that lets you interact with [OpenAI GPT3](https://beta.openai.com/).
+A [Raycast](https://raycast.com/) extension that lets you interact with [OpenAI GPT](https://platform.openai.com/).
 
-Warning: Please comply with the [OpenAI Content policy](https://beta.openai.com/docs/usage-guidelines/content-policy) while using this extension.
+Warning: Please comply with the [OpenAI Usage Policy](https://openai.com/policies/usage-policies) while using this extension.
 
 To use this extension, you must have an OpenAI API account, obtain your API key, and add it during the extension configuration screen.
 
@@ -19,13 +19,13 @@ The interface of the extension follows the interface of the OpenAI Playground.
 
 ## Actions
 
-`Send Prompt`: send entered prompt to GPT3.
+`Send Prompt`: send entered prompt to GPT.
 
-`Copy Answer to Clipboard`: copy the last answer from GPT3 to the system's clipboard.
+`Copy Answer to Clipboard`: copy the last answer from GPT to the system's clipboard.
 
-`Load an Example`: load an example of GPT3 usage into your prompt. Examples are taken from the OpenAI website.
+`Load an Example`: load an example of GPT usage into your prompt. Examples are taken from the OpenAI website.
 
-`Check Examples on OpenAI Website`: open a browser and go to [OpenAI Example Page](https://beta.openai.com/examples).
+`Check Examples on OpenAI Website`: open a browser and go to [OpenAI Example Page](https://platform.openai.com/examples).
 
 `Change API Key`: open Raycast extension preference where you can change the API key.
 
@@ -33,7 +33,7 @@ The interface of the extension follows the interface of the OpenAI Playground.
 
 You can set different parameters for the AI model:
 
-`AI Model`: type of the model you want to use. `text-davinci-003` is the most powerful one for now.
+`AI Model`: type of the model you want to use. `gpt-4` is the most powerful one for now, but `gpt-3.5-turbo` is cheaper, faster, and almost as capable.
 
 `Temperature`: controls randomness of the AI model. The lower it is, the less random (and "creative") the results will be.
 
@@ -47,14 +47,13 @@ You can set different parameters for the AI model:
 
 ### Supported AI Models
 
-1. `gpt-3.5-turbo`
-2. `text-davinci-003`
-3. `text-davinci-002`
-4. `text-curie-001`
-5. `text-babbage-001`
-6. `text-ada-001`
-7. `code-davinci-002`
-8. `code-cushman-001`
+1. `gpt-4`
+2. `gpt-3.5-turbo`
+3. `text-davinci-003`
+4. `text-davinci-002`
+5. `text-curie-001`
+6. `text-babbage-001`
+7. `text-ada-001`
 
 ## Token Count
 

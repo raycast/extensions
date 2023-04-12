@@ -46,11 +46,10 @@ const configuration = new Configuration({
 const openai = new OpenAIApi(configuration);
 
 export default function Command() {
+  const maxTokensGPT4 = 8192;
   const maxTokensGPT35Turbo = 4096;
   const maxTokensDavinci = 4000;
   const maxTokensAdaBabbageCurie = 2048;
-  const maxTokensCodex = 8000;
-  const maxTokensCushman = 2048;
   const [textPrompt, setTextPrompt] = useState("");
   const [answer, setAnswer] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -65,14 +64,13 @@ export default function Command() {
   const [maxModelTokens, setMaxModelTokens] = useState<number>(maxTokensDavinci);
 
   const modelLimit = {} as modelTokenLimit;
+  modelLimit["gpt-4"] = maxTokensGPT4;
   modelLimit["gpt-3.5-turbo"] = maxTokensGPT35Turbo;
   modelLimit["text-davinci-003"] = maxTokensDavinci;
   modelLimit["text-davinci-002"] = maxTokensDavinci;
   modelLimit["text-curie-001"] = maxTokensAdaBabbageCurie;
   modelLimit["text-babbage-001"] = maxTokensAdaBabbageCurie;
   modelLimit["text-ada-001"] = maxTokensAdaBabbageCurie;
-  modelLimit["code-davinci-002"] = maxTokensCodex;
-  modelLimit["code-cushman-001"] = maxTokensCushman;
 
   function dropPromptErrorIfNeeded() {
     if (promptError && promptError.length > 0) {
@@ -122,14 +120,13 @@ export default function Command() {
     setIsLoading(true);
     try {
       const completion: gptCompletion =
-        formRequest.model === "gpt-3.5-turbo"
+        formRequest.model === "gpt-3.5-turbo" || formRequest.model === "gpt-4"
           ? await openai.createChatCompletion({
               model: formRequest.model,
               messages: [
                 {
                   role: "user",
                   content: formRequest.prompt,
-                  name: "You",
                 },
               ],
               temperature: Number(formRequest.temperature),
@@ -149,8 +146,8 @@ export default function Command() {
             });
       await showToast({ title: "Answer Received" });
       const response =
-        formRequest.model === "gpt-3.5-turbo"
-          ? completion.data.choices[0].message.content
+        formRequest.model === "gpt-3.5-turbo" || formRequest.model === "gpt-4"
+          ? `\n\n${completion.data.choices[0].message.content}`
           : completion.data.choices[0].text;
       setTextPrompt(textPrompt + response);
       setAnswer(response);
@@ -214,7 +211,7 @@ export default function Command() {
             <Action icon={Icon.Book} title="Classification" onAction={() => updatePromptAndTokens(example.classify)} />
             <Action icon={Icon.Book} title="Chat" onAction={() => updatePromptAndTokens(example.chat)} />
           </ActionPanel.Submenu>
-          <Action.OpenInBrowser title="Check Examples at OpenAI Website" url="https://beta.openai.com/examples" />
+          <Action.OpenInBrowser title="Check Examples at OpenAI Website" url="https://platform.openai.com/examples" />
           <Action title="Change API Key" icon={Icon.Key} onAction={() => openCommandPreferences()} />
         </ActionPanel>
       }
