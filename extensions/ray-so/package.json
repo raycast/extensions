@@ -4,20 +4,11 @@
   "title": "ray.so",
   "description": "Create beautiful images of your code using ray.so",
   "icon": "icon.png",
-  "author": "garrett",
+  "author": "billyjr",
   "contributors": [
-    "RSO",
-    "vette"
   ],
   "license": "MIT",
   "commands": [
-    {
-      "name": "create-a-snippet",
-      "title": "Create Image From Code",
-      "subtitle": "ray.so",
-      "description": "Use Ray.so to create beautiful images of your code",
-      "mode": "view"
-    },
     {
       "name": "generate-image",
       "title": "Generate Image",
@@ -26,12 +17,6 @@
       "mode": "no-view",
       "preferences": [
         {
-          "name": "theme",
-          "title": "Theme",
-          "type": "dropdown",
-          "required": false,
-          "description": "Change the background color",
-          "default": "candy",
           "data": [
             {
               "title": "Candy",
@@ -65,15 +50,15 @@
               "title": "Sunset",
               "value": "sunset"
             }
-          ]
+          ],
+          "default": "candy",
+          "description": "Change the background color",
+          "name": "theme",
+          "required": false,
+          "title": "Theme",
+          "type": "dropdown"
         },
         {
-          "name": "padding",
-          "title": "Padding",
-          "type": "dropdown",
-          "required": false,
-          "description": "Set the padding around the code",
-          "default": "64",
           "data": [
             {
               "title": "16",
@@ -91,34 +76,65 @@
               "title": "128",
               "value": "128"
             }
-          ]
+          ],
+          "default": "64",
+          "description": "Set the padding around the code",
+          "name": "padding",
+          "required": false,
+          "title": "Padding",
+          "type": "dropdown"
         },
         {
-          "name": "darkMode",
-          "title": "Dark Mode",
-          "type": "checkbox",
+          "default": true,
           "description": "Set the theme to light or dark mode",
+          "label": "Enabled",
+          "name": "darkMode",
           "required": false,
-          "default": true,
-          "label": "Enabled"
+          "title": "Dark Mode",
+          "type": "checkbox"
         },
         {
-          "name": "background",
-          "title": "Background",
-          "type": "checkbox",
-          "description": "Select whether you want a gradient background or not",
-          "required": false,
           "default": true,
-          "label": "Enabled"
+          "description": "Select whether you want a gradient background or not",
+          "label": "Enabled",
+          "name": "background",
+          "required": false,
+          "title": "Background",
+          "type": "checkbox"
+        },
+        {
+          "default": "http://192.168.5.145:5252",
+          "description": "Set the URL of the Ray.so instance you want to use",
+          "name": "raysoUrl",
+          "required": false,
+          "title": "Ray.so URL",
+          "type": "textfield"
+        },
+        {
+          "description": "Set the directory of the System username instance you want to use",
+          "name": "SystemDirectory",
+          "required": true,
+          "title": "System Directory",
+          "type": "directory"
+        },
+        {
+          "default": false,
+          "description": "Open Directory",
+          "label": "Enabled",
+          "name": "OpenDirectory",
+          "required": false,
+          "title": "Open Directory",
+          "type": "checkbox"
         }
       ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.25.3",
+    "@raycast/api": "^1.49.2",
+    "axios": "^1.3.5",
+    "crypto": "^1.0.1",
     "js-base64": "^3.7.2",
     "node-fetch": "^3.2.0",
-    "open": "^8.4.0",
     "run-applescript": "^6.0.0",
     "tempy": "^2.0.0",
     "url-safe-base64": "^1.1.1"
@@ -135,6 +151,7 @@
   },
   "scripts": {
     "build": "ray build -e dist",
-    "dev": "ray develop"
+    "dev": "ray develop",
+    "publish": "npx @raycast/api@latest publish"
   }
 }
