@@ -72,7 +72,7 @@
       "name": "closeAfterCopy",
       "title": "Close the window after copying the command",
       "label": "Enabled",
-      "description": "Close the window after copying the command",
+      "description": "Close Window After Copy",
       "type": "checkbox",
       "required": true,
       "default": false
