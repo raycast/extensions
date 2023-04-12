@@ -93,10 +93,41 @@ export default class HueClient {
     setZones?: React.Dispatch<React.SetStateAction<Zone[]>>,
     setScenes?: React.Dispatch<React.SetStateAction<Scene[]>>
   ) {
+    function getCertificate(host: string): Promise<tls.PeerCertificate> {
+      return new Promise((resolve, reject) => {
+        const socket = tls.connect(
+          {
+            host: host,
+            port: 443,
+            rejectUnauthorized: false,
+          },
+          () => {
+            resolve(socket.getPeerCertificate());
+          }
+        );
+
+        socket.on("error", (error) => {
+          reject(error);
+        });
+      });
+    }
+
+    let cert: string | undefined;
+    // TODO: Only do this if the certificate is self-signed
+    const peerCertificate = await getCertificate(bridgeIpAddress);
+    if (peerCertificate.issuer.CN === bridgeId.toLowerCase()) {
+      const insertNewlines = (str: string): string => {
+        const regex = new RegExp(`(.{64})`, "g");
+        return str.replace(regex, "$1\n");
+      };
+      const base64 = peerCertificate.raw.toString("base64");
+      cert = `-----BEGIN CERTIFICATE-----\n${insertNewlines(base64)}\n-----END CERTIFICATE-----\n`;
+    }
+
     const http2Session = await new Promise<ClientHttp2Session>((resolve, reject) => {
       // Connect to the Hue Bridge using the Bridge ID as the hostname, which we then resolve to the Bridge IP address.
       const session = connect(`https://${bridgeId}`, {
-        ca: fs.readFileSync(environment.assetsPath + "/huebridge_cacert.pem"),
+        ca: cert ? Buffer.from(cert, "utf-8") : fs.readFileSync(environment.assetsPath + "/huebridge_cacert.pem"),
         checkServerIdentity: (hostname, cert) => {
           /*
            * If both the certificate issuer’s Common Name field, and the certificate subject’s Common Name field are
