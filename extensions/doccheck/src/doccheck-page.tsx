@@ -9,11 +9,12 @@ import { NodeHtmlMarkdown } from "node-html-markdown";
 const preferences = getPreferenceValues();
 
 export default function DocCheckPage(props: { url: string; prevurl: string; query: string }) {
-  const prevtitle = decodeURI(props.prevurl?.split("/")?.pop())?.replace(/_/gm, " ") ?? "";
-  const urlTitle =
-    decodeURI(props.url?.split("/")?.pop())
-      ?.replace(/_/gm, " ")
-      ?.replace(/.*\?title=(.*?)&.*/gm, `$1: Hier fehlt dein Wissen! Schreib diesen Artikel...`) ?? "";
+  const prevUrlArray = props.prevurl?.split("/");
+  const prevtitle = decodeURI(prevUrlArray?.pop() ?? "").replace(/_/gm, " ");
+  const urlArray = props.url?.split("/");
+  const urlTitle = decodeURI(urlArray?.pop() ?? "")
+    .replace(/_/gm, " ")
+    .replace(/.*\?title=(.*?)&.*/gm, `$1: Hier fehlt dein Wissen! Schreib diesen Artikel...`);
 
   const [searchText, setSearchText] = useState("");
   const { isLoading, data } = useFetch(props.url, {
