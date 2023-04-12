@@ -113,7 +113,7 @@ export default function DocCheckPage(props: { url: string; prevurl: string; quer
         queryText +
         "](" +
         "raycast://extensions/spacedog/doccheck/doccheck-flexikon?fallbackText=" +
-        query +
+        encodeURI(query) +
         ")";
   markdown +=
     "\n" +
