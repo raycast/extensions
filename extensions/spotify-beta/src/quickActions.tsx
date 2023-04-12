@@ -68,7 +68,7 @@ function QuickActionsCommand(props: Props) {
   const { currentlyPlayingData, currentlyPlayingRevalidate } = useCurrentlyPlaying();
   const { playbackStateData, playbackStateRevalidate } = usePlaybackState();
   const nothingIsPlaying = !currentlyPlayingData || !currentlyPlayingData?.item;
-  const isPlaying = currentlyPlayingData?.is_playing;
+  const isPlaying = playbackStateData?.is_playing;
   const isTrack = currentlyPlayingData?.currently_playing_type !== "episode";
   const trackId = currentlyPlayingData?.item?.id;
 
@@ -129,7 +129,7 @@ function QuickActionsCommand(props: Props) {
         if (isPlaying) {
           try {
             await pause();
-            await currentlyPlayingRevalidate();
+            await playbackStateRevalidate();
             await showHUD("Paused");
           } catch (err) {
             const error = getError(err);
@@ -138,7 +138,7 @@ function QuickActionsCommand(props: Props) {
         } else {
           try {
             await play();
-            await currentlyPlayingRevalidate();
+            await playbackStateRevalidate();
             await showHUD("Playing");
           } catch (err) {
             const error = getError(err);
