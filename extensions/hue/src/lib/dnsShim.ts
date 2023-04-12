@@ -21,7 +21,9 @@ dns.lookup = async (
   ]);
 
   if (hostname.toLowerCase() === bridgeId?.toLowerCase() && bridgeIpAddress !== undefined) {
-    console.log(`Overriding DNS lookup for ${hostname} to ${bridgeIpAddress}`);
+    console.log(
+      `Overriding DNS lookup for host name "${hostname}" (Bridge ID) to ${bridgeIpAddress} to avoid TLS ServerName IP warning.`
+    );
     callback(null, bridgeIpAddress, 4);
   } else {
     dnsLookup(hostname, options, callback);

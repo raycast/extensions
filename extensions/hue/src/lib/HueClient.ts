@@ -105,6 +105,7 @@ export default class HueClient {
            */
           if (cert.issuer.CN === bridgeId.toLowerCase() && cert.subject.CN === bridgeId.toLowerCase()) {
             if (bridgeCertFingerprint === undefined) {
+              console.log("Self-signed Hue Bridge certificate detected. Storing fingerprint for future connections.");
               LocalStorage.setItem(BRIDGE_CERT_FINGERPRINT, cert.fingerprint);
             } else {
               if (bridgeCertFingerprint !== cert.fingerprint) {
@@ -113,6 +114,7 @@ export default class HueClient {
                     "If you trust this certificate, please unlink and relink your Bridge."
                 );
               }
+              console.log("Fingerprint matches known fingerprint. Continuing connection.");
             }
 
             // Certificate is deemed valid, even though it is self-signed.
