@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "dictionary",
   "title": "Web Dictionaries",
-  "description": "Search any words with multiple online dictionaries or translation engines in one place -- lightweight, zero dependencies.",
+  "description": "Search any word with multiple online dictionaries or translation engines in one place—lightweight, zero dependencies.",
   "icon": "icon.png",
   "author": "DrChai",
   "categories": [
