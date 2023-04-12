@@ -39,7 +39,7 @@
       "type": "password",
       "required": false,
       "description": "The API key to use the Google Translation API",
-      "title": "Google Api key [optional]"
+      "title": "Google API key"
     },
     {
       "name": "youdaoapiKey",
