@@ -61,16 +61,7 @@
           "title": "Maximum text length",
           "description": "Maximum number of characters to show. If left empty, it defaults to 30",
           "type": "textfield",
-          "default": "30",
-          "required": false
-        },
-        {
-          "name": "showEllipsis",
-          "title": "Show ellipsis if title is too long",
-          "description": "If the title is longer than the maximum length, show an ellipsis",
-          "type": "checkbox",
-          "label": "Enabled",
-          "default": true,
+          "default": "20",
           "required": false
         }
       ]

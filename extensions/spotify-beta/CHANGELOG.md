@@ -1,6 +1,6 @@
 # Spotify Player Changelog
 
-## [Version 2] - 2023-03-27
+## [Version 2] - 2023-04-12
 
 ### Spotify Player v2
 
@@ -8,23 +8,22 @@ Spotify Player first launched in October 2021. It was one of our first extension
 
 So now it's time for a refresher ✨
 
-Spotify Player v2 is a complete re-write, focusing on performance, maintainability, and user experience. One of our main goals was to keep the list of commands to a minimum but still allow users to tailor their own experience. This way, both new users of Raycast, as well as more advanced ones, can make the most of Spotify Player.
+Spotify Beta is a complete re-write, focusing on performance, maintainability, and user experience. One of our main goals was to keep the list of commands to a minimum but still allow users to tailor their own experience. This way, both new users of Raycast, as well as more advanced ones, can make the most of Spotify Player.
+
+#### New Features
+
+- Updated Extension icon
+- Updated Menu Bar icon
+- Support Podcasts and Episodes in "Now Playing"/"Menu Bar Player"
+- Support Podcasts and Episodes in "Search"/"Your Library"
+- Support "Transfer Playback" action, available in "Now Playing"/"Menu Bar Player"
+- Support "Add to Playlist" action, available in "Now Playing"/"Menu Bar Player"
 
 #### New Commands
 
 - **Search:** A single unified search command. Use this to search for artists, albums, songs, playlists, podcasts, and episodes. Use the dropdown menu to filter your search to a specific category. Each category offers contextual actions, so you can dive deeper into the search.
 - **Your Library:** Use this to see your saved artists, albums, songs, playlists, and podcasts. Similar to the "Search" command, it includes a category dropdown and contextual actions.
 - **Quick Actions:** This is a list of lots of Spotify actions. For example: Play/Pause, Like/Dislike current song, Change Volume, and more. If you'd like to have any of these available as a Root Command, you can create Quicklinks via the actions menu (⌘ K).
-
-#### New Features
-
-- Extension icon
-- Menu Bar icon
-- "Transfer Playback" action, available in "Now Playing"/"Menu Bar Player"
-- "Add to Playlist" action, available in "Now Playing"/"Menu Bar Player"
-- Support Podcasts and Episodes in "Now Playing"/"Menu Bar Player"
-- Support searching for Podcasts and Episodes
-- "Max Title Length" now has a default value of 30
 
 #### Removed Commands
 
@@ -39,6 +38,11 @@ Spotify Player v2 is a complete re-write, focusing on performance, maintainabili
 - **Dislike Current Song:** Available as an action under "Now Playing"/"Menu Bar Player" or in "Quick Actions"
 - **Browse All:** Use the Spotify App instead
 - **Featured Playlists:** Use the Spotify App instead
+
+#### General improvements
+
+- Menu Bar Player Preferences: "Max Text Length" has a default value of 20
+- Menu Bar Player Preferences: "showEllipsis" setting has been removed. It'll always show ellipsis if the title needs to be truncated (based on the "Max Text Length" setting)
 
 We hope you enjoy the new and improved Spotify Player Extension — we've [obsessed over every detail](https://twitter.com/peduarte/status/1638101325312577536).
 

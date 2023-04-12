@@ -45,7 +45,6 @@ In order to use this extension, you'll need to authenticate with Spotify. This e
 
 ---
 
-To do
+Still to do
 
 - [ ] Paginate views (artists, songs, albums, playlists, podcasts, episodes, etc.)
-- [ ] Prioritise AppleScript (when possible) if Spotify is running

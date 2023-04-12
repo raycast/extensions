@@ -160,7 +160,7 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
     <MenuBarExtra
       isLoading={currentlyPlayingIsLoading || currentlyPlayingUriIsLoading || playbackStateIsLoading}
       icon={{ source: { dark: "menu-icon-dark.svg", light: "menu-icon-light.svg" } }}
-      title={formatTitle(title, Number(preferences.maxTextLength), preferences.showEllipsis)}
+      title={formatTitle(title, Number(preferences.maxTextLength))}
       tooltip={title}
     >
       {isPlaying && (

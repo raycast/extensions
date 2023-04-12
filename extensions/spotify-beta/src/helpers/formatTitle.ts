@@ -1,4 +1,4 @@
-export function formatTitle(title: string, max: number, showEllipsis = false) {
+export function formatTitle(title: string, max: number, showEllipsis = true) {
   if (Number.isNaN(max) || max < 0 || title.length <= max) {
     return title;
   }
