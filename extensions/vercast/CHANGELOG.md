@@ -1,6 +1,6 @@
 # Vercast Changelog
 
-## [2.4] - 2023-03-28
+## [2.4] - 2023-04-12
 
 - Fixed persistency of the selected team
 
