@@ -29,7 +29,7 @@ import Chain from "stream-chain";
 import "./arrayExtensions";
 import * as tls from "tls";
 import { BRIDGE_CERT_FINGERPRINT } from "./constants";
-import "./dnsShim";
+import dns from "dns";
 
 const DATA_PREFIX = "data: ";
 const CONNECTION_TIMEOUT_MS = 5000;
@@ -94,6 +94,7 @@ export default class HueClient {
     setScenes?: React.Dispatch<React.SetStateAction<Scene[]>>
   ) {
     const http2Session = await new Promise<ClientHttp2Session>((resolve, reject) => {
+      // Connect to the Hue Bridge using the Bridge ID as the hostname, which we then resolve to the Bridge IP address.
       const session = connect(`https://${bridgeId}`, {
         ca: fs.readFileSync(environment.assetsPath + "/philips-hue-cert.pem"),
         checkServerIdentity: (hostname, cert) => {
@@ -121,7 +122,7 @@ export default class HueClient {
             return undefined;
           }
 
-          /**
+          /*
            * In case of a more up-to-date firmware version, we need to check the certificate’s Common Name field against
            * the bridgeId and check the certificate against the Hue Bridge Root CA.
            */
@@ -132,6 +133,20 @@ export default class HueClient {
               "Server identity check failed. Certificate subject’s Common Name does not match bridgeId " +
                 "or certificate issuer’s Common Name does not match “root-bridge”."
             );
+          }
+        },
+        lookup: (hostname, options, callback) => {
+          /*
+           * Resolve the Bridge ID to the Bridge IP address to prevent the following warning:
+           * [DEP0123] DeprecationWarning: Setting the TLS ServerName to an IP address is not permitted by RFC 6066.
+           */
+          if (hostname.toLowerCase() === bridgeId?.toLowerCase() && bridgeIpAddress !== undefined) {
+            console.log(
+              `Overriding DNS lookup for host name "${hostname}" (Bridge ID) to ${bridgeIpAddress} to avoid TLS ServerName IP warning.`
+            );
+            callback(null, bridgeIpAddress, 4);
+          } else {
+            dns.lookup(hostname, options, callback);
           }
         },
       });
