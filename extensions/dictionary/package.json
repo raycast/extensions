@@ -15,7 +15,7 @@
     {
       "name": "fromCmd",
       "title": "Search in Dictionaries",
-      "description": "Search any words with multiple online dictionaries",
+      "description": "Search any word with multiple online dictionaries.",
       "mode": "view",
       "arguments": [
         {
