@@ -7,8 +7,9 @@ export const LOCAL_STORAGE_KEY = {
   PASSWORD_ONE_TIME_WARNING: "bw-generate-password-warning-accepted",
   SESSION_TOKEN: "sessionToken",
   REPROMPT_HASH: "sessionRepromptHash",
-  REPROMPT_PASSWORD_ENTERED: "sessionRepromptAfter",
   SERVER_URL: "cliServer",
+  LAST_ACTIVITY_TIME: "lastActivityTime",
+  VAULT_LOCK_REASON: "vaultLockReason",
 };
 
 export const ERRORS = {

@@ -1,7 +1,12 @@
 import { List, Color } from "@raycast/api";
 import { MutatePromise } from "@raycast/utils";
 
-import { getNotificationIcon, getNotificationSubtitle, getNotificationTooltip } from "../helpers/notifications";
+import {
+  getNotificationIcon,
+  getNotificationSubtitle,
+  getNotificationTooltip,
+  getNotificationTypeTitle,
+} from "../helpers/notifications";
 import { NotificationsResponse } from "../notifications";
 
 import NotificationActions from "./NotificationActions";
@@ -21,7 +26,10 @@ export default function NotificationListItem({ notification, userId, mutateList 
 
   return (
     <List.Item
-      icon={{ source: icon.value, tintColor: Color.PrimaryText }}
+      icon={{
+        value: { source: icon.value, tintColor: Color.PrimaryText },
+        tooltip: getNotificationTypeTitle(notification),
+      }}
       title={notification.subject.title}
       subtitle={getNotificationSubtitle(notification)}
       accessories={[

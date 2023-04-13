@@ -1,4 +1,4 @@
-import { ActionPanel, List, LocalStorage, confirmAlert, Icon, Alert } from "@raycast/api";
+import { ActionPanel, List, LocalStorage, confirmAlert, Icon, Alert, Action } from "@raycast/api";
 import { useCallback, useEffect, useState } from "react";
 import { Quest } from "./types";
 import CreateQuestAction from "./actions/createQuest";
@@ -6,11 +6,13 @@ import DeleteQuestAction from "./actions/deleteQuest";
 import StartQuestAction from "./actions/startQuest";
 import EditQuestAction from "./actions/editQuest";
 import CloseQuestAction from "./actions/closeQuest";
+import ShareQuestAction from "./actions/shareQuestAction";
 import EmptyView from "./components/emptyView";
 import { nanoid } from "nanoid";
 import { environment } from "@raycast/api";
 import exampleQuests from "./fixtures/exampleQuests";
 import { getProgressIcon } from "@raycast/utils";
+import { sharableQuest } from "./lib/util";
 
 type State = {
   isLoading: boolean;
@@ -102,6 +104,7 @@ export default function Command() {
                   </ActionPanel.Section>
                   <ActionPanel.Section title="Quest">
                     <EditQuestAction onCreate={handleCreate} quest={quest} />
+                    <ShareQuestAction quest={quest} />
                     <DeleteQuestAction onDelete={() => handleDelete(quest)} />
                   </ActionPanel.Section>
                   <ActionPanel.Section>
@@ -127,6 +130,7 @@ export default function Command() {
                   </ActionPanel.Section>
                   <ActionPanel.Section title="Quest">
                     <EditQuestAction onCreate={handleCreate} quest={quest} />
+                    <ShareQuestAction quest={quest} />
                     <DeleteQuestAction onDelete={() => handleDelete(quest)} />
                   </ActionPanel.Section>
                   <ActionPanel.Section>

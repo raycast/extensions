@@ -1,5 +1,22 @@
 # Changelog
 
+## 1.49.0 - 2023-03-29
+
+### ✨ New
+
+- It is now possible to drag and drop items from Grids. Lists are also supported if their items have as `quickLook` properties.
+
+### 💎 Improvements
+
+- Extend `launchCommand` to allow inter-extension launches
+- Extend `launchCommand` to allow to pass a `fallbackText`
+
+### 🐞 Fixes
+
+- **SVG**: Ignore doctype and HTML comments
+- Fix a flicker happening when there was a fallback text passed to a command
+- Fix a rendering issue with multi-line `tag` text.
+
 ## 1.48.0 - 2023-02-22
 
 ### ✨ New

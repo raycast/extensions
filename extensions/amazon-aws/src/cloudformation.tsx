@@ -9,7 +9,7 @@ import {
 } from "@aws-sdk/client-cloudformation";
 import { useCachedPromise } from "@raycast/utils";
 import AWSProfileDropdown from "./components/searchbar/aws-profile-dropdown";
-import { resourceToConsoleLink } from "./util";
+import { isReadyToFetch, resourceToConsoleLink } from "./util";
 
 export default function CloudFormation() {
   const { data: stacks, error, isLoading, revalidate } = useCachedPromise(fetchStacks);
@@ -83,7 +83,7 @@ function CloudFormationStackResources({ stackName }: { stackName: string }) {
 }
 
 async function fetchStacks(token?: string, stacks?: StackSummary[]): Promise<StackSummary[]> {
-  if (!process.env.AWS_PROFILE) return [];
+  if (!isReadyToFetch()) return [];
   const { NextToken, StackSummaries } = await new CloudFormationClient({}).send(
     new ListStacksCommand({ NextToken: token })
   );

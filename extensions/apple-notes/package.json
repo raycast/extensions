@@ -60,6 +60,15 @@
       "label": "Show the modification date next to each note",
       "description": "Show the modification date next to each note",
       "required": false
+    },
+    {
+      "name": "openSeparately",
+      "title": "Open notes separately",
+      "type": "checkbox",
+      "default": false,
+      "label": "Open notes in separate windows by default",
+      "description": "Use ⌘+return to open separately if turned off",
+      "required": false
     }
   ],
   "dependencies": {

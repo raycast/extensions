@@ -1,5 +1,9 @@
 # Trello Changelog
 
+## [Fix] - 2023-03-28
+
+- Fixed a bug in the endpoint.
+
 ## [Fix] - 2023-03-16
 
 Add fields missing that broke card creation action

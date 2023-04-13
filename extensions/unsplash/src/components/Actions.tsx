@@ -1,4 +1,6 @@
 import { ActionPanel, Icon, useNavigation, getPreferenceValues, Action } from "@raycast/api";
+import { likeOrDislike } from "@/functions/utils";
+import { useState } from "react";
 
 // Functions
 import { saveImage } from "@/functions/saveImage";
@@ -7,25 +9,33 @@ import { copyFileToClipboard } from "@/functions/copyFileToClipboard";
 
 // Components
 import Details from "@/views/Details";
-import React from "react";
 
 // Types
 interface BaseProps {
   item: SearchResult;
   details?: boolean;
+  unlike?: React.Dispatch<React.SetStateAction<string[]>>;
 }
 
-export const Actions: React.FC<BaseProps> = ({ details = false, item }) => (
+export const Actions = ({ details, item, unlike }: BaseProps) => (
   <ActionPanel>
-    <Sections details={details} item={item} />
+    <Sections details={details} item={item} unlike={unlike} />
   </ActionPanel>
 );
 
-export const Sections: React.FC<BaseProps> = ({ details = false, item }) => {
+export const Sections = ({ details = false, item, unlike }: BaseProps) => {
   const { push } = useNavigation();
   const { downloadSize } = getPreferenceValues<UnsplashPreferences>();
+  const [liked, setLiked] = useState(item.liked_by_user);
 
   const imageUrl = item.urls?.raw || item.urls?.full || item.urls?.regular || item.urls?.small;
+
+  const handleLike = async () => {
+    await likeOrDislike(item.id, liked);
+
+    if (liked && unlike) unlike((p) => [...p, String(item.id)]);
+    setLiked(!liked);
+  };
 
   const clipboardCopyUrl = {
     url: item.urls?.[downloadSize] || imageUrl,
@@ -33,9 +43,17 @@ export const Sections: React.FC<BaseProps> = ({ details = false, item }) => {
   };
 
   return (
-    <React.Fragment>
+    <>
       <ActionPanel.Section>
         {details && <Action title="Show Details" icon={Icon.List} onAction={() => push(<Details result={item} />)} />}
+
+        <Action
+          title={`${liked ? "Unlike" : "Like"} Photo`}
+          icon={Icon.Heart}
+          style={liked ? Action.Style.Destructive : Action.Style.Regular}
+          shortcut={{ modifiers: ["cmd"], key: "l" }}
+          onAction={handleLike}
+        />
 
         {item.links?.html && <Action.OpenInBrowser url={item.links.html} title="Open Original" />}
 
@@ -49,9 +67,9 @@ export const Sections: React.FC<BaseProps> = ({ details = false, item }) => {
         )}
       </ActionPanel.Section>
 
-      <ActionPanel.Section title="Image">
-        {imageUrl && (
-          <React.Fragment>
+      {imageUrl && (
+        <>
+          <ActionPanel.Section title="Image">
             <Action
               title="Copy to Clipboard"
               icon={Icon.Clipboard}
@@ -60,21 +78,30 @@ export const Sections: React.FC<BaseProps> = ({ details = false, item }) => {
             />
 
             <Action
-              title="Set as Desktop Wallpaper"
+              title="Download Image"
+              icon={Icon.Desktop}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+              onAction={() => saveImage({ url: imageUrl, id: String(item.id) })}
+            />
+          </ActionPanel.Section>
+
+          <ActionPanel.Section title="Set as Wallpaper On">
+            <Action
+              title="Current Monitor"
               icon={Icon.Desktop}
               shortcut={{ modifiers: ["cmd", "shift"], key: "w" }}
               onAction={() => setWallpaper({ url: imageUrl, id: String(item.id) })}
             />
 
             <Action
-              title="Download Image"
+              title="Every Monitor"
               icon={Icon.Desktop}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
-              onAction={() => saveImage({ url: imageUrl, id: String(item.id) })}
+              shortcut={{ modifiers: ["shift", "opt"], key: "w" }}
+              onAction={() => setWallpaper({ url: imageUrl, id: String(item.id), every: true })}
             />
-          </React.Fragment>
-        )}
-      </ActionPanel.Section>
+          </ActionPanel.Section>
+        </>
+      )}
 
       <ActionPanel.Section title="Links">
         {item.links?.html && (
@@ -93,7 +120,7 @@ export const Sections: React.FC<BaseProps> = ({ details = false, item }) => {
           />
         )}
       </ActionPanel.Section>
-    </React.Fragment>
+    </>
   );
 };
 
