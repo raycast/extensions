@@ -15,14 +15,7 @@ import {
   SceneRequest,
   Zone,
 } from "./types";
-import {
-  ClientHttp2Session,
-  connect,
-  constants,
-  IncomingHttpHeaders,
-  IncomingHttpStatusHeader,
-  sensitiveHeaders,
-} from "http2";
+import { ClientHttp2Session, constants, IncomingHttpHeaders, IncomingHttpStatusHeader, sensitiveHeaders } from "http2";
 import React from "react";
 import RateLimitedQueue from "./RateLimitedQueue";
 import StreamArray from "stream-json/streamers/StreamArray";
@@ -32,7 +25,6 @@ import * as tls from "tls";
 import dns from "dns";
 
 const DATA_PREFIX = "data: ";
-const CONNECTION_TIMEOUT_MS = 5000;
 const { HTTP2_HEADER_METHOD, HTTP2_HEADER_PATH, HTTP2_HEADER_ACCEPT } = constants;
 
 type Response = {
@@ -45,16 +37,16 @@ type Response = {
 
 export default class HueClient {
   public bridgeConfig: BridgeConfig;
+  private readonly http2Session: ClientHttp2Session;
   private readonly setLights?: React.Dispatch<React.SetStateAction<Light[]>>;
   private readonly setGroupedLights?: React.Dispatch<React.SetStateAction<GroupedLight[]>>;
   private readonly setRooms?: React.Dispatch<React.SetStateAction<Room[]>>;
   private readonly setZones?: React.Dispatch<React.SetStateAction<Zone[]>>;
   private readonly setScenes?: React.Dispatch<React.SetStateAction<Scene[]>>;
-  private readonly http2Session: ClientHttp2Session;
   private readonly lightsQueue = new RateLimitedQueue(10);
   private readonly groupedLightsQueue = new RateLimitedQueue(1, 1);
 
-  private constructor(
+  constructor(
     bridgeConfig: BridgeConfig,
     http2Session: ClientHttp2Session,
     setLights?: React.Dispatch<React.SetStateAction<Light[]>>,
@@ -71,135 +63,6 @@ export default class HueClient {
     this.setZones = setZones;
     this.setScenes = setScenes;
     this.listenToEventSource();
-  }
-
-  public static async createInstance(
-    bridgeConfig: BridgeConfig,
-    setLights?: React.Dispatch<React.SetStateAction<Light[]>>,
-    setGroupedLights?: React.Dispatch<React.SetStateAction<GroupedLight[]>>,
-    setRooms?: React.Dispatch<React.SetStateAction<Room[]>>,
-    setZones?: React.Dispatch<React.SetStateAction<Zone[]>>,
-    setScenes?: React.Dispatch<React.SetStateAction<Scene[]>>
-  ) {
-    function getCertificate(host: string): Promise<tls.PeerCertificate> {
-      return new Promise((resolve, reject) => {
-        console.log("Getting certificate for", host, "…");
-        const socket = tls.connect(
-          {
-            host: host,
-            port: 443,
-            rejectUnauthorized: false,
-          },
-          () => {
-            console.log("Connection established, getting certificate…");
-            resolve(socket.getPeerCertificate());
-          }
-        );
-
-        socket.on("error", (error) => {
-          console.error("Error while getting certificate:", error);
-          reject(error);
-        });
-      });
-    }
-
-    let cert: string | undefined;
-    // TODO: Only do this if the certificate is self-signed
-    const peerCertificate = await getCertificate(bridgeConfig.ipAddress);
-    console.log("Peer certificate:", peerCertificate);
-    if (peerCertificate.issuer.CN === bridgeConfig.id.toLowerCase()) {
-      console.log(`Certificate belongs to Hue Bridge with id "${bridgeConfig.id}", converting to PEM format…`);
-      const insertNewlines = (str: string): string => {
-        const regex = new RegExp(`(.{64})`, "g");
-        return str.replace(regex, "$1\n");
-      };
-      const base64 = peerCertificate.raw.toString("base64");
-      cert = `-----BEGIN CERTIFICATE-----\n${insertNewlines(base64)}\n-----END CERTIFICATE-----\n`;
-    }
-
-    if (cert) {
-      console.log("Connecting to Hue Bridge using self-signed certificate…");
-    } else {
-      console.log("Connecting to Hue Bridge and checking it's certificate against the Hue Bridge root CA…");
-    }
-    const http2Session = await new Promise<ClientHttp2Session>((resolve, reject) => {
-      // Connect to the Hue Bridge using the Bridge ID as the hostname, which we then resolve to the Bridge IP address.
-      const session = connect(`https://${bridgeConfig.id}`, {
-        ca: cert ? Buffer.from(cert, "utf-8") : fs.readFileSync(environment.assetsPath + "/huebridge_cacert.pem"),
-        checkServerIdentity: (hostname, cert) => {
-          /*
-           * If both the certificate issuer’s Common Name field, and the certificate subject’s Common Name field are
-           * equal to the Bridge ID, the Bridge is running an older firmware version.
-           * In that case, we need to store the certificate’s fingerprint and check future connections against it.
-           * Source: https://developers.meethue.com/develop/application-design-guidance/using-https/#Self-signed%20certificates
-           */
-          if (cert.issuer.CN === bridgeConfig.id.toLowerCase() && cert.subject.CN === bridgeConfig.id.toLowerCase()) {
-            if (bridgeConfig.certFingerprint === undefined) {
-              console.log("Self-signed Hue Bridge certificate detected. Storing fingerprint for future connections.");
-              // TODO: Move to function called from Bridge machine
-              // LocalStorage.setItem(BRIDGE_CERT_FINGERPRINT, cert.fingerprint);
-            } else {
-              if (bridgeConfig.certFingerprint !== cert.fingerprint) {
-                return new Error(
-                  "Server identity check failed. " +
-                    "Fingerprint does not match known fingerprint. " +
-                    "If you trust this certificate, please unlink and relink your Bridge."
-                );
-              }
-              console.log(
-                "Self-signed Hue Bridge certificate detected. " +
-                  "Certificate fingerprint matches known fingerprint. " +
-                  "Continuing connection."
-              );
-            }
-
-            // Certificate is deemed valid, even though it is self-signed.
-            return undefined;
-          }
-
-          /*
-           * In case of a more up-to-date firmware version, we need to check the certificate’s Common Name field against
-           * the bridgeId and check the certificate against the Hue Bridge Root CA.
-           */
-          if (cert.subject.CN === bridgeConfig.id.toLowerCase() && cert.issuer.CN === "root-bridge") {
-            return undefined;
-          } else {
-            return new Error(
-              "Server identity check failed. Certificate subject’s Common Name does not match bridgeId " +
-                "or certificate issuer’s Common Name does not match “root-bridge”."
-            );
-          }
-        },
-        lookup: (hostname, options, callback) => {
-          /*
-           * Resolve the Bridge ID to the Bridge IP address to prevent the following warning:
-           * [DEP0123] DeprecationWarning: Setting the TLS ServerName to an IP address is not permitted by RFC 6066.
-           */
-          if (hostname.toLowerCase() === bridgeConfig.id?.toLowerCase() && bridgeConfig.ipAddress !== undefined) {
-            console.log(
-              `Overriding DNS lookup for host name "${hostname}" (Bridge ID) to ${bridgeConfig.ipAddress} to avoid TLS ServerName IP warning.`
-            );
-            callback(null, bridgeConfig.ipAddress, 4);
-          } else {
-            dns.lookup(hostname, options, callback);
-          }
-        },
-      });
-
-      session.setTimeout(CONNECTION_TIMEOUT_MS, () => {
-        reject(new Error("Connection timed out."));
-      });
-
-      session.once("connect", () => {
-        resolve(session);
-      });
-
-      session.once("error", (error) => {
-        reject(error);
-      });
-    });
-
-    return new HueClient(bridgeConfig, http2Session, setLights, setGroupedLights, setRooms, setZones, setScenes);
   }
 
   public async getLights(): Promise<Light[]> {
@@ -373,7 +236,7 @@ export default class HueClient {
     stream.setEncoding("utf8");
 
     stream.on("data", (chunk) => {
-      parser ??= createNewParser(parser, onParsedUpdateEvent);
+      parser ??= createParser(parser, onParsedUpdateEvent);
 
       const lines = chunk.split("\n");
 
@@ -398,7 +261,7 @@ export default class HueClient {
   }
 }
 
-function createNewParser(parser: Chain | null, callback: (data: ParsedUpdateEvent) => void): Chain {
+function createParser(parser: Chain | null, callback: (data: ParsedUpdateEvent) => void): Chain {
   parser = StreamArray.withParser();
 
   parser.on("data", (data) => {

@@ -25,11 +25,11 @@ export function useHue() {
     if (hueBridgeState.context.hueClient !== undefined) {
       (async () => {
         if (hueBridgeState.context.hueClient === undefined) {
-          throw new Error("Lights are undefined");
+          throw new Error("hueClient is undefined");
         }
 
         // Executing these in parallel causes the API to return an error as if one of the endpoints is not found.
-        // Since we're using HTTP/2 we can just execute them sequentially, and it's faster anyway.
+        // Since we’re using HTTP/2 we can just execute them sequentially, and it's faster anyway.
         setLights(await hueBridgeState.context.hueClient.getLights());
         setGroupedLights(await hueBridgeState.context.hueClient.getGroupedLights());
         setRooms(await hueBridgeState.context.hueClient.getRooms());
@@ -42,6 +42,7 @@ export function useHue() {
   return {
     hueBridgeState,
     sendHueMessage,
+    // TODO: Don't assume that someone has zones, for example.
     isLoading: !lights.length || !rooms.length || !zones.length || !scenes.length,
     lights,
     setLights,

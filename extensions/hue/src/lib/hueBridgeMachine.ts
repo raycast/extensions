@@ -16,6 +16,7 @@ import { BRIDGE_CONFIG_KEY } from "./constants";
 import HueClient from "./HueClient";
 import { BridgeConfig, GroupedLight, Light, Room, Scene, Zone } from "./types";
 import React from "react";
+import createHueClient from "./createHueClient";
 
 export type HueBridgeState = State<
   HueContext,
@@ -96,7 +97,7 @@ export default function hueBridgeMachine(
               throw Error("Invalid state");
             }
 
-            const hueClient = await HueClient.createInstance(
+            const hueClient = await createHueClient(
               context.bridgeConfig,
               setLights,
               setGroupedLights,
@@ -189,7 +190,7 @@ export default function hueBridgeMachine(
               id: configuration.bridgeid,
             };
 
-            const hueClient = await HueClient.createInstance(
+            const hueClient = await createHueClient(
               bridgeConfig,
               setLights,
               setGroupedLights,

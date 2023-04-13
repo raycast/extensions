@@ -3,6 +3,7 @@ import { CouldNotConnectToHueBridgeError, NoHueBridgeConfiguredError } from "./l
 import HueClient from "./lib/HueClient";
 import { BRIDGE_CONFIG_KEY } from "./lib/constants";
 import { BridgeConfig } from "./lib/types";
+import createHueClient from "./lib/createHueClient";
 
 export default async () => {
   closeMainWindow().then();
@@ -13,7 +14,7 @@ export default async () => {
       return JSON.parse(bridgeConfigString);
     })
     .then(async (bridgeConfig: BridgeConfig) => {
-      const hueClient = await HueClient.createInstance(bridgeConfig);
+      const hueClient = await createHueClient(bridgeConfig);
       return hueClient.getLights().then((lights) => ({ hueClient, lights }));
     })
     .then(({ hueClient, lights }) => {
