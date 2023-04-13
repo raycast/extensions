@@ -119,11 +119,6 @@ const parseHeader = (data: GooglResult, transCode: LanguageCode = "en"): DefItem
       id: `header-${trans.trans}`,
       title: `${trans.trans}`,
       subtitle: translit?.translit && ` [${translit?.translit}]`,
-      accessories: [
-        { tag: { value: `↵ : Copy` }, icon: Icon.CopyClipboard },
-        { tag: { value: `⌘ + ↵ : View in browser` }, icon: Icon.Globe },
-        // { icon: Icon.SpeechBubbleActive, tooltip: "TTS available" },  // dynamically added when availiable
-      ],
       metaData: {
         toClipboard: [trans.trans, trans.orig],
         url: webUrl,

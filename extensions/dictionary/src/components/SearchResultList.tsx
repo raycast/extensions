@@ -29,7 +29,7 @@ const searchItem =
       ttsReady &&
         accessories.push({
           icon: Icon.SpeechBubbleActive,
-          tag: { value: `⇧ + ↵ : TTS available`, color: Color.Green },
+          tag: { value: `TTS available`, color: Color.Green },
         });
     }
 
@@ -69,7 +69,6 @@ const HeaderSection = (props: { headers: DefListRts }) => {
 
 const SearchResultList = (props: Props) => {
   const { data: { defs = [], extras = [] } = {} } = props;
-  // console.debug(`reload SearchResultList`);
   return (
     <>
       {extras && <HeaderSection headers={extras} />}

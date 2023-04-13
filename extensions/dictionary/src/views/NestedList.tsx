@@ -12,7 +12,6 @@ const NestedList = (props: Props) => {
   const { isShowingDetail, engine, defItem } = props;
   const activeEngine = getEngine(engine) as EngineHookProps<object, object>;
   const { isLoading, data } = useEngine(defItem.title, activeEngine);
-  // console.debug(`reload Command`, query, isShowingDetail)
   return (
     <List
       isLoading={isLoading}

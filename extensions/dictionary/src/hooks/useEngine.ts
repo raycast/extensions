@@ -1,8 +1,8 @@
-import { usePromise } from "@raycast/utils";
+import { useCachedState, usePromise } from "@raycast/utils";
 import { knownPos } from "../constants";
 import { Image, showToast, Toast } from "@raycast/api";
 import { createContext, useRef, useState } from "react";
-import { useDebounce, useStatedCache } from "../hooks";
+import { useDebounce } from "../hooks";
 import { DefListRts, DefItem, LanguageCode, isObjKey } from "../types";
 import fetch from "cross-fetch";
 import { EngineHookProps } from "../engines";
@@ -23,15 +23,15 @@ class EngineError extends Error {
 
 type ParserDef<T> = (item: T) => DefItem | DefItem[];
 type ParserPos<T> = (item: T) => string;
-type PromiseData<R> = { defs: DefListRts; extras?: DefListRts; rawRes: R; transCode: LanguageCode | undefined };
+type PromiseData<R> = { defs: DefListRts; extras?: DefListRts; rawRes: R; transCode: LanguageCode };
 //Re-rendering flows: useDebounce -> !isLoading -> fetched data, !isLoading -> setTTS (if available)
 const useEngine = <R extends object, T extends object>(query: string, engineProps: EngineHookProps<R, T>) => {
   const { getUrl, getOpts, parseData, parseDef, parsePos, parseExtras, parseTTS, key, fallbackSearch } = engineProps;
   const isValid = (query: string) => !query.startsWith("-") && !!query;
   const debouncedSearchTerm = useDebounce(query, 500, isValid);
   const abortable = useRef<AbortController>();
-  const [defaultLang] = useStatedCache<LanguageCode>("primary_language");
-  const [fallbackLang] = useStatedCache<LanguageCode>("fallback_language");
+  const [defaultLang = "en"] = useCachedState<LanguageCode>("primary_language");
+  const [fallbackLang] = useCachedState<LanguageCode>("fallback_language");
   // const [engineStatus, dispatch] = useReducer(engineStateReducer,{tts: [],})
   const [curTTS, setTTS] = useState<[string?, string?]>([]); // using simpler state currently instead of reducer
   const preferences = usePreferences();
@@ -59,7 +59,7 @@ const useEngine = <R extends object, T extends object>(query: string, engineProp
     });
   };
   const onSuccess = async (data: PromiseData<R>) => {
-    if (data.transCode && parseTTS) {
+    if (parseTTS) {
       const { transCode, rawRes } = data;
       const toast = await showToast({
         style: Toast.Style.Animated,
@@ -115,14 +115,13 @@ const useEngine = <R extends object, T extends object>(query: string, engineProp
       toast.message = message;
     } else {
       toast.message = error.message;
-      // console.warn(error);
     }
   };
   // const { isLoading, data, revalidate } =  useFetch<R>(url, { ...options, execute: !!debouncedSearchTerm}) // not fit when we using more fetch within one chain
   const { isLoading, data } = usePromise(
     async (searchTerm: string, _key) => {
       const url = getUrl(searchTerm);
-      let options = getOpts && getOpts(searchTerm, defaultLang || "en", apiKey);
+      let options = getOpts && getOpts(searchTerm, defaultLang, apiKey);
       let response = await fetch(url, { ...options, signal: abortable.current?.signal });
       if (!response.ok && ![404].includes(response.status)) throw new EngineError(response);
       let jsonD = await response.json();
@@ -148,7 +147,6 @@ const useEngine = <R extends object, T extends object>(query: string, engineProp
       onError,
     }
   );
-  // console.debug(`useEngine: ${debouncedSearchTerm}`, isLoading,);
   return { isLoading, data, curTTS };
 };
 

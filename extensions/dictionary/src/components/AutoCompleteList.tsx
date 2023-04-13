@@ -1,7 +1,8 @@
 import { Action, ActionPanel, clearSearchBar, Color, Icon, List, showToast, useNavigation } from "@raycast/api";
+import { useCachedState } from "@raycast/utils";
 import React, { useCallback } from "react";
 
-import { useAutoComplete, useQuery, QueryOptionResult } from "../hooks/";
+import { useAutoComplete, QueryOptionResult } from "../hooks/";
 import { ConfigView } from "../views";
 
 interface ACListItemProps extends QueryOptionResult {
@@ -11,8 +12,14 @@ interface ACListItemProps extends QueryOptionResult {
 
 const ACListItem = React.memo((option: ACListItemProps) => {
   const { icon, query, onAction, subtitle, isFinal, id, ...restOpt } = option;
-  const [cachedVal, setter] = useQuery(query);
-  // console.debug(`reload ACListItem id: ${id} - ${query} / cachedVal:${cachedVal}`)
+  const queryValidate = (query: string): [string?, string?] | [] => {
+    const [type, key, value] = query.trim().split(" ");
+    return (!!key && type === "-set" && [key, value]) || [];
+  };
+  const [key, value] = queryValidate(query);
+  //it's ok to initial with empty key, since the parent never calls setCache on invalid key such that the current query is incomplete.
+  const [cachedVal, setCache] = useCachedState<string | undefined>(key || "");
+
   return (
     <List.Item
       icon={icon || Icon.Terminal}
@@ -20,7 +27,14 @@ const ACListItem = React.memo((option: ACListItemProps) => {
       {...restOpt}
       actions={
         <ActionPanel>
-          <Action title="Select" onAction={() => onAction(`${query} `, setter)} />
+          <Action
+            title="Select"
+            onAction={() =>
+              onAction(`${query} `, () => {
+                setCache(value);
+              })
+            }
+          />
         </ActionPanel>
       }
       accessories={[
@@ -67,7 +81,6 @@ const AutoCompleteList = (props: AutoCompleteListProps) => {
     const executeTitle = `Confirm for [${title}]?`;
     return <ACListItem icon={icon || Icon.Cog} onAction={onConfirm} title={executeTitle} {...resOptions} />;
   };
-  // console.debug(`reload AutoCompleteList ${query}, `,matchedOptions)
   return matchedOptions.length
     ? matchedOptions[0].isFinal && query.trim() === matchedOptions[0].query.trim()
       ? renderExecuteItem(matchedOptions[0])

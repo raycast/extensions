@@ -1,19 +1,20 @@
 import { Icon, List, useNavigation } from "@raycast/api";
+import { useCachedState } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import getEngine, { EngineHookProps, EngineID } from "../engines";
 import { SearchResultList, AutoCompleteList } from "../components/";
-import { SearchContext, useEngine, useStatedCache } from "../hooks";
+import { SearchContext, useEngine } from "../hooks";
 import { supportedEngine } from "../constants";
 import ConfigView from "./ConfigView";
+import { LanguageCode } from "../types";
 
 type SearchDropdownProps = {
   selectedEngine: EngineID | undefined;
   onChange: (value: EngineID) => void;
 };
 
-function SearchDropdown({ selectedEngine, onChange: onSuperChange }: SearchDropdownProps) {
+const SearchDropdown = ({ selectedEngine, onChange: onSuperChange }: SearchDropdownProps) => {
   const navigation = useNavigation();
-  // console.debug('reload SearchDropdown', selectedEngine)
   const onChange = (value: EngineID | "config") => {
     if (value === "config") {
       navigation.push(<ConfigView />);
@@ -23,7 +24,7 @@ function SearchDropdown({ selectedEngine, onChange: onSuperChange }: SearchDropd
   };
   return (
     <List.Dropdown
-      value={selectedEngine || ""}
+      value={selectedEngine || "googl"}
       tooltip="Select an engine"
       onChange={onChange as (value: string) => void}
     >
@@ -35,12 +36,13 @@ function SearchDropdown({ selectedEngine, onChange: onSuperChange }: SearchDropd
       </List.Dropdown.Section>
     </List.Dropdown>
   );
-}
+};
 
 const EntryList = ({ initQuery = "" }: { initQuery: string }) => {
   const [query, setQuery] = useState(initQuery);
   const [isShowingDetail, setShowingDetail] = useState(false);
-  const [selectedEngine, setSelectedEngine] = useStatedCache<EngineID>("engine");
+  const [selectedEngine, setSelectedEngine] = useCachedState<EngineID>("engine");
+  const [selectedPrimeLang = "en"] = useCachedState<LanguageCode | undefined>("primary_language");
   const activeEngine = getEngine(selectedEngine) as EngineHookProps<object, object>;
   const { isLoading, data, curTTS } = useEngine(query.trim(), activeEngine);
   const searchStatus = {
@@ -52,16 +54,21 @@ const EntryList = ({ initQuery = "" }: { initQuery: string }) => {
   }, [initQuery]);
 
   const onSelectionChange = (id: string | null) => {
-    // console.debug('onSelectionChange', id)
     // BUG: here would cause double render
     setShowingDetail(!!id?.startsWith("detail"));
   };
-  // console.debug(`reload Command`, query, isShowingDetail)
+  const emptyTitle: string = query
+    ? `Sorry, There are no results for: ${query} on ${activeEngine.title}.`
+    : `Look up any word on ${activeEngine.title}.`;
+  const emptyDescription: string = query
+    ? `Try looking up other dictionaries by using the dropdown menu or typing command: '-set engine ...'.`
+    : `The word(s) will be translated to '${selectedPrimeLang}'.`;
+
   return (
     <List
       isShowingDetail={isShowingDetail}
       isLoading={isLoading}
-      searchBarPlaceholder="Look up any words, language auto detected"
+      searchBarPlaceholder="Look up any word, language auto detected"
       onSearchTextChange={setQuery}
       onSelectionChange={onSelectionChange}
       searchText={query}
@@ -71,6 +78,7 @@ const EntryList = ({ initQuery = "" }: { initQuery: string }) => {
       <SearchContext.Provider value={searchStatus}>
         <SearchResultList data={(!query.startsWith("-") && data) || undefined} setQuery={setQuery} />
       </SearchContext.Provider>
+      <List.EmptyView title={emptyTitle} description={emptyDescription} />
     </List>
   );
 };

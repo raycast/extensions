@@ -12,7 +12,6 @@ const TTSSection = ({ ttsTitles }: { ttsTitles: [string, string?] }) => {
   const { revalidate: srcTTS } = useExec("afplay", [`${os.tmpdir()}/raycast-dictionary-source.mp3`], {
     execute: false,
   });
-  // console.debug('reloading TTSSeciton', )
   return (
     <ActionPanel.Section title="TTS">
       {ttsTitles[0] && (

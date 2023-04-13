@@ -56,7 +56,6 @@ const useAutoComplete = ({ query, prefix = "-" }: AutoCompleteHookProps) => {
         query: prefix + [...keyChain, token].join(" "),
         isFinal: !optionsFunc && !Object.keys(options || {}).length,
       };
-      // console.log('END#2',possibleCommand)
       results.current.push(possibleCommand);
     });
   };
@@ -66,7 +65,6 @@ const useAutoComplete = ({ query, prefix = "-" }: AutoCompleteHookProps) => {
       traverse(config, 0, []);
 
       const serializeRts = results.current.map((result) => result.query).join(", ");
-      // console.log(`useAutoComplete ${results.current.length&&results}, pickle: ${serializeRts}`)
       setSerializedRts(serializeRts);
     } else if (serializedRts) setSerializedRts("");
   }, [query]);
