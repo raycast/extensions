@@ -66,8 +66,8 @@ export default function IssueDetail({ initialIssue, issueKey }: IssueDetailProps
 
           <Detail.Metadata.Label
             title="Project"
-            text={issue?.fields.project.name}
-            icon={issue?.fields.project.avatarUrls["32x32"]}
+            text={issue?.fields.project?.name ?? "None"}
+            icon={issue?.fields.project?.avatarUrls["32x32"]}
           />
 
           <Detail.Metadata.Label
@@ -78,13 +78,11 @@ export default function IssueDetail({ initialIssue, issueKey }: IssueDetailProps
             }}
           />
 
-          {issue?.fields.priority ? (
-            <Detail.Metadata.Label
-              title="Priority"
-              text={issue?.fields.priority.name}
-              icon={issue?.fields.priority.iconUrl}
-            />
-          ) : null}
+          <Detail.Metadata.Label
+            title="Priority"
+            text={issue?.fields.priority?.name ?? "None"}
+            icon={issue?.fields.priority?.iconUrl}
+          />
 
           <Detail.Metadata.Label
             title="Assignee"

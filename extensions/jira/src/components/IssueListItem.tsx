@@ -16,7 +16,7 @@ export default function IssueListItem({ issue, mutate }: IssueListItemProps) {
   const updatedAt = new Date(issue.fields.updated);
   const assignee = issue.fields.assignee;
 
-  const keywords = [issue.key, issue.fields.status?.name, issue.fields.issuetype?.name];
+  const keywords = [issue.key, issue.fields.status.name, issue.fields.issuetype.name];
 
   if (issue.fields.priority) {
     keywords.push(issue.fields.priority.name);
@@ -29,7 +29,7 @@ export default function IssueListItem({ issue, mutate }: IssueListItemProps) {
   const accessories = [
     {
       text: {
-        value: issue.fields.status?.name,
+        value: issue.fields.status.name,
         color: getStatusColor(issue.fields.status.statusCategory.colorName),
       },
     },
@@ -41,14 +41,14 @@ export default function IssueListItem({ issue, mutate }: IssueListItemProps) {
   ];
 
   if (issue.fields.priority) {
-    accessories.push({ icon: issue.fields.priority.iconUrl, tooltip: `Priority: ${issue.fields.priority?.name}` });
+    accessories.push({ icon: issue.fields.priority.iconUrl, tooltip: `Priority: ${issue.fields.priority.name}` });
   }
 
   return (
     <List.Item
       key={issue.id}
       keywords={keywords}
-      icon={{ value: issue.fields.issuetype.iconUrl, tooltip: `Issue Type: ${issue.fields.issuetype?.name}` }}
+      icon={{ value: issue.fields.issuetype.iconUrl, tooltip: `Issue Type: ${issue.fields.issuetype.name}` }}
       title={issue.fields.summary}
       subtitle={issue.key}
       accessories={accessories}
