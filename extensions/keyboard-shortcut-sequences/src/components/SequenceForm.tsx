@@ -133,6 +133,7 @@ export default function SequenceForm(props: {
         <ActionPanel>
           <Action.SubmitForm
             title="Save Shortcut Sequence"
+            icon={Icon.Link}
             onSubmit={async (values) => {
               if (!updateNameError(values.sequenceNameField)) {
                 return;
@@ -208,7 +209,7 @@ export default function SequenceForm(props: {
 
       <Form.TextField
         id="sequenceShortcutCount"
-        title="Number Of Shortcuts"
+        title="Number of Shortcuts"
         defaultValue={shortcutCount.toString()}
         info="The number of shortcuts that this shortcut sequence will run sequentially."
         error={countError}
