@@ -69,8 +69,6 @@ export default function Command() {
             });
 
             if (trendingPmidsList.length !== 0) {
-              // const ids = searchJson.esearchresult.idlist[0].split(",");
-              // const idList = escape(ids.join(","));
 
               const summaryUrl = `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=pubmed&id=${trendingPmidsList.join(
                 ","
