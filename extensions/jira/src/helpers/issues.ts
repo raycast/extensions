@@ -45,6 +45,7 @@ export function getIssueListSections(issues?: Issue[]) {
     // a known key, assign it to unknown by default
     return StatusCategoryKey.unknown;
   });
+
   return statusCategoryKeyOrder
     .filter((categoryKey) => {
       const issues = issuesByStatusCategoryKey[categoryKey];

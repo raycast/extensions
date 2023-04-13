@@ -187,6 +187,7 @@
 /extensions/dekudeals                                @rrroyal
 /extensions/descript-to-youtube-chapters             @peduarte
 /extensions/designer-news                            @itsnwa
+/extensions/deta-space                               @pomdtr @pomdtr
 /extensions/deutscherwetterdienst                    @NicolaiSchmid
 /extensions/dev-to                                   @aeither
 /extensions/devdocs                                  @pomdtr
@@ -223,11 +224,13 @@
 /extensions/drafts                                   @FlohGro-dev
 /extensions/dribbble                                 @gebeto
 /extensions/dropbox                                  @chyroc
+/extensions/dropover                                 @jag-k
 /extensions/drupal-org                               @hussainweb
 /extensions/drupal-toolbox                           @emircanerkul @pernielsentikaer
 /extensions/eagle                                    @Yukaii
 /extensions/easy-new-file                            @koinzhang
 /extensions/easydict                                 @tisfeng
+/extensions/ebird                                    @OozyGrub
 /extensions/ecosia-search                            @MFCo
 /extensions/element                                  @Aayush9029
 /extensions/elgato-key-light                         @thomaspaulmann @omarshahine
@@ -420,6 +423,7 @@
 /extensions/keepassxc                                @zkytech
 /extensions/keyboard-layout-switcher                 @lucaschultz
 /extensions/keyboard-maestro                         @eluce2
+/extensions/keyboard-shortcut-sequences              @SKaplanOfficial
 /extensions/kill-process                             @rolandleth @crazyones110
 /extensions/kinopio-inbox                            @pketh
 /extensions/kinopoisk                                @mattisssa
@@ -625,6 +629,7 @@
 /extensions/projects                                 @ajaypremshankar
 /extensions/proton-version                           @flavienbonvin @pernielsentikaer
 /extensions/punto                                    @red-avtovo
+/extensions/purelymail                               @xmok
 /extensions/purpleair                                @omarshahine
 /extensions/px-to-rem-converter                      @raulanatol
 /extensions/qbittorrent                              @J3n5en
@@ -788,6 +793,7 @@
 /extensions/teamgantt                                @knownasilya
 /extensions/teamup-rooms                             @drewwatkins11
 /extensions/temporary-email                          @natterstefan @JoelKlint
+/extensions/tennis-standings                         @faisal3389
 /extensions/terminal                                 @ron-myers
 /extensions/terminalfinder                           @yedongze
 /extensions/text-decorator                           @koinzhang
@@ -885,6 +891,7 @@
 /extensions/wrike                                    @suarez-agu
 /extensions/writersbrew                              @pradeepb28
 /extensions/xcode                                    @SvenTiigi @qeude @oliverepper @kiliankoe
+/extensions/xcode-cloud                              @yuta24
 /extensions/xecutor                                  @GastroGeek
 /extensions/xid                                      @rosszurowski
 /extensions/xkcd                                     @maggie-j-liu
