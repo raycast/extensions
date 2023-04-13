@@ -1,0 +1,11 @@
+query Timers {
+  timers {
+    id
+    start
+    tags {
+      key
+      value
+    }
+    note
+  }
+}

@@ -1,0 +1,29 @@
+schema: https://raw.githubusercontent.com/traggo/server/v0.3.0/schema.graphql
+documents: ./src/graphql/*.graphql
+generates:
+  ./src/graphql/types.ts:
+    plugins:
+      - add:
+          content: "/* eslint-disable */"
+      - typescript
+  ./src/graphql/:
+    preset: near-operation-file
+    presetConfig:
+      extension: .hook.ts
+      baseTypesPath: ./types.ts
+    config:
+      withHooks: true
+      withComponent: false
+      withHOC: false
+    plugins:
+      - add:
+          content: "/* eslint-disable */"
+      - typescript-operations
+      - typescript-react-apollo
+
+config:
+  apolloClientVersion: 3
+  reactApolloVersion: 3
+  gqlImport: "@apollo/client#gql"
+  scalars:
+    Time: string

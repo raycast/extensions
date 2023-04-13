@@ -1,0 +1,5 @@
+mutation CreateTimeSpan($start: Time!, $tags: [InputTimeSpanTag!], $note: String!) {
+  createTimeSpan(start: $start, tags: $tags, note: $note) {
+    id
+  }
+}

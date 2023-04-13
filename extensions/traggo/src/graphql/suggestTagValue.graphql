@@ -1,0 +1,3 @@
+query SuggestTagValue($key: String!, $query: String!) {
+  suggestTagValue(key: $key, query: $query)
+}

@@ -1,0 +1,5 @@
+mutation StopTimeSpan($id: Int!, $end: Time!) {
+  stopTimeSpan(id: $id, end: $end) {
+    id
+  }
+}

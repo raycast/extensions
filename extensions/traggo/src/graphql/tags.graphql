@@ -1,0 +1,6 @@
+query Tags {
+  tags {
+    color
+    key
+  }
+}

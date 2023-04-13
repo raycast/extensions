@@ -1,0 +1,5 @@
+query User {
+  currentUser {
+    id
+  }
+}

@@ -1,0 +1,5 @@
+mutation Login($username: String!, $password: String!, $deviceName: String!) {
+  login(username: $username, pass: $password, deviceName: $deviceName, type: LongExpiry, cookie: false) {
+    token
+  }
+}
