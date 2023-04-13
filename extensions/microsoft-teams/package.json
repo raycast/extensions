@@ -14,6 +14,7 @@
     {
       "name": "findChat",
       "title": "Find Chat",
+      "subtitle": "Microsoft Teams",
       "icon": "chat.png",
       "description": "Find a chat by title.",
       "mode": "view"
@@ -21,6 +22,7 @@
     {
       "name": "setPresence",
       "title": "Set Presence",
+      "subtitle": "Microsoft Teams",
       "icon": "presence.png",
       "description": "Set your Microsoft Teams presence.",
       "mode": "view"
@@ -28,6 +30,7 @@
     {
       "name": "setStatus",
       "title": "Set Status",
+      "subtitle": "Microsoft Teams",
       "icon": "status.png",
       "description": "Set your Microsoft Teams status message (and optionally your presence).",
       "mode": "view"
