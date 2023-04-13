@@ -18,7 +18,8 @@ export type BridgeConfig = {
   ipAddress: string;
   id: string;
   username: string;
-  certFingerprint?: string;
+  certificateType: "self-signed" | "signed-by-hue-bridge-root-ca";
+  certificate?: string;
 };
 
 export type ParsedUpdateEvent = { key: number; value: UpdateEvent };

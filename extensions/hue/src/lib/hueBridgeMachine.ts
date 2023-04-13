@@ -10,13 +10,13 @@ import {
   TypegenDisabled,
 } from "xstate";
 import { LocalStorage, Toast } from "@raycast/api";
-import { v3 } from "node-hue-api";
 import { BRIDGE_CONFIG_KEY } from "../helpers/constants";
 import HueClient from "./HueClient";
 import { BridgeConfig, GroupedLight, Light, Room, Scene, Zone } from "./types";
 import React from "react";
 import createHueClient from "./createHueClient";
-import { discoverBridgeUsingMdns, discoverBridgeUsingNupnp, getUsernameFromBridge } from "../helpers/hueNetworking";
+import { discoverBridgeUsingMdns, discoverBridgeUsingNupnp } from "../helpers/hueNetworking";
+import { linkWithBridge } from "./linkWithBridge";
 
 export type HueBridgeState = State<
   HueContext,
@@ -176,19 +176,7 @@ export default function hueBridgeMachine(
           src: async (context) => {
             if (context.bridgeIpAddress === undefined) throw Error("No bridge IP address");
 
-            // TODO: Get Bridge certificate and determine if it is self-signed
-
-            const username = await getUsernameFromBridge(context.bridgeIpAddress);
-
-            // Get bridge ID using the new credentials
-            const api = await v3.api.createLocal(context.bridgeIpAddress).connect(username);
-            const configuration = await api.configuration.getConfiguration();
-
-            const bridgeConfig: BridgeConfig = {
-              ipAddress: context.bridgeIpAddress,
-              username,
-              id: configuration.bridgeid,
-            };
+            const bridgeConfig = await linkWithBridge(context.bridgeIpAddress);
 
             const hueClient = await createHueClient(
               bridgeConfig,
@@ -209,7 +197,10 @@ export default function hueBridgeMachine(
             }),
           },
           onError: {
-            actions: (_, event) => console.error(event.data),
+            actions: (_, event) => {
+              new Toast({ title: "Failed to link with bridge", message: event.data }).show().then();
+              console.error(event.data);
+            },
             target: "failedToLink",
           },
         },
