@@ -146,7 +146,7 @@ function collectData(html: string): SearchResult[] {
     title = title.replace(`(${academicTitle})`, "").trim();
 
     // Remove the parentheses and trim any extra whitespace from the academicTitle
-    academicTitle = academicTitle.replace(/[\(\)]/g, "").trim();
+    academicTitle = academicTitle.replace(/[()]/g, "").trim();
 
     // Rearrange the name
     const nameParts = title.split(" ");

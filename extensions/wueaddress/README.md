@@ -10,10 +10,12 @@ This Raycast extension allows you to search for contacts from the WueAddress web
 
 ## Installation
 
+The Extension will be soon on the Raycast Store. Up until then, install it directly:
+
 1. Clone this repository to your local machine:
 
 ```bash
-git clone https://github.com/yourusername/wueaddress-raycast-extension.git
+git clone https://github.com/janschlatter/wueaddress-raycast-extension.git
 ```
 
 2. Install the necessary dependencies:
