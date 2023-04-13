@@ -69,10 +69,10 @@ export default function Command() {
             });
 
             if (trendingPmidsList.length !== 0) {
-
-              const summaryUrl = `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=pubmed&id=${trendingPmidsList.join(
-                ","
-              )}&version=2.0&retmode=json` + apikeyArgument;
+              const summaryUrl =
+                `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=pubmed&id=${trendingPmidsList.join(
+                  ","
+                )}&version=2.0&retmode=json` + apikeyArgument;
 
               const summaryResponse = await fetch(summaryUrl);
               if (summaryResponse.ok) {
@@ -128,7 +128,7 @@ export default function Command() {
                 setEntries(sortedArticles);
                 setLoading(false);
               } else {
-                  throw new Error(`Error fetching summary data: ${summaryResponse.status}`);
+                throw new Error(`Error fetching summary data: ${summaryResponse.status}`);
               }
             } else {
               setEntries([
@@ -165,7 +165,9 @@ export default function Command() {
       } else {
         setLoading(true);
         try {
-          const searchUrl = `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&retmax=${preferences.retmax.value}&sort=${sortBy}&term=${query}&retmode=json` + apikeyArgument;
+          const searchUrl =
+            `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&retmax=${preferences.retmax.value}&sort=${sortBy}&term=${query}&retmode=json` +
+            apikeyArgument;
 
           const searchResponse = await fetch(searchUrl);
           if (searchResponse.ok) {
@@ -176,7 +178,9 @@ export default function Command() {
               // const idList = escape(ids.join(","));
               const idList = searchJson.esearchresult.idlist.join(",");
 
-              const summaryUrl = `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=pubmed&id=${idList}&version=2.0&retmode=json` + apikeyArgument;
+              const summaryUrl =
+                `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=pubmed&id=${idList}&version=2.0&retmode=json` +
+                apikeyArgument;
 
               const summaryResponse = await fetch(summaryUrl);
               if (summaryResponse.ok) {
@@ -271,7 +275,7 @@ export default function Command() {
 
     fetchData();
   }, [query, sortBy]);
-  
+
   return (
     <List
       navigationTitle={`PubMe Search`}
@@ -312,7 +316,7 @@ export default function Command() {
             return (
               <List.Item
                 key={entry.uid}
-                title={{value:entry.title, tooltip: entry.title}}
+                title={{ value: entry.title, tooltip: entry.title }}
                 // icon={entry.title}
                 accessories={[
                   // { tag: { value: entry.title_alias[0], color: Color.Red }, tooltip: "Tag with tooltip" },
@@ -336,7 +340,7 @@ export default function Command() {
             return (
               <List.Item
                 key={entry.uid}
-                title={{value:entry.title, tooltip: entry.title}}
+                title={{ value: entry.title, tooltip: entry.title }}
                 // icon={entry.title}
                 accessories={[
                   // { tag: { value: entry.title_alias[0], color: Color.Red }, tooltip: "Tag with tooltip" },
@@ -378,7 +382,7 @@ export default function Command() {
             return (
               <List.Item
                 key={entry.uid}
-                title={{value:entry.title, tooltip: entry.title}}
+                title={{ value: entry.title, tooltip: entry.title }}
                 // icon={entry.title}
                 accessories={[
                   // { tag: { value: entry.title_alias[0], color: Color.Red }, tooltip: "Tag with tooltip" },
