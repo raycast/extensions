@@ -5,9 +5,11 @@ import ManageHueBridge from "./components/ManageHueBridge";
 import { SendHueMessage, useHue } from "./hooks/useHue";
 import HueClient from "./lib/HueClient";
 import useGradients from "./hooks/useGradientUris";
-import { getColorsFromScene, getTransitionTimeInMs } from "./lib/utils";
 import { useMemo, useState } from "react";
-import "./lib/arrayExtensions";
+import "./helpers/arrayExtensions";
+import { getColorsFromScene } from "./helpers/hueResources";
+
+import { getTransitionTimeInMs } from "./helpers/raycast";
 import Style = Toast.Style;
 
 // Exact dimensions of a 16:9 Raycast 5 column grid item.

@@ -9,14 +9,14 @@ import {
   State,
   TypegenDisabled,
 } from "xstate";
-import { discoverBridgeUsingMdns, discoverBridgeUsingNupnp, getUsernameFromBridge } from "./utils";
 import { LocalStorage, Toast } from "@raycast/api";
 import { v3 } from "node-hue-api";
-import { BRIDGE_CONFIG_KEY } from "./constants";
+import { BRIDGE_CONFIG_KEY } from "../helpers/constants";
 import HueClient from "./HueClient";
 import { BridgeConfig, GroupedLight, Light, Room, Scene, Zone } from "./types";
 import React from "react";
 import createHueClient from "./createHueClient";
+import { discoverBridgeUsingMdns, discoverBridgeUsingNupnp, getUsernameFromBridge } from "../helpers/hueNetworking";
 
 export type HueBridgeState = State<
   HueContext,

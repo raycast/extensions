@@ -1,9 +1,9 @@
 import { Action, ActionPanel, Alert, confirmAlert, Detail, environment, Icon, Toast } from "@raycast/api";
 import { HueBridgeState } from "../lib/hueBridgeMachine";
 import { SendHueMessage } from "../hooks/useHue";
+import { pathToFileURL } from "url";
 import ActionStyle = Alert.ActionStyle;
 import Style = Toast.Style;
-import { pathToFileURL } from "url";
 
 const successImagePath = pathToFileURL(`${environment.assetsPath}/bridge-success.png`).href;
 const failureImagePath = pathToFileURL(`${environment.assetsPath}/bridge-failure.png`).href;

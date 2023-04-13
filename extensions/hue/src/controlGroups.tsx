@@ -1,24 +1,18 @@
 import { ActionPanel, Color, Grid, Icon, Image, Toast, useNavigation } from "@raycast/api";
-import {
-  calculateAdjustedBrightness,
-  getClosestBrightness,
-  getColorFromLight,
-  getLightsFromGroup,
-  getTransitionTimeInMs,
-  optimisticUpdate,
-  optimisticUpdates,
-} from "./lib/utils";
 import { Group, GroupedLight, Id, Light, Palette, Room, Zone } from "./lib/types";
-import { BRIGHTNESS_MAX, BRIGHTNESS_MIN, BRIGHTNESSES } from "./lib/constants";
+import { BRIGHTNESS_MAX, BRIGHTNESS_MIN, BRIGHTNESSES } from "./helpers/constants";
 import ManageHueBridge from "./components/ManageHueBridge";
 import { useHue } from "./hooks/useHue";
 import { getProgressIcon } from "@raycast/utils";
 import { useMemo, useState } from "react";
 import useGradientUris from "./hooks/useGradientUris";
-import "./lib/arrayExtensions";
+import "./helpers/arrayExtensions";
 import useInputRateLimiter from "./hooks/useInputRateLimiter";
 import UnlinkAction from "./components/UnlinkAction";
 import SetScene from "./setScene";
+import { getColorFromLight, getLightsFromGroup } from "./helpers/hueResources";
+import { getTransitionTimeInMs, optimisticUpdate, optimisticUpdates } from "./helpers/raycast";
+import { calculateAdjustedBrightness, getClosestBrightness } from "./helpers/colors";
 import Style = Toast.Style;
 
 // Exact dimensions of a 16:9 Raycast 5 column grid item.

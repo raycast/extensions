@@ -1,13 +1,21 @@
 import { closeMainWindow, LocalStorage, showHUD } from "@raycast/api";
-import { CouldNotConnectToHueBridgeError, NoHueBridgeConfiguredError } from "./lib/errors";
-import HueClient from "./lib/HueClient";
-import { BRIDGE_CONFIG_KEY } from "./lib/constants";
+import { BRIDGE_CONFIG_KEY } from "./helpers/constants";
 import { BridgeConfig } from "./lib/types";
 import createHueClient from "./lib/createHueClient";
 
-export default async () => {
-  closeMainWindow().then();
+class NoHueBridgeConfiguredError extends Error {
+  constructor() {
+    super("No Hue Bridge configured");
+  }
+}
 
+class CouldNotConnectToHueBridgeError extends Error {
+  constructor() {
+    super("Hue Bridge not found");
+  }
+}
+
+export default async () => {
   LocalStorage.getItem<string>(BRIDGE_CONFIG_KEY)
     .then((bridgeConfigString) => {
       if (bridgeConfigString === undefined) throw new NoHueBridgeConfiguredError();
@@ -27,9 +35,13 @@ export default async () => {
     .then(() => {
       return showHUD("Turned off all lights");
     })
+    .then(() => closeMainWindow())
+    .then(() => showHUD("Turned off all lights"))
     .catch((error) => {
-      if (error instanceof NoHueBridgeConfiguredError) return showHUD("No Hue bridge configured");
-      if (error instanceof CouldNotConnectToHueBridgeError) return showHUD("Could not connect to the Hue bridge");
-      return showHUD("Failed turning off all lights");
+      closeMainWindow().then(() => {
+        if (error instanceof NoHueBridgeConfiguredError) return showHUD("No Hue bridge configured");
+        if (error instanceof CouldNotConnectToHueBridgeError) return showHUD("Could not connect to the Hue bridge");
+        return showHUD("Failed turning off all lights");
+      });
     });
 };

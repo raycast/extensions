@@ -1,7 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import fs from "fs";
-import { environment } from "@raycast/api";
 import {
   BridgeConfig,
   GroupedLight,
@@ -20,9 +18,7 @@ import React from "react";
 import RateLimitedQueue from "./RateLimitedQueue";
 import StreamArray from "stream-json/streamers/StreamArray";
 import Chain from "stream-chain";
-import "./arrayExtensions";
-import * as tls from "tls";
-import dns from "dns";
+import "../helpers/arrayExtensions";
 
 const DATA_PREFIX = "data: ";
 const { HTTP2_HEADER_METHOD, HTTP2_HEADER_PATH, HTTP2_HEADER_ACCEPT } = constants;

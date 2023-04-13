@@ -1,4 +1,4 @@
-import { HasId, Id } from "./types";
+import { HasId, Id } from "../lib/types";
 
 export {};
 

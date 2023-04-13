@@ -1,4 +1,4 @@
-import { CssColor } from "./types";
+import { CssColor } from "../lib/types";
 
 export const APP_NAME = "raycast_hue_extension";
 export const BRIDGE_CONFIG_KEY = "bridgeCredentials";

@@ -1,5 +1,5 @@
-import { Rgb, Xy } from "./types";
-import { MIRED_ADJUSTMENT } from "./constants";
+import { Rgb, Xy } from "../lib/types";
+import { BRIGHTNESSES, MIRED_ADJUSTMENT, MIRED_MAX, MIRED_MIN, MIRED_STEP } from "./constants";
 import chroma from "chroma-js";
 
 /**
@@ -157,4 +157,30 @@ export function miredToHexString(mireds: number, brightness = 100) {
   const greenHex = g.toString(16).padStart(2, "0");
   const blueHex = b.toString(16).padStart(2, "0");
   return `#${redHex}${greenHex}${blueHex}`;
+}
+
+/**
+ * Because the Hue API does not return the exact brightness value that was set,
+ * we need to find the closest brightness so that we can update the UI accordingly.
+ */
+export function getClosestBrightness(brightness: number) {
+  return BRIGHTNESSES.reduce((prev, curr) => {
+    return Math.abs(curr - brightness) < Math.abs(prev - brightness) ? curr : prev;
+  });
+}
+
+export function calculateAdjustedBrightness(brightness: number, direction: "increase" | "decrease") {
+  const closestBrightness = getClosestBrightness(brightness);
+  const sortedBrightnesses = direction === "decrease" ? BRIGHTNESSES : [...BRIGHTNESSES].reverse();
+
+  return (
+    sortedBrightnesses.find((b) => {
+      return direction === "increase" ? b > closestBrightness : b < closestBrightness;
+    }) ?? closestBrightness
+  );
+}
+
+export function calculateAdjustedColorTemperature(mired: number, direction: "increase" | "decrease") {
+  const newColorTemperature = direction === "increase" ? mired - MIRED_STEP : mired + MIRED_STEP;
+  return Math.round(Math.min(Math.max(MIRED_MIN, newColorTemperature), MIRED_MAX));
 }
