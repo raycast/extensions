@@ -141,7 +141,8 @@ export type Issue = {
   fields: {
     summary: string;
     issuetype: IssueType;
-    priority: Priority;
+    // Apparently, the API can return null for the priority field
+    priority: Priority | null;
     assignee: User | null;
     project: Project;
     updated: string;
