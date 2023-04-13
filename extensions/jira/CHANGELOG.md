@@ -1,5 +1,9 @@
 # Jira Changelog
 
+## [Fix priority issue] - 2023-04-13
+
+- Fix an issue where priorities could be unset, causing the loading of issues to fail.
+
 ## [Support tables] - 2023-04-12
 
 - Support tables in Jira following Markdown additions in v1.49.3 release
