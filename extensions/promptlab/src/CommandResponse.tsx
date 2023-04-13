@@ -3,6 +3,7 @@ import {
   Detail,
   getFrontmostApplication,
   getSelectedText,
+  List,
   LocalStorage,
   showToast,
   Toast,
@@ -213,6 +214,12 @@ export default function CommandResponse(props: { commandName: string; prompt: st
 
     Promise.resolve(runReplacements()).then((subbedPrompt) => {
       setLoadingData(false);
+
+      if (options.outputKind == "list") {
+        subbedPrompt +=
+          "<Format the output as a single list with each item separated by '~~~'. Do not provide any other commentary, headings, or data.>";
+      }
+
       setSubstitutedPrompt(subbedPrompt);
     });
   }, []);
@@ -245,13 +252,56 @@ export default function CommandResponse(props: { commandName: string; prompt: st
     return null;
   }
 
-  const text = `# ${commandName}\n${
+  const text = `${options.outputKind == "detail" || options.outputKind == undefined ? `# ${commandName}\n` : ``}${
     data
       ? data
       : options.minNumFiles != undefined && options.minNumFiles == 0
       ? "Loading response..."
       : "Analyzing files..."
   }`;
+
+  if (options.outputKind == "list") {
+    return (
+      <List
+        isLoading={
+          loading ||
+          isLoading ||
+          loadingData ||
+          (options.minNumFiles != undefined && options.minNumFiles != 0 && contentPrompts.length == 0)
+        }
+        navigationTitle={commandName}
+        actions={
+          <ResponseActions
+            commandSummary="Response"
+            responseText={text}
+            promptText={fullPrompt}
+            reattempt={revalidate}
+            files={selectedFiles}
+          />
+        }
+      >
+        {text.split("~~~").filter((item) => {
+          return item.match(/^[\S]*.*$/g) != undefined
+        }).map((item, index) => (
+          <List.Item
+            title={item.trim()}
+            key={`item${index}`}
+            actions={
+              <ResponseActions
+                commandSummary="Response"
+                responseText={text}
+                promptText={fullPrompt}
+                reattempt={revalidate}
+                files={selectedFiles}
+                listItem={item.trim()}
+              />
+            }
+          />
+        ))}
+      </List>
+    );
+  }
+
   return (
     <Detail
       isLoading={

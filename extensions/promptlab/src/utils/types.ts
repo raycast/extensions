@@ -15,6 +15,7 @@ export interface ExtensionPreferences {
  * useBarcodeDetection - If true, the payload text of barcodes, QR codes, and other computer-readable code formats will be included in the AI prompt.
  * useFaceDetection - If true, the number of faces in images will be included in the AI prompt.
  * treatPDFsAsImages - If true, text will be extract from PDFs via OCR. This slows performance but allows for analysis on more kinds of PDF content.
+ * outputKind - A string indicating the view type of the output.
  */
 export interface CommandOptions {
   minNumFiles?: number;
@@ -26,6 +27,7 @@ export interface CommandOptions {
   useRectangleDetection?: boolean;
   useBarcodeDetection?: boolean;
   useFaceDetection?: boolean;
+  outputKind?: string;
 }
 
 /**
@@ -35,6 +37,7 @@ export interface Command {
   name: string;
   prompt: string;
   icon: string;
+  iconColor?: string;
   minNumFiles?: number;
   acceptedFileExtensions?: string;
   useMetadata?: boolean;
@@ -45,4 +48,5 @@ export interface Command {
   useBarcodeDetection?: boolean;
   useFaceDetection?: boolean;
   treatPDFsAsImages?: boolean;
+  outputKind?: string;
 }

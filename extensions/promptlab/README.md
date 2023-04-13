@@ -1,18 +1,18 @@
-# File AI
+# PromptLab
 
 Make custom commands that act on selected files using Raycast AI, making use of powerful placeholders to provide relevant context.
 
 ## Commands
 
-- Create File AI Command
-    - Create a custom File AI command accessible via 'Search File AI Commands'
-- Search File AI Commands
-    - Search and run custom File AI commands
+- Create PromptLab Command
+    - Create a custom PromptLab command accessible via 'Search PromptLab Commands'
+- Search PromptLab Commands
+    - Search and run custom PromptLab commands
 - Summarize Selected Files
     - Summarize the contents of selected text files, PDFs, images, audio files, and more.
-- File AI Chat
+- PromptLab Chat
     - Start a back-and-forth conversation with AI with selected files provided as context.
-- Import File AI Commands
+- Import PromptLab Commands
     - Add custom commands from a JSON string.
 
 ## Custom Commands

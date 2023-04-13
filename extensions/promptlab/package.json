@@ -1,13 +1,14 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "file-ai",
-  "title": "File AI",
-  "description": "Summarize files with AI",
+  "name": "promptlab",
+  "title": "PromptLab",
+  "description": "Create custom AI commands using powerful placeholders",
   "icon": "command-icon.png",
   "author": "HelloImSteven",
   "categories": [
     "Productivity",
-    "Data"
+    "Data",
+    "Developer Tools"
   ],
   "license": "MIT",
   "preferences": [
@@ -16,7 +17,7 @@
       "label": "Use OCR For PDFs",
       "type": "checkbox",
       "default": true,
-      "description": "If checked, File AI will use OCR to extract text from PDFs. This takes longer but enables analysis of more PDF content types.",
+      "description": "If checked, PromptLab will use OCR to extract text from PDFs. This takes longer but enables analysis of more PDF content types.",
       "required": false
     }
   ],
@@ -29,14 +30,14 @@
     },
     {
       "name": "create-command",
-      "title": "Create File AI Command",
-      "description": "Create a custom File AI command accessible via 'Search File AI Commands'",
+      "title": "Create PromptLab Command",
+      "description": "Create a custom PromptLab command accessible via 'Search PromptLab Commands'",
       "mode": "view"
     },
     {
       "name": "search-commands",
-      "title": "Search File AI Commands",
-      "description": "Search custom File AI commands",
+      "title": "Search PromptLab Commands",
+      "description": "Search custom PromptLab commands",
       "mode": "view",
       "arguments": [
         {
@@ -49,7 +50,7 @@
     },
     {
       "name": "chat",
-      "title": "File AI Chat",
+      "title": "PromptLab Chat",
       "description": "Start an interactive chat with the context of selected files provided'",
       "mode": "view",
       "arguments": [
@@ -63,8 +64,8 @@
     },
     {
       "name": "import-commands",
-      "title": "Import File AI Commands",
-      "description": "Import custom File AI commands from a JSON string",
+      "title": "Import PromptLab Commands",
+      "description": "Import custom PromptLab commands from a JSON string",
       "mode": "view"
     }
   ],

@@ -143,7 +143,9 @@ export function useFileContents(options: CommandOptions) {
               // Get metadata for an unsupported file type
               try {
                 // Assume file contains readable text
-                contents += `"${filterContentString(fs.readFileSync(file).toString(), maxCharacters / 2)}"`;
+                if (fs.statSync(file).size < 100000) {
+                  contents += `"${filterContentString(fs.readFileSync(file).toString(), maxCharacters / 2)}"`;
+                }
               } catch (error) {
                 // File contains characters that can't be read
               }
