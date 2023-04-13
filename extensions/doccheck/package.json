@@ -45,7 +45,7 @@
       "arguments": [
         {
           "name": "url",
-          "placeholder": "URL",
+          "placeholder": "Article URL",
           "type": "text",
           "required": true
         },
@@ -57,7 +57,7 @@
         },
         {
           "name": "query",
-          "placeholder": "Searchquery",
+          "placeholder": "Search query",
           "type": "text",
           "required": false
         }

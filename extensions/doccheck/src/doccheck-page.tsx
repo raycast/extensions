@@ -98,7 +98,7 @@ export default function DocCheckPage(props: { url: string; prevurl: string; quer
   });
 
   const query = props.query ? props.query : "";
-  const queryText = props.query ? ` "` + props.query + `"` : "";
+  const queryText = props.query ? ` \"` + props.query + `\"` : "";
   markdown = title ? "# " + title : "# " + urlTitle;
   const goback =
     props.prevurl != undefined && props.prevurl != "" && preferences.openIn != "browser"
