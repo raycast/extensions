@@ -1,8 +1,4 @@
-import {
-  ActionPanel,
-  Action,
-  List,
-} from "@raycast/api";
+import { ActionPanel, Action, List } from "@raycast/api";
 import { useState, useEffect } from "react";
 import axios from "axios";
 import * as cheerio from "cheerio";
@@ -25,12 +21,12 @@ export default function Command() {
   const fetchHTMLContent = async (query: string) => {
     setIsLoading(true);
     setError(undefined);
-  
+
     try {
       const url = "https://wueaddress.uni-wuerzburg.de/search/person";
       const params = query ? { q: query } : undefined;
       const response = await axios.get(url, { params });
-  
+
       const results = collectData(response.data);
       setSearchResults(results);
       setError(undefined);
@@ -64,59 +60,52 @@ export default function Command() {
           <List.Item title={error} icon="error.png" />
         </List.Section>
       )}
-  
-      {(!isLoading && searchQuery === "" && (!searchResults || searchResults.length === 0)) ? (
-        <List.EmptyView
-          icon={{ source: wueIconData }}
-          title="Type something to get started"
-        />
+
+      {!isLoading && searchQuery === "" && (!searchResults || searchResults.length === 0) ? (
+        <List.EmptyView icon={{ source: wueIconData }} title="Type something to get started" />
       ) : (
         searchResults?.map((result, index) => (
-        <List.Item
-        key={`${result.title}_${index}`}
-          title={result.title}
-          subtitle={result.workplaces.join(", ")}
-          actions={
-            <ActionPanel>
-              {result.emails.map((email) => (
-                <Action.Open
-                  key={email}
-                  icon="AtSymbol"
-                  title={`Write Email`}
-                  target={`mailto:${email}`}
-                />
-              ))}
-            </ActionPanel>
-          }
-          detail={
-            <List.Item.Detail
-              metadata={
-                <List.Item.Detail.Metadata>
-                  <List.Item.Detail.Metadata.Label title="Name" text={result.title}/>
-                  {result.workplaces.map((workplace) => (
-                    <>
-                      <List.Item.Detail.Metadata.Separator />
-                      <List.Item.Detail.Metadata.Label title="Workplace" text={workplace}/>
-                    </>
-                  ))}
-                  {result.phones.map((phone) => (
-                    <>
-                      <List.Item.Detail.Metadata.Separator />
-                      <List.Item.Detail.Metadata.Label title="Phone" text={phone}/>
-                    </>
-                  ))}
-                  {result.emails.map((email) => (
-                    <>
-                      <List.Item.Detail.Metadata.Separator />
-                      <List.Item.Detail.Metadata.Label title="Email" text={email}/>
-                    </>
-                  ))}
-                </List.Item.Detail.Metadata>
-              }
-            />
-          }
-        />
-      )))}
+          <List.Item
+            key={`${result.title}_${index}`}
+            title={result.title}
+            subtitle={result.workplaces.join(", ")}
+            actions={
+              <ActionPanel>
+                {result.emails.map((email) => (
+                  <Action.Open key={email} icon="AtSymbol" title={`Write Email`} target={`mailto:${email}`} />
+                ))}
+              </ActionPanel>
+            }
+            detail={
+              <List.Item.Detail
+                metadata={
+                  <List.Item.Detail.Metadata>
+                    <List.Item.Detail.Metadata.Label title="Name" text={result.title} />
+                    {result.workplaces.map((workplace) => (
+                      <>
+                        <List.Item.Detail.Metadata.Separator />
+                        <List.Item.Detail.Metadata.Label title="Workplace" text={workplace} />
+                      </>
+                    ))}
+                    {result.phones.map((phone) => (
+                      <>
+                        <List.Item.Detail.Metadata.Separator />
+                        <List.Item.Detail.Metadata.Label title="Phone" text={phone} />
+                      </>
+                    ))}
+                    {result.emails.map((email) => (
+                      <>
+                        <List.Item.Detail.Metadata.Separator />
+                        <List.Item.Detail.Metadata.Label title="Email" text={email} />
+                      </>
+                    ))}
+                  </List.Item.Detail.Metadata>
+                }
+              />
+            }
+          />
+        ))
+      )}
     </List>
   );
 }
