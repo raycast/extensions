@@ -78,11 +78,13 @@ export default function IssueDetail({ initialIssue, issueKey }: IssueDetailProps
             }}
           />
 
-          <Detail.Metadata.Label
-            title="Priority"
-            text={issue?.fields.priority.name}
-            icon={issue?.fields.priority.iconUrl}
-          />
+          {issue?.fields.priority ? (
+            <Detail.Metadata.Label
+              title="Priority"
+              text={issue?.fields.priority.name}
+              icon={issue?.fields.priority.iconUrl}
+            />
+          ) : null}
 
           <Detail.Metadata.Label
             title="Assignee"
