@@ -197,7 +197,7 @@ export default function CommandResponse(props: { commandName: string; prompt: st
       for (const m of codeMatches) {
         const script = m.substring(3, m.length - 3);
         const output = await runAppleScript(script);
-        subbedPrompt = subbedPrompt.replaceAll(m, output);
+        subbedPrompt = filterString(subbedPrompt.replaceAll(m, output));
       }
 
       // Replace URL placeholders with the website's visible text

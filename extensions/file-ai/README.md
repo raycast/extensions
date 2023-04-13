@@ -58,6 +58,7 @@ You can create custom File AI commands, accessed via the "Search File AI Command
 - Recommend Apps
 - Respond To Last Email
 - Suggest File AI Commands
+- Suggest Fonts
 - Suggest Hashtags
 - Suggest Improvements
 - Suggest Project Ideas
