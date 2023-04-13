@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ActionPanel, Action, List, Color } from "@raycast/api";
+import { List, Color } from "@raycast/api";
 import { PlayerDetails } from "../types";
 import { useATPRankings } from "../hooks";
 
@@ -14,7 +14,7 @@ function DriverList() {
   return (
     <List isLoading={isLoading}>
       {selectedRankings
-        ? selectedRankings.map((standing, index) => (
+        ? selectedRankings.map((standing) => (
             <List.Item
               key={standing.id}
               icon={{
