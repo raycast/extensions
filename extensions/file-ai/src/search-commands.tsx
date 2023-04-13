@@ -33,7 +33,9 @@ export default function Command(props: { arguments: { commandName: string } }) {
         prompt={command.prompt}
         options={{
           minNumFiles: parseInt(command.minNumFiles as unknown as string),
-          acceptedFileExtensions: command.acceptedFileExtensions?.split(",").map((item) => item.trim()),
+          acceptedFileExtensions: command.acceptedFileExtensions?.length
+            ? command.acceptedFileExtensions?.split(",").map((item) => item.trim())
+            : undefined,
           useMetadata: command.useMetadata,
           useSoundClassification: command.useSoundClassification,
           useAudioDetails: command.useAudioDetails,
@@ -63,7 +65,9 @@ export default function Command(props: { arguments: { commandName: string } }) {
                   prompt={command.prompt}
                   options={{
                     minNumFiles: parseInt(command.minNumFiles as unknown as string),
-                    acceptedFileExtensions: command.acceptedFileExtensions?.split(",").map((item) => item.trim()),
+                    acceptedFileExtensions: command.acceptedFileExtensions?.length
+                      ? command.acceptedFileExtensions?.split(",").map((item) => item.trim())
+                      : undefined,
                     useMetadata: command.useMetadata,
                     useSoundClassification: command.useSoundClassification,
                     useAudioDetails: command.useAudioDetails,
