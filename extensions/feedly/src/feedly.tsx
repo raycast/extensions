@@ -9,6 +9,7 @@ import {
 import { useCachedState, useFetch } from '@raycast/utils';
 import Feed from './components/Feed';
 import { Collection } from './types/collection.types';
+import { useRef } from 'react';
 
 const Feedly = () => {
   const { isLoading, data } = useFetch<Collection[]>(
@@ -26,15 +27,18 @@ const Feedly = () => {
     []
   );
 
+  const defaultValue = useRef('0');
+
   return (
     <List
       isLoading={isLoading}
       searchBarPlaceholder="Search for feeds..."
       searchBarAccessory={
         <List.Dropdown
-          defaultValue="All"
+          defaultValue={defaultValue.current}
           tooltip="Filter by category"
           onChange={(value) => {
+            defaultValue.current = value;
             if (value === '0') {
               setActiveFeed(
                 data?.flatMap((collection) => collection.feeds) ?? []
