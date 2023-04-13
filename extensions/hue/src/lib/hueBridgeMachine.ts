@@ -12,9 +12,9 @@ import {
 import { discoverBridgeUsingMdns, discoverBridgeUsingNupnp, getUsernameFromBridge } from "./utils";
 import { LocalStorage, Toast } from "@raycast/api";
 import { v3 } from "node-hue-api";
-import { BRIDGE_CERT_FINGERPRINT, BRIDGE_ID_KEY, BRIDGE_IP_ADDRESS_KEY, BRIDGE_USERNAME_KEY } from "./constants";
+import { BRIDGE_CONFIG_KEY } from "./constants";
 import HueClient from "./HueClient";
-import { GroupedLight, Light, Room, Scene, Zone } from "./types";
+import { BridgeConfig, GroupedLight, Light, Room, Scene, Zone } from "./types";
 import React from "react";
 
 export type HueBridgeState = State<
@@ -27,9 +27,9 @@ export type HueBridgeState = State<
 
 export type HueContext = {
   bridgeIpAddress?: string;
+  bridgeConfig?: BridgeConfig;
   bridgeId?: string;
   bridgeUsername?: string;
-  bridgeCertFingerprint?: string;
   hueClient?: HueClient;
 };
 
@@ -48,6 +48,7 @@ export default function hueBridgeMachine(
     initial: "loadingCredentials",
     predictableActionArguments: true,
     context: {
+      bridgeConfig: undefined,
       bridgeIpAddress: undefined,
       bridgeId: undefined,
       bridgeUsername: undefined,
@@ -63,32 +64,25 @@ export default function hueBridgeMachine(
         invoke: {
           id: "loadingCredentials",
           src: async () => {
-            const [bridgeIpAddress, bridgeId, bridgeUsername, bridgeCertFingerprint] = await Promise.all([
-              LocalStorage.getItem<string>(BRIDGE_IP_ADDRESS_KEY),
-              LocalStorage.getItem<string>(BRIDGE_ID_KEY),
-              LocalStorage.getItem<string>(BRIDGE_USERNAME_KEY),
-              LocalStorage.getItem<string>(BRIDGE_CERT_FINGERPRINT),
-            ]);
+            const bridgeConfigString = await LocalStorage.getItem<string>(BRIDGE_CONFIG_KEY);
 
-            // Bridge certificate fingerprint is only required for Bridges with self-signed certificates
-            if (bridgeIpAddress === undefined || bridgeId === undefined || bridgeUsername === undefined) {
-              throw Error("No Hue Bridge credentials found");
+            if (bridgeConfigString === undefined) {
+              throw new Error("No bridge configuration found");
             }
 
-            return { bridgeIpAddress, bridgeId, bridgeUsername, bridgeCertFingerprint };
+            return { bridgeConfig: JSON.parse(bridgeConfigString) };
           },
           onDone: {
             actions: assign({
-              bridgeIpAddress: (context, event) => event.data.bridgeIpAddress,
-              bridgeId: (context, event) => event.data.bridgeId,
-              bridgeUsername: (context, event) => event.data.bridgeUsername,
-              bridgeCertFingerprint: (context, event) => event.data.bridgeCertFingerprint,
+              bridgeConfig: (context, event) => event.data.bridgeConfig,
             }),
             target: "connecting",
           },
           onError: {
-            // This is expected if the user has not yet linked their bridge
-            actions: (_, event) => console.info(event.data.message),
+            actions: (_, event) => {
+              // This is expected if the user has not yet linked their bridge. Hence, info instead of error.
+              console.info(event.data.message);
+            },
             target: "discoveringUsingPublicApi",
           },
         },
@@ -98,19 +92,12 @@ export default function hueBridgeMachine(
           id: "connecting",
           src: async (context) => {
             // We have already validated that these values are defined, but TypeScript doesn't know that
-            if (
-              context.bridgeIpAddress === undefined ||
-              context.bridgeId === undefined ||
-              context.bridgeUsername === undefined
-            ) {
+            if (context.bridgeConfig === undefined) {
               throw Error("Invalid state");
             }
 
             const hueClient = await HueClient.createInstance(
-              context.bridgeIpAddress,
-              context.bridgeId,
-              context.bridgeUsername,
-              context.bridgeCertFingerprint,
+              context.bridgeConfig,
               setLights,
               setGroupedLights,
               setRooms,
@@ -187,22 +174,23 @@ export default function hueBridgeMachine(
           id: "linking",
           src: async (context) => {
             if (context.bridgeIpAddress === undefined) throw Error("No bridge IP address");
+
+            // TODO: Get Bridge certificate and determine if it is self-signed
+
             const username = await getUsernameFromBridge(context.bridgeIpAddress);
 
             // Get bridge ID using the new credentials
             const api = await v3.api.createLocal(context.bridgeIpAddress).connect(username);
             const configuration = await api.configuration.getConfiguration();
 
-            // Set the new credentials. They will be unset if the linking fails.
-            LocalStorage.setItem(BRIDGE_IP_ADDRESS_KEY, context.bridgeIpAddress).then();
-            LocalStorage.setItem(BRIDGE_ID_KEY, configuration.bridgeid).then();
-            LocalStorage.setItem(BRIDGE_USERNAME_KEY, username).then();
+            const bridgeConfig: BridgeConfig = {
+              ipAddress: context.bridgeIpAddress,
+              username,
+              id: configuration.bridgeid,
+            };
 
             const hueClient = await HueClient.createInstance(
-              context.bridgeIpAddress,
-              configuration.bridgeid,
-              username,
-              undefined,
+              bridgeConfig,
               setLights,
               setGroupedLights,
               setRooms,
@@ -210,21 +198,17 @@ export default function hueBridgeMachine(
               setScenes
             );
 
-            return { bridgeId: configuration.bridgeid, bridgeUsername: username, hueClient };
+            return { bridgeConfig, hueClient };
           },
           onDone: {
-            target: "connecting",
+            target: "linked",
             actions: assign({
-              bridgeId: (context, event) => event.data.bridgeId,
-              bridgeUsername: (context, event) => event.data.bridgeUsername,
+              bridgeConfig: (context, event) => event.data.bridgeConfig,
               hueClient: (context, event) => event.data.hueClient,
             }),
           },
           onError: {
-            actions: (_, event) => {
-              console.error(event.data);
-              LocalStorage.clear().then();
-            },
+            actions: (_, event) => console.error(event.data),
             target: "failedToLink",
           },
         },
@@ -233,6 +217,20 @@ export default function hueBridgeMachine(
         on: {
           RETRY: {
             target: "linking",
+          },
+        },
+      },
+      linked: {
+        invoke: {
+          id: "linked",
+          src: async (context) => {
+            if (context.bridgeConfig === undefined) throw Error("No bridge IP address");
+            await LocalStorage.setItem(BRIDGE_CONFIG_KEY, JSON.stringify(context.bridgeConfig));
+          },
+        },
+        on: {
+          DONE: {
+            target: "connecting",
           },
         },
       },

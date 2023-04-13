@@ -1,8 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import fs from "fs";
-import { environment, LocalStorage } from "@raycast/api";
+import { environment } from "@raycast/api";
 import {
+  BridgeConfig,
   GroupedLight,
   HasId,
   Light,
@@ -28,7 +29,6 @@ import StreamArray from "stream-json/streamers/StreamArray";
 import Chain from "stream-chain";
 import "./arrayExtensions";
 import * as tls from "tls";
-import { BRIDGE_CERT_FINGERPRINT } from "./constants";
 import dns from "dns";
 
 const DATA_PREFIX = "data: ";
@@ -44,10 +44,7 @@ type Response = {
 };
 
 export default class HueClient {
-  public bridgeIpAddress: string;
-  public bridgeId: string;
-  public bridgeUsername: string;
-  public bridgeCertFingerprint?: string;
+  public bridgeConfig: BridgeConfig;
   private readonly setLights?: React.Dispatch<React.SetStateAction<Light[]>>;
   private readonly setGroupedLights?: React.Dispatch<React.SetStateAction<GroupedLight[]>>;
   private readonly setRooms?: React.Dispatch<React.SetStateAction<Room[]>>;
@@ -58,10 +55,7 @@ export default class HueClient {
   private readonly groupedLightsQueue = new RateLimitedQueue(1, 1);
 
   private constructor(
-    bridgeIpAddress: string,
-    bridgeId: string,
-    bridgeUsername: string,
-    bridgeCertFingerprint: string | undefined,
+    bridgeConfig: BridgeConfig,
     http2Session: ClientHttp2Session,
     setLights?: React.Dispatch<React.SetStateAction<Light[]>>,
     setGroupedLights?: React.Dispatch<React.SetStateAction<GroupedLight[]>>,
@@ -69,11 +63,8 @@ export default class HueClient {
     setZones?: React.Dispatch<React.SetStateAction<Zone[]>>,
     setScenes?: React.Dispatch<React.SetStateAction<Scene[]>>
   ) {
-    this.bridgeUsername = bridgeUsername;
     this.http2Session = http2Session;
-    this.bridgeIpAddress = bridgeIpAddress;
-    this.bridgeCertFingerprint = bridgeCertFingerprint;
-    this.bridgeId = bridgeId;
+    this.bridgeConfig = bridgeConfig;
     this.setLights = setLights;
     this.setGroupedLights = setGroupedLights;
     this.setRooms = setRooms;
@@ -83,10 +74,7 @@ export default class HueClient {
   }
 
   public static async createInstance(
-    bridgeIpAddress: string,
-    bridgeId: string,
-    bridgeUsername: string,
-    bridgeCertFingerprint: string | undefined = undefined,
+    bridgeConfig: BridgeConfig,
     setLights?: React.Dispatch<React.SetStateAction<Light[]>>,
     setGroupedLights?: React.Dispatch<React.SetStateAction<GroupedLight[]>>,
     setRooms?: React.Dispatch<React.SetStateAction<Room[]>>,
@@ -117,10 +105,10 @@ export default class HueClient {
 
     let cert: string | undefined;
     // TODO: Only do this if the certificate is self-signed
-    const peerCertificate = await getCertificate(bridgeIpAddress);
+    const peerCertificate = await getCertificate(bridgeConfig.ipAddress);
     console.log("Peer certificate:", peerCertificate);
-    if (peerCertificate.issuer.CN === bridgeId.toLowerCase()) {
-      console.log(`Certificate belongs to Hue Bridge with id "${bridgeId}", converting to PEM format…`);
+    if (peerCertificate.issuer.CN === bridgeConfig.id.toLowerCase()) {
+      console.log(`Certificate belongs to Hue Bridge with id "${bridgeConfig.id}", converting to PEM format…`);
       const insertNewlines = (str: string): string => {
         const regex = new RegExp(`(.{64})`, "g");
         return str.replace(regex, "$1\n");
@@ -136,7 +124,7 @@ export default class HueClient {
     }
     const http2Session = await new Promise<ClientHttp2Session>((resolve, reject) => {
       // Connect to the Hue Bridge using the Bridge ID as the hostname, which we then resolve to the Bridge IP address.
-      const session = connect(`https://${bridgeId}`, {
+      const session = connect(`https://${bridgeConfig.id}`, {
         ca: cert ? Buffer.from(cert, "utf-8") : fs.readFileSync(environment.assetsPath + "/huebridge_cacert.pem"),
         checkServerIdentity: (hostname, cert) => {
           /*
@@ -145,12 +133,13 @@ export default class HueClient {
            * In that case, we need to store the certificate’s fingerprint and check future connections against it.
            * Source: https://developers.meethue.com/develop/application-design-guidance/using-https/#Self-signed%20certificates
            */
-          if (cert.issuer.CN === bridgeId.toLowerCase() && cert.subject.CN === bridgeId.toLowerCase()) {
-            if (bridgeCertFingerprint === undefined) {
+          if (cert.issuer.CN === bridgeConfig.id.toLowerCase() && cert.subject.CN === bridgeConfig.id.toLowerCase()) {
+            if (bridgeConfig.certFingerprint === undefined) {
               console.log("Self-signed Hue Bridge certificate detected. Storing fingerprint for future connections.");
-              LocalStorage.setItem(BRIDGE_CERT_FINGERPRINT, cert.fingerprint);
+              // TODO: Move to function called from Bridge machine
+              // LocalStorage.setItem(BRIDGE_CERT_FINGERPRINT, cert.fingerprint);
             } else {
-              if (bridgeCertFingerprint !== cert.fingerprint) {
+              if (bridgeConfig.certFingerprint !== cert.fingerprint) {
                 return new Error(
                   "Server identity check failed. " +
                     "Fingerprint does not match known fingerprint. " +
@@ -172,7 +161,7 @@ export default class HueClient {
            * In case of a more up-to-date firmware version, we need to check the certificate’s Common Name field against
            * the bridgeId and check the certificate against the Hue Bridge Root CA.
            */
-          if (cert.subject.CN === bridgeId.toLowerCase() && cert.issuer.CN === "root-bridge") {
+          if (cert.subject.CN === bridgeConfig.id.toLowerCase() && cert.issuer.CN === "root-bridge") {
             return undefined;
           } else {
             return new Error(
@@ -186,11 +175,11 @@ export default class HueClient {
            * Resolve the Bridge ID to the Bridge IP address to prevent the following warning:
            * [DEP0123] DeprecationWarning: Setting the TLS ServerName to an IP address is not permitted by RFC 6066.
            */
-          if (hostname.toLowerCase() === bridgeId?.toLowerCase() && bridgeIpAddress !== undefined) {
+          if (hostname.toLowerCase() === bridgeConfig.id?.toLowerCase() && bridgeConfig.ipAddress !== undefined) {
             console.log(
-              `Overriding DNS lookup for host name "${hostname}" (Bridge ID) to ${bridgeIpAddress} to avoid TLS ServerName IP warning.`
+              `Overriding DNS lookup for host name "${hostname}" (Bridge ID) to ${bridgeConfig.ipAddress} to avoid TLS ServerName IP warning.`
             );
-            callback(null, bridgeIpAddress, 4);
+            callback(null, bridgeConfig.ipAddress, 4);
           } else {
             dns.lookup(hostname, options, callback);
           }
@@ -210,18 +199,7 @@ export default class HueClient {
       });
     });
 
-    return new HueClient(
-      bridgeIpAddress,
-      bridgeId,
-      bridgeUsername,
-      bridgeCertFingerprint,
-      http2Session,
-      setLights,
-      setGroupedLights,
-      setRooms,
-      setZones,
-      setScenes
-    );
+    return new HueClient(bridgeConfig, http2Session, setLights, setGroupedLights, setRooms, setZones, setScenes);
   }
 
   public async getLights(): Promise<Light[]> {
@@ -276,7 +254,7 @@ export default class HueClient {
       const stream = this.http2Session.request({
         [HTTP2_HEADER_METHOD]: method,
         [HTTP2_HEADER_PATH]: path,
-        "hue-application-key": this.bridgeUsername,
+        "hue-application-key": this.bridgeConfig.username,
         [sensitiveHeaders]: ["hue-application-key"],
       });
 
@@ -343,7 +321,7 @@ export default class HueClient {
       [HTTP2_HEADER_METHOD]: "GET",
       [HTTP2_HEADER_PATH]: "/eventstream/clip/v2",
       [HTTP2_HEADER_ACCEPT]: "text/event-stream",
-      "hue-application-key": this.bridgeUsername,
+      "hue-application-key": this.bridgeConfig.username,
       [sensitiveHeaders]: ["hue-application-key"],
     });
 

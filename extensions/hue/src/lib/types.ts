@@ -14,6 +14,13 @@ export type Palette = string[];
 export type GradientUri = string;
 export type GradientUriCache = Map<Id, GradientUri>;
 
+export type BridgeConfig = {
+  ipAddress: string;
+  id: string;
+  username: string;
+  certFingerprint?: string;
+};
+
 export type ParsedUpdateEvent = { key: number; value: UpdateEvent };
 
 export type CssColor = {
