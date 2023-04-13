@@ -25,7 +25,7 @@ export default function Command() {
   const svgSelected = selectedFiles?.join("").toLowerCase().includes(".svg");
   const imageSelected = selectedFiles?.join("").toLowerCase().search(matchAnyImageExtensions) != -1;
 
-  const basePrompt = `I want you to derive insights from information I provide about the content of files. You will respond with a descriptive discussion of the file, its main topics, and its significance. You will use all information provided to infer more insights. Provide several insights derived from metadata or EXIF data. Give an overview of lists, content, the position of objects and rectangles, etc. without listing specific details. Do not mention coordinates. Don't mention that information is provided. Don't repeat yourself. Don't list properties without describing their value. ${
+  const basePrompt = `I want you to derive insights from information I provide about the content of files. You will respond with a descriptive discussion of the file, its main topics, and its significance. You will use all information provided to infer more insights. Provide several insights derived from metadata or EXIF data. Give an overview of lists, content, objects, etc. without listing specific details. Discuss the general position of any objects or rectangles within the image. Don't mention that information is provided. Don't repeat yourself. Don't list properties without describing their value. ${
     imageSelected
       ? "Discuss the payload of any barcodes or QR codes. For images, use the general size and arrangement of objects to help predict what the file is about."
       : ""

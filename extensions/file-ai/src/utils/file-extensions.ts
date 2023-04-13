@@ -301,6 +301,12 @@ export const textFileExtensions = [
   "yml",
   "yrl",
   "zsh",
+  "rdf",
+  "text",
+  "tsv",
+  "manifest",
+  "sass",
+  "ascii",
 ];
 
 export const imageFileExtensions = [
@@ -318,7 +324,6 @@ export const imageFileExtensions = [
   "raw",
   "heic",
   "psd",
-  "webp",
   "indd",
 ];
 

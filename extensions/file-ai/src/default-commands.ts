@@ -37,8 +37,8 @@ export const defaultCommands = {
     '{"prompt":"Generate a response to the following email:\\n###\\n{{lastEmail}}\\n###","useFileMetadata":false,"minNumFiles":"0","icon":"envelope-16","acceptedFileExtensions":"","name":"Respond To Last Email","useSoundClassifications":false}',
   "Create Notes":
     '{"useRectangleDetection":false,"useBarcodeDetection":true,"icon":"bullet-points-16","minNumFiles":"1","useMetadata":false,"prompt":"I want you to act as a notetaker. I will provide file names and their contents, and you will respond with a multi-level markdown list of well-structured, concise notes. The notes should be in your own words and should make connections between topics and ideas. Each list item should be at most 20 words long. Minimize the notes as much as possible. Here are the files:","useSubjectClassification":true,"useFaceDetection":false,"useSoundClassification":true,"name":"Create Notes","acceptedFileExtensions":"","useAudioDetails":true}',
-  "Recently Headlines From 68k News":
-    '{"useFileMetadata":false,"minNumFiles":"0","acceptedFileExtensions":"","prompt":"Discuss the recent headlines from 68k News:\\n###\\n{{http://68k.news}}\\n###","name":"Recent Headlines from 68k News","useSoundClassifications":false,"icon":"important-01-16"}',
+  "Recent Headlines From 68k News":
+    '{"useFileMetadata":false,"minNumFiles":"0","acceptedFileExtensions":"","prompt":"Discuss the recent headlines from 68k News:\\n###\\n{{http://68k.news}}\\n###","name":"Recent Headlines From 68k News","useSoundClassifications":false,"icon":"important-01-16"}',
   "Generate Questions":
     '{"useAudioDetails":true,"useSubjectClassification":true,"useRectangleDetection":true,"useFaceDetection":true,"minNumFiles":"1","useBarcodeDetection":true,"useMetadata":true,"acceptedFileExtensions":"","prompt":"Generate questions based on the content of each of the following files, their metadata, filename, type, and other information. Format the response as a markdown list.","icon":"question-mark-circle-16","name":"Generate Questions","useSoundClassification":true}',
   "Suggest Improvements":

@@ -31,7 +31,7 @@ export default function Command(props: { arguments: { initialQuery: string } }) 
   const [creativityError, setCreativityError] = useState<string>();
 
   // Set up ground rules for the chat
-  const basePrompt = `I want you to act as an interactive information engine. I will provide information about the content of files, and then I will ask questions about those files. When I supply a question, you will respond with an answer based on the information I've provided. Respond in non-technical terms unless otherwise instructed. Only answer questions surrounded by {}, like {this}. Limit your responses to 200 words. Here are the files:\n"""`;
+  const basePrompt = `I want you to act as an interactive information engine. I will provide information about the content of files, and then I will ask questions about those files. When I supply a question, you will respond with an answer based on the information I've provided and your own inferences. Respond in non-technical terms unless otherwise instructed. Only answer questions surrounded by {}, like {this}. Limit your responses to 200 words. Here are the files:\n"""`;
 
   // Input the file data
   let fullPrompt = basePrompt + contentPrompts.join("\n");

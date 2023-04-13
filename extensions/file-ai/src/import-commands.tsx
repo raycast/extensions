@@ -89,7 +89,7 @@ export default function Command() {
               return `Missing prompt argument for command #${index} with key ${key}`;
             }
 
-            const intValue = parseInt(commandData["minNumFiles"]);
+            const intValue = parseInt(commandData["minNumFiles"] as unknown as string);
             if (intValue == undefined || intValue < 0) {
               return `Invalid minimum file count argument for command #${index} with key ${key}`;
             }

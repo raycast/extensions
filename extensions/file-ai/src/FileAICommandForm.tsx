@@ -6,15 +6,15 @@ interface CommandFormValues {
   name: string;
   prompt: string;
   icon: string;
-  minNumFiles: string,
-  acceptedFileExtensions: string,
-  useMetadata: boolean,
-  useAudioDetails: boolean,
-  useSoundClassification: boolean,
-  useSubjectClassification: boolean,
-  useRectangleDetection: boolean,
-  useBarcodeDetection: boolean,
-  useFaceDetection: boolean,
+  minNumFiles: string;
+  acceptedFileExtensions?: string;
+  useMetadata?: boolean;
+  useAudioDetails?: boolean;
+  useSoundClassification?: boolean;
+  useSubjectClassification?: boolean;
+  useRectangleDetection?: boolean;
+  useBarcodeDetection?: boolean;
+  useFaceDetection?: boolean;
 }
 
 export default function FileAICommandForm(props: {
@@ -24,7 +24,7 @@ export default function FileAICommandForm(props: {
   const { oldData, setCommands } = props;
   const { pop } = useNavigation();
 
-  let maxPromptLength = oldData?.minNumFiles == "0" ? 3000 : 500
+  let maxPromptLength = oldData?.minNumFiles == "0" ? 3000 : 500;
 
   const { handleSubmit, itemProps } = useForm<CommandFormValues>({
     async onSubmit(values) {
@@ -61,7 +61,7 @@ export default function FileAICommandForm(props: {
         if (!value) {
           return "Must provide a prompt";
         }
-        
+
         if (value.length > maxPromptLength) {
           return `Prompt must be ${maxPromptLength} characters or fewer`;
         }
@@ -106,9 +106,9 @@ export default function FileAICommandForm(props: {
         title="Minimum File Count"
         placeholder="Minimum number of files required"
         onChange={(value) => {
-          const intVal = parseInt(value)
+          const intVal = parseInt(value);
           if (intVal == 0) {
-            maxPromptLength = 3000
+            maxPromptLength = 3000;
           }
         }}
         {...itemProps.minNumFiles}

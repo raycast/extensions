@@ -10,6 +10,16 @@
     "Data"
   ],
   "license": "MIT",
+  "preferences": [
+    {
+      "name": "pdfOCR",
+      "label": "Use OCR For PDFs",
+      "type": "checkbox",
+      "default": true,
+      "description": "If checked, File AI will use OCR to extract text from PDFs. This takes longer but enables analysis of more PDF content types.",
+      "required": false
+    }
+  ],
   "commands": [
     {
       "name": "summarize-files",
