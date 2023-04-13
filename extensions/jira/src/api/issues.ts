@@ -141,9 +141,9 @@ export type Issue = {
   fields: {
     summary: string;
     issuetype: IssueType;
-    priority: Priority;
+    priority: Priority | null;
     assignee: User | null;
-    project: Project;
+    project: Project | null;
     updated: string;
     status: IssueStatus;
   };

@@ -8,8 +8,8 @@ import { FetchHeaders, getDeploymentURL, getFetchDeploymentsURL } from "../../ve
 import { useFetch } from "@raycast/utils";
 
 const DeploymentsList = ({ projectId }: { projectId?: string }) => {
-  const { user, selectedTeam } = useVercel();
-  const url = getFetchDeploymentsURL(selectedTeam?.id, projectId);
+  const { user, teams, selectedTeam } = useVercel();
+  const url = getFetchDeploymentsURL(selectedTeam, projectId);
 
   const { isLoading, data, revalidate } = useFetch<{
     deployments: Deployment[];
@@ -26,7 +26,7 @@ const DeploymentsList = ({ projectId }: { projectId?: string }) => {
   };
 
   const { push } = useNavigation();
-
+  const team = teams?.find((team) => team.id === selectedTeam);
   return (
     <List
       throttle
@@ -42,7 +42,7 @@ const DeploymentsList = ({ projectId }: { projectId?: string }) => {
             title={`${getCommitMessage(deployment)}`}
             icon={StateIcon(deployment.readyState ? deployment.readyState : deployment.state)}
             subtitle={`${!projectId ? ` ${deployment.name}` : ""}`}
-            keywords={[deployment.name, getCommitMessage(deployment) || "", branchName]}
+            keywords={[deployment.name, getCommitMessage(deployment) || "", branchName || ""]}
             key={deployment.uid}
             actions={
               <ActionPanel>
@@ -50,13 +50,7 @@ const DeploymentsList = ({ projectId }: { projectId?: string }) => {
                   title="Show Details"
                   icon={Icon.Binoculars}
                   onAction={() => {
-                    push(
-                      <InspectDeployment
-                        username={user?.username}
-                        deployment={deployment}
-                        selectedTeam={selectedTeam}
-                      />
-                    );
+                    push(<InspectDeployment username={user?.username} deployment={deployment} selectedTeam={team} />);
                   }}
                 />
                 <Action.OpenInBrowser title={`Visit in Browser`} url={`https://${deployment.url}`} icon={Icon.Link} />
@@ -64,7 +58,7 @@ const DeploymentsList = ({ projectId }: { projectId?: string }) => {
                   <Action.OpenInBrowser
                     title={`Visit on Vercel`}
                     url={getDeploymentURL(
-                      selectedTeam ? selectedTeam.name : user.username,
+                      team?.slug || user.username,
                       deployment.name,
                       /* @ts-expect-error Property id does not exist on type Deployment */
                       deployment.id || deployment.uid

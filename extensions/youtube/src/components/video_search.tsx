@@ -1,40 +1,140 @@
-import { showToast, Toast } from "@raycast/api";
-import { useState } from "react";
+import { Action, ActionPanel, Icon, Color, getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { useState, useEffect } from "react";
 import { getErrorMessage } from "../lib/utils";
-import { searchVideos, useRefresher, Video } from "../lib/youtubeapi";
+import { searchVideos, getVideos, useRefresher, Video } from "../lib/youtubeapi";
 import { VideoItem } from "./video";
-import { ListOrGrid, getViewLayout, getGridItemSize } from "./listgrid";
-import { RecentVideos, PinVideo } from "./recent_videos";
+import { ListOrGrid, ListOrGridEmptyView, ListOrGridSection } from "./listgrid";
+import * as cache from "./recent_videos";
+import { Preferences } from "../lib/types";
 
-export function SearchVideoList(props: { channedId?: string | undefined; searchQuery?: string | undefined }) {
-  const [searchText, setSearchText] = useState<string>(props.searchQuery || "");
-  const { data, error, isLoading } = useRefresher<Video[] | undefined>(async () => {
-    if (searchText) {
-      return await searchVideos(searchText, props.channedId);
-    }
-    return undefined;
-  }, [searchText]);
+export function SearchVideoList({ channelId, searchQuery }: { channelId?: string; searchQuery?: string | undefined }) {
+  const { griditemsize, showRecentVideos } = getPreferenceValues<Preferences>();
+  const [searchText, setSearchText] = useState<string>(searchQuery || "");
+  const { data, error, isLoading } = useRefresher<Video[] | undefined>(
+    async () => (searchText ? await searchVideos(searchText, channelId) : undefined),
+    [searchText]
+  );
   if (error) {
-    showToast(Toast.Style.Failure, "Could not search videos", getErrorMessage(error));
+    showToast(Toast.Style.Failure, "Could Not Search Videos", getErrorMessage(error));
   }
-  const layout = getViewLayout();
-  const itemSize = getGridItemSize();
-  if (props.searchQuery || data) {
+  const [loading, setLoading] = useState<boolean>(true);
+  const [pinnedVideos, setPinnedVideos] = useState<Video[]>([]);
+  const [recentVideos, setRecentVideos] = useState<Video[]>([]);
+
+  useEffect(() => {
+    (async () => {
+      const pinnedVideos = await getVideos(cache.getPinnedVideos());
+      setPinnedVideos(pinnedVideos.filter((v) => !channelId || v.channelId === channelId));
+      const recentVideos = await getVideos(cache.getRecentVideos());
+      setRecentVideos(recentVideos.filter((v) => !channelId || v.channelId === channelId));
+      setLoading(false);
+    })();
+  }, []);
+
+  const PinVideo = ({ video }: { video: Video }): JSX.Element => {
     return (
-      <ListOrGrid
-        layout={layout}
-        itemSize={itemSize}
-        isLoading={isLoading}
-        onSearchTextChange={setSearchText}
-        searchText={searchText}
-        throttle={true}
-      >
-        {data?.map((v) => (
-          <VideoItem key={v.id} video={v} actions={<PinVideo video={v} />} />
-        ))}
-      </ListOrGrid>
+      <Action
+        title="Pin Video"
+        icon={{ source: Icon.Pin, tintColor: Color.PrimaryText }}
+        shortcut={{ modifiers: ["cmd"], key: "p" }}
+        onAction={() => {
+          cache.addPinnedVideo(video);
+          setRecentVideos(recentVideos.filter((v) => v.id !== video.id));
+          setPinnedVideos([...pinnedVideos, video]);
+          showToast(Toast.Style.Success, "Pinned Video");
+        }}
+      />
     );
-  } else {
-    return <RecentVideos setRootSearchText={setSearchText} isLoading={isLoading} channelId={props.channedId} />;
-  }
+  };
+  const PinnedVideoActions = ({ video }: { video: Video }) => (
+    <ActionPanel.Section>
+      <Action
+        title="Remove From Pinned Videos"
+        onAction={() => {
+          cache.removePinnedVideo(video.id);
+          setPinnedVideos(pinnedVideos.filter((v) => v.id !== video.id));
+          showToast(Toast.Style.Success, "Removed From Pinned Videos");
+        }}
+        icon={{ source: Icon.XMarkCircle, tintColor: Color.PrimaryText }}
+        shortcut={{ modifiers: ["cmd"], key: "r" }}
+      />
+      <Action
+        title="Clear All Pinned Videos"
+        onAction={() => {
+          cache.clearPinnedVideos();
+          setPinnedVideos([]);
+          showToast(Toast.Style.Success, "Cleared All Pinned Videos");
+        }}
+        icon={{ source: Icon.Trash, tintColor: Color.Red }}
+        shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
+      />
+    </ActionPanel.Section>
+  );
+  const RecentVideoActions = ({ video }: { video: Video }) => {
+    return (
+      <ActionPanel.Section>
+        <PinVideo video={video} />
+        <Action
+          title="Remove From Recent Videos"
+          onAction={() => {
+            cache.removeRecentVideo(video.id);
+            setRecentVideos(recentVideos.filter((v) => v.id !== video.id));
+            showToast(Toast.Style.Success, "Removed From Recent Videos");
+          }}
+          icon={{ source: Icon.XMarkCircle, tintColor: Color.PrimaryText }}
+          shortcut={{ modifiers: ["cmd"], key: "r" }}
+        />
+        <Action
+          title="Clear All Recent Videos"
+          onAction={() => {
+            cache.clearRecentVideos();
+            setRecentVideos([]);
+            showToast(Toast.Style.Success, "Cleared All Recent Videos");
+          }}
+          icon={{ source: Icon.Trash, tintColor: Color.Red }}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
+        />
+      </ActionPanel.Section>
+    );
+  };
+
+  return data ? (
+    <ListOrGrid
+      isLoading={isLoading}
+      columns={griditemsize}
+      aspectRatio={"4/3"}
+      onSearchTextChange={setSearchText}
+      throttle={true}
+    >
+      {data.map((v) => (
+        <VideoItem key={v.id} video={v} actions={<PinVideo video={v} />} />
+      ))}
+    </ListOrGrid>
+  ) : !loading ? (
+    <ListOrGrid
+      isLoading={isLoading}
+      columns={griditemsize}
+      aspectRatio={"4/3"}
+      onSearchTextChange={setSearchText}
+      throttle={true}
+    >
+      {recentVideos.length === 0 && pinnedVideos.length === 0 && (
+        <ListOrGridEmptyView title="No Pinned or Recent Videos" />
+      )}
+      <ListOrGridSection title="Pinned Videos">
+        {pinnedVideos.map((v: Video) => (
+          <VideoItem key={v.id} video={v} actions={<PinnedVideoActions video={v} />} />
+        ))}
+      </ListOrGridSection>
+      {showRecentVideos && (
+        <ListOrGridSection title="Recent Videos">
+          {recentVideos.map((v: Video) => (
+            <VideoItem key={v.id} video={v} actions={<RecentVideoActions video={v} />} />
+          ))}
+        </ListOrGridSection>
+      )}
+    </ListOrGrid>
+  ) : (
+    <ListOrGrid isLoading={true} />
+  );
 }

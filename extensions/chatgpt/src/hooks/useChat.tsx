@@ -19,6 +19,12 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
     }>().useStream;
   });
 
+  const [isHistoryPaused] = useState<boolean>(() => {
+    return getPreferenceValues<{
+      isHistoryPaused: boolean;
+    }>().isHistoryPaused;
+  });
+
   const history = useHistory();
   const isAutoTTS = useAutoTTS();
   const proxy = useProxy();
@@ -53,7 +59,7 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
         {
           model: model.option,
           temperature: Number(model.temperature),
-          messages: [...chatTransfomer(data, model.prompt), { role: "user", content: question }],
+          messages: [...chatTransfomer(data.reverse(), model.prompt), { role: "user", content: question }],
           stream: useStream,
         },
         {
@@ -77,7 +83,9 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
                 toast.title = "Got your answer!";
                 toast.style = Toast.Style.Success;
 
-                history.add(chat);
+                if (!isHistoryPaused) {
+                  history.add(chat);
+                }
                 return;
               }
               try {
@@ -128,7 +136,9 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
               });
             });
 
-            history.add(chat);
+            if (!isHistoryPaused) {
+              history.add(chat);
+            }
           }
         }
       })
@@ -136,7 +146,11 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
         toast.title = "Error";
         if (err) {
           if (err?.response?.data?.error?.message) {
-            toast.message = err.response.data.error.message;
+            if (err.response.data.error.status === 429 || err.response.data.error.message.includes("429")) {
+              toast.message = "Please upgrade your account to pay-as-you-go";
+            } else {
+              toast.message = err.response.data.error.message;
+            }
           } else {
             toast.message = err.message;
           }
