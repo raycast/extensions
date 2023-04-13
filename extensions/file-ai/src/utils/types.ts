@@ -4,7 +4,7 @@ export interface ExtensionPreferences {
 
 /**
  * User-customizable options for File AI commands.
- * 
+ *
  * minNumFiles - The minimum number of files required for a command to run.
  * acceptedFileExtensions - The comma-separated list of extensions that the command operates on.
  * useMetadata - If true, metadata and EXIF data will be included in the AI prompt.

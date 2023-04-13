@@ -65,7 +65,7 @@ end tell`);
 
 /**
  * Gets the raw content, content labels, and metadata of selected files.
- * 
+ *
  * @param options Options for types of information to include in the output; a {@link CommandOptions} object.
  * @returns A string containing the contents of selected files.
  */
@@ -78,7 +78,7 @@ export function useFileContents(options: CommandOptions) {
   const validExtensions = options.acceptedFileExtensions ? options.acceptedFileExtensions : [];
 
   useEffect(() => {
-    const preferences = getPreferenceValues<ExtensionPreferences>()
+    const preferences = getPreferenceValues<ExtensionPreferences>();
     getSelectedFiles()
       .then((files) => {
         // Raise error if too few files are selected
@@ -183,7 +183,7 @@ export function useFileContents(options: CommandOptions) {
 
 /**
  * Removes excess characters from a string.
- * 
+ *
  * @param content The content string to filter.
  * @param cutoff The maximum number of characters in the output.
  * @returns The filtered string.
@@ -199,7 +199,7 @@ const filterContentString = (content: string, cutoff?: number): string => {
 
 /**
  * Obtains a description of an image by using computer vision and EXIF data.
- * 
+ *
  * @param filePath The path of the image file.
  * @param options A {@link CommandOptions} object describing the types of information to include in the output.
  * @returns The image description as a string.
@@ -213,7 +213,7 @@ const getImageDetails = async (filePath: string, options: CommandOptions): Promi
 
 /**
  * Obtains a description of files contained in a folder directory.
- * 
+ *
  * @param filePath The path of the directory.
  * @returns The folder description as a string.
  */
@@ -224,7 +224,7 @@ const getDirectoryDetails = (filePath: string): string => {
 
 /**
  * Obtains information about objects within an image using Apple's Vision framework.
- * 
+ *
  * @param filePath The path of the image file.
  * @param options A {@link CommandOptions} object describing the types of information to obtain.
  * @returns A string containing all extracted Vision information.
@@ -375,7 +375,7 @@ const getImageVisionDetails = (filePath: string, options: CommandOptions): strin
 
 /**
  * Obtains a description of an application bundle based on its plist, metadata, and scripting dictionary.
- * 
+ *
  * @param filePath The path of the application bundle.
  * @param useMetadata Whether to include metadata in the output.
  * @returns The description of the application bundle as a string.
@@ -415,7 +415,7 @@ const getApplicationDetails = (filePath: string, useMetadata?: boolean): string 
 
 /**
  * Obtains metadata information for a file.
- * 
+ *
  * @param filePath The path to the file.
  * @returns The metadata as a string.
  */
@@ -428,7 +428,7 @@ const getMetadataDetails = (filePath: string): string => {
 
 /**
  * Obtains EXIF data for an image file.
- * 
+ *
  * @param filePath The path to the image file.
  * @returns The EXIF data as a string.
  */
@@ -441,7 +441,7 @@ const getFileExifData = async (filePath: string) => {
 
 /**
  * Extracts text from a PDF.
- * 
+ *
  * @param filePath The path of the PDF file.
  * @param useOCR Whether to use OCR to extract additional text from the PDF
  * @param pageLimit The number of pages to use OCR on if asImages is true.
@@ -449,7 +449,8 @@ const getFileExifData = async (filePath: string) => {
  */
 const getPDFText = async (filePath: string, useOCR: boolean, pageLimit: number): Promise<string> => {
   // Use OCR to extract text
-  const imageText = useOCR ? await runAppleScript(`use framework "PDFKit"
+  const imageText = useOCR
+    ? await runAppleScript(`use framework "PDFKit"
     use framework "Vision"
     
     set theFile to "${filePath}"
@@ -478,8 +479,9 @@ const getPDFText = async (filePath: string, useOCR: boolean, pageLimit: number):
         set theText to theText & ((first item in (observation's topCandidates:1))'s |string|() as text) & ", "
       end repeat
     end repeat
-    return theText`) : ''
-  
+    return theText`)
+    : "";
+
   // Get the raw text of the PDF
   const rawText = await runAppleScript(`use framework "Quartz"
   set thePDF to "${filePath}"
@@ -487,15 +489,15 @@ const getPDFText = async (filePath: string, useOCR: boolean, pageLimit: number):
   set thePDF to current application's PDFDocument's alloc()'s initWithURL:theURL
   return (thePDF's |string|()) as text`);
 
-  return `${rawText} ${imageText}`
+  return `${rawText} ${imageText}`;
 };
 
 /**
  * Gets the metadata and sound classifications of an audio file.
- * 
+ *
  * @param filePath The path of the audio file.
  * @param useMetadata Whether to include metadata in the output.
- * 
+ *
  * @returns The metadata and sound classifications as a single string.
  */
 const getAudioDetails = (filePath: string, useMetadata?: boolean): string => {
@@ -510,7 +512,7 @@ const getAudioDetails = (filePath: string, useMetadata?: boolean): string => {
 
 /**
  * Obtains labels for sounds in an audio file.
- * 
+ *
  * @param filePath The path of the audio file.
  * @returns The list of labels as a comma-separated string.
  */
@@ -578,7 +580,7 @@ const getSoundClassification = (filePath: string): string => {
 
 /**
  * Transcribes spoken content in an audio file.
- * 
+ *
  * @param filePath The path of the audio file.
  * @returns The transcribed text as a string.
  */
