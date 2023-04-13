@@ -8,7 +8,7 @@ import {
   Toast,
   useUnstableAI,
 } from "@raycast/api";
-import { CommandOptions, ERRORTYPE, useFileContents } from "./utils/file-utils";
+import { ERRORTYPE, useFileContents } from "./utils/file-utils";
 import ResponseActions from "./ResponseActions";
 import * as os from "os";
 import * as fs from "fs";
@@ -33,12 +33,10 @@ import {
   getJSONResponse,
   getWeatherData,
 } from "./utils/context-utils";
+import { CommandOptions } from "./utils/types";
+import { runAppleScript } from "run-applescript";
 
-export default function CommandResponse(props: {
-  commandName: string;
-  prompt: string;
-  options: CommandOptions
-}) {
+export default function CommandResponse(props: { commandName: string; prompt: string; options: CommandOptions }) {
   const { commandName, prompt, options } = props;
   const [substitutedPrompt, setSubstitutedPrompt] = useState<string>(prompt);
   const [loadingData, setLoadingData] = useState<boolean>(true);
@@ -82,7 +80,6 @@ export default function CommandResponse(props: {
     },
     "{{currentTabText}}": async () => {
       const app = await getFrontmostApplication();
-      console.log("here");
       if (SupportedBrowsers.includes(app.name)) {
         const URL = await getCurrentURL(app.name);
         const URLText = await getTextOfWebpage(URL);
@@ -195,6 +192,15 @@ export default function CommandResponse(props: {
         }
       }
 
+      // Replace script placeholders with their output
+      const codeMatches = prompt.match(/{{{(.*[\s\n\r]*)*}}}/g) || [];
+      for (const m of codeMatches) {
+        const script = m.substring(3, m.length - 3);
+        const output = await runAppleScript(script)
+        subbedPrompt = subbedPrompt.replaceAll(m, output);
+      }
+
+      // Replace URL placeholders with the website's visible text
       const matches = prompt.match(/{{(https?:.*?)}}/g) || [];
       for (const m of matches) {
         const url = m.substring(2, m.length - 2);
@@ -217,7 +223,8 @@ export default function CommandResponse(props: {
     ""
   );
   const { data, isLoading, revalidate } = useUnstableAI(fullPrompt, {
-    execute: !loadingData && ((options.minNumFiles != undefined && options.minNumFiles == 0) || contentPrompts.length > 0),
+    execute:
+      !loadingData && ((options.minNumFiles != undefined && options.minNumFiles == 0) || contentPrompts.length > 0),
   });
 
   if (errorType) {
@@ -239,7 +246,11 @@ export default function CommandResponse(props: {
   }
 
   const text = `# ${commandName}\n${
-    data ? data : options.minNumFiles != undefined && options.minNumFiles == 0 ? "Loading response..." : "Analyzing files..."
+    data
+      ? data
+      : options.minNumFiles != undefined && options.minNumFiles == 0
+      ? "Loading response..."
+      : "Analyzing files..."
   }`;
   return (
     <Detail

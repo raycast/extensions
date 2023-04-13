@@ -54,6 +54,7 @@ You can create custom File AI commands, accessed via the "Search File AI Command
 - Meeting Agenda
 - Pattern Analysis
 - Pros And Cons
+- Recent Headlines From 68k News
 - Recommend Apps
 - Respond To Last Email
 - Suggest File AI Commands
@@ -81,7 +82,11 @@ You can create custom File AI commands, accessed via the "Search File AI Command
 
 When creating custom commands, you can use placeholders in your prompts that will be substituted with relevant information whenever you run the command. These placeholders range from simple information, like the current date, to complex data retrieval operations such as getting the content of the most recent email. Placeholders are a powerful way to add context to your File AI prompts. The valid placeholders are as follows:
 
-### URL Placeholders
+### Script Placeholders
+
+You can include AppleScript in your commands that will be run prior to sending the prompt to Raycast AI. The output of the script will be included in the final prompt. To do this, surround your script with three curly braces, {{{like this}}}. For example: 'Summarize this text: {{{tell application "TextEdit" to get text of document 1}}}'
+
+#### URL Placeholders
 
 You can instruct File AI to extract text from any webpage by using the {{URL}} placeholder. For example, `{{http://68k.news}}` would be replaced with the visible text of the 68k News homepage. You can use this to interface between files, data, webpages, and APIs.
 
