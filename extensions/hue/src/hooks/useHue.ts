@@ -7,6 +7,7 @@ export type HueMessage = "LINK" | "RETRY" | "DONE" | "UNLINK";
 export type SendHueMessage = (message: HueMessage) => void;
 
 export function useHue() {
+  const [isLoading, setIsLoading] = useCachedState("isLoading", true);
   const [lights, setLights] = useCachedState("lights", [] as Light[]);
   const [groupedLights, setGroupedLights] = useCachedState("groupedLights", [] as GroupedLight[]);
   const [rooms, setRooms] = useCachedState("rooms", [] as Room[]);
@@ -35,6 +36,8 @@ export function useHue() {
         setRooms(await hueBridgeState.context.hueClient.getRooms());
         setZones(await hueBridgeState.context.hueClient.getZones());
         setScenes(await hueBridgeState.context.hueClient.getScenes());
+
+        setIsLoading(false);
       })();
     }
   }, [hueBridgeState.context.hueClient]);
@@ -42,8 +45,7 @@ export function useHue() {
   return {
     hueBridgeState,
     sendHueMessage,
-    // TODO: Don't assume that someone has zones, for example.
-    isLoading: !lights.length || !rooms.length || !zones.length || !scenes.length,
+    isLoading: isLoading,
     lights,
     setLights,
     groupedLights,
