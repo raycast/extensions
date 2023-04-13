@@ -40,7 +40,7 @@ export default function SearchBirdTaxons() {
     <List
       isLoading={isLoading}
       onSearchTextChange={setSearchText}
-      searchBarPlaceholder={isLoading ? "Fetching eBird Taxon..." : "Search for birds from eBird..."}
+      searchBarPlaceholder="Search for birds from eBird..."
       searchText={searchText}
       throttle
     >
