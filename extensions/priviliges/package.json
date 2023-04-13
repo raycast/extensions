@@ -21,6 +21,12 @@
       "title": "Revoke admin priviliges",
       "description": "Revoke admin permission with SAP Priviliges",
       "mode": "no-view"
+    },
+    {
+      "name": "temp",
+      "title": "Temporary grant admin priviliges",
+      "description": "Revoke admin permission with SAP Priviliges for 1 minute",
+      "mode": "no-view"
     }
   ],
   "dependencies": {
