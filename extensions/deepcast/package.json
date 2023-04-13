@@ -31,6 +31,34 @@
       "mode": "no-view"
     },
     {
+      "name": "norwegian",
+      "title": "Translate Into Norwegian",
+      "subtitle": "Deepcast",
+      "description": "Translate selected text into Norwegian (Bokmål) using DeepL",
+      "mode": "no-view"
+    },
+    {
+      "name": "indonesian",
+      "title": "Translate Into Indonesian",
+      "subtitle": "Deepcast",
+      "description": "Translate selected text into Indonesian using DeepL",
+      "mode": "no-view"
+    },
+    {
+      "name": "korean",
+      "title": "Translate Into Korean",
+      "subtitle": "Deepcast",
+      "description": "Translate selected text into Korean using DeepL",
+      "mode": "no-view"
+    },
+    {
+      "name": "turkish",
+      "title": "Translate Into Turkish",
+      "subtitle": "Deepcast",
+      "description": "Translate selected text into Turkish using DeepL",
+      "mode": "no-view"
+    },
+    {
       "name": "chinese",
       "title": "Translate Into Chinese",
       "subtitle": "Deepcast",
@@ -233,20 +261,18 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.31.0",
+    "@raycast/api": "^1.48.8",
     "got": "^11.8.2"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
+    "@raycast/eslint-config": "^1.0.5",
+    "@types/node": "^18.8.3",
     "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
     "typescript": "^4.4.3"
   },
   "scripts": {
     "build": "ray build -e dist",
-    "dev": "ray develop"
+    "dev": "ray develop",
+    "lint": "ray lint"
   }
 }

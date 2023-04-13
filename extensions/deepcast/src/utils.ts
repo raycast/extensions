@@ -85,6 +85,10 @@ export const source_languages = {
   ES: "Spanish",
   SV: "Swedish",
   UK: "Ukrainian",
+  ID: "Indonesian",
+  KO: "Korean",
+  NB: "Norwegian (Bokmål)",
+  TR: "Turkish",
 };
 export type SourceLanguage = keyof typeof source_languages;
 
@@ -116,5 +120,9 @@ export const target_languages = {
   ES: "Spanish",
   SV: "Swedish",
   UK: "Ukrainian",
+  ID: "Indonesian",
+  KO: "Korean",
+  NB: "Norwegian (Bokmål)",
+  TR: "Turkish",
 };
 export type TargetLanguage = keyof typeof target_languages;
