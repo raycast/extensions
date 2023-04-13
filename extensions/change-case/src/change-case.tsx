@@ -211,6 +211,7 @@ export default function Command() {
       <List.Item
         id={props.case}
         title={props.case}
+        accessories={[{ text: props.modified }]}
         detail={<List.Item.Detail markdown={props.modified} />}
         actions={
           <ActionPanel>
