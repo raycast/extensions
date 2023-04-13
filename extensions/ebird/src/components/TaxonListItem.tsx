@@ -18,8 +18,6 @@ export default function TaxonListItem({ taxon }: { taxon: EBirdTaxon }) {
         <ActionPanel>
           <ActionPanel.Section>
             <Action.OpenInBrowser title="Open in Browser" url={`${EBIRD_URL}/${taxon.speciesCode}`} />
-          </ActionPanel.Section>
-          <ActionPanel.Section>
             <Action.CopyToClipboard
               title="Copy Common Name"
               content={taxon.comName}
