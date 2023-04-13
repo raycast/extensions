@@ -150,9 +150,8 @@ export default function ListDomains() {
       isLoading={state.domains === undefined || state.isLoading}
       searchBarPlaceholder="Search for domain..."
       isShowingDetail={state.showDetails}
-      navigationTitle={`${state.domains?.length || 0} domains`}
     >
-      <List.Section title="Domains">
+      <List.Section title={`${state.domains?.length || 0} domains`}>
         {(state.domains || [])
           .filter((domain) => (state.listSharedDomains ? domain : !domain.isShared))
           .map((domain) => (

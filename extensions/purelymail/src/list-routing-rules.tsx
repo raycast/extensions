@@ -140,9 +140,8 @@ export default function ListRoutingRules() {
       isLoading={state.rules === undefined || state.isLoading}
       searchBarPlaceholder="Search for rule..."
       isShowingDetail={state.showDetails == true}
-      navigationTitle={`${state.rules?.length || 0} rules`}
     >
-      <List.Section title="Rules">
+      <List.Section title={`${state.rules?.length || 0} rules`}>
         {(state.rules || []).map((rule) => (
           <List.Item
             key={rule.id}
