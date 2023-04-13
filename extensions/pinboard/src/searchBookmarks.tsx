@@ -1,17 +1,23 @@
 import { List } from "@raycast/api";
-import { useSearchBookmarks, SearchKind } from "./api";
-import { BookmarkListItem } from "./components";
+import { useSearchBookmarks } from "./api";
+import { BookmarkListItem, EmptyView } from "./components";
+import { Bookmark } from "./types";
+import { deleteItem } from "./utils";
 
 export default function Command() {
-  const { state, search } = useSearchBookmarks(SearchKind.All);
+  const { data, isLoading, mutate } = useSearchBookmarks();
+
+  async function deleteBookmark(bookmark: Bookmark) {
+    await deleteItem({ bookmark, mutate });
+  }
 
   return (
-    <List isLoading={state.isLoading} onSearchTextChange={search} searchBarPlaceholder="Search by tags..." throttle>
-      <List.Section title={state.title} subtitle={state.bookmarks.length + ""}>
-        {state.bookmarks.map((bookmark) => (
-          <BookmarkListItem key={bookmark.id} bookmark={bookmark} />
+    <List isLoading={isLoading} searchBarPlaceholder="Search by name or #tag...">
+      <EmptyView />
+      {data?.bookmarks &&
+        data.bookmarks.map((bookmark) => (
+          <BookmarkListItem key={bookmark.id} bookmark={bookmark} onDelete={deleteBookmark} />
         ))}
-      </List.Section>
     </List>
   );
 }

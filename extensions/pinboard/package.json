@@ -6,6 +6,10 @@
   "icon": "extension-icon.png",
   "author": "fe9lix",
   "license": "MIT",
+  "contributors": [
+    "kory-smith",
+    "pernielsentikaer"
+  ],
   "categories": [
     "Media",
     "Web"
@@ -47,28 +51,33 @@
       "type": "textfield",
       "required": false,
       "title": "Constant tags",
-      "description": "Enter the tags you want to add when searching with constant tags",
-      "placeholder": "bookmarks"
+      "description": "Enter the tags you want to add when searching with constant tags - separated by spaces",
+      "placeholder": "web development hats"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.30.0",
+    "@raycast/api": "1.47.3",
+    "@raycast/utils": "^1.4.16",
     "he": "^1.2.0",
-    "node-fetch": "^3.2.0"
+    "node-fetch": "^3.3.0"
   },
   "devDependencies": {
     "@types/he": "^1.1.2",
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "eslint-plugin-react-hooks": "^4.3.0",
-    "typescript": "^4.4.3"
+    "@types/node": "~18.11.18",
+    "@types/react": "^18.0.26",
+    "@typescript-eslint/eslint-plugin": "^5.48.1",
+    "@typescript-eslint/parser": "^5.48.1",
+    "eslint": "^8.32.0",
+    "eslint-config-prettier": "^8.6.0",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "prettier": "^2.8.4",
+    "typescript": "^4.9.4"
   },
   "scripts": {
     "build": "ray build -e dist",
-    "dev": "ray develop"
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
   }
 }

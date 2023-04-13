@@ -1,115 +1,75 @@
-import { getPreferenceValues, showToast, Toast } from "@raycast/api";
-import { useState, useEffect, useRef, useCallback } from "react";
-import fetch, { AbortError } from "node-fetch";
-
-const apiBasePath = "https://api.pinboard.in/v1";
+import { getPreferenceValues } from "@raycast/api";
+import fetch from "node-fetch";
+import { useFetch } from "@raycast/utils";
+import { PinboardBookmark, Bookmark, BookmarksResponse } from "./types";
+import { extractDocumentTitle } from "./utils";
 
 const { apiToken, constantTags } = getPreferenceValues();
+const apiBasePath = "https://api.pinboard.in/v1";
+const allPostsEndpoint = `${apiBasePath}/posts/all`;
+const params = new URLSearchParams({ auth_token: apiToken, format: "json" });
 
-export interface Bookmark {
-  id: string;
-  url: string;
-  title: string;
-  tags?: string;
-  private: boolean;
-  readLater: boolean;
-}
-
-export interface BookmarksState {
-  bookmarks: Bookmark[];
-  isLoading: boolean;
-  title: string;
-}
-
-export enum SearchKind {
-  Constant,
-  All,
-}
-
-export function useSearchBookmarks(searchKind: SearchKind) {
-  const [state, setState] = useState<BookmarksState>({ bookmarks: [], isLoading: true, title: "" });
-  const cancelRef = useRef<AbortController | null>(null);
-
-  const search = useCallback(
-    async (searchText: string) => {
-      cancelRef.current?.abort();
-      cancelRef.current = new AbortController();
-      try {
-        setState((oldState) => ({
-          ...oldState,
-          isLoading: true,
-        }));
-        let bookmarks: Bookmark[];
-        switch (searchKind) {
-          case SearchKind.All:
-            bookmarks = await searchBookmarks(searchText, searchKind, cancelRef.current.signal);
-            break;
-          case SearchKind.Constant:
-            bookmarks = await searchBookmarks(searchText + " " + constantTags, searchKind, cancelRef.current.signal);
-            break;
-        }
-
-        setState((oldState) => ({
-          ...oldState,
-          bookmarks: bookmarks,
-          isLoading: false,
-          title: searchKind === SearchKind.All && searchText.length === 0 ? "Recent Bookmarks" : "Found Bookmarks",
-        }));
-      } catch (error) {
-        if (error instanceof AbortError) {
-          return;
-        }
-        console.error("searchBookmarks error", error);
-        showToast({ title: "Could not search bookmarks", message: String(error), style: Toast.Style.Failure });
+export function useSearchConstantsBookmarks() {
+  return useFetch<BookmarksResponse>(`${allPostsEndpoint}?${params.toString()}`, {
+    async parseResponse(response) {
+      if (!response.ok) {
+        throw new Error(response.statusText);
       }
+
+      const data = (await response.json()) as PinboardBookmark[];
+      if (data !== undefined) {
+        const constantTagsData = constantTags?.split(" ");
+        if (constantTags.length) {
+          const items: Bookmark[] = data.map((post) => transformBookmark(post));
+          const filtered = items.filter((tag) => {
+            const tagBookmarks = tag.tags?.split(" ");
+            return tagBookmarks ? tagBookmarks.some((r) => constantTagsData.includes(r)) : false;
+          });
+
+          return { bookmarks: filtered };
+        }
+      }
+      return { bookmarks: [] };
     },
-    [searchKind]
-  );
+  });
+}
 
-  useEffect(() => {
-    search("");
-    return () => {
-      cancelRef.current?.abort();
-    };
-  }, [search]);
+export function useSearchBookmarks() {
+  return useFetch<BookmarksResponse>(`${allPostsEndpoint}?${params.toString()}`, {
+    async parseResponse(response) {
+      if (!response.ok) {
+        throw new Error(response.statusText);
+      }
 
+      const data = (await response.json()) as PinboardBookmark[];
+      if (data !== undefined) {
+        const items = data.map((post) => transformBookmark(post)) as Bookmark[];
+
+        return { bookmarks: items };
+      }
+      return { bookmarks: [] };
+    },
+  });
+}
+
+export function transformBookmark(post: PinboardBookmark): Bookmark {
   return {
-    state: state,
-    search: search,
+    id: post.hash as string,
+    url: post.href as string,
+    title: post.description as string,
+    tags: post.tags as string,
+    private: (post.shared as string) === "no",
+    readLater: (post.toread as string) === "yes",
   };
 }
 
-async function searchBookmarks(searchText: string, kind: SearchKind, signal: AbortSignal): Promise<Bookmark[]> {
-  const path = kind == SearchKind.All && searchText.length === 0 ? "/posts/recent" : "/posts/all";
-
+export async function deleteBookmark(bookmark: Bookmark) {
   const params = new URLSearchParams();
-  if (searchText.length > 0) {
-    params.append("tag", searchText);
-    params.append("results", "100");
-  }
-  params.append("format", "json");
   params.append("auth_token", apiToken);
+  params.append("url", bookmark.url);
 
-  const response = await fetch(apiBasePath + path + "?" + params.toString(), {
-    method: "get",
-    signal: signal,
-  });
-
-  if (!response.ok) {
-    return Promise.reject(response.statusText);
-  }
-
-  const json = (await response.json()) as Record<string, unknown>;
-  const posts = (json?.posts ?? json) as Record<string, unknown>[];
-  return posts.map((post) => {
-    return {
-      id: post.hash as string,
-      url: post.href as string,
-      title: post.description as string,
-      tags: post.tags as string,
-      private: (post.shared as string) === "no",
-      readLater: (post.toread as string) === "yes",
-    };
+  return await fetch(apiBasePath + "/posts/delete?" + params.toString(), {
+    method: "post",
   });
 }
 
@@ -137,4 +97,12 @@ export async function addBookmark(bookmark: Bookmark): Promise<unknown> {
   }
 
   return result;
+}
+
+export async function loadDocumentTitle(url: string): Promise<string> {
+  const response = await fetch(url);
+  if (!response.ok) {
+    return Promise.reject(response.statusText);
+  }
+  return extractDocumentTitle(await response.text());
 }
