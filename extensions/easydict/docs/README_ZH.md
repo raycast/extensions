@@ -13,9 +13,11 @@
 
 ## Easydict（易词典）
 
-`Easydict` 是一个简洁易用的 Raycast 词典扩展，可轻松优雅地查找单词或翻译文本，特别针对英语和中文单词进行了优化。开箱即用，能自动识别输入文本语言，目前支持 [Linguee](https://www.linguee.com/) 和[有道词典](https://www.youdao.com/)查询，支持 🍎**苹果系统翻译**，[DeepL](https://www.deepl.com/translator)，[谷歌](https://translate.google.com)，[Bing](https://www.bing.com/translator), [百度](https://fanyi.baidu.com/)，[腾讯](https://fanyi.qq.com/)，[火山](https://translate.volcengine.com/translate)，[有道](https://fanyi.youdao.com/)和[彩云翻译](https://fanyi.caiyunapp.com/#/)。
+`Easydict` 是一个简洁易用的 Raycast 词典扩展，可轻松优雅地查找单词或翻译文本，特别针对英语和中文单词进行了优化。开箱即用，能自动识别输入文本语言，目前支持 [Linguee](https://www.linguee.com/) 和[有道词典](https://www.youdao.com/)查询，支持 OpenAI ChatGPT, 🍎**苹果系统翻译**，[DeepL](https://www.deepl.com/translator)，[谷歌](https://translate.google.com)，[Bing](https://www.bing.com/translator), [百度](https://fanyi.baidu.com/)，[腾讯](https://fanyi.qq.com/)，[火山](https://translate.volcengine.com/translate)，[有道](https://fanyi.youdao.com/)和[彩云翻译](https://fanyi.caiyunapp.com/#/)。
 
 ![easydict-1-1671806758](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/easydict-1-1671806758.png)
+
+![OpenAI-Translate-1679670891](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/OpenAI-Translate-1679670891.gif)
 
 ## 功能
 
@@ -27,11 +29,12 @@
 - [x] 支持自动播放单词发音。使用 `Cmd + S` 手动播放单词发音。
 - [x] 支持有道文本合成语音（TTS）。
 - [x] 支持手动排序查询结果。
-- [x] 支持 Arguments 参数。
+- [x] 支持 [Arguments](https://developers.raycast.com/information/lifecycle/arguments)。
+- [x] 支持 [Fallback Commands](https://manual.raycast.com/fallback-commands)。
 - [x] 支持系统代理。
 - [x] 支持 Linguee 和有道词典查询。
 - [x] 支持 macOS 系统翻译。详情请看 [如何在 Easydict 中使用 🍎 macOS 系统翻译？](https://github.com/tisfeng/Raycast-Easydict/blob/main/docs/%E5%A6%82%E4%BD%95%E5%9C%A8Easydict%E4%B8%AD%E4%BD%BF%E7%94%A8macOS%F0%9F%8D%8E%E7%B3%BB%E7%BB%9F%E7%BF%BB%E8%AF%91.md)
-- [x] 支持 DeepL，Google，Bing，百度，腾讯，火山，有道和彩云翻译。
+- [x] 支持 OpenAI ChatGPT, DeepL，Google，Bing，百度，腾讯，火山，有道和彩云翻译。
 - [x] 支持 48+ 种语言。
 
 **如果觉得这个扩展还不错，给个 [Star](https://github.com/tisfeng/Raycast-Easydict) ⭐️ 支持一下吧 (^-^)**
@@ -40,10 +43,10 @@
 
 ## 推荐
 
-我的另一个项目，[Easydict](https://github.com/tisfeng/Easydict) 是一个原生的 macOS 翻译词典 App，一个免费开源版本的 [Bob](https://apps.apple.com/cn/app/id1630034110#?platform=mac)，欢迎尝试。
+我另一个项目，[Easydict](https://github.com/tisfeng/Easydict) ，一个简洁优雅的翻译词典 macOS App。开箱即用，支持离线 OCR 识别，支持有道词典，🍎 苹果系统翻译，DeepL，谷歌，百度和火山翻译。
 
 **查单词**
-![iShot_2023-01-28_17.40.28-1674901716](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/iShot_2023-01-28_17.40.28-1674901716.png)
+![iShot_2023-03-17_18.01.22_11zon-1679056100](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/iShot_2023-03-17_18.01.22_11zon-1679056100.jpg)
 
 **翻译文本**
 ![iShot_2023-01-28_17.49.53-1674901731](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/iShot_2023-01-28_17.49.53-1674901731.png)
@@ -341,12 +344,12 @@ Linguee 默认支持系统代理。
 
 ### 手动排序查询结果
 
-<details> <summary> 你可以按照自己的偏好对查询结果显示进行排序，默认是 Youao Dictionary, Linguee dictionary, DeepL, Google, Bing, Apple, Baidu, Tencent, Volcano, Youdao, Caiyun。 </summary>
+<details> <summary> 你可以按照自己的偏好对查询结果显示进行排序，默认是 Youao Dictionary, Linguee dictionary, OpenAI, DeepL, Google, Bing, Apple, Baidu, Tencent, Volcano, Youdao, Caiyun。 </summary>
 
 <p>
 
-大小写不敏感，使用逗号分隔开。例如：`youdao dictionary, linguee dictionary, deepl, google, bing, apple, baidu, tencent, volcano, youdao, caiyun`。
-也可仅指定部分排序，如：`youdao dictionary, apple, tencent`，此时程序实际排序是：`youdao dictionary, apple, tencent, linguee dictionary, deepl, google, bing, baidu, volcano, youdao, caiyun`。
+大小写不敏感，使用逗号分隔开。例如：`youdao dictionary, linguee dictionary, openai, deepl, google, bing, apple, baidu, tencent, volcano, youdao, caiyun`。
+也可仅指定部分排序，如：`youdao dictionary, apple, tencent`，此时程序实际排序是：`youdao dictionary, apple, tencent, linguee dictionary, openai, deepl, google, bing, baidu, volcano, youdao, caiyun`。
 
 > 注意：以上排序是总体排序，若某项翻译服务未开启，排序会自动忽略。
 

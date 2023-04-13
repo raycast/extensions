@@ -19,6 +19,7 @@ export function SurfBoardsListItem(props: {
     <List.Item
       title={application.name}
       icon={{ fileIcon: application.path }}
+      quickLook={{ path: application.path, name: application.name }}
       actions={
         <ActionOnOpenLinkApp
           isCustom={isCustom}

@@ -31,7 +31,10 @@ export function ProjectListItem(props: { project: Project }): JSX.Element {
   }
   accessories.push({
     text: project.star_count.toString(),
-    icon: { source: Icon.Star, tintColor: Color.Yellow },
+    icon: {
+      source: Icon.Star,
+      tintColor: project.star_count > 0 ? Color.Yellow : null,
+    },
     tooltip: `Number of stars: ${project.star_count}`,
   });
   return (
