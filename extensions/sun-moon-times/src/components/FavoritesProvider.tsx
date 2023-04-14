@@ -1,7 +1,7 @@
 import { LocalStorage, showToast, Toast } from "@raycast/api"
 import { createContext, ReactNode, useContext, useEffect, useState } from "react"
-import { countryList } from "../ressources/countryList"
 import { CityItem } from "../../types/CityItem"
+import { countryList } from "../ressources/countryList"
 
 interface FavoritesContextProps {
     favorites: CityItem[]
@@ -16,9 +16,9 @@ interface FavoritesProviderProps {
 
 const initialFavoritesContext: FavoritesContextProps = {
     favorites: [],
-    addToFavorites: () => new Promise(() => Promise<object>),
-    removeFromFavorites: () => new Promise(() => Promise<object>),
-    moveFavorite: () => new Promise(() => Promise<object>),
+    addToFavorites: () => new Promise(() => Promise),
+    removeFromFavorites: () => new Promise(() => Promise),
+    moveFavorite: () => new Promise(() => Promise),
 }
 
 const FavoritesContext = createContext<FavoritesContextProps>(initialFavoritesContext)

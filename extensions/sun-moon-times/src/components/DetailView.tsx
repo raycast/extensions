@@ -1,9 +1,9 @@
-import { Action, ActionPanel, Detail, Icon, useNavigation } from "@raycast/api"
+import { List } from "@raycast/api"
 import sunCalc from "suncalc"
-import { countryList } from "../ressources/countryList"
 import { CityItem } from "../../types/CityItem"
 import { convertDateToString } from "../common/convertDateToString"
 import { resolveCoords } from "../common/resolveCoords"
+import { countryList } from "../ressources/countryList"
 
 interface DetailViewProps extends Omit<CityItem, "geonameId"> {
     sunrise: string
@@ -20,7 +20,6 @@ export const DetailView = ({
     sunset,
     dayDuration,
 }: DetailViewProps) => {
-    const { pop } = useNavigation()
     const moreSunInfos = sunCalc.getTimes(new Date(), coordinates.lat, coordinates.lon)
     const solarNoon = convertDateToString(moreSunInfos.solarNoon, timezone)
     const nadir = convertDateToString(moreSunInfos.nadir, timezone)
@@ -32,32 +31,34 @@ export const DetailView = ({
     const moonset = !moonTimes.set ? "Moon doesn't set today" : convertDateToString(moonTimes.set, timezone)
     const moonIllumination = sunCalc.getMoonIllumination(new Date())
 
-    const cityInfo = `# ${name}  ${countryList[countryCode].flag}\n\n`
-    const headings = `### ☀️ Sun \t\t\t\t\t\t\t\t\t\t 🌖  Moon\n`
-    const riseTimes = `Sunrise: ${sunrise}  \t\t\t\t\t\t\t\t Moonrise: ${moonrise}\n\n`
-    const setTimes = `Sunset: ${sunset} \t\t\t\t\t\t\t\t\t Moonset: ${moonset}\n\n`
-    const moreInfo1 = `Dawn: ${dawn} \t\t\t\t\t\t\t\t\t Moon Illumination: ${(moonIllumination.fraction * 100).toFixed(
-        1
-    )}%\n\n`
-    const moreInfo2 = `Dusk: ${dusk} \n\n`
-
-    const otherHeadings = `### ⌛ Other Info\n`
-    const otherInfo1 = `Day Duration: ${dayDuration}\n\n`
-    const otherInfo2 = `Solar Noon: ${solarNoon}, Nadir: ${nadir}`
-
-    const infoText = `${cityInfo} ${headings} ${riseTimes} ${setTimes} ${moreInfo1} ${moreInfo2} ${otherHeadings} ${otherInfo1} ${otherInfo2}`
-
     return (
-        <Detail
-            navigationTitle={`${name} ${countryList[countryCode].flag}  |  ${resolveCoords(
-                coordinates.lat,
-                coordinates.lon
-            )}`}
-            markdown={infoText}
-            actions={
-                <ActionPanel>
-                    <Action title="Go Back" icon={Icon.ArrowCounterClockwise} onAction={() => pop()} />
-                </ActionPanel>
+        <List.Item.Detail
+            metadata={
+                <List.Item.Detail.Metadata>
+                    <List.Item.Detail.Metadata.Label
+                        title={`${countryList[countryCode].flag} ${name}`}
+                        text={resolveCoords(coordinates.lat, coordinates.lon)}
+                    />
+                    <List.Item.Detail.Metadata.Separator />
+                    <List.Item.Detail.Metadata.Label title="☀️ Sun" />
+                    <List.Item.Detail.Metadata.Label title="Sunrise" text={sunrise} />
+                    <List.Item.Detail.Metadata.Label title="Sunset" text={sunset} />
+                    <List.Item.Detail.Metadata.Label title="Dawn" text={dawn} />
+                    <List.Item.Detail.Metadata.Label title="Dusk" text={dusk} />
+                    <List.Item.Detail.Metadata.Separator />
+                    <List.Item.Detail.Metadata.Label title="🌖 Moon" />
+                    <List.Item.Detail.Metadata.Label title="Moonrise" text={moonrise} />
+                    <List.Item.Detail.Metadata.Label title="Moonset" text={moonset} />
+                    <List.Item.Detail.Metadata.Label
+                        title="Moon Illumination"
+                        text={`${(moonIllumination.fraction * 100).toFixed(1)}%`}
+                    />
+                    <List.Item.Detail.Metadata.Separator />
+                    <List.Item.Detail.Metadata.Label title="⌛ Other Info" />
+                    <List.Item.Detail.Metadata.Label title="Day Duration" text={dayDuration} />
+                    <List.Item.Detail.Metadata.Label title="Solar Noon" text={solarNoon} />
+                    <List.Item.Detail.Metadata.Label title="Nadir" text={nadir} />
+                </List.Item.Detail.Metadata>
             }
         />
     )

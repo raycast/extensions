@@ -1,10 +1,9 @@
-import { Action, ActionPanel, Icon, List, useNavigation } from "@raycast/api"
+import { Action, ActionPanel, Alert, confirmAlert, Icon, List } from "@raycast/api"
 import { getSunrise, getSunset } from "sunrise-sunset-js"
-import { countryList } from "../ressources/countryList"
 import { CityItem } from "../../types/CityItem"
 import { convertDateToString } from "../common/convertDateToString"
 import { getDayDuration } from "../common/getDayDuration"
-import { resolveCoords } from "../common/resolveCoords"
+import { countryList } from "../ressources/countryList"
 import { DetailView } from "./DetailView"
 import { useFavorites } from "./FavoritesProvider"
 
@@ -20,7 +19,6 @@ export const CityListItemView = ({
     coordinates,
     isFavorite,
 }: CityListItemViewProps) => {
-    const { push } = useNavigation()
     const city = { geonameId, name, countryCode, timezone, coordinates }
     const sunrise = getSunrise(coordinates.lat, coordinates.lon)
     const sunset = getSunset(coordinates.lat, coordinates.lon)
@@ -35,45 +33,36 @@ export const CityListItemView = ({
             key={geonameId}
             icon={{ source: countryList[countryCode].flag }}
             title={name}
-            subtitle={resolveCoords(coordinates.lat, coordinates.lon)}
-            accessories={[
-                { icon: Icon.Sun },
-                {
-                    icon: Icon.ArrowUp,
-                    text: sunriseString,
-                },
-                {
-                    icon: Icon.ArrowDown,
-                    text: sunsetString,
-                },
-                { icon: Icon.Clock, text: dayDuration },
-            ]}
+            detail={
+                <DetailView
+                    name={name}
+                    countryCode={countryCode}
+                    timezone={timezone}
+                    coordinates={coordinates}
+                    sunrise={sunriseString}
+                    sunset={sunsetString}
+                    dayDuration={dayDuration}
+                />
+            }
             actions={
                 <ActionPanel>
-                    <Action
-                        title="Show More Info"
-                        icon={Icon.Info}
-                        onAction={() =>
-                            push(
-                                <DetailView
-                                    name={name}
-                                    countryCode={countryCode}
-                                    timezone={timezone}
-                                    coordinates={coordinates}
-                                    sunrise={sunriseString}
-                                    sunset={sunsetString}
-                                    dayDuration={dayDuration}
-                                />
-                            )
-                        }
-                    />
                     {isFavorite ? (
                         <>
                             <Action
                                 title="Remove From Favorites"
                                 style={Action.Style.Destructive}
                                 icon={Icon.Trash}
-                                onAction={async () => await removeFromFavorites(city)}
+                                onAction={async () => {
+                                    if (
+                                        await confirmAlert({
+                                            title: "Remove From Favorites?",
+                                            message: `${countryList[countryCode].flag} ${name}`,
+                                            primaryAction: { title: "Remove", style: Alert.ActionStyle.Destructive },
+                                        })
+                                    ) {
+                                        await removeFromFavorites(city)
+                                    }
+                                }}
                             />
                             <Action
                                 title="Move Favorite Up"

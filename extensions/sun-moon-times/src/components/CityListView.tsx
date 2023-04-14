@@ -1,8 +1,8 @@
 import { List } from "@raycast/api"
 import { useFetch } from "@raycast/utils"
 import { useState } from "react"
-import { ressourceUrl } from "../ressources/ressourceUrl"
 import { ResponseData } from "../../types/ResponseData"
+import { ressourceUrl } from "../ressources/ressourceUrl"
 import { CityListItemView } from "./CityListItemView"
 import { useFavorites } from "./FavoritesProvider"
 
@@ -13,7 +13,7 @@ export const CityListView = () => {
     const { favorites } = useFavorites()
 
     return (
-        <List isLoading={isLoading} onSearchTextChange={setSearchText}>
+        <List isLoading={isLoading} onSearchTextChange={setSearchText} isShowingDetail throttle>
             {searchText.length === 0 ? (
                 <List.Section title="Favorites">
                     {favorites.map((city) => {
