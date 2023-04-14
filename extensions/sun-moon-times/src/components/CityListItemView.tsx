@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Icon, List, useNavigation } from "@raycast/api"
 import { getSunrise, getSunset } from "sunrise-sunset-js"
-import { countryList } from "../../assets/countryList"
+import { countryList } from "../ressources/countryList"
 import { CityItem } from "../../types/CityItem"
 import { convertDateToString } from "../common/convertDateToString"
 import { getDayDuration } from "../common/getDayDuration"

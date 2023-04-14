@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Detail, Icon, useNavigation } from "@raycast/api"
 import sunCalc from "suncalc"
-import { countryList } from "../../assets/countryList"
+import { countryList } from "../ressources/countryList"
 import { CityItem } from "../../types/CityItem"
 import { convertDateToString } from "../common/convertDateToString"
 import { resolveCoords } from "../common/resolveCoords"

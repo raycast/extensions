@@ -1,7 +1,7 @@
 import { List } from "@raycast/api"
 import { useFetch } from "@raycast/utils"
 import { useState } from "react"
-import { ressourceUrl } from "../../assets/ressourceUrl"
+import { ressourceUrl } from "../ressources/ressourceUrl"
 import { ResponseData } from "../../types/ResponseData"
 import { CityListItemView } from "./CityListItemView"
 import { useFavorites } from "./FavoritesProvider"

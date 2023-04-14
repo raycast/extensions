@@ -1,6 +1,6 @@
 import { LocalStorage, showToast, Toast } from "@raycast/api"
 import { createContext, ReactNode, useContext, useEffect, useState } from "react"
-import { countryList } from "../../assets/countryList"
+import { countryList } from "../ressources/countryList"
 import { CityItem } from "../../types/CityItem"
 
 interface FavoritesContextProps {
