@@ -263,9 +263,7 @@ function Main(props: { region: string; onValueChange: (newValue: string) => void
       isLoading={isLoading}
       isShowingDetail={showingDetail}
       searchBarPlaceholder="Search players..."
-      navigationTitle={`Defly.io teams (${
-        filteredTeams?.map((i) => i.players.length).reduce((a, b) => (a + b) as 1) || "No"
-      } players)`}
+      navigationTitle={`Defly.io teams (${teams?.map((i) => i.players.length).reduce((a, b) => (a + b) as 1)} players)`}
       onSearchTextChange={(query) => setSearchQuery(query)}
       searchBarAccessory={
         <Dropdown
@@ -276,60 +274,61 @@ function Main(props: { region: string; onValueChange: (newValue: string) => void
         />
       }
     >
-      {filteredTeams &&
-        filteredTeams.map((team) => {
-          const itemProps: Partial<List.Item.Props> = showingDetail
-            ? {
-                detail: (
-                  <List.Item.Detail
-                    markdown={`# ${team.team.color}\n${team.mapPercent.toFixed(2)}%\n${team.players
-                      .map((player) => {
-                        const playerName = escapeMarkdown(player.name);
-                        return `- ${playerName} ${
-                          player.badge
-                            ? `<img src="https://defly.io/img/badges/${player.badge}.png" alt="Badge ${player.badge}" title="Badge ${player.badge}" height="16">`
-                            : ""
-                        }`;
-                      })
-                      .join("\n")}`}
-                  />
-                ),
-              }
-            : { accessories: [{ text: team.players.map((player) => player.name).join(", ") }] };
-          return (
-            <List.Item
-              key={team.team.ID}
-              title={team.team.color}
-              icon={{
-                source: team.available ? Icon.CircleFilled : Icon.XMarkCircleFilled,
-                tintColor: `#${team.team.hex}`,
-              }}
-              subtitle={`${team.players.length}/${team.maxSize} - ${team.mapPercent.toFixed(2)}%`}
-              {...itemProps}
-              actions={
-                <ActionPanel>
-                  <Action.OpenInBrowser
-                    url={getDeflyUrl(props.region)}
-                    shortcut={{ modifiers: ["cmd"], key: "enter" }}
-                  />
-                  <Action.CopyToClipboard
-                    title="Copy Defly URL"
-                    content={getDeflyUrl(props.region)}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
-                  />
-                  <Action
-                    title="Toggle Detail"
-                    onAction={() => setShowingDetail(!showingDetail)}
-                    shortcut={{
-                      modifiers: ["cmd", "shift"],
-                      key: "d",
-                    }}
-                  />
-                </ActionPanel>
-              }
-            />
-          );
-        })}
+      {filteredTeams
+        ? filteredTeams.map((team) => {
+            const itemProps: Partial<List.Item.Props> = showingDetail
+              ? {
+                  detail: (
+                    <List.Item.Detail
+                      markdown={`# ${team.team.color}\n${team.mapPercent.toFixed(2)}%\n${team.players
+                        .map((player) => {
+                          const playerName = escapeMarkdown(player.name);
+                          return `- ${playerName} ${
+                            player.badge
+                              ? `<img src="https://defly.io/img/badges/${player.badge}.png" alt="Badge ${player.badge}" title="Badge ${player.badge}" height="16">`
+                              : ""
+                          }`;
+                        })
+                        .join("\n")}`}
+                    />
+                  ),
+                }
+              : { accessories: [{ text: team.players.map((player) => player.name).join(", ") }] };
+            return (
+              <List.Item
+                key={team.team.ID}
+                title={team.team.color}
+                icon={{
+                  source: team.available ? Icon.CircleFilled : Icon.XMarkCircleFilled,
+                  tintColor: `#${team.team.hex}`,
+                }}
+                subtitle={`${team.players.length}/${team.maxSize} - ${team.mapPercent.toFixed(2)}%`}
+                {...itemProps}
+                actions={
+                  <ActionPanel>
+                    <Action.OpenInBrowser
+                      url={getDeflyUrl(props.region)}
+                      shortcut={{ modifiers: ["cmd"], key: "enter" }}
+                    />
+                    <Action.CopyToClipboard
+                      title="Copy Defly URL"
+                      content={getDeflyUrl(props.region)}
+                      shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
+                    />
+                    <Action
+                      title="Toggle Detail"
+                      onAction={() => setShowingDetail(!showingDetail)}
+                      shortcut={{
+                        modifiers: ["cmd", "shift"],
+                        key: "d",
+                      }}
+                    />
+                  </ActionPanel>
+                }
+              />
+            );
+          })
+        : null}
     </List>
   );
 }
