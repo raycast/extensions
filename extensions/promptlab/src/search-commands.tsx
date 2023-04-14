@@ -1,4 +1,15 @@
-import { Action, ActionPanel, Alert, Clipboard, Color, confirmAlert, Icon, List, LocalStorage, showHUD } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Alert,
+  Clipboard,
+  Color,
+  confirmAlert,
+  Icon,
+  List,
+  LocalStorage,
+  showHUD,
+} from "@raycast/api";
 import { useEffect, useState } from "react";
 import CommandResponse from "./CommandResponse";
 import { installDefaults } from "./utils/file-utils";
@@ -44,6 +55,8 @@ export default function Command(props: { arguments: { commandName: string } }) {
           useRectangleDetection: command.useRectangleDetection,
           useSubjectClassification: command.useSubjectClassification,
           outputKind: command.outputKind,
+          actionScript: command.actionScript,
+          showResponse: command.showResponse,
         }}
       />
     );
@@ -54,7 +67,10 @@ export default function Command(props: { arguments: { commandName: string } }) {
     .map((command) => (
       <List.Item
         title={command.name}
-        icon={{ source: command.icon, tintColor: command.iconColor == undefined ? Color.PrimaryText : command.iconColor }}
+        icon={{
+          source: command.icon,
+          tintColor: command.iconColor == undefined ? Color.PrimaryText : command.iconColor,
+        }}
         key={command.name}
         actions={
           <ActionPanel>
@@ -77,6 +93,8 @@ export default function Command(props: { arguments: { commandName: string } }) {
                     useRectangleDetection: command.useRectangleDetection,
                     useSubjectClassification: command.useSubjectClassification,
                     outputKind: command.outputKind,
+                    actionScript: command.actionScript,
+                    showResponse: command.showResponse,
                   }}
                 />
               }
@@ -138,6 +156,8 @@ export default function Command(props: { arguments: { commandName: string } }) {
                       useBarcodeDetection: command.useBarcodeDetection,
                       useFaceDetection: command.useFaceDetection,
                       outputKind: command.outputKind,
+                      actionScript: command.actionScript,
+                      showResponse: command.showResponse,
                     }}
                     setCommands={setCommands}
                   />

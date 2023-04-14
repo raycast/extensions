@@ -1,5 +1,6 @@
 import {
   Clipboard,
+  closeMainWindow,
   Detail,
   getFrontmostApplication,
   getSelectedText,
@@ -33,9 +34,12 @@ import {
   getSafariTopSites,
   getJSONResponse,
   getWeatherData,
+  getComputerName,
+  getSafariBookmarks,
 } from "./utils/context-utils";
 import { CommandOptions } from "./utils/types";
 import { runAppleScript } from "run-applescript";
+import { runActionScript } from "./utils/command-utils";
 
 export default function CommandResponse(props: { commandName: string; prompt: string; options: CommandOptions }) {
   const { commandName, prompt, options } = props;
@@ -70,8 +74,14 @@ export default function CommandResponse(props: { commandName: string; prompt: st
     "{{user}}": async () => {
       return os.userInfo().username;
     },
-    homedir: async () => {
+    "{{homedir}}": async () => {
       return os.userInfo().homedir;
+    },
+    "{{computerName}}": async () => {
+      return await getComputerName();
+    },
+    "{{hostname}}": async () => {
+      return os.hostname();
     },
 
     // Context Data
@@ -97,7 +107,11 @@ export default function CommandResponse(props: { commandName: string; prompt: st
       return "";
     },
     "{{selectedText}}": async () => {
-      return (await getSelectedText()).substring(0, 3000);
+      try {
+        return (await getSelectedText()).substring(0, 3000);
+      } catch {
+        return "";
+      }
     },
     "{{clipboardText}}": async () => {
       const text = filterString((await Clipboard.readText()) as string);
@@ -131,6 +145,10 @@ export default function CommandResponse(props: { commandName: string; prompt: st
     "{{safariTopSites}}": async () => {
       const topSites = await getSafariTopSites();
       return topSites;
+    },
+    "{{safariBookmarks}}": async () => {
+      const bookmarks = await getSafariBookmarks();
+      return bookmarks;
     },
 
     // API Data
@@ -185,6 +203,10 @@ export default function CommandResponse(props: { commandName: string; prompt: st
   };
 
   useEffect(() => {
+    if (options.showResponse == false) {
+      closeMainWindow();
+    }
+
     const runReplacements = async (): Promise<string> => {
       let subbedPrompt = prompt;
       for (const key in replacements) {
@@ -234,6 +256,12 @@ export default function CommandResponse(props: { commandName: string; prompt: st
       !loadingData && ((options.minNumFiles != undefined && options.minNumFiles == 0) || contentPrompts.length > 0),
   });
 
+  useEffect(() => {
+    if (data && !isLoading && options.actionScript != undefined && options.actionScript.trim().length > 0) {
+      Promise.resolve(runActionScript(options.actionScript, data));
+    }
+  }, [data, isLoading]);
+
   if (errorType) {
     let errorMessage = "";
     if (errorType == ERRORTYPE.FINDER_INACTIVE) {
@@ -260,6 +288,10 @@ export default function CommandResponse(props: { commandName: string; prompt: st
       : "Analyzing files..."
   }`;
 
+  if (options.showResponse == false) {
+    return null;
+  }
+
   if (options.outputKind == "list") {
     return (
       <List
@@ -280,24 +312,27 @@ export default function CommandResponse(props: { commandName: string; prompt: st
           />
         }
       >
-        {text.split("~~~").filter((item) => {
-          return item.match(/^[\S]*.*$/g) != undefined
-        }).map((item, index) => (
-          <List.Item
-            title={item.trim()}
-            key={`item${index}`}
-            actions={
-              <ResponseActions
-                commandSummary="Response"
-                responseText={text}
-                promptText={fullPrompt}
-                reattempt={revalidate}
-                files={selectedFiles}
-                listItem={item.trim()}
-              />
-            }
-          />
-        ))}
+        {text
+          .split("~~~")
+          .filter((item) => {
+            return item.match(/^[\S]*.*$/g) != undefined;
+          })
+          .map((item, index) => (
+            <List.Item
+              title={item.trim()}
+              key={`item${index}`}
+              actions={
+                <ResponseActions
+                  commandSummary="Response"
+                  responseText={text}
+                  promptText={fullPrompt}
+                  reattempt={revalidate}
+                  files={selectedFiles}
+                  listItem={item.trim()}
+                />
+              }
+            />
+          ))}
       </List>
     );
   }

@@ -17,79 +17,19 @@ Make custom commands that act on selected files using Raycast AI, making use of 
 
 ## Custom Commands
 
-You can create custom File AI commands, accessed via the "Search File AI Commands" command, to execute your own prompts acting on the contents of selected files. A variety of useful defaults are provided, as listed below.
-
-### Default Custom Commands
-
-- Assess Academic Validity
-- Assess File Overlap
-- Compare Selected Files
-- Compose Response
-- Compose Tweet
-- Condense Files
-- Create Action Items
-- Create Flashcards
-- Create Notes
-- Create Slides
-- Detect Bias
-- Extend Files
-- Extract Code
-- Extract Emails
-- Extract Named Entities
-- Extract Phone Numbers
-- Extract URLs
-- Extract Visible Text
-- Extract Vocabulary
-- Find Errors
-- Generate Questions
-- Historical Context
-- Identify Gaps
-- Identify Relationships
-- Identify Selected Files
-- Location Significance
-- Make Jingle
-- Make Poem
-- Make Song
-- Metadata Analysis
-- Meeting Agenda
-- Pattern Analysis
-- Pros And Cons
-- Recent Headlines From 68k News
-- Recommend Apps
-- Respond To Last Email
-- Suggest File AI Commands
-- Suggest Fonts
-- Suggest Hashtags
-- Suggest Improvements
-- Suggest Project Ideas
-- Suggest Related File AI Prompts
-- Suggest Title
-- Suggest Tools
-- Summarize Clipboard
-- Summarize Current Tab
-- Summarize Last Email
-- Summarize Spoken Audio
-- Table Of Contents
-- Today's Agenda
-- Translate To English
-- What Is This?
-- Write Abstract
-- Write Caption
-- Write Conclusion
-- Write Discussion
-- Write Introduction
+You can create custom PromptLab commands, accessed via the "Search PromptLab Commands" command, to execute your own prompts acting on the contents of selected files. The extension comes with 50+ useful custom commands preloaded, which you delete if desired.
 
 ### Placeholders
 
-When creating custom commands, you can use placeholders in your prompts that will be substituted with relevant information whenever you run the command. These placeholders range from simple information, like the current date, to complex data retrieval operations such as getting the content of the most recent email. Placeholders are a powerful way to add context to your File AI prompts. The valid placeholders are as follows:
+When creating custom commands, you can use placeholders in your prompts that will be substituted with relevant information whenever you run the command. These placeholders range from simple information, like the current date, to complex data retrieval operations such as getting the content of the most recent email. Placeholders are a powerful way to add context to your PromptLab prompts. The valid placeholders are as follows:
 
-### Script Placeholders
+#### Script Placeholders
 
 You can include AppleScript in your commands that will be run prior to sending the prompt to Raycast AI. The output of the script will be included in the final prompt. To do this, surround your script with three curly braces, {{{like this}}}. For example: 'Summarize this text: {{{tell application "TextEdit" to get text of document 1}}}'
 
 #### URL Placeholders
 
-You can instruct File AI to extract text from any webpage by using the {{URL}} placeholder. For example, `{{http://68k.news}}` would be replaced with the visible text of the 68k News homepage. You can use this to interface between files, data, webpages, and APIs.
+You can instruct PromptLab to extract text from any webpage by using the {{URL}} placeholder. For example, `{{http://68k.news}}` would be replaced with the visible text of the 68k News homepage. You can use this to interface between files, data, webpages, and APIs.
 
 #### API Data Placeholders
 | Placeholder | Replaced With |
@@ -105,6 +45,7 @@ You can instruct File AI to extract text from any webpage by using the {{URL}} p
 | `{{lastEmail}}` | The subject, sender, and content of the most recently received email in Mail.app |
 | `{{lastNote}}` | The text of the most recently edited note in Notes.app |
 | `{{musicTracks}}` | The list of track titles in Music.app |
+| `{{safariBookmarks}}` | The list of bookmarks in Safari |
 | `{{safariTopSites}}` | Your list of top visited sites in Safari |
 | `{{selectedText}}` | The currently selected text |
 
@@ -130,7 +71,7 @@ You can instruct File AI to extract text from any webpage by using the {{URL}} p
 | `{{currentTabText}}` | The text content of the active tab of the active browser |
 | `{{currentTrack}}` | The title of the track/stream currently playing in Music.app |
 | `{{currentURL}}` | The current URL of the active tab of the active browser |
-| `{{fileAICommands}}` | The list of all custom File AI commands |
+| `{{fileAICommands}}` | The list of all custom PromptLab commands |
 
 #### File Data Placeholders
 | Placeholder | Replaced With |
@@ -143,10 +84,22 @@ You can instruct File AI to extract text from any webpage by using the {{URL}} p
 #### System Data Placeholders
 | Placeholder | Replaced With |
 | --- | --- |
+| `{{computerName}}` | The computer's name (prettified version of the hostname) |
 | `{{homedir}}` | The user's home directory |
+| `{{hostname}}` | The computer's hostname |
 | `{{user}}` | Replaced with the logged in user's username |
 
 #### Other Placeholders
 | Placeholder | Replaced With |
 | --- | --- |
 | `{{END}}` | Marks the end of a prompt -- no content, metadata, or instructions will be appended after |
+
+### Action Scripts
+
+When configuring a PromptLab command, you can provide AppleScript code to execute once the AI finishes its response. You can access the response text via the `response` variable in AppleScript. Several convenient handlers for working with the response text are also provided, as listed below. Action Scripts can be used to build complex workflows using AI as a content provider, navigator, or decision-maker.
+
+#### Provided Handlers
+| Handler | Purpose | Returns |
+| --- | --- | --- |
+| `split(theString, theDelimiter)` | Splits text around the specified delimiter. | List of String |
+| `trim(theString)` | Removes leading and trailing spaces from text. | String |

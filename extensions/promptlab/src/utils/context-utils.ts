@@ -14,6 +14,11 @@ const getCurrentSafariURL = async (): Promise<string> => {
     end try`);
 };
 
+/**
+ * Gets the top sites in Safari as a comma-separated string.
+ *
+ * @returns A promise resolving to the list of top sites as a string.
+ */
 export const getSafariTopSites = async (): Promise<string> => {
   return runAppleScript(`use framework "Foundation"
     property ca : current application
@@ -33,6 +38,71 @@ export const getSafariTopSites = async (): Promise<string> => {
       copy siteTitle & ": " & siteURL to end of siteSummaries
     end repeat
     return siteSummaries`);
+};
+
+/**
+ * Gets a list of the specified number of bookmarks from Safari.
+ *
+ * @param count The maximum number of bookmarks to retrieve, defaults to 100
+ * @returns A promise resolving to the list of bookmark URLs as a string.
+ */
+export const getSafariBookmarks = async (count = 100): Promise<string> => {
+  return runAppleScript(`use framework "Foundation"
+
+  on plist for thePath
+    set plistData to current application's NSData's dataWithContentsOfFile:thePath
+    set plist to current application's NSPropertyListSerialization's propertyListWithData:plistData options:(current application's NSPropertyListImmutable) format:(missing value) |error|:(missing value)
+  end plist
+  
+  set bookmarksPlist to (plist for "/Users/steven/Library/Safari/Bookmarks.plist") as record
+  
+  on getChildBookmarks(node)
+    set internalBookmarks to {}
+    if WebBookmarkType of node is "WebBookmarkTypeLeaf" then
+      set maxLength to 50
+      set theURL to URLString of node as text
+      if length of theURL < maxLength then
+        set maxLength to length of theURL
+      end if
+      copy text 1 thru maxLength of theURL to end of internalBookmarks
+    else if WebBookmarkType of node is "WebBookmarkTypeProxy" then
+      -- Ignore
+    else
+      try
+        repeat with theChild in Children of node
+          set internalBookmarks to internalBookmarks & my getChildBookmarks(theChild)
+        end repeat
+      on error err
+        log err
+      end try
+    end if
+    return internalBookmarks
+  end getChildBookmarks
+  
+  set bookmarks to {}
+  repeat with theChild in Children of bookmarksPlist
+    if WebBookmarkType of theChild is "WebBookmarkTypeLeaf" then
+      set maxLength to 50
+      set theURL to URLString of theChild as text
+      if length of theURL < maxLength then
+        set maxLength to length of theURL
+      end if
+      copy text 1 thru maxLength of theURL to end of bookmarks
+    else
+      set bookmarks to bookmarks & getChildBookmarks(theChild)
+    end if
+  end repeat
+  
+  set maxBookmarks to ${count}
+  if (count of bookmarks) < maxBookmarks then
+    set maxBookmarks to count of bookmarks
+  end if
+
+  set finalBookmarks to {}
+  repeat maxBookmarks times
+    copy some item of bookmarks to end of finalBookmarks
+  end repeat
+  return finalBookmarks`);
 };
 
 /**
@@ -319,6 +389,12 @@ export const getLastEmail = async (): Promise<string> => {
   end try`);
 };
 
+/**
+ * Gets the weather forecast from open-meteo.com.
+ *
+ * @param days The number of days to get the forecast for (either 1 or 7)
+ * @returns The forecast as a JSON object.
+ */
 export const getWeatherData = (days: number): JSONObject => {
   const jsonObj = getJSONResponse("https://get.geojs.io/v1/ip/geo.json");
   const latitude = jsonObj["latitude"];
@@ -327,4 +403,14 @@ export const getWeatherData = (days: number): JSONObject => {
   return getJSONResponse(
     `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&daily=weathercode,temperature_2m_max,temperature_2m_min,sunrise,sunset,uv_index_max,rain_sum,snowfall_sum,precipitation_hours&current_weather=true&windspeed_unit=ms&forecast_days=${days.toString()}&timezone=${timezone}`
   );
+};
+
+/**
+ * Gets the computer's name.
+ *
+ * @returns A promise resolving to the computer name as a string.
+ */
+export const getComputerName = async () => {
+  return await runAppleScript(`use scripting additions
+  return computer name of ((system info) as record)`);
 };

@@ -1,4 +1,14 @@
-import { Action, ActionPanel, Form, showToast, Icon, LocalStorage, useNavigation, Color, environment } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Form,
+  showToast,
+  Icon,
+  LocalStorage,
+  useNavigation,
+  Color,
+  environment,
+} from "@raycast/api";
 import { useForm, FormValidation } from "@raycast/utils";
 import { Command } from "./utils/types";
 
@@ -17,6 +27,8 @@ interface CommandFormValues {
   useBarcodeDetection?: boolean;
   useFaceDetection?: boolean;
   outputKind?: string;
+  actionScript?: string;
+  showResponse?: boolean;
 }
 
 export default function CommandForm(props: {
@@ -48,7 +60,7 @@ export default function CommandForm(props: {
     },
     initialValues: oldData || {
       iconColor: Color.PrimaryText,
-      minNumFiles: "1",
+      minNumFiles: "0",
       useMetadata: false,
       acceptedFileExtensions: "",
       useAudioDetails: false,
@@ -58,6 +70,8 @@ export default function CommandForm(props: {
       useBarcodeDetection: true,
       useFaceDetection: true,
       outputKind: "detail",
+      actionScript: "",
+      showResponse: true,
     },
     validation: {
       name: FormValidation.Required,
@@ -93,8 +107,6 @@ export default function CommandForm(props: {
     >
       <Form.TextField title="Command Name" placeholder="Name of File AI Command" {...itemProps.name} />
 
-      <Form.TextArea title="Prompt" placeholder="Instructions for Raycast AI to follow" {...itemProps.prompt} />
-
       <Form.Dropdown title="Icon" {...itemProps.icon}>
         {Object.keys(Icon).map((iconName, index) => (
           <Form.Dropdown.Item
@@ -107,17 +119,60 @@ export default function CommandForm(props: {
       </Form.Dropdown>
 
       <Form.Dropdown title="Icon Color" {...itemProps.iconColor}>
-        <Form.Dropdown.Item title={environment.theme == "dark" ? "White" : "Black"} value={Color.PrimaryText} icon={{ source: Icon.CircleFilled, tintColor: Color.PrimaryText }} />
+        <Form.Dropdown.Item
+          title={environment.theme == "dark" ? "White" : "Black"}
+          value={Color.PrimaryText}
+          icon={{ source: Icon.CircleFilled, tintColor: Color.PrimaryText }}
+        />
         <Form.Dropdown.Item title="Red" value={Color.Red} icon={{ source: Icon.CircleFilled, tintColor: Color.Red }} />
-        <Form.Dropdown.Item title="Orange" value={Color.Orange} icon={{ source: Icon.CircleFilled, tintColor: Color.Orange }} />
-        <Form.Dropdown.Item title="Yellow" value={Color.Yellow} icon={{ source: Icon.CircleFilled, tintColor: Color.Yellow }} />
-        <Form.Dropdown.Item title="Green" value={Color.Green} icon={{ source: Icon.CircleFilled, tintColor: Color.Green }} />
-        <Form.Dropdown.Item title="Blue" value={Color.Blue} icon={{ source: Icon.CircleFilled, tintColor: Color.Blue }} />
-        <Form.Dropdown.Item title="Purple" value={Color.Purple} icon={{ source: Icon.CircleFilled, tintColor: Color.Purple }} />
-        <Form.Dropdown.Item title="Magenta" value={Color.Magenta} icon={{ source: Icon.CircleFilled, tintColor: Color.Magenta }} />
+        <Form.Dropdown.Item
+          title="Orange"
+          value={Color.Orange}
+          icon={{ source: Icon.CircleFilled, tintColor: Color.Orange }}
+        />
+        <Form.Dropdown.Item
+          title="Yellow"
+          value={Color.Yellow}
+          icon={{ source: Icon.CircleFilled, tintColor: Color.Yellow }}
+        />
+        <Form.Dropdown.Item
+          title="Green"
+          value={Color.Green}
+          icon={{ source: Icon.CircleFilled, tintColor: Color.Green }}
+        />
+        <Form.Dropdown.Item
+          title="Blue"
+          value={Color.Blue}
+          icon={{ source: Icon.CircleFilled, tintColor: Color.Blue }}
+        />
+        <Form.Dropdown.Item
+          title="Purple"
+          value={Color.Purple}
+          icon={{ source: Icon.CircleFilled, tintColor: Color.Purple }}
+        />
+        <Form.Dropdown.Item
+          title="Magenta"
+          value={Color.Magenta}
+          icon={{ source: Icon.CircleFilled, tintColor: Color.Magenta }}
+        />
       </Form.Dropdown>
 
+      <Form.TextArea title="Prompt" placeholder="Instructions for Raycast AI to follow" {...itemProps.prompt} />
+
       <Form.TextArea
+        title="Script"
+        placeholder="AppleScript code to run after response"
+        info="An AppleScript script to run after receiving a response to the prompt. Use the `response` variable to access the text of the response."
+        {...itemProps.actionScript}
+      />
+
+      <Form.Checkbox
+        label="Show Response View"
+        {...itemProps.showResponse}
+        info="If checked, the AI's output will be display in Raycast. Disabling this is only useful if you provide an action script."
+      />
+
+      <Form.TextField
         title="Minimum File Count"
         placeholder="Minimum number of files required"
         onChange={(value) => {
@@ -145,6 +200,7 @@ export default function CommandForm(props: {
       />
 
       <Form.Checkbox
+        title="Included Information"
         label="Use File Metadata"
         {...itemProps.useMetadata}
         info="If checked, metadata of selected files will be included in the text provided to the AI, and additional EXIF data will be included for image files."

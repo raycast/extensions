@@ -11,9 +11,11 @@ export default function ResponseActions(props: {
   const { commandSummary, responseText, promptText, reattempt, files, listItem } = props;
   return (
     <ActionPanel>
-      {listItem?.length ? <ActionPanel.Section title="Item Actions">
-        <Action.CopyToClipboard title="Copy Item" content={listItem} />
-      </ActionPanel.Section> : null}
+      {listItem?.length ? (
+        <ActionPanel.Section title="Item Actions">
+          <Action.CopyToClipboard title="Copy Item" content={listItem} />
+        </ActionPanel.Section>
+      ) : null}
       <ActionPanel.Section title="Prompt Actions">
         <Action.CopyToClipboard
           title={`Copy ${commandSummary} To Clipboard`}
