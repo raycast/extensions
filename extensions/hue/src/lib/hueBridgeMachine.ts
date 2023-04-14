@@ -94,7 +94,7 @@ export default function hueBridgeMachine(
           src: async (context) => {
             // We have already validated that these values are defined, but TypeScript doesn't know that
             if (context.bridgeConfig === undefined) {
-              throw Error("Invalid state");
+              throw Error("Bridge configuration is undefined when trying to connect");
             }
 
             const hueClient = await createHueClient(
