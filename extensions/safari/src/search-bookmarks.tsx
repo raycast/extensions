@@ -16,30 +16,36 @@ const Command = () => {
     return <PermissionError />;
   }
 
-  const groupedBookmarks = _.groupBy(bookmarks as GeneralBookmark[], ({ folder }) => folder);
+  const folderNames = Object.keys(_.groupBy(bookmarks as GeneralBookmark[], ({ folder }) => folder));
+
+  const groupedBookmarks = _.groupBy(
+    (bookmarks as GeneralBookmark[])?.filter((bookmark) =>
+      selectedFolder == "All Bookmarks"
+        ? true
+        : selectedFolder == "Top Level Bookmarks"
+        ? bookmark.folder == ""
+        : bookmark.folder == selectedFolder
+    ),
+    ({ folder }) => folder
+  );
 
   return (
     <List
       isLoading={!bookmarks}
       onSearchTextChange={setSearchText}
       searchBarAccessory={
-        <BookmarksDropdown
-          folderNames={["All Bookmarks", ...Object.keys(groupedBookmarks)]}
-          onSelection={setSelectedFolder}
-        />
+        <BookmarksDropdown folderNames={["All Bookmarks", ...folderNames]} onSelection={setSelectedFolder} />
       }
     >
-      {_.filter(groupedBookmarks, (bookmarks, key) =>
-        selectedFolder == "All Bookmarks"
-          ? true
-          : selectedFolder == "Top Level Bookmarks"
-          ? key == ""
-          : key == selectedFolder
-      ).map((bookmarks, key) => {
+      {_.map(groupedBookmarks, (bookmarks, key) => {
         const filteredBookmarks = search(bookmarks, ["title", "url", "description"], searchText) as GeneralBookmark[];
 
         return (
-          <BookmarkListSection key={key} title={key.toString() || "Top Level Bookmarks"} filteredBookmarks={filteredBookmarks} />
+          <BookmarkListSection
+            key={key}
+            title={key.toString() || "Top Level Bookmarks"}
+            filteredBookmarks={filteredBookmarks}
+          />
         );
       })}
     </List>
