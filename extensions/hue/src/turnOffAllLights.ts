@@ -39,8 +39,7 @@ export default async () => {
 
       if (onLights.length === 0) {
         closeMainWindow();
-        showHUD("All lights are already off");
-        return Promise.reject();
+        return Promise.reject("All lights are already off");
       }
 
       const promises = onLights
@@ -68,10 +67,7 @@ export default async () => {
       showHUD(`Turned off all ${settledPromises.length} lights that were on.`);
     })
     .catch((error) => {
-      closeMainWindow().then(() => {
-        if (error instanceof NoHueBridgeConfiguredError) return showHUD("No Hue bridge configured.");
-        if (error instanceof CouldNotConnectToHueBridgeError) return showHUD("Could not connect to the Hue bridge.");
-        return showHUD("Failed turning off all lights.");
-      });
+      closeMainWindow();
+      showHUD(error);
     });
 };
