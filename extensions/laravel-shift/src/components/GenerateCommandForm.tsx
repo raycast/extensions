@@ -23,6 +23,8 @@ export function GenerateCommandForm(): JSX.Element {
   const [shiftCommand, setShiftCommand] = useState<string>("");
   const preferences = getPreferenceValues<Preferences>();
 
+  !shiftCommand && updateShiftCommand({ shiftCode, projectPath });
+
   function copyShiftCommand(values: FormValues) {
     copyToClipboard(shiftCommand).then(function () {
       if (preferences.closeAfterCopy) {
