@@ -41,7 +41,7 @@ export default function SetScene(props: { group?: Group; useHue?: ReturnType<typ
         <Grid.Section title={group.metadata.name}>
           {groupScenes.map((groupScene) => (
             <Scene
-              key={group.id}
+              key={groupScene.id}
               scene={groupScene}
               group={group}
               gradientUri={gradientUris.get(groupScene.id)}
