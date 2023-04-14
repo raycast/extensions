@@ -39,7 +39,6 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
 
   // First we get the currently playing URI using `useCurrentlyPlayingUri` (this prioritises AppleScript over the API)
   const { currentlyPlayingUriData, currentlyPlayingUriIsLoading } = useCurrentlyPlayingUri();
-
   // Then we store it in a state using `useCachedState` (this will persist the value between launches)
   const [currentUri, setCurrentUri] = useCachedState<string | undefined>(
     "currentlyPlayingUri",
@@ -68,6 +67,11 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
 
   // We use `useEffect` to update the currently playing URI state when the currently playing URI changes
   useEffect(() => {
+    if (!currentlyPlayingUriData) {
+      setCurrentUri(undefined);
+      shouldExecute.current = false;
+      return;
+    }
     if (currentlyPlayingUriData !== currentUri) {
       setCurrentUri(currentlyPlayingUriData);
       shouldExecute.current = true;
@@ -78,7 +82,7 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
   const trackAlreadyLiked = containsMySavedTracksData?.[0];
   const isTrack = currentlyPlayingData?.currently_playing_type !== "episode";
 
-  if (!currentlyPlayingData || !currentlyPlayingData.item) {
+  if (!currentUri || !currentlyPlayingData?.item) {
     return (
       <NothingPlaying isLoading={currentlyPlayingIsLoading || currentlyPlayingUriIsLoading || playbackStateIsLoading} />
     );
