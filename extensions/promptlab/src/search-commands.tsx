@@ -72,6 +72,34 @@ export default function Command(props: { arguments: { commandName: string } }) {
           tintColor: command.iconColor == undefined ? Color.PrimaryText : command.iconColor,
         }}
         key={command.name}
+        detail={
+          <List.Item.Detail
+            markdown={`# ${command.name}
+
+## Description
+${command.description || "None"}
+
+## Prompt
+${command.prompt}
+
+## Action Script
+${command.actionScript || "None"}
+
+## Options
+| Option | Value |
+| --- | --- |
+| Output View | ${command.outputKind == "list" ? "List" : "Detail"} |
+| Show Response View | ${command.showResponse ? "Yes" : "No"} |
+| Minimum File Count | ${command.minNumFiles} |
+| Use File Metadata? | ${command.useMetadata ? "Yes" : "No"} |
+| Use Sound Classification? | ${command.useSoundClassification ? "Yes" : "No"} |
+| Use Subject Classification? | ${command.useSubjectClassification ? "Yes" : "No"} |
+| Use Audio Transcription? | ${command.useAudioDetails ? "Yes" : "No"} |
+| Use Barcode Detection? | ${command.useBarcodeDetection ? "Yes" : "No"} |
+| Use Face Detection? | ${command.useFaceDetection ? "Yes" : "No"} |
+| Use Rectangle Detection? | ${command.useRectangleDetection ? "Yes" : "No"} |`}
+          />
+        }
         actions={
           <ActionPanel>
             <Action.Push
@@ -158,6 +186,7 @@ export default function Command(props: { arguments: { commandName: string } }) {
                       outputKind: command.outputKind,
                       actionScript: command.actionScript,
                       showResponse: command.showResponse,
+                      description: command.description,
                     }}
                     setCommands={setCommands}
                   />
@@ -214,6 +243,7 @@ export default function Command(props: { arguments: { commandName: string } }) {
       searchText={searchText}
       onSearchTextChange={(text) => setSearchText(text)}
       filtering={true}
+      isShowingDetail={true}
       searchBarPlaceholder={`Search ${
         !commands || commands.length == 1 ? "commands..." : `${commands.length} commands...`
       }`}

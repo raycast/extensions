@@ -36,6 +36,7 @@ import {
   getWeatherData,
   getComputerName,
   getSafariBookmarks,
+  getCurrentDirectory,
 } from "./utils/context-utils";
 import { CommandOptions } from "./utils/types";
 import { runAppleScript } from "run-applescript";
@@ -149,6 +150,9 @@ export default function CommandResponse(props: { commandName: string; prompt: st
     "{{safariBookmarks}}": async () => {
       const bookmarks = await getSafariBookmarks();
       return bookmarks;
+    },
+    "{{currentDirectory}}": async () => {
+      return await getCurrentDirectory();
     },
 
     // API Data

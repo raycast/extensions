@@ -414,3 +414,13 @@ export const getComputerName = async () => {
   return await runAppleScript(`use scripting additions
   return computer name of ((system info) as record)`);
 };
+
+/**
+ * Gets the current Finder directory.
+ * @returns A promise resolving to the path of the current directory as a string.
+ */
+export const getCurrentDirectory = async () => {
+  return await runAppleScript(`tell application "Finder"
+    return POSIX path of (insertion location as alias)
+  end tell`);
+};

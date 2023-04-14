@@ -13,7 +13,6 @@ import { runAppleScript } from "run-applescript";
  * @param response The PromptLab AI response.
  */
 export const runActionScript = async (script: string, response: string) => {
-  console.log(response);
   try {
     await runAppleScript(`use framework "AVFoundation"
     use framework "CoreLocation"
@@ -67,7 +66,7 @@ export const runActionScript = async (script: string, response: string) => {
         return text startIndex thru endIndex of theString
     end trim
 
-    set response to "${response}"
+    set response to "${response.replaceAll('"', '\\"')}"
     ${script}`);
   } catch (error) {
     console.error(error);

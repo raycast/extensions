@@ -68,6 +68,7 @@ You can instruct PromptLab to extract text from any webpage by using the {{URL}}
 | --- | --- |
 | `{{clipboardText}}` | The text of the clipboard |
 | `{{currentApplication}}` | The name of the current application |
+| `{{currentDirectory}}` | The path of the current directory |
 | `{{currentTabText}}` | The text content of the active tab of the active browser |
 | `{{currentTrack}}` | The title of the track/stream currently playing in Music.app |
 | `{{currentURL}}` | The current URL of the active tab of the active browser |

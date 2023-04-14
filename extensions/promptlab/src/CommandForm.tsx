@@ -29,6 +29,7 @@ interface CommandFormValues {
   outputKind?: string;
   actionScript?: string;
   showResponse?: boolean;
+  description?: string;
 }
 
 export default function CommandForm(props: {
@@ -72,6 +73,7 @@ export default function CommandForm(props: {
       outputKind: "detail",
       actionScript: "",
       showResponse: true,
+      description: "",
     },
     validation: {
       name: FormValidation.Required,
@@ -158,6 +160,13 @@ export default function CommandForm(props: {
       </Form.Dropdown>
 
       <Form.TextArea title="Prompt" placeholder="Instructions for Raycast AI to follow" {...itemProps.prompt} />
+
+      <Form.TextArea
+        title="Description"
+        placeholder="Description of what this command does"
+        info="A description of what this command does. Useful if you plan to share the command with others."
+        {...itemProps.description}
+      />
 
       <Form.TextArea
         title="Script"

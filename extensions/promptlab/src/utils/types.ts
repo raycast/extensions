@@ -41,4 +41,5 @@ export interface Command {
   outputKind?: string;
   actionScript?: string;
   showResponse?: boolean;
+  description?: string;
 }
