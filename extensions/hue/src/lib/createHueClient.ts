@@ -20,7 +20,7 @@ export default async function createHueClient(
     let certificate: Buffer | undefined;
 
     if (bridgeConfig.certificateType === "self-signed" && bridgeConfig.certificate) {
-      certificate = new Buffer(bridgeConfig.certificate, "utf-8");
+      certificate = Buffer.from(bridgeConfig.certificate, "utf-8");
       console.log("Connecting to Hue Bridge using self-signed certificate…");
     } else {
       certificate = fs.readFileSync(environment.assetsPath + "/huebridge_cacert.pem");
