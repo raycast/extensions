@@ -32,11 +32,30 @@ const extractReadingListBookmarks = (
       .value();
   }
 
-  return _.chain(bookmarks.Children)
-    .thru((coll) => _.union(coll, (_.map(coll, "Children") as []) || []) as unknown as Bookmark[])
-    .flatten()
+  const flattenBookmarks = (
+    node:
+      | BookmarkPListResult
+      | {
+          Title: string;
+          Children: Bookmark[] | BookmarkPListResult;
+        }
+  ) => {
+    const arr: Bookmark[] = [];
+    if ("Title" in node && node.Title == "com.apple.ReadingList") {
+      // Ignore reading list items
+    } else {
+      if ("Children" in node) {
+        (node.Children as []).forEach((child) => arr.push(...flattenBookmarks(child)));
+      } else {
+        arr.push(node);
+      }
+    }
+    return arr;
+  };
+
+  return _.chain(flattenBookmarks(bookmarks))
     .filter((res) => {
-      return res != undefined && res.WebBookmarkType == "WebBookmarkTypeLeaf";
+      return res.WebBookmarkType == "WebBookmarkTypeLeaf";
     })
     .map((res) => ({
       uuid: res.WebBookmarkUUID,

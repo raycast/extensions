@@ -23,7 +23,7 @@ const Command = () => {
   }
 
   const groupedBookmarks = groupByStatus
-    ? _.groupBy(bookmarks, ({ dateLastViewed }) => (dateLastViewed ? "read" : "unread"))
+    ? _.groupBy(bookmarks as ReadingListBookmark[], ({ dateLastViewed }) => (dateLastViewed ? "read" : "unread"))
     : { All: bookmarks || [] };
 
   return (
