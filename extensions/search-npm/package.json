@@ -117,7 +117,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.49.2",
+    "@raycast/api": "^1.49.3",
     "@raycast/utils": "^1.5.2",
     "dedupe": "^4.0.2",
     "fetch-readme": "^1.0.0",
@@ -128,13 +128,10 @@
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.5",
-    "@types/node": "^18.15.6",
+    "@types/node": "^18.8.3",
     "@types/parse-github-url": "^1.0.0",
     "@types/react": "^18.0.33",
-    "@typescript-eslint/eslint-plugin": "^5.57.1",
-    "@typescript-eslint/parser": "^5.57.1",
     "eslint": "^8.38.0",
-    "eslint-config-prettier": "^8.8.0",
     "react-devtools": "^4.27.3",
     "typescript": "^5.0.4"
   },
