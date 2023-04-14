@@ -1,6 +1,6 @@
 import { Action, ActionPanel, getPreferenceValues, List, showToast, Toast } from "@raycast/api";
-import { useEffect, useState } from "react";
-import axios from "axios";
+import { useEffect, useRef, useState } from "react";
+import axios, { CancelTokenSource } from "axios";
 import { Agent } from "https";
 import { LinkdingBookmark, LinkdingResponse, LinkdingServer } from "./types/linkding-types";
 
@@ -12,45 +12,44 @@ export default function searchLinkding() {
     ignoreSSL: preferences.ignoreSSL,
   };
 
-  const [searchText, setSearchText] = useState("");
-  const [isLoading, setLoading] = useState(false);
+  const [isLoading, setLoading] = useState(true);
   const [data, setData] = useState<LinkdingBookmark[]>([]);
-  const [error, setError] = useState<Error>();
+  const cancelRef = useRef<CancelTokenSource | null>(null);
 
-  useEffect(() => {
+  function fetchBookmarks(searchText: string) {
+    cancelRef.current?.cancel();
+    cancelRef.current = axios.CancelToken.source();
     setLoading(true);
     axios<LinkdingResponse>(`${linkdingAccount.serverUrl}/api/bookmarks?` + new URLSearchParams({ q: searchText }), {
+      cancelToken: cancelRef.current?.token,
       responseType: "json",
-      httpsAgent: new Agent({
-        rejectUnauthorized: !linkdingAccount.ignoreSSL,
-      }),
-      headers: {
-        Authorization: `Token ${linkdingAccount.apiKey}`,
-      },
+      httpsAgent: new Agent({ rejectUnauthorized: !linkdingAccount.ignoreSSL }),
+      headers: { Authorization: `Token ${linkdingAccount.apiKey}` },
     })
       .then((data) => {
         setData(data.data.results);
       })
       .catch((err) => {
-        setError(err);
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Something went wrong",
+          message: err.message,
+        });
       })
       .finally(() => {
         setLoading(false);
       });
-  }, [searchText]);
+  }
 
   useEffect(() => {
-    if (error) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Something went wrong",
-        message: error.message,
-      });
-    }
-  }, [error]);
+    fetchBookmarks("");
+    return () => {
+      cancelRef.current?.cancel();
+    };
+  }, []);
 
   return (
-    <List isLoading={isLoading} onSearchTextChange={setSearchText} searchBarPlaceholder="Search bookmarks..." throttle>
+    <List isLoading={isLoading} onSearchTextChange={fetchBookmarks} searchBarPlaceholder="Search bookmarks..." throttle>
       <List.Section title="Results" subtitle={data?.length + ""}>
         {data?.map((linkdingBookmark) => (
           <SearchListItem key={linkdingBookmark.id} linkdingBookmark={linkdingBookmark} />
