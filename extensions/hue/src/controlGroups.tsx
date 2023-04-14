@@ -39,51 +39,57 @@ export default function ControlGroups() {
   if (manageHueBridgeElement !== null) return manageHueBridgeElement;
 
   return (
-    <Grid isLoading={isLoading} aspectRatio="16/9" fit={Grid.Fit.Fill}>
+    <Grid isLoading={isLoading} aspectRatio="16/9" fit={Grid.Fit.Fill} filtering={{ keepSectionOrder: true }}>
       {rooms.length > 0 && (
         <Grid.Section title="Rooms">
-          {rooms.map((room: Room) => {
-            const groupLights = getLightsFromGroup(lights, room);
-            const groupedLight = groupedLights.find(
-              (groupedLight) =>
-                groupedLight.id === room.services.find((resource) => resource.rtype === "grouped_light")?.rid
-            );
+          {[...rooms]
+            .sort((a, b) => a.metadata.name.localeCompare(b.metadata.name))
+            .map((room: Room) => {
+              const groupLights = getLightsFromGroup(lights, room).sort((a, b) =>
+                a.metadata.name.localeCompare(b.metadata.name)
+              );
+              const groupedLight = groupedLights.find(
+                (groupedLight) =>
+                  groupedLight.id === room.services.find((resource) => resource.rtype === "grouped_light")?.rid
+              );
 
-            return (
-              <Group
-                key={room.id}
-                groupLights={groupLights}
-                groupedLight={groupedLight}
-                group={room}
-                gradientUri={gradientUris.get(room.id)}
-                useHue={useHueObject}
-                rateLimiter={rateLimiter}
-              />
-            );
-          })}
+              return (
+                <Group
+                  key={room.id}
+                  groupLights={groupLights}
+                  groupedLight={groupedLight}
+                  group={room}
+                  gradientUri={gradientUris.get(room.id)}
+                  useHue={useHueObject}
+                  rateLimiter={rateLimiter}
+                />
+              );
+            })}
         </Grid.Section>
       )}
       {zones.length > 0 && (
         <Grid.Section title="Zones">
-          {zones.map((zone: Zone) => {
-            const groupLights = getLightsFromGroup(lights, zone);
-            const groupedLight = groupedLights.find(
-              (groupedLight) =>
-                groupedLight.id === zone.services.find((resource) => resource.rtype === "grouped_light")?.rid
-            );
+          {[...zones]
+            .sort((a, b) => a.metadata.name.localeCompare(b.metadata.name))
+            .map((zone: Zone) => {
+              const groupLights = getLightsFromGroup(lights, zone);
+              const groupedLight = groupedLights.find(
+                (groupedLight) =>
+                  groupedLight.id === zone.services.find((resource) => resource.rtype === "grouped_light")?.rid
+              );
 
-            return (
-              <Group
-                key={zone.id}
-                group={zone}
-                groupLights={groupLights}
-                groupedLight={groupedLight}
-                gradientUri={gradientUris.get(zone.id)}
-                useHue={useHueObject}
-                rateLimiter={rateLimiter}
-              />
-            );
-          })}
+              return (
+                <Group
+                  key={zone.id}
+                  group={zone}
+                  groupLights={groupLights}
+                  groupedLight={groupedLight}
+                  gradientUri={gradientUris.get(zone.id)}
+                  useHue={useHueObject}
+                  rateLimiter={rateLimiter}
+                />
+              );
+            })}
         </Grid.Section>
       )}
     </Grid>

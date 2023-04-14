@@ -32,12 +32,17 @@ export default function SetScene(props: { group?: Group; useHue?: ReturnType<typ
   if (props.group !== undefined) {
     const group = props.group;
     const groupScenes =
-      scenes.filter((scene: Scene) => {
-        return scene.group.rid === group.id;
-      }) ?? [];
+      scenes
+        .filter((scene: Scene) => scene.group.rid === group.id)
+        .sort((sceneA, sceneB) => sceneA.metadata.name.localeCompare(sceneB.metadata.name)) ?? [];
 
     return (
-      <Grid navigationTitle={`Set Scene for ${props.group.metadata.name}`} isLoading={isLoading} aspectRatio="16/9">
+      <Grid
+        navigationTitle={`Set Scene for ${props.group.metadata.name}`}
+        isLoading={isLoading}
+        aspectRatio="16/9"
+        filtering={{ keepSectionOrder: true }}
+      >
         <Grid.Section title={group.metadata.name}>
           {groupScenes.map((groupScene) => (
             <Scene
@@ -54,13 +59,13 @@ export default function SetScene(props: { group?: Group; useHue?: ReturnType<typ
     );
   } else {
     return (
-      <Grid isLoading={isLoading} aspectRatio="16/9">
+      <Grid isLoading={isLoading} aspectRatio="16/9" filtering={{ keepSectionOrder: true }}>
         {groupTypes.map((groupType: Group[]): JSX.Element[] => {
           return groupType.map((group: Group): JSX.Element => {
             const groupScenes =
-              scenes.filter((scene: Scene) => {
-                return scene.group.rid === group.id;
-              }) ?? [];
+              scenes
+                .filter((scene: Scene) => scene.group.rid === group.id)
+                .sort((sceneA, sceneB) => sceneA.metadata.name.localeCompare(sceneB.metadata.name)) ?? [];
 
             return (
               <Group

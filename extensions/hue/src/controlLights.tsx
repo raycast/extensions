@@ -23,19 +23,19 @@ export default function ControlLights() {
   const { hueBridgeState, sendHueMessage, isLoading, lights, rooms, zones } = useHueObject;
   const rateLimiter = useInputRateLimiter(10, 1000);
 
-  const groups = ([] as Group[]).concat(rooms, zones);
+  const groups = ([] as Group[]).concat(rooms, zones).sort((a, b) => a.metadata.name.localeCompare(b.metadata.name));
 
   const manageHueBridgeElement = ManageHueBridge(hueBridgeState, sendHueMessage);
   if (manageHueBridgeElement !== null) return manageHueBridgeElement;
 
   return (
-    <List isLoading={isLoading}>
+    <List isLoading={isLoading} filtering={{ keepSectionOrder: true }}>
       {groups.map((group: Group) => {
         return (
           <Group
             key={group.id}
             group={group}
-            lights={getLightsFromGroup(lights, group)}
+            lights={getLightsFromGroup(lights, group).sort((a, b) => a.metadata.name.localeCompare(b.metadata.name))}
             useHue={useHueObject}
             rateLimiter={rateLimiter}
           />
