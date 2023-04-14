@@ -23,15 +23,18 @@ export function GenerateCommandForm(): JSX.Element {
   const [shiftCommand, setShiftCommand] = useState<string>("");
   const preferences = getPreferenceValues<Preferences>();
 
-  function handleSubmit(values: FormValues) {
-    buildDockerCommand(values).then(function (command: Command) {
-      setShiftCommand(command);
-      copyToClipboard(command).then(function () {
-        if (preferences.closeAfterCopy) {
-          return showHUD("Shift Command copied to clipboard");
-        }
-        showToast(Toast.Style.Success, "Command copied to clipboard");
-      });
+  function copyShiftCommand(values: FormValues) {
+    copyToClipboard(shiftCommand).then(function () {
+      if (preferences.closeAfterCopy) {
+        return showHUD("Shift Command copied to clipboard");
+      }
+      showToast(Toast.Style.Success, "Command copied to clipboard");
+    });
+  }
+
+  function updateShiftCommand(values: FormValues) {
+    buildDockerCommand(values).then((shiftCommand: Command) => {
+      setShiftCommand(shiftCommand);
     });
   }
 
@@ -39,7 +42,7 @@ export function GenerateCommandForm(): JSX.Element {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Generate Shift Command" icon={Icon.Wand} onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Copy Shift Command" icon={Icon.Wand} onSubmit={copyShiftCommand} />
           <Action
             title="Open Preferences"
             shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
@@ -59,7 +62,10 @@ export function GenerateCommandForm(): JSX.Element {
         title="Shift Code"
         info="The Shift you wish to run."
         value={shiftCode}
-        onChange={setShiftCode}
+        onChange={(shiftCode: string) => {
+          setShiftCode(shiftCode);
+          updateShiftCommand({ shiftCode, projectPath });
+        }}
       >
         {getShiftGroups().map((group: Group) => (
           <Form.Dropdown.Section key={group.name} title={group.name}>
@@ -78,7 +84,10 @@ export function GenerateCommandForm(): JSX.Element {
         value={projectPath}
         placeholder={`${homedir()}/your/project`}
         info="The full path to the project you wish to run the Shift on. You can get the full path by running `pwd` in your terminal."
-        onChange={setProjectPath}
+        onChange={(projectPath: string) => {
+          setProjectPath(projectPath);
+          updateShiftCommand({ shiftCode, projectPath });
+        }}
       />
 
       {!preferences.closeAfterCopy && (
@@ -87,11 +96,10 @@ export function GenerateCommandForm(): JSX.Element {
           title="Shift Command"
           value={shiftCommand}
           placeholder="Shift command will appear here"
-          info="The generated Shift Command."
-          onChange={setShiftCommand}
-          onFocus={() => {
-            copyToClipboard(shiftCommand).then(() => showToast(Toast.Style.Success, "Command copied to clipboard"));
+          onChange={(shiftCommand: string) => {
+            setShiftCommand(shiftCommand);
           }}
+          info="The generated Shift Command."
         />
       )}
 

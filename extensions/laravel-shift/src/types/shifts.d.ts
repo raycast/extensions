@@ -1,11 +1,6 @@
 export declare type FormValues = {
   shiftCode: string;
-  dockerToken: string;
-  mountOption: string;
   projectPath: string;
-  gitAuthorName: string;
-  gitAuthorEmail: string;
-  shiftCommand: string;
 };
 
 interface Preferences {
