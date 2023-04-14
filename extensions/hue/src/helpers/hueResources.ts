@@ -53,7 +53,7 @@ export function getColorsFromScene(scene: Scene): Palette {
         if (action.action.color?.xy) {
           return xyToRgbHexString(action.action.color.xy, action.action.dimming?.brightness);
         }
-        throw new Error("Invalid state.");
+        return miredToHexString(MIRED_DEFAULT, action.action.dimming?.brightness);
       }) || [];
 
   return paletteColors.length > 0 ? paletteColors : actionColors;
