@@ -39,17 +39,31 @@ export default async () => {
         .filter((light) => light.on.on)
         .map((light) => hueClient.updateLight(light, { on: { on: false } }));
 
-      return Promise.all(promises);
+      return Promise.allSettled(promises);
     })
-    .then((lights) => {
+    .then((settledPromises) => {
+      const lightsTurnedOff = settledPromises.filter((settledPromise) => settledPromise.status === "fulfilled");
+      const lightsFailedToTurnOff = settledPromises.filter((settledPromise) => settledPromise.status === "rejected");
+
       closeMainWindow();
-      showHUD(`Turned off all ${lights.length} lights that were on`);
+
+      if (lightsTurnedOff.length === 0 && lightsFailedToTurnOff.length > 0) {
+        return showHUD(`Failed turning off all ${lightsFailedToTurnOff.length} lights that were on.`);
+      }
+
+      if (lightsFailedToTurnOff.length > 0) {
+        showHUD(
+          `Turned off ${lightsTurnedOff.length} lights, failed turning off ${lightsFailedToTurnOff.length} lights.`
+        );
+      }
+
+      showHUD(`Turned off all ${settledPromises.length} lights that were on.`);
     })
     .catch((error) => {
       closeMainWindow().then(() => {
-        if (error instanceof NoHueBridgeConfiguredError) return showHUD("No Hue bridge configured");
-        if (error instanceof CouldNotConnectToHueBridgeError) return showHUD("Could not connect to the Hue bridge");
-        return showHUD("Failed turning off all lights");
+        if (error instanceof NoHueBridgeConfiguredError) return showHUD("No Hue bridge configured.");
+        if (error instanceof CouldNotConnectToHueBridgeError) return showHUD("Could not connect to the Hue bridge.");
+        return showHUD("Failed turning off all lights.");
       });
     });
 };
