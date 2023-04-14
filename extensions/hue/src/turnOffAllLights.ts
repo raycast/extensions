@@ -1,4 +1,4 @@
-import { closeMainWindow, LocalStorage, showHUD } from "@raycast/api";
+import { closeMainWindow, LocalStorage, showHUD, Toast } from "@raycast/api";
 import { BRIDGE_CONFIG_KEY } from "./helpers/constants";
 import { BridgeConfig } from "./lib/types";
 import createHueClient from "./lib/createHueClient";
@@ -16,6 +16,14 @@ class CouldNotConnectToHueBridgeError extends Error {
 }
 
 export default async () => {
+  new Toast({
+    style: Toast.Style.Animated,
+    title: "Turning off all lights",
+    message: "Please wait…",
+  })
+    .show()
+    .then();
+
   await LocalStorage.getItem<string>(BRIDGE_CONFIG_KEY)
     .then((bridgeConfigString) => {
       if (bridgeConfigString === undefined) throw new NoHueBridgeConfiguredError();
