@@ -1,10 +1,10 @@
+import _ from "lodash";
 import { useState } from "react";
-import { PermissionError } from "./components";
+import { BookmarkListSection, PermissionError } from "./components";
 import { useBookmarks } from "./hooks";
 import { GeneralBookmark } from "./types";
 import { search } from "./utils";
 import { List } from "@raycast/api";
-import BookmarkListItem from "./components/BookmarkListItem";
 
 const Command = () => {
   const [searchText, setSearchText] = useState<string>("");
@@ -14,13 +14,17 @@ const Command = () => {
     return <PermissionError />;
   }
 
-  const filteredBookmarks = search(bookmarks || [], ["title", "url"], searchText) as GeneralBookmark[];
+  const groupedBookmarks = _.groupBy(bookmarks as GeneralBookmark[], ({ folder }) => folder);
 
   return (
     <List isLoading={!bookmarks} onSearchTextChange={setSearchText}>
-      {filteredBookmarks.map((bookmark) => (
-        <BookmarkListItem key={bookmark.uuid} bookmark={bookmark} />
-      ))}
+      {_.map(groupedBookmarks, (bookmarks, key) => {
+        const filteredBookmarks = search(bookmarks, ["title", "url", "description"], searchText) as GeneralBookmark[];
+
+        return (
+          <BookmarkListSection key={key} title={key || "Top Level Bookmarks"} filteredBookmarks={filteredBookmarks} />
+        );
+      })}
     </List>
   );
 };

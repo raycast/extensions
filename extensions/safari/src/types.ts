@@ -33,6 +33,7 @@ export interface GeneralBookmark {
   url: string;
   domain?: string;
   title: string;
+  folder: string;
 }
 
 export interface ReadingListBookmark {

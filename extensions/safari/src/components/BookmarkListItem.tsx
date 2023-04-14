@@ -1,34 +1,18 @@
-import { ActionPanel, List, Action } from "@raycast/api";
+import { ActionPanel, List, Action, Icon } from "@raycast/api";
 import { getFavicon } from "@raycast/utils";
 
 import { GeneralBookmark, ReadingListBookmark } from "../types";
-import { executeJxa, formatDate, safariAppIdentifier } from "../utils";
+import { formatDate } from "../utils";
 import CopyMarkdownLinkAction from "./CopyMarkdownLinkAction";
 import CopyTitleAction from "./CopyTitleAction";
 import CopyUrlAction from "./CopyUrlAction";
-import { closeMainWindow } from "@raycast/api";
-import { Icon } from "@raycast/api";
-
-const openInNewWindow = async (url: string) =>
-  executeJxa(`
-      const safari = Application("${safariAppIdentifier}");
-      const doc = safari.Document().make();
-      doc.url = "${url}"
-      safari.activate()
-  `);
+import OpenNewWindowAction from "./OpenNewWindowAction";
 
 const Actions = (props: { bookmark: ReadingListBookmark | GeneralBookmark }) => (
   <ActionPanel>
     <ActionPanel.Section>
       <Action.OpenInBrowser url={props.bookmark.url} />
-      <Action
-        title="Open In New Window"
-        icon={Icon.AppWindow}
-        onAction={async () => {
-          await closeMainWindow();
-          await openInNewWindow(props.bookmark.url);
-        }}
-      />
+      <OpenNewWindowAction url={props.bookmark.url} />
     </ActionPanel.Section>
     <ActionPanel.Section>
       <CopyUrlAction url={props.bookmark.url} />
@@ -57,7 +41,11 @@ const BookmarkListItem = (props: { bookmark: ReadingListBookmark | GeneralBookma
               text: formatDate(props.bookmark.dateAdded),
             },
           ]
-        : undefined
+        : [
+            {
+              tag: props.bookmark.folder,
+            },
+          ]
     }
   />
 );

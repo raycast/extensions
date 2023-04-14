@@ -38,32 +38,36 @@ const extractReadingListBookmarks = (
       | {
           Title: string;
           Children: Bookmark[] | BookmarkPListResult;
+        },
+    parent?:
+      | BookmarkPListResult
+      | {
+          Title: string;
+          Children: Bookmark[] | BookmarkPListResult;
         }
   ) => {
-    const arr: Bookmark[] = [];
+    const arr: GeneralBookmark[] = [];
     if ("Title" in node && node.Title == "com.apple.ReadingList") {
       // Ignore reading list items
     } else {
       if ("Children" in node) {
-        (node.Children as []).forEach((child) => arr.push(...flattenBookmarks(child)));
-      } else {
-        arr.push(node);
+        (node.Children as []).forEach((child) => arr.push(...flattenBookmarks(child, node)));
+      } else if ((node as Bookmark).WebBookmarkType == "WebBookmarkTypeLeaf") {
+        const res = node as Bookmark;
+        const resParent = parent as BookmarkPListResult;
+        arr.push({
+          uuid: res.WebBookmarkUUID,
+          url: res.URLString,
+          domain: getUrlDomain(res.URLString),
+          title: "Title" in res ? (res.Title as string) : res.URIDictionary.title,
+          folder: resParent.Title,
+        });
       }
     }
     return arr;
   };
 
-  return _.chain(flattenBookmarks(bookmarks))
-    .filter((res) => {
-      return res.WebBookmarkType == "WebBookmarkTypeLeaf";
-    })
-    .map((res) => ({
-      uuid: res.WebBookmarkUUID,
-      url: res.URLString,
-      domain: getUrlDomain(res.URLString),
-      title: "Title" in res ? res.Title : res.URIDictionary.title,
-    }))
-    .value() as GeneralBookmark[];
+  return _.chain(flattenBookmarks(bookmarks)).value() as GeneralBookmark[];
 };
 
 const useBookmarks = (readingListOnly?: boolean) => {
