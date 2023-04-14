@@ -4,7 +4,6 @@ import FallbackSearchSection from "./FallbackSearchSection";
 import HistoryListSection from "./HistoryListSection";
 import PermissionError from "./PermissionError";
 import ReadingListSection from "./ReadingListSection";
-import BookmarkListSection from "./BookmarkListSection";
 
 export {
   AddToReadingListAction,
@@ -13,5 +12,4 @@ export {
   HistoryListSection,
   PermissionError,
   ReadingListSection,
-  BookmarkListSection,
 };
