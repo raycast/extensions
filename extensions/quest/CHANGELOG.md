@@ -1,6 +1,13 @@
 # Quest Changelog
 
-## [Initial Version] - 2023-02-19
+## 🤲🏻 Import & Export Quests - March 18, 23
+
+- Add export (share quest)
+- Add import (paste from clipboard during quest creation)
+- Add link to quest ideas
+- Add a task filter to quest view
+
+## 🐣 Hello World - March 12, 2023
 
 - Add action to create quests
 - Add action to edit quests

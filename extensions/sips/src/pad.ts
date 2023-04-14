@@ -1,6 +1,6 @@
 import { showToast, Toast } from "@raycast/api";
 import { execSync } from "child_process";
-import { getSelectedImages } from "./utils";
+import { execSIPSCommandOnSVG, execSIPSCommandOnWebP, getSelectedImages } from "./utils";
 
 export default async function Command(props: { arguments: { amount: string; hexcolor: string } }) {
   const { amount, hexcolor } = props.arguments;
@@ -26,6 +26,8 @@ export default async function Command(props: { arguments: { amount: string; hexc
     return;
   }
 
+  const toast = await showToast({ title: "Padding in progress...", style: Toast.Style.Animated });
+
   if (selectedImages) {
     const pluralized = `image${selectedImages.length === 1 ? "" : "s"}`;
     try {
@@ -36,19 +38,34 @@ export default async function Command(props: { arguments: { amount: string; hexc
         const oldWidth = parseInt(resultArr[4]);
         const oldHeight = parseInt(resultArr[8]);
 
-        execSync(
-          `sips --padToHeightWidth ${oldHeight + padAmount} ${
-            oldWidth + padAmount
-          } --padColor ${hexString} "${imagePath}"`
-        );
+        if (imagePath.toLowerCase().endsWith(".webp")) {
+          // Convert to PNG, apply padding, then restore to WebP
+          execSIPSCommandOnWebP(
+            `sips --padToHeightWidth ${oldHeight + padAmount} ${oldWidth + padAmount} --padColor ${hexString}`,
+            imagePath
+          );
+        }
+        if (imagePath.toLowerCase().endsWith(".svg")) {
+          // Convert to PNG, apply padding, then restore to SVG
+          execSIPSCommandOnSVG(
+            `sips --padToHeightWidth ${oldHeight + padAmount} ${oldWidth + padAmount} --padColor ${hexString}`,
+            imagePath
+          );
+        } else {
+          // Run command normally
+          execSync(
+            `sips --padToHeightWidth ${oldHeight + padAmount} ${
+              oldWidth + padAmount
+            } --padColor ${hexString} "${imagePath}"`
+          );
+        }
       }
 
-      await showToast({ title: `Added padding to ${selectedImages.length.toString()} ${pluralized}` });
+      toast.title = `Added padding to ${selectedImages.length.toString()} ${pluralized}`;
+      toast.style = Toast.Style.Success;
     } catch {
-      await showToast({
-        title: `Failed to pad ${selectedImages.length.toString()} ${pluralized}`,
-        style: Toast.Style.Failure,
-      });
+      toast.title = `Failed to pad ${selectedImages.length.toString()} ${pluralized}`;
+      toast.style = Toast.Style.Failure;
     }
   }
 }

@@ -30,8 +30,25 @@ export async function move(id: string, projectId: string) {
   sync_token = data.sync_token;
 }
 
+export async function uncomplete(id: string) {
+  const { data } = await todoistSyncApi.post("/sync", {
+    sync_token,
+    resource_types: ["all"],
+    commands: [
+      {
+        type: "item_uncomplete",
+        uuid: crypto.randomUUID(),
+        args: { id },
+      },
+    ],
+  });
+
+  sync_token = data.sync_token;
+}
+
 type Event = {
   id: string;
+  object_id: string;
   event_date: string;
   event_type: "completed";
   extra_data: {

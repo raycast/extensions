@@ -1,7 +1,7 @@
 /* eslint-disable camelcase */
 import * as lang from "./lang";
 import { fetchSSE } from "./utils";
-
+import { SocksProxyAgent } from "socks-proxy-agent";
 export type TranslateMode = "translate" | "polishing" | "summarize" | "what";
 
 export interface TranslateQuery {
@@ -13,6 +13,7 @@ export interface TranslateQuery {
   onError: (error: string) => void;
   onFinish: (reason: string) => void;
   signal: AbortSignal;
+  agent?: SocksProxyAgent;
 }
 
 export interface TranslateResult {
@@ -25,7 +26,18 @@ export interface TranslateResult {
 
 const chineseLangs = ["zh", "zh-CN", "zh-TW", "zh-Hans", "zh-Hant", "wyw", "yue"];
 
-export async function translate(query: TranslateQuery, entrypoint: string, apiKey: string) {
+const isAWord = (lang: string, text: string) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const Segmenter = (Intl as any).Segmenter;
+  if (!Segmenter) {
+    return false;
+  }
+  const segmenter = new Segmenter(lang, { granularity: "word" });
+  const iterator = segmenter.segment(text)[Symbol.iterator]();
+  return iterator.next().value.segment === text;
+};
+
+export async function translate(query: TranslateQuery, entrypoint: string, apiKey: string, model: string) {
   const headers: Record<string, string> =
     apiKey == "none"
       ? { "Content-Type": "application/json" }
@@ -46,9 +58,25 @@ export async function translate(query: TranslateQuery, entrypoint: string, apiKe
           assistantPrompt = "翻译成繁体白话文";
         } else if (query.detectTo === "zh-Hans") {
           assistantPrompt = "翻译成简体白话文";
-        } else if (query.detectTo === "yue") {
-          assistantPrompt = "翻译成粤语白话文";
+        } else if (query.text.length < 5 && toChinese) {
+          // 当用户的默认语言为中文时，查询中文词组（不超过5个字），展示多种翻译结果，并阐述适用语境。
+          systemPrompt = `你是一个翻译引擎，请将给到的文本翻译成${
+            lang.langMap.get(query.detectTo) || query.detectTo
+          }。请列出3种（如果有）最常用翻译结果：单词或短语，并列出对应的适用语境（用中文阐述）、音标、词性、双语示例。按照下面格式用中文阐述：
+                        <序号><单词或短语> · /<音标>
+                        [<词性缩写>] <适用语境（用中文阐述）>
+                        例句：<例句>(例句翻译)`;
+          assistantPrompt = "";
         }
+      }
+      if (toChinese && isAWord(query.detectFrom, query.text.trim())) {
+        // 翻译为中文时，增加单词模式，可以更详细的翻译结果，包括：音标、词性、含义、双语示例。
+        systemPrompt = `你是一个翻译引擎，请将翻译给到的文本，只需要翻译不需要解释。当且仅当文本只有一个单词时，请给出单词原始形态（如果有）、单词的语种、对应的音标（如果有）、所有含义（含词性）、双语示例，至少三条例句，请严格按照下面格式给到翻译结果：
+                <原始文本>
+                [<语种>] · / <单词音标>
+                [<词性缩写>] <中文含义>]
+                例句：
+                <序号><例句>(例句翻译)`;
       }
       break;
     case "what":
@@ -82,7 +110,7 @@ export async function translate(query: TranslateQuery, entrypoint: string, apiKe
       break;
   }
   const body = {
-    model: "gpt-3.5-turbo",
+    model,
     temperature: 0,
     max_tokens: 1000,
     top_p: 1,
@@ -103,12 +131,12 @@ export async function translate(query: TranslateQuery, entrypoint: string, apiKe
   };
 
   let isFirst = true;
-
   await fetchSSE(`${entrypoint}`, {
     method: "POST",
     headers,
     body: JSON.stringify(body),
     signal: query.signal,
+    agent: query.agent,
     onMessage: (msg) => {
       let resp;
       try {

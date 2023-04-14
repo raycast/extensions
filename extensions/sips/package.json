@@ -5,12 +5,35 @@
   "description": "Rotate, flip, resize, and convert images using SIPS",
   "icon": "command-icon.png",
   "author": "HelloImSteven",
+  "contributors": [
+    "arronhunt"
+  ],
   "categories": [
     "Media",
     "Productivity",
     "Design Tools"
   ],
   "license": "MIT",
+  "preferences": [
+    {
+      "name": "preferredFileManager",
+      "description": "The preferred file manager to obtain selected images from. Finder will always be used as a fallback.",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "Finder",
+          "value": "Finder"
+        },
+        {
+          "title": "Path Finder",
+          "value": "Path Finder"
+        }
+      ],
+      "default": "Finder",
+      "required": false,
+      "title": "Preferred File Manager"
+    }
+  ],
   "commands": [
     {
       "name": "flip-horizontally",
@@ -103,12 +126,27 @@
       "title": "Apply Image Filter",
       "description": "Apply filters to images using Apple's CIFilters",
       "mode": "view"
+    },
+    {
+      "name": "optimize",
+      "title": "Optimize Images",
+      "description": "Optimize images by compressing them",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "optimizationFactor",
+          "placeholder": "Amount (0 to 100)",
+          "required": false,
+          "type": "text"
+        }
+      ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.48.1",
+    "@raycast/api": "^1.48.8",
     "@raycast/utils": "^1.4.18",
-    "run-applescript": "^6.1.0"
+    "run-applescript": "^6.1.0",
+    "svgo": "^3.0.2"
   },
   "devDependencies": {
     "@types/node": "18.8.3",

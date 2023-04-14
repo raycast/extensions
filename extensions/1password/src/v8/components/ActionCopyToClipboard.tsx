@@ -1,5 +1,6 @@
-import { Action, Clipboard, Icon, Keyboard, Toast, showToast } from "@raycast/api";
+import { Action, Clipboard, Icon, Keyboard, showToast, Toast } from "@raycast/api";
 import { execFileSync } from "child_process";
+
 import { CLI_PATH, titleCaseWord } from "../utils";
 
 async function copyPassword(password: string): Promise<boolean> {
@@ -52,7 +53,7 @@ export function CopyToClipboard({
 
         try {
           const stdout = execFileSync(CLI_PATH!, ["read", `op://${vault_id}/${id}/${field}`]);
-          await copyPassword(stdout.toString());
+          await copyPassword(stdout.toString().trim());
 
           toast.style = Toast.Style.Success;
           toast.title = "Copied to clipboard";
