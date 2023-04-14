@@ -2,9 +2,10 @@
 
 ## [Hue Extension 2.0] - 2023-04-10
 
-* Groups and scenes are now shown as images to make it easier to find the right one
-* Add rate limiting to improve behaviour when holding down a hotkey and to prevent rate limiting errors
-* Add live updating of lights when they are changed by e.g. the Hue app or a physical switch
+* Show groups and scenes as gradients
+* Show lights as tinted icons
+* Use rate limiting to improve behaviour when holding down a hotkey and to prevent rate limiting errors
+* Update the UI when lights are changed by e.g. the Hue app or a physical switch
 * Many improvements under the hood to improve performance, responsiveness and reliability
   * Use Hue API V2: ‘Connected Lighting Interface Protocol’ or CLIP
   * Connect with the Hue Bridge using TLS (HTTPS) and HTTP/2
