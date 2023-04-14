@@ -41,7 +41,7 @@ export default function main() {
         </ActionPanel>
       }
     >
-      <Form.TextField
+      <Form.TextArea
         id="input"
         title="Input"
         placeholder="Paste JSON here…"
