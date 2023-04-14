@@ -3,13 +3,13 @@ import { usePromise } from "@raycast/utils";
 import getVPN from "./getVPN";
 import toggle from "./toggle";
 
-import { sortVPNList } from "./utils";
+import { sortVPNArray } from "./utils";
 
 export default function Command() {
   // const [VPN, setVPN] = useState<VPN[]>();
   const { isLoading, data } = usePromise(getVPN);
 
-  sortVPNList(data);
+  sortVPNArray(data);
 
   return data?.length === 0 ? (
     <List>

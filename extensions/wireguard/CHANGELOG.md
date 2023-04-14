@@ -1,5 +1,9 @@
 # Wireguard Changelog
 
+## [Changed] - 2023-04-14
+
+- Improve the performance of fetching lists when there are too many configurations.
+
 ## [Feature] - 2023-03-24
 
 - Add disconnectAllWireguardConnections command.
