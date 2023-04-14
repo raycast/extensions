@@ -16,7 +16,7 @@ const { groupByStatus }: Preferences = getPreferenceValues();
 
 const Command = () => {
   const [searchText, setSearchText] = useState<string>("");
-  const { bookmarks, hasPermission } = useBookmarks();
+  const { bookmarks, hasPermission } = useBookmarks(true);
 
   if (!hasPermission) {
     return <PermissionError />;

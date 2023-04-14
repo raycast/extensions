@@ -32,11 +32,15 @@ const BookmarkListItem = (props: { bookmark: ReadingListBookmark }) => (
     subtitle={props.bookmark.domain}
     icon={getFavicon(props.bookmark.url)}
     actions={<Actions bookmark={props.bookmark} />}
-    accessories={[
-      {
-        text: formatDate(props.bookmark.dateAdded),
-      },
-    ]}
+    accessories={
+      props.bookmark.dateAdded
+        ? [
+            {
+              text: formatDate(props.bookmark.dateAdded),
+            },
+          ]
+        : undefined
+    }
   />
 );
 
