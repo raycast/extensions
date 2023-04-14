@@ -27,17 +27,24 @@ export default async () => {
       lights: await hueClient.getLights(),
     }))
     .then(({ hueClient, lights }) => {
-      const promises = lights
+      const onLights = lights.filter((light) => light.on.on);
+
+      if (onLights.length === 0) {
+        closeMainWindow();
+        showHUD("All lights are already off");
+        return Promise.reject();
+      }
+
+      const promises = onLights
         .filter((light) => light.on.on)
         .map((light) => hueClient.updateLight(light, { on: { on: false } }));
 
       return Promise.all(promises);
     })
-    .then(() => {
-      return showHUD("Turned off all lights");
+    .then((lights) => {
+      closeMainWindow();
+      showHUD(`Turned off all ${lights.length} lights that were on`);
     })
-    .then(() => closeMainWindow())
-    .then(() => showHUD("Turned off all lights"))
     .catch((error) => {
       closeMainWindow().then(() => {
         if (error instanceof NoHueBridgeConfiguredError) return showHUD("No Hue bridge configured");
