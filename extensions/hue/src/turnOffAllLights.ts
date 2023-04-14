@@ -16,19 +16,20 @@ class CouldNotConnectToHueBridgeError extends Error {
 }
 
 export default async () => {
-  LocalStorage.getItem<string>(BRIDGE_CONFIG_KEY)
+  await LocalStorage.getItem<string>(BRIDGE_CONFIG_KEY)
     .then((bridgeConfigString) => {
       if (bridgeConfigString === undefined) throw new NoHueBridgeConfiguredError();
       return JSON.parse(bridgeConfigString);
     })
-    .then(async (bridgeConfig: BridgeConfig) => {
-      const hueClient = await createHueClient(bridgeConfig);
-      return hueClient.getLights().then((lights) => ({ hueClient, lights }));
-    })
+    .then((bridgeConfig: BridgeConfig) => createHueClient(bridgeConfig))
+    .then(async (hueClient) => ({
+      hueClient,
+      lights: await hueClient.getLights(),
+    }))
     .then(({ hueClient, lights }) => {
-      const promises = lights.map((light) => {
-        return hueClient.updateLight(light, { on: { on: false } });
-      });
+      const promises = lights
+        .filter((light) => light.on.on)
+        .map((light) => hueClient.updateLight(light, { on: { on: false } }));
 
       return Promise.all(promises);
     })
