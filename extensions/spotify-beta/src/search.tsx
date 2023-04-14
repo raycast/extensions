@@ -50,10 +50,10 @@ function SearchCommand() {
 
   const sharedProps: ComponentProps<typeof List> = {
     searchBarPlaceholder: "What do you want to listen to",
+    searchText,
     onSearchTextChange: setSearchText,
     isLoading: searchIsLoading || recentSearchIsLoading,
     throttle: true,
-    searchText,
   };
 
   if (Boolean(searchText) === false) {

@@ -15,15 +15,23 @@ type TrackActionPanelProps = {
   album?: SimplifiedAlbumObject;
   showGoToAlbum?: boolean;
   playingContext?: string;
+  tracksToQueue?: SimplifiedTrackObject[];
 };
 
-export function TrackActionPanel({ title, track, album, showGoToAlbum, playingContext }: TrackActionPanelProps) {
+export function TrackActionPanel({
+  title,
+  track,
+  album,
+  showGoToAlbum,
+  playingContext,
+  tracksToQueue,
+}: TrackActionPanelProps) {
   const { myPlaylistsData } = useMyPlaylists();
   const { meData } = useMe();
 
   return (
     <ActionPanel>
-      <PlayAction id={track.id as string} type="track" playingContext={playingContext} />
+      <PlayAction id={track.id as string} type="track" playingContext={playingContext} tracksToQueue={tracksToQueue} />
       {album && showGoToAlbum && (
         <Action.Push
           icon={Icon.AppWindowList}
