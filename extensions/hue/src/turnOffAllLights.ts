@@ -3,18 +3,6 @@ import { BRIDGE_CONFIG_KEY } from "./helpers/constants";
 import { BridgeConfig } from "./lib/types";
 import createHueClient from "./lib/createHueClient";
 
-class NoHueBridgeConfiguredError extends Error {
-  constructor() {
-    super("No Hue Bridge configured");
-  }
-}
-
-class CouldNotConnectToHueBridgeError extends Error {
-  constructor() {
-    super("Hue Bridge not found");
-  }
-}
-
 export default async () => {
   new Toast({
     style: Toast.Style.Animated,
@@ -26,7 +14,7 @@ export default async () => {
 
   await LocalStorage.getItem<string>(BRIDGE_CONFIG_KEY)
     .then((bridgeConfigString) => {
-      if (bridgeConfigString === undefined) throw new NoHueBridgeConfiguredError();
+      if (bridgeConfigString === undefined) return Promise.reject("No Hue Bridge configured");
       return JSON.parse(bridgeConfigString);
     })
     .then((bridgeConfig: BridgeConfig) => createHueClient(bridgeConfig))
