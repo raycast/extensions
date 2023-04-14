@@ -7,6 +7,7 @@ export default function UnlinkAction(props: { sendHueMessage: SendHueMessage }) 
     <Action
       key="unlink"
       title="Unlink Saved Hue Bridge"
+      style={Action.Style.Destructive}
       onAction={async () =>
         await confirmAlert({
           title: "Are you sure you want to unlink the configured Hue Bridge?",
