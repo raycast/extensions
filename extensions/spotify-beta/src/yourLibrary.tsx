@@ -70,6 +70,7 @@ function YourLibraryCommand() {
               limit={searchText ? undefined : 6}
               tracks={myLibraryData?.tracks?.items}
               title="Liked Songs"
+              queueTracks
             />
             <ShowsSection type="list" limit={searchText ? undefined : 6} shows={myLibraryData?.shows?.items} />
             <EpisodesSection
@@ -80,7 +81,9 @@ function YourLibraryCommand() {
           </>
         )}
 
-        {searchFilter === "tracks" && <TracksSection tracks={myLibraryData?.tracks?.items} title="Liked Songs" />}
+        {searchFilter === "tracks" && (
+          <TracksSection tracks={myLibraryData?.tracks?.items} title="Liked Songs" queueTracks />
+        )}
         {searchFilter === "episodes" && (
           <EpisodesSection episodes={myLibraryData?.episodes?.items} title="Saved Episodes" />
         )}
