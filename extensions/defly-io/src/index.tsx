@@ -301,6 +301,7 @@ function Main(props: { region: string; onValueChange: (newValue: string) => void
                 icon={{
                   source: team.available ? Icon.CircleFilled : Icon.XMarkCircleFilled,
                   tintColor: `#${team.team.hex}`,
+                  tooltip: team.available ? undefined : "Team Unavailable",
                 }}
                 subtitle={`${team.players.length}/${team.maxSize} - ${team.mapPercent.toFixed(2)}%`}
                 {...itemProps}
@@ -316,6 +317,7 @@ function Main(props: { region: string; onValueChange: (newValue: string) => void
                       shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
                     />
                     <Action
+                      icon={Icon.Sidebar}
                       title="Toggle Detail"
                       onAction={() => setShowingDetail(!showingDetail)}
                       shortcut={{
