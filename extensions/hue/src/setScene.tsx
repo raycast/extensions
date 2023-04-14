@@ -49,7 +49,6 @@ export default function SetScene(props: { group?: Group; useHue?: ReturnType<typ
               sendHueMessage={sendHueMessage}
             />
           ))}
-          );
         </Grid.Section>
       </Grid>
     );
