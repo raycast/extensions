@@ -25,10 +25,54 @@ export default function Command() {
           ))}
         </List.Section>
       ) : (
-        <List.EmptyView title={"Type to search"} />
+        <List.Section>
+          {defaultLinks().map((searchResult: SearchResult) => (
+            <SearchListItem key={searchResult.name} searchResult={searchResult} />
+          ))}
+        </List.Section>
       )}
     </List>
   );
+}
+
+function defaultLinks() {
+  return [
+    {
+      name: 'Code Reference',
+      description: 'Looking for documentation for the codebase?',
+      url: 'https://developer.wordpress.org/reference',
+    } as SearchResult,
+    {
+      name: 'Coding Standards',
+      description: 'Looking to ensure your code meets the standards?',
+      url: 'https://developer.wordpress.org/coding-standards/',
+    } as SearchResult,
+    {
+      name: 'Common APIs',
+      description: 'Interested in interacting with various APIs?',
+      url: 'https://developer.wordpress.org/apis/',
+    } as SearchResult,
+    {
+      name: 'REST API',
+      description: 'Getting started on making WordPress applications?',
+      url: 'https://developer.wordpress.org/rest-api/',
+    } as SearchResult,
+    {
+      name: 'WP CLI',
+      description: 'Want to accelerate your workflow managing WordPress?',
+      url: 'https://developer.wordpress.org/cli/commands/',
+    } as SearchResult,
+    {
+      name: 'Plugin Handbook',
+      description: 'Ready to dive deep into the world of plugin authoring?',
+      url: 'https://developer.wordpress.org/cli/commands/',
+    } as SearchResult,
+    {
+      name: 'Theme Handbook',
+      description: 'Want to learn how to start theming WordPress?',
+      url: 'https://developer.wordpress.org/cli/commands/',
+    } as SearchResult,
+  ];
 }
 
 function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
@@ -36,7 +80,7 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
     <List.Item
       title={searchResult.name}
       subtitle={searchResult.description}
-      accessories={[{ icon: Icon.Code, text: searchResult.type }]}
+      accessories={searchResult.type ? [{ icon: Icon.Code, text: searchResult.type }] : null}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
@@ -80,7 +124,6 @@ async function parseFetchResponse(response: Response) {
   }
 
   return result.rss.channel.item.map((match: RssItem) => {
-    console.log(match);
     const text = match.description.replace(/(<([^>]+)>)/gi, "");
     const type = text.substring(0, text.indexOf(":")).trim();
     const description = text.substring(text.indexOf(":") + 1).trim();
