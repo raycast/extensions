@@ -1,5 +1,9 @@
 # GitLab Changelog
 
+## [Remove Branch] - 2023-04-15
+
+- Add checkbox `Delete source branch` for a new MR (default state of project is respected)
+
 ## [Improve Starred Project Visibility] - 2023-03-16
 
 - Use default color for non-starred projects so starred projects are more visible

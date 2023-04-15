@@ -84,6 +84,7 @@ export function dataToProject(project: any): Project {
     http_url_to_repo: project.http_url_to_repo,
     default_branch: project.default_branch,
     archived: project.archived,
+    remove_source_branch_after_merge: project.remove_source_branch_after_merge,
   };
 }
 
@@ -310,6 +311,7 @@ export class Project {
   public http_url_to_repo?: string = undefined;
   public default_branch = "";
   public archived = false;
+  public remove_source_branch_after_merge = false;
 }
 
 export class User {
