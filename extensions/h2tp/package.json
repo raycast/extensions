@@ -13,7 +13,7 @@
     {
       "name": "index",
       "title": "HTTP Request Form",
-      "description": "",
+      "description": "Open form to send http request",
       "mode": "view"
     }
   ],
