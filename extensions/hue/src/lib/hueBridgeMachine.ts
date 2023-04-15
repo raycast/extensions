@@ -9,7 +9,7 @@ import {
   State,
   TypegenDisabled,
 } from "xstate";
-import { LocalStorage, Toast } from "@raycast/api";
+import { getPreferenceValues, LocalStorage, Toast } from "@raycast/api";
 import { BRIDGE_CONFIG_KEY } from "../helpers/constants";
 import HueClient from "./HueClient";
 import { BridgeConfig, GroupedLight, Light, Room, Scene, Zone } from "./types";
@@ -46,7 +46,7 @@ export default function hueBridgeMachine(
 ) {
   return createMachine<HueContext>({
     id: "manage-hue-bridge",
-    initial: "loadingCredentials",
+    initial: "loadingPreferences",
     predictableActionArguments: true,
     context: {
       bridgeConfig: undefined,
@@ -61,17 +61,62 @@ export default function hueBridgeMachine(
       },
     },
     states: {
+      loadingPreferences: {
+        invoke: {
+          id: "loadingPreferences",
+          src: async () => {
+            const bridgeIpAddress = getPreferenceValues().bridgeIpAddress;
+            const bridgeUsername = getPreferenceValues().bridgeUsername;
+
+            if (bridgeIpAddress && bridgeUsername) {
+              console.log("Using bridge IP address and username from preferences");
+            } else if (bridgeIpAddress) {
+              console.log("Using bridge IP address from preferences");
+            } else if (bridgeUsername) {
+              console.log("Using bridge username from preferences");
+            }
+
+            if (bridgeIpAddress || bridgeUsername) {
+              return {
+                bridgeIpAddress: bridgeIpAddress ? bridgeIpAddress : undefined,
+                bridgeUsername: bridgeUsername ? bridgeUsername : undefined,
+              };
+            }
+
+            throw new Error("No bridge IP address found in preferences");
+          },
+          onDone: {
+            actions: assign({
+              bridgeIpAddress: (context, event) => event.data.bridgeIpAddress,
+              bridgeUsername: (context, event) => event.data.bridgeUsername,
+            }),
+            target: "loadingCredentials",
+          },
+          onError: {
+            target: "loadingCredentials",
+          },
+        },
+      },
       loadingCredentials: {
         invoke: {
           id: "loadingCredentials",
-          src: async () => {
+          src: async (context) => {
             const bridgeConfigString = await LocalStorage.getItem<string>(BRIDGE_CONFIG_KEY);
 
             if (bridgeConfigString === undefined) {
               throw new Error("No bridge configuration found");
             }
 
-            return { bridgeConfig: JSON.parse(bridgeConfigString) };
+            let bridgeConfig = JSON.parse(bridgeConfigString);
+
+            // Override bridge IP address and username if they are loaded from preferences
+            bridgeConfig = {
+              ...bridgeConfig,
+              ...(context.bridgeIpAddress ? { ipAddress: context.bridgeIpAddress } : {}),
+              ...(context.bridgeUsername ? { username: context.bridgeUsername } : {}),
+            };
+
+            return { bridgeConfig: bridgeConfig };
           },
           onDone: {
             actions: assign({
@@ -176,7 +221,14 @@ export default function hueBridgeMachine(
           src: async (context) => {
             if (context.bridgeIpAddress === undefined) throw Error("No bridge IP address");
 
-            const bridgeConfig = await linkWithBridge(context.bridgeIpAddress);
+            // TODO: Test cases:
+            //  With manual IP
+            //  With manual invalid IP
+            //  With manual username
+            //  With manual invalid username
+            //  With manual IP and username
+            //  With manual invalid IP and username
+            const bridgeConfig = await linkWithBridge(context.bridgeIpAddress, context.bridgeUsername);
 
             const hueClient = await createHueClient(
               bridgeConfig,

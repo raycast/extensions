@@ -58,6 +58,24 @@
       "type": "textfield",
       "default": "400",
       "required": false
+    },
+    {
+      "name": "bridgeIpAddress",
+      "title": "Bridge IP address (manual)",
+      "description": "The IP address of your Hue bridge. Use this if automatic discovery doesn't work.",
+      "placeholder": "x.x.x.x",
+      "type": "textfield",
+      "default": "",
+      "required": false
+    },
+    {
+      "name": "bridgeUsername",
+      "title": "Bridge Username (manual)",
+      "description": "The username for your Hue bridge. Use this if you have already created a username you want to use.",
+      "placeholder": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+      "type": "textfield",
+      "default": "",
+      "required": false
     }
   ],
   "dependencies": {

@@ -2,12 +2,12 @@ import { BridgeConfig } from "./types";
 import { createPemString, getCertificate, getUsernameFromBridge } from "../helpers/hueNetworking";
 import { v3 } from "node-hue-api";
 
-export async function linkWithBridge(bridgeIpAddress: string): Promise<BridgeConfig> {
+export async function linkWithBridge(bridgeIpAddress: string, bridgeUsername?: string): Promise<BridgeConfig> {
   // TODO: Remove dependency on node-hue-api
   // TODO: Reduce the number of calls to the Hue Bridge
 
   const peerCertificate = await getCertificate(bridgeIpAddress);
-  const username = await getUsernameFromBridge(bridgeIpAddress);
+  const username = bridgeUsername ?? (await getUsernameFromBridge(bridgeIpAddress));
 
   // Get bridge ID using the new credentials
   const bridgeId: string = await (async () => {
