@@ -1,5 +1,30 @@
 # GitLab Changelog
 
+## [Improve Starred Project Visibility] - 2023-03-16
+
+- Use default color for non-starred projects so starred projects are more visible
+
+## [Add Retry for Failed Jobs] - 2023-03-15
+
+- Added ability to retry all failed jobs for a pipeline
+- Added ability to retry a single job
+
+## [Add Group and Project Wikis] - 2023-03-14
+
+- Added wikis for groups and projects
+
+## [Add Copy Clone Url] - 2023-02-24
+
+- Added command to copy clone url of a project to clipboard
+
+## [Allow Failure Jobs] - 2023-02-24
+
+- Added indicators for jobs that are allowed to fail
+
+## [Project Create New Issue] - 2023-02-03
+
+- Added command to cerate new issue on a project
+
 ## [New Preference] - 2023-01-03
 
 - Added preference to hide annoying bot created todos in the todo command

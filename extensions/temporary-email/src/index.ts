@@ -11,7 +11,7 @@ const MAILSERVICE_MAPPING: {
   [service in EmailServices]: () => [/** email */ string, /** url */ string];
 } = {
   "maildrop.cc": () => {
-    return [`${RANDOM_EMAIL}@maildrop.cc`, `https://maildrop.cc/inbox/${RANDOM_EMAIL}`];
+    return [`${RANDOM_EMAIL}@maildrop.cc`, `https://maildrop.cc/inbox/?mailbox=${RANDOM_EMAIL}`];
   },
   "harakirimail.com": () => {
     return [`${RANDOM_EMAIL}@harakirimail.com`, `https://harakirimail.com/inbox/${RANDOM_EMAIL}`];

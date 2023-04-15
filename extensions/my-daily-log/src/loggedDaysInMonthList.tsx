@@ -1,13 +1,13 @@
 import { List } from "@raycast/api";
 import { useState } from "react";
-import { getDailyLog } from "./domain/getDailyLog";
-import { getLoggedDays } from "./domain/getLoggedDays";
-import { LoggedDay } from "./domain/LoggedDay";
+import { LoggedDay } from "./domain/loggedDay/LoggedDay";
+import { getDailyLogsForDateUseCaseFactory } from "./factories/getDailyLogsForDateUseCaseFactory";
+import { getLoggedDaysuseCaseFactory } from "./factories/getLoggedDaysuseCaseFactory";
 import { capitalize } from "./shared/capitalize";
 
 export default function Command() {
-  const d = getLoggedDays();
-  const [items] = useState<LoggedDay[]>(d);
+  const useCase = getLoggedDaysuseCaseFactory();
+  const [items] = useState<LoggedDay[]>(useCase.execute());
   return (
     <List isShowingDetail>
       {items.map((item) => (
@@ -18,7 +18,7 @@ export default function Command() {
 }
 
 function Detail(props: { date: Date }) {
-  const items = getDailyLog(props.date);
+  const items = getDailyLogsForDateUseCaseFactory().execute(props.date);
   return (
     <List.Item.Detail
       markdown={items.map((item) => `* ${capitalize(item.title)} - _${hoursAndMinutes(item.date)}_`).join("\n")}

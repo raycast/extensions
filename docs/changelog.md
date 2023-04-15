@@ -1,5 +1,39 @@
 # Changelog
 
+## 1.49.0 - 2023-03-29
+
+### ✨ New
+
+- It is now possible to drag and drop items from Grids. Lists are also supported if their items have as `quickLook` properties.
+
+### 💎 Improvements
+
+- Extend `launchCommand` to allow inter-extension launches
+- Extend `launchCommand` to allow to pass a `fallbackText`
+
+### 🐞 Fixes
+
+- **SVG**: Ignore doctype and HTML comments
+- Fix a flicker happening when there was a fallback text passed to a command
+- Fix a rendering issue with multi-line `tag` text.
+
+## 1.48.0 - 2023-02-22
+
+### ✨ New
+
+- **Clipboard**: Added `transient` option to `Clipboard.copy` method.
+- **Actions**: Added `type` prop to `Action.PickDate` to control the date components to be picked.
+
+### 💎 Improvements
+
+- Improve the time to interaction when launching a command that always renders the same view type.
+
+### 🐞 Fixes
+
+- Changed `Deactivate Command` action shortcut to `⌘ ⌥ ⇧ D`, so it doesn't clash with `Copy Deeplink`
+- Fixed an issue where restarting Raycast would not properly restore menu bar commands that sometimes didn't put anything in the menu bar.
+- Locale: Respect the hourCycle, calendar, and numbering system locale.
+
 ## 1.47.0 - 2023-02-01
 
 ### ✨ New

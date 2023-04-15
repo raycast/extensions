@@ -107,7 +107,7 @@ export function WorkflowRunActions({ workflowRun, repository, mutateList }: Work
       <ActionPanel.Section>
         {workflowRun.status === "completed" ? (
           <Action
-            title="Re-run Workflow"
+            title="Re-Run Workflow"
             icon={Icon.Clock}
             onAction={rerunWorkflow}
             shortcut={{ modifiers: ["cmd"], key: "enter" }}

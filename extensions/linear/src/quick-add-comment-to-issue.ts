@@ -30,7 +30,7 @@ const command = async (props: { arguments: Arguments }) => {
       await closeMainWindow();
     }
 
-    const payload = await linearClient.commentCreate({
+    const payload = await linearClient.createComment({
       body: comment,
       issueId,
     });

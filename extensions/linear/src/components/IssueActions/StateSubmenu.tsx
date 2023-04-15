@@ -3,7 +3,7 @@ import { useState } from "react";
 
 import { IssueResult, IssueState } from "../../api/getIssues";
 
-import { getOrderedStates, statusIcons } from "../../helpers/states";
+import { getOrderedStates, getStatusIcon } from "../../helpers/states";
 
 import useStates from "../../hooks/useStates";
 
@@ -59,7 +59,7 @@ export default function StateSubmenu({
             key={state.id}
             autoFocus={state.id === issue.state.id}
             title={state.name}
-            icon={{ source: statusIcons[state.type], tintColor: state.color }}
+            icon={getStatusIcon(state)}
             onAction={() => setStatus(state)}
           />
         ))

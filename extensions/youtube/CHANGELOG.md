@@ -1,5 +1,14 @@
 # YouTube Changelog
 
+## [Enhancements] - 2023-04-13
+
+- Optimized the experience
+- Using cache instead of local storage
+- Using a 4/3 aspect ratio for videos
+
+## [Search From Root] - 2023-02-08
+- Add query parameter to Search Videos and Search Channels commands
+
 ## [README update] - 2023-01-17
 - Fixed path to API
 

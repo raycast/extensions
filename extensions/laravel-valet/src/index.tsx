@@ -1,67 +1,42 @@
-import { useEffect, useState } from "react";
-import { site, getParked, pathExists, configPath, searchSites } from "./utils";
-import { Action, ActionPanel, Icon, List, showToast, Toast } from "@raycast/api";
-import { Site } from "./components/Site";
+import React, { useState } from "react";
+import { handleError } from "./helpers/general";
+import { List } from "@raycast/api";
+import { SiteListItem } from "./components/SiteListItem";
+import { useCachedPromise } from "@raycast/utils";
+import { getParked, getUniqueId } from "./helpers/sites";
+import { Site } from "./types/entities";
 
 export default function Command() {
-  const [isLoading, setIsLoading] = useState(false);
-  const [sites, setSites] = useState<site[]>();
+  const [isShowingDetail, setIsShowingDetail] = useState<boolean>(false);
 
-  useEffect(() => {
-    setIsLoading(true);
+  const {
+    data: sites,
+    isLoading: isLoadingSites,
+    error: getSitesError,
+    mutate: mutateSites,
+  } = useCachedPromise(() => getParked());
 
-    getParked()
-      .then((sites: site[]) => {
-        setSites(sites);
-        setIsLoading(false);
-      })
-      .catch(() => {
-        setIsLoading(false);
-      });
+  if (getSitesError) {
+    handleError({ error: getSitesError, title: "Unable to get sites" });
+  }
 
-    setIsLoading(false);
-  }, []);
-
-  const onSearchTextChange = async (query: string) => {
-    searchSites(query)
-      .then((sites: site[]) => {
-        setSites(sites);
-        setIsLoading(false);
-      })
-      .catch((error: Error) => {
-        setIsLoading(false);
-        showToast(Toast.Style.Failure, "Something went wrong!", error.message);
-      });
-  };
+  const filteredSites = React.useMemo(() => {
+    return sites ?? [];
+  }, [sites]);
 
   return (
-    <List
-      isLoading={isLoading}
-      searchBarPlaceholder="Search sites..."
-      throttle={false}
-      onSearchTextChange={onSearchTextChange}
-    >
-      {!pathExists(configPath) && (
-        <List.EmptyView
-          title="No Valet Config File Found"
-          description={`Please make sure Valet is installed and configured.\n\nPress enter to open the documentation.`}
-          icon="no-view.png"
-          actions={
-            <ActionPanel>
-              <Action.OpenInBrowser
-                title="Open Laravel Valet docs"
-                url="https://laravel.com/docs/master/valet#installation"
-              />
-            </ActionPanel>
-          }
-        />
-      )}
-      {pathExists(configPath) && (sites ?? []).length === 0 && (
-        <List.EmptyView title="No Sites Found" icon="no-view.png" description="Try searching for something else" />
-      )}
-      {(sites ?? []).map((site: site) => (
-        <Site site={site} key={site.name} />
-      ))}
+    <List isLoading={isLoadingSites} searchBarPlaceholder="Search sites..." isShowingDetail={isShowingDetail}>
+      {filteredSites.map((site: Site) => {
+        return (
+          <SiteListItem
+            key={getUniqueId(site)}
+            site={site}
+            mutateSites={mutateSites}
+            isShowingDetail={isShowingDetail}
+            setIsShowingDetail={setIsShowingDetail}
+          />
+        );
+      })}
     </List>
   );
 }

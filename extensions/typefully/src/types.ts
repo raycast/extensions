@@ -49,6 +49,7 @@ export type Notification = {
   user: Omit<Account, "id">;
   account: Account;
   payload: NotificationPayload;
+  url: string;
 };
 
 export type ActivityNotification = Notification & {

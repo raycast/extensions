@@ -7,8 +7,8 @@ export default async function Command() {
   const lastStationURL = await LocalStorage.getItem("-last-station-url");
 
   if ((lastStationName && lastStationURL && lastStationName != "") || lastStationURL != "") {
-    await playStation(lastStationName as string, lastStationURL as string);
-    if (environment.launchType == LaunchType.UserInitiated) {
+    const status = await playStation(lastStationName as string, lastStationURL as string);
+    if (status != -1 && environment.launchType == LaunchType.UserInitiated) {
       await showToast({ title: "Resuming Station", message: lastStationName as string });
     }
   } else if (environment.launchType == LaunchType.UserInitiated) {

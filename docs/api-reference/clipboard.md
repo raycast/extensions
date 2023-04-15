@@ -13,7 +13,7 @@ Copies text or a file to the clipboard.
 #### Signature
 
 ```typescript
-async function copy(content: string | Content): Promise<void>;
+async function copy(content: string | number | Content, options?: CopyOptions): Promise<void>;
 ```
 
 #### Example
@@ -38,6 +38,9 @@ export default async function Command() {
   } catch (error) {
     console.log(`Could not copy file '${file}'. Reason: ${error}`);
   }
+
+// copy transient data
+  await Clipboard.copy("my-secret-password", { transient: true })
 }
 ```
 
@@ -184,4 +187,12 @@ type Content =
   | {
       html?: string;
     };
+```
+
+### Clipboard.CopyOptions
+
+Type of options passed to `Clipboard.copy`.
+
+```typescript
+type CopyOptions = { transient: boolean }
 ```

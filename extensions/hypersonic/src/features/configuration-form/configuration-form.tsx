@@ -199,7 +199,7 @@ export default function ConfigurationForm({
         value={values.titleProperty}
         onChange={(v) => setValue('titleProperty', v)}
         error={
-          !values.statusProperty && !isLoading && !!database
+          !values.titleProperty && !isLoading && !!database
             ? 'Required'
             : undefined
         }
@@ -220,7 +220,7 @@ export default function ConfigurationForm({
         value={values.dateProperty}
         onChange={(v) => setValue('dateProperty', v)}
         error={
-          !values.statusProperty && !isLoading && !!database
+          !values.dateProperty && !isLoading && !!database
             ? 'Required'
             : undefined
         }

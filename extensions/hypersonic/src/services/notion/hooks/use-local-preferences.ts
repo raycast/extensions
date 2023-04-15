@@ -16,6 +16,6 @@ export function useLocalPreferences() {
     error,
     isLoading,
     mutate,
-    revalidate,
+    revalidatePreferences: revalidate,
   }
 }

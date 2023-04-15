@@ -1,5 +1,6 @@
 export const DEFAULT_NOTION_ICON = "📄"
 export const DONATION_URL = "https://www.buymeacoffee.com/pluqin"
+export const FEEDBACK_URL = "https://forms.gle/XAbP57BWfs6JA4T99"
 
 export const NOTION_RECENT_PAGE_PERSISTENCE_KEY = "notion_recent_page_id"
 export const NOTION_SEARCH_RETRY = 3

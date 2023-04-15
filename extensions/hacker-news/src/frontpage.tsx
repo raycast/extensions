@@ -28,17 +28,30 @@ export default function Command() {
       }
     >
       {data?.map((item, index) => (
-        <StoryListItem key={item.guid} item={item} index={index} />
+        <StoryListItem key={item.guid} item={item} index={index} topic={topic} />
       ))}
     </List>
   );
 }
 
-function StoryListItem(props: { item: Parser.Item; index: number }) {
+function setTitle(title: string, topic: Topic) {
+  if (topic === Topic.ShowHN) {
+    return title.replace(/Show HN: /, "");
+  }
+  if (topic === Topic.AskHN) {
+    return title.replace(/Ask HN: /, "");
+  }
+  if (topic === Topic.Polls) {
+    return title.replace(/Poll: /, "");
+  }
+  return title;
+}
+
+function StoryListItem(props: { item: Parser.Item; index: number; topic: Topic | null }) {
   return (
     <List.Item
       icon={getIcon(props.index + 1)}
-      title={props.item.title ?? "No title"}
+      title={setTitle(props.item.title || "No Title", props.topic || Topic.FrontPage)}
       subtitle={props.item.creator}
       accessories={getAccessories(props.item)}
       actions={<Actions item={props.item} />}

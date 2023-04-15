@@ -1,3 +1,8 @@
+export type Bank = {
+  logo: string;
+  name: string;
+};
+
 export type Transaction = {
   id: number;
   bank_account_id: number;
@@ -14,10 +19,7 @@ export type Transaction = {
   category: Category;
   bank_account: {
     name: string;
-    bank: {
-      logo: string;
-      name: string;
-    };
+    bank: Bank;
   };
 };
 
@@ -34,6 +36,17 @@ export interface Category {
   created_at: Date;
   updated_at: Date;
 }
+
+export type BankAccount = {
+  id: number;
+  bank_id: number;
+  name: string;
+  balance: number;
+  currency: string;
+  hidden: boolean;
+  updated_at: Date;
+  bank: Bank;
+};
 
 export type Currency = "EUR" | "USD" | "GBP";
 export type Locale = "es-ES" | "en-US" | "en-GB";

@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-08-04 12:28
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-10-11 22:44
+ * @lastEditTime: 2023-03-17 23:41
  * @fileName: utils.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -161,7 +161,7 @@ export function showErrorToast(errorInfo: RequestErrorInfo | undefined) {
  */
 export function getTypeErrorInfo(type: RequestType, error: AxiosError): RequestErrorInfo {
   const errorCode = error.response?.status;
-  const errorMessage = error.message || error.response?.statusText || "something error 😭";
+  const errorMessage = error.response?.statusText || error.message || "something error 😭";
   const errorInfo: RequestErrorInfo = {
     type: type,
     code: `${errorCode || ""}`,

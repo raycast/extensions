@@ -193,6 +193,7 @@ async function launchCommand(options: {
   type: LaunchType;
   arguments?: Arguments | null;
   context?: LaunchContext | null;
+  fallbackText?: string | null;
 }): Promise<void>;
 ```
 
@@ -238,3 +239,7 @@ Supported path types.
 ### LaunchContext
 
 Represents the passed context object of programmatic command launches.
+
+### LaunchOptions
+
+A parameter object used to decide which command should be launched and what data (arguments, context) it should receive.

@@ -1,6 +1,6 @@
 # Bike
 
-Control Bike.app with Raycast
+Control Bike with Raycast
 
 # Commands
 - New Bike
@@ -15,6 +15,8 @@ Control Bike.app with Raycast
     - Copy the URL of the current Bike document to the clipboard.
 - Copy Row URL
     - Copy the URL of the currently focused row to the clipboard.
+- Extract Links
+    - Copy all links in the currently focused document to the clipboard.
 - Search Rows
     - Search for and quickly navigate to rows within the current Bike document.
 - Minimize Bike

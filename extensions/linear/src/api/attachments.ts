@@ -1,4 +1,4 @@
-import { readFileSync } from "fs";
+import { readFile } from "fs/promises";
 import path from "path";
 import { UploadFile } from "@linear/sdk";
 import { getLinearClient } from "../helpers/withLinearClient";
@@ -7,7 +7,7 @@ import { fileTypeFromFile } from "file-type";
 export async function uploadFile(filePath: string) {
   const { graphQLClient } = getLinearClient();
 
-  const buffer = await readFileSync(filePath);
+  const buffer = await readFile(filePath);
   const type = await fileTypeFromFile(filePath);
   const file = new Blob([buffer], { type: type?.mime });
   const name = path.basename(filePath);

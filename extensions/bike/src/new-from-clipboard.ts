@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { Clipboard, popToRoot, showHUD } from "@raycast/api";
-import { runAppleScript } from "run-applescript";
 import checkBikeInstalled from "./index";
+import { newDocumentFromClipboard } from "./scripts";
 
 export default function main() {
   const error_alert = checkBikeInstalled();
@@ -13,33 +13,14 @@ export default function main() {
     // Get lines of text from the clipboard
     Clipboard.readText().then((text) => {
       const lines = text?.split("\n").reverse();
-      const clipboard_lines = lines?.map(
+      const clipboardLines = lines?.map(
         (line: string) => '"' + line.replaceAll("\\", "\\\\").replaceAll('"', '\\"') + '"'
       );
 
       // Run script
-      runAppleScript(`tell application "Bike"
-        activate
-        set newDoc to make new document
-        
-        try
-          -- Attempt to delete every row (only works with license)
-          tell newDoc to delete every row
-        on error
-          -- No license, just clear every row
-          repeat with rowItem in rows of newDoc
-            set name of rowItem to ""
-          end repeat
-        end try
-
-        -- Get lines of clipboard content
-        set docData to {${clipboard_lines}}
-
-        -- Add the clipboard content to the beginning of the document
-        repeat with lineItem in docData
-          tell newDoc to make new row at front of rows with properties {name: lineItem}
-        end repeat
-      end tell`).then(() => showHUD("Created New Bike Document").then(() => Promise.resolve(popToRoot())));
+      Promise.resolve(newDocumentFromClipboard(clipboardLines as string[])).then(() =>
+        showHUD("Created New Bike Document").then(() => Promise.resolve(popToRoot()))
+      );
     });
   }, []);
 }

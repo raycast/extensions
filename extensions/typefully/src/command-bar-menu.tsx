@@ -9,19 +9,17 @@ import {
   getRelativeDate,
   getTypefullyIcon,
   sortByCreated,
-  sortByPublished,
   sortByScheduled,
   getMenuBarItemNotificationTooltip,
   getFlattenAcivityNotifications,
   getMenuBarExtraNotificationKey,
   getMenuBarExtraItemIcon,
 } from "./utils";
-import { useNotifications, usePublishedDrafts, useScheduledDrafts } from "./typefully";
+import { useNotifications, useScheduledDrafts } from "./typefully";
 
 export default function Command() {
   const { data: notifications, isLoading: isLoadingNotifications } = useNotifications();
   const { data: scheduledDrafts, isLoading: isLoadingScheduledDrafts } = useScheduledDrafts();
-  const { data: publishedDrafts, isLoading: isLoadingPublishedDrafts } = usePublishedDrafts();
 
   const inbox = getFlattenInboxNotifications(notifications);
   const activity = getFlattenAcivityNotifications(notifications);
@@ -30,7 +28,7 @@ export default function Command() {
     <MenuBarExtra
       icon={getTypefullyIcon(inbox.length > 0)}
       title={getMenuBarExtraTitle(inbox, scheduledDrafts)}
-      isLoading={isLoadingNotifications || isLoadingScheduledDrafts || isLoadingPublishedDrafts}
+      isLoading={isLoadingNotifications || isLoadingScheduledDrafts}
     >
       <MenuBarExtra.Section>
         <MenuBarExtra.Item
@@ -57,7 +55,7 @@ export default function Command() {
                 subtitle={getMenuBarExtraItemNotificationSubtitle(notification)}
                 tooltip={getMenuBarItemNotificationTooltip(notification)}
                 shortcut={getMenuBarExtraItemShortcut(index, ["ctrl"])}
-                onAction={() => open(`https://typefully.com/?d=${notification.payload.draft_id}`)}
+                onAction={() => open(notification.url)}
               />
             ))}
         </MenuBarExtra.Section>
@@ -86,28 +84,6 @@ export default function Command() {
         </MenuBarExtra.Section>
       ) : null}
       <MenuBarExtra.Section>
-        {publishedDrafts && publishedDrafts.length > 0 ? (
-          <MenuBarExtra.Submenu title="Tweeted">
-            {publishedDrafts
-              ?.slice(0, 9)
-              ?.sort(sortByPublished)
-              .map((draft) => (
-                <MenuBarExtra.Item
-                  key={draft.id}
-                  title={getMenuBarExtraItemDraftTitle(draft)}
-                  subtitle={getRelativeDate(draft)}
-                  tooltip={draft.text}
-                  onAction={async (event) => {
-                    if (event.type === "left-click") {
-                      await open(`https://typefully.com/?d=${draft.id}`);
-                    } else if (event.type === "right-click" && draft.twitter_url) {
-                      await open(draft.twitter_url);
-                    }
-                  }}
-                />
-              ))}
-          </MenuBarExtra.Submenu>
-        ) : null}
         {activity && activity.length > 0 ? (
           <MenuBarExtra.Submenu title="Activity">
             {activity
@@ -120,7 +96,7 @@ export default function Command() {
                   title={getMenuBarExtraItemNotificationTitle(notification)}
                   subtitle={getMenuBarExtraItemNotificationSubtitle(notification)}
                   tooltip={getMenuBarItemNotificationTooltip(notification)}
-                  onAction={() => open(`https://typefully.com/?d=${notification.payload.draft_id}`)}
+                  onAction={() => open(notification.url)}
                 />
               ))}
           </MenuBarExtra.Submenu>

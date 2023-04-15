@@ -20,6 +20,26 @@
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "name": "defaultAction",
+      "description": "Set the default action",
+      "type": "dropdown",
+      "required": false,
+      "title": "Default Action",
+      "default": "copy",
+      "data": [
+        {
+          "title": "Copy",
+          "value": "copy"
+        },
+        {
+          "title": "Paste",
+          "value": "paste"
+        }
+      ]
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.25.0",
     "hi-base32": "^0.5.1"

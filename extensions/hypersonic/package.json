@@ -7,7 +7,7 @@
   "author": "reboot.studio",
   "owner": "reboot",
   "access": "public",
-  "version": "2.0.3",
+  "version": "2.0.4",
   "categories": [
     "Developer Tools",
     "Design Tools",
@@ -34,8 +34,8 @@
   "preferences": [],
   "dependencies": {
     "@notionhq/client": "2.2.0",
-    "@raycast/api": "1.46.0",
-    "@raycast/utils": "1.4.16",
+    "@raycast/api": "1.48.5",
+    "@raycast/utils": "1.5.2",
     "chrono-node": "2.4.1",
     "date-fns": "2.29.3",
     "fuse.js": "6.6.2",

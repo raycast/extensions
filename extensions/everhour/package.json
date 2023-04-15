@@ -5,6 +5,9 @@
   "description": "Track time against projects",
   "icon": "everhour-logo.png",
   "author": "farisaziz12",
+  "contributors": [
+    "ahoereth"
+  ],
   "license": "MIT",
   "keywords": [
     "everhour"
@@ -12,9 +15,16 @@
   "commands": [
     {
       "name": "index",
-      "title": "Track Projects",
+      "title": "Active Projects",
       "subtitle": "Everhour",
       "description": "List active projects that you can track time against",
+      "mode": "view"
+    },
+    {
+      "name": "recentTasks",
+      "title": "Recent Tasks",
+      "subtitle": "Everhour",
+      "description": "List your recent tasks from the last seven days",
       "mode": "view"
     }
   ],

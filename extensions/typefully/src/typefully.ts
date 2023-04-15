@@ -1,4 +1,5 @@
 import { useFetch } from "@raycast/utils";
+import fetch from "node-fetch";
 import { extensionPreferences } from "./preferences";
 import { CreateDraftValues, Draft, NotificationsResponse } from "./types";
 

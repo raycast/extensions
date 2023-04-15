@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { List, getApplications, open, showToast, Toast } from "@raycast/api";
-import React from "react";
 
 export default function checkBikeInstalled() {
   const [app, setApp] = useState<string | undefined>();
