@@ -1,0 +1,97 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "put-io",
+  "title": "Put.io",
+  "description": "Browse files and transfers on Put.io.",
+  "icon": "putio-icon.png",
+  "author": "EpaL",
+  "categories": [
+    "Media",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "transfers",
+      "title": "Browse Transfers",
+      "subtitle": "Put.io",
+      "description": "Browse your Put.io transfers.",
+      "mode": "view"
+    },
+    {
+      "name": "files",
+      "title": "Browse Files",
+      "subtitle": "Put.io",
+      "description": "Browse your Put.io files and perform configurable actions on them.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "putioClientId",
+      "description": "Put.io Client ID",
+      "type": "textfield",
+      "required": true,
+      "title": "Put.io Client ID",
+      "placeholder": "Put.io Client ID"
+    },
+    {
+      "name": "putioOAuthToken",
+      "description": "Put.io OAuth Token",
+      "type": "textfield",
+      "required": true,
+      "title": "Put.io OAuth Token",
+      "placeholder": "Put.io OAuth Token"
+    },
+    {
+      "name": "actionTitle1",
+      "description": "Title of the first action. e.g. 'Download to my local machine'",
+      "type": "textfield",
+      "required": false,
+      "title": "Custom Action Title #1 (optional)",
+      "placeholder": "Download to my local machine"
+    },
+    {
+      "name": "actionCommand1",
+      "description": "The command to run for this action. Use {0} to insert the file URL. e.g. 'wget {0}'",
+      "type": "textfield",
+      "required": false,
+      "title": "Custom Action Command #1 (optional)",
+      "placeholder": "wget {0}"
+    },
+    {
+      "name": "actionTitle2",
+      "description": "Title of the second action. e.g. 'Send to Google Drive'",
+      "type": "textfield",
+      "required": false,
+      "title": "Custom Action Title #2 (optional)",
+      "placeholder": "Multi-threaded download"
+    },
+    {
+      "name": "actionCommand2",
+      "description": "The command to run for this action. Use {0} to insert the file URL. e.g. 'wget {0}'",
+      "type": "textfield",
+      "required": false,
+      "title": "Custom Action Command #2 (optional)",
+      "placeholder": "aria2c -x 5 -s 4 -k 1M --secure-protocol=auto '{0}'"
+    }
+  ],
+  "dependencies": {
+    "@putdotio/api-client": "^8.32.0",
+    "@raycast/api": "^1.48.8"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.5",
+    "@types/node": "^18.8.3",
+    "eslint": "^8.36.0",
+    "prettier": "^2.8.7",
+    "typescript": "^4.9.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
