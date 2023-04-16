@@ -7,6 +7,7 @@ import { PathLike } from "fs";
 interface Download {
   name: string;
   path: string;
+  size: number;
   lastModifiedAt: Date;
 }
 
@@ -25,8 +26,9 @@ export default function RecentDownloads() {
       .map(async (file) => {
         const filePath = join(downloadsPath, file);
         const fileStats = await stat(filePath);
+        const size = fileStats.size;
         const lastModifiedAt = fileStats.mtime;
-        return { name: basename(filePath), path: filePath, lastModifiedAt };
+        return { name: basename(filePath), path: filePath, size, lastModifiedAt };
       });
     Promise.all(downloads)
       .then((downloads) => {
@@ -44,8 +46,10 @@ export default function RecentDownloads() {
     );
   }
 
+  const markdown = `![Image](download.path)`;
+
   return (
-    <List searchBarPlaceholder="Filter files...">
+    <List isShowingDetail searchBarPlaceholder="Filter files...">
       {downloads.map((download) => (
         <List.Item
           key={download.path}
@@ -53,6 +57,22 @@ export default function RecentDownloads() {
           icon={{ fileIcon: download.path }}
           quickLook={{ path: download.path, name: download.name }}
           subtitle={download.path}
+          detail={
+            <List.Item.Detail
+              markdown={`![Image](${download.path})`}
+              metadata={
+                <List.Item.Detail.Metadata>
+                  <List.Item.Detail.Metadata.Label title="Size" text={`${(download.size / 1024).toFixed(2)} KB`} />
+                  <List.Item.Detail.Metadata.Label
+                    title="Last Modified"
+                    text={download.lastModifiedAt.toLocaleString()}
+                  />
+
+                  <List.Item.Detail.Metadata.Label title="Location" text={download.path} />
+                </List.Item.Detail.Metadata>
+              }
+            />
+          }
           actions={
             <ActionPanel>
               <Action.Open title="Open File" target={download.path} />
