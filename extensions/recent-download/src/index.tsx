@@ -68,8 +68,15 @@ export default function RecentDownloads() {
               <Action.Trash
                 title="Delete File"
                 paths={[download.path]}
-                shortcut={{ modifiers: ["ctrl"], key: "x" }}
+                shortcut={{ modifiers: ["cmd"], key: "backspace" }}
                 onTrash={handleTrash}
+              />
+
+              <Action.Trash
+                title="Delete All"
+                paths={downloads.map((download) => download.path)}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "backspace" }}
+                onTrash={() => setDownloads([])}
               />
             </ActionPanel>
           }
