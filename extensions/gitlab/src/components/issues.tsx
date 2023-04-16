@@ -204,7 +204,7 @@ export function IssueListItem(props: { issue: Issue; refreshData: () => void }):
       }}
       accessories={[
         {
-          tag: issue.milestone ? issue.milestone.title : undefined,
+          tag: issue.milestone ? issue.milestone.title : "",
           tooltip: issue.milestone ? `Milestone: ${issue.milestone.title}` : undefined,
         },
         { date: new Date(issue.updated_at), tooltip: `Updated: ${toLongDateString(issue.updated_at)}` },
