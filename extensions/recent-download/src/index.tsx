@@ -1,4 +1,4 @@
-import { List, ActionPanel, Action, OpenInBrowserAction, showHUD } from "@raycast/api";
+import { List, ActionPanel, Action } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { readdir, stat } from "fs/promises";
 import { join, resolve, basename } from "path";
@@ -55,8 +55,6 @@ export default function RecentDownloads() {
           subtitle={download.path}
           actions={
             <ActionPanel>
-              <OpenInBrowserAction title="Abrir en el navegador de archivos" url={`file://${download.path}`} />
-
               <Action.Open title="Open File" target={download.path} />
 
               <Action.CopyToClipboard
