@@ -405,7 +405,7 @@ export function MRListItem(props: {
   if (!getListDetailsPreference()) {
     accessories.push(
       { icon: mr.has_conflicts ? "⚠️" : undefined, tooltip: mr.has_conflicts ? "Has Conflict" : undefined },
-      { text: mr.milestone?.title },
+      { tag: mr.milestone?.title, tooltip: mr.milestone ? `Milestone: ${mr.milestone?.title}` : undefined },
       { date: new Date(mr.updated_at), tooltip: `Updated: ${toLongDateString(mr.updated_at)}` }
     );
   }

@@ -1,8 +1,9 @@
 # GitLab Changelog
 
-## [Remove Branch] - 2023-04-15
+## [Remove Branch] - 2023-04-17
 
 - Add checkbox `Delete source branch` for a new MR (default state of project is respected)
+- Milestones are now shown as tags instead of text in a list
 
 ## [Improve Starred Project Visibility] - 2023-03-16
 
