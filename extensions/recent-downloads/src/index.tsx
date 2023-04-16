@@ -34,7 +34,7 @@ export default function RecentDownloads() {
         setDownloads(downloads);
       })
       .catch((error) => {
-        console.error("Error get recent files", error);
+        console.error("Sorry, error get recent files", error);
       });
   }
 
