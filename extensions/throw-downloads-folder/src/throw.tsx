@@ -13,7 +13,7 @@ export default function ClearDownloads() {
         pop();
       })
       .catch((error) => {
-        console.error("Error trying to catch the downloads folder", error);
+        console.error("Sorry, error trying to catch the downloads folder", error);
       });
   }, []);
 
