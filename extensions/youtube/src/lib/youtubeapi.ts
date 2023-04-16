@@ -127,6 +127,11 @@ export interface Channel {
   relatedPlaylists?: ChannelRelatedPlaylists;
 }
 
+export interface ChannelActionProps {
+  channelId: string;
+  refresh?: () => void;
+}
+
 export interface Video {
   id: string;
   title: string;
@@ -137,6 +142,11 @@ export interface Video {
   statistics?: VideoStatistics;
   channelId: string;
   channelTitle: string;
+}
+
+export interface VideoActionProps {
+  video: Video;
+  refresh?: () => void;
 }
 
 function dataToStatistics(statistics?: youtube_v3.Schema$VideoStatistics | undefined): VideoStatistics | undefined {
