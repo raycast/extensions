@@ -100,6 +100,7 @@
       "name": "sidenote",
       "title": "SideNote Integration",
       "description": "Enable SideNote integration (requires SideNote). Allows you to send the results to SideNote as a new note.",
+      "label": "Enabled",
       "type": "checkbox",
       "default": false,
       "required": false

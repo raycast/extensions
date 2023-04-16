@@ -34,7 +34,7 @@ export default function ResultView(prompt: string, toast_title: string) {
           model: model_override,
           messages: [
             { role: "system", content: prompt },
-            { role: "user", content: selectedText }
+            { role: "user", content: selectedText },
           ],
           stream: true,
         },
@@ -97,7 +97,6 @@ export default function ResultView(prompt: string, toast_title: string) {
       setCumulativeTokens(cumulative_tokens + prompt_token_count + response_token_count);
       setCumulativeCost(cumulative_cost + estimatePrice(prompt_token_count, response_token_count, model_override));
     }
-      
   }, [loading]);
 
   let sidenote = undefined;
@@ -123,8 +122,13 @@ export default function ResultView(prompt: string, toast_title: string) {
           <Action.CopyToClipboard title="Copy Results" content={response} />
           <Action.Paste title="Paste Results" content={response} />
           <Action title="Retry" onAction={retry} shortcut={{ modifiers: ["cmd"], key: "r" }} icon={Icon.Repeat} />
-          {(
-            model_override != "gpt-4" && <Action title="Retry with GPT-4" onAction={retryWithGPT4} shortcut={{ modifiers: ["cmd", "shift"], key: "r" }} icon={Icon.ArrowNe} />
+          {model_override != "gpt-4" && (
+            <Action
+              title="Retry with GPT-4"
+              onAction={retryWithGPT4}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
+              icon={Icon.ArrowNe}
+            />
           )}
           {sidenote}
         </ActionPanel>
@@ -142,10 +146,7 @@ export default function ResultView(prompt: string, toast_title: string) {
           />
           <Detail.Metadata.Separator />
           <Detail.Metadata.Label title="Culmulative Tokens" text={cumulative_tokens.toString()} />
-          <Detail.Metadata.Label
-            title="Culmulative Cost"
-            text={cumulative_cost.toString() + " cents"}
-          />
+          <Detail.Metadata.Label title="Culmulative Cost" text={cumulative_cost.toString() + " cents"} />
         </Detail.Metadata>
       }
     />

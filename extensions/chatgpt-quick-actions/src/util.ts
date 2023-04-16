@@ -28,7 +28,7 @@ export function countToken(content: string) {
 export function estimatePrice(prompt_token: number, output_token: number, model: string) {
   // price is per 1K tokens, but we are measuing in cents. Hence the denominator is 10
   if (model == "gpt-3.5-turbo") {
-    return naiveRound((prompt_token + output_token) * 0.002 / 10, 2); 
+    return naiveRound(((prompt_token + output_token) * 0.002) / 10, 2);
   } else if (model == "gpt-4") {
     return naiveRound((prompt_token * 0.03 + output_token * 0.06) / 10, 2);
   } else {
