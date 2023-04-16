@@ -5,7 +5,7 @@ import formatString from "../utils/formatString";
 
 const doFileAction = (actionCommand: string | undefined, fileUrl: string) => {
   if (fileUrl !== undefined && actionCommand !== undefined) {
-    let cmd = formatString(actionCommand ? actionCommand : "(no command defined)", fileUrl);
+    const cmd = formatString(actionCommand ? actionCommand : "(no command defined)", fileUrl);
     console.log("Executing command: " + cmd);
     exec(cmd, (error: Error | null, stdout: string, stderr: string) => {
       if (error) {
@@ -29,7 +29,6 @@ const doFileAction = (actionCommand: string | undefined, fileUrl: string) => {
       });
     });
   }
-
 };
 
 export default doFileAction;

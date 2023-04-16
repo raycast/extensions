@@ -1,4 +1,14 @@
-import { ActionPanel, showToast, Toast, Detail, List, Action, Icon, useNavigation, openExtensionPreferences } from "@raycast/api";
+import {
+  ActionPanel,
+  showToast,
+  Toast,
+  Detail,
+  List,
+  Action,
+  Icon,
+  useNavigation,
+  openExtensionPreferences,
+} from "@raycast/api";
 import { useEffect, useState } from "react";
 import FileDetails from "../components/FileDetails";
 import doFileAction from "../utils/fileAction";
@@ -124,7 +134,8 @@ function FileBrowser({ parent_file_id }: { parent_file_id: number }) {
         {files.length == 0 ? (
           <List.EmptyView icon={{ source: "putio-icon.png" }} title="There doesn't seem to be anything here." />
         ) : (
-          files && files.length > 0 &&
+          files &&
+          files.length > 0 &&
           Object.values(files).map((file) => {
             const accessories = [];
             accessories.push({ text: formatSize(file.size, true, 1) });
@@ -221,7 +232,7 @@ function FileBrowser({ parent_file_id }: { parent_file_id: number }) {
                     } else {
                       doFileAction(preferences.actionCommand2, fileUrl);
                     }
-                }}
+                  }}
                 />
               )}
             </ActionPanel>

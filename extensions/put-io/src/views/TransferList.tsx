@@ -76,9 +76,10 @@ function TransferList() {
 
   return (
     <List isLoading={transfers === undefined} isShowingDetail={isShowingDetail} navigationTitle="Put.io Transfers">
-      { transfers && transfers.length == 0 ? (
+      {transfers && transfers.length == 0 ? (
         <List.EmptyView icon={{ source: "putio-icon.png" }} title="There doesn't seem to be anything here." />
-      ) : transfers &&
+      ) : (
+        transfers &&
         Object.values(transfers).map((transfer) => {
           let icon = null;
           let downloadPercent = "";
@@ -155,7 +156,8 @@ function TransferList() {
               accessories={accessories}
             />
           );
-        })}
+        })
+      )}
     </List>
   );
 }

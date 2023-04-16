@@ -5,12 +5,12 @@ const formatFileInfo = (file: IFile) => {
     return `
 ### ${file.name || "(no name)"}
 ![](${file.screenshot})
-    `;    
+    `;
   } else {
     return `
     # No file selected
     `;
   }
-}
+};
 
 export default formatFileInfo;
