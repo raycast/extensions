@@ -3,7 +3,7 @@
   "name": "h2tp",
   "title": "H2TP",
   "description": "Send http request easy way.",
-  "icon": "command-icon.png",
+  "icon": "icon.png",
   "author": "Phantola",
   "categories": [
     "Developer Tools"

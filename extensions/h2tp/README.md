@@ -2,11 +2,6 @@
 
 ## Send http request easy way.
 
+### _This extension for practice_
 
-### *This extension for practice*
-
-This Raycast Extention for simple HTTP reqeust.
-
-
-
-
+This Raycast Extension for simple HTTP Request.
