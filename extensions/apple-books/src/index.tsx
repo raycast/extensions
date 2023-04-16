@@ -30,7 +30,7 @@ export default function SearchBooks() {
       {books
         ?.filter((item: any) => !!item)
         .map((item: any) => (
-          <BookItem key={item.trackId} item={item} />
+          <BookItem key={item.trackId ?? item.collectionId} item={item} />
         ))}
     </List>
   );
