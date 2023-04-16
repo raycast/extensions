@@ -43,7 +43,7 @@ export async function fetchReferenceContent(reference: BibleReference): Promise<
 // Parse the given YouVersion HTML and return a string a reference content
 export function parseContentFromHTML(reference: BibleReference, html: string): string {
   const $ = cheerio.load(html);
-  const $chapter = $(".chapter");
+  const $chapter = $("[class*='chapter']");
   const contentParts: string[] = [];
   // Loop over sections indicating paragraphs / breaks in the text
   $chapter.children().each((s, section) => {
@@ -61,19 +61,34 @@ export function getSpacingBeforeSection(
   $section: cheerio.Cheerio
 ): string {
   const sectionType = $section.prop("class");
-  if (blockElems.has(sectionType)) {
+  if (classMatchesOneOf(sectionType, blockElems)) {
     return "\n\n";
-  } else if (breakElems.has(sectionType)) {
+  } else if (classMatchesOneOf(sectionType, breakElems)) {
     return "\n";
   } else {
     return "";
   }
 }
 
+export function classMatchesOneOf(className: string, elemsSet: Set<string>): boolean {
+  const elemsUnion = Array.from(elemsSet).join("|");
+  const bool = new RegExp(`\\b(${elemsUnion})\\b`).test(
+    // The normal regex word boundary (\b) considers underscores as part of the
+    // definition of a "word"; this will not work for us since the class names
+    // we are working with have underscore-delimited components, and we need to
+    // treat each of those components as distinct "words"; fortunately, we can
+    // use negative lookbehinds/lookaheads to effectively implement a custom
+    // word boundary, per this blog post:
+    // <http://www.rexegg.com/regex-boundaries.html#diy>
+    className.replace(/_/g, " ")
+  );
+  return bool;
+}
+
 // Determine the spacing to insert after the given section of content
 export function getSpacingAfterSection(_reference: BibleReference, $: cheerio.Root, $section: cheerio.Cheerio): string {
   const sectionType = $section.prop("class");
-  if (blockElems.has(sectionType)) {
+  if (classMatchesOneOf(sectionType, blockElems)) {
     return "\n\n";
   } else {
     return "";
@@ -83,11 +98,11 @@ export function getSpacingAfterSection(_reference: BibleReference, $: cheerio.Ro
 // Retrieve all reference content within the given section
 export function getSectionContent(reference: BibleReference, $: cheerio.Root, $section: cheerio.Cheerio): string[] {
   const sectionContentParts = [getSpacingBeforeSection(reference, $, $section)];
-  const $verses = $section.children(".verse");
+  const $verses = $section.children("[class*='verse']");
   $verses.each((v, verse) => {
     const $verse = $(verse);
     if (isVerseWithinRange(reference, $, $verse)) {
-      sectionContentParts.push(...$verse.find(".content").text());
+      sectionContentParts.push(...$verse.find("[class*='content']").text());
     }
   });
   sectionContentParts.push(getSpacingAfterSection(reference, $, $section));
