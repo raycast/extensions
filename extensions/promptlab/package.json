@@ -45,6 +45,12 @@
           "placeholder": "Command Name",
           "required": false,
           "type": "text"
+        },
+        {
+          "name": "queryInput",
+          "placeholder": "Input",
+          "required": false,
+          "type": "text"
         }
       ]
     },

@@ -21,6 +21,7 @@ import {
   getCurrentDate,
   getCurrentTime,
   getUpcomingCalendarEvents,
+  getUpcomingReminders,
 } from "./utils/calendar-utils";
 import {
   getTextOfWebpage,
@@ -42,8 +43,13 @@ import { CommandOptions } from "./utils/types";
 import { runAppleScript } from "run-applescript";
 import { runActionScript } from "./utils/command-utils";
 
-export default function CommandResponse(props: { commandName: string; prompt: string; options: CommandOptions }) {
-  const { commandName, prompt, options } = props;
+export default function CommandResponse(props: {
+  commandName: string;
+  prompt: string;
+  input?: string;
+  options: CommandOptions;
+}) {
+  const { commandName, prompt, input, options } = props;
   const [substitutedPrompt, setSubstitutedPrompt] = useState<string>(prompt);
   const [loadingData, setLoadingData] = useState<boolean>(true);
 
@@ -53,6 +59,10 @@ export default function CommandResponse(props: { commandName: string; prompt: st
       : { selectedFiles: [], contentPrompts: [], loading: false, errorType: undefined };
 
   const replacements: { [key: string]: () => Promise<string> } = {
+    "{{input}}": async () => {
+      return input || (await getSelectedText()).substring(0, 3000);
+    },
+
     // File Data
     "{{files}}": async () => {
       return selectedFiles ? selectedFiles?.join(", ") : "";
@@ -193,16 +203,16 @@ export default function CommandResponse(props: { commandName: string; prompt: st
       return filterString(await getUpcomingCalendarEvents(CalendarDuration.YEAR));
     },
     "{{todayReminders}}": async () => {
-      return filterString(await getUpcomingCalendarEvents(CalendarDuration.DAY));
+      return filterString(await getUpcomingReminders(CalendarDuration.DAY));
     },
     "{{weekReminders}}": async () => {
-      return filterString(await getUpcomingCalendarEvents(CalendarDuration.WEEK));
+      return filterString(await getUpcomingReminders(CalendarDuration.WEEK));
     },
     "{{monthReminders}}": async () => {
-      return filterString(await getUpcomingCalendarEvents(CalendarDuration.MONTH));
+      return filterString(await getUpcomingReminders(CalendarDuration.MONTH));
     },
     "{{yearReminders}}": async () => {
-      return filterString(await getUpcomingCalendarEvents(CalendarDuration.YEAR));
+      return filterString(await getUpcomingReminders(CalendarDuration.YEAR));
     },
   };
 

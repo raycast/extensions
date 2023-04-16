@@ -33,10 +33,11 @@ interface CommandFormValues {
 }
 
 export default function CommandForm(props: {
-  oldData?: CommandFormValues;
+  oldData?: Command;
   setCommands?: React.Dispatch<React.SetStateAction<Command[] | undefined>>;
+  duplicate?: boolean;
 }) {
-  const { oldData, setCommands } = props;
+  const { oldData, setCommands, duplicate } = props;
   const { pop } = useNavigation();
 
   let maxPromptLength = oldData?.minNumFiles == "0" ? 3000 : 500;
@@ -56,7 +57,12 @@ export default function CommandForm(props: {
         );
         setCommands(commandDataFiltered.map((data) => JSON.parse(data)));
       }
-      await showToast({ title: "Added File AI Command" });
+
+      if (oldData && !duplicate) {
+        await showToast({ title: "Command Saved" });
+      } else {
+        await showToast({ title: "Added PromptLab Command" });
+      }
       pop();
     },
     initialValues: oldData || {
@@ -103,11 +109,14 @@ export default function CommandForm(props: {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Create Command" onSubmit={handleSubmit} />
+          <Action.SubmitForm
+            title={oldData && !duplicate ? "Save Command" : "Create Command"}
+            onSubmit={handleSubmit}
+          />
         </ActionPanel>
       }
     >
-      <Form.TextField title="Command Name" placeholder="Name of File AI Command" {...itemProps.name} />
+      <Form.TextField title="Command Name" placeholder="Name of PromptLab Command" {...itemProps.name} />
 
       <Form.Dropdown title="Icon" {...itemProps.icon}>
         {Object.keys(Icon).map((iconName, index) => (
@@ -195,7 +204,7 @@ export default function CommandForm(props: {
 
       <Form.Dropdown
         title="Output View"
-        info="The view in which the command's output will be rendered. Detail is the most likely to work for any given command, but File AI will do its best to give you usable output no matter what."
+        info="The view in which the command's output will be rendered. Detail is the most likely to work for any given command, but PromptLab will do its best to give you usable output no matter what."
         {...itemProps.outputKind}
       >
         <Form.Dropdown.Item title="Detail" value="detail" icon={Icon.AppWindow} />

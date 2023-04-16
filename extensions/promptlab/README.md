@@ -41,6 +41,7 @@ You can instruct PromptLab to extract text from any webpage by using the {{URL}}
 #### Application Data Placeholders
 | Placeholder | Replaced With |
 | --- | --- |
+| `{{input}}` | An input string provided by either Quicklink input or the currently selected text |
 | `{{installedApps}}` | The list of installed applications |
 | `{{lastEmail}}` | The subject, sender, and content of the most recently received email in Mail.app |
 | `{{lastNote}}` | The text of the most recently edited note in Notes.app |
@@ -102,5 +103,7 @@ When configuring a PromptLab command, you can provide AppleScript code to execut
 #### Provided Handlers
 | Handler | Purpose | Returns |
 | --- | --- | --- |
-| `split(theString, theDelimiter)` | Splits text around the specified delimiter. | List of String |
-| `trim(theString)` | Removes leading and trailing spaces from text. | String |
+| `split(theText, theDelimiter)` | Splits text around the specified delimiter. | List of String |
+| `trim(theText)` | Removes leading and trailing spaces from text. | String |
+| `replaceAll(theText, textToReplace, theReplacement)` | Replaces all occurrences of a string within the given text. | String |
+| `rselect(theArray, numItems)` | Randomly selects the specified number of items from a list. | List |

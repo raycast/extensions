@@ -1,3 +1,3 @@
-# File AI Changelog
+# PromptLab Changelog
 
-## [Initial Version] - 2023-03-26
+## [Initial Version] - 2023-04-14

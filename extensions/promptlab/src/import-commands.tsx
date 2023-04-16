@@ -49,11 +49,11 @@ export default function Command() {
           title: `Added ${numNewCommands} command${numNewCommands == 1 ? "" : "s"}, replaced ${numReplacedCommands}`,
         });
       } else if (numNewCommands > 0) {
-        showToast({ title: `Added ${numNewCommands} File AI command${numNewCommands == 1 ? "" : "s"}` });
+        showToast({ title: `Added ${numNewCommands} PromptLab command${numNewCommands == 1 ? "" : "s"}` });
       } else if (numReplacedCommands > 0) {
-        showToast({ title: `Replaced ${numReplacedCommands} File AI command${numReplacedCommands == 1 ? "" : "s"}` });
+        showToast({ title: `Replaced ${numReplacedCommands} PromptLab command${numReplacedCommands == 1 ? "" : "s"}` });
       } else {
-        showToast({ title: `No File AI commands added or replaced` });
+        showToast({ title: `No PromptLab commands added or replaced` });
       }
 
       launchCommand({ name: "search-commands", type: LaunchType.UserInitiated });
@@ -74,7 +74,7 @@ export default function Command() {
             let commandData = {} as Command;
 
             try {
-              /* Assume value is a data string, as is default for export via Search File AI Commands interface. */
+              /* Assume value is a data string, as is default for export via Search PromptLab Commands interface. */
               commandData = JSON.parse(value as string) as Command;
             } catch (error) {
               /* Fallback to using the value as raw JSON. */

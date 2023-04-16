@@ -28,7 +28,7 @@ export interface Command {
   prompt: string;
   icon: string;
   iconColor?: string;
-  minNumFiles?: number;
+  minNumFiles?: string;
   acceptedFileExtensions?: string;
   useMetadata?: boolean;
   useSoundClassification?: boolean;

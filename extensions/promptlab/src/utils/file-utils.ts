@@ -207,7 +207,7 @@ const filterContentString = (content: string, cutoff?: number): string => {
  * @returns The image description as a string.
  */
 const getImageDetails = async (filePath: string, options: CommandOptions): Promise<string> => {
-  const imageVisionInstructions = getImageVisionDetails(filePath, options);
+  const imageVisionInstructions = filterContentString(getImageVisionDetails(filePath, options));
   const exifData = options.useMetadata ? filterContentString(await getFileExifData(filePath)) : ``;
   const exifInstruction = options.useMetadata ? `<EXIF data: ###${exifData}###>` : ``;
   return `${imageVisionInstructions}${exifInstruction}`;

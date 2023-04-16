@@ -63,7 +63,7 @@ export default function Command(props: { arguments: { initialQuery: string } }) 
     }
 
     showToast({
-      title: "Couldn't Start File AI Chat",
+      title: "Couldn't Start PromptLab Chat",
       message: errorMessage,
       style: Toast.Style.Failure,
     });
@@ -137,7 +137,7 @@ export default function Command(props: { arguments: { initialQuery: string } }) 
         </ActionPanel>
       }
     >
-      <Form.Description title="File AI Chat" text={selectedFiles ? selectedFiles.join(", ") : ""} />
+      <Form.Description title="PromptLab Chat" text={selectedFiles ? selectedFiles.join(", ") : ""} />
       <Form.TextArea id="userQueryField" title="Query" value={query || ""} onChange={(value) => setQuery(value)} />
 
       <Form.TextArea
