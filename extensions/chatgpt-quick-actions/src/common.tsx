@@ -20,6 +20,8 @@ export default function ResultView(prompt: string, toast_title: string) {
   const [loading, setLoading] = useState(true);
   let response_ = "";
   const [cumulative_tokens, setCumulativeTokens] = useState(0);
+  const [cumulative_cost, setCumulativeCost] = useState(0);
+  const [model_override, setModelOverride] = useState(model);
 
   async function getResult() {
     const now = new Date();
@@ -29,8 +31,11 @@ export default function ResultView(prompt: string, toast_title: string) {
       const selectedText = await getSelectedText();
       const stream = await openai.createChatCompletion(
         {
-          model: model,
-          messages: [{ role: "user", content: prompt + selectedText }],
+          model: model_override,
+          messages: [
+            { role: "system", content: prompt },
+            { role: "user", content: selectedText }
+          ],
           stream: true,
         },
         { responseType: "stream" }
@@ -76,12 +81,23 @@ export default function ResultView(prompt: string, toast_title: string) {
     getResult();
   }
 
+  async function retryWithGPT4() {
+    setModelOverride("gpt-4");
+    setLoading(true);
+    setResponse("");
+    getResult();
+  }
+
   useEffect(() => {
     getResult();
   }, []);
 
   useEffect(() => {
-    if (loading == false) setCumulativeTokens(cumulative_tokens + prompt_token_count + response_token_count);
+    if (loading == false) {
+      setCumulativeTokens(cumulative_tokens + prompt_token_count + response_token_count);
+      setCumulativeCost(cumulative_cost + estimatePrice(prompt_token_count, response_token_count, model_override));
+    }
+      
   }, [loading]);
 
   let sidenote = undefined;
@@ -107,24 +123,28 @@ export default function ResultView(prompt: string, toast_title: string) {
           <Action.CopyToClipboard title="Copy Results" content={response} />
           <Action.Paste title="Paste Results" content={response} />
           <Action title="Retry" onAction={retry} shortcut={{ modifiers: ["cmd"], key: "r" }} icon={Icon.Repeat} />
+          {(
+            model_override != "gpt-4" && <Action title="Retry with GPT-4" onAction={retryWithGPT4} shortcut={{ modifiers: ["cmd", "shift"], key: "r" }} icon={Icon.ArrowNe} />
+          )}
           {sidenote}
         </ActionPanel>
       }
       metadata={
         <Detail.Metadata>
+          <Detail.Metadata.Label title="Current Model" text={model_override} />
           <Detail.Metadata.Label title="Prompt Tokens" text={prompt_token_count.toString()} />
           <Detail.Metadata.Label title="Response Tokens" text={response_token_count.toString()} />
           <Detail.Metadata.Separator />
           <Detail.Metadata.Label title="Total Tokens" text={(prompt_token_count + response_token_count).toString()} />
           <Detail.Metadata.Label
             title="Total Cost"
-            text={estimatePrice(prompt_token_count + response_token_count).toString() + " cents"}
+            text={estimatePrice(prompt_token_count, response_token_count, model_override).toString() + " cents"}
           />
           <Detail.Metadata.Separator />
           <Detail.Metadata.Label title="Culmulative Tokens" text={cumulative_tokens.toString()} />
           <Detail.Metadata.Label
             title="Culmulative Cost"
-            text={estimatePrice(cumulative_tokens).toString() + " cents"}
+            text={cumulative_cost.toString() + " cents"}
           />
         </Detail.Metadata>
       }

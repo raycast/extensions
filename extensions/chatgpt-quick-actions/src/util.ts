@@ -1,8 +1,9 @@
 import { closeMainWindow } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
+import { encode } from "@nem035/gpt-3-encoder";
 
 function escapeStringForAppleScript(str: string) {
-  return str.replace(/[\\"]/g, '\\$&');
+  return str.replace(/[\\"]/g, "\\$&");
 }
 
 export async function sentToSideNote(content: string) {
@@ -21,16 +22,18 @@ function naiveRound(num: number, decimalPlaces = 0) {
 }
 
 export function countToken(content: string) {
-  const word_count = content.split(" ").length;
-  const char_count = content.length;
-  const tokens_count_word_est = word_count / 0.75;
-  const tokens_count_char_est = char_count / 4.0;
-  const token_est = (tokens_count_word_est + tokens_count_char_est) / 2;
-  return Math.round(token_est);
+  return encode(content).length;
 }
 
-export function estimatePrice(token_est: number) {
-  return naiveRound((token_est * 0.002) / 10, 2);
+export function estimatePrice(prompt_token: number, output_token: number, model: string) {
+  // price is per 1K tokens, but we are measuing in cents. Hence the denominator is 10
+  if (model == "gpt-3.5-turbo") {
+    return naiveRound((prompt_token + output_token) * 0.002 / 10, 2); 
+  } else if (model == "gpt-4") {
+    return naiveRound((prompt_token * 0.03 + output_token * 0.06) / 10, 2);
+  } else {
+    return -1;
+  }
 }
 
 export async function runAppleScriptSilently(appleScript: string) {

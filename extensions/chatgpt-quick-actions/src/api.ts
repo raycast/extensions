@@ -5,4 +5,4 @@ const configuration = new Configuration({
   apiKey: getPreferenceValues().apikey,
 });
 export const openai = new OpenAIApi(configuration);
-export const model = "gpt-3.5-turbo";
+export const model = getPreferenceValues().model;

@@ -1,6 +1,6 @@
 import ResultView from "./common";
 
-const prompt = "";
+const prompt = "You are a helpful assistant.";
 const toast_title = "Thinking...";
 
 export default function Preview() {
