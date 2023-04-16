@@ -29,9 +29,9 @@ export default function Command() {
   const [useBodyError, setBodyError] = useState<string | undefined>();
   const [useResponseError, setResponseError] = useState<string | undefined>();
 
-  const urlPlaceHolder = `https://example.com`;
+  const urlPlaceHolder = `https://example.com/`;
   const httpHeaderContentPlaceHolder = `{"Content-Type": "application/json", ...}`;
-  const httpBodyContentPlaceHolder = `{"name": "John Doe", "age": 30, ...}`;
+  const httpBodyContentPlaceHolder = `{"name": "John Doe", "age": 30, "job" : "programmer" ...}`;
 
   async function handleSubmit(values: HttpRequest) {
     const { httpHeaderContent, httpBodyContent, httpRequestUrl, httpMethod } = values;
