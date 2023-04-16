@@ -34,7 +34,7 @@ export default function RecentDownloads() {
         setDownloads(downloads);
       })
       .catch((error) => {
-        console.error("Sorry, error get recent files", error);
+        console.error("Sorry, Error get recent files", error);
       });
   }
 
@@ -56,22 +56,20 @@ export default function RecentDownloads() {
           actions={
             <ActionPanel>
               <Action.Open title="Open File" target={download.path} />
-
               <Action.CopyToClipboard
                 title="Copy File"
                 content={{ file: download.path }}
                 shortcut={{ modifiers: ["cmd"], key: "enter" }}
               />
-
               <Action.ShowInFinder shortcut={{ modifiers: ["cmd"], key: "o" }} path={download.path} />
 
+              <Action.ToggleQuickLook title="Preview File" shortcut={{ modifiers: ["cmd"], key: "y" }} />
               <Action.Trash
                 title="Delete File"
                 paths={[download.path]}
                 shortcut={{ modifiers: ["cmd"], key: "backspace" }}
                 onTrash={handleTrash}
               />
-
               <Action.Trash
                 title="Delete All"
                 paths={downloads.map((download) => download.path)}
