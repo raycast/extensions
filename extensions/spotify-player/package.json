@@ -5,6 +5,7 @@
   "description": "Search and Play Spotify music from Raycast, and control your library with convenient commands.",
   "icon": "icon.png",
   "author": "mattisssa",
+  "license": "MIT",
   "contributors": [
     "dillionverma",
     "andreaselia",
@@ -14,44 +15,51 @@
     "sxn",
     "runmaxde"
   ],
-  "license": "MIT",
   "commands": [
     {
       "name": "justPlay",
       "title": "Just Play",
       "subtitle": "Spotify",
       "description": "Starts the song by query straightway in Spotify",
-      "mode": "no-view"
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Track / Artist",
+          "type": "text",
+          "required": true
+        }
+      ]
     },
     {
       "name": "nowPlaying",
       "title": "Now Playing",
-      "subtitle": "Spotify",
       "description": "Shows currently playing song",
+      "subtitle": "Spotify",
       "mode": "view"
     },
     {
       "name": "nowPlayingMenuBar",
       "title": "Menu Bar Player",
-      "subtitle": "Spotify",
       "description": "Shows currently playing song in the Subtitle and in the Menu Bar. It also automatically refreshes in the background once per minute.",
+      "subtitle": "Spotify",
       "mode": "menu-bar",
       "interval": "10s",
       "preferences": [
         {
-          "description": "Max Menubar title length. Leave empty for no limitation.",
           "name": "maxtitlelength",
+          "description": "Max Menubar title length. Leave empty for no limitation.",
+          "type": "textfield",
           "required": false,
-          "title": "Max. Menubar Title length",
-          "type": "textfield"
+          "title": "Max. Menubar Title length"
         },
         {
-          "description": "Check to show ellipsis if title is longer than the max length.",
-          "label": "Show ellipsis (...) if title is truncated.",
           "name": "showEllipsis",
-          "required": false,
+          "description": "Check to show ellipsis if title is longer than the max length.",
+          "type": "checkbox",
           "title": "Show Ellipsis",
-          "type": "checkbox"
+          "label": "Show ellipsis (...) if title is truncated.",
+          "required": false
         }
       ]
     },
@@ -106,36 +114,36 @@
     },
     {
       "name": "likeCurrentSong",
-      "title": "Like Current Song",
       "subtitle": "Spotify",
+      "title": "Like Current Song",
       "description": "Likes currently playing song",
       "mode": "no-view"
     },
     {
       "name": "dislikeCurrentSong",
-      "title": "Dislike Current Song",
       "subtitle": "Spotify",
+      "title": "Dislike Current Song",
       "description": "Dislikes currently playing song",
       "mode": "no-view"
     }
   ],
   "preferences": [
     {
-      "default": true,
-      "description": "If checked then the Raycast window will be closed on action (Play/Pause)",
-      "label": "Yes/No",
       "name": "closeWindowOnAction",
+      "type": "checkbox",
+      "label": "Yes/No",
       "required": false,
+      "default": true,
       "title": "Close Window On Action",
-      "type": "checkbox"
+      "description": "If checked then the Raycast window will be closed on action (Play/Pause)"
     },
     {
       "default": false,
-      "description": "If checked and the track got explicit lyrics, an icon (🔞) is shown beside the title",
+      "description": "If checked and the track got explicit lyrics, an icon (🅴) is shown beside the title",
       "label": "Yes/No",
       "name": "explicitIcon",
       "required": false,
-      "title": "Show if a track has explicit lyrics (🔞)",
+      "title": "Show if a track has explicit lyrics (🅴)",
       "type": "checkbox"
     }
   ],
