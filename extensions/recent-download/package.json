@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "recent-download",
   "title": "Recent Download",
-  "description": "See recent downloads files",
+  "description": "This application provides a way to view recent downloads from the Downloads folder and the Desktop, with the ability to copy the file by using the Command + Enter shortcut.",
   "icon": "command-icon.png",
   "author": "Alcibiades",
   "categories": [
@@ -11,10 +11,10 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "index",
-      "title": "recent",
+      "name": "recent-download",
+      "title": "Recent",
       "subtitle": "download",
-      "description": "",
+      "description": "This application provides a way to view recent downloads from the Downloads folder and the Desktop, with the ability to copy the file by using the Command + Enter shortcut.",
       "mode": "view"
     }
   ],
