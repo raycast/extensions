@@ -13,15 +13,15 @@ export async function searchBibleForPhrase(searchText: string) {
 
 export async function parseContentFromHTML(html: string): Promise<BibleReference[]> {
   const $ = cheerio.load(html);
-  const $references = $("li.reference");
+  const $references = $("a[href*='/bible/']");
 
   const bible = await getBibleData(await getPreferredLanguage());
 
   const results: BibleReference[] = [];
   $references.each((r, referenceElem) => {
     const $reference = $(referenceElem);
-    const reference = buildBibleReferenceFromID(getReferenceIDFromURL($reference.find("a").prop("href")), bible);
-    reference.content = $reference.find("p").text().trim();
+    const reference = buildBibleReferenceFromID(getReferenceIDFromURL($reference.prop("href")), bible);
+    reference.content = $reference.parent().next("p").text().trim();
     if (reference) {
       results.push(reference);
     }
