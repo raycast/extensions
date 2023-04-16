@@ -1,0 +1,39 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "throw-your-downloads",
+  "title": "Throw your downloads",
+  "description": "This script is designed to help users quickly and efficiently clear the contents of their Downloads folder. The Downloads folder is a common location where files are temporarily stored after being downloaded from the internet. Over time, this folder can become cluttered with a mix of files, making it difficult for users to locate specific items or manage their storage space effectively.\n\nBy using this script, users can easily delete all files and folders in the Downloads folder with just a few clicks, without needing to navigate through the folder and manually select items for deletion. This can save time and ensure that the Downloads folder remains organized and easy to use.",
+  "icon": "command-icon.png",
+  "author": "Alcibiades",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "throw",
+      "title": "throw",
+      "subtitle": "empty download folder",
+      "description": "This script is designed to help users quickly and efficiently clear the contents of their Downloads folder. The Downloads folder is a common location where files are temporarily stored after being downloaded from the internet. Over time, this folder can become cluttered with a mix of files, making it difficult for users to locate specific items or manage their storage space effectively.\n\nBy using this script, users can easily delete all files and folders in the Downloads folder with just a few clicks, without needing to navigate through the folder and manually select items for deletion. This can save time and ensure that the Downloads folder remains organized and easy to use.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.49.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
