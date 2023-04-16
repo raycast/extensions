@@ -57,7 +57,7 @@ export default function Command() {
         return;
       }
     } else {
-      setUrlError("Invalid URL");
+      setUrlError("Please enter a URL");
       return;
     }
 
