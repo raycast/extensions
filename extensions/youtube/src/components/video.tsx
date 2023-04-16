@@ -1,13 +1,18 @@
 import { Action, ActionPanel, Color, Detail, Icon, List, Grid, showHUD, getPreferenceValues } from "@raycast/api";
 import React from "react";
 import { compactNumberFormat, formatDate } from "../lib/utils";
-import { Video, VideoActionProps } from "../lib/youtubeapi";
+import { Video } from "../lib/youtubeapi";
 import { OpenChannelInBrowser } from "./actions";
 import { ChannelItemDetailFetched } from "./channel";
 import { addRecentVideo, PinnedVideoActions, PinVideo, RecentVideoActions } from "./recent_videos";
 import fs from "fs";
 import he from "he";
 import { ViewLayout, PrimaryAction, Preferences } from "../lib/types";
+
+export interface VideoActionProps {
+  video: Video;
+  refresh?: () => void;
+}
 
 function videoUrl(videoId: string) {
   return `https://youtube.com/watch?v=${videoId}`;

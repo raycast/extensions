@@ -1,8 +1,12 @@
 import { Color, Icon, Action } from "@raycast/api";
 import { PlaylistList } from "./playlist";
 import { SearchVideoList } from "./video_search";
-import { ChannelActionProps } from "../lib/youtubeapi";
 import { addRecentChannel } from "./recent_channels";
+
+export interface ChannelActionProps {
+  channelId: string;
+  refresh?: () => void;
+}
 
 export function OpenChannelInBrowser({ channelId, refresh }: ChannelActionProps) {
   return (

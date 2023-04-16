@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Icon, Color, Toast, showToast, Cache, getPreferenceValues } from "@raycast/api";
-import { ChannelActionProps } from "../lib/youtubeapi";
+import { ChannelActionProps } from "./actions";
 import { Preferences } from "../lib/types";
 
 const { griditemsize } = getPreferenceValues<Preferences>();
