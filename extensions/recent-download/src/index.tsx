@@ -34,7 +34,7 @@ export default function RecentDownloads() {
         setDownloads(downloads);
       })
       .catch((error) => {
-        console.error("Error al obtener las descargas recientes:", error);
+        console.error("Error get recent files", error);
       });
   }
 
@@ -45,7 +45,7 @@ export default function RecentDownloads() {
   }
 
   return (
-    <List searchBarPlaceholder="Filtrar descargas recientes...">
+    <List searchBarPlaceholder="Filter files...">
       {downloads.map((download) => (
         <List.Item
           key={download.path}
