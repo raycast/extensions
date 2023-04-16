@@ -11,7 +11,7 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "recent-download",
+      "name": "index",
       "title": "Recent",
       "subtitle": "download",
       "description": "This application provides a way to view recent downloads from the Downloads folder and the Desktop, with the ability to copy the file by using the Command + Enter shortcut.",

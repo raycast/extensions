@@ -1,11 +1,17 @@
-import { List, ListItem, ActionPanel, Action, OpenInBrowserAction, Clipboard, showHUD, openFolder } from "@raycast/api";
+import { List, ActionPanel, Action, OpenInBrowserAction, showHUD } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { readdir, stat } from "fs/promises";
 import { join, resolve, basename } from "path";
 import { PathLike } from "fs";
 
+interface Download {
+  name: string;
+  path: string;
+  lastModifiedAt: Date;
+}
+
 export default function RecentDownloads() {
-  const [downloads, setDownloads] = useState([]);
+  const [downloads, setDownloads] = useState<Download[]>([]);
 
   useEffect(() => {
     getRecentDownloads();
@@ -45,7 +51,7 @@ export default function RecentDownloads() {
           key={download.path}
           title={download.name}
           icon={{ fileIcon: download.path }}
-          quickLook={{ path: download.path, name: download.file }}
+          quickLook={{ path: download.path, name: download.name }}
           subtitle={download.path}
           actions={
             <ActionPanel>
@@ -59,11 +65,11 @@ export default function RecentDownloads() {
                 shortcut={{ modifiers: ["cmd"], key: "enter" }}
               />
 
-              <Action.ShowInFinder shortcut={{ modifiers: ["command"], key: "o" }} path={download.path} />
+              <Action.ShowInFinder shortcut={{ modifiers: ["cmd"], key: "o" }} path={download.path} />
 
               <Action.Trash
                 title="Delete File"
-                paths={download.path}
+                paths={[download.path]}
                 shortcut={{ modifiers: ["ctrl"], key: "x" }}
                 onTrash={handleTrash}
               />
