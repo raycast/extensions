@@ -440,6 +440,7 @@
 /extensions/laravel-forge                            @KevinBatdorf @macbookandrew
 /extensions/laravel-livewire                         @tafhyseni
 /extensions/laravel-nova                             @a-drew
+/extensions/laravel-shift                            @denniseilander @pernielsentikaer
 /extensions/laravel-valet                            @denniseilander
 /extensions/large-type                               @gon250 @FezVrasta
 /extensions/lark                                     @tmkx
