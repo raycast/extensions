@@ -1,4 +1,4 @@
-import { getApplications, showHUD, showToast, Toast } from "@raycast/api";
+import { getApplications, getPreferenceValues, showHUD, showToast, Toast } from "@raycast/api";
 import { SpotifyPlayingState, SpotifyState, TrackInfo } from "../spotify/types";
 
 export interface Preferences {
@@ -10,8 +10,18 @@ export async function isSpotifyInstalled() {
   return applications.some(({ bundleId }) => bundleId === "com.spotify.client");
 }
 
+export function explicitIcon(track: SpotifyApi.TrackObjectSimplified): string {
+  const isExplicit = track?.explicit;
+
+  const pref = getPreferenceValues();
+  const shouldShowExplicitFlag = Boolean(pref.explicitIcon);
+
+  if (isExplicit && shouldShowExplicitFlag) return "🅴";
+  return "";
+}
+
 export function trackTitle(track: SpotifyApi.TrackObjectSimplified): string {
-  return `${track.artists[0].name} - ${track.name}`;
+  return `${explicitIcon(track)} ${track.artists[0].name} - ${track.name}`;
 }
 
 export async function spotifyApplicationName(): Promise<string> {

@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Color, Icon, Image, List, showToast } from "@raycast/api";
 import _ from "lodash";
 import { addTrackToQueue, play, startPlaySimilar } from "../spotify/client";
-import { msToHMS, trackTitle } from "../utils";
+import { explicitIcon, msToHMS, trackTitle } from "../utils";
 import { useSpotify } from "../utils/context";
 
 export default function TrackListItem(props: {
@@ -93,7 +93,7 @@ const getTrackDetailMarkdownContent = (
   track: SpotifyApi.TrackObjectSimplified,
   album?: SpotifyApi.AlbumObjectSimplified
 ) => {
-  let content = `# ${track.name}\n## Album\n`;
+  let content = `# ${explicitIcon(track)}${track.name}\n## Album\n`;
   if (album) {
     const albumCover = _(album.images).first()?.url;
     if (albumCover) {
