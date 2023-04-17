@@ -159,7 +159,7 @@ async function getGitHubFile(path, { github, context }) {
     path,
   });
 
-  return Buffer.from(data.content, "base64").toString("utf8");
+  return data as string;
 }
 
 // Create a new comment or update the existing one
