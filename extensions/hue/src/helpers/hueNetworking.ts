@@ -1,8 +1,9 @@
-import { discovery } from "node-hue-api";
 import { APP_NAME } from "./constants";
 import tls, { PeerCertificate } from "tls";
 import * as https from "https";
-import { LinkResponse } from "../lib/types";
+import { LinkResponse, MDnsService } from "../lib/types";
+import Bonjour from "bonjour-service";
+import { isIPv4 } from "net";
 
 /**
  * Ignoring that you could have more than one Hue Bridge on a network as this is unlikely in 99.9% of users situations
@@ -57,22 +58,25 @@ export async function discoverBridgeUsingNupnp(): Promise<string> {
  * Ignoring that you could have more than one Hue Bridge on a network as this is unlikely in 99.9% of users situations
  */
 export async function discoverBridgeUsingMdns(): Promise<string> {
-  // TODO: Remove dependency on node-hue-api
   console.info("Discovering bridge using mDNS…");
 
-  const mDnsResults = await discovery.mdnsSearch(10_000); // 10 seconds
-  if (mDnsResults.length === 0) {
-    throw new Error("Could not find a Hue Bridge");
-  }
+  return new Promise((resolve, reject) => {
+    const browser = new Bonjour().findOne({ type: "hue", protocol: "tcp" });
 
-  const ipAddress = mDnsResults[0].ipaddress;
+    browser.on("up", (service: MDnsService) => {
+      const ipv4Address = service.addresses.find((address) => isIPv4(address));
+      return ipv4Address ? resolve(ipv4Address) : reject("Could not find a Hue Bridge using mDNS");
+    });
 
-  if (ipAddress === undefined) {
-    throw new Error("Could not find a Hue Bridge");
-  }
+    browser.on("down", () => {
+      return reject("Could not find a Hue Bridge using mDNS");
+    });
 
-  console.info("Discovered Hue Bridge using mDNS:", ipAddress);
-  return ipAddress;
+    setTimeout(() => {
+      browser.stop();
+      return reject("Could not find a Hue Bridge using mDNS");
+    }, 10000);
+  });
 }
 
 function isValidBridgeCertificate(peerCertificate: PeerCertificate) {
