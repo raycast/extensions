@@ -28,14 +28,14 @@ export type HueBridgeState = State<
 
 export type HueContext = {
   bridgeIpAddress?: string;
-  bridgeConfig?: BridgeConfig;
-  bridgeId?: string;
   bridgeUsername?: string;
+  bridgeId?: string;
+  bridgeConfig?: BridgeConfig;
   hueClient?: HueClient;
 };
 
 /**
- * @see https://stately.ai/viz/ee0edf94-7a82-4d65-a6a8-324e2f1eca49
+ * @see https://stately.ai/viz/5dacdcc5-0f75-4620-9330-3455876b2e50
  */
 export default function hueBridgeMachine(
   setLights: React.Dispatch<React.SetStateAction<Light[]>>,
@@ -49,10 +49,10 @@ export default function hueBridgeMachine(
     initial: "loadingPreferences",
     predictableActionArguments: true,
     context: {
-      bridgeConfig: undefined,
       bridgeIpAddress: undefined,
-      bridgeId: undefined,
       bridgeUsername: undefined,
+      bridgeId: undefined,
+      bridgeConfig: undefined,
       hueClient: undefined,
     },
     on: {
@@ -65,8 +65,9 @@ export default function hueBridgeMachine(
         invoke: {
           id: "loadingPreferences",
           src: async () => {
-            const bridgeIpAddress = getPreferenceValues().bridgeIpAddress;
-            const bridgeUsername = getPreferenceValues().bridgeUsername;
+            const preferences = getPreferenceValues();
+            const bridgeIpAddress = preferences.bridgeIpAddress;
+            const bridgeUsername = preferences.bridgeUsername;
 
             if (bridgeIpAddress && bridgeUsername) {
               console.log("Using bridge IP address and username from preferences");
@@ -76,35 +77,28 @@ export default function hueBridgeMachine(
               console.log("Using bridge username from preferences");
             }
 
-            if (bridgeIpAddress || bridgeUsername) {
-              return {
-                bridgeIpAddress: bridgeIpAddress ? bridgeIpAddress : undefined,
-                bridgeUsername: bridgeUsername ? bridgeUsername : undefined,
-              };
-            }
-
-            throw new Error("No bridge IP address found in preferences");
+            return {
+              bridgeIpAddress: bridgeIpAddress,
+              bridgeUsername: bridgeUsername,
+            };
           },
           onDone: {
             actions: assign({
               bridgeIpAddress: (context, event) => event.data.bridgeIpAddress,
               bridgeUsername: (context, event) => event.data.bridgeUsername,
             }),
-            target: "loadingCredentials",
-          },
-          onError: {
-            target: "loadingCredentials",
+            target: "loadingConfiguration",
           },
         },
       },
-      loadingCredentials: {
+      loadingConfiguration: {
         invoke: {
-          id: "loadingCredentials",
+          id: "loadingConfiguration",
           src: async (context) => {
             const bridgeConfigString = await LocalStorage.getItem<string>(BRIDGE_CONFIG_KEY);
 
             if (bridgeConfigString === undefined) {
-              throw new Error("No bridge configuration found");
+              return { bridgeConfig: undefined };
             }
 
             let bridgeConfig = JSON.parse(bridgeConfigString);
@@ -118,19 +112,22 @@ export default function hueBridgeMachine(
 
             return { bridgeConfig: bridgeConfig };
           },
-          onDone: {
-            actions: assign({
-              bridgeConfig: (context, event) => event.data.bridgeConfig,
-            }),
-            target: "connecting",
-          },
-          onError: {
-            actions: (_, event) => {
-              // This is expected if the user has not yet linked their bridge. Hence, info instead of error.
-              console.info(event.data.message);
+          onDone: [
+            {
+              target: "connecting",
+              actions: assign({
+                bridgeConfig: (context, event) => event.data.bridgeConfig,
+              }),
+              cond: (context, event) => event.data.bridgeConfig !== undefined,
             },
-            target: "discoveringUsingPublicApi",
-          },
+            {
+              target: "linking",
+              cond: (context) => context.bridgeIpAddress !== undefined,
+            },
+            {
+              target: "discoveringUsingPublicApi",
+            },
+          ],
         },
       },
       connecting: {
@@ -281,15 +278,29 @@ export default function hueBridgeMachine(
       unlinking: {
         invoke: {
           id: "unlinking",
-          src: async (context) => {
-            context.bridgeIpAddress = undefined;
-            context.bridgeId = undefined;
-            context.bridgeUsername = undefined;
+          src: async () => {
             await LocalStorage.clear();
           },
-          onDone: {
-            target: "discoveringUsingPublicApi",
-          },
+          onDone: [
+            {
+              target: "linking",
+              actions: assign({
+                bridgeUsername: (context, event) => getPreferenceValues().bridgeUsername,
+                bridgeId: (context, event) => undefined,
+                bridgeConfig: (context, event) => undefined,
+              }),
+              cond: () => getPreferenceValues().bridgeIpAddress !== undefined,
+            },
+            {
+              target: "discoveringUsingPublicApi",
+              actions: assign({
+                bridgeIpAddress: (context, event) => undefined,
+                bridgeUsername: (context, event) => getPreferenceValues().bridgeUsername,
+                bridgeId: (context, event) => undefined,
+                bridgeConfig: (context, event) => undefined,
+              }),
+            },
+          ],
         },
       },
     },
