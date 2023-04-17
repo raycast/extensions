@@ -13,6 +13,8 @@
 * Deprecation: It is no longer possible to set/adjust the color (temperature) of a group since this is not supported by
   the Hue API V2. It may be added in the future with a workaround. Please use scenes or individual lights instead.
 
+You will need to re-link your Hue Bridge to use the new version.
+
 ## [Fixes and Enhancements] - 2023-03-29
 
 * Fix too many network requests resulting in rate limiting (429) errors
