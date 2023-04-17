@@ -24,6 +24,8 @@ const noBridgeFoundMessage = `
 ![Not Found](${connectImagePath})
 
 Your Hue Bridge must be switched on, plugged into your router via an Ethernet cable and connected to the same Wi-Fi network as your device. All three blue lights on the Hue Bridge should be on.
+
+You can manually enter the IP address of your Hue Bridge in this extension’s preferences.
 `;
 
 const linkWithBridgeMessage = `

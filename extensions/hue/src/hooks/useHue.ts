@@ -33,7 +33,7 @@ export function useHue() {
 
         try {
           // Executing these in parallel causes the API to return an error as if one of the endpoints is not found.
-          // Since we’re using HTTP/2 we can just execute them sequentially, and it's faster anyway.
+          // Since we’re using HTTP/2 we can just execute them sequentially, and it’s faster anyway.
           setLights(await hueBridgeState.context.hueClient.getLights());
           setGroupedLights(await hueBridgeState.context.hueClient.getGroupedLights());
           setRooms(await hueBridgeState.context.hueClient.getRooms());

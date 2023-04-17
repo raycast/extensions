@@ -95,6 +95,7 @@ export default function hueBridgeMachine(
         invoke: {
           id: "loadingConfiguration",
           src: async (context) => {
+            console.log("Loading configuration…");
             const bridgeConfigString = await LocalStorage.getItem<string>(BRIDGE_CONFIG_KEY);
 
             if (bridgeConfigString === undefined) {
@@ -134,7 +135,6 @@ export default function hueBridgeMachine(
         invoke: {
           id: "connecting",
           src: async (context) => {
-            // We have already validated that these values are defined, but TypeScript doesn't know that
             if (context.bridgeConfig === undefined) {
               throw Error("Bridge configuration is undefined when trying to connect");
             }
@@ -216,7 +216,11 @@ export default function hueBridgeMachine(
         invoke: {
           id: "linking",
           src: async (context) => {
-            if (context.bridgeIpAddress === undefined) throw Error("No bridge IP address");
+            console.log("Linking with Hue Bridge and saving configuration…");
+
+            if (context.bridgeIpAddress === undefined) {
+              throw Error("No bridge IP address");
+            }
 
             // TODO: Test cases:
             //  With manual IP
@@ -265,7 +269,9 @@ export default function hueBridgeMachine(
         invoke: {
           id: "linked",
           src: async (context) => {
-            if (context.bridgeConfig === undefined) throw Error("No bridge IP address");
+            if (context.bridgeConfig === undefined) {
+              throw Error("Bridge configuration is undefined when trying to save it");
+            }
             await LocalStorage.setItem(BRIDGE_CONFIG_KEY, JSON.stringify(context.bridgeConfig));
           },
         },
@@ -279,6 +285,7 @@ export default function hueBridgeMachine(
         invoke: {
           id: "unlinking",
           src: async () => {
+            console.log("Unlinking (clearing configuration)…");
             await LocalStorage.clear();
           },
           onDone: [

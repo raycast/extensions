@@ -21,10 +21,10 @@ export default async function createHueClient(
 
     if (bridgeConfig.certificateType === "self-signed" && bridgeConfig.certificate) {
       certificate = Buffer.from(bridgeConfig.certificate, "utf-8");
-      console.log("Connecting to Hue Bridge using self-signed certificate…");
+      console.log("Connecting to the Hue Bridge using it’s self-signed certificate…");
     } else {
       certificate = fs.readFileSync(environment.assetsPath + "/huebridge_cacert.pem");
-      console.log("Connecting to Hue Bridge and checking it's certificate against the Hue Bridge root CA…");
+      console.log("Connecting to the Hue Bridge, checking it’s certificate against the Hue Bridge root CA…");
     }
 
     /*
