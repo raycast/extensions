@@ -27,7 +27,6 @@ jobs:
             require('fs').writeFileSync('./issue-bot.js', result.data);
 
             const script = require('./issue-bot')
-            console.log(script);
             await script({
               github,
               context,
