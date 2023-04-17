@@ -1,7 +1,6 @@
 import { discovery } from "node-hue-api";
 import { APP_NAME } from "./constants";
-import tls from "tls";
-import { PeerCertificate } from "tls";
+import tls, { PeerCertificate } from "tls";
 import * as https from "https";
 import { LinkResponse } from "../lib/types";
 
@@ -9,17 +8,49 @@ import { LinkResponse } from "../lib/types";
  * Ignoring that you could have more than one Hue Bridge on a network as this is unlikely in 99.9% of users situations
  */
 export async function discoverBridgeUsingNupnp(): Promise<string> {
-  // TODO: Remove dependency on node-hue-api
   console.info("Discovering bridge using MeetHue's public API…");
-  const hueApiResults = await discovery.nupnpSearch();
 
-  if (hueApiResults.length === 0) {
-    throw new Error("Could not find a Hue Bridge using MeetHue's public API");
-  }
+  return new Promise((resolve, reject) => {
+    const options = {
+      hostname: "discovery.meethue.com",
+      path: "/",
+      method: "GET",
+    };
 
-  console.info("Discovered Hue Bridge using MeetHue's public API:", hueApiResults[0].ipaddress);
+    const request = https.request(options, (response) => {
+      let data = "";
 
-  return hueApiResults[0].ipaddress;
+      response.on("data", (chunk) => {
+        data += chunk;
+      });
+
+      response.on("end", () => {
+        if (response.statusCode !== 200) {
+          return reject(`Unexpected status code from MeetHue's public API: ${response.statusCode}`);
+        }
+
+        if (data === "") {
+          return reject("Could not find a Hue Bridge using MeetHue's public API");
+        }
+
+        const hueApiResults = JSON.parse(data);
+
+        if (hueApiResults.length === 0) {
+          return reject("Could not find a Hue Bridge using MeetHue's public API");
+        }
+
+        const ipAddress = hueApiResults[0].ipaddress;
+        console.info(`Discovered Hue Bridge using MeetHue's public API: ${ipAddress}`);
+        resolve(ipAddress);
+      });
+    });
+
+    request.on("error", (error) => {
+      return reject(`Could not find a Hue Bridge using MeetHue's public API ${error.message}`);
+    });
+
+    request.end();
+  });
 }
 
 /**
