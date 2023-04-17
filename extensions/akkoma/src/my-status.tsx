@@ -10,7 +10,7 @@ const cache = new Cache();
 
 export default function ViewStatusCommand() {
   const cached = cache.get("latest_statuses");
-  const [status, setStatus] = useState<Status[]>(cached ? JSON.parse(cached) : []);
+  const [statuses, setStatuses] = useState<Status[]>(cached ? JSON.parse(cached) : []);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -19,7 +19,7 @@ export default function ViewStatusCommand() {
         await getAccessToken();
         showToast(Toast.Style.Animated, "Loading Status...ε=ε=┌( >_<)┘");
         const status = await apiServer.fetchUserStatus();
-        setStatus(status);
+        setStatuses(statuses);
         showToast(Toast.Style.Success, "Statuses has been loaded ٩(•̤̀ᵕ•̤́๑)ᵒᵏᵎᵎᵎᵎ");
         cache.set("latest_statuses", JSON.stringify(status));
       } catch (error) {
@@ -32,9 +32,11 @@ export default function ViewStatusCommand() {
     getBookmark();
   }, []);
 
+  const filterReblog = (statuses: Status[]) => statuses.filter((status) => !status.reblog);
+
   return (
     <List isShowingDetail isLoading={isLoading} searchBarPlaceholder="Search your status">
-      {status?.map((status) => (
+      {filterReblog(statuses)?.map((status) => (
         <List.Item
           title={status.akkoma.source.content}
           key={status.id}

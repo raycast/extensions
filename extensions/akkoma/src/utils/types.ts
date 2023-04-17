@@ -64,12 +64,7 @@ export interface StatusRequest {
 export interface Status {
   created_at: Date;
   media_attachments: UploadAttachResponse[];
-  akkoma: {
-    source: {
-      content: string;
-      mediaType: "text/markdown" | "text/plain" | "text/bbcode" | "text/html" | "x.misskeymarkdown";
-    };
-  };
+  akkoma: AkkomaSource;
   account: {
     acct: string;
   };
@@ -83,8 +78,18 @@ export interface Status {
   };
   id: string;
   fqn: string;
+  reblog: {
+    content: string;
+    akkoma: AkkomaSource;
+  };
 }
 
+interface AkkomaSource {
+  source: {
+    content: string;
+    mediaType: "text/markdown" | "text/plain" | "text/bbcode" | "text/html" | "x.misskeymarkdown";
+  };
+}
 // API Responses
 export interface ApiResponse {
   id: number;
