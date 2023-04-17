@@ -93,7 +93,7 @@ export default function RecentDownloads() {
                 />
                 <Action.ShowInFinder shortcut={{ modifiers: ["cmd"], key: "o" }} path={download.path} />
 
-                <Action.ToggleQuickLook title="Preview File" shortcut={{ modifiers: ["cmd"], key: "y" }} />
+                <Action.ToggleQuickLook title="Preview File" shortcut={{ modifiers: ["shift"], key: "space" }} />
                 <Action.Trash
                   title="Delete File"
                   paths={[download.path]}
