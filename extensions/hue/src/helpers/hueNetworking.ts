@@ -1,14 +1,14 @@
 import { APP_NAME } from "./constants";
 import tls, { PeerCertificate } from "tls";
 import * as https from "https";
-import { LinkResponse, MDnsService } from "../lib/types";
+import { HueApiService, LinkResponse, MDnsService } from "../lib/types";
 import Bonjour from "bonjour-service";
 import { isIPv4 } from "net";
 
 /**
  * Ignoring that you could have more than one Hue Bridge on a network as this is unlikely in 99.9% of users situations
  */
-export async function discoverBridgeUsingNupnp(): Promise<string> {
+export async function discoverBridgeUsingNupnp(): Promise<{ ipAddress: string; id: string }> {
   console.info("Discovering bridge using MeetHue's public API…");
 
   return new Promise((resolve, reject) => {
@@ -34,15 +34,17 @@ export async function discoverBridgeUsingNupnp(): Promise<string> {
           return reject("Could not find a Hue Bridge using MeetHue's public API");
         }
 
-        const hueApiResults = JSON.parse(data);
+        const hueApiResults: HueApiService[] = JSON.parse(data);
 
         if (hueApiResults.length === 0) {
           return reject("Could not find a Hue Bridge using MeetHue's public API");
         }
 
-        const ipAddress = hueApiResults[0].ipaddress;
-        console.info(`Discovered Hue Bridge using MeetHue's public API: ${ipAddress}`);
-        return resolve(ipAddress);
+        const ipAddress = hueApiResults[0].internalipaddress;
+        const id = hueApiResults[0].id;
+
+        console.info(`Discovered Hue Bridge using MeetHue's public API: ${ipAddress}, ${id}`);
+        return resolve({ ipAddress, id });
       });
     });
 
@@ -57,15 +59,18 @@ export async function discoverBridgeUsingNupnp(): Promise<string> {
 /**
  * Ignoring that you could have more than one Hue Bridge on a network as this is unlikely in 99.9% of users situations
  */
-export async function discoverBridgeUsingMdns(): Promise<string> {
+export async function discoverBridgeUsingMdns(): Promise<{ ipAddress: string; id: string }> {
   console.info("Discovering bridge using mDNS…");
 
   return new Promise((resolve, reject) => {
     const browser = new Bonjour().findOne({ type: "hue", protocol: "tcp" });
 
     browser.on("up", (service: MDnsService) => {
-      const ipv4Address = service.addresses.find((address) => isIPv4(address));
-      return ipv4Address ? resolve(ipv4Address) : reject("Could not find a Hue Bridge using mDNS");
+      const ipAddress = service.addresses.find((address) => isIPv4(address));
+      const id = service.txt.bridgeid;
+
+      console.info(`Discovered Hue Bridge using MeetHue's public API: ${ipAddress}, ${id}`);
+      return ipAddress ? resolve({ ipAddress, id }) : reject("Could not find a Hue Bridge using mDNS");
     });
 
     browser.on("down", () => {
@@ -79,14 +84,14 @@ export async function discoverBridgeUsingMdns(): Promise<string> {
   });
 }
 
-function isValidBridgeCertificate(peerCertificate: PeerCertificate) {
+function isValidBridgeCertificate(peerCertificate: PeerCertificate, bridgeId: string) {
   return (
-    /^([0-9a-fA-F]){16}$/.test(peerCertificate.subject.CN) &&
+    peerCertificate.subject.CN === bridgeId &&
     (peerCertificate.subject.CN === peerCertificate.issuer.CN || peerCertificate.issuer.CN === "root-bridge")
   );
 }
 
-export async function getUsernameFromBridge(ipAddress: string, certificate: Buffer): Promise<string> {
+export async function getUsernameFromBridge(ipAddress: string, bridgeId: string, certificate: Buffer): Promise<string> {
   return new Promise((resolve, reject) => {
     const request = https.request(
       {
@@ -97,7 +102,7 @@ export async function getUsernameFromBridge(ipAddress: string, certificate: Buff
         ca: certificate,
         agent: new https.Agent({
           checkServerIdentity: (hostname, peerCertificate) => {
-            if (!isValidBridgeCertificate(peerCertificate)) {
+            if (!isValidBridgeCertificate(peerCertificate, bridgeId)) {
               reject("TLS certificate is not a valid Hue Bridge certificate");
             }
 
@@ -137,7 +142,7 @@ export async function getUsernameFromBridge(ipAddress: string, certificate: Buff
   });
 }
 
-export function getCertificate(host: string): Promise<PeerCertificate> {
+export function getCertificate(host: string, bridgeId: string): Promise<PeerCertificate> {
   return new Promise((resolve, reject) => {
     const socket = tls.connect(
       {
@@ -158,7 +163,7 @@ export function getCertificate(host: string): Promise<PeerCertificate> {
          * https://developers.meethue.com/develop/application-design-guidance/using-https/#Common%20name%20validation
          * https://developers.meethue.com/develop/application-design-guidance/using-https/#Self-signed%20certificates
          */
-        if (!isValidBridgeCertificate(peerCertificate)) {
+        if (!isValidBridgeCertificate(peerCertificate, bridgeId)) {
           return reject("TLS certificate is not a valid Hue Bridge certificate");
         }
 

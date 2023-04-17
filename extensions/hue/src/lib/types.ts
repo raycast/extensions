@@ -63,6 +63,12 @@ export type MDnsService = {
   protocol: string;
 };
 
+export type HueApiService = {
+  id: string;
+  internalipaddress: string;
+  port: number;
+};
+
 ///////////////////
 // Hue API types //
 ///////////////////

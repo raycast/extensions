@@ -3,8 +3,8 @@ import { createPemString, getCertificate, getUsernameFromBridge } from "../helpe
 import fs from "fs";
 import { environment } from "@raycast/api";
 
-export async function linkWithBridge(bridgeIpAddress: string): Promise<BridgeConfig> {
-  const bridgeCertificate = await getCertificate(bridgeIpAddress);
+export async function linkWithBridge(bridgeIpAddress: string, bridgeId: string): Promise<BridgeConfig> {
+  const bridgeCertificate = await getCertificate(bridgeIpAddress, bridgeId);
   const isSelfSigned = bridgeCertificate.subject.CN === bridgeCertificate.issuer.CN;
   const pemString = createPemString(bridgeCertificate);
   const certificate = isSelfSigned
@@ -13,8 +13,8 @@ export async function linkWithBridge(bridgeIpAddress: string): Promise<BridgeCon
 
   return {
     ipAddress: bridgeIpAddress,
-    username: await getUsernameFromBridge(bridgeIpAddress, certificate),
-    id: bridgeCertificate.subject.CN,
+    username: await getUsernameFromBridge(bridgeIpAddress, bridgeId, certificate),
+    id: bridgeId,
     certificateType: isSelfSigned ? "self-signed" : "signed-by-hue-bridge-root-ca",
     certificate: isSelfSigned ? pemString : undefined,
   };
