@@ -159,7 +159,7 @@ async function getGitHubFile(path, { github, context }) {
     path,
   });
 
-  return data as string;
+  return data;
 }
 
 // Create a new comment or update the existing one
