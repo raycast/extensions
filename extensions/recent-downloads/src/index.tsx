@@ -28,15 +28,12 @@ export default function RecentDownloads() {
 
   if (selectedDownload) {
     const fileExtension = extname(selectedDownload.name);
-    const icon = getFileTypeIcon(fileExtension);
-    const color = getFileTypeColor(fileExtension);
-
     return (
       <Detail
         navigationTitle={selectedDownload.name}
         metadata={
           <Detail.Metadata>
-            <Detail.Metadata.Label title="File Type" text={fileExtension} icon={{ source: icon, tintColor: color }} />
+            <Detail.Metadata.Label title="File Type" text={fileExtension} />
           </Detail.Metadata>
         }
       />
@@ -48,7 +45,6 @@ export default function RecentDownloads() {
       {downloads.map((download) => {
         const fileExtension = extname(download.name);
         const icon = getFileTypeIcon(fileExtension);
-        const color = getFileTypeColor(fileExtension);
 
         function getPreview(filePath: string, fileExtension: string) {
           const imageExtensions = [".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp"];
@@ -75,7 +71,7 @@ export default function RecentDownloads() {
                 metadata={
                   <List.Item.Detail.Metadata>
                     <List.Item.Detail.Metadata.Label title="Title" text={`${download.name} `} />
-                    <List.Item.Detail.Metadata.Label title="File Type" icon={icon} text={fileExtension} />
+                    <List.Item.Detail.Metadata.Label title="File Type" text={fileExtension} icon={icon} />
                     <List.Item.Detail.Metadata.Label title="Size" text={`${(download.size / 1024).toFixed(2)} KB`} />
                     <List.Item.Detail.Metadata.Separator />
                     <List.Item.Detail.Metadata.Label
