@@ -15,7 +15,7 @@ jobs:
         with:
           github-token: ${{ secrets.RAYCAST_BOT_API_ACCESS_TOKEN }}
           script: |
-            const result = await github.rest.repos.getContent({
+            const { data } = await github.rest.repos.getContent({
               mediaType: {
                 format: "raw",
               },
@@ -23,14 +23,13 @@ jobs:
               repo: context.repo.repo,
               path: "scripts/issue-bot.js",
             });
-            
-            console.log(result);
-            console.log(result.data);
 
-            const fn = Buffer.from(result.data.content, 'base64')
-            require('fs').writeFileSync('./issue-bot.js', fn)
+            const fn = Buffer.from(data.content, 'base64');
+            console.log(fn);
+            require('fs').writeFileSync('./issue-bot.js', fn);
 
             const script = require('./issue-bot')
+            console.log(script);
             await script({
               github,
               context,
