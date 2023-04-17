@@ -48,6 +48,18 @@ export type Method = "GET" | "DELETE" | "HEAD" | "OPTIONS" | "POST" | "PUT" | "P
 // Hue API types //
 ///////////////////
 
+export type LinkResponse = {
+  success?: {
+    username: string;
+    clientkey: string;
+  };
+  error?: {
+    type: number;
+    address: string;
+    description: string;
+  };
+};
+
 type LightArchetype =
   | "unknown_archetype"
   | "classic_bulb"
