@@ -108,6 +108,9 @@ export default function ManageHueBridge(
       toast.show().then();
       break;
     case "noBridgeFound":
+      contextActions = [
+        <Action key="retryLink" title="Retry" onAction={() => sendHueMessage("RETRY")} icon={Icon.Repeat} />,
+      ];
       markdown = noBridgeFoundMessage;
       toast.hide().then();
       break;
