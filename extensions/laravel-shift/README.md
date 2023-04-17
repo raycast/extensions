@@ -13,11 +13,19 @@ for Docker](https://laravelshift.com/docker/install) docs for installation and s
 
 ## Requirements
 
-- A Shift Token is required to complete the setup step.
+- A Shift Docker Token is required to complete the setup step.
 
 ## Usage
 
 - Open Raycast and search for "Laravel Shift for Docker"
 - Search for a shift you want to generate
-- Press enter on the selected shift to generate it
+- Press ⌘ + ↵ (command + enter)
 - The generated shift will be copied to your clipboard
+
+## Settings
+
+Within the Extension settings (⌘+⇧+,) you can set the following: 
+- Shift Docker Token
+- Git Author Name & Email
+- Mount option
+- Whether to clos the Raycast window after copying the generated shift
