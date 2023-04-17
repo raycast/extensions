@@ -92,18 +92,16 @@ export function GenerateCommandForm(): JSX.Element {
         }}
       />
 
-      {!preferences.closeAfterCopy && (
-        <Form.TextArea
-          id="shiftCommand"
-          title="Shift Command"
-          value={shiftCommand}
-          placeholder="Shift command will appear here"
-          onChange={(shiftCommand: string) => {
-            setShiftCommand(shiftCommand);
-          }}
-          info="The generated Shift Command."
-        />
-      )}
+      <Form.TextArea
+        id="shiftCommand"
+        title="Shift Command"
+        value={shiftCommand}
+        placeholder="Shift command will appear here"
+        onChange={(shiftCommand: string) => {
+          setShiftCommand(shiftCommand);
+        }}
+        info="The generated Shift Command."
+      />
 
       <Form.Separator />
 
