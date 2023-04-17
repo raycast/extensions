@@ -13,7 +13,7 @@
     {
       "name": "index",
       "title": "Recent Download",
-      "subtitle": "show last download",
+      "subtitle": "show last downloads",
       "description": "Show recent files downloaded inside desktop and download folder, copy file to clipboard, delete, go to the folder",
       "mode": "view"
     }

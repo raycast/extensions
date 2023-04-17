@@ -6,7 +6,7 @@ import { getRecentDownloads, Download, getFileTypeIcon, getFileTypeColor } from 
 
 export default function RecentDownloads() {
   const [downloads, setDownloads] = useState<Download[]>([]);
-  const [selectedDownload, setSelectedDownload] = useState<Download | null>(null);
+  const [selectedDownload] = useState<Download | null>(null);
 
   useEffect(() => {
     const downloadsPath = resolve(process.env.HOME || "", "Downloads");
@@ -53,12 +53,14 @@ export default function RecentDownloads() {
         function getPreview(filePath: string, fileExtension: string) {
           const imageExtensions = [".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp"];
 
+          const height = 180;
+
           if (imageExtensions.includes(fileExtension)) {
-            return `<img src="${filePath}" alt="Image" width="300" />`;
+            return `<img src="${filePath}" alt="Image" height="${height}" />`;
           } else {
             const icon = getFileTypeIcon(fileExtension);
 
-            return `<img src="${icon}" alt="Image" height="150" />`;
+            return `<img src="${icon}" alt="Image" height="${height}" />`;
           }
         }
 
@@ -73,7 +75,7 @@ export default function RecentDownloads() {
                 metadata={
                   <List.Item.Detail.Metadata>
                     <List.Item.Detail.Metadata.Label title="Title" text={`${download.name} `} />
-                    <List.Item.Detail.Metadata.Label title="File Type" icon={icon} text={fileExtension} color={color} />
+                    <List.Item.Detail.Metadata.Label title="File Type" icon={icon} text={fileExtension} />
                     <List.Item.Detail.Metadata.Label title="Size" text={`${(download.size / 1024).toFixed(2)} KB`} />
                     <List.Item.Detail.Metadata.Separator />
                     <List.Item.Detail.Metadata.Label
