@@ -131,7 +131,6 @@ export default function ManageHueBridge(
         <Action key="retryLink" title="Retry" onAction={() => sendHueMessage("RETRY")} icon={Icon.Repeat} />,
       ];
       markdown = failedToLinkMessage;
-      toast.hide().then();
       break;
     case "linked":
       contextActions = [
