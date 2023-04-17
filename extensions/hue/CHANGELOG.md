@@ -1,6 +1,6 @@
 # Hue Changelog
 
-## [Hue Extension 2.0] - 2023-04-10
+## [Hue Extension 2.0] - 2023-04-17
 
 * Show groups and scenes as gradients
 * Show lights as tinted icons
