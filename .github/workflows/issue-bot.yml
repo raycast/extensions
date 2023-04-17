@@ -24,6 +24,9 @@ jobs:
               path: "scripts/issue-bot.js",
             });
 
+            console.log(typeof data.content);
+            const utf8 = Buffer.from(data.content, 'utf8');
+            console.log(utf8);
             const fn = Buffer.from(data.content, 'base64');
             console.log(fn);
             require('fs').writeFileSync('./issue-bot.js', fn);
