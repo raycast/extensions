@@ -84,14 +84,20 @@ export async function discoverBridgeUsingMdns(): Promise<{ ipAddress: string; id
   });
 }
 
-function isValidBridgeCertificate(peerCertificate: PeerCertificate, bridgeId: string) {
+function isValidBridgeCertificate(peerCertificate: PeerCertificate, bridgeId?: string) {
   return (
-    peerCertificate.subject.CN === bridgeId &&
+    // The subject CN is the given Bridge ID or a valid Bridge ID
+    (peerCertificate.subject.CN === bridgeId || /^([0-9a-fA-F]){16}$/.test(peerCertificate.subject.CN)) &&
+    // The issuer CN is equal to the subject CN or “root-bridge”
     (peerCertificate.subject.CN === peerCertificate.issuer.CN || peerCertificate.issuer.CN === "root-bridge")
   );
 }
 
-export async function getUsernameFromBridge(ipAddress: string, bridgeId: string, certificate: Buffer): Promise<string> {
+export async function getUsernameFromBridge(
+  ipAddress: string,
+  bridgeId: string | undefined = undefined,
+  certificate: Buffer
+): Promise<string> {
   return new Promise((resolve, reject) => {
     const request = https.request(
       {
@@ -142,7 +148,7 @@ export async function getUsernameFromBridge(ipAddress: string, bridgeId: string,
   });
 }
 
-export function getCertificate(host: string, bridgeId: string): Promise<PeerCertificate> {
+export function getCertificate(host: string, bridgeId?: string): Promise<PeerCertificate> {
   return new Promise((resolve, reject) => {
     const socket = tls.connect(
       {
