@@ -66,15 +66,15 @@ export default async function createHueClient(
     });
 
     session.setTimeout(CONNECTION_TIMEOUT_MS, () => {
-      reject(new Error("Connection timed out."));
+      return reject("Connection timed out.");
     });
 
     session.once("connect", () => {
-      resolve(session);
+      return resolve(session);
     });
 
     session.once("error", (error) => {
-      reject(error);
+      return reject(error);
     });
   });
 

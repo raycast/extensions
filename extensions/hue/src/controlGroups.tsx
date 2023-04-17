@@ -308,13 +308,13 @@ async function handleToggle(
     toast.style = Style.Success;
     toast.title = groupedLight.on?.on ? `Turned ${group.metadata.name} off` : `Turned ${group.metadata.name} on`;
     await toast.show();
-  } catch (e) {
-    console.error(e);
+  } catch (error) {
+    console.error(error);
     toast.style = Style.Failure;
     toast.title = groupedLight?.on?.on
       ? `Failed turning ${group.metadata.name} off`
       : `Failed turning ${group.metadata.name} on`;
-    toast.message = e instanceof Error ? e.message : undefined;
+    toast.message = error instanceof Error ? error.message : undefined;
     await toast.show();
   }
 }
@@ -352,10 +352,10 @@ async function handleSetBrightness(
       style: "percent",
     })}.`;
     await toast.show();
-  } catch (e) {
+  } catch (error) {
     toast.style = Style.Failure;
     toast.title = `Failed setting brightness of ${group.metadata.name}.`;
-    toast.message = e instanceof Error ? e.message : undefined;
+    toast.message = error instanceof Error ? error.message : undefined;
     await toast.show();
   }
 }
@@ -399,12 +399,12 @@ async function handleBrightnessChange(
       style: "percent",
     })}`;
     await toast.show();
-  } catch (e) {
+  } catch (error) {
     toast.style = Style.Failure;
     toast.title = `Failed ${direction === "increase" ? "increasing" : "decreasing"} brightness of ${
       group.metadata.name
     }`;
-    toast.message = e instanceof Error ? e.message : undefined;
+    toast.message = error instanceof Error ? error.message : undefined;
     await toast.show();
   }
 }

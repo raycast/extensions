@@ -256,21 +256,21 @@ async function handleToggle(
     };
 
     const undoOptimisticUpdate = optimisticUpdate(light, changes, setLights);
-    await hueBridgeState.context.hueClient.updateLight(light, changes).catch((e) => {
+    await hueBridgeState.context.hueClient.updateLight(light, changes).catch((error) => {
       undoOptimisticUpdate();
-      throw e;
+      throw error;
     });
 
     toast.style = Style.Success;
     toast.title = light.on.on ? `Turned ${light.metadata.name} off` : `Turned ${light.metadata.name} on`;
     await toast.show();
-  } catch (e) {
-    console.error(e);
+  } catch (error) {
+    console.error(error);
     toast.style = Style.Failure;
     toast.title = light.on.on
       ? `Failed turning ${light.metadata.name} off`
       : `Failed turning ${light.metadata.name} on`;
-    toast.message = e instanceof Error ? e.message : undefined;
+    toast.message = error instanceof Error ? error.message : undefined;
     await toast.show();
   }
 }
@@ -292,9 +292,9 @@ async function handleSetBrightness(
     };
 
     const undoOptimisticUpdate = optimisticUpdate(light, changes, setLights);
-    await hueBridgeState.context.hueClient.updateLight(light, changes).catch((e) => {
+    await hueBridgeState.context.hueClient.updateLight(light, changes).catch((error) => {
       undoOptimisticUpdate();
-      throw e;
+      throw error;
     });
 
     toast.style = Style.Success;
@@ -302,11 +302,11 @@ async function handleSetBrightness(
       style: "percent",
     })}`;
     await toast.show();
-  } catch (e) {
-    console.error(e);
+  } catch (error) {
+    console.error(error);
     toast.style = Style.Failure;
     toast.title = `Failed setting brightness of ${light.metadata.name}`;
-    toast.message = e instanceof Error ? e.message : undefined;
+    toast.message = error instanceof Error ? error.message : undefined;
     await toast.show();
   }
 }
@@ -334,9 +334,9 @@ async function handleBrightnessChange(
     };
 
     const undoOptimisticUpdate = optimisticUpdate(light, changes, setLights);
-    await hueBridgeState.context.hueClient.updateLight(light, changes).catch((e) => {
+    await hueBridgeState.context.hueClient.updateLight(light, changes).catch((error) => {
       undoOptimisticUpdate();
-      throw e;
+      throw error;
     });
 
     toast.style = Style.Success;
@@ -346,12 +346,12 @@ async function handleBrightnessChange(
       style: "percent",
     })}`;
     await toast.show();
-  } catch (e) {
+  } catch (error) {
     toast.style = Style.Failure;
     toast.title = `Failed ${direction === "increase" ? "increasing" : "decreasing"} brightness of ${
       light.metadata.name
     }`;
-    toast.message = e instanceof Error ? e.message : undefined;
+    toast.message = error instanceof Error ? error.message : undefined;
     await toast.show();
   }
 }
@@ -374,18 +374,18 @@ async function handleSetColor({ hueBridgeState, setLights }: ReturnType<typeof u
     };
 
     const undoOptimisticUpdate = optimisticUpdate(light, changes, setLights);
-    await hueBridgeState.context.hueClient.updateLight(light, changes).catch((e) => {
+    await hueBridgeState.context.hueClient.updateLight(light, changes).catch((error) => {
       undoOptimisticUpdate();
-      throw e;
+      throw error;
     });
 
     toast.style = Style.Success;
     toast.title = `Set color of ${light.metadata.name} to ${color.name}`;
     await toast.show();
-  } catch (e) {
+  } catch (error) {
     toast.style = Style.Failure;
     toast.title = "Failed setting color";
-    toast.message = e instanceof Error ? e.message : undefined;
+    toast.message = error instanceof Error ? error.message : undefined;
     await toast.show();
   }
 }
@@ -413,20 +413,20 @@ async function handleColorTemperatureChange(
     } as Partial<Light>;
 
     const undoOptimisticUpdate = optimisticUpdate(light, changes, setLights);
-    await hueBridgeState.context.hueClient.updateLight(light, changes).catch((e) => {
+    await hueBridgeState.context.hueClient.updateLight(light, changes).catch((error) => {
       undoOptimisticUpdate();
-      throw e;
+      throw error;
     });
 
     toast.style = Style.Success;
     toast.title = `${direction === "increase" ? "Increased" : "Decreased"} color temperature of ${light.metadata.name}`;
     await toast.show();
-  } catch (e) {
+  } catch (error) {
     toast.style = Style.Failure;
     toast.title = `Failed ${direction === "increase" ? "increasing" : "decreasing"} color temperature of ${
       light.metadata.name
     }`;
-    toast.message = e instanceof Error ? e.message : undefined;
+    toast.message = error instanceof Error ? error.message : undefined;
     await toast.show();
   }
 }

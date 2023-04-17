@@ -158,10 +158,10 @@ async function handleSetScene(hueClient: HueClient | undefined, group: Group, sc
     toast.style = Style.Success;
     toast.title = `Scene ${scene.metadata.name} set for ${group.metadata.name}.`;
     await toast.show();
-  } catch (e) {
+  } catch (error) {
     toast.style = Style.Failure;
     toast.title = `Failed setting scene ${scene.metadata.name} for ${group.metadata.name}.`;
-    toast.message = e instanceof Error ? e.message : undefined;
+    toast.message = error instanceof Error ? error.message : undefined;
     await toast.show();
   }
 }

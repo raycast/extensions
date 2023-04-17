@@ -149,7 +149,7 @@ export default class HueClient {
             const errorMatch = data.match(/(?<=<div class="error">)(.*?)(?=<\/div>)/);
             if (errorMatch && errorMatch[0]) {
               console.error({ headers: response.headers, message: errorMatch[0] });
-              reject(new Error(errorMatch[0]));
+              return reject(errorMatch[0]);
             }
           }
 
@@ -158,17 +158,17 @@ export default class HueClient {
           if (response.data.errors != null && response.data.errors.length > 0) {
             const errorMessage = response.data.errors.map((error) => error.description).join(", ");
             console.error({ headers: response.headers, message: errorMessage });
-            reject(new Error(errorMessage));
+            return reject(new Error(errorMessage));
           }
 
-          resolve(response);
-        } catch (e) {
-          reject(e);
+          return resolve(response);
+        } catch (error) {
+          return reject(error);
         }
       });
 
-      stream.on("error", (e) => {
-        reject(e);
+      stream.on("error", (error) => {
+        return reject(error);
       });
 
       stream.end();

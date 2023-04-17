@@ -41,7 +41,7 @@ export async function discoverBridgeUsingNupnp(): Promise<string> {
 
         const ipAddress = hueApiResults[0].ipaddress;
         console.info(`Discovered Hue Bridge using MeetHue's public API: ${ipAddress}`);
-        resolve(ipAddress);
+        return resolve(ipAddress);
       });
     });
 
@@ -106,18 +106,17 @@ export async function getUsernameFromBridge(ipAddress: string, certificate: Buff
       },
       (response) => {
         if (response.statusCode !== 200) {
-          throw new Error(`Unexpected status code: ${response.statusCode}`);
+          return reject(`Unexpected status code from Hue Bridge: ${response.statusCode}`);
         }
 
         response.on("data", (data) => {
           const response: LinkResponse = JSON.parse(data.toString())[0];
-          if (response.error) {
-            const errorMessage =
-              response.error.description.charAt(0).toUpperCase() + response.error.description.slice(1);
-            reject(errorMessage);
+          if (response.error?.description) {
+            const errorDescription = response.error.description;
+            return reject(errorDescription.charAt(0).toUpperCase() + errorDescription.slice(1));
           }
           if (response.success) {
-            resolve(response.success.username);
+            return resolve(response.success.username);
           }
         });
       }
@@ -145,7 +144,7 @@ export function getCertificate(host: string): Promise<PeerCertificate> {
       () => {
         console.log("Getting certificate from the Hue Bridge…");
         socket.end();
-        const peerCertificate = socket.getPeerCertificate();
+        const peerCertificate: PeerCertificate = socket.getPeerCertificate();
 
         /*
          * The Hue Bridge uses either a self-signed certificate, or a certificate signed by a root-bridge certificate.
@@ -156,15 +155,15 @@ export function getCertificate(host: string): Promise<PeerCertificate> {
          * https://developers.meethue.com/develop/application-design-guidance/using-https/#Self-signed%20certificates
          */
         if (!isValidBridgeCertificate(peerCertificate)) {
-          reject("TLS certificate is not a valid Hue Bridge certificate");
+          return reject("TLS certificate is not a valid Hue Bridge certificate");
         }
 
-        resolve(peerCertificate);
+        return resolve(peerCertificate);
       }
     );
 
     socket.on("error", (error) => {
-      reject(error);
+      return reject(error);
     });
   });
 }
