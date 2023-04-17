@@ -1,5 +1,11 @@
 # Changelog
 
+## [Allow to Preview Formatted JSON] - 2023-04-04
+
+- Ability to view formated JSON
+- Added new action to view formatted JSON
+- Ability to recognize invalid input
+
 ## [Format JS Objects] - 2023-02-12
 
 - Ability to format JS Objects
