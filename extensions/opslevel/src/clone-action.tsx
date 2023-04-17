@@ -8,6 +8,7 @@ import {
     showHUD,
     showToast,
     Toast,
+    Icon,
 } from "@raycast/api";
 import { promises as fs } from "fs";
 import { LocalStorage } from "@raycast/api";
@@ -80,7 +81,7 @@ export default function OpenRepoInEditorAction({
     return (
         <ActionPanel.Section>
             {isEditorLoading || isApplicationsLoading ? (
-                <Action title="Loading..." />
+                <Action title="Loading..." icon={Icon.Ellipsis} />
             ) : (
                 [
                     editorBundleId ? (
@@ -90,6 +91,7 @@ export default function OpenRepoInEditorAction({
                             title={`Open In ${
                                 applications?.find((app) => app.bundleId === editorBundleId)?.name ?? "Unknown"
                             }`}
+                            icon={Icon.Pencil}
                             shortcut={{ modifiers: ["cmd"], key: "o" }}
                             onAction={async () => {
                                 onVisisted();
@@ -100,12 +102,14 @@ export default function OpenRepoInEditorAction({
                     <ActionPanel.Submenu
                         key="open-in-choice"
                         title="Open in ..."
+                        icon={Icon.Pencil}
                         isLoading={isApplicationsLoading}
                         onOpen={onVisisted}
                     >
                         {applications?.map((app) => (
                             <Action
                                 key={`open-in-${app.bundleId}`}
+                                icon={{ fileIcon: app.path }}
                                 title={app.name}
                                 onAction={async () => await selectEditor(app.bundleId ?? "", repoPath, repoUrl)}
                             />

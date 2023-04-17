@@ -9,19 +9,13 @@ import ContactSection from "./contact-section";
 import { useVisitedServices } from "./useVisitedServices";
 import { fetchServices } from "./client";
 
-let lastRefresh = 0;
 export default function Command(props: LaunchProps<{ arguments: { service: string } }>) {
     const [searchText, setSearchText] = useState(props.arguments?.service ?? "");
-    const { isLoading, error, data, revalidate } = useCachedPromise(fetchServices, [], {
+    const { isLoading, error, data } = useCachedPromise(fetchServices, [], {
         keepPreviousData: true,
     });
 
     const { services: visitedServices, visitService, isLoading: isLoadingVisistedServices } = useVisitedServices();
-
-    if (lastRefresh < Date.now() - 1000 * 60 * 5) {
-        revalidate();
-        lastRefresh = Date.now();
-    }
 
     if (error) {
         showToast({
