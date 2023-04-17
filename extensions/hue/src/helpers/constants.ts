@@ -1,17 +1,19 @@
-import { CssColor } from "./types";
+import { CssColor } from "../lib/types";
 
 export const APP_NAME = "raycast_hue_extension";
-export const BRIDGE_IP_ADDRESS_KEY = "bridgeIpAddress";
-export const BRIDGE_USERNAME_KEY = "bridgeUsername";
+export const BRIDGE_CONFIG_KEY = "bridgeCredentials";
 
-export const BRIGHTNESSES = [1].concat(Array.from(Array(10).keys()).map((i) => i * 10 + 10)).reverse();
-// TODO: Replace with lookup table so that each step corresponds to an 10% value increment and use setBrightness instead of increase/decrease to prevent 9% or 11% steps due to rounding errors.
-export const BRIGHTNESS_STEP = 25.4;
-export const BRIGHTNESS_MAX = 254;
-export const BRIGHTNESS_MIN = 1;
-export const COLOR_TEMPERATURE_STEP = (500.0 - 153.0) / 10.0;
-export const COLOR_TEMP_MAX = 500;
-export const COLOR_TEMP_MIN = 153;
+export const BRIGHTNESSES = [100, 90, 80, 70, 60, 50, 40, 30, 20, 10, 1];
+export const BRIGHTNESS_MIN = BRIGHTNESSES[BRIGHTNESSES.length - 1];
+export const BRIGHTNESS_MAX = BRIGHTNESSES[0];
+export const MIRED_MIN = 153;
+export const MIRED_MAX = 500;
+export const MIRED_STEP = (500.0 - 153.0) / 10.0;
+export const MIRED_DEFAULT = 357;
+/**
+ * The mired from Hue's API is too warm, so we make it cooler by an arbitrary amount
+ */
+export const MIRED_ADJUSTMENT = -50;
 export const COLORS: CssColor[] = [
   { name: "Alice Blue", value: "#f0f8ff" },
   { name: "Antique White", value: "#faebd7" },
