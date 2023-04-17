@@ -52,7 +52,7 @@ export default function SimpleCommand(props: CommandProps) {
     const init = async () => {
       try {
         await getAccessToken();
-        const fqn = await LocalStorage.getItem<string>("account-fqn") ||  "";
+        const fqn = (await LocalStorage.getItem<string>("account-fqn")) || "";
         setState((prevState) => ({
           ...prevState,
           fqn: fqn,

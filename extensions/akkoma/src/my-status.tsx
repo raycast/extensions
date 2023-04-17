@@ -16,7 +16,7 @@ export default function ViewStatusCommand() {
   useEffect(() => {
     const getBookmark = async () => {
       try {
-       await getAccessToken();
+        await getAccessToken();
         showToast(Toast.Style.Animated, "Loading Status...ε=ε=┌( >_<)┘");
         const status = await apiServer.fetchUserStatus();
         setStatus(status);
