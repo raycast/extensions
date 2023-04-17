@@ -3,7 +3,7 @@ import { Action, ActionPanel, List, Toast, showToast, Cache } from "@raycast/api
 
 import { Status, AkkomaError } from "./utils/types";
 import apiServer from "./utils/api";
-import { authorize } from "./utils/oauth";
+import { getAccessToken } from "./utils/oauth";
 import { statusParser } from "./utils/util";
 
 const cache = new Cache();
@@ -16,7 +16,7 @@ export default function BookmarkCommand() {
   useEffect(() => {
     const getBookmark = async () => {
       try {
-        await authorize();
+        await getAccessToken();
         showToast(Toast.Style.Animated, "Loading bookmarks..☆ﾐ(o*･ω･)ﾉ.");
         const newBookmarks = await apiServer.fetchBookmarks();
         setBookmarks(newBookmarks);

@@ -14,7 +14,7 @@ import {
 } from "@raycast/api";
 import apiServer from "./utils/api";
 import { AkkomaError, StatusResponse, Preference, StatusRequest } from "./utils/types";
-import { authorize } from "./utils/oauth";
+import { getAccessToken } from "./utils/oauth";
 import { dateTimeFormatter } from "./utils/util";
 
 import VisibilityDropdown from "./components/VisibilityDropdown";
@@ -51,11 +51,11 @@ export default function SimpleCommand(props: CommandProps) {
   useEffect(() => {
     const init = async () => {
       try {
-        await authorize();
-        const newFqn = (await LocalStorage.getItem<string>("account-fqn")) ?? "";
+        await getAccessToken();
+        const fqn = await LocalStorage.getItem<string>("account-fqn") ||  "";
         setState((prevState) => ({
           ...prevState,
-          fqn: newFqn,
+          fqn: fqn,
         }));
       } catch (error) {
         console.error("Error during authorization or fetching account-fqn:", error);

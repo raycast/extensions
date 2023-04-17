@@ -44,7 +44,7 @@ const refreshToken = async (
   return tokenResponse;
 };
 
-export const authorize = async (): Promise<void> => {
+export const authorize = async (): Promise<string> => {
   const { instance } = getPreferenceValues<Preference>();
   const tokenSet = await client.getTokens();
 
@@ -53,7 +53,8 @@ export const authorize = async (): Promise<void> => {
       const { client_id, client_secret } = await apiServer.createApp();
       await client.setTokens(await refreshToken(client_id, client_secret, tokenSet.refreshToken));
     }
-    return;
+    const { fqn } = await apiServer.fetchAccountInfo();
+    return fqn;
   }
 
   const { client_id, client_secret } = await apiServer.createApp();
@@ -68,4 +69,43 @@ export const authorize = async (): Promise<void> => {
 
   const { fqn } = await apiServer.fetchAccountInfo();
   await LocalStorage.setItem("account-fqn", fqn);
+  return fqn;
 };
+
+async function getValidTokens(): Promise<OAuth.TokenSet> {
+  const tokenSet = await client.getTokens();
+
+  if (!tokenSet || !tokenSet.accessToken) {
+    const fqn = await authorize();
+    const updatedTokenSet = await client.getTokens();
+    if (updatedTokenSet && updatedTokenSet.accessToken) {
+      await LocalStorage.setItem("account-fqn", fqn);
+      return updatedTokenSet;
+    } else {
+      throw new Error("Failed to get valid access token");
+    }
+  }
+
+  if (tokenSet.refreshToken && tokenSet.isExpired()) {
+    const { client_id, client_secret } = await apiServer.createApp();
+    const refreshedTokens = await refreshToken(client_id, client_secret, tokenSet.refreshToken);
+    await client.setTokens(refreshedTokens);
+    const updatedTokenSet = await client.getTokens();
+    if (updatedTokenSet && updatedTokenSet.accessToken) {
+      return updatedTokenSet;
+    } else {
+      throw new Error("Failed to refresh access token");
+    }
+  }
+
+  return tokenSet;
+}
+
+export async function getAccessToken(): Promise<string> {
+  const validTokenSet = await getValidTokens();
+  if (validTokenSet && validTokenSet.accessToken) {
+    return validTokenSet.accessToken;
+  } else {
+    throw new Error("Failed to get valid access token");
+  }
+}

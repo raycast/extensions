@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Action, ActionPanel, List, Toast, showToast, Cache } from "@raycast/api";
 import { Status, AkkomaError } from "./utils/types";
 
-import { authorize } from "./utils/oauth";
+import { getAccessToken } from "./utils/oauth";
 import apiServer from "./utils/api";
 import { statusParser } from "./utils/util";
 
@@ -16,7 +16,7 @@ export default function ViewStatusCommand() {
   useEffect(() => {
     const getBookmark = async () => {
       try {
-        await authorize();
+       await getAccessToken();
         showToast(Toast.Style.Animated, "Loading Status...ε=ε=┌( >_<)┘");
         const status = await apiServer.fetchUserStatus();
         setStatus(status);
