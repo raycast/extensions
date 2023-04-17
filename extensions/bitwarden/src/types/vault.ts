@@ -22,7 +22,7 @@ export interface Item {
   card?: Card;
 }
 
-export const enum ItemType {
+export enum ItemType {
   LOGIN = 1,
   NOTE = 2,
   CARD = 3,
@@ -63,7 +63,7 @@ export interface Card {
   code: string | null;
 }
 
-export const enum FieldType {
+export enum FieldType {
   TEXT = 0,
   HIDDEN = 1,
   BOOLEAN = 2,
@@ -85,7 +85,7 @@ export interface Login {
   uris?: Uris[];
 }
 
-export const enum UriMatch {
+export enum UriMatch {
   BASE_DOMAIN = 0,
   HOST = 1,
   STARTS_WITH = 2,
@@ -103,7 +103,7 @@ export interface SecureNote {
   type: number;
 }
 
-export const enum Reprompt {
+export enum Reprompt {
   NO = 0,
   REQUIRED = 1,
 }
