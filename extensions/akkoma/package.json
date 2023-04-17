@@ -35,7 +35,7 @@
           "type": "textfield",
           "required": false,
           "title": "Maximum number of bookmarks",
-          "description": "Maximum number of bookmarks",
+          "description": "Maximum number of bookmarks,Will be ignored if it's more than 40",
           "placeholder": "default value : 20"
         }
       ]
@@ -51,7 +51,7 @@
           "type": "textfield",
           "required": false,
           "title": "Maximum number of statuses",
-          "description": "Maximum number of statuses to be show",
+          "description": "Maximum number of statuses to be show, Will be ignored if it's more than 40",
           "placeholder": "default value : 20"
         }
       ]
