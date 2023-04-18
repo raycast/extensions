@@ -1,5 +1,9 @@
 # DocCheck Changelog
 
+## [Version 1.2.1] - 2023-04-12
+
+- Bugfixes from @sxn (thanks!)
+
 ## [Version 1.2] - 2023-04-12
 
 - NEU: beim zurückgehen zur Suche wird der Suchbegriff wieder eingetragen
@@ -16,11 +20,11 @@
 
 ## [Version 1.1.1] - 2023-04-09
 
-- NEW: go back to search if there is no prevous article
+- NEU: wenn es keinen vorheriger Artikel vorhanden gibt, kann man nun zurück zur Suche gelangen
 
 ## [Version 1.1] - 2023-04-09
 
-- NEW: Open article directly in Raycast using deeplinks (you can even go back one time!)
+- NEU: Artikel direkt in Raycast über Deeplinks öffnen (man kann sogar einmal zurückgehen!)
 
 ## [Initial Version] - 2023-04-01
 

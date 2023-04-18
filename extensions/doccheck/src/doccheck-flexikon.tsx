@@ -19,79 +19,87 @@ export default function Command() {
   const [entries, setEntries] = useState<Result[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    async function fetch() {
-      setLoading(true);
-      if (!query) {
-        setEntries([]);
-        await axios
-          .get("https://flexikon.doccheck.com/de/")
-          .then((response) => {
-            const $ = cheerio.load(response.data);
-            const topArticles: Result[] = [];
-
-            $("#topArticlesSection .row > a, #topArticlesSection .is-grid > a").each((i, el) => {
-              const title = $(el).find("h3").text().trim();
-              const url = $(el).attr("href") ?? "";
-              const imageUrl = $(el).find("img").attr("src") ?? "";
-              const description = $(el).find("p").text().trim() ?? "";
-              const title_alias: string[] = [];
-              const date_publish = "";
-              const author = "";
-              topArticles.push({ title, url, imageUrl, description, title_alias, date_publish, author });
-            });
-            setEntries(topArticles);
-            setLoading(false);
-          })
-          .catch((error) => {
-            console.log(error);
-          });
-      } else {
-        setEntries([]);
-        try {
-          const response = await axios.get(
-            `https://search.doccheck.com/doccheck-portal/search?q=${query}&language=de&start=0&facetq=content_type:flexikon`
-          );
-          if (response.status === 200 && response.data.urls != 0) {
-            setEntries(response.data.urls);
-          } else if (response.status === 200) {
-            setEntries([
-              {
-                title: "Keine Suchergebnisse im Flexikon!",
-                url: "",
-                description: "Drücke ⏎ um den Suchbegriff auf AMBOSS im Browser zu suchen",
-                title_alias: [],
-                imageUrl: "",
-                date_publish: "",
-                author: "",
-              },
-            ]);
-          }
-        } catch (e) {
-          await showToast({
-            style: Toast.Style.Failure,
-            title: "Failed to fetch entries",
-            message: "Please try again later",
-          });
-        } finally {
-          setLoading(false);
-        }
-      }
+  async function fetchTopArticles() {
+    setLoading(true);
+    setEntries([]);
+    try {
+      const response = await axios.get("https://flexikon.doccheck.com/de/");
+      const $ = cheerio.load(response.data);
+      const topArticles: Result[] = [];
+      $("#topArticlesSection .row > a, #topArticlesSection .is-grid > a").each((i, el) => {
+        const title = $(el).find("h3").text().trim();
+        const url = $(el).attr("href") ?? "";
+        const imageUrl = $(el).find("img").attr("src") ?? "";
+        const description = $(el).find("p").text().trim() ?? "";
+        const title_alias: string[] = [];
+        const date_publish = "";
+        const author = "";
+        topArticles.push({ title, url, imageUrl, description, title_alias, date_publish, author });
+      });
+      setEntries(topArticles);
+      setLoading(false);
+    } catch (e) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to fetch top articles",
+        message: "Please try again later",
+      });
+    } finally {
+      setLoading(false);
     }
-    fetch();
-  }, [query]);
+  }
+  async function searchArticles(query: string) {
+    setLoading(true);
+    setEntries([]);
+    try {
+      const response = await axios.get(
+        `https://search.doccheck.com/doccheck-portal/search?q=${query}&language=de&start=0&facetq=content_type:flexikon`
+      );
+      if (response.status === 200 && response.data.urls != 0) {
+        setEntries(response.data.urls);
+      } else if (response.status === 200) {
+        setEntries([
+          {
+            title: "Keine Suchergebnisse im Flexikon!",
+            url: "",
+            description: "Drücke ⏎ um den Suchbegriff auf AMBOSS im Browser zu suchen",
+            title_alias: [],
+            imageUrl: "",
+            date_publish: "",
+            author: "",
+          },
+        ]);
+      }
+    } catch (e) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to fetch articles",
+        message: "Please try again later",
+      });
+    } finally {
+      setLoading(false);
+    }
+  }
+  useEffect(() => {
+    fetchTopArticles();
+  }, []);
 
   if (!query) {
     return (
       <List
         navigationTitle={`DocCheck Flexikon Suche`}
         filtering={false}
-        onSearchTextChange={(text) => {
+        onSearchTextChange={async (text) => {
           setQuery(text);
+          if (text === "") {
+            await fetchTopArticles();
+            return;
+          }
+          await searchArticles(text);
         }}
         throttle={true}
         isLoading={loading}
-        searchBarPlaceholder="Search entry..."
+        searchBarPlaceholder="Suchbegriff…"
       >
         <List.Section title={query ? "" : "Top Artikel"}>
           {entries.map((entry) => {
@@ -126,12 +134,17 @@ export default function Command() {
     <List
       navigationTitle={`DocCheck Flexikon Suche`}
       filtering={false}
-      onSearchTextChange={(text) => {
+      onSearchTextChange={async (text) => {
         setQuery(text);
+        if (text === "") {
+          await fetchTopArticles();
+          return;
+        }
+        await searchArticles(text);
       }}
       throttle={true}
       isLoading={loading}
-      searchBarPlaceholder="Search entry..."
+      searchBarPlaceholder="Suchbegriff…"
     >
       {entries.map((entry) => {
         if (entry.description) {

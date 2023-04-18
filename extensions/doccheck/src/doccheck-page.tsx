@@ -111,7 +111,7 @@ export default function DocCheckPage(props: { url: string; prevurl: string; quer
         encodeURI(query) +
         ")";
   markdown +=
-    "\n" +
+    "\n " +
     goback +
     "\n" +
     mdSynonyms +
