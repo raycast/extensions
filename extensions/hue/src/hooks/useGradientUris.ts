@@ -1,12 +1,12 @@
 import { useMemo, useState } from "react";
 import { createGradientPngUri } from "../helpers/createGradientUri";
-import { GradientUri, GradientUriCache, Id, Palette } from "../lib/types";
+import { PngUri, PngUriCache, Id, Palette } from "../lib/types";
 import { Cache } from "@raycast/api";
 
 const gradientCache = new Cache({ namespace: "hue-scene-gradients" });
 
 export default function useGradientUris(idsToPalettes: Map<Id, Palette>, width: number, height: number) {
-  const [gradientUris, setGradientUris] = useState<GradientUriCache>(new Map<Id, GradientUri>());
+  const [gradientUris, setGradientUris] = useState<PngUriCache>(new Map<Id, PngUri>());
 
   useMemo(() => {
     idsToPalettes.forEach((palette, id) => {
@@ -14,7 +14,7 @@ export default function useGradientUris(idsToPalettes: Map<Id, Palette>, width: 
         return;
       }
 
-      const key = `${width}x${height}_${palette.join("_")}`;
+      const key = `${palette.join("_")}_${width}x${height}`;
       const cached = gradientCache.get(key);
 
       if (cached) {
@@ -28,5 +28,5 @@ export default function useGradientUris(idsToPalettes: Map<Id, Palette>, width: 
     });
   }, [idsToPalettes]);
 
-  return { gradientUris: gradientUris };
+  return { gradientUris };
 }

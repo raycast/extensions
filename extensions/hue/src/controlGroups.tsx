@@ -1,5 +1,5 @@
 import { ActionPanel, Color, Grid, Icon, Image, Toast, useNavigation } from "@raycast/api";
-import { Group, GroupedLight, Id, Light, Palette, Room, Zone } from "./lib/types";
+import { Group, GroupedLight, Id, Light, Palette, PngUri, Room, Zone } from "./lib/types";
 import { BRIGHTNESS_MAX, BRIGHTNESS_MIN, BRIGHTNESSES } from "./helpers/constants";
 import ManageHueBridge from "./components/ManageHueBridge";
 import { useHue } from "./hooks/useHue";
@@ -109,7 +109,7 @@ function Group(props: {
   groupLights: Light[];
   groupedLight?: GroupedLight;
   group: Group;
-  gradientUri?: string;
+  gradientUri?: PngUri;
   useHue: ReturnType<typeof useHue>;
   rateLimiter: ReturnType<typeof useInputRateLimiter>;
 }) {

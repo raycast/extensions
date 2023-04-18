@@ -83,7 +83,7 @@ function Group(props: {
 function Light(props: {
   light: Light;
   group?: Group;
-  iconSquare?: string;
+  iconSquare?: PngUri;
   useHue: ReturnType<typeof useHue>;
   rateLimiter: ReturnType<typeof useInputRateLimiter>;
 }) {

@@ -11,8 +11,8 @@
 ///////////////////////
 export type Id = string | number;
 export type Palette = string[];
-export type GradientUri = string;
-export type GradientUriCache = Map<Id, GradientUri>;
+export type PngUri = string;
+export type PngUriCache = Map<Id, PngUri>;
 
 export type BridgeConfig = {
   ipAddress: string;

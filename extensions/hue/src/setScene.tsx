@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Grid, Icon, Toast } from "@raycast/api";
-import { GradientUri, GradientUriCache, Group, Id, Palette, Scene } from "./lib/types";
+import { PngUri, PngUriCache, Group, Id, Palette, Scene } from "./lib/types";
 import UnlinkAction from "./components/UnlinkAction";
 import ManageHueBridge from "./components/ManageHueBridge";
 import { SendHueMessage, useHue } from "./hooks/useHue";
@@ -87,7 +87,7 @@ export default function SetScene(props: { group?: Group; useHue?: ReturnType<typ
 function Group(props: {
   group: Group;
   scenes: Scene[];
-  gradientUris: GradientUriCache;
+  gradientUris: PngUriCache;
   hueClient?: HueClient;
   sendHueMessage: SendHueMessage;
 }) {
@@ -112,7 +112,7 @@ function Group(props: {
 function Scene(props: {
   scene: Scene;
   group: Group;
-  gradientUri: GradientUri | undefined;
+  gradientUri: PngUri | undefined;
   sendHueMessage: SendHueMessage;
   hueClient?: HueClient;
 }) {
