@@ -1,9 +1,8 @@
-import { List, ActionPanel, Action, Detail } from "@raycast/api";
+import { List, ActionPanel, Action, Detail, getPreferenceValues } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { extname } from "path";
 import { PathLike } from "fs";
-import { getRecentDownloads, Download, getFileTypeIcon } from "./utils";
-import { getPreferenceValues } from "@raycast/api";
+import { getRecentDownloads, Download, getFileTypeIcon, formatBytes } from "./utils";
 
 interface Preferences {
   folder1: string;
@@ -98,7 +97,7 @@ export default function RecentDownloads() {
                   <List.Item.Detail.Metadata>
                     <List.Item.Detail.Metadata.Label title="Title" text={`${download.name} `} />
                     <List.Item.Detail.Metadata.Label title="File Type" text={fileExtension} icon={icon} />
-                    <List.Item.Detail.Metadata.Label title="Size" text={`${(download.size / 1024).toFixed(2)} KB`} />
+                    <List.Item.Detail.Metadata.Label title="Size" text={formatBytes(download.size)} />
                     <List.Item.Detail.Metadata.Separator />
                     <List.Item.Detail.Metadata.Label
                       title="Last Modified"
