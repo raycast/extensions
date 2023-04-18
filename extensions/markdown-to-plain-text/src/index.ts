@@ -1,6 +1,6 @@
 import { Clipboard } from "@raycast/api";
-import MarkdownIt from 'markdown-it';
-import plainText from 'markdown-it-plain-text';
+import MarkdownIt from "markdown-it";
+import plainText from "markdown-it-plain-text";
 
 
 export default async function main() {
