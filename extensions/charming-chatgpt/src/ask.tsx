@@ -104,14 +104,14 @@ export default function Command() {
       if (questing) {
         showToast({
           style: Toast.Style.Animated,
-          title: "Charming is busy fetching...",//"莫斯拼命获取中...",
-          message: "You can also go back to Charming to view details.",//"也可以返回主应用查看",
+          title: "Charming is busy fetching...", //"莫斯拼命获取中...",
+          message: "You can also go back to Charming to view details.", //"也可以返回主应用查看",
         });
       } else {
         showToast({
           style: Toast.Style.Success,
-          title: "Fetched success",//"成功获取",
-          message: "You can also go back to Charming to view details.",//"也可以返回主应用查看",
+          title: "Fetched success", //"成功获取",
+          message: "You can also go back to Charming to view details.", //"也可以返回主应用查看",
         });
       }
     }
@@ -167,7 +167,7 @@ export default function Command() {
 
   const getActionPanel = () => (
     <ActionPanel>
-      <PrimaryAction title="Ask Charming"/*"询问莫斯"*/ onAction={returnBlock} />
+      <PrimaryAction title="Ask Charming" /*"询问莫斯"*/ onAction={returnBlock} />
       <PreferencesActionSection />
     </ActionPanel>
   );

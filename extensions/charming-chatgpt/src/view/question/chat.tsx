@@ -24,7 +24,7 @@ export const ChatView = ({ data, ques, ans, conve }: ChatViewProps) => {
 
   const getActionPanel = () => (
     <ActionPanel>
-      <PrimaryAction title=/*"跳转到莫斯"*/"Go Charming" onAction={returnBlock} />
+      <PrimaryAction title=/*"跳转到莫斯"*/ "Go Charming" onAction={returnBlock} />
       <PreferencesActionSection />
     </ActionPanel>
   );
@@ -32,7 +32,7 @@ export const ChatView = ({ data, ques, ans, conve }: ChatViewProps) => {
   return sortedChats.length === 0 ? (
     <EmptyView />
   ) : (
-    <List.Section title="Questions"/*"问题"*/ subtitle={""}>
+    <List.Section title="Questions" /*"问题"*/ subtitle={""}>
       {sortedChats.map((sortedChat, _) => {
         return (
           <List.Item
