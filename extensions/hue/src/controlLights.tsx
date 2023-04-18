@@ -145,11 +145,13 @@ function ToggleLightAction(props: { light: Light; onToggle?: () => void }) {
 }
 
 function SetBrightnessAction(props: { light: Light; onSet: (percentage: number) => void }) {
-  // TODO: Figure out why Color.PrimaryText is black instead of white in dark mode
   return (
     <ActionPanel.Submenu
       title="Set Brightness"
-      icon={getProgressIcon((props.light.dimming?.brightness ?? 0) / 100, Color.PrimaryText)}
+      icon={getProgressIcon(
+        (props.light.dimming?.brightness ?? 0) / 100,
+        environment.theme === "light" ? "#000" : "#fff"
+      )}
       shortcut={{ modifiers: ["cmd", "shift"], key: "b" }}
     >
       {BRIGHTNESSES.map((brightness) => (
