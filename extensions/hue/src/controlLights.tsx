@@ -27,7 +27,7 @@ export default function ControlLights() {
 
   useMemo(() => {
     lights.forEach(async (light: Light) => {
-      const iconSquare = await createIconSquare([getColorFromLight(light)], getLightIcon(light), 81, 81);
+      const iconSquare = await createIconSquare(getColorFromLight(light), getLightIcon(light), 81, 81);
       setIconSquares((prev) => prev.set(light.id, iconSquare));
     });
   }, [lights]);
