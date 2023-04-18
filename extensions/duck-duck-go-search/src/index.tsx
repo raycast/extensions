@@ -1,4 +1,4 @@
-import { ActionPanel, closeMainWindow, Action, Icon, List, open } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, closeMainWindow, confirmAlert, open } from "@raycast/api";
 import { useSearch } from "./utils/useSearch";
 
 export default function Command() {
@@ -32,21 +32,25 @@ export default function Command() {
                 <ActionPanel.Section title="History">
                   {item.isHistory && (
                     <Action
-                      title="Remove From History"
+                      title="Remove from History"
                       onAction={async () => {
                         await deleteHistoryItem(item);
                       }}
                       icon={{ source: Icon.Trash }}
-                      shortcut={{ modifiers: ["cmd"], key: "d" }}
+                      shortcut={{ modifiers: ["ctrl"], key: "x" }}
                     />
                   )}
 
                   <Action
                     title="Clear All History"
+                    style={Action.Style.Destructive}
                     onAction={async () => {
-                      await deleteAllHistory();
+                      if (await confirmAlert({ title: "Clear all Duck Duck Go search history?" })) {
+                        await deleteAllHistory();
+                      }
                     }}
                     icon={{ source: Icon.ExclamationMark }}
+                    shortcut={{ modifiers: ["ctrl", "shift"], key: "x" }}
                   />
                 </ActionPanel.Section>
               </ActionPanel>
