@@ -1,5 +1,4 @@
 import { promises as fs } from "fs";
-import { existsSync } from "fs";
 import { join } from "path";
 import { FileTypeColors, FileTypeIcons } from "./fileTypes";
 
@@ -8,6 +7,7 @@ export interface Download {
   name: string;
   size: number;
   lastModifiedAt: Date;
+  icon: string;
 }
 
 export async function getRecentDownloads(downloadsPath: string): Promise<Download[]> {
@@ -17,12 +17,15 @@ export async function getRecentDownloads(downloadsPath: string): Promise<Downloa
   for (const file of files) {
     const path = join(downloadsPath, file);
     const stats = await fs.stat(path);
+    const fileExtension = getFileExtension(file);
+    const icon = await getFileTypeIcon(fileExtension);
     if (!stats.isDirectory()) {
       downloads.push({
         path,
         name: file,
         size: stats.size,
         lastModifiedAt: new Date(stats.mtimeMs),
+        icon,
       });
     }
   }
@@ -30,13 +33,18 @@ export async function getRecentDownloads(downloadsPath: string): Promise<Downloa
   return downloads;
 }
 
-export function getFileTypeIcon(fileExtension: string): string {
+export function getFileExtension(filename: string): string {
+  return filename.slice((Math.max(0, filename.lastIndexOf(".")) || Infinity) + 1);
+}
+
+export async function getFileTypeIcon(fileExtension: string): Promise<string> {
   const iconName = FileTypeIcons[fileExtension] ?? "default";
   const iconPath = join(__dirname, "assets", "filetype-icon", `${iconName}.png`);
 
-  if (existsSync(iconPath)) {
+  try {
+    await fs.access(iconPath);
     return iconPath;
-  } else {
+  } catch (error) {
     console.warn(`Icon not found for file extension: ${fileExtension}. Using default icon.`);
     const defaultIconPath = join(__dirname, "assets", "filetype-icon", "_page.png");
     return defaultIconPath;
