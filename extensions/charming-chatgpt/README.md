@@ -1,14 +1,6 @@
-<p align="center">
-<img width=500 src="metadata/ho512.jpg">
-</p>
-<h1 align="center">Charming-chatGPT</h1>
+<h1 align="center">Charming ChatGPT</h1>
 
-<h3 align="center">
-Make chatGPT x charming x Raycast all together
-</h3>
-<p align="center">
-<a title="Install chatgpt Raycast Extension" href="https://www.raycast.com/trizone/charming-chatgpt"><img src="metadata/512.png" style="height: 300px;" alt="" height="300"></a>
-</p>
+<h3 align="center">Make chatGPT x charming x Raycast all together</h3>
 
 ![Conversation View](metadata/ho1.jpg)
 
@@ -25,10 +17,6 @@ Hit `space+cmd`, select `Ask Charming Question`,then it will automatically sync 
 ### Worry about missing the conversaions?
 
 Take it easy. It all stored in charming, just hit the `return key` and here waits for you.
-
-![Saving the answer](metadata/ho4.jpg)
-
-
 
 # Import locally
 1. `git clone https://github.com/KittenYang/charming-chatgpt.git`

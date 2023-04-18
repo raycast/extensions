@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "charming-chatgpt",
-  "title": "charming ChatGPT",
+  "title": "Charming ChatGPT",
   "description": "Make chatGPT x charming x Raycast all together",
   "icon": "icon.png",
   "author": "KittenYang",
