@@ -27,10 +27,13 @@ export function getColorFromLight(light: Light): string {
 
 export function getColorsFromScene(scene: Scene): Palette {
   const containsSceneColor = scene.palette?.color?.length ?? 0 > 0;
+  const uniqueSceneColors = new Set(scene.palette?.color?.map((color) => color.color.xy) ?? []);
   const sceneColors =
-    scene.palette?.color?.map((color) => {
-      return xyToRgbHexString(color.color.xy, color.color.dimming?.brightness);
-    }) ?? [];
+    scene.palette?.color
+      ?.filter((color) => uniqueSceneColors.has(color.color.xy))
+      ?.map((color) => {
+        return xyToRgbHexString(color.color.xy, color.color.dimming?.brightness);
+      }) ?? [];
   if (containsSceneColor) return sceneColors;
 
   const containsActionColors = scene.actions?.some((action) => action.action.color) ?? false;

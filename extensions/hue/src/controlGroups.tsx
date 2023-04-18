@@ -32,9 +32,9 @@ export default function ControlGroups() {
     const palettes = new Map<Id, Palette>(
       groups.map((group) => {
         const groupLights = getLightsFromGroup(lights, group);
-        const containsColorLights = groupLights.some((light) => light.color);
-        const filteredGroupLights = groupLights.filter((light) => !containsColorLights || light.color);
-        const groupColors = filteredGroupLights
+        const uniqueColors = new Set(groupLights.map((light) => getColorFromLight(light)));
+        const groupColors = groupLights
+          .filter((light) => uniqueColors.has(getColorFromLight(light)))
           .map((light) => getColorFromLight(light))
           .sort((a, b) => chroma.hex(b).get("hsl.h") - chroma.hex(a).get("hsl.h"));
         return [group.id, groupColors];
