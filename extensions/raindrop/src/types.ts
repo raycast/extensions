@@ -58,6 +58,13 @@ export interface BookmarksResponse {
   items: Bookmark[];
 }
 
+export interface TagsResponse {
+  items: Array<{
+    _id: string;
+    count: number;
+  }>;
+}
+
 export type UserData = {
   // files: unknown;
   // avatar: string;
@@ -91,3 +98,9 @@ export type BookmarksParams = {
   collection: string;
   search?: string;
 };
+
+export interface FormValues {
+  link: string;
+  collection: string;
+  tags: string[];
+}

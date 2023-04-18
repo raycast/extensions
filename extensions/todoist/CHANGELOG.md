@@ -1,5 +1,12 @@
 # Todoist Changelog
 
+## [Improvements & fixes] - 2023-04-12
+
+- Add action to mark an already completed task as incomplete
+- Add action to copy the title of a completed task
+- Fix a bug where the "Today" view in the menu bar command would use the "Upcoming Days" settings
+- Remove Markdown formatting from the focused task
+
 ## [Add various actions and new completed tasks command] - 2023-01-20
 
 - Add new command to see your completed tasks

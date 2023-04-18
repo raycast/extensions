@@ -9,9 +9,26 @@ interface FetchSSEOptions extends RequestInit {
 }
 
 export async function fetchSSE(input: string, options: FetchSSEOptions) {
-  const { onMessage, onError, ...fetchOptions } = options;
+  const proxy = "socks5://localhost:1080";
+
+  const { onMessage, onError, signal: originSignal, ...fetchOptions } = options;
+  const timeout = 15 * 1000;
+  let abortByTimeout = false;
   try {
-    const resp = await fetch(input, fetchOptions);
+    const ctrl = new AbortController();
+    const { signal } = ctrl;
+    if (originSignal) {
+      originSignal.addEventListener("abort", () => ctrl.abort());
+    }
+    const timerId = setTimeout(() => {
+      abortByTimeout = true;
+      ctrl.abort();
+    }, timeout);
+
+    const resp = await fetch(input, { ...fetchOptions, signal });
+
+    clearTimeout(timerId);
+
     if (resp.status !== 200) {
       onError(await resp.json());
       return;
@@ -30,6 +47,10 @@ export async function fetchSSE(input: string, options: FetchSSEOptions) {
       }
     }
   } catch (error) {
-    onError({ error });
+    if (abortByTimeout) {
+      onError({ error: { message: "Connection Timeout" } });
+    } else {
+      onError({ error });
+    }
   }
 }

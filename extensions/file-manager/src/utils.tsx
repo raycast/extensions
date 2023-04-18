@@ -9,6 +9,7 @@ import {
   Action,
   Alert,
   confirmAlert,
+  Color,
 } from "@raycast/api";
 import { promisify } from "node:util";
 import { exec as _exec } from "node:child_process";
@@ -199,8 +200,8 @@ export function SymlinkItem(props: { fileData: FileDataType; refresh: () => void
   const filePath = `${props.fileData.path}/${props.fileData.name}`;
   const a = readlinkSync(filePath);
   const originalPath = a.startsWith("/") ? a : `${props.fileData.path}/${a}`;
-  const originalFileData = lstatSync(originalPath);
-  if (originalFileData.isDirectory()) {
+  const originalFileData = lstatSync(originalPath, { throwIfNoEntry: false });
+  if (originalFileData?.isDirectory() ?? false) {
     return (
       <List.Item
         id={filePath}
@@ -245,10 +246,19 @@ export function SymlinkItem(props: { fileData: FileDataType; refresh: () => void
         title={props.fileData.name}
         icon={{ fileIcon: filePath }}
         subtitle={preferences.showFilePermissions ? props.fileData.permissions : ""}
+        accessories={
+          !originalFileData
+            ? [{ icon: { source: Icon.ExclamationMark, tintColor: Color.Red }, tooltip: "Broken Symlink" }]
+            : []
+        }
         actions={
           <ActionPanel>
-            <Action.Open title="Open File" target={originalPath} />
-            <Action.OpenWith path={filePath} shortcut={{ modifiers: ["cmd"], key: "o" }} />
+            {originalFileData && (
+              <>
+                <Action.Open title="Open File" target={originalPath} />
+                <Action.OpenWith path={filePath} shortcut={{ modifiers: ["cmd"], key: "o" }} />
+              </>
+            )}
             <Action.CopyToClipboard
               title="Copy Symlink Path"
               content={filePath}

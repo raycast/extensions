@@ -1,5 +1,10 @@
 # Changelog
 
+## [Fix & Feature] - April, 9 2023
+
+- Feature: Pause history
+- Fix: Handle the `429` error code
+
 ## [Fix] - April, 4 2023
 
 - Fixed an edge case bug causing the conversation to only remember the response to #1.
