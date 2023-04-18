@@ -1,4 +1,4 @@
-import { HIDDEN_PLACEHOLDER } from "~/constants/general";
+import { SENSITIVE_VALUE_PLACEHOLDER as SENSITIVE_VALUE_PLACEHOLDER } from "~/constants/general";
 import { Folder, Item } from "~/types/vault";
 
 export function prepareItemsForCache(items: Item[]): Item[] {
@@ -14,15 +14,15 @@ export function prepareItemsForCache(items: Item[]): Item[] {
     deletedDate: item.deletedDate,
     favorite: item.favorite,
     reprompt: item.reprompt,
+    collectionIds: item.collectionIds,
+    secureNote: item.secureNote ? { type: item.secureNote.type } : undefined,
     // sensitive data below
-    collectionIds: [],
-    notes: item.notes != null ? HIDDEN_PLACEHOLDER : item.notes,
-    passwordHistory: undefined,
-    secureNote: undefined,
-    login: cleanLogin(item.login),
-    identity: hideStringProperties(item.identity),
     fields: cleanFields(item.fields),
-    card: hideStringProperties(item.card),
+    login: cleanLogin(item.login),
+    identity: cleanIdentity(item.identity),
+    card: cleanCard(item.card),
+    passwordHistory: cleanPasswordHistory(item.passwordHistory),
+    notes: item.notes != null ? SENSITIVE_VALUE_PLACEHOLDER : null,
   }));
 }
 
@@ -30,30 +30,63 @@ export function prepareFoldersForCache(folders: Folder[]): Folder[] {
   return folders.map((folder) => ({ object: folder.object, id: folder.id, name: folder.name }));
 }
 
-function cleanLogin(login: Item["login"]): Item["login"] {
-  if (!login) return undefined;
-  // leave username because it's necessary to display in the list
-  return { ...hideStringProperties(login), username: login.username };
-}
-
 function cleanFields(fields: Item["fields"]): Item["fields"] {
-  if (!fields) return undefined;
-  // leave name because it's necessary to display in the list
-  return fields.map((field) => ({
-    name: field.name,
-    value: HIDDEN_PLACEHOLDER,
+  return fields?.map((field) => ({
+    name: field.name, // necessary for display
+    value: SENSITIVE_VALUE_PLACEHOLDER,
     type: field.type,
     linkedId: field.linkedId,
   }));
 }
 
-function hideStringProperties<T extends RecordOfAny | undefined>(obj: T): T {
-  if (!obj) return undefined as T;
-  const cleanObj: T = { ...obj };
-  for (const [key, value] of Object.entries(obj)) {
-    if (value != null && typeof value === "string") {
-      cleanObj[key] = HIDDEN_PLACEHOLDER;
-    }
-  }
-  return cleanObj as T;
+function cleanLogin(login: Item["login"]): Item["login"] {
+  if (!login) return undefined;
+  return {
+    username: login.username, // necessary for display
+    uris: login.uris,
+    password: SENSITIVE_VALUE_PLACEHOLDER,
+    passwordRevisionDate: SENSITIVE_VALUE_PLACEHOLDER,
+    totp: SENSITIVE_VALUE_PLACEHOLDER,
+  };
+}
+
+function cleanIdentity(identity: Item["identity"]): Item["identity"] {
+  if (!identity) return undefined;
+  return {
+    middleName: SENSITIVE_VALUE_PLACEHOLDER,
+    lastName: SENSITIVE_VALUE_PLACEHOLDER,
+    address1: SENSITIVE_VALUE_PLACEHOLDER,
+    address2: SENSITIVE_VALUE_PLACEHOLDER,
+    address3: SENSITIVE_VALUE_PLACEHOLDER,
+    city: SENSITIVE_VALUE_PLACEHOLDER,
+    state: SENSITIVE_VALUE_PLACEHOLDER,
+    postalCode: SENSITIVE_VALUE_PLACEHOLDER,
+    country: SENSITIVE_VALUE_PLACEHOLDER,
+    company: SENSITIVE_VALUE_PLACEHOLDER,
+    email: SENSITIVE_VALUE_PLACEHOLDER,
+    phone: SENSITIVE_VALUE_PLACEHOLDER,
+    ssn: SENSITIVE_VALUE_PLACEHOLDER,
+    username: SENSITIVE_VALUE_PLACEHOLDER,
+    passportNumber: SENSITIVE_VALUE_PLACEHOLDER,
+    licenseNumber: SENSITIVE_VALUE_PLACEHOLDER,
+  };
+}
+
+function cleanCard(card: Item["card"]): Item["card"] {
+  if (!card) return undefined;
+  return {
+    cardholderName: SENSITIVE_VALUE_PLACEHOLDER,
+    brand: SENSITIVE_VALUE_PLACEHOLDER,
+    number: SENSITIVE_VALUE_PLACEHOLDER,
+    expMonth: SENSITIVE_VALUE_PLACEHOLDER,
+    expYear: SENSITIVE_VALUE_PLACEHOLDER,
+    code: SENSITIVE_VALUE_PLACEHOLDER,
+  };
+}
+
+function cleanPasswordHistory(passwordHistory: Item["passwordHistory"]): Item["passwordHistory"] {
+  return passwordHistory?.map(() => ({
+    password: SENSITIVE_VALUE_PLACEHOLDER,
+    lastUsedDate: SENSITIVE_VALUE_PLACEHOLDER,
+  }));
 }

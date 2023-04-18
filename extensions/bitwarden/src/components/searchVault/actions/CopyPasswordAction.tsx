@@ -2,7 +2,7 @@ import { Clipboard, Icon, showHUD, showToast, Toast } from "@raycast/api";
 import ActionWithReprompt from "~/components/actions/ActionWithReprompt";
 import { useVaultItemSubscriber } from "~/components/searchVault/context/vaultListeners";
 import { useSelectedVaultItem } from "~/components/searchVault/context/vaultItem";
-import { HIDDEN_PLACEHOLDER } from "~/constants/general";
+import { SENSITIVE_VALUE_PLACEHOLDER } from "~/constants/general";
 import { getTransientCopyPreference } from "~/utils/preferences";
 
 function CopyPasswordAction() {
@@ -14,7 +14,7 @@ function CopyPasswordAction() {
   if (!password) return null;
 
   const handleCopyPassword = async () => {
-    if (password && password !== HIDDEN_PLACEHOLDER) return copyPassword(password);
+    if (password && password !== SENSITIVE_VALUE_PLACEHOLDER) return copyPassword(password);
 
     const toast = await showToast(Toast.Style.Animated, "Getting password...");
     try {
