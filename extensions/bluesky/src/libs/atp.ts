@@ -2,6 +2,7 @@ import {
   ATPCredentialsHashKey,
   ATPSessionStorageKey,
   BlueskyFeedType,
+  BlueskyProfileUrlBase,
   BlueskyQuoteType,
   FirstSignInSuccessToast,
   ProfileCacheKey,
@@ -235,7 +236,7 @@ export const getMarkdownText = async (text: string) => {
     if (segment.isLink()) {
       markdown += `[${segment.text}](${segment.link?.uri})`;
     } else if (segment.isMention()) {
-      markdown += `[${segment.text}](https://my-bsky-app.com/user/${segment.mention?.did})`;
+      markdown += `[${segment.text}](${BlueskyProfileUrlBase}/${segment.mention?.did})`;
     } else {
       markdown += segment.text;
     }
