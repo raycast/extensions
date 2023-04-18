@@ -15,6 +15,7 @@ interface MRFormValues {
   reviewer_ids: number[];
   labels: string[];
   milestone_id: number;
+  remove_source_branch: boolean;
 }
 
 async function submit(values: MRFormValues) {
@@ -129,6 +130,13 @@ export function MRCreateForm(props: { project?: Project | undefined; branch?: st
   if (selectedProject) {
     project = projects?.find((pro) => pro.id.toString() === selectedProject);
   }
+  const removeBranchFlagOrDefault = (val?: boolean) => {
+    if (val !== undefined) {
+      return val;
+    }
+    return project?.remove_source_branch_after_merge ?? true;
+  };
+  const [removeBranch, setRemoveBranch] = useState<boolean | undefined>(undefined);
 
   return (
     <Form
@@ -139,7 +147,14 @@ export function MRCreateForm(props: { project?: Project | undefined; branch?: st
         </ActionPanel>
       }
     >
-      <ProjectDropdown projects={projects || []} setSelectedProject={setSelectedProject} value={selectedProject} />
+      <ProjectDropdown
+        projects={projects || []}
+        setSelectedProject={(newValue) => {
+          setRemoveBranch(undefined);
+          setSelectedProject(newValue);
+        }}
+        value={selectedProject}
+      />
       <SourceBranchDropdown project={project} info={projectinfo} value={props.branch} />
       <TargetBranchDropdown project={project} info={projectinfo} />
       <Form.TextField id="title" title="Title" placeholder="Enter title" />
@@ -179,6 +194,12 @@ export function MRCreateForm(props: { project?: Project | undefined; branch?: st
           <Form.Dropdown.Item key={m.id} value={m.id.toString()} title={m.title} />
         ))}
       </Form.Dropdown>
+      <Form.Checkbox
+        id="remove_source_branch"
+        label="Delete source branch when merge request is accepted"
+        value={removeBranchFlagOrDefault(removeBranch)}
+        onChange={setRemoveBranch}
+      />
     </Form>
   );
 }
