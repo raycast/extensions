@@ -3,14 +3,10 @@ import { Action, ActionPanel, Detail, openExtensionPreferences } from "@raycast/
 
 import HomeAction from "../actions/HomeAction";
 
-interface AboutProps {
-  previousViewTitle?: string;
-}
-
-const About = ({ previousViewTitle = "" }: AboutProps) => {
+const About = () => {
   return (
     <Detail
-      navigationTitle={`${previousViewTitle}${AboutNavigationTitle}`}
+      navigationTitle={AboutNavigationTitle}
       markdown={AboutMarkdown}
       actions={
         <ActionPanel>

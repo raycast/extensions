@@ -4,7 +4,6 @@ import AuthorFeed from "./components/feed/AuthorFeed";
 import Error from "./components/error/Error";
 import Onboard from "./components/onboarding/Onboard";
 import { ViewRecentPostsNavigationTitle } from "./utils/constants";
-import { buildTitle } from "./utils/common";
 import { getSignedInUserHandle } from "./libs/atp";
 import { useNavigation } from "@raycast/api";
 import useStartATSession from "./hooks/useStartATSession";

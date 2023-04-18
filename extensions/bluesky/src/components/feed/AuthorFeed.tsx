@@ -70,7 +70,7 @@ export default function AuthorFeed({ authorHandle, previousViewTitle = "" }: Aut
       isShowingDetail={isShowingDetails}
       onSelectionChange={(index) => onSelectionChange(index)}
       navigationTitle={buildTitle(previousViewTitle, `@${authorHandle}`)}
-      searchBarPlaceholder={`Search ${authorHandle}'s timeline`}
+      searchBarPlaceholder={`Search @${authorHandle}'s timeline`}
       searchBarAccessory={<NavigationDropdown currentViewId={5} />}
       actions={
         <ActionPanel>

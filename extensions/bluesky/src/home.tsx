@@ -12,6 +12,7 @@ import ViewNotifications from "./view-notifications";
 import ViewRecentPosts from "./view-my-recent-posts";
 import ViewTimeline from "./view-timeline";
 import { ViewTypes } from "./config/viewTypeMap";
+import { getProfileTitle } from "./utils/common";
 import { useEffect } from "react";
 import useStartATSession from "./hooks/useStartATSession";
 
@@ -50,7 +51,7 @@ const Home = ({ launchContext }: HomeProps) => {
         push(<SignOut />);
         break;
       case 7:
-        push(<About previousViewTitle="Home" />);
+        push(<About />);
         break;
     }
   };

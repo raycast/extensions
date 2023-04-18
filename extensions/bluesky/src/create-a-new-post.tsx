@@ -1,6 +1,5 @@
 import { Action, ActionPanel, Form, confirmAlert, useNavigation } from "@raycast/api";
 import {
-  CreatePostFormPlaceholder,
   CreatePostTitle,
   DefaultPostCacheKey,
   PostSuccessToastMessage,
