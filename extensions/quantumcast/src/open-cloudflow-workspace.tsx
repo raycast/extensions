@@ -16,10 +16,7 @@ export default function Command() {
   });
 
   return (
-    <List
-      searchBarPlaceholder="Select a workspace location to open in your default browser"
-      navigationTitle="Select a Workspace"
-    >
+    <List searchBarPlaceholder="Select a workspace location to open in your default browser">
       {workspaces_sorted.map((workspace) => (
         <List.Item
           id={workspace.name}
