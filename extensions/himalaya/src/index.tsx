@@ -41,6 +41,7 @@ interface State {
   isLoading: boolean;
   envelopes: Envelope[];
   folders: Folder[];
+  exe: boolean;
 }
 
 export default function ListEnvelopes() {
@@ -48,6 +49,7 @@ export default function ListEnvelopes() {
     isLoading: true,
     envelopes: [],
     folders: [],
+    exe: false,
   } as State);
 
   useEffect(() => {
@@ -57,15 +59,28 @@ export default function ListEnvelopes() {
         isLoading: true,
       }));
 
-      const envelopes = await listEnvelopes();
-      const folders = await listFolders();
+      const exe = await hasExe();
 
-      setState((previous: State) => ({
-        ...previous,
-        envelopes: envelopes,
-        folders: folders,
-        isLoading: false,
-      }));
+      if (exe) {
+        const envelopes = await listEnvelopes();
+        const folders = await listFolders();
+
+        setState((previous: State) => ({
+          ...previous,
+          envelopes: envelopes,
+          folders: folders,
+          isLoading: false,
+          exe: exe,
+        }));
+      } else {
+        setState((previous: State) => ({
+          ...previous,
+          envelopes: [],
+          folders: [],
+          isLoading: false,
+          exe: exe,
+        }));
+      }
     }
 
     fetch();
@@ -92,43 +107,49 @@ export default function ListEnvelopes() {
     return accessories;
   };
 
-  return (
-    <List isLoading={state.isLoading}>
-      {Array.from(group_envelopes_by_date(state.envelopes).entries()).map(([date, group]) => {
-        const items = group.map((envelope) => {
-          const item = (
-            <List.Item
-              id={envelope.id}
-              key={envelope.id}
-              title={envelope.subject}
-              icon={envelope.flags.includes(Flag.Seen) ? Icon.Circle : Icon.CircleFilled}
-              accessories={accessories(envelope)}
-              actions={
-                <ActionPanel title="Envelope">
-                  {readAction(envelope, state, setState)}
-                  {envelope.flags.includes(Flag.Seen) && markUnreadAction(envelope, state, setState)}
-                  {!envelope.flags.includes(Flag.Seen) && markReadAction(envelope, state, setState)}
-                  {moveToSelectedAction(envelope, state, setState)}
-                  {moveToTrashAction(envelope, state, setState)}
-                  <Action.CopyToClipboard title="Copy ID to Clipboard" content={envelope.id} />
-                </ActionPanel>
-              }
-            />
+  if (state.isLoading) {
+    return <List isLoading={state.isLoading}></List>;
+  } else if (!state.isLoading && state.exe) {
+    return (
+      <List isLoading={state.isLoading}>
+        {Array.from(group_envelopes_by_date(state.envelopes).entries()).map(([date, group]) => {
+          const items = group.map((envelope) => {
+            const item = (
+              <List.Item
+                id={envelope.id}
+                key={envelope.id}
+                title={envelope.subject}
+                icon={envelope.flags.includes(Flag.Seen) ? Icon.Circle : Icon.CircleFilled}
+                accessories={accessories(envelope)}
+                actions={
+                  <ActionPanel title="Envelope">
+                    {readAction(envelope, state, setState)}
+                    {envelope.flags.includes(Flag.Seen) && markUnreadAction(envelope, state, setState)}
+                    {!envelope.flags.includes(Flag.Seen) && markReadAction(envelope, state, setState)}
+                    {moveToSelectedAction(envelope, state, setState)}
+                    {moveToTrashAction(envelope, state, setState)}
+                    <Action.CopyToClipboard title="Copy ID to Clipboard" content={envelope.id} />
+                  </ActionPanel>
+                }
+              />
+            );
+
+            return item;
+          });
+
+          const section = (
+            <List.Section title={date} key={date}>
+              {items}
+            </List.Section>
           );
 
-          return item;
-        });
-
-        const section = (
-          <List.Section title={date} key={date}>
-            {items}
-          </List.Section>
-        );
-
-        return section;
-      })}
-    </List>
-  );
+          return section;
+        })}
+      </List>
+    );
+  } else {
+    return <Detail markdown="Couldn't find executable" />;
+  }
 }
 
 const group_envelopes_by_date = (envelopes: Envelope[]) => {
@@ -165,6 +186,32 @@ const group_envelopes_by_date = (envelopes: Envelope[]) => {
 
   return groups;
 };
+
+async function hasExe(): Promise<boolean> {
+  try {
+    const { stdout, stderr } = await exec("which himalaya", {
+      env: {
+        PATH: PATH,
+      },
+    });
+
+    if (stdout) {
+      return true;
+    }
+
+    if (stderr) {
+      console.error("Couldn't find executable", stderr);
+
+      return false;
+    }
+
+    throw new Error("No results from stdout or stderr");
+  } catch (error) {
+    console.error("Couldn't find executable", error);
+
+    return false;
+  }
+}
 
 async function listEnvelopes(): Promise<Envelope[]> {
   const { stdout, stderr } = await exec('"himalaya" -o json list -s 100', {
