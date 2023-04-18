@@ -1,4 +1,4 @@
-export const FileTypeIcons: { [key: string]: string } = {
+export const FileTypeIcons = {
   ".txt": "text",
   ".md": "markdown",
   ".pdf": "pdf",
