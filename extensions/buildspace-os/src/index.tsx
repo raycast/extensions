@@ -1,6 +1,6 @@
 import { Cache, Clipboard, Icon, MenuBarExtra, confirmAlert, open, showHUD } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { Events, Images, Videos } from "./types";
+import { Events, Images, Misc, Videos } from "./types";
 import { apiInstance } from "./clients/api";
 const useDemoDayCountdown = () => {
   const getCountdown = (endDate: Date) => {
@@ -39,16 +39,21 @@ export default function Command() {
   const cache = new Cache();
   const [imagesEnabled, setImagesEnabled] = useState<boolean>(false);
   const [videosEnabled, setVideosEnabled] = useState<boolean>(false);
+  const [miscEnabled, setMiscEnabled] = useState<boolean>(false);
   const [images, setImages] = useState<Images[]>([]);
   const [events, setEvents] = useState<Events[]>([]);
   const [videos, setVideos] = useState<Videos[]>([]);
+  const [misc, setMisc] = useState<Misc[]>([]);
+
   useEffect(() => {
-    const fetchCachedData = async () => {
+    const fetchCachedData = () => {
       const cachedImages = cache.get("images");
       const cachedEvents = cache.get("events");
       const cachedVideos = cache.get("videos");
+      const cachedMisc = cache.get("misc");
       const cachedImagesEnabled = cache.get("imagesEnabled");
       const cachedVideosEnabled = cache.get("videosEnabled");
+      const cachedMiscEnabled = cache.get("miscEnabled");
       if (cachedImages) {
         try {
           const imgs: Images[] = JSON.parse(cachedImages);
@@ -76,6 +81,15 @@ export default function Command() {
         }
       }
 
+      if (cachedMisc) {
+        try {
+          const misc: Misc[] = JSON.parse(cachedMisc);
+          setMisc(misc);
+        } catch (e) {
+          console.error(`Unable to parse cachedMisc into our Misc interface`);
+        }
+      }
+
       if (cachedImagesEnabled) {
         try {
           const enabled: boolean = cachedImagesEnabled === "true";
@@ -93,32 +107,56 @@ export default function Command() {
           console.error(`Unable to parse cachedVideosEnabled into a boolean`);
         }
       }
+
+      if (cachedMiscEnabled) {
+        try {
+          const enabled: boolean = cachedMiscEnabled === "true";
+          setMiscEnabled(enabled);
+        } catch (e) {
+          console.error("Unable to parse cachedMiscEnabled into a boolean");
+        }
+      }
     };
 
-    const fetchData = async () => {
+    const fetchData = () => {
       try {
         const cacheTTL = cache.get("ttl");
 
         if ((cacheTTL && new Date().getTime() > Number(cacheTTL)) || !cacheTTL) {
-          const imagesEnabledResponse = await apiInstance.get<boolean>(`/api/imagesEnabled`);
-          setImagesEnabled(imagesEnabledResponse.data);
-          cache.set("imagesEnabled", String(imagesEnabledResponse.data));
+          apiInstance.get<boolean>("/api/imagesEnabled").then((data) => {
+            setImagesEnabled(data.data);
+            cache.set("imagesEnabled", String(data.data));
+          });
 
-          const videosEnabledResponse = await apiInstance.get<boolean>("/api/videosEnabled");
-          setVideosEnabled(videosEnabledResponse.data);
-          cache.set("videosEnabled", String(videosEnabledResponse.data));
+          apiInstance.get<boolean>("/api/videosEnabled").then((data) => {
+            setVideosEnabled(data.data);
+            cache.set("videosEnabled", String(data.data));
+          });
 
-          const imagesResponse = await apiInstance.get("/api/images");
-          setImages(imagesResponse.data);
-          cache.set("images", JSON.stringify(imagesResponse.data));
+          apiInstance.get<boolean>("/api/miscEnabled").then((data) => {
+            setMiscEnabled(data.data);
+            cache.set("miscEnabled", String(data.data));
+          });
 
-          const eventsResponse = await apiInstance.get("/api/events");
-          setEvents(eventsResponse.data);
-          cache.set("events", JSON.stringify(eventsResponse.data));
+          apiInstance.get<Images[]>("/api/images").then((data) => {
+            setImages(data.data);
+            cache.set("images", JSON.stringify(data.data));
+          });
 
-          const videosResponse = await apiInstance.get("/api/videos");
-          setVideos(videosResponse.data);
-          cache.set("videos", JSON.stringify(videosResponse.data));
+          apiInstance.get<Events[]>("/api/events").then((data) => {
+            setEvents(data.data);
+            cache.set("events", JSON.stringify(data.data));
+          });
+
+          apiInstance.get<Videos[]>("/api/videos").then((data) => {
+            setVideos(data.data);
+            cache.set("videos", JSON.stringify(data.data));
+          });
+
+          apiInstance.get<Misc[]>("/api/misc").then((data) => {
+            setMisc(data.data);
+            cache.set("misc", JSON.stringify(data.data));
+          });
 
           cache.set("ttl", String(new Date().getTime() + 300000));
         }
@@ -126,6 +164,7 @@ export default function Command() {
         setImagesEnabled(false);
         setImages([]);
         setEvents([]);
+        setMisc([]);
         console.error("Error fetching data:", error);
       }
     };
@@ -175,6 +214,15 @@ export default function Command() {
             key={event.event}
             title={`${event.date} - ${event.event}`}
             onAction={() => open(event.rsvp)}
+          />
+        ))}
+      </MenuBarExtra.Submenu>
+      <MenuBarExtra.Submenu title="Misc" icon={Icon.QuestionMark}>
+        {misc.map((miscEvent) => (
+          <MenuBarExtra.Item
+            key={miscEvent.title}
+            title={`${miscEvent.title} ${miscEvent.other ? `- ${miscEvent.other}` : ""}`}
+            onAction={() => open(miscEvent.link)}
           />
         ))}
       </MenuBarExtra.Submenu>

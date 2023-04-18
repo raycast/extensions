@@ -13,3 +13,9 @@ export interface Videos {
   title: string;
   link: string;
 }
+
+export interface Misc {
+  title: string;
+  link: string;
+  other?: string;
+}
