@@ -1,11 +1,11 @@
-import { ActionPanel, Color, Icon, List, Toast } from "@raycast/api";
+import { ActionPanel, environment, Grid, Icon, Image, Toast } from "@raycast/api";
 import "./helpers/arrayExtensions";
-import { CssColor, Group, Light } from "./lib/types";
+import { CssColor, Group, Id, Light } from "./lib/types";
 import { BRIGHTNESS_MAX, BRIGHTNESS_MIN, BRIGHTNESSES, COLORS, MIRED_MAX, MIRED_MIN } from "./helpers/constants";
 import ManageHueBridge from "./components/ManageHueBridge";
 import UnlinkAction from "./components/UnlinkAction";
 import { useHue } from "./hooks/useHue";
-import React from "react";
+import React, { useMemo, useState } from "react";
 import { getProgressIcon } from "@raycast/utils";
 import useInputRateLimiter from "./hooks/useInputRateLimiter";
 import {
@@ -14,14 +14,23 @@ import {
   getClosestBrightness,
   hexToXy,
 } from "./helpers/colors";
-import { getLightIcon, getLightsFromGroup } from "./helpers/hueResources";
+import { getColorFromLight, getLightIcon, getLightsFromGroup } from "./helpers/hueResources";
 import { getIconForColor, getTransitionTimeInMs, optimisticUpdate } from "./helpers/raycast";
+import { createIconSquare } from "./helpers/createIconSquare";
 import Style = Toast.Style;
 
 export default function ControlLights() {
   const useHueObject = useHue();
   const { hueBridgeState, sendHueMessage, isLoading, lights, rooms, zones } = useHueObject;
   const rateLimiter = useInputRateLimiter(10, 1000);
+  const [iconSquares, setIconSquares] = useState(new Map<Id, string>([]));
+
+  useMemo(() => {
+    lights.forEach(async (light: Light) => {
+      const iconSquare = await createIconSquare([getColorFromLight(light)], getLightIcon(light), 81, 81);
+      setIconSquares((prev) => prev.set(light.id, iconSquare));
+    });
+  }, [lights]);
 
   const groups = ([] as Group[]).concat(rooms, zones).sort((a, b) => a.metadata.name.localeCompare(b.metadata.name));
 
@@ -29,55 +38,67 @@ export default function ControlLights() {
   if (manageHueBridgeElement !== null) return manageHueBridgeElement;
 
   return (
-    <List isLoading={isLoading} filtering={{ keepSectionOrder: true }}>
+    <Grid isLoading={isLoading} filtering={{ keepSectionOrder: true }} columns={8}>
       {groups.map((group: Group) => {
         return (
           <Group
             key={group.id}
             group={group}
             lights={getLightsFromGroup(lights, group).sort((a, b) => a.metadata.name.localeCompare(b.metadata.name))}
+            iconSquares={iconSquares}
             useHue={useHueObject}
             rateLimiter={rateLimiter}
           />
         );
       })}
-    </List>
+    </Grid>
   );
 }
 
 function Group(props: {
   group: Group;
   lights: Light[];
+  iconSquares: Map<Id, string>;
   useHue: ReturnType<typeof useHue>;
   rateLimiter: ReturnType<typeof useInputRateLimiter>;
 }) {
   return (
-    <List.Section key={props.group.id} title={props.group.metadata.name}>
+    <Grid.Section key={props.group.id} title={props.group.metadata.name}>
       {props.lights.map(
         (light: Light): JSX.Element => (
           <Light
             key={light.id}
             light={light}
             group={props.group}
+            iconSquare={props.iconSquares?.get(light.id)}
             useHue={props.useHue}
             rateLimiter={props.rateLimiter}
           />
         )
       )}
-    </List.Section>
+    </Grid.Section>
   );
 }
 
 function Light(props: {
   light: Light;
   group?: Group;
+  iconSquare?: string;
   useHue: ReturnType<typeof useHue>;
   rateLimiter: ReturnType<typeof useInputRateLimiter>;
 }) {
+  const content = props.light?.on?.on
+    ? props.iconSquare ?? ""
+    : ({
+        source: {
+          light: "group-off.png",
+          dark: "group-off@dark.png",
+        },
+      } as Image);
   return (
-    <List.Item
+    <Grid.Item
       title={props.light.metadata.name}
-      icon={getLightIcon(props.light)}
+      content={content}
       keywords={[props.group?.metadata?.name ?? ""]}
       actions={
         <ActionPanel>
