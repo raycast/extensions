@@ -1,0 +1,104 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "bluesky",
+  "title": "Bluesky",
+  "description": "Browse through your Bluesky timeline. Create new posts, find people, and view your notifications.",
+  "icon": "command-icon.png",
+  "author": "dharamkapila",
+  "categories": [
+    "Communication",
+    "Web"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "type": "textfield",
+      "title": "Bluesky Service URL",
+      "description": "Service Url",
+      "default": "https://bsky.social",
+      "name": "service",
+      "required": true
+    },
+    {
+      "type": "textfield",
+      "title": "Bluesky Email or Handle",
+      "description": "Your Bluesky email or handle",
+      "name": "accountId",
+      "required": true
+    },
+    {
+      "type": "password",
+      "title": "Password",
+      "description": "Your account password",
+      "name": "password",
+      "required": true
+    }
+  ],
+  "commands": [
+    {
+      "name": "menu-bar",
+      "title": "Menu Bar",
+      "description": "Quick actions to create a new post, view your timeline, and more.",
+      "mode": "menu-bar"
+    },
+    {
+      "name": "home",
+      "title": "Home",
+      "description": "Your Bluesky Home",
+      "mode": "view"
+    },
+    {
+      "name": "view-timeline",
+      "title": "View Timeline",
+      "description": "View your Bluesky timeline. Click on a post to see more details.",
+      "mode": "view"
+    },
+    {
+      "name": "search-people",
+      "title": "Search People",
+      "description": "Search for people on Bluesky.",
+      "mode": "view"
+    },
+    {
+      "name": "create-a-new-post",
+      "title": "Create A New Post",
+      "description": "Create a new public post on Bluesky.",
+      "mode": "view"
+    },
+    {
+      "name": "view-notifications",
+      "title": "View Notifications",
+      "description": "View your Recent Notifications.",
+      "mode": "view"
+    },
+    {
+      "name": "view-my-recent-posts",
+      "title": "View My Recent Posts",
+      "description": "View your recent posts on Bluesky. Click on a post to see more details.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@atproto/api": "^0.2.5",
+    "@atproto/uri": "^0.0.2",
+    "@raycast/api": "^1.49.2",
+    "@raycast/utils": "^1.5.2",
+    "cross-fetch": "^3.1.5",
+    "use-debounce": "^9.0.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
