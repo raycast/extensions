@@ -1,6 +1,5 @@
-import { ActionPanel, Detail, List, Action, useNavigation, Color, Icon, showToast, Toast, Image } from "@raycast/api";
-import { FormValueModel } from "@raycast/api/types/api/internal";
-import React, { useEffect, useState } from "react";
+import { ActionPanel, List, Action, Icon, showToast, Toast, Image } from "@raycast/api";
+import { useEffect, useState } from "react";
 import { runAppleScript } from "run-applescript";
 
 interface Device {
@@ -12,7 +11,7 @@ interface Device {
   ipv6: string;
   os: string;
   online: boolean;
-  lastseen: any;
+  lastseen: Date;
 }
 
 interface LooseObject {
@@ -37,7 +36,7 @@ function loadDevices(self: LooseObject, data: LooseObject) {
 
   devices.push(me);
 
-  for (const [key, value] of Object.entries(data)) {
+  for (const [, value] of Object.entries(data)) {
     const device = {
       self: false,
       key: ++theKey,
@@ -51,7 +50,6 @@ function loadDevices(self: LooseObject, data: LooseObject) {
     };
     devices.push(device);
   }
-  console.log(devices);
   return devices;
 }
 
@@ -83,7 +81,7 @@ function DeviceList() {
       {devices?.map((device) => (
         <List.Item
           title={device.name}
-          subtitle={device.ipv4 + "    " + device.os}
+          subtitle={device.ipv4 + "   " + device.os}
           key={device.key}
           icon={
             device.online
@@ -107,36 +105,20 @@ function DeviceList() {
               ? [
                   { text: "This device", icon: Icon.Person },
                   {
-                    text: device.online
-                      ? `        Connected`
-                      : "Last seen " +
-                        device.lastseen.toLocaleString("en-US", {
-                          month: "short",
-                          day: "numeric",
-                          hour: "numeric",
-                          minute: "numeric",
-                        }),
+                    text: device.online ? `        Connected` : "Last seen " + formatDate(device.lastseen),
                   },
                 ]
               : [
                   {
-                    text: device.online
-                      ? `        Connected`
-                      : "Last seen " +
-                        device.lastseen.toLocaleString("en-US", {
-                          month: "short",
-                          day: "numeric",
-                          hour: "numeric",
-                          minute: "numeric",
-                        }),
+                    text: device.online ? `        Connected` : "Last seen " + formatDate(device.lastseen),
                   },
                 ]
           }
           actions={
             <ActionPanel>
-              <Action.CopyToClipboard content={device.ipv4} title="Copy IPv4 Address to Clipboard" />
-              <Action.CopyToClipboard content={device.dns} title="Copy MagicDNS to Clipboard" />
-              <Action.CopyToClipboard content={device.ipv6} title="Copy IPv6 Address to Clipboard" />
+              <Action.CopyToClipboard content={device.ipv4} title="Copy IPv4" />
+              <Action.CopyToClipboard content={device.dns} title="Copy MagicDNS" />
+              <Action.CopyToClipboard content={device.ipv6} title="Copy IPv6" />
             </ActionPanel>
           }
         />
@@ -147,4 +129,13 @@ function DeviceList() {
 
 export default function Command() {
   return <DeviceList />;
+}
+
+function formatDate(d: Date) {
+  return d.toLocaleString("en-US", {
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "numeric",
+  });
 }
