@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { createGradientPngUri } from "../lib/createGradientUri";
+import { createGradientPngUri } from "../helpers/createGradientUri";
 import { GradientUri, GradientUriCache, Id, Palette } from "../lib/types";
 import { Cache } from "@raycast/api";
 import chroma from "chroma-js";
