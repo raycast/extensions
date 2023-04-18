@@ -1,6 +1,6 @@
 import { ActionPanel, environment, Grid, Icon, Image, Toast } from "@raycast/api";
 import "./helpers/arrayExtensions";
-import { CssColor, Group, Id, Light } from "./lib/types";
+import { CssColor, Group, Id, Light, PngUri } from "./lib/types";
 import { BRIGHTNESS_MAX, BRIGHTNESS_MIN, BRIGHTNESSES, COLORS, MIRED_MAX, MIRED_MIN } from "./helpers/constants";
 import ManageHueBridge from "./components/ManageHueBridge";
 import UnlinkAction from "./components/UnlinkAction";
@@ -14,23 +14,16 @@ import {
   getClosestBrightness,
   hexToXy,
 } from "./helpers/colors";
-import { getColorFromLight, getLightIcon, getLightsFromGroup } from "./helpers/hueResources";
+import { getLightsFromGroup } from "./helpers/hueResources";
 import { getIconForColor, getTransitionTimeInMs, optimisticUpdate } from "./helpers/raycast";
-import { createIconSquare } from "./helpers/createIconSquare";
 import Style = Toast.Style;
+import useLightIconUris from "./hooks/useLightIconUris";
 
 export default function ControlLights() {
   const useHueObject = useHue();
   const { hueBridgeState, sendHueMessage, isLoading, lights, rooms, zones } = useHueObject;
   const rateLimiter = useInputRateLimiter(10, 1000);
-  const [iconSquares, setIconSquares] = useState(new Map<Id, string>([]));
-
-  useMemo(() => {
-    lights.forEach(async (light: Light) => {
-      const iconSquare = await createIconSquare(getColorFromLight(light), getLightIcon(light), 162, 162);
-      setIconSquares((prev) => prev.set(light.id, iconSquare));
-    });
-  }, [lights]);
+  const { lightIconUris } = useLightIconUris(lights, 162, 162);
 
   const groups = ([] as Group[]).concat(rooms, zones).sort((a, b) => a.metadata.name.localeCompare(b.metadata.name));
 
@@ -45,7 +38,7 @@ export default function ControlLights() {
             key={group.id}
             group={group}
             lights={getLightsFromGroup(lights, group).sort((a, b) => a.metadata.name.localeCompare(b.metadata.name))}
-            iconSquares={iconSquares}
+            lightIconUris={lightIconUris}
             useHue={useHueObject}
             rateLimiter={rateLimiter}
           />
@@ -58,7 +51,7 @@ export default function ControlLights() {
 function Group(props: {
   group: Group;
   lights: Light[];
-  iconSquares: Map<Id, string>;
+  lightIconUris: Map<Id, string>;
   useHue: ReturnType<typeof useHue>;
   rateLimiter: ReturnType<typeof useInputRateLimiter>;
 }) {
@@ -70,7 +63,7 @@ function Group(props: {
             key={light.id}
             light={light}
             group={props.group}
-            iconSquare={props.iconSquares?.get(light.id)}
+            lightIconUri={props.lightIconUris?.get(light.id)}
             useHue={props.useHue}
             rateLimiter={props.rateLimiter}
           />
@@ -83,12 +76,12 @@ function Group(props: {
 function Light(props: {
   light: Light;
   group?: Group;
-  iconSquare?: PngUri;
+  lightIconUri?: PngUri;
   useHue: ReturnType<typeof useHue>;
   rateLimiter: ReturnType<typeof useInputRateLimiter>;
 }) {
   const content = props.light?.on?.on
-    ? props.iconSquare ?? ""
+    ? props.lightIconUri ?? ""
     : ({
         source: {
           light: "group-off.png",

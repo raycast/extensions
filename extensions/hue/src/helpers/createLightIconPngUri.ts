@@ -1,10 +1,15 @@
 import Jimp from "jimp";
 import chroma from "chroma-js";
-import { environment, Image } from "@raycast/api";
+import { PngUri } from "../lib/types";
 
 const LUMINANCE_THRESHOLD = 0.7;
 
-export function createIconSquare(colorHex: string, icon: Image, width: number, height: number): Promise<string> {
+export function createLightIconPngUri(
+  iconPath: string,
+  colorHex: string,
+  width: number,
+  height: number
+): Promise<PngUri> {
   return new Promise((resolve, reject) => {
     new Jimp(width, height, async (error, image) => {
       if (error) {
@@ -19,7 +24,7 @@ export function createIconSquare(colorHex: string, icon: Image, width: number, h
         image.setPixelColor(Jimp.rgbaToInt(rgba[0], rgba[1], rgba[2], 254 * rgba[3]), x, y);
       });
 
-      const overlayImage = await Jimp.read(`${environment.assetsPath}/${icon.source}`);
+      const overlayImage = await Jimp.read(iconPath);
       overlayImage.brightness(color.luminance() < LUMINANCE_THRESHOLD ? 0 : -0.9);
       image.composite(overlayImage, 24, 24, {
         mode: Jimp.BLEND_SOURCE_OVER,

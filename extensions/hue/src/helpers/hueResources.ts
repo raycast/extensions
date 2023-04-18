@@ -1,7 +1,7 @@
 import { Group, Light, Palette, Scene } from "../lib/types";
 import { miredToHexString, xyToRgbHexString } from "./colors";
 import { MIRED_DEFAULT } from "./constants";
-import { Image } from "@raycast/api";
+import { environment } from "@raycast/api";
 
 export function getLightsFromGroup(lights: Light[], group: Group): Light[] {
   return lights.filter((light) =>
@@ -11,13 +11,8 @@ export function getLightsFromGroup(lights: Light[], group: Group): Light[] {
   );
 }
 
-export function getLightIcon(light: Light): Image {
-  const color = getColorFromLight(light);
-
-  return {
-    source: `icons/${light.metadata.archetype}.png`,
-    tintColor: light.on.on ? color : "gray",
-  };
+export function getIconPathFromLight(light: Light): string {
+  return `${environment.assetsPath}/icons/${light.metadata.archetype}.png`;
 }
 
 export function getColorFromLight(light: Light): string {
