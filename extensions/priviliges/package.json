@@ -12,19 +12,19 @@
   "commands": [
     {
       "name": "grant",
-      "title": "Grant admin priviliges",
+      "title": "Grant Admin Priviliges",
       "description": "Grant admin permission with SAP Priviliges",
       "mode": "no-view"
     },
     {
       "name": "revoke",
-      "title": "Revoke admin priviliges",
+      "title": "Revoke Admin Priviliges",
       "description": "Revoke admin permission with SAP Priviliges",
       "mode": "no-view"
     },
     {
       "name": "temp",
-      "title": "Temporary grant admin priviliges",
+      "title": "Temporary Grant Admin Priviliges",
       "description": "Revoke admin permission with SAP Priviliges for 1 minute",
       "mode": "no-view"
     }
