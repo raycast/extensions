@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "quantumcast",
   "title": "Quantumcast",
-  "description": "A Raycast extension tailored for HYBRID Software engineers",
+  "description": "A Raycast extension tailored for HYBRID Software PLC engineers",
   "icon": "quantumcast.png",
   "author": "jcgerhard",
   "categories": [
@@ -15,8 +15,15 @@
       "name": "open-cloudflow-manual",
       "title": "Open Cloudflow Manual",
       "subtitle": "Quantumcast",
-      "description": "Open the Cloudflow documentation in the browser.",
+      "description": "Open the Cloudflow documentation in the browser",
       "mode": "no-view"
+    },
+    {
+      "name": "open-cloudflow-workspace",
+      "title": "Open Cloudflow Workspace",
+      "subtitle": "Quantumcast",
+      "description": "Open a Cloudflow workspace in the browser",
+      "mode": "view"
     }
   ],
   "preferences": [
@@ -30,17 +37,18 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.47.3"
+    "@raycast/api": "^1.49.3",
+    "quantumlib": "^0.0.8"
   },
   "devDependencies": {
-    "@types/node": "18.8.3",
-    "@types/react": "18.0.9",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@types/node": "^18.8.3",
+    "@types/react": "^18.0.9",
+    "@typescript-eslint/eslint-plugin": "^5.57.0",
+    "@typescript-eslint/parser": "^5.57.0",
+    "eslint": "^8.37.0",
+    "eslint-config-prettier": "^8.8.0",
+    "prettier": "^2.8.7",
+    "typescript": "^5.0.2"
   },
   "scripts": {
     "build": "ray build -e dist",
