@@ -24,11 +24,12 @@ export const getQuotedPostMarkdownView = async (postAuthor: string, post: ViewRe
     .replace(/^/gm, "> ");
 
   const postTime = getReadableDate(post.indexedAt);
+  const displayNameText = post.author.displayName ? `**${post.author.displayName.trim()}**` : "";
 
   return `
 ### \`Original Post quoted by ${postAuthor}:\`
 
-**${post.author.displayName?.trim()}** _[(${post.author.handle})](${BlueskyProfileUrlBase}/${post.author.handle})_
+${displayNameText} _[(${post.author.handle})](${BlueskyProfileUrlBase}/${post.author.handle})_
 
 ${postMarkdown}
 
@@ -45,8 +46,9 @@ export const getPostMarkdownView = async (post: AppBskyFeedDefs.PostView, imageE
     .replace(/^/gm, "> ");
   const postTime = getReadableDate(post.indexedAt);
 
+  const displayNameText = post.author.displayName ? `**${post.author.displayName.trim()}**` : "";
   return `
-**${post.author.displayName?.trim()}** _[(${post.author.handle})](${BlueskyProfileUrlBase}/${post.author.handle})_
+${displayNameText} _[(${post.author.handle})](${BlueskyProfileUrlBase}/${post.author.handle})_
 
 ${postMarkdown}
 
