@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, List, closeMainWindow, confirmAlert, open } from "@raycast/api";
+import { Action, ActionPanel, Alert, Icon, List, closeMainWindow, confirmAlert, open } from "@raycast/api";
 import { useSearch } from "./utils/useSearch";
 
 export default function Command() {
@@ -46,9 +46,18 @@ export default function Command() {
                     title="Clear All History"
                     style={Action.Style.Destructive}
                     onAction={async () => {
-                      if (await confirmAlert({ title: "Clear all Duck Duck Go search history?" })) {
-                        await deleteAllHistory();
-                      }
+                      const options: Alert.Options = {
+                        title: "Clear Duck Duck Go search history?",
+                        primaryAction: {
+                          title: "Delete",
+                          style: Alert.ActionStyle.Destructive,
+                          onAction: async () => {
+                            await deleteAllHistory();
+                          },
+                        },
+                      };
+
+                      await confirmAlert(options);
                     }}
                     icon={{ source: Icon.Trash }}
                     shortcut={{ modifiers: ["ctrl", "shift"], key: "x" }}
