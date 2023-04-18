@@ -33,10 +33,7 @@ export default function ViewRecentPosts() {
   }
 
   return sessionStartFailed ? (
-    <Error
-      errorMessage={errorMessage}
-      navigationTitle={ ViewRecentPostsNavigationTitle}
-    />
+    <Error errorMessage={errorMessage} navigationTitle={ViewRecentPostsNavigationTitle} />
   ) : (
     <AuthorFeed previousViewTitle="" authorHandle={handle} />
   );
