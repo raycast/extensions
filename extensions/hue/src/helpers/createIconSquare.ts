@@ -18,8 +18,7 @@ export function createIconSquare(colorHex: string, icon: Image, width: number, h
       });
 
       const overlayImage = await Jimp.read(`${environment.assetsPath}/${icon.source}`);
-      const bottomAlign = height - overlayImage.getHeight();
-      image.composite(overlayImage, 16, bottomAlign - 16, {
+      image.composite(overlayImage, 24, 24, {
         mode: Jimp.BLEND_SOURCE_OVER,
         opacitySource: 1,
         opacityDest: 1,
