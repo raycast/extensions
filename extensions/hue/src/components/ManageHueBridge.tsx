@@ -95,10 +95,15 @@ export default function ManageHueBridge(
       toast.show().then();
       return null;
     case "failedToConnect":
-      toast.hide().then();
       contextActions = [
         <Action key="retryConnect" title="Retry" onAction={() => sendHueMessage("RETRY")} icon={Icon.Repeat} />,
-        <Action key="unlink" title="Unlink Saved Hue Bridge" onAction={unlinkSavedBridge} icon={Icon.Trash} />,
+        <Action
+          key="unlink"
+          title="Unlink Saved Hue Bridge"
+          onAction={unlinkSavedBridge}
+          style={Action.Style.Destructive}
+          icon={Icon.Trash}
+        />,
       ];
       markdown = failedToConnectMessage;
       break;
@@ -135,7 +140,13 @@ export default function ManageHueBridge(
     case "linked":
       contextActions = [
         <Action key="done" title="Done" onAction={() => sendHueMessage("DONE")} icon={Icon.Check} />,
-        <Action key="unlink" title="Unlink Saved Hue Bridge" onAction={unlinkSavedBridge} icon={Icon.Trash} />,
+        <Action
+          key="unlink"
+          title="Unlink Saved Hue Bridge"
+          onAction={unlinkSavedBridge}
+          style={Action.Style.Destructive}
+          icon={Icon.Trash}
+        />,
       ];
       markdown = linkedMessage;
       toast.hide().then();

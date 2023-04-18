@@ -17,6 +17,8 @@ import React from "react";
 import createHueClient from "./createHueClient";
 import { discoverBridgeUsingMdns, discoverBridgeUsingNupnp } from "../helpers/hueNetworking";
 import { linkWithBridge } from "./linkWithBridge";
+import * as net from "net";
+import Style = Toast.Style;
 
 export type HueBridgeState = State<
   HueContext,
@@ -69,6 +71,10 @@ export default function hueBridgeMachine(
             const bridgeIpAddress = preferences.bridgeIpAddress;
             const bridgeUsername = preferences.bridgeUsername;
 
+            if (bridgeIpAddress && !net.isIP(bridgeIpAddress)) {
+              throw Error("Bridge IP address is not a valid IPv4 address");
+            }
+
             if (bridgeIpAddress && bridgeUsername) {
               console.log("Using bridge IP address and username from preferences");
             } else if (bridgeIpAddress) {
@@ -83,11 +89,23 @@ export default function hueBridgeMachine(
             };
           },
           onDone: {
+            target: "loadingConfiguration",
             actions: assign({
               bridgeIpAddress: (context, event) => event.data.bridgeIpAddress,
               bridgeUsername: (context, event) => event.data.bridgeUsername,
             }),
-            target: "loadingConfiguration",
+          },
+          onError: {
+            target: "failedToConnect",
+            actions: (context, event) => {
+              new Toast({
+                style: Style.Failure,
+                title: "Failed to load preferences",
+                message: event.data.message,
+              })
+                .show()
+                .then();
+            },
           },
         },
       },
@@ -123,7 +141,8 @@ export default function hueBridgeMachine(
             },
             {
               target: "linking",
-              cond: (context) => context.bridgeIpAddress !== undefined,
+              // TODO: When emptying a preference field it becomes an empty string, not undefined. Bug?
+              cond: (context) => !!context.bridgeIpAddress,
             },
             {
               target: "discoveringUsingPublicApi",
@@ -157,7 +176,16 @@ export default function hueBridgeMachine(
             target: "connected",
           },
           onError: {
-            actions: (_, event) => console.error(event.data),
+            actions: (_, event) => {
+              console.error(event.data);
+              new Toast({
+                title: "Failed to connect to bridge",
+                message: event.data,
+                style: Style.Failure,
+              })
+                .show()
+                .then();
+            },
             target: "failedToConnect",
           },
         },
@@ -174,13 +202,24 @@ export default function hueBridgeMachine(
         invoke: {
           id: "discoverBridgeUsingNupnp",
           src: discoverBridgeUsingNupnp,
-          onDone: {
-            actions: assign({
-              bridgeIpAddress: (context, event) => event.data.ipAddress,
-              bridgeId: (context, event) => event.data.id,
-            }),
-            target: "linkWithBridge",
-          },
+          onDone: [
+            {
+              target: "linking",
+              actions: assign({
+                bridgeIpAddress: (context, event) => event.data.ipAddress,
+                bridgeId: (context, event) => event.data.id,
+              }),
+              // TODO: When emptying a preference field it becomes an empty string, not undefined. Bug?
+              cond: (context) => !!context.bridgeUsername,
+            },
+            {
+              target: "linkWithBridge",
+              actions: assign({
+                bridgeIpAddress: (context, event) => event.data.ipAddress,
+                bridgeId: (context, event) => event.data.id,
+              }),
+            },
+          ],
           onError: {
             actions: (_, event) => console.error(event.data),
             target: "discoveringUsingMdns",
@@ -191,13 +230,25 @@ export default function hueBridgeMachine(
         invoke: {
           id: "discoverBridgeUsingMdns",
           src: discoverBridgeUsingMdns,
-          onDone: {
-            actions: assign({
-              bridgeIpAddress: (context, event) => event.data.ipAddress,
-              bridgeId: (context, event) => event.data.id,
-            }),
-            target: "linkWithBridge",
-          },
+          onDone: [
+            {
+              target: "linking",
+              actions: assign({
+                bridgeIpAddress: (context, event) => event.data.ipAddress,
+                bridgeId: (context, event) => event.data.id,
+              }),
+              // TODO: When emptying a preference field it becomes an empty string, not undefined. Bug?
+              cond: (context) => !!context.bridgeUsername,
+            },
+            {
+              actions: assign({
+                bridgeIpAddress: (context, event) => event.data.ipAddress,
+                bridgeId: (context, event) => event.data.id,
+              }),
+              target: "linkWithBridge",
+            },
+          ],
+
           onError: {
             actions: (_, event) => console.error(event.data),
             target: "noBridgeFound",
@@ -226,14 +277,11 @@ export default function hueBridgeMachine(
 
             console.log("Linking with Hue Bridge and saving configuration…");
 
-            // TODO: Test cases:
-            //  With manual IP
-            //  With manual invalid IP
-            //  With manual username
-            //  With manual invalid username
-            //  With manual IP and username
-            //  With manual invalid IP and username
-            const bridgeConfig = await linkWithBridge(context.bridgeIpAddress, context.bridgeId);
+            const bridgeConfig = await linkWithBridge(
+              context.bridgeIpAddress,
+              context.bridgeId,
+              context.bridgeUsername
+            );
 
             const hueClient = await createHueClient(
               bridgeConfig,
@@ -300,7 +348,8 @@ export default function hueBridgeMachine(
                 bridgeId: () => undefined,
                 bridgeConfig: () => undefined,
               }),
-              cond: () => getPreferenceValues().bridgeIpAddress !== undefined,
+              // TODO: When emptying a preference field it becomes an empty string, not undefined. Bug?
+              cond: () => !!getPreferenceValues().bridgeIpAddress,
             },
             {
               target: "discoveringUsingPublicApi",

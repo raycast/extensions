@@ -69,7 +69,7 @@ export async function discoverBridgeUsingMdns(): Promise<{ ipAddress: string; id
       const ipAddress = service.addresses.find((address) => isIPv4(address));
       const id = service.txt.bridgeid;
 
-      console.info(`Discovered Hue Bridge using MeetHue's public API: ${ipAddress}, ${id}`);
+      console.info(`Discovered Hue Bridge using mDNS: ${ipAddress}, ${id}`);
       return ipAddress ? resolve({ ipAddress, id }) : reject("Could not find a Hue Bridge using mDNS");
     });
 

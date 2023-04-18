@@ -39,13 +39,12 @@ export function useHue() {
           setRooms(await hueBridgeState.context.hueClient.getRooms());
           setZones(await hueBridgeState.context.hueClient.getZones());
           setScenes(await hueBridgeState.context.hueClient.getScenes());
-        } catch (e) {
-          // TODO: "Oops, there appears to be no lighting here" error is shown when connecting to the Bridge with an invalid username.
-          //      This is because the username is part of the URL. Update the error message to reflect this.
+        } catch (error) {
+          const message = error instanceof Error ? error.message : (error as string);
           new Toast({
             title: "Error",
             style: Style.Failure,
-            message: e instanceof Error ? e.message : undefined,
+            message: message,
           })
             .show()
             .then();
