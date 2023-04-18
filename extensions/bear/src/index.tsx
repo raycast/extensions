@@ -1,12 +1,16 @@
-import { Color, getPreferenceValues, List, showToast, Toast } from "@raycast/api";
+import { Color, getPreferenceValues, LaunchProps, List, showToast, Toast } from "@raycast/api";
 import { formatDistanceToNowStrict } from "date-fns";
 import { useEffect, useState } from "react";
 import { Note } from "./bear-db";
 import { useBearDb } from "./hooks";
 import NoteActions from "./note-actions";
 
-export default function SearchNotes() {
-  const [searchQuery, setSearchQuery] = useState<string>("");
+interface SearchNotesArguments {
+  searchQuery?: string;
+}
+export default function SearchNotes(props: LaunchProps<{ arguments: SearchNotesArguments }>) {
+  const { searchQuery: initialSearchQuery } = props.arguments;
+  const [searchQuery, setSearchQuery] = useState(initialSearchQuery ?? "");
   const [db, error] = useBearDb();
   const [notes, setNotes] = useState<Note[]>();
 
@@ -21,12 +25,15 @@ export default function SearchNotes() {
   }
 
   const showDetail = (notes ?? []).length > 0 && getPreferenceValues().showPreviewInListView;
+
   return (
     <List
       isLoading={notes == undefined}
       onSearchTextChange={setSearchQuery}
+      searchText={searchQuery}
       searchBarPlaceholder="Search note text or id ..."
       isShowingDetail={showDetail}
+      throttle={true}
     >
       {notes?.map((note) => (
         <List.Item
@@ -36,8 +43,15 @@ export default function SearchNotes() {
           icon={{ source: "command-icon.png" }}
           keywords={[note.id]}
           actions={<NoteActions isNotePreview={false} note={note} />}
-          accessoryTitle={
-            showDetail ? undefined : `edited ${formatDistanceToNowStrict(note.modifiedAt, { addSuffix: true })}`
+          accessories={
+            showDetail
+              ? undefined
+              : [
+                  {
+                    date: note.modifiedAt,
+                    tooltip: `Last modified ${formatDistanceToNowStrict(note.modifiedAt, { addSuffix: true })}`,
+                  },
+                ]
           }
           detail={
             <List.Item.Detail

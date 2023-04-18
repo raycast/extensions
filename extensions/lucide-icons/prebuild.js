@@ -11,8 +11,10 @@ if (existsSync("assets/icons"))
 mkdirSync("assets/icons");
 
 files.forEach((file) => {
-  let content = readFileSync(join("node_modules/lucide-static/icons", file), "utf8");
-  content = content.replace(/currentColor/g, "#F56565");
+  if (file.endsWith(".svg")) {
+    let content = readFileSync(join("node_modules/lucide-static/icons", file), "utf8");
+    content = content.replace(/currentColor/g, "#F56565");
 
-  writeFileSync(join("assets/icons", file), content);
+    writeFileSync(join("assets/icons", file), content);
+  }
 });

@@ -1,15 +1,14 @@
 import { Action, ActionPanel, getPreferenceValues, List } from "@raycast/api";
-import React from "react";
-import { searchMyIpGeolocation } from "./hooks/hooks";
+import { ActionOpenCommandPreferences } from "./components/action-open-command-preferences";
 import { IpEmptyView } from "./components/ip-empty-view";
-import { myIpListIcons } from "./utils/constants";
+import { searchMyIpGeolocation } from "./hooks/hooks";
 import { Preferences } from "./types/preferences";
 import { isEmpty } from "./utils/common-utils";
-import { ActionOpenCommandPreferences } from "./components/action-open-command-preferences";
+import { myIpListIcons } from "./utils/constants";
 
 export default function SearchIpGeolocation() {
-  const { language, showIPv6 } = getPreferenceValues<Preferences>();
-  const { ipGeolocation, loading } = searchMyIpGeolocation(language, showIPv6);
+  const { language, showIPv6, coordinatesFormat } = getPreferenceValues<Preferences>();
+  const { ipGeolocation, loading } = searchMyIpGeolocation(language, showIPv6, coordinatesFormat);
 
   return (
     <List isLoading={loading} searchBarPlaceholder={"My IP Geolocation"}>

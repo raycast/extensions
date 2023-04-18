@@ -16,9 +16,6 @@ export function decryptSeed(encryptedSeed: string, salt: string, password: strin
   let decrypted = decryptAES(salt, password, encryptedSeed, false);
   if (decrypted === null || !isBase32(decrypted)) {
     decrypted = decryptAES(salt, password, encryptedSeed, true);
-    if (decrypted === null || !isBase32(decrypted)) {
-      throw new Error("Couldn't decrypt service tokens. Seems like Backup Password is wrong");
-    }
   }
   return decrypted;
 }
