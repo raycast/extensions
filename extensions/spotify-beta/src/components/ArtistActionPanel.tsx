@@ -32,7 +32,7 @@ export function ArtistActionPanel({ title, artist }: ArtistActionPanelProps) {
         <Action.Push
           icon={Icon.AppWindowGrid3x3}
           title="Show Albums"
-          target={<AlbumsGrid albums={albums} title={`${artist.name} Albums`} />}
+          target={<AlbumsGrid albums={albums} title={artist.name} />}
         />
       )}
       <StartRadioAction artistId={artist.id} />
