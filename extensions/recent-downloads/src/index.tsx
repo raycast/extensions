@@ -1,4 +1,4 @@
-import { List, ActionPanel, Action, Detail, getPreferenceValues } from "@raycast/api";
+import { List, ActionPanel, Action, Detail, Icon, getPreferenceValues } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { extname } from "path";
 import { PathLike } from "fs";
@@ -16,6 +16,7 @@ export default function RecentDownloads() {
   const preferences = getPreferenceValues<Preferences>();
   const [downloads, setDownloads] = useState<Download[]>([]);
   const [selectedDownload] = useState<Download | null>(null);
+  const [showHiddenFiles, setShowHiddenFiles] = useState<boolean>(false);
 
   useEffect(() => {
     async function fetchDownloads() {
@@ -38,12 +39,20 @@ export default function RecentDownloads() {
       }
 
       allDownloads.sort((a, b) => b.lastModifiedAt.getTime() - a.lastModifiedAt.getTime());
-      allDownloads.filter((download) => !download.name.startsWith("."));
-      setDownloads(allDownloads);
+
+      const filteredDownloads = showHiddenFiles
+        ? allDownloads
+        : allDownloads.filter((download) => !download.name.startsWith("."));
+
+      setDownloads(filteredDownloads);
     }
 
     fetchDownloads();
-  }, [preferences]);
+  }, [preferences, showHiddenFiles]);
+
+  function toggleHiddenFiles() {
+    setShowHiddenFiles(!showHiddenFiles);
+  }
 
   function handleTrash(paths: PathLike | PathLike[]) {
     setDownloads((downloads) =>
@@ -63,6 +72,20 @@ export default function RecentDownloads() {
         }
       />
     );
+  }
+
+  function getHiddenFilesInfo() {
+    if (showHiddenFiles) {
+      return {
+        icon: Icon.EyeDisabled,
+        text: "Hide hidden files",
+      };
+    } else {
+      return {
+        icon: Icon.Eye,
+        text: "Show hidden files",
+      };
+    }
   }
 
   return (
@@ -111,6 +134,12 @@ export default function RecentDownloads() {
             actions={
               <ActionPanel>
                 <Action.Open title="Open File" target={download.path} />
+                <Action
+                  title={getHiddenFilesInfo().text}
+                  icon={getHiddenFilesInfo().icon}
+                  shortcut={{ modifiers: ["cmd"], key: "h" }}
+                  onAction={toggleHiddenFiles}
+                />
                 <Action.CopyToClipboard
                   title="Copy File"
                   content={{ file: download.path }}
