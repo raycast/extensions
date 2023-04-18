@@ -1,4 +1,11 @@
-export const FileTypeIcons = {
+interface FileTypeIconMap {
+  [key: string]: string;
+}
+
+interface FileTypeColorMap {
+  [key: string]: string;
+}
+export const FileTypeIcons: FileTypeIconMap = {
   ".txt": "text",
   ".md": "markdown",
   ".pdf": "pdf",
@@ -33,7 +40,7 @@ export const FileTypeIcons = {
   ".go": "code",
 };
 
-export const FileTypeColors = {
+export const FileTypeColors: FileTypeColorMap = {
   ".txt": "#1A1AA6",
   ".md": "#6E5494",
   ".pdf": "#FF0000",
