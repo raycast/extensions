@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "recent-downloads",
   "title": "Recent Downloads",
-  "description": "Show recent files downloaded inside desktop and download folder, copy file to clipboard, delete, go to the folder",
+  "description": "Displays recently downloaded files on the downloads folder. Allows copying the file to the clipboard, deleting it, and navigating to its location.",
   "icon": "command-icon.png",
   "author": "Alcibiades",
   "categories": [
@@ -12,18 +12,52 @@
   "commands": [
     {
       "name": "index",
-      "title": "Recent Download",
-      "subtitle": "show last downloads",
-      "description": "Show recent files downloaded inside desktop and download folder, copy file to clipboard, delete, go to the folder",
+      "title": "Recent Downloads",
+      "subtitle": "Show last downloads",
+      "description": "Displays recently downloaded files on the downloads folder. Allows copying the file to the clipboard, deleting it, and navigating to its location.",
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "name": "folder1",
+      "title": "Folder 1",
+      "description": "Select an additional folder to display recently downloaded files. (Default: Downloads folder)",
+      "type": "directory",
+      "required": true,
+      "default": "~/Downloads"
+    },
+    {
+      "name": "folder2",
+      "title": "Folder 2",
+      "description": "Select an additional folder to display recently downloaded files.",
+      "type": "directory",
+      "required": false
+    },
+    {
+      "name": "folder3",
+      "title": "Folder 3",
+      "description": "Select an additional folder to display recently downloaded files.",
+      "type": "directory",
+      "required": false
+    },
+    {
+      "name": "folder4",
+      "title": "Folder 4",
+      "description": "Select an additional folder to display recently downloaded files.",
+      "type": "directory",
+      "required": false
+    },
+    {
+      "name": "folder5",
+      "title": "Folder 5",
+      "description": "Select an additional folder to display recently downloaded files.",
+      "type": "directory",
+      "required": false
+    }
+  ],
   "dependencies": {
-    "@raycast/api": "^1.49.3",
-    "@react-pdf/renderer": "^3.1.9",
-    "canvas": "^2.11.2",
-    "react-pdf": "^6.2.2",
-    "react-syntax-highlighter": "^15.5.0"
+    "@raycast/api": "^1.49.3"
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.5",

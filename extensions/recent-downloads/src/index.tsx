@@ -1,24 +1,50 @@
 import { List, ActionPanel, Action, Detail } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { resolve, extname } from "path";
+import { extname } from "path";
 import { PathLike } from "fs";
-import { getRecentDownloads, Download, getFileTypeIcon, getFileTypeColor } from "./utils";
+import { getRecentDownloads, Download, getFileTypeIcon } from "./utils";
+import { getPreferenceValues } from "@raycast/api";
+
+interface Preferences {
+  folder1: string;
+  folder2?: string;
+  folder3?: string;
+  folder4?: string;
+  folder5?: string;
+}
 
 export default function RecentDownloads() {
+  const preferences = getPreferenceValues<Preferences>();
   const [downloads, setDownloads] = useState<Download[]>([]);
   const [selectedDownload] = useState<Download | null>(null);
 
   useEffect(() => {
-    const downloadsPath = resolve(process.env.HOME || "", "Downloads");
-    getRecentDownloads(downloadsPath)
-      .then((downloads) => {
-        downloads.sort((a, b) => b.lastModifiedAt.getTime() - a.lastModifiedAt.getTime());
-        setDownloads(downloads);
-      })
-      .catch((error) => {
-        console.error("Sorry, Error get recent files", error);
-      });
-  }, []);
+    async function fetchDownloads() {
+      const allDownloads: Download[] = [];
+      const folders = [
+        preferences.folder1,
+        preferences.folder2,
+        preferences.folder3,
+        preferences.folder4,
+        preferences.folder5,
+      ].filter(Boolean) as string[];
+
+      for (const folder of folders) {
+        try {
+          const downloads = await getRecentDownloads(folder);
+          allDownloads.push(...downloads);
+        } catch (error) {
+          console.error(`Error getting recent files from folder ${folder}:`, error);
+        }
+      }
+
+      allDownloads.sort((a, b) => b.lastModifiedAt.getTime() - a.lastModifiedAt.getTime());
+      allDownloads.filter((download) => !download.name.startsWith("."));
+      setDownloads(allDownloads);
+    }
+
+    fetchDownloads();
+  }, [preferences]);
 
   function handleTrash(paths: PathLike | PathLike[]) {
     setDownloads((downloads) =>
@@ -47,7 +73,7 @@ export default function RecentDownloads() {
         const icon = getFileTypeIcon(fileExtension);
 
         function getPreview(filePath: string, fileExtension: string) {
-          const imageExtensions = [".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp"];
+          const imageExtensions = [".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp", ".svg"];
 
           const height = 180;
 
