@@ -2,6 +2,8 @@ import Jimp from "jimp";
 import chroma from "chroma-js";
 import { environment, Image } from "@raycast/api";
 
+const LUMINANCE_THRESHOLD = 0.7;
+
 export function createIconSquare(colorHex: string, icon: Image, width: number, height: number): Promise<string> {
   return new Promise((resolve, reject) => {
     new Jimp(width, height, async (error, image) => {
@@ -18,6 +20,7 @@ export function createIconSquare(colorHex: string, icon: Image, width: number, h
       });
 
       const overlayImage = await Jimp.read(`${environment.assetsPath}/${icon.source}`);
+      overlayImage.brightness(color.luminance() < LUMINANCE_THRESHOLD ? 0 : -0.9);
       image.composite(overlayImage, 24, 24, {
         mode: Jimp.BLEND_SOURCE_OVER,
         opacitySource: 1,
