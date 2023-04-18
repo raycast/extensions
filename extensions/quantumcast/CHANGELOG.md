@@ -1,8 +1,6 @@
-# Changelog
+# Quantumcast Changelog
 
-
-
-## 0.0.2 - 2023-04-18
+## [0.0.2] - 2023-04-18
 
 ✨ New
 
@@ -18,7 +16,7 @@
 
 - Fixed some typos in list titles
 
-## 0.0.1 - 2023-02-25
+## [0.0.1] - 2023-02-25
 
 ✨ New
 
