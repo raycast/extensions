@@ -33,6 +33,7 @@ export default function Command() {
                   {item.isHistory && (
                     <Action
                       title="Remove from History"
+                      style={Action.Style.Destructive}
                       onAction={async () => {
                         await deleteHistoryItem(item);
                       }}
@@ -49,7 +50,7 @@ export default function Command() {
                         await deleteAllHistory();
                       }
                     }}
-                    icon={{ source: Icon.ExclamationMark }}
+                    icon={{ source: Icon.Trash }}
                     shortcut={{ modifiers: ["ctrl", "shift"], key: "x" }}
                   />
                 </ActionPanel.Section>
