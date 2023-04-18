@@ -1,7 +1,4 @@
-import { Action, ActionPanel, Detail, getPreferenceValues, Icon, popToRoot, showToast, Toast } from "@raycast/api";
-import { useCachedPromise, useCachedState, usePromise } from "@raycast/utils";
-import Style = Toast.Style;
-import { useEffect, useState } from "react";
+import { Action, ActionPanel, Detail, getPreferenceValues, Icon } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import cheerio from "cheerio";
 import { NodeHtmlMarkdown } from "node-html-markdown";
@@ -14,7 +11,6 @@ export default function DocCheckPage(props: { url: string; prevurl: string; quer
     .replace(/_/gm, " ")
     .replace(/.*\?title=(.*?)&.*/gm, `$1: Hier fehlt dein Wissen! Schreib diesen Artikel...`);
 
-  const [searchText, setSearchText] = useState("");
   const { isLoading, data } = useFetch(props.url, {
     // to make sure the screen isn't flickering when the searchText changes
     keepPreviousData: true,

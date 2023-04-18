@@ -15,9 +15,9 @@ type Result = {
 };
 
 export default function Command() {
-  const [query, setQuery] = useState<null | string>(null);
+  const [query, setQuery] = useState<string>("");
   const [entries, setEntries] = useState<Result[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function fetch() {
@@ -81,10 +81,6 @@ export default function Command() {
     fetch();
   }, [query]);
 
-  if (entries === null) {
-    return <List isLoading={true} searchBarPlaceholder="Search entry..." />;
-  }
-
   if (!query) {
     return (
       <List
@@ -97,7 +93,7 @@ export default function Command() {
         isLoading={loading}
         searchBarPlaceholder="Search entry..."
       >
-        <List.Section title={!query ? "Top Artikel" : ""} subtitle={""}>
+        <List.Section title={query ? "" : "Top Artikel"}>
           {entries.map((entry) => {
             if (entry.description) {
               return (
@@ -124,130 +120,130 @@ export default function Command() {
         </List.Section>
       </List>
     );
-  } else if (query.length != 0) {
-    return (
-      <List
-        navigationTitle={`DocCheck Flexikon Suche`}
-        filtering={false}
-        onSearchTextChange={(text) => {
-          setQuery(text);
-        }}
-        throttle={true}
-        isLoading={loading}
-        searchBarPlaceholder="Search entry..."
-      >
-        {entries.map((entry) => {
-          if (entry.description) {
-            return (
-              <List.Item
-                key={entry.description}
-                title={entry.title}
-                icon={entry.imageUrl}
-                subtitle={entry.description}
-                actions={
-                  <ActionPanel>
-                    <Action.Open
-                      icon={Icon.Uppercase}
-                      title="Suchbegriff als AMBOSS-Suche"
-                      target={"https://next.amboss.com/de/search?q=" + encodeURI(query) + "&v=overview"}
-                    />
-                    <Action.Open
-                      icon={Icon.MagnifyingGlass}
-                      title="Suchbegriff als Flexikon-Suche"
-                      target={"https://www.doccheck.com/search?q=" + encodeURI(query)}
-                      shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
-                    />
-                  </ActionPanel>
-                }
-              />
-            );
-          } else if (entry.title_alias[2]) {
-            return (
-              <List.Item
-                key={entry.url}
-                title={entry.title}
-                accessories={[
-                  { tag: { value: entry.title_alias[0], color: Color.Red }, tooltip: entry.title_alias[0] },
-                  { tag: { value: entry.title_alias[1], color: Color.Red }, tooltip: entry.title_alias[1] },
-                  { tag: { value: entry.title_alias[2], color: Color.Red }, tooltip: entry.title_alias[2] },
-                  { icon: Icon.Person, text: entry.author, tooltip: entry.author },
-                  {
-                    tag: new Date(entry.date_publish),
-                    tooltip: new Date(entry.date_publish).toLocaleDateString("de-DE", {
-                      day: "2-digit",
-                      month: "2-digit",
-                      year: "numeric",
-                    }),
-                  },
-                ]}
-                actions={EntryActions(entry.url, entry.title, query)}
-              />
-            );
-          } else if (entry.title_alias[1]) {
-            return (
-              <List.Item
-                key={entry.url}
-                title={entry.title}
-                accessories={[
-                  { tag: { value: entry.title_alias[0], color: Color.Red }, tooltip: entry.title_alias[0] },
-                  { tag: { value: entry.title_alias[1], color: Color.Red }, tooltip: entry.title_alias[1] },
-                  { icon: Icon.Person, text: entry.author, tooltip: entry.author },
-                  {
-                    tag: new Date(entry.date_publish),
-                    tooltip: new Date(entry.date_publish).toLocaleDateString("de-DE", {
-                      day: "2-digit",
-                      month: "2-digit",
-                      year: "numeric",
-                    }),
-                  },
-                ]}
-                actions={EntryActions(entry.url, entry.title, query)}
-              />
-            );
-          } else if (entry.title_alias[0]) {
-            return (
-              <List.Item
-                key={entry.url}
-                title={entry.title}
-                accessories={[
-                  { tag: { value: entry.title_alias[0], color: Color.Red }, tooltip: entry.title_alias[0] },
-                  { icon: Icon.Person, text: entry.author, tooltip: entry.author },
-                  {
-                    tag: new Date(entry.date_publish),
-                    tooltip: new Date(entry.date_publish).toLocaleDateString("de-DE", {
-                      day: "2-digit",
-                      month: "2-digit",
-                      year: "numeric",
-                    }),
-                  },
-                ]}
-                actions={EntryActions(entry.url, entry.title, query)}
-              />
-            );
-          } else if (entry.title) {
-            return (
-              <List.Item
-                key={entry.url}
-                title={entry.title}
-                accessories={[
-                  { icon: Icon.Person, text: entry.author, tooltip: entry.author },
-                  {
-                    tag: new Date(entry.date_publish),
-                    tooltip: new Date(entry.date_publish).toLocaleDateString("de-DE", {
-                      day: "2-digit",
-                      month: "2-digit",
-                      year: "numeric",
-                    }),
-                  },
-                ]}
-                actions={EntryActions(entry.url, entry.title, query)}
-              />
-            );
-          }
-        })}
-      </List>
-    );
   }
+
+  return (
+    <List
+      navigationTitle={`DocCheck Flexikon Suche`}
+      filtering={false}
+      onSearchTextChange={(text) => {
+        setQuery(text);
+      }}
+      throttle={true}
+      isLoading={loading}
+      searchBarPlaceholder="Search entry..."
+    >
+      {entries.map((entry) => {
+        if (entry.description) {
+          return (
+            <List.Item
+              key={entry.description}
+              title={entry.title}
+              icon={entry.imageUrl}
+              subtitle={entry.description}
+              actions={
+                <ActionPanel>
+                  <Action.Open
+                    icon={Icon.Uppercase}
+                    title="Suchbegriff als AMBOSS-Suche"
+                    target={"https://next.amboss.com/de/search?q=" + encodeURI(query) + "&v=overview"}
+                  />
+                  <Action.Open
+                    icon={Icon.MagnifyingGlass}
+                    title="Suchbegriff als Flexikon-Suche"
+                    target={"https://www.doccheck.com/search?q=" + encodeURI(query)}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
+                  />
+                </ActionPanel>
+              }
+            />
+          );
+        } else if (entry.title_alias[2]) {
+          return (
+            <List.Item
+              key={entry.url}
+              title={entry.title}
+              accessories={[
+                { tag: { value: entry.title_alias[0], color: Color.Red }, tooltip: entry.title_alias[0] },
+                { tag: { value: entry.title_alias[1], color: Color.Red }, tooltip: entry.title_alias[1] },
+                { tag: { value: entry.title_alias[2], color: Color.Red }, tooltip: entry.title_alias[2] },
+                { icon: Icon.Person, text: entry.author, tooltip: entry.author },
+                {
+                  tag: new Date(entry.date_publish),
+                  tooltip: new Date(entry.date_publish).toLocaleDateString("de-DE", {
+                    day: "2-digit",
+                    month: "2-digit",
+                    year: "numeric",
+                  }),
+                },
+              ]}
+              actions={EntryActions(entry.url, entry.title, query)}
+            />
+          );
+        } else if (entry.title_alias[1]) {
+          return (
+            <List.Item
+              key={entry.url}
+              title={entry.title}
+              accessories={[
+                { tag: { value: entry.title_alias[0], color: Color.Red }, tooltip: entry.title_alias[0] },
+                { tag: { value: entry.title_alias[1], color: Color.Red }, tooltip: entry.title_alias[1] },
+                { icon: Icon.Person, text: entry.author, tooltip: entry.author },
+                {
+                  tag: new Date(entry.date_publish),
+                  tooltip: new Date(entry.date_publish).toLocaleDateString("de-DE", {
+                    day: "2-digit",
+                    month: "2-digit",
+                    year: "numeric",
+                  }),
+                },
+              ]}
+              actions={EntryActions(entry.url, entry.title, query)}
+            />
+          );
+        } else if (entry.title_alias[0]) {
+          return (
+            <List.Item
+              key={entry.url}
+              title={entry.title}
+              accessories={[
+                { tag: { value: entry.title_alias[0], color: Color.Red }, tooltip: entry.title_alias[0] },
+                { icon: Icon.Person, text: entry.author, tooltip: entry.author },
+                {
+                  tag: new Date(entry.date_publish),
+                  tooltip: new Date(entry.date_publish).toLocaleDateString("de-DE", {
+                    day: "2-digit",
+                    month: "2-digit",
+                    year: "numeric",
+                  }),
+                },
+              ]}
+              actions={EntryActions(entry.url, entry.title, query)}
+            />
+          );
+        } else if (entry.title) {
+          return (
+            <List.Item
+              key={entry.url}
+              title={entry.title}
+              accessories={[
+                { icon: Icon.Person, text: entry.author, tooltip: entry.author },
+                {
+                  tag: new Date(entry.date_publish),
+                  tooltip: new Date(entry.date_publish).toLocaleDateString("de-DE", {
+                    day: "2-digit",
+                    month: "2-digit",
+                    year: "numeric",
+                  }),
+                },
+              ]}
+              actions={EntryActions(entry.url, entry.title, query)}
+            />
+          );
+        }
+      })}
+    </List>
+  );
 }
 
 function EntryActions(url: string, title: string, query: string) {
