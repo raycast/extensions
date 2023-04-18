@@ -29,7 +29,11 @@ export function ArtistActionPanel({ title, artist }: ArtistActionPanelProps) {
         />
       )}
       {albums && (
-        <Action.Push icon={Icon.AppWindowGrid3x3} title="Show Albums" target={<AlbumsGrid albums={albums} />} />
+        <Action.Push
+          icon={Icon.AppWindowGrid3x3}
+          title="Show Albums"
+          target={<AlbumsGrid albums={albums} title={`${artist.name} Albums`} />}
+        />
       )}
       <StartRadioAction artistId={artist.id} />
       <FooterAction url={artist?.external_urls?.spotify} uri={artist.uri} title={title} />

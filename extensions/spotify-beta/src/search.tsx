@@ -17,7 +17,7 @@ const filters = {
   tracks: "Songs",
   albums: "Albums",
   playlists: "Playlists",
-  shows: "Podcasts",
+  shows: "Podcasts & Shows",
   episodes: "Episodes",
 };
 
