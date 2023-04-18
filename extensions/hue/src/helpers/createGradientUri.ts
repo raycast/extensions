@@ -8,7 +8,7 @@ export function createGradientPngUri(colors: string[], width: number, height: nu
         return reject(error);
       }
 
-      const scale = chroma.scale(colors).gamma(0.5);
+      const scale = chroma.scale(colors).mode("lab").gamma(0.8).padding(1.1);
 
       image.scan(0, 0, width, height, (x, y) => {
         const factor = (y / height) * 2.3;

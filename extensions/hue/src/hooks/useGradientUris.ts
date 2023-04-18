@@ -2,7 +2,6 @@ import { useMemo, useState } from "react";
 import { createGradientPngUri } from "../helpers/createGradientUri";
 import { GradientUri, GradientUriCache, Id, Palette } from "../lib/types";
 import { Cache } from "@raycast/api";
-import chroma from "chroma-js";
 
 const gradientCache = new Cache({ namespace: "hue-scene-gradients" });
 
@@ -14,8 +13,6 @@ export default function useGradientUris(idsToPalettes: Map<Id, Palette>, width: 
       if (palette.length === 0) {
         return;
       }
-
-      palette.sort((a, b) => chroma(a).get("hsl.h") - chroma(b).get("hsl.h"));
 
       const key = `${width}x${height}_${palette.join("_")}`;
       const cached = gradientCache.get(key);

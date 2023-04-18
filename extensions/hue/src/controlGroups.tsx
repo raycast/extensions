@@ -13,6 +13,7 @@ import SetScene from "./setScene";
 import { getColorFromLight, getLightsFromGroup } from "./helpers/hueResources";
 import { getTransitionTimeInMs, optimisticUpdate, optimisticUpdates } from "./helpers/raycast";
 import { calculateAdjustedBrightness, getClosestBrightness } from "./helpers/colors";
+import chroma from "chroma-js";
 import Style = Toast.Style;
 
 // Exact dimensions of a 16:9 Raycast 5 column grid item.
@@ -29,7 +30,15 @@ export default function ControlGroups() {
   useMemo(() => {
     const groups = [...rooms, ...zones];
     const palettes = new Map<Id, Palette>(
-      groups.map((group) => [group.id, getLightsFromGroup(lights, group).map((light) => getColorFromLight(light))])
+      groups.map((group) => {
+        const groupLights = getLightsFromGroup(lights, group);
+        const containsColorLights = groupLights.some((light) => light.color);
+        const filteredGroupLights = groupLights.filter((light) => !containsColorLights || light.color);
+        const groupColors = filteredGroupLights
+          .map((light) => getColorFromLight(light))
+          .sort((a, b) => chroma.hex(b).get("hsl.h") - chroma.hex(a).get("hsl.h"));
+        return [group.id, groupColors];
+      })
     );
 
     setPalettes(palettes);

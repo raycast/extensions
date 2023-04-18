@@ -31,30 +31,55 @@ export function getColorFromLight(light: Light): string {
 }
 
 export function getColorsFromScene(scene: Scene): Palette {
-  const paletteColors = [
-    ...(scene.palette?.color?.map((color) => {
+  const containsSceneColor = scene.palette?.color?.length ?? 0 > 0;
+  const sceneColors =
+    scene.palette?.color?.map((color) => {
       return xyToRgbHexString(color.color.xy, color.color.dimming?.brightness);
-    }) || []),
-    ...(scene.palette?.color_temperature?.map((color_temperature) => {
-      return miredToHexString(color_temperature.color_temperature.mirek, color_temperature.dimming.brightness);
-    }) || []),
-    ...(scene.palette?.dimming?.map((dimming) => {
-      return miredToHexString(MIRED_DEFAULT, dimming.brightness);
-    }) || []),
-  ];
+    }) ?? [];
+  if (containsSceneColor) return sceneColors;
 
+  const containsActionColors = scene.actions?.some((action) => action.action.color) ?? false;
   const actionColors =
     scene.actions
-      ?.filter((action) => action.action.color || action.action.color_temperature || action.action.dimming)
+      ?.filter((action) => action.action.color)
       .map((action) => {
-        if (action.action.color_temperature?.mirek) {
-          return miredToHexString(action.action.color_temperature.mirek, action.action.dimming?.brightness);
-        }
-        if (action.action.color?.xy) {
-          return xyToRgbHexString(action.action.color.xy, action.action.dimming?.brightness);
-        }
-        return miredToHexString(MIRED_DEFAULT, action.action.dimming?.brightness);
+        if (action.action.color?.xy === undefined) throw new Error("action.action.color.xy is undefined");
+        return xyToRgbHexString(action.action.color.xy, action.action.dimming?.brightness);
       }) || [];
+  if (containsActionColors) return actionColors;
 
-  return paletteColors.length > 0 ? paletteColors : actionColors;
+  const containsSceneTemperatures = scene.palette?.color_temperature?.length ?? 0 > 0;
+  const sceneTemperatures =
+    scene.palette?.color_temperature?.map((color_temperature) => {
+      return miredToHexString(color_temperature.color_temperature.mirek, color_temperature.dimming.brightness);
+    }) ?? [];
+  if (containsSceneTemperatures) return sceneTemperatures;
+
+  const containsActionTemperatures = scene.actions?.some((action) => action.action.color_temperature) ?? false;
+  const actionTemperatures =
+    scene.actions
+      ?.filter((action) => action.action.color_temperature)
+      .map((action) => {
+        if (action.action.color_temperature?.mirek === undefined)
+          throw new Error("action.action.color_temperature.mirek is undefined");
+        return miredToHexString(action.action.color_temperature.mirek, action.action.dimming?.brightness);
+      }) || [];
+  if (containsActionTemperatures) return actionTemperatures;
+
+  const containsSceneDimmings = scene.palette?.dimming?.length ?? 0 > 0;
+  const sceneDimmings =
+    scene.palette?.dimming?.map((dimming) => {
+      return miredToHexString(MIRED_DEFAULT, dimming.brightness);
+    }) ?? [];
+  if (containsSceneDimmings) return sceneDimmings;
+
+  const containsActionDimmings = scene.actions?.some((action) => action.action.dimming) ?? false;
+  const actionDimmings = scene.actions
+    .filter((action) => action.action.dimming)
+    .map((action) => {
+      return miredToHexString(MIRED_DEFAULT, action.action.dimming?.brightness);
+    });
+  if (containsActionDimmings) return actionDimmings;
+
+  return [];
 }
