@@ -200,17 +200,20 @@ export default function Command() {
                           deleteNote(note);
                         }
                       }}
+                      shortcut={{ modifiers: ["cmd"], key: "d" }}
                     />
                     <ActionPanel.Section title="Copy Actions">
                       <Action.CopyToClipboard
                         title="Copy Note URL"
                         icon={Icon.Link}
                         content={`notes://showNote?identifier=${note.UUID}`}
+                        shortcut={{ modifiers: ["cmd"], key: "c" }}
                       />
                       <Action.CopyToClipboard
                         title="Copy Mobile Note URL"
                         icon={Icon.Link}
                         content={`mobilenotes://showNote?identifier=${note.UUID}`}
+                        shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
                       />
                     </ActionPanel.Section>
                   </ActionPanel>
@@ -275,6 +278,7 @@ export default function Command() {
                         onAction={() => {
                           restoreNote(note);
                         }}
+                        shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
                       />
                     </ActionPanel>
                   }
