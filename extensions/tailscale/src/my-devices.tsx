@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { execSync } from "child_process";
 import { Device, LooseObject, loadDevices } from "./shared";
 
-function DeviceList() {
+function MyDeviceList() {
   const [devices, setDevices] = useState<Device[]>();
   useEffect(() => {
     async function fetch() {
@@ -16,9 +16,11 @@ function DeviceList() {
         if (!data.Self.Online) {
           throw "Tailscale not connected";
         }
-
+        const me: string = data.Self.UserID;
         const _list = loadDevices(data.Self, data.Peer);
-        setDevices(_list);
+        console.log(_list);
+        const _mylist = _list.filter((device) => device.userid === me);
+        setDevices(_mylist);
       } catch (error) {
         showToast(Toast.Style.Failure, "Couldn't load devices. Make sure Tailscale is connected.");
       }
@@ -31,7 +33,7 @@ function DeviceList() {
       {devices?.map((device) => (
         <List.Item
           title={device.name}
-          subtitle={device.ipv4 + "   " + device.os}
+          subtitle={device.ipv4 + "    " + device.os}
           key={device.key}
           icon={
             device.online
@@ -55,12 +57,28 @@ function DeviceList() {
               ? [
                   { text: "This device", icon: Icon.Person },
                   {
-                    text: device.online ? `        Connected` : "Last seen " + formatDate(device.lastseen),
+                    text: device.online
+                      ? `        Connected`
+                      : "Last seen " +
+                        device.lastseen.toLocaleString("en-US", {
+                          month: "short",
+                          day: "numeric",
+                          hour: "numeric",
+                          minute: "numeric",
+                        }),
                   },
                 ]
               : [
                   {
-                    text: device.online ? `        Connected` : "Last seen " + formatDate(device.lastseen),
+                    text: device.online
+                      ? `        Connected`
+                      : "Last seen " +
+                        device.lastseen.toLocaleString("en-US", {
+                          month: "short",
+                          day: "numeric",
+                          hour: "numeric",
+                          minute: "numeric",
+                        }),
                   },
                 ]
           }
@@ -78,14 +96,5 @@ function DeviceList() {
 }
 
 export default function Command() {
-  return <DeviceList />;
-}
-
-function formatDate(d: Date) {
-  return d.toLocaleString("en-US", {
-    month: "short",
-    day: "numeric",
-    hour: "numeric",
-    minute: "numeric",
-  });
+  return <MyDeviceList />;
 }
