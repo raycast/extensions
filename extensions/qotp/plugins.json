@@ -1,0 +1,12 @@
+{
+  "name": "QOTP",
+  "description": "生成 OTP 六位动态码",
+  "author": {
+    "name": "ariesly15",
+    "email": "ileeyi@qq.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ariesly15/qotp"
+  }
+}
