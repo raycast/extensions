@@ -1,5 +1,9 @@
 # Spotify Player Changelog
 
+## [Enhancement] - 2023-04-19
+
+- Added keyboard shortcuts for the actions to copy the URL or open Spotify. This way, you can quickly share a song/artist/etc. or jump to the Spotify app/website to continue.
+
 ## [Version 2] - 2023-04-12
 
 ### Spotify Player v2

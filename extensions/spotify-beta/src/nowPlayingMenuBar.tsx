@@ -249,6 +249,7 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
         <MenuBarExtra.Item
           title="Copy URL"
           icon={Icon.Link}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
           onAction={async () => {
             await Clipboard.copy({
               html: `<a href=${external_urls?.spotify}>${title}</a>`,
@@ -260,6 +261,7 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
         <MenuBarExtra.Item
           icon="spotify-icon.svg"
           title="Open on Spotify"
+          shortcut={{ modifiers: ["cmd"], key: "o" }}
           onAction={() =>
             isSpotifyInstalled ? open(uri || "spotify") : open(external_urls?.spotify || "https://play.spotify.com")
           }
