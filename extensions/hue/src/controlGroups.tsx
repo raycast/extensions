@@ -298,10 +298,13 @@ async function handleToggle(
     if (hueBridgeState.context.hueClient === undefined) throw new Error("Not connected to Hue Bridge.");
     if (groupedLight === undefined) throw new Error("Light group not found.");
 
+    // TODO: Find out why Hue complains when we turn off a group where some lights are already off.
     const changes = {
       on: { on: !groupedLight.on?.on },
       dynamics: { duration: getTransitionTimeInMs() },
-      ...(groupedLight.dimming ? { dimming: { brightness: groupedLight.dimming?.brightness } } : {}),
+      ...(!groupedLight.on?.on && groupedLight.dimming
+        ? { dimming: { brightness: groupedLight.dimming?.brightness } }
+        : {}),
     };
 
     // TODO: Update zones
