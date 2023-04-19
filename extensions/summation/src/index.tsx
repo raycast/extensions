@@ -75,7 +75,10 @@ async function calculateResult() {
     });
 
   if (numbersStr.length == 0) {
-    const badInput: CalculationResult = { errorMessage: `no recognizable numbers found`, subject };
+    const badInput: CalculationResult = {
+      errorMessage: `no recognizable numbers found, select numbers or copy to clipboard and try again`,
+      subject,
+    };
     return badInput;
   }
 
@@ -137,7 +140,6 @@ function formatOutput(data: CalculationResult) {
   }
 
   const content = [
-    `from ${data?.subject?.source}\n`,
     `  ${data?.formattedNumbers ? data?.formattedNumbers.join("\n+ ") : ""}`,
     `==${"=".repeat(data?.sumStr ? data?.sumStr.length : 3)} `,
     `  ${data?.sumStr} `,
@@ -147,9 +149,14 @@ function formatOutput(data: CalculationResult) {
   return content;
 }
 
+function formatTitle(data: CalculationResult) {
+  return `## Summarizing from ${data?.subject?.source}\n`;
+}
+
 export default function Command() {
   const [result, setResult] = useState<CalculationResult>({});
   const [display, setDisplay] = useState("");
+  const [title, setTitle] = useState("");
   const [isLoading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -158,6 +165,7 @@ export default function Command() {
       .then((res) => {
         setResult(res);
         setDisplay(formatOutput(res));
+        setTitle(formatTitle(res));
         setLoading(false);
       })
       .catch((err) => {
@@ -169,7 +177,7 @@ export default function Command() {
   return (
     <Detail
       isLoading={isLoading}
-      markdown={`\`\`\`\n${display}\n\`\`\``}
+      markdown={`${title}\`\`\`\n${display}\n\`\`\``}
       actions={
         <ActionPanel>
           <Action.CopyToClipboard content={`${result?.sum}`} title="Copy Sum" />
