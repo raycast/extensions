@@ -1,23 +1,25 @@
 import { Action, ActionPanel, Color, Icon, Image, List } from "@raycast/api";
 import { useState } from "react";
-import { useTable } from "./hooks";
+import { useSeasons, useTable } from "./hooks";
+
 
 export default function Standings() {
-  const [table, isLoading] = useTable();
+  const [currentSeason, seasons, setCurrentSeason] = useSeasons();
+  const [table, isLoading] = useTable(currentSeason);
   const [showDetails, setShowDetails] = useState(false);
 
   return (
     <List
       throttle
-      // searchBarAccessory={
-      //   <List.Dropdown tooltip="Filter by Season" value={selectedSeason} onChange={setSeason}>
-      //     <List.Dropdown.Section>
-      //       {seasons.map((season) => {
-      //         return <List.Dropdown.Item key={season.id} value={season.id.toString()} title={season.label} />;
-      //       })}
-      //     </List.Dropdown.Section>
-      //   </List.Dropdown>
-      // }
+      searchBarAccessory={
+        <List.Dropdown tooltip="Filter by Season" value={currentSeason} onChange={setCurrentSeason}>
+          <List.Dropdown.Section>
+            {seasons.map((season) => {
+              return <List.Dropdown.Item key={season} value={season} title={season} />;
+            })}
+          </List.Dropdown.Section>
+        </List.Dropdown>
+      }
       isLoading={isLoading}
       isShowingDetail={showDetails}
     >
@@ -46,8 +48,8 @@ export default function Standings() {
             <List.Item
               key={position}
               title={position.toString()}
-              subtitle={team.name}
-              keywords={[team.name, team.shortName, team.tla]}
+              subtitle={team.shortName}
+              keywords={[team.name, team.shortName]}
               icon={{
                 source: team.crest,
                 fallback: "default.png",
