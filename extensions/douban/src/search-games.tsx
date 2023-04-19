@@ -1,7 +1,7 @@
-import { Action, List, ActionPanel, Icon } from '@raycast/api';
-import { useFetch } from '@raycast/utils';
-import { useState } from 'react';
-import * as cheerio from 'cheerio';
+import { Action, List, ActionPanel, Icon } from "@raycast/api";
+import { useFetch } from "@raycast/utils";
+import { useState } from "react";
+import * as cheerio from "cheerio";
 
 type Game = {
   category: string;
@@ -14,14 +14,14 @@ type Game = {
 type SearchResult = Game[];
 
 export default function Command() {
-  const [search, setSearch] = useState<string>('');
+  const [search, setSearch] = useState<string>("");
   const [showingDetail, setShowingDetail] = useState(true);
 
   const { data, isLoading } = useFetch(`https://www.douban.com/search?q=${search}&cat=3114`, {
     execute: search.trim().length > 0,
     headers: {
-      'User-Agent':
-        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36',
+      "User-Agent":
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36",
     },
     async parseResponse(response) {
       if (!response.ok) {
@@ -32,14 +32,14 @@ export default function Command() {
       const data = await response.text();
       if (data) {
         const $ = cheerio.load(data);
-        const items = $('div.result');
+        const items = $("div.result");
 
         items.each((index, item) => {
-          const category = $(item).find('h3 span:first')?.text()?.trim() || '';
-          const url = $(item).find('div.content a')?.prop('href')?.trim() || '';
-          const title = $(item).find('div.title a')?.text()?.trim() || '';
-          const cover = $(item).find("img[src^='https']").attr('src') || '';
-          const info = $(item).find('span.subject-cast')?.text()?.trim() || '';
+          const category = $(item).find("h3 span:first")?.text()?.trim() || "";
+          const url = $(item).find("div.content a")?.prop("href")?.trim() || "";
+          const title = $(item).find("div.title a")?.text()?.trim() || "";
+          const cover = $(item).find("img[src^='https']").attr("src") || "";
+          const info = $(item).find("span.subject-cast")?.text()?.trim() || "";
 
           const game: Game = {
             category,
@@ -74,7 +74,7 @@ export default function Command() {
       searchBarPlaceholder="Search Games on Douban"
       onSearchTextChange={(newValue) => setSearch(newValue)}
     >
-      {search === '' ? (
+      {search === "" ? (
         <List.EmptyView />
       ) : (
         data &&
@@ -87,7 +87,7 @@ export default function Command() {
             detail={
               <List.Item.Detail
                 markdown={`![Illustration](${game.cover})`}
-                metadata={showingDetail ? metadata(game) : ''}
+                metadata={showingDetail ? metadata(game) : ""}
               />
             }
             actions={
@@ -96,7 +96,7 @@ export default function Command() {
                 <Action
                   title="Toggle Details"
                   icon={Icon.AppWindowList}
-                  shortcut={{ modifiers: ['cmd', 'shift'], key: 'd' }}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
                   onAction={() => setShowingDetail(!showingDetail)}
                 />
               </ActionPanel>
