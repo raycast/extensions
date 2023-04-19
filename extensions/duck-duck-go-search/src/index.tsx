@@ -5,7 +5,7 @@ export default function Command() {
   const { isLoading, results, search, addHistory, deleteAllHistory, deleteHistoryItem } = useSearch();
 
   return (
-    <List isLoading={isLoading} onSearchTextChange={search} searchBarPlaceholder="Search Duck Duck Go...">
+    <List isLoading={isLoading} onSearchTextChange={search} searchBarPlaceholder="Search DuckDuckGo...">
       <List.Section title="Results" subtitle={results.length + ""}>
         {results.map((item) => (
           <List.Item
@@ -47,7 +47,7 @@ export default function Command() {
                     style={Action.Style.Destructive}
                     onAction={async () => {
                       const options: Alert.Options = {
-                        title: "Clear Duck Duck Go search history?",
+                        title: "Clear DuckDuckGo search history?",
                         primaryAction: {
                           title: "Delete",
                           style: Alert.ActionStyle.Destructive,
