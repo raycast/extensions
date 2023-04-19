@@ -20,76 +20,64 @@ export default function Command() {
   const [search, setSearch] = useState<string>("");
   const [showingDetail, setShowingDetail] = useState(true);
 
-  const { data, isLoading } = useFetch(
-    `https://www.douban.com/search?q=${search}&cat=1001`,
-    {
-      execute: search.trim().length > 0,
-      headers: {
-        "User-Agent":
-          "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36",
-      },
-      async parseResponse(response) {
-        if (!response.ok) {
-          throw new Error(response.statusText);
-        }
+  const { data, isLoading } = useFetch(`https://www.douban.com/search?q=${search}&cat=1001`, {
+    execute: search.trim().length > 0,
+    headers: {
+      "User-Agent":
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36",
+    },
+    async parseResponse(response) {
+      if (!response.ok) {
+        throw new Error(response.statusText);
+      }
 
-        const books: SearchResult = [];
-        const data = await response.text();
-        if (data) {
-          const $ = cheerio.load(data);
-          const items = $("div.result");
+      const books: SearchResult = [];
+      const data = await response.text();
+      if (data) {
+        const $ = cheerio.load(data);
+        const items = $("div.result");
 
-          items.each((index, item) => {
-            const category =
-              $(item).find("h3 span:first")?.text()?.trim() || "";
-            const url =
-              $(item).find("div.content a")?.prop("href")?.trim() || "";
-            const title = $(item).find("div.title a")?.text()?.trim() || "";
-            const rating =
-              $(item).find("span.rating_nums")?.text()?.trim() || "";
-            const subjectEl = $(item)
-              .find("span.subject-cast")
-              ?.text()
-              ?.split("/");
-            const year = subjectEl?.pop()?.trim() || "";
-            const press = subjectEl?.pop()?.trim() || "";
-            const authors = $(item)
-              .find("span.subject-cast")
-              ?.text()
-              ?.split("/")
-              .slice(0, -2)
-              .map((author) => author.trim()) || [""];
-            const cover = $(item).find("img[src^='https']").attr("src") || "";
+        items.each((index, item) => {
+          const category = $(item).find("h3 span:first")?.text()?.trim() || "";
+          const url = $(item).find("div.content a")?.prop("href")?.trim() || "";
+          const title = $(item).find("div.title a")?.text()?.trim() || "";
+          const rating = $(item).find("span.rating_nums")?.text()?.trim() || "";
+          const subjectEl = $(item).find("span.subject-cast")?.text()?.split("/");
+          const year = subjectEl?.pop()?.trim() || "";
+          const press = subjectEl?.pop()?.trim() || "";
+          const authors = $(item)
+            .find("span.subject-cast")
+            ?.text()
+            ?.split("/")
+            .slice(0, -2)
+            .map((author) => author.trim()) || [""];
+          const cover = $(item).find("img[src^='https']").attr("src") || "";
 
-            const book: Book = {
-              category,
-              title,
-              rating,
-              year,
-              authors,
-              url,
-              cover,
-              press,
-            };
+          const book: Book = {
+            category,
+            title,
+            rating,
+            year,
+            authors,
+            url,
+            cover,
+            press,
+          };
 
-            books.push(book);
-          });
-        }
+          books.push(book);
+        });
+      }
 
-        return books;
-      },
-    }
-  );
+      return books;
+    },
+  });
 
   function metadata(book: Book) {
     return (
       <List.Item.Detail.Metadata>
         <List.Item.Detail.Metadata.Label title="Year" text={book.year} />
         <List.Item.Detail.Metadata.Label title="Rating" text={book.rating} />
-        <List.Item.Detail.Metadata.Label
-          title="Authors"
-          text={book.authors && book.authors.join(" / ")}
-        />
+        <List.Item.Detail.Metadata.Label title="Authors" text={book.authors && book.authors.join(" / ")} />
         <List.Item.Detail.Metadata.Label title="Press" text={book.press} />
       </List.Item.Detail.Metadata>
     );

@@ -17,50 +17,45 @@ export default function Command() {
   const [search, setSearch] = useState<string>("");
   const [showingDetail, setShowingDetail] = useState(true);
 
-  const { data, isLoading } = useFetch(
-    `https://www.douban.com/search?q=${search}&cat=1005`,
-    {
-      execute: search.trim().length > 0,
-      headers: {
-        "User-Agent":
-          "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36",
-      },
-      async parseResponse(response) {
-        if (!response.ok) {
-          throw new Error(response.statusText);
-        }
+  const { data, isLoading } = useFetch(`https://www.douban.com/search?q=${search}&cat=1005`, {
+    execute: search.trim().length > 0,
+    headers: {
+      "User-Agent":
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36",
+    },
+    async parseResponse(response) {
+      if (!response.ok) {
+        throw new Error(response.statusText);
+      }
 
-        const users: SearchResult = [];
-        const data = await response.text();
-        if (data) {
-          const $ = cheerio.load(data);
-          const items = $("div.result");
+      const users: SearchResult = [];
+      const data = await response.text();
+      if (data) {
+        const $ = cheerio.load(data);
+        const items = $("div.result");
 
-          items.each((index, item) => {
-            const category =
-              $(item).find("h3 span:first")?.text()?.trim() || "";
-            const url =
-              $(item).find("div.content a")?.prop("href")?.trim() || "";
-            const title = $(item).find("div.title a")?.text()?.trim() || "";
-            const cover = $(item).find("img[src^='https']").attr("src") || "";
-            const info = $(item).find("div.info")?.text()?.trim() || "";
+        items.each((index, item) => {
+          const category = $(item).find("h3 span:first")?.text()?.trim() || "";
+          const url = $(item).find("div.content a")?.prop("href")?.trim() || "";
+          const title = $(item).find("div.title a")?.text()?.trim() || "";
+          const cover = $(item).find("img[src^='https']").attr("src") || "";
+          const info = $(item).find("div.info")?.text()?.trim() || "";
 
-            const user: User = {
-              category,
-              title,
-              url,
-              cover,
-              info,
-            };
+          const user: User = {
+            category,
+            title,
+            url,
+            cover,
+            info,
+          };
 
-            users.push(user);
-          });
-        }
+          users.push(user);
+        });
+      }
 
-        return users;
-      },
-    }
-  );
+      return users;
+    },
+  });
 
   function metadata(user: User) {
     return (
