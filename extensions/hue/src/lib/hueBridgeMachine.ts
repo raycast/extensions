@@ -96,7 +96,7 @@ export default function hueBridgeMachine(
             }),
           },
           onError: {
-            target: "failedToConnect",
+            target: "failedToLoadPreferences",
             actions: (context, event) => {
               new Toast({
                 style: Style.Failure,
@@ -109,6 +109,7 @@ export default function hueBridgeMachine(
           },
         },
       },
+      failedToLoadPreferences: {},
       loadingConfiguration: {
         invoke: {
           id: "loadingConfiguration",

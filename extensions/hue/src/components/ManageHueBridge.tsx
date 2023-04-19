@@ -36,6 +36,14 @@ const linkWithBridgeMessage = `
 Press the link button in the center of the bridge and press enter.
 `;
 
+const failedToLoadPreferencesMessage = `
+# Failed to load preferences
+
+![Failure](${failureImagePath})
+
+Please make sure you have entered a valid Hue Bridge IP address.
+`;
+
 const failedToLinkMessage = `
 # Failed to link with the Hue Bridge
 
@@ -86,10 +94,14 @@ export default function ManageHueBridge(
   const toast = new Toast({ style: Style.Animated, title: "" });
 
   switch (hueBridgeState.value) {
+    case "loadingPreferences":
     case "loadingCredentials":
     case "discoveringUsingPublicApi":
     case "connected":
       return null;
+    case "failedToLoadPreferences":
+      markdown = failedToLoadPreferencesMessage;
+      break;
     case "connecting":
       toast.message = "Connecting to Hue Bridge…";
       toast.show().then();
