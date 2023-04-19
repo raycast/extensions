@@ -109,6 +109,7 @@ async function calculateResult() {
   if (decimalIndex == -1) {
     decimalIndex = sumLength;
   }
+  decimalIndex = decimalIndex + 1
 
   // format numbers so they are aligned at the decimal point
   const formattedNumbers = numbers.map((n) => {
@@ -119,7 +120,7 @@ async function calculateResult() {
     let dpIndex = `${nStr}`.indexOf(decimalSeparator);
     if (dpIndex == -1) dpIndex = nStr.length;
     nStr = whole.padStart(decimalIndex, " ");
-    return `${nStr}` + (decimal == "" ? "" : `${decimalSeparator}${decimal}`);
+    return `+ ${nStr}` + (decimal == "" ? "" : `${decimalSeparator}${decimal}`);
   });
 
   const results: CalculationResult = {
@@ -140,9 +141,9 @@ function formatOutput(data: CalculationResult) {
   }
 
   const content = [
-    `  ${data?.formattedNumbers ? data?.formattedNumbers.join("\n+ ") : ""}`,
-    `==${"=".repeat(data?.sumStr ? data?.sumStr.length : 3)} `,
-    `  ${data?.sumStr} `,
+    `${data?.formattedNumbers ? data?.formattedNumbers.join("\n").replace(/^./,' ') : ""}`,
+    `==${"=".repeat(data?.sumStr ? data?.sumStr.length+1 : 3)} `,
+    `   ${data?.sumStr} `,
     "",
   ].join("\n");
 
