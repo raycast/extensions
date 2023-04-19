@@ -35,6 +35,7 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
+    "prettier": "prettier -c -w **/*.tsx",
     "publish": "npx @raycast/api@latest publish"
   }
 }
