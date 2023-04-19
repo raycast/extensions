@@ -21,6 +21,8 @@ import OtpListItems from "./OtpListItems";
 
 const { preferCustomName } = getPreferenceValues<{ preferCustomName: boolean }>();
 
+export const CORRUPTED = "corrupted";
+
 export function OtpList(props: { isLogin: boolean | undefined; setLogin: (login: boolean) => void }) {
   const [otpList, setOtpList] = useState<Otp[]>([]);
 
@@ -77,6 +79,7 @@ export function OtpList(props: { isLogin: boolean | undefined; setLogin: (login:
       } = getPreferenceValues<{ authyPassword: string; excludeNames: string; recentlyUsedOrder: boolean }>();
       const services: Otp[] = servicesResponse.authenticator_tokens.map((i) => {
         const seed = decryptSeed(i.encrypted_seed, i.salt, authyPassword);
+
         return {
           id: i.unique_id,
           type: "service",
@@ -85,7 +88,7 @@ export function OtpList(props: { isLogin: boolean | undefined; setLogin: (login:
           issuer: i.issuer,
           logo: i.logo,
           digits: i.digits,
-          generate: () => generateTOTP(seed, { digits: i.digits, period: 30 }),
+          generate: () => (seed ? generateTOTP(seed, { digits: i.digits, period: 30 }) : CORRUPTED),
         };
       });
       const apps: Otp[] = appsResponse.apps.map((i) => {

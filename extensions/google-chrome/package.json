@@ -9,7 +9,9 @@
     "bromanko",
     "crisboarna",
     "andreaselia",
-    "KarolRe"
+    "rtyke",
+    "KarolRe",
+    "Aiee"
   ],
   "license": "MIT",
   "commands": [
@@ -40,25 +42,26 @@
       "subtitle": "Google Chrome",
       "description": "Search browser bookmarks.",
       "mode": "view"
+    },
+    {
+      "name": "new-window",
+      "title": "Create New Window",
+      "subtitle": "Google Chrome",
+      "description": "Create New Window.",
+      "mode": "no-view"
     }
   ],
   "preferences": [
     {
-      "name": "useOriginalFavicon",
-      "title": "Fav icon",
-      "label": "Extract the favicon from every open tab",
+      "default": false,
       "description": "Before enable this, you should enable 'View > Developer > Allow JavaScript from Apple Events' in every Chrome profile.",
+      "label": "Extract the favicon from every open tab",
+      "name": "useOriginalFavicon",
       "required": false,
-      "type": "checkbox",
-      "default": false
+      "title": "Favicon",
+      "type": "checkbox"
     },
     {
-      "name": "openTabInProfile",
-      "title": "Open Tab In Profile",
-      "type": "dropdown",
-      "required": false,
-      "description": "When 'Default(classic), the tab will be opened in the profile open, or topmost profile window if multiple windows are open. When 'Current Profile', the tab will be opened in the profile specified in the 'Profile' field. When 'Original Profile' it will open in original profile tab is sourced from",
-      "default": "default",
       "data": [
         {
           "title": "Default(classic)",
@@ -72,7 +75,13 @@
           "title": "Original Profile",
           "value": "profile_original"
         }
-      ]
+      ],
+      "default": "default",
+      "description": "When 'Default(classic), the tab will be opened in the profile open, or topmost profile window if multiple windows are open. When 'Current Profile', the tab will be opened in the profile specified in the 'Profile' field. When 'Original Profile' it will open in original profile tab is sourced from",
+      "name": "openTabInProfile",
+      "required": false,
+      "title": "Open Tab In Profile",
+      "type": "dropdown"
     }
   ],
   "dependencies": {

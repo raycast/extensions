@@ -84,6 +84,7 @@ export function dataToProject(project: any): Project {
     http_url_to_repo: project.http_url_to_repo,
     default_branch: project.default_branch,
     archived: project.archived,
+    remove_source_branch_after_merge: project.remove_source_branch_after_merge,
   };
 }
 
@@ -109,6 +110,8 @@ export function jsonDataToMergeRequest(mr: any): MergeRequest {
     milestone: mr.milestone ? (mr.milestone as Milestone) : undefined,
     draft: mr.draft,
     has_conflicts: mr.has_conflicts === true || false,
+    force_remove_source_branch: mr.force_remove_source_branch,
+    squash_on_merge: mr.squash_on_merge,
   };
 }
 
@@ -246,6 +249,8 @@ export class MergeRequest {
   public milestone?: Milestone;
   public draft = false;
   public has_conflicts = false;
+  public force_remove_source_branch: boolean | undefined = undefined;
+  public squash_on_merge: boolean | undefined = undefined;
 }
 
 export class Pipeline {
@@ -310,6 +315,7 @@ export class Project {
   public http_url_to_repo?: string = undefined;
   public default_branch = "";
   public archived = false;
+  public remove_source_branch_after_merge = false;
 }
 
 export class User {

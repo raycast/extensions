@@ -93,6 +93,24 @@
       ],
       "required": false,
       "default": "en"
+    },
+    {
+      "name": "coordinatesFormat",
+      "title": "Coordinates Format",
+      "description": "Coordinate format of location information display.",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "Latitude, Longitude (default)",
+          "value": "latLon"
+        },
+        {
+          "title": "Longitude, Latitude",
+          "value": "lonLat"
+        }
+      ],
+      "required": false,
+      "default": "latLon"
     }
   ],
   "dependencies": {

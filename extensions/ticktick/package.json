@@ -29,6 +29,13 @@
       "subtitle": "TickTick",
       "description": "Search tasks.",
       "mode": "view"
+    },
+    {
+      "name": "create",
+      "title": "Add Task",
+      "subtitle": "TickTick",
+      "description": "Convenient way to easily add new task.",
+      "mode": "view"
     }
   ],
   "dependencies": {

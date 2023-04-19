@@ -4,9 +4,8 @@ import { handleError, todoist } from "./api";
 import { isTodoistInstalled, checkTodoistApp } from "./helpers/isTodoistInstalled";
 
 type Arguments = {
-  title: string;
+  text: string;
   description?: string;
-  info?: string;
 };
 
 type Preferences = {
@@ -25,7 +24,7 @@ const command = async (props: { arguments: Arguments }) => {
     }
 
     const { url, id } = await todoist.quickAddTask({
-      text: `${props.arguments.title}${props.arguments.info ? ` ${props.arguments.info}` : ""}`,
+      text: props.arguments.text,
     });
 
     await todoist.updateTask(id, { description: props.arguments.description });
