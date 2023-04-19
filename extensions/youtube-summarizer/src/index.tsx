@@ -1,5 +1,5 @@
-import {useEffect, useState} from "react";
-import {YoutubeTranscript} from "youtube-transcript";
+import { useEffect, useState } from "react";
+import { YoutubeTranscript } from "youtube-transcript";
 import {
   Action,
   ActionPanel,
@@ -40,7 +40,7 @@ async function getVideoInfo(url: string) {
   const information = await ytdl.getBasicInfo(url);
   const title = information.videoDetails.title;
   const author = information.videoDetails.author.name;
-  return {title, author};
+  return { title, author };
 }
 
 export default function Command(props: { arguments: { url: string } }) {
@@ -54,7 +54,7 @@ export default function Command(props: { arguments: { url: string } }) {
   } = useUnstableAI(
     `${sections}---\n\nSummarize the above YouTube video segments from a video titled "${metadata?.title}" by ${metadata?.author}.`,
     {
-      execute: isGenerating
+      execute: isGenerating,
     }
   );
 
@@ -79,16 +79,16 @@ export default function Command(props: { arguments: { url: string } }) {
       isLoading={!isGenerating || isLoading}
       actions={
         <ActionPanel>
-          <Action.CopyToClipboard title="Copy Summary" content={summary}/>
-          <Action.Paste content={summary}/>
+          <Action.CopyToClipboard title="Copy Summary" content={summary} />
+          <Action.Paste content={summary} />
           <Action
             title="Regenerate Summary"
             onAction={revalidate}
             icon={Icon.ArrowCounterClockwise}
-            shortcut={{key: "r", modifiers: ["cmd"]}}
+            shortcut={{ key: "r", modifiers: ["cmd"] }}
           />
         </ActionPanel>
       }
     />
-  )
+  );
 }
