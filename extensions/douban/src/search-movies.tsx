@@ -1,4 +1,4 @@
-import { Action, List, ActionPanel } from '@raycast/api';
+import { Action, List, ActionPanel, Icon } from '@raycast/api';
 import { useFetch } from '@raycast/utils';
 import { useState } from 'react';
 import * as cheerio from 'cheerio';
@@ -105,7 +105,12 @@ export default function Command() {
             actions={
               <ActionPanel>
                 <Action.OpenInBrowser url={movie.url} />
-                <Action title="Toggle Detail" onAction={() => setShowingDetail(!showingDetail)} />
+                <Action
+                  title="Toggle Details"
+                  icon={Icon.AppWindowList}
+                  shortcut={{ modifiers: ['cmd', 'shift'], key: 'd' }}
+                  onAction={() => setShowingDetail(!showingDetail)}
+                />
               </ActionPanel>
             }
           />

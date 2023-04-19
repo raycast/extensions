@@ -5,9 +5,7 @@
   "description": "Search Something on Douban",
   "icon": "douban.png",
   "author": "crazyczy",
-  "categories": [
-    "Web"
-  ],
+  "categories": ["Web"],
   "license": "MIT",
   "commands": [
     {
@@ -54,12 +52,12 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.49.1",
+    "@raycast/api": "^1.49.3",
     "@raycast/utils": "^1.5.2",
     "cheerio": "^1.0.0-rc.12"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "1.0.5",
+    "@raycast/eslint-config": "^1.0.5",
     "@types/node": "18.8.3",
     "@types/react": "18.0.9",
     "eslint": "^7.32.0",
