@@ -22,7 +22,7 @@ export function prepareItemsForCache(items: Item[]): Item[] {
     identity: cleanIdentity(item.identity),
     card: cleanCard(item.card),
     passwordHistory: cleanPasswordHistory(item.passwordHistory),
-    notes: item.notes != null ? SENSITIVE_VALUE_PLACEHOLDER : null,
+    notes: hideIfDefined(item.notes),
   }));
 }
 
@@ -33,7 +33,7 @@ export function prepareFoldersForCache(folders: Folder[]): Folder[] {
 function cleanFields(fields: Item["fields"]): Item["fields"] {
   return fields?.map((field) => ({
     name: field.name, // necessary for display
-    value: SENSITIVE_VALUE_PLACEHOLDER,
+    value: hideIfDefined(field.value),
     type: field.type,
     linkedId: field.linkedId,
   }));
@@ -44,49 +44,54 @@ function cleanLogin(login: Item["login"]): Item["login"] {
   return {
     username: login.username, // necessary for display
     uris: login.uris,
-    password: SENSITIVE_VALUE_PLACEHOLDER,
-    passwordRevisionDate: SENSITIVE_VALUE_PLACEHOLDER,
-    totp: SENSITIVE_VALUE_PLACEHOLDER,
+    password: hideIfDefined(login.password),
+    passwordRevisionDate: hideIfDefined(login.passwordRevisionDate),
+    totp: hideIfDefined(login.totp),
   };
 }
 
 function cleanIdentity(identity: Item["identity"]): Item["identity"] {
   if (!identity) return undefined;
   return {
-    middleName: SENSITIVE_VALUE_PLACEHOLDER,
-    lastName: SENSITIVE_VALUE_PLACEHOLDER,
-    address1: SENSITIVE_VALUE_PLACEHOLDER,
-    address2: SENSITIVE_VALUE_PLACEHOLDER,
-    address3: SENSITIVE_VALUE_PLACEHOLDER,
-    city: SENSITIVE_VALUE_PLACEHOLDER,
-    state: SENSITIVE_VALUE_PLACEHOLDER,
-    postalCode: SENSITIVE_VALUE_PLACEHOLDER,
-    country: SENSITIVE_VALUE_PLACEHOLDER,
-    company: SENSITIVE_VALUE_PLACEHOLDER,
-    email: SENSITIVE_VALUE_PLACEHOLDER,
-    phone: SENSITIVE_VALUE_PLACEHOLDER,
-    ssn: SENSITIVE_VALUE_PLACEHOLDER,
-    username: SENSITIVE_VALUE_PLACEHOLDER,
-    passportNumber: SENSITIVE_VALUE_PLACEHOLDER,
-    licenseNumber: SENSITIVE_VALUE_PLACEHOLDER,
+    middleName: hideIfDefined(identity.middleName),
+    lastName: hideIfDefined(identity.lastName),
+    address1: hideIfDefined(identity.address1),
+    address2: hideIfDefined(identity.address2),
+    address3: hideIfDefined(identity.address3),
+    city: hideIfDefined(identity.city),
+    state: hideIfDefined(identity.state),
+    postalCode: hideIfDefined(identity.postalCode),
+    country: hideIfDefined(identity.country),
+    company: hideIfDefined(identity.company),
+    email: hideIfDefined(identity.email),
+    phone: hideIfDefined(identity.phone),
+    ssn: hideIfDefined(identity.ssn),
+    username: hideIfDefined(identity.username),
+    passportNumber: hideIfDefined(identity.passportNumber),
+    licenseNumber: hideIfDefined(identity.licenseNumber),
   };
 }
 
 function cleanCard(card: Item["card"]): Item["card"] {
   if (!card) return undefined;
   return {
-    cardholderName: SENSITIVE_VALUE_PLACEHOLDER,
-    brand: SENSITIVE_VALUE_PLACEHOLDER,
-    number: SENSITIVE_VALUE_PLACEHOLDER,
-    expMonth: SENSITIVE_VALUE_PLACEHOLDER,
-    expYear: SENSITIVE_VALUE_PLACEHOLDER,
-    code: SENSITIVE_VALUE_PLACEHOLDER,
+    cardholderName: hideIfDefined(card.cardholderName),
+    brand: hideIfDefined(card.brand),
+    number: hideIfDefined(card.number),
+    expMonth: hideIfDefined(card.expMonth),
+    expYear: hideIfDefined(card.expYear),
+    code: hideIfDefined(card.code),
   };
 }
 
-function cleanPasswordHistory(passwordHistory: Item["passwordHistory"]): Item["passwordHistory"] {
-  return passwordHistory?.map(() => ({
-    password: SENSITIVE_VALUE_PLACEHOLDER,
-    lastUsedDate: SENSITIVE_VALUE_PLACEHOLDER,
+function cleanPasswordHistory(passwordHistoryItems: Item["passwordHistory"]): Item["passwordHistory"] {
+  return passwordHistoryItems?.map((passwordHistory) => ({
+    password: hideIfDefined(passwordHistory.password),
+    lastUsedDate: hideIfDefined(passwordHistory.lastUsedDate),
   }));
+}
+
+function hideIfDefined<T>(value: T) {
+  if (!value) return value;
+  return SENSITIVE_VALUE_PLACEHOLDER;
 }

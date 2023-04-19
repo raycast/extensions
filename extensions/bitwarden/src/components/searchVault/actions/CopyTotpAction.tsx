@@ -4,19 +4,22 @@ import { useBitwarden } from "~/context/bitwarden";
 import { useSession } from "~/context/session";
 import { useSelectedVaultItem } from "~/components/searchVault/context/vaultItem";
 import { getTransientCopyPreference } from "~/utils/preferences";
+import useGetUpdatedVaultItem from "~/components/searchVault/utils/useGetUpdatedVaultItem";
+import { captureException } from "~/utils/development";
 
 function CopyTotpAction() {
-  const { id, name, login } = useSelectedVaultItem();
   const bitwarden = useBitwarden();
   const session = useSession();
-  const code = login?.totp;
+  const selectedItem = useSelectedVaultItem();
+  const getUpdatedVaultItem = useGetUpdatedVaultItem();
 
-  if (!code) return null;
+  if (!selectedItem.login?.totp) return null;
 
   const copyTotp = async () => {
     if (session.token) {
       const toast = await showToast(Toast.Style.Animated, "Copying TOTP Code...");
       try {
+        const id = await getUpdatedVaultItem(selectedItem, (item) => item.id);
         const totp = await bitwarden.getTotp(id, session.token);
         await Clipboard.copy(totp, { transient: getTransientCopyPreference("other") });
         await showHUD("Copied to clipboard.");
@@ -25,6 +28,7 @@ function CopyTotpAction() {
       } catch (error) {
         toast.style = Toast.Style.Failure;
         toast.title = "Failed to copy TOTP";
+        captureException("Failed to copy TOTP", error);
       }
     } else {
       showToast(Toast.Style.Failure, "Failed to fetch TOTP.");
@@ -37,7 +41,7 @@ function CopyTotpAction() {
       icon={Icon.Clipboard}
       onAction={copyTotp}
       shortcut={{ modifiers: ["cmd"], key: "t" }}
-      repromptDescription={`Copying the TOTP of <${name}>`}
+      repromptDescription={`Copying the TOTP of <${selectedItem.name}>`}
     />
   );
 }

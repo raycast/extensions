@@ -1,15 +1,18 @@
 import { Clipboard, Icon } from "@raycast/api";
 import ActionWithReprompt from "~/components/actions/ActionWithReprompt";
 import { useSelectedVaultItem } from "~/components/searchVault/context/vaultItem";
+import useGetUpdatedVaultItem from "~/components/searchVault/utils/useGetUpdatedVaultItem";
 
 function PastePasswordAction() {
-  const { login, name } = useSelectedVaultItem();
-  const password = login?.password;
+  const selectedItem = useSelectedVaultItem();
+  const getUpdatedVaultItem = useGetUpdatedVaultItem();
 
-  if (!password) return null;
+  if (!selectedItem.login?.password) return null;
 
   const pastePassword = async () => {
-    await Clipboard.paste(password);
+    // TODO: Show toast while getting password
+    const password = await getUpdatedVaultItem(selectedItem, (item) => item.login?.password);
+    if (password) await Clipboard.paste(password);
   };
 
   return (
@@ -17,7 +20,7 @@ function PastePasswordAction() {
       title="Paste Password"
       icon={Icon.Key}
       onAction={pastePassword}
-      repromptDescription={`Pasting the password of <${name}>`}
+      repromptDescription={`Pasting the password of <${selectedItem.name}>`}
     />
   );
 }

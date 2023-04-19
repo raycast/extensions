@@ -1,4 +1,4 @@
-import { Detail } from "@raycast/api";
+import { Detail, List } from "@raycast/api";
 import { createContext, PropsWithChildren, useContext, useEffect, useMemo, useRef } from "react";
 import UnlockForm from "~/components/UnlockForm";
 import { useBitwarden } from "~/context/bitwarden";
@@ -110,7 +110,7 @@ export function SessionProvider(props: SessionProviderProps) {
     [state, handleLock, handleLogout, confirmMasterPassword]
   );
 
-  if (state.isLoading) return <Detail isLoading />;
+  if (state.isLoading) return <List isLoading />;
 
   const showUnlockForm = state.isLocked || !state.isAuthenticated;
   const children = state.token ? props.children : null;
