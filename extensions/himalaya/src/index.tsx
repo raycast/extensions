@@ -148,7 +148,7 @@ export default function ListEnvelopes() {
       </List>
     );
   } else {
-    return <Detail markdown="Couldn't find executable" />;
+    return <Detail markdown="Couldn't find executable, please install Himalaya CLI" />;
   }
 }
 
