@@ -13,15 +13,25 @@ export function FooterAction({ url, uri, title }: FooterActionProps) {
       <Action.CopyToClipboard
         icon={Icon.Link}
         title="Copy URL"
+        shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
         content={{
           html: `<a href="${url}" title="${title}">${title}</a>`,
           text: url,
         }}
       />
       {isSpotifyInstalled ? (
-        <Action.Open icon="spotify-icon.svg" title="Open on Spotify" target={uri || "spotify"} />
+        <Action.Open
+          icon="spotify-icon.svg"
+          title="Open on Spotify"
+          shortcut={{ modifiers: ["cmd"], key: "o" }}
+          target={uri || "spotify"}
+        />
       ) : (
-        <Action.OpenInBrowser title="Open on Spotify Web" url={url || "https://play.spotify.com"} />
+        <Action.OpenInBrowser
+          title="Open on Spotify Web"
+          shortcut={{ modifiers: ["cmd"], key: "o" }}
+          url={url || "https://play.spotify.com"}
+        />
       )}
     </ActionPanel.Section>
   );
