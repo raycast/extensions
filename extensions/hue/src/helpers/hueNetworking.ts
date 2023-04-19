@@ -8,7 +8,7 @@ import { isIPv4 } from "net";
 /**
  * Ignoring that you could have more than one Hue Bridge on a network as this is unlikely in 99.9% of users situations
  */
-export async function discoverBridgeUsingNupnp(): Promise<{ ipAddress: string; id: string }> {
+export async function discoverBridgeUsingHuePublicApi(): Promise<{ ipAddress: string; id: string }> {
   console.info("Discovering bridge using MeetHue's public API…");
 
   return new Promise((resolve, reject) => {

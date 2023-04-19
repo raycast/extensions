@@ -15,7 +15,7 @@ import HueClient from "./HueClient";
 import { BridgeConfig, GroupedLight, Light, Room, Scene, Zone } from "./types";
 import React from "react";
 import createHueClient from "./createHueClient";
-import { discoverBridgeUsingMdns, discoverBridgeUsingNupnp } from "../helpers/hueNetworking";
+import { discoverBridgeUsingMdns, discoverBridgeUsingHuePublicApi } from "../helpers/hueNetworking";
 import { linkWithBridge } from "./linkWithBridge";
 import * as net from "net";
 import Style = Toast.Style;
@@ -201,8 +201,8 @@ export default function hueBridgeMachine(
       },
       discoveringUsingPublicApi: {
         invoke: {
-          id: "discoverBridgeUsingNupnp",
-          src: discoverBridgeUsingNupnp,
+          id: "discoverBridgeUsingHuePublicApi",
+          src: discoverBridgeUsingHuePublicApi,
           onDone: [
             {
               target: "linking",
