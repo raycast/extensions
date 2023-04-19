@@ -10,6 +10,7 @@ import {
   Color,
   LaunchProps,
   openCommandPreferences,
+  Image,
 } from "@raycast/api";
 import { pause } from "./api/pause";
 import { play } from "./api/play";
@@ -34,8 +35,17 @@ import { useCachedState } from "@raycast/utils";
 import { useCurrentlyPlayingUri } from "./hooks/useCurrentlyPlayingUri";
 import { formatTitle } from "./helpers/formatTitle";
 
+enum NowPlayingMenuBarIconType {
+  Spotify = "spotify",
+  Album = "album",
+}
+
 function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
-  const preferences = getPreferenceValues<{ maxTextLength?: boolean; showEllipsis?: boolean }>();
+  const preferences = getPreferenceValues<{
+    maxTextLength?: boolean;
+    showEllipsis?: boolean;
+    iconType?: NowPlayingMenuBarIconType;
+  }>();
 
   // First we get the currently playing URI using `useCurrentlyPlayingUri` (this prioritises AppleScript over the API)
   const { currentlyPlayingUriData, currentlyPlayingUriIsLoading } = useCurrentlyPlayingUri();
@@ -92,13 +102,16 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
   const { name, external_urls, uri } = item;
 
   let title = "";
+  let albumImageUrl = "";
   let menuItems: JSX.Element | null = null;
 
   if (isTrack) {
-    const { artists, id: trackId } = item as TrackObject;
+    const { artists, id: trackId, album } = item as TrackObject;
     const artistName = artists?.[0]?.name;
     const artistId = artists?.[0]?.id;
     title = `${name} · ${artistName}`;
+    // Get the album image with the lowest resolution
+    albumImageUrl = album?.images.slice(-1)[0]?.url || "";
 
     menuItems = (
       <>
@@ -163,7 +176,14 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
   return (
     <MenuBarExtra
       isLoading={currentlyPlayingIsLoading || currentlyPlayingUriIsLoading || playbackStateIsLoading}
-      icon={{ source: { dark: "menu-icon-dark.svg", light: "menu-icon-light.svg" } }}
+      icon={
+        preferences.iconType === NowPlayingMenuBarIconType.Album && albumImageUrl
+          ? {
+              source: albumImageUrl,
+              mask: Image.Mask.RoundedRectangle,
+            }
+          : { source: { dark: "menu-icon-dark.svg", light: "menu-icon-light.svg" } }
+      }
       title={formatTitle(title, Number(preferences.maxTextLength))}
       tooltip={title}
     >

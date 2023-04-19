@@ -63,6 +63,24 @@
           "type": "textfield",
           "default": "20",
           "required": false
+        },
+        {
+          "name": "iconType",
+          "title": "Menu Bar Icon type",
+          "description": "Choose between the default Spotify icon, or the album image of the current track",
+          "type": "dropdown",
+          "default": "spotify",
+          "data": [
+            {
+              "title": "Spotify Icon",
+              "value": "spotify"
+            },
+            {
+              "title": "Album Image",
+              "value": "album"
+            }
+          ],
+          "required": false
         }
       ]
     },
