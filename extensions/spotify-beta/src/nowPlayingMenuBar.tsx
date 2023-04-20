@@ -213,16 +213,6 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
               playlist.id && (
                 <MenuBarExtra.Item
                   key={playlist.id}
-                  icon={
-                    playlist.images?.length
-                      ? {
-                          source: playlist.images.slice(-1)[0].url,
-                          mask: Image.Mask.RoundedRectangle,
-                        }
-                      : {
-                          source: Icon.Music,
-                        }
-                  }
                   title={playlist.name}
                   onAction={async () => {
                     await addToPlaylist({
