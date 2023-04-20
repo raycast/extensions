@@ -414,7 +414,7 @@ function EntryActions(article: Article, query: string, sortBy: string) {
         <Action.Push icon={Icon.Book} title="Read abstract" target={<Details article={article} query={query} />} />
         <Action.Open
           icon={Icon.Globe}
-          title="Open article in Browser"
+          title="Open Article in Browser"
           target={article.url}
           shortcut={{ modifiers: ["cmd"], key: "enter" }}
         />
@@ -426,7 +426,7 @@ function EntryActions(article: Article, query: string, sortBy: string) {
         />
         <Action.Open
           icon={Icon.LockUnlocked}
-          title="Open article on Sci-Hub in Browser"
+          title="Open Article on Sci-Hub in Browser"
           target={preferences.scihubinstance.value + encodeURI(article.doi)}
           shortcut={{ modifiers: ["opt"], key: "enter" }}
         />
@@ -438,7 +438,7 @@ function EntryActions(article: Article, query: string, sortBy: string) {
         <Action.Push icon={Icon.Book} title="Read abstract" target={<Details article={article} query={query} />} />
         <Action.Open
           icon={Icon.Globe}
-          title="Open article in Browser"
+          title="Open Article in Browser"
           target={article.url}
           shortcut={{ modifiers: ["cmd"], key: "enter" }}
         />
@@ -457,10 +457,10 @@ function EntryActionsDetail(article: Article) {
   if (preferences.scihubinstance.value != undefined && preferences.scihubinstance.value != "" && article.doi) {
     return (
       <ActionPanel>
-        <Action.Open icon={Icon.Globe} title="Open article in Browser" target={article.url} />
+        <Action.Open icon={Icon.Globe} title="Open Article in Browser" target={article.url} />
         <Action.Open
           icon={Icon.LockUnlocked}
-          title="Open article on Sci-Hub in Browser"
+          title="Open Article on Sci-Hub in Browser"
           target={preferences.scihubinstance.value + encodeURI(article.doi)}
           shortcut={{ modifiers: ["opt"], key: "enter" }}
         />
@@ -469,7 +469,7 @@ function EntryActionsDetail(article: Article) {
   } else {
     return (
       <ActionPanel>
-        <Action.Open icon={Icon.Globe} title="Open article in Browser" target={article.url} />
+        <Action.Open icon={Icon.Globe} title="Open Article in Browser" target={article.url} />
       </ActionPanel>
     );
   }
