@@ -19,35 +19,34 @@
     {
       "required": true,
       "name": "pin",
-      "title": "pin code",
+      "title": "PinCode",
       "type": "password",
-      "description": "Your Pin Code",
-      "placeholder": "Enter your Pin Code"
+      "description": "qotp.corp 平台中用户设置的6位密码",
+      "placeholder": "qotp.corp 平台中用户设置的6位密码"
     },
     {
       "required": true,
       "name": "secret",
-      "title": "secret",
+      "title": "Secret",
       "type": "password",
       "description": "Your Secret",
-      "placeholder": "Enter your Secret"
+      "placeholder": "Enter Your Secret"
     },
     {
       "required": false,
       "name": "passphrase",
-      "title": "passphrase",
+      "title": "passphrase(跳板机登录线上机器的密码)",
       "type": "password",
-      "description": "passphrase",
-      "placeholder": "passphrase"
+      "description": "跳板机登录线上机器的密码"
     },
     {
       "required": false,
       "name": "genCodeCount",
-      "title": "genCodeCount",
+      "title": "生成的code数量",
       "type": "textfield",
       "default": "3",
-      "description": "genCodeCount",
-      "placeholder": "genCodeCount"
+      "description": "生成的code数量",
+      "placeholder": "请填写数字"
     }
   ],
   "dependencies": {

@@ -9,8 +9,6 @@ interface IPreferences {
 
 function Preferences(): IPreferences {
   const preferences = getPreferenceValues<IPreferences>();
-  // console.log(preferences);
-  // console.trace();
   return preferences;
 }
 
@@ -19,6 +17,6 @@ const pres = Preferences();
 export const pin = pres.pin;
 export const secret = pres.secret;
 export const passphrase = pres.passphrase;
-export const genCodeCount = pres.genCodeCount;
+export const genCodeCount = pres.genCodeCount >= 1 ? pres.genCodeCount : 1;
 
 export default pres;
