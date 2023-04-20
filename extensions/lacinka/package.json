@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "lacinka",
-  "title": "Łacinka",
-  "description": "Use belarussian \"Łacinka\" on the go\n\nПеракладай тэкст на лацінку",
+  "title": "lacinka",
+  "description": "Use belarussian lacinka on the go",
   "icon": "icon.png",
   "author": "colorage",
   "categories": [
@@ -13,7 +13,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "Convert to Łacinka",
+      "title": "Convert to lacinka",
       "description": "Trasform selected text to",
       "mode": "view"
     }
