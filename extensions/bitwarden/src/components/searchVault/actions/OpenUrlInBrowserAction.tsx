@@ -12,11 +12,7 @@ function OpenUrlInBrowserAction() {
 
   const handleOpenUrlInBrowser = async () => {
     try {
-      let toast: Toast | undefined;
-      const mainUri = await getUpdatedVaultItem(selectedItem, getUri, {
-        onBeforeGetItem: async () => (toast = await showToast(Toast.Style.Animated, "Getting URL...")),
-      });
-      await toast?.hide();
+      const mainUri = await getUpdatedVaultItem(selectedItem, getUri, "Getting URL...");
       if (mainUri) await open(mainUri);
     } catch (error) {
       await showToast(Toast.Style.Failure, "Failed to get URL");

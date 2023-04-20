@@ -1,3 +1,4 @@
+import { Toast, showToast } from "@raycast/api";
 import { useVaultItemSubscriber } from "~/components/searchVault/context/vaultListeners";
 import { SENSITIVE_VALUE_PLACEHOLDER } from "~/constants/general";
 import { Item } from "~/types/vault";
@@ -6,19 +7,31 @@ export type Options = {
   onBeforeGetItem?: () => any | Promise<any>;
 };
 
+/**
+ * Returns a function that will get the latest value of a vault item.
+ * If the value is already known, it will be returned immediately.
+ * Otherwise, it will wait for the value to be retrieved from the vault.
+ */
 function useGetUpdatedVaultItem() {
-  const getItem = useVaultItemSubscriber();
+  const getItemFromVault = useVaultItemSubscriber();
 
-  return async function <TResult = Item>(
+  async function getItem<TResult = Item>(
     possiblyCachedItem: Item,
     selector = ((item) => item) as (item: Item) => TResult,
-    options?: Options
+    loadingMessage?: string
   ): Promise<TResult> {
     const currentValue = selector(possiblyCachedItem);
     if (currentValue !== SENSITIVE_VALUE_PLACEHOLDER) return currentValue;
-    await options?.onBeforeGetItem?.();
-    return selector(await getItem(possiblyCachedItem.id));
-  };
+
+    let toast: Toast | undefined;
+    if (loadingMessage) toast = await showToast(Toast.Style.Animated, loadingMessage);
+    const value = selector(await getItemFromVault(possiblyCachedItem.id));
+    await toast?.hide();
+
+    return value;
+  }
+
+  return getItem;
 }
 
 export default useGetUpdatedVaultItem;

@@ -15,12 +15,7 @@ function ShowCardDetailsAction() {
 
   const showCardDetails = async () => {
     try {
-      let toast: Toast | undefined;
-      const card = await getUpdatedVaultItem(selectedItem, (item) => item.card, {
-        onBeforeGetItem: async () => (toast = await showToast(Toast.Style.Animated, "Getting card details...")),
-      });
-      await toast?.hide();
-
+      const card = await getUpdatedVaultItem(selectedItem, (item) => item.card, "Getting card details...");
       if (card) {
         push(
           <Detail

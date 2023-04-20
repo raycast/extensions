@@ -12,11 +12,7 @@ function PastePasswordAction() {
 
   const pastePassword = async () => {
     try {
-      let toast: Toast | undefined;
-      const password = await getUpdatedVaultItem(selectedItem, (item) => item.login?.password, {
-        onBeforeGetItem: async () => (toast = await showToast(Toast.Style.Animated, "Getting password...")),
-      });
-      await toast?.hide();
+      const password = await getUpdatedVaultItem(selectedItem, (item) => item.login?.password, "Getting password...");
       if (password) await Clipboard.paste(password);
     } catch (error) {
       await showToast(Toast.Style.Failure, "Failed to get password");

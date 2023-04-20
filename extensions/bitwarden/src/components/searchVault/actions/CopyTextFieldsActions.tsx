@@ -24,11 +24,7 @@ function CopyTextFieldsActions() {
 
   const handleCopyUri = (index: number) => async () => {
     try {
-      let toast: Toast | undefined;
-      const uriEntry = await getUpdatedVaultItem(selectedItem, (item) => item.login?.uris?.[index], {
-        onBeforeGetItem: async () => (toast = await showToast(Toast.Style.Animated, "Getting uri...")),
-      });
-      await toast?.hide();
+      const uriEntry = await getUpdatedVaultItem(selectedItem, (item) => item.login?.uris?.[index], "Getting uri...");
       if (uriEntry?.uri) {
         await Clipboard.copy(uriEntry.uri, { transient: getTransientCopyPreference("other") });
         await showHUD("Copied to clipboard");
@@ -42,13 +38,13 @@ function CopyTextFieldsActions() {
 
   const handleCopyTextField = (field: keyof ReturnType<typeof getTextFields>) => async () => {
     try {
-      let toast: Toast | undefined;
-      const fieldValue = await getUpdatedVaultItem(selectedItem, (item) => getTextFields(item)[field], {
-        onBeforeGetItem: async () => (toast = await showToast(Toast.Style.Animated, "Getting uri...")),
-      });
-      await toast?.hide();
-      if (fieldValue) {
-        await Clipboard.copy(fieldValue, { transient: getTransientCopyPreference("other") });
+      const value = await getUpdatedVaultItem(
+        selectedItem,
+        (item) => getTextFields(item)[field],
+        `Getting ${field}...`
+      );
+      if (value) {
+        await Clipboard.copy(value, { transient: getTransientCopyPreference("other") });
         await showHUD("Copied to clipboard");
         await closeMainWindow();
       }

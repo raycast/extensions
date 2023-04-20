@@ -15,12 +15,7 @@ function ShowSecureNoteAction() {
 
   const showSecureNote = async () => {
     try {
-      let toast: Toast | undefined;
-      const notes = await getUpdatedVaultItem(selectedItem, (item) => item.notes, {
-        onBeforeGetItem: async () => (toast = await showToast(Toast.Style.Animated, "Getting url...")),
-      });
-      await toast?.hide();
-
+      const notes = await getUpdatedVaultItem(selectedItem, (item) => item.notes, "Getting secure note...");
       if (notes) {
         push(
           <Detail

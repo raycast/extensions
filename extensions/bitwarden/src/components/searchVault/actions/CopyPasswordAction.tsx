@@ -12,15 +12,9 @@ function CopyPasswordAction() {
   if (!selectedItem.login?.password) return null;
 
   const handleCopyPassword = async () => {
-    let toast: Toast | undefined;
     try {
-      const password = await getUpdatedVaultItem(selectedItem, (item) => item.login?.password, {
-        onBeforeGetItem: async () => (toast = await showToast(Toast.Style.Animated, "Getting password...")),
-      });
-      await toast?.hide();
-      if (password) {
-        await copyPassword(password);
-      }
+      const password = await getUpdatedVaultItem(selectedItem, (item) => item.login?.password, "Getting password...");
+      if (password) await copyPassword(password);
     } catch (error) {
       await showToast(Toast.Style.Failure, "Failed to get password");
       captureException("Failed to copy password", error);

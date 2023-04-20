@@ -17,18 +17,17 @@ function CopyTotpAction() {
 
   const copyTotp = async () => {
     if (session.token) {
-      let toast: Toast | undefined;
+      const toast = await showToast(Toast.Style.Animated, "Getting TOTP code...");
       try {
-        const id = await getUpdatedVaultItem(selectedItem, (item) => item.id, {
-          onBeforeGetItem: async () => (toast = await showToast(Toast.Style.Animated, "Getting password...")),
-        });
+        const id = await getUpdatedVaultItem(selectedItem, (item) => item.id);
         const totp = await bitwarden.getTotp(id, session.token);
         await toast?.hide();
         await Clipboard.copy(totp, { transient: getTransientCopyPreference("other") });
         await showHUD("Copied to clipboard");
         await closeMainWindow({ clearRootSearch: true });
       } catch (error) {
-        await showToast(Toast.Style.Failure, "Failed to get TOTP");
+        toast.message = "Failed to get TOTP";
+        toast.style = Toast.Style.Failure;
         captureException("Failed to copy TOTP", error);
       }
     } else {

@@ -12,11 +12,7 @@ function CopyUsernameAction() {
 
   const handleCopyUsername = async () => {
     try {
-      let toast: Toast | undefined;
-      const username = await getUpdatedVaultItem(selectedItem, (item) => item.login?.username, {
-        onBeforeGetItem: async () => (toast = await showToast(Toast.Style.Animated, "Getting username...")),
-      });
-      await toast?.hide();
+      const username = await getUpdatedVaultItem(selectedItem, (item) => item.login?.username, "Getting username...");
       if (username) {
         await Clipboard.copy(username, { transient: getTransientCopyPreference("other") });
         await showHUD("Copied to clipboard");
