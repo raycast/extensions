@@ -3,6 +3,7 @@ import ActionWithReprompt from "~/components/actions/ActionWithReprompt";
 import { useSelectedVaultItem } from "~/components/searchVault/context/vaultItem";
 import { getTransientCopyPreference } from "~/utils/preferences";
 import useGetUpdatedVaultItem from "~/components/searchVault/utils/useGetUpdatedVaultItem";
+import { captureException } from "~/utils/development";
 
 function CopyPasswordAction() {
   const selectedItem = useSelectedVaultItem();
@@ -11,16 +12,18 @@ function CopyPasswordAction() {
   if (!selectedItem.login?.password) return null;
 
   const handleCopyPassword = async () => {
-    const toast = await showToast(Toast.Style.Animated, "Getting password...");
+    let toast: Toast | undefined;
     try {
-      const itemPassword = await getUpdatedVaultItem(selectedItem, (item) => item.login?.password);
-      if (!itemPassword) {
-        await showToast(Toast.Style.Failure, "Failed to get password");
-        return;
+      const password = await getUpdatedVaultItem(selectedItem, (item) => item.login?.password, {
+        onBeforeGetItem: async () => (toast = await showToast(Toast.Style.Animated, "Getting password...")),
+      });
+      await toast?.hide();
+      if (password) {
+        await copyPassword(password);
       }
-      copyPassword(itemPassword);
-    } finally {
-      toast.hide();
+    } catch (error) {
+      await showToast(Toast.Style.Failure, "Failed to get password");
+      captureException("Failed to copy password", error);
     }
   };
 

@@ -2,14 +2,22 @@ import { useVaultItemSubscriber } from "~/components/searchVault/context/vaultLi
 import { SENSITIVE_VALUE_PLACEHOLDER } from "~/constants/general";
 import { Item } from "~/types/vault";
 
+export type Options = {
+  onBeforeGetItem?: () => any | Promise<any>;
+};
+
 function useGetUpdatedVaultItem() {
   const getItem = useVaultItemSubscriber();
 
-  return async function <T = Item>(possiblyCachedItem: Item, selector?: (item: Item) => T): Promise<T> {
-    const currentValue = selector?.(possiblyCachedItem) ?? possiblyCachedItem;
-    if (currentValue !== SENSITIVE_VALUE_PLACEHOLDER) return currentValue as T;
-    const updatedItem = await getItem(possiblyCachedItem.id);
-    return (selector?.(updatedItem) ?? updatedItem) as T;
+  return async function <TResult = Item>(
+    possiblyCachedItem: Item,
+    selector = ((item) => item) as (item: Item) => TResult,
+    options?: Options
+  ): Promise<TResult> {
+    const currentValue = selector(possiblyCachedItem);
+    if (currentValue !== SENSITIVE_VALUE_PLACEHOLDER) return currentValue;
+    await options?.onBeforeGetItem?.();
+    return selector(await getItem(possiblyCachedItem.id));
   };
 }
 

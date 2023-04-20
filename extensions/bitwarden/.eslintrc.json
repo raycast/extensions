@@ -9,6 +9,7 @@
   "extends": ["eslint:recommended", "plugin:@typescript-eslint/recommended", "prettier"],
   "rules": {
     "prettier/prettier": ["error"],
-    "@typescript-eslint/no-unnecessary-type-constraint": "off"
+    "@typescript-eslint/no-unnecessary-type-constraint": "off",
+    "@typescript-eslint/no-explicit-any": "off"
   }
 }

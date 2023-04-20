@@ -1,7 +1,8 @@
-import { Action, Icon, open } from "@raycast/api";
+import { Action, Icon, Toast, open, showToast } from "@raycast/api";
 import { useSelectedVaultItem } from "~/components/searchVault/context/vaultItem";
 import useGetUpdatedVaultItem from "~/components/searchVault/utils/useGetUpdatedVaultItem";
 import { Item } from "~/types/vault";
+import { captureException } from "~/utils/development";
 
 function OpenUrlInBrowserAction() {
   const selectedItem = useSelectedVaultItem();
@@ -10,8 +11,17 @@ function OpenUrlInBrowserAction() {
   if (!getUri(selectedItem)) return null;
 
   const handleOpenUrlInBrowser = async () => {
-    const itemMainUri = await getUpdatedVaultItem(selectedItem, getUri);
-    if (itemMainUri) await open(itemMainUri);
+    try {
+      let toast: Toast | undefined;
+      const mainUri = await getUpdatedVaultItem(selectedItem, getUri, {
+        onBeforeGetItem: async () => (toast = await showToast(Toast.Style.Animated, "Getting URL...")),
+      });
+      await toast?.hide();
+      if (mainUri) await open(mainUri);
+    } catch (error) {
+      await showToast(Toast.Style.Failure, "Failed to get URL");
+      captureException("Failed to open URL in browser", error);
+    }
   };
 
   return (

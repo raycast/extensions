@@ -1,10 +1,11 @@
-import { Action, Clipboard, closeMainWindow, Icon, showHUD } from "@raycast/api";
+import { Action, Clipboard, closeMainWindow, Icon, showHUD, showToast, Toast } from "@raycast/api";
 import { capitalize } from "~/utils/strings";
 import { useSelectedVaultItem } from "~/components/searchVault/context/vaultItem";
 import ActionWithReprompt from "~/components/actions/ActionWithReprompt";
 import { getTransientCopyPreference } from "~/utils/preferences";
 import useGetUpdatedVaultItem from "~/components/searchVault/utils/useGetUpdatedVaultItem";
 import { Item } from "~/types/vault";
+import { captureException } from "~/utils/development";
 
 function CopyTextFieldsActions() {
   const selectedItem = useSelectedVaultItem();
@@ -21,12 +22,39 @@ function CopyTextFieldsActions() {
 
   const textFields = getTextFields(selectedItem);
 
-  const onRepromptAction = (field: keyof ReturnType<typeof getTextFields>) => async () => {
-    const fieldValue = await getUpdatedVaultItem(selectedItem, (item) => getTextFields(item)[field]);
-    if (fieldValue) {
-      await Clipboard.copy(fieldValue, { transient: getTransientCopyPreference("other") });
-      await showHUD("Copied to Clipboard");
-      await closeMainWindow();
+  const handleCopyUri = (index: number) => async () => {
+    try {
+      let toast: Toast | undefined;
+      const uriEntry = await getUpdatedVaultItem(selectedItem, (item) => item.login?.uris?.[index], {
+        onBeforeGetItem: async () => (toast = await showToast(Toast.Style.Animated, "Getting uri...")),
+      });
+      await toast?.hide();
+      if (uriEntry?.uri) {
+        await Clipboard.copy(uriEntry.uri, { transient: getTransientCopyPreference("other") });
+        await showHUD("Copied to clipboard");
+        await closeMainWindow();
+      }
+    } catch (error) {
+      await showToast(Toast.Style.Failure, "Failed to get uri");
+      captureException("Failed to copy uri", error);
+    }
+  };
+
+  const handleCopyTextField = (field: keyof ReturnType<typeof getTextFields>) => async () => {
+    try {
+      let toast: Toast | undefined;
+      const fieldValue = await getUpdatedVaultItem(selectedItem, (item) => getTextFields(item)[field], {
+        onBeforeGetItem: async () => (toast = await showToast(Toast.Style.Animated, "Getting uri...")),
+      });
+      await toast?.hide();
+      if (fieldValue) {
+        await Clipboard.copy(fieldValue, { transient: getTransientCopyPreference("other") });
+        await showHUD("Copied to clipboard");
+        await closeMainWindow();
+      }
+    } catch (error) {
+      await showToast(Toast.Style.Failure, `Failed to get ${field}`);
+      captureException(`Failed to copy ${field}`, error);
     }
   };
 
@@ -36,26 +64,25 @@ function CopyTextFieldsActions() {
         if (!content) return null;
 
         return (
-          <Action.CopyToClipboard
+          <Action
             key={`${index}-${title}`}
             title={`Copy ${title}`}
             icon={Icon.Clipboard}
-            content={content}
-            transient={getTransientCopyPreference("other")}
+            onAction={handleCopyUri(index)}
           />
         );
       })}
-      {Object.entries(textFields).map(([f, content], index) => {
-        const field = f as keyof ReturnType<typeof getTextFields>;
+      {Object.entries(textFields).map(([fieldKey, content], index) => {
         if (!content) return null;
 
+        const field = fieldKey as keyof ReturnType<typeof getTextFields>;
         const capitalizedTitle = capitalize(field);
         return (
           <ActionWithReprompt
             key={`${index}-${field}`}
             title={`Copy ${capitalizedTitle}`}
             icon={Icon.Clipboard}
-            onAction={onRepromptAction(field)}
+            onAction={handleCopyTextField(field)}
             repromptDescription={`Copying the ${capitalizedTitle} of <${selectedItem.name}>`}
           />
         );

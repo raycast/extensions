@@ -1,4 +1,4 @@
-import { Detail, List } from "@raycast/api";
+import { List } from "@raycast/api";
 import { createContext, PropsWithChildren, useContext, useEffect, useMemo, useRef } from "react";
 import UnlockForm from "~/components/UnlockForm";
 import { useBitwarden } from "~/context/bitwarden";

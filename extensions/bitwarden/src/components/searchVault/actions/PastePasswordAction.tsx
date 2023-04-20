@@ -1,7 +1,8 @@
-import { Clipboard, Icon } from "@raycast/api";
+import { Clipboard, Icon, Toast, showToast } from "@raycast/api";
 import ActionWithReprompt from "~/components/actions/ActionWithReprompt";
 import { useSelectedVaultItem } from "~/components/searchVault/context/vaultItem";
 import useGetUpdatedVaultItem from "~/components/searchVault/utils/useGetUpdatedVaultItem";
+import { captureException } from "~/utils/development";
 
 function PastePasswordAction() {
   const selectedItem = useSelectedVaultItem();
@@ -10,9 +11,17 @@ function PastePasswordAction() {
   if (!selectedItem.login?.password) return null;
 
   const pastePassword = async () => {
-    // TODO: Show toast while getting password
-    const password = await getUpdatedVaultItem(selectedItem, (item) => item.login?.password);
-    if (password) await Clipboard.paste(password);
+    try {
+      let toast: Toast | undefined;
+      const password = await getUpdatedVaultItem(selectedItem, (item) => item.login?.password, {
+        onBeforeGetItem: async () => (toast = await showToast(Toast.Style.Animated, "Getting password...")),
+      });
+      await toast?.hide();
+      if (password) await Clipboard.paste(password);
+    } catch (error) {
+      await showToast(Toast.Style.Failure, "Failed to get password");
+      captureException("Failed to paste password", error);
+    }
   };
 
   return (
