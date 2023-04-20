@@ -45,7 +45,7 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
     currentlyPlayingUriData
   );
 
-  const [count, setCount] = useCachedState<number>("currentlyPlayingRefreshCount", 0);
+  const [backgroundRefreshCount, setBackgroundRefreshCount] = useCachedState<number>("currentlyPlayingRefreshCount", 0);
 
   // We use a ref to store the value of `shouldExecute` so that it doesn't trigger a re-render
   const shouldExecute = useRef(false);
@@ -92,12 +92,12 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
   // Then we reset the count to 0, set `shouldExecute` to false and start the process again
   useEffect(() => {
     if (launchType === LaunchType.Background) {
-      if (playbackStateData?.is_playing === false && count < 180) {
+      if (playbackStateData?.is_playing === false && backgroundRefreshCount < 180) {
         shouldExecute.current = false;
-        setCount((prevCount) => prevCount + 1);
+        setBackgroundRefreshCount((prevCount) => prevCount + 1);
       } else {
         shouldExecute.current = true;
-        setCount(0);
+        setBackgroundRefreshCount(0);
       }
     }
   }, [playbackStateData]);
