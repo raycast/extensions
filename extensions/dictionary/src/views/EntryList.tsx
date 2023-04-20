@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import getEngine, { EngineHookProps, EngineID } from "../engines";
 import { SearchResultList, AutoCompleteList } from "../components/";
 import { SearchContext, useEngine } from "../hooks";
-import { supportedEngine } from "../constants";
+import { supportedEngine, supportedLanguages } from "../constants";
 import ConfigView from "./ConfigView";
 import { LanguageCode } from "../types";
 
@@ -57,13 +57,15 @@ const EntryList = ({ initQuery = "" }: { initQuery: string }) => {
     // BUG: here would cause double render
     setShowingDetail(!!id?.startsWith("detail"));
   };
-  const emptyTitle: string = query
-    ? `Sorry, There are no results for: ${query} on ${activeEngine.title}.`
-    : `Look up any word on ${activeEngine.title}.`;
-  const emptyDescription: string = query
-    ? `Try looking up other dictionaries by using the dropdown menu or typing command: '-set engine ...'.`
-    : `The word(s) will be translated to '${selectedPrimeLang}'.`;
-
+  const emptyViewProps: { title: string; description: string } = (activeEngine.getEmptyViewProps &&
+    activeEngine.getEmptyViewProps(selectedPrimeLang, query)) || {
+    title: query
+      ? `Sorry, There are no results for: ${query} on ${activeEngine.title}.`
+      : `Look up any word on ${activeEngine.title}.`,
+    description: query
+      ? `Try looking up other dictionaries by using the dropdown menu or typing command: '-set engine ...'.`
+      : `The word(s) will be translated to ${supportedLanguages[selectedPrimeLang].title}.`,
+  };
   return (
     <List
       isShowingDetail={isShowingDetail}
@@ -78,7 +80,7 @@ const EntryList = ({ initQuery = "" }: { initQuery: string }) => {
       <SearchContext.Provider value={searchStatus}>
         <SearchResultList data={(!query.startsWith("-") && data) || undefined} setQuery={setQuery} />
       </SearchContext.Provider>
-      <List.EmptyView title={emptyTitle} description={emptyDescription} />
+      <List.EmptyView {...emptyViewProps} />
     </List>
   );
 };

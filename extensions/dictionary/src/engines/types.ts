@@ -16,4 +16,5 @@ export interface EngineHookProps<R, T> {
   parseDef: (item: T) => DefItem | DefItem[];
   parsePos?: (item: T) => string;
   parseExtras?: (data: R, transCode?: LanguageCode) => DefListRts;
+  getEmptyViewProps?: (lang: LanguageCode, query: string) => { title: string; description: string };
 }

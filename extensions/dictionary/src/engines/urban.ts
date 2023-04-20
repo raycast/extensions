@@ -1,4 +1,4 @@
-import { DefsBody } from "../types";
+import { DefsBody, LanguageCode } from "../types";
 import { EngineHookProps } from "./types";
 const baseUrl = "https://www.urbandictionary.com/define.php";
 type Endpoint = "define" | "autocomplete-extra";
@@ -81,6 +81,16 @@ export const UrbanDefineEngine: EngineHookProps<DefineList, DefineItem> = {
   parseData: (data: DefineList): DefsBody<DefineItem> => ({ definitions: data.list }),
   parseDef: parseDetailDef,
 };
+const getEmptyViewProps = (_lang: LanguageCode, query: string) => {
+  const title: string = query
+    ? `Sorry, There are no results for: ${query} on Urban Dictionary.`
+    : `Look up any word on Urban Dictionary.`;
+  const description: string = query
+    ? `Try looking up other dictionaries by using the dropdown menu or typing command: '-set engine ...'.`
+    : "";
+  return { title, description };
+};
+
 const UrbanListEngine: EngineHookProps<AutoCompleteResults, AutoCompleteItem> = {
   key: "urban",
   baseUrl: baseUrl,
@@ -88,5 +98,6 @@ const UrbanListEngine: EngineHookProps<AutoCompleteResults, AutoCompleteItem> = 
   getUrl: prepareRequestUrl("autocomplete-extra"),
   parseData: (data: AutoCompleteResults): DefsBody<AutoCompleteItem> => ({ definitions: data.results }),
   parseDef: parseListDef,
+  getEmptyViewProps,
 };
 export default UrbanListEngine;
