@@ -1,4 +1,4 @@
-import { getSelectedText, Clipboard } from "@raycast/api";
+import { getSelectedText, Clipboard, showHUD } from "@raycast/api";
 
 const cyrillicToLatin: { [key: string]: string } = {
   а: "a",
@@ -394,6 +394,6 @@ export default async function Command() {
 
     await Clipboard.paste(latinText);
   } catch (error) {
-    await Clipboard.paste("");
+    await showHUD("❌ Couldn't get selected text");
   }
 }

@@ -14,8 +14,8 @@
     {
       "name": "index",
       "title": "Convert to lacinka",
-      "description": "Trasform selected text to",
-      "mode": "view"
+      "description": "Transform selected text to",
+      "mode": "no-view"
     }
   ],
   "dependencies": {
