@@ -557,10 +557,10 @@ const Details = (props: { article: Article; query: string }) => {
         year: "numeric",
       });
 
-  const citationTitle = props.article.issue ? "Volume(Issue):Pages" : "Volume:Pages";
+  const citationTitle = props.article.issue ? "Volume(Issue):Pages" : props.article.volume ? "Volume:Pages" : "Volume(Issue):Pages";
   const citationText = props.article.issue
     ? props.article.volume + "(" + props.article.issue + "):" + props.article.pages
-    : props.article.volume + ":" + props.article.pages;
+    : props.article.volume ? props.article.volume + ":" + props.article.pages : "Online ahead of print";
 
   const idsTitle = props.article.pmc && props.article.doi ? "PMC, DOI, PMID" : props.article.doi ? "DOI, PMID" : "PMID";
 

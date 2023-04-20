@@ -1,5 +1,9 @@
 # PubMe Changelog
 
+## [Version 1.1.2] - 2023-04-13
+
+- Fix: show "Online ahead of print", when there is no "Volume(Issue):Pages" to display
+
 ## [Version 1.1.1] - 2023-04-13
 
 - Fix: renaming to PubMe
