@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "buildspace-os-raycast",
-  "title": "buildspace os",
+  "title": "Buildspace OS",
   "description": "use a mini version of the buildspace os in your menu bar",
   "icon": "command-icon.png",
   "author": "landon",
@@ -12,8 +12,8 @@
   "commands": [
     {
       "name": "index",
-      "title": "buildspace os",
-      "description": "use the buildspace os in your menu bar",
+      "title": "Buildspace OS",
+      "description": "use the Buildspace OS in your menu bar",
       "mode": "menu-bar",
       "interval": "1m"
     }
