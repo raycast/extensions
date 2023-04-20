@@ -99,7 +99,7 @@ export default function Command() {
         }}
         throttle={true}
         isLoading={loading}
-        searchBarPlaceholder="Suchbegriff…"
+        searchBarPlaceholder="Suchbegriff..."
       >
         <List.Section title={query ? "" : "Top Artikel"}>
           {entries.map((entry) => {
@@ -144,7 +144,7 @@ export default function Command() {
       }}
       throttle={true}
       isLoading={loading}
-      searchBarPlaceholder="Suchbegriff…"
+      searchBarPlaceholder="Suchbegriff..."
     >
       {entries.map((entry) => {
         if (entry.description) {
