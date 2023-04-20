@@ -30,43 +30,49 @@
     {
       "name": "domain-pricing",
       "title": "Domain Pricing",
+      "subtitle": "Porkbun",
       "description": "Check default domain pricing information for all supported TLDs. This command does not require authentication.",
       "mode": "view"
     },
     {
       "name": "ping",
       "title": "Ping",
-      "subtitle": "Porkbun - use this to make sure API key is working as intended",
+      "subtitle": "Porkbun",
       "description": "The ping endpoint will return your IP address",
       "mode": "no-view"
     },
     {
       "name": "create-dns-record",
       "title": "Create DNS Record",
+      "subtitle": "Porkbun",
       "description": "Create a DNS record",
       "mode": "view"
     },
     {
       "name": "edit-dns-record",
       "title": "Edit DNS Record",
+      "subtitle": "Porkbun",
       "description": "Edit a DNS record",
       "mode": "view"
     },
     {
       "name": "delete-dns-record",
       "title": "Delete DNS Record",
+      "subtitle": "Porkbun",
       "description": "Delete a DNS record",
       "mode": "view"
     },
     {
       "name": "retrieve-dns-records",
       "title": "Retrieve DNS Records",
+      "subtitle": "Porkbun",
       "description": "Retrieve all editable DNS records meeting criteria",
       "mode": "view"
     },
     {
       "name": "retrieve-ssl-bundle",
       "title": "Retrieve SSL Bundle",
+      "subtitle": "Porkbun",
       "description": "Retrieve the SSL certificate bundle for the domain",
       "mode": "view"
     }
