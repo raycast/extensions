@@ -146,13 +146,12 @@ export default function SimpleCommand(props: CommandProps) {
       {props.children}
       <Form.Checkbox
         id="markdown"
-        title="Markdown"
-        label=""
+        label="Markdown"
         value={state.isMarkdown}
         onChange={(value) => setState((prevState) => ({ ...prevState, isMarkdown: value }))}
         storeValue
       />
-      <Form.Checkbox id="sensitive" title="Sensitive" label="" value={state.sensitive} onChange={handleCw} storeValue />
+      <Form.Checkbox id="sensitive" label="Sensitive" value={state.sensitive} onChange={handleCw} storeValue />
     </Form>
   );
 }
