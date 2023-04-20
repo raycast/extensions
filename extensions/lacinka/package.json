@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "lacinka",
-  "title": "lacinka",
+  "title": "Lacinka",
   "description": "Use belarussian lacinka on the go",
   "icon": "icon.png",
   "author": "colorage",
