@@ -92,7 +92,7 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
   // Then we reset the count to 0, set `shouldExecute` to false and start the process again
   useEffect(() => {
     if (launchType === LaunchType.Background) {
-      if (playbackStateData?.is_playing === false && backgroundRefreshCount < 180) {
+      if (playbackStateData?.is_playing === false && backgroundRefreshCount < 18) {
         shouldExecute.current = false;
         setBackgroundRefreshCount((prevCount) => prevCount + 1);
       } else {
