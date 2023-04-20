@@ -13,7 +13,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "Convert to lacinka",
+      "title": "Convert to Lacinka",
       "description": "Transform selected text to",
       "mode": "no-view"
     }
