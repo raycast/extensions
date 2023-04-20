@@ -46,7 +46,7 @@ export default function Command() {
   const [query, setQuery] = useState<null | string>(null);
   const [state, setState] = useState<Article[]>([]);
   const [entries, setEntries] = useState<Article[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [sortBy, setSortBy] = useState<string>();
   const [count, setCount] = useState<string>();
 
