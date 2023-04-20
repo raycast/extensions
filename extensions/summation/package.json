@@ -14,7 +14,7 @@
     {
       "name": "index",
       "title": "Summation",
-      "subtitle": "Calculate total",
+      "subtitle": "Calculate Total",
       "description": "Calculate the sum of a list of numbers in the selected text or clipboard.",
       "mode": "view"
     }
