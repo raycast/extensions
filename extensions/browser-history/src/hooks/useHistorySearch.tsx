@@ -68,7 +68,7 @@ const searchHistory = (
   const { data, isLoading, permissionView } = useSQL<HistoryEntry>(dbPath, queries);
   return {
     browser,
-    data: data?.map((d) => ({ ...d, id: `${browser}-${d.id}` })),
+    data: data?.map((d) => ({ ...d, id: `${browser}-${d.id}`, browser: browser })),
     isLoading,
     permissionView,
   };

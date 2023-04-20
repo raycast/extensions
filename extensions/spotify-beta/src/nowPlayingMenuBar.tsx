@@ -45,6 +45,8 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
     currentlyPlayingUriData
   );
 
+  const [backgroundRefreshCount, setBackgroundRefreshCount] = useCachedState<number>("currentlyPlayingRefreshCount", 0);
+
   // We use a ref to store the value of `shouldExecute` so that it doesn't trigger a re-render
   const shouldExecute = useRef(false);
 
@@ -53,7 +55,7 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
     options: { execute: shouldExecute.current },
   });
   const { playbackStateData, playbackStateIsLoading, playbackStateRevalidate } = usePlaybackState({
-    options: { execute: launchType === LaunchType.UserInitiated },
+    options: { execute: launchType === LaunchType.UserInitiated || shouldExecute.current },
   });
 
   // The hooks below will only execute when the Menu Bar is opened
@@ -77,6 +79,28 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
       shouldExecute.current = true;
     }
   }, [currentUri, currentlyPlayingUriData]);
+
+  // Sync back to the local state if the currently playing data changes
+  useEffect(() => {
+    setCurrentUri(currentlyPlayingData?.item?.uri);
+  }, [currentlyPlayingData]);
+
+  // Here we will keep a count of everytime this command background refreshes (every 10 seconds)
+  // We' check if the current playback state isn't playing and if the count is lesser than 18 (180 seconds/3 minutes)
+  // If so, we'll increment the count and set `shouldExecute` to false
+  // we'll set `shouldExecute` to true in order to execute the `useCurrentlyPlaying` hook and sync the playing state from the API back to the local state (happening in the `useEffect` above)
+  // Then we reset the count to 0, set `shouldExecute` to false and start the process again
+  useEffect(() => {
+    if (launchType === LaunchType.Background) {
+      if (playbackStateData?.is_playing === false && backgroundRefreshCount < 18) {
+        shouldExecute.current = false;
+        setBackgroundRefreshCount((prevCount) => prevCount + 1);
+      } else {
+        shouldExecute.current = true;
+        setBackgroundRefreshCount(0);
+      }
+    }
+  }, [playbackStateData]);
 
   const isPlaying = playbackStateData?.is_playing;
   const trackAlreadyLiked = containsMySavedTracksData?.[0];
@@ -249,6 +273,7 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
         <MenuBarExtra.Item
           title="Copy URL"
           icon={Icon.Link}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
           onAction={async () => {
             await Clipboard.copy({
               html: `<a href=${external_urls?.spotify}>${title}</a>`,
@@ -260,6 +285,7 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
         <MenuBarExtra.Item
           icon="spotify-icon.svg"
           title="Open on Spotify"
+          shortcut={{ modifiers: ["cmd"], key: "o" }}
           onAction={() =>
             isSpotifyInstalled ? open(uri || "spotify") : open(external_urls?.spotify || "https://play.spotify.com")
           }

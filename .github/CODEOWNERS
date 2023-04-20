@@ -33,9 +33,10 @@
 /extensions/any-website-search                       @rben01
 /extensions/anybox                                   @francisfeng
 /extensions/append-clipboard                         @koinzhang
+/extensions/apple-books                              @vimtor
 /extensions/apple-developer-docs                     @CaliCastle
 /extensions/apple-maps-search                        @djpowers @ratoru
-/extensions/apple-notes                              @tumispro @ron-myers @mathieudutour @StevenRCE0
+/extensions/apple-notes                              @tumispro @ron-myers @mathieudutour @StevenRCE0 @SKaplanOfficial
 /extensions/arc                                      @thomaspaulmann @pomdtr @zach-fuller @ankitchouhan1020 @pernielsentikaer @danpalmer
 /extensions/archiver                                 @404J
 /extensions/asana                                    @thomaslombart
@@ -223,6 +224,7 @@
 /extensions/dotnet-docs-search                       @huseyint
 /extensions/dotween-eases                            @metakirby5
 /extensions/dou-tu                                   @gaoyang
+/extensions/douban                                   @crazyczy
 /extensions/downloads-manager                        @thomaspaulmann @ron-myers @infused-kim
 /extensions/drafts                                   @FlohGro-dev
 /extensions/dribbble                                 @gebeto
@@ -359,6 +361,7 @@
 /extensions/hide-files                               @koinzhang
 /extensions/hide-mail                                @Flatroy
 /extensions/hiit                                     @pernielsentikaer @andreaselia
+/extensions/himalaya                                 @jesse-c
 /extensions/holodex                                  @uetchy
 /extensions/holopin                                  @timoransky @pernielsentikaer
 /extensions/homeassistant                            @tonka3000 @altrdev @rspeicher
@@ -581,6 +584,7 @@
 /extensions/openweathermap                           @tonka3000
 /extensions/opera                                    @crisboarna
 /extensions/opsgenie                                 @ricoberger
+/extensions/opslevel                                 @DuckyC
 /extensions/orion                                    @Plonq
 /extensions/oss-browser                              @404J
 /extensions/ossinsight                               @k8scat @pernielsentikaer
@@ -779,6 +783,7 @@
 /extensions/storytime                                @andreaselia @pernielsentikaer
 /extensions/stretchly                                @skyran1278
 /extensions/stripe                                   @pradeepb28 @farisaziz12
+/extensions/summation                                @supermamon
 /extensions/sun-moon-times                           @DannySeidel
 /extensions/supabase-docs                            @Isaiah-Hamilton
 /extensions/supernotes                               @acnebs @peduarte
@@ -792,7 +797,7 @@
 /extensions/switchhosts                              @tiancheng92
 /extensions/system-monitor                           @hossammourad @Crayon144 @pernielsentikaer @lucasmezencio
 /extensions/tableplus                                @pernielsentikaer
-/extensions/tailscale                                @samlinville
+/extensions/tailscale                                @samlinville @rosszurowski @samlinville
 /extensions/tailwindcss                              @vimtor @cy-98
 /extensions/tana                                     @cheslip
 /extensions/tapo-smart-devices                       @timrogers
