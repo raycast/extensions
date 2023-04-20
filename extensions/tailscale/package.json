@@ -5,6 +5,8 @@
   "description": "List devices in your Tailnet and copy the IPv4, IPv6, or MagicDNS address to your clipboard.",
   "icon": "command-icon.png",
   "author": "samlinville",
+  "owner": "tailscale",
+  "access": "public",
   "contributors": [
     "rosszurowski",
     "kradalby"
