@@ -35,16 +35,11 @@ import { useCachedState } from "@raycast/utils";
 import { useCurrentlyPlayingUri } from "./hooks/useCurrentlyPlayingUri";
 import { formatTitle } from "./helpers/formatTitle";
 
-enum NowPlayingMenuBarIconType {
-  Spotify = "spotify",
-  Album = "album",
-}
-
 function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
   const preferences = getPreferenceValues<{
     maxTextLength?: boolean;
     showEllipsis?: boolean;
-    iconType?: NowPlayingMenuBarIconType;
+    iconType?: "spotify-icon" | "cover-image";
   }>();
 
   // First we get the currently playing URI using `useCurrentlyPlayingUri` (this prioritises AppleScript over the API)
@@ -102,7 +97,7 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
   const { name, external_urls, uri } = item;
 
   let title = "";
-  let albumImageUrl = "";
+  let coverImageUrl = "";
   let menuItems: JSX.Element | null = null;
 
   if (isTrack) {
@@ -110,8 +105,8 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
     const artistName = artists?.[0]?.name;
     const artistId = artists?.[0]?.id;
     title = `${name} · ${artistName}`;
-    // Get the album image with the lowest resolution
-    albumImageUrl = album?.images.slice(-1)[0]?.url || "";
+    // Get the image with the lowest resolution
+    coverImageUrl = album?.images.slice(-1)[0]?.url || "";
 
     menuItems = (
       <>
@@ -171,15 +166,16 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
     const { show } = item as EpisodeObject;
     const showName = show.name;
     title = `${name} · ${showName}`;
+    coverImageUrl = show.images.slice(-1)[0]?.url || "";
   }
 
   return (
     <MenuBarExtra
       isLoading={currentlyPlayingIsLoading || currentlyPlayingUriIsLoading || playbackStateIsLoading}
       icon={
-        preferences.iconType === NowPlayingMenuBarIconType.Album && albumImageUrl
+        preferences.iconType === "cover-image" && coverImageUrl
           ? {
-              source: albumImageUrl,
+              source: coverImageUrl,
               mask: Image.Mask.RoundedRectangle,
             }
           : { source: { dark: "menu-icon-dark.svg", light: "menu-icon-light.svg" } }

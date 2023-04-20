@@ -66,18 +66,18 @@
         },
         {
           "name": "iconType",
-          "title": "Menu Bar Icon type",
-          "description": "Choose between the default Spotify icon, or the album image of the current track",
+          "title": "Icon type",
+          "description": "Choose between the default Spotify icon, or the cover image of the current track or episode",
           "type": "dropdown",
           "default": "spotify",
           "data": [
             {
               "title": "Spotify Icon",
-              "value": "spotify"
+              "value": "spotify-icon"
             },
             {
-              "title": "Album Image",
-              "value": "album"
+              "title": "Cover Image",
+              "value": "cover-image"
             }
           ],
           "required": false
