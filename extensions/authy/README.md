@@ -31,3 +31,7 @@ A: Try to refresh the extension data `cmd + r`
 Q: I got my token damaged error during refresh
 
 A: Try a few time, in case problem hasn't been resolved try to re-install extension, any way all synced services should work fine
+
+Q: I got `currpted` OTP for some of my records
+
+A: That mean extension couldn't decrypt your OTP, pls submit a [GitHub issue](https://github.com/raycast/extensions/issues/new/choose) for Authy extension. 

@@ -1,11 +1,9 @@
 # Hyper Focus Raycast Extension
 
-UI to control the [Hyper Focus](https://github.com/iloveitaly/hyper-focus) app.
+Hyper Focus is a command line tool that watches what you are doing on your computer and prevents you from doing distracting things.
 
-## Development
+It allows you define what "distracting things" are for you. For example, you might want to prevent yourself from using social media between 9am and 5pm. Or making certain google searches. Or using specific macOS applications. You can define what activities are distracting on a schedule.
 
--
-- Can't use `ts-node` with the raycast extension development stack
-- `http http://localhost:9029/status` to hit the HTTP API
-- Check out [TODO](./TODO.md) for things left undone
-  cp -R . ~/Projects/raycast/raycast-extensions/extensions/hyper-focus
+In other words, if you are obsessive about personal productivity you can define what you want a productive day to look like and then use Hyper Focus to enforce it.
+
+Learn more: https://github.com/iloveitaly/hyper-focus

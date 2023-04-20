@@ -142,6 +142,6 @@ export function getGitHubIcon(tinted = false) {
   const overrideTintColor = tinted ? Color.Orange : undefined;
   return {
     source: "github.svg",
-    tintColor: overrideTintColor ? overrideTintColor : { light: "#000000", dark: "#FFFFFF" },
+    tintColor: overrideTintColor ? overrideTintColor : { light: "#000000", dark: "#FFFFFF", adjustContrast: false },
   };
 }
