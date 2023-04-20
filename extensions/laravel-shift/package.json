@@ -1,0 +1,100 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "laravel-shift",
+  "title": "Laravel Shift for Docker",
+  "description": "Run any of the Shifts for Laravel, Lumen, PHP, Django, and Tailwind completely locally using Raycast.",
+  "icon": "command-icon.png",
+  "author": "denniseilander",
+  "contributors": [
+    "pernielsentikaer"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "generate-shift",
+      "title": "Generate Shift Command",
+      "subtitle": "Laravel Shift for Docker",
+      "description": "Easily generate a Docker Shift Command",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "dockerToken",
+      "title": "Docker Token",
+      "description": "Your Docker token",
+      "type": "password",
+      "required": true,
+      "default": "",
+      "placeholder": "Your Docker token"
+    },
+    {
+      "name": "gitAuthorName",
+      "title": "Git Author Name",
+      "description": "The name of the Git author",
+      "type": "textfield",
+      "required": false,
+      "default": "",
+      "placeholder": "The name of the Git author"
+    },
+    {
+      "name": "gitAuthorEmail",
+      "title": "Git Author Email",
+      "description": "The email address of the Git author",
+      "type": "textfield",
+      "required": false,
+      "default": "",
+      "placeholder": "The email address of the Git author"
+    },
+    {
+      "name": "mountOption",
+      "title": "Mount Option",
+      "description": "The mount option to use",
+      "type": "dropdown",
+      "required": true,
+      "default": "delegated",
+      "data": [
+        {
+          "title": "delegated",
+          "value": "delegated"
+        },
+        {
+          "title": "Z",
+          "value": "Z"
+        }
+      ]
+    },
+    {
+      "name": "closeAfterCopy",
+      "title": "Close the window after copying the command",
+      "label": "Enabled",
+      "description": "Close Window After Copy",
+      "type": "checkbox",
+      "required": true,
+      "default": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.48.8",
+    "@raycast/utils": "^1.5.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

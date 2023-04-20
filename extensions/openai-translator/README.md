@@ -2,7 +2,8 @@
 
 [Raycast](https://www.raycast.com/) extension for translation based on ChatGPT API.
 
-https://user-images.githubusercontent.com/743074/224527077-8256a26a-bbeb-482e-86fa-74fe435e59fe.mov
+Quick Tips and Tricks:
+[![Quick Tips and Tricks for Raycast OpenAI Translator](https://img.youtube.com/vi/2tW9iKz2nT0/maxresdefault.jpg)](https://www.youtube.com/watch?v=2tW9iKz2nT0)
 
 # Insipired By
 
@@ -16,6 +17,11 @@ https://user-images.githubusercontent.com/743074/224527077-8256a26a-bbeb-482e-86
 
 # Install
 
+## Store
+
+[Raycast OpenAI Translator](https://www.raycast.com/douo/openai-translator)
+
+
 ## Manual
 
 ``` shell
@@ -26,9 +32,6 @@ npm install && npm run dev
 
 After the extension command show up, You can stop(`Ctrl-c`) the server safely.
 
-## Store
-
-Waitting  Raycast's review : https://github.com/raycast/extensions/pull/5306
 
 # Feature
 
@@ -41,7 +44,7 @@ Get your [OpenAI](https://platform.openai.com/account/api-keys) API Keys
 - Selected text translation
 - Screencapture translation（Powered by macOS Vision API）
 - Clipboard text translation
-- Bindable global shortcuts
+- Global shortcut(Go to the Raycast extension configuration page to configure it manually)
 
 ![openai-translator-10](https://user-images.githubusercontent.com/743074/226171648-d138308b-837e-4b79-a84e-3f2173958066.png)
 
@@ -71,7 +74,7 @@ Thanks to [yetone/openai-translator](https://github.com/yetone/openai-translator
 - [x] Stream text display
 - [x] Manually specify text language (automatic detection is not reliable when mixing multiple languages)
 - [x] Custom API Entrypoint
-- [ ] Proxy
+- [X] Proxy
 - [ ] i18n
 - [ ] TTS
 

@@ -226,19 +226,57 @@
       "required": true
     },
     {
+      "name": "apiModel",
+      "type": "dropdown",
+      "required": false,
+      "title": "API Model",
+      "default": "gpt-3.5-turbo",
+      "description": "Choice API Model",
+      "data": [
+        {
+          "value": "gpt-3.5-turbo",
+          "title": "gpt-3.5-turbo"
+        },
+        {
+          "value": "gpt-3.5-turbo-0301",
+          "title": "gpt-3.5-turbo-0301"
+        },
+        {
+          "value": "gpt-4",
+          "title": "gpt-4"
+        },
+        {
+          "value": "gpt-4-0314",
+          "title": "gpt-4-0314"
+        },
+        {
+          "value": "gpt-4-32k",
+          "title": "gpt-4-32k"
+        },
+        {
+          "value": "gpt-4-32k-0314",
+          "title": "gpt-4-32k-0314"
+        }
+      ]
+    },
+    {
       "name": "toLang",
       "type": "dropdown",
       "required": true,
       "title": "Translate to",
-      "default": "zh",
+      "default": "zh-Hans",
       "data": [
         {
           "value": "en",
           "title": "English"
         },
         {
-          "value": "zh",
-          "title": "中文"
+          "value": "zh-Hans",
+          "title": "简体中文"
+        },
+        {
+          "value": "zh-Hant",
+          "title": "正體中文"
         },
         {
           "value": "yue",
@@ -487,6 +525,43 @@
       "title": "Max History Size",
       "required": false,
       "default": "30"
+    },
+    {
+      "name": "useProxy",
+      "label": "Enable proxy for each request",
+      "description": "Each request will be passed through the proxy",
+      "type": "checkbox",
+      "title": "Use Proxy",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "proxyHost",
+      "description": "Sever address of the proxy",
+      "type": "textfield",
+      "title": "Socks5 Proxy Host",
+      "required": false
+    },
+    {
+      "name": "proxyPort",
+      "description": "Server port of the proxy",
+      "type": "textfield",
+      "title": "Socks5 Proxy Port",
+      "required": false
+    },
+    {
+      "name": "proxyUsername",
+      "description": "Leave empty if doesn't have",
+      "type": "textfield",
+      "title": "Socks5 Proxy Username",
+      "required": false
+    },
+    {
+      "name": "proxyPassword",
+      "description": "Leave empty if doesn't have",
+      "type": "password",
+      "title": "Socks5 Proxy Password",
+      "required": false
     }
   ],
   "dependencies": {
@@ -496,6 +571,7 @@
     "guesslanguage-ng": "^0.0.2",
     "languagedetect": "^2.0.0",
     "node-fetch": "^3.3.0",
+    "socks-proxy-agent": "^7.0.0",
     "uuid": "^9.0.0",
     "xregexp": "^5.1.1"
   },

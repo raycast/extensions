@@ -34,7 +34,10 @@ export default function Main(): ReactElement {
     defaultCollection
   );
 
-  const { isLoading, bookmarks, collections } = useRequest({ collection, search: searchText });
+  const { isLoading, bookmarks, collections, revalidate } = useRequest({
+    collection,
+    search: searchText,
+  });
 
   const onCollectionChange = (value: string) => {
     if (collection !== value) {
@@ -60,7 +63,7 @@ export default function Main(): ReactElement {
       throttle
     >
       {bookmarks?.items?.map((bookmark: Bookmark) => (
-        <BookmarkItem key={bookmark._id} bookmark={bookmark} />
+        <BookmarkItem key={bookmark._id} bookmark={bookmark} revalidate={revalidate} />
       ))}
     </List>
   );

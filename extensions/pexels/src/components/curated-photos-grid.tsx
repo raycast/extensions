@@ -32,7 +32,7 @@ export function CuratedPhotosGrid(props: {
     >
       <PexelsEmptyView title={"No Photos"} layout={preferences.layout} />
       {pexelsPhotos?.photos.map((value, index) => (
-        <PhotosGridItem key={index} pexelsPhoto={value} index={index} />
+        <PhotosGridItem key={index} item={value} index={index} />
       ))}
     </Grid>
   );

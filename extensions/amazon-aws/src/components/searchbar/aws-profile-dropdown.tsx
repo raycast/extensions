@@ -1,10 +1,10 @@
-import { List } from "@raycast/api";
+import { Icon, List } from "@raycast/api";
 import { useEffect } from "react";
 import { loadSharedConfigFiles } from "@aws-sdk/shared-ini-file-loader";
-import { useCachedPromise, useCachedState } from "@raycast/utils";
+import { useCachedPromise, useCachedState, useExec } from "@raycast/utils";
 
 interface Props {
-  onProfileSelected?: (profile: string) => void;
+  onProfileSelected?: VoidFunction;
 }
 
 export default function AWSProfileDropdown({ onProfileSelected }: Props) {
@@ -22,14 +22,35 @@ export default function AWSProfileDropdown({ onProfileSelected }: Props) {
     }
   }, [profileOptions]);
 
-  useEffect(() => {
-    if (selectedProfile) {
-      process.env.AWS_PROFILE = selectedProfile;
-      process.env.AWS_REGION = configFile?.[selectedProfile]?.region || credentialsFile?.[selectedProfile]?.region;
+  const vaultSessions = useVaultSessions();
+  const isUsingAwsVault = !!vaultSessions;
 
-      onProfileSelected?.(selectedProfile);
+  useAwsVault({
+    profile: vaultSessions?.includes(selectedProfile || "") ? selectedProfile : undefined,
+    onUpdate: () => onProfileSelected?.(),
+  });
+
+  useEffect(() => {
+    if (selectedProfile && !isUsingAwsVault) {
+      process.env.AWS_PROFILE = selectedProfile;
+    } else {
+      delete process.env.AWS_PROFILE;
     }
-  }, [selectedProfile, configs]);
+
+    if (selectedProfile) {
+      const includeProfile = configFile?.[selectedProfile]?.include_profile;
+      process.env.AWS_REGION =
+        configFile?.[selectedProfile]?.region ||
+        credentialsFile?.[selectedProfile]?.region ||
+        (includeProfile && configFile?.[includeProfile]?.region);
+    }
+
+    if (!vaultSessions?.includes(selectedProfile || "")) {
+      delete process.env.AWS_VAULT;
+    }
+
+    onProfileSelected?.();
+  }, [selectedProfile, isUsingAwsVault, configs]);
 
   if (!profileOptions || profileOptions.length < 2) {
     return null;
@@ -38,8 +59,50 @@ export default function AWSProfileDropdown({ onProfileSelected }: Props) {
   return (
     <List.Dropdown tooltip="Select AWS Profile" value={selectedProfile} onChange={setSelectedProfile}>
       {profileOptions.map((profile) => (
-        <List.Dropdown.Item key={profile} value={profile} title={profile} />
+        <List.Dropdown.Item
+          key={profile}
+          value={profile}
+          title={profile}
+          icon={isUsingAwsVault ? (vaultSessions.includes(profile) ? Icon.LockUnlocked : Icon.LockDisabled) : undefined}
+        />
       ))}
     </List.Dropdown>
   );
 }
+
+const useVaultSessions = () => {
+  const { data: awsVaultSessions } = useExec("aws-vault", ["list"], {
+    env: { PATH: "/opt/homebrew/bin" },
+    onError: () => undefined,
+  });
+
+  const activeSessions = awsVaultSessions
+    ?.split(/\r?\n/)
+    .filter((line) => line.includes("sts.AssumeRole:") && !line.includes("sts.AssumeRole:-"))
+    .map((line) => line.split(" ")[0]);
+
+  return activeSessions;
+};
+
+const useAwsVault = ({ profile, onUpdate }: { profile?: string; onUpdate: VoidFunction }) => {
+  useExec("aws-vault", ["exec", profile as string, "--json"], {
+    execute: !!profile,
+    env: { PATH: "/opt/homebrew/bin" },
+    onError: () => undefined,
+    onData: (awsCredentials) => {
+      if (awsCredentials) {
+        const { AccessKeyId, SecretAccessKey, SessionToken } = JSON.parse(awsCredentials) as {
+          AccessKeyId: string;
+          SecretAccessKey: string;
+          SessionToken: string;
+        };
+        process.env.AWS_VAULT = profile;
+        process.env.AWS_ACCESS_KEY_ID = AccessKeyId;
+        process.env.AWS_SECRET_ACCESS_KEY = SecretAccessKey;
+        process.env.AWS_SESSION_TOKEN = SessionToken;
+
+        onUpdate();
+      }
+    },
+  });
+};
