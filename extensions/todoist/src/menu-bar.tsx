@@ -5,7 +5,7 @@ import { useMemo } from "react";
 import removeMarkdown from "remove-markdown";
 
 import { handleError, todoist } from "./api";
-import MenubarTask from "./components/MenubarTask";
+import MenuBarTask from "./components/MenuBarTask";
 import View from "./components/View";
 import { getSectionsWithDueDates } from "./helpers/sections";
 import { useFocusedTask } from "./hooks/useFocusedTask";
@@ -88,7 +88,7 @@ const TodayView = ({ tasks, mutateTasks }: TaskViewProps) => {
       <MenuBarExtra.Item title="Tasks due today" />
 
       {tasks.map((task) => (
-        <MenubarTask key={task.id} task={task} mutateTasks={mutateTasks} />
+        <MenuBarTask key={task.id} task={task} mutateTasks={mutateTasks} />
       ))}
     </>
   ) : (
@@ -113,7 +113,7 @@ const UpcomingView = ({ tasks, mutateTasks }: TaskViewProps): JSX.Element => {
         return (
           <MenuBarExtra.Section title={section.name} key={index}>
             {section.tasks.map((task) => (
-              <MenubarTask key={task.id} task={task} mutateTasks={mutateTasks} />
+              <MenuBarTask key={task.id} task={task} mutateTasks={mutateTasks} />
             ))}
           </MenuBarExtra.Section>
         );

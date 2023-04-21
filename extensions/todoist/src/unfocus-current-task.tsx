@@ -8,7 +8,7 @@ const command = async () => {
   await showHUD(`👋 No more focus`);
 
   try {
-    launchCommand({ name: "menubar", type: LaunchType.UserInitiated });
+    launchCommand({ name: "menu-bar", type: LaunchType.UserInitiated });
   } catch (error) {
     /* empty */
   }

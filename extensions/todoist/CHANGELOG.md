@@ -22,7 +22,7 @@
 
 ## [Menu bar fix] - 2023-01-10
 
-- Fix focused task when not listed in menubar
+- Fix focused task when not listed in menu bar
 
 ## [Menu bar improvements] - 2023-01-03
 

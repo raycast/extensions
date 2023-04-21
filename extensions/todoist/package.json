@@ -90,14 +90,14 @@
       "name": "completed-tasks",
       "title": "Completed Tasks",
       "subtitle": "Todoist",
-      "description": "See all your completed tasks",
+      "description": "See all your completed tasks.",
       "mode": "view"
     },
     {
-      "name": "menubar",
+      "name": "menu-bar",
       "title": "Menu Bar Tasks",
       "subtitle": "Todoist",
-      "description": "See your upcoming Todoist tasks in your menubar",
+      "description": "See your upcoming or today Todoist tasks in your menu bar.",
       "mode": "menu-bar",
       "preferences": [
         {
@@ -116,7 +116,7 @@
           "default": "upcoming",
           "required": false,
           "title": "View",
-          "description": "Indicates which view you want to see in your menubar."
+          "description": "Indicates which view you want to see in your menu bar."
         },
         {
           "name": "upcomingDays",
@@ -124,7 +124,7 @@
           "default": "7",
           "required": false,
           "title": "Number of days for Upcoming",
-          "description": "Indicates the number of days you want in the upcoming view of the menubar."
+          "description": "Indicates the number of days you want in the upcoming view of the menu bar."
         },
         {
           "name": "focusFeatureWidth",
@@ -132,7 +132,7 @@
           "required": false,
           "default": "40",
           "title": "Max width of Focused Task",
-          "description": "Maximum width of the focused task' text."
+          "description": "Maximum width of the focused task's text."
         }
       ],
       "interval": "10m"

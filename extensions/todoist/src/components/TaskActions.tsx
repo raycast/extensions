@@ -68,7 +68,7 @@ export default function TaskActions({
   }
 
   async function refreshMenuBarCommand() {
-    await launchCommand({ name: "menubar", type: LaunchType.UserInitiated });
+    await launchCommand({ name: "menu-bar", type: LaunchType.UserInitiated });
   }
 
   async function completeTask(task: Task) {

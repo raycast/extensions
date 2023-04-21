@@ -10,12 +10,12 @@ import { useFocusedTask } from "../hooks/useFocusedTask";
 
 import View from "./View";
 
-interface MenubarTaskProps {
+interface MenuBarTaskProps {
   task: Task;
   mutateTasks: MutatePromise<Task[] | undefined>;
 }
 
-const MenubarTask = ({ task, mutateTasks }: MenubarTaskProps) => {
+const MenubarTask = ({ task, mutateTasks }: MenuBarTaskProps) => {
   const { focusedTask, unfocusTask, focusTask } = useFocusedTask();
 
   const priority = priorities.find((p) => p.value === task.priority);
