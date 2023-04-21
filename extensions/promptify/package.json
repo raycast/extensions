@@ -51,9 +51,7 @@
   "dependencies": {
     "@raycast/api": "^1.49.3",
     "@raycast/utils": "^1.5.2",
-    "got": "^12.6.0",
-    "node-fetch": "^3.3.1",
-    "openai": "^3.2.1"
+    "node-fetch": "^3.3.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.5",
