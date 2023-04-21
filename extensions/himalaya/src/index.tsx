@@ -390,7 +390,7 @@ function ReadDetail(props: { envelope: Envelope }) {
           <Detail.Metadata.Separator />
           <Detail.Metadata.TagList title="Flags">
             {props.envelope.flags.map((flag) => (
-              <Detail.Metadata.TagList.Item text={flag} />
+              <Detail.Metadata.TagList.Item text={flag} key={flag} />
             ))}
           </Detail.Metadata.TagList>
         </Detail.Metadata>
