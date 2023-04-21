@@ -15,7 +15,7 @@ Make quick requests to OpenAI models GPT and DALL-E
 
 Before you can use the extension, you will need to add your OpenAI API key to the settings.
 
-<img src="https://raw.githubusercontent.com/Ph-lo/Promptify/main/metadata/metadata-0.png" width="650">
+<img src="https://raw.githubusercontent.com/Ph-lo/Promptify/main/readme_assets/metadata-0.png" width="650">
 (Can also be done from the Raycast extensions menu)
 
 ## Usage
