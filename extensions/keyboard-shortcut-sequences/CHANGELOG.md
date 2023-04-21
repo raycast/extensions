@@ -1,6 +1,6 @@
 # Auto Keyboard Shortcuts Changelog
 
-## [Added Application Support] - 2023-04-13
+## [Added Application Support] - 2023-04-21
 
 - Added ability to create applications
 - Store sequences in applications
