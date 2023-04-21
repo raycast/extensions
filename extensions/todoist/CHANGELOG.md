@@ -1,5 +1,9 @@
 # Todoist Changelog
 
+## [Improvement & fixes] - 2023-04-21
+
+- Fix no due date action in menu bar
+
 ## [Improvements & fixes] - 2023-04-12
 
 - Add action to mark an already completed task as incomplete
