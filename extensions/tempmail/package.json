@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "tempmail",
   "title": "TempMail",
-  "description": "Temporary mailbox using the mail.gw API",
+  "description": "Temporary email mailbox using the mail.gw API",
   "icon": "command-icon.png",
   "author": "Joshlucpoll",
   "categories": [
