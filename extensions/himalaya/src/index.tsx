@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Detail, Form, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
-import { useForm, FormValidation, useCachedState } from "@raycast/utils";
-import { useState, useEffect } from "react";
+import { FormValidation, useCachedState, useForm } from "@raycast/utils";
+import { useEffect, useState } from "react";
 import child_process = require("node:child_process");
 import util = require("node:util");
 
@@ -138,15 +138,13 @@ async function hasExe(): Promise<boolean> {
 
     if (stdout) {
       return true;
-    }
-
-    if (stderr) {
+    } else if (stderr) {
       console.error("Couldn't find executable", stderr);
 
       return false;
+    } else {
+      throw new Error("No results from stdout or stderr");
     }
-
-    throw new Error("No results from stdout or stderr");
   } catch (error) {
     console.error("Couldn't find executable", error);
 
@@ -182,15 +180,13 @@ async function listEnvelopes(): Promise<Envelope[]> {
     });
 
     return envelopes;
-  }
-
-  if (stderr) {
-    console.log(stderr);
+  } else if (stderr) {
+    console.error(stderr);
 
     return [];
+  } else {
+    throw new Error("No results from stdout or stderr");
   }
-
-  throw new Error("No results from stdout or stderr");
 }
 
 async function listFolders(): Promise<Folder[]> {
@@ -214,15 +210,13 @@ async function listFolders(): Promise<Folder[]> {
     });
 
     return folders;
-  }
-
-  if (stderr) {
-    console.log(stderr);
+  } else if (stderr) {
+    console.error(stderr);
 
     return [];
+  } else {
+    throw new Error("No results from stdout or stderr");
   }
-
-  throw new Error("No results from stdout or stderr");
 }
 
 interface MoveToSelectedFormValues {
@@ -240,20 +234,35 @@ function MoveToSelectedForm(props: { folders: Folder[]; envelope: Envelope; setS
       });
 
       try {
-        const { stdout, _stderr } = await exec(`"himalaya" move ${values.folder} -- ${props.envelope.id}`, {
+        const { stdout, stderr } = await exec(`"himalaya" move ${values.folder} -- ${props.envelope.id}`, {
           env: {
             PATH: PATH,
           },
         });
+        if (stdout) {
+          toast.style = Toast.Style.Success;
+          toast.title = `Moved envelope to folder ${values.folder}`;
 
-        toast.style = Toast.Style.Success;
-        toast.title = `Moved envelope to folder ${values.folder}`;
+          props.setState((previous: State) => ({
+            ...previous,
+            isLoading: true,
+          }));
+          const envelopes = await listEnvelopes();
+          props.setState((previous: State) => ({
+            ...previous,
+            envelopes: envelopes,
+            isLoading: false,
+          }));
 
-        props.setState((previous: State) => ({ ...previous, isLoading: true }));
-        const envelopes = await listEnvelopes();
-        props.setState((previous: State) => ({ ...previous, envelopes: envelopes, isLoading: false }));
+          pop();
+        } else if (stderr) {
+          console.error(stderr);
 
-        pop();
+          toast.style = Toast.Style.Failure;
+          toast.title = `Failed to move envelope`;
+
+          pop();
+        }
       } catch (error) {
         toast.style = Toast.Style.Failure;
         toast.title = `Failed to move envelope: ${error}`;
@@ -349,15 +358,13 @@ async function readEmail(envelope: Envelope): Promise<any> {
 
   if (stdout) {
     return stdout;
-  }
-
-  if (stderr) {
+  } else if (stderr) {
     console.log(stderr);
 
     return stderr;
+  } else {
+    throw new Error("No results from stdout or stderr");
   }
-
-  throw new Error("No results from stdout or stderr");
 }
 
 const markUnreadAction = (envelope: Envelope, state: State, setState: any) => {
@@ -373,18 +380,33 @@ const markUnreadAction = (envelope: Envelope, state: State, setState: any) => {
         });
 
         try {
-          const { stdout, _stderr } = await exec(`"himalaya" flag remove ${envelope.id} -- seen`, {
+          const { stdout, stderr } = await exec(`"himalaya" flag remove ${envelope.id} -- seen`, {
             env: {
               PATH: PATH,
             },
           });
 
-          toast.style = Toast.Style.Success;
-          toast.title = "Marked unread";
+          if (stdout) {
+            toast.style = Toast.Style.Success;
+            toast.title = "Marked unread";
 
-          setState((previous: State) => ({ ...previous, isLoading: true }));
-          const envelopes = await listEnvelopes();
-          setState((previous: State) => ({ ...previous, envelopes: envelopes, isLoading: false }));
+            setState((previous: State) => ({ ...previous, isLoading: true }));
+            const envelopes = await listEnvelopes();
+            setState((previous: State) => ({
+              ...previous,
+              envelopes: envelopes,
+              isLoading: false,
+            }));
+          } else if (stderr) {
+            console.error(stderr);
+
+            setState((previous: State) => ({ ...previous, isLoading: false }));
+
+            toast.style = Toast.Style.Failure;
+            toast.title = "Failed to mark unread";
+          } else {
+            throw new Error("No results from stdout or stderr");
+          }
         } catch (error) {
           toast.style = Toast.Style.Failure;
           toast.title = `Failed to mark unread: ${error}`;
@@ -407,18 +429,33 @@ const markReadAction = (envelope: Envelope, state: State, setState: any) => {
         });
 
         try {
-          const { stdout, _stderr } = await exec(`"himalaya" flag add ${envelope.id} -- seen`, {
+          const { stdout, stderr } = await exec(`"himalaya" flag add ${envelope.id} -- seen`, {
             env: {
               PATH: PATH,
             },
           });
 
-          toast.style = Toast.Style.Success;
-          toast.title = "Marked read";
+          if (stdout) {
+            toast.style = Toast.Style.Success;
+            toast.title = "Marked read";
 
-          setState((previous: State) => ({ ...previous, isLoading: true }));
-          const envelopes = await listEnvelopes();
-          setState((previous: State) => ({ ...previous, envelopes: envelopes, isLoading: false }));
+            setState((previous: State) => ({ ...previous, isLoading: true }));
+            const envelopes = await listEnvelopes();
+            setState((previous: State) => ({
+              ...previous,
+              envelopes: envelopes,
+              isLoading: false,
+            }));
+          } else if (stderr) {
+            console.error(stderr);
+
+            setState((previous: State) => ({ ...previous, isLoading: false }));
+
+            toast.style = Toast.Style.Failure;
+            toast.title = "Failed to mark read";
+          } else {
+            throw new Error("No results from stdout or stderr");
+          }
         } catch (error) {
           toast.style = Toast.Style.Failure;
           toast.title = `Failed to mark read: ${error}`;
@@ -455,18 +492,33 @@ const moveToTrashAction = (envelope: Envelope, state: State, setState: any) => {
         });
 
         try {
-          const { stdout, _stderr } = await exec(`"himalaya" delete ${envelope.id}`, {
+          const { stdout, stderr } = await exec(`"himalaya" delete ${envelope.id}`, {
             env: {
               PATH: PATH,
             },
           });
 
-          toast.style = Toast.Style.Success;
-          toast.title = "Moved to trash";
+          if (stdout) {
+            toast.style = Toast.Style.Success;
+            toast.title = "Moved to trash";
 
-          setState((previous: State) => ({ ...previous, isLoading: true }));
-          const envelopes = await listEnvelopes();
-          setState((previous: State) => ({ ...previous, envelopes: envelopes, isLoading: false }));
+            setState((previous: State) => ({ ...previous, isLoading: true }));
+            const envelopes = await listEnvelopes();
+            setState((previous: State) => ({
+              ...previous,
+              envelopes: envelopes,
+              isLoading: false,
+            }));
+          } else if (stderr) {
+            console.error(stderr);
+
+            setState((previous: State) => ({ ...previous, isLoading: false }));
+
+            toast.style = Toast.Style.Failure;
+            toast.title = "Failed to move to trash";
+          } else {
+            throw new Error("No results from stdout or stderr");
+          }
         } catch (error) {
           toast.style = Toast.Style.Failure;
           toast.title = `Failed to move to trash: ${error}`;
