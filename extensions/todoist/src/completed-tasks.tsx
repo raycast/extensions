@@ -6,6 +6,7 @@ import removeMarkdown from "remove-markdown";
 
 import { handleError } from "./api";
 import { displayDueDate } from "./helpers/dates";
+import { refreshMenuBarCommand } from "./helpers/menu-bar";
 import { getActivity, uncomplete } from "./sync-api";
 
 export default function Activity() {
@@ -18,6 +19,7 @@ export default function Activity() {
       await uncomplete(taskId);
       await showToast({ style: Toast.Style.Success, title: "Uncompleted Task" });
       mutate();
+      refreshMenuBarCommand();
     } catch (error) {
       handleError({ error, title: "Unable to uncomplete task" });
     }
@@ -49,7 +51,6 @@ export default function Activity() {
         return (
           <List.Section key={section.name} title={section.name}>
             {section.events.map((event) => {
-              console.log(event);
               return (
                 <List.Item
                   icon={Icon.CheckCircle}

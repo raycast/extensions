@@ -1,16 +1,5 @@
 import { AddTaskArgs, Comment, Project as TProject, Task, UpdateTaskArgs } from "@doist/todoist-api-typescript";
-import {
-  ActionPanel,
-  Icon,
-  confirmAlert,
-  showToast,
-  Toast,
-  Action,
-  useNavigation,
-  Color,
-  launchCommand,
-  LaunchType,
-} from "@raycast/api";
+import { ActionPanel, Icon, confirmAlert, showToast, Toast, Action, useNavigation, Color } from "@raycast/api";
 import { MutatePromise } from "@raycast/utils";
 
 import { todoist, handleError } from "../api";
@@ -19,6 +8,7 @@ import CreateTask from "../create-task";
 import { getAPIDate } from "../helpers/dates";
 import { GroupByProp } from "../helpers/groupBy";
 import { isTodoistInstalled } from "../helpers/isTodoistInstalled";
+import { refreshMenuBarCommand } from "../helpers/menu-bar";
 import { getProjectIcon } from "../helpers/projects";
 import { useFocusedTask } from "../hooks/useFocusedTask";
 import { move } from "../sync-api";
@@ -65,10 +55,8 @@ export default function TaskActions({
     if (fromDetail && withPop) {
       pop();
     }
-  }
 
-  async function refreshMenuBarCommand() {
-    await launchCommand({ name: "menu-bar", type: LaunchType.UserInitiated });
+    refreshMenuBarCommand();
   }
 
   async function completeTask(task: Task) {
@@ -80,7 +68,6 @@ export default function TaskActions({
 
       if (focusedTask.id === task.id) {
         unfocusTask();
-        refreshMenuBarCommand();
       }
 
       mutate({ withPop: true });

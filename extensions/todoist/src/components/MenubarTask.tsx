@@ -31,11 +31,12 @@ const MenuBarTask = ({ task, mutateTasks }: MenuBarTaskProps) => {
           return data.filter((t) => t.id !== task.id);
         },
       });
-      await showHUD("Completed task 🙌");
 
       if (focusedTask.id === task.id) {
         unfocusTask();
       }
+
+      await showHUD("Completed task 🙌");
     } catch (error) {
       showHUD("Unable to complete task ❌");
     }
@@ -44,8 +45,9 @@ const MenuBarTask = ({ task, mutateTasks }: MenuBarTaskProps) => {
   async function changeDueDate(task: Task, dueString: string) {
     try {
       await todoist.updateTask(task.id, { dueString });
+      // Mutating the task optimistically here is a bit tricky so let's not do it
+      await mutateTasks();
       await showHUD("Updated task due date");
-      mutateTasks();
     } catch (error) {
       console.log(error);
       showHUD("Unable to update task due date ❌");

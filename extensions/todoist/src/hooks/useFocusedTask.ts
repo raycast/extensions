@@ -20,7 +20,7 @@ export const useFocusedTask = () => {
     setFocusedTask({ id: "", content: "" });
 
     if (commandMode === "view") {
-      await showToast({ style: Toast.Style.Success, title: "👋 No more focus" });
+      await showToast({ style: Toast.Style.Success, title: "No more focus" });
     }
   }
 
@@ -28,7 +28,7 @@ export const useFocusedTask = () => {
     setFocusedTask({ id, content });
 
     if (commandMode === "view") {
-      await showToast({ style: Toast.Style.Success, title: `🎯 Focus on "${content}"` });
+      await showToast({ style: Toast.Style.Success, title: `Focus on "${content}" 🎯` });
     }
   }
 
