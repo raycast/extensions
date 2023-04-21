@@ -5,6 +5,9 @@
   "description": "Format code with Prettier",
   "icon": "prettier-logo.png",
   "author": "lin",
+  "contributors": [
+    "jasonwaters"
+  ],
   "categories": [
     "Developer Tools"
   ],
@@ -14,31 +17,36 @@
       "name": "formatJavaScript",
       "title": "Format JavaScript",
       "description": "Format Clipboard content with Prettier",
-      "mode": "no-view"
+      "mode": "no-view",
+      "keywords": ["js", "javascript"]
     },
     {
       "name": "formatTypeScript",
       "title": "Format TypeScript",
       "description": "Format Clipboard content with Prettier",
-      "mode": "no-view"
+      "mode": "no-view",
+      "keywords": ["ts", "typescript"]
     },
     {
       "name": "formatJSON",
       "title": "Format JSON",
       "description": "Format Clipboard content with Prettier",
-      "mode": "no-view"
+      "mode": "no-view",
+      "keywords": ["json"]
     },
     {
       "name": "formatCSS",
       "title": "Format CSS",
       "description": "Format Clipboard content with Prettier",
-      "mode": "no-view"
+      "mode": "no-view",
+      "keywords": ["css"]
     },
     {
       "name": "formatHTML",
       "title": "Format HTML",
       "description": "Format Clipboard content with Prettier",
-      "mode": "no-view"
+      "mode": "no-view",
+      "keywords": ["html"]
     }
   ],
   "preferences": [
