@@ -24,6 +24,13 @@
       "subtitle": "Quantumcast",
       "description": "Open a Cloudflow workspace in the browser",
       "mode": "view"
+    },
+    {
+      "name": "open-cloudflow-api-docs",
+      "title": "Open Cloudflow API Documentation",
+      "subtitle": "Quantumcast",
+      "description": "Open a Cloudflow API documentation in the browser",
+      "mode": "view"
     }
   ],
   "preferences": [
@@ -37,16 +44,14 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.49.3",
-    "quantumlib": "^0.0.8"
+    "@raycast/api": "^1.48.8",
+    "quantumlib": "^0.0.9"
   },
   "devDependencies": {
+    "@raycast/eslint-config": "^1.0.5",
     "@types/node": "^18.8.3",
     "@types/react": "^18.0.9",
-    "@typescript-eslint/eslint-plugin": "^5.57.0",
-    "@typescript-eslint/parser": "^5.57.0",
     "eslint": "^8.37.0",
-    "eslint-config-prettier": "^8.8.0",
     "prettier": "^2.8.7",
     "typescript": "^5.0.2"
   },

@@ -16,17 +16,14 @@ export default function Command() {
   });
 
   return (
-    <List
-      searchBarPlaceholder="Select a workspace location to open in your default browser"
-      navigationTitle="Select a Workspace"
-    >
+    <List searchBarPlaceholder="Select a workspace location to open in your default browser">
       {workspaces_sorted.map((workspace) => (
         <List.Item
           id={workspace.name}
           key={workspace.name}
           title={workspace.name}
-          subtitle={workspace.license}
           icon="../assets/quantumcast.png"
+          accessories={[{ text: workspace.license }]}
           actions={
             <ActionPanel title="Quantumcast - Workspaces">
               <Action.OpenInBrowser url={`${workspace.url}`} />
