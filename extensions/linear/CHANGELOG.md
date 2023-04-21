@@ -1,5 +1,9 @@
 # Linear Changelog
 
+## [Remove Raycast signature] - 2023-04-19
+
+- Remove Raycast signature preference from the `Create Issue` command
+
 ## [Add multiple attachments when creating an issue] - 2023-02-28
 
 - Add support for multiple attachments in the `Create Issue` command

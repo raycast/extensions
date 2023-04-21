@@ -66,7 +66,6 @@ export type CreateIssueValues = {
 };
 
 type Preferences = {
-  signature: boolean;
   autofocusField: "teamId" | "title";
   copyToastAction: "id" | "url" | "title";
 };
@@ -85,7 +84,7 @@ function getCopyToastAction(copyToastAction: Preferences["copyToastAction"], iss
 
 export default function CreateIssueForm(props: CreateIssueFormProps) {
   const { push } = useNavigation();
-  const { signature, autofocusField, copyToastAction } = getPreferenceValues<Preferences>();
+  const { autofocusField, copyToastAction } = getPreferenceValues<Preferences>();
 
   const { teams, isLoadingTeams } = useTeams();
   const hasMoreThanOneTeam = teams && teams.length > 1;
@@ -93,15 +92,6 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
   const { handleSubmit, itemProps, values, setValue, focus, reset, setValidationError } = useForm<CreateIssueValues>({
     async onSubmit(values) {
       const toast = await showToast({ style: Toast.Style.Animated, title: "Creating issue" });
-
-      let payloadDescription = values.description || "";
-      if (signature) {
-        if (values.description) {
-          payloadDescription += "\n\n---\n";
-        }
-
-        payloadDescription += "Created via [Raycast](https://www.raycast.com)";
-      }
 
       const teamId = hasMoreThanOneTeam ? values.teamId : teams?.[0]?.id;
 
@@ -115,7 +105,7 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
         const payload: CreateIssuePayload = {
           teamId,
           title: values.title,
-          description: payloadDescription,
+          description: values.description || "",
           stateId: values.stateId,
           labelIds: values.labelIds,
           dueDate: values.dueDate,

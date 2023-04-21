@@ -21,15 +21,19 @@ export function ArtistActionPanel({ title, artist }: ArtistActionPanelProps) {
   return (
     <ActionPanel>
       <PlayAction id={artist.id as string} type="artist" />
+      {albums && (
+        <Action.Push
+          icon={Icon.AppWindowGrid3x3}
+          title="Show Albums"
+          target={<AlbumsGrid albums={albums} title={artist.name} />}
+        />
+      )}
       {artistTopTracksData && (
         <Action.Push
           icon={Icon.List}
           title="Show Popular Songs"
           target={<TracksList tracks={artistTopTracksData.tracks} />}
         />
-      )}
-      {albums && (
-        <Action.Push icon={Icon.AppWindowGrid3x3} title="Show Albums" target={<AlbumsGrid albums={albums} />} />
       )}
       <StartRadioAction artistId={artist.id} />
       <FooterAction url={artist?.external_urls?.spotify} uri={artist.uri} title={title} />
