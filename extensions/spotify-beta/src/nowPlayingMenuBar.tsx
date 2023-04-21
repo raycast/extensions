@@ -29,6 +29,7 @@ import { addToPlaylist } from "./api/addToPlaylist";
 import { useContainsMyLikedTracks } from "./hooks/useContainsMyLikedTracks";
 import { useMe } from "./hooks/useMe";
 import { formatTitle } from "./helpers/formatTitle";
+import { getErrorMessage } from "./helpers/getError";
 
 function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
   const preferences = getPreferenceValues<{ maxTextLength?: boolean; showEllipsis?: boolean }>();
@@ -71,10 +72,15 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
             icon={Icon.HeartDisabled}
             title="Dislike"
             onAction={async () => {
-              await removeFromMySavedTracks({
-                trackIds: trackId ? [trackId] : [],
-              });
-              await containsMySavedTracksRevalidate();
+              try {
+                await removeFromMySavedTracks({
+                  trackIds: trackId ? [trackId] : [],
+                });
+                await containsMySavedTracksRevalidate();
+              } catch (err) {
+                const error = getErrorMessage(err);
+                showHUD(error);
+              }
             }}
           />
         )}
@@ -83,10 +89,15 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
             icon={Icon.Heart}
             title="Like"
             onAction={async () => {
-              await addToMySavedTracks({
-                trackIds: trackId ? [trackId] : [],
-              });
-              await containsMySavedTracksRevalidate();
+              try {
+                await addToMySavedTracks({
+                  trackIds: trackId ? [trackId] : [],
+                });
+                await containsMySavedTracksRevalidate();
+              } catch (err) {
+                const error = getErrorMessage(err);
+                showHUD(error);
+              }
             }}
           />
         )}
@@ -94,26 +105,41 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
           icon={Icon.Forward}
           title="Next"
           onAction={async () => {
-            await skipToNext();
-            await currentlyPlayingRevalidate();
+            try {
+              await skipToNext();
+              await currentlyPlayingRevalidate();
+            } catch (err) {
+              const error = getErrorMessage(err);
+              showHUD(error);
+            }
           }}
         />
         <MenuBarExtra.Item
           icon={Icon.Rewind}
           title="Previous"
           onAction={async () => {
-            await skipToPrevious();
-            await currentlyPlayingRevalidate();
+            try {
+              await skipToPrevious();
+              await currentlyPlayingRevalidate();
+            } catch (err) {
+              const error = getErrorMessage(err);
+              showHUD(error);
+            }
           }}
         />
         <MenuBarExtra.Item
           icon={Icon.Music}
           title="Start Radio"
           onAction={async () => {
-            await startRadio({
-              trackIds: trackId ? [trackId] : [],
-              artistIds: artistId ? [artistId] : [],
-            });
+            try {
+              await startRadio({
+                trackIds: trackId ? [trackId] : [],
+                artistIds: artistId ? [artistId] : [],
+              });
+            } catch (err) {
+              const error = getErrorMessage(err);
+              showHUD(error);
+            }
           }}
         />
       </>
@@ -136,8 +162,13 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
           icon={Icon.Pause}
           title="Pause"
           onAction={async () => {
-            await pause();
-            await currentlyPlayingRevalidate();
+            try {
+              await pause();
+              await currentlyPlayingRevalidate();
+            } catch (err) {
+              const error = getErrorMessage(err);
+              showHUD(error);
+            }
           }}
         />
       )}
@@ -146,8 +177,13 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
           icon={Icon.Play}
           title="Play"
           onAction={async () => {
-            await play();
-            await currentlyPlayingRevalidate();
+            try {
+              await play();
+              await currentlyPlayingRevalidate();
+            } catch (err) {
+              const error = getErrorMessage(err);
+              showHUD(error);
+            }
           }}
         />
       )}
@@ -163,11 +199,16 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
                   key={playlist.id}
                   title={playlist.name}
                   onAction={async () => {
-                    await addToPlaylist({
-                      playlistId: playlist.id as string,
-                      trackUris: [uri as string],
-                    });
-                    showHUD(`Added to ${playlist.name}`);
+                    try {
+                      await addToPlaylist({
+                        playlistId: playlist.id as string,
+                        trackUris: [uri as string],
+                      });
+                      showHUD(`Added to ${playlist.name}`);
+                    } catch (err) {
+                      const error = getErrorMessage(err);
+                      showHUD(error);
+                    }
                   }}
                 />
               )
@@ -189,7 +230,12 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
                 }
                 onAction={async () => {
                   if (device.id) {
-                    await transferMyPlayback(device.id, isPlaying ? true : false);
+                    try {
+                      await transferMyPlayback(device.id, isPlaying ? true : false);
+                    } catch (err) {
+                      const error = getErrorMessage(err);
+                      showHUD(error);
+                    }
                   }
                   await showHUD(`Connected to ${device.name}`);
                 }}
