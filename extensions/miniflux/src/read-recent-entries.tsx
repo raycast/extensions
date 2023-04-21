@@ -30,13 +30,13 @@ export default function readRecentEntries() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        showToast(Toast.Style.Animated, "Fetching latest entries.....─=≡Σ((( つ＞＜)つ");
+        showToast(Toast.Style.Animated, "Fetching latest entries...");
 
         const { entries }: MinifluxEntries = await apiServer.getRecentEntries();
 
         setState({ entries, isLoading: false });
 
-        showToast(Toast.Style.Success, "Latest entries has been loaded !＼(≧▽≦)／");
+        showToast(Toast.Style.Success, "Latest entries has been loaded !");
         cache.set("latest-entries", JSON.stringify(entries));
       } catch (error) {
         handleError(error as MinifluxApiError);

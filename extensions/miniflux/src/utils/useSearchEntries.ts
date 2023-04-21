@@ -19,11 +19,11 @@ export const useSearchEntries = (searchText: string): State => {
   const message = (total: number) => {
     switch (total) {
       case 0:
-        return "No results found. Try a different query ヽ(´ー` )┌ .";
+        return "No results found. Try a different query.";
       case 1:
-        return "1 result found (^０^)ノ !";
+        return "1 result found !";
       default:
-        return `${total} results found ! ヽ(>∀ <☆)ノ`;
+        return `${total} results found !`;
     }
   };
 
@@ -32,7 +32,7 @@ export const useSearchEntries = (searchText: string): State => {
 
     setState((oldState) => ({ ...oldState, isLoading: true }));
     try {
-      showToast(Toast.Style.Animated, "Searching for entries... ~(>_<~)");
+      showToast(Toast.Style.Animated, "Searching for entries...");
       const { total, entries }: MinifluxEntries = await apiServer.search(searchText);
       setState({ total, entries, isLoading: false });
       showToast(Toast.Style.Success, message(total));

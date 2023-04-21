@@ -26,13 +26,13 @@ export default function AddSubscription() {
       if (urlError) return;
       try {
         setIsLoading(true);
-        showToast(Toast.Style.Animated, "Finding Feeds...〜(＞＜)〜");
+        showToast(Toast.Style.Animated, "Finding Feeds..");
         const results = await apiServer.discoverFeed({ url });
 
         if (results.length === 0) {
-          showToast(Toast.Style.Success, `no feeds found ＼(＾▽＾)／`);
+          showToast(Toast.Style.Success, `no feeds found`);
         } else {
-          showToast(Toast.Style.Success, `${results.length} feeds found ＼(＾▽＾)／`);
+          showToast(Toast.Style.Success, `${results.length} feeds found`);
           setFeeds(results);
         }
 

@@ -20,12 +20,12 @@ const CreateFeedForm = ({ feeds, categoryId }: FromType) => {
     const { enableAdvance: _, ...remainingSettings } = values;
     setIsLoading(true);
     try {
-      showToast(Toast.Style.Animated, "Subscribing to the feed...__φ(．．;)");
+      showToast(Toast.Style.Animated, "Subscribing to the feed...");
 
       await apiServer.createFeed({ ...remainingSettings, category_id: Number(categoryId) });
 
       setIsLoading(false);
-      showToast(Toast.Style.Animated, "Subscribed! ＼(≧▽≦)／");
+      showToast(Toast.Style.Animated, "Subscribed!");
     } catch (error) {
       handleError(error as MinifluxApiError);
       setIsLoading(false);
