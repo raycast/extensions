@@ -1,5 +1,9 @@
 # DocCheck Changelog
 
+## [Version 1.2.2] - 2023-04-12
+
+- Fix: die Tabelle Berechnung im Artikel [Relatives Risiko](https://flexikon.doccheck.com/de/Relatives_Risiko) wird nun korrekt angezeigt (offenbar kann eine Tabelle nicht mit einer leeren Zelle beginnen)
+
 ## [Version 1.2.1] - 2023-04-12
 
 - Bugfixes from @sxn (thanks!)
