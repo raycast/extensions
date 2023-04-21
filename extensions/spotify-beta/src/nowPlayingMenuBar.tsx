@@ -49,7 +49,12 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
   const trackAlreadyLiked = containsMySavedTracksData?.[0];
   const isTrack = currentlyPlayingData?.currently_playing_type !== "episode";
 
-  if (!currentlyPlayingData?.item) {
+  const currentTime = Date.now();
+  const tenMinutesInMilliseconds = 10 * 60 * 1000;
+  const dataIsOld =
+    currentlyPlayingData?.timestamp && currentTime - currentlyPlayingData.timestamp > tenMinutesInMilliseconds;
+
+  if ((dataIsOld && !isPlaying) || !currentlyPlayingData?.item) {
     return <NothingPlaying isLoading={currentlyPlayingIsLoading || currentlyPlayingIsLoading} />;
   }
 
