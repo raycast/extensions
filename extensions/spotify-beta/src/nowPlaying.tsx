@@ -171,6 +171,7 @@ by ${artistName}
           shortcut={{ modifiers: ["cmd"], key: "arrowRight" }}
           onAction={async () => {
             await skipToNext();
+            await launchCommand({ name: "nowPlayingMenuBar", type: LaunchType.Background });
             if (closeWindowOnAction) {
               await showHUD("Skipped to next");
               await popToRoot();
@@ -187,6 +188,7 @@ by ${artistName}
           shortcut={{ modifiers: ["cmd"], key: "arrowLeft" }}
           onAction={async () => {
             await skipToPrevious();
+            await launchCommand({ name: "nowPlayingMenuBar", type: LaunchType.Background });
             if (closeWindowOnAction) {
               await showHUD("Skipped to previous");
               await popToRoot();
