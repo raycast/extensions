@@ -3,6 +3,7 @@
 ## [Improvement & fixes] - 2023-04-21
 
 - Fix no due date action in menu bar
+- Add optimistic updates to menu bar tasks and projects
 
 ## [Improvements & fixes] - 2023-04-12
 
