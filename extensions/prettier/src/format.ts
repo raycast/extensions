@@ -1,5 +1,6 @@
 import { Clipboard, getPreferenceValues, showHUD, closeMainWindow } from "@raycast/api";
-import { format } from "prettier";
+import { homedir } from "os";
+import { format, resolveConfig } from "prettier";
 import { Preferences } from "./types";
 
 const decorateMarkdown = (parser: string, formatted: string) => {
@@ -35,7 +36,8 @@ export default async (expectedFormat: string, parser: string) => {
   }
 
   try {
-    const prettier = format(text, { semi: false, parser });
+    const userOptions = await resolveConfig(homedir());
+    const prettier = format(text, { ...userOptions, parser });
     const formatted = formatAsMarkdownCodeBlock ? decorateMarkdown(parser, prettier) : prettier;
 
     if (copyImmediately) {
