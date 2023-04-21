@@ -19,19 +19,27 @@ function Projects() {
   const projects = data || [];
 
   async function toggleFavorite(project: TProject) {
-    await showToast({
-      style: Toast.Style.Animated,
-      title: project.isFavorite ? "Removing from favorites" : "Adding to favorites",
-    });
-
     try {
-      await todoist.updateProject(project.id, { name: project.name, isFavorite: !project.isFavorite });
+      await mutate(todoist.updateProject(project.id, { name: project.name, isFavorite: !project.isFavorite }), {
+        optimisticUpdate(data) {
+          if (!data) {
+            return;
+          }
+
+          return data.map((p) => {
+            if (p.id === project.id) {
+              return { ...p, isFavorite: !p.isFavorite };
+            }
+
+            return p;
+          });
+        },
+      });
+
       await showToast({
         style: Toast.Style.Success,
         title: project.isFavorite ? "Removed from favorites" : "Added to favorites",
       });
-
-      mutate();
     } catch (error) {
       handleError({
         error,
@@ -48,12 +56,18 @@ function Projects() {
         icon: { source: Icon.Trash, tintColor: Color.Red },
       })
     ) {
-      await showToast({ style: Toast.Style.Animated, title: "Deleting project" });
-
       try {
-        await todoist.deleteProject(id);
+        await mutate(todoist.deleteProject(id), {
+          optimisticUpdate(data) {
+            if (!data) {
+              return;
+            }
+
+            return data.filter((project) => project.id !== id);
+          },
+        });
+
         await showToast({ style: Toast.Style.Success, title: "Project deleted" });
-        mutate();
       } catch (error) {
         handleError({ error, title: "Unable to delete project" });
       }
