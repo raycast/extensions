@@ -15,17 +15,23 @@ interface MenuBarTaskProps {
   mutateTasks: MutatePromise<Task[] | undefined>;
 }
 
-const MenubarTask = ({ task, mutateTasks }: MenuBarTaskProps) => {
+const MenuBarTask = ({ task, mutateTasks }: MenuBarTaskProps) => {
   const { focusedTask, unfocusTask, focusTask } = useFocusedTask();
 
   const priority = priorities.find((p) => p.value === task.priority);
 
   async function completeTask(task: Task) {
-    await showHUD("⏰ Completing task");
     try {
-      await todoist.closeTask(task.id);
-      await showHUD("Task completed 🙌");
-      mutateTasks();
+      await mutateTasks(todoist.closeTask(task.id), {
+        optimisticUpdate(data) {
+          if (!data) {
+            return;
+          }
+
+          return data.filter((t) => t.id !== task.id);
+        },
+      });
+      await showHUD("Completed task 🙌");
 
       if (focusedTask.id === task.id) {
         unfocusTask();
@@ -36,11 +42,9 @@ const MenubarTask = ({ task, mutateTasks }: MenuBarTaskProps) => {
   }
 
   async function changeDueDate(task: Task, dueString: string) {
-    await showHUD("⏰ Updating task due date");
-
     try {
       await todoist.updateTask(task.id, { dueString });
-      await showHUD("Updated task due date 🙌");
+      await showHUD("Updated task due date");
       mutateTasks();
     } catch (error) {
       console.log(error);
@@ -49,12 +53,24 @@ const MenubarTask = ({ task, mutateTasks }: MenuBarTaskProps) => {
   }
 
   async function changePriority(task: Task, priority: number) {
-    await showHUD("⏰ Updating task priority");
-
     try {
-      await todoist.updateTask(task.id, { priority });
-      await showHUD("Task Priority Updated 🙌");
-      mutateTasks();
+      await mutateTasks(todoist.updateTask(task.id, { priority }), {
+        optimisticUpdate(data) {
+          if (!data) {
+            return;
+          }
+
+          return data.map((t) => {
+            if (t.id === task.id) {
+              return { ...t, priority };
+            }
+
+            return t;
+          });
+        },
+      });
+
+      await showHUD("Updated task priority");
     } catch (error) {
       console.log(error);
       showHUD("Unable to update task priority ❌");
@@ -69,13 +85,17 @@ const MenubarTask = ({ task, mutateTasks }: MenuBarTaskProps) => {
         icon: { source: Icon.Trash, tintColor: Color.Red },
       })
     ) {
-      await showHUD("⏰ Deleting task");
-
       try {
-        await todoist.deleteTask(task.id);
-        await showHUD("Task deleted 🙌");
+        await mutateTasks(todoist.deleteTask(task.id), {
+          optimisticUpdate(data) {
+            if (!data) {
+              return;
+            }
 
-        mutateTasks();
+            return data.filter((t) => t.id !== task.id);
+          },
+        });
+        await showHUD("Deleted task");
       } catch (error) {
         console.log(error);
         showHUD("Unable to delete task ❌");
@@ -135,4 +155,4 @@ const MenubarTask = ({ task, mutateTasks }: MenuBarTaskProps) => {
   );
 };
 
-export default MenubarTask;
+export default MenuBarTask;
