@@ -1,0 +1,73 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "promptify",
+  "title": "Promptify",
+  "description": "Make quick requests to the OpenAI models",
+  "icon": "promptify.png",
+  "author": "phlo",
+  "categories": [
+    "Productivity",
+    "Developer Tools",
+    "Data",
+    "Media"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "ask",
+      "title": "Ask OpenAI",
+      "description": "Query chosen OpenAI model",
+      "mode": "view"
+    },
+    {
+      "name": "history",
+      "title": "History",
+      "description": "Display your prompt history",
+      "mode": "view"
+    },
+    {
+      "name": "create-prompt",
+      "title": "Create Prompt",
+      "description": "Create a custom system prompt",
+      "mode": "view"
+    },
+    {
+      "name": "custom-prompts",
+      "title": "Saved Prompts",
+      "description": "List custom prompts",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "description": "Your OpenAI API key",
+      "name": "accessToken",
+      "placeholder": "Enter your OpenAI API key",
+      "required": true,
+      "title": "API key",
+      "type": "password"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.49.3",
+    "@raycast/utils": "^1.5.2",
+    "got": "^12.6.0",
+    "node-fetch": "^3.3.1",
+    "openai": "^3.2.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
