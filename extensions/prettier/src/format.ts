@@ -44,8 +44,8 @@ export default async (expectedFormat: string, parser: string) => {
 
     if (pasteImmediately) {
       await Clipboard.paste(formatted);
-    }else {
-      await closeMainWindow()
+    } else {
+      await closeMainWindow();
     }
   } catch (error) {
     await showHUD(`There was an error while formatting ${expectedFormat} using parser: "${parser}.`);
