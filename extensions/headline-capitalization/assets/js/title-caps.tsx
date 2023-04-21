@@ -46,20 +46,17 @@ export default class TitleCapsEditor {
 	/**
 	 * Public method. Sets capitalization mode/rule.
 	 */
-	// TODO:
 	public setMode(mode : number): void {
 		const val = parseInt(this.value, 10);
 		this.mode = val >= 1 && val <= 4 ? val : this.STYLE_CHICAGO_MANUAL;
 		this.mode = mode;
-		// Refresh result.
-		// return this.titleCaps(this.original_title);
 	};
 	
 	/**
 	 * method. Gets capitalization mode/rule.
 	 */
-	public getMode(mode : number): number {
-		return mode;
+	public getMode(): number {
+		return this.mode;
 	};
 	
 	/**

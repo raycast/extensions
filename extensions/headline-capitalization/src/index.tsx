@@ -26,18 +26,21 @@ async function copyToClipboard(value: string) {
 
 export default function Command() {
   const [capitalizedTitle, setCapitalizedTitle] = useState("");
+  const [mode, setMode] = useState<number>(2); // initializing mode to the default value of 2
 
   function handleChange(value: string): void {
     const editor = new TitleCapsEditor(value);
-    editor.setMode(3);
+    editor.setMode(mode);
     const capitalised = editor.titleCaps(value);
     setCapitalizedTitle(capitalised);
   }
 
   function handleDropdownChange(value: string): void {
-    const editor = new TitleCapsEditor("");
-    editor.setMode(Number(value));
+    const editor = new TitleCapsEditor(capitalizedTitle);
+    const newMode = Number(value);
+    editor.setMode(newMode);
     const capitalised = editor.titleCaps(capitalizedTitle);
+    setMode(newMode);
     setCapitalizedTitle(capitalised);
   }
 
@@ -63,7 +66,7 @@ export default function Command() {
           onChange={(value) => handleChange(value)}
           value={capitalizedTitle}
         />
-        <Form.Dropdown id="options" title="Capitalization Style" onChange={(value) => handleDropdownChange(value)}>
+        <Form.Dropdown id="mode" title="Capitalization Style" onChange={(value) => handleDropdownChange(value)}>
           <Form.Dropdown.Item value="2" title="Capitalize With 4+ Letters (AP Style)" />
           <Form.Dropdown.Item value="3" title="Capitalize with 5+ Letters (APA Style)" />
           <Form.Dropdown.Item value="4" title="Don't Capitalize Based on Length (Chicago Style)" />
