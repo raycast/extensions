@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Detail, Form, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
-import { useForm, FormValidation } from "@raycast/utils";
+import { useForm, FormValidation, useCachedState } from "@raycast/utils";
 import { useState, useEffect } from "react";
 import child_process = require("node:child_process");
 import util = require("node:util");
@@ -45,7 +45,7 @@ interface State {
 }
 
 export default function ListEnvelopes() {
-  const [state, setState] = useState<State>({
+  const [state, setState] = useCachedState<State>("index", {
     isLoading: true,
     envelopes: [],
     folders: [],
@@ -86,67 +86,8 @@ export default function ListEnvelopes() {
     fetch();
   }, []);
 
-  const accessories = (envelope: Envelope) => {
-    const accessories = [];
-
-    if (envelope.flags.includes(Flag.Answered)) {
-      accessories.push({
-        icon: Icon.Reply,
-      });
-    }
-
-    // This is always present. Accessories are rendered ordered
-    // so put them last.
-    accessories.push({
-      text: {
-        value: `${envelope.from.name} <${envelope.from.addr}>`,
-      },
-      icon: Icon.Person,
-    });
-
-    return accessories;
-  };
-
-  if (state.isLoading) {
-    return <List isLoading={state.isLoading}></List>;
-  } else if (!state.isLoading && state.exe) {
-    return (
-      <List isLoading={state.isLoading}>
-        {Array.from(group_envelopes_by_date(state.envelopes).entries()).map(([date, group]) => {
-          const items = group.map((envelope) => {
-            const item = (
-              <List.Item
-                id={envelope.id}
-                key={envelope.id}
-                title={envelope.subject}
-                icon={envelope.flags.includes(Flag.Seen) ? Icon.Circle : Icon.CircleFilled}
-                accessories={accessories(envelope)}
-                actions={
-                  <ActionPanel title="Envelope">
-                    {readAction(envelope, state, setState)}
-                    {envelope.flags.includes(Flag.Seen) && markUnreadAction(envelope, state, setState)}
-                    {!envelope.flags.includes(Flag.Seen) && markReadAction(envelope, state, setState)}
-                    {moveToSelectedAction(envelope, state, setState)}
-                    {moveToTrashAction(envelope, state, setState)}
-                    <Action.CopyToClipboard title="Copy ID to Clipboard" content={envelope.id} />
-                  </ActionPanel>
-                }
-              />
-            );
-
-            return item;
-          });
-
-          const section = (
-            <List.Section title={date} key={date}>
-              {items}
-            </List.Section>
-          );
-
-          return section;
-        })}
-      </List>
-    );
+  if (state.exe) {
+    return <List isLoading={state.isLoading}>{envelopesToList(state, setState)}</List>;
   } else {
     return <Detail markdown="Couldn't find executable, please install Himalaya CLI" />;
   }
@@ -533,4 +474,61 @@ const moveToTrashAction = (envelope: Envelope, state: State, setState: any) => {
       }}
     />
   );
+};
+
+const accessories = (envelope: Envelope) => {
+  const accessories = [];
+
+  if (envelope.flags.includes(Flag.Answered)) {
+    accessories.push({
+      icon: Icon.Reply,
+    });
+  }
+
+  // This is always present. Accessories are rendered ordered
+  // so put them last.
+  accessories.push({
+    text: {
+      value: `${envelope.from.name} <${envelope.from.addr}>`,
+    },
+    icon: Icon.Person,
+  });
+
+  return accessories;
+};
+
+const envelopesToList = (state: any, setState: any): any => {
+  return Array.from(group_envelopes_by_date(state.envelopes).entries()).map(([date, group]) => {
+    const items = group.map((envelope) => {
+      const item = (
+        <List.Item
+          id={envelope.id}
+          key={envelope.id}
+          title={envelope.subject}
+          icon={envelope.flags.includes(Flag.Seen) ? Icon.Circle : Icon.CircleFilled}
+          accessories={accessories(envelope)}
+          actions={
+            <ActionPanel title="Envelope">
+              {readAction(envelope, state, setState)}
+              {envelope.flags.includes(Flag.Seen) && markUnreadAction(envelope, state, setState)}
+              {!envelope.flags.includes(Flag.Seen) && markReadAction(envelope, state, setState)}
+              {moveToSelectedAction(envelope, state, setState)}
+              {moveToTrashAction(envelope, state, setState)}
+              <Action.CopyToClipboard title="Copy ID to Clipboard" content={envelope.id} />
+            </ActionPanel>
+          }
+        />
+      );
+
+      return item;
+    });
+
+    const section = (
+      <List.Section title={date} key={date}>
+        {items}
+      </List.Section>
+    );
+
+    return section;
+  });
 };
