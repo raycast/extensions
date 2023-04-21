@@ -1,4 +1,4 @@
-import { Cache, Image, MenuBarExtra, open, updateCommandMetadata } from "@raycast/api";
+import { Cache, Image, LaunchType, MenuBarExtra, launchCommand, open, updateCommandMetadata } from "@raycast/api";
 import { useAllSites } from "./hooks/useAllSites";
 import { ISite } from "./types";
 import { runAppleScript } from "run-applescript";
@@ -78,11 +78,13 @@ export default function Command() {
           title={site?.name ?? site?.aliases?.[0] ?? "Unknown"}
           subtitle={site?.deployment_status === "deploying" ? "deploying..." : site?.deployment_status ?? "deployed"}
           tooltip="Open in Raycast"
-          onAction={() => {
-            open(
-              `raycast://extensions/KevinBatdorf/laravel-forge/index?arguments=%7B%22server%22%3A%22${site.server_id}%22%7D`
-            );
-          }}
+          onAction={() =>
+            launchCommand({
+              name: "laravel-forge",
+              type: LaunchType.UserInitiated,
+              arguments: { server: site.server_id },
+            })
+          }
         />
       ))}
       {recentlyActive?.length > 0 && <MenuBarExtra.Item key="recent-activity" title="Recent Activity" />}

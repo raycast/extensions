@@ -1,21 +1,22 @@
-import { LocalStorage, Toast, popToRoot, showToast } from "@raycast/api";
+import { LaunchType, LocalStorage, Toast, environment, popToRoot, showToast } from "@raycast/api";
 import fetch, { RequestInit } from "node-fetch";
 import { clearCache } from "./cache";
 
 const doTheFetch = async (url: string, options?: RequestInit) => {
+  const isBackground = environment.launchType === LaunchType.Background;
   let res;
   try {
     res = await fetch(url, options);
   } catch (e) {
     if (e instanceof Error) {
       console.error({ error: e, url });
-      showResetToast({ title: `Error ${res?.status}: ${e.message}` });
+      isBackground || showResetToast({ title: `Error ${res?.status}: ${e.message}` });
       throw new Error(e.message);
     }
   }
   if (!res?.ok) {
     console.error({ status: res?.status, text: res?.statusText, url });
-    showResetToast({ title: `Error ${res?.status}: ${res?.statusText}` });
+    isBackground || showResetToast({ title: `Error ${res?.status}: ${res?.statusText}` });
     throw new Error(res?.statusText);
   }
   return res;
