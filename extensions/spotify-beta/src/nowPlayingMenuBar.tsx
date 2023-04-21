@@ -27,36 +27,13 @@ import { EpisodeObject, TrackObject } from "./helpers/spotify.api";
 import { useMyPlaylists } from "./hooks/useMyPlaylists";
 import { addToPlaylist } from "./api/addToPlaylist";
 import { useContainsMyLikedTracks } from "./hooks/useContainsMyLikedTracks";
-import { usePlaybackState } from "./hooks/usePlaybackState";
 import { useMe } from "./hooks/useMe";
-import { useEffect, useRef } from "react";
-import { useCachedState } from "@raycast/utils";
-import { useCurrentlyPlayingUri } from "./hooks/useCurrentlyPlayingUri";
 import { formatTitle } from "./helpers/formatTitle";
 
 function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
   const preferences = getPreferenceValues<{ maxTextLength?: boolean; showEllipsis?: boolean }>();
 
-  // First we get the currently playing URI using `useCurrentlyPlayingUri` (this prioritises AppleScript over the API)
-  const { currentlyPlayingUriData, currentlyPlayingUriIsLoading } = useCurrentlyPlayingUri();
-  // Then we store it in a state using `useCachedState` (this will persist the value between launches)
-  const [currentUri, setCurrentUri] = useCachedState<string | undefined>(
-    "currentlyPlayingUri",
-    currentlyPlayingUriData
-  );
-
-  const [backgroundRefreshCount, setBackgroundRefreshCount] = useCachedState<number>("currentlyPlayingRefreshCount", 0);
-
-  // We use a ref to store the value of `shouldExecute` so that it doesn't trigger a re-render
-  const shouldExecute = useRef(false);
-
-  // We conditionally set `shouldExecute` to true if the currently playing URI has changed
-  const { currentlyPlayingData, currentlyPlayingIsLoading, currentlyPlayingRevalidate } = useCurrentlyPlaying({
-    options: { execute: shouldExecute.current },
-  });
-  const { playbackStateData, playbackStateIsLoading, playbackStateRevalidate } = usePlaybackState({
-    options: { execute: launchType === LaunchType.UserInitiated || shouldExecute.current },
-  });
+  const { currentlyPlayingData, currentlyPlayingIsLoading, currentlyPlayingRevalidate } = useCurrentlyPlaying();
 
   // The hooks below will only execute when the Menu Bar is opened
   const { myDevicesData } = useMyDevices({ options: { execute: launchType === LaunchType.UserInitiated } });
@@ -67,49 +44,12 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
     options: { execute: launchType === LaunchType.UserInitiated },
   });
 
-  // We use `useEffect` to update the currently playing URI state when the currently playing URI changes
-  useEffect(() => {
-    if (!currentlyPlayingUriData) {
-      setCurrentUri(undefined);
-      shouldExecute.current = false;
-      return;
-    }
-    if (currentlyPlayingUriData !== currentUri) {
-      setCurrentUri(currentlyPlayingUriData);
-      shouldExecute.current = true;
-    }
-  }, [currentUri, currentlyPlayingUriData]);
-
-  // Sync back to the local state if the currently playing data changes
-  useEffect(() => {
-    setCurrentUri(currentlyPlayingData?.item?.uri);
-  }, [currentlyPlayingData]);
-
-  // Here we will keep a count of everytime this command background refreshes (every 10 seconds)
-  // We' check if the current playback state isn't playing and if the count is lesser than 18 (180 seconds/3 minutes)
-  // If so, we'll increment the count and set `shouldExecute` to false
-  // we'll set `shouldExecute` to true in order to execute the `useCurrentlyPlaying` hook and sync the playing state from the API back to the local state (happening in the `useEffect` above)
-  // Then we reset the count to 0, set `shouldExecute` to false and start the process again
-  useEffect(() => {
-    if (launchType === LaunchType.Background) {
-      if (playbackStateData?.is_playing === false && backgroundRefreshCount < 18) {
-        shouldExecute.current = false;
-        setBackgroundRefreshCount((prevCount) => prevCount + 1);
-      } else {
-        shouldExecute.current = true;
-        setBackgroundRefreshCount(0);
-      }
-    }
-  }, [playbackStateData]);
-
-  const isPlaying = playbackStateData?.is_playing;
+  const isPlaying = currentlyPlayingData?.is_playing === true;
   const trackAlreadyLiked = containsMySavedTracksData?.[0];
   const isTrack = currentlyPlayingData?.currently_playing_type !== "episode";
 
-  if (!currentUri || !currentlyPlayingData?.item) {
-    return (
-      <NothingPlaying isLoading={currentlyPlayingIsLoading || currentlyPlayingUriIsLoading || playbackStateIsLoading} />
-    );
+  if (!currentlyPlayingData?.item) {
+    return <NothingPlaying isLoading={currentlyPlayingIsLoading || currentlyPlayingIsLoading} />;
   }
 
   const { item } = currentlyPlayingData;
@@ -186,7 +126,7 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
 
   return (
     <MenuBarExtra
-      isLoading={currentlyPlayingIsLoading || currentlyPlayingUriIsLoading || playbackStateIsLoading}
+      isLoading={currentlyPlayingIsLoading || currentlyPlayingIsLoading}
       icon={{ source: { dark: "menu-icon-dark.svg", light: "menu-icon-light.svg" } }}
       title={formatTitle(title, Number(preferences.maxTextLength))}
       tooltip={title}
@@ -197,7 +137,7 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
           title="Pause"
           onAction={async () => {
             await pause();
-            await playbackStateRevalidate();
+            await currentlyPlayingRevalidate();
           }}
         />
       )}
@@ -207,7 +147,7 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
           title="Play"
           onAction={async () => {
             await play();
-            await playbackStateRevalidate();
+            await currentlyPlayingRevalidate();
           }}
         />
       )}
