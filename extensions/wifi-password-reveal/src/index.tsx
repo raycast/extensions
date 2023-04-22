@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { ActionPanel, Detail, List, Action, Icon } from "@raycast/api";
+import { ActionPanel, Detail, List, Action, Icon, showToast, Toast } from "@raycast/api";
 import { exec } from "child_process";
 
 const DetailPassword = ({
@@ -9,21 +9,37 @@ const DetailPassword = ({
   networkName: string;
   setIsLoading: (loading: boolean) => void;
 }) => {
-  const [password, setPassword] = useState("");
+  const [text, setText] = useState("");
 
   useEffect(() => {
-    exec(`security find-generic-password -wa ${networkName}`, (error, stdout, stderr) => {
-      if (error) {
-        console.error(`exec error: ${error}`);
-        setIsLoading(false);
-        return;
-      }
+    (async () => {
+      const toast = await showToast({ style: Toast.Style.Animated, title: "Permission Checking" });
 
-      setPassword(stdout.trim());
-    });
+      exec(`security find-generic-password -wa ${networkName}`, (error, password, stderr) => {
+        if (error) {
+          console.error(`exec error: ${error}`);
+
+          toast.style = Toast.Style.Failure;
+          toast.title = "Checking failed 😢";
+          toast.message = error.message;
+
+          setIsLoading(false);
+          return;
+        }
+
+        // Trigger open raycast app
+        exec("open /Applications/Raycast.app", (error, stdout, stderr) => {
+          toast.style = Toast.Style.Success;
+          toast.title = "Got it 🥳";
+
+          setText(password.trim());
+          setIsLoading(false);
+        });
+      });
+    })();
   }, []);
 
-  return <Detail markdown={`Password: ${password}`} />;
+  return <Detail markdown={`${text}`} />;
 };
 
 export default function Command() {
@@ -33,27 +49,23 @@ export default function Command() {
   useEffect(() => {
     setIsLoading(true);
 
-    exec(
-      "/System/Library/PrivateFrameworks/Apple80211.framework/Versions/Current/Resources/airport -s | sed '1d; s/^[ *]//g' | awk '{print $1}' | sort | uniq",
-      (error, stdout, stderr) => {
-        if (error) {
-          console.error(`exec error: ${error}`);
-          setIsLoading(false);
-          return;
-        }
-
-        const networkList: Array<string> = stdout
-          .trim() // remove trailing newline
-          .split("\n") // split into lines
-          .slice(1) // remove header row
-          .map((line) => line.trim().split(/\s+/)[0]); // extract the network names
-
-        if (networkList?.length > 0) {
-          setNetworks(networkList);
-        }
+    exec("/usr/sbin/networksetup -listpreferredwirelessnetworks en0", (error, stdout, stderr) => {
+      if (error) {
+        console.error(`exec error: ${error}`);
         setIsLoading(false);
+        return;
       }
-    );
+
+      const lines = stdout.trim().split("\n");
+
+      // Extract the Wi-Fi network names from the lines
+      const networks = lines.slice(1).map((line) => line.trim());
+
+      if (networks?.length > 0) {
+        setNetworks(networks);
+      }
+      setIsLoading(false);
+    });
   }, []);
 
   return (
