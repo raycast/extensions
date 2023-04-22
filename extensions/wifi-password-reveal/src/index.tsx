@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { ActionPanel, Detail, List, Action, Icon, showToast, Toast } from "@raycast/api";
+import { ActionPanel, Detail, List, Action, Icon, showToast, Toast, Clipboard } from "@raycast/api";
 import { exec } from "child_process";
 
 const DetailPassword = ({
@@ -9,37 +9,54 @@ const DetailPassword = ({
   networkName: string;
   setIsLoading: (loading: boolean) => void;
 }) => {
-  const [text, setText] = useState("");
+  const [password, setPassword] = useState("");
 
   useEffect(() => {
     (async () => {
       const toast = await showToast({ style: Toast.Style.Animated, title: "Permission Checking" });
 
-      exec(`security find-generic-password -wa "${networkName}"`, (error, password, stderr) => {
-        if (error) {
-          console.error(`exec error: ${error}`);
+      exec(
+        `security find-generic-password -D "AirPort network password" -a "${networkName}" -w`,
+        async (error, password, stderr) => {
+          if (error) {
+            console.error(`exec error: ${error}`);
 
-          toast.style = Toast.Style.Failure;
-          toast.title = "Checking failed 😢";
-          toast.message = error.message;
+            toast.style = Toast.Style.Failure;
+            toast.title = "Checking failed 😢";
+            toast.message = error.message;
 
-          setIsLoading(false);
-          return;
+            setIsLoading(false);
+            return;
+          }
+
+          password = password.trim();
+          await Clipboard.copy(password);
+
+          // Trigger open raycast app
+          exec("open /Applications/Raycast.app", (error, stdout, stderr) => {
+            toast.style = Toast.Style.Success;
+            toast.title = "Got it 🥳";
+
+            setPassword(password);
+            setIsLoading(false);
+          });
         }
-
-        // Trigger open raycast app
-        exec("open /Applications/Raycast.app", (error, stdout, stderr) => {
-          toast.style = Toast.Style.Success;
-          toast.title = "Got it 🥳";
-
-          setText(password.trim());
-          setIsLoading(false);
-        });
-      });
+      );
     })();
   }, []);
 
-  return <Detail markdown={`${text}`} />;
+  return (
+    <Detail
+      markdown={`
+  ## Wifi Name 📶
+  ${networkName}
+  ## Password 🔑
+  ${password}
+  ## Note 📝
+  > ***It has been copied inside your clipboard***
+  `}
+    />
+  );
 };
 
 export default function Command() {
