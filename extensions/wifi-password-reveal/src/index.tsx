@@ -15,7 +15,7 @@ const DetailPassword = ({
     (async () => {
       const toast = await showToast({ style: Toast.Style.Animated, title: "Permission Checking" });
 
-      exec(`security find-generic-password -wa ${networkName}`, (error, password, stderr) => {
+      exec(`security find-generic-password -wa "${networkName}"`, (error, password, stderr) => {
         if (error) {
           console.error(`exec error: ${error}`);
 
