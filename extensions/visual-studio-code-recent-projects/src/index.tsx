@@ -1,10 +1,10 @@
-import { ActionPanel, Action, Grid, Icon, showToast } from "@raycast/api";
+import { ActionPanel, Action, Grid, Icon, showToast, open } from "@raycast/api";
 import { useState } from "react";
 import { basename, dirname } from "path";
 import tildify from "tildify";
 import { fileURLToPath } from "url";
 import { useRecentEntries } from "./db";
-import { bundleIdentifier, build, keepSectionOrder } from "./preferences";
+import { bundleIdentifier, build, keepSectionOrder, closeOtherWindows } from "./preferences";
 import { EntryLike, EntryType, RemoteEntry, PinMethods } from "./types";
 import {
   filterEntriesByType,
@@ -23,6 +23,7 @@ import {
   ListOrGridItem,
 } from "./grid-or-list";
 import { usePinnedEntries } from "./pinned";
+import { runAppleScript } from "run-applescript";
 
 export default function Command() {
   const { data, isLoading } = useRecentEntries();
@@ -108,11 +109,23 @@ function LocalItem(props: { entry: EntryLike; uri: string; pinned?: boolean } & 
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <Action.Open
+            <Action
               title={`Open in ${build}`}
               icon="action-icon.png"
-              target={props.uri}
-              application={bundleIdentifier}
+              onAction={() => {
+                open(props.uri, bundleIdentifier);
+                if (closeOtherWindows) {
+                  runAppleScript(`
+                    tell application "System Events"
+                      tell process "${build}"
+                        repeat while window 2 exists
+                          click button 1 of window 2
+                        end repeat
+                      end tell
+                    end tell
+                  `);
+                }
+              }}
             />
             <Action.ShowInFinder path={path} />
             <Action.OpenWith path={path} shortcut={{ modifiers: ["cmd"], key: "o" }} />
