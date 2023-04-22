@@ -22,7 +22,7 @@ const DetailPassword = ({
             console.error(`exec error: ${error}`);
 
             toast.style = Toast.Style.Failure;
-            toast.title = "Checking failed 😢";
+            toast.title = "Permission Checking failed ❌";
             toast.message = error.message;
 
             setIsLoading(false);
@@ -35,7 +35,7 @@ const DetailPassword = ({
           // Trigger open raycast app
           exec("open /Applications/Raycast.app", (error, stdout, stderr) => {
             toast.style = Toast.Style.Success;
-            toast.title = "Got it 🥳";
+            toast.title = "Copied the password to the clipboard ✅";
 
             setPassword(password);
             setIsLoading(false);
@@ -52,8 +52,6 @@ const DetailPassword = ({
   ${networkName}
   ## Password 🔑
   ${password}
-  ## Note 📝
-  > ***It has been copied inside your clipboard***
   `}
     />
   );
