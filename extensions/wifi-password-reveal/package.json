@@ -3,7 +3,7 @@
   "name": "wifi-password-reveal",
   "title": "Wifi Password Reveal",
   "description": "Reval Wifi Password On MacOs",
-  "icon": "command-icon.png",
+  "icon": "extension_icon.png",
   "author": "loishy",
   "categories": [
     "Developer Tools"

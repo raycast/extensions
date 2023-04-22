@@ -22,22 +22,19 @@ const DetailPassword = ({
             console.error(`exec error: ${error}`);
 
             toast.style = Toast.Style.Failure;
-            toast.title = "Permission Checking failed ❌";
+            toast.title = "Permission checked failed ❌";
             toast.message = error.message;
 
             setIsLoading(false);
             return;
           }
 
-          password = password.trim();
-          await Clipboard.copy(password);
-
           // Trigger open raycast app
           exec("open /Applications/Raycast.app", (error, stdout, stderr) => {
             toast.style = Toast.Style.Success;
-            toast.title = "Copied the password to the clipboard ✅";
+            toast.title = "Permission checked successed ✅";
 
-            setPassword(password);
+            setPassword(password.trim());
             setIsLoading(false);
           });
         }
@@ -53,6 +50,11 @@ const DetailPassword = ({
   ## Password 🔑
   ${password}
   `}
+      actions={
+        <ActionPanel>
+          <Action.CopyToClipboard content={password} shortcut={{ modifiers: ["cmd"], key: "." }} />
+        </ActionPanel>
+      }
     />
   );
 };
