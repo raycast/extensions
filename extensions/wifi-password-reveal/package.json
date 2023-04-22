@@ -13,7 +13,7 @@
     {
       "name": "index",
       "title": "Show List Wifi",
-      "description": "",
+      "description": "Show All Wifi Name currently connected to our Mac Network Card",
       "mode": "view"
     }
   ],
