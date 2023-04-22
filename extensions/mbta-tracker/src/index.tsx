@@ -1,91 +1,51 @@
-import { ActionPanel, Action, List } from "@raycast/api";
-import { useFetch, Response } from "@raycast/utils";
 import { useState } from "react";
-import { URLSearchParams } from "node:url";
+import { Icon, List, ActionPanel, Action } from "@raycast/api";
+import { useFetch } from "@raycast/utils";
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
-  const { data, isLoading } = useFetch(
-    "https://api.npms.io/v2/search?" +
-      // send the search query to the API
-      new URLSearchParams({ q: searchText.length === 0 ? "@raycast/api" : searchText }),
-    {
-      parseResponse: parseFetchResponse,
-    }
-  );
+  const { isLoading, data } = useFetch(`https://api-v3.mbta.com/routes`, {
+    keepPreviousData: true,
+  });
 
   return (
-    <List
-      isLoading={isLoading}
-      onSearchTextChange={setSearchText}
-      searchBarPlaceholder="Search npm packages..."
-      throttle
-    >
-      <List.Section title="Results" subtitle={data?.length + ""}>
-        {data?.map((searchResult) => (
-          <SearchListItem key={searchResult.name} searchResult={searchResult} />
-        ))}
+    <List isLoading={isLoading} searchText={searchText} throttle>
+      <List.Section title="Subway">
+        {(data.data || [])
+          .filter((item) => item.attributes.type == 0 || item.attributes.type == 1)
+          .map((item) => (
+            <List.Item
+              key={item.id}
+              title={item.attributes.long_name}
+              icon={{ source: Icon.CircleFilled, tintColor: item.attributes.color }}
+              accessoryTitle={item.attributes.description}
+            />
+          ))}
+      </List.Section>
+      <List.Section title="Bus">
+        {(data.data || [])
+          .filter((item) => item.attributes.type == 3)
+          .map((item) => (
+            <List.Item
+              key={item.id}
+              title={item.attributes.short_name}
+              icon={{ source: Icon.CircleFilled, tintColor: item.attributes.color }}
+              accessoryTitle={item.attributes.description}
+            />
+          ))}
+      </List.Section>
+      <List.Section title="Commuter Rail">
+        {(data.data || [])
+          .filter((item) => item.attributes.type == 2)
+          .map((item) => (
+            <List.Item
+              key={item.id}
+              title={item.attributes.long_name}
+              icon={{ source: Icon.CircleFilled, tintColor: item.attributes.color }}
+              accessoryTitle={item.attributes.description}
+            />
+          ))}
       </List.Section>
     </List>
   );
-}
-
-function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
-  return (
-    <List.Item
-      title={searchResult.name}
-      subtitle={searchResult.description}
-      accessoryTitle={searchResult.username}
-      actions={
-        <ActionPanel>
-          <ActionPanel.Section>
-            <Action.OpenInBrowser title="Open in Browser" url={searchResult.url} />
-          </ActionPanel.Section>
-          <ActionPanel.Section>
-            <Action.CopyToClipboard
-              title="Copy Install Command"
-              content={`npm install ${searchResult.name}`}
-              shortcut={{ modifiers: ["cmd"], key: "." }}
-            />
-          </ActionPanel.Section>
-        </ActionPanel>
-      }
-    />
-  );
-}
-
-/** Parse the response from the fetch query into something we can display */
-async function parseFetchResponse(response: Response) {
-  const json = (await response.json()) as
-    | {
-        results: {
-          package: {
-            name: string;
-            description?: string;
-            publisher?: { username: string };
-            links: { npm: string };
-          };
-        }[];
-      }
-    | { code: string; message: string };
-
-  if (!response.ok || "message" in json) {
-    throw new Error("message" in json ? json.message : response.statusText);
-  }
-
-  return json.results.map((result) => {
-    return {
-      name: result.package.name,
-      description: result.package.description,
-      username: result.package.publisher?.username,
-      url: result.package.links.npm,
-    } as SearchResult;
-  });
-}
-
-interface SearchResult {
-  name: string;
-  description?: string;
-  username?: string;
-  url: string;
 }
