@@ -33,13 +33,12 @@
   "dependencies": {
     "@raycast/api": "^1.48.9",
     "@raycast/utils": "^1.5.2",
-    "fluent-ffmpeg": "^2.1.2",
+    "fluent-ffmpeg": "2.1.2",
     "patch-package": "^6.5.1",
     "pretty-bytes": "^6.1.0",
     "tempfile": "^4.0.0",
     "unused-filename": "^4.0.1",
-    "ytdl-core": "^4.11.2",
-    "parse-duration": "^1.0.3"
+    "ytdl-core": "^4.11.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.5",
