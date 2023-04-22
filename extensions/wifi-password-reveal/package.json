@@ -12,7 +12,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "Show List Wifi",
+      "title": "Wifi Password Reveal",
       "description": "Show All Wifi Name currently connected to our Mac Network Card",
       "mode": "view"
     }
