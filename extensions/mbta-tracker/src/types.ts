@@ -21,6 +21,7 @@ export interface Stop {
   attributes: {
     address?: string;
     at_street?: string;
+    municipality: string;
     name: string;
     one_street?: string;
   };

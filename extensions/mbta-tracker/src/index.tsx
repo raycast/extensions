@@ -12,7 +12,7 @@ function outputRouteListItem(item: Route) {
       accessories={[{ text: item.attributes.description }]}
       actions={
         <ActionPanel>
-          <Action.Push title="Show Stops" icon={Icon.Box} target={<StopsList key={item.id} routeId={item.id} />} />
+          <Action.Push title="Show Stops" icon={Icon.Box} target={<StopsList key={item.id} route={item} />} />
         </ActionPanel>
       }
     />
