@@ -217,13 +217,24 @@ function SetCustomStatusAction(props: {
   );
 }
 
-function ClearStatusAction(props: { slackClient: SlackClient; currentStatusResponseState: SlackStatusResponseState }) {
+function ClearStatusAction({ slackClient, currentStatusResponseState }: { slackClient: SlackClient; currentStatusResponseState: SlackStatusResponseState }) {
+  const clearStatus = () => {
+    showAlertDialog({
+      title: 'Confirm Clear Status',
+      message: 'Are you sure you want to clear your status?',
+      actions: [
+        { title: 'Cancel' },
+        { title: 'Clear', destructive: true, onAction: () => slackClient.clearStatus(currentStatusResponseState) },
+      ],
+    });
+  };
+
   return (
     <ActionPanel.Item
       id="clearStatus"
       title="Clear Status"
       icon={Icon.XmarkCircle}
-      onAction={() => props.slackClient.clearStatus(props.currentStatusResponseState)}
+      onAction={clearStatus}
     />
   );
 }
