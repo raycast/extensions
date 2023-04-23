@@ -1,5 +1,6 @@
-import { Icon, List } from "@raycast/api";
+import { Icon, List, ActionPanel, Action } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
+import { PredictionsList } from "./PredictionsList";
 import type { Route, StopsResponse } from "../types";
 
 interface Props {
@@ -17,6 +18,15 @@ export const StopsList = ({ route }: Props): JSX.Element => {
           title={stop.attributes.name}
           icon={{ source: Icon.CircleFilled, tintColor: route.attributes.color }}
           accessories={[{ text: stop.attributes.address || stop.attributes.municipality, icon: Icon.Pin }]}
+          actions={
+            <ActionPanel>
+              <Action.Push
+                title="Show Predictions"
+                icon={Icon.Clock}
+                target={<PredictionsList key={stop.id} stop={stop} />}
+              />
+            </ActionPanel>
+          }
         />
       ))}
     </List>

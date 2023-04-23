@@ -27,3 +27,16 @@ export interface Stop {
   };
   id: string;
 }
+
+export interface PredictionsResponse {
+  data: Prediction[];
+}
+
+export interface Prediction {
+  attributes: {
+    arrival_time?: string;
+    departure_time?: string;
+    direction_id: number;
+  };
+  id: string;
+}

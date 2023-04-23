@@ -12,14 +12,15 @@
   "commands": [
     {
       "name": "index",
-      "title": "Browse MBTA predictions",
+      "title": "Browse arrival predictions",
       "description": "Template for showing typeahead search with network results.",
       "mode": "view"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.49.3",
-    "@raycast/utils": "^1.4.8"
+    "@raycast/utils": "^1.4.8",
+    "dayjs": "^1.11.7"
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.5",
