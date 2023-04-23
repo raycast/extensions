@@ -3,16 +3,16 @@ import { useFetch } from "@raycast/utils";
 import { StopsList } from "./components/StopsList";
 import type { RoutesResponse, Route } from "./types";
 
-function outputRouteListItem(item: Route) {
+function outputRouteListItem(route: Route) {
   return (
     <List.Item
-      key={item.id}
-      title={item.attributes.type == "3" ? item.attributes.short_name : item.attributes.long_name}
-      icon={{ source: Icon.CircleFilled, tintColor: item.attributes.color }}
-      accessories={[{ text: item.attributes.description }]}
+      key={route.id}
+      title={route.attributes.type == "3" ? route.attributes.short_name : route.attributes.long_name}
+      icon={{ source: Icon.CircleFilled, tintColor: route.attributes.color }}
+      accessories={[{ text: route.attributes.description }]}
       actions={
         <ActionPanel>
-          <Action.Push title="Show Stops" icon={Icon.Box} target={<StopsList key={item.id} route={item} />} />
+          <Action.Push title="Show Stops" icon={Icon.Box} target={<StopsList key={route.id} route={route} />} />
         </ActionPanel>
       }
     />
@@ -28,18 +28,18 @@ export default function Command() {
     <List isLoading={isLoading} searchBarPlaceholder="Select MBTA route...">
       <List.Section title="Subway">
         {(data?.data || [])
-          .filter((item: Route) => parseInt(item.attributes.type) == 0 || parseInt(item.attributes.type) == 1)
-          .map((item) => outputRouteListItem(item))}
+          .filter((route: Route) => parseInt(route.attributes.type) == 0 || parseInt(route.attributes.type) == 1)
+          .map((route) => outputRouteListItem(route))}
       </List.Section>
       <List.Section title="Bus">
         {(data?.data || [])
-          .filter((item) => parseInt(item.attributes.type) == 3)
-          .map((item) => outputRouteListItem(item))}
+          .filter((route) => parseInt(route.attributes.type) == 3)
+          .map((route) => outputRouteListItem(route))}
       </List.Section>
       <List.Section title="Commuter Rail">
         {(data?.data || [])
-          .filter((item) => parseInt(item.attributes.type) == 2)
-          .map((item) => outputRouteListItem(item))}
+          .filter((route) => parseInt(route.attributes.type) == 2)
+          .map((route) => outputRouteListItem(route))}
       </List.Section>
     </List>
   );
