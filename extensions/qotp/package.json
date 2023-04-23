@@ -11,7 +11,11 @@
       "name": "qotp-panel",
       "title": "QOTP",
       "description": "QOTP is a simple tool to generate OTP code",
-      "keywords": ["otp", "qotp", "ff"],
+      "keywords": [
+        "otp",
+        "qotp",
+        "ff"
+      ],
       "mode": "view"
     }
   ],
@@ -48,6 +52,10 @@
       "description": "生成的code数量",
       "placeholder": "请填写数字"
     }
+  ],
+  "categories": [
+    "Productivity",
+    "Security"
   ],
   "dependencies": {
     "@raycast/api": "^1.49.3",
