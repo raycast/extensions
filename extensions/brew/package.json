@@ -6,7 +6,8 @@
   "author": "nhojb",
   "contributors": [
     "Aayush9029",
-    "mathieudutour"
+    "mathieudutour",
+    "urwrstkn8mare"
   ],
   "license": "MIT",
   "icon": "icon.png",
@@ -56,6 +57,14 @@
       "required": false,
       "title": "Custom Brew Executable Path",
       "description": "Set this if your brew executable is in a non-standard location"
+    },
+    {
+      "name": "useIterm2",
+      "type": "checkbox",
+      "required": false,
+      "title": "Use iTerm2",
+      "label": "Use iTerm2 instead of Terminal",
+      "description": "Use iTerm2 instead of the Terminal app when using the Run in Terminal action."
     }
   ],
   "dependencies": {
