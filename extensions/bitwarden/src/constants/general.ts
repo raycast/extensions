@@ -14,6 +14,4 @@ export const LOCAL_STORAGE_KEY = {
   VAULT_LOCK_REASON: "vaultLockReason",
 };
 
-export const ERRORS = {
-  CLINotFound: "CLINotFound",
-} as const;
+

@@ -1,7 +1,7 @@
 import { environment, showToast, Toast } from "@raycast/api";
 import { Component, ErrorInfo, ReactNode } from "react";
 import TroubleshootingGuide from "~/components/TroubleshootingGuide";
-import { ERRORS } from "~/constants/general";
+import { ERROR_TYPES } from "~/utils/errors";
 
 type Props = {
   children?: ReactNode;
@@ -23,7 +23,7 @@ export default class RootErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    if (error.name in ERRORS) {
+    if (error.name in ERROR_TYPES) {
       this.setState((state) => ({ ...state, hasError: true, error: error.message }));
       showToast(Toast.Style.Failure, error.message);
     } else {
@@ -41,12 +41,5 @@ export default class RootErrorBoundary extends Component<Props, State> {
     } catch {
       return <TroubleshootingGuide />;
     }
-  }
-}
-
-export class CLINotFoundError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = ERRORS.CLINotFound;
   }
 }

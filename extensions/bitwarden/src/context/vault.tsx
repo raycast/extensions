@@ -3,9 +3,10 @@ import { createContext, PropsWithChildren, useContext, useEffect, useMemo, useRe
 import { useVaultItemPublisher } from "~/components/searchVault/context/vaultListeners";
 import { useBitwarden } from "~/context/bitwarden";
 import { useSession } from "~/context/session";
-import { Item, Vault } from "~/types/vault";
+import { Folder, Item, Vault } from "~/types/vault";
 import { captureException } from "~/utils/development";
 import useCachedVault from "~/components/searchVault/utils/useVaultCache";
+import { FailedToLoadVaultItemsError } from "~/utils/errors";
 
 export type VaultState = Vault & {
   isLoading: boolean;
@@ -46,18 +47,24 @@ export const VaultProvider = ({ children }: PropsWithChildren) => {
 
   async function loadItems(sessionToken: string) {
     try {
-      const [items, folders] = await Promise.all([
-        bitwarden.listItems(sessionToken),
-        bitwarden.listFolders(sessionToken),
-      ]);
-      items.sort(favoriteItemsFirstSorter);
-      setState({ isLoading: false, items, folders });
+      let items: Item[] = [];
+      let folders: Folder[] = [];
+      try {
+        [items, folders] = await Promise.all([bitwarden.listItems(sessionToken), bitwarden.listFolders(sessionToken)]);
+        items.sort(favoriteItemsFirstSorter);
+      } catch (error) {
+        publishItems(new FailedToLoadVaultItemsError());
+        throw error;
+      }
 
+      setState({ items, folders });
       publishItems(items);
       cacheVault(items, folders);
     } catch (error) {
-      await showToast(Toast.Style.Failure, "Failed to load vault.");
+      await showToast(Toast.Style.Failure, "Failed to load updated vault");
       captureException("Failed to load vault items", error);
+    } finally {
+      setState({ isLoading: false });
     }
   }
 

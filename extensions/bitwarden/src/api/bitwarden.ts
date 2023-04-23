@@ -2,7 +2,6 @@ import { environment, getPreferenceValues, LocalStorage, showToast, Toast } from
 import { execa, ExecaChildProcess, ExecaError } from "execa";
 import { existsSync } from "fs";
 import { dirname } from "path/posix";
-import { CLINotFoundError } from "~/components/RootErrorBoundary";
 import { LOCAL_STORAGE_KEY, DEFAULT_SERVER_URL } from "~/constants/general";
 import { VaultState, VaultStatus } from "~/types/general";
 import { Preferences } from "~/types/preferences";
@@ -10,6 +9,7 @@ import { PasswordGeneratorOptions } from "~/types/passwords";
 import { Folder, Item } from "~/types/vault";
 import { getPasswordGeneratingArgs } from "~/utils/passwords";
 import { getServerUrlPreference } from "~/utils/preferences";
+import { CLINotFoundError } from "~/utils/errors";
 
 export class Bitwarden {
   private env: Record<string, string>;

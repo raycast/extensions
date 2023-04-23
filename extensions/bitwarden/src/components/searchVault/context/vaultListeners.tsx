@@ -1,12 +1,13 @@
 import { createContext, MutableRefObject, ReactNode, useContext, useMemo, useRef } from "react";
 import { Item } from "~/types/vault";
+import { FailedToLoadVaultItemsError } from "~/utils/errors";
 
-export type ItemListener = (item: Item) => void;
+export type ItemListener = (item: Item | FailedToLoadVaultItemsError) => void;
 
 export type VaultListenersContextType = {
   listeners: MutableRefObject<Map<string, ItemListener>>;
   subscribeItem: (itemId: string, listener: ItemListener) => () => void;
-  publishItems: (items: Item[]) => void;
+  publishItems: (items: Item[] | FailedToLoadVaultItemsError) => void;
 };
 
 const VaultListenersContext = createContext<VaultListenersContextType | null>(null);
@@ -14,11 +15,15 @@ const VaultListenersContext = createContext<VaultListenersContextType | null>(nu
 const VaultListenersProvider = ({ children }: { children: ReactNode }) => {
   const listeners = useRef(new Map<string, ItemListener>());
 
-  const publishItems = (items: Item[]) => {
-    listeners.current.forEach((listener, itemId) => {
-      const item = items.find((item) => item.id === itemId);
-      if (item) listener(item);
-    });
+  const publishItems = (itemsOrError: Item[] | FailedToLoadVaultItemsError) => {
+    if (itemsOrError instanceof FailedToLoadVaultItemsError) {
+      listeners.current.forEach((listener) => listener(itemsOrError));
+    } else {
+      listeners.current.forEach((listener, itemId) => {
+        const item = itemsOrError.find((item) => item.id === itemId);
+        if (item) listener(item);
+      });
+    }
   };
 
   const subscribeItem = (itemId: string, listener: ItemListener) => {
@@ -46,10 +51,17 @@ export const useVaultItemSubscriber = () => {
   if (context == null) throw new Error("useVaultItemSubscriber must be used within a VaultListenersProvider");
 
   return (itemId: string) => {
-    return new Promise<Item>((resolve) => {
-      const unsubscribe = context.subscribeItem(itemId, (item) => {
-        unsubscribe();
-        resolve(item);
+    return new Promise<Item>((resolve, reject) => {
+      const unsubscribe = context.subscribeItem(itemId, (itemOrError) => {
+        try {
+          unsubscribe();
+          if (itemOrError instanceof FailedToLoadVaultItemsError) {
+            throw itemOrError;
+          }
+          resolve(itemOrError);
+        } catch (error) {
+          reject(error);
+        }
       });
     });
   };
