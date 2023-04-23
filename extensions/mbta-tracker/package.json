@@ -3,7 +3,7 @@
   "name": "mbta-tracker",
   "title": "MBTA Tracker",
   "description": "Provides a way to quickly check arrival times for saved stops along MBTA routes",
-  "icon": "command-icon.png",
+  "icon": "MBTA-icon.png",
   "author": "djpowers",
   "categories": [
     "Productivity"
@@ -12,7 +12,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "Show Typeahead Results",
+      "title": "Browse MBTA predictions",
       "description": "Template for showing typeahead search with network results.",
       "mode": "view"
     }
