@@ -67,7 +67,7 @@ export default function Command() {
       icon={{
         source: "forge-icon-64.png",
         mask: Image.Mask.Circle,
-        tintColor: deploying?.length > 0 ? "#19b69c" : { light: "#000000", dark: "#ffffff", adjustContrast: true },
+        tintColor: deploying?.length > 0 ? "#19b69c" : { light: "#000000", dark: "#ffffff", adjustContrast: false },
       }}
       tooltip="Laravel Forge"
     >
