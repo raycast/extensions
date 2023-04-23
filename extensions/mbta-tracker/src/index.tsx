@@ -9,7 +9,7 @@ function outputRouteListItem(item: Route) {
       key={item.id}
       title={item.attributes.type == "3" ? item.attributes.short_name : item.attributes.long_name}
       icon={{ source: Icon.CircleFilled, tintColor: item.attributes.color }}
-      accessoryTitle={item.attributes.description}
+      accessories={[{ text: item.attributes.description }]}
     />
   );
 }
