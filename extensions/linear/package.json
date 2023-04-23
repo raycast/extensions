@@ -25,15 +25,6 @@
       "mode": "view",
       "preferences": [
         {
-          "name": "signature",
-          "type": "checkbox",
-          "title": "Signature",
-          "label": "Add Raycast signature to new issues",
-          "description": "When enabled, \"Created via Raycast\" signature will be added at the bottom of the description.",
-          "required": false,
-          "default": true
-        },
-        {
           "name": "autofocusField",
           "title": "Autofocus Field",
           "type": "dropdown",
@@ -215,12 +206,12 @@
       "required": false
     },
     {
-        "name": "limit",
-        "title": "API Issue Limit",
-        "description": "The maximum number of issues to fetch from the Linear API at once. Be careful when changing this, as too large a number can cause you to exceed your API rate limit and/or cause heap memory errors.",
-        "type": "textfield",
-        "default": "50",
-        "required": false
+      "name": "limit",
+      "title": "API Issue Limit",
+      "description": "The maximum number of issues to fetch from the Linear API at once. Be careful when changing this, as too large a number can cause you to exceed your API rate limit and/or cause heap memory errors.",
+      "type": "textfield",
+      "default": "50",
+      "required": false
     }
   ],
   "dependencies": {

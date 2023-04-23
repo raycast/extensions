@@ -21,6 +21,7 @@ export interface CpuMonitorState {
 export interface MemoryMonitorState {
   freeDisk: string;
   totalDisk: string;
+  totalMem: string;
   freeMem: string;
   freeMemPercentage: string;
   topProcess: string[][];
@@ -33,4 +34,9 @@ export interface PowerMonitorState {
   batteryCondition: string;
   maxBatteryCapacity: string;
   batteryTime: string;
+}
+
+export interface MemoryInterface {
+  memTotal: number;
+  memUsed: number;
 }

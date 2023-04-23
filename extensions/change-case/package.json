@@ -13,7 +13,7 @@
     {
       "name": "change-case",
       "title": "Change Case",
-      "description": "Change the text in the clipboard",
+      "description": "Change the case of the selected text or text in the clipboard",
       "mode": "view"
     }
   ],
@@ -21,8 +21,8 @@
     {
       "name": "source",
       "type": "dropdown",
-      "title": "Preferred source",
-      "description": "Choose a preferred text source. If not available, both are tried.",
+      "title": "Preferred Source",
+      "description": "Choose a preferred text source. If no text is selected, clipboard is used.",
       "data": [
         {
           "title": "Selected",
@@ -36,23 +36,23 @@
       "default": "selected",
       "required": false
     },
-    {
-      "name": "defaultAction",
+    { 
+      "name": "action",
       "type": "dropdown",
-      "title": "Default action",
-      "description": "Default action.",
-      "required": false,
-      "default": "copy",
+      "title": "Primary Action",
+      "description": "Choose whether the primary action should copy or paste the output.",
       "data": [
         {
-          "title": "Copy to Clipboard",
+          "title": "Copy",
           "value": "copy"
         },
         {
-          "title": "Paste to Active App",
+          "title": "Paste",
           "value": "paste"
         }
-      ]
+      ],
+      "default": "paste",
+      "required": false
     },
     {
       "name": "CamelCase",

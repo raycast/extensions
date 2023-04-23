@@ -1,14 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Form,
-  getPreferenceValues,
-  Icon,
-  showToast,
-  Toast,
-  Clipboard,
-  useNavigation,
-} from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, showToast, Toast, Clipboard, useNavigation } from "@raycast/api";
 import { FormValidation, useCachedPromise, useCachedState, useForm } from "@raycast/utils";
 import { useEffect, useMemo, useState } from "react";
 
@@ -39,10 +29,6 @@ export type IssueFormValues = {
   attachments: string[];
 } & Record<string, unknown>;
 
-type Preferences = {
-  signature: boolean;
-};
-
 type CreateIssueFormProps = {
   draftValues?: IssueFormValues;
   enableDrafts?: boolean;
@@ -50,7 +36,6 @@ type CreateIssueFormProps = {
 
 export default function CreateIssueForm({ draftValues, enableDrafts = true }: CreateIssueFormProps) {
   const { push } = useNavigation();
-  const { signature } = getPreferenceValues<Preferences>();
 
   const [projectQuery, setProjectQuery] = useState("");
   const { data: projects, isLoading: isLoadingProjects } = useCachedPromise(
@@ -74,7 +59,7 @@ export default function CreateIssueForm({ draftValues, enableDrafts = true }: Cr
       const toast = await showToast({ style: Toast.Style.Animated, title: "Creating issue" });
 
       try {
-        const issue = await createIssue(values, { signature, customFields: selectedIssueType?.fields });
+        const issue = await createIssue(values, { customFields: selectedIssueType?.fields });
 
         if (issue) {
           toast.style = Toast.Style.Success;
@@ -269,7 +254,7 @@ export default function CreateIssueForm({ draftValues, enableDrafts = true }: Cr
       <FormUserDropdown
         {...itemProps.assigneeId}
         title="Assignee"
-        autocompleteUrl={selectedIssueType?.fields.assignee.autoCompleteUrl}
+        autocompleteUrl={selectedIssueType?.fields.assignee?.autoCompleteUrl}
       />
 
       <Form.Dropdown {...itemProps.priorityId} title="Priority">

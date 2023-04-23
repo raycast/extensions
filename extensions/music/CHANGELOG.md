@@ -1,5 +1,9 @@
 # Apple Music Changelog
 
+## [Update] - 2023-04-10
+
+- Improved search to match Apple Music behaviour
+
 ## [Fix] - 2023-03-23
 
 - Added fallback scripts to commands that were interacting with the library.

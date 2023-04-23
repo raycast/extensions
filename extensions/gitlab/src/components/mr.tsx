@@ -82,6 +82,20 @@ function stateColor(state: string): Color.ColorLike {
   }
 }
 
+function MRSourceBranchTagList({ mr }: { mr: MergeRequest }) {
+  const deleteText = mr.force_remove_source_branch === true ? "Delete after Merge" : undefined;
+  const squashText = mr.squash_on_merge === true ? "Squash before Merge" : undefined;
+  if (!deleteText && !squashText) {
+    return null;
+  }
+  return (
+    <Detail.Metadata.TagList title="Source Branch">
+      {deleteText && <Detail.Metadata.TagList.Item text={deleteText} />}
+      {squashText && <Detail.Metadata.TagList.Item text={squashText} />}
+    </Detail.Metadata.TagList>
+  );
+}
+
 export function MRDetail(props: { mr: MergeRequest }): JSX.Element {
   const mr = props.mr;
   const { mrdetail, error, isLoading } = useDetail(props.mr.id);
@@ -145,6 +159,7 @@ export function MRDetail(props: { mr: MergeRequest }): JSX.Element {
               ))}
             </Detail.Metadata.TagList>
           )}
+          <MRSourceBranchTagList mr={mr} />
         </Detail.Metadata>
       }
     />
@@ -390,7 +405,7 @@ export function MRListItem(props: {
   if (!getListDetailsPreference()) {
     accessories.push(
       { icon: mr.has_conflicts ? "⚠️" : undefined, tooltip: mr.has_conflicts ? "Has Conflict" : undefined },
-      { text: mr.milestone?.title },
+      { tag: mr.milestone?.title ?? "", tooltip: mr.milestone ? `Milestone: ${mr.milestone?.title}` : "" },
       { date: new Date(mr.updated_at), tooltip: `Updated: ${toLongDateString(mr.updated_at)}` }
     );
   }

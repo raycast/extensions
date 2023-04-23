@@ -42,9 +42,20 @@ Automatically save all the question and answer so you can go back digging for th
 
 ![Looking through the question history](metadata/5.png)
 
+# Models availability
+
+### GPT-3.5
+
+- `gpt-3.5-turbo`
+- `gpt-3.5-turbo-0301`
+
+### GPT-4
+
+GPT-4 model availability depends on your developer account. You need access to the GPT-4 API key through OpenAI's waitlist from [here](https://openai.com/waitlist/gpt-4-api) to see the GPT-4 model option.
+
 # How to use
 
-This package requires a valid `Secret Key` from [OpenAI](https://platform.openai.com/account/api-keys).
+This package requires a valid `Secret Key` from [OpenAI](https://platform.openai.com/account/api-keys) with a `pay-as-you-go` plan account (**you'll get a `429` error if you're on a `free-tier` account**).
 
 ![Initial set-up](metadata/6.png)
 
@@ -59,6 +70,7 @@ All preferences properties list that can be customize through `Raycast Settings 
 | `api`                    | API                    | `string`                            | `true`   | `empty` | Your personal Open AI API key                                                                                    |
 | `useStream`              | Stream Completion      | `boolean`                           | `true`   | `true`  | Stream the completions of the generated answer                                                                   |
 | `isAutoSaveConversation` | Auto-save Conversation | `boolean`                           | `true`   | `true`  | Auto-save every conversation that you had with the model                                                         |
+| `isHistoryPaused`        | Pause History          | `boolean`                           | `false`  | `false` | Pause the history of the conversation                                                                            |
 | `isAutoLoadText`         | Auto-load              | `boolean`                           | `false`  | `false` | Load selected text from your frontmost application to the `question bar` or `full text input form` automatically |
 | `isAutoFullInput`        | Use Full Text Input    | `boolean`                           | `false`  | `false` | Switch to `full text input form` from `question bar` automatically whenever you want to ask or type a question   |
 | `isAutoTTS`              | Text-to-Speech         | `boolean`                           | `false`  | `false` | Enable auto text-to-speech everytime you get a generated answer                                                  |

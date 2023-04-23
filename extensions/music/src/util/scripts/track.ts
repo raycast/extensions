@@ -12,7 +12,7 @@ export const search = (search: string) => {
   return runScript(`
 		set output to ""
 			tell application "Music"
-				set results to (every track whose name contains "${search}" or artist contains "${search}")
+				set results to (search (library playlist 1) for "${search}")
 				repeat with selectedTrack in results
 					set trackId to the id of selectedTrack
 					set trackName to the name of selectedTrack

@@ -6,23 +6,31 @@ import { resolveHome } from "./utils";
 interface SetWallpaperProps {
   url: string;
   id: string;
+  every?: boolean;
   useHud?: boolean;
   isBackground?: boolean;
 }
 
-export const setWallpaper = async ({ url, id, useHud = false, isBackground = false }: SetWallpaperProps) => {
-  const { downloadSize, applyTo, wallpaperPath } = getPreferenceValues<UnsplashPreferences>();
+const displayMessage = async (msg: string, type: "hud" | "toast") => {
+  if (type === "hud") await showHUD(msg);
+  else return await showToast(Toast.Style.Animated, msg);
+};
+
+export const setWallpaper = async ({ url, id, every, useHud = false, isBackground = false }: SetWallpaperProps) => {
+  const { downloadSize, wallpaperPath } = getPreferenceValues<UnsplashPreferences>();
   const selectedPath = resolveHome(wallpaperPath || environment.supportPath);
 
   let toast;
 
   if (existsSync(selectedPath)) {
-    const msg = "Downloading and setting wallpaper...";
-    useHud ? !isBackground && (await showHUD(msg)) : (toast = await showToast(Toast.Style.Animated, msg));
+    if (isBackground) return;
+    toast = await displayMessage("Downloading and setting wallpaper...", useHud ? "hud" : "toast");
   } else {
-    const msg = "The selected path does not exist. Please select a valid path.";
-    await (useHud ? showHUD(msg) : showToast(Toast.Style.Animated, msg));
-    return;
+    if (isBackground) return;
+    toast = await displayMessage(
+      "The selected path does not exist. Please select a valid path.",
+      useHud ? "hud" : "toast"
+    );
   }
 
   const fixedPathName = selectedPath.endsWith("/")
@@ -47,7 +55,7 @@ export const setWallpaper = async ({ url, id, useHud = false, isBackground = fal
 
       try
         tell application "System Events"
-          tell ${applyTo} desktop
+          tell ${every ? "every" : "current"} desktop
             set picture to (x as text)
             return "ok"
           end tell

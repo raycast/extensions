@@ -13,9 +13,9 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "open-new",
-      "title": "Open New",
-      "description": "Opens Reader to new page",
+      "name": "open-inbox",
+      "title": "Open Inbox",
+      "description": "Opens Reader Inbox",
       "mode": "no-view",
       "icon": "reader-logo.png"
     },
@@ -66,6 +66,20 @@
       "name": "save-clipboard",
       "title": "Save Clipboard",
       "description": "Save a URL from the clipboard",
+      "mode": "no-view",
+      "icon": "reader-logo.png"
+    },
+    {
+      "name": "search",
+      "title": "Search",
+      "description": "Search Reader Library",
+      "mode": "no-view",
+      "icon": "reader-logo.png"
+    },
+    {
+      "name": "open-shortlist",
+      "title": "Open Shortlist",
+      "description": "Opens Reader to the shortlist page",
       "mode": "no-view",
       "icon": "reader-logo.png"
     }

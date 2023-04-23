@@ -7,9 +7,19 @@
   "author": "thomas",
   "owner": "the-browser-company",
   "access": "public",
-  "categories": ["Web", "Applications", "Productivity"],
+  "categories": [
+    "Web",
+    "Applications",
+    "Productivity"
+  ],
   "license": "MIT",
-  "contributors": ["pomdtr", "zach", "ankitchouhan1020", "pernielsentikaer"],
+  "contributors": [
+    "pomdtr",
+    "zach",
+    "ankitchouhan1020",
+    "pernielsentikaer",
+    "danpalmer"
+  ],
   "commands": [
     {
       "name": "search-history",
@@ -83,8 +93,7 @@
           "title": "URL",
           "description": "The URL to open in the new tab",
           "type": "textfield",
-          "required": false,
-          "default": "https://google.com"
+          "required": false
         }
       ]
     },
