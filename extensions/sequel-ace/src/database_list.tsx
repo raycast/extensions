@@ -110,7 +110,7 @@ function ConnectionListItem(props: { connection: Connection }) {
           <Action.OpenInBrowser
             title="Open Database"
             icon={Icon.Coin}
-            url={`sequelace://LaunchFavorite?name=${connection.name}`}
+            url={`sequelace://LaunchFavorite?name=${encodeURIComponent(connection.name)}`}
           />
         </ActionPanel>
       }
