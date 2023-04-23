@@ -37,29 +37,20 @@ export type SavedSessionState = {
 const VAULT_TIMEOUT_MESSAGE = "Vault timed out due to inactivity";
 
 export async function getSavedSession(): Promise<SavedSessionState> {
-  const loadedState: SavedSessionState = {};
   const [token, passwordHash, lastActivityTimeString] = await Storage.getSavedSession();
+  if (!token || !passwordHash) return { shouldLockVault: true };
 
-  if (!token || !passwordHash) return { ...loadedState, shouldLockVault: true };
-  loadedState.token = token;
-  loadedState.passwordHash = passwordHash;
-
+  const loadedState: SavedSessionState = { token, passwordHash };
   if (!lastActivityTimeString) return { ...loadedState, shouldLockVault: false };
 
   const lastActivityTime = new Date(lastActivityTimeString);
   loadedState.lastActivityTime = lastActivityTime;
-
   const vaultTimeoutMs = +getPreferenceValues<Preferences>().repromptIgnoreDuration;
   if (vaultTimeoutMs === VAULT_TIMEOUT.NEVER) return { ...loadedState, shouldLockVault: false };
-  if (vaultTimeoutMs === VAULT_TIMEOUT.IMMEDIATELY) {
-    return { ...loadedState, shouldLockVault: true, lockReason: VAULT_TIMEOUT_MESSAGE };
-  }
 
-  if (lastActivityTime != null) {
-    const timeElapseSinceLastPasswordEnter = Date.now() - lastActivityTime.getTime();
-    if (timeElapseSinceLastPasswordEnter >= vaultTimeoutMs) {
-      return { ...loadedState, shouldLockVault: true, lockReason: VAULT_TIMEOUT_MESSAGE };
-    }
+  const timeElapseSinceLastPasswordEnter = Date.now() - lastActivityTime.getTime();
+  if (vaultTimeoutMs === VAULT_TIMEOUT.IMMEDIATELY || timeElapseSinceLastPasswordEnter >= vaultTimeoutMs) {
+    return { ...loadedState, shouldLockVault: true, lockReason: VAULT_TIMEOUT_MESSAGE };
   }
 
   return { ...loadedState, shouldLockVault: false };
