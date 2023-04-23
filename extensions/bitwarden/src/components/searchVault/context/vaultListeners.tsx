@@ -51,6 +51,8 @@ export const useVaultItemSubscriber = () => {
   if (context == null) throw new Error("useVaultItemSubscriber must be used within a VaultListenersProvider");
 
   return (itemId: string) => {
+    let timeoutId: NodeJS.Timeout;
+
     return new Promise<Item>((resolve, reject) => {
       const unsubscribe = context.subscribeItem(itemId, (itemOrError) => {
         try {
@@ -59,12 +61,25 @@ export const useVaultItemSubscriber = () => {
             throw itemOrError;
           }
           resolve(itemOrError);
+          clearTimeout(timeoutId);
         } catch (error) {
           reject(error);
         }
       });
+
+      timeoutId = setTimeout(() => {
+        unsubscribe();
+        reject(new SubscriberTimeoutError());
+      }, 15000);
     });
   };
 };
+
+class SubscriberTimeoutError extends Error {
+  constructor() {
+    super("Timed out waiting for item");
+    this.name = "SubscriberTimeoutError";
+  }
+}
 
 export default VaultListenersProvider;

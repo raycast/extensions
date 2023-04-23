@@ -13,5 +13,3 @@ export const LOCAL_STORAGE_KEY = {
   LAST_ACTIVITY_TIME: "lastActivityTime",
   VAULT_LOCK_REASON: "vaultLockReason",
 };
-
-
