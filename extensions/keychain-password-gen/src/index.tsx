@@ -41,7 +41,7 @@ function generate() {
   // pick characters
   let count = 1;
   let passwordSection = "";
-  for (let i = 1; i < 18; i++) {
+  for (let i = 1; i <= 18; i++) {
     count += 1;
 
     if (NumberPosition === i) {
@@ -68,7 +68,7 @@ function generate() {
     }
 
     // separate characters into sections
-    if (i % 6 === 0) {
+    if (i !== 18 && i % 6 === 0) {
       passwordSection += "-";
     }
   }
