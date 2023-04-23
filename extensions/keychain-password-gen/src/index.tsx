@@ -4,7 +4,7 @@ import { randomInt } from "crypto";
 export default async function Command() {
   const pass = generate();
   await Clipboard.copy(pass);
-  
+
   await showHUD("Password copied to clipboard");
 }
 
@@ -14,18 +14,18 @@ function generate() {
   const lowerVowels = "aeiouy".split("");
   const upperVowels = "AEUY".split("");
 
-  const numberPositions: {[index: number]: number} = {
+  const numberPositions: { [index: number]: number } = {
     1: 1,
     2: 7,
     3: 13,
     4: 6,
     5: 12,
-    6: 18
+    6: 18,
   };
 
   // choose position of number and upper case letter
   const numPosKey = randomInt(2, 7);
-  const NumberPosition = numberPositions[numPosKey]; 
+  const NumberPosition = numberPositions[numPosKey];
 
   let uppercasePos = randomInt(1, 19);
   if (uppercasePos === numPosKey) {
@@ -50,7 +50,6 @@ function generate() {
       }
       passwordSection += randomInt(1, 10);
     } else {
-
       if (count % 3 === 0) {
         // vowel
         if (uppercasePos === i) {
@@ -72,7 +71,6 @@ function generate() {
     if (i % 6 === 0) {
       passwordSection += "-";
     }
-
   }
 
   return passwordSection;
