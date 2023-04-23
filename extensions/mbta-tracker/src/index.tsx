@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Icon, List, ActionPanel, Action } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { StopsList } from "./components/StopsList";
@@ -21,13 +20,12 @@ function outputRouteListItem(item: Route) {
 }
 
 export default function Command() {
-  const [searchText, setSearchText] = useState("");
   const { isLoading, data } = useFetch<RoutesResponse>(`https://api-v3.mbta.com/routes`, {
     keepPreviousData: true,
   });
 
   return (
-    <List isLoading={isLoading} searchText={searchText} throttle>
+    <List isLoading={isLoading} searchBarPlaceholder="Select MBTA route...">
       <List.Section title="Subway">
         {(data?.data || [])
           .filter((item: Route) => parseInt(item.attributes.type) == 0 || parseInt(item.attributes.type) == 1)

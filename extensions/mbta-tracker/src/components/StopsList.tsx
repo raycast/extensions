@@ -10,7 +10,7 @@ export const StopsList = ({ routeId }: Props): JSX.Element => {
   const { isLoading, data } = useFetch<StopsResponse>(`https://api-v3.mbta.com/stops?filter%5Broute%5D=${routeId}`);
 
   return (
-    <List isLoading={isLoading} throttle>
+    <List isLoading={isLoading} searchBarPlaceholder="Select MBTA stop...">
       {(data?.data || []).map((item) => (
         <List.Item key={item.id} title={item.attributes.name} />
       ))}
