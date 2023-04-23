@@ -12,3 +12,17 @@ export interface Route {
   };
   id: string;
 }
+
+export interface StopsResponse {
+  data: Stop[];
+}
+
+export interface Stop {
+  attributes: {
+    address?: string;
+    at_street?: string;
+    name: string;
+    one_street?: string;
+  };
+  id: string;
+}
