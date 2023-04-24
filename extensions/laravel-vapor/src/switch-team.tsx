@@ -6,9 +6,8 @@ export default function Command() {
   const { data: teams, isLoading } = useCachedPromise(getTeams, [], { execute: true });
 
   return (
-    <List>
-      {!isLoading &&
-        teams &&
+    <List isLoading={isLoading}>
+      {teams &&
         teams.map((team) => (
           <List.Item
             key={team.id}
@@ -41,9 +40,7 @@ export default function Command() {
           />
         ))}
 
-      {isLoading && <List.Item title="Loading..." />}
-
-      {!isLoading && !teams && <List.EmptyView title="No Teams" description="No teams found" />}
+      {!teams && <List.EmptyView title="No Teams" description="No teams found" />}
     </List>
   );
 }

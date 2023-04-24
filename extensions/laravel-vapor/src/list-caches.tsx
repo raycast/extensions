@@ -7,16 +7,13 @@ export default function Command() {
   const { data: caches, isLoading } = useCachedPromise(getCaches, [], { execute: true });
 
   return (
-    <List isShowingDetail>
-      {!isLoading &&
-        caches &&
+    <List isLoading={isLoading} isShowingDetail>
+      {caches &&
         caches.map((cache) => (
           <ResultItem key={cache.id} id={cache.id} title={cache.name} result={cache} type={"cache"} />
         ))}
 
-      {isLoading && <List.Item title="Loading..." />}
-
-      {!isLoading && !caches && <List.EmptyView title="No caches" description="No caches found" />}
+      {!caches && <List.EmptyView title="No caches" description="No caches found" />}
     </List>
   );
 }

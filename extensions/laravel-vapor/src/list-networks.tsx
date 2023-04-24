@@ -7,16 +7,13 @@ export default function Command() {
   const { data: networks, isLoading } = useCachedPromise(getNetworks, [], { execute: true });
 
   return (
-    <List isShowingDetail>
-      {!isLoading &&
-        networks &&
+    <List isLoading={isLoading} isShowingDetail>
+      {networks &&
         networks.map((network) => (
           <ResultItem key={network.id} id={network.id} title={network.name} result={network} type={"network"} />
         ))}
 
-      {isLoading && <List.Item title="Loading..." />}
-
-      {!isLoading && !networks && <List.EmptyView title="No networks" description="No networks found" />}
+      {!networks && <List.EmptyView title="No networks" description="No networks found" />}
     </List>
   );
 }
