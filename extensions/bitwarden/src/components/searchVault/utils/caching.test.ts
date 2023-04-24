@@ -6,7 +6,7 @@ const SENSITIVE_VALUE = "THIS-IS-A-SENSITIVE-VALUE";
 
 describe("vault caching utils", () => {
   test("should clean items and folders of any sensitive values", () => {
-    const items = getMockItems(100, SENSITIVE_VALUE);
+    const items = getMockItems(100, { sensitiveValue: SENSITIVE_VALUE });
     const folders = getMockFolders(100);
     const amountOfSensitiveValuesInItems = getStringValueCount(JSON.stringify(items), SENSITIVE_VALUE);
     const amountOfSensitiveValuesInFolders = getStringValueCount(JSON.stringify(folders), SENSITIVE_VALUE);
@@ -26,6 +26,12 @@ describe("vault caching utils", () => {
       );
       expect(amountOfSensitiveValuesInFolders).toEqual(amountOfHiddenValuesInCleanFolders);
     }
+  });
+
+  test("should not replace sensitive properties if they are empty already", () => {
+    const items = getMockItems(10, { sensitiveValue: "" });
+
+    expect(getStringValueCount(JSON.stringify(items), SENSITIVE_VALUE_PLACEHOLDER)).toEqual(0);
   });
 });
 

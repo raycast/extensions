@@ -1,7 +1,9 @@
 import { faker } from "@faker-js/faker";
 import { FieldType, Folder, Item } from "~/types/vault";
 
-export function getMockItems(count = 10, sensitiveValue = "THIS-IS-A-SENSITIVE-VALUE"): Item[] {
+export function getMockItems(count = 10, options?: { sensitiveValue?: string }): Item[] {
+  const { sensitiveValue = faker.random.alphaNumeric(10) } = options || {};
+
   return [...Array(count)].map(
     (): RecursiveNonOptional<Item> => ({
       object: "item",
