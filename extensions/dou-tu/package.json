@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "dou-tu",
-  "title": "Dou Tu",
+  "name": "doutu",
+  "title": "DouTu",
   "description": "An extension for easy retrieval of web emoji images while chatting.",
   "icon": "icon.png",
   "author": "gaoyang",
@@ -13,7 +13,8 @@
   "commands": [
     {
       "name": "index",
-      "title": "Dou Tu",
+      "title": "DouTu",
+      "subtitle": "doutu",
       "description": "An extension for easy retrieval of web emoji images while chatting.",
       "mode": "view"
     }

@@ -13,8 +13,30 @@ export declare interface ISource {
   get(keyword: string | null, pageIndex: number): Promise<{ isEnd: boolean; images: IDoutuImage[] }>;
 }
 
-export class DouTuSource implements ISource {
+export class DouBiZJSJ implements ISource {
   name = "Source 1";
+  get = async (keyword: string | null, pageIndex: number): Promise<{ isEnd: boolean; images: IDoutuImage[] }> => {
+    const isDefault = keyword && keyword.trim() !== "" ? false : true;
+    let url = `https://www.dbbqb.com/api/search/json?start=${(pageIndex - 1) * 100}&w=${keyword}`;
+    if (isDefault) url = `https://www.dbbqb.com/api/search/json?size=100`;
+    const response = await fetch(url, {
+      headers: {
+        "Web-Agent": "web",
+      },
+    });
+    const json = (await response.json()) as { path: string }[];
+    if (json.length === 0) return { isEnd: true, images: [] };
+    return {
+      isEnd: json.length < 100,
+      images: json.map((item) => {
+        return { id: uuidv4(), url: `https://image.dbbqb.com/${item.path}` };
+      }),
+    };
+  };
+}
+
+export class DouTuSource implements ISource {
+  name = "Source 2";
   get = async (keyword: string | null, pageIndex: number): Promise<{ isEnd: boolean; images: IDoutuImage[] }> => {
     keyword = keyword && keyword.trim() !== "" ? keyword : defaultKeyword;
     const response = await fetch(
@@ -40,7 +62,7 @@ export class DouTuSource implements ISource {
 }
 
 export class DouTuLaSource implements ISource {
-  name = "Source 2";
+  name = "Source 3";
   get = async (keyword: string | null, pageIndex: number): Promise<{ isEnd: boolean; images: IDoutuImage[] }> => {
     keyword = keyword && keyword.trim() !== "" ? keyword : defaultKeyword;
     const response = await fetch(

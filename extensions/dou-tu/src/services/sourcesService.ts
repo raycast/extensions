@@ -1,6 +1,6 @@
-import { ISource, DouTuLaSource, DouTuSource } from "./sources";
+import { ISource, DouTuLaSource, DouTuSource, DouBiZJSJ } from "./sources";
 
-const sources: ISource[] = [new DouTuSource(), new DouTuLaSource()];
+const sources: ISource[] = [new DouBiZJSJ(), new DouTuSource(), new DouTuLaSource()];
 let source: ISource | undefined;
 
 export default {
@@ -13,6 +13,8 @@ export default {
   get: (keyword: string, pageIndex: number) => {
     if (!source) return { isEnd: true, images: [] };
     // console.log(`get -> keyword:${keyword} pageIndex:${pageIndex}`)
-    return source.get(keyword, pageIndex);
+    return source.get(keyword, pageIndex).catch((e) => {
+      return { isEnd: true, images: [] };
+    });
   },
 };
