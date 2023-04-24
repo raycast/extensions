@@ -17,10 +17,10 @@ export default function ViewStatusCommand() {
     const getBookmark = async () => {
       try {
         await getAccessToken();
-        showToast(Toast.Style.Animated, "Loading Status...ε=ε=┌( >_<)┘");
+        showToast(Toast.Style.Animated, "Loading Status...");
         const status = await apiServer.fetchUserStatus();
         setStatuses(statuses);
-        showToast(Toast.Style.Success, "Statuses has been loaded ٩(•̤̀ᵕ•̤́๑)ᵒᵏᵎᵎᵎᵎ");
+        showToast(Toast.Style.Success, "Statuses has been loaded");
         cache.set("latest_statuses", JSON.stringify(status));
       } catch (error) {
         const requestErr = error as AkkomaError;

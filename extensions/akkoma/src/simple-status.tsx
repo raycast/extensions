@@ -66,8 +66,8 @@ export default function SimpleCommand(props: CommandProps) {
 
   const handleSubmit = async (value: StatusForm) => {
     try {
-      if (!value.status && !value.files) throw new Error("You might forget the content, right ? |･ω･)");
-      showToast(Toast.Style.Animated, "Publishing to the Fediverse ... ᕕ( ᐛ )ᕗ");
+      if (!value.status && !value.files) throw new Error("Please add content");
+      showToast(Toast.Style.Animated, "Publishing to the Fediverse...");
 
       const mediaIds = await Promise.all(
         value.files?.map(async (file) => {
@@ -87,7 +87,7 @@ export default function SimpleCommand(props: CommandProps) {
 
       value.scheduled_at
         ? showToast(Toast.Style.Success, "Scheduled", dateTimeFormatter(value.scheduled_at, "long"))
-        : showToast(Toast.Style.Success, "Status has been published (≧∇≦)/ ! ");
+        : showToast(Toast.Style.Success, "Status has been published");
 
       setStatusInfo(response);
       setState((prevState) => ({

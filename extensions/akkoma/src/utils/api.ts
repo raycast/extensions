@@ -72,7 +72,7 @@ const postNewStatus = async (statusOptions: Partial<StatusRequest>): Promise<Sta
     body: JSON.stringify(statusOptions),
   });
 
-  if (!response.ok) throw new Error("Failed to publish :(");
+  if (!response.ok) throw new Error("Failed to publish");
 
   return (await response.json()) as StatusResponse;
 };
@@ -80,7 +80,7 @@ const postNewStatus = async (statusOptions: Partial<StatusRequest>): Promise<Sta
 const fetchAccountInfo = async (): Promise<Account> => {
   const response = await fetchWithAuth(apiUrl(instance, CONFIG.verifyCredentialsUrl));
 
-  if (!response.ok) throw new Error("Failed to fetch account's info :(");
+  if (!response.ok) throw new Error("Failed to fetch account's info");
   return (await response.json()) as Account;
 };
 
