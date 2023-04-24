@@ -5,7 +5,7 @@ import { useBitwarden } from "~/context/bitwarden";
 import { useSession } from "~/context/session";
 import { Folder, Item, Vault } from "~/types/vault";
 import { captureException } from "~/utils/development";
-import useVaultCaching from "~/components/searchVault/utils/useVaultCache";
+import useVaultCaching from "~/components/searchVault/utils/useVaultCaching";
 import { FailedToLoadVaultItemsError } from "~/utils/errors";
 
 export type VaultState = Vault & {

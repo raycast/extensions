@@ -7,6 +7,11 @@ import { captureException } from "~/utils/development";
 import { useContentEncryptor } from "~/utils/hooks/useContentEncryptor";
 import useOnceEffect from "~/utils/hooks/useOnceEffect";
 
+export const CACHE_KEYS = {
+  IV: "iv",
+  VAULT: "vault",
+};
+
 function useVaultCaching() {
   const { encrypt, decrypt } = useContentEncryptor();
   const isCachingEnable = getPreferenceValues<Preferences>().shouldCacheVaultItems;
@@ -20,14 +25,13 @@ function useVaultCaching() {
     try {
       if (!isCachingEnable) throw new VaultCachingNoEnabledError();
 
-      const cachedIv = Cache.get("iv");
-      const cachedEncryptedVault = Cache.get("vault");
+      const cachedIv = Cache.get(CACHE_KEYS.IV);
+      const cachedEncryptedVault = Cache.get(CACHE_KEYS.VAULT);
       if (!cachedIv || !cachedEncryptedVault) throw new VaultCachingNoEnabledError();
 
       const decryptedVault = decrypt(cachedEncryptedVault, cachedIv);
       return JSON.parse<Vault>(decryptedVault);
     } catch (error) {
-      console.log(error);
       if (!(error instanceof VaultCachingNoEnabledError)) {
         captureException("Failed to decrypt cached vault", error);
       }
@@ -35,7 +39,7 @@ function useVaultCaching() {
     }
   };
 
-  const cacheVault = (items: Item[], folders: Folder[]) => {
+  const cacheVault = (items: Item[], folders: Folder[]): void => {
     try {
       if (!isCachingEnable) throw new VaultCachingNoEnabledError();
 
@@ -44,10 +48,9 @@ function useVaultCaching() {
         folders: prepareFoldersForCache(folders),
       });
       const encryptedVault = encrypt(vaultToEncrypt);
-      Cache.set("vault", encryptedVault.content);
-      Cache.set("iv", encryptedVault.iv);
+      Cache.set(CACHE_KEYS.VAULT, encryptedVault.content);
+      Cache.set(CACHE_KEYS.IV, encryptedVault.iv);
     } catch (error) {
-      console.log(error);
       if (!(error instanceof VaultCachingNoEnabledError)) {
         captureException("Failed to cache vault", error);
       }

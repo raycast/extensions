@@ -1,14 +1,14 @@
-import { getPreferenceValues } from "@raycast/api";
+import { getPreferenceValues as _getPreferenceValues } from "@raycast/api";
 import React from "react";
 import { useContentEncryptor } from "~/utils/hooks/useContentEncryptor";
 
-const MOCK_CLIENT_SECRET = "test";
+const getPreferenceValues = _getPreferenceValues as jest.Mock;
 
-jest.mock("@raycast/api", () => ({ getPreferenceValues: jest.fn() }), { virtual: true });
+const MOCK_CLIENT_SECRET = "test";
 
 describe("useContentEncryptor", () => {
   beforeAll(() => {
-    (getPreferenceValues as jest.Mock).mockReturnValue({ clientSecret: MOCK_CLIENT_SECRET });
+    getPreferenceValues.mockReturnValue({ clientSecret: MOCK_CLIENT_SECRET });
     jest.spyOn(React, "useMemo").mockImplementation((fn) => fn());
   });
 
