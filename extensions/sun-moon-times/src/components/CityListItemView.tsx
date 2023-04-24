@@ -41,7 +41,7 @@ export const CityListItemView = ({
                     {isFavorite ? (
                         <>
                             <Action
-                                title="Remove From Favorites"
+                                title="Remove from Favorites"
                                 style={Action.Style.Destructive}
                                 icon={Icon.Trash}
                                 onAction={async () => {
