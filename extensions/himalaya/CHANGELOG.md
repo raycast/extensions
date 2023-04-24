@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.0] - 2023-04-21
+
+### Changed
+
+- Cached state for command
+
+### Fixed
+
+- Console log levels to correctly use `console.error`
+- Check all `stdout` and `stderr`
+- Use a unique key for flags
+
 ## [0.0.1] - 2023-04-09
 
 ### Added
