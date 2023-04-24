@@ -30,10 +30,13 @@ export const DirectionsList = ({ route }: Props): JSX.Element => {
     <List searchBarPlaceholder="Select travel direction...">
       <List.Item
         key={route.attributes.direction_destinations[0]}
-        title={route.attributes.direction_destinations[0]}
-        icon={{ source: Icon.CircleFilled, tintColor: route.attributes.color }}
+        title={route.attributes.direction_names[0]}
+        icon={renderDirectionIcon(route.attributes.direction_names[0])}
         accessories={[
-          { text: route.attributes.direction_names[0], icon: renderDirectionIcon(route.attributes.direction_names[0]) },
+          {
+            text: route.attributes.direction_destinations[0],
+            icon: Icon.Pin,
+          },
         ]}
         actions={
           <ActionPanel>
@@ -47,10 +50,13 @@ export const DirectionsList = ({ route }: Props): JSX.Element => {
       />
       <List.Item
         key={route.attributes.direction_destinations[1]}
-        title={route.attributes.direction_destinations[1]}
-        icon={{ source: Icon.CircleFilled, tintColor: route.attributes.color }}
+        title={route.attributes.direction_names[1]}
+        icon={renderDirectionIcon(route.attributes.direction_names[1])}
         accessories={[
-          { text: route.attributes.direction_names[1], icon: renderDirectionIcon(route.attributes.direction_names[1]) },
+          {
+            text: route.attributes.direction_destinations[1],
+            icon: Icon.Pin,
+          },
         ]}
         actions={
           <ActionPanel>
