@@ -1,48 +1,49 @@
 import { Action, ActionPanel, Color, Grid, Icon, List, useNavigation } from "@raycast/api";
 import {
   BlueskyProfileUrlBase,
+  EmptySearchText,
   FollowToastMessage,
   MuteToastMessage,
   OpenUserProfile,
   SearchPeopleSearchBarPlaceholder,
-  SearchPeopleTitle,
-  SearchPeopleViewOpenedToast,
+  SearchTitle,
   ShowPeopleViewAsGridCacheKey,
   UnfollowToastMessage,
   UnmuteToastMessage,
   ViewInBrowser,
-} from "./utils/constants";
-import { buildTitle, showDangerToast, showSuccessToast } from "./utils/common";
-import { deleteFollow, follow, getProfile, getUsers, mute, unmute } from "./libs/atp";
+} from "../../utils/constants";
+import { deleteFollow, follow, getProfile, getUsers, mute, unmute } from "../../libs/atp";
+import { showDangerToast, showSuccessToast } from "../../utils/common";
 import { useEffect, useState } from "react";
 
-import AuthorFeed from "./components/feed/AuthorFeed";
-import CustomAction from "./components/actions/CustomAction";
-import Error from "./components/error/Error";
-import HomeAction from "./components/actions/HomeAction";
-import NavigationDropdown from "./components/nav/NavigationDropdown";
-import Onboard from "./components/onboarding/Onboard";
-import { User } from "./types/types";
-import { parseUsers } from "./utils/parser";
+import AuthorFeed from "../feed/AuthorFeed";
+import CustomAction from "../actions/CustomAction";
+import Error from "../error/Error";
+import HomeAction from "../actions/HomeAction";
+import NavigationDropdown from "../nav/NavigationDropdown";
+import Onboard from "../onboarding/Onboard";
+import { User } from "../../types/types";
+import { parseUsers } from "../../utils/parser";
 import { useCachedState } from "@raycast/utils";
 import { useDebounce } from "use-debounce";
-import useStartATSession from "./hooks/useStartATSession";
+import useStartATSession from "../../hooks/useStartATSession";
 
-interface SearchTitleProps {
-  previousViewTitle?: string;
+interface PeopleViewProps {
+  defaultSearchTerm?: string;
 }
 
-export default function SearchPeople({ previousViewTitle = "" }: SearchTitleProps) {
+const PeopleView = ({ defaultSearchTerm = "" }: PeopleViewProps) => {
   const [users, setUsers] = useState<User[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [isLoading, setIsLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState<string>(defaultSearchTerm);
   const debouncedTerm = useDebounce<string>(searchTerm, 500);
   const [cursor, setCursor] = useState<string | null>(null);
-  const [showPeopleViewAsGrid, setShowPeopleViewAsGrid] = useCachedState(ShowPeopleViewAsGridCacheKey, false);
+  const [showPeopleViewAsGrid, setShowPeopleViewAsGrid] = useCachedState(ShowPeopleViewAsGridCacheKey, true);
   const { push } = useNavigation();
   const [sessionStarted, sessionStartFailed, errorMessage] = useStartATSession(() => push(<Onboard />));
-  const fetchUsers = async (resetList = false) => {
-    const cursorVal = resetList ? null : cursor;
+
+  const fetchUsers = async (invalidateCache = false) => {
+    const cursorVal = invalidateCache ? null : cursor;
     const data = await getUsers(debouncedTerm[0], cursorVal);
 
     if (!data) {
@@ -53,10 +54,12 @@ export default function SearchPeople({ previousViewTitle = "" }: SearchTitleProp
 
     if (data.cursor) {
       setCursor(data.cursor);
+    } else {
+      setCursor(null);
     }
 
     setUsers((state) => {
-      if (resetList) {
+      if (invalidateCache) {
         return newUsers;
       }
 
@@ -67,19 +70,28 @@ export default function SearchPeople({ previousViewTitle = "" }: SearchTitleProp
   };
 
   useEffect(() => {
-    if (sessionStarted) {
-      showSuccessToast(SearchPeopleViewOpenedToast);
+    if (sessionStarted && searchTerm.length < 3) {
+      setIsLoading(false);
     }
   }, [sessionStarted]);
 
   useEffect(() => {
-    (async () => {
+    const fetchResults = async () => {
       if (debouncedTerm[0].length > 2) {
         await fetchUsers(true);
         setIsLoading(false);
+
+        return;
       }
-    })();
-  }, [debouncedTerm[0]]);
+
+      setUsers([]);
+      setIsLoading(false);
+    };
+
+    if (sessionStarted) {
+      fetchResults();
+    }
+  }, [debouncedTerm[0], sessionStarted]);
 
   const onSearchTextChange = async (text: string) => {
     setIsLoading(true);
@@ -91,7 +103,7 @@ export default function SearchPeople({ previousViewTitle = "" }: SearchTitleProp
       return;
     }
 
-    if (index == users[users.length - 1].handle && cursor) {
+    if (users[users.length - 1] && index == users[users.length - 1].handle && cursor) {
       await fetchUsers();
     }
   };
@@ -169,13 +181,12 @@ export default function SearchPeople({ previousViewTitle = "" }: SearchTitleProp
           title={OpenUserProfile}
           icon={{ source: Icon.Person, tintColor: Color.Blue }}
           onAction={() =>
-            push(
-              <AuthorFeed
-                previousViewTitle={buildTitle(previousViewTitle, SearchPeopleTitle)}
-                authorHandle={user.handle}
-              />
-            )
+            push(<AuthorFeed showNavDropdown={false} previousViewTitle={SearchTitle} authorHandle={user.handle} />)
           }
+        />
+        <CustomAction
+          actionKey="openProfile"
+          onClick={() => push(<AuthorFeed showNavDropdown={false} authorHandle={user.handle} />)}
         />
         <Action.OpenInBrowser
           icon={{ source: Icon.Globe, tintColor: Color.Blue }}
@@ -212,53 +223,68 @@ export default function SearchPeople({ previousViewTitle = "" }: SearchTitleProp
     );
   };
 
-  const peopleView = () => {
+  const renderSearchResults = () => {
     return showPeopleViewAsGrid ? (
       <Grid
+        columns={6}
         isLoading={isLoading}
         filtering={false}
+        searchText={searchTerm}
         onSearchTextChange={onSearchTextChange}
         onSelectionChange={onSelectionChange}
         actions={homeAction()}
-        navigationTitle={buildTitle(previousViewTitle, SearchPeopleTitle)}
         searchBarPlaceholder={SearchPeopleSearchBarPlaceholder}
         searchBarAccessory={<NavigationDropdown currentViewId={3} />}
       >
-        {users.map((user) => (
-          <Grid.Item
-            key={user.handle}
-            id={user.handle}
-            content={{ source: user.avatarUrl ? user.avatarUrl : Icon.ChessPiece }}
-            title={user.displayName}
-            subtitle={user.handle}
-            actions={actionPanel(user)}
-          />
-        ))}
+        {searchTerm === "" && users.length === 0 ? (
+          <List.EmptyView icon={{ source: Icon.MagnifyingGlass }} title={EmptySearchText} />
+        ) : (
+          users.map((user) => (
+            <Grid.Item
+              key={user.handle}
+              id={user.handle}
+              content={{ source: user.avatarUrl ? user.avatarUrl : Icon.ChessPiece }}
+              title={user.displayName}
+              subtitle={user.handle}
+              actions={actionPanel(user)}
+            />
+          ))
+        )}
       </Grid>
     ) : (
       <List
         actions={homeAction()}
         isLoading={isLoading}
+        searchText={searchTerm}
         filtering={false}
         onSearchTextChange={onSearchTextChange}
         onSelectionChange={onSelectionChange}
-        navigationTitle={buildTitle(previousViewTitle, SearchPeopleTitle)}
         searchBarPlaceholder={SearchPeopleSearchBarPlaceholder}
         searchBarAccessory={<NavigationDropdown currentViewId={3} />}
       >
-        {users.map((user) => (
-          <List.Item
-            key={user.handle}
-            id={user.handle}
-            icon={{ source: user.avatarUrl ? user.avatarUrl : Icon.ChessPiece }}
-            title={`${getListText(user)}`}
-            subtitle={user.description}
-            actions={actionPanel(user)}
-          />
-        ))}
+        {searchTerm === "" && users.length === 0 ? (
+          <List.EmptyView icon={{ source: Icon.MagnifyingGlass }} title={EmptySearchText} />
+        ) : (
+          users.map((user) => (
+            <List.Item
+              key={user.handle}
+              id={user.handle}
+              icon={{ source: user.avatarUrl ? user.avatarUrl : Icon.ChessPiece }}
+              title={`${getListText(user)}`}
+              subtitle={user.description}
+              actions={actionPanel(user)}
+            />
+          ))
+        )}
       </List>
     );
   };
 
-  return sessionStartFailed ? <Error errorMessage={errorMessage} navigationTitle={SearchPeopleTitle} /> : peopleView();
-}
+  return sessionStartFailed ? (
+    <Error errorMessage={errorMessage} navigationTitle={SearchTitle} />
+  ) : (
+    renderSearchResults()
+  );
+};
+
+export default PeopleView;

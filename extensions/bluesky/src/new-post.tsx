@@ -1,9 +1,10 @@
-import { Action, ActionPanel, Form, confirmAlert, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Color, Form, Icon, confirmAlert, useNavigation } from "@raycast/api";
 import {
-  CreatePostTitle,
   DefaultPostCacheKey,
+  NewPostTextAreaTitle,
   PostSuccessToastMessage,
   PublishPostConfirmation,
+  PublishText,
   Quoting,
   PostYourReply as ReplyingTo,
   ShareYourNext,
@@ -21,12 +22,12 @@ import { useCachedState } from "@raycast/utils";
 import useStartATSession from "./hooks/useStartATSession";
 import { useState } from "react";
 
-interface CreateNewPostProps {
+interface NewPostProps {
   previousViewTitle?: string;
   postReference?: PostReference;
 }
 
-export default function CreateNewPost({ postReference, previousViewTitle = "" }: CreateNewPostProps) {
+export default function NewPost({ postReference, previousViewTitle = "" }: NewPostProps) {
   const randomInspiringWord = inspiringWords[Math.floor(Math.random() * inspiringWords.length)];
   const [postText, setPostText] = useCachedState<string>(DefaultPostCacheKey, "");
   const [randomWord] = useState(randomInspiringWord);
@@ -70,13 +71,17 @@ export default function CreateNewPost({ postReference, previousViewTitle = "" }:
     }
   };
   return sessionStartFailed ? (
-    <Error errorMessage={errorMessage} navigationTitle={buildTitle(previousViewTitle, CreatePostTitle)} />
+    <Error errorMessage={errorMessage} navigationTitle={buildTitle(previousViewTitle, PublishText)} />
   ) : (
     <Form
       navigationTitle={buildTitle(previousViewTitle, `${postText.length} of ${ExtensionConfig.maxPostCharacterSize}`)}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title={CreatePostTitle} onSubmit={onSubmit} />
+          <Action.SubmitForm
+            icon={{ source: Icon.AirplaneFilled, tintColor: Color.Blue }}
+            title={PublishText}
+            onSubmit={onSubmit}
+          />
           <HomeAction />
         </ActionPanel>
       }
@@ -85,7 +90,7 @@ export default function CreateNewPost({ postReference, previousViewTitle = "" }:
         placeholder={placeHolderText}
         id="postText"
         error={nameError}
-        title={CreatePostTitle}
+        title={NewPostTextAreaTitle}
         value={postText}
         onBlur={(event) => {
           if (event.target.value && event.target.value?.length >= 300) {

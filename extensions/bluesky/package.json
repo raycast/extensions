@@ -28,17 +28,17 @@
     },
     {
       "type": "password",
-      "title": "Password",
-      "description": "Your account password",
+      "title": "App Password",
+      "description": "Your app password",
       "name": "password",
       "required": true
     }
   ],
   "commands": [
     {
-      "name": "menu-bar",
-      "title": "Menu Bar",
-      "description": "Quick actions to create a new post, view your timeline, and more.",
+      "name": "unread-notifications",
+      "title": "Unread Notifications",
+      "description": "A menu bar item to show your unread notification count.",
       "mode": "menu-bar"
     },
     {
@@ -48,33 +48,55 @@
       "mode": "view"
     },
     {
-      "name": "view-timeline",
-      "title": "View Timeline",
+      "name": "timeline",
+      "title": "Timeline",
       "description": "View your Bluesky timeline. Click on a post to see more details.",
       "mode": "view"
     },
     {
-      "name": "search-people",
-      "title": "Search People",
-      "description": "Search for people on Bluesky.",
-      "mode": "view"
+      "name": "search",
+      "title": "Search",
+      "description": "Search for people and entities on Bluesky.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "searchTerm",
+          "placeholder": "person or entity",
+          "type": "text",
+          "required": false
+        }
+      ]
     },
     {
-      "name": "create-a-new-post",
-      "title": "Create A New Post",
+      "name": "new-post",
+      "title": "New Post",
       "description": "Create a new public post on Bluesky.",
       "mode": "view"
     },
     {
-      "name": "view-notifications",
-      "title": "View Notifications",
+      "name": "notifications",
+      "title": "Notifications",
       "description": "View your Recent Notifications.",
       "mode": "view"
     },
     {
-      "name": "view-my-recent-posts",
-      "title": "View My Recent Posts",
+      "name": "recent-posts",
+      "title": "Recent Posts",
       "description": "View your recent posts on Bluesky. Click on a post to see more details.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "handle",
+          "placeholder": "@handle",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "sign-out",
+      "title": "Sign Out",
+      "description": "Sign out of your Bluesky account.",
       "mode": "view"
     }
   ],

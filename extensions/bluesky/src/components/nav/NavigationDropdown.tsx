@@ -1,43 +1,49 @@
 import { List, useNavigation } from "@raycast/api";
 
 import About from "../about/About";
-import CreateNewPost from "../../create-a-new-post";
+import AuthorFeed from "../feed/AuthorFeed";
 import Home from "../../home";
+import LikeFeed from "../feed/LikeFeed";
 import { NavigationViewTooltip } from "../../utils/constants";
-import SearchPeople from "../../search-people";
-import SignOut from "../signOut/SignOut";
-import ViewNotifications from "../../view-notifications";
-import ViewRecentPosts from "../../view-my-recent-posts";
-import ViewTimeline from "../../view-timeline";
+import NewPost from "../../new-post";
+import Notifications from "../../notifications";
+import PeopleView from "../people/PeopleView";
+import Timeline from "../../timeline";
 import { ViewTypes } from "../../config/viewTypeMap";
+import { getSignedInUserHandle } from "../../libs/atp";
 
 const NavigationDropdown = ({ currentViewId }: { currentViewId: number }) => {
   const { push } = useNavigation();
 
-  const onViewChanged = (viewId: string) => {
+  const onViewChanged = async (viewId: string) => {
+    const handle = await getSignedInUserHandle();
     switch (parseInt(viewId)) {
       case 0:
         push(<Home />);
         break;
       case 1:
-        push(<ViewTimeline />);
+        push(<Timeline />);
         break;
       case 2:
-        push(<ViewNotifications />);
+        push(<Notifications />);
         break;
       case 3:
-        push(<SearchPeople />);
+        push(<PeopleView />);
         break;
       case 4:
-        push(<CreateNewPost />);
+        push(<NewPost />);
         break;
       case 5:
-        push(<ViewRecentPosts />);
+        if (handle) {
+          push(<AuthorFeed showNavDropdown={true} authorHandle={handle} />);
+        }
         break;
       case 6:
-        push(<SignOut />);
+        if (handle) {
+          push(<LikeFeed showNavDropdown={true} authorHandle={handle} />);
+        }
         break;
-      case 7:
+      case 8:
         push(<About />);
         break;
       default:
@@ -46,11 +52,11 @@ const NavigationDropdown = ({ currentViewId }: { currentViewId: number }) => {
   };
 
   const getSectionIds = () => {
-    return [...new Set(ViewTypes.map((viewType) => viewType.sectionId))];
+    return [...new Set(ViewTypes.map((viewType) => viewType.navbarSectionId))];
   };
 
   const getViewsForSection = (sectionId: string) => {
-    return ViewTypes.filter((viewType) => viewType.sectionId === sectionId);
+    return ViewTypes.filter((view) => !view.hideInNavView && view.navbarSectionId === sectionId);
   };
 
   return (

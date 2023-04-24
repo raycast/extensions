@@ -9,7 +9,10 @@ import {
   NewNotifications,
   NoNewNotifications,
   NotificationCacheKey,
+  NotificationTextCacheKey,
   NotificationsReadToast,
+  ReadNotificationSectionTitle,
+  UnreadNotificationSectionTitle,
   ViewNotification,
   ViewNotificationsNavigationTitle,
   ViewNotificationsSearchBarPlaceholder,
@@ -19,7 +22,7 @@ import { buildTitle, showLoadingToast, showSuccessToast } from "./utils/common";
 import { getFormattedDateTime, getRelativeDateTime } from "./utils/date";
 import { getNotifications, getPostThread, getUnreadNotificationCount, markNotificationsAsRead } from "./libs/atp";
 import { getPostMarkdownView, parseNotifications } from "./utils/parser";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import AuthorFeed from "./components/feed/AuthorFeed";
 import Error from "./components/error/Error";
@@ -39,7 +42,7 @@ interface ViewNotificationProps {
   previousViewTitle?: string;
 }
 
-export default function ViewNotifications({ previousViewTitle = "" }: ViewNotificationProps) {
+export default function Notifications({ previousViewTitle = "" }: ViewNotificationProps) {
   const [notifications, setNotifications] = useCachedState<Notification[]>(NotificationCacheKey, []);
   const [cursor, setCursor] = useState<string | null>(null);
   const [selectedNotificationId, setSelectedNotificationId] = useState<string | null>(null);
@@ -47,46 +50,55 @@ export default function ViewNotifications({ previousViewTitle = "" }: ViewNotifi
   const [sessionStarted, sessionStartFailed, errorMessage] = useStartATSession(() => push(<Onboard />));
   const [showDetails, setShowDetails] = useState<boolean>(false);
   const [detailsText, setDetailsText] = useState<string>("");
-  const [firstFetch, setFirstFetch] = useState(true);
+  const [notificationText, setNotificationText] = useCachedState<string>(NotificationTextCacheKey, "");
+  const [notificationsLoaded, setNotificationsLoaded] = useState(false);
 
-  const fetchNotifications = async () => {
-    const data = await getNotifications(cursor, ExtensionConfig.notificationRequestLimit);
+  const fetchNotifications = useCallback(
+    async (invalidateCache: boolean) => {
+      const notificationCursor = invalidateCache ? null : cursor;
+      const data = await getNotifications(notificationCursor, ExtensionConfig.notificationRequestLimit);
 
-    if (!data) {
-      return;
-    }
-
-    const posts = parseNotifications(data.notifications);
-
-    if (data.cursor) {
-      setCursor(data.cursor);
-    }
-
-    setNotifications((state) => {
-      if (firstFetch) {
-        state = [];
-        setFirstFetch(false);
+      if (!data) {
+        return;
       }
 
-      const existingIds = new Set(state.map((post) => post.id));
-      const newPosts = posts.filter((post) => !existingIds.has(post.id));
-      return [...state, ...newPosts];
-    });
-  };
+      const notifications = parseNotifications(data.notifications);
+
+      if (data.cursor) {
+        setCursor(data.cursor);
+      }
+
+      setNotifications((state) => {
+        if (invalidateCache) {
+          state = [];
+        }
+
+        const existingIds = new Set(state.map((post) => post.id));
+        const newNotifications = notifications.filter((post) => !existingIds.has(post.id));
+        return [...state, ...newNotifications];
+      });
+    },
+    [cursor]
+  );
 
   useEffect(() => {
     (async () => {
       if (sessionStarted) {
-        fetchNotifications();
+        fetchNotifications(true);
 
         const notificationCount = await getUnreadNotificationCount();
+        let notificationMessage = "";
         if (notificationCount > 1) {
-          showSuccessToast(`${notificationCount} ${NewNotifications}`);
+          notificationMessage = `${notificationCount} ${NewNotifications}`;
         } else if (notificationCount == 1) {
-          showSuccessToast(`${notificationCount} ${NewNotification}`);
+          notificationMessage = `${notificationCount} ${NewNotification}`;
         } else {
-          showSuccessToast(NoNewNotifications);
+          notificationMessage = NoNewNotifications;
         }
+
+        setNotificationText(notificationMessage);
+        showSuccessToast(notificationMessage);
+        setNotificationsLoaded(true);
       }
     })();
   }, [sessionStarted]);
@@ -102,19 +114,23 @@ export default function ViewNotifications({ previousViewTitle = "" }: ViewNotifi
     setSelectedNotificationId(index);
 
     if (index == notifications[notifications.length - 1].id) {
-      await fetchNotifications();
+      await fetchNotifications(false);
     }
   };
 
   const onMarkNotificationsAsReadSelected = async () => {
     if (await confirmAlert({ title: MarkNotificationsAsReadAlert })) {
       await markNotificationsAsRead();
+      await fetchNotifications(true);
       showSuccessToast(NotificationsReadToast);
+      setNotificationText(NoNewNotifications);
     }
   };
 
   const openNotification = async (notification: Notification) => {
     if (notification.targetPostUri) {
+      setShowDetails(true);
+      setDetailsText(`${LoadingNotificationContent}...`);
       showLoadingToast(LoadingNotificationContent);
 
       let uri = notification.targetPostUri;
@@ -129,8 +145,6 @@ export default function ViewNotifications({ previousViewTitle = "" }: ViewNotifi
           return;
         }
 
-        setShowDetails(true);
-
         let imageEmbeds: string[] = [];
         const post = responseData.thread.post as PostView;
 
@@ -144,16 +158,65 @@ export default function ViewNotifications({ previousViewTitle = "" }: ViewNotifi
         return;
       } catch (error) {
         showDangerToast(ErrorLoadingNotification);
+        setDetailsText(ErrorLoadingNotification);
         return;
       }
     }
 
     return push(
       <AuthorFeed
+        showNavDropdown={false}
         previousViewTitle={buildTitle(previousViewTitle, ViewNotificationsNavigationTitle)}
         authorHandle={notification.author.handle}
       />
     );
+  };
+
+  const notificationItem = (notification: Notification) => {
+    return (
+      <List.Item
+        key={notification.id}
+        id={notification.id}
+        icon={{ source: notification.author.avatarUrl }}
+        detail={<List.Item.Detail markdown={detailsText} />}
+        accessories={getNotificationAccessory(notification)}
+        title={`${notification.author.displayName} ${notification.text}`}
+        actions={
+          <ActionPanel>
+            <Action
+              title={ViewNotification}
+              icon={{ source: Icon.Alarm, tintColor: Color.Blue }}
+              onAction={() => (showDetails ? setShowDetails(false) : openNotification(notification))}
+            />
+            <Action
+              icon={{ source: Icon.Checkmark, tintColor: Color.Green }}
+              title={MarkNotificationsAsRead}
+              onAction={onMarkNotificationsAsReadSelected}
+            />
+            <HomeAction />
+          </ActionPanel>
+        }
+      />
+    );
+  };
+
+  const getNotificationAccessory = (notification: Notification) => {
+    const accessories: List.Item.Accessory[] = [
+      {
+        text:
+          selectedNotificationId == notification.id
+            ? `${getFormattedDateTime(notification.indexedAtDate)}`
+            : `${getRelativeDateTime(notification.indexedAtDate)}`,
+      },
+    ];
+
+    if (!notification.isRead) {
+      accessories.push({
+        icon: Icon.AlarmRinging,
+      });
+    }
+
+    return accessories;
   };
 
   return sessionStartFailed ? (
@@ -166,7 +229,7 @@ export default function ViewNotifications({ previousViewTitle = "" }: ViewNotifi
       isLoading={notifications.length === 0}
       isShowingDetail={showDetails}
       onSelectionChange={onSelectionChange}
-      navigationTitle={buildTitle(previousViewTitle, ViewNotificationsNavigationTitle)}
+      navigationTitle={notificationsLoaded ? notificationText : ViewNotificationsNavigationTitle}
       searchBarPlaceholder={ViewNotificationsSearchBarPlaceholder}
       searchBarAccessory={<NavigationDropdown currentViewId={2} />}
       actions={
@@ -175,38 +238,16 @@ export default function ViewNotifications({ previousViewTitle = "" }: ViewNotifi
         </ActionPanel>
       }
     >
-      {notifications.map((notification) => (
-        <List.Item
-          key={notification.id}
-          id={notification.id}
-          icon={{ source: notification.author.avatarUrl }}
-          detail={<List.Item.Detail markdown={detailsText} />}
-          accessories={[
-            {
-              text:
-                selectedNotificationId == notification.id
-                  ? `${getFormattedDateTime(notification.indexedAtDate)}`
-                  : `${getRelativeDateTime(notification.indexedAtDate)}`,
-            },
-          ]}
-          title={`${notification.author.displayName} ${notification.text}`}
-          actions={
-            <ActionPanel>
-              <Action
-                title={ViewNotification}
-                icon={{ source: Icon.Alarm, tintColor: Color.Blue }}
-                onAction={() => openNotification(notification)}
-              />
-              <Action
-                icon={{ source: Icon.Checkmark, tintColor: Color.Green }}
-                title={MarkNotificationsAsRead}
-                onAction={onMarkNotificationsAsReadSelected}
-              />
-              <HomeAction />
-            </ActionPanel>
-          }
-        />
-      ))}
+      <List.Section title={UnreadNotificationSectionTitle}>
+        {notifications
+          .filter((notifications) => !notifications.isRead)
+          .map((notification) => notificationItem(notification))}
+      </List.Section>
+      <List.Section title={ReadNotificationSectionTitle}>
+        {notifications
+          .filter((notifications) => notifications.isRead)
+          .map((notification) => notificationItem(notification))}
+      </List.Section>
     </List>
   );
 }

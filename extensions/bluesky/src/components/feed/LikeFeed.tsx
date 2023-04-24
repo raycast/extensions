@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Icon, List, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import {
   BlueskyProfileUrlBase,
   FollowToastMessage,
@@ -16,26 +16,26 @@ import {
 } from "../../utils/constants";
 import { Post, User } from "../../types/types";
 import { buildTitle, getAuthorDetailsMarkdown, showDangerToast, showSuccessToast } from "../../utils/common";
-import { deleteFollow, follow, getProfile, getUserPosts } from "../../libs/atp";
+import { deleteFollow, follow, getLikePosts, getProfile } from "../../libs/atp";
 import { useEffect, useState } from "react";
 
+import { AppBskyFeedDefs } from "@atproto/api";
 import CustomAction from "../actions/CustomAction";
 import { ExtensionConfig } from "../../config/config";
 import HomeAction from "../actions/HomeAction";
-import LikeFeed from "./LikeFeed";
 import NavigationDropdown from "../nav/NavigationDropdown";
 import PostItem from "./PostItem";
 import { ProfileViewDetailed } from "@atproto/api/dist/client/types/app/bsky/actor/defs";
 import { parseFeed } from "../../utils/parser";
 import { useCachedState } from "@raycast/utils";
 
-interface AuthorFeedProps {
+interface LikeFeedProps {
   authorHandle: string;
   showNavDropdown: boolean;
   previousViewTitle?: string;
 }
 
-export default function AuthorFeed({ showNavDropdown, authorHandle, previousViewTitle = "" }: AuthorFeedProps) {
+export default function LikeFeed({ showNavDropdown, authorHandle, previousViewTitle = "" }: LikeFeedProps) {
   const [posts, setPosts] = useState<Post[]>([]);
   const [isLoadingPosts, setIsLoadingPosts] = useState(true);
   const [isLoadingAuthor, setIsLoadingAuthor] = useState(true);
@@ -44,20 +44,19 @@ export default function AuthorFeed({ showNavDropdown, authorHandle, previousView
   const [author, setAuthor] = useState<ProfileViewDetailed | null>(null);
   const [firstFetch, setFirstFetch] = useState(true);
   const [selectionIndex, setSelectionIndex] = useState("");
-  const { push } = useNavigation();
 
   const fetchPosts = async () => {
     setIsLoadingPosts(true);
 
-    const fetchLimit = firstFetch ? ExtensionConfig.userFeedFirstFetchLimit : ExtensionConfig.userFeedRequestLimit;
+    const fetchLimit = firstFetch ? ExtensionConfig.likeFeedFirstLimit : ExtensionConfig.likeFeedRequestLimit;
 
-    const data = await getUserPosts(authorHandle, cursor, fetchLimit);
+    const data = await getLikePosts(authorHandle, cursor, fetchLimit);
 
     if (!data) {
       return;
     }
 
-    const posts = await parseFeed(data.feed);
+    const posts = await parseFeed(data.feed as AppBskyFeedDefs.FeedViewPost[]);
 
     if (data.cursor) {
       setCursor(data.cursor);
@@ -132,6 +131,15 @@ export default function AuthorFeed({ showNavDropdown, authorHandle, previousView
     return accessory;
   };
 
+  const getUser = (author: ProfileViewDetailed): User => {
+    return {
+      did: author.did,
+      handle: author.handle,
+      displayName: author.displayName ? author.displayName : "",
+      avatarUrl: author.avatar ? author.avatar : "",
+    };
+  };
+
   const followUser = async (user: User) => {
     await follow(user.did);
     showSuccessToast(`${FollowToastMessage} ${user.handle}`);
@@ -149,15 +157,6 @@ export default function AuthorFeed({ showNavDropdown, authorHandle, previousView
     fetchAuthor();
   };
 
-  const getUser = (author: ProfileViewDetailed): User => {
-    return {
-      did: author.did,
-      handle: author.handle,
-      displayName: author.displayName ? author.displayName : "",
-      avatarUrl: author.avatar ? author.avatar : "",
-    };
-  };
-
   useEffect(() => {
     if (!firstFetch) {
       fetchPosts();
@@ -169,9 +168,9 @@ export default function AuthorFeed({ showNavDropdown, authorHandle, previousView
       isLoading={isLoadingPosts || isLoadingAuthor}
       isShowingDetail={isShowingDetails}
       onSelectionChange={(index) => onSelectionChange(index)}
-      navigationTitle={buildTitle(previousViewTitle, `@${authorHandle}`)}
-      searchBarPlaceholder={`Search @${authorHandle}'s timeline`}
-      searchBarAccessory={showNavDropdown ? <NavigationDropdown currentViewId={5} /> : null}
+      navigationTitle={buildTitle(previousViewTitle, `@${authorHandle}'s likes`)}
+      searchBarPlaceholder={`Search @${authorHandle}'s liked posts`}
+      searchBarAccessory={showNavDropdown ? <NavigationDropdown currentViewId={6} /> : null}
       actions={
         <ActionPanel>
           <HomeAction />
@@ -197,18 +196,6 @@ export default function AuthorFeed({ showNavDropdown, authorHandle, previousView
                   icon={{ source: Icon.Globe, tintColor: Color.Blue }}
                   shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
                   url={`${BlueskyProfileUrlBase}/${authorHandle}`}
-                />
-                <CustomAction
-                  actionKey="openUserLikes"
-                  onClick={() =>
-                    push(
-                      <LikeFeed
-                        showNavDropdown={false}
-                        previousViewTitle={previousViewTitle}
-                        authorHandle={authorHandle}
-                      />
-                    )
-                  }
                 />
                 {author.viewer && author.viewer.following ? (
                   <CustomAction actionKey="unfollow" onClick={() => unfollowUser(getUser(author))} />
@@ -245,12 +232,11 @@ export default function AuthorFeed({ showNavDropdown, authorHandle, previousView
           />
         </List.Section>
       )}
-      <List.Section title={`Timeline`}>
+      <List.Section title={`Posts liked by ${author?.displayName ? author.displayName : authorHandle}`}>
         {posts.map((post) => (
           <PostItem
             previousViewTitle={buildTitle(previousViewTitle, `@${authorHandle}`)}
             isSelected={selectionIndex === post.uri}
-            authorFeedHandle={authorHandle}
             key={post.uri}
             post={post}
             isShowingDetails={isShowingDetails}

@@ -1,40 +1,21 @@
-import { SectionType, ViewType } from "../types/types";
-import { getFormattedActionShortcut, getProfileTitle } from "../utils/common";
-
 import { Icon } from "@raycast/api";
-
-export const SectionTypes: SectionType[] = [
-  {
-    id: "0",
-    getName: () => "Home",
-  },
-  {
-    id: "1",
-    getName: () => "User",
-  },
-  {
-    id: "2",
-    getName: () => "World",
-  },
-  {
-    id: "3",
-    getName: () => "Settings",
-  },
-];
+import { ViewType } from "../types/types";
+import { getFormattedActionShortcut } from "../utils/common";
 
 export const ViewTypes: ViewType[] = [
   {
     id: "0",
     getName: () => "Home",
-    sectionId: "0",
+    navbarSectionId: "0",
     icon: Icon.BulletPoints,
     description: "Home View",
     hideInHomeView: true,
+    hideInNavView: true,
   },
   {
     id: "1",
     getName: () => "Timeline",
-    sectionId: "2",
+    navbarSectionId: "2",
     icon: Icon.BulletPoints,
     description: `
 View your timeline feed. 
@@ -50,7 +31,7 @@ View your timeline feed.
   {
     id: "2",
     getName: () => "Notifications",
-    sectionId: "2",
+    navbarSectionId: "2",
     icon: Icon.AlarmRinging,
     description: `
 View your recent notifications. 
@@ -60,9 +41,9 @@ View your recent notifications.
   },
   {
     id: "3",
-    getName: () => "People",
-    sectionId: "2",
-    icon: Icon.TwoPeople,
+    getName: () => "Search",
+    navbarSectionId: "2",
+    icon: Icon.MagnifyingGlass,
     description: `
 Search for People and Entities on Bluesky. 
 
@@ -76,7 +57,7 @@ Search for People and Entities on Bluesky.
   {
     id: "4",
     getName: () => "New Post",
-    sectionId: "1",
+    navbarSectionId: "1",
     icon: Icon.Bubble,
     description: `
 Create a New Post.
@@ -86,12 +67,9 @@ Create a New Post.
   },
   {
     id: "5",
-    getName: () => {
-      const profileTitle = getProfileTitle();
-      return profileTitle ? profileTitle : "Your Recent Posts";
-    },
-    sectionId: "1",
-    icon: Icon.AtSymbol,
+    getName: () => "My Recent Posts",
+    navbarSectionId: "1",
+    icon: Icon.Person,
     description: `
 View your recent posts.
 
@@ -105,16 +83,33 @@ View your recent posts.
   },
   {
     id: "6",
+    getName: () => "My Recent Likes",
+    navbarSectionId: "1",
+    icon: Icon.Heart,
+    description: `
+View your recently liked posts.
+
+- Press \`⌘ + Enter\` to open the thread in your browser.
+- Press ${getFormattedActionShortcut("like")} to like a post.
+- Press ${getFormattedActionShortcut("unlike")} to unlike a post.
+- Press ${getFormattedActionShortcut("repost")} to repost.
+- Press ${getFormattedActionShortcut("reply")} to reply to a post.
+- Press ${getFormattedActionShortcut("quote")} to quote a post.
+     `,
+  },
+  {
+    id: "7",
     getName: () => "Sign Out",
-    sectionId: "3",
+    navbarSectionId: "3",
+    hideInNavView: true,
     icon: Icon.Logout,
     description: "Sign out of your active session.",
   },
   {
-    id: "7",
+    id: "8",
     getName: () => "About",
-    sectionId: "3",
+    navbarSectionId: "3",
     icon: Icon.Cd,
-    description: "About Bluesky for Raycast.",
+    description: "About Bluesky for Raycast (beta).",
   },
 ];

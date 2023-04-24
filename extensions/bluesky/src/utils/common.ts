@@ -1,10 +1,11 @@
-import { Cache, Toast, showToast } from "@raycast/api";
+import { Toast, showToast } from "@raycast/api";
 
 import { ActionMap } from "../config/actionMap";
 import { AllowedActionKeys } from "../types/types";
-import { ProfileCacheKey } from "./constants";
+import { BlueskyProfileUrlBase } from "./constants";
 import { ProfileViewDetailed } from "@atproto/api/dist/client/types/app/bsky/actor/defs";
 import crypto from "crypto";
+import { getRKey } from "../libs/atp";
 
 export const showLoadingToast = async (message: string) => {
   await showToast({
@@ -52,16 +53,23 @@ const formatModifier = (modifier: string) => {
   }
 };
 
-export const getProfileTitle = () => {
-  const cache = new Cache();
-  const response = cache.get(ProfileCacheKey);
-  const profile: ProfileViewDetailed = response ? JSON.parse(response) : null;
-  return profile ? `${profile.displayName ? profile.displayName : profile.handle}` : null;
-};
-
 export const getFormattedActionShortcut = (actionKey: AllowedActionKeys) => {
   const action = ActionMap[actionKey];
   const shortcut = action.shortcut;
 
   return `\`${shortcut.modifiers.map(formatModifier).join(" + ")} + ${shortcut.key}\``;
+};
+
+export const getPostUrl = (handle: string, uri: string) => {
+  return `${BlueskyProfileUrlBase}/${handle}/post/${getRKey(uri)}`;
+};
+
+export const getAuthorDetailsMarkdown = (author: ProfileViewDetailed): string => {
+  const displayNameText = author.displayName ? `**${author.displayName.trim()}**` : "";
+
+  return `
+${displayNameText} _[(${author.handle})](${BlueskyProfileUrlBase}/${author.handle})_
+
+${author.description ? author.description : ""}
+`;
 };

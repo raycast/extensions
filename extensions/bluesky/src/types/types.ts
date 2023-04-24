@@ -9,6 +9,11 @@ export type BskyRecord = {
   createdAt: string;
 };
 
+export type PostReason = {
+  type: "reply" | "quote" | "repost";
+  authorName: string;
+} | null;
+
 export type SessionCreatedResultMessage =
   | "new-session-created"
   | "resuming-existing-session"
@@ -60,6 +65,7 @@ export type Post = {
   metrics: PostMetrics;
   viewer?: ViewerState;
   markdownView: string;
+  reason: PostReason;
   likeUri: string;
   imageEmbeds?: string[];
 };
@@ -73,23 +79,20 @@ export type Notification = {
   id: string;
   text: string;
   reason: string;
+  isRead: boolean;
   author: User;
   indexedAtDate: string;
   targetPostUri: string | null;
 };
 
-export type SectionType = {
-  id: string;
-  getName: () => string;
-};
-
 export type ViewType = {
   id: string;
   getName: () => string;
-  sectionId: string;
+  navbarSectionId: string;
   icon: Icon;
   description: string;
   hideInHomeView?: boolean;
+  hideInNavView?: boolean;
 };
 
 export type NewPost = {
@@ -106,8 +109,7 @@ export type ActionProperty = {
 export type AllowedActionKeys =
   | "homeView"
   | "timelineView"
-  | "notificationView"
-  | "createPostView"
+  | "newPostView"
   | "searchView"
   | "recentPostsView"
   | "aboutView"
@@ -123,9 +125,8 @@ export type AllowedActionKeys =
   | "quote"
   | "reply"
   | "switchToHomeView"
-  | "openProfile"
-  | "openProfileInBrowser"
-  | "openPostInBrowser";
+  | "openUserLikes"
+  | "openProfile";
 
 export type ActionsDictionary = {
   [K in AllowedActionKeys]: ActionProperty;

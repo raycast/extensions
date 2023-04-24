@@ -2,17 +2,18 @@ import { Action, ActionPanel, Color, List, useNavigation } from "@raycast/api";
 import { HomeNavigationTitle, SelectActionMessage } from "./utils/constants";
 
 import About from "./components/about/About";
-import CreateNewPost from "./create-a-new-post";
+import AuthorFeed from "./components/feed/AuthorFeed";
 import Error from "./components/error/Error";
 import { HomeLaunchContext } from "./types/types";
+import LikeFeed from "./components/feed/LikeFeed";
+import NewPost from "./new-post";
+import Notifications from "./notifications";
 import Onboard from "./components/onboarding/Onboard";
-import SearchPeople from "./search-people";
-import SignOut from "./components/signOut/SignOut";
-import ViewNotifications from "./view-notifications";
-import ViewRecentPosts from "./view-my-recent-posts";
-import ViewTimeline from "./view-timeline";
+import PeopleView from "./components/people/PeopleView";
+import SignOut from "./sign-out";
+import Timeline from "./timeline";
 import { ViewTypes } from "./config/viewTypeMap";
-import { getProfileTitle } from "./utils/common";
+import { getSignedInUserHandle } from "./libs/atp";
 import { useEffect } from "react";
 import useStartATSession from "./hooks/useStartATSession";
 
@@ -30,27 +31,35 @@ const Home = ({ launchContext }: HomeProps) => {
     }
   }, []);
 
-  const onViewSelected = (viewId: string) => {
+  const onViewSelected = async (viewId: string) => {
+    const handle = await getSignedInUserHandle();
     switch (parseInt(viewId)) {
       case 1:
-        push(<ViewTimeline />);
+        push(<Timeline />);
         break;
       case 2:
-        push(<ViewNotifications />);
+        push(<Notifications />);
         break;
       case 3:
-        push(<SearchPeople />);
+        push(<PeopleView />);
         break;
       case 4:
-        push(<CreateNewPost />);
+        push(<NewPost />);
         break;
       case 5:
-        push(<ViewRecentPosts />);
+        if (handle) {
+          push(<AuthorFeed showNavDropdown={true} authorHandle={handle} />);
+        }
         break;
       case 6:
-        push(<SignOut />);
+        if (handle) {
+          push(<LikeFeed showNavDropdown={true} authorHandle={handle} />);
+        }
         break;
       case 7:
+        push(<SignOut />);
+        break;
+      case 8:
         push(<About />);
         break;
     }

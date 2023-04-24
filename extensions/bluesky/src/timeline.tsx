@@ -1,6 +1,9 @@
 import { ActionPanel, List, useNavigation } from "@raycast/api";
 import {
-  ShowPostDetails,
+  LoadMore,
+  LoadMoreKey,
+  LoadingMorePosts,
+  ShowDetails,
   TimelineCacheKey,
   ViewTimelineNavigationTitle,
   ViewTimelineSearchBarPlaceholder,
@@ -20,18 +23,19 @@ import { parseFeed } from "./utils/parser";
 import { useCachedState } from "@raycast/utils";
 import useStartATSession from "./hooks/useStartATSession";
 
-interface ViewTimelineProps {
+interface TimelineProps {
   previousViewTitle?: string;
 }
 
-export default function ViewTimeline({ previousViewTitle = "" }: ViewTimelineProps) {
+export default function Timeline({ previousViewTitle = "" }: TimelineProps) {
   const [posts, setPosts] = useCachedState<Post[]>(TimelineCacheKey, []);
   const [isLoading, setIsLoading] = useState(true);
   const [cursor, setCursor] = useState<string | null>(null);
   const { push } = useNavigation();
-  const [isShowingDetails, setIsShowingDetails] = useCachedState(ShowPostDetails, false);
+  const [isShowingDetails, setIsShowingDetails] = useCachedState(ShowDetails, false);
   const [sessionStarted, sessionStartFailed, errorMessage] = useStartATSession(() => push(<Onboard />));
   const [firstFetch, setFirstFetch] = useState(true);
+  const [selectionIndex, setSelectionIndex] = useState("");
 
   const fetchPosts = async () => {
     setIsLoading(true);
@@ -46,6 +50,8 @@ export default function ViewTimeline({ previousViewTitle = "" }: ViewTimelinePro
 
     if (data.cursor) {
       setCursor(data.cursor);
+    } else {
+      setCursor(null);
     }
 
     setPosts((state) => {
@@ -56,7 +62,9 @@ export default function ViewTimeline({ previousViewTitle = "" }: ViewTimelinePro
 
       const existingIds = new Set(state.map((post) => post.uri));
       const newPosts = posts.filter((post) => !existingIds.has(post.uri));
-      return [...state, ...newPosts];
+
+      const allPosts = [...state, ...newPosts].filter((post) => !post.reason || post.metrics.likeCount > 0);
+      return allPosts;
     });
 
     setIsLoading(false);
@@ -73,7 +81,9 @@ export default function ViewTimeline({ previousViewTitle = "" }: ViewTimelinePro
       return;
     }
 
-    if (index == posts[posts.length - 1].uri) {
+    setSelectionIndex(index);
+
+    if (index === LoadMoreKey) {
       await fetchPosts();
     }
   };
@@ -96,6 +106,7 @@ export default function ViewTimeline({ previousViewTitle = "" }: ViewTimelinePro
     >
       {posts.map((post) => (
         <PostItem
+          isSelected={selectionIndex === post.uri}
           previousViewTitle={buildTitle(previousViewTitle, ViewTimelineNavigationTitle)}
           key={post.uri}
           post={post}
@@ -103,6 +114,9 @@ export default function ViewTimeline({ previousViewTitle = "" }: ViewTimelinePro
           toggleShowDetails={() => setIsShowingDetails((state) => !state)}
         />
       ))}
+      {cursor && (
+        <List.Item id={LoadMoreKey} key={LoadMoreKey} title="" subtitle={isLoading ? LoadingMorePosts : LoadMore} />
+      )}
     </List>
   );
 }

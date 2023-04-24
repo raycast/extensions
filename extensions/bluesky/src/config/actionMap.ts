@@ -3,8 +3,7 @@ import {
   Follow,
   LikePost,
   Mute,
-  OpenPostInBrowser,
-  OpenProfileInBrowser,
+  OpenUserLikes,
   OpenUserProfile,
   QuotePost,
   ReplyPost,
@@ -18,14 +17,13 @@ import {
 } from "../utils/constants";
 
 import { ActionsDictionary } from "../types/types";
-import { getProfileTitle } from "../utils/common";
 
 export const ActionMap: ActionsDictionary = {
   aboutView: {
     getTitle: () => "About",
     icon: Icon.Cd,
     color: Color.Blue,
-    shortcut: { modifiers: ["cmd"], key: "6" },
+    shortcut: { modifiers: ["cmd"], key: "5" },
   },
   homeView: {
     getTitle: () => "Home",
@@ -39,32 +37,23 @@ export const ActionMap: ActionsDictionary = {
     color: Color.Blue,
     shortcut: { modifiers: ["cmd"], key: "1" },
   },
-  notificationView: {
-    getTitle: () => "Notifications",
-    icon: Icon.Bell,
-    color: Color.Blue,
-    shortcut: { modifiers: ["cmd"], key: "2" },
-  },
-  createPostView: {
-    getTitle: () => "Create a new Post",
+  newPostView: {
+    getTitle: () => "New Post",
     icon: Icon.Bubble,
     color: Color.Blue,
-    shortcut: { modifiers: ["cmd"], key: "4" },
+    shortcut: { modifiers: ["cmd"], key: "3" },
   },
   searchView: {
     getTitle: () => "Search",
     icon: Icon.MagnifyingGlass,
     color: Color.Blue,
-    shortcut: { modifiers: ["cmd"], key: "3" },
+    shortcut: { modifiers: ["cmd"], key: "2" },
   },
   recentPostsView: {
-    getTitle: () => {
-      const profileTitle = getProfileTitle();
-      return profileTitle ? profileTitle : "Your Recent Posts";
-    },
-    icon: Icon.AtSymbol,
+    getTitle: () => "Recent Posts",
+    icon: Icon.Person,
     color: Color.Blue,
-    shortcut: { modifiers: ["cmd"], key: "5" },
+    shortcut: { modifiers: ["cmd"], key: "4" },
   },
   follow: {
     getTitle: () => Follow,
@@ -144,16 +133,10 @@ export const ActionMap: ActionsDictionary = {
     color: Color.Blue,
     shortcut: { modifiers: ["cmd"], key: "return" },
   },
-  openProfileInBrowser: {
-    getTitle: () => OpenProfileInBrowser,
-    icon: Icon.Globe,
+  openUserLikes: {
+    getTitle: () => OpenUserLikes,
+    icon: Icon.Heartbeat,
     color: Color.Blue,
-    shortcut: { modifiers: ["cmd", "shift"], key: "return" },
-  },
-  openPostInBrowser: {
-    getTitle: () => OpenPostInBrowser,
-    icon: Icon.Glasses,
-    color: Color.Blue,
-    shortcut: { modifiers: ["cmd", "shift"], key: "o" },
+    shortcut: { modifiers: ["cmd", "ctrl"], key: "l" },
   },
 };

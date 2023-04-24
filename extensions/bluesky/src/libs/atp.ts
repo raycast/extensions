@@ -5,24 +5,25 @@ import {
   BlueskyProfileUrlBase,
   BlueskyQuoteType,
   FirstSignInSuccessToast,
-  ProfileCacheKey,
 } from "../utils/constants";
 import { ATSessionResponse, CredentialsHashStore, PostReference } from "../types/types";
 import {
   AppBskyActorSearchActors,
   AppBskyFeedGetAuthorFeed,
   AppBskyFeedGetTimeline,
+  AppBskyFeedLike,
   AppBskyFeedPost,
   AppBskyNotificationListNotifications,
   AtpSessionData,
   BskyAgent,
+  ComAtprotoRepoListRecords,
   RichText,
 } from "@atproto/api";
-import { Cache, LocalStorage } from "@raycast/api";
 import { clearLocalStore, getItemFromLocalStore } from "../utils/localStore";
 import { createHashKey, showSuccessToast } from "../utils/common";
 
 import { AtUri } from "@atproto/uri";
+import { LocalStorage } from "@raycast/api";
 import { clearCache } from "../utils/cacheStore";
 import fetch from "cross-fetch";
 import { getPreferences } from "../utils/preference";
@@ -55,6 +56,15 @@ export const getExistingSession = async () => {
   return await getItemFromLocalStore<AtpSessionData>(ATPSessionStorageKey);
 };
 
+export const resolveHandle = async (handle: string): Promise<boolean> => {
+  try {
+    await agent.resolveHandle({ handle });
+    return true;
+  } catch (error) {
+    return false;
+  }
+};
+
 export const getTimelinePosts = async (cursor: string | null, limit = 10) => {
   const requestObject: AppBskyFeedGetTimeline.QueryParams = {
     limit,
@@ -70,6 +80,44 @@ export const getTimelinePosts = async (cursor: string | null, limit = 10) => {
   } else {
     return null;
   }
+};
+
+export const getLikePosts = async (handle: string, cursor: string | null, limit = 10) => {
+  const requestObject: ComAtprotoRepoListRecords.QueryParams = {
+    collection: "app.bsky.feed.like",
+    repo: handle,
+    limit,
+  };
+
+  if (cursor) {
+    requestObject.cursor = cursor;
+  }
+
+  const authorLikesResponse = await agent.com.atproto.repo.listRecords(requestObject);
+  const newCursor = authorLikesResponse.data?.cursor;
+
+  const uris =
+    authorLikesResponse.data?.records.map((record) => (record.value as AppBskyFeedLike.Record).subject.uri) || [];
+
+  const response = await Promise.all(
+    uris
+      .map(async (uri) => {
+        try {
+          const response = await getPostThread(uri);
+          if (response && response.thread) {
+            return response.thread;
+          }
+        } catch {
+          return null;
+        }
+      })
+      .filter((thread) => thread !== null)
+  );
+
+  return {
+    cursor: newCursor,
+    feed: response,
+  };
 };
 
 export const getUserPosts = async (handle: string, cursor: string | null, limit = 10) => {
@@ -187,14 +235,6 @@ export const createNewSession = async (): Promise<ATSessionResponse> => {
 
     await LocalStorage.setItem(ATPCredentialsHashKey, JSON.stringify(hashStore));
     showSuccessToast(FirstSignInSuccessToast);
-
-    const session = await getExistingSession();
-
-    if (session) {
-      const cache = new Cache();
-      const profile = await getProfile(session?.handle);
-      cache.set(ProfileCacheKey, JSON.stringify(profile));
-    }
 
     const response: ATSessionResponse = {
       status: "new-session-created",

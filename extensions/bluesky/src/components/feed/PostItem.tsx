@@ -1,47 +1,72 @@
-import { Action, ActionPanel, Icon, List, open, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, useNavigation } from "@raycast/api";
 import {
   BlueskyProfileUrlBase,
   ErrorToastMessage,
   FollowToastMessage,
-  HidePostDetails,
+  HideDetails,
+  InReplyToTag,
   LikePostToastMessage,
   MuteToastMessage,
+  OpenPostInBrowser,
+  OpenProfileInBrowser,
+  QuotedByTag,
+  RepliesMarkdown,
+  RepliesTooltip,
   RepostToastMessage,
-  ShowPostDetails,
+  RepostedByTag,
+  RepostsTooltip,
+  ShowDetails,
   UnfollowToastMessage,
   UnlikePostToastMessage,
   UnmuteToastMessage,
 } from "../../utils/constants";
 import { Post, User } from "../../types/types";
-import { deleteFollow, follow, getProfile, like, mute, repost, unlike, unmute } from "../../libs/atp";
-import { showDangerToast, showLoadingToast, showSuccessToast } from "../../utils/common";
+import { deleteFollow, follow, getPostThread, getProfile, like, mute, repost, unlike, unmute } from "../../libs/atp";
+import { getPostUrl, showDangerToast, showLoadingToast, showSuccessToast } from "../../utils/common";
+import { useEffect, useState } from "react";
 
 import AuthorFeed from "./AuthorFeed";
-import CreateNewPost from "../../create-a-new-post";
 import CustomAction from "../actions/CustomAction";
 import HomeAction from "../actions/HomeAction";
-import { getPostUrl } from "../../utils/parser";
-import { useState } from "react";
+import LikeFeed from "./LikeFeed";
+import NewPost from "../../new-post";
+import { PostView } from "@atproto/api/dist/client/types/app/bsky/feed/defs";
+import { ThreadViewPost } from "@atproto/api/dist/client/types/app/bsky/feed/defs";
+import { getPostMarkdownView } from "../../utils/parser";
+import { useDebounce } from "use-debounce";
 
 interface PostItemProps {
   post: Post;
   previousViewTitle: string;
   isShowingDetails: boolean;
+  isSelected: boolean;
+  authorFeedHandle?: string;
   toggleShowDetails: () => void;
 }
 
-export default function PostItem({ previousViewTitle, post, isShowingDetails, toggleShowDetails }: PostItemProps) {
+export default function PostItem({
+  previousViewTitle,
+  isSelected,
+  post,
+  isShowingDetails,
+  authorFeedHandle,
+  toggleShowDetails,
+}: PostItemProps) {
   const [likeUri, setLikeUri] = useState(post.likeUri);
   const [likeCount, setLikeCount] = useState(post.metrics.likeCount);
 
   const [following, setFollowing] = useState(post.viewer ? post.viewer.following : null);
   const [muted, setMuted] = useState(post.viewer ? post.viewer.muted : null);
 
+  const [postMarkdown, setPostMarkdown] = useState(post.markdownView);
+  const [fullThreadLoaded, setFullThreadLoaded] = useState(false);
+  const debouncedPostSelected = useDebounce<boolean>(isSelected, 1000);
+
   const { push } = useNavigation();
 
   const onQuotePostSelected = async (post: Post) => {
     push(
-      <CreateNewPost
+      <NewPost
         previousViewTitle={previousViewTitle}
         postReference={{
           reason: "quote",
@@ -58,7 +83,7 @@ export default function PostItem({ previousViewTitle, post, isShowingDetails, to
 
   const onReplyToPostSelected = async (post: Post) => {
     push(
-      <CreateNewPost
+      <NewPost
         previousViewTitle={previousViewTitle}
         postReference={{
           reason: "reply",
@@ -102,12 +127,61 @@ export default function PostItem({ previousViewTitle, post, isShowingDetails, to
     showDangerToast(UnlikePostToastMessage);
   };
 
-  const getPostAccessoryText = () => {
-    if (likeUri && likeUri.length > 0) {
-      return `${likeCount} ❤️ `;
+  const getPostAccessory = (post: Post, isShowingDetails: boolean) => {
+    const accessory = [];
+    if (post.imageEmbeds && post.imageEmbeds.length > 0) {
+      accessory.push({
+        icon: {
+          source: post.imageEmbeds[0],
+        },
+      });
     }
 
-    return `${likeCount} ♡ `;
+    if (!isShowingDetails && post.reason && post.reason.type === "repost") {
+      accessory.push({
+        tag: { value: `${RepostedByTag} ${post.reason.authorName}`, color: Color.Green },
+      });
+    }
+
+    if (!isShowingDetails && post.reason && post.reason.type === "reply") {
+      accessory.push({
+        tag: { value: `${InReplyToTag} ${post.reason.authorName}`, color: Color.Blue },
+      });
+    }
+
+    if (!isShowingDetails && post.reason && post.reason.type === "quote") {
+      accessory.push({
+        tag: { value: `${QuotedByTag} ${post.reason.authorName}`, color: Color.Orange },
+      });
+    }
+
+    if (!isShowingDetails && post.metrics.replyCount > 0) {
+      accessory.push({
+        tag: { value: `${post.metrics.replyCount} ↓`, color: Color.SecondaryText },
+        tooltip: RepliesTooltip,
+      });
+    }
+
+    if (post.metrics.repostCount > 0 && !isShowingDetails) {
+      accessory.push({
+        tag: { value: `${post.metrics.repostCount} ♺`, color: Color.SecondaryText },
+        tooltip: RepostsTooltip,
+      });
+    }
+
+    if (likeUri && likeUri.length > 0) {
+      accessory.push({
+        tag: { value: `${likeCount} ❤️ `, color: Color.Red },
+        tooltip: `${likeCount} ❤️ `,
+      });
+    } else {
+      accessory.push({
+        tag: { value: `${likeCount} ♡ `, color: Color.SecondaryText },
+        tooltip: `${likeCount} ♡ `,
+      });
+    }
+
+    return accessory;
   };
 
   const muteUser = async (user: User) => {
@@ -140,27 +214,77 @@ export default function PostItem({ previousViewTitle, post, isShowingDetails, to
     }
   };
 
+  const getThread = async (post: Post) => {
+    const data = await getPostThread(post.uri);
+
+    if (data && data.thread && data.thread.replies) {
+      const replies: ThreadViewPost[] = data.thread.replies as ThreadViewPost[];
+      let replyMarkdown = RepliesMarkdown;
+
+      for (const reply of replies) {
+        if (reply.post) {
+          const replyText = await getPostMarkdownView(reply.post as PostView, []);
+          replyMarkdown = replyMarkdown + replyText;
+        }
+      }
+
+      setFullThreadLoaded(true);
+      setPostMarkdown((state) => state + replyMarkdown);
+    }
+  };
+
+  useEffect(() => {
+    if (isShowingDetails && debouncedPostSelected[0] && !fullThreadLoaded && post.metrics.replyCount > 0) {
+      getThread(post);
+    }
+  }, [debouncedPostSelected[0], fullThreadLoaded, isShowingDetails]);
+
+  const getPostTitle = (post: Post) => {
+    if (post.createdByUser.handle === authorFeedHandle || isShowingDetails) {
+      return "";
+    }
+
+    return `${post.createdByUser.displayName ? post.createdByUser.displayName : post.createdByUser.handle}`;
+  };
+
   return (
     <List.Item
       key={post.uri}
       id={post.uri}
       icon={{ source: post.createdByUser.avatarUrl }}
-      accessories={[{ text: getPostAccessoryText() }]}
-      title={
-        `${post.createdByUser.displayName ? post.createdByUser.displayName : post.createdByUser.handle}: ` + post.text
-      }
+      accessories={getPostAccessory(post, isShowingDetails)}
+      title={getPostTitle(post)}
+      subtitle={{ value: post.text, tooltip: post.text }}
       actions={
         <ActionPanel>
           <Action
             icon={isShowingDetails ? Icon.AppWindow : Icon.AppWindowSidebarRight}
-            title={isShowingDetails ? HidePostDetails : ShowPostDetails}
+            title={isShowingDetails ? HideDetails : ShowDetails}
             onAction={toggleShowDetails}
           />
           <ActionPanel.Section>
             <CustomAction
               actionKey="openProfile"
               onClick={() =>
-                push(<AuthorFeed previousViewTitle={previousViewTitle} authorHandle={post.createdByUser.handle} />)
+                push(
+                  <AuthorFeed
+                    showNavDropdown={false}
+                    previousViewTitle={previousViewTitle}
+                    authorHandle={post.createdByUser.handle}
+                  />
+                )
+              }
+            />
+            <CustomAction
+              actionKey="openUserLikes"
+              onClick={() =>
+                push(
+                  <LikeFeed
+                    showNavDropdown={false}
+                    previousViewTitle={previousViewTitle}
+                    authorHandle={post.createdByUser.handle}
+                  />
+                )
               }
             />
           </ActionPanel.Section>
@@ -175,13 +299,17 @@ export default function PostItem({ previousViewTitle, post, isShowingDetails, to
             <CustomAction actionKey="quote" onClick={() => onQuotePostSelected(post)} />
           </ActionPanel.Section>
           <ActionPanel.Section>
-            <CustomAction
-              actionKey="openPostInBrowser"
-              onClick={() => open(getPostUrl(post.createdByUser.handle, post.uri))}
+            <Action.OpenInBrowser
+              title={OpenPostInBrowser}
+              icon={{ source: Icon.Globe, tintColor: Color.Blue }}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "return" }}
+              url={getPostUrl(post.createdByUser.handle, post.uri)}
             />
-            <CustomAction
-              actionKey="openProfileInBrowser"
-              onClick={() => open(`${BlueskyProfileUrlBase}/${post.createdByUser.handle}`)}
+            <Action.OpenInBrowser
+              title={OpenProfileInBrowser}
+              icon={{ source: Icon.Globe, tintColor: Color.Blue }}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
+              url={`${BlueskyProfileUrlBase}/${post.createdByUser.handle}`}
             />
           </ActionPanel.Section>
           {post.viewer && muted !== null && (
@@ -198,10 +326,24 @@ export default function PostItem({ previousViewTitle, post, isShowingDetails, to
               )}
             </ActionPanel.Section>
           )}
+          <ActionPanel.Section>
+            <Action.CopyToClipboard
+              title="Copy Post Link"
+              icon={{ source: Icon.CopyClipboard, tintColor: Color.Blue }}
+              shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
+              content={getPostUrl(post.createdByUser.handle, post.uri)}
+            />
+            <Action.CopyToClipboard
+              title="Copy Post Text"
+              icon={{ source: Icon.CopyClipboard, tintColor: Color.Blue }}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+              content={post.text}
+            />
+          </ActionPanel.Section>
           <HomeAction />
         </ActionPanel>
       }
-      detail={<List.Item.Detail markdown={post.markdownView} />}
+      detail={<List.Item.Detail markdown={postMarkdown} />}
     />
   );
 }

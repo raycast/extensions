@@ -6,12 +6,14 @@ import HomeAction from "../actions/HomeAction";
 interface ErrorProps {
   navigationTitle: string;
   errorMessage: string;
+  showErrorBody?: boolean;
 }
 
-const Error = ({ errorMessage, navigationTitle }: ErrorProps) => {
+const Error = ({ errorMessage, navigationTitle, showErrorBody = true }: ErrorProps) => {
+  const errorBody = showErrorBody ? ErrorMessageBody : "";
   const markdown = `## Error: ${errorMessage}
 
-${ErrorMessageBody}
+${errorBody}
   `;
 
   return (

@@ -6,18 +6,18 @@ import {
   SignedOutToast,
   SigningOutMarkdown,
   SigningOutToast,
-} from "../../utils/constants";
-import { buildTitle, showLoadingToast, showSuccessToast } from "../../utils/common";
+} from "./utils/constants";
+import { buildTitle, showLoadingToast, showSuccessToast } from "./utils/common";
 import { useEffect, useState } from "react";
 
-import { clearCache } from "../../utils/cacheStore";
-import { clearLocalStore } from "../../utils/localStore";
+import { clearCache } from "./utils/cacheStore";
+import { clearLocalStore } from "./utils/localStore";
 
 interface SignOutProps {
   previousViewTitle?: string;
 }
 
-const SignOut = ({ previousViewTitle = "" }: SignOutProps) => {
+export default function SignOut({ previousViewTitle = "" }: SignOutProps) {
   const [isSignedOut, setIsSignedOut] = useState(false);
 
   useEffect(() => {
@@ -45,6 +45,4 @@ const SignOut = ({ previousViewTitle = "" }: SignOutProps) => {
       markdown={isSignedOut ? SignedOutMarkdown : SigningOutMarkdown}
     />
   );
-};
-
-export default SignOut;
+}
