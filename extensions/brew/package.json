@@ -56,6 +56,14 @@
       "required": false,
       "title": "Custom Brew Executable Path",
       "description": "Set this if your brew executable is in a non-standard location"
+    },
+    {
+      "name": "zapCask",
+      "type": "checkbox",
+      "required": false,
+      "title": "Zap Casks",
+      "label": "Add --zap to brew uninstall --cask",
+      "description": "Run cask uninstall with the --zap option for a more complete uninstallation of files associated with cask."
     }
   ],
   "dependencies": {
