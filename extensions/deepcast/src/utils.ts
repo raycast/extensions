@@ -10,6 +10,7 @@ export function getPreferences() {
   return getPreferenceValues<Preferences>();
 }
 
+
 function isPro(key: string) {
   return !key.endsWith(":fx");
 }
@@ -39,6 +40,7 @@ export async function sendTranslateRequest({
   targetLanguage,
 }: {
   text?: string;
+
   sourceLanguage?: SourceLanguage;
   targetLanguage: TargetLanguage;
 }) {
