@@ -82,6 +82,10 @@
           "title": "Visual Studio Code - Insiders"
         },
         {
+          "value": "VSCodium < 1.70",
+          "title": "VSCodium < 1.70"
+        },
+        {
           "value": "VSCodium",
           "title": "VSCodium"
         }
