@@ -1,5 +1,10 @@
 # DocCheck Changelog
 
+## [Version 1.3] - 2023-04-24
+
+- NEU: Schnellinfo (Tooltip) auch bei Titeln der Suchergebnisse
+- Fix: "Top Artikel" werden jetzt immer korrekt dargestellt und nur einmal geladen (Optimierung bei der Darstellung von Suchergebnissen nach dem Verlassen einer Artikelansicht über den "← Suche *" Link und beim Löschen des Suchbegriffes)
+
 ## [Version 1.2.2] - 2023-04-12
 
 - Fix: die Tabelle Berechnung im Artikel [Relatives Risiko](https://flexikon.doccheck.com/de/Relatives_Risiko) wird nun korrekt angezeigt (offenbar kann eine Tabelle nicht mit einer leeren Zelle beginnen)

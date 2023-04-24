@@ -1,4 +1,4 @@
-import { Icon, Color, List, showToast, Toast, Action, ActionPanel } from "@raycast/api";
+import { Icon, Color, List, showToast, Toast, Action, ActionPanel, LaunchProps } from "@raycast/api";
 import axios from "axios";
 import cheerio from "cheerio";
 import { useEffect, useState } from "react";
@@ -14,39 +14,46 @@ type Result = {
   author: string;
 };
 
-export default function Command() {
-  const [query, setQuery] = useState<string>("");
+export default function Command(props: LaunchProps) {
+  const [query, setQuery] = useState<string>(props.fallbackText ?? ""); // if we came here by jumping back from an article (with fallbackText) - this is our query
   const [entries, setEntries] = useState<Result[]>([]);
   const [loading, setLoading] = useState(true);
 
+  useEffect(() => {
+    if (query === "") { // if query is empty load Top Articles
+      fetchTopArticles();
+    } else {
+      searchArticles(query);
+    }
+  }, [query]);
+
   async function fetchTopArticles() {
     setLoading(true);
-    setEntries([]);
-    try {
-      const response = await axios.get("https://flexikon.doccheck.com/de/");
-      const $ = cheerio.load(response.data);
-      const topArticles: Result[] = [];
-      $("#topArticlesSection .row > a, #topArticlesSection .is-grid > a").each((i, el) => {
-        const title = $(el).find("h3").text().trim();
-        const url = $(el).attr("href") ?? "";
-        const imageUrl = $(el).find("img").attr("src") ?? "";
-        const description = $(el).find("p").text().trim() ?? "";
-        const title_alias: string[] = [];
-        const date_publish = "";
-        const author = "";
-        topArticles.push({ title, url, imageUrl, description, title_alias, date_publish, author });
-      });
-      setEntries(topArticles);
-      setLoading(false);
-    } catch (e) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to fetch top articles",
-        message: "Please try again later",
-      });
-    } finally {
-      setLoading(false);
-    }
+      try {
+        const response = await axios.get("https://flexikon.doccheck.com/de/");
+        const $ = cheerio.load(response.data);
+        const topArticles: Result[] = [];
+        $("#topArticlesSection .row > a, #topArticlesSection .is-grid > a").each((i, el) => {
+          const title = $(el).find("h3").text().trim();
+          const url = $(el).attr("href") ?? "";
+          const imageUrl = $(el).find("img").attr("src") ?? "";
+          const description = $(el).find("p").text().trim() ?? "";
+          const title_alias: string[] = [];
+          const date_publish = "";
+          const author = "";
+          topArticles.push({ title, url, imageUrl, description, title_alias, date_publish, author });
+        });
+        setEntries(topArticles);
+        setLoading(false);
+      } catch (e) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Failed to fetch top articles",
+          message: "Please try again later",
+        });
+      } finally {
+        setLoading(false);
+      }
   }
   async function searchArticles(query: string) {
     setLoading(true);
@@ -66,7 +73,7 @@ export default function Command() {
             title_alias: [],
             imageUrl: "",
             date_publish: "",
-            author: "",
+            author: "spacedog",
           },
         ]);
       }
@@ -80,22 +87,14 @@ export default function Command() {
       setLoading(false);
     }
   }
-  useEffect(() => {
-    fetchTopArticles();
-  }, []);
 
-  if (!query) {
+  if (query === "") { // Display Top Articles
     return (
       <List
         navigationTitle={`DocCheck Flexikon Suche`}
         filtering={false}
         onSearchTextChange={async (text) => {
           setQuery(text);
-          if (text === "") {
-            await fetchTopArticles();
-            return;
-          }
-          await searchArticles(text);
         }}
         throttle={true}
         isLoading={loading}
@@ -130,52 +129,23 @@ export default function Command() {
     );
   }
 
-  return (
+  return ( // Display Search Entries
     <List
       navigationTitle={`DocCheck Flexikon Suche`}
       filtering={false}
       onSearchTextChange={async (text) => {
         setQuery(text);
-        if (text === "") {
-          await fetchTopArticles();
-          return;
-        }
-        await searchArticles(text);
       }}
       throttle={true}
       isLoading={loading}
       searchBarPlaceholder="Suchbegriff..."
     >
       {entries.map((entry) => {
-        if (entry.description) {
-          return (
-            <List.Item
-              key={entry.description}
-              title={entry.title}
-              icon={entry.imageUrl}
-              subtitle={entry.description}
-              actions={
-                <ActionPanel>
-                  <Action.Open
-                    icon={Icon.Uppercase}
-                    title="Suchbegriff als AMBOSS-Suche"
-                    target={"https://next.amboss.com/de/search?q=" + encodeURI(query) + "&v=overview"}
-                  />
-                  <Action.Open
-                    icon={Icon.MagnifyingGlass}
-                    title="Suchbegriff als Flexikon-Suche"
-                    target={"https://www.doccheck.com/search?q=" + encodeURI(query)}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
-                  />
-                </ActionPanel>
-              }
-            />
-          );
-        } else if (entry.title_alias[2]) {
+        if (entry.title_alias[2]) {
           return (
             <List.Item
               key={entry.url}
-              title={entry.title}
+              title={{ value: entry.title, tooltip: entry.title }}
               accessories={[
                 { tag: { value: entry.title_alias[0], color: Color.Red }, tooltip: entry.title_alias[0] },
                 { tag: { value: entry.title_alias[1], color: Color.Red }, tooltip: entry.title_alias[1] },
@@ -197,7 +167,7 @@ export default function Command() {
           return (
             <List.Item
               key={entry.url}
-              title={entry.title}
+              title={{ value: entry.title, tooltip: entry.title }}
               accessories={[
                 { tag: { value: entry.title_alias[0], color: Color.Red }, tooltip: entry.title_alias[0] },
                 { tag: { value: entry.title_alias[1], color: Color.Red }, tooltip: entry.title_alias[1] },
@@ -218,7 +188,7 @@ export default function Command() {
           return (
             <List.Item
               key={entry.url}
-              title={entry.title}
+              title={{ value: entry.title, tooltip: entry.title }}
               accessories={[
                 { tag: { value: entry.title_alias[0], color: Color.Red }, tooltip: entry.title_alias[0] },
                 { icon: Icon.Person, text: entry.author, tooltip: entry.author },
@@ -234,11 +204,34 @@ export default function Command() {
               actions={EntryActions(entry.url, entry.title, query)}
             />
           );
-        } else if (entry.title) {
+        } else if (entry.author && entry.description) {
+          return (
+            <List.Item
+              key={entry.description}
+              title={entry.title}
+              subtitle={entry.description}
+              actions={
+                <ActionPanel>
+                  <Action.Open
+                    icon={Icon.Uppercase}
+                    title="Suchbegriff als AMBOSS-Suche"
+                    target={"https://next.amboss.com/de/search?q=" + encodeURI(query) + "&v=overview"}
+                  />
+                  <Action.Open
+                    icon={Icon.MagnifyingGlass}
+                    title="Suchbegriff als Flexikon-Suche"
+                    target={"https://www.doccheck.com/search?q=" + encodeURI(query)}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
+                  />
+                </ActionPanel>
+              }
+            />
+          );
+        } else if (entry.author) {
           return (
             <List.Item
               key={entry.url}
-              title={entry.title}
+              title={{ value: entry.title, tooltip: entry.title }}
               accessories={[
                 { icon: Icon.Person, text: entry.author, tooltip: entry.author },
                 {
