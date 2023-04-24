@@ -2,7 +2,7 @@
 
 ## [Update] - 2023-04-24
 
-- Update build identifier for Codium. (#6001, VSCodium/vscodium#1227)
+- Update build identifier for Codium. (VSCodium/vscodium#1227)
 
 ## [Update] - 2023-03-30
 
