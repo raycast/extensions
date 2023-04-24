@@ -63,7 +63,7 @@
       "required": false,
       "title": "Zap Casks",
       "label": "Remove all files associated with a cask.",
-      "description": "Run cask uninstall with the --zap option for a more complete uninstallation of files associated with cask."
+      "description": "Run cask uninstall with the --zap option for a more complete uninstallation of files associated with cask. WARNING: This may remove files shared with other applications."
     }
   ],
   "dependencies": {
