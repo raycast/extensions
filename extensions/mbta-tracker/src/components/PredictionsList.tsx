@@ -7,12 +7,14 @@ import type { PredictionsResponse, Stop } from "../types";
 dayjs.extend(relativeTime);
 
 interface Props {
+  directionId: string;
+  routeId: string;
   stop: Stop;
 }
 
-export const PredictionsList = ({ stop }: Props): JSX.Element => {
+export const PredictionsList = ({ stop, directionId, routeId }: Props): JSX.Element => {
   const { isLoading, data } = useFetch<PredictionsResponse>(
-    `https://api-v3.mbta.com/predictions?filter%5Bstop%5D=${stop.id}`
+    `https://api-v3.mbta.com/predictions?filter%5Broute%5D=${routeId}&filter%5Bdirection_id%5D=${directionId}&filter%5Bstop%5D=${stop.id}`
   );
 
   return (
