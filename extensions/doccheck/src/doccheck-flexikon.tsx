@@ -20,7 +20,8 @@ export default function Command(props: LaunchProps) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (query === "") { // if query is empty load Top Articles
+    if (query === "") {
+      // if query is empty load Top Articles
       fetchTopArticles();
     } else {
       searchArticles(query);
@@ -29,31 +30,31 @@ export default function Command(props: LaunchProps) {
 
   async function fetchTopArticles() {
     setLoading(true);
-      try {
-        const response = await axios.get("https://flexikon.doccheck.com/de/");
-        const $ = cheerio.load(response.data);
-        const topArticles: Result[] = [];
-        $("#topArticlesSection .row > a, #topArticlesSection .is-grid > a").each((i, el) => {
-          const title = $(el).find("h3").text().trim();
-          const url = $(el).attr("href") ?? "";
-          const imageUrl = $(el).find("img").attr("src") ?? "";
-          const description = $(el).find("p").text().trim() ?? "";
-          const title_alias: string[] = [];
-          const date_publish = "";
-          const author = "";
-          topArticles.push({ title, url, imageUrl, description, title_alias, date_publish, author });
-        });
-        setEntries(topArticles);
-        setLoading(false);
-      } catch (e) {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Failed to fetch top articles",
-          message: "Please try again later",
-        });
-      } finally {
-        setLoading(false);
-      }
+    try {
+      const response = await axios.get("https://flexikon.doccheck.com/de/");
+      const $ = cheerio.load(response.data);
+      const topArticles: Result[] = [];
+      $("#topArticlesSection .row > a, #topArticlesSection .is-grid > a").each((i, el) => {
+        const title = $(el).find("h3").text().trim();
+        const url = $(el).attr("href") ?? "";
+        const imageUrl = $(el).find("img").attr("src") ?? "";
+        const description = $(el).find("p").text().trim() ?? "";
+        const title_alias: string[] = [];
+        const date_publish = "";
+        const author = "";
+        topArticles.push({ title, url, imageUrl, description, title_alias, date_publish, author });
+      });
+      setEntries(topArticles);
+      setLoading(false);
+    } catch (e) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to fetch top articles",
+        message: "Please try again later",
+      });
+    } finally {
+      setLoading(false);
+    }
   }
   async function searchArticles(query: string) {
     setLoading(true);
@@ -88,7 +89,8 @@ export default function Command(props: LaunchProps) {
     }
   }
 
-  if (query === "") { // Display Top Articles
+  if (query === "") {
+    // Display Top Articles
     return (
       <List
         navigationTitle={`DocCheck Flexikon Suche`}
@@ -129,7 +131,8 @@ export default function Command(props: LaunchProps) {
     );
   }
 
-  return ( // Display Search Entries
+  return (
+    // Display Search Entries
     <List
       navigationTitle={`DocCheck Flexikon Suche`}
       filtering={false}

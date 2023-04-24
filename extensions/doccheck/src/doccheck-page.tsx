@@ -115,7 +115,14 @@ export default function DocCheckPage(props: { url: string; prevurl: string; quer
     goback +
     "\n" +
     mdSynonyms +
-    nhm.translate(html.replace(toc, "").replace(/#cite_\D*\d*/gm, '"').replace(`&nbsp;`, `.`)).replace(/\s{94}\|\n/gm, `\n`); // ÜBERSCHRIFT + ```SYNONYME``` -TOC + ARTIKEL (Entfernung von Ankern, relative zu absoluten Links, Entfernung der leeren Startzeile bei Berechnung "Relatives Risiko",Entfernung einiger Tabellenenden wie bei DDx in "Scharlach")
+    nhm
+      .translate(
+        html
+          .replace(toc, "")
+          .replace(/#cite_\D*\d*/gm, '"')
+          .replace(`&nbsp;`, `.`)
+      )
+      .replace(/\s{94}\|\n/gm, `\n`); // ÜBERSCHRIFT + ```SYNONYME``` -TOC + ARTIKEL (Entfernung von Ankern, relative zu absoluten Links, Entfernung der leeren Startzeile bei Berechnung "Relatives Risiko",Entfernung einiger Tabellenenden wie bei DDx in "Scharlach")
 
   return (
     <Detail
