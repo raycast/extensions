@@ -10,7 +10,6 @@ export function getPreferences() {
   return getPreferenceValues<Preferences>();
 }
 
-
 function isPro(key: string) {
   return !key.endsWith(":fx");
 }
