@@ -9,8 +9,9 @@ export function runCommandInTerminal(command: string): void {
         preferences.useIterm2
           ? "set newWindow to create window with default profile command"
           : "do shell script \"open -a 'Terminal'\"\ndo script"
-      } "bash -c '${command}; read -n 1 -s -r -p \\"Press any key to exit - will not quit\\" ; echo' ; exit" in selected tab of the front window
-
+      } "bash -c '${command}; read -n 1 -s -r -p \\"Press any key to exit - will not quit\\" ; echo' ; exit" ${
+    preferences.useIterm2 ? "" : "in selected tab of the front window"
+  }
     end tell
   `);
   closeMainWindow();
