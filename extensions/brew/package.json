@@ -59,12 +59,21 @@
       "description": "Set this if your brew executable is in a non-standard location"
     },
     {
-      "name": "useIterm2",
-      "type": "checkbox",
+      "name": "terminalApp",
+      "type": "dropdown",
       "required": false,
-      "title": "Use iTerm2",
-      "label": "Use iTerm2 instead of Terminal",
-      "description": "Use iTerm2 instead of the Terminal app when using the Run in Terminal action."
+      "title": "Choose Terminal Application",
+      "data": [
+        {
+          "title": "Terminal",
+          "value": "terminal"
+        },
+        {
+          "title": "iTerm",
+          "value": "iterm"
+        }
+      ],
+      "description": "Choose the terminal application/emulator to use when using any Run in Terminal action."
     }
   ],
   "dependencies": {
