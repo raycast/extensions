@@ -22,8 +22,6 @@ export default function ResultActions(props: Props) {
     <ActionPanel title={title}>
       <ActionPanel.Section>
         <Action.OpenInBrowser url={url} />
-      </ActionPanel.Section>
-      <ActionPanel.Section>
         <Action.CopyToClipboard content={url} title="Copy Link" shortcut={{ modifiers: ["cmd"], key: "." }} />
       </ActionPanel.Section>
     </ActionPanel>
