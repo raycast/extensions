@@ -46,7 +46,7 @@ const UnlockForm = (props: UnlockFormProps) => {
         }
       }
 
-      onUnlock(password);
+      await onUnlock(password);
       await toast.hide();
     } catch (error) {
       const { displayableError = "Please check your credentials", treatedError } = getUsefulError(error, password);
