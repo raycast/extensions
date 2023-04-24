@@ -70,7 +70,7 @@ export default function Command() {
         currentPageIndex = 1;
         more();
       }}
-      onSelectionChange={(id: string | null) => {
+      onSelectionChange={(id: string | undefined) => {
         if (!id) return;
         if (id === "more" && currentPageIndex > 0) return more();
         selectedItemId = id;
