@@ -62,7 +62,7 @@
       "type": "checkbox",
       "required": false,
       "title": "Zap Casks",
-      "label": "Add --zap to brew uninstall --cask",
+      "label": "Remove all files associated with a cask.",
       "description": "Run cask uninstall with the --zap option for a more complete uninstallation of files associated with cask."
     }
   ],
