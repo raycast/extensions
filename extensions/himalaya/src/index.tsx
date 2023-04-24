@@ -86,7 +86,7 @@ export default function ListEnvelopes() {
     fetch();
   }, []);
 
-  if (state.exe) {
+  if (state.exe || state.isLoading) {
     return <List isLoading={state.isLoading}>{envelopesToList(state, setState)}</List>;
   } else {
     return <Detail markdown="Couldn't find executable, please install Himalaya CLI" />;
