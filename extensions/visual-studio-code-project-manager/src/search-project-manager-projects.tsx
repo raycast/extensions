@@ -21,7 +21,7 @@ const appKeyMapping = {
   Code: "com.microsoft.VSCode",
   "Code - Insiders": "com.microsoft.VSCodeInsiders",
   "VSCodium < 1.71": "com.visualstudio.code.oss",
-  VSCodium: "com.vscodium"
+  VSCodium: "com.vscodium",
 } as const;
 const appKey: string = appKeyMapping[build] ?? appKeyMapping.Code;
 
