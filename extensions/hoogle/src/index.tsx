@@ -78,7 +78,7 @@ export default function Command() {
               <ActionPanel>
                 <Action.OpenInBrowser url={item.url} />
                 <Action
-                  title="Toggle Docs"
+                  title="Toggle Documentation"
                   icon={Icon.Document}
                   shortcut={{ key: "d", modifiers: ["cmd", "shift"] }}
                   onAction={() => setShowDetail(!showDetail)}
