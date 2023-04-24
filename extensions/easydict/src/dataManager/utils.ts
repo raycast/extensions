@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-08-17 17:41
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-08-23 00:08
+ * @lastEditTime: 2023-03-15 17:45
  * @fileName: utils.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -11,55 +11,103 @@
 import { hasLingueeDictionaryEntries } from "../dictionary/linguee/parse";
 import { LingueeDictionaryResult } from "../dictionary/linguee/types";
 import { hasYoudaoDictionaryEntries } from "../dictionary/youdao/formatData";
-import { YoudaoDictionaryFormatResult } from "../dictionary/youdao/types";
+import { QueryWordInfo, YoudaoDictionaryFormatResult, YoudaoDictionaryListItemType } from "../dictionary/youdao/types";
+import { getYoudaoWebDictionaryURL } from "../dictionary/youdao/utils";
+import { chineseLanguageItem, englishLanguageItem } from "../language/consts";
 import {
-  getLanguageItemFromYoudaoId,
+  getLanguageItemFromYoudaoCode,
   maxLineLengthOfChineseTextDisplay,
   maxLineLengthOfEnglishTextDisplay,
 } from "../language/languages";
-import { myPreferences } from "../preferences";
-import { DicionaryType, QueryResult, QueryTypeResult, TranslationItem, TranslationType } from "../types";
+import { AppKeyStore, myPreferences } from "../preferences";
+import {
+  DicionaryType,
+  ListDisplayItem,
+  QueryResult,
+  QueryTypeResult,
+  TranslationItem,
+  TranslationType,
+} from "../types";
+import {
+  checkIsDictionaryType,
+  checkIsLingueeListItem,
+  checkIsTranslationType,
+  checkIsWord,
+  checkIsYoudaoDictionaryListItem,
+} from "../utils";
+
+/**
+ * Sort query results by designated order.
+ *
+ * * NOTE: this function will be called many times, because request results are async, so we need to sort every time.
+ */
+export function sortedQueryResults(queryResults: QueryResult[]) {
+  const sortedQueryResults: QueryResult[] = [];
+  for (const queryResult of queryResults) {
+    const typeString = queryResult.type.toString().toLowerCase();
+    const index = getSortOrder().indexOf(typeString);
+    sortedQueryResults[index] = queryResult;
+    // console.log(`---> sort results: index: ${index}, ${queryResult.type}`);
+  }
+  // filter undefined, or result is undefined.
+  return sortedQueryResults.filter((queryResult) => {
+    if (queryResult?.sourceResult.result) {
+      return true;
+    }
+  });
+}
 
 /**
  * Get services sort order. If user set the order manually, prioritize the order.
  *
- * * Note: currently only can manually sort transaltion order.
- *
  * @return [linguee dictionary, youdao dictionary, deepl...], all lowercase.
  */
 export function getSortOrder(): string[] {
-  const defaultDictionaryOrder = [DicionaryType.Linguee, DicionaryType.Youdao];
-  const defaultTranslationOrder = [
+  const defaultOrderList = [
+    DicionaryType.Youdao,
+    DicionaryType.Linguee,
+
+    TranslationType.OpenAI,
     TranslationType.DeepL,
     TranslationType.Google,
+    TranslationType.Bing,
     TranslationType.Apple,
     TranslationType.Baidu,
     TranslationType.Tencent,
+    TranslationType.Volcano,
     TranslationType.Youdao,
     TranslationType.Caiyun,
   ];
 
-  const defaultTranslations = defaultTranslationOrder.map((type) => type.toString().toLowerCase());
-
   const userOrder: string[] = [];
+  const defaultOrders = defaultOrderList.map((type) => type.toString().toLowerCase());
+
   // * NOTE: user manually set the sort order may not be complete, or even tpye wrong name.
-  const manualOrder = myPreferences.translationOrder.split(","); // "Baidu,DeepL,Tencent"
+  const manualOrder = myPreferences.servicesOrder.split(",");
   // console.log("---> manualOrder:", manualOrder);
-  if (manualOrder.length > 0) {
-    for (let translationName of manualOrder) {
-      translationName = `${translationName.trim()} Translate`.toLowerCase();
-      // if the type name is in the default order, add it to user order, and remove it from defaultNameOrder.
-      if (defaultTranslations.includes(translationName)) {
+  const formatManualOrder = manualOrder.map((order) => order.trim().toLowerCase());
+
+  // eg: [Youdao dictionary, DeepL, Tencent, linguee dictionary, Baidu, Google, Apple, Youdao]
+  for (const order of formatManualOrder) {
+    // 1. handle dictionary type.
+    const dictionaryName = order;
+    if (dictionaryName.endsWith("dictionary")) {
+      if (defaultOrders.includes(dictionaryName)) {
+        userOrder.push(dictionaryName);
+        defaultOrders.splice(defaultOrders.indexOf(dictionaryName), 1);
+      }
+    } else {
+      // 2. handle translation type.
+      const translationName = `${order} translate`;
+      // if the type name is in the default order, add it to user order, and remove it from defaultOrders.
+      if (defaultOrders.includes(translationName)) {
         userOrder.push(translationName);
-        defaultTranslations.splice(defaultTranslations.indexOf(translationName), 1);
+        defaultOrders.splice(defaultOrders.indexOf(translationName), 1);
       }
     }
   }
 
-  const finalOrder = [...defaultDictionaryOrder, ...userOrder, ...defaultTranslations].map((title) =>
-    title.toLowerCase()
-  );
-  // console.log("defaultNameOrder:", defaultTranslations);
+  const finalOrder = [...userOrder, ...defaultOrders].map((title) => title.toLowerCase());
   // console.log("userOrder:", userOrder);
   // console.log("finalOrder:", finalOrder);
   return finalOrder;
@@ -68,16 +116,18 @@ export function getSortOrder(): string[] {
 /**
  * Determine whether the title of the result exceeds the maximum value of one line.
  */
-export function isTranslationTooLong(translation: string, toLanguage: string): boolean {
-  const isChineseTextResult = toLanguage === "zh-CHS";
-  const isEnglishTextResult = toLanguage === "en";
+export function isTextOneLineTooLong(text: string, textLanguage: string): boolean {
+  const isChineseText = textLanguage === chineseLanguageItem.youdaoLangCode;
+  const isEnglishText = textLanguage === englishLanguageItem.youdaoLangCode;
+  // console.log(`check if text too long, ${textLanguage}, ${text.length}`);
+
   let isTooLong = false;
-  const textLength = translation.length;
-  if (isChineseTextResult) {
+  const textLength = text.length;
+  if (isChineseText) {
     if (textLength > maxLineLengthOfChineseTextDisplay) {
       isTooLong = true;
     }
-  } else if (isEnglishTextResult) {
+  } else if (isEnglishText) {
     if (textLength > maxLineLengthOfEnglishTextDisplay) {
       isTooLong = true;
     }
@@ -85,7 +135,7 @@ export function isTranslationTooLong(translation: string, toLanguage: string): b
     isTooLong = true;
   }
   if (isTooLong) {
-    console.log(`---> check is too long: ${isTooLong}, length: ${translation.length}`);
+    console.log(`---> check is too long: ${isTooLong}, ${textLanguage}, length: ${text.length}`);
   }
   return isTooLong;
 }
@@ -98,8 +148,9 @@ export function isTranslationTooLong(translation: string, toLanguage: string): b
 export function checkIfShowTranslationDetail(queryResults: QueryResult[]): boolean {
   let isShowDetail = false;
   for (const queryResult of queryResults) {
-    const wordInfo = queryResult.sourceResult.wordInfo;
-    const isDictionaryType = Object.values(DicionaryType).includes(queryResult.type as DicionaryType);
+    const sourceResult = queryResult.sourceResult;
+    const wordInfo = sourceResult.queryWordInfo;
+    const isDictionaryType = checkIsDictionaryType(queryResult.type);
     if (isDictionaryType) {
       if (wordInfo.hasDictionaryEntries) {
         isShowDetail = false;
@@ -107,8 +158,8 @@ export function checkIfShowTranslationDetail(queryResults: QueryResult[]): boole
       }
     } else {
       // check if translation is too long
-      const oneLineTranslation = queryResult.sourceResult?.oneLineTranslation || "";
-      const isTooLong = isTranslationTooLong(oneLineTranslation, wordInfo.toLanguage);
+      const oneLineTranslation = sourceResult?.oneLineTranslation || "";
+      const isTooLong = isTextOneLineTooLong(oneLineTranslation, wordInfo.toLanguage);
       if (isTooLong) {
         isShowDetail = true;
         break;
@@ -124,7 +175,7 @@ export function checkIfShowTranslationDetail(queryResults: QueryResult[]): boole
  */
 export function checkIfDictionaryHasEntries(dictionaryResult: QueryResult): boolean {
   const { type: dictionaryType } = dictionaryResult;
-  const isDictionaryType = Object.values(DicionaryType).includes(dictionaryType as DicionaryType);
+  const isDictionaryType = checkIsDictionaryType(dictionaryType);
   if (!isDictionaryType) {
     return false;
   }
@@ -151,31 +202,110 @@ export function checkIfDictionaryHasEntries(dictionaryResult: QueryResult): bool
  * * Since language title is too long for detail page, so we use short emoji instead.  eg. zh-CHS --> en, return: 🇨🇳 --> 🇬🇧
  */
 export function getFromToLanguageTitle(from: string, to: string, onlyEmoji = false) {
-  const fromLanguageItem = getLanguageItemFromYoudaoId(from);
-  const toLanguageItem = getLanguageItemFromYoudaoId(to);
+  const fromLanguageItem = getLanguageItemFromYoudaoCode(from);
+  const toLanguageItem = getLanguageItemFromYoudaoCode(to);
   const fromToEmoji = `${fromLanguageItem.emoji} --> ${toLanguageItem.emoji}`;
-  const fromToLanguageNameAndEmoji = `${fromLanguageItem.englishName}${fromLanguageItem.emoji} --> ${toLanguageItem.englishName}${toLanguageItem.emoji}`;
+  const fromToLanguageNameAndEmoji = `${fromLanguageItem.langEnglishName}${fromLanguageItem.emoji} --> ${toLanguageItem.langEnglishName}${toLanguageItem.emoji}`;
   return onlyEmoji ? fromToEmoji : fromToLanguageNameAndEmoji;
 }
 
 /**
- * Format translation to markdown.
+ * Get show more detail markdown.
  */
-export function formatTranslationToMarkdown(sourceResult: QueryTypeResult) {
-  const { type, translations, wordInfo } = sourceResult;
+export function getShowMoreDetailMarkdown(displayItem: ListDisplayItem) {
+  console.log(`getShowMoreDetailMarkdown`);
+
+  const { queryType, displayType, title, subtitle, copyText, detailsMarkdown } = displayItem;
+  const { word, fromLanguage, toLanguage } = displayItem.queryWordInfo;
+
+  const type = queryType.toString();
+  const fromToLang = getFromToLanguageTitle(fromLanguage, toLanguage);
+  const fromToTitle = `${type}  (${fromToLang})`;
+
+  console.log(`fromToTitle: ${fromToTitle}`);
+  console.log(`word: ${word}`);
+  console.log(`title: ${title}`);
+  console.log(`copyText: ${copyText}`);
+
+  let markdown = "";
+
+  // Translate type
+  if (checkIsTranslationType(queryType)) {
+    markdown += `## ${fromToTitle} \n`;
+    // * Note: word may contain wrap character, so we need to handle it.
+    word.split("\n").forEach((line) => {
+      markdown += `### ${line} \n`;
+    });
+    markdown += `----\n`;
+    copyText.split("\n").forEach((line) => {
+      markdown += `${line} \n\n`;
+    });
+    console.log(`markdown: ${markdown}`);
+
+    return markdown;
+  }
+
+  let queryWord = word;
+  let explanation = title;
+
+  // Linguee dictionary
+  if (checkIsLingueeListItem(displayItem)) {
+    queryWord = word;
+    explanation = displayItem.copyText;
+  }
+
+  // Youdao dictionary
+  if (checkIsYoudaoDictionaryListItem(displayItem)) {
+    queryWord = word;
+    explanation = subtitle ? `${title} ${subtitle}` : title;
+    if (subtitle?.startsWith(title)) {
+      explanation = subtitle;
+    }
+    // if subtitle starts with "title", use subtitle
+    if (subtitle) {
+      const reg = /"(.*)"/;
+      const match = reg.exec(subtitle);
+      if (match) {
+        const startWord = match[1];
+        if (startWord === title) {
+          explanation = subtitle;
+        }
+      }
+    }
+    if (displayType === YoudaoDictionaryListItemType.ModernChineseDict) {
+      explanation = detailsMarkdown || copyText;
+    }
+  }
+
+  markdown = `
+## ${fromToTitle} 
+### ${queryWord}
+----
+${explanation}
+`;
+  console.log(`markdown: ${markdown}`);
+
+  return markdown;
+}
+
+/**
+ * Get translation markdown.
+ */
+function getTranslationMarkdown(sourceResult: QueryTypeResult) {
+  const { type, translations, queryWordInfo: wordInfo } = sourceResult;
   const oneLineTranslation = translations.join("\n");
   if (oneLineTranslation.trim().length === 0) {
     return "";
   }
 
-  const string = oneLineTranslation.replace(/\n/g, "\n\n");
+  const text = oneLineTranslation.replace(/\n/g, "\n\n");
   const fromTo = getFromToLanguageTitle(wordInfo.fromLanguage, wordInfo.toLanguage, true);
 
   const markdown = `
-  ## ${type}   (${fromTo})
-  ---  
-  ${string}
-  `;
+## ${type}   (${fromTo})
+----  
+${text}
+`;
   return markdown;
 }
 
@@ -191,10 +321,10 @@ export function updateTranslationMarkdown(queryResult: QueryResult, queryResults
   const translations = [] as TranslationItem[];
   for (const queryResult of queryResults) {
     const { type, sourceResult } = queryResult;
-    const isTranslationType = Object.values(TranslationType).includes(type as TranslationType);
+    const isTranslationType = checkIsTranslationType(type);
     if (sourceResult && isTranslationType) {
       const type = sourceResult.type as TranslationType;
-      const markdownTranslation = formatTranslationToMarkdown(sourceResult);
+      const markdownTranslation = getTranslationMarkdown(sourceResult);
       translations.push({ type: type, text: markdownTranslation });
     }
   }
@@ -212,27 +342,27 @@ export function updateTranslationMarkdown(queryResult: QueryResult, queryResults
 
   const listDiplayItem = displaySections[0].items;
   if (listDiplayItem?.length) {
-    listDiplayItem[0].translationMarkdown = markdown;
+    listDiplayItem[0].detailsMarkdown = markdown;
   }
 }
 
 /**
- * Sort query results by designated order.
- *
- * * NOTE: this function will be called many times, because request results are async, so we need to sort every time.
+ * Check if enable Youdao dictionary.
  */
-export function sortedQueryResults(queryResults: QueryResult[]) {
-  const sortedQueryResults: QueryResult[] = [];
-  for (const queryResult of queryResults) {
-    const typeString = queryResult.type.toString().toLowerCase();
-    const index = getSortOrder().indexOf(typeString);
-    sortedQueryResults[index] = queryResult;
-    // console.log(`---> sort results: index: ${index}, ${queryResult.type}`);
+export function checkIfEnableYoudaoDictionary(queryWordInfo: QueryWordInfo) {
+  const isValidYoudaoDictionaryLanguageQuery = getYoudaoWebDictionaryURL(queryWordInfo) !== undefined;
+  const isWord = checkIsWord(queryWordInfo);
+  const enableYoudaoDictionary = myPreferences.enableYoudaoDictionary && isValidYoudaoDictionaryLanguageQuery && isWord;
+  console.log(`---> enable Youdao Dictionary: ${enableYoudaoDictionary}`);
+  return enableYoudaoDictionary;
+}
+
+/**
+ * Check if enable Youdao API translation.
+ */
+export function hasYoudaoAppKey() {
+  if (AppKeyStore.youdaoAppId && AppKeyStore.youdaoAppSecret) {
+    return true;
   }
-  // filter undefined, or result is undefined.
-  return sortedQueryResults.filter((queryResult) => {
-    if (queryResult?.sourceResult.result) {
-      return true;
-    }
-  });
+  return false;
 }

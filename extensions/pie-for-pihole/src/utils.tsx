@@ -1,4 +1,4 @@
-import { getPreferenceValues, Action, showToast, Toast } from "@raycast/api";
+import { getPreferenceValues, Action, showToast, Toast, Icon } from "@raycast/api";
 import fetch, { AbortError } from "node-fetch";
 
 export function UNIXTimestampToTime(UNIX_timestamp: number) {
@@ -31,7 +31,11 @@ export function AddToListAction(props: { domain: string; listType: string }) {
     });
   }
   return (
-    <Action title={props.listType == "black" ? "Add to blacklist" : "Add to whitelist"} onAction={() => addToList()} />
+    <Action
+      title={props.listType == "black" ? "Add to blacklist" : "Add to whitelist"}
+      onAction={() => addToList()}
+      icon={props.listType == "black" ? Icon.XMarkCircle : Icon.Checkmark}
+    />
   );
 }
 

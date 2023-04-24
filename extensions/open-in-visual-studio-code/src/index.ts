@@ -1,5 +1,9 @@
-import { getApplications, getSelectedFinderItems, open, showToast, Toast } from "@raycast/api";
+import { getApplications, getPreferenceValues, getSelectedFinderItems, open, showToast, Toast } from "@raycast/api";
 import { exec } from "child_process";
+
+interface OpenVSCodePreferences {
+  VSCodeVariant: string;
+}
 
 /**
  * Gets the selected Finder window.
@@ -31,16 +35,21 @@ const getSelectedFinderWindow = (): Promise<string> => {
 };
 
 export default async () => {
+  const preferences = getPreferenceValues<OpenVSCodePreferences>();
   const applications = await getApplications();
-  const visualStudioCode = applications.find((app) => app.bundleId === "com.microsoft.VSCode");
+  const vscodeApplication = applications.find((app) => app.bundleId === preferences.VSCodeVariant);
 
-  if (!visualStudioCode) {
+  if (!vscodeApplication) {
     await showToast({
       style: Toast.Style.Failure,
       title: "Visual Studio Code is not installed",
       primaryAction: {
         title: "Install Visual Studio Code",
         onAction: () => open("https://code.visualstudio.com/download"),
+      },
+      secondaryAction: {
+        title: "Install VSCodium",
+        onAction: () => open("https://github.com/VSCodium/vscodium/releases"),
       },
     });
     return;
@@ -50,12 +59,12 @@ export default async () => {
     const selectedFinderItems = await getSelectedFinderItems();
     if (selectedFinderItems.length) {
       for (const finderItem of selectedFinderItems) {
-        await open(finderItem.path, visualStudioCode);
+        await open(finderItem.path, vscodeApplication);
       }
       return;
     }
     const selectedFinderWindow = await getSelectedFinderWindow();
-    await open(selectedFinderWindow, visualStudioCode);
+    await open(selectedFinderWindow, vscodeApplication);
     return;
   } catch (error: any) {
     await showToast({

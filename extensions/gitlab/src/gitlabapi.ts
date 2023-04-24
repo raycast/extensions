@@ -70,6 +70,7 @@ function userFromJson(data: any): User {
 export function dataToProject(project: any): Project {
   return {
     id: project.id,
+    name: project.name,
     name_with_namespace: project.name_with_namespace,
     fullPath: project.path_with_namespace,
     web_url: project.web_url,
@@ -82,6 +83,8 @@ export function dataToProject(project: any): Project {
     ssh_url_to_repo: project.ssh_url_to_repo,
     http_url_to_repo: project.http_url_to_repo,
     default_branch: project.default_branch,
+    archived: project.archived,
+    remove_source_branch_after_merge: project.remove_source_branch_after_merge,
   };
 }
 
@@ -106,6 +109,9 @@ export function jsonDataToMergeRequest(mr: any): MergeRequest {
     sha: mr.sha,
     milestone: mr.milestone ? (mr.milestone as Milestone) : undefined,
     draft: mr.draft,
+    has_conflicts: mr.has_conflicts === true || false,
+    force_remove_source_branch: mr.force_remove_source_branch,
+    squash_on_merge: mr.squash_on_merge,
   };
 }
 
@@ -242,6 +248,30 @@ export class MergeRequest {
   public sha = "";
   public milestone?: Milestone;
   public draft = false;
+  public has_conflicts = false;
+  public force_remove_source_branch: boolean | undefined = undefined;
+  public squash_on_merge: boolean | undefined = undefined;
+}
+
+export class Pipeline {
+  public id = 0;
+  public iid = "";
+  public projectId = "";
+  public status = "";
+  public ref = "";
+  public sha = "";
+  public before_sha = "";
+  public tag = false;
+  public user?: User;
+  public created_at = "";
+  public updated_at = "";
+  public started_at = "";
+  public finished_at = "";
+  public committed_at = "";
+  public duration = 0;
+  public queued_duration = 0;
+  public coverage = "";
+  public webUrl = "";
 }
 
 export interface TodoGroup {
@@ -265,11 +295,14 @@ export class Todo {
   public project_with_namespace = "";
   public group?: TodoGroup;
   public author?: User = undefined;
+  public created_at = "";
+  public updated_at = "";
 }
 
 export class Project {
   public id = 0;
   public name_with_namespace = "";
+  public name = "";
   public fullPath = "";
   public web_url = "";
   public star_count = 0;
@@ -281,6 +314,8 @@ export class Project {
   public ssh_url_to_repo?: string = undefined;
   public http_url_to_repo?: string = undefined;
   public default_branch = "";
+  public archived = false;
+  public remove_source_branch_after_merge = false;
 }
 
 export class User {
@@ -341,6 +376,10 @@ export class GitLab {
   constructor(url: string, token: string) {
     this.token = token;
     this.url = url;
+  }
+
+  public joinUrl(relativeUrl: string): string {
+    return new URL(relativeUrl, this.url).href;
   }
 
   public async fetch(url: string, params: { [key: string]: string } = {}, all = false): Promise<any> {
@@ -666,6 +705,8 @@ export class GitLab {
         project_with_namespace: issue.project ? issue.project.name_with_namespace : undefined,
         group: issue.group ? (issue.group as TodoGroup) : undefined,
         author: maybeUserFromJson(issue.author),
+        created_at: issue.created_at,
+        updated_at: issue.updated_at,
       }));
     });
 
@@ -703,7 +744,7 @@ export class GitLab {
     const search = params.search;
     delete params.search;
 
-    const dataAll: Group[] = await receiveLargeCachedObject(hashRecord(params, "mygroups"), async () => {
+    const dataAll: Group[] = await receiveLargeCachedObject(hashRecord(params, "usergroups"), async () => {
       return ((await this.fetch(`groups`, params, true)) as Group[]) || [];
     });
     return searchData<Group>(dataAll, { search: search, keys: ["title"], limit: 50 });

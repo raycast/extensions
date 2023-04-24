@@ -1,5 +1,13 @@
 # TickTick Changelog
 
+## [Added] - 2022-04-06
+
+- Add "Add Task" action.
+
+## [Added] - 2022-10-14
+
+- Add "Copy" action.
+
 ## [Improve] - 2022-06-16
 
 - The Task detail view can show more information.

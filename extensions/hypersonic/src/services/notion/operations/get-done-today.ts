@@ -1,54 +1,76 @@
-import { getPreferenceValues, showToast, Toast } from '@raycast/api'
-import { isNotionClientError } from '@notionhq/client'
 import { Todo } from '@/types/todo'
 import { notion } from '../client'
-import { loadDatabase } from '@/services/storage'
-import { mapPageToTodo } from '../utils/map-page-to-todo'
+import { loadPreferences } from '@/services/storage'
+import { normalizeTodo } from '../utils/normalize-todo'
+import { Filter } from '@/types/filter'
 
-export async function getDoneToday(): Promise<Todo[]> {
-  try {
-    const notionClient = await notion()
-    const database = await loadDatabase()
-    const preferences = getPreferenceValues()
-    const response = await notionClient.databases.query({
-      database_id: database.databaseId,
-      filter: {
-        and: [
+export async function getDoneToday(
+  databaseId: string,
+  filter: Filter
+): Promise<Todo[]> {
+  const notionClient = await notion()
+  const preferences = await loadPreferences()
+  const status = preferences.properties.status
+
+  const dynamicFiltersQuery = [
+    ...(filter?.projectId && preferences.properties.project
+      ? [
           {
-            property: preferences.property_done,
-            checkbox: {
-              equals: true,
-            },
+            property: preferences.properties.project,
+            relation: { contains: filter.projectId },
           },
+        ]
+      : []),
+    ...(filter?.user?.id && preferences.properties.assignee
+      ? [
           {
-            or: [
-              {
-                property: preferences.property_date,
-                date: {
-                  equals: new Date().toISOString().split('T')[0],
-                },
-              },
-            ],
+            property: preferences.properties.assignee,
+            people: { contains: filter.user.id },
           },
-        ],
-      },
-      sorts: [
+        ]
+      : []),
+    ...(filter?.tag?.id && preferences.properties.tag
+      ? [
+          {
+            property: preferences.properties.tag,
+            select: { equals: filter.tag.name },
+          },
+        ]
+      : []),
+  ]
+
+  const response = await notionClient.databases.query({
+    database_id: databaseId,
+    filter: {
+      and: [
         {
-          timestamp: 'created_time',
-          direction: 'descending',
+          property: status.name,
+          ...(status.type === 'status' && status.doneName
+            ? { status: { equals: status.doneName } }
+            : {
+                checkbox: {
+                  equals: true,
+                },
+              }),
         },
+        {
+          property: preferences.properties.date,
+          date: {
+            equals: new Date().toISOString().split('T')[0],
+          },
+        },
+        ...dynamicFiltersQuery,
       ],
-    })
+    },
+    sorts: [
+      {
+        timestamp: 'created_time',
+        direction: 'descending',
+      },
+    ],
+  })
 
-    const doneTodos = response.results.map(mapPageToTodo)
-
-    return doneTodos
-  } catch (err: unknown) {
-    if (isNotionClientError(err)) {
-      showToast(Toast.Style.Failure, err.message)
-    } else {
-      showToast(Toast.Style.Failure, 'Error occurred')
-    }
-    return []
-  }
+  return response.results.map((page) =>
+    normalizeTodo({ page, preferences: preferences.properties })
+  )
 }

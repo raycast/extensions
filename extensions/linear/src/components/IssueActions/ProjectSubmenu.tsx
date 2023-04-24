@@ -6,7 +6,7 @@ import { ProjectResult } from "../../api/getProjects";
 
 import useProjects from "../../hooks/useProjects";
 
-import { projectStatusText } from "../../helpers/projects";
+import { getProjectIcon, projectStatusText } from "../../helpers/projects";
 
 import { UpdateIssueParams } from "./IssueActions";
 
@@ -62,11 +62,9 @@ export default function ProjectSubmenu({
         (projects || []).map((project) => (
           <Action
             key={project.id}
+            autoFocus={project.id === issue.project?.id}
             title={`${project.name} (${projectStatusText[project.state]})`}
-            icon={{
-              source: project.icon || { light: "light/project.svg", dark: "dark/project.svg" },
-              tintColor: project.color,
-            }}
+            icon={getProjectIcon(project)}
             onAction={() => setProject(project)}
           />
         ))

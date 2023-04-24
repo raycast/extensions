@@ -2,16 +2,16 @@
  * @author: tisfeng
  * @createTime: 2022-07-24 17:58
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-08-18 17:08
+ * @lastEditTime: 2023-03-16 16:10
  * @fileName: linguee.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
  */
 
 import { LocalStorage } from "@raycast/api";
-import axios, { AxiosError, AxiosRequestConfig, AxiosRequestHeaders } from "axios";
+import axios, { AxiosError, AxiosRequestConfig } from "axios";
 import util from "util";
-import { requestCostTime } from "../../axiosConfig";
+import { httpsAgent, requestCostTime } from "../../axiosConfig";
 import { userAgent } from "../../consts";
 import { DicionaryType, QueryTypeResult } from "../../types";
 import { getTypeErrorInfo } from "../../utils";
@@ -36,22 +36,19 @@ export async function rquestLingueeDictionary(queryWordInfo: QueryWordInfo): Pro
       type: DicionaryType.Linguee,
       result: undefined,
       translations: [],
-      wordInfo: queryWordInfo,
+      queryWordInfo: queryWordInfo,
     };
     return Promise.resolve(result);
   }
 
   return new Promise((resolve, reject) => {
     // * avoid linguee's anti-spider, otherwise it will reponse very slowly or even error.
-    const headers: AxiosRequestHeaders = {
-      "User-Agent": userAgent,
-      // accept: "*/*",
-      // connection: "keep-alive",
-      // withCredentials: true,
-    };
     const config: AxiosRequestConfig = {
-      headers: headers,
+      headers: {
+        "User-Agent": userAgent,
+      },
       responseType: "arraybuffer", // handle French content-type iso-8859-15
+      httpsAgent, // use proxy, if ip was blocked by linguee, we can change ip.
     };
 
     axios
@@ -80,13 +77,12 @@ export async function rquestLingueeDictionary(queryWordInfo: QueryWordInfo): Pro
             toLanguage: queryWordInfo.toLanguage,
           };
         }
-
         resolve(lingueeTypeResult);
       })
       .catch((error: AxiosError) => {
         if (error.message === "canceled") {
           console.log(`---> linguee canceled`);
-          return;
+          return reject(undefined);
         }
         console.error(`---> linguee error: ${error}`);
         console.error(`---> error response: ${util.inspect(error.response, { depth: null })}`);

@@ -1,9 +1,10 @@
 import { pipe } from "fp-ts/lib/function";
 
-import { hud } from "./util/feedback";
+import { SFSymbols } from "./util/models";
 import * as music from "./util/scripts";
 import { handleTaskEitherError } from "./util/utils";
 
-export default async () => {
-  await pipe(music.currentTrack.addToLibrary, hud(`✅ Added to library`), handleTaskEitherError)();
-};
+export default pipe(
+  music.currentTrack.addToLibrary,
+  handleTaskEitherError(SFSymbols.WARNING + " Failed to Add to Library", SFSymbols.ADD_TO_LIBRARY + " Added to library")
+)();

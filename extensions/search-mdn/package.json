@@ -6,7 +6,14 @@
   "icon": "icon.png",
   "author": "krzysztofzuraw",
   "contributors": [
-    "OBQun"
+    "OBQun",
+    "k8scat"
+  ],
+  "categories": [
+    "Productivity",
+    "Developer Tools",
+    "Web",
+    "Documentation"
   ],
   "license": "MIT",
   "commands": [
@@ -18,64 +25,9 @@
       "mode": "view"
     }
   ],
-  "preferences": [
-    {
-      "name": "locale",
-      "description": "Search result language.",
-      "type": "dropdown",
-      "required": true,
-      "title": "Locale",
-      "data": [
-        {
-          "value": "de",
-          "title": "Deutsch"
-        },
-        {
-          "value": "en-US",
-          "title": "English (US)"
-        },
-        {
-          "value": "es",
-          "title": "Español"
-        },
-        {
-          "value": "fr",
-          "title": "Français"
-        },
-        {
-          "value": "ja",
-          "title": "日本語"
-        },
-        {
-          "value": "ko",
-          "title": "한국어"
-        },
-        {
-          "value": "pl",
-          "title": "Polski"
-        },
-        {
-          "value": "pt-BR",
-          "title": "Português (do Brasil)"
-        },
-        {
-          "value": "ru",
-          "title": "Русский"
-        },
-        {
-          "value": "zh-CN",
-          "title": "中文(简体)"
-        },
-        {
-          "value": "zh-TW",
-          "title": "正體中文 (繁體)"
-        }
-      ],
-      "default": "en-US"
-    }
-  ],
   "dependencies": {
-    "@raycast/api": "^1.25.0",
+    "@raycast/api": "^1.40.1",
+    "@raycast/utils": "^1.4.8",
     "axios": "^0.23.0",
     "url-join": "4.0.1"
   },
@@ -93,7 +45,8 @@
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
-    "tsc": "tsc --project . --noEmit",
-    "lint": "eslint --fix --quiet --ext .ts,.tsx,.es,.jsx src/"
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "ray publish"
   }
 }

@@ -1,4 +1,4 @@
-import { List, Icon, ActionPanel, SubmitFormAction, showToast, ToastStyle } from "@raycast/api";
+import { List, Icon, ActionPanel, Action, showToast, Toast } from "@raycast/api";
 import dayjs from "dayjs";
 import { TimeEntry } from "../toggl/types";
 import useCurrentTime from "../hooks/useCurrentTime";
@@ -12,13 +12,14 @@ function RunningTimeEntry({ runningTimeEntry }: { runningTimeEntry: TimeEntry })
   const getProjectById = (id: number) => projects.find((p) => p.id === id);
 
   const stopTimeEntry = async () => {
-    await showToast(ToastStyle.Animated, "Stopping time entry...");
+    await showToast(Toast.Style.Animated, "Stopping time entry...");
     try {
-      await toggl.stopTimeEntry({ id: runningTimeEntry.id });
+      await toggl.stopTimeEntry({ id: runningTimeEntry.id, workspaceId: runningTimeEntry.workspace_id });
       await storage.runningTimeEntry.refresh();
-      await showToast(ToastStyle.Success, `Stopped time entry`);
+      await storage.timeEntries.refresh();
+      await showToast(Toast.Style.Success, `Stopped time entry`);
     } catch (e) {
-      await showToast(ToastStyle.Failure, "Failed to stop time entry");
+      await showToast(Toast.Style.Failure, "Failed to stop time entry");
     }
   };
 
@@ -30,12 +31,12 @@ function RunningTimeEntry({ runningTimeEntry }: { runningTimeEntry: TimeEntry })
           (runningTimeEntry.billable ? "$  " : "") +
           dayjs.duration(dayjs(currentTime).diff(runningTimeEntry.start), "milliseconds").format("HH:mm:ss")
         }
-        accessoryTitle={getProjectById(runningTimeEntry?.pid)?.name}
-        accessoryIcon={{ source: Icon.Dot, tintColor: getProjectById(runningTimeEntry?.pid)?.hex_color }}
-        icon={{ source: Icon.Clock, tintColor: getProjectById(runningTimeEntry?.pid)?.hex_color }}
+        accessoryTitle={getProjectById(runningTimeEntry?.project_id)?.name}
+        accessoryIcon={{ source: Icon.Dot, tintColor: getProjectById(runningTimeEntry?.project_id)?.color }}
+        icon={{ source: Icon.Clock, tintColor: getProjectById(runningTimeEntry?.project_id)?.color }}
         actions={
           <ActionPanel>
-            <SubmitFormAction icon={{ source: Icon.Clock }} onSubmit={stopTimeEntry} title="Stop Time Entry" />
+            <Action.SubmitForm icon={{ source: Icon.Clock }} onSubmit={stopTimeEntry} title="Stop Time Entry" />
           </ActionPanel>
         }
       />

@@ -31,7 +31,7 @@ export function ActionNewFileHere(props: {
       <Action.Push
         title="New File with Name"
         shortcut={{ modifiers: ["cmd"], key: "n" }}
-        icon={Icon.TextDocument}
+        icon={Icon.NewDocument}
         target={<NewFileWithName newFileType={newFileType} templateFiles={templateFiles} />}
       />
       <Action

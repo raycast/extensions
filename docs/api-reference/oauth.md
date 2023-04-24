@@ -13,7 +13,7 @@ Before considering OAuth, first check if your provider supports PKCE. You can us
 The OAuth flow from an extension looks like this:
 
 1. The extension initiates the OAuth flow and starts authorization
-2. Raycast shows the OAuth overlay ("Connect to provider...")
+2. Raycast shows the OAuth overlay ("Connect to provider…")
 3. The user opens the provider's consent page in the web browser
 4. After the user consent, the provider redirects back to Raycast
 5. Raycast opens the extension where authorization is completed
@@ -33,7 +33,7 @@ Note: Make sure to choose an app type that supports PKCE. Some providers still s
 
 An extension can initiate the OAuth flow and authorize by using the methods on [OAuth.PKCEClient](#oauth.pkceclient).
 
-You can create a new client and configure it with a provider name, icon and description that will be shown in the OAuth overlay. You can also choose between different redirect methods–depending on which method you choose, you need to configure this value as redirect URI in your provider's registered OAuth app. (See the [OAuth.RedirectMethod](#oauth.redirectmethod) docs for each method to get concrete examples for supported redirect URI.) If you can choose, use `OAuth.RedirectMethod.Web` and enter `https://raycast.com/redirect?packageName=Extension` (whether you have to add the `?packageName=Extension` depends on the provider).
+You can create a new client and configure it with a provider name, icon and description that will be shown in the OAuth overlay. You can also choose between different redirect methods; depending on which method you choose, you need to configure this value as redirect URI in your provider's registered OAuth app. (See the [OAuth.RedirectMethod](#oauth.redirectmethod) docs for each method to get concrete examples for supported redirect URI.) If you can choose, use `OAuth.RedirectMethod.Web` and enter `https://raycast.com/redirect?packageName=Extension` (whether you have to add the `?packageName=Extension` depends on the provider).
 
 ```typescript
 import { OAuth } from "@raycast/api";
@@ -42,7 +42,7 @@ const client = new OAuth.PKCEClient({
   redirectMethod: OAuth.RedirectMethod.Web,
   providerName: "Twitter",
   providerIcon: "twitter-logo.png",
-  description: "Connect your Twitter account...",
+  description: "Connect your Twitter account…",
 });
 ```
 
@@ -175,7 +175,7 @@ const client = new OAuth.PKCEClient({
   redirectMethod: OAuth.RedirectMethod.Web,
   providerName: "Twitter",
   providerIcon: "twitter-logo.png",
-  description: "Connect your Twitter account...",
+  description: "Connect your Twitter account…",
 });
 ```
 
@@ -335,11 +335,11 @@ Defines the supported redirect methods for the OAuth flow. You can choose betwee
 
 #### Enumeration members
 
-| Name   | Value                                                                                                                                                                                                                                                                                                                  |
-| :----- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Web    | Use this type for a redirect back to the Raycast website, which will then open the extension. In the OAuth app, configure either `https://raycast.com/redirect` or `https://raycast.com/redirect?packageName=Extension`<br>(For example, Twitter would accept the former, while Spotify requires the query parameter.) |
-| App    | Use this type for an app-scheme based redirect that directly opens Raycast. In the OAuth app, configure `raycast://oauth?package_name=Extension`                                                                                                                                                                       |
-| AppURI | Use this type for a URI-style app scheme that directly opens Raycast. In the OAuth app, configure `com.raycast:/oauth?package_name=Extension`<br>(Note the single slash – Google, for example, would require this flavor for an OAuth app where the Bundle ID is `com.raycast`)                                        |
+| Name   | Value                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| :----- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Web    | Use this type for a redirect back to the Raycast website, which will then open the extension. In the OAuth app, configure `https://raycast.com/redirect?packageName=Extension`<br>(This is a static redirect URL for all extensions.)<br>If the provider does not accept query parameters in redirect URLs, you can alternatively use `https://raycast.com/redirect/extension` and then customize the [AuthorizationRequest](#oauth.authorizationrequest) via its `extraParameters` property. For example add: `extraParameters: { "redirect_uri": "https://raycast.com/redirect/extension" }` |
+| App    | Use this type for an app-scheme based redirect that directly opens Raycast. In the OAuth app, configure `raycast://oauth?package_name=Extension`                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| AppURI | Use this type for a URI-style app scheme that directly opens Raycast. In the OAuth app, configure `com.raycast:/oauth?package_name=Extension`<br>(Note the single slash – Google, for example, would require this flavor for an OAuth app where the Bundle ID is `com.raycast`)                                                                                                                                                                                                                                                                                                                |
 
 ### OAuth.AuthorizationRequestOptions
 

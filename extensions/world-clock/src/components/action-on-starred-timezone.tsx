@@ -22,7 +22,7 @@ export function ActionOnStarredTimezone(props: {
     <ActionPanel>
       <ActionTimeInfo timeInfo={timeInfo} />
       <Action
-        icon={Icon.Circle}
+        icon={Icon.StarDisabled}
         title={"Unstar Timezone"}
         shortcut={{ modifiers: ["ctrl"], key: "x" }}
         onAction={async () => {

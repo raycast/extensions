@@ -1,0 +1,70 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "pixabay",
+  "title": "Pixabay",
+  "description": "Search Images and Videos on pixabay.com",
+  "icon": "pixabay.png",
+  "author": "tonka3000",
+  "categories": [
+    "Design Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "searchimages",
+      "title": "Search Images",
+      "description": "Search Images",
+      "mode": "view",
+      "subtitle": "Pixabay"
+    },
+    {
+      "name": "searchvideos",
+      "title": "Search Videos",
+      "description": "Search Videos",
+      "mode": "view",
+      "subtitle": "Pixabay"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.42.2",
+    "@raycast/utils": "^1.4.10",
+    "cross-fetch": "^3.1.5",
+    "node-fetch": "^3.2.10",
+    "url-join": "^5.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  },
+  "preferences": [
+    {
+      "name": "apikey",
+      "description": "API Key from pixabay.com",
+      "type": "password",
+      "required": true,
+      "title": "API key",
+      "placeholder": "API key from pixabay.com"
+    },
+    {
+      "name": "showinfinder",
+      "description": "Show In Finder after Download",
+      "type": "checkbox",
+      "required": true,
+      "default": true,
+      "label": "Show In Finder after Download"
+    }
+  ]
+}

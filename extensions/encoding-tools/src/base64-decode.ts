@@ -1,4 +1,4 @@
-import { entrypoint, getInput, setOutput, ToastException } from "../lib/utils";
+import { entrypoint, getInput, removeNewlines, setOutput, ToastException } from "../lib/utils";
 
 /**
  * Base64 decoding.
@@ -7,10 +7,11 @@ import { entrypoint, getInput, setOutput, ToastException } from "../lib/utils";
  */
 export default entrypoint(async () => {
   const contents = await getInput();
-  const decoded = Buffer.from(contents.toString("utf8"), "base64").toString("utf8");
+  const contentsAsString = removeNewlines(contents.toString("utf8"));
+  const decoded = Buffer.from(contentsAsString, "base64").toString("utf8");
   const encoded = Buffer.from(decoded, "utf8").toString("base64");
 
-  if (encoded !== contents.toString("utf8")) {
+  if (encoded !== contentsAsString) {
     throw new ToastException("Clipboard contents not Base64-encoded.");
   }
 

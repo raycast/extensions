@@ -4,12 +4,10 @@ import { showToast, Toast, getSelectedFinderItems, getPreferenceValues, showHUD 
 import { statSync, createReadStream, createWriteStream } from "fs";
 import fetch from "node-fetch";
 import { dirname, basename, join } from "path";
+import { compressImageResponseScheme } from "./zodSchema";
+import { Preference } from "./types";
 
-type Preferences = {
-  apiKey: string;
-};
-
-const preferences = getPreferenceValues<Preferences>();
+const preferences = getPreferenceValues<Preference>();
 
 export default async function main() {
   let filePaths: string[];
@@ -31,61 +29,12 @@ export default async function main() {
   });
 
   try {
-    let originalTotalSize = 0;
-    let compressedTotalSize = 0;
-
-    for (const filePath of filePaths) {
-      const { size } = statSync(filePath);
-      originalTotalSize += size;
-
-      const readStream = createReadStream(filePath);
-
-      // Upload original image
-      const resPost = await fetch("https://api.tinify.com/shrink", {
-        method: "POST",
-        headers: {
-          Authorization: `Basic ${Buffer.from(`api:${preferences.apiKey}`).toString("base64")}`,
-          contentLength: size.toString(),
-        },
-        body: readStream,
-      });
-
-      const resJson = (await resPost.json()) as {
-        output: { size: number; url: string };
-        error: string;
-        message: string;
-      };
-
-      // Validate
-      if ("error" in resJson) {
-        toast.style = Toast.Style.Failure;
-        toast.title = "Error";
-        toast.message = resJson.message;
-        return;
-      }
-
-      compressedTotalSize += resJson.output.size;
-
-      // Download compressed image
-      const downloadUrl = resJson.output.url;
-      const resGet = await fetch(downloadUrl);
-
-      const outputDir = join(dirname(filePath), "compressed-images");
-      if (!existsSync(outputDir)) {
-        mkdirSync(outputDir);
-      }
-      const outputPath = join(outputDir, basename(filePath));
-      const outputFileStream = createWriteStream(outputPath);
-
-      await new Promise((resolve, reject) => {
-        resGet.body?.pipe(outputFileStream);
-        resGet.body?.on("error", reject);
-        outputFileStream.on("finish", resolve);
-      });
-    }
+    const results = await Promise.all(filePaths.map((filePath) => _compressImage(filePath)));
+    const totalOriginalSize = results.reduce((acc, cur) => acc + cur[0].originalSize, 0);
+    const totalCompressedSize = results.reduce((acc, cur) => acc + cur[0].compressedSize, 0);
 
     await showHUD(
-      `Compression successful 🎉  (-${(100 - (compressedTotalSize / originalTotalSize) * 100).toFixed(1)}%)`
+      `Compression successful 🎉  (-${(100 - (totalCompressedSize / totalOriginalSize) * 100).toFixed(1)}%)`
     );
   } catch (e) {
     toast.style = Toast.Style.Failure;
@@ -93,3 +42,64 @@ export default async function main() {
     toast.message = e instanceof Error ? e.message : "failed to compress images";
   }
 }
+
+const _compressImage = async (
+  filePath: string
+): Promise<
+  [
+    {
+      originalSize: number;
+      compressedSize: number;
+    }
+  ]
+> => {
+  const { size } = statSync(filePath);
+
+  const readStream = createReadStream(filePath);
+
+  // Upload original image
+  const resPost = await fetch("https://api.tinify.com/shrink", {
+    method: "POST",
+    headers: {
+      Authorization: `Basic ${Buffer.from(`api:${preferences.apiKey}`).toString("base64")}`,
+      contentLength: size.toString(),
+    },
+    body: readStream,
+  });
+
+  const resJson = compressImageResponseScheme.parse(await resPost.json());
+
+  // Validate
+  if ("error" in resJson) {
+    throw new Error(resJson.message);
+  }
+
+  // Download compressed image
+  const downloadUrl = resJson.output.url;
+  const resGet = await fetch(downloadUrl);
+
+  // Save compressed image
+  let outputDir = dirname(filePath);
+  if (!preferences.overwrite) {
+    outputDir = join(dirname(filePath), "compressed-images");
+    if (!existsSync(outputDir)) {
+      mkdirSync(outputDir);
+    }
+  }
+
+  const outputPath = join(outputDir, basename(filePath));
+  const outputFileStream = createWriteStream(outputPath);
+
+  await new Promise((resolve, reject) => {
+    resGet.body?.pipe(outputFileStream);
+    resGet.body?.on("error", reject);
+    outputFileStream.on("finish", resolve);
+  });
+
+  return [
+    {
+      originalSize: size,
+      compressedSize: resJson.output.size,
+    },
+  ];
+};

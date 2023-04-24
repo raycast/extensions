@@ -1,5 +1,20 @@
 # Tailwind CSS Changelog
 
+## [Default Action for Search Classes] - 2023-03-12
+- Add a preference to set the default action for the `Search Classes` command
+
+## [Search Classes command improvements] - 2023-01-21
+- Search by class content instead of only by selector
+- Add an action to copy the class name
+
+## [Updated CSS classes] - 2022-11-29
+
+## [Generate all CSS classes] - 2022-11-27
+- Generate all CSS classes for the `Search Classes` command
+
+## [Fixed typo] - 2022-09-12
+- Renamed grid-col- to grid-cols
+
 ## [Search Colors and Components command] - 2022-06-27
 - Add `Search Colors` command
 - Add `Search Components` command

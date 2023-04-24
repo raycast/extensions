@@ -12,6 +12,7 @@ The Pipe command syntax is very similar to the [script command syntax](https://g
 
 - The `mode` field must be set to pipe.
 - The `refreshTime`, `argument1`, `argument2`, `argument3` fields are not supported and will be ignored.
+- A new `input` field is available to specify the input type. It can be `text` (default), `file` or `tab`.
 
 ![mode illustration](./medias/modes.excalidraw.png)
 
@@ -51,8 +52,8 @@ open "https://www.google.com/search?q=$1"
 # @raycast.title Prettify JSON
 # @raycast.packageName Developer Utils
 # @raycast.mode pipe
+# @raycast.inputType text
 # @raycast.icon 🔨
-# @raycast.argument1 {"type": "text", "placeholder": "JSON to format"}
 
 python3 -m json.tool --indent 2
 ```

@@ -49,17 +49,16 @@
     {
       "name": "accessKey",
       "title": "Access Key",
-      "description": "Get your API key from https://unsplash.com/app/api",
+      "description": "Get your API key from https://unsplash.com/oauth/applications",
       "type": "password",
       "required": true
     },
     {
-      "name": "username",
-      "title": "Username",
-      "placeholder": "Your Unsplash username",
-      "description": "Your username on Unsplash. Needed to list your lists.",
-      "type": "textfield",
-      "required": false
+      "name": "secretKey",
+      "title": "Secret Key",
+      "description": "Get your secret key from https://unsplash.com/oauth/applications",
+      "type": "password",
+      "required": true
     },
     {
       "name": "gridItemSize",
@@ -90,50 +89,6 @@
       "type": "checkbox",
       "default": false,
       "required": false
-    },
-    {
-      "name": "orientation",
-      "title": "Image Orientation",
-      "description": "The orientation of images that will be displayed as result.",
-      "type": "dropdown",
-      "data": [
-        {
-          "title": "All",
-          "value": "all"
-        },
-        {
-          "title": "Landscape",
-          "value": "landscape"
-        },
-        {
-          "title": "Portrait",
-          "value": "portrait"
-        },
-        {
-          "title": "Squarish",
-          "value": "squarish"
-        }
-      ],
-      "required": false,
-      "default": "all"
-    },
-    {
-      "name": "applyTo",
-      "title": "Apply Wallpaper To",
-      "description": "Set the wallpaper on all screens.",
-      "type": "dropdown",
-      "data": [
-        {
-          "title": "Current Desktop",
-          "value": "current"
-        },
-        {
-          "title": "Every Desktop",
-          "value": "every"
-        }
-      ],
-      "required": false,
-      "default": "current"
     },
     {
       "name": "downloadSize",

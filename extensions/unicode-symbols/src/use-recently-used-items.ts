@@ -1,4 +1,4 @@
-import { getLocalStorageItem, setLocalStorageItem } from "@raycast/api";
+import { LocalStorage } from "@raycast/api";
 import { Dispatch, SetStateAction, useCallback, useEffect, useState } from "react";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -15,7 +15,7 @@ const useStateAndLocalStorage = <T, _ = void>(
     let didUnmount = false;
 
     (async () => {
-      const cache = await getLocalStorageItem(key);
+      const cache = await LocalStorage.getItem(key);
 
       if (typeof cache === "string") {
         if (!didUnmount) {
@@ -34,10 +34,11 @@ const useStateAndLocalStorage = <T, _ = void>(
     };
   }, []);
 
+  // @ts-expect-error TS struggles to infer the types as T could potentially be a function
   const setStateAndLocalStorage = useCallback((updater) => {
     setState((state) => {
       const newValue = typeof updater === "function" ? updater(state) : updater;
-      setLocalStorageItem(key, JSON.stringify(newValue));
+      LocalStorage.setItem(key, JSON.stringify(newValue));
       return newValue;
     });
   }, []);

@@ -13,6 +13,7 @@ import {
   showErrorToast,
   toDateString,
   tokenizeQueryText,
+  toLongDateString,
 } from "../utils";
 import { gql } from "@apollo/client";
 import { MRItemActions } from "./mr_actions";
@@ -21,6 +22,7 @@ import { getCIJobStatusEmoji } from "./jobs";
 import { useCache } from "../cache";
 import { userIcon } from "./users";
 import { useCachedState } from "@raycast/utils";
+import { CacheActionPanelSection } from "./cache_actions";
 
 /* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/explicit-module-boundary-types */
 
@@ -78,6 +80,20 @@ function stateColor(state: string): Color.ColorLike {
       return Color.Green;
     }
   }
+}
+
+function MRSourceBranchTagList({ mr }: { mr: MergeRequest }) {
+  const deleteText = mr.force_remove_source_branch === true ? "Delete after Merge" : undefined;
+  const squashText = mr.squash_on_merge === true ? "Squash before Merge" : undefined;
+  if (!deleteText && !squashText) {
+    return null;
+  }
+  return (
+    <Detail.Metadata.TagList title="Source Branch">
+      {deleteText && <Detail.Metadata.TagList.Item text={deleteText} />}
+      {squashText && <Detail.Metadata.TagList.Item text={squashText} />}
+    </Detail.Metadata.TagList>
+  );
 }
 
 export function MRDetail(props: { mr: MergeRequest }): JSX.Element {
@@ -139,10 +155,11 @@ export function MRDetail(props: { mr: MergeRequest }): JSX.Element {
           {mr.labels.length > 0 && (
             <Detail.Metadata.TagList title="Labels">
               {mr.labels.map((m) => (
-                <Detail.Metadata.TagList.Item key={m.id} text={m.name} color={m.color} />
+                <Detail.Metadata.TagList.Item key={m.id || (m as any)} text={m.name || (m as any)} color={m.color} />
               ))}
             </Detail.Metadata.TagList>
           )}
+          <MRSourceBranchTagList mr={mr} />
         </Detail.Metadata>
       }
     />
@@ -287,7 +304,7 @@ function navTitle(project?: Project, group?: Group): string | undefined {
     return `Group MRs ${group.full_path}`;
   }
   if (project) {
-    return `MRs ${project.fullPath}`;
+    return `MRs ${project.name_with_namespace}`;
   }
   return undefined;
 }
@@ -344,13 +361,26 @@ export function MRListItem(props: {
 }): JSX.Element {
   const mr = props.mr;
 
-  const getIcon = (): Image.ImageLike => {
+  const getIcon = (): List.Item.Props["icon"] => {
     if (mr.state === "merged") {
-      return { source: GitLabIcons.merged, tintColor: Color.Purple, mask: Image.Mask.Circle };
+      return {
+        value: {
+          source: GitLabIcons.merged,
+          tintColor: Color.Purple,
+          mask: Image.Mask.Circle,
+        },
+        tooltip: "Status: Merged",
+      };
     } else if (mr.state === "closed") {
-      return { source: GitLabIcons.mropen, tintColor: Color.Red, mask: Image.Mask.Circle };
+      return {
+        value: { source: GitLabIcons.mropen, tintColor: Color.Red, mask: Image.Mask.Circle },
+        tooltip: "Status: Closed",
+      };
     } else {
-      return { source: GitLabIcons.mropen, tintColor: Color.Green, mask: Image.Mask.Circle };
+      return {
+        value: { source: GitLabIcons.mropen, tintColor: Color.Green, mask: Image.Mask.Circle },
+        tooltip: "Status: Open",
+      };
     }
   };
 
@@ -373,9 +403,13 @@ export function MRListItem(props: {
 
   const accessories: List.Item.Accessory[] = [];
   if (!getListDetailsPreference()) {
-    accessories.push({ text: mr.milestone?.title }, { text: toDateString(mr.updated_at) });
+    accessories.push(
+      { icon: mr.has_conflicts ? "⚠️" : undefined, tooltip: mr.has_conflicts ? "Has Conflict" : undefined },
+      { tag: mr.milestone?.title ?? "", tooltip: mr.milestone ? `Milestone: ${mr.milestone?.title}` : "" },
+      { date: new Date(mr.updated_at), tooltip: `Updated: ${toLongDateString(mr.updated_at)}` }
+    );
   }
-  accessories.push({ icon: accessoryIcon });
+  accessories.push({ icon: accessoryIcon, tooltip: mr.author ? `Author: ${mr.author.name}` : undefined });
 
   const detailsIcon = { source: GitLabIcons.show_details, tintColor: Color.PrimaryText };
 
@@ -407,6 +441,7 @@ export function MRListItem(props: {
             <MRItemActions mr={mr} onDataChange={props.refreshData} />
           </ActionPanel.Section>
           <ActionPanel.Section>{props.action ?? props.action}</ActionPanel.Section>
+          <CacheActionPanelSection />
         </ActionPanel>
       }
     />

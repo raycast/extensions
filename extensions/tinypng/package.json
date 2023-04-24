@@ -16,6 +16,36 @@
       "subtitle": "TinyPNG",
       "description": "Compress selected images with TinyPNG.",
       "mode": "no-view"
+    },
+    {
+      "name": "resizingImages",
+      "title": "Resizing Images",
+      "subtitle": "TinyPNG",
+      "description": "Compress and resizing selected images with TinyPNG.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "method",
+          "placeholder": "fit",
+          "type": "text",
+          "description": "Resize method. Available values are values are 'fit', 'scale', 'cover', 'thumb'",
+          "required": true
+        },
+        {
+          "name": "width",
+          "placeholder": "width(px)",
+          "type": "text",
+          "description": "Width to be resized",
+          "required": false
+        },
+        {
+          "name": "height",
+          "placeholder": "height(px)",
+          "type": "text",
+          "description": "height to be resized",
+          "required": false
+        }
+      ]
     }
   ],
   "preferences": [
@@ -25,11 +55,21 @@
       "description": "TinyPNG API Key.",
       "type": "password",
       "required": true
+    },
+    {
+      "title": "Options",
+      "name": "overwrite",
+      "description": "Whether to overwrite the original image file.",
+      "type": "checkbox",
+      "label": "Overwrite Original Image File",
+      "default": false,
+      "required": false
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.39.1",
-    "node-fetch": "^3.2.10"
+    "node-fetch": "^3.2.10",
+    "zod": "^3.20.6"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^5.0.0",

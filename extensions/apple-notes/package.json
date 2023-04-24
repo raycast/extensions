@@ -7,7 +7,9 @@
   "author": "tumtum",
   "contributors": [
     "ron-myers",
-    "mathieudutour"
+    "mathieudutour",
+    "StevenRCE0",
+    "HelloImSteven"
   ],
   "license": "MIT",
   "commands": [
@@ -59,10 +61,19 @@
       "label": "Show the modification date next to each note",
       "description": "Show the modification date next to each note",
       "required": false
+    },
+    {
+      "name": "openSeparately",
+      "title": "Open notes separately",
+      "type": "checkbox",
+      "default": false,
+      "label": "Open notes in separate windows by default",
+      "description": "Use ⌘+return to open separately if turned off",
+      "required": false
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.37.0",
+    "@raycast/api": "^1.46.1",
     "file-url": "^4.0.0",
     "run-applescript": "^6.0.0",
     "sql.js": "^1.7.0",

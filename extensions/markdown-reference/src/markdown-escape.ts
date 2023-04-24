@@ -10,8 +10,8 @@ const replacements: Array<Array<RegExp | string>> = [
   [/</g, "&lt;", "angle brackets"],
   [/>/g, "&gt;", "angle brackets"],
   [/_/g, "\\_", "underscores"],
-  [/=/g, "\n\\=", "equals sign"],
-  [/-/g, "\n\\-", "hyphen"],
+  [/=/g, "\\=", "equals sign"],
+  [/-/g, "\\-", "hyphen"],
 ];
 
 export default function escapeMd(str: string, skips: (string | RegExp)[] = []) {

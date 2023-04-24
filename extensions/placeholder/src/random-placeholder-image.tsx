@@ -1,6 +1,5 @@
 import { Action, ActionPanel, Form, getPreferenceValues, Icon } from "@raycast/api";
 import React, { useState } from "react";
-import { ImageDetail } from "./components/image-detail";
 import { PicsumImageAction } from "./components/picsum-image-action";
 import { getRandomPlaceholderImageURL } from "./hooks/hooks";
 import { RandomImageConfig, randomImageConfigInit } from "./types/types";

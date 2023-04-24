@@ -3,14 +3,16 @@ import React, { useState } from "react";
 import { getWifiList, getWifiStatus } from "./hooks/hooks";
 import { EmptyView } from "./components/empty-view";
 import EnterPassword from "./enter-password";
-import { WifiPassword } from "./types/types";
+import { WifiPasswordCache } from "./types/types";
 import { LocalStorageKey } from "./utils/constants";
 import { PrimaryActions } from "./components/primary-actions";
+import { getSignalIcon } from "./utils/common-utils";
+import { RefreshWifi } from "./components/refresh-wifi";
 
 export default function ScanWifi() {
   const { push } = useNavigation();
   const [refresh, setRefresh] = useState<number>(0);
-  const { wifiPassword, publicWifi, wifiWithPasswordList, wifiList, curWifi, loading } = getWifiList(refresh);
+  const { wifiPasswordCaches, publicWifi, wifiWithPasswordList, wifiList, curWifi, loading } = getWifiList(refresh);
   const { wifiStatus } = getWifiStatus();
 
   return (
@@ -22,7 +24,7 @@ export default function ScanWifi() {
           return (
             <List.Item
               icon={{
-                source: "wifi-icon.svg",
+                source: Icon.Wifi,
                 tintColor: curWifi.length > 0 && curWifi[0].ssid === value.ssid ? Color.Green : Color.SecondaryText,
               }}
               key={index}
@@ -31,14 +33,14 @@ export default function ScanWifi() {
               accessories={[
                 {
                   icon: {
-                    source: "password.svg",
-                    tintColor: Color.Brown,
+                    source: Icon.Lock,
+                    tintColor: value.quality < 40 ? Color.Red : value.quality < 70 ? Color.Orange : Color.Green,
                   },
                   tooltip: value.password,
                 },
                 {
                   icon: {
-                    source: Icon.LevelMeter,
+                    source: getSignalIcon(value.quality),
                     tintColor: value.quality < 40 ? Color.Red : value.quality < 70 ? Color.Orange : Color.Green,
                   },
                   tooltip: value.quality + "%",
@@ -47,7 +49,6 @@ export default function ScanWifi() {
               actions={
                 <ActionPanel>
                   <PrimaryActions wifiNetwork={value} curWifi={curWifi} setRefresh={setRefresh} />
-
                   <ActionPanel.Section>
                     <Action.CopyToClipboard
                       title={"Copy Password"}
@@ -68,7 +69,7 @@ export default function ScanWifi() {
                           primaryAction: {
                             title: "Remove",
                             onAction: () => {
-                              const newWifiWithPasswordLis: WifiPassword[] = [];
+                              const newWifiWithPasswordLis: WifiPasswordCache[] = [];
                               wifiWithPasswordList.forEach((w) => {
                                 if (w.ssid !== value.ssid) {
                                   newWifiWithPasswordLis.push(w);
@@ -86,6 +87,7 @@ export default function ScanWifi() {
                       }}
                     />
                   </ActionPanel.Section>
+                  <RefreshWifi setRefresh={setRefresh} />
                 </ActionPanel>
               }
             />
@@ -98,7 +100,7 @@ export default function ScanWifi() {
           return (
             <List.Item
               icon={{
-                source: "wifi-icon.svg",
+                source: Icon.Wifi,
                 tintColor: curWifi.length > 0 && curWifi[0].ssid === value.ssid ? Color.Green : Color.SecondaryText,
               }}
               key={index}
@@ -107,7 +109,7 @@ export default function ScanWifi() {
               accessories={[
                 {
                   icon: {
-                    source: Icon.LevelMeter,
+                    source: getSignalIcon(value.quality),
                     tintColor: value.quality < 40 ? Color.Red : value.quality < 70 ? Color.Orange : Color.Green,
                   },
                   tooltip: value.quality + "%",
@@ -116,18 +118,25 @@ export default function ScanWifi() {
               actions={
                 <ActionPanel>
                   <Action
-                    icon={{ source: "wifi-icon.svg", tintColor: Color.PrimaryText }}
+                    icon={{ source: Icon.Wifi, tintColor: Color.PrimaryText }}
                     title={"Connect Wi-Fi"}
                     onAction={() => {
                       if (curWifi.length > 0) {
                         if (curWifi[0].ssid === value.ssid) {
                           return;
                         }
-                        push(<EnterPassword wifiPassword={wifiPassword} wifiNetWork={value} setRefresh={setRefresh} />);
+                        push(
+                          <EnterPassword
+                            wifiPasswordCaches={wifiPasswordCaches}
+                            wifiNetWork={value}
+                            setRefresh={setRefresh}
+                          />
+                        );
                       }
                     }}
                   />
                   <Action.CopyToClipboard title={"Copy Wi-FI"} content={value.ssid} />
+                  <RefreshWifi setRefresh={setRefresh} />
                 </ActionPanel>
               }
             />
@@ -140,7 +149,7 @@ export default function ScanWifi() {
           return (
             <List.Item
               icon={{
-                source: "wifi-icon.svg",
+                source: Icon.Wifi,
                 tintColor: curWifi.length > 0 && curWifi[0].ssid === value.ssid ? Color.Green : Color.SecondaryText,
               }}
               key={index}
@@ -149,7 +158,7 @@ export default function ScanWifi() {
               accessories={[
                 {
                   icon: {
-                    source: Icon.LevelMeter,
+                    source: getSignalIcon(value.quality),
                     tintColor: value.quality < 40 ? Color.Red : value.quality < 70 ? Color.Orange : Color.Green,
                   },
                   tooltip: value.quality + "%",
@@ -158,6 +167,7 @@ export default function ScanWifi() {
               actions={
                 <ActionPanel>
                   <PrimaryActions wifiNetwork={{ ...value, password: "" }} curWifi={curWifi} setRefresh={setRefresh} />
+                  <RefreshWifi setRefresh={setRefresh} />
                 </ActionPanel>
               }
             />

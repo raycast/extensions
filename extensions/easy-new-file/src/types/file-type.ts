@@ -86,7 +86,7 @@ export const codeFileTypes: FileType[] = [
     inputContent: true,
   },
   {
-    name: "Json",
+    name: "JSON",
     extension: "json",
     languageId: "json",
     keywords: [],

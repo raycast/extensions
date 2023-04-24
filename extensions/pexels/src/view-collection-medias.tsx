@@ -30,13 +30,15 @@ export default function ViewCollectionMedias(props: { id: string; title: string 
     >
       <PexelsEmptyView title={"No Photos"} layout={preferences.layout} />
       {collectionMedias.map((pexelsPhoto, index) => {
-        return <PhotosListItem key={index} pexelsPhoto={pexelsPhoto as Photo} index={index} />;
+        return <PhotosListItem key={index} item={pexelsPhoto as Photo} index={index} />;
       })}
     </List>
   ) : (
     <Grid
-      itemSize={preferences.itemSize as Grid.ItemSize}
+      columns={parseInt(preferences.columns)}
       isLoading={loading}
+      aspectRatio={"3/2"}
+      fit={Grid.Fit.Fill}
       navigationTitle={title}
       searchBarPlaceholder={"Search photographers"}
       onSelectionChange={(id) => {
@@ -50,7 +52,7 @@ export default function ViewCollectionMedias(props: { id: string; title: string 
     >
       <PexelsEmptyView title={"No Photos"} layout={preferences.layout} />
       {collectionMedias.map((pexelsPhoto, index) => {
-        return <PhotosGridItem key={index} pexelsPhoto={pexelsPhoto as Photo} index={index} />;
+        return <PhotosGridItem key={index} item={pexelsPhoto as Photo} index={index} />;
       })}
     </Grid>
   );

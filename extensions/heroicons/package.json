@@ -4,7 +4,7 @@
   "title": "Heroicons",
   "description": "Search and preview Heroicons",
   "icon": "command-icon.png",
-  "author": "torben030",
+  "author": "haack",
   "categories": [
     "Developer Tools",
     "Documentation",
@@ -22,6 +22,68 @@
       "title": "Heroicons Search",
       "description": "Search and preview Heroicons",
       "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "primaryAction",
+      "description": "Select the primary action that will be performed [↵]",
+      "type": "dropdown",
+      "required": true,
+      "title": "Primary Action",
+      "default": "pasteJSX",
+      "data": [
+        {
+          "title": "Paste JSX",
+          "value": "pasteJSX"
+        },
+        {
+          "title": "Paste SVG",
+          "value": "pasteSVG"
+        },
+        {
+          "title": "Copy JSX",
+          "value": "copyJSX"
+        },
+        {
+          "title": "Copy SVG",
+          "value": "copySVG"
+        },
+        {
+          "title": "Copy Name",
+          "value": "copyName"
+        }
+      ]
+    },
+    {
+      "name": "secondaryAction",
+      "description": "Select the secondary action that will be performed [⌘ + ↵]",
+      "type": "dropdown",
+      "required": true,
+      "title": "Secondary Action",
+      "default": "pasteSVG",
+      "data": [
+        {
+          "title": "Paste SVG",
+          "value": "pasteSVG"
+        },
+        {
+          "title": "Paste JSX",
+          "value": "pasteJSX"
+        },
+        {
+          "title": "Copy JSX",
+          "value": "copyJSX"
+        },
+        {
+          "title": "Copy SVG",
+          "value": "copySVG"
+        },
+        {
+          "title": "Copy Name",
+          "value": "copyName"
+        }
+      ]
     }
   ],
   "dependencies": {

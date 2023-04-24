@@ -19,7 +19,7 @@ export function ActionOnRaycastWallpaper(props: { index: number; raycastWallpape
       />
       <Action
         icon={Icon.Download}
-        title={"Download Picture"}
+        title={"Download Wallpaper"}
         onAction={async () => {
           await downloadPicture(raycastWallpapers[index]);
         }}
@@ -33,7 +33,7 @@ export function ActionOnRaycastWallpaper(props: { index: number; raycastWallpape
 
       <ActionPanel.Section>
         <Action
-          icon={Icon.TwoArrowsClockwise}
+          icon={Icon.ArrowClockwise}
           title={"Set Random Wallpaper"}
           shortcut={{ modifiers: ["cmd"], key: "r" }}
           onAction={() => {

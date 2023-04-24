@@ -134,8 +134,8 @@ async function submitTweets(tweets: TweetContent[]) {
   }
 }
 
-export function TweetSendThreadFormV2(): ReactElement {
-  const [tweets, setTweets] = useState<TweetContent[]>([{ text: "" }]);
+export function TweetSendThreadFormV2({ defaultValue }: { defaultValue?: string }): ReactElement {
+  const [tweets, setTweets] = useState<TweetContent[]>([{ text: defaultValue || "" }]);
   const addTweet = () => {
     const nt = [...tweets, { text: "" }];
     setTweets(nt);

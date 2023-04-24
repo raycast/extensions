@@ -22,17 +22,25 @@
       "required": true,
       "title": "Personal Access Token",
       "description": "Create a token with repository access"
+    },
+    {
+      "name": "baseUrl",
+      "type": "textfield",
+      "required": false,
+      "title": "GitHub Base URL",
+      "description": "Optional Base URL for GitHub Enterprise (e.g. https://github.acme-inc.com/api/v3). Defaults to the public GitHub."
     }
   ],
   "contributors": [
-    "immint023"
+    "immint023",
+    "mheidinger"
   ],
   "categories": [
     "Developer Tools"
   ],
   "dependencies": {
     "@raycast/api": "^1.31.0",
-    "@raycast/utils": "^1.1.0",
+    "@raycast/utils": "^1.4.8",
     "javascript-time-ago": "^2.3.9",
     "octokit": "^1.7.0",
     "use-debounce": "^7.0.0"

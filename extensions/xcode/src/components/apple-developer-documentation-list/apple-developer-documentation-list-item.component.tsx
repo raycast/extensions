@@ -1,5 +1,7 @@
 import { AppleDeveloperDocumentationEntry } from "../../models/apple-developer-documentation/apple-developer-documentation-entry.model";
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, List } from "@raycast/api";
+import { AppleDeveloperDocumentationListItemDetail } from "./apple-developer-documentation-list-item-detail.component";
+import { AppleDeveloperDocumentationEntryTypeIcon } from "../../shared/apple-developer-documentation-entry-type-icon";
 
 /**
  * Apple Developer Documentation List Item
@@ -7,34 +9,15 @@ import { Action, ActionPanel, Icon, List } from "@raycast/api";
 export function AppleDeveloperDocumentationListItem(props: { entry: AppleDeveloperDocumentationEntry }): JSX.Element {
   return (
     <List.Item
-      key={props.entry.url}
-      icon={icon(props.entry)}
+      icon={AppleDeveloperDocumentationEntryTypeIcon(props.entry.type)}
       title={props.entry.title}
-      subtitle={props.entry.description}
-      accessories={[{ text: props.entry.platform.at(0) }]}
+      detail={<AppleDeveloperDocumentationListItemDetail entry={props.entry} />}
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser title="Open in Browser" icon={Icon.Globe} url={props.entry.url} />
+          <Action.OpenInBrowser url={props.entry.url} />
           <Action.CopyToClipboard content={props.entry.url} />
         </ActionPanel>
       }
     />
   );
-}
-
-/**
- * Retrieve icon for AppleDeveloperDocumentationEntry
- * @param appleDeveloperDocumentationEntry The AppleDeveloperDocumentationEntry
- */
-function icon(appleDeveloperDocumentationEntry: AppleDeveloperDocumentationEntry): Icon {
-  switch (appleDeveloperDocumentationEntry.type) {
-    case "General":
-      return Icon.Window;
-    case "video":
-      return Icon.Video;
-    case "sample_code":
-      return Icon.Download;
-    default:
-      return Icon.BlankDocument;
-  }
 }

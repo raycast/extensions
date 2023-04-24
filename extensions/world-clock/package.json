@@ -37,24 +37,44 @@
           ]
         },
         {
-          "name": "itemSize",
+          "name": "columns",
           "type": "dropdown",
-          "description": "Set the size of the timezone items. (Only works with Grid layout)",
+          "description": "Set the number of columns of the timezone items. (Only works with Grid layout)",
           "required": false,
-          "title": "Timezone Item Size",
-          "default": "medium",
+          "title": "Timezone Item Coloums",
+          "default": "5",
           "data": [
             {
-              "title": "Small",
-              "value": "small"
+              "title": "1",
+              "value": "1"
             },
             {
-              "title": "Medium",
-              "value": "medium"
+              "title": "2",
+              "value": "2"
             },
             {
-              "title": "Large",
-              "value": "large"
+              "title": "3",
+              "value": "3"
+            },
+            {
+              "title": "4",
+              "value": "4"
+            },
+            {
+              "title": "5",
+              "value": "5"
+            },
+            {
+              "title": "6",
+              "value": "6"
+            },
+            {
+              "title": "7",
+              "value": "7"
+            },
+            {
+              "title": "8",
+              "value": "8"
             }
           ]
         },
@@ -78,6 +98,13 @@
       ]
     },
     {
+      "name": "query-world-time-menu-bar",
+      "title": "Query World Time",
+      "icon": "query-world-time-menu-bar.png",
+      "description": "Query the current time of starred timezones.",
+      "mode": "menu-bar"
+    },
+    {
       "name": "query-ip-time",
       "title": "Query IP Time",
       "icon": "query-ip-time.png",
@@ -87,17 +114,40 @@
   ],
   "preferences": [
     {
-      "title": "Advanced Preferences",
+      "title": "Time Format",
       "name": "hour24",
       "type": "checkbox",
       "required": true,
       "label": "Hour 24",
       "description": "24 hour clock",
       "default": false
+    },
+    {
+      "name": "dateFormat",
+      "type": "dropdown",
+      "required": true,
+      "title": "Date Format",
+      "description": "Date format",
+      "default": "zh",
+      "data": [
+        {
+          "title": "YYYY-MM-DD",
+          "value": "zh"
+        },
+        {
+          "title": "MM/DD/YYYY",
+          "value": "en"
+        },
+        {
+          "title": "DD/MM/YYYY",
+          "value": "en-GB"
+        }
+      ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.36.1",
+    "@raycast/api": "^1.45.2",
+    "@raycast/utils": "^1.4.14",
     "axios": "^0.27.2",
     "file-url": "^4.0.0"
   },

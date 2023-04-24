@@ -1,4 +1,4 @@
-import { ActionPanel, List, OpenInBrowserAction, showToast, ToastStyle, ImageMask, Color } from "@raycast/api";
+import { ActionPanel, List, showToast, Color, Action, Image, Toast } from "@raycast/api";
 import { useState, useEffect } from "react";
 
 import { preferences } from "../../helpers/preferences";
@@ -44,7 +44,11 @@ export function PipelinesList(props: { repo: Repository; pageNumber: number }): 
   }, [pageNumber]);
 
   if (state.error) {
-    showToast(ToastStyle.Failure, "Failed loading repositories", state.error.message);
+    showToast({
+      style: Toast.Style.Failure,
+      title: "Failed loading repositories",
+      message: state.error.message,
+    });
   }
 
   return (
@@ -103,14 +107,12 @@ function SearchListItem({
     <List.Item
       title={pipeline.commitMessage || pipeline.uuid}
       subtitle={"#" + pipeline.buildNumber}
-      accessoryTitle={pipeline.state}
-      accessoryIcon={{ source: statusIconUrl }}
       // accessoryTitle={pipeline .name}
-      icon={{ source: pipelineImg, mask: ImageMask.Circle }}
+      icon={{ source: pipelineImg, mask: Image.Mask.Circle }}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <OpenInBrowserAction
+            <Action.OpenInBrowser
               title="Open Pipeline in Browser"
               url={`https://bitbucket.org/${preferences.workspace}/${repoSlug}/addon/pipelines/home#!/results/${pipeline.buildNumber}`}
               icon={{ source: icon.code, tintColor: Color.PrimaryText }}
@@ -131,6 +133,12 @@ function SearchListItem({
           {/* <DeleteAnnotationAction annotation={searchResult} /> */}
         </ActionPanel>
       }
+      accessories={[
+        {
+          text: pipeline.state,
+          icon: { source: statusIconUrl },
+        },
+      ]}
     />
   );
 }

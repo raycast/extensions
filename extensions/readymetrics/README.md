@@ -1,13 +1,9 @@
-<div style="text-align: center;">
-  <img
-    src="https://www.readymetrics.com/style/readymetrics-logo-66.png"
-    width="100"
-  />
+<div style="text-align: left;">
   <h1>
-    Readymetrics
+    Ready
   </h1>
 
-A Raycast extension to list upcoming and past check-ins in Readymetrics.
+A Raycast extension to list upcoming and past check-ins in Ready.
 
   <p>
     <a href="https://www.raycast.com/cfeigenbutz/readymetrics">
@@ -30,18 +26,16 @@ A Raycast extension to list upcoming and past check-ins in Readymetrics.
 
 - List upcoming check-ins
 - List past check-ins
-- Navigate easily to your check-in in Readymetrics
+- Navigate easily to your check-in in Ready
 
-## Generating your personal access key for the Readymetrics API
+## Generating your personal access key for the Ready API
 
-- Log into Readymetrics at https://www.readymetrics.com
+- Sign up to Ready at https://www.ready.app
 - Click your avatar image in the upper left-hand section of the sidebar
 - Click on `Settings`
 - Click on `Integrations` on the left sidebar
 - In the `Personal API Keys` section give your personal API key a name like `Raycast`
 - Click `Create key` 
 - Click the API key and it will be copied to your clipboard
-- Go to the preferences for Readymetrics in Raycast
-- Paste the key from Readymetrics into the `API Key` field
-
-#### You will now be able to retrieve your check-ins quickly from Raycast!
+- Go to the preferences for Ready in Raycast
+- Paste the key from Ready into the `API Key` field

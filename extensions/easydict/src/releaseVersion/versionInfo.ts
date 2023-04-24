@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-07-01 19:05
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-08-20 11:36
+ * @lastEditTime: 2023-03-17 22:00
  * @fileName: versionInfo.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -11,7 +11,6 @@
 import { LocalStorage } from "@raycast/api";
 import axios from "axios";
 import { requestCostTime } from "../axiosConfig";
-import { releaseNote } from "./releaseNote";
 
 const versionInfoKey = "EasydictVersionInfoKey";
 const githubUrl = "https://github.com";
@@ -26,14 +25,33 @@ export class Easydict {
   static author = "tisfeng";
   static repo = "Raycast-Easydict";
 
-  // new version info
   // * NOTE: this is new version info, don't use it directly. Use getCurrentStoredVersionInfo() instead.
-  version = "2.0.0";
-  buildNumber = 8;
-  versionDate = "2022-08-20";
-  isNeedPrompt = true;
-  hasPrompted = false; // always default false, only show once, then should be set to true.
-  releaseMarkdown = releaseNote;
+  version = "2.8.1";
+  buildNumber = 24;
+  versionDate = "2023-03-28";
+  isNeedPrompt = false;
+  hasPrompted = false; // * always default false, only show once, then should be set to true.
+
+  releaseMarkdown = `
+## [v${this.version}] - ${this.versionDate}
+
+### 🐞 修复
+
+- 修复请求 OpenAI 可能报错崩溃问题。
+
+#### 如果觉得这个扩展还不错，给个 [Star](https://github.com/tisfeng/Raycast-Easydict) ⭐️ 支持一下吧 (^-^)
+
+## 推荐
+
+我另一个项目，[Easydict](https://github.com/tisfeng/Easydict) ，一个简洁优雅的翻译词典 macOS App。开箱即用，支持离线 OCR 识别，支持有道词典，🍎苹果系统翻译，DeepL，谷歌，百度和火山翻译。
+
+![iShot_2023-03-17_18.01.22_11zon-1679050206](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/iShot_2023-03-17_18.01.22_11zon-1679050206.jpg)
+
+---
+
+### 🐞 Fixes
+- Fixed the crash problem when requesting OpenAI translation.
+`;
 
   getRepoUrl() {
     return `${githubUrl}/${Easydict.author}/${Easydict.repo}`;
@@ -108,7 +126,7 @@ export class Easydict {
     const currentEasydictInfo = await this.getVersionInfo(currentVersionKey);
     if (currentEasydictInfo) {
       // console.log(`get current easydict cost time: ${Date.now() - startTime} ms`);
-      // console.log(`current easydict info: ${JSON.stringify(currentEasydictInfo, null, 2)}`);
+      // console.log(`current easydict info: ${JSON.stringify(currentEasydictInfo, null, 4)}`);
       return Promise.resolve(currentEasydictInfo);
     } else {
       const startStoredTime = Date.now();
@@ -126,7 +144,7 @@ export class Easydict {
    */
   public async fetchReleaseMarkdown(): Promise<string> {
     try {
-      console.log("fetch release markdown from github");
+      console.log(`fetch release markdown from github: ${this.getReleaseApiUrl()}`);
       const releaseInfo = await this.fetchReleaseInfo(this.getReleaseApiUrl());
       const releaseMarkdown = releaseInfo.body;
       console.log("fetch release markdown from github success");

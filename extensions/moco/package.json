@@ -1,0 +1,73 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "moco",
+  "title": "MOCO",
+  "description": "Provide Integration to MOCO timetracking.",
+  "icon": "MocoLogo.png",
+  "author": "eviscares",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "moco",
+      "title": "Manage Time Bookings",
+      "subtitle": "MOCO",
+      "description": "Manage all your time bookings",
+      "mode": "view"
+    },
+    {
+      "name": "moco_today",
+      "title": "Todays Activities",
+      "subtitle": "MOCO",
+      "description": "Show todays activities",
+      "mode": "view",
+      "subtitle": "moco"
+    },
+    {
+      "name": "moco_menu_bar",
+      "title": "Menu Bar",
+      "subtitle": "MOCO",
+      "description": "See if a timer is running with a glance",
+      "mode": "menu-bar",
+      "interval": "30s"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apikey",
+      "title": "API Key",
+      "description": "Your moco api key",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "url_prefix",
+      "title": "URL Prefix",
+      "description": "Your moco instance url prefix",
+      "type": "textfield",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.43.2",
+    "axios": "^1.3.3",
+    "zod": "^3.20.6"
+  },
+  "devDependencies": {
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

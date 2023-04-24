@@ -6,11 +6,11 @@ import download from "download";
 import { sha256FileHash } from "./utils";
 import tar from "tar";
 
-const cliVersion = "1.0.0";
+const cliVersion = "1.2.0";
 const cliFileInfo = {
-  arch: "x64",
-  pkg: "macosx.tgz",
-  sha256: "8d0af8a81e668fbf04b7676f173016976131877e9fbdcd0a396d4e6b70a5e8f4",
+  arch: "universal",
+  pkg: "macosx-universal.tgz",
+  sha256: "c9f8192149ebc88f8699998cecab1ce144144045907ece6f53cf50877f4de66f",
 };
 
 export function speedtestCLIDirectory(): string {
