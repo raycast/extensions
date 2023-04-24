@@ -5,10 +5,13 @@ import type { Route, StopsResponse } from "../types";
 
 interface Props {
   route: Route;
+  directionId: string;
 }
 
-export const StopsList = ({ route }: Props): JSX.Element => {
-  const { isLoading, data } = useFetch<StopsResponse>(`https://api-v3.mbta.com/stops?filter%5Broute%5D=${route.id}`);
+export const StopsList = ({ route, directionId }: Props): JSX.Element => {
+  const { isLoading, data } = useFetch<StopsResponse>(
+    `https://api-v3.mbta.com/stops?filter%5Broute%5D=${route.id}&direction_id=${directionId}`
+  );
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Select MBTA stop...">

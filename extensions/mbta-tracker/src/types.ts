@@ -6,6 +6,8 @@ export interface Route {
   attributes: {
     color: string;
     description: string;
+    direction_destinations: string[];
+    direction_names: string[];
     long_name: string;
     short_name: string;
     type: string;

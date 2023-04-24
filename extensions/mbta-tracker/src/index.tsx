@@ -1,6 +1,6 @@
 import { Icon, List, ActionPanel, Action } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
-import { StopsList } from "./components/StopsList";
+import { DirectionsList } from "./components/DirectionsList";
 import type { RoutesResponse, Route } from "./types";
 
 function outputRouteListItem(route: Route) {
@@ -12,7 +12,12 @@ function outputRouteListItem(route: Route) {
       accessories={[{ text: route.attributes.description }]}
       actions={
         <ActionPanel>
-          <Action.Push title="Show Stops" icon={Icon.Map} target={<StopsList key={route.id} route={route} />} />
+          <Action.Push
+            title="Choose Travel Direction"
+            icon={Icon.Compass}
+            target={<DirectionsList key={route.id} route={route} />}
+          />
+          {/* <Action.Push title="Show Stops" icon={Icon.Map} target={<StopsList key={route.id} route={route} />} /> */}
         </ActionPanel>
       }
     />
