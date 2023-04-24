@@ -3,11 +3,10 @@ export type Thread = {
   title: string;
   description?: string;
   author: {
-    name: string,
-    avatar_url: string
+    name: string;
+    avatar_url: string;
   };
   tags: string[];
   is_private: boolean;
   page_url: string;
 };
-

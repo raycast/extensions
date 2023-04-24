@@ -1,5 +1,5 @@
-import { Form } from '@raycast/api';
-import { Thread } from '../types/threads.types';
+import { Form } from "@raycast/api";
+import { Thread } from "../types/threads.types";
 
 interface ThreadDropdownProps {
   threads?: Array<Thread>;

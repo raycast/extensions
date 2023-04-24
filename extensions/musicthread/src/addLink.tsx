@@ -1,16 +1,16 @@
 import { Form, ActionPanel, Action, showToast } from "@raycast/api";
-import { useEffect, useState } from 'react';
-import { useAsync } from 'react-use';
-import ThreadDropdown from './components/ThreadDropdown';
-import { useMusicThreadHttpApi } from './hooks/useMusicThreadHttpApi';
-import { Thread } from './types/threads.types';
-import { Link } from './types/links.types';
+import { useEffect, useState } from "react";
+import { useAsync } from "react-use";
+import ThreadDropdown from "./components/ThreadDropdown";
+import { useMusicThreadHttpApi } from "./hooks/useMusicThreadHttpApi";
+import { Thread } from "./types/threads.types";
+import { Link } from "./types/links.types";
 
 export default function Command() {
   const [_, setSelectedThread] = useState<Thread | null>(null);
   const [isLoadingDisplay, setIsLoadingDisplay] = useState(true);
   const [titleError, setTitleError] = useState<string | undefined>();
-  
+
   const { getThreads, addLink } = useMusicThreadHttpApi();
 
   const { value: threads, loading: isLoadingThreads } = useAsync(async () => {
@@ -65,7 +65,7 @@ export default function Command() {
         onChange={dropTitleErrorIfNeeded}
         onBlur={(event) => {
           if (event.target.value?.length == 0) {
-            setTitleError ("Please set a link");
+            setTitleError("Please set a link");
           } else {
             dropTitleErrorIfNeeded();
           }

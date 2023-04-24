@@ -1,11 +1,11 @@
 import { Form, ActionPanel, Action, showToast } from "@raycast/api";
-import { useState } from 'react';
-import { useMusicThreadHttpApi } from './hooks/useMusicThreadHttpApi';
-import { Thread } from './types/threads.types';
+import { useState } from "react";
+import { useMusicThreadHttpApi } from "./hooks/useMusicThreadHttpApi";
+import { Thread } from "./types/threads.types";
 
 export default function Command() {
   const [titleError, setTitleError] = useState<string | undefined>();
-  
+
   const { createThread } = useMusicThreadHttpApi();
 
   function dropTitleErrorIfNeeded() {
@@ -38,14 +38,14 @@ export default function Command() {
         onChange={dropTitleErrorIfNeeded}
         onBlur={(event) => {
           if (event.target.value?.length == 0) {
-            setTitleError ("Please name your thread");
+            setTitleError("Please name your thread");
           } else {
             dropTitleErrorIfNeeded();
           }
         }}
       />
       <Form.TextArea id="description" title="Description (optional)" placeholder="Thread description" />
-      <Form.TextField id="tags" title="Tags (optional)" placeholder={tagsHint} />     
+      <Form.TextField id="tags" title="Tags (optional)" placeholder={tagsHint} />
     </Form>
   );
 }

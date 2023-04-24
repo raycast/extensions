@@ -4,13 +4,13 @@ type NaturalSortInput = { title: string; [key: string]: unknown };
 
 type SortOptions = {
   key: string;
-  direction: 'asc' | 'desc';
+  direction: "asc" | "desc";
   caseSensitive: boolean;
 };
 
 const defaultOptions: SortOptions = {
-  key: 'title',
-  direction: 'asc',
+  key: "title",
+  direction: "asc",
   caseSensitive: false,
 };
 
@@ -19,18 +19,18 @@ const getSortFunction = <T extends NaturalSortInput>(options: SortOptions) => {
     const a = aToken[options.key];
     const b = bToken[options.key];
 
-    if (typeof a !== 'string' || typeof b !== 'string') {
+    if (typeof a !== "string" || typeof b !== "string") {
       return 0;
     }
 
     const EQUAL = 0;
-    const GREATER = options.direction === 'desc' ? -1 : 1;
+    const GREATER = options.direction === "desc" ? -1 : 1;
     const SMALLER = -GREATER;
 
     const matchNumeric = /(^-?[0-9]+|[0-9]+$)/gi;
 
     const normalize = function normalize(value: string) {
-      const str = '' + value;
+      const str = "" + value;
       return options.caseSensitive ? str : str.toLowerCase();
     };
 
@@ -40,8 +40,8 @@ const getSortFunction = <T extends NaturalSortInput>(options: SortOptions) => {
     if (a && !b) return SMALLER;
 
     // Normalize values to strings
-    const x = normalize(a).trim() || '';
-    const y = normalize(b).trim() || '';
+    const x = normalize(a).trim() || "";
+    const y = normalize(b).trim() || "";
 
     // Return immediately if at least one of the values is empty.
     if (!x && !y) return EQUAL;
@@ -49,8 +49,8 @@ const getSortFunction = <T extends NaturalSortInput>(options: SortOptions) => {
     if (x && !y) return SMALLER;
 
     // Isolate alpha and numeric. We put the numeric values between null character,
-    const xArray = x.replace(matchNumeric, '\0$1\0').replace(/\0$/, '').replace(/^\0/, '').split('\0');
-    const yArray = y.replace(matchNumeric, '\0$1\0').replace(/\0$/, '').replace(/^\0/, '').split('\0');
+    const xArray = x.replace(matchNumeric, "\0$1\0").replace(/\0$/, "").replace(/^\0/, "").split("\0");
+    const yArray = y.replace(matchNumeric, "\0$1\0").replace(/\0$/, "").replace(/^\0/, "").split("\0");
 
     // Natural sorting here
     for (let index = 0, maxIteration = Math.max(xArray.length, yArray.length); index < maxIteration; index++) {
