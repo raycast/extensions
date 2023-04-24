@@ -5,7 +5,7 @@ import { useBitwarden } from "~/context/bitwarden";
 import { useSession } from "~/context/session";
 import { Folder, Item, Vault } from "~/types/vault";
 import { captureException } from "~/utils/development";
-import useCachedVault from "~/components/searchVault/utils/useVaultCache";
+import useVaultCaching from "~/components/searchVault/utils/useVaultCache";
 import { FailedToLoadVaultItemsError } from "~/utils/errors";
 
 export type VaultState = Vault & {
@@ -27,7 +27,7 @@ export const VaultProvider = ({ children }: PropsWithChildren) => {
   const session = useSession();
   const bitwarden = useBitwarden();
   const publishItems = useVaultItemPublisher();
-  const { getCachedVault, cacheVault } = useCachedVault();
+  const { getCachedVault, cacheVault } = useVaultCaching();
   const [state, setState] = useReducer(
     (previous: VaultState, next: Partial<VaultState>) => ({ ...previous, ...next }),
     { ...initialState, ...getCachedVault() }

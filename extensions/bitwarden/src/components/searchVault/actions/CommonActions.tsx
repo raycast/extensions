@@ -6,7 +6,7 @@ function SearchCommonActions() {
   const vault = useVault();
   const session = useSession();
 
-  const handleLock = async () => {
+  const handleLockVault = async () => {
     const toast = await showToast(Toast.Style.Animated, "Locking Vault...", "Please wait");
     await session.lock("Manually locked by the user");
     await toast.hide();
@@ -30,7 +30,7 @@ function SearchCommonActions() {
         icon={{ source: "sf_symbols_lock.svg", tintColor: Color.PrimaryText }} // Does not immediately follow theme
         title="Lock Vault"
         shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
-        onAction={handleLock}
+        onAction={handleLockVault}
       />
       <Action style={Action.Style.Destructive} title="Logout" icon={Icon.Logout} onAction={handleLogoutVault} />
     </>

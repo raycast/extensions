@@ -70,16 +70,16 @@ const UnlockForm = (props: UnlockFormProps) => {
         <ActionPanel>
           {!isLoading && (
             <Action.SubmitForm
+              icon={Icon.LockUnlocked}
               title="Unlock"
               onSubmit={onSubmit}
-              icon={Icon.LockUnlocked}
               shortcut={{ key: "enter", modifiers: [] }}
             />
           )}
           {!!unlockError && (
             <Action
-              title="Copy Last Error"
               onAction={copyUnlockError}
+              title="Copy Last Error"
               icon={Icon.Bug}
               style={Action.Style.Destructive}
             />
@@ -89,13 +89,13 @@ const UnlockForm = (props: UnlockFormProps) => {
     >
       {shouldShowServer && <Form.Description title="Server URL" text={serverMessage} />}
       <Form.Description title="Vault Status" text={userMessage} />
+      <Form.PasswordField autoFocus id="password" title="Master Password" />
       {!!lockReason && (
         <>
           <Form.Description title="ℹ️" text={lockReason} />
           <TimeoutInfoDescription />
         </>
       )}
-      <Form.PasswordField autoFocus id="password" title="Master Password" />
     </Form>
   );
 };
