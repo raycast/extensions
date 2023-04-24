@@ -50,7 +50,6 @@ export const useMusicThreadHttpApi = () => {
       title: thread.title,
       description: thread.description,
     };
-    console.log('payload', payload)
     try {
       return await axiosInstance.post(
         '/new-thread',

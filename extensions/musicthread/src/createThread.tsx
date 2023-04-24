@@ -1,5 +1,5 @@
 import { Form, ActionPanel, Action, showToast } from "@raycast/api";
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 // import { useAsync } from 'react-use';
 import { useMusicThreadHttpApi } from './hooks/useMusicThreadHttpApi';
 import { Thread } from './types/threads.types';

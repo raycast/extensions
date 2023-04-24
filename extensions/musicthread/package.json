@@ -12,13 +12,13 @@
   "commands": [
     {
       "name": "addLink",
-      "title": "Add link",
+      "title": "Add Link",
       "description": "Add link to a thread in MusicThread",
       "mode": "view"
     },
     {
       "name": "createThread",
-      "title": "Create thread",
+      "title": "Create Thread",
       "description": "Create new thread in MusicThread",
       "mode": "view"
     }
@@ -43,7 +43,7 @@
     "@types/node": "18.8.3",
     "@types/react": "18.0.9",
     "eslint": "^7.32.0",
-    "prettier": "^2.5.1",
+    "prettier": "^2.8.7",
     "typescript": "^4.4.3"
   },
   "scripts": {

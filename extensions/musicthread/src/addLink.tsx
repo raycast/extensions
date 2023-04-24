@@ -7,7 +7,7 @@ import { Thread } from './types/threads.types';
 import { Link } from './types/links.types';
 
 export default function Command() {
-  const [selectedThread, setSelectedThread] = useState<Thread | null>(null);
+  const [setSelectedThread] = useState<Thread | null>(null);
   const [isLoadingDisplay, setIsLoadingDisplay] = useState(true);
   const [titleError, setTitleError] = useState<string | undefined>();
   
