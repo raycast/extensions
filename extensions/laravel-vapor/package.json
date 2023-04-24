@@ -16,30 +16,35 @@
     {
       "name": "list-projects",
       "title": "Projects",
+      "subtitle": "Laravel Vapor",
       "description": "List projects for the current team",
       "mode": "view"
     },
     {
       "name": "list-databases",
       "title": "Databases",
+      "subtitle": "Laravel Vapor",
       "description": "List databases for the current team",
       "mode": "view"
     },
     {
       "name": "list-networks",
       "title": "Networks",
+      "subtitle": "Laravel Vapor",
       "description": "List networks for the current team",
       "mode": "view"
     },
     {
       "name": "list-domains",
       "title": "Domains",
+      "subtitle": "Laravel Vapor",
       "description": "List domains for the current team",
       "mode": "view"
     },
     {
       "name": "list-caches",
       "title": "Caches",
+      "subtitle": "Laravel Vapor",
       "description": "List caches for the current team",
       "mode": "view"
     }
