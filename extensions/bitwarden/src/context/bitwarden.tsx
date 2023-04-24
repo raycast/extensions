@@ -11,7 +11,7 @@ export const BitwardenProvider = (props: BitwardenProviderProps) => {
   const [bitwarden, setBitwarden] = useState<Bitwarden>();
 
   useEffect(() => {
-    new Bitwarden().initialize().then(setBitwarden);
+    void new Bitwarden().initialize().then(setBitwarden);
   }, []);
 
   if (!bitwarden) return <Detail isLoading />;

@@ -39,7 +39,7 @@ export const VaultProvider = ({ children }: PropsWithChildren) => {
   useEffect(() => {
     if (!session.active) return;
     if (session.token) {
-      loadItems(session.token);
+      void loadItems(session.token);
     } else {
       setState({ isLocked: true });
     }

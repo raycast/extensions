@@ -31,7 +31,7 @@ function CopyTotpAction() {
         captureException("Failed to copy TOTP", error);
       }
     } else {
-      showToast(Toast.Style.Failure, "Failed to fetch TOTP");
+      await showToast(Toast.Style.Failure, "Failed to fetch TOTP");
     }
   };
 

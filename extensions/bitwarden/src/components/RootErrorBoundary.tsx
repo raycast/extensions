@@ -22,10 +22,10 @@ export default class RootErrorBoundary extends Component<Props, State> {
     return { hasError: true };
   }
 
-  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+  async componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     if (error.name in ERROR_TYPES) {
       this.setState((state) => ({ ...state, hasError: true, error: error.message }));
-      showToast(Toast.Style.Failure, error.message);
+      await showToast(Toast.Style.Failure, error.message);
     } else {
       if (environment.isDevelopment) {
         this.setState((state) => ({ ...state, hasError: true, error: error.message }));

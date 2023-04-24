@@ -139,7 +139,9 @@ export class Bitwarden {
   }
 
   async lock(reason?: string): Promise<void> {
-    if (reason) this.setLockReason(reason);
+    if (reason) {
+      await this.setLockReason(reason);
+    }
     await this.exec(["lock"]);
   }
 

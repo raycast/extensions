@@ -36,8 +36,11 @@ export function SessionProvider(props: SessionProviderProps) {
 
   useEffect(() => {
     if (!bitwarden || isInitialized.current) return;
-    loadSavedSession();
-    isInitialized.current = true;
+    const initialize = async () => {
+      await loadSavedSession();
+      isInitialized.current = true;
+    };
+    void initialize();
   }, [bitwarden]);
 
   useEffect(() => {
@@ -48,21 +51,15 @@ export function SessionProvider(props: SessionProviderProps) {
       if (status === "unauthenticated") return await handleLogout();
       if (status === "locked") return await handleLock();
     };
-    checkVaultStatus();
+    void checkVaultStatus();
   }, [state.token]);
 
   async function loadSavedSession() {
     try {
       const { shouldLockVault, lockReason, ...savedSession } = await getSavedSession();
-
       dispatch({ type: "loadSavedState", shouldLockVault, lockReason, ...savedSession });
-
       if (shouldLockVault) {
-        const { status } = await bitwarden.status();
-        if (status !== "unauthenticated") {
-          await bitwarden.lock(lockReason);
-        }
-        await Storage.clearSession();
+        await handleLock(lockReason, true);
       }
     } catch (error) {
       await handleLock();
@@ -78,8 +75,15 @@ export function SessionProvider(props: SessionProviderProps) {
     dispatch({ type: "unlock", token, passwordHash });
   }
 
-  async function handleLock(reason?: string) {
-    await bitwarden.lock(reason);
+  async function handleLock(reason?: string, shouldCheckVaultStatus = false) {
+    if (shouldCheckVaultStatus) {
+      const { status } = await bitwarden.status();
+      if (status !== "unauthenticated") {
+        await bitwarden.lock(reason);
+      }
+    } else {
+      await bitwarden.lock(reason);
+    }
     await Storage.clearSession();
     dispatch({ type: "lock", lockReason: reason });
   }
