@@ -1,4 +1,3 @@
-import { environment } from "@raycast/api";
 import { authenticator } from "otplib";
 
 //https://github.com/yeojz/otplib/issues/181#issuecomment-590244240
@@ -14,13 +13,4 @@ export function generate(secret: string, offset = 0) {
   const offsetToken = authenticator.generate(secret);
   authenticator.resetOptions();
   return offsetToken;
-}
-
-export function getPieIcon(pie: number) {
-  return {
-    source: {
-      light: `${environment.assetsPath}/icons/light/pie-${pie}.png`,
-      dark: `${environment.assetsPath}/icons/dark/pie-${pie}.png`,
-    },
-  };
 }

@@ -1,9 +1,20 @@
+/*
+ * @Author: aweleey.li
+ * @Date: 2023-04-18 14:30:02
+ * @LastEditors: aweleey.li
+ * @LastEditTime: 2023-04-24 21:27:37
+ * @FilePath: /qotp/src/qotp-panel.tsx
+ * @Description: -
+ * @Telephone: 177****5210
+ * Copyright (c) 2023 by aweleey.li, All Rights Reserved.
+ */
 import { useState, useEffect } from "react";
 import { Action, ActionPanel, Icon, List, Clipboard, popToRoot, showHUD, Image } from "@raycast/api";
 import { authenticator } from "otplib";
 import { secret } from "./preferences";
 import { IOTPItem, genCode, getExtraList } from "./data";
-import { generate, getPieIcon } from "./utils";
+import { generate } from "./utils";
+import { getProgressIcon } from "@raycast/utils";
 
 const ExtraList = getExtraList();
 
@@ -52,7 +63,7 @@ function OTPItem(props: IOTPItemProps) {
   if (showTimeLeft) {
     itemProps["accessories"].push({
       text: "",
-      icon: getPieIcon(Number(item.timeLeft)),
+      icon: getProgressIcon(Number(item.timeLeft) / 30, "green"),
     });
   }
 
@@ -69,14 +80,14 @@ function OTPPanel(props: IOTPPanelProps) {
 
   async function onAction(item: IOTPItem) {
     await Clipboard.copy(item.arg);
-    await showHUD("已复制到剪贴板");
+    await showHUD("Copied to clipboard !");
     await popToRoot();
   }
 
   return (
     <ActionPanel>
       <ActionPanel.Section>
-        <Action icon={Icon.Clipboard} title="回车复制" onAction={() => onAction(item)} />
+        <Action icon={Icon.Clipboard} title="Enter Copy" onAction={() => onAction(item)} />
       </ActionPanel.Section>
     </ActionPanel>
   );

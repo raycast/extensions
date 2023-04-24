@@ -16,9 +16,6 @@ export function genCode() {
     };
     if (idx === 0) {
       item.timeLeft = authenticator.timeRemaining();
-      item.subtitle = "当前";
-    } else {
-      item.subtitle = `${"下".repeat(idx)}一个`;
     }
     return item;
   });
@@ -35,7 +32,8 @@ export function getExtraList(): IOTPItem[] {
 
   if (passphrase) {
     items.push({
-      title: "跳板机登录线上机器的密码",
+      // title: "跳板机登录线上机器的密码",
+      title: "passphrase",
       arg: passphrase,
     });
   }
