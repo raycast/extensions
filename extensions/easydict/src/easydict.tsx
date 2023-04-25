@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-06-23 14:19
  * @lastEditor: tisfeng
- * @lastEditTime: 2023-03-01 11:19
+ * @lastEditTime: 2023-03-17 22:48
  * @fileName: easydict.tsx
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -19,7 +19,7 @@ import { myPreferences, preferredLanguage1 } from "./preferences";
 import { DisplaySection } from "./types";
 import { checkIfInstalledEudic, checkIfNeedShowReleasePrompt, trimTextLength } from "./utils";
 
-const disableConsoleLog = true;
+const disableConsoleLog = false;
 
 if (disableConsoleLog) {
   // Since too many logs will cause bugs, we need to disable the console.log in development. Ref: https://github.com/raycast/extensions/pull/3917#issuecomment-1370771358

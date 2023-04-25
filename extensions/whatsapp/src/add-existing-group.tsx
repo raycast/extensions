@@ -12,7 +12,7 @@ interface FormValues extends Omit<GroupChat, "id" | "pinned"> {
 }
 
 export default function WhatsAppGroupChatForm({ defaultValue }: WhatsAppGroupChatFormProps) {
-  const { chats, updateChats } = useWhatsAppChats();
+  const [chats, setChats] = useWhatsAppChats();
   const isCreation = !defaultValue;
 
   async function handleSubmit(formValues: FormValues) {
@@ -34,7 +34,7 @@ export default function WhatsAppGroupChatForm({ defaultValue }: WhatsAppGroupCha
     }
 
     if (isCreation) {
-      await updateChats([...chats, savedChat]);
+      setChats([...chats, savedChat]);
       await showToast(Toast.Style.Success, `Created new group`, savedChat.name);
     } else {
       const newChats = chats.map((chat) => {
@@ -43,7 +43,7 @@ export default function WhatsAppGroupChatForm({ defaultValue }: WhatsAppGroupCha
         }
         return chat;
       });
-      await updateChats(newChats);
+      setChats(newChats);
       await showToast(Toast.Style.Success, `Updated existing group`, savedChat.name);
     }
 

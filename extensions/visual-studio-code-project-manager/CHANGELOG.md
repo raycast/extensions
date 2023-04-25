@@ -1,5 +1,13 @@
 # Visual Studio Code - Project Manager Changelog
 
+## [Update] - 2023-03-30
+
+- Add support for VS Code cached projects.
+
+## [Fixes] - 2023-03-16
+
+- Fixed a problem with the remote path when there is a "." in the path
+
 ## [Fixes] - 2023-03-11
 
 - Fixed terminal overrides the default environment variables.

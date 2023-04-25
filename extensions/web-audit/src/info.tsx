@@ -14,7 +14,7 @@ export default function Command(props: LaunchProps<{ arguments: Website }>) {
   const [urlError, setUrlError] = useState<string | undefined>();
   const [website, setWebsite] = useState<string | undefined>();
   const [ogImage, setOgImage] = useState<string | undefined>();
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
 
   const getWebsiteInfo = (data: string) => {
     const title = data.match(/<title>(.*?)<\/title>/)?.[1];
@@ -90,7 +90,6 @@ export default function Command(props: LaunchProps<{ arguments: Website }>) {
   };
 
   const submitForm = async (values: Record<string, string>) => {
-    setLoading(true);
     if (values.url) {
       if (validateUrl(values.url) && (await urlReachable(values.url))) {
         await websiteInfo(String(values.url));
@@ -133,6 +132,7 @@ export default function Command(props: LaunchProps<{ arguments: Website }>) {
 
   return (
     <>
+      {loading && <Detail isLoading={true} navigationTitle="Getting data..." />}
       {result && !loading && (
         <Detail
           navigationTitle={`Scraped ${website}`}

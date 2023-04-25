@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Grid } from '@raycast/api'
 import { DataLoaderProvider } from '@scaleway/use-dataloader'
-import { APIProvider } from '../providers'
+import { APIProvider } from 'providers'
 import { APIkeys, Applications, Groups, Policies, Users } from './pages'
 
 export const IAM = () => (

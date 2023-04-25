@@ -67,10 +67,10 @@ jobs:
             git add .
             git commit -m 'API Docs: Update from the extensions repo'
             git push origin docs-sync-${{ github.sha }}
-            echo '::set-output name=has_commit::true'
+            echo 'has_commit=true' >> $GITHUB_OUTPUT
           else
             echo 'No changes'
-            echo '::set-output name=has_commit::false'
+            echo 'has_commit=false' >> $GITHUB_OUTPUT
           fi
 
       - name: Open PR on the main repo

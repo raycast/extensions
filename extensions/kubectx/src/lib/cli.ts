@@ -26,3 +26,8 @@ export const getBrewExecutablePath = (packageName: string) => {
 
   return validPath;
 };
+
+export const getKubeConfig = () => {
+  const preferences: { kubeConfig: string } = getPreferenceValues();
+  return preferences.kubeConfig || null;
+};

@@ -1,5 +1,9 @@
 # Home Assistant Changelog
 
+## [Fix] . 2023-03-15
+
+- Inject https agent only on `https` urls - fix [#5358](https://github.com/raycast/extensions/issues/5358)
+
 ## [Fix] - 2023-03-08
 
 - Fixed that some commands didn't fully support ignore certs preference.

@@ -26,24 +26,20 @@ const serializeFromJson = (jsonArray: string): Account[] => {
   return res;
 };
 
-const execute = async (
-  command: string,
-  opts: { log: { stdout: boolean; stderr: boolean } } = { log: { stdout: false, stderr: false } }
-) => {
+const execute = async (command: string, opts: { log: { stdout: boolean } } = { log: { stdout: false } }) => {
   const PATH = "/usr/gnu/bin:/usr/local/bin:/bin:/usr/bin:.:/opt/homebrew/bin";
   const wrappedCommand = `zsh -l -c 'export PATH="$PATH:${PATH}" && ${command}'`;
   console.log(`Executing: ${wrappedCommand}`);
+  const startTimestamp = Date.now();
   return new Promise<string>((res, rej) =>
     exec(wrappedCommand, (error: ExecException | null, stdout: string, stderr: string) => {
+      const endTimestamp = Date.now();
+      const tookSeconds = (endTimestamp - startTimestamp) / 1000;
       if (error) {
-        if (opts.log.stderr) {
-          console.error(`Failed: ${stderr}`);
-        }
+        console.error(`[${tookSeconds}s] Failed:\n${stderr}`);
         rej(error);
       }
-      if (opts.log.stdout) {
-        console.log(`Success: ${stdout}`);
-      }
+      console.log(`[${tookSeconds}s] Success${opts.log.stdout ? `:\n${stdout}` : ""}`);
       res(stdout.trim());
     })
   );
@@ -70,6 +66,20 @@ export const lastPass = (email: string, password: string) => ({
 
   list: (opts: { sync: "auto" | "now" | "no" } = { sync: "auto" }) =>
     execute(
+      `echo "${password}" | LPASS_DISABLE_PINENTRY=1 lpass ls --sync=${opts.sync} --format="%ai<=>%an<=>%au<=>%ap<=>%al"`
+    ).then((stdout) => {
+      const items: { id: string; name: string; username: string; password: string; url: string }[] = stdout
+        .split("\n")
+        .map((line) => {
+          const [id, name, username, password, url] = line.split("<=>");
+          return { id, name, username, password, url };
+        })
+        .filter(({ name }) => name);
+      return items;
+    }),
+
+  export: (opts: { sync: "auto" | "now" | "no" } = { sync: "auto" }) =>
+    execute(
       `echo "${password}" | LPASS_DISABLE_PINENTRY=1 lpass export --sync=${opts.sync} --fields=id,name,username,password,url`
     ).then((stdout) => {
       const items: { id: string; name: string; username: string; password: string; url: string }[] = stdout
@@ -79,7 +89,8 @@ export const lastPass = (email: string, password: string) => ({
         .map((line) => {
           const [id, name, username, password, url] = line.split(",");
           return { id, name, username, password, url };
-        });
+        })
+        .filter(({ name }) => name);
       return items;
     }),
 });

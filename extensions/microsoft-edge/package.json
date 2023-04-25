@@ -49,6 +49,15 @@
   ],
   "preferences": [
     {
+      "name": "useDev",
+      "title": "Use Dev",
+      "label": "use Microsoft Edge Dev",
+      "description": "use Microsoft Edge Dev",
+      "required": false,
+      "type": "checkbox",
+      "default": false
+    },
+    {
       "name": "useOriginalFavicon",
       "title": "Fav icon",
       "label": "Extract the favicon from every open tab",
@@ -101,5 +110,6 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish"
-  }
+  },
+  "repository": "git@github.com:raycast/extensions.git"
 }

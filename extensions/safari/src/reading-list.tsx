@@ -16,14 +16,14 @@ const { groupByStatus }: Preferences = getPreferenceValues();
 
 const Command = () => {
   const [searchText, setSearchText] = useState<string>("");
-  const { bookmarks, hasPermission } = useBookmarks();
+  const { bookmarks, hasPermission } = useBookmarks(true);
 
   if (!hasPermission) {
     return <PermissionError />;
   }
 
   const groupedBookmarks = groupByStatus
-    ? _.groupBy(bookmarks, ({ dateLastViewed }) => (dateLastViewed ? "read" : "unread"))
+    ? _.groupBy(bookmarks as ReadingListBookmark[], ({ dateLastViewed }) => (dateLastViewed ? "read" : "unread"))
     : { All: bookmarks || [] };
 
   return (
