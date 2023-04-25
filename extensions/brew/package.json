@@ -43,15 +43,6 @@
   ],
   "preferences": [
     {
-      "name": "greedyUpgrades",
-      "type": "checkbox",
-      "required": false,
-      "title": "Upgrades",
-      "description": "Include auto-updating casks when upgrading or checking for outdated items.",
-      "default": false,
-      "label": "Include auto-updating casks when upgrading"
-    },
-    {
       "name": "customBrewPath",
       "type": "textfield",
       "required": false,
@@ -74,6 +65,23 @@
         }
       ],
       "description": "The terminal application/emulator to use when using any Run in Terminal action."
+    },
+    {
+      "name": "greedyUpgrades",
+      "type": "checkbox",
+      "required": false,
+      "title": "Upgrades",
+      "description": "Include auto-updating casks when upgrading or checking for outdated items.",
+      "default": false,
+      "label": "Include auto-updating casks when upgrading"
+    },
+    {
+      "name": "zapCask",
+      "type": "checkbox",
+      "required": false,
+      "title": "Uninstall",
+      "label": "Remove all files associated with a cask.",
+      "description": "Run cask uninstall with the --zap option for a more complete uninstallation of files associated with cask.\nWARNING: This may remove files shared with other applications."
     }
   ],
   "dependencies": {
