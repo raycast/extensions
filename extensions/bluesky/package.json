@@ -3,18 +3,21 @@
   "name": "bluesky",
   "title": "Bluesky",
   "description": "Browse through your Bluesky timeline. Create new posts, find people, and view your notifications.",
-  "icon": "command-icon.png",
+  "icon": "extension-icon.png",
   "author": "dharamkapila",
   "categories": [
     "Communication",
     "Web"
+  ],
+  "contributors": [
+    "peduarte"
   ],
   "license": "MIT",
   "preferences": [
     {
       "type": "textfield",
       "title": "Bluesky Service URL",
-      "description": "Service Url",
+      "description": "Service URL",
       "default": "https://bsky.social",
       "name": "service",
       "required": true
@@ -76,7 +79,7 @@
     {
       "name": "notifications",
       "title": "Notifications",
-      "description": "View your Recent Notifications.",
+      "description": "View your recent notifications.",
       "mode": "view"
     },
     {

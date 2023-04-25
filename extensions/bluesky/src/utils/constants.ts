@@ -9,7 +9,7 @@ export const NotificationTextCacheKey = "notification-text";
 
 export const BlueskyUrl = "https://staging.bsky.app";
 export const BlueskyProfileUrlBase = `${BlueskyUrl}/profile`;
-export const MenuBarIconUrl = `command-icon.png`;
+export const MenuBarIconUrl = `extension-icon.png`;
 
 export const BlueskyFeedType = "app.bsky.feed.post";
 export const BlueskyQuoteType = "app.bsky.embed.record";
