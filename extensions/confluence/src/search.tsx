@@ -1,5 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Action, ActionPanel, List, showToast, Toast } from "@raycast/api";
+import "./util/fetchPolyfill";
+
+import { Action, ActionPanel, List, showToast, Toast, getPreferenceValues } from "@raycast/api";
 import { AbortError } from "node-fetch";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useAsyncEffect } from "use-async-effect";
@@ -17,6 +19,8 @@ import { Site } from "./api/site";
 import { SearchActions, SearchListItem } from "./SearchResults";
 import { useAuthorizeSite } from "./util/hooks";
 import { capitalize } from "./util/text";
+
+const { searchAttachments, sort } = getPreferenceValues();
 
 export default function Command() {
   const site = useAuthorizeSite();
@@ -162,7 +166,10 @@ async function performSearch(
   const spaceKey = spaceFilter === "" ? undefined : spaceFilter;
 
   if (searchText) {
-    const searchResults = (await fetchSearchByText(site, searchText, spaceKey, signal)) as any;
+    const searchResults = (await fetchSearchByText(
+      { site, text: searchText, includeAttachments: searchAttachments, spaceKey, sort },
+      signal
+    )) as any;
     return searchResults.results.map((item: any) => mapToSearchResult(item, searchResults._links));
   } else {
     const recentResults = (await fetchRecentlyViewed(site, spaceKey, signal)) as any;

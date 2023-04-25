@@ -16,7 +16,42 @@
       "title": "Search",
       "subtitle": "Confluence",
       "description": "Search for pages and blogs across Confluence.",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "searchAttachments",
+          "label": "Include Attachments",
+          "description": "Include attachments in search results.",
+          "type": "checkbox",
+          "default": false,
+          "required": false
+        },
+        {
+          "name": "sort",
+          "type": "dropdown",
+          "required": false,
+          "title": "Sort by",
+          "description": "Sort search results by",
+          "data": [
+            {
+              "value": "",
+              "title": "--"
+            },
+            {
+              "value": "lastmodified desc",
+              "title": "Last modified (desc)"
+            },
+            {
+              "value": "created desc",
+              "title": "Created (desc)"
+            },
+            {
+              "value": "title",
+              "title": "Title"
+            }
+          ]
+        }
+      ]
     },
     {
       "name": "people",

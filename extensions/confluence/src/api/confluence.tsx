@@ -93,20 +93,27 @@ export async function fetchFavouriteSpaces(site: Site) {
 }
 
 export const SEARCH_EXPAND = [
+  "content.version.by",
   "content.metadata.currentuser.viewed",
   "content.metadata.currentuser.favourited",
   "content.metadata.likes",
+  "content.metadata.mediaType",
 ].join(",");
 
-function withCQLSpace(search: string, spaceKey?: string): string {
+function withCQLSpace(search: string, spaceKey?: string, sort?: string): string {
   if (spaceKey) {
     return search + ` and space.key = "${escCql(spaceKey)}"`;
+  }
+  if (sort) {
+    return search + ` order by ${sort}`;
   }
   return search;
 }
 
-export async function fetchSearchByText(site: Site, text: string, spaceKey?: string, signal?: AbortSignal) {
-  const cql = withCQLSpace(`type IN (blogpost, page) and siteSearch ~ "${escCql(text)}"`, spaceKey);
+export async function fetchSearchByText(searchOptions: SearchOptions, signal?: AbortSignal) {
+  const { site, spaceKey, text, includeAttachments = false, sort } = searchOptions;
+  const types = includeAttachments ? "blogpost,page,attachment" : "blogpost,page";
+  const cql = withCQLSpace(`type IN (${types}) and siteSearch ~ "${escCql(text)}"`, spaceKey, sort);
   return fetchSearchByCql(site, cql, signal, SEARCH_EXPAND);
 }
 
@@ -120,18 +127,24 @@ export async function fetchRecentlyViewed(site: Site, spaceKey?: string, signal?
 }
 
 export function mapToSearchResult(item: any, links: any): SearchResult {
+  const authorPicture = `${links.base.replace(links.context, "")}${item.content.version.by.profilePicture.path}`;
   const result: SearchResult = {
     id: item.content.id,
     title: item.content.title,
     space: item.resultGlobalContainer.title,
     type: item.content.type,
-    icon: getContentIcon(item.content.type),
+    icon: getContentIcon(item.content.type, item.content?.metadata?.mediaType as string),
     modifiedAt: new Date(item.lastModified),
     modifiedAtFriendly: item.friendlyLastModified,
     lastSeenAt:
       item.content.metadata?.currentuser?.viewed && new Date(item.content.metadata?.currentuser?.viewed?.lastSeen),
     lastSeenAtFriendly: item.content.metadata?.currentuser?.viewed?.friendlyLastSeen,
     url: links.base + item.url,
+    editUrl: links.base + "/pages/editpage.action?pageId=" + item.content.id,
+    author: {
+      name: item.content.version.by.displayName as string,
+      profilePicture: authorPicture,
+    },
   };
 
   if (item.content.metadata?.likes) {
@@ -201,12 +214,25 @@ export interface SearchResult {
   lastSeenAt: Date;
   lastSeenAtFriendly: string;
   url: string;
+  editUrl: string;
   likes?: {
     currentUser: boolean;
     count: number;
+  };
+  author?: {
+    name: string;
+    profilePicture: string;
   };
   favourite?: {
     isFavourite: boolean;
     favouritedDate: Date;
   };
+}
+
+export interface SearchOptions {
+  site: Site;
+  text: string;
+  includeAttachments?: boolean;
+  spaceKey?: string;
+  sort?: string;
 }
