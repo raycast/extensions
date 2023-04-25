@@ -1,5 +1,7 @@
 # Prettier Changelog
 
+## [New Icon] - 2023-04-25
+
 ## [Add support for new commands and config options] - 2023-04-21
 
 - Added 5 distinct commands
