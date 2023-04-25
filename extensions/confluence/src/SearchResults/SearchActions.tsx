@@ -13,12 +13,12 @@ interface SearchActionsProps {
 
 /* Wraps in a raycast ActionPanel with standard search result actions */
 export function SearchActions({ globalActions, searchResult }: SearchActionsProps) {
+  const otherActions = searchResult?.editUrl && (
+    <Action.OpenInBrowser title="Edit in Browser" url={searchResult.editUrl} icon={Icon.EditShape} />
+  );
+
   const searchActions = searchResult && (
-    <StandardUrlActionSection
-      url={searchResult.url}
-      title={capitalize(searchResult.type)}
-      other={<Action.OpenInBrowser title="Edit in Browser" url={searchResult?.editUrl} icon={Icon.EditShape} />}
-    />
+    <StandardUrlActionSection url={searchResult.url} title={capitalize(searchResult.type)} other={otherActions} />
   );
 
   if (!searchActions && !globalActions) return null;

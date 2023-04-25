@@ -214,7 +214,7 @@ export interface SearchResult {
   lastSeenAt: Date;
   lastSeenAtFriendly: string;
   url: string;
-  editUrl: string;
+  editUrl?: string;
   likes?: {
     currentUser: boolean;
     count: number;
