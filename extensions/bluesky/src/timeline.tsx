@@ -63,7 +63,7 @@ export default function Timeline({ previousViewTitle = "" }: TimelineProps) {
       const existingIds = new Set(state.map((post) => post.uri));
       const newPosts = posts.filter((post) => !existingIds.has(post.uri));
 
-      const allPosts = [...state, ...newPosts].filter((post) => !post.reason || post.metrics.likeCount > 0);
+      const allPosts = [...state, ...newPosts].filter((post) => !post.reason || post.metrics.likeCount > 1);
       return allPosts;
     });
 
