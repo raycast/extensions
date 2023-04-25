@@ -1,7 +1,7 @@
 # ChatGo
 
 <p align="center">
-   <img src="assets/command-icon.png" height="128">
+   <img src="https://s.newscdn.cn/yilu/smallapp/images/ketong/command-icon.png" height="128">
    <h1 align="center">ChatGo</h1>
  </p>
 
@@ -26,10 +26,7 @@ To use this extension, you must have an ChatGo account, sign up at [ChatGo](http
 `Help`: This is the help center.
 
 ## Discussion Group
-You can scan the QR code below and note Raycast ChatGo to join the relevant discussion group and receive free Token
-<p> 
-  <img src="assets/wechat.jpg" width="256" style="display: inline;">
-</p>
+You can add the author WeChat（Weixin ID: wx_juncao） as a friend and note Raycast ChatGo to join the relevant discussion group and receive free Token
 
 
 ## Issues

@@ -160,7 +160,7 @@ export interface ChatViewProps extends ChangeTemplateModelProp {
 export interface TemplateBase {
   id: number;
   name: string;
-  type: 1; // TODO
+  type: 1;
   description: string;
   content: string;
   tags: string[];

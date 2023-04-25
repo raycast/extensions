@@ -154,7 +154,6 @@ class ChatGoAPi {
         title: error?.message || "Login Failed, Please check you email and password",
         style: Toast.Style.Failure,
       });
-      // TODO @J 处理跳转到提示充值的页面
 
       return Promise.reject(error);
     }
@@ -210,7 +209,7 @@ class ChatGoAPi {
         await this.getMineTPL();
       }
     } catch (error) {
-      // TODO
+      console.log("error", error);
     }
   };
 }

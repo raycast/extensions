@@ -76,7 +76,6 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
         toast.message = `Couldn't stream message`;
         toast.style = Toast.Style.Failure;
         setLoading(false);
-        //   TODO  @J 这里需要处理下其他错误，比如，Token 用完需要充值
       },
     });
   };

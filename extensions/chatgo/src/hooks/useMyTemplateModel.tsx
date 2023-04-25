@@ -33,14 +33,11 @@ export function useMyTemplateModel(): ModelTemplateHook {
         setLoading(false);
       })
       .catch((err) => {
-        //  TODO
         setData([DEFAULT_TEMPLATE_MODE]);
         setLoading(false);
         console.log("useModel getMyTemplateList err", err);
       });
   }, []);
-
-  // 以下几个函数似乎都没有意义，因为这些数据是存储在服务端的
 
   const add = useCallback(async (model: TemplateModel) => {
     //
