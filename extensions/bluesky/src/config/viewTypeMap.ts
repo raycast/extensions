@@ -99,14 +99,6 @@ View your recently liked posts.
   },
   {
     id: "7",
-    getName: () => "Sign Out",
-    navbarSectionId: "3",
-    hideInNavView: true,
-    icon: Icon.Logout,
-    description: "Sign out of your active session.",
-  },
-  {
-    id: "8",
     getName: () => "About",
     navbarSectionId: "3",
     icon: Icon.Cd,

@@ -10,7 +10,6 @@ import NewPost from "./new-post";
 import Notifications from "./notifications";
 import Onboard from "./components/onboarding/Onboard";
 import PeopleView from "./components/people/PeopleView";
-import SignOut from "./sign-out";
 import Timeline from "./timeline";
 import { ViewTypes } from "./config/viewTypeMap";
 import { getSignedInUserHandle } from "./libs/atp";
@@ -57,9 +56,6 @@ const Home = ({ launchContext }: HomeProps) => {
         }
         break;
       case 7:
-        push(<SignOut />);
-        break;
-      case 8:
         push(<About />);
         break;
     }

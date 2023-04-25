@@ -49,7 +49,6 @@ export const ViewNotification = "View Notification";
 
 export const CreatePostFormPlaceholder = "Create Post";
 export const PublishText = "Publish";
-export const PublishPostConfirmation = "Publish this post?";
 export const PostSuccessToastMessage = "Your Post has been Published.";
 export const NewPostTextAreaTitle = "New Post";
 
@@ -107,8 +106,6 @@ export const ShareYourNext = "Share your next";
 export const PostYourReply = "Replying to";
 export const Quoting = "Quoting";
 
-export const SignedOut = "Signed Out";
-
 export const FirstSignInSuccessToast = "You have successfully signed in to Bluesky 🎉";
 
 export const PostEndHorizontalLine = `
@@ -147,19 +144,6 @@ _by Dharam Kapila_
 
 Thank you for using this extension. And to the special work being done by [Bluesky](https://blueskyweb.xyz/) and [Raycast](https://www.raycast.com) (*´∀人)
 `;
-
-export const SigningOutToast = "Signing you out of your Bluesky account.";
-export const SignedOutToast = "Signed Out";
-
-export const SignedOutMarkdown = `
-## You have signed out of your Bluesky session 🚪
-
-Press \`Enter\`, and **remove** your login details from the extension settings.
-`;
-export const SigningOutMarkdown = `
-## Signing you out of your Bluesky account.
-`;
-export const SignOutActionMessage = "Update Your Account Details";
 
 export const ErrorMessageBody = `
 Please try updating your account details in the extension preferences. 

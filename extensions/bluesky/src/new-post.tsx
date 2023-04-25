@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Form, Icon, confirmAlert, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Color, Form, Icon, useNavigation } from "@raycast/api";
 import {
   DefaultPostCacheKey,
   NewPostTextAreaTitle,
@@ -47,17 +47,15 @@ export default function NewPost({ postReference, previousViewTitle = "" }: NewPo
   }
 
   const onSubmit = async (values: NewPost) => {
-    if (await confirmAlert({ title: PublishPostConfirmation })) {
-      if (values.postText && values.postText.length > 0) {
-        await createPost(values.postText, postReference);
-        showSuccessToast(PostSuccessToastMessage);
+    if (values.postText && values.postText.length > 0) {
+      await createPost(values.postText, postReference);
+      showSuccessToast(PostSuccessToastMessage);
 
-        if (postReference) {
-          pop();
-        }
-
-        setPostText("");
+      if (postReference) {
+        pop();
       }
+
+      setPostText("");
     }
   };
 

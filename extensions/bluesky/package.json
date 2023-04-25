@@ -92,12 +92,6 @@
           "required": false
         }
       ]
-    },
-    {
-      "name": "sign-out",
-      "title": "Sign Out",
-      "description": "Sign out of your Bluesky account.",
-      "mode": "view"
     }
   ],
   "dependencies": {

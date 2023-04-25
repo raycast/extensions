@@ -33,7 +33,6 @@ import { Notification } from "./types/types";
 import Onboard from "./components/onboarding/Onboard";
 import { PostView } from "@atproto/api/dist/client/types/app/bsky/feed/defs";
 import { ViewImage } from "@atproto/api/dist/client/types/app/bsky/embed/images";
-import { confirmAlert } from "@raycast/api";
 import { showDangerToast } from "./utils/common";
 import { useCachedState } from "@raycast/utils";
 import useStartATSession from "./hooks/useStartATSession";
@@ -119,12 +118,11 @@ export default function Notifications({ previousViewTitle = "" }: ViewNotificati
   };
 
   const onMarkNotificationsAsReadSelected = async () => {
-    if (await confirmAlert({ title: MarkNotificationsAsReadAlert })) {
-      await markNotificationsAsRead();
-      await fetchNotifications(true);
-      showSuccessToast(NotificationsReadToast);
-      setNotificationText(NoNewNotifications);
-    }
+    showLoadingToast("");
+    await markNotificationsAsRead();
+    await fetchNotifications(true);
+    showSuccessToast(NotificationsReadToast);
+    setNotificationText(NoNewNotifications);
   };
 
   const openNotification = async (notification: Notification) => {

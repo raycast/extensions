@@ -43,7 +43,7 @@ const NavigationDropdown = ({ currentViewId }: { currentViewId: number }) => {
           push(<LikeFeed showNavDropdown={true} authorHandle={handle} />);
         }
         break;
-      case 8:
+      case 7:
         push(<About />);
         break;
       default:
