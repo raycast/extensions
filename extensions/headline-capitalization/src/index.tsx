@@ -1,4 +1,4 @@
-import { Clipboard, Form, ActionPanel, Action, showToast, Toast } from "@raycast/api";
+import { Clipboard, Form, ActionPanel, Action, showToast, Toast, Icon } from "@raycast/api";
 import TitleCapsEditor from "../assets/js/title-caps";
 import { useState } from "react";
 
@@ -50,28 +50,31 @@ export default function Command() {
   }
 
   return (
-    <>
-      <Form
-        actions={
-          <ActionPanel>
-            <Action.SubmitForm onSubmit={handleSubmit} title="Copy to Clipboard" />
-          </ActionPanel>
-        }
+    <Form
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm onSubmit={handleSubmit} icon={Icon.Wand} title="Copy to Clipboard" />
+        </ActionPanel>
+      }
+    >
+      <Form.Description text="Enter your Headline, then select the Capitalization Style." />
+      <Form.TextField
+        id="text_input"
+        title="Headline"
+        placeholder="Enter your Headline"
+        onChange={(value) => handleChange(value)}
+        value={capitalizedTitle}
+      />
+      <Form.Dropdown
+        id="mode"
+        title="Capitalization Style"
+        onChange={(value) => handleDropdownChange(value)}
+        storeValue
       >
-        <Form.Description text="Enter your Headline, then select the Capitalization Style." />
-        <Form.TextField
-          id="text_input"
-          title="Headline"
-          placeholder="Enter your Headline"
-          onChange={(value) => handleChange(value)}
-          value={capitalizedTitle}
-        />
-        <Form.Dropdown id="mode" title="Capitalization Style" onChange={(value) => handleDropdownChange(value)}>
-          <Form.Dropdown.Item value="2" title="Capitalize With 4+ Letters (AP Style)" />
-          <Form.Dropdown.Item value="3" title="Capitalize with 5+ Letters (APA Style)" />
-          <Form.Dropdown.Item value="4" title="Don't Capitalize Based on Length (Chicago Style)" />
-        </Form.Dropdown>
-      </Form>
-    </>
+        <Form.Dropdown.Item value="2" title="Capitalize With 4+ Letters (AP Style)" />
+        <Form.Dropdown.Item value="3" title="Capitalize with 5+ Letters (APA Style)" />
+        <Form.Dropdown.Item value="4" title="Don't Capitalize Based on Length (Chicago Style)" />
+      </Form.Dropdown>
+    </Form>
   );
 }
