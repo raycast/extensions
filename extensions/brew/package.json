@@ -73,7 +73,7 @@
           "value": "iterm"
         }
       ],
-      "description": "Choose the terminal application/emulator to use when using any Run in Terminal action."
+      "description": "The terminal application/emulator to use when using any Run in Terminal action."
     }
   ],
   "dependencies": {
