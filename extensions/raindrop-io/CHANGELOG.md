@@ -1,5 +1,9 @@
 # Raindrop.io Extension Changelog
 
+## [Fixes] - 2023-04-21
+
+- Added a fix to avoid duplicate and empty collections in dropdown results.
+
 ## [Enhancements] - 2023-04-11
 
 - Added possibility to add and delete bookmarks.
