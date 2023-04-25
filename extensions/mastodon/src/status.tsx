@@ -10,7 +10,7 @@ export default function DetailCommand(props: LaunchProps<{ draftValues: Partial<
 
   return (
     <SimpleCommand {...props}>
-      <Form.FilePicker id="files" value={files} onChange={setFiles} title="Attechments" />
+      <Form.FilePicker id="files" value={files} onChange={setFiles} title="Attachments" />
       {files.length === 1 && <Form.TextArea id="description" title="Alt text" />}
       <Form.DatePicker id="scheduled_at" title="Scheduled Time (>=5min)" />
       <VisibilityDropdown />
