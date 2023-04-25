@@ -23,7 +23,11 @@ export const imgExt = [".svg", ".gif", ".jpg", ".jpeg", ".png"];
 
 export const getGistDetailContent = (gistFile: GistItem, gistFileContent: string) => {
   const gistFileExt = parse(gistFile.filename).ext;
-
+  
+  if (gistFileExt == ".md") {
+    return gistFileContent;
+  }
+  
   if (imgExt.includes(gistFileExt)) {
     return `![](${gistFile.raw_url})`;
   }
