@@ -13,7 +13,7 @@ export default function Command() {
           <ResultItem key={network.id} id={network.id} title={network.name} result={network} type={"network"} />
         ))}
 
-      {!networks && <List.EmptyView title="No networks" description="No networks found" />}
+      {!networks && <List.EmptyView title="No Networks" description="No networks found" />}
     </List>
   );
 }

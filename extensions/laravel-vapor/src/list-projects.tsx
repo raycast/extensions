@@ -13,7 +13,7 @@ export default function Command() {
           <ResultItem key={project.id} id={project.id} title={project.name} result={project} type={"project"} />
         ))}
 
-      {!projects && <List.EmptyView title="No projects" description="No projects found" />}
+      {!projects && <List.EmptyView title="No Projects" description="No projects found" />}
     </List>
   );
 }

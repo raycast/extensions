@@ -13,7 +13,7 @@ export default function Command() {
           <ResultItem key={domain.id} id={domain.id} title={domain.zone} result={domain} type={"domain"} />
         ))}
 
-      {!domains && <List.EmptyView title="No domains" description="No domains found" />}
+      {!domains && <List.EmptyView title="No Domains" description="No domains found" />}
     </List>
   );
 }

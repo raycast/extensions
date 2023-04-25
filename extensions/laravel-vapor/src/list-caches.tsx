@@ -13,7 +13,7 @@ export default function Command() {
           <ResultItem key={cache.id} id={cache.id} title={cache.name} result={cache} type={"cache"} />
         ))}
 
-      {!caches && <List.EmptyView title="No caches" description="No caches found" />}
+      {!caches && <List.EmptyView title="No Caches" description="No caches found" />}
     </List>
   );
 }

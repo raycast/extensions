@@ -13,7 +13,7 @@ export default function Command() {
           <ResultItem key={database.id} id={database.id} title={database.name} result={database} type={"database"} />
         ))}
 
-      {!databases && <List.EmptyView title="No databases" description="No databases found" />}
+      {!databases && <List.EmptyView title="No Databases" description="No databases found" />}
     </List>
   );
 }
