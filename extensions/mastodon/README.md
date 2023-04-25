@@ -15,7 +15,7 @@
 - View your latest statuses.
 - Open the latest published status that was published from Raycast through the actions.
 
-## Settings
+## Login
 
 Input your Mastodon instance's URL, then click the "Continue" button in the bottom-right corner.
 
