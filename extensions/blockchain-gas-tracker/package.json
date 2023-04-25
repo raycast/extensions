@@ -10,6 +10,15 @@
     "Finance",
     "Data"
   ],
+  "keywords": [
+    "blockchain",
+    "ethereum",
+    "gas",
+    "fee",
+    "cryptocurrency",
+    "crypto",
+    "web3"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -17,6 +26,30 @@
       "title": "Show Current Gas",
       "description": "Show current blochchain gas fee",
       "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "ethscanKey",
+      "title":  "Etherscan API Key",
+      "description": "API key used to query gas fee and current token price",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "polygonscanKey",
+      "title":  "Polygonscan API Key",
+      "description": "API key used to query gas fee and current token price",
+      "type": "password",
+      "required": false
+    }
+    ,
+    {
+      "name": "bscscanKey",
+      "title":  "Bscscan API Key",
+      "description": "API key used to query gas fee and current token price",
+      "type": "password",
+      "required": false
     }
   ],
   "dependencies": {
