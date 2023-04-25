@@ -3,17 +3,28 @@ import { useFetch } from "@raycast/utils"
 import { useState } from "react"
 import { ResponseData } from "../../types/ResponseData"
 import { ressourceUrl } from "../ressources/ressourceUrl"
+import { CityListDropdownView } from "./CityListDropdownView"
 import { CityListItemView } from "./CityListItemView"
 import { useFavorites } from "./FavoritesProvider"
 
 export const CityListView = () => {
     const [searchText, setSearchText] = useState<string>("")
+    const [currentDate, setCurrentDate] = useState<Date>(
+        new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate())
+    )
     const { isLoading, data } = useFetch<ResponseData>(ressourceUrl(searchText))
 
     const { favorites } = useFavorites()
 
     return (
-        <List isLoading={isLoading} onSearchTextChange={setSearchText} isShowingDetail throttle>
+        <List
+            isLoading={isLoading}
+            onSearchTextChange={setSearchText}
+            searchBarPlaceholder="Search a city..."
+            searchBarAccessory={<CityListDropdownView setCurrentDate={setCurrentDate} />}
+            isShowingDetail
+            throttle
+        >
             {searchText.length === 0 ? (
                 <List.Section title="Favorites">
                     {favorites.map((city) => {
@@ -26,6 +37,7 @@ export const CityListView = () => {
                                 countryCode={countryCode}
                                 timezone={timezone}
                                 coordinates={coordinates}
+                                currentDate={currentDate}
                                 isFavorite
                             />
                         )
@@ -41,6 +53,7 @@ export const CityListView = () => {
                             name={name}
                             countryCode={country_code}
                             timezone={timezone}
+                            currentDate={currentDate}
                             coordinates={coordinates}
                         />
                     )
