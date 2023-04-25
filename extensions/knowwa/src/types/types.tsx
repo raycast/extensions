@@ -22,7 +22,7 @@ export type DocumentVersion = {
   updated_at: string;
   created_at: string;
   pdf_url: string;
-  inputData: string;
+  input_data: string;
 };
 
 export type InputDataType = {
