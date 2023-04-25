@@ -14,12 +14,14 @@
     {
       "name": "add-subscription",
       "title": "Subscribe to Feed",
+      "subtitle": "Miniflux",
       "description": "Subscribe to a new feed",
       "mode": "view"
     },
     {
       "name": "search",
       "title": "Search Feeds",
+      "subtitle": "Miniflux",
       "description": "Search entries in your subscribed feeds",
       "mode": "view",
       "preferences": [
@@ -36,6 +38,7 @@
     {
       "name": "read-recent-entries",
       "title": "Read Recent Feed Entries",
+      "subtitle": "Miniflux",
       "description": "Read the recent entries from your subscribed feeds in Raycast",
       "mode": "view",
       "preferences": [
@@ -52,12 +55,14 @@
     {
       "name": "open-miniflux",
       "title": "Open Miniflux",
+      "subtitle": "Miniflux",
       "description": "Open Miniflux RSS reader",
       "mode": "view"
     },
     {
       "name": "refresh-all-feeds",
       "title": "Refresh All Feeds",
+      "subtitle": "Miniflux",
       "description": "Refresh all RSS feeds",
       "mode": "no-view",
       "interval": "1d"
