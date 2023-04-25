@@ -22,8 +22,8 @@ export default function Command() {
           id={workspace.name}
           key={workspace.name}
           title={workspace.name}
-          subtitle={workspace.license}
           icon="../assets/quantumcast.png"
+          accessories={[{ text: workspace.license }]}
           actions={
             <ActionPanel title="Quantumcast - Workspaces">
               <Action.OpenInBrowser url={`${workspace.url}`} />
