@@ -14,7 +14,6 @@
     {
       "name": "index",
       "title": "DouTu",
-      "subtitle": "doutu",
       "description": "An extension for easy retrieval of web emoji images while chatting.",
       "mode": "view"
     }
