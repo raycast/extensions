@@ -26,12 +26,14 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.47.3",
-    "@raycast/utils": "^1.4.8",
-    "trending-github": "^2.0.7"
+    "@raycast/api": "^1.49.3",
+    "@raycast/utils": "^1.5.2",
+    "cheerio": "^1.0.0-rc.12",
+    "node-fetch": "^3.3.1"
   },
   "devDependencies": {
     "@types/node": "18.8.3",
+    "@types/node-fetch": "^2.6.3",
     "@types/react": "18.0.9",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",

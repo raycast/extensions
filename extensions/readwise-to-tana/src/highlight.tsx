@@ -5,6 +5,7 @@ import HighlightDetails from './highlightDetails'
 type HighlightProps = {
   allHighlights: string
   allUnsyncedHighlights: string
+  clearSyncHistory: () => void
   handleCopy: (id: number) => void
   handleCopyAll: () => void
   handleCopyUnsynced: () => void
@@ -15,6 +16,7 @@ type HighlightProps = {
 export default function Highlight({
   allHighlights,
   allUnsyncedHighlights,
+  clearSyncHistory,
   highlight,
   handleCopy,
   handleCopyAll,
@@ -46,6 +48,7 @@ export default function Highlight({
             content={allUnsyncedHighlights}
             onCopy={handleCopyUnsynced}
           />
+          <Action title="Reset Sync History" onAction={clearSyncHistory} />
         </ActionPanel>
       }
       key={highlight.id}

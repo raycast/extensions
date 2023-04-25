@@ -8,16 +8,19 @@ import {
 
 import beautify from 'js-beautify';
 
-export async function formatJS(text: string) {
+export function formatJS(text: string) {
   const indent = getIndentation();
   const trimmedText = text.trim();
 
-  if (trimmedText.length === 0) {
-    await showToast({
+  try {
+    JSON.parse(trimmedText);
+  } catch (err) {
+    showToast({
       style: Toast.Style.Failure,
-      title: 'Empty input',
+      title: trimmedText ? 'Invalid input' : 'Empty input',
     });
-    return;
+
+    return null;
   }
 
   const options = {
@@ -26,13 +29,17 @@ export async function formatJS(text: string) {
     indent_with_tabs: indent === 'tab',
   };
 
-  const out = beautify(trimmedText, options);
+  const output = beautify(trimmedText, options);
 
+  return output;
+}
+
+export async function copyFormattedJs(result: string) {
   if (autoPasteEnabled()) {
-    await Clipboard.paste(out);
+    await Clipboard.paste(result);
     await showHUD('✅ Pasted succesfully!');
   } else {
-    await Clipboard.copy(out);
+    await Clipboard.copy(result);
     await showHUD('✅ Copied succesfully!');
   }
 }

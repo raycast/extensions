@@ -1,4 +1,5 @@
 import AddToReadingListAction from "./AddToReadingListAction";
+import BookmarkListSection from "./BookmarkListSection";
 import DeviceListSection from "./DeviceListSection";
 import FallbackSearchSection from "./FallbackSearchSection";
 import HistoryListSection from "./HistoryListSection";
@@ -12,4 +13,5 @@ export {
   HistoryListSection,
   PermissionError,
   ReadingListSection,
+  BookmarkListSection,
 };
