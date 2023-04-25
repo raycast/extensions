@@ -3,7 +3,6 @@ import {
   DefaultPostCacheKey,
   NewPostTextAreaTitle,
   PostSuccessToastMessage,
-  PublishPostConfirmation,
   PublishText,
   Quoting,
   PostYourReply as ReplyingTo,
