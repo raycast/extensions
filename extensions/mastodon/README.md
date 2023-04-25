@@ -65,4 +65,5 @@ Based on performance considerations, the number of statuses displayed is limited
 ![](media/setting-status.png)
 
 ## Actions 
-![](media/actions.png)
+
+<img src="./media/actions.png" alt="search limit" style="width:350px;"> 
