@@ -1,4 +1,4 @@
-# 斗图 Changelog
+# DouTu Changelog
 
 ## [New Features] - 2023-04-24
 
