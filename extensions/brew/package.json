@@ -62,7 +62,7 @@
       "name": "terminalApp",
       "type": "dropdown",
       "required": false,
-      "title": "Choose Terminal Application",
+      "title": "Terminal Application",
       "data": [
         {
           "title": "Terminal",
