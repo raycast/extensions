@@ -5,7 +5,7 @@ export default function Command() {
   const { cloudflowBaseUrl } = getPreferenceValues();
 
   return (
-    <List searchBarPlaceholder="Select a documentation to open in your default browser">
+    <List searchBarPlaceholder="Select a documentation to open">
       {cloudflow.getApiDocumentations(cloudflowBaseUrl).map((doc) => (
         <List.Item
           id={doc.name}
