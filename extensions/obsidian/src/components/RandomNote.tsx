@@ -1,16 +1,11 @@
-import { useEffect, useState } from "react";
-import { useNotes } from "../utils/cache";
-import { Vault, Note } from "../utils/interfaces";
-import { getRandomNote } from "../utils/utils";
+import { useNotes } from "../utils/hooks";
+import { Vault } from "../utils/interfaces";
 import { NoteQuickLook } from "./NoteQuickLook";
 
 export function RandomNote(props: { vault: Vault; showTitle: boolean }) {
   const { vault, showTitle } = props;
-  const [randomNote, setRandomNote] = useState<Note>();
+  const [notes] = useNotes(vault);
+  const randomNote = notes[Math.floor(Math.random() * notes.length)];
 
-  useEffect(() => {
-    setRandomNote(getRandomNote(vault));
-  }, []);
-
-  return <NoteQuickLook note={randomNote} notes={useNotes(vault)} vault={vault} showTitle={showTitle}></NoteQuickLook>;
+  return <NoteQuickLook note={randomNote} showTitle={showTitle}></NoteQuickLook>;
 }

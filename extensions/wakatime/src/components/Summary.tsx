@@ -23,7 +23,7 @@ const RangeStatsItem: React.FC<SummaryItemProps> = ({ range, setShowDetail, show
   const md = useMemo(() => {
     return [
       `## ${title}`,
-      getDuration(range.cummulative_total.seconds),
+      getDuration(range.cumulative_total.seconds),
       "---",
       ...keys.flatMap((key) => [
         `### ${key[0].toUpperCase()}${key.slice(1)}`,
@@ -38,7 +38,7 @@ const RangeStatsItem: React.FC<SummaryItemProps> = ({ range, setShowDetail, show
         accessories: [
           {
             tooltip: "Cumulative Total",
-            text: getDuration(range.cummulative_total.seconds),
+            text: getDuration(range.cumulative_total.seconds),
           },
         ],
       };

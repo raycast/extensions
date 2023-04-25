@@ -7,26 +7,32 @@ import {
   showHUD,
   showToast,
   Toast,
+  popToRoot,
   getPreferenceValues,
   useNavigation,
+  ArgumentsLaunchProps,
 } from "@raycast/api";
 import { pipe } from "fp-ts/lib/function";
 import * as TE from "fp-ts/TaskEither";
 import { useEffect, useState } from "react";
 
-import { Preferences, SFSymbols } from "./util/models";
+import { Preferences } from "./util/models";
 import { divideNumber } from "./util/parser";
 import * as music from "./util/scripts";
 import { handleTaskEitherError } from "./util/utils";
 
-export default function SetVolume() {
+export default function SetVolume(props: ArgumentsLaunchProps) {
   const { volumeSteps = "10" } = getPreferenceValues<Preferences>();
   const step = parseInt(volumeSteps);
+
+  const volumeArg = props.arguments?.volumeArg;
 
   const volumeLevels = divideNumber(100, step);
 
   const [volume, setVolume] = useState<number | null>(null);
 
+  // on view load
+  // update local state with current volume
   useEffect(() => {
     pipe(
       music.player.volume.get,
@@ -34,23 +40,38 @@ export default function SetVolume() {
     )();
   }, []);
 
+  // if volume arg is passed we can close the view
+  useEffect(() => {
+    if (!volumeArg || isNaN(parseInt(volumeArg))) return;
+
+    pipe(
+      music.player.volume.set(parseInt(volumeArg)),
+      handleTaskEitherError("Could not update volume", () => {
+        showHUD(`Volume set to ${volumeArg}`);
+        popToRoot();
+        closeMainWindow();
+      })
+    )();
+  }, [volumeArg]);
+
   return (
-    <List isLoading={!volume}>
-      {volumeLevels.map((level) => (
-        <List.Item
-          key={level}
-          title={level.toString()}
-          icon={volume === level ? Icon.Checkmark : Icon.SpeakerOn}
-          actions={<Actions value={level} />}
-        />
-      ))}
+    <List isLoading={!volume || (volumeArg && !isNaN(parseInt(volumeArg)))}>
+      {!volumeArg &&
+        volumeLevels.map((level) => (
+          <List.Item
+            key={level}
+            title={level.toString()}
+            icon={volume === level ? Icon.CheckCircle : Icon.SpeakerOn}
+            actions={<Actions value={level} />}
+          />
+        ))}
     </List>
   );
 }
 
 function Actions({ value }: { value: number }) {
   const { pop } = useNavigation();
-  const title = SFSymbols.SPEAKER_FILL + "  Set Volume";
+  const title = "Set Volume";
 
   const handleRating = async () => {
     await pipe(
@@ -70,7 +91,7 @@ function Actions({ value }: { value: number }) {
 
   return (
     <ActionPanel>
-      <Action title={title} onAction={handleRating} />
+      <Action title={title} onAction={handleRating} icon={Icon.SpeakerOn} />
     </ActionPanel>
   );
 }

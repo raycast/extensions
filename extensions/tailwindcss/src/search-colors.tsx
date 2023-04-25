@@ -30,7 +30,7 @@ export default function SearchColors() {
                 key={shade}
                 title={shade}
                 subtitle={value as string}
-                content={{ tintColor: value as string, source: "square.jpeg" }}
+                content={{ color: { light: value as string, dark: value as string, adjustContrast: false } }}
                 keywords={[name, name + shade, `${name} ${shade}`, `${name}-${shade}`]}
                 actions={
                   <ActionPanel>

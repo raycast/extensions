@@ -36,7 +36,7 @@ const command = async (props: { arguments: Arguments }) => {
       throw Error("No team found");
     }
 
-    const payload = await linearClient.issueCreate({
+    const payload = await linearClient.createIssue({
       teamId: team.id,
       title: props.arguments.title,
       description: props.arguments.description,

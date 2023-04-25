@@ -38,10 +38,17 @@
           "type": "checkbox",
           "required": false,
           "label": "Show IPv6 Address",
-          "description": "Query and display my IPv6 address.",
-          "default": true
+          "description": "Query and display my IPv6 address. Can cause information loading speed to drop.",
+          "default": false
         }
       ]
+    },
+    {
+      "name": "copy-local-ip-address",
+      "title": "Copy Local IP Address",
+      "icon": "copy-local-ip-address.png",
+      "description": "Copy local IPv4 address.",
+      "mode": "no-view"
     }
   ],
   "preferences": [
@@ -86,10 +93,28 @@
       ],
       "required": false,
       "default": "en"
+    },
+    {
+      "name": "coordinatesFormat",
+      "title": "Coordinates Format",
+      "description": "Coordinate format of location information display.",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "Latitude, Longitude (default)",
+          "value": "latLon"
+        },
+        {
+          "title": "Longitude, Latitude",
+          "value": "lonLat"
+        }
+      ],
+      "required": false,
+      "default": "latLon"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.44.0",
+    "@raycast/api": "^1.47.3",
     "axios": "^0.27.2",
     "public-ip": "^6.0.1"
   },

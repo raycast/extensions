@@ -22,8 +22,8 @@ export default function IssueCommentForm({ comment, issue, mutateComments }: Iss
 
     try {
       comment
-        ? await linearClient.commentUpdate(comment.id, { body: content })
-        : await linearClient.commentCreate({ body: content, issueId: issue.id });
+        ? await linearClient.updateComment(comment.id, { body: content })
+        : await linearClient.createComment({ body: content, issueId: issue.id });
 
       await showToast({ style: Toast.Style.Success, title: `${comment ? "Updated" : "Added"} comment` });
 

@@ -14,8 +14,11 @@
   ],
   "license": "MIT",
   "contributors": [
+    "pomdtr",
     "zach",
-    "ankitchouhan1020"
+    "ankitchouhan1020",
+    "pernielsentikaer",
+    "danpalmer"
   ],
   "commands": [
     {
@@ -31,6 +34,31 @@
       "description": "Create and open a new window",
       "mode": "no-view",
       "subtitle": "Arc"
+    },
+    {
+      "name": "new-little-arc",
+      "title": "Open New Little Arc Window",
+      "description": "Create and open a new little arc window",
+      "mode": "no-view",
+      "subtitle": "Arc",
+      "preferences": [
+        {
+          "name": "url",
+          "title": "URL",
+          "description": "The URL to open in the new tab",
+          "type": "textfield",
+          "required": false,
+          "default": "https://google.com"
+        }
+      ],
+      "arguments": [
+        {
+          "name": "url",
+          "placeholder": "URL",
+          "type": "text",
+          "required": false
+        }
+      ]
     },
     {
       "name": "search-spaces",
@@ -65,8 +93,7 @@
           "title": "URL",
           "description": "The URL to open in the new tab",
           "type": "textfield",
-          "required": false,
-          "default": "https://google.com"
+          "required": false
         }
       ]
     },
@@ -81,7 +108,68 @@
       "name": "search",
       "title": "Search Arc",
       "description": "Search tabs, history and search suggestions",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "sorting",
+          "title": "Sorting",
+          "description": "Sorting of sections in search results",
+          "type": "dropdown",
+          "required": false,
+          "default": "asc",
+          "data": [
+            {
+              "title": "Tabs → History → Suggestions",
+              "value": "tabsHistorySuggestions"
+            },
+            {
+              "title": "History → Tabs → Suggestions",
+              "value": "historyTabsSuggestions"
+            }
+          ]
+        },
+        {
+          "name": "showFavorites",
+          "title": "Sections",
+          "label": "Show Favorites",
+          "description": "Show favorites in search results",
+          "type": "checkbox",
+          "required": false,
+          "default": true
+        },
+        {
+          "name": "showPinnedTabs",
+          "label": "Show Pinned Tabs",
+          "description": "Show pinned tabs in search results",
+          "type": "checkbox",
+          "required": false,
+          "default": true
+        },
+        {
+          "name": "showUnpinnedTabs",
+          "label": "Show Unpinned Tabs",
+          "description": "Show unpinned tabs in search results",
+          "type": "checkbox",
+          "required": false,
+          "default": true
+        },
+        {
+          "name": "showHistory",
+          "label": "Show History",
+          "description": "Show history in search results",
+          "type": "checkbox",
+          "required": false,
+          "default": true
+        },
+        {
+          "name": "showSuggestions",
+          "label": "Show Suggestions",
+          "description": "Show suggestions in search results",
+          "type": "checkbox",
+          "required": false,
+          "default": true
+        }
+      ]
     }
   ],
   "dependencies": {
@@ -105,7 +193,7 @@
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
+    "prettier": "^2.8.4",
     "typescript": "^4.4.3"
   },
   "scripts": {

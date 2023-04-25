@@ -30,7 +30,7 @@ export function getDuration(seconds?: number | null) {
  */
 export function cumulateSummaryDuration(
   { data }: WakaTime.Summary,
-  key: keyof Omit<typeof data[0], "grand_total" | "range">
+  key: keyof Omit<(typeof data)[0], "grand_total" | "range">
 ) {
   const obj = Object.entries(
     data

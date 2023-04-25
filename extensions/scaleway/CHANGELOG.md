@@ -1,5 +1,9 @@
 # Scaleway Changelog
 
+## [Improvement] - 2023-03-14
+
+- Update scaleway SDK
+
 ## [Fix] - 2023-01-04
 
 - fix(config): bug when you don't have configure the cli

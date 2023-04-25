@@ -7,7 +7,7 @@ export class BrowserHistoryActions {
   public static OpenPreferences = ActionOpenPreferences;
 }
 
-function HistoryItemAction({ entry: { url } }: { entry: HistoryEntry }) {
+function HistoryItemAction({ entry: { url, browser } }: { entry: HistoryEntry }) {
   const { defaultBrowser } = getPreferenceValues<Preferences>();
   const actions = {
     [SupportedBrowsers.Chrome]: (
@@ -94,7 +94,11 @@ function HistoryItemAction({ entry: { url } }: { entry: HistoryEntry }) {
   return (
     <ActionPanel>
       {defaultBrowser && defaultBrowser !== "Default" ? (
-        actions[defaultBrowser]
+        defaultBrowser == "Originator" ? (
+          actions[browser]
+        ) : (
+          actions[defaultBrowser]
+        )
       ) : (
         <Action.OpenInBrowser title="Open in Default Browser" url={url} />
       )}

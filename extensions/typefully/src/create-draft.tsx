@@ -1,81 +1,88 @@
-import { Form, ActionPanel, Action, showToast, getPreferenceValues } from "@raycast/api";
-import { useRef, useState } from "react";
-import got from "got";
-import { Preferences } from "./interfaces/preferences";
-import { useForm } from "@raycast/utils";
+import { Form, ActionPanel, Action, showToast, Toast, Icon, open, Clipboard } from "@raycast/api";
+import { useState } from "react";
+import { CreateDraftValues } from "./types";
+import { FormValidation, useForm } from "@raycast/utils";
+import { createDraft } from "./typefully";
 
-type Values = {
-  content: string;
-  threadify: boolean;
-  schedule_date?: Date;
-  share_options: string;
-};
-
-const Command = () => {
-  const textAreaRef = useRef<Form.TextArea>(null);
-  const preferences = getPreferenceValues<Preferences>();
+export default function Command() {
   const [shareOptions, setShareOptions] = useState<string>();
+  const { handleSubmit, reset, focus, itemProps } = useForm<CreateDraftValues>({
+    onSubmit: async (values) => {
+      await showToast({
+        style: Toast.Style.Animated,
+        title: "Creating draft",
+      });
 
-  async function handleSubmit(values: Values) {
-    showToast({ title: "Submitting to Typefully", message: "We've submitted your draft to Typefully." });
+      try {
+        const draft = await createDraft(values);
 
-    const data: Record<string, any> = {
-      content: values.content,
-      threadify: values.threadify,
-    };
+        reset({
+          content: "",
+        });
 
-    if (values.share_options == "schedule-share") {
-      data["schedule-date"] = values.schedule_date;
-    }
+        focus("content");
 
-    if (values.share_options == "schedule-next-free-slot") {
-      data["schedule-date"] = "next-free-slot";
-    }
-
-    try {
-      await got
-        .post("https://api.typefully.com/v1/drafts/", {
-          json: data,
-          headers: {
-            "X-API-KEY": `Bearer ${preferences.token}`,
+        await showToast({
+          style: Toast.Style.Success,
+          title: "Created draft",
+          primaryAction: {
+            title: "Open Draft",
+            shortcut: { modifiers: ["cmd", "shift"], key: "o" },
+            onAction: async (toast) => {
+              await toast.hide();
+              await open(`https://typefully.com/?d=${draft.id}`);
+            },
           },
-        })
-        .json();
-    } catch (error) {
-      showToast({ title: "Whoops!", message: "Something went wrong while submitting to Typefully." });
-    }
+          secondaryAction: {
+            title: "Copy Draft URL",
+            shortcut: { modifiers: ["cmd", "shift"], key: "c" },
+            onAction: async (toast) => {
+              await toast.hide();
+              await Clipboard.copy(`https://typefully.com/?d=${draft.id}`);
+            },
+          },
+        });
+      } catch (error) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Failed creating draft",
+          message: error instanceof Error ? error.message : String(error),
+        });
+      }
+    },
+    validation: {
+      content: FormValidation.Required,
+      scheduleDate: shareOptions === "schedule" ? FormValidation.Required : undefined,
+    },
+  });
 
-    textAreaRef.current?.reset();
-    showToast({ title: "Submitted to Typefully", message: "Your draft made it to Typefully! 🥳" });
+  function handleScheduleChange(value: string) {
+    setShareOptions(value);
+
+    if (itemProps.shareOptions.onChange) {
+      itemProps.shareOptions.onChange(value);
+    }
   }
 
   return (
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Create Draft" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
-      <Form.TextArea
-        ref={textAreaRef}
-        id="content"
-        title="Draft 🪶"
-        autoFocus={true}
-        placeholder="Craft your next communication"
-      />
+      <Form.TextArea title="Content" placeholder="Craft your next communication" autoFocus {...itemProps.content} />
+      <Form.Checkbox label="Split long threads into multiple tweets" {...itemProps.threadify} />
       <Form.Separator />
-      <Form.Dropdown id="share_options" title="Schedule" onChange={setShareOptions}>
-        <Form.Dropdown.Item value="save-as-draft" title="Save as draft" />
-        <Form.Dropdown.Item value="schedule-share" title="Schedule" />
-        <Form.Dropdown.Item value="schedule-next-free-slot" title="Schedule to next free slot" />
+      <Form.Dropdown title="Schedule" {...itemProps.shareOptions} onChange={handleScheduleChange}>
+        <Form.Dropdown.Item icon={Icon.Circle} value="none" title="None" />
+        <Form.Dropdown.Item icon={Icon.ArrowRightCircle} value="next-free-slot" title="Next free slot" />
+        <Form.Dropdown.Item icon={Icon.Clock} value="schedule" title="Find slot" />
       </Form.Dropdown>
-      <Form.Checkbox id="threadify" title="Threadify?" label="Automatically split long threads into multiple tweets?" />
-      {shareOptions == "schedule-share" && (
-        <Form.DatePicker type={Form.DatePicker.Type.DateTime} id="schedule_date" title="Date picker" />
+      {shareOptions == "schedule" && (
+        <Form.DatePicker type={Form.DatePicker.Type.DateTime} title="Schedule at" {...itemProps.scheduleDate} />
       )}
     </Form>
   );
-};
-
-export default Command;
+}

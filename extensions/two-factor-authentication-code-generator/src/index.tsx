@@ -1,21 +1,14 @@
 import {
+  Action,
   ActionPanel,
-  ActionPanelItem,
-  ActionPanelSection,
-  allLocalStorageItems,
-  CopyToClipboardAction,
   Form,
-  FormValue,
-  getLocalStorageItem,
   Icon,
   List,
-  PushAction,
-  removeLocalStorageItem,
-  setLocalStorageItem,
   showToast,
-  SubmitFormAction,
-  ToastStyle,
   useNavigation,
+  getPreferenceValues,
+  LocalStorage,
+  Toast,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { decode } from "hi-base32";
@@ -34,37 +27,51 @@ export default function AppsView() {
       name: string;
       key: string;
       code: string;
+      percent: number;
+      time: string;
     }[]
   >([]);
+  const { defaultAction } = getPreferenceValues();
+
+  async function updateApps() {
+    const _apps = await LocalStorage.allItems();
+    setApps(
+      Object.keys(_apps)
+        .sort((a, b) => a.localeCompare(b))
+        .map((name) => {
+          const token: { secret: string; options: Options } = parse(_apps[name]);
+          return {
+            name,
+            key: _apps[name].toString(),
+            time: `${Math.floor(token.options.period - ((new Date().getTime() / 1000) % token.options.period))}`,
+            percent:
+              (Math.floor(token.options.period - ((new Date().getTime() / 1000) % token.options.period)) /
+                token.options.period) *
+              100,
+            code: generateTOTP(token.secret, token.options).toString().padStart(token.options.digits, "0"),
+          };
+        })
+    );
+  }
 
   useEffect(() => {
-    allLocalStorageItems().then((_apps) => {
-      setApps(
-        Object.keys(_apps)
-          .sort((a, b) => a.localeCompare(b))
-          .map((name) => {
-            const token: { secret: string; options: Options } = parse(_apps[name]);
-            return {
-              name,
-              key: _apps[name].toString(),
-              code: generateTOTP(token.secret, token.options).toString().padStart(token.options.digits, "0"),
-            };
-          })
-      );
-    });
+    updateApps();
+    setInterval(() => {
+      updateApps();
+    }, 100);
   }, []);
 
   return (
     <List
       actions={
         <ActionPanel>
-          <PushAction
+          <Action.Push
             icon={Icon.Plus}
             title="Add App"
             target={<AddForm />}
             shortcut={{ modifiers: ["cmd"], key: "enter" }}
           />
-          <PushAction
+          <Action.Push
             icon={Icon.Link}
             title="Add App By URL"
             target={<AddAppByUrlForm />}
@@ -78,53 +85,67 @@ export default function AppsView() {
           title={a.name}
           subtitle={a.code}
           key={a.name}
+          accessories={[
+            {
+              icon: {
+                source:
+                  +a.percent > 75
+                    ? Icon.CircleProgress100
+                    : +a.percent > 50
+                    ? Icon.CircleProgress75
+                    : +a.percent > 25
+                    ? Icon.CircleProgress50
+                    : +a.time > 0
+                    ? Icon.CircleProgress25
+                    : Icon.Circle,
+              },
+              tooltip: a.time,
+            },
+          ]}
           actions={
             <ActionPanel>
-              <ActionPanelSection>
-                <CopyToClipboardAction content={a.code} title="Copy Code" />
-                <PushAction
+              <ActionPanel.Section>
+                {defaultAction == "copy" ? (
+                  <>
+                    <Action.CopyToClipboard content={a.code} title="Copy Code" />
+                    <Action.Paste content={a.code} title="Paste Code" />
+                  </>
+                ) : (
+                  <>
+                    <Action.Paste content={a.code} title="Paste Code" />
+                    <Action.CopyToClipboard content={a.code} title="Copy Code" />
+                  </>
+                )}
+              </ActionPanel.Section>
+              <ActionPanel.Section>
+                <Action.Push
                   icon={Icon.Plus}
                   title="Add App"
                   target={<AddForm />}
                   shortcut={{ modifiers: ["cmd"], key: "enter" }}
                 />
-                <PushAction
+                <Action.Push
                   icon={Icon.Link}
                   title="Add App By URL"
                   target={<AddAppByUrlForm />}
                   shortcut={{ modifiers: ["cmd"], key: "u" }}
                 />
-              </ActionPanelSection>
-              <ActionPanelSection>
-                <ActionPanelItem
+              </ActionPanel.Section>
+              <ActionPanel.Section>
+                <Action
                   icon={Icon.Trash}
                   title="Remove App"
                   onAction={async () => {
-                    await removeLocalStorageItem(a.name);
+                    await LocalStorage.removeItem(a.name);
 
-                    allLocalStorageItems().then((_apps) => {
-                      setApps(
-                        Object.keys(_apps)
-                          .sort((a, b) => a.localeCompare(b))
-                          .map((name) => {
-                            const token = parse(_apps[name]);
-                            return {
-                              name,
-                              key: _apps[name].toString(),
-                              code: generateTOTP(token.secret, token.options)
-                                .toString()
-                                .padStart(token.options.digits, "0"),
-                            };
-                          })
-                      );
-                    });
+                    await updateApps();
                   }}
                   shortcut={{
                     modifiers: ["ctrl"],
                     key: "return",
                   }}
                 />
-              </ActionPanelSection>
+              </ActionPanel.Section>
             </ActionPanel>
           }
         />
@@ -136,41 +157,41 @@ export default function AppsView() {
 function AddForm() {
   const { push } = useNavigation();
 
-  const onSubmit = async (e: Record<string, FormValue>) => {
+  const onSubmit = async (e: Record<string, Form.Value>) => {
     const values = e as { name?: string; secret?: string; digits: Digits; period: number; algorithm: Algorithm };
 
     if (!values.name || !values.secret) {
-      showToast(ToastStyle.Failure, "Please provide both fields");
+      showToast(Toast.Style.Failure, "Please provide both fields");
       return;
     }
 
     values.secret = values.secret.replace(/[-\s]/g, "").toUpperCase();
 
-    if (await getLocalStorageItem(values.name)) {
-      showToast(ToastStyle.Failure, "This app name is already taken");
+    if (await LocalStorage.getItem(values.name)) {
+      showToast(Toast.Style.Failure, "This app name is already taken");
       return;
     }
 
     try {
       decode.asBytes(values.secret);
     } catch {
-      showToast(ToastStyle.Failure, "Invalid 2FA secret");
+      showToast(Toast.Style.Failure, "Invalid 2FA secret");
       return;
     }
 
     if (isNaN(values.period)) {
-      showToast(ToastStyle.Failure, "Period should be a number");
+      showToast(Toast.Style.Failure, "Period should be a number");
       return;
     }
 
     if (+values.period <= 0) {
-      showToast(ToastStyle.Failure, "Period should be positive number");
+      showToast(Toast.Style.Failure, "Period should be positive number");
       return;
     }
 
     const options: Options = { digits: values.digits, period: values.period, algorithm: values.algorithm };
 
-    await setLocalStorageItem(values.name, JSON.stringify({ secret: values.secret, options: options }));
+    await LocalStorage.setItem(values.name, JSON.stringify({ secret: values.secret, options: options }));
 
     push(<AppsView />);
   };
@@ -179,7 +200,7 @@ function AddForm() {
     <Form
       actions={
         <ActionPanel>
-          <SubmitFormAction icon={Icon.Plus} title="Submit" onSubmit={onSubmit} />
+          <Action.SubmitForm icon={Icon.Plus} title="Submit" onSubmit={onSubmit} />
         </ActionPanel>
       }
     >
@@ -208,27 +229,27 @@ function AddForm() {
 function AddAppByUrlForm() {
   const { push } = useNavigation();
 
-  const onSubmit = async (e: Record<string, FormValue>) => {
+  const onSubmit = async (e: Record<string, Form.Value>) => {
     const { url } = e as { url?: string };
 
     if (!url) {
-      showToast(ToastStyle.Failure, "Please provide both fields");
+      showToast(Toast.Style.Failure, "Please provide both fields");
       return;
     }
 
     try {
       const parse = new URL(url);
       if (parse.protocol != "otpauth:") {
-        showToast(ToastStyle.Failure, "Unsupported protocol " + parse.protocol);
+        showToast(Toast.Style.Failure, "Unsupported protocol " + parse.protocol);
         return;
       }
       if (parse.host != "totp") {
-        showToast(ToastStyle.Failure, "Unsupported type " + parse.host + " only TOTP supported");
+        showToast(Toast.Style.Failure, "Unsupported type " + parse.host + " only TOTP supported");
         return;
       }
 
       if (!parse.pathname) {
-        showToast(ToastStyle.Failure, "Label is missing");
+        showToast(Toast.Style.Failure, "Label is missing");
         return;
       }
 
@@ -241,44 +262,44 @@ function AddAppByUrlForm() {
       const digits = searchParams.get("digits") ? searchParams.get("digits") : DEFAULT_OPTIONS.digits;
 
       if (!secret) {
-        showToast(ToastStyle.Failure, "Secret is mandatory");
+        showToast(Toast.Style.Failure, "Secret is mandatory");
         return;
       }
 
       try {
         decode.asBytes(secret);
       } catch {
-        showToast(ToastStyle.Failure, "Invalid 2FA secret");
+        showToast(Toast.Style.Failure, "Invalid 2FA secret");
         return;
       }
 
       if (!isValidAlgorithm(algorithm)) {
-        showToast(ToastStyle.Failure, "Unsupported hashing algorithm " + algorithm);
+        showToast(Toast.Style.Failure, "Unsupported hashing algorithm " + algorithm);
         return;
       }
 
       if (isNaN(period)) {
-        showToast(ToastStyle.Failure, "Period should be a number");
+        showToast(Toast.Style.Failure, "Period should be a number");
         return;
       }
 
       if (+period <= 0) {
-        showToast(ToastStyle.Failure, "Period should be positive number");
+        showToast(Toast.Style.Failure, "Period should be positive number");
         return;
       }
 
       if (!isValidDigit(digits)) {
-        showToast(ToastStyle.Failure, "Unsupported digits " + digits);
+        showToast(Toast.Style.Failure, "Unsupported digits " + digits);
         return;
       }
 
       const options: Options = { digits: digits, period: period, algorithm: algorithm };
 
-      await setLocalStorageItem(name, JSON.stringify({ secret: secret, options: options }));
+      await LocalStorage.setItem(name, JSON.stringify({ secret: secret, options: options }));
 
       push(<AppsView />);
     } catch (e) {
-      showToast(ToastStyle.Failure, "Unable to parse URL");
+      showToast(Toast.Style.Failure, "Unable to parse URL");
       return;
     }
     push(<AppsView />);
@@ -288,7 +309,7 @@ function AddAppByUrlForm() {
     <Form
       actions={
         <ActionPanel>
-          <SubmitFormAction title="Submit" onSubmit={onSubmit} />
+          <Action.SubmitForm title="Submit" onSubmit={onSubmit} />
         </ActionPanel>
       }
     >

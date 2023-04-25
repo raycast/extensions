@@ -1,5 +1,21 @@
 # Toothpick Changelog
 
+## [Partial Device Support Addition] - 2023-02-17
+
+- Added rudimentary mappings for the following devices:
+  - Jabra Elite 85t (custom icon)
+- Cleaned up codebase a little bit
+
+## [Partial Device Support Addition] - 2023-02-10
+
+- Added rudimentary mappings for the following devices:
+  - Google Pixel Buds Pro (custom icon)
+
+## [Partial Device Support Addition] - 2023-01-25
+
+- Added rudimentary mappings for the following devices:
+  - Sony WF-1000XM3 (battery level and custom icon)
+
 ## [Partial Device Support Addition] - 2023-01-18
 
 - Added rudimentary mappings for the following devices:

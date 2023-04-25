@@ -1,4 +1,4 @@
-import { Action, ActionPanel, closeMainWindow, List, showToast, Toast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, closeMainWindow, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
 import { flow, pipe } from "fp-ts/lib/function";
 import * as A from "fp-ts/ReadonlyNonEmptyArray";
 import * as TE from "fp-ts/TaskEither";
@@ -29,30 +29,34 @@ const kindToString = (kind: PlaylistKind) => {
   }
 };
 
-export default function PlaySelected() {
+export default function AddToPlaylist() {
+  const [isLoading, setIsLoading] = useState(false);
   const [playlists, setPlaylists] = useState<PlaylistSections | null>(null);
   const { pop } = useNavigation();
 
   useEffect(() => {
     pipe(
-      PlaylistKind.USER,
-      music.playlists.getPlaylists,
+      music.playlists.getPlaylists(PlaylistKind.USER),
       TE.mapLeft((e) => {
         console.error(e);
         showToast(Toast.Style.Failure, "Could not get your playlists");
+        setIsLoading(false);
       }),
       TE.map(
         flow(
           parseResult<Playlist>(),
           (data) => A.groupBy<Playlist>((playlist) => playlist.kind?.split(" ")?.[0] ?? "Other")(data),
-          setPlaylists
+          (data) => {
+            setPlaylists(data);
+            setIsLoading(false);
+          }
         )
       )
     )();
   }, []);
 
   return (
-    <List isLoading={playlists === null} searchBarPlaceholder="Search A Playlist">
+    <List isLoading={playlists === null || isLoading} searchBarPlaceholder="Search A Playlist">
       {Object.entries(playlists ?? {})
         .filter(([section]) => section !== "library")
         .map(([section, data]) => (
@@ -61,12 +65,16 @@ export default function PlaySelected() {
               <List.Item
                 key={playlist.id}
                 title={playlist.name}
-                accessoryTitle={
-                  SFSymbols.PLAYLIST +
-                  ` ${playlist.count}   ` +
-                  SFSymbols.TIME +
-                  ` ${Math.floor(Number(playlist.duration) / 60)} min`
-                }
+                accessories={[
+                  {
+                    icon: Icon.Music,
+                    text: `${playlist.count}`,
+                  },
+                  {
+                    icon: Icon.Clock,
+                    text: `${Math.floor(Number(playlist.duration) / 60)} min`,
+                  },
+                ]}
                 icon={{ source: "../assets/icon.png" }}
                 actions={<Actions playlist={playlist} pop={pop} />}
               />
@@ -83,7 +91,7 @@ interface ActionsProps {
 }
 
 function Actions({ playlist: { name }, pop }: ActionsProps) {
-  const title1 = SFSymbols.ADD_TO_LIBRARY + `  Add to Playlist "${name}"`;
+  const title1 = `Add to Playlist "${name}"`;
 
   const handleSubmit = () => async () => {
     await pipe(
@@ -101,7 +109,7 @@ function Actions({ playlist: { name }, pop }: ActionsProps) {
 
   return (
     <ActionPanel title={title1}>
-      <Action title={title1} onAction={handleSubmit()} />
+      <Action title={title1} onAction={handleSubmit()} icon={Icon.PlusCircle} />
     </ActionPanel>
   );
 }

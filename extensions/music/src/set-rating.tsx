@@ -41,7 +41,7 @@ export default function SetRating() {
 
 function Actions({ value }: { value: number }) {
   const { pop } = useNavigation();
-  const title = SFSymbols.STAR + "  Rate track";
+  const title = "Rate track";
 
   const handleRating = async () => {
     await pipe(
@@ -61,7 +61,7 @@ function Actions({ value }: { value: number }) {
 
   return (
     <ActionPanel>
-      <Action title={title} onAction={handleRating} />
+      <Action title={title} onAction={handleRating} icon={Icon.Stars} />
     </ActionPanel>
   );
 }

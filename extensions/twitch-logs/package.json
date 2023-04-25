@@ -1,0 +1,68 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "twitch-logs",
+  "title": "Twitch Logs",
+  "description": "See what messages a user has sent on a paticular twitch channel on a paticular month.",
+  "icon": "command-icon.png",
+  "author": "Aayush9029",
+  "categories": [
+    "Other",
+    "Fun"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Twitch Logs",
+      "description": "Messages a user has sent on a specfic channel.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "channel",
+          "title": "Channel",
+          "description": "The channel to search for messages in",
+          "placeholder": "Channel",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "user",
+          "title": "User",
+          "description": "The user to search for messages from",
+          "placeholder": "User",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "month",
+          "title": "Month",
+          "description": "The month to search for messages in (default: current month)",
+          "placeholder": "Month (1-12)",
+          "type": "text",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/utils": "^1.4.8",
+    "@raycast/api": "^1.47.3"
+  },
+  "devDependencies": {
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

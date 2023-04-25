@@ -10,8 +10,11 @@ import {
   CopyAction,
   ExportAction,
   EditAction,
+  ImportAction,
 } from "./components";
-import { useCopy, useExport } from "./actions";
+import { useCopy, useExport, useImport } from "./actions";
+import { nanoid } from "nanoid";
+import detectLang from "lang-detector";
 
 type State = {
   filter: Language;
@@ -32,6 +35,7 @@ export default function Command() {
 
   const { handleCopy } = useCopy();
   const { handleExport } = useExport();
+  const { readFile, readFolder, isValidFile, isFolder } = useImport();
 
   useEffect(() => {
     (async () => {
@@ -104,6 +108,41 @@ export default function Command() {
     }
   }
 
+  async function buildImportedCodeStash(file: string) {
+    const data = await readFile(file);
+    const filename = file.replace(/^.*[\\/]/, "").replace(/.txt$/, "");
+
+    const lang = detectLang(data) ?? "Unknown";
+
+    if (data) {
+      return { id: nanoid(), title: filename, code: data, language: lang };
+    }
+  }
+
+  async function handleImport(files: string[]) {
+    const importedStashes = [] as CodeStash[];
+
+    for (const file of files) {
+      if (isValidFile(file) || isFolder(file)) {
+        const fileList = isValidFile(file) ? [file] : await readFolder(file);
+
+        if (!fileList) continue;
+
+        for (const file of fileList) {
+          const codeStash = await buildImportedCodeStash(file);
+          if (codeStash) importedStashes.push(codeStash);
+        }
+      }
+    }
+
+    setState((previous) => ({
+      ...previous,
+      codeStashes: [...previous.codeStashes, ...importedStashes],
+      filter: Language.All,
+      searchText: "",
+    }));
+  }
+
   const filterCodeStashes = useCallback(() => {
     const { filter, codeStashes } = state;
 
@@ -140,7 +179,12 @@ export default function Command() {
         setState((previous) => ({ ...previous, searchText: newValue }));
       }}
     >
-      <EmptyView codeStashes={filterCodeStashes()} searchText={state.searchText} onCreate={handleCreate} />
+      <EmptyView
+        codeStashes={filterCodeStashes()}
+        searchText={state.searchText}
+        onCreate={handleCreate}
+        onImport={(files) => handleImport(files)}
+      />
       {filterCodeStashes().map((codeStash, index) => (
         <List.Item
           key={codeStash.id}
@@ -159,6 +203,7 @@ export default function Command() {
               </ActionPanel.Section>
               <ActionPanel.Section>
                 <ExportAction onExport={() => handleExport(state.codeStashes)} />
+                <ImportAction onImport={(files) => handleImport(files)} />
               </ActionPanel.Section>
             </ActionPanel>
           }

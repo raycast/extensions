@@ -1,11 +1,14 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "quick-open-project",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "title": "Quick Open Project",
   "description": "Find and open projects on your system",
   "icon": "icon.png",
   "author": "zerowidth",
+  "contributors": [
+    "bjw-s"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -22,6 +25,14 @@
           "description": "Comma-separated list of paths to index. Example: '~/work,~/projects'. Wildcards allowed, e.g. '~/go/src/*/*'",
           "placeholder": "~/work,~/projects",
           "default": ""
+        },
+        {
+          "name": "includeWorkspaces",
+          "type": "checkbox",
+          "label": "Include VSCode workspaces",
+          "required": true,
+          "description": "Include Visual Studio Code workspaces in the results",
+          "default": false
         },
         {
           "name": "editorApp",

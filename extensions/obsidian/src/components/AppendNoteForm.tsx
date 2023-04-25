@@ -1,15 +1,16 @@
 import { ActionPanel, Form, Action, useNavigation, showToast, Toast, getPreferenceValues } from "@raycast/api";
 import fs from "fs";
-import { NoteAction } from "../utils/constants";
-import { Note, SearchNotePreferences } from "../utils/interfaces";
+import { NoteReducerAction, NoteReducerActionType } from "../utils/data/reducers";
+import { Note, Vault } from "../utils/interfaces";
+import { SearchNotePreferences } from "../utils/preferences";
 import { applyTemplates } from "../utils/utils";
 
 interface FormValue {
   content: string;
 }
 
-export function AppendNoteForm(props: { note: Note; actionCallback: (action: NoteAction) => void }) {
-  const { note, actionCallback } = props;
+export function AppendNoteForm(props: { note: Note; vault: Vault; dispatch: (action: NoteReducerAction) => void }) {
+  const { note, vault, dispatch } = props;
   const { pop } = useNavigation();
 
   const { appendTemplate } = getPreferenceValues<SearchNotePreferences>();
@@ -18,8 +19,8 @@ export function AppendNoteForm(props: { note: Note; actionCallback: (action: Not
     const content = await applyTemplates(text.content);
     fs.appendFileSync(note.path, "\n" + content);
     showToast({ title: "Added text to note", style: Toast.Style.Success });
+    dispatch({ type: NoteReducerActionType.Update, payload: { note: note, vault: vault } });
     pop();
-    actionCallback(NoteAction.Append);
   }
 
   return (

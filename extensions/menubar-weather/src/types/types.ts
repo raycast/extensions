@@ -31,6 +31,7 @@ export interface Daily {
   rain_sum: number[];
   weathercode: number[];
   windspeed_10m_max: number[];
+  winddirection_10m_dominant: number[];
 }
 
 export interface DailyUnits {

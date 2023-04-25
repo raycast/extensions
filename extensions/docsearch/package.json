@@ -5,12 +5,16 @@
   "description": "Link all DocSearch into Raycast",
   "icon": "docsearch.png",
   "author": "Fatpandac",
+  "keywords": [
+    "algolia"
+  ],
   "categories": [
     "Documentation"
   ],
   "license": "MIT",
   "contributors": [
-    "AnishDe12020"
+    "AnishDe12020",
+    "pomdtr"
   ],
   "commands": [
     {

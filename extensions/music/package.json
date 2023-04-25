@@ -6,7 +6,8 @@
   "icon": "icon.png",
   "author": "fedevitaledev",
   "contributors": [
-    "peterdev22"
+    "peterdev22",
+    "danpalmer"
   ],
   "license": "MIT",
   "keywords": [
@@ -45,6 +46,13 @@
     }
   ],
   "commands": [
+    {
+      "name": "toggle-shuffle",
+      "title": "Toggle Shuffle",
+      "subtitle": "Apple Music",
+      "description": "Toggle Shuffle",
+      "mode": "no-view"
+    },
     {
       "name": "reveal-track",
       "title": "Reveal Track",
@@ -123,6 +131,16 @@
       "mode": "no-view"
     },
     {
+      "name": "add-to-playlist",
+      "title": "Add to Playlist",
+      "subtitle": "Apple Music",
+      "description": "Add currently playing track to a playlist",
+      "keywords": [
+        "playlist"
+      ],
+      "mode": "view"
+    },
+    {
       "name": "start-playlist",
       "title": "Start Playlist",
       "subtitle": "Apple Music",
@@ -172,6 +190,14 @@
       "keywords": [
         "volume",
         "sound"
+      ],
+      "arguments": [
+        {
+          "name": "volumeArg",
+          "placeholder": "Volume (0-100)",
+          "type": "text",
+          "required": false
+        }
       ]
     },
     {
@@ -197,23 +223,14 @@
         "volume-down",
         "decrease"
       ]
-    },
-    {
-      "name": "add-to-playlist",
-      "title": "Add to Playlist",
-      "subtitle": "Apple Music",
-      "description": "Add current track to playlist",
-      "mode": "view",
-      "keywords": [
-        "add-to-playlist"
-      ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.34.1",
+    "@raycast/api": "^1.47.2",
     "fp-ts": "^2.12.1",
     "io-ts": "^2.2.19",
-    "run-applescript": "^6.0.0"
+    "run-applescript": "^6.0.0",
+    "ts-pattern": "^4.2.1"
   },
   "devDependencies": {
     "@rawnly/eslint-config-ts": "^0.0.2",

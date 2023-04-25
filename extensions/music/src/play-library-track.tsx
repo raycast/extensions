@@ -1,4 +1,4 @@
-import { Action, ActionPanel, closeMainWindow, List, showToast, Toast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, closeMainWindow, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
 import { pipe } from "fp-ts/lib/function";
 import * as O from "fp-ts/Option";
 import * as S from "fp-ts/string";
@@ -59,7 +59,7 @@ export default function PlayLibraryTrack() {
           key={id}
           title={name}
           subtitle={SFSymbols.ARTIST + ` ${artist}`}
-          accessoryTitle={SFSymbols.MUSIC_NOTE + ` ${album}`}
+          accessories={[{ text: SFSymbols.MUSIC_NOTE + ` ${album}` }]}
           icon={{ source: "../assets/icon.png" }}
           actions={<Actions name={name} id={id ?? ""} pop={pop} />}
         />
@@ -69,7 +69,7 @@ export default function PlayLibraryTrack() {
 }
 
 function Actions({ name, pop, id }: { id: string; name: string; pop: () => void }) {
-  const title = SFSymbols.PLAY + `  Start Track "${name}"`;
+  const title = `Start Track "${name}"`;
 
   const handleSubmit = async () => {
     await pipe(
@@ -84,7 +84,7 @@ function Actions({ name, pop, id }: { id: string; name: string; pop: () => void 
 
   return (
     <ActionPanel>
-      <Action title={title} onAction={handleSubmit} />
+      <Action title={title} onAction={handleSubmit} icon={Icon.Play} />
     </ActionPanel>
   );
 }

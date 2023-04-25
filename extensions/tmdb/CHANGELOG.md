@@ -1,11 +1,14 @@
 # TMDB Changelog
 
+## [Upcoming Movies] - 2023-03-24
+
+- Add upcoming movies command.
+
 ## [UI Update] - 2023-01-02
 
 - Updated Poster UI for movies and tv shows.
 - Minor UI changes.
 - Migrated to new Raycast Version.
-
 
 ## [Initial Version] - 2022-07-27
 

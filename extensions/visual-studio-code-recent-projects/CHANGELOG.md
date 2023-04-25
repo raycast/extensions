@@ -1,5 +1,11 @@
 # Visual Studio Code Search Recent Projects Changelog
 
+## [Update] - 2023-01-31
+
+- Updated pinned projects logic
+- Cleaned up file structure
+- Restructure components
+
 ## [Update] - 2023-01-03
 
 - Adds support for VSCodium as an option in the extension settings.

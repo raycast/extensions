@@ -4,6 +4,8 @@ export type Preferences = {
   focusIntervalDuration: string;
   shortBreakIntervalDuration: string;
   longBreakIntervalDuration: string;
+  completionImage: string;
+  sound: string;
 };
 
 export type IntervalType = "focus" | "short-break" | "long-break";

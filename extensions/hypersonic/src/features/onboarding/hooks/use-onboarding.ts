@@ -16,7 +16,6 @@ const ONBOARDING_DATA: OnboardingTodo[] = [
     url: '',
     shareUrl: '',
     contentUrl: '',
-    inProgress: false,
     completed: false,
   },
   {
@@ -26,7 +25,6 @@ const ONBOARDING_DATA: OnboardingTodo[] = [
     url: '',
     shareUrl: '',
     contentUrl: '',
-    inProgress: false,
     completed: false,
   },
   {
@@ -36,7 +34,6 @@ const ONBOARDING_DATA: OnboardingTodo[] = [
     url: '',
     shareUrl: '',
     contentUrl: '',
-    inProgress: false,
     completed: false,
   },
   {
@@ -46,7 +43,6 @@ const ONBOARDING_DATA: OnboardingTodo[] = [
     url: '',
     shareUrl: '',
     contentUrl: 'https://www.loom.com/share/1f4c369a32794c779458bbfbcdf27494',
-    inProgress: false,
     completed: false,
   },
   {
@@ -57,7 +53,6 @@ const ONBOARDING_DATA: OnboardingTodo[] = [
     url: '',
     shareUrl: '',
     contentUrl: '',
-    inProgress: false,
     completed: false,
   },
 ]
@@ -97,7 +92,6 @@ export const useOnboarding = () => {
       url: '',
       shareUrl: '',
       contentUrl: '',
-      inProgress: false,
       completed: false,
     }
 

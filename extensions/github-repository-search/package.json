@@ -22,10 +22,18 @@
       "required": true,
       "title": "Personal Access Token",
       "description": "Create a token with repository access"
+    },
+    {
+      "name": "baseUrl",
+      "type": "textfield",
+      "required": false,
+      "title": "GitHub Base URL",
+      "description": "Optional Base URL for GitHub Enterprise (e.g. https://github.acme-inc.com/api/v3). Defaults to the public GitHub."
     }
   ],
   "contributors": [
-    "immint023"
+    "immint023",
+    "mheidinger"
   ],
   "categories": [
     "Developer Tools"

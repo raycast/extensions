@@ -7,6 +7,7 @@ type Status = {
   type: 'status' | 'checkbox'
   name: string
   doneName?: string
+  completedStatuses?: string[]
   inProgressId?: string
   notStartedId?: string
 }

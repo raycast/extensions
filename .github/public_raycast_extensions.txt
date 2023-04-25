@@ -14,3 +14,7 @@ vercast
 ohdear
 devutils
 arc
+netlify
+pinata
+grafbase
+tailscale

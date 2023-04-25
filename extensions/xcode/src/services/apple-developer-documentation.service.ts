@@ -1,5 +1,4 @@
 import fetch from "node-fetch";
-import * as Path from "path";
 import { AppleDeveloperDocumentationEntry } from "../models/apple-developer-documentation/apple-developer-documentation-entry.model";
 import { URL } from "url";
 
@@ -44,7 +43,7 @@ export class AppleDeveloperDocumentationService {
     // For each Entry
     for (const entry of entries) {
       // Update URL
-      entry.url = Path.join(AppleDeveloperDocumentationService.hostUrl, entry.url);
+      entry.url = [AppleDeveloperDocumentationService.hostUrl, entry.url].join(entry.url.startsWith("/") ? "" : "/");
     }
     // Return Documentation Entries
     return entries;

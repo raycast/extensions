@@ -1,14 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Clipboard,
-  Form,
-  Icon,
-  useNavigation,
-  Toast,
-  getPreferenceValues,
-  showToast,
-} from "@raycast/api";
+import { Action, ActionPanel, Clipboard, Form, Icon, useNavigation, Toast, showToast } from "@raycast/api";
 import { format } from "date-fns";
 import { FormValidation, getAvatarIcon, useCachedState, useForm } from "@raycast/utils";
 import { useMemo, useEffect } from "react";
@@ -38,17 +28,7 @@ export default function CreateTaskForm(props: {
       const toast = await showToast({ style: Toast.Style.Animated, title: "Creating task" });
 
       try {
-        const { signature } = getPreferenceValues<{ signature: boolean }>();
-
-        let htmlNotes = `<body>${values.description}`;
-        if (signature) {
-          if (values.description) {
-            htmlNotes += "\n--\n";
-          }
-
-          htmlNotes += `Created via <a href="https://www.raycast.com/?ref=signatureAsana">Raycast</a>`;
-        }
-        htmlNotes += "</body>";
+        const htmlNotes = `<body>${values.description}</body>`;
 
         const customFieldsEntries = Object.entries(values).filter(
           ([key, value]) => key.startsWith("field-") && value !== ""
@@ -65,6 +45,7 @@ export default function CreateTaskForm(props: {
           ...(values.projects && values.projects.length > 0 ? { projects: values.projects } : {}),
           ...(values.description ? { html_notes: htmlNotes } : {}),
           ...(values.assignee ? { assignee: values.assignee } : {}),
+          ...(values.start_date ? { start_on: format(values.start_date, "yyyy-MM-dd") } : {}),
           ...(values.due_date ? { due_on: format(values.due_date, "yyyy-MM-dd") } : {}),
         });
 
@@ -114,6 +95,7 @@ export default function CreateTaskForm(props: {
       name: props.draftValues?.name,
       description: props.draftValues?.description,
       assignee: props.draftValues?.assignee || props.assignee,
+      start_date: props.draftValues?.start_date,
       due_date: props.draftValues?.due_date,
     },
   });
@@ -139,6 +121,7 @@ export default function CreateTaskForm(props: {
   }, [values.projects]);
 
   const hasCustomFields = customFields && customFields.length > 0;
+  const selectedWorkspace = workspaces?.find((workspace) => values.workspace === workspace.gid);
 
   return (
     <Form
@@ -189,7 +172,9 @@ export default function CreateTaskForm(props: {
           );
         })}
       </Form.Dropdown>
-
+      {selectedWorkspace?.is_organization ? (
+        <Form.DatePicker title="Start Date" type={Form.DatePicker.Type.Date} {...itemProps.start_date} />
+      ) : null}
       <Form.DatePicker title="Due Date" type={Form.DatePicker.Type.Date} {...itemProps.due_date} />
 
       {hasCustomFields

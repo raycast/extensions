@@ -16,7 +16,7 @@ type ProjectIssuesProps = {
   me: User | undefined;
 };
 
-export default function ProjectIssues({ projectId, teamId, priorities, me, users }: ProjectIssuesProps) {
+export default function ProjectIssues({ projectId, priorities, me, users }: ProjectIssuesProps) {
   const { issues, isLoadingIssues, mutateList } = useIssues(getProjectIssues, [projectId]);
 
   return (
@@ -28,9 +28,7 @@ export default function ProjectIssues({ projectId, teamId, priorities, me, users
           <ActionPanel>
             <Action.Push
               title="Create Issue"
-              target={
-                <CreateIssueForm projectId={projectId} teamId={teamId} priorities={priorities} users={users} me={me} />
-              }
+              target={<CreateIssueForm projectId={projectId} priorities={priorities} users={users} me={me} />}
             />
           </ActionPanel>
         }
