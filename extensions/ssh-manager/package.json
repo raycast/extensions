@@ -5,6 +5,7 @@
   "description": "Quickly connect and manage multiple SSH connections",
   "icon": "command-icon.png",
   "author": "dimagrossman",
+  "contributors": ["LenoxFro"],
   "license": "MIT",
   "preferences": [
     {
@@ -27,6 +28,24 @@
       }
     ],
     "default": "Terminal"
+    },
+    {
+    "name": "openin",
+    "type": "dropdown",
+    "required": false,
+    "title": "Decide how to open our SSH-Connection",
+    "description": "Choose wether to open in new Window or new Tab",
+    "data": [
+      {
+        "title": "new Window",
+        "value": "newWindow"
+      },
+      {
+        "title": "new Tab",
+        "value": "newTab"
+      }
+    ],
+    "default": "newWindow"
     }
 
   ],
