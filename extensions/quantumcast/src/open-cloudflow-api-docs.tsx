@@ -11,7 +11,7 @@ export default function Command() {
           id={doc.name}
           key={doc.name}
           title={doc.name}
-          icon="../assets/quantumcast.png"
+          icon="quantumcast.png"
           accessories={[{ text: doc.location }]}
           actions={
             <ActionPanel title="Quantumcast - API Documentation">
