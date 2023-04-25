@@ -38,7 +38,7 @@ export default function newDoc() {
                 />
                 <Action.Push
                   target={<NewDocForm template={doc} />}
-                  title="Go To Form"
+                  title="Go to Form"
                 />
               </ActionPanel>
             }

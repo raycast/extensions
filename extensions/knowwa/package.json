@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "knowwa",
-  "title": "Knowwa - Generate Documents In Knowwa From Raycast",
-  "description": "Generate documents from Raycast",
+  "title": "Knowwa",
+  "description": "Generate and list documents in Knowwa directly from Raycast",
   "icon": "knowwa_icon.png",
   "author": "knowwa",
   "categories": [
