@@ -46,7 +46,8 @@ export default function indexDocs() {
                 metadata={
                   <List.Item.Detail.Metadata>
                     {doc.document_version &&
-                      JSON.parse(doc.document_version.inputData).map(
+                      doc.document_version?.input_data &&
+                      JSON.parse(doc.document_version?.input_data)?.map(
                         (item: InputDataType) => (
                           <List.Item.Detail.Metadata.Label
                             key={Object.keys(item)[0]}
