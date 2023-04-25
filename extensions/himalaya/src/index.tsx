@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Detail, Form, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
-import { useForm, FormValidation } from "@raycast/utils";
-import { useState, useEffect } from "react";
+import { FormValidation, useCachedState, useForm } from "@raycast/utils";
+import { useEffect, useState } from "react";
 import child_process = require("node:child_process");
 import util = require("node:util");
 
@@ -45,7 +45,7 @@ interface State {
 }
 
 export default function ListEnvelopes() {
-  const [state, setState] = useState<State>({
+  const [state, setState] = useCachedState<State>("index", {
     isLoading: true,
     envelopes: [],
     folders: [],
@@ -86,67 +86,8 @@ export default function ListEnvelopes() {
     fetch();
   }, []);
 
-  const accessories = (envelope: Envelope) => {
-    const accessories = [];
-
-    if (envelope.flags.includes(Flag.Answered)) {
-      accessories.push({
-        icon: Icon.Reply,
-      });
-    }
-
-    // This is always present. Accessories are rendered ordered
-    // so put them last.
-    accessories.push({
-      text: {
-        value: `${envelope.from.name} <${envelope.from.addr}>`,
-      },
-      icon: Icon.Person,
-    });
-
-    return accessories;
-  };
-
-  if (state.isLoading) {
-    return <List isLoading={state.isLoading}></List>;
-  } else if (!state.isLoading && state.exe) {
-    return (
-      <List isLoading={state.isLoading}>
-        {Array.from(group_envelopes_by_date(state.envelopes).entries()).map(([date, group]) => {
-          const items = group.map((envelope) => {
-            const item = (
-              <List.Item
-                id={envelope.id}
-                key={envelope.id}
-                title={envelope.subject}
-                icon={envelope.flags.includes(Flag.Seen) ? Icon.Circle : Icon.CircleFilled}
-                accessories={accessories(envelope)}
-                actions={
-                  <ActionPanel title="Envelope">
-                    {readAction(envelope, state, setState)}
-                    {envelope.flags.includes(Flag.Seen) && markUnreadAction(envelope, state, setState)}
-                    {!envelope.flags.includes(Flag.Seen) && markReadAction(envelope, state, setState)}
-                    {moveToSelectedAction(envelope, state, setState)}
-                    {moveToTrashAction(envelope, state, setState)}
-                    <Action.CopyToClipboard title="Copy ID to Clipboard" content={envelope.id} />
-                  </ActionPanel>
-                }
-              />
-            );
-
-            return item;
-          });
-
-          const section = (
-            <List.Section title={date} key={date}>
-              {items}
-            </List.Section>
-          );
-
-          return section;
-        })}
-      </List>
-    );
+  if (state.exe || state.isLoading) {
+    return <List isLoading={state.isLoading}>{envelopesToList(state, setState)}</List>;
   } else {
     return <Detail markdown="Couldn't find executable, please install Himalaya CLI" />;
   }
@@ -197,15 +138,13 @@ async function hasExe(): Promise<boolean> {
 
     if (stdout) {
       return true;
-    }
-
-    if (stderr) {
+    } else if (stderr) {
       console.error("Couldn't find executable", stderr);
 
       return false;
+    } else {
+      throw new Error("No results from stdout or stderr");
     }
-
-    throw new Error("No results from stdout or stderr");
   } catch (error) {
     console.error("Couldn't find executable", error);
 
@@ -241,15 +180,13 @@ async function listEnvelopes(): Promise<Envelope[]> {
     });
 
     return envelopes;
-  }
-
-  if (stderr) {
-    console.log(stderr);
+  } else if (stderr) {
+    console.error(stderr);
 
     return [];
+  } else {
+    throw new Error("No results from stdout or stderr");
   }
-
-  throw new Error("No results from stdout or stderr");
 }
 
 async function listFolders(): Promise<Folder[]> {
@@ -273,15 +210,13 @@ async function listFolders(): Promise<Folder[]> {
     });
 
     return folders;
-  }
-
-  if (stderr) {
-    console.log(stderr);
+  } else if (stderr) {
+    console.error(stderr);
 
     return [];
+  } else {
+    throw new Error("No results from stdout or stderr");
   }
-
-  throw new Error("No results from stdout or stderr");
 }
 
 interface MoveToSelectedFormValues {
@@ -299,20 +234,35 @@ function MoveToSelectedForm(props: { folders: Folder[]; envelope: Envelope; setS
       });
 
       try {
-        const { stdout, _stderr } = await exec(`"himalaya" move ${values.folder} -- ${props.envelope.id}`, {
+        const { stdout, stderr } = await exec(`"himalaya" move ${values.folder} -- ${props.envelope.id}`, {
           env: {
             PATH: PATH,
           },
         });
+        if (stdout) {
+          toast.style = Toast.Style.Success;
+          toast.title = `Moved envelope to folder ${values.folder}`;
 
-        toast.style = Toast.Style.Success;
-        toast.title = `Moved envelope to folder ${values.folder}`;
+          props.setState((previous: State) => ({
+            ...previous,
+            isLoading: true,
+          }));
+          const envelopes = await listEnvelopes();
+          props.setState((previous: State) => ({
+            ...previous,
+            envelopes: envelopes,
+            isLoading: false,
+          }));
 
-        props.setState((previous: State) => ({ ...previous, isLoading: true }));
-        const envelopes = await listEnvelopes();
-        props.setState((previous: State) => ({ ...previous, envelopes: envelopes, isLoading: false }));
+          pop();
+        } else if (stderr) {
+          console.error(stderr);
 
-        pop();
+          toast.style = Toast.Style.Failure;
+          toast.title = `Failed to move envelope`;
+
+          pop();
+        }
       } catch (error) {
         toast.style = Toast.Style.Failure;
         toast.title = `Failed to move envelope: ${error}`;
@@ -390,7 +340,7 @@ function ReadDetail(props: { envelope: Envelope }) {
           <Detail.Metadata.Separator />
           <Detail.Metadata.TagList title="Flags">
             {props.envelope.flags.map((flag) => (
-              <Detail.Metadata.TagList.Item text={flag} />
+              <Detail.Metadata.TagList.Item text={flag} key={flag} />
             ))}
           </Detail.Metadata.TagList>
         </Detail.Metadata>
@@ -408,15 +358,13 @@ async function readEmail(envelope: Envelope): Promise<any> {
 
   if (stdout) {
     return stdout;
-  }
-
-  if (stderr) {
+  } else if (stderr) {
     console.log(stderr);
 
     return stderr;
+  } else {
+    throw new Error("No results from stdout or stderr");
   }
-
-  throw new Error("No results from stdout or stderr");
 }
 
 const markUnreadAction = (envelope: Envelope, state: State, setState: any) => {
@@ -432,18 +380,33 @@ const markUnreadAction = (envelope: Envelope, state: State, setState: any) => {
         });
 
         try {
-          const { stdout, _stderr } = await exec(`"himalaya" flag remove ${envelope.id} -- seen`, {
+          const { stdout, stderr } = await exec(`"himalaya" flag remove ${envelope.id} -- seen`, {
             env: {
               PATH: PATH,
             },
           });
 
-          toast.style = Toast.Style.Success;
-          toast.title = "Marked unread";
+          if (stdout) {
+            toast.style = Toast.Style.Success;
+            toast.title = "Marked unread";
 
-          setState((previous: State) => ({ ...previous, isLoading: true }));
-          const envelopes = await listEnvelopes();
-          setState((previous: State) => ({ ...previous, envelopes: envelopes, isLoading: false }));
+            setState((previous: State) => ({ ...previous, isLoading: true }));
+            const envelopes = await listEnvelopes();
+            setState((previous: State) => ({
+              ...previous,
+              envelopes: envelopes,
+              isLoading: false,
+            }));
+          } else if (stderr) {
+            console.error(stderr);
+
+            setState((previous: State) => ({ ...previous, isLoading: false }));
+
+            toast.style = Toast.Style.Failure;
+            toast.title = "Failed to mark unread";
+          } else {
+            throw new Error("No results from stdout or stderr");
+          }
         } catch (error) {
           toast.style = Toast.Style.Failure;
           toast.title = `Failed to mark unread: ${error}`;
@@ -466,18 +429,33 @@ const markReadAction = (envelope: Envelope, state: State, setState: any) => {
         });
 
         try {
-          const { stdout, _stderr } = await exec(`"himalaya" flag add ${envelope.id} -- seen`, {
+          const { stdout, stderr } = await exec(`"himalaya" flag add ${envelope.id} -- seen`, {
             env: {
               PATH: PATH,
             },
           });
 
-          toast.style = Toast.Style.Success;
-          toast.title = "Marked read";
+          if (stdout) {
+            toast.style = Toast.Style.Success;
+            toast.title = "Marked read";
 
-          setState((previous: State) => ({ ...previous, isLoading: true }));
-          const envelopes = await listEnvelopes();
-          setState((previous: State) => ({ ...previous, envelopes: envelopes, isLoading: false }));
+            setState((previous: State) => ({ ...previous, isLoading: true }));
+            const envelopes = await listEnvelopes();
+            setState((previous: State) => ({
+              ...previous,
+              envelopes: envelopes,
+              isLoading: false,
+            }));
+          } else if (stderr) {
+            console.error(stderr);
+
+            setState((previous: State) => ({ ...previous, isLoading: false }));
+
+            toast.style = Toast.Style.Failure;
+            toast.title = "Failed to mark read";
+          } else {
+            throw new Error("No results from stdout or stderr");
+          }
         } catch (error) {
           toast.style = Toast.Style.Failure;
           toast.title = `Failed to mark read: ${error}`;
@@ -514,18 +492,33 @@ const moveToTrashAction = (envelope: Envelope, state: State, setState: any) => {
         });
 
         try {
-          const { stdout, _stderr } = await exec(`"himalaya" delete ${envelope.id}`, {
+          const { stdout, stderr } = await exec(`"himalaya" delete ${envelope.id}`, {
             env: {
               PATH: PATH,
             },
           });
 
-          toast.style = Toast.Style.Success;
-          toast.title = "Moved to trash";
+          if (stdout) {
+            toast.style = Toast.Style.Success;
+            toast.title = "Moved to trash";
 
-          setState((previous: State) => ({ ...previous, isLoading: true }));
-          const envelopes = await listEnvelopes();
-          setState((previous: State) => ({ ...previous, envelopes: envelopes, isLoading: false }));
+            setState((previous: State) => ({ ...previous, isLoading: true }));
+            const envelopes = await listEnvelopes();
+            setState((previous: State) => ({
+              ...previous,
+              envelopes: envelopes,
+              isLoading: false,
+            }));
+          } else if (stderr) {
+            console.error(stderr);
+
+            setState((previous: State) => ({ ...previous, isLoading: false }));
+
+            toast.style = Toast.Style.Failure;
+            toast.title = "Failed to move to trash";
+          } else {
+            throw new Error("No results from stdout or stderr");
+          }
         } catch (error) {
           toast.style = Toast.Style.Failure;
           toast.title = `Failed to move to trash: ${error}`;
@@ -533,4 +526,61 @@ const moveToTrashAction = (envelope: Envelope, state: State, setState: any) => {
       }}
     />
   );
+};
+
+const accessories = (envelope: Envelope) => {
+  const accessories = [];
+
+  if (envelope.flags.includes(Flag.Answered)) {
+    accessories.push({
+      icon: Icon.Reply,
+    });
+  }
+
+  // This is always present. Accessories are rendered ordered
+  // so put them last.
+  accessories.push({
+    text: {
+      value: `${envelope.from.name} <${envelope.from.addr}>`,
+    },
+    icon: Icon.Person,
+  });
+
+  return accessories;
+};
+
+const envelopesToList = (state: any, setState: any): any => {
+  return Array.from(group_envelopes_by_date(state.envelopes).entries()).map(([date, group]) => {
+    const items = group.map((envelope) => {
+      const item = (
+        <List.Item
+          id={envelope.id}
+          key={envelope.id}
+          title={envelope.subject}
+          icon={envelope.flags.includes(Flag.Seen) ? Icon.Circle : Icon.CircleFilled}
+          accessories={accessories(envelope)}
+          actions={
+            <ActionPanel title="Envelope">
+              {readAction(envelope, state, setState)}
+              {envelope.flags.includes(Flag.Seen) && markUnreadAction(envelope, state, setState)}
+              {!envelope.flags.includes(Flag.Seen) && markReadAction(envelope, state, setState)}
+              {moveToSelectedAction(envelope, state, setState)}
+              {moveToTrashAction(envelope, state, setState)}
+              <Action.CopyToClipboard title="Copy ID to Clipboard" content={envelope.id} />
+            </ActionPanel>
+          }
+        />
+      );
+
+      return item;
+    });
+
+    const section = (
+      <List.Section title={date} key={date}>
+        {items}
+      </List.Section>
+    );
+
+    return section;
+  });
 };
