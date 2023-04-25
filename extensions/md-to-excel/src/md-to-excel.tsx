@@ -1,14 +1,16 @@
-import { Action, ActionPanel, Clipboard, closeMainWindow, Form, Icon, popToRoot, showHUD, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Clipboard, Form, Icon, popToRoot, showHUD, showToast, Toast } from "@raycast/api";
 import { useState } from "react";
-const markdownTable = require("markdown-table");
-import { createObjectCsvStringifier } from "csv-writer";
-
 
 function convertMarkdownTableToExcel(markdown: string): Promise<string> {
   const lines = markdown.trim().split("\n");
   const tableData: string[][] = lines
     .filter((line) => !/^\s*[-|]+\s*$/.test(line)) // Skip separator lines
-    .map((line) => line.replace(/^\||\|$/g, "").split("|").map((cell) => cell.trim()));
+    .map((line) =>
+      line
+        .replace(/^\||\|$/g, "")
+        .split("|")
+        .map((cell) => cell.trim())
+    );
 
   const result = tableData
     .filter((row) => row.some((cell) => !/^[-\s]+$/.test(cell))) // Filter out rows with only dashes and spaces
@@ -17,23 +19,6 @@ function convertMarkdownTableToExcel(markdown: string): Promise<string> {
 
   return Promise.resolve(result);
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 export default function MD2Excel() {
   const [input, setInput] = useState("");
@@ -49,17 +34,15 @@ export default function MD2Excel() {
       showToast(Toast.Style.Failure, "Failed to convert and copy Plain", "See console for more details");
     }
   };
-  
 
   return (
-    <Form actions={<ActionPanel>
-        <Action
-          icon={Icon.Clipboard}
-          title="Convert to Plain and Copy to Clipboard"
-          onAction={handleSubmit}
-        />
-      </ActionPanel>
-    }>
+    <Form
+      actions={
+        <ActionPanel>
+          <Action icon={Icon.Clipboard} title="Convert to Plain and Copy to Clipboard" onAction={handleSubmit} />
+        </ActionPanel>
+      }
+    >
       <Form.TextArea
         id="input"
         title="Markdown Table"

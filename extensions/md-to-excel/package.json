@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "md-to-excel",
   "title": "md-to-excel",
-  "description": "Convert MD format table to Excel compatible table.",
+  "description": "Convert md format table to Excel compatible table.",
   "icon": "command-icon.png",
   "author": "wu.eth",
   "categories": [
@@ -13,8 +13,8 @@
     {
       "name": "md-to-excel",
       "title": "md-to-excel",
-      "subtitle": "Convert MD format table to Excel compatible table.",
-      "description": "Convert MD format table to Excel compatible table.",
+      "subtitle": "Convert md format table to Excel compatible table.",
+      "description": "Convert md format table to Excel compatible table.",
       "mode": "view"
     }
   ],
