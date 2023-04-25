@@ -1,0 +1,6 @@
+{
+    "prettier.tabWidth": 4,
+    "prettier.documentSelectors": [
+        "*.tsx"
+    ]
+}
