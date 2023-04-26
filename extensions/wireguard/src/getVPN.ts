@@ -1,5 +1,5 @@
 import { VPN } from "./type";
-import { CMD_PATH, runScript, runScriptReturnArray } from "./utils";
+import { CMD_PATH, getFlagByName, getFlagEmoji, runScript, runScriptReturnArray } from "./utils";
 
 export default async () => {
   const GET_VPN_NAMES = `${CMD_PATH} --nc list | grep "com.wireguard.macos"`;
@@ -11,7 +11,8 @@ export default async () => {
   let execString = REG_VPN.exec(cmdResult);
   while (execString !== null) {
     const isConnected = execString[1] === "(Connected)" ? true : false;
-    const VPNItem: VPN = { name: execString[2], isConnected: isConnected };
+    const VPNName = execString[2];
+    const VPNItem: VPN = { name: VPNName, isConnected: isConnected, flag: getFlagByName(VPNName) };
     VPNItems.push(VPNItem);
     execString = REG_VPN.exec(cmdResult);
   }

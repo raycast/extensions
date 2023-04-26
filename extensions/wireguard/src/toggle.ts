@@ -1,9 +1,9 @@
-import { getVPNStatusByName } from "./getVPN";
+import { VPN } from "./type";
 import { CMD_PATH, runScript } from "./utils";
 
-export default async (VPNName: string) => {
-  const isConnected = await getVPNStatusByName(VPNName);
-  if (isConnected) {
+export default async (VPN: VPN) => {
+  const VPNName = VPN.name;
+  if (VPN.isConnected) {
     await disconnectVPNByName(VPNName, true);
   } else {
     await connectVPNByName(VPNName, true);

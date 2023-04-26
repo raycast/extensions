@@ -58,3 +58,21 @@ export async function runScriptReturnArray(command: string, isSilently = false) 
     return [];
   }
 }
+
+export function getFlagByName(name: string): string {
+  // VPN name is beginning of country code, eg: us-xxx, gb09-xxx, etc
+  const COUNTRY_REGEX = /^(\w{2})\d*?-/;
+  const execString = COUNTRY_REGEX.exec(name);
+  const countryCode = execString !== null ? execString[1] : "";
+  return getFlagEmoji(countryCode);
+}
+
+export function getFlagEmoji(countryCode: string): string {
+  const defaultEmoji = "🏴‍☠️";
+  if (countryCode?.length !== 2) {
+    return defaultEmoji;
+  }
+  const flagEmoji = String.fromCodePoint(...[...countryCode.toUpperCase()].map((c) => 0x1f1a5 + c.charCodeAt(0)));
+  const isFlagEmoji = /[\uD83C][\uDDE6-\uDDFF][\uD83C][\uDDE6-\uDDFF]/.test(flagEmoji);
+  return isFlagEmoji ? flagEmoji : defaultEmoji;
+}
