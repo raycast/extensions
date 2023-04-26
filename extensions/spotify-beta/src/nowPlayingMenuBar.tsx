@@ -28,12 +28,9 @@ import { EpisodeObject, TrackObject } from "./helpers/spotify.api";
 import { useMyPlaylists } from "./hooks/useMyPlaylists";
 import { addToPlaylist } from "./api/addToPlaylist";
 import { useContainsMyLikedTracks } from "./hooks/useContainsMyLikedTracks";
-import { usePlaybackState } from "./hooks/usePlaybackState";
 import { useMe } from "./hooks/useMe";
-import { useEffect, useRef } from "react";
-import { useCachedState } from "@raycast/utils";
-import { useCurrentlyPlayingUri } from "./hooks/useCurrentlyPlayingUri";
 import { formatTitle } from "./helpers/formatTitle";
+import { getErrorMessage } from "./helpers/getError";
 
 function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
   const preferences = getPreferenceValues<{
@@ -42,24 +39,7 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
     iconType?: "spotify-icon" | "cover-image";
   }>();
 
-  // First we get the currently playing URI using `useCurrentlyPlayingUri` (this prioritises AppleScript over the API)
-  const { currentlyPlayingUriData, currentlyPlayingUriIsLoading } = useCurrentlyPlayingUri();
-  // Then we store it in a state using `useCachedState` (this will persist the value between launches)
-  const [currentUri, setCurrentUri] = useCachedState<string | undefined>(
-    "currentlyPlayingUri",
-    currentlyPlayingUriData
-  );
-
-  // We use a ref to store the value of `shouldExecute` so that it doesn't trigger a re-render
-  const shouldExecute = useRef(false);
-
-  // We conditionally set `shouldExecute` to true if the currently playing URI has changed
-  const { currentlyPlayingData, currentlyPlayingIsLoading, currentlyPlayingRevalidate } = useCurrentlyPlaying({
-    options: { execute: shouldExecute.current },
-  });
-  const { playbackStateData, playbackStateIsLoading, playbackStateRevalidate } = usePlaybackState({
-    options: { execute: launchType === LaunchType.UserInitiated },
-  });
+  const { currentlyPlayingData, currentlyPlayingIsLoading, currentlyPlayingRevalidate } = useCurrentlyPlaying();
 
   // The hooks below will only execute when the Menu Bar is opened
   const { myDevicesData } = useMyDevices({ options: { execute: launchType === LaunchType.UserInitiated } });
@@ -70,27 +50,17 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
     options: { execute: launchType === LaunchType.UserInitiated },
   });
 
-  // We use `useEffect` to update the currently playing URI state when the currently playing URI changes
-  useEffect(() => {
-    if (!currentlyPlayingUriData) {
-      setCurrentUri(undefined);
-      shouldExecute.current = false;
-      return;
-    }
-    if (currentlyPlayingUriData !== currentUri) {
-      setCurrentUri(currentlyPlayingUriData);
-      shouldExecute.current = true;
-    }
-  }, [currentUri, currentlyPlayingUriData]);
-
-  const isPlaying = playbackStateData?.is_playing;
+  const isPlaying = currentlyPlayingData?.is_playing === true;
   const trackAlreadyLiked = containsMySavedTracksData?.[0];
   const isTrack = currentlyPlayingData?.currently_playing_type !== "episode";
 
-  if (!currentUri || !currentlyPlayingData?.item) {
-    return (
-      <NothingPlaying isLoading={currentlyPlayingIsLoading || currentlyPlayingUriIsLoading || playbackStateIsLoading} />
-    );
+  const currentTime = Date.now();
+  const tenMinutesInMilliseconds = 10 * 60 * 1000;
+  const dataIsOld =
+    currentlyPlayingData?.timestamp && currentTime - currentlyPlayingData.timestamp > tenMinutesInMilliseconds;
+
+  if ((dataIsOld && !isPlaying) || !currentlyPlayingData?.item) {
+    return <NothingPlaying isLoading={currentlyPlayingIsLoading || currentlyPlayingIsLoading} />;
   }
 
   const { item } = currentlyPlayingData;
@@ -115,10 +85,15 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
             icon={Icon.HeartDisabled}
             title="Dislike"
             onAction={async () => {
-              await removeFromMySavedTracks({
-                trackIds: trackId ? [trackId] : [],
-              });
-              await containsMySavedTracksRevalidate();
+              try {
+                await removeFromMySavedTracks({
+                  trackIds: trackId ? [trackId] : [],
+                });
+                await containsMySavedTracksRevalidate();
+              } catch (err) {
+                const error = getErrorMessage(err);
+                showHUD(error);
+              }
             }}
           />
         )}
@@ -127,10 +102,15 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
             icon={Icon.Heart}
             title="Like"
             onAction={async () => {
-              await addToMySavedTracks({
-                trackIds: trackId ? [trackId] : [],
-              });
-              await containsMySavedTracksRevalidate();
+              try {
+                await addToMySavedTracks({
+                  trackIds: trackId ? [trackId] : [],
+                });
+                await containsMySavedTracksRevalidate();
+              } catch (err) {
+                const error = getErrorMessage(err);
+                showHUD(error);
+              }
             }}
           />
         )}
@@ -138,26 +118,41 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
           icon={Icon.Forward}
           title="Next"
           onAction={async () => {
-            await skipToNext();
-            await currentlyPlayingRevalidate();
+            try {
+              await skipToNext();
+              await currentlyPlayingRevalidate();
+            } catch (err) {
+              const error = getErrorMessage(err);
+              showHUD(error);
+            }
           }}
         />
         <MenuBarExtra.Item
           icon={Icon.Rewind}
           title="Previous"
           onAction={async () => {
-            await skipToPrevious();
-            await currentlyPlayingRevalidate();
+            try {
+              await skipToPrevious();
+              await currentlyPlayingRevalidate();
+            } catch (err) {
+              const error = getErrorMessage(err);
+              showHUD(error);
+            }
           }}
         />
         <MenuBarExtra.Item
           icon={Icon.Music}
           title="Start Radio"
           onAction={async () => {
-            await startRadio({
-              trackIds: trackId ? [trackId] : [],
-              artistIds: artistId ? [artistId] : [],
-            });
+            try {
+              await startRadio({
+                trackIds: trackId ? [trackId] : [],
+                artistIds: artistId ? [artistId] : [],
+              });
+            } catch (err) {
+              const error = getErrorMessage(err);
+              showHUD(error);
+            }
           }}
         />
       </>
@@ -171,7 +166,7 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
 
   return (
     <MenuBarExtra
-      isLoading={currentlyPlayingIsLoading || currentlyPlayingUriIsLoading || playbackStateIsLoading}
+      isLoading={currentlyPlayingIsLoading || currentlyPlayingIsLoading}
       icon={
         preferences.iconType === "cover-image" && coverImageUrl
           ? {
@@ -188,8 +183,13 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
           icon={Icon.Pause}
           title="Pause"
           onAction={async () => {
-            await pause();
-            await playbackStateRevalidate();
+            try {
+              await pause();
+              await currentlyPlayingRevalidate();
+            } catch (err) {
+              const error = getErrorMessage(err);
+              showHUD(error);
+            }
           }}
         />
       )}
@@ -198,8 +198,13 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
           icon={Icon.Play}
           title="Play"
           onAction={async () => {
-            await play();
-            await playbackStateRevalidate();
+            try {
+              await play();
+              await currentlyPlayingRevalidate();
+            } catch (err) {
+              const error = getErrorMessage(err);
+              showHUD(error);
+            }
           }}
         />
       )}
@@ -215,11 +220,16 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
                   key={playlist.id}
                   title={playlist.name}
                   onAction={async () => {
-                    await addToPlaylist({
-                      playlistId: playlist.id as string,
-                      trackUris: [uri as string],
-                    });
-                    showHUD(`Added to ${playlist.name}`);
+                    try {
+                      await addToPlaylist({
+                        playlistId: playlist.id as string,
+                        trackUris: [uri as string],
+                      });
+                      showHUD(`Added to ${playlist.name}`);
+                    } catch (err) {
+                      const error = getErrorMessage(err);
+                      showHUD(error);
+                    }
                   }}
                 />
               )
@@ -241,7 +251,12 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
                 }
                 onAction={async () => {
                   if (device.id) {
-                    await transferMyPlayback(device.id, isPlaying ? true : false);
+                    try {
+                      await transferMyPlayback(device.id, isPlaying ? true : false);
+                    } catch (err) {
+                      const error = getErrorMessage(err);
+                      showHUD(error);
+                    }
                   }
                   await showHUD(`Connected to ${device.name}`);
                 }}
@@ -265,6 +280,7 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
         <MenuBarExtra.Item
           title="Copy URL"
           icon={Icon.Link}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
           onAction={async () => {
             await Clipboard.copy({
               html: `<a href=${external_urls?.spotify}>${title}</a>`,
@@ -276,6 +292,7 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
         <MenuBarExtra.Item
           icon="spotify-icon.svg"
           title="Open on Spotify"
+          shortcut={{ modifiers: ["cmd"], key: "o" }}
           onAction={() =>
             isSpotifyInstalled ? open(uri || "spotify") : open(external_urls?.spotify || "https://play.spotify.com")
           }

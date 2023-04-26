@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "duck-duck-go-search",
-  "title": "Duck Duck Go Search",
-  "description": "Duck Duck Go search with suggestions",
+  "title": "DuckDuckGo Search",
+  "description": "DuckDuckGo search with suggestions.",
   "icon": "command-icon.png",
   "author": "tegola",
   "categories": [
@@ -12,8 +12,8 @@
   "commands": [
     {
       "name": "index",
-      "title": "Duck Duck Go Search",
-      "description": "Search Duck Duck Go with suggestions",
+      "title": "DuckDuckGo Search",
+      "description": "Search DuckDuckGo with suggestions.",
       "mode": "view"
     }
   ],
@@ -24,7 +24,7 @@
       "required": false,
       "default": true,
       "label": "Remember Search History",
-      "description": "Enable this checkbox to locally store Duck Duck Go search history."
+      "description": "Enable to locally store DuckDuckGo search history."
     }
   ],
   "dependencies": {

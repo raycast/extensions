@@ -1,20 +1,20 @@
-import { networkTimeout } from "./../../consts";
 /*
  * @author: tisfeng
  * @createTime: 2023-03-14 22:11
  * @lastEditor: tisfeng
- * @lastEditTime: 2023-03-28 18:38
+ * @lastEditTime: 2023-04-25 23:05
  * @fileName: chat.ts
  *
  * Copyright (c) 2023 by ${git_name}, All Rights Reserved.
  */
 
 import axios, { AxiosError } from "axios";
-import { httpsAgent } from "../../axiosConfig";
+import { getProxyAgent } from "../../axiosConfig";
 import { QueryWordInfo } from "../../dictionary/youdao/types";
 import { AppKeyStore } from "../../preferences";
 import { QueryTypeResult, TranslationType } from "../../types";
 import { getTypeErrorInfo } from "../../utils";
+import { networkTimeout } from "./../../consts";
 import { fetchSSE } from "./utils";
 
 const controller = new AbortController();
@@ -22,7 +22,7 @@ const timeout = setTimeout(() => {
   controller.abort();
 }, networkTimeout); // set timeout to 15s.
 
-export function requestOpenAIStreamTranslate(queryWordInfo: QueryWordInfo): Promise<QueryTypeResult> {
+export async function requestOpenAIStreamTranslate(queryWordInfo: QueryWordInfo): Promise<QueryTypeResult> {
   console.warn(`---> start request OpenAI`);
 
   const url = "https://api.openai.com/v1/chat/completions";
@@ -66,6 +66,7 @@ export function requestOpenAIStreamTranslate(queryWordInfo: QueryWordInfo): Prom
   let targetTxt = "";
   let openAIResult: QueryTypeResult;
 
+  const httpsAgent = await getProxyAgent();
   console.warn(`---> openai agent: ${JSON.stringify(httpsAgent)}`);
 
   return new Promise((resolve, reject) => {

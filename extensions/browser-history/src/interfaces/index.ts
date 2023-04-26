@@ -36,6 +36,7 @@ export interface HistoryEntry {
   readonly url: string;
   readonly title: string;
   readonly lastVisited: Date;
+  readonly browser: SupportedBrowsers;
 }
 
 export enum SupportedBrowsers {

@@ -33,6 +33,7 @@
     "dependencies": {
         "@raycast/api": "^1.48.9",
         "@raycast/utils": "^1.5.2",
+        "date-fns": "^2.29.3",
         "suncalc": "^1.9.0",
         "sunrise-sunset-js": "^2.2.1"
     },

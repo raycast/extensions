@@ -29,7 +29,7 @@ export function getStaticResult(searchText: string): SearchResult[] {
     {
       id: nanoid(),
       query: searchText,
-      url: `https://www.google.com/search?q=${encodeURIComponent(searchText)}`,
+      url: `https://duckduckgo.com/?q=${encodeURIComponent(searchText)}`,
     },
   ];
 
