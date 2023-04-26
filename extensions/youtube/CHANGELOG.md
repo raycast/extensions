@@ -1,5 +1,13 @@
 # YouTube Changelog
 
+## [Enhancements] - 2023-04-18
+
+- Bug fixes for recent and pinned items not updating correctly
+- Recent items were not being added until relaunching the command
+- Pinned items were not being added to the front
+- Now all actions for videos and channels will add them to the recent list
+- Added new empty view
+
 ## [Enhancements] - 2023-04-13
 
 - Optimized the experience

@@ -20,18 +20,7 @@
       "title": "Create Issue",
       "subtitle": "Jira",
       "description": "Create and assign new issues.",
-      "mode": "view",
-      "preferences": [
-        {
-          "name": "signature",
-          "type": "checkbox",
-          "title": "Signature",
-          "label": "Add Raycast signature to new issues",
-          "description": "When enabled, \"Created via Raycast\" signature will be added at the bottom of the description.",
-          "required": false,
-          "default": true
-        }
-      ]
+      "mode": "view"
     },
     {
       "name": "open-issues",

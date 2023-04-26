@@ -1,4 +1,5 @@
 import fetch, { Headers, RequestInfo, RequestInit } from "node-fetch";
+import https from "https";
 
 export interface Jenkins {
   id: string;
@@ -10,6 +11,7 @@ export interface Jenkins {
   url: string;
   username: string;
   token?: string;
+  unsafeHttps: boolean;
 }
 
 export interface Job {
@@ -103,6 +105,9 @@ export class JenkinsAPI {
   }
 
   async request(url: RequestInfo, init?: RequestInit) {
+    const httpsAgent = new https.Agent({
+      rejectUnauthorized: !this.jenkins.unsafeHttps,
+    });
     let headers: Headers | undefined = undefined;
     if (this.jenkins.token) {
       headers = new Headers();
@@ -114,6 +119,7 @@ export class JenkinsAPI {
     const resp = await fetch(url, {
       headers,
       method: "GET",
+      agent: httpsAgent,
       ...init,
     });
     if (!resp.ok) {

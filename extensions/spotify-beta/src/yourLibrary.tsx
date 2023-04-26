@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { ComponentProps, useState } from "react";
 import { Grid, List } from "@raycast/api";
 import { View } from "./components/View";
 import { useYourLibrary } from "./hooks/useYourLibrary";
@@ -15,21 +15,25 @@ const filters = {
   albums: "Albums",
   artists: "Artists",
   tracks: "Songs",
-  shows: "Podcasts",
+  shows: "Podcasts & Shows",
   episodes: "Episodes",
 };
 
 type FilterValue = keyof typeof filters;
 
 function YourLibraryCommand() {
+  const [searchText, setSearchText] = useState("");
   const [searchFilter, setSearchFilter] = useState<FilterValue>("all");
   const { myLibraryData, myLibraryIsLoading } = useYourLibrary({
     options: { keepPreviousData: true },
   });
 
-  const sharedProps = {
+  const sharedProps: ComponentProps<typeof List> = {
     searchBarPlaceholder: "Search your library",
     isLoading: myLibraryIsLoading,
+    searchText,
+    onSearchTextChange: setSearchText,
+    filtering: true,
   };
 
   if (
@@ -55,16 +59,31 @@ function YourLibraryCommand() {
       >
         {searchFilter === "all" && (
           <>
-            <PlaylistsSection type="list" limit={6} playlists={myLibraryData?.playlists?.items} />
-            <AlbumsSection type="list" limit={6} albums={myLibraryData?.albums?.items} />
-            <ArtistsSection type="list" limit={6} artists={myLibraryData?.artists?.items} />
-            <TracksSection limit={6} tracks={myLibraryData?.tracks?.items} title="Liked Songs" />
-            <ShowsSection type="list" limit={6} shows={myLibraryData?.shows?.items} />
-            <EpisodesSection limit={6} episodes={myLibraryData?.episodes?.items} title="Saved Episodes" />
+            <PlaylistsSection
+              type="list"
+              limit={searchText ? undefined : 6}
+              playlists={myLibraryData?.playlists?.items}
+            />
+            <AlbumsSection type="list" limit={searchText ? undefined : 6} albums={myLibraryData?.albums?.items} />
+            <ArtistsSection type="list" limit={searchText ? undefined : 6} artists={myLibraryData?.artists?.items} />
+            <TracksSection
+              limit={searchText ? undefined : 6}
+              tracks={myLibraryData?.tracks?.items}
+              title="Liked Songs"
+              queueTracks
+            />
+            <ShowsSection type="list" limit={searchText ? undefined : 6} shows={myLibraryData?.shows?.items} />
+            <EpisodesSection
+              limit={searchText ? undefined : 6}
+              episodes={myLibraryData?.episodes?.items}
+              title="Saved Episodes"
+            />
           </>
         )}
 
-        {searchFilter === "tracks" && <TracksSection tracks={myLibraryData?.tracks?.items} title="Liked Songs" />}
+        {searchFilter === "tracks" && (
+          <TracksSection tracks={myLibraryData?.tracks?.items} title="Liked Songs" queueTracks />
+        )}
         {searchFilter === "episodes" && (
           <EpisodesSection episodes={myLibraryData?.episodes?.items} title="Saved Episodes" />
         )}

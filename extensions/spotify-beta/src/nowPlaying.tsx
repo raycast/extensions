@@ -33,6 +33,7 @@ import { FooterAction } from "./components/FooterAction";
 import { StartRadioAction } from "./components/StartRadioAction";
 import { PlayAction } from "./components/PlayAction";
 import { PauseAction } from "./components/PauseAction";
+import { getErrorMessage } from "./helpers/getError";
 
 function NowPlayingCommand() {
   const { currentlyPlayingData, currentlyPlayingIsLoading, currentlyPlayingRevalidate } = useCurrentlyPlaying();
@@ -124,20 +125,32 @@ by ${artistName}
             title="Dislike"
             onAction={async () => {
               if (closeWindowOnAction) {
+                try {
+                  await removeFromMySavedTracks({
+                    trackIds: trackId ? [trackId] : [],
+                  });
+                  await showHUD("Disliked");
+                  await popToRoot();
+                  return;
+                } catch (err) {
+                  const error = getErrorMessage(err);
+                  await showHUD(error);
+                }
+              }
+              const toast = await showToast({ title: "Disliking...", style: Toast.Style.Animated });
+              try {
                 await removeFromMySavedTracks({
                   trackIds: trackId ? [trackId] : [],
                 });
-                await showHUD("Disliked");
-                await popToRoot();
-                return;
+                await containsMySavedTracksRevalidate();
+                toast.title = "Disliked";
+                toast.style = Toast.Style.Success;
+              } catch (err) {
+                const error = getErrorMessage(err);
+                toast.style = Toast.Style.Failure;
+                toast.title = "Something went wrong";
+                toast.message = error;
               }
-              const toast = await showToast({ title: "Disliking...", style: Toast.Style.Animated });
-              await removeFromMySavedTracks({
-                trackIds: trackId ? [trackId] : [],
-              });
-              await containsMySavedTracksRevalidate();
-              toast.title = "Disliked";
-              toast.style = Toast.Style.Success;
             }}
           />
         )}
@@ -148,20 +161,32 @@ by ${artistName}
             title="Like"
             onAction={async () => {
               if (closeWindowOnAction) {
+                try {
+                  await addToMySavedTracks({
+                    trackIds: trackId ? [trackId] : [],
+                  });
+                  await showHUD("Liked");
+                  await popToRoot();
+                  return;
+                } catch (err) {
+                  const error = getErrorMessage(err);
+                  await showHUD(error);
+                }
+              }
+              const toast = await showToast({ title: "Liking...", style: Toast.Style.Animated });
+              try {
                 await addToMySavedTracks({
                   trackIds: trackId ? [trackId] : [],
                 });
-                await showHUD("Liked");
-                await popToRoot();
-                return;
+                await containsMySavedTracksRevalidate();
+                toast.title = "Liked";
+                toast.style = Toast.Style.Success;
+              } catch (err) {
+                const error = getErrorMessage(err);
+                toast.style = Toast.Style.Failure;
+                toast.title = "Something went wrong";
+                toast.message = error;
               }
-              const toast = await showToast({ title: "Liking...", style: Toast.Style.Animated });
-              await addToMySavedTracks({
-                trackIds: trackId ? [trackId] : [],
-              });
-              await containsMySavedTracksRevalidate();
-              toast.title = "Liked";
-              toast.style = Toast.Style.Success;
             }}
           />
         )}
@@ -170,14 +195,25 @@ by ${artistName}
           title="Next"
           shortcut={{ modifiers: ["cmd"], key: "arrowRight" }}
           onAction={async () => {
-            await skipToNext();
-            if (closeWindowOnAction) {
-              await showHUD("Skipped to next");
-              await popToRoot();
-              return;
+            try {
+              await skipToNext();
+              await launchCommand({ name: "nowPlayingMenuBar", type: LaunchType.Background });
+              if (closeWindowOnAction) {
+                await showHUD("Skipped to next");
+                await popToRoot();
+                return;
+              }
+              await showToast({ title: "Skipped to next" });
+              await currentlyPlayingRevalidate();
+            } catch (err) {
+              const error = getErrorMessage(err);
+              if (closeWindowOnAction) {
+                await showHUD(error);
+                await popToRoot();
+                return;
+              }
+              await showToast({ style: Toast.Style.Failure, title: "Something went wrong", message: error });
             }
-            await showToast({ title: "Skipped to next" });
-            await currentlyPlayingRevalidate();
           }}
         />
 
@@ -186,14 +222,25 @@ by ${artistName}
           title="Previous"
           shortcut={{ modifiers: ["cmd"], key: "arrowLeft" }}
           onAction={async () => {
-            await skipToPrevious();
-            if (closeWindowOnAction) {
-              await showHUD("Skipped to previous");
-              await popToRoot();
-              return;
+            try {
+              await skipToPrevious();
+              await launchCommand({ name: "nowPlayingMenuBar", type: LaunchType.Background });
+              if (closeWindowOnAction) {
+                await showHUD("Skipped to previous");
+                await popToRoot();
+                return;
+              }
+              await showToast({ title: "Skipped to previous" });
+              await currentlyPlayingRevalidate();
+            } catch (err) {
+              const error = getErrorMessage(err);
+              if (closeWindowOnAction) {
+                await showHUD(error);
+                await popToRoot();
+                return;
+              }
+              await showToast({ style: Toast.Style.Failure, title: "Something went wrong", message: error });
             }
-            await showToast({ title: "Skipped to previous" });
-            await currentlyPlayingRevalidate();
           }}
         />
         <StartRadioAction trackId={trackId} artistId={artistId} onRadioStarted={() => currentlyPlayingRevalidate()} />
@@ -249,15 +296,25 @@ ${description}
                   title={device.name as string}
                   icon={device.is_active ? Icon.SpeakerOn : { source: Icon.SpeakerOff, tintColor: Color.SecondaryText }}
                   onAction={async () => {
-                    if (device.id) {
-                      await transferMyPlayback(device.id);
+                    try {
+                      if (device.id) {
+                        await transferMyPlayback(device.id);
+                      }
+                      if (closeWindowOnAction) {
+                        await showHUD(`Connected to ${device.name}`);
+                        await popToRoot();
+                        return;
+                      }
+                      await showToast({ title: `Connected to ${device.name}` });
+                    } catch (err) {
+                      const error = getErrorMessage(err);
+                      if (closeWindowOnAction) {
+                        await showHUD(error);
+                        await popToRoot();
+                        return;
+                      }
+                      await showToast({ style: Toast.Style.Failure, title: "Something went wrong", message: error });
                     }
-                    if (closeWindowOnAction) {
-                      await showHUD(`Connected to ${device.name}`);
-                      await popToRoot();
-                      return;
-                    }
-                    await showToast({ title: `Connected to ${device.name}` });
                   }}
                 />
               ))}
