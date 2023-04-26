@@ -1,3 +1,3 @@
 # Toggle Dark Mode
 
-Toggle the dark mode on or off
+Toggle macOS dark mode with ease
