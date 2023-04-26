@@ -66,7 +66,7 @@ export default function Command() {
       {!reminders.length ? (
         <List.EmptyView
           title="No reminders yet"
-          description="To set a reminder, simply type what you want to be remembered of and then and hit enter!"
+          description="To set a reminder, simply type what you want and when you want it and hit enter!"
           icon="no_bell.png"
         />
       ) : (
@@ -80,7 +80,7 @@ export default function Command() {
               actions={
                 <ActionPanel>
                   {searchText.length > 0 && (
-                    <Action title="Set Reminder" icon="checkmark.png" onAction={onSetReminderAction} />
+                    <Action title="Set Reminder" icon={Icon.AlarmRinging} onAction={onSetReminderAction} />
                   )}
                   <Action
                     title="Delete Reminder"
