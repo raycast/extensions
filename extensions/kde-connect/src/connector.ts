@@ -45,4 +45,43 @@ export const KDECFunctions: { [key: string]: KDECFunction } = {
     }
     return `-d ${params.deviceID} --pair`;
   },
+  unpairDevice: (params) => {
+    if (!params.deviceID) {
+      return null;
+    }
+    return `-d ${params.deviceID} --unpair`;
+  },
+  sendFiles: (params) => {
+    if (!params.deviceID || !params.args) {
+      return null;
+    }
+    return `-d ${params.deviceID} --attachment ${params.args[0]}`;
+  },
+  // args: [path/URL]
+  share: (params) => {
+    if (!params.deviceID || !params.args) {
+      return null;
+    }
+    return `-d ${params.deviceID} --share ${params.args[0]}`;
+  },
+  sendText: (params) => {
+    if (!params.deviceID || !params.args) {
+      return null;
+    }
+    return `-d ${params.deviceID} --share-text ${params.args[0]}`;
+  },
+  // args: [destination, message]
+  sendSms: (params) => {
+    if (!params.deviceID || !params.args) {
+      return null;
+    }
+    return `-d ${params.deviceID} --destination ${params.args[0]} --send-sms ${params.args[1]}`;
+  },
+  // args: [path]
+  getPhoto: (params) => {
+    if (!params.deviceID || !params.args) {
+      return null;
+    }
+    return `-d ${params.deviceID} --photo ${params.args[0]}`;
+  },
 };

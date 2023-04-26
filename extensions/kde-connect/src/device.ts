@@ -2,6 +2,7 @@ import { exec } from "child_process";
 import { appPath, KDECFunctions, parseDeviceInfo } from "./connector";
 import { LocalStorage, showToast } from "@raycast/api";
 import { StorageKey } from "./storage";
+
 export interface KDEDevice {
   name: string;
   id: string;
@@ -18,10 +19,9 @@ export class KDEConnect {
 
   private executeCommand(command: string | null): Promise<string> {
     return new Promise((resolve, reject) => {
-      let output = "";
       if (command === null) {
         showToast({ title: "Command exection error" });
-        reject(output);
+        reject("");
       }
       exec(`${appPath} ${command} 2> /tmp/kde-connect-raycast.log`, (err, stdout) => {
         if (err) {
@@ -30,6 +30,21 @@ export class KDEConnect {
           resolve(stdout);
         }
       });
+    });
+  }
+
+  isAvailable(): Promise<boolean> {
+    if (!this.deviceID) {
+      return Promise.reject("No deviceID set");
+    }
+    return new Promise((resolve, reject) => {
+      this.listDevices()
+        .then((devices) => {
+          resolve(devices.some((device) => device.id === this.deviceID));
+        })
+        .catch((err) => {
+          reject(err);
+        });
     });
   }
 
@@ -53,6 +68,52 @@ export class KDEConnect {
   pairDevice(deviceID: string): Promise<void> {
     return new Promise((resolve, reject) => {
       this.executeCommand(KDECFunctions.pairDevice({ deviceID: deviceID }))
+        .then(() => {
+          resolve();
+        })
+        .catch((err) => {
+          reject(err);
+        });
+    });
+  }
+
+  unpairDevice(deviceID?: string): Promise<void> {
+    const deviceIDToUnpair = deviceID || this.deviceID;
+    if (!deviceIDToUnpair) {
+      return Promise.reject("No deviceID set");
+    }
+    return new Promise((resolve, reject) => {
+      this.executeCommand(KDECFunctions.unpairDevice({ deviceID: deviceIDToUnpair }))
+        .then(() => {
+          resolve();
+        })
+        .catch((err) => {
+          reject(err);
+        });
+    });
+  }
+
+  share(path: string): Promise<void> {
+    if (!this.deviceID) {
+      return Promise.reject("No deviceID set");
+    }
+    return new Promise((resolve, reject) => {
+      this.executeCommand(KDECFunctions.share({ deviceID: this.deviceID, args: [path] }))
+        .then(() => {
+          resolve();
+        })
+        .catch((err) => {
+          reject(err);
+        });
+    });
+  }
+
+  sendText(str: string): Promise<void> {
+    if (!this.deviceID) {
+      return Promise.reject("No deviceID set");
+    }
+    return new Promise((resolve, reject) => {
+      this.executeCommand(KDECFunctions.sendText({ deviceID: this.deviceID, args: [str] }))
         .then(() => {
           resolve();
         })

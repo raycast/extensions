@@ -5,14 +5,13 @@ import { appExists } from "./connector";
 import { StorageKey } from "./storage";
 import GetKDEConnect from "./getKDEConnect";
 
-// TODO: init from storage
-let connect = new KDEConnect();
+const connect = new KDEConnect();
 
 export default function Command() {
-  let [loading, setLoading] = useState<boolean>(true);
-  let [appOk, setAppOk] = useState<boolean | undefined>();
-  let [devices, setDevices] = useState<KDEDevice[]>([]);
-  let [choseDevice, chooseDevice] = useState<KDEDevice[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [appOk, setAppOk] = useState<boolean | undefined>();
+  const [devices, setDevices] = useState<KDEDevice[]>([]);
+  const [favouriteDevice, setFavouriteDevice] = useState<string | undefined>();
 
   const refreshDevices = () => {
     setLoading(true);
@@ -37,6 +36,13 @@ export default function Command() {
           setDevices(devices);
         }
       });
+      LocalStorage.getItem(StorageKey.favouriteDevice).then((value) => {
+        if (loading && value) {
+          const device = value as string;
+          console.log("fav", device);
+          setFavouriteDevice(device);
+        }
+      });
       refreshDevices();
     }
   }, [appOk]);
@@ -47,6 +53,15 @@ export default function Command() {
 
   const deviceStatusIcon = (item: KDEDevice): Icon => {
     return item.paired ? (item.reachable ? Icon.Bolt : Icon.BoltDisabled) : Icon.Link;
+  };
+
+  const setFavourite = (device: KDEDevice | undefined) => {
+    if (!device) {
+      LocalStorage.removeItem(StorageKey.favouriteDevice);
+    } else {
+      LocalStorage.setItem(StorageKey.favouriteDevice, device.id);
+    }
+    setFavouriteDevice(device?.id);
   };
 
   if (appOk === false) {
@@ -61,11 +76,32 @@ export default function Command() {
           icon={Icon.Mobile}
           title={item.name}
           subtitle={item.id}
-          accessories={[{ icon: deviceStatusIcon(item), text: deviceStatus(item) }]}
+          accessories={(item.id === favouriteDevice ? [{ icon: Icon.Star, text: "Favourite" }] : []).concat([
+            { icon: deviceStatusIcon(item), text: deviceStatus(item) },
+          ])}
           actions={
             <ActionPanel>
               {item.paired ? (
-                <React.Fragment />
+                <React.Fragment>
+                  <Action
+                    title="Set Favourite"
+                    onAction={() => {
+                      setFavourite(item);
+                    }}
+                  />
+                  <Action
+                    title="Unset Favourite"
+                    onAction={() => {
+                      setFavourite(undefined);
+                    }}
+                  />
+                  <Action
+                    title="Unpair"
+                    onAction={() => {
+                      connect.unpairDevice(item.id);
+                    }}
+                  />
+                </React.Fragment>
               ) : (
                 <Action
                   title="Pair Device"

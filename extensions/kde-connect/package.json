@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "kde-connect",
   "title": "KDE Connect",
-  "description": "An extension to access KDE Connect in Raycast. ",
+  "description": "An extension to access KDE Connect in Raycast.",
   "icon": "command-icon.png",
   "author": "StevenRCE0",
   "categories": [
@@ -15,6 +15,21 @@
       "title": "List and Pair Devices",
       "description": "List and pair devices to use with KDE Connect",
       "mode": "view"
+    },
+    {
+      "name": "share",
+      "title": "Share",
+      "subtitle": "To KDE Connect",
+      "description": "Share string, path or URL",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "string",
+          "placeholder": "Content",
+          "type": "text",
+          "required": true
+        }
+      ]
     }
   ],
   "dependencies": {
