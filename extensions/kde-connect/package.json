@@ -17,17 +17,17 @@
       "mode": "view"
     },
     {
-      "name": "share",
-      "title": "Share",
-      "subtitle": "To KDE Connect",
-      "description": "Share string, path or URL",
+      "name": "send",
+      "title": "Send",
+      "subtitle": "to KDE Connect",
+      "description": "Send string, path or URL to KDE Connect device",
       "mode": "no-view",
       "arguments": [
         {
           "name": "string",
           "placeholder": "Content",
           "type": "text",
-          "required": true
+          "required": false
         }
       ]
     }

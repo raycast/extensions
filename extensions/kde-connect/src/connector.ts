@@ -1,21 +1,24 @@
-import { readFileSync } from "fs";
+import { existsSync } from "fs";
 import { KDEDevice } from "./device";
 
 export const appPath = "/Applications/kdeconnect-indicator.app/Contents/MacOS/kdeconnect-cli";
 
+export enum SendType {
+  Text = "Text",
+  URL = "URL",
+  Files = "Files",
+  SMS = "SMS",
+}
+
+export const SendTypeAllCases = (Object.keys(SendType) as (keyof typeof SendType)[]).map((key) => SendType[key]);
+
 export function appExists() {
-  try {
-    readFileSync(appPath);
-    return true;
-  } catch (e) {
-    return false;
-  }
+  return existsSync(appPath);
 }
 
 export function parseDeviceInfo(str: string): KDEDevice | undefined {
   const regex = /- (.+?): (.+?) \((.+)\)/;
   const matches = regex.exec(str);
-  console.log(matches);
   if (!matches) {
     return undefined;
   }
@@ -51,37 +54,38 @@ export const KDECFunctions: { [key: string]: KDECFunction } = {
     }
     return `-d ${params.deviceID} --unpair`;
   },
-  sendFiles: (params) => {
-    if (!params.deviceID || !params.args) {
-      return null;
-    }
-    return `-d ${params.deviceID} --attachment ${params.args[0]}`;
-  },
   // args: [path/URL]
   share: (params) => {
     if (!params.deviceID || !params.args) {
       return null;
     }
-    return `-d ${params.deviceID} --share ${params.args[0]}`;
+    return `-d ${params.deviceID} --share "${params.args[0]}"`;
   },
   sendText: (params) => {
     if (!params.deviceID || !params.args) {
       return null;
     }
-    return `-d ${params.deviceID} --share-text ${params.args[0]}`;
+    return `-d ${params.deviceID} --share-text "${params.args[0]}"`;
   },
-  // args: [destination, message]
+  // args: [destination, message, ...attachments]
   sendSms: (params) => {
-    if (!params.deviceID || !params.args) {
+    if (!params.deviceID || !params.args || params.args.length < 2) {
       return null;
     }
-    return `-d ${params.deviceID} --destination ${params.args[0]} --send-sms ${params.args[1]}`;
+    if (params.args.length === 2) {
+      return `-d ${params.deviceID} --destination "${params.args[0]}" --send-sms "${params.args[1]}"`;
+    }
+    const attachments = params.args
+      .slice(2)
+      .flatMap((path) => `"${path}"`)
+      .join(" ");
+    return `-d ${params.deviceID} --destination "${params.args[0]}" --send-sms "${params.args[1]}" --attachments ${attachments}`;
   },
   // args: [path]
   getPhoto: (params) => {
     if (!params.deviceID || !params.args) {
       return null;
     }
-    return `-d ${params.deviceID} --photo ${params.args[0]}`;
+    return `-d ${params.deviceID} --photo "${params.args[0]}"`;
   },
 };
