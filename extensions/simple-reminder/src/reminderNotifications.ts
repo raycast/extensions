@@ -9,7 +9,9 @@ export default async function Command() {
   for (const key in storedRemindersObject) {
     const reminder: Reminder = JSON.parse(storedRemindersObject[key]);
     if (new Date().getTime() >= new Date(reminder.date).getTime()) {
-      await runAppleScript(`display notification "${reminder.topic}" with title "Simple Reminder" sound name "default"`);
+      await runAppleScript(
+        `display notification "${reminder.topic}" with title "Simple Reminder" sound name "default"`
+      );
       await LocalStorage.removeItem(reminder.id);
     }
   }
