@@ -286,7 +286,7 @@ function DecreaseBrightnessAction(props: { group: Group; groupedLight: GroupedLi
 }
 
 async function handleToggle(
-  { hueBridgeState, setLights, setGroupedLights }: ReturnType<typeof useHue>,
+  { hueBridgeState, groupedLights, setGroupedLights, zones }: ReturnType<typeof useHue>,
   rateLimiter: ReturnType<typeof useInputRateLimiter>,
   groupLights: Light[],
   groupedLight: GroupedLight | undefined,
@@ -307,14 +307,31 @@ async function handleToggle(
         : {}),
     };
 
-    // TODO: Update zones
-    const changesToLights = new Map(groupLights.map((light) => [light.id, changes]));
-    const undoOptimisticLightsUpdate = optimisticUpdates(changesToLights, setLights);
-    const undoOptimisticGroupedLightUpdate = optimisticUpdate(groupedLight, changes, setGroupedLights);
-    await hueBridgeState.context.hueClient.updateGroupedLight(groupedLight, changes).catch((e: Error) => {
-      undoOptimisticLightsUpdate();
-      undoOptimisticGroupedLightUpdate();
-      throw e;
+    const changesToGroupedLights = new Map(
+      zones
+        // Find zones that contain affected lights
+        .filter((zone) =>
+          zone.children.some((child) =>
+            groupLights.some((light) => light.id === child.rid || light.owner.rid === child.rid)
+          )
+        )
+        // Get the grouped lights that belong to those zones
+        .map((zone) =>
+          groupedLights.find((zoneGroupedLight) =>
+            zone.services.some((zoneService) => zoneService.rid === zoneGroupedLight.id)
+          )
+        )
+        // Filter out undefined grouped lights
+        .filter((zoneGroupedLight): zoneGroupedLight is GroupedLight => zoneGroupedLight !== undefined)
+        .map((zoneGroupedLight) => [zoneGroupedLight.id, changes])
+    )
+      // Add the grouped light that triggered the action
+      .set(groupedLight.id, changes);
+
+    const undoOptimisticGroupedLightsUpdate = optimisticUpdates(changesToGroupedLights, setGroupedLights);
+    await hueBridgeState.context.hueClient.updateGroupedLight(groupedLight, changes).catch((error: Error) => {
+      undoOptimisticGroupedLightsUpdate();
+      throw error;
     });
 
     toast.style = Style.Success;
