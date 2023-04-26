@@ -1,6 +1,6 @@
 # Wifi Password Reveal
 
-Reval Wifi Password On MacOs
+Reveal any saved WIFI Password on macOS
 
 ## TODO
 
