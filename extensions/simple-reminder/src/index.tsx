@@ -68,7 +68,7 @@ export default function Command() {
           icon="no_bell.png"
         />
       ) : (
-        <List.Section title="Existing reminders" subtitle="you can edit existing reminders">
+        <List.Section title="Existing reminders" subtitle="you can delete existing reminders">
           {reminders.map((reminder) => (
             <List.Item
               key={reminder.id}
