@@ -2,7 +2,7 @@ import { GetQueueAttributesCommand, ListQueuesCommand, PurgeQueueCommand, SQSCli
 import { ActionPanel, List, Action, confirmAlert, Toast, showToast, Icon } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import AWSProfileDropdown from "./components/searchbar/aws-profile-dropdown";
-import { resourceToConsoleLink } from "./util";
+import { isReadyToFetch, resourceToConsoleLink } from "./util";
 
 export default function SQS() {
   const { data: queues, error, isLoading, revalidate } = useCachedPromise(fetchQueues);
@@ -72,7 +72,7 @@ function SQSQueue({ queue }: { queue: string }) {
 }
 
 async function fetchQueues(token?: string, queues?: string[]): Promise<string[]> {
-  if (!process.env.AWS_PROFILE) return [];
+  if (!isReadyToFetch()) return [];
   const { NextToken, QueueUrls } = await new SQSClient({}).send(new ListQueuesCommand({ NextToken: token }));
   const combinedQueues = [...(queues ?? []), ...(QueueUrls ?? [])];
 

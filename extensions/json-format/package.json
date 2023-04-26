@@ -7,6 +7,7 @@
   "author": "destiner",
   "contributors": [
     "Aayush9029",
+    "devlos",
     "lachero"
   ],
   "categories": [
@@ -30,20 +31,15 @@
   ],
   "preferences": [
     {
-      "name": "autopaste",
-      "title": "Auto Paste",
-      "label": "Automatically paste the formatted JSON",
+      "default": false,
       "description": "Paste the formatted JSON to an active app",
-      "type": "checkbox",
+      "label": "Automatically paste the formatted JSON",
+      "name": "autopaste",
       "required": false,
-      "default": false
+      "title": "Auto Paste",
+      "type": "checkbox"
     },
     {
-      "name": "indent",
-      "title": "Indentation",
-      "description": "Output file indentation",
-      "type": "dropdown",
-      "required": false,
       "data": [
         {
           "title": "Tab",
@@ -61,7 +57,12 @@
           "title": "Spaces: 8",
           "value": "8"
         }
-      ]
+      ],
+      "description": "Output file indentation",
+      "name": "indent",
+      "required": false,
+      "title": "Indentation",
+      "type": "dropdown"
     }
   ],
   "dependencies": {

@@ -1,5 +1,5 @@
 import { List } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { useCachedPromise, useCachedState } from "@raycast/utils";
 import { useState } from "react";
 
 import { getFilters } from "./api/filters";
@@ -8,20 +8,41 @@ import StatusIssueList from "./components/StatusIssueList";
 import { withJiraCredentials } from "./helpers/withJiraCredentials";
 
 export function MyFilters() {
-  const { data: filters } = useCachedPromise(() => getFilters());
+  const [query, setQuery] = useState("");
+  const [filterId, setFilterId] = useCachedState("filter-id", "");
 
-  const [filterJql, setFilterJql] = useState("");
+  const { data: filters, isLoading: isLoadingFilters } = useCachedPromise((query) => getFilters(query), [query], {
+    keepPreviousData: true,
+  });
 
   const {
     data: issues,
     isLoading,
     mutate,
-  } = useCachedPromise((jql) => getIssues({ jql }), [filterJql], { execute: filterJql !== "" });
+  } = useCachedPromise(
+    (filterId) => {
+      const jql = filters?.find((filter) => filter.id === filterId)?.jql;
+      if (!jql) {
+        return Promise.resolve([]);
+      }
+
+      return getIssues({ jql });
+    },
+    [filterId],
+    { execute: filterId !== "" }
+  );
 
   const searchBarAccessory = filters ? (
-    <List.Dropdown tooltip="Filter issues by filters" onChange={setFilterJql} storeValue>
+    <List.Dropdown
+      tooltip="Filter issues by filters"
+      onChange={setFilterId}
+      value={filterId}
+      isLoading={isLoadingFilters}
+      onSearchTextChange={setQuery}
+      throttle
+    >
       {filters?.map((filter) => {
-        return <List.Dropdown.Item key={filter.id} title={filter.name} value={filter.jql} />;
+        return <List.Dropdown.Item key={filter.id} title={filter.name} value={filter.id} />;
       })}
     </List.Dropdown>
   ) : null;

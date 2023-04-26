@@ -8,17 +8,9 @@ import {
 
 import beautify from 'js-beautify';
 
-export async function formatJS(text: string) {
+export function formatJS(text: string) {
   const indent = getIndentation();
   const trimmedText = text.trim();
-
-  if (trimmedText.length === 0) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: 'Empty input',
-    });
-    return;
-  }
 
   const options = {
     indent_size: indent === 'tab' ? 1 : parseInt(indent, 10),
@@ -28,13 +20,17 @@ export async function formatJS(text: string) {
 
   const json = convert(trimmedText);
   if (!json) return;
-  const out = beautify(json, options);
+  const output = beautify(json, options);
 
+  return output;
+}
+
+export async function copyFormattedJs(result: string) {
   if (autoPasteEnabled()) {
-    await Clipboard.paste(out);
+    await Clipboard.paste(result);
     await showHUD('✅ Pasted succesfully!');
   } else {
-    await Clipboard.copy(out);
+    await Clipboard.copy(result);
     await showHUD('✅ Copied succesfully!');
   }
 }

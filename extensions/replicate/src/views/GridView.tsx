@@ -2,7 +2,7 @@ import { useLayoutEffect, useState } from "react";
 import { ActionPanel, Action, Grid, getPreferenceValues, Icon, List, openCommandPreferences } from "@raycast/api";
 import { Prediction, PredictionResponse } from "../types";
 import { PREDICTIONS_URL } from "../constants";
-import { buildPredictionsList, copyImage, showAuthError } from "../utils/helpers";
+import { buildPredictionsList, copyImage, showAuthError, saveImage } from "../utils/helpers";
 import { Single } from "./Single";
 import fetch from "node-fetch";
 
@@ -94,7 +94,8 @@ export const GridView = ({ isLoading, onSearchTextChange }: Props) => {
             actions={
               <ActionPanel>
                 <Action.Push icon={Icon.Sidebar} title="View" target={<Single prediction={prediction} />} />
-                <Action icon={Icon.Image} title="Copy Image" onAction={() => copyImage(output[0])} />
+                <Action icon={Icon.SaveDocument} title="Save Image" onAction={() => saveImage(output[0])} />
+                <Action icon={Icon.CopyClipboard} title="Copy Image" onAction={() => copyImage(output[0])} />
                 <Action.OpenInBrowser
                   icon={Icon.Globe}
                   title="Open on Replicate"

@@ -81,6 +81,10 @@
               "value": "Default"
             },
             {
+              "title": "Originating Browser",
+              "value": "Originator"
+            },
+            {
               "title": "Google Chrome",
               "value": "Chrome"
             },

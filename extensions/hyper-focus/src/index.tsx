@@ -26,8 +26,30 @@ function configPath() {
   return join(homedir(), ".config/focus/");
 }
 
+function timestampToHoursMinutes(timestamp: number): string {
+  const until = new Date(timestamp * 1000);
+  return until.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
+}
+
 function minutesFromNowToTimestamp(minutes: number): number {
   return Math.round(new Date().getTime() / 1000) + minutes * 60;
+}
+
+function formatMinutes(minutes: number) {
+  if (minutes >= 60) {
+    const hours = Math.floor(minutes / 60);
+    if (hours == 1) {
+      return "1 hour";
+    } else {
+      return `${hours} hours`;
+    }
+  } else {
+    if (minutes == 1) {
+      return "1 minute";
+    } else {
+      return minutes + " minutes";
+    }
+  }
 }
 
 function SetOverride(props: { [name: string]: string }) {
@@ -47,14 +69,14 @@ function SetOverride(props: { [name: string]: string }) {
     popToRoot({ clearSearchBar: true });
   }
 
-  const overrideOptions = [15, 30, 45, 60].map((minutes) => {
+  const overrideOptions = [15, 30, 45, 60, 120, 180].map((minutes) => {
     return (
       <List.Item
         key={minutes}
-        title={`${minutes} minutes`}
+        title={formatMinutes(minutes)}
         actions={
           <ActionPanel>
-            <Action onAction={() => submitOverride(props.name, minutes)} title="Pause" />
+            <Action onAction={() => submitOverride(props.name, minutes)} title="Override" />
           </ActionPanel>
         }
       />
@@ -105,24 +127,8 @@ function Pause() {
     popToRoot({ clearSearchBar: true });
   }
 
-  const pauseOptions = [1, 5, 10, 15, 30, 60, 120].map((minutes) => {
-    function formatMinutes(minutes: number) {
-      if (minutes >= 60) {
-        const hours = Math.floor(minutes / 60);
-        if (hours == 1) {
-          return "1 hour";
-        } else {
-          return `${hours} hours`;
-        }
-      } else {
-        if (minutes == 1) {
-          return "1 minute";
-        } else {
-          return minutes + " minutes";
-        }
-      }
-    }
-
+  // intentionally limit available pause amounts
+  const pauseOptions = [1, 5, 10, 15].map((minutes) => {
     return (
       <List.Item
         key={minutes}
@@ -139,13 +145,21 @@ function Pause() {
   return <List>{pauseOptions}</List>;
 }
 
-function timestampToHoursMinutes(timestamp: number): string {
-  const until = new Date(timestamp * 1000);
-  return until.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
-}
-
 export default function Command() {
   const { data, isLoading, error } = useFetch<FocusStatus>(baseURL() + "/status");
+
+  async function reloadConfiguration() {
+    const result = await fetch(`${baseURL()}/reload`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({}),
+    });
+
+    const jsonResult = await result.json();
+
+    showHUD("Reloaded configuration");
+    popToRoot({ clearSearchBar: true });
+  }
 
   const renderActions = () => {
     const hasScheduledFocus = data?.schedule?.until !== null;
@@ -250,7 +264,7 @@ Press ↵ to open the Hyper Focus website"
             actions={
               <ActionPanel>
                 <Action.ShowInFinder title="Open Configuration" path={configPath()} />
-                <Action.Push title="Schedule Override" target={<ChooseOverride />} />
+                <Action title="Reload configuration" onAction={reloadConfiguration} />
               </ActionPanel>
             }
           />
