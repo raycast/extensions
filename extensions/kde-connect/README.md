@@ -1,3 +1,3 @@
 # KDE Connect
 
-An extension to access KDE Connect in Raycast. 
+An extension to access KDE Connect in Raycast.

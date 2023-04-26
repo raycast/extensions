@@ -1,31 +1,48 @@
 import { readFileSync } from "fs";
-import { execSync } from "child_process";
+import { KDEDevice } from "./device";
 
-const appPath = "/Applications/kdeconnect-indicator.app/Contents/MacOS/kdeconnect-cli"
+export const appPath = "/Applications/kdeconnect-indicator.app/Contents/MacOS/kdeconnect-cli";
 
 export function appExists() {
-    try {
-        readFileSync(appPath)
-        return true
-    } catch (e) {
-        console.log(e)
-        return false
-    }
+  try {
+    readFileSync(appPath);
+    return true;
+  } catch (e) {
+    return false;
+  }
 }
 
-export enum KDECOptions {
-    listDevice = "-l",
+export function parseDeviceInfo(str: string): KDEDevice | undefined {
+  const regex = /- (.+?): (.+?) \((.+)\)/;
+  const matches = regex.exec(str);
+  console.log(matches);
+  if (!matches) {
+    return undefined;
+  }
+
+  return {
+    name: matches[1],
+    id: matches[2],
+    paired: matches[3].includes("paired"),
+    reachable: matches[3].includes("reachable"),
+  };
 }
 
-export class KDEConnectDevice {
-    deviceID: string
-
-    constructor(deviceID: string) {
-        this.deviceID = deviceID
-    }
-
-    private executeCommand(option: KDECOptions, args: string[] = []) {
-        const result = execSync(`${appPath} ${option} ${this.deviceID} ${args.join(" ")}`)
-        return result.toString()
-    }
+interface KDECFunctionParam {
+  deviceID?: string;
+  args?: string[];
 }
+type KDECFunction = (param: KDECFunctionParam) => string | null;
+
+// object indexed by function string
+export const KDECFunctions: { [key: string]: KDECFunction } = {
+  listDevices: () => {
+    return "-l --refresh";
+  },
+  pairDevice: (params) => {
+    if (!params.deviceID) {
+      return null;
+    }
+    return `-d ${params.deviceID} --pair`;
+  },
+};
