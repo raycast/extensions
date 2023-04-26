@@ -9,7 +9,7 @@ export default async function main() {
     try {
         await execPromise(`osascript -e 'tell app "System Events" to tell appearance preferences to set dark mode to not dark mode'`);
 
-        execPromise("defaults read -g AppleInterfaceStyle")
+        await execPromise("defaults read -g AppleInterfaceStyle")
             // If dark mode is enabled, the command will return “Dark”.
             .then((result) => {
                 showHUD("Dark mode is now enabled.");
