@@ -1,13 +1,11 @@
 import { Action, ActionPanel, Alert, confirmAlert, Icon, List } from "@raycast/api"
-import { getSunrise, getSunset } from "sunrise-sunset-js"
 import { CityItem } from "../../types/CityItem"
-import { convertDateToString } from "../common/convertDateToString"
-import { getDayDuration } from "../common/getDayDuration"
 import { countryList } from "../ressources/countryList"
 import { DetailView } from "./DetailView"
 import { useFavorites } from "./FavoritesProvider"
 
 interface CityListItemViewProps extends CityItem {
+    currentDate: Date
     isFavorite?: boolean
 }
 
@@ -17,14 +15,10 @@ export const CityListItemView = ({
     countryCode,
     timezone,
     coordinates,
+    currentDate,
     isFavorite,
 }: CityListItemViewProps) => {
     const city = { geonameId, name, countryCode, timezone, coordinates }
-    const sunrise = getSunrise(coordinates.lat, coordinates.lon)
-    const sunset = getSunset(coordinates.lat, coordinates.lon)
-    const dayDuration = getDayDuration(sunrise, sunset)
-    const sunriseString = convertDateToString(sunrise, timezone)
-    const sunsetString = convertDateToString(sunset, timezone)
 
     const { addToFavorites, removeFromFavorites, moveFavorite } = useFavorites()
 
@@ -39,9 +33,7 @@ export const CityListItemView = ({
                     countryCode={countryCode}
                     timezone={timezone}
                     coordinates={coordinates}
-                    sunrise={sunriseString}
-                    sunset={sunsetString}
-                    dayDuration={dayDuration}
+                    currentDate={currentDate}
                 />
             }
             actions={

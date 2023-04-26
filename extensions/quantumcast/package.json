@@ -7,7 +7,8 @@
   "author": "jcgerhard",
   "categories": [
     "Developer Tools",
-    "Productivity"
+    "Productivity",
+    "Applications"
   ],
   "license": "MIT",
   "commands": [
@@ -24,6 +25,13 @@
       "subtitle": "Quantumcast",
       "description": "Open a Cloudflow workspace in the browser",
       "mode": "view"
+    },
+    {
+      "name": "open-cloudflow-api-docs",
+      "title": "Open Cloudflow API Documentation",
+      "subtitle": "Quantumcast",
+      "description": "Open a Cloudflow API documentation in the browser",
+      "mode": "view"
     }
   ],
   "preferences": [
@@ -38,7 +46,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.48.8",
-    "quantumlib": "^0.0.8"
+    "quantumlib": "^0.0.9"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.5",

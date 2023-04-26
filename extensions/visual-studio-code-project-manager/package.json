@@ -8,6 +8,7 @@
   "contributors": [
     "GastroGeek",
     "4very",
+    "theherk",
     "TobiasYin",
     "yossizahn"
   ],
@@ -83,6 +84,10 @@
         {
           "value": "VSCodium",
           "title": "VSCodium"
+        },
+        {
+          "value": "VSCodium < 1.71",
+          "title": "VSCodium < 1.71"
         }
       ]
     }

@@ -6,7 +6,8 @@
   "author": "nhojb",
   "contributors": [
     "Aayush9029",
-    "mathieudutour"
+    "mathieudutour",
+    "urwrstkn8mare"
   ],
   "license": "MIT",
   "icon": "icon.png",
@@ -42,6 +43,30 @@
   ],
   "preferences": [
     {
+      "name": "customBrewPath",
+      "type": "textfield",
+      "required": false,
+      "title": "Custom Brew Executable Path",
+      "description": "Set this if your brew executable is in a non-standard location"
+    },
+    {
+      "name": "terminalApp",
+      "type": "dropdown",
+      "required": false,
+      "title": "Terminal Application",
+      "data": [
+        {
+          "title": "Terminal",
+          "value": "terminal"
+        },
+        {
+          "title": "iTerm",
+          "value": "iterm"
+        }
+      ],
+      "description": "The terminal application/emulator to use when using any Run in Terminal action."
+    },
+    {
       "name": "greedyUpgrades",
       "type": "checkbox",
       "required": false,
@@ -51,11 +76,12 @@
       "label": "Include auto-updating casks when upgrading"
     },
     {
-      "name": "customBrewPath",
-      "type": "textfield",
+      "name": "zapCask",
+      "type": "checkbox",
       "required": false,
-      "title": "Custom Brew Executable Path",
-      "description": "Set this if your brew executable is in a non-standard location"
+      "title": "Uninstall",
+      "label": "Remove all files associated with a cask.",
+      "description": "Run cask uninstall with the --zap option for a more complete uninstallation of files associated with cask.\nWARNING: This may remove files shared with other applications."
     }
   ],
   "dependencies": {
