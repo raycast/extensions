@@ -5,7 +5,7 @@ import { BRIGHTNESS_MAX, BRIGHTNESS_MIN, BRIGHTNESSES, COLORS, MIRED_MAX, MIRED_
 import ManageHueBridge from "./components/ManageHueBridge";
 import UnlinkAction from "./components/UnlinkAction";
 import { useHue } from "./hooks/useHue";
-import React, { useMemo, useState } from "react";
+import React from "react";
 import { getProgressIcon } from "@raycast/utils";
 import useInputRateLimiter from "./hooks/useInputRateLimiter";
 import {
@@ -80,14 +80,7 @@ function Light(props: {
   useHue: ReturnType<typeof useHue>;
   rateLimiter: ReturnType<typeof useInputRateLimiter>;
 }) {
-  const content = props.light?.on?.on
-    ? props.lightIconUri ?? ""
-    : ({
-        source: {
-          light: "group-off.png",
-          dark: "group-off@dark.png",
-        },
-      } as Image);
+  const content = props.lightIconUri ?? "";
   return (
     <Grid.Item
       title={props.light.metadata.name}
