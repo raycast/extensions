@@ -3,11 +3,18 @@ import { useEffect } from "react";
 import { Reminder } from "../types/reminder";
 import { dateSortPredicate } from "../utils/dateSortPredicate";
 
-export function useFetchStoredReminders(setReminders: (reminders: Reminder[]) => void) {
+export function useFetchStoredReminders(
+  setReminders: (reminders: Reminder[]) => void,
+  setIsLoading: (isLoading: boolean) => void
+) {
   useEffect(() => {
+    setIsLoading(true);
     async function fetchRemindersFromLocalStorage() {
       const storedRemindersObject = await LocalStorage.allItems<Record<string, string>>();
-      if (!Object.keys(storedRemindersObject).length) return;
+      if (!Object.keys(storedRemindersObject).length) {
+        setIsLoading(false);
+        return;
+      }
       const storedReminders: Reminder[] = [];
       for (const key in storedRemindersObject) {
         const storedReminder: Reminder = JSON.parse(storedRemindersObject[key]);
@@ -16,6 +23,7 @@ export function useFetchStoredReminders(setReminders: (reminders: Reminder[]) =>
       }
       storedReminders.sort(dateSortPredicate);
       setReminders(storedReminders);
+      setIsLoading(false);
     }
     fetchRemindersFromLocalStorage();
   }, []);

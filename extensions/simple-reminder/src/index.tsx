@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Action, ActionPanel, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, showToast, Toast } from "@raycast/api";
 import { randomUUID } from "crypto";
 import { useFetchStoredReminders } from "./hooks/useFetchStoredReminders";
 import { Reminder } from "./types/reminder";
@@ -11,8 +11,9 @@ import Style = Toast.Style;
 export default function Command() {
   const [searchText, setSearchText] = useState("");
   const [reminders, setReminders] = useState<Reminder[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  useFetchStoredReminders(setReminders);
+  useFetchStoredReminders(setReminders, setIsLoading);
 
   const onSetReminderAction = async () => {
     try {
@@ -52,19 +53,20 @@ export default function Command() {
   return (
     <List
       searchText={searchText}
+      isLoading={isLoading}
       searchBarPlaceholder="remind me to speak with Joana tomorrow at 1pm"
       onSearchTextChange={setSearchText}
       filtering={false}
       actions={
         <ActionPanel>
-          <Action autoFocus title="Set Reminder" icon="checkmark.png" onAction={onSetReminderAction} />
+          <Action autoFocus title="Set Reminder" icon={Icon.AlarmRinging} onAction={onSetReminderAction} />
         </ActionPanel>
       }
     >
       {!reminders.length ? (
         <List.EmptyView
           title="No reminders yet"
-          description="To set a reminder, simply type what you want to be remembered of and when and hit enter!"
+          description="To set a reminder, simply type what you want to be remembered of and then and hit enter!"
           icon="no_bell.png"
         />
       ) : (
@@ -77,10 +79,13 @@ export default function Command() {
               icon="bell.png"
               actions={
                 <ActionPanel>
-                  <Action autoFocus title="Set Reminder" icon="checkmark.png" onAction={onSetReminderAction} />
+                  {searchText.length > 0 && (
+                    <Action title="Set Reminder" icon="checkmark.png" onAction={onSetReminderAction} />
+                  )}
                   <Action
                     title="Delete Reminder"
-                    icon="trash.png"
+                    style={Action.Style.Destructive}
+                    icon={Icon.Trash}
                     onAction={() => onDeleteReminderAction(reminder.id)}
                   />
                 </ActionPanel>
