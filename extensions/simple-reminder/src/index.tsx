@@ -74,6 +74,7 @@ export default function Command() {
               key={reminder.id}
               title={reminder.topic}
               subtitle={`set to ${reminder.date.toLocaleString()}`}
+              icon="bell.png"
               actions={
                 <ActionPanel>
                   <Action autoFocus title="Set Reminder" icon="checkmark.png" onAction={onSetReminderAction} />
