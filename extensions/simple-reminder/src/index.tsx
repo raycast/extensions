@@ -55,30 +55,39 @@ export default function Command() {
       searchBarPlaceholder="remind me to speak with Joana tomorrow at 1pm"
       onSearchTextChange={setSearchText}
       filtering={false}
+      actions={
+        <ActionPanel>
+          <Action autoFocus title="Set Reminder" icon="checkmark.png" onAction={onSetReminderAction} />
+        </ActionPanel>
+      }
     >
-      <List.Item
-        title="Set reminder"
-        icon="checkmark.png"
-        actions={
-          <ActionPanel>
-            <Action autoFocus title="Set Reminder" icon="checkmark.png" onAction={onSetReminderAction} />
-          </ActionPanel>
-        }
-      />
-      <List.Section title="Existing reminders" subtitle="you can edit existing reminders">
-        {reminders.map((reminder) => (
-          <List.Item
-            key={reminder.id}
-            title={reminder.topic}
-            subtitle={`set to ${reminder.date.toLocaleString()}`}
-            actions={
-              <ActionPanel>
-                <Action title="Delete Reminder" icon="trash.png" onAction={() => onDeleteReminderAction(reminder.id)} />
-              </ActionPanel>
-            }
-          />
-        ))}
-      </List.Section>
+      {!reminders.length ? (
+        <List.EmptyView
+          title="No reminders yet"
+          description="To set a reminder, simply type what you want to be remembered of and when and hit enter!"
+          icon="no_bell.png"
+        />
+      ) : (
+        <List.Section title="Existing reminders" subtitle="you can edit existing reminders">
+          {reminders.map((reminder) => (
+            <List.Item
+              key={reminder.id}
+              title={reminder.topic}
+              subtitle={`set to ${reminder.date.toLocaleString()}`}
+              actions={
+                <ActionPanel>
+                  <Action autoFocus title="Set Reminder" icon="checkmark.png" onAction={onSetReminderAction} />
+                  <Action
+                    title="Delete Reminder"
+                    icon="trash.png"
+                    onAction={() => onDeleteReminderAction(reminder.id)}
+                  />
+                </ActionPanel>
+              }
+            />
+          ))}
+        </List.Section>
+      )}
     </List>
   );
 }

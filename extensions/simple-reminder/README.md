@@ -17,7 +17,6 @@ Set your reminders in plain english without the need to have any application ins
 ![Demo 2](media/simple-reminder-2.png)
 ![Demo 3](media/simple-reminder-3.png)
 ![Demo 4](media/simple-reminder-4.png)
-![Demo 5](media/simple-reminder-5.png)
 
 ## Limitations
 
