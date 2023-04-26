@@ -17,10 +17,18 @@ export default function useLightIconUris(lights: Light[], width: number, height:
       const offLightKey = `${lightIconPath}_off_light_${width}x${height}`;
       const offDarkKey = `${lightIconPath}_off_dark_${width}x${height}`;
 
+      const cachedOnIcon = lightSquareCache.get(onKey);
+      const cachedOffLightIcon = lightSquareCache.get(offLightKey);
+      const cachedOffDarkIcon = lightSquareCache.get(offDarkKey);
+
       Promise.all([
-        lightSquareCache.get(onKey) ?? createLightOnIconPngUri(lightIconPath, lightColor, width, height),
-        lightSquareCache.get(offLightKey) ?? createLightOffIconPngUri(lightIconPath, "light", width, height),
-        lightSquareCache.get(offDarkKey) ?? createLightOffIconPngUri(lightIconPath, "dark", width, height),
+        cachedOnIcon ? JSON.parse(cachedOnIcon) : createLightOnIconPngUri(lightIconPath, lightColor, width, height),
+        cachedOffLightIcon
+          ? JSON.parse(cachedOffLightIcon)
+          : createLightOffIconPngUri(lightIconPath, "light", width, height),
+        cachedOffDarkIcon
+          ? JSON.parse(cachedOffDarkIcon)
+          : createLightOffIconPngUri(lightIconPath, "dark", width, height),
       ]).then(([onIcon, offLightIcon, offDarkIcon]) => {
         lightSquareCache.set(onKey, JSON.stringify(onIcon));
         lightSquareCache.set(offLightKey, JSON.stringify(offLightIcon));
