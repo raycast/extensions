@@ -7,7 +7,7 @@ import { getColorFromLight, getIconPathFromLight } from "../helpers/hueResources
 const lightSquareCache = new Cache({ namespace: "hue-light-icons" });
 
 export default function useLightIconUris(lights: Light[], width: number, height: number) {
-  const [lightIconUris, setLightIconUris] = useState(new Map<Id, PngUriLightIconSet>());
+  const [lightIconPngUriSets, setLightIconPngUriSets] = useState(new Map<Id, PngUriLightIconSet>());
 
   useMemo(() => {
     lights.forEach((light) => {
@@ -25,7 +25,7 @@ export default function useLightIconUris(lights: Light[], width: number, height:
         lightSquareCache.set(onKey, JSON.stringify(onIcon));
         lightSquareCache.set(offLightKey, JSON.stringify(offLightIcon));
         lightSquareCache.set(offDarkKey, JSON.stringify(offDarkIcon));
-        setLightIconUris((lightIcons) =>
+        setLightIconPngUriSets((lightIcons) =>
           new Map(lightIcons).set(light.id, {
             on: onIcon,
             offLight: offLightIcon,
@@ -36,5 +36,5 @@ export default function useLightIconUris(lights: Light[], width: number, height:
     });
   }, [lights]);
 
-  return { lightIconPngUriSets: lightIconUris };
+  return { lightIconPngUriSets };
 }
