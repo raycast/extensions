@@ -1,6 +1,6 @@
 # YouVersion Bible Suggest for Raycast
 
-_Copyright 2022 Caleb Evans_  
+_Copyright 2022-2023 Caleb Evans_  
 _Released under the MIT license_
 
 This [Raycast][raycast] extension allows you to search the YouVersion Bible

@@ -1,7 +1,7 @@
 import { List, showToast, Toast } from "@raycast/api";
 import { useCallback, useEffect, useState } from "react";
+import { getReferencesMatchingPhrase } from "youversion-suggest";
 import ReferenceActions from "./reference-actions";
-import { searchBibleForPhrase } from "./search-result-fetcher";
 import { BibleReference } from "./types";
 import { normalizeSearchText } from "./utilities";
 
@@ -77,7 +77,7 @@ async function getSearchResults(searchText: string): Promise<BibleReference[]> {
   searchText = normalizeSearchText(searchText);
   // Do not call out to YouVersion's servers if the search text is empty
   if (searchText.trim()) {
-    return searchBibleForPhrase(searchText);
+    return getReferencesMatchingPhrase(searchText);
   } else {
     return [];
   }
