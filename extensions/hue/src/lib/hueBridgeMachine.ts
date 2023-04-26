@@ -142,7 +142,6 @@ export default function hueBridgeMachine(
             },
             {
               target: "linking",
-              // TODO: When emptying a preference field it becomes an empty string, not undefined. Bug?
               cond: (context) => !!context.bridgeIpAddress,
             },
             {
@@ -210,7 +209,6 @@ export default function hueBridgeMachine(
                 bridgeIpAddress: (context, event) => event.data.ipAddress,
                 bridgeId: (context, event) => event.data.id,
               }),
-              // TODO: When emptying a preference field it becomes an empty string, not undefined. Bug?
               cond: (context) => !!context.bridgeUsername,
             },
             {
@@ -238,7 +236,6 @@ export default function hueBridgeMachine(
                 bridgeIpAddress: (context, event) => event.data.ipAddress,
                 bridgeId: (context, event) => event.data.id,
               }),
-              // TODO: When emptying a preference field it becomes an empty string, not undefined. Bug?
               cond: (context) => !!context.bridgeUsername,
             },
             {
@@ -349,7 +346,6 @@ export default function hueBridgeMachine(
                 bridgeId: () => undefined,
                 bridgeConfig: () => undefined,
               }),
-              // TODO: When emptying a preference field it becomes an empty string, not undefined. Bug?
               cond: () => !!getPreferenceValues().bridgeIpAddress,
             },
             {
