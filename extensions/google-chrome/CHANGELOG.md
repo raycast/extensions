@@ -1,5 +1,9 @@
 # Google Chrome Changelog
 
+## [Search Tabs] - 2023-04-26
+
+- Fixed issue with window ids represented as scientific numbers
+
 ## [Added better debug] - 2023-04-25
 
 - Increase exception message to diagnose issues
