@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 
 import Docxtemplater from "docxtemplater";
-import { ImageModule } from "docxtemplater-image-module-free";
+import ImageModule  from "docxtemplater-image-module-free";
 import PizZip from "pizzip";
 
 export interface VecationData {

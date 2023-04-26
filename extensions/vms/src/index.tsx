@@ -27,9 +27,9 @@ const vd: VecationData = {
     image: "signature.png",
 };
 
+var start_date = new Date();
+var end_date = new Date();
 export default function Command() {
-    let start_date = new Date();
-    let end_date = new Date();
 
     const cached_name = cache.get("name");
     const cached_position = cache.get("position");
@@ -41,8 +41,12 @@ export default function Command() {
     const getDateDiff = (start: Date, end: Date) => {
         const oneDay = 1000 * 60 * 60 * 24;
         const diffInTime = end.getTime() - start.getTime();
+        console.log(diffInTime)
+        console.log(start ,end)
+        console.log(start.getTime() - end.getTime())
+
         const diffInDays = Math.round(diffInTime / oneDay);
-        return `연차 (${diffInDays.toString()}일간)`;
+        return `${diffInDays.toString()}`;
     };
 
     return (
@@ -144,22 +148,26 @@ export default function Command() {
             <Form.DatePicker
                 id="dateOfStartVecation"
                 title="Date of Start Vecation"
-                defaultValue={new Date()}
-                onChange={(date) => {
-                    if (date !== null) {
-                        start_date = date;
+                defaultValue={start_date}
+                onBlur={(event)=> {
+                    if(event.target.value) {
+                        start_date = event.target.value;
+                        setPeriod(getDateDiff(start_date, end_date));
                     }
+                }}
+                onChange={(date) => {
                     setPeriod(getDateDiff(start_date, end_date));
                 }}
             />
             <Form.DatePicker
                 id="dateOfEndVecation"
                 title="Date of End Vecation"
-                defaultValue={new Date()}
+                defaultValue={end_date}
+                onBlur={(event) => {
+                    end_date = event.target.value
+                    setPeriod(getDateDiff(start_date, end_date));
+                }}
                 onChange={(date) => {
-                    if (date !== null) {
-                        end_date = date;
-                    }
                     setPeriod(getDateDiff(start_date, end_date));
                 }}
             />
