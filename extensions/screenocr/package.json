@@ -17,12 +17,6 @@
       "mode": "no-view"
     },
     {
-      "name": "recognize-text",
-      "title": "Recognize Text",
-      "description": "Detect all text from the captured screen area.",
-      "mode": "no-view"
-    },
-    {
       "name": "recognize-text-fullscreen",
       "title": "Recognize Text Entire Screen",
       "description": "Detect all text from the captured screen.",
