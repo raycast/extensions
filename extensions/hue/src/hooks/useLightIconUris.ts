@@ -1,40 +1,40 @@
 import { useMemo, useState } from "react";
-import { Id, Light, PngUri, PngUriCache } from "../lib/types";
-import { Cache, environment } from "@raycast/api";
-import { createLightOffIconPngUri, createLightIconPngUri } from "../helpers/createLightIconPngUri";
+import { Id, Light, PngUriLightIconSet } from "../lib/types";
+import { Cache } from "@raycast/api";
+import { createLightOffIconPngUri, createLightOnIconPngUri } from "../helpers/createLightIconPngUri";
 import { getColorFromLight, getIconPathFromLight } from "../helpers/hueResources";
 
-const lightSquareCache = new Cache({ namespace: "hue-scene-gradients" });
+const lightSquareCache = new Cache({ namespace: "hue-light-icons" });
 
 export default function useLightIconUris(lights: Light[], width: number, height: number) {
-  const [lightIconUris, setLightIconUris] = useState<PngUriCache>(new Map<Id, PngUri>());
+  const [lightIconUris, setLightIconUris] = useState(new Map<Id, PngUriLightIconSet>());
 
   useMemo(() => {
     lights.forEach((light) => {
       const lightIconPath = getIconPathFromLight(light);
       const lightColor = getColorFromLight(light);
-      const key = light.on.on
-        ? `${lightIconPath}_${lightColor}_${width}x${height}`
-        : `${lightIconPath}_off_${environment.theme}_${width}x${height}`;
-      const cached = lightSquareCache.get(key) && false;
+      const onKey = `${lightIconPath}_${lightColor}_${width}x${height}`;
+      const offLightKey = `${lightIconPath}_off_light_${width}x${height}`;
+      const offDarkKey = `${lightIconPath}_off_dark_${width}x${height}`;
 
-      if (cached) {
-        setLightIconUris((gradients) => new Map(gradients).set(light.id, JSON.parse(cached)));
-      } else {
-        if (light.on.on) {
-          createLightIconPngUri(lightIconPath, lightColor, width, height).then((lightIconUri) => {
-            lightSquareCache.set(key, JSON.stringify(lightIconUri));
-            setLightIconUris((gradients) => new Map(gradients).set(light.id, lightIconUri));
-          });
-        } else {
-          createLightOffIconPngUri(lightIconPath, environment.theme, width, height).then((lightIconUri) => {
-            lightSquareCache.set(key, JSON.stringify(lightIconUri));
-            setLightIconUris((gradients) => new Map(gradients).set(light.id, lightIconUri));
-          });
-        }
-      }
+      Promise.all([
+        lightSquareCache.get(onKey) ?? createLightOnIconPngUri(lightIconPath, lightColor, width, height),
+        lightSquareCache.get(offLightKey) ?? createLightOffIconPngUri(lightIconPath, "light", width, height),
+        lightSquareCache.get(offDarkKey) ?? createLightOffIconPngUri(lightIconPath, "dark", width, height),
+      ]).then(([onIcon, offLightIcon, offDarkIcon]) => {
+        lightSquareCache.set(onKey, JSON.stringify(onIcon));
+        lightSquareCache.set(offLightKey, JSON.stringify(offLightIcon));
+        lightSquareCache.set(offDarkKey, JSON.stringify(offDarkIcon));
+        setLightIconUris((lightIcons) =>
+          new Map(lightIcons).set(light.id, {
+            on: onIcon,
+            offLight: offLightIcon,
+            offDark: offDarkIcon,
+          })
+        );
+      });
     });
   }, [lights]);
 
-  return { lightIconUris };
+  return { lightIconPngUriSets: lightIconUris };
 }

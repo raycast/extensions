@@ -5,7 +5,7 @@ import { environment } from "@raycast/api";
 
 const LUMINANCE_THRESHOLD = 0.7;
 
-export function createLightIconPngUri(
+export function createLightOnIconPngUri(
   iconPath: string,
   colorHex: string,
   width: number,

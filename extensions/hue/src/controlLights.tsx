@@ -1,6 +1,6 @@
 import { ActionPanel, environment, Grid, Icon, Image, Toast } from "@raycast/api";
 import "./helpers/arrayExtensions";
-import { CssColor, Group, Id, Light, PngUri } from "./lib/types";
+import { CssColor, Group, Id, Light, PngUriLightIconSet } from "./lib/types";
 import { BRIGHTNESS_MAX, BRIGHTNESS_MIN, BRIGHTNESSES, COLORS, MIRED_MAX, MIRED_MIN } from "./helpers/constants";
 import ManageHueBridge from "./components/ManageHueBridge";
 import UnlinkAction from "./components/UnlinkAction";
@@ -16,14 +16,14 @@ import {
 } from "./helpers/colors";
 import { getLightsFromGroup } from "./helpers/hueResources";
 import { getIconForColor, getTransitionTimeInMs, optimisticUpdate } from "./helpers/raycast";
+import useLightIconPngUriSets from "./hooks/useLightIconUris";
 import Style = Toast.Style;
-import useLightIconUris from "./hooks/useLightIconUris";
 
 export default function ControlLights() {
   const useHueObject = useHue();
   const { hueBridgeState, sendHueMessage, isLoading, lights, rooms, zones } = useHueObject;
   const rateLimiter = useInputRateLimiter(10, 1000);
-  const { lightIconUris } = useLightIconUris(lights, 162, 162);
+  const { lightIconPngUriSets } = useLightIconPngUriSets(lights, 162, 162);
 
   const groups = ([] as Group[]).concat(rooms, zones).sort((a, b) => a.metadata.name.localeCompare(b.metadata.name));
 
@@ -38,7 +38,7 @@ export default function ControlLights() {
             key={group.id}
             group={group}
             lights={getLightsFromGroup(lights, group).sort((a, b) => a.metadata.name.localeCompare(b.metadata.name))}
-            lightIconUris={lightIconUris}
+            lightIconPngUriSets={lightIconPngUriSets}
             useHue={useHueObject}
             rateLimiter={rateLimiter}
           />
@@ -51,7 +51,7 @@ export default function ControlLights() {
 function Group(props: {
   group: Group;
   lights: Light[];
-  lightIconUris: Map<Id, string>;
+  lightIconPngUriSets: Map<Id, PngUriLightIconSet>;
   useHue: ReturnType<typeof useHue>;
   rateLimiter: ReturnType<typeof useInputRateLimiter>;
 }) {
@@ -63,7 +63,7 @@ function Group(props: {
             key={light.id}
             light={light}
             group={props.group}
-            lightIconUri={props.lightIconUris?.get(light.id)}
+            lightIconPngUriSet={props.lightIconPngUriSets?.get(light.id)}
             useHue={props.useHue}
             rateLimiter={props.rateLimiter}
           />
@@ -76,11 +76,23 @@ function Group(props: {
 function Light(props: {
   light: Light;
   group?: Group;
-  lightIconUri?: PngUri;
+  lightIconPngUriSet?: PngUriLightIconSet;
   useHue: ReturnType<typeof useHue>;
   rateLimiter: ReturnType<typeof useInputRateLimiter>;
 }) {
-  const content = props.lightIconUri ?? "";
+  const content = (
+    props.light?.on?.on
+      ? {
+          source: props.lightIconPngUriSet?.on,
+        }
+      : {
+          source: {
+            light: props.lightIconPngUriSet?.offLight,
+            dark: props.lightIconPngUriSet?.offDark,
+          },
+        }
+  ) as Image;
+
   return (
     <Grid.Item
       title={props.light.metadata.name}
