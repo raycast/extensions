@@ -1,5 +1,5 @@
-import { Action, ActionPanel, Grid, Icon, Toast } from "@raycast/api";
-import { PngUri, PngUriCache, Group, Id, Palette, Scene } from "./lib/types";
+import { Action, ActionPanel, Grid, Icon, Toast, useNavigation } from "@raycast/api";
+import { Group, Id, Palette, PngUri, PngUriCache, Scene } from "./lib/types";
 import UnlinkAction from "./components/UnlinkAction";
 import ManageHueBridge from "./components/ManageHueBridge";
 import { SendHueMessage, useHue } from "./hooks/useHue";
@@ -21,6 +21,8 @@ export default function SetScene(props: { group?: Group; useHue?: ReturnType<typ
   const [palettes, setPalettes] = useState(new Map<Id, Palette>([]));
   const { gradientUris } = useGradients(palettes, GRID_ITEM_WIDTH, GRID_ITEM_HEIGHT);
   const groupTypes = [rooms, zones];
+  const { pop } = useNavigation();
+  const isSubView = props.group !== undefined;
 
   useMemo(() => {
     setPalettes(new Map<Id, Palette>(scenes.map((scene) => [scene.id, getColorsFromScene(scene)])));
@@ -50,6 +52,11 @@ export default function SetScene(props: { group?: Group; useHue?: ReturnType<typ
               scene={groupScene}
               group={group}
               gradientUri={gradientUris.get(groupScene.id)}
+              onSetScene={() => {
+                if (isSubView) {
+                  pop();
+                }
+              }}
               hueClient={hueBridgeState.context.hueClient}
               sendHueMessage={sendHueMessage}
             />
@@ -88,6 +95,7 @@ function Group(props: {
   group: Group;
   scenes: Scene[];
   gradientUris: PngUriCache;
+  onSetScene?: () => void;
   hueClient?: HueClient;
   sendHueMessage: SendHueMessage;
 }) {
@@ -100,6 +108,7 @@ function Group(props: {
             group={props.group}
             scene={scene}
             gradientUri={props.gradientUris.get(scene.id)}
+            onSetScene={props.onSetScene}
             hueClient={props.hueClient}
             sendHueMessage={props.sendHueMessage}
           />
@@ -113,6 +122,7 @@ function Scene(props: {
   scene: Scene;
   group: Group;
   gradientUri: PngUri | undefined;
+  onSetScene?: () => void;
   sendHueMessage: SendHueMessage;
   hueClient?: HueClient;
 }) {
@@ -127,7 +137,10 @@ function Scene(props: {
           <SetSceneAction
             group={props.group}
             scene={props.scene}
-            onSet={() => handleSetScene(props.hueClient, props.group, props.scene)}
+            onSet={() => {
+              handleSetScene(props.hueClient, props.group, props.scene).then();
+              props.onSetScene?.();
+            }}
           />
           <ActionPanel.Section>
             <UnlinkAction sendHueMessage={props.sendHueMessage} />
