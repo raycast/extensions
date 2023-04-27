@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "keychain-password-gen",
   "title": "Apple-Like Password",
-  "description": "Generate an Apple Keychain-Like Password",
+  "description": "Copies a generated Apple Keychain-Like password directly to the clipboard in one step",
   "icon": "icon.png",
   "author": "breadone",
   "categories": [
