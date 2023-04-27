@@ -65,10 +65,8 @@ export const SelectTerminalApp = ({ setTerminalAppName }: { setTerminalAppName: 
         </ActionPanel>
       }
     >
-      <Form.Description
-        title="Select Terminal App"
-        text="Choose your default terminal App. When switch to session, it will open the session in the selected terminal app."
-      />
+      <Form.Description text="Choose your default terminal App" />
+      <Form.Description text="When switch to session, it will open the session in the selected terminal app." />
       <Form.Dropdown id="terminalAppName" isLoading={loading}>
         {apps?.map((app, index) => (
           <Form.Dropdown.Item key={index} value={app.name} title={app.name} icon={app.iconPath} />
