@@ -4,7 +4,6 @@ Set your reminders in plain english without the need to have any application ins
 
 ## Example usage
 
-
 > remind me to speak with Jane on May 18th at 6pm
 > 
 > remind me to buy lunch today at noon
