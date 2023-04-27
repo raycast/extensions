@@ -3,7 +3,9 @@
 ## [Version 1.3] - 2023-04-24
 
 - NEU: Schnellinfo (Tooltip) auch bei Titeln der Suchergebnisse
+- NEU: Hinweis "Articulus brevis minimus" wird entfernt
 - Fix: "Top Artikel" werden jetzt immer korrekt dargestellt und nur einmal geladen (Optimierung bei der Darstellung von Suchergebnissen nach dem Verlassen einer Artikelansicht über den "← Suche *" Link und beim Löschen des Suchbegriffes)
+- Fix: wenn ein Top Artikel ausgewählt wurde erscheint jetzt "← Top Artikel" in der Detail Ansicht; wenn in den Einstellungen "Open in: Browser" gewählt wurde wird nichts mehr angezeigt, da mit "Esc" zurückgesprungen werden kann
 
 ## [Version 1.2.2] - 2023-04-12
 

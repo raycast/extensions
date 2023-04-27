@@ -82,8 +82,15 @@ export default function DocCheckPage(props: { url: string; prevurl: string; quer
         : $(link).html();
   });
 
+  // table of contents
   let toc = "";
   $("#toc").each(function (i, link) {
+    toc += $(link).html();
+  });
+  
+  // "Articulus brevis minimus"
+  let abm = "";
+  $(".has-bg-gray-200").each(function (i, link) {
     toc += $(link).html();
   });
 
@@ -103,24 +110,28 @@ export default function DocCheckPage(props: { url: string; prevurl: string; quer
         "](" +
         "raycast://extensions/spacedog/doccheck/open-page?arguments=" +
         encodeURI(JSON.stringify({ url: props.prevurl, query: props.query })) +
-        ")"
-      : "[← Suche" +
+        ")\n"
+      : props.query != "" && preferences.openIn != "browser"
+      ? "[← Suche" +
         queryText +
         "](" +
         "raycast://extensions/spacedog/doccheck/doccheck-flexikon?fallbackText=" +
         encodeURI(query) +
-        ")";
+        ")\n"
+      : preferences.openIn != "browser"
+      ? "[← Top Artikel](raycast://extensions/spacedog/doccheck/doccheck-flexikon)\n"
+      : "";
   markdown +=
     "\n " +
     goback +
-    "\n" +
     mdSynonyms +
     nhm
       .translate(
         html
           .replace(toc, "")
+          .replace(abm, "")
           .replace(/#cite_\D*\d*/gm, '"')
-          .replace(`&nbsp;`, `.`)
+          .replace(`>&nbsp;<`, `>.<`)
       )
       .replace(/\s{94}\|\n/gm, `\n`); // ÜBERSCHRIFT + ```SYNONYME``` -TOC + ARTIKEL (Entfernung von Ankern, relative zu absoluten Links, Entfernung der leeren Startzeile bei Berechnung "Relatives Risiko",Entfernung einiger Tabellenenden wie bei DDx in "Scharlach")
 
