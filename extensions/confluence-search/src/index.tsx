@@ -118,7 +118,7 @@ function useSearch() {
 }
 
 async function searchConfluence(searchText: string, _type: string, signal: AbortSignal) {
-  return query(searchText, _type, "title", signal).then(result => {
+  return query(searchText, _type, "title", signal).then((result) => {
     if (result.length > 0) {
       return result;
     } else {
