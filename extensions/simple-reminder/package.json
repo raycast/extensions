@@ -5,7 +5,14 @@
   "description": "Set your reminders in natural language without the need to have any application installed.",
   "icon": "logo.png",
   "author": "comoser",
-  "keywords": ["remind", "reminder", "simple"],
+  "contributors": [
+    "pernielsentikaer"
+  ],
+  "keywords": [
+    "remind",
+    "reminder",
+    "simple"
+  ],
   "categories": [
     "Productivity"
   ],
@@ -13,13 +20,13 @@
   "commands": [
     {
       "name": "index",
-      "title": "Add-reminder",
+      "title": "Add Reminder",
       "description": "Add a new reminder or check existing ones. You will be notified when the reminder time is reached.",
       "mode": "view"
     },
     {
       "name": "reminderNotifications",
-      "title": "Reminder-system-notifications",
+      "title": "Reminder System Notifications",
       "description": "Background service to notify the user through a system notification when a reminder date is right up",
       "mode": "no-view",
       "interval": "1m"
