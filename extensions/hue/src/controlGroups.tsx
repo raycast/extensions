@@ -23,7 +23,7 @@ const GRID_ITEM_HEIGHT = 153;
 export default function ControlGroups() {
   const useHueObject = useHue();
   const { hueBridgeState, sendHueMessage, isLoading, lights, groupedLights, rooms, zones } = useHueObject;
-  const rateLimiter = useInputRateLimiter(10, 1000);
+  const rateLimiter = useInputRateLimiter(3, 1000);
   const [palettes, setPalettes] = useState(new Map<Id, Palette>([]));
   const { gradientUris } = useGradientUris(palettes, GRID_ITEM_WIDTH, GRID_ITEM_HEIGHT);
 
@@ -297,6 +297,7 @@ async function handleToggle(
   try {
     if (hueBridgeState.context.hueClient === undefined) throw new Error("Not connected to Hue Bridge.");
     if (groupedLight === undefined) throw new Error("Light group not found.");
+    if (!rateLimiter.canExecute()) return;
 
     // TODO: Find out why Hue complains when we turn off a group where some lights are already off.
     const changes = {
