@@ -1,0 +1,123 @@
+import { exec, spawnSync } from "child_process";
+import {
+  Cache,
+  Clipboard,
+  closeMainWindow,
+  environment,
+  getSelectedText,
+  LocalStorage,
+  PopToRootType,
+  showHUD,
+} from "@raycast/api";
+import { deviceToken } from "../types/preferences";
+import { CacheKey, EXPIRE_TIME } from "./constants";
+import { isIPv4 } from "net";
+
+export const isEmpty = (string: string | null | undefined) => {
+  return !(string != null && String(string).length > 0);
+};
+
+export const getSelectedMessage = async () => {
+  try {
+    let message = "";
+    const selectedText = await getSelectedText();
+    if (isEmpty(selectedText)) {
+      const copiedText = await Clipboard.readText();
+      if (typeof copiedText !== "undefined" && !isEmpty(copiedText)) {
+        message = copiedText;
+      }
+    } else {
+      message = selectedText;
+    }
+    console.debug(`message: ${message}`);
+    return message.trim().replaceAll("\n", " ");
+  } catch (e) {
+    console.error(e);
+    return "";
+  }
+};
+
+export const createNewAuthToken = () => {
+  const command = "sh";
+  const args = [
+    `${environment.assetsPath}/token/create-token.sh`,
+    `${environment.assetsPath}/token/AuthKey_LH4T9V5U4R_5U8LBRXG3A.p8`,
+  ];
+  const authToken = spawnSync(command, args).stdout.toString().trim();
+  const cacheAuthToken = {
+    token: authToken,
+    createAt: Date.now(),
+  };
+  LocalStorage.setItem(CacheKey.AUTHENTICATION_TOKEN, JSON.stringify(cacheAuthToken)).then(() => {
+    console.debug("set token success");
+  });
+  console.debug(`New Token: ${authToken}`);
+  return authToken;
+};
+
+export const getCacheAuthToken = async () => {
+  const cacheString = await LocalStorage.getItem<string>(CacheKey.AUTHENTICATION_TOKEN);
+  if (typeof cacheString === "undefined") {
+    return createNewAuthToken();
+  } else {
+    const { token, createAt } = JSON.parse(cacheString);
+    const tokenLiveTime = Date.now() - createAt;
+    if (tokenLiveTime > EXPIRE_TIME) {
+      return createNewAuthToken();
+    }
+    console.debug(`Cache Token: ${token}`);
+    return token;
+  }
+};
+
+export const getSound = () => {
+  const cache = new Cache();
+  const soundStr = cache.get(CacheKey.SOUND);
+  console.debug(`soundStr: ${soundStr}`);
+  if (typeof soundStr === "undefined") {
+    return "silence.caf";
+  } else {
+    return soundStr;
+  }
+};
+export const getIcon = () => {
+  const cache = new Cache();
+  const iconStr = cache.get(CacheKey.ICON);
+  console.debug(`iconStr: ${iconStr}`);
+  if (typeof iconStr === "undefined") {
+    return "";
+  } else {
+    return iconStr;
+  }
+};
+
+export const sendMessage = async (message: string, title: string, subTitle: string, badge: number) => {
+  await closeMainWindow({ popToRootType: PopToRootType.Default });
+
+  const APNS_HOST_NAME = "api.push.apple.com";
+  const DEVICE_TOKEN = deviceToken;
+  const TOPIC = "me.fin.bark";
+  const AUTHENTICATION_TOKEN = await getCacheAuthToken();
+
+  const script = `curl -X "POST" "https://${APNS_HOST_NAME}/3/device/${DEVICE_TOKEN}" \\
+     -H 'apns-topic: ${TOPIC}' \\
+     -H 'apns-push-type: alert' \\
+     -H 'authorization: bearer ${AUTHENTICATION_TOKEN}' \\
+     -H 'Content-Type: text/plain; charset=utf-8' \\
+     -d $'{
+    "aps": {
+        "mutable-content": 1,
+        "alert": {
+            "title" : "${title}",
+            "subtitle" : "${subTitle}",
+            "body": "${message}"
+        },
+        "category": "myNotificationCategory",
+        "sound": "${getSound()}",
+        "badge": ${badge}
+    },
+    "icon": "${getIcon()}"
+}'`;
+  exec(script);
+  await showHUD("Message Sent");
+};
