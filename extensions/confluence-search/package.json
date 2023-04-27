@@ -6,7 +6,8 @@
   "icon": "confluence-icon.png",
   "author": "daviddkkim",
   "contributors": [
-    "lr1980"
+    "lr1980",
+    "ahoereth"
   ],
   "license": "MIT",
   "commands": [

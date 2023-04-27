@@ -127,9 +127,14 @@ async function searchConfluence(searchText: string, _type: string, signal: Abort
     signal: signal,
     agent: httpsAgent,
   };
-  let query = `title~"${searchText}*"`; // default query
+  // CQL documentation: developer.atlassian.com/server/confluence/advanced-searching-using-cql
+  // Pieces to the CQL query:
+  // 1. exact word match
+  // 2. partial match
+  // 3. "fuzzy" match
+  let query = `title ~ "${searchText}" OR title ~ "${searchText}*" OR title ~ "${searchText}~"`;
   if (_type) {
-    query = `type=${_type} AND ${query}`;
+    query = `type=${_type} AND (${query})`;
   }
   // url encode query
   query = encodeURIComponent(query);
