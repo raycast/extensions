@@ -1,6 +1,8 @@
 # QOTP
 
-## pin 获取
+English [中文](README.CN.md)
+
+## pin
 
 qotp.corp platform, The six-digit password entered by the user.
 
