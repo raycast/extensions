@@ -100,7 +100,11 @@ export interface OutdatedResults {
 
 /// Paths
 
+export const customBrewPath =
+  preferences.customBrewPath && preferences.customBrewPath.length > 0 ? preferences.customBrewPath : undefined;
+
 export const brewPrefix: string = (() => {
+  if (customBrewPath) return path_join(customBrewPath, "..", "..");
   try {
     return execSync("brew --prefix", { encoding: "utf8" }).trim();
   } catch {
@@ -113,11 +117,7 @@ export function brewPath(suffix: string): string {
 }
 
 export function brewExecutable(): string {
-  if (preferences.customBrewPath && preferences.customBrewPath.length > 0) {
-    return preferences.customBrewPath;
-  } else {
-    return path_join(brewPrefix, "bin/brew");
-  }
+  return customBrewPath ?? path_join(brewPrefix, "bin/brew");
 }
 
 /// Fetching
