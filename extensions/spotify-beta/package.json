@@ -63,6 +63,24 @@
           "type": "textfield",
           "default": "20",
           "required": false
+        },
+        {
+          "name": "iconType",
+          "title": "Icon type",
+          "description": "Choose between the default Spotify icon, or the cover image of the current track or episode",
+          "type": "dropdown",
+          "default": "spotify",
+          "data": [
+            {
+              "title": "Spotify Icon",
+              "value": "spotify-icon"
+            },
+            {
+              "title": "Cover Image",
+              "value": "cover-image"
+            }
+          ],
+          "required": false
         }
       ]
     },
