@@ -12,8 +12,14 @@
   "commands": [
     {
       "name": "index",
-      "title": "Switch Session",
+      "title": "Switch Tmux Session",
       "description": "Switch Session in Tmux and Open Terminal",
+      "mode": "view"
+    },
+    {
+      "name": "choose_terminal_app",
+      "title": "Change Default Terminal Tmux Sessioner",
+      "description": "Change Default Terminal for Tmux Sessioner",
       "mode": "view"
     }
   ],
