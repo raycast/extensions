@@ -87,7 +87,7 @@ function OTPPanel(props: IOTPPanelProps) {
   return (
     <ActionPanel>
       <ActionPanel.Section>
-        <Action icon={Icon.Clipboard} title="Enter Copy" onAction={() => onAction(item)} />
+        <Action icon={Icon.Clipboard} title="Copy to Clipboard" onAction={() => onAction(item)} />
       </ActionPanel.Section>
     </ActionPanel>
   );
