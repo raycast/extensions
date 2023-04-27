@@ -1,5 +1,6 @@
 import { Form } from "@raycast/api";
 import { useCallback, useEffect, useState } from "react";
+import { getBibleData, getLanguages } from "youversion-suggest";
 import {
   getPreferredLanguage,
   getPreferredReferenceFormat,
@@ -8,9 +9,8 @@ import {
   setPreferredReferenceFormat,
   setPreferredVersion,
 } from "./preferences";
-import { isReferenceFormatValid } from "./ref-content-fetcher";
 import { BibleLanguage, BibleLanguageId, BibleVersion, BibleVersionId } from "./types";
-import { getBibleData, getLanguages } from "./utilities";
+import { isReferenceFormatValid } from "./utilities";
 
 export default function Command() {
   const { state, onChangeLanguage, onChangeVersion, onChangeReferenceFormat } = usePreferences();
