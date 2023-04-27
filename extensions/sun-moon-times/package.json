@@ -26,7 +26,7 @@
         {
             "name": "index",
             "title": "Show Sun/Moon Times",
-            "description": "Search for a city and show the sun and moon times for today.",
+            "description": "Search for a city and show the sun and moon times for a selected day.",
             "mode": "view"
         }
     ],
