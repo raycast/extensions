@@ -64,7 +64,7 @@ function SearchListItem({
                 mask: Image.Mask.Circle,
             },
             tooltip: "On call",
-            text: "Jane Smith", // service.onCalls?.nodes[0]?.name,
+            text: service.onCalls?.nodes[0]?.name,
         });
     }
 
