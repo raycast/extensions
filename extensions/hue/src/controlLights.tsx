@@ -31,7 +31,7 @@ export default function ControlLights() {
   if (manageHueBridgeElement !== null) return manageHueBridgeElement;
 
   return (
-    <Grid isLoading={isLoading} filtering={{ keepSectionOrder: true }} columns={8}>
+    <Grid isLoading={isLoading || lightIconPngUriSets === null} filtering={{ keepSectionOrder: true }} columns={8}>
       {groups.map((group: Group) => {
         return (
           <Group
@@ -51,7 +51,7 @@ export default function ControlLights() {
 function Group(props: {
   group: Group;
   lights: Light[];
-  lightIconPngUriSets: Map<Id, PngUriLightIconSet>;
+  lightIconPngUriSets: Map<Id, PngUriLightIconSet> | null;
   useHue: ReturnType<typeof useHue>;
   rateLimiter: ReturnType<typeof useInputRateLimiter>;
 }) {
@@ -80,18 +80,18 @@ function Light(props: {
   useHue: ReturnType<typeof useHue>;
   rateLimiter: ReturnType<typeof useInputRateLimiter>;
 }) {
-  const content = (
-    props.light?.on?.on
-      ? {
-          source: props.lightIconPngUriSet?.on,
-        }
-      : {
-          source: {
-            light: props.lightIconPngUriSet?.offLight,
-            dark: props.lightIconPngUriSet?.offDark,
-          },
-        }
-  ) as Image;
+  const content = props.lightIconPngUriSet
+    ? ((props.light?.on?.on
+        ? {
+            source: props.lightIconPngUriSet?.on,
+          }
+        : {
+            source: {
+              light: props.lightIconPngUriSet?.offLight,
+              dark: props.lightIconPngUriSet?.offDark,
+            },
+          }) as Image)
+    : "";
 
   return (
     <Grid.Item

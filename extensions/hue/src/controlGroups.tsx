@@ -11,7 +11,7 @@ import useInputRateLimiter from "./hooks/useInputRateLimiter";
 import UnlinkAction from "./components/UnlinkAction";
 import SetScene from "./setScene";
 import { getColorFromLight, getLightsFromGroup } from "./helpers/hueResources";
-import { getTransitionTimeInMs, optimisticUpdate, optimisticUpdates } from "./helpers/raycast";
+import { getTransitionTimeInMs, optimisticUpdates } from "./helpers/raycast";
 import { calculateAdjustedBrightness, getClosestBrightness } from "./helpers/colors";
 import chroma from "chroma-js";
 import Style = Toast.Style;
@@ -119,10 +119,8 @@ function Group(props: {
     lightStatusText = "All lights are off";
   } else if (lightsOnCount === props.groupLights.length) {
     lightStatusText = "All lights are on";
-  } else if (lightsOnCount === 1) {
-    lightStatusText = "1 light is on";
   } else {
-    lightStatusText = `${lightsOnCount} lights are on`;
+    lightStatusText = `${lightsOnCount} out of ${props.groupLights.length} lights are on`;
   }
 
   const content = props.groupedLight?.on?.on

@@ -7,7 +7,7 @@ import { getColorFromLight, getIconPathFromLight } from "../helpers/hueResources
 const lightSquareCache = new Cache({ namespace: "hue-light-icons" });
 
 export default function useLightIconUris(lights: Light[], width: number, height: number) {
-  const [lightIconPngUriSets, setLightIconPngUriSets] = useState(new Map<Id, PngUriLightIconSet>());
+  const [lightIconPngUriSets, setLightIconPngUriSets] = useState<Map<Id, PngUriLightIconSet> | null>(null);
 
   useMemo(() => {
     lights.forEach((light) => {
