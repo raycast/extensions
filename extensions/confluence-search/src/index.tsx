@@ -118,6 +118,16 @@ function useSearch() {
 }
 
 async function searchConfluence(searchText: string, _type: string, signal: AbortSignal) {
+  return query(searchText, _type, "title", signal).then(result => {
+    if (result.length > 0) {
+      return result;
+    } else {
+      return query(searchText, _type, "text", signal);
+    }
+  });
+}
+
+async function query(searchText: string, _type: string, field: string, signal: AbortSignal) {
   const httpsAgent = new https.Agent({
     rejectUnauthorized: !prefs.unsafeHttps,
   });
@@ -132,7 +142,7 @@ async function searchConfluence(searchText: string, _type: string, signal: Abort
   // 1. exact word match
   // 2. partial match
   // 3. "fuzzy" match
-  let query = `title ~ "${searchText}" OR title ~ "${searchText}*" OR title ~ "${searchText}~"`;
+  let query = `${field}~"${searchText}" OR ${field}~"${searchText}*" OR ${field}~"${searchText}~"`;
   if (_type) {
     query = `type=${_type} AND (${query})`;
   }
