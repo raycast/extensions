@@ -3,6 +3,7 @@
 ## [Search Scope] - 2023-04-27
 
 - Add scope dropdown for `Search Issues`
+- Add possibility to search for specific `state`, `author`, `assignees`, `milestone` or `label` in `Search Issues`.
 
 ## [Remove Branch] - 2023-04-17
 

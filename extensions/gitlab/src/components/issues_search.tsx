@@ -4,7 +4,7 @@ import { useCache } from "../cache";
 import { gitlab } from "../common";
 import { Issue } from "../gitlabapi";
 import { daysInSeconds, getErrorMessage, hashRecord, showErrorToast } from "../utils";
-import { IssueListItem, IssueScope, IssueState } from "./issues";
+import { IssueListItem, IssueScope, IssueState, getIssueQuery, injectQueryNamedParameters } from "./issues";
 
 /* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/explicit-module-boundary-types */
 
@@ -13,9 +13,11 @@ export function SearchMyIssues(): JSX.Element {
   const state = IssueState.all;
   const [search, setSearch] = useState<string>();
   const params: Record<string, any> = { state, scope };
-  if (search) {
-    params.search = search;
-  }
+  const qd = getIssueQuery(search);
+  params.search = qd.query || "";
+  injectQueryNamedParameters(params, qd, scope as IssueScope, false);
+  injectQueryNamedParameters(params, qd, scope as IssueScope, true);
+
   const paramsHash = hashRecord(params);
   const { data, isLoading, error, performRefetch } = useCache<Issue[] | undefined>(
     `myissuessearch_${paramsHash}`,
