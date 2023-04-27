@@ -9,7 +9,7 @@ import { IssueListItem, IssueScope, IssueState } from "./issues";
 /* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/explicit-module-boundary-types */
 
 export function SearchMyIssues(): JSX.Element {
-  const scope = IssueScope.created_by_me;
+  const [scope, setScope] = useState<string>(IssueScope.created_by_me);
   const state = IssueState.all;
   const [search, setSearch] = useState<string>();
   const params: Record<string, any> = { state, scope };
@@ -36,7 +36,18 @@ export function SearchMyIssues(): JSX.Element {
   }
   const title = search ? "Search Results" : "Created Recently";
   return (
-    <List isLoading={isLoading} searchText={search} onSearchTextChange={setSearch} throttle>
+    <List
+      isLoading={isLoading}
+      searchText={search}
+      onSearchTextChange={setSearch}
+      throttle
+      searchBarAccessory={
+        <List.Dropdown tooltip="Scope" onChange={setScope}>
+          <List.Dropdown.Item title="Created By Me" value={IssueScope.created_by_me} />
+          <List.Dropdown.Item title="All" value={IssueScope.all} />
+        </List.Dropdown>
+      }
+    >
       <List.Section title={title} subtitle={data ? `${data.length}` : undefined}>
         {data?.map((i) => (
           <IssueListItem key={i.id} issue={i} refreshData={performRefetch} />

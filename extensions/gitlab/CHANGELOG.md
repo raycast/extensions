@@ -1,5 +1,9 @@
 # GitLab Changelog
 
+## [Search Scope] - 2023-04-27
+
+- Add scope dropdown for `Search Issues`
+
 ## [Remove Branch] - 2023-04-17
 
 - Add checkbox `Delete source branch` for a new MR (default state of project is respected)
