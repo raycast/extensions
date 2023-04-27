@@ -7,7 +7,8 @@
   "author": "destiner",
   "contributors": [
     "Aayush9029",
-    "devlos"
+    "devlos",
+    "lachero"
   ],
   "categories": [
     "Data",
@@ -18,13 +19,13 @@
     {
       "name": "formatClipboard",
       "title": "Format Clipboard JSON",
-      "description": "Formats a JSON string stored in clipboard and copies it back",
+      "description": "Formats a JSON/JS Object string stored in clipboard and copies it back",
       "mode": "no-view"
     },
     {
       "name": "index",
       "title": "Format JSON",
-      "description": "Formats a JSON",
+      "description": "Formats a JSON/JS Object",
       "mode": "view"
     }
   ],
