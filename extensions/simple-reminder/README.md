@@ -13,10 +13,10 @@ Set your reminders in plain english without the need to have any application ins
 
 ## Screenshots
 
-![Demo 1](media/simple-reminder-1.png)
-![Demo 2](media/simple-reminder-2.png)
-![Demo 3](media/simple-reminder-3.png)
-![Demo 4](media/simple-reminder-4.png)
+![Demo 1](metadata/simple-reminder-1.png)
+![Demo 2](metadata/simple-reminder-2.png)
+![Demo 3](metadata/simple-reminder-3.png)
+![Demo 4](metadata/simple-reminder-4.png)
 
 ## Limitations
 
