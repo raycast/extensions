@@ -10,7 +10,7 @@ import { MRScope, MRState, MRListItem } from "./mr";
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 export function SearchMyMergeRequests(): JSX.Element {
-  const scope = MRScope.created_by_me;
+  const [scope, setScope] = useState<string>(MRScope.created_by_me);
   const state = MRState.all;
   const [search, setSearch] = useState<string>();
   const params: Record<string, any> = { state, scope };
@@ -46,6 +46,13 @@ export function SearchMyMergeRequests(): JSX.Element {
       onSearchTextChange={setSearch}
       isShowingDetail={getListDetailsPreference()}
       throttle
+      searchBarAccessory={
+        <List.Dropdown tooltip="Scope" onChange={setScope}>
+          <List.Dropdown.Item title="Created By Me" value={MRScope.created_by_me} />
+          <List.Dropdown.Item title="Assigned To Me" value={MRScope.assigned_to_me} />
+          <List.Dropdown.Item title="All" value={MRScope.all} />
+        </List.Dropdown>
+      }
     >
       <List.Section title={title} subtitle={data ? `${data.length}` : undefined}>
         {data?.map((m) => (
