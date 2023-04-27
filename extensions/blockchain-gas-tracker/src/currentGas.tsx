@@ -1,4 +1,4 @@
-import { ActionPanel, List, Action, Icon, Color, getPreferenceValues } from "@raycast/api";
+import { ActionPanel, List, Action, Icon, Color, getPreferenceValues, openExtensionPreferences } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { useState } from "react";
 
@@ -122,7 +122,6 @@ export default function Command() {
   }
 
   function returnList(isLoading: boolean) {
-    console.log(token);
     if (!isLoading) {
       return (
         <List
@@ -231,13 +230,23 @@ export default function Command() {
               tintColor: Color.Blue,
             }}
             title="Loading..."
+            actions={
+              <ActionPanel>
+                <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
+              </ActionPanel>
+            }
           />
           <List.Item
             icon={{
               source: Icon.Info,
               tintColor: Color.Blue,
             }}
-            title="Tips: Add api keys in preferences to avoid waiting"
+            title="Tips: Add api keys in extension preferences to avoid waiting"
+            actions={
+              <ActionPanel>
+                <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
+              </ActionPanel>
+            }
           />
         </List>
       );
