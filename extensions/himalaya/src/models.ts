@@ -1,3 +1,6 @@
+import "reflect-metadata";
+import { Transform, Type } from "class-transformer";
+
 export enum Flag {
   Seen = "Seen",
   Answered = "Answered",
@@ -8,21 +11,54 @@ export enum Flag {
   // TODO Custom
 }
 
-export interface Envelope {
+export class Envelope {
   id: string;
   internal_id: string;
   message_id: string;
   flags: Flag[];
-  from: {
-    name: string;
-    addr: string;
-  };
+  @Type(() => From)
+  from: From;
   subject: string;
+  @Type(() => Date)
   date: Date;
+
+  constructor(
+    id: string,
+    internal_id: string,
+    message_id: string,
+    flags: Flag[],
+    from: From,
+    subject: string,
+    date: Date,
+  ) {
+    this.id = id;
+    this.internal_id = internal_id;
+    this.message_id = message_id;
+    this.flags = flags;
+    this.from = from;
+    this.subject = subject;
+    this.date = date;
+  }
 }
 
-export interface Folder {
+export class From {
+  name: string;
+  addr: string;
+
+  constructor(name: string, addr: string) {
+    this.name = name;
+    this.addr = addr;
+  }
+}
+
+export class Folder {
   delim: string;
   name: string;
   desc: string;
+
+  constructor(delim: string, name: string, desc: string) {
+    this.delim = delim;
+    this.name = name;
+    this.desc = desc;
+  }
 }

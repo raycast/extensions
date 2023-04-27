@@ -1,4 +1,15 @@
-import { Action, ActionPanel, Detail, Form, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Detail,
+  Form,
+  Icon,
+  List,
+  LocalStorage,
+  showToast,
+  Toast,
+  useNavigation,
+} from "@raycast/api";
 import { FormValidation, useCachedState, useForm } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { State } from "./state";
@@ -6,6 +17,8 @@ import { Envelope, Flag, Folder } from "./models";
 import * as Envelopes from "./envelopes";
 import * as Folders from "./folders";
 import * as Exec from "./exec";
+import "reflect-metadata";
+import { Type, serialize, deserializeArray } from "class-transformer";
 
 export default function ListEnvelopes() {
   const [state, setState] = useCachedState<State>("index", {
@@ -14,6 +27,42 @@ export default function ListEnvelopes() {
     folders: [],
     exe: false,
   } as State);
+
+  useEffect(() => {
+    async function fetch() {
+      const rawEnvelopes = await LocalStorage.getItem<string>("envelopes");
+
+      if (rawEnvelopes != undefined) {
+        console.debug("Found envelopes in cache");
+
+        await LocalStorage.removeItem("envelopes");
+
+        const envelopes: Envelope[] = deserializeArray(Envelope, rawEnvelopes);
+
+        setState((previous: State) => ({
+          ...previous,
+          envelopes: envelopes,
+        }));
+      }
+
+      const rawFolders = await LocalStorage.getItem<string>("folders");
+
+      if (rawFolders != undefined) {
+        console.debug("Found folders in cache");
+
+        await LocalStorage.removeItem("folders");
+
+        const folders: Folder[] = deserializeArray(Folder, rawFolders);
+
+        setState((previous: State) => ({
+          ...previous,
+          folders: folders,
+        }));
+      }
+    }
+
+    fetch();
+  }, []);
 
   useEffect(() => {
     async function fetch() {

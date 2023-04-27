@@ -1,4 +1,4 @@
-import { Flag, Envelope } from "./models";
+import { Envelope, Flag } from "./models";
 import * as Exec from "./exec";
 
 export async function list(): Promise<Envelope[]> {
