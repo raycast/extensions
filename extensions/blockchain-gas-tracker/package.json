@@ -24,7 +24,7 @@
     {
       "name": "currentGas",
       "title": "Show Current Gas",
-      "description": "Show current blochchain gas fee",
+      "description": "Show current blockchain gas fee",
       "mode": "view"
     }
   ],
