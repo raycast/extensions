@@ -1,8 +1,11 @@
 import { faker } from "@faker-js/faker";
 import { FieldType, Folder, Item } from "~/types/vault";
 
-export function getMockItems(count = 10, options?: { sensitiveValue?: string }): Item[] {
-  const { sensitiveValue = faker.random.alphaNumeric(10) } = options || {};
+export function getMockItems(
+  count = 10,
+  options?: { sensitiveValue?: string; overrideProps?: Partial<RecursiveNonOptional<Item>> }
+): Item[] {
+  const { sensitiveValue = faker.random.alphaNumeric(10), overrideProps } = options || {};
 
   return [...Array(count)].map(
     (): RecursiveNonOptional<Item> => ({
@@ -60,6 +63,7 @@ export function getMockItems(count = 10, options?: { sensitiveValue?: string }):
         passportNumber: sensitiveValue,
         licenseNumber: sensitiveValue,
       },
+      ...overrideProps,
     })
   );
 }

@@ -13,6 +13,7 @@
     "@typescript-eslint/no-unnecessary-type-constraint": "off",
     "@typescript-eslint/no-explicit-any": "off",
     "@typescript-eslint/no-floating-promises": ["error"],
-    "react-hooks/rules-of-hooks": "error"
+    "react-hooks/rules-of-hooks": "error",
+    "@typescript-eslint/ban-ts-comment": "off"
   }
 }
