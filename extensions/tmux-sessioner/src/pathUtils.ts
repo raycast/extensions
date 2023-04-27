@@ -41,13 +41,3 @@ export function applicationIconFromPath(path: string): string {
   console.log(iconPath);
   return iconPath;
 }
-
-export function applicationNameFromPath(path: string): string {
-  /* Example:
-   * '/Applications/Visual Studio Code.app' -> 'Visual Studio Code'
-   */
-
-  const pathParts = path.split("/");
-  const appName = pathParts[pathParts.length - 1];
-  return appName.replace(".app", "");
-}
