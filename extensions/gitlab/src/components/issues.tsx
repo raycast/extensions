@@ -344,11 +344,9 @@ export function injectQueryNamedParameters(
           break;
         case "state": {
           console.log(extraParamVal);
-          if (!isValidIssueState(extraParamVal)) {
-            console.log("invalid");
-            continue;
+          if (isValidIssueState(extraParamVal)) {
+            requestParams[prefixed("state")] = extraParamVal.join(",");
           }
-          requestParams[prefixed("state")] = extraParamVal.join(",");
         }
       }
     }

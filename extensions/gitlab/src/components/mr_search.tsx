@@ -5,7 +5,7 @@ import { useCache } from "../cache";
 import { getListDetailsPreference, gitlab } from "../common";
 import { MergeRequest } from "../gitlabapi";
 import { daysInSeconds, getErrorMessage, hashRecord, showErrorToast } from "../utils";
-import { MRScope, MRState, MRListItem } from "./mr";
+import { MRScope, MRState, MRListItem, getMRQuery, injectMRQueryNamedParameters } from "./mr";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -14,9 +14,10 @@ export function SearchMyMergeRequests(): JSX.Element {
   const state = MRState.all;
   const [search, setSearch] = useState<string>();
   const params: Record<string, any> = { state, scope };
-  if (search) {
-    params.search = search;
-  }
+  const qd = getMRQuery(search);
+  params.search = qd.query || "";
+  injectMRQueryNamedParameters(params, qd, scope as MRScope, false);
+  injectMRQueryNamedParameters(params, qd, scope as MRScope, true);
   const paramsHash = hashRecord(params);
   const { data, isLoading, error, performRefetch } = useCache<MergeRequest[] | undefined>(
     `mymrssearch_${paramsHash}`,
