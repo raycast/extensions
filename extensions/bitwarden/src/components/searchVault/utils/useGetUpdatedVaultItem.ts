@@ -23,8 +23,7 @@ function useGetUpdatedVaultItem() {
     const currentValue = selector(possiblyCachedItem);
     if (currentValue !== SENSITIVE_VALUE_PLACEHOLDER) return currentValue;
 
-    let toast: Toast | undefined;
-    if (loadingMessage) toast = await showToast(Toast.Style.Animated, loadingMessage);
+    const toast = loadingMessage ? await showToast(Toast.Style.Animated, loadingMessage) : undefined;
     const value = selector(await getItemFromVault(possiblyCachedItem.id));
     await toast?.hide();
 
