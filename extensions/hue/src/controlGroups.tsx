@@ -297,7 +297,6 @@ async function handleToggle(
     if (groupedLight === undefined) throw new Error("Light group not found.");
     if (!rateLimiter.canExecute()) return;
 
-    // TODO: Find out why Hue complains when we turn off a group where some lights are already off.
     const changes = {
       on: { on: !groupedLight.on?.on },
       dynamics: { duration: getTransitionTimeInMs() },
@@ -329,6 +328,7 @@ async function handleToggle(
 
     const undoOptimisticGroupedLightsUpdate = optimisticUpdates(changesToGroupedLights, setGroupedLights);
     await hueBridgeState.context.hueClient.updateGroupedLight(groupedLight, changes).catch((error: Error) => {
+      if (error.message === 'device (grouped_light) is "soft off", command (.on) may not have effect') return;
       undoOptimisticGroupedLightsUpdate();
       throw error;
     });
