@@ -89,8 +89,21 @@
       "title": "Toggle Play/Pause",
       "subtitle": "Spotify",
       "description": "Use this to toggle the playback of the current song.",
-      "mode": "no-view",
-      "disabledByDefault": true
+      "mode": "no-view"
+    },
+    {
+      "name": "next",
+      "title": "Next",
+      "subtitle": "Spotify",
+      "description": "Use this to skip to the next song.",
+      "mode": "no-view"
+    },
+    {
+      "name": "previous",
+      "title": "Previous",
+      "subtitle": "Spotify",
+      "description": "Use this to skip to the previous song.",
+      "mode": "no-view"
     },
     {
       "name": "like",
@@ -105,22 +118,6 @@
       "title": "Dislike",
       "subtitle": "Spotify",
       "description": "Use this to dislike the current song.",
-      "mode": "no-view",
-      "disabledByDefault": true
-    },
-    {
-      "name": "next",
-      "title": "Next",
-      "subtitle": "Spotify",
-      "description": "Use this to skip to the next song.",
-      "mode": "no-view",
-      "disabledByDefault": true
-    },
-    {
-      "name": "previous",
-      "title": "Previous",
-      "subtitle": "Spotify",
-      "description": "Use this to skip to the previous song.",
       "mode": "no-view",
       "disabledByDefault": true
     },
