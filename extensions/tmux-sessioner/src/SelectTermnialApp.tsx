@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Application, Form, getApplications } from "@raycast/api";
+import { Action, ActionPanel, Application, Form, Toast, getApplications, showToast, useNavigation } from "@raycast/api";
 import { LocalStorage } from "@raycast/api";
 
 import { useEffect, useState } from "react";
@@ -6,9 +6,10 @@ import { applicationIconFromPath } from "./pathUtils";
 
 const ALLOWED_APPS = ["kitty", "Alacritty", "iTerm2", "Terminal", "Warp"];
 
-export const SelectTerminalApp = ({ setTerminalAppName }: { setTerminalAppName: (value: string) => void }) => {
+export const SelectTerminalApp = ({ setIsTerminalSetup }: { setIsTerminalSetup?: (value: boolean) => void }) => {
   const [apps, setApps] = useState<Application[]>();
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const { pop } = useNavigation();
 
   useEffect(() => {
     (async () => {
@@ -23,14 +24,24 @@ export const SelectTerminalApp = ({ setTerminalAppName }: { setTerminalAppName: 
   return (
     <Form
       enableDrafts
+      isLoading={loading}
       navigationTitle="Select Terminal App"
       actions={
         <ActionPanel>
           <Action.SubmitForm
             title="Submit Terminal App Name"
-            onSubmit={(values) => {
+            onSubmit={async (values) => {
               LocalStorage.setItem("terminalAppName", values.terminalAppName);
-              setTerminalAppName(values.terminalAppName);
+              const toast = await showToast({
+                style: Toast.Style.Animated,
+                title: "Setup Terminal",
+              });
+
+              toast.style = Toast.Style.Success;
+              toast.message = `Terminal ${values.terminalAppName} is setup successfully for tmux sessioner`;
+
+              setIsTerminalSetup && setIsTerminalSetup(true);
+              pop();
             }}
           />
         </ActionPanel>
