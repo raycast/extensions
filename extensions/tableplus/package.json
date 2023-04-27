@@ -6,6 +6,9 @@
   "version": "1.2.1",
   "icon": "icon.png",
   "author": "pernielsentikaer",
+  "contributors": [
+    "nagauta"
+  ],
   "license": "MIT",
   "commands": [
     {
