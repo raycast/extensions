@@ -22,9 +22,77 @@ See what's currently playing. Use the actions (⌘ K) for further actions, such 
 
 See what's currently playing in your Menu Bar. Click for further actions, such as Play/Pause, Like/Dislike, Skip, Start Radio, Add to Playlist, Connect Device and more. Refreshes every 10 seconds.
 
-### Quick Actions
+### Toggle Play/Pause
 
-This is a list of lots of Spotify actions. For example: Play/Pause, Like/Dislike current song, Change Volume, and more. If you'd like to have any of these available as a Root Command, you can create Quicklinks via the actions menu (⌘ K).
+Use this to toggle the playback of the current song.
+
+### Next
+
+Use this to skip to the next song/episode.
+
+### Previous
+
+Use this to skip to the previous song/episode.
+
+## Disabled Commands
+
+This extension includes a few commands that are disabled by default. You can enable them by going to the extension's settings. These commands are:
+
+### Like
+
+Use this to like the current song.
+
+### Dislike
+
+Use this to dislike the current song.
+
+### Set Volume to 0%
+
+Use this to mute the volume.
+
+### Set Volume to 25%
+
+Use this to set the volume to 25%.
+
+### Set Volume to 50%
+
+Use this to set the volume to 50%.
+
+### Set Volume to 75%
+
+Use this to set the volume to 75%.
+
+### Set Volume to 100%
+
+Use this to set the volume to 100%.
+
+### Turn Volume Down
+
+Use this to turn the volume down by 10%.
+
+### Turn Volume Up
+
+Use this to turn the volume up by 10%.
+
+### Toggle Shuffle
+
+Use this to toggle shuffle.
+
+### Toggle Repeat
+
+Use this to toggle repeat.
+
+### Start Radio
+
+Use this to start a radio station based on the current song.
+
+### Copy URL
+
+Use this to copy the URL of the current song/episode.
+
+### Just Play
+
+Use this to quickly start playing a song based on your query.
 
 ---
 
@@ -42,9 +110,3 @@ In order to use this extension, you'll need to authenticate with Spotify. This e
 - `user-read-playback-state`: To fetch playback state, such as volume, shuffle, repeat, and more.
 - `user-read-private`: To fetch your country code, so we can display songs available in your location only.
 - `user-top-read`: To fetch your top artists and tracks.
-
----
-
-Still to do
-
-- [ ] Paginate views (artists, songs, albums, playlists, podcasts, episodes, etc.)

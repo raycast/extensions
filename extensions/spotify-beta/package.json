@@ -95,14 +95,14 @@
       "name": "next",
       "title": "Next",
       "subtitle": "Spotify",
-      "description": "Use this to skip to the next song.",
+      "description": "Use this to skip to the next song/episode.",
       "mode": "no-view"
     },
     {
       "name": "previous",
       "title": "Previous",
       "subtitle": "Spotify",
-      "description": "Use this to skip to the previous song.",
+      "description": "Use this to skip to the previous song/episode.",
       "mode": "no-view"
     },
     {
