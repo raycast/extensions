@@ -1,12 +1,21 @@
 # Changelog
 
-## [Fix] - 29/23
+## [Fix & Feature] - April, 9 2023
+
+- Feature: Pause history
+- Fix: Handle the `429` error code
+
+## [Fix] - April, 4 2023
+
+- Fixed an edge case bug causing the conversation to only remember the response to #1.
+
+## [Fix] - March, 29 2023
 
 - Fetch models from the API. This allows to use GPT-4 if enabled on the user's account ([@CruelMoney](https://github.com/abielzulio/chatgpt-raycast/pull/29))
 - Show the error message coming from OpenAI instead of the generic error message ([@CruelMoney](https://github.com/abielzulio/chatgpt-raycast/pull/29))
 - Handle overlimit token usage ([@CruelMoney](https://github.com/abielzulio/chatgpt-raycast/pull/29))
 
-## [Initial release] - 26/23
+## [Initial release] - March, 26 2023
 
 Introducing ChatGPT for Raycast. Interact with OpenAI's ChatGPT straight from your command bar, with 5 commands available:
 
