@@ -87,7 +87,7 @@ export default function DocCheckPage(props: { url: string; prevurl: string; quer
   $("#toc").each(function (i, link) {
     toc += $(link).html();
   });
-  
+
   // "Articulus brevis minimus"
   let abm = "";
   $(".has-bg-gray-200").each(function (i, link) {
