@@ -1,6 +1,6 @@
 {
   "name": "QOTP",
-  "description": "生成 OTP 六位动态码",
+  "description": "Generate OTP six-bit dynamic code",
   "author": {
     "name": "ariesly15",
     "email": "ileeyi@qq.com"
