@@ -302,7 +302,7 @@
       "name": "LAI-TL"
     },
     {
-      "full_name": "Indonesian Tazi NT Study Bible",
+      "full_name": "Indonesian Tazi NT",
       "id": 2862,
       "name": "INOTAZI"
     },
@@ -310,6 +310,11 @@
       "full_name": "Perjanjian Baru Terjemahan Baru Edisi 2",
       "id": 2863,
       "name": "PBTB2"
+    },
+    {
+      "full_name": "Alkitab Gratis untuk Semua",
+      "id": 3384,
+      "name": "AGS"
     }
   ]
 }

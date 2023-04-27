@@ -310,7 +310,7 @@
 /extensions/github-cli-manual                        @demartini
 /extensions/github-codespaces                        @mkwng
 /extensions/github-for-enterprise                    @Kinbaum @emanguy @LunaticMuch @pernielsentikaer
-/extensions/github-gist                              @koinzhang
+/extensions/github-gist                              @koinzhang @Aayush9029
 /extensions/github-menu-bar                          @fe9lix
 /extensions/github-repository-search                 @thomaspaulmann @immint023 @mheidinger
 /extensions/github-review-requests                   @resessh @kudrykv
@@ -753,6 +753,7 @@
 /extensions/silent-mention                           @peduarte
 /extensions/simctl                                   @noppefoxwolf
 /extensions/simon                                    @andreaselia @pernielsentikaer
+/extensions/simple-reminder                          @comoser @pernielsentikaer
 /extensions/simple-youdao                            @xeric
 /extensions/simplebackups                            @zOxta
 /extensions/simplelogin                              @adrian-schnell
@@ -901,6 +902,7 @@
 /extensions/whatsapp                                 @vimtor
 /extensions/whosampled                               @ajtruex @pernielsentikaer
 /extensions/wi-fi                                    @koinzhang
+/extensions/wifi-password-reveal                     @louishuyng
 /extensions/wiggle-text                              @PineappleRind
 /extensions/wikipedia                                @vimtor @shubzkothekar @JonathanWbn @NikosEfthias @menahishayan @pernielsentikaer @igor9silva
 /extensions/wireguard                                @sbugzu

@@ -1,5 +1,12 @@
 # YouVersion Bible Suggest Changelog
 
+# v3.0.0 - 2023-04-25
+
+- Fetched the latest Bible data from YouVersion
+- Fixed a bug where the extension would not correctly retrieve Bible
+  data when a non-English language (particularly one containing non-ASCII
+  characters) was chosen
+
 # v2.1.0 - 2023-04-11
 
 - Updated the Raycast API to the latest version (v1.49.2, at the time of
