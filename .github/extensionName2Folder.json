@@ -435,6 +435,7 @@
   "input-switcher": "keyboard-layout-switcher",
   "list-keyboard-maestro-macros": "keyboard-maestro",
   "keyboard-shortcut-sequences": "keyboard-shortcut-sequences",
+  "keychain-password-gen": "keychain-password-gen",
   "kill-process": "kill-process",
   "kinopio-inbox": "kinopio-inbox",
   "kinopoisk": "kinopoisk",
