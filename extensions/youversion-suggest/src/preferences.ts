@@ -1,6 +1,11 @@
 import { LocalStorage } from "@raycast/api";
+import path from "path";
+import { getBibleData, setBibleDataDirBase } from "youversion-suggest";
 import defaultPreferences from "./default-preferences.json";
-import { getBibleData } from "./utilities";
+
+// Raycast requires that all static assets be placed in the assets/ directory,
+// so the paths of our Bible data files will become assets/data/*.json
+setBibleDataDirBase(path.join(__dirname, "assets"));
 
 export async function getPreferenceValue<T extends LocalStorage.Value>(id: string): Promise<T | undefined> {
   return LocalStorage.getItem(id);

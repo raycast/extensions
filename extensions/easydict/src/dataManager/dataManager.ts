@@ -3,7 +3,7 @@ import { OpenAITranslateResult } from "./../types";
  * @author: tisfeng
  * @createTime: 2022-06-26 11:13
  * @lastEditor: tisfeng
- * @lastEditTime: 2023-03-28 18:41
+ * @lastEditTime: 2023-04-25 22:55
  * @fileName: dataManager.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -746,15 +746,30 @@ export class DataManager {
       const type = TranslationType.OpenAI;
       this.addQueryToRecordList(type);
 
-      let openAIQueryResult: QueryResult | null = null;
+      let openAIQueryResult: QueryResult | undefined;
 
       queryWordInfo.onMessage = (message) => {
-        // console.warn(`onMessage content: ${message.content}`);
+        const resultText = message.content;
+        console.warn(`onMessage content: ${message.content}`);
         if (openAIQueryResult) {
           const openAIResult = openAIQueryResult.sourceResult.result as OpenAITranslateResult;
           const translatedText = openAIResult.translatedText + message.content;
           openAIResult.translatedText = translatedText;
           openAIQueryResult.sourceResult.translations = [translatedText];
+          this.updateTranslationDisplay(openAIQueryResult);
+          console.warn(`onMessage: ${translatedText}`);
+        } else {
+          openAIQueryResult = {
+            type: type,
+            sourceResult: {
+              type,
+              queryWordInfo,
+              translations: [resultText],
+              result: {
+                translatedText: resultText,
+              },
+            },
+          };
           this.updateTranslationDisplay(openAIQueryResult);
         }
       };
@@ -778,28 +793,22 @@ export class DataManager {
             openAIResult.translatedText = translatedText;
             openAIQueryResult.sourceResult.translations = [translatedText];
             this.updateTranslationDisplay(openAIQueryResult);
+            console.warn(`onFinish translatedText: ${translatedText}`);
           }
           this.removeQueryFromRecordList(type);
         }
       };
 
       requestOpenAIStreamTranslate(queryWordInfo)
-        .then((openAITypeResult) => {
-          const queryResult: QueryResult = {
-            type: type,
-            sourceResult: openAITypeResult,
-          };
-
-          openAIQueryResult = queryResult;
-          this.updateTranslationDisplay(queryResult);
+        .then(() => {
+          // move to onMessage
         })
         .catch((error) => {
           showErrorToast(error);
           this.removeQueryFromRecordList(type);
         })
         .finally(() => {
-          // Since it is stream, we need to remove it when finished or error.
-          // this.removeQueryFromRecordList(type);
+          // move to onFinish
         });
     }
   }
