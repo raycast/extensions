@@ -12,8 +12,9 @@ interface DetailViewProps extends Omit<CityItem, "geonameId"> {
 }
 
 export const DetailView = ({ name, countryCode, timezone, coordinates, currentDate }: DetailViewProps) => {
-    const sunrise = getSunrise(coordinates.lat, coordinates.lon, currentDate)
-    const sunset = getSunset(coordinates.lat, coordinates.lon, currentDate)
+    const currentDateTimezoneAdjusted = new Date(currentDate.getTime() - new Date().getTimezoneOffset() * 60 * 1000)
+    const sunrise = getSunrise(coordinates.lat, coordinates.lon, currentDateTimezoneAdjusted)
+    const sunset = getSunset(coordinates.lat, coordinates.lon, currentDateTimezoneAdjusted)
     const dayDuration = getDayDuration(sunrise, sunset)
     const sunriseString = convertDateToString(sunrise, timezone)
     const sunsetString = convertDateToString(sunset, timezone)
