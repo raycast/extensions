@@ -257,7 +257,7 @@ function ChangePrioritySubmenu({ issue, mutate }: SubmenuProps) {
               title={priority.name}
               icon={priority.iconUrl}
               onAction={() => changePriority(priority)}
-              autoFocus={priority.id === issue.fields.priority.id}
+              autoFocus={priority.id === issue.fields.priority?.id}
             />
           );
         })

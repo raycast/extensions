@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-08-05 10:36
  * @lastEditor: tisfeng
- * @lastEditTime: 2023-03-17 23:36
+ * @lastEditTime: 2023-03-31 16:04
  * @fileName: preferences.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -123,14 +123,8 @@ export class AppKeyStore {
 
   static caiyunToken = myPreferences.caiyunToken.trim();
 
-  static volcanoSecretId =
-    myPreferences.volcanoAccessKeyId.trim().length > 0
-      ? myPreferences.volcanoAccessKeyId.trim()
-      : this.defaultVolcanoAccessId;
-  static volcanoSecretKey =
-    myPreferences.volcanoAccessKeySecret.trim().length > 0
-      ? myPreferences.volcanoAccessKeySecret.trim()
-      : this.defaultVolcanoAccessKey;
+  static volcanoSecretId = myPreferences.volcanoAccessKeyId.trim();
+  static volcanoSecretKey = myPreferences.volcanoAccessKeySecret.trim();
 
   static openAIAPIKey = myPreferences.openAIAPIKey.trim();
 }
