@@ -4,7 +4,7 @@ Raycast extension for ftrack Studio - Search and modify your tasks from your mac
 
 Requires an active ftrack Studio account, sign up at https://www.ftrack.com/en/studio.
 
-![screenshot](./metadata/ftrack-3.png)
+![screenshot](https://raw.githubusercontent.com/ftrackhq/ftrack-raycast-extension/main/metadata/ftrack-3.png)
 
 # Getting started
 
