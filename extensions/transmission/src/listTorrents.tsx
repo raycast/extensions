@@ -267,7 +267,7 @@ function TorrentListItem({
             markdown={dedent(`
                 # ${downloadStats.map(({ textIcon, text }) => [textIcon, text.trim()].join(" ").trim()).join(" - ")}
 
-                <img src="data:image/svg+xml,${encodeURIComponent(cellImage.value)}" />
+                ${cellImage.value && `<img src="data:image/svg+xml,${encodeURIComponent(cellImage.value)}"/>`}
                 ${torrent.errorString && `**Error**: ${torrent.errorString}`}
               `)}
             metadata={
