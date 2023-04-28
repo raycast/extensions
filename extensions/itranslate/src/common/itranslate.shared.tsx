@@ -43,7 +43,7 @@ export function checkPreferences() {
   if (langFirst.langId === langSecond.langId) {
     return <LanguageConflict />;
   }
-  return checkService(preferences.defaultServiceProvider);
+  return checkService(preferences.defaultServiceProvider, true);
 }
 
 export function checkService(service: TransServiceProviderTp, checkEnable?: boolean) {
@@ -53,7 +53,7 @@ export function checkService(service: TransServiceProviderTp, checkEnable?: bool
   switch (service) {
     case TransServiceProviderTp.Google:
       checkCfg = true;
-      disabled = false;
+      disabled = preferences.disableGoogleFree;
       break;
     case TransServiceProviderTp.GoogleCouldTrans:
       if (!preferences.googleApiKey) checkCfg = false;
@@ -125,6 +125,7 @@ export function getServiceProviderMap(): Map<TransServiceProviderTp, ITransServi
   const serviceProviderMap = new Map<TransServiceProviderTp, ITransServiceProvider>([]);
   switch (preferences.defaultServiceProvider) {
     case TransServiceProviderTp.Google:
+      if (preferences.disableGoogleFree) break;
       serviceProviderMap.set(preferences.defaultServiceProvider, {
         serviceProvider: preferences.defaultServiceProvider,
         appId: "",
@@ -188,7 +189,7 @@ export function getServiceProviderMap(): Map<TransServiceProviderTp, ITransServi
       });
       break;
   }
-  if (preferences.defaultServiceProvider != TransServiceProviderTp.Google) {
+  if (!preferences.disableGoogleFree && preferences.defaultServiceProvider != TransServiceProviderTp.Google) {
     serviceProviderMap.set(TransServiceProviderTp.Google, {
       serviceProvider: TransServiceProviderTp.Google,
       appId: "",

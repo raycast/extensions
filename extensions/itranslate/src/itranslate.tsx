@@ -5,7 +5,7 @@ import {
   ActionPanel,
   Action,
   Icon,
-  openCommandPreferences,
+  openExtensionPreferences,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { TransAPIErrCode } from "./common/const";
@@ -158,7 +158,7 @@ export default function Command() {
             icon={Icon.ComputerChip}
             title="Open iTranslate Preferences"
             shortcut={{ modifiers: ["cmd"], key: "p" }}
-            onAction={openCommandPreferences}
+            onAction={openExtensionPreferences}
           />
         </ActionPanel>
       );
@@ -177,7 +177,7 @@ export default function Command() {
           icon={Icon.ComputerChip}
           title="Open iTranslate Preferences"
           shortcut={{ modifiers: ["cmd"], key: "p" }}
-          onAction={openCommandPreferences}
+          onAction={openExtensionPreferences}
         />
       </ActionPanel>
     );
