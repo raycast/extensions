@@ -3,6 +3,11 @@
 ## [Update] - 2023-04-12
 
 - Updated dependencies
+- Enable syntax highlighting
+
+## [Update] - 2023-04-12
+
+- Updated dependencies
 
 ## [Optimize extension] - 2022-09-30 
 
