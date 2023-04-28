@@ -14,13 +14,15 @@ function isPro(key: string) {
   return !key.endsWith(":fx");
 }
 
+const DEEPL_QUOTA_EXCEEDED = 456;
+
 function gotErrorToString(error: unknown) {
   // response received
   if (error instanceof got.HTTPError) {
     const { statusCode } = error.response;
     if (statusCode === StatusCodes.FORBIDDEN) return "Invalid DeepL API key";
     if (statusCode === StatusCodes.TOO_MANY_REQUESTS) return "Too many requests to DeepL API";
-    if (statusCode === 456)
+    if (statusCode === DEEPL_QUOTA_EXCEEDED)
       return "DeepL API quota exceeded. The translation limit of your account has been reached. Consider upgrading your subscription.";
     if (statusCode.toString().startsWith("5")) return "DeepL API is temporary unavailable. Please try again later.";
 
@@ -28,7 +30,8 @@ function gotErrorToString(error: unknown) {
   }
 
   // request failed
-  if (error instanceof got.RequestError) return `Failed to send a request to DeepL API: ${error.code} ${error.message}`;
+  if (error instanceof got.RequestError)
+    return `Something went wrong when sending a request to the DeepL API. If you’re having issues, open an issue on GitHub and include following text: ${error.code} ${error.message}`;
 
   return "Unknown error";
 }
@@ -39,7 +42,6 @@ export async function sendTranslateRequest({
   targetLanguage,
 }: {
   text?: string;
-
   sourceLanguage?: SourceLanguage;
   targetLanguage: TargetLanguage;
 }) {
