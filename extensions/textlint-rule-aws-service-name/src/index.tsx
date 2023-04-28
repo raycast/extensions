@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Form, ActionPanel, Action, showToast, Toast } from "@raycast/api";
 import { TextlintKernel, TextlintKernelOptions } from "@textlint/kernel";
 import * as pluginMarkdown from "@textlint/textlint-plugin-markdown";
-const awsRule = require("textlint-rule-aws-service-name");
+import * as awsRule from "textlint-rule-aws-service-name";
 
 type Values = {
   input: string;
