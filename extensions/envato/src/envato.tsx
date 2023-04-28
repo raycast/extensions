@@ -1,104 +1,52 @@
-import {
-  ActionPanel,
-  getPreferenceValues,
-  List,
-  OpenInBrowserAction,
-  showToast,
-  ToastStyle,
-  Detail,
-} from "@raycast/api";
-import { useState, useEffect } from "react";
-import Envato from "envato";
+import { List, Detail, Icon, environment } from "@raycast/api";
 import dateFormat from "dateformat";
+import { Account } from "./accountEnvato";
+import { SaleItem, PayoutItem } from "./saleItem";
+import { useFetch, fullDate } from "./utils";
+import fs from "fs";
 
-const token = getPreferenceValues().token;
-const client = new Envato.Client(token);
-
-const date = new Date();
-const day = date.getDate();
-const month = date.getMonth() + 1;
-const year = date.getFullYear();
-const fullDate = `${day}, ${month}, ${year}`;
-
-type envatoErrors = {
-  empty?: boolean;
-  reason?: string;
-  description?: string;
-};
-
+/*-----------------------------------*/
+/*------ INDEX
+/*-----------------------------------*/
 export default function Command() {
-  const [state, setState] = useState<{ sales: []; errors: envatoErrors }>({ sales: [], errors: [] as envatoErrors });
-
-  useEffect(() => {
-    async function fetch() {
-      try {
-        const salesInfo = await client.private.getSales();
-        const salesEmpty: any = salesInfo.length === 0 ? { empty: true } : [];
-        setState((oldState) => ({
-          ...oldState,
-          sales: salesInfo as [],
-          errors: salesEmpty as envatoErrors,
-        }));
-      } catch (error: any) {
-        const reason = error.response.reason ?? "Error";
-        const description = error.response.error ?? "An unknown error has occurred.";
-        const out: { [key: string]: any } = { reason, description };
-        setState((oldState) => ({
-          ...oldState,
-          errors: out as envatoErrors,
-        }));
-        showToast(ToastStyle.Failure, reason, description);
-        return;
-      }
-    }
-    fetch();
-  }, []);
-
-  if (state.errors.reason !== undefined && state.errors.empty !== true) {
-    return (
-      <Detail markdown={`# 😢 ${state.errors.reason ?? ""} \n \`\`\`\n${state.errors.description ?? ""}\n\`\`\``} />
-    );
-  }
-
-  function price(price: "", support: "") {
-    let support_out = "";
-    if (parseInt(support) != 0) {
-      support_out = " ($" + support + ")";
-    }
-    return "$" + price + support_out;
-  }
-
-  function SaleItem(props: { sale: any; key: number }) {
-    return (
-      <List.Item
-        icon={props.sale.item.previews.icon_preview.icon_url ?? "/"}
-        title={String(props.sale.item.name ?? "")}
-        subtitle={String(dateFormat(props.sale.sold_at, "dd.mm.yyyy")) ?? ""}
-        accessoryIcon="💵"
-        accessoryTitle={`${price(props.sale.amount, props.sale.support_amount)}`}
-        actions={
-          <ActionPanel>
-            <OpenInBrowserAction url={`${props.sale.item.url}`} />
-          </ActionPanel>
-        }
-      />
-    );
-  }
+	const state = useFetch();
+	
+	// IF EMPTY
+	if (state.errors.reason !== undefined && state.errors.empty !== true) {
+		return ( <Detail markdown={`# 😢 ${state.errors.reason ?? ""} \n \`\`\`\n${state.errors.description ?? ""}\n\`\`\``} />);
+	}
+  
+	let statementItems = [];
+	let resultItems = [];
+	let sales = state.sales;
+	function cacheItems() {
+		var cache = fs.readFileSync(`${environment.supportPath}/cache.json`, 'utf8');;
+		if (sales[0]?.sold_at == undefined && cache || sales[0]?.sold_at !== cache[0]?.sold_at) {
+			sales = cache as saleItem;
+	 	}	
+	}
+	console.log(state.sales);
+	
 
   return (
-    <List isLoading={state.sales.length === 0 && state.errors.reason == undefined && state.errors.empty !== true}>
-      <List.Section title="Today">
-        {state.sales.map((sale, index) => {
-          const saleDate = String(dateFormat(sale["sold_at"], "dd, mm, yyyy"));
-          if (saleDate == fullDate && state.errors !== []) return <SaleItem sale={sale} key={index} />;
-        })}
-      </List.Section>
-      <List.Section title="Sales">
-        {state.sales.map((sale, index) => {
-          const saleDate = String(dateFormat(sale["sold_at"], "dd, mm, yyyy"));
-          if (saleDate != fullDate && state.errors !== []) return <SaleItem sale={sale} key={index} />;
-        })}
-      </List.Section>
-    </List>
+	<List isShowingDetail={state.showdetail} isLoading={Object.keys(sales).length === 0 && state.errors.reason == undefined && state.errors.empty !== true}>
+			<Account state={state}/>
+  			<List.Section title="Sales">
+	  			{state.user.username === "" ||  state.user.username == undefined ? (
+						<List.EmptyView icon={{ source: Icon.TwoArrowsClockwise }} title="Loading..." />
+		  			) : (
+			  			state.statement.results.map((item, index) => {
+			  				if(item.type == "Payout") { statementItems.push(item); }
+			  			}),
+			  			resultItems = statementItems.concat(state.sales).sort((a, b) => b.date - a.sold_at),
+						resultItems.map((sale, index) => {
+			  				const saleDate = String(dateFormat(sale["sold_at"], "d, m, yyyy"));
+							if (sale.type == "Payout" && state.errors !== []) return <PayoutItem sale={sale}/>
+			  				if (saleDate == fullDate && sale.type === undefined && state.errors !== []) return <SaleItem sale={sale} key={index} todey={true} item={true} />;
+			  				if (saleDate != fullDate && sale.type === undefined && state.errors !== []) return <SaleItem sale={sale} key={index} todey={false} item={true} />;
+						})
+		 			)}
+  			</List.Section>
+		</List>
   );
 }
