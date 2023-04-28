@@ -18,8 +18,8 @@
     },
     {
       "name": "choose_terminal_app",
-      "title": "Change Default Terminal Tmux Sessioner",
-      "description": "Change Default Terminal for Tmux Sessioner",
+      "title": "Change Default Terminal",
+      "description": "Change Default Terminal so that it can be opened with the correct app",
       "mode": "view"
     }
   ],
