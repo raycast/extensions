@@ -118,7 +118,7 @@ function Details({ secret, digits, tokenPeriod }: DetailsProps) {
       metadata={
         <Detail.Metadata>
           <Detail.Metadata.Label title="Secret Key" text={secret.toUpperCase()} />
-          <Detail.Metadata.Label title="Updating in" text={`${tokenExpiresIn}`} icon={progressIcon} />
+          <Detail.Metadata.Label title="Updating in" text={`${tokenExpiresIn}s`} icon={progressIcon} />
         </Detail.Metadata>
       }
       actions={
