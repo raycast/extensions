@@ -16,7 +16,7 @@ function price(price: "", support: "") {
 /*-----------------------------------*/
 /*------ SALE ITEM  
 /*-----------------------------------*/
-export function SaleItem(props: { sale: saleItem; key: number; todey: Boolean; item: Boolean }) {
+export function SaleItem(props: { sale: saleItem; key: number; todey: boolean; item: boolean }) {
   const accessories = props.todey
     ? [
         { icon: { source: Icon.Dot, tintColor: Color.Red } },
@@ -71,9 +71,9 @@ export function PayoutItem(props: { sale: saleItem }) {
 /*-----------------------------------*/
 /*------ ITEM DETAILS
 /*-----------------------------------*/
-export function SaleItemDetail(props: { sale: saleItem; todey: Boolean }) {
-  let item = props.sale.item !== undefined ? props.sale.item : props.sale;
-  let metadata =
+export function SaleItemDetail(props: { sale: saleItem; todey: boolean }) {
+  const item = props.sale.item !== undefined ? props.sale.item : props.sale;
+  const metadata =
     props.sale.item?.wordpress_theme_metadata !== undefined ? props.sale.item.wordpress_theme_metadata : props.sale;
   const theme_name = metadata !== undefined ? `- **Theme Name:** ${metadata.theme_name ?? metadata.name}` : "";
   const author_name =
@@ -105,7 +105,7 @@ export function SaleItemDetail(props: { sale: saleItem; todey: Boolean }) {
 /*------ ITEM METADATA
 /*-----------------------------------*/
 export function MetadataSale(props: { sale: saleItem }) {
-  let item = props.sale.item !== undefined ? props.sale.item : props.sale;
+  const item = props.sale.item !== undefined ? props.sale.item : props.sale;
 
   // LET TAGS
   let SupportAmount;

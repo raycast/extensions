@@ -1,9 +1,8 @@
-import { List, Detail, Icon, environment } from "@raycast/api";
+import { List, Detail, Icon } from "@raycast/api";
 import dateFormat from "dateformat";
 import { Account } from "./accountEnvato";
 import { SaleItem, PayoutItem } from "./saleItem";
 import { useFetch, fullDate } from "./utils";
-import fs from "fs";
 
 /*-----------------------------------*/
 /*------ INDEX
@@ -20,7 +19,7 @@ export default function Command() {
 
   const statementItems = [];
   let resultItems = [];
-  let sales = state.sales;
+  const sales = state.sales;
 
   return (
     <List

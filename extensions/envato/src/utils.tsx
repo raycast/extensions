@@ -17,7 +17,7 @@ export const fullDate = `${day}, ${month}, ${year}`;
 /*-----------------------------------*/
 export const useFetch = () => {
   const [state, setState] = useState<{
-    showdetail: Boolean;
+    showdetail: boolean;
     account: [];
     user: envatoUser;
     portfolio: [];
@@ -39,7 +39,7 @@ export const useFetch = () => {
   async function fetch() {
     try {
       // GET API
-      let cache = fs.readFileSync(`${environment.supportPath}/cache.json`, "utf8");
+      const cache = fs.readFileSync(`${environment.supportPath}/cache.json`, "utf8");
       const client = Envato !== undefined ? new Envato.Client(token) : undefined;
       const username = client !== undefined ? await client.private.getUsername() : "";
       const userInfo = client !== undefined ? await client.user.getAccountDetails(username) : [];
