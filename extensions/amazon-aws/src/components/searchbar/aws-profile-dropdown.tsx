@@ -78,7 +78,7 @@ const useVaultSessions = () => {
 
   const activeSessions = awsVaultSessions
     ?.split(/\r?\n/)
-    .filter((line) => line.includes("sts.AssumeRole:") && !line.includes("sts.AssumeRole:-"))
+    .filter(isRowWithActiveSession)
     .map((line) => line.split(" ")[0]);
 
   return activeSessions;
@@ -106,3 +106,7 @@ const useAwsVault = ({ profile, onUpdate }: { profile?: string; onUpdate: VoidFu
     },
   });
 };
+
+const isRowWithActiveSession = (line: string) =>
+  (line.includes("sts.AssumeRole:") && !line.includes("sts.AssumeRole:-")) ||
+  (line.includes("sts.GetSessionToken:") && !line.includes("sts.GetSessionToken:-"));
