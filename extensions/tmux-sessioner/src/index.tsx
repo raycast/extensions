@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { List, Icon, Action, ActionPanel, Toast, showToast, Detail } from "@raycast/api";
 import { exec, execSync } from "child_process";
-import { LocalStorage } from "@raycast/api";
+import { LocalStorage, showHUD } from "@raycast/api";
 import { SelectTerminalApp } from "./SelectTermnialApp";
 
 const env = Object.assign({}, process.env, { PATH: "/usr/local/bin:/usr/bin:/opt/homebrew/bin" });
@@ -30,6 +30,7 @@ async function switchToSession(session: string) {
 
       toast.style = Toast.Style.Success;
       toast.title = `Switched to session ${session}`;
+      await showHUD(`Switched to session ${session}`);
     } catch (e) {
       toast.style = Toast.Style.Failure;
       toast.title = "Terminal not supported 😢";
