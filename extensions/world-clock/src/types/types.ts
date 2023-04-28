@@ -10,6 +10,7 @@ export interface TimeInfo {
   dst_from: null;
   dst_offset: number;
   dst_until: null;
+  original_datetime: string;
   raw_offset: number;
   timezone: string;
   unixtime: number;

@@ -161,7 +161,11 @@ export const getRegionTime = (timezone: string) => {
     })
       .then((axiosResponse) => {
         const _timeInfo = axiosResponse.data as TimeInfo;
-        const { dateTime, utc_datetime } = calculateTimeInfoByOffset(_timeInfo.unixtime, _timeInfo.utc_offset);
+        const { originalDateTime, dateTime, utc_datetime } = calculateTimeInfoByOffset(
+          _timeInfo.unixtime,
+          _timeInfo.utc_offset
+        );
+        _timeInfo.original_datetime = originalDateTime;
         _timeInfo.datetime = dateTime;
         _timeInfo.utc_datetime = utc_datetime;
 

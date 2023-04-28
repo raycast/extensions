@@ -118,6 +118,16 @@ export const calculateTimeInfoByOffset = (unixtime: number, offset: string) => {
     minute: "2-digit",
     second: "2-digit",
   });
+  let _original_datetime = dateTime.toLocaleDateString() + " " + time;
+  let _original_utcDatetime =
+    utc.toLocaleDateString() +
+    " " +
+    utc.toLocaleTimeString("en-US", {
+      hour12: true,
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+    });
   let _datetime = dateTime.toLocaleDateString(dateFormat) + " " + time;
   let _utcDatetime =
     utc.toLocaleDateString(dateFormat) +
@@ -131,11 +141,16 @@ export const calculateTimeInfoByOffset = (unixtime: number, offset: string) => {
 
   if (hour24) {
     time = buildHour24Time(dateTime);
+    _original_datetime = dateTime.toLocaleDateString() + " " + time;
+    _original_utcDatetime = utc.toLocaleDateString() + " " + buildHour24Time(utc);
     _datetime = dateTime.toLocaleDateString(dateFormat) + " " + time;
     _utcDatetime = utc.toLocaleDateString(dateFormat) + " " + buildHour24Time(utc);
   }
+
   return {
     time: time,
+    originalDateTime: _original_datetime,
+    original_utc_datetime: _original_utcDatetime,
     dateTime: _datetime,
     utc_datetime: _utcDatetime,
   };
