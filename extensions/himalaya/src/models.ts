@@ -1,5 +1,5 @@
 import "reflect-metadata";
-import { Transform, Type } from "class-transformer";
+import { Type } from "class-transformer";
 
 export enum Flag {
   Seen = "Seen",
@@ -29,7 +29,7 @@ export class Envelope {
     flags: Flag[],
     from: From,
     subject: string,
-    date: Date,
+    date: Date
   ) {
     this.id = id;
     this.internal_id = internal_id;
