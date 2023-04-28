@@ -5,6 +5,7 @@ interface IPreferences {
   googleFreeTLD: GoogleFreeAPITLD;
   googleFreeTimeout: number;
   googleApiKey: string;
+  disableGoogleFree: boolean;
   disableGoogleCould: boolean;
   deeplAuthKey: string;
   deeplApiPro: boolean;
