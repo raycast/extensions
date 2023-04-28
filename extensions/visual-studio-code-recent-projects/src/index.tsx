@@ -23,7 +23,7 @@ import {
   ListOrGridItem,
 } from "./grid-or-list";
 import { usePinnedEntries } from "./pinned";
-import { runAppleScript } from "run-applescript";
+import { runAppleScriptSync } from "run-applescript";
 
 export default function Command() {
   const { data, isLoading } = useRecentEntries();
@@ -113,18 +113,18 @@ function LocalItem(props: { entry: EntryLike; uri: string; pinned?: boolean } & 
               title={`Open in ${build}`}
               icon="action-icon.png"
               onAction={() => {
-                open(props.uri, bundleIdentifier);
                 if (closeOtherWindows) {
-                  runAppleScript(`
+                  runAppleScriptSync(`
                     tell application "System Events"
                       tell process "${build}"
-                        repeat while window 2 exists
-                          click button 1 of window 2
+                        repeat while window 1 exists
+                          click button 1 of window 1
                         end repeat
                       end tell
                     end tell
                   `);
                 }
+                open(props.uri, bundleIdentifier);
               }}
             />
             <Action.ShowInFinder path={path} />
