@@ -1,6 +1,6 @@
 # Unsplash Changelog
 
-## [Fix] - 2022-04-28
+## [Fix] - 2023-04-28
 
 - Fixed background updates not working.
 
