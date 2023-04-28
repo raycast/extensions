@@ -60,7 +60,7 @@ ColorLike: Color | Color.Dynamic | Color.Raw;
 
 Union type for the supported color types.
 
-When using a [Raw Color](#color.raw), it will be dynamically adjusted to achieve high contrast with the Raycast user interface.
+When using a [Raw Color](#color.raw), it will be adjusted to achieve high contrast with the Raycast user interface. To disable color adjustment, you need to switch to using a [Dynamic Color](#color.dynamic). However, we recommend leaving color adjustment on, unless your extension depends on exact color reproduction.
 
 #### Example
 
@@ -92,6 +92,8 @@ export default function Command() {
 
 A dynamic color applies different colors depending on the active Raycast theme.
 
+When using a [Dynamic Color](#color.dynamic), it will be adjusted to achieve high contrast with the Raycast user interface. To disable color adjustment, you can set the `adjustContrast` property to `false`. However, we recommend leaving color adjustment on, unless your extension depends on exact color reproduction.
+
 #### Example
 
 ```typescript
@@ -107,7 +109,7 @@ export default function Command() {
           tintColor: {
             light: "#FF01FF",
             dark: "#FFFF50",
-            adjustContrast: true,
+            adjustContrast: false,
           },
         }}
       />

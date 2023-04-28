@@ -1,5 +1,24 @@
 # Changelog
 
+## 1.50.0 - 2023-04-27
+
+### ✨ New
+
+- Raycast now provides 2 global TypeScript namespaces called `**Preferences**` and `**Arguments**` which respectively contains the types of the preferences and the types of the arguments of all the commands of the extensions.
+  For example, if a command named `show-todos` has some preferences, its `getPreferenceValues`'s return type can be specified with `getPreferenceValues<Preferences.ShowTodos>()`. This will make sure that the types used in the command stay in sync with the manifest.
+- It is now possible to add commands that are disabled by default. A user will have to enable it manually before it shows up in Raycast's root search. This can be useful to provide commands for specific workflows without overwhelming everybody's root search.
+- **Markdown Tables** are now properly supported.
+- **Markdown** code blocks now support syntax highlighting. To enable it, make sure you specify the programming language at the start of the block.
+
+### 💎 Improvements
+
+- **Colors**: To improve accessibility, dynamic adjustment for raw colors (`HEX`, `rgb` etc) used in extensions has been switched from opt-in to opt-out. If your extension relies on accurate color reproduction, check the [documentation](https://developers.raycast.com/api-reference/user-interface/colors) for instructions on how to opt out.
+- **Images**: You can now suffix your local assets with `@dark` to automatically provide a dark theme option, eg: `icon.png` and `icon@dark.png`.
+
+### 🐞 Fixes
+
+- **CLI**: Fix an issue where the CLI wouldn't want to bundle files named `foo.node.js`.
+
 ## 1.49.0 - 2023-03-29
 
 ### ✨ New
@@ -8,14 +27,14 @@
 
 ### 💎 Improvements
 
-- Extend `launchCommand` to allow inter-extension launches
+- Extend `launchCommand` to allow inter-extension launches
 - Extend `launchCommand` to allow to pass a `fallbackText`
 
 ### 🐞 Fixes
 
 - **SVG**: Ignore doctype and HTML comments
 - Fix a flicker happening when there was a fallback text passed to a command
-- Fix a rendering issue with multi-line `tag` text.
+- Fix a rendering issue with multi-line `tag` text.
 
 ## 1.48.0 - 2023-02-22
 
@@ -48,7 +67,7 @@
 
 - Fixed a bug where reloading menu bar commands in development mode would not respect certain manifest property updates (e.g. interval).
 - Fixed a bug that caused `Metadata.Link`'s `title` to be cut off unnecessarily when using the large text size.
-- Fixed a bug where `clearSearchBar` wouldn’t clear the search bar when rendering a Grid.
+- Fixed a bug where `clearSearchBar` wouldn't clear the search bar when rendering a Grid.
 - Fixed a bug where `ray lint` would fail if there were a .DS_Store file in the `src` folder.
 
 ## 1.46.0 - 2023-01-18
@@ -97,11 +116,11 @@
 - Fixed a bug where menu bar extra icon tinting would change based on Raycast's appearance instead of the system's.
 - Fixed some memory leaks when using Form components
 
-## 1.44.0 – 2022-11-23
+## 1.44.0 - 2022-11-23
 
 ### ✨ New
 
-- **Async Submenus and Dropdown**: Dropdowns and ActionPanel Submenus now also support the properties `onSearchTextChange, isLoading, throttle, filtering` – same as for List and Grid where you can perform custom logic when the user changes the search text.
+- **Async Submenus and Dropdown**: Dropdowns and ActionPanel Submenus now also support the properties `onSearchTextChange, isLoading, throttle, filtering` - same as for List and Grid where you can perform custom logic when the user changes the search text.
 - **Application:** You can now get the current frontmost Application of the system with the top-level `getFrontmostApplication` method.
 - **File and Directory Preferences**: We've added two new preference types `"directory"` and `"file"`, supported via the manifest. Both types show a file picker component and let the user select directory or file paths.
 - **Environment:** You can now get the user's text size via `environment.textSize`.

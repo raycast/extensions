@@ -41,6 +41,37 @@ export default async function Command() {
 | supportPath<mark style="color:red;">*</mark> | The absolute path for the support directory of an extension. Use it to read and write files related to your extension or command. | <code>string</code> |
 | textSize<mark style="color:red;">*</mark> | The text size used by the Raycast application. | <code>"medium"</code> or <code>"large"</code> |
 | theme<mark style="color:red;">*</mark> | The theme used by the Raycast application. | <code>"light"</code> or <code>"dark"</code> |
+| canAccess<mark style="color:red;">*</mark> | Returns whether the user has access to the given API. | <code>(api: unknown) => boolean</code> |
+
+## environment.canAccess
+
+Checks whether the user can access a specific API or not.
+
+#### Signature
+
+```typescript
+function canAccess(api: any): bool;
+```
+
+#### Example
+
+```typescript
+import { unstable_AI, showHUD, environment } from "@raycast/api";
+import fs from "fs";
+
+export default async function main() {
+  if (environment.canAccess(AI)) {
+    const answer = await unstable_AI.ask("Suggest 5 jazz songs");
+    await Clipboard.copy(answer);
+  } else {
+    await showHUD("You don't have access :(");
+  }
+}
+```
+
+#### Return
+
+A Boolean indicating whether the user running the command has access to the API.
 
 ### getSelectedFinderItems
 
