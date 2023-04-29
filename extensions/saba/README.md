@@ -7,7 +7,9 @@
 Saba is a raycast extension for watching live TV
 </p>
 
+<p align="center">
 <img width="1000" alt="Raycast 2023-04-27 at 22 03 33" src="https://user-images.githubusercontent.com/20072792/235139266-b9358f68-85e2-45c9-afc6-dc75aad6c589.png">
+</p>
 
 ### Requirements
 

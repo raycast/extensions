@@ -5,6 +5,8 @@ import { Channel } from "./types/Channel";
 import { SubscriptionGuard } from "./components/SubscriptionGuard";
 import { apiUrl } from "./utils/apiUrl";
 import { ErrorState } from "./components/ErrorState";
+import { logoUrl } from "./utils/logoUrl";
+import { snakeCase } from "snake-case";
 
 const Command = () => {
   const [activeChannelId, setActiveChannelId] = useState("");
@@ -66,11 +68,11 @@ const Command = () => {
         onSelectionChange={(id) => setActiveChannelId(id || "")}
       >
         <Grid.Section title="Channels">
-          {channels.map(({ tvgId, logoUrl, title }) => (
+          {channels.map(({ tvgId, title }) => (
             <Grid.Item
               id={tvgId}
               key={tvgId}
-              content={logoUrl}
+              content={`${logoUrl}/${snakeCase(title)}.svg`}
               keywords={[title]}
               actions={
                 <ActionPanel>
