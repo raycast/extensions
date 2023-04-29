@@ -12,14 +12,20 @@
   "commands": [
     {
       "name": "index",
-      "title": "Switch Tmux Session",
-      "description": "Switch Session in Tmux and Open Terminal",
+      "title": "Manage Tmux Session",
+      "description": "Manage Tmux Session that user can switch or delete any tmux session from here",
       "mode": "view"
     },
     {
       "name": "choose_terminal_app",
       "title": "Change Default Terminal",
       "description": "Change Default Terminal so that it can be opened with the correct app",
+      "mode": "view"
+    },
+    {
+      "name": "create_new_session",
+      "title": "Create New Session",
+      "description": "Create New Tmux Session",
       "mode": "view"
     }
   ],
