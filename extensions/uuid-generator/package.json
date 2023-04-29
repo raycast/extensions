@@ -46,15 +46,16 @@
         }
       ],
       "preferences": [
-      {
-        "name": "uuidNamespace",
-        "type": "textfield",
-        "required": false,
-        "default": "",
-        "title": "UUID v5 Namespace",
-        "label": "Namespace",
-        "description": "The namespace for UUID v5"
-      }]
+        {
+          "name": "uuidNamespace",
+          "type": "textfield",
+          "required": false,
+          "default": "",
+          "title": "UUID v5 Namespace",
+          "label": "Namespace",
+          "description": "The namespace for UUID v5"
+        }
+      ]
     }
   ],
   "preferences": [
@@ -77,6 +78,7 @@
     "@types/node": "^18.8.3",
     "@types/uuid": "^9.0.1",
     "eslint": "^8.38.0",
+    "eslint-plugin-import": "^2.27.5",
     "react-devtools": "^4.27.4",
     "typescript": "^5.0.4"
   },

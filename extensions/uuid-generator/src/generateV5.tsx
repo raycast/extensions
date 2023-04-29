@@ -1,4 +1,4 @@
-import { showHUD, Clipboard, getPreferenceValues, showToast, Toast  } from "@raycast/api";
+import { showHUD, Clipboard, getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { v5 as uuidV5, validate as uuidValidate } from "uuid";
 
 interface UUIDV5Arguments {
