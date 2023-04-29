@@ -8,13 +8,17 @@ import { serialize } from "class-transformer";
 export default async function Sync() {
   const preferences = getPreferenceValues<Preferences>();
 
-  console.debug(`Syncing envelopes (for folder "${preferences.defaultFolder}") and folders`);
+  console.debug(
+    `Syncing envelopes (Account: "${preferences.defaultAccount}" / Folder: "${preferences.defaultFolder}") and folders`
+  );
 
-  const envelopes = await Envelopes.list(preferences.defaultFolder);
+  const envelopes = await Envelopes.list(preferences.defaultFolder, preferences.defaultAccount);
   await LocalStorage.setItem("envelopes", serialize(envelopes));
 
   const folders = await Folders.list();
   await LocalStorage.setItem("folders", serialize(folders));
 
-  console.debug(`Synced envelopes (for folder "${preferences.defaultFolder}") and folders`);
+  console.debug(
+    `Synced envelopes (Account: "${preferences.defaultAccount}" / Folder: "${preferences.defaultFolder}") and folders`
+  );
 }

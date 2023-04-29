@@ -31,6 +31,7 @@ export default function ListEnvelopes() {
     folders: [],
     exe: false,
     currentFolderName: preferences.defaultFolder,
+    currentAccountName: preferences.defaultAccount,
   } as State);
 
   useEffect(() => {
@@ -79,7 +80,7 @@ export default function ListEnvelopes() {
       const exe = await hasExe();
 
       if (exe) {
-        const envelopes = await Envelopes.list(state.currentFolderName);
+        const envelopes = await Envelopes.list(state.currentFolderName, state.currentAccountName);
         const folders = await Folders.list();
 
         setState((previous: State) => ({
@@ -109,7 +110,7 @@ export default function ListEnvelopes() {
       isLoading: true,
     }));
 
-    const envelopes = await Envelopes.list(newValue);
+    const envelopes = await Envelopes.list(newValue, state.currentAccountName);
 
     setState((previous: State) => ({
       ...previous,
@@ -215,11 +216,14 @@ function MoveToSelectedForm(props: { folders: Folder[]; envelope: Envelope; stat
       });
 
       try {
-        const { stdout, stderr } = await Exec.run(`himalaya move ${values.folder} -- ${props.envelope.id}`, {
-          env: {
-            PATH: Exec.PATH,
-          },
-        });
+        const { stdout, stderr } = await Exec.run(
+          `himalaya --account "${props.state.currentAccountName}" move ${values.folder} -- ${props.envelope.id}`,
+          {
+            env: {
+              PATH: Exec.PATH,
+            },
+          }
+        );
         if (stdout) {
           toast.style = Toast.Style.Success;
           toast.title = `Moved envelope to folder ${values.folder}`;
@@ -228,7 +232,7 @@ function MoveToSelectedForm(props: { folders: Folder[]; envelope: Envelope; stat
             ...previous,
             isLoading: true,
           }));
-          const envelopes = await Envelopes.list(props.state.currentFolderName);
+          const envelopes = await Envelopes.list(props.state.currentFolderName, props.state.currentAccountName);
 
           props.setState((previous: State) => ({
             ...previous,
@@ -276,7 +280,7 @@ function MoveToSelectedForm(props: { folders: Folder[]; envelope: Envelope; stat
   );
 }
 
-function ReadDetail(props: { envelope: Envelope }) {
+function ReadDetail(props: { envelope: Envelope; currentAccountName: string }) {
   const [state, setState] = useState<{ isLoading: boolean; email: null | string }>({
     isLoading: true,
     email: null,
@@ -289,7 +293,7 @@ function ReadDetail(props: { envelope: Envelope }) {
         isLoading: true,
       }));
 
-      const email = await readEmail(props.envelope);
+      const email = await readEmail(props.envelope, props.currentAccountName);
 
       setState((previous) => ({
         ...previous,
@@ -331,12 +335,15 @@ function ReadDetail(props: { envelope: Envelope }) {
   );
 }
 
-async function readEmail(envelope: Envelope): Promise<string> {
-  const { stdout, stderr } = await Exec.run(`himalaya read --mime-type plain ${envelope.id}`, {
-    env: {
-      PATH: Exec.PATH,
-    },
-  });
+async function readEmail(envelope: Envelope, currentAccountName: string): Promise<string> {
+  const { stdout, stderr } = await Exec.run(
+    `himalaya --account "${currentAccountName}" read --mime-type plain ${envelope.id}`,
+    {
+      env: {
+        PATH: Exec.PATH,
+      },
+    }
+  );
 
   if (stdout) {
     return stdout;
@@ -364,11 +371,14 @@ const markUnreadAction = (envelope: Envelope, state: State, setState: any) => {
         const index = state.envelopes.findIndex((cur) => cur.id === envelope.id);
 
         try {
-          const { stdout, stderr } = await Exec.run(`himalaya flag remove ${envelope.id} -- seen`, {
-            env: {
-              PATH: Exec.PATH,
-            },
-          });
+          const { stdout, stderr } = await Exec.run(
+            `himalaya --account "${state.currentAccountName}" flag remove ${envelope.id} -- seen`,
+            {
+              env: {
+                PATH: Exec.PATH,
+              },
+            }
+          );
 
           if (stdout) {
             toast.style = Toast.Style.Success;
@@ -415,11 +425,14 @@ const markReadAction = (envelope: Envelope, state: State, setState: any) => {
         const index = state.envelopes.findIndex((cur) => cur.id === envelope.id);
 
         try {
-          const { stdout, stderr } = await Exec.run(`himalaya flag add ${envelope.id} -- seen`, {
-            env: {
-              PATH: Exec.PATH,
-            },
-          });
+          const { stdout, stderr } = await Exec.run(
+            `himalaya --account "${state.currentAccountName}" flag add ${envelope.id} -- seen`,
+            {
+              env: {
+                PATH: Exec.PATH,
+              },
+            }
+          );
 
           if (stdout) {
             toast.style = Toast.Style.Success;
@@ -461,8 +474,14 @@ const moveToSelectedAction = (envelope: Envelope, state: State, setState: any) =
   );
 };
 
-const readAction = (envelope: Envelope) => {
-  return <Action.Push title="Read" icon={Icon.Eye} target={<ReadDetail envelope={envelope} />} />;
+const readAction = (envelope: Envelope, currentAccountName: string) => {
+  return (
+    <Action.Push
+      title="Read"
+      icon={Icon.Eye}
+      target={<ReadDetail envelope={envelope} currentAccountName={currentAccountName} />}
+    />
+  );
 };
 
 const moveToTrashAction = (envelope: Envelope, state: State, setState: any) => {
@@ -480,11 +499,14 @@ const moveToTrashAction = (envelope: Envelope, state: State, setState: any) => {
         const index = state.envelopes.findIndex((cur) => cur.id === envelope.id);
 
         try {
-          const { stdout, stderr } = await Exec.run(`himalaya delete ${envelope.id}`, {
-            env: {
-              PATH: Exec.PATH,
-            },
-          });
+          const { stdout, stderr } = await Exec.run(
+            `himalaya --account "${state.currentAccountName}" delete ${envelope.id}`,
+            {
+              env: {
+                PATH: Exec.PATH,
+              },
+            }
+          );
 
           if (stdout) {
             toast.style = Toast.Style.Success;
@@ -572,7 +594,7 @@ const envelopesToList = (state: State, setState: any): any => {
           accessories={accessories(envelope)}
           actions={
             <ActionPanel title="Envelope">
-              {readAction(envelope)}
+              {readAction(envelope, state.currentAccountName)}
               {envelope.flags.includes(Flag.Seen) && markUnreadAction(envelope, state, setState)}
               {!envelope.flags.includes(Flag.Seen) && markReadAction(envelope, state, setState)}
               {moveToSelectedAction(envelope, state, setState)}
