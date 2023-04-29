@@ -21,8 +21,17 @@
             "interval": "1m"
         }
     ],
-    "categories": [
-        "Communication"
+    "categories": ["Communication"],
+    "preferences": [
+        {
+            "name": "defaultFolder",
+            "description": "The default folder used for commands",
+            "required": false,
+            "type": "textfield",
+            "title": "Default Folder",
+            "placeholder": "INBOX",
+            "default": "INBOX"
+        }
     ],
     "dependencies": {
         "@raycast/api": "^1.49.2",

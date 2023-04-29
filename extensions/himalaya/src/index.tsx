@@ -9,10 +9,12 @@ import {
   showToast,
   Toast,
   useNavigation,
+  getPreferenceValues,
 } from "@raycast/api";
 import { FormValidation, useCachedState, useForm } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { State } from "./state";
+import { Preferences } from "./preferences";
 import { Envelope, Flag, Folder } from "./models";
 import * as Envelopes from "./envelopes";
 import * as Folders from "./folders";
@@ -21,11 +23,14 @@ import "reflect-metadata";
 import { Type, serialize, deserializeArray } from "class-transformer";
 
 export default function ListEnvelopes() {
+  const preferences = getPreferenceValues<Preferences>();
+
   const [state, setState] = useCachedState<State>("index", {
     isLoading: true,
     envelopes: [],
     folders: [],
     exe: false,
+    currentFolderName: preferences.defaultFolder,
   } as State);
 
   useEffect(() => {
@@ -74,7 +79,7 @@ export default function ListEnvelopes() {
       const exe = await hasExe();
 
       if (exe) {
-        const envelopes = await Envelopes.list();
+        const envelopes = await Envelopes.list(state.currentFolderName);
         const folders = await Folders.list();
 
         setState((previous: State) => ({
@@ -98,8 +103,39 @@ export default function ListEnvelopes() {
     fetch();
   }, []);
 
+  const onFolderChange = async (newValue: string) => {
+    setState((previous: State) => ({
+      ...previous,
+      isLoading: true,
+    }));
+
+    const envelopes = await Envelopes.list(newValue);
+
+    setState((previous: State) => ({
+      ...previous,
+      isLoading: false,
+      currentFolderName: newValue,
+      envelopes: envelopes,
+    }));
+  };
+
   if (state.exe || state.isLoading) {
-    return <List isLoading={state.isLoading}>{envelopesToList(state, setState)}</List>;
+    return (
+      <List
+        isLoading={state.isLoading}
+        navigationTitle="Search Envelopes"
+        searchBarPlaceholder="Search your envelopes"
+        searchBarAccessory={
+          <FolderDropdown
+            folders={state.folders}
+            onFolderChange={onFolderChange}
+            defaultValue={state.currentFolderName}
+          />
+        }
+      >
+        {envelopesToList(state, setState)}
+      </List>
+    );
   } else {
     return <Detail markdown="Couldn't find executable, please install Himalaya CLI" />;
   }
@@ -168,7 +204,7 @@ interface MoveToSelectedFormValues {
   folder: string;
 }
 
-function MoveToSelectedForm(props: { folders: Folder[]; envelope: Envelope; setState: any }) {
+function MoveToSelectedForm(props: { folders: Folder[]; envelope: Envelope; state: State; setState: any }) {
   const { pop } = useNavigation();
 
   const { handleSubmit, itemProps } = useForm<MoveToSelectedFormValues>({
@@ -192,7 +228,7 @@ function MoveToSelectedForm(props: { folders: Folder[]; envelope: Envelope; setS
             ...previous,
             isLoading: true,
           }));
-          const envelopes = await Envelopes.list();
+          const envelopes = await Envelopes.list(props.state.currentFolderName);
 
           props.setState((previous: State) => ({
             ...previous,
@@ -420,7 +456,7 @@ const moveToSelectedAction = (envelope: Envelope, state: State, setState: any) =
     <Action.Push
       title="Move to Selected"
       icon={Icon.Folder}
-      target={<MoveToSelectedForm folders={state.folders} envelope={envelope} setState={setState} />}
+      target={<MoveToSelectedForm folders={state.folders} envelope={envelope} state={state} setState={setState} />}
     />
   );
 };
@@ -500,6 +536,29 @@ const accessories = (envelope: Envelope) => {
 
   return accessories;
 };
+
+function FolderDropdown(props: {
+  folders: Folder[];
+  onFolderChange: (newValue: string) => void;
+  defaultValue: string;
+}) {
+  const { folders, onFolderChange, defaultValue } = props;
+
+  return (
+    <List.Dropdown
+      tooltip="Select Folder"
+      storeValue={true}
+      onChange={(newValue) => {
+        onFolderChange(newValue);
+      }}
+      defaultValue={defaultValue}
+    >
+      {folders.map((folder) => (
+        <List.Dropdown.Item key={folder.name} title={folder.name} value={folder.name} />
+      ))}
+    </List.Dropdown>
+  );
+}
 
 const envelopesToList = (state: State, setState: any): any => {
   return Array.from(group_envelopes_by_date(state.envelopes).entries()).map(([date, group]) => {
