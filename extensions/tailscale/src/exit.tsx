@@ -22,10 +22,6 @@ function isExitNodeActive(devices: any) {
 }
 
 function setExitNode(host: string, allowLAN: boolean) {
-  if (host === "Turn off exit node") {
-    host = "";
-  }
-
   const command = `/Applications/Tailscale.app/Contents/MacOS/Tailscale set --exit-node "${host}"`;
   console.log(command);
   popToRoot();
@@ -38,6 +34,7 @@ function setExitNode(host: string, allowLAN: boolean) {
 }
 
 function ExitNodeList() {
+  const [isActive, setIsActive] = useState<boolean>(false);
   const [exitNodes, setExitNodes] = useState<any>();
   useEffect(() => {
     async function fetch() {
@@ -50,27 +47,11 @@ function ExitNodeList() {
         }
 
         const _list = loadExitNodes(data.Self, data.Peer);
+        setExitNodes(_list);
 
         if (isExitNodeActive(_list)) {
-          const disable = {
-            self: false,
-            userid: "",
-            dns: "",
-            key: 9001,
-            name: "Turn off exit node",
-            ipv4: "",
-            ipv6: "",
-            os: "",
-            online: true,
-            lastseen: new Date(),
-            exitnode: true,
-            exitnodeoption: false,
-          };
-
-          _list.unshift(disable);
+          setIsActive(true);
         }
-
-        setExitNodes(_list);
       } catch (error) {
         showToast(Toast.Style.Failure, "Couldn't load exitNodes. Make sure Tailscale is connected.");
       }
@@ -80,6 +61,25 @@ function ExitNodeList() {
 
   return (
     <List isLoading={exitNodes === undefined}>
+      {isActive && (
+        <List.Item
+          key="_disable"
+          title="Turn off exit node"
+          icon={{
+            source: {
+              light: "disconnected_light.png",
+              dark: "disconnected_dark.png",
+            },
+            mask: Image.Mask.Circle,
+          }}
+          actions={
+            <ActionPanel>
+              <Action title="Turn off exit node" onAction={() => setExitNode("", false)} />
+            </ActionPanel>
+          }
+        />
+      )}
+
       {exitNodes?.map((exitNode: any) => (
         <List.Item
           title={exitNode.name}

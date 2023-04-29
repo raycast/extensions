@@ -6,10 +6,10 @@
   "icon": "command-icon.png",
   "author": "samlinville",
   "owner": "tailscale",
-  "access": "public",
   "contributors": [
     "rosszurowski",
-    "kradalby"
+    "kradalby",
+    "itsmingjie"
   ],
   "categories": [
     "Developer Tools",
@@ -17,6 +17,7 @@
     "System",
     "Security"
   ],
+  "access": "public",
   "license": "MIT",
   "commands": [
     {
