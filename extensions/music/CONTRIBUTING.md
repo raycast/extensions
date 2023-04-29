@@ -17,6 +17,10 @@ All the `AppleScript` controls are in the `src/util/scripts` folder.
 Each file represents some kind of macro-category.
 If you want to add a new script please follow the project structure.
 
+### Library interactions
+
+Seems like the Library is translated locally by the system. So to work on any non english version it must be referenced as `source 1` or `playlist 1`
+
 ### Conclusion
 
 Thanks for reading. I appreciate your interest, please make sure to tag me [@Rawnly](https://github.com/rawnly) in any issue or PR.

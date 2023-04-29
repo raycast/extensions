@@ -1,9 +1,7 @@
 import { Clipboard, showToast, Toast } from "@raycast/api";
-import fsPromises from "fs/promises";
-import fetch from "node-fetch";
-import path from "path";
-import { fetchReferenceContent } from "./ref-content-fetcher";
-import { BibleBookMetadata, BibleData, BibleLanguage, BibleReference, JSONSerializable } from "./types";
+import { fetchReferenceContent } from "youversion-suggest";
+import { getDefaultReferenceFormat, getPreferredReferenceFormat } from "./preferences";
+import { BibleReference } from "./types";
 
 export function normalizeSearchText(searchText: string): string {
   searchText = searchText.toLowerCase();
@@ -80,51 +78,20 @@ export function buildBibleReference({
   };
 }
 
-export function buildBibleReferenceFromID(id: string, bible: BibleData): BibleReference {
-  const matches = id.match(/^(\d+)\/([a-z0-9]{3})\.(\d+)(?:\.(\d+)(?:-(\d+))?)?$/i) || [];
-  const versionId = Number(matches[1]);
-  const bookId = matches[2];
-  const chapter = Number(matches[3]);
-  const verse = Number(matches[4]) || null;
-  const endVerse = Number(matches[5]) || null;
-  return buildBibleReference({
-    book: bible.books.find((book) => book.id === bookId) || {
-      id: "",
-      name: "",
-    },
-    chapter: chapter,
-    verse: verse ? verse : null,
-    endVerse: endVerse ? endVerse : null,
-    version: bible.versions.find((version) => version.id === versionId) || {
-      id: 0,
-      name: "",
-      full_name: "",
-    },
-  });
+export async function applyReferenceFormat(reference: BibleReference, content: string): Promise<string> {
+  const referenceFormat = (await getPreferredReferenceFormat()) || (await getDefaultReferenceFormat());
+  return referenceFormat
+    .replace(/{name}/gi, reference.name)
+    .replace(/{version}/gi, reference.version.name)
+    .replace(/{content}/gi, content);
 }
 
-export async function getJSONData<T extends JSONSerializable>(path: string): Promise<T> {
-  return JSON.parse(String(await fsPromises.readFile(path)));
-}
-
-export async function getBibleData(language: string): Promise<BibleData> {
-  return getJSONData(path.join(__dirname, "assets", "data", "bible", `bible-${language}.json`));
-}
-
-export async function getBibleBookMetadata(): Promise<{ [key: string]: BibleBookMetadata }> {
-  return getJSONData(path.join(__dirname, "assets", "data", "bible", `book-metadata.json`));
-}
-
-export async function getLanguages(): Promise<BibleLanguage[]> {
-  return getJSONData(path.join(__dirname, "assets", "data", "bible", `languages.json`));
-}
-
-export function fetchHTML(url: string): Promise<string> {
-  return fetch(url, {
-    headers: {
-      "User-Agent": "YouVersion Suggest",
-    },
-  }).then((response) => response.text());
+export function isReferenceFormatValid(newFormat: string): boolean {
+  const evaluatedFormat = newFormat
+    .replace(/{name}/gi, "John 11:35")
+    .replace(/{version}/gi, "NIV")
+    .replace(/{content}/gi, "Jesus wept.");
+  return !(evaluatedFormat.includes("{") || evaluatedFormat.includes("}"));
 }
 
 export async function copyContentToClipboard(reference: BibleReference) {
@@ -133,8 +100,8 @@ export async function copyContentToClipboard(reference: BibleReference) {
       style: Toast.Style.Animated,
       title: `Copying ${reference.name} to clipboard...`,
     });
-    const referenceContent = await fetchReferenceContent(reference);
-    Clipboard.copy(referenceContent);
+    const { content } = await fetchReferenceContent(reference.id);
+    Clipboard.copy(await applyReferenceFormat(reference, content || ""));
     showToast({
       style: Toast.Style.Success,
       title: `Copied ${reference.name} (${reference.version.name}) to clipboard`,

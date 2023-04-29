@@ -1,6 +1,7 @@
 import CreateList from "./components/CreateList";
+import { withHeightAuth } from "./components/withHeightAuth";
 import { CreateListFormValues } from "./types/list";
 
 export default function Command({ draftValues }: { draftValues?: CreateListFormValues }) {
-  return <CreateList draftValues={draftValues} />;
+  return withHeightAuth(<CreateList draftValues={draftValues} />);
 }

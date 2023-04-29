@@ -16,6 +16,7 @@ import {
   OpenProjectPipelinesPushAction,
   OpenProjectSecurityComplianceInBrowserAction,
   OpenProjectSettingsInBrowserAction,
+  OpenProjectWikiInBrowserAction,
   ProjectDefaultActions,
   ShowProjectLabels,
 } from "./project_actions";
@@ -36,7 +37,10 @@ export function ProjectListItem(props: { project: Project }): JSX.Element {
       title={project.name_with_namespace}
       accessories={[
         {
-          icon: { source: Icon.Star, tintColor: Color.Yellow },
+          icon: {
+            source: Icon.Star,
+            tintColor: project.star_count > 0 ? Color.Yellow : null,
+          },
           text: `${project.star_count}`,
           tooltip: `Number of stars: ${project.star_count}`,
         },
@@ -55,6 +59,7 @@ export function ProjectListItem(props: { project: Project }): JSX.Element {
             <OpenProjectBranchesPushAction project={project} />
             <OpenProjectPipelinesPushAction project={project} />
             <OpenProjectMilestonesPushAction project={project} />
+            <OpenProjectWikiInBrowserAction project={project} />
             <ShowProjectLabels project={props.project} shortcut={{ modifiers: ["cmd"], key: "l" }} />
           </ActionPanel.Section>
           <ActionPanel.Section title="Open in Browser">

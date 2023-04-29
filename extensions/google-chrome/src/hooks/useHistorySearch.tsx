@@ -5,7 +5,7 @@ import { getHistoryDbPath } from "../util";
 import { NotInstalledError } from "../components";
 
 const whereClauses = (tableTitle: string, terms: string[]) => {
-  return terms.map((t) => `${tableTitle}.title LIKE '%${t}%'`).join(" AND ");
+  return terms.map((t) => `(${tableTitle}.title LIKE '%${t}%' OR ${tableTitle}.url LIKE '%${t}%')`).join(" AND ");
 };
 
 const getHistoryQuery = (table: string, date_field: string, terms: string[]) =>

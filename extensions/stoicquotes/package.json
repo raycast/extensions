@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "stoicquotes",
   "title": "Stoic Quotes",
-  "description": "Gives a random quote from one of the stoic philosophers - Marcus Aurelius, Cato, Zeno, Seneca or Epictetus",
+  "description": "Gives a random quote from one of the stoic philosophers - Marcus Aurelius, Seneca or Epictetus",
   "icon": "command-icon.png",
   "author": "rrajath",
   "categories": [
@@ -13,7 +13,7 @@
     {
       "name": "index",
       "title": "Random Stoic Quote",
-      "description": "Get a random quote from one of the stoic philosophers - Marcus Aurelius, Cato, Zeno, Seneca or Epictetus",
+      "description": "Get a random quote from one of the stoic philosophers - Marcus Aurelius, Seneca or Epictetus",
       "mode": "view"
     }
   ],

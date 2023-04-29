@@ -71,7 +71,12 @@ module.exports = async ({ github, context, core }) => {
     // we don't want to label the issue here, only answer to a comment
 
     // if the one who posts a comment is an owner of the extension related to the issue
-    if (context.payload.comment.user && owners.indexOf(context.payload.comment.user.login) !== -1) {
+    if (
+      context.payload.comment.user &&
+      (owners.indexOf(context.payload.comment.user.login) !== -1 ||
+        // also allow the OP to close the issue that way
+        context.payload.comment.user.login === context.payload.issue.user.login)
+    ) {
       if (closeIssueMatch.test(context.payload.comment.body)) {
         console.log(`closing #${context.payload.issue.number}`);
         await github.rest.issues.update({
@@ -154,7 +159,7 @@ async function getGitHubFile(path, { github, context }) {
     path,
   });
 
-  return Buffer.from(data.content, "base64").toString("utf8");
+  return data;
 }
 
 // Create a new comment or update the existing one

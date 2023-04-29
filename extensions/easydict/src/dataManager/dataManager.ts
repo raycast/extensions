@@ -1,8 +1,9 @@
+import { OpenAITranslateResult } from "./../types";
 /*
  * @author: tisfeng
  * @createTime: 2022-06-26 11:13
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-10-13 22:40
+ * @lastEditTime: 2023-04-25 22:55
  * @fileName: dataManager.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -33,6 +34,7 @@ import { requestCaiyunTextTranslate } from "../translation/caiyun";
 import { requestDeepLTranslate } from "../translation/deepL";
 import { requestGoogleTranslate } from "../translation/google";
 import { requestWebBingTranslate } from "../translation/microsoft/bing";
+import { requestOpenAIStreamTranslate } from "../translation/openAI/chat";
 import { requestTencentTranslate } from "../translation/tencent";
 import { requestVolcanoTranslate } from "../translation/volcano/volcanoAPI";
 import {
@@ -158,6 +160,7 @@ export class DataManager {
     this.queryTencentTranslate(queryWordInfo);
     this.queryVolcanoTranslate(queryWordInfo);
     this.queryCaiyunTranslate(queryWordInfo);
+    this.queryOpenAITranslate(queryWordInfo);
 
     this.delayQuery(queryWordInfo);
 
@@ -736,6 +739,81 @@ export class DataManager {
   }
 
   /**
+   * Query OpenAI translate.
+   */
+  private queryOpenAITranslate(queryWordInfo: QueryWordInfo) {
+    if (myPreferences.enableOpenAITranslate) {
+      const type = TranslationType.OpenAI;
+      this.addQueryToRecordList(type);
+
+      let openAIQueryResult: QueryResult | undefined;
+
+      queryWordInfo.onMessage = (message) => {
+        const resultText = message.content;
+        console.warn(`onMessage content: ${message.content}`);
+        if (openAIQueryResult) {
+          const openAIResult = openAIQueryResult.sourceResult.result as OpenAITranslateResult;
+          const translatedText = openAIResult.translatedText + message.content;
+          openAIResult.translatedText = translatedText;
+          openAIQueryResult.sourceResult.translations = [translatedText];
+          this.updateTranslationDisplay(openAIQueryResult);
+          console.warn(`onMessage: ${translatedText}`);
+        } else {
+          openAIQueryResult = {
+            type: type,
+            sourceResult: {
+              type,
+              queryWordInfo,
+              translations: [resultText],
+              result: {
+                translatedText: resultText,
+              },
+            },
+          };
+          this.updateTranslationDisplay(openAIQueryResult);
+        }
+      };
+      queryWordInfo.onFinish = (value) => {
+        console.warn(`onFinish content: ${value}`);
+
+        if (value === "stop") {
+          if (openAIQueryResult) {
+            const openAIResult = openAIQueryResult.sourceResult.result as OpenAITranslateResult;
+            let translatedText = openAIResult.translatedText;
+            // If the translated last char contains ["”", '"', "」"], remove it.
+            const rightQuotes = ['"', "”", "'", "」"];
+            if (translatedText.length > 0) {
+              const lastQueryTextChar = queryWordInfo.word[queryWordInfo.word.length - 1];
+              const lastTranslatedTextChar = translatedText[translatedText.length - 1];
+              if (!rightQuotes.includes(lastQueryTextChar) && rightQuotes.includes(lastTranslatedTextChar)) {
+                translatedText = translatedText.slice(0, translatedText.length - 1);
+              }
+            }
+
+            openAIResult.translatedText = translatedText;
+            openAIQueryResult.sourceResult.translations = [translatedText];
+            this.updateTranslationDisplay(openAIQueryResult);
+            console.warn(`onFinish translatedText: ${translatedText}`);
+          }
+          this.removeQueryFromRecordList(type);
+        }
+      };
+
+      requestOpenAIStreamTranslate(queryWordInfo)
+        .then(() => {
+          // move to onMessage
+        })
+        .catch((error) => {
+          showErrorToast(error);
+          this.removeQueryFromRecordList(type);
+        })
+        .finally(() => {
+          // move to onFinish
+        });
+    }
+  }
+
+  /**
    * Add query to record list, and update loading status.
    */
   private addQueryToRecordList(type: QueryType) {
@@ -796,10 +874,15 @@ export class DataManager {
     }
 
     if (oneLineTranslation) {
+      let key = `${oneLineTranslation}-${type}`;
+      if (type === TranslationType.OpenAI) {
+        // Avoid frequent update cause UI flicker.
+        key = type;
+      }
       const displayItem: ListDisplayItem = {
         displayType: type, // TranslationType
         queryType: type,
-        key: `${oneLineTranslation}-${type}`,
+        key: key,
         title: ` ${oneLineTranslation}`,
         copyText: copyText,
         queryWordInfo: sourceResult.queryWordInfo,

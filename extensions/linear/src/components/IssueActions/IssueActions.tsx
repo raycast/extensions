@@ -418,7 +418,7 @@ export default function IssueActions({
 
         {me ? (
           <Action
-            title={isAssignedToMe ? "Un-assign from Me" : "Assign to Me"}
+            title={isAssignedToMe ? "Un-Assign From Me" : "Assign to Me"}
             icon={getUserIcon(me)}
             shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
             onAction={() => setToMe(isAssignedToMe ? null : me)}

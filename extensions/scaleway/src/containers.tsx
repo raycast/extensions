@@ -1,3 +1,3 @@
-import { ServerlessContainer } from './containers/ServerlessContainer'
+import { ServerlessContainer } from './products/containers/ServerlessContainer'
 
 export default () => <ServerlessContainer />

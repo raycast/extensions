@@ -18,11 +18,31 @@
       "name": "index",
       "title": "Query Numi",
       "description": "Query Numi right from Raycast",
-      "mode": "view"
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "queryArgument",
+          "placeholder": "15+1",
+          "type": "text",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "max_history_elemets",
+      "type": "textfield",
+      "required": false,
+      "title": "Maximum number of history elements",
+      "placeholder": "10",
+      "description": "The number of elements to save on the history",
+      "default": "10"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.37.0"
+    "@raycast/api": "^1.37.0",
+    "@raycast/utils": "^1.5.2"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^5.0.0",

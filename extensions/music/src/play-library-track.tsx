@@ -59,7 +59,7 @@ export default function PlayLibraryTrack() {
           key={id}
           title={name}
           subtitle={SFSymbols.ARTIST + ` ${artist}`}
-          accessoryTitle={SFSymbols.MUSIC_NOTE + ` ${album}`}
+          accessories={[{ text: SFSymbols.MUSIC_NOTE + ` ${album}` }]}
           icon={{ source: "../assets/icon.png" }}
           actions={<Actions name={name} id={id ?? ""} pop={pop} />}
         />

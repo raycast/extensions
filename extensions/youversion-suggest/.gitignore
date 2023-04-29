@@ -3,5 +3,8 @@
 # dependencies
 /node_modules
 
+# Bible data from YouVersion Suggest
+assets/data
+
 # misc
 .DS_Store

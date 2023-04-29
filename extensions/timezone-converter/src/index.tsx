@@ -1,8 +1,25 @@
-import { Action, ActionPanel, Alert, Color, Detail, Form, Icon, confirmAlert, useNavigation } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Alert,
+  Color,
+  Detail,
+  Form,
+  Icon,
+  confirmAlert,
+  useNavigation,
+  getPreferenceValues,
+  List,
+} from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import { DateTime, IANAZone } from "luxon";
 import { Fragment, createContext, useCallback, useContext, useMemo, useState } from "react";
 
+interface Preferences {
+  sortTimezones: "manually" | "alphabetically";
+}
+
+const preferences = getPreferenceValues<Preferences>();
 const ALL_TIMEZONES = (Intl as any).supportedValuesOf("timeZone");
 
 function formatZoneName(zoneName: string) {
@@ -88,12 +105,18 @@ function Timezones() {
   function toggleTimezone(tz?: string) {
     if (!tz) return;
     const tzName = tz.replace(/ (\(.*\))/gim, "");
-    if (selectedTimezones?.includes(tzName)) {
+    if (selectedTimezones.includes(tzName)) {
       selectedTimezones.splice(selectedTimezones.indexOf(tzName), 1);
     } else {
       selectedTimezones.push(tzName);
     }
     setSelectedTimezones(selectedTimezones);
+  }
+
+  const addedTimezones = preferences.sortTimezones === "alphabetically" ? selectedTimezones.sort() : selectedTimezones;
+
+  function updateSort(addedTimezones: string[]) {
+    setSelectedTimezones(addedTimezones);
   }
 
   return (
@@ -104,7 +127,7 @@ function Timezones() {
           <ActionPanel>
             <ActionPanel.Submenu title="Add Timezones" icon={Icon.Globe}>
               <ActionPanel.Section title="Selected">
-                {selectedTimezones?.map((tz) => (
+                {addedTimezones.map((tz) => (
                   <Action
                     key={tz}
                     icon={{
@@ -140,26 +163,42 @@ function Timezones() {
               onAction={isCustom ? resetCustomTime : setCustomTime}
               icon={Icon.Clock}
             />
-            {selectedTimezones?.length > 0 && (
-              <Action
-                title={`Remove Added Timezones`}
-                shortcut={{ modifiers: ["ctrl"], key: "x" }}
-                style={Action.Style.Destructive}
-                onAction={() => {
-                  confirmAlert({
-                    primaryAction: {
-                      title: "Remove All",
-                      style: Alert.ActionStyle.Destructive,
-                      onAction: () => {
-                        setSelectedTimezones([]);
+            <ActionPanel.Section>
+              {preferences.sortTimezones === "manually" && (
+                <Action.Push
+                  title="Reorder Timezones"
+                  target={
+                    <OrderTimezones
+                      timezones={addedTimezones}
+                      onSort={async function (addedTimezones: string[]): Promise<void> {
+                        await updateSort(addedTimezones);
+                      }}
+                    />
+                  }
+                  icon={Icon.Switch}
+                />
+              )}
+              {selectedTimezones?.length > 0 && (
+                <Action
+                  title={`Remove Added Timezones`}
+                  shortcut={{ modifiers: ["ctrl"], key: "x" }}
+                  style={Action.Style.Destructive}
+                  onAction={() => {
+                    confirmAlert({
+                      primaryAction: {
+                        title: "Remove All",
+                        style: Alert.ActionStyle.Destructive,
+                        onAction: () => {
+                          setSelectedTimezones([]);
+                        },
                       },
-                    },
-                    title: `Are you sure you want remove all timezones?`,
-                  });
-                }}
-                icon={Icon.Eraser}
-              />
-            )}
+                      title: `Are you sure you want remove all timezones?`,
+                    });
+                  }}
+                  icon={Icon.Eraser}
+                />
+              )}
+            </ActionPanel.Section>
           </ActionPanel>
         }
         metadata={
@@ -189,6 +228,86 @@ function Timezones() {
         }
       />
     </TimezoneCotext.Provider>
+  );
+}
+
+function OrderTimezones(props: { timezones: string[]; onSort: (addedTimezones: string[]) => void }) {
+  const { timezones } = props;
+  const [timeZones, setTimeZones] = useState(timezones);
+
+  const moveUp = (index: number) => {
+    if (index > 0) {
+      const updatedTimezones = [...timeZones];
+      const temp = updatedTimezones[index];
+      updatedTimezones[index] = updatedTimezones[index - 1];
+      updatedTimezones[index - 1] = temp;
+      setTimeZones(updatedTimezones);
+      props.onSort(updatedTimezones);
+    }
+  };
+
+  const moveDown = (index: number) => {
+    if (index < timezones.length - 1) {
+      const updatedTimezones = [...timeZones];
+      const temp = updatedTimezones[index];
+      updatedTimezones[index] = updatedTimezones[index + 1];
+      updatedTimezones[index + 1] = temp;
+      setTimeZones(updatedTimezones);
+      props.onSort(updatedTimezones);
+    }
+  };
+
+  const remove = (index: number) => {
+    const updatedTimezones = [...timeZones];
+    updatedTimezones.splice(index, 1);
+    setTimeZones(updatedTimezones);
+    props.onSort(updatedTimezones);
+  };
+
+  return (
+    <List navigationTitle="Reorder Timezones">
+      {timeZones &&
+        timeZones.map((tz, index) => {
+          return (
+            <List.Item
+              key={tz}
+              title={tz}
+              icon={Icon.Clock}
+              actions={
+                <ActionPanel>
+                  {index > 0 && (
+                    <Action
+                      title="Move Up"
+                      shortcut={{ modifiers: ["cmd", "opt"], key: "arrowUp" }}
+                      icon={Icon.ChevronUp}
+                      onAction={() => moveUp(index)}
+                    ></Action>
+                  )}
+                  {index < timezones.length - 1 && (
+                    <Action
+                      title="Move Down"
+                      shortcut={{ modifiers: ["cmd", "opt"], key: "arrowDown" }}
+                      icon={Icon.ChevronDown}
+                      onAction={() => moveDown(index)}
+                    ></Action>
+                  )}
+                  <Action
+                    title="Remove Timezone"
+                    style={Action.Style.Destructive}
+                    icon={Icon.Trash}
+                    shortcut={{ modifiers: ["ctrl"], key: "x" }}
+                    onAction={async () => {
+                      if (await confirmAlert({ title: `Are you sure you want to delete "${tz}"?` })) {
+                        remove(index);
+                      }
+                    }}
+                  />
+                </ActionPanel>
+              }
+            />
+          );
+        })}
+    </List>
   );
 }
 

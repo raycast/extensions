@@ -7,7 +7,7 @@ export default function GetStandings() {
   const [showDetails, setShowDetails] = useState<boolean>(false);
 
   return (
-    <List isLoading={!standings} isShowingDetail={showDetails}>
+    <List isLoading={!standings} filtering={false} isShowingDetail={showDetails}>
       {standings?.map((table) => {
         return (
           <List.Item

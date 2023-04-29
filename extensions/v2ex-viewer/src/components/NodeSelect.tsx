@@ -1,5 +1,5 @@
 import { getToken } from "@/utils/preference";
-import { Icon, List } from "@raycast/api";
+import { Icon, List, Cache } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { useEffect } from "react";
 import { Response, Node } from "@/types/v2ex";

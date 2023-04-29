@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-08-05 10:36
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-10-13 11:27
+ * @lastEditTime: 2023-03-31 16:04
  * @fileName: preferences.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -61,6 +61,9 @@ export interface MyPreferences {
   enableVolcanoTranslate: boolean;
   volcanoAccessKeyId: string;
   volcanoAccessKeySecret: string;
+
+  enableOpenAITranslate: boolean;
+  openAIAPIKey: string;
 }
 
 /**
@@ -118,17 +121,12 @@ export class AppKeyStore {
 
   static userDeepLAuthKey = myPreferences.deepLAuthKey.trim();
 
-  static caiyunToken =
-    myPreferences.caiyunToken.trim().length > 0 ? myPreferences.caiyunToken.trim() : this.defaultCaiyunToken;
+  static caiyunToken = myPreferences.caiyunToken.trim();
 
-  static volcanoSecretId =
-    myPreferences.volcanoAccessKeyId.trim().length > 0
-      ? myPreferences.volcanoAccessKeyId.trim()
-      : this.defaultVolcanoAccessId;
-  static volcanoSecretKey =
-    myPreferences.volcanoAccessKeySecret.trim().length > 0
-      ? myPreferences.volcanoAccessKeySecret.trim()
-      : this.defaultVolcanoAccessKey;
+  static volcanoSecretId = myPreferences.volcanoAccessKeyId.trim();
+  static volcanoSecretKey = myPreferences.volcanoAccessKeySecret.trim();
+
+  static openAIAPIKey = myPreferences.openAIAPIKey.trim();
 }
 
 export function myDecrypt(ciphertext: string) {

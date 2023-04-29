@@ -1,6 +1,6 @@
-# YouVersion Suggest for Raycast
+# YouVersion Bible Suggest for Raycast
 
-_Copyright 2022 Caleb Evans_  
+_Copyright 2022-2023 Caleb Evans_  
 _Released under the MIT license_
 
 This [Raycast][raycast] extension allows you to search the YouVersion Bible
@@ -12,7 +12,12 @@ quickly and easily. You can:
 - Choose an alternate language (other than English) and/or pick your preferred
   version/translation (e.g. ESV, NKJV)
 
+## [Download Extension][extension-in-store]
+
+## Screenshots
+
 [raycast]: https://www.raycast.com/
+[extension-in-store]: https://www.raycast.com/caleb531/youversion-suggest
 
 ![Filter Bible Reference](./media/screenshot-filter.png)
 ![Search the Bible by Phrase](./media/screenshot-search.png)

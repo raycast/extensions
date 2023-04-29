@@ -1,5 +1,10 @@
 # MyIP Changelog
 
+## [Update] - 2023-03-11
+
+- Fixed IP Lookup not working
+- Remove obsolete code
+
 ## [Update] - 2023-03-10
 
 - Made local ip copiable regardless of whether the public ip is successfully obtained

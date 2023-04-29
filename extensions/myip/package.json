@@ -27,8 +27,8 @@
   "dependencies": {
     "@raycast/api": "^1.48.8",
     "axios": "^0.26.1",
-    "cheerio": "^1.0.0-rc.10",
-    "ip": "^1.1.5"
+    "cheerio": "1.0.0-rc.12",
+    "ip": "^1.1.8"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.5",

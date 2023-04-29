@@ -15,6 +15,7 @@ export const ProjectListItem: React.FC<Props> = ({ index, project, updateProject
     <List.Item
       key={project.id}
       title={project.name}
+      subtitle={project.customer!.name}
       actions={
         <ActionPanel>
           <Action.Push title={`Select Task`} target={<TaskList project={project} />} />
