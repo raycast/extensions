@@ -253,7 +253,7 @@ export default class HueClient {
     stream.on("error", (error) => {
       parser?.end();
       stream.close();
-      throw error;
+      console.error(error, [parser?.input]);
     });
   }
 }
