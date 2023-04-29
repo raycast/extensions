@@ -5,7 +5,7 @@ import {
   getPreferenceValues,
   Icon,
   List,
-  openCommandPreferences,
+  openExtensionPreferences,
   showToast,
   Toast,
 } from "@raycast/api";
@@ -125,6 +125,7 @@ export function TranslateResult(props: {
             </ActionPanel.Section>
           )}
           <Action.CopyToClipboard content={props.transRes.res} />
+          <Action.Paste content={props.transRes.res} />
           {props.transRes.isWord && (
             <Action.CreateSnippet
               title="Save Vocab as Snippet"
@@ -189,7 +190,7 @@ export function TranslateResult(props: {
             icon={Icon.ComputerChip}
             title="Open iTranslate Preferences"
             shortcut={{ modifiers: ["cmd"], key: "p" }}
-            onAction={openCommandPreferences}
+            onAction={openExtensionPreferences}
           />
         </ActionPanel>
       }
