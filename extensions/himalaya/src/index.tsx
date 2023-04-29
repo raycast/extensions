@@ -179,7 +179,7 @@ function MoveToSelectedForm(props: { folders: Folder[]; envelope: Envelope; setS
       });
 
       try {
-        const { stdout, stderr } = await Exec.run(`"himalaya" move ${values.folder} -- ${props.envelope.id}`, {
+        const { stdout, stderr } = await Exec.run(`himalaya move ${values.folder} -- ${props.envelope.id}`, {
           env: {
             PATH: Exec.PATH,
           },
@@ -296,7 +296,7 @@ function ReadDetail(props: { envelope: Envelope }) {
 }
 
 async function readEmail(envelope: Envelope): Promise<string> {
-  const { stdout, stderr } = await Exec.run(`"himalaya" read --mime-type plain ${envelope.id}`, {
+  const { stdout, stderr } = await Exec.run(`himalaya read --mime-type plain ${envelope.id}`, {
     env: {
       PATH: Exec.PATH,
     },
@@ -328,7 +328,7 @@ const markUnreadAction = (envelope: Envelope, state: State, setState: any) => {
         const index = state.envelopes.findIndex((cur) => cur.id === envelope.id);
 
         try {
-          const { stdout, stderr } = await Exec.run(`"himalaya" flag remove ${envelope.id} -- seen`, {
+          const { stdout, stderr } = await Exec.run(`himalaya flag remove ${envelope.id} -- seen`, {
             env: {
               PATH: Exec.PATH,
             },
@@ -379,7 +379,7 @@ const markReadAction = (envelope: Envelope, state: State, setState: any) => {
         const index = state.envelopes.findIndex((cur) => cur.id === envelope.id);
 
         try {
-          const { stdout, stderr } = await Exec.run(`"himalaya" flag add ${envelope.id} -- seen`, {
+          const { stdout, stderr } = await Exec.run(`himalaya flag add ${envelope.id} -- seen`, {
             env: {
               PATH: Exec.PATH,
             },
@@ -444,7 +444,7 @@ const moveToTrashAction = (envelope: Envelope, state: State, setState: any) => {
         const index = state.envelopes.findIndex((cur) => cur.id === envelope.id);
 
         try {
-          const { stdout, stderr } = await Exec.run(`"himalaya" delete ${envelope.id}`, {
+          const { stdout, stderr } = await Exec.run(`himalaya delete ${envelope.id}`, {
             env: {
               PATH: Exec.PATH,
             },

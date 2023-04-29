@@ -2,7 +2,7 @@ import { Envelope, Flag } from "./models";
 import * as Exec from "./exec";
 
 export async function list(): Promise<Envelope[]> {
-  const { stdout, stderr } = await Exec.run('"himalaya" -o json list -s 100', {
+  const { stdout, stderr } = await Exec.run('himalaya -o json list -s 100', {
     env: {
       PATH: Exec.PATH,
     },
