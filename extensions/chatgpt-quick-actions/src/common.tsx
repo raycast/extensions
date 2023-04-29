@@ -26,26 +26,51 @@ export default function ResultView(prompt: string, toast_title: string) {
   async function getResult() {
     const now = new Date();
     let duration = 0;
+    const toast = await showToast(Toast.Style.Animated, toast_title);
 
     async function getStream(prompt: string) {
-      const selectedText = await getSelectedText();
-      const stream = await openai.createChatCompletion(
-        {
-          model: model_override,
-          messages: [
-            { role: "system", content: prompt },
-            { role: "user", content: selectedText },
-          ],
-          stream: true,
-        },
-        { responseType: "stream" }
-      );
-      setPromptTokenCount(countToken(prompt + selectedText));
-      return stream;
+      let selectedText = "";
+      try {
+        selectedText = await getSelectedText();
+      } catch (error) {
+        toast.title = "Error";
+        toast.style = Toast.Style.Failure;
+        setLoading(false);
+        setResponse(
+          "⚠️ Raycast was unable to get the selected text. You may try copying the text to a text editor and try again."
+        );
+        return;
+      }
+
+      try {
+        const stream = await openai.createChatCompletion(
+          {
+            model: model_override,
+            messages: [
+              { role: "system", content: prompt },
+              { role: "user", content: selectedText },
+            ],
+            stream: true,
+          },
+          { responseType: "stream" }
+        );
+        setPromptTokenCount(countToken(prompt + selectedText));
+        return stream;
+      } catch (error) {
+        toast.title = "Error";
+        toast.style = Toast.Style.Failure;
+        setLoading(false);
+        setResponse(
+          `⚠️ Failed to get response from OpenAI. Please check your network connection and API key. \n\n Error Message: \`\`\`${
+            (error as Error).message
+          }\`\`\``
+        );
+        return;
+      }
     }
 
     getStream(prompt).then(async (stream) => {
-      const toast = await showToast(Toast.Style.Animated, toast_title);
+      if (!stream) return;
       (stream.data as any).on("data", (data: any) => {
         const lines = data
           .toString()
@@ -118,20 +143,22 @@ export default function ResultView(prompt: string, toast_title: string) {
       markdown={response}
       isLoading={loading}
       actions={
-        <ActionPanel title="Actions">
-          <Action.CopyToClipboard title="Copy Results" content={response} />
-          <Action.Paste title="Paste Results" content={response} />
-          <Action title="Retry" onAction={retry} shortcut={{ modifiers: ["cmd"], key: "r" }} icon={Icon.Repeat} />
-          {model_override != "gpt-4" && (
-            <Action
-              title="Retry with GPT-4"
-              onAction={retryWithGPT4}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
-              icon={Icon.ArrowNe}
-            />
-          )}
-          {sidenote}
-        </ActionPanel>
+        !loading && (
+          <ActionPanel title="Actions">
+            <Action.CopyToClipboard title="Copy Results" content={response} />
+            <Action.Paste title="Paste Results" content={response} />
+            <Action title="Retry" onAction={retry} shortcut={{ modifiers: ["cmd"], key: "r" }} icon={Icon.Repeat} />
+            {model_override != "gpt-4" && (
+              <Action
+                title="Retry with GPT-4"
+                onAction={retryWithGPT4}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
+                icon={Icon.ArrowNe}
+              />
+            )}
+            {sidenote}
+          </ActionPanel>
+        )
       }
       metadata={
         <Detail.Metadata>
