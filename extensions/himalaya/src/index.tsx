@@ -325,6 +325,8 @@ const markUnreadAction = (envelope: Envelope, state: State, setState: any) => {
           title: "Marking as unread",
         });
 
+        const index = state.envelopes.findIndex((cur) => cur.id === envelope.id);
+
         try {
           const { stdout, stderr } = await Exec.run(`"himalaya" flag remove ${envelope.id} -- seen`, {
             env: {
@@ -336,13 +338,12 @@ const markUnreadAction = (envelope: Envelope, state: State, setState: any) => {
             toast.style = Toast.Style.Success;
             toast.title = "Marked unread";
 
-            setState((previous: State) => ({ ...previous, isLoading: true }));
-            const envelopes = await Envelopes.list();
+            const envelopes = state.envelopes;
+            envelopes[index].flags = envelopes[index].flags.filter((flag) => flag != Flag.Seen);
 
             setState((previous: State) => ({
               ...previous,
               envelopes: envelopes,
-              isLoading: false,
             }));
           } else if (stderr) {
             console.error(stderr);
@@ -375,6 +376,8 @@ const markReadAction = (envelope: Envelope, state: State, setState: any) => {
           title: "Marking as read",
         });
 
+        const index = state.envelopes.findIndex((cur) => cur.id === envelope.id);
+
         try {
           const { stdout, stderr } = await Exec.run(`"himalaya" flag add ${envelope.id} -- seen`, {
             env: {
@@ -386,13 +389,12 @@ const markReadAction = (envelope: Envelope, state: State, setState: any) => {
             toast.style = Toast.Style.Success;
             toast.title = "Marked read";
 
-            setState((previous: State) => ({ ...previous, isLoading: true }));
-            const envelopes = await Envelopes.list();
+            const envelopes = state.envelopes;
+            envelopes[index].flags.push(Flag.Seen);
 
             setState((previous: State) => ({
               ...previous,
               envelopes: envelopes,
-              isLoading: false,
             }));
           } else if (stderr) {
             console.error(stderr);
@@ -439,6 +441,8 @@ const moveToTrashAction = (envelope: Envelope, state: State, setState: any) => {
           title: "Moving to trash",
         });
 
+        const index = state.envelopes.findIndex((cur) => cur.id === envelope.id);
+
         try {
           const { stdout, stderr } = await Exec.run(`"himalaya" delete ${envelope.id}`, {
             env: {
@@ -450,13 +454,12 @@ const moveToTrashAction = (envelope: Envelope, state: State, setState: any) => {
             toast.style = Toast.Style.Success;
             toast.title = "Moved to trash";
 
-            setState((previous: State) => ({ ...previous, isLoading: true }));
-            const envelopes = await Envelopes.list();
+            const envelopes = state.envelopes;
+            envelopes.splice(index, 1);
 
             setState((previous: State) => ({
               ...previous,
               envelopes: envelopes,
-              isLoading: false,
             }));
           } else if (stderr) {
             console.error(stderr);
