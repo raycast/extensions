@@ -1,4 +1,4 @@
-import { Alert, confirmAlert, LocalStorage, showToast, Toast } from "@raycast/api";
+import { Alert, Color, confirmAlert, Icon, LocalStorage, showToast, Toast } from "@raycast/api";
 import { Reminder } from "../types/reminder";
 import ActionStyle = Alert.ActionStyle;
 import Style = Toast.Style;
@@ -9,7 +9,7 @@ type DeleteReminderProps = {
   setReminders: (reminders: Reminder[]) => void;
 };
 
-export async function deleteReminder(props: DeleteReminderProps) {
+export async function deleteExistingReminder(props: DeleteReminderProps) {
   const deleteConfirmation = await confirmAlert({
     title: "Delete reminder",
     message: "Are you sure you wish to delete this reminder?",
@@ -21,7 +21,10 @@ export async function deleteReminder(props: DeleteReminderProps) {
       title: "No",
       style: ActionStyle.Cancel,
     },
-    icon: "trash.png",
+    icon: {
+      source: Icon.Trash,
+      tintColor: Color.Red,
+    },
   });
 
   if (deleteConfirmation) {

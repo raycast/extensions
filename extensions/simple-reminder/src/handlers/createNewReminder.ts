@@ -1,6 +1,6 @@
 import { Reminder } from "../types/reminder";
 import { LocalStorage, showToast, Toast } from "@raycast/api";
-import { dateSortPredicate } from "./dateSortPredicate";
+import { dateSortPredicate } from "../utils/dateSortPredicate";
 import Style = Toast.Style;
 
 type CreateNewReminderProps = {
