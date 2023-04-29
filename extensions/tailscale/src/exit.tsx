@@ -61,7 +61,7 @@ function ExitNodeList() {
             ipv4: "",
             ipv6: "",
             os: "",
-            online: true,
+            online: false,
             lastseen: new Date(),
             exitnode: true,
             exitnodeoption: false,
