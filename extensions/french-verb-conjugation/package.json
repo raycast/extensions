@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "french-verb-conjugation",
   "title": "French Verb Conjugation",
-  "description": "",
+  "description": "Quickly conjugate french verbs on the fly",
   "icon": "french-conjugation.png",
   "author": "Joellee",
   "license": "MIT",
