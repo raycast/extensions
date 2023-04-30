@@ -4,7 +4,6 @@ import { ShowWatchTime } from "../interface/show-watch-time";
 import { load } from "cheerio";
 
 export async function getSuggestions(searchTerm: string): Promise<SearchResult[]> {
-  console.log("getSuggestions", searchTerm);
   const url = "https://www.bingeclock.com/call_search.php";
   const params = new URLSearchParams({
     sendSearch: "1",
@@ -20,7 +19,6 @@ export async function getSuggestions(searchTerm: string): Promise<SearchResult[]
 
   const response = await fetch(url, options);
   const html = await response.text();
-  console.log(html);
   const searchResults: SearchResult[] = [];
   const $ = load(html);
   $(".search_item").each((_, elem) => {
@@ -43,7 +41,6 @@ export async function getSuggestions(searchTerm: string): Promise<SearchResult[]
 }
 
 export async function getWatchTime(url: string): Promise<ShowWatchTime> {
-  console.log("getShowDetails", url);
   const response = await fetch(url);
   const html = await response.text();
   const $ = load(html);
