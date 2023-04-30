@@ -3,13 +3,13 @@ import {
   ActionPanel,
   Detail,
   Form,
+  getPreferenceValues,
   Icon,
   List,
   LocalStorage,
   showToast,
   Toast,
   useNavigation,
-  getPreferenceValues,
 } from "@raycast/api";
 import { FormValidation, useCachedState, useForm } from "@raycast/utils";
 import { useEffect, useState } from "react";
@@ -20,7 +20,7 @@ import * as Envelopes from "./envelopes";
 import * as Folders from "./folders";
 import * as Exec from "./exec";
 import "reflect-metadata";
-import { Type, serialize, deserializeArray } from "class-transformer";
+import { deserializeArray, serialize, Type } from "class-transformer";
 
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
@@ -177,7 +177,9 @@ async function hasExe(): Promise<boolean> {
   try {
     const cmd = "which himalaya";
     console.debug(`cmd: ${cmd}`);
-    const { stdout, stderr } = await Exec.run(cmd, { env: { PATH: Exec.PATH } });
+    const { stdout, stderr } = await Exec.run(cmd, {
+      env: { PATH: Exec.PATH },
+    });
 
     if (stdout) {
       return true;
@@ -210,9 +212,11 @@ function MoveToSelectedForm(props: { folders: Folder[]; envelope: Envelope; stat
       });
 
       try {
-        const cmd = `himalaya --account "${props.state.currentAccountName}" move ${values.folder} -- ${props.envelope.id}`;
+        const cmd = `himalaya --account "${props.state.currentAccountName}" --folder "${props.state.currentFolderName}" move ${values.folder} -- ${props.envelope.id}`;
         console.debug(`cmd: ${cmd}`);
-        const { stdout, stderr } = await Exec.run(cmd, { env: { PATH: Exec.PATH } });
+        const { stdout, stderr } = await Exec.run(cmd, {
+          env: { PATH: Exec.PATH },
+        });
 
         if (stdout) {
           toast.style = Toast.Style.Success;
@@ -270,7 +274,7 @@ function MoveToSelectedForm(props: { folders: Folder[]; envelope: Envelope; stat
   );
 }
 
-function ReadDetail(props: { envelope: Envelope; currentAccountName: string }) {
+function ReadDetail(props: { envelope: Envelope; currentAccountName: string; currentFolderName: string }) {
   const [state, setState] = useState<{ isLoading: boolean; email: null | string }>({
     isLoading: true,
     email: null,
@@ -283,7 +287,7 @@ function ReadDetail(props: { envelope: Envelope; currentAccountName: string }) {
         isLoading: true,
       }));
 
-      const email = await readEmail(props.envelope, props.currentAccountName);
+      const email = await readEmail(props.envelope, props.currentAccountName, props.currentFolderName);
 
       setState((previous) => ({
         ...previous,
@@ -323,8 +327,8 @@ function ReadDetail(props: { envelope: Envelope; currentAccountName: string }) {
   );
 }
 
-async function readEmail(envelope: Envelope, currentAccountName: string): Promise<string> {
-  const cmd = `himalaya --account "${currentAccountName}" read --mime-type plain ${envelope.id}`;
+async function readEmail(envelope: Envelope, currentAccountName: string, currentFolderName: string): Promise<string> {
+  const cmd = `himalaya --account "${currentAccountName}" --folder "${currentFolderName}" read --mime-type plain ${envelope.id}`;
   console.debug(`cmd: ${cmd}`);
   const { stdout, stderr } = await Exec.run(cmd, { env: { PATH: Exec.PATH } });
 
@@ -354,9 +358,11 @@ const markUnreadAction = (envelope: Envelope, state: State, setState: any) => {
         const index = state.envelopes.findIndex((cur) => cur.id === envelope.id);
 
         try {
-          const cmd = `himalaya --account "${state.currentAccountName}" flag remove ${envelope.id} -- seen`;
+          const cmd = `himalaya --account "${state.currentAccountName}" --folder "${state.currentFolderName}" flag remove ${envelope.id} -- seen`;
           console.debug(`cmd: ${cmd}`);
-          const { stdout, stderr } = await Exec.run(cmd, { env: { PATH: Exec.PATH } });
+          const { stdout, stderr } = await Exec.run(cmd, {
+            env: { PATH: Exec.PATH },
+          });
 
           if (stdout) {
             toast.style = Toast.Style.Success;
@@ -403,9 +409,11 @@ const markReadAction = (envelope: Envelope, state: State, setState: any) => {
         const index = state.envelopes.findIndex((cur) => cur.id === envelope.id);
 
         try {
-          const cmd = `himalaya --account "${state.currentAccountName}" flag add ${envelope.id} -- seen`;
+          const cmd = `himalaya --account "${state.currentAccountName}" --folder "${state.currentFolderName}" flag add ${envelope.id} -- seen`;
           console.debug(`cmd: ${cmd}`);
-          const { stdout, stderr } = await Exec.run(cmd, { env: { PATH: Exec.PATH } });
+          const { stdout, stderr } = await Exec.run(cmd, {
+            env: { PATH: Exec.PATH },
+          });
 
           if (stdout) {
             toast.style = Toast.Style.Success;
@@ -447,12 +455,14 @@ const moveToSelectedAction = (envelope: Envelope, state: State, setState: any) =
   );
 };
 
-const readAction = (envelope: Envelope, currentAccountName: string) => {
+const readAction = (envelope: Envelope, currentAccountName: string, currentFolderName: string) => {
   return (
     <Action.Push
       title="Read"
       icon={Icon.Eye}
-      target={<ReadDetail envelope={envelope} currentAccountName={currentAccountName} />}
+      target={
+        <ReadDetail envelope={envelope} currentAccountName={currentAccountName} currentFolderName={currentFolderName} />
+      }
     />
   );
 };
@@ -472,9 +482,11 @@ const moveToTrashAction = (envelope: Envelope, state: State, setState: any) => {
         const index = state.envelopes.findIndex((cur) => cur.id === envelope.id);
 
         try {
-          const cmd = `himalaya --account "${state.currentAccountName}" delete ${envelope.id}`;
+          const cmd = `himalaya --account "${state.currentAccountName}" --folder "${state.currentFolderName}" delete ${envelope.id}`;
           console.debug(`cmd: ${cmd}`);
-          const { stdout, stderr } = await Exec.run(cmd, { env: { PATH: Exec.PATH } });
+          const { stdout, stderr } = await Exec.run(cmd, {
+            env: { PATH: Exec.PATH },
+          });
 
           if (stdout) {
             toast.style = Toast.Style.Success;
@@ -562,7 +574,7 @@ const envelopesToList = (state: State, setState: any): any => {
           accessories={accessories(envelope)}
           actions={
             <ActionPanel title="Envelope">
-              {readAction(envelope, state.currentAccountName)}
+              {readAction(envelope, state.currentAccountName, state.currentFolderName)}
               {envelope.flags.includes(Flag.Seen) && markUnreadAction(envelope, state, setState)}
               {!envelope.flags.includes(Flag.Seen) && markReadAction(envelope, state, setState)}
               {moveToSelectedAction(envelope, state, setState)}
