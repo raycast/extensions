@@ -1,0 +1,61 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "qaw-commands",
+  "title": "QAW Commands",
+  "description": "Speed up working with QAW",
+  "icon": "qaw-icon-blue-round.png",
+  "author": "Lukep",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "removeTestFromAllWorkflows",
+      "title": "Remove Test From All Workflows",
+      "description": "Remove a test from all attached workflows",
+      "mode": "view"
+    },
+    {
+      "name": "duplicateEnvironment",
+      "title": "Duplicate Environment",
+      "description": "Duplicate an environment",
+      "mode": "view"
+    },
+    {
+      "name": "codeSearch",
+      "title": "Code Search",
+      "description": "Search Tests (LTM Only)",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "QAW_TOKEN",
+      "title": "QAW API Key",
+      "description": "API key for QAW",
+      "type": "password",
+      "required": true,
+      "placeholder": "Get yours from a network request in QAW"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.49.3",
+    "axios": "^1.3.6",
+    "date-fns": "^2.29.3",
+    "graphql-request": "^6.0.0",
+    "timers": "^0.1.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
