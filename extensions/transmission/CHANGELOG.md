@@ -1,5 +1,9 @@
 # Transmission Changelog
 
+## [Usability improvements] - 2023-04-30
+
+- Use the password type for a field storing a password.
+
 ## [Error Handling and Pieces Graph] - 2022-03-25
 
 - Torrents with an error state are now displayed with a different icon and have their error visible on the details panel;
