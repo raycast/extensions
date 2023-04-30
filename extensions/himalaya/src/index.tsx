@@ -22,7 +22,7 @@ import * as Exec from "./exec";
 import "reflect-metadata";
 import { Type, serialize, deserializeArray } from "class-transformer";
 
-export default function ListEnvelopes() {
+export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
 
   const [state, setState] = useCachedState<State>("index", {
@@ -35,7 +35,7 @@ export default function ListEnvelopes() {
   } as State);
 
   useEffect(() => {
-    async function fetch() {
+    (async () => {
       const rawEnvelopes = await LocalStorage.getItem<string>("envelopes");
 
       if (rawEnvelopes != undefined) {
@@ -65,13 +65,11 @@ export default function ListEnvelopes() {
           folders: folders,
         }));
       }
-    }
-
-    fetch();
+    })();
   }, []);
 
   useEffect(() => {
-    async function fetch() {
+    (async () => {
       setState((previous: State) => ({
         ...previous,
         isLoading: true,
@@ -99,9 +97,7 @@ export default function ListEnvelopes() {
           exe: exe,
         }));
       }
-    }
-
-    fetch();
+    })();
   }, []);
 
   const onFolderChange = async (newValue: string) => {
@@ -287,7 +283,7 @@ function ReadDetail(props: { envelope: Envelope; currentAccountName: string }) {
   });
 
   useEffect(() => {
-    async function fetch() {
+    (async () => {
       setState((previous) => ({
         ...previous,
         isLoading: true,
@@ -300,9 +296,7 @@ function ReadDetail(props: { envelope: Envelope; currentAccountName: string }) {
         isLoading: false,
         email: email,
       }));
-    }
-
-    fetch();
+    })();
   }, []);
 
   const markdown = state.email;
