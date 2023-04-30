@@ -13,7 +13,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "sspai rss",
+      "title": "Sspai Rss",
       "description": "Get The SSPAI RSS",
       "mode": "view"
     }
