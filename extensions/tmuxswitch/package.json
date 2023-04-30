@@ -1,0 +1,61 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "tmuxswitch",
+  "title": "Tmux Switch",
+  "description": "Integrate tmux with Raycast",
+  "icon": "tmux-icon.png",
+  "author": "NitroCao",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "List Windows",
+      "description": "List all windows in specific a specific client",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "tmuxPath",
+          "description": "The executable path of tmux",
+          "type": "textfield",
+          "required": false,
+          "title": "tmux path"
+        },
+        {
+          "name": "sessionName",
+          "description": "Session name where tmux locates in iTerm2",
+          "type": "textfield",
+          "required": false,
+          "title": "Session name where tmux locates in iTerm2"
+        },
+        {
+          "name": "socketPath",
+          "description": "Socket path of tmux",
+          "type": "textfield",
+          "required": true,
+          "title": "Socket path of tmux"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.50.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
