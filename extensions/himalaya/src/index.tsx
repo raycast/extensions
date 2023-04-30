@@ -175,11 +175,9 @@ const group_envelopes_by_date = (envelopes: Envelope[]) => {
 
 async function hasExe(): Promise<boolean> {
   try {
-    const { stdout, stderr } = await Exec.run("which himalaya", {
-      env: {
-        PATH: Exec.PATH,
-      },
-    });
+    const cmd = "which himalaya";
+    console.debug(`cmd: ${cmd}`);
+    const { stdout, stderr } = await Exec.run(cmd, { env: { PATH: Exec.PATH } });
 
     if (stdout) {
       return true;
@@ -212,14 +210,10 @@ function MoveToSelectedForm(props: { folders: Folder[]; envelope: Envelope; stat
       });
 
       try {
-        const { stdout, stderr } = await Exec.run(
-          `himalaya --account "${props.state.currentAccountName}" move ${values.folder} -- ${props.envelope.id}`,
-          {
-            env: {
-              PATH: Exec.PATH,
-            },
-          }
-        );
+        const cmd = `himalaya --account "${props.state.currentAccountName}" move ${values.folder} -- ${props.envelope.id}`;
+        console.debug(`cmd: ${cmd}`);
+        const { stdout, stderr } = await Exec.run(cmd, { env: { PATH: Exec.PATH } });
+
         if (stdout) {
           toast.style = Toast.Style.Success;
           toast.title = `Moved envelope to folder ${values.folder}`;
@@ -330,14 +324,9 @@ function ReadDetail(props: { envelope: Envelope; currentAccountName: string }) {
 }
 
 async function readEmail(envelope: Envelope, currentAccountName: string): Promise<string> {
-  const { stdout, stderr } = await Exec.run(
-    `himalaya --account "${currentAccountName}" read --mime-type plain ${envelope.id}`,
-    {
-      env: {
-        PATH: Exec.PATH,
-      },
-    }
-  );
+  const cmd = `himalaya --account "${currentAccountName}" read --mime-type plain ${envelope.id}`;
+  console.debug(`cmd: ${cmd}`);
+  const { stdout, stderr } = await Exec.run(cmd, { env: { PATH: Exec.PATH } });
 
   if (stdout) {
     return stdout;
@@ -365,14 +354,9 @@ const markUnreadAction = (envelope: Envelope, state: State, setState: any) => {
         const index = state.envelopes.findIndex((cur) => cur.id === envelope.id);
 
         try {
-          const { stdout, stderr } = await Exec.run(
-            `himalaya --account "${state.currentAccountName}" flag remove ${envelope.id} -- seen`,
-            {
-              env: {
-                PATH: Exec.PATH,
-              },
-            }
-          );
+          const cmd = `himalaya --account "${state.currentAccountName}" flag remove ${envelope.id} -- seen`;
+          console.debug(`cmd: ${cmd}`);
+          const { stdout, stderr } = await Exec.run(cmd, { env: { PATH: Exec.PATH } });
 
           if (stdout) {
             toast.style = Toast.Style.Success;
@@ -419,14 +403,9 @@ const markReadAction = (envelope: Envelope, state: State, setState: any) => {
         const index = state.envelopes.findIndex((cur) => cur.id === envelope.id);
 
         try {
-          const { stdout, stderr } = await Exec.run(
-            `himalaya --account "${state.currentAccountName}" flag add ${envelope.id} -- seen`,
-            {
-              env: {
-                PATH: Exec.PATH,
-              },
-            }
-          );
+          const cmd = `himalaya --account "${state.currentAccountName}" flag add ${envelope.id} -- seen`;
+          console.debug(`cmd: ${cmd}`);
+          const { stdout, stderr } = await Exec.run(cmd, { env: { PATH: Exec.PATH } });
 
           if (stdout) {
             toast.style = Toast.Style.Success;
@@ -493,14 +472,9 @@ const moveToTrashAction = (envelope: Envelope, state: State, setState: any) => {
         const index = state.envelopes.findIndex((cur) => cur.id === envelope.id);
 
         try {
-          const { stdout, stderr } = await Exec.run(
-            `himalaya --account "${state.currentAccountName}" delete ${envelope.id}`,
-            {
-              env: {
-                PATH: Exec.PATH,
-              },
-            }
-          );
+          const cmd = `himalaya --account "${state.currentAccountName}" delete ${envelope.id}`;
+          console.debug(`cmd: ${cmd}`);
+          const { stdout, stderr } = await Exec.run(cmd, { env: { PATH: Exec.PATH } });
 
           if (stdout) {
             toast.style = Toast.Style.Success;
