@@ -165,7 +165,7 @@ function FileBrowser({ parent_file_id }: { parent_file_id: number }) {
                         icon={Icon.Download}
                         shortcut={{ modifiers: ["cmd", "shift"], key: "1" }}
                         onAction={() => {
-                          if (preferences.actionTitle1 == "") {
+                          if (preferences.actionTitle1 === null) {
                             openExtensionPreferences();
                           } else {
                             doFileAction(preferences.actionCommand1, fileUrl);
@@ -179,7 +179,7 @@ function FileBrowser({ parent_file_id }: { parent_file_id: number }) {
                         icon={Icon.Download}
                         shortcut={{ modifiers: ["cmd", "shift"], key: "2" }}
                         onAction={() => {
-                          if (preferences.actionTitle2 == "") {
+                          if (preferences.actionTitle2 === null) {
                             openExtensionPreferences();
                           } else {
                             doFileAction(preferences.actionCommand2, fileUrl);
@@ -209,11 +209,11 @@ function FileBrowser({ parent_file_id }: { parent_file_id: number }) {
               {fileUrl && <Action.OpenInBrowser url={fileUrl} />}
               {fileUrl && (
                 <Action
-                  title={preferences.actionTitle1 === null ? preferences.actionTitle1 : "(Configure Custom Action #1)"}
+                  title={preferences.actionTitle1 ? preferences.actionTitle1 : "(Configure Custom Action #1)"}
                   icon={Icon.Download}
                   shortcut={{ modifiers: ["cmd", "shift"], key: "1" }}
                   onAction={() => {
-                    if (preferences.actionTitle1 == "") {
+                    if (preferences.actionTitle1 === null) {
                       openExtensionPreferences();
                     } else {
                       doFileAction(preferences.actionCommand1, fileUrl);
@@ -223,11 +223,11 @@ function FileBrowser({ parent_file_id }: { parent_file_id: number }) {
               )}
               {fileUrl && (
                 <Action
-                  title={preferences.actionTitle2 === null ? preferences.actionTitle2 : "(Configure Custom Action #2)"}
+                  title={preferences.actionTitle2 ? preferences.actionTitle2 : "(Configure Custom Action #2)"}
                   icon={Icon.Download}
                   shortcut={{ modifiers: ["cmd", "shift"], key: "2" }}
                   onAction={() => {
-                    if (preferences.actionTitle2 == "") {
+                    if (preferences.actionTitle2 === null) {
                       openExtensionPreferences();
                     } else {
                       doFileAction(preferences.actionCommand2, fileUrl);
