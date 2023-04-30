@@ -1,4 +1,4 @@
-import { Alert, showToast, Toast, Form, ActionPanel, Action, confirmAlert} from "@raycast/api";
+import { Alert, showToast, Toast, Form, ActionPanel, Action, confirmAlert, Icon} from "@raycast/api";
 /// <reference path="./index.d.ts" />
 import * as qawolf from "../qawolf/index.js";
 import { useState, useEffect } from "react";
@@ -44,7 +44,7 @@ export default function Command() {
       title: "Are you sure?",
       message: "Test will effectivly be deleted.",
       primaryAction: {
-        title: "Remove Test",
+        title: "Delete Test",
         style: Alert.ActionStyle.Destructive,
       }
     })
@@ -74,7 +74,7 @@ export default function Command() {
         isLoading={isLoading}
         actions={
           <ActionPanel>
-            <Action.SubmitForm title="Remove from WFs" onSubmit={handleSubmit} />
+            <Action.SubmitForm title="Remove from WFs" icon={Icon.XMarkCircleFilled} onSubmit={handleSubmit} />
           </ActionPanel>
         }
       >

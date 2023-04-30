@@ -97,7 +97,8 @@ export default function Command() {
                     actions={
                       <ActionPanel title="Test Actions">
                           <Action.Push
-                            title="View Full Code"
+                            title="Preview Code"
+                            icon={Icon.Eye}
                             target={
                               <Detail
                                 markdown={
@@ -144,7 +145,7 @@ export default function Command() {
         enableDrafts={false}
         actions={
           <ActionPanel>
-            <Action.SubmitForm title="Submit Action" onSubmit={handleSubmit} />
+            <Action.SubmitForm title="Search Tests" icon={Icon.MagnifyingGlass} onSubmit={handleSubmit} />
           </ActionPanel>
         }>
           
