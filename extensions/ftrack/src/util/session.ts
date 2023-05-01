@@ -5,9 +5,6 @@ import { Preferences } from "../types";
 
 const preferences = getPreferenceValues<Preferences>();
 
-export const session = new Session(
-  preferences.ftrackServerUrl,
-  preferences.ftrackApiUser,
-  preferences.ftrackApiKey,
-  { strictApi: true }
-);
+export const session = new Session(preferences.ftrackServerUrl, preferences.ftrackApiUser, preferences.ftrackApiKey, {
+  strictApi: true,
+});

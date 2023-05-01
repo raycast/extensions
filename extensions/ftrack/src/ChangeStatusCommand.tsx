@@ -1,13 +1,5 @@
 // :copyright: Copyright (c) 2023 ftrack
-import {
-  ActionPanel,
-  Action,
-  Icon,
-  showToast,
-  Toast,
-  useNavigation,
-  List,
-} from "@raycast/api";
+import { ActionPanel, Action, Icon, showToast, Toast, useNavigation, List } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { buildExpression } from "./util/buildExpression";
 import { operation, QueryResponse } from "@ftrack/api";
@@ -15,13 +7,7 @@ import { updateEntity } from "./util/updateEntity";
 import { Status } from "./types";
 import { session } from "./util/session";
 
-async function getStatusOptions({
-  entityType,
-  entityId,
-}: {
-  entityType: string;
-  entityId: string;
-}) {
+async function getStatusOptions({ entityType, entityId }: { entityType: string; entityId: string }) {
   const statusQuery = buildExpression({
     entityType: "Status",
     projection: ["id", "name", "sort", "color"],
@@ -35,17 +21,15 @@ async function getStatusOptions({
     limit: 1,
   });
 
-  const [statusResponse, entityResponse] = await session.call<
-    [QueryResponse<Status>, QueryResponse]
-  >([operation.query(statusQuery), operation.query(entityQuery)], {
-    decodeDatesAsIso: true,
-  });
-
-  const allowedStatusIds =
-    entityResponse.data[0].__permissions.status_id.__options;
-  const validStatuses = statusResponse.data.filter((status) =>
-    allowedStatusIds.includes(status.id)
+  const [statusResponse, entityResponse] = await session.call<[QueryResponse<Status>, QueryResponse]>(
+    [operation.query(statusQuery), operation.query(entityQuery)],
+    {
+      decodeDatesAsIso: true,
+    }
   );
+
+  const allowedStatusIds = entityResponse.data[0].__permissions.status_id.__options;
+  const validStatuses = statusResponse.data.filter((status) => allowedStatusIds.includes(status.id));
   const defaultValue = entityResponse.data[0].status_id as string;
 
   return {
@@ -63,9 +47,7 @@ export default function ChangeStatusCommand({
   entityId: string;
   onStatusChanged?: () => void;
 }) {
-  const { data, isLoading, mutate } = usePromise(getStatusOptions, [
-    { entityType, entityId },
-  ]);
+  const { data, isLoading, mutate } = usePromise(getStatusOptions, [{ entityType, entityId }]);
   const { pop } = useNavigation();
 
   const mutateEntity = async (values: { status_id: string }) => {
@@ -93,8 +75,7 @@ export default function ChangeStatusCommand({
           key={status.id}
           title={status.name}
           icon={{
-            source:
-              status.id === data.defaultValue ? Icon.CheckCircle : Icon.Circle,
+            source: status.id === data.defaultValue ? Icon.CheckCircle : Icon.Circle,
             tintColor: status.color,
           }}
           actions={

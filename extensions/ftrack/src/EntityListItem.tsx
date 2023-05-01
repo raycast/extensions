@@ -1,12 +1,4 @@
-import {
-  Color,
-  List,
-  Image,
-  ActionPanel,
-  Action,
-  getPreferenceValues,
-  Icon,
-} from "@raycast/api";
+import { Color, List, Image, ActionPanel, Action, getPreferenceValues, Icon } from "@raycast/api";
 import slugify from "slugify";
 import ChangeStatusCommand from "./ChangeStatusCommand";
 import SearchEntitiesCommand from "./search_entities";
@@ -55,12 +47,7 @@ interface EntityListItemProps<EntityType = any> {
   revalidate: () => void;
 }
 
-export function EntityListItem({
-  entity,
-  configuration,
-  revalidate,
-  ...props
-}: EntityListItemProps) {
+export function EntityListItem({ entity, configuration, revalidate, ...props }: EntityListItemProps) {
   return (
     <List.Item
       title={configuration.title(entity)}
@@ -86,24 +73,13 @@ interface EntityListItemConfiguration<EntityType = SearchableEntity> {
   subtitle?: (entity: EntityType) => List.Item.Props["subtitle"];
   thumbnail?: (entity: EntityType) => Image.Source;
   accessories?: (entity: EntityType) => List.Item.Props["accessories"];
-  actions?: (
-    entity: EntityType,
-    { revalidate }: { revalidate: () => void }
-  ) => List.Item.Props["actions"];
+  actions?: (entity: EntityType, { revalidate }: { revalidate: () => void }) => List.Item.Props["actions"];
 }
 
 export const configuration = {
   AssetVersion: {
     namePlural: "versions",
-    projection: [
-      "id",
-      "asset.name",
-      "link",
-      "version",
-      "thumbnail_url",
-      "status.name",
-      "status.color",
-    ],
+    projection: ["id", "asset.name", "link", "version", "thumbnail_url", "status.name", "status.color"],
     order: "asset.name, version desc",
     title: (entity) => `${entity.asset?.name} - v${entity.version}`,
     subtitle: (entity) =>
@@ -112,9 +88,7 @@ export const configuration = {
         .map((item) => item.name)
         .join("/"),
     thumbnail: (entity) => entity.thumbnail_url.value,
-    accessories: (entity) => [
-      { tag: { value: entity.status.name, color: entity.status.color } },
-    ],
+    accessories: (entity) => [{ tag: { value: entity.status.name, color: entity.status.color } }],
     actions: (entity, { revalidate }) => (
       <ActionPanel>
         <Action.OpenInBrowser
@@ -129,13 +103,7 @@ export const configuration = {
         <Action.Push
           title="Change Status"
           icon={Icon.ArrowRightCircle}
-          target={
-            <ChangeStatusCommand
-              entityType="AssetVersion"
-              entityId={entity.id}
-              onStatusChanged={revalidate}
-            />
-          }
+          target={<ChangeStatusCommand entityType="AssetVersion" entityId={entity.id} onStatusChanged={revalidate} />}
           shortcut={{ modifiers: ["cmd"], key: "s" }}
         />
         <Action.CopyToClipboard
@@ -148,14 +116,7 @@ export const configuration = {
   } as EntityListItemConfiguration<AssetVersionEntity>,
   Project: {
     namePlural: "projects",
-    projection: [
-      "id",
-      "full_name",
-      "thumbnail_url",
-      "status",
-      "project_schema.name",
-      "end_date",
-    ],
+    projection: ["id", "full_name", "thumbnail_url", "status", "project_schema.name", "end_date"],
     order: "full_name",
     title: (entity) => entity.full_name,
     subtitle: (entity) => entity.project_schema.name,
@@ -278,14 +239,7 @@ export const configuration = {
   } as EntityListItemConfiguration<ReviewSessionEntity>,
   List: {
     namePlural: "lists",
-    projection: [
-      "id",
-      "name",
-      "is_open",
-      "project.thumbnail_url",
-      "project.full_name",
-      "category.name",
-    ],
+    projection: ["id", "name", "is_open", "project.thumbnail_url", "project.full_name", "category.name"],
     order: "project.full_name, category.name, name",
     title: (entity) => entity.name,
     subtitle: (entity) => entity.category.name,
@@ -343,20 +297,14 @@ export const configuration = {
     accessories: (entity) => [
       {
         tag: {
-          value: entity.object_type.is_typeable
-            ? entity.type.name
-            : entity.object_type.name,
+          value: entity.object_type.is_typeable ? entity.type.name : entity.object_type.name,
           color: entity.object_type.is_typeable ? entity.type.color : null,
         },
       },
       {
         tag: {
-          value: entity.object_type.is_prioritizable
-            ? entity.priority.name
-            : null,
-          color: entity.object_type.is_prioritizable
-            ? entity.priority.color
-            : null,
+          value: entity.object_type.is_prioritizable ? entity.priority.name : null,
+          color: entity.object_type.is_prioritizable ? entity.priority.color : null,
         },
       },
       {
@@ -384,13 +332,7 @@ export const configuration = {
           <Action.Push
             title="Change Status"
             icon={Icon.ArrowRightCircle}
-            target={
-              <ChangeStatusCommand
-                entityType="TypedContext"
-                entityId={entity.id}
-                onStatusChanged={revalidate}
-              />
-            }
+            target={<ChangeStatusCommand entityType="TypedContext" entityId={entity.id} onStatusChanged={revalidate} />}
             shortcut={{ modifiers: ["cmd"], key: "s" }}
           />
         ) : null}
