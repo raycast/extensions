@@ -20,7 +20,7 @@ export default function WindowItem({
       actions={
         <ActionPanel>
           <Action
-            title="switch to window"
+            title="Switch to Window"
             onAction={() => {
               closeMainWindow({ clearRootSearch: true });
               tmux.switch_client(win_id);
