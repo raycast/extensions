@@ -22,8 +22,8 @@
       "name": "key",
       "title": "Access Key",
       "description": "Your access key",
-      "type": "textfield",
-      "placeholder": "x x x x x x",
+      "type": "password",
+      "placeholder": "xxxxxx",
       "required": true
     }
   ],
