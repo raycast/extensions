@@ -67,7 +67,7 @@ function ExitNodeList() {
           title="Turn off exit node"
           actions={
             <ActionPanel>
-              <Action title="Turn Off Exit Node" onAction={() => setExitNode("", false)} />
+              <Action title="Turn off Exit Node" onAction={() => setExitNode("", false)} />
             </ActionPanel>
           }
         />
