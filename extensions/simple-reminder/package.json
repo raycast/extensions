@@ -32,6 +32,24 @@
       "interval": "1m"
     }
   ],
+  "preferences": [
+    {
+      "name": "mobileNotificationNtfy",
+      "description": "With this option turned on, you will receive notifications (through ntfy) in your mobile phone when a reminder time is up",
+      "type": "checkbox",
+      "default": false,
+      "required": false,
+      "label": "Mobile notifications with ntfy"
+    },
+    {
+      "name": "mobileNotificationNtfyTopic",
+      "description": "Specify the topic you want to receive notifications in. Be precise e.g. simple_reminder_david_alecrim",
+      "type": "textfield",
+      "default": "",
+      "required": false,
+      "title": "ntfy topic"
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.49.3",
     "@raycast/utils": "^1.5.2",
