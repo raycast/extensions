@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Form, ActionPanel, Action, showToast, Toast } from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, Toast, Icon, Clipboard } from "@raycast/api";
 import { TextlintKernel, TextlintKernelOptions } from "@textlint/kernel";
 import * as pluginMarkdown from "@textlint/textlint-plugin-markdown";
 import * as awsRule from "textlint-rule-aws-service-name";
@@ -13,34 +13,57 @@ export default function Command() {
   const [fixed, setFixed] = useState<string>("");
 
   async function runTextLint(values: Values) {
+    if (values.input === "") {
+      showToast(Toast.Style.Failure, "Input text is required");
+      return;
+    }
+
     const kernel = new TextlintKernel();
     const options = getOptions();
     const result = await kernel.lintText(values.input, options);
     const messages = result.messages.map((message) => {
       return `${message.message}`;
     });
-    if (messages.length === 0) {
-      showToast(Toast.Style.Success, "Check Result", "Input text is valid");
-    }
+
     const lintResult = messages.join("\n");
     setLintResult(lintResult);
     const fixedResult = await kernel.fixText(values.input, options);
     const fixed = fixedResult.output;
     setFixed(fixed);
+    await Clipboard.copy(fixed);
+    await showToast(Toast.Style.Success, "Copied to clipboard");
   }
 
   return (
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm onSubmit={runTextLint} />
+          <Action.SubmitForm onSubmit={runTextLint} title="Submit and Copy Result" icon={Icon.Wand} />
         </ActionPanel>
       }
     >
       <Form.TextArea id="input" title="Input" placeholder="Please enter the text you wish to check" />
-      <Form.Separator />
-      <Form.TextArea id="fixed" title="Fixed Result" value={fixed} />
-      <Form.TextArea id="lintResult" title="Check Result" value={lintResult} />
+      {fixed && (
+        <>
+          <Form.Separator />
+          <Form.TextArea
+            id="lintResult"
+            onChange={(e) => {
+              console.log(e);
+            }}
+            title="Check Result"
+            value={lintResult}
+          />
+          <Form.TextArea
+            id="fixed"
+            title="Copied Result"
+            onChange={(e) => {
+              console.log(e);
+            }}
+            value={fixed}
+          />
+        </>
+      )}
     </Form>
   );
 }
