@@ -12,9 +12,9 @@
   "commands": [
     {
       "name": "md-to-excel",
-      "title": "md-to-excel",
-      "subtitle": "Convert md format table to Excel compatible table.",
-      "description": "Convert md format table to Excel compatible table.",
+      "title": "Markdown Table to Excel",
+      "subtitle": "Convert markdown table to Excel compatible table.",
+      "description": "Convert markdown table to Excel compatible table.",
       "mode": "view"
     }
   ],
