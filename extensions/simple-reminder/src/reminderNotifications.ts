@@ -1,6 +1,6 @@
 import { getPreferenceValues, LocalStorage, updateCommandMetadata } from "@raycast/api";
-import { Reminder } from "./types/reminder";
 import { runAppleScript } from "run-applescript";
+import { Reminder } from "./types/reminder";
 import { sendPushNotificationWithNtfy } from "./utils/sendPushNotificationWithNtfy";
 
 interface Preferences {
