@@ -49,8 +49,8 @@ export function SearchMyMergeRequests(): JSX.Element {
       throttle
       searchBarAccessory={
         <List.Dropdown tooltip="Scope" onChange={setScope}>
-          <List.Dropdown.Item title="Created By Me" value={MRScope.created_by_me} />
-          <List.Dropdown.Item title="Assigned To Me" value={MRScope.assigned_to_me} />
+          <List.Dropdown.Item title="Created by Me" value={MRScope.created_by_me} />
+          <List.Dropdown.Item title="Assigned to Me" value={MRScope.assigned_to_me} />
           <List.Dropdown.Item title="All" value={MRScope.all} />
         </List.Dropdown>
       }
