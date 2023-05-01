@@ -22,15 +22,15 @@ export const setWallpaper = async ({ url, id, every, useHud = false, isBackgroun
 
   let toast;
 
-  if (existsSync(selectedPath)) {
-    if (isBackground) return;
-    toast = await displayMessage("Downloading and setting wallpaper...", useHud ? "hud" : "toast");
-  } else {
-    if (isBackground) return;
-    toast = await displayMessage(
-      "The selected path does not exist. Please select a valid path.",
-      useHud ? "hud" : "toast"
-    );
+  if (!isBackground) {
+    if (existsSync(selectedPath)) {
+      toast = await displayMessage("Downloading and setting wallpaper...", useHud ? "hud" : "toast");
+    } else {
+      toast = await displayMessage(
+        "The selected path does not exist. Please select a valid path.",
+        useHud ? "hud" : "toast"
+      );
+    }
   }
 
   const fixedPathName = selectedPath.endsWith("/")
