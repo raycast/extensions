@@ -1,3 +1,3 @@
 # md-to-excel
 
-Convert MD format table to Excel compatible table.
+Convert Markdown table to Excel compatible table.
