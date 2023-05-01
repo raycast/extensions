@@ -58,6 +58,7 @@
 /extensions/bear                                     @hmarr @lucaschultz @diokhan @ron-myers
 /extensions/beat-per-minute                          @pernielsentikaer
 /extensions/beeminder                                @vivgui
+/extensions/berlin-public-transportation             @arjanski
 /extensions/better-uptime                            @andreaselia
 /extensions/betterdiscord-search                     @TheCommieAxolotl
 /extensions/bettertouchtool                          @dnnsmnstrr
@@ -506,6 +507,7 @@
 /extensions/matter                                   @cernezan
 /extensions/maven-central-repository                 @koinzhang
 /extensions/mayar                                    @moerdowo
+/extensions/md-to-excel                              @victor-defi
 /extensions/mem                                      @brianfakhoury
 /extensions/meme-generator                           @timoransky
 /extensions/memo                                     @mt40
@@ -732,6 +734,7 @@
 /extensions/scrcpy                                   @zcfan
 /extensions/screen-saver                             @koinzhang
 /extensions/screen-sharing-recents                   @m-hall
+/extensions/screenocr                                @joshauh46
 /extensions/screenshot                               @Aayush9029
 /extensions/script-commands                          @unnamedd
 /extensions/script-kit                               @pomdtr
@@ -893,7 +896,7 @@
 /extensions/vercast                                  @MaxLeiter @gleich @dgrcode
 /extensions/vim-bro                                  @ajaypremshankar
 /extensions/visual-studio-code-project-manager       @MarkusLanger @GastroGeek @4very @theherk @TobiasYin @yossizahn
-/extensions/visual-studio-code-recent-projects       @thomaspaulmann @iainsimmons @macbookandrew @cy-98 @immint023 @pernielsentikaer @elijah-scott
+/extensions/visual-studio-code-recent-projects       @thomaspaulmann @iainsimmons @macbookandrew @cy-98 @immint023 @pernielsentikaer @elijah-scott @vimtor
 /extensions/vivaldi                                  @crisboarna
 /extensions/vocab-search                             @DATADEER @pernielsentikaer
 /extensions/vuejs-documentation                      @Dpblandin
@@ -908,6 +911,7 @@
 /extensions/websocket-debugging                      @RhysLees
 /extensions/wechat                                   @raffeyang
 /extensions/whatsapp                                 @vimtor
+/extensions/whois                                    @zavbala
 /extensions/whosampled                               @ajtruex @pernielsentikaer
 /extensions/wi-fi                                    @koinzhang
 /extensions/wifi-password-reveal                     @louishuyng
