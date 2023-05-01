@@ -1,5 +1,10 @@
 # Simple Reminder Changelog
 
+## [Mobile notifications with ntfy] - 2023-05-02
+
+- Add preferences to let the user be notified in their mobile device through ntfy
+- Refactor code so that the reminders trigger a mobile notification if defined in the user preferences
+
 ## [Copy remind action] - 2023-04-28
 
 - Add "Copy to Clipboard" action for the reminders
