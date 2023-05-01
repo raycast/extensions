@@ -65,16 +65,9 @@ function ExitNodeList() {
         <List.Item
           key="_disable"
           title="Turn off exit node"
-          icon={{
-            source: {
-              light: "disconnected_light.png",
-              dark: "disconnected_dark.png",
-            },
-            mask: Image.Mask.Circle,
-          }}
           actions={
             <ActionPanel>
-              <Action title="Turn off exit node" onAction={() => setExitNode("", false)} />
+              <Action title="Turn Off Exit Node" onAction={() => setExitNode("", false)} />
             </ActionPanel>
           }
         />
