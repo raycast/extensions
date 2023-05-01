@@ -149,6 +149,9 @@ export default function ListView(props: { listId: string }) {
     if (state.filter === Filter.Open) {
       return state.tasks.filter((task) => !isCompleted(task));
     }
+    if (state.filter === Filter.Completed) {
+      return state.tasks.filter((task) => isCompleted(task));
+    }
     return state.tasks;
   }, [state.tasks, state.filter]);
 
