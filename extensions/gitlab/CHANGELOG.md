@@ -1,5 +1,10 @@
 # GitLab Changelog
 
+## [Search Scope] - 2023-04-27
+
+- Add scope dropdown for `Search Issues` and `Search Merge Requests`
+- Add possibility to search for named parameters in `Search Issues` and `Search Merge Requests`.
+
 ## [Remove Branch] - 2023-04-17
 
 - Add checkbox `Delete source branch` for a new MR (default state of project is respected)

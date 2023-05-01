@@ -1,48 +1,24 @@
-import { Action, ActionPanel, Detail, Form, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Detail,
+  Form,
+  Icon,
+  List,
+  LocalStorage,
+  showToast,
+  Toast,
+  useNavigation,
+} from "@raycast/api";
 import { FormValidation, useCachedState, useForm } from "@raycast/utils";
 import { useEffect, useState } from "react";
-import child_process = require("node:child_process");
-import util = require("node:util");
-
-const exec: any = util.promisify(child_process.exec);
-
-const PATH = "/usr/bin:/bin:/usr/sbin:/opt/homebrew/bin:/opt/homebrew/sbin";
-
-enum Flag {
-  Seen = "Seen",
-  Answered = "Answered",
-  Flagged = "Flagged",
-  Deleted = "Deleted",
-  Draft = "Draft",
-  Recent = "Recent",
-  // TODO Custom
-}
-
-interface Envelope {
-  id: string;
-  internal_id: string;
-  message_id: string;
-  flags: Flag[];
-  from: {
-    name: string;
-    addr: string;
-  };
-  subject: string;
-  date: Date;
-}
-
-interface Folder {
-  delim: string;
-  name: string;
-  desc: string;
-}
-
-interface State {
-  isLoading: boolean;
-  envelopes: Envelope[];
-  folders: Folder[];
-  exe: boolean;
-}
+import { State } from "./state";
+import { Envelope, Flag, Folder } from "./models";
+import * as Envelopes from "./envelopes";
+import * as Folders from "./folders";
+import * as Exec from "./exec";
+import "reflect-metadata";
+import { Type, serialize, deserializeArray } from "class-transformer";
 
 export default function ListEnvelopes() {
   const [state, setState] = useCachedState<State>("index", {
@@ -54,6 +30,42 @@ export default function ListEnvelopes() {
 
   useEffect(() => {
     async function fetch() {
+      const rawEnvelopes = await LocalStorage.getItem<string>("envelopes");
+
+      if (rawEnvelopes != undefined) {
+        console.debug("Found envelopes in cache");
+
+        await LocalStorage.removeItem("envelopes");
+
+        const envelopes: Envelope[] = deserializeArray(Envelope, rawEnvelopes);
+
+        setState((previous: State) => ({
+          ...previous,
+          envelopes: envelopes,
+        }));
+      }
+
+      const rawFolders = await LocalStorage.getItem<string>("folders");
+
+      if (rawFolders != undefined) {
+        console.debug("Found folders in cache");
+
+        await LocalStorage.removeItem("folders");
+
+        const folders: Folder[] = deserializeArray(Folder, rawFolders);
+
+        setState((previous: State) => ({
+          ...previous,
+          folders: folders,
+        }));
+      }
+    }
+
+    fetch();
+  }, []);
+
+  useEffect(() => {
+    async function fetch() {
       setState((previous: State) => ({
         ...previous,
         isLoading: true,
@@ -62,8 +74,8 @@ export default function ListEnvelopes() {
       const exe = await hasExe();
 
       if (exe) {
-        const envelopes = await listEnvelopes();
-        const folders = await listFolders();
+        const envelopes = await Envelopes.list();
+        const folders = await Folders.list();
 
         setState((previous: State) => ({
           ...previous,
@@ -130,9 +142,9 @@ const group_envelopes_by_date = (envelopes: Envelope[]) => {
 
 async function hasExe(): Promise<boolean> {
   try {
-    const { stdout, stderr } = await exec("which himalaya", {
+    const { stdout, stderr } = await Exec.run("which himalaya", {
       env: {
-        PATH: PATH,
+        PATH: Exec.PATH,
       },
     });
 
@@ -152,73 +164,6 @@ async function hasExe(): Promise<boolean> {
   }
 }
 
-async function listEnvelopes(): Promise<Envelope[]> {
-  const { stdout, stderr } = await exec('"himalaya" -o json list -s 100', {
-    env: {
-      PATH: PATH,
-    },
-  });
-
-  if (stdout) {
-    const results = JSON.parse(stdout);
-
-    const envelopes: Envelope[] = results.map((result: any) => {
-      const envelope: Envelope = {
-        id: result.id,
-        internal_id: result.internal_id,
-        message_id: result.message_id,
-        flags: result.flags.map((flag: string) => flag as Flag),
-        from: {
-          name: result.from.name,
-          addr: result.from.addr,
-        },
-        subject: result.subject,
-        date: new Date(result.date),
-      };
-
-      return envelope;
-    });
-
-    return envelopes;
-  } else if (stderr) {
-    console.error(stderr);
-
-    return [];
-  } else {
-    throw new Error("No results from stdout or stderr");
-  }
-}
-
-async function listFolders(): Promise<Folder[]> {
-  const { stdout, stderr } = await exec('"himalaya" -o json folder list', {
-    env: {
-      PATH: PATH,
-    },
-  });
-
-  if (stdout) {
-    const results = JSON.parse(stdout);
-
-    const folders: Folder[] = results.map((result: any) => {
-      const folder: Folder = {
-        delim: result.delim,
-        name: result.name,
-        desc: result.desc,
-      };
-
-      return folder;
-    });
-
-    return folders;
-  } else if (stderr) {
-    console.error(stderr);
-
-    return [];
-  } else {
-    throw new Error("No results from stdout or stderr");
-  }
-}
-
 interface MoveToSelectedFormValues {
   folder: string;
 }
@@ -234,9 +179,9 @@ function MoveToSelectedForm(props: { folders: Folder[]; envelope: Envelope; setS
       });
 
       try {
-        const { stdout, stderr } = await exec(`"himalaya" move ${values.folder} -- ${props.envelope.id}`, {
+        const { stdout, stderr } = await Exec.run(`"himalaya" move ${values.folder} -- ${props.envelope.id}`, {
           env: {
-            PATH: PATH,
+            PATH: Exec.PATH,
           },
         });
         if (stdout) {
@@ -247,7 +192,8 @@ function MoveToSelectedForm(props: { folders: Folder[]; envelope: Envelope; setS
             ...previous,
             isLoading: true,
           }));
-          const envelopes = await listEnvelopes();
+          const envelopes = await Envelopes.list();
+
           props.setState((previous: State) => ({
             ...previous,
             envelopes: envelopes,
@@ -295,7 +241,7 @@ function MoveToSelectedForm(props: { folders: Folder[]; envelope: Envelope; setS
 }
 
 function ReadDetail(props: { envelope: Envelope }) {
-  const [state, setState] = useState({
+  const [state, setState] = useState<{ isLoading: boolean; email: null | string }>({
     isLoading: true,
     email: null,
   });
@@ -349,10 +295,10 @@ function ReadDetail(props: { envelope: Envelope }) {
   );
 }
 
-async function readEmail(envelope: Envelope): Promise<any> {
-  const { stdout, stderr } = await exec(`"himalaya" read --mime-type plain ${envelope.id}`, {
+async function readEmail(envelope: Envelope): Promise<string> {
+  const { stdout, stderr } = await Exec.run(`"himalaya" read --mime-type plain ${envelope.id}`, {
     env: {
-      PATH: PATH,
+      PATH: Exec.PATH,
     },
   });
 
@@ -380,9 +326,9 @@ const markUnreadAction = (envelope: Envelope, state: State, setState: any) => {
         });
 
         try {
-          const { stdout, stderr } = await exec(`"himalaya" flag remove ${envelope.id} -- seen`, {
+          const { stdout, stderr } = await Exec.run(`"himalaya" flag remove ${envelope.id} -- seen`, {
             env: {
-              PATH: PATH,
+              PATH: Exec.PATH,
             },
           });
 
@@ -391,7 +337,8 @@ const markUnreadAction = (envelope: Envelope, state: State, setState: any) => {
             toast.title = "Marked unread";
 
             setState((previous: State) => ({ ...previous, isLoading: true }));
-            const envelopes = await listEnvelopes();
+            const envelopes = await Envelopes.list();
+
             setState((previous: State) => ({
               ...previous,
               envelopes: envelopes,
@@ -429,9 +376,9 @@ const markReadAction = (envelope: Envelope, state: State, setState: any) => {
         });
 
         try {
-          const { stdout, stderr } = await exec(`"himalaya" flag add ${envelope.id} -- seen`, {
+          const { stdout, stderr } = await Exec.run(`"himalaya" flag add ${envelope.id} -- seen`, {
             env: {
-              PATH: PATH,
+              PATH: Exec.PATH,
             },
           });
 
@@ -440,7 +387,8 @@ const markReadAction = (envelope: Envelope, state: State, setState: any) => {
             toast.title = "Marked read";
 
             setState((previous: State) => ({ ...previous, isLoading: true }));
-            const envelopes = await listEnvelopes();
+            const envelopes = await Envelopes.list();
+
             setState((previous: State) => ({
               ...previous,
               envelopes: envelopes,
@@ -475,7 +423,7 @@ const moveToSelectedAction = (envelope: Envelope, state: State, setState: any) =
   );
 };
 
-const readAction = (envelope: Envelope, state: State, setState: any) => {
+const readAction = (envelope: Envelope) => {
   return <Action.Push title="Read" icon={Icon.Eye} target={<ReadDetail envelope={envelope} />} />;
 };
 
@@ -492,9 +440,9 @@ const moveToTrashAction = (envelope: Envelope, state: State, setState: any) => {
         });
 
         try {
-          const { stdout, stderr } = await exec(`"himalaya" delete ${envelope.id}`, {
+          const { stdout, stderr } = await Exec.run(`"himalaya" delete ${envelope.id}`, {
             env: {
-              PATH: PATH,
+              PATH: Exec.PATH,
             },
           });
 
@@ -503,7 +451,8 @@ const moveToTrashAction = (envelope: Envelope, state: State, setState: any) => {
             toast.title = "Moved to trash";
 
             setState((previous: State) => ({ ...previous, isLoading: true }));
-            const envelopes = await listEnvelopes();
+            const envelopes = await Envelopes.list();
+
             setState((previous: State) => ({
               ...previous,
               envelopes: envelopes,
@@ -549,7 +498,7 @@ const accessories = (envelope: Envelope) => {
   return accessories;
 };
 
-const envelopesToList = (state: any, setState: any): any => {
+const envelopesToList = (state: State, setState: any): any => {
   return Array.from(group_envelopes_by_date(state.envelopes).entries()).map(([date, group]) => {
     const items = group.map((envelope) => {
       const item = (
@@ -561,7 +510,7 @@ const envelopesToList = (state: any, setState: any): any => {
           accessories={accessories(envelope)}
           actions={
             <ActionPanel title="Envelope">
-              {readAction(envelope, state, setState)}
+              {readAction(envelope)}
               {envelope.flags.includes(Flag.Seen) && markUnreadAction(envelope, state, setState)}
               {!envelope.flags.includes(Flag.Seen) && markReadAction(envelope, state, setState)}
               {moveToSelectedAction(envelope, state, setState)}
