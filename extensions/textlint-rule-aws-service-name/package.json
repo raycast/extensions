@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "raycast-textlint-rule-aws-service-name",
   "include": "src/.textlintrc.yaml",
-  "title": "raycast-textlint-rule-aws-service-name",
+  "title": "Textlint AWS Service Name",
   "description": "Check AWS services name typo",
   "icon": "command-icon.png",
   "author": "bun913",
@@ -14,7 +14,6 @@
     {
       "name": "index",
       "title": "Textlint AWS Service Name",
-      "subtitle": "Run textlint-rule-aws-service-name",
       "description": "Check and Fix AWS Service name typo",
       "mode": "view"
     }
