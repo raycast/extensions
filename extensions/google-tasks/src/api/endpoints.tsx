@@ -26,6 +26,7 @@ export async function fetchList(tasklist: string): Promise<Task[]> {
   const params = new URLSearchParams();
   params.append("showCompleted", "true");
   params.append("showHidden", "true");
+  params.append("maxResults", "100");
   const response = await fetch(`https://tasks.googleapis.com/tasks/v1/lists/${tasklist}/tasks?` + params.toString(), {
     headers: {
       "Content-Type": "application/json",
