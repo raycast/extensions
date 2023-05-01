@@ -84,7 +84,7 @@ export default function Command() {
             title={session}
             actions={
               <ActionPanel>
-                <Action title="Switch To Selected Session" onAction={() => switchToSession(session, setIsLoading)} />
+                <Action title="Switch to Selected Session" onAction={() => switchToSession(session, setIsLoading)} />
                 <Action
                   title="Delete This Session"
                   onAction={() =>
