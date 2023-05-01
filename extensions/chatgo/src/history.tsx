@@ -1,7 +1,7 @@
 import { ActionPanel, Icon, List } from "@raycast/api";
 import { useSavedChat } from "./hooks/useSavedChat";
 import { useHistory } from "./hooks/useHistory";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { AnswerDetailView } from "./views/answer-detail";
 import { Chat } from "./type";
 import { CopyActionSection } from "./actions/copy";
@@ -82,7 +82,7 @@ export default function History() {
     >
       {history.data.length === 0 ? (
         <List.EmptyView
-          title="No history"
+          title="No History"
           description="Your recent questions will be showed up here"
           icon={Icon.Stars}
         />
