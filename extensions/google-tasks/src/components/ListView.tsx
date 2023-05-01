@@ -25,8 +25,10 @@ export default function ListView(props: { listId: string }) {
   useEffect(() => {
     (async () => {
       try {
+        setState((previous) => ({ ...previous, isLoading: true }));
         await google.authorize();
-        const fetchedList = await fetchList(props.listId);
+        const showCompleted = state.filter === Filter.All || state.filter === Filter.Completed;
+        const fetchedList = await fetchList(props.listId, showCompleted);
         setState((previous) => ({
           ...previous,
           tasks: fetchedList,
@@ -38,7 +40,7 @@ export default function ListView(props: { listId: string }) {
         showToast({ style: Toast.Style.Failure, title: String(error) });
       }
     })();
-  }, [google]);
+  }, [google, state.filter]);
 
   const handleCreate = useCallback(
     (listId: string, taskToCreate: TaskForm) => {
@@ -146,9 +148,6 @@ export default function ListView(props: { listId: string }) {
   const filterTasks = useCallback(() => {
     if (state.filter === Filter.Open) {
       return state.tasks.filter((task) => !isCompleted(task));
-    }
-    if (state.filter === Filter.Completed) {
-      return state.tasks.filter((task) => isCompleted(task));
     }
     return state.tasks;
   }, [state.tasks, state.filter]);
