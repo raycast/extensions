@@ -42,11 +42,12 @@
       "mode": "view"
     },
     {
-      "name": "turnOffAllLights",
-      "title": "Turn Off All Lights",
+      "name": "toggleAllLights",
+      "title": "Toggle All Lights",
       "subtitle": "Hue",
-      "description": "Turn off all the lights",
-      "mode": "no-view"
+      "description": "Toggle all the lights",
+      "mode": "no-view",
+      "interval": "5m"
     }
   ],
   "preferences": [
