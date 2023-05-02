@@ -1,34 +1,17 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "doccheck",
-  "title": "DocCheck",
+  "title": "DocCheck!",
   "description": "Search through DocCheck Flexikon from Raycast",
   "icon": "doccheck.png",
   "author": "spacedog",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "categories": [
     "Web"
   ],
   "license": "MIT",
-  "preferences": [
-    {
-      "name": "openIn",
-      "title": "Open In",
-      "description": "Where to open the DocCheck page by default",
-      "type": "dropdown",
-      "data": [
-        {
-          "title": "Browser",
-          "value": "browser"
-        },
-        {
-          "title": "Raycast",
-          "value": "raycast"
-        }
-      ],
-      "default": "raycast",
-      "required": false
-    }
-  ],
   "commands": [
     {
       "name": "doccheck-flexikon",
@@ -41,27 +24,27 @@
       "title": "Open Page",
       "subtitle": "DocCheck",
       "description": "Open DocCheck page in Raycast",
-      "mode": "view",
-      "arguments": [
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "data": [
         {
-          "name": "url",
-          "placeholder": "Article URL",
-          "type": "text",
-          "required": true
+          "title": "Browser",
+          "value": "browser"
         },
         {
-          "name": "prevurl",
-          "placeholder": "Previous article URL",
-          "type": "text",
-          "required": false
-        },
-        {
-          "name": "query",
-          "placeholder": "Search query",
-          "type": "text",
-          "required": false
+          "title": "Raycast",
+          "value": "raycast"
         }
-      ]
+      ],
+      "default": "raycast",
+      "description": "Where to open the DocCheck page by default",
+      "name": "openIn",
+      "required": false,
+      "title": "Open In",
+      "type": "dropdown"
     }
   ],
   "dependencies": {
