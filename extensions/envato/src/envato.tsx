@@ -38,7 +38,7 @@ export default function Command() {
       <List.Section title="Sales">
         {resultItems.map((sale: any, index: any) => {
           const saleDate = sale?.sold_at !== undefined ? String(dateFormat(sale.sold_at, "d, m, yyyy")) : "";
-          if (sale?.type == "Payout" && state.errors !== undefined) return <PayoutItem sale={sale} />;
+          if (sale?.type == "Payout" && state.errors !== undefined) return <PayoutItem key={index} sale={sale} />;
           if (saleDate == fullDate && sale?.type === undefined && state.errors !== undefined)
             return <SaleItem sale={sale} key={index} todey={true} item={true} />;
           if (saleDate != fullDate && sale?.type === undefined && state.errors !== undefined)

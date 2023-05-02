@@ -37,12 +37,12 @@ export const useFetch = () => {
 
       setState((oldState) => ({
         ...oldState,
-        sales: salesInfo as saleItem[],
+        sales: salesInfo as [],
         statement: statement as statementUser,
         user: userInfo as envatoUser,
         badges: badges as [],
         account: accountInfo as [],
-        portfolio: portfolio as Portfolio,
+        portfolio: portfolio as unknown as Portfolio,
         errors: salesEmpty as envatoErrors,
         isLoading: false,
       }));

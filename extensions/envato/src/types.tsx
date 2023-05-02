@@ -93,6 +93,14 @@ export interface Portfolio {
   matches: PortfolioItems[];
 }
 
+// export declare type PortfolioItems = Omit<saleItem, 'previews'> & {
+//     previews: Omit<saleItem['previews'], 'live_site'> & {
+//         live_site?: {
+//             url: string;
+//         };
+//     };
+// };
+
 export interface PortfolioItems {
   id: number;
   name: string;
