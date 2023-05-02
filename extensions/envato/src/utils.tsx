@@ -1,7 +1,7 @@
 import { getPreferenceValues, showToast, Toast, Cache } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { envatoErrors, envatoUser, saleItem } from "./types";
-const Envato = require("envato");
+import Envato = require("envato");
 const token = getPreferenceValues().token;
 import { statementUser, Portfolio, GetData } from "./types";
 const cache = new Cache();
