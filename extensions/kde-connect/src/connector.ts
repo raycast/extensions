@@ -52,7 +52,7 @@ export async function startApp() {
     return;
   }
 
-  showHUD("KDE Connect is starting...")
+  showHUD("KDE Connect is starting...");
 
   return new Promise<void>((resolve, reject) => {
     execSync("open -jg " + mainApp);

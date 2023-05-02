@@ -12,7 +12,7 @@ export interface KDEDevice {
 
 export class KDEConnect {
   deviceID?: string;
-  preference: Preferences
+  preference: Preferences;
 
   constructor(deviceID?: string) {
     this.deviceID = deviceID;

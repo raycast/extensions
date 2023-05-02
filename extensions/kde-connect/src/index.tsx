@@ -17,9 +17,9 @@ export default function Command() {
 
   const refreshDevices = async () => {
     setLoading(true);
-    await startApp()
-    console.log("App ready")
-    const discoveredDevices = await connect.listDevices()
+    await startApp();
+    console.log("App ready");
+    const discoveredDevices = await connect.listDevices();
     setDevices(discoveredDevices);
     setLoading(false);
   };
