@@ -12,6 +12,8 @@ quickly and easily. You can:
 - Choose an alternate language (other than English) and/or pick your preferred
   version/translation (e.g. ESV, NKJV)
 
+**Warning: This extension is not compliant with the Terms of Service of YouVersion. Use at your own risk.**
+
 ## [Download Extension][extension-in-store]
 
 ## Screenshots
