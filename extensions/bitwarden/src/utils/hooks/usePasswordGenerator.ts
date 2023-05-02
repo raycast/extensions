@@ -55,9 +55,9 @@ function usePasswordGenerator() {
     }
   };
 
-  const regeneratePassword = () => {
+  const regeneratePassword = async () => {
     if (state.isGenerating) return;
-    generatePassword();
+    await generatePassword();
   };
 
   const setOption = async <Option extends keyof PasswordGeneratorOptions>(
@@ -84,7 +84,7 @@ function usePasswordGenerator() {
   };
 
   useEffect(() => {
-    restoreStoredOptions();
+    void restoreStoredOptions();
   }, []);
 
   return { ...state, regeneratePassword, options, setOption };
