@@ -1,4 +1,4 @@
-import { List, Detail, Icon } from "@raycast/api";
+import { List, Detail, Cache } from "@raycast/api";
 import dateFormat from "dateformat";
 import { Account } from "./accountEnvato";
 import { SaleItem, PayoutItem } from "./saleItem";
@@ -8,44 +8,42 @@ import { useFetch, fullDate } from "./utils";
 /*------ INDEX
 /*-----------------------------------*/
 export default function Command() {
-  const state = useFetch();
+  const cache = new Cache();
+  const cached = cache.get("state") ?? "";
+  const stateFetch = useFetch();
+  const state = stateFetch.isLoading ? JSON.parse(cached) : stateFetch;
 
   // IF EMPTY
-  if (state.errors.reason !== undefined && state.errors.empty !== true) {
+  if (state.errors?.reason !== undefined && state.errors.empty !== true) {
     return (
       <Detail markdown={`# 😢 ${state.errors.reason ?? ""} \n \`\`\`\n${state.errors.description ?? ""}\n\`\`\``} />
     );
   }
 
-  const statementItems = [];
+  const statementItems: any = [];
   let resultItems = [];
-  const sales = state.sales;
+  (state.statement?.results.map((item: any ) => {
+    if (item.type == "Payout") {
+      statementItems.push(item);
+    }
+  }),
+  resultItems = statementItems.concat(state.sales).sort(({ a, b }: any) => b?.date - a?.sold_at))
 
   return (
     <List
       isShowingDetail={state.showdetail}
-      isLoading={Object.keys(sales).length === 0 && state.errors.reason == undefined && state.errors.empty !== true}
+      isLoading={stateFetch.isLoading && state.errors?.reason == undefined && state.errors?.empty !== true}
     >
       <Account state={state} />
       <List.Section title="Sales">
-        {state.user.username === "" || state.user.username == undefined ? (
-          <List.EmptyView icon={{ source: Icon.TwoArrowsClockwise }} title="Loading..." />
-        ) : (
-          (state.statement.results.map((item, index) => {
-            if (item.type == "Payout") {
-              statementItems.push(item);
-            }
-          }),
-          (resultItems = statementItems.concat(state.sales).sort((a, b) => b.date - a.sold_at)),
-          resultItems.map((sale, index) => {
-            const saleDate = String(dateFormat(sale["sold_at"], "d, m, yyyy"));
-            if (sale.type == "Payout" && state.errors !== []) return <PayoutItem sale={sale} />;
-            if (saleDate == fullDate && sale.type === undefined && state.errors !== [])
-              return <SaleItem sale={sale} key={index} todey={true} item={true} />;
-            if (saleDate != fullDate && sale.type === undefined && state.errors !== [])
-              return <SaleItem sale={sale} key={index} todey={false} item={true} />;
-          }))
-        )}
+        {resultItems.map((sale: any, index: any) => {
+          const saleDate = sale?.sold_at !== undefined ? String(dateFormat(sale.sold_at, "d, m, yyyy")) : "";
+          if (sale?.type == "Payout" && state.errors !== undefined) return <PayoutItem sale={sale} />;
+          if (saleDate == fullDate && sale?.type === undefined && state.errors !== undefined)
+            return <SaleItem sale={sale} key={index} todey={true} item={true} />;
+          if (saleDate != fullDate && sale?.type === undefined && state.errors !== undefined)
+            return <SaleItem sale={sale} key={index} todey={false} item={true} />;
+        })}
       </List.Section>
     </List>
   );

@@ -1,9 +1,10 @@
-import { getPreferenceValues, showToast, ToastStyle, environment } from "@raycast/api";
+import { getPreferenceValues, showToast, Toast, Cache } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { envatoErrors, envatoUser, saleItem } from "./types";
-import Envato from "envato";
+const Envato = require("envato");
 const token = getPreferenceValues().token;
-import fs from "fs";
+import { statementUser, Portfolio, GetData } from "./types";
+const cache = new Cache();
 
 // DATE
 const date = new Date();
@@ -16,58 +17,36 @@ export const fullDate = `${day}, ${month}, ${year}`;
 /*------ FETCH
 /*-----------------------------------*/
 export const useFetch = () => {
-  const [state, setState] = useState<{
-    showdetail: boolean;
-    account: [];
-    user: envatoUser;
-    portfolio: [];
-    sales: saleItem;
-    badges: [];
-    statement: [];
-    errors: envatoErrors;
-  }>({
-    showdetail: false,
-    account: [],
-    user: [] as envatoUser,
-    portfolio: [],
-    sales: [] as saleItem,
-    badges: [],
-    statement: [],
-    errors: [] as envatoErrors,
+  const [state, setState] = useState<GetData>({
+    isLoading: true,
   });
 
   async function fetch() {
     try {
       // GET API
-      const cache = fs.readFileSync(`${environment.supportPath}/cache.json`, "utf8");
       const client = Envato !== undefined ? new Envato.Client(token) : undefined;
       const username = client !== undefined ? await client.private.getUsername() : "";
       const userInfo = client !== undefined ? await client.user.getAccountDetails(username) : [];
       const accountInfo = client !== undefined ? await client.private.getAccountDetails() : [];
       const badges = client !== undefined ? await client.user.getBadges(username) : [];
       const portfolio = client !== undefined ? await client.catalog.searchItems({ username: username }) : [];
-      const salesInfo = client !== undefined ? await client.private.getSales() : JSON.parse(cache);
+      const email = client !== undefined ? await client.private.getEmail() : "";
+      const salesInfo = client !== undefined ? await client.private.getSales() : [];
       const statement = client !== undefined ? await client.private.getStatement({}) : [];
       const salesEmpty: any = salesInfo.length === 0 ? { empty: true } : [];
 
-      // CACHE
-      fs.writeFile(`${environment.supportPath}/cache.json`, JSON.stringify(salesInfo), (err) => {
-        if (err) {
-          console.error(err);
-        }
-        // file written successfully
-        console.error(environment.supportPath);
-      });
       setState((oldState) => ({
         ...oldState,
-        sales: salesInfo as saleItem,
-        statement: statement as [],
+        sales: salesInfo as saleItem[],
+        statement: statement as statementUser,
         user: userInfo as envatoUser,
         badges: badges as [],
         account: accountInfo as [],
-        portfolio: portfolio as [],
+        portfolio: portfolio as Portfolio,
         errors: salesEmpty as envatoErrors,
+        isLoading: false,
       }));
+
     } catch (error: any) {
       // ERRORS
       let reason = "Error";
@@ -80,8 +59,13 @@ export const useFetch = () => {
       setState((oldState) => ({
         ...oldState,
         errors: out as envatoErrors,
+        isLoading: false,
       }));
-      showToast(ToastStyle.Failure, reason, description);
+      await showToast({
+        style: Toast.Style.Failure,
+        title: reason,
+        message: description,
+      });
       return;
     }
   }
@@ -89,6 +73,11 @@ export const useFetch = () => {
   useEffect(() => {
     fetch();
   }, []);
-
+  
+  const cached = cache.get("state");
+  if(state !== undefined && cached !== JSON.stringify(state)) {
+   cache.set("state", JSON.stringify(state)); 
+  }
+  
   return state;
 };
