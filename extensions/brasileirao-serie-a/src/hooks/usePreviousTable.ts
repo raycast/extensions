@@ -14,7 +14,6 @@ export function usePreviousTable(season: string) {
   const { data } = useFetch<Standings>(`${BASE_URL}/standings?${params.toString()}`, {
     headers: authHeaders,
   });
-
   const table = useMemo(() => {
     if (!data) {
       return [];

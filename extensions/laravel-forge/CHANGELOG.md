@@ -1,5 +1,17 @@
 # Laravel Forge Changelog
 
+## [Complete Rewrite] - 2023-04-17
+- Rewrite from scratch using modern Raycast features
+- Better caching with predictive pre-fetching
+- Passive deployment checking via BG command
+- Dynamic activity icons
+- Trigger command from anywhere with arguments
+- Shows system notification when deploy starts
+- Add view into recent deployments
+
+## [Cache optimization] - 2022-12-29
+- Update initial view to show cached data immediately
+
 ## [Per-site SSH Command] - 2022-04-20
 - Add “Open SSH connection” command to sites
 

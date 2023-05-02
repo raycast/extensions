@@ -1,5 +1,28 @@
 # Visual Studio Code - Project Manager Changelog
 
+## [Update] - 2023-04-24
+
+- Update build identifier for VSCodium. (VSCodium/vscodium#1227)
+- Add option for `VSCodium < 1.71` to maintain old build identifier.
+
+## [Update] - 2023-03-30
+
+- Add support for VS Code cached projects.
+
+## [Fixes] - 2023-03-16
+
+- Fixed a problem with the remote path when there is a "." in the path
+
+## [Fixes] - 2023-03-11
+
+- Fixed terminal overrides the default environment variables.
+
+## [Fixes] - 2022-11-25
+
+- This commit filters out duplicate entries
+
+## [Added screenshots] - 2022-11-17
+
 ## [Support ssh remote projects] - 2022-08-24
 
 ## [Add VSCodium option] - 2022-07-28

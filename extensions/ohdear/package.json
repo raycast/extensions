@@ -5,8 +5,11 @@
   "description": "Manage your Oh Dear sites easy directly from Raycast",
   "icon": "command-icon.png",
   "author": "andreaselia",
+  "owner": "oh-dear",
+  "access": "public",
   "contributors": [
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "Hodglim"
   ],
   "categories": [
     "Web",
@@ -126,7 +129,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.39.1",
-    "@raycast/utils": "^1.1.0",
+    "@raycast/utils": "^1.4.8",
     "dayjs": "^1.11.5",
     "node-fetch": "^3.2.10"
   },

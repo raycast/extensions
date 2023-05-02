@@ -16,6 +16,10 @@ npm install --save @raycast/utils
 
 ## Changelog
 
+### v1.4.0
+
+Added the [`useSQL`](./react-hooks/useSQL.md) hook.
+
 ### v1.3.1
 
 - Added the `reset` method to `useForm`.

@@ -47,7 +47,7 @@ async function fetchToken(
     throw new Error('Bad response from token endpoint')
   }
 
-  const data: any = await response.json()
+  const data = (await response.json()) as any
 
   return data.access_token
 }

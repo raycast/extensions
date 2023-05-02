@@ -51,6 +51,15 @@
       "required": true
     },
     {
+      "name": "preferredLibgenMirror",
+      "title": "Preferred Libgen Mirror",
+      "description": "Force query from the specified mirror.",
+      "type": "textfield",
+      "default": "",
+      "placeholder": "https://libgen.li",
+      "required": false
+    },
+    {
       "name": "downloadGateway",
       "title": "Download Gateway",
       "description": "Choosing the default download gateway.",
@@ -78,6 +87,22 @@
         }
       ],
       "default": "0",
+      "required": true
+    },
+    {
+      "name": "downloadPath",
+      "title": "Download Directory",
+      "description": "Set the default download directory.",
+      "type": "directory",
+      "default": "~/Downloads",
+      "required": true
+    },
+    {
+      "name": "alwaysAskWhereToSave",
+      "description": "Always ask where to save the downloaded file, ignoring the default directory.",
+      "type": "checkbox",
+      "default": false,
+      "label": "Always ask where to save",
       "required": true
     },
     {
@@ -123,13 +148,16 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.37.1",
+    "axios": "^1.2.1",
     "cheerio": "^1.0.0-rc.12",
+    "fs-extra": "^11.1.0",
     "libgen": "^2.1.2",
     "node-fetch": "^3.2.8",
     "node-html-parser": "^5.3.3",
     "run-applescript": "^6.0.0"
   },
   "devDependencies": {
+    "@types/fs-extra": "^9.0.13",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",

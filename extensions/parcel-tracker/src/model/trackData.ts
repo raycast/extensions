@@ -1,4 +1,9 @@
 export interface ITrackData {
+  isCompleted: string;
+  data: ITrack[];
+}
+
+export interface ITrack {
   id: string;
   vendorId: number;
   senderName: string;
@@ -9,10 +14,6 @@ export interface ITrackData {
   level: string;
   recipient: string;
   completeYN: string;
-  details: TrackingDetail[];
-}
-
-export interface TrackingDetail {
   trackingDate: string;
   trackingTime: string;
   trackingTimeString: string;

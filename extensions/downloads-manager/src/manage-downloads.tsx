@@ -1,7 +1,7 @@
 import { ActionPanel, Action, List } from "@raycast/api";
 import { PathLike } from "fs";
 import { useState } from "react";
-import { downloadsDir, getDownloads } from "./utils";
+import { downloadsFolder, getDownloads } from "./utils";
 
 export default function Command() {
   const [downloads, setDownloads] = useState(getDownloads());
@@ -16,7 +16,7 @@ export default function Command() {
     <List>
       {downloads.length === 0 && (
         <List.EmptyView
-          icon={{ fileIcon: downloadsDir }}
+          icon={{ fileIcon: downloadsFolder }}
           title="No downloads found"
           description="Well, first download some files ¯\_(ツ)_/¯"
         />
@@ -27,6 +27,7 @@ export default function Command() {
           key={download.path}
           title={download.file}
           icon={{ fileIcon: download.path }}
+          quickLook={{ path: download.path, name: download.file }}
           accessories={[
             {
               date: download.lastModifiedAt,
@@ -38,7 +39,15 @@ export default function Command() {
               <ActionPanel.Section>
                 <Action.Open title="Open File" target={download.path} />
                 <Action.ShowInFinder path={download.path} />
+                <Action.CopyToClipboard
+                  title="Copy File"
+                  content={{ file: download.path }}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                />
+              </ActionPanel.Section>
+              <ActionPanel.Section>
                 <Action.OpenWith path={download.path} shortcut={{ modifiers: ["cmd"], key: "o" }} />
+                <Action.ToggleQuickLook shortcut={{ modifiers: ["cmd"], key: "y" }} />
               </ActionPanel.Section>
               <ActionPanel.Section>
                 <Action.Trash

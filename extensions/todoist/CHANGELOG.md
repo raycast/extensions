@@ -1,5 +1,67 @@
 # Todoist Changelog
 
+## [Improvements & fixes] - 2023-04-12
+
+- Add action to mark an already completed task as incomplete
+- Add action to copy the title of a completed task
+- Fix a bug where the "Today" view in the menu bar command would use the "Upcoming Days" settings
+- Remove Markdown formatting from the focused task
+
+## [Add various actions and new completed tasks command] - 2023-01-20
+
+- Add new command to see your completed tasks
+- Add new `Show Project` action
+- Add `Duplicate Task` action
+- Add `Move to Project` action
+- Add `Show Project` action
+- Remove `Group By` preferences in favor of an action
+- Support lots more dates when scheduling tasks (thanks to the new `Action.PickDate` component)
+- Use consistent project icons throughout all the commands
+
+⚠️ If you were using the `Group By` preference, it's been replaced by a list item action. Now, select any item in the today or project list and press `⌥` + `⇧` + `G` to configure your view.
+
+## [Menu bar fix] - 2023-01-10
+
+- Fix focused task when not listed in menubar
+
+## [Menu bar improvements] - 2023-01-03
+
+- Add possibility to specify the number of days in Upcoming view for Menu Bar
+
+## [Menu bar command bug fix] - 2023-01-02
+
+- Fixed an error that caused menu bar to throw an error
+
+## [Optimizing title] - 2022-12-21
+
+- Removed eventually markdown from titles.
+
+## [Menu bar command for tasks] - 2022-11-19
+
+- Upgrade `@raycast/api`
+- Add a menu bar command that shows upcoming tasks/tasks for that day (can be changed via preferences)
+- User can complete task, change due date, change priority, open task in Todoist and delete task from the menu bar
+
+## [Migrate to Todoist REST API v2]
+
+- Refactor the extension to use Todoist's REST API v2
+- Support view style for projects (either list or board)
+- Add new command called `Quick Add Task` replacing `Create Task in Inbox`: this new command allows users to add more info to their newly created tasks
+
+## [Bunch of improvements] - 2022-09-22
+
+- Upgrade the dependencies
+- Improve destructive actions: apply styling and added descriptions for alerts.
+- Move the specific commands preferences (today's group by options, projects group by options) in the command's preferences
+- Use `@raycast/utils` data fetching hooks instead of `swr` enabling caching by default for every call in the extension 🚀
+- Add "Open in Todoist app" action
+- Add new "Create Task in Inbox" command
+- Refactor "Create Task" and "Create Form" to use `useForm`
+- Add validations to "Create Task" and "Create Form"
+- Add draft values to "Create Task" command
+- Add tooltips to task accessories
+- Add "add new comment" action on task list
+
 ## [New tasks from projects and task actions in detail] - 2022-05-13
 
 - Added the ability to add a new task from a project

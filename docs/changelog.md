@@ -1,5 +1,243 @@
 # Changelog
 
+## 1.50.0 - 2023-04-27
+
+### ✨ New
+
+- Raycast now provides 2 global TypeScript namespaces called `**Preferences**` and `**Arguments**` which respectively contains the types of the preferences and the types of the arguments of all the commands of the extensions.
+  For example, if a command named `show-todos` has some preferences, its `getPreferenceValues`'s return type can be specified with `getPreferenceValues<Preferences.ShowTodos>()`. This will make sure that the types used in the command stay in sync with the manifest.
+- It is now possible to add commands that are disabled by default. A user will have to enable it manually before it shows up in Raycast's root search. This can be useful to provide commands for specific workflows without overwhelming everybody's root search.
+- **Markdown Tables** are now properly supported.
+- **Markdown** code blocks now support syntax highlighting. To enable it, make sure you specify the programming language at the start of the block.
+
+### 💎 Improvements
+
+- **Colors**: To improve accessibility, dynamic adjustment for raw colors (`HEX`, `rgb` etc) used in extensions has been switched from opt-in to opt-out. If your extension relies on accurate color reproduction, check the [documentation](https://developers.raycast.com/api-reference/user-interface/colors) for instructions on how to opt out.
+- **Images**: You can now suffix your local assets with `@dark` to automatically provide a dark theme option, eg: `icon.png` and `icon@dark.png`.
+
+### 🐞 Fixes
+
+- **CLI**: Fix an issue where the CLI wouldn't want to bundle files named `foo.node.js`.
+
+## 1.49.0 - 2023-03-29
+
+### ✨ New
+
+- It is now possible to drag and drop items from Grids. Lists are also supported if their items have as `quickLook` properties.
+
+### 💎 Improvements
+
+- Extend `launchCommand` to allow inter-extension launches
+- Extend `launchCommand` to allow to pass a `fallbackText`
+
+### 🐞 Fixes
+
+- **SVG**: Ignore doctype and HTML comments
+- Fix a flicker happening when there was a fallback text passed to a command
+- Fix a rendering issue with multi-line `tag` text.
+
+## 1.48.0 - 2023-02-22
+
+### ✨ New
+
+- **Clipboard**: Added `transient` option to `Clipboard.copy` method.
+- **Actions**: Added `type` prop to `Action.PickDate` to control the date components to be picked.
+
+### 💎 Improvements
+
+- Improve the time to interaction when launching a command that always renders the same view type.
+
+### 🐞 Fixes
+
+- Changed `Deactivate Command` action shortcut to `⌘ ⌥ ⇧ D`, so it doesn't clash with `Copy Deeplink`
+- Fixed an issue where restarting Raycast would not properly restore menu bar commands that sometimes didn't put anything in the menu bar.
+- Locale: Respect the hourCycle, calendar, and numbering system locale.
+
+## 1.47.0 - 2023-02-01
+
+### ✨ New
+
+- **Clipboard**: Add a new `Clipboard.read()` method that reads the clipboard content as plain text, file path, or HTML.
+
+### 💎 Improvements
+
+- **List Accessories**: Tags can now use any color (we made some improvements to ensure that any color would have enough contrast to be readable)
+
+### 🐞 Fixes
+
+- Fixed a bug where reloading menu bar commands in development mode would not respect certain manifest property updates (e.g. interval).
+- Fixed a bug that caused `Metadata.Link`'s `title` to be cut off unnecessarily when using the large text size.
+- Fixed a bug where `clearSearchBar` wouldn't clear the search bar when rendering a Grid.
+- Fixed a bug where `ray lint` would fail if there were a .DS_Store file in the `src` folder.
+
+## 1.46.0 - 2023-01-18
+
+⚠️️ **Global Fetch Deprecation**: We've removed the experimental support for global fetch in Node 18. The reason is that the feature is not stable yet (hence the warning on it being "experimental" in the dev console) and is not compatible with our new proxy feature in Raycast. We've scanned the public repository for extensions that make use of global fetch and replaced it with the _cross-fetch_ dependency via separate PRs. If we missed an extension, let us know - in most cases, it should be a straightforward replacement.
+
+### ✨ New
+
+- **Source maps** for production errors: source maps are now also enabled for production builds of an extension. When an exception occurs, you get cleaner stack traces with proper source locations in the TypeScript sources files (vs. the minified and unusable JavaScript locations). _Note_: An extension must be re-published to enable production source maps.
+- **Action.PickDate**: We are introducing a new Action to allow users to set a Date directly from the action panel.
+
+### 💎 Improvements
+
+- **Dev Tools**: the "Start Development" command under "Manage Extensions" now starts development in iTerm if installed as the default terminal.
+- In order to ensure that date formatting & other internationalization functions work as expected, the NodeJS process is now started with the `LC_ALL` environment variable set to the user's current locale.
+
+### 🐞 Fixes
+
+- Fixed an issue where the first exec/spawn call for running a subprocess could be slower than subsequent calls.
+- Fixed menu bar icon padding when there's no text.
+- Fixed a problem where menu bar commands updated with a new required preference would not display the required preference screen.
+- Fixed a rare bug with menu bar commands that could lead to Raycast hanging.
+- Fixed an issue where menu bar commands launching view commands would cause stacking in the navigation hierarchy.
+- Fixed an issue where fallback images in lists would flicker.
+- Dev Tools: Fixed a bug when zip archiving extensions with special characters in file names.
+
+## 1.45.0 - 2022-12-14
+
+### ✨ New
+
+- **Fallback commands**: All commands (except menu-bar commands and commands with more than one required argument) can now be used as [fallback commands](https://manual.raycast.com/fallback-commands)! They should all work out of the box (e.g. a command that renders a List will receive `onSearchTextChange` with the fallback text on its first render, etc.) but you can customize the user experience with a new top-level prop `fallbackText`.
+- **List Accessories:** `date` and `text` accessories can now be colored.
+- **List Accessories:** We've added a new accessory type: `tag`.
+- **Metadata:** Label text can now also be colored.
+- **Proxy Support**: Extensions using popular networking libraries such as node-fetch/cross-fetch, got, Axios, or our useFetch hook are compatible with proxies if the user has turned on the new proxy preference in Raycast.
+
+### 💎 Improvements
+
+- **Background refresh**: when a command misses a required preference, instead of showing the error screen, the user is directed to the preference onboarding screen again.
+
+### 🐞 Fixes
+
+- Fixed a bug where entered characters could be "swallowed" in controlled form components or the controlled search bar.
+- Fixed the `launchContext` not being propagated to menu-bar and background launches when using the `launchCommand` API.
+- Fixed a multi-monitor [bug](https://github.com/raycast/extensions/issues/2975) where menu bar extra text would be unreadable on the inactive screen.
+- Fixed a bug where menu bar extra icon tinting would change based on Raycast's appearance instead of the system's.
+- Fixed some memory leaks when using Form components
+
+## 1.44.0 - 2022-11-23
+
+### ✨ New
+
+- **Async Submenus and Dropdown**: Dropdowns and ActionPanel Submenus now also support the properties `onSearchTextChange, isLoading, throttle, filtering` - same as for List and Grid where you can perform custom logic when the user changes the search text.
+- **Application:** You can now get the current frontmost Application of the system with the top-level `getFrontmostApplication` method.
+- **File and Directory Preferences**: We've added two new preference types `"directory"` and `"file"`, supported via the manifest. Both types show a file picker component and let the user select directory or file paths.
+- **Environment:** You can now get the user's text size via `environment.textSize`.
+
+### 💎 Improvements
+
+- **Pop To Root Behavior**: `closeMainWindow` accepts a new parameter `popToRootType` that lets you control when Raycast pops back to root: the default is as-is and respects the user's "Pop to Root Search" preference in Raycast. `PopToRootType.Immediate` closes the window _and_ immediately pops back to root, regardless of the user's setting (so you can get rid of an additional `popToRoot()` call). The new mode `PopToRootType.Suspended` temporarily prevents Raycast from automatically popping back to root; this is useful for situations where a command needs to interact with an external system utility and then return the user back to the launching command.
+- **Clipboard:** We added new options to copy and paste HTML content, which is useful for sharing formatted text, e.g. a link to a Notion page in Slack.
+- **Markdown**: Markdown in a `Detail` component now supports convenience image references for icons and asset folder files such as:
+  `![built-in icon](${Icon.AddPerson})` or `![local-assets-image](example.png)` (absolute URLs and user folder paths via `~` are also supported)
+- **OAuth**: The client's `providerIcon` is now optional (extension icon as default) and accepts an `Image.ImageLike` type.
+- **List and Detail Metadata**: Now show tooltips when labels get truncated.
+- **Action.ToggleQuickLook**: Now also expands paths starting with `~`.
+
+### 🐞 Fixes
+
+- **Dropdown**: Fixed triggering a dropdown component's `onChange` handler when navigating.
+- **Dropdown**: Fixed the missing `placeholder` property in the search bar dropdown.
+- **Forms**: Fixed submitting a form with marked text.
+
+## 1.43.0 - 2022-11-09
+
+### ✨ New
+
+- **Actions**: You can now specify an action to focus when opening the ActionPanel (and an ActionPanel.Submenu) by setting the `autoFocus` prop.
+- **Forms**: Introducing a new Form Item `Form.FilePicker` to select one or multiple files (or directories)
+
+### 💎 Improvements
+
+- **DX**: A warning will now be shown in the console when using async entry points for view and menu-bar commands.
+- **List/Grid**: Improved the keyword search algorithm to match intersecting keywords (for example, the search term "black cat" matches keywords ["black", "cat"]).
+- **Grid**: The grid supports a new property for configuring how sections are ordered. Setting `filtering={{ keepSectionOrder: true }}` ensures that the sections' order is not changed based on items' ranking values; this can be useful for use cases where a small number of fixed sections should always appear in the same order when the user filters the grid. We are deprecating the `enableFiltering` property.
+
+### 🐞 Fixes
+
+- Fixed the Grid or List's selection sometimes not being preserved when native filtering is disabled.
+- The `Image.Mask.RoundedRectangle` mask will be more consistent regardless of the size of the image.
+- Fixed an issue where the specified `searchText` property would not always be respected.
+
+## 1.42.0 - 2022-10-26
+
+### ✨ New
+
+- The Node runtime has been updated to [Node 18](https://nodejs.org/en/blog/announcements/v18-release-announce/), the [current](https://github.com/nodejs/Release#release-schedule) Long-term Support (LTS) release.
+- Commands can now launch other commands! Using the new `launchCommand` method, you can now trigger a background refresh of another command in the same extension - or even open another command. Some use cases are updating a menu bar command from a view command or, vice versa, launching a companion view command from the menu bar. (Note that for now we only support launches of other commands within the same extension.)
+
+### 💎 Improvements
+
+- **Grid** now supports two new aspect ratios: 4/3 and 3/4.
+- **Menu Bar** icon tinting is now theme-aware.
+- **Background Refresh:** The shortest interval available is now 10s instead of 1m (use cautiously and also see our [best practices guide](https://developers.raycast.com/information/background-refresh#best-practices)).
+- **Grid**: The grid supports a new property for configuring how sections are ordered. Setting `filtering={{ keepSectionOrder: true }}` ensures that the section order is not changed based on items' ranking values; this can be useful for use cases where a small number of fix sections should always appear in the same order when the user filters the list. We are deprecating the `enableFiltering` property.
+
+### 🐞 Fixes
+
+- **List Item Metadata Link and Detail Metadata Link** styling should now be consistent with their respective **List Item Metadata Label** and **Detail Metadata Label** respectively.
+- Fixed a bug where `List.Item`'s accessories might not be aligned.
+- Fixed a bug where the last API call or log in a no-view command would not run before the command gets unloaded.
+
+## 1.41.0 - 2022-10-12
+
+### New
+
+- **Grid**: the `Grid` component accepts three new props that should give extension authors more flexibility: `columns`, `fit` and `aspectRatio`.
+
+![](.gitbook/assets/grid-styled-sections.png)
+
+- **Grid Sections** don't all have to look the same anymore! The grid `Section` component now _also_ accepts the `columns`, `fit` and `aspectRatio` props. When specified, they will override the value of the parent `Grid` component's prop.
+- **List**: The list supports a new property for configuring how sections are ordered. Setting `filtering={{ keepSectionOrder: true }}` ensures that the section order is not changed based on items' ranking values; this can be useful for use cases where a small number of fix sections should always appear in the same order when the user filters the list. We are deprecating the `enableFiltering` property.
+- **Menu Bar Extra:** added a new `Section` component, which can be used to better group related `Item`s and/or `Submenu`s. The component has an optional title for the section. At the same time, we are deprecating the `Separator` component.
+- **Menu Bar Extra**: The `Item` component now accepts an optional `subtitle` prop.
+- **Clipboard:** `Clipboard.copy()` and `Clipboard.paste()` methods now accept file paths as a parameter.
+
+### 💎 Improvements
+
+- Improved dark/light mode detection for **Menu Bar Extra** icons.
+- If a **Menu Bar Extra**'s `title` spans multiple lines**,** only the first one will be displayed.
+
+### 🐞 Fixes
+
+- Fixed certain error stack traces causing CPU spikes of the Node process.
+- Fixed an issue with **macOS Ventura Beta** where **Menu Bar Extra**s would sometimes become unresponsive.
+- Fixed the type of the List and Grid's `onSelectionChange`. It always used to return `null` when no items were selected but the type was `string | undefined`. It is now properly `string | null`. Note that this might trigger some TypeScript error when you upgrade but it should help you fix some bugs.
+
+## 1.40.0 - 2022-09-28
+
+### ✨ New
+
+- **Menu Bar Extras** can now be deactivated without disabling the menu bar command! To deactivate a menu bar command, run the `Deactivate Command` action from the command's Action Panel - or drag the menu bar extra out of the menu bar while holding down ⌘.
+- Commands with **Background Refresh** also now have a `Deactivate Command` action!
+- **Menu Bar Extras** now support both a primary and secondary action type (right click or control click).
+- **Dropdown**'s items can now specify `keywords` to match more search terms.
+- **Extension Diagnostics** command can now be used to help finding the cause behind any issues with extensions. It displays all `Loaded Commands`, commands with `Background Refresh` enabled and latest `Events` triggered.
+
+### 💎 Improvements
+
+- **Menu Bar Extra** action handlers will now either wait or force a render after finishing execution, to ensure any state updates performed in the action handler have had a chance to render.
+- **Menu Bar** commands now automatically refresh when their or their parent extension's preferences change.
+- **OAuth**: Path-based redirect URLs are now officially supported.
+- **OAuth**: ⚠️️ API methods for OAuth request creation now throw an error when used from a background command - you can check the launch type of a command to see whether authorization can be performed
+- **Types**: Node and React types have been added back as optional API peer dependencies and dev dependencies to the templates, so that VS Code autocompletion works.
+- **Templates**: Updated to include the utils package.
+- **DevX**: Added warnings when specifying a `value` without `onChange` or when changing a Form item from controlled to uncontrolled.
+- **DevX**: For starting development, the CLI does not depend on metadata attributes any more
+
+### 🐞 Fixes
+
+- **Forms**: The type of the `DatePicker`'s value is now `Date | null` (`null` happens when selecting `No Date`).
+  ⚠️ This might cause some TypeScript errors but it will now reflect what is really happening, preventing bugs at runtime.
+- Fixed an issue where `List.Item.Detail.Metadata` titles sometimes being cropped despite there being enough room.
+- **Menu Bar Extra** `Item` and `Submenu` icons now change based on the system's dark / light mode, not Raycast's.
+- **Forms**: Fixed a bug where the initial value for a controlled TextArea could not be deleted.
+- **Forms**: Fixed the info icon and message not coming back after clearing an error on form items.
+- **Forms**: Fixed updating the placeholder of the TagPicker item.
+- **Empty View**: Fix an issue where an Empty View's actions would be rendered even thought the Empty View isn't.
+- **OAuth**: Fixed a bug where multiple overlays could stack upon each other when OAuth was initiated from a menu bar or background launched command
+
 ## 1.39.2 - 2022-09-01
 
 ### ✨ New
@@ -19,13 +257,13 @@
 
 ### ✨ New
 
-- **List.Item.Detail.Metadata**: We’ve added support for new `Link` and `TagList` item types.
+- **List.Item.Detail.Metadata**: We've added support for new `Link` and `TagList` item types.
 - **Environment**: You can now check the `mode` of the current command _(as defined in the manifest)_ _via_ `environment.commandMode`.
 
 ### 💎 Improvements
 
 - **CLI**: The ray CLI is now code-signed
-- **CLI**: We’ve updated esbuild to v0.14.52
+- **CLI**: We've updated esbuild to v0.14.52
 - **NPM size:** is now 0.5MB instead of 25MB _(binary files for ray CLI have been moved out of the NPM package)_
 
 ### 🐞 Fixes
@@ -33,8 +271,8 @@
 - **Navigation**: Top-level components can now dynamically return a different view type when used inside a navigation stack
 - **Background Refresh**: Fixed an edge case where commands would run into a timeout that prevented further refreshing
 - **Menu Bar Commands**: Fixed a bug where the error screen of menu bar commands would repeatedly be shown in the root search
-- **Actions:** Triggering actions by _numeric shortcut / double-clicking_ could trigger wrong actions or didn’t work entirely
-- **Form:** `TextArea` placeholder now won’t highlight markdowns if it has `enabledMarkdown`
+- **Actions:** Triggering actions by _numeric shortcut / double-clicking_ could trigger wrong actions or didn't work entirely
+- **Form:** `TextArea` placeholder now won't highlight markdowns if it has `enabledMarkdown`
 
 ## 1.38.3 - 2022-08-03
 
@@ -46,7 +284,7 @@
 ### 🐞 Fixes
 
 - **Menu Bar Commands**: Fixed issues around hot reloading, unloading, and inconsistent action handler behavior
-- **No-view Commands:** Fixed returning top-level props for commands that doesn’t have arguments or drafts
+- **No-view Commands:** Fixed returning top-level props for commands that doesn't have arguments or drafts
 
 ## 1.38.1 - 2022-07-21
 

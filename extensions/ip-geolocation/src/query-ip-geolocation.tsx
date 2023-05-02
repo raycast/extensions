@@ -1,11 +1,11 @@
 import { Action, ActionPanel, getPreferenceValues, List } from "@raycast/api";
-import React, { useState } from "react";
-import { searchIpGeolocation } from "./hooks/hooks";
-import { IpEmptyView } from "./components/ip-empty-view";
-import { listIcons } from "./utils/constants";
-import { isEmpty } from "./utils/common-utils";
+import { useState } from "react";
 import { ActionOpenExtensionPreferences } from "./components/action-open-extension-preferences";
+import { IpEmptyView } from "./components/ip-empty-view";
+import { searchIpGeolocation } from "./hooks/hooks";
 import { Preferences } from "./types/preferences";
+import { isEmpty } from "./utils/common-utils";
+import { listIcons } from "./utils/constants";
 
 interface IpArgument {
   ipAddress: string;
@@ -13,9 +13,9 @@ interface IpArgument {
 
 export default function QueryIpGeolocation(props: { arguments: IpArgument }) {
   const { ipAddress } = props.arguments;
-  const { language } = getPreferenceValues<Preferences>();
+  const { language, coordinatesFormat } = getPreferenceValues<Preferences>();
   const [searchContent, setSearchContent] = useState<string>(ipAddress);
-  const { ipGeolocation, loading } = searchIpGeolocation(language, searchContent.trim());
+  const { ipGeolocation, loading } = searchIpGeolocation(language, searchContent.trim(), coordinatesFormat);
 
   const emptyViewTitle = () => {
     if (loading) {
@@ -39,16 +39,12 @@ export default function QueryIpGeolocation(props: { arguments: IpArgument }) {
       {ipGeolocation.map((value, index) => (
         <List.Item
           key={index}
-          icon={{ source: { light: listIcons[index].light, dark: listIcons[index].dark } }}
+          icon={listIcons[index]}
           title={value[0]}
           subtitle={value[1]}
           actions={
             <ActionPanel>
-              <Action.CopyToClipboard
-                icon={{ source: { light: listIcons[index].light, dark: listIcons[index].dark } }}
-                title={`Copy ${value[0]}`}
-                content={value[1]}
-              />
+              <Action.CopyToClipboard icon={listIcons[index]} title={`Copy ${value[0]}`} content={value[1]} />
               <Action.CopyToClipboard
                 title={`Copy All Info`}
                 content={JSON.stringify(Object.fromEntries(ipGeolocation), null, 2)}

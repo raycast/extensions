@@ -3,49 +3,25 @@ import { useContext } from "react";
 import {
   Action,
   ActionPanel,
-  Clipboard,
-  closeMainWindow,
   getPreferenceValues,
+  Icon,
   Keyboard,
+  launchCommand,
+  LaunchType,
   List,
-  showHUD,
 } from "@raycast/api";
 
 import ServicesContext from "./ServicesContext";
 import { Services } from "../Extension";
 
 import { ColorType } from "../colors/Color";
-import { returnToRaycast } from "../utilities";
-import pickColor from "../pickerHelper";
 import GeneralActions from "./GeneralActions";
 
 export default function ColorPickers() {
   const { history } = useContext(ServicesContext) as Services;
 
-  let pickerOpened = false;
-
-  const openColorPicker = async (type: ColorType) => {
-    if (pickerOpened) {
-      return;
-    }
-
-    pickerOpened = true;
-    closeMainWindow();
-    const color = await pickColor(type);
-
-    if (color === null) {
-      await returnToRaycast();
-      await showHUD("Cancelled");
-      pickerOpened = false;
-
-      return;
-    }
-
-    history.add(color);
-    Clipboard.copy(color.stringValue());
-    showHUD("Copied to Clipboard");
-    returnToRaycast();
-    pickerOpened = false;
+  const openColorPicker = (type: ColorType) => {
+    launchCommand({ name: "picker", type: LaunchType.UserInitiated, context: { internal: true, type } });
   };
 
   const defaultFormat = getPreferenceValues<{
@@ -66,12 +42,17 @@ export default function ColorPickers() {
       icon={{ source: "dropper.png" }}
       actions={
         <ActionPanel>
-          <Action title={`Pick in ${defaultFormat}`} onAction={() => openColorPicker(defaultFormat)} />
+          <Action
+            title={`Pick in ${defaultFormat}`}
+            icon={Icon.Brush}
+            onAction={() => openColorPicker(defaultFormat)}
+          />
           <ActionPanel.Section key="pickers">
             {orderedPickFormats.map((type, index) => (
               <Action
                 key={index}
                 title={`Pick in ${type}`}
+                icon={Icon.Brush}
                 shortcut={shortcuts[index]}
                 onAction={() => openColorPicker(type)}
               />

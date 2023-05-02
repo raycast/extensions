@@ -23,7 +23,7 @@ export function QueryWorldListLayout() {
       isLoading={loading || (starTimezones.length !== 0 && tag === "")}
       searchBarPlaceholder={"Search timezones"}
       onSelectionChange={(id) => {
-        if (typeof id !== "undefined" && !isEmpty(id)) {
+        if (typeof id === "string" && !isEmpty(id)) {
           setRegion((JSON.parse(id) as TimezoneId).region);
         }
       }}

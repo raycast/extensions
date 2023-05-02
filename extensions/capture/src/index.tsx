@@ -1,58 +1,114 @@
-import { Action, ActionPanel, closeMainWindow, Form, getPreferenceValues, popToRoot, showToast } from "@raycast/api";
-import fetch from "node-fetch";
+import {
+  Action,
+  ActionPanel,
+  closeMainWindow,
+  confirmAlert,
+  environment,
+  Form,
+  getPreferenceValues,
+  Icon,
+  openCommandPreferences,
+  popToRoot,
+  showToast,
+  Toast,
+} from "@raycast/api";
+import fetch, { RequestInit } from "node-fetch";
 import { useState } from "react";
 
+import { Env, useEnv } from "./useEnv";
+
 interface Preferences {
-  url: string;
   jwt: string;
 }
 
-interface Values {
+interface FormValues {
   text: string;
 }
 
-const requiredError = "Required";
-
 export default function Command() {
+  // Env used for API requests (selectable in development environments)
+  const { env, envOrder, getApiConfig, setEnv } = useEnv();
+
+  // Raycast Preferences for this command
   const preferences = getPreferenceValues<Preferences>();
 
-  const [textError, setTextError] = useState<string | undefined>();
+  // Error message for the primary TextArea
+  const [textErrorMessage, setTextErrorMessage] = useState<string | undefined>();
 
-  function hasRequiredError(values: Values) {
-    setTextError(!values.text ? requiredError : undefined);
+  // Clear the text error message
+  const clearTextErrorMessage = () => setTextErrorMessage(undefined);
 
-    return !values.text;
-  }
+  // Handle changes to Env and prompt user open Raycast Preferences to update their JWT
+  const handleChangeEnv = async (nextEnv: Env) => {
+    if (nextEnv === env) return;
 
-  function clearTextErrorIfNeeded(): any {
-    if (textError && textError.length > 0) setTextError(undefined);
-  }
+    if (
+      await confirmAlert({
+        title: `Change environment to ${nextEnv}?`,
+        message: `Select "Confirm" to open Raycast Preferences and update your JWT.`,
+      })
+    ) {
+      setEnv(nextEnv);
+      openCommandPreferences();
+    }
+  };
 
-  function handleSubmit(values: Values) {
-    if (hasRequiredError(values)) return;
+  // Handle Form submit and send request to the API
+  const handleSubmit = async (formValues: FormValues) => {
+    if (!formValues.text) return setTextErrorMessage("Required");
 
-    showToast({ title: "Sending to Capture...", style: "ANIMATED" as any });
+    const { url } = await getApiConfig();
 
-    fetch(preferences.url, POST({ body: { text: values.text }, token: preferences.jwt })).then(() => {
-      closeMainWindow();
-      popToRoot();
-    });
-  }
+    showToast({ title: "Sending to Capture...", style: Toast.Style.Animated });
+
+    fetch(url, POST({ body: { text: formValues.text }, token: preferences.jwt }))
+      .then(() => {
+        // Close main window after request succeeds
+        closeMainWindow();
+        // Ensure the user sees root search when they re-open Raycast
+        popToRoot();
+      })
+      .catch(() =>
+        showToast({ title: "Something went wrong", message: "Please try again", style: Toast.Style.Failure })
+      );
+  };
 
   return (
     <Form
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Submit" onSubmit={handleSubmit} />
+          {environment.isDevelopment && (
+            <ActionPanel.Submenu title="Change Environment...">
+              {envOrder.map((_env) => (
+                <Action
+                  key={_env}
+                  title={_env}
+                  icon={_env === env ? Icon.CircleProgress100 : Icon.Circle}
+                  onAction={() => handleChangeEnv(_env)}
+                />
+              ))}
+            </ActionPanel.Submenu>
+          )}
         </ActionPanel>
       }
     >
-      <Form.TextArea id="text" placeholder="Start typing..." error={textError} onChange={clearTextErrorIfNeeded} />
+      <Form.TextArea
+        id="text"
+        placeholder="Start typing..."
+        error={textErrorMessage}
+        onChange={clearTextErrorMessage}
+      />
     </Form>
   );
 }
 
-const POST: (params: any) => any = ({ body, token }) => ({
+interface POSTParams {
+  body: { text: string };
+  token: string;
+}
+
+const POST: (params: POSTParams) => RequestInit = ({ body, token }) => ({
   method: "POST",
   headers: {
     "Content-Type": "application/json",

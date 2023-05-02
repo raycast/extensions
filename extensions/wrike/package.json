@@ -5,7 +5,6 @@
   "description": "Interact with Wrike",
   "icon": "wrike_logo.png",
   "author": "Slus",
-  "owner": "Slus",
   "license": "MIT",
   "categories": ["Productivity", "Web"],
   "preferences": [

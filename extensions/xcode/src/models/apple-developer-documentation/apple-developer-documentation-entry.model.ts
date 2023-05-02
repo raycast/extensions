@@ -1,3 +1,5 @@
+import { AppleDeveloperDocumentationEntryType } from "./apple-developer-documentation-entry-type.model";
+
 /**
  * Apple Developer Documentation Entry
  */
@@ -13,7 +15,7 @@ export interface AppleDeveloperDocumentationEntry {
   /**
    * The type
    */
-  type: string;
+  type: AppleDeveloperDocumentationEntryType;
   /**
    * The platforms
    */

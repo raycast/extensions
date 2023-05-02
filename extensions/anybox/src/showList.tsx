@@ -61,7 +61,7 @@ export default function Sidebar() {
             title={itemTitle(item)}
             subtitle={itemSubtitle(item)}
             icon={{
-              source: `http://localhost:6391/sf-symbols/${item.icon}`,
+              source: `http://127.0.0.1:6391/sf-symbols/${item.icon}`,
               fallback: Icon.List,
               tintColor: item.color || Color.Purple,
             }}
@@ -72,7 +72,7 @@ export default function Sidebar() {
                 <Action
                   title={`Open ${item.name} List in Anybox`}
                   icon={{
-                    source: `http://localhost:6391/sf-symbols/${item.icon}`,
+                    source: `http://127.0.0.1:6391/sf-symbols/${item.icon}`,
                     fallback: Icon.List,
                     tintColor: item.color || Color.Purple,
                   }}

@@ -22,13 +22,7 @@ export default function Club() {
     <Grid
       throttle
       isLoading={!clubs}
-      searchBarAccessory={
-        <CompetitionDropdown
-          type="grid"
-          selected={competition}
-          onSelect={setCompetition}
-        />
-      }
+      searchBarAccessory={<CompetitionDropdown type="grid" selected={competition} onSelect={setCompetition} />}
     >
       {clubs?.map((club) => {
         return (
@@ -39,11 +33,7 @@ export default function Club() {
             content={club.shield.url}
             actions={
               <ActionPanel>
-                <Action.Push
-                  title="Club Profile"
-                  icon={Icon.Sidebar}
-                  target={<ClubDetails {...club} />}
-                />
+                <Action.Push title="Club Profile" icon={Icon.Sidebar} target={<ClubDetails {...club} />} />
               </ActionPanel>
             }
           />

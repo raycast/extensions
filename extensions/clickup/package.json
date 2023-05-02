@@ -1,17 +1,27 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "manage-clickup-tasks",
-  "title": "Clickup Tasks Explorer",
+  "title": "ClickUp - Tasks Explorer",
   "description": "Browse ClickUp tasks from Raycast",
   "icon": "clickup-icon.png",
   "author": "aparandeh",
+  "contributors": [
+    "aesadde"
+  ],
   "license": "MIT",
   "commands": [
     {
-      "name": "index",
+      "name": "explore",
       "title": "Tasks Explorer",
-      "subtitle": "Clickup",
+      "subtitle": "ClickUp",
       "description": "Browse ClickUp tasks from Raycast",
+      "mode": "view"
+    },
+    {
+      "name": "capture",
+      "title": "Quick Capture",
+      "subtitle": "ClickUp",
+      "description": "Quickly capture tasks to your default ClickUp list",
       "mode": "view"
     }
   ],
@@ -27,7 +37,7 @@
     },
     {
       "name": "teamId",
-      "type": "textfield" ,
+      "type": "textfield",
       "required": false,
       "title": "Default Team ID",
       "description": "Your default ClickUp team ID taken from https://app.clickup.com/<team_id>",
@@ -36,16 +46,26 @@
     },
     {
       "name": "spaceId",
-      "type": "textfield" ,
+      "type": "textfield",
       "required": false,
       "title": "Default Space ID",
       "description": "Set your default ClickUp space ID taken from https://app.clickup.com/<team_id>/v/b/1234-{space_id}-1234",
       "link": "https://github.com/Ali-Parandeh/raycast-clickup-extension",
       "placeholder": "123456789"
+    },
+    {
+      "name": "listId",
+      "type": "textfield",
+      "required": true,
+      "title": "Default List ID",
+      "description": "Set your default ClickUp list ID taken from https://app.clickup.com/<team_id>/v/li/{list_id}",
+      "link": "https://github.com/Ali-Parandeh/raycast-clickup-extension",
+      "placeholder": "123456789"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.27.0",
+    "@raycast/api": "^1.45.2",
+    "@raycast/utils": "^1.4.14",
     "axios": "^0.24.0",
     "prettier": "^2.5.1"
   },

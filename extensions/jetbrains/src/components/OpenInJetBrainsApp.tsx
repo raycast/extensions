@@ -1,22 +1,64 @@
 import { exec } from "child_process";
 import { AppHistory, recentEntry } from "../util";
-import { ActionPanel, popToRoot, showHUD, showToast, Toast } from "@raycast/api";
+import { ActionPanel, popToRoot, showHUD, showToast, Toast, open } from "@raycast/api";
+import { promisify } from "util";
+
+const execPromise = promisify(exec);
 
 interface OpenInJetBrainsAppActionProps {
   tool: AppHistory;
   recent: recentEntry | null;
 }
 
-export function OpenInJetBrainsApp({ tool, recent }: OpenInJetBrainsAppActionProps): JSX.Element {
-  function handleAction() {
-    const cmd = tool.tool ? `${tool.tool} "${recent?.path ?? ""}"` : `open ${tool.url}${recent?.title ?? ""}`;
-    showHUD(`Opening ${recent ? recent.title : tool.title}`)
-      .then(() => exec(cmd, { env: {} }))
-      .then(() => popToRoot())
-      .catch((error) => showToast(Toast.Style.Failure, "Failed", error.message).then(() => console.error({ error })));
+export function openInApp(tool: AppHistory, recent: recentEntry | null): () => Promise<Toast | undefined> {
+  const cmd = tool.tool ? `"${tool.tool}" "${recent?.path ?? ""}"` : `open ${tool.url}${recent?.title ?? ""}`;
+  const toOpen = tool.app?.path ?? (tool.tool ? tool.tool : "");
+
+  async function isRunning() {
+    const { stdout } = await execPromise(`ps aux | grep -v "grep" | grep "${tool.app?.path}"`).catch(() => ({
+      stdout: "",
+    }));
+    return stdout !== "";
   }
 
+  function sleep(seconds: number): Promise<void> {
+    return new Promise(function (resolve) {
+      setTimeout(resolve, seconds * 1000);
+    });
+  }
+
+  return async function () {
+    if (toOpen === "") {
+      return showToast(Toast.Style.Failure, "Failed", "No app path or tool path");
+    }
+    let running = await isRunning();
+    if (!running) {
+      /**
+       * WORKAROUND FOR ENVIRONMENT PROBLEMS
+       * if the app is not running open it and wait for a bit
+       * using the tool directly opens with the wrong env
+       * and we need to wait so the tool actually does open
+       */
+      console.log("not-running");
+      await showHUD(`Opening ${tool.app?.title ?? tool.title}`).then(() => open(toOpen));
+      do {
+        running = await isRunning();
+      } while (!running);
+      await sleep(5);
+    }
+    showHUD(`Opening ${recent ? recent.title : tool.title}`)
+      .then(() => recent !== null && exec(cmd))
+      .then(() => popToRoot())
+      .catch((error) => showToast(Toast.Style.Failure, "Failed", error.message).then(() => console.error({ error })));
+  };
+}
+
+export function OpenInJetBrainsApp({ tool, recent }: OpenInJetBrainsAppActionProps): JSX.Element | null {
   return (
-    <ActionPanel.Item title={`Open ${recent ? "with " : ""}${tool.title}`} icon={tool.icon} onAction={handleAction} />
+    <ActionPanel.Item
+      title={`Open ${recent ? "with " : ""}${tool.title}`}
+      icon={tool.icon}
+      onAction={openInApp(tool, recent)}
+    />
   );
 }

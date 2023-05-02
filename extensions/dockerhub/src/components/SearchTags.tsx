@@ -1,20 +1,26 @@
 import { Action, ActionPanel, List, showToast, Toast } from "@raycast/api";
 import { useCallback, useEffect, useState } from "react";
-import { searchTag } from "../lib/api";
-import { Tag, TagImage } from "../lib/type";
+import { Hub } from "../lib/hub/hub";
+import { Tag } from "../lib/hub/types";
 
-export default function SearchTags({ image }: { image: string }) {
+export default function SearchTags(props: { repo: string; hub?: Hub }) {
   const [tags, setTags] = useState<Tag[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
-  const onSearchTextChange = useCallback(async (text: string) => {
+  const search = useCallback((text: string) => {
     const abortCtrl = new AbortController();
 
     const fn = async () => {
       setLoading(true);
       try {
-        const result = await searchTag(image, { page_size: 50, name: text }, abortCtrl.signal);
-        setTags(result);
+        let hub: Hub;
+        if (props.hub) {
+          hub = props.hub;
+        } else {
+          hub = new Hub();
+        }
+        const result = await hub.listTags(props.repo, text, abortCtrl.signal);
+        setTags(result.results);
       } catch (err) {
         showToast({
           style: Toast.Style.Failure,
@@ -25,34 +31,33 @@ export default function SearchTags({ image }: { image: string }) {
         setLoading(false);
       }
     };
-
     fn();
     return () => abortCtrl.abort();
   }, []);
 
   useEffect(() => {
-    onSearchTextChange("");
+    search("");
   }, []);
 
   return (
-    <List isLoading={loading} onSearchTextChange={onSearchTextChange} throttle>
+    <List isLoading={loading} onSearchTextChange={search} throttle>
       {tags.map((tag) =>
-        tag.images?.map((imageTag: TagImage) => (
+        tag.images?.map((imageTag) => (
           <List.Item
             key={`${tag.id}-${imageTag.digest}`}
-            title={`${tag.name}`}
-            subtitle={`${tag.update_time ? tag.update_time : ""} by ${tag.last_updater_username}`}
+            title={tag.name}
+            subtitle={tag.last_updated ? `${tag.last_updated} by ${tag.last_updater_username}` : ""}
             actions={
               <ActionPanel>
-                <Action.CopyToClipboard title="Copy Pull Command" content={`docker pull ${image}:${tag.name}`} />
-                <Action.CopyToClipboard title="Copy Name with Tag" content={`${image}:${tag.name}`} />
-                <Action.OpenInBrowser url={imageTag.url ? imageTag.url : ""} />
-                <Action.CopyToClipboard title="Copy URL" content={imageTag.url ? imageTag.url : ""} />
+                <Action.CopyToClipboard title="Copy Pull Command" content={`docker pull ${props.repo}:${tag.name}`} />
+                <Action.CopyToClipboard title="Copy Name with Tag" content={`${props.repo}:${tag.name}`} />
+                <Action.OpenInBrowser url={imageTag.url ?? ""} />
+                <Action.CopyToClipboard title="Copy URL" content={imageTag.url ?? ""} />
               </ActionPanel>
             }
             accessories={[
               {
-                text: `${imageTag.os_arch ? imageTag.os_arch : ""} ${imageTag.sizeHuman ? imageTag.sizeHuman : ""}`,
+                text: `${imageTag.os_arch ?? ""} ${imageTag.sizeHuman ? imageTag.sizeHuman : ""}`,
               },
             ]}
           />

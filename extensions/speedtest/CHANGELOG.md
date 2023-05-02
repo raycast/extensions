@@ -1,5 +1,9 @@
 # Speedtest Changelog
 
+## [Update] - 2022-10-04
+
+Update speedtest CLI to 1.2.0, which is a universal binary.
+
 ## [Update] - 2022-05-03
 
 Updated Raycast API to 1.33.0

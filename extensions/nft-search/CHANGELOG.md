@@ -1,5 +1,9 @@
 # NFT Changelog
 
+## [Fixed URL] - 2022-09-22
+
+- Fixed URL in the changelog
+
 ## [Initial Version] - 2022-05-28
 
 - Add support for searching NFTs by name

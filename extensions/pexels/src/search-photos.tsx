@@ -45,13 +45,15 @@ export default function SearchPhotos() {
     >
       <PexelsEmptyView title={emptyViewTitle()} layout={preferences.layout} />
       {pexelsPhotos?.photos.map((value, index) => (
-        <PhotosListItem key={index} pexelsPhoto={value} index={index} />
+        <PhotosListItem key={index} item={value} index={index} />
       ))}
     </List>
   ) : (
     <Grid
-      itemSize={preferences.itemSize as Grid.ItemSize}
+      columns={parseInt(preferences.columns)}
       isLoading={loading}
+      aspectRatio={"3/2"}
+      fit={Grid.Fit.Fill}
       searchBarPlaceholder={"Search photos"}
       onSearchTextChange={(newValue) => {
         setSearchRequest({ searchContent: newValue, page: 1 });
@@ -69,7 +71,7 @@ export default function SearchPhotos() {
     >
       <PexelsEmptyView title={emptyViewTitle()} layout={preferences.layout} />
       {pexelsPhotos?.photos.map((value, index) => (
-        <PhotosGridItem key={index} pexelsPhoto={value} index={index} />
+        <PhotosGridItem key={index} item={value} index={index} />
       ))}
     </Grid>
   );

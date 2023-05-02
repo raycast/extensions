@@ -154,3 +154,34 @@ export const getProjects = async () => {
     return [];
   }
 };
+
+export const addTask = async (data: {
+  projectId: string;
+  title: string;
+  description: string;
+  dueDate?: string;
+  isAllDay: boolean;
+}) => {
+  const { projectId, title, description, dueDate, isAllDay } = data;
+  const installed = await checkAppInstalled();
+  if (!installed) return undefined;
+
+  try {
+    const result = (await runAppleScript(`
+    set result to ""
+    tell application "TickTick"
+      set result to add task to list "${projectId}" title "${title}" description "${description}"${
+      dueDate ? ` due date "${dueDate}"` : ""
+    } from "raycast" ${isAllDay ? "with" : "without"} allday
+    end tell
+
+  `)) as string;
+    if (result === "missing value") {
+      return false;
+    }
+    if (result === "true") return true;
+    return false;
+  } catch (e) {
+    return undefined;
+  }
+};

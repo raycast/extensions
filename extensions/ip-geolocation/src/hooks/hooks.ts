@@ -1,13 +1,17 @@
-import { useCallback, useEffect, useState } from "react";
-import { getIPGeolocation, getIPV4Address, getIPV6Address, isEmpty } from "../utils/common-utils";
-import { showToast, Toast } from "@raycast/api";
-import { IPGeolocation, IPGeolocationReadable } from "../types/ip-geolocation";
-import publicIp from "public-ip";
-import Style = Toast.Style;
+import { Cache, showToast, Toast } from "@raycast/api";
 import axios from "axios";
+import { publicIpv4, publicIpv6 } from "public-ip";
+import { useCallback, useEffect, useState } from "react";
+import { CacheKey, IPGeolocation, IPGeolocationReadable } from "../types/ip-geolocation";
+import { getIPGeolocation, getIPV4Address, getIPV6Address, isEmpty } from "../utils/common-utils";
 import { WORLD_TIME_API } from "../utils/constants";
+import Style = Toast.Style;
 
-export const searchIpGeolocation = (language: string, searchContent: string) => {
+export const searchIpGeolocation = (
+  language: string,
+  searchContent: string,
+  coordinatesFormat: "latLon" | "lonLat"
+) => {
   const [ipGeolocation, setIpGeolocation] = useState<[string, string][]>([]);
   const [loading, setLoading] = useState<boolean>(false);
 
@@ -30,7 +34,10 @@ export const searchIpGeolocation = (language: string, searchContent: string) => 
             Location: `${ipGeolocation.country}, ${ipGeolocation.regionName}, ${ipGeolocation.city}${
               isEmpty(ipGeolocation.district) ? "" : ", " + ipGeolocation.district
             }${isEmpty(ipGeolocation.zip) ? "" : ", ZIP: " + ipGeolocation.zip}`, //country  regionName city districtGeoCoordinates: `${ipGeolocation.lon} , ${ipGeolocation.lat}`, //(lon,lat)
-            GeoCoordinates: `${ipGeolocation.lon} , ${ipGeolocation.lat}`, ////(lon,lat)
+            GeoCoordinates:
+              coordinatesFormat === "latLon"
+                ? `${ipGeolocation.lat} , ${ipGeolocation.lon}` ////(lat,lon)
+                : `${ipGeolocation.lon} , ${ipGeolocation.lat}`, ////(lon,lat)
             Timezone: ipGeolocation.timezone,
             AS: ipGeolocation.as.substring(0, ipGeolocation.as.indexOf(" ")),
             ISP: ipGeolocation.isp,
@@ -71,12 +78,19 @@ export const searchIpGeolocation = (language: string, searchContent: string) => 
   return { ipGeolocation: ipGeolocation, loading: loading };
 };
 
-export const searchMyIpGeolocation = (language: string, showIPv6: boolean) => {
+export const searchMyIpGeolocation = (language: string, showIPv6: boolean, coordinatesFormat: "latLon" | "lonLat") => {
   const [ipGeolocation, setIpGeolocation] = useState<[string, string][]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
   const fetchData = useCallback(async () => {
     try {
+      const cache = new Cache();
+      const cacheInfo = cache.get(CacheKey.MY_IP_GEOLOCATION);
+      console.debug("cacheInfo: " + cacheInfo);
+      if (typeof cacheInfo === "string") {
+        setIpGeolocation(JSON.parse(cacheInfo));
+      }
+
       const _ipv4 = getIPV4Address();
       const myInternalIpv4 = (isEmpty(_ipv4) ? "" : _ipv4) as string;
       let myInternalIpv6 = "";
@@ -84,14 +98,12 @@ export const searchMyIpGeolocation = (language: string, showIPv6: boolean) => {
         const _ipv6 = getIPV6Address();
         myInternalIpv6 = (isEmpty(_ipv6) ? "" : _ipv6) as string;
       }
-      const myPublicIpv4 = await publicIp
-        .v4({ onlyHttps: true })
+      const myPublicIpv4 = await publicIpv4({ onlyHttps: true })
         .then((ip) => ip)
         .catch(() => "");
       let myPublicIpv6 = "";
       if (showIPv6) {
-        myPublicIpv6 = await publicIp
-          .v6({ onlyHttps: true })
+        myPublicIpv6 = await publicIpv6({ onlyHttps: true })
           .then((ip) => ip)
           .catch(() => "");
       }
@@ -100,14 +112,17 @@ export const searchMyIpGeolocation = (language: string, showIPv6: boolean) => {
         .then((ipGeolocation: IPGeolocation) => {
           if (ipGeolocation.status === "success") {
             const ipGeolocationReadable = {
-              "Local IP": `${myInternalIpv4}${isEmpty(myInternalIpv6) ? "" : " , " + myInternalIpv6}`,
-              "Public IP": `${isEmpty(myPublicIpv4) ? ipGeolocation.query : myPublicIpv4}${
-                isEmpty(myPublicIpv6) ? "" : " , " + myPublicIpv6
-              }`,
+              "Local IPv4": `${myInternalIpv4}`,
+              "Local IPv6": `${myInternalIpv6}`,
+              "Public IPv4": `${isEmpty(myPublicIpv4) ? ipGeolocation.query : myPublicIpv4}`,
+              "Public IPv6": `${myPublicIpv6}`,
               Location: `${ipGeolocation.country}, ${ipGeolocation.regionName}, ${ipGeolocation.city}${
                 isEmpty(ipGeolocation.district) ? "" : ", " + ipGeolocation.district
               }${isEmpty(ipGeolocation.zip) ? "" : ", ZIP: " + ipGeolocation.zip}`, //country  regionName city districtGeoCoordinates: `${ipGeolocation.lon} , ${ipGeolocation.lat}`, //(lon,lat)
-              GeoCoordinates: `${ipGeolocation.lon} , ${ipGeolocation.lat}`, ////(lon,lat)
+              GeoCoordinates:
+                coordinatesFormat === "latLon"
+                  ? `${ipGeolocation.lat} , ${ipGeolocation.lon}` ////(lat,lon)
+                  : `${ipGeolocation.lon} , ${ipGeolocation.lat}`, ////(lon,lat)
               Timezone: ipGeolocation.timezone,
               AS: ipGeolocation.as.substring(0, ipGeolocation.as.indexOf(" ")),
               ISP: ipGeolocation.isp,
@@ -125,22 +140,29 @@ export const searchMyIpGeolocation = (language: string, showIPv6: boolean) => {
                   _ipGeolocationReadable.Timezone +
                   ", " +
                   dateTime.substring(0, dateTime.indexOf(".")).replace("T", " ");
-                setIpGeolocation(Object.entries(_ipGeolocationReadable));
+
+                const ipGeolocationInfo = Object.entries(_ipGeolocationReadable);
+                setIpGeolocation(ipGeolocationInfo);
+                cache.set(CacheKey.MY_IP_GEOLOCATION, JSON.stringify(ipGeolocationInfo));
                 setLoading(false);
               })
               .catch((reason) => {
-                setIpGeolocation(Object.entries(ipGeolocationReadable));
+                const ipGeolocationInfo = Object.entries(ipGeolocationReadable);
+                setIpGeolocation(ipGeolocationInfo);
+                cache.set(CacheKey.MY_IP_GEOLOCATION, JSON.stringify(ipGeolocationInfo));
                 setLoading(false);
                 console.error(String(reason));
               });
           } else {
             const ipGeolocationReadable = {
-              "Local IP": `${myInternalIpv4}${isEmpty(myInternalIpv6) ? "" : " , " + myInternalIpv6}`,
-              "Public IP": `${isEmpty(myPublicIpv4) ? ipGeolocation.query : myPublicIpv4}${
-                isEmpty(myPublicIpv6) ? "" : " , " + myPublicIpv6
-              }`,
+              "Local IPv4": `${myInternalIpv4}`,
+              "Local IPv6": `${myInternalIpv6}`,
+              "Public IPv4": `${isEmpty(myPublicIpv4) ? ipGeolocation.query : myPublicIpv4}`,
+              "Public IPv6": `${myPublicIpv6}`,
             };
-            setIpGeolocation(Object.entries(ipGeolocationReadable));
+            const ipGeolocationInfo = Object.entries(ipGeolocationReadable);
+            setIpGeolocation(ipGeolocationInfo);
+            cache.set(CacheKey.MY_IP_GEOLOCATION, JSON.stringify(ipGeolocationInfo));
             setLoading(false);
           }
         })

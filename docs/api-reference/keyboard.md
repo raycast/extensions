@@ -13,7 +13,7 @@ See [KeyModifier](#keyboard.keymodifier) and [KeyEquivalent](#keyboard.keyequiva
 #### Example
 
 ```typescript
-import { ActionPanel, Detail } from "@raycast/api";
+import { Action, ActionPanel, Detail } from "@raycast/api";
 
 export default function Command() {
   return (
@@ -21,22 +21,18 @@ export default function Command() {
       markdown="Let's play some games 👾"
       actions={
         <ActionPanel title="Game controls">
-          <ActionPanel.Item
-            title="Up"
-            shortcut={{ modifiers: ["opt"], key: "arrowUp" }}
-            onAction={() => console.log("Go up")}
-          />
-          <ActionPanel.Item
+          <Action title="Up" shortcut={{ modifiers: ["opt"], key: "arrowUp" }} onAction={() => console.log("Go up")} />
+          <Action
             title="Down"
             shortcut={{ modifiers: ["opt"], key: "arrowDown" }}
             onAction={() => console.log("Go down")}
           />
-          <ActionPanel.Item
+          <Action
             title="Left"
             shortcut={{ modifiers: ["opt"], key: "arrowLeft" }}
             onAction={() => console.log("Go left")}
           />
-          <ActionPanel.Item
+          <Action
             title="Right"
             shortcut={{ modifiers: ["opt"], key: "arrowRight" }}
             onAction={() => console.log("Go right")}

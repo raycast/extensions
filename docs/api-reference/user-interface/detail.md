@@ -29,12 +29,9 @@ export default function Command() {
 
 ```typescript
 import { Detail } from "@raycast/api";
-import { pathToFileURL } from "url";
-
-const image = pathToFileURL(`${environment.assetsPath}/image.png`).href;
 
 export default function Command() {
-  return <Detail markdown={`![Image Title](${image})`} />;
+  return <Detail markdown={`![Image Title](example.png)`} />;
 }
 ```
 
@@ -103,6 +100,15 @@ A single value with an optional icon.
 ```typescript
 import { Detail } from "@raycast/api";
 
+// Define markdown here to prevent unwanted indentation.
+const markdown = `
+# Pikachu
+
+![](https://assets.pokemon.com/assets/cms2/img/pokedex/full/025.png)
+
+Pikachu that can generate powerful electricity have cheek sacs that are extra soft and super stretchy.
+`;
+
 export default function Main() {
   return (
     <Detail
@@ -133,6 +139,15 @@ An item to display a link.
 ```typescript
 import { Detail } from "@raycast/api";
 
+// Define markdown here to prevent unwanted indentation.
+const markdown = `
+# Pikachu
+
+![](https://assets.pokemon.com/assets/cms2/img/pokedex/full/025.png)
+
+Pikachu that can generate powerful electricity have cheek sacs that are extra soft and super stretchy.
+`;
+
 export default function Main() {
   return (
     <Detail
@@ -162,6 +177,15 @@ A list of [`Tags`](detail.md#detail.metadata.taglist.item) displayed in a row.
 
 ```typescript
 import { Detail } from "@raycast/api";
+
+// Define markdown here to prevent unwanted indentation.
+const markdown = `
+# Pikachu
+
+![](https://assets.pokemon.com/assets/cms2/img/pokedex/full/025.png)
+
+Pikachu that can generate powerful electricity have cheek sacs that are extra soft and super stretchy.
+`;
 
 export default function Main() {
   return (
@@ -200,6 +224,15 @@ A metadata item that shows a separator line. Use it for grouping and visually se
 
 ```typescript
 import { Detail } from "@raycast/api";
+
+// Define markdown here to prevent unwanted indentation.
+const markdown = `
+# Pikachu
+
+![](https://assets.pokemon.com/assets/cms2/img/pokedex/full/025.png)
+
+Pikachu that can generate powerful electricity have cheek sacs that are extra soft and super stretchy.
+`;
 
 export default function Main() {
   return (

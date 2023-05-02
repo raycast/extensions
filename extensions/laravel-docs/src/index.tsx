@@ -1,15 +1,11 @@
-import {
-  ActionPanel,
-  getPreferenceValues,
-  List,
-  CopyToClipboardAction,
-  OpenInBrowserAction,
-  showToast,
-  ToastStyle,
-} from "@raycast/api";
+import { ActionPanel, List, Action, showToast, Toast } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
 import algoliasearch from "algoliasearch/lite";
 import striptags from "striptags";
+import { VersionDropdown } from "./version_dropdown";
+/* eslint-disable @typescript-eslint/no-var-requires */
+const glob = require("glob"); // No ES version is provided.
+/* eslint-enable @typescript-eslint/no-var-requires */
 
 type docList = {
   [key: string]: {
@@ -18,23 +14,26 @@ type docList = {
   }[];
 };
 
-const DOCS: { [key: string]: docList } = {
-  master: require("./documentation/master.json"),
-  "9.x": require("./documentation/9.x.json"),
-  "8.x": require("./documentation/8.x.json"),
-  "7.x": require("./documentation/7.x.json"),
-  "6.x": require("./documentation/6.x.json"),
-  "5.8": require("./documentation/5.8.json"),
-  "5.7": require("./documentation/5.7.json"),
-  "5.6": require("./documentation/5.6.json"),
-  "5.5": require("./documentation/5.5.json"),
-  "5.4": require("./documentation/5.4.json"),
-  "5.3": require("./documentation/5.3.json"),
-  "5.2": require("./documentation/5.2.json"),
-  "5.1": require("./documentation/5.1.json"),
-  "5.0": require("./documentation/5.0.json"),
-  "4.2": require("./documentation/4.2.json"),
-};
+const DOCS: { [key: string]: docList } = Object.fromEntries(
+  glob
+    .sync(__dirname + "/assets/documentation/*.json")
+    // only keep the version from the path as key, result: [['master', {...}], ['10.x', {...}]]
+    .map((path: string) => [/(?<version>[^/]+)\.json/.exec(path)?.groups?.version, require(path)])
+    // Sort these putting non-numeric "versions" first.
+    .sort(function (a: [string], b: [string]) {
+      const aVersion: RegExpMatchArray | null = a[0].match(/\d+/);
+      const bVersion: RegExpMatchArray | null = b[0].match(/\d+/);
+      if (aVersion === null) {
+        return -1;
+      }
+
+      if (bVersion === null) {
+        return 1;
+      }
+
+      return (bVersion[0] as unknown as number) - (aVersion[0] as unknown as number);
+    })
+);
 
 const APPID = "E3MIRNPJH5";
 const APIKEY = "1fa3a8fec06eb1858d6ca137211225c0";
@@ -68,8 +67,6 @@ type LaravelDocsHit = {
 };
 
 export default function main() {
-  const preferences = getPreferenceValues();
-
   const algoliaClient = useMemo(() => {
     return algoliasearch(APPID, APIKEY);
   }, [APPID, APIKEY]);
@@ -79,7 +76,8 @@ export default function main() {
   }, [algoliaClient, INDEX]);
 
   const [searchResults, setSearchResults] = useState<any[] | undefined>();
-  const [isLoading, setIsLoading] = useState(false);
+  const [version, setVersion] = useState<string | undefined>();
+  const [isLoading, setIsLoading] = useState(true);
 
   const hierarchyToArray = (hierarchy: KeyValueHierarchy) => {
     return Object.values(hierarchy)
@@ -111,7 +109,7 @@ export default function main() {
     return await algoliaIndex
       .search(query, {
         hitsPerPage: 11,
-        facetFilters: ["version:" + preferences.laravelVersion],
+        facetFilters: ["version:" + version],
       })
       .then((res) => {
         setIsLoading(false);
@@ -119,7 +117,7 @@ export default function main() {
       })
       .catch((err) => {
         setIsLoading(false);
-        showToast(ToastStyle.Failure, "Error searching Laravel Documentation", err.message);
+        showToast(Toast.Style.Failure, "Error searching Laravel Documentation", err.message);
         return [];
       });
   };
@@ -128,13 +126,27 @@ export default function main() {
     (async () => setSearchResults(await search()))();
   }, []);
 
-  const currentDocs = DOCS[preferences.laravelVersion];
+  if (!version) {
+    return (
+      <List
+        isLoading={isLoading}
+        searchBarAccessory={<VersionDropdown id="version" versions={Object.keys(DOCS)} onChange={setVersion} />}
+      />
+    );
+  }
+
+  const currentDocs = DOCS[version];
+
+  if (isLoading && Object.entries(currentDocs).length) {
+    setIsLoading(false);
+  }
 
   return (
     <List
-      throttle={true}
+      throttle={false}
       isLoading={isLoading}
       onSearchTextChange={async (query) => setSearchResults(await search(query))}
+      searchBarAccessory={<VersionDropdown id="version" versions={Object.keys(DOCS)} onChange={setVersion} />}
     >
       {searchResults?.map((hit: LaravelDocsHit) => {
         return (
@@ -145,8 +157,8 @@ export default function main() {
             icon="command-icon.png"
             actions={
               <ActionPanel title={hit.url}>
-                <OpenInBrowserAction url={hit.url} title="Open in Browser" />
-                <CopyToClipboardAction content={hit.url} title="Copy URL" />
+                <Action.OpenInBrowser url={hit.url} title="Open in Browser" />
+                <Action.CopyToClipboard content={hit.url} title="Copy URL" />
               </ActionPanel>
             }
           />
@@ -163,8 +175,8 @@ export default function main() {
                     icon="command-icon.png"
                     actions={
                       <ActionPanel title={item.url}>
-                        <OpenInBrowserAction url={item.url} title="Open in Browser" />
-                        <CopyToClipboardAction content={item.url} title="Copy URL" />
+                        <Action.OpenInBrowser url={item.url} title="Open in Browser" />
+                        <Action.CopyToClipboard content={item.url} title="Copy URL" />
                       </ActionPanel>
                     }
                   />

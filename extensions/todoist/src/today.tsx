@@ -1,18 +1,37 @@
-import { getPreferenceValues, List } from "@raycast/api";
-import useSWR from "swr";
-import { partitionTasksWithOverdue, getSectionsWithPriorities, getSectionsWithLabels } from "./helpers";
+import { List } from "@raycast/api";
+import { useCachedPromise, useCachedState } from "@raycast/utils";
+
 import { todoist, handleError } from "./api";
-import { SectionWithTasks, SWRKeys, TodayGroupBy } from "./types";
 import TaskList from "./components/TaskList";
+import View from "./components/View";
+import {
+  getSectionsWithProjects,
+  GroupByOption,
+  partitionTasksWithOverdue,
+  SectionWithTasks,
+  todayGroupByOptions,
+} from "./helpers/groupBy";
+import { getSectionsWithPriorities, getSectionsWithLabels } from "./helpers/sections";
 
-export default function Today() {
-  const { data: tasks, error: getTasksError } = useSWR(SWRKeys.tasks, () =>
-    todoist.getTasks({ filter: "today|overdue" })
-  );
-  const { data: projects, error: getProjectsError } = useSWR(SWRKeys.projects, () => todoist.getProjects());
-  const { data: labels, error: getLabelsError } = useSWR(SWRKeys.labels, () => todoist.getLabels());
+function Today() {
+  const {
+    data: tasks,
+    isLoading: isLoadingTasks,
+    error: getTasksError,
+    mutate: mutateTasks,
+  } = useCachedPromise(() => todoist.getTasks({ filter: "today|overdue" }));
 
-  const preferences = getPreferenceValues();
+  const {
+    data: projects,
+    isLoading: isLoadingProjects,
+    error: getProjectsError,
+  } = useCachedPromise(() => todoist.getProjects());
+
+  const {
+    data: labels,
+    isLoading: isLoadingLabels,
+    error: getLabelsError,
+  } = useCachedPromise(() => todoist.getLabels());
 
   if (getTasksError) {
     handleError({ error: getTasksError, title: "Unable to get tasks" });
@@ -26,35 +45,33 @@ export default function Today() {
     handleError({ error: getLabelsError, title: "Unable to get labels" });
   }
 
+  const [groupBy, setGroupBy] = useCachedState<GroupByOption>("todoist.todaygroupby", "default");
+
   let sections: SectionWithTasks[] = [];
 
-  if (preferences.todayGroupBy === TodayGroupBy.default) {
-    const [overdue, today] = partitionTasksWithOverdue(tasks || []);
+  switch (groupBy) {
+    case "default": {
+      const [overdue, today] = partitionTasksWithOverdue(tasks || []);
 
-    sections = [{ name: "Today", tasks: today }];
+      sections = [{ name: "Today", tasks: today }];
 
-    if (overdue.length > 0) {
-      sections.unshift({
-        name: "Overdue",
-        tasks: overdue,
-      });
+      if (overdue.length > 0) {
+        sections.unshift({
+          name: "Overdue",
+          tasks: overdue,
+        });
+      }
+      break;
     }
-  }
-
-  if (preferences.todayGroupBy === TodayGroupBy.priority) {
-    sections = getSectionsWithPriorities(tasks || []);
-  }
-
-  if (preferences.todayGroupBy === TodayGroupBy.project) {
-    sections =
-      projects?.map((project) => ({
-        name: project.name,
-        tasks: tasks?.filter((task) => task.projectId === project.id) || [],
-      })) || [];
-  }
-
-  if (preferences.todayGroupBy === TodayGroupBy.label) {
-    sections = getSectionsWithLabels({ tasks: tasks || [], labels: labels || [] });
+    case "priority":
+      sections = getSectionsWithPriorities(tasks || []);
+      break;
+    case "project":
+      sections = getSectionsWithProjects({ tasks: tasks || [], projects: projects || [] });
+      break;
+    case "label":
+      sections = getSectionsWithLabels({ tasks: tasks || [], labels: labels || [] });
+      break;
   }
 
   return tasks?.length === 0 ? (
@@ -64,8 +81,18 @@ export default function Today() {
   ) : (
     <TaskList
       sections={sections}
-      isLoading={(!tasks && !getTasksError) || (!projects && !getProjectsError)}
+      isLoading={isLoadingTasks || isLoadingProjects || isLoadingLabels}
       projects={projects}
+      groupBy={{ value: groupBy, setValue: setGroupBy, options: todayGroupByOptions }}
+      mutateTasks={mutateTasks}
     />
+  );
+}
+
+export default function Command() {
+  return (
+    <View>
+      <Today />
+    </View>
   );
 }

@@ -2,16 +2,20 @@
  * @author: tisfeng
  * @createTime: 2022-06-24 22:36
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-08-23 10:50
+ * @lastEditTime: 2023-03-20 09:29
  * @fileName: consts.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
  */
 
 export const userAgent =
-  "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36";
+  "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Mobile Safari/537.36";
 
 export const clipboardQueryTextKey = "clipboardQueryTextKey";
+
+export const isChineseIPKey = "isChineseIP";
+
+export const networkTimeout = 15000;
 
 export enum YoudaoErrorCode {
   Success = "0",

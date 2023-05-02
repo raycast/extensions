@@ -1,3 +1,5 @@
+import { Color } from "@raycast/api";
+
 interface HeaderKey {
   [key: string]: string | number;
 }
@@ -7,7 +9,15 @@ interface Header extends HeaderKey {
   value: string;
 }
 
-export const methods: string[] = ["GET", "POST", "PUT", "DELETE"];
+export const methods: string[] = ["GET", "POST", "PUT", "PATCH", "DELETE"];
+
+export const methodColors = {
+  GET: Color.Green,
+  DELETE: Color.Red,
+  PATCH: Color.Orange,
+  POST: Color.Yellow,
+  PUT: Color.Purple,
+};
 
 export const headerKeys: string[] = [
   "A-IM",

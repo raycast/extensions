@@ -11,6 +11,10 @@
 
 A [Raycast](https://raycast.com/) extension that lets you search books on Library Genesis and allows you to quickly view them and directly download them.
 
+<p align="center">
+   <video src="https://user-images.githubusercontent.com/24559576/209476646-8c9fc1c7-e035-4ab1-b7e3-ebbe54c9c5b4.mp4" />
+</p>
+
 ## Features
 
 ### Search Books
@@ -20,14 +24,17 @@ The extension sends query directly to the fastest mirror of Library Genesis. It 
 
 ### Direct Download
 
-The extension allows you to quickly download the book file to your local machine with a single click. You can specify the directory to save the file.
+The extension allows you to quickly download the book file to your local machine with a single click.
 
 ![Screencast](./metadata/library-genesis-2.png)
+You can choose either to save it in a default directory, or to specify the directory every time, by configuring the extension.
+
+![Screencast](./metadata/library-genesis-3.png)
 
 ### Preferred Languages
 
 The extension allows you to set your preferred languages and prioritize the results of those languages.
 
-![Screencast](./metadata/library-genesis-3.png)
+![Screencast](./metadata/library-genesis-4.png)
 
 For example, if your preferred language is set to `Chinese, English`, the extension will show you all the Chinese books first, and English second, and then others. In this case, even when you are searching in other languages, the results keep your preferred ones on top, so that you don't miss out.

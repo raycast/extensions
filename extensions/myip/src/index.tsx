@@ -11,7 +11,7 @@ export default function Command() {
   const [status, setStatus] = useState<LoadingStatus>("loading");
   const [ip, setIp] = useState("");
   const { pop } = useNavigation();
-  const localIp = address("public", "ipv4").toString();
+  const [localIp] = useState(() => address("public", "ipv4").toString());
 
   useEffect(() => {
     async function getIp() {
@@ -32,9 +32,8 @@ export default function Command() {
       <List.Item
         icon={Icon.Desktop}
         title={localIp}
-        accessoryTitle="local IP address"
         actions={
-          status === "success" && (
+          !!localIp && (
             <ActionPanel>
               <Action.CopyToClipboard
                 content={localIp}
@@ -45,12 +44,16 @@ export default function Command() {
             </ActionPanel>
           )
         }
+        accessories={[
+          {
+            text: "Local IP address",
+          },
+        ]}
       />
       <List.Item
         subtitle={ip === "" ? "Loading..." : ""}
         icon={Icon.Globe}
         title={ip}
-        accessoryTitle="public IP address"
         actions={
           status === "success" && (
             <ActionPanel>
@@ -63,6 +66,11 @@ export default function Command() {
             </ActionPanel>
           )
         }
+        accessories={[
+          {
+            text: "Public IP address",
+          },
+        ]}
       />
       {status === "success" && (
         <>
@@ -70,23 +78,31 @@ export default function Command() {
             icon={ip === "" ? "" : Icon.Eye}
             title=""
             subtitle="IP Lookup"
-            accessoryTitle="Details of the public IP address"
             actions={
               <ActionPanel>
-                <Action.Push title="IP Lookup" target={<LookUp />} icon={Icon.Eye} />
+                <Action.Push title="IP Lookup" target={<LookUp ip={ip} />} icon={Icon.Eye} />
               </ActionPanel>
             }
+            accessories={[
+              {
+                text: "Details of the public IP address",
+              },
+            ]}
           />
           <List.Item
             icon={ip === "" ? "" : Icon.Download}
             title=""
             subtitle="Torrent History"
-            accessoryTitle="Torrent download history of the public IP address"
             actions={
               <ActionPanel>
                 <Action.Push title="Torrent History" target={<Torrent ip={ip} />} icon={Icon.Download} />
               </ActionPanel>
             }
+            accessories={[
+              {
+                text: "Torrent download history of the public IP address",
+              },
+            ]}
           />
         </>
       )}

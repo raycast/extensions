@@ -1,12 +1,12 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import React, { useState } from "react";
 import { searchMavenArtifact } from "./hooks/hooks";
-import { getListIcon } from "./utils/ui-utils";
 import { actionIcons, buildDependency, buildUpdatedDate, dependencyTypes, isEmpty } from "./utils/common-utils";
 import { MAVEN_CENTRAL_REPOSITORY_SEARCH } from "./utils/constants";
 import { ActionToAdvancedSearchOptions } from "./components/action-to-advanced-search-options";
 import { ActionToPexels } from "./components/action-to-pexels";
 import { MavenEmptyView } from "./components/maven-empty-view";
+import { getAvatarIcon } from "@raycast/utils";
 
 interface MavenCentralRepositorySearchProps {
   repository: string;
@@ -38,7 +38,7 @@ export default function SearchMavenCentralRepository(props: { arguments: MavenCe
       {docs.map((value, index) => (
         <List.Item
           key={index}
-          icon={{ source: getListIcon(value.a) }}
+          icon={getAvatarIcon(value.a)}
           title={value.id}
           subtitle={{
             value: value.latestVersion,

@@ -22,46 +22,15 @@ import { Color, Icon, List } from "@raycast/api";
 export default function Command() {
   return (
     <List>
-      <List.Item
-        title="Blue"
-        icon={{ source: Icon.Circle, tintColor: Color.Blue }}
-      />
-      <List.Item
-        title="Green"
-        icon={{ source: Icon.Circle, tintColor: Color.Green }}
-      />
-      <List.Item
-        title="Brown"
-        icon={{ source: Icon.Circle, tintColor: Color.Brown }}
-      />
-      <List.Item
-        title="Magenta"
-        icon={{ source: Icon.Circle, tintColor: Color.Magenta }}
-      />
-      <List.Item
-        title="Orange"
-        icon={{ source: Icon.Circle, tintColor: Color.Orange }}
-      />
-      <List.Item
-        title="Purple"
-        icon={{ source: Icon.Circle, tintColor: Color.Purple }}
-      />
-      <List.Item
-        title="Red"
-        icon={{ source: Icon.Circle, tintColor: Color.Red }}
-      />
-      <List.Item
-        title="Yellow"
-        icon={{ source: Icon.Circle, tintColor: Color.Yellow }}
-      />
-      <List.Item
-        title="PrimaryText"
-        icon={{ source: Icon.Circle, tintColor: Color.PrimaryText }}
-      />
-      <List.Item
-        title="SecondaryText"
-        icon={{ source: Icon.Circle, tintColor: Color.SecondaryText }}
-      />
+      <List.Item title="Blue" icon={{ source: Icon.Circle, tintColor: Color.Blue }} />
+      <List.Item title="Green" icon={{ source: Icon.Circle, tintColor: Color.Green }} />
+      <List.Item title="Magenta" icon={{ source: Icon.Circle, tintColor: Color.Magenta }} />
+      <List.Item title="Orange" icon={{ source: Icon.Circle, tintColor: Color.Orange }} />
+      <List.Item title="Purple" icon={{ source: Icon.Circle, tintColor: Color.Purple }} />
+      <List.Item title="Red" icon={{ source: Icon.Circle, tintColor: Color.Red }} />
+      <List.Item title="Yellow" icon={{ source: Icon.Circle, tintColor: Color.Yellow }} />
+      <List.Item title="PrimaryText" icon={{ source: Icon.Circle, tintColor: Color.PrimaryText }} />
+      <List.Item title="SecondaryText" icon={{ source: Icon.Circle, tintColor: Color.SecondaryText }} />
     </List>
   );
 }
@@ -72,7 +41,6 @@ export default function Command() {
 | Name          | Dark Theme                                               | Light Theme                                         |
 | :------------ | :------------------------------------------------------- | :-------------------------------------------------- |
 | Blue          | ![](../../.gitbook/assets/color-dark-blue.png)           | ![](../../.gitbook/assets/color-blue.png)           |
-| Brown         | ![](../../.gitbook/assets/color-dark-brown.png)          | ![](../../.gitbook/assets/color-brown.png)          |
 | Green         | ![](../../.gitbook/assets/color-dark-green.png)          | ![](../../.gitbook/assets/color-green.png)          |
 | Magenta       | ![](../../.gitbook/assets/color-dark-magenta.png)        | ![](../../.gitbook/assets/color-magenta.png)        |
 | Orange        | ![](../../.gitbook/assets/color-dark-orange.png)         | ![](../../.gitbook/assets/color-orange.png)         |
@@ -92,7 +60,7 @@ ColorLike: Color | Color.Dynamic | Color.Raw;
 
 Union type for the supported color types.
 
-When using a [Raw Color](#color.raw), it will be dynamically adjusted to achieve high contrast with the Raycast user interface.
+When using a [Raw Color](#color.raw), it will be adjusted to achieve high contrast with the Raycast user interface. To disable color adjustment, you need to switch to using a [Dynamic Color](#color.dynamic). However, we recommend leaving color adjustment on, unless your extension depends on exact color reproduction.
 
 #### Example
 
@@ -102,14 +70,8 @@ import { Color, Icon, List } from "@raycast/api";
 export default function Command() {
   return (
     <List>
-      <List.Item
-        title="Built-in color"
-        icon={{ source: Icon.Circle, tintColor: Color.Red }}
-      />
-      <List.Item
-        title="Raw color"
-        icon={{ source: Icon.Circle, tintColor: "#FF0000" }}
-      />
+      <List.Item title="Built-in color" icon={{ source: Icon.Circle, tintColor: Color.Red }} />
+      <List.Item title="Raw color" icon={{ source: Icon.Circle, tintColor: "#FF0000" }} />
       <List.Item
         title="Dynamic color"
         icon={{
@@ -130,10 +92,12 @@ export default function Command() {
 
 A dynamic color applies different colors depending on the active Raycast theme.
 
+When using a [Dynamic Color](#color.dynamic), it will be adjusted to achieve high contrast with the Raycast user interface. To disable color adjustment, you can set the `adjustContrast` property to `false`. However, we recommend leaving color adjustment on, unless your extension depends on exact color reproduction.
+
 #### Example
 
 ```typescript
-import { Color, Icon, List } from "@raycast/api";
+import { Icon, List } from "@raycast/api";
 
 export default function Command() {
   return (
@@ -145,7 +109,7 @@ export default function Command() {
           tintColor: {
             light: "#FF01FF",
             dark: "#FFFF50",
-            adjustContrast: true,
+            adjustContrast: false,
           },
         }}
       />

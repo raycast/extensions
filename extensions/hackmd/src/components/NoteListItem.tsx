@@ -12,7 +12,7 @@ export default function NoteListItem({ note, mutate }: { note: Note; mutate?: ()
       icon={Icon.Document}
       accessories={[
         {
-          date: new Date(note.createdAt),
+          date: new Date(note.lastChangedAt || note.createdAt),
         },
       ]}
       actions={

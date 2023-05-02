@@ -210,3 +210,8 @@ export interface State {
   error?: Error;
   isLoading: boolean;
 }
+
+export interface Preferences {
+  sort_order: "original" | "last_copied";
+  paste_on_enter: boolean;
+}

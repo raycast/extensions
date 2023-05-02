@@ -6,11 +6,13 @@ import Preferences from "./interfaces/preference";
 import Site from "./interfaces/site";
 import State from "./interfaces/state";
 
-const Command = () => {
-  const preferences = getPreferenceValues<Preferences>();
-  const [state, setState] = useState<State>({});
+interface SiteProps {
+  site: Site;
+  preferences: Preferences;
+}
 
-  async function handleDelete(site: Site) {
+const SiteListItem: React.FC<SiteProps> = (props: SiteProps) => {
+  async function handleDelete() {
     const toast: Toast = await showToast({
       style: Toast.Style.Animated,
       title: "Deleting site...",
@@ -18,9 +20,9 @@ const Command = () => {
 
     try {
       await got
-        .delete(`https://api.usefathom.com/v1/sites/${site.id}`, {
+        .delete(`https://api.usefathom.com/v1/sites/${props.site.id}`, {
           headers: {
-            Authorization: `Bearer ${preferences.apiToken}`,
+            Authorization: `Bearer ${props.preferences.apiToken}`,
           },
         })
         .json();
@@ -34,6 +36,28 @@ const Command = () => {
       toast.message = "Something has gone wrong.";
     }
   }
+
+  return (
+    <List.Item
+      title={props.site.name}
+      actions={
+        <ActionPanel title={props.site.name}>
+          <ActionPanel.Section>
+            <Action.OpenInBrowser
+              url={`https://app.usefathom.com/?range=last_7_days&site=${props.site.id}`}
+              title={`Open ${props.site.name} Dashboard`}
+            />
+          </ActionPanel.Section>
+          <Action.SubmitForm title="Delete Site" onSubmit={handleDelete} />
+        </ActionPanel>
+      }
+    />
+  );
+};
+
+const Command = () => {
+  const preferences = getPreferenceValues<Preferences>();
+  const [state, setState] = useState<State>({});
 
   useEffect(() => {
     async function fetchSites() {
@@ -60,22 +84,7 @@ const Command = () => {
   return (
     <List isLoading={!state.sites && !state.error}>
       {state.sites?.map((site) => (
-        <List.Item
-          key={site.id}
-          title={site.name}
-          subtitle={site.id}
-          actions={
-            <ActionPanel title={site.name}>
-              <ActionPanel.Section>
-                <Action.OpenInBrowser
-                  url={`https://app.usefathom.com/#/?filters=%5B%5D&range=last_7_days&site=${site.id}`}
-                  title={`Open ${site.name} Dashboard`}
-                />
-              </ActionPanel.Section>
-              <Action.SubmitForm title="Delete Site" onSubmit={handleDelete} />
-            </ActionPanel>
-          }
-        />
+        <SiteListItem key={site.id} site={site} preferences={preferences} />
       ))}
     </List>
   );

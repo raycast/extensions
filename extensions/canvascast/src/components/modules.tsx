@@ -8,7 +8,7 @@ import { showRecent, getRecentModuleItems, getPinnedModuleItems } from "../utils
 
 export const Modules = (props: { id: number; url: string }) => {
   const [searchText, setSearchText] = useState<string>("");
-  const [modules, setModules] = useState<modulesection[]>();
+  const [modules, setModules] = useState<modulesection[] | undefined>();
 
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
@@ -16,12 +16,14 @@ export const Modules = (props: { id: number; url: string }) => {
     const getItems = async () => {
       try {
         const modules = await getModules(props.id);
+        for (const m of modules) {
+          console.log(m);
+        }
         setModules(modules);
-        setIsLoading(false);
       } catch {
-        setModules(null);
-        setIsLoading(false);
+        setModules(undefined);
       }
+      setIsLoading(false);
     };
     getItems();
   }, []);
@@ -57,8 +59,8 @@ export const Modules = (props: { id: number; url: string }) => {
           ))}
         </List.Section>
       )}
-      {modules !== null ? (
-        modules?.map((module: modulesection, index: number) => (
+      {modules !== undefined ? (
+        modules.map((module: modulesection, index: number) => (
           <List.Section title={module.name} key={index}>
             {module.items?.map((item: moduleitem, index: number) => (
               <ModuleItem key={index} {...props} item={item} refresh={triggerRefresh} />
