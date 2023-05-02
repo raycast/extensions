@@ -5,9 +5,6 @@
   "description": "Fetch snippets from massCode app",
   "icon": "massCode.png",
   "author": "antonreshetov",
-  "contributors": [
-    "generic_user_256"
-  ],
   "categories": [
     "Productivity",
     "Developer Tools"
@@ -19,8 +16,11 @@
       "title": "MassCode Assistant",
       "description": "Fetch snippets from massCode app",
       "mode": "view",
-      "preferences": [
-        {
+      "preferences": [{
+          "name": "sort_order",
+          "type": "dropdown",
+          "required": false,
+          "title": "Sort order",
           "data": [
             {
               "title": "Sort by last copied",
@@ -31,22 +31,9 @@
               "value": "original"
             }
           ],
-          "default": "last_copied",
           "description": "How snippets are ordered",
-          "name": "sort_order",
-          "required": false,
-          "title": "Sort order",
-          "type": "dropdown"
-        },
-        {
-          "name": "paste_on_enter",
-          "description": "Default action for a snippet",
-          "label": "Paste on enter",
-          "default": false,
-          "type": "checkbox",
-          "required": false
-        }
-      ]
+          "default": "last_copied"
+        }]
     }
   ],
   "dependencies": {

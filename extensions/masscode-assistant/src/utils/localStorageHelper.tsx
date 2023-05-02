@@ -1,5 +1,5 @@
 import { LocalStorage } from "@raycast/api";
-import type { Preferences, Snippet } from "../types";
+import type { Snippet } from "../types";
 
 const getKey = function (snippet: Snippet) {
   const snippet_id = snippet.id;
@@ -26,7 +26,11 @@ const clearUnusedSnippets = async function (snippets: Snippet[], lastUsedMap: { 
   );
 };
 
-const orderSnippets = function (snippets: Snippet[], orderMap: { [key: string]: number }, preferences: Preferences) {
+const orderSnippets = function (
+  snippets: Snippet[],
+  orderMap: { [key: string]: number },
+  preferences: { [key: string]: string }
+) {
   if (!snippets) {
     return snippets;
   }
@@ -35,7 +39,11 @@ const orderSnippets = function (snippets: Snippet[], orderMap: { [key: string]: 
     return snippets;
   }
 
-  if (preferences?.sort_order !== "last_copied") {
+  if (!preferences || !preferences["sort_order"]) {
+    return snippets;
+  }
+
+  if (preferences["sort_order"] != "last_copied") {
     return snippets;
   }
 
