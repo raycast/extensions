@@ -1,8 +1,8 @@
-import { Action, ActionPanel, Cache, Form, Icon } from "@raycast/api";
-import React, { useEffect, useState } from "react";
+import { Action, ActionPanel, Cache, Form, Icon, closeMainWindow } from "@raycast/api";
+import React, { useEffect, useRef, useState } from "react";
 import { getIcon, getSelectedMessage, getSound, sendMessage } from "./utils/common-utils";
 import { CacheKey, sounds } from "./utils/constants";
-import { autoGetMessage } from "./types/preferences";
+import { autoCloseWindow, autoGetMessage } from "./types/preferences";
 import { ActionOpenPreferences } from "./component/action-open-preferences";
 
 export default function SendMessageToBark() {
@@ -40,7 +40,11 @@ export default function SendMessageToBark() {
                   setError("Message is required");
                   return;
                 }
-                await sendMessage(message, title, subTitle, badge, true);
+                await sendMessage(message, title, subTitle, badge, autoCloseWindow);
+                setMessage("");
+                setTitle("");
+                setSubTitle("");
+                setBadge(0);
               }}
             />
           </ActionPanel.Section>

@@ -97,11 +97,11 @@ export const sendMessage = async (
   title: string,
   subTitle: string,
   badge: number,
-  isToast: boolean
+  autoCloseWindow: boolean
 ) => {
   let promptMessage;
   try {
-    if (!isToast) {
+    if (autoCloseWindow) {
       await closeMainWindow({ popToRootType: PopToRootType.Default });
     }
 
@@ -130,9 +130,9 @@ export const sendMessage = async (
     console.error(e);
     promptMessage = "Error: " + e;
   }
-  if (isToast) {
-    await showToast(Toast.Style.Success, promptMessage);
-  } else {
+  if (autoCloseWindow) {
     await showHUD(promptMessage);
+  } else {
+    await showToast(Toast.Style.Success, promptMessage);
   }
 };
