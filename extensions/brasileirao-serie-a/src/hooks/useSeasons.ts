@@ -8,7 +8,7 @@ const seasons = eachYearOfInterval({
 
 seasons.sort((a, b) => b.localeCompare(a));
 
-const CURRENT_SEASON = seasons[1];
+const CURRENT_SEASON = seasons[0];
 
 export function useSeasons() {
   const [currentSeason, setCurrentSeason] = useState(CURRENT_SEASON);

@@ -1,7 +1,7 @@
 import { useFetch } from "@raycast/utils";
+import { URLSearchParams } from "node:url";
 import { useMemo } from "react";
-import { URLSearchParams } from "url";
-import { authHeaders, BASE_URL } from "../api";
+import { BASE_URL, authHeaders } from "../api";
 import { useLeagueInfo } from "./useLeagueInfo";
 
 export function usePreviousTable(season: string) {
@@ -14,6 +14,7 @@ export function usePreviousTable(season: string) {
   const { data } = useFetch<Standings>(`${BASE_URL}/standings?${params.toString()}`, {
     headers: authHeaders,
   });
+
   const table = useMemo(() => {
     if (!data) {
       return [];
