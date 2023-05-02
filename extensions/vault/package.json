@@ -5,6 +5,9 @@
   "description": "Vault extension for Raycast",
   "icon": "vault.png",
   "author": "fonimus",
+  "contributors": [
+    "ricoberger"
+  ],
   "categories": [
     "Productivity",
     "Developer Tools"
