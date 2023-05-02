@@ -1,25 +1,34 @@
 # YouVersion Bible Suggest Changelog
 
-# v3.0.0 - 2023-04-25
+## [v3.1.0] - 2023-05-02
+
+- Added a new setting to control the inclusion of verse numbers in copied Bible
+  content
+- Added a new setting to control the preservation of line breaks in copied Bible
+  content (useful for verses from books like Psalms or Proverbs)
+- Updated Raycast API to v1.50.1
+- Removed obsolete code from codebase
+
+## [v3.0.0] - 2023-04-25
 
 - Fetched the latest Bible data from YouVersion
 - Fixed a bug where the extension would not correctly retrieve Bible
   data when a non-English language (particularly one containing non-ASCII
   characters) was chosen
 
-# v2.1.0 - 2023-04-11
+## [v2.1.0] - 2023-04-11
 
 - Updated the Raycast API to the latest version (v1.49.2, at the time of
   writing)
 
-# v2.0.1 - 2023-04-10
+## [v2.0.1] - 2023-04-10
 
 - Fixed a critical bug where the "Copy to Clipboard" functionality would return
   an error for any passage; all users are encouraged to upgrade to this release
 - Fixed a critical bug where the "Search the Bible by Phrase" command would
   return no results
 
-## v2.0.0 - 2022-09-18
+## [v2.0.0] - 2022-09-18
 
 ### New Features
 
@@ -33,6 +42,6 @@
 - Changed extension ID to remove \*-raycast suffix; if you're already using v1, this means that you will
   need to uninstall and reinstall the extension
 
-## v1.0.0 - 2022-09-16
+## [v1.0.0] - 2022-09-16
 
 - Initial stable release

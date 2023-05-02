@@ -3,7 +3,6 @@ import { useCallback, useEffect, useState } from "react";
 import { getReferencesMatchingPhrase } from "youversion-suggest";
 import ReferenceActions from "./reference-actions";
 import { BibleReference } from "./types";
-import { normalizeSearchText } from "./utilities";
 
 export default function Command() {
   const { state, search } = useSearch();
@@ -74,7 +73,6 @@ function useSearch() {
 }
 
 async function getSearchResults(searchText: string): Promise<BibleReference[]> {
-  searchText = normalizeSearchText(searchText);
   // Do not call out to YouVersion's servers if the search text is empty
   if (searchText.trim()) {
     return getReferencesMatchingPhrase(searchText);
