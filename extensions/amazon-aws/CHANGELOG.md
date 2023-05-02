@@ -3,6 +3,7 @@
 ## [Extend Support AWS Vault] - 2023-04-28
 
 - Add support for people using aws-vault with the GetSessionToken API call.
+- Add support for aws-vault usage with a master-credentials approach.
 
 ## [Support AWS Vault] - 2023-04-03
 
