@@ -83,16 +83,10 @@ export default function DocCheckPage(props: { url: string; prevurl: string; quer
   });
 
   // table of contents
-  let toc = "";
-  $("#toc").each(function (i, link) {
-    toc += $(link).html();
-  });
+  let toc = $("#toc").html()
 
   // "Articulus brevis minimus"
-  let abm = "";
-  $(".has-bg-gray-200").each(function (i, link) {
-    toc += $(link).html();
-  });
+  let abm = $(".has-bg-gray-200").html();
 
   // remove synonyms
   let markdown = "";
