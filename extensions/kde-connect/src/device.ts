@@ -1,7 +1,7 @@
 import { exec } from "child_process";
 import { appPath, KDECFunctions, parseDeviceInfo } from "./connector";
-import { LocalStorage, Toast } from "@raycast/api";
-import { StorageKey } from "./storage";
+import { getPreferenceValues, LocalStorage, Toast } from "@raycast/api";
+import { StorageKey, Preferences } from "./storage";
 
 export interface KDEDevice {
   name: string;
@@ -12,9 +12,11 @@ export interface KDEDevice {
 
 export class KDEConnect {
   deviceID?: string;
+  preference: Preferences
 
   constructor(deviceID?: string) {
     this.deviceID = deviceID;
+    this.preference = getPreferenceValues<Preferences>();
   }
 
   private executeCommand(command: string | null): Promise<string> {
@@ -167,6 +169,22 @@ export class KDEConnect {
     }
     return new Promise((resolve, reject) => {
       this.executeCommand(KDECFunctions.ping({ deviceID: targetDeviceID }))
+        .then(() => {
+          resolve();
+        })
+        .catch((err) => {
+          reject(err);
+        });
+    });
+  }
+
+  getPhoto(deviceID: string): Promise<void> {
+    const targetDeviceID = deviceID || this.deviceID;
+    if (!targetDeviceID) {
+      return Promise.reject("No deviceID set");
+    }
+    return new Promise((resolve, reject) => {
+      this.executeCommand(KDECFunctions.getPhoto({ deviceID: targetDeviceID, args: [this.preference.photoPath] }))
         .then(() => {
           resolve();
         })

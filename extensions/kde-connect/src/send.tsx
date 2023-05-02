@@ -2,7 +2,7 @@ import { LaunchProps, LocalStorage, Toast, getSelectedFinderItems, getSelectedTe
 import { KDEConnect } from "./device";
 import { StorageKey } from "./storage";
 import { existsSync } from "fs";
-import { SendType } from "./connector";
+import { SendType, startApp } from "./connector";
 
 interface ShareArguments {
   string?: string;
@@ -21,6 +21,8 @@ export default async function Command(props: LaunchProps<{ arguments: ShareArgum
   let sendType: SendType.Text | SendType.URL | SendType.Files = SendType.Text;
   let sendContent: string | undefined;
   let selectedFiles: string[] = [];
+
+  await startApp();
 
   if (props.arguments.string) {
     if (testURL(props.arguments.string) || existsSync(props.arguments.string)) {

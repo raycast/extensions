@@ -32,6 +32,15 @@
       ]
     }
   ],
+  "preferences": [
+    {
+      "name": "photoPath",
+      "default": "~/Downloads",
+      "title": "Photo Save Location",
+      "description": "The location to save photos received from KDE Connect",
+      "type": "directory"
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.49.3"
   },

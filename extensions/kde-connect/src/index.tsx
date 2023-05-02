@@ -1,7 +1,7 @@
 import { ActionPanel, Action, Icon, List, LocalStorage, Form, useNavigation } from "@raycast/api";
 import React, { useEffect, useState } from "react";
 import { KDEConnect, KDEDevice } from "./device";
-import { SendType, SendTypeAllCases, appExists } from "./connector";
+import { SendType, SendTypeAllCases, appExists, startApp } from "./connector";
 import { StorageKey } from "./storage";
 import GetKDEConnect from "./getKDEConnect";
 
@@ -15,12 +15,13 @@ export default function Command() {
 
   const { push } = useNavigation();
 
-  const refreshDevices = () => {
+  const refreshDevices = async () => {
     setLoading(true);
-    connect.listDevices().then((devices) => {
-      setDevices(devices);
-      setLoading(false);
-    });
+    await startApp()
+    console.log("App ready")
+    const discoveredDevices = await connect.listDevices()
+    setDevices(discoveredDevices);
+    setLoading(false);
   };
 
   useEffect(() => {
@@ -86,32 +87,47 @@ export default function Command() {
               actions={
                 <ActionPanel>
                   <Action
-                    title="Send"
+                    title="Send…"
+                    icon={Icon.ArrowUpCircleFilled}
                     onAction={() => {
                       connect.deviceID = item.id;
                       push(<DeviceActions device={item} connect={connect} />);
                     }}
                   />
-                  <Action
-                    title="Set Favourite"
-                    onAction={() => {
-                      setFavourite(item);
-                    }}
-                  />
-                  <Action
-                    title="Unset Favourite"
-                    onAction={() => {
-                      setFavourite(undefined);
-                    }}
-                  />
+                  {item.id === favouriteDevice ? (
+                    <Action
+                      title="Unset Favourite"
+                      icon={Icon.StarDisabled}
+                      onAction={() => {
+                        setFavourite(undefined);
+                      }}
+                    />
+                  ) : (
+                    <Action
+                      title="Set Favourite"
+                      icon={Icon.Star}
+                      onAction={() => {
+                        setFavourite(item);
+                      }}
+                    />
+                  )}
                   <Action
                     title="Ping"
+                    icon={Icon.Network}
                     onAction={() => {
                       connect.ping(item.id);
                     }}
                   />
                   <Action
+                    title="Get Photo"
+                    icon={Icon.Image}
+                    onAction={() => {
+                      connect.getPhoto(item.id);
+                    }}
+                  />
+                  <Action
                     title="Unpair"
+                    icon={Icon.Trash}
                     onAction={() => {
                       connect.unpairDevice(item.id).then(() => {
                         refreshDevices();
@@ -139,6 +155,7 @@ export default function Command() {
                 <ActionPanel>
                   <Action
                     title="Pair Device"
+                    icon={Icon.Link}
                     onAction={() => {
                       setLoading(true);
                       connect.pairDevice(item.id).then(() => {
