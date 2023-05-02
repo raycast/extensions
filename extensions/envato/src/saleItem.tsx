@@ -55,7 +55,7 @@ export function SaleItem(props: { sale: saleItem; key: number; todey: boolean; i
 /*-----------------------------------*/
 /*------ PAYOUT ITEM  
 /*-----------------------------------*/
-export function PayoutItem(props: { sale: saleItem; key: number; }) {
+export function PayoutItem(props: { sale: saleItem; key: number }) {
   const saleDateSt = props.sale.date !== undefined ? dateFormat(props.sale.date, "dd.mm.yyyy") : "";
 
   return (
