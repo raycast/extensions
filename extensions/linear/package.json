@@ -30,7 +30,7 @@
           "type": "dropdown",
           "required": false,
           "description": "Select the field to focus automatically once the form is rendered",
-          "default": "team",
+          "default": "title",
           "data": [
             {
               "title": "Team",
