@@ -56,7 +56,7 @@ export function SaleItem(props: { sale: saleItem; key: number; todey: boolean; i
 /*------ PAYOUT ITEM  
 /*-----------------------------------*/
 export function PayoutItem(props: { sale: saleItem }) {
-  const saleDateSt = props.sale.date !== undefined ? (dateFormat(props.sale.date, "dd.mm.yyyy")) : "";
+  const saleDateSt = props.sale.date !== undefined ? dateFormat(props.sale.date, "dd.mm.yyyy") : "";
 
   return (
     <List.Item
@@ -73,9 +73,11 @@ export function PayoutItem(props: { sale: saleItem }) {
 /*-----------------------------------*/
 export function SaleItemDetail(props: { sale: saleItem; todey: boolean }) {
   const item = props.sale.item !== undefined ? props.sale.item : props.sale;
-  const metadata = props.sale.item?.wordpress_theme_metadata !== undefined ? props.sale.item.wordpress_theme_metadata : props.sale;
+  const metadata =
+    props.sale.item?.wordpress_theme_metadata !== undefined ? props.sale.item.wordpress_theme_metadata : props.sale;
   const theme_name = metadata !== undefined ? `- **Theme Name:** ${metadata.theme_name ?? metadata.name}` : "";
-  const author_name = metadata !== undefined ? `- **Author Name:** ${metadata.author_name ?? metadata.author_username}` : "";
+  const author_name =
+    metadata !== undefined ? `- **Author Name:** ${metadata.author_name ?? metadata.author_username}` : "";
   const version = metadata.version !== undefined ? `- **Version:** ${metadata.version}` : "";
   const description = metadata !== undefined ? "- **Description:** " + metadata.description : "";
   const markdown = `# ${item.name}

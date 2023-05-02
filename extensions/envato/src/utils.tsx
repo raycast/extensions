@@ -46,7 +46,6 @@ export const useFetch = () => {
         errors: salesEmpty as envatoErrors,
         isLoading: false,
       }));
-
     } catch (error: any) {
       // ERRORS
       let reason = "Error";
@@ -73,11 +72,11 @@ export const useFetch = () => {
   useEffect(() => {
     fetch();
   }, []);
-  
+
   const cached = cache.get("state");
-  if(state !== undefined && cached !== JSON.stringify(state)) {
-   cache.set("state", JSON.stringify(state)); 
+  if (state !== undefined && cached !== JSON.stringify(state)) {
+    cache.set("state", JSON.stringify(state));
   }
-  
+
   return state;
 };

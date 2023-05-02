@@ -74,7 +74,7 @@ export interface previewsItem {
 
 export interface previewsItemURL {
   icon_url?: string;
-  landscape_url?: string
+  landscape_url?: string;
 }
 
 export interface GetData {

@@ -22,12 +22,12 @@ export default function Command() {
 
   const statementItems: any = [];
   let resultItems = [];
-  (state.statement?.results.map((item: any ) => {
+  state.statement?.results.map((item: any) => {
     if (item.type == "Payout") {
       statementItems.push(item);
     }
   }),
-  resultItems = statementItems.concat(state.sales).sort(({ a, b }: any) => b?.date - a?.sold_at))
+    (resultItems = statementItems.concat(state.sales).sort(({ a, b }: any) => b?.date - a?.sold_at));
 
   return (
     <List
