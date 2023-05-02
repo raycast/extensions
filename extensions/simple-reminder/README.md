@@ -31,7 +31,7 @@ This handles the extension side of things. The next step involves your mobile de
 Simply download ntfy from [Google Play](https://play.google.com/store/apps/details?id=io.heckel.ntfy) or from the [App Store](https://apps.apple.com/us/app/ntfy/id1625396347) and subscribe to the topic that you just defined in the extension. As simple as that.
 
 
-![ntfy-2.gif](media/ntfy-2.gif)
+<img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExODQxOTU2ODk1ZDNkZGIxMDliNDUxMDI5MjBlZWVlYWMyZjgwZWFmNyZlcD12MV9pbnRlcm5hbF9naWZzX2dpZklkJmN0PWc/upd24i7KoatmzLw34v/giphy.gif" width="400">
 
 ![ntfy-3.png](media/ntfy-3.png)
 
