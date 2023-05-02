@@ -51,6 +51,7 @@
 /extensions/axios-docs                               @denizyoldas
 /extensions/bamboo-search-self-hosted                @axp-dev
 /extensions/banca-d-italia-currency-converter        @FezVrasta
+/extensions/bark                                     @koinzhang
 /extensions/base64                                   @DanielSinclair @sammarks
 /extensions/battery-health                           @o1y
 /extensions/bazinga-tools                            @luin
