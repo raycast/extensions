@@ -40,7 +40,7 @@ export default function SendMessageToBark() {
                   setError("Message is required");
                   return;
                 }
-                await sendMessage(message, title, subTitle, badge);
+                await sendMessage(message, title, subTitle, badge, true);
               }}
             />
           </ActionPanel.Section>

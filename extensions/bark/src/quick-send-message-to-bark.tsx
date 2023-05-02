@@ -7,5 +7,5 @@ export default async () => {
     await showHUD("No message to send");
     return;
   }
-  await sendMessage(message, "", "", 0);
+  await sendMessage(message, "", "", 0, false);
 };

@@ -8,10 +8,11 @@ import {
   LocalStorage,
   PopToRootType,
   showHUD,
+  showToast,
+  Toast,
 } from "@raycast/api";
 import { deviceToken } from "../types/preferences";
 import { CacheKey, EXPIRE_TIME } from "./constants";
-import { isIPv4 } from "net";
 
 export const isEmpty = (string: string | null | undefined) => {
   return !(string != null && String(string).length > 0);
@@ -91,33 +92,47 @@ export const getIcon = () => {
   }
 };
 
-export const sendMessage = async (message: string, title: string, subTitle: string, badge: number) => {
-  await closeMainWindow({ popToRootType: PopToRootType.Default });
+export const sendMessage = async (
+  message: string,
+  title: string,
+  subTitle: string,
+  badge: number,
+  isToast: boolean
+) => {
+  let promptMessage;
+  try {
+    if (!isToast) {
+      await closeMainWindow({ popToRootType: PopToRootType.Default });
+    }
 
-  const APNS_HOST_NAME = "api.push.apple.com";
-  const DEVICE_TOKEN = deviceToken;
-  const TOPIC = "me.fin.bark";
-  const AUTHENTICATION_TOKEN = await getCacheAuthToken();
+    const APNS_HOST_NAME = "api.push.apple.com";
+    const DEVICE_TOKEN = deviceToken;
+    const TOPIC = "me.fin.bark";
+    const AUTHENTICATION_TOKEN = await getCacheAuthToken();
 
-  const script = `curl -X "POST" "https://${APNS_HOST_NAME}/3/device/${DEVICE_TOKEN}" \\
-     -H 'apns-topic: ${TOPIC}' \\
-     -H 'apns-push-type: alert' \\
-     -H 'authorization: bearer ${AUTHENTICATION_TOKEN}' \\
-     -H 'Content-Type: text/plain; charset=utf-8' \\
-     -d $'{
-    "aps": {
-        "mutable-content": 1,
-        "alert": {
-            "title" : "${title}",
-            "subtitle" : "${subTitle}",
-            "body": "${message}"
-        },
-        "category": "myNotificationCategory",
-        "sound": "${getSound()}",
-        "badge": ${badge}
-    },
-    "icon": "${getIcon()}"
-}'`;
-  exec(script);
-  await showHUD("Message Sent");
+    const script = `curl -v --header "apns-topic: ${TOPIC}" --header "apns-push-type: alert" --header "authorization: bearer ${AUTHENTICATION_TOKEN}" --data '{
+  "aps": {
+      "mutable-content": 1,
+      "alert": {
+          "title" : "${title}",
+          "subtitle" : "${subTitle}",
+          "body": "${message}"
+      },
+      "category": "myNotificationCategory",
+      "sound": "${getSound()}",
+      "badge": ${badge}
+  },
+  "icon": "${getIcon()}"
+}' --http2 https://${APNS_HOST_NAME}/3/device/${DEVICE_TOKEN}`;
+    exec(script);
+    promptMessage = "Message Sent";
+  } catch (e) {
+    console.error(e);
+    promptMessage = "Error: " + e;
+  }
+  if (isToast) {
+    await showToast(Toast.Style.Success, promptMessage);
+  } else {
+    await showHUD(promptMessage);
+  }
 };
