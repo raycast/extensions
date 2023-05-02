@@ -30,7 +30,7 @@
     "eslint": "^7.32.0",
     "prettier": "^2.5.1",
     "textlint": "^13.3.2",
-    "textlint-rule-aws-service-name": "^1.3.2",
+    "textlint-rule-aws-service-name": "^1.4.0",
     "typescript": "^4.4.3"
   },
   "scripts": {
