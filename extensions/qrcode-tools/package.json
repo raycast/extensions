@@ -1,0 +1,51 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "qrcode-tools",
+  "title": "QRCode Tools",
+  "description": "Scan qrcode from clipboard or files, and generate qrcode to clipboard or files.",
+  "icon": "command-icon.png",
+  "author": "XGHeaven",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "scan-qrcode-from-clipboard",
+      "title": "Scan QRCode From Clipboard",
+      "description": "Scan QRCode image from clipboard",
+      "mode": "view"
+    },
+    {
+      "name": "generate-qrcode-from-clipboard",
+      "title": "Generate QRCode From Clipboard",
+      "description": "Generate QRCode image from clipboard. Save it to clipboard or disk.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.49.3",
+    "jimp": "^0.22.7",
+    "jsqr": "^1.4.0",
+    "qrcode": "^1.5.3",
+    "react-use": "^17.4.0",
+    "tmp": "^0.2.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/qrcode": "^1.5.0",
+    "@types/react": "18.0.9",
+    "@types/tmp": "^0.2.3",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
