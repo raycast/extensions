@@ -1,5 +1,9 @@
 # Vault Changelog
 
+## [Fix] - 2023-05-03
+
+- Fix issue to reuse vault token from cache
+
 ## [Added Vault] - 2023-03-01
 
 - Login with token or ldap/password and auto-renewal of token
