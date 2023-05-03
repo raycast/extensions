@@ -1,15 +1,15 @@
 import { environment, getPreferenceValues, LocalStorage, showToast, Toast } from "@raycast/api";
-import { execa, ExecaChildProcess } from "execa";
+import { execa, ExecaChildProcess, ExecaError } from "execa";
 import { existsSync } from "fs";
 import { dirname } from "path/posix";
-import { CLINotFoundError } from "~/components/RootErrorBoundary";
 import { LOCAL_STORAGE_KEY, DEFAULT_SERVER_URL } from "~/constants/general";
-import { VaultState } from "~/types/general";
+import { VaultState, VaultStatus } from "~/types/general";
 import { Preferences } from "~/types/preferences";
 import { PasswordGeneratorOptions } from "~/types/passwords";
-import { Item } from "~/types/vault";
+import { Folder, Item } from "~/types/vault";
 import { getPasswordGeneratingArgs } from "~/utils/passwords";
 import { getServerUrlPreference } from "~/utils/preferences";
+import { CLINotFoundError } from "~/utils/errors";
 
 export class Bitwarden {
   private env: Record<string, string>;
@@ -121,10 +121,9 @@ export class Bitwarden {
     return items.filter((item: Item) => !!item.name);
   }
 
-  async listFolders(sessionToken: string): Promise<Item[]> {
+  async listFolders(sessionToken: string): Promise<Folder[]> {
     const { stdout } = await this.exec(["list", "folders", "--session", sessionToken]);
-    const folders = JSON.parse<Item[]>(stdout);
-    return folders;
+    return JSON.parse<Folder[]>(stdout);
   }
 
   async getTotp(id: string, sessionToken: string): Promise<string> {
@@ -140,13 +139,26 @@ export class Bitwarden {
   }
 
   async lock(reason?: string): Promise<void> {
-    if (reason) this.setLockReason(reason);
+    if (reason) {
+      await this.setLockReason(reason);
+    }
     await this.exec(["lock"]);
   }
 
   async status(sessionToken?: string): Promise<VaultState> {
     const { stdout } = await this.exec(sessionToken == null ? ["status"] : ["status", "--session", sessionToken]);
     return JSON.parse(stdout);
+  }
+
+  async checkLockStatus(sessionToken?: string): Promise<VaultStatus> {
+    try {
+      await this.exec(["unlock", "--check", ...(sessionToken != null ? ["--session", sessionToken] : [])]);
+      return "unlocked";
+    } catch (error) {
+      const errorMessage = (error as ExecaError).stderr;
+      if (errorMessage === "Vault is locked.") return "locked";
+      return "unauthenticated";
+    }
   }
 
   async generatePassword(options?: PasswordGeneratorOptions, abortController?: AbortController): Promise<string> {

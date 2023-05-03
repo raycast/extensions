@@ -1,5 +1,9 @@
 # Bitwarden Changelog
 
+## [Performance Improvement] - 2023-04-03
+
+- Implemented caching of vault items (only safe values) to speed up the Search Vault command loading time.
+
 ## [Improvement] - 2023-04-03
 
 - Display better login/unlock error messages

@@ -2,6 +2,7 @@ import { Icon, List } from "@raycast/api";
 import { format } from "date-fns";
 import { TeamsSelector } from "./components";
 import { useMatches, useSelectedTeam } from "./hooks";
+import { getTeamShortName } from "./hooks/useTeams";
 import { groupBy } from "./utils";
 
 export default function Upcoming() {
@@ -25,8 +26,10 @@ export default function Upcoming() {
                   title={time}
                   subtitle={
                     isLive
-                      ? `${match.homeTeam.shortName} ${match.score.fullTime.home} - ${match.score.fullTime.away} ${match.awayTeam.shortName}`
-                      : `${match.homeTeam.shortName} - ${match.awayTeam.shortName}`
+                      ? `${getTeamShortName(match.homeTeam)} ${match.score.fullTime.home} - ${
+                          match.score.fullTime.away
+                        } ${getTeamShortName(match.awayTeam)}`
+                      : `${getTeamShortName(match.homeTeam)} - ${getTeamShortName(match.awayTeam)}`
                   }
                   icon={Icon.Clock}
                 />

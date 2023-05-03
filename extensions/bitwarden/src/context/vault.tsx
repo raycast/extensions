@@ -1,12 +1,14 @@
 import { showToast, Toast } from "@raycast/api";
 import { createContext, PropsWithChildren, useContext, useEffect, useMemo, useReducer } from "react";
+import { useVaultItemPublisher } from "~/components/searchVault/context/vaultListeners";
 import { useBitwarden } from "~/context/bitwarden";
 import { useSession } from "~/context/session";
-import { Folder, Item } from "~/types/vault";
+import { Folder, Item, Vault } from "~/types/vault";
+import { captureException } from "~/utils/development";
+import useVaultCaching from "~/components/searchVault/utils/useVaultCaching";
+import { FailedToLoadVaultItemsError } from "~/utils/errors";
 
-export type VaultState = {
-  items: Item[];
-  folders: Folder[];
+export type VaultState = Vault & {
   isLoading: boolean;
   isLocked: boolean;
 };
@@ -24,9 +26,11 @@ const initialState: VaultState = { items: [], folders: [], isLoading: true, isLo
 export const VaultProvider = ({ children }: PropsWithChildren) => {
   const session = useSession();
   const bitwarden = useBitwarden();
+  const publishItems = useVaultItemPublisher();
+  const { getCachedVault, cacheVault } = useVaultCaching();
   const [state, setState] = useReducer(
     (previous: VaultState, next: Partial<VaultState>) => ({ ...previous, ...next }),
-    initialState
+    { ...initialState, ...getCachedVault() }
   );
 
   const isEmpty = state.items.length == 0;
@@ -35,7 +39,7 @@ export const VaultProvider = ({ children }: PropsWithChildren) => {
   useEffect(() => {
     if (!session.active) return;
     if (session.token) {
-      loadItems(session.token);
+      void loadItems(session.token);
     } else {
       setState({ isLocked: true });
     }
@@ -43,14 +47,24 @@ export const VaultProvider = ({ children }: PropsWithChildren) => {
 
   async function loadItems(sessionToken: string) {
     try {
-      const [folders, items] = await Promise.all([
-        bitwarden.listFolders(sessionToken),
-        bitwarden.listItems(sessionToken),
-      ]);
-      items.sort(favoriteItemsFirstSorter);
-      setState({ isLoading: false, items, folders });
+      let items: Item[] = [];
+      let folders: Folder[] = [];
+      try {
+        [items, folders] = await Promise.all([bitwarden.listItems(sessionToken), bitwarden.listFolders(sessionToken)]);
+        items.sort(favoriteItemsFirstSorter);
+      } catch (error) {
+        publishItems(new FailedToLoadVaultItemsError());
+        throw error;
+      }
+
+      setState({ items, folders });
+      publishItems(items);
+      cacheVault(items, folders);
     } catch (error) {
-      showToast(Toast.Style.Failure, "Failed to load vault.");
+      await showToast(Toast.Style.Failure, "Failed to load updated vault");
+      captureException("Failed to load vault items", error);
+    } finally {
+      setState({ isLoading: false });
     }
   }
 
@@ -61,7 +75,7 @@ export const VaultProvider = ({ children }: PropsWithChildren) => {
         await bitwarden.sync(session.token);
         await loadItems(session.token);
         await toast.hide();
-      } catch (error) {
+      } catch {
         await session.logout();
         toast.style = Toast.Style.Failure;
         toast.message = "Failed to sync. Please try logging in again.";
@@ -90,5 +104,3 @@ export const useVault = () => {
 
   return context;
 };
-
-export default VaultContext;
