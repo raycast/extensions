@@ -54,13 +54,13 @@ export function VaultFavorites() {
                   ) : (
                     <Action.Push
                       icon={Icon.ArrowDown}
-                      title="Retrieve secret"
+                      title="Retrieve Secret"
                       target={<VaultDisplay path={entry.key} />}
                     />
                   )}
                   <Action
                     icon={Icon.Star}
-                    title={"Remove from favorites"}
+                    title={"Remove From Favorites"}
                     onAction={() => removeFromFavorites(entry.key, revalidate)}
                   />
                 </ActionPanel.Section>

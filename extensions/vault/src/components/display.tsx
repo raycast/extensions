@@ -161,15 +161,15 @@ export function VaultDisplay(props: { path: string }) {
         <ActionPanel>
           <ActionPanel.Section title="Copy">
             {entry && (
-              <Action.CopyToClipboard icon={Icon.CopyClipboard} title="Copy secret value" content={entry.value} />
+              <Action.CopyToClipboard icon={Icon.CopyClipboard} title="Copy Secret Value" content={entry.value} />
             )}
             {entry && (
-              <Action.Paste icon={Icon.Clipboard} title="Paste secret value in current app" content={entry.value} />
+              <Action.Paste icon={Icon.Clipboard} title="Paste Secret Value in Current App" content={entry.value} />
             )}
-            <Action.CopyToClipboard icon={Icon.CopyClipboard} title="Copy secret" content={stringify(secret)} />
+            <Action.CopyToClipboard icon={Icon.CopyClipboard} title="Copy Secret" content={stringify(secret)} />
             <Action
               icon={Icon.SaveDocument}
-              title="Save secret to file"
+              title="Save Secret to File"
               shortcut={{ modifiers: ["cmd"], key: "s" }}
               onAction={() => saveSecretToFile(secret, props.path)}
             />
@@ -179,13 +179,13 @@ export function VaultDisplay(props: { path: string }) {
             {favorite ? (
               <Action
                 icon={Icon.Star}
-                title={"Remove from favorites"}
+                title={"Remove From Favorites"}
                 onAction={() => removeFromFavorites(props.path, revalidate)}
               />
             ) : (
               <Action
                 icon={Icon.Star}
-                title={"Add to favorites"}
+                title={"Add to Favorites"}
                 onAction={() => addToFavorites(props.path, revalidate)}
               />
             )}
@@ -196,7 +196,7 @@ export function VaultDisplay(props: { path: string }) {
             <ActionPanel.Section title="Edit">
               <Action.Push
                 icon={Icon.NewDocument}
-                title="Create new version"
+                title="Create New Version"
                 shortcut={{ modifiers: ["cmd"], key: "n" }}
                 target={<VaultEdit path={props.path} currentSecret={secret} />}
               />
@@ -207,7 +207,7 @@ export function VaultDisplay(props: { path: string }) {
               {!metadata?.current_version.destroyed && (
                 <Action
                   icon={Icon.Trash}
-                  title={metadata?.current_version.deleted ? "Undelete version" : "Delete version"}
+                  title={metadata?.current_version.deleted ? "Undelete Version" : "Delete Version"}
                   shortcut={{ modifiers: ["ctrl"], key: "x" }}
                   onAction={() =>
                     metadata?.current_version.deleted ? undeleteSecret() : deleteSecret(DeleteMode.deleteVersion)
@@ -217,14 +217,14 @@ export function VaultDisplay(props: { path: string }) {
               {!metadata?.current_version.destroyed && (
                 <Action
                   icon={Icon.Trash}
-                  title="Destroy version"
+                  title="Destroy Version"
                   shortcut={{ modifiers: ["ctrl", "opt"], key: "x" }}
                   onAction={() => deleteSecret(DeleteMode.destroyVersion)}
                 />
               )}
               <Action
                 icon={Icon.Trash}
-                title="Destroy all versions"
+                title="Destroy All Versions"
                 shortcut={{ modifiers: ["ctrl", "opt", "shift"], key: "x" }}
                 onAction={() => deleteSecret(DeleteMode.destroyAllVersions)}
               />
@@ -245,7 +245,7 @@ export function VaultDisplay(props: { path: string }) {
             )}
             <Action
               icon={Icon.Info}
-              title="Display details"
+              title="Display Details"
               shortcut={{ modifiers: ["cmd"], key: "i" }}
               onAction={() => setWithDetails((x) => !x)}
             />
