@@ -32,14 +32,15 @@ export function TransactionsList(props: Props) {
 
   const { memberships, membershipsLoading } = useMemberships();
   const { organization, organizationLoading, organizationError } = useOrganization();
-  const { transactions, transactionsMeta, transactionsError, transactionsLoading, transactionsMutate } = useTransactions(
-    {
-      iban: filters.iban ?? organization?.bank_accounts[0].iban ?? "?",
-    },
-    {
-      execute: !!organization && !!memberships && !!filters.iban,
-    }
-  );
+  const { transactions, transactionsMeta, transactionsError, transactionsLoading, transactionsMutate } =
+    useTransactions(
+      {
+        iban: filters.iban ?? organization?.bank_accounts[0].iban ?? "?",
+      },
+      {
+        execute: !!organization && !!memberships && !!filters.iban,
+      }
+    );
 
   /** apply filters and group data */
   const transactionsFiltered: {
