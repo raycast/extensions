@@ -64,7 +64,7 @@ Use action to open or copy it.
 
 <div style="text-align: center;">
 
-![](${fileURL})
+![](${encodeURI(fileURL)})
 
 </div>
   `.trim();
