@@ -61,11 +61,11 @@
   ],
   "preferences": [
     {
-      "name": "api",
-      "label": "Open AI API",
-      "description": "Enter your personal Open AI API",
+      "name": "apiKey",
+      "label": "Open AI API Key",
+      "description": "Enter your personal Open AI API Key",
       "type": "password",
-      "title": "API",
+      "title": "API Key",
       "required": true
     },
     {

@@ -5,8 +5,8 @@ import { useState } from "react";
 export function useChatGPT(): OpenAIApi {
   const [chatGPT] = useState(() => {
     const apiKey = getPreferenceValues<{
-      api: string;
-    }>().api;
+      apiKey: string;
+    }>().apiKey;
 
     const config = new Configuration({ apiKey });
 

@@ -67,7 +67,7 @@ All preferences properties list that can be customize through `Raycast Settings 
 
 | Properties               | Label                  | Value                               | Required | Default | Description                                                                                                      |
 | ------------------------ | ---------------------- | ----------------------------------- | -------- | ------- | ---------------------------------------------------------------------------------------------------------------- |
-| `api`                    | API                    | `string`                            | `true`   | `empty` | Your personal Open AI API key                                                                                    |
+| `apiKey`                 | API                    | `string`                            | `true`   | `empty` | Your personal Open AI API key                                                                                    |
 | `useStream`              | Stream Completion      | `boolean`                           | `true`   | `true`  | Stream the completions of the generated answer                                                                   |
 | `isAutoSaveConversation` | Auto-save Conversation | `boolean`                           | `true`   | `true`  | Auto-save every conversation that you had with the model                                                         |
 | `isHistoryPaused`        | Pause History          | `boolean`                           | `false`  | `false` | Pause the history of the conversation                                                                            |
