@@ -5,6 +5,7 @@ function DeletePortalAction(props: { onDelete: () => void }) {
     <Action
       icon={Icon.Trash}
       title="Delete Portal"
+      style={Action.Style.Destructive}
       shortcut={{ modifiers: ["ctrl"], key: "x" }}
       onAction={props.onDelete}
     />

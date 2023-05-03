@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { nanoid } from "nanoid";
-import { ActionPanel, Action, Icon, List, LocalStorage } from "@raycast/api";
+import { ActionPanel, Action, Icon, List, LocalStorage, confirmAlert, Alert } from "@raycast/api";
 import { Portal, PortalType, Filter } from "./types";
 import { CreatePortalAction, DeletePortalAction, EmptyView, OpenPortalAction } from "./components";
 import { portalTypeIcons } from "./utils";
@@ -57,10 +57,22 @@ export default function Command() {
   );
 
   const handleDelete = useCallback(
-    (index: number) => {
-      const newPortals = [...state.portals];
-      newPortals.splice(index, 1);
-      setState((previous) => ({ ...previous, portals: newPortals }));
+    async (index: number) => {
+      const options: Alert.Options = {
+        title: "Delete Portal",
+        icon: Icon.Trash,
+        message: "Are you sure you want to delete the portal?",
+        primaryAction: {
+          title: "Delete",
+          style: Alert.ActionStyle.Destructive,
+          onAction: () => {
+            const newPortals = [...state.portals];
+            newPortals.splice(index, 1);
+            setState((previous) => ({ ...previous, portals: newPortals }));
+          },
+        },
+      };
+      await confirmAlert(options);
     },
     [state.portals, setState]
   );
