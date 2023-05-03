@@ -67,10 +67,28 @@
       "title": "Options",
       "label": "Uppercase Letters",
       "description": "Should letters be uppercased?"
+    },
+    {
+      "name": "defaultAction",
+      "description": "Set the default action",
+      "type": "dropdown",
+      "required": false,
+      "title": "Default Action",
+      "default": "copy",
+      "data": [
+        {
+          "title": "Copy",
+          "value": "copy"
+        },
+        {
+          "title": "Paste",
+          "value": "paste"
+        }
+      ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.49.2",
+    "@raycast/api": "^1.50.2",
     "uuid": "^9.0.0"
   },
   "devDependencies": {
