@@ -12,8 +12,8 @@
   "commands": [
     {
       "name": "get",
-      "title": "Get",
-      "subtitle": "Get the status from the server",
+      "title": "Get Status",
+      "subtitle": "Comodoro",
       "description": "Displays the status from the server in the menu bar.",
       "mode": "menu-bar",
       "interval": "1m"
@@ -21,14 +21,14 @@
     {
       "name": "start",
       "title": "Start",
-      "subtitle": "Start the Pomodoro",
+      "subtitle": "Comodoro",
       "description": "Sends the start command to the server.",
       "mode": "no-view"
     },
     {
       "name": "stop",
       "title": "Stop",
-      "subtitle": "Stop the Pomodoro",
+      "subtitle": "Comodoro",
       "description": "Sends the stop command to the server.",
       "mode": "no-view"
     }
