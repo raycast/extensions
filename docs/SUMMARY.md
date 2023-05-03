@@ -85,5 +85,4 @@
   - [v1.31.0](migration/v1.31.0.md)
   - [v1.37.0](migration/v1.37.0.md)
   - [v1.48.8](migration/v1.48.8.md)
-  - [v1.50.0](migration/v1.50.0.md)
 - [FAQ](faq.md)
