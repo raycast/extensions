@@ -1,5 +1,9 @@
 # Apple Music Changelog
 
+## [Update] - 2023-05-03
+
+- This adds the currently playing track in Play Library Track
+
 ## [Fix] - 2023-03-23
 
 - Added fallback scripts to commands that were interacting with the library.
