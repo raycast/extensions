@@ -73,7 +73,7 @@ export function VaultEdit(props: { path: string; currentSecret: object }) {
       actions={
         <ActionPanel>
           <Action.SubmitForm
-            title="Save new secret"
+            title="Save New Secret"
             onSubmit={saveSecret}
             icon={Icon.SaveDocument}
             shortcut={{ modifiers: ["cmd"], key: "s" }}

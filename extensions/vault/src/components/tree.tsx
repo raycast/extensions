@@ -152,7 +152,7 @@ export function VaultTree(props: { path: string }) {
                   {!entry.folder && (
                     <Action.Push
                       icon={Icon.ArrowDown}
-                      title="Retrieve secret"
+                      title="Retrieve Secret"
                       target={<VaultDisplay path={entry.key} />}
                     />
                   )}
@@ -162,13 +162,13 @@ export function VaultTree(props: { path: string }) {
                   {entry.favorite ? (
                     <Action
                       icon={Icon.Star}
-                      title={"Remove from favorites"}
+                      title={"Remove From Favorites"}
                       onAction={() => removeFromFavorites(entry.key, revalidate)}
                     />
                   ) : (
                     <Action
                       icon={Icon.Star}
-                      title={"Add to favorites"}
+                      title={"Add to Favorites"}
                       onAction={() => addToFavorites(entry.key, revalidate)}
                     />
                   )}
@@ -179,7 +179,7 @@ export function VaultTree(props: { path: string }) {
                 <ActionPanel.Section title="Display">
                   <Action
                     icon={showTechnical ? Icon.EyeDisabled : Icon.Eye}
-                    title={showTechnical ? "Hide technical" : "Show technical"}
+                    title={showTechnical ? "Hide Technical" : "Show Technical"}
                     shortcut={{ modifiers: ["cmd"], key: "i" }}
                     onAction={() => setShowTechnical(!showTechnical)}
                   />
@@ -190,7 +190,7 @@ export function VaultTree(props: { path: string }) {
                     {entry.folder && (
                       <Action
                         icon={Icon.Trash}
-                        title="Delete all secrets recursively"
+                        title="Delete All Secrets Recursively"
                         onAction={() => deleteRecursively(entry.key)}
                       />
                     )}

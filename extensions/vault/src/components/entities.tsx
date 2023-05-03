@@ -71,7 +71,7 @@ function VaultAddEntity(props: { entity?: VaultEntity }) {
         <ActionPanel>
           <Action.SubmitForm
             icon={Icon.AddPerson}
-            title={edit ? "Add alias" : "Create"}
+            title={edit ? "Add Alias" : "Create"}
             onSubmit={createEntityWithAlias}
           />
         </ActionPanel>
@@ -207,10 +207,10 @@ export function VaultEntities() {
               <ActionPanel>
                 {writeEnabled() && (
                   <>
-                    <Action.Push icon={Icon.Pencil} title={"Add alias"} target={<VaultAddEntity entity={entity} />} />
+                    <Action.Push icon={Icon.Pencil} title={"Add Alias"} target={<VaultAddEntity entity={entity} />} />
                     <Action.Push
                       icon={Icon.AddPerson}
-                      title={"Add entity"}
+                      title={"Add Entity"}
                       shortcut={{ modifiers: ["cmd"], key: "n" }}
                       target={<VaultAddEntity />}
                     />
@@ -219,7 +219,7 @@ export function VaultEntities() {
                 {deleteEnabled() && (
                   <Action
                     icon={Icon.RemovePerson}
-                    title={"Remove entity"}
+                    title={"Remove Entity"}
                     shortcut={{ modifiers: ["ctrl"], key: "x" }}
                     onAction={() => deleteEntity(entity.id)}
                   />
@@ -227,13 +227,13 @@ export function VaultEntities() {
                 <ActionPanel.Section title="Display">
                   <Action
                     icon={showWithoutPolicies ? Icon.EyeDisabled : Icon.Eye}
-                    title={showWithoutPolicies ? "Hide without policies" : "Show without policies"}
+                    title={showWithoutPolicies ? "Hide without Policies" : "Show without Policies"}
                     shortcut={{ modifiers: ["cmd"], key: "i" }}
                     onAction={() => setShowWithoutPolicies(!showWithoutPolicies)}
                   />
                   <Action
                     icon={showDetails ? Icon.EyeDisabled : Icon.Eye}
-                    title={showDetails ? "Hide details" : "Show details"}
+                    title={showDetails ? "Hide Details" : "Show Details"}
                     shortcut={{ modifiers: ["cmd"], key: "d" }}
                     onAction={() => setShowDetails(!showDetails)}
                   />

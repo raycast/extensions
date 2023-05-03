@@ -20,28 +20,16 @@ import fs from "fs";
 import hdate from "human-date";
 import Values = Form.Values;
 
-export interface VaultPreferences {
-  url: string;
-  loginMethod: "ldap" | "token";
-  ldap: string;
-  password: string;
-  token: string;
-  technicalPaths: string;
-  favoriteNamespaces: string;
-  enableWrite: boolean;
-  enableDelete: boolean;
-}
-
-const preferences = getPreferenceValues<VaultPreferences>();
-const vaultUrl = preferences.url.replace(/\/$/, "");
+const preferences = getPreferenceValues<ExtensionPreferences>();
+const vaultUrl = (preferences.url || "").replace(/\/$/, "");
 const cache = new Cache();
 
 export function writeEnabled(): boolean {
-  return preferences.enableWrite;
+  return preferences.enableWrite || true;
 }
 
 export function deleteEnabled(): boolean {
-  return preferences.enableDelete;
+  return preferences.enableDelete || false;
 }
 
 export function stringify(value: object) {
@@ -106,7 +94,9 @@ export async function getVaultClient(): Promise<NodeVault.client> {
 
   // get token if needed
   let token;
-  if (!tokenCache) {
+  if (tokenCache) {
+    token = tokenCache.token;
+  } else {
     if (preferences.loginMethod === "ldap") {
       if (!preferences.ldap || !preferences.password) {
         throw new ConfigurationError("Ldap method needs ldap and password to be set in preferences");

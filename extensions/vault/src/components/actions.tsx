@@ -33,25 +33,25 @@ export function Configuration() {
       <ActionPanel.Section title="Configuration">
         <Action.Push
           icon={Icon.Cog}
-          title={"Change namespace"}
+          title={"Change Namespace"}
           shortcut={{ modifiers: ["cmd"], key: "y" }}
           target={<VaultNamespace />}
         />
         <Action.Push
           icon={Icon.Star}
-          title={"List favorites"}
+          title={"List Favorites"}
           shortcut={{ modifiers: ["cmd"], key: "f" }}
           target={<VaultFavorites />}
         />
         <Action.Push
           icon={Icon.PersonLines}
-          title={"List entities"}
+          title={"List Entities"}
           shortcut={{ modifiers: ["cmd", "opt"], key: "a" }}
           target={<VaultEntities />}
         />
         <Action.Push
           icon={Icon.List}
-          title={"List secrets"}
+          title={"List Secrets"}
           shortcut={{ modifiers: ["cmd", "opt"], key: "t" }}
           target={<VaultTree path={"/"} />}
         />
@@ -78,7 +78,7 @@ export function CopyToken() {
   return (
     <Action.CopyToClipboard
       icon={Icon.CopyClipboard}
-      title="Copy token"
+      title="Copy Token"
       shortcut={{ modifiers: ["cmd"], key: "t" }}
       content={getUserToken()}
     />
@@ -99,7 +99,7 @@ export function OpenVault(props: { path?: string }) {
   return (
     <Action.OpenInBrowser
       icon={Icon.Globe}
-      title="Open in vault UI"
+      title="Open in Vault UI"
       shortcut={{ modifiers: ["cmd"], key: "o" }}
       url={`${getVaultUrl()}/ui/vault/secrets${path}?namespace=${getVaultNamespace()}`}
     />
@@ -110,7 +110,7 @@ export function Root() {
   return (
     <Action.Push
       icon={Icon.ArrowLeft}
-      title="Go to root"
+      title="Go to Root"
       shortcut={{ modifiers: ["opt", "shift"], key: "arrowLeft" }}
       target={<VaultTree path={"/"} />}
     />
@@ -121,7 +121,7 @@ export function Back(props: { path: string }) {
   const path = props.path.endsWith("/") ? props.path.substring(0, props.path.length - 1) : props.path;
   return (
     <Action.Push
-      title={"Go back"}
+      title={"Go Back"}
       icon={Icon.ArrowLeft}
       shortcut={{ modifiers: ["opt"], key: "arrowLeft" }}
       target={<VaultTree path={path.substring(0, path.lastIndexOf("/") + 1)} />}

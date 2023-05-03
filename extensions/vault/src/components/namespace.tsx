@@ -10,7 +10,7 @@ export function VaultNamespace() {
         <ActionPanel>
           <Action.SubmitForm
             icon={Icon.Cog}
-            title="Set namespace"
+            title="Set Namespace"
             onSubmit={(values: { namespace: string }) => setNamespaceAndGoToTree(values, push)}
           />
           <CopyToken />
