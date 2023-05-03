@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "doccheck",
-  "title": "DocCheck!",
-  "description": "Search through DocCheck Flexikon from Raycast",
+  "title": "DocCheck",
+  "description": "Search through DocCheck Flexikon directly from Raycast",
   "icon": "doccheck.png",
   "author": "spacedog",
   "contributors": [
