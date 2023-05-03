@@ -1,0 +1,105 @@
+import { useState } from "react";
+import { Action, ActionPanel, LaunchProps, List, useNavigation } from "@raycast/api";
+import { useFetch } from "@raycast/utils";
+import { ApiUrls } from "./constants/center";
+import AssetTransferHistory from "./AssetTransferHistory";
+import AssetDetail from "./AssetDetail";
+import { markdownNFTDetail } from "./utils/markdown";
+import CollectionDetail from "./CollectionDetail";
+
+interface GetContractsOfOwnerArguments {
+  query: string;
+}
+
+const resultTypes = [
+  { id: "All", name: "All" },
+  { id: "Asset", name: "Assets" },
+  { id: "Collection", name: "Collections" },
+];
+
+function ResultTypeDropdown(props: {
+  resultTypes: typeof resultTypes;
+  onResultTypeChange: (newValue: string) => void;
+}) {
+  const { resultTypes, onResultTypeChange } = props;
+  return (
+    <List.Dropdown
+      tooltip="Select Drink Type"
+      storeValue={true}
+      onChange={(newValue) => {
+        onResultTypeChange(newValue);
+      }}
+    >
+      <List.Dropdown.Section title="Alcoholic Beverages">
+        {resultTypes.map((drinkType) => (
+          <List.Dropdown.Item key={drinkType.id} title={drinkType.name} value={drinkType.id} />
+        ))}
+      </List.Dropdown.Section>
+    </List.Dropdown>
+  );
+}
+
+export default function Command(props: LaunchProps<{ arguments: GetContractsOfOwnerArguments }>) {
+  const query = props?.arguments.query || "";
+  const [searchText, setSearchText] = useState(query || "");
+  const [resultType, setResultType] = useState("all");
+
+  const { push } = useNavigation();
+  const { data } = useFetch(ApiUrls.search("ethereum-mainnet", searchText), {
+    method: "GET",
+    headers: { accept: "application/json", "X-API-Key": "keya5c220403e6b7ac702391824" },
+  });
+
+  //  @ts-ignore
+  let results = data?.results;
+
+  if (resultType !== "All") {
+    results = results?.filter((item: any) => item.type === resultType);
+  }
+
+  return (
+    <List
+      isShowingDetail
+      searchText={searchText}
+      onSearchTextChange={setSearchText}
+      navigationTitle="Search NFT collections or assets"
+      searchBarPlaceholder="Type..."
+      filtering={true}
+      searchBarAccessory={<ResultTypeDropdown resultTypes={resultTypes} onResultTypeChange={setResultType} />}
+    >
+      {searchText
+        ? results?.map((item: any, index: number) => (
+            <List.Item
+              key={index}
+              title={item.name}
+              subtitle={item.type}
+              detail={<List.Item.Detail markdown={markdownNFTDetail(item.previewImageUrl, item.name)} />}
+              icon={{
+                source: item.previewImageUrl,
+              }}
+              actions={
+                <ActionPanel>
+                  <Action
+                    title="Go to Details"
+                    onAction={() => {
+                      if (item.type === "Asset") {
+                        push(<AssetDetail address={item.address} tokenId={item.tokenId} />);
+                      } else if (item.type === "Collection") {
+                        push(<CollectionDetail address={item.address} />);
+                      }
+                    }}
+                  />
+                  {item.type === "Asset" ? (
+                    <Action
+                      title="Transfer History"
+                      onAction={() => push(<AssetTransferHistory address={item.address} tokenId={item.tokenId} />)}
+                    />
+                  ) : null}
+                </ActionPanel>
+              }
+            />
+          ))
+        : null}
+    </List>
+  );
+}
