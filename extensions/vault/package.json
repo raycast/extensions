@@ -18,7 +18,6 @@
     {
       "name": "vault",
       "title": "Vault Manager",
-      "subtitle": "Explore vault secrets and more",
       "description": "Explore, display, edit, delete vault secrets, list entities",
       "mode": "view"
     }
