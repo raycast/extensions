@@ -2,9 +2,25 @@ import { useCachedPromise } from "@raycast/utils";
 import { useMemo } from "react";
 import { client } from "../api/client";
 import { Organization } from "../types/organization";
+import { match } from "ts-pattern";
+import { ContractResponses } from "../api/contract";
+
+async function handleErrors(response: Promise<ContractResponses["getOrganization"]>) {
+  return match(await response)
+    .with({ status: 401 }, ({ body }) => {
+      throw new Error(body.errors[0].detail);
+    })
+    .otherwise(() => {
+      return response;
+    });
+}
 
 export function useOrganization(options?: { execute?: boolean }) {
-  const { data, isLoading, ...others } = useCachedPromise(client.getOrganization, [], options);
+  const { data, isLoading, error, ...others } = useCachedPromise(
+    async () => handleErrors(client.getOrganization()),
+    [],
+    options
+  );
 
   const organization = useMemo(() => {
     if (data?.status !== 200) return undefined;
@@ -24,6 +40,7 @@ export function useOrganization(options?: { execute?: boolean }) {
   return {
     organization,
     organizationLoading: isLoading,
+    organizationError: error,
     ...others,
   };
 }

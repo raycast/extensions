@@ -30,9 +30,9 @@ export function TransactionsList(props: Props) {
     transactions: "all-transactions",
   });
 
-  const { organization, organizationLoading } = useOrganization();
   const { memberships, membershipsLoading } = useMemberships();
-  const { transactions, transactionsMeta, transactionsLoading, transactionsMutate } = useTransactions(
+  const { organization, organizationLoading, organizationError } = useOrganization();
+  const { transactions, transactionsMeta, transactionsError, transactionsLoading, transactionsMutate } = useTransactions(
     {
       iban: filters.iban ?? organization?.bank_accounts[0].iban ?? "?",
     },
@@ -102,6 +102,14 @@ export function TransactionsList(props: Props) {
         </List.Dropdown>
       }
     >
+      {(organizationError || transactionsError) && (
+        <List.EmptyView
+          icon={{ source: Icon.ExclamationMark, tintColor: Color.Red }}
+          title="Error"
+          description={organizationError?.message ?? transactionsError?.message}
+        />
+      )}
+
       {Object.entries(transactionsFiltered.byMonth).map(([period, transactions]) => (
         <List.Section key={period} title={period}>
           {transactions.map(({ transaction, initiator }, index) => (

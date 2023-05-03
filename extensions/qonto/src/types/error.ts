@@ -5,10 +5,12 @@ import { z } from "zod";
 
 // prettier-ignore
 export const ErrorDetailSchema = z.object({
-  "errors": z.array(z.object({
-    "code": z.string(),     // "unauthorized",
-    "detail": z.string(),   // "You must be authenticated to perform this action"
-  }))
+  errors: z.array(
+    z.object({
+      code: z.string(),     // "unauthorized",
+      detail: z.string(),   // "You must be authenticated to perform this action"
+    })
+  ),
 });
 
 // prettier-ignore

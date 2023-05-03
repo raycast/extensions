@@ -27,8 +27,11 @@ const IconAccountClosed = {
 
 export function AccountsList() {
   const { push } = useNavigation();
-
-  const { organization } = useOrganization();
+  const {
+    organization,
+    organizationLoading,
+    organizationError
+  } = useOrganization();
 
   const [details, setDetails] = useState<boolean>(false);
   const [filters, setFilters] = useState<Filters>({ status: "active" });
@@ -51,9 +54,8 @@ export function AccountsList() {
 
   return (
     <List
-      isLoading={!organization}
+      isLoading={organizationLoading}
       isShowingDetail={details}
-      navigationTitle={currency.format(filtered.total)}
       searchBarAccessory={
         <List.Dropdown
           tooltip="Change Status"
@@ -67,7 +69,15 @@ export function AccountsList() {
         </List.Dropdown>
       }
     >
-      {filtered.accounts.map((account) => {
+      {organizationError && (
+        <List.EmptyView
+          icon={{ source: Icon.ExclamationMark, tintColor: Color.Red }}
+          title="Error"
+          description={organizationError.message}
+        />
+      )}
+
+      {!organizationError && filtered.accounts.map((account) => {
         const accountIcon =
           account.status === "active"
             ? { value: IconAccountActive, tooltip: "Bank Account Active" }
@@ -75,12 +85,12 @@ export function AccountsList() {
 
         const props: Partial<List.Item.Props> = !details
           ? {
-              accessories: [{ text: `${currency.format(account.balance)}` }],
-            }
+            accessories: [{ text: `${currency.format(account.balance)}` }],
+          }
           : {
-              detail: (
-                <List.Item.Detail
-                  markdown={`
+            detail: (
+              <List.Item.Detail
+                markdown={`
                 + ----- + --------------------------- +
                 | Bank  | Qonto                       |
                 | ----- | --------------------------- |
@@ -89,18 +99,18 @@ export function AccountsList() {
                 | BIC   | ${account.bic}                 |
                 + ----- + --------------------------- +
                 `}
-                  metadata={
-                    <Detail.Metadata>
-                      <Detail.Metadata.Label title="Name" text={account.name} />
-                      <Detail.Metadata.Label title="Balance" text={currency.format(account.balance)} />
-                      <Detail.Metadata.Label title="Currency" text={account.currency} />
-                      <Detail.Metadata.Label title="Status" text={account.status} />
-                      <Detail.Metadata.Label title="Updated at" text={datetime.format(account.updated_at)} />
-                    </Detail.Metadata>
-                  }
-                />
-              ),
-            };
+                metadata={
+                  <Detail.Metadata>
+                    <Detail.Metadata.Label title="Name" text={account.name} />
+                    <Detail.Metadata.Label title="Balance" text={currency.format(account.balance)} />
+                    <Detail.Metadata.Label title="Currency" text={account.currency} />
+                    <Detail.Metadata.Label title="Status" text={account.status} />
+                    <Detail.Metadata.Label title="Updated at" text={datetime.format(account.updated_at)} />
+                  </Detail.Metadata>
+                }
+              />
+            ),
+          };
 
         return (
           <List.Item

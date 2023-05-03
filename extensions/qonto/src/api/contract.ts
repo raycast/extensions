@@ -36,6 +36,7 @@ export const contract = c.router({
         meta: PaginateSchema,
       }),
       400: ErrorMessageSchema,
+      401: ErrorDetailSchema,
       404: any, // doc is ambiguous
       422: ErrorDetailSchema,
     },
