@@ -1,6 +1,6 @@
 # Quick Web
 
-Quick web is a configurable tools that opens web with 
+Quick Web is a configurable tools that opens web with 
 commonly used args.
 
 ## Terminology
