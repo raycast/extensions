@@ -15,7 +15,16 @@ export function SearchResultListItem(props: { result: SearchResult }) {
       actions={
         <ActionPanel>
           <Action title="Calculate Watch Time" icon={{ source: Icon.Clock }} onAction={() => watchTimeHUD({ url })} />
-          <Action title="Copy Bingeclock URL" icon={{ source: Icon.Clipboard }} onAction={() => Clipboard.copy(url)} />
+          <Action.OpenInBrowser title="Open in Browser" icon={{ source: Icon.Globe }} url={url} />
+          <Action.CopyToClipboard
+            title="Copy URL"
+            icon={{ source: Icon.Clipboard }}
+            content={url}
+            shortcut={{
+              modifiers: ["cmd"],
+              key: "c",
+            }}
+          />
         </ActionPanel>
       }
     />
