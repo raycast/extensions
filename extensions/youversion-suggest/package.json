@@ -3,7 +3,7 @@
   "name": "youversion-suggest",
   "title": "YouVersion Bible Suggest",
   "description": "Allows you to search the YouVersion Bible quickly and easily",
-  "version": "3.0.0",
+  "version": "3.1.0",
   "icon": "command-icon.png",
   "author": "caleb531",
   "categories": [
@@ -31,8 +31,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.49.2",
-    "youversion-suggest": "^1.1.0"
+    "@raycast/api": "^1.50.1",
+    "youversion-suggest": "^1.2.1"
   },
   "devDependencies": {
     "@types/react": "^18.0.9",

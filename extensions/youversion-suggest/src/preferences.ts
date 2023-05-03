@@ -60,3 +60,17 @@ export async function getPreferredReferenceFormat(): Promise<string> {
 export async function setPreferredReferenceFormat(newReferenceFormat: string): Promise<void> {
   await setPreferenceValue<string>("yvs-refformat", newReferenceFormat);
 }
+
+export async function getPreferredVerseNumbersSetting(): Promise<boolean> {
+  return Boolean(await getPreferenceValue<boolean>("yvs-versenumbers")) ?? defaultPreferences.versenumbers;
+}
+export async function setPreferredVerseNumbersSetting(newValue: boolean): Promise<void> {
+  await setPreferenceValue<boolean>("yvs-versenumbers", newValue);
+}
+
+export async function getPreferredLineBreaksSetting(): Promise<boolean> {
+  return Boolean(await getPreferenceValue<boolean>("yvs-linebreaks")) ?? defaultPreferences.linebreaks;
+}
+export async function setPreferredLineBreaksSetting(newValue: boolean): Promise<void> {
+  await setPreferenceValue<boolean>("yvs-linebreaks", newValue);
+}
