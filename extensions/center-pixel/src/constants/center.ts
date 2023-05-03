@@ -13,3 +13,5 @@ export const ApiUrls = {
     return url.toString();
   },
 };
+
+export const CENTER_API_KEY = "keya5c220403e6b7ac702391824";

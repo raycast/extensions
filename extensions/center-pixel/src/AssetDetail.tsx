@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Detail, useNavigation } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import AssetTransferHistory from "./AssetTransferHistory";
-import { ApiUrls } from "./constants/center";
+import { ApiUrls, CENTER_API_KEY } from "./constants/center";
 import { getRandomColor } from "./utils/color";
 import { markdownNFTDetail } from "./utils/markdown";
 import { AssetDetailsResponse } from "./types";
@@ -15,7 +15,7 @@ type AssetDetailProps = {
 export default function AssetDetail({ address, tokenId }: AssetDetailProps) {
   const { data } = useFetch<AssetDetailsResponse>(ApiUrls.getAsset(address, tokenId), {
     method: "GET",
-    headers: { accept: "application/json", "X-API-Key": "keya5c220403e6b7ac702391824" },
+    headers: { accept: "application/json", "X-API-Key": CENTER_API_KEY },
   });
   const { push } = useNavigation();
 

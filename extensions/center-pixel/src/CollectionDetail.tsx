@@ -1,6 +1,6 @@
 import { Detail } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
-import { ApiUrls } from "./constants/center";
+import { ApiUrls, CENTER_API_KEY } from "./constants/center";
 import type { CollectionResponse, FloorPriceResponse } from "./types";
 import { getErrorColor, getSuccessColor } from "./utils/color";
 import { markdownCollectionDetail } from "./utils/markdown";
@@ -13,14 +13,14 @@ type CollectionDetailProps = {
 export default function CollectionDetail({ address }: CollectionDetailProps) {
   const { data } = useFetch<CollectionResponse>(ApiUrls.getCollection("ethereum-mainnet", address), {
     method: "GET",
-    headers: { accept: "application/json", "X-API-Key": "keya5c220403e6b7ac702391824" },
+    headers: { accept: "application/json", "X-API-Key": CENTER_API_KEY },
   });
 
   const { data: floorPriceData } = useFetch<FloorPriceResponse>(
     ApiUrls.getFloorPriceOfCollection("ethereum-mainnet", address),
     {
       method: "GET",
-      headers: { accept: "application/json", "X-API-Key": "keya5c220403e6b7ac702391824" },
+      headers: { accept: "application/json", "X-API-Key": CENTER_API_KEY },
     }
   );
 

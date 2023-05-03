@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Action, ActionPanel, LaunchProps, List, useNavigation } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
-import { ApiUrls } from "./constants/center";
+import { ApiUrls, CENTER_API_KEY } from "./constants/center";
 import AssetTransferHistory from "./AssetTransferHistory";
 import AssetDetail from "./AssetDetail";
 import { markdownNFTDetail } from "./utils/markdown";
@@ -17,7 +17,7 @@ export default function Command(props: LaunchProps<{ arguments: GetContractsOfOw
   const { push } = useNavigation();
   const { data } = useFetch(ApiUrls.getContractsOfOwner("ethereum-mainnet", searchText), {
     method: "GET",
-    headers: { accept: "application/json", "X-API-Key": "keya5c220403e6b7ac702391824" },
+    headers: { accept: "application/json", "X-API-Key": CENTER_API_KEY },
   });
 
   //  @ts-ignore
