@@ -1,6 +1,6 @@
 # Center Raycast Extension
 
-![Center Raycast Extension OG Image](./assets/og.jpg)
+![Center Raycast Extension OG Image](./metadata/og.jpg)
 
 Center Raycast Extension allows you to interact with any NFT collections or assets in any blockchain, right in your command line.
 
