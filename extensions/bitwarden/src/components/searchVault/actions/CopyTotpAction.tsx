@@ -20,7 +20,7 @@ function CopyTotpAction() {
       const toast = await showToast(Toast.Style.Animated, "Getting TOTP code...");
       try {
         const id = await getUpdatedVaultItem(selectedItem, (item) => item.id);
-        const totp = await bitwarden.getTotp(id, session.token);
+        const totp = await bitwarden.getTotp(id);
         await toast?.hide();
         await Clipboard.copy(totp, { transient: getTransientCopyPreference("other") });
         await showHUD("Copied to clipboard");
