@@ -5,6 +5,7 @@ import { ApiUrls, CENTER_API_KEY } from "./constants/center";
 import AssetTransferHistory from "./AssetTransferHistory";
 import AssetDetail from "./AssetDetail";
 import { markdownNFTDetail } from "./utils/markdown";
+import { UseContractsOfOwnersResponse } from "./types";
 
 interface GetContractsOfOwnerArguments {
   address: string;
@@ -15,12 +16,11 @@ export default function Command(props: LaunchProps<{ arguments: GetContractsOfOw
   const [searchText, setSearchText] = useState(address || "");
 
   const { push } = useNavigation();
-  const { data } = useFetch(ApiUrls.getContractsOfOwner("ethereum-mainnet", searchText), {
+  const { data } = useFetch<UseContractsOfOwnersResponse>(ApiUrls.getContractsOfOwner("ethereum-mainnet", searchText), {
     method: "GET",
     headers: { accept: "application/json", "X-API-Key": CENTER_API_KEY },
   });
 
-  //  @ts-ignore
   const contracts = data?.contracts;
 
   return (

@@ -44,3 +44,34 @@ export type AssetDetailsResponse = {
     }[];
   };
 };
+
+export type SearchResponse = {
+  results: {
+    address: string;
+    id: string;
+    name: boolean;
+    previewImageUrl: string;
+    relevance: number;
+    tokenId: string;
+    type: string;
+  }[];
+};
+
+export type UseContractsOfOwnersResponse = {
+  contracts: {
+    address: string;
+    isSpam: boolean;
+    media: {
+      gateway: string;
+      raw: string;
+    };
+    name: string;
+    numDistinctTokensOwned: number;
+    ownedCount: number;
+    symbol: string;
+    tokenID: string;
+    tokenType: string;
+    totalBalance: number;
+  }[];
+  totalCount: 2;
+};

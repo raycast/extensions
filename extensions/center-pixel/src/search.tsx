@@ -6,6 +6,7 @@ import AssetTransferHistory from "./AssetTransferHistory";
 import AssetDetail from "./AssetDetail";
 import { markdownNFTDetail } from "./utils/markdown";
 import CollectionDetail from "./CollectionDetail";
+import { SearchResponse } from "./types";
 
 interface GetContractsOfOwnerArguments {
   query: string;
@@ -45,12 +46,11 @@ export default function Command(props: LaunchProps<{ arguments: GetContractsOfOw
   const [resultType, setResultType] = useState("all");
 
   const { push } = useNavigation();
-  const { data } = useFetch(ApiUrls.search("ethereum-mainnet", searchText), {
+  const { data } = useFetch<SearchResponse>(ApiUrls.search("ethereum-mainnet", searchText), {
     method: "GET",
     headers: { accept: "application/json", "X-API-Key": CENTER_API_KEY },
   });
 
-  //  @ts-ignore
   let results = data?.results;
 
   if (resultType !== "All") {
