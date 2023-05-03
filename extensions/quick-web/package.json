@@ -1,0 +1,79 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "quick-web",
+  "title": "Quick Web",
+  "description": "Quick Web is a configurable url autocompletion tool",
+  "icon": "rocket.png",
+  "author": "ShawYoungTang",
+  "categories": ["Productivity"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Index",
+      "description": "Template for showing a static list and a detail view",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "customizedInput",
+          "placeholder": "customized input",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "name": "add_url",
+      "title": "Add Url Config",
+      "description": "Open a page where users can add url pattern configs",
+      "mode": "view"
+    },
+    {
+      "name": "add_arg",
+      "title": "Add Arg Config",
+      "description": "Open a page where users can add arg names",
+      "mode": "view"
+    },
+    {
+      "name": "edit_url_list",
+      "title": "Edit Url Config",
+      "description": "Open list of url patterns and jump to edit page or delete url configs",
+      "mode": "view"
+    },
+    {
+      "name": "edit_arg_list",
+      "title": "Edit Arg Config",
+      "description": "Open list of args and and arg values for update or deletion",
+      "mode": "view"
+    },
+    {
+      "name": "export_configs",
+      "title": "Export Configs",
+      "description": "Export all configs in json which can be imported by users",
+      "mode": "view"
+    },
+    {
+      "name": "import_configs",
+      "title": "Import Configs",
+      "description": "Import all configs, this will override the old configs",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.49.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
