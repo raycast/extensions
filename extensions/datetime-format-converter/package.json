@@ -5,6 +5,9 @@
   "description": "Convert timestamps and datetime strings into various formats.",
   "icon": "command-icon.png",
   "author": "yangxy",
+  "contributors": [
+    "randomradio"
+  ],
   "license": "MIT",
   "commands": [
     {
