@@ -41,7 +41,7 @@ export default async (props: { arguments: UUIDV5Arguments }) => {
       if (upperCaseLetters) {
         uuids = uuids.map((element) => element.toUpperCase());
       }
-    
+
       if (defaultAction === "copy") {
         await Clipboard.copy(uuids.join("\r\n"));
       } else if (defaultAction === "paste") {
@@ -50,7 +50,6 @@ export default async (props: { arguments: UUIDV5Arguments }) => {
       const action = defaultAction === "copy" ? "Copied" : "Pasted";
       const successMessage = uuids.length > 1 ? `${action} ${uuids.length} new UUIDs.` : `${action} new UUID: ${uuids}`;
       await showHUD(`✅ ${successMessage}`);
-
     } else {
       await showToast({
         style: Toast.Style.Failure,
