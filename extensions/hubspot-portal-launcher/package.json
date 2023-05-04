@@ -17,18 +17,21 @@
     {
       "name": "search-portals",
       "title": "Search Portals",
+      "subtitle": "HubSpot Portal",
       "description": "Search and open HubSpot Portals",
       "mode": "view"
     },
     {
       "name": "add-portal",
       "title": "Add Portal",
+      "subtitle": "HubSpot Portal",
       "description": "Add additional HubSpot Portals to launch into",
       "mode": "view"
     },
     {
       "name": "import-portals",
       "title": "Import Portals",
+      "subtitle": "HubSpot Portal",
       "description": "Import HubSpot Portals from a JSON file",
       "mode": "view"
     }
