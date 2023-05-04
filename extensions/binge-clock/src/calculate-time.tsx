@@ -33,7 +33,7 @@ export default function Command() {
       onSearchTextChange={onSearchTextChange}
     >
       {searchTerm === "" && searchResults.length === 0 ? (
-        <List.EmptyView title="Search for movie / tv show name" description="Minimum of 3 characters" />
+        <List.EmptyView title="Search for movie / tv show name" description="Minimum of 4 characters" />
       ) : (
         <List.Section title="Results" subtitle={searchResults.length + ""}>
           {searchResults.map((result: SearchResult) => (
