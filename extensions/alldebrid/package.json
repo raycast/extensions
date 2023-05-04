@@ -1,0 +1,81 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "alldebrid",
+  "title": "Alldebrid",
+  "description": "Alldebrid features from your keyboard",
+  "icon": "command-icon.png",
+  "author": "dck",
+  "categories": [
+    "Web"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "apikey",
+      "description": "Alldebrid api key",
+      "type": "textfield",
+      "required": true,
+      "title": "API Key"
+    }
+  ],
+  "commands": [
+    {
+      "name": "saveLink",
+      "title": "Save Link",
+      "subtitle": "Alldebrid",
+      "description": "Store the link to your alldebrid media folder",
+      "mode": "view"
+    },
+    {
+      "name": "debridLink",
+      "title": "Debrid Link",
+      "subtitle": "Alldebrid",
+      "description": "Unlock a link",
+      "mode": "view"
+    },
+    {
+      "name": "magnetFile",
+      "title": "Debrid Magnet",
+      "subtitle": "Alldebrid",
+      "description": "Unlock a torrent magnet",
+      "mode": "view"
+    },
+    {
+      "name": "myLinks",
+      "title": "My Links",
+      "subtitle": "Alldebrid",
+      "description": "Display saved links",
+      "mode": "view"
+    },
+    {
+      "name": "myMagnets",
+      "title": "My Magnets",
+      "subtitle": "Alldebrid",
+      "description": "Display magnets",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.49.3",
+    "@raycast/utils": "^1.5.2",
+    "@swan-io/boxed": "^1.0.1",
+    "axios": "^1.4.0",
+    "form-data": "^4.0.0",
+    "ts-pattern": "^4.2.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
