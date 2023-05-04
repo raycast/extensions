@@ -10,7 +10,6 @@ import { FailedToLoadVaultItemsError } from "~/utils/errors";
 
 export type VaultState = Vault & {
   isLoading: boolean;
-  isLocked: boolean;
 };
 
 export type VaultContextType = VaultState & {
@@ -21,7 +20,7 @@ export type VaultContextType = VaultState & {
 
 const VaultContext = createContext<VaultContextType | null>(null);
 
-const initialState: VaultState = { items: [], folders: [], isLoading: true, isLocked: false };
+const initialState: VaultState = { items: [], folders: [], isLoading: true };
 
 export const VaultProvider = ({ children }: PropsWithChildren) => {
   const session = useSession();
@@ -40,8 +39,6 @@ export const VaultProvider = ({ children }: PropsWithChildren) => {
     if (!session.active) return;
     if (session.token) {
       void loadItems();
-    } else {
-      setState({ isLocked: true });
     }
   }, [session.token, session.active]);
 

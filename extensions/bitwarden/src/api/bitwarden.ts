@@ -113,7 +113,6 @@ export class Bitwarden {
     const { abortController, input = "", skipLastActivityUpdate = false } = options ?? {};
     let env = this.env;
     if (this.tempSessionToken) env = { ...env, BW_SESSION: this.tempSessionToken };
-    console.log({ env });
     const result = await execa(this.cliPath, args, { env, input, signal: abortController?.signal });
 
     if (!skipLastActivityUpdate) {
