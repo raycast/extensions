@@ -56,12 +56,10 @@ export function SessionProvider(props: SessionProviderProps) {
 
   async function loadSavedSession() {
     try {
-      const { shouldLockVault, lockReason, ...savedSession } = await getSavedSession();
-      if (savedSession.token) bitwarden.setSessionToken(savedSession.token);
-      dispatch({ type: "loadSavedState", shouldLockVault, lockReason, ...savedSession });
-      if (shouldLockVault) {
-        await handleLock(lockReason, true);
-      }
+      const restoredSession = await getSavedSession();
+      if (restoredSession.token) bitwarden.setSessionToken(restoredSession.token);
+      dispatch({ type: "loadSavedState", ...restoredSession });
+      if (restoredSession.shouldLockVault) await handleLock(restoredSession.lockReason, true);
     } catch (error) {
       await handleLock();
       dispatch({ type: "failedLoadSavedState" });
