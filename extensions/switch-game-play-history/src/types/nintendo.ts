@@ -14,18 +14,19 @@ export interface IRecentPlayHistory {
     totalPlayedMinutes: number;
   }[];
 }
+export interface IPlayHistory {
+  titleId: string;
+  titleName: string;
+  deviceType: string;
+  imageUrl: string;
+  lastUpdatedAt: string;
+  firstPlayedAt: string;
+  lastPlayedAt: string;
+  totalPlayedDays: number;
+  totalPlayedMinutes: number;
+}
 export interface IPlayHistories {
-  playHistories: {
-    titleId: string;
-    titleName: string;
-    deviceType: string;
-    imageUrl: string;
-    lastUpdatedAt: string;
-    firstPlayedAt: string;
-    lastPlayedAt: string;
-    totalPlayedDays: number;
-    totalPlayedMinutes: number;
-  }[];
+  playHistories: IPlayHistory[];
   hiddenTitleList: [];
   recentPlayHistories: IRecentPlayHistory[];
   lastUpdatedAt: string;

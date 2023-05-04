@@ -2,12 +2,20 @@ import { Grid } from "@raycast/api";
 import { usePlayHistories } from "../helpers/nintendo";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
+import { PlayHistoriesGridItem } from "./PlayHistoriesGridItem";
+import { useState } from "react";
+import { SessionTokenGuard } from "./SessionTokenGuard";
 dayjs.extend(relativeTime);
 
-// TODO
-// 1. Add sorting options
+const sortKeys = [
+  { id: 1, name: "Most Played", value: "totalPlayedMinutes" },
+  { id: 2, name: "Recently Played", value: "lastPlayedAt" },
+] as const;
+type TSortKeyValue = (typeof sortKeys)[number]["value"];
+
 export const PlayHistoriesGrid = () => {
   const history = usePlayHistories();
+  const [sortKey, setSortKey] = useState<TSortKeyValue>(sortKeys[0].value);
 
   const totalPlayTime = Math.floor(
     (history.data?.playHistories.reduce((a, b) => a + b.totalPlayedMinutes, 0) || 0) / 60
@@ -18,33 +26,33 @@ export const PlayHistoriesGrid = () => {
   const sectionSubtitle = `Last update at (${lastUpdate})`;
 
   return (
-    <Grid navigationTitle="Play Histories" isLoading={history.isLoading}>
-      <Grid.Section title={sectionTitle} subtitle={sectionSubtitle}>
-        {history.data?.playHistories
-          .sort((a, b) => (a.totalPlayedMinutes > b.totalPlayedMinutes ? -1 : 1))
-          .map((item) => {
-            const totalPlayTime =
-              item.totalPlayedMinutes < 60
-                ? item.totalPlayedMinutes + " mins"
-                : Math.floor(item.totalPlayedMinutes / 60) + " hours " + (item.totalPlayedMinutes % 60) + " mins";
-            const itemTooltip = [
-              "[" + item.titleName + "]",
-              "First Played: " + dayjs(item.firstPlayedAt).fromNow(),
-              "Last Played: " + dayjs(item.lastPlayedAt).fromNow(),
-              "Total Playtime: " + totalPlayTime,
-            ].join("\n");
-            return (
-              <Grid.Item
-                content={{
-                  tooltip: itemTooltip,
-                  value: item.imageUrl,
-                }}
-                title={item.titleName}
-                subtitle={totalPlayTime}
-              />
-            );
-          })}
-      </Grid.Section>
+    <Grid
+      navigationTitle="Play Histories"
+      isLoading={history.isLoading}
+      searchBarPlaceholder="Search your favorite drink"
+      searchBarAccessory={
+        <Grid.Dropdown
+          tooltip="Select Sort Key"
+          storeValue
+          onChange={(newValue) => setSortKey(newValue as TSortKeyValue)}
+        >
+          <Grid.Dropdown.Section title="Sort By">
+            {sortKeys.map((key) => (
+              <Grid.Dropdown.Item key={key.id} title={key.name} value={key.value} />
+            ))}
+          </Grid.Dropdown.Section>
+        </Grid.Dropdown>
+      }
+    >
+      <SessionTokenGuard type="grid">
+        <Grid.Section title={sectionTitle} subtitle={sectionSubtitle}>
+          {history.data?.playHistories
+            .sort((a, b) => (a[sortKey] > b[sortKey] ? -1 : 1))
+            .map((item) => (
+              <PlayHistoriesGridItem history={item} />
+            ))}
+        </Grid.Section>
+      </SessionTokenGuard>
     </Grid>
   );
 };
