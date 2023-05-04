@@ -7,6 +7,8 @@ import { useIdes } from "./ide";
 import { Node, getNodeType, retrieveNodesSync } from "./node";
 import { Language, OTHER, getLanguages } from "./programmingLanguages";
 
+const KB = 1000;
+
 const Languages = ({ languages }: { languages?: Language[] }) => {
   return (
     <>
@@ -78,6 +80,9 @@ const ProjectDetail = ({ absolutePath }: { absolutePath: string }) => {
             }
           }
           case "FILE": {
+            if (statSync(absolutePath).size > 5 * KB) {
+              return "### Too big to display content";
+            }
             const content = await readFile(absolutePath);
             return "```" + `${languages[0].language}\n` + content + "\n" + "```";
           }
