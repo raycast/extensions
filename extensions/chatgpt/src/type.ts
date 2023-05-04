@@ -77,6 +77,7 @@ export interface ChatHook {
   setSelectedChatId: Set<string | null>;
   ask: PromiseFunctionWithTwoArg<string, Model>;
   clear: PromiseFunctionNoArg;
+  streamData: Chat | undefined;
 }
 
 export interface ChangeModelProp {
