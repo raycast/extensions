@@ -47,7 +47,7 @@ export function SessionProvider(props: SessionProviderProps) {
     // check if the vault is locked or unauthenticated in the background
     if (!state.token) return;
     const checkVaultStatus = async () => {
-      const status = await bitwarden.checkLockStatus(state.token);
+      const status = await bitwarden.checkLockStatus();
       if (status === "unauthenticated") return await handleLogout();
       if (status === "locked") return await handleLock();
     };
@@ -56,11 +56,10 @@ export function SessionProvider(props: SessionProviderProps) {
 
   async function loadSavedSession() {
     try {
-      const { shouldLockVault, lockReason, ...savedSession } = await getSavedSession();
-      dispatch({ type: "loadSavedState", shouldLockVault, lockReason, ...savedSession });
-      if (shouldLockVault) {
-        await handleLock(lockReason, true);
-      }
+      const restoredSession = await getSavedSession();
+      if (restoredSession.token) bitwarden.setSessionToken(restoredSession.token);
+      dispatch({ type: "loadSavedState", ...restoredSession });
+      if (restoredSession.shouldLockVault) await handleLock(restoredSession.lockReason, true);
     } catch (error) {
       await handleLock();
       dispatch({ type: "failedLoadSavedState" });
@@ -72,6 +71,7 @@ export function SessionProvider(props: SessionProviderProps) {
     const token = await bitwarden.unlock(password);
     const passwordHash = await hashMasterPasswordForReprompting(password);
     await Storage.saveSession(token, passwordHash);
+    bitwarden.setSessionToken(token);
     dispatch({ type: "unlock", token, passwordHash });
   }
 
