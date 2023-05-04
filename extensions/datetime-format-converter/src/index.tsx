@@ -5,7 +5,8 @@ export default function main() {
   const { push } = useNavigation();
 
   function isValidFormat(format: string) {
-    const regex = /^((Y{2,4})|(M{1,2})|(D{1,2})|(H{1,2})|(h{1,2})|(m{1,2})|(s{1,2})|(A{1})|(a{1})|(Z{1,2})){1,}$/;
+    const regex =
+      /^((Y{2,4})[-\/]?(M{1,2})[-\/]?(D{1,2}))?(\s?((H{1,2})|(h{1,2}))[:]?(m{1,2})?[:]?(s{1,2})?)?(A{1})?(a{1})?(Z{1,2})?$/;
     return regex.test(format);
   }
 
@@ -94,12 +95,16 @@ export default function main() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Submit Form" onSubmit={(values) => timeConverter(values.time)} />
+          <Action.SubmitForm title="Submit Form" onSubmit={(values) => timeConverter(values)} />
         </ActionPanel>
       }
     >
       <Form.TextField id="time" defaultValue="now" placeholder="Enter timestamp, datetime string, or 'now'." />
-      <Form.TextField id="timeFormat" defaultValue="YYYYMMDD" placeholder="Enter datetime format string, e.g. YYYYMMDD" />
+      <Form.TextField
+        id="timeFormat"
+        defaultValue="YYYYMMDD"
+        placeholder="Enter datetime format string, e.g. YYYYMMDD"
+      />
     </Form>
   );
 }
