@@ -20,12 +20,12 @@ export const BitwardenProvider = (props: BitwardenProviderProps) => {
 };
 
 export const useBitwarden = () => {
-  const bitwarden = useContext(BitwardenContext);
-  if (bitwarden == null) {
+  const context = useContext(BitwardenContext);
+  if (context == null) {
     throw new Error("useBitwarden must be used within a BitwardenProvider");
   }
 
-  return bitwarden;
+  return context;
 };
 
 export default BitwardenContext;
