@@ -8,14 +8,15 @@ type UseCurrentlyPlayingProps = {
 };
 
 export function useCurrentlyPlaying({ options }: UseCurrentlyPlayingProps = {}) {
-  const { data, error, isLoading, revalidate } = useCachedPromise(() => getCurrentlyPlaying(), [], {
+  const { data, error, isLoading, mutate } = useCachedPromise(() => getCurrentlyPlaying(), [], {
     execute: options?.execute !== false,
   });
+
 
   return {
     currentlyPlayingData: data,
     currentlyPlayingError: error,
     currentlyPlayingIsLoading: isLoading,
-    currentlyPlayingRevalidate: revalidate,
+    currentlyPlayingRevalidate: mutate,
   };
 }

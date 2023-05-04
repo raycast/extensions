@@ -79,6 +79,8 @@ function QuickActionsCommand(props: Props) {
       description: "Play the currently paused song/episode",
       icon: Icon.Play,
       onAction: async () => {
+        await playbackStateRevalidate();
+
         if (isPlaying) {
           return await showHUD("Playing");
         }
@@ -99,6 +101,9 @@ function QuickActionsCommand(props: Props) {
       description: "Pause the currently playing song/episode",
       icon: Icon.Pause,
       onAction: async () => {
+        await currentlyPlayingRevalidate();
+        await playbackStateRevalidate();
+
         if (nothingIsPlaying) {
           return await showHUD("Nothing is currently playing");
         }
@@ -126,6 +131,8 @@ function QuickActionsCommand(props: Props) {
         tintColor: Color.PrimaryText,
       },
       onAction: async () => {
+        await playbackStateRevalidate();
+
         if (isPlaying) {
           try {
             await pause();
@@ -153,6 +160,8 @@ function QuickActionsCommand(props: Props) {
       description: "Like the current track",
       icon: Icon.Heart,
       onAction: async () => {
+        await currentlyPlayingRevalidate();
+
         if (nothingIsPlaying) {
           return await showHUD("Nothing is currently playing");
         }
@@ -177,6 +186,8 @@ function QuickActionsCommand(props: Props) {
       description: "Dislike the current track",
       icon: Icon.HeartDisabled,
       onAction: async () => {
+        await currentlyPlayingRevalidate();
+
         if (nothingIsPlaying) {
           return await showHUD("Nothing is currently playing");
         }
@@ -201,6 +212,8 @@ function QuickActionsCommand(props: Props) {
       description: "Skip to the next track",
       icon: Icon.Forward,
       onAction: async () => {
+        await currentlyPlayingRevalidate();
+
         if (nothingIsPlaying) {
           return await showHUD("Nothing is currently playing");
         }
@@ -223,6 +236,8 @@ function QuickActionsCommand(props: Props) {
       description: "Skip to the previous track",
       icon: Icon.Rewind,
       onAction: async () => {
+        await currentlyPlayingRevalidate();
+
         if (nothingIsPlaying) {
           return await showHUD("Nothing is currently playing");
         }
@@ -343,6 +358,7 @@ function QuickActionsCommand(props: Props) {
       description: "Toggle shuffle",
       icon: Icon.Shuffle,
       onAction: async () => {
+        await playbackStateRevalidate();
         const shuffleState = playbackStateData?.shuffle_state;
         try {
           await shuffle(!shuffleState);
@@ -359,6 +375,7 @@ function QuickActionsCommand(props: Props) {
       description: "Toggle repeat",
       icon: Icon.Repeat,
       onAction: async () => {
+        await playbackStateRevalidate();
         const repeatState = playbackStateData?.repeat_state;
         try {
           await repeat(repeatState === "off" ? "context" : "off");
@@ -375,6 +392,7 @@ function QuickActionsCommand(props: Props) {
       description: "Start radio based on the currently playing song",
       icon: Icon.Music,
       onAction: async () => {
+        await currentlyPlayingRevalidate();
         if (nothingIsPlaying) {
           return await showHUD("Nothing is currently playing");
         }
@@ -400,6 +418,7 @@ function QuickActionsCommand(props: Props) {
       description: "Copy the URL of the currently playing song/episode",
       icon: Icon.Link,
       onAction: async () => {
+        await currentlyPlayingRevalidate();
         if (nothingIsPlaying) {
           return await showHUD("Nothing is currently playing");
         }
