@@ -32,6 +32,24 @@
       "subtitle": "Visual Studio Code",
       "description": "Opens the currently selected Finder item with Visual Studio Code.",
       "mode": "no-view"
+    },
+    {
+      "name": "extensions",
+      "title": "Show Installed Extensions",
+      "description": "Manage Installed Extensions",
+      "mode": "view"
+    },
+    {
+      "name": "install-extension",
+      "title": "Install Extension",
+      "description": "Install Extensions from the VSCode Marketplace",
+      "mode": "view"
+    },
+    {
+      "name": "commandpalette",
+      "title": "Commands",
+      "description": "Show Commands of the VSCode Command Palette",
+      "mode": "view"
     }
   ],
   "preferences": [
