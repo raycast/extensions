@@ -4,13 +4,13 @@ Browse your Nintendo Switch gameplay history. Including information such as firs
 
 ## How to get session token?
 
+The session token has a validity period of up to 2 years. This means that theoretically, users only need to obtain the token once, and it will remain valid for the duration of the 2-year period.
+
 1. Run the "get session token" command and press ⌘ + ↩ to open the link.
 
 2. Login to your nintendo account.
 
-3. Right-click on the "Select your account" button to copy the link address.
-
-![pic](assets/copy_link.png)
+3. Right-click on the "Select your account" button to copy the link address.![pic](assets/copy_link.png)
 
 4. Paste the url into the input in the step 2, and the session token will be automatically fetched.
 
