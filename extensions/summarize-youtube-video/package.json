@@ -1,0 +1,63 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "summarize-youtube-video",
+  "title": "Summarize Youtube Video",
+  "description": "Summarize Youtube Video with OpenAI ChatGPT",
+  "icon": "extension_icon.png",
+  "author": "iKasch",
+  "categories": [
+    "Productivity",
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "videosummary",
+      "title": "Summarize Video",
+      "subtitle": "Summarize a Youtube Video with ChatGPT",
+      "description": "Use OpenAI ChatGPT to summarize a Youtube Video.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "video",
+          "placeholder": "Video URL or ID",
+          "type": "text",
+          "required": true
+        }
+      ],
+      "preferences": [
+        {
+          "name": "openaiApiToken",
+          "title": "OpenAI API Token",
+          "description": "Your OpenAI API Token",
+          "type": "password",
+          "default": "",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.50.2",
+    "@raycast/utils": "^1.5.2",
+    "date-fns": "^2.30.0",
+    "openai": "^3.2.1",
+    "youtube-transcript": "^1.0.6",
+    "ytdl-core": "^4.11.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "^18.16.3",
+    "@types/react": "^18.2.2",
+    "eslint": "^8.39.0",
+    "prettier": "^2.5.1",
+    "typescript": "^5.0.4"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
