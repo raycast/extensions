@@ -42,6 +42,7 @@ const blacklistPaths = [
   'helpers',
   'mersenne',
   'random',
+  'science',
 ];
 
 const { locale }: Preferences = getPreferenceValues();
