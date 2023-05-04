@@ -10,7 +10,7 @@ The session token has a validity period of up to 2 years. This means that theore
 
 2. Login to your nintendo account.
 
-3. Right-click on the "Select your account" button to copy the link address.![pic](assets/copy_link.png)
+3. Right-click on the "Select this account" red button to copy the link address.![pic](assets/copy_link.png)
 
 4. Paste the url into the input in the step 2, and the session token will be automatically fetched.
 
