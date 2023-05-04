@@ -128,12 +128,12 @@ function GalleryExtensionListItem(props: {
   const alreadyInstalled = installedIDs.includes(getFullExtensionID(e).toLocaleLowerCase());
   return (
     <List.Item
-      title={e.displayName} //title={{ value: e.displayName, tooltip: e.shortDescription }}
+      title={{ value: e.displayName, tooltip: e.shortDescription }}
       subtitle={e.publisher?.displayName}
       icon={iconURI() || "icon.png"}
       accessories={[
         {
-          /*tag: alreadyInstalled ? { value: "Installed", color: Color.Blue } : "",*/
+          tag: alreadyInstalled ? { value: "Installed", color: Color.Blue } : "",
           tooltip: alreadyInstalled ? "Already Installed" : "",
         },
         {
@@ -141,7 +141,7 @@ function GalleryExtensionListItem(props: {
           text: installCount !== undefined ? compactNumberFormat(installCount) : undefined,
           tooltip: installCount !== undefined ? `${compactNumberFormat(installCount)} Installs` : undefined,
         },
-        /*{ tag: version, tooltip: lastUpdated ? `Last Update: ${lastUpdated?.toLocaleString()}` : "" },*/
+        { tag: version, tooltip: lastUpdated ? `Last Update: ${lastUpdated?.toLocaleString()}` : "" },
       ]}
       actions={
         <ActionPanel>

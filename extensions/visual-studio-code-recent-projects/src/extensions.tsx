@@ -23,13 +23,13 @@ function ExtensionListItem(props: { extension: Extension; reloadExtension: () =>
       title={e.name}
       subtitle={e.publisherDisplayName}
       icon={{ source: e.icon || "icon.png", fallback: "icon.png" }}
-      /*accessories={[
+      accessories={[
         { tag: e.preview === true ? { color: Color.Red, value: "Preview" } : "" },
         {
           tag: e.version,
           tooltip: e.installedTimestamp ? `Installed:  ${new Date(e.installedTimestamp).toLocaleString()}` : "",
         },
-      ]}*/
+      ]}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
