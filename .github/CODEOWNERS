@@ -23,7 +23,7 @@
 /extensions/algolia                                  @valentindotxyz
 /extensions/aliyun-oss                               @yangxyo
 /extensions/alpinejs-doc-search                      @aurawindsurfing
-/extensions/amazon-aws                               @victor-falcon @Hodglim @JonathanWbn @gebeto @momme-rtf @duboiss @hexpl0it @crisboarna @sidhant92 @DorukAkinci @JonathanWbn
+/extensions/amazon-aws                               @victor-falcon @Hodglim @JonathanWbn @gebeto @momme-rtf @duboiss @hexpl0it @crisboarna @sidhant92 @DorukAkinci @frese
 /extensions/amphetamine                              @gstvds
 /extensions/android                                  @MohamedISoliman
 /extensions/android-adb-input                        @STAR-ZERO
@@ -76,7 +76,7 @@
 /extensions/bitcoin-price                            @futantan
 /extensions/bitfinex                                 @Yukaii
 /extensions/bitly-url-shortener                      @blessanm86
-/extensions/bitrise                                  @ubuntudroid @ubuntudroid
+/extensions/bitrise                                  @ofalvai @ubuntudroid
 /extensions/bitwarden                                @jomifepe @daniel-stoneuk @pomdtr @andreaselia @pernielsentikaer @eth-p
 /extensions/blockchain-explorer-search               @Namaskar-1F64F
 /extensions/blockchain-gas-tracker                   @vonernue
@@ -114,7 +114,7 @@
 /extensions/change-scroll-direction                  @gregoralbrecht @emilshr
 /extensions/charming-chatgpt                         @KittenYang
 /extensions/chatgo                                   @chuyun
-/extensions/chatgpt                                  @abielzulio @abielzulio @pernielsentikaer @abielzulio @abielzulio @pomdtr @abielzulio
+/extensions/chatgpt                                  @abielzulio @erodactyl @pernielsentikaer @shichongrui @timolins @pomdtr @cruelmoney
 /extensions/chatgpt-quick-actions                    @alanzchen
 /extensions/chatgpt3-prompt                          @denizyoldas @pernielsentikaer
 /extensions/cheatsheets                              @Destiner
@@ -200,7 +200,7 @@
 /extensions/dekudeals                                @rrroyal
 /extensions/descript-to-youtube-chapters             @peduarte
 /extensions/designer-news                            @itsnwa
-/extensions/deta-space                               @pomdtr @pomdtr
+/extensions/deta-space                               @deta @SlumberDemon
 /extensions/deutscherwetterdienst                    @NicolaiSchmid
 /extensions/dev-to                                   @aeither
 /extensions/devdocs                                  @pomdtr
@@ -231,7 +231,7 @@
 /extensions/doppler-share-secrets                    @thomaspaulmann
 /extensions/dot-new                                  @natterstefan
 /extensions/dota-2                                   @FlorianWendelborn
-/extensions/dotnet-api-browser                       @pernielsentikaer
+/extensions/dotnet-api-browser                       @vcsjones
 /extensions/dotnet-docs-search                       @huseyint
 /extensions/dotween-eases                            @metakirby5
 /extensions/douban                                   @crazyczy
@@ -351,7 +351,7 @@
 /extensions/google-workspace                         @thomaslombart @mathieudutour
 /extensions/gopass                                   @bake
 /extensions/grafana                                  @Lp-Francois
-/extensions/grafbase                                 @notrab @notrab
+/extensions/grafbase                                 @mlafeldt @notrab
 /extensions/graphcdn                                 @mathieudutour
 /extensions/greip                                    @gre-dev @pernielsentikaer
 /extensions/guitar-chords                            @GastroGeek
@@ -402,7 +402,7 @@
 /extensions/imdb                                     @ryan-exe
 /extensions/imessage-2fa                             @yuercl @thomaspaulmann @arronhunt
 /extensions/imgur                                    @BalliAsghar @pernielsentikaer @caumeira
-/extensions/improvmx                                 @MuhaddiMu
+/extensions/improvmx                                 @ImprovMX
 /extensions/inertiajs-documentation                  @danyelkeddah
 /extensions/infakt                                   @teziovsky
 /extensions/initium                                  @toto-minai
