@@ -99,6 +99,7 @@ export default function main() {
       }
     >
       <Form.TextField id="time" defaultValue="now" placeholder="Enter timestamp, datetime string, or 'now'." />
+      <Form.TextField id="timeFormat" defaultValue="YYYYMMDD" placeholder="Enter datetime format string, e.g. YYYYMMDD" />
     </Form>
   );
 }
