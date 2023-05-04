@@ -1,12 +1,13 @@
 import { useState } from "react";
-import { Action, ActionPanel, Icon, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { randomUUID } from "crypto";
 import { useFetchStoredReminders } from "./hooks/useFetchStoredReminders";
 import { Reminder } from "./types/reminder";
-import { createNewReminder } from "./utils/createNewReminder";
+import { createNewReminder } from "./handlers/createNewReminder";
 import { extractTopicAndDateFromInputText } from "./utils/extractTopicAndDateFromInputText";
-import { deleteReminder } from "./utils/deleteReminder";
-import Style = Toast.Style;
+import { deleteExistingReminder } from "./handlers/deleteExistingReminder";
+import { copyExistingReminder } from "./handlers/copyExistingReminder";
+import { showError } from "./utils/showError";
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
@@ -30,23 +31,27 @@ export default function Command() {
         setSearchText,
       });
     } catch (e) {
-      await showToast(Style.Failure, "Reminder not set", "Oops. Did you specify a time you would like to be notified?");
+      await showError("Reminder not set", "Oops. Did you specify a time you would like to be notified?");
+    }
+  };
+
+  const onCopyReminderTopicAction = async (reminderTopic: string) => {
+    try {
+      await copyExistingReminder(reminderTopic);
+    } catch (e) {
+      await showError("Reminder not copied");
     }
   };
 
   const onDeleteReminderAction = async (reminderId: string) => {
     try {
-      await deleteReminder({
+      await deleteExistingReminder({
         reminderId,
         existingReminders: reminders,
         setReminders,
       });
     } catch (e) {
-      await showToast(
-        Style.Failure,
-        "Reminder not deleted",
-        "Oops. This is truly unexpected, please contact us directly for us to solve the issue!"
-      );
+      await showError("Reminder not deleted");
     }
   };
 
@@ -82,6 +87,11 @@ export default function Command() {
                   {searchText.length > 0 && (
                     <Action title="Set Reminder" icon={Icon.AlarmRinging} onAction={onSetReminderAction} />
                   )}
+                  <Action
+                    title="Copy to Clipboard"
+                    icon={Icon.CopyClipboard}
+                    onAction={() => onCopyReminderTopicAction(reminder.topic)}
+                  />
                   <Action
                     title="Delete Reminder"
                     style={Action.Style.Destructive}

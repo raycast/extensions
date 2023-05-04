@@ -1,5 +1,9 @@
 # Tailscale Changelog
 
+## [Improve UI for disconnecting exit node] - 2023-04-29
+
+- Updated the icon and accessory text for the "Turn off exit node" action
+
 ## [Add new features] - 2023-04-19
 
 - Added a command to view only devices owned by you

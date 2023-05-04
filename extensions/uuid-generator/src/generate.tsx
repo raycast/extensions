@@ -1,5 +1,5 @@
-import { showHUD, Clipboard, getPreferenceValues } from "@raycast/api";
-import { v4 as uuidv4 } from "uuid";
+import { showHUD, Clipboard, getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { v4 as uuidV4 } from "uuid";
 
 interface UUIDArguments {
   numberOfUUIDsToGenerate: string;
@@ -30,7 +30,7 @@ export default async (props: { arguments: UUIDArguments }) => {
 
     // safe?
     if (parseableNumber <= UUID_MAX_NUMBER) {
-      let uuids = Array.from(Array(parseableNumber)).map(() => uuidv4());
+      let uuids = Array.from(Array(parseableNumber)).map(() => uuidV4());
       if (upperCaseLetters) {
         uuids = uuids.map((element) => element.toUpperCase());
       }
@@ -44,9 +44,17 @@ export default async (props: { arguments: UUIDArguments }) => {
       const successMessage = uuids.length > 1 ? `${action} ${uuids.length} new UUIDs.` : `${action} new UUID: ${uuids}`;
       await showHUD(`✅ ${successMessage}`);
     } else {
-      await showHUD(`❌ ${parseableNumber} exceeds maximum UUIDs of ${UUID_MAX_NUMBER}. Try a lower number.`);
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Too many UUIDs requested.",
+        message: `${parseableNumber} exceeds maximum UUIDs of ${UUID_MAX_NUMBER}. Try a lower number.`,
+      });
     }
   } catch (e) {
-    await showHUD(`❌ Invalid number provided. Try an actual number.`);
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Invalid number.",
+      message: "An invalid number has been provided. Try an actual number.",
+    });
   }
 };
