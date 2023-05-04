@@ -43,6 +43,17 @@ export function SessionProvider(props: SessionProviderProps) {
     void initialize();
   }, [bitwarden]);
 
+  useEffect(() => {
+    // check if the vault is locked or unauthenticated in the background
+    if (!state.token) return;
+    const checkVaultStatus = async () => {
+      const status = await bitwarden.checkLockStatus();
+      if (status === "unauthenticated") return await handleLogout();
+      if (status === "locked") return await handleLock();
+    };
+    void checkVaultStatus();
+  }, [state.token]);
+
   async function loadSavedSession() {
     try {
       const { shouldLockVault, lockReason, ...savedSession } = await getSavedSession();
@@ -57,17 +68,6 @@ export function SessionProvider(props: SessionProviderProps) {
       captureException("Failed to load saved session state", error);
     }
   }
-
-  useEffect(() => {
-    // check if the vault is locked or unauthenticated in the background
-    if (!state.token) return;
-    const checkVaultStatus = async () => {
-      const status = await bitwarden.checkLockStatus();
-      if (status === "unauthenticated") return await handleLogout();
-      if (status === "locked") return await handleLock();
-    };
-    void checkVaultStatus();
-  }, [state.token]);
 
   async function handleUnlock(password: string) {
     const token = await bitwarden.unlock(password);
