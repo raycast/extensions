@@ -4,13 +4,20 @@ import dayjs from "dayjs";
 export default function main() {
   const { push } = useNavigation();
 
-  function timeConverter(time: string) {
+  function isValidFormat(format: string) {
+    const regex = /^((Y{2,4})|(M{1,2})|(D{1,2})|(H{1,2})|(h{1,2})|(m{1,2})|(s{1,2})|(A{1})|(a{1})|(Z{1,2})){1,}$/;
+    return regex.test(format);
+  }
+
+  function timeConverter(values: Form.Values) {
+    const time = values.time;
+    const format = values.timeFormat;
     if (!time || time === "now") {
-      push(ResultList(formatTime(new Date().toString())));
+      push(ResultList(formatTime(new Date().toString(), format)));
     } else {
       const dTime = dayjs(time);
       if (dTime.isValid()) {
-        push(ResultList(formatTime(time)));
+        push(ResultList(formatTime(time, format)));
       } else {
         showError();
       }
@@ -25,8 +32,14 @@ export default function main() {
     });
   }
 
-  function formatTime(time: string) {
+  function formatTime(time: string, format: string) {
     let dTime;
+
+    if (!isValidFormat(format)) {
+      showError();
+      return [];
+    }
+
     if (!isNaN(Number(time))) {
       if (time.length == 10) {
         // is unix timestamp seconds
@@ -43,6 +56,8 @@ export default function main() {
     }
 
     return [
+      dTime.format(format).toString(),
+      dTime.format("YYYY-MM-DD").toString(),
       dTime.format("YYYY-MM-DD hh:mm:ss").toString(),
       dTime.format("YYYY-MM-DD hh:mm:ss.SSS").toString(),
       dTime.format().toString(),
@@ -80,11 +95,12 @@ export default function main() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Submit Form" onSubmit={(values) => timeConverter(values.time)} />
+          <Action.SubmitForm title="Submit Form" onSubmit={(values) => timeConverter(values)} />
         </ActionPanel>
       }
     >
       <Form.TextField id="time" defaultValue="now" placeholder="Enter timestamp, datetime string, or 'now'." />
+      <Form.TextField id="timeFormat" defaultValue="YYYYMMDD" placeholder="Enter format, YYYY-MM-DD hh:mm:ss" />
     </Form>
   );
 }
