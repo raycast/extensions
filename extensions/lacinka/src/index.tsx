@@ -201,16 +201,16 @@ const softLetters: { [key: string]: string } = {
   Ння: "Ńnia",
 
   /** double л */
-  лле: "llie",
-  ллё: "llio",
+  лле: "lle",
+  ллё: "llo",
   ллі: "lli",
-  ллю: "lliu",
-  лля: "llia",
-  Лле: "Llie",
-  Ллё: "Llio",
+  ллю: "llu",
+  лля: "lla",
+  Лле: "Lle",
+  Ллё: "Llo",
   Ллі: "Lli",
-  Ллю: "Lliu",
-  Лля: "Llia",
+  Ллю: "Llu",
+  Лля: "Lla",
 
   /** soft */
   бь: "b́",
