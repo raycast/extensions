@@ -2,7 +2,7 @@
 
 ![Center Raycast Extension OG Image](./metadata/og.jpg)
 
-Center Raycast Extension allows you to interact with any NFT collections or assets in any blockchain, right in your command line.
+Center Raycast Extension allows you to interact with any NFT collections or assets in any blockchain, right in your command line, powered by [Center](https://center.app/)'s NFT API
 
 ## Features
 
@@ -20,3 +20,7 @@ Center Raycast Extension allows you to interact with any NFT collections or asse
 ### Authors
 
 - [Enes O.](https://twitter.com/enesozt_)
+
+## About Center
+
+Center indexes every non-fungible token on every blockchain and make them available to creators and builders, with 99.999% uptime. Learn more about [Center API](https://center.app/api/)
