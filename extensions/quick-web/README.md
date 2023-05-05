@@ -33,8 +33,8 @@ of them should be created by `Add Arg Config` command
 ### Arg Values
 Arg values are the values of an Arg. For example, we have an arg named
 `Fruit` and it has values `Apple`, `Banana`, `Orange`. Arg Values will be displayed
-in a list for users to pick quickly without repeatedly and tediously to type
-the full name of it, and this the reason why this tools is called **Quick Web** 
+in a list for users to pick one up quickly without repeatedly and tediously typing
+the full value of it, and this the reason why this tools is called **Quick Web** 
 
 
 ## Commands
