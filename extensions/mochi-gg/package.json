@@ -1,0 +1,60 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "mochi-gg",
+  "title": "Mochi.gg",
+  "description": "Raycast extension for the Mochi.gg Discord bot and platform",
+  "icon": "command-icon.png",
+  "author": "raycast-mochi-extension-anish",
+  "categories": [
+    "Productivity",
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-tokens",
+      "title": "Search Tokens",
+      "subtitle": "Mochi.gg",
+      "description": "Search crypto tokens",
+      "mode": "view"
+    },
+    {
+      "name": "watchlist",
+      "title": "Watchlist",
+      "subtitle": "Mochi.gg",
+      "description": "View your watchlist",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "discord-uid",
+      "type": "textfield",
+      "required": true,
+      "title": "Discord User ID",
+      "description": "Your Discord User ID. You can find this by enabling \"Developer Mode\" in Discord's settings under the \"Advanced\" section and then right clicking on your profile and clicking \"Copy User ID\".",
+      "placeholder": "Enter your Discord User ID"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.49.3",
+    "@raycast/utils": "^1.5.2",
+    "axios": "^1.4.0",
+    "use-debounce": "^9.0.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
