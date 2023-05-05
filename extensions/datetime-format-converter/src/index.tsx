@@ -99,9 +99,15 @@ export default function main() {
         </ActionPanel>
       }
     >
-      <Form.TextField id="time" defaultValue="now" placeholder="Enter timestamp, datetime string, or 'now'." />
+      <Form.TextField
+        id="time"
+        title="Datetime"
+        defaultValue="now"
+        placeholder="Enter timestamp, datetime string, or 'now'."
+      />
       <Form.TextField
         id="timeFormat"
+        title="Format String"
         defaultValue="YYYYMMDD"
         placeholder="Enter datetime format string, e.g. YYYYMMDD"
       />
