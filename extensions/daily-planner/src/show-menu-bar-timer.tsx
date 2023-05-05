@@ -153,6 +153,7 @@ export default function RunningTimer() {
     setRunningTimer(cacheableTimeEntry);
   }
 
+  /* eslint-disable @typescript-eslint/no-misused-promises */
   return (
     <MenuBarExtra
       isLoading={isLoading}
