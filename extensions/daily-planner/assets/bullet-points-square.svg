@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg viewBox="0 0 16 16" width="100%" height="100%" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M 6.75 11.625 H 12.25 M 6.75 8 H 12.25 M 6.75 4.375 H 12.25 M 2.75 15.25 H 13.25 C 14.3546 15.25 15.25 14.3546 15.25 13.25 V 2.75 C 15.25 1.6454 14.3546 0.75 13.25 0.75 H 2.75 C 1.6454 0.75 0.75 1.6454 0.75 2.75 V 13.25 C 0.75 14.3546 1.6454 15.25 2.75 15.25 Z" fill="#FAFAFA" stroke="#A9A9AE" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 4.5 4.375 C 4.5 4.6511 4.2761 4.875 4 4.875 C 3.7239 4.875 3.5 4.6511 3.5 4.375 C 3.5 4.0989 3.7239 3.875 4 3.875 C 4.2761 3.875 4.5 4.0989 4.5 4.375 Z" stroke="#367BF5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 4.5 8 C 4.5 8.2761 4.2761 8.5 4 8.5 C 3.7239 8.5 3.5 8.2761 3.5 8 C 3.5 7.7239 3.7239 7.5 4 7.5 C 4.2761 7.5 4.5 7.7239 4.5 8 Z" stroke="#E74C3C" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 4.5 11.625 C 4.5 11.9011 4.2761 12.125 4 12.125 C 3.7239 12.125 3.5 11.9011 3.5 11.625 C 3.5 11.3489 3.7239 11.125 4 11.125 C 4.2761 11.125 4.5 11.3489 4.5 11.625 Z" stroke="#EA9A37" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
