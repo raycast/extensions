@@ -18,10 +18,10 @@
       "mode": "no-view"
     },
     {
-      "name": "viewFromSelectedText",
-      "title": "View from Selected Text",
-      "description": "View selected text as JSON string in OK JSON.",
-      "mode": "no-view"
+      "name": "viewFromcURLCommand",
+      "title": "View from cURL Command",
+      "description": "Run cURL command and view the result in OK JSON.",
+      "mode": "view"
     },
     {
       "name": "runScript",

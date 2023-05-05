@@ -113,8 +113,10 @@ export default function Command() {
     setScripts(result);
   }, []);
   useEffect(() => {
-    checkForInstallation().then(() => {
-      fetchScripts();
+    checkForInstallation().then((isInstalled) => {
+      if (isInstalled) {
+        fetchScripts();
+      }
     });
   }, [fetchScripts]);
   return (

@@ -1,37 +1,33 @@
-import { getApplications, Toast, open, showToast, environment } from "@raycast/api";
+import { getApplications, open, Alert, confirmAlert, popToRoot } from "@raycast/api";
 
 async function isInstalled() {
   const applications = await getApplications();
-  if (environment.isDevelopment) {
-    return true;
-  }
-  return applications.some(({ bundleId }) => bundleId === "net.shinystone.OKJSON");
+  const result = applications.some(({ bundleId }) => bundleId === "net.shinystone.OKJSON");
+  return result;
 }
 
 export default async function checkForInstallation() {
   const installed = await isInstalled();
   if (!installed) {
-    const options: Toast.Options = {
-      style: Toast.Style.Failure,
+    const alertOptions: Alert.Options = {
       title: "OK JSON is not installed.",
-      message: "Install it from here.",
+      message: "Do you want to install it right now?",
       primaryAction: {
-        title: "Download OK JSON on Mac App Store",
-        onAction: (toast) => {
+        title: "Install",
+        onAction: async () => {
           open("https://apps.apple.com/app/ok-json-offline-private/id1576121509?mt=12");
-          toast.hide();
+          await popToRoot({ clearSearchBar: false });
         },
       },
-      secondaryAction: {
-        title: "Download OK JSON on the Offical Website",
-        onAction(toast) {
-          open("https://okjson.app");
-          toast.hide();
+      dismissAction: {
+        title: "Cancel",
+        onAction: async () => {
+          await popToRoot({ clearSearchBar: false });
         },
       },
     };
-    await showToast(options);
-    return Promise.reject(false);
+    await confirmAlert(alertOptions);
+    return Promise.resolve(false);
   } else {
     return Promise.resolve(true);
   }

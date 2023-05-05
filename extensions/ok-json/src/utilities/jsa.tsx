@@ -65,12 +65,12 @@ export const runScript = (scriptID: string, input?: string) => {
   }
 };
 
-export const viewString = (string: string) => {
+export const runcURLCommand = (string: string) => {
   return executeJxa(
     `
 		const okjson = Application('net.shinystone.OKJSON');
     const text = argv[0]
-		okjson.view(text)
+		okjson.runCURLCommand(text)
 	`,
     [string]
   );

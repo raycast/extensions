@@ -1,4 +1,4 @@
-import { closeMainWindow, open } from "@raycast/api";
+import { closeMainWindow, open, popToRoot } from "@raycast/api";
 import checkForInstallation from "./utilities/checkForInstallation";
 
 export default async function Command() {
