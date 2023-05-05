@@ -18,6 +18,7 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
       useStream: boolean;
     }>().useStream;
   });
+  const [streamData, setStreamData] = useState<Chat | undefined>();
 
   const [isHistoryPaused] = useState<boolean>(() => {
     return getPreferenceValues<{
@@ -78,6 +79,19 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
             for (const line of lines) {
               const message = line.replace(/^data: /, "");
               if (message === "[DONE]") {
+                setData((prev) => {
+                  return prev.map((a) => {
+                    if (a.id === chat.id) {
+                      return chat;
+                    }
+                    return a;
+                  });
+                });
+
+                setTimeout(async () => {
+                  setStreamData(undefined)
+                }, 5);
+
                 setLoading(false);
 
                 toast.title = "Got your answer!";
@@ -93,18 +107,10 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
 
                 const content = response.choices[0].delta?.content;
 
-                if (content) chat.answer += response.choices[0].delta.content;
-
-                setTimeout(async () => {
-                  setData((prev) => {
-                    return prev.map((a) => {
-                      if (a.id === chat.id) {
-                        return chat;
-                      }
-                      return a;
-                    });
-                  });
-                }, 5);
+                if (content) {
+                  chat.answer += response.choices[0].delta.content;
+                  setStreamData({...chat, answer: chat.answer});
+                }
               } catch (error) {
                 toast.title = "Error";
                 toast.message = `Couldn't stream message`;
@@ -165,7 +171,7 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
   }, [setData]);
 
   return useMemo(
-    () => ({ data, setData, isLoading, setLoading, selectedChatId, setSelectedChatId, ask, clear }),
-    [data, setData, isLoading, setLoading, selectedChatId, setSelectedChatId, ask, clear]
+    () => ({ data, setData, isLoading, setLoading, selectedChatId, setSelectedChatId, ask, clear, streamData }),
+    [data, setData, isLoading, setLoading, selectedChatId, setSelectedChatId, ask, clear, streamData]
   );
 }
