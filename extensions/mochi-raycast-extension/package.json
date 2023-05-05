@@ -1,0 +1,56 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "mochi-raycast-extension",
+  "title": "Mochi",
+  "description": "Mochi bot helps bring the Web3 universe to your Discord server, with ease! Simple query NFT rarity, alert new sales on Discord & Twitter, tips, and so many more.",
+  "icon": "command-icon.webp",
+  "author": "Vincenzo",
+  "categories": [
+    "Finance"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "token-ticker",
+      "title": "Token Ticker",
+      "subtitle": "Mochi",
+      "description": "Display token prices and market cap.",
+      "mode": "view"
+    },
+    {
+      "name": "nft-ticker",
+      "title": "NFT Ticker",
+      "subtitle": "Mochi",
+      "description": "Display NFT Collection information.",
+      "mode": "view"
+    },
+    {
+      "name": "conversion",
+      "title": "Crypto conversion",
+      "subtitle": "Mochi",
+      "description": "Crypto conversion",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.50.0",
+    "@raycast/utils": "^1.5.2",
+    "axios": "^1.4.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "version": "0.0.2"
+}
