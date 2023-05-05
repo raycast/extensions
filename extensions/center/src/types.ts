@@ -94,3 +94,15 @@ export type UseContractsOfOwnersResponse = {
   }[];
   totalCount: 2;
 };
+
+export type TransferHistoryResponse = {
+  items: {
+    address: string;
+    blockNumber: number;
+    from: string;
+    logIndex: number;
+    network: string;
+    to: string;
+    tokenId: string;
+  }[];
+};
