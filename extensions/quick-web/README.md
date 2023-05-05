@@ -44,6 +44,7 @@ chosen arg value
 
 #### Invoke Command
 ![Invoke Command](./assets/readme_imgs/index1.png)
+
 If customized input is needed, press tab to focus on the text field and 
 type in
 #### Choose Web
