@@ -38,7 +38,7 @@ export default function viewFromcURLCommand() {
               const command = values.command;
               if (command && command.startsWith("curl ")) {
                 runcURLCommand(command);
-                popToRoot()
+                popToRoot();
               } else {
                 if (command) {
                   setCommandError("cURL command should start with “curl”.");
