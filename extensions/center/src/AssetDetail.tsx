@@ -1,10 +1,11 @@
-import { Action, ActionPanel, Detail, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon, useNavigation } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import AssetTransferHistory from "./AssetTransferHistory";
 import { ApiUrls, CENTER_API_KEY } from "./constants/center";
 import { getRandomColor } from "./utils/color";
 import { markdownNFTDetail } from "./utils/markdown";
 import { AssetDetailsResponse } from "./types";
+import { getAssetCenterUrl } from "./utils/url";
 
 type AssetDetailProps = {
   address: string;
@@ -51,9 +52,15 @@ export default function AssetDetail({ address, tokenId }: AssetDetailProps) {
           {data ? (
             <Action
               title="Transfer History"
+              icon={Icon.List}
               onAction={() => push(<AssetTransferHistory address={data.address} tokenId={data.tokenId} />)}
             />
           ) : null}
+          <Action.OpenInBrowser
+            title="See on Center.app"
+            icon={Icon.Globe}
+            url={getAssetCenterUrl("ethereum-mainnet", data.address, data?.tokenId)}
+          />
         </ActionPanel>
       }
     />

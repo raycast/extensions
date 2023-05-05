@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Action, ActionPanel, LaunchProps, List, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Icon, LaunchProps, List, useNavigation } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { ApiUrls, CENTER_API_KEY } from "./constants/center";
 import AssetTransferHistory from "./AssetTransferHistory";
@@ -44,10 +44,17 @@ export default function Command(props: LaunchProps<{ arguments: GetContractsOfOw
                 <ActionPanel>
                   <Action
                     title="Go to Details"
+                    icon={Icon.ArrowRightCircle}
                     onAction={() => push(<AssetDetail address={item.address} tokenId={item.tokenID} />)}
                   />
                   <Action
                     title="Transfer History"
+                    icon={Icon.List}
+                    onAction={() => push(<AssetTransferHistory address={item.address} tokenId={item.tokenID} />)}
+                  />
+                  <Action
+                    title="Visit Center"
+                    icon={Icon.Globe}
                     onAction={() => push(<AssetTransferHistory address={item.address} tokenId={item.tokenID} />)}
                   />
                 </ActionPanel>

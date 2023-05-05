@@ -1,9 +1,10 @@
-import { Detail } from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { ApiUrls, CENTER_API_KEY } from "./constants/center";
 import type { CollectionResponse, FloorPriceResponse, VolumeResponse } from "./types";
 import { getErrorColor, getSuccessColor } from "./utils/color";
 import { markdownCollectionDetail } from "./utils/markdown";
+import { getCollectionCenterUrl } from "./utils/url";
 
 type CollectionDetailProps = {
   address: string;
@@ -31,6 +32,17 @@ export default function CollectionDetail({ address }: CollectionDetailProps) {
 
   return (
     <Detail
+      actions={
+        <ActionPanel>
+          {data ? (
+            <Action.OpenInBrowser
+              title="See on Center.app"
+              icon={Icon.Globe}
+              url={getCollectionCenterUrl("ethereum-mainnet", data.address)}
+            />
+          ) : null}
+        </ActionPanel>
+      }
       markdown={markdownCollectionDetail(data?.smallPreviewImageUrl, data?.name, floorPriceData, volumeData)}
       metadata={
         <Detail.Metadata>
