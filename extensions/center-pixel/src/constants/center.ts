@@ -4,6 +4,8 @@ export const ApiUrls = {
     `https://api.center.dev/v1/${network}/transfers?collection=${address}&tokenID=${tokenId}`,
   getFloorPriceOfCollection: (network: string, address: string) =>
     `https://api.center.dev/v1/${network}/${address}/market-data/floor-price`,
+  getVolumeOfCollection: (network: string, address: string) =>
+    `https://api.center.dev/v1/${network}/${address}/market-data/volume`,
   getCollection: (network: string, address: string) => `https://api.center.dev/v1/${network}/${address}`,
   getContractsOfOwner: (network: string, searchText: string) =>
     `https://api.center.dev/experimental/alchemy/${network}/nft/v2/test/getContractsForOwner?owner=${searchText}`,

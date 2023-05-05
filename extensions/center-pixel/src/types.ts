@@ -11,6 +11,25 @@ export type FloorPriceResponse = {
   };
 };
 
+type TokenVolume = {
+  atomicAmount: string;
+  wholeAmount: number;
+};
+
+type CurrencyInfo = {
+  symbol: string;
+  decimals: number;
+  address: string;
+  isNative: boolean;
+};
+
+export type VolumeResponse = {
+  currencyInfo: CurrencyInfo;
+  oneDayVolume: TokenVolume;
+  sevenDayVolume: TokenVolume;
+  thirtyDayVolume: TokenVolume;
+};
+
 export type CollectionResponse = {
   address: string;
   creator: string;
