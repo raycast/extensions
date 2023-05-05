@@ -16,7 +16,7 @@
     {
       "name": "search",
       "title": "Search Collection or Asset",
-      "subtitle": "Center",
+      "subtitle": "Center NFTs",
       "description": "Search NFT collections or assets with name, description, or address.",
       "mode": "view",
       "arguments": [
@@ -31,7 +31,7 @@
     {
       "name": "get-contracts-of-owner",
       "title": "Assets of Owner",
-      "subtitle": "Center",
+      "subtitle": "Center NFTs",
       "description": "Get NFTs of owner with ENS or contract address.",
       "mode": "view",
       "arguments": [
@@ -46,7 +46,7 @@
     {
       "name": "get-asset",
       "title": "Asset Details",
-      "subtitle": "Center",
+      "subtitle": "Center NFTs",
       "description": "Get NFT asset in the blockchain in milliseconds.",
       "mode": "view",
       "arguments": [
@@ -67,7 +67,7 @@
     {
       "name": "get-collection",
       "title": "Collection Details",
-      "subtitle": "Center",
+      "subtitle": "Center NFTs",
       "description": "Get NFT collection in the blockchain in milliseconds.",
       "mode": "view",
       "arguments": [
