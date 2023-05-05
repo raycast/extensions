@@ -1,15 +1,17 @@
-import { Action, ActionPanel, Icon, List, showToast, Toast } from "@raycast/api";
-import { useCallback, useEffect, useState } from "react";
+import { Action, ActionPanel, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
+import React, { useCallback, useEffect, useState } from "react";
 import { uniqBy } from "lodash";
 import { useChatGo } from "./hooks/useChatGo";
 import { TemplateBase, TemplateModel } from "./type";
 import { getAvatarIcon } from "@raycast/utils";
+import Ask from "./ask";
 
 export default function Store() {
   const [isLoading, setLoading] = useState<boolean>(true);
   const [myTPlList, setMyTPlList] = useState<TemplateModel[]>([]);
   const [list, setList] = useState<TemplateBase[]>([]);
   const chatGo = useChatGo();
+  const { push } = useNavigation();
 
   const uniqMyTplList = uniqBy(myTPlList, "id");
   const uniqList = uniqBy(list, "id");
@@ -46,7 +48,7 @@ export default function Store() {
       {myTPlList.length === 0 && list.length === 0 && (
         <List.EmptyView title="No Data" description="Your recent questions will be showed up here" icon={Icon.Stars} />
       )}
-      <List.Section title="My Template" subtitle={uniqBy(myTPlList, "id").length.toLocaleString()}>
+      <List.Section title={"My Template"} subtitle={uniqBy(myTPlList, "id").length.toLocaleString()}>
         {uniqMyTplList.map((item) => {
           return (
             <List.Item
@@ -61,7 +63,7 @@ export default function Store() {
                   {item.template_name !== "万能助手" && (
                     <Action
                       icon={Icon.StarDisabled}
-                      title="Remove Template from My Templates"
+                      title="Remove the Template From My Templates"
                       onAction={() => {
                         chatGo.removeMyTemplate(item.id).then(() => {
                           getData();
