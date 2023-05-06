@@ -8,8 +8,8 @@ import {
   TransferHistoryResponse,
   UseContractsOfOwnersResponse,
   VolumeResponse,
-} from "./types";
-import { ApiUrls } from "./constants/center";
+} from "../types";
+import { ApiUrls } from "../constants/endpoints";
 
 export const useAssetDetails = ({ address, tokenId }: { address: string; tokenId: string }) => {
   const apiKey = getAPIKey();

@@ -4,7 +4,7 @@ import AssetTransferHistory from "./AssetTransferHistory";
 import AssetDetail from "./AssetDetail";
 import { markdownNFTDetail } from "./utils/markdown";
 import CollectionDetail from "./CollectionDetail";
-import { useSearch } from "./center-hooks";
+import { useSearch } from "./hooks/center";
 import { SearchResponse } from "./types";
 
 interface GetContractsOfOwnerArguments {

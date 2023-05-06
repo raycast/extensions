@@ -3,7 +3,7 @@ import { Action, ActionPanel, Icon, LaunchProps, List, getPreferenceValues, useN
 import AssetTransferHistory from "./AssetTransferHistory";
 import AssetDetail from "./AssetDetail";
 import { markdownNFTDetail } from "./utils/markdown";
-import { useContractsOfOwner } from "./center-hooks";
+import { useContractsOfOwner } from "./hooks/center";
 import { UseContractsOfOwnersResponse } from "./types";
 
 interface GetContractsOfOwnerArguments {

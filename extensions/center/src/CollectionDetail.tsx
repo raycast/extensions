@@ -2,7 +2,7 @@ import { Action, ActionPanel, Detail, Icon } from "@raycast/api";
 import { getErrorColor, getSuccessColor } from "./utils/color";
 import { markdownCollectionDetail } from "./utils/markdown";
 import { getCollectionCenterUrl } from "./utils/url";
-import { useCollectionDetails, useFloorPrice, useVolumeData } from "./center-hooks";
+import { useCollectionDetails, useFloorPrice, useVolumeData } from "./hooks/center";
 
 type CollectionDetailProps = {
   address: string;

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { List } from "@raycast/api";
 import { TransferHistoryResponse } from "./types";
-import { useTransferHistory } from "./center-hooks";
+import { useTransferHistory } from "./hooks/center";
 
 export default function AssetTransferHistory({
   address,

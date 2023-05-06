@@ -3,7 +3,7 @@ import AssetTransferHistory from "./AssetTransferHistory";
 import { getRandomColor } from "./utils/color";
 import { markdownNFTDetail } from "./utils/markdown";
 import { getAssetCenterUrl } from "./utils/url";
-import { useAssetDetails } from "./center-hooks";
+import { useAssetDetails } from "./hooks/center";
 
 type AssetDetailProps = {
   address: string;
