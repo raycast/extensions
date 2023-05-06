@@ -7,6 +7,9 @@
   "author": "thomaslombart",
   "owner": "raycast",
   "access": "public",
+  "contributors": [
+    "sasivarnan"
+  ],
   "categories": [
     "Web"
   ],

@@ -7,6 +7,7 @@ import SelectBrowsers from "./components/SelectBrowsers";
 import useAvailableBrowsers, { BROWSERS_BUNDLE_ID } from "./hooks/useAvailableBrowsers";
 import useBraveBookmarks from "./hooks/useBraveBookmarks";
 import useChromeBookmarks from "./hooks/useChromeBookmarks";
+import useEdgeBookmarks from "./hooks/useEdgeBookmarks";
 import useFirefoxBookmarks from "./hooks/useFirefoxBookmarks";
 import useSafariBookmarks from "./hooks/useSafariBookmarks";
 import { getMacOSDefaultBrowser } from "./utils/browsers";
@@ -65,19 +66,24 @@ export default function Command() {
 
   const hasBrave = browsers.includes(BROWSERS_BUNDLE_ID.brave) ?? false;
   const hasChrome = browsers.includes(BROWSERS_BUNDLE_ID.chrome) ?? false;
+  const hasEdge = browsers.includes(BROWSERS_BUNDLE_ID.edge) ?? false;
   const hasFirefox = browsers.includes(BROWSERS_BUNDLE_ID.firefox) ?? false;
   const hasSafari = browsers.includes(BROWSERS_BUNDLE_ID.safari) ?? false;
 
   const brave = useBraveBookmarks(hasBrave);
   const chrome = useChromeBookmarks(hasChrome);
+  const edge = useEdgeBookmarks(hasEdge);
   const firefox = useFirefoxBookmarks(hasFirefox);
   const safari = useSafariBookmarks(hasSafari);
+
+  console.log("edge", edge.profiles, edge.currentProfile)
+  console.log("chrome", chrome.profiles, chrome.currentProfile)
 
   const [bookmarks, setBookmarks] = useCachedState<Bookmark[]>("bookmarks", []);
   const [folders, setFolders] = useCachedState<Folder[]>("folders", []);
 
   useEffect(() => {
-    const bookmarks = [...brave.bookmarks, ...chrome.bookmarks, ...firefox.bookmarks, ...safari.bookmarks]
+    const bookmarks = [...brave.bookmarks, ...chrome.bookmarks, ...edge.bookmarks, ...firefox.bookmarks, ...safari.bookmarks]
       .map((item) => {
         return {
           ...item,
@@ -106,13 +112,13 @@ export default function Command() {
       });
 
     setBookmarks(bookmarks);
-  }, [brave.bookmarks, chrome.bookmarks, firefox.bookmarks, safari.bookmarks, frecencies, setBookmarks]);
+  }, [brave.bookmarks, chrome.bookmarks, edge.bookmarks, firefox.bookmarks, safari.bookmarks, frecencies, setBookmarks]);
 
   useEffect(() => {
-    const folders = [...brave.folders, ...chrome.folders, ...firefox.folders, ...safari.folders];
+    const folders = [...brave.folders, ...chrome.folders, ...edge.folders, ...firefox.folders, ...safari.folders];
 
     setFolders(folders);
-  }, [brave.folders, chrome.folders, firefox.folders, safari.folders, setFolders]);
+  }, [brave.folders, chrome.folders, edge.folders, firefox.folders, safari.folders, setFolders]);
 
   const filteredBookmarks = useMemo(() => {
     return bookmarks.filter((item) => {
@@ -143,6 +149,10 @@ export default function Command() {
 
     if (hasChrome) {
       chrome.mutate();
+    }
+
+    if (hasEdge) {
+      edge.mutate();
     }
 
     if (hasFirefox) {
@@ -194,6 +204,7 @@ export default function Command() {
         isLoadingFrecencies ||
         brave.isLoading ||
         chrome.isLoading ||
+        edge.isLoading ||
         firefox.isLoading ||
         safari.isLoading
       }
@@ -254,6 +265,16 @@ export default function Command() {
                     profiles={chrome.profiles}
                     currentProfile={chrome.currentProfile}
                     setCurrentProfile={chrome.setCurrentProfile}
+                  />
+
+                  <SelectProfileSubmenu
+                    bundleId={BROWSERS_BUNDLE_ID.edge}
+                    name="Edge"
+                    icon="edge.png"
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
+                    profiles={edge.profiles}
+                    currentProfile={edge.currentProfile}
+                    setCurrentProfile={edge.setCurrentProfile}
                   />
 
                   <SelectProfileSubmenu
