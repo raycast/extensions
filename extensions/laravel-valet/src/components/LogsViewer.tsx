@@ -60,9 +60,6 @@ function LogDetail({ log, path }: ListItemProps): JSX.Element {
   }, [retry, log]);
 
   return (
-    <Detail
-      navigationTitle={"Watching for updates..."}
-      markdown={`## ${log}\n\n\`\`\`\n# ${path}\n\n${tail}\n\`\`\``}
-    />
+    <Detail navigationTitle={`${log}: Watching for updates...`} markdown={`\`\`\`\n# ${path}\n\n${tail}\n\`\`\``} />
   );
 }
