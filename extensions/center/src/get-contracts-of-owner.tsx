@@ -24,8 +24,8 @@ export default function Command(props: LaunchProps<{ arguments: GetContractsOfOw
       isShowingDetail
       searchText={searchText}
       onSearchTextChange={setSearchText}
-      navigationTitle="Search Beers"
-      searchBarPlaceholder="Search your favorite beer"
+      navigationTitle="Get Contracts of Owner"
+      searchBarPlaceholder="Type ENS or Address"
     >
       {searchText
         ? contracts?.map((item: ContractItem, index: number) => (
