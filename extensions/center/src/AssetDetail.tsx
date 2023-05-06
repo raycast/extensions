@@ -1,11 +1,9 @@
 import { Action, ActionPanel, Detail, Icon, useNavigation } from "@raycast/api";
-import { useFetch } from "@raycast/utils";
 import AssetTransferHistory from "./AssetTransferHistory";
-import { ApiUrls, CENTER_API_KEY } from "./constants/center";
 import { getRandomColor } from "./utils/color";
 import { markdownNFTDetail } from "./utils/markdown";
-import { AssetDetailsResponse } from "./types";
 import { getAssetCenterUrl } from "./utils/url";
+import { useAssetDetails } from "./center-hooks";
 
 type AssetDetailProps = {
   address: string;
@@ -14,9 +12,9 @@ type AssetDetailProps = {
 
 // 0xBC4CA0EdA7647A8aB7C2061c2E118A18a936f13D
 export default function AssetDetail({ address, tokenId }: AssetDetailProps) {
-  const { data } = useFetch<AssetDetailsResponse>(ApiUrls.getAsset(address, tokenId), {
-    method: "GET",
-    headers: { accept: "application/json", "X-API-Key": CENTER_API_KEY },
+  const { data } = useAssetDetails({
+    address,
+    tokenId,
   });
   const { push } = useNavigation();
 
@@ -53,7 +51,15 @@ export default function AssetDetail({ address, tokenId }: AssetDetailProps) {
             <Action
               title="Transfer History"
               icon={Icon.List}
-              onAction={() => push(<AssetTransferHistory address={data.address} tokenId={data.tokenId} />)}
+              onAction={() =>
+                push(
+                  <AssetTransferHistory
+                    title={`${data.collectionName} / ${data.name} - Transfer History`}
+                    address={data.address}
+                    tokenId={data.tokenId}
+                  />
+                )
+              }
             />
           ) : null}
           <Action.OpenInBrowser

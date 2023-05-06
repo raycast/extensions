@@ -1,26 +1,22 @@
 import { useState } from "react";
-import { Action, ActionPanel, Icon, LaunchProps, List, useNavigation } from "@raycast/api";
-import { useFetch } from "@raycast/utils";
-import { ApiUrls, CENTER_API_KEY } from "./constants/center";
+import { Action, ActionPanel, Icon, LaunchProps, List, getPreferenceValues, useNavigation } from "@raycast/api";
 import AssetTransferHistory from "./AssetTransferHistory";
 import AssetDetail from "./AssetDetail";
 import { markdownNFTDetail } from "./utils/markdown";
+import { useContractsOfOwner } from "./center-hooks";
 import { UseContractsOfOwnersResponse } from "./types";
 
 interface GetContractsOfOwnerArguments {
   address: string;
 }
+type ContractItem = UseContractsOfOwnersResponse["contracts"]["0"];
 
 export default function Command(props: LaunchProps<{ arguments: GetContractsOfOwnerArguments }>) {
   const address = props?.arguments.address || "";
   const [searchText, setSearchText] = useState(address || "");
 
   const { push } = useNavigation();
-  const { data } = useFetch<UseContractsOfOwnersResponse>(ApiUrls.getContractsOfOwner("ethereum-mainnet", searchText), {
-    method: "GET",
-    headers: { accept: "application/json", "X-API-Key": CENTER_API_KEY },
-  });
-
+  const { data } = useContractsOfOwner({ searchText });
   const contracts = data?.contracts;
 
   return (
@@ -32,13 +28,17 @@ export default function Command(props: LaunchProps<{ arguments: GetContractsOfOw
       searchBarPlaceholder="Search your favorite beer"
     >
       {searchText
-        ? contracts?.map((item: any, index: number) => (
+        ? contracts?.map((item: ContractItem, index: number) => (
             <List.Item
               key={index}
               title={item.name}
-              icon={{
-                source: item.media?.gateway,
-              }}
+              icon={
+                item.media?.gateway
+                  ? {
+                      source: item.media?.gateway,
+                    }
+                  : Icon.Image
+              }
               detail={<List.Item.Detail markdown={markdownNFTDetail(item.media?.gateway, item.name)} />}
               actions={
                 <ActionPanel>
@@ -50,12 +50,28 @@ export default function Command(props: LaunchProps<{ arguments: GetContractsOfOw
                   <Action
                     title="Transfer History"
                     icon={Icon.List}
-                    onAction={() => push(<AssetTransferHistory address={item.address} tokenId={item.tokenID} />)}
+                    onAction={() =>
+                      push(
+                        <AssetTransferHistory
+                          title={`${item.name} Transfer History`}
+                          address={item.address}
+                          tokenId={item.tokenID}
+                        />
+                      )
+                    }
                   />
                   <Action
                     title="Visit Center"
                     icon={Icon.Globe}
-                    onAction={() => push(<AssetTransferHistory address={item.address} tokenId={item.tokenID} />)}
+                    onAction={() =>
+                      push(
+                        <AssetTransferHistory
+                          title={`${item.name} Transfer History`}
+                          address={item.address}
+                          tokenId={item.tokenID}
+                        />
+                      )
+                    }
                   />
                 </ActionPanel>
               }

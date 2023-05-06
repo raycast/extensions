@@ -12,6 +12,16 @@
     "Fun"
   ],
   "license": "MIT",
+  "preferences": [
+    {
+      "name": "apiKey",
+      "type": "password",
+      "required": true,
+      "title": "API Key",
+      "description": "Your Center API key.",
+      "placeholder": "See center.app/api/"
+    }
+  ],
   "commands": [
     {
       "name": "search",

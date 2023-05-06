@@ -1,10 +1,8 @@
 import { Action, ActionPanel, Detail, Icon } from "@raycast/api";
-import { useFetch } from "@raycast/utils";
-import { ApiUrls, CENTER_API_KEY } from "./constants/center";
-import type { CollectionResponse, FloorPriceResponse, VolumeResponse } from "./types";
 import { getErrorColor, getSuccessColor } from "./utils/color";
 import { markdownCollectionDetail } from "./utils/markdown";
 import { getCollectionCenterUrl } from "./utils/url";
+import { useCollectionDetails, useFloorPrice, useVolumeData } from "./center-hooks";
 
 type CollectionDetailProps = {
   address: string;
@@ -12,23 +10,9 @@ type CollectionDetailProps = {
 
 // 0xBC4CA0EdA7647A8aB7C2061c2E118A18a936f13D
 export default function CollectionDetail({ address }: CollectionDetailProps) {
-  const { data } = useFetch<CollectionResponse>(ApiUrls.getCollection("ethereum-mainnet", address), {
-    method: "GET",
-    headers: { accept: "application/json", "X-API-Key": CENTER_API_KEY },
-  });
-
-  const { data: floorPriceData } = useFetch<FloorPriceResponse>(
-    ApiUrls.getFloorPriceOfCollection("ethereum-mainnet", address),
-    {
-      method: "GET",
-      headers: { accept: "application/json", "X-API-Key": CENTER_API_KEY },
-    }
-  );
-
-  const { data: volumeData } = useFetch<VolumeResponse>(ApiUrls.getVolumeOfCollection("ethereum-mainnet", address), {
-    method: "GET",
-    headers: { accept: "application/json", "X-API-Key": CENTER_API_KEY },
-  });
+  const { data } = useCollectionDetails({ address });
+  const { data: floorPriceData } = useFloorPrice({ address });
+  const { data: volumeData } = useVolumeData({ address });
 
   return (
     <Detail

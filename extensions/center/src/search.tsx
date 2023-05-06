@@ -1,16 +1,16 @@
 import { useState } from "react";
 import { Action, ActionPanel, Icon, LaunchProps, List, useNavigation } from "@raycast/api";
-import { useFetch } from "@raycast/utils";
-import { ApiUrls, CENTER_API_KEY } from "./constants/center";
 import AssetTransferHistory from "./AssetTransferHistory";
 import AssetDetail from "./AssetDetail";
 import { markdownNFTDetail } from "./utils/markdown";
 import CollectionDetail from "./CollectionDetail";
+import { useSearch } from "./center-hooks";
 import { SearchResponse } from "./types";
 
 interface GetContractsOfOwnerArguments {
   query: string;
 }
+type SearchItem = SearchResponse["results"][0];
 
 const resultTypes = [
   { id: "All", name: "All" },
@@ -46,10 +46,7 @@ export default function Command(props: LaunchProps<{ arguments: GetContractsOfOw
   const [resultType, setResultType] = useState("all");
 
   const { push } = useNavigation();
-  const { data } = useFetch<SearchResponse>(ApiUrls.search("ethereum-mainnet", searchText), {
-    method: "GET",
-    headers: { accept: "application/json", "X-API-Key": CENTER_API_KEY },
-  });
+  const { data } = useSearch({ searchText });
 
   let results = data?.results;
 
@@ -68,7 +65,7 @@ export default function Command(props: LaunchProps<{ arguments: GetContractsOfOw
       searchBarAccessory={<ResultTypeDropdown resultTypes={resultTypes} onResultTypeChange={setResultType} />}
     >
       {searchText
-        ? results?.map((item: any, index: number) => (
+        ? results?.map((item: SearchItem, index: number) => (
             <List.Item
               key={index}
               title={item.name}
@@ -94,7 +91,15 @@ export default function Command(props: LaunchProps<{ arguments: GetContractsOfOw
                     <Action
                       title="Transfer History"
                       icon={Icon.List}
-                      onAction={() => push(<AssetTransferHistory address={item.address} tokenId={item.tokenId} />)}
+                      onAction={() =>
+                        push(
+                          <AssetTransferHistory
+                            title={`${item.name} Transfer History`}
+                            address={item.address}
+                            tokenId={item.tokenId}
+                          />
+                        )
+                      }
                     />
                   ) : null}
                 </ActionPanel>

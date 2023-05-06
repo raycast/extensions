@@ -68,7 +68,7 @@ export type SearchResponse = {
   results: {
     address: string;
     id: string;
-    name: boolean;
+    name: string;
     previewImageUrl: string;
     relevance: number;
     tokenId: string;
