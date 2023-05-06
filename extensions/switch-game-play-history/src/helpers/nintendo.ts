@@ -3,12 +3,31 @@ import { useFetch } from "@raycast/utils";
 import base64url from "base64url";
 import crypto from "crypto";
 import { IPlayHistories, ISessionToken, IToken } from "../types/nintendo";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { parseUrlParams } from "./utils";
 import getCache from "./cache";
 export const NINTENDO_CLIENT_ID = "5c38e31cd085304b";
 const getSessionToken = () => {
   return getPreferenceValues<{ NINTENDO_SESSION_TOKEN: string }>().NINTENDO_SESSION_TOKEN;
+};
+const getAuthenticationUrl = () => {
+  const state = base64url(crypto.randomBytes(36));
+  const verifier = base64url(crypto.randomBytes(32));
+  const challenge = base64url(crypto.createHash("sha256").update(verifier).digest());
+
+  const params = {
+    state,
+    client_id: NINTENDO_CLIENT_ID,
+    redirect_uri: `npf${NINTENDO_CLIENT_ID}://auth`,
+    scope: "openid user user.mii user.email user.links[].id",
+    response_type: "session_token_code",
+    session_token_code_challenge: challenge,
+    session_token_code_challenge_method: "S256",
+    theme: "login_form",
+  };
+
+  const url = "https://accounts.nintendo.com/connect/1.0.0/authorize?" + new URLSearchParams(params).toString();
+  return { url, verifier, state };
 };
 export const useToken = () => {
   const sessionToken = getSessionToken();
@@ -28,21 +47,31 @@ export const useToken = () => {
       grant_type: "urn:ietf:params:oauth:grant-type:jwt-bearer-session-token",
     }),
     execute: !cachedToken && !!sessionToken,
-    initialData: cachedToken,
     keepPreviousData: false,
+    initialData: cachedToken,
     onError: (error) => {
       showToast(Toast.Style.Failure, error.name, error.message);
     },
     onData: (data) => {
-      cache.set(data);
+      if (data.access_token !== cachedToken?.access_token) {
+        cache.set(data);
+      }
     },
   });
+  if (!cachedToken) {
+    token.data = {
+      expires_in: 0,
+      id_token: "",
+      scope: [],
+      access_token: "",
+      token_type: "",
+    };
+  }
   return token;
 };
 export const usePlayHistories = () => {
   const token = useToken();
-  const sessionToken = getSessionToken();
-  const cache = getCache<IPlayHistories>("HISTORY" + sessionToken);
+  const cache = getCache<IPlayHistories>("HISTORY");
   const cachedHistories = cache.get();
   const histories = useFetch<IPlayHistories, IPlayHistories>(
     "https://mypage-api.entry.nintendo.co.jp/api/v1/users/me/play_histories",
@@ -139,23 +168,4 @@ export const useSessionToken = () => {
     return data;
   };
   return { sessionToken, url, getCode, getCachedSessionToken };
-};
-export const getAuthenticationUrl = () => {
-  const state = base64url(crypto.randomBytes(36));
-  const verifier = base64url(crypto.randomBytes(32));
-  const challenge = base64url(crypto.createHash("sha256").update(verifier).digest());
-
-  const params = {
-    state,
-    client_id: NINTENDO_CLIENT_ID,
-    redirect_uri: `npf${NINTENDO_CLIENT_ID}://auth`,
-    scope: "openid user user.mii user.email user.links[].id",
-    response_type: "session_token_code",
-    session_token_code_challenge: challenge,
-    session_token_code_challenge_method: "S256",
-    theme: "login_form",
-  };
-
-  const url = "https://accounts.nintendo.com/connect/1.0.0/authorize?" + new URLSearchParams(params).toString();
-  return { url, verifier, state };
 };
