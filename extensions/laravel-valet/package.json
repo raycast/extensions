@@ -26,6 +26,7 @@
     "@raycast/utils": "^1.5.2"
   },
   "devDependencies": {
+    "@raycast/eslint-config": "^1.0.5",
     "@types/node": "20.1.0",
     "@types/react": "18.2.6",
     "@typescript-eslint/eslint-plugin": "^5.59.2",
@@ -40,6 +41,6 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "ray publish"
+    "publish": "npx @raycast/api@latest publish"
   }
 }
