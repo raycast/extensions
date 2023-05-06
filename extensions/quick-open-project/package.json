@@ -7,7 +7,8 @@
   "icon": "icon.png",
   "author": "zerowidth",
   "contributors": [
-    "bjw-s"
+    "bjw-s",
+    "mattstein"
   ],
   "license": "MIT",
   "commands": [
