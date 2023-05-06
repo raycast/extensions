@@ -23,9 +23,6 @@ export function isReadyToFetch() {
   const isProfileSelected = !!process.env.AWS_PROFILE;
   const isAwsVaultSessionActive = !!process.env.AWS_VAULT;
 
-  console.log("isProfileSelected", isProfileSelected);
-  console.log("isAwsVaultSessionActive", isAwsVaultSessionActive);
-
   return isProfileSelected || isAwsVaultSessionActive;
 }
 
