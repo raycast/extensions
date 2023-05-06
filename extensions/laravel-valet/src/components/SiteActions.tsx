@@ -51,7 +51,7 @@ export default function SiteActions({ site, mutateSites }: SiteActionsProps): JS
     <>
       <Action.OpenInBrowser url={site.url} icon={Icon.Globe} />
 
-      <ActionPanel.Section title={"Valet actions"}>
+      <ActionPanel.Section title={"Site actions"}>
         <Action
           title="Secure Site"
           icon={{ source: Icon.Lock, tintColor: Color.Green }}
@@ -64,8 +64,6 @@ export default function SiteActions({ site, mutateSites }: SiteActionsProps): JS
           shortcut={{ modifiers: ["cmd", "shift"], key: "u" }}
           onAction={() => unsecureSite(site)}
         />
-      </ActionPanel.Section>
-      <ActionPanel.Section title={"Default actions"}>
         <Action.ShowInFinder path={site.path} />
         <Action.OpenWith path={site.path} shortcut={{ modifiers: ["cmd"], key: "o" }} />
         <Action.CopyToClipboard

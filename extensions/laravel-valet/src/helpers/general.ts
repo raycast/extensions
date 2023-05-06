@@ -5,8 +5,14 @@ import { execSync } from "child_process";
 import { Config } from "../types/entities";
 
 export const configPath = `${homedir()}/.config/valet/config.json`;
+export const valetHomePath = `${homedir()}/.config/valet`;
 export const sitesPath = `${homedir()}/.config/valet/Sites`;
 export const certsPath = `${homedir()}/.config/valet/Certificates`;
+export const brewDir = "/opt/homebrew";
+
+export function isRunning(): boolean {
+  return fs.existsSync(`${valetHomePath}/valet.sock`);
+}
 
 export function pathExists(path: string): boolean {
   return fs.existsSync(path);
@@ -57,7 +63,7 @@ export async function executeCommand(command: string): Promise<Buffer> {
     return await execSync(command, {
       env: {
         HOME: homeDir,
-        PATH: `/bin:/usr/bin:/usr/local/bin:/opt/homebrew/bin:${homeDir}/.composer/vendor/bin`,
+        PATH: `/bin:/usr/bin:/usr/local/bin:${brewDir}/bin:${homeDir}/.composer/vendor/bin`,
       },
     });
   } catch (error) {
@@ -68,12 +74,14 @@ export async function executeCommand(command: string): Promise<Buffer> {
 interface HandleErrorArgs {
   error: Error | unknown;
   title: string;
+  primaryAction?: Toast.ActionOptions;
 }
 
-export function handleError({ error, title }: HandleErrorArgs) {
+export function handleError({ error, title, primaryAction }: HandleErrorArgs) {
   return showToast({
     style: Toast.Style.Failure,
     title: title,
     message: error instanceof Error ? error.message : "",
+    primaryAction,
   });
 }
