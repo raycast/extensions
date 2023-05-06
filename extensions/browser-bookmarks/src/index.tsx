@@ -76,14 +76,17 @@ export default function Command() {
   const firefox = useFirefoxBookmarks(hasFirefox);
   const safari = useSafariBookmarks(hasSafari);
 
-  console.log("edge", edge.profiles, edge.currentProfile)
-  console.log("chrome", chrome.profiles, chrome.currentProfile)
-
   const [bookmarks, setBookmarks] = useCachedState<Bookmark[]>("bookmarks", []);
   const [folders, setFolders] = useCachedState<Folder[]>("folders", []);
 
   useEffect(() => {
-    const bookmarks = [...brave.bookmarks, ...chrome.bookmarks, ...edge.bookmarks, ...firefox.bookmarks, ...safari.bookmarks]
+    const bookmarks = [
+      ...brave.bookmarks,
+      ...chrome.bookmarks,
+      ...edge.bookmarks,
+      ...firefox.bookmarks,
+      ...safari.bookmarks,
+    ]
       .map((item) => {
         return {
           ...item,
@@ -112,7 +115,15 @@ export default function Command() {
       });
 
     setBookmarks(bookmarks);
-  }, [brave.bookmarks, chrome.bookmarks, edge.bookmarks, firefox.bookmarks, safari.bookmarks, frecencies, setBookmarks]);
+  }, [
+    brave.bookmarks,
+    chrome.bookmarks,
+    edge.bookmarks,
+    firefox.bookmarks,
+    safari.bookmarks,
+    frecencies,
+    setBookmarks,
+  ]);
 
   useEffect(() => {
     const folders = [...brave.folders, ...chrome.folders, ...edge.folders, ...firefox.folders, ...safari.folders];
