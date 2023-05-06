@@ -15,7 +15,7 @@ Users should keep using the web interface to modify Gerrit entities.
 
 Users can provide an `username`+`HTTP password` to authenticate with API to get personalized info when possible.
 
-This plugin was tested by on instances `=> 3.5.4`.
+This plugin was tested on instances `=> 3.5.4`.
 
 ## Commands
 
