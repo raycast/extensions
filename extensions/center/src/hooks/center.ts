@@ -1,5 +1,5 @@
 import { useFetch } from "@raycast/utils";
-import { getAPIKey } from "./utils/preferences";
+import { getAPIKey } from "../utils/preferences";
 import {
   AssetDetailsResponse,
   CollectionResponse,
