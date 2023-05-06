@@ -271,7 +271,7 @@ function AddGerrit(props: { gerrit?: Gerrit; setGerritList: (f: (v: Gerrit[]) =>
         title="URL"
         id="url"
         defaultValue={props.gerrit?.url}
-        placeholder="Enter a URL, please ensure no trailing `/` is present"
+        placeholder="Enter a URL"
         error={urlError}
         onChange={dropUrlErrorIfNeeded}
         onBlur={(event) => {
