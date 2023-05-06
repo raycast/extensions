@@ -3,14 +3,20 @@ import { useFetch } from "@raycast/utils";
 import base64url from "base64url";
 import crypto from "crypto";
 import { IPlayHistories, ISessionToken, IToken } from "../types/nintendo";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { parseUrlParams } from "./utils";
-
+import getCache from "./cache";
 export const NINTENDO_CLIENT_ID = "5c38e31cd085304b";
-
+const getSessionToken = () => {
+  return getPreferenceValues<{ NINTENDO_SESSION_TOKEN: string }>().NINTENDO_SESSION_TOKEN;
+};
 export const useToken = () => {
-  const { NINTENDO_SESSION_TOKEN } = getPreferenceValues<{ NINTENDO_SESSION_TOKEN: string }>();
-  const token = useFetch<IToken>("https://accounts.nintendo.com/connect/1.0.0/api/token", {
+  const sessionToken = getSessionToken();
+  const cache = getCache<IToken>("TOKEN", {
+    expiration: 800,
+  });
+  const cachedToken = cache.get();
+  const token = useFetch<IToken, IToken>("https://accounts.nintendo.com/connect/1.0.0/api/token", {
     method: "POST",
     headers: {
       "Content-Type": "application/json; charset=utf-8",
@@ -18,37 +24,49 @@ export const useToken = () => {
     },
     body: JSON.stringify({
       client_id: NINTENDO_CLIENT_ID,
-      session_token: NINTENDO_SESSION_TOKEN,
+      session_token: sessionToken,
       grant_type: "urn:ietf:params:oauth:grant-type:jwt-bearer-session-token",
     }),
-    execute: !!NINTENDO_SESSION_TOKEN,
+    execute: !cachedToken && !!sessionToken,
+    initialData: cachedToken,
     keepPreviousData: false,
     onError: (error) => {
       showToast(Toast.Style.Failure, error.name, error.message);
+    },
+    onData: (data) => {
+      cache.set(data);
     },
   });
   return token;
 };
 export const usePlayHistories = () => {
   const token = useToken();
-  const histories = useFetch<IPlayHistories>("https://mypage-api.entry.nintendo.co.jp/api/v1/users/me/play_histories", {
-    method: "GET",
-    execute: !!token.data?.access_token,
-    headers: {
-      "User-Agent": "com.nintendo.znej/1.13.0 (Android/7.1.2)",
-      Authorization: `Bearer ${token.data?.access_token}`,
-    },
-    keepPreviousData: true,
-    onError: (error) => {
-      showToast(Toast.Style.Failure, error.name, error.message);
-    },
-    onWillExecute: () => {
-      showToast(Toast.Style.Animated, "Fetching play histories...");
-    },
-    onData: () => {
-      showToast(Toast.Style.Success, "Play histories fetched successfully");
-    },
-  });
+  const sessionToken = getSessionToken();
+  const cache = getCache<IPlayHistories>("HISTORY" + sessionToken);
+  const cachedHistories = cache.get();
+  const histories = useFetch<IPlayHistories, IPlayHistories>(
+    "https://mypage-api.entry.nintendo.co.jp/api/v1/users/me/play_histories",
+    {
+      method: "GET",
+      execute: !!token.data?.access_token,
+      headers: {
+        "User-Agent": "com.nintendo.znej/1.13.0 (Android/7.1.2)",
+        Authorization: `Bearer ${token.data?.access_token}`,
+      },
+      keepPreviousData: false,
+      initialData: cachedHistories,
+      onError: (error) => {
+        showToast(Toast.Style.Failure, error.name, error.message);
+      },
+      onWillExecute: () => {
+        showToast(Toast.Style.Animated, `${cachedHistories ? "Updating" : "Fetching"} play histories...`);
+      },
+      onData: (data) => {
+        cache.set(data);
+        showToast(Toast.Style.Success, "Play histories fetched successfully");
+      },
+    }
+  );
   return histories;
 };
 export const useSessionToken = () => {
