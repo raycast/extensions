@@ -122,8 +122,8 @@ export default function DocCheckPage(props: { url: string; prevurl: string; quer
     nhm
       .translate(
         html
-          .replace(toc, "")
-          .replace(abm, "")
+          .replace(toc ?? "", "")
+          .replace(abm ?? "", "")
           .replace(/#cite_\D*\d*/gm, '"')
           .replace(`>&nbsp;<`, `>.<`)
           .replace(`tr>\n<th></th>`, `tr>\n<th>.</th>`)
