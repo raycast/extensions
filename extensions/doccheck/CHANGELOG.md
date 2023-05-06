@@ -3,7 +3,7 @@
 ## [Version 1.3] - 2023-04-24
 
 - NEW: Tooltips now also for titles of search results
-- NEW: Note "Articulus brevis minimus" is removed
+- NEW: "Articulus brevis minimus" is removed
 - Fix: "Top articles" are now always displayed correctly and loaded only once (optimisation when displaying search results after leaving an article view via the "← Search \*" link and when deleting the search term)
 - Fix: if a top article was selected, "← Top article" now appears in the detail view; if "Open in: Browser" is selected in the settings, nothing is displayed any more, as it is possible to jump back with "Esc".
 - Fix: Table calculation in article [Odds Ratio](https://flexikon.doccheck.com/de/Odds_Ratio) is now displayed correctly (apparently a table cannot start with an empty cell)
@@ -42,7 +42,7 @@
 ## [Version 1.1] - 2023-04-09
 
 - NEW: Open article directly in Raycast using deeplinks (you can even go back one time!)
->>>>>>> contributions/merge-1683367590204766000
+  > > > > > > > contributions/merge-1683367590204766000
 
 ## [Initial Version] - 2023-04-01
 
