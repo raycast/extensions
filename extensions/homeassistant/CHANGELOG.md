@@ -3,6 +3,7 @@
 ## [Update] - 2023-05-04
 
 - Hide hidden or disabled entities
+- Add `Assist` root command
 
 ## [Fix] . 2023-03-15
 

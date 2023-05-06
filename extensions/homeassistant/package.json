@@ -228,6 +228,13 @@
           "placeholder": "weather.home"
         }
       ]
+    },
+    {
+      "name": "assist",
+      "title": "Assist",
+      "description": "Conversation with Home Assistant Assist",
+      "mode": "view",
+      "subtitle": "Home Assistant"
     }
   ],
   "preferences": [
@@ -281,6 +288,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.42.0",
+    "@raycast/utils": "^1.5.2",
     "home-assistant-js-websocket": "^5.11.1",
     "javascript-time-ago": "^2.5.9",
     "lodash-es": "^4.17.21",
