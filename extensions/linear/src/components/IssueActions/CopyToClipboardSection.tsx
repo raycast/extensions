@@ -3,8 +3,6 @@ import { IssueResult } from "../../api/getIssues";
 
 type ISSUE_KEY = "title" | "identifier" | "url" | "branchName";
 
-type IssuePreferences = { issueCustomCopyAction?: string };
-
 const variables: Record<string, ISSUE_KEY> = {
   ISSUE_TITLE: "title",
   ISSUE_ID: "identifier",
@@ -13,7 +11,7 @@ const variables: Record<string, ISSUE_KEY> = {
 };
 
 export default function CopyToClipboardSection({ issue }: { issue: IssueResult }) {
-  const { issueCustomCopyAction } = getPreferenceValues<IssuePreferences>();
+  const { issueCustomCopyAction } = getPreferenceValues<Preferences>();
 
   return (
     <ActionPanel.Section>

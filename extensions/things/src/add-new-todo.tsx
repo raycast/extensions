@@ -97,7 +97,7 @@ export default function AddNewTodo(props: { title?: string; listName?: string })
     }
 
     const json = buildJSON(values);
-    const url = `open -g things:///json?data=${encodeURIComponent(JSON.stringify(json)).replace(/'/g, '%27')}`;
+    const url = `open -g things:///json?data=${escape(JSON.stringify(json))}`;
     await asyncExec(url);
 
     showToast({

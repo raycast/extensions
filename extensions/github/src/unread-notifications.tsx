@@ -21,7 +21,7 @@ import {
 import { getGitHubClient } from "./helpers/withGithubClient";
 import { useViewer } from "./hooks/useViewer";
 
-const preferences = getPreferenceValues<{ alwaysShow: boolean }>();
+const preferences = getPreferenceValues<Preferences.UnreadNotifications>();
 
 function UnreadNotifications() {
   const { octokit } = getGitHubClient();
@@ -76,7 +76,7 @@ function UnreadNotifications() {
             return (
               <MenuBarExtra.Item
                 key={notification.id}
-                icon={{ source: icon.value, tintColor: { light: "#000", dark: "#fff" } }}
+                icon={{ source: icon.value, tintColor: { light: "#000", dark: "#fff", adjustContrast: false } }}
                 title={notification.subject.title}
                 subtitle={getNotificationSubtitle(notification)}
                 tooltip={getNotificationTooltip(updatedAt)}

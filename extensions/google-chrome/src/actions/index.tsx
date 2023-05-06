@@ -16,7 +16,7 @@ export async function getOpenTabs(useOriginalFavicon: boolean): Promise<Tab[]> {
       set _output to ""
       tell application "Google Chrome"
         repeat with w in windows
-          set _w_id to get id of w  
+          set _w_id to get id of w as inches as string
           set _tab_index to 1
           repeat with t in tabs of w
             set _title to get title of t
@@ -143,3 +143,13 @@ return isInstalled`);
   }
   LocalStorage.setItem("is-installed", true);
 };
+
+export async function createNewWindow(): Promise<void> {
+  await runAppleScript(`
+    tell application "Google Chrome"
+      make new window
+      activate
+    end tell
+    return true
+  `);
+}

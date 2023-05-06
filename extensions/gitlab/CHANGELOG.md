@@ -1,5 +1,15 @@
 # GitLab Changelog
 
+## [Search Scope] - 2023-04-27
+
+- Add scope dropdown for `Search Issues` and `Search Merge Requests`
+- Add possibility to search for named parameters in `Search Issues` and `Search Merge Requests`.
+
+## [Remove Branch] - 2023-04-17
+
+- Add checkbox `Delete source branch` for a new MR (default state of project is respected)
+- Milestones are now shown as tags instead of text in a list
+
 ## [Improve Starred Project Visibility] - 2023-03-16
 
 - Use default color for non-starred projects so starred projects are more visible

@@ -22,6 +22,8 @@ declare global {
      */
     parse<T = unknown>(text: string, reviver?: (this: any, key: string, value: any) => any): T;
   }
+  type RecordOfAny = Record<string, any>;
+  type RecursiveNonOptional<T> = { [K in keyof T]-?: RecursiveNonOptional<T[K]> };
 }
 
 export {};

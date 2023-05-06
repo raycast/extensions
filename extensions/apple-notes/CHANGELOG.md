@@ -1,5 +1,12 @@
 # Apple Notes Changelog
 
+## [Bug Fixes & Improvements] - 2023-04-09
+
+- Added Copy Note URL and Copy Mobile Note URL actions.
+- Added Delete Note and Restore Note actions.
+- Moved Recently Deleted notes to their own section at the bottom
+- Fixed Open Note action not working on notes outside of the current account
+
 ## [Improvements] - 2023-03-31
 
 - Added the function to open notes in separate windows. 
