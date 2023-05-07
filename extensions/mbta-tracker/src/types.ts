@@ -40,6 +40,27 @@ export interface Prediction {
     departure_time?: string;
     direction_id: number;
   };
+  relationships: {
+    alerts: {
+      data: AlertRelationship[];
+    };
+  };
+  id: string;
+}
+
+export interface AlertRelationship {
+  id: string;
+  type: "alert";
+}
+
+export interface AlertsResponse {
+  data: Alert[];
+}
+
+export interface Alert {
+  attributes: {
+    header: string;
+  };
   id: string;
 }
 
