@@ -30,7 +30,7 @@ const UnlockForm = (props: UnlockFormProps) => {
       setUnlockError(undefined);
 
       const state = await bitwarden.status();
-      if (state.status == "unauthenticated") {
+      if (state.status === "unauthenticated") {
         try {
           await bitwarden.login();
         } catch (error) {
