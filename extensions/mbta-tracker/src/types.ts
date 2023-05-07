@@ -59,7 +59,13 @@ export interface AlertsResponse {
 
 export interface Alert {
   attributes: {
+    description: string;
+    effect: string;
     header: string;
+    lifecycle: string;
+    service_effect: string;
+    severity: number;
+    timeframe: string;
   };
   id: string;
 }

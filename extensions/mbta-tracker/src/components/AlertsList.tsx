@@ -15,7 +15,14 @@ export const AlertsList = ({ alertIds }: Props): JSX.Element => {
   return (
     <List.Section title="Alerts">
       {data?.data.map((alert) => (
-        <List.Item key={alert.id} title={alert.attributes.header} />
+        <List.Item
+          key={alert.id}
+          title={alert.attributes.header}
+          subtitle={{
+            tooltip: alert.attributes.header + "\n\n" + alert.attributes.description,
+            value: alert.attributes.description,
+          }}
+        />
       ))}
     </List.Section>
   );
