@@ -23,13 +23,12 @@ export const PlayHistoriesGrid = () => {
   const gameRecords = history.data?.playHistories.length;
   const lastUpdate = dayjs(history.data?.lastUpdatedAt).format("YYYY-MM-DD HH:mm:ss");
   const sectionTitle = `Game Records (${gameRecords}) | Total Playtime (${totalPlayTime} hours)`;
-  const sectionSubtitle = `Last update at (${lastUpdate})`;
+  const sectionSubtitle = `Last update ${dayjs(lastUpdate).fromNow()}`;
 
   return (
     <Grid
-      navigationTitle="Play Histories"
+      navigationTitle="All Play Histories"
       isLoading={history.isLoading}
-      searchBarPlaceholder="Search your favorite drink"
       searchBarAccessory={
         <Grid.Dropdown
           tooltip="Select Sort Key"
