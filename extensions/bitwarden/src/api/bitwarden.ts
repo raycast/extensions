@@ -144,6 +144,7 @@ export class Bitwarden {
   async login(): Promise<void> {
     await this.exec(["login", "--apikey"]);
     await this.clearLockReason();
+    await this.handlers.login?.();
   }
 
   async logout(): Promise<void> {
@@ -226,9 +227,10 @@ type Env = {
 };
 
 type Handlers = {
-  logout?: () => void | Promise<void>;
-  lock?: (reason?: string) => void | Promise<void>;
-  unlock?: (password: string, sessionToken: string) => void | Promise<void>;
+  login?: () => MaybePromise<void>;
+  logout?: () => MaybePromise<void>;
+  lock?: (reason?: string) => MaybePromise<void>;
+  unlock?: (password: string, sessionToken: string) => MaybePromise<void>;
 };
 
 type ExecProps = {
