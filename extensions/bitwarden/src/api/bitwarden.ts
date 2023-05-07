@@ -15,7 +15,7 @@ export class Bitwarden {
   private env: Env;
   private initPromise: Promise<void>;
   private tempSessionToken?: string;
-  private handlers: Handlers = {};
+  private callbacks: ActionCallbacks = {};
   lockReason: string | undefined;
   cliPath: string;
 
@@ -42,8 +42,8 @@ export class Bitwarden {
     })();
   }
 
-  setHandler<THandlerName extends keyof Handlers>(name: THandlerName, callback: Handlers[THandlerName]): this {
-    this.handlers[name] = callback;
+  setActionCallback<TAction extends keyof ActionCallbacks>(action: TAction, callback: ActionCallbacks[TAction]): this {
+    this.callbacks[action] = callback;
     return this;
   }
 
@@ -144,13 +144,13 @@ export class Bitwarden {
   async login(): Promise<void> {
     await this.exec(["login", "--apikey"]);
     await this.clearLockReason();
-    await this.handlers.login?.();
+    await this.callbacks.login?.();
   }
 
   async logout(): Promise<void> {
     await this.exec(["logout"]);
     this.clearSessionToken();
-    await this.handlers.logout?.();
+    await this.callbacks.logout?.();
   }
 
   async lock(reason?: string, shouldCheckVaultStatus?: boolean): Promise<void> {
@@ -161,14 +161,14 @@ export class Bitwarden {
 
     if (reason) await this.setLockReason(reason);
     await this.exec(["lock"]);
-    await this.handlers?.lock?.(reason);
+    await this.callbacks.lock?.(reason);
   }
 
   async unlock(password: string): Promise<string> {
     const { stdout: sessionToken } = await this.exec(["unlock", password, "--raw"]);
     this.setSessionToken(sessionToken);
     await this.clearLockReason();
-    await this.handlers?.unlock?.(password, sessionToken);
+    await this.callbacks.unlock?.(password, sessionToken);
     return sessionToken;
   }
 
@@ -226,7 +226,7 @@ type Env = {
   BW_SESSION?: string;
 };
 
-type Handlers = {
+type ActionCallbacks = {
   login?: () => MaybePromise<void>;
   logout?: () => MaybePromise<void>;
   lock?: (reason?: string) => MaybePromise<void>;

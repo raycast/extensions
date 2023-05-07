@@ -34,10 +34,10 @@ export function SessionProvider(props: SessionProviderProps) {
 
   useOnceEffect(async () => {
     try {
-      bitwarden /* set bitwarden handler callbacks */
-        .setHandler("lock", handleLock)
-        .setHandler("unlock", handleUnlock)
-        .setHandler("logout", handleLogout);
+      bitwarden
+        .setActionCallback("lock", handleLock)
+        .setActionCallback("unlock", handleUnlock)
+        .setActionCallback("logout", handleLogout);
 
       const restoredSession = await getSavedSession();
       if (restoredSession.token) bitwarden.setSessionToken(restoredSession.token);
