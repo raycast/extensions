@@ -50,10 +50,10 @@
       "mode": "view"
     },
     {
-      "name": "help",
-      "title": "Help",
+      "name": "mine",
+      "title": "Mine",
       "subtitle": "ChatGo",
-      "description": "Help of the usage of this plugin",
+      "description": "User center of chatGo",
       "mode": "view"
     }
   ],
@@ -94,7 +94,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.50.2",
+    "@raycast/api": "^1.50.3",
     "@raycast/utils": "^1.5.2",
     "axios": "^1.3.6",
     "cross-fetch": "^3.1.5",
