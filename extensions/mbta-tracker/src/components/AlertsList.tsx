@@ -22,6 +22,7 @@ export const AlertsList = ({ alertIds }: Props): JSX.Element => {
             tooltip: alert.attributes.header + "\n\n" + alert.attributes.description,
             value: alert.attributes.description,
           }}
+          accessories={[{ tag: { value: alert.attributes.lifecycle }, tooltip: alert.attributes.timeframe }]}
         />
       ))}
     </List.Section>
