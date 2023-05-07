@@ -9,7 +9,7 @@ import { PasswordGeneratorOptions } from "~/types/passwords";
 import { Folder, Item } from "~/types/vault";
 import { getPasswordGeneratingArgs } from "~/utils/passwords";
 import { getServerUrlPreference } from "~/utils/preferences";
-import { CLINotFoundError } from "~/utils/errors";
+import { CLINotFoundError, VaultIsLockedError } from "~/utils/errors";
 
 export class Bitwarden {
   private env: Env;
@@ -131,7 +131,7 @@ export class Bitwarden {
       /* since we have the session token in the env, the password 
       should not be requested, unless the vault is locked */
       await this.lock();
-      throw new Error("Vault is locked");
+      throw new VaultIsLockedError();
     }
 
     return result;
