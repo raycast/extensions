@@ -15,7 +15,7 @@ export const StopsList = ({ route, directionId }: Props): JSX.Element => {
   );
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Select MBTA stop...">
+    <List isLoading={isLoading} searchBarPlaceholder="Select origin MBTA stop...">
       {(data?.data || []).map((stop) => (
         <List.Item
           key={stop.id}
@@ -27,7 +27,7 @@ export const StopsList = ({ route, directionId }: Props): JSX.Element => {
               <Action.Push
                 title="Show Predictions"
                 icon={Icon.Clock}
-                target={<PredictionsList key={stop.id} stop={stop} directionId={directionId} routeId={route.id} />}
+                target={<PredictionsList key={stop.id} stop={stop} directionId={directionId} route={route} />}
               />
             </ActionPanel>
           }

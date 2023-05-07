@@ -3,21 +3,21 @@ import { useFetch } from "@raycast/utils";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { AlertsList } from "./AlertsList";
-import type { AlertRelationship, PredictionsResponse, Stop } from "../types";
+import type { AlertRelationship, PredictionsResponse, Route, Stop } from "../types";
 import { appendApiKey } from "../utils";
 
 dayjs.extend(relativeTime);
 
 interface Props {
   directionId: string;
-  routeId: string;
+  route: Route;
   stop: Stop;
 }
 
-export const PredictionsList = ({ stop, directionId, routeId }: Props): JSX.Element => {
+export const PredictionsList = ({ stop, directionId, route }: Props): JSX.Element => {
   const { isLoading, data } = useFetch<PredictionsResponse>(
     appendApiKey(
-      `https://api-v3.mbta.com/predictions?filter%5Broute%5D=${routeId}&filter%5Bdirection_id%5D=${directionId}&filter%5Bstop%5D=${stop.id}&sort=departure_time&include=alerts`
+      `https://api-v3.mbta.com/predictions?filter%5Broute%5D=${route.id}&filter%5Bdirection_id%5D=${directionId}&filter%5Bstop%5D=${stop.id}&sort=departure_time&include=alerts`
     )
   );
 
@@ -35,12 +35,13 @@ export const PredictionsList = ({ stop, directionId, routeId }: Props): JSX.Elem
               key={prediction.id}
               title={dayjs(prediction.attributes.departure_time).fromNow() || "Unknown"}
               accessories={[
+                { tag: { value: route.id, color: route.attributes.color }, tooltip: route.attributes.long_name },
                 { text: dayjs(prediction.attributes.departure_time).format("ddd, h:mm:ss A"), icon: Icon.Clock },
               ]}
               actions={
                 <ActionPanel>
                   <Action.OpenInBrowser
-                    url={`https://www.mbta.com/schedules/${routeId}/line?schedule_direction%5Bdirection_id%5D=1&&schedule_finder%5Bdirection_id%5D=${directionId}&schedule_finder%5Borigin%5D=${stop.id}`}
+                    url={`https://www.mbta.com/schedules/${route.id}/line?schedule_direction%5Bdirection_id%5D=1&&schedule_finder%5Bdirection_id%5D=${directionId}&schedule_finder%5Borigin%5D=${stop.id}`}
                   />
                 </ActionPanel>
               }
