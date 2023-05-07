@@ -1,4 +1,4 @@
-import { Icon, Color, List, showToast, Toast, Action, ActionPanel, LaunchProps, Favicon } from "@raycast/api";
+import { Icon, Color, List, showToast, Toast, Action, ActionPanel, LaunchProps } from "@raycast/api";
 import { getFavicon } from "@raycast/utils";
 import axios from "axios";
 import cheerio from "cheerio";
