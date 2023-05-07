@@ -420,7 +420,7 @@ function EntryActions(article: Article, query: string, sortBy: string) {
         />
         <Action.Open
           icon={Icon.MagnifyingGlass}
-          title="Open search in Browser"
+          title="Open Search in Browser"
           target={"https://pubmed.ncbi.nlm.nih.gov/?term=" + encodeURI(query!) + "&sort=" + encodeURI(sortBy!)}
           shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
         />
@@ -445,7 +445,7 @@ function EntryActions(article: Article, query: string, sortBy: string) {
         />
         <Action.Open
           icon={Icon.MagnifyingGlass}
-          title="Open search in Browser"
+          title="Open Search in Browser"
           target={"https://pubmed.ncbi.nlm.nih.gov/?term=" + encodeURI(query!) + "&sort=" + encodeURI(sortBy!)}
           shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
         />
