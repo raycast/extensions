@@ -10,6 +10,6 @@ const appendApiKey = (baseUrl: string) => {
     params.append("api_key", preferences.apiKey);
   }
 
-  return `${url.href}?${params.toString()}`;
+  return `${url.origin}${url.pathname}?${params.toString()}`;
 };
 export { appendApiKey };
