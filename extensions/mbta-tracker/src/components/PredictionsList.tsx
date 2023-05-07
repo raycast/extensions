@@ -27,11 +27,17 @@ export const PredictionsList = ({ stop, directionId, routeId }: Props): JSX.Elem
 
   return (
     <List isLoading={isLoading}>
-      <List.Section title="Predictions">
+      <List.Section title="Departures">
         {(data?.data || [])
           .filter((prediction) => prediction.attributes.departure_time !== null)
           .map((prediction) => (
-            <List.Item key={prediction.id} title={dayjs(prediction.attributes.departure_time).fromNow() || "Unknown"} />
+            <List.Item
+              key={prediction.id}
+              title={dayjs(prediction.attributes.departure_time).fromNow() || "Unknown"}
+              accessories={[
+                { text: dayjs(prediction.attributes.departure_time).format("ddd, h:mm:ss A"), icon: Icon.Clock },
+              ]}
+            />
           ))}
       </List.Section>
       <AlertsList key={alertIds?.toString()} alertIds={alertIds}></AlertsList>
