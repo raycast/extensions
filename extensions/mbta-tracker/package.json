@@ -12,8 +12,8 @@
   "commands": [
     {
       "name": "index",
-      "title": "Browse departure predictions",
-      "description": "Template for showing typeahead search with network results.",
+      "title": "Browse departures",
+      "description": "View predicted departure times for a given transit route and stop",
       "mode": "view"
     }
   ],

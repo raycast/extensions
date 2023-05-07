@@ -25,7 +25,7 @@ export const StopsList = ({ route, directionId }: Props): JSX.Element => {
           actions={
             <ActionPanel>
               <Action.Push
-                title="Show Predictions"
+                title="Choose Stop"
                 icon={Icon.Clock}
                 target={
                   <PredictionsList

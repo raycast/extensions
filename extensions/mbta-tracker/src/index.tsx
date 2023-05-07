@@ -14,11 +14,10 @@ function outputRouteListItem(route: Route) {
       actions={
         <ActionPanel>
           <Action.Push
-            title="Choose Travel Direction"
+            title="Choose Route"
             icon={Icon.Compass}
             target={<DirectionsList key={route.id} route={route} />}
           />
-          {/* <Action.Push title="Show Stops" icon={Icon.Map} target={<StopsList key={route.id} route={route} />} /> */}
         </ActionPanel>
       }
     />
