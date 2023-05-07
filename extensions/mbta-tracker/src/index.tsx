@@ -1,7 +1,7 @@
-import { Icon, List, ActionPanel, Action } from "@raycast/api";
+import { getPreferenceValues, Icon, List, ActionPanel, Action } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { DirectionsList } from "./components/DirectionsList";
-import type { RoutesResponse, Route } from "./types";
+import type { Preferences, RoutesResponse, Route } from "./types";
 
 function outputRouteListItem(route: Route) {
   return (
@@ -25,7 +25,15 @@ function outputRouteListItem(route: Route) {
 }
 
 export default function Command() {
-  const { isLoading, data } = useFetch<RoutesResponse>(`https://api-v3.mbta.com/routes`, {
+  const preferences = getPreferenceValues<Preferences>();
+  const url = new URL("https://api-v3.mbta.com/routes");
+  const params = new URLSearchParams(url.search);
+
+  if (preferences.apiKey !== undefined && preferences.apiKey !== "") {
+    params.append("api_key", preferences.apiKey);
+  }
+
+  const { isLoading, data } = useFetch<RoutesResponse>(`${url.href}?${params.toString()}`, {
     keepPreviousData: true,
   });
 

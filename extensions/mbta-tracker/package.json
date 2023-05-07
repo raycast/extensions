@@ -17,6 +17,16 @@
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "description": "Your MBTA developer account API key",
+      "placeholder": "https://api-v3.mbta.com/",
+      "type": "password",
+      "required": false,
+      "title": "MBTA API Key"
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.49.3",
     "@raycast/utils": "^1.4.8",

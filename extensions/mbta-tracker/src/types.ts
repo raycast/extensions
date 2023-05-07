@@ -42,3 +42,7 @@ export interface Prediction {
   };
   id: string;
 }
+
+export interface Preferences {
+  apiKey?: string;
+}
