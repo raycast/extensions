@@ -1,5 +1,6 @@
 import { LocalStorage } from '@raycast/api';
 import crypto from 'crypto';
+import { parseUrl } from './utils';
 
 export type Account = {
   id: string;
@@ -37,10 +38,9 @@ export async function addAccount(account: AccountWithoutId) {
   const accounts = await getAccounts();
 
   if (isOtpUrl(account.secret)) {
-    const qs = account.secret.slice(account.secret.indexOf('?'));
-    const searchParams = new URLSearchParams(qs);
-    account.secret = searchParams.get('secret') || '';
-    account.issuer = searchParams.get('issuer') || '';
+    const { secret, issuer } = parseUrl<'secret' | 'issuer'>(account.secret);
+    account.secret = secret || '';
+    account.issuer = issuer || '';
   }
 
   accounts.push({ ...account, id: generateAccountId(account) });

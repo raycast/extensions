@@ -24,29 +24,35 @@ async function extractQRCodeFromImage(path: string) {
   return code?.data;
 }
 export async function readDataFromQRCodeOnScreen(type: ScanType) {
+  type Output = {
+    data?: string;
+    isGoogleAuthenticatorMigration?: boolean;
+  };
   try {
     const path = `${TEMP_DIR}/raycast-one-time-password-qr.png`;
-    let outputCode: string | undefined;
+    const output: Output = {};
 
     switch (type) {
       case 'scan': {
         for (let i = 0; i < (await getDisplayCount()); i++) {
           await execAsync(`/usr/sbin/screencapture -xD ${i + 1} ${path}`);
-          outputCode = await extractQRCodeFromImage(path);
-          if (outputCode) break;
+          output.data = await extractQRCodeFromImage(path);
+          if (output.data) break;
         }
         break;
       }
       case 'select': {
         await execAsync(`/usr/sbin/screencapture -xi ${path}`);
-        outputCode = await extractQRCodeFromImage(path);
+        output.data = await extractQRCodeFromImage(path);
         break;
       }
     }
 
+    output.isGoogleAuthenticatorMigration = isGoogleAuthenticatorMigration(output.data);
+
     await execAsync(`rm ${path}`);
 
-    return outputCode;
+    return output;
   } catch {
     /* empty */
   }
@@ -59,4 +65,14 @@ export function getCurrentSeconds() {
 export function splitStrToParts(str: string, partLength = 3) {
   const regex = new RegExp(`(.{${partLength}})`, 'g');
   return str.replace(regex, '$1 ').trim();
+}
+
+export function parseUrl<T extends string>(url: string) {
+  const qs = url.slice(url.indexOf('?'));
+  const searchParams = new URLSearchParams(qs);
+  return Object.fromEntries(searchParams.entries()) as { [K in T]: string };
+}
+
+export function isGoogleAuthenticatorMigration(str?: string) {
+  return str?.startsWith('otpauth-migration://');
 }

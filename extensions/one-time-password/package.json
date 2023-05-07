@@ -42,9 +42,11 @@
   "dependencies": {
     "@raycast/api": "^1.49.3",
     "@raycast/utils": "^1.5.2",
+    "hi-base32": "^0.5.1",
     "jimp": "^0.22.7",
     "jsqr": "^1.4.0",
-    "otpauth": "^9.1.1"
+    "otpauth": "^9.1.1",
+    "protobufjs": "^7.2.3"
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.5",

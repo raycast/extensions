@@ -10,12 +10,14 @@ import {
   getPreferenceValues,
   openExtensionPreferences,
   popToRoot,
+  confirmAlert,
 } from '@raycast/api';
 import { useEffect, useState } from 'react';
 import { getProgressIcon } from '@raycast/utils';
 import * as store from './store';
-import { readDataFromQRCodeOnScreen, getCurrentSeconds, splitStrToParts, ScanType } from './utils';
+import { readDataFromQRCodeOnScreen, getCurrentSeconds, splitStrToParts, ScanType, parseUrl } from './utils';
 import { TOKEN_TIME, generateToken } from './totp';
+import { extractAccountsFromMigrationUrl } from './google-authenticator';
 
 type Preferences = {
   passwordVisibility?: boolean;
@@ -47,14 +49,40 @@ export default () => {
     });
   }
 
+  async function handleGoogleAuthenticatorMigration(resData: string) {
+    const { data } = parseUrl<'data'>(resData);
+    const accounts = extractAccountsFromMigrationUrl(data);
+
+    const confirmed = await confirmAlert({
+      title: 'Google Authenticator Migration',
+      message: `Are you sure you want to import ${accounts.length} accounts from Google Authenticator?`,
+    });
+
+    if (!confirmed) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: 'Google Authenticator migration cancelled',
+      });
+      return;
+    }
+
+    for (const account of accounts) {
+      await store.addAccount(account);
+    }
+    showToast({
+      style: Toast.Style.Success,
+      title: `${accounts.length} accounts imported`,
+    });
+  }
+
   async function scanQRCode(type: ScanType) {
     if (qrCodeScanType) return;
 
     setQRCodeScanType(type);
-    const code = await readDataFromQRCodeOnScreen(type);
+    const response = await readDataFromQRCodeOnScreen(type);
     setQRCodeScanType(null);
 
-    if (!code) {
+    if (!response?.data) {
       showToast({
         style: Toast.Style.Failure,
         title: 'QR code detection failed',
@@ -62,7 +90,12 @@ export default () => {
       return;
     }
 
-    navigation.push(<SetupKey onSubmit={handleFormSubmit} secret={code} />);
+    if (response.isGoogleAuthenticatorMigration) {
+      await handleGoogleAuthenticatorMigration(response.data);
+      await loadAccounts();
+    } else {
+      navigation.push(<SetupKey onSubmit={handleFormSubmit} secret={response.data} />);
+    }
   }
 
   async function handleFormSubmit() {
