@@ -436,7 +436,7 @@ function EntryActions(article: Article, query: string, sortBy: string) {
   } else if (article.doi) {
     return (
       <ActionPanel>
-        <Action.Push icon={Icon.Book} title="Read abstract" target={<Details article={article} query={query} />} />
+        <Action.Push icon={Icon.Book} title="Read Abstract" target={<Details article={article} query={query} />} />
         <Action.Open
           icon={Icon.Globe}
           title="Open Article in Browser"
