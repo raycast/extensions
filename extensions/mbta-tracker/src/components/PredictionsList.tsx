@@ -37,6 +37,13 @@ export const PredictionsList = ({ stop, directionId, routeId }: Props): JSX.Elem
               accessories={[
                 { text: dayjs(prediction.attributes.departure_time).format("ddd, h:mm:ss A"), icon: Icon.Clock },
               ]}
+              actions={
+                <ActionPanel>
+                  <Action.OpenInBrowser
+                    url={`https://www.mbta.com/schedules/${routeId}/line?schedule_direction%5Bdirection_id%5D=1&&schedule_finder%5Bdirection_id%5D=${directionId}&schedule_finder%5Borigin%5D=${stop.id}`}
+                  />
+                </ActionPanel>
+              }
             />
           ))}
       </List.Section>
