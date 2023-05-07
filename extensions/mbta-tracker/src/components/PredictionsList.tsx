@@ -12,9 +12,10 @@ interface Props {
   directionId: string;
   route: Route;
   stop: Stop;
+  destination: string;
 }
 
-export const PredictionsList = ({ stop, directionId, route }: Props): JSX.Element => {
+export const PredictionsList = ({ stop, directionId, route, destination }: Props): JSX.Element => {
   const { isLoading, data } = useFetch<PredictionsResponse>(
     appendApiKey(
       `https://api-v3.mbta.com/predictions?filter%5Broute%5D=${route.id}&filter%5Bdirection_id%5D=${directionId}&filter%5Bstop%5D=${stop.id}&sort=departure_time&include=alerts`
@@ -35,8 +36,13 @@ export const PredictionsList = ({ stop, directionId, route }: Props): JSX.Elemen
               key={prediction.id}
               title={dayjs(prediction.attributes.departure_time).fromNow() || "Unknown"}
               accessories={[
-                { tag: { value: route.id, color: route.attributes.color }, tooltip: route.attributes.long_name },
-                { text: dayjs(prediction.attributes.departure_time).format("ddd, h:mm:ss A"), icon: Icon.Clock },
+                { tag: { value: route.id, color: route.attributes.color }, tooltip: "Route" },
+                { text: destination, icon: Icon.Pin, tooltip: "Destination" },
+                {
+                  text: dayjs(prediction.attributes.departure_time).format("ddd, h:mm:ss A"),
+                  icon: Icon.Clock,
+                  tooltip: "Departure Time",
+                },
               ]}
               actions={
                 <ActionPanel>

@@ -27,7 +27,15 @@ export const StopsList = ({ route, directionId }: Props): JSX.Element => {
               <Action.Push
                 title="Show Predictions"
                 icon={Icon.Clock}
-                target={<PredictionsList key={stop.id} stop={stop} directionId={directionId} route={route} />}
+                target={
+                  <PredictionsList
+                    key={stop.id}
+                    stop={stop}
+                    directionId={directionId}
+                    route={route}
+                    destination={route.attributes.direction_destinations[parseInt(directionId)]}
+                  />
+                }
               />
             </ActionPanel>
           }
