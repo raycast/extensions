@@ -72,7 +72,7 @@ export const VaultProvider = ({ children }: PropsWithChildren) => {
       await loadItems();
       await toast.hide();
     } catch {
-      await session.logout();
+      await bitwarden.logout();
       toast.style = Toast.Style.Failure;
       toast.message = "Failed to sync. Please try logging in again.";
     }

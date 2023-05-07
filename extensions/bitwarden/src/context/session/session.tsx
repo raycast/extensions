@@ -1,11 +1,12 @@
 import { List } from "@raycast/api";
-import { createContext, PropsWithChildren, useContext, useEffect, useMemo, useRef } from "react";
+import { createContext, PropsWithChildren, useContext, useMemo } from "react";
 import UnlockForm from "~/components/UnlockForm";
 import { useBitwarden } from "~/context/bitwarden";
 import { useSessionReducer } from "~/context/session/reducer";
 import { getSavedSession, Storage } from "~/context/session/utils";
 import { Cache } from "~/utils/cache";
 import { captureException } from "~/utils/development";
+import useOnceEffect from "~/utils/hooks/useOnceEffect";
 import { hashMasterPasswordForReprompting } from "~/utils/passwords";
 
 export type Session = {
@@ -15,8 +16,6 @@ export type Session = {
   isLocked: boolean;
   isAuthenticated: boolean;
   confirmMasterPassword: (password: string) => Promise<boolean>;
-  lock: (reason?: string) => Promise<void>;
-  logout: () => Promise<void>;
 };
 
 export const SessionContext = createContext<Session | null>(null);
@@ -32,64 +31,37 @@ export type SessionProviderProps = PropsWithChildren<{
 export function SessionProvider(props: SessionProviderProps) {
   const bitwarden = useBitwarden();
   const [state, dispatch] = useSessionReducer();
-  const isInitialized = useRef(false);
 
-  useEffect(() => {
-    if (!bitwarden || isInitialized.current) return;
-    const initialize = async () => {
-      await loadSavedSession();
-      isInitialized.current = true;
-    };
-    void initialize();
-  }, [bitwarden]);
-
-  useEffect(() => {
-    // check if the vault is locked or unauthenticated in the background
-    if (!state.token) return;
-    const checkVaultStatus = async () => {
-      const status = await bitwarden.checkLockStatus();
-      if (status === "unauthenticated") return await handleLogout();
-      if (status === "locked") return await handleLock();
-    };
-    void checkVaultStatus();
-  }, [state.token]);
-
-  async function loadSavedSession() {
+  useOnceEffect(async () => {
     try {
+      bitwarden /* set bitwarden handler callbacks */
+        .setHandler("lock", handleLock)
+        .setHandler("unlock", handleUnlock)
+        .setHandler("logout", handleLogout);
+
       const restoredSession = await getSavedSession();
       if (restoredSession.token) bitwarden.setSessionToken(restoredSession.token);
       dispatch({ type: "loadSavedState", ...restoredSession });
-      if (restoredSession.shouldLockVault) await handleLock(restoredSession.lockReason, true);
+      if (restoredSession.shouldLockVault) await bitwarden.lock(restoredSession.lockReason, true);
     } catch (error) {
-      await handleLock();
+      await bitwarden.lock();
       dispatch({ type: "failedLoadSavedState" });
       captureException("Failed to load saved session state", error);
     }
-  }
+  }, bitwarden);
 
-  async function handleUnlock(password: string) {
-    const token = await bitwarden.unlock(password);
+  async function handleUnlock(password: string, token: string) {
     const passwordHash = await hashMasterPasswordForReprompting(password);
     await Storage.saveSession(token, passwordHash);
-    bitwarden.setSessionToken(token);
     dispatch({ type: "unlock", token, passwordHash });
   }
 
-  async function handleLock(reason?: string, shouldCheckVaultStatus = false) {
-    if (shouldCheckVaultStatus) {
-      const { status } = await bitwarden.status();
-      if (status !== "unauthenticated") {
-        await bitwarden.lock(reason);
-      }
-    } else {
-      await bitwarden.lock(reason);
-    }
+  async function handleLock(reason?: string) {
     await Storage.clearSession();
     dispatch({ type: "lock", lockReason: reason });
   }
 
   async function handleLogout() {
-    await bitwarden.logout();
     await Storage.clearSession();
     Cache.clear();
     dispatch({ type: "logout" });
@@ -107,11 +79,9 @@ export function SessionProvider(props: SessionProviderProps) {
       isAuthenticated: state.isAuthenticated,
       isLocked: state.isLocked,
       active: !state.isLoading && state.isAuthenticated && !state.isLocked,
-      lock: handleLock,
-      logout: handleLogout,
       confirmMasterPassword,
     }),
-    [state, handleLock, handleLogout, confirmMasterPassword]
+    [state, confirmMasterPassword]
   );
 
   if (state.isLoading) return <List isLoading />;
@@ -120,7 +90,7 @@ export function SessionProvider(props: SessionProviderProps) {
   const children = state.token ? props.children : null;
   return (
     <SessionContext.Provider value={contextValue}>
-      {showUnlockForm && props.unlock ? <UnlockForm onUnlock={handleUnlock} lockReason={state.lockReason} /> : children}
+      {showUnlockForm && props.unlock ? <UnlockForm lockReason={state.lockReason} /> : children}
     </SessionContext.Provider>
   );
 }
