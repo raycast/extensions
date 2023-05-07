@@ -1,4 +1,5 @@
-import { Icon, Color, List, showToast, Toast, Action, ActionPanel, LaunchProps } from "@raycast/api";
+import { Icon, Color, List, showToast, Toast, Action, ActionPanel, LaunchProps, Favicon } from "@raycast/api";
+import { getFavicon } from "@raycast/utils";
 import axios from "axios";
 import cheerio from "cheerio";
 import { useEffect, useState } from "react";
@@ -17,6 +18,7 @@ type Result = {
 export default function Command(props: LaunchProps) {
   const [query, setQuery] = useState<string>(props.fallbackText ?? ""); // if we came here by jumping back from an article (with fallbackText) - this is our query
   const [entries, setEntries] = useState<Result[]>([]);
+  const [noSearchResults, setNoSearchResults] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -26,7 +28,7 @@ export default function Command(props: LaunchProps) {
     } else {
       searchArticles(query);
     }
-  }, [query]);
+  }, [query, noSearchResults]);
 
   async function fetchTopArticles() {
     setLoading(true);
@@ -66,15 +68,43 @@ export default function Command(props: LaunchProps) {
       if (response.status === 200 && response.data.urls != 0) {
         setEntries(response.data.urls);
       } else if (response.status === 200) {
+        setNoSearchResults(true);
         setEntries([
           {
-            title: "Keine Suchergebnisse im Flexikon!",
-            url: "",
-            description: "Drücke ⏎ um den Suchbegriff auf AMBOSS im Browser zu suchen",
+            title: "AMBOSS",
+            url: "https://next.amboss.com/de/search?q=",
+            description: "Drücke ⏎ um den Suchbegriff in AMBOSS im Browser zu suchen",
             title_alias: [],
             imageUrl: "",
             date_publish: "",
-            author: "spacedog",
+            author: "amboss",
+          },
+          {
+            title: "Google",
+            url: "https://www.google.com/search?q=",
+            description: "Drücke ⏎ um den Suchbegriff in Google im Browser zu suchen",
+            title_alias: [],
+            imageUrl: "",
+            date_publish: "",
+            author: "google",
+          },
+          {
+            title: "Wikipedia",
+            url: "https://en.wikipedia.org/w/index.php?search=",
+            description: "Drücke ⏎ um den Suchbegriff in Wikipedia im Browser zu suchen",
+            title_alias: [],
+            imageUrl: "",
+            date_publish: "",
+            author: "google",
+          },
+          {
+            title: "Wikipedia DE",
+            url: "https://de.wikipedia.org/w/index.php?search=",
+            description: "Drücke ⏎ um den Suchbegriff in der deutschen Wikipedia im Browser zu suchen",
+            title_alias: [],
+            imageUrl: "",
+            date_publish: "",
+            author: "google",
           },
         ]);
       }
@@ -93,9 +123,10 @@ export default function Command(props: LaunchProps) {
     // Display Top Articles
     return (
       <List
-        navigationTitle={`DocCheck Flexikon Suche`}
+        navigationTitle={`DocCheck Top Artikel`}
         filtering={false}
         onSearchTextChange={async (text) => {
+          setNoSearchResults(false);
           setQuery(text);
         }}
         throttle={true}
@@ -129,6 +160,50 @@ export default function Command(props: LaunchProps) {
         </List.Section>
       </List>
     );
+  } else if (noSearchResults) {
+    return (
+      <List
+        navigationTitle={`DocCheck Flexikon Suche`}
+        filtering={false}
+        onSearchTextChange={async (text) => {
+          setNoSearchResults(false);
+          setQuery(text);
+        }}
+        throttle={true}
+        isLoading={loading}
+        searchBarPlaceholder="Suchbegriff..."
+      >
+        <List.Section title={"Keine Suchergebnisse im Flexikon!"}>
+          {entries.map((entry) => {
+            if (entry.description) {
+              return (
+                <List.Item
+                  key={entry.description}
+                  title={entry.title}
+                  subtitle={entry.description}
+                  icon={getFavicon("https://" + entry.url.split("/")[2])}
+                  actions={
+                    <ActionPanel>
+                      <Action.Open
+                        icon={Icon.Uppercase}
+                        title={"Suchbegriff als " + entry.title + "-Suche"}
+                        target={entry.url + encodeURI(query)}
+                      />
+                      <Action.Open
+                        icon={Icon.MagnifyingGlass}
+                        title="Suchbegriff als Flexikon-Suche"
+                        target={"https://www.doccheck.com/search?q=" + encodeURI(query)}
+                        shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
+                      />
+                    </ActionPanel>
+                  }
+                />
+              );
+            }
+          })}
+        </List.Section>
+      </List>
+    );
   }
 
   return (
@@ -137,6 +212,7 @@ export default function Command(props: LaunchProps) {
       navigationTitle={`DocCheck Flexikon Suche`}
       filtering={false}
       onSearchTextChange={async (text) => {
+        setNoSearchResults(false);
         setQuery(text);
       }}
       throttle={true}
@@ -205,29 +281,6 @@ export default function Command(props: LaunchProps) {
                 },
               ]}
               actions={EntryActions(entry.url, entry.title, query)}
-            />
-          );
-        } else if (entry.author && entry.description) {
-          return (
-            <List.Item
-              key={entry.description}
-              title={entry.title}
-              subtitle={entry.description}
-              actions={
-                <ActionPanel>
-                  <Action.Open
-                    icon={Icon.Uppercase}
-                    title="Suchbegriff als AMBOSS-Suche"
-                    target={"https://next.amboss.com/de/search?q=" + encodeURI(query) + "&v=overview"}
-                  />
-                  <Action.Open
-                    icon={Icon.MagnifyingGlass}
-                    title="Suchbegriff als Flexikon-Suche"
-                    target={"https://www.doccheck.com/search?q=" + encodeURI(query)}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
-                  />
-                </ActionPanel>
-              }
             />
           );
         } else if (entry.author) {

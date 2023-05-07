@@ -1,7 +1,8 @@
 # DocCheck Changelog
 
-## [Version 1.3] - 2023-04-24
+## [Version 1.3] - 2023-05-07
 
+- NEW: Search in AMBOSS, Google, Wikipedia or the German Wikipedia if no entry is found.
 - NEW: Tooltips now also for titles of search results
 - NEW: "Articulus brevis minimus" is removed
 - Fix: "Top articles" are now always displayed correctly and loaded only once (optimisation when displaying search results after leaving an article view via the "← Search \*" link and when deleting the search term)
