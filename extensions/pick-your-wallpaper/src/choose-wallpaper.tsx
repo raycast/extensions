@@ -1,6 +1,6 @@
 // This Works
 
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import fs from "fs";
 import path from "path";
 import { Preferences } from "./types/preferences";
