@@ -43,7 +43,7 @@ export default function VideoSummary(props: LaunchProps<{ arguments: VideoSummar
   
   <img src="${videoData?.thumbnails[3].url}">
   `
-    : undefined;
+    : `<img src="${videoData?.thumbnails[3].url}">`;
 
   return (
     <Detail

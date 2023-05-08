@@ -1,3 +1,4 @@
+import { Toast, showToast } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { YoutubeTranscript } from "youtube-transcript";
 
@@ -12,6 +13,11 @@ export default function getVideoTranscript(video: string) {
   });
 
   if (!data) {
+    showToast({
+      style: Toast.Style.Failure,
+      title: "❗",
+      message: "This video has no Transcript.",
+    });
     return { transcriptLoading: isLoading, rawTranscript: undefined };
   }
 
