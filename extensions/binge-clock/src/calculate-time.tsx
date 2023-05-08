@@ -25,6 +25,16 @@ export default function Command() {
     }
   }
 
+  let emptyTitle = "Search for movie / tv show name";
+  let emptyDescription = "Minimum of 4 characters";
+  if (isLoading) {
+    emptyTitle = "Loading...";
+    emptyDescription = "Please wait while we are fetching the results";
+  } else if (searchTerm.length >= 4 && searchResults.length === 0) {
+    emptyTitle = "No Result";
+    emptyDescription = "Try searching for something else";
+  }
+
   return (
     <List
       isLoading={isLoading}
@@ -32,15 +42,12 @@ export default function Command() {
       throttle
       onSearchTextChange={onSearchTextChange}
     >
-      {searchTerm === "" && searchResults.length === 0 ? (
-        <List.EmptyView title="Search for movie / tv show name" description="Minimum of 4 characters" />
-      ) : (
-        <List.Section title="Results" subtitle={searchResults.length + ""}>
-          {searchResults.map((result: SearchResult) => (
-            <SearchResultListItem key={result.url} result={result} />
-          ))}
-        </List.Section>
-      )}
+      <List.EmptyView title={emptyTitle} description={emptyDescription} />
+      <List.Section title="Results" subtitle={searchResults.length + ""}>
+        {searchResults.map((result: SearchResult) => (
+          <SearchResultListItem key={result.url} result={result} />
+        ))}
+      </List.Section>
     </List>
   );
 }
