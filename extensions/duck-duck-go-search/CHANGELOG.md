@@ -2,7 +2,7 @@
 
 ## [Version 1.1] - 2023-04-10
 
-- NEW: show favicons for the hardcoded bangs
+- NEW: Limited direct support for [DuckDuckGo !Bangs](https://duckduckgo.com/bangs) - show favicons
 
 ## [Naming change] - 2023-04-19
 

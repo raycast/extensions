@@ -61,7 +61,7 @@ export function getStaticResult(searchText: string): SearchResult[] {
   if (searchText.startsWith("!")) {
     const parts = searchText.split(" ");
     bang = parts[0].substring(1); // remove the "!" prefix from the bang
-    if (parts.length == 1 || parts[1] == "") {
+    if (parts.length === 1 || parts[1] === "") {
       // Only "!*" or "!* "
       if (bang in BANGS) {
         description = `Go to ${BANGS[bang].name} (open '${BANGS[bang].url
@@ -109,7 +109,7 @@ export async function getAutoSearchResults(searchText: string, signal: any): Pro
     return Promise.reject(response.statusText);
   }
 
-  const json = await response.json();
+  const json = await response.json() as Array<any>;
 
   const results: SearchResult[] = [];
 
@@ -117,7 +117,7 @@ export async function getAutoSearchResults(searchText: string, signal: any): Pro
     let bang = "";
     const searchText = item.phrase;
 
-    if (searchText.substring(0, 1) == "!") {
+    if (searchText.substring(0, 1) === "!") {
       if (
         searchText.substring(1, searchText.length).length > 2 &&
         searchText.substring(1, searchText.length).split(" ")[0] in BANGS

@@ -49,12 +49,14 @@ export function useSearch() {
           setAutoResults([]);
         }
       } catch (error) {
-        //         if (error instanceof AbortError) {
-        //           return;
-        //         }
-        //
-        //         console.error("Search error", error);
-        //         showToast(Toast.Style.Failure, "Could not perform search", String(error));
+        if (searchText.substring(0, 1) != "!") {
+          if (error instanceof AbortError) {
+            return;
+          }
+
+          console.error("Search error", error);
+          showToast(Toast.Style.Failure, "Could not perform search", String(error));
+        }
       }
     };
 
