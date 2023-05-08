@@ -1,4 +1,4 @@
-import { ActionPanel, closeMainWindow, Action, Icon, List, open } from "@raycast/api";
+import { ActionPanel, closeMainWindow, Action, Icon, List, Alert, open } from "@raycast/api";
 import { getFavicon } from "@raycast/utils";
 import { useSearch } from "./utils/useSearch";
 
