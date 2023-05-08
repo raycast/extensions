@@ -217,7 +217,7 @@ export default function Command(props: LaunchProps) {
       }}
       throttle={true}
       isLoading={loading}
-      searchBarPlaceholder="Suchbegriff..."
+      searchBarPlaceholder="Search entry..."
     >
       {entries.map((entry) => {
         if (entry.title_alias[2]) {
