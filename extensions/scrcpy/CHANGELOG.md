@@ -1,6 +1,6 @@
 # scrcpy Changelog
 
-## [Minor change] - 2023-04-17
+## [Minor change] - 2023-05-08
 
 - Added disable audio for scrcpy
 - Improve configuration prompt
