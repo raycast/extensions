@@ -1,6 +1,6 @@
 # Chinese Character Changelog
 
-## [Quotation mark Conversion] - {PR_MERGE_DATE}
+## [Quotation mark Conversion] - 2023-05-08
 
 - Add the conversion of quotation marks between simplified and traditional Chinese
 
