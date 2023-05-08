@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "visual-studio-code",
-  "title": "Visual Studio Code Recent Projects",
-  "description": "Search and open recent projects from Visual Studio Code.",
+  "title": "Visual Studio Code",
+  "description": "Control Visual Studio Code direcly from Raycast - Search and open recent projects, handle extensions and commands.",
   "icon": "icon.png",
   "author": "thomas",
   "contributors": [
