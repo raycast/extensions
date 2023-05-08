@@ -96,7 +96,7 @@
   "dependencies": {
     "@raycast/api": "^1.45.1",
     "cross-fetch": "^3.1.5",
-    "emojilib": "^3.0.6",
+    "emojilib": "^3.0.10",
     "fuse.js": "^6.5.3",
     "raycast-toolkit": "^1.0.3"
   },
