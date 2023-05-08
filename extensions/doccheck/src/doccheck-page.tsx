@@ -152,13 +152,13 @@ export default function DocCheckPage(props: { url: string; prevurl: string; quer
         <ActionPanel>
           <Action.Open
             icon={Icon.Globe}
-            title="Open article in browser"
+            title="Open Article in Browser"
             target={props.url}
             shortcut={{ modifiers: ["cmd"], key: "enter" }}
           />
           <Action.Open
             icon={Icon.Uppercase}
-            title="Article title as AMBOSS search"
+            title="Article Title as AMBOSS Search"
             target={"https://next.amboss.com/de/search?q=" + encodeURI(urlTitle) + "&v=overview"}
             shortcut={{ modifiers: ["opt"], key: "enter" }}
           />
