@@ -6,7 +6,7 @@ import { useSession } from "~/context/session";
 import { Folder, Item, Vault } from "~/types/vault";
 import { captureException } from "~/utils/development";
 import useVaultCaching from "~/components/searchVault/utils/useVaultCaching";
-import { FailedToLoadVaultItemsError } from "~/utils/errors";
+import { FailedToLoadVaultItemsError, getDisplayableErrorMessage } from "~/utils/errors";
 
 export type VaultState = Vault & {
   isLoading: boolean;
@@ -58,7 +58,7 @@ export const VaultProvider = ({ children }: PropsWithChildren) => {
       publishItems(items);
       cacheVault(items, folders);
     } catch (error) {
-      await showToast(Toast.Style.Failure, "Failed to load updated vault");
+      await showToast(Toast.Style.Failure, "Failed to load vault items", getDisplayableErrorMessage(error));
       captureException("Failed to load vault items", error);
     } finally {
       setState({ isLoading: false });
@@ -71,10 +71,11 @@ export const VaultProvider = ({ children }: PropsWithChildren) => {
       await bitwarden.sync();
       await loadItems();
       await toast.hide();
-    } catch {
-      await session.logout();
+    } catch (error) {
+      await bitwarden.logout();
       toast.style = Toast.Style.Failure;
-      toast.message = "Failed to sync. Please try logging in again.";
+      toast.title = "Failed to sync. Please try logging in again.";
+      toast.message = getDisplayableErrorMessage(error);
     }
   }
 
