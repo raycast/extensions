@@ -217,11 +217,7 @@ export default function Command(props: LaunchProps) {
       }}
       throttle={true}
       isLoading={loading}
-<<<<<<< HEAD
       searchBarPlaceholder="Search..."
-=======
-      searchBarPlaceholder="Search entry..."
->>>>>>> contributions/merge-1683535848626858000
     >
       {entries.map((entry) => {
         if (entry.title_alias[2]) {
