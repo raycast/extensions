@@ -6,6 +6,7 @@ import { useSessionReducer } from "~/context/session/reducer";
 import { getSavedSession, Storage } from "~/context/session/utils";
 import { Cache } from "~/utils/cache";
 import { captureException } from "~/utils/development";
+import { VaultIsLockedError } from "~/utils/errors";
 import useOnceEffect from "~/utils/hooks/useOnceEffect";
 import { hashMasterPasswordForReprompting } from "~/utils/passwords";
 
@@ -44,7 +45,7 @@ export function SessionProvider(props: SessionProviderProps) {
       dispatch({ type: "loadSavedState", ...restoredSession });
       if (restoredSession.shouldLockVault) await bitwarden.lock(restoredSession.lockReason, true);
     } catch (error) {
-      await bitwarden.lock();
+      if (!(error instanceof VaultIsLockedError)) await bitwarden.lock();
       dispatch({ type: "failedLoadSavedState" });
       captureException("Failed to load saved session state", error);
     }
