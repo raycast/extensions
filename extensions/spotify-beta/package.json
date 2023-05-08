@@ -85,11 +85,145 @@
       ]
     },
     {
-      "name": "quickActions",
-      "title": "Quick Actions",
+      "name": "togglePlayPause",
+      "title": "Toggle Play/Pause",
       "subtitle": "Spotify",
-      "description": "This is a list of lots of Spotify actions. For example: Play/Pause, Like/Dislike current song, Change Volume, and more. If you'd like to have any of these available as a Root Command, you can create Quicklinks via the actions menu (⌘ K).",
-      "mode": "view"
+      "description": "Use this to toggle the playback of the current song.",
+      "mode": "no-view"
+    },
+    {
+      "name": "next",
+      "title": "Next",
+      "subtitle": "Spotify",
+      "description": "Use this to skip to the next song/episode.",
+      "mode": "no-view"
+    },
+    {
+      "name": "previous",
+      "title": "Previous",
+      "subtitle": "Spotify",
+      "description": "Use this to skip to the previous song/episode.",
+      "mode": "no-view"
+    },
+    {
+      "name": "like",
+      "title": "Like",
+      "subtitle": "Spotify",
+      "description": "Use this to like the current song.",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "dislike",
+      "title": "Dislike",
+      "subtitle": "Spotify",
+      "description": "Use this to dislike the current song.",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "volume0",
+      "title": "Set Volume to 0%",
+      "subtitle": "Spotify",
+      "description": "Use this to mute the volume.",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "volume25",
+      "title": "Set Volume to 25%",
+      "subtitle": "Spotify",
+      "description": "Use this to set the volume to 25%.",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "volume50",
+      "title": "Set Volume to 50%",
+      "subtitle": "Spotify",
+      "description": "Use this to set the volume to 50%.",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "volume75",
+      "title": "Set Volume to 75%",
+      "subtitle": "Spotify",
+      "description": "Use this to set the volume to 75%.",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "volume100",
+      "title": "Set Volume to 100%",
+      "subtitle": "Spotify",
+      "description": "Use this to set the volume to 100%.",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "volumeDown",
+      "title": "Turn Volume Down",
+      "subtitle": "Spotify",
+      "description": "Use this to turn the volume down by 10%.",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "volumeUp",
+      "title": "Turn Volume Up",
+      "subtitle": "Spotify",
+      "description": "Use this to turn the volume up by 10%.",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "toggleShuffle",
+      "title": "Toggle Shuffle",
+      "subtitle": "Spotify",
+      "description": "Use this to toggle shuffle.",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "toggleRepeat",
+      "title": "Toggle Repeat",
+      "subtitle": "Spotify",
+      "description": "Use this to toggle repeat.",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "startRadio",
+      "title": "Start Radio",
+      "subtitle": "Spotify",
+      "description": "Use this to start a radio station based on the current song.",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "copyUrl",
+      "title": "Copy URL",
+      "subtitle": "Spotify",
+      "description": "Use this to copy the URL of the current song/episode.",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "justPlay",
+      "title": "Just Play",
+      "subtitle": "Spotify",
+      "description": "Use this to quickly start playing a song based on your query.",
+      "mode": "no-view",
+      "disabledByDefault": true,
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Song / Artist",
+          "type": "text",
+          "required": true
+        }
+      ]
     }
   ],
   "dependencies": {
