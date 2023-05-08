@@ -109,7 +109,7 @@ export async function getAutoSearchResults(searchText: string, signal: any): Pro
     return Promise.reject(response.statusText);
   }
 
-  const json = await response.json() as Array<any>;
+  const json = (await response.json()) as Array<any>;
 
   const results: SearchResult[] = [];
 
