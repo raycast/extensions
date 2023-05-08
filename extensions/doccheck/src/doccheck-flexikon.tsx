@@ -186,12 +186,12 @@ export default function Command(props: LaunchProps) {
                     <ActionPanel>
                       <Action.Open
                         icon={Icon.Uppercase}
-                        title={"Search term as " + entry.title + " search"}
+                        title={"Search Term as " + entry.title + " Search"}
                         target={entry.url + encodeURI(query)}
                       />
                       <Action.Open
                         icon={Icon.MagnifyingGlass}
-                        title="Search term as Flexikon search"
+                        title="Search Term as Flexikon Search"
                         target={"https://www.doccheck.com/search?q=" + encodeURI(query)}
                         shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
                       />
@@ -317,7 +317,7 @@ function EntryActions(url: string, title: string, query: string) {
       />
       <Action.Open
         icon={Icon.Globe}
-        title="Open article in browser"
+        title="Open Article in Browser"
         target={url}
         shortcut={{ modifiers: ["cmd"], key: "enter" }}
       />
