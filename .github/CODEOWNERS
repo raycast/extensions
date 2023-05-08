@@ -667,6 +667,7 @@
 /extensions/purpleair                                @omarshahine
 /extensions/px-to-rem-converter                      @raulanatol
 /extensions/qbittorrent                              @J3n5en
+/extensions/qonto                                    @ChristoRibeiro
 /extensions/qotp                                     @ariesly15
 /extensions/qq-music-controls                        @jwickers
 /extensions/qr-code-scanner                          @StevenRCE0
@@ -736,7 +737,7 @@
 /extensions/savvycal                                 @keturiosakys @pernielsentikaer @derrickreimer @vimtor
 /extensions/scaleway                                 @philibea @flozdra
 /extensions/scrapbox-search                          @zett-8
-/extensions/scrcpy                                   @zcfan
+/extensions/scrcpy                                   @zcfan @bxb100
 /extensions/screen-saver                             @koinzhang
 /extensions/screen-sharing-recents                   @m-hall
 /extensions/screenocr                                @joshauh46

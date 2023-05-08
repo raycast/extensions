@@ -1,5 +1,5 @@
 import { environment, getPreferenceValues, LocalStorage, showToast, Toast } from "@raycast/api";
-import { execa, ExecaChildProcess, ExecaError } from "execa";
+import { execa, ExecaChildProcess, ExecaError, ExecaReturnValue } from "execa";
 import { existsSync } from "fs";
 import { dirname } from "path/posix";
 import { LOCAL_STORAGE_KEY, DEFAULT_SERVER_URL } from "~/constants/general";
@@ -9,12 +9,13 @@ import { PasswordGeneratorOptions } from "~/types/passwords";
 import { Folder, Item } from "~/types/vault";
 import { getPasswordGeneratingArgs } from "~/utils/passwords";
 import { getServerUrlPreference } from "~/utils/preferences";
-import { CLINotFoundError } from "~/utils/errors";
+import { CLINotFoundError, VaultIsLockedError } from "~/utils/errors";
 
 export class Bitwarden {
   private env: Env;
   private initPromise: Promise<void>;
-  private tempSessionToken: string | undefined;
+  private tempSessionToken?: string;
+  private callbacks: ActionCallbacks = {};
   lockReason: string | undefined;
   cliPath: string;
 
@@ -41,23 +42,28 @@ export class Bitwarden {
     })();
   }
 
-  setSessionToken(token: string) {
+  setActionCallback<TAction extends keyof ActionCallbacks>(action: TAction, callback: ActionCallbacks[TAction]): this {
+    this.callbacks[action] = callback;
+    return this;
+  }
+
+  setSessionToken(token: string): void {
     this.env = {
       ...this.env,
       BW_SESSION: token,
     };
   }
 
-  clearSessionToken() {
+  clearSessionToken(): void {
     delete this.env.BW_SESSION;
   }
 
-  withSession(token: string) {
+  withSession(token: string): this {
     this.tempSessionToken = token;
     return this;
   }
 
-  async initialize() {
+  async initialize(): Promise<this> {
     await this.initPromise;
     return this;
   }
@@ -121,6 +127,13 @@ export class Bitwarden {
     if (this.tempSessionToken) {
       this.tempSessionToken = undefined;
     }
+    if (this.isPromptWaitingForMasterPassword(result)) {
+      /* since we have the session token in the env, the password 
+      should not be requested, unless the vault is locked */
+      await this.lock();
+      throw new VaultIsLockedError();
+    }
+
     return result;
   }
 
@@ -131,11 +144,32 @@ export class Bitwarden {
   async login(): Promise<void> {
     await this.exec(["login", "--apikey"]);
     await this.clearLockReason();
+    await this.callbacks.login?.();
   }
 
   async logout(): Promise<void> {
     await this.exec(["logout"]);
     this.clearSessionToken();
+    await this.callbacks.logout?.();
+  }
+
+  async lock(reason?: string, shouldCheckVaultStatus?: boolean): Promise<void> {
+    if (shouldCheckVaultStatus) {
+      const isAuthenticated = (await this.status()).status !== "unauthenticated";
+      if (!isAuthenticated) return;
+    }
+
+    if (reason) await this.setLockReason(reason);
+    await this.exec(["lock"]);
+    await this.callbacks.lock?.(reason);
+  }
+
+  async unlock(password: string): Promise<string> {
+    const { stdout: sessionToken } = await this.exec(["unlock", password, "--raw"]);
+    this.setSessionToken(sessionToken);
+    await this.clearLockReason();
+    await this.callbacks.unlock?.(password, sessionToken);
+    return sessionToken;
   }
 
   async listItems(): Promise<Item[]> {
@@ -154,17 +188,6 @@ export class Bitwarden {
     // this could return something like "Not found." but checks for totp code are done before calling this function
     const { stdout } = await this.exec(["get", "totp", id]);
     return stdout;
-  }
-
-  async unlock(password: string): Promise<string> {
-    const { stdout: sessionToken } = await this.exec(["unlock", password, "--raw"]);
-    await this.clearLockReason();
-    return sessionToken;
-  }
-
-  async lock(reason?: string): Promise<void> {
-    if (reason) await this.setLockReason(reason);
-    await this.exec(["lock"]);
   }
 
   async status(): Promise<VaultState> {
@@ -188,6 +211,10 @@ export class Bitwarden {
     const { stdout } = await this.exec(["generate", ...args], { abortController });
     return stdout;
   }
+
+  private isPromptWaitingForMasterPassword(result: ExecaReturnValue): boolean {
+    return !!(result.stderr && result.stderr.includes("Master password"));
+  }
 }
 
 type Env = {
@@ -197,6 +224,13 @@ type Env = {
   PATH: string;
   NODE_EXTRA_CA_CERTS?: string;
   BW_SESSION?: string;
+};
+
+type ActionCallbacks = {
+  login?: () => MaybePromise<void>;
+  logout?: () => MaybePromise<void>;
+  lock?: (reason?: string) => MaybePromise<void>;
+  unlock?: (password: string, sessionToken: string) => MaybePromise<void>;
 };
 
 type ExecProps = {

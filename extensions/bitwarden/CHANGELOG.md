@@ -1,5 +1,9 @@
 # Bitwarden Changelog
 
+## [Fix] - 2023-05-08
+
+- Hopefully fixed a bug that caused the extnesion to keep logging out right after logging in.
+
 ## [Improvement] - 2023-05-04
 
 - Use session token on every bitwarden cli command

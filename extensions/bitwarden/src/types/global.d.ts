@@ -24,6 +24,7 @@ declare global {
   }
   type RecordOfAny = Record<string, any>;
   type RecursiveNonOptional<T> = { [K in keyof T]-?: RecursiveNonOptional<T[K]> };
+  type MaybePromise<T> = T | Promise<T>;
 }
 
 export {};
