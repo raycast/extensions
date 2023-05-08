@@ -11,7 +11,7 @@ Here is a typical manifest file:
   "description": "My extension that can do a lot of things",
   "icon": "icon.png",
   "author": "thomas",
-  "categories": ["Fun", "Communication"]
+  "categories": ["Fun", "Communication"],
   "license": "MIT",
   "commands": [
     {
