@@ -80,10 +80,10 @@ export default async function getAiSummary(video: string, videoTitle?: string) {
       openAiInstructions +=
         videoTitle &&
         rawTranscript &&
-        `Summarize the following transcription of a youtube video as a bullet point list of the most important points each starting with a fitting emoji.
+        `Summarize the following transcription of a youtube video as a list of the most important points each starting with a fitting emoji.
 
         Format:
-        [Emoji] [Summary] \n
+        [Emoji] [List Item] \n
 
         Here is the transcript: ${temporarySummary.length > 0 ? temporarySummary : rawTranscript}`;
 
