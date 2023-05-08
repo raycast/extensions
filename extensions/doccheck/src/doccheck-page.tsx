@@ -28,7 +28,7 @@ export default function DocCheckPage(props: { url: string; prevurl: string; quer
       synonyms += $(link).html() + "\n";
     });
 
-  // erster <i></i> im Artikel - zum Abgleich ob es Synonyme gibt oder nicht
+  // first <i></i> in the article - to check if there are synonyms or not
   let notSynonyms = "";
   $(".collapsible")
     .find("i")
@@ -40,7 +40,7 @@ export default function DocCheckPage(props: { url: string; prevurl: string; quer
 
   // SYNONYME
   if (synonyms) {
-    // es gibt Synonyme oder Erklärungen unter der Überschrift
+    // there are synonyms or explanations under the heading
     mdSynonyms =
       "```\n" +
       synonyms
@@ -106,14 +106,14 @@ export default function DocCheckPage(props: { url: string; prevurl: string; quer
         encodeURI(JSON.stringify({ url: props.prevurl, query: props.query })) +
         ")\n"
       : props.query != "" && preferences.openIn != "browser"
-      ? "[← Suche" +
+      ? "[← Search" +
         queryText +
         "](" +
         "raycast://extensions/spacedog/doccheck/doccheck-flexikon?fallbackText=" +
         encodeURI(query) +
         ")\n"
       : preferences.openIn != "browser"
-      ? "[← Top Artikel](raycast://extensions/spacedog/doccheck/doccheck-flexikon)\n"
+      ? "[← Top Articles](raycast://extensions/spacedog/doccheck/doccheck-flexikon)\n"
       : "";
   markdown +=
     "\n " +
@@ -128,7 +128,7 @@ export default function DocCheckPage(props: { url: string; prevurl: string; quer
           .replace(`>&nbsp;<`, `>.<`)
           .replace(`tr>\n<th></th>`, `tr>\n<th>.</th>`)
       )
-      .replace(/\s{94}\|\n/gm, `\n`); // ÜBERSCHRIFT + ```SYNONYME``` -TOC + ARTIKEL (Entfernung von Ankern, relative zu absoluten Links, Setzen eines Punktes in der leeren Startzeile bei Berechnung "Relatives Risiko" und "Odds Ratio" zur korrekten Anzeige, Entfernung einiger Tabellenenden wie bei DDx in "Scharlach")
+      .replace(/\s{94}\|\n/gm, `\n`); // HEADING + ``SYNONYME`` -TOC + ARTICLE (removal of anchors, relative to absolute links, putting a dot in the empty start line when calculating "Relatives Risiko" and "Odds Ratio" for correct display, removal of some table ends like DDx in "Scharlach")
 
   return (
     <Detail
@@ -152,13 +152,13 @@ export default function DocCheckPage(props: { url: string; prevurl: string; quer
         <ActionPanel>
           <Action.Open
             icon={Icon.Globe}
-            title="Eintrag im Browser öffnen"
+            title="Open article in browser"
             target={props.url}
             shortcut={{ modifiers: ["cmd"], key: "enter" }}
           />
           <Action.Open
             icon={Icon.Uppercase}
-            title="Eintragtitel als AMBOSS-Suche"
+            title="Article title as AMBOSS search"
             target={"https://next.amboss.com/de/search?q=" + encodeURI(urlTitle) + "&v=overview"}
             shortcut={{ modifiers: ["opt"], key: "enter" }}
           />

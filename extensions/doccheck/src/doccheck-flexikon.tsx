@@ -73,7 +73,7 @@ export default function Command(props: LaunchProps) {
           {
             title: "AMBOSS",
             url: "https://next.amboss.com/de/search?q=",
-            description: "Drücke ⏎ um den Suchbegriff in AMBOSS im Browser zu suchen",
+            description: "Press ⏎ to search for the search term in AMBOSS in the browser",
             title_alias: [],
             imageUrl: "",
             date_publish: "",
@@ -82,7 +82,7 @@ export default function Command(props: LaunchProps) {
           {
             title: "Google",
             url: "https://www.google.com/search?q=",
-            description: "Drücke ⏎ um den Suchbegriff in Google im Browser zu suchen",
+            description: "Press ⏎ to search for the search term in Google in the browser",
             title_alias: [],
             imageUrl: "",
             date_publish: "",
@@ -91,7 +91,7 @@ export default function Command(props: LaunchProps) {
           {
             title: "Wikipedia",
             url: "https://en.wikipedia.org/w/index.php?search=",
-            description: "Drücke ⏎ um den Suchbegriff in Wikipedia im Browser zu suchen",
+            description: "Press ⏎ to search for the search term in Wikipedia in the browser",
             title_alias: [],
             imageUrl: "",
             date_publish: "",
@@ -100,7 +100,7 @@ export default function Command(props: LaunchProps) {
           {
             title: "Wikipedia DE",
             url: "https://de.wikipedia.org/w/index.php?search=",
-            description: "Drücke ⏎ um den Suchbegriff in der deutschen Wikipedia im Browser zu suchen",
+            description: "Press ⏎ to search for the search term in the German Wikipedia in the browser",
             title_alias: [],
             imageUrl: "",
             date_publish: "",
@@ -123,7 +123,7 @@ export default function Command(props: LaunchProps) {
     // Display Top Articles
     return (
       <List
-        navigationTitle={`DocCheck Top Artikel`}
+        navigationTitle={`DocCheck Top Articles`}
         filtering={false}
         onSearchTextChange={async (text) => {
           setNoSearchResults(false);
@@ -131,9 +131,9 @@ export default function Command(props: LaunchProps) {
         }}
         throttle={true}
         isLoading={loading}
-        searchBarPlaceholder="Suchbegriff..."
+        searchBarPlaceholder="Search..."
       >
-        <List.Section title={query ? "" : "Top Artikel"}>
+        <List.Section title={"Top Articles"}>
           {entries.map((entry) => {
             if (entry.description) {
               return (
@@ -163,7 +163,7 @@ export default function Command(props: LaunchProps) {
   } else if (noSearchResults) {
     return (
       <List
-        navigationTitle={`DocCheck Flexikon Suche`}
+        navigationTitle={`DocCheck Flexikon Search`}
         filtering={false}
         onSearchTextChange={async (text) => {
           setNoSearchResults(false);
@@ -171,9 +171,9 @@ export default function Command(props: LaunchProps) {
         }}
         throttle={true}
         isLoading={loading}
-        searchBarPlaceholder="Suchbegriff..."
+        searchBarPlaceholder="Search..."
       >
-        <List.Section title={"Keine Suchergebnisse im Flexikon!"}>
+        <List.Section title={"No search results in Flexikon!"}>
           {entries.map((entry) => {
             if (entry.description) {
               return (
@@ -186,12 +186,12 @@ export default function Command(props: LaunchProps) {
                     <ActionPanel>
                       <Action.Open
                         icon={Icon.Uppercase}
-                        title={"Suchbegriff als " + entry.title + "-Suche"}
+                        title={"Search term as " + entry.title + " search"}
                         target={entry.url + encodeURI(query)}
                       />
                       <Action.Open
                         icon={Icon.MagnifyingGlass}
-                        title="Suchbegriff als Flexikon-Suche"
+                        title="Search term as Flexikon search"
                         target={"https://www.doccheck.com/search?q=" + encodeURI(query)}
                         shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
                       />
@@ -209,7 +209,7 @@ export default function Command(props: LaunchProps) {
   return (
     // Display Search Entries
     <List
-      navigationTitle={`DocCheck Flexikon Suche`}
+      navigationTitle={`DocCheck Flexikon Search`}
       filtering={false}
       onSearchTextChange={async (text) => {
         setNoSearchResults(false);
@@ -217,7 +217,11 @@ export default function Command(props: LaunchProps) {
       }}
       throttle={true}
       isLoading={loading}
+<<<<<<< HEAD
+      searchBarPlaceholder="Search..."
+=======
       searchBarPlaceholder="Search entry..."
+>>>>>>> contributions/merge-1683535848626858000
     >
       {entries.map((entry) => {
         if (entry.title_alias[2]) {
@@ -313,30 +317,30 @@ function EntryActions(url: string, title: string, query: string) {
     <ActionPanel>
       <Action.Push
         icon={Icon.Book}
-        title="Eintrag lesen"
+        title="Read article"
         target={<DocCheckPage url={url} prevurl={""} query={query} />}
       />
       <Action.Open
         icon={Icon.Globe}
-        title="Eintrag im Browser öffnen"
+        title="Open article in browser"
         target={url}
         shortcut={{ modifiers: ["cmd"], key: "enter" }}
       />
       <Action.Open
         icon={Icon.MagnifyingGlass}
-        title="Suchbegriff als Flexikon-Suche"
+        title="Search term as Flexikon search"
         target={"https://www.doccheck.com/search?q=" + encodeURI(query)}
         shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
       />
       <Action.Open
         icon={Icon.Uppercase}
-        title="Eintrag als AMBOSS-Suche"
+        title="Article title as AMBOSS search"
         target={"https://next.amboss.com/de/search?q=" + encodeURI(title) + "&v=overview"}
         shortcut={{ modifiers: ["opt"], key: "enter" }}
       />
       <Action.Open
         icon={Icon.Uppercase}
-        title="Suchbegriff als AMBOSS-Suche"
+        title="Search term as AMBOSS search"
         target={"https://next.amboss.com/de/search?q=" + encodeURI(query) + "&v=overview"}
         shortcut={{ modifiers: ["opt", "shift"], key: "enter" }}
       />
