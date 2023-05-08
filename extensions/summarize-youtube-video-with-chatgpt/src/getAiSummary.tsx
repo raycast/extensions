@@ -37,8 +37,11 @@ export default async function getAiSummary(video: string, videoTitle?: string) {
 
         const transcriptionSummary = rawTranscript?.split(/(?<=\.)/).reduce(
           (acc, curr) => {
-            if (acc[acc.length - 1].length + curr.length > SUMMARY_MAX_CHARS) {
-              acc.push(curr);
+            if (curr.length > SUMMARY_MAX_CHARS) {
+              const splitTranscription = curr.match(new RegExp(`.{1,${SUMMARY_MAX_CHARS}}`, "g"));
+              splitTranscription?.forEach((split) => {
+                acc.push(split);
+              });
             } else {
               acc[acc.length - 1] += curr;
             }
