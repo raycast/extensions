@@ -1,6 +1,6 @@
 # Binge Clock Changelog
 
-## [Initial Version] - 2023-04-29
+## [Initial Version] - 2023-05-08
 
 - Initial version of the app
 - Ability to search for a movie or TV show
