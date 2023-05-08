@@ -209,7 +209,6 @@ export default function Command(props: LaunchProps) {
   return (
     // Display Search Entries
     <List
-      navigationTitle={`DocCheck Flexikon Search`}
       filtering={false}
       onSearchTextChange={async (text) => {
         setNoSearchResults(false);
@@ -313,7 +312,7 @@ function EntryActions(url: string, title: string, query: string) {
     <ActionPanel>
       <Action.Push
         icon={Icon.Book}
-        title="Read article"
+        title="Read Article"
         target={<DocCheckPage url={url} prevurl={""} query={query} />}
       />
       <Action.Open
@@ -324,19 +323,19 @@ function EntryActions(url: string, title: string, query: string) {
       />
       <Action.Open
         icon={Icon.MagnifyingGlass}
-        title="Search term as Flexikon search"
+        title="Search Term as Flexikon Search"
         target={"https://www.doccheck.com/search?q=" + encodeURI(query)}
         shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
       />
       <Action.Open
         icon={Icon.Uppercase}
-        title="Article title as AMBOSS search"
+        title="Article Title as AMBOSS Search"
         target={"https://next.amboss.com/de/search?q=" + encodeURI(title) + "&v=overview"}
         shortcut={{ modifiers: ["opt"], key: "enter" }}
       />
       <Action.Open
         icon={Icon.Uppercase}
-        title="Search term as AMBOSS search"
+        title="Search Term as AMBOSS Search"
         target={"https://next.amboss.com/de/search?q=" + encodeURI(query) + "&v=overview"}
         shortcut={{ modifiers: ["opt", "shift"], key: "enter" }}
       />
