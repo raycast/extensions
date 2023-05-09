@@ -1,5 +1,16 @@
 # Jira Changelog
 
+## [Fix missing error title] - 2023-05-09
+
+Statuses in Jira may not have categories. Problem is, these categories are used as a section title in various commands such as `Open Issues` causing the error:
+
+```
+Error: Rendering failed:
+Missing required component property "title"
+```
+
+This should be fixed now!
+
 ## [Remove Raycast signature] - 2023-04-19
 
 - Remove Raycast signature preference from the `Create Issue` command
