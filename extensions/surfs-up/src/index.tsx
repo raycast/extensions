@@ -2,13 +2,13 @@ import { useState } from "react";
 import { Action, ActionPanel, Icon, Image, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import spots from "./data/spots.json";
+import { spotFlags } from "./data/spotFlags";
 import { Spot } from "./types/spot";
 import { ForecastPanelInfo } from "./types/forecastPanelInfo";
 import { Forecast } from "./types/forecast";
 import { alphaSortPredicate } from "./utils/alphaSortPredicate";
 import { checkForecast } from "./handlers/checkForecast";
 import { closeForecast } from "./handlers/closeForecast";
-import { spotFlags } from "./data/spotFlags";
 import Mask = Image.Mask;
 
 export default function Command() {

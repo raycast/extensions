@@ -5,6 +5,7 @@
   "description": "Search the weather and the ocean conditions in your favorite surfing spots",
   "icon": "logo.png",
   "author": "comoser",
+  "keywords": ["surf", "weather", "ocean", "skim", "sea", "forecast"],
   "categories": [
     "Fun"
   ],
