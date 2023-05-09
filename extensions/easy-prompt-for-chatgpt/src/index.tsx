@@ -30,10 +30,8 @@ interface UrlItem {
 // default system list urls
 const systemUrls: SystemURLs = {
   en: "https://raw.githubusercontent.com/f/awesome-chatgpt-prompts/main/prompts.csv",
-  "zh-cn":
-    "https://raw.githubusercontent.com/PlexPt/awesome-chatgpt-prompts-zh/main/prompts-zh.json",
-  "zh-tw":
-    "https://raw.githubusercontent.com/PlexPt/awesome-chatgpt-prompts-zh/main/prompts-zh-TW.json",
+  "zh-cn": "https://raw.githubusercontent.com/PlexPt/awesome-chatgpt-prompts-zh/main/prompts-zh.json",
+  "zh-tw": "https://raw.githubusercontent.com/PlexPt/awesome-chatgpt-prompts-zh/main/prompts-zh-TW.json",
 };
 
 async function fetch(item: UrlItem): Promise<{ type: string; items: Item[] }> {
@@ -159,25 +157,17 @@ export default function Command() {
                 shortcut={{ modifiers: ["cmd"], key: "d" }}
                 target={
                   <Detail
-                    markdown={`${item.prompt}${
-                      item.description ? "\r\n\r\n" + item.description : ""
-                    }`}
+                    markdown={`${item.prompt}${item.description ? "\r\n\r\n" + item.description : ""}`}
                     actions={
                       <ActionPanel>
                         {primaryAction === "copy" ? (
                           <>
                             <Action.CopyToClipboard title="Copy Prompt" content={item.prompt} />
-                            <Action.Paste
-                              title="Paste Prompt in Active App"
-                              content={item.prompt}
-                            />
+                            <Action.Paste title="Paste Prompt in Active App" content={item.prompt} />
                           </>
                         ) : (
                           <>
-                            <Action.Paste
-                              title="Paste Prompt in Active App"
-                              content={item.prompt}
-                            />
+                            <Action.Paste title="Paste Prompt in Active App" content={item.prompt} />
                             <Action.CopyToClipboard title="Copy Prompt" content={item.prompt} />
                           </>
                         )}
