@@ -1,6 +1,7 @@
-import { Color, List } from "@raycast/api";
+import { ActionPanel, Color, List } from "@raycast/api";
 import { IRecentPlayHistory } from "../types/nintendo";
 import dayjs from "dayjs";
+import { PushGameInfoDetailAction } from "./GameInfoDetail";
 
 export const DailyPlayHistoriesSection = ({
   history,
@@ -27,7 +28,19 @@ export const DailyPlayHistoriesSection = ({
               item.totalPlayedMinutes < 60 ? Color.Green : item.totalPlayedMinutes < 120 ? Color.Orange : Color.Red,
           },
         };
-        return <List.Item key={item.titleId} title={item.titleName} icon={item.imageUrl} accessories={[timeBar]} />;
+        return (
+          <List.Item
+            key={item.titleId}
+            title={item.titleName}
+            icon={item.imageUrl}
+            accessories={[timeBar]}
+            actions={
+              <ActionPanel>
+                <PushGameInfoDetailAction titleId={item.titleId} />
+              </ActionPanel>
+            }
+          />
+        );
       })}
     </List.Section>
   );

@@ -40,6 +40,7 @@
     "@raycast/api": "^1.50.0",
     "@raycast/utils": "^1.5.2",
     "base64url": "^3.0.1",
+    "cheerio": "^1.0.0-rc.12",
     "crypto": "^1.0.1",
     "dayjs": "^1.11.7"
   },

@@ -69,6 +69,27 @@ export const useToken = () => {
   }
   return token;
 };
+export const getPlayHistory = (titleId: string) => {
+  const cache = getCache<IPlayHistories>("HISTORY");
+  const cachedHistories = cache.get();
+  if (!cachedHistories) return null;
+  const history = cachedHistories.playHistories.find((history) => history.titleId === titleId);
+  if (!history) return null;
+  const totalPlayTime =
+    history.totalPlayedMinutes < 60
+      ? history.totalPlayedMinutes + " mins"
+      : Math.floor(history.totalPlayedMinutes / 60) + " hours " + (history.totalPlayedMinutes % 60) + " mins";
+  const weeklyPlayedMinutes = cachedHistories.recentPlayHistories.reduce((time, recentPlayHistory) => {
+    return (
+      time +
+      recentPlayHistory.dailyPlayHistories.reduce((time, dailyHistory) => {
+        return time + dailyHistory.totalPlayedMinutes;
+      }, 0)
+    );
+  }, 0);
+
+  return { ...history, weeklyPlayedMinutes, totalPlayTime };
+};
 export const usePlayHistories = () => {
   const token = useToken();
   const cache = getCache<IPlayHistories>("HISTORY");
@@ -88,11 +109,11 @@ export const usePlayHistories = () => {
         showToast(Toast.Style.Failure, error.name, error.message);
       },
       onWillExecute: () => {
-        showToast(Toast.Style.Animated, `${cachedHistories ? "Updating" : "Fetching"} play histories...`);
+        showToast(Toast.Style.Animated, `${cachedHistories ? "Updating" : "Loading"}`);
       },
       onData: (data) => {
         cache.set(data);
-        showToast(Toast.Style.Success, "Play histories fetched successfully");
+        showToast(Toast.Style.Success, "Success");
       },
     }
   );
@@ -150,13 +171,13 @@ export const useSessionToken = () => {
       showToast(Toast.Style.Failure, error.name, error.message);
     },
     onWillExecute: () => {
-      showToast(Toast.Style.Animated, "Fetching session token...");
+      showToast(Toast.Style.Animated, "Fetching");
     },
     onData: (data) => {
       if (data.session_token) {
         cache.set("NINTENDO_SESSION_TOKEN", JSON.stringify({ value: data.session_token, fetchTime: Date.now() }));
       }
-      showToast(Toast.Style.Success, "Session token fetched successfully");
+      showToast(Toast.Style.Success, "Success");
     },
   });
   const getCachedSessionToken = () => {
