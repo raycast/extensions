@@ -13,7 +13,7 @@
     {
       "name": "block-time",
       "title": "Block Time for To-Dos",
-      "description": "Schedule focus time blocks for tasks from your favorite to-do list apps such as Reminders, Things, or Todoist.",
+      "description": "Schedule time blocks for tasks pulled from your preferred to-do list apps: Reminders, Things, or Todoist.",
       "mode": "view",
       "preferences": [
         {
@@ -129,7 +129,7 @@
     {
       "name": "track-time",
       "title": "Track Time for To-Dos",
-      "description": "Track time spent on tasks using Toggl or Clockify, or directly on your calendar. Compare it against the time blocks you've budgeted for each task.",
+      "description": "Log time spent on tasks using Toggl or Clockify, or directly on your calendar. If time tracking isn't your thing, you have the freedom to skip it.",
       "mode": "view",
       "preferences": [
         {
@@ -145,7 +145,7 @@
     {
       "name": "generate-productivity-reports",
       "title": "Generate Productivity Reports",
-      "description": "Build customizable blocked and tracked time reports to identify productivity patterns and improve workflow over time. See how much time you're spending on meetings and other events.",
+      "description": "Analyze your productivity by comparing budgeted time blocks and actual time spent on tasks. Discover how much of your time is dedicated to meetings and other events.",
       "mode": "view",
       "preferences": [
         {
@@ -177,7 +177,7 @@
     {
       "name": "show-menu-bar-timer",
       "title": "Show Menu Bar Timer",
-      "description": "Display a running timer and the associated task title in the macOS Menu Bar for quick reference and to stay focused on your current task.",
+      "description": "Stay focused with a running timer and associated task title displayed in your macOS Menu Bar.",
       "mode": "menu-bar",
       "interval": "1m",
       "preferences": [
@@ -194,7 +194,7 @@
     {
       "name": "split-screen",
       "title": "Split Screen To-Dos and Calendar",
-      "description": "Arrange your primary to-do app (Reminders, Things, or Todoist) and macOS Calendar app side by side for a convenient view of your daily tasks and scheduled events. Relaunching the command restores the to-do app and Calendar window positions and sizes to their original state.",
+      "description": "Display your primary to-do app and Calendar side by side for visually assisted time blocking. Relaunch to restore original window positions and sizes.",
       "mode": "no-view",
       "preferences": [
         {
