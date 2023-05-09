@@ -17,12 +17,30 @@
             "name": "sync",
             "title": "Sync Envelopes",
             "description": "Sync envelopes",
-            "mode": "no-view",
+            "mode": "menu-bar",
             "interval": "1m"
         }
     ],
-    "categories": [
-        "Communication"
+    "categories": ["Communication"],
+    "preferences": [
+        {
+            "name": "defaultFolder",
+            "description": "The default folder used for commands",
+            "required": false,
+            "type": "textfield",
+            "title": "Default Folder",
+            "placeholder": "INBOX",
+            "default": "INBOX"
+        },
+        {
+            "name": "defaultAccount",
+            "description": "The default account used for commands",
+            "required": false,
+            "type": "textfield",
+            "title": "Default Account",
+            "placeholder": "Personal",
+            "default": "Personal"
+        }
     ],
     "dependencies": {
         "@raycast/api": "^1.49.2",
