@@ -15,7 +15,7 @@ export default function Timers() {
 
   useEffect(() => {
     const initialize = async () => {
-      setTimers(await getTimers());
+      setTimers((await getTimers()).sort((a, b) => a.timeMS - b.timeMS));
     };
     initialize();
   }, []);
