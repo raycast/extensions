@@ -12,7 +12,7 @@ export const DailyPlayHistoriesSection = ({
 }) => {
   const date = dayjs(history.playedDate).format("YYYY-MM-DD");
   const totalPlayedMinutes = history.dailyPlayHistories.reduce((acc, cur) => acc + cur.totalPlayedMinutes, 0);
-  const sectionSubtitle = `${history.dailyPlayHistories.length} Games · ${totalPlayedMinutes} Minutes`;
+  const sectionSubtitle = `${history.dailyPlayHistories.length} Game · ${totalPlayedMinutes} Minutes`;
   return (
     <List.Section title={date} subtitle={sectionSubtitle}>
       {history.dailyPlayHistories.map((item) => {
@@ -20,8 +20,8 @@ export const DailyPlayHistoriesSection = ({
           tag: {
             value: [
               "\u200B",
-              "\u3000".repeat(Math.floor((item.totalPlayedMinutes / timeBarMaxValue) * 10)),
-              item.totalPlayedMinutes + " minutes",
+              "\u3000".repeat(Math.floor((item.totalPlayedMinutes / timeBarMaxValue) * 12)),
+              item.totalPlayedMinutes + " min",
               "\u200B",
             ].join(""),
             color:

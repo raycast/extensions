@@ -22,7 +22,7 @@ export const PlayHistoriesGrid = () => {
   );
   const gameRecords = history.data?.playHistories.length;
   const lastUpdate = dayjs(history.data?.lastUpdatedAt).format("YYYY-MM-DD HH:mm:ss");
-  const sectionTitle = `Game Records (${gameRecords}) | Total Playtime (${totalPlayTime} hours)`;
+  const sectionTitle = `${gameRecords} GAME · ${totalPlayTime} HOURS`;
   const sectionSubtitle = `Last update ${dayjs(lastUpdate).fromNow()}`;
 
   return (

@@ -9,8 +9,8 @@ dayjs.extend(relativeTime);
 export const PlayHistoriesGridItem = ({ history }: { history: IPlayHistory }) => {
   const totalPlayTime =
     history.totalPlayedMinutes < 60
-      ? history.totalPlayedMinutes + " mins"
-      : Math.floor(history.totalPlayedMinutes / 60) + " hours " + (history.totalPlayedMinutes % 60) + " mins";
+      ? history.totalPlayedMinutes + " min"
+      : Math.floor(history.totalPlayedMinutes / 60) + " hr " + (history.totalPlayedMinutes % 60) + " min";
   const tooltip = [
     "[" + history.titleName + "]",
     "First Played: " + dayjs(history.firstPlayedAt).fromNow(),
