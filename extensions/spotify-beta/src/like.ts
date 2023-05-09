@@ -23,7 +23,7 @@ export default async function Command() {
     await addToMySavedTracks({
       trackIds: trackId ? [trackId] : [],
     });
-    await showHUD(`Disliked ${currentlyPlayingData?.item.name}`);
+    await showHUD(`Liked ${currentlyPlayingData?.item.name}`);
   } catch (error) {
     await showHUD("Nothing is currently playing");
   }
