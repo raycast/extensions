@@ -57,11 +57,11 @@ export default function Command() {
         </ActionPanel>
       }
     >
-      <Form.Description text="Enter your Headline, then select the Capitalization Style." />
+      <Form.Description text="Enter your text, then select the Capitalization Style." />
       <Form.TextField
         id="text_input"
-        title="Headline"
-        placeholder="Enter your Headline"
+        title="Text"
+        placeholder="Enter your text"
         onChange={(value) => handleChange(value)}
         value={capitalizedTitle}
       />
