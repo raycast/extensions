@@ -120,7 +120,7 @@ export default function Command() {
           items,
           lang,
           customSources,
-        })
+        });
         await LocalStorage.setItem("cached", JSON.stringify(cached));
         setItems(items);
       } catch (error) {
