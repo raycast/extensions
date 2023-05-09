@@ -35,3 +35,15 @@ export interface ISessionToken {
   code: string;
   session_token: string;
 }
+export interface IGameInformation {
+  name: string;
+  headline: string;
+  description: string;
+  playModes: { code: string }[];
+  releaseDate: string;
+  romFileSize: number;
+  supportedLanguages: string[];
+  screenshots: string[];
+  genres: { label: string; color: string }[];
+  publisher?: string;
+}
