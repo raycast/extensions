@@ -8,21 +8,19 @@ https://user-images.githubusercontent.com/105991837/236577248-a79f12b0-aa0a-4695
 
 ## 🌟 Features
 
-- **Block Time for To-Dos**: Schedule focus time blocks for tasks from your favorite to-do list apps like Reminders, Things, or Todoist.
-- **Track Time for To-Dos**: Track time spent on tasks using Toggl or Clockify, or directly on your calendar. Compare actual time spent with the time blocks you've budgeted for each task.
-- **Generate Productivity Reports**: Build customizable reports on blocked and tracked time to uncover productivity patterns and optimize your workflow. Discover how much time you're spending on meetings and other events.
-- **Show Menu Bar Timer**: Stay focused with a running timer and associated task title displayed in the macOS Menu.
-- **Split Screen To-Dos and Calendar**: Arrange your primary to-do app (Reminders, Things, or Todoist) and macOS Calendar app side by side for a convenient view of your daily tasks and scheduled events. Relaunch the command to restore the to-do app and Calendar window positions and sizes to their original state.
+- **Block Time for To-Dos**: Schedule time blocks for tasks pulled from your preferred to-do list apps: Reminders, Things, or Todoist.
+- **Track Time for To-Dos**: Log time spent on tasks using Toggl or Clockify, or directly on your calendar. If time tracking isn't your thing, you have the freedom to skip it.
+- **Generate Productivity Reports**: Analyze your productivity by comparing budgeted time blocks and actual time spent on tasks. Discover how much of your time is dedicated to meetings and other events.
+- **Show Menu Bar Timer**: Stay focused with a running timer and associated task title displayed in your macOS Menu Bar.
+- **Split Screen To-Dos and Calendar**: Display your primary to-do app and Calendar side by side for visually assisted time blocking. Relaunch to restore original window positions and sizes.
 
 ## 🚀 Advantages
 
-- **Seamless To-Do List App Integration**: Continue using your favorite to-do list apps like **Reminders**, **Things**, and **Todoist**—no need to migrate data or learn new systems.
-- **Local Calendar Integration**: Your calendar is access locally and securely using macOS frameworks, keeping your data safe without sending it to the cloud.
-- **Flexible Time Tracking Options**: Choose from a range of time tracking options, such as using your calendar for a fully-offline, privacy-first experience, or integrating with a popular app like Toggl or Clockify. Or, simply skip time tracking if it's not your thing.
-- **Effortless Free Time Finder**: Daily Planner quickly locates available times in your schedule based on natural language input, helping you to rapidly schedule and reschedule time blocks without sifting through calendar events.
-- **Natural Language Date Interval Input**: Schedule your time blocks using concise natural language phrases such as “1h”, “2-3p”, or “90 minutes early next week”. Use natural language for report generation as well, like “last 5 weeks” or “late afternoon”.
-- **Offline-first and Privacy-focused**: Opt for apps that don't rely on network APIs—Reminders, Things, and Calendar—for complete offline functionality and data processing on your device.
-- **Efficient Keyboard Navigation**: Time block your day with just a few keystrokes, eliminating the need to manually copy and paste data.
+- **Effortless Free Time Finder**: Instantly locate open slots in your schedule. Rapidly schedule and reschedule time blocks without the need to painstakingly sift through your calendar events.
+- **Natural Language Date/Time Expressions**: Harness the power of intuitive natural language phrases like “1h”, “2-3p”, or “90 mins early next week” to schedule your time blocks with ease. Extend this convenience to report generation with expressions like “last 5 weeks” or “Monday through Thursday”.
+- **Seamless Integration, No Duplicates**: Keep using your favorite apps without interruption. Daily Planner acts as a seamless connector between your existing apps, without creating duplicate data. There's no need to migrate data or learn new systems.
+- **Offline-first and Privacy-focused**: Your privacy comes first—your calendar is accessed locally and securely. Choose apps that don't rely on network APIs—like Reminders, Things, and Calendar—for a complete offline experience and secure on-device data processing.
+- **Efficient Keyboard Navigation**: Make the mouse optional. Glide through your day with just a few keystrokes.
 
 ## 🎯 Getting Started
 
