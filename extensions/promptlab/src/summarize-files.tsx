@@ -1,9 +1,9 @@
 import { Detail, popToRoot, showToast, Toast } from "@raycast/api";
-import { useAI } from "@raycast/utils";
 import { useEffect } from "react";
 import { ERRORTYPE, installDefaults, useFileContents } from "./utils/file-utils";
 import ResponseActions from "./ResponseActions";
 import { imageFileExtensions } from "./utils/file-extensions";
+import useModel from "./utils/useModel";
 
 export default function Command() {
   const options = {
@@ -39,7 +39,7 @@ export default function Command() {
 
   const contentPromptString = contentPrompts.join("\n");
   const fullPrompt = basePrompt + contentPromptString;
-  const { data, isLoading, revalidate } = useAI(fullPrompt, { execute: contentPrompts.length > 0 });
+  const { data, isLoading, revalidate } = useModel("", fullPrompt, "", contentPrompts.length > 0);
 
   if (errorType) {
     let errorMessage = "";
