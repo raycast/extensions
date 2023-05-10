@@ -11,7 +11,10 @@ export const certsPath = `${homedir()}/.config/valet/Certificates`;
 export const brewDir = "/opt/homebrew";
 
 export function isRunning(): boolean {
-  return fs.existsSync(`${valetHomePath}/valet.sock`);
+  const expectedPath = `${valetHomePath}/valet.sock`;
+  const fileStats = fs.lstatSync(expectedPath);
+  const theRealPath = fileStats.isSymbolicLink() ? fs.readlinkSync(expectedPath) : expectedPath;
+  return fs.existsSync(theRealPath);
 }
 
 export function pathExists(path: string): boolean {

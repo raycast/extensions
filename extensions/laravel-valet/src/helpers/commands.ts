@@ -9,7 +9,11 @@ interface RunCommandArgs {
   errorTitle?: string;
   successCallback?: () => void;
 }
+
+let lock = false;
 async function runCommand({ command, title, successTitle, errorTitle, successCallback }: RunCommandArgs) {
+  if (lock) return;
+  lock = true;
   await showToast({ style: Toast.Style.Animated, title });
 
   try {
@@ -20,10 +24,11 @@ async function runCommand({ command, title, successTitle, errorTitle, successCal
     });
     // Optional callback
     await (successCallback?.() ?? Promise.resolve());
-
+    lock = false;
     return output;
   } catch (error) {
     await handleError({ error, title: errorTitle || "Unable to execute command" });
+    lock = false;
   }
 }
 

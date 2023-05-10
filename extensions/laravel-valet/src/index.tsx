@@ -6,9 +6,11 @@ import { useCachedPromise } from "@raycast/utils";
 import { getParked, getUniqueId } from "./helpers/sites";
 import { Site } from "./types/entities";
 import { start } from "./helpers/commands";
+import { ValetListItems } from "./components/ValetListItems";
 
 export default function Command() {
   const [isShowingDetail, setIsShowingDetail] = useState<boolean>(false);
+  const [showGlobalList, setShowGlobalList] = useState<boolean>(true);
 
   const {
     data: sites,
@@ -38,18 +40,33 @@ export default function Command() {
   }
 
   return (
-    <List isLoading={isLoadingSites} searchBarPlaceholder="Search sites..." isShowingDetail={isShowingDetail}>
-      {filteredSites.map((site: Site) => {
-        return (
-          <SiteListItem
-            key={getUniqueId(site)}
-            site={site}
-            mutateSites={mutateSites}
-            isShowingDetail={isShowingDetail}
-            setIsShowingDetail={setIsShowingDetail}
-          />
-        );
-      })}
+    <List
+      isLoading={isLoadingSites}
+      searchBarPlaceholder="Search sites..."
+      isShowingDetail={isShowingDetail}
+      onSearchTextChange={
+        // If there is search dont show global list
+        (searchText) => setShowGlobalList(searchText.length === 0)
+      }
+    >
+      {showGlobalList && (
+        <List.Section title="Commands">
+          <ValetListItems />
+        </List.Section>
+      )}
+      <List.Section title="Sites">
+        {filteredSites.map((site: Site) => {
+          return (
+            <SiteListItem
+              key={getUniqueId(site)}
+              site={site}
+              mutateSites={mutateSites}
+              isShowingDetail={isShowingDetail}
+              setIsShowingDetail={setIsShowingDetail}
+            />
+          );
+        })}
+      </List.Section>
     </List>
   );
 }

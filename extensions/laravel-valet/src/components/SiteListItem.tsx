@@ -4,7 +4,7 @@ import SiteActions from "./SiteActions";
 import SiteDetail from "./SiteDetail";
 import { getSecuredIcon, getSecuredTooltip, isSecured } from "../helpers/sites";
 import { Site } from "../types/entities";
-import GlobalActions from "./GlobalActions";
+import ValetActions from "./ValetActions";
 
 interface SiteListItemProps {
   site: Site;
@@ -38,7 +38,7 @@ export function SiteListItem({
         <ActionPanel>
           <Action title="Show Details" onAction={() => setIsShowingDetail(!isShowingDetail)} icon={Icon.Sidebar} />
           <SiteActions site={site} mutateSites={mutateSites} />
-          <GlobalActions />
+          <ValetActions />
         </ActionPanel>
       }
     />
