@@ -65,6 +65,7 @@ export default function VideoSummary(props: LaunchProps<{ arguments: VideoSummar
       actions={
         videoData && (
           <ActionPanel title="Video Actions">
+            <Action.CopyToClipboard title="Copy Summary" content={markdown ?? ""} />
             <Action.OpenInBrowser title="Go to Video" url={videoData.video_url} />
             <Action.OpenInBrowser title="Go to Channel" url={videoData.ownerProfileUrl} />
           </ActionPanel>
