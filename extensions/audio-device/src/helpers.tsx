@@ -131,9 +131,9 @@ function SetAudioDeviceAction({ device, type }: SetAudioDeviceActionProps) {
   );
 }
 
-function setOutputAndSystemDevice(deviceId: string) {
-  setDefaultOutputDevice(deviceId);
-  setDefaultSystemDevice(deviceId);
+async function setOutputAndSystemDevice(deviceId: string) {
+  await setDefaultOutputDevice(deviceId);
+  await setDefaultSystemDevice(deviceId);
 }
 
 export function deviceIcon(device: AudioDevice) {
