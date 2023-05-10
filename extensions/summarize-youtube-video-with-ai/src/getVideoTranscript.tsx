@@ -2,7 +2,7 @@ import { Toast, popToRoot, showToast } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { YoutubeTranscript } from "youtube-transcript";
 
-export default function getVideoTranscript(video: string) {
+export default async function getVideoTranscript(video: string) {
   const { isLoading, data } = usePromise(async () => {
     const transcriptCaptions = await YoutubeTranscript.fetchTranscript(video);
     const transcript = transcriptCaptions

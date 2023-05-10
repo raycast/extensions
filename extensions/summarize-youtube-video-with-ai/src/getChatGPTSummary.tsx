@@ -1,15 +1,22 @@
 import { Toast, getPreferenceValues, showToast } from "@raycast/api";
 import { Configuration, OpenAIApi } from "openai";
-import getVideoTranscript from "./getVideoTranscript";
 import { usePromise } from "@raycast/utils";
 import { useState } from "react";
+import { CHATGPT_SUMMARY_MAX_CHARS } from "./const";
+import { summarizeTranscription } from "./utils";
 
-const SUMMARY_MAX_CHARS = 12000;
+type GetChatGPTSummaryProps = {
+  videoTitle?: string;
+  transcript?: string;
+  transcriptIsLoading: boolean;
+};
 
-export default async function getChatGPTSummary(video: string, videoTitle?: string) {
+export default async function getChatGPTSummary({
+  videoTitle,
+  transcript,
+  transcriptIsLoading,
+}: GetChatGPTSummaryProps) {
   const [summary, setSummary] = useState<string | undefined>(undefined);
-
-  const { transcriptLoading, rawTranscript } = getVideoTranscript(video);
 
   const preferences = getPreferenceValues();
 
@@ -28,28 +35,14 @@ export default async function getChatGPTSummary(video: string, videoTitle?: stri
         message: "Summarizing the video",
       });
 
-      if (rawTranscript && rawTranscript?.length > SUMMARY_MAX_CHARS) {
+      if (transcript && transcript?.length > CHATGPT_SUMMARY_MAX_CHARS) {
         showToast({
           style: Toast.Style.Animated,
           title: "❗",
           message: "That's a long video, hold on.",
         });
 
-        const transcriptionSummary = rawTranscript?.split(/(?<=\.)/).reduce(
-          (acc, curr) => {
-            if (acc[acc.length - 1].length + curr.length > SUMMARY_MAX_CHARS) {
-              const splitTranscription = curr.match(new RegExp(`.{1,${SUMMARY_MAX_CHARS}}`, "g"));
-              console.log("splitTranscription", splitTranscription);
-              splitTranscription?.forEach((split) => {
-                acc.push(split);
-              });
-            } else {
-              acc[acc.length - 1] += curr;
-            }
-            return acc;
-          },
-          [""]
-        );
+        const transcriptionSummary = summarizeTranscription(transcript, CHATGPT_SUMMARY_MAX_CHARS);
 
         for (const summaryBlock of transcriptionSummary) {
           const index = transcriptionSummary.indexOf(summaryBlock) + 1;
@@ -57,7 +50,7 @@ export default async function getChatGPTSummary(video: string, videoTitle?: stri
           Summarize this transcription of a youtube video.
           The transcription is split into parts and this is part ${index} of ${transcriptionSummary.length}.
           Be as concise as possible.
-          Do not use more then ${SUMMARY_MAX_CHARS / transcriptionSummary.length} characters.
+          Do not use more then ${CHATGPT_SUMMARY_MAX_CHARS / transcriptionSummary.length} characters.
 
           Here is the transcript: ${summaryBlock}`;
 
@@ -83,13 +76,13 @@ export default async function getChatGPTSummary(video: string, videoTitle?: stri
 
       openAiInstructions +=
         videoTitle &&
-        rawTranscript &&
+        transcript &&
         `Summarize the following transcription of a youtube video as a list of the most important points each starting with a fitting emoji. Ignore mentions of video sponsors.
 
         Format:
-        [Emoji] [List Item] \n
+        [Emoji] [List Item] [\n\n]
 
-        Here is the transcript: ${temporarySummary.length > 0 ? temporarySummary : rawTranscript}`;
+        Here is the transcript: ${temporarySummary.length > 0 ? temporarySummary : transcript}`;
 
       openAiInstructions &&
         (await openai
@@ -116,9 +109,9 @@ export default async function getChatGPTSummary(video: string, videoTitle?: stri
     },
     [],
     {
-      execute: Boolean(rawTranscript),
+      execute: Boolean(transcript),
     }
   );
 
-  return { summaryIsLoading: transcriptLoading || isLoading, summary };
+  return { summaryIsLoading: transcriptIsLoading || isLoading, summary };
 }

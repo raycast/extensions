@@ -1,10 +1,11 @@
 import { Action, ActionPanel, Detail, Toast, getPreferenceValues, showToast } from "@raycast/api";
+import { formatDuration } from "date-fns";
+import { useState } from "react";
 import getChatGPTSummary from "./getChatGPTSummary";
 import getVideoInfo from "./getVideoInfo";
+import getVideoTranscript from "./getVideoTranscript";
 import type { LaunchProps } from "@raycast/api";
 import ytdl from "ytdl-core";
-import { useState } from "react";
-import { formatDuration } from "date-fns";
 
 interface VideoSummaryProps {
   video: string;
@@ -13,7 +14,9 @@ interface VideoSummaryProps {
 export default function VideoSummary(props: LaunchProps<{ arguments: VideoSummaryProps }>) {
   const preferences = getPreferenceValues();
 
-  const [summary, setSummary] = useState<string | undefined>(undefined);
+  const [transcript, setTranscript] = useState<string | undefined>(undefined);
+  const [transcriptIsLoading, setTranscriptIsLoading] = useState<boolean>(false);
+  const [content, setContent] = useState<string | undefined>(undefined);
   const [summaryIsLoading, setSummaryIsLoading] = useState<boolean>(false);
   const { video } = props.arguments;
 
@@ -34,11 +37,15 @@ export default function VideoSummary(props: LaunchProps<{ arguments: VideoSummar
   const minutes = Math.floor((Number(videoData?.lengthSeconds) % 3600) / 60);
   const duration = formatDuration({ hours, minutes }, { format: ["hours", "minutes", "seconds"] });
 
+  getVideoTranscript(video).then((result) => {
+    setTranscriptIsLoading(result.transcriptLoading);
+    setTranscript(result.rawTranscript);
+  });
+
   if (preferences.chosenAi === "chatgpt") {
-    console.log("preferencenes.chosenAI", preferences.chosenAi);
-    getChatGPTSummary(video, videoData?.title).then((result) => {
-      setSummary(result.summary);
+    getChatGPTSummary({ videoTitle: videoData?.title, transcript, transcriptIsLoading }).then((result) => {
       setSummaryIsLoading(result.summaryIsLoading);
+      setContent(result.summary);
     });
   }
 
@@ -46,12 +53,12 @@ export default function VideoSummary(props: LaunchProps<{ arguments: VideoSummar
     console.log("preferencenes.chosenAI", preferences.chosenAi);
   }
 
-  const markdown = summary
-    ? `${summary}
+  const markdown = content
+    ? `${content}
   
   <img src="${videoData?.thumbnails[3].url}">
   `
-    : `<img src="${videoData?.thumbnails[3].url}">`;
+    : undefined;
 
   return (
     <Detail
@@ -63,7 +70,7 @@ export default function VideoSummary(props: LaunchProps<{ arguments: VideoSummar
           </ActionPanel>
         )
       }
-      isLoading={summaryIsLoading}
+      isLoading={transcriptIsLoading || summaryIsLoading}
       markdown={markdown}
       metadata={
         videoData && (
