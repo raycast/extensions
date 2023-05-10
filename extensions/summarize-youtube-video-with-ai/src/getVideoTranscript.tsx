@@ -12,7 +12,7 @@ export default function getVideoTranscript(video: string) {
     return transcript;
   });
 
-  if (!data) {
+  if (!isLoading && !data) {
     showToast({
       style: Toast.Style.Failure,
       title: "❗",
