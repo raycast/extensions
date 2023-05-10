@@ -44,7 +44,6 @@ Returns an object with the [AsyncState](#asyncstate) corresponding to the execut
 
 - `data`, `error`, `isLoading` - see [AsyncState](#asyncstate).
 - `revalidate` is a method to manually call the function with the same arguments again.
-- `mutate` is a method to wrap an asynchronous update and gives some control over how the `useAI`'s data should be updated while the update is going through. By default, the data will be revalidated (eg. the function will be called again) after the update is done. See [Mutation and Optimistic Updates](#mutation-and-optimistic-updates) for more information.
 
 ## Example
 
