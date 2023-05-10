@@ -37,8 +37,9 @@ export default async function getChatGPTSummary(video: string, videoTitle?: stri
 
         const transcriptionSummary = rawTranscript?.split(/(?<=\.)/).reduce(
           (acc, curr) => {
-            if (curr.length > SUMMARY_MAX_CHARS) {
+            if (acc[acc.length - 1].length + curr.length > SUMMARY_MAX_CHARS) {
               const splitTranscription = curr.match(new RegExp(`.{1,${SUMMARY_MAX_CHARS}}`, "g"));
+              console.log("splitTranscription", splitTranscription);
               splitTranscription?.forEach((split) => {
                 acc.push(split);
               });
@@ -83,7 +84,7 @@ export default async function getChatGPTSummary(video: string, videoTitle?: stri
       openAiInstructions +=
         videoTitle &&
         rawTranscript &&
-        `Summarize the following transcription of a youtube video as a list of the most important points each starting with a fitting emoji.
+        `Summarize the following transcription of a youtube video as a list of the most important points each starting with a fitting emoji. Ignore mentions of video sponsors.
 
         Format:
         [Emoji] [List Item] \n
@@ -105,7 +106,6 @@ export default async function getChatGPTSummary(video: string, videoTitle?: stri
             setSummary(result.data.choices[0].message?.content);
           })
           .catch((error) => {
-            console.log("error im main request");
             showToast({
               style: Toast.Style.Failure,
               title: "🚨",
