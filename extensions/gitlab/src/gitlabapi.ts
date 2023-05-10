@@ -98,7 +98,7 @@ export function jsonDataToMergeRequest(mr: any): MergeRequest {
     updated_at: mr.updated_at,
     author: maybeUserFromJson(mr.author),
     assignees: mr.assignees.map(userFromJson),
-    reviewers: mr.reviewers.map(userFromJson),
+    reviewers: mr.reviewers?.map(userFromJson) || [],
     project_id: mr.project_id,
     description: mr.description,
     reference_full: mr.references?.full,
