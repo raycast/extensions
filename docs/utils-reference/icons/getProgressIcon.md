@@ -19,7 +19,7 @@ function getProgressIcon(
 
 - `progress` is a number between 0 and 1 (0 meaning not started, 1 meaning finished).
 - `color` is a hexadecimal representation of a color. By default it will be `"#FF6363"`.
-- `options.background` is the color of the background of the progress icon. By default, it will be `white` if the Raycast theme is `dark`, and `black` if the Raycast theme is `light`.
+- `options.background` is the color of the background of the progress icon. By default, it will be `white` if the Raycast's appearance is `dark`, and `black` if the appearance is `light`.
 - `options.backgroundOpacity` is the opacity of the background of the progress icon. By default, it will be `0.1`.
 
 Returns an [Image.Asset](../../api-reference/user-interface/icons-and-images.md) that can be used where Raycast expects them.
