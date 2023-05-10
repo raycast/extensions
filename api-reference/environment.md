@@ -21,7 +21,7 @@ export default async function Command() {
   console.log(`Assets path: ${environment.assetsPath}`);
   console.log(`Support path: ${environment.supportPath}`);
   console.log(`Is development mode: ${environment.isDevelopment}`);
-  console.log(`Theme: ${environment.theme}`);
+  console.log(`Appearance: ${environment.appearance}`);
   console.log(`Text size: ${environment.textSize}`);
   console.log(`LaunchType: ${environment.launchType}`);
 }
@@ -31,6 +31,7 @@ export default async function Command() {
 
 | Property | Description | Type |
 | :--- | :--- | :--- |
+| appearance<mark style="color:red;">*</mark> | The appearance used by the Raycast application. | <code>"light"</code> or <code>"dark"</code> |
 | assetsPath<mark style="color:red;">*</mark> | The absolute path to the assets directory of the extension. | <code>string</code> |
 | commandMode<mark style="color:red;">*</mark> | The mode of the launched command, as specified in package.json | <code>"no-view"</code> or <code>"view"</code> or <code>"menu-bar"</code> |
 | commandName<mark style="color:red;">*</mark> | The name of the launched command, as specified in package.json | <code>string</code> |
@@ -40,7 +41,6 @@ export default async function Command() {
 | raycastVersion<mark style="color:red;">*</mark> | The version of the main Raycast app | <code>string</code> |
 | supportPath<mark style="color:red;">*</mark> | The absolute path for the support directory of an extension. Use it to read and write files related to your extension or command. | <code>string</code> |
 | textSize<mark style="color:red;">*</mark> | The text size used by the Raycast application. | <code>"medium"</code> or <code>"large"</code> |
-| theme<mark style="color:red;">*</mark> | The theme used by the Raycast application. | <code>"light"</code> or <code>"dark"</code> |
 | canAccess<mark style="color:red;">*</mark> | Returns whether the user has access to the given API. | <code>(api: unknown) => boolean</code> |
 
 ## environment.canAccess

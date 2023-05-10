@@ -52,6 +52,7 @@
 
 ## API Reference
 
+- [AI](api-reference/ai.md)
 - [Cache](api-reference/cache.md)
 - [Clipboard](api-reference/clipboard.md)
 - [Environment](api-reference/environment.md)
@@ -92,6 +93,7 @@
   - [useForm](utils-reference/react-hooks/useForm.md)
   - [useExec](utils-reference/react-hooks/useExec.md)
   - [useSQL](utils-reference/react-hooks/useSQL.md)
+  - [useAI](utils-reference/react-hooks/useAI.md)
 
 ---
 
