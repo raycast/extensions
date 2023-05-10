@@ -27,13 +27,13 @@
       ],
       "preferences": [
         {
-          "name": "choosenAi",
+          "name": "chosenAi",
           "title": "Choose AI",
           "description": "Choose between Raycast AI or ChatGPT",
           "type": "dropdown",
           "data": [
             {
-              "value": "raycast",
+              "value": "raycastai",
               "title": "Raycast AI"
             },
             {

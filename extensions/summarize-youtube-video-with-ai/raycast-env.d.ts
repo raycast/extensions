@@ -16,7 +16,7 @@ declare namespace Preferences {
   /** Preferences accessible in the `videoSummary` command */
   export type VideoSummary = ExtensionPreferences & {
   /** Choose AI - Choose between Raycast AI or ChatGPT */
-  "choosenAi": "raycast" | "chatgpt",
+  "chosenAi": "raycastai" | "chatgpt",
   /** OpenAI API Token - Your OpenAI API Token. Required if you choose ChatGPT as your AI. */
   "openaiApiToken"?: string
 }
