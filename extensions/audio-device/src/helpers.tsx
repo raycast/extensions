@@ -133,9 +133,9 @@ function SetAudioDeviceAction({ device, type }: SetAudioDeviceActionProps) {
 }
 
 async function setOutputAndSystemDevice(deviceId: string) {
-  const { systemoutput } = getPreferenceValues();
+  const { systemOutput } = getPreferenceValues();
   await setDefaultOutputDevice(deviceId);
-  if (systemoutput) {
+  if (systemOutput) {
     await setDefaultSystemDevice(deviceId);
   }
 }

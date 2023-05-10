@@ -52,7 +52,7 @@
       "default": false
     },
     {
-      "name": "systemoutput",
+      "name": "systemOutput",
       "required": false,
       "title": "Play sound effects through current output",
       "description": "Play system sounds through current output.",
