@@ -10,7 +10,7 @@ import { ValetListItems } from "./components/ValetListItems";
 
 export default function Command() {
   const [isShowingDetail, setIsShowingDetail] = useState<boolean>(false);
-  const [showGlobalList, setShowGlobalList] = useState<boolean>(true);
+  const [showValetCommands, setShowValetCommands] = useState<boolean>(true);
 
   const {
     data: sites,
@@ -45,11 +45,11 @@ export default function Command() {
       searchBarPlaceholder="Search sites..."
       isShowingDetail={isShowingDetail}
       onSearchTextChange={
-        // If there is search dont show global list
-        (searchText) => setShowGlobalList(searchText.length === 0)
+        // If there is search dont show the valet commands
+        (searchText) => setShowValetCommands(searchText.length === 0)
       }
     >
-      {showGlobalList && (
+      {showValetCommands && (
         <List.Section title="Commands">
           <ValetListItems />
         </List.Section>

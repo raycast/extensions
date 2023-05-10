@@ -10,7 +10,9 @@ interface RunCommandArgs {
   successCallback?: () => void;
 }
 
+// Raycast locks up but will queue commands. This prevents those commands from running.
 let lock = false;
+
 async function runCommand({ command, title, successTitle, errorTitle, successCallback }: RunCommandArgs) {
   if (lock) return;
   lock = true;

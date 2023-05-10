@@ -13,6 +13,7 @@ export const brewDir = "/opt/homebrew";
 export function isRunning(): boolean {
   const expectedPath = `${valetHomePath}/valet.sock`;
   const fileStats = fs.lstatSync(expectedPath);
+  // TODO: Is this enough? Should we add an "unknown" state?
   const theRealPath = fileStats.isSymbolicLink() ? fs.readlinkSync(expectedPath) : expectedPath;
   return fs.existsSync(theRealPath);
 }

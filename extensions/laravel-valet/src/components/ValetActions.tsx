@@ -9,13 +9,11 @@ export default function ValetActions(): JSX.Element {
   const refresh = () => setRunning(isRunning());
 
   return (
-    <>
-      <ActionPanel.Section title={"Valet actions"}>
-        <StartOrStop running={running} callBack={refresh} />
-        <Restart running={running} callBack={refresh} />
-        <ViewLogs />
-      </ActionPanel.Section>
-    </>
+    <ActionPanel.Section title={"Valet actions"}>
+      <StartOrStop running={running} callBack={refresh} />
+      <Restart running={running} callBack={refresh} />
+      <ViewLogs />
+    </ActionPanel.Section>
   );
 }
 
