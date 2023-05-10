@@ -35,7 +35,17 @@ export interface Folder {
   name: string;
 }
 
+export enum IdentityTitle {
+  MR = "Mr",
+  MRS = "Mrs",
+  MS = "Ms",
+  MX = "Mx",
+  DR = "Dr",
+}
+
 export interface Identity {
+  title: IdentityTitle | null;
+  firstName: string | null;
   middleName: string | null;
   lastName: string | null;
   address1: string | null;
@@ -54,9 +64,22 @@ export interface Identity {
   licenseNumber: string | null;
 }
 
+export enum CardBrand {
+  VISA = "Visa",
+  MASTERCARD = "Mastercard",
+  AMEX = "Amex",
+  DISCOVER = "Discover",
+  DINERS_CLUB = "Diners Club",
+  JCB = "JCB",
+  MAESTRO = "Maestro",
+  UNIONPAY = "UnionPay",
+  RUPAY = "RuPay",
+  OTHER = "Other",
+}
+
 export interface Card {
   cardholderName: string | null;
-  brand: string | null;
+  brand: CardBrand | null;
   number: string | null;
   expMonth: string | null;
   expYear: string | null;

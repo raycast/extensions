@@ -1,5 +1,5 @@
 import { faker } from "@faker-js/faker";
-import { FieldType, Folder, Item } from "~/types/vault";
+import { CardBrand, FieldType, Folder, IdentityTitle, Item } from "~/types/vault";
 
 export function getMockItems(
   count = 10,
@@ -39,13 +39,15 @@ export function getMockItems(
       passwordHistory: [{ lastUsedDate: sensitiveValue, password: sensitiveValue }],
       card: {
         cardholderName: sensitiveValue,
-        brand: sensitiveValue,
+        brand: sensitiveValue as CardBrand,
         number: sensitiveValue,
         expMonth: sensitiveValue,
         expYear: sensitiveValue,
         code: sensitiveValue,
       },
       identity: {
+        title: sensitiveValue as IdentityTitle,
+        firstName: sensitiveValue,
         middleName: sensitiveValue,
         lastName: sensitiveValue,
         address1: sensitiveValue,
