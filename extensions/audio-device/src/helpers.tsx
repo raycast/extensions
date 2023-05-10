@@ -3,6 +3,7 @@ import {
   Clipboard,
   closeMainWindow,
   Color,
+  getPreferenceValues,
   Icon,
   List,
   popToRoot,
@@ -132,8 +133,11 @@ function SetAudioDeviceAction({ device, type }: SetAudioDeviceActionProps) {
 }
 
 async function setOutputAndSystemDevice(deviceId: string) {
+  const { systemoutput } = getPreferenceValues();
   await setDefaultOutputDevice(deviceId);
-  await setDefaultSystemDevice(deviceId);
+  if (systemoutput) {
+    await setDefaultSystemDevice(deviceId);
+  }
 }
 
 export function deviceIcon(device: AudioDevice) {

@@ -12,7 +12,7 @@ const getId = (devices: AudioDevice[], deviceName: string): string => {
 };
 
 export default async () => {
-  const { favourite, favourite2 } = getPreferenceValues();
+  const { favourite, favourite2, systemoutput } = getPreferenceValues();
   const current = await getDefaultOutputDevice();
   const devices = await getOutputDevices();
 
@@ -22,14 +22,18 @@ export default async () => {
       if (favourite2 != null && favourite2 !== "" && String(current.name) === String(favourite)) {
         const deviceId = getId(devices, favourite2);
         await setDefaultOutputDevice(deviceId);
-        await setDefaultSystemDevice(deviceId);
+        if (systemoutput) {
+          await setDefaultSystemDevice(deviceId);
+        }
         await showHUD(`Active output audio device set to ${favourite2}`);
       }
       // Otherwise set to favourite
       else {
         const deviceId = getId(devices, favourite);
         await setDefaultOutputDevice(deviceId);
-        await setDefaultSystemDevice(deviceId);
+        if (systemoutput) {
+          await setDefaultSystemDevice(deviceId);
+        }
         await showHUD(`Active output audio device set to ${favourite}`);
       }
     } catch (err) {

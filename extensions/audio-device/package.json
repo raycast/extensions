@@ -52,6 +52,15 @@
       "default": false
     },
     {
+      "name": "systemoutput",
+      "required": false,
+      "title": "Play sound effects through current output",
+      "description": "Play system sounds through current output.",
+      "label": "Update system sounds output",
+      "type": "checkbox",
+      "default": false
+    },
+    {
       "name": "favourite",
       "required": false,
       "title": "Favourite Output Device",
