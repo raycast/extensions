@@ -3,19 +3,14 @@ import { Configuration, OpenAIApi } from "openai";
 import { usePromise } from "@raycast/utils";
 import { useState } from "react";
 import { CHATGPT_SUMMARY_MAX_CHARS } from "./const";
-import { summarizeTranscription } from "./utils";
+import { splitTranscript } from "./utils";
 
 type GetChatGPTSummaryProps = {
   videoTitle?: string;
   transcript?: string;
-  transcriptIsLoading: boolean;
 };
 
-export default async function getChatGPTSummary({
-  videoTitle,
-  transcript,
-  transcriptIsLoading,
-}: GetChatGPTSummaryProps) {
+export default async function getChatGPTSummary({ videoTitle, transcript }: GetChatGPTSummaryProps) {
   const [summary, setSummary] = useState<string | undefined>(undefined);
 
   const preferences = getPreferenceValues();
@@ -42,7 +37,7 @@ export default async function getChatGPTSummary({
           message: "That's a long video, hold on.",
         });
 
-        const transcriptionSummary = summarizeTranscription(transcript, CHATGPT_SUMMARY_MAX_CHARS);
+        const transcriptionSummary = splitTranscript(transcript, CHATGPT_SUMMARY_MAX_CHARS);
 
         for (const summaryBlock of transcriptionSummary) {
           const index = transcriptionSummary.indexOf(summaryBlock) + 1;
@@ -113,5 +108,5 @@ export default async function getChatGPTSummary({
     }
   );
 
-  return { summaryIsLoading: transcriptIsLoading || isLoading, summary };
+  return { summaryIsLoading: isLoading, summary };
 }

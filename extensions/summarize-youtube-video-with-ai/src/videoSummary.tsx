@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Detail, Toast, getPreferenceValues, showToast } from "@raycast/api";
 import { formatDuration } from "date-fns";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import getChatGPTSummary from "./getChatGPTSummary";
 import getVideoInfo from "./getVideoInfo";
 import getVideoTranscript from "./getVideoTranscript";
@@ -14,8 +14,8 @@ interface VideoSummaryProps {
 export default function VideoSummary(props: LaunchProps<{ arguments: VideoSummaryProps }>) {
   const preferences = getPreferenceValues();
 
+  const [videoData, setVideoData] = useState<ytdl.MoreVideoDetails | undefined>(undefined);
   const [transcript, setTranscript] = useState<string | undefined>(undefined);
-  const [transcriptIsLoading, setTranscriptIsLoading] = useState<boolean>(false);
   const [content, setContent] = useState<string | undefined>(undefined);
   const [summaryIsLoading, setSummaryIsLoading] = useState<boolean>(false);
   const { video } = props.arguments;
@@ -29,7 +29,11 @@ export default function VideoSummary(props: LaunchProps<{ arguments: VideoSummar
     return;
   }
 
-  const videoData = getVideoInfo(video);
+  useEffect(() => {
+    getVideoInfo(video).then(setVideoData);
+    getVideoTranscript(video).then(setTranscript);
+  }, [video]);
+
   const publishDate = videoData && new Date(videoData.publishDate).toLocaleDateString();
   const viewCount = videoData && Number(videoData.viewCount).toLocaleString();
 
@@ -37,13 +41,8 @@ export default function VideoSummary(props: LaunchProps<{ arguments: VideoSummar
   const minutes = Math.floor((Number(videoData?.lengthSeconds) % 3600) / 60);
   const duration = formatDuration({ hours, minutes }, { format: ["hours", "minutes", "seconds"] });
 
-  getVideoTranscript(video).then((result) => {
-    setTranscriptIsLoading(result.transcriptLoading);
-    setTranscript(result.rawTranscript);
-  });
-
   if (preferences.chosenAi === "chatgpt") {
-    getChatGPTSummary({ videoTitle: videoData?.title, transcript, transcriptIsLoading }).then((result) => {
+    getChatGPTSummary({ videoTitle: videoData?.title, transcript }).then((result) => {
       setSummaryIsLoading(result.summaryIsLoading);
       setContent(result.summary);
     });
@@ -71,7 +70,7 @@ export default function VideoSummary(props: LaunchProps<{ arguments: VideoSummar
           </ActionPanel>
         )
       }
-      isLoading={transcriptIsLoading || summaryIsLoading}
+      isLoading={summaryIsLoading}
       markdown={markdown}
       metadata={
         videoData && (
