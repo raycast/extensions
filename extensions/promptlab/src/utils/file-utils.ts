@@ -74,11 +74,13 @@ export function useFileContents(options: CommandOptions) {
   const [contentPrompts, setContentPrompts] = useState<string[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [errorType, setErrorType] = useState<number>();
+  const [shouldRevalidate, setShouldRevalidate] = useState<boolean>(false);
 
   const validExtensions = options.acceptedFileExtensions ? options.acceptedFileExtensions : [];
 
   useEffect(() => {
     const preferences = getPreferenceValues<ExtensionPreferences>();
+    setShouldRevalidate(false);
     getSelectedFiles()
       .then((files) => {
         // Raise error if too few files are selected
@@ -102,10 +104,22 @@ export function useFileContents(options: CommandOptions) {
 
         const fileContents: Promise<string[]> = Promise.all(
           filteredFiles.map(async (file, index) => {
+            if (file.trim().length == 0) {
+              setErrorType(ERRORTYPE.MIN_SELECTION_NOT_MET);
+              return "";
+            }
+
+            // Init. file contents with file name as header
             let contents = `{File ${index + 1} - ${
               file.endsWith("/") ? file.split("/").at(-2) : file.split("/").at(-1)
             }}:\n`;
 
+            // If the file is too large, just return the metadata
+            if (fs.lstatSync(file).size > 10000000) {
+              return contents + getMetadataDetails(file);
+            }
+
+            // Otherwise, get the file's contents (and maybe the metadata)
             const pathLower = file.toLowerCase();
             if (!pathLower.includes(".app") && fs.lstatSync(file).isDirectory()) {
               // Get size, list of contained files within a directory
@@ -113,6 +127,10 @@ export function useFileContents(options: CommandOptions) {
             } else if (pathLower.includes(".pdf")) {
               // Extract text from a PDF
               contents += `"${filterContentString(await getPDFText(file, preferences.pdfOCR, 3))}"`;
+              if (options.useMetadata) {
+                contents += filterContentString(await getPDFAttributes(file));
+                contents += filterContentString(getMetadataDetails(file));
+              }
             } else if (imageFileExtensions.includes(pathLower.split(".").at(-1) as string)) {
               // Extract text, subjects, barcodes, rectangles, and metadata for an image
               contents += await getImageDetails(file, options);
@@ -143,7 +161,7 @@ export function useFileContents(options: CommandOptions) {
               // Get metadata for an unsupported file type
               try {
                 // Assume file contains readable text
-                if (fs.statSync(file).size < 100000) {
+                if (fs.statSync(file).size < 10000000) {
                   contents += `"${filterContentString(fs.readFileSync(file).toString(), maxCharacters / 2)}"`;
                 }
               } catch (error) {
@@ -151,7 +169,6 @@ export function useFileContents(options: CommandOptions) {
               }
               contents += getMetadataDetails(file);
             }
-
             return contents;
           })
         );
@@ -169,7 +186,11 @@ export function useFileContents(options: CommandOptions) {
         console.log(error);
         setErrorType(ERRORTYPE.FINDER_INACTIVE);
       });
-  }, []);
+  }, [shouldRevalidate]);
+
+  const revalidate = () => {
+    setShouldRevalidate(true);
+  };
 
   useEffect(() => {
     setLoading(false);
@@ -180,6 +201,7 @@ export function useFileContents(options: CommandOptions) {
     contentPrompts: contentPrompts,
     loading: loading,
     errorType: errorType,
+    revalidate: revalidate,
   };
 }
 
@@ -247,9 +269,10 @@ const getImageVisionDetails = (filePath: string, options: CommandOptions): strin
   set animalRequest to current application's VNRecognizeAnimalsRequest's alloc()'s init()
   set faceRequest to current application's VNDetectFaceRectanglesRequest's alloc()'s init()
   set rectRequest to current application's VNDetectRectanglesRequest's alloc()'s init()
+  set saliencyRequest to current application's VNGenerateAttentionBasedSaliencyImageRequest's alloc()'s init()
   rectRequest's setMaximumObservations:0
   
-  requestHandler's performRequests:{textRequest, classificationRequest, barcodeRequest, animalRequest, faceRequest, rectRequest} |error|:(missing value)
+  requestHandler's performRequests:{textRequest, classificationRequest, barcodeRequest, animalRequest, faceRequest, rectRequest, saliencyRequest} |error|:(missing value)
   
   -- Extract raw text results
   set textResults to textRequest's results()
@@ -323,11 +346,40 @@ const getImageVisionDetails = (filePath: string, options: CommandOptions): strin
   end repeat`
       : ``
   }
+
+  ${
+    options.useSaliencyAnalysis
+      ? `-- Identify areas most likely to draw attention
+  set pointsOfInterest to ""
+  set saliencyResults to saliencyRequest's results()
+  repeat with observation in saliencyResults
+    set salientObjects to observation's salientObjects()
+    repeat with salientObject in salientObjects
+      set bl to salientObject's bottomLeft()
+      set br to salientObject's bottomRight()
+      set tl to salientObject's topLeft()
+      set tr to salientObject's topRight()
+
+      set midX to (bl's x + br's x) / 2
+      set midY to (bl's y + tl's y) / 2
+      set pointsOfInterest to pointsOfInterest & (" (" & midX as text) & "," & midY as text & ")"
+    end repeat
+  end repeat`
+      : ``
+  }
   
   set promptText to ""
   if theText is not "" then
     set promptText to "<Transcribed text of the image: \\"" & theText & "\\".>"
   end if
+
+  ${
+    options.useSaliencyAnalysis
+      ? `if pointsOfInterest is not "" then
+    set promptText to promptText & "<Areas most likely to draw attention: " & pointsOfInterest & ">"
+  end if`
+      : ``
+  }
   
   ${
     options.useSubjectClassification
@@ -455,8 +507,7 @@ const getPDFText = async (filePath: string, useOCR: boolean, pageLimit: number):
     ? await runAppleScript(`use framework "PDFKit"
     use framework "Vision"
     
-    set theFile to "${filePath}"
-    set theURL to current application's |NSURL|'s fileURLWithPath:theFile
+    set theURL to current application's |NSURL|'s fileURLWithPath:"${filePath}"
     set thePDF to current application's PDFDocument's alloc()'s initWithURL:theURL
     set theText to ""
     set numPages to thePDF's pageCount()
@@ -481,7 +532,7 @@ const getPDFText = async (filePath: string, useOCR: boolean, pageLimit: number):
         set theText to theText & ((first item in (observation's topCandidates:1))'s |string|() as text) & ", "
       end repeat
     end repeat
-    return theText`)
+    return {theText, "NumPages:" & thePDF's pageCount(), "NumCharacters:" & length of theText}`)
     : "";
 
   // Get the raw text of the PDF
@@ -489,9 +540,18 @@ const getPDFText = async (filePath: string, useOCR: boolean, pageLimit: number):
   set thePDF to "${filePath}"
   set theURL to current application's |NSURL|'s fileURLWithPath:thePDF
   set thePDF to current application's PDFDocument's alloc()'s initWithURL:theURL
-  return (thePDF's |string|()) as text`);
+  set theText to thePDF's |string|() as text
+  return {theText, "NumPages:" & thePDF's pageCount(), "NumCharacters:" & length of theText}`);
 
-  return `${rawText} ${imageText}`;
+  return `${imageText} ${rawText}`;
+};
+
+const getPDFAttributes = async (filePath: string): Promise<string> => {
+  return await runAppleScript(`use framework "Foundation"
+  use framework "PDFKit"
+  set theURL to current application's NSURL's fileURLWithPath:"${filePath}"
+  set theDoc to current application's PDFDocument's alloc()'s initWithURL:theURL
+  theDoc's documentAttributes() as record`);
 };
 
 /**

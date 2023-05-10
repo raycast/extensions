@@ -1,5 +1,7 @@
+import { runAppleScript } from "run-applescript";
+
 /** AppleScriptObjC framework and library imports */
-export const objc_imports = `use framework "AVFoundation"
+export const objcImports = `use framework "AVFoundation"
 use framework "CoreLocation"
 use framework "CoreMedia"
 use framework "EventKit"
@@ -20,7 +22,7 @@ use framework "WebKit"
 use scripting additions`;
 
 /** AS handler to split text around the provided delimiter */
-export const split_handler = `on split(theText, theDelimiter)
+export const splitHandler = `on split(theText, theDelimiter)
     set oldDelimiters to AppleScript's text item delimiters
     set AppleScript's text item delimiters to theDelimiter
     set theArray to every text item of theText
@@ -29,14 +31,14 @@ export const split_handler = `on split(theText, theDelimiter)
 end split`;
 
 /** AS handler to replace all occurrences of a string */
-export const replaceAll_handler = `on replaceAll(theText, textToReplace, theReplacement)
+export const replaceAllHandler = `on replaceAll(theText, textToReplace, theReplacement)
     set theString to current application's NSString's stringWithString:theText
     set replacedString to theString's stringByReplacingOccurrencesOfString:textToReplace withString:theReplacement
     return replacedString as text
 end replaceAll`;
 
 /** AS handler to trim leading and trailing whitespace, including newlines */
-export const trim_handler = `on trim(theText)
+export const trimHandler = `on trim(theText)
     set theString to current application's NSString's stringWithString:theText
     set spaces to current application's NSCharacterSet's whitespaceAndNewlineCharacterSet
     set trimmedString to theString's stringByTrimmingCharactersInSet:spaces
@@ -44,8 +46,22 @@ export const trim_handler = `on trim(theText)
 end trim`;
 
 /** AS handler to randomly select items from a list */
-export const rselect_handler = `on rselect(theList, numItems)
+export const rselectHandler = `on rselect(theList, numItems)
     set randomSource to current application's GKRandomSource's alloc()'s init()
     set shuffledArray to randomSource's arrayByShufflingObjectsInArray:theList
     return items 1 thru numItems of (shuffledArray as list)
 end rselect`;
+
+/**
+ * Adds a file to the current Finder selection.
+ * @param filePath The path of the file to add to the selection.
+ * @returns A promise that resolves to void when the AppleScript has finished running.
+ */
+export const addFileToSelection = async (filePath: string) => {
+  await runAppleScript(`tell application "Finder"
+        set theSelection to selection as alias list
+        set targetPath to POSIX file "${filePath}"
+        copy targetPath to end of theSelection
+        select theSelection
+    end tell`);
+};
