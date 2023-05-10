@@ -4,41 +4,12 @@ A Raycast extension for creating and sharing powerful, contextually-aware AI com
 
 PromptLab allows you to create custom AI commands with prompts that utilize contextual placeholders such as {{selectedText}}, {{todayEvents}}, or {{currentApplication}} to vastly expand the capabilities of Raycast AI. PromptLab can also extract information from selected files, if you choose, so that it can tell you about the subjects in an image, summarize a PDF, and more.
 
-PromptLab also supports "action scripts" -- AppleScripts which run with the AI's response as input. This opens a whole new world of capabilities such as allowing the AI to generate and modify files.
-
-## Table Of Contents
-
-- [Top-Level Commands](#top-level-commands)
-- [Images](#images)
-- [Create Your Own Commands](#create-your-own-commands)
-    - [Placeholders](#placeholders)
-        - [Command Placeholders](#command-placeholders)
-        - [Script Placeholders](#script-placeholders)
-        - [URL Placeholders](#url-placeholders)
-        - [API Data Placeholders](#api-data-placeholders)
-        - [Application Data Placeholders](#application-data-placeholders)
-        - [Calendar Data Placeholders](#calendar-data-placeholders)
-        - [Context Data Placeholders](#context-data-placeholders)
-        - [File Data Placeholders](#file-data-placeholders)
-        - [System Data Placeholders](#system-data-placeholders)
-        - [Other Placeholders](#other-placeholders)
-    - [Action Scripts](#action-scripts)
-        - [Provided Variables](#provided-variables)
-        - [Provided Handlers](#provided-handlers)
-- [List Of Useful Prompts](#list-of-useful-prompts)
-    - [Default Command Prompts](#default-command-prompts)
-    - [Non-Default Command Prompts](#non-default-command-prompts)
-- [Installation](#installation)
-    - [Manual Installation](#manual-installation)
-- [Custom Model Endpoints](#custom-model-endpoints)
-- [Autonomous Agent Features](#autonomous-agent-features)
-- [Contributing](#contributing)
-- [Useful Resources](#useful-resources)
+PromptLab also supports "action scripts" -- AppleScripts or Shell Scripts which run with the AI's response as input. This opens a whole new world of capabilities such as allowing the AI to generate and modify files.
 
 ## Top-Level Commands
 
 - New PromptLab Command
-    - Create a custom PromptLab command accessible via 'Search PromptLab Commands'
+    - Create a custom PromptLab command accessible via 'My PromptLab Commands'
 - My PromptLab Commands
     - Search and run custom PromptLab commands that you've installed or created
 - PromptLab Command Store
@@ -50,21 +21,9 @@ PromptLab also supports "action scripts" -- AppleScripts which run with the AI's
 - Import PromptLab Commands
     - Add custom commands from a JSON string.
 
-## Images
-![List Of Default Commands](./examples/promptlab-1.png)
-![Editing a command](./examples/promptlab-2.png)
-![Customization options for commands](./examples/promptlab-3.png)
-![Identify Selected Files example](./examples/promptlab-4.png)
-![Recent News Headlines Example](./examples/promptlab-5.png)
-![PromptLab commands as Quicklinks](./examples/promptlab-6.png)
-![Navigating the PromptLab Command Store](./examples/promptlab-7.png)
-![PromptLab Chat + Autonomous Agent Features](./examples/promptlab-8.png)
-
-View more images in [the gallery](https://skaplanofficial.github.io/Raycast-PromptLab/gallery).
-
 ## Create Your Own Commands
 
-You can create custom PromptLab commands, accessed via the "Search PromptLab Commands" command, to execute your own prompts acting on the contents of selected files. A variety of useful defaults are provided, as listed under [Default Commands](#default-commands).
+You can create custom PromptLab commands, accessed via the "My PromptLab Commands" command, to execute your own prompts acting on the contents of selected files.
 
 ### Placeholders
 
