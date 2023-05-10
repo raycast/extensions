@@ -1,15 +1,4 @@
-import {
-  Action,
-  Icon,
-  ActionPanel,
-  showToast,
-  Toast,
-  confirmAlert,
-  Color,
-  useNavigation,
-  environment,
-  AI,
-} from "@raycast/api";
+import { Action, Icon, ActionPanel, showToast, Toast, confirmAlert, Color, useNavigation } from "@raycast/api";
 import { MutatePromise } from "@raycast/utils";
 import { IssuePriorityValue, User } from "@linear/sdk";
 import { IssueUpdateInput } from "@linear/sdk/dist/_generated_documents";
@@ -493,14 +482,12 @@ export default function IssueActions({
           shortcut={{ modifiers: ["cmd", "shift"], key: "m" }}
         />
 
-        {environment.canAccess(AI) ? (
-          <Action.Push
-            title="Break Issues Into Sub-Issues"
-            icon={Icon.Stars}
-            target={<CreateSubIssues issue={issue} />}
-            shortcut={{ modifiers: ["opt", "shift"], key: "m" }}
-          />
-        ) : null}
+        <Action.Push
+          title="Break Issues Into Sub-Issues"
+          icon={Icon.Stars}
+          target={<CreateSubIssues issue={issue} />}
+          shortcut={{ modifiers: ["opt", "shift"], key: "m" }}
+        />
 
         <Action.Push
           title="Add Comment"
