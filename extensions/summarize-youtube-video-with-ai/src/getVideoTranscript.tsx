@@ -1,4 +1,4 @@
-import { Toast, showToast } from "@raycast/api";
+import { Toast, popToRoot, showToast } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { YoutubeTranscript } from "youtube-transcript";
 
@@ -16,8 +16,9 @@ export default function getVideoTranscript(video: string) {
     showToast({
       style: Toast.Style.Failure,
       title: "❗",
-      message: "This video has no Transcript.",
+      message: "Sorry, this video doesn't have a transcript.",
     });
+    popToRoot();
     return { transcriptLoading: isLoading, rawTranscript: undefined };
   }
 
