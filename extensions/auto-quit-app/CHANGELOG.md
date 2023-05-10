@@ -1,5 +1,3 @@
-# Auto Quit App Changelog
+# Mail Changelog
 
-## [Initial Version] - 2022-12-05
-
-- Automatically quit the application after all windows are closed
+## [Initial Version] - 2022-08-15
