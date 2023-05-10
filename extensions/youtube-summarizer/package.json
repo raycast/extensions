@@ -30,10 +30,10 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.49.0",
-    "youtube-transcript": "^1.0.5",
-    "langchain": "^0.0.43",
-    "ytdl-core": "^4.11.2"
+    "@raycast/api": "^1.51.0",
+    "@raycast/utils": "^1.6.1",
+    "youtube-transcript": "^1.0.6",
+    "ytdl-core": "^4.11.4"
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.5",

@@ -1,22 +1,13 @@
 import { useEffect, useState } from "react";
 import { YoutubeTranscript } from "youtube-transcript";
-import {
-  Action,
-  ActionPanel,
-  Detail,
-  Icon,
-  popToRoot,
-  showToast,
-  Toast,
-  unstable_AI,
-  useUnstableAI,
-} from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon, popToRoot, showToast, Toast, AI, environment } from "@raycast/api";
 import ytdl from "ytdl-core";
+import { useAI } from "@raycast/utils";
 
 export async function getVideoSections(text: string) {
   const chunks = text.match(/.{1,5000}/g) || [];
   const jobs = chunks.map((chunk) => {
-    return unstable_AI.ask(`${chunk}\n\n---\n\nSummarize the above segment of YouTube video transcriptions.`);
+    return AI.ask(`${chunk}\n\n---\n\nSummarize the above segment of YouTube video transcriptions.`);
   });
   const sections = await Promise.all(jobs);
   return sections.join("\n\n");
@@ -44,6 +35,16 @@ async function getVideoInfo(url: string) {
 }
 
 export default function Command(props: { arguments: { url: string } }) {
+  if (!environment.canAccess(AI)) {
+    popToRoot();
+    showToast({
+      title: "AI not available",
+      message: "This extension requires access to Raycast AI. To use it, subscribe to Raycast Pro.",
+      style: Toast.Style.Failure,
+    });
+    return;
+  }
+
   const [sections, setSections] = useState("");
   const [metadata, setMetadata] = useState<null | { title: string; author: string }>(null);
   const isGenerating = !!sections && !!metadata;
@@ -51,7 +52,7 @@ export default function Command(props: { arguments: { url: string } }) {
     data: summary,
     isLoading,
     revalidate,
-  } = useUnstableAI(
+  } = useAI(
     `${sections}---\n\nSummarize the above YouTube video segments from a video titled "${metadata?.title}" by ${metadata?.author}.`,
     {
       execute: isGenerating,
