@@ -268,7 +268,14 @@ export function tokenizeQueryText(query: string | undefined, namedKeywords: stri
 }
 
 export function getErrorMessage(error: unknown): string {
-  return error instanceof Error ? error.message : "unknown error";
+  if (error instanceof Error) {
+    return error.message;
+  } else {
+    if (typeof error === "string") {
+      return error as string;
+    }
+    return "Unknown Error";
+  }
 }
 
 export function formatDate(input: Date | string): string {

@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-09-26 15:52
  * @lastEditor: tisfeng
- * @lastEditTime: 2023-03-17 23:21
+ * @lastEditTime: 2023-03-31 16:02
  * @fileName: volcanoAPI.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -50,13 +50,12 @@ export function requestVolcanoTranslate(queryWordInfo: QueryWordInfo): Promise<Q
   const signObjet = genVolcanoSign(query, params);
   if (!signObjet) {
     console.warn(`Volcano AccessKey or SecretKey is empty`);
-    const result: QueryTypeResult = {
+    const errorInfo: RequestErrorInfo = {
       type: type,
-      result: undefined,
-      translations: [],
-      queryWordInfo: queryWordInfo,
+      code: "",
+      message: "Volcano AccessKey or SecretKey is empty",
     };
-    return Promise.resolve(result);
+    return Promise.reject(errorInfo);
   }
 
   const url = signObjet.getUrl();

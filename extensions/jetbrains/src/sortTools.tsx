@@ -65,11 +65,7 @@ export function SortTools({
   }
 
   return (
-    <List
-      navigationTitle="Choose Application Sort Order"
-      enableFiltering={false}
-      searchBarPlaceholder="Sort applications"
-    >
+    <List navigationTitle="Choose Application Sort Order" filtering={false} searchBarPlaceholder="Sort applications">
       <List.Section
         title="Choose Order"
         subtitle={screenshotMode ? `⌃+S to save${pop ? " – ⌃+C to cancel" : ""}` : undefined}
@@ -84,7 +80,7 @@ export function SortTools({
               <ActionPanel>
                 <Action
                   icon={Icon.Checkmark}
-                  title="Save order"
+                  title="Save Order"
                   shortcut={{ modifiers: ["ctrl"], key: "s" }}
                   onAction={save}
                 />

@@ -233,6 +233,12 @@ function AddJenkins(props: { jenkins?: Jenkins; setJenkinsList: (f: (v: Jenkins[
         placeholder="Enter username"
       />
       <Form.PasswordField title="Token" id="token" defaultValue={props.jenkins?.token} placeholder="Enter token" />
+      <Form.Checkbox
+        title="Unsafe HTTPS"
+        id="unsafeHttps"
+        defaultValue={props.jenkins?.unsafeHttps}
+        label="[DANGEROUS] Allow unsafe HTTPS requests"
+      />
     </Form>
   );
 }

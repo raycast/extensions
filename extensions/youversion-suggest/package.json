@@ -3,7 +3,7 @@
   "name": "youversion-suggest",
   "title": "YouVersion Bible Suggest",
   "description": "Allows you to search the YouVersion Bible quickly and easily",
-  "version": "2.1.0",
+  "version": "3.1.0",
   "icon": "command-icon.png",
   "author": "caleb531",
   "categories": [
@@ -31,14 +31,10 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.49.2",
-    "cheerio": "^1.0.0-rc.12",
-    "lodash-es": "^4.17.21",
-    "node-fetch": "^3.2.10"
+    "@raycast/api": "^1.50.1",
+    "youversion-suggest": "^1.2.1"
   },
   "devDependencies": {
-    "@types/cheerio": "^0.22.31",
-    "@types/lodash-es": "^4.17.6",
     "@types/react": "^18.0.9",
     "@types/react-dom": "^18.0.9",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
@@ -49,8 +45,9 @@
     "typescript": "^4.4.3"
   },
   "scripts": {
-    "build": "ray build -e dist",
-    "dev": "ray develop",
+    "copy-bible-data": "cp -R node_modules/youversion-suggest/dist/data assets",
+    "build": "npm run copy-bible-data && ray build -e dist",
+    "dev": "npm run copy-bible-data && ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish"

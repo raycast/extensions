@@ -1,5 +1,5 @@
 import { List } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { useCachedPromise, useCachedState } from "@raycast/utils";
 import { useState } from "react";
 
 import { getFilters } from "./api/filters";
@@ -9,7 +9,7 @@ import { withJiraCredentials } from "./helpers/withJiraCredentials";
 
 export function MyFilters() {
   const [query, setQuery] = useState("");
-  const [filterId, setFilterId] = useState("");
+  const [filterId, setFilterId] = useCachedState("filter-id", "");
 
   const { data: filters, isLoading: isLoadingFilters } = useCachedPromise((query) => getFilters(query), [query], {
     keepPreviousData: true,
@@ -36,7 +36,7 @@ export function MyFilters() {
     <List.Dropdown
       tooltip="Filter issues by filters"
       onChange={setFilterId}
-      storeValue
+      value={filterId}
       isLoading={isLoadingFilters}
       onSearchTextChange={setQuery}
       throttle

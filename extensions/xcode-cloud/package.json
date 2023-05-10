@@ -1,0 +1,79 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "xcode-cloud",
+  "title": "Xcode Cloud",
+  "description": "Check your Xcode Cloud builds and start new ones.",
+  "icon": "icon.png",
+  "author": "yuta24",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "keywords": [
+    "Xcode",
+    "CI"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "builds.command",
+      "title": "View Builds",
+      "description": "View all builds",
+      "mode": "view"
+    },
+    {
+      "name": "start-build.command",
+      "title": "Start Build",
+      "description": "Start a new build",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "issuerId",
+      "description": "Enter App Store Connect's Issuer ID",
+      "type": "textfield",
+      "required": true,
+      "title": "Issuer ID"
+    },
+    {
+      "name": "keyId",
+      "description": "Enter App Store Connect's Key ID",
+      "type": "textfield",
+      "required": true,
+      "title": "Key ID"
+    },
+    {
+      "name": "privateKey",
+      "description": "Enter file path for App Store Connect's Private Key",
+      "type": "textfield",
+      "required": true,
+      "title": "Private Key's file path"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.45.2",
+    "@raycast/utils": "^1.4.14",
+    "@types/jsonwebtoken": "^9.0.0",
+    "jsonwebtoken": "^9.0.0"
+  },
+  "devDependencies": {
+    "@openapitools/openapi-generator-cli": "^2.5.2",
+    "@types/node": "18.15.3",
+    "@types/react": "18.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^8.36.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^5.0.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "generate": "openapi-generator-cli generate --skip-validate-spec -g typescript-axios -i ./schema/openapi.json -o ./src/appstore-connect",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

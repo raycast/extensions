@@ -6,7 +6,11 @@ import { useEffect, useReducer } from "react";
 import { sortTools } from "./sortTools";
 
 function appHistorySorter(results: AppHistory[], sortOrder: string) {
-  return results.filter((app) => app.entries?.length).sort(sortTools(String(sortOrder).split(",")));
+  let order = String(sortOrder).split(",");
+  if (order.length === 0) {
+    order = results.map((ah) => ah.title).sort();
+  }
+  return results.sort(sortTools(order));
 }
 
 function projectsReducer(state: State, action: Action): State {
@@ -108,12 +112,16 @@ export interface appHistoryReturn {
 }
 
 export function useAppHistory(): appHistoryReturn {
-  const [{ isLoading, toolboxApp, history, appHistory, myFavs, filter }, dispatch] = useReducer(
-    projectsReducer,
-    initialState
-  );
-  const [favourites, histories, setHistories, favActions] = useFavorites("history", []);
   const [{ sortOrder, screenshotMode }, prefActions] = usePreferences({ sortOrder: "", screenshotMode: false });
+  const [favourites, histories, setHistories, favActions] = useFavorites("history", []);
+  const [{ isLoading, toolboxApp, history, appHistory, myFavs, filter, ...rest }, dispatch] = useReducer(
+    projectsReducer,
+    {
+      ...initialState,
+      sortOrder: String(sortOrder),
+      favourites,
+    }
+  );
 
   useEffect(() => {
     getJetBrainsToolboxApp().then((toolboxApp) => dispatch({ type: "setToolboxApp", results: toolboxApp }));
@@ -121,21 +129,27 @@ export function useAppHistory(): appHistoryReturn {
   }, []);
 
   useEffect(() => {
-    dispatch({ type: "setSortOrder", results: String(sortOrder) });
-  }, [sortOrder]);
+    if (history === undefined) return;
+    loadAppEntries(history).then((entries) => dispatch({ type: "setEntries", results: entries }));
+  }, [history]);
 
   useEffect(() => {
+    if (sortOrder === rest.sortOrder) {
+      return;
+    }
+    dispatch({ type: "setSortOrder", results: String(sortOrder) });
+  }, [sortOrder, rest.sortOrder]);
+
+  useEffect(() => {
+    if (favourites === rest.favourites) {
+      return;
+    }
     dispatch({ type: "setFavourites", results: favourites });
-  }, [favourites]);
+  }, [favourites, rest.favourites]);
 
   useEffect(() => {
     setHistories(...appHistory.map((history) => (history?.entries ?? []).map((entry) => entry.path)));
   }, [appHistory, filter]);
-
-  useEffect(() => {
-    if (history === undefined) return;
-    loadAppEntries(history).then((entries) => dispatch({ type: "setEntries", results: entries }));
-  }, [history]);
 
   return {
     isLoading: isLoading || histories.length === 0,
