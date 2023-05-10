@@ -19,6 +19,75 @@
       "default": true,
       "description": "If checked, PromptLab will use OCR to extract text from PDFs. This takes longer but enables analysis of more PDF content types.",
       "required": false
+    },
+    {
+      "name": "modelEndpoint",
+      "title": "Model Endpoint",
+      "type": "textfield",
+      "required": false,
+      "default": "Raycast AI",
+      "description": "The API endpoint of the model used to generate PromptLab command output. Set to 'Raycast AI' to use the Raycast AI API."
+    },
+    {
+      "name": "authType",
+      "title": "API Authorization Type",
+      "type": "dropdown",
+      "required": false,
+      "default": "bearer",
+      "description": "The authorization type for the model endpoint, e.g. API Key or Bearer. This is only used if the model source is set to something other than Raycast AI.",
+      "data": [
+        {
+          "title": "API Key",
+          "value": "apiKey"
+        },
+        {
+          "title": "Bearer Token",
+          "value": "bearerToken"
+        }
+      ]
+    },
+    {
+      "name": "apiKey",
+      "title": "API Key",
+      "type": "password",
+      "required": false,
+      "default": "",
+      "description": "The API key for the model source. This is only used if the model source is set to something other than Raycast AI."
+    },
+    {
+      "name": "inputSchema",
+      "title": "Input Schema",
+      "type": "textfield",
+      "required": false,
+      "default": "N/A",
+      "description": "The JSON schema of the endpoint used to generate PromptLab command output. This is only used if the model source is set to something other than Raycast AI. Use {input} to represent PromptLab's input to the command.",
+      "placeholder": "{ \"prompt\": \"{input}\" }"
+    },
+    {
+      "name": "outputKeyPath",
+      "title": "Output Key Path",
+      "type": "textfield",
+      "required": false,
+      "default": "N/A",
+      "description": "The key path to the text output in the JSON response from the model endpoint. For example, choices[0].message.content, for the OpenAI API. This is only used if the model source is set to something other than Raycast AI."
+    },
+    {
+      "name": "outputTiming",
+      "title": "Output Timing",
+      "type": "dropdown",
+      "required": false,
+      "default": "sync",
+      "description": "Whether output from the model endpoint should be processed synchronously or asynchronously. Often, this is also an option on the model API. This is only used if the model source is set to something other than Raycast AI.",
+      "data": [
+        {
+          "title": "Synchronous",
+          "value": "sync"
+        },
+        {
+          "title": "Asynchronous",
+          "value": "async"
+        }
+      ]
     }
   ],
   "commands": [
@@ -30,25 +99,19 @@
     },
     {
       "name": "create-command",
-      "title": "Create PromptLab Command",
+      "title": "New PromptLab Command",
       "description": "Create a custom PromptLab command accessible via 'Search PromptLab Commands'",
       "mode": "view"
     },
     {
       "name": "search-commands",
-      "title": "Search PromptLab Commands",
-      "description": "Search custom PromptLab commands",
+      "title": "My PromptLab Commands",
+      "description": "Search your installed PromptLab commands",
       "mode": "view",
       "arguments": [
         {
           "name": "commandName",
           "placeholder": "Command Name",
-          "required": false,
-          "type": "text"
-        },
-        {
-          "name": "queryInput",
-          "placeholder": "Input",
           "required": false,
           "type": "text"
         }
@@ -66,6 +129,41 @@
           "required": false,
           "type": "text"
         }
+      ],
+      "preferences": [
+        {
+          "title": "Default Chat Settings",
+          "name": "useSelectedFiles",
+          "label": "Selected Files",
+          "type": "checkbox",
+          "default": false,
+          "description": "If checked, the selected files will be used as context for conversations by default.",
+          "required": false
+        },
+        {
+          "name": "useConversationHistory",
+          "label": "Conversation History",
+          "type": "checkbox",
+          "default": true,
+          "description": "If checked, the conversation history will be used as context for conversations by default.",
+          "required": false
+        },
+        {
+          "name": "autonomousFeatures",
+          "label": "Autonomous Agent Features",
+          "type": "checkbox",
+          "default": false,
+          "description": "If checked, autonomous agent features such as 'Allow AI To Run Commands' will be enabled by default.",
+          "required": false
+        },
+        {
+          "name": "basePrompt",
+          "title": "Base Prompt",
+          "type": "textfield",
+          "required": false,
+          "default": "I want you to act as an interactive information engine. When I supply a question, you will respond with an answer based on any information I've provided and your own inferences.",
+          "description": "The base prompt that provides the initial context for the conversation."
+        }
       ]
     },
     {
@@ -73,13 +171,20 @@
       "title": "Import PromptLab Commands",
       "description": "Import custom PromptLab commands from a JSON string",
       "mode": "view"
+    },
+    {
+      "name": "discover-commands",
+      "title": "PromptLab Command Store",
+      "description": "Discover commands from the PromptLab community",
+      "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.48.9",
-    "@raycast/utils": "^1.5.2",
+    "@raycast/api": "^1.51.0",
+    "@raycast/utils": "^1.6.1",
     "run-applescript": "^6.1.0",
-    "exifr": "^7.1.3"
+    "exifr": "^7.1.3",
+    "node-fetch": "^3.3.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.5",

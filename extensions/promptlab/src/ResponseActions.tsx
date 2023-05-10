@@ -1,14 +1,19 @@
-import { Action, ActionPanel, Icon, Keyboard, launchCommand, LaunchType } from "@raycast/api";
+import { Action, ActionPanel, Icon, Keyboard } from "@raycast/api";
+import CommandChatView from "./components/CommandChatView";
+import { CommandOptions } from "./utils/types";
 
 export default function ResponseActions(props: {
+  commandName: string;
+  options: CommandOptions;
   commandSummary: string;
   responseText: string;
   promptText: string;
   reattempt: () => void;
   files?: string[];
   listItem?: string;
+  cancel: () => void;
 }) {
-  const { commandSummary, responseText, promptText, reattempt, files, listItem } = props;
+  const { commandName, commandSummary, options, responseText, promptText, reattempt, files, listItem, cancel } = props;
   return (
     <ActionPanel>
       {listItem?.length ? (
@@ -20,7 +25,7 @@ export default function ResponseActions(props: {
         <Action.CopyToClipboard
           title={`Copy ${commandSummary} To Clipboard`}
           content={responseText}
-          shortcut={{ modifiers: ["cmd"], key: "c" }}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
         />
         <Action.CopyToClipboard
           title={`Copy Prompt To Clipboard`}
@@ -33,19 +38,22 @@ export default function ResponseActions(props: {
           icon={Icon.ArrowClockwise}
           shortcut={{ modifiers: ["cmd"], key: "r" }}
         />
-        <Action
+        <Action.Push
           title="Open Chat"
-          onAction={() => {
-            launchCommand({
-              name: "chat",
-              arguments: {
-                initialQuery: `Your last response: "${responseText}" {Summarize your last response.}`,
-              },
-              type: LaunchType.UserInitiated,
-            });
-          }}
+          target={
+            <CommandChatView
+              isLoading={false}
+              commandName={commandName}
+              options={options}
+              prompt={promptText}
+              response={responseText}
+              revalidate={reattempt}
+              cancel={cancel}
+              useFiles={options.minNumFiles != undefined && options.minNumFiles > 0 ? true : false}
+            />
+          }
           icon={Icon.Message}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+          shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
         />
       </ActionPanel.Section>
 

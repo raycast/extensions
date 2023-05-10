@@ -10,7 +10,8 @@ import {
   environment,
 } from "@raycast/api";
 import { useForm, FormValidation } from "@raycast/utils";
-import { Command } from "./utils/types";
+import { Command } from "../utils/types";
+import { useState } from "react";
 
 interface CommandFormValues {
   name: string;
@@ -30,6 +31,12 @@ interface CommandFormValues {
   actionScript?: string;
   showResponse?: boolean;
   description?: string;
+  useSaliencyAnalysis?: boolean;
+  author?: string;
+  website?: string;
+  version?: string;
+  requirements?: string;
+  scriptKind?: string;
 }
 
 export default function CommandForm(props: {
@@ -38,12 +45,19 @@ export default function CommandForm(props: {
   duplicate?: boolean;
 }) {
   const { oldData, setCommands, duplicate } = props;
+  const [showResponse, setShowResponse] = useState<boolean>(
+    oldData != undefined && oldData.showResponse != undefined ? oldData.showResponse : true
+  );
   const { pop } = useNavigation();
 
   let maxPromptLength = oldData?.minNumFiles == "0" ? 3000 : 500;
 
   const { handleSubmit, itemProps } = useForm<CommandFormValues>({
     async onSubmit(values) {
+      if (!values.showResponse) {
+        values["outputKind"] = "none";
+      }
+
       await LocalStorage.setItem(values.name, JSON.stringify(values));
       if (oldData && oldData.name != values.name) {
         await LocalStorage.removeItem(oldData.name);
@@ -73,13 +87,19 @@ export default function CommandForm(props: {
       useAudioDetails: false,
       useSoundClassification: true,
       useSubjectClassification: true,
-      useRectangleDetection: true,
+      useRectangleDetection: false,
       useBarcodeDetection: true,
-      useFaceDetection: true,
+      useFaceDetection: false,
       outputKind: "detail",
       actionScript: "",
       showResponse: true,
       description: "",
+      useSaliencyAnalysis: true,
+      author: "",
+      website: "",
+      version: "1.0.0",
+      requirements: "",
+      scriptKind: "applescript",
     },
     validation: {
       name: FormValidation.Required,
@@ -88,7 +108,8 @@ export default function CommandForm(props: {
           return "Must provide a prompt";
         }
 
-        if (value.length > maxPromptLength) {
+        const subbedValue = value.replaceAll(/{{.*?}}/g, "");
+        if (subbedValue.length > maxPromptLength) {
           return `Prompt must be ${maxPromptLength} characters or fewer`;
         }
       },
@@ -116,6 +137,8 @@ export default function CommandForm(props: {
         </ActionPanel>
       }
     >
+      <Form.Description title="Name & Icon" text="Give your command a memorable name and an icon to match." />
+
       <Form.TextField title="Command Name" placeholder="Name of PromptLab Command" {...itemProps.name} />
 
       <Form.Dropdown title="Icon" {...itemProps.icon}>
@@ -168,31 +191,56 @@ export default function CommandForm(props: {
         />
       </Form.Dropdown>
 
-      <Form.TextArea title="Prompt" placeholder="Instructions for Raycast AI to follow" {...itemProps.prompt} />
+      <Form.Separator />
 
-      <Form.TextArea
-        title="Description"
-        placeholder="Description of what this command does"
-        info="A description of what this command does. Useful if you plan to share the command with others."
-        {...itemProps.description}
+      <Form.Description
+        title="Instructions"
+        text="Learn about placeholders to use in your prompts at promptlab.skaplan.io."
       />
+
+      <Form.TextArea title="Prompt" placeholder="Instructions for AI to follow" {...itemProps.prompt} />
 
       <Form.TextArea
         title="Script"
-        placeholder="AppleScript code to run after response"
-        info="An AppleScript script to run after receiving a response to the prompt. Use the `response` variable to access the text of the response."
+        placeholder="Script to run after response is received"
+        info="Code for the script to run after receiving a response to the prompt. Use the `response` variable to access the text of the response."
         {...itemProps.actionScript}
       />
+
+      <Form.Dropdown title="Script Kind" info="The type of script used in the Script field." {...itemProps.scriptKind}>
+        <Form.Dropdown.Item title="AppleScript" value="applescript" icon={Icon.Paragraph} />
+        <Form.Dropdown.Item title="Shell (ZSH)" value="zsh" icon={Icon.Terminal} />
+      </Form.Dropdown>
+
+      <Form.Separator />
+
+      <Form.Description title="Settings" text="Customize the way your command works and what data is accesses." />
+
+      {showResponse ? (
+        <Form.Dropdown
+          title="Output View"
+          info="The view in which the command's output will be rendered. Detail is the most likely to work for any given command, but PromptLab will do its best to give you usable output no matter what."
+          {...itemProps.outputKind}
+        >
+          <Form.Dropdown.Item title="Detail" value="detail" icon={Icon.AppWindow} />
+          <Form.Dropdown.Item title="List" value="list" icon={Icon.List} />
+          <Form.Dropdown.Item title="Grid" value="grid" icon={Icon.Message} />
+          <Form.Dropdown.Item title="Chat" value="chat" icon={Icon.Message} />
+        </Form.Dropdown>
+      ) : null}
 
       <Form.Checkbox
         label="Show Response View"
         {...itemProps.showResponse}
-        info="If checked, the AI's output will be display in Raycast. Disabling this is only useful if you provide an action script."
+        value={showResponse}
+        onChange={setShowResponse}
+        info="If checked, the AI's output will be displayed in Raycast. Disabling this is only useful if you provide an action script."
       />
 
       <Form.TextField
         title="Minimum File Count"
         placeholder="Minimum number of files required"
+        info="The minimum number of files that must be selected for the command to be run."
         onChange={(value) => {
           const intVal = parseInt(value);
           if (intVal == 0) {
@@ -202,18 +250,10 @@ export default function CommandForm(props: {
         {...itemProps.minNumFiles}
       />
 
-      <Form.Dropdown
-        title="Output View"
-        info="The view in which the command's output will be rendered. Detail is the most likely to work for any given command, but PromptLab will do its best to give you usable output no matter what."
-        {...itemProps.outputKind}
-      >
-        <Form.Dropdown.Item title="Detail" value="detail" icon={Icon.AppWindow} />
-        <Form.Dropdown.Item title="List" value="list" icon={Icon.List} />
-      </Form.Dropdown>
-
       <Form.TextArea
         title="Accepted File Extensions"
         placeholder="Comma-separated list of file extensions, e.g. txt, csv, html"
+        info="A list of file extensions that will be accepted by the command. If left blank, all files will be accepted."
         {...itemProps.acceptedFileExtensions}
       />
 
@@ -258,6 +298,49 @@ export default function CommandForm(props: {
         label="Use Face Detection"
         {...itemProps.useFaceDetection}
         info="If checked, the number of faces in image files will be included in the text provided to the AI."
+      />
+
+      <Form.Checkbox
+        label="Use Saliency Analysis"
+        {...itemProps.useSaliencyAnalysis}
+        info="If checked, the areas of an image most likely to draw attention will be included in the text provided to the AI."
+      />
+
+      <Form.Separator />
+
+      <Form.Description
+        title="Command Metadata"
+        text="Information about the command for when you share it or upload it to the command store."
+      />
+      <Form.TextField
+        title="Author"
+        placeholder="Your name or username"
+        info="An optional name or username that others can attribute the command to. If you upload the command to the store, this will be displayed on the command's page."
+        {...itemProps.author}
+      />
+      <Form.TextField
+        title="Website"
+        placeholder="Your website"
+        info="An optional website URL that others can visit to learn more about the command. If you upload the command to the store, this will be displayed on the command's page."
+        {...itemProps.website}
+      />
+      <Form.TextField
+        title="Command Version"
+        placeholder="The version of the command"
+        info="An optional version number for the command. If you upload the command to the store, this will be displayed on the command's page."
+        {...itemProps.version}
+      />
+      <Form.TextArea
+        title="Description"
+        placeholder="Description of what this command does"
+        info="A description of what this command does. Useful if you plan to share the command with others."
+        {...itemProps.description}
+      />
+      <Form.TextArea
+        title="Requirements"
+        placeholder="Any requirements for the command"
+        info="A list or paragraph explaining any requirements for this script, e.g. other commands, command-line utilities, etc."
+        {...itemProps.requirements}
       />
     </Form>
   );

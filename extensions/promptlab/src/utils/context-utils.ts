@@ -203,7 +203,6 @@ export const getCurrentURL = async (browserName: string): Promise<string> => {
  */
 export const getURLHTML = (URL: string): string => {
   return runAppleScriptSync(`use framework "Foundation"
-
     set theResult to ""
     on getURLHTML(theURL)
         global theResult
@@ -227,9 +226,9 @@ export const getURLHTML = (URL: string): string => {
     on URLSession:tmpSession dataTask:tmpTask didReceiveData:tmpData
         global theResult
         set theText to (current application's NSString's alloc()'s initWithData:tmpData encoding:(current application's NSASCIIStringEncoding)) as string
+
         set theResult to theResult & theText
     end URLSession:dataTask:didReceiveData:
-    
     return getURLHTML("${URL}")`);
 };
 
@@ -261,7 +260,7 @@ export const getTextOfWebpage = async (URL: string): Promise<string> => {
   const html = getURLHTML(URL);
   const filteredString = html
     .replaceAll(
-      /(<head>[\S\s\n\r]*?<\/head>|<script[\s\S\n\r]+?<\/script>|<style[\s\S\n\r]+?<\/style>|<nav[\s\S\n\r]+?<\/nav>|<link[\s\S\n\r]+?<\/link>|<form[\s\S\n\r]+?<\/form>|<button[\s\S\n\r]+?<\/button>|<!--[\s\S\n\r]+?-->|<select[\s\S\n\r]+?<\/select>|<[\s\n\r\S]+?>)/g,
+      /(<script[\s\S\n\r]+?<\/script>|<style[\s\S\n\r]+?<\/style>|<nav[\s\S\n\r]+?<\/nav>|<link[\s\S\n\r]+?<\/link>|<form[\s\S\n\r]+?<\/form>|<button[\s\S\n\r]+?<\/button>|<!--[\s\S\n\r]+?-->|<select[\s\S\n\r]+?<\/select>|<[\s\n\r\S]+?>)/g,
       " "
     )
     .replaceAll(/[\s\n\r]+/g, " ")
@@ -423,4 +422,29 @@ export const getCurrentDirectory = async () => {
   return await runAppleScript(`tell application "Finder"
     return POSIX path of (insertion location as alias)
   end tell`);
+};
+
+/**
+ * Gets the application that owns the menubar.
+ * @returns A promise resolving to the name of the application as a string.
+ */
+export const getMenubarOwningApplication = async () => {
+  return await runAppleScript(`use framework "Foundation"
+
+  set workspace to current application's NSWorkspace's sharedWorkspace()
+  set runningApps to workspace's runningApplications()
+  
+  set targetApp to missing value
+  repeat with theApp in runningApps
+    if theApp's ownsMenuBar() then
+      set targetApp to theApp
+      exit repeat
+    end if
+  end repeat
+  
+  if targetApp is missing value then
+    return ""
+  else
+    return targetApp's localizedName() as text
+  end if`);
 };
