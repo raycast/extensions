@@ -1,5 +1,5 @@
-import { Action, ActionPanel, Detail, Toast, showToast } from "@raycast/api";
-import getAiSummary from "./getAiSummary";
+import { Action, ActionPanel, Detail, Toast, getPreferenceValues, showToast } from "@raycast/api";
+import getChatGPTSummary from "./getChatGPTSummary";
 import getVideoInfo from "./getVideoInfo";
 import type { LaunchProps } from "@raycast/api";
 import ytdl from "ytdl-core";
@@ -11,6 +11,8 @@ interface VideoSummaryProps {
 }
 
 export default function VideoSummary(props: LaunchProps<{ arguments: VideoSummaryProps }>) {
+  const preferences = getPreferenceValues();
+
   const [summary, setSummary] = useState<string | undefined>(undefined);
   const [summaryIsLoading, setSummaryIsLoading] = useState<boolean>(false);
   const { video } = props.arguments;
@@ -32,11 +34,17 @@ export default function VideoSummary(props: LaunchProps<{ arguments: VideoSummar
   const minutes = Math.floor((Number(videoData?.lengthSeconds) % 3600) / 60);
   const duration = formatDuration({ hours, minutes }, { format: ["hours", "minutes", "seconds"] });
 
-  const summaryData = getAiSummary(video, videoData?.title);
-  summaryData.then((result) => {
-    setSummary(result.summary);
-    setSummaryIsLoading(result.summaryIsLoading);
-  });
+  if (preferences.chosenAi === "chatgpt") {
+    console.log("preferencenes.chosenAI", preferences.chosenAi);
+    getChatGPTSummary(video, videoData?.title).then((result) => {
+      setSummary(result.summary);
+      setSummaryIsLoading(result.summaryIsLoading);
+    });
+  }
+
+  if (preferences.chosenAi === "raycastai") {
+    console.log("preferencenes.chosenAI", preferences.chosenAi);
+  }
 
   const markdown = summary
     ? `${summary}

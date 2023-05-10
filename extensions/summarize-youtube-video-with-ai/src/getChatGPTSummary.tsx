@@ -6,7 +6,7 @@ import { useState } from "react";
 
 const SUMMARY_MAX_CHARS = 12000;
 
-export default async function getAiSummary(video: string, videoTitle?: string) {
+export default async function getChatGPTSummary(video: string, videoTitle?: string) {
   const [summary, setSummary] = useState<string | undefined>(undefined);
 
   const { transcriptLoading, rawTranscript } = getVideoTranscript(video);
