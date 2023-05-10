@@ -31,6 +31,7 @@
           "title": "Choose AI",
           "description": "Choose between Raycast AI or ChatGPT",
           "type": "dropdown",
+          "default": "raycastai",
           "data": [
             {
               "value": "raycastai",
