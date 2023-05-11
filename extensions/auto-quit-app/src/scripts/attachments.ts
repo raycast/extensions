@@ -8,9 +8,11 @@ import { formatFileSize, getMIMEtype } from "../utils/finder";
 const preferences: Preferences = getPreferenceValues();
 let downloadDirectory = preferences.saveDirectory.replace("~", homedir());
 const attachmentsDirectory = downloadDirectory;
+
 if (!existsSync(downloadDirectory)) {
   downloadDirectory = `${homedir()}/Downloads`;
 }
+
 downloadDirectory = "Macintosh HD" + downloadDirectory.replaceAll("/", ":");
 
 export const getMessageAttachments = async (message: Message, mailbox: Mailbox): Promise<Attachment[]> => {
@@ -54,6 +56,7 @@ export const saveAttachment = async (message: Message, mailbox: Mailbox, attachm
       return;
     }
   }
+
   if (name) {
     const extension = attachmentName.split(".").pop();
     if (extension && !name.endsWith(extension)) {
@@ -62,6 +65,7 @@ export const saveAttachment = async (message: Message, mailbox: Mailbox, attachm
   } else {
     name = attachmentName;
   }
+
   const script = `
     set attachmentsFolder to "${downloadDirectory}"
     tell msg
@@ -71,6 +75,7 @@ export const saveAttachment = async (message: Message, mailbox: Mailbox, attachm
       save selectedAttachment in attachmentPath
     end tell
   `;
+
   try {
     await tellMessage(message, mailbox, script);
     const options: Toast.Options = {
@@ -111,6 +116,7 @@ export const saveAllAttachments = async (message: Message, mailbox: Mailbox) => 
       end repeat
     end tell
   `;
+
   try {
     await tellMessage(message, mailbox, script);
     const options: Toast.Options = {
@@ -125,6 +131,7 @@ export const saveAllAttachments = async (message: Message, mailbox: Mailbox) => 
         },
       },
     };
+
     await showToast(options);
   } catch (error) {
     await showToast(Toast.Style.Failure, "Error saving attachments");

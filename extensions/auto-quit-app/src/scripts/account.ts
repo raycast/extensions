@@ -5,39 +5,41 @@ import { getMailboxIcon } from "../utils/mailbox";
 
 export const getMailAccounts = async (): Promise<Account[] | undefined> => {
   const script = `
-  set output to ""
-  tell application "Mail"
-    set mailAccounts to every account
-    repeat with mailAcc in mailAccounts
-      repeat 1 times
-        if (count of every mailbox of mailAcc) is 0 then exit repeat
-        set accId to id of mailAcc
-        set accName to name of mailAcc
-        set accUser to user name of mailAcc
-        set fullName to full name of mailAcc
-        set accEmail to email addresses of mailAcc
-        try
-          set mainMailbox to (first mailbox of mailAcc whose name is "All Mail")
-          set numUnread to unread count of mainMailbox
-        on error
+    set output to ""
+    tell application "Mail"
+      set mailAccounts to every account
+      repeat with mailAcc in mailAccounts
+        repeat 1 times
+          if (count of every mailbox of mailAcc) is 0 then exit repeat
+          set accId to id of mailAcc
+          set accName to name of mailAcc
+          set accUser to user name of mailAcc
+          set fullName to full name of mailAcc
+          set accEmail to email addresses of mailAcc
           try
-            set mainMailbox to (first mailbox of mailAcc whose name is "INBOX")
+            set mainMailbox to (first mailbox of mailAcc whose name is "All Mail")
             set numUnread to unread count of mainMailbox
           on error
-            set numUnread to 0
+            try
+              set mainMailbox to (first mailbox of mailAcc whose name is "INBOX")
+              set numUnread to unread count of mainMailbox
+            on error
+              set numUnread to 0
+            end try
           end try
-        end try
-        set output to output & accId & "," & accName & "," & accUser & "," & fullName & "," & accEmail & "," & numUnread & "\n"
+          set output to output & accId & "," & accName & "," & accUser & "," & fullName & "," & accEmail & "," & numUnread & "\n"
+        end repeat
       end repeat
-    end repeat
-  end tell
-  return output
+    end tell
+    return output
   `;
+
   let accounts = cache.getAccounts();
   if (!accounts) {
     try {
       const response: string[] = (await runAppleScript(script)).split("\n");
       response.pop();
+
       accounts = await Promise.all(
         response.map(async (line: string) => {
           const [id, name, userName, fullName, email, numUnread] = line.split(",");
@@ -52,6 +54,7 @@ export const getMailAccounts = async (): Promise<Account[] | undefined> => {
           };
         })
       );
+
       if (accounts) {
         cache.setAccounts(accounts);
       }
@@ -60,6 +63,7 @@ export const getMailAccounts = async (): Promise<Account[] | undefined> => {
       return undefined;
     }
   }
+
   return accounts;
 };
 
@@ -77,9 +81,11 @@ export const getMailboxes = async (accountName: string): Promise<Mailbox[]> => {
     end tell
     return output
   `;
+
   try {
     const response: string[] = (await runAppleScript(script)).split("\n");
     response.pop();
+
     const mailboxes: Mailbox[] = response
       .map((line: string) => {
         const [name, unreadCount] = line.split(",");

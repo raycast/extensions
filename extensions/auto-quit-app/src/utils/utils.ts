@@ -3,6 +3,7 @@ import * as cleanTextUtils from "clean-text-utils";
 import TimeAgo from "javascript-time-ago";
 import en from "javascript-time-ago/locale/en.json";
 import json2md from "json2md";
+import { AnyFn } from "../types";
 
 TimeAgo.addDefaultLocale(en);
 const timeAgo = new TimeAgo("en-US");
@@ -73,4 +74,8 @@ export const getAttachmentIcon = (type: string | undefined): string | Icon => {
   } else {
     return Icon.Paperclip;
   }
+};
+
+export const invoke = <T>(fn: AnyFn<T>) => {
+  return fn();
 };

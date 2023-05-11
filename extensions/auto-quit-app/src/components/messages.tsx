@@ -1,36 +1,57 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { List, Icon } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import * as messageScripts from "../scripts/messages";
-import { shortenText, formatDate, titleCase } from "../utils";
 import { Account, Mailbox, Message, MessageProps } from "../types";
+import { shortenText, formatDate, titleCase, invoke } from "../utils";
 import { MailIcons } from "../utils/presets";
-import { MessageActions } from "./message-actions";
 import * as cache from "../utils/cache";
+import { MessageActions } from "./message-actions";
 
 export const Messages = (props: { account: Account; mailbox: Mailbox }): JSX.Element => {
+  const { account } = props;
+
   const [mailbox, setMailbox] = useState<Mailbox>(props.mailbox);
 
   const {
     data: messages,
+    mutate: mutateMessages,
     isLoading: isLoadingMessages,
-    revalidate: revalidateMessages,
-  } = useCachedPromise(messageScripts.getAccountMessages, [props.account, mailbox, mailbox.name]);
+  } = useCachedPromise(messageScripts.getAccountMessages, [account, mailbox]);
+
+  const handleAction = useCallback((action: () => Promise<void>, account: Account, mailbox: Mailbox) => {
+    mutateMessages(
+      invoke(async () => {
+        await action();
+        const messages = await messageScripts.getAccountMessages(account, mailbox);
+
+        return messages;
+      }),
+      {
+        optimisticUpdate: (data) => {
+          if (!data) return data;
+
+          const messages = cache.getMessages(account.id, mailbox.name);
+          return messages;
+        },
+      }
+    );
+  }, []);
 
   return (
     <List
       isLoading={isLoadingMessages}
       searchBarPlaceholder={"Search for emails"}
-      navigationTitle={`${props.account.name} - ${titleCase(mailbox.name)}`}
+      navigationTitle={`${account.name} - ${titleCase(mailbox.name)}`}
       searchBarAccessory={
         <List.Dropdown
           tooltip="Mailbox"
           defaultValue={mailbox.name}
           onChange={(name: string) => {
-            setMailbox(props.account.mailboxes.find((mailbox) => mailbox.name === name) as Mailbox);
+            setMailbox(account.mailboxes.find((mailbox) => mailbox.name === name) as Mailbox);
           }}
         >
-          {props.account.mailboxes.map((mailbox) => (
+          {account.mailboxes.map((mailbox) => (
             <List.Dropdown.Item
               key={mailbox.name}
               title={titleCase(mailbox.name)}
@@ -46,25 +67,9 @@ export const Messages = (props: { account: Account; mailbox: Mailbox }): JSX.Ele
           key={index}
           mailbox={mailbox}
           message={message}
-          account={props.account}
-          setMessage={(account, message) => {
-            // TODO: We should update all mailboxes for the given account
-            const cachedMessages = cache.getMessages(account.id, mailbox.name);
-            const nextCachedMessages = cachedMessages.map((m) => {
-              if (m.id === message.id) {
-                m = { ...m, ...message };
-              }
-              return m;
-            });
-            cache.setMessages(nextCachedMessages, account.id, mailbox.name);
-            revalidateMessages();
-          }}
-          deleteMessage={(account, message) => {
-            // TODO: We should update all mailboxes for the given account
-            const cachedMessages = cache.getMessages(account.id, mailbox.name);
-            const nextCachedMessages = cachedMessages.filter((m) => m.id !== message.id);
-            cache.setMessages(nextCachedMessages, account.id, mailbox.name);
-            revalidateMessages();
+          account={account}
+          onAction={(action) => {
+            handleAction(action, account, mailbox);
           }}
         />
       ))}

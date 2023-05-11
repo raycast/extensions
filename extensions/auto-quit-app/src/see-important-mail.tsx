@@ -1,21 +1,18 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { List, showToast, Toast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { MessageListItem } from "./components/messages";
 import { getMailAccounts } from "./scripts/account";
 import { getAccountMessages } from "./scripts/messages";
-import { Account, Message } from "./types";
+import { Account, Mailbox, Message } from "./types";
+import { invoke } from "./utils";
 import { isImportantMailbox } from "./utils/mailbox";
 import * as cache from "./utils/cache";
 
 export default function SeeImportantMail() {
   const [account, setAccount] = useState<Account>();
 
-  const {
-    data: accounts,
-    isLoading: isLoadingAccounts,
-    revalidate: revalidateAccounts,
-  } = useCachedPromise(async () => {
+  const fetchAccounts = useCallback(async () => {
     const accounts = await getMailAccounts();
 
     if (!accounts) {
@@ -27,7 +24,7 @@ export default function SeeImportantMail() {
       accounts.map((account: Account) => {
         const mailbox = account.mailboxes.find(isImportantMailbox);
         if (mailbox) {
-          return getAccountMessages(account, mailbox, mailbox.name, 10);
+          return getAccountMessages(account, mailbox);
         } else {
           return [];
         }
@@ -38,7 +35,31 @@ export default function SeeImportantMail() {
       account.messages = messages[index];
       return account;
     });
-  });
+  }, []);
+
+  const { data: accounts, mutate: mutateAccounts, isLoading: isLoadingAccounts } = useCachedPromise(fetchAccounts);
+
+  const handleAction = useCallback((action: () => Promise<void>, mailbox: Mailbox) => {
+    mutateAccounts(
+      invoke(async () => {
+        await action();
+        const accounts = await fetchAccounts();
+
+        return accounts;
+      }),
+      {
+        optimisticUpdate: (data) => {
+          if (!data) return data;
+
+          return data.map((account: Account) => {
+            const messages = cache.getMessages(account.id, mailbox.name);
+            account.messages = messages;
+            return account;
+          });
+        },
+      }
+    );
+  }, []);
 
   const numMessages = accounts
     ?.filter((a: Account) => account === undefined || a.id === account.id)
@@ -77,24 +98,8 @@ export default function SeeImportantMail() {
                     mailbox={importantMailbox}
                     account={account}
                     message={message}
-                    setMessage={(account, message) => {
-                      // TODO: We should update all mailboxes for the given account
-                      const cachedMessages = cache.getMessages(account.id, importantMailbox.name);
-                      const nextCachedMessages = cachedMessages.map((m) => {
-                        if (m.id === message.id) {
-                          m = { ...m, ...message };
-                        }
-                        return m;
-                      });
-                      cache.setMessages(nextCachedMessages, account.id, importantMailbox.name);
-                      revalidateAccounts();
-                    }}
-                    deleteMessage={(account, message) => {
-                      // TODO: We should update all mailboxes for the given account
-                      const cachedMessages = cache.getMessages(account.id, importantMailbox.name);
-                      const nextCachedMessages = cachedMessages.filter((m) => m.id !== message.id);
-                      cache.setMessages(nextCachedMessages, account.id, importantMailbox.name);
-                      revalidateAccounts();
+                    onAction={(action) => {
+                      handleAction(action, importantMailbox);
                     }}
                   />
                 ))}

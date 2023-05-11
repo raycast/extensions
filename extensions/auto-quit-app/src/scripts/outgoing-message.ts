@@ -13,15 +13,18 @@ export const newOutgoingMessage = async (
     await showToast(Toast.Style.Failure, "No recipients specified");
     return;
   }
+
   for (const recipient of outgoingMessage.to) {
     if (!emailRegex({ exact: true }).test(recipient)) {
       await showToast(Toast.Style.Failure, "Invalid email for recipient");
       return;
     }
   }
+
   let attachments =
     outgoingMessage.attachments && outgoingMessage.attachments.length > 0 ? outgoingMessage.attachments : [];
   attachments = attachments.map((attachment: string) => `Macintosh HD${attachment.replaceAll("/", ":")}`);
+
   const actionScript = (() => {
     switch (action) {
       case OutgoingMessageAction.New:
@@ -38,6 +41,7 @@ export const newOutgoingMessage = async (
         return "make new outgoing message";
     }
   })();
+
   const script = `
     tell application "Mail"
       ${
@@ -75,5 +79,6 @@ export const newOutgoingMessage = async (
       send newMessage
     end tell  
   `;
+
   await runAppleScript(script);
 };

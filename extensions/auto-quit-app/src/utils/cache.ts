@@ -24,7 +24,12 @@ export const getAccounts = (): Account[] | undefined => {
       }
     }
   }
+
   return undefined;
+};
+
+export const getAccount = (idOrName: string): Account | undefined => {
+  return getAccounts()?.find((x) => x.id === idOrName || x.name === idOrName);
 };
 
 export const setAccounts = (data: Account[]) => {
@@ -32,6 +37,10 @@ export const setAccounts = (data: Account[]) => {
 };
 
 const messages = new Cache();
+
+export const invalidateMessages = () => {
+  messages.clear();
+};
 
 export const getMessages = (account: string, mailbox: string): Message[] => {
   const key = `${account}-${mailbox}`;
@@ -44,10 +53,38 @@ export const getMessages = (account: string, mailbox: string): Message[] => {
       }
     }
   }
+
   return [];
 };
 
 export const setMessages = (data: Message[], account: string, mailbox: string) => {
   const key = `${account}-${mailbox}`;
   messages.set(key, JSON.stringify({ time: Date.now(), data: data }));
+};
+
+export const addMessage = (data: Message, account: string, mailbox: string) => {
+  const currentMessages = getMessages(account, mailbox);
+  const nextMessages = [...currentMessages, data];
+
+  setMessages(nextMessages, account, mailbox);
+};
+
+export const updateMessage = (id: string, data: Message, account: string, mailbox: string) => {
+  const currentMessages = getMessages(account, mailbox);
+  const nextMessages = currentMessages.map((currentMessage) => {
+    if (currentMessage.id === id) {
+      return { ...currentMessage, ...data };
+    }
+
+    return currentMessage;
+  });
+
+  setMessages(nextMessages, account, mailbox);
+};
+
+export const deleteMessage = (id: string, account: string, mailbox: string) => {
+  const currentMessages = getMessages(account, mailbox);
+  const nextMessages = currentMessages.filter((currentMessage) => currentMessage.id !== id);
+
+  setMessages(nextMessages, account, mailbox);
 };

@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Form, Action, ActionPanel, showHUD, popToRoot } from "@raycast/api";
 import { useCachedPromise, useForm } from "@raycast/utils";
 import { newOutgoingMessage } from "../scripts/outgoing-message";
@@ -9,6 +10,8 @@ import { FormValidation } from "../utils";
 
 export const ComposeMessage = (props: ComposeMessageProps): JSX.Element => {
   const { account, message, mailbox, attachments, action, draftValues } = props;
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { handleSubmit, itemProps, values, setValue } = useForm<OutgoingMessageForm>({
     initialValues: {
@@ -28,20 +31,26 @@ export const ComposeMessage = (props: ComposeMessageProps): JSX.Element => {
       attachments: (value) => FormValidation.maxFileSize(value),
     },
     onSubmit: async (values) => {
-      const message: OutgoingMessage = {
-        account: values.account,
-        to: values.to.split(",").map((recipient: string) => recipient.trim()),
-        cc: values.cc.split(",").map((recipient: string) => recipient.trim()),
-        bcc: values.bcc.split(",").map((recipient: string) => recipient.trim()),
-        subject: values.subject,
-        content: values.content,
-        attachments: values.attachments,
-      };
+      setIsSubmitting(true);
 
-      await newOutgoingMessage(message, props.action, props.message, props.mailbox);
+      try {
+        const message: OutgoingMessage = {
+          account: values.account,
+          to: values.to.split(",").map((recipient: string) => recipient.trim()),
+          cc: values.cc.split(",").map((recipient: string) => recipient.trim()),
+          bcc: values.bcc.split(",").map((recipient: string) => recipient.trim()),
+          subject: values.subject,
+          content: values.content,
+          attachments: values.attachments,
+        };
 
-      await showHUD("Message Sent");
-      await popToRoot();
+        await newOutgoingMessage(message, props.action, props.message, props.mailbox);
+
+        await showHUD("Message Sent");
+        await popToRoot();
+      } finally {
+        setIsSubmitting(false);
+      }
     },
   });
 
@@ -72,6 +81,7 @@ export const ComposeMessage = (props: ComposeMessageProps): JSX.Element => {
     <Form isLoading={true}></Form>
   ) : (
     <Form
+      isLoading={isSubmitting}
       enableDrafts={shouldEnableDrafts}
       actions={
         <ActionPanel>

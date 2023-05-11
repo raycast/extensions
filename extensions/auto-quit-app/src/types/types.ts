@@ -1,5 +1,9 @@
 import { Image } from "@raycast/api";
 
+export type AnyFn<T = void> = (...args: unknown[]) => T;
+
+export type MaybePromise<T> = T | Promise<T>;
+
 export type Account = {
   id: string;
   name: string;
@@ -37,12 +41,18 @@ export type Message = {
   redirected?: boolean;
 };
 
+export type Action = () => Promise<void>;
+
+export type ActionPayload = {
+  account: Account;
+  message: Message;
+};
+
 export type MessageProps = {
   account: Account;
   mailbox: Mailbox;
   message: Message;
-  setMessage: (account: Account, message: Message) => void;
-  deleteMessage: (account: Account, message: Message) => void;
+  onAction?: (action: Action, payload: ActionPayload) => MaybePromise<void>;
 };
 
 export enum OutgoingMessageAction {

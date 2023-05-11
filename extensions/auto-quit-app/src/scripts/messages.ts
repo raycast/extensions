@@ -1,7 +1,7 @@
 import { showToast, Toast } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
 import { Account, Mailbox, Message } from "../types";
-import { constructDate } from "../utils";
+import { constructDate, titleCase } from "../utils";
 import * as cache from "../utils/cache";
 import { isJunkMailbox, isTrashMailbox } from "../utils/mailbox";
 
@@ -27,26 +27,97 @@ export const openMessage = async (message: Message, mailbox: Mailbox) => {
   await tellMessage(message, mailbox, "open msg\nactivate");
 };
 
-export const toggleMessageRead = async (message: Message, mailbox: Mailbox) => {
-  await tellMessage(message, mailbox, "tell msg to set read status to not read status");
+export const toggleMessageRead = async (
+  message: Message,
+  mailbox: Mailbox,
+  { silent = false }: { silent?: boolean } = {}
+) => {
+  try {
+    const account = cache.getAccount(message.account);
+    const mailboxes = account?.mailboxes || [];
+
+    if (account && mailboxes) {
+      mailboxes.forEach((innerMailbox) => {
+        cache.updateMessage(
+          message.id,
+          {
+            ...message,
+            read: !message.read,
+          },
+          account.id,
+          innerMailbox.name
+        );
+      });
+    }
+
+    if (!silent) {
+      await showToast(Toast.Style.Success, `Message marked as ${message.read ? "unread" : "read"}`);
+    }
+
+    await tellMessage(message, mailbox, "tell msg to set read status to not read status");
+  } catch (error) {
+    if (!silent) {
+      await showToast(Toast.Style.Failure, `Failed to mark message as ${message.read ? "unread" : "read"}`);
+    }
+
+    console.error(error);
+
+    cache.invalidateMessages();
+  }
 };
 
 export const moveMessage = async (message: Message, mailbox: Mailbox, target: Mailbox) => {
-  await tellMessage(message, mailbox, `set mailbox of msg to first mailbox whose name is "${target.name}"`);
+  try {
+    const account = cache.getAccount(message.account);
+    const mailboxes = account?.mailboxes || [];
+
+    if (account && mailboxes) {
+      mailboxes.forEach((innerMailbox) => {
+        if (innerMailbox.name === target.name) {
+          cache.addMessage(message, account.id, innerMailbox.name);
+        } else {
+          cache.deleteMessage(message.id, account.id, innerMailbox.name);
+        }
+      });
+    }
+
+    await showToast(Toast.Style.Success, `Moved message to ${titleCase(target.name)}`);
+    await tellMessage(message, mailbox, `set mailbox of msg to first mailbox whose name is "${target.name}"`);
+  } catch (error) {
+    await showToast(Toast.Style.Failure, `Error moving message to ${titleCase(target.name)}`);
+    console.error(error);
+
+    cache.invalidateMessages();
+  }
 };
 
 export const moveToJunk = async (message: Message, account: Account, mailbox: Mailbox) => {
   try {
     const junkMailbox = account.mailboxes.find(isJunkMailbox);
     if (junkMailbox) {
+      const account = cache.getAccount(message.account);
+      const mailboxes = account?.mailboxes || [];
+
+      if (account && mailboxes) {
+        mailboxes.forEach((innerMailbox) => {
+          if (innerMailbox.name === junkMailbox.name) {
+            cache.addMessage(message, account.id, innerMailbox.name);
+          } else {
+            cache.deleteMessage(message.id, account.id, innerMailbox.name);
+          }
+        });
+      }
+
+      await showToast(Toast.Style.Success, "Moved message to Junk");
       await moveMessage(message, mailbox, junkMailbox);
-      await showToast(Toast.Style.Success, "Moved message to junk");
     } else {
-      await showToast(Toast.Style.Failure, "No junk mailbox found");
+      await showToast(Toast.Style.Failure, "No Junk mailbox found");
     }
   } catch (error) {
-    await showToast(Toast.Style.Failure, "Error moving message to junk");
+    await showToast(Toast.Style.Failure, "Error moving message to Junk");
     console.error(error);
+
+    cache.invalidateMessages();
   }
 };
 
@@ -54,31 +125,58 @@ export const moveToTrash = async (message: Message, account: Account, mailbox: M
   try {
     const trashMailbox = account.mailboxes.find(isTrashMailbox);
     if (trashMailbox) {
+      const account = cache.getAccount(message.account);
+      const mailboxes = account?.mailboxes || [];
+
+      if (account && mailboxes) {
+        mailboxes.forEach((innerMailbox) => {
+          if (innerMailbox.name === trashMailbox.name) {
+            cache.addMessage(message, account.id, innerMailbox.name);
+          } else {
+            cache.deleteMessage(message.id, account.id, innerMailbox.name);
+          }
+        });
+      }
+
+      await showToast(Toast.Style.Success, "Moved message to Trash");
       await moveMessage(message, mailbox, trashMailbox);
-      await showToast(Toast.Style.Success, "Moved message to trash");
     } else {
-      await showToast(Toast.Style.Failure, "No trash mailbox found");
+      await showToast(Toast.Style.Failure, "No Trash mailbox found");
     }
   } catch (error) {
-    await showToast(Toast.Style.Failure, "Error moving message to trash");
+    await showToast(Toast.Style.Failure, "Error moving message to Trash");
     console.error(error);
+
+    cache.invalidateMessages();
   }
 };
 
 export const deleteMessage = async (message: Message, mailbox: Mailbox) => {
   try {
+    const account = cache.getAccount(message.account);
+    const mailboxes = account?.mailboxes || [];
+
+    if (account && mailboxes.length) {
+      mailboxes.forEach((mailbox) => {
+        cache.deleteMessage(message.id, account.id, mailbox.name);
+      });
+    }
+
+    await showToast(Toast.Style.Success, "Message deleted");
     await tellMessage(
       message,
       mailbox,
-      `open msg
-      activate
-      delay 0.5
-		  tell application "System Events" to key code 51`
+      `
+        open msg
+        activate
+        delay 0.5
+		    tell application "System Events" to key code 51`
     );
-    await showToast(Toast.Style.Success, "Message deleted");
   } catch (error) {
     await showToast(Toast.Style.Failure, "Error deleting message");
     console.error(error);
+
+    cache.invalidateMessages();
   }
 };
 
@@ -114,11 +212,11 @@ export const getRecipients = async (message: Message, mailbox: Mailbox): Promise
 export const getAccountMessages = async (
   account: Account,
   mailbox: Mailbox,
-  cacheMailbox: string,
   numMessages = 10,
   unreadOnly = false
 ): Promise<Message[] | undefined> => {
-  let messages: Message[] = cache.getMessages(account.id, cacheMailbox);
+  let messages: Message[] = cache.getMessages(account.id, mailbox.name);
+
   const first = messages.length > 0 ? messages[0].id : undefined;
   const script = `
     set output to ""
@@ -143,31 +241,34 @@ export const getAccountMessages = async (
     end repeat
     return output
 `;
+
   try {
     const response: string[] = (await runAppleScript(script)).split("$end");
     response.pop();
-    const newMessages: Message[] = response
-      .map((line: string) => {
-        const [id, subject, senderName, senderAddress, date, read, numAttachments] = line.split("$break");
-        return {
-          id,
-          account: account.name,
-          accountAddress: account.email,
-          subject,
-          date: constructDate(date),
-          read: read === "true",
-          numAttachments: parseInt(numAttachments),
-          senderName,
-          senderAddress,
-        };
-      })
-      .filter((msg: Message) => !unreadOnly || !msg.read);
+
+    const newMessages: Message[] = response.map((line: string) => {
+      const [id, subject, senderName, senderAddress, date, read, numAttachments] = line.split("$break");
+      return {
+        id,
+        account: account.name,
+        accountAddress: account.email,
+        subject,
+        date: constructDate(date),
+        read: read === "true",
+        numAttachments: parseInt(numAttachments),
+        senderName,
+        senderAddress,
+      };
+    });
+
     messages = newMessages.concat(messages);
-    cache.setMessages(messages, account.id, cacheMailbox);
+
+    cache.setMessages(messages, account.id, mailbox.name);
   } catch (error) {
     console.error(error);
   }
-  return messages;
+
+  return unreadOnly ? messages.filter((x) => !x.read) : messages;
 };
 
 export const getMessageContent = async (message: Message, mailbox: Mailbox): Promise<string> => {

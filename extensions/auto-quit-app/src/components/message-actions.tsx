@@ -24,7 +24,7 @@ const { primaryAction }: Preferences = getPreferenceValues();
 type MessageActionsProps = MessageProps & { inMessageView?: boolean };
 
 export const MessageActions = (props: MessageActionsProps): JSX.Element => {
-  const { mailbox, account, message, setMessage, deleteMessage, inMessageView } = props;
+  const { mailbox, account, message, inMessageView, onAction } = props;
   const navigation = useNavigation();
 
   const SeeInMail = () => (
@@ -44,7 +44,27 @@ export const MessageActions = (props: MessageActionsProps): JSX.Element => {
   );
 
   const SeeMessage = () => (
-    <Action.Push title={"See Message"} icon={Icon.QuoteBlock} target={<ViewMessage {...props} />} />
+    <Action.Push
+      title={"See Message"}
+      icon={Icon.QuoteBlock}
+      target={<ViewMessage {...props} />}
+      onPush={() => {
+        const action = async () => {
+          if (!message.read) {
+            await messageScripts.toggleMessageRead(message, mailbox, { silent: true });
+          }
+        };
+
+        const actionPayload = {
+          account,
+          message: { ...message, read: true },
+        };
+
+        const invokeAction = onAction ? () => onAction(action, actionPayload) : action;
+
+        invokeAction();
+      }}
+    />
   );
 
   return (
@@ -64,18 +84,21 @@ export const MessageActions = (props: MessageActionsProps): JSX.Element => {
           shortcut={{ modifiers: ["cmd"], key: "r" }}
           target={<ComposeMessage {...props} action={OutgoingMessageAction.Reply} />}
         />
+
         <Action.Push
           title={OutgoingMessageAction.ReplyAll}
           icon={OutgoingMessageIcons[OutgoingMessageAction.ReplyAll]}
           shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
           target={<ComposeMessage {...props} action={OutgoingMessageAction.ReplyAll} />}
         />
+
         <Action.Push
           title={OutgoingMessageAction.Forward}
           icon={OutgoingMessageIcons[OutgoingMessageAction.Forward]}
           shortcut={{ modifiers: ["cmd"], key: "f" }}
           target={<ComposeMessage {...props} action={OutgoingMessageAction.Forward} />}
         />
+
         <Action.Push
           title={OutgoingMessageAction.Redirect}
           icon={OutgoingMessageIcons[OutgoingMessageAction.Redirect]}
@@ -83,22 +106,28 @@ export const MessageActions = (props: MessageActionsProps): JSX.Element => {
           target={<ComposeMessage {...props} action={OutgoingMessageAction.Redirect} />}
         />
       </ActionPanel.Section>
+
       <ActionPanel.Section>
         <Action
           title={message.read ? "Mark as Unread" : "Mark as Read"}
           shortcut={{ modifiers: ["cmd", "shift"], key: "m" }}
           icon={message.read ? MailIcons.Unread : Icon.CheckCircle}
           onAction={async () => {
-            try {
-              setMessage(account, { ...message, read: !message.read });
+            const action = async () => {
               await messageScripts.toggleMessageRead(message, mailbox);
-              await showToast(Toast.Style.Success, `Message marked as ${message.read ? "unread" : "read"}`);
-            } catch (error) {
-              await showToast(Toast.Style.Failure, `Failed to mark message as ${message.read ? "unread" : "read"}`);
-              console.error(error);
-            }
+            };
+
+            const actionPayload = {
+              account,
+              message: { ...message, read: !message.read },
+            };
+
+            const invokeAction = onAction ? () => onAction(action, actionPayload) : action;
+
+            invokeAction();
           }}
         />
+
         {message.numAttachments > 0 && (
           <React.Fragment>
             <Action.Push
@@ -107,6 +136,7 @@ export const MessageActions = (props: MessageActionsProps): JSX.Element => {
               title={`See ${message.numAttachments} Attachment${message.numAttachments > 1 ? "s" : ""}`}
               target={<Attachments {...props} />}
             />
+
             <Action
               shortcut={{ modifiers: ["cmd"], key: "s" }}
               icon={MailIcons.Save}
@@ -121,27 +151,43 @@ export const MessageActions = (props: MessageActionsProps): JSX.Element => {
             />
           </React.Fragment>
         )}
+
         {!isJunkMailbox(mailbox) && (
           <Action
             title={"Move to Junk"}
             shortcut={{ modifiers: ["cmd", "shift"], key: "j" }}
             icon={MailIcons.Junk}
             onAction={async () => {
-              deleteMessage(account, message);
-              await messageScripts.moveToJunk(message, account, mailbox);
-              if (inMessageView) navigation.pop();
+              const action = async () => {
+                await messageScripts.moveToJunk(message, account, mailbox);
+                if (inMessageView) navigation.pop();
+              };
+
+              const actionPayload = { account, message };
+
+              const invokeAction = onAction ? () => onAction(action, actionPayload) : action;
+
+              invokeAction();
             }}
           />
         )}
+
         {!isTrashMailbox(mailbox) ? (
           <Action
             title={"Move to Trash"}
             shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
             icon={MailIcons.Trash}
             onAction={async () => {
-              deleteMessage(account, message);
-              await messageScripts.moveToTrash(message, account, mailbox);
-              if (inMessageView) navigation.pop();
+              const action = async () => {
+                await messageScripts.moveToTrash(message, account, mailbox);
+                if (inMessageView) navigation.pop();
+              };
+
+              const actionPayload = { account, message };
+
+              const invokeAction = onAction ? () => onAction(action, actionPayload) : action;
+
+              invokeAction();
             }}
           />
         ) : (
@@ -155,10 +201,18 @@ export const MessageActions = (props: MessageActionsProps): JSX.Element => {
                 message: "This message will be permanently deleted.",
                 icon: MailIcons.TrashRed,
               });
+
               if (confirm) {
-                deleteMessage(account, message);
-                await messageScripts.deleteMessage(message, mailbox);
-                if (inMessageView) navigation.pop();
+                const action = async () => {
+                  await messageScripts.deleteMessage(message, mailbox);
+                  if (inMessageView) navigation.pop();
+                };
+
+                const actionPayload = { account, message };
+
+                const invokeAction = onAction ? () => onAction(action, actionPayload) : action;
+
+                invokeAction();
               }
             }}
           />

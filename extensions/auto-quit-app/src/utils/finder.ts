@@ -121,6 +121,7 @@ export const getDirectorySizeSync = (dir: string, depth: number) => {
 export const getMIMEtype = (extension: string | undefined): string | undefined => {
   if (!extension) return undefined;
   const mimeType: string | false = mime.lookup(extension);
+
   if (mimeType) return mimeType.split("/")[0];
   else return undefined;
 };
@@ -137,6 +138,7 @@ export async function getFinderSelection(): Promise<string[]> {
     end repeat
     return itemsPaths
   `;
+
   const response = await runAppleScript(script);
   return response === "" ? [] : response.split("\r");
 }
