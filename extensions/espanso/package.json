@@ -15,6 +15,7 @@
     {
       "name": "index",
       "title": "Search Matches",
+      "subtitle": "Espanso",
       "description": "The Raycast version of Espanso Search Bar",
       "mode": "view"
     }
