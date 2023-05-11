@@ -19,7 +19,7 @@ function ShowCardDetailsAction() {
       if (card) {
         push(
           <Detail
-            markdown={getCardDetailsMarkdown(card)}
+            markdown={getCardDetailsMarkdown(selectedItem.name, card)}
             actions={
               <ActionPanel>
                 <Action.CopyToClipboard

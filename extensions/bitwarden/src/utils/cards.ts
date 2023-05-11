@@ -32,12 +32,14 @@ const getCardValue = (key: string, value: string) => {
   return CARD_MAPPER[key as keyof Card]?.(value) ?? value;
 };
 
-export function getCardDetailsMarkdown(card: Card) {
-  return `# 💳 Card Details
+export function getCardDetailsMarkdown(itemName: string, card: Card) {
+  return `# 💳 ${itemName}
 ---
 &nbsp;
+| **Field** | **Value** |
+| --- | --- |
 ${Object.entries(card)
-  .map(([key, value]) => (value ? `- **${CARD_KEY_LABEL[key as keyof Card]}**: ${getCardValue(key, value)}` : null))
+  .map(([key, value]) => (value ? `| **${CARD_KEY_LABEL[key as keyof Card]}** | ${getCardValue(key, value)} |` : null))
   .join("\n")}
 `;
 }

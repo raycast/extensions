@@ -19,7 +19,7 @@ function ShowIdentityDetailsAction() {
       if (identity) {
         push(
           <Detail
-            markdown={getIdentityDetailsMarkdown(identity)}
+            markdown={getIdentityDetailsMarkdown(selectedItem.name, identity)}
             actions={
               <ActionPanel>
                 <Action.CopyToClipboard

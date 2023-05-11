@@ -21,11 +21,11 @@ const IDENTITY_KEY_LABEL: Record<keyof Identity, string> = {
   country: "Country",
 };
 
-export function getIdentityDetailsMarkdown(identity: Identity) {
-  return `# 💳 Identity Details
+export function getIdentityDetailsMarkdown(itemName: string, identity: Identity) {
+  return `# 🪪 ${itemName}
 ---
 &nbsp;
-| Field | Value |
+| **Field** | **Value** |
 | --- | --- |
 ${Object.entries(identity)
   .map(([key, value]) => (value ? `| **${IDENTITY_KEY_LABEL[key as keyof Identity]}** | ${value} |` : null))
