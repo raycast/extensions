@@ -16,8 +16,7 @@ export interface VisibilityOption {
 
 // Error
 export interface AkkomaError {
-  code: string;
-  message: string;
+  error: string;
 }
 
 // Application and Credentials

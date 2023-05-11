@@ -23,7 +23,7 @@ const requestAccessToken = async (
   params.append("grant_type", "authorization_code");
   params.append("redirect_uri", authRequest.redirectURI);
 
-  return await apiServer.fetchToken(params, "fetch tokens error:");
+  return await apiServer.fetchToken(params);
 };
 
 const refreshToken = async (
@@ -37,7 +37,7 @@ const refreshToken = async (
   params.append("refresh_token", refreshToken);
   params.append("grant_type", "refresh_token");
 
-  const tokenResponse = await apiServer.fetchToken(params, "refresh tokens error:");
+  const tokenResponse = await apiServer.fetchToken(params);
 
   tokenResponse.refresh_token = tokenResponse.refresh_token ?? refreshToken;
   return tokenResponse;
@@ -46,6 +46,10 @@ const refreshToken = async (
 const authorize = async (): Promise<string> => {
   const { instance }: Preferences = getPreferenceValues();
   const tokenSet = await client.getTokens();
+
+  if (!instance) {
+    throw new Error("instance is required");
+  }
 
   if (tokenSet?.accessToken) {
     if (tokenSet.refreshToken && tokenSet.isExpired()) {

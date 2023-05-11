@@ -99,7 +99,7 @@ export default function SimpleCommand(props: CommandProps) {
       setTimeout(() => popToRoot(), 2000);
     } catch (error) {
       const requestErr = error as AkkomaError;
-      showToast(Toast.Style.Failure, "Error", requestErr.message);
+      showToast(Toast.Style.Failure, "Error", requestErr.error);
     }
   };
 
