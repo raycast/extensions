@@ -175,6 +175,9 @@ export const useToken = () => {
     onError: (error) => {
       showToast(Toast.Style.Failure, error.name, error.message);
     },
+    onWillExecute: () => {
+      showToast(Toast.Style.Animated, "Fetching Token");
+    },
     onData: (data) => {
       if (data.access_token !== cachedToken?.access_token) {
         cache.set(data);
@@ -211,7 +214,7 @@ export const usePlayHistories = () => {
         showToast(Toast.Style.Failure, error.name, error.message);
       },
       onWillExecute: () => {
-        showToast(Toast.Style.Animated, `${cachedHistories ? "Updating" : "Loading"}`);
+        showToast(Toast.Style.Animated, `${cachedHistories ? "Updating" : "Loading"} Play Histories`);
       },
       onData: (data) => {
         cache.set(data);
@@ -273,7 +276,7 @@ export const useSessionToken = () => {
       showToast(Toast.Style.Failure, error.name, error.message);
     },
     onWillExecute: () => {
-      showToast(Toast.Style.Animated, "Fetching");
+      showToast(Toast.Style.Animated, "Fetching Session Token");
     },
     onData: (data) => {
       if (data.session_token) {
@@ -307,7 +310,7 @@ export const useGameInfo = (titleId: string) => {
       }
     },
     onWillExecute: () => {
-      showToast(Toast.Style.Animated, "Loading");
+      showToast(Toast.Style.Animated, "Loading Game Info");
     },
     onData: () => {
       retryRef.current = 0;
