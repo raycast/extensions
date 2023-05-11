@@ -12,11 +12,12 @@ import {
   ShowCardDetailsAction,
   ShowSecureNoteAction,
 } from "~/components/searchVault/actions";
+import ShowIdentityDetailsAction from "~/components/searchVault/actions/ShowIdentityDetailsAction";
 
 const { primaryAction } = getPreferenceValues();
 
 const VaultItemActionPanel = () => {
-  const { login, card } = useSelectedVaultItem();
+  const { login } = useSelectedVaultItem();
 
   return (
     <ActionPanel>
@@ -31,12 +32,11 @@ const VaultItemActionPanel = () => {
           <OpenUrlInBrowserAction />
         </ActionPanel.Section>
       )}
-      {!!card && (
-        <ActionPanel.Section>
-          <ShowCardDetailsAction />
-          <ShowSecureNoteAction />
-        </ActionPanel.Section>
-      )}
+      <ActionPanel.Section>
+        <ShowCardDetailsAction />
+        <ShowIdentityDetailsAction />
+        <ShowSecureNoteAction />
+      </ActionPanel.Section>
       <ActionPanel.Section>
         <CopyTextFieldsActions />
       </ActionPanel.Section>
