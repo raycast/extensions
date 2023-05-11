@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { List, showToast, Toast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { MessageListItem } from "./components/messages";
@@ -37,11 +37,19 @@ export default function SeeRecentMail() {
     });
   }, []);
 
-  const { data: accounts, mutate: mutateAccounts, isLoading: isLoadingAccounts } = useCachedPromise(fetchAccounts);
+  const accountsAbortController = useRef<AbortController>(new AbortController());
+
+  const {
+    data: accounts,
+    mutate: mutateAccounts,
+    isLoading: isLoadingAccounts,
+  } = useCachedPromise(fetchAccounts, [], { abortable: accountsAbortController });
 
   const handleAction = useCallback((action: () => Promise<void>, mailbox: Mailbox) => {
     mutateAccounts(
       invoke(async () => {
+        accountsAbortController.current.abort();
+
         await action();
         const accounts = await fetchAccounts();
 

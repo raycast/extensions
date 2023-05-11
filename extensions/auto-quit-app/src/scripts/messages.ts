@@ -1,9 +1,12 @@
-import { showToast, Toast } from "@raycast/api";
+import { getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
-import { Account, Mailbox, Message } from "../types";
+import { Account, Mailbox, Message, Preferences } from "../types";
 import { constructDate, titleCase } from "../utils";
 import * as cache from "../utils/cache";
 import { isJunkMailbox, isTrashMailbox } from "../utils/mailbox";
+
+const preferences: Preferences = getPreferenceValues();
+const messageLimit = preferences.messageLimit ? parseInt(preferences.messageLimit) : 10;
 
 export const tellMessage = async (message: Message, mailbox: Mailbox, script: string): Promise<string> => {
   if (!script.includes("msg")) {
@@ -212,10 +215,10 @@ export const getRecipients = async (message: Message, mailbox: Mailbox): Promise
 export const getAccountMessages = async (
   account: Account,
   mailbox: Mailbox,
-  numMessages = 10,
+  numMessages = messageLimit,
   unreadOnly = false
 ): Promise<Message[] | undefined> => {
-  let messages: Message[] = cache.getMessages(account.id, mailbox.name);
+  let messages = cache.getMessages(account.id, mailbox.name);
 
   const first = messages.length > 0 ? messages[0].id : undefined;
   const script = `
@@ -261,6 +264,8 @@ export const getAccountMessages = async (
       };
     });
 
+    // Get messages after await as they might have changed
+    messages = cache.getMessages(account.id, mailbox.name);
     messages = newMessages.concat(messages);
 
     cache.setMessages(messages, account.id, mailbox.name);
@@ -268,7 +273,8 @@ export const getAccountMessages = async (
     console.error(error);
   }
 
-  return unreadOnly ? messages.filter((x) => !x.read) : messages;
+  const result = unreadOnly ? messages.filter((x) => !x.read) : messages;
+  return result.slice(0, messageLimit);
 };
 
 export const getMessageContent = async (message: Message, mailbox: Mailbox): Promise<string> => {

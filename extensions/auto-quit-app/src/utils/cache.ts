@@ -1,5 +1,5 @@
-import { Cache } from "@raycast/api";
-import { Account, Message } from "../types";
+import { Cache, getPreferenceValues } from "@raycast/api";
+import { Account, Message, Preferences } from "../types";
 
 export enum ExpirationTime {
   Minute = 60 * 1000,
@@ -8,11 +8,18 @@ export enum ExpirationTime {
   Week = 7 * Day,
 }
 
-const isCacheExpired = (time: number, limit = ExpirationTime.Hour): boolean => {
+const preferences: Preferences = getPreferenceValues();
+const messageLimit = preferences.messageLimit ? parseInt(preferences.messageLimit) : 10;
+
+const isCacheExpired = (time: number, limit = ExpirationTime.Day): boolean => {
   return Date.now() - time > limit;
 };
 
 const accounts = new Cache();
+
+export const invalidateAccounts = () => {
+  accounts.clear();
+};
 
 export const getAccounts = (): Account[] | undefined => {
   if (accounts.has("accounts")) {
@@ -49,7 +56,7 @@ export const getMessages = (account: string, mailbox: string): Message[] => {
     if (response) {
       const { time, data } = JSON.parse(response);
       if (!isCacheExpired(time)) {
-        return data;
+        return data.slice(0, messageLimit);
       }
     }
   }

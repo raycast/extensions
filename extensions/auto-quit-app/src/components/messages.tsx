@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { List, Icon } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import * as messageScripts from "../scripts/messages";
@@ -13,15 +13,19 @@ export const Messages = (props: { account: Account; mailbox: Mailbox }): JSX.Ele
 
   const [mailbox, setMailbox] = useState<Mailbox>(props.mailbox);
 
+  const messagesAbortController = useRef<AbortController>(new AbortController());
+
   const {
     data: messages,
     mutate: mutateMessages,
     isLoading: isLoadingMessages,
-  } = useCachedPromise(messageScripts.getAccountMessages, [account, mailbox]);
+  } = useCachedPromise(messageScripts.getAccountMessages, [account, mailbox], { abortable: messagesAbortController });
 
   const handleAction = useCallback((action: () => Promise<void>, account: Account, mailbox: Mailbox) => {
     mutateMessages(
       invoke(async () => {
+        messagesAbortController.current.abort();
+
         await action();
         const messages = await messageScripts.getAccountMessages(account, mailbox);
 

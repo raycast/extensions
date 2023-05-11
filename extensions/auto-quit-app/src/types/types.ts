@@ -102,4 +102,5 @@ export type Attachment = {
 export type Preferences = {
   primaryAction: string;
   saveDirectory: string;
+  messageLimit: string;
 };

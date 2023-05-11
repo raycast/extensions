@@ -11,7 +11,9 @@ type ExtensionPreferences = {
   /** Primary Action - The primary action to be performed on the selected message. */
   "primaryAction"?: "seeMessage" | "openMessage",
   /** Save Attachments To - Directory to save mail attachments. */
-  "saveDirectory"?: string
+  "saveDirectory"?: string,
+  /** Message Limit - The amount of messages to retrieve. */
+  "messageLimit"?: "5" | "10" | "25" | "50" | "100"
 }
 
 /** Preferences accessible in all the extension's commands */
@@ -32,6 +34,8 @@ declare namespace Preferences {
   export type ShareWithMail = ExtensionPreferences & {}
   /** Preferences accessible in the `background-refresh` command */
   export type BackgroundRefresh = ExtensionPreferences & {}
+  /** Preferences accessible in the `invalidate-cache` command */
+  export type InvalidateCache = ExtensionPreferences & {}
 }
 
 declare namespace Arguments {
@@ -49,4 +53,6 @@ declare namespace Arguments {
   export type ShareWithMail = {}
   /** Arguments passed to the `background-refresh` command */
   export type BackgroundRefresh = {}
+  /** Arguments passed to the `invalidate-cache` command */
+  export type InvalidateCache = {}
 }
