@@ -10,23 +10,10 @@ import { FormValidation } from "../utils";
 export const ComposeMessage = (props: ComposeMessageProps): JSX.Element => {
   const { account, message, mailbox, attachments, action, draftValues } = props;
 
-  const { data: accounts, isLoading: isLoadingAccounts } = useCachedPromise(getMailAccounts);
-  const { data: recipients, isLoading: isLoadingRecipients } = useCachedPromise(async () => {
-    if (message && mailbox) {
-      if (action === OutgoingMessageAction.Reply) {
-        return [message.senderAddress];
-      } else if (action === OutgoingMessageAction.ReplyAll) {
-        return getRecipients(message, mailbox);
-      }
-    }
-
-    return draftValues?.to || [];
-  });
-
-  const { handleSubmit, itemProps, values } = useForm<OutgoingMessageForm>({
+  const { handleSubmit, itemProps, values, setValue } = useForm<OutgoingMessageForm>({
     initialValues: {
       account: draftValues?.account,
-      to: (Array.isArray(recipients) ? recipients?.join(",") : recipients) || draftValues?.to,
+      to: draftValues?.to,
       cc: draftValues?.cc,
       bcc: draftValues?.bcc,
       subject: draftValues?.subject,
@@ -57,6 +44,27 @@ export const ComposeMessage = (props: ComposeMessageProps): JSX.Element => {
       await popToRoot();
     },
   });
+
+  const { data: accounts, isLoading: isLoadingAccounts } = useCachedPromise(getMailAccounts);
+  const { data: recipients, isLoading: isLoadingRecipients } = useCachedPromise(
+    async () => {
+      if (message && mailbox) {
+        if (action === OutgoingMessageAction.Reply) {
+          return [message.senderAddress];
+        } else if (action === OutgoingMessageAction.ReplyAll) {
+          return getRecipients(message, mailbox);
+        }
+      }
+
+      return [draftValues?.to] || [];
+    },
+    [],
+    {
+      onData: (data) => {
+        setValue("to", data?.join(","));
+      },
+    }
+  );
 
   const shouldEnableDrafts = !!values.subject || !!values.content || !!values.attachments;
 

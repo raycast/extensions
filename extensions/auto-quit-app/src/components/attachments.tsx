@@ -1,4 +1,4 @@
-import { List, Action, ActionPanel, Form } from "@raycast/api";
+import { List, Action, ActionPanel, Form, showHUD, popToRoot } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import * as attachmentUtils from "../scripts/attachments";
 import { getAttachmentIcon } from "../utils";
@@ -67,7 +67,9 @@ export const SaveAttachment = ({ mailbox, message, attachment }: SaveAttachmentP
             title={"Save Attachment"}
             icon={MailIcons.Save}
             onSubmit={async (values: { name: string }) => {
-              attachmentUtils.saveAttachment(message, mailbox, attachment, values.name);
+              await attachmentUtils.saveAttachment(message, mailbox, attachment, values.name);
+              await showHUD("Attachment Saved");
+              await popToRoot();
             }}
           />
         </ActionPanel>

@@ -1,7 +1,6 @@
 import { existsSync } from "fs";
 import { homedir } from "os";
 import { showToast, Toast, open, showInFinder, closeMainWindow, getPreferenceValues } from "@raycast/api";
-import { runAppleScript } from "run-applescript";
 import { Mailbox, Attachment, Message, Preferences } from "../types";
 import { tellMessage } from "./messages";
 import { formatFileSize, getMIMEtype } from "../utils/finder";
@@ -18,28 +17,24 @@ export const getMessageAttachments = async (message: Message, mailbox: Mailbox):
   try {
     const script = `
       set output to ""
-      tell application "Mail"
-        set acc to account "${message.account}"
-        tell acc
-          set msg to (first message of mailbox "${mailbox.name}" whose id is "${message.id}")
-          tell msg 
-            repeat with a in mail attachments
-              tell a 
-                set output to output & id & "$break" & name & "$break" & file size & "$end"
-              end tell
-            end repeat
+      tell msg 
+        repeat with a in mail attachments
+          tell a 
+            set output to output & id & "$break" & name & "$break" & file size & "$end"
           end tell
-        end tell
+        end repeat
       end tell
-      return output
     `;
-    const response: string[] = (await runAppleScript(script)).split("$end");
+
+    const response: string[] = (await tellMessage(message, mailbox, script)).split("$end");
     response.pop();
+
     const attachments: Attachment[] = response.map((line: string) => {
       const [id, name, size] = line.split("$break");
       const type = getMIMEtype(name.split(".").pop());
       return { id, name, type, size: formatFileSize(parseInt(size)) };
     });
+
     return attachments;
   } catch (error) {
     await showToast(Toast.Style.Failure, "Error getting message attachments");

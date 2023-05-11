@@ -1,7 +1,7 @@
 import { showToast, Toast } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
-import { constructDate } from "../utils";
 import { Account, Mailbox, Message } from "../types";
+import { constructDate } from "../utils";
 import * as cache from "../utils/cache";
 import { isJunkMailbox, isTrashMailbox } from "../utils/mailbox";
 
@@ -10,14 +10,16 @@ export const tellMessage = async (message: Message, mailbox: Mailbox, script: st
     console.error("Script must include msg");
     return "missing value";
   }
+
   const appleScript = `
-  tell application "Mail"
-    tell account "${message.account}"
-      set msg to (first message of (first mailbox whose name is "${mailbox.name}") whose id is "${message.id}")
-      ${script.trim()}
+    tell application "Mail"
+      tell account "${message.account}"
+        set msg to (first message of (first mailbox whose name is "${mailbox.name}") whose id is "${message.id}")
+        ${script.trim()}
+      end tell
     end tell
-  end tell
   `;
+
   return await runAppleScript(appleScript);
 };
 
@@ -83,22 +85,17 @@ export const deleteMessage = async (message: Message, mailbox: Mailbox) => {
 export const getRecipients = async (message: Message, mailbox: Mailbox): Promise<string[]> => {
   const script = `
     set output to ""
-    tell application "Mail"
-      set acc to (first account whose id is "${message.account}")
-      tell acc
-        set msg to (first message of (first mailbox whose name is "${mailbox.name}") whose id is "${message.id}")
-        repeat with r in recipients of msg
-          tell r to set output to output & name & "$break" & address & "$end"
-        end repeat
-      end tell
-    end tell
-    return output
+    repeat with r in recipients of msg
+      tell r to set output to output & name & "$break" & address & "$end"
+    end repeat
   `;
+
   try {
-    const response: string[] = (await runAppleScript(script)).split("$end");
+    const response: string[] = (await tellMessage(message, mailbox, script)).split("$end");
     response.pop();
     const recipientNames: string[] = [];
     const recipientAddresses: string[] = [];
+
     for (const line of response) {
       const [name, address] = line.split("$break");
       if (address !== message.accountAddress) {
@@ -106,6 +103,7 @@ export const getRecipients = async (message: Message, mailbox: Mailbox): Promise
         recipientAddresses.push(address);
       }
     }
+
     return [message.senderAddress, ...recipientAddresses];
   } catch (error) {
     console.error(error);
