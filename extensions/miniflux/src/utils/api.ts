@@ -26,6 +26,11 @@ const requestApi = async <T>(
   body?: object
 ): Promise<T> => {
   const { baseUrl, apiKey }: Preferences = getPreferenceValues();
+
+  if (!baseUrl || !apiKey) {
+    throw new Error("baseUrl and apikey are required!");
+  }
+
   const apiUrl = removeTrailingSlash(baseUrl);
 
   const headers: HeadersInit = { "X-Auth-Token": apiKey };
