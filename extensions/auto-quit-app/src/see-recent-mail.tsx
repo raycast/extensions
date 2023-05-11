@@ -32,7 +32,7 @@ export default function SeeRecentMail() {
     );
 
     return accounts.map((account: Account, index: number) => {
-      account.messages = messages[index];
+      account.messages = messages[index]?.slice(0, 5);
       return account;
     });
   }, []);
