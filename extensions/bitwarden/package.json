@@ -115,7 +115,7 @@
       "title": "Generate Password (Quick)",
       "subtitle": "Bitwarden",
       "description": "Generate a password using Bitwarden and copy and/or paste it into the active app right away.",
-      "icon": "generate-password.png",
+      "icon": "generate-password-quick.png",
       "mode": "no-view",
       "preferences": [
         {
