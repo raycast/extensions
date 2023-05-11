@@ -41,12 +41,12 @@ export default function Extension({
     getSelectedText()
       .then((text) => {
         const color = getValidColor(text.trim());
-        if (!!color && !searchText) {
+        if (color && !searchText) {
           setSearchText(color);
         }
+        setReadingSelection(false);
       })
-      .catch(() => {})
-      .finally(() => {
+      .catch(() => {
         setReadingSelection(false);
       });
   }, []);
