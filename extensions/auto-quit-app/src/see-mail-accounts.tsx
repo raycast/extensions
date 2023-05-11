@@ -8,7 +8,7 @@ export default function MailAccounts() {
   const { data: accounts, isLoading: isLoadingAccounts } = useCachedPromise(getMailAccounts);
 
   return (
-    <List isLoading={isLoadingAccounts}>
+    <List searchBarPlaceholder="Search for accounts" isLoading={isLoadingAccounts}>
       {accounts && accounts.length > 0 ? (
         accounts?.map((account: Account) => <MailAccount key={account.id} {...account} />)
       ) : (

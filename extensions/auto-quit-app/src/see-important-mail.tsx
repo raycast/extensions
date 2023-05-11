@@ -79,6 +79,7 @@ export default function SeeImportantMail() {
     <List
       isLoading={isLoadingAccounts}
       navigationTitle={`${account?.name || "All Accounts"} - Important Mail`}
+      searchBarPlaceholder="Search for important emails"
       searchBarAccessory={
         <List.Dropdown
           tooltip="Choose Account"

@@ -77,6 +77,7 @@ export default function SeeRecentMail() {
     <List
       isLoading={isLoadingAccounts}
       navigationTitle={`${account?.name || "All Accounts"} - Recent Mail`}
+      searchBarPlaceholder="Search for recent emails"
       searchBarAccessory={
         <List.Dropdown
           tooltip="Choose Account"
