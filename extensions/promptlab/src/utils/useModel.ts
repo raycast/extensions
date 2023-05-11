@@ -30,7 +30,7 @@ export default function useModel(basePrompt: string, prompt: string, input: stri
         error: "Raycast AI is not available — Upgrade to Pro or use a different model endpoint.",
       };
     }
-    return useAI(prompt, { execute: execute });
+    return useAI(prompt, { execute: execute, model: "gpt-3.5-turbo" });
   } else if (preferences.modelEndpoint.includes(":")) {
     // If the endpoint is a URL, use the fetch hook
     const headers: { [key: string]: string } = {
