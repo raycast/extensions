@@ -2,6 +2,7 @@ import { Action, ActionPanel, Detail, Toast, getPreferenceValues, showToast } fr
 import { formatDuration } from "date-fns";
 import { useEffect, useState } from "react";
 import getChatGPTSummary from "./getChatGPTSummary";
+import getRaycatsAISummary from "./getRaycastAISummary";
 import getVideoInfo from "./getVideoInfo";
 import getVideoTranscript from "./getVideoTranscript";
 import type { LaunchProps } from "@raycast/api";
@@ -49,7 +50,10 @@ export default function VideoSummary(props: LaunchProps<{ arguments: VideoSummar
   }
 
   if (preferences.chosenAi === "raycastai") {
-    console.log("preferencenes.chosenAI", preferences.chosenAi);
+    getRaycatsAISummary({ videoTitle: videoData?.title, transcript }).then((result) => {
+      setSummaryIsLoading(result.summaryIsLoading);
+      setContent(result.summary);
+    });
   }
 
   const markdown = content

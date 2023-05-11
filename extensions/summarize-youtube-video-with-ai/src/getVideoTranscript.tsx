@@ -1,5 +1,4 @@
 import { Toast, popToRoot, showToast } from "@raycast/api";
-
 import { YoutubeTranscript } from "youtube-transcript";
 
 export default async function getVideoTranscript(video: string) {
