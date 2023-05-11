@@ -59,7 +59,12 @@ export default function Command() {
                 onAction={() => runAppleScriptSilently(applyWallpaperUpdate(filename))}
               />
               <Action.ShowInFinder path={`${wallpaperDir}/${filename}`} />
-              <Action title="Open Preferences" icon={Icon.Gear} onAction={() => openExtensionPreferences()} shortcut={{ modifiers: ["cmd", "shift"], key: "," }}/>
+              <Action
+                title="Open Preferences"
+                icon={Icon.Gear}
+                onAction={() => openExtensionPreferences()}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
+              />
             </ActionPanel>
           }
         />
