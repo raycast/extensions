@@ -5,6 +5,9 @@
   "description": "Extension for Apple Mail.",
   "icon": "mail.png",
   "author": "yug2005",
+  "contributors": [
+    "ikupenov"
+  ],
   "categories": [
     "Applications",
     "Productivity",

@@ -164,7 +164,6 @@ export const MessageActions = (props: MessageActionsProps): JSX.Element => {
               };
 
               const actionPayload = { account, message };
-
               const invokeAction = onAction ? () => onAction(action, actionPayload) : action;
 
               invokeAction();
@@ -184,7 +183,6 @@ export const MessageActions = (props: MessageActionsProps): JSX.Element => {
               };
 
               const actionPayload = { account, message };
-
               const invokeAction = onAction ? () => onAction(action, actionPayload) : action;
 
               invokeAction();
@@ -209,7 +207,6 @@ export const MessageActions = (props: MessageActionsProps): JSX.Element => {
                 };
 
                 const actionPayload = { account, message };
-
                 const invokeAction = onAction ? () => onAction(action, actionPayload) : action;
 
                 invokeAction();
