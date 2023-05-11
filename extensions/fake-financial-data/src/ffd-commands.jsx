@@ -2,7 +2,7 @@ import { MenuBarExtra } from "@raycast/api";
 import {
   generateFakeAccountNumber,
   generateFakeBIC,
-  copyToClipboard
+  copyToClipboard,
 } from "../utils";
 import { IBAN } from "ibankit";
 

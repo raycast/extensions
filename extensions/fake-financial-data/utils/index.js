@@ -23,4 +23,8 @@ async function copyToClipboard(value) {
     });
 }
 
-module.exports = { generateFakeBIC, generateFakeAccountNumber, copyToClipboard };
+module.exports = {
+  generateFakeBIC,
+  generateFakeAccountNumber,
+  copyToClipboard,
+};
