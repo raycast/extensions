@@ -3,7 +3,7 @@ import { useAI } from "@raycast/utils";
 import { randomFromArray, tryJsonGameFromAi } from "../lib/util";
 import { DynamicGameListItem } from "./ListItems";
 import { GameDataSimple, GameSimple } from "../types";
-import { useCallback, useLayoutEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 const gamesRecLength = 5;
 export const GameRecommendations = ({ recentlyViewed }: { recentlyViewed?: GameDataSimple[] }) => {
@@ -42,7 +42,7 @@ Create a new list of ${gamesRecLength} games you recommend that I should conside
     execute: randomPick !== undefined,
   });
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     if (!aiData) return;
     const parsed = tryJsonGameFromAi(aiData);
     if (!parsed) {
@@ -53,7 +53,7 @@ Create a new list of ${gamesRecLength} games you recommend that I should conside
     setRandomPick(randomFromArray(parsed));
   }, [aiData]);
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     if (!game1 || game1.length === 0) return;
     setRecommend(game1[0]);
   }, [game1]);
