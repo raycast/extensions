@@ -33,6 +33,7 @@ Create a new list of ${gamesRecLength} games you recommend that I should conside
   const { data: aiData } = useAI(prompt(), {
     execute: (myGames?.length ?? 0) > 0,
     stream: false,
+    creativity: 0,
   });
 
   // TODO: update the api to support sending back multiple games
