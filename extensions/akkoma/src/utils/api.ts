@@ -71,7 +71,7 @@ const createApp = async (): Promise<Credentials> =>
   requestApi<Credentials>("POST", CONFIG.appUrl, {
     client_name: "raycast-akkoma-extension",
     redirect_uris: "https://raycast.com/redirect?packageName=Extension",
-    scopes: "read write",
+    scopes: "read:statuses write:statuses read:bookmarks read:accounts write:media",
     website: "https://raycast.com",
   });
 
