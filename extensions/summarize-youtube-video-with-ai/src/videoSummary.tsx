@@ -17,8 +17,9 @@ export default function VideoSummary(props: LaunchProps<{ arguments: VideoSummar
 
   const [videoData, setVideoData] = useState<VideoDataTypes>();
   const [transcript, setTranscript] = useState<string | undefined>(undefined);
-  const [content, setContent] = useState<string | undefined>(undefined);
+  const [summary, setSummary] = useState<string | undefined>(undefined);
   const [summaryIsLoading, setSummaryIsLoading] = useState<boolean>(false);
+
   const { video } = props.arguments;
 
   if (!ytdl.validateURL(video) && !ytdl.validateID(video)) {
@@ -42,19 +43,19 @@ export default function VideoSummary(props: LaunchProps<{ arguments: VideoSummar
   if (preferences.chosenAi === "chatgpt") {
     getChatGPTSummary({ videoTitle: videoData?.title, transcript }).then((result) => {
       setSummaryIsLoading(result.summaryIsLoading);
-      setContent(result.summary);
+      setSummary(result.summary);
     });
   }
 
   if (preferences.chosenAi === "raycastai") {
     getRaycatsAISummary({ videoTitle: videoData?.title, transcript }).then((result) => {
       setSummaryIsLoading(result.summaryIsLoading);
-      setContent(result.summary);
+      setSummary(result.summary);
     });
   }
 
-  const markdown = content
-    ? `${content}
+  const markdown = summary
+    ? `${summary}
   
   <img src="${videoData?.thumbnail}">
   `

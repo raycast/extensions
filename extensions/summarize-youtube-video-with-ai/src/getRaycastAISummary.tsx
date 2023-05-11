@@ -51,11 +51,10 @@ export default async function getRaycatsAISummary({ videoTitle, transcript }: Ge
   console.log("temporarySummary", temporarySummary);
 
   const aiInstructions = `Summarize the following transcription of a youtube video as a list of the most important points each starting with a fitting emoji. Ignore mentions of video sponsors.
-
-        Format:
-        [Emoji] [List Item] [\n\n]
-
-        Here is the transcript: ${temporarySummary.length > 0 ? temporarySummary : transcript}`;
+  
+  Format:
+  [Emoji] [List Item] [\n\n]
+  Here is the transcript: ${temporarySummary.length > 0 ? temporarySummary : transcript}`;
 
   console.log("askAI", askAI);
   console.log(temporarySummary);
