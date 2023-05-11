@@ -4,7 +4,6 @@ import { FormData, File } from "node-fetch";
 import { OAuth, getPreferenceValues } from "@raycast/api";
 import {
   Credentials,
-  Preference,
   StatusRequest,
   StatusResponse,
   Account,
@@ -15,7 +14,7 @@ import {
 import { client } from "./oauth";
 import { RequestInit, Response } from "node-fetch";
 
-const { instance } = getPreferenceValues<Preference>();
+const { instance }: Preferences = getPreferenceValues();
 
 const CONFIG = {
   tokenUrl: "/oauth/token",
@@ -103,7 +102,7 @@ const uploadAttachment = async ({ file, description }: StatusAttachment): Promis
 };
 
 const fetchBookmarks = async (): Promise<Status[]> => {
-  const { bookmarkLimit } = getPreferenceValues<Preference>();
+  const { bookmarkLimit }: Preferences.Bookmark = getPreferenceValues();
   const url = bookmarkLimit ? CONFIG.bookmarkUrl + `?&limit=${bookmarkLimit}` : CONFIG.bookmarkUrl;
 
   const response = await fetchWithAuth(apiUrl(instance, url));

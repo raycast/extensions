@@ -13,14 +13,14 @@ import {
   LocalStorage,
 } from "@raycast/api";
 import apiServer from "./utils/api";
-import { AkkomaError, StatusResponse, Preference, StatusRequest } from "./utils/types";
+import { AkkomaError, StatusResponse, StatusRequest } from "./utils/types";
 import { getAccessToken } from "./utils/oauth";
 import { dateTimeFormatter } from "./utils/util";
 
 import VisibilityDropdown from "./components/VisibilityDropdown";
 
 const cache = new Cache();
-const { instance } = getPreferenceValues<Preference>();
+const { instance }: Preferences = getPreferenceValues();
 
 interface CommandProps extends LaunchProps<{ draftValues: Partial<StatusRequest> }> {
   children?: React.ReactNode;

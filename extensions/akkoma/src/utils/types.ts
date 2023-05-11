@@ -2,11 +2,11 @@ import type { Icon } from "@raycast/api";
 
 export type VisibilityScope = "public" | "unlisted" | "direct" | "private" | "local";
 
-export interface Preference {
-  instance: string;
-  defaultVisibility: VisibilityScope;
-  bookmarkLimit: string;
-}
+// export interface Preference {
+//   instance: string;
+//   defaultVisibility: VisibilityScope;
+//   bookmarkLimit: string;
+// }
 
 export interface VisibilityOption {
   title: string;
