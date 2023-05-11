@@ -110,16 +110,16 @@
       "mode": "view"
     },
     {
-      "name": "background-refresh",
-      "title": "Background Refresh",
-      "description": "Enable background refresh for all accounts.",
+      "name": "refresh-mail",
+      "title": "Refresh Mail",
+      "description": "Refresh all mailboxes.",
       "mode": "no-view",
       "interval": "30m"
     },
     {
-      "name": "invalidate-cache",
-      "title": "Invalidate Cache",
-      "description": "Invalidate the cache for all accounts.",
+      "name": "wipe-cache",
+      "title": "Wipe Cache",
+      "description": "Invalidates the cache for all accounts.",
       "mode": "no-view"
     }
   ],

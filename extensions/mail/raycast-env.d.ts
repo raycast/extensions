@@ -32,10 +32,10 @@ declare namespace Preferences {
   export type SeeMailAccounts = ExtensionPreferences & {}
   /** Preferences accessible in the `share-with-mail` command */
   export type ShareWithMail = ExtensionPreferences & {}
-  /** Preferences accessible in the `background-refresh` command */
-  export type BackgroundRefresh = ExtensionPreferences & {}
-  /** Preferences accessible in the `invalidate-cache` command */
-  export type InvalidateCache = ExtensionPreferences & {}
+  /** Preferences accessible in the `refresh-mail` command */
+  export type RefreshMail = ExtensionPreferences & {}
+  /** Preferences accessible in the `wipe-cache` command */
+  export type WipeCache = ExtensionPreferences & {}
 }
 
 declare namespace Arguments {
@@ -51,8 +51,8 @@ declare namespace Arguments {
   export type SeeMailAccounts = {}
   /** Arguments passed to the `share-with-mail` command */
   export type ShareWithMail = {}
-  /** Arguments passed to the `background-refresh` command */
-  export type BackgroundRefresh = {}
-  /** Arguments passed to the `invalidate-cache` command */
-  export type InvalidateCache = {}
+  /** Arguments passed to the `refresh-mail` command */
+  export type RefreshMail = {}
+  /** Arguments passed to the `wipe-cache` command */
+  export type WipeCache = {}
 }

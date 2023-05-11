@@ -1,10 +1,7 @@
-import { closeMainWindow } from "@raycast/api";
 import * as messageScripts from "./scripts/messages";
 import { getMailAccounts } from "./scripts/account";
 
-export default async function BackgroundRefresh() {
-  closeMainWindow();
-
+export default async function RefreshMail() {
   const accounts = await getMailAccounts();
   if (!accounts) return;
 
