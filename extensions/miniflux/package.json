@@ -5,11 +5,14 @@
   "description": "A Raycast extension for Miniflux",
   "icon": "miniflux-icon.png",
   "author": "SevicheCC",
-  "license": "MIT",
+  "contributors": [
+    "sevichee"
+  ],
   "categories": [
     "News",
     "Web"
   ],
+  "license": "MIT",
   "commands": [
     {
       "name": "add-subscription",
@@ -26,12 +29,12 @@
       "mode": "view",
       "preferences": [
         {
+          "description": "high numbers could lead to worse performance",
           "name": "searchLimit",
-          "type": "textfield",
+          "placeholder": "10",
           "required": false,
           "title": "Max search results",
-          "description": "high numbers could lead to worse performance",
-          "placeholder": "10"
+          "type": "textfield"
         }
       ]
     },
@@ -43,12 +46,12 @@
       "mode": "view",
       "preferences": [
         {
+          "description": "High numbers could lead to poor performance.",
           "name": "feedLimit",
-          "type": "textfield",
+          "placeholder": "30",
           "required": false,
           "title": "The latest feeds show on first page",
-          "description": "High numbers could lead to poor performance.",
-          "placeholder": "30"
+          "type": "textfield"
         }
       ]
     },
@@ -70,28 +73,28 @@
   ],
   "preferences": [
     {
+      "description": "The URL of your Miniflux server",
       "name": "baseUrl",
-      "type": "textfield",
+      "placeholder": "E.g. https://hosting.miniflux.app/",
       "required": true,
       "title": "Miniflux URL",
-      "description": "The URL of your Miniflux server",
-      "placeholder": "E.g. https://hosting.miniflux.app/"
+      "type": "textfield"
     },
     {
+      "description": "Your Miniflux API key from 'Settings > API Keys > Create a new API key' in Miniflux",
       "name": "apiKey",
-      "type": "password",
+      "placeholder": "Enter your Miniflux API Key.",
       "required": true,
       "title": "API Key",
-      "description": "Your Miniflux API key from 'Settings > API Keys > Create a new API key' in Miniflux",
-      "placeholder": "Enter your Miniflux API Key."
+      "type": "password"
     },
     {
+      "description": "Generate a token at: https://readwise.io/access_token",
       "name": "readwiseToken",
-      "type": "password",
+      "placeholder": "Generate a token at: https://readwise.io/access_toke",
       "required": false,
       "title": "Readwise Access Token",
-      "description": "Generate a token at: https://readwise.io/access_token",
-      "placeholder": "Generate a token at: https://readwise.io/access_toke"
+      "type": "password"
     }
   ],
   "dependencies": {
@@ -104,9 +107,9 @@
     "@raycast/eslint-config": "1.0.5",
     "@types/node": "18.8.3",
     "@types/react": "18.0.9",
-    "eslint": "^7.32.0",
+    "eslint": "^8.40.0",
     "prettier": "^2.8.8",
-    "typescript": "^4.9.5"
+    "typescript": "^4.4.3"
   },
   "scripts": {
     "build": "ray build -e dist",
