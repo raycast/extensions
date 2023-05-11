@@ -10,7 +10,7 @@ import {
   PastePasswordAction,
   SearchCommonActions,
   ShowCardDetailsAction,
-  ShowSecureNoteAction,
+  ShowNotesAction,
 } from "~/components/searchVault/actions";
 import ShowIdentityDetailsAction from "~/components/searchVault/actions/ShowIdentityDetailsAction";
 
@@ -35,7 +35,7 @@ const VaultItemActionPanel = () => {
       <ActionPanel.Section>
         <ShowCardDetailsAction />
         <ShowIdentityDetailsAction />
-        <ShowSecureNoteAction />
+        <ShowNotesAction />
       </ActionPanel.Section>
       <ActionPanel.Section>
         <CopyTextFieldsActions />

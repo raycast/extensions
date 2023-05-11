@@ -1,7 +1,7 @@
 export { default as CopyPasswordAction } from "./CopyPasswordAction";
 export { default as PastePasswordAction } from "./PastePasswordAction";
 export { default as CopyTotpAction } from "./CopyTotpAction";
-export { default as ShowSecureNoteAction } from "./ShowSecureNoteAction";
+export { default as ShowNotesAction } from "./ShowNotesAction";
 export { default as SearchCommonActions } from "./CommonActions";
 export { default as CopyUsernameAction } from "./CopyUsernameAction";
 export { default as CopyTextFieldsActions } from "./CopyTextFieldsActions";

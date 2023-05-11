@@ -23,8 +23,7 @@ const IDENTITY_KEY_LABEL: Record<keyof Identity, string> = {
 
 export function getIdentityDetailsMarkdown(itemName: string, identity: Identity) {
   return `# 🪪 ${itemName}
----
-&nbsp;
+<br></br>
 | **Field** | **Value** |
 | --- | --- |
 ${Object.entries(identity)
