@@ -30,6 +30,8 @@ declare namespace Preferences {
   export type SeeMailAccounts = ExtensionPreferences & {}
   /** Preferences accessible in the `share-with-mail` command */
   export type ShareWithMail = ExtensionPreferences & {}
+  /** Preferences accessible in the `background-refresh` command */
+  export type BackgroundRefresh = ExtensionPreferences & {}
 }
 
 declare namespace Arguments {
@@ -45,4 +47,6 @@ declare namespace Arguments {
   export type SeeMailAccounts = {}
   /** Arguments passed to the `share-with-mail` command */
   export type ShareWithMail = {}
+  /** Arguments passed to the `background-refresh` command */
+  export type BackgroundRefresh = {}
 }

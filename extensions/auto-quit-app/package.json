@@ -70,14 +70,21 @@
     {
       "name": "see-mail-accounts",
       "title": "See Mail Accounts",
-      "description": "See all inboxes for all your Mail accounts.",
+      "description": "See mail accounts.",
       "mode": "view"
     },
     {
       "name": "share-with-mail",
       "title": "Share With Mail",
-      "description": "Share selected finder items with Mail.",
+      "description": "Share selected Finder items with Mail.",
       "mode": "view"
+    },
+    {
+      "name": "background-refresh",
+      "title": "Background Refresh",
+      "description": "Enable background refresh for all accounts.",
+      "mode": "no-view",
+      "interval": "1h"
     }
   ],
   "dependencies": {
