@@ -25,11 +25,11 @@ export const PlayHistoriesGridItem = ({ history }: { history: IPlayHistory }) =>
       }}
       title={history.titleName}
       subtitle={totalPlayTime}
-      actions={
-        <ActionPanel>
-          <PushGameInfoDetailAction titleId={history.titleId} />
-        </ActionPanel>
-      }
+      // actions={
+      //   <ActionPanel>
+      //     <PushGameInfoDetailAction titleId={history.titleId} />
+      //   </ActionPanel>
+      // }
     />
   );
 };

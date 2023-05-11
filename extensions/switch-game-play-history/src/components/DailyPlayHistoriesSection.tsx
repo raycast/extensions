@@ -34,11 +34,11 @@ export const DailyPlayHistoriesSection = ({
             title={item.titleName}
             icon={item.imageUrl}
             accessories={[timeBar]}
-            actions={
-              <ActionPanel>
-                <PushGameInfoDetailAction titleId={item.titleId} />
-              </ActionPanel>
-            }
+            // actions={
+            //   <ActionPanel>
+            //     <PushGameInfoDetailAction titleId={item.titleId} />
+            //   </ActionPanel>
+            // }
           />
         );
       })}
