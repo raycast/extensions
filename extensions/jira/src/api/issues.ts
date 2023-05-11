@@ -115,7 +115,7 @@ export enum StatusCategoryKey {
 type IssueStatus = {
   id: string;
   name: string;
-  statusCategory: {
+  statusCategory?: {
     id: string;
     key: StatusCategoryKey;
     name: string;

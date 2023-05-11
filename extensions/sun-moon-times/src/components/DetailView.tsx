@@ -1,35 +1,34 @@
 import { List } from "@raycast/api"
 import sunCalc from "suncalc"
+import { getSunrise, getSunset } from "sunrise-sunset-js"
 import { CityItem } from "../../types/CityItem"
 import { convertDateToString } from "../common/convertDateToString"
+import { getDayDuration } from "../common/getDayDuration"
 import { resolveCoords } from "../common/resolveCoords"
 import { countryList } from "../ressources/countryList"
 
 interface DetailViewProps extends Omit<CityItem, "geonameId"> {
-    sunrise: string
-    sunset: string
-    dayDuration: string
+    currentDate: Date
 }
 
-export const DetailView = ({
-    name,
-    countryCode,
-    timezone,
-    coordinates,
-    sunrise,
-    sunset,
-    dayDuration,
-}: DetailViewProps) => {
-    const moreSunInfos = sunCalc.getTimes(new Date(), coordinates.lat, coordinates.lon)
+export const DetailView = ({ name, countryCode, timezone, coordinates, currentDate }: DetailViewProps) => {
+    const currentDateTimezoneAdjusted = new Date(currentDate.getTime() - new Date().getTimezoneOffset() * 60 * 1000)
+    const sunrise = getSunrise(coordinates.lat, coordinates.lon, currentDateTimezoneAdjusted)
+    const sunset = getSunset(coordinates.lat, coordinates.lon, currentDateTimezoneAdjusted)
+    const dayDuration = getDayDuration(sunrise, sunset)
+    const sunriseString = convertDateToString(sunrise, timezone)
+    const sunsetString = convertDateToString(sunset, timezone)
+
+    const moreSunInfos = sunCalc.getTimes(currentDate, coordinates.lat, coordinates.lon)
     const solarNoon = convertDateToString(moreSunInfos.solarNoon, timezone)
     const nadir = convertDateToString(moreSunInfos.nadir, timezone)
     const dawn = convertDateToString(moreSunInfos.dawn, timezone)
     const dusk = convertDateToString(moreSunInfos.dusk, timezone)
 
-    const moonTimes = sunCalc.getMoonTimes(new Date(), coordinates.lat, coordinates.lon)
+    const moonTimes = sunCalc.getMoonTimes(currentDate, coordinates.lat, coordinates.lon)
     const moonrise = !moonTimes.rise ? "Moon doesn't rise today" : convertDateToString(moonTimes.rise, timezone)
     const moonset = !moonTimes.set ? "Moon doesn't set today" : convertDateToString(moonTimes.set, timezone)
-    const moonIllumination = sunCalc.getMoonIllumination(new Date())
+    const moonIllumination = sunCalc.getMoonIllumination(currentDate)
 
     return (
         <List.Item.Detail
@@ -41,8 +40,8 @@ export const DetailView = ({
                     />
                     <List.Item.Detail.Metadata.Separator />
                     <List.Item.Detail.Metadata.Label title="☀️ Sun" />
-                    <List.Item.Detail.Metadata.Label title="Sunrise" text={sunrise} />
-                    <List.Item.Detail.Metadata.Label title="Sunset" text={sunset} />
+                    <List.Item.Detail.Metadata.Label title="Sunrise" text={sunriseString} />
+                    <List.Item.Detail.Metadata.Label title="Sunset" text={sunsetString} />
                     <List.Item.Detail.Metadata.Label title="Dawn" text={dawn} />
                     <List.Item.Detail.Metadata.Label title="Dusk" text={dusk} />
                     <List.Item.Detail.Metadata.Separator />

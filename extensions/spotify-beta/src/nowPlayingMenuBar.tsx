@@ -10,6 +10,7 @@ import {
   Color,
   LaunchProps,
   openCommandPreferences,
+  Image,
 } from "@raycast/api";
 import { pause } from "./api/pause";
 import { play } from "./api/play";
@@ -32,7 +33,11 @@ import { formatTitle } from "./helpers/formatTitle";
 import { getErrorMessage } from "./helpers/getError";
 
 function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
-  const preferences = getPreferenceValues<{ maxTextLength?: boolean; showEllipsis?: boolean }>();
+  const preferences = getPreferenceValues<{
+    maxTextLength?: boolean;
+    showEllipsis?: boolean;
+    iconType?: "spotify-icon" | "cover-image";
+  }>();
 
   const { currentlyPlayingData, currentlyPlayingIsLoading, currentlyPlayingRevalidate } = useCurrentlyPlaying();
 
@@ -49,7 +54,12 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
   const trackAlreadyLiked = containsMySavedTracksData?.[0];
   const isTrack = currentlyPlayingData?.currently_playing_type !== "episode";
 
-  if (!currentlyPlayingData?.item) {
+  const currentTime = Date.now();
+  const tenMinutesInMilliseconds = 10 * 60 * 1000;
+  const dataIsOld =
+    currentlyPlayingData?.timestamp && currentTime - currentlyPlayingData.timestamp > tenMinutesInMilliseconds;
+
+  if ((dataIsOld && !isPlaying) || !currentlyPlayingData?.item) {
     return <NothingPlaying isLoading={currentlyPlayingIsLoading || currentlyPlayingIsLoading} />;
   }
 
@@ -57,13 +67,16 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
   const { name, external_urls, uri } = item;
 
   let title = "";
+  let coverImageUrl = "";
   let menuItems: JSX.Element | null = null;
 
   if (isTrack) {
-    const { artists, id: trackId } = item as TrackObject;
+    const { artists, id: trackId, album } = item as TrackObject;
     const artistName = artists?.[0]?.name;
     const artistId = artists?.[0]?.id;
     title = `${name} · ${artistName}`;
+    // Get the image with the lowest resolution
+    coverImageUrl = album?.images.slice(-1)[0]?.url || "";
 
     menuItems = (
       <>
@@ -148,12 +161,20 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
     const { show } = item as EpisodeObject;
     const showName = show.name;
     title = `${name} · ${showName}`;
+    coverImageUrl = show.images.slice(-1)[0]?.url || "";
   }
 
   return (
     <MenuBarExtra
       isLoading={currentlyPlayingIsLoading || currentlyPlayingIsLoading}
-      icon={{ source: { dark: "menu-icon-dark.svg", light: "menu-icon-light.svg" } }}
+      icon={
+        preferences.iconType === "cover-image" && coverImageUrl
+          ? {
+              source: coverImageUrl,
+              mask: Image.Mask.RoundedRectangle,
+            }
+          : { source: { dark: "menu-icon-dark.svg", light: "menu-icon-light.svg" } }
+      }
       title={formatTitle(title, Number(preferences.maxTextLength))}
       tooltip={title}
     >

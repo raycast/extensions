@@ -307,14 +307,14 @@
       "name": "SCH2000"
     },
     {
-      "full_name": "Schlachter 1951",
+      "full_name": "Die Heilige Schrift (Schlachter 1951)",
       "id": 158,
-      "name": "SCH51"
+      "name": "SCH1951"
     },
     {
-      "full_name": "NeÜ bibel.heute",
+      "full_name": "bibel heute",
       "id": 877,
-      "name": "NBH"
+      "name": "BIBEL.HEUTE"
     },
     {
       "full_name": "Textbibel von Kautzsch und Weizsäcker",
@@ -330,6 +330,11 @@
       "full_name": "luther.heute",
       "id": 3100,
       "name": "LUTHEUTE"
+    },
+    {
+      "full_name": "Die Bibel (Schlachter 2000)",
+      "id": 3372,
+      "name": "SCHL2000"
     }
   ]
 }

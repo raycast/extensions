@@ -297,9 +297,14 @@
       "name": "ICL00D"
     },
     {
-      "full_name": "Traduzione Interconfessionale in Lingua Corrente",
+      "full_name": "Parola del Signore - la Bibbia in lingua corrente",
       "id": 1197,
       "name": "ICL00P"
+    },
+    {
+      "full_name": "La Sacra Bibbia Versione Riveduta 2020 (R2)",
+      "id": 3368,
+      "name": "IRB20"
     }
   ]
 }

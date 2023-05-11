@@ -288,11 +288,23 @@ export function IssueList({
   );
 }
 
-function getIssueQuery(query: string | undefined) {
-  return tokenizeQueryText(query, ["label", "author", "milestone", "assignee"]);
+export function getIssueQuery(query: string | undefined) {
+  return tokenizeQueryText(query, ["label", "author", "milestone", "assignee", "state"]);
 }
 
-function injectQueryNamedParameters(
+function isValidIssueState(texts: string[] | undefined) {
+  if (!texts) {
+    return false;
+  }
+  for (const v of texts) {
+    if (![IssueState.closed.valueOf(), IssueState.opened.valueOf(), IssueState.all.valueOf()].includes(v)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+export function injectQueryNamedParameters(
   requestParams: Record<string, any>,
   query: Query,
   scope: IssueScope,
@@ -330,6 +342,12 @@ function injectQueryNamedParameters(
             }
           }
           break;
+        case "state": {
+          console.log(extraParamVal);
+          if (isValidIssueState(extraParamVal)) {
+            requestParams[prefixed("state")] = extraParamVal.join(",");
+          }
+        }
       }
     }
   }

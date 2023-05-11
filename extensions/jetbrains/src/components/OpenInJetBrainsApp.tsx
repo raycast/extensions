@@ -15,7 +15,8 @@ export function openInApp(tool: AppHistory, recent: recentEntry | null): () => P
   const toOpen = tool.app?.path ?? (tool.tool ? tool.tool : "");
 
   async function isRunning() {
-    const { stdout } = await execPromise(`ps aux | grep -v "grep" | grep "${tool.app?.path}"`).catch(() => ({
+    const grep = `ps aux | grep -v "grep" | grep "${tool.shortname}" | grep "${tool.build}"`;
+    const { stdout } = await execPromise(grep).catch(() => ({
       stdout: "",
     }));
     return stdout !== "";
@@ -40,11 +41,11 @@ export function openInApp(tool: AppHistory, recent: recentEntry | null): () => P
        * and we need to wait so the tool actually does open
        */
       console.log("not-running");
-      await showHUD(`Opening ${tool.app?.title ?? tool.title}`).then(() => open(toOpen));
+      await showHUD(`Opening ${tool.title}`).then(() => open(toOpen));
       do {
+        await sleep(1);
         running = await isRunning();
       } while (!running);
-      await sleep(5);
     }
     showHUD(`Opening ${recent ? recent.title : tool.title}`)
       .then(() => recent !== null && exec(cmd))

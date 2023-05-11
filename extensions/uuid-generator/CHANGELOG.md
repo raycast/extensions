@@ -1,5 +1,13 @@
 # UUID Generator Changelog
 
+## [Fix default action issue] - 2023-05-03
+
+- Fix the issue with the default action
+
+## [Added support for UUID v5] - 2023-05-02
+
+- You can now generate v5 UUIDs, defining a custom namespace
+
 ## [Added default action support] - 2023-04-11
 
 - You can now select if you want to copy or paste as action

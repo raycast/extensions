@@ -1,5 +1,9 @@
 # Google Chrome Changelog
 
+## [Added better debug] - 2023-04-25
+
+- Increase exception message to diagnose issues
+
 ## [Search url] - 2023-04-01
 
 - Added support to match url in bookmark and history search

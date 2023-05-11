@@ -81,6 +81,7 @@ const buildCollectionsOptions = (userData: UserResponse, collections: Collection
   const groups = buildGroupsAndOrder(userData.user.groups);
   const orderedCollections = orderCollections(collectionsTree, groups);
 
+  treeFlat.splice(0, treeFlat.length);
   flatCollections(orderedCollections);
   return treeFlat;
 };

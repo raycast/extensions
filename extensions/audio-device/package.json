@@ -7,7 +7,8 @@
   "contributors": [
     "mathieudutour",
     "mike182uk",
-    "FezVrasta"
+    "FezVrasta",
+    "rcruzper"
   ],
   "license": "MIT",
   "commands": [
@@ -47,6 +48,15 @@
       "title": "Enable AirPlay Support",
       "description": "Enable AirPlay speakers detection on the output devices list.",
       "label": "Include AirPlay devices",
+      "type": "checkbox",
+      "default": false
+    },
+    {
+      "name": "systemOutput",
+      "required": false,
+      "title": "Play sound effects through current output",
+      "description": "Play system sounds through current output.",
+      "label": "Update system sounds output",
       "type": "checkbox",
       "default": false
     },
