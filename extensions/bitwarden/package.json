@@ -28,6 +28,7 @@
       "title": "Search Vault",
       "subtitle": "Bitwarden",
       "description": "Search all items in the authenticated Bitwarden vault.",
+      "icon": "search.png",
       "mode": "view",
       "preferences": [
         {
@@ -86,6 +87,7 @@
       "title": "Generate Password",
       "subtitle": "Bitwarden",
       "description": "Generate a password using Bitwarden.",
+      "icon": "generate-password.png",
       "mode": "view",
       "preferences": [
         {
@@ -113,6 +115,7 @@
       "title": "Generate Password (Quick)",
       "subtitle": "Bitwarden",
       "description": "Generate a password using Bitwarden and copy and/or paste it into the active app right away.",
+      "icon": "generate-password.png",
       "mode": "no-view",
       "preferences": [
         {
