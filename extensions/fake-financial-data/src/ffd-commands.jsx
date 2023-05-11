@@ -1,3 +1,4 @@
+import React from "react";
 import { MenuBarExtra } from "@raycast/api";
 import {
   generateFakeAccountNumber,
