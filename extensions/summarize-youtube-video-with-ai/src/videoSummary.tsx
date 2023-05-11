@@ -1,11 +1,11 @@
 import { Action, ActionPanel, Detail, Toast, getPreferenceValues, showToast } from "@raycast/api";
-import { formatDuration } from "date-fns";
+import { getVideoData } from "./getVideoData";
 import { useEffect, useState } from "react";
 import getChatGPTSummary from "./getChatGPTSummary";
 import getRaycatsAISummary from "./getRaycastAISummary";
-import getVideoInfo from "./getVideoInfo";
 import getVideoTranscript from "./getVideoTranscript";
 import type { LaunchProps } from "@raycast/api";
+import type { VideoDataTypes } from "./getVideoData";
 import ytdl from "ytdl-core";
 
 interface VideoSummaryProps {
@@ -15,7 +15,7 @@ interface VideoSummaryProps {
 export default function VideoSummary(props: LaunchProps<{ arguments: VideoSummaryProps }>) {
   const preferences = getPreferenceValues();
 
-  const [videoData, setVideoData] = useState<ytdl.MoreVideoDetails | undefined>(undefined);
+  const [videoData, setVideoData] = useState<VideoDataTypes>();
   const [transcript, setTranscript] = useState<string | undefined>(undefined);
   const [content, setContent] = useState<string | undefined>(undefined);
   const [summaryIsLoading, setSummaryIsLoading] = useState<boolean>(false);
@@ -31,16 +31,13 @@ export default function VideoSummary(props: LaunchProps<{ arguments: VideoSummar
   }
 
   useEffect(() => {
-    getVideoInfo(video).then(setVideoData);
+    getVideoData(video).then(setVideoData);
     getVideoTranscript(video).then(setTranscript);
-  }, [video]);
-
-  const publishDate = videoData && new Date(videoData.publishDate).toLocaleDateString();
-  const viewCount = videoData && Number(videoData.viewCount).toLocaleString();
-
-  const hours = Math.floor(Number(videoData?.lengthSeconds) / 3600);
-  const minutes = Math.floor((Number(videoData?.lengthSeconds) % 3600) / 60);
-  const duration = formatDuration({ hours, minutes }, { format: ["hours", "minutes", "seconds"] });
+    return () => {
+      setVideoData(undefined);
+      setTranscript(undefined);
+    };
+  }, []);
 
   if (preferences.chosenAi === "chatgpt") {
     getChatGPTSummary({ videoTitle: videoData?.title, transcript }).then((result) => {
@@ -59,7 +56,7 @@ export default function VideoSummary(props: LaunchProps<{ arguments: VideoSummar
   const markdown = content
     ? `${content}
   
-  <img src="${videoData?.thumbnails[3].url}">
+  <img src="${videoData?.thumbnail}">
   `
     : undefined;
 
@@ -86,9 +83,9 @@ export default function VideoSummary(props: LaunchProps<{ arguments: VideoSummar
               text={videoData.ownerChannelName}
             />
             <Detail.Metadata.Separator />
-            <Detail.Metadata.Label title="Published" text={publishDate} />
-            <Detail.Metadata.Label title="Duration" text={duration} />
-            <Detail.Metadata.Label title="Views" text={viewCount} />
+            <Detail.Metadata.Label title="Published" text={videoData.publishDate} />
+            <Detail.Metadata.Label title="Duration" text={videoData.duration} />
+            <Detail.Metadata.Label title="Views" text={videoData.viewCount} />
           </Detail.Metadata>
         )
       }
