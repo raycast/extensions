@@ -1,10 +1,17 @@
-import { MenuBarExtra, Icon } from "@raycast/api";
-import { generateFakeAccountNumber, generateFakeBIC, copyToClipboard } from "../utils";
+import { MenuBarExtra } from "@raycast/api";
+import {
+  generateFakeAccountNumber,
+  generateFakeBIC,
+  copyToClipboard
+} from "../utils";
 import { IBAN } from "ibankit";
 
 export default function Command() {
   return (
-    <MenuBarExtra icon={Icon.AddPerson} tooltip="Generate Financial Data">
+    <MenuBarExtra
+      icon={{ source: "icon.png" }}
+      tooltip="Generate Financial Data"
+    >
       <MenuBarExtra.Item title="IBAN" />
       <MenuBarExtra.Item
         title="Generate an IBAN"

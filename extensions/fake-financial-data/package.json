@@ -13,7 +13,6 @@
     {
       "name": "ffd-commands",
       "title": "Generate Financial Data",
-      "subtitle": "Generate Financial data",
       "description": "Generate fake financial data",
       "mode": "menu-bar"
     }
