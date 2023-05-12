@@ -1,8 +1,12 @@
 # Bitwarden Changelog
 
+## [Improvement] - 2023-05-12
+
+- Add different icons for each command
+
 ## [Fix] - 2023-05-08
 
-- Hopefully fixed a bug that caused the extnesion to keep logging out right after logging in.
+- Hopefully fixed a bug that caused the extension to keep logging out right after logging in.
 
 ## [Improvement] - 2023-05-04
 
