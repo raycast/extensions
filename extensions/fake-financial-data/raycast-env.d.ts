@@ -7,17 +7,17 @@
 
 /* eslint-disable @typescript-eslint/ban-types */
 
-type ExtensionPreferences = {};
+type ExtensionPreferences = {}
 
 /** Preferences accessible in all the extension's commands */
-declare type Preferences = ExtensionPreferences;
+declare type Preferences = ExtensionPreferences
 
 declare namespace Preferences {
-  /** Preferences accessible in the `index` command */
-  export type Index = ExtensionPreferences & {};
+  /** Preferences accessible in the `ffd-commands` command */
+  export type FfdCommands = ExtensionPreferences & {}
 }
 
 declare namespace Arguments {
-  /** Arguments passed to the `index` command */
-  export type Index = {};
+  /** Arguments passed to the `ffd-commands` command */
+  export type FfdCommands = {}
 }

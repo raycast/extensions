@@ -1,30 +1,15 @@
-const { beforeEach } = require("node:test");
-const { generateFakeAccountNumber, generateFakeSWIFT } = require("../utils");
-const { Clipboard, showHUD } = require("@raycast/api");
-
+import { generateFakeAccountNumber, generateFakeSWIFT } from "../utils";
 describe("Generate Data", () => {
-  jest.mock("@raycast/api", () => ({
-    Clipboard: {
-      copy: jest.fn(),
-    },
-    showHUD: jest.fn(),
-  }));
-
-  beforeEach(() => {
-    jest.clearAllMocks();
-    Clipboard.copy.mockReturnValue(true);
-    showHUD.mockReturnValue(true);
-  });
 
   describe("generateFakeSWIFT", () => {
     it("should return a string of length 11", () => {
       const swift = generateFakeSWIFT();
-      expect(swift).toHaveLength(11);
+      expect(swift).toHaveLength(8);
     });
 
     it("should only contain numbers", () => {
       const swift = generateFakeSWIFT();
-      expect(/^\d+$/.test(swift)).toBe(true);
+      expect(/^[A-Z]{4}[A-Z]{2}[A-Z0-9]{2}([A-Z0-9]{3})?$/.test(swift)).toBe(true);
     });
   });
 

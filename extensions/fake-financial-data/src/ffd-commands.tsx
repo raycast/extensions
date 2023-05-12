@@ -1,11 +1,11 @@
 import React from "react";
 import { MenuBarExtra } from "@raycast/api";
+import { IBAN } from "ibankit";
 import {
   generateFakeAccountNumber,
-  generateFakeBIC,
+  generateFakeSWIFT,
   copyToClipboard,
 } from "../utils";
-import { IBAN } from "ibankit";
 
 export default function Command() {
   return (
@@ -15,21 +15,22 @@ export default function Command() {
     >
       <MenuBarExtra.Item title="IBAN" />
       <MenuBarExtra.Item
-        title="Generate an IBAN"
+        title="Generate IBAN"
         onAction={() => {
-          copyToClipboard(IBAN.random().value);
+          const iban = IBAN.random();
+          copyToClipboard(iban.toString());
         }}
       />
       <MenuBarExtra.Item title="SWIFT/BIC" />
       <MenuBarExtra.Item
-        title="Generate SWIFT"
+        title="Generate SWIFT/BIC"
         onAction={() => {
-          copyToClipboard(generateFakeBIC());
+          copyToClipboard(generateFakeSWIFT());
         }}
       />
       <MenuBarExtra.Item title="Account Number" />
       <MenuBarExtra.Item
-        title="Generate an Account Number"
+        title="Generate Account Number"
         onAction={() => {
           copyToClipboard(generateFakeAccountNumber());
         }}
