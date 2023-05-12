@@ -88,7 +88,8 @@ export default function Command() {
           <Grid.Item
             key={card.path}
             content={card.path}
-            title={card.name}
+            title={card.name.replace(":", "/")}
+            keywords = {[card.name]}
             actions={loadCardActionNodes(card)}
             quickLook={{ name: card.name, path: card.path }}
           />
