@@ -1,7 +1,7 @@
 import { OAuth } from "@raycast/api";
 import axios from "axios";
 
-const clientId = "e977f983796441c0985c745d7c572511";
+const clientId = "9c06463da9ea494aa21fd881140b9dd4";
 
 export const client = new OAuth.PKCEClient({
   redirectMethod: OAuth.RedirectMethod.Web,
