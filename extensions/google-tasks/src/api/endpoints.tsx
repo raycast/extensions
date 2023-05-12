@@ -22,10 +22,15 @@ export async function fetchLists(): Promise<{ id: string; title: string }[]> {
   return json.items.map((item) => ({ id: item.id, title: item.title }));
 }
 
-export async function fetchList(tasklist: string): Promise<Task[]> {
+export async function fetchList(tasklist: string, showCompleted = false): Promise<Task[]> {
   const params = new URLSearchParams();
-  params.append("showCompleted", "true");
   params.append("showHidden", "true");
+  params.append("maxResults", "100");
+  if (showCompleted) {
+    params.append("showCompleted", "true");
+  } else {
+    params.append("showCompleted", "false");
+  }
   const response = await fetch(`https://tasks.googleapis.com/tasks/v1/lists/${tasklist}/tasks?` + params.toString(), {
     headers: {
       "Content-Type": "application/json",
