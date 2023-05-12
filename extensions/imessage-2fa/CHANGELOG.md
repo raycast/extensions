@@ -1,5 +1,10 @@
 # Messages 2FA Changelog
 
+## [Update] - 2023-05-12
+
+- Add a new command to support paste latest 2FA code immediately
+- Add more support for Chinese 2FA code format
+
 ## [Update] - 2023-04-13
 
 - Resolves [iMessage 2FA] support code format 123-456 #5523 by making the check case-insensitive

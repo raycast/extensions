@@ -7,7 +7,8 @@
   "author": "yuercl",
   "contributors": [
     "thomas",
-    "arronhunt"
+    "arronhunt",
+    "tzfeng"
   ],
   "categories": [
     "Productivity"
@@ -15,10 +16,17 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "index",
+      "name": "view-2fa-codes",
       "title": "View 2FA Codes",
       "subtitle": "Messages",
       "description": "View messages and two factor authentication codes",
+      "mode": "view"
+    },
+    {
+      "name": "paste-latest-2fa-code",
+      "title": "Paste Latest 2FA Code",
+      "subtitle": "Messages",
+      "description": "Paste latest two factor authentication code from messages",
       "mode": "view"
     }
   ],

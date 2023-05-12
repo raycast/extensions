@@ -53,6 +53,5 @@ function getQuery(options: { searchText?: string; searchType: SearchType }) {
 
 export function useMessages(options: { searchText?: string; searchType: SearchType }) {
   const query = getQuery(options);
-  // console.log(query.substring(200));
   return useSQL<Message>(DB_PATH, query);
 }
