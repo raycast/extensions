@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
-import { List, Icon, Action, ActionPanel, Detail, useNavigation } from "@raycast/api";
+
+import { List, Icon, Action, ActionPanel, Toast, showToast, Detail, useNavigation } from "@raycast/api";
 import { SelectTerminalApp } from "./SelectTermnialApp";
-import { deleteSession, getAllSession, switchToSession } from "./utils/sessionUtils";
+import { deleteSession, getAllSession, switchToSession } from "./sessionUtils";
 import { RenameTmuxSession } from "./RenameTmuxSession";
 import { checkTerminalSetup } from "./utils/terminalUtils";
 
@@ -11,6 +12,7 @@ export default function Command() {
   const [isTerminalSetup, setIsTerminalSetup] = useState(false);
 
   const { push } = useNavigation();
+
   const setupListSesssions = () => {
     getAllSession((error, stdout) => {
       if (error) {

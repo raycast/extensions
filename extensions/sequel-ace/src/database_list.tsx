@@ -43,7 +43,7 @@ export default function DatabaseList() {
           return (
             <List.Section key={item.id} title={item.name} subtitle={subtitle}>
               {item.connections.map((connection) => (
-                <ConnectionListItem key={connection.id} connection={connection} />
+                <ConnectionListItem key={connection.id} connection={connection} groupName={item.name} />
               ))}
             </List.Section>
           );
@@ -88,8 +88,9 @@ function getfavorites(favorites: ReadonlyArray<plist.PlistObject>, grpName: stri
   return grps;
 }
 
-function ConnectionListItem(props: { connection: Connection }) {
+function ConnectionListItem(props: { connection: Connection; groupName: string }) {
   const connection = props.connection;
+  const groupName = props.groupName;
   const accessories = [];
   if (connection.colorIndex in tintColorsIndex) {
     accessories.push({
@@ -110,10 +111,11 @@ function ConnectionListItem(props: { connection: Connection }) {
           <Action.OpenInBrowser
             title="Open Database"
             icon={Icon.Coin}
-            url={`sequelace://LaunchFavorite?name=${connection.name}`}
+            url={`sequelace://LaunchFavorite?name=${encodeURIComponent(connection.name)}`}
           />
         </ActionPanel>
       }
+      keywords={preferences.searchByGroupName ? [groupName] : []}
     />
   );
 }

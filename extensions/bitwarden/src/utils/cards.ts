@@ -35,6 +35,7 @@ const getCardValue = (key: string, value: string) => {
 export function getCardDetailsMarkdown(card: Card) {
   return `# 💳 Card Details
 ---
+&nbsp;
 ${Object.entries(card)
   .map(([key, value]) => (value ? `- **${CARD_KEY_LABEL[key as keyof Card]}**: ${getCardValue(key, value)}` : null))
   .join("\n")}

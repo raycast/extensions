@@ -30,7 +30,9 @@ export default function IssueListItem({ issue, mutate }: IssueListItemProps) {
     {
       text: {
         value: issue.fields.status.name,
-        color: getStatusColor(issue.fields.status.statusCategory.colorName),
+        color: issue.fields.status.statusCategory
+          ? getStatusColor(issue.fields.status.statusCategory.colorName)
+          : undefined,
       },
     },
     {

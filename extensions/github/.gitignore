@@ -7,3 +7,4 @@
 .DS_Store
 
 .env
+raycast-env.d.ts

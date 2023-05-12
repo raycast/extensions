@@ -6,5 +6,5 @@
 ### Fixed
 - Fix code structure to be more readable 📝
 - Refactor utils folder
- 
+
 ## [Initial Version] - 2023-04-26

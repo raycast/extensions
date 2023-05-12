@@ -21,7 +21,7 @@ import {
 import { getGitHubClient } from "./helpers/withGithubClient";
 import { useViewer } from "./hooks/useViewer";
 
-const preferences = getPreferenceValues<{ alwaysShow: boolean }>();
+const preferences = getPreferenceValues<Preferences.UnreadNotifications>();
 
 function UnreadNotifications() {
   const { octokit } = getGitHubClient();

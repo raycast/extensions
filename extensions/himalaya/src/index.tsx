@@ -1,59 +1,75 @@
-import { Action, ActionPanel, Detail, Form, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
-import { useForm, FormValidation } from "@raycast/utils";
-import { useState, useEffect } from "react";
-import child_process = require("node:child_process");
-import util = require("node:util");
+import {
+  Action,
+  ActionPanel,
+  Detail,
+  Form,
+  getPreferenceValues,
+  Icon,
+  List,
+  LocalStorage,
+  showToast,
+  Toast,
+  useNavigation,
+} from "@raycast/api";
+import { FormValidation, useCachedState, useForm } from "@raycast/utils";
+import { useEffect, useState } from "react";
+import { State } from "./state";
+import { Preferences } from "./preferences";
+import { Envelope, Flag, Folder } from "./models";
+import * as Envelopes from "./envelopes";
+import * as Folders from "./folders";
+import * as Exec from "./exec";
+import "reflect-metadata";
+import { deserializeArray, serialize, Type } from "class-transformer";
 
-const exec: any = util.promisify(child_process.exec);
+export default function Command() {
+  const preferences = getPreferenceValues<Preferences>();
 
-const PATH = "/usr/bin:/bin:/usr/sbin:/opt/homebrew/bin:/opt/homebrew/sbin";
-
-enum Flag {
-  Seen = "Seen",
-  Answered = "Answered",
-  Flagged = "Flagged",
-  Deleted = "Deleted",
-  Draft = "Draft",
-  Recent = "Recent",
-  // TODO Custom
-}
-
-interface Envelope {
-  id: string;
-  internal_id: string;
-  message_id: string;
-  flags: Flag[];
-  from: {
-    name: string;
-    addr: string;
-  };
-  subject: string;
-  date: Date;
-}
-
-interface Folder {
-  delim: string;
-  name: string;
-  desc: string;
-}
-
-interface State {
-  isLoading: boolean;
-  envelopes: Envelope[];
-  folders: Folder[];
-  exe: boolean;
-}
-
-export default function ListEnvelopes() {
-  const [state, setState] = useState<State>({
+  const [state, setState] = useCachedState<State>("index", {
     isLoading: true,
     envelopes: [],
     folders: [],
     exe: false,
+    currentFolderName: preferences.defaultFolder,
+    currentAccountName: preferences.defaultAccount,
   } as State);
 
   useEffect(() => {
-    async function fetch() {
+    (async () => {
+      const rawEnvelopes = await LocalStorage.getItem<string>("envelopes");
+
+      if (rawEnvelopes != undefined) {
+        console.debug("Found envelopes in cache");
+
+        await LocalStorage.removeItem("envelopes");
+
+        const envelopes: Envelope[] = deserializeArray(Envelope, rawEnvelopes);
+
+        setState((previous: State) => ({
+          ...previous,
+          envelopes: envelopes,
+        }));
+      }
+
+      const rawFolders = await LocalStorage.getItem<string>("folders");
+
+      if (rawFolders != undefined) {
+        console.debug("Found folders in cache");
+
+        await LocalStorage.removeItem("folders");
+
+        const folders: Folder[] = deserializeArray(Folder, rawFolders);
+
+        setState((previous: State) => ({
+          ...previous,
+          folders: folders,
+        }));
+      }
+    })();
+  }, []);
+
+  useEffect(() => {
+    (async () => {
       setState((previous: State) => ({
         ...previous,
         isLoading: true,
@@ -62,8 +78,8 @@ export default function ListEnvelopes() {
       const exe = await hasExe();
 
       if (exe) {
-        const envelopes = await listEnvelopes();
-        const folders = await listFolders();
+        const envelopes = await Envelopes.list(state.currentFolderName, state.currentAccountName);
+        const folders = await Folders.list();
 
         setState((previous: State) => ({
           ...previous,
@@ -81,70 +97,40 @@ export default function ListEnvelopes() {
           exe: exe,
         }));
       }
-    }
-
-    fetch();
+    })();
   }, []);
 
-  const accessories = (envelope: Envelope) => {
-    const accessories = [];
+  const onFolderChange = async (newValue: string) => {
+    setState((previous: State) => ({
+      ...previous,
+      isLoading: true,
+    }));
 
-    if (envelope.flags.includes(Flag.Answered)) {
-      accessories.push({
-        icon: Icon.Reply,
-      });
-    }
+    const envelopes = await Envelopes.list(newValue, state.currentAccountName);
 
-    // This is always present. Accessories are rendered ordered
-    // so put them last.
-    accessories.push({
-      text: {
-        value: `${envelope.from.name} <${envelope.from.addr}>`,
-      },
-      icon: Icon.Person,
-    });
-
-    return accessories;
+    setState((previous: State) => ({
+      ...previous,
+      isLoading: false,
+      currentFolderName: newValue,
+      envelopes: envelopes,
+    }));
   };
 
-  if (state.isLoading) {
-    return <List isLoading={state.isLoading}></List>;
-  } else if (!state.isLoading && state.exe) {
+  if (state.exe || state.isLoading) {
     return (
-      <List isLoading={state.isLoading}>
-        {Array.from(group_envelopes_by_date(state.envelopes).entries()).map(([date, group]) => {
-          const items = group.map((envelope) => {
-            const item = (
-              <List.Item
-                id={envelope.id}
-                key={envelope.id}
-                title={envelope.subject}
-                icon={envelope.flags.includes(Flag.Seen) ? Icon.Circle : Icon.CircleFilled}
-                accessories={accessories(envelope)}
-                actions={
-                  <ActionPanel title="Envelope">
-                    {readAction(envelope, state, setState)}
-                    {envelope.flags.includes(Flag.Seen) && markUnreadAction(envelope, state, setState)}
-                    {!envelope.flags.includes(Flag.Seen) && markReadAction(envelope, state, setState)}
-                    {moveToSelectedAction(envelope, state, setState)}
-                    {moveToTrashAction(envelope, state, setState)}
-                    <Action.CopyToClipboard title="Copy ID to Clipboard" content={envelope.id} />
-                  </ActionPanel>
-                }
-              />
-            );
-
-            return item;
-          });
-
-          const section = (
-            <List.Section title={date} key={date}>
-              {items}
-            </List.Section>
-          );
-
-          return section;
-        })}
+      <List
+        isLoading={state.isLoading}
+        navigationTitle="Search Envelopes"
+        searchBarPlaceholder="Search your envelopes"
+        searchBarAccessory={
+          <FolderDropdown
+            folders={state.folders}
+            onFolderChange={onFolderChange}
+            defaultValue={state.currentFolderName}
+          />
+        }
+      >
+        {envelopesToList(state, setState)}
       </List>
     );
   } else {
@@ -189,23 +175,21 @@ const group_envelopes_by_date = (envelopes: Envelope[]) => {
 
 async function hasExe(): Promise<boolean> {
   try {
-    const { stdout, stderr } = await exec("which himalaya", {
-      env: {
-        PATH: PATH,
-      },
+    const cmd = "which himalaya";
+    console.debug(`cmd: ${cmd}`);
+    const { stdout, stderr } = await Exec.run(cmd, {
+      env: { PATH: Exec.PATH },
     });
 
     if (stdout) {
       return true;
-    }
-
-    if (stderr) {
+    } else if (stderr) {
       console.error("Couldn't find executable", stderr);
 
       return false;
+    } else {
+      throw new Error("No results from stdout or stderr");
     }
-
-    throw new Error("No results from stdout or stderr");
   } catch (error) {
     console.error("Couldn't find executable", error);
 
@@ -213,82 +197,11 @@ async function hasExe(): Promise<boolean> {
   }
 }
 
-async function listEnvelopes(): Promise<Envelope[]> {
-  const { stdout, stderr } = await exec('"himalaya" -o json list -s 100', {
-    env: {
-      PATH: PATH,
-    },
-  });
-
-  if (stdout) {
-    const results = JSON.parse(stdout);
-
-    const envelopes: Envelope[] = results.map((result: any) => {
-      const envelope: Envelope = {
-        id: result.id,
-        internal_id: result.internal_id,
-        message_id: result.message_id,
-        flags: result.flags.map((flag: string) => flag as Flag),
-        from: {
-          name: result.from.name,
-          addr: result.from.addr,
-        },
-        subject: result.subject,
-        date: new Date(result.date),
-      };
-
-      return envelope;
-    });
-
-    return envelopes;
-  }
-
-  if (stderr) {
-    console.log(stderr);
-
-    return [];
-  }
-
-  throw new Error("No results from stdout or stderr");
-}
-
-async function listFolders(): Promise<Folder[]> {
-  const { stdout, stderr } = await exec('"himalaya" -o json folder list', {
-    env: {
-      PATH: PATH,
-    },
-  });
-
-  if (stdout) {
-    const results = JSON.parse(stdout);
-
-    const folders: Folder[] = results.map((result: any) => {
-      const folder: Folder = {
-        delim: result.delim,
-        name: result.name,
-        desc: result.desc,
-      };
-
-      return folder;
-    });
-
-    return folders;
-  }
-
-  if (stderr) {
-    console.log(stderr);
-
-    return [];
-  }
-
-  throw new Error("No results from stdout or stderr");
-}
-
 interface MoveToSelectedFormValues {
   folder: string;
 }
 
-function MoveToSelectedForm(props: { folders: Folder[]; envelope: Envelope; setState: any }) {
+function MoveToSelectedForm(props: { folders: Folder[]; envelope: Envelope; state: State; setState: any }) {
   const { pop } = useNavigation();
 
   const { handleSubmit, itemProps } = useForm<MoveToSelectedFormValues>({
@@ -299,20 +212,37 @@ function MoveToSelectedForm(props: { folders: Folder[]; envelope: Envelope; setS
       });
 
       try {
-        const { stdout, _stderr } = await exec(`"himalaya" move ${values.folder} -- ${props.envelope.id}`, {
-          env: {
-            PATH: PATH,
-          },
+        const cmd = `himalaya --account "${props.state.currentAccountName}" --folder "${props.state.currentFolderName}" move ${values.folder} -- ${props.envelope.id}`;
+        console.debug(`cmd: ${cmd}`);
+        const { stdout, stderr } = await Exec.run(cmd, {
+          env: { PATH: Exec.PATH },
         });
 
-        toast.style = Toast.Style.Success;
-        toast.title = `Moved envelope to folder ${values.folder}`;
+        if (stdout) {
+          toast.style = Toast.Style.Success;
+          toast.title = `Moved envelope to folder ${values.folder}`;
 
-        props.setState((previous: State) => ({ ...previous, isLoading: true }));
-        const envelopes = await listEnvelopes();
-        props.setState((previous: State) => ({ ...previous, envelopes: envelopes, isLoading: false }));
+          props.setState((previous: State) => ({
+            ...previous,
+            isLoading: true,
+          }));
+          const envelopes = await Envelopes.list(props.state.currentFolderName, props.state.currentAccountName);
 
-        pop();
+          props.setState((previous: State) => ({
+            ...previous,
+            envelopes: envelopes,
+            isLoading: false,
+          }));
+
+          pop();
+        } else if (stderr) {
+          console.error(stderr);
+
+          toast.style = Toast.Style.Failure;
+          toast.title = `Failed to move envelope`;
+
+          pop();
+        }
       } catch (error) {
         toast.style = Toast.Style.Failure;
         toast.title = `Failed to move envelope: ${error}`;
@@ -344,29 +274,27 @@ function MoveToSelectedForm(props: { folders: Folder[]; envelope: Envelope; setS
   );
 }
 
-function ReadDetail(props: { envelope: Envelope }) {
-  const [state, setState] = useState({
+function ReadDetail(props: { envelope: Envelope; currentAccountName: string; currentFolderName: string }) {
+  const [state, setState] = useState<{ isLoading: boolean; email: null | string }>({
     isLoading: true,
     email: null,
   });
 
   useEffect(() => {
-    async function fetch() {
+    (async () => {
       setState((previous) => ({
         ...previous,
         isLoading: true,
       }));
 
-      const email = await readEmail(props.envelope);
+      const email = await readEmail(props.envelope, props.currentAccountName, props.currentFolderName);
 
       setState((previous) => ({
         ...previous,
         isLoading: false,
         email: email,
       }));
-    }
-
-    fetch();
+    })();
   }, []);
 
   const markdown = state.email;
@@ -390,7 +318,7 @@ function ReadDetail(props: { envelope: Envelope }) {
           <Detail.Metadata.Separator />
           <Detail.Metadata.TagList title="Flags">
             {props.envelope.flags.map((flag) => (
-              <Detail.Metadata.TagList.Item text={flag} />
+              <Detail.Metadata.TagList.Item text={flag} key={flag} />
             ))}
           </Detail.Metadata.TagList>
         </Detail.Metadata>
@@ -399,24 +327,20 @@ function ReadDetail(props: { envelope: Envelope }) {
   );
 }
 
-async function readEmail(envelope: Envelope): Promise<any> {
-  const { stdout, stderr } = await exec(`"himalaya" read --mime-type plain ${envelope.id}`, {
-    env: {
-      PATH: PATH,
-    },
-  });
+async function readEmail(envelope: Envelope, currentAccountName: string, currentFolderName: string): Promise<string> {
+  const cmd = `himalaya --account "${currentAccountName}" --folder "${currentFolderName}" read --mime-type plain ${envelope.id}`;
+  console.debug(`cmd: ${cmd}`);
+  const { stdout, stderr } = await Exec.run(cmd, { env: { PATH: Exec.PATH } });
 
   if (stdout) {
     return stdout;
-  }
-
-  if (stderr) {
+  } else if (stderr) {
     console.log(stderr);
 
     return stderr;
+  } else {
+    throw new Error("No results from stdout or stderr");
   }
-
-  throw new Error("No results from stdout or stderr");
 }
 
 const markUnreadAction = (envelope: Envelope, state: State, setState: any) => {
@@ -431,19 +355,36 @@ const markUnreadAction = (envelope: Envelope, state: State, setState: any) => {
           title: "Marking as unread",
         });
 
+        const index = state.envelopes.findIndex((cur) => cur.id === envelope.id);
+
         try {
-          const { stdout, _stderr } = await exec(`"himalaya" flag remove ${envelope.id} -- seen`, {
-            env: {
-              PATH: PATH,
-            },
+          const cmd = `himalaya --account "${state.currentAccountName}" --folder "${state.currentFolderName}" flag remove ${envelope.id} -- seen`;
+          console.debug(`cmd: ${cmd}`);
+          const { stdout, stderr } = await Exec.run(cmd, {
+            env: { PATH: Exec.PATH },
           });
 
-          toast.style = Toast.Style.Success;
-          toast.title = "Marked unread";
+          if (stdout) {
+            toast.style = Toast.Style.Success;
+            toast.title = "Marked unread";
 
-          setState((previous: State) => ({ ...previous, isLoading: true }));
-          const envelopes = await listEnvelopes();
-          setState((previous: State) => ({ ...previous, envelopes: envelopes, isLoading: false }));
+            const envelopes = state.envelopes;
+            envelopes[index].flags = envelopes[index].flags.filter((flag) => flag != Flag.Seen);
+
+            setState((previous: State) => ({
+              ...previous,
+              envelopes: envelopes,
+            }));
+          } else if (stderr) {
+            console.error(stderr);
+
+            setState((previous: State) => ({ ...previous, isLoading: false }));
+
+            toast.style = Toast.Style.Failure;
+            toast.title = "Failed to mark unread";
+          } else {
+            throw new Error("No results from stdout or stderr");
+          }
         } catch (error) {
           toast.style = Toast.Style.Failure;
           toast.title = `Failed to mark unread: ${error}`;
@@ -465,19 +406,36 @@ const markReadAction = (envelope: Envelope, state: State, setState: any) => {
           title: "Marking as read",
         });
 
+        const index = state.envelopes.findIndex((cur) => cur.id === envelope.id);
+
         try {
-          const { stdout, _stderr } = await exec(`"himalaya" flag add ${envelope.id} -- seen`, {
-            env: {
-              PATH: PATH,
-            },
+          const cmd = `himalaya --account "${state.currentAccountName}" --folder "${state.currentFolderName}" flag add ${envelope.id} -- seen`;
+          console.debug(`cmd: ${cmd}`);
+          const { stdout, stderr } = await Exec.run(cmd, {
+            env: { PATH: Exec.PATH },
           });
 
-          toast.style = Toast.Style.Success;
-          toast.title = "Marked read";
+          if (stdout) {
+            toast.style = Toast.Style.Success;
+            toast.title = "Marked read";
 
-          setState((previous: State) => ({ ...previous, isLoading: true }));
-          const envelopes = await listEnvelopes();
-          setState((previous: State) => ({ ...previous, envelopes: envelopes, isLoading: false }));
+            const envelopes = state.envelopes;
+            envelopes[index].flags.push(Flag.Seen);
+
+            setState((previous: State) => ({
+              ...previous,
+              envelopes: envelopes,
+            }));
+          } else if (stderr) {
+            console.error(stderr);
+
+            setState((previous: State) => ({ ...previous, isLoading: false }));
+
+            toast.style = Toast.Style.Failure;
+            toast.title = "Failed to mark read";
+          } else {
+            throw new Error("No results from stdout or stderr");
+          }
         } catch (error) {
           toast.style = Toast.Style.Failure;
           toast.title = `Failed to mark read: ${error}`;
@@ -492,13 +450,21 @@ const moveToSelectedAction = (envelope: Envelope, state: State, setState: any) =
     <Action.Push
       title="Move to Selected"
       icon={Icon.Folder}
-      target={<MoveToSelectedForm folders={state.folders} envelope={envelope} setState={setState} />}
+      target={<MoveToSelectedForm folders={state.folders} envelope={envelope} state={state} setState={setState} />}
     />
   );
 };
 
-const readAction = (envelope: Envelope, state: State, setState: any) => {
-  return <Action.Push title="Read" icon={Icon.Eye} target={<ReadDetail envelope={envelope} />} />;
+const readAction = (envelope: Envelope, currentAccountName: string, currentFolderName: string) => {
+  return (
+    <Action.Push
+      title="Read"
+      icon={Icon.Eye}
+      target={
+        <ReadDetail envelope={envelope} currentAccountName={currentAccountName} currentFolderName={currentFolderName} />
+      }
+    />
+  );
 };
 
 const moveToTrashAction = (envelope: Envelope, state: State, setState: any) => {
@@ -513,19 +479,36 @@ const moveToTrashAction = (envelope: Envelope, state: State, setState: any) => {
           title: "Moving to trash",
         });
 
+        const index = state.envelopes.findIndex((cur) => cur.id === envelope.id);
+
         try {
-          const { stdout, _stderr } = await exec(`"himalaya" delete ${envelope.id}`, {
-            env: {
-              PATH: PATH,
-            },
+          const cmd = `himalaya --account "${state.currentAccountName}" --folder "${state.currentFolderName}" delete ${envelope.id}`;
+          console.debug(`cmd: ${cmd}`);
+          const { stdout, stderr } = await Exec.run(cmd, {
+            env: { PATH: Exec.PATH },
           });
 
-          toast.style = Toast.Style.Success;
-          toast.title = "Moved to trash";
+          if (stdout) {
+            toast.style = Toast.Style.Success;
+            toast.title = "Moved to trash";
 
-          setState((previous: State) => ({ ...previous, isLoading: true }));
-          const envelopes = await listEnvelopes();
-          setState((previous: State) => ({ ...previous, envelopes: envelopes, isLoading: false }));
+            const envelopes = state.envelopes;
+            envelopes.splice(index, 1);
+
+            setState((previous: State) => ({
+              ...previous,
+              envelopes: envelopes,
+            }));
+          } else if (stderr) {
+            console.error(stderr);
+
+            setState((previous: State) => ({ ...previous, isLoading: false }));
+
+            toast.style = Toast.Style.Failure;
+            toast.title = "Failed to move to trash";
+          } else {
+            throw new Error("No results from stdout or stderr");
+          }
         } catch (error) {
           toast.style = Toast.Style.Failure;
           toast.title = `Failed to move to trash: ${error}`;
@@ -533,4 +516,84 @@ const moveToTrashAction = (envelope: Envelope, state: State, setState: any) => {
       }}
     />
   );
+};
+
+const accessories = (envelope: Envelope) => {
+  const accessories = [];
+
+  if (envelope.flags.includes(Flag.Answered)) {
+    accessories.push({
+      icon: Icon.Reply,
+    });
+  }
+
+  // This is always present. Accessories are rendered ordered
+  // so put them last.
+  accessories.push({
+    text: {
+      value: `${envelope.from.name} <${envelope.from.addr}>`,
+    },
+    icon: Icon.Person,
+  });
+
+  return accessories;
+};
+
+function FolderDropdown(props: {
+  folders: Folder[];
+  onFolderChange: (newValue: string) => void;
+  defaultValue: string;
+}) {
+  const { folders, onFolderChange, defaultValue } = props;
+
+  return (
+    <List.Dropdown
+      tooltip="Select Folder"
+      storeValue={true}
+      onChange={(newValue) => {
+        onFolderChange(newValue);
+      }}
+      defaultValue={defaultValue}
+    >
+      {folders.map((folder) => (
+        <List.Dropdown.Item key={folder.name} title={folder.name} value={folder.name} />
+      ))}
+    </List.Dropdown>
+  );
+}
+
+const envelopesToList = (state: State, setState: any): any => {
+  return Array.from(group_envelopes_by_date(state.envelopes).entries()).map(([date, group]) => {
+    const items = group.map((envelope) => {
+      const item = (
+        <List.Item
+          id={envelope.id}
+          key={envelope.id}
+          title={envelope.subject}
+          icon={envelope.flags.includes(Flag.Seen) ? Icon.Circle : Icon.CircleFilled}
+          accessories={accessories(envelope)}
+          actions={
+            <ActionPanel title="Envelope">
+              {readAction(envelope, state.currentAccountName, state.currentFolderName)}
+              {envelope.flags.includes(Flag.Seen) && markUnreadAction(envelope, state, setState)}
+              {!envelope.flags.includes(Flag.Seen) && markReadAction(envelope, state, setState)}
+              {moveToSelectedAction(envelope, state, setState)}
+              {moveToTrashAction(envelope, state, setState)}
+              <Action.CopyToClipboard title="Copy ID to Clipboard" content={envelope.id} />
+            </ActionPanel>
+          }
+        />
+      );
+
+      return item;
+    });
+
+    const section = (
+      <List.Section title={date} key={date}>
+        {items}
+      </List.Section>
+    );
+
+    return section;
+  });
 };

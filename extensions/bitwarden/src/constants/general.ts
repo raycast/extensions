@@ -2,6 +2,8 @@
 
 export const DEFAULT_SERVER_URL = "https://bitwarden.com";
 
+export const SENSITIVE_VALUE_PLACEHOLDER = "HIDDEN-VALUE";
+
 export const LOCAL_STORAGE_KEY = {
   PASSWORD_OPTIONS: "bw-generate-password-options",
   PASSWORD_ONE_TIME_WARNING: "bw-generate-password-warning-accepted",
@@ -11,7 +13,3 @@ export const LOCAL_STORAGE_KEY = {
   LAST_ACTIVITY_TIME: "lastActivityTime",
   VAULT_LOCK_REASON: "vaultLockReason",
 };
-
-export const ERRORS = {
-  CLINotFound: "CLINotFound",
-} as const;
