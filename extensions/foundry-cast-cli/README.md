@@ -1,8 +1,6 @@
 # Foundry `Cast` Raycast Extension
 
-> Use the Cast CLI directly inside Raycast
-
-This extension is not ready to be published on the Raycast store yet. Hopefully soon! In the meantime, you can install it locally. All contributions are more than welcome!
+Use the Cast CLI directly inside Raycast!
 
 ## Getting started
 
