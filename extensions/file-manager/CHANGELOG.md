@@ -1,6 +1,11 @@
 # File Manager Changelog
 
+## [Features] - 2023-05-12
+
+Add enable standard shortcut preference.
+
 ## [Fixes] - 2023-04-11
+
 - Modified behavior to prevent errors caused by broken symlinks.
 - Added an icon to indicate broken symlinks.
 
