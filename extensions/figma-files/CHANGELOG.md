@@ -2,8 +2,8 @@
 
 ## [Multi-team support and better caching] - 2023-05-12
 
- - Added support for multiple teams. You can now search across multiple teams by providing a comma separated list of teamIDs in preferences.
- - Search results are cached for smoother experience. You can now also search for files when offline.
+- Added support for multiple teams. You can now search across multiple teams by providing a comma separated list of teamIDs in preferences.
+- Search results are cached for smoother experience. You can now also search for files when offline.
 
 ## [Fixes] - 2022-12-20
 

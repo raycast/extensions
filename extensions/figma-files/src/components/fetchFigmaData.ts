@@ -2,7 +2,6 @@ import { getPreferenceValues, showToast, Toast, LocalStorage } from "@raycast/ap
 import fetch from "node-fetch";
 import { File, ProjectFiles, TeamFiles, TeamProjects } from "../types";
 
-
 async function fetchTeamProjects(): Promise<TeamProjects[]> {
   const { PERSONAL_ACCESS_TOKEN, TEAM_ID } = getPreferenceValues();
 
@@ -23,8 +22,6 @@ async function fetchTeamProjects(): Promise<TeamProjects[]> {
 
       const json = (await response.json()) as TeamProjects;
       return json;
-
-
     } catch (error) {
       console.error(error);
       showToast(Toast.Style.Failure, "Could not load team");
@@ -38,7 +35,7 @@ async function fetchFiles(): Promise<ProjectFiles[][]> {
   const { PERSONAL_ACCESS_TOKEN } = getPreferenceValues();
   const teamProjects = await fetchTeamProjects();
   const teamNames = teamProjects.map((team) => team.name).join(",");
-  await LocalStorage.setItem("teamNames", teamNames)
+  await LocalStorage.setItem("teamNames", teamNames);
   const teamFiles = teamProjects.map(async (team) => {
     //fetch all files for each project of a team
     const projects = (team.projects || []).map(async (project) => {
@@ -66,9 +63,9 @@ async function fetchFiles(): Promise<ProjectFiles[][]> {
 
 export async function resolveAllFiles(): Promise<TeamFiles[]> {
   const teamFiles = await fetchFiles();
-  const teams = (await LocalStorage.getItem<string>("teamNames") || "").split(",")
+  const teams = ((await LocalStorage.getItem<string>("teamNames")) || "").split(",");
   const fi = teamFiles.map((projectFiles, index) => {
     return { name: teams[index], files: projectFiles } as TeamFiles;
-  })
+  });
   return fi;
 }

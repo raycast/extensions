@@ -18,7 +18,7 @@ export type ProjectFiles = {
 export type TeamFiles = {
   name: string;
   files: ProjectFiles[];
-}
+};
 
 export type TeamProjects = {
   name: string;

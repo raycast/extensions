@@ -7,12 +7,16 @@ import { useEffect, useState } from "react";
 import { useCachedPromise } from "@raycast/utils";
 
 export default function Command() {
-  const { data, isLoading, error } = useCachedPromise(async () => {
-    const results = await resolveAllFiles()
-    return results
-  }, [], {
-    keepPreviousData: true,
-  })
+  const { data, isLoading, error } = useCachedPromise(
+    async () => {
+      const results = await resolveAllFiles();
+      return results;
+    },
+    [],
+    {
+      keepPreviousData: true,
+    }
+  );
 
   const { files: visitedFiles, visitFile, isLoading: isLoadingVisitedFiles } = useVisitedFiles();
   const isLoadingBlock = isLoading || isLoadingVisitedFiles;
@@ -56,7 +60,11 @@ export default function Command() {
   );
 
   return (
-    <Grid isLoading={isLoadingBlock} searchBarPlaceholder="Filter files by name..." searchBarAccessory={filterDropdown()} >
+    <Grid
+      isLoading={isLoadingBlock}
+      searchBarPlaceholder="Filter files by name..."
+      searchBarAccessory={filterDropdown()}
+    >
       {!isFiltered && (
         <Grid.Section key="recent-files" title="Recent Files">
           {visitedFiles?.map((file) => (
@@ -71,13 +79,15 @@ export default function Command() {
         </Grid.Section>
       )}
 
-      {filteredFiles?.map((team) => (team.files.map((project) => (<Grid.Section key={team.name + project.name + "-project"} title={team.name + " - " + project.name}>
-        {(project.files || []).map((file) => (
-          <FileGridItem key={file.key + "-file"} file={file} desktopApp={desktopApp} onVisit={visitFile} />
-        ))}
-      </Grid.Section>))
-
-      ))}
+      {filteredFiles?.map((team) =>
+        team.files.map((project) => (
+          <Grid.Section key={team.name + project.name + "-project"} title={team.name + " - " + project.name}>
+            {(project.files || []).map((file) => (
+              <FileGridItem key={file.key + "-file"} file={file} desktopApp={desktopApp} onVisit={visitFile} />
+            ))}
+          </Grid.Section>
+        ))
+      )}
     </Grid>
   );
 }

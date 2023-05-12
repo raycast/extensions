@@ -5,13 +5,16 @@ import { useEffect, useState } from "react";
 import { useCachedPromise } from "@raycast/utils";
 
 export default function Command() {
-
-  const { data, isLoading, error } = useCachedPromise(async () => {
-    const results = await resolveAllFiles()
-    return results
-  }, [], {
-    keepPreviousData: true,
-  })
+  const { data, isLoading, error } = useCachedPromise(
+    async () => {
+      const results = await resolveAllFiles();
+      return results;
+    },
+    [],
+    {
+      keepPreviousData: true,
+    }
+  );
 
   const { files: visitedFiles, visitFile, isLoading: isLoadingVisitedFiles } = useVisitedFiles();
   const [desktopApp, setDesktopApp] = useState<Application>();
@@ -41,7 +44,6 @@ export default function Command() {
       {error && <MenuBarExtra.Item title="Error" />}
       {visitedFiles && (
         <>
-
           <MenuBarExtra.Submenu key="recent-files" title="Recent">
             {visitedFiles?.map((file) => (
               <MenuBarExtra.Item
@@ -77,7 +79,6 @@ export default function Command() {
                 ))}
               />
             ))}
-
           </MenuBarExtra.Section>
         ))}
       {(isLoading || isLoadingVisitedFiles) && !data && <MenuBarExtra.Item title="Loading..." />}
