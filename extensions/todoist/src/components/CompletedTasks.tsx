@@ -4,26 +4,35 @@ import { compareDesc, format } from "date-fns";
 import { useMemo } from "react";
 import removeMarkdown from "remove-markdown";
 
-import { handleError } from "./api";
-import { displayDueDate } from "./helpers/dates";
-import { getActivity, uncomplete } from "./sync-api";
+import { handleError, getActivity } from "../api";
+import { uncompleteTask as apiUncompleteTask } from "../api";
+import { displayDueDate } from "../helpers/dates";
+import { refreshMenuBarCommand } from "../helpers/menu-bar";
+import { QuickLinkView } from "../home";
+import useCachedData from "../hooks/useCachedData";
 
-export default function Activity() {
-  const { data, isLoading, mutate } = useCachedPromise(() => getActivity());
+import CreateViewAction from "./CreateViewAction";
+
+type CompletedTaskProps = { quickLinkView: QuickLinkView };
+
+export default function CompletedTasks({ quickLinkView }: CompletedTaskProps) {
+  const [data, setData] = useCachedData();
+  const { data: activity, mutate } = useCachedPromise(() => getActivity());
 
   async function uncompleteTask(taskId: string) {
     await showToast({ style: Toast.Style.Animated, title: "Uncompleting task" });
 
     try {
-      await uncomplete(taskId);
-      await showToast({ style: Toast.Style.Success, title: "Uncompleted Task" });
+      await apiUncompleteTask(taskId, { data, setData });
+      await showToast({ style: Toast.Style.Success, title: "Uncompleted task" });
       mutate();
+      refreshMenuBarCommand();
     } catch (error) {
       handleError({ error, title: "Unable to uncomplete task" });
     }
   }
 
-  const events = data?.map((event) => {
+  const events = activity?.map((event) => {
     return { ...event, date: format(new Date(event.event_date), "yyyy-MM-dd") };
   });
 
@@ -41,15 +50,14 @@ export default function Activity() {
     }));
 
     return sections;
-  }, [data]);
+  }, [activity]);
 
   return (
-    <List isLoading={isLoading}>
+    <>
       {sections?.map((section) => {
         return (
           <List.Section key={section.name} title={section.name}>
             {section.events.map((event) => {
-              console.log(event);
               return (
                 <List.Item
                   icon={Icon.CheckCircle}
@@ -67,6 +75,15 @@ export default function Activity() {
                       />
 
                       <Action.CopyToClipboard title="Copy Task Title" content={event.extra_data.content} />
+
+                      <CreateViewAction {...quickLinkView} />
+
+                      <Action
+                        title="Refresh Data"
+                        icon={Icon.ArrowClockwise}
+                        shortcut={{ modifiers: ["cmd"], key: "r" }}
+                        onAction={mutate}
+                      />
                     </ActionPanel>
                   }
                 />
@@ -75,6 +92,6 @@ export default function Activity() {
           </List.Section>
         );
       })}
-    </List>
+    </>
   );
 }

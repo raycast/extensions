@@ -1,4 +1,10 @@
-export const truncateMiddle = (fullStr: string, strLen: number, separator = "...") => {
+import { LaunchType, launchCommand } from "@raycast/api";
+
+export function refreshMenuBarCommand() {
+  return launchCommand({ name: "menu-bar", type: LaunchType.Background, context: { fromCommand: true } });
+}
+
+export const truncateMiddle = (fullStr: string, strLen: number, separator = "…") => {
   if (fullStr.length <= strLen) return fullStr;
 
   const sepLen = separator.length;
