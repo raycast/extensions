@@ -5,6 +5,9 @@
   "description": "Manage Night Shift System Settings",
   "icon": "icon.png",
   "author": "devmoath",
+  "contributors": [
+    "kgrhartlage"
+  ],
   "categories": [
     "Productivity",
     "System"
