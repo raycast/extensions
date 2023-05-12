@@ -40,7 +40,7 @@ export default async function QuickNew(props: LaunchProps<{ arguments: Props }>)
   const data = await fetch(`${pref.shlinkUrl}/rest/v3/short-urls`, {
     method: "POST",
     headers: {
-      "X-Api-Key": pref.shlinkApiKey,
+      "X-Api-Key": pref.shlinkApiKey as string,
       "Content-Type": "application/json",
     },
     body: JSON.stringify({

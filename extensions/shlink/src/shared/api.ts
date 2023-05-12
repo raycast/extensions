@@ -45,8 +45,8 @@ export function useApiFetch<DataObject extends object>({
   return useFetch<DataObject>(`${pref.shlinkUrl}/rest/v3/${restPath}`, {
     method: method,
     headers: {
-      "X-Api-Key": pref.shlinkApiKey,
-    },
+      "X-Api-Key": pref.shlinkApiKey as string,
+    } as HeadersInit,
     body: data,
     keepPreviousData: true,
   });
@@ -58,7 +58,7 @@ export async function apiFetch({ restPath, method, data }: { restPath: string; m
   const res = await fetch(url, {
     method: method,
     headers: {
-      "X-Api-Key": pref.shlinkApiKey,
+      "X-Api-Key": pref.shlinkApiKey as string,
     },
     body: data,
   });

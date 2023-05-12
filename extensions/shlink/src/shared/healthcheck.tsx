@@ -14,8 +14,8 @@ export function HealthCheck({ renderWhileLoading, onLoading, children }: Props) 
   const { isLoading, data, error } = useFetch(`${pref.shlinkUrl}/rest/health`, {
     method: "GET",
     headers: {
-      "X-Api-Key": pref.shlinkApiKey,
-    },
+      "X-Api-Key": pref.shlinkApiKey as string,
+    } as HeadersInit,
     keepPreviousData: true,
     async parseResponse(response) {
       return response.ok;
