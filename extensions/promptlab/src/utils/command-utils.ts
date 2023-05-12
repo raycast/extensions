@@ -125,9 +125,9 @@ export const replaceShellScriptPlaceholders = async (prompt: string) => {
  */
 export const replaceURLPlaceholders = async (prompt: string) => {
   let subbedPrompt = prompt;
-  const urlMatches = prompt.match(/{{(https?:.*?)}}/g) || [];
+  const urlMatches = prompt.match(/{{(https?:(.| )*?)}}/g) || [];
   for (const m of urlMatches) {
-    const url = m.substring(2, m.length - 2);
+    const url = encodeURI(m.substring(2, m.length - 2));
     const text = await getTextOfWebpage(url);
     subbedPrompt = subbedPrompt.replaceAll(m, filterString(text));
   }
@@ -148,6 +148,34 @@ export const replaceFileSelectionPlaceholders = async (prompt: string) => {
     addFileToSelection(file);
     subbedPrompt = subbedPrompt.replaceAll(m, "");
   }
+  return subbedPrompt;
+};
+
+/**
+ * Updates persistent data and replaces counter placeholders with the updated values.
+ *
+ * @param prompt The prompt to operate on.
+ * @returns A promise resolving to the prompt with persistent data placeholders replaced.
+ */
+export const replaceCounterPlaceholders = async (prompt: string) => {
+  let subbedPrompt = prompt;
+  const incrementMatches = prompt.match(/{{increment:.*?}}/g) || [];
+  const decrementMatches = prompt.match(/{{decrement:.*?}}/g) || [];
+
+  for (const m of incrementMatches) {
+    const identifier = "id-" + m.substring(10, m.length - 2);
+    const value = parseInt((await LocalStorage.getItem(identifier)) || "0") + 1;
+    await LocalStorage.setItem(identifier, value.toString());
+    subbedPrompt = subbedPrompt.replaceAll(m, value.toString());
+  }
+
+  for (const m of decrementMatches) {
+    const identifier = "id-" + m.substring(10, m.length - 2);
+    const value = parseInt((await LocalStorage.getItem(identifier)) || "0") - 1;
+    await LocalStorage.setItem(identifier, value.toString());
+    subbedPrompt = subbedPrompt.replaceAll(m, value.toString());
+  }
+
   return subbedPrompt;
 };
 
@@ -187,6 +215,7 @@ export const runReplacements = async (
   }
 
   // Replace complex placeholders (i.e. shell scripts, AppleScripts, etc.)
+  subbedPrompt = await replaceCounterPlaceholders(subbedPrompt);
   subbedPrompt = await replaceAppleScriptPlaceholders(subbedPrompt);
   subbedPrompt = await replaceShellScriptPlaceholders(subbedPrompt);
   subbedPrompt = await replaceURLPlaceholders(subbedPrompt);

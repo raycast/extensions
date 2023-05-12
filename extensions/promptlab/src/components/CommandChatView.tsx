@@ -83,13 +83,17 @@ export default function CommandChatView(props: {
   }, [data]);
 
   useEffect(() => {
+    if (input == undefined || !data.includes("}}")) {
+      return;
+    }
+
     // When the input changes, run specified command if autonomous features are enabled
     const cmdMatch = data.match(/.*{{cmd:(.*?):(.*?)}}.*/);
     if (cmdMatch && useAutonomousFeatures) {
       // Get the command prompt
       LocalStorage.allItems().then((commands) => {
         const commandPrompts = Object.entries(commands)
-          .filter(([key]) => key != "--defaults-installed")
+          .filter(([key]) => key != "--defaults-installed" && !key.startsWith("id-"))
           .sort(([a], [b]) => (a > b ? 1 : -1))
           .map(([, value], index) => `${index}:${JSON.parse(value)["prompt"]}`);
         const nameIndex = parseInt(cmdMatch[1]);
@@ -106,7 +110,7 @@ export default function CommandChatView(props: {
         }
       });
     }
-  }, [input]);
+  }, [input, data]);
 
   useEffect(() => {
     if (!loading && enableModel == true && currentResponse == data) {
@@ -186,11 +190,11 @@ export default function CommandChatView(props: {
                             : `You will also consider your previous response. Your previous response was: ###${values.responseField}###`
                         }${
                           values.useAICommandsCheckbox
-                            ? `Try to answer my next query using your knowledge. If and only if you cannot provide an answer, choose the command from the following list that is most likely to carries out the goal expressed in my next query, and then respond with the number of the command you want to run in the format {{cmd:commandNumber:input}}. Replace the input with a short string according to my query. For example, if I say 'search google for AI', the input would be 'AI'. Here are the commands: ###${commandDescriptions.join(
+                            ? `Try to answer my next query using your knowledge. If you cannot fulfill the query, if the query requires new information, or if the query invokes an action such as searching, choose the command from the following list that is most likely to carries out the goal expressed in my next query, and then respond with the number of the command you want to run in the format {{cmd:commandNumber:input}}. Replace the input with a short string according to my query. For example, if I say 'search google for AI', the input would be 'AI'. Here are the commands: ###${commandDescriptions.join(
                                 "\n"
-                              )}### Try to answer without using a command, unless the command asks for new information (e.g. latest news, weather, etc.). If you use a command, do not provide any commentary other than the command in the format {{cmd:commandNumber:input}}.`
+                              )}### Try to answer without using a command, unless the query asks for new information (e.g. latest news, weather, stock prices, etc.) or invokes an action (e.g. searching, opening apps). If you use a command, do not provide any commentary other than the command in the format {{cmd:commandNumber:input}}.`
                             : ``
-                        }\n\nMy next input is: ###`
+                        }\n\nMy next query is: ###`
                       : ""
                   }
                   ${subbedPrompt}###`

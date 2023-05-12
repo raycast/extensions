@@ -37,6 +37,7 @@ interface CommandFormValues {
   version?: string;
   requirements?: string;
   scriptKind?: string;
+  categories?: string[];
 }
 
 export default function CommandForm(props: {
@@ -67,7 +68,8 @@ export default function CommandForm(props: {
         const commandData = await LocalStorage.allItems();
         const commandDataFiltered = Object.values(commandData).filter(
           (cmd, index) =>
-            Object.keys(commandData)[index] != "--defaults-installed" || (oldData && oldData.name == cmd.name)
+            Object.keys(commandData)[index] != "--defaults-installed" &&
+            !Object.keys(commandData)[index].startsWith("id-")
         );
         setCommands(commandDataFiltered.map((data) => JSON.parse(data)));
       }
@@ -100,6 +102,7 @@ export default function CommandForm(props: {
       version: "1.0.0",
       requirements: "",
       scriptKind: "applescript",
+      categories: ["Other"],
     },
     validation: {
       name: FormValidation.Required,
@@ -342,6 +345,54 @@ export default function CommandForm(props: {
         info="A list or paragraph explaining any requirements for this script, e.g. other commands, command-line utilities, etc."
         {...itemProps.requirements}
       />
+      <Form.TagPicker
+        title="Categories"
+        info="A comma-separated list of categories for the command. This will be used to help users find your command in the store and in their prompt library."
+        {...itemProps.categories}
+      >
+        <Form.TagPicker.Item
+          title="Other"
+          value="Other"
+          icon={{ source: Icon.Circle, tintColor: Color.SecondaryText }}
+        />
+        <Form.TagPicker.Item title="Data" value="Data" icon={{ source: Icon.List, tintColor: Color.Blue }} />
+        <Form.TagPicker.Item
+          title="Development"
+          value="Development"
+          icon={{ source: Icon.Terminal, tintColor: Color.PrimaryText }}
+        />
+        <Form.TagPicker.Item title="News" value="News" icon={{ source: Icon.Important, tintColor: Color.Blue }} />
+        <Form.TagPicker.Item title="Social" value="Social" icon={{ source: Icon.TwoPeople, tintColor: Color.Green }} />
+        <Form.TagPicker.Item title="Web" value="Web" icon={{ source: Icon.Network, tintColor: Color.Red }} />
+        <Form.TagPicker.Item title="Finance" value="Finance" icon={{ source: Icon.Coins, tintColor: Color.Blue }} />
+        <Form.TagPicker.Item title="Health" value="Health" icon={{ source: Icon.Heartbeat, tintColor: Color.Red }} />
+        <Form.TagPicker.Item
+          title="Sports"
+          value="Sports"
+          icon={{ source: Icon.SoccerBall, tintColor: Color.PrimaryText }}
+        />
+        <Form.TagPicker.Item title="Travel" value="Travel" icon={{ source: Icon.Airplane, tintColor: Color.Yellow }} />
+        <Form.TagPicker.Item title="Shopping" value="Shopping" icon={{ source: Icon.Cart, tintColor: Color.Purple }} />
+        <Form.TagPicker.Item
+          title="Entertainment"
+          value="Entertainment"
+          icon={{ source: Icon.Video, tintColor: Color.Red }}
+        />
+        <Form.TagPicker.Item
+          title="Lifestyle"
+          value="Lifestyle"
+          icon={{ source: Icon.Person, tintColor: Color.Green }}
+        />
+        <Form.TagPicker.Item
+          title="Education"
+          value="Education"
+          icon={{ source: Icon.Bookmark, tintColor: Color.Orange }}
+        />
+        <Form.TagPicker.Item title="Reference" value="Reference" icon={{ source: Icon.Book, tintColor: Color.Red }} />
+        <Form.TagPicker.Item title="Weather" value="Weather" icon={{ source: Icon.CloudSun, tintColor: Color.Blue }} />
+        <Form.TagPicker.Item title="Media" value="Media" icon={{ source: Icon.Image, tintColor: Color.Magenta }} />
+        <Form.TagPicker.Item title="Calendar" value="Calendar" icon={{ source: Icon.Calendar, tintColor: Color.Red }} />
+      </Form.TagPicker>
     </Form>
   );
 }

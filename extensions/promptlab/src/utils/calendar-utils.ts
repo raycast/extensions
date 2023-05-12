@@ -1,4 +1,6 @@
+import { getPreferenceValues } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
+import { ExtensionPreferences } from "./types";
 
 /**
  * Removes extraneous symbols from a string and limits it to (by default) 3000 characters.
@@ -9,10 +11,11 @@ import { runAppleScript } from "run-applescript";
  */
 export const filterString = (str: string, cutoff?: number): string => {
   /* Removes unnecessary/invalid characters from strings. */
+  const preferences = getPreferenceValues<ExtensionPreferences>();
   return str
     .replaceAll(/[^A-Za-z0-9,.?!\-()/[\]{}@: \n\r<>]/g, "")
     .replaceAll('"', "'")
-    .substring(0, cutoff || 3000);
+    .substring(0, cutoff || parseInt(preferences.lengthLimit) + 500 || 3000);
 };
 
 /**

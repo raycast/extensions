@@ -30,7 +30,10 @@ export async function installDefaults() {
 /**
  * The maximum length of a file's read content string. This value is divided across all selected files.
  */
-let maxCharacters = 2000;
+let maxCharacters = (() => {
+  const preferences = getPreferenceValues<ExtensionPreferences>();
+  return parseInt(preferences.lengthLimit) || 2500;
+})();
 
 /**
  * Errors that can arise when getting the contents of selected files.

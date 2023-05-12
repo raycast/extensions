@@ -89,6 +89,12 @@ You can instruct PromptLab to extract text from any webpage by using the {{URL}}
 | `{{input}}` | An input string provided by either Quicklink input or the currently selected text |
 | `{{selectedText}}` | The currently selected text |
 
+#### Persistent Data Placeholders
+| Placeholder | Replaced With |
+| --- | --- |
+| `{{increment:identifier}}` | The value of the local storage entry whose key is `identifier`, increased by 1 |
+| `{{decrement:identifier}}` | The value of the local storage entry whose key is `identifier`, decreased by 1 |
+
 #### File Data Placeholders
 | Placeholder | Replaced With |
 | --- | --- |

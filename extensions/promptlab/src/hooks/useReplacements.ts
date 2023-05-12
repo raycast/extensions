@@ -148,11 +148,11 @@ export const useReplacements = (
     },
     "{{todayWeather}}": async () => {
       const weatherData = getWeatherData(1);
-      return weatherData as unknown as string;
+      return JSON.stringify(weatherData);
     },
     "{{weekWeather}}": async () => {
       const weatherData = getWeatherData(7);
-      return weatherData as unknown as string;
+      return JSON.stringify(weatherData);
     },
 
     // Calendar Data

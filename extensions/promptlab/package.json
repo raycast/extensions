@@ -88,6 +88,14 @@
           "value": "async"
         }
       ]
+    },
+    {
+      "name": "lengthLimit",
+      "title": "Prompt Length Limit",
+      "type": "textfield",
+      "required": false,
+      "default": "2500",
+      "description": "The maximum length of the prompt that will be sent to the model endpoint, beyond which it will be truncated. Larger values will support more content, but may result in token count errors. Adjust this value according to the model's token limit (but leave some space, e.g. 1000 characters, for additional input and placeholders)."
     }
   ],
   "commands": [
@@ -114,6 +122,24 @@
           "placeholder": "Command Name",
           "required": false,
           "type": "text"
+        }
+      ],
+      "preferences": [
+        {
+          "name": "groupByCategory",
+          "label": "Group Commands By Category",
+          "type": "checkbox",
+          "default": false,
+          "description": "If checked, each command category will have its own section in the search results.",
+          "required": false
+        },
+        {
+          "title": "Export Location",
+          "name": "exportLocation",
+          "type": "directory",
+          "default": "~/Downloads",
+          "description": "The folder where exported commands will be saved.",
+          "required": false
         }
       ]
     },

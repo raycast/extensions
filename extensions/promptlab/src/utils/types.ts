@@ -1,3 +1,6 @@
+/**
+ * General preferences for the entire extension.
+ */
 export interface ExtensionPreferences {
   pdfOCR: boolean;
   modelEndpoint: string;
@@ -6,7 +9,40 @@ export interface ExtensionPreferences {
   inputSchema: string;
   outputKeyPath: string;
   outputTiming: string;
+  lengthLimit: string;
 }
+
+/**
+ * Preferences for the `My PromptLab Commands` command.
+ */
+export interface searchPreferences {
+  groupByCategory: boolean;
+  exportLocation: string;
+}
+
+/**
+ * Command categories.
+ */
+export const categories = [
+  "Calendar",
+  "Data",
+  "Development",
+  "Education",
+  "Entertainment",
+  "Finance",
+  "Health",
+  "Lifestyle",
+  "Media",
+  "News",
+  "Other",
+  "Reference",
+  "Shopping",
+  "Social",
+  "Sports",
+  "Travel",
+  "Weather",
+  "Web",
+];
 
 /**
  * User-customizable options for PromptLab commands.
@@ -55,6 +91,7 @@ export interface Command {
   version?: string;
   requirements?: string;
   scriptKind?: string;
+  categories?: string[];
 }
 
 /**
@@ -85,6 +122,7 @@ export interface StoreCommand {
   version?: string;
   requirements?: string;
   scriptKind?: string;
+  categories?: string;
 }
 
 /** Output from a model endpoint */
