@@ -44,7 +44,7 @@
 /extensions/associated-press                         @Dammmien
 /extensions/asyncapi                                 @smoya
 /extensions/atomic                                   @joepio
-/extensions/audio-device                             @benvp @mathieudutour @mike182uk @FezVrasta
+/extensions/audio-device                             @benvp @mathieudutour @mike182uk @FezVrasta @rcruzper
 /extensions/authy                                    @guga4ka @gdsmith @lukekarrys
 /extensions/auto-quit-app                            @koinzhang
 /extensions/avatar                                   @koinzhang
@@ -267,6 +267,7 @@
 /extensions/epoch-to-timestamp                       @bgreenlee
 /extensions/esa-search                               @kawamataryo
 /extensions/escape-regexp-characters                 @lryong
+/extensions/espanso                                  @kud
 /extensions/esse-actions                             @rben01
 /extensions/esv-bible                                @cpenned
 /extensions/ethereum-gas-tracker                     @vinch
@@ -347,7 +348,7 @@
 /extensions/google-meet                              @vitoorgomes @hughlaw
 /extensions/google-search                            @mblode
 /extensions/google-tasks                             @elliotdes @pernielsentikaer
-/extensions/google-translate                         @gebeto @FezVrasta @henriquemacedo @metakirby5 @tangerine1202
+/extensions/google-translate                         @gebeto @FezVrasta @metakirby5 @tangerine1202
 /extensions/google-trends                            @kkange
 /extensions/google-workspace                         @thomaslombart @mathieudutour
 /extensions/gopass                                   @bake
