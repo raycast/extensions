@@ -54,10 +54,10 @@ export async function sendTranslateRequest({
       const {
         translations: [{ text: translation, detected_source_language: detectedSourceLanguage }],
       } = await got
-        .post(`https://api${isPro(key) ? "" : "-free"}.deepl.com/v2/translate`, {
-          headers: {
-            Authorization: `DeepL-Auth-Key ${key}`,
-          },
+        .post(`https://deeplx-production-bf8b.up.railway.app/translate`, {
+          // headers: {
+          //   Authorization: `DeepL-Auth-Key ${key}`,
+          // },
           json: {
             text: [text],
             source_lang: sourceLanguage,
