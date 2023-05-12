@@ -47,3 +47,25 @@ export async function switchToWindow(window: TmuxWindow, setLoading: (value: boo
     return;
   });
 }
+
+export async function deleteWindow(window: TmuxWindow, setLoading: (value: boolean) => void, callback: () => void) {
+  setLoading(true);
+  const toast = await showToast({ style: Toast.Style.Animated, title: "" });
+
+  exec(`tmux kill-window -t ${window.sessionName}:${window.windowName}`, { env }, (error, stdout, stderr) => {
+    if (error || stderr) {
+      console.error(`exec error: ${error || stderr}`);
+
+      toast.style = Toast.Style.Failure;
+      toast.title = "Something went wrong 😢";
+      toast.message = error ? error.message : stderr;
+      setLoading(false);
+      return;
+    }
+
+    toast.style = Toast.Style.Success;
+    toast.title = `Deleted window ${window.windowName}`;
+    callback();
+    setLoading(false);
+  });
+}
