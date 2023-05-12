@@ -27,7 +27,7 @@ You can see how the API Key modal will look like below.
 <details>
 <summary>API Key Modal</summary>
 
-![Center API Key modal screenshot](./metadata/api-key-screenshot.png)
+![Center API Key modal screenshot](./media/api-key-screenshot.png)
 
 </details>
 
