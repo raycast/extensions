@@ -11,6 +11,14 @@
     "Web"
   ],
   "license": "MIT",
+  "keywords": [
+    "short link",
+    "short url",
+    "shlink",
+    "short",
+    "link",
+    "url"
+  ],
   "commands": [
     {
       "name": "list",
@@ -84,6 +92,61 @@
       "title": "Shlink API Key",
       "description": "The API key for your shlink server",
       "placeholder": "abc123",
+      "required": true
+    },
+    {
+      "name": "thunderforestApiKey",
+      "type": "password",
+      "title": "Thunderforest API Key",
+      "description": "The API key for Thunderforest (using for map in visits view)",
+      "placeholder": "abc123",
+      "default": "c88c645ad8f64411bef71105c00710bc",
+      "required": true
+    },
+    {
+      "name": "thunderforestType",
+      "type": "dropdown",
+      "title": "Thunderforest Map Style",
+      "description": "The map style for Thunderforest (using for map in visits view)",
+      "data": [
+        {
+          "title": "Cycle",
+          "value": "cycle"
+        },
+        {
+          "title": "Transport",
+          "value": "transport"
+        },
+        {
+          "title": "Landscape",
+          "value": "landscape"
+        },
+        {
+          "title": "Outdoors",
+          "value": "outdoors"
+        },
+        {
+          "title": "Transport dark",
+          "value": "transport-dark"
+        },
+        {
+          "title": "Spinal map",
+          "value": "spinal-map"
+        },
+        {
+          "title": "Pioneer",
+          "value": "pioneer"
+        },
+        {
+          "title": "Mobile atlas",
+          "value": "mobile-atlas"
+        },
+        {
+          "title": "Neighbourhood",
+          "value": "neighbourhood"
+        }
+      ],
+      "default": "cycle",
       "required": true
     }
   ],

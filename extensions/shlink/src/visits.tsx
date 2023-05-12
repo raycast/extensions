@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Color, getPreferenceValues, Icon, List } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import { ActionCopyToClipboard, HealthCheck, useApiFetchPaginationExtract } from "./shared";
 import { useState } from "react";
@@ -282,12 +282,13 @@ function ShlinkViewsListItem({ item, showDetail, showMap, showVisitType, extraAc
           .filter((x) => x)
           .join(", ")
       : "Unknown";
+  const { thunderforestApiKey, thunderforestType } = getPreferenceValues<ExtensionPreferences>();
 
   const mapLink =
     item.visitLocation && !item.visitLocation?.isEmpty
-      ? "https://tile.thunderforest.com/static/cycle/" +
+      ? `https://tile.thunderforest.com/static/${thunderforestType}/` +
         `${item.visitLocation.longitude},${item.visitLocation.latitude},14/300x125@2x.png?` +
-        "apikey=c88c645ad8f64411bef71105c00710bc"
+        `apikey=${thunderforestApiKey}`
       : "";
 
   return (

@@ -12,9 +12,9 @@ You can create, edit and delete short URLs, get a QR-Code and tracking pixel for
 
 ## Screenshots
 
-![Shlink Raycast Extension in Raycast menu](https://raw.githubusercontent.com/jag-k/shlink-raycast-extension/main/screenshots/shlink-1.png)
-![Shlink Raycast Extension in Raycast menu](https://raw.githubusercontent.com/jag-k/shlink-raycast-extension/main/screenshots/shlink-2.png)
-![Shlink Raycast Extension in Raycast menu](https://raw.githubusercontent.com/jag-k/shlink-raycast-extension/main/screenshots/shlink-3.png)
-![Shlink Raycast Extension in Raycast menu](https://raw.githubusercontent.com/jag-k/shlink-raycast-extension/main/screenshots/shlink-4.png)
-![Shlink Raycast Extension in Raycast menu](https://raw.githubusercontent.com/jag-k/shlink-raycast-extension/main/screenshots/shlink-5.png)
-![Shlink Raycast Extension in Raycast menu](https://raw.githubusercontent.com/jag-k/shlink-raycast-extension/main/screenshots/shlink-6.png)
+![Shlink Raycast Extension in Raycast menu](https://raw.githubusercontent.com/jag-k/shlink-raycast-extension/main/screenshots/shlink-1.jpg)
+![Shlink Raycast Extension in Raycast menu](https://raw.githubusercontent.com/jag-k/shlink-raycast-extension/main/screenshots/shlink-2.jpg)
+![Shlink Raycast Extension in Raycast menu](https://raw.githubusercontent.com/jag-k/shlink-raycast-extension/main/screenshots/shlink-3.jpg)
+![Shlink Raycast Extension in Raycast menu](https://raw.githubusercontent.com/jag-k/shlink-raycast-extension/main/screenshots/shlink-4.jpg)
+![Shlink Raycast Extension in Raycast menu](https://raw.githubusercontent.com/jag-k/shlink-raycast-extension/main/screenshots/shlink-5.jpg)
+![Shlink Raycast Extension in Raycast menu](https://raw.githubusercontent.com/jag-k/shlink-raycast-extension/main/screenshots/shlink-6.jpg)
