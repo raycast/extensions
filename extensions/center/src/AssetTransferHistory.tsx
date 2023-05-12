@@ -19,7 +19,7 @@ export default function AssetTransferHistory({
   });
 
   return (
-    <List searchText={searchText} onSearchTextChange={setSearchText} navigationTitle="Transfer History">
+    <List searchText={searchText} onSearchTextChange={setSearchText}>
       {searchText
         ? data?.items?.map((item: TransferHistoryResponse["items"]["0"], index: number) => (
             <List.Item key={index} title={item.blockNumber.toString()} subtitle={`From: ${item.from} To: ${item.to}`} />
