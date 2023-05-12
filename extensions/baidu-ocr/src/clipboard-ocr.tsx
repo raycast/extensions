@@ -1,4 +1,4 @@
-import { Clipboard, showHUD, closeMainWindow, PopToRootType} from "@raycast/api";
+import { Clipboard, showHUD, closeMainWindow, PopToRootType } from "@raycast/api";
 import { recognizeText } from "./utils";
 
 export default async function Command() {
@@ -13,8 +13,7 @@ export default async function Command() {
     return await showHUD("❌ This is not an image");
   }
   let filepath = file;
-  if (file.substring(0, 7) == "file://")
-    filepath = file.substring(7, file.length);
+  if (file.substring(0, 7) == "file://") filepath = file.substring(7, file.length);
   const ocrResult = await recognizeText(filepath);
   // console.log("result = " + ocrResult);
   await Clipboard.copy(ocrResult);
