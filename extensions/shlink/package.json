@@ -1,0 +1,112 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "shlink",
+  "title": "Shlink",
+  "description": "Manage your shlink addresses",
+  "icon": "extension_icon.png",
+  "author": "jag-k",
+  "categories": [
+    "Productivity",
+    "Data",
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "list",
+      "title": "Show All Short Links",
+      "subtitle": "Shlink",
+      "description": "See all your short links from shlink",
+      "mode": "view"
+    },
+    {
+      "name": "tags",
+      "title": "Show All Tags",
+      "subtitle": "Shlink",
+      "description": "See all your tags from shlink",
+      "mode": "view"
+    },
+    {
+      "name": "domains",
+      "title": "Show All Domains",
+      "subtitle": "Shlink",
+      "description": "See all your domains from shlink",
+      "mode": "view"
+    },
+    {
+      "name": "quick-new",
+      "title": "Quick Create New Short Url",
+      "subtitle": "Select, copy or send in argument to create a new short url",
+      "description": "Select, copy or send in argument to create a new short url. The short url will be copied to your clipboard",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "url",
+          "placeholder": "Long URL",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "name": "create",
+      "title": "Create New Short Url",
+      "subtitle": "Select, copy or send in argument to create a new short url",
+      "description": "Select, copy or send in argument to create a new short url. The short url will be copied to your clipboard",
+      "mode": "view"
+    },
+    {
+      "name": "menu-bar",
+      "title": "Show Views in Menu Bar",
+      "subtitle": "Shlink",
+      "description": "See your total, bots and non-bots views split by Non-Orphan and Orphan types from Menu Bar",
+      "mode": "menu-bar"
+    },
+    {
+      "name": "visits",
+      "title": "Show Visits",
+      "subtitle": "Shlink",
+      "description": "See your total, bots and non-bots views split by Non-Orphan and Orphan types from Menu Bar",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "shlinkUrl",
+      "type": "textfield",
+      "title": "Shlink Server URL",
+      "description": "The URL of your shlink server",
+      "placeholder": "https://shlink.example.com",
+      "required": true
+    },
+    {
+      "name": "shlinkApiKey",
+      "type": "password",
+      "title": "Shlink API Key",
+      "description": "The API key for your shlink server",
+      "placeholder": "abc123",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.50.4",
+    "@raycast/utils": "^1.5.2",
+    "node-fetch": "^3.3.1",
+    "ua-parser-js": "^1.0.35"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "@types/ua-parser-js": "^0.7.36",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
