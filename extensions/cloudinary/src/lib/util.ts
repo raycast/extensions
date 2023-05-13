@@ -6,6 +6,10 @@ const preferences = getPreferenceValues<Preferences>();
 const TEMP_DIRECTORY = "/tmp/raycast-upload-to-cloudinary";
 
 export function storeClipboardToTemp() {
+  if (typeof preferences.pngpasteFullPath !== "string") {
+    throw new Error("Missing pngpasteFullPath configuration.");
+  }
+
   const { failed } = execaSync(preferences.pngpasteFullPath, [TEMP_DIRECTORY]);
 
   if (failed) {
