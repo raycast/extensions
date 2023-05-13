@@ -186,7 +186,10 @@ function GerritItem(props: {
   );
 }
 
-function AddGerrit(props: { gerrit?: Gerrit; setGerritList: (f: (v: Gerrit[]) => Gerrit[]) => void }) {
+function AddGerrit(props: {
+  gerrit?: GerritInstance;
+  setGerritList: (f: (v: GerritInstance[]) => GerritInstance[]) => void;
+}) {
   const action = props.gerrit ? "updated" : "added";
 
   const [nameError, setNameError] = useState<string | undefined>();
