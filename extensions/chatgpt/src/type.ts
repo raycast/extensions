@@ -116,3 +116,10 @@ export interface CreateChatCompletionDeltaResponse {
     }
   ];
 }
+
+export interface ConfigurationPreferences {
+  apiKey: string;
+  useAzure: boolean;
+  azureEndpoint: string;
+  azureDeployment: string;
+}

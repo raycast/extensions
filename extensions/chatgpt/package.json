@@ -184,6 +184,29 @@
       "type": "password",
       "title": "Proxy Password",
       "required": false
+    },
+    {
+      "name": "useAzure",
+      "label": "Use Azure OpenAI",
+      "description": "Use Azure OPENAI rather than OPENAI",
+      "type": "checkbox",
+      "title": "Use Azure OpenAI",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "azureEndpoint",
+      "description": "Leave empty if you are not using Azure OpenAI",
+      "type": "textfield",
+      "title": "Azure Endpoint",
+      "required": false
+    },
+    {
+      "name": "azureDeployment",
+      "description": "Leave empty if you are not using Azure OpenAI",
+      "type": "textfield",
+      "title": "Azure Deployment",
+      "required": false
     }
   ],
   "dependencies": {
