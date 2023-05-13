@@ -40,6 +40,7 @@ export const categories = [
   "Social",
   "Sports",
   "Travel",
+  "Utilities",
   "Weather",
   "Web",
 ];

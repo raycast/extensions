@@ -1,5 +1,7 @@
 import { runAppleScript, runAppleScriptSync } from "run-applescript";
 import * as os from "os";
+import { filterString } from "./calendar-utils";
+import * as fs from "fs";
 
 /**
  * Gets the URL of the active tab in Safari.
@@ -266,6 +268,54 @@ export const getTextOfWebpage = async (URL: string): Promise<string> => {
     .replaceAll(/[\s\n\r]+/g, " ")
     .replaceAll(/(\([^A-Za-z0-9]*\)|(?<=[,.!?%*])[,.!?%*]*?\s*[,.!?%*])/g, " ");
   return filteredString;
+};
+
+/**
+ * Gets the English transcript of a YouTube video specified by its ID.
+ * @param videoId The ID of the YouTube video.
+ * @returns A promise resolving to the transcript as a string, or "No transcript available." if there is no transcript.
+ */
+export const getYouTubeVideoTranscriptById = async (videoId: string): Promise<string> => {
+  const html = getURLHTML(`https://www.youtube.com/watch?v=${videoId}`);
+  const captionsJSON = JSON.parse(html.split(`"captions":`)[1].split(`,"videoDetails"`)[0].replace("\n", ""))[
+    "playerCaptionsTracklistRenderer"
+  ];
+
+  if (!("captionTracks" in captionsJSON)) {
+    return "No transcript available.";
+  }
+
+  const title = html.matchAll(/title":"((.| )*?),"lengthSeconds/g).next().value[1];
+  const captionTracks = captionsJSON["captionTracks"];
+  const englishCaptionTrack = captionTracks.find((track: JSONObject) => track["languageCode"] === "en");
+  if (!englishCaptionTrack) {
+    return "No transcript available.";
+  }
+
+  const transcriptURL = "https://youtube.com" + englishCaptionTrack["baseUrl"];
+  const transcriptText = await getTextOfWebpage(transcriptURL);
+  return filterString(`Video Title: ${title}\n\nTranscript:\n${transcriptText}`);
+};
+
+/**
+ * Gets the English transcript of a YouTube video specified by its URL.
+ * @param videoURL The URL of the YouTube video.
+ * @returns A promise resolving to the transcript as a string, or "No transcript available." if there is no transcript.
+ */
+export const getYouTubeVideoTranscriptByURL = async (videoURL: string): Promise<string> => {
+  const videoId = videoURL.split("v=")[1].split("&")[0];
+  return getYouTubeVideoTranscriptById(videoId);
+};
+
+/**
+ * Gets the ID of the first YouTube video matching the search text.
+ * @param searchText The text to search for.
+ * @returns The ID of the first matching video.
+ */
+export const getMatchingYouTubeVideoID = (searchText: string): string => {
+  const html = getURLHTML(`https://www.youtube.com/results?search_query=${encodeURIComponent(searchText)}`);
+  const videoID = html.matchAll(/videoId\\x22:\\x22(.*?)\\x22,/g).next().value[1];
+  return videoID;
 };
 
 /**

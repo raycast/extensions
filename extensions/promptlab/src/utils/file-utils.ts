@@ -275,8 +275,12 @@ const getImageVisionDetails = (filePath: string, options: CommandOptions): strin
   set saliencyRequest to current application's VNGenerateAttentionBasedSaliencyImageRequest's alloc()'s init()
   rectRequest's setMaximumObservations:0
   
-  requestHandler's performRequests:{textRequest, classificationRequest, barcodeRequest, animalRequest, faceRequest, rectRequest, saliencyRequest} |error|:(missing value)
-  
+  if theImage's |size|()'s width > 200 and theImage's |size|()'s height > 200 then
+    requestHandler's performRequests:{textRequest, classificationRequest, barcodeRequest, animalRequest, faceRequest, rectRequest, saliencyRequest} |error|:(missing value)
+  else
+    requestHandler's performRequests:{textRequest, classificationRequest, barcodeRequest, animalRequest, faceRequest, saliencyRequest} |error|:(missing value)
+  end if
+
   -- Extract raw text results
   set textResults to textRequest's results()
   set theText to ""
@@ -336,17 +340,19 @@ const getImageVisionDetails = (filePath: string, options: CommandOptions): strin
   ${
     options.useRectangleDetection
       ? `-- Extract rectangle coordinates
-  set rectResults to rectRequest's results()
-  set imgWidth to theImage's |size|()'s width
-  set imgHeight to theImage's |size|()'s height
-  set rectResult to {}
-  repeat with observation in rectResults
-    set bottomLeft to (("Coordinate 1:(" & observation's bottomLeft()'s x as text) & "," & observation's bottomLeft()'s y as text) & ") "
-    set bottomRight to (("Coordinate 2:(" & observation's bottomRight()'s x as text) & "," & observation's bottomRight()'s y as text) & ") "
-    set topRight to (("Coordinate 3:(" & observation's topRight()'s x as text) & "," & observation's topRight()'s y as text) & ") "
-    set topLeft to (("Coordinate 4:(" & observation's topLeft()'s x as text) & "," & observation's topLeft()'s y as text) & ") "
-    copy bottomLeft & bottomRight & topRight & topLeft to end of rectResult
-  end repeat`
+  if theImage's |size|()'s width > 200 and theImage's |size|()'s height > 200 then
+    set rectResults to rectRequest's results()
+    set imgWidth to theImage's |size|()'s width
+    set imgHeight to theImage's |size|()'s height
+    set rectResult to {}
+    repeat with observation in rectResults
+      set bottomLeft to (("Coordinate 1:(" & observation's bottomLeft()'s x as text) & "," & observation's bottomLeft()'s y as text) & ") "
+      set bottomRight to (("Coordinate 2:(" & observation's bottomRight()'s x as text) & "," & observation's bottomRight()'s y as text) & ") "
+      set topRight to (("Coordinate 3:(" & observation's topRight()'s x as text) & "," & observation's topRight()'s y as text) & ") "
+      set topLeft to (("Coordinate 4:(" & observation's topLeft()'s x as text) & "," & observation's topLeft()'s y as text) & ") "
+      copy bottomLeft & bottomRight & topRight & topLeft to end of rectResult
+    end repeat
+  end if`
       : ``
   }
 
@@ -406,16 +412,18 @@ const getImageVisionDetails = (filePath: string, options: CommandOptions): strin
   
   ${
     options.useRectangleDetection
-      ? `if (count of rectResult) > 0 then
-    set promptText to promptText & "<Boundaries of rectangles: ###"
-    set theIndex to 1
-    repeat with rectCoords in rectResult
-      set promptText to promptText & "	Rectangle #" & theIndex & ": " & rectCoords & "
-  "
-      set theIndex to theIndex + 1
-    end repeat
-    set promptText to promptText & "###>"
-  end if`
+      ? `if theImage's |size|()'s width > 200 and theImage's |size|()'s height > 200 then
+      if (count of rectResult) > 0 then
+        set promptText to promptText & "<Boundaries of rectangles: ###"
+        set theIndex to 1
+        repeat with rectCoords in rectResult
+          set promptText to promptText & "	Rectangle #" & theIndex & ": " & rectCoords & "
+      "
+          set theIndex to theIndex + 1
+        end repeat
+        set promptText to promptText & "###>"
+      end if
+    end if`
       : ``
   }
   

@@ -392,6 +392,11 @@ export default function CommandForm(props: {
         <Form.TagPicker.Item title="Weather" value="Weather" icon={{ source: Icon.CloudSun, tintColor: Color.Blue }} />
         <Form.TagPicker.Item title="Media" value="Media" icon={{ source: Icon.Image, tintColor: Color.Magenta }} />
         <Form.TagPicker.Item title="Calendar" value="Calendar" icon={{ source: Icon.Calendar, tintColor: Color.Red }} />
+        <Form.TagPicker.Item
+          title="Utilities"
+          value="Utilities"
+          icon={{ source: Icon.Calculator, tintColor: Color.Green }}
+        />
       </Form.TagPicker>
     </Form>
   );

@@ -21,7 +21,9 @@ type ExtensionPreferences = {
   /** Output Key Path - The key path to the text output in the JSON response from the model endpoint. For example, choices[0].message.content, for the OpenAI API. This is only used if the model source is set to something other than Raycast AI. */
   "outputKeyPath"?: string,
   /** Output Timing - Whether output from the model endpoint should be processed synchronously or asynchronously. Often, this is also an option on the model API. This is only used if the model source is set to something other than Raycast AI. */
-  "outputTiming"?: "sync" | "async"
+  "outputTiming"?: "sync" | "async",
+  /** Prompt Length Limit - The maximum length of the prompt that will be sent to the model endpoint, beyond which it will be truncated. Larger values will support more content, but may result in token count errors. Adjust this value according to the model's token limit (but leave some space, e.g. 1000 characters, for additional input and placeholders). */
+  "lengthLimit"?: string
 }
 
 /** Preferences accessible in all the extension's commands */
@@ -33,7 +35,12 @@ declare namespace Preferences {
   /** Preferences accessible in the `create-command` command */
   export type CreateCommand = ExtensionPreferences & {}
   /** Preferences accessible in the `search-commands` command */
-  export type SearchCommands = ExtensionPreferences & {}
+  export type SearchCommands = ExtensionPreferences & {
+  /**  - If checked, each command category will have its own section in the search results. */
+  "groupByCategory"?: boolean,
+  /** Export Location - The folder where exported commands will be saved. */
+  "exportLocation"?: string
+}
   /** Preferences accessible in the `chat` command */
   export type Chat = ExtensionPreferences & {
   /** Default Chat Settings - If checked, the selected files will be used as context for conversations by default. */

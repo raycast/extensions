@@ -26,11 +26,16 @@ import {
 } from "../utils/calendar-utils";
 import * as fs from "fs";
 import * as os from "os";
+import { useCachedState } from "@raycast/utils";
 
 export const useReplacements = (
   input: string | undefined,
   selectedFiles: string[] | undefined
 ): { [key: string]: () => Promise<string> } => {
+  const [previousCommand] = useCachedState<string>("promptlab-previous-command", "");
+  const [previousResponse] = useCachedState<string>("promptlab-previous-response", "");
+  const [previousPrompt] = useCachedState<string>("promptlab-previous-prompt", "");
+
   return {
     "{{input}}": async () => {
       return input || (await getSelectedText()).substring(0, 3000);
@@ -38,22 +43,20 @@ export const useReplacements = (
 
     // File Data
     "{{files}}": async () => {
-      return selectedFiles ? selectedFiles?.join(", ") : "";
+      return (selectedFiles || []).join(", ");
     },
     "{{fileNames}}": async () => {
-      return selectedFiles ? selectedFiles.map((path) => path.split("/").at(-1)).join(", ") : "";
+      return (selectedFiles || []).map((path) => path.split("/").at(-1)).join(", ");
     },
     "{{metadata}}": async () => {
-      return selectedFiles
-        ? selectedFiles
-            .map(
-              (path) =>
-                `${path}:\n${Object.entries(fs.lstatSync(path))
-                  .map((entry) => `${entry[0]}:entry[1]`)
-                  .join("\n")}`
-            )
-            .join("\n\n")
-        : "";
+      return (selectedFiles || [])
+        .map(
+          (path) =>
+            `${path}:\n${Object.entries(fs.lstatSync(path))
+              .map((entry) => `${entry[0]}:entry[1]`)
+              .join("\n")}`
+        )
+        .join("\n\n");
     },
     "{{user}}": async () => {
       return os.userInfo().username;
@@ -135,6 +138,15 @@ export const useReplacements = (
     },
     "{{currentDirectory}}": async () => {
       return await getCurrentDirectory();
+    },
+    "{{previousCommand}}": async () => {
+      return previousCommand;
+    },
+    "{{previousPrompt}}": async () => {
+      return previousPrompt;
+    },
+    "{{previousResponse}}": async () => {
+      return previousResponse;
     },
 
     // API Data

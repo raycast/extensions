@@ -1,4 +1,4 @@
-import { closeMainWindow, showToast, Toast } from "@raycast/api";
+import { closeMainWindow, showHUD, showToast, Toast, useNavigation } from "@raycast/api";
 import { ERRORTYPE, useFileContents } from "../utils/file-utils";
 import { useEffect, useState } from "react";
 import { CommandOptions } from "../utils/types";
@@ -9,6 +9,7 @@ import CommandDetailView from "./CommandDetailView";
 import CommandChatView from "./CommandChatView";
 import CommandListView from "./CommandListView";
 import CommandGridView from "./CommandGridView";
+import { useCachedState } from "@raycast/utils";
 
 export default function CommandResponse(props: {
   commandName: string;
@@ -20,6 +21,11 @@ export default function CommandResponse(props: {
   const [substitutedPrompt, setSubstitutedPrompt] = useState<string>(prompt);
   const [loadingData, setLoadingData] = useState<boolean>(true);
   const [shouldCancel, setShouldCancel] = useState<boolean>(false);
+  const [, setPreviousCommand] = useCachedState<string>("promptlab-previous-command", "");
+  const [, setPreviousResponse] = useCachedState<string>("promptlab-previous-response", "");
+  const [, setPreviousPrompt] = useCachedState<string>("promptlab-previous-prompt", "");
+
+  const { pop } = useNavigation();
 
   const { selectedFiles, contentPrompts, loading, errorType } =
     options.minNumFiles != undefined && options.minNumFiles > 0
@@ -29,6 +35,10 @@ export default function CommandResponse(props: {
   const replacements = useReplacements(input, selectedFiles);
 
   useEffect(() => {
+    if (loading || !loadingData) {
+      return;
+    }
+
     if (options.showResponse == false) {
       closeMainWindow();
     }
@@ -46,7 +56,7 @@ export default function CommandResponse(props: {
 
       setSubstitutedPrompt(subbedPrompt);
     });
-  }, []);
+  }, [replacements, loading]);
 
   const contentPromptString = contentPrompts.join("\n");
   const fullPrompt = (substitutedPrompt.replaceAll("{{contents}}", contentPromptString) + contentPromptString).replace(
@@ -120,8 +130,25 @@ export default function CommandResponse(props: {
       : "Analyzing files..."
   }`;
 
+  // Update previous command placeholders
+  if (!loadingData && !loading && !isLoading && data.length) {
+    setPreviousCommand(commandName);
+    setPreviousResponse(text);
+    setPreviousPrompt(fullPrompt);
+  }
+
   // Don't show the response if the user has disabled it
   if (options.showResponse == false) {
+    if (options.showResponse == false) {
+      Promise.resolve(showHUD(`Running '${commandName}'...`));
+    }
+
+    if (!loadingData && !loading && !isLoading && data.length) {
+      if (options.showResponse == false) {
+        Promise.resolve(showHUD("Done!"));
+      }
+      pop();
+    }
     return null;
   }
 

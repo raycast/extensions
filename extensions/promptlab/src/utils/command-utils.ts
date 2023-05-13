@@ -8,7 +8,12 @@ import {
   trimHandler,
 } from "./scripts";
 import { filterString } from "./calendar-utils";
-import { getTextOfWebpage } from "./context-utils";
+import {
+  getMatchingYouTubeVideoID,
+  getTextOfWebpage,
+  getYouTubeVideoTranscriptById,
+  getYouTubeVideoTranscriptByURL,
+} from "./context-utils";
 import { exec } from "child_process";
 import * as os from "os";
 import { Command, StoreCommand } from "./types";
@@ -179,6 +184,19 @@ export const replaceCounterPlaceholders = async (prompt: string) => {
   return subbedPrompt;
 };
 
+export const replaceYouTubePlaceholders = async (prompt: string) => {
+  let subbedPrompt = prompt;
+  const youtubeMatches = prompt.match(/{{youtube:(.*?[\s\n\r]*)*?}}/g) || [];
+  for (const m of youtubeMatches) {
+    const specifier = m.substring(10, m.length - 2);
+    const transcriptText = specifier.startsWith("http")
+      ? await getYouTubeVideoTranscriptByURL(specifier)
+      : await getYouTubeVideoTranscriptById(getMatchingYouTubeVideoID(specifier));
+    subbedPrompt = subbedPrompt.replaceAll(m, filterString(transcriptText));
+  }
+  return subbedPrompt;
+};
+
 /**
  * Gets the importable JSON string representation of a command.
  *
@@ -216,6 +234,7 @@ export const runReplacements = async (
 
   // Replace complex placeholders (i.e. shell scripts, AppleScripts, etc.)
   subbedPrompt = await replaceCounterPlaceholders(subbedPrompt);
+  subbedPrompt = await replaceYouTubePlaceholders(subbedPrompt);
   subbedPrompt = await replaceAppleScriptPlaceholders(subbedPrompt);
   subbedPrompt = await replaceShellScriptPlaceholders(subbedPrompt);
   subbedPrompt = await replaceURLPlaceholders(subbedPrompt);
@@ -228,6 +247,9 @@ export const runReplacements = async (
       const cmdResponse = await AI.ask(
         await runReplacements(cmd.prompt, replacements, [cmd.name, ...disallowedCommands])
       );
+      if (cmd.actionScript != undefined && cmd.actionScript.trim().length > 0 && cmd.actionScript != "None") {
+        await runActionScript(cmd.actionScript, cmd.prompt, "", cmdResponse, cmd.scriptKind);
+      }
       subbedPrompt = subbedPrompt.replaceAll(`{{${cmd.name}}}`, cmdResponse);
     }
   }

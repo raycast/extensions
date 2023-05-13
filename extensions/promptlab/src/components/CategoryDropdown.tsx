@@ -44,6 +44,11 @@ export default function CategoryDropdown(props: { onSelection: (newValue: string
       <List.Dropdown.Item title="Weather" value="Weather" icon={{ source: Icon.CloudSun, tintColor: Color.Blue }} />
       <List.Dropdown.Item title="Media" value="Media" icon={{ source: Icon.Image, tintColor: Color.Magenta }} />
       <List.Dropdown.Item title="Calendar" value="Calendar" icon={{ source: Icon.Calendar, tintColor: Color.Red }} />
+      <List.Dropdown.Item
+        title="Utilities"
+        value="Utilities"
+        icon={{ source: Icon.Calculator, tintColor: Color.Green }}
+      />
     </List.Dropdown>
   );
 }
