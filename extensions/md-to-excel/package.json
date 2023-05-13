@@ -19,7 +19,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.49.3",
+    "@raycast/api": "^1.51.1",
     "@raycast/utils": "^1.5.2",
     "bluebird": "^3.7.2",
     "csv-writer": "^1.6.0",
