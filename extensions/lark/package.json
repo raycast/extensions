@@ -27,9 +27,30 @@
       "name": "domain",
       "type": "textfield",
       "required": true,
-      "title": "Domain",
-      "description": "Lark domain name, larksuite.com, or feishu.cn, or custom domain name if you have Lark deployed privately",
-      "placeholder": "Enter larksuite.com or feishu.cn or ..."
+      "title": "Type",
+      "description": "Your app type",
+      "data": [
+        {
+          "title": "Feishu",
+          "value": "feishu"
+        },
+        {
+          "title": "Lark",
+          "value": "lark"
+        },
+        {
+          "title": "Self-hosted",
+          "value": "self-hosted"
+        }
+      ]
+    },
+    {
+      "name": "selfHostedDomain",
+      "type": "textfield",
+      "required": false,
+      "title": "Self-hosted domain",
+      "description": "The self-hosted domain of your enterprise. For example: mycompany.com",
+      "placeholder": "Only needed if you opt for self-hosted"
     },
     {
       "name": "recentListCount",
