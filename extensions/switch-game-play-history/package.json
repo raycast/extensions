@@ -3,7 +3,7 @@
   "name": "switch-game-play-history",
   "title": "Switch Game Play History",
   "description": "Browse your Nintendo Switch gameplay history. Including information such as first played time, last played time, and total playtime for each game.",
-  "icon": "switch_icon.png",
+  "icon": "extension_icon.png",
   "author": "kvdo2",
   "license": "MIT",
   "commands": [
@@ -32,6 +32,28 @@
       "title": "Nintendo Session Token",
       "description": "It is used to fetch the game history. Please run `Get Session Token` command for the first time.",
       "type": "password",
+      "required": false
+    },
+    {
+      "name": "SYNC_TO_NOTION",
+      "title": "Sync to Notion (Beta)",
+      "description": "Sync your play history to Notion.If you want to use this feature, please set `Notion API Key` and `Notion Database ID`.",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "NOTION_API_KEY",
+      "title": "Notion API Key",
+      "description": "",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "NOTION_DATABASE_ID",
+      "title": "Notion Database ID",
+      "description": "",
+      "type": "textfield",
       "required": false
     }
   ],

@@ -1,7 +1,5 @@
-import { ActionPanel, Grid } from "@raycast/api";
-
+import { Grid } from "@raycast/api";
 import { IPlayHistory } from "../types/nintendo";
-import { PushGameInfoDetailAction } from "./GameInfoDetail";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 dayjs.extend(relativeTime);
@@ -25,11 +23,6 @@ export const PlayHistoriesGridItem = ({ history }: { history: IPlayHistory }) =>
       }}
       title={history.titleName}
       subtitle={totalPlayTime}
-      // actions={
-      //   <ActionPanel>
-      //     <PushGameInfoDetailAction titleId={history.titleId} />
-      //   </ActionPanel>
-      // }
     />
   );
 };
