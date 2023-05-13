@@ -25,6 +25,7 @@ export type NewTabPreferences = {
 };
 
 export type SearchArcPreferences = {
+  engine: "google" | "duckduckgo" | "bing" | "yahoo" | "neeva" | "ecosia";
   sorting: "tabsHistorySuggestions" | "historyTabsSuggestions";
   showFavorites: boolean;
   showPinnedTabs: boolean;
@@ -32,6 +33,21 @@ export type SearchArcPreferences = {
   showHistory: boolean;
   showSuggestions: boolean;
 };
+
+export type SearchConfig = {
+  search: string;
+  suggestions: string | null;
+  suggestionParser: (json: any, suggestions: Suggestion[]) => void;
+}
+
+export type SearchConfigs = {
+  google: SearchConfig;
+  duckduckgo: SearchConfig;
+  bing: SearchConfig;
+  yahoo: SearchConfig;
+  neeva: SearchConfig;
+  ecosia: SearchConfig;
+}
 
 export type Suggestion = {
   id: string;

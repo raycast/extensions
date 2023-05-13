@@ -18,7 +18,8 @@
     "zach",
     "ankitchouhan1020",
     "pernielsentikaer",
-    "danpalmer"
+    "danpalmer",
+    "hugivar"
   ],
   "commands": [
     {
@@ -110,6 +111,40 @@
       "description": "Search tabs, history and search suggestions",
       "mode": "view",
       "preferences": [
+        {
+          "name": "engine",
+          "title": "Search Engine",
+          "description": "SSearch engine used to find search results",
+          "type": "dropdown",
+          "required": false,
+          "default": "google",
+          "data": [
+            {
+              "title": "Google",
+              "value": "google"
+            },
+            {
+              "title": "DuckDuckGo",
+              "value": "duckduckgo"
+            },
+            {
+              "title": "Bing",
+              "value": "bing"
+            },
+            {
+              "title": "Yahoo!",
+              "value": "yahoo"
+            },
+            {
+              "title": "Neeva",
+              "value": "neeva"
+            },
+            {
+              "title": "Ecosia",
+              "value": "ecosia"
+            }
+          ]
+        },
         {
           "name": "sorting",
           "title": "Sorting",

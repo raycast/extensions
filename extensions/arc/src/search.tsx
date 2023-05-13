@@ -34,7 +34,7 @@ function SearchArc(props: LaunchProps) {
 
   return (
     <List
-      searchBarPlaceholder="Search history"
+      searchBarPlaceholder="Search"
       isLoading={isLoadingTabs || isLoadingHistory || isLoadingSuggestions}
       onSearchTextChange={setSearchText}
     >
