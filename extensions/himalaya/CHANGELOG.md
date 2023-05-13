@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2023-04-20
+
+### Added
+
+- Folder support from search bar and preferences
+- Account support from preferences
+
+### Changed
+
+- Sync command is now a menu bar command displays the unread count
+
 ## [0.2.0] - 2023-04-28
 
 ### Added
