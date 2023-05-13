@@ -22,7 +22,7 @@
     {
       "name": "getSessionToken",
       "title": "Get Session Token",
-      "description": "Get Nintendo’s session token.",
+      "description": "Get Nintendo's session token.",
       "mode": "view"
     }
   ],
@@ -40,19 +40,20 @@
       "description": "Sync your play history to Notion.If you want to use this feature, please set `Notion API Key` and `Notion Database ID`.",
       "type": "checkbox",
       "default": false,
-      "required": false
+      "required": false,
+      "label": "Enabled"
     },
     {
       "name": "NOTION_API_KEY",
       "title": "Notion API Key",
-      "description": "",
+      "description": "Internal Integration Token",
       "type": "password",
       "required": false
     },
     {
       "name": "NOTION_DATABASE_ID",
       "title": "Notion Database ID",
-      "description": "",
+      "description": "It is used to store play history data.",
       "type": "textfield",
       "required": false
     }
