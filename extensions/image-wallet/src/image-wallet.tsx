@@ -89,7 +89,7 @@ export default function Command() {
             key={card.path}
             content={card.path}
             title={card.name.replace(":", "/")}
-            keywords = {[card.name]}
+            keywords={[card.name]}
             actions={loadCardActionNodes(card)}
             quickLook={{ name: card.name, path: card.path }}
           />
