@@ -87,15 +87,18 @@ All preferences properties list that can be customize through `Raycast Settings 
 
 1. Copy and paste your Azure OpenAI's `KEY` value to the `API key` field
 
-   ![Enter Azure OpenAI Key](metadata/8.png)
-
+   ![Enter Azure OpenAI Key](https://github.com/abielzulio/extensions/assets/7030944/9c2797b6-4005-4ddf-9f84-ad74d690ed3a)
+   
+   
 2. Copy and paste your Azure OpenAI `Endpoint` value to the `Azure Endpoint` field. Then, Tick the `Use Azure OpenAI` checkbox
 
-   ![Enter Azure OpenAI Endpoint](metadata/9.png)
+   ![Enter Azure OpenAI Endpoint](https://github.com/abielzulio/extensions/assets/7030944/f09aa681-b36f-4441-aa55-cb55f7cbe248)
+
 
 3. Copy and paste your Azure OpenAI `Model deployment name` value to the `Azure Deployment` field
 
-   ![Enter Azure OpenAI Deployment](metadata/10.png)
+   ![Enter Azure OpenAI Deployment](https://github.com/abielzulio/extensions/assets/7030944/b2ebaf3b-f961-4c5f-8ea7-6c6f164e3934)
+
 
 # Support
 
