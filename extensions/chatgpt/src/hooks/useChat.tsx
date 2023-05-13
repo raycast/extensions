@@ -102,7 +102,7 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
                 });
 
                 setTimeout(async () => {
-                  setStreamData(undefined)
+                  setStreamData(undefined);
                 }, 5);
 
                 setLoading(false);
@@ -122,7 +122,7 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
 
                 if (content) {
                   chat.answer += response.choices[0].delta.content;
-                  setStreamData({...chat, answer: chat.answer});
+                  setStreamData({ ...chat, answer: chat.answer });
                 }
               } catch (error) {
                 toast.title = "Error";
