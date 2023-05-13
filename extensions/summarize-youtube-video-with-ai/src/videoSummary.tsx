@@ -1,11 +1,9 @@
-import { Action, ActionPanel, Detail, Toast, getPreferenceValues, showToast } from "@raycast/api";
-import { getVideoData } from "./getVideoData";
-import { useEffect, useState } from "react";
-import getChatGPTSummary from "./getChatGPTSummary";
-import getRaycatsAISummary from "./getRaycastAISummary";
-import getVideoTranscript from "./getVideoTranscript";
+import { Action, ActionPanel, Detail, Toast, showToast } from "@raycast/api";
+import { getVideoData } from "./utils/getVideoData";
+import { useVideoSummary } from "./hooks/useVideoSummary";
+import React, { useEffect, useState } from "react";
 import type { LaunchProps } from "@raycast/api";
-import type { VideoDataTypes } from "./getVideoData";
+import type { VideoDataTypes } from "./utils/getVideoData";
 import ytdl from "ytdl-core";
 
 interface VideoSummaryProps {
