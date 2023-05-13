@@ -97,6 +97,11 @@ All preferences properties list that can be customize through `Raycast Settings 
 
    ![Enter Azure OpenAI Deployment](metadata/10.png)
 
+# Support
+
+Donate to support the development of this extension. Thank you!
+
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/abielzulio)
 
 ---
 
