@@ -93,12 +93,7 @@ export const ChatView = ({
             key={sortedChat.id}
             accessories={[{ text: `#${use.chats.data.length - i}` }]}
             title={sortedChat.question}
-            detail={sortedChat && 
-              <AnswerDetailView 
-                chat={sortedChat}
-                streamData={use.chats.streamData}
-              />
-            }
+            detail={sortedChat && <AnswerDetailView chat={sortedChat} streamData={use.chats.streamData} />}
             actions={use.chats.isLoading ? undefined : getActionPanel(sortedChat)}
           />
         );
