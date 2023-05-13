@@ -37,8 +37,8 @@ export type SearchArcPreferences = {
 export type SearchConfig = {
   search: string;
   suggestions: string | null;
-  suggestionParser: (json: any, suggestions: Suggestion[]) => void;
-}
+  suggestionParser: ((json: any, suggestions: Suggestion[]) => void) | null;
+};
 
 export type SearchConfigs = {
   google: SearchConfig;
@@ -47,7 +47,7 @@ export type SearchConfigs = {
   yahoo: SearchConfig;
   neeva: SearchConfig;
   ecosia: SearchConfig;
-}
+};
 
 export type Suggestion = {
   id: string;

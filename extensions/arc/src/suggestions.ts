@@ -12,7 +12,7 @@ const config: SearchConfigs = {
       json[1].map((item: string, i: number) => {
         const type = json[4]["google:suggesttype"][i];
         const description = json[2][i];
-    
+
         if (type === "NAVIGATION") {
           suggestions.push({
             id: nanoid(),
@@ -29,27 +29,27 @@ const config: SearchConfigs = {
           console.warn("Unknown suggestion type", type, item, description);
         }
       });
-    }
+    },
   },
   duckduckgo: {
     search: "https://www.duckduckgo.com?q=",
     suggestions: null, //Note: https://stackoverflow.com/questions/37012469/duckduckgo-api-getting-search-results
-    suggestionParser: () => {}
+    suggestionParser: null,
   },
   bing: {
     search: "https://www.bing.com/search?q=",
     suggestions: null, //Note: Behind an API
-    suggestionParser: () => {} 
+    suggestionParser: null,
   },
   yahoo: {
     search: "https://search.yahoo.com/search?p=",
     suggestions: null, //Note: Unknown
-    suggestionParser: () => {}
+    suggestionParser: null,
   },
   neeva: {
     search: "https://neeva.com/search?q=",
     suggestions: null, //Note: Unknown
-    suggestionParser: () => {}
+    suggestionParser: null,
   },
   ecosia: {
     search: "https://www.ecosia.org/search?q=",
@@ -62,8 +62,8 @@ const config: SearchConfigs = {
           url: `https://www.ecosia.org/search?q=${encodeURIComponent(item)}`,
         });
       });
-    }
-  }
+    },
+  },
 };
 
 async function parseResponse(response: Response) {
@@ -78,7 +78,9 @@ async function parseResponse(response: Response) {
 
   const suggestions = new Array<Suggestion>();
 
-  suggestionParser(json, suggestions)
+  if (suggestionParser) {
+    suggestionParser(json, suggestions);
+  }
 
   return suggestions;
 }
@@ -98,27 +100,22 @@ export function useSuggestions(searchText: string) {
   const defaultSuggestion = getDefaultSuggestion(searchText);
 
   if (suggestionUrl) {
-    const response = useFetch(
-      `${suggestionUrl}${encodeURIComponent(searchText)}`,
-      {
-        headers: {
-          "Content-Type": "text/plain; charset=UTF-8",
-        },
-        parseResponse,
-      }
-    );
-
+    const response = useFetch(`${suggestionUrl}${encodeURIComponent(searchText)}`, {
+      headers: {
+        "Content-Type": "text/plain; charset=UTF-8",
+      },
+      parseResponse,
+    });
 
     if (defaultSuggestion) {
       response.data = [defaultSuggestion, ...(response.data || [])];
     }
-  
+
     return response;
   }
 
-
   return {
     isLoading: false,
-    data: defaultSuggestion ? [defaultSuggestion] : undefined
+    data: defaultSuggestion ? [defaultSuggestion] : undefined,
   };
 }
