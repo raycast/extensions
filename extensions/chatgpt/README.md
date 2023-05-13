@@ -79,6 +79,24 @@ All preferences properties list that can be customize through `Raycast Settings 
 | `proxyHost`              | Proxy Host             | `string`                            | `false`  | `empty` | Proxy host value                                                                                                 |
 | `proxyUsername`          | Proxy Username         | `string`                            | `false`  | `empty` | Proxy username value                                                                                             |
 | `proxyPassword`          | Proxy Password         | `string`                            | `false`  | `empty` | Proxy password value                                                                                             |
+| `useAzure`               | Use Azure OpenAI       | `boolean`                           | `true`   | `false` | Use Azure OPENAI rather than OPENAI                                                                              |
+| `azureEndpoint`          | Azure Endpoint         | `string`                            | `false`  | `empty` | Azure OpenAI resource endpoint                                                                                   |
+| `azureDeploymentName`    | Azure Deployment       | `string`                            | `false`  | `empty` | Azure OpenAI resource deployment                                                                                 |
+
+### How to use Azure OpenAI
+
+1. Copy and paste your Azure OpenAI's `KEY` value to the `API key` field
+
+   ![Enter Azure OpenAI Key](metadata/8.png)
+
+2. Copy and paste your Azure OpenAI `Endpoint` value to the `Azure Endpoint` field. Then, Tick the `Use Azure OpenAI` checkbox
+
+   ![Enter Azure OpenAI Endpoint](metadata/9.png)
+
+3. Copy and paste your Azure OpenAI `Model deployment name` value to the `Azure Deployment` field
+
+   ![Enter Azure OpenAI Deployment](metadata/10.png)
+
 
 ---
 
