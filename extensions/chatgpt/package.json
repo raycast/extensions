@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "chatgpt",
   "title": "ChatGPT",
-  "description": "Interact with OpenAI's ChatGPT API directly from your command bar",
+  "description": "Interact with OpenAI's ChatGPT directly from your command bar",
   "icon": "icon.png",
   "author": "abielzulio",
   "contributors": [

@@ -55,7 +55,7 @@ GPT-4 model availability depends on your developer account. You need access to t
 
 # How to use
 
-This package requires a valid `Secret Key` from [OpenAI](https://platform.openai.com/account/api-keys) with a `pay-as-you-go` plan account (**you'll get a `429` error if you're on a `free-tier` account**).
+This extension requires a valid `Secret Key` as your API Key from [OpenAI](https://platform.openai.com/account/api-keys) with a `pay-as-you-go` plan account (**you'll get a `429` error if you're on a `free-tier` account**).
 
 ![Initial set-up](metadata/6.png)
 
@@ -67,7 +67,7 @@ All preferences properties list that can be customize through `Raycast Settings 
 
 | Properties               | Label                  | Value                               | Required | Default | Description                                                                                                      |
 | ------------------------ | ---------------------- | ----------------------------------- | -------- | ------- | ---------------------------------------------------------------------------------------------------------------- |
-| `apiKey`                 | API                    | `string`                            | `true`   | `empty` | Your personal Open AI API key                                                                                    |
+| `apiKey`                 | API Key                | `string`                            | `true`   | `empty` | Your personal OpenAI API key                                                                                     |
 | `useStream`              | Stream Completion      | `boolean`                           | `true`   | `true`  | Stream the completions of the generated answer                                                                   |
 | `isAutoSaveConversation` | Auto-save Conversation | `boolean`                           | `true`   | `true`  | Auto-save every conversation that you had with the model                                                         |
 | `isHistoryPaused`        | Pause History          | `boolean`                           | `false`  | `false` | Pause the history of the conversation                                                                            |
