@@ -13,10 +13,24 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "index",
+      "name": "upload-clipboard",
       "title": "Upload Clipboard",
       "description": "Upload image contents from clipboard to Cloudinary.",
       "mode": "view"
+    },
+    {
+      "name": "upload-url",
+      "title": "Upload URL",
+      "description": "Upload a file by URL to Cloudinary.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "url",
+          "placeholder": "URL",
+          "type": "text",
+          "required": true
+        }
+      ]
     }
   ],
   "preferences": [

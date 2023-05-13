@@ -10,11 +10,27 @@ cloudinary.config({
   secure: true,
 });
 
+/**
+ * uploadImage
+ */
+
+const EXCLUDED_KEYS = ["api_key"];
+
 export async function uploadImage(path: string) {
-  return cloudinary.uploader.upload(path, {
+  const resource = await cloudinary.uploader.upload(path, {
     folder: preferences.cloudinaryUploadFolder,
   });
+
+  const resourceSanitized = Object.fromEntries(
+    Object.entries(resource).filter(([key]) => !EXCLUDED_KEYS.includes(key))
+  );
+
+  return resourceSanitized;
 }
+
+/**
+ * getImageUrl
+ */
 
 export function getImageUrl(publicId: string, options?: object) {
   return cloudinary.url(publicId, options);
