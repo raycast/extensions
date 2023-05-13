@@ -46,3 +46,12 @@ export const pullImage = async (image: string): Promise<void> => {
 function updateToast(toast: Toast, style: Toast.Style, title: string, message: string): void {
   Object.assign(toast, { style, title, message });
 }
+
+export const checkImageExists = async (image: string): Promise<boolean> => {
+  try {
+    await docker.getImage(image).inspect();
+    return true;
+  } catch (error) {
+    return false;
+  }
+};

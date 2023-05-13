@@ -1,14 +1,15 @@
-import { Action, ActionPanel, Icon, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, showToast, Toast } from "@raycast/api";
 import { useCallback, useState, useEffect } from "react";
 import { Hub } from "../lib/hub/hub";
 import SearchTags from "./SearchTags";
-import { SearchTypeEnum, Summary } from "../lib/hub/types";
+import { SearchTypeEnum, Summary, ItemAccessory } from "../lib/hub/types";
 import { mapFromToIcon } from "../lib/hub/utils";
-import { pullImage } from "../lib/hub/docker";
+import { pullImage, checkImageExists } from "../lib/hub/docker";
 
 export default function Search(props: { searchType: SearchTypeEnum }) {
   const [images, setImages] = useState<Summary[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [existingImages, setExistingImages] = useState<Set<string>>(new Set());
 
   const search = useCallback((text: string) => {
     const abortCtrl = new AbortController();
@@ -35,6 +36,20 @@ export default function Search(props: { searchType: SearchTypeEnum }) {
   useEffect(() => {
     search("");
   }, []);
+
+  useEffect(() => {
+    const checkImagesExistence = async () => {
+      const exist = new Set<string>();
+      for (const img of images) {
+        const exists = await checkImageExists(img.slug);
+        if (exists) {
+          exist.add(img.slug);
+        }
+      }
+      setExistingImages(exist);
+    };
+    checkImagesExistence();
+  }, [images]);
 
   return (
     <List isLoading={loading} onSearchTextChange={search} throttle>
@@ -63,18 +78,26 @@ export default function Search(props: { searchType: SearchTypeEnum }) {
               ) : null}
             </ActionPanel>
           }
-          accessories={[
-            {
-              text: `${item.star_count}`,
-              icon: Icon.Star,
-              tooltip: `${item.star_count} Stars`,
-            },
-            {
-              text: item.pull_count,
-              icon: Icon.Download,
-              tooltip: `${item.pull_count} Downloads`,
-            },
-          ]}
+          accessories={
+            [
+              existingImages.has(item.slug)
+                ? {
+                    icon: { source: Icon.Checkmark, tintColor: Color.Green },
+                    tooltip: "Image exists locally",
+                  }
+                : null,
+              {
+                text: `${item.star_count}`,
+                icon: Icon.Star,
+                tooltip: `${item.star_count} Stars`,
+              },
+              {
+                text: item.pull_count,
+                icon: Icon.Download,
+                tooltip: `${item.pull_count} Downloads`,
+              },
+            ].filter((item) => item !== null) as ItemAccessory[]
+          }
         />
       ))}
     </List>
