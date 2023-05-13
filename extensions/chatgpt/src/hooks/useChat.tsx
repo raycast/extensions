@@ -162,15 +162,12 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
         }
       })
       .catch((err) => {
-        toast.title = "Error";
-        if (err) {
-          if (err?.response?.data?.error?.message) {
-            if (err.response.data.error.status === 429 || err.response.data.error.message.includes("429")) {
-              toast.message = "Please upgrade your account to pay-as-you-go";
-            } else {
-              toast.message = err.response.data.error.message;
-            }
+        if (err?.message) {
+          if (err.message.includes("429")) {
+            toast.title = "You've reached your API limit";
+            toast.message = "Please upgrade to pay-as-you-go";
           } else {
+            toast.title = "Error";
             toast.message = err.message;
           }
         }
