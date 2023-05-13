@@ -4,6 +4,7 @@ import { Hub } from "../lib/hub/hub";
 import SearchTags from "./SearchTags";
 import { SearchTypeEnum, Summary } from "../lib/hub/types";
 import { mapFromToIcon } from "../lib/hub/utils";
+import { pullImage } from "../lib/hub/docker";
 
 export default function Search(props: { searchType: SearchTypeEnum }) {
   const [images, setImages] = useState<Summary[]>([]);
@@ -52,6 +53,12 @@ export default function Search(props: { searchType: SearchTypeEnum }) {
                   <Action.Push icon={Icon.List} title="Show Tags" target={<SearchTags repo={item.slug} />} />
                   <Action.CopyToClipboard title="Copy Pull Command" content={`docker pull ${item.slug}`} />
                   <Action.CopyToClipboard title="Copy Image Name" content={`${item.slug}`} />
+                  <Action
+                    title="Pull Image"
+                    onAction={() => pullImage(item.slug)}
+                    icon={Icon.Download}
+                    shortcut={{ modifiers: ["cmd"], key: "p" }}
+                  />
                 </ActionPanel.Section>
               ) : null}
             </ActionPanel>
