@@ -1,5 +1,5 @@
 import React from "react";
-import { AI, Toast, environment, popToRoot, showToast } from "@raycast/api";
+import { AI, environment, getPreferenceValues, popToRoot, showToast, Toast } from "@raycast/api";
 import { RAYCASTAI_SUMMARY_MAX_CHARS } from "../const/max_chars";
 import splitTranscript from "../utils/splitTranscript";
 
@@ -12,6 +12,11 @@ type GetRaycastAISummaryProps = {
 async function fetchAiAnswer(aiInstructions: string) {
   return await AI.ask(aiInstructions);
 }
+  const preferences = getPreferenceValues();
+
+  if (preferences.chosenAi !== "raycastai") {
+    return;
+  }
 
 const useRaycastAISummary = ({ transcript, setSummaryIsLoading, setSummary }: GetRaycastAISummaryProps) => {
   let temporarySummary = "";

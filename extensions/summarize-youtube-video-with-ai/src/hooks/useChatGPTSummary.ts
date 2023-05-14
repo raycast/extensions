@@ -1,3 +1,4 @@
+import React from "react";
 import { CHATGPT_SUMMARY_MAX_CHARS } from "../const/max_chars";
 import { Configuration, OpenAIApi } from "openai";
 import { Toast, getPreferenceValues, showToast } from "@raycast/api";
@@ -12,6 +13,10 @@ type GetChatGPTSummaryProps = {
 
 const useChatGPTSummary = ({ transcript, setSummaryIsLoading, setSummary }: GetChatGPTSummaryProps) => {
   const preferences = getPreferenceValues();
+
+  if (preferences.chosenAi !== "chatgpt") {
+    return;
+  }
 
   const configuration = new Configuration({
     apiKey: preferences.openaiApiToken,
