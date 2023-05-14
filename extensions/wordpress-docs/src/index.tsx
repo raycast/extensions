@@ -111,7 +111,7 @@ function DefaultActions({ searchResult }: { searchResult: SearchResult }) {
 
 function Summary({ searchResult }: { searchResult: SearchResult }) {
   const item = JSON.stringify(searchResult);
-  const prompt = `Summarize the following from the WordPress docs and give one example of usage in a code block. The context can only be about WordPress. Format the response as if you are providing documentation:\n\n${item}`;
+  const prompt = `Summarize the following from the WordPress docs and give one example of usage in a code block. The context can only be about WordPress. Format the response as if you are providing documentation:\n${item}`;
   const { data, isLoading } = useAI(prompt, { creativity: 0 });
   const code = data.match(/```[\w\S]*\n([\s\S]*?)\n```/);
 
@@ -122,6 +122,11 @@ function Summary({ searchResult }: { searchResult: SearchResult }) {
       actions={
         <ActionPanel>
           <ActionPanel.Section>
+            <Action.OpenInBrowser
+              title="Continue in Chat"
+              icon={Icon.SpeechBubble}
+              url={`raycast://extensions/raycast/raycast-ai/ai-chat?fallbackText=${encodeURIComponent(prompt)}`}
+            />
             <DefaultActions searchResult={searchResult} />
             <Action.CopyToClipboard
               shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
