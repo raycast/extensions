@@ -12,7 +12,7 @@ export type VideoDataTypes = {
   viewCount: ytdl.videoInfo["videoDetails"]["viewCount"];
 };
 
-export async function getVideoData(video: string) {
+async function getVideoData(video: string) {
   const basicVideoInformation = await ytdl.getBasicInfo(video);
 
   const publishDate = new Date(basicVideoInformation.videoDetails.publishDate).toLocaleDateString();
@@ -35,3 +35,5 @@ export async function getVideoData(video: string) {
 
   return videoDetails;
 }
+
+export default getVideoData;

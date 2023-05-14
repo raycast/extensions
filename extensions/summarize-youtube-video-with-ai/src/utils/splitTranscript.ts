@@ -1,4 +1,4 @@
-export const splitTranscript = (transcript: string, max_chars: number) =>
+const splitTranscript = (transcript: string, max_chars: number) =>
   transcript?.split(/(?<=\.)/).reduce(
     (acc, curr) => {
       if (acc[acc.length - 1].length + curr.length > max_chars) {
@@ -13,3 +13,5 @@ export const splitTranscript = (transcript: string, max_chars: number) =>
     },
     [""]
   );
+
+export default splitTranscript;

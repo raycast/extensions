@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Detail, Toast, showToast } from "@raycast/api";
-import { getVideoData } from "./utils/getVideoData";
-import { useVideoSummary } from "./hooks/useVideoSummary";
+import getVideoData from "./utils/getVideoData";
+import useVideoSummary from "./hooks/useVideoSummary";
 import React, { useEffect, useState } from "react";
 import type { LaunchProps } from "@raycast/api";
 import type { VideoDataTypes } from "./utils/getVideoData";
@@ -10,11 +10,8 @@ interface VideoSummaryProps {
   video: string;
 }
 
-export default function VideoSummary(props: LaunchProps<{ arguments: VideoSummaryProps }>) {
-  const preferences = getPreferenceValues();
-
+const VideoSummary = (props: LaunchProps<{ arguments: VideoSummaryProps }>) => {
   const [videoData, setVideoData] = useState<VideoDataTypes>();
-  const [transcript, setTranscript] = useState<string | undefined>(undefined);
   const [summary, setSummary] = useState<string | undefined>(undefined);
   const [summaryIsLoading, setSummaryIsLoading] = useState<boolean>(false);
 
@@ -31,26 +28,13 @@ export default function VideoSummary(props: LaunchProps<{ arguments: VideoSummar
 
   useEffect(() => {
     getVideoData(video).then(setVideoData);
-    getVideoTranscript(video).then(setTranscript);
+    useVideoSummary({ video, setSummaryIsLoading, setSummary });
+
     return () => {
       setVideoData(undefined);
-      setTranscript(undefined);
+      setSummary(undefined);
     };
   }, []);
-
-  if (preferences.chosenAi === "chatgpt") {
-    getChatGPTSummary({ videoTitle: videoData?.title, transcript }).then((result) => {
-      setSummaryIsLoading(result.summaryIsLoading);
-      setSummary(result.summary);
-    });
-  }
-
-  if (preferences.chosenAi === "raycastai") {
-    getRaycatsAISummary({ videoTitle: videoData?.title, transcript }).then((result) => {
-      setSummaryIsLoading(result.summaryIsLoading);
-      setSummary(result.summary);
-    });
-  }
 
   const markdown = summary
     ? `${summary}
@@ -91,4 +75,6 @@ export default function VideoSummary(props: LaunchProps<{ arguments: VideoSummar
       navigationTitle={videoData && `${videoData.title} by ${videoData.ownerChannelName}`}
     />
   );
-}
+};
+
+export default VideoSummary;

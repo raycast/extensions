@@ -1,18 +1,16 @@
-import { Toast, getPreferenceValues, showToast } from "@raycast/api";
+import { CHATGPT_SUMMARY_MAX_CHARS } from "../const/max_chars";
 import { Configuration, OpenAIApi } from "openai";
+import { Toast, getPreferenceValues, showToast } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
-import { useState } from "react";
-import { CHATGPT_SUMMARY_MAX_CHARS } from "./const";
-import { splitTranscript } from "./utils";
+import splitTranscript from "../utils/splitTranscript";
 
 type GetChatGPTSummaryProps = {
-  videoTitle?: string;
   transcript?: string;
+  setSummaryIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
+  setSummary: React.Dispatch<React.SetStateAction<string | undefined>>;
 };
 
-export default async function getChatGPTSummary({ videoTitle, transcript }: GetChatGPTSummaryProps) {
-  const [summary, setSummary] = useState<string | undefined>(undefined);
-
+const useChatGPTSummary = ({ transcript, setSummaryIsLoading, setSummary }: GetChatGPTSummaryProps) => {
   const preferences = getPreferenceValues();
 
   const configuration = new Configuration({
@@ -70,7 +68,6 @@ export default async function getChatGPTSummary({ videoTitle, transcript }: GetC
       }
 
       openAiInstructions +=
-        videoTitle &&
         transcript &&
         `Summarize the following transcription of a youtube video as a list of the most important points each starting with a fitting emoji. Ignore mentions of video sponsors.
 
@@ -108,5 +105,9 @@ export default async function getChatGPTSummary({ videoTitle, transcript }: GetC
     }
   );
 
-  return { summaryIsLoading: isLoading, summary };
-}
+  setSummaryIsLoading(isLoading);
+
+  return null;
+};
+
+export default useChatGPTSummary;
