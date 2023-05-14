@@ -27,7 +27,7 @@ export function getIdentityDetailsMarkdown(itemName: string, identity: Identity)
 | **Field** | **Value** |
 | --- | --- |
 ${Object.entries(identity)
-  .sort(bitwardenPageFieldOrderSorter)
+  .sort(identityFormOrderSorter)
   .map(([key, value]) => (value ? `| **${IDENTITY_KEY_LABEL[key as keyof Identity]}** | ${value} |` : null))
   .join("\n")}
 `;
@@ -35,15 +35,16 @@ ${Object.entries(identity)
 
 export function getIdentityDetailsCopyValue(identity: Identity): string {
   return Object.entries(identity)
-    .sort(bitwardenPageFieldOrderSorter)
+    .sort(identityFormOrderSorter)
     .map(([key, value]) => (value ? `${IDENTITY_KEY_LABEL[key as keyof Identity]}: ${value}` : null))
     .filter(Boolean)
     .join("\n");
 }
 
 const IDENTITY_KEY_LABEL_KEYS = Object.keys(IDENTITY_KEY_LABEL);
-function bitwardenPageFieldOrderSorter([a]: [string, any], [b]: [string, any]) {
-  const aIndex = IDENTITY_KEY_LABEL_KEYS.indexOf(a as keyof Identity);
-  const bIndex = IDENTITY_KEY_LABEL_KEYS.indexOf(b as keyof Identity);
+/** sorts the fields according to the order they appear on bitwarden's web vault form */
+export function identityFormOrderSorter([a]: string | [string, any], [b]: string | [string, any]) {
+  const aIndex = IDENTITY_KEY_LABEL_KEYS.indexOf((Array.isArray(a) ? a[0] : a) as keyof Identity);
+  const bIndex = IDENTITY_KEY_LABEL_KEYS.indexOf((Array.isArray(b) ? b[0] : b) as keyof Identity);
   return aIndex - bIndex;
 }

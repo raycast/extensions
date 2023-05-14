@@ -38,7 +38,7 @@ export function getCardDetailsMarkdown(itemName: string, card: Card) {
 | **Field** | **Value** |
 | --- | --- |
 ${Object.entries(card)
-  .sort(bitwardenPageFieldOrderSorter)
+  .sort(cardBitwardenPageFieldOrderSorter)
   .map(([key, value]) => (value ? `| **${CARD_KEY_LABEL[key as keyof Card]}** | ${getCardValue(key, value)} |` : null))
   .join("\n")}
 `;
@@ -46,15 +46,16 @@ ${Object.entries(card)
 
 export function getCardDetailsCopyValue(card: Card) {
   return Object.entries(card)
-    .sort(bitwardenPageFieldOrderSorter)
+    .sort(cardBitwardenPageFieldOrderSorter)
     .map(([key, value]) => (value ? `${CARD_KEY_LABEL[key as keyof Card]}: ${getCardValue(key, value)}` : null))
     .filter(Boolean)
     .join("\n");
 }
 
 const CARD_KEY_LABEL_KEYS = Object.keys(CARD_KEY_LABEL);
-function bitwardenPageFieldOrderSorter([a]: [string, any], [b]: [string, any]) {
-  const aIndex = CARD_KEY_LABEL_KEYS.indexOf(a as keyof Card);
-  const bIndex = CARD_KEY_LABEL_KEYS.indexOf(b as keyof Card);
+/** sorts the fields according to the order they appear on bitwarden's web vault form */
+export function cardBitwardenPageFieldOrderSorter([a]: string | [string, any], [b]: string | [string, any]) {
+  const aIndex = CARD_KEY_LABEL_KEYS.indexOf((Array.isArray(a) ? a[0] : a) as keyof Card);
+  const bIndex = CARD_KEY_LABEL_KEYS.indexOf((Array.isArray(b) ? b[0] : b) as keyof Card);
   return aIndex - bIndex;
 }

@@ -3,7 +3,6 @@ import ComponentReverser from "~/components/ComponentReverser";
 import { useSelectedVaultItem } from "~/components/searchVault/context/vaultItem";
 import {
   CopyPasswordAction,
-  CopyTextFieldsActions,
   CopyTotpAction,
   CopyUsernameAction,
   OpenUrlInBrowserAction,
@@ -12,6 +11,10 @@ import {
   ShowCardDetailsAction,
   ShowNotesAction,
   ShowIdentityDetailsAction,
+  CopyCardFieldsActions,
+  CopyIdentityFieldsActions,
+  CopyLoginUrisActions,
+  CopyCustomFieldsActions,
 } from "~/components/searchVault/actions";
 
 const { primaryAction } = getPreferenceValues();
@@ -38,7 +41,10 @@ const VaultItemActionPanel = () => {
         <ShowNotesAction />
       </ActionPanel.Section>
       <ActionPanel.Section>
-        <CopyTextFieldsActions />
+        <CopyCardFieldsActions />
+        <CopyIdentityFieldsActions />
+        <CopyLoginUrisActions />
+        <CopyCustomFieldsActions />
       </ActionPanel.Section>
       <ActionPanel.Section>
         <SearchCommonActions />
