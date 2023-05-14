@@ -7,14 +7,16 @@ import useGetUpdatedVaultItem from "~/components/searchVault/utils/useGetUpdated
 import { Item } from "~/types/vault";
 import { captureException } from "~/utils/development";
 
-export type CopyObjectStringFieldsActionsProps<TValue extends RecordOfStrings | undefined | null> = {
-  selector: (item: Item) => TValue;
+export type CopyObjectStringFieldsActionsProps<TValue extends RecordOfAny> = {
+  selector: (item: Item) => TValue | null | undefined;
   sorter?: (itemA: [string, any], itemB: [string, any]) => number;
+  labelMapper?: (field: keyof TValue) => string; // TODO: figure out why the field is not being inferred as a keyof TValue
 };
 
-function CopyObjectStringFieldsActions<TValue extends RecordOfStrings | undefined | null>({
+function CopyObjectStringFieldsActions<TValue extends RecordOfAny>({
   selector,
   sorter,
+  labelMapper,
 }: CopyObjectStringFieldsActionsProps<TValue>) {
   const selectedItem = useSelectedVaultItem();
   const getUpdatedVaultItem = useGetUpdatedVaultItem();
@@ -24,31 +26,31 @@ function CopyObjectStringFieldsActions<TValue extends RecordOfStrings | undefine
   const handleCopyField = (field: string) => async () => {
     try {
       const value = await getUpdatedVaultItem(selectedItem, (item) => selector(item)?.[field], `Getting ${field}...`);
-      if (typeof value !== "string") throw new Error("Field value is not a string");
+      if (typeof value !== "string") throw new Error(`Value of ${field} is not a string`);
       if (value) {
         await Clipboard.copy(value, { transient: getTransientCopyPreference("other") });
         await showHUD("Copied to clipboard");
         await closeMainWindow();
       }
     } catch (error) {
-      await showToast(Toast.Style.Failure, `Failed to get ${field}`);
+      await showToast(Toast.Style.Failure, `Failed to copy ${field}`);
       captureException(`Failed to copy ${field}`, error);
     }
   };
 
   return (
     <>
-      {selectedItemEntries.map(([fieldKey, content], index) => {
-        if (!content) return null;
+      {selectedItemEntries.map(([key, value], index) => {
+        if (!value || typeof value !== "string") return null;
 
-        const capitalizedTitle = capitalize(fieldKey);
+        const label = labelMapper?.(key as keyof TValue) ?? capitalize(key);
         return (
           <ActionWithReprompt
-            key={`${index}-${fieldKey}`}
-            title={`Copy ${capitalizedTitle}`}
+            key={`${index}-${key}`}
+            title={`Copy ${label}`}
             icon={Icon.Clipboard}
-            onAction={handleCopyField(fieldKey)}
-            repromptDescription={`Copying the ${capitalizedTitle} of <${selectedItem.name}>`}
+            onAction={handleCopyField(key)}
+            repromptDescription={`Copying the ${label} of <${selectedItem.name}>`}
           />
         );
       })}
@@ -56,7 +58,7 @@ function CopyObjectStringFieldsActions<TValue extends RecordOfStrings | undefine
   );
 }
 
-function useItemObjectEntries<TValue extends RecordOfAny | undefined | null>(
+function useItemObjectEntries<TValue extends RecordOfAny>(
   selectedItem: Item,
   selector: CopyObjectStringFieldsActionsProps<TValue>["selector"],
   sorter: CopyObjectStringFieldsActionsProps<TValue>["sorter"]

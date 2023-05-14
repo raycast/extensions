@@ -1,8 +1,16 @@
 import CopyObjectStringFieldsActions from "~/components/searchVault/actions/CopyObjectFieldsActions";
+import { IDENTITY_KEY_LABEL } from "~/constants/labels";
+import { Identity } from "~/types/vault";
 import { identityFormOrderSorter } from "~/utils/identity";
 
 function CopyIdentityFieldsActions() {
-  return <CopyObjectStringFieldsActions selector={(item) => item.identity} sorter={identityFormOrderSorter} />;
+  return (
+    <CopyObjectStringFieldsActions
+      selector={(item) => item.identity}
+      sorter={identityFormOrderSorter}
+      labelMapper={(field) => IDENTITY_KEY_LABEL[field as keyof Identity]}
+    />
+  );
 }
 
 export default CopyIdentityFieldsActions;

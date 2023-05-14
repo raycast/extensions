@@ -1,5 +1,5 @@
 import { environment, getPreferenceValues } from "@raycast/api";
-import { VAULT_TIMEOUT_MS_TO_LABEL } from "~/constants/preferences";
+import { VAULT_TIMEOUT_MS_TO_LABEL } from "~/constants/labels";
 import { CommandName } from "~/types/general";
 import { Preferences, TransientCopyPreferences } from "~/types/preferences";
 

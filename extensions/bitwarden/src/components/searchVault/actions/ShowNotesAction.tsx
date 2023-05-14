@@ -15,22 +15,7 @@ function ShowNotesAction() {
   const showNotes = async () => {
     try {
       const notes = await getUpdatedVaultItem(selectedItem, (item) => item.notes, "Getting notes...");
-      if (notes) {
-        push(
-          <Detail
-            markdown={getNotesDetailsMarkdown(selectedItem.name, notes)}
-            actions={
-              <ActionPanel>
-                <Action.CopyToClipboard
-                  title="Copy Notes"
-                  content={notes}
-                  transient={getTransientCopyPreference("other")}
-                />
-              </ActionPanel>
-            }
-          />
-        );
-      }
+      if (notes) push(<DetailsScreen itemName={selectedItem.name} notes={notes} />);
     } catch (error) {
       await showToast(Toast.Style.Failure, "Failed to get notes");
       captureException("Failed to show notes", error);
@@ -43,6 +28,19 @@ function ShowNotesAction() {
       icon={Icon.BlankDocument}
       onAction={showNotes}
       repromptDescription={`Showing the notes of <${selectedItem.name}>`}
+    />
+  );
+}
+
+function DetailsScreen({ itemName, notes }: { itemName: string; notes: string }) {
+  return (
+    <Detail
+      markdown={getNotesDetailsMarkdown(itemName, notes)}
+      actions={
+        <ActionPanel>
+          <Action.CopyToClipboard title="Copy Notes" content={notes} transient={getTransientCopyPreference("other")} />
+        </ActionPanel>
+      }
     />
   );
 }

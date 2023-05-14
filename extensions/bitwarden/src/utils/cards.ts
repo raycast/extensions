@@ -1,3 +1,4 @@
+import { CARD_KEY_LABEL } from "~/constants/labels";
 import { Card } from "~/types/vault";
 
 const MONTH_NUMBER_TO_LABEL_MAP = {
@@ -17,15 +18,6 @@ const MONTH_NUMBER_TO_LABEL_MAP = {
 
 const CARD_MAPPER: Record<string, (value: string) => string> = {
   expMonth: (value: string) => MONTH_NUMBER_TO_LABEL_MAP[value],
-};
-
-const CARD_KEY_LABEL: Record<keyof Card, string> = {
-  cardholderName: "Cardholder name",
-  brand: "Brand",
-  number: "Number",
-  expMonth: "Expiration month",
-  expYear: "Expiration year",
-  code: "Security code (CVV)",
 };
 
 const getCardValue = (key: string, value: string) => {
