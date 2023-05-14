@@ -29,8 +29,8 @@ const HISTORY_GLOB = resolve(toolsInstall, "apps/**/.history.json");
 const APP_GLOB = resolve(toolsInstall, "apps/**/*.app");
 const SETTINGS_GLOB = resolve(toolsInstall, ".settings.json");
 
-const getAppFromPath = (path: string, apps: file[]): file | undefined => {
-  return apps.find((app) => dirname(app.path).startsWith(dirname(path)));
+const getAppFromPathAndBuild = (path: string, build: string, apps: file[]): file | undefined => {
+  return apps.find((app) => dirname(app.path).startsWith(dirname(path)) && dirname(app.path).includes(build));
 };
 
 export interface file {
@@ -55,7 +55,9 @@ export interface recentEntry {
 
 export interface AppHistory {
   title: string;
-  shortname: string;
+  name: string;
+  id: string;
+  version: string;
   url: string | false;
   tool: string | false;
   toolName: string | false;
@@ -242,18 +244,22 @@ export const getHistory = async (): Promise<AppHistory[]> => {
             return null;
           }
           const shellLinkTool = await getReadFile(file.path.replace("history.json", "shellLink"));
-          const history: History = historyFile.history.pop() as History;
+          const history: History = historyFile.history
+            .sort((history1: History, history2: History) => Number(history1.item.build) - Number(history2.item.build))
+            .pop() as History;
           const icon = icons.find((icon) => icon.title.startsWith(history.item.name))?.path ?? JetBrainsIcon;
           const tool = shellLinkTool ?? history.item.intellij_platform?.shell_script_name ?? false;
           const activation = history.item.activation?.hosts[0] ?? false;
           return {
-            title: `${history.item.name} ${history.item.major_version.name}`,
-            shortname: history.item.name,
+            title: `${history.item.name} ${history.item.version}`,
+            name: history.item.name,
+            id: history.item.id,
+            version: history.item.version,
             build: history.item.build,
             url: useUrl && activation ? `jetbrains://${activation}/navigate/reference?project=` : false,
             tool: tool ? await which(tool, { path: scriptDir }).catch(() => false) : false,
             toolName: tool ? tool : false,
-            app: getAppFromPath(file.path, apps),
+            app: getAppFromPathAndBuild(file.path, history.item.build, apps),
             icon,
             xmlFiles: await getRecent(globFromHistory(history), icon),
           } as AppHistory;

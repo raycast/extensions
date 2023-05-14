@@ -44,7 +44,7 @@
 /extensions/associated-press                         @Dammmien
 /extensions/asyncapi                                 @smoya
 /extensions/atomic                                   @joepio
-/extensions/audio-device                             @benvp @mathieudutour @mike182uk @FezVrasta
+/extensions/audio-device                             @benvp @mathieudutour @mike182uk @FezVrasta @rcruzper
 /extensions/authy                                    @guga4ka @gdsmith @lukekarrys
 /extensions/auto-quit-app                            @koinzhang
 /extensions/avatar                                   @koinzhang
@@ -90,7 +90,7 @@
 /extensions/brew                                     @nhojb @Aayush9029 @mathieudutour @urwrstkn8mare
 /extensions/brew-services                            @es183923
 /extensions/brightness-control                       @CaliCastle
-/extensions/browser-bookmarks                        @thomaslombart
+/extensions/browser-bookmarks                        @thomaslombart @sasivarnan
 /extensions/browser-history                          @crisboarna
 /extensions/browsers-profiles                        @skydiver
 /extensions/bttv-emote                               @Aayush9029
@@ -110,6 +110,7 @@
 /extensions/capture-fullpage-of-website              @Coun1er
 /extensions/capture-raycast-metadata                 @koinzhang
 /extensions/carbon-raycast                           @adelowo
+/extensions/center                                   @enesozturk
 /extensions/chakra-ui-docs                           @pgvr @Ansub
 /extensions/change-case                              @es183923 @pernielsentikaer
 /extensions/change-scroll-direction                  @gregoralbrecht @emilshr
@@ -267,6 +268,7 @@
 /extensions/epoch-to-timestamp                       @bgreenlee
 /extensions/esa-search                               @kawamataryo
 /extensions/escape-regexp-characters                 @lryong
+/extensions/espanso                                  @kud
 /extensions/esse-actions                             @rben01
 /extensions/esv-bible                                @cpenned
 /extensions/ethereum-gas-tracker                     @vinch
@@ -347,7 +349,7 @@
 /extensions/google-meet                              @vitoorgomes @hughlaw
 /extensions/google-search                            @mblode
 /extensions/google-tasks                             @elliotdes @pernielsentikaer
-/extensions/google-translate                         @gebeto @FezVrasta @henriquemacedo @metakirby5 @tangerine1202
+/extensions/google-translate                         @gebeto @FezVrasta @metakirby5 @tangerine1202
 /extensions/google-trends                            @kkange
 /extensions/google-workspace                         @thomaslombart @mathieudutour
 /extensions/gopass                                   @bake
@@ -509,6 +511,7 @@
 /extensions/markdown-reference                       @codedbyjordan
 /extensions/markdown-this                            @aravindballa
 /extensions/markdown-to-plain-text                   @skyline-123
+/extensions/mastodon-search                          @daveverwer
 /extensions/material-icons                           @creasty
 /extensions/matter                                   @cernezan
 /extensions/maven-central-repository                 @koinzhang
@@ -545,6 +548,7 @@
 /extensions/multilinks                               @abhisheksatre
 /extensions/multipass                                @davibe @pernielsentikaer
 /extensions/music                                    @Rawnly @peterdev22 @danpalmer
+/extensions/musicthread                              @ChucKN0risK
 /extensions/must                                     @eggsy
 /extensions/my-daily-log                             @frugoman
 /extensions/myanimelist-search                       @luknl
@@ -588,6 +592,7 @@
 /extensions/ohdear                                   @andreaselia @pernielsentikaer @Hodglim
 /extensions/ohmyzsh-git-alias                        @yufeikang
 /extensions/ohmyzsh-plugins                          @k8scat
+/extensions/ok-json                                  @francisfeng
 /extensions/omni-news                                @danielkastberg
 /extensions/one-tab-group                            @xiaoluoboding
 /extensions/one-thing                                @pernielsentikaer @mathieudutour
@@ -855,6 +860,7 @@
 /extensions/tinypng                                  @kawamataryo
 /extensions/tldr                                     @pomdtr
 /extensions/tmdb                                     @Aayush9029 @andreaselia
+/extensions/tmux-sessioner                           @louishuyng
 /extensions/todo-list                                @maggie-j-liu
 /extensions/todoist                                  @thomaslombart @AnishDe12020 @kud
 /extensions/toggl-track                              @franzwilhelm @bkeys818 @rogatty @michaelfaisst

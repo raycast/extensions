@@ -1,16 +1,12 @@
-import { Task } from "@doist/todoist-api-typescript";
 import { getPreferenceValues, Toast, environment, showToast } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import { useEffect } from "react";
 
-import { truncateMiddle } from "../helpers/texts";
-
-type Preferences = {
-  focusFeatureWidth: number;
-};
+import { Task } from "../api";
+import { truncateMiddle } from "../helpers/menu-bar";
 
 export const useFocusedTask = () => {
-  const { focusFeatureWidth } = getPreferenceValues<Preferences>();
+  const { focusFeatureWidth } = getPreferenceValues<Preferences.MenuBar>();
 
   const { commandMode } = environment;
 
@@ -20,7 +16,7 @@ export const useFocusedTask = () => {
     setFocusedTask({ id: "", content: "" });
 
     if (commandMode === "view") {
-      await showToast({ style: Toast.Style.Success, title: "👋 No more focus" });
+      await showToast({ style: Toast.Style.Success, title: "No more focus" });
     }
   }
 
@@ -28,12 +24,12 @@ export const useFocusedTask = () => {
     setFocusedTask({ id, content });
 
     if (commandMode === "view") {
-      await showToast({ style: Toast.Style.Success, title: `🎯 Focus on "${content}"` });
+      await showToast({ style: Toast.Style.Success, title: `Focus on "${content}" 🎯` });
     }
   }
 
   useEffect(() => {
-    focusedTask.content = truncateMiddle(focusedTask.content, focusFeatureWidth);
+    focusedTask.content = truncateMiddle(focusedTask.content, parseInt(focusFeatureWidth));
   }, [focusedTask.content, focusFeatureWidth]);
 
   return { focusedTask, unfocusTask, focusTask };

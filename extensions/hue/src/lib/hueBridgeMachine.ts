@@ -198,7 +198,7 @@ export default function hueBridgeMachine(
           },
           onError: {
             actions: (_, event) => {
-              new Toast({ title: "Failed to link with bridge", message: event.data }).show().then();
+              new Toast({ title: "Failed to link with bridge", message: event.data?.toString() }).show().then();
               console.error(event.data);
             },
             target: "failedToLink",
