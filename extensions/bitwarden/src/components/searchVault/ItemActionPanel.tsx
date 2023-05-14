@@ -11,8 +11,8 @@ import {
   SearchCommonActions,
   ShowCardDetailsAction,
   ShowNotesAction,
+  ShowIdentityDetailsAction,
 } from "~/components/searchVault/actions";
-import ShowIdentityDetailsAction from "~/components/searchVault/actions/ShowIdentityDetailsAction";
 
 const { primaryAction } = getPreferenceValues();
 
