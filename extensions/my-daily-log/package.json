@@ -61,7 +61,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.49.1",
+    "@raycast/api": "^1.51.1",
     "@raycast/utils": "^1.4.10",
     "fs": "0.0.1-security",
     "uuid": "^9.0.0"

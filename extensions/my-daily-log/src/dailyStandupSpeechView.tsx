@@ -1,6 +1,7 @@
-import { Detail, useUnstableAI } from "@raycast/api";
+import { Detail } from "@raycast/api";
 import { DailyLog } from "./domain/dailyLog/DailyLog";
 import { getDailyLogsForStandupSpeechUseCaseFactory } from "./factories/getDailyLogsForStandupSpeechUseCaseFactory";
+import { useAI } from "@raycast/utils";
 
 export default function Command() {
   const logsForStandup = getDailyLogsForStandupSpeechUseCaseFactory().execute();
@@ -8,7 +9,7 @@ export default function Command() {
     return <Detail markdown="No major updates to report yet!" />;
   }
   const messageForAI = makeMessageForAIForLogs(logsForStandup);
-  const { isLoading, data } = useUnstableAI(messageForAI);
+  const { isLoading, data } = useAI(messageForAI);
 
   return <Detail isLoading={isLoading} markdown={data} navigationTitle="Daily standup speech" />;
 }
