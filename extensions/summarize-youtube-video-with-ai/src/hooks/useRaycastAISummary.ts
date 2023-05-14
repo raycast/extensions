@@ -69,6 +69,12 @@ const useRaycastAISummary = async ({ transcript, setSummaryIsLoading, setSummary
     model: "gpt-3.5-turbo",
   });
 
+  showToast({
+    style: Toast.Style.Animated,
+    title: "💡",
+    message: "Summarizing video",
+  });
+
   raycastSummary.on("data", (data) => {
     setSummary((result) => {
       if (result === undefined) return data;
