@@ -27,6 +27,7 @@ export function getIdentityDetailsMarkdown(itemName: string, identity: Identity)
 | **Field** | **Value** |
 | --- | --- |
 ${Object.entries(identity)
+  .sort(bitwardenPageFieldOrderSorter)
   .map(([key, value]) => (value ? `| **${IDENTITY_KEY_LABEL[key as keyof Identity]}** | ${value} |` : null))
   .join("\n")}
 `;
@@ -34,7 +35,15 @@ ${Object.entries(identity)
 
 export function getIdentityDetailsCopyValue(identity: Identity): string {
   return Object.entries(identity)
+    .sort(bitwardenPageFieldOrderSorter)
     .map(([key, value]) => (value ? `${IDENTITY_KEY_LABEL[key as keyof Identity]}: ${value}` : null))
     .filter(Boolean)
     .join("\n");
+}
+
+const IDENTITY_KEY_LABEL_KEYS = Object.keys(IDENTITY_KEY_LABEL);
+function bitwardenPageFieldOrderSorter([a]: [string, any], [b]: [string, any]) {
+  const aIndex = IDENTITY_KEY_LABEL_KEYS.indexOf(a as keyof Identity);
+  const bIndex = IDENTITY_KEY_LABEL_KEYS.indexOf(b as keyof Identity);
+  return aIndex - bIndex;
 }

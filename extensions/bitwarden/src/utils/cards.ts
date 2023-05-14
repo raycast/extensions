@@ -21,11 +21,11 @@ const CARD_MAPPER: Record<string, (value: string) => string> = {
 
 const CARD_KEY_LABEL: Record<keyof Card, string> = {
   cardholderName: "Cardholder name",
+  brand: "Brand",
   number: "Number",
-  code: "Security code (CVV)",
   expMonth: "Expiration month",
   expYear: "Expiration year",
-  brand: "Brand",
+  code: "Security code (CVV)",
 };
 
 const getCardValue = (key: string, value: string) => {
@@ -38,6 +38,7 @@ export function getCardDetailsMarkdown(itemName: string, card: Card) {
 | **Field** | **Value** |
 | --- | --- |
 ${Object.entries(card)
+  .sort(bitwardenPageFieldOrderSorter)
   .map(([key, value]) => (value ? `| **${CARD_KEY_LABEL[key as keyof Card]}** | ${getCardValue(key, value)} |` : null))
   .join("\n")}
 `;
@@ -45,7 +46,15 @@ ${Object.entries(card)
 
 export function getCardDetailsCopyValue(card: Card) {
   return Object.entries(card)
+    .sort(bitwardenPageFieldOrderSorter)
     .map(([key, value]) => (value ? `${CARD_KEY_LABEL[key as keyof Card]}: ${getCardValue(key, value)}` : null))
     .filter(Boolean)
     .join("\n");
+}
+
+const CARD_KEY_LABEL_KEYS = Object.keys(CARD_KEY_LABEL);
+function bitwardenPageFieldOrderSorter([a]: [string, any], [b]: [string, any]) {
+  const aIndex = CARD_KEY_LABEL_KEYS.indexOf(a as keyof Card);
+  const bIndex = CARD_KEY_LABEL_KEYS.indexOf(b as keyof Card);
+  return aIndex - bIndex;
 }
