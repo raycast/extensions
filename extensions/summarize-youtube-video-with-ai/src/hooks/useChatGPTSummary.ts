@@ -3,6 +3,12 @@ import { CHATGPT_SUMMARY_MAX_CHARS } from "../const/max_chars";
 import { Configuration, OpenAIApi } from "openai";
 import { Toast, getPreferenceValues, showToast } from "@raycast/api";
 import splitTranscript from "../utils/splitTranscript";
+import {
+  ERROR_SUMMARIZING_VIDEO,
+  LONG_VIDEO,
+  SUCCESS_SUMMARIZING_VIDEO,
+  SUMMARIZING_VIDEO,
+} from "../const/toast_messages";
 
 type GetChatGPTSummaryProps = {
   transcript?: string;
@@ -29,8 +35,8 @@ const useChatGPTSummary = async ({ transcript, setSummaryIsLoading, setSummary }
   if (transcript && transcript?.length > CHATGPT_SUMMARY_MAX_CHARS) {
     showToast({
       style: Toast.Style.Animated,
-      title: "❗",
-      message: "That's a long video, hold on.",
+      title: LONG_VIDEO.title,
+      message: LONG_VIDEO.message,
     });
 
     const transcriptionSummary = splitTranscript(transcript, CHATGPT_SUMMARY_MAX_CHARS);
@@ -55,7 +61,7 @@ const useChatGPTSummary = async ({ transcript, setSummaryIsLoading, setSummary }
       } catch (error: any) {
         showToast({
           style: Toast.Style.Failure,
-          title: "🚨",
+          title: ERROR_SUMMARIZING_VIDEO.title,
           message: error.message,
         });
       }
@@ -74,8 +80,8 @@ const useChatGPTSummary = async ({ transcript, setSummaryIsLoading, setSummary }
   try {
     showToast({
       style: Toast.Style.Animated,
-      title: "💡",
-      message: "Summarizing video",
+      title: SUMMARIZING_VIDEO.title,
+      message: SUMMARIZING_VIDEO.message,
     });
 
     const result = await openai.createChatCompletion({
@@ -84,15 +90,15 @@ const useChatGPTSummary = async ({ transcript, setSummaryIsLoading, setSummary }
     });
     showToast({
       style: Toast.Style.Success,
-      title: "📝",
-      message: "Video summarized!",
+      title: SUCCESS_SUMMARIZING_VIDEO.title,
+      message: SUCCESS_SUMMARIZING_VIDEO.message,
     });
     setSummary(result.data.choices[0].message?.content);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     showToast({
       style: Toast.Style.Failure,
-      title: "🚨",
+      title: ERROR_SUMMARIZING_VIDEO.title,
       message: error.message,
     });
     console.error(error.request.res);
