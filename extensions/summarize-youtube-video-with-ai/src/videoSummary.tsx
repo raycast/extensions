@@ -1,21 +1,25 @@
+import React from "react";
 import { Action, ActionPanel, Detail, Toast, showToast } from "@raycast/api";
 import getVideoData from "./utils/getVideoData";
-import useVideoSummary from "./hooks/useVideoSummary";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import type { LaunchProps } from "@raycast/api";
 import type { VideoDataTypes } from "./utils/getVideoData";
 import ytdl from "ytdl-core";
+import getVideoTranscript from "./utils/getVideoTranscript";
+import useChatGPTSummary from "./hooks/useChatGPTSummary";
+import useRaycastAISummary from "./hooks/useRaycastAISummary";
 
 interface VideoSummaryProps {
   video: string;
 }
 
 const VideoSummary = (props: LaunchProps<{ arguments: VideoSummaryProps }>) => {
-  const [videoData, setVideoData] = useState<VideoDataTypes>();
-  const [summary, setSummary] = useState<string | undefined>(undefined);
-  const [summaryIsLoading, setSummaryIsLoading] = useState<boolean>(false);
-
   const { video } = props.arguments;
+
+  const [videoData, setVideoData] = useState<VideoDataTypes>();
+  const [summary, setSummary] = useState<string | undefined>();
+  const [summaryIsLoading, setSummaryIsLoading] = useState<boolean>(false);
+  const [transcript, setTranscript] = useState<string | undefined>();
 
   if (!ytdl.validateURL(video) && !ytdl.validateID(video)) {
     showToast({
@@ -28,13 +32,14 @@ const VideoSummary = (props: LaunchProps<{ arguments: VideoSummaryProps }>) => {
 
   useEffect(() => {
     getVideoData(video).then(setVideoData);
-    useVideoSummary({ video, setSummaryIsLoading, setSummary });
+    getVideoTranscript(video).then(setTranscript);
+  }, [video]);
 
-    return () => {
-      setVideoData(undefined);
-      setSummary(undefined);
-    };
-  }, []);
+  useEffect(() => {
+    if (transcript === undefined) return;
+    useChatGPTSummary({ transcript, setSummaryIsLoading, setSummary });
+    useRaycastAISummary({ transcript, setSummaryIsLoading, setSummary });
+  }, [transcript]);
 
   const markdown = summary
     ? `${summary}

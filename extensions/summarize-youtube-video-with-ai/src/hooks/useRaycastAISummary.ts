@@ -9,16 +9,13 @@ type GetRaycastAISummaryProps = {
   setSummary: React.Dispatch<React.SetStateAction<string | undefined>>;
 };
 
-async function fetchAiAnswer(aiInstructions: string) {
-  return await AI.ask(aiInstructions);
-}
+const useRaycastAISummary = async ({ transcript, setSummaryIsLoading, setSummary }: GetRaycastAISummaryProps) => {
   const preferences = getPreferenceValues();
 
   if (preferences.chosenAi !== "raycastai") {
     return;
   }
 
-const useRaycastAISummary = ({ transcript, setSummaryIsLoading, setSummary }: GetRaycastAISummaryProps) => {
   let temporarySummary = "";
 
   // if (!environment.canAccess(AI)) {
@@ -35,25 +32,30 @@ const useRaycastAISummary = ({ transcript, setSummaryIsLoading, setSummary }: Ge
     showToast({
       style: Toast.Style.Animated,
       title: "❗",
-      message: "That's a long video, hold on.",
+      message: "Quite a lot of information in that video, hold on.",
     });
 
+    setSummaryIsLoading(true);
+
     const splitTranscripts = splitTranscript(transcript, RAYCASTAI_SUMMARY_MAX_CHARS);
+
+    const fetchAiAnswer = async (aiInstructions: string) => {
+      return await AI.ask(aiInstructions);
+    };
 
     for (const summaryBlock of splitTranscripts) {
       const index = splitTranscripts.indexOf(summaryBlock) + 1;
       const aiInstructions = `
-        Summarize this transcription of a youtube video.
-        The transcription is split into parts and this is part ${index} of ${splitTranscripts.length}.
-        Be as concise as possible.
-        Do not use more then ${RAYCASTAI_SUMMARY_MAX_CHARS / splitTranscripts.length} characters.
-        
-        Here is the transcript: ${summaryBlock}`;
+      Summarize this transcription of a youtube video.
+      The transcription is split into parts and this is part ${index} of ${splitTranscripts.length}.
+      Be as concise as possible.
+      Do not use more then ${RAYCASTAI_SUMMARY_MAX_CHARS / splitTranscripts.length} characters.
+      
+      Here is the transcript: ${summaryBlock}`;
 
-      const result = fetchAiAnswer(aiInstructions);
+      const result = await fetchAiAnswer(aiInstructions);
 
       temporarySummary += "\n" + result;
-      console.log("temporarySummary", temporarySummary);
     }
   }
 
@@ -68,13 +70,19 @@ const useRaycastAISummary = ({ transcript, setSummaryIsLoading, setSummary }: Ge
   });
 
   raycastSummary.on("data", (data) => {
-    console.log("data", data);
-    setSummaryIsLoading(true);
-    setSummary((result) => result + data);
+    setSummary((result) => {
+      if (result === undefined) return data;
+      return result + data;
+    });
   });
 
   raycastSummary.finally(() => {
     setSummaryIsLoading(false);
+    showToast({
+      style: Toast.Style.Success,
+      title: "📝",
+      message: "Video summarized!",
+    });
   });
 
   return null;
