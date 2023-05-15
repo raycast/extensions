@@ -1,20 +1,16 @@
 import { useState, useEffect } from "react";
-
-import { List, Icon, Action, ActionPanel, Detail, useNavigation } from "@raycast/api";
+import { List, Icon, Action, ActionPanel, Detail } from "@raycast/api";
 import { SelectTerminalApp } from "./SelectTermnialApp";
-import { RenameTmuxSession } from "./RenameTmuxSession";
-import { deleteSession, getAllSession, switchToSession } from "./utils/sessionUtils";
 import { checkTerminalSetup } from "./utils/terminalUtils";
+import { getAllWindow, switchToWindow, TmuxWindow, deleteWindow } from "./utils/windowUtils";
 
-export default function Command() {
-  const [sessions, setSessions] = useState<Array<string>>([]);
+export default function ManageTmuxWindows() {
+  const [windows, setWindows] = useState<Array<TmuxWindow & { keyIndex: number }>>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isTerminalSetup, setIsTerminalSetup] = useState(false);
 
-  const { push } = useNavigation();
-
-  const setupListSesssions = () => {
-    getAllSession((error, stdout) => {
+  const setupListWindows = () => {
+    getAllWindow((error, stdout) => {
       if (error) {
         console.error(`exec error: ${error}`);
         setIsLoading(false);
@@ -24,7 +20,19 @@ export default function Command() {
       const lines = stdout.trim().split("\n");
 
       if (lines?.length > 0) {
-        setSessions(lines);
+        let keyIndex = 0;
+        const windows = lines.map((line) => {
+          const [sessionName, windowName, windowIndex] = line.split(":");
+          keyIndex += 1; // NOTE: using key index for easily delete and remove window outside the original list
+          return {
+            keyIndex,
+            sessionName,
+            windowIndex: parseInt(windowIndex),
+            windowName,
+          };
+        });
+
+        setWindows(windows);
       }
 
       setIsLoading(false);
@@ -51,33 +59,29 @@ export default function Command() {
 
     // List down all tmux session
     setIsLoading(true);
-    setupListSesssions();
+    setupListWindows();
   }, [isTerminalSetup]);
 
   return (
     <>
       <List isLoading={isLoading}>
-        {sessions.map((session, index) => (
+        {windows.map((window, index) => (
           <List.Item
             key={index}
-            icon={Icon.Terminal}
-            title={session}
+            icon={Icon.Window}
+            title={window.windowName}
+            subtitle={window.sessionName}
             actions={
               <ActionPanel>
-                <Action title="Switch to Selected Session" onAction={() => switchToSession(session, setIsLoading)} />
+                <Action title="Switch To Selected Window" onAction={() => switchToWindow(window, setIsLoading)} />
                 <Action
-                  title="Delete This Session"
+                  title="Delete This Window"
                   onAction={() =>
-                    deleteSession(session, setIsLoading, () => setSessions(sessions.filter((s) => s !== session)))
+                    deleteWindow(window, setIsLoading, () =>
+                      setWindows(windows.filter((w) => w.keyIndex !== window.keyIndex))
+                    )
                   }
                   shortcut={{ modifiers: ["cmd"], key: "d" }}
-                />
-                <Action
-                  title="Rename This Session"
-                  onAction={() => {
-                    push(<RenameTmuxSession session={session} callback={() => setupListSesssions()} />);
-                  }}
-                  shortcut={{ modifiers: ["cmd"], key: "r" }}
                 />
               </ActionPanel>
             }
