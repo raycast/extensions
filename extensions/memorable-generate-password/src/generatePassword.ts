@@ -41,7 +41,7 @@ interface PasswordData {
 const generatePassword = async (wordCount = 3, passwordCount = 1, maxIterations = 1000): Promise<PasswordData[]> => {
   const words = fs.readFileSync(filePath, "utf8").split("\n");
   const passwordData: PasswordData[] = [];
-console.log(wordCount, passwordCount);
+  console.log(wordCount, passwordCount);
   for (let c = 0; c < passwordCount; c++) {
     let password = "";
     let plaintext = "";
