@@ -1,0 +1,48 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "transfer",
+  "title": "Transfer",
+  "description": "Easy file sharing via transfer.sh. Upload a selected file and its remote URL will be copied to your clipboard.",
+  "author": "kgrhartlage",
+  "license": "MIT",
+  "icon": "icon.png",
+  "categories": [
+    "Data",
+    "Productivity",
+    "Web"
+  ],
+  "keywords": [
+    "transfer",
+    "upload",
+    "file"
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "format": "prettier --write 'src/**/*.{ts,tsx}'",
+    "lint": "ray lint && eslint --fix 'src/**/*.{ts,tsx}'",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.51.1",
+    "run-applescript": "^6.1.0"
+  },
+  "devDependencies": {
+    "@labforward/config": "^0.1.3",
+    "@labforward/eslint-config-node": "^0.1.1",
+    "@raycast/eslint-config": "^1.0.5",
+    "eslint": "^8.40.0",
+    "prettier": "^2.8.8",
+    "typescript": "^4.9.5"
+  },
+  "commands": [
+    {
+      "name": "index",
+      "title": "Upload File",
+      "subtitle": "transfer.sh",
+      "description": "Easy file sharing via transfer.sh. Upload a selected file and its remote URL will be copied to your clipboard.",
+      "mode": "no-view"
+    }
+  ]
+}
