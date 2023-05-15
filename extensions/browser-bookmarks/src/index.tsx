@@ -149,6 +149,10 @@ export default function Command() {
 
   const filteredFolders = useMemo(() => {
     return folders.filter((item) => {
+      if (!item.title) {
+        return false;
+      }
+
       return bookmarks.some((bookmark) => bookmark.browser === item.browser && bookmark.folder.includes(item.title));
     });
   }, [folders, bookmarks]);
@@ -246,7 +250,7 @@ export default function Command() {
             icon={getFavicon(item.url)}
             title={item.title}
             keywords={[item.domain, ...item.folder.split("/")]}
-            accessories={[{ icon: Icon.Folder, tag: item.folder }]}
+            accessories={item.folder ? [{ icon: Icon.Folder, tag: item.folder }] : []}
             actions={
               <ActionPanel>
                 <Action.OpenInBrowser url={item.url} onOpen={() => updateFrecency(item)} />
