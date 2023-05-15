@@ -1,5 +1,9 @@
 # Arc Changelog
 
+## [Improvements] - 2023-05-15
+
+- Expand Search Arc suggestions to available engines
+
 ## [Improvements] - 2023-03-08
 
 - Add a new command to open little arc.
