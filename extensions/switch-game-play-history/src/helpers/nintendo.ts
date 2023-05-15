@@ -31,12 +31,12 @@ const getAuthenticationUrl = () => {
 };
 
 export const useToken = () => {
-  const sessionToken = getPreferenceValues<{ NINTENDO_SESSION_TOKEN?: string }>().NINTENDO_SESSION_TOKEN;
+  const { NINTENDO_SESSION_TOKEN } = getPreferenceValues<{ NINTENDO_SESSION_TOKEN?: string }>();
   const cache = getCache<IToken & { session_token: string }>("TOKEN", {
     expiration: 800,
   });
   let cachedToken = cache.get();
-  if (cachedToken && cachedToken.session_token !== sessionToken) {
+  if (cachedToken && cachedToken.session_token !== NINTENDO_SESSION_TOKEN) {
     cachedToken = undefined;
     cache.remove();
   }
@@ -48,10 +48,10 @@ export const useToken = () => {
     },
     body: JSON.stringify({
       client_id: NINTENDO_CLIENT_ID,
-      session_token: sessionToken,
+      session_token: NINTENDO_SESSION_TOKEN,
       grant_type: "urn:ietf:params:oauth:grant-type:jwt-bearer-session-token",
     }),
-    execute: !cachedToken && !!sessionToken,
+    execute: !cachedToken && !!NINTENDO_SESSION_TOKEN,
     keepPreviousData: false,
     initialData: cachedToken,
     onError: (error) => {
@@ -61,8 +61,8 @@ export const useToken = () => {
       showToast(Toast.Style.Animated, "Fetching Token");
     },
     onData: (data) => {
-      if (sessionToken && data.access_token !== cachedToken?.access_token) {
-        cache.set({ ...data, session_token: sessionToken });
+      if (NINTENDO_SESSION_TOKEN && data.access_token !== cachedToken?.access_token) {
+        cache.set({ ...data, session_token: NINTENDO_SESSION_TOKEN });
       }
     },
   });
@@ -105,7 +105,7 @@ export const usePlayHistories = () => {
       onData: async (data) => {
         cache.set(data);
         await showToast(Toast.Style.Success, "Success");
-        if (SYNC_TO_NOTION) await syncDataToNotionDatabase(data.playHistories);
+        if (SYNC_TO_NOTION && data.playHistories) await syncDataToNotionDatabase(data.playHistories);
       },
     }
   );

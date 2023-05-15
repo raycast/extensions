@@ -1,7 +1,6 @@
 import { Client } from "@notionhq/client";
 import { IPlayHistory } from "../types/nintendo";
 import { Toast, getPreferenceValues, showToast } from "@raycast/api";
-let notionClient: Client;
 const PROPERTY_KEYS = [
   "titleName",
   "titleId",
@@ -12,19 +11,20 @@ const PROPERTY_KEYS = [
   "totalPlayedDays",
   "totalPlayedMinutes",
 ] as const;
+
+let notionClient: Client;
 const getNotionClient = () => {
   if (notionClient) return notionClient;
   const { NOTION_API_KEY } = getPreferenceValues<{
     NOTION_API_KEY?: string;
   }>();
   if (!NOTION_API_KEY) {
-    showToast(Toast.Style.Failure, "Notion API Key is not set");
     throw new Error("Notion API Key is not set");
   }
   notionClient = new Client({ auth: NOTION_API_KEY });
   return notionClient;
 };
-const updateProperties = async (databaseID: string) => {
+const checkProperties = async (databaseID: string) => {
   const notionClient = getNotionClient();
   const { properties } = await notionClient.databases.retrieve({
     database_id: databaseID,
@@ -170,64 +170,88 @@ const updatePage = async (pageId: string, data: IPlayHistory) => {
 export const syncDataToNotionDatabase = async (data: IPlayHistory[]) => {
   let successCount = 0;
   let failedCount = 0;
+  let totalCount = 0;
+  let notionClient: Client;
+
+  // Start Sync
   const toast = await showToast(Toast.Style.Animated, "Syncing data to Notion");
+
+  // Get Notion Client
+  try {
+    notionClient = getNotionClient();
+  } catch (error: any) {
+    toast.style = Toast.Style.Failure;
+    toast.title = error.message;
+    return;
+  }
+
+  // Check Notion Database ID
   const { NOTION_DATABASE_ID } = getPreferenceValues<{
     NOTION_DATABASE_ID?: string;
   }>();
-  const notionClient = getNotionClient();
-  if (!notionClient) return;
   if (!NOTION_DATABASE_ID) {
     toast.style = Toast.Style.Failure;
     toast.title = "Notion Database ID is not set";
     return;
   }
-  await updateProperties(NOTION_DATABASE_ID);
-  const { results } = await notionClient.databases.query({
-    database_id: NOTION_DATABASE_ID,
-  });
-  const pagesToCreate = data.filter((item) => {
-    const page = results.find((result) => {
-      if ("properties" in result && "rich_text" in result.properties.titleId)
-        return result.properties.titleId.rich_text[0].plain_text === item.titleId;
-    });
-    if (!page) return true;
-  });
-  const pagesToUpdate = data.reduce<{ pageId: string; data: IPlayHistory }[]>((pages, item) => {
-    const page = results.find((result) => {
-      if (
-        "properties" in result &&
-        "rich_text" in result.properties.titleId &&
-        "number" in result.properties.totalPlayedMinutes
-      ) {
-        return (
-          result.properties.titleId.rich_text[0].plain_text === item.titleId &&
-          result.properties.totalPlayedMinutes.number !== item.totalPlayedMinutes
-        );
-      }
-    });
-    if (page) {
-      pages.push({ pageId: page.id, data: item });
-    }
-    return pages;
-  }, []);
+  try {
+    // Check Database Properties
+    await checkProperties(NOTION_DATABASE_ID);
 
-  const totalCount = pagesToCreate.length + pagesToUpdate.length;
-  const promises = [
-    ...pagesToCreate.map((item) => createPage(NOTION_DATABASE_ID, item)),
-    ...pagesToUpdate.map((item) => updatePage(item.pageId, item.data)),
-  ];
-  promises.forEach((promise) => {
-    promise
-      .then(() => {
-        successCount++;
-        toast.message = `( ${successCount} / ${totalCount} )`;
-      })
-      .catch(() => {
-        failedCount++;
+    // Diff Database
+    const { results } = await notionClient.databases.query({
+      database_id: NOTION_DATABASE_ID,
+    });
+    const pagesToCreate = data.filter((item) => {
+      const page = results.find((result) => {
+        if ("properties" in result && "rich_text" in result.properties.titleId)
+          return result.properties.titleId.rich_text[0].plain_text === item.titleId;
       });
-  });
-  await Promise.all(promises);
+      if (!page) return true;
+    });
+    const pagesToUpdate = data.reduce<{ pageId: string; data: IPlayHistory }[]>((pages, item) => {
+      const page = results.find((result) => {
+        if (
+          "properties" in result &&
+          "rich_text" in result.properties.titleId &&
+          "number" in result.properties.totalPlayedMinutes
+        ) {
+          return (
+            result.properties.titleId.rich_text[0].plain_text === item.titleId &&
+            result.properties.totalPlayedMinutes.number !== item.totalPlayedMinutes
+          );
+        }
+      });
+      if (page) {
+        pages.push({ pageId: page.id, data: item });
+      }
+      return pages;
+    }, []);
+    totalCount = pagesToCreate.length + pagesToUpdate.length;
 
+    // Sync to Database
+    const promises = [
+      ...pagesToCreate.map((item) => createPage(NOTION_DATABASE_ID, item)),
+      ...pagesToUpdate.map((item) => updatePage(item.pageId, item.data)),
+    ];
+    promises.forEach((promise) => {
+      promise
+        .then(() => {
+          successCount++;
+          toast.message = `( ${successCount} / ${totalCount} )`;
+        })
+        .catch(() => {
+          failedCount++;
+        });
+    });
+    await Promise.all(promises);
+  } catch (error: any) {
+    toast.style = Toast.Style.Failure;
+    toast.title = error.message;
+    return;
+  }
+
+  // End Sync
   toast.style = Toast.Style.Success;
   if (totalCount === 0) {
     toast.title = `No data to sync`;
@@ -236,5 +260,4 @@ export const syncDataToNotionDatabase = async (data: IPlayHistory[]) => {
   }
   toast.title = `Synced ${successCount} data to Notion`;
   toast.message = failedCount ? `${failedCount} failed` : undefined;
-  return;
 };
