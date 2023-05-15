@@ -1,8 +1,9 @@
 # Browser Bookmarks Changelog
 
-## [Fix Safari to show root folders]
+## [Various Fixes]
 
-Support root bookmark folders for Safari
+- Support root bookmark folders for Safari
+- If the user has only one browser, use it by default
 
 ## [Support for Edge] - 2023-05-05
 
