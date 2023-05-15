@@ -18,7 +18,9 @@ declare namespace Preferences {
   /** Choose AI - Choose between Raycast AI or ChatGPT */
   "chosenAi": "raycastai" | "chatgpt",
   /** OpenAI API Token - Your OpenAI API Token. Required if you choose ChatGPT as your AI. */
-  "openaiApiToken"?: string
+  "openaiApiToken"?: string,
+  /** Language - Define the language which the AI should use to summarize the video. */
+  "language"?: string
 }
 }
 

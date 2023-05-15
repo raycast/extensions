@@ -70,7 +70,9 @@ const useChatGPTSummary = async ({ transcript, setSummaryIsLoading, setSummary }
 
   openAiInstructions +=
     transcript &&
-    `Summarize the following transcription of a youtube video as a list of the most important points each starting with a fitting emoji. Ignore mentions of video sponsors.
+    `Summarize the following transcription of a youtube video as a list of the most important points each starting with a fitting emoji. Ignore mentions of video sponsors. Answer in ${
+      preferences.language
+    }.
 
     Format:
     [Emoji] [List Item] [\n\n]

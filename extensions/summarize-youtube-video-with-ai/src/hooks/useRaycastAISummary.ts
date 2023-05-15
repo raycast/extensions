@@ -65,7 +65,9 @@ const useRaycastAISummary = async ({ transcript, setSummaryIsLoading, setSummary
     }
   }
 
-  const aiInstructions = `Summarize the following transcription of a youtube video as a list of the most important points each starting with a fitting emoji. Ignore mentions of video sponsors.
+  const aiInstructions = `Summarize the following transcription of a youtube video as a list of the most important points each starting with a fitting emoji. Ignore mentions of video sponsors. Answer in ${
+    preferences.language
+  }.
   
   Format:
   [Emoji] [List Item] [\n\n]

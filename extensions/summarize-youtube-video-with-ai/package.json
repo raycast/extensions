@@ -51,6 +51,14 @@
           "type": "password",
           "default": "",
           "required": false
+        },
+        {
+          "name": "language",
+          "title": "Language",
+          "description": "Define the language which the AI should use to summarize the video.",
+          "type": "textfield",
+          "default": "english",
+          "required": false
         }
       ]
     }
