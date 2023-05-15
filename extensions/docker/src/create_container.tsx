@@ -37,30 +37,31 @@ export default function CreateContainer({ imageId }: Props) {
     }));
   }, []);
 
+  const ContainerPorts = useMemo(() => Object.keys(imageInfo?.Config?.ExposedPorts || {}), [imageInfo]);
+
   const handleFormSubmit = useCallback(
     (values: FormValues) => {
       const { name, port, volume, env } = values;
-
       const splitValues = (value: string) => value.split(',');
 
-      const createPortBindings = (ports: string[]) =>
-        ports.reduce(
-          (bindings, port) => ({
+      const createPortBindings = (hostPorts: string[]) => {
+        return ContainerPorts.slice(0, hostPorts.length).reduce((bindings, containerPort, index) => {
+          return {
             ...bindings,
-            [port]: [
+            [containerPort]: [
               {
-                HostPort: port,
+                HostPort: hostPorts[index],
               },
             ],
-          }),
-          {},
-        );
+          };
+        }, {});
+      };
 
       const options: ContainerCreateOptions = {
         Image: imageInfo?.RepoTags[0],
         name,
         HostConfig: {
-          PortBindings: port ? createPortBindings(splitValues(port)) : undefined,
+          PortBindings: port ? createPortBindings(splitValues(port)) : createPortBindings(ContainerPorts),
           Binds: volume ? splitValues(volume) : undefined,
         },
         Env: env ? splitValues(env) : undefined,
@@ -82,21 +83,18 @@ export default function CreateContainer({ imageId }: Props) {
     },
     [createContainer, imageInfo?.RepoTags],
   );
-
   const portFields = useMemo(() => {
-    const ports = Object.keys(imageInfo?.Config?.ExposedPorts || {});
-
     return (
       <Form.TextField
         title="Port"
         id="port"
-        placeholder="HostPort:ContainerPort"
-        info="multiple ports can be separated by comma"
-        value={ports.join(',')}
+        placeholder={ContainerPorts.join(',')}
+        info="default ports are used if no ports are provided"
+        value={formValues.port}
         onChange={(value) => handleInputChange('port', value)}
       />
     );
-  }, [imageInfo, handleInputChange]);
+  }, [imageInfo, handleInputChange, formValues.port]);
 
   return (
     <Form
