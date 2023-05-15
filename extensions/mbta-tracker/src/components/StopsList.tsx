@@ -37,6 +37,13 @@ export const StopsList = ({ route, directionId }: Props): JSX.Element => {
                   />
                 }
               />
+              <Action
+                title="Add Favorite"
+                icon={Icon.Star}
+                onAction={() => {
+                  addFavoriteStop(route, directionId, stop);
+                }}
+              />
             </ActionPanel>
           }
         />
