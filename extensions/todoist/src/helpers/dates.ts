@@ -1,12 +1,17 @@
-import { Task } from "@doist/todoist-api-typescript";
 import { addDays, format, formatISO, isThisYear, isBefore, isSameDay } from "date-fns";
 
-export function isRecurring(task: Task): boolean {
-  return task.due?.isRecurring || false;
+import { Task } from "../api";
+
+export function isRecurring(task: Task) {
+  return task.due?.is_recurring || false;
 }
 
-export function isExactTimeTask(task: Task): boolean {
-  return !!task.due?.datetime;
+export function isExactTimeTask(task: Task) {
+  if (!task.due) {
+    return false;
+  }
+
+  return task.due.date.includes("T");
 }
 
 /**
@@ -25,7 +30,7 @@ export function isOverdue(date: Date) {
   return isBefore(date, getToday());
 }
 
-export function displayDueDate(dateString: string): string {
+export function displayDueDate(dateString: string) {
   const date = new Date(dateString);
 
   if (isOverdue(date)) {
@@ -53,6 +58,11 @@ export function displayDueDate(dateString: string): string {
   }
 
   return format(date, "dd MMMM yyy");
+}
+
+export function displayDueDateTime(dateString: string) {
+  const date = displayDueDate(dateString);
+  return `${date} ${format(new Date(dateString), "HH:mm")}`;
 }
 
 export function getAPIDate(date: Date): string {
