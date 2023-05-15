@@ -16,7 +16,7 @@ type FormValues = {
   env: string;
 };
 
-export default function CrateContainer({ imageId }: Props) {
+export default function CreateContainer({ imageId }: Props) {
   const docker = useDockerode();
   const { useImageInfo, useCreateContainer } = useDocker(docker);
   const { imageInfo, isLoading } = useImageInfo({ Id: imageId });

@@ -3,7 +3,6 @@ import { DockerState } from './docker';
 import { containerName, formatContainerDetailMarkdown } from './docker/container';
 import { formatContainerError } from './docker/error';
 import { withToast } from './ui/toast';
-import { randomUUID } from 'crypto';
 export default function ContainerDetail({ docker, containerId }: { docker: DockerState; containerId: string }) {
   const { isLoading, containerInfo, startContainer, restartContainer, stopContainer, removeContainer } =
     docker.useContainerInfo(containerId);
@@ -22,26 +21,21 @@ export default function ContainerDetail({ docker, containerId }: { docker: Docke
               <Detail.Metadata.TagList.Item
                 text={containerInfo.State.Status}
                 color={containerInfo.State.Running ? Color.Green : Color.Yellow}
-                key={randomUUID()}
               />
             </Detail.Metadata.TagList>
             <Detail.Metadata.TagList title="Command">
-              <Detail.Metadata.TagList.Item text={containerInfo.Config.Cmd?.join(' ')} key={randomUUID()} />
+              <Detail.Metadata.TagList.Item text={containerInfo.Config.Cmd?.join(' ')} />
             </Detail.Metadata.TagList>
             {containerInfo.Config.ExposedPorts && (
               <Detail.Metadata.TagList title="Ports">
-                {Object.keys(containerInfo.Config.ExposedPorts).map((p) => (
-                  <Detail.Metadata.TagList.Item text={p} color={Color.PrimaryText} key={randomUUID()} />
+                {Object.keys(containerInfo.Config.ExposedPorts).map((p, idx) => (
+                  <Detail.Metadata.TagList.Item text={p} color={Color.PrimaryText} key={idx} />
                 ))}
               </Detail.Metadata.TagList>
             )}
             <Detail.Metadata.Separator />
             {containerInfo.Created && (
-              <Detail.Metadata.Label
-                title="Created at"
-                text={new Date(containerInfo.Created).toLocaleString()}
-                key={randomUUID()}
-              />
+              <Detail.Metadata.Label title="Created at" text={new Date(containerInfo.Created).toLocaleString()} />
             )}
           </Detail.Metadata>
         )
