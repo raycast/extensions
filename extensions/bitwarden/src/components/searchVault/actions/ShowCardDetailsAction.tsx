@@ -13,10 +13,10 @@ import {
 import ActionWithReprompt from "~/components/actions/ActionWithReprompt";
 import { useSelectedVaultItem } from "~/components/searchVault/context/vaultItem";
 import useGetUpdatedVaultItem from "~/components/searchVault/utils/useGetUpdatedVaultItem";
-import { Card, Identity } from "~/types/vault";
+import { Card } from "~/types/vault";
 import { getCardDetailsCopyValue, getCardDetailsMarkdown } from "~/utils/cards";
 import { captureException } from "~/utils/development";
-import { IDENTITY_KEY_LABEL } from "~/constants/labels";
+import { CARD_KEY_LABEL } from "~/constants/labels";
 import { getTransientCopyPreference } from "~/utils/preferences";
 import { capitalize } from "~/utils/strings";
 
@@ -69,7 +69,7 @@ function DetailsScreen({ itemName, card }: { itemName: string; card: Card }) {
             return (
               <Action
                 key={`${index}-${fieldKey}`}
-                title={`Copy ${IDENTITY_KEY_LABEL[fieldKey as keyof Identity] ?? capitalize(fieldKey)}`}
+                title={`Copy ${CARD_KEY_LABEL[fieldKey as keyof Card] ?? capitalize(fieldKey)}`}
                 icon={Icon.Clipboard}
                 onAction={handleCopyField(content)}
               />
