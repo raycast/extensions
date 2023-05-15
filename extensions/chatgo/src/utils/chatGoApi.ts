@@ -2,15 +2,22 @@ import { LocalStorage, Toast, getPreferenceValues, openExtensionPreferences, sho
 import {
   addMyTemplateService,
   chat,
-  getAccountBalance,
+  clone2MyTemplateService,
+  createTemplateService,
+  deleteMyTemplateService,
+  getAccountBalanceService,
   getFavoriteListService,
   getImagesService,
+  getMemberInfoService,
   getMyTemplateListService,
+  getMyTemplateTagsService,
   getPromptTemplatesService,
   loginAccount,
+  pinTemplateService,
   removeMyTemplateService,
+  updateMyTemplateService,
 } from "../service";
-import { ChatParams, GetImagesOps, Message, TemplateModel } from "../type";
+import { ChatParams, GetImagesOps, Message, TemplateBase, TemplateBaseOps, TemplateModel } from "../type";
 
 class ChatGoAPi {
   token: string | undefined;
@@ -33,8 +40,8 @@ class ChatGoAPi {
     })();
   }
 
-  public getMyTemplateList = async (refreash = false) => {
-    if (refreash) {
+  public getMyTemplateList = async (refresh = false) => {
+    if (refresh) {
       return await this.getMineTPL();
     }
     return this.templateList.length >= 1 ? this.templateList : await this.getMineTPL();
@@ -47,28 +54,13 @@ class ChatGoAPi {
     }
   ) => {
     const { data, model, onClose, onMessage, onError } = options;
-    const token = await this.getToken();
-    // console.log("getToken", token);
-    // const templateList = await this.getMyTemplateList();
-    if (!token) {
-      console.log("token 缺失");
-      return;
-    }
+    const token = await this.checkToken();
     const defaultOps = {
       templateId: model.template_id,
       templateName: model.template_name,
       systemPrompt: model.content,
       temperature: model.temperature,
     };
-    // if (templateList.length) {
-    //   const { content, temperature, template_name: templateName, template_id: templateId } = templateList[0];
-    //   defaultOps = {
-    //     templateId,
-    //     templateName,
-    //     systemPrompt: content,
-    //     temperature,
-    //   };
-    // }
     await chat({
       data: {
         ...defaultOps,
@@ -82,52 +74,84 @@ class ChatGoAPi {
   };
 
   public getImages = async (ops: GetImagesOps) => {
-    const token = await this.getToken();
-    if (!token) {
-      console.log("token 缺失");
-      return;
-    }
+    const token = await this.checkToken();
     return getImagesService(ops, token);
   };
 
-  public getPromptTemplates = async (ops: { name?: string; tag?: string }) => {
-    const token = await this.getToken();
-    if (!token) {
-      console.log("token 缺失");
-      return;
-    }
+  public getPromptTemplates = async (ops: { name?: string; tag?: string; type?: 1 | 2 | 3 }) => {
+    const token = await this.checkToken();
     return getPromptTemplatesService(ops, token);
   };
 
   public getFavoriteList = async (ops: { name?: string }) => {
-    const token = await this.getToken();
-    if (!token) {
-      console.log("token 缺失");
-      return;
-    }
+    const token = await this.checkToken();
     return getFavoriteListService(ops, token);
   };
 
   public addTemplateForMine = async (templateId: number) => {
-    const token = await this.getToken();
-    if (!token) {
-      console.log("token 缺失");
-      return;
-    }
+    const token = await this.checkToken();
     return addMyTemplateService(templateId, token);
   };
 
   public removeMyTemplate = async (id: number) => {
-    const token = await this.getToken();
-    if (!token) {
-      console.log("token 缺失");
-      return;
-    }
+    const token = await this.checkToken();
     return removeMyTemplateService(id, token);
+  };
+
+  public moveUpMyFavoriteTPl = async (id: number) => {
+    const token = await this.checkToken();
+    return pinTemplateService(id, token);
+  };
+
+  public getMyTemplateTags = async () => {
+    const token = await this.checkToken();
+    return getMyTemplateTagsService(token);
+  };
+
+  public updateMyTemplate = async (ops: TemplateBaseOps) => {
+    const token = await this.checkToken();
+    return updateMyTemplateService(ops, token);
+  };
+  public createTemplate = async (ops: TemplateBaseOps) => {
+    const token = await this.checkToken();
+    return createTemplateService(ops, token);
+  };
+  public clone2MyTemplate = async (id: number) => {
+    const token = await this.checkToken();
+    return clone2MyTemplateService(id, token);
+  };
+  public deleteMyTemplate = async (id: number) => {
+    const token = await this.checkToken();
+    return deleteMyTemplateService(id, token);
+  };
+  public getMemberInfo = async () => {
+    const token = await this.checkToken();
+    return getMemberInfoService(token);
   };
 
   private getToken = async () => {
     return this.token || (await this.login());
+  };
+
+  private checkToken = async () => {
+    const token = await this.getToken();
+    return new Promise<string>((resolve, reject) => {
+      if (!token) {
+        const msg = "Token went wrong, Please retry again";
+        showToast({
+          style: Toast.Style.Failure,
+          title: msg,
+        }).then();
+        reject(msg);
+        return;
+      }
+      resolve(token);
+    });
+  };
+
+  public getAccountBalance = async () => {
+    const token = await this.checkToken();
+    return getAccountBalanceService(token);
   };
 
   private checkAccountBalance = async () => {
@@ -138,7 +162,7 @@ class ChatGoAPi {
         await this.checkAccountBalance();
         return;
       }
-      const response = await getAccountBalance(token);
+      const response = await this.getAccountBalance();
       const { data } = response;
       if (data.code === "000000") {
         const { token_balance: tokenBalance } = data.data;
@@ -149,6 +173,7 @@ class ChatGoAPi {
         await this.login();
         await this.checkAccountBalance();
       }
+      await Promise.resolve(data);
     } catch (error: any) {
       await showToast({
         title: error?.message || "Login Failed, Please check you email and password",
@@ -164,7 +189,7 @@ class ChatGoAPi {
       const e = email || this.email;
       const p = password || this.password;
       if (!e || !p) {
-        throw new Error("Email or Password is lost, Plaease Check!");
+        throw new Error("Email or Password is lost, Please Check!");
       }
       const response = await loginAccount({
         email: e,
@@ -175,14 +200,13 @@ class ChatGoAPi {
         const { token, expiresTime } = data.data;
         this.token = token;
         this.expiresTime = expiresTime;
-        LocalStorage.setItem("token", token);
-        LocalStorage.setItem("expiresTime", expiresTime);
+        LocalStorage.setItem("token", token).then();
+        LocalStorage.setItem("expiresTime", expiresTime).then();
         return Promise.resolve(this.token);
       } else {
         throw new Error(data.msg);
       }
     } catch (error: any) {
-      console.log("login error: ", error.message);
       await showToast({
         title: error?.message || "Login Failed, Please check you email and password",
         style: Toast.Style.Failure,
@@ -194,12 +218,7 @@ class ChatGoAPi {
 
   private getMineTPL = async () => {
     try {
-      const token = await this.getToken();
-      if (!token) {
-        await this.login();
-        await this.getMineTPL();
-        return;
-      }
+      const token = await this.checkToken();
       const { data } = await getMyTemplateListService(token);
       if (data.code === "000000") {
         this.templateList = data.data;
