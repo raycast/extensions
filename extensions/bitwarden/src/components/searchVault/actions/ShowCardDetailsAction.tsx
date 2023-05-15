@@ -39,7 +39,7 @@ function ShowCardDetailsAction() {
 
   return (
     <ActionWithReprompt
-      title="Show Card Details"
+      title="Show Card"
       icon={Icon.CreditCard}
       onAction={showCardDetails}
       repromptDescription={`Showing the card details of <${selectedItem.name}>`}

@@ -38,15 +38,21 @@ const VaultItemActionPanel = () => {
       <ActionPanel.Section>
         <ShowCardDetailsAction />
         <ShowIdentityDetailsAction />
+      </ActionPanel.Section>
+      <ActionPanel.Section title="Card Fields">
+        <CopyCardFieldsActions />
+      </ActionPanel.Section>
+      <ActionPanel.Section title="Identity Fields">
+        <CopyIdentityFieldsActions />
+      </ActionPanel.Section>
+      <ActionPanel.Section>
+        <CopyLoginUrisActions />
         <ShowNotesAction />
       </ActionPanel.Section>
-      <ActionPanel.Section>
-        <CopyCardFieldsActions />
-        <CopyIdentityFieldsActions />
-        <CopyLoginUrisActions />
+      <ActionPanel.Section title="Custom Fields">
         <CopyCustomFieldsActions />
       </ActionPanel.Section>
-      <ActionPanel.Section>
+      <ActionPanel.Section title="Vault Management">
         <SearchCommonActions />
       </ActionPanel.Section>
     </ActionPanel>
