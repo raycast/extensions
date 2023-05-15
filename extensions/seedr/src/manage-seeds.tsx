@@ -159,6 +159,7 @@ function DeleteAction(props: { cookie: string; id: string; type: string }) {
   return (
     <Action
       title="Delete"
+      style={Action.Style.Destructive}
       icon={Icon.Trash}
       onAction={async () => await deleteSeed(props.cookie, props.id, props.type)}
     />
