@@ -13,8 +13,8 @@ type ExtensionPreferences = {}
 declare type Preferences = ExtensionPreferences
 
 declare namespace Preferences {
-  /** Preferences accessible in the `videoSummary` command */
-  export type VideoSummary = ExtensionPreferences & {
+  /** Preferences accessible in the `summarizeVideo` command */
+  export type SummarizeVideo = ExtensionPreferences & {
   /** Choose AI - Choose between Raycast AI or ChatGPT */
   "chosenAi": "raycastai" | "chatgpt",
   /** OpenAI API Token - Your OpenAI API Token. Required if you choose ChatGPT as your AI. */
@@ -23,8 +23,8 @@ declare namespace Preferences {
 }
 
 declare namespace Arguments {
-  /** Arguments passed to the `videoSummary` command */
-  export type VideoSummary = {
+  /** Arguments passed to the `summarizeVideo` command */
+  export type SummarizeVideo = {
   /** Video URL or ID */
   "video": string
 }

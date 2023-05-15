@@ -74,7 +74,6 @@ const useChatGPTSummary = async ({ transcript, setSummaryIsLoading, setSummary }
 
     Format:
     [Emoji] [List Item] [\n\n]
-
     Here is the transcript: ${temporarySummary.length > 0 ? temporarySummary : transcript}`;
 
   try {

@@ -12,7 +12,7 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "videoSummary",
+      "name": "summarizeVideo",
       "title": "Summarize Video",
       "subtitle": "Summarize a Youtube Video with AI",
       "description": "Use AI to create a summary of any youtube video.",

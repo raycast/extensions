@@ -9,11 +9,11 @@ import getVideoTranscript from "./utils/getVideoTranscript";
 import useChatGPTSummary from "./hooks/useChatGPTSummary";
 import useRaycastAISummary from "./hooks/useRaycastAISummary";
 
-interface VideoSummaryProps {
+interface SummarizeVideoProps {
   video: string;
 }
 
-const VideoSummary = (props: LaunchProps<{ arguments: VideoSummaryProps }>) => {
+const SummarizeVideo = (props: LaunchProps<{ arguments: SummarizeVideoProps }>) => {
   const { video } = props.arguments;
 
   const [videoData, setVideoData] = useState<VideoDataTypes>();
@@ -82,4 +82,4 @@ const VideoSummary = (props: LaunchProps<{ arguments: VideoSummaryProps }>) => {
   );
 };
 
-export default VideoSummary;
+export default SummarizeVideo;
