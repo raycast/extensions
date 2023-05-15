@@ -1,6 +1,6 @@
 import { Toast, closeMainWindow, open } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
-import { checkReflect, reflectDownload } from "./util";
+import { checkReflect, reflectDownload } from "./utils";
 
 export default async () => {
   const reflectInstalled = await checkReflect();
