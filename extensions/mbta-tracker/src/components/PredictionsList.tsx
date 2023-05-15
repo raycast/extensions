@@ -27,8 +27,8 @@ export const PredictionsList = ({ stop, directionId, route, destination }: Props
     .flat();
 
   return (
-    <List isLoading={isLoading} navigationTitle={`Browse departures: ${stop.attributes.name}`}>
-      <List.Section title="Departures">
+    <List isLoading={isLoading} >
+      <List.Section title={stop.attributes.name}>
         {(data?.data || [])
           .filter((prediction) => prediction.attributes.departure_time !== null)
           .map((prediction) => (
