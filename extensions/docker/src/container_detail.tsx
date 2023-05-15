@@ -33,6 +33,17 @@ export default function ContainerDetail({ docker, containerId }: { docker: Docke
                 ))}
               </Detail.Metadata.TagList>
             )}
+            {containerInfo.NetworkSettings.Ports && (
+              <Detail.Metadata.TagList title="Host Ports">
+                {Object.keys(containerInfo.NetworkSettings.Ports).map((p, idx) => (
+                  <Detail.Metadata.TagList.Item
+                    text={containerInfo.NetworkSettings.Ports[p]?.map((p) => p.HostPort).join(', ') || 'None'}
+                    color={Color.PrimaryText}
+                    key={idx}
+                  />
+                ))}
+              </Detail.Metadata.TagList>
+            )}
             <Detail.Metadata.Separator />
             {containerInfo.Created && (
               <Detail.Metadata.Label title="Created at" text={new Date(containerInfo.Created).toLocaleString()} />
