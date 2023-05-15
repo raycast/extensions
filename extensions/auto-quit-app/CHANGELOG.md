@@ -1,6 +1,6 @@
 # Auto Quit App Changelog
 
-## [Support More Apps] - {PR_MERGE_DATE}
+## [Support More Apps] - 2023-05-15
 
 - Now you can set any app to quit automatically
 - Now you can set the time interval for the extension refresh
