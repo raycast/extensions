@@ -38,7 +38,7 @@
     },
     {
       "name": "TEAM_ID",
-      "type": "password",
+      "type": "textfield",
       "required": true,
       "title": "Team ID/s",
       "description": "Find this in the url after navigating to your team page. Add multiple Team IDs separated by a comma."
