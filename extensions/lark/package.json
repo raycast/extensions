@@ -25,7 +25,7 @@
   "preferences": [
     {
       "name": "domain",
-      "type": "textfield",
+      "type": "dropdown",
       "required": true,
       "title": "Type",
       "description": "Your app type",
