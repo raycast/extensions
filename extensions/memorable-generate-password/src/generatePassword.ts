@@ -38,7 +38,14 @@ const leetRules: Record<string, string[]> = {
 export interface PasswordData {
   password: string;
   plaintext: string;
+  strength: number;
 }
+
+const evaluatePasswordStrength = (password: string): number => {
+  const strengthRules = [/[a-z]/, /[A-Z]/, /\d/, /[^a-zA-Z0-9]/];
+
+  return strengthRules.reduce((strength, rule) => (rule.test(password) ? strength + 1 : strength), 0);
+};
 
 const generatePassword = async (
   wordCount: number,
@@ -58,7 +65,7 @@ const generatePassword = async (
         .map((letter) => shuffle(leetRules[letter] || [letter])[0])
         .join("");
 
-      if (/[a-z]/.test(password) && /[A-Z]/.test(password) && /\d/.test(password) && /[^a-zA-Z0-9]/.test(password)) {
+      if (evaluatePasswordStrength(password) >= 4) {
         break;
       }
 
@@ -66,7 +73,9 @@ const generatePassword = async (
       iterationCount++;
     }
 
-    passwordData.push({ password: password.replace(/ /g, "-"), plaintext });
+    const strength = evaluatePasswordStrength(password);
+
+    passwordData.push({ password: password.replace(/ /g, "-"), plaintext, strength });
   }
 
   return passwordData;

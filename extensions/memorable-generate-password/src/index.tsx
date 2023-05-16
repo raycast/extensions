@@ -21,9 +21,9 @@ export default function Command(props: LaunchProps<{ arguments: PasswordArgument
       const validWordCount = parseNumber(wordCount, 3);
       const validPasswordCount = parseNumber(passwordCount, 9);
 
-      const passwordList = await generatePassword(validWordCount, validPasswordCount);
+      const passwords = await generatePassword(validWordCount, validPasswordCount);
 
-      setPasswords(passwordList);
+      setPasswords(passwords);
     };
     fetchData();
   }, [wordCount, passwordCount]);
@@ -35,18 +35,16 @@ export default function Command(props: LaunchProps<{ arguments: PasswordArgument
 
   return (
     <List>
-      {passwords.map((passwordData, index) => (
+      {passwords.map((p, index) => (
         <List.Item
           key={index}
           icon={Icon.Key}
-          title={`${passwordData.password}`}
-          accessories={[{ text: `${passwordData.plaintext}`, icon: Icon.Eye }]}
+          title={`${p.password}`}
+          subtitle={`Strength: ${p.strength}/4`}
+          accessories={[{ text: `${p.plaintext}`, icon: Icon.Eye }]}
           actions={
             <ActionPanel title="Copy Password">
-              <Action
-                title={`Copy Password: ${passwordData.password}`}
-                onAction={() => handleCopyPassword(passwordData.password)}
-              />
+              <Action title={`Copy Password: ${p.password}`} onAction={() => handleCopyPassword(p.password)} />
             </ActionPanel>
           }
         />
