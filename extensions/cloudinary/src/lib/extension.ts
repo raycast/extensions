@@ -15,12 +15,6 @@ export function getUploadSuccessItems(asset: Asset) {
     fetch_format: "auto",
   });
 
-  const backgroundRemovedUrl = getImageUrl(asset.public_id, {
-    effect: "background_removal",
-    quality: "auto",
-    fetch_format: "auto",
-  });
-
   return [
     {
       title: "Optimized",
@@ -28,13 +22,6 @@ export function getUploadSuccessItems(asset: Asset) {
       assetUrl: optimizedUrl,
       previewUrl: optimizedUrl,
       detail: `![Uploaded Image Optimized](${optimizedUrl})`,
-    },
-    {
-      title: "Background Removed",
-      icon: "url.png",
-      assetUrl: backgroundRemovedUrl,
-      previewUrl: optimizedUrl,
-      detail: `![Uploaded Image with Background Removed](${optimizedUrl})`,
     },
     {
       title: "Raw",
