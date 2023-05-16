@@ -43,7 +43,7 @@ export async function createDraft(values: CreateDraftValues) {
     body: JSON.stringify({
       content: values.content,
       threadify: values.threadify,
-      schedule_date:
+      "schedule-date":
         values.shareOptions == "schedule"
           ? values.scheduleDate?.toISOString()
           : values.shareOptions == "next-free-slot"

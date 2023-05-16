@@ -1,5 +1,9 @@
 # Typefully Changelog
 
+## [Fixed draft scheduling] - 2023-05-16
+
+- Fixed an issue where creating a new scheduled draft wouldn't take into account the scheduling option.
+
 ## [Fixes and enhancements] - 2023-02-03
 
 - Fixed an issue to open the correct notification and remove the recently tweeted section in the menu bar command. The tweets are part of the activity submenu.

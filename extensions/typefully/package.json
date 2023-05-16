@@ -4,17 +4,23 @@
   "title": "Typefully",
   "description": "The Typefully extension to help you schedule tweets and reach your audience.",
   "icon": "extension-icon.png",
+  "keywords": [
+    "Typefully",
+    "Twitter",
+    "Social Media"
+  ],
   "author": "danielferguson",
   "owner": "typefully",
-  "access": "public",
   "contributors": [
     "pernielsentikaer",
-    "thomas"
+    "thomas",
+    "albertogiunta"
   ],
   "categories": [
     "Productivity",
     "Web"
   ],
+  "access": "public",
   "license": "MIT",
   "commands": [
     {
@@ -29,72 +35,67 @@
       "name": "create-draft",
       "title": "Create Draft Tweet",
       "subtitle": "Typefully",
-      "icon": "extension-icon.png",
       "description": "Draft a tweet with the Typefully platform, optionally schedule it for the next available slot.",
-      "mode": "view",
+      "icon": "extension-icon.png",
       "keywords": [
         "draft",
         "schedule",
         "twitter",
         "tweet"
-      ]
+      ],
+      "mode": "view"
     },
     {
       "name": "view-scheduled",
       "title": "View Scheduled Drafts",
       "subtitle": "Typefully",
-      "icon": "extension-icon.png",
       "description": "View drafts that have been recently scheduled.",
-      "mode": "view",
+      "icon": "extension-icon.png",
       "keywords": [
         "draft",
         "recently",
         "scheduled",
         "twitter",
         "tweet"
-      ]
+      ],
+      "mode": "view"
     },
     {
       "name": "view-posted",
       "title": "View Recently Posted Drafts",
       "subtitle": "Typefully",
-      "icon": "extension-icon.png",
       "description": "View recently posted drafts.",
-      "mode": "view",
+      "icon": "extension-icon.png",
       "keywords": [
         "view",
         "recently",
         "scheduled",
         "twitter",
         "tweets"
-      ]
+      ],
+      "mode": "view"
     },
     {
       "name": "open-dashboard",
       "title": "Open Typefully",
       "subtitle": "Typefully",
-      "icon": "extension-icon.png",
       "description": "Open the Typefully website",
-      "mode": "no-view",
+      "icon": "extension-icon.png",
       "keywords": [
         "open",
         "dashboard"
-      ]
+      ],
+      "mode": "no-view"
     }
-  ],
-  "keywords": [
-    "Typefully",
-    "Twitter",
-    "Social Media"
   ],
   "preferences": [
     {
-      "name": "token",
       "description": "Your personal API token.",
-      "type": "password",
+      "name": "token",
+      "placeholder": "Your token",
       "required": true,
       "title": "Typefully API Token",
-      "placeholder": "Your token"
+      "type": "password"
     }
   ],
   "dependencies": {
