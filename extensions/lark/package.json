@@ -24,7 +24,7 @@
   ],
   "preferences": [
     {
-      "name": "domain",
+      "name": "type",
       "type": "dropdown",
       "required": true,
       "title": "Type",
