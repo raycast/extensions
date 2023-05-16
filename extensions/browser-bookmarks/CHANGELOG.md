@@ -5,7 +5,6 @@
 - Support root bookmark folders for Safari
 - Use the only browser by default if the user has exactly one browser
 - Fix `JS heap out of memory error` if the user has hundreds, if not thousands of bookmarks
-- Fix `maxObject` count error if the user had thousands of bookmarks in Safari
 
 ## [Support for Edge] - 2023-05-05
 
