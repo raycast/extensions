@@ -7,7 +7,8 @@ import {
   showToast,
   Toast,
 } from '@raycast/api';
-import { useEffect, useRef, useState } from 'react';
+import Fuse from 'fuse.js';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import Service, { Coin } from './service';
 import {
   Currency,
@@ -15,6 +16,8 @@ import {
   getCurrencies,
   getPreferredCurrency,
 } from './utils';
+
+const noop = () => ({});
 
 enum FormFieldDataType {
   Coin,
@@ -27,12 +30,18 @@ interface FormResult {
   to: string;
 }
 
+const fuse = new Fuse<Coin>([], {
+  keys: ['name', 'symbol'],
+  threshold: 0.5,
+});
+
 export default function Command() {
   const DEFAULT_COIN = 'bitcoin';
   const { id: DEFAULT_CURRENCY } = getPreferredCurrency();
 
   const [isLoading, setLoading] = useState<boolean>(true);
   const [coins, setCoins] = useState<Coin[]>([]);
+  const [coinFilter, setCoinFilter] = useState<string>('');
   const currencies = getCurrencies();
   const selectedCoin = useRef<string>(DEFAULT_COIN);
   const selectedCurrency = useRef<string>(DEFAULT_CURRENCY);
@@ -44,16 +53,20 @@ export default function Command() {
 
   const service = new Service();
 
+  const filteredCoins = useMemo(() => {
+    if (coinFilter === '') {
+      return coins;
+    }
+
+    return fuse.search(coinFilter, { limit: 40 }).map(({ item }) => item);
+  }, [coinFilter, coins]);
+
+  useEffect(() => fuse.setCollection(coins), [coins]);
+
   useEffect(() => {
     async function fetchData() {
-      // Use the top 2000 coins instead of every coin for performance reasons -
-      // getCoinList returns over 13k items which can sometimes hit the memory limit
-      // for the command. It also makes the UI lag when swapping the field order
-      // and makes searching the drop down more cumbersome (there are sometimes
-      // coins that have the same / very similar symbols). Keeping the list to 2000
-      // feels like a good compromise between functionality and performance.
       try {
-        const coins = await service.getTopCoins(selectedCurrency.current, 2000);
+        const coins = await service.getCoinList();
         setCoins(coins);
       } catch (err) {
         await showToast({
@@ -79,6 +92,10 @@ export default function Command() {
     await showHUD('Copied to Clipboard');
 
     reset();
+  };
+
+  const onFilterCoins = (query: string) => {
+    setCoinFilter(query);
   };
 
   const onDropdownChange = (type: FormFieldDataType, value: string) => {
@@ -185,7 +202,7 @@ export default function Command() {
     };
   };
 
-  const coinItems = coins
+  const coinItems = filteredCoins
     .map((coin) => {
       return {
         value: coin.id,
@@ -275,6 +292,10 @@ export default function Command() {
         id="from"
         title="From"
         onChange={(value) => onDropdownChange(fieldOrder[0], value)}
+        filtering={fieldOrder[0] === FormFieldDataType.Currency ? true : false}
+        onSearchTextChange={
+          fieldOrder[0] === FormFieldDataType.Coin ? onFilterCoins : noop
+        }
       >
         {fromFieldItems.map(({ value, title }, idx) => (
           <Form.Dropdown.Item key={idx} value={value} title={title} />
@@ -284,6 +305,10 @@ export default function Command() {
         id="to"
         title="To"
         onChange={(value) => onDropdownChange(fieldOrder[1], value)}
+        filtering={fieldOrder[1] === FormFieldDataType.Currency ? true : false}
+        onSearchTextChange={
+          fieldOrder[1] === FormFieldDataType.Coin ? onFilterCoins : noop
+        }
       >
         {toFieldItems.map(({ value, title }, idx) => (
           <Form.Dropdown.Item key={idx} value={value} title={title} />
