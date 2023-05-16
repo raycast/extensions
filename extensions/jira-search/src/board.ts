@@ -23,7 +23,7 @@ export async function searchBoards(query: string): Promise<ResultItem[]> {
     id: board.id.toString(),
     title: board.name,
     subtitle: board.location?.displayName,
-    accessories: [{tag: board.type}],
+    accessories: [{ tag: board.type }],
     icon: board.location ? await jiraImage(board.location.avatarURI) : Icon.BarChart,
     url: `${jiraUrl}/secure/RapidBoard.jspa?rapidView=${board.id}`,
   })
