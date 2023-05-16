@@ -39,11 +39,11 @@
     "description": "Choose wether to open in new Window or new Tab",
     "data": [
       {
-        "title": "new Window",
+        "title": "New Window",
         "value": "newWindow"
       },
       {
-        "title": "new Tab",
+        "title": "New Tab",
         "value": "newTab"
       }
     ],
