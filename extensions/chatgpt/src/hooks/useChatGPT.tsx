@@ -1,5 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
-import { Configuration, OpenAIApi } from "openai";
+import { Configuration, ConfigurationParameters, OpenAIApi } from "openai";
 import { useState } from "react";
 import { ConfigurationPreferences } from "../type";
 
@@ -13,16 +13,23 @@ export function useChatGPT(): OpenAIApi {
       azureEndpoint: string;
       azureDeployment: string;
     }>();
-    const getConfig = function ({ useAzure, apiKey, azureEndpoint, azureDeployment }: ConfigurationPreferences) {
-      let config = { apiKey };
-      
+    const getConfig = function ({
+      useAzure,
+      apiKey,
+      azureEndpoint,
+      azureDeployment,
+      useSelfHost,
+      selfHost,
+    }: ConfigurationPreferences) {
+      let config: ConfigurationParameters = { apiKey };
+
       if (useAzure) {
-          config = { ...config, basePath: azureEndpoint + "/openai/deployments/" + azureDeployment}
-      } 
+        config = { ...config, basePath: azureEndpoint + "/openai/deployments/" + azureDeployment };
+      }
       if (useSelfHost) {
-          config = { ...config, basePath: selfHost}
-      } 
-      
+        config = { ...config, basePath: selfHost };
+      }
+      console.log(config)
       return new Configuration(config);
     };
     const config = getConfig(preferences);
@@ -37,5 +44,7 @@ export function getConfiguration(): ConfigurationPreferences {
     useAzure: boolean;
     azureEndpoint: string;
     azureDeployment: string;
+    useSelfHost: boolean;
+    selfHost: string;
   }>();
 }
