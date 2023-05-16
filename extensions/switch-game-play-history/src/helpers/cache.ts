@@ -33,6 +33,14 @@ function getCache<T>(
     }
     return value as T;
   };
-  return { set, get, remove };
+  const getTimestamp = () => {
+    const cached = cache.get(key);
+    if (!cached) {
+      return undefined;
+    }
+    const { timestamp } = JSON.parse(cached);
+    return (timestamp as number) || undefined;
+  };
+  return { set, get, remove, getTimestamp };
 }
 export default getCache;

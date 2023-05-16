@@ -12,14 +12,14 @@ import {
 import { useState } from "react";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import { useSessionToken } from "../helpers/nintendo";
+import { getCachedSessionToken, useSessionToken } from "../helpers/nintendo";
 dayjs.extend(relativeTime);
 export default function GetSessionTokenForm() {
-  const { url, getCode, sessionToken, getCachedSessionToken } = useSessionToken();
+  const { url, getCode, sessionToken } = useSessionToken();
   const [urlError, setUrlError] = useState<string | undefined>(undefined);
   const cachedSessionToken = getCachedSessionToken();
   const copyToClipboard = async () => {
-    const sessionTokenValue = sessionToken.data?.session_token || cachedSessionToken.value;
+    const sessionTokenValue = sessionToken.data?.session_token || cachedSessionToken?.value;
     if (!sessionTokenValue) {
       await showToast(Toast.Style.Failure, "Session Token not found.");
       return;
@@ -71,11 +71,11 @@ export default function GetSessionTokenForm() {
       <Form.TextField
         id="session_token"
         placeholder={sessionToken.isLoading ? "Loading" : undefined}
-        value={sessionToken.data?.session_token || cachedSessionToken.value}
+        value={sessionToken.data?.session_token || cachedSessionToken?.value}
         info="The Session Token has a validity period of 2 years, theoretically you only need to fetch it once."
       />
-      {cachedSessionToken.value && (
-        <Form.Description text={`Last fetch was ${dayjs(cachedSessionToken.fetchTime).fromNow()}.`} />
+      {cachedSessionToken?.value && (
+        <Form.Description text={`Last fetch was ${dayjs(cachedSessionToken.timestamp).fromNow()}.`} />
       )}
     </Form>
   );

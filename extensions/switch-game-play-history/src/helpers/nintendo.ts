@@ -29,7 +29,16 @@ const getAuthenticationUrl = () => {
   const url = "https://accounts.nintendo.com/connect/1.0.0/authorize?" + new URLSearchParams(params).toString();
   return { url, verifier, state };
 };
-
+export const getCachedSessionToken = () => {
+  const cache = getCache<ISessionToken>("SESSION_TOKEN");
+  const cachedSessionToken = cache.get();
+  const timestamp = cache.getTimestamp();
+  if (!cachedSessionToken || !timestamp) return undefined;
+  return {
+    value: cachedSessionToken.session_token,
+    timestamp,
+  };
+};
 export const useToken = () => {
   const { NINTENDO_SESSION_TOKEN } = getPreferenceValues<{ NINTENDO_SESSION_TOKEN?: string }>();
   const cache = getCache<IToken & { session_token: string }>("TOKEN", {
@@ -116,7 +125,7 @@ export const useSessionToken = () => {
   const [code, setCode] = useState<string | null>(null);
   const [state, setState] = useState<string | null>(null);
   const [verifier, setVerifier] = useState<string | null>(null);
-  const cache = new Cache();
+  const cache = getCache<ISessionToken>("SESSION_TOKEN");
   useEffect(() => {
     const { url, verifier, state } = getAuthenticationUrl();
     setUrl(url);
@@ -163,22 +172,14 @@ export const useSessionToken = () => {
       showToast(Toast.Style.Failure, error.name, error.message);
     },
     onWillExecute: () => {
+      cache.remove();
       showToast(Toast.Style.Animated, "Fetching Session Token");
     },
     onData: (data) => {
-      if (data.session_token) {
-        cache.set("NINTENDO_SESSION_TOKEN", JSON.stringify({ value: data.session_token, fetchTime: Date.now() }));
-      }
+      data.session_token && cache.set(data);
       showToast(Toast.Style.Success, "Success");
     },
   });
-  const getCachedSessionToken = () => {
-    const cached = cache.get("NINTENDO_SESSION_TOKEN");
-    const data: {
-      value: string | undefined;
-      fetchTime: number | undefined;
-    } = cached ? JSON.parse(cached) : {};
-    return data;
-  };
-  return { sessionToken, url, getCode, getCachedSessionToken };
+
+  return { sessionToken, url, getCode };
 };
