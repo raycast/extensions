@@ -8,18 +8,22 @@ export function useChatGPT(): OpenAIApi {
     const preferences = getPreferenceValues<{
       apiKey: string;
       useAzure: boolean;
+      useSelfHost: boolean;
+      selfHost: string;
       azureEndpoint: string;
       azureDeployment: string;
     }>();
     const getConfig = function ({ useAzure, apiKey, azureEndpoint, azureDeployment }: ConfigurationPreferences) {
+      let config = { apiKey };
+      
       if (useAzure) {
-        return new Configuration({
-          apiKey,
-          basePath: azureEndpoint + "/openai/deployments/" + azureDeployment,
-        });
-      } else {
-        return new Configuration({ apiKey });
-      }
+          config = { ...config, basePath: azureEndpoint + "/openai/deployments/" + azureDeployment}
+      } 
+      if (useSelfHost) {
+          config = { ...config, basePath: selfHost}
+      } 
+      
+      return new Configuration(config);
     };
     const config = getConfig(preferences);
     return new OpenAIApi(config);
