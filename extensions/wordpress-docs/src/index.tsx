@@ -111,7 +111,7 @@ function DefaultActions({ searchResult }: { searchResult: SearchResult }) {
 
 function Summary({ searchResult }: { searchResult: SearchResult }) {
   const item = JSON.stringify(searchResult);
-  const prompt = `Summarize the following from the WordPress docs and give one example of usage in a code block. The context can only be about WordPress. Format the response as if you are providing documentation:\n${item}`;
+  const prompt = `Summarize the following from the WordPress documentation and give one example of usage in a code block. The context can only be about WordPress. Format the response as if you are providing documentation:\n${item}`;
   const { data, isLoading } = useAI(prompt, { creativity: 0 });
   const code = data.match(/```[\w\S]*\n([\s\S]*?)\n```/);
 
