@@ -1,5 +1,6 @@
 import { Icon, launchCommand, LaunchType, MenuBarExtra, open, openCommandPreferences } from "@raycast/api";
 import { quitAppsHook } from "./hooks/hooks";
+import { scriptQuitApps } from "./utils/applescript-utils";
 
 export default function AutoQuitAppMenubar() {
   const { quitApps, loading } = quitAppsHook();
@@ -16,19 +17,32 @@ export default function AutoQuitAppMenubar() {
       tooltip={"Auto Quit App"}
     >
       {quitApps.length !== 0 && (
-        <MenuBarExtra.Section title={"Quit Apps"}>
+        <MenuBarExtra.Section title={"Auto Quit Apps"}>
           {quitApps?.map((value) => {
             return (
               <MenuBarExtra.Item
                 key={value.name}
                 title={value.name}
                 icon={{ fileIcon: value.path }}
-                onAction={() => {
-                  open(value.path).then();
+                tooltip={`Open ${value.name}`}
+                onAction={async () => {
+                  await open(value.path);
                 }}
               />
             );
           })}
+        </MenuBarExtra.Section>
+      )}
+      {quitApps.length !== 0 && (
+        <MenuBarExtra.Section>
+          <MenuBarExtra.Item
+            title={"Quit All Apps"}
+            icon={Icon.XMarkTopRightSquare}
+            shortcut={{ modifiers: ["cmd"], key: "q" }}
+            onAction={async () => {
+              await scriptQuitApps(quitApps);
+            }}
+          />
         </MenuBarExtra.Section>
       )}
       <MenuBarExtra.Section>

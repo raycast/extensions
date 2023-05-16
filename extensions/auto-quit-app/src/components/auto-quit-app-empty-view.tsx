@@ -6,8 +6,8 @@ import { layout } from "../types/preferences";
 export function AutoQuitAppEmptyView() {
   return layout === "List" ? (
     <List.EmptyView
-      icon={{ source: { light: "empty-icon.svg", dark: "empty-icon@dark.svg" } }}
-      title={"No Application"}
+      icon={{ source: "empty-view-icon.png" }}
+      title={"No App"}
       actions={
         <ActionPanel>
           <ActionOpenPreferences />
@@ -16,8 +16,8 @@ export function AutoQuitAppEmptyView() {
     />
   ) : (
     <Grid.EmptyView
-      icon={{ source: { light: "empty-icon.svg", dark: "empty-icon@dark.svg" } }}
-      title={"No Application"}
+      icon={{ source: "empty-view-icon.png" }}
+      title={"No App"}
       actions={
         <ActionPanel>
           <ActionOpenPreferences />
