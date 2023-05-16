@@ -72,6 +72,23 @@
       "required": true
     },
     {
+      "name": "useSelfHost",
+      "label": "use self host",
+      "description": "If you have self Host you can Input here",
+      "type": "checkbox",
+      "title": "Use Self Host",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "basePath",
+      "label": "Open AI Host",
+      "description": "Enter your personal Open AI Host, like: https://oa.api2d.net/v1",
+      "type": "textfield",
+      "title": "Host",
+      "required": false
+    },
+    {
       "name": "useStream",
       "label": "Enable streaming completions",
       "description": "Stream the completions of the generated answer",
