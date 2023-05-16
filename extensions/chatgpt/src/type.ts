@@ -122,4 +122,6 @@ export interface ConfigurationPreferences {
   useAzure: boolean;
   azureEndpoint: string;
   azureDeployment: string;
+  useSelfHost: boolean;
+  selfHost: string;
 }
