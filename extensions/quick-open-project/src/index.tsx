@@ -184,17 +184,19 @@ export default function Command() {
                 icon={{ fileIcon: editorApp.path }}
                 shortcut={{ modifiers: ["cmd"], key: "e" }}
               />
-              <Action
-                title={"Open in " + editorAppAlt.name}
-                key="editorAlt"
-                onAction={() => {
-                  updateFrecency(searchQuery, project);
-                  open(project.fullPath, { app: { name: editorAppAlt.path } });
-                  closeMainWindow();
-                }}
-                icon={{ fileIcon: editorAppAlt.path }}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
-              />
+              {editorAppAlt && (
+                <Action
+                  title={"Open in " + editorAppAlt.name}
+                  key="editorAlt"
+                  onAction={() => {
+                    updateFrecency(searchQuery, project);
+                    open(project.fullPath, { app: { name: editorAppAlt.path } });
+                    closeMainWindow();
+                  }}
+                  icon={{ fileIcon: editorAppAlt.path }}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
+                />
+              )}
               <Action
                 title={"Open in " + terminalApp.name}
                 key="terminal"
