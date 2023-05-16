@@ -44,6 +44,7 @@ export default function Command() {
       isLoading={isLoadingSites}
       searchBarPlaceholder="Search sites..."
       isShowingDetail={isShowingDetail}
+      filtering={true}
       onSearchTextChange={
         // If there is search dont show the valet commands
         (searchText) => setShowValetCommands(searchText.length === 0)
