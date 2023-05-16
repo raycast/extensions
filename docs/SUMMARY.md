@@ -52,6 +52,7 @@
 
 ## API Reference
 
+- [AI](api-reference/ai.md)
 - [Cache](api-reference/cache.md)
 - [Clipboard](api-reference/clipboard.md)
 - [Environment](api-reference/environment.md)

@@ -1,5 +1,65 @@
 # Todoist Changelog
 
+## [Todoist v2] - 2023-05-12
+
+The Todoist extension has been completely revamped for a cleaner, better and smoother Raycast experience. The goal of this extension is clear: make you able to use Todoist anytime, anywhere, for anything on your computer using the power of Raycast. This update is packed with new features, so let's jump right into them.
+
+### Home Command
+
+Exit `Today Tasks`, `Upcoming Tasks`, `Search Tasks`, `Completed Tasks`. Welcome `Home`. This brand new command allows you to see your different tasks views from within one command: inbox, today, upcoming, completed but also your project and labels views. Then, switch views very easily using `⌘` + `P`. Need a quick-access to a view? Select your favorite view, and press the `Create View Quicklink` action. Note it's also possible to configure the default view in the command's preferences.
+
+### OAuth Integration
+
+To start using the extension, you previously had to go to Todoist settings, then the developer section and then get your API key. That's not the best experience when using an extension. Now? Just connect your Todoist account with the new OAuth integration. Note that if you were using the token previously, you should stay logged in without any problems.
+
+### Better performance and always fresh data
+
+Navigating across the extension is now smoother and faster. Plus, your data can stay always fresh by activating the `Background Refresh` option in the `Menu Bar Tasks` command. This has been made possible by using Todoist's Sync API instead of the REST API. The Sync API is actually used by Todoist's own clients and also unlocks ton of new features, which brings us to the next feature...
+
+
+### Assignee Support
+
+Assignees are coming to the extension! It's now possible to see who's responsible for each task directly from Raycast but also who assigned you the task and the comment's authors. You can also assign a task to anyone and create a task with an assignee.
+
+### Flexible Grouping and Sorting
+
+One of the power of Todoist is being able to group and sort your different tasks views by due date, assignee, label, or priority. Well, why not do the same? Make use of the `Group By` action ( `⌥` + `⇧` + `G`), `Sort By` action (`⌥` + `⇧` + `S`), and `Order By` (`⌥` + `⇧` + `O`) and customize your task views independently from each other, the way you want it.
+
+### Reminders
+
+This update also adds support for reminders. It's now possible to see a task's reminders, create time reminders (`⌘` + `⇧` + `R`), create location reminders (`⌥` + `⇧` + `R`) using your pre-defined locations list, or delete reminders (`⌃` + `⇧` + `R`). Note that you won't be able to use reminder actions if you're not using Todoist Pro.
+
+### Attachment Support
+
+Need a file for a particular task? You can now add a file attachment from the `Create Task` command. Of course, it's also possible to add attachments by adding a new comment to a task.
+
+### Label Improvements
+
+There's also significant improvements to labels with this update: introducing the `Show Labels` command. This command allows you to view all labels, add or remove them to or from favorites (`⌘` + `⇧` + `F`), and delete them (`⌃` + `X`).
+
+### Menu Bar improvements
+
+The menu bar command also gets its own set of improvements:
+- Hide the tasks count in the command's preferences if you want to have a cleaner (and maybe more stress-free) menu-bar
+- Add a label or an assignee to a task
+- Quickly access your tasks views (`Inbox`, `Today`, etc.), or other commands such as `Create Task` or `Create Project` 
+- Also, some bugs have been fixed which should make the menu-bar smoother to use
+
+### Quality of Life Improvements
+
+This changelog is getting long, isn't it? I'd be happy to tell you more about other updates but it'd get way longer so let's just put up a list for the rest of them:
+- See your sub-tasks from a task list item (`⌘` + `⇧` + `T`)
+- See the task's project section from within the list
+- Set the parent task of another task if you want to make-it a sub-task (`⌘` + `⇧` + `M`)
+- See the different reactions to your comment
+- Refresh your data with (`⌘` + `R`)
+- Better empty views (especially the today one!)
+- See your team inbox in the `Show Projects` view
+- Same order than Todoist in the today or upcoming view
+- And other improvements and fixes I've probably forgotten.
+
+This update paves the way for other features such as filters. I hope you enjoy it and that it'll make your Todoist experience on Raycast delightful.
+
 ## [Improvements & fixes] - 2023-04-12
 
 - Add action to mark an already completed task as incomplete
@@ -22,7 +82,7 @@
 
 ## [Menu bar fix] - 2023-01-10
 
-- Fix focused task when not listed in menubar
+- Fix focused task when not listed in menu bar
 
 ## [Menu bar improvements] - 2023-01-03
 

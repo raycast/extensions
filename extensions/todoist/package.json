@@ -5,6 +5,8 @@
   "description": "Check your Todoist tasks and quickly create new ones",
   "icon": "todoist.png",
   "author": "thomaslombart",
+  "owner": "doist",
+  "access": "public",
   "license": "MIT",
   "categories": [
     "Productivity"
@@ -15,25 +17,48 @@
   ],
   "commands": [
     {
-      "name": "today",
-      "title": "Today Tasks",
+      "name": "home",
+      "title": "Home",
       "subtitle": "Todoist",
-      "description": "See your Todoist tasks due today.",
-      "mode": "view"
-    },
-    {
-      "name": "upcoming",
-      "title": "Upcoming Tasks",
-      "subtitle": "Todoist",
-      "description": "See your upcoming Todoist tasks grouped by due date.",
-      "mode": "view"
-    },
-    {
-      "name": "search",
-      "title": "Search Tasks",
-      "subtitle": "Todoist",
-      "description": "Search across all your Todoist tasks.",
-      "mode": "view"
+      "description": "Show your Todoist tasks and views (inbox, today, upcoming, completed, projects, labels).",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "view",
+          "type": "dropdown",
+          "data": [
+            {
+              "title": "Inbox",
+              "value": "inbox"
+            },
+            {
+              "title": "Today",
+              "value": "today"
+            },
+            {
+              "title": "Upcoming",
+              "value": "upcoming"
+            },
+            {
+              "title": "Completed",
+              "value": "completed"
+            }
+          ],
+          "default": "today",
+          "required": false,
+          "title": "View",
+          "description": "Indicates which view you want to see in the command."
+        }
+      ],
+      "keywords": [
+        "inbox",
+        "today",
+        "today tasks",
+        "upcoming",
+        "upcoming tasks",
+        "completed",
+        "completed tasks"
+      ]
     },
     {
       "name": "create-task",
@@ -45,6 +70,7 @@
     {
       "name": "quick-add-task",
       "title": "Quick Add Task",
+      "subtitle": "Todoist",
       "description": "Quickly add a new task in Todoist.",
       "mode": "no-view",
       "preferences": [
@@ -73,13 +99,6 @@
       ]
     },
     {
-      "name": "projects",
-      "title": "Search Projects",
-      "subtitle": "Todoist",
-      "description": "See your Todoist projects and tasks by project.",
-      "mode": "view"
-    },
-    {
       "name": "create-project",
       "title": "Create Project",
       "subtitle": "Todoist",
@@ -87,19 +106,21 @@
       "mode": "view"
     },
     {
-      "name": "completed-tasks",
-      "title": "Completed Tasks",
-      "subtitle": "Todoist",
-      "description": "See all your completed tasks",
-      "mode": "view"
-    },
-    {
-      "name": "menubar",
+      "name": "menu-bar",
       "title": "Menu Bar Tasks",
       "subtitle": "Todoist",
-      "description": "See your upcoming Todoist tasks in your menubar",
+      "description": "Show your Todoist tasks and views in your menu bar.",
       "mode": "menu-bar",
       "preferences": [
+        {
+          "name": "hideMenuBarCount",
+          "type": "checkbox",
+          "title": "Count",
+          "label": "Hide menu bar count",
+          "description": "When enabled, the number of tasks in the menu bar won't be shown.",
+          "default": false,
+          "required": false
+        },
         {
           "name": "view",
           "type": "dropdown",
@@ -116,56 +137,75 @@
           "default": "upcoming",
           "required": false,
           "title": "View",
-          "description": "Indicates which view you want to see in your menubar."
+          "description": "Indicates which view you want to see in your menu bar."
         },
         {
           "name": "upcomingDays",
           "type": "textfield",
           "default": "7",
           "required": false,
-          "title": "Number of days for Upcoming",
-          "description": "Indicates the number of days you want in the upcoming view of the menubar."
+          "title": "Number of Days for Upcoming View",
+          "description": "Indicates the number of days you want in the upcoming view."
         },
         {
           "name": "focusFeatureWidth",
           "type": "textfield",
           "required": false,
           "default": "40",
-          "title": "Max width of Focused Task",
-          "description": "Maximum width of the focused task' text."
+          "title": "Maximum Width of Focused Task",
+          "description": "Maximum width of the focused task's text."
         }
       ],
       "interval": "10m"
     },
     {
+      "name": "show-projects",
+      "title": "Show Projects",
+      "subtitle": "Todoist",
+      "description": "Show your Todoist projects.",
+      "mode": "view"
+    },
+    {
+      "name": "show-labels",
+      "title": "Show Labels",
+      "subtitle": "Todoist",
+      "description": "Show your Todoist labels.",
+      "mode": "view"
+    },
+    {
       "name": "unfocus-current-task",
       "title": "Unfocus Current Task",
       "subtitle": "Todoist",
-      "description": "Unfocus the current Todoist task.",
-      "mode": "no-view"
+      "description": "Unfocus the current task in the menu bar.",
+      "mode": "no-view",
+      "disabledByDefault": true
     }
   ],
   "preferences": [
     {
       "name": "token",
       "type": "password",
-      "required": true,
+      "required": false,
       "title": "Todoist Token",
       "description": "Your Todoist Token. Find it in Todoist integration settings view.",
       "placeholder": "Enter your Todoist token"
     }
   ],
   "dependencies": {
-    "@doist/todoist-api-typescript": "^2.1.2",
-    "@raycast/api": "^1.48.8",
-    "@raycast/utils": "^1.4.16",
+    "@raycast/api": "^1.50.0",
+    "@raycast/utils": "^1.5.2",
+    "axios": "^1.3.6",
     "date-fns": "^2.29.3",
+    "form-data": "^4.0.0",
     "lodash": "^4.17.21",
-    "remove-markdown": "0.5.0"
+    "mime": "^3.0.0",
+    "node-fetch": "^3.3.1",
+    "remove-markdown": "^0.5.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.5",
     "@types/lodash": "^4.14.185",
+    "@types/mime": "^3.0.1",
     "@types/node": "^18.7.18",
     "@types/react": "^18.0.20",
     "@types/remove-markdown": "^0.3.1",

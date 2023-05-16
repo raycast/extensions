@@ -16,8 +16,8 @@ export const ConversationListView = (props: {
         <List.Item
           id={conversation.id}
           key={conversation.id}
-          title={conversation.chats[conversation.chats.length - 1].question}
-          icon={getAvatarIcon(conversation.chats[conversation.chats.length - 1].question)}
+          title={`[${conversation.model.template_name}] ` + conversation.chats[conversation.chats.length - 1].question}
+          icon={conversation.model.avatar || getAvatarIcon(conversation.model.template_name)}
           accessories={[
             { text: conversation.chats[conversation.chats.length - 1].answer },
             { text: new Date(conversation.created_at ?? 0).toLocaleDateString() },

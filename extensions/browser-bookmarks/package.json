@@ -2,11 +2,14 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "browser-bookmarks",
   "title": "Browser Bookmarks",
-  "description": "Integrate bookmarks from Chrome, Brave, Firefox or Safari.",
+  "description": "Integrate bookmarks from Chrome, Brave, Edge, Firefox or Safari.",
   "icon": "icon.png",
   "author": "thomaslombart",
   "owner": "raycast",
   "access": "public",
+  "contributors": [
+    "sasivarnan"
+  ],
   "categories": [
     "Web"
   ],

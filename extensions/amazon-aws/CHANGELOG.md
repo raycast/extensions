@@ -1,5 +1,9 @@
 # Amazon AWS Changelog
 
+## [Fix Broken Authentication] - 2023-05-06
+
+- Fix regression from AWS Vault changes that affected all non-aws-vault users.
+
 ## [Extend Support AWS Vault] - 2023-04-28
 
 - Add support for people using aws-vault with the GetSessionToken API call.
