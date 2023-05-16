@@ -1,21 +1,26 @@
+import { SHORTCUT_KEY_SEQUENCE } from "~/constants/general";
 import { IDENTITY_KEY_LABEL } from "~/constants/labels";
 import { Identity } from "~/types/vault";
 
 export function getIdentityDetailsMarkdown(itemName: string, identity: Identity) {
   return `# 🪪 ${itemName}
 <br></br>
-| **Field** | **Value** |
+| ⌘\t**Field** | **Value** |
 | --- | --- |
 ${Object.entries(identity)
-  .sort(identityFormOrderSorter)
-  .map(([key, value]) => (value ? `| **${IDENTITY_KEY_LABEL[key as keyof Identity]}** | ${value} |` : null))
+  .map(([key, value], index) => {
+    if (!value) return null;
+    const label = IDENTITY_KEY_LABEL[key as keyof Identity];
+    const shortcutKey = SHORTCUT_KEY_SEQUENCE[index] ?? "&nbsp;";
+
+    return `| ${shortcutKey}.\t**${label}** | ${value} |`;
+  })
   .join("\n")}
 `;
 }
 
 export function getIdentityDetailsCopyValue(identity: Identity): string {
   return Object.entries(identity)
-    .sort(identityFormOrderSorter)
     .map(([key, value]) => (value ? `${IDENTITY_KEY_LABEL[key as keyof Identity]}: ${value}` : null))
     .filter(Boolean)
     .join("\n");

@@ -1,3 +1,4 @@
+import { SHORTCUT_KEY_SEQUENCE } from "~/constants/general";
 import { CARD_KEY_LABEL } from "~/constants/labels";
 import { Card } from "~/types/vault";
 
@@ -27,18 +28,22 @@ const getCardValue = (key: string, value: string) => {
 export function getCardDetailsMarkdown(itemName: string, card: Card) {
   return `# 💳 ${itemName}
 <br></br>
-| **Field** | **Value** |
+| ⌘\t**Field** | **Value** |
 | --- | --- |
 ${Object.entries(card)
-  .sort(cardBitwardenPageFieldOrderSorter)
-  .map(([key, value]) => (value ? `| **${CARD_KEY_LABEL[key as keyof Card]}** | ${getCardValue(key, value)} |` : null))
+  .map(([key, value], index) => {
+    if (!value) return null;
+    const label = CARD_KEY_LABEL[key as keyof Card];
+    const shortcutKey = SHORTCUT_KEY_SEQUENCE[index];
+
+    return `| ${shortcutKey}.\t**${label}** | ${getCardValue(key, value)} |`;
+  })
   .join("\n")}
 `;
 }
 
 export function getCardDetailsCopyValue(card: Card) {
   return Object.entries(card)
-    .sort(cardBitwardenPageFieldOrderSorter)
     .map(([key, value]) => (value ? `${CARD_KEY_LABEL[key as keyof Card]}: ${getCardValue(key, value)}` : null))
     .filter(Boolean)
     .join("\n");

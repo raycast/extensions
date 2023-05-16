@@ -16,9 +16,11 @@ import useGetUpdatedVaultItem from "~/components/searchVault/utils/useGetUpdated
 import { Identity } from "~/types/vault";
 import { IDENTITY_KEY_LABEL } from "~/constants/labels";
 import { captureException } from "~/utils/development";
-import { getIdentityDetailsCopyValue, getIdentityDetailsMarkdown } from "~/utils/identity";
+import { getIdentityDetailsCopyValue, getIdentityDetailsMarkdown, identityFormOrderSorter } from "~/utils/identity";
 import { getTransientCopyPreference } from "~/utils/preferences";
 import { capitalize } from "~/utils/strings";
+import { SHORTCUT_KEY_SEQUENCE } from "~/constants/general";
+import { useMemo } from "react";
 
 function ShowIdentityDetailsAction() {
   const { push } = useNavigation();
@@ -54,24 +56,34 @@ function DetailsScreen({ itemName, identity }: { itemName: string; identity: Ide
     await closeMainWindow();
   };
 
+  const { sortedIdentity, sortedIdentityEntries } = useMemo(() => {
+    const sorted: [string, string][] = Object.entries(identity).sort(identityFormOrderSorter);
+    return {
+      sortedIdentity: Object.fromEntries(sorted) as unknown as Identity,
+      sortedIdentityEntries: sorted,
+    };
+  }, [identity]);
+
   return (
     <Detail
-      markdown={getIdentityDetailsMarkdown(itemName, identity)}
+      markdown={getIdentityDetailsMarkdown(itemName, sortedIdentity)}
       actions={
         <ActionPanel>
           <Action.CopyToClipboard
             title="Copy Identity Details"
-            content={getIdentityDetailsCopyValue(identity)}
+            content={getIdentityDetailsCopyValue(sortedIdentity)}
             transient={getTransientCopyPreference("other")}
           />
-          {Object.entries(identity).map(([fieldKey, content], index) => {
+          {sortedIdentityEntries.map(([fieldKey, content], index) => {
             if (!content) return null;
+
             return (
               <Action
                 key={`${index}-${fieldKey}`}
                 title={`Copy ${IDENTITY_KEY_LABEL[fieldKey as keyof Identity] ?? capitalize(fieldKey)}`}
                 icon={Icon.Clipboard}
-                onAction={handleCopyField(fieldKey)}
+                onAction={handleCopyField(content)}
+                shortcut={{ modifiers: ["cmd"], key: SHORTCUT_KEY_SEQUENCE[index] }}
               />
             );
           })}
