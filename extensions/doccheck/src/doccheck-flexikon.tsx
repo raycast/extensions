@@ -25,14 +25,54 @@ export default function Command(props: LaunchProps) {
     if (query === "") {
       // if query is empty load Top Articles
       fetchTopArticles();
+    } else if (noSearchResults) {
+      // if there are no search results load alternative search entries
+      setEntries([
+        {
+          title: "AMBOSS",
+          url: "https://next.amboss.com/de/search?q=",
+          description: "Press ⏎ to search for the search term in AMBOSS in the browser",
+          title_alias: [],
+          imageUrl: "",
+          date_publish: "",
+          author: "amboss",
+        },
+        {
+          title: "Google",
+          url: "https://www.google.com/search?q=",
+          description: "Press ⏎ to search for the search term in Google in the browser",
+          title_alias: [],
+          imageUrl: "",
+          date_publish: "",
+          author: "google",
+        },
+        {
+          title: "Wikipedia",
+          url: "https://en.wikipedia.org/w/index.php?search=",
+          description: "Press ⏎ to search for the search term in Wikipedia in the browser",
+          title_alias: [],
+          imageUrl: "",
+          date_publish: "",
+          author: "google",
+        },
+        {
+          title: "Wikipedia DE",
+          url: "https://de.wikipedia.org/w/index.php?search=",
+          description: "Press ⏎ to search for the search term in the German Wikipedia in the browser",
+          title_alias: [],
+          imageUrl: "",
+          date_publish: "",
+          author: "google",
+        },
+      ]);
     } else {
       searchArticles(query);
     }
   }, [query, noSearchResults]);
 
   async function fetchTopArticles() {
-    setLoading(true);
     try {
+      setLoading(true);
       const response = await axios.get("https://flexikon.doccheck.com/de/");
       const $ = cheerio.load(response.data);
       const topArticles: Result[] = [];
@@ -59,9 +99,9 @@ export default function Command(props: LaunchProps) {
     }
   }
   async function searchArticles(query: string) {
-    setLoading(true);
     setEntries([]);
     try {
+      setLoading(true);
       const response = await axios.get(
         `https://search.doccheck.com/doccheck-portal/search?q=${query}&language=de&start=0&facetq=content_type:flexikon`
       );
@@ -69,44 +109,6 @@ export default function Command(props: LaunchProps) {
         setEntries(response.data.urls);
       } else if (response.status === 200) {
         setNoSearchResults(true);
-        setEntries([
-          {
-            title: "AMBOSS",
-            url: "https://next.amboss.com/de/search?q=",
-            description: "Press ⏎ to search for the search term in AMBOSS in the browser",
-            title_alias: [],
-            imageUrl: "",
-            date_publish: "",
-            author: "amboss",
-          },
-          {
-            title: "Google",
-            url: "https://www.google.com/search?q=",
-            description: "Press ⏎ to search for the search term in Google in the browser",
-            title_alias: [],
-            imageUrl: "",
-            date_publish: "",
-            author: "google",
-          },
-          {
-            title: "Wikipedia",
-            url: "https://en.wikipedia.org/w/index.php?search=",
-            description: "Press ⏎ to search for the search term in Wikipedia in the browser",
-            title_alias: [],
-            imageUrl: "",
-            date_publish: "",
-            author: "google",
-          },
-          {
-            title: "Wikipedia DE",
-            url: "https://de.wikipedia.org/w/index.php?search=",
-            description: "Press ⏎ to search for the search term in the German Wikipedia in the browser",
-            title_alias: [],
-            imageUrl: "",
-            date_publish: "",
-            author: "google",
-          },
-        ]);
       }
     } catch (e) {
       await showToast({
