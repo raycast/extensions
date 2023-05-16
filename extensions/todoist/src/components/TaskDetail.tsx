@@ -1,85 +1,53 @@
-import { Task, colors } from "@doist/todoist-api-typescript";
 import { ActionPanel, Detail, Icon } from "@raycast/api";
-import { MutatePromise, useCachedPromise } from "@raycast/utils";
 import { format } from "date-fns";
 
-import { todoist, handleError } from "../api";
-import { priorities } from "../constants";
-import { displayDueDate } from "../helpers/dates";
+import { Task } from "../api";
+import { getCollaboratorIcon } from "../helpers/collaborators";
+import { displayDueDate, isExactTimeTask } from "../helpers/dates";
+import { getTaskLabels } from "../helpers/labels";
+import { priorities } from "../helpers/priorities";
 import { getProjectIcon } from "../helpers/projects";
+import { displayReminderName } from "../helpers/reminders";
+import useCachedData from "../hooks/useCachedData";
 
 import TaskActions from "./TaskActions";
 
-interface TaskDetailProps {
+type TaskDetailProps = {
   taskId: Task["id"];
-  mutateTasks?: MutatePromise<Task[] | undefined>;
-}
+};
 
-export default function TaskDetail({ taskId, mutateTasks }: TaskDetailProps): JSX.Element {
-  const {
-    data: task,
-    isLoading: isLoadingTask,
-    error: getTaskError,
-    mutate: mutateTaskDetail,
-  } = useCachedPromise((taskId) => todoist.getTask(taskId), [taskId]);
+export default function TaskDetail({ taskId }: TaskDetailProps): JSX.Element {
+  const [data] = useCachedData();
 
-  const {
-    data: projects,
-    isLoading: isLoadingProjects,
-    error: getProjectsError,
-  } = useCachedPromise(() => todoist.getProjects());
-
-  const {
-    data: labels,
-    isLoading: isLoadingLabels,
-    error: getLabelsError,
-  } = useCachedPromise(() => todoist.getLabels());
-
-  const {
-    data: comments,
-    isLoading: isLoadingComments,
-    error: getCommentsError,
-    mutate: mutateComments,
-  } = useCachedPromise((taskId) => todoist.getComments({ taskId }), [task?.id], { execute: !!task?.id });
-
-  if (getTaskError) {
-    handleError({ error: getTaskError, title: "Unable to get task detail" });
-  }
-
-  if (getProjectsError) {
-    handleError({ error: getProjectsError, title: "Unable to get projects" });
-  }
-
-  if (getLabelsError) {
-    handleError({ error: getLabelsError, title: "Unable to get labels" });
-  }
-
-  if (getCommentsError) {
-    handleError({ error: getCommentsError, title: "Unable to get comments" });
-  }
+  const task = data?.items.find((task) => task.id === taskId);
+  const comments = data?.notes.filter((comment) => comment.item_id === taskId);
+  const commentsWithFiles = comments?.filter((comment) => !!comment.file_attachment);
+  const assignee = data?.collaborators.find((collaborator) => task?.responsible_uid === collaborator.id);
+  const assignedBy = data?.collaborators.find((collaborator) => task?.assigned_by_uid === collaborator.id);
 
   const priority = priorities.find((priority) => priority.value === task?.priority);
-  const project = projects?.find((project) => project.id === task?.projectId);
-  const taskLabels = task?.labels.map((labelName) => {
-    const associatedLabel = labels?.find((label) => label.name === labelName);
-
-    return {
-      ...associatedLabel,
-      color: colors.find((color) => color.key === associatedLabel?.color),
-    };
-  });
+  const project = data?.projects.find((project) => project.id === task?.project_id);
+  const section = data?.sections.find((section) => section.id === task?.section_id);
+  const taskLabels = task && data?.labels ? getTaskLabels(task, data.labels) : [];
   const hasComments = comments && comments.length > 0;
 
   let displayedDate = "No due date";
+
   if (task?.due) {
     const dueDate = displayDueDate(task.due.date);
 
-    displayedDate = task.due.datetime ? `${dueDate} ${format(new Date(task.due.datetime), "HH:mm")}` : dueDate;
+    displayedDate = isExactTimeTask(task) ? `${dueDate} ${format(new Date(task.due.date), "HH:mm")}` : dueDate;
   }
+
+  const reminders =
+    data?.reminders.filter((r) => {
+      if (r.is_deleted === 1) return false;
+
+      return r.item_id === taskId;
+    }) ?? [];
 
   return (
     <Detail
-      isLoading={isLoadingTask || isLoadingProjects || isLoadingLabels || isLoadingComments}
       navigationTitle={task?.content}
       {...(task
         ? {
@@ -87,7 +55,19 @@ export default function TaskDetail({ taskId, mutateTasks }: TaskDetailProps): JS
             metadata: (
               <Detail.Metadata>
                 {project ? (
-                  <Detail.Metadata.Label title="Project" text={project.name} icon={getProjectIcon(project)} />
+                  <Detail.Metadata.Label
+                    title="Project"
+                    text={`${project.name}${section ? ` / ${section.name}` : ""}`}
+                    icon={getProjectIcon(project)}
+                  />
+                ) : null}
+
+                {assignee ? (
+                  <Detail.Metadata.Label
+                    title="Assignee"
+                    text={assignee.full_name}
+                    icon={getCollaboratorIcon(assignee)}
+                  />
                 ) : null}
 
                 <Detail.Metadata.Label title="Due Date" text={displayedDate} icon={Icon.Calendar} />
@@ -102,35 +82,52 @@ export default function TaskDetail({ taskId, mutateTasks }: TaskDetailProps): JS
 
                 {taskLabels && taskLabels.length > 0 ? (
                   <Detail.Metadata.TagList title="Labels">
-                    {taskLabels.map((taskLabel, index) => (
-                      <Detail.Metadata.TagList.Item
-                        key={taskLabel?.id || index}
-                        text={taskLabel?.name || ""}
-                        color={taskLabel.color?.hexValue}
-                      />
+                    {taskLabels.map((taskLabel) => {
+                      return (
+                        <Detail.Metadata.TagList.Item
+                          key={taskLabel.id}
+                          text={taskLabel.name}
+                          color={taskLabel.color}
+                        />
+                      );
+                    })}
+                  </Detail.Metadata.TagList>
+                ) : null}
+
+                {reminders.length > 0 ? (
+                  <Detail.Metadata.TagList title="Reminders">
+                    {reminders.map((reminder) => (
+                      <Detail.Metadata.TagList.Item key={reminder.id} text={displayReminderName(reminder)} />
                     ))}
                   </Detail.Metadata.TagList>
                 ) : null}
 
+                {hasComments || assignedBy ? <Detail.Metadata.Separator /> : null}
+
                 {hasComments ? (
                   <Detail.Metadata.Label
                     title="Comments"
-                    text={`${comments.length} ${comments.length === 1 ? "comment" : "comments"}`}
+                    text={`${comments.length} ${comments.length === 1 ? "comment" : "comments"}${
+                      commentsWithFiles && commentsWithFiles.length > 0
+                        ? ` (${commentsWithFiles.length} with file)`
+                        : ""
+                    }`}
                     icon={Icon.Bubble}
+                  />
+                ) : null}
+
+                {assignedBy ? (
+                  <Detail.Metadata.Label
+                    title="Assigned by"
+                    text={assignedBy.full_name}
+                    icon={getCollaboratorIcon(assignedBy)}
                   />
                 ) : null}
               </Detail.Metadata>
             ),
             actions: (
               <ActionPanel>
-                <TaskActions
-                  task={task}
-                  fromDetail={true}
-                  projects={projects}
-                  mutateTasks={mutateTasks}
-                  mutateTaskDetail={mutateTaskDetail}
-                  mutateComments={mutateComments}
-                />
+                <TaskActions task={task} fromDetail={true} />
               </ActionPanel>
             ),
           }

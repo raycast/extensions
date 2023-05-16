@@ -1,8 +1,8 @@
 import { Action, ActionPanel, closeMainWindow, Form, getPreferenceValues, Toast } from "@raycast/api";
 import { useState } from "react";
-import { createCustomTimer, ensureCTFileExists, startTimer } from "./timerUtils";
-import { CTInlineArgs, InputField, RayFormEvent, Values } from "./types";
 import { soundData } from "./soundData";
+import { checkForOverlyLoudAlert, createCustomTimer, ensureCTFileExists, startTimer } from "./timerUtils";
+import { CTInlineArgs, InputField, RayFormEvent, Values } from "./types";
 
 export default function CustomTimerView(props: { arguments: CTInlineArgs }) {
   const hasArgs = Object.values(props.arguments).some((x) => x !== "");
@@ -22,6 +22,7 @@ export default function CustomTimerView(props: { arguments: CTInlineArgs }) {
     } else if (isNaN(Number(values.seconds))) {
       setSecErr("Seconds must be a number!");
     } else {
+      if (!checkForOverlyLoudAlert()) return;
       closeMainWindow();
       const timerName = values.name ? values.name : "Untitled";
       const timeInSeconds = 3600 * Number(values.hours) + 60 * Number(values.minutes) + Number(values.seconds);

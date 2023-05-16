@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-07-01 19:05
  * @lastEditor: tisfeng
- * @lastEditTime: 2023-02-28 21:44
+ * @lastEditTime: 2023-04-25 23:49
  * @fileName: versionInfo.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -26,24 +26,33 @@ export class Easydict {
   static repo = "Raycast-Easydict";
 
   // * NOTE: this is new version info, don't use it directly. Use getCurrentStoredVersionInfo() instead.
-  version = "2.7.3";
-  buildNumber = 22;
-  versionDate = "2023-02-28";
-  isNeedPrompt = false;
+  version = "2.8.2";
+  buildNumber = 25;
+  versionDate = "2023-04-25";
+  isNeedPrompt = true;
   hasPrompted = false; // * always default false, only show once, then should be set to true.
 
   releaseMarkdown = `
 ## [v${this.version}] - ${this.versionDate}
 
-### 💎 优化
+### 🐞 修复
 
-- 当使用 Easydict 作为 Fallback Command 时，优先使用用户输入文本作为查询词（而不是选中文本）。
+- 修复了 OpenAI 翻译可能丢失首字符的问题。
+- 修复了 OpenAI 默认未启用代理的问题。
+
+#### 如果觉得这个扩展还不错，给个 [Star](https://github.com/tisfeng/Raycast-Easydict) ⭐️ 支持一下吧 (^-^)
+
+## 推荐
+
+我另一个项目，[Easydict](https://github.com/tisfeng/Easydict) ，一个简洁优雅的翻译词典 macOS App。开箱即用，支持离线 OCR 识别，支持有道词典，🍎苹果系统翻译，DeepL，谷歌，百度和火山翻译。
+
+![iShot_2023-03-17_18.01.22_11zon-1679050206](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/iShot_2023-03-17_18.01.22_11zon-1679050206.jpg)
 
 ---
 
-### 💎 Improvement
-
-- When using Easydict as Fallback Command, use the user input text as the query word (not the selected text).
+### 🐞 Fixes
+- Fixed the issue that OpenAI translation may lose the first character.
+- Fixed the issue that OpenAI does not enable proxy by default.
 `;
 
   getRepoUrl() {

@@ -1,7 +1,8 @@
 import { List, Icon, ActionPanel } from "@raycast/api";
 import RootErrorBoundary from "~/components/RootErrorBoundary";
-import SearchCommonActions from "~/components/searchVault/CommonActions";
-import SearchItem from "~/components/searchVault/Item";
+import SearchCommonActions from "~/components/searchVault/actions/CommonActions";
+import VaultListenersProvider from "~/components/searchVault/context/vaultListeners";
+import VaultItem from "~/components/searchVault/Item";
 import { BitwardenProvider } from "~/context/bitwarden";
 import { SessionProvider } from "~/context/session";
 import { useVault, VaultProvider } from "~/context/vault";
@@ -11,9 +12,11 @@ const SearchVaultCommand = () => (
   <RootErrorBoundary>
     <BitwardenProvider>
       <SessionProvider unlock>
-        <VaultProvider>
-          <SearchVaultComponent />
-        </VaultProvider>
+        <VaultListenersProvider>
+          <VaultProvider>
+            <SearchVaultComponent />
+          </VaultProvider>
+        </VaultListenersProvider>
       </SessionProvider>
     </BitwardenProvider>
   </RootErrorBoundary>
@@ -25,7 +28,7 @@ function SearchVaultComponent() {
   return (
     <List isLoading={isLoading}>
       {items.map((item) => (
-        <SearchItem key={item.id} item={item} folder={getItemFolder(folders, item)} />
+        <VaultItem key={item.id} item={item} folder={getItemFolder(folders, item)} />
       ))}
       {isLoading ? (
         <List.EmptyView icon={Icon.ArrowClockwise} title="Loading..." description="Please wait." />

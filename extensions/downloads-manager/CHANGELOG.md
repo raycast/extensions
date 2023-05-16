@@ -1,5 +1,9 @@
 # Downloads Manager Changelog
 
+## [Add new action] - 2023-03-30
+
+- Added the action `Copy File` for the `Manage Downloads` command
+
 ## [New preference] - 2023-01-23
 
 - Added quick look to `Manage Downloads` command

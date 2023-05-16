@@ -1,5 +1,5 @@
 import { Action, ActionPanel, environment, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
-import { MutatePromise, useForm } from "@raycast/utils";
+import { useForm } from "@raycast/utils";
 import { useState } from "react";
 import { ApiTask } from "../api/task";
 import useFieldTemplates from "../hooks/useFieldTemplates";
@@ -7,13 +7,13 @@ import useLists from "../hooks/useLists";
 import useTasks from "../hooks/useTasks";
 import useUsers from "../hooks/useUsers";
 import { TaskObject, UpdateBatchTaskPayload, UpdateTaskFormValues, UpdateTaskPayload } from "../types/task";
-import { ApiResponse } from "../types/utils";
+import { ApiResponse, UseCachedPromiseMutatePromise } from "../types/utils";
 import { getTintColorFromHue, ListColors } from "../utils/list";
 import { getIconByStatusState } from "../utils/task";
 
 type Props = {
   task: TaskObject;
-  mutateTask: MutatePromise<ApiResponse<TaskObject[]> | undefined>;
+  mutateTask: UseCachedPromiseMutatePromise<ApiResponse<TaskObject[]>>;
   detailsTaskRevalidate?: () => void;
   detailsPage?: boolean;
 };
@@ -141,7 +141,7 @@ export default function UpdateList({ task, mutateTask, detailsPage, detailsTaskR
             value={list.id}
             title={list.name}
             icon={{
-              source: list.appearance?.iconUrl ?? "list-icons/list-light.svg",
+              source: list.appearance?.iconUrl ?? "list-icons/list.svg",
               tintColor: getTintColorFromHue(list?.appearance?.hue, ListColors),
             }}
           />
@@ -206,7 +206,7 @@ export default function UpdateList({ task, mutateTask, detailsPage, detailsTaskR
                 value={task.id}
                 title={task.name}
                 icon={{
-                  source: task.lists?.[0].appearance?.iconUrl ?? "list-icons/list-light.svg",
+                  source: task.lists?.[0].appearance?.iconUrl ?? "list-icons/list.svg",
                   tintColor: getTintColorFromHue(task.lists?.[0]?.appearance?.hue, ListColors),
                 }}
               />

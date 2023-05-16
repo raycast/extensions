@@ -1,4 +1,4 @@
-import { environment, getPreferenceValues, popToRoot, showHUD } from "@raycast/api";
+import { environment, getPreferenceValues, popToRoot, showHUD, showToast, Toast } from "@raycast/api";
 import { exec, execSync } from "child_process";
 import { randomUUID } from "crypto";
 import { existsSync, readdirSync, readFileSync, writeFileSync } from "fs";
@@ -7,6 +7,20 @@ import { CustomTimer, Preferences, Timer } from "./types";
 import { formatTime, secondsBetweenDates } from "./formatUtils";
 
 const DATAPATH = environment.supportPath + "/customTimers.json";
+
+const checkForOverlyLoudAlert = (launchedFromMenuBar = false) => {
+  const prefs = getPreferenceValues<Preferences>();
+  if (parseFloat(prefs.volumeSetting) > 5.0) {
+    const errorMsg = "⚠️ Timer alert volume should not be louder than 5 (it can get quite loud!)";
+    if (launchedFromMenuBar) {
+      showHUD(errorMsg);
+    } else {
+      showToast({ style: Toast.Style.Failure, title: errorMsg });
+    }
+    return false;
+  }
+  return true;
+};
 
 async function startTimer(timeInSeconds: number, timerName = "Untitled", selectedSound = "default") {
   const fileName = environment.supportPath + "/" + new Date().toISOString() + "---" + timeInSeconds + ".timer";
@@ -118,6 +132,7 @@ function deleteCustomTimer(ctID: string) {
 }
 
 export {
+  checkForOverlyLoudAlert,
   createCustomTimer,
   deleteCustomTimer,
   ensureCTFileExists,

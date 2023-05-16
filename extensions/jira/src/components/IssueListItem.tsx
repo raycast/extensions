@@ -16,10 +16,34 @@ export default function IssueListItem({ issue, mutate }: IssueListItemProps) {
   const updatedAt = new Date(issue.fields.updated);
   const assignee = issue.fields.assignee;
 
-  const keywords = [issue.key, issue.fields.status.name, issue.fields.issuetype.name, issue.fields.priority.name];
+  const keywords = [issue.key, issue.fields.status.name, issue.fields.issuetype.name];
+
+  if (issue.fields.priority) {
+    keywords.push(issue.fields.priority.name);
+  }
 
   if (issue.fields.assignee) {
     keywords.push(issue.fields.assignee.displayName);
+  }
+
+  const accessories = [
+    {
+      text: {
+        value: issue.fields.status.name,
+        color: issue.fields.status.statusCategory
+          ? getStatusColor(issue.fields.status.statusCategory.colorName)
+          : undefined,
+      },
+    },
+    {
+      icon: assignee ? assignee.avatarUrls["32x32"] : Icon.Person,
+      tooltip: `Assignee: ${assignee ? assignee.displayName : "Unassigned"}`,
+    },
+    { date: updatedAt, tooltip: format(updatedAt, "EEEE d MMMM yyyy 'at' HH:mm") },
+  ];
+
+  if (issue.fields.priority) {
+    accessories.push({ icon: issue.fields.priority.iconUrl, tooltip: `Priority: ${issue.fields.priority.name}` });
   }
 
   return (
@@ -29,20 +53,7 @@ export default function IssueListItem({ issue, mutate }: IssueListItemProps) {
       icon={{ value: issue.fields.issuetype.iconUrl, tooltip: `Issue Type: ${issue.fields.issuetype.name}` }}
       title={issue.fields.summary}
       subtitle={issue.key}
-      accessories={[
-        {
-          text: {
-            value: issue.fields.status.name,
-            color: getStatusColor(issue.fields.status.statusCategory.colorName),
-          },
-        },
-        {
-          icon: assignee ? assignee.avatarUrls["32x32"] : Icon.Person,
-          tooltip: `Assignee: ${assignee ? assignee.displayName : "Unassigned"}`,
-        },
-        { date: updatedAt, tooltip: format(updatedAt, "EEEE d MMMM yyyy 'at' HH:mm") },
-        { icon: issue.fields.priority.iconUrl, tooltip: `Priority: ${issue.fields.priority.name}` },
-      ]}
+      accessories={accessories}
       actions={<IssueActions issue={issue} mutate={mutate} showDetailsAction={true} />}
     />
   );

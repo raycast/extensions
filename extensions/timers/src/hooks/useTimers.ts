@@ -1,6 +1,7 @@
 import { environment } from "@raycast/api";
 import { useState } from "react";
 import {
+  checkForOverlyLoudAlert,
   createCustomTimer,
   deleteCustomTimer,
   ensureCTFileExists,
@@ -25,7 +26,8 @@ export default function useTimers() {
     setIsLoading(false);
   };
 
-  const handleStartTimer = (seconds: number, name: string) => {
+  const handleStartTimer = (seconds: number, name: string, launchedFromMenuBar = false) => {
+    if (!checkForOverlyLoudAlert(launchedFromMenuBar)) return;
     startTimer(seconds, name);
     refreshTimers();
   };
@@ -36,7 +38,8 @@ export default function useTimers() {
     refreshTimers();
   };
 
-  const handleStartCT = (customTimer: CustomTimer) => {
+  const handleStartCT = (customTimer: CustomTimer, launchedFromMenuBar = false) => {
+    if (!checkForOverlyLoudAlert(launchedFromMenuBar)) return;
     startTimer(customTimer.timeInSeconds, customTimer.name, customTimer.selectedSound);
     refreshTimers();
   };

@@ -1,34 +1,27 @@
 import { Clipboard, closeMainWindow, getPreferenceValues, open, Toast } from "@raycast/api";
 
-import { handleError, todoist } from "./api";
+import { quickAddTask, handleError, updateTask } from "./api";
 import { isTodoistInstalled, checkTodoistApp } from "./helpers/isTodoistInstalled";
+import { getTaskAppUrl, getTaskUrl } from "./helpers/tasks";
+import { initializeApi } from "./helpers/withTodoistApi";
 
-type Arguments = {
-  title: string;
-  description?: string;
-  info?: string;
-};
-
-type Preferences = {
-  shouldCloseMainWindow: boolean;
-};
-
-const command = async (props: { arguments: Arguments }) => {
+const command = async (props: { arguments: Arguments.QuickAddTask }) => {
+  await initializeApi();
   const toast = new Toast({ style: Toast.Style.Animated, title: "Creating task" });
   await toast.show();
 
   try {
-    const preferences: Preferences = getPreferenceValues();
+    const preferences = getPreferenceValues<Preferences.QuickAddTask>();
 
     if (preferences.shouldCloseMainWindow) {
       await closeMainWindow();
     }
 
-    const { url, id } = await todoist.quickAddTask({
-      text: `${props.arguments.title}${props.arguments.info ? ` ${props.arguments.info}` : ""}`,
+    const { id } = await quickAddTask({
+      text: props.arguments.text,
     });
 
-    await todoist.updateTask(id, { description: props.arguments.description });
+    await updateTask({ id, description: props.arguments.description });
 
     toast.style = Toast.Style.Success;
     toast.title = "Task created";
@@ -39,14 +32,14 @@ const command = async (props: { arguments: Arguments }) => {
       title: `Open Task ${isTodoistInstalled ? "in Todoist" : "in Browser"}`,
       shortcut: { modifiers: ["cmd", "shift"], key: "o" },
       onAction: async () => {
-        open(isTodoistInstalled ? `todoist://task?id=${id}` : url);
+        open(isTodoistInstalled ? getTaskAppUrl(id) : getTaskUrl(id));
       },
     };
 
     toast.secondaryAction = {
       title: "Copy Task URL",
       shortcut: { modifiers: ["cmd", "shift"], key: "c" },
-      onAction: () => Clipboard.copy(url),
+      onAction: () => Clipboard.copy(getTaskUrl(id)),
     };
   } catch (error) {
     handleError({ error, title: "Unable to create task" });

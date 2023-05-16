@@ -1,18 +1,14 @@
-import { Comment, Cycle, Issue, Project, Team, User, WorkflowState } from "@linear/sdk";
+import { Comment, Cycle, Issue, IssueRelation, Project, Team, User, WorkflowState } from "@linear/sdk";
 import { getPreferenceValues } from "@raycast/api";
 import { LabelResult } from "./getLabels";
 import { getLinearClient } from "../helpers/withLinearClient";
 import { getPaginated, PageInfo } from "./pagination";
 
-type Preferences = {
-  limit?: string;
-};
-
 const DEFAULT_PAGE_SIZE = 50;
 const DEFAULT_LIMIT = 50;
 
 function getPageLimits() {
-  const preferences: Preferences = getPreferenceValues();
+  const preferences = getPreferenceValues<Preferences>();
   const limit = preferences.limit ? +preferences.limit : DEFAULT_LIMIT;
   const pageSize = Math.min(DEFAULT_PAGE_SIZE, limit);
   const pageLimit = Math.floor(limit / pageSize);
@@ -342,16 +338,43 @@ export async function getComments(issueId: string) {
   return data.issue.comments.nodes;
 }
 
-export type IssueDetailResult = IssueResult & Pick<Issue, "description" | "dueDate">;
+export type IssueDetailResult = IssueResult &
+  Pick<Issue, "description" | "dueDate"> & {
+    relations: {
+      nodes: [
+        Pick<IssueRelation, "id" | "type"> & {
+          relatedIssue: Pick<Issue, "identifier" | "title"> & {
+            state: Pick<WorkflowState, "type" | "color">;
+          };
+        }
+      ];
+    };
+  };
 
 export async function getIssueDetail(issueId: string) {
   const { graphQLClient } = getLinearClient();
+
   const { data } = await graphQLClient.rawRequest<{ issue: IssueDetailResult }, Record<string, unknown>>(
     `
       query($issueId: String!) {
         issue(id: $issueId) {
           ${IssueFragment}
           description
+          relations {
+            nodes {
+              id
+              type
+              relatedIssue {
+                id
+                identifier
+                title
+                state {
+                  color
+                  type
+                }
+              }
+            }
+          }
         }
       }
     `,

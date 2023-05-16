@@ -387,9 +387,9 @@
       "name": "TOJB2011"
     },
     {
-      "full_name": "World English Bible",
+      "full_name": "World English Bible, American English Edition, without Strong's Numbers",
       "id": 206,
-      "name": "WEB"
+      "name": "WEBUS"
     },
     {
       "full_name": "Contemporary English Version (Anglicised) 2012",
@@ -547,9 +547,9 @@
       "name": "NRSV"
     },
     {
-      "full_name": "Revised Standard Version",
+      "full_name": "Revised Standard Version Old Tradition 1952",
       "id": 2017,
-      "name": "RSV-CI"
+      "name": "RSV-C"
     },
     {
       "full_name": "Revised Standard Version",
@@ -605,6 +605,21 @@
       "full_name": "Scottish Metrical Paraphrases 1781",
       "id": 3051,
       "name": "MP1781"
+    },
+    {
+      "full_name": "Legacy Standard Bible",
+      "id": 3345,
+      "name": "LSB"
+    },
+    {
+      "full_name": "New Revised Standard Version Updated Edition 2021",
+      "id": 3523,
+      "name": "NRSVUE"
+    },
+    {
+      "full_name": "Revised Standard Version",
+      "id": 3548,
+      "name": "RSVCI"
     }
   ]
 }

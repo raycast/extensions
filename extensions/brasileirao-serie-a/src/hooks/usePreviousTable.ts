@@ -1,14 +1,14 @@
 import { useFetch } from "@raycast/utils";
+import { URLSearchParams } from "node:url";
 import { useMemo } from "react";
-import { URLSearchParams } from "url";
-import { authHeaders, BASE_URL } from "../api";
-import { useCurrentSeason } from "./useCurrentSeason";
+import { BASE_URL, authHeaders } from "../api";
+import { useLeagueInfo } from "./useLeagueInfo";
 
-export function usePreviousTable() {
-  const currentSeason = useCurrentSeason();
+export function usePreviousTable(season: string) {
+  const leagueInfo = useLeagueInfo();
   const params = new URLSearchParams({
-    season: new Date(currentSeason.endDate).getFullYear().toString(),
-    matchday: currentSeason.previousMatchday.toString(),
+    season: season,
+    matchday: leagueInfo.previousMatchday.toString(),
   });
 
   const { data } = useFetch<Standings>(`${BASE_URL}/standings?${params.toString()}`, {
