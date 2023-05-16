@@ -3,6 +3,16 @@ import { BRIDGE_CONFIG_KEY } from "./helpers/constants";
 import createHueClient from "./lib/createHueClient";
 
 export default async function ToggleAllLights() {
+  if (environment.launchType === "background") {
+    await background();
+  }
+
+  if (environment.launchType === "userInitiated") {
+    await userInitiated();
+  }
+}
+
+async function userInitiated() {
   try {
     const bridgeConfigString = await LocalStorage.getItem<string>(BRIDGE_CONFIG_KEY);
     if (bridgeConfigString === undefined) throw Error("No Hue Bridge configured");
@@ -15,26 +25,6 @@ export default async function ToggleAllLights() {
       title: "",
       message: "Please wait…",
     });
-
-    if (environment.launchType === "background") {
-      if (onLights.length === 0) {
-        updateCommandMetadata({
-          subtitle: "All lights are off",
-        }).then();
-      } else if (onLights.length === lights.length) {
-        updateCommandMetadata({
-          subtitle: "All lights are on",
-        }).then();
-      } else {
-        updateCommandMetadata({
-          subtitle: `${onLights.length} of ${lights.length} lights are on`,
-        }).then();
-      }
-
-      // TODO: Update status of all groups and lights
-
-      return;
-    }
 
     if (onLights.length === 0) {
       toast.title = "Turning on all lights…";
@@ -105,4 +95,29 @@ export default async function ToggleAllLights() {
       await closeMainWindow();
     }
   }
+}
+
+async function background() {
+  const bridgeConfigString = await LocalStorage.getItem<string>(BRIDGE_CONFIG_KEY);
+  if (bridgeConfigString === undefined) throw Error("No Hue Bridge configured");
+  const bridgeConfig = JSON.parse(bridgeConfigString);
+  const hueClient = await createHueClient(bridgeConfig);
+  const lights = await hueClient.getLights();
+  const onLights = lights.filter((light) => light.on.on);
+
+  if (onLights.length === 0) {
+    updateCommandMetadata({
+      subtitle: "All lights are off",
+    }).then();
+  } else if (onLights.length === lights.length) {
+    updateCommandMetadata({
+      subtitle: "All lights are on",
+    }).then();
+  } else {
+    updateCommandMetadata({
+      subtitle: `${onLights.length} of ${lights.length} lights are on`,
+    }).then();
+  }
+
+  // TODO: Update status of all groups and lights
 }
