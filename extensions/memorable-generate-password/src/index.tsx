@@ -1,30 +1,32 @@
-import { LaunchProps, List, Clipboard, Action, ActionPanel, showHUD } from "@raycast/api";
+import { LaunchProps, Icon,List, Clipboard, Action, ActionPanel, showHUD } from "@raycast/api";
 import { useState, useEffect } from "react";
-import generatePassword from "./generatePassword";
+import generatePassword, { PasswordData } from "./generatePassword";
 
 interface PasswordArguments {
-  wordCount?: number;
-  passwordCount?: number;
+  wordCount: string;
+  passwordCount: string;
 }
 
 export default function Command(props: LaunchProps<{ arguments: PasswordArguments }>) {
-  console.log(props);
   const { wordCount, passwordCount } = props.arguments;
-  const [passwords, setPasswords] = useState<{ title: string; accessoryTitle: string; isCompleted: boolean }[]>([]);
+  const [passwords, setPasswords] = useState<PasswordData[]>([]);
+
+  const parseNumber = (value: string, defaultValue: number) => {
+    const parsedValue = parseInt(value);
+    return !isNaN(parsedValue) ? parsedValue : defaultValue;
+  };
 
   useEffect(() => {
     const fetchData = async () => {
-      const passwordList = await generatePassword(wordCount || 3, passwordCount || 9);
-      setPasswords(
-        passwordList.map(({ password, plaintext }) => ({
-          title: password,
-          accessoryTitle: plaintext,
-          isCompleted: false,
-        }))
-      );
+      const validWordCount = parseNumber(wordCount, 3);
+      const validPasswordCount = parseNumber(passwordCount, 9);
+
+      const passwordList = await generatePassword(validWordCount, validPasswordCount);
+
+      setPasswords(passwordList);
     };
     fetchData();
-  }, []);
+  }, [wordCount, passwordCount]);
 
   const handleCopyPassword = (password: string) => {
     Clipboard.copy(password);
@@ -33,14 +35,15 @@ export default function Command(props: LaunchProps<{ arguments: PasswordArgument
 
   return (
     <List>
-      {passwords.map((password, index) => (
+      {passwords.map((passwordData, index) => (
         <List.Item
           key={index}
-          title={`Password:${password.title}`}
-          accessoryTitle={`Plaintext:${password.accessoryTitle}`}
+          icon={Icon.Key}
+      title={`${passwordData.password}`}
+          accessories={[{ text: `${passwordData.plaintext}` , icon: Icon.Eye }]} 
           actions={
             <ActionPanel title="Copy Password">
-              <Action title={`Copy Password:${password.title}`} onAction={() => handleCopyPassword(password.title)} />
+              <Action title={`Copy Password: ${passwordData.password}`} onAction={() => handleCopyPassword(passwordData.password)} />
             </ActionPanel>
           }
         />

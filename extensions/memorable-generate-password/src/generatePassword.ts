@@ -1,8 +1,10 @@
 import fs from "fs";
-import path from "path";
-import * as _ from "lodash";
+import {shuffle} from "lodash";
+import { resolve } from "path";
+import { environment } from "@raycast/api";
 
-const filePath = path.join(__dirname, "./assets/The_Oxford_3000.txt");
+const filePath = resolve(environment.assetsPath, "The_Oxford_3000.txt");
+const words = fs.readFileSync(filePath, "utf8").split("\n");
 
 const leetRules: Record<string, string[]> = {
   a: ["a", "A", "4", "@"],
@@ -33,25 +35,23 @@ const leetRules: Record<string, string[]> = {
   z: ["z", "Z", "2"],
 };
 
-interface PasswordData {
+export interface PasswordData {
   password: string;
   plaintext: string;
 }
 
-const generatePassword = async (wordCount = 3, passwordCount = 1, maxIterations = 1000): Promise<PasswordData[]> => {
-  const words = fs.readFileSync(filePath, "utf8").split("\n");
+const generatePassword = async (wordCount:number, passwordCount:number, maxIterations = 1000): Promise<PasswordData[]> => {
   const passwordData: PasswordData[] = [];
-  console.log(wordCount, passwordCount);
   for (let c = 0; c < passwordCount; c++) {
     let password = "";
     let plaintext = "";
     let iterationCount = 0;
 
     while (iterationCount < maxIterations) {
-      plaintext = _.shuffle(words).slice(0, wordCount).join(" ");
+      plaintext = shuffle(words).slice(0, wordCount).join(" ");
 
       password = Array.from(plaintext)
-        .map((letter) => _.shuffle(leetRules[letter] || [letter])[0])
+        .map((letter) => shuffle(leetRules[letter] || [letter])[0])
         .join("");
 
       if (/[a-z]/.test(password) && /[A-Z]/.test(password) && /\d/.test(password) && /[^a-zA-Z0-9]/.test(password)) {
