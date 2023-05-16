@@ -81,7 +81,7 @@
       "default": false
     },
     {
-      "name": "basePath",
+      "name": "selfHost",
       "label": "Open AI Host",
       "description": "Enter your personal Open AI Host, like: https://oa.api2d.net/v1",
       "type": "textfield",
