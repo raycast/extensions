@@ -161,7 +161,7 @@
 /extensions/control-d                                @httpjamesm
 /extensions/conventional-comments                    @krzysztofzuraw
 /extensions/convert                                  @nielsvanrijn
-/extensions/converter                                @koinzhang
+/extensions/converter                                @koinzhang @Saafo
 /extensions/copy-gcp-icons                           @pomdtr
 /extensions/copy-path                                @koinzhang
 /extensions/country-lookup                           @pernielsentikaer
