@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Application, environment, getApplications, LaunchType } from "@raycast/api";
 import { CacheKey, defaultCache } from "../utils/constants";
-import { scriptQuitApps } from "../utils/applescript-utils";
+import { scriptQuitAppsWithoutWindow } from "../utils/applescript-utils";
 import { refreshInterval } from "../types/preferences";
 
 export const setAutoQuitAppsHook = (refresh: number) => {
@@ -41,6 +41,7 @@ export const quitAppsHook = () => {
     if (typeof quitAppsString == "string") {
       quitApps = JSON.parse(quitAppsString);
     }
+    setQuitApps(quitApps);
 
     // Quit Apps
     if (environment.launchType == LaunchType.Background) {
@@ -50,23 +51,21 @@ export const quitAppsHook = () => {
         realRefreshInterval = parseInt(refreshIntervalString);
       }
       if (realRefreshInterval == refreshInterval) {
-        await scriptQuitApps(quitApps);
+        await scriptQuitAppsWithoutWindow(quitApps);
         defaultCache.set(CacheKey.REFRESH_INTERVAL, "5");
       } else {
         const nextRefreshInterval = realRefreshInterval + 5;
         if (nextRefreshInterval > refreshInterval) {
-          await scriptQuitApps(quitApps);
+          await scriptQuitAppsWithoutWindow(quitApps);
           defaultCache.set(CacheKey.REFRESH_INTERVAL, "5");
         } else {
           defaultCache.set(CacheKey.REFRESH_INTERVAL, String(nextRefreshInterval));
         }
       }
     } else {
-      await scriptQuitApps(quitApps);
+      await scriptQuitAppsWithoutWindow(quitApps);
       defaultCache.set(CacheKey.REFRESH_INTERVAL, "5");
     }
-
-    setQuitApps(quitApps);
     setLoading(false);
   }, []);
 
