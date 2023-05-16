@@ -29,10 +29,19 @@ You'll be asked to provide your Cloudinary Cloud Name, API Key, and API Secret w
 
 ## Workflows
 
+### Search
+
+* Open the Search action
+* Add your query and/or tag you'd like to search
+
+Currently will display the first 30 results.
+
 ### Upload from Clipboard
 
-* Copy something to your clipboard, run the Upload action
+* Copy something to your clipboard
+* Run the Upload Clipboard action
 
-## Credits
+### Upload from URL
 
-Extension heavily inspired by [aliyun-oss](https://github.com/raycast/extensions/tree/78b7c11594d4551540ca9ba0f11a98cd921f7412/extensions/aliyun-oss).
+* Open the Upload URL action
+* Paste a URL as an option

@@ -1,17 +1,15 @@
-import { List, ActionPanel, Action, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
+import { showToast, Toast } from "@raycast/api";
 
 import { storeClipboardToTemp } from "./lib/util";
 import { uploadImage } from "./lib/cloudinary";
-import { getUploadSuccessItems } from "./lib/extension";
-
 import type { Asset } from "./types/asset";
+
+import ViewResource from "./components/ViewResource";
 
 export default function main() {
   const [asset, setAsset] = useState<Asset>();
   const [loading, setLoading] = useState(false);
-
-  const listItems = asset && getUploadSuccessItems(asset);
 
   useEffect(() => {
     (async function run() {
@@ -41,35 +39,5 @@ export default function main() {
     });
   }
 
-  return (
-    <>
-      <List isShowingDetail isLoading={loading}>
-        {listItems?.map((item) => {
-          return (
-            <List.Item
-              key={item.title}
-              title={item.title}
-              icon={item.icon}
-              actions={<Actions item={{ content: item.assetUrl }} />}
-              detail={<List.Item.Detail markdown={item.detail} />}
-            />
-          );
-        })}
-      </List>
-    </>
-  );
-}
-
-type ActionItem = {
-  item: {
-    content: string;
-  };
-};
-
-function Actions({ item }: ActionItem) {
-  return (
-    <ActionPanel>
-      <Action.CopyToClipboard content={item.content} />
-    </ActionPanel>
-  );
+  return <ViewResource resource={asset} isLoading={loading} />;
 }

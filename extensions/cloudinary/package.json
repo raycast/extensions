@@ -13,6 +13,26 @@
   "license": "MIT",
   "commands": [
     {
+      "name": "search",
+      "title": "Search Assets",
+      "description": "Search for assets inside Cloudinary",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Search",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "tag",
+          "placeholder": "Tag",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
       "name": "upload-clipboard",
       "title": "Upload Clipboard",
       "description": "Upload image contents from clipboard to Cloudinary.",

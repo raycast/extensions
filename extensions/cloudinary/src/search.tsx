@@ -1,32 +1,36 @@
 import { useEffect, useState } from "react";
 import { showToast, Toast, LaunchProps } from "@raycast/api";
 
-import { uploadImage } from "./lib/cloudinary";
+import { searchAssets } from "./lib/cloudinary";
 import type { Asset } from "./types/asset";
 
-import ViewResource from "./components/ViewResource";
+import ViewResources from "./components/ViewResources";
 
 interface Arguments {
-  url?: string;
+  tag?: string;
+  query?: string;
 }
 
 export default function main(props: LaunchProps<{ arguments: Arguments }>) {
-  const [asset, setAsset] = useState<Asset>();
+  const [assets, setAssets] = useState<Array<Asset>>();
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     (async function run() {
-      if (typeof props?.arguments?.url !== "string") {
+      if (typeof props?.arguments?.tag !== "string" && typeof props?.arguments?.query !== "string") {
         return;
       }
 
       setLoading(true);
 
       try {
-        const resource = await uploadImage(props.arguments.url);
-        setAsset(resource as Asset);
+        const resources = await searchAssets({
+          query: props.arguments.query,
+          tag: props.arguments.tag,
+        });
+        setAssets(resources as Array<Asset>);
       } catch (e) {
-        displayError("Failed to upload clipboard data to Cloudinary");
+        displayError("Search Error");
       }
 
       setLoading(false);
@@ -45,5 +49,5 @@ export default function main(props: LaunchProps<{ arguments: Arguments }>) {
     });
   }
 
-  return <ViewResource resource={asset} isLoading={loading} />;
+  return <ViewResources resources={assets} isLoading={loading} />;
 }
