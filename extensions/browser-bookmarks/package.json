@@ -24,10 +24,10 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.50.0",
-    "@raycast/utils": "^1.5.2",
+    "@raycast/api": "^1.51.1",
+    "@raycast/utils": "^1.6.1",
     "ini": "^3.0.1",
-    "simple-plist": "^1.4.0-0",
+    "plist": "^3.0.6",
     "sql.js": "^1.8.0"
   },
   "devDependencies": {
