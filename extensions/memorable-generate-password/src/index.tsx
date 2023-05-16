@@ -1,4 +1,4 @@
-import { LaunchProps, Icon,List, Clipboard, Action, ActionPanel, showHUD } from "@raycast/api";
+import { LaunchProps, Icon, List, Clipboard, Action, ActionPanel, showHUD } from "@raycast/api";
 import { useState, useEffect } from "react";
 import generatePassword, { PasswordData } from "./generatePassword";
 
@@ -39,11 +39,14 @@ export default function Command(props: LaunchProps<{ arguments: PasswordArgument
         <List.Item
           key={index}
           icon={Icon.Key}
-      title={`${passwordData.password}`}
-          accessories={[{ text: `${passwordData.plaintext}` , icon: Icon.Eye }]} 
+          title={`${passwordData.password}`}
+          accessories={[{ text: `${passwordData.plaintext}`, icon: Icon.Eye }]}
           actions={
             <ActionPanel title="Copy Password">
-              <Action title={`Copy Password: ${passwordData.password}`} onAction={() => handleCopyPassword(passwordData.password)} />
+              <Action
+                title={`Copy Password: ${passwordData.password}`}
+                onAction={() => handleCopyPassword(passwordData.password)}
+              />
             </ActionPanel>
           }
         />

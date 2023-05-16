@@ -1,5 +1,5 @@
 import fs from "fs";
-import {shuffle} from "lodash";
+import { shuffle } from "lodash";
 import { resolve } from "path";
 import { environment } from "@raycast/api";
 
@@ -40,7 +40,11 @@ export interface PasswordData {
   plaintext: string;
 }
 
-const generatePassword = async (wordCount:number, passwordCount:number, maxIterations = 1000): Promise<PasswordData[]> => {
+const generatePassword = async (
+  wordCount: number,
+  passwordCount: number,
+  maxIterations = 1000
+): Promise<PasswordData[]> => {
   const passwordData: PasswordData[] = [];
   for (let c = 0; c < passwordCount; c++) {
     let password = "";
