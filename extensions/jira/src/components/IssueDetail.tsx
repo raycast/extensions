@@ -27,8 +27,12 @@ export default function IssueDetail({ initialIssue, issueKey }: IssueDetailProps
   const { customMarkdownFields, customMetadataFields } = useMemo(() => getCustomFieldsForDetail(issue), [issue]);
 
   const markdown = useMemo(() => {
-    let markdown = `# ${issue?.fields.summary}`;
-    const description = issue?.renderedFields?.description;
+    if (!issue) {
+      return "";
+    }
+
+    let markdown = `# ${issue.fields.summary}`;
+    const description = issue.renderedFields?.description;
 
     if (description) {
       markdown += `\n\n${getIssueDescription(description)}`;
@@ -40,12 +44,6 @@ export default function IssueDetail({ initialIssue, issueKey }: IssueDetailProps
 
     return markdown;
   }, [issue]);
-
-  // If coming from Create Issue's toast action, there's no initial issue
-  // so don't display anything until the data is fully loaded
-  if (!issue) {
-    return null;
-  }
 
   return (
     <Detail
@@ -74,7 +72,9 @@ export default function IssueDetail({ initialIssue, issueKey }: IssueDetailProps
             title="Status"
             text={{
               value: issue?.fields.status.name || "",
-              color: getStatusColor(issue?.fields.status.statusCategory.colorName),
+              color: issue?.fields.status.statusCategory
+                ? getStatusColor(issue?.fields.status.statusCategory.colorName)
+                : undefined,
             }}
           />
 

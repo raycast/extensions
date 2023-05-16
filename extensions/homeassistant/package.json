@@ -228,6 +228,13 @@
           "placeholder": "weather.home"
         }
       ]
+    },
+    {
+      "name": "assist",
+      "title": "Assist",
+      "description": "Conversation with Home Assistant Assist",
+      "mode": "view",
+      "subtitle": "Home Assistant"
     }
   ],
   "preferences": [
@@ -280,7 +287,8 @@
     "Other"
   ],
   "dependencies": {
-    "@raycast/api": "^1.42.0",
+    "@raycast/api": "^1.50.0",
+    "@raycast/utils": "^1.5.2",
     "home-assistant-js-websocket": "^5.11.1",
     "javascript-time-ago": "^2.5.9",
     "lodash-es": "^4.17.21",
@@ -290,15 +298,13 @@
     "ws": "^8.2.3"
   },
   "devDependencies": {
+    "@raycast/eslint-config": "^1.0.5",
     "@types/lodash-es": "^4.17.6",
     "@types/node": "^18.8.3",
     "@types/node-fetch": "^2.5.12",
     "@types/url-join": "^4.0.1",
     "@types/ws": "^8.2.0",
-    "@typescript-eslint/eslint-plugin": "^4.28.5",
-    "@typescript-eslint/parser": "^4.28.5",
     "eslint": "^7.31.0",
-    "eslint-config-prettier": "^8.3.0",
     "typescript": "^4.3.5"
   },
   "scripts": {

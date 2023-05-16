@@ -1,4 +1,4 @@
-import { Icon, Color, ActionPanel, Detail, List, Action, showToast, Toast, preferences } from "@raycast/api";
+import { Icon, Color, ActionPanel, Detail, List, Action, showToast, Toast, preferences, Clipboard } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { useFetch } from "@raycast/utils";
 import fetch from "node-fetch";
@@ -420,7 +420,7 @@ function EntryActions(article: Article, query: string, sortBy: string) {
         />
         <Action.Open
           icon={Icon.MagnifyingGlass}
-          title="Open search in Browser"
+          title="Open Search in Browser"
           target={"https://pubmed.ncbi.nlm.nih.gov/?term=" + encodeURI(query!) + "&sort=" + encodeURI(sortBy!)}
           shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
         />
@@ -430,6 +430,26 @@ function EntryActions(article: Article, query: string, sortBy: string) {
           target={preferences.scihubinstance.value + encodeURI(article.doi)}
           shortcut={{ modifiers: ["opt"], key: "enter" }}
         />
+        <Action.CopyToClipboard title="Copy DOI" content={article.doi} shortcut={{ modifiers: ["cmd"], key: "d" }} />
+      </ActionPanel>
+    );
+  } else if (article.doi) {
+    return (
+      <ActionPanel>
+        <Action.Push icon={Icon.Book} title="Read Abstract" target={<Details article={article} query={query} />} />
+        <Action.Open
+          icon={Icon.Globe}
+          title="Open Article in Browser"
+          target={article.url}
+          shortcut={{ modifiers: ["cmd"], key: "enter" }}
+        />
+        <Action.Open
+          icon={Icon.MagnifyingGlass}
+          title="Open Search in Browser"
+          target={"https://pubmed.ncbi.nlm.nih.gov/?term=" + encodeURI(query!) + "&sort=" + encodeURI(sortBy!)}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
+        />
+        <Action.CopyToClipboard title="Copy DOI" content={article.doi} shortcut={{ modifiers: ["cmd"], key: "d" }} />
       </ActionPanel>
     );
   } else {
@@ -464,6 +484,14 @@ function EntryActionsDetail(article: Article) {
           target={preferences.scihubinstance.value + encodeURI(article.doi)}
           shortcut={{ modifiers: ["opt"], key: "enter" }}
         />
+        <Action.CopyToClipboard title="Copy DOI" content={article.doi} shortcut={{ modifiers: ["cmd"], key: "d" }} />
+      </ActionPanel>
+    );
+  } else if (article.doi) {
+    return (
+      <ActionPanel>
+        <Action.Open icon={Icon.Globe} title="Open Article in Browser" target={article.url} />
+        <Action.CopyToClipboard title="Copy DOI" content={article.doi} shortcut={{ modifiers: ["cmd"], key: "d" }} />
       </ActionPanel>
     );
   } else {
@@ -537,30 +565,48 @@ const Details = (props: { article: Article; query: string }) => {
     markdown = nhm.translate("<em>Loading abstract…</em>");
   }
 
-  const dateTitle = props.article.epubdate ? "(Electronic) Publication Date" : "Publication Date";
-  const dateText = props.article.epubdate
-    ? "(" +
-      new Date(props.article.epubdate).toLocaleDateString("de-DE", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-      }) +
-      ") " +
-      new Date(props.article.pubdate).toLocaleDateString("de-DE", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-      })
-    : new Date(props.article.pubdate).toLocaleDateString("de-DE", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-      });
+  const dateTitle =
+    props.article.epubdate === props.article.pubdate
+      ? "Electronic Publication Date"
+      : props.article.epubdate
+      ? "(Electronic) Publication Date"
+      : "Publication Date";
+  const dateText =
+    props.article.epubdate === props.article.pubdate
+      ? new Date(props.article.epubdate).toLocaleDateString("de-DE", {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+        })
+      : props.article.epubdate
+      ? "(" +
+        new Date(props.article.epubdate).toLocaleDateString("de-DE", {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+        }) +
+        ") " +
+        new Date(props.article.pubdate).toLocaleDateString("de-DE", {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+        })
+      : new Date(props.article.pubdate).toLocaleDateString("de-DE", {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+        });
 
-  const citationTitle = props.article.issue ? "Volume(Issue):Pages" : "Volume:Pages";
+  const citationTitle = props.article.issue
+    ? "Volume(Issue):Pages"
+    : props.article.volume
+    ? "Volume:Pages"
+    : "Not published yet";
   const citationText = props.article.issue
     ? props.article.volume + "(" + props.article.issue + "):" + props.article.pages
-    : props.article.volume + ":" + props.article.pages;
+    : props.article.volume
+    ? props.article.volume + ":" + props.article.pages
+    : "Online ahead of print";
 
   const idsTitle = props.article.pmc && props.article.doi ? "PMC, DOI, PMID" : props.article.doi ? "DOI, PMID" : "PMID";
 

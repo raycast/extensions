@@ -1,7 +1,7 @@
 import fetch, { HeadersInit } from "node-fetch";
 import { getPreferenceValues } from "@raycast/api";
+
 import {
-  Preferences,
   MinifluxApiError,
   MinifluxEntries,
   MinifluxEntry,
@@ -25,7 +25,12 @@ const requestApi = async <T>(
   method: "GET" | "POST" | "PUT" = "GET",
   body?: object
 ): Promise<T> => {
-  const { baseUrl, apiKey } = getPreferenceValues<Preferences>();
+  const { baseUrl, apiKey }: Preferences = getPreferenceValues();
+
+  if (!baseUrl || !apiKey) {
+    throw new Error("baseUrl and apikey are required!");
+  }
+
   const apiUrl = removeTrailingSlash(baseUrl);
 
   const headers: HeadersInit = { "X-Auth-Token": apiKey };
@@ -53,18 +58,18 @@ const requestApi = async <T>(
 const getEntriesWithParams = async <T>(queryParams: string): Promise<T> => requestApi<T>("/v1/entries", queryParams);
 
 const search = async (query: string): Promise<MinifluxEntries> => {
-  const { searchLimit } = getPreferenceValues<Preferences>();
+  const { searchLimit }: Preferences.Search = getPreferenceValues();
 
   return getEntriesWithParams<MinifluxEntries>(`?search=${query}${searchLimit ? "&limit=" + searchLimit : ""}`);
 };
 
 const getRecentEntries = async (): Promise<MinifluxEntries> => {
-  const { feedLimit } = getPreferenceValues<Preferences>();
+  const { feedLimit }: Preferences.ReadRecentEntries = getPreferenceValues();
   return getEntriesWithParams<MinifluxEntries>(`?status=unread&direction=desc&limit=${feedLimit}`);
 };
 
 const getEntryUrlInMiniflux = ({ id, status }: MinifluxEntry): string => {
-  const { baseUrl } = getPreferenceValues<Preferences>();
+  const { baseUrl }: Preferences = getPreferenceValues();
   const entryStatus = status === "read" ? "history" : status;
 
   return `${baseUrl}/${entryStatus}/entry/${id}`;
@@ -97,7 +102,7 @@ const refreshAllFeed = async (): Promise<boolean> => (await requestApi<number>(`
 
 // Readwise API
 const saveToReadwise = async (body: ReadwiseRequest): Promise<ReadwiseResponse> => {
-  const { readwiseToken } = getPreferenceValues<Preferences>();
+  const { readwiseToken }: Preferences = getPreferenceValues();
 
   const response = await fetch("https://readwise.io/api/v3/save/", {
     method: "POST",

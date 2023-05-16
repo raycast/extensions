@@ -3,6 +3,7 @@ import {
   Clipboard,
   closeMainWindow,
   Color,
+  getPreferenceValues,
   Icon,
   List,
   popToRoot,
@@ -20,6 +21,7 @@ import {
   getDefaultOutputDevice,
   setDefaultInputDevice,
   setDefaultOutputDevice,
+  setDefaultSystemDevice,
   TransportType,
 } from "./audio-device";
 
@@ -113,7 +115,7 @@ function SetAudioDeviceAction({ device, type }: SetAudioDeviceActionProps) {
       title={`Select ${device.name}`}
       onAction={async () => {
         try {
-          await (type === "input" ? setDefaultInputDevice(device.id) : setDefaultOutputDevice(device.id));
+          await (type === "input" ? setDefaultInputDevice(device.id) : setOutputAndSystemDevice(device.id));
           closeMainWindow({ clearRootSearch: true });
           popToRoot({ clearSearchBar: true });
           showHUD(`Active ${type} audio device set to ${device.name}`);
@@ -128,6 +130,14 @@ function SetAudioDeviceAction({ device, type }: SetAudioDeviceActionProps) {
       }}
     />
   );
+}
+
+async function setOutputAndSystemDevice(deviceId: string) {
+  const { systemOutput } = getPreferenceValues();
+  await setDefaultOutputDevice(deviceId);
+  if (systemOutput) {
+    await setDefaultSystemDevice(deviceId);
+  }
 }
 
 export function deviceIcon(device: AudioDevice) {
