@@ -1,20 +1,14 @@
-import { exec } from "child_process";
 import { homedir } from "os";
 import { promisify } from "util";
 
 import { useCachedPromise } from "@raycast/utils";
-import plist from "plist";
+import { readFile } from "simple-plist";
 
 import { BROWSERS_BUNDLE_ID } from "./useAvailableBrowsers";
 
-const execAsync = promisify(exec);
-
 const PLIST_PATH = `${homedir()}/Library/Safari/Bookmarks.plist`;
 
-async function convertBPList(binaryPlistPath: string) {
-  const result = await execAsync(`plutil -convert xml1 -o - "${binaryPlistPath}"`);
-  return result.stdout;
-}
+const readPlist = promisify(readFile);
 
 export type BookmarkFolder = {
   WebBookmarkUUID: string;
@@ -108,14 +102,11 @@ function getFolders(bookmark: BookmarkFolder | BookmarkItem, hierarchy = ""): Fo
 
 export default function useSafariBookmarks(enabled: boolean) {
   const { data, isLoading, mutate, error } = useCachedPromise(
-    async (enabled) => {
-      if (!enabled) return null;
-
-      return plist.parse(await convertBPList(PLIST_PATH)) as BookmarkFolder;
+    (enabled) => {
+      return enabled ? (readPlist(PLIST_PATH) as Promise<BookmarkFolder>) : Promise.resolve();
     },
     [enabled]
   );
-
   const bookmarks = data ? getBookmarks(data) : [];
   const folders = data ? getFolders(data) : [];
 
