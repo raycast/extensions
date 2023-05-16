@@ -7,6 +7,7 @@ import {
   showToast,
   Toast,
 } from '@raycast/api';
+import { AxiosError } from 'axios';
 import Fuse from 'fuse.js';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import Service, { Coin } from './service';
@@ -69,10 +70,26 @@ export default function Command() {
         const coins = await service.getCoinList();
         setCoins(coins);
       } catch (err) {
+        let errMsg = 'Try running the command again';
+
+        if (err instanceof AxiosError && err.response) {
+          const { status, headers } = err.response;
+
+          if (status === 429) {
+            const retryAfter = headers['retry-after'];
+
+            if (retryAfter) {
+              errMsg = `Too many requests, try again in ${retryAfter} seconds`;
+            } else {
+              errMsg = 'Too many requests, try again later';
+            }
+          }
+        }
+
         await showToast({
           style: Toast.Style.Failure,
           title: 'Failed to load data',
-          message: 'Try running the command again',
+          message: errMsg,
         });
       }
 
