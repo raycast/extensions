@@ -1,5 +1,10 @@
 # Changelog
 
+## Tweaks (2023-05-16)
+- Refactor calculate command to circumvent rate limit issues
+- Handle rate limit error on calculate command
+- Tweaked copy of calculate command actions
+
 ## Tweaks (2022-03-15)
 - Use h2 for coin info details layout
 - Handle coin list fetch failure

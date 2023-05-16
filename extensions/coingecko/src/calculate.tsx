@@ -106,7 +106,14 @@ export default function Command() {
   const copyResultToClipboard = async (unformatted = false) => {
     const value = unformatted ? `${result.current[0]}` : result.current[1];
     await Clipboard.copy(value);
-    await showHUD('Copied to Clipboard');
+
+    let msg = 'Copied to Clipboard';
+
+    if (unformatted) {
+      msg += ' (Without Formatting)';
+    }
+
+    await showHUD(msg);
 
     reset();
   };
@@ -203,18 +210,10 @@ export default function Command() {
     toast.title = totalFormatted;
     toast.primaryAction = {
       title: 'Copy',
-      shortcut: {
-        modifiers: ['cmd', 'shift'],
-        key: 'c',
-      },
       onAction: () => copyResultToClipboard(),
     };
     toast.secondaryAction = {
-      title: 'Copy Raw',
-      shortcut: {
-        modifiers: ['cmd', 'shift'],
-        key: 'x',
-      },
+      title: 'Copy Without Formatting',
       onAction: () => copyResultToClipboard(true),
     };
   };
@@ -257,21 +256,7 @@ export default function Command() {
         <ActionPanel>
           <Action.SubmitForm title="Calculate" onSubmit={onFormSubmit} />
           <Action
-            title="Copy Unformatted Result"
-            onAction={async () => {
-              if (result.current[1] === '') {
-                await showToast({
-                  style: Toast.Style.Failure,
-                  title: 'Nothing to copy',
-                });
-                return;
-              }
-
-              copyResultToClipboard(true);
-            }}
-          />
-          <Action
-            title="Copy Formatted Result"
+            title="Copy Result"
             onAction={async () => {
               if (result.current[1] === '') {
                 await showToast({
@@ -283,9 +268,23 @@ export default function Command() {
 
               copyResultToClipboard();
             }}
+          />
+          <Action
+            title="Copy Result Without Formatting"
+            onAction={async () => {
+              if (result.current[1] === '') {
+                await showToast({
+                  style: Toast.Style.Failure,
+                  title: 'Nothing to copy',
+                });
+                return;
+              }
+
+              copyResultToClipboard(true);
+            }}
             shortcut={{
               modifiers: ['cmd', 'shift'],
-              key: 'f',
+              key: 'x',
             }}
           />
           <Action
