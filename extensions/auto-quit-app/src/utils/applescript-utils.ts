@@ -1,13 +1,32 @@
 import { runAppleScript } from "run-applescript";
 import { Application, getFrontmostApplication } from "@raycast/api";
 
-export async function scriptQuitApps(apps: Application[]) {
+export async function scriptQuitAppsWithoutWindow(apps: Application[]) {
   for (let i = 0; i < apps.length; i++) {
     const appName = apps[i].path.split("/").pop()?.replace(".app", "");
     const hasWindow = await scriptGetAppWindow(appName);
     const isRunning = await scriptIsRunning(appName);
     const isFrontmost = await IsFrontmostApp(appName);
     if (!hasWindow && isRunning && !isFrontmost) {
+      const script = `tell application "${appName}"
+   quit
+end tell`;
+
+      try {
+        await runAppleScript(script);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+  }
+}
+
+export async function scriptQuitApps(apps: Application[]) {
+  for (let i = 0; i < apps.length; i++) {
+    const appName = apps[i].path.split("/").pop()?.replace(".app", "");
+
+    const isRunning = await scriptIsRunning(appName);
+    if (isRunning) {
       const script = `tell application "${appName}"
    quit
 end tell`;
