@@ -29,7 +29,6 @@ export function useChatGPT(): OpenAIApi {
       if (useSelfHost) {
         config = { ...config, basePath: selfHost };
       }
-      console.log(config)
       return new Configuration(config);
     };
     const config = getConfig(preferences);
