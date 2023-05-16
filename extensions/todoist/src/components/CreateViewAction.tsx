@@ -17,7 +17,7 @@ export default function CreateViewAction({ title, view }: CreateViewActionProps)
       title="Create View Quicklink"
       quicklink={{
         link: createDeeplink(view),
-        name: `Todoist ${title}`,
+        name: title,
       }}
     />
   );
