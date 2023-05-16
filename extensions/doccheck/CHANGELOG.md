@@ -1,5 +1,9 @@
 # DocCheck Changelog
 
+## [Version 1.3.1] - 2023-05-10
+
+- Fix: flickering loading indicator when no search result is found
+
 ## [Version 1.3] - 2023-05-07
 
 - NEW: Search in AMBOSS, Google, Wikipedia or the German Wikipedia if no entry is found.
