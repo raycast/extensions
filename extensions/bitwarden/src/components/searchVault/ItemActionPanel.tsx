@@ -20,7 +20,7 @@ import {
 const { primaryAction } = getPreferenceValues();
 
 const VaultItemActionPanel = () => {
-  const { login } = useSelectedVaultItem();
+  const { login, card, identity } = useSelectedVaultItem();
 
   return (
     <ActionPanel>
@@ -35,16 +35,26 @@ const VaultItemActionPanel = () => {
           <OpenUrlInBrowserAction />
         </ActionPanel.Section>
       )}
-      <ActionPanel.Section>
-        <ShowCardDetailsAction />
-        <ShowIdentityDetailsAction />
-      </ActionPanel.Section>
-      <ActionPanel.Section title="Card Fields">
-        <CopyCardFieldsActions />
-      </ActionPanel.Section>
-      <ActionPanel.Section title="Identity Fields">
-        <CopyIdentityFieldsActions />
-      </ActionPanel.Section>
+      {!!card && (
+        <>
+          <ActionPanel.Section>
+            <ShowCardDetailsAction />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Card Fields">
+            <CopyCardFieldsActions />
+          </ActionPanel.Section>
+        </>
+      )}
+      {!!identity && (
+        <>
+          <ActionPanel.Section>
+            <ShowIdentityDetailsAction />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Identity Fields">
+            <CopyIdentityFieldsActions />
+          </ActionPanel.Section>
+        </>
+      )}
       <ActionPanel.Section>
         <CopyLoginUrisActions />
         <ShowNotesAction />
