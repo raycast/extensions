@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "mui-search",
-  "title": "MUI Documentation Search",
+  "name": "mui-documentation",
+  "title": "MUI Documentation",
   "description": "Search the online MUI documentation.",
   "author": "kgrhartlage",
   "license": "MIT",
