@@ -1,4 +1,4 @@
-import { Clipboard, closeMainWindow, getPreferenceValues, showHUD, showToast, Toast } from "@raycast/api";
+import { Clipboard, getPreferenceValues, showHUD, showToast, Toast } from "@raycast/api";
 import { Bitwarden } from "~/api/bitwarden";
 import { Preferences } from "~/types/preferences";
 import { captureException } from "~/utils/development";
@@ -11,15 +11,14 @@ const actions: Record<Preferences["generatePasswordQuickAction"], (password: str
   copy: async (password) => {
     await Clipboard.copy(password, { transient: getTransientCopyPreference("password") });
     await showHUD("Copied password to clipboard");
-    await closeMainWindow();
   },
   paste: async (password) => {
     await Clipboard.paste(password);
   },
   copyAndPaste: async (password) => {
     await Clipboard.copy(password, { transient: getTransientCopyPreference("password") });
-    await showHUD("Copied password to clipboard");
     await Clipboard.paste(password);
+    await showHUD("Copied password to clipboard");
   },
 };
 
