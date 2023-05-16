@@ -55,6 +55,7 @@ export default function Command() {
         id="result"
         title="Generated mock data"
         placeholder="Your generated mock data will appear here"
+        onChange={(json) => console.log("readonly field with json: ", json)}
         value={mockData.length > 0 ? prettyPrint(mockData) : ""}
       />
     </Form>
