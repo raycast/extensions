@@ -1,9 +1,11 @@
 # Browser Bookmarks Changelog
 
-## [Various Fixes]
+## [Various Fixes] - 2023-05-16
 
 - Support root bookmark folders for Safari
-- If the user has only one browser, use it by default
+- Use the only browser by default if the user has exactly one browser
+- Fix `JS heap out of memory error` if the user has hundreds, if not thousands of bookmarks
+- Fix `maxObject` count error if the user had thousands of bookmarks in Safari
 
 ## [Support for Edge] - 2023-05-05
 
