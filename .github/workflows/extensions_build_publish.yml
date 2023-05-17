@@ -11,6 +11,10 @@ on:
         description: "Ray CLI command to run (build | publish)"
         default: "build"
         required: true
+        type: choice
+        options:
+          - build
+          - publish
       cli_version:
         description: 'CLI Version (optional, eg. "1.0.0")'
         required: false
