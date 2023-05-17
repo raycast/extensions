@@ -11,6 +11,7 @@ import {
   openExtensionPreferences,
   popToRoot,
   confirmAlert,
+  Color,
 } from '@raycast/api';
 import { useEffect, useState } from 'react';
 import { getProgressIcon } from '@raycast/utils';
@@ -110,9 +111,9 @@ export default () => {
 
   function getProgressColor() {
     if (timer > 5) {
-      return '#61b972'; // green
+      return Color.Green;
     } else {
-      return '#d26060'; // red
+      return Color.Red;
     }
   }
 
@@ -196,7 +197,10 @@ export default () => {
             keywords={[account.issuer ?? '', account.name]}
             accessories={[
               account.issuer ? { tag: account.issuer } : {},
-              { icon: getProgressIcon(timer / TOKEN_TIME, getProgressColor()), text: `${timer}s` },
+              {
+                icon: { source: getProgressIcon(timer / TOKEN_TIME), tintColor: getProgressColor() },
+                text: `${timer}s`,
+              },
             ]}
             actions={
               <ActionPanel>
