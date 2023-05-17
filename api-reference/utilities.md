@@ -192,20 +192,15 @@ A Promise that resolves when the target has been opened.
 
 ### launchCommand
 
-Launches another command of the same extension. If the command does not exist, or if it's not enabled, an error will be thrown.
+Launches another command. If the command does not exist, or if it's not enabled, an error will be thrown.
+If the command is part of another extension, the user will be presented with a permission alert.
 Use this method if your command needs to open another command based on user interaction,
 or when an immediate background refresh should be triggered, for example when a command needs to update an associated menu-bar command.
 
 #### Signature
 
 ```typescript
-async function launchCommand(options: {
-  name: string;
-  type: LaunchType;
-  arguments?: Arguments | null;
-  context?: LaunchContext | null;
-  fallbackText?: string | null;
-}): Promise<void>;
+export async function launchCommand(options: LaunchOptions): Promise<void>;
 ```
 
 #### Example
@@ -260,3 +255,24 @@ Represents the passed context object of programmatic command launches.
 ### LaunchOptions
 
 A parameter object used to decide which command should be launched and what data (arguments, context) it should receive.
+
+#### IntraExtensionLaunchOptions
+
+The options that can be used when launching a command from the same extension.
+
+| Property | Description | Type |
+| :--- | :--- | :--- |
+| name<mark style="color:red;">*</mark> | command name as defined in the extension's manifest | <code>string</code> |
+| type<mark style="color:red;">*</mark> | [LaunchType.UserInitiated](environment.md#launchtype) or [LaunchType.Background](environment.md#launchtype) | <code>[LaunchType](environment.md#launchtype)</code> |
+| arguments | optional object for the argument properties and values as defined in the extension's manifest, for example: `{ "argument1": "value1" }` | <code>[Arguments](../information/lifecycle/arguments.md#arguments)</code> or <code>null</code> |
+| context | arbitrary object for custom data that should be passed to the command and accessible as `environment.launchContext`; the object must be JSON serializable (Dates and Buffers supported) | <code>[LaunchContext](utilities.md#launchcontext)</code> or <code>null</code> |
+| fallbackText | optional string to send as fallback text to the command | <code>string</code> or <code>null</code> |
+
+#### InterExtensionLaunchOptions
+
+The options that can be used when launching a command from a different extension.
+
+| Property | Description | Type |
+| :--- | :--- | :--- |
+| extensionName<mark style="color:red;">*</mark> | when launching command from a different extension, the extension name (as defined in the extension's manifest) is necessary | <code>string</code> |
+| ownerOrAuthorName<mark style="color:red;">*</mark> | when launching command from a different extension, the owner or author (as defined in the extension's manifest) is necessary | <code>string</code> |
