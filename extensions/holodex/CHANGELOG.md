@@ -1,5 +1,9 @@
 # Holodex Changelog
 
+## [Fix] - 2023-05-18
+
+- Fixed API headers (Channel Search)
+
 ## [Fix] - 2023-05-17
 
 - Fixed API headers
