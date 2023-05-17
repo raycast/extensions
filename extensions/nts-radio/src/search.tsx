@@ -57,10 +57,10 @@ export default function Command() {
           actions={
             <ActionPanel title={result.title}>
               {result.article_type === "episode" && result.article?.path && (
-                <Action.Push title="Open" target={<Details path={result.article.path} />} />
+                <Action.Push title="View More" target={<Details path={result.article.path} />} />
               )}
               {result.article_type === "show" && result.article?.path && (
-                <Action.Push title="Open" target={<Show path={result.article.path} />} />
+                <Action.Push title="View More" target={<Show path={result.article.path} />} />
               )}
               {result.article?.path && (
                 <Action.OpenInBrowser

@@ -1,4 +1,4 @@
-import { Toast, showToast } from "@raycast/api";
+import { Toast, popToRoot, showToast } from "@raycast/api";
 import { play } from "./api/play";
 import { STATION1_STREAM_URL } from "./constants/constants";
 import { getErrorMessage } from "./utils/getError";
@@ -10,6 +10,7 @@ export default async function Command() {
       title: "Opening NTS Live 1 audio stream",
     });
     await play(STATION1_STREAM_URL);
+    await popToRoot();
   } catch (err) {
     const error = getErrorMessage(err);
     await showToast({
