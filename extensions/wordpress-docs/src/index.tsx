@@ -117,6 +117,7 @@ function Summary({ searchResult }: { searchResult: SearchResult }) {
 
   return (
     <Detail
+      navigationTitle="AI Generated Summary"
       isLoading={isLoading}
       markdown={data}
       actions={
