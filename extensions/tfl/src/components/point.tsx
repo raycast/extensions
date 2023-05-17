@@ -21,7 +21,7 @@ export default function Point({ onSelect, onToggleFavorite, isFavorite, stopPoin
         <ActionPanel>
           <Action.Push title="Select" target={onSelect(stopPoint)} icon={Icon.ArrowRight} />
           <Action
-            title={isFavorite ? "Remove From Favorites" : "Add to Favorites"}
+            title={isFavorite ? "Remove from Favorites" : "Add to Favorites"}
             icon={{
               source: isFavorite ? Icon.HeartDisabled : Icon.Heart,
               tintColor: Color.Red,
