@@ -94,4 +94,5 @@ export type Preferences = {
   primaryAction: string;
   saveDirectory: string;
   messageLimit: string;
+  plainTextMode: boolean;
 };

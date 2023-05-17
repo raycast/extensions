@@ -3,18 +3,18 @@ import { useCachedPromise } from "@raycast/utils";
 
 import { MessageActions } from "./message-actions";
 import { MessageProps } from "../types";
-import { getMessageContent } from "../scripts/messages";
-import { formatDate, formatMarkdown } from "../utils";
+import { getMessageMarkdown } from "../scripts/messages";
+import { formatDate } from "../utils";
 
 export const MessageDetail = (props: MessageProps) => {
   const { mailbox, message } = props;
 
-  const { data: content, isLoading: isLoadingContent } = useCachedPromise(getMessageContent, [message, mailbox]);
+  const { data: markdown, isLoading: isLoadingContent } = useCachedPromise(getMessageMarkdown, [message, mailbox]);
 
   return (
     <Detail
       isLoading={isLoadingContent}
-      markdown={!isLoadingContent ? formatMarkdown(message.subject, content) : undefined}
+      markdown={markdown}
       metadata={
         <Detail.Metadata>
           <Detail.Metadata.Label title="From" text={message.senderName} icon={Icon.PersonCircle} />

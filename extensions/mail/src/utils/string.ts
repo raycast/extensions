@@ -34,7 +34,6 @@ export const titleCase = (str: string): string => {
 };
 
 export const formatMarkdown = (title: string, text: string | undefined): string => {
-  title = titleCase(title);
   if (text) {
     text = strip.nonASCII(text);
     text = replace.diacritics(text);
@@ -43,5 +42,9 @@ export const formatMarkdown = (title: string, text: string | undefined): string 
     text = text.trim().replaceAll(/[ ][ ]+/g, " ");
   }
 
-  return json2md([{ h1: title }, { p: text }]);
+  return json2md([{ h1: titleCase(title) }, { p: text }]);
+};
+
+export const stripHtmlComments = (html: string) => {
+  return html.replace(/<!--[\s\S]*?(?:-->)/g, "");
 };

@@ -1,14 +1,19 @@
 import { getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
 import emailRegex from "email-regex";
+import { simpleParser } from "mailparser";
+import TurndownService from "turndown";
+import juice from "juice";
+import utf8 from "utf8";
 
 import { Account, Mailbox, Message, OutgoingMessage, OutgoingMessageAction, Preferences } from "../types";
-import { constructDate, titleCase } from "../utils";
+import { constructDate, formatMarkdown, stripHtmlComments, titleCase } from "../utils";
 import { Cache } from "../utils/cache";
 import { isJunkMailbox, isTrashMailbox } from "../utils/mailbox";
 
 const preferences: Preferences = getPreferenceValues();
 const messageLimit = preferences.messageLimit ? parseInt(preferences.messageLimit) : 10;
+const plainTextMode = preferences.plainTextMode ?? false;
 
 export const tellMessage = async (message: Message, mailbox: Mailbox, script: string): Promise<string> => {
   if (!script.includes("msg")) {
@@ -16,7 +21,7 @@ export const tellMessage = async (message: Message, mailbox: Mailbox, script: st
     return "missing value";
   }
 
-  const appleScript = `
+  const scriptContainer = `
     tell application "Mail"
       tell account "${message.account}"
         set msg to (first message of (first mailbox whose name is "${mailbox.name}") whose id is "${message.id}")
@@ -25,7 +30,7 @@ export const tellMessage = async (message: Message, mailbox: Mailbox, script: st
     end tell
   `;
 
-  return await runAppleScript(appleScript);
+  return await runAppleScript(scriptContainer);
 };
 
 export const openMessage = async (message: Message, mailbox: Mailbox) => {
@@ -280,11 +285,55 @@ export const getMessages = async (
   return result.slice(0, messageLimit);
 };
 
-export const getMessageContent = async (message: Message, mailbox: Mailbox): Promise<string> => {
+export const getMessageContent = async (message: Message, mailbox: Mailbox) => {
   try {
     return await tellMessage(message, mailbox, "tell msg to return content");
   } catch (error) {
     await showToast(Toast.Style.Failure, "Error getting message content");
+    console.error(error);
+    return "";
+  }
+};
+
+export const getMessageHtml = async (message: Message, mailbox: Mailbox) => {
+  try {
+    const source = await tellMessage(message, mailbox, "tell msg to return source");
+    const decodedSource = utf8.decode(source);
+
+    const { html } = await simpleParser(decodedSource, { encoding: "utf-8" });
+    const htmlWithoutComments = stripHtmlComments(html || "");
+    const htmlWithInlineCss = juice(htmlWithoutComments, {
+      preserveFontFaces: false,
+      preserveImportant: false,
+      preserveMediaQueries: false,
+      preserveKeyFrames: false,
+      preservePseudos: false,
+      removeStyleTags: true,
+    });
+
+    return htmlWithInlineCss;
+  } catch (error) {
+    await showToast(Toast.Style.Failure, "Error getting message html");
+    console.error(error);
+    return "";
+  }
+};
+
+export const getMessageMarkdown = async (message: Message, mailbox: Mailbox): Promise<string> => {
+  try {
+    if (plainTextMode) {
+      const content = await getMessageContent(message, mailbox);
+      return formatMarkdown(message.subject, content);
+    }
+
+    const html = await getMessageHtml(message, mailbox);
+
+    const turndownService = new TurndownService();
+    const markdown = turndownService.turndown(html);
+
+    return formatMarkdown(message.subject, markdown);
+  } catch (error) {
+    await showToast(Toast.Style.Failure, "Error getting message markdown");
     console.error(error);
     return "";
   }

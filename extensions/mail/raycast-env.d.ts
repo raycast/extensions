@@ -8,6 +8,8 @@
 /* eslint-disable @typescript-eslint/ban-types */
 
 type ExtensionPreferences = {
+  /** Message Format - Sets whether to show messages in plain text or HTML. */
+  "plainTextMode"?: boolean,
   /** Primary Action - The primary action to be performed on the selected message. */
   "primaryAction"?: "seeMessage" | "openMessage",
   /** Save Attachments To - Directory to save mail attachments. */
@@ -34,8 +36,8 @@ declare namespace Preferences {
   export type ShareWithMail = ExtensionPreferences & {}
   /** Preferences accessible in the `refresh-mail` command */
   export type RefreshMail = ExtensionPreferences & {}
-  /** Preferences accessible in the `wipe-cache` command */
-  export type WipeCache = ExtensionPreferences & {}
+  /** Preferences accessible in the `clear-cache` command */
+  export type ClearCache = ExtensionPreferences & {}
 }
 
 declare namespace Arguments {
@@ -53,6 +55,6 @@ declare namespace Arguments {
   export type ShareWithMail = {}
   /** Arguments passed to the `refresh-mail` command */
   export type RefreshMail = {}
-  /** Arguments passed to the `wipe-cache` command */
-  export type WipeCache = {}
+  /** Arguments passed to the `clear-cache` command */
+  export type ClearCache = {}
 }

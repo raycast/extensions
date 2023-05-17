@@ -10,7 +10,7 @@
     ],
     "module": "commonjs",
     "target": "es2021",
-    "strict": true,
+    "strict": false,
     "isolatedModules": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
