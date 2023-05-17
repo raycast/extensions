@@ -4,7 +4,7 @@ import { VAULT_TIMEOUT } from "~/constants/preferences";
 import { Preferences } from "~/types/preferences";
 import { SessionState } from "~/types/session";
 
-export const Storage = {
+export const SessionStorage = {
   getSavedSession: () => {
     return Promise.all([
       LocalStorage.getItem<string>(LOCAL_STORAGE_KEY.SESSION_TOKEN),
@@ -37,7 +37,7 @@ export type SavedSessionState = {
 const VAULT_TIMEOUT_MESSAGE = "Vault timed out due to inactivity";
 
 export async function getSavedSession(): Promise<SavedSessionState> {
-  const [token, passwordHash, lastActivityTimeString] = await Storage.getSavedSession();
+  const [token, passwordHash, lastActivityTimeString] = await SessionStorage.getSavedSession();
   if (!token || !passwordHash) return { shouldLockVault: true };
 
   const loadedState: SavedSessionState = { token, passwordHash };

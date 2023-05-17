@@ -159,6 +159,13 @@
           ]
         }
       ]
+    },
+    {
+      "name": "lock-vault",
+      "title": "Lock Vault",
+      "subtitle": "Bitwarden",
+      "description": "Lock your bitwarden vault.",
+      "mode": "no-view"
     }
   ],
   "preferences": [
