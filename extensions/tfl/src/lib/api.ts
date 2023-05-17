@@ -1,6 +1,6 @@
-import axios, { AxiosResponse } from 'axios';
-import { API_URL } from './constants';
-import { IArrival, IStopPoint } from '../types';
+import axios, { AxiosResponse } from "axios";
+import { API_URL } from "./constants";
+import { IArrival, IStopPoint } from "../types";
 
 /**
  * Search for stop points based on the parameter passed in and search for it.
