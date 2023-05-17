@@ -12,7 +12,7 @@ import { Image } from "@raycast/api";
 import { RawResponse } from "@vitalets/google-translate-api/dist/cjs/types";
 import { ChildProcess } from "child_process";
 import { TextTranslateResponse } from "tencentcloud-sdk-nodejs-tmt/tencentcloud/services/tmt/v20180321/tmt_models";
-import { LanguageDetectType } from "./detectLanauge/types";
+import { LanguageDetectType } from "./detectLanguage/types";
 import { IcibaDictionaryResult } from "./dictionary/iciba/interface";
 import { LingueeDictionaryResult, LingueeListItemType } from "./dictionary/linguee/types";
 import {
@@ -45,15 +45,15 @@ export enum TranslationType {
   OpenAI = "OpenAI Translate",
 }
 
-export enum DicionaryType {
+export enum DictionaryType {
   Youdao = "Youdao Dictionary",
   Iciba = "Iciba Dictionary",
   Eudic = "Eudic Dictionary",
   Linguee = "Linguee Dictionary",
 }
 
-export type QueryType = TranslationType | DicionaryType;
-export type RequestType = TranslationType | DicionaryType | LanguageDetectType;
+export type QueryType = TranslationType | DictionaryType;
+export type RequestType = TranslationType | DictionaryType | LanguageDetectType;
 
 export interface QueryTypeResult {
   type: QueryType;
@@ -189,12 +189,12 @@ export interface ListAccessoryItem {
 
 export type ListItemDisplayType = LingueeListItemType | YoudaoDictionaryListItemType | QueryType;
 
-export interface ClipboardRecoredItem {
+export interface ClipboardRecordedItem {
   key: string;
   value: string;
 }
 
-export interface QueryRecoredItem {
+export interface QueryRecordedItem {
   timestamp: number;
   queryText: string;
   result?: string;

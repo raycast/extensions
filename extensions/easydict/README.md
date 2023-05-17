@@ -203,11 +203,11 @@ Details of the languages supported by each language detection service are as fol
 
 ##### Youdao Dictionary
 
-Support 5 langauges, (Chinese), English, French, Japanese, Korean.
+Support 5 languages, (Chinese), English, French, Japanese, Korean.
 
 ##### Linguee Dictionary
 
-Support 19 langauges, (Chinese, Japanese, Russian), English, French, Spanish, Portuguese, Italian, German, Swedish, Romanian, Slovak, Dutch, Hungarian, Greek, Danish, Finnish, Polish, Czech.
+Support 19 languages, (Chinese, Japanese, Russian), English, French, Spanish, Portuguese, Italian, German, Swedish, Romanian, Slovak, Dutch, Hungarian, Greek, Danish, Finnish, Polish, Czech.
 
 #### Translation
 

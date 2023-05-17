@@ -17,7 +17,7 @@ import { hasTencentAppKey, tencentDetect } from "../translation/tencent";
 import { volcanoDetect } from "../translation/volcano/volcanoAPI";
 import { hasVolcanoAppKey } from "../translation/volcano/volcanoSign";
 import { RequestErrorInfo } from "../types";
-import { francLangaugeDetect } from "./franc";
+import { francLanguageDetect as francLanguageDetect } from "./franc";
 import { DetectedLangModel, LanguageDetectType } from "./types";
 import {
   checkIfPreferredLanguagesContainChinese,
@@ -289,7 +289,7 @@ function getLocalTextLanguageDetectResult(
   console.warn(`start local detect language, confirmed confidence (>${confirmedConfidence})`);
 
   // if detect preferred language confidence > confirmedConfidence.
-  const francDetectResult = francLangaugeDetect(text, confirmedConfidence);
+  const francDetectResult = francLanguageDetect(text, confirmedConfidence);
   if (francDetectResult.confirmed) {
     return francDetectResult;
   }

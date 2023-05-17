@@ -21,6 +21,14 @@
           "required": false
         }
       ]
+    },
+    {
+      "name": "ocr",
+      "title": "OCR Translate",
+      "icon": "ocr.png",
+      "subtitle": "Query text from image",
+      "description": "Screenshot OCR, and query text from image.",
+      "mode": "no-view"
     }
   ],
   "categories": [
@@ -574,7 +582,7 @@
       "name": "enableYoudaoDictionary",
       "label": "Youdao Dictionary",
       "required": false,
-      "description": "Support 5 langauges: (Chinese), English, French, Japanese, Korean.",
+      "description": "Support 5 languages: (Chinese), English, French, Japanese, Korean.",
       "default": true
     },
     {
@@ -582,7 +590,7 @@
       "name": "enableLingueeDictionary",
       "label": "Linguee Dictionary",
       "required": false,
-      "description": "Support 19 langauges: (Chinese, Japanese, Russian), English, French, Spanish, Portuguese, Italian, German, Swedish, Romanian, Slovak, Dutch, Hungarian, Greek, Danish, Finnish, Polish, Czech.",
+      "description": "Support 19 languages: (Chinese, Japanese, Russian), English, French, Spanish, Portuguese, Italian, German, Swedish, Romanian, Slovak, Dutch, Hungarian, Greek, Danish, Finnish, Polish, Czech.",
       "default": true
     },
     {
