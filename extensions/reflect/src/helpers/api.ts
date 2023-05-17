@@ -40,7 +40,7 @@ export async function getGraphs(authorizationToken: string) {
   }
 }
 
-export async function appendToDailyNote(authorizationToken: string, graphId: string, text: string, listName?: string) {
+export async function appendToDailyNote(authorizationToken: string, graphId: any, text: string, listName?: string) {
   const url = `https://reflect.app/api/graphs/${graphId}/daily-notes`;
 
   const data = {
