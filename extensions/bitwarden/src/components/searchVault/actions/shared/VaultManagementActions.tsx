@@ -2,7 +2,7 @@ import { Action, Color, Icon, showToast, Toast } from "@raycast/api";
 import { useBitwarden } from "~/context/bitwarden";
 import { useVault } from "~/context/vault";
 
-function SearchCommonActions() {
+function VaultManagementActions() {
   const vault = useVault();
   const bitwarden = useBitwarden();
 
@@ -36,4 +36,4 @@ function SearchCommonActions() {
     </>
   );
 }
-export default SearchCommonActions;
+export default VaultManagementActions;

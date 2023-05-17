@@ -1,4 +1,4 @@
-import CopyObjectStringFieldsActions from "~/components/searchVault/actions/CopyObjectFieldsActions";
+import CopyObjectStringFieldsActions from "~/components/searchVault/actions/shared/CopyObjectFieldsActions";
 import { Item } from "~/types/vault";
 
 function CopyCustomFieldsActions() {

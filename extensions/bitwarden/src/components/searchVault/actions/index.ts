@@ -1,7 +1,7 @@
 export { default as CopyPasswordAction } from "./CopyPasswordAction";
 export { default as PastePasswordAction } from "./PastePasswordAction";
 export { default as CopyTotpAction } from "./CopyTotpAction";
-export { default as SearchCommonActions } from "./CommonActions";
+export { default as VaultManagementActions } from "./shared/VaultManagementActions";
 export { default as CopyUsernameAction } from "./CopyUsernameAction";
 export { default as OpenUrlInBrowserAction } from "./OpenUrlInBrowserAction";
 export { default as ShowCardDetailsAction } from "./ShowCardDetailsAction";

@@ -7,7 +7,7 @@ import {
   CopyUsernameAction,
   OpenUrlInBrowserAction,
   PastePasswordAction,
-  SearchCommonActions,
+  VaultManagementActions,
   ShowCardDetailsAction,
   ShowNotesAction,
   ShowIdentityDetailsAction,
@@ -63,7 +63,7 @@ const VaultItemActionPanel = () => {
         <CopyCustomFieldsActions />
       </ActionPanel.Section>
       <ActionPanel.Section title="Vault Management">
-        <SearchCommonActions />
+        <VaultManagementActions />
       </ActionPanel.Section>
     </ActionPanel>
   );

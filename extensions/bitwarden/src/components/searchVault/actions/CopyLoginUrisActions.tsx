@@ -1,5 +1,5 @@
 import { Item } from "~/types/vault";
-import CopyObjectStringFieldsActions from "~/components/searchVault/actions/CopyObjectFieldsActions";
+import CopyObjectStringFieldsActions from "~/components/searchVault/actions/shared/CopyObjectFieldsActions";
 
 function CopyLoginUrisActions() {
   const getUriMap = (item: Item) => {
