@@ -18,14 +18,14 @@
     {
       "name": "arrivals",
       "title": "Arrivals",
-      "subtitle": "Get arrivals in London",
+      "subtitle": "Transport for London",
       "description": "Displays all arrivals in London",
       "mode": "view"
     },
     {
       "name": "favourite-stop-points",
-      "title": "Disruptions",
-      "subtitle": "Check for any disruptions in your lines",
+      "title": "Menubar Disruptions",
+      "subtitle": "Transport for London",
       "description": "See any disruptions in your favourite stop points and lines",
       "mode": "menu-bar"
     }
