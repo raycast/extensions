@@ -1,0 +1,24 @@
+{
+  "configurations": [
+    {
+      "type": "lldb",
+      "request": "launch",
+      "sourceLanguages": ["swift"],
+      "name": "Debug menu-bar",
+      "program": "${workspaceFolder:menu-bar-search}/.build/debug/menu-bar",
+      "args": [],
+      "cwd": "${workspaceFolder:menu-bar-search}",
+      "preLaunchTask": "swift: Build Debug menu-bar"
+    },
+    {
+      "type": "lldb",
+      "request": "launch",
+      "sourceLanguages": ["swift"],
+      "name": "Release menu-bar",
+      "program": "${workspaceFolder:menu-bar-search}/.build/release/menu-bar",
+      "args": [],
+      "cwd": "${workspaceFolder:menu-bar-search}",
+      "preLaunchTask": "swift: Build Release menu-bar"
+    }
+  ]
+}

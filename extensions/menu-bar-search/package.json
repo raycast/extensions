@@ -1,0 +1,60 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "menu-bar-search",
+  "title": "Menu Bar Search",
+  "description": "Quickly search for menu bar options for frontmost app",
+  "icon": "extension_icon.png",
+  "author": "BalliAsghar",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "menu",
+      "title": "Menu Bar",
+      "subtitle": "Menu Bar Search",
+      "description": "Quickly search for menu bar options for frontmost app",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "label": "Pop to root after action",
+      "name": "popToRootAfterAction",
+      "description": "Pop to root after action",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "label": "Show Keyboard Shortcuts",
+      "name": "showKeyboardShortcuts",
+      "description": "Show Keyboard Shortcuts",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.51.1",
+    "@raycast/utils": "^1.6.1",
+    "execa": "^7.1.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "build-swift": "swift build --configuration=release --arch arm64 --arch x86_64 && mv .build/apple/Products/Release/menu-bar assets",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

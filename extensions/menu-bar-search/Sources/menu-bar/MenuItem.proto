@@ -1,0 +1,18 @@
+// protoc --swift_out=. MenuItem.proto
+
+syntax = "proto3";
+
+message MenuItemList {
+repeated MenuItem items = 1;
+}
+
+message MenuItem {
+string pathIndices = 1;
+string shortcut = 2;
+repeated string path = 3;
+repeated string searchPath = 4;
+}
+
+message MenuPath {
+repeated string path = 1;
+}
