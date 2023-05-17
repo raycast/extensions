@@ -1,5 +1,5 @@
-import { Action, ActionPanel, Keyboard } from "@raycast/api";
-import React, { FC } from "react";
+import { Action, ActionPanel, Icon, Keyboard } from "@raycast/api";
+import { FC } from "react";
 import { RollForm } from "types";
 
 const shortcuts: Record<string, Keyboard.Shortcut> = {
@@ -15,8 +15,8 @@ interface Props {
 export const FormActions: FC<Props> = ({ onSubmit, onCopy }) => {
   return (
     <ActionPanel>
-      <Action.SubmitForm shortcut={shortcuts.submit} title={"Roll!"} onSubmit={onSubmit} />
-      <Action title={"Copy Result"} onAction={onCopy} shortcut={shortcuts.copy} />
+      <Action.SubmitForm shortcut={shortcuts.submit} title={"Roll"} onSubmit={onSubmit} icon={Icon.Wand} />
+      <Action title={"Copy Result"} onAction={onCopy} shortcut={shortcuts.copy} icon={Icon.CopyClipboard} />
     </ActionPanel>
   );
 };
