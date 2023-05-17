@@ -10,7 +10,7 @@ type CommandPreferences = {
 interface Bookmark {
   title: string;
   address: string;
-  path?: string;
+  path: string;
   file?: string;
 };
 
