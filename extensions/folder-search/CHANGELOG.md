@@ -1,5 +1,9 @@
 # Folder Search Changelog
 
+## [Command rename] - 2023-05-17
+
+- Rename the command to conform to the standards
+
 ## [New Features] - 2022-12-15
 
 - **added** Can take selected Finder item(s) and allow you to move them to a selected folder via a new Action menu entry
