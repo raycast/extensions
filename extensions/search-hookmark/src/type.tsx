@@ -1,5 +1,5 @@
 export type Bookmark = {
-    title: string;
-    address: string;
-    path?: string;
-  };
+  title: string;
+  address: string;
+  path?: string;
+};

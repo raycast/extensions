@@ -12,7 +12,7 @@ interface Bookmark {
   address: string;
   path: string;
   file?: string;
-};
+}
 
 export default function Command() {
   const [data, setData] = useState<Bookmark[]>([]);
@@ -48,7 +48,7 @@ export default function Command() {
   end tell
   
   return "[\\n" & _output & "\\n]" 
-  `)
+  `);
         const parsedData = JSON.parse(jsonData);
         // console.log(parsedData);
         setData(parsedData);
@@ -63,7 +63,7 @@ export default function Command() {
   // console.log(data);
   return (
     <List isLoading={isLoading}>
-      {data.map(bookmark => (
+      {data.map((bookmark) => (
         <List.Item
           title={bookmark.title}
           key={bookmark.address}
@@ -74,14 +74,14 @@ export default function Command() {
             <ActionPanel>
               <Action.OpenInBrowser url={bookmark.address} />
               <Action.CopyToClipboard title="Copy As File URL" content={bookmark.address} />
-              <Action.CopyToClipboard 
-                title="Copy As Path" 
-                content={bookmark.path} 
+              <Action.CopyToClipboard
+                title="Copy As Path"
+                content={bookmark.path}
                 shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
-                />
-              <Action.Paste 
-                title="Paste Address" 
-                content={bookmark.address} 
+              />
+              <Action.Paste
+                title="Paste Address"
+                content={bookmark.address}
                 shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
               />
               {/* {preferences.primaryAction === "paste" && (
@@ -94,4 +94,3 @@ export default function Command() {
     </List>
   );
 }
-

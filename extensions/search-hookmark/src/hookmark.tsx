@@ -28,8 +28,7 @@ export async function getBookmarks() {
     end tell
     
     return "[\\n" & _output & "\\n]" 
-    `)
+    `);
   console.log(JSON.parse(response));
   return response ? (JSON.parse(response) as Bookmark[]) : undefined;
-
 }
