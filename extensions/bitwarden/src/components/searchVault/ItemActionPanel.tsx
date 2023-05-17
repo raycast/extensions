@@ -16,15 +16,16 @@ import {
   CopyLoginUrisActions,
   CopyCustomFieldsActions,
 } from "~/components/searchVault/actions";
+import { ItemType } from "~/types/vault";
 
 const { primaryAction } = getPreferenceValues();
 
 const VaultItemActionPanel = () => {
-  const { login, card, identity } = useSelectedVaultItem();
+  const { type } = useSelectedVaultItem();
 
   return (
     <ActionPanel>
-      {!!login && (
+      {type === ItemType.LOGIN && (
         <ActionPanel.Section>
           <ComponentReverser reverse={primaryAction === "copy"}>
             <PastePasswordAction />
@@ -33,9 +34,11 @@ const VaultItemActionPanel = () => {
           <CopyTotpAction />
           <CopyUsernameAction />
           <OpenUrlInBrowserAction />
+          <CopyLoginUrisActions />
+          <ShowNotesAction />
         </ActionPanel.Section>
       )}
-      {!!card && (
+      {type === ItemType.CARD && (
         <>
           <ActionPanel.Section>
             <ShowCardDetailsAction />
@@ -43,9 +46,12 @@ const VaultItemActionPanel = () => {
           <ActionPanel.Section title="Card Fields">
             <CopyCardFieldsActions />
           </ActionPanel.Section>
+          <ActionPanel.Section>
+            <ShowNotesAction />
+          </ActionPanel.Section>
         </>
       )}
-      {!!identity && (
+      {type === ItemType.IDENTITY && (
         <>
           <ActionPanel.Section>
             <ShowIdentityDetailsAction />
@@ -53,12 +59,16 @@ const VaultItemActionPanel = () => {
           <ActionPanel.Section title="Identity Fields">
             <CopyIdentityFieldsActions />
           </ActionPanel.Section>
+          <ActionPanel.Section>
+            <ShowNotesAction />
+          </ActionPanel.Section>
         </>
       )}
-      <ActionPanel.Section>
-        <CopyLoginUrisActions />
-        <ShowNotesAction />
-      </ActionPanel.Section>
+      {type === ItemType.NOTE && (
+        <ActionPanel.Section>
+          <ShowNotesAction />
+        </ActionPanel.Section>
+      )}
       <ActionPanel.Section title="Custom Fields">
         <CopyCustomFieldsActions />
       </ActionPanel.Section>
