@@ -1,17 +1,15 @@
 import { Color, Detail, Icon } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import * as messageScripts from "../scripts/messages";
-import { MessageProps } from "../types";
-import { formatDate, formatMarkdown } from "../utils";
-import { MessageActions } from "./message-actions";
 
-export const ViewMessage = (props: MessageProps): JSX.Element => {
+import { MessageActions } from "./message-actions";
+import { MessageProps } from "../types";
+import { getMessageContent } from "../scripts/messages";
+import { formatDate, formatMarkdown } from "../utils";
+
+export const MessageDetail = (props: MessageProps) => {
   const { mailbox, message } = props;
 
-  const { data: content, isLoading: isLoadingContent } = useCachedPromise(messageScripts.getMessageContent, [
-    message,
-    mailbox,
-  ]);
+  const { data: content, isLoading: isLoadingContent } = useCachedPromise(getMessageContent, [message, mailbox]);
 
   return (
     <Detail

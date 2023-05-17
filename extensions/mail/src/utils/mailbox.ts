@@ -1,20 +1,21 @@
 import { Icon, Image } from "@raycast/api";
+
 import { Mailbox } from "../types";
-import { MailIcons } from "./presets";
+import { MailIcon } from "./presets";
 
 export const getMailboxIcon = (name: string): Image.ImageLike => {
   name = name.toLowerCase();
 
-  if (name.includes("important")) return MailIcons.Important;
-  if (name.includes("inbox")) return MailIcons.Inbox;
-  if (name.includes("junk") || name.includes("spam")) return MailIcons.Junk;
-  if (name.includes("recent") || name.includes("unread")) return MailIcons.Recent;
-  if (name.includes("sent")) return MailIcons.Sent;
+  if (name.includes("important")) return MailIcon.Important;
+  if (name.includes("inbox")) return MailIcon.Inbox;
+  if (name.includes("junk") || name.includes("spam")) return MailIcon.Junk;
+  if (name.includes("recent") || name.includes("unread")) return MailIcon.Recent;
+  if (name.includes("sent")) return MailIcon.Sent;
   if (name.includes("starred") || name.includes("flagged")) return Icon.Star;
-  if (name.includes("trash") || name.includes("bin")) return MailIcons.Trash;
-  if (name.includes("mail")) return MailIcons.Envelope;
+  if (name.includes("trash") || name.includes("bin")) return MailIcon.Trash;
+  if (name.includes("mail")) return MailIcon.Envelope;
 
-  return MailIcons.Envelope;
+  return MailIcon.Envelope;
 };
 
 export const isInbox = (mailbox: Mailbox) => {

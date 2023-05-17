@@ -1,9 +1,10 @@
 import { runAppleScript } from "run-applescript";
+
 import { Account, Mailbox } from "../types";
-import * as cache from "../utils/cache";
+import { Cache } from "../utils/cache";
 import { getMailboxIcon } from "../utils/mailbox";
 
-export const getMailAccounts = async (): Promise<Account[] | undefined> => {
+export const getAccounts = async (): Promise<Account[] | undefined> => {
   const script = `
     set output to ""
     tell application "Mail"
@@ -34,7 +35,7 @@ export const getMailAccounts = async (): Promise<Account[] | undefined> => {
     return output
   `;
 
-  let accounts = cache.getAccounts();
+  let accounts = Cache.getAccounts();
   if (!accounts) {
     try {
       const response: string[] = (await runAppleScript(script)).split("\n");
@@ -56,7 +57,7 @@ export const getMailAccounts = async (): Promise<Account[] | undefined> => {
       );
 
       if (accounts) {
-        cache.setAccounts(accounts);
+        Cache.setAccounts(accounts);
       }
     } catch (error) {
       console.error(error);

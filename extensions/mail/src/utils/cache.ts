@@ -1,4 +1,5 @@
-import { Cache, getPreferenceValues } from "@raycast/api";
+import { Cache as RaycastCache, getPreferenceValues } from "@raycast/api";
+
 import { Account, Message, Preferences } from "../types";
 
 export enum ExpirationTime {
@@ -15,13 +16,13 @@ const isCacheExpired = (time: number, limit = ExpirationTime.Day): boolean => {
   return Date.now() - time > limit;
 };
 
-const accounts = new Cache();
+const accounts = new RaycastCache();
 
-export const invalidateAccounts = () => {
+const invalidateAccounts = () => {
   accounts.clear();
 };
 
-export const getAccounts = (): Account[] | undefined => {
+const getAccounts = (): Account[] | undefined => {
   if (accounts.has("accounts")) {
     const response = accounts.get("accounts");
     if (response) {
@@ -35,21 +36,21 @@ export const getAccounts = (): Account[] | undefined => {
   return undefined;
 };
 
-export const getAccount = (idOrName: string): Account | undefined => {
+const getAccount = (idOrName: string): Account | undefined => {
   return getAccounts()?.find((x) => x.id === idOrName || x.name === idOrName);
 };
 
-export const setAccounts = (data: Account[]) => {
+const setAccounts = (data: Account[]) => {
   accounts.set("accounts", JSON.stringify({ time: Date.now(), data: data }));
 };
 
-const messages = new Cache();
+const messages = new RaycastCache();
 
-export const invalidateMessages = () => {
+const invalidateMessages = () => {
   messages.clear();
 };
 
-export const getMessages = (account: string, mailbox: string): Message[] => {
+const getMessages = (account: string, mailbox: string): Message[] => {
   const key = `${account}-${mailbox}`;
   if (messages.has(key)) {
     const response = messages.get(key);
@@ -64,19 +65,19 @@ export const getMessages = (account: string, mailbox: string): Message[] => {
   return [];
 };
 
-export const setMessages = (data: Message[], account: string, mailbox: string) => {
+const setMessages = (data: Message[], account: string, mailbox: string) => {
   const key = `${account}-${mailbox}`;
   messages.set(key, JSON.stringify({ time: Date.now(), data: data }));
 };
 
-export const addMessage = (data: Message, account: string, mailbox: string) => {
+const addMessage = (data: Message, account: string, mailbox: string) => {
   const currentMessages = getMessages(account, mailbox);
   const nextMessages = [...currentMessages, data];
 
   setMessages(nextMessages, account, mailbox);
 };
 
-export const updateMessage = (id: string, data: Message, account: string, mailbox: string) => {
+const updateMessage = (id: string, data: Message, account: string, mailbox: string) => {
   const currentMessages = getMessages(account, mailbox);
   const nextMessages = currentMessages.map((currentMessage) => {
     if (currentMessage.id === id) {
@@ -89,9 +90,22 @@ export const updateMessage = (id: string, data: Message, account: string, mailbo
   setMessages(nextMessages, account, mailbox);
 };
 
-export const deleteMessage = (id: string, account: string, mailbox: string) => {
+const deleteMessage = (id: string, account: string, mailbox: string) => {
   const currentMessages = getMessages(account, mailbox);
   const nextMessages = currentMessages.filter((currentMessage) => currentMessage.id !== id);
 
   setMessages(nextMessages, account, mailbox);
 };
+
+export const Cache = Object.freeze({
+  getAccounts,
+  setAccounts,
+  getAccount,
+  invalidateAccounts,
+  getMessages,
+  setMessages,
+  addMessage,
+  updateMessage,
+  deleteMessage,
+  invalidateMessages,
+});

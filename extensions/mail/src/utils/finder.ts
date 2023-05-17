@@ -10,28 +10,34 @@ const isHidden = (item: string) => {
 
 export const getDirectoryItems = async (dir: string): Promise<{ files: string[]; subDirectories: string[] }> => {
   const directoryItems = await readdir(dir, { withFileTypes: true });
+
   const files = directoryItems
     .filter((dirent) => dirent.isFile())
     .map((dirent) => dirent.name)
     .filter((item) => !isHidden(item))
     .sort((a, b) => a.localeCompare(b));
+
   const subDirectories = directoryItems
     .filter((dirent) => dirent.isDirectory())
     .map((dirent) => dirent.name)
     .filter((item) => !isHidden(item))
     .sort((a, b) => a.localeCompare(b));
+
   return { files, subDirectories };
 };
 
 export const formatFileSize = (size: number): string => {
   const sizes = ["B", "KB", "MB", "GB", "TB"];
   let i = size;
+
   if (i < 0) return "0";
+
   let j = 0;
   while (i > 1024) {
     i /= 1024;
     j++;
   }
+
   return i.toFixed(1) + " " + sizes[j];
 };
 

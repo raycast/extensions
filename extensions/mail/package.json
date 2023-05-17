@@ -80,8 +80,8 @@
       "mode": "no-view"
     },
     {
-      "name": "new-message",
-      "title": "New Message",
+      "name": "compose-new-message",
+      "title": "Compose New Message",
       "description": "Compose a new message.",
       "mode": "view"
     },

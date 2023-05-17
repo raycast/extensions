@@ -1,10 +1,10 @@
 import { List, ActionPanel, Action, Icon } from "@raycast/api";
 
-type ErrorProps = List.EmptyView.Props & {
+export type ErrorDetailProps = List.EmptyView.Props & {
   error: string;
 };
 
-export const ErrorView = (props: ErrorProps): JSX.Element => {
+export const ErrorDetail = (props: ErrorDetailProps) => {
   return (
     <List
       navigationTitle={props.title}

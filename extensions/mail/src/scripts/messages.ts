@@ -1,8 +1,10 @@
 import { getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
-import { Account, Mailbox, Message, Preferences } from "../types";
+import emailRegex from "email-regex";
+
+import { Account, Mailbox, Message, OutgoingMessage, OutgoingMessageAction, Preferences } from "../types";
 import { constructDate, titleCase } from "../utils";
-import * as cache from "../utils/cache";
+import { Cache } from "../utils/cache";
 import { isJunkMailbox, isTrashMailbox } from "../utils/mailbox";
 
 const preferences: Preferences = getPreferenceValues();
@@ -36,12 +38,12 @@ export const toggleMessageRead = async (
   { silent = false }: { silent?: boolean } = {}
 ) => {
   try {
-    const account = cache.getAccount(message.account);
+    const account = Cache.getAccount(message.account);
     const mailboxes = account?.mailboxes || [];
 
     if (account && mailboxes) {
       mailboxes.forEach((innerMailbox) => {
-        cache.updateMessage(
+        Cache.updateMessage(
           message.id,
           {
             ...message,
@@ -65,21 +67,21 @@ export const toggleMessageRead = async (
 
     console.error(error);
 
-    cache.invalidateMessages();
+    Cache.invalidateMessages();
   }
 };
 
-export const moveMessage = async (message: Message, mailbox: Mailbox, target: Mailbox) => {
+export const moveMessageTo = async (message: Message, mailbox: Mailbox, target: Mailbox) => {
   try {
-    const account = cache.getAccount(message.account);
+    const account = Cache.getAccount(message.account);
     const mailboxes = account?.mailboxes || [];
 
     if (account && mailboxes) {
       mailboxes.forEach((innerMailbox) => {
         if (innerMailbox.name === target.name) {
-          cache.addMessage(message, account.id, innerMailbox.name);
+          Cache.addMessage(message, account.id, innerMailbox.name);
         } else {
-          cache.deleteMessage(message.id, account.id, innerMailbox.name);
+          Cache.deleteMessage(message.id, account.id, innerMailbox.name);
         }
       });
     }
@@ -90,29 +92,29 @@ export const moveMessage = async (message: Message, mailbox: Mailbox, target: Ma
     await showToast(Toast.Style.Failure, `Error moving message to ${titleCase(target.name)}`);
     console.error(error);
 
-    cache.invalidateMessages();
+    Cache.invalidateMessages();
   }
 };
 
-export const moveToJunk = async (message: Message, account: Account, mailbox: Mailbox) => {
+export const moveMessageToJunk = async (message: Message, account: Account, mailbox: Mailbox) => {
   try {
     const junkMailbox = account.mailboxes.find(isJunkMailbox);
     if (junkMailbox) {
-      const account = cache.getAccount(message.account);
+      const account = Cache.getAccount(message.account);
       const mailboxes = account?.mailboxes || [];
 
       if (account && mailboxes) {
         mailboxes.forEach((innerMailbox) => {
           if (innerMailbox.name === junkMailbox.name) {
-            cache.addMessage(message, account.id, innerMailbox.name);
+            Cache.addMessage(message, account.id, innerMailbox.name);
           } else {
-            cache.deleteMessage(message.id, account.id, innerMailbox.name);
+            Cache.deleteMessage(message.id, account.id, innerMailbox.name);
           }
         });
       }
 
       await showToast(Toast.Style.Success, "Moved message to Junk");
-      await moveMessage(message, mailbox, junkMailbox);
+      await moveMessageTo(message, mailbox, junkMailbox);
     } else {
       await showToast(Toast.Style.Failure, "No Junk mailbox found");
     }
@@ -120,29 +122,29 @@ export const moveToJunk = async (message: Message, account: Account, mailbox: Ma
     await showToast(Toast.Style.Failure, "Error moving message to Junk");
     console.error(error);
 
-    cache.invalidateMessages();
+    Cache.invalidateMessages();
   }
 };
 
-export const moveToTrash = async (message: Message, account: Account, mailbox: Mailbox) => {
+export const moveMessageToTrash = async (message: Message, account: Account, mailbox: Mailbox) => {
   try {
     const trashMailbox = account.mailboxes.find(isTrashMailbox);
     if (trashMailbox) {
-      const account = cache.getAccount(message.account);
+      const account = Cache.getAccount(message.account);
       const mailboxes = account?.mailboxes || [];
 
       if (account && mailboxes) {
         mailboxes.forEach((innerMailbox) => {
           if (innerMailbox.name === trashMailbox.name) {
-            cache.addMessage(message, account.id, innerMailbox.name);
+            Cache.addMessage(message, account.id, innerMailbox.name);
           } else {
-            cache.deleteMessage(message.id, account.id, innerMailbox.name);
+            Cache.deleteMessage(message.id, account.id, innerMailbox.name);
           }
         });
       }
 
       await showToast(Toast.Style.Success, "Moved message to Trash");
-      await moveMessage(message, mailbox, trashMailbox);
+      await moveMessageTo(message, mailbox, trashMailbox);
     } else {
       await showToast(Toast.Style.Failure, "No Trash mailbox found");
     }
@@ -150,18 +152,18 @@ export const moveToTrash = async (message: Message, account: Account, mailbox: M
     await showToast(Toast.Style.Failure, "Error moving message to Trash");
     console.error(error);
 
-    cache.invalidateMessages();
+    Cache.invalidateMessages();
   }
 };
 
 export const deleteMessage = async (message: Message, mailbox: Mailbox) => {
   try {
-    const account = cache.getAccount(message.account);
+    const account = Cache.getAccount(message.account);
     const mailboxes = account?.mailboxes || [];
 
     if (account && mailboxes.length) {
       mailboxes.forEach((mailbox) => {
-        cache.deleteMessage(message.id, account.id, mailbox.name);
+        Cache.deleteMessage(message.id, account.id, mailbox.name);
       });
     }
 
@@ -173,13 +175,14 @@ export const deleteMessage = async (message: Message, mailbox: Mailbox) => {
         open msg
         activate
         delay 0.5
-		    tell application "System Events" to key code 51`
+		    tell application "System Events" to key code 51
+      `
     );
   } catch (error) {
     await showToast(Toast.Style.Failure, "Error deleting message");
     console.error(error);
 
-    cache.invalidateMessages();
+    Cache.invalidateMessages();
   }
 };
 
@@ -212,13 +215,13 @@ export const getRecipients = async (message: Message, mailbox: Mailbox): Promise
   }
 };
 
-export const getAccountMessages = async (
+export const getMessages = async (
   account: Account,
   mailbox: Mailbox,
   numMessages = messageLimit,
   unreadOnly = false
 ): Promise<Message[] | undefined> => {
-  let messages = cache.getMessages(account.id, mailbox.name);
+  let messages = Cache.getMessages(account.id, mailbox.name);
 
   const first = messages.length > 0 ? messages[0].id : undefined;
   const script = `
@@ -243,7 +246,7 @@ export const getAccountMessages = async (
       set output to output & item 1 of messageData & "$break" & item 2 of messageData & "$break" & item 3 of messageData & "$break" & item 4 of messageData & "$break" & item 5 of messageData & "$break" & item 6 of messageData & "$break" & item 7 of messageData & "$end"
     end repeat
     return output
-`;
+  `;
 
   try {
     const response: string[] = (await runAppleScript(script)).split("$end");
@@ -265,10 +268,10 @@ export const getAccountMessages = async (
     });
 
     // Get messages after await as they might have changed
-    messages = cache.getMessages(account.id, mailbox.name);
+    messages = Cache.getMessages(account.id, mailbox.name);
     messages = newMessages.concat(messages);
 
-    cache.setMessages(messages, account.id, mailbox.name);
+    Cache.setMessages(messages, account.id, mailbox.name);
   } catch (error) {
     console.error(error);
   }
@@ -285,4 +288,84 @@ export const getMessageContent = async (message: Message, mailbox: Mailbox): Pro
     console.error(error);
     return "";
   }
+};
+
+export const sendMessage = async (
+  outgoingMessage: OutgoingMessage,
+  action = OutgoingMessageAction.New,
+  message?: Message,
+  mailbox?: Mailbox
+) => {
+  if (outgoingMessage.to.length === 0) {
+    await showToast(Toast.Style.Failure, "No recipients specified");
+    return;
+  }
+
+  for (const recipient of outgoingMessage.to) {
+    if (!emailRegex({ exact: true }).test(recipient)) {
+      await showToast(Toast.Style.Failure, "Invalid email for recipient");
+      return;
+    }
+  }
+
+  let attachments =
+    outgoingMessage.attachments && outgoingMessage.attachments.length > 0 ? outgoingMessage.attachments : [];
+  attachments = attachments.map((attachment: string) => `Macintosh HD${attachment.replaceAll("/", ":")}`);
+
+  const actionScript = (() => {
+    switch (action) {
+      case OutgoingMessageAction.New:
+        return "make new outgoing message";
+      case OutgoingMessageAction.Reply:
+        return "reply msg";
+      case OutgoingMessageAction.ReplyAll:
+        return "reply msg with properties {reply to all: true}";
+      case OutgoingMessageAction.Forward:
+        return "forward msg";
+      case OutgoingMessageAction.Redirect:
+        return "redirect msg";
+      default:
+        return "make new outgoing message";
+    }
+  })();
+
+  const script = `
+    tell application "Mail"
+      ${
+        message && mailbox
+          ? `tell account "${message.account}"
+          set msg to (first message of (first mailbox whose name is "${mailbox.name}") whose id is "${message.id}")
+        end tell`
+          : ""
+      }
+      set theTos to {"${outgoingMessage.to.join(`", "`)}"}
+      set theCcs to {"${outgoingMessage.cc.join(`", "`)}"}
+      set theBccs to {"${outgoingMessage.bcc.join(`", "`)}"}
+      set theAttachments to {"${attachments.join(`", "`)}"}
+      set newMessage to ${actionScript}
+      set properties of newMessage to {sender: "${outgoingMessage.account}", subject: "${
+    outgoingMessage.subject
+  }", content: "${outgoingMessage.content}", visible: false}
+      tell newMessage
+        repeat with theTo in theTos
+          make new recipient at end of to recipients with properties {address:theTo}
+        end repeat
+        repeat with theCc in theCcs
+          make new cc recipient at end of cc recipients with properties {address:theCc}
+        end repeat
+        repeat with theBcc in theBccs
+          make new bcc recipient at end of bcc recipients with properties {address:theBcc}
+        end repeat
+        repeat with theAttachment in theAttachments
+          try
+            make new attachment with properties {file name:theAttachment as alias} at after last paragraph
+            delay 1
+          end try
+        end repeat
+      end tell
+      send newMessage
+    end tell  
+  `;
+
+  await runAppleScript(script);
 };

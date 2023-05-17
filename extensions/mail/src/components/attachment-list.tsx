@@ -1,20 +1,21 @@
 import { useState } from "react";
 import { List, Action, ActionPanel, Form, showHUD, popToRoot } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import * as attachmentUtils from "../scripts/attachments";
-import { getAttachmentIcon } from "../utils";
+
 import { Mailbox, Message, Attachment } from "../types";
-import { MailIcons } from "../utils/presets";
+import { getAttachments, saveAttachment, saveAllAttachments } from "../scripts/attachments";
+import { getIconByType } from "../utils";
+import { MailIcon } from "../utils/presets";
 
-type AttachmentsProps = { mailbox: Mailbox; message: Message };
+export type AttachmentListProps = {
+  mailbox: Mailbox;
+  message: Message;
+};
 
-export const Attachments = (props: AttachmentsProps): JSX.Element => {
+export const AttachmentList = (props: AttachmentListProps) => {
   const { mailbox, message } = props;
 
-  const { data: attachments, isLoading: isLoadingAttachments } = useCachedPromise(
-    attachmentUtils.getMessageAttachments,
-    [message, mailbox]
-  );
+  const { data: attachments, isLoading: isLoadingAttachments } = useCachedPromise(getAttachments, [message, mailbox]);
 
   const [isSavingAttachments, setIsSavingAttachments] = useState(false);
 
@@ -26,16 +27,16 @@ export const Attachments = (props: AttachmentsProps): JSX.Element => {
           id={attachment.id}
           title={attachment.name}
           accessories={[{ text: attachment.size }]}
-          icon={getAttachmentIcon(attachment.type)}
+          icon={getIconByType(attachment.type)}
           actions={
             <ActionPanel>
               <Action
                 title={"Save Attachment"}
-                icon={MailIcons.Save}
+                icon={MailIcon.Save}
                 onAction={async () => {
                   try {
                     setIsSavingAttachments(true);
-                    await attachmentUtils.saveAttachment(message, mailbox, attachment);
+                    await saveAttachment(message, mailbox, attachment);
                   } finally {
                     setIsSavingAttachments(false);
                   }
@@ -45,11 +46,11 @@ export const Attachments = (props: AttachmentsProps): JSX.Element => {
               {attachments.length > 1 && (
                 <Action
                   title={"Save All Attachments"}
-                  icon={MailIcons.Save}
+                  icon={MailIcon.Save}
                   onAction={async () => {
                     try {
                       setIsSavingAttachments(true);
-                      await attachmentUtils.saveAllAttachments(message, mailbox);
+                      await saveAllAttachments(message, mailbox);
                     } finally {
                       setIsSavingAttachments(false);
                     }
@@ -60,7 +61,7 @@ export const Attachments = (props: AttachmentsProps): JSX.Element => {
               <Action.Push
                 title={"Save Attachment As..."}
                 shortcut={{ modifiers: ["cmd"], key: "s" }}
-                icon={MailIcons.SaveAs}
+                icon={MailIcon.SaveAs}
                 target={<SaveAttachment {...props} attachment={attachment} />}
               />
             </ActionPanel>
@@ -73,7 +74,7 @@ export const Attachments = (props: AttachmentsProps): JSX.Element => {
 
 type SaveAttachmentProps = { mailbox: Mailbox; message: Message; attachment: Attachment };
 
-export const SaveAttachment = ({ mailbox, message, attachment }: SaveAttachmentProps): JSX.Element => {
+const SaveAttachment = ({ mailbox, message, attachment }: SaveAttachmentProps): JSX.Element => {
   const [isSavingAttachment, setIsSavingAttachment] = useState(false);
 
   return (
@@ -83,11 +84,11 @@ export const SaveAttachment = ({ mailbox, message, attachment }: SaveAttachmentP
         <ActionPanel>
           <Action.SubmitForm
             title={"Save Attachment"}
-            icon={MailIcons.Save}
+            icon={MailIcon.Save}
             onSubmit={async (values: { name: string }) => {
               try {
                 setIsSavingAttachment(true);
-                await attachmentUtils.saveAttachment(message, mailbox, attachment, values.name);
+                await saveAttachment(message, mailbox, attachment, values.name);
                 await showHUD("Attachment Saved");
                 await popToRoot();
               } finally {
@@ -98,7 +99,7 @@ export const SaveAttachment = ({ mailbox, message, attachment }: SaveAttachmentP
         </ActionPanel>
       }
     >
-      <Form.TextField id="name" title="Save As" autoFocus={true} placeholder={attachment.name} />
+      <Form.TextField id="name" title="Filename" autoFocus={true} placeholder={attachment.name} />
     </Form>
   );
 };

@@ -1,13 +1,13 @@
 import { Form, showToast, Toast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { ComposeMessage } from "./components/compose";
-import { maximumFileSize, getSize, formatFileSize } from "./utils/finder";
-import { getFinderSelection } from "./utils/finder";
-import { OutgoingMessageForm } from "./types";
 
-export interface ShareWithMailProps {
+import { OutgoingMessageForm } from "./types";
+import { ComposeMessage } from "./components";
+import { maximumFileSize, getSize, formatFileSize, getFinderSelection } from "./utils/finder";
+
+export type ShareWithMailProps = {
   draftValues?: OutgoingMessageForm;
-}
+};
 
 export default function ShareWithMail(props: ShareWithMailProps) {
   const { draftValues } = props;

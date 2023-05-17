@@ -1,19 +1,20 @@
 import { useState, useCallback, useRef } from "react";
 import { List, showToast, Toast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { MessageListItem } from "./components/messages";
-import { getMailAccounts } from "./scripts/account";
-import { getAccountMessages } from "./scripts/messages";
+
+import { MessageListItem } from "./components";
+import { getAccounts } from "./scripts/accounts";
+import { getMessages } from "./scripts/messages";
 import { Account, Mailbox, Message } from "./types";
 import { invoke } from "./utils";
 import { isImportantMailbox } from "./utils/mailbox";
-import * as cache from "./utils/cache";
+import { Cache } from "./utils/cache";
 
 export default function SeeImportantMail() {
   const [account, setAccount] = useState<Account>();
 
   const fetchAccounts = useCallback(async () => {
-    const accounts = await getMailAccounts();
+    const accounts = await getAccounts();
 
     if (!accounts) {
       showToast(Toast.Style.Failure, "Could not get important messages from accounts");
@@ -24,7 +25,7 @@ export default function SeeImportantMail() {
       accounts.map((account: Account) => {
         const mailbox = account.mailboxes.find(isImportantMailbox);
         if (mailbox) {
-          return getAccountMessages(account, mailbox);
+          return getMessages(account, mailbox);
         } else {
           return [];
         }
@@ -62,7 +63,7 @@ export default function SeeImportantMail() {
           if (!data) return data;
 
           return data.map((account: Account) => {
-            const messages = cache.getMessages(account.id, mailbox.name);
+            const messages = Cache.getMessages(account.id, mailbox.name);
             account.messages = messages;
             return account;
           });

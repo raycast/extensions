@@ -1,14 +1,23 @@
 import { useState } from "react";
 import { Form, Action, ActionPanel, showHUD, popToRoot } from "@raycast/api";
 import { useCachedPromise, useForm } from "@raycast/utils";
-import { newOutgoingMessage } from "../scripts/outgoing-message";
-import { Account, OutgoingMessageAction, ComposeMessageProps, OutgoingMessage, OutgoingMessageForm } from "../types";
-import { getRecipients } from "../scripts/messages";
-import { getMailAccounts } from "../scripts/account";
-import { OutgoingMessageIcons } from "../utils/presets";
-import { FormValidation } from "../utils";
 
-export const ComposeMessage = (props: ComposeMessageProps): JSX.Element => {
+import { Account, OutgoingMessageAction, OutgoingMessage, OutgoingMessageForm, Message, Mailbox } from "../types";
+import { getRecipients, sendMessage } from "../scripts/messages";
+import { getAccounts } from "../scripts/accounts";
+import { Validation } from "../utils/validation";
+import { OutgoingMessageIcon } from "../utils/presets";
+
+export type ComposeMessageProps = {
+  account?: Account;
+  message?: Message;
+  mailbox?: Mailbox;
+  attachments?: string[];
+  action?: OutgoingMessageAction;
+  draftValues?: OutgoingMessageForm;
+};
+
+export const ComposeMessage = (props: ComposeMessageProps) => {
   const { account, message, mailbox, attachments, action, draftValues } = props;
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -24,11 +33,11 @@ export const ComposeMessage = (props: ComposeMessageProps): JSX.Element => {
       attachments: attachments || draftValues?.attachments,
     },
     validation: {
-      to: (value) => FormValidation.required(value) || FormValidation.emails(value),
-      cc: (value) => FormValidation.emails(value),
-      bcc: (value) => FormValidation.emails(value),
-      subject: (value) => FormValidation.required(value),
-      attachments: (value) => FormValidation.maxFileSize(value),
+      to: (value) => Validation.required(value) || Validation.emails(value),
+      cc: (value) => Validation.emails(value),
+      bcc: (value) => Validation.emails(value),
+      subject: (value) => Validation.required(value),
+      attachments: (value) => Validation.maxFileSize(value),
     },
     onSubmit: async (values) => {
       setIsSubmitting(true);
@@ -44,7 +53,7 @@ export const ComposeMessage = (props: ComposeMessageProps): JSX.Element => {
           attachments: values.attachments,
         };
 
-        await newOutgoingMessage(message, props.action, props.message, props.mailbox);
+        await sendMessage(message, props.action, props.message, props.mailbox);
 
         await showHUD("Message Sent");
         await popToRoot();
@@ -54,7 +63,7 @@ export const ComposeMessage = (props: ComposeMessageProps): JSX.Element => {
     },
   });
 
-  const { data: accounts, isLoading: isLoadingAccounts } = useCachedPromise(getMailAccounts);
+  const { data: accounts, isLoading: isLoadingAccounts } = useCachedPromise(getAccounts);
   const { data: recipients, isLoading: isLoadingRecipients } = useCachedPromise(
     async () => {
       if (message && mailbox) {
@@ -87,7 +96,7 @@ export const ComposeMessage = (props: ComposeMessageProps): JSX.Element => {
         <ActionPanel>
           <Action.SubmitForm
             title={action ? action : OutgoingMessageAction.New}
-            icon={action ? OutgoingMessageIcons[action] : OutgoingMessageIcons[OutgoingMessageAction.New]}
+            icon={action ? OutgoingMessageIcon[action] : OutgoingMessageIcon[OutgoingMessageAction.New]}
             onSubmit={handleSubmit}
           />
         </ActionPanel>

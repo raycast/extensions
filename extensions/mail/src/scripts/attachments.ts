@@ -1,8 +1,9 @@
 import { existsSync } from "fs";
 import { homedir } from "os";
 import { showToast, Toast, open, showInFinder, closeMainWindow, getPreferenceValues } from "@raycast/api";
-import { Mailbox, Attachment, Message, Preferences } from "../types";
+
 import { tellMessage } from "./messages";
+import { Mailbox, Attachment, Message, Preferences } from "../types";
 import { formatFileSize, getMIMEtype } from "../utils/finder";
 
 const preferences: Preferences = getPreferenceValues();
@@ -15,7 +16,7 @@ if (!existsSync(downloadDirectory)) {
 
 downloadDirectory = "Macintosh HD" + downloadDirectory.replaceAll("/", ":");
 
-export const getMessageAttachments = async (message: Message, mailbox: Mailbox): Promise<Attachment[]> => {
+export const getAttachments = async (message: Message, mailbox: Mailbox): Promise<Attachment[]> => {
   try {
     const script = `
       set output to ""

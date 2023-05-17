@@ -63,15 +63,6 @@ export enum OutgoingMessageAction {
   Redirect = "Redirect",
 }
 
-export type ComposeMessageProps = {
-  account?: Account;
-  message?: Message;
-  mailbox?: Mailbox;
-  attachments?: string[];
-  action?: OutgoingMessageAction;
-  draftValues?: OutgoingMessageForm;
-};
-
 export type OutgoingMessageForm = {
   account: string;
   to: string;

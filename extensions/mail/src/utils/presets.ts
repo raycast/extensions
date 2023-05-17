@@ -1,10 +1,11 @@
 import { Color, Icon, Image, environment } from "@raycast/api";
+
 import { OutgoingMessageAction } from "../types";
 
 const UnreadColor = environment.appearance === "dark" ? "#0983ff" : "#007aff";
 const ReadColor = environment.appearance === "dark" ? "#a7a7a7" : "#757575";
 
-export const MailIcons: { [key: string]: Image.ImageLike } = {
+export const MailIcon: { [key: string]: Image.ImageLike } = {
   Envelope: { source: "../assets/icons/envelope.svg", tintColor: Color.PrimaryText },
   Important: { source: "../assets/icons/important.svg", tintColor: Color.PrimaryText },
   Inbox: { source: "../assets/icons/inbox.svg", tintColor: Color.PrimaryText },
@@ -20,8 +21,8 @@ export const MailIcons: { [key: string]: Image.ImageLike } = {
   Unread: { source: Icon.CircleProgress100, tintColor: UnreadColor },
 };
 
-export const OutgoingMessageIcons: { [key: string]: Image.ImageLike } = {
-  [OutgoingMessageAction.New]: MailIcons.Sent,
+export const OutgoingMessageIcon: { [key: string]: Image.ImageLike } = {
+  [OutgoingMessageAction.New]: MailIcon.Sent,
   [OutgoingMessageAction.Reply]: Icon.Reply,
   [OutgoingMessageAction.ReplyAll]: Icon.Reply,
   [OutgoingMessageAction.Forward]: Icon.ArrowUpCircle,

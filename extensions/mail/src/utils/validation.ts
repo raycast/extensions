@@ -1,7 +1,8 @@
 import emailRegex from "email-regex";
+
 import { formatFileSize, getSizeSync, maximumFileSize } from "./finder";
 
-export const required = (value: unknown) => {
+const required = (value: unknown) => {
   let isValid = true;
 
   if (Array.isArray(value) && (!value || !value.length)) {
@@ -19,11 +20,11 @@ export const required = (value: unknown) => {
   return isValid ? undefined : "This field is required";
 };
 
-export const email = (value?: string) => {
+const email = (value?: string) => {
   return value != null && emailRegex({ exact: true }).test(value) ? undefined : "Invalid email address";
 };
 
-export const emails = (value?: string) => {
+const emails = (value?: string) => {
   const errors = value
     ?.split(",")
     .map((recipient: string) => {
@@ -39,7 +40,7 @@ export const emails = (value?: string) => {
   return errors?.[0];
 };
 
-export const maxFileSize = (attachments?: string[]) => {
+const maxFileSize = (attachments?: string[]) => {
   if (!attachments?.length) {
     return undefined;
   }
@@ -49,3 +50,10 @@ export const maxFileSize = (attachments?: string[]) => {
     ? `Total file size is ${formatFileSize(size)} which exceeds the maximum file size of ${maximumFileSize.label}`
     : undefined;
 };
+
+export const Validation = Object.freeze({
+  required,
+  email,
+  emails,
+  maxFileSize,
+});

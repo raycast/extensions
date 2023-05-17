@@ -22,8 +22,8 @@ declare type Preferences = ExtensionPreferences
 declare namespace Preferences {
   /** Preferences accessible in the `check-for-mail` command */
   export type CheckForMail = ExtensionPreferences & {}
-  /** Preferences accessible in the `new-message` command */
-  export type NewMessage = ExtensionPreferences & {}
+  /** Preferences accessible in the `compose-new-message` command */
+  export type ComposeNewMessage = ExtensionPreferences & {}
   /** Preferences accessible in the `see-recent-mail` command */
   export type SeeRecentMail = ExtensionPreferences & {}
   /** Preferences accessible in the `see-important-mail` command */
@@ -41,8 +41,8 @@ declare namespace Preferences {
 declare namespace Arguments {
   /** Arguments passed to the `check-for-mail` command */
   export type CheckForMail = {}
-  /** Arguments passed to the `new-message` command */
-  export type NewMessage = {}
+  /** Arguments passed to the `compose-new-message` command */
+  export type ComposeNewMessage = {}
   /** Arguments passed to the `see-recent-mail` command */
   export type SeeRecentMail = {}
   /** Arguments passed to the `see-important-mail` command */

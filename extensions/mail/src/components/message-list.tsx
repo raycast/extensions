@@ -1,14 +1,20 @@
 import { useState, useCallback, useRef } from "react";
 import { List, Icon } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import * as messageScripts from "../scripts/messages";
-import { Account, Mailbox, Message, MessageProps } from "../types";
-import { shortenText, formatDate, titleCase, invoke } from "../utils";
-import { MailIcons } from "../utils/presets";
-import * as cache from "../utils/cache";
-import { MessageActions } from "./message-actions";
 
-export const Messages = (props: { account: Account; mailbox: Mailbox }): JSX.Element => {
+import { MessageActions } from "./message-actions";
+import { Account, Mailbox, Message, MessageProps } from "../types";
+import * as messageScripts from "../scripts/messages";
+import { shortenText, formatDate, titleCase, invoke } from "../utils";
+import { MailIcon } from "../utils/presets";
+import { Cache } from "../utils/cache";
+
+export type MessageListProps = {
+  account: Account;
+  mailbox: Mailbox;
+};
+
+export const MessageList = (props: MessageListProps) => {
   const { account } = props;
 
   const [mailbox, setMailbox] = useState<Mailbox>(props.mailbox);
@@ -19,7 +25,7 @@ export const Messages = (props: { account: Account; mailbox: Mailbox }): JSX.Ele
     data: messages,
     mutate: mutateMessages,
     isLoading: isLoadingMessages,
-  } = useCachedPromise(messageScripts.getAccountMessages, [account, mailbox], { abortable: messagesAbortController });
+  } = useCachedPromise(messageScripts.getMessages, [account, mailbox], { abortable: messagesAbortController });
 
   const handleAction = useCallback((action: () => Promise<void>, account: Account, mailbox: Mailbox) => {
     mutateMessages(
@@ -27,7 +33,7 @@ export const Messages = (props: { account: Account; mailbox: Mailbox }): JSX.Ele
         messagesAbortController.current.abort();
 
         await action();
-        const messages = await messageScripts.getAccountMessages(account, mailbox);
+        const messages = await messageScripts.getMessages(account, mailbox);
 
         return messages;
       }),
@@ -35,7 +41,7 @@ export const Messages = (props: { account: Account; mailbox: Mailbox }): JSX.Ele
         optimisticUpdate: (data) => {
           if (!data) return data;
 
-          const messages = cache.getMessages(account.id, mailbox.name);
+          const messages = Cache.getMessages(account.id, mailbox.name);
           return messages;
         },
       }
@@ -88,7 +94,7 @@ export const MessageListItem = (props: MessageProps): JSX.Element => {
   return (
     <List.Item
       title={message.subject ? shortenText(message.subject, 60) : "No Subject"}
-      icon={message.read ? MailIcons.Read : MailIcons.Unread}
+      icon={message.read ? MailIcon.Read : MailIcon.Unread}
       accessories={[
         { text: formatDate(message.date), icon: Icon.Calendar },
         { text: shortenText(message.senderName, 20), icon: Icon.PersonCircle },
