@@ -20,6 +20,13 @@
       "mode": "no-view"
     },
     {
+      "name": "open-packz-manual",
+      "title": "Open Packz Manual",
+      "subtitle": "Quantumcast",
+      "description": "Open the Packz documentation in the browser",
+      "mode": "view"
+    },
+    {
       "name": "open-cloudflow-workspace",
       "title": "Open Cloudflow Workspace",
       "subtitle": "Quantumcast",
@@ -42,15 +49,53 @@
       "type": "textfield",
       "required": true,
       "default": "http://127.0.0.1:9090"
+    },
+    {
+      "name": "packzManualLanguage",
+      "title": "Packz Manual Language",
+      "description": "The prefered language for the Packz manual",
+      "type": "dropdown",
+      "required": true,
+      "data": [
+        {
+          "title": "English",
+          "value": "en"
+        },
+        {
+          "title": "German",
+          "value": "de"
+        },
+        {
+          "title": "Spanish",
+          "value": "es"
+        },
+        {
+          "title": "French",
+          "value": "fr"
+        },
+        {
+          "title": "Italian",
+          "value": "it"
+        },
+        {
+          "title": "Japanese",
+          "value": "ja"
+        },
+        {
+          "title": "Chinese",
+          "value": "zh"
+        }
+      ],
+      "default": "en"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.48.8",
-    "quantumlib": "^0.0.9"
+    "@raycast/api": "^1.51.2",
+    "quantumlib": "^0.0.10"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.5",
-    "@types/node": "^18.8.3",
+    "@types/node": "^18.16.12",
     "@types/react": "^18.0.9",
     "eslint": "^8.37.0",
     "prettier": "^2.8.7",
