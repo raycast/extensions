@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "chatgpt",
   "title": "ChatGPT",
-  "description": "Interact with OpenAI's ChatGPT API directly from your command bar",
+  "description": "Interact with OpenAI's ChatGPT directly from your command bar",
   "icon": "icon.png",
   "author": "abielzulio",
   "contributors": [
@@ -11,7 +11,10 @@
     "shichongrui",
     "timolins",
     "pomdtr",
-    "cruelmoney"
+    "cruelmoney",
+    "sykuang",
+    "thanhlongb",
+    "k8scat"
   ],
   "categories": [
     "Productivity",
@@ -61,11 +64,11 @@
   ],
   "preferences": [
     {
-      "name": "api",
-      "label": "Open AI API",
-      "description": "Enter your personal Open AI API",
+      "name": "apiKey",
+      "label": "Open AI API Key",
+      "description": "Enter your personal Open AI API Key",
       "type": "password",
-      "title": "API",
+      "title": "API Key",
       "required": true
     },
     {
@@ -183,6 +186,29 @@
       "description": "Leave empty if doesn't have",
       "type": "password",
       "title": "Proxy Password",
+      "required": false
+    },
+    {
+      "name": "useAzure",
+      "label": "Use Azure OpenAI",
+      "description": "Use Azure OPENAI rather than OPENAI",
+      "type": "checkbox",
+      "title": "Use Azure OpenAI",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "azureEndpoint",
+      "description": "Leave empty if you are not using Azure OpenAI",
+      "type": "textfield",
+      "title": "Azure Endpoint",
+      "required": false
+    },
+    {
+      "name": "azureDeployment",
+      "description": "Leave empty if you are not using Azure OpenAI",
+      "type": "textfield",
+      "title": "Azure Deployment",
       "required": false
     }
   ],

@@ -1,6 +1,6 @@
 # Browser Bookmarks
 
-Integrate bookmarks from Chrome, Brave, Firefox or Safari.
+Integrate bookmarks from Chrome, Brave, Edge, Firefox or Safari.
 
 ## Configuration
 
@@ -9,4 +9,5 @@ The extension retrieves bookmarks from two sources: your browsers and their prof
 If you have multiple profiles, you can select the one you want from the enabled browsers:
 -  Brave: `⌘` + `⇧` + `B`
 -  Chrome: `⌘` + `⇧` + `C`
+-  Edge: `⌘` + `⇧` + `E`
 -  Firefox: `⌘` + `⇧` + `F`

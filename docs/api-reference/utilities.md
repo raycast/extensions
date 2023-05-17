@@ -181,20 +181,15 @@ A Promise that resolves when the target has been opened.
 
 ### launchCommand
 
-Launches another command of the same extension. If the command does not exist, or if it's not enabled, an error will be thrown.
+Launches another command. If the command does not exist, or if it's not enabled, an error will be thrown.
+If the command is part of another extension, the user will be presented with a permission alert.
 Use this method if your command needs to open another command based on user interaction,
 or when an immediate background refresh should be triggered, for example when a command needs to update an associated menu-bar command.
 
 #### Signature
 
 ```typescript
-async function launchCommand(options: {
-  name: string;
-  type: LaunchType;
-  arguments?: Arguments | null;
-  context?: LaunchContext | null;
-  fallbackText?: string | null;
-}): Promise<void>;
+export async function launchCommand(options: LaunchOptions): Promise<void>;
 ```
 
 #### Example
@@ -243,3 +238,15 @@ Represents the passed context object of programmatic command launches.
 ### LaunchOptions
 
 A parameter object used to decide which command should be launched and what data (arguments, context) it should receive.
+
+#### IntraExtensionLaunchOptions
+
+The options that can be used when launching a command from the same extension.
+
+<InterfaceTableFromJSDoc name="IntraExtensionLaunchOptions" />
+
+#### InterExtensionLaunchOptions
+
+The options that can be used when launching a command from a different extension.
+
+<InterfaceTableFromJSDoc name="InterExtensionLaunchOptions" />

@@ -8,6 +8,11 @@ export enum DisplayMode {
   json = "json",
 }
 
+export enum ExportMode {
+  env = "env",
+  json = "json",
+}
+
 export enum DeleteMode {
   deleteVersion = "deleteVersion",
   destroyVersion = "destroyVersion",

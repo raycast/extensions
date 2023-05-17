@@ -7,6 +7,7 @@ import SelectBrowsers from "./components/SelectBrowsers";
 import useAvailableBrowsers, { BROWSERS_BUNDLE_ID } from "./hooks/useAvailableBrowsers";
 import useBraveBookmarks from "./hooks/useBraveBookmarks";
 import useChromeBookmarks from "./hooks/useChromeBookmarks";
+import useEdgeBookmarks from "./hooks/useEdgeBookmarks";
 import useFirefoxBookmarks from "./hooks/useFirefoxBookmarks";
 import useSafariBookmarks from "./hooks/useSafariBookmarks";
 import { getMacOSDefaultBrowser } from "./utils/browsers";
@@ -30,16 +31,26 @@ type Folder = {
 };
 
 export default function Command() {
+  const { data: availableBrowsers } = useAvailableBrowsers();
+
   const {
     data: storedBrowsers,
     isLoading: isLoadingBrowsers,
     mutate: mutateBrowsers,
-  } = useCachedPromise(async () => {
-    const defaultBrowser = await getMacOSDefaultBrowser();
-    const browsersItem = await LocalStorage.getItem("browsers");
+  } = useCachedPromise(
+    async (browsers) => {
+      // If the user only has one browser, let's not bother with LocalStorage stuff
+      if (browsers && browsers.length === 1) {
+        return [browsers[0].bundleId as string];
+      }
 
-    return browsersItem ? (JSON.parse(browsersItem.toString()) as string[]) : [defaultBrowser];
-  });
+      const defaultBrowser = await getMacOSDefaultBrowser();
+      const browsersItem = await LocalStorage.getItem("browsers");
+
+      return browsersItem ? (JSON.parse(browsersItem.toString()) as string[]) : [defaultBrowser];
+    },
+    [availableBrowsers]
+  );
 
   async function setBrowsers(browsers: string[]) {
     await LocalStorage.setItem("browsers", JSON.stringify(browsers));
@@ -61,15 +72,18 @@ export default function Command() {
   const browsers = useMemo(() => storedBrowsers ?? [], [storedBrowsers]);
   const frecencies = useMemo(() => storedFrecencies ?? {}, [storedFrecencies]);
 
+  const [query, setQuery] = useState("");
   const [selectedFolderId, setSelectedFolderId] = useState("");
 
   const hasBrave = browsers.includes(BROWSERS_BUNDLE_ID.brave) ?? false;
   const hasChrome = browsers.includes(BROWSERS_BUNDLE_ID.chrome) ?? false;
+  const hasEdge = browsers.includes(BROWSERS_BUNDLE_ID.edge) ?? false;
   const hasFirefox = browsers.includes(BROWSERS_BUNDLE_ID.firefox) ?? false;
   const hasSafari = browsers.includes(BROWSERS_BUNDLE_ID.safari) ?? false;
 
   const brave = useBraveBookmarks(hasBrave);
   const chrome = useChromeBookmarks(hasChrome);
+  const edge = useEdgeBookmarks(hasEdge);
   const firefox = useFirefoxBookmarks(hasFirefox);
   const safari = useSafariBookmarks(hasSafari);
 
@@ -77,7 +91,13 @@ export default function Command() {
   const [folders, setFolders] = useCachedState<Folder[]>("folders", []);
 
   useEffect(() => {
-    const bookmarks = [...brave.bookmarks, ...chrome.bookmarks, ...firefox.bookmarks, ...safari.bookmarks]
+    const bookmarks = [
+      ...brave.bookmarks,
+      ...chrome.bookmarks,
+      ...edge.bookmarks,
+      ...firefox.bookmarks,
+      ...safari.bookmarks,
+    ]
       .map((item) => {
         return {
           ...item,
@@ -106,15 +126,23 @@ export default function Command() {
       });
 
     setBookmarks(bookmarks);
-  }, [brave.bookmarks, chrome.bookmarks, firefox.bookmarks, safari.bookmarks, frecencies, setBookmarks]);
+  }, [
+    brave.bookmarks,
+    chrome.bookmarks,
+    edge.bookmarks,
+    firefox.bookmarks,
+    safari.bookmarks,
+    frecencies,
+    setBookmarks,
+  ]);
 
   useEffect(() => {
-    const folders = [...brave.folders, ...chrome.folders, ...firefox.folders, ...safari.folders];
+    const folders = [...brave.folders, ...chrome.folders, ...edge.folders, ...firefox.folders, ...safari.folders];
 
     setFolders(folders);
-  }, [brave.folders, chrome.folders, firefox.folders, safari.folders, setFolders]);
+  }, [brave.folders, chrome.folders, edge.folders, firefox.folders, safari.folders, setFolders]);
 
-  const filteredBookmarks = useMemo(() => {
+  const folderBookmarks = useMemo(() => {
     return bookmarks.filter((item) => {
       if (selectedFolderId === "") {
         return true;
@@ -130,8 +158,31 @@ export default function Command() {
     });
   }, [bookmarks, selectedFolderId, folders]);
 
+  // Limit display to 100 bookmarks to avoid heap memory errors
+  // Use custom filtering instead of native filtering
+  const filteredBookmarks = useMemo(() => {
+    return folderBookmarks.filter((item) => {
+      if (query === "") {
+        return true;
+      }
+
+      // Check if the query matches the item's title, domain, or folder (case-insensitive)
+      const lowercasedQuery = query.toLowerCase();
+
+      return (
+        item.title.toLowerCase().includes(lowercasedQuery) ||
+        item.domain.toLowerCase().includes(lowercasedQuery) ||
+        item.folder.toLowerCase().includes(lowercasedQuery)
+      );
+    });
+  }, [folderBookmarks, query]);
+
   const filteredFolders = useMemo(() => {
     return folders.filter((item) => {
+      if (!item.title) {
+        return false;
+      }
+
       return bookmarks.some((bookmark) => bookmark.browser === item.browser && bookmark.folder.includes(item.title));
     });
   }, [folders, bookmarks]);
@@ -143,6 +194,10 @@ export default function Command() {
 
     if (hasChrome) {
       chrome.mutate();
+    }
+
+    if (hasEdge) {
+      edge.mutate();
     }
 
     if (hasFirefox) {
@@ -194,10 +249,12 @@ export default function Command() {
         isLoadingFrecencies ||
         brave.isLoading ||
         chrome.isLoading ||
+        edge.isLoading ||
         firefox.isLoading ||
         safari.isLoading
       }
       searchBarPlaceholder="Search by title, domain name or tag in selected folder"
+      onSearchTextChange={setQuery}
       searchBarAccessory={
         <List.Dropdown tooltip="Folder" onChange={setSelectedFolderId}>
           <List.Dropdown.Item icon={Icon.Globe} title="All" value="" />
@@ -217,14 +274,13 @@ export default function Command() {
         </List.Dropdown>
       }
     >
-      {filteredBookmarks?.map((item) => {
+      {filteredBookmarks.slice(0, 100).map((item) => {
         return (
           <List.Item
             key={item.id}
             icon={getFavicon(item.url)}
             title={item.title}
-            keywords={[item.domain, ...item.folder.split("/")]}
-            accessories={[{ icon: Icon.Folder, tag: item.folder }]}
+            accessories={item.folder ? [{ icon: Icon.Folder, tag: item.folder }] : []}
             actions={
               <ActionPanel>
                 <Action.OpenInBrowser url={item.url} onOpen={() => updateFrecency(item)} />
@@ -234,7 +290,9 @@ export default function Command() {
                 <Action title="Reset Ranking" icon={Icon.ArrowCounterClockwise} onAction={() => removeFrecency(item)} />
 
                 <ActionPanel.Section>
-                  <SelectBrowserAction browsers={browsers} setBrowsers={setBrowsers} />
+                  {availableBrowsers && availableBrowsers.length > 1 ? (
+                    <SelectBrowserAction browsers={browsers} setBrowsers={setBrowsers} />
+                  ) : null}
 
                   <SelectProfileSubmenu
                     bundleId={BROWSERS_BUNDLE_ID.brave}
@@ -254,6 +312,16 @@ export default function Command() {
                     profiles={chrome.profiles}
                     currentProfile={chrome.currentProfile}
                     setCurrentProfile={chrome.setCurrentProfile}
+                  />
+
+                  <SelectProfileSubmenu
+                    bundleId={BROWSERS_BUNDLE_ID.edge}
+                    name="Edge"
+                    icon="edge.png"
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
+                    profiles={edge.profiles}
+                    currentProfile={edge.currentProfile}
+                    setCurrentProfile={edge.setCurrentProfile}
                   />
 
                   <SelectProfileSubmenu
@@ -297,15 +365,10 @@ export default function Command() {
 type SelectBrowsersAction = {
   browsers: string[];
   setBrowsers: (browsers: string[]) => void;
+  availableBrowsers?: string[];
 };
 
 function SelectBrowserAction({ browsers, setBrowsers }: SelectBrowsersAction) {
-  const { data: availableBrowsers } = useAvailableBrowsers();
-
-  if (availableBrowsers && availableBrowsers.length === 1) {
-    return null;
-  }
-
   return (
     <Action.Push
       title="Select Browsers"
