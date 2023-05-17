@@ -3,7 +3,7 @@ import { ConsoleCommand } from "../types";
 import { Action, ActionPanel, Detail, Icon } from "@raycast/api";
 
 export const SummaryView = ({ command }: { command: ConsoleCommand }) => {
-  const prompt = `In the context of Laravel Artisan only, teach me about following command. Format the response as if you are providing documentation and do not repeat the command. You may use code blocks.\nCommand: laravel artisan ${command.name}\nDescription: ${command.description}`;
+  const prompt = `In the context of Laravel Artisan only, teach me about following command. Format the response as if you are providing documentation. If there is an interesting use case, provide that. You may use code blocks but include the language like \`\`\`php.\nCommand: php artisan ${command.name}\nDescription: ${command.description}`;
   const { data, isLoading } = useAI(prompt, { creativity: 0 });
   const code = data.match(/```[\w\S]*\n([\s\S]*?)\n```/);
   return (
