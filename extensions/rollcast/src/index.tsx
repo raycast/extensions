@@ -1,5 +1,5 @@
-import { Clipboard, Form, showToast, Toast } from "@raycast/api";
-import React, { useState } from "react";
+import { Clipboard, Form, showToast, Toast, getPreferenceValues } from "@raycast/api";
+import { useState } from "react";
 import { FormActions } from "components/FormActions";
 import { parseCommand } from "utils/parse";
 import { roll } from "utils/roll";
@@ -14,6 +14,8 @@ export default function main() {
   const [result, setResult] = useState<number>();
   const [rolls, setRolls] = useState<Roll[]>();
   const [type, setType] = useState<RollType>();
+
+  const prefs = getPreferenceValues<ExtensionPreferences>();
 
   const handleCopy = async (result?: number) => {
     await Clipboard.copy(result || "");
@@ -34,7 +36,9 @@ export default function main() {
       setType(type);
       setPreviousInput(input);
 
-      await handleCopy(result);
+      if (prefs.copy_to_clipboard) {
+        await handleCopy(result);
+      }
     } else {
       await showToast({ style: Style.Failure, message: `Incorrect format`, title: "Error" });
     }
@@ -49,7 +53,7 @@ export default function main() {
         onChange={setInput}
         id={"dice"}
         title={"Enter dice"}
-        placeholder={"Input dice combination "}
+        placeholder={"Input dice combination"}
       />
       <Form.Description text={"Some examples - 2d20, 3d6, d8, d20:dis, d6:adv"} />
 

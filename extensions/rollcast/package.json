@@ -5,6 +5,9 @@
   "description": "Roll dice for your D&D games from Raycast!",
   "icon": "command-icon.png",
   "author": "troalexis",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "categories": [
     "Fun"
   ],
@@ -18,7 +21,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.48.9"
+    "@raycast/api": "^1.51.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.5",
@@ -34,5 +37,15 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish"
-  }
+  },
+  "preferences": [
+    {
+      "name": "copy_to_clipboard",
+      "description": "Copy the dice result to clipboard when rolling",
+      "type": "checkbox",
+      "required": true,
+      "title": "Options",
+      "label": "Copy dice result to clipboard when rolling"
+    }
+  ]
 }
