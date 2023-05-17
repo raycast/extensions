@@ -1,4 +1,4 @@
-import * as messageScripts from "./scripts/messages";
+import { getMessages } from "./scripts/messages";
 import { getAccounts } from "./scripts/accounts";
 
 export default async function RefreshMail() {
@@ -8,7 +8,7 @@ export default async function RefreshMail() {
   const mailboxes = accounts.flatMap((account) => account.mailboxes.map((mailbox) => ({ ...mailbox, account })));
   if (!mailboxes) return;
 
-  const getAccountMessagesPromises = mailboxes.map((mailbox) => messageScripts.getMessages(mailbox.account, mailbox));
+  const getAccountMessagesPromises = mailboxes.map((mailbox) => getMessages(mailbox.account, mailbox));
 
   await Promise.all(getAccountMessagesPromises);
 }

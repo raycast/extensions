@@ -4,7 +4,7 @@ import { useCachedPromise } from "@raycast/utils";
 
 import { MessageActions } from "./message-actions";
 import { Account, Mailbox, Message, MessageProps } from "../types";
-import * as messageScripts from "../scripts/messages";
+import { getMessages } from "../scripts/messages";
 import { shortenText, formatDate, titleCase, invoke } from "../utils";
 import { MailIcon } from "../utils/presets";
 import { Cache } from "../utils/cache";
@@ -25,7 +25,7 @@ export const MessageList = (props: MessageListProps) => {
     data: messages,
     mutate: mutateMessages,
     isLoading: isLoadingMessages,
-  } = useCachedPromise(messageScripts.getMessages, [account, mailbox], { abortable: messagesAbortController });
+  } = useCachedPromise(getMessages, [account, mailbox], { abortable: messagesAbortController });
 
   const handleAction = useCallback((action: () => Promise<void>, account: Account, mailbox: Mailbox) => {
     mutateMessages(
@@ -33,7 +33,7 @@ export const MessageList = (props: MessageListProps) => {
         messagesAbortController.current.abort();
 
         await action();
-        const messages = await messageScripts.getMessages(account, mailbox);
+        const messages = await getMessages(account, mailbox);
 
         return messages;
       }),
