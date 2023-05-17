@@ -302,7 +302,7 @@
 /extensions/focus                                    @namzo
 /extensions/focus-anchor                             @ashleyhindle
 /extensions/focustask                                @vojto @pernielsentikaer
-/extensions/folder-search                            @GastroGeek @omarshahine
+/extensions/folder-search                            @GastroGeek @omarshahine @fengtianze
 /extensions/fontawesome                              @dutzi @DanielFerguson
 /extensions/fork-repositories                        @sxn
 /extensions/format-graphql                           @tngranados
@@ -378,7 +378,7 @@
 /extensions/hide-mail                                @Flatroy
 /extensions/hiit                                     @pernielsentikaer @andreaselia
 /extensions/himalaya                                 @jesse-c
-/extensions/holodex                                  @uetchy
+/extensions/holodex                                  @uetchy @hcy1251
 /extensions/holopin                                  @timoransky @pernielsentikaer
 /extensions/homeassistant                            @tonka3000 @altrdev @rspeicher
 /extensions/homey                                    @DominicVonk
@@ -581,10 +581,11 @@
 /extensions/nouns                                    @peduarte
 /extensions/novu                                     @djabarovgeorge
 /extensions/nsis-reference                           @idleberg
+/extensions/nts-radio                                @arjanski
 /extensions/nuget                                    @hexpl0it
 /extensions/numi                                     @AndresMorelos @pernielsentikaer
 /extensions/obs-control                              @Yukaii
-/extensions/obsidian                                 @marcjulianschwarz
+/extensions/obsidian                                 @KevinBatdorf
 /extensions/obsidian-bookmarks                       @Dru89
 /extensions/odin                                     @aamoussa97
 /extensions/office-quotes                            @braydoncoyer @sandypockets
@@ -828,6 +829,7 @@
 /extensions/svgr                                     @rickMcGavin
 /extensions/swift-evolution                          @BProg
 /extensions/swift-package-index                      @maximkrouk
+/extensions/switch-game-play-history                 @kvdo2
 /extensions/switchhosts                              @tiancheng92
 /extensions/system-monitor                           @hossammourad @Crayon144 @pernielsentikaer @lucasmezencio
 /extensions/tableplus                                @pernielsentikaer @nagauta

@@ -1,11 +1,10 @@
 import { LaunchProps, List } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
 import { useState, useMemo } from "react";
 
-import { getIssues } from "./api/issues";
 import { IssueListEmptyView } from "./components/IssueListEmptyView";
 import IssueListItem from "./components/IssueListItem";
 import { withJiraCredentials } from "./helpers/withJiraCredentials";
+import useIssues from "./hooks/useIssues";
 
 type SearchIssuesProps = {
   query?: string;
@@ -40,11 +39,7 @@ export function SearchIssues({ query: initialQuery }: SearchIssuesProps) {
     return `(text ~ "${escapedQuery}" OR project = "${escapedQuery}" ${issueKeyQuery}) ORDER BY updated DESC`;
   }, [query]);
 
-  const {
-    data: issues,
-    isLoading,
-    mutate,
-  } = useCachedPromise((jql) => getIssues({ jql }), [jql], { keepPreviousData: true });
+  const { issues, isLoading, mutate } = useIssues(jql, { keepPreviousData: true });
 
   return (
     <List
