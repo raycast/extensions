@@ -16,8 +16,7 @@ export const blockAnchors = (turndownService: TurndownService) => {
         return isBlock;
       });
     },
-    replacement: (content, node: HTMLElement) => {
-      console.log("CONTENT IS", node.nodeName, content);
+    replacement: (content) => {
       return content;
     },
   });
