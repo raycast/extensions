@@ -10,6 +10,7 @@ import { Account, Mailbox, Message, OutgoingMessage, OutgoingMessageAction, Pref
 import { constructDate, formatMarkdown, stripHtmlComments, titleCase } from "../utils";
 import { Cache } from "../utils/cache";
 import { isJunkMailbox, isTrashMailbox } from "../utils/mailbox";
+import { blockAnchors, hideElements } from "../utils/turndown";
 
 const preferences: Preferences = getPreferenceValues();
 const messageLimit = preferences.messageLimit ? parseInt(preferences.messageLimit) : 10;
@@ -328,7 +329,14 @@ export const getMessageMarkdown = async (message: Message, mailbox: Mailbox): Pr
 
     const html = await getMessageHtml(message, mailbox);
 
-    const turndownService = new TurndownService();
+    const turndownService = new TurndownService({
+      headingStyle: "atx",
+      bulletListMarker: "-",
+      codeBlockStyle: "fenced",
+    });
+
+    turndownService.use([hideElements, blockAnchors]);
+
     const markdown = turndownService.turndown(html);
 
     return formatMarkdown(message.subject, markdown);

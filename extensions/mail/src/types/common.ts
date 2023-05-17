@@ -2,6 +2,8 @@ import { Image } from "@raycast/api";
 
 export type AnyFn<T = void> = (...args: unknown[]) => T;
 
+export type AnyObject = Record<string, unknown>;
+
 export type MaybePromise<T> = T | Promise<T>;
 
 export type Account = {
