@@ -1,5 +1,9 @@
 # Bitwarden Changelog
 
+## [Fix] - 2023-05-16
+
+- Fixed Generate Password (Quick) command not copying password before pasting
+
 ## [Improvement] - 2023-05-12
 
 - Add different icons for each command
