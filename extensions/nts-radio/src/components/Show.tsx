@@ -28,6 +28,7 @@ export default function Show({ path }: Props) {
               {result.show_alias && result.episode_alias && (
                 <Action.Push
                   title="Open"
+                  icon={Icon.AppWindowSidebarRight}
                   target={<Details path={`/shows/${result.show_alias}/episodes/${result.episode_alias}`} />}
                 />
               )}

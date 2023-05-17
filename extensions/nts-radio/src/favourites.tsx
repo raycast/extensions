@@ -52,6 +52,7 @@ export default function Command() {
               {favourite.episode_alias && favourite.show_alias && (
                 <Action.Push
                   title="Open"
+                  icon={Icon.AppWindowSidebarRight}
                   target={<Details path={`/shows/${favourite.show_alias}/episodes/${favourite.episode_alias}`} />}
                 />
               )}
