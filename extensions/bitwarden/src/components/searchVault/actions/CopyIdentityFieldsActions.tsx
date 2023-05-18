@@ -5,10 +5,10 @@ import { identityFormOrderSorter } from "~/utils/identity";
 
 function CopyIdentityFieldsActions() {
   return (
-    <CopyObjectStringFieldsActions
+    <CopyObjectStringFieldsActions<Identity>
       selector={(item) => item.identity}
       sorter={identityFormOrderSorter}
-      labelMapper={(field) => IDENTITY_KEY_LABEL[field as keyof Identity]}
+      labelMapper={(field) => IDENTITY_KEY_LABEL[field]}
     />
   );
 }

@@ -5,10 +5,10 @@ import { cardBitwardenPageFieldOrderSorter } from "~/utils/cards";
 
 function CopyCardFieldsActions() {
   return (
-    <CopyObjectStringFieldsActions
+    <CopyObjectStringFieldsActions<Card>
       selector={(item) => item.card}
       sorter={cardBitwardenPageFieldOrderSorter}
-      labelMapper={(field) => CARD_KEY_LABEL[field as keyof Card]}
+      labelMapper={(field) => CARD_KEY_LABEL[field]}
     />
   );
 }
