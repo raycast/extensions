@@ -222,7 +222,7 @@ export default function Command() {
                         icon={Icon.Link}
                         content={{
                           html: `<a href="mobilenotes://showNote?identifier=${note.UUID}" title="${note.title}">${note.title}</a>`,
-                          text: `mibolenotes://showNote?identifier=${note.UUID}`,
+                          text: `mobilenotes://showNote?identifier=${note.UUID}`,
                         }}
                         shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
                       />
