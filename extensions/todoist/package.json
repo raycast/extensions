@@ -6,26 +6,34 @@
   "icon": "todoist.png",
   "author": "thomaslombart",
   "owner": "doist",
-  "access": "public",
-  "license": "MIT",
+  "contributors": [
+    "AnishDe12020",
+    "kud",
+    "gerardcs"
+  ],
   "categories": [
     "Productivity"
   ],
-  "contributors": [
-    "AnishDe12020",
-    "kud"
-  ],
+  "access": "public",
+  "license": "MIT",
   "commands": [
     {
       "name": "home",
       "title": "Home",
       "subtitle": "Todoist",
       "description": "Show your Todoist tasks and views (inbox, today, upcoming, completed, projects, labels).",
+      "keywords": [
+        "inbox",
+        "today",
+        "today tasks",
+        "upcoming",
+        "upcoming tasks",
+        "completed",
+        "completed tasks"
+      ],
       "mode": "view",
       "preferences": [
         {
-          "name": "view",
-          "type": "dropdown",
           "data": [
             {
               "title": "Inbox",
@@ -45,19 +53,12 @@
             }
           ],
           "default": "today",
+          "description": "Indicates which view you want to see in the command.",
+          "name": "view",
           "required": false,
           "title": "View",
-          "description": "Indicates which view you want to see in the command."
+          "type": "dropdown"
         }
-      ],
-      "keywords": [
-        "inbox",
-        "today",
-        "today tasks",
-        "upcoming",
-        "upcoming tasks",
-        "completed",
-        "completed tasks"
       ]
     },
     {
@@ -75,26 +76,13 @@
       "mode": "no-view",
       "preferences": [
         {
-          "name": "shouldCloseMainWindow",
-          "type": "checkbox",
-          "title": "Advanced",
-          "label": "Close window immediately",
-          "description": "When enabled, the Raycast window is closed immediately, allowing you to carry on with other work.",
           "default": false,
-          "required": false
-        }
-      ],
-      "arguments": [
-        {
-          "name": "text",
-          "placeholder": "Title/info (today 5pm p2)",
-          "type": "text",
-          "required": true
-        },
-        {
-          "name": "description",
-          "placeholder": "Description",
-          "type": "text"
+          "description": "When enabled, the Raycast window is closed immediately, allowing you to carry on with other work.",
+          "label": "Close window immediately",
+          "name": "shouldCloseMainWindow",
+          "required": false,
+          "title": "Advanced",
+          "type": "checkbox"
         }
       ]
     },
@@ -111,19 +99,18 @@
       "subtitle": "Todoist",
       "description": "Show your Todoist tasks and views in your menu bar.",
       "mode": "menu-bar",
+      "interval": "10m",
       "preferences": [
         {
-          "name": "hideMenuBarCount",
-          "type": "checkbox",
-          "title": "Count",
-          "label": "Hide menu bar count",
-          "description": "When enabled, the number of tasks in the menu bar won't be shown.",
           "default": false,
-          "required": false
+          "description": "When enabled, the number of tasks in the menu bar won't be shown.",
+          "label": "Hide menu bar count",
+          "name": "hideMenuBarCount",
+          "required": false,
+          "title": "Count",
+          "type": "checkbox"
         },
         {
-          "name": "view",
-          "type": "dropdown",
           "data": [
             {
               "title": "Today",
@@ -135,28 +122,37 @@
             }
           ],
           "default": "upcoming",
+          "description": "Indicates which view you want to see in your menu bar.",
+          "name": "view",
           "required": false,
           "title": "View",
-          "description": "Indicates which view you want to see in your menu bar."
+          "type": "dropdown"
         },
         {
-          "name": "upcomingDays",
-          "type": "textfield",
           "default": "7",
+          "description": "Indicates the number of days you want in the upcoming view.",
+          "name": "upcomingDays",
           "required": false,
           "title": "Number of Days for Upcoming View",
-          "description": "Indicates the number of days you want in the upcoming view."
+          "type": "textfield"
         },
         {
-          "name": "focusFeatureWidth",
-          "type": "textfield",
+          "default": "",
+          "description": "Task filter. Use Todoist filter syntax.",
+          "name": "filter",
           "required": false,
+          "title": "Filter query",
+          "type": "textfield"
+        },
+        {
           "default": "40",
+          "description": "Maximum width of the focused task's text.",
+          "name": "focusFeatureWidth",
+          "required": false,
           "title": "Maximum Width of Focused Task",
-          "description": "Maximum width of the focused task's text."
+          "type": "textfield"
         }
-      ],
-      "interval": "10m"
+      ]
     },
     {
       "name": "show-projects",
@@ -183,12 +179,12 @@
   ],
   "preferences": [
     {
+      "description": "Your Todoist Token. Find it in Todoist integration settings view.",
       "name": "token",
-      "type": "password",
+      "placeholder": "Enter your Todoist token",
       "required": false,
       "title": "Todoist Token",
-      "description": "Your Todoist Token. Find it in Todoist integration settings view.",
-      "placeholder": "Enter your Todoist token"
+      "type": "password"
     }
   ],
   "dependencies": {

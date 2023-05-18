@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 import { authorize } from "../oauth";
 
 let todoistApi: AxiosInstance | null = null;
+let todoistRestApi: AxiosInstance | null = null;
 
 export async function initializeApi() {
   const { token } = getPreferenceValues<Preferences>();
@@ -13,6 +14,10 @@ export async function initializeApi() {
 
   todoistApi = axios.create({
     baseURL: "https://api.todoist.com/sync/v9",
+    headers: { authorization: `Bearer ${accessToken}` },
+  });
+  todoistRestApi = axios.create({
+    baseURL: "https://api.todoist.com/rest/v2",
     headers: { authorization: `Bearer ${accessToken}` },
   });
 }
@@ -50,4 +55,13 @@ export function getTodoistApi() {
   }
 
   return todoistApi;
+}
+
+
+export function getTodoistRestApi() {
+  if (!todoistRestApi) {
+    throw new Error("getTodoistApi must be used when authenticated");
+  }
+
+  return todoistRestApi;
 }
