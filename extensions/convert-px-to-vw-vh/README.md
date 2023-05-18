@@ -1,4 +1,4 @@
-# Raycast Extension: Pixels to VW/VH Converter
+# Raycast Extension: Pixels to Viewport Width or Height
 
 ![Extension Logo](assets/logo.png)
 
