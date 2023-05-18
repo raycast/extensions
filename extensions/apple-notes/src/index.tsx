@@ -10,7 +10,7 @@ import {
   List,
   showToast,
   Toast,
-  Color
+  Color,
 } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
 import { useSqlNotes } from "./useSql";
@@ -164,9 +164,18 @@ export default function Command() {
                 title={note.title || ""}
                 subtitle={note.snippet}
                 keywords={[`${note.folder}`, `${note.account}`]
+                  .concat(note.tags ? note.tags.map((tag) => tag.replace("#", "")) : [])
                   .concat(note.noteBody ? [note.noteBody.replace(/\n/g, "")] : [])
                   .concat(note.ocrText ? [note.ocrText.replace(/\n/g, "")] : [])}
                 accessories={([] as List.Item.Accessory[])
+                  .concat(
+                    preferences.tags && note.tags
+                      ? note.tags.map((tag) => ({
+                          tag: { value: `${tag}`, color: Color.Yellow },
+                          tooltip: `${tag} Tag`,
+                        }))
+                      : []
+                  )
                   .concat(
                     preferences.accounts
                       ? preferences.folders
@@ -190,11 +199,7 @@ export default function Command() {
                           },
                         ]
                       : []
-                  ).concat(
-                    preferences.tags && note.tags
-                    ? [{ tag: { value: `${note.tags || ""}`, color: Color.Yellow }, tooltip: "Tags" }]
-                    : []
-                )}
+                  )}
                 actions={
                   <ActionPanel title="Actions">
                     {preferences.openSeparately || (
@@ -257,9 +262,18 @@ export default function Command() {
                   title={note.title || ""}
                   subtitle={note.snippet}
                   keywords={[`${note.folder}`, `${note.account}`]
-                    .concat(note.noteBody ? [note.noteBody.replace(/\n/g, "")] : [])
-                    .concat(note.ocrText ? [note.ocrText.replace(/\n/g, "")] : [])}
+                  .concat(note.tags ? note.tags.map((tag) => tag.replace("#", "")) : [])
+                  .concat(note.noteBody ? [note.noteBody.replace(/\n/g, "")] : [])
+                  .concat(note.ocrText ? [note.ocrText.replace(/\n/g, "")] : [])}
                   accessories={([] as List.Item.Accessory[])
+                    .concat(
+                      preferences.tags && note.tags
+                        ? note.tags.map((tag) => ({
+                            tag: { value: `${tag}`, color: Color.Yellow },
+                            tooltip: `${tag} Tag`,
+                          }))
+                        : []
+                    )
                     .concat(
                       preferences.accounts
                         ? preferences.folders
@@ -282,11 +296,6 @@ export default function Command() {
                               tooltip: "Last Modified At",
                             },
                           ]
-                        : []
-                    )
-                    .concat(
-                        preferences.tags && note.tags
-                        ? [{ tag: { value: `${note.tags || ""}`, color: Color.Yellow }, tooltip: "Tags" }]
                         : []
                     )}
                   actions={
