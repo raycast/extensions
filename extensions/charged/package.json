@@ -56,6 +56,7 @@
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.5",
+    "@types/bn.js": "^5.1.1",
     "@types/node": "18.8.3",
     "@types/react": "18.0.9",
     "eslint": "^7.32.0",
