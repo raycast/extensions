@@ -1,5 +1,6 @@
 import { showToast, Toast } from "@raycast/api";
 import { Bitwarden } from "~/api/bitwarden";
+import { VAULT_LOCK_MESSAGES } from "~/constants/general";
 import { SessionStorage } from "~/context/session/utils";
 
 async function generatePasswordQuickCommand() {
@@ -14,7 +15,7 @@ async function generatePasswordQuickCommand() {
     }
 
     const bitwarden = await new Bitwarden().initialize();
-    await bitwarden.withSession(token).lock("Manually locked by the user");
+    await bitwarden.withSession(token).lock(VAULT_LOCK_MESSAGES.MANUAL);
     await SessionStorage.clearSession();
 
     toast.style = Toast.Style.Success;

@@ -13,3 +13,8 @@ export const LOCAL_STORAGE_KEY = {
   LAST_ACTIVITY_TIME: "lastActivityTime",
   VAULT_LOCK_REASON: "vaultLockReason",
 };
+
+export const VAULT_LOCK_MESSAGES = {
+  TIMEOUT: "Vault timed out due to inactivity",
+  MANUAL: "Manually locked by the user",
+};
