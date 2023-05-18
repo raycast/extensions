@@ -1,6 +1,6 @@
-import emailRegex from "email-regex";
-
 import { formatFileSize, getSizeSync, maximumFileSize } from "./finder";
+
+const emailRegex = /[^\\.\\s@:](?:[^\\s@:]*[^\\s@:\\.])?@[^\\.\\s@]+(?:\\.[^\\.\\s@]+)*/;
 
 const required = (value: unknown) => {
   let isValid = true;
@@ -21,7 +21,7 @@ const required = (value: unknown) => {
 };
 
 const email = (value?: string) => {
-  return value != null && emailRegex({ exact: true }).test(value) ? undefined : "Invalid email address";
+  return value != null && emailRegex.test(value) ? undefined : "Invalid email address";
 };
 
 const emails = (value?: string) => {
@@ -29,7 +29,7 @@ const emails = (value?: string) => {
     ?.split(",")
     .map((recipient: string) => {
       const trimmedRecipient = recipient.trim();
-      if (trimmedRecipient && !emailRegex({ exact: true }).test(trimmedRecipient)) {
+      if (trimmedRecipient && !emailRegex.test(trimmedRecipient)) {
         return "Invalid email address";
       }
 

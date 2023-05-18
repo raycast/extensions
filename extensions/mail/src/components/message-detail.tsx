@@ -4,7 +4,7 @@ import { useCachedPromise } from "@raycast/utils";
 import { MessageActions } from "./message-actions";
 import { MessageProps } from "../types";
 import { getMessageMarkdown } from "../scripts/messages";
-import { formatDate } from "../utils";
+import { toRelative } from "../utils";
 
 export const MessageDetail = (props: MessageProps) => {
   const { mailbox, message } = props;
@@ -31,7 +31,7 @@ export const MessageDetail = (props: MessageProps) => {
             icon={Icon.Paperclip}
           />
 
-          <Detail.Metadata.Label title="Received" text={formatDate(message.date)} icon={Icon.Calendar} />
+          <Detail.Metadata.Label title="Received" text={toRelative(message.date)} icon={Icon.Calendar} />
         </Detail.Metadata>
       }
       actions={<MessageActions {...props} inMessageView={true} />}

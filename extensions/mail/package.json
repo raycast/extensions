@@ -135,14 +135,11 @@
   "dependencies": {
     "@raycast/api": "^1.51.0",
     "@raycast/utils": "^1.6.1",
-    "clean-text-utils": "^1.1.17",
-    "email-regex": "^5.0.0",
-    "javascript-time-ago": "^2.5.7",
+    "javascript-time-ago": "^2.5.9",
     "json2md": "^1.12.0",
     "juice": "^9.0.0",
     "mailparser": "^3.6.4",
     "mime-types": "^2.1.35",
-    "node-fetch": "^3.2.10",
     "run-applescript": "^6.0.0",
     "turndown": "^7.1.2",
     "utf8": "^3.0.0"

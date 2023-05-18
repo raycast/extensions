@@ -1,7 +1,6 @@
-import { strip, replace } from "clean-text-utils";
 import json2md from "json2md";
 
-export const shortenText = (text: string, maxLength: number): string => {
+export const shortenText = (text: string, maxLength: number) => {
   let length = text
     .split("")
     .map((c: string) => (c == c.toUpperCase() ? 1.2 : 1))
@@ -23,7 +22,7 @@ export const shortenText = (text: string, maxLength: number): string => {
   return text;
 };
 
-export const titleCase = (str: string): string => {
+export const titleCase = (str: string) => {
   str = str
     .toLowerCase()
     .split(" ")
@@ -33,15 +32,7 @@ export const titleCase = (str: string): string => {
   return str.trim();
 };
 
-export const formatMarkdown = (title: string, text: string | undefined): string => {
-  if (text) {
-    text = strip.nonASCII(text);
-    text = replace.diacritics(text);
-    text = replace.exoticChars(text);
-    text = replace.smartChars(text);
-    text = text.trim().replaceAll(/[ ][ ]+/g, " ");
-  }
-
+export const formatMarkdown = (title: string, text: string | undefined) => {
   return json2md([{ h1: titleCase(title) }, { p: text }]);
 };
 

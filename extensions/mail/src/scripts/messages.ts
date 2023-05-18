@@ -1,6 +1,5 @@
 import { getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
-import emailRegex from "email-regex";
 import { simpleParser } from "mailparser";
 import TurndownService from "turndown";
 import juice from "juice";
@@ -11,6 +10,7 @@ import { constructDate, formatMarkdown, stripHtmlComments, titleCase } from "../
 import { Cache } from "../utils/cache";
 import { isJunkMailbox, isTrashMailbox } from "../utils/mailbox";
 import { blockAnchors, hideElements } from "../utils/turndown";
+import { Validation } from "../utils/validation";
 
 const preferences: Preferences = getPreferenceValues();
 const messageLimit = preferences.messageLimit ? parseInt(preferences.messageLimit) : 10;
@@ -336,6 +336,8 @@ export const getMessageMarkdown = async (message: Message, mailbox: Mailbox): Pr
       headingStyle: "atx",
       bulletListMarker: "-",
       codeBlockStyle: "fenced",
+      strongDelimiter: "**",
+      emDelimiter: "_",
     });
 
     turndownService.use([hideElements, blockAnchors]);
@@ -362,7 +364,7 @@ export const sendMessage = async (
   }
 
   for (const recipient of outgoingMessage.to) {
-    if (!emailRegex({ exact: true }).test(recipient)) {
+    if (Validation.email(recipient)) {
       await showToast(Toast.Style.Failure, "Invalid email for recipient");
       return;
     }

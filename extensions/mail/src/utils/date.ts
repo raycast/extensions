@@ -8,7 +8,7 @@ export const constructDate = (date: string): Date => {
   return new Date(date.replaceAll(",", "").replaceAll("at", ""));
 };
 
-export const formatDate = (input: Date | string): string => {
+export const toRelative = (input: Date | string): string => {
   const date = typeof input === "string" ? constructDate(input) : input;
   return timeAgo.format(date) as string;
 };
