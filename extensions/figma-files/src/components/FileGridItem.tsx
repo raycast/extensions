@@ -29,7 +29,7 @@ export default function FileGridItem(props: {
 
           <ActionPanel.Section>
             {file.branches && <OpenBranchSubmenuAction file={props.file} desktopApp={desktopApp} />}
-            <OpenPageSubmenuAction file={props.file} onVisit={onVisit} />
+            <OpenPageSubmenuAction file={props.file} desktopApp={desktopApp} onVisit={onVisit} />
           </ActionPanel.Section>
           <DevelopmentActionSection />
         </ActionPanel>
