@@ -7,13 +7,15 @@ import useGetUpdatedVaultItem from "~/components/searchVault/utils/useGetUpdated
 import { Item } from "~/types/vault";
 import { captureException } from "~/utils/development";
 
-export type CopyObjectStringFieldsActionsProps<TValue extends RecordOfAny> = {
+type Constraint = RecordOfAny;
+
+export type CopyObjectStringFieldsActionsProps<TValue extends Constraint> = {
   selector: (item: Item) => TValue | null | undefined;
   sorter?: (itemA: [string, any], itemB: [string, any]) => number;
   labelMapper?: (field: keyof TValue) => string; // TODO: figure out why the field is not being inferred as a keyof TValue
 };
 
-function CopyObjectStringFieldsActions<TValue extends RecordOfAny>({
+function CopyObjectStringFieldsActions<TValue extends Constraint>({
   selector,
   sorter,
   labelMapper,
@@ -23,6 +25,7 @@ function CopyObjectStringFieldsActions<TValue extends RecordOfAny>({
   const selectedItemEntries = getItemObjectEntries(selectedItem, selector, sorter);
 
   if (!selectedItemEntries) return null;
+
   const handleCopyField = (field: string) => async () => {
     try {
       const value = await getUpdatedVaultItem(selectedItem, (item) => selector(item)?.[field], `Getting ${field}...`);
@@ -58,7 +61,7 @@ function CopyObjectStringFieldsActions<TValue extends RecordOfAny>({
   );
 }
 
-function getItemObjectEntries<TValue extends RecordOfAny>(
+function getItemObjectEntries<TValue extends Constraint>(
   selectedItem: Item,
   selector: CopyObjectStringFieldsActionsProps<TValue>["selector"],
   sorter: CopyObjectStringFieldsActionsProps<TValue>["sorter"]
