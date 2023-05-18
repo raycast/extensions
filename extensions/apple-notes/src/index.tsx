@@ -131,6 +131,8 @@ export default function Command() {
       let tagString = note.tags as unknown as string;
       note.tags = tagString.split(" ");
     }
+    console.log([note.noteBody.replace(/\n/g, "")][0].split(" "))
+    console.log(typeof([note.noteBody.replace(/\n/g, "")][0].split(" ")))
   });
 
   return (
@@ -165,8 +167,8 @@ export default function Command() {
                 subtitle={note.snippet}
                 keywords={[`${note.folder}`, `${note.account}`]
                   .concat(note.tags ? note.tags.map((tag) => tag.replace("#", "")) : [])
-                  .concat(note.noteBody ? [note.noteBody.replace(/\n/g, "")] : [])
-                  .concat(note.ocrText ? [note.ocrText.replace(/\n/g, "")] : [])}
+                  .concat(note.noteBody ? note.noteBody.replace(/\n/g, "").split(" ") : [])
+                  .concat(note.ocrText ? note.ocrText.replace(/\n/g, "").split(" ") : [])}
                 accessories={([] as List.Item.Accessory[])
                   .concat(
                     preferences.tags && note.tags
@@ -263,8 +265,8 @@ export default function Command() {
                   subtitle={note.snippet}
                   keywords={[`${note.folder}`, `${note.account}`]
                   .concat(note.tags ? note.tags.map((tag) => tag.replace("#", "")) : [])
-                  .concat(note.noteBody ? [note.noteBody.replace(/\n/g, "")] : [])
-                  .concat(note.ocrText ? [note.ocrText.replace(/\n/g, "")] : [])}
+                  .concat(note.noteBody ? note.noteBody.replace(/\n/g, "").split(" ") : [])
+                  .concat(note.ocrText ? note.ocrText.replace(/\n/g, "").split(" ") : [])}
                   accessories={([] as List.Item.Accessory[])
                     .concat(
                       preferences.tags && note.tags
