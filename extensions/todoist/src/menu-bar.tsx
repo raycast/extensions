@@ -43,7 +43,6 @@ function MenuBar(props: MenuBarProps) {
 
   const tasks = useMemo(() => {
    if (filter!= "") {
-    console.log(filterTasks)
     return filterTasks ? filterTasks : []
    }
     const tasks = data ? getTasksForTodayOrUpcomingView(data.items, data.user.id) : [];
@@ -244,10 +243,12 @@ const FilterView = ({ tasks }: TaskViewProps) => {
 
   if (completedToday > 0) {
     return (
-      <MenuBarExtra.Item
-        title={`Congrats! You've completed ${completedToday} ${completedToday === 1 ? "task" : "tasks"} today.`}
-        icon="🎉"
-      />
+      <MenuBarExtra.Section title={"No tasks matching filter"} key={"filterTasks"}>
+        <MenuBarExtra.Item
+          title={`Congrats! You've completed ${completedToday} ${completedToday === 1 ? "task" : "tasks"} today.`}
+          icon="🎉"
+        />
+      </MenuBarExtra.Section>
     );
   } else {
     return <MenuBarExtra.Item title="No tasks matching filter." />;
