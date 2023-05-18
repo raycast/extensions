@@ -15,6 +15,7 @@ export function useChatGPT(): OpenAIApi {
       } else {
         return new Configuration({
           apiKey: params.apiKey,
+          basePath: params.apiEndpoint ?? "https://api.openai.com/v1",
         });
       }
     };

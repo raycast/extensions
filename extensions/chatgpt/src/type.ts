@@ -122,4 +122,5 @@ export interface ConfigurationPreferences {
   useAzure: boolean;
   azureEndpoint: string;
   azureDeployment: string;
+  apiEndpoint: string;
 }
