@@ -126,7 +126,10 @@ export default function Command() {
                   title={"Submit bug report"}
                   url="https://github.com/raycast/extensions/issues/new?template=extension_bug_report.yml&title=%5BApple%20Notes%5D+...&extension-url=https%3A%2F%2Fraycast.com%2Ftumtum%2Fapple-notes"
                 />
-                <Action.CopyToClipboard title="Copy Error Message" content={failedToOpenMessage} />
+                <Action.CopyToClipboard title="Copy Error Message"
+                  content={{
+                    text: failedToOpenMessage,
+                  }} />
               </ActionPanel>
             }
           />
@@ -149,24 +152,24 @@ export default function Command() {
                     preferences.accounts
                       ? preferences.folders
                         ? [
-                            {
-                              text: `${note.account || ""} -> ${note.folder || ""}`,
-                              tooltip: "Account -> Folder",
-                            },
-                          ]
+                          {
+                            text: `${note.account || ""} -> ${note.folder || ""}`,
+                            tooltip: "Account -> Folder",
+                          },
+                        ]
                         : [{ text: `${note.account || ""}`, tooltip: "Account" }]
                       : preferences.folders
-                      ? [{ text: `${note.folder || ""}`, tooltip: "Folder" }]
-                      : []
+                        ? [{ text: `${note.folder || ""}`, tooltip: "Folder" }]
+                        : []
                   )
                   .concat(
                     preferences.modificationDate
                       ? [
-                          {
-                            date: new Date(note.modifiedAt || ""),
-                            tooltip: "Last Modified At",
-                          },
-                        ]
+                        {
+                          date: new Date(note.modifiedAt || ""),
+                          tooltip: "Last Modified At",
+                        },
+                      ]
                       : []
                   )}
                 actions={
@@ -206,13 +209,19 @@ export default function Command() {
                       <Action.CopyToClipboard
                         title="Copy Note URL"
                         icon={Icon.Link}
-                        content={`notes://showNote?identifier=${note.UUID}`}
+                        content={{
+                          html: `<a href="notes://showNote?identifier=${note.UUID}" title="${note.title}">${note.title}</a>`,
+                          text: `notes://showNote?identifier=${note.UUID}`,
+                        }}
                         shortcut={{ modifiers: ["cmd"], key: "c" }}
                       />
                       <Action.CopyToClipboard
                         title="Copy Mobile Note URL"
                         icon={Icon.Link}
-                        content={`mobilenotes://showNote?identifier=${note.UUID}`}
+                        content={{
+                          html: `<a href="mobilenotes://showNote?identifier=${note.UUID}" title="${note.title}">${note.title}</a>`,
+                          text: `mibolenotes://showNote?identifier=${note.UUID}`,
+                        }} 
                         shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
                       />
                     </ActionPanel.Section>
@@ -236,24 +245,24 @@ export default function Command() {
                       preferences.accounts
                         ? preferences.folders
                           ? [
-                              {
-                                text: `${note.account || ""} -> ${note.folder || ""}`,
-                                tooltip: "Account -> Folder",
-                              },
-                            ]
+                            {
+                              text: `${note.account || ""} -> ${note.folder || ""}`,
+                              tooltip: "Account -> Folder",
+                            },
+                          ]
                           : [{ text: `${note.account || ""}`, tooltip: "Account" }]
                         : preferences.folders
-                        ? [{ text: `${note.folder || ""}`, tooltip: "Folder" }]
-                        : []
+                          ? [{ text: `${note.folder || ""}`, tooltip: "Folder" }]
+                          : []
                     )
                     .concat(
                       preferences.modificationDate
                         ? [
-                            {
-                              date: new Date(note.modifiedAt || ""),
-                              tooltip: "Last Modified At",
-                            },
-                          ]
+                          {
+                            date: new Date(note.modifiedAt || ""),
+                            tooltip: "Last Modified At",
+                          },
+                        ]
                         : []
                     )}
                   actions={
