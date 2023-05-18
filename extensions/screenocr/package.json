@@ -4,7 +4,7 @@
   "title": "ScreenOCR",
   "description": "ScreenOCR allows you to quickly and easily extract text from screen captures via OCR, perfect for extracting text from any on-screen content. All processing is done locally on device.",
   "icon": "command-icon.png",
-  "author": "neo773",
+  "author": "huzef44",
   "categories": [
     "Productivity"
   ],

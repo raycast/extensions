@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import {
   Action,
   ActionPanel,
@@ -27,7 +27,6 @@ export function LanguagesManagerItem({
   onDelete?: () => void;
   selected?: boolean;
 }) {
-
   return (
     <List.Item
       title={language.title}
@@ -60,9 +59,10 @@ export const LanguagesManagerList = () => {
     const selectedLanguages = await LocalStorage.getItem("SelectedLanguages");
 
     const primaryLanguage = {
-      title: supportedLanguages.find(
-        (lang) => lang.value === preference.primaryLanguage
-      )?.title!,
+      title:
+        supportedLanguages.find(
+          (lang) => lang.value === preference.primaryLanguage
+        )?.title ?? "🇺🇸 English (US)",
       value: preference.primaryLanguage,
       isDefault: true,
     } as Language;

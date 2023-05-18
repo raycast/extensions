@@ -12,9 +12,10 @@ export const getUserSelectedLanguages = async () => {
   const selectedLanguages = await LocalStorage.getItem("SelectedLanguages");
 
   const primaryLanguage = {
-    title: supportedLanguages.find(
-      (lang) => lang.value === preference.primaryLanguage
-    )?.title!,
+    title:
+      supportedLanguages.find(
+        (lang) => lang.value === preference.primaryLanguage
+      )?.title ?? "🇺🇸 English (US)",
     value: preference.primaryLanguage,
     isDefault: true,
   } as Language;
