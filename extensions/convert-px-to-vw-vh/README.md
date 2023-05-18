@@ -1,48 +1,48 @@
-# Extension Raycast : Convertisseur de Pixels en VW/VH
+# Raycast Extension: Pixels to VW/VH Converter
 
-![Logo de l'extension](assets/logo.png)
+![Extension Logo](assets/logo.png)
 
-Une extension Raycast qui permet de convertir les valeurs de pixels en valeurs de viewport units (vw/vh) en fonction de la taille du viewport.
+A Raycast extension that converts pixel values to viewport units (vw/vh) based on the chosen viewport size.
 
-## Fonctionnalités
+## Features
 
-- Conversion précise des pixels en vw (viewport width) ou vh (viewport height) en fonction de la taille du viewport choisi.
-- Les résultats des convertions sont directement ajouté dans le presse papier pour une utilisation rapide et pratique.
+- Precise conversion of pixels to vw (viewport width) or vh (viewport height) based on the selected viewport size.
+- Converted values are directly copied to the clipboard for quick and convenient use.
 
-## Captures d'écran
+## Screenshots
 
-![Capture d'écran 1](metadata/convert-px-to-vw-or-vh-1.png)
-![Capture d'écran 2](metadata/convert-px-to-vw-or-vh-2.png)
-![Capture d'écran 3](metadata/convert-px-to-vw-or-vh-3.png)
-![Capture d'écran 4](metadata/pixels-viewport-width-1.png)
-![Capture d'écran 5](metadata/pixels-viewport-width-2.png)
-![Capture d'écran 6](metadata/pixels-viewport-height.png)
-_Capture d'écran de l'extension en action_
+![Screenshot 1](metadata/convert-px-to-vw-or-vh-1.png)
+![Screenshot 2](metadata/convert-px-to-vw-or-vh-2.png)
+![Screenshot 3](metadata/convert-px-to-vw-or-vh-3.png)
+![Screenshot 4](metadata/pixels-viewport-width-1.png)
+![Screenshot 5](metadata/pixels-viewport-width-2.png)
+![Screenshot 6](metadata/pixels-viewport-height.png)
+_Screenshots of the extension in action_
 
 ## Installation
 
-1. Assurez-vous d'avoir [Raycast](https://www.raycast.com) installé sur votre système.
-2. Ouvrez Raycast et naviguez vers l'onglet "Extensions".
-3. Cliquez sur le bouton "Add Extension" (Ajouter une extension).
-4. Rechercher "Pixels to Viewport Width or Height" et installer l'extension.
+1. Make sure you have [Raycast](https://www.raycast.com) installed on your system.
+2. Open Raycast and navigate to the "Extensions" tab.
+3. Click on the "Add Extension" button.
+4. Search for "Pixels to Viewport Width or Height" and install the extension.
 
-## Utilisation
+## Usage
 
-1. Lancez Raycast.
-2. Recherchez et sélectionnez "Convert PX to VW or VH".
-3. Choisisser entre width ou height de votre viewport.
-4. Ensuite choisisser la votre devise.
-5. Entrez la valeur en pixels que vous souhaitez convertir.
-6. La valeur convertie en vw/vh sera directement coller dans le presse papier.
+1. Launch Raycast.
+2. Search and select "Convert PX to VW or VH".
+3. Choose between viewport width or height.
+4. Then choose your desired currency.
+5. Enter the pixel value you want to convert.
+6. The converted value in vw/vh will be automatically copied to the clipboard.
 
 ## Contribution
 
-Les contributions sont les bienvenues ! Si vous souhaitez améliorer cette extension ou ajouter de nouvelles fonctionnalités, n'hésitez pas à ouvrir une pull request.
+Contributions are welcome! If you want to improve this extension or add new features, feel free to open a pull request.
 
-## Licence
+## License
 
-Ce projet est sous licence MIT. Veuillez consulter le fichier [LICENSE](LICENSE) pour plus de détails.
+This project is licensed under the MIT License. Please see the [LICENSE](LICENSE) file for more details.
 
 ---
 
-**Note :** Cette extension a été développée par Atiipik et ThoPel.
+**Note:** This extension was developed by Atiipik and ThoPel.
