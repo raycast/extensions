@@ -3,7 +3,7 @@ import { Bitwarden } from "~/api/bitwarden";
 import { VAULT_LOCK_MESSAGES } from "~/constants/general";
 import { SessionStorage } from "~/context/session/utils";
 
-async function generatePasswordQuickCommand() {
+async function lockVaultCommand() {
   const toast = await showToast(Toast.Style.Animated, "Locking vault...", "Please wait");
   try {
     const [token] = await SessionStorage.getSavedSession();
@@ -26,4 +26,4 @@ async function generatePasswordQuickCommand() {
   }
 }
 
-export default generatePasswordQuickCommand;
+export default lockVaultCommand;
