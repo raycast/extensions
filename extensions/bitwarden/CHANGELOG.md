@@ -1,5 +1,9 @@
 # Bitwarden Changelog
 
+## [New Command] - 2023-05-12
+
+- Add Lock Vault command
+
 ## [Improvement] - 2023-05-12
 
 - Add different icons for each command

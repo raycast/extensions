@@ -164,7 +164,7 @@
       "name": "lock-vault",
       "title": "Lock Vault",
       "subtitle": "Bitwarden",
-      "description": "Lock your bitwarden vault.",
+      "description": "Lock your bitwarden vault",
       "icon": "lock-vault.png",
       "mode": "no-view"
     }
