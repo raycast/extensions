@@ -87,14 +87,14 @@ export async function syncRequest(params: Record<string, any>) {
 }
 
 export async function getFilterTasks(filter: string) {
-  if (filter == ""){
-    return []
+  if (filter == "") {
+    return [];
   }
-  
-  const todoistApi = getTodoistRestApi();
-  const { data } = await todoistApi.get<Task[]>("/tasks", {params: {filter: filter}});
 
-  return data as Task[]
+  const todoistApi = getTodoistRestApi();
+  const { data } = await todoistApi.get<Task[]>("/tasks", { params: { filter: filter } });
+
+  return data as Task[];
 }
 
 export async function initialSync() {

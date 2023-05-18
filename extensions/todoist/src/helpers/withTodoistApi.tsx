@@ -57,7 +57,6 @@ export function getTodoistApi() {
   return todoistApi;
 }
 
-
 export function getTodoistRestApi() {
   if (!todoistRestApi) {
     throw new Error("getTodoistApi must be used when authenticated");

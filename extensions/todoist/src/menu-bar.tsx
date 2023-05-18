@@ -13,15 +13,15 @@ import { addDays, format, isBefore, isSameDay } from "date-fns";
 import { useEffect, useMemo } from "react";
 import removeMarkdown from "remove-markdown";
 
-import { Task, getFilterTasks, getProductivityStats } from "./api";
+import { Task, getProductivityStats } from "./api";
 import MenuBarTask from "./components/MenubarTask";
 import View from "./components/View";
 import { getToday } from "./helpers/dates";
 import { groupByDueDates } from "./helpers/groupBy";
 import { getTasksForTodayOrUpcomingView } from "./helpers/tasks";
+import useFilterTasks from "./hooks/useFilterData";
 import { useFocusedTask } from "./hooks/useFocusedTask";
 import useSyncData from "./hooks/useSyncData";
-import useFilterTasks from "./hooks/useFilterData";
 
 type MenuBarProps = LaunchProps<{ launchContext: { fromCommand: boolean } }>;
 
@@ -31,7 +31,7 @@ function MenuBar(props: MenuBarProps) {
   const { data, isLoading } = useSyncData(!launchedFromWithinCommand);
   const { focusedTask, unfocusTask } = useFocusedTask();
   const { view, filter, upcomingDays, hideMenuBarCount } = getPreferenceValues<Preferences.MenuBar>();
-  const {data: filterTasks, isLoading: isLoadingFilter} = useFilterTasks(filter);
+  const { data: filterTasks, isLoading: isLoadingFilter } = useFilterTasks(filter);
 
   useEffect(() => {
     const isFocusedTaskInTasks = tasks?.some((t) => t.id === focusedTask.id);
@@ -42,9 +42,9 @@ function MenuBar(props: MenuBarProps) {
   }, [data]);
 
   const tasks = useMemo(() => {
-   if (filter!= "") {
-    return filterTasks ? filterTasks : []
-   }
+    if (filter != "") {
+      return filterTasks ? filterTasks : [];
+    }
     const tasks = data ? getTasksForTodayOrUpcomingView(data.items, data.user.id) : [];
 
     if (view === "today") {
@@ -87,12 +87,12 @@ function MenuBar(props: MenuBarProps) {
   }, [focusedTask.id, tasks]);
 
   let taskView;
-  if (view === "today"){
-    taskView = tasks && <TodayView tasks={tasks} />
+  if (view === "today") {
+    taskView = tasks && <TodayView tasks={tasks} />;
   } else if (filterTasks) {
-    taskView = filterTasks && <FilterView tasks={filterTasks}/>
-  }else {
-    taskView = tasks && <UpcomingView tasks={tasks} />
+    taskView = filterTasks && <FilterView tasks={filterTasks} />;
+  } else {
+    taskView = tasks && <UpcomingView tasks={tasks} />;
   }
 
   return (
@@ -102,8 +102,6 @@ function MenuBar(props: MenuBarProps) {
       title={menuBarExtraTitle}
     >
       {taskView}
-      
-    
 
       <MenuBarExtra.Section>
         {focusedTask.id !== "" && (
@@ -226,18 +224,13 @@ const FilterView = ({ tasks }: TaskViewProps) => {
   const todayStats = stats?.days_items.find((d) => d.date === format(Date.now(), "yyyy-MM-dd"));
   const completedToday = todayStats?.total_completed ?? 0;
 
-
-
   if (tasks.length > 0) {
     return (
       <MenuBarExtra.Section title={"Filtered tasks"} key={"filterTasks"}>
         {tasks.map((task) => {
-          return (
-                <MenuBarTask key={task.id} task={task} />
-          );
+          return <MenuBarTask key={task.id} task={task} />;
         })}
-        </MenuBarExtra.Section>
-      
+      </MenuBarExtra.Section>
     );
   }
 
