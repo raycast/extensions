@@ -82,7 +82,10 @@ const notesQuery = `
         datetime(modDate + 978307200, 'unixepoch') AS modifiedAt,
         snippet,
         accountName AS account,
-        UUID as UUID
+        UUID as UUID,
+        zippedNoteBody,
+        ocrText,
+        tags
     FROM (
         SELECT
             c.ztitle1 AS noteTitle,
@@ -91,13 +94,16 @@ const notesQuery = `
             c.z_pk AS xcoredataID,
             c.zaccount4 AS noteAccountID,
             c.zsnippet AS snippet,
-            c.zidentifier AS UUID
+            c.zidentifier AS UUID,
+            n.zdata AS zippedNoteBody
         FROM
             ziccloudsyncingobject AS c
+            INNER JOIN zicnotedata AS n ON c.znotedata = n.z_pk -- note id (int) distinct from xcoredataID
         WHERE
             noteTitle IS NOT NULL AND
             modDate IS NOT NULL AND
             xcoredataID IS NOT NULL AND
+            zippedNoteBody IS NOT NULL AND
             c.zmarkedfordeletion != 1
     ) AS notes
     INNER JOIN (
@@ -119,6 +125,32 @@ const notesQuery = `
     LEFT JOIN (
         SELECT z_uuid FROM z_metadata
     )
+    LEFT JOIN (
+      SELECT
+          CAST(ZNOTE AS TEXT) as noteID,
+          IFNULL(GROUP_CONCAT(ZHANDWRITINGSUMMARY, ''), '') 
+                 || IFNULL(GROUP_CONCAT(ZOCRSUMMARY, ''), '') as ocrText
+      FROM
+          ZICCLOUDSYNCINGOBJECT
+      WHERE
+          (
+              ZOCRSUMMARY IS NOT NULL
+              OR ZHANDWRITINGSUMMARY IS NOT NULL
+          )
+      GROUP BY
+          ZNOTE
+    ) as OCR on noteID = xcoredataID
+    LEFT JOIN (
+      SELECT
+          CAST(ZNOTE1 AS TEXT) as tagNoteID,
+          GROUP_CONCAT(ZALTTEXT, ' ') as tags
+      FROM
+          ZICCLOUDSYNCINGOBJECT
+      WHERE
+          ZTYPEUTI1 = 'com.apple.notes.inlinetextattachment.hashtag'
+      GROUP BY
+          ZNOTE1
+    ) as tag on tagNoteID = xcoredataID
     ORDER BY modDate DESC
   `;
 

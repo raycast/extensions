@@ -10,17 +10,22 @@ import {
   List,
   showToast,
   Toast,
+  Color
 } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
 import { useSqlNotes } from "./useSql";
 import { testPermissionErrorType, PermissionErrorScreen } from "./errors";
 import { NoteItem } from "./types";
 import { useState } from "react";
+import { NoteStoreProto } from "./proto/notestore";
+
+const pako = require("pako");
 
 interface Preferences {
   accounts: boolean;
   folders: boolean;
   modificationDate: boolean;
+  tags: boolean;
   openSeparately: boolean;
 }
 
@@ -113,6 +118,21 @@ export default function Command() {
     })
     .sort((a, b) => (a.modifiedAt && b.modifiedAt && a.modifiedAt < b.modifiedAt ? 1 : -1));
 
+  notes.forEach((note) => {
+    if (note.zippedNoteBody) {
+      // unzip the note body
+      let unzipped = pako.ungzip(note.zippedNoteBody);
+      // decode the unzipped protobuf
+      const noteBody = NoteStoreProto.decode(unzipped);
+      note.noteBody = noteBody?.document?.note?.noteText || "";
+    }
+    if (note.tags) {
+      // tags come from the db as a string, so we need to split them into an array
+      let tagString = note.tags as unknown as string;
+      note.tags = tagString.split(" ");
+    }
+  });
+
   return (
     <>
       {failedToOpenMessage && (
@@ -143,7 +163,9 @@ export default function Command() {
                 icon="notes-icon.png"
                 title={note.title || ""}
                 subtitle={note.snippet}
-                keywords={[`${note.folder}`, `${note.account}`].concat(note.snippet ? [note.snippet] : [])}
+                keywords={[`${note.folder}`, `${note.account}`]
+                  .concat(note.noteBody ? [note.noteBody.replace(/\n/g, "")] : [])
+                  .concat(note.ocrText ? [note.ocrText.replace(/\n/g, "")] : [])}
                 accessories={([] as List.Item.Accessory[])
                   .concat(
                     preferences.accounts
@@ -168,7 +190,11 @@ export default function Command() {
                           },
                         ]
                       : []
-                  )}
+                  ).concat(
+                    preferences.tags && note.tags
+                    ? [{ tag: { value: `${note.tags || ""}`, color: Color.Yellow }, tooltip: "Tags" }]
+                    : []
+                )}
                 actions={
                   <ActionPanel title="Actions">
                     {preferences.openSeparately || (
@@ -230,7 +256,9 @@ export default function Command() {
                   icon={{ source: Icon.Trash, tintColor: "#777777" }}
                   title={note.title || ""}
                   subtitle={note.snippet}
-                  keywords={[`${note.folder}`, `${note.account}`].concat(note.snippet ? [note.snippet] : [])}
+                  keywords={[`${note.folder}`, `${note.account}`]
+                    .concat(note.noteBody ? [note.noteBody.replace(/\n/g, "")] : [])
+                    .concat(note.ocrText ? [note.ocrText.replace(/\n/g, "")] : [])}
                   accessories={([] as List.Item.Accessory[])
                     .concat(
                       preferences.accounts
@@ -254,6 +282,11 @@ export default function Command() {
                               tooltip: "Last Modified At",
                             },
                           ]
+                        : []
+                    )
+                    .concat(
+                        preferences.tags && note.tags
+                        ? [{ tag: { value: `${note.tags || ""}`, color: Color.Yellow }, tooltip: "Tags" }]
                         : []
                     )}
                   actions={

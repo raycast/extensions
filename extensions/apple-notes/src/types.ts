@@ -6,4 +6,8 @@ export interface NoteItem {
   folder: string;
   snippet: string;
   account: string;
+  zippedNoteBody: string;
+  noteBody: string;
+  ocrText: string;
+  tags: string[];
 }
