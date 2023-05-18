@@ -301,7 +301,10 @@ export const getMessageHtml = async (message: Message, mailbox: Mailbox) => {
     const source = await tellMessage(message, mailbox, "tell msg to return source");
     const decodedSource = utf8.decode(source);
 
-    const { html } = await simpleParser(decodedSource, { encoding: "utf-8" });
+    const { html, textAsHtml } = await simpleParser(decodedSource, { encoding: "utf-8" });
+
+    if (!html) return textAsHtml;
+
     const htmlWithoutComments = stripHtmlComments(html || "");
     const htmlWithInlineCss = juice(htmlWithoutComments, {
       preserveFontFaces: false,
