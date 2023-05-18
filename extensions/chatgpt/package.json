@@ -95,7 +95,7 @@
       "description": "Pause the history of the conversation",
       "type": "checkbox",
       "title": "Pause History",
-      "default": true,
+      "default": false,
       "required": false
     },
     {
