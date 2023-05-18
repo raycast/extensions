@@ -6,9 +6,10 @@
   "icon": "command-icon.png",
   "author": "michaelschultz",
   "contributors": [
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "GLaDO8"
   ],
-  "version": "1.2.0",
+  "version": "1.3.0",
   "license": "MIT",
   "commands": [
     {
@@ -37,14 +38,15 @@
     },
     {
       "name": "TEAM_ID",
-      "type": "password",
+      "type": "textfield",
       "required": true,
-      "title": "Team ID",
-      "description": "Find this in the url after navigating to your team page"
+      "title": "Team ID/s",
+      "description": "Find this in the url after navigating to your team page. Add multiple Team IDs separated by a comma."
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.39.1",
+    "@raycast/api": "^1.51.0",
+    "@raycast/utils": "^1.6.1",
     "node-fetch": "^3.2.10"
   },
   "devDependencies": {

@@ -37,7 +37,7 @@ export interface Quote {
 }
 
 export async function quote(symbols: string[], abortSignal: AbortSignal): Promise<QuoteResponse> {
-  const url = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${symbols.join(",")}`;
+  const url = `https://query1.finance.yahoo.com/v6/finance/quote?symbols=${symbols.join(",")}`;
   return ((await (await fetch(url, { signal: abortSignal })).json()) as QuoteResult).quoteResponse;
 }
 

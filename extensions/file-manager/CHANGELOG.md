@@ -1,8 +1,12 @@
 # File Manager Changelog
 
-## [Features] - 2023-05-12
+## [Features] - 2023-05-18
 
-Add enable standard shortcut preference.
+- Added support for using standard shortcuts.
+
+## [Features] - 2023-05-14
+
+- Added support for renaming files and folders.
 
 ## [Fixes] - 2023-04-11
 
