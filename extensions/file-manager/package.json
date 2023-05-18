@@ -86,8 +86,8 @@
     {
       "default": false,
       "description": "Use ctrl + x to Move to Trash, ctrl + shift + x to Delete",
-      "label": "Standard Actions Shortcut",
-      "name": "standardShortcut",
+      "label": "Standard Action Shortcuts",
+      "name": "standardShortcuts",
       "required": true,
       "title": "",
       "type": "checkbox"

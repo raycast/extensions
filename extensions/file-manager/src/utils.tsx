@@ -41,7 +41,7 @@ export type PreferencesType = {
   showFileSize: boolean;
   startDirectory: string;
   showDeleteActions: boolean;
-  standardShortcut: boolean;
+  standardShortcuts: boolean;
 };
 
 export async function deleteFile(filePath: string, fileName: string, refresh: () => void) {
@@ -134,7 +134,7 @@ export function DirectoryItem(props: { fileData: FileDataType; refresh: () => vo
             <Action.Trash
               title="Move to Trash"
               shortcut={
-                preferences.standardShortcut ? { modifiers: ["ctrl"], key: "x" } : { modifiers: ["cmd"], key: "t" }
+                preferences.standardShortcuts ? { modifiers: ["ctrl"], key: "x" } : { modifiers: ["cmd"], key: "t" }
               }
               paths={filePath}
               onTrash={() => {
@@ -195,7 +195,7 @@ export function FileItem(props: { fileData: FileDataType; refresh: () => void })
             <Action.Trash
               title="Move to Trash"
               shortcut={
-                preferences.standardShortcut ? { modifiers: ["ctrl"], key: "x" } : { modifiers: ["cmd"], key: "t" }
+                preferences.standardShortcuts ? { modifiers: ["ctrl"], key: "x" } : { modifiers: ["cmd"], key: "t" }
               }
               paths={filePath}
               onTrash={() => {
@@ -209,7 +209,7 @@ export function FileItem(props: { fileData: FileDataType; refresh: () => void })
                 icon={Icon.Eraser}
                 style={Action.Style.Destructive}
                 shortcut={
-                  preferences.standardShortcut
+                  preferences.standardShortcuts
                     ? { modifiers: ["ctrl", "shift"], key: "x" }
                     : { modifiers: ["cmd"], key: "d" }
                 }
