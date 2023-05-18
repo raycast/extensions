@@ -20,7 +20,7 @@ function CopyObjectStringFieldsActions<TValue extends RecordOfAny>({
 }: CopyObjectStringFieldsActionsProps<TValue>) {
   const selectedItem = useSelectedVaultItem();
   const getUpdatedVaultItem = useGetUpdatedVaultItem();
-  const selectedItemEntries = useItemObjectEntries(selectedItem, selector, sorter);
+  const selectedItemEntries = getItemObjectEntries(selectedItem, selector, sorter);
 
   if (!selectedItemEntries) return null;
   const handleCopyField = (field: string) => async () => {
@@ -58,7 +58,7 @@ function CopyObjectStringFieldsActions<TValue extends RecordOfAny>({
   );
 }
 
-function useItemObjectEntries<TValue extends RecordOfAny>(
+function getItemObjectEntries<TValue extends RecordOfAny>(
   selectedItem: Item,
   selector: CopyObjectStringFieldsActionsProps<TValue>["selector"],
   sorter: CopyObjectStringFieldsActionsProps<TValue>["sorter"]
