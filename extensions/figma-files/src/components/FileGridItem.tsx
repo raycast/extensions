@@ -4,6 +4,7 @@ import type { File } from "../types";
 import DevelopmentActionSection from "./DevelopmentActionSection";
 import { OpenProjectFileAction } from "./OpenProjectFileAction";
 import { OpenPageSubmenuAction } from "./OpenPageSubmenuAction";
+import { OpenBranchSubmenuAction } from "./OpenBranchSubmenuAction";
 
 export default function FileGridItem(props: {
   file: File;
@@ -25,7 +26,9 @@ export default function FileGridItem(props: {
             <OpenProjectFileAction file={props.file} desktopApp={desktopApp} onVisit={onVisit} />
             <Action.CopyToClipboard content={`https://figma.com/file/${file.key}`} />
           </ActionPanel.Section>
+
           <ActionPanel.Section>
+            {file.branches && <OpenBranchSubmenuAction file={props.file} desktopApp={desktopApp} />}
             <OpenPageSubmenuAction file={props.file} onVisit={onVisit} />
           </ActionPanel.Section>
           <DevelopmentActionSection />
