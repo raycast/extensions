@@ -1,22 +1,26 @@
-import { ReactElement, useEffect, useState } from "react";
+import React, { ReactElement, useState } from "react";
 import { List, ActionPanel, showToast, Toast, Action, Icon } from "@raycast/api";
-import { useSelectedLanguagesSet } from "./hooks";
-import { supportedLanguagesByCode, LanguageCode } from "./languages";
+import { usePromise } from "@raycast/utils";
+import { useDebouncedValue, useSelectedLanguagesSet } from "./hooks";
+import { supportedLanguagesByCode } from "./languages";
 import { LanguageManagerListDropdown } from "./LanguagesManager";
 import { AUTO_DETECT, simpleTranslate } from "./simple-translate";
+import { LanguageCodeSet } from "./types";
 
-let count = 0;
+async function translateText(text: string, opts: LanguageCodeSet) {
+  if (!text) {
+    return [];
+  }
 
-async function translateText(langFrom: LanguageCode, langTo: LanguageCode, text: string) {
-  if (langFrom === AUTO_DETECT) {
+  if (opts.langFrom === AUTO_DETECT) {
     const translated1 = await simpleTranslate(text, {
-      langFrom: langFrom,
-      langTo: langTo,
+      langFrom: opts.langFrom,
+      langTo: opts.langTo,
     });
 
     if (translated1?.langFrom) {
       const translated2 = await simpleTranslate(translated1.translatedText, {
-        langFrom: langTo,
+        langFrom: opts.langTo,
         langTo: translated1.langFrom,
       });
 
@@ -27,12 +31,12 @@ async function translateText(langFrom: LanguageCode, langTo: LanguageCode, text:
   } else {
     return await Promise.all([
       simpleTranslate(text, {
-        langFrom: langFrom,
-        langTo: langTo,
+        langFrom: opts.langFrom,
+        langTo: opts.langTo,
       }),
       simpleTranslate(text, {
-        langFrom: langTo,
-        langTo: langFrom,
+        langFrom: opts.langTo,
+        langTo: opts.langFrom,
       }),
     ]);
   }
@@ -40,68 +44,49 @@ async function translateText(langFrom: LanguageCode, langTo: LanguageCode, text:
 
 export default function Command(): ReactElement {
   const [selectedLanguageSet] = useSelectedLanguagesSet();
-  const [isLoading, setIsLoading] = useState(false);
-  const [toTranslate, setToTranslate] = useState("");
-  const [results, setResults] = useState<
-    { text: string; languages: string; source_language: string; target_language: string }[]
-  >([]);
   const [isShowingDetail, setIsShowingDetail] = useState(false);
 
-  useEffect(() => {
-    if (toTranslate === "") {
-      setResults([]);
-      return;
-    }
+  const [text, setText] = React.useState("");
+  const debouncedValue = useDebouncedValue(text, 500);
+  const { data: results, isLoading: isLoading } = usePromise(
+    async (...args: Parameters<typeof translateText>) => {
+      const results = await translateText(...args);
 
-    count++;
-    const localCount = count;
+      return results.map((t) => {
+        const langFrom = supportedLanguagesByCode[t.langFrom];
+        const langFromRep = langFrom.flag ?? langFrom.code;
+        const langTo = supportedLanguagesByCode[t.langTo];
+        const langToRep = langTo.flag ?? langTo.code;
 
-    setIsLoading(true);
-
-    translateText(selectedLanguageSet.langFrom, selectedLanguageSet.langTo, toTranslate)
-      .then((translations) => {
-        if (localCount === count) {
-          if (selectedLanguageSet.langFrom === AUTO_DETECT && !translations.length) {
-            showToast(Toast.Style.Failure, "Could not translate", "Could not detect language");
-            setResults([]);
-            setIsLoading(false);
-            return;
-          }
-
-          const result = translations.map((t) => {
-            const langFrom = supportedLanguagesByCode[t.langFrom];
-            const langFromRep = langFrom.flag ?? langFrom.code;
-            const langTo = supportedLanguagesByCode[t.langTo];
-            const langToRep = langTo.flag ?? langTo.code;
-
-            return {
-              text: t.translatedText,
-              languages: `${langFromRep} -> ${langToRep}`,
-              source_language: supportedLanguagesByCode[t.langFrom]?.code,
-              target_language: supportedLanguagesByCode[t.langTo]?.code,
-            };
-          });
-
-          setResults(result);
-          setIsLoading(false);
-        }
-      })
-      .catch((error) => {
-        setIsLoading(false);
-        showToast(Toast.Style.Failure, "Could not translate", error?.toString());
+        return {
+          text: t.translatedText,
+          languages: `${langFromRep} -> ${langToRep}`,
+          sourceLanguage: supportedLanguagesByCode[t.langFrom]?.code,
+          targetLanguage: supportedLanguagesByCode[t.langTo]?.code,
+        };
       });
-  }, [toTranslate, selectedLanguageSet.langFrom, selectedLanguageSet.langTo]);
+    },
+    [debouncedValue, selectedLanguageSet],
+    {
+      onError(error) {
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Could not translate",
+          message: error.toString(),
+        });
+      },
+    }
+  );
 
   return (
     <List
       searchBarPlaceholder="Enter text to translate"
-      onSearchTextChange={setToTranslate}
+      onSearchTextChange={setText}
       isLoading={isLoading}
       isShowingDetail={isShowingDetail}
-      throttle
       searchBarAccessory={<LanguageManagerListDropdown />}
     >
-      {results.map((r, index) => (
+      {results?.map((r, index) => (
         <List.Item
           key={index}
           title={r.text}
@@ -121,11 +106,11 @@ export default function Command(): ReactElement {
                   shortcut={{ modifiers: ["opt"], key: "enter" }}
                   url={
                     "https://translate.google.com/?sl=" +
-                    r.source_language +
+                    r.sourceLanguage +
                     "&tl=" +
-                    r.target_language +
+                    r.targetLanguage +
                     "&text=" +
-                    encodeURIComponent(toTranslate) +
+                    encodeURIComponent(debouncedValue) +
                     "&op=translate"
                   }
                 />

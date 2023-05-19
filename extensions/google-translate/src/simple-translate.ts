@@ -17,6 +17,15 @@ export async function simpleTranslate(
   options: { langFrom: LanguageCode; langTo: LanguageCode }
 ): Promise<SimpleTranslateResult> {
   try {
+    if (!text) {
+      return {
+        originalText: text,
+        translatedText: "",
+        langFrom: options.langFrom,
+        langTo: options.langTo,
+      };
+    }
+
     const translated = await translate(text, {
       from: options.langFrom,
       to: options.langTo,
