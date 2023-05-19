@@ -38,6 +38,7 @@ function MyMRList(props: {
       onSearchTextChange={props.onSearchTextChange}
       searchBarAccessory={props.searchBarAccessory}
       isShowingDetail={getListDetailsPreference()}
+      throttle
     >
       <List.Section title={props.title} subtitle={mrs?.length.toString() || ""}>
         {mrs?.map((mr) => (

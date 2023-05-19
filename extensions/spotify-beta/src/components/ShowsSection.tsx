@@ -15,7 +15,7 @@ export function ShowsSection({ type, shows, columns, limit }: ShowsSectionProps)
   const items = shows.slice(0, limit || shows.length);
 
   return (
-    <ListOrGridSection type={type} title="Podcasts" columns={columns}>
+    <ListOrGridSection type={type} title="Podcasts & Shows" columns={columns}>
       {items.map((show) => (
         <ShowItem type={type} key={show.id} show={show} />
       ))}

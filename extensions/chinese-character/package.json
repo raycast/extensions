@@ -16,14 +16,34 @@
       "title": "Simplified to Traditional",
       "icon": "zh2tw.png",
       "description": "Convert Simplified Chinese to Traditional Chinese from selection or clipboard.",
-      "mode": "no-view"
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "simplifiedToTraditionalQuoteStyle",
+          "type": "checkbox",
+          "required": false,
+          "description": "Simplified Chinese quotation marks ‘’ / “” to Traditional Chinese quotation marks 「」/『』.",
+          "default": true,
+          "label": "Convert Quotation Marks"
+        }
+      ]
     },
     {
       "name": "traditional-to-simplified",
       "title": "Traditional to Simplified",
       "icon": "tw2zh.png",
       "description": "Convert Traditional Chinese to Simplified Chinese from selection or clipboard.",
-      "mode": "no-view"
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "traditionalToSimplifiedQuoteStyle",
+          "type": "checkbox",
+          "required": false,
+          "description": "Traditional Chinese quotation marks 「」/『』 to Simplified Chinese quotation marks ‘’ / “”.",
+          "default": true,
+          "label": "Convert Quotation Marks"
+        }
+      ]
     },
     {
       "name": "chinese-to-pinyin",
@@ -78,9 +98,9 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.44.0",
-    "cjk-conv": "^1.2.142",
-    "pinyin-pro": "^3.13.0"
+    "@raycast/api": "^1.50.2",
+    "cjk-conv": "^1.2.143",
+    "pinyin-pro": "^3.14.0"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",

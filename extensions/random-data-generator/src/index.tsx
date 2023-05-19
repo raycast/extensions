@@ -28,6 +28,7 @@ const blacklistPaths = [
   'helpers',
   'mersenne',
   'random',
+  'science',
 ];
 
 const buildItems = (path: string) => {

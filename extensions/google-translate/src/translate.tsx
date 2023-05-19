@@ -42,9 +42,11 @@ export default function Command(): ReactElement {
     { text: string; languages: string; source_language: string; target_language: string }[]
   >([]);
   const [isShowingDetail, setIsShowingDetail] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
 
   useEffect(() => {
     if (toTranslate === "") {
+      setResults([]);
       return;
     }
 
@@ -52,7 +54,6 @@ export default function Command(): ReactElement {
     const localCount = count;
 
     setIsLoading(true);
-    setResults([]);
 
     translateText(selectedLanguageSet.langFrom, selectedLanguageSet.langTo, toTranslate)
       .then((translations) => {
@@ -60,6 +61,7 @@ export default function Command(): ReactElement {
           if (selectedLanguageSet.langFrom === AUTO_DETECT && !translations.length) {
             showToast(Toast.Style.Failure, "Could not translate", "Could not detect language");
             setResults([]);
+            setIsLoading(false);
             return;
           }
 
@@ -78,15 +80,21 @@ export default function Command(): ReactElement {
           });
 
           setResults(result);
+          setIsLoading(false);
         }
       })
-      .catch((errors) => {
-        showToast(Toast.Style.Failure, "Could not translate", errors);
-      })
-      .then(() => {
-        setIsLoading(false);
+      .catch((error) => {
+        console.error("translate error", error);
+        // HACK: BAD_NETWORK errors are caused by too many requests in quick succession;
+        // ignore and retry – this should be fixed systemically.
+        if (error?.code === "BAD_NETWORK") {
+          setRetryCount(retryCount + 1);
+        } else {
+          setIsLoading(false);
+          showToast(Toast.Style.Failure, "Could not translate", error?.toString());
+        }
       });
-  }, [toTranslate, selectedLanguageSet.langFrom, selectedLanguageSet.langTo]);
+  }, [toTranslate, selectedLanguageSet.langFrom, selectedLanguageSet.langTo, retryCount]);
 
   return (
     <List

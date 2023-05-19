@@ -25,7 +25,6 @@ export async function getIssuePriorities() {
 }
 
 type CreateIssueParams = {
-  signature: boolean;
   customFields?: Record<string, CustomField>;
 };
 
@@ -34,32 +33,21 @@ type CreateIssueResponse = {
   key: string;
 };
 
-export async function createIssue(values: IssueFormValues, { signature, customFields }: CreateIssueParams) {
+export async function createIssue(values: IssueFormValues, { customFields }: CreateIssueParams) {
   const jsonValues: Record<string, unknown> = {
     summary: values.summary,
     issuetype: { id: values.issueTypeId },
     project: { id: values.projectId },
   };
 
-  const signatureText = "Created via [Raycast](https://www.raycast.com/?ref=signatureJira)";
   if (values.description) {
-    let description = values.description;
-
-    if (signature) {
-      description += `\n\n---\n\n${signatureText}`;
-    }
-
     // This library is the most reliable one I could find that does the job.
     // However, it doesn't seem to be actively maintained and makes use of an
     // obsolete NPM package called adf-builder. This could break at some point.
     // In the meantime, writing a markdown to ADF util seems overkill so let's
     // wait for any status updates on the following issue:
     // https://jira.atlassian.com/browse/JRACLOUD-77436
-    jsonValues.description = markdownToAdf(description);
-  } else {
-    if (signature) {
-      jsonValues.description = markdownToAdf(signatureText);
-    }
+    jsonValues.description = markdownToAdf(values.description);
   }
 
   if (values.parent) {
@@ -127,7 +115,7 @@ export enum StatusCategoryKey {
 type IssueStatus = {
   id: string;
   name: string;
-  statusCategory: {
+  statusCategory?: {
     id: string;
     key: StatusCategoryKey;
     name: string;

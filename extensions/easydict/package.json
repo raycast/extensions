@@ -640,7 +640,7 @@
       "label": "Volcano Translate",
       "required": false,
       "description": "Turn on/off Volcano Translate. App Key is required.",
-      "default": true
+      "default": false
     },
     {
       "name": "enableYoudaoTranslate",

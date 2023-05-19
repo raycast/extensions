@@ -10,16 +10,10 @@ import { ExtendedRepositoryFieldsFragment } from "./generated/graphql";
 import { useHistory } from "./helpers/repository";
 import { getGitHubClient } from "./helpers/withGithubClient";
 
-type SearchRepositoriesPrefs = {
-  includeForks: boolean;
-  includeArchived: boolean;
-  displayOwnerName: boolean;
-};
-
 function SearchRepositories() {
   const { github } = getGitHubClient();
 
-  const preferences = getPreferenceValues<SearchRepositoriesPrefs>();
+  const preferences = getPreferenceValues<Preferences.SearchRepositories>();
 
   const [searchText, setSearchText] = useState("");
   const [searchFilter, setSearchFilter] = useState<string | null>(null);

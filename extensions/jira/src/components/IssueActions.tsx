@@ -26,7 +26,6 @@ type IssueActionsProps = {
   issue: Issue | TIssueDetail;
   mutate?: MutatePromise<Issue[] | undefined>;
   mutateDetail?: MutatePromise<Issue | TIssueDetail | null>;
-  showDetailsAction?: boolean;
   showAttachmentsAction?: boolean;
 };
 
@@ -35,13 +34,7 @@ type MutateParams = {
   optimisticUpdate: <T extends Issue>(task: T) => T;
 };
 
-export default function IssueActions({
-  issue,
-  mutate,
-  mutateDetail,
-  showDetailsAction,
-  showAttachmentsAction,
-}: IssueActionsProps) {
+export default function IssueActions({ issue, mutate, mutateDetail, showAttachmentsAction }: IssueActionsProps) {
   const { siteUrl, myself } = getJiraCredentials();
   const issueUrl = `${siteUrl}/browse/${issue.key}`;
 
@@ -107,13 +100,11 @@ export default function IssueActions({
   return (
     <ActionPanel title={issue.key}>
       <ActionPanel.Section>
-        {showDetailsAction ? (
-          <Action.Push
-            title="Show Details"
-            icon={Icon.Sidebar}
-            target={<IssueDetail initialIssue={issue} issueKey={issue.key} />}
-          />
-        ) : null}
+        <Action.Push
+          title="Show Details"
+          icon={Icon.Sidebar}
+          target={<IssueDetail initialIssue={issue} issueKey={issue.key} />}
+        />
 
         <Action.OpenInBrowser url={issueUrl} />
 

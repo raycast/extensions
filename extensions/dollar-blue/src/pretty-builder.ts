@@ -6,7 +6,7 @@ export default (resp: Response | undefined): string => {
 
   return `
 ![Flags](headerImg.png)
-## Oficial
+## Official
   
 - Buy: $${oficial.value_buy}
 - Sell: $${oficial.value_sell}

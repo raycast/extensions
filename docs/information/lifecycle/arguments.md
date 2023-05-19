@@ -93,3 +93,9 @@ Depending on the `type` of the argument, the type of its value will be different
 | :-------------------- | :------------------ |
 | <code>text</code>     | <code>string</code> |
 | <code>password</code> | <code>string</code> |
+
+{% hint style="info" %}
+Raycast provides a global TypeScript namespace called `Arguments` which contains the types of the arguments of all the commands of the extensions.
+
+For example, if a command named `show-todos` accepts arguments, its `LaunchProps` can be described as `LaunchProps<{ arguments: Arguments.ShowTodos }>`. This will make sure that the types used in the command stay in sync with the manifest.
+{% endhint %}

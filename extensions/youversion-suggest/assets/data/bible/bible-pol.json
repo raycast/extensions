@@ -295,6 +295,16 @@
       "full_name": "Biblia, to jest Pismo Święte Starego i Nowego Przymierza Wydanie pierwsze 2018",
       "id": 2095,
       "name": "SNP"
+    },
+    {
+      "full_name": "Biblia Warszawska 1975",
+      "id": 3490,
+      "name": "BW1975"
+    },
+    {
+      "full_name": "Dobra Wiadomość o ratunku w Chrystusie. Nowy Przekład Dynamiczny Nowego Testamentu",
+      "id": 3551,
+      "name": "NT NPD"
     }
   ]
 }

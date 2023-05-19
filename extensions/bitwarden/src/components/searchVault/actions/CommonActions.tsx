@@ -1,12 +1,23 @@
-import { Action, Color, Icon } from "@raycast/api";
-import { useSession } from "~/context/session";
+import { Action, Color, Icon, showToast, Toast } from "@raycast/api";
+import { VAULT_LOCK_MESSAGES } from "~/constants/general";
+import { useBitwarden } from "~/context/bitwarden";
 import { useVault } from "~/context/vault";
 
 function SearchCommonActions() {
   const vault = useVault();
-  const session = useSession();
+  const bitwarden = useBitwarden();
 
-  const handleLockVault = () => session.lock("Manually locked by the user");
+  const handleLockVault = async () => {
+    const toast = await showToast(Toast.Style.Animated, "Locking Vault...", "Please wait");
+    await bitwarden.lock(VAULT_LOCK_MESSAGES.MANUAL);
+    await toast.hide();
+  };
+
+  const handleLogoutVault = async () => {
+    const toast = await showToast({ title: "Logging Out...", style: Toast.Style.Animated });
+    await bitwarden.logout();
+    await toast.hide();
+  };
 
   return (
     <>
@@ -22,7 +33,7 @@ function SearchCommonActions() {
         shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
         onAction={handleLockVault}
       />
-      <Action title="Logout" icon={Icon.XMarkCircle} onAction={session.logout} />
+      <Action style={Action.Style.Destructive} title="Logout" icon={Icon.Logout} onAction={handleLogoutVault} />
     </>
   );
 }

@@ -13,14 +13,8 @@ type RepositoryListItemProps = {
   mutateList: MutatePromise<ExtendedRepositoryFieldsFragment[] | undefined>;
 };
 
-type SearchRepositoriesPrefs = {
-  includeForks: boolean;
-  includeArchived: boolean;
-  displayOwnerName: boolean;
-};
-
 export default function RepositoryListItem({ repository, mutateList, onVisit }: RepositoryListItemProps) {
-  const preferences = getPreferenceValues<SearchRepositoriesPrefs>();
+  const preferences = getPreferenceValues<Preferences.SearchRepositories>();
 
   const owner = getGitHubUser(repository.owner);
   const numberOfStars = repository.stargazerCount;
