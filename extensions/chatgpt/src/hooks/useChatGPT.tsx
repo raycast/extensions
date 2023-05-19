@@ -10,7 +10,7 @@ export function useChatGPT(): OpenAIApi {
     const getConfig = function (params: ConfigurationPreferences) {
       return new Configuration({
         apiKey: params.apiKey,
-        basePath: getConfigUrl(params)
+        basePath: getConfigUrl(params),
       });
     };
     const config = getConfig(preferences);
