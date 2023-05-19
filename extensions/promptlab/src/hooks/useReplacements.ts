@@ -73,10 +73,10 @@ export const useReplacements = (
 
     // Context Data
     "{{currentApplication}}": async () => {
-      return await getMenubarOwningApplication();
+      return (await getMenubarOwningApplication()) as string;
     },
     "{{currentTabText}}": async () => {
-      const app = await getMenubarOwningApplication();
+      const app = (await getMenubarOwningApplication()) as string;
       if (SupportedBrowsers.includes(app)) {
         const URL = await getCurrentURL(app);
         const URLText = await getTextOfWebpage(URL);
@@ -85,7 +85,7 @@ export const useReplacements = (
       return "";
     },
     "{{currentURL}}": async () => {
-      const app = await getMenubarOwningApplication();
+      const app = (await getMenubarOwningApplication()) as string;
       if (SupportedBrowsers.includes(app)) {
         const URL = await getCurrentURL(app);
         return URL;

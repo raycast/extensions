@@ -68,6 +68,7 @@ export default function CommandResponse(props: {
     substitutedPrompt,
     fullPrompt,
     input || contentPromptString,
+    options.temperature == undefined ? "1.0" : options.temperature,
     !loadingData &&
       ((options.minNumFiles != undefined && options.minNumFiles == 0) || (contentPrompts.length > 0 && !shouldCancel))
   );
@@ -122,7 +123,7 @@ export default function CommandResponse(props: {
   }
 
   // Get the text output for the response
-  const text = `${options.outputKind == "detail" || options.outputKind == undefined ? `# ${commandName}\n` : ``}${
+  const text = `${
     data
       ? data
       : options.minNumFiles != undefined && options.minNumFiles == 0

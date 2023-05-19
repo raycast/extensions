@@ -66,7 +66,17 @@ export default function CommandChatView(props: {
     revalidate: revalidateFiles,
   } = useFileContents(options);
   const replacements = useReplacements(input, selectedFiles);
-  const { data, isLoading: loading, revalidate: reattempt } = useModel(prompt, sentQuery, "", enableModel);
+  const {
+    data,
+    isLoading: loading,
+    revalidate: reattempt,
+  } = useModel(
+    prompt,
+    sentQuery,
+    sentQuery,
+    options.temperature == undefined ? "1.0" : options.temperature,
+    enableModel
+  );
 
   useEffect(() => {
     if (data.length > 0) {
@@ -148,11 +158,11 @@ export default function CommandChatView(props: {
 
   return (
     <Form
-      isLoading={isLoading || loading || contentIsLoading}
+      isLoading={isLoading || (loading && enableModel) || contentIsLoading}
       navigationTitle={commandName}
       actions={
         <ActionPanel>
-          {isLoading || loading ? (
+          {isLoading || (loading && enableModel) ? (
             <Action
               title="Cancel"
               onAction={() => {

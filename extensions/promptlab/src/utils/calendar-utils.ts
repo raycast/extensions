@@ -12,10 +12,28 @@ import { ExtensionPreferences } from "./types";
 export const filterString = (str: string, cutoff?: number): string => {
   /* Removes unnecessary/invalid characters from strings. */
   const preferences = getPreferenceValues<ExtensionPreferences>();
-  return str
-    .replaceAll(/[^A-Za-z0-9,.?!\-()/[\]{}@: \n\r<>]/g, "")
-    .replaceAll('"', "'")
-    .substring(0, cutoff || parseInt(preferences.lengthLimit) + 500 || 3000);
+  if (preferences.condenseAmount == "high") {
+    // Remove some useful characters for the sake of brevity
+    return str
+      .replaceAll(/[^A-Za-z0-9,.?!\-()/[\]{}@: \n\r<>]/g, "")
+      .replaceAll('"', "'")
+      .substring(0, cutoff || parseInt(preferences.lengthLimit) + 500 || 3000);
+  } else if (preferences.condenseAmount == "medium") {
+    // Remove uncommon characters
+    return str
+      .replaceAll(/[^A-Za-z0-9,.?!\-()/[\]{}@: \n\r<>+*&|]/g, "")
+      .replaceAll('"', "'")
+      .substring(0, cutoff || parseInt(preferences.lengthLimit) + 500 || 3000);
+  } else if (preferences.condenseAmount == "low") {
+    // Remove all characters except for letters, numbers, and punctuation
+    return str
+      .replaceAll(/[^A-Za-z0-9,.?!\-()/[\]{}@:; \n\r\t<>%^$~+*_&|]/g, "")
+      .replaceAll('"', "'")
+      .substring(0, cutoff || parseInt(preferences.lengthLimit) + 500 || 3000);
+  } else {
+    // Just remove quotes and cut off at the limit
+    return str.replaceAll('"', "'").substring(0, cutoff || parseInt(preferences.lengthLimit) + 500 || 3000);
+  }
 };
 
 /**

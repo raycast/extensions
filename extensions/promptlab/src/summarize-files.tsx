@@ -39,7 +39,7 @@ export default function Command() {
 
   const contentPromptString = contentPrompts.join("\n");
   const fullPrompt = basePrompt + contentPromptString;
-  const { data, isLoading, revalidate } = useModel("", fullPrompt, "", contentPrompts.length > 0);
+  const { data, isLoading, revalidate } = useModel("", fullPrompt, "", "1.0", contentPrompts.length > 0);
 
   if (errorType) {
     let errorMessage = "";

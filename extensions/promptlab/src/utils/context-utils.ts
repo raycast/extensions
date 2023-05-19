@@ -476,11 +476,14 @@ export const getCurrentDirectory = async () => {
 
 /**
  * Gets the application that owns the menubar.
- * @returns A promise resolving to the name of the application as a string.
+ * @param includePaths Whether to include the path of the application.
+ * @returns A promise resolving to the name of the application as a string, or an object containing the name and path if includePaths is true.
  */
-export const getMenubarOwningApplication = async () => {
-  return await runAppleScript(`use framework "Foundation"
-
+export const getMenubarOwningApplication = async (
+  includePaths?: boolean
+): Promise<string | { name: string; path: string }> => {
+  const app = await runAppleScript(`use framework "Foundation"
+  use scripting additions
   set workspace to current application's NSWorkspace's sharedWorkspace()
   set runningApps to workspace's runningApplications()
   
@@ -495,6 +498,52 @@ export const getMenubarOwningApplication = async () => {
   if targetApp is missing value then
     return ""
   else
-    return targetApp's localizedName() as text
+    ${
+      includePaths
+        ? `return {targetApp's localizedName() as text, targetApp's bundleURL()'s fileSystemRepresentation() as text}`
+        : `return targetApp's localizedName() as text`
+    }
   end if`);
+
+  if (includePaths) {
+    const data = app.split(", ");
+    return { name: data[0], path: data[1] };
+  }
+  return app;
+};
+
+/**
+ * The same as {@link getMenubarOwningApplication}, but synchronous.
+ * @param includePaths Whether to include the path of the application.
+ * @returns The name of the application as a string, or an object containing the name and path if includePaths is true.
+ */
+export const getMenubarOwningApplicationSync = (includePaths?: boolean): string | { name: string; path: string } => {
+  const app = runAppleScriptSync(`use framework "Foundation"
+  use scripting additions
+  set workspace to current application's NSWorkspace's sharedWorkspace()
+  set runningApps to workspace's runningApplications()
+  
+  set targetApp to missing value
+  repeat with theApp in runningApps
+    if theApp's ownsMenuBar() then
+      set targetApp to theApp
+      exit repeat
+    end if
+  end repeat
+  
+  if targetApp is missing value then
+    return ""
+  else
+    ${
+      includePaths
+        ? `return {targetApp's localizedName() as text, targetApp's bundleURL()'s fileSystemRepresentation() as text}`
+        : `return targetApp's localizedName() as text`
+    }
+  end if`);
+
+  if (includePaths) {
+    const data = app.split(", ");
+    return { name: data[0], path: data[1] };
+  }
+  return app;
 };

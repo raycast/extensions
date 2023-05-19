@@ -128,6 +128,7 @@ ${
       ? command.acceptedFileExtensions
       : "Any"
   } |
+  | Creativity | ${command.temperature == undefined || command.temperature == "" ? "1.0" : command.temperature} |
   | Use File Metadata? | ${command.useMetadata == "TRUE" ? "Yes" : "No"} |
   | Use Sound Classification? | ${command.useSoundClassification == "TRUE" ? "Yes" : "No"} |
   | Use Subject Classification? | ${command.useSubjectClassification == "TRUE" ? "Yes" : "No"} |
@@ -160,9 +161,7 @@ ${
                   iconColor: command.iconColor,
                   minNumFiles: parseInt(command.minNumFiles as string),
                   acceptedFileExtensions:
-                    command.acceptedFileExtensions?.length && command.acceptedFileExtensions !== "None"
-                      ? command.acceptedFileExtensions?.split(",").map((item) => item.trim())
-                      : undefined,
+                    command.acceptedFileExtensions == "None" ? "" : command.acceptedFileExtensions,
                   useMetadata: command.useMetadata == "TRUE" ? true : false,
                   useSoundClassification: command.useSoundClassification == "TRUE" ? true : false,
                   useAudioDetails: command.useAudioDetails == "TRUE" ? true : false,
@@ -181,6 +180,7 @@ ${
                   requirements: command.requirements,
                   scriptKind: command.scriptKind,
                   categories: command.categories?.split(", ") || ["Other"],
+                  temperature: command.temperature,
                 };
                 LocalStorage.setItem(cmdName, JSON.stringify(commandData)).then(() => {
                   showToast({ title: "Command Installed", message: `${command.name}" has been installed.` });
@@ -219,6 +219,7 @@ ${
                     showResponse: command.showResponse == "TRUE" ? true : false,
                     useSaliencyAnalysis: command.useSaliencyAnalysis == "TRUE" ? true : false,
                     scriptKind: command.scriptKind,
+                    temperature: command.temperature,
                   }}
                 />
               }
@@ -250,7 +251,8 @@ ${
                       icon: command.icon,
                       iconColor: command.iconColor,
                       minNumFiles: command.minNumFiles as unknown as string,
-                      acceptedFileExtensions: command.acceptedFileExtensions,
+                      acceptedFileExtensions:
+                        command.acceptedFileExtensions == "None" ? "" : command.acceptedFileExtensions,
                       useMetadata: command.useMetadata == "TRUE" ? true : false,
                       useAudioDetails: command.useAudioDetails == "TRUE" ? true : false,
                       useSoundClassification: command.useSoundClassification == "TRUE" ? true : false,
@@ -269,6 +271,8 @@ ${
                       requirements: command.requirements,
                       scriptKind: command.scriptKind,
                       categories: command.categories?.split(", ") || ["Other"],
+                      temperature:
+                        command.temperature == undefined || command.temperature == "" ? "1.0" : command.temperature,
                     }}
                     setCommands={setMyCommands}
                     duplicate={true}
@@ -276,6 +280,80 @@ ${
                 }
                 icon={Icon.EyeDropper}
                 shortcut={{ modifiers: ["ctrl"], key: "c" }}
+              />
+              <Action
+                title="Install All Commands"
+                icon={Icon.Plus}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
+                onAction={async () => {
+                  const successes: string[] = [];
+                  const failures: string[] = [];
+                  const toast = await showToast({ title: "Installing Commands...", style: Toast.Style.Animated });
+
+                  for (const command of availableCommands) {
+                    let cmdName = command.name;
+                    if (knownCommandNames?.includes(command.name)) {
+                      cmdName = `${command.name} 2`;
+                    }
+                    if (knownPrompts?.includes(command.prompt)) {
+                      failures.push(command.name);
+                      continue;
+                    }
+                    const commandData = {
+                      name: cmdName,
+                      prompt: command.prompt,
+                      icon: command.icon,
+                      iconColor: command.iconColor,
+                      minNumFiles: parseInt(command.minNumFiles as string),
+                      acceptedFileExtensions:
+                        command.acceptedFileExtensions == "None" ? "" : command.acceptedFileExtensions,
+                      useMetadata: command.useMetadata == "TRUE" ? true : false,
+                      useSoundClassification: command.useSoundClassification == "TRUE" ? true : false,
+                      useAudioDetails: command.useAudioDetails == "TRUE" ? true : false,
+                      useSubjectClassification: command.useSubjectClassification == "TRUE" ? true : false,
+                      useRectangleDetection: command.useRectangleDetection == "TRUE" ? true : false,
+                      useBarcodeDetection: command.useBarcodeDetection == "TRUE" ? true : false,
+                      useFaceDetection: command.useFaceDetection == "TRUE" ? true : false,
+                      outputKind: command.outputKind,
+                      actionScript: command.actionScript,
+                      showResponse: command.showResponse == "TRUE" ? true : false,
+                      description: command.description,
+                      useSaliencyAnalysis: command.useSaliencyAnalysis == "TRUE" ? true : false,
+                      author: command.author,
+                      website: command.website,
+                      version: command.version,
+                      requirements: command.requirements,
+                      scriptKind: command.scriptKind,
+                      categories: command.categories?.split(", ") || ["Other"],
+                      temperature: command.temperature,
+                    };
+                    await LocalStorage.setItem(cmdName, JSON.stringify(commandData));
+                    successes.push(command.name);
+
+                    const allCommands = await LocalStorage.allItems();
+                    const filteredCommands = Object.values(allCommands).filter(
+                      (cmd, index) =>
+                        Object.keys(allCommands)[index] != "--defaults-installed" &&
+                        !Object.keys(cmd)[index].startsWith("id-")
+                    );
+                    setMyCommands(filteredCommands.map((data) => JSON.parse(data)));
+                  }
+
+                  if (successes.length > 0 && failures.length == 0) {
+                    toast.title = `Installed ${successes.length} Command${successes.length == 1 ? "" : "s"}`;
+                    toast.style = Toast.Style.Success;
+                  } else if (successes.length > 0 && failures.length > 0) {
+                    toast.title = `Installed ${successes.length} Command${successes.length == 1 ? "" : "s"}`;
+                    toast.message = `Failed to install ${failures.length} command${
+                      failures.length == 1 ? "" : "s"
+                    }: ${failures.join(", ")}`;
+                    toast.style = Toast.Style.Success;
+                  } else if (failures.length > 0) {
+                    toast.title = `Failed To Install ${failures.length} Command${failures.length == 1 ? "" : "s"}`;
+                    toast.message = failures.join(", ");
+                    toast.style = Toast.Style.Failure;
+                  }
+                }}
               />
             </ActionPanel.Section>
           </ActionPanel>

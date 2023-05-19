@@ -17,7 +17,7 @@ export default function CommandDetailView(props: {
   return (
     <Detail
       isLoading={isLoading}
-      markdown={response}
+      markdown={`# ${commandName}\n${response}`}
       navigationTitle={commandName}
       actions={
         <ResponseActions

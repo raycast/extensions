@@ -11,7 +11,13 @@ import fetch from "node-fetch";
  * @param execute Whether to execute the request immediately or wait until this value becomes true.
  * @returns The string output received from the model endpoint.
  */
-export default function useModel(basePrompt: string, prompt: string, input: string, execute: boolean) {
+export default function useModel(
+  basePrompt: string,
+  prompt: string,
+  input: string,
+  temperature: string,
+  execute: boolean
+) {
   const preferences = getPreferenceValues<ExtensionPreferences>();
   const [data, setData] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -20,6 +26,7 @@ export default function useModel(basePrompt: string, prompt: string, input: stri
   // We can be a little forgiving of how users specify Raycast AI
   const validRaycastAIReps = ["raycast ai", "raycastai", "raycast", "raycast-ai"];
 
+  const temp = preferences.includeTemperature ? parseFloat(temperature) || 1.0 : 1.0;
   if (validRaycastAIReps.includes(preferences.modelEndpoint.toLowerCase())) {
     // If the endpoint is Raycast AI, use the AI hook
     if (!environment.canAccess(AI)) {
@@ -30,7 +37,7 @@ export default function useModel(basePrompt: string, prompt: string, input: stri
         error: "Raycast AI is not available — Upgrade to Pro or use a different model endpoint.",
       };
     }
-    return useAI(prompt, { execute: execute });
+    return useAI(preferences.promptPrefix + prompt + preferences.promptSuffix, { execute: execute, creativity: temp });
   } else if (preferences.modelEndpoint.includes(":")) {
     // If the endpoint is a URL, use the fetch hook
     const headers: { [key: string]: string } = {
@@ -69,6 +76,13 @@ export default function useModel(basePrompt: string, prompt: string, input: stri
       headers["Authorization"] = `Api-Key ${preferences.apiKey}`;
     } else if (preferences.authType == "bearerToken") {
       headers["Authorization"] = `Bearer ${preferences.apiKey}`;
+    } else if (preferences.authType == "x-api-key") {
+      headers["X-API-Key"] = `${preferences.apiKey}`;
+    }
+
+    const modelSchema = JSON.parse(preferences.inputSchema);
+    if (preferences.includeTemperature) {
+      modelSchema["temperature"] = temp;
     }
 
     useEffect(() => {
@@ -78,10 +92,23 @@ export default function useModel(basePrompt: string, prompt: string, input: stri
           fetch(preferences.modelEndpoint, {
             method: "POST",
             headers: headers,
-            body: preferences.inputSchema
-              .replace("{prompt}", prompt.replaceAll(/[\n\r\s]+/g, " ").replaceAll('"', '\\"'))
-              .replace("{basePrompt}", basePrompt.replaceAll(/[\n\r\s]+/g, " ").replaceAll('"', '\\"'))
-              .replace("{input}", input.replaceAll(/[\n\r\s]+/g, " ").replaceAll('"', '\\"')),
+            body: JSON.stringify(modelSchema)
+              .replace(
+                "{prompt}",
+                preferences.promptPrefix +
+                  prompt.replaceAll(/[\n\r\s]+/g, " ").replaceAll('"', '\\"') +
+                  preferences.promptSuffix
+              )
+              .replace(
+                "{basePrompt}",
+                preferences.promptPrefix + basePrompt.replaceAll(/[\n\r\s]+/g, " ").replaceAll('"', '\\"')
+              )
+              .replace(
+                "{input}",
+                preferences.inputSchema.includes("{prompt") && prompt == input
+                  ? ""
+                  : input.replaceAll(/[\n\r\s]+/g, " ").replaceAll('"', '\\"') + preferences.promptSuffix
+              ),
           }).then(async (response) => {
             if (response.ok) {
               try {
@@ -101,10 +128,21 @@ export default function useModel(basePrompt: string, prompt: string, input: stri
           fetch(preferences.modelEndpoint, {
             method: "POST",
             headers: headers,
-            body: preferences.inputSchema
-              .replace("{prompt}", prompt.replaceAll(/[\n\r\s]+/g, " ").replaceAll('"', '\\"'))
-              .replace("{basePrompt}", basePrompt.replaceAll(/[\n\r\s]+/g, " ").replaceAll('"', '\\"'))
-              .replace("{input}", input.replaceAll(/[\n\r\s]+/g, " ").replaceAll('"', '\\"')),
+            body: JSON.stringify(modelSchema)
+              .replace(
+                "{prompt}",
+                preferences.promptPrefix +
+                  prompt.replaceAll(/[\n\r\s]+/g, " ").replaceAll('"', '\\"') +
+                  preferences.promptSuffix
+              )
+              .replace(
+                "{basePrompt}",
+                preferences.promptPrefix + basePrompt.replaceAll(/[\n\r\s]+/g, " ").replaceAll('"', '\\"')
+              )
+              .replace(
+                "{input}",
+                input.replaceAll(/[\n\r\s]+/g, " ").replaceAll('"', '\\"') + preferences.promptSuffix
+              ),
           }).then(async (response) => {
             if (response.ok && response.body != null) {
               let text = "";
@@ -115,7 +153,11 @@ export default function useModel(basePrompt: string, prompt: string, input: stri
                     try {
                       const jsonData = JSON.parse(line.substring(5));
                       const output = get(jsonData, preferences.outputKeyPath) || "";
-                      text = text + output;
+                      if (output.toString().includes(text)) {
+                        text = output.toString();
+                      } else {
+                        text = text + output;
+                      }
                       setData(text);
                     } catch (e) {
                       console.log("Failed to get JSON from model output");

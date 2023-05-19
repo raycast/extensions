@@ -8,9 +8,10 @@ import {
   useNavigation,
   Color,
   environment,
+  getPreferenceValues,
 } from "@raycast/api";
 import { useForm, FormValidation } from "@raycast/utils";
-import { Command } from "../utils/types";
+import { Command, ExtensionPreferences } from "../utils/types";
 import { useState } from "react";
 
 interface CommandFormValues {
@@ -38,6 +39,7 @@ interface CommandFormValues {
   requirements?: string;
   scriptKind?: string;
   categories?: string[];
+  temperature?: string;
 }
 
 export default function CommandForm(props: {
@@ -52,6 +54,7 @@ export default function CommandForm(props: {
   const { pop } = useNavigation();
 
   let maxPromptLength = oldData?.minNumFiles == "0" ? 3000 : 500;
+  const preferences = getPreferenceValues<ExtensionPreferences>();
 
   const { handleSubmit, itemProps } = useForm<CommandFormValues>({
     async onSubmit(values) {
@@ -103,6 +106,7 @@ export default function CommandForm(props: {
       requirements: "",
       scriptKind: "applescript",
       categories: ["Other"],
+      temperature: "1.0",
     },
     validation: {
       name: FormValidation.Required,
@@ -259,6 +263,15 @@ export default function CommandForm(props: {
         info="A list of file extensions that will be accepted by the command. If left blank, all files will be accepted."
         {...itemProps.acceptedFileExtensions}
       />
+
+      {preferences.includeTemperature ? (
+        <Form.TextField
+          title="Creativity"
+          placeholder="Value between 0.0 and 2.0"
+          info="A measure of the level of the randomness and creativity in the model's output. Higher values will result in more creative output, but may be less relevant to the prompt. Value must be between 0.0 and 2.0."
+          {...itemProps.temperature}
+        />
+      ) : null}
 
       <Form.Checkbox
         title="Included Information"

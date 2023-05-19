@@ -51,6 +51,8 @@ export const ERRORTYPE = {
  */
 async function getSelectedFiles(): Promise<string> {
   return runAppleScript(`tell application "Finder"
+  set oldDelimiters to AppleScript's text item delimiters
+  set AppleScript's text item delimiters to "::"
   set theSelection to selection
   if theSelection is {} then
     return
@@ -61,7 +63,9 @@ async function getSelectedFiles(): Promise<string> {
     repeat with i from 1 to (theSelection count)
         copy (POSIX path of (item i of theSelection as alias)) to end of thePaths
     end repeat
-    return thePaths
+    set thePathsString to thePaths as text
+    set AppleScript's text item delimiters to oldDelimiters
+    return thePathsString
   end if
 end tell`);
 }
@@ -87,14 +91,14 @@ export function useFileContents(options: CommandOptions) {
     getSelectedFiles()
       .then((files) => {
         // Raise error if too few files are selected
-        if (files.split(", ").length < (options.minNumFiles || 1)) {
+        if (files.split("::").length < (options.minNumFiles || 1)) {
           setErrorType(ERRORTYPE.MIN_SELECTION_NOT_MET);
           return;
         }
 
         // Remove directories and files with invalid extensions
         const filteredFiles = files
-          .split(", ")
+          .split("::")
           .filter(
             (file) =>
               validExtensions.length == 0 ||
@@ -124,7 +128,7 @@ export function useFileContents(options: CommandOptions) {
 
             // Otherwise, get the file's contents (and maybe the metadata)
             const pathLower = file.toLowerCase();
-            if (!pathLower.includes(".app") && fs.lstatSync(file).isDirectory()) {
+            if (!pathLower.replaceAll("/", "").endsWith(".app") && fs.lstatSync(file).isDirectory()) {
               // Get size, list of contained files within a directory
               contents += getDirectoryDetails(file);
             } else if (pathLower.includes(".pdf")) {
@@ -217,11 +221,32 @@ export function useFileContents(options: CommandOptions) {
  */
 const filterContentString = (content: string, cutoff?: number): string => {
   /* Removes unnecessary/invalid characters from file content strings. */
-  return content
-    .replaceAll(/[^A-Za-z0-9,.?!\-()[\]{}@: \n]/g, "")
-    .replaceAll('"', "'")
-    .replaceAll(/[^\S\r\n]/g, " ")
-    .substring(0, cutoff || maxCharacters);
+  const preferences = getPreferenceValues<ExtensionPreferences>();
+  console.log(preferences.condenseAmount);
+  if (preferences.condenseAmount == "high") {
+    // Remove some useful characters for the sake of brevity
+    return content
+      .replaceAll(/[^A-Za-z0-9,.?!\-()[\]{}@: \n\r]/g, "")
+      .replaceAll('"', "'")
+      .replaceAll(/[^\S\r\n]+/g, " ")
+      .substring(0, cutoff || maxCharacters);
+  } else if (preferences.condenseAmount == "medium") {
+    // Remove uncommon characters
+    return content
+      .replaceAll(/[^A-Za-z0-9,.?!\-()[\]{}@: \n\r*+&|]/g, "")
+      .replaceAll('"', "'")
+      .replaceAll(/[^\S\r\n]+/g, " ")
+      .substring(0, cutoff || maxCharacters);
+  } else if (preferences.condenseAmount == "low") {
+    // Remove all characters except for letters, numbers, and punctuation
+    return content
+      .replaceAll(/[^A-Za-z0-9,.?!\-()[\]{}@: \n\r\t*+&%^|$~_]/g, "")
+      .replaceAll('"', "'")
+      .substring(0, cutoff || maxCharacters);
+  } else {
+    // Just remove quotes and cut off at the limit
+    return content.replaceAll('"', "'").substring(0, cutoff || maxCharacters);
+  }
 };
 
 /**
@@ -262,6 +287,9 @@ const getImageVisionDetails = (filePath: string, options: CommandOptions): strin
   set confidenceThreshold to 0.7
   
   set imagePath to "${filePath}"
+  set promptText to ""
+
+  try
   set theImage to current application's NSImage's alloc()'s initWithContentsOfFile:imagePath
   
   set requestHandler to current application's VNImageRequestHandler's alloc()'s initWithData:(theImage's TIFFRepresentation()) options:(current application's NSDictionary's alloc()'s init())
@@ -377,7 +405,6 @@ const getImageVisionDetails = (filePath: string, options: CommandOptions): strin
       : ``
   }
   
-  set promptText to ""
   if theText is not "" then
     set promptText to "<Transcribed text of the image: \\"" & theText & "\\".>"
   end if
@@ -434,6 +461,7 @@ const getImageVisionDetails = (filePath: string, options: CommandOptions): strin
   end if`
       : ``
   }
+  end try
 
   return promptText`);
 };

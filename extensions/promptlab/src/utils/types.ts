@@ -10,6 +10,11 @@ export interface ExtensionPreferences {
   outputKeyPath: string;
   outputTiming: string;
   lengthLimit: string;
+  primaryAction: string;
+  promptPrefix: string;
+  promptSuffix: string;
+  includeTemperature: boolean;
+  condenseAmount: string;
 }
 
 /**
@@ -63,6 +68,7 @@ export interface CommandOptions {
   showResponse?: boolean;
   useSaliencyAnalysis?: boolean;
   scriptKind?: string;
+  temperature?: string;
 }
 
 /**
@@ -93,6 +99,7 @@ export interface Command {
   requirements?: string;
   scriptKind?: string;
   categories?: string[];
+  temperature?: string;
 }
 
 /**
@@ -124,6 +131,7 @@ export interface StoreCommand {
   requirements?: string;
   scriptKind?: string;
   categories?: string;
+  temperature?: string;
 }
 
 /** Output from a model endpoint */
