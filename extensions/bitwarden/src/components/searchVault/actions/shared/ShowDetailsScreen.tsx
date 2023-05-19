@@ -18,6 +18,7 @@ export type ShowDetailsScreenProps<TDetails extends Constraint = Constraint> = {
 
 function ShowDetailsScreen<TDetails extends Constraint>(props: ShowDetailsScreenProps<TDetails>) {
   const { itemName, details, sorter, label, getMarkdown, getCopyValue, titleMap } = props;
+  const capitalizedLabel = capitalize(label, true);
 
   const handleCopyField = (value: string) => async () => {
     await Clipboard.copy(value, { transient: getTransientCopyPreference("other") });
@@ -40,24 +41,28 @@ function ShowDetailsScreen<TDetails extends Constraint>(props: ShowDetailsScreen
       markdown={getMarkdown(itemName, sortedDetails)}
       actions={
         <ActionPanel>
-          <Action.CopyToClipboard
-            title={`Copy ${capitalize(label, true)} Details`}
-            content={getCopyValue(sortedDetails)}
-            transient={getTransientCopyPreference("other")}
-          />
-          {sortedDetailsEntries.map(([fieldKey, content], index) => {
-            if (!content) return null;
+          <ActionPanel.Section>
+            <Action.CopyToClipboard
+              title={`Copy ${capitalizedLabel} Details`}
+              content={getCopyValue(sortedDetails)}
+              transient={getTransientCopyPreference("other")}
+            />
+          </ActionPanel.Section>
+          <ActionPanel.Section title={`${capitalizedLabel} Fields`}>
+            {sortedDetailsEntries.map(([fieldKey, content], index) => {
+              if (!content) return null;
 
-            return (
-              <Action
-                key={`${index}-${fieldKey}`}
-                title={`Copy ${getTitle(fieldKey, titleMap)}`}
-                icon={Icon.Clipboard}
-                onAction={handleCopyField(content)}
-                shortcut={{ modifiers: ["cmd"], key: SHORTCUT_KEY_SEQUENCE[index] }}
-              />
-            );
-          })}
+              return (
+                <Action
+                  key={`${index}-${fieldKey}`}
+                  title={`Copy ${getTitle(fieldKey, titleMap)}`}
+                  icon={Icon.Clipboard}
+                  onAction={handleCopyField(content)}
+                  shortcut={{ modifiers: ["cmd"], key: SHORTCUT_KEY_SEQUENCE[index] }}
+                />
+              );
+            })}
+          </ActionPanel.Section>
         </ActionPanel>
       }
     />

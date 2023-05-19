@@ -39,7 +39,7 @@ function ShowIdentityDetailsAction() {
   return (
     <ActionWithReprompt
       title="Show Identity"
-      icon={Icon.Person}
+      icon={Icon.Eye}
       onAction={showIdentityDetails}
       repromptDescription={`Showing the identity details of <${selectedItem.name}>`}
     />

@@ -23,7 +23,7 @@ function CopyNotesAction() {
     }
   };
 
-  return <Action title="Copy Notes" icon={Icon.Person} onAction={handleCopyNotes} />;
+  return <Action title="Copy Notes" icon={Icon.Clipboard} onAction={handleCopyNotes} />;
 }
 
 export default CopyNotesAction;
