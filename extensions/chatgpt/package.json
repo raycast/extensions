@@ -14,7 +14,8 @@
     "cruelmoney",
     "sykuang",
     "thanhlongb",
-    "k8scat"
+    "k8scat",
+    "Nauxscript"
   ],
   "categories": [
     "Productivity",
@@ -126,13 +127,20 @@
       "default": false
     },
     {
-      "name": "apiEndpoint",
-      "label": "Change API Endpoint",
+      "default": false,
       "description": "Change the OpenAI's default API endpoint to custom endpoint",
-      "type": "checkbox",
+      "label": "Change API Endpoint",
+      "name": "useApiEndpoint",
+      "required": false,
+      "title": "Use API Endpoint",
+      "type": "checkbox"
+    },
+    {
+      "description": "Custom API endpoint",
+      "name": "apiEndpoint",
+      "required": false,
       "title": "API Endpoint",
-      "placeholder": "https://api.openai.com/v1",
-      "required": false
+      "type": "textfield"
     },
     {
       "name": "useProxy",
