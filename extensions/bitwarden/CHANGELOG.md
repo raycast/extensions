@@ -8,12 +8,12 @@
 
 - Add Lock Vault command
 
-## [Improvements] - 2023-05-11
+## [Improvements to Actions] - 2023-05-11
 
 - Add "Show Identity" action for identity vault items
-- Change "Show Card" details view to a table format
+- Change "Show Card" action details view to a table format
 - Add actions with shortcuts to copy Card and Identity fields in the details view
-- General action improvements: Better order, labels and icons
+- General action improvements: Better order, labels, icons and section titles
 
 ## [Fix] - 2023-05-16
 
