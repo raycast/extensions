@@ -18,3 +18,4 @@ To migrate Google Authenticator, follow these steps:
 ## Credits
 
 - Inspiration from [jaden/totp-generator](https://github.com/jaden/totp-generator)
+- [Export Google Authenticator secret OTP-keys](https://gist.github.com/mapster/4b8b9f8f6b92cc1ca58ae5506e0508f7)
