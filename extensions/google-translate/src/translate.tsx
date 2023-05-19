@@ -9,7 +9,6 @@ import { doubleWayTranslate } from "./simple-translate";
 export default function Translate(): ReactElement {
   const [selectedLanguageSet] = useSelectedLanguagesSet();
   const [isShowingDetail, setIsShowingDetail] = useState(false);
-
   const [text, setText] = React.useState("");
   const debouncedValue = useDebouncedValue(text, 500);
   const { data: results, isLoading: isLoading } = usePromise(
