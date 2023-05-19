@@ -1,5 +1,9 @@
 # Bitwarden Changelog
 
+## [Fix] - 2023-05-19
+
+- Avoid displaying timeout info label on Unlock Form when the preference is Never 
+
 ## [New Command] - 2023-05-18
 
 - Add Lock Vault command
