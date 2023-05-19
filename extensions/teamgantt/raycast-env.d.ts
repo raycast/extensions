@@ -9,28 +9,28 @@
 
 type ExtensionPreferences = {
   /** ClientID - TeamGantt ClientID */
-  clientId: string;
+  "clientId": string,
   /** ClientSecret - TeamGantt ClientSecret */
-  clientSecret: string;
+  "clientSecret": string,
   /** Username/Email - TeamGantt Username/Email */
-  username: string;
+  "username": string,
   /** Password - TeamGantt Password */
-  password: string;
-};
+  "password": string
+}
 
 /** Preferences accessible in all the extension's commands */
-declare type Preferences = ExtensionPreferences;
+declare type Preferences = ExtensionPreferences
 
 declare namespace Preferences {
   /** Preferences accessible in the `search` command */
-  export type Search = ExtensionPreferences & {};
+  export type Search = ExtensionPreferences & {}
   /** Preferences accessible in the `my-tasks` command */
-  export type MyTasks = ExtensionPreferences & {};
+  export type MyTasks = ExtensionPreferences & {}
 }
 
 declare namespace Arguments {
   /** Arguments passed to the `search` command */
-  export type Search = {};
+  export type Search = {}
   /** Arguments passed to the `my-tasks` command */
-  export type MyTasks = {};
+  export type MyTasks = {}
 }

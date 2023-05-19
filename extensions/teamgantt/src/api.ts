@@ -27,7 +27,13 @@ export const getCurrentUser = (idToken?: string): Promise<User> => {
 };
 
 export const findTasks = async (
-  { q, today, showCompleted, userId }: { q?: string; today?: boolean; showCompleted?: boolean; userId?: string } = {},
+  {
+    q,
+    today,
+    showCompleted,
+    userId,
+    status,
+  }: { q?: string; today?: boolean; showCompleted?: boolean; userId?: string; status?: 'inprogress' } = {},
   idToken?: string
 ) => {
   if (!idToken) {
@@ -50,6 +56,10 @@ export const findTasks = async (
 
   if (userId) {
     url.searchParams.set('user_resource_ids', userId);
+  }
+
+  if (status) {
+    url.searchParams.set('status', status);
   }
 
   return got(url.toString(), { headers: { Authorization: `Bearer ${idToken}` } }).json();

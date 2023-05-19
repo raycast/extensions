@@ -36,7 +36,10 @@ export default function Command() {
     if (idToken) {
       setIsLoading(true);
 
-      Promise.all([findTasks({ today: true, userId: String(currentUser?.id) }, idToken), getCurrentTimeBlock(idToken)])
+      Promise.all([
+        findTasks({ today: true, userId: String(currentUser?.id), status: 'inprogress' }, idToken),
+        getCurrentTimeBlock(idToken),
+      ])
         .then(([tasks, timeblock]) => {
           setTasks(tasks as Task[]);
           setTimeBlock(timeblock);
