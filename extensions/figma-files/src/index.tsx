@@ -52,9 +52,9 @@ export default function Command() {
 
   const filterDropdown = () => (
     <Grid.Dropdown tooltip="Projects" defaultValue="All" onChange={handleDropdownChange} storeValue>
-      <Grid.Dropdown.Item key="all" title="All" value="All" />
+      <Grid.Dropdown.Item key="all" title="All" value="All teams" />
       {data?.map((team) => (
-        <Grid.Dropdown.Item key={team.name} title={team.name} value={team.name} />
+        <Grid.Dropdown.Item key={team.name} title={team.name} value={team.name} icon="team.svg" />
       ))}
     </Grid.Dropdown>
   );
@@ -81,10 +81,18 @@ export default function Command() {
 
       {filteredFiles?.map((team) =>
         team.files.map((project) => (
-          <Grid.Section key={team.name + project.name + "-project"} title={team.name + " - " + project.name}>
-            {(project.files || []).map((file) => (
-              <FileGridItem key={file.key + "-file"} file={file} desktopApp={desktopApp} onVisit={visitFile} />
-            ))}
+          <Grid.Section
+            key={team.name + project.name + "-project"}
+            title={project.name}
+            subtitle={`${team.name} ${project.files?.length != 0 ? `(${project.files?.length} Files)` : ""}`}
+          >
+            {project.files?.length != 0 ? (
+              project.files?.map((file) => (
+                <FileGridItem key={file.key + "-file"} file={file} desktopApp={desktopApp} onVisit={visitFile} />
+              ))
+            ) : (
+              <Grid.Item key={project.name + "-file-empty"} content="📂" title="Empty project" />
+            )}
           </Grid.Section>
         ))
       )}
