@@ -70,9 +70,7 @@ const optimizeItems = async (items: FileSystemItem[]) => {
 
         if (content && isSvg(content)) {
           const result = optimize(content);
-
-          if (result.modernError) reject(result.modernError.message);
-          else resolve({ data: result.data, path });
+          resolve({ data: result.data, path });
         } else {
           reject(`Not a valid SVG`);
         }

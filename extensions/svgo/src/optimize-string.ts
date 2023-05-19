@@ -18,11 +18,13 @@ export default async function Command() {
 
     const res = optimize(svgStr);
 
-    if (res.modernError) throw Error(res.modernError.message);
-
     await Clipboard[paste ? "paste" : "copy"](res.data);
     showHUD("Copied to clipboard");
   } catch (error) {
+    /**
+     * To distinguish between SVGO parsing errors and runtime errors we can
+     * check for `error.name === 'SvgoParserError'`.
+     */
     console.error(error);
     showHUD(`❌ ${String(error)}`);
   }
