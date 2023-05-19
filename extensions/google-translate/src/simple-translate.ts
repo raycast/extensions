@@ -1,4 +1,4 @@
-import { translate } from "@vitalets/google-translate-api";
+import translate from "@iamtraction/google-translate";
 import { LanguageCode } from "./languages";
 
 export const AUTO_DETECT = "auto";
@@ -25,7 +25,7 @@ export async function simpleTranslate(
     return {
       originalText: text,
       translatedText: translated.text,
-      langFrom: translated?.raw.src as LanguageCode,
+      langFrom: translated?.from?.language?.iso as LanguageCode,
       langTo: options.langTo,
     };
   } catch (err) {
