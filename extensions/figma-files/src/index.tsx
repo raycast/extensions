@@ -83,8 +83,12 @@ export default function Command() {
         team.files.map((project) => (
           <Grid.Section
             key={team.name + project.name + "-project"}
-            title={project.name}
-            subtitle={`${team.name} ${project.files?.length != 0 ? `(${project.files?.length} Files)` : ""}`}
+            title={`${project.name} ${
+              project.files?.length != 0
+                ? `(${project.files?.length} File${project.files?.length === 1 ? "" : "s"})`
+                : ""
+            }`}
+            subtitle={team.name}
           >
             {project.files?.length != 0 ? (
               project.files?.map((file) => (
