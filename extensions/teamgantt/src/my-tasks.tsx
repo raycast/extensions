@@ -33,20 +33,22 @@ export default function Command() {
 
   // Find todays tasks
   useEffect(() => {
-    if (idToken) {
+    if (idToken && currentUser) {
       setIsLoading(true);
 
       Promise.all([
-        findTasks({ today: true, userId: String(currentUser?.id), status: 'inprogress' }, idToken),
+        findTasks({ today: true, userId: String(currentUser.id) }, idToken),
+        findTasks({ userId: String(currentUser.id), status: 'starttwoweeks' }, idToken),
         getCurrentTimeBlock(idToken),
       ])
-        .then(([tasks, timeblock]) => {
-          setTasks(tasks as Task[]);
+        .then(([tasks, upcomingTasks, timeblock]) => {
+          console.log({ upcomingTasks });
+          setTasks([...(tasks as Task[]), ...(upcomingTasks as Task[])]);
           setTimeBlock(timeblock);
         })
         .finally(() => setIsLoading(false));
     }
-  }, [idToken]);
+  }, [idToken, currentUser]);
 
   if (!idToken) {
     return (

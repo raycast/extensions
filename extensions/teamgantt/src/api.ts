@@ -33,7 +33,13 @@ export const findTasks = async (
     showCompleted,
     userId,
     status,
-  }: { q?: string; today?: boolean; showCompleted?: boolean; userId?: string; status?: 'inprogress' } = {},
+  }: {
+    q?: string;
+    today?: boolean;
+    showCompleted?: boolean;
+    userId?: string;
+    status?: 'inprogress' | 'starttwoweeks';
+  } = {},
   idToken?: string
 ) => {
   if (!idToken) {
@@ -98,7 +104,7 @@ export const punchOut = async (timeblockId: number, idToken: string, message?: s
   }
 };
 
-export const getCurrentTimeBlock = (idToken?: string): Promise<TimeBlock> => {
+export const getCurrentTimeBlock = (idToken: string): Promise<TimeBlock> => {
   if (!idToken) {
     throw new Error('not authenticated');
   }
