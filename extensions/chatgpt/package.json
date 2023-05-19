@@ -126,19 +126,27 @@
       "default": false
     },
     {
-      "name": "apiEndpoint",
+      "name": "useApiEndpoint",
       "label": "Change API Endpoint",
       "description": "Change the OpenAI's default API endpoint to custom endpoint",
       "type": "checkbox",
       "title": "API Endpoint",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "apiEndpoint",
+      "description": "Custom API Endpoint",
+      "type": "textfield",
       "placeholder": "https://api.openai.com/v1",
+      "title": "API Endpoint",
       "required": false
     },
     {
       "name": "useProxy",
       "label": "Enable proxy for each request",
       "description": "Each request will be passed through the proxy",
-      "type": "checkbox",
+      "type": "textfield",
       "title": "Use Proxy",
       "required": false,
       "default": false
