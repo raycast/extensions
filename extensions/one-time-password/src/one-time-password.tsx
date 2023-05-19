@@ -215,6 +215,7 @@ export default () => {
                 <Action
                   title="Remove Account"
                   icon={Icon.Trash}
+                  style={Action.Style.Destructive}
                   shortcut={{ modifiers: ['cmd'], key: 'delete' }}
                   onAction={() => handleRemoveAccount(account)}
                 />
