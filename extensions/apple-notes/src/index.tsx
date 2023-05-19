@@ -19,7 +19,7 @@ import { NoteItem } from "./types";
 import { useState } from "react";
 import { NoteStoreProto } from "./proto/notestore";
 
-const pako = require("pako");
+var pako = require("pako"); // eslint-disable-line @typescript-eslint/no-var-requires
 
 interface Preferences {
   accounts: boolean;
@@ -120,15 +120,13 @@ export default function Command() {
 
   notes.forEach((note) => {
     if (note.zippedNoteBody) {
-      // unzip the note body
-      let unzipped = pako.ungzip(note.zippedNoteBody);
       // decode the unzipped protobuf
-      const noteBody = NoteStoreProto.decode(unzipped);
+      const noteBody = NoteStoreProto.decode(pako.ungzip(note.zippedNoteBody));
       note.noteBody = noteBody?.document?.note?.noteText || "";
     }
     if (note.tags) {
       // tags come from the db as a string, so we need to split them into an array
-      let tagString = note.tags as unknown as string;
+      const tagString = note.tags as unknown as string;
       note.tags = tagString.split(" ");
     }
   });
