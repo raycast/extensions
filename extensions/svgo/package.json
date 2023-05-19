@@ -2,9 +2,17 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "raycast-svgo",
   "title": "SVGO",
-  "description": "Optimize SVG from the clipboard",
+  "description": "Optimize SVG vector graphics files.",
   "icon": "svgo.png",
   "author": "kaichi",
+  "contributors": [
+    "kgrhartlage"
+  ],
+  "keywords": [
+    "optimize",
+    "svg",
+    "vector"
+  ],
   "categories": [
     "Developer Tools",
     "Design Tools"
@@ -12,10 +20,27 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "optimize",
-      "title": "Optimize SVG",
+      "name": "optimize-string",
+      "title": "Optimize SVG String",
       "subtitle": "SVGO",
-      "description": "optimize svg",
+      "description": "Reads the clipboard content as plain text and copies the optimized SVG string to the clipboard.",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "paste",
+          "description": "If checked, the command will automatically paste the optimized SVG string to the frontmost application.",
+          "label": "Paste to frontmost application",
+          "default": false,
+          "type": "checkbox",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "optimize-files",
+      "title": "Optimize SVG Files",
+      "subtitle": "SVGO",
+      "description": "Creates one or multiple optimized SVG files based on the current Finder selection.",
       "mode": "no-view"
     }
   ],
