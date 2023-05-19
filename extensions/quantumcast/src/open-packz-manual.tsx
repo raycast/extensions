@@ -33,6 +33,7 @@ export default function Command() {
             <ActionPanel title="Quantumcast - Open Packz Manual">
               <Action
                 title="Open in Browser"
+                icon={Icon.Globe}
                 onAction={async () =>
                   open(packz.getManualURL(`${installation.url}/${installation.executable}`, packzManualLanguage) ?? '')
                 }
