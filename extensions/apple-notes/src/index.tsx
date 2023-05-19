@@ -162,7 +162,7 @@ export default function Command() {
                 key={note.id}
                 icon="notes-icon.png"
                 title={note.title || ""}
-                subtitle={note.snippet}
+                subtitle={note.snippet || note.ocrText}
                 keywords={[`${note.folder}`, `${note.account}`]
                   .concat(note.tags ? note.tags.map((tag) => tag.replace("#", "")) : [])
                   .concat(note.noteBody ? note.noteBody.replace(/\n/g, "").split(" ") : [])
