@@ -1,12 +1,10 @@
-import { ActionPanel, List, Icon, Action, getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { ActionPanel, List, Icon, Action, showToast, Toast } from "@raycast/api";
 import { Server } from "../../api/Server";
 import { IServer } from "../../types";
 import { unwrapToken } from "../../lib/auth";
 import { SitesList } from "../sites/SitesList";
 
 export const ServerSingle = ({ server }: { server: IServer }) => {
-  const preferences = getPreferenceValues();
-  const sshUser = preferences?.laravel_forge_ssh_user ?? "forge";
   const token = unwrapToken(server.api_token_key);
 
   return (
@@ -30,15 +28,19 @@ export const ServerSingle = ({ server }: { server: IServer }) => {
         <List.Item
           id="open-in-ssh"
           key="open-in-ssh"
-          title={`Open SSH connection (${sshUser})`}
+          title={`Open SSH connection (${server.ssh_user})`}
           icon={Icon.Terminal}
-          accessories={[{ text: `ssh://${sshUser}@${server.ip_address}` }]}
+          accessories={[{ text: `ssh://${server.ssh_user}@${server.ip_address}` }]}
           actions={
             <ActionPanel>
               <Action.OpenInBrowser
                 // eslint-disable-next-line @raycast/prefer-title-case
-                title={`Open SSH Connection (${sshUser})`}
-                url={`ssh://${sshUser}@${server.ip_address}`}
+                title={`Open SSH Connection (${server.ssh_user})`}
+                url={`ssh://${server.ssh_user}@${server.ip_address}`}
+              />
+              <Action.CopyToClipboard
+                title="Copy SSH Connection String"
+                content={`ssh://${server.ssh_user}@${server.ip_address}`}
               />
             </ActionPanel>
           }

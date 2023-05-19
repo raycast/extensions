@@ -1,6 +1,7 @@
 import NodeVault from "node-vault";
 import {
   DeleteMode,
+  ExportMode,
   VAULT_NAMESPACE_CACHE_KEY,
   VAULT_TOKEN_CACHE_KEY,
   VaultAuth,
@@ -20,7 +21,7 @@ import fs from "fs";
 import hdate from "human-date";
 import Values = Form.Values;
 
-const preferences = getPreferenceValues<ExtensionPreferences>();
+const preferences = getPreferenceValues<Preferences.Vault>();
 const vaultUrl = (preferences.url || "").replace(/\/$/, "");
 const cache = new Cache();
 
@@ -140,14 +141,23 @@ export async function getVaultClient(): Promise<NodeVault.client> {
   });
 }
 
-export async function saveSecretToFile(secret: object, path: string) {
+function env(secret: any): string {
+  let result = "";
+  for (const key of Object.keys(secret)) {
+    result += key + "=" + secret[key] + "\n";
+  }
+  return result;
+}
+
+export async function exportSecretToFile(secret: object, path: string, mode: ExportMode) {
   const toast = await showToast({
     style: Toast.Style.Animated,
-    title: "Saving secet",
+    title: "Saving secret",
   });
   if (secret) {
-    const filePath = `${homedir()}/Downloads/secret${path.replaceAll("/", "_")}.json`;
-    fs.writeFile(filePath, stringify(secret), async (err) => {
+    const filePath = `${homedir()}/Downloads/secret${path.replaceAll("/", "_")}.${mode}`;
+    const content = mode === ExportMode.json ? stringify(secret) : env(secret);
+    fs.writeFile(filePath, content, async (err) => {
       if (err) {
         toast.style = Toast.Style.Failure;
         toast.message = "Failed to save secret to " + filePath + "\n" + String(err);

@@ -8,3 +8,6 @@
 /.idea/codeStyles/
 /.idea/
 .DS_Store
+
+# Raycast specific files
+raycast-env.d.ts
