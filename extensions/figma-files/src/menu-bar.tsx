@@ -67,16 +67,22 @@ export default function Command() {
               <MenuBarExtra.Submenu
                 key={team.name + project.name + "-project"}
                 title={project.name}
-                children={project.files?.map((file) => (
-                  <MenuBarExtra.Item
-                    key={team.name + project.name + file.key + "-file"}
-                    title={file.name}
-                    onAction={async () => {
-                      open(url + file.key);
-                      await visitFile(file);
-                    }}
-                  />
-                ))}
+                children={
+                  project.files?.length != 0 ? (
+                    project.files?.map((file) => (
+                      <MenuBarExtra.Item
+                        key={team.name + project.name + file.key + "-file"}
+                        title={file.name}
+                        onAction={async () => {
+                          open(url + file.key);
+                          await visitFile(file);
+                        }}
+                      />
+                    ))
+                  ) : (
+                    <MenuBarExtra.Item key={team.name + project.name + "-nofile"} title="Empty project" />
+                  )
+                }
               />
             ))}
           </MenuBarExtra.Section>
