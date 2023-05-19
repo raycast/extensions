@@ -8,6 +8,13 @@
 
 - Add Lock Vault command
 
+## [Improvements] - 2023-05-11
+
+- Add "Show Identity" action for identity vault items
+- Change "Show Card" details view to a table format
+- Add actions with shortcuts to copy Card and Identity fields in the details view
+- General action improvements: Better order, labels and icons
+
 ## [Fix] - 2023-05-16
 
 - Fixed Generate Password (Quick) command not copying password before pasting
