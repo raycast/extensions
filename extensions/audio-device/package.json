@@ -80,7 +80,7 @@
   "dependencies": {
     "@raycast/api": "^1.46.0",
     "execa": "^6.0.0",
-    "macos-audio-devices": "^1.4.0",
+    "@spotxyz/macos-audio-devices": "1.5.0",
     "react-use": "^17.3.2",
     "run-applescript": "^6.0.0"
   },
@@ -94,7 +94,7 @@
     "typescript": "^4.4.3"
   },
   "scripts": {
-    "copy-binary": "cp node_modules/macos-audio-devices/audio-devices assets/audio-devices",
+    "copy-binary": "cp node_modules/@spotxyz/macos-audio-devices/audio-devices assets/audio-devices",
     "build": "npm run copy-binary && ray build -e dist",
     "dev": "npm run copy-binary && ray develop"
   }

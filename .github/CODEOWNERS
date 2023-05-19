@@ -116,7 +116,7 @@
 /extensions/change-scroll-direction                  @gregoralbrecht @emilshr
 /extensions/charming-chatgpt                         @KittenYang
 /extensions/chatgo                                   @chuyun
-/extensions/chatgpt                                  @abielzulio @erodactyl @pernielsentikaer @shichongrui @timolins @pomdtr @cruelmoney @abielzulio @abielzulio @k8scat
+/extensions/chatgpt                                  @abielzulio @erodactyl @pernielsentikaer @shichongrui @timolins @pomdtr @cruelmoney @abielzulio @abielzulio @k8scat @Nauxscript
 /extensions/chatgpt-quick-actions                    @alanzchen
 /extensions/chatgpt3-prompt                          @denizyoldas @pernielsentikaer
 /extensions/cheatsheets                              @Destiner
@@ -138,6 +138,7 @@
 /extensions/clojuredocs-search                       @edblancas
 /extensions/cloudflare                               @Destiner @niklaswa
 /extensions/coda-bookmarks-search                    @allienx
+/extensions/code-review-emojis                       @rus64
 /extensions/code-stash                               @ben-greenwood
 /extensions/codegeex                                 @MBearo
 /extensions/codegrepper                              @emircanerkul @pernielsentikaer
@@ -258,7 +259,7 @@
 /extensions/email-verifier                           @lryong
 /extensions/ember-api-documentation                  @tdwesten
 /extensions/emissions-calculator                     @andreaselia @pernielsentikaer
-/extensions/emoji                                    @FezVrasta @kidonng @sxn
+/extensions/emoji                                    @FezVrasta @kidonng @sxn @maxdavid
 /extensions/empty-screenshots                        @chanceaclark
 /extensions/encoding-tools                           @eth-p
 /extensions/ens-name-lookup                          @Yukaii
@@ -286,7 +287,7 @@
 /extensions/fibonacci-sequence                       @adambutler
 /extensions/figma-files                              @michaelwschultz @pernielsentikaer @GLaDO8
 /extensions/filamentphp-doc-seach                    @aurawindsurfing
-/extensions/file-manager                             @es183923 @BalliAsghar @urwrstkn8mare
+/extensions/file-manager                             @es183923 @BalliAsghar @urwrstkn8mare @fengtianze
 /extensions/filezilla                                @naqet
 /extensions/finary                                   @jetaix
 /extensions/finnish-dictionary                       @albertoxamin
@@ -638,6 +639,7 @@
 /extensions/phpmon                                   @nicoverbruggen
 /extensions/pianoman                                 @juhamust
 /extensions/pick-random                              @MatteoGauthier @hongqn
+/extensions/pick-your-wallpaper                      @hugomarf
 /extensions/pie-for-pihole                           @GLaDO8
 /extensions/pika                                     @rishimohan
 /extensions/pinata                                   @stevedsimkins
@@ -850,6 +852,7 @@
 /extensions/text-decorator                           @koinzhang
 /extensions/text-shortcuts                           @koinzhang
 /extensions/textlint-rule-aws-service-name           @bun913
+/extensions/tfl                                      @haneenmahd
 /extensions/the-verge                                @klkvsky @pernielsentikaer
 /extensions/thesaurus                                @ABukSwienty
 /extensions/things                                   @loris @andreaselia

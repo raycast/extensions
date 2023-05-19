@@ -41,6 +41,7 @@ export type PreferencesType = {
   showFileSize: boolean;
   startDirectory: string;
   showDeleteActions: boolean;
+  standardShortcuts: boolean;
 };
 
 export async function deleteFile(filePath: string, fileName: string, refresh: () => void) {
@@ -132,7 +133,9 @@ export function DirectoryItem(props: { fileData: FileDataType; refresh: () => vo
           <ActionPanel.Section>
             <Action.Trash
               title="Move to Trash"
-              shortcut={{ modifiers: ["cmd"], key: "t" }}
+              shortcut={
+                preferences.standardShortcuts ? { modifiers: ["ctrl"], key: "x" } : { modifiers: ["cmd"], key: "t" }
+              }
               paths={filePath}
               onTrash={() => {
                 showToast(Toast.Style.Success, "Moved to Trash", `Directory: ${filePath}`);
@@ -191,7 +194,9 @@ export function FileItem(props: { fileData: FileDataType; refresh: () => void })
           <ActionPanel.Section>
             <Action.Trash
               title="Move to Trash"
-              shortcut={{ modifiers: ["cmd"], key: "t" }}
+              shortcut={
+                preferences.standardShortcuts ? { modifiers: ["ctrl"], key: "x" } : { modifiers: ["cmd"], key: "t" }
+              }
               paths={filePath}
               onTrash={() => {
                 showToast(Toast.Style.Success, "Moved to Trash", `File: ${filePath}`);
@@ -201,9 +206,13 @@ export function FileItem(props: { fileData: FileDataType; refresh: () => void })
             {preferences.showDeleteActions && (
               <Action
                 title="Delete File"
-                icon={Icon.Trash}
+                icon={Icon.Eraser}
                 style={Action.Style.Destructive}
-                shortcut={{ modifiers: ["cmd"], key: "d" }}
+                shortcut={
+                  preferences.standardShortcuts
+                    ? { modifiers: ["ctrl", "shift"], key: "x" }
+                    : { modifiers: ["cmd"], key: "d" }
+                }
                 onAction={() => deleteFile(filePath, props.fileData.name, props.refresh)}
               />
             )}

@@ -1,5 +1,10 @@
 # Changelog
 
+## [Fix & Feature] - May, 18 2023
+
+- Feature: Custom API Endpoint
+- Fix: 404 error code while Use Azure is enabled
+
 ## [Fix & Feature] - May, 2023
 
 - Feature: Azure OpenAI ([@sykuang](https://github.com/abielzulio/chatgpt-raycast/pull/36))

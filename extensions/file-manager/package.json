@@ -7,14 +7,15 @@
   "author": "es183923",
   "contributors": [
     "BalliAsghar",
-    "urwrstkn8mare"
+    "urwrstkn8mare",
+    "tzfeng"
   ],
   "license": "MIT",
   "commands": [
     {
       "name": "manage-files",
       "title": "Manage Files",
-      "subtitle": "Files",
+      "subtitle": "File Manager",
       "description": "Traverse the file system and create files in Raycast",
       "mode": "view"
     }
@@ -78,6 +79,15 @@
       "description": "Show Delete Actions",
       "label": "Show Delete Actions",
       "name": "showDeleteActions",
+      "required": true,
+      "title": "",
+      "type": "checkbox"
+    },
+    {
+      "default": false,
+      "description": "Use ctrl + x to Move to Trash, ctrl + shift + x to Delete",
+      "label": "Standard Action Shortcuts",
+      "name": "standardShortcuts",
       "required": true,
       "title": "",
       "type": "checkbox"
