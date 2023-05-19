@@ -13,7 +13,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "Show Emoji Legend",
+      "title": "Show Review Emoji",
       "description": "Shows a list of emojis that can be used for code review, in line with the Code Review Emoji Guide.",
       "mode": "view"
     }
