@@ -7,7 +7,6 @@ import { useEffect, useState } from "react";
 import { useCachedPromise } from "@raycast/utils";
 import { getPreferenceValues } from "@raycast/api";
 
-
 export default function Command() {
   const { data, isLoading, error } = useCachedPromise(
     async () => {
