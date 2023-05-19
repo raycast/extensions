@@ -210,6 +210,13 @@
       "type": "textfield",
       "title": "Azure Deployment",
       "required": false
+    },
+    {
+      "description": "Leave empty if you are not using custom service api",
+      "name": "customServiceAPI",
+      "required": false,
+      "title": "Custom Service API",
+      "type": "textfield"
     }
   ],
   "dependencies": {
