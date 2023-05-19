@@ -53,11 +53,7 @@ export default function Command() {
         placeholder="Place reported checksum here"
         defaultValue=""
       />
-      <Form.FilePicker
-        id="file"
-        title="File"
-        allowMultipleSelection={false}
-      />
+      <Form.FilePicker id="file" title="File" allowMultipleSelection={false} />
       <Form.Dropdown id="dropdown" title="Dropdown">
         <Form.Dropdown.Item value="sha-256" title="sha-256" />
       </Form.Dropdown>
