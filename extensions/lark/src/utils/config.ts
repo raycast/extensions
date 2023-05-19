@@ -1,7 +1,8 @@
 import { getPreferenceValues } from '@raycast/api';
 
 export interface Preference {
-  type: 'feishu' | 'lark';
+  type: 'feishu' | 'lark' | 'self-hosted';
+  selfHostedDomain?: string;
   recentListCount: number;
 }
 
@@ -13,7 +14,11 @@ export function getPreference(): Preference {
 
 export const preference = getPreference();
 
-export const DOMAIN = preference.type === 'feishu' ? 'feishu.cn' : 'larksuite.com';
+const builtinDomainMap: Partial<Record<Preference['type'], string>> = {
+  feishu: 'feishu.cn',
+  lark: 'larksuite.com',
+};
+export const DOMAIN = preference.selfHostedDomain?.trim() || builtinDomainMap[preference.type];
 
 export function getDomain(sub?: string): string {
   return `https://${sub ? `${sub}.` : ''}${DOMAIN}`;

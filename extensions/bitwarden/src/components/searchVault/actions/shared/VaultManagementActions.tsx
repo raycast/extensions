@@ -1,4 +1,5 @@
 import { Action, Color, Icon, showToast, Toast } from "@raycast/api";
+import { VAULT_LOCK_MESSAGES } from "~/constants/general";
 import { useBitwarden } from "~/context/bitwarden";
 import { useVault } from "~/context/vault";
 
@@ -8,7 +9,7 @@ function VaultManagementActions() {
 
   const handleLockVault = async () => {
     const toast = await showToast(Toast.Style.Animated, "Locking Vault...", "Please wait");
-    await bitwarden.lock("Manually locked by the user");
+    await bitwarden.lock(VAULT_LOCK_MESSAGES.MANUAL);
     await toast.hide();
   };
 

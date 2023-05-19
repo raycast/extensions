@@ -2,14 +2,12 @@ import os from "os";
 
 import { List, ActionPanel, Action } from "@raycast/api";
 
-const macosVenturaAndLater = parseInt(os.release().split(".")[0]) >= 22;
-const preferencesString = macosVenturaAndLater ? "Settings" : "Preferences";
+const isMacOSVenturaOrLater = parseInt(os.release().split(".")[0]) >= 22;
+const preferencesString = isMacOSVenturaOrLater ? "Settings" : "Preferences";
 
 export default function PermissionErrorScreen() {
-  const action = {
-    title: macosVenturaAndLater ? "Open System Settings -> Privacy" : "Open System Preferences -> Security",
-    target: "x-apple.systempreferences:com.apple.preference.security?Privacy_AllFiles",
-  };
+  const actionTitle = isMacOSVenturaOrLater ? "Open System Settings -> Privacy" : "Open System Preferences -> Security";
+  const actionTarget = "x-apple.systempreferences:com.apple.preference.security?Privacy_AllFiles";
 
   return (
     <List>
@@ -24,7 +22,7 @@ export default function PermissionErrorScreen() {
         description={`This is required to get your bookmarks. Note that you can revert this access in ${preferencesString} whenever you want.`}
         actions={
           <ActionPanel>
-            <Action.Open {...action} />
+            <Action.Open title={actionTitle} target={actionTarget} />
           </ActionPanel>
         }
       />
