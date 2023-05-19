@@ -286,7 +286,7 @@
 /extensions/fibonacci-sequence                       @adambutler
 /extensions/figma-files                              @michaelwschultz @pernielsentikaer @GLaDO8
 /extensions/filamentphp-doc-seach                    @aurawindsurfing
-/extensions/file-manager                             @es183923 @BalliAsghar @urwrstkn8mare
+/extensions/file-manager                             @es183923 @BalliAsghar @urwrstkn8mare @fengtianze
 /extensions/filezilla                                @naqet
 /extensions/finary                                   @jetaix
 /extensions/finnish-dictionary                       @albertoxamin
@@ -735,6 +735,7 @@
 /extensions/roam-research                            @dive2Pro
 /extensions/roblox-games                             @TayIorRobinson
 /extensions/roll-d20                                 @kaylasween
+/extensions/rollcast                                 @TroAlexis @pernielsentikaer
 /extensions/rss-reader                               @fuksman @pernielsentikaer @pomdtr
 /extensions/rsync-commands                           @maxfahl
 /extensions/ruby-evaluate                            @obahareth
