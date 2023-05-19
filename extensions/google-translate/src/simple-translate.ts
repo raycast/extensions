@@ -1,5 +1,6 @@
 import translate from "@iamtraction/google-translate";
 import { LanguageCode } from "./languages";
+import { LanguageCodeSet } from "./types";
 
 export const AUTO_DETECT = "auto";
 
@@ -12,10 +13,7 @@ export type SimpleTranslateResult = {
 
 export class TranslateError extends Error {}
 
-export async function simpleTranslate(
-  text: string,
-  options: { langFrom: LanguageCode; langTo: LanguageCode }
-): Promise<SimpleTranslateResult> {
+export async function simpleTranslate(text: string, options: LanguageCodeSet): Promise<SimpleTranslateResult> {
   try {
     if (!text) {
       return {
@@ -53,5 +51,40 @@ export async function simpleTranslate(
     }
 
     throw err;
+  }
+}
+
+export async function doubleWayTranslate(text: string, options: LanguageCodeSet) {
+  if (!text) {
+    return [];
+  }
+
+  if (options.langFrom === AUTO_DETECT) {
+    const translated1 = await simpleTranslate(text, {
+      langFrom: options.langFrom,
+      langTo: options.langTo,
+    });
+
+    if (translated1?.langFrom) {
+      const translated2 = await simpleTranslate(translated1.translatedText, {
+        langFrom: options.langTo,
+        langTo: translated1.langFrom,
+      });
+
+      return [translated1, translated2];
+    }
+
+    return [];
+  } else {
+    return await Promise.all([
+      simpleTranslate(text, {
+        langFrom: options.langFrom,
+        langTo: options.langTo,
+      }),
+      simpleTranslate(text, {
+        langFrom: options.langTo,
+        langTo: options.langFrom,
+      }),
+    ]);
   }
 }
