@@ -42,41 +42,21 @@ async function translateText(text: string, opts: LanguageCodeSet) {
   }
 }
 
-export default function Command(): ReactElement {
+export default function Translate(): ReactElement {
   const [selectedLanguageSet] = useSelectedLanguagesSet();
   const [isShowingDetail, setIsShowingDetail] = useState(false);
 
   const [text, setText] = React.useState("");
   const debouncedValue = useDebouncedValue(text, 500);
-  const { data: results, isLoading: isLoading } = usePromise(
-    async (...args: Parameters<typeof translateText>) => {
-      const results = await translateText(...args);
-
-      return results.map((t) => {
-        const langFrom = supportedLanguagesByCode[t.langFrom];
-        const langFromRep = langFrom.flag ?? langFrom.code;
-        const langTo = supportedLanguagesByCode[t.langTo];
-        const langToRep = langTo.flag ?? langTo.code;
-
-        return {
-          text: t.translatedText,
-          languages: `${langFromRep} -> ${langToRep}`,
-          sourceLanguage: supportedLanguagesByCode[t.langFrom]?.code,
-          targetLanguage: supportedLanguagesByCode[t.langTo]?.code,
-        };
+  const { data: results, isLoading: isLoading } = usePromise(translateText, [debouncedValue, selectedLanguageSet], {
+    onError(error) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Could not translate",
+        message: error.toString(),
       });
     },
-    [debouncedValue, selectedLanguageSet],
-    {
-      onError(error) {
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Could not translate",
-          message: error.toString(),
-        });
-      },
-    }
-  );
+  });
 
   return (
     <List
@@ -86,39 +66,45 @@ export default function Command(): ReactElement {
       isShowingDetail={isShowingDetail}
       searchBarAccessory={<LanguageManagerListDropdown />}
     >
-      {results?.map((r, index) => (
-        <List.Item
-          key={index}
-          title={r.text}
-          accessories={[{ text: r.languages }]}
-          detail={<List.Item.Detail markdown={r.text} />}
-          actions={
-            <ActionPanel>
-              <ActionPanel.Section>
-                <Action.CopyToClipboard title="Copy" content={r.text} />
-                <Action
-                  title="Toggle Full Text"
-                  icon={Icon.Text}
-                  onAction={() => setIsShowingDetail(!isShowingDetail)}
-                />
-                <Action.OpenInBrowser
-                  title="Open in Google Translate"
-                  shortcut={{ modifiers: ["opt"], key: "enter" }}
-                  url={
-                    "https://translate.google.com/?sl=" +
-                    r.sourceLanguage +
-                    "&tl=" +
-                    r.targetLanguage +
-                    "&text=" +
-                    encodeURIComponent(debouncedValue) +
-                    "&op=translate"
-                  }
-                />
-              </ActionPanel.Section>
-            </ActionPanel>
-          }
-        />
-      ))}
+      {results?.map((r, index) => {
+        const langFrom = supportedLanguagesByCode[r.langFrom];
+        const langTo = supportedLanguagesByCode[r.langTo];
+        const languages = `${langFrom.flag ?? langFrom.code} -> ${langTo.flag ?? langTo.code}`;
+
+        return (
+          <List.Item
+            key={index}
+            title={r.translatedText}
+            accessories={[{ text: languages }]}
+            detail={<List.Item.Detail markdown={r.translatedText} />}
+            actions={
+              <ActionPanel>
+                <ActionPanel.Section>
+                  <Action.CopyToClipboard title="Copy" content={r.translatedText} />
+                  <Action
+                    title="Toggle Full Text"
+                    icon={Icon.Text}
+                    onAction={() => setIsShowingDetail(!isShowingDetail)}
+                  />
+                  <Action.OpenInBrowser
+                    title="Open in Google Translate"
+                    shortcut={{ modifiers: ["opt"], key: "enter" }}
+                    url={
+                      "https://translate.google.com/?sl=" +
+                      r.langFrom +
+                      "&tl=" +
+                      r.langTo +
+                      "&text=" +
+                      encodeURIComponent(debouncedValue) +
+                      "&op=translate"
+                    }
+                  />
+                </ActionPanel.Section>
+              </ActionPanel>
+            }
+          />
+        );
+      })}
     </List>
   );
 }

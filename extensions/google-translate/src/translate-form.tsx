@@ -6,7 +6,7 @@ import { LanguageCode, supportedLanguagesByCode, languages } from "./languages";
 import { AUTO_DETECT, simpleTranslate } from "./simple-translate";
 import { LanguagesManagerList } from "./LanguagesManager";
 
-const TranslateForm = () => {
+export default function TranslateForm() {
   const [selectedLanguageSet, setSelectedLanguageSet] = useSelectedLanguagesSet();
   const langFrom = selectedLanguageSet.langFrom;
   const langTo = selectedLanguageSet.langTo;
@@ -171,6 +171,4 @@ const TranslateForm = () => {
       />
     </Form>
   );
-};
-
-export default TranslateForm;
+}
