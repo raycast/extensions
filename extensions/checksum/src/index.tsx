@@ -19,7 +19,7 @@ export default function Command() {
     for (const filePath of values.file) {
       const buff = fs.readFileSync(filePath);
 
-      const hash = createHash("sha256");
+      const hash = createHash(values.dropdown);
       hash.update(buff);
       const result = hash.digest("hex");
 
@@ -55,7 +55,15 @@ export default function Command() {
       />
       <Form.FilePicker id="file" title="File" allowMultipleSelection={false} />
       <Form.Dropdown id="dropdown" title="Dropdown">
-        <Form.Dropdown.Item value="sha-256" title="sha-256" />
+        <Form.Dropdown.Item value="sha1" title="sha1" />
+        <Form.Dropdown.Item value="sha224" title="sha224" />
+        <Form.Dropdown.Item value="sha256" title="sha256" />
+        <Form.Dropdown.Item value="sha512" title="sha512" />
+        <Form.Dropdown.Item value="md4" title="md4" />
+        <Form.Dropdown.Item value="md5" title="md5" />
+        <Form.Dropdown.Item value="sm3" title="sm3" />
+        <Form.Dropdown.Item value="ripemd160" title="ripemd160" />
+        <Form.Dropdown.Item value="whirlpool" title="whirlpool" />
       </Form.Dropdown>
     </Form>
   );

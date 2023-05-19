@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "checksum",
   "title": "Checksum",
-  "description": "An awesome, simple to use app that can do checksums. More hashing algorithms coming soon",
+  "description": "This Raycast extension allows you to check the checksum of a file. Simply enter the file path and the extension will calculate its checksum and compare it to a provided value. This can be useful for verifying the integrity of downloaded files or ensuring that a file has not been tampered with",
   "icon": "command_icon.png",
   "author": "Ek217",
   "license": "MIT",
