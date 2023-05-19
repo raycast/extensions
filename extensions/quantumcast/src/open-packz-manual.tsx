@@ -1,4 +1,4 @@
-import { List, Action, ActionPanel, getPreferenceValues, open } from '@raycast/api';
+import { List, Action, ActionPanel, getPreferenceValues, open, icon } from '@raycast/api';
 import { useState, useEffect } from 'react';
 import { packz, env } from 'quantumlib';
 
