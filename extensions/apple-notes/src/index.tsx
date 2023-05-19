@@ -32,9 +32,9 @@ interface Preferences {
 const preferences: Preferences = getPreferenceValues();
 
 export default function Command() {
-  console.log("first line of index")
+  console.log("first line of index");
   const sqlState = useSqlNotes();
-  console.log("queries worked okay")
+  console.log("queries worked okay");
   const [failedToOpenMessage, setFailedToOpenMessage] = useState("");
 
   const escapeStringForAppleScript = (str: string) => str.replace('"', '\\"');
@@ -202,13 +202,13 @@ export default function Command() {
                   )}
                 actions={
                   <ActionPanel title="Actions">
-                      <Action
-                        title="Open Note"
-                        icon={Icon.Document}
-                        onAction={() => {
-                          openNote(note, preferences.openSeparately);
-                        }}
-                      />
+                    <Action
+                      title="Open Note"
+                      icon={Icon.Document}
+                      onAction={() => {
+                        openNote(note, preferences.openSeparately);
+                      }}
+                    />
                     <Action
                       title="Delete Note"
                       icon={Icon.Trash}
