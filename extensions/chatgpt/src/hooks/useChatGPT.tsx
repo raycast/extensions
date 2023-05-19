@@ -10,6 +10,7 @@ export function useChatGPT(): OpenAIApi {
       useAzure: boolean;
       azureEndpoint: string;
       azureDeployment: string;
+      customServiceAPI: string;
     }>();
     const getConfig = function ({ useAzure, apiKey, azureEndpoint, azureDeployment }: ConfigurationPreferences) {
       if (useAzure) {
@@ -17,6 +18,8 @@ export function useChatGPT(): OpenAIApi {
           apiKey,
           basePath: azureEndpoint + "/openai/deployments/" + azureDeployment,
         });
+      } else if (preferences.customServiceAPI) {
+        return new Configuration({ apiKey, basePath: preferences.customServiceAPI });
       } else {
         return new Configuration({ apiKey });
       }
