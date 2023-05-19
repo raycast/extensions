@@ -14,7 +14,8 @@
     "cruelmoney",
     "sykuang",
     "thanhlongb",
-    "k8scat"
+    "k8scat",
+    "Nauxscript"
   ],
   "categories": [
     "Productivity",
@@ -64,81 +65,77 @@
   ],
   "preferences": [
     {
-      "name": "apiKey",
-      "label": "Open AI API Key",
       "description": "Enter your personal Open AI API Key",
-      "type": "password",
+      "label": "Open AI API Key",
+      "name": "apiKey",
+      "required": true,
       "title": "API Key",
-      "required": true
+      "type": "password"
     },
     {
-      "name": "useStream",
-      "label": "Enable streaming completions",
+      "default": true,
       "description": "Stream the completions of the generated answer",
-      "type": "checkbox",
+      "label": "Enable streaming completions",
+      "name": "useStream",
+      "required": true,
       "title": "Stream Completion",
-      "default": true,
-      "required": true
+      "type": "checkbox"
     },
     {
-      "name": "isAutoSaveConversation",
-      "label": "Enable auto-save conversation",
+      "default": true,
       "description": "Auto-save every conversation that you had with the model",
-      "type": "checkbox",
+      "label": "Enable auto-save conversation",
+      "name": "isAutoSaveConversation",
+      "required": true,
       "title": "Auto-save Conversation",
-      "default": true,
-      "required": true
+      "type": "checkbox"
     },
     {
-      "name": "isHistoryPaused",
-      "label": "Enable pause history",
+      "default": true,
       "description": "Pause the history of the conversation",
-      "type": "checkbox",
+      "label": "Enable pause history",
+      "name": "isHistoryPaused",
+      "required": false,
       "title": "Pause History",
-      "default": true,
-      "required": false
+      "type": "checkbox"
     },
     {
-      "name": "isAutoLoadText",
-      "label": "Enable auto-load selected text",
+      "default": false,
       "description": "Load selected text from your frontmost application to the question bar automatically",
-      "type": "checkbox",
+      "label": "Enable auto-load selected text",
+      "name": "isAutoLoadText",
+      "required": false,
       "title": "Auto-load Text",
-      "default": false,
-      "required": false
+      "type": "checkbox"
     },
     {
-      "name": "isAutoFullInput",
-      "label": "Enable full text input initially",
+      "default": false,
       "description": "Use full text input form when asking question for the first time",
-      "type": "checkbox",
+      "label": "Enable full text input initially",
+      "name": "isAutoFullInput",
+      "required": false,
       "title": "Use Full Text Input",
+      "type": "checkbox"
+    },
+    {
       "default": false,
-      "required": false
-    },
-    {
-      "name": "isAutoTTS",
-      "label": "Enable text-to-speech for every response",
       "description": "Enable auto TTS everytime you get a generated answer",
-      "type": "checkbox",
+      "label": "Enable text-to-speech for every response",
+      "name": "isAutoTTS",
+      "required": false,
       "title": "Text-to-Speech",
-      "required": false,
-      "default": false
+      "type": "checkbox"
     },
     {
-      "name": "useProxy",
+      "default": false,
+      "description": "Each request will be passed through the proxy",
       "label": "Enable proxy for each request",
-      "description": "Each request will be passed through the proxy",
-      "type": "checkbox",
-      "title": "Use Proxy",
+      "name": "useProxy",
       "required": false,
-      "default": false
+      "title": "Use Proxy",
+      "type": "checkbox"
     },
     {
-      "name": "proxyProtocol",
-      "description": "Each request will be passed through the proxy",
-      "type": "dropdown",
-      "title": "Proxy Protocol",
       "data": [
         {
           "title": "HTTP",
@@ -157,59 +154,63 @@
           "value": "socks5"
         }
       ],
+      "default": "http",
+      "description": "Each request will be passed through the proxy",
+      "name": "proxyProtocol",
       "required": false,
-      "default": "http"
+      "title": "Proxy Protocol",
+      "type": "dropdown"
     },
     {
-      "name": "proxyHost",
       "description": "Sever address of the proxy",
-      "type": "textfield",
+      "name": "proxyHost",
+      "required": false,
       "title": "Proxy Host",
-      "required": false
+      "type": "textfield"
     },
     {
-      "name": "proxyPort",
       "description": "Server port of the proxy",
-      "type": "textfield",
+      "name": "proxyPort",
+      "required": false,
       "title": "Proxy Port",
-      "required": false
+      "type": "textfield"
     },
     {
+      "description": "Leave empty if doesn't have",
       "name": "proxyUsername",
-      "description": "Leave empty if doesn't have",
-      "type": "textfield",
+      "required": false,
       "title": "Proxy Username",
-      "required": false
+      "type": "textfield"
     },
     {
-      "name": "proxyPassword",
       "description": "Leave empty if doesn't have",
-      "type": "password",
+      "name": "proxyPassword",
+      "required": false,
       "title": "Proxy Password",
-      "required": false
+      "type": "password"
     },
     {
-      "name": "useAzure",
-      "label": "Use Azure OpenAI",
-      "description": "Use Azure OPENAI rather than OPENAI",
-      "type": "checkbox",
-      "title": "Use Azure OpenAI",
       "default": false,
-      "required": false
+      "description": "Use Azure OPENAI rather than OPENAI",
+      "label": "Use Azure OpenAI",
+      "name": "useAzure",
+      "required": false,
+      "title": "Use Azure OpenAI",
+      "type": "checkbox"
     },
     {
+      "description": "Leave empty if you are not using Azure OpenAI",
       "name": "azureEndpoint",
-      "description": "Leave empty if you are not using Azure OpenAI",
-      "type": "textfield",
+      "required": false,
       "title": "Azure Endpoint",
-      "required": false
+      "type": "textfield"
     },
     {
-      "name": "azureDeployment",
       "description": "Leave empty if you are not using Azure OpenAI",
-      "type": "textfield",
+      "name": "azureDeployment",
+      "required": false,
       "title": "Azure Deployment",
-      "required": false
+      "type": "textfield"
     },
     {
       "description": "Leave empty if you are not using custom service api",
