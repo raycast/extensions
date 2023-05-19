@@ -32,7 +32,9 @@ interface Preferences {
 const preferences: Preferences = getPreferenceValues();
 
 export default function Command() {
+  console.log("first line of index")
   const sqlState = useSqlNotes();
+  console.log("queries worked okay")
   const [failedToOpenMessage, setFailedToOpenMessage] = useState("");
 
   const escapeStringForAppleScript = (str: string) => str.replace('"', '\\"');
@@ -163,8 +165,8 @@ export default function Command() {
                 subtitle={note.snippet || note.ocrText}
                 keywords={[`${note.folder}`, `${note.account}`]
                   .concat(note.tags ? note.tags.map((tag) => tag.replace("#", "")) : [])
-                  .concat(note.noteBody ? note.noteBody.replace(/\n/g, "").split(" ") : [])
-                  .concat(note.ocrText ? note.ocrText.replace(/\n/g, "").split(" ") : [])}
+                  .concat(note.noteBody ? note.noteBody.replace(/\n/g, " ").split(" ") : [])
+                  .concat(note.ocrText ? note.ocrText.replace(/\n/g, " ").split(" ") : [])}
                 accessories={([] as List.Item.Accessory[])
                   .concat(
                     preferences.tags && note.tags
@@ -260,8 +262,8 @@ export default function Command() {
                   subtitle={note.snippet}
                   keywords={[`${note.folder}`, `${note.account}`]
                     .concat(note.tags ? note.tags.map((tag) => tag.replace("#", "")) : [])
-                    .concat(note.noteBody ? note.noteBody.replace(/\n/g, "").split(" ") : [])
-                    .concat(note.ocrText ? note.ocrText.replace(/\n/g, "").split(" ") : [])}
+                    .concat(note.noteBody ? note.noteBody.replace(/\n/g, " ").split(" ") : [])
+                    .concat(note.ocrText ? note.ocrText.replace(/\n/g, " ").split(" ") : [])}
                   accessories={([] as List.Item.Accessory[])
                     .concat(
                       preferences.tags && note.tags
