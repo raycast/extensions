@@ -14,8 +14,9 @@ async function translateText(langFrom: LanguageCode, langTo: LanguageCode, text:
       langTo: langTo,
     });
 
-    if (translated1.langFrom) {
+    if (translated1?.langFrom) {
       const translated2 = await simpleTranslate(text, { langFrom: langTo, langTo: translated1.langFrom });
+
       return [translated1, translated2];
     }
 

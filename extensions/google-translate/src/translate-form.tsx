@@ -3,7 +3,7 @@ import { Action, ActionPanel, Form, Icon, showToast, Toast } from "@raycast/api"
 import debounce from "debounce";
 import { useSelectedLanguagesSet } from "./hooks";
 import { LanguageCode, supportedLanguagesByCode, languages } from "./languages";
-import { AUTO_DETECT, simpleTranslate, SimpleTranslateResult } from "./simple-translate";
+import { AUTO_DETECT, simpleTranslate, SimpleTranslateResult, TranslateError } from "./simple-translate";
 import { LanguagesManagerList } from "./LanguagesManager";
 
 const TranslateForm = () => {
@@ -34,12 +34,21 @@ const TranslateForm = () => {
 
   const doTranslate = React.useMemo(() => {
     const debouncedTranslate = debounce(async (text: string, langFrom: LanguageCode, langTo: LanguageCode) => {
-      const result = await simpleTranslate(text, {
-        langFrom,
-        langTo,
-      });
-
-      setTranslated(result);
+      try {
+        const result = await simpleTranslate(text, {
+          langFrom,
+          langTo,
+        });
+        setTranslated(result);
+      } catch (err) {
+        if (err instanceof TranslateError) {
+          showToast({
+            title: err.name,
+            message: err.message,
+            style: Toast.Style.Failure,
+          });
+        }
+      }
       setIsLoading(false);
     }, 500);
 

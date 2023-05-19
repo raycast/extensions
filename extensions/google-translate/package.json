@@ -925,7 +925,7 @@
     "@raycast/api": "^1.47.3",
     "@raycast/utils": "^1.4.16",
     "@types/debounce": "^1.2.1",
-    "@vitalets/google-translate-api": "^7.0.0",
+    "@vitalets/google-translate-api": "^9.2.0",
     "debounce": "^1.2.1"
   },
   "devDependencies": {
