@@ -131,7 +131,7 @@
       "label": "Change API Endpoint",
       "description": "Change the OpenAI's default API endpoint to custom endpoint",
       "type": "checkbox",
-      "title": "API Endpoint",
+      "title": "Use API Endpoint",
       "required": false,
       "default": false
     },
