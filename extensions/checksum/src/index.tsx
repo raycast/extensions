@@ -1,6 +1,6 @@
 import { Form, ActionPanel, Action, showToast, Toast } from "@raycast/api";
-const { createHash } = require('crypto'); 
-const fs = require('fs');
+import { createHash } from 'crypto';
+import fs from 'fs';
 
 type Values = {
   textfield: string;   // Expected hash

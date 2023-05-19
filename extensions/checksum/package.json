@@ -9,7 +9,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "Run a checksum",
+      "title": "Run A Checksum",
       "description": "Run a checksum",
       "mode": "view"
     }
