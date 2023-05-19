@@ -5,7 +5,9 @@
   "description": "Convert LaTeX math to Unicode Text.",
   "icon": "command-icon.png",
   "author": "jaykmody",
-  "categories": ["Productivity"],
+  "categories": [
+    "Productivity"
+  ],
   "license": "MIT",
   "commands": [
     {
