@@ -5,6 +5,9 @@
   "description": "Search live streams, archives, clips and channels in Holodex.",
   "icon": "holodex.png",
   "author": "uetchy",
+  "contributors": [
+    "hcy1251"
+  ],
   "categories": [
     "Web"
   ],

@@ -10,10 +10,6 @@ const PLIST_PATH = `${homedir()}/Library/Safari/Bookmarks.plist`;
 
 const readPlist = promisify(readFile);
 
-export type BookmarkPListResult = {
-  Children: (BookmarkFolder | ReadingList)[];
-};
-
 export type BookmarkFolder = {
   WebBookmarkUUID: string;
   Title: string;
@@ -49,12 +45,25 @@ export type ReadingListItem = BookmarkItem & {
   };
 };
 
+function getTitle(title: string, hierarchy = "") {
+  let formattedTitle = title;
+  if (title === "com.apple.ReadingList") {
+    formattedTitle = "Reading List";
+  } else if (title === "BookmarksBar") {
+    formattedTitle = "Favourites";
+  } else if (title === "BookmarksMenu") {
+    formattedTitle = "Bookmarks Menu";
+  }
+
+  return hierarchy === "" ? formattedTitle : `${hierarchy}/${title}`;
+}
+
 function getBookmarks(bookmark: BookmarkFolder | BookmarkItem, hierarchy = "") {
   const bookmarks = [];
 
-  if (bookmark.WebBookmarkType === "WebBookmarkTypeList") {
-    bookmark.Children?.map((child) => {
-      bookmarks.push(...getBookmarks(child, hierarchy === "" ? "Favourites" : `${hierarchy}/${bookmark.Title}`));
+  if (bookmark.WebBookmarkType === "WebBookmarkTypeList" && bookmark.Children && bookmark.Children.length > 0) {
+    bookmark.Children.map((child) => {
+      bookmarks.push(...getBookmarks(child, getTitle(bookmark.Title, hierarchy)));
     });
   }
 
@@ -79,8 +88,8 @@ type Folder = {
 function getFolders(bookmark: BookmarkFolder | BookmarkItem, hierarchy = ""): Folder[] {
   const folders: Folder[] = [];
 
-  if (bookmark.WebBookmarkType === "WebBookmarkTypeList") {
-    const title = hierarchy === "" ? "Favourites" : `${hierarchy}/${bookmark.Title}`;
+  if (bookmark.WebBookmarkType === "WebBookmarkTypeList" && bookmark.Children && bookmark.Children.length > 0) {
+    const title = getTitle(bookmark.Title, hierarchy);
 
     return [
       { title, id: bookmark.WebBookmarkUUID, icon: "safari.png" },
@@ -92,59 +101,21 @@ function getFolders(bookmark: BookmarkFolder | BookmarkItem, hierarchy = ""): Fo
 }
 
 export default function useSafariBookmarks(enabled: boolean) {
-  const {
-    data: plist,
-    isLoading,
-    mutate,
-    error,
-  } = useCachedPromise(
+  const { data, isLoading, mutate, error } = useCachedPromise(
     (enabled) => {
-      return enabled ? (readPlist(PLIST_PATH) as Promise<BookmarkPListResult>) : Promise.resolve();
+      return enabled ? (readPlist(PLIST_PATH) as Promise<BookmarkFolder>) : Promise.resolve();
     },
     [enabled]
   );
-
-  const bookmarksBar = plist?.Children?.find((bookmark) => bookmark.Title === "BookmarksBar");
-
-  const bookmarks = bookmarksBar ? getBookmarks(bookmarksBar) : [];
-  const folders = bookmarksBar ? getFolders(bookmarksBar) : [];
-
-  const readingList = plist?.Children?.find((bookmark) => bookmark.Title === "com.apple.ReadingList") as
-    | ReadingList
-    | undefined;
-
-  const readingListBookmarks =
-    readingList?.Children?.sort((itemA, itemB) => {
-      const dateA = new Date(itemA.ReadingList.DateAdded);
-      const dateB = new Date(itemB.ReadingList.DateAdded);
-      return dateB.getTime() - dateA.getTime();
-    }).map((item) => {
-      return {
-        id: item.WebBookmarkUUID,
-        title: item.ReadingListNonSync.Title || item.URIDictionary.title,
-        url: item.URLString,
-        imageURL: item.imageURL,
-        folder: "Reading List",
-      };
-    }) || [];
-
-  if (readingListBookmarks.length > 0) {
-    bookmarks.push(...readingListBookmarks);
-    folders.push({ title: "Reading List", id: "reading-list", icon: "safari.png" });
-  }
+  const bookmarks = data ? getBookmarks(data) : [];
+  const folders = data ? getFolders(data) : [];
 
   return {
     bookmarks: bookmarks.map((bookmark) => {
-      return {
-        ...bookmark,
-        browser: BROWSERS_BUNDLE_ID.safari,
-      };
+      return { ...bookmark, browser: BROWSERS_BUNDLE_ID.safari };
     }),
     folders: folders.map((folder) => {
-      return {
-        ...folder,
-        browser: BROWSERS_BUNDLE_ID.safari,
-      };
+      return { ...folder, browser: BROWSERS_BUNDLE_ID.safari };
     }),
     isLoading,
     mutate,

@@ -5,7 +5,8 @@ import { useVisitedFiles } from "./hooks/useVisitedFiles";
 import { resolveAllFiles } from "./components/fetchFigmaData";
 import { useEffect, useState } from "react";
 import { useCachedPromise } from "@raycast/utils";
-import { getPreferenceValues, Icon } from "@raycast/api";
+import { getPreferenceValues } from "@raycast/api";
+
 
 export default function Command() {
   const { data, isLoading, error } = useCachedPromise(

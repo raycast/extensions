@@ -83,6 +83,7 @@ export default function Command() {
                     <MenuBarExtra.Item key={team.name + project.name + "-nofile"} title="Empty project" />
                   )
                 }
+
               />
             ))}
           </MenuBarExtra.Section>

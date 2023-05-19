@@ -1,3 +1,5 @@
+import { SHORTCUT_KEY_SEQUENCE } from "~/constants/general";
+import { CARD_KEY_LABEL } from "~/constants/labels";
 import { Card } from "~/types/vault";
 
 const MONTH_NUMBER_TO_LABEL_MAP = {
@@ -16,28 +18,26 @@ const MONTH_NUMBER_TO_LABEL_MAP = {
 } as Record<string, string>;
 
 const CARD_MAPPER: Record<string, (value: string) => string> = {
-  expMonth: (value: string) => MONTH_NUMBER_TO_LABEL_MAP[value],
-};
-
-const CARD_KEY_LABEL: Record<keyof Card, string> = {
-  cardholderName: "Cardholder name",
-  number: "Number",
-  code: "Security code (CVV)",
-  expMonth: "Expiration month",
-  expYear: "Expiration year",
-  brand: "Brand",
+  expMonth: (value: string) => MONTH_NUMBER_TO_LABEL_MAP[value] ?? value,
 };
 
 const getCardValue = (key: string, value: string) => {
   return CARD_MAPPER[key as keyof Card]?.(value) ?? value;
 };
 
-export function getCardDetailsMarkdown(card: Card) {
-  return `# 💳 Card Details
----
-&nbsp;
+export function getCardDetailsMarkdown(itemName: string, card: Card) {
+  return `# 💳 ${itemName}
+<br></br>
+| ⌘\t**Field** | **Value** |
+| --- | --- |
 ${Object.entries(card)
-  .map(([key, value]) => (value ? `- **${CARD_KEY_LABEL[key as keyof Card]}**: ${getCardValue(key, value)}` : null))
+  .map(([key, value], index) => {
+    if (!value) return null;
+    const label = CARD_KEY_LABEL[key as keyof Card];
+    const shortcutKey = SHORTCUT_KEY_SEQUENCE[index];
+
+    return `| ${shortcutKey ? `${shortcutKey}.` : "&nbsp;"}\t**${label}** | ${getCardValue(key, value)} |`;
+  })
   .join("\n")}
 `;
 }
@@ -47,4 +47,12 @@ export function getCardDetailsCopyValue(card: Card) {
     .map(([key, value]) => (value ? `${CARD_KEY_LABEL[key as keyof Card]}: ${getCardValue(key, value)}` : null))
     .filter(Boolean)
     .join("\n");
+}
+
+const CARD_KEY_LABEL_KEYS = Object.keys(CARD_KEY_LABEL);
+/** sorts the fields according to the order they appear on bitwarden's web vault form */
+export function cardBitwardenPageFieldOrderSorter([a]: string | [string, any], [b]: string | [string, any]) {
+  const aIndex = CARD_KEY_LABEL_KEYS.indexOf((Array.isArray(a) ? a[0] : a) as keyof Card);
+  const bIndex = CARD_KEY_LABEL_KEYS.indexOf((Array.isArray(b) ? b[0] : b) as keyof Card);
+  return aIndex - bIndex;
 }

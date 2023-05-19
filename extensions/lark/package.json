@@ -37,8 +37,20 @@
         {
           "title": "Lark",
           "value": "lark"
+        },
+        {
+          "title": "Self-hosted",
+          "value": "self-hosted"
         }
       ]
+    },
+    {
+      "name": "selfHostedDomain",
+      "type": "textfield",
+      "required": false,
+      "title": "Self-hosted domain",
+      "description": "The self-hosted domain of your enterprise. For example: mycompany.com",
+      "placeholder": "Only needed if you opt for self-hosted"
     },
     {
       "name": "recentListCount",
