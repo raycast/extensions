@@ -18,7 +18,7 @@ const MONTH_NUMBER_TO_LABEL_MAP = {
 } as Record<string, string>;
 
 const CARD_MAPPER: Record<string, (value: string) => string> = {
-  expMonth: (value: string) => MONTH_NUMBER_TO_LABEL_MAP[value],
+  expMonth: (value: string) => MONTH_NUMBER_TO_LABEL_MAP[value] ?? value,
 };
 
 const getCardValue = (key: string, value: string) => {

@@ -27,5 +27,5 @@ export function getTransientCopyPreference(type: "password" | "other"): boolean 
 }
 
 export function getLabelForTimeoutPreference(timeout: string | number): string {
-  return VAULT_TIMEOUT_MS_TO_LABEL[timeout as keyof typeof VAULT_TIMEOUT_MS_TO_LABEL];
+  return VAULT_TIMEOUT_MS_TO_LABEL[timeout as keyof typeof VAULT_TIMEOUT_MS_TO_LABEL] ?? timeout.toString();
 }

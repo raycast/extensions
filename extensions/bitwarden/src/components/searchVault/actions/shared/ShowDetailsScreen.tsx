@@ -51,7 +51,7 @@ function ShowDetailsScreen<TDetails extends Constraint>(props: ShowDetailsScreen
           <ActionPanel.Section title={`${capitalizedLabel} Fields`}>
             {sortedDetailsEntries.map(([fieldKey, content], index) => {
               if (!content) return null;
-              const shortcutKey: Keyboard.KeyEquivalent | undefined = SHORTCUT_KEY_SEQUENCE[index];
+              const shortcutKey = SHORTCUT_KEY_SEQUENCE[index];
 
               return (
                 <Action
