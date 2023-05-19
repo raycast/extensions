@@ -1,0 +1,2 @@
+# Ignore proto and generated files
+src/proto/*

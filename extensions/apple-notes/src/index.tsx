@@ -19,7 +19,7 @@ import { NoteItem } from "./types";
 import { useState } from "react";
 import { NoteStoreProto } from "./proto/notestore";
 
-var pako = require("pako"); // eslint-disable-line @typescript-eslint/no-var-requires
+const pako = require("pako"); // eslint-disable-line @typescript-eslint/no-var-requires
 
 interface Preferences {
   accounts: boolean;
