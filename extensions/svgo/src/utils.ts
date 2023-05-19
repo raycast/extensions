@@ -72,7 +72,7 @@ const optimizeItems = async (items: FileSystemItem[]) => {
           const result = optimize(content);
           resolve({ data: result.data, path });
         } else {
-          reject(`Not a valid SVG`);
+          reject(`Selected item is not a SVG:\n\n${path}`);
         }
       })
   );

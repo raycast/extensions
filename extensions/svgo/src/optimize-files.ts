@@ -1,19 +1,31 @@
-import { closeMainWindow, getSelectedFinderItems, showHUD } from "@raycast/api";
+import {
+  closeMainWindow,
+  getSelectedFinderItems,
+  showHUD,
+  showToast,
+  Toast,
+} from "@raycast/api";
 
 import optimizeItems from "./utils";
 
 const command = async () => {
-  await closeMainWindow;
+  const toast = await showToast({
+    style: Toast.Style.Animated,
+    title: "Optimizing files...",
+  });
 
   try {
     const items = await getSelectedFinderItems();
 
     await optimizeItems(items);
-
-    showHUD("Optimization successful");
+    await closeMainWindow();
+    showHUD("🎉 Success");
   } catch (error) {
     console.error(error);
-    showHUD(`❌ ${String(error)}`);
+
+    toast.style = Toast.Style.Failure;
+    toast.title = "Something went wrong!";
+    toast.message = String(error);
   }
 };
 
