@@ -127,7 +127,7 @@ export default function Command() {
     if (note.tags) {
       // tags come from the db as a string, so we need to split them into an array
       const tagString = note.tags as unknown as string;
-      note.tags = tagString.split(" ");
+      note.tags = Array.from(new Set(tagString.split(" ")));
     }
   });
 
@@ -200,20 +200,13 @@ export default function Command() {
                   )}
                 actions={
                   <ActionPanel title="Actions">
-                    {preferences.openSeparately || (
                       <Action
-                        title="Open in Notes"
+                        title="Open Note"
                         icon={Icon.Document}
                         onAction={() => {
-                          openNote(note, false);
+                          openNote(note, preferences.openSeparately);
                         }}
                       />
-                    )}
-                    <Action
-                      title="Open in a Separate Window"
-                      icon={Icon.Document}
-                      onAction={() => openNote(note, true)}
-                    />
                     <Action
                       title="Delete Note"
                       icon={Icon.Trash}
@@ -235,13 +228,19 @@ export default function Command() {
                       <Action.CopyToClipboard
                         title="Copy Note URL"
                         icon={Icon.Link}
-                        content={`notes://showNote?identifier=${note.UUID}`}
+                        content={{
+                          html: `<a href="notes://showNote?identifier=${note.UUID}" title="${note.title}">${note.title}</a>`,
+                          text: `notes://showNote?identifier=${note.UUID}`,
+                        }}
                         shortcut={{ modifiers: ["cmd"], key: "c" }}
                       />
                       <Action.CopyToClipboard
                         title="Copy Mobile Note URL"
                         icon={Icon.Link}
-                        content={`mobilenotes://showNote?identifier=${note.UUID}`}
+                        content={{
+                          html: `<a href="mobilenotes://showNote?identifier=${note.UUID}" title="${note.title}">${note.title}</a>`,
+                          text: `mobilenotes://showNote?identifier=${note.UUID}`,
+                        }}
                         shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
                       />
                     </ActionPanel.Section>
@@ -298,19 +297,12 @@ export default function Command() {
                     )}
                   actions={
                     <ActionPanel title="Actions">
-                      {preferences.openSeparately || (
-                        <Action
-                          title="Open in Notes"
-                          icon={Icon.Document}
-                          onAction={() => {
-                            openNote(note, false);
-                          }}
-                        />
-                      )}
                       <Action
-                        title="Open in a Separate Window"
+                        title="Open Note"
                         icon={Icon.Document}
-                        onAction={() => openNote(note, true)}
+                        onAction={() => {
+                          openNote(note, preferences.openSeparately);
+                        }}
                       />
                       <Action
                         title="Restore To Notes Folder"
