@@ -5,6 +5,7 @@ import { useVisitedFiles } from "./hooks/useVisitedFiles";
 import { resolveAllFiles } from "./components/fetchFigmaData";
 import { useEffect, useState } from "react";
 import { useCachedPromise } from "@raycast/utils";
+import { getPreferenceValues, Icon } from "@raycast/api";
 
 export default function Command() {
   const { data, isLoading, error } = useCachedPromise(
@@ -50,12 +51,25 @@ export default function Command() {
     }
   }
 
+  const { TEAM_ID } = getPreferenceValues();
+  const teamID: string[] = TEAM_ID.split(",").map((team: string) => team.toString().trim());
   const filterDropdown = () => (
-    <Grid.Dropdown tooltip="Projects" defaultValue="All" onChange={handleDropdownChange} storeValue>
-      <Grid.Dropdown.Item key="all" title="All teams" value="All" />
-      {data?.map((team) => (
-        <Grid.Dropdown.Item key={team.name} title={team.name} value={team.name} icon="team.svg" />
-      ))}
+    <Grid.Dropdown
+      tooltip={teamID.length > 1 ? "Teams" : "Projects"}
+      defaultValue="All"
+      onChange={handleDropdownChange}
+      storeValue
+    >
+      <Grid.Dropdown.Item key="all" title={teamID.length > 1 ? "All teams" : "All projects"} value="All" />
+      {teamID.length > 1
+        ? data?.map((team) => (
+            <Grid.Dropdown.Item key={team.name} title={team.name} value={team.name} icon="team.svg" />
+          ))
+        : data?.map((team) =>
+            team.files.map((project) => (
+              <Grid.Dropdown.Item key={project.name} title={project.name} value={project.name} icon="project.svg" />
+            ))
+          )}
     </Grid.Dropdown>
   );
 
