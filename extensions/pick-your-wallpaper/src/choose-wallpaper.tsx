@@ -42,7 +42,6 @@ export default function Command() {
       aspectRatio={"16/9"}
       filtering={false}
       onSearchTextChange={setSearchText}
-      navigationTitle="Search Wallpapers"
       searchBarPlaceholder="Search for wallpapers"
     >
       <Grid.EmptyView icon={Icon.Image} title={"No wallpapers found. Add some images."} />
