@@ -1,38 +1,8 @@
 import protobuf from 'protobufjs';
 import base32 from 'hi-base32';
+import { environment } from '@raycast/api';
 
-const migrationPayload = `
-syntax = "proto3";
-
-message MigrationPayload {
-  enum Algorithm {
-    ALGO_INVALID = 0;
-    ALGO_SHA1 = 1;
-  }
-
-  enum OtpType {
-    OTP_INVALID = 0;
-    OTP_HOTP = 1;
-    OTP_TOTP = 2;
-  }
-
-  message OtpParameters {
-    bytes secret = 1;
-    string name = 2;
-    string issuer = 3;
-    Algorithm algorithm = 4;
-    int32 digits = 5;
-    OtpType type = 6;
-    int64 counter = 7;
-  }
-
-  repeated OtpParameters otp_parameters = 1;
-  int32 version = 2;
-  int32 batch_size = 3;
-  int32 batch_index = 4;
-  int32 batch_id = 5;
-}
-`;
+const { assetsPath } = environment;
 
 type OTPParameter = {
   secret: string;
@@ -50,8 +20,8 @@ type DecodedMessage = {
   batchIndex: number;
 };
 
-function decodeMessage(buffer: Buffer) {
-  const { root } = protobuf.parse(migrationPayload);
+async function decodeMessage(buffer: Buffer) {
+  const root = await protobuf.load(`${assetsPath}/google-authenticator-migration.proto`);
   const payload = root.lookupType('MigrationPayload');
   const err = payload.verify(buffer);
   if (err) throw err;
@@ -60,9 +30,9 @@ function decodeMessage(buffer: Buffer) {
   return payload.toObject(message) as DecodedMessage;
 }
 
-export function extractAccountsFromMigrationUrl(url: string) {
+export async function extractAccountsFromMigrationUrl(url: string) {
   const otpBuffer = Buffer.from(url.replace(/%3D/g, ''), 'base64');
-  const { otpParameters } = decodeMessage(otpBuffer);
+  const { otpParameters } = await decodeMessage(otpBuffer);
 
   return otpParameters.map((otpParameter) => {
     const secret = base32.encode(otpParameter.secret);

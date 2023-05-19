@@ -52,7 +52,7 @@ export default () => {
 
   async function handleGoogleAuthenticatorMigration(resData: string) {
     const { data } = parseUrl<'data'>(resData);
-    const accounts = extractAccountsFromMigrationUrl(data);
+    const accounts = await extractAccountsFromMigrationUrl(data);
 
     const confirmed = await confirmAlert({
       title: 'Google Authenticator Migration',
