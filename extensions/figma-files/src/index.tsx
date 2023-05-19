@@ -52,7 +52,7 @@ export default function Command() {
 
   const filterDropdown = () => (
     <Grid.Dropdown tooltip="Projects" defaultValue="All" onChange={handleDropdownChange} storeValue>
-      <Grid.Dropdown.Item key="all" title="All" value="All teams" />
+      <Grid.Dropdown.Item key="all" title="All teams" value="All" />
       {data?.map((team) => (
         <Grid.Dropdown.Item key={team.name} title={team.name} value={team.name} icon="team.svg" />
       ))}
