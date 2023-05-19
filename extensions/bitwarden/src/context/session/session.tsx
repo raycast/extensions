@@ -3,7 +3,7 @@ import { createContext, PropsWithChildren, useContext, useMemo } from "react";
 import UnlockForm from "~/components/UnlockForm";
 import { useBitwarden } from "~/context/bitwarden";
 import { useSessionReducer } from "~/context/session/reducer";
-import { getSavedSession, Storage } from "~/context/session/utils";
+import { getSavedSession, SessionStorage } from "~/context/session/utils";
 import { Cache } from "~/utils/cache";
 import { captureException } from "~/utils/development";
 import { VaultIsLockedError } from "~/utils/errors";
@@ -53,17 +53,17 @@ export function SessionProvider(props: SessionProviderProps) {
 
   async function handleUnlock(password: string, token: string) {
     const passwordHash = await hashMasterPasswordForReprompting(password);
-    await Storage.saveSession(token, passwordHash);
+    await SessionStorage.saveSession(token, passwordHash);
     dispatch({ type: "unlock", token, passwordHash });
   }
 
   async function handleLock(reason?: string) {
-    await Storage.clearSession();
+    await SessionStorage.clearSession();
     dispatch({ type: "lock", lockReason: reason });
   }
 
   async function handleLogout() {
-    await Storage.clearSession();
+    await SessionStorage.clearSession();
     Cache.clear();
     dispatch({ type: "logout" });
   }
