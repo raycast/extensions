@@ -40,6 +40,13 @@ export default () => {
   }
 
   async function handleRemoveAccount(account: store.Account) {
+    const confirmed = await confirmAlert({
+      title: 'Remove Account',
+      message: `Are you sure you want to remove ${account.name}?`,
+    });
+
+    if (!confirmed) return;
+
     setLoading(true);
     await store.removeAccount(account.id);
     await loadAccounts();
