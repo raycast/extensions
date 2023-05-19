@@ -36,7 +36,7 @@ ${Object.entries(card)
     const label = CARD_KEY_LABEL[key as keyof Card];
     const shortcutKey = SHORTCUT_KEY_SEQUENCE[index];
 
-    return `| ${shortcutKey}.\t**${label}** | ${getCardValue(key, value)} |`;
+    return `| ${shortcutKey ? `${shortcutKey}.` : "&nbsp;"}\t**${label}** | ${getCardValue(key, value)} |`;
   })
   .join("\n")}
 `;

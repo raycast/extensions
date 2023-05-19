@@ -11,9 +11,9 @@ ${Object.entries(identity)
   .map(([key, value], index) => {
     if (!value) return null;
     const label = IDENTITY_KEY_LABEL[key as keyof Identity];
-    const shortcutKey = SHORTCUT_KEY_SEQUENCE[index] ?? "&nbsp;";
+    const shortcutKey = SHORTCUT_KEY_SEQUENCE[index];
 
-    return `| ${shortcutKey}.\t**${label}** | ${value} |`;
+    return `| ${shortcutKey ? `${shortcutKey}.` : "&nbsp;"}\t**${label}** | ${value} |`;
   })
   .join("\n")}
 `;

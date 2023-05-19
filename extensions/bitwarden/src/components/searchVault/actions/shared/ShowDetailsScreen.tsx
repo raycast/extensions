@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Clipboard, Detail, Icon, closeMainWindow, showHUD } from "@raycast/api";
+import { Action, ActionPanel, Clipboard, Detail, Icon, Keyboard, closeMainWindow, showHUD } from "@raycast/api";
 import { getTransientCopyPreference } from "~/utils/preferences";
 import { capitalize } from "~/utils/strings";
 import { SHORTCUT_KEY_SEQUENCE } from "~/constants/general";
@@ -51,6 +51,7 @@ function ShowDetailsScreen<TDetails extends Constraint>(props: ShowDetailsScreen
           <ActionPanel.Section title={`${capitalizedLabel} Fields`}>
             {sortedDetailsEntries.map(([fieldKey, content], index) => {
               if (!content) return null;
+              const shortcutKey: Keyboard.KeyEquivalent | undefined = SHORTCUT_KEY_SEQUENCE[index];
 
               return (
                 <Action
@@ -58,7 +59,7 @@ function ShowDetailsScreen<TDetails extends Constraint>(props: ShowDetailsScreen
                   title={`Copy ${getTitle(fieldKey, titleMap)}`}
                   icon={Icon.Clipboard}
                   onAction={handleCopyField(content)}
-                  shortcut={{ modifiers: ["cmd"], key: SHORTCUT_KEY_SEQUENCE[index] }}
+                  shortcut={shortcutKey ? { modifiers: ["cmd"], key: shortcutKey } : undefined}
                 />
               );
             })}
