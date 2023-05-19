@@ -14,10 +14,9 @@ const client = algoliasearch(appId, apiKey);
 export const algoliaIndex = client.initIndex('material-ui');
 
 /**
- * The function prepares a filter string based on the input value, with a
- * special case for 'mui-x'.
- * @param {string} library - A MUI library name
- * @returns A filter string in SQL syntax
+ * Prepares a filter string based on the library parameter.
+ * @param {string} library - The MUI library name.
+ * @returns {string} The filter string in SQL syntax.
  */
 const prepareFilterString = (library: string) => {
   return library === 'mui-x'
@@ -26,10 +25,10 @@ const prepareFilterString = (library: string) => {
 };
 
 /**
- * The function generates search filter options based on a dropdown value and
+ * Prepares a filter string based on a dropdown value and
  * preference values.
- * @param {string} dropdownValue - A selected option from the searchbar select
- * @returns A filter string in SQL syntax
+ * @param {string} dropdownValue - The value selected from the dropdown.
+ * @returns {string} The filter string in SQL syntax.
  *
  * See more: [Filters and facet filters](https://www.algolia.com/doc/guides/managing-results/refine-results/filtering/in-depth/filters-and-facetfilters/)
  * @example
@@ -59,10 +58,10 @@ export const prepareFilters = (dropdownValue: string) => {
 };
 
 /**
- * The function generates a subtitle by omitting the root hierarchy level and
+ * Prepares a subtitle by omitting the root hierarchy level and
  * concatenating the remaining levels with a separator.
- * @param {Object} hierarchy - The `hierarchy` property from a search result
- * @returns A formatted subtitle
+ * @param {Object} hierarchy - The `hierarchy` property from a search result.
+ * @returns {string} The formatted subtitle.
  * @example
  * prepareSubtitle(hierarchy)
  * // => '> Accessability'
@@ -81,9 +80,9 @@ const prepareSubtitle = (hierarchy: Hit['hierarchy']) => {
 };
 
 /**
- * The function formats a product name for display.
- * @param {string} product - A MUI product name
- * @returns A formatted display name
+ * Formats a product name for display.
+ * @param {string} product - The MUI product name.
+ * @returns {string} The formatted display name.
  */
 const formatProductName = (product: Hit['product']) => {
   switch (product) {
@@ -104,10 +103,10 @@ const formatProductName = (product: Hit['product']) => {
 };
 
 /**
- * The function formats a list section title for display. Section title are
- * based on the root hierarchy level value of a search result.
- * @param {string} str - A section title string
- * @returns A formatted display name
+ * Formats a list section title for display. Section title are based on the
+ * root hierarchy level value of a search result.
+ * @param {string} str - The section title string.
+ * @returns {string} The formatted display name.
  */
 const formatSectionTitle = (str: string) => {
   return str
@@ -119,10 +118,10 @@ const formatSectionTitle = (str: string) => {
 };
 
 /**
- * The function prepares search results by grouping them into sections and
- * limiting the number of results per section.
- * @param {Hit[]} results - An array of search results
- * @returns The formatted search results grouped by their root hierarchy level
+ * Prepares search results by grouping them into sections and limiting
+ * the number of results per section.
+ * @param {Hit[]} results - The array of search results
+ * @returns {Record<string, ListItem[]>} The formatted search results grouped by their root hierarchy level.
  */
 export const prepareResults = (results: Hit[]) => {
   const { limit } = getPreferenceValues<Preferences>();
@@ -172,10 +171,10 @@ const isMaterialPackage = (
 };
 
 /**
- * The function returns a GitHub URL for a specific Material UI  component.
- * @param {ProductName} product - A formatted MUI product name
- * @param {string} title - A list item's title that references a MUI component
- * @returns A GitHub URL
+ * Returns a GitHub URL for a given Material UI component.
+ * @param {ProductName} product - The formatted MUI product name.
+ * @param {string} title - The component title.
+ * @returns {string} The GitHub URL.
  */
 export const getSourceUrl = (product: ProductName, title: string) => {
   const baseURL = 'https://github.com/mui/material-ui/blob/master/packages/';
@@ -193,11 +192,11 @@ export const getSourceUrl = (product: ProductName, title: string) => {
 };
 
 /**
- * The function checks if a given search result is valid for including the
+ * Determines if a given search result should include the
  * "View Source Code" action.
- * @param {ProductName} product - A formatted MUI product name
- * @param {string} section - A formatted section title
- * @returns A boolean value.
+ * @param {ProductName} product - The formatted MUI product name.
+ * @param {string} section - The formatted section title.
+ * @returns {boolean} A boolean value.
  */
 export const showSourceAction = (product: ProductName, section: string) => {
   if (product in packageMap) {
