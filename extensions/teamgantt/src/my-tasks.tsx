@@ -42,7 +42,6 @@ export default function Command() {
         getCurrentTimeBlock(idToken),
       ])
         .then(([tasks, upcomingTasks, timeblock]) => {
-          console.log({ upcomingTasks });
           setTasks([...(tasks as Task[]), ...(upcomingTasks as Task[])]);
           setTimeBlock(timeblock);
         })
