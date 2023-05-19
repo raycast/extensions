@@ -32,9 +32,7 @@ interface Preferences {
 const preferences: Preferences = getPreferenceValues();
 
 export default function Command() {
-  console.log("first line of index");
   const sqlState = useSqlNotes();
-  console.log("queries worked okay");
   const [failedToOpenMessage, setFailedToOpenMessage] = useState("");
 
   const escapeStringForAppleScript = (str: string) => str.replace('"', '\\"');
