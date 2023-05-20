@@ -40,12 +40,14 @@
     "lodash": "^4.17.21",
     "run-applescript": "^6.0.0",
     "uuid": "^8.3.2",
+    "xml2js": "^0.5.0",
     "zod": "^3.21.4"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.5",
     "@types/lodash": "^4.14.185",
     "@types/uuid": "^8.3.4",
+    "@types/xml2js": "^0.4.11",
     "eslint": "^7.32.0",
     "prettier": "^2.5.1",
     "typescript": "^4.4.3"

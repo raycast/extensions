@@ -45,7 +45,7 @@ on run
 	
 	clipboardConvertToFMObjects({}) of objTrans
 	
-	return "No Error"
+	return result
 	
 end run
 

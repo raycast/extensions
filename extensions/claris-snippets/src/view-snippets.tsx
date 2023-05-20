@@ -2,7 +2,6 @@ import {
   Action,
   ActionPanel,
   Alert,
-  Clipboard,
   closeMainWindow,
   confirmAlert,
   Icon,
@@ -192,9 +191,8 @@ ${snippet.snippet}`}
                       icon={Icon.Clipboard}
                       shortcut={{ key: "c", modifiers: ["cmd"] }}
                       onAction={async () => {
-                        await Clipboard.copy(snippet.snippet);
                         try {
-                          XMLToFMObjects();
+                          await XMLToFMObjects(snippet.snippet);
                           closeMainWindow();
                           showHUD("Copied to Clipboard");
                         } catch (e) {
