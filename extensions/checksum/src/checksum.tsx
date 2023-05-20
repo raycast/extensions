@@ -53,15 +53,12 @@ export default function Command() {
         placeholder="Place reported checksum here"
         defaultValue=""
       />
-      <Form.FilePicker id="file" title="File To Compare" allowMultipleSelection={false} />
+      <Form.FilePicker id="file" title="File To Compare" />
       <Form.Dropdown id="dropdown" title="Hashing Algorithm">
         <Form.Dropdown.Item value="sha1" title="sha1" />
         <Form.Dropdown.Item value="sha224" title="sha224" />
         <Form.Dropdown.Item value="sha256" title="sha256" />
         <Form.Dropdown.Item value="sha512" title="sha512" />
-        <Form.Dropdown.Item value="md4" title="md4" />
-        <Form.Dropdown.Item value="md5" title="md5" />
-        <Form.Dropdown.Item value="sm3" title="sm3" />
       </Form.Dropdown>
     </Form>
   );

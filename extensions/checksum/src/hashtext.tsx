@@ -20,7 +20,7 @@ export default function Command() {
     const result = hash.digest("hex");
     Clipboard.copy(result);
 
-    showToast({ title: "Files Hash Copied To Clipboard" });
+    showToast({ title: "Texts Hash Copied To Clipboard" });
 
     return true;
   }
@@ -45,9 +45,6 @@ export default function Command() {
         <Form.Dropdown.Item value="sha224" title="sha224" />
         <Form.Dropdown.Item value="sha256" title="sha256" />
         <Form.Dropdown.Item value="sha512" title="sha512" />
-        <Form.Dropdown.Item value="md4" title="md4" />
-        <Form.Dropdown.Item value="md5" title="md5" />
-        <Form.Dropdown.Item value="sm3" title="sm3" />
       </Form.Dropdown>
     </Form>
   );
