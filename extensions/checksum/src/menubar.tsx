@@ -6,7 +6,7 @@ export default function Command() {
       <MenuBarExtra.Item
         title="Checksum of a file"
         onAction={() => {
-          launchCommand({ name: "index", type: LaunchType.UserInitiated });
+          launchCommand({ name: "checksum", type: LaunchType.UserInitiated });
         }}
       />
       <MenuBarExtra.Item
