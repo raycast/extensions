@@ -1,0 +1,126 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "open-path-with",
+  "title": "Open Path With...",
+  "description": "This extension allows you to open a path in a custom application of your choice. Visual Studio Code & Xcode provided by default. It also includes features such as history preservation and clipboard reading.",
+  "icon": "icon.png",
+  "author": "ProAlexUSC",
+  "categories": ["Productivity", "Developer Tools", "System"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "open",
+      "title": "Open Path With...",
+      "description": "Open a path in a custom application of your choice. Visual Studio Code & Xcode provided by default (if installed). It also includes features such as history preservation and clipboard reading.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "readClipboardPossiblePath",
+          "label": "Read Clipboard Possible Path",
+          "description": "If checked, the extension will read the clipboard and try to load it as a path.",
+          "type": "checkbox",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "historyLimit",
+          "title": "History Store Limit",
+          "description": "History Store Limit",
+          "type": "textfield",
+          "default": "20",
+          "required": false
+        },
+        {
+          "name": "customApp1",
+          "title": "Custom App #1",
+          "description": "Custom App",
+          "type": "appPicker",
+          "default": "com.microsoft.VSCode",
+          "required": false
+        },
+        {
+          "name": "customApp2",
+          "title": "Custom App #2",
+          "description": "Custom App",
+          "type": "appPicker",
+          "default": "com.apple.dt.Xcode",
+          "required": false
+        },
+        {
+          "name": "customApp3",
+          "title": "Custom App #3",
+          "description": "Custom App",
+          "type": "appPicker",
+          "required": false
+        },
+        {
+          "name": "customApp4",
+          "title": "Custom App #4",
+          "description": "Custom App",
+          "type": "appPicker",
+          "required": false
+        },
+        {
+          "name": "customApp5",
+          "title": "Custom App #5",
+          "description": "Custom App",
+          "type": "appPicker",
+          "required": false
+        },
+        {
+          "name": "customApp6",
+          "title": "Custom App #6",
+          "description": "Custom App",
+          "type": "appPicker",
+          "required": false
+        },
+        {
+          "name": "customApp7",
+          "title": "Custom App #7",
+          "description": "Custom App",
+          "type": "appPicker",
+          "required": false
+        },
+        {
+          "name": "customApp8",
+          "title": "Custom App #8",
+          "description": "Custom App",
+          "type": "appPicker",
+          "required": false
+        },
+        {
+          "name": "customApp9",
+          "title": "Custom App #9",
+          "description": "Custom App",
+          "type": "appPicker",
+          "required": false
+        },
+        {
+          "name": "customApp10",
+          "title": "Custom App #10",
+          "description": "Custom App",
+          "type": "appPicker",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.51.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
