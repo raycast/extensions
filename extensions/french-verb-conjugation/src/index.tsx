@@ -88,7 +88,7 @@ function displayAllTenses({ verb, mode, tense }: ConjugationArguments) {
   return output;
 }
 
-function generateTenseConjugationTable({ verb , mode, tense }: ConjugationArguments) {
+function generateTenseConjugationTable({ verb, mode, tense }: ConjugationArguments) {
   let tenseTable = "";
   const body = conjugationFR.conjugate(verb, mode ?? "", tense ?? "").filter((record) => record.pronounIndex !== -1);
   if (body.length === 0) {
