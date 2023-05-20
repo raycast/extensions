@@ -1,13 +1,30 @@
-import { showToast, ToastStyle } from "@raycast/api";
-import { contents, update } from "./util/clipboard";
-export default async () => {
+import { List } from "@raycast/api";
+import { atobPolyfill } from "js-base64";
+import { useState } from "react";
+import { ActionListSection } from "./components/ActionListSection";
+
+function safeDecodeBase64(input: string) {
   try {
-    const clipboard = await contents();
-    const decoded = decodeURIComponent(clipboard);
-    await update(decoded);
+    return atobPolyfill(input);
   } catch (e) {
-    if (typeof e === "string") {
-      await showToast(ToastStyle.Failure, "Decode failed", e);
-    }
+    return "not a base64 encoded string";
   }
-};
+}
+
+function safeDecodeURI(input: string) {
+  try {
+    return decodeURIComponent(input);
+  } catch (e) {
+    return "not a url encoded string";
+  }
+}
+
+export default function Command() {
+  const [inputText, setInputText] = useState("");
+  return (
+    <List searchText={inputText} onSearchTextChange={setInputText} searchBarPlaceholder="Input String">
+      <ActionListSection title="URL Decode" text={safeDecodeURI(inputText)} />
+      <ActionListSection title="Base64 Decode" text={safeDecodeBase64(inputText)} />
+    </List>
+  );
+}

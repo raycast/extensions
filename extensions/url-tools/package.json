@@ -5,25 +5,45 @@
   "description": "Quickly encode or decode URL from the clipboard",
   "icon": "command-icon.png",
   "author": "joshua46",
+  "contributors": [
+    "ProAlexUSC"
+  ],
   "license": "MIT",
   "commands": [
     {
       "name": "encode",
-      "title": "URL Encode",
+      "title": "Encode",
+      "description": "Input and get an encoded string, support url encode and base64",
+      "mode": "view"
+    },
+    {
+      "name": "decode",
+      "title": "Decode",
+      "description": "Input and get an decoded string, support url decode and base64",
+      "mode": "view"
+    },
+    {
+      "name": "encodeFromClipboard",
+      "title": "URL Encode from Clipboard",
       "description": "Overwrite the clipboard contents with an URL encoded string",
       "mode": "no-view"
     },
     {
-      "name": "decode",
-      "title": "URL Decode",
+      "name": "decodeFromClipboard",
+      "title": "URL Decode from Clipboard",
       "description": "Overwrite the clipboard contents with a URL decoded string",
       "mode": "no-view"
+    },
+    {
+      "name": "urlParse",
+      "title": "URL Parse",
+      "description": "Input a URL and get the parsed result",
+      "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "1.25.5",
-    "js-base64": "3.7.2",
-    "run-applescript": "6.0.0"
+    "@raycast/api": "^1.47.0",
+    "js-base64": "3.7.2"
   },
   "devDependencies": {
     "@types/node": "16.11.7",
