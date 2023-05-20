@@ -1,0 +1,1 @@
+# Natural Space Changelog
