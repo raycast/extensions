@@ -44,7 +44,6 @@ export default function Command() {
     }
     queryJson = JSON.stringify(queryParams);
   } catch (e) {
-    // If the input is not a valid URL, we'll just show an error message in the protocol field
     if (inputText != "") {
       showToast(Toast.Style.Failure, "Invalid URL");
     }
