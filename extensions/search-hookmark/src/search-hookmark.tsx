@@ -1,11 +1,7 @@
 import { ActionPanel, Detail, List, Action, getPreferenceValues, Icon } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { runAppleScript } from "run-applescript";
+import { runAppleScriptSync } from "run-applescript";
 import { useEffect, useState } from "react";
-
-type CommandPreferences = {
-  primaryAction: "copy" | "paste";
-};
 
 interface Bookmark {
   title: string;
@@ -15,14 +11,9 @@ interface Bookmark {
 }
 
 export default function Command() {
-  const [data, setData] = useState<Bookmark[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const preferences: CommandPreferences = getPreferenceValues();
-  useEffect(() => {
-    const fetchData = async () => {
-      setIsLoading(true);
-      try {
-        const jsonData = await runAppleScript(`
+
+  const jsonData = runAppleScriptSync(`
   set _output to ""
 
   tell application "Hookmark"
@@ -49,26 +40,14 @@ export default function Command() {
   
   return "[\\n" & _output & "\\n]" 
   `);
-        const parsedData = JSON.parse(jsonData);
-        // console.log(parsedData);
-        setData(parsedData);
-      } catch (error) {
-        console.error(error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchData();
-  }, []);
-  // console.log(data);
+  const data = JSON.parse(jsonData);
   return (
     <List isLoading={isLoading}>
-      {data.map((bookmark) => (
+      {data.map((bookmark: Bookmark) => (
         <List.Item
           title={bookmark.title}
           key={bookmark.address}
           icon="command-Icon.png"
-          // icon={Icon.Link}
           accessories={[{ text: bookmark.address }]}
           actions={
             <ActionPanel>
@@ -84,9 +63,6 @@ export default function Command() {
                 content={bookmark.address}
                 shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
               />
-              {/* {preferences.primaryAction === "paste" && (
-                <Action.Paste title="Paste Address" content={bookmark.address} />
-              )} */}
             </ActionPanel>
           }
         />
