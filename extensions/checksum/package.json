@@ -8,10 +8,29 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "index",
+      "name": "checksum",
       "title": "Run A Checksum",
-      "description": "Run a checksum",
+      "description": "Run a checksum on a specified file",
       "mode": "view"
+    },
+    {
+      "name": "hashfile",
+      "title": "Get A Files Hash",
+      "description": "Calculate the hash of a specified file",
+      "mode": "view"
+    },
+    {
+      "name": "hashtext",
+      "title": "Get A Texts Hash",
+      "description": "Calculate the hash of a specified text",
+      "mode": "view"
+    },
+    {
+      "name": "menubar",
+      "title": "Show In Menubar",
+      "description": "Show the checksum extension shortcuts in the menubar",
+      "mode": "menu-bar",
+      "interval": "1m"
     }
   ],
   "dependencies": {
