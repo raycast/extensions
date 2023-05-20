@@ -24,7 +24,7 @@ export default function Command() {
 
       showToast({ title: "Files Hash Copied To Clipboard" });
     }
-    return null;
+    return true;
   }
 
   return (

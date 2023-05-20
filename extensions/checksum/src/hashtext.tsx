@@ -13,7 +13,7 @@ type Values = {
 
 export default function Command() {
   function handleSubmit(values: Values) {
-    const buff = values.file;
+    const buff = Buffer.from(values.textfield);
 
     const hash = createHash(values.dropdown);
     hash.update(buff);
@@ -22,7 +22,7 @@ export default function Command() {
 
     showToast({ title: "Files Hash Copied To Clipboard" });
 
-    return null;
+    return true;
   }
 
   return (
@@ -35,7 +35,7 @@ export default function Command() {
     >
       <Form.Description text="" />
       <Form.TextField
-        id="file"
+        id="textfield"
         title="Text To Hash"
         placeholder="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
         defaultValue=""
