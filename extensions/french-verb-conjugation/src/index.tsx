@@ -77,7 +77,7 @@ export default function Command(props: LaunchProps<{ arguments: ConjugationArgum
   return <Detail markdown={markdown} />;
 }
 
-function displayAllTenses({ verb, mode, tense }) {
+function displayAllTenses({ verb, mode, tense }: ConjugationArguments) {
   let output = "";
   for (const [mode, tenses] of Object.entries(structure)) {
     for (const tense of tenses) {
@@ -88,7 +88,7 @@ function displayAllTenses({ verb, mode, tense }) {
   return output;
 }
 
-function generateTenseConjugationTable({ verb, mode, tense }) {
+function generateTenseConjugationTable({ verb , mode, tense }: ConjugationArguments) {
   let tenseTable = "";
   const body = conjugationFR.conjugate(verb, mode ?? "", tense ?? "").filter((record) => record.pronounIndex !== -1);
   if (body.length === 0) {
