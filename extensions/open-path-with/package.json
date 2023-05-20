@@ -5,7 +5,11 @@
   "description": "This extension allows you to open a path in a custom application of your choice. Visual Studio Code & Xcode provided by default. It also includes features such as history preservation and clipboard reading.",
   "icon": "icon.png",
   "author": "ProAlexUSC",
-  "categories": ["Productivity", "Developer Tools", "System"],
+  "categories": [
+    "Productivity",
+    "Developer Tools",
+    "System"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -106,7 +110,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.51.3"
+    "@raycast/api": "^1.51.3",
+    "@raycast/utils": "^1.6.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.5",

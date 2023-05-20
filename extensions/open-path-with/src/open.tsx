@@ -1,4 +1,5 @@
-import { Application, Clipboard, List, LocalStorage, Toast, getPreferenceValues, open, showToast } from "@raycast/api";
+import { Application, Clipboard, List, Toast, getPreferenceValues, open, showToast } from "@raycast/api";
+import { useCachedState } from "@raycast/utils";
 import fs from "fs";
 import { useEffect, useState } from "react";
 import { AppActionPanel } from "./AppActionPanel";
@@ -25,23 +26,21 @@ export type ListItemProps = {
 
 export default function Command() {
   const [inputText, setInputText] = useState("");
-  const [history, setHistory] = useState<string[]>([]);
+  const [history, setHistory] = useCachedState<string[]>("history", []);
   const [filtering, setFiltering] = useState(true);
 
   const historyLimit = Number(getPreferenceValues<Preferences>().historyLimit) || 20;
 
   useEffect(() => {
-    Promise.all([
-      getPreferenceValues<Preferences>().readClipboardPossiblePath
-        ? Clipboard.readText().then((text) => fs.existsSync(text || "") && setInputText(text || ""))
-        : Promise.resolve(),
-      LocalStorage.getItem<string>("history").then((storedHistoryString) => {
-        if (storedHistoryString) {
-          const storedHistory = JSON.parse(storedHistoryString);
-          setHistory(storedHistory);
-        }
-      }),
-    ]).then(() => setFiltering(false));
+    if (getPreferenceValues<Preferences>()) {
+      Clipboard.readText()
+        .then((text) => {
+          if (fs.existsSync(text || "")) {
+            setInputText(text || "");
+          }
+        })
+        .finally(() => setFiltering(false));
+    }
   }, []);
 
   const openPath = async (path: string, app?: Application) => {
@@ -52,7 +51,6 @@ export default function Command() {
         newHistory = newHistory.slice(0, historyLimit);
       }
       setHistory(newHistory);
-      await LocalStorage.setItem("history", JSON.stringify(newHistory));
     } else {
       await showToast({
         style: Toast.Style.Failure,
