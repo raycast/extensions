@@ -17,11 +17,14 @@ export default function TickTickCreate() {
   const { isInitCompleted } = useStartApp();
 
   const [isLocalDataLoaded, setIsLocalDataLoaded] = useState(false);
-  const [projectId, setProjectId] = useState<string>('');
+  const [projectId, setProjectId] = useState<string>("");
 
   useEffect(() => {
     (async () => {
-      setProjectId(await LocalStorage.getItem<string>("defaultAddList") ?? "");
+      const defaultProjectId = await LocalStorage.getItem<string>("defaultAddList");
+      if (defaultProjectId) {
+        setProjectId(defaultProjectId);
+      }
       setIsLocalDataLoaded(true);
     })();
   }, []);
@@ -78,12 +81,12 @@ export default function TickTickCreate() {
   }, []);
 
   const onTitleBlur: NonNullable<Form.TextField.Props["onBlur"]> = useCallback(async (newValue) => {
-    const title = newValue.target.value
+    const title = newValue.target.value;
     if (title && environment.canAccess(AI)) {
       const toast = await showToast(Toast.Style.Animated, "🧠 Guessing project...");
       setProjectId(await guessProject(title));
       toast.hide();
-    };
+    }
   }, []);
 
   if (isLoading) {
