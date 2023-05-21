@@ -1,5 +1,6 @@
-export type Bookmark = {
+export interface Bookmark {
   title: string;
   address: string;
-  path?: string;
-};
+  path: string;
+  file?: string;
+}

@@ -1,8 +1,8 @@
-import { runAppleScript } from "run-applescript";
+import { runAppleScriptSync } from "run-applescript";
 import { Bookmark } from "./type";
 
-export async function getBookmarks() {
-  const response = await runAppleScript(`
+export function getBookmarks(): Bookmark[] {
+  const response = runAppleScriptSync(`
     set _output to ""
   
     tell application "Hookmark"
@@ -29,6 +29,7 @@ export async function getBookmarks() {
     
     return "[\\n" & _output & "\\n]" 
     `);
-  console.log(JSON.parse(response));
-  return response ? (JSON.parse(response) as Bookmark[]) : undefined;
+  const data: Bookmark[] = JSON.parse(response);
+  // console.log(typeof data);
+  return data;
 }

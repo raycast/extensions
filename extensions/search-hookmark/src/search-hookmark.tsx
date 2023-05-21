@@ -1,46 +1,13 @@
 import { ActionPanel, Detail, List, Action, getPreferenceValues, Icon } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
-import { runAppleScriptSync } from "run-applescript";
-import { useEffect, useState } from "react";
-
-interface Bookmark {
-  title: string;
-  address: string;
-  path: string;
-  file?: string;
-}
+// import { useCachedPromise } from "@raycast/utils";
+import { useState } from "react";
+import { getBookmarks } from "./hookmark";
+import { Bookmark } from "./type";
 
 export default function Command() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const data: Bookmark[] = getBookmarks();
 
-  const jsonData = runAppleScriptSync(`
-  set _output to ""
-
-  tell application "Hookmark"
-    set _bookmark_name_list to name of every bookmark
-    set _bookmark_addr_list to address of every bookmark
-    set _bookmark_path_list to path of every bookmark
-
-    set _bookmark_count to count of _bookmark_name_list
-    
-    repeat with i from 1 to _bookmark_count
-      set _name to item i of _bookmark_name_list
-      set _address to item i of _bookmark_addr_list
-      set _path to item i of _bookmark_path_list
-      
-      set _output to (_output & "{\\"title\\": \\"" & _name & "\\", \\"address\\": \\"" & _address & "\\", \\"path\\": \\"" & _path & "\\" }")
-      
-      if i < _bookmark_count then
-        set _output to (_output & ",\\n")
-      else
-        set _output to (_output & "\\n")
-      end if
-    end repeat
-  end tell
-  
-  return "[\\n" & _output & "\\n]" 
-  `);
-  const data = JSON.parse(jsonData);
   return (
     <List isLoading={isLoading}>
       {data.map((bookmark: Bookmark) => (
@@ -52,7 +19,12 @@ export default function Command() {
           actions={
             <ActionPanel>
               <Action.OpenInBrowser url={bookmark.address} />
-              <Action.CopyToClipboard title="Copy As File URL" content={bookmark.address} />
+              <Action.Open title="Open File" target={bookmark.path} />
+              <Action.CopyToClipboard
+                title="Copy As File URL"
+                content={bookmark.address}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "u" }}
+              />
               <Action.CopyToClipboard
                 title="Copy As Path"
                 content={bookmark.path}
