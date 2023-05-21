@@ -3,6 +3,7 @@
 ## [Fix] - 2023-05-19
 
 - Avoid displaying timeout info label on Unlock Form when the preference is Never 
+- Fix crashing when getting the name of the frontmost application
 
 ## [Improvements to Actions] - 2023-05-18
 
