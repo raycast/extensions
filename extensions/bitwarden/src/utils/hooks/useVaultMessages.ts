@@ -11,9 +11,7 @@ function useVaultMessages() {
   useEffect(() => {
     void bitwarden
       .status()
-      .then((vaultState) => {
-        setVaultState(vaultState);
-      })
+      .then((vaultState) => setVaultState(vaultState))
       .catch(() => {
         /* ignore */
       });
