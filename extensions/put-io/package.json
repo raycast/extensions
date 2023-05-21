@@ -73,7 +73,7 @@
       "type": "textfield",
       "required": false,
       "title": "Custom Action Command #2 (optional)",
-      "placeholder": "aria2c -x 5 -s 4 -k 1M --secure-protocol=auto '{0}'"
+      "placeholder": "wget {0}"
     }
   ],
   "dependencies": {
