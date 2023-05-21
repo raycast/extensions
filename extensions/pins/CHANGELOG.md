@@ -1,3 +1,11 @@
 # Pins Changelog
 
+## [Minor Improvements] - 2023-05-20
+
+- Added "Preferred Browser" setting to allow you to choose which browser to open links in
+- Added support for tilde expansion in paths
+- Added menu bar menu items for "Pin This Tab" and "Pin This Directory"
+- Added 'Show "Pin This" shortcut' setting to allow you to hide the "Pin This" items
+- When adding a new pin, the icon dropdown will now show the favicon or file icon of the URL/path
+
 ## [Initial Version] - 2022-10-05

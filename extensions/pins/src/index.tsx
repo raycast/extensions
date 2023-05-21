@@ -1,14 +1,10 @@
 import { useEffect, useState } from "react";
-import { Icon, MenuBarExtra, open, openExtensionPreferences, getPreferenceValues, showToast } from "@raycast/api";
-import { getFavicon } from "@raycast/utils";
-import { setStorage, getStorage, iconMap, useGroups, copyPinData } from "./utils";
+import { MenuBarExtra, open, openExtensionPreferences, getPreferenceValues, getFrontmostApplication } from "@raycast/api";
+import { getFavicon, useCachedState } from "@raycast/utils";
+import { setStorage, getStorage, iconMap, useGroups, copyPinData, openPin, createNewPin, getCurrentDirectory } from "./utils";
 import { StorageKey } from "./constants";
-import { Pin, Group } from "./types";
-
-interface Preferences {
-  showCategories: boolean;
-  showOpenAll: boolean;
-}
+import { Pin, Group, ExtensionPreferences } from "./types";
+import { SupportedBrowsers, getCurrentURL } from "./browser-utils";
 
 const usePinGroups = () => {
   // Get the groups to display in the menu (i.e. groups that actually contain pins)
@@ -52,7 +48,8 @@ const getGroupIcon = (groupName: string, groups: Group[]) => {
 export default function Command() {
   const { pinGroups, isLoading } = usePinGroups();
   const [groups, setGroups] = useGroups();
-  const preferences = getPreferenceValues<Preferences>();
+  const [currentAppName, setCurrentAppName] = useCachedState<string>("current-app-name","");
+  const preferences = getPreferenceValues<ExtensionPreferences>();
   const pinIcon = { source: { light: "pin-icon.svg", dark: "pin-icon@dark.svg" } };
 
   useEffect(() => {
@@ -68,6 +65,10 @@ export default function Command() {
         setStorage(StorageKey.NEXT_GROUP_ID, [0]);
       }
     });
+
+    Promise.resolve(getFrontmostApplication()).then((app) => {
+      setCurrentAppName(app.name);
+    });
   }, []);
 
   // If there are pins to display, then display them
@@ -82,73 +83,78 @@ export default function Command() {
     // Display the menu
     return (
       <MenuBarExtra icon={pinIcon} isLoading={isLoading}>
-        {preferences.showCategories && "None" in pinGroups ? <MenuBarExtra.Item title="Pins" /> : null}
+        {preferences.showCategories && "None" in pinGroups ? (
+          <MenuBarExtra.Section title="Pins">
+            {"None" in pinGroups
+              ? pinGroups["None"].map((pin: Pin) => (
+                  <MenuBarExtra.Item
+                    key={pin.id}
+                    icon={
+                      pin.icon in iconMap
+                        ? iconMap[pin.icon]
+                        : pin.icon == "None"
+                        ? ""
+                        : pin.url.startsWith("/")
+                        ? { fileIcon: pin.url }
+                        : getFavicon(pin.url)
+                    }
+                    title={pin.name || (pin.url.length > 20 ? pin.url.substring(0, 19) + "..." : pin.url)}
+                    onAction={async () => await openPin(pin, preferences)}
+                  />
+                ))
+              : null}
+          </MenuBarExtra.Section>
+        ) : null}
 
-        {"None" in pinGroups
-          ? pinGroups["None"].map((pin: Pin) => (
-              <MenuBarExtra.Item
-                key={pin.id}
-                icon={
-                  pin.icon in iconMap
-                    ? iconMap[pin.icon]
-                    : pin.icon == "None"
-                    ? ""
-                    : pin.url.startsWith("/")
-                    ? { fileIcon: pin.url }
-                    : getFavicon(pin.url)
-                }
-                title={pin.name || (pin.url.length > 20 ? pin.url.substring(0, 19) + "..." : pin.url)}
-                onAction={() => open(pin.url)}
-              />
-            ))
-          : null}
+        {preferences.showCategories && groups?.length ? (
+          <MenuBarExtra.Section title="Groups">
+            {Object.keys(usedGroups).map((key) => (
+              <MenuBarExtra.Submenu title={key} key={key} icon={getGroupIcon(key, groups as Group[])}>
+                {usedGroups[key].map((pin) => (
+                  <MenuBarExtra.Item
+                    key={pin.id}
+                    icon={
+                      pin.icon in iconMap
+                        ? iconMap[pin.icon]
+                        : pin.icon == "None"
+                        ? ""
+                        : pin.url.startsWith("/")
+                        ? { fileIcon: pin.url }
+                        : getFavicon(pin.url)
+                    }
+                    title={pin.name || (pin.url.length > 20 ? pin.url.substring(0, 19) + "..." : pin.url)}
+                    onAction={async () => await openPin(pin, preferences)}
+                  />
+                ))}
 
-        <MenuBarExtra.Separator />
-
-        {preferences.showCategories && groups?.length ? <MenuBarExtra.Item title="Groups" /> : null}
-        {Object.keys(usedGroups).map((key) => (
-          <MenuBarExtra.Submenu title={key} key={key} icon={getGroupIcon(key, groups as Group[])}>
-            {usedGroups[key].map((pin) => (
-              <MenuBarExtra.Item
-                key={pin.id}
-                icon={
-                  pin.icon in iconMap
-                    ? iconMap[pin.icon]
-                    : pin.icon == "None"
-                    ? ""
-                    : pin.url.startsWith("/")
-                    ? { fileIcon: pin.url }
-                    : getFavicon(pin.url)
-                }
-                title={pin.name || (pin.url.length > 20 ? pin.url.substring(0, 19) + "..." : pin.url)}
-                onAction={() => {
-                  try {
-                    open(pin.url);
-                  } catch {
-                    showToast({
-                      title:
-                        "Failed to open " +
-                        (pin.name || (pin.url.length > 20 ? pin.url.substring(0, 19) + "..." : pin.url)),
-                    });
-                  }
-                }}
-              />
+                <MenuBarExtra.Separator />
+                {preferences.showOpenAll ? (
+                  <MenuBarExtra.Item
+                    title="Open All"
+                    onAction={() => usedGroups[key].forEach((pin: Pin) => open(pin.url))}
+                  />
+                ) : null}
+              </MenuBarExtra.Submenu>
             ))}
+          </MenuBarExtra.Section>
+        ) : null}
 
-            <MenuBarExtra.Separator />
-            {preferences.showOpenAll ? (
-              <MenuBarExtra.Item
-                title="Open All"
-                onAction={() => usedGroups[key].forEach((pin: Pin) => open(pin.url))}
-              />
-            ) : null}
-          </MenuBarExtra.Submenu>
-        ))}
-
-        <MenuBarExtra.Separator />
-
-        <MenuBarExtra.Item title="Copy Pin Data" onAction={() => copyPinData()} />
-        <MenuBarExtra.Item title="Preferences..." onAction={() => openExtensionPreferences()} />
+        <MenuBarExtra.Section>
+          {preferences.showPinShortcut && SupportedBrowsers.includes(currentAppName) ? <MenuBarExtra.Item title="Pin This Tab" onAction={async () => {
+            const currentTab = await getCurrentURL(currentAppName);
+            const tabName = currentTab[0]
+            const tabURL = currentTab[1]
+            await createNewPin(tabName, tabURL, "Favicon / File Icon", "None")
+          }} /> : null}
+          {preferences.showPinShortcut && currentAppName == "Finder" ? <MenuBarExtra.Item title={`Pin This Directory`} tooltip="Add a pin whose target path is the current directory of Finder" onAction={async () => {
+            const currentDir = await getCurrentDirectory();
+            const dirName = currentDir[0]
+            const dirPath = currentDir[1]
+            await createNewPin(dirName, dirPath, "Favicon / File Icon", "None")
+          }} /> : null}
+          <MenuBarExtra.Item title="Copy Pin Data" tooltip="Copy the JSON data for all of your pins" onAction={() => copyPinData()} />
+          <MenuBarExtra.Item title="Preferences..." onAction={() => openExtensionPreferences()} />
+        </MenuBarExtra.Section>
       </MenuBarExtra>
     );
   }

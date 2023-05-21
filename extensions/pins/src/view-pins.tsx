@@ -10,10 +10,11 @@ import {
   showToast,
   confirmAlert,
   clearSearchBar,
+  getPreferenceValues,
 } from "@raycast/api";
-import { iconMap, setStorage, getStorage, usePins } from "./utils";
+import { iconMap, setStorage, getStorage, usePins, openPin } from "./utils";
 import { StorageKey } from "./constants";
-import { Pin, Group } from "./types";
+import { Pin, Group, ExtensionPreferences } from "./types";
 import { getFavicon } from "@raycast/utils";
 
 const useGetGroups = () => {
@@ -174,6 +175,7 @@ const movePinDown = async (index: number, setPins: (pins: Pin[]) => void) => {
 export default function Command() {
   const [pins, setPins] = usePins();
   const { push } = useNavigation();
+  const preferences = getPreferenceValues<ExtensionPreferences>();
 
   return (
     <List isLoading={pins === undefined} searchBarPlaceholder="Search pins...">
@@ -195,7 +197,7 @@ export default function Command() {
             }
             actions={
               <ActionPanel>
-                <Action title="Open" icon={Icon.ChevronRight} onAction={() => open(pin.url)} />
+                <Action title="Open" icon={Icon.ChevronRight} onAction={() => openPin(pin, preferences)} />
                 <Action
                   title="Edit"
                   icon={Icon.Pencil}

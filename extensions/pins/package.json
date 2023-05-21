@@ -68,18 +68,35 @@
       "required": false
     },
     {
+      "name": "showPinShortcut",
+      "type": "checkbox",
+      "label": "Show \"Pin This\" shortcut",
+      "description": "Whether to show a \"Pin This\" item in the menu dropdown.",
+      "default": true,
+      "required": false
+    },
+    {
       "name": "showOpenAll",
       "type": "checkbox",
       "label": "Show \"Open All\" button in groups",
       "description": "Whether to show an \"Open All\" item in group submenus.",
       "default": true,
       "required": false
+    },
+    {
+      "name": "preferredBrowser",
+      "title": "Preferred Browser",
+      "type": "appPicker",
+      "label": "Preferred Browser",
+      "description": "The browser to use when opening URLs.",
+      "default": "Safari",
+      "required": false
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.40.1",
-    "@raycast/utils": "^1.4.8",
-    "run-applescript": "^6.0.0"
+    "@raycast/api": "^1.51.3",
+    "@raycast/utils": "^1.6.1",
+    "run-applescript": "^6.1.0"
   },
   "devDependencies": {
     "@types/node": "16.10.3",
