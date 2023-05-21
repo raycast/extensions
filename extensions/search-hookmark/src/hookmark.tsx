@@ -1,7 +1,7 @@
 import { runAppleScriptSync } from "run-applescript";
 import { Bookmark } from "./type";
 
-export function getBookmarks(): Bookmark[] {
+export async function getBookmarks() {
   const response = runAppleScriptSync(`
     set _output to ""
   
@@ -29,7 +29,13 @@ export function getBookmarks(): Bookmark[] {
     
     return "[\\n" & _output & "\\n]" 
     `);
-  const data: Bookmark[] = JSON.parse(response);
-  // console.log(typeof data);
-  return data;
+  return response ? (JSON.parse(response) as Bookmark[]) : undefined;
+}
+
+export function getNumberOfBookmarks(tabs?: Bookmark[]) {
+  if (!tabs) {
+    return undefined;
+  }
+
+  return tabs.length === 1 ? "1 bookmark" : `${tabs.length} bookmarks`;
 }
