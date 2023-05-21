@@ -4,6 +4,9 @@
   "description": "Check and search tasks in TickTick via Raycast",
   "icon": "tick-logo.png",
   "author": "appest",
+  "contributors": [
+    "Alireza"
+  ],
   "license": "MIT",
   "categories": [
     "Productivity"
@@ -41,11 +44,13 @@
   "dependencies": {
     "@raycast/api": "^1.36.0",
     "moment": "^2.29.1",
-    "run-applescript": "^6.0.0"
+    "run-applescript": "^6.0.0",
+    "similarity": "^1.2.1"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",
     "@types/react": "^17.0.28",
+    "@types/similarity": "^1.2.1",
     "@types/sql.js": "^1.4.3",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",

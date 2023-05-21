@@ -1,9 +1,10 @@
-import { Form, Action, ActionPanel, Detail, LocalStorage, showToast, Toast } from "@raycast/api";
+import { Form, Action, ActionPanel, Detail, LocalStorage, showToast, Toast, environment, AI } from "@raycast/api";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import useStartApp from "./hooks/useStartApp";
 import { addTask } from "./service/osScript";
 import { getProjects } from "./service/project";
 import { formatToServerDate } from "./utils/date";
+import guessProject from "./service/ai/guessProject";
 
 interface FormValues {
   list: string;
@@ -16,11 +17,11 @@ export default function TickTickCreate() {
   const { isInitCompleted } = useStartApp();
 
   const [isLocalDataLoaded, setIsLocalDataLoaded] = useState(false);
-  const [defaultAddList, setDefaultAddList] = useState<string>();
+  const [projectId, setProjectId] = useState<string>('');
 
   useEffect(() => {
     (async () => {
-      setDefaultAddList(await LocalStorage.getItem<string>("defaultAddList"));
+      setProjectId(await LocalStorage.getItem<string>("defaultAddList") ?? "");
       setIsLocalDataLoaded(true);
     })();
   }, []);
@@ -33,7 +34,6 @@ export default function TickTickCreate() {
   const handleSubmit = useCallback(
     async (values: FormValues) => {
       if (!isInitCompleted) return;
-      console.log(values.dueDate, values.dueDate?.toDateString());
       const result = await addTask({
         projectId: values.list,
         // eslint-disable-next-line no-useless-escape
@@ -74,6 +74,16 @@ export default function TickTickCreate() {
 
   const onListChange: NonNullable<Form.Dropdown.Props["onChange"]> = useCallback((newValue) => {
     LocalStorage.setItem("defaultAddList", newValue);
+    setProjectId(newValue);
+  }, []);
+
+  const onTitleBlur: NonNullable<Form.TextField.Props["onBlur"]> = useCallback(async (newValue) => {
+    const title = newValue.target.value
+    if (title && environment.canAccess(AI)) {
+      const toast = await showToast(Toast.Style.Animated, "🧠 Guessing project...");
+      setProjectId(await guessProject(title));
+      toast.hide();
+    };
   }, []);
 
   if (isLoading) {
@@ -89,14 +99,14 @@ export default function TickTickCreate() {
       }
       isLoading={isLoading}
     >
-      <Form.TextField ref={titleRef} id="title" autoFocus title="Title" placeholder="No Title" />
-      <Form.Dropdown ref={listPickerRef} id="list" title="List" onChange={onListChange} defaultValue={defaultAddList}>
+      <Form.TextField ref={titleRef} id="title" onBlur={onTitleBlur} autoFocus title="Title" placeholder="No Title" />
+      <Form.TextArea ref={descRef} id="desc" title="Description" placeholder="" />
+      <Form.DatePicker ref={dueDatePickerRef} id="dueDate" title="Due Date" type={Form.DatePicker.Type.DateTime} />
+      <Form.Dropdown value={projectId} ref={listPickerRef} id="list" title="List" onChange={onListChange}>
         {listOptions.map((option) => {
           return <Form.Dropdown.Item key={option.id} value={option.id} title={option.name} />;
         })}
       </Form.Dropdown>
-      <Form.TextArea ref={descRef} id="desc" title="Description" placeholder="" />
-      <Form.DatePicker ref={dueDatePickerRef} id="dueDate" title="Due Date" type={Form.DatePicker.Type.DateTime} />
     </Form>
   );
 }
