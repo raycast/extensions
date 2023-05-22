@@ -1,7 +1,7 @@
 import { LocalStorage } from "@raycast/api";
 import { Config } from "./types";
 
-export const CONFIG_STORAGE_KEY = "config2";
+export const CONFIG_STORAGE_KEY = "config";
 const DEFAULT_CONFIG: Config = {
   baseUrl: "",
   nameFilterRegExp: "",
