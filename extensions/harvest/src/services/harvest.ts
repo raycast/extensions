@@ -13,8 +13,8 @@ import { Cache, getPreferenceValues, launchCommand, LaunchType, LocalStorage } f
 import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
 import { NewTimeEntryDuration, NewTimeEntryStartEnd } from "./requestTypes";
 import dayjs from "dayjs";
-import { useCachedPromise, useCachedState } from "@raycast/utils";
-import { useState, useEffect } from "react";
+import { useCachedPromise } from "@raycast/utils";
+import { useEffect } from "react";
 
 const cache = new Cache();
 
@@ -90,12 +90,6 @@ export async function getMyId() {
   return resp.data.id;
 }
 
-// export function getCurrentTimerFromCache() {
-//   const running = cache.get("running");
-//   if (!running) return;
-//   return JSON.parse(running) as HarvestTimeEntry;
-// }
-
 export function useMyTimeEntries(from = new Date(), to = new Date()) {
   const qr = useCachedPromise(getMyTimeEntries, [{ from, to }], { initialData: [], keepPreviousData: true });
   useEffect(() => {
@@ -110,14 +104,7 @@ export function useMyTimeEntries(from = new Date(), to = new Date()) {
   }, [qr.data]);
   return qr;
 }
-export async function getMyTimeEntries(): Promise<HarvestTimeEntry[]>;
-export async function getMyTimeEntries({
-  from = new Date(),
-  to = new Date(),
-}: {
-  from: Date;
-  to: Date;
-}): Promise<HarvestTimeEntry[]>;
+
 export async function getMyTimeEntries(args?: { from: Date; to: Date }): Promise<HarvestTimeEntry[]> {
   const { from = new Date(), to = new Date() } = args ?? {};
   const id = await getMyId();
