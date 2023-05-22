@@ -48,10 +48,10 @@ function getIcon(item: Item) {
 
 type ListItemAccessory = NonNullable<List.Item.Props["accessories"]>[number];
 const TYPE_TO_ACCESSORY_MAP: Record<ItemType, ListItemAccessory> = {
-  [ItemType.LOGIN]: { icon: { source: Icon.Globe, tintColor: Color.Blue } },
-  [ItemType.CARD]: { icon: { source: Icon.CreditCard, tintColor: Color.Green } },
-  [ItemType.IDENTITY]: { icon: { source: Icon.Person, tintColor: Color.Orange } },
-  [ItemType.NOTE]: { icon: { source: Icon.Document, tintColor: Color.PrimaryText } },
+  [ItemType.LOGIN]: { icon: { source: Icon.Globe, tintColor: Color.Blue }, tooltip: "Login" },
+  [ItemType.CARD]: { icon: { source: Icon.CreditCard, tintColor: Color.Green }, tooltip: "Card" },
+  [ItemType.IDENTITY]: { icon: { source: Icon.Person, tintColor: Color.Orange }, tooltip: "Identity" },
+  [ItemType.NOTE]: { icon: { source: Icon.Document, tintColor: Color.PrimaryText }, tooltip: "Secure Note" },
 };
 
 function getAccessories(item: Item, folder: Folder | undefined) {
@@ -61,8 +61,8 @@ function getAccessories(item: Item, folder: Folder | undefined) {
     if (folder?.id) {
       accessories.push({
         icon: { source: Icon.Folder, tintColor: Color.SecondaryText },
+        tag: { value: folder.name, color: Color.SecondaryText },
         tooltip: "Folder",
-        text: folder.name,
       });
     }
     if (item.favorite) {
