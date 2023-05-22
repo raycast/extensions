@@ -15,5 +15,6 @@ export default async function main() {
     return;
   });
   await toast.hide();
+
   await showHUD("Timer stopped");
 }

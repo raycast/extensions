@@ -10,6 +10,15 @@
   "license": "MIT",
   "commands": [
     {
+      "name": "menu-bar",
+      "title": "Running Timer",
+      "subtitle": "Harvest",
+      "description": "See your active Harvest timer at a glance",
+      "mode": "menu-bar",
+      "interval": "1m",
+      "disabledByDefault": true
+    },
+    {
       "name": "new",
       "icon": "add.png",
       "title": "New Time Entry",

@@ -9,11 +9,14 @@ import {
   HarvestProjectAssignment,
   HarvestUserResponse,
 } from "./responseTypes";
-import { getPreferenceValues, LocalStorage } from "@raycast/api";
+import { Cache, getPreferenceValues, LocalStorage } from "@raycast/api";
 import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
 import { NewTimeEntryDuration, NewTimeEntryStartEnd } from "./requestTypes";
 import dayjs from "dayjs";
-import { useCachedPromise } from "@raycast/utils";
+import { useCachedPromise, useCachedState } from "@raycast/utils";
+import { useState, useEffect } from "react";
+
+const cache = new Cache();
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function isAxiosError(error: any): error is AxiosError {
@@ -87,7 +90,36 @@ export async function getMyId() {
   return resp.data.id;
 }
 
-export async function getMyTimeEntries({ from = new Date(), to = new Date() }: { from: Date; to: Date }) {
+export function getCurrentTimerFromCache() {
+  const running = cache.get("running");
+  if (!running) return;
+  return JSON.parse(running) as HarvestTimeEntry;
+}
+
+export function useMyTimeEntries(from = new Date(), to = new Date()) {
+  const qr = useCachedPromise(getMyTimeEntries, [{ from, to }], { initialData: [], keepPreviousData: true });
+  useEffect(() => {
+    if (from === new Date() && to === new Date()) {
+      const running_timer = qr.data.find((o) => o.is_running);
+      if (running_timer) {
+        cache.set("running", JSON.stringify(running_timer));
+      } else {
+        cache.remove("running");
+      }
+    }
+  }, [qr.data]);
+  return qr;
+}
+export async function getMyTimeEntries(): Promise<HarvestTimeEntry[]>;
+export async function getMyTimeEntries({
+  from = new Date(),
+  to = new Date(),
+}: {
+  from: Date;
+  to: Date;
+}): Promise<HarvestTimeEntry[]>;
+export async function getMyTimeEntries(args?: { from: Date; to: Date }): Promise<HarvestTimeEntry[]> {
+  const { from = new Date(), to = new Date() } = args ?? {};
   const id = await getMyId();
   let time_entries: HarvestTimeEntry[] = [];
   let page = 1;
