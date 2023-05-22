@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Note } from "./bear-db";
 import { useBearDb } from "./hooks";
 import NoteActions from "./note-actions";
+import TagsDropdown from "./search-dropdown";
 
 interface SearchNotesArguments {
   searchQuery?: string;
@@ -25,6 +26,7 @@ export default function SearchNotes(props: LaunchProps<{ arguments: SearchNotesA
   }
 
   const showDetail = (notes ?? []).length > 0 && getPreferenceValues().showPreviewInListView;
+  const handleTagChange = (tag: string) => setNotes(db?.getNotes(tag));
 
   return (
     <List
@@ -34,6 +36,7 @@ export default function SearchNotes(props: LaunchProps<{ arguments: SearchNotesA
       searchBarPlaceholder="Search note text or id ..."
       isShowingDetail={showDetail}
       throttle={true}
+      searchBarAccessory={<TagsDropdown onTagChange={handleTagChange} />}
     >
       {notes?.map((note) => (
         <List.Item

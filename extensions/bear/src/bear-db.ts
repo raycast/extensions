@@ -4,6 +4,8 @@ import { homedir } from "os";
 import path from "path";
 import initSqlJs, { Database, ParamsObject } from "sql.js";
 import {
+  ALL_TAGS_V1,
+  ALL_TAGS_V2,
   SEARCH_BACKLINKS_V1,
   SEARCH_BACKLINKS_V2,
   SEARCH_LINKS_V1,
@@ -70,6 +72,11 @@ export class BearDb {
     v2: SEARCH_BACKLINKS_V2,
   };
 
+  static getTags = {
+    v1: ALL_TAGS_V1,
+    v2: ALL_TAGS_V2,
+  };
+
   constructor(database: Database) {
     this.database = database;
   }
@@ -116,6 +123,19 @@ export class BearDb {
     while (statement.step()) {
       const row = statement.getAsObject();
       results.push(this.toNote(row));
+    }
+
+    statement.free();
+
+    return results;
+  }
+
+  getTags(): string[] {
+    const statement = this.database.prepare(this.getBearVersion() === 2 ? BearDb.getTags.v2 : BearDb.getTags.v1);
+    const results: string[] = [];
+    while (statement.step()) {
+      const row = statement.getAsObject();
+      if (row.tags !== null) results.push(row.tags as string);
     }
 
     statement.free();
