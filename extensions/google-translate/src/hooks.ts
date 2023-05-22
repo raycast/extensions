@@ -26,3 +26,19 @@ export const usePreferencesLanguageSet = () => {
 export const isSameLanguageSet = (langSet1: LanguageCodeSet, langSet2: LanguageCodeSet) => {
   return langSet1.langFrom === langSet2.langFrom && langSet1.langTo === langSet2.langTo;
 };
+
+export const useDebouncedValue = <T>(value: T, delay: number) => {
+  const [debouncedValue, setDebouncedValue] = React.useState<T>(value);
+
+  React.useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [value, delay]);
+
+  return debouncedValue;
+};
