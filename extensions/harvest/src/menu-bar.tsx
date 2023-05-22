@@ -1,6 +1,6 @@
 import React from "react";
-import { Cache, MenuBarExtra } from "@raycast/api";
-import { useMyTimeEntries } from "./services/harvest";
+import { Cache, LaunchType, MenuBarExtra, launchCommand } from "@raycast/api";
+import { stopTimer, useMyTimeEntries } from "./services/harvest";
 import { HarvestTimeEntry } from "./services/responseTypes";
 
 const cache = new Cache();
@@ -12,10 +12,12 @@ export function getCurrentTimerFromCache() {
 }
 
 export default function MenuBar() {
-  const { data, isLoading } = useMyTimeEntries();
+  const { data, isLoading, revalidate } = useMyTimeEntries();
   const [cacheLoading, setCacheLoading] = React.useState(true);
 
   const runningTimer = getCurrentTimerFromCache();
+
+  //   console.log({ isLoading, cacheLoading });
 
   React.useEffect(() => {
     if (data && !isLoading) {
@@ -23,32 +25,50 @@ export default function MenuBar() {
       if (runningTimer?.id !== found?.id) {
         console.log("found new running timer!!");
       }
-      found ? cache.set("running", JSON.stringify(found)) : cache.remove("running");
+      if (found) {
+        cache.set("running", JSON.stringify(found));
+      } else {
+        cache.remove("running");
+      }
       setCacheLoading(false);
     }
   }, [data, isLoading]);
 
+  if (!runningTimer)
+    return (
+      <MenuBarExtra
+        icon={{ source: runningTimer ? "../assets/harvest-logo-icon.png" : "../assets/harvest-logo-icon-gray.png" }}
+        isLoading={isLoading || cacheLoading}
+      >
+        <MenuBarExtra.Item title="No Timer Running" />
+        <MenuBarExtra.Item
+          title="View Timesheet"
+          onAction={() => {
+            launchCommand({ extensionName: "harvest", name: "listTimeEntries", type: LaunchType.UserInitiated });
+          }}
+        />
+      </MenuBarExtra>
+    );
+
   return (
     <MenuBarExtra
       icon={{ source: "../assets/harvest-logo-icon.png" }}
-      title={runningTimer ? runningTimer.hours.toString() : "not running"}
+      title={runningTimer.hours.toString()}
       isLoading={isLoading || cacheLoading}
     >
-      <MenuBarExtra.Section title="Seen">
-        <MenuBarExtra.Item
-          title="Example Seen Pull Request"
-          onAction={() => {
-            console.log("seen pull request clicked");
-          }}
-        />
-      </MenuBarExtra.Section>
-      <MenuBarExtra.Item title="Unseen" />
-      <MenuBarExtra.Item
-        title="Example Unseen Pull Request"
-        onAction={() => {
-          console.log("unseen pull request clicked");
+      <MenuBarExtra.Item title={`${runningTimer.project.name} - ${runningTimer.task.name}`} />
+      {runningTimer.notes && runningTimer.notes.length > 0 && <MenuBarExtra.Item title={`${runningTimer.notes}`} />}
+
+      {/* <MenuBarExtra.Item
+        title="Stop Timer"
+        onAction={async () => {
+          setCacheLoading(true);
+          console.log("stopping timer...");
+          await stopTimer(runningTimer);
+          revalidate();
+          setCacheLoading(false);
         }}
-      />
+      /> */}
     </MenuBarExtra>
   );
 }

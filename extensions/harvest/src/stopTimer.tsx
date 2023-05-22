@@ -1,4 +1,4 @@
-import { showToast, Toast, showHUD } from "@raycast/api";
+import { showToast, Toast, showHUD, open, launchCommand, LaunchType } from "@raycast/api";
 import { stopTimer } from "./services/harvest";
 
 export default async function main() {
@@ -15,6 +15,5 @@ export default async function main() {
     return;
   });
   await toast.hide();
-
   await showHUD("Timer stopped");
 }

@@ -9,7 +9,7 @@ import {
   HarvestProjectAssignment,
   HarvestUserResponse,
 } from "./responseTypes";
-import { Cache, getPreferenceValues, LocalStorage } from "@raycast/api";
+import { Cache, getPreferenceValues, launchCommand, LaunchType, LocalStorage } from "@raycast/api";
 import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
 import { NewTimeEntryDuration, NewTimeEntryStartEnd } from "./requestTypes";
 import dayjs from "dayjs";
@@ -90,11 +90,11 @@ export async function getMyId() {
   return resp.data.id;
 }
 
-export function getCurrentTimerFromCache() {
-  const running = cache.get("running");
-  if (!running) return;
-  return JSON.parse(running) as HarvestTimeEntry;
-}
+// export function getCurrentTimerFromCache() {
+//   const running = cache.get("running");
+//   if (!running) return;
+//   return JSON.parse(running) as HarvestTimeEntry;
+// }
 
 export function useMyTimeEntries(from = new Date(), to = new Date()) {
   const qr = useCachedPromise(getMyTimeEntries, [{ from, to }], { initialData: [], keepPreviousData: true });
@@ -145,6 +145,7 @@ export async function newTimeEntry(param: NewTimeEntryDuration | NewTimeEntrySta
   const url = id ? `/time_entries/${id}` : "/time_entries";
   console.log({ url });
   const resp = await harvestAPI<HarvestTimeEntryCreatedResponse>({ method: id ? "PATCH" : "POST", url, data: param });
+  refreshMenuBar();
   return resp.data;
 }
 
@@ -164,6 +165,7 @@ export async function stopTimer(entry?: HarvestTimeEntry) {
     url: `/time_entries/${entry.id}/stop`,
     method: "PATCH",
   });
+  refreshMenuBar();
   return true;
 }
 
@@ -172,6 +174,7 @@ export async function restartTimer(entry: HarvestTimeEntry) {
     url: `/time_entries/${entry.id}/restart`,
     method: "PATCH",
   });
+  refreshMenuBar();
   return true;
 }
 
@@ -180,5 +183,10 @@ export async function deleteTimeEntry(entry: HarvestTimeEntry) {
     url: `/time_entries/${entry.id}`,
     method: "DELETE",
   });
+  refreshMenuBar();
   return true;
+}
+
+export function refreshMenuBar() {
+  launchCommand({ extensionName: "harvest", name: "menu-bar", type: LaunchType.Background }); // refresh menu bar
 }
