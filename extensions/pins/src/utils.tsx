@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { LocalStorage, Icon, Clipboard, showToast, open, popToRoot } from "@raycast/api";
+import { LocalStorage, Icon, Clipboard, showToast, open } from "@raycast/api";
 import { exec, execSync } from "child_process";
 import { StorageKey } from "./constants";
 import { Pin, Group } from "./types";
@@ -85,7 +85,7 @@ export const usePins = () => {
     });
   }, []);
 
-  return [pins, setPins];
+  return { pins: pins, setPins: setPins };
 };
 
 /**
@@ -150,8 +150,6 @@ export const createNewPin = async (name: string, url: string, icon: string, grou
   });
 
   await setStorage(StorageKey.LOCAL_PINS, newData);
-  await showToast({ title: `Added pin for "${name}"` });
-  popToRoot();
 };
 
 /**

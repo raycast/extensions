@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { Form, Icon, ActionPanel, Action, showToast, popToRoot } from "@raycast/api";
-import { iconMap, setStorage, getStorage, createNewPin } from "./utils";
+import { Form, Icon, ActionPanel, Action, showToast, useNavigation } from "@raycast/api";
+import { iconMap, getStorage, createNewPin } from "./utils";
 import { StorageKey } from "./constants";
 import { Group } from "./types";
 import { getFavicon } from "@raycast/utils";
@@ -32,13 +32,19 @@ const NewPinForm = () => {
   iconList.unshift("Favicon / File Icon");
   iconList.unshift("None");
 
+  const { pop } = useNavigation();
+
   return (
     <Form
       actions={
         <ActionPanel>
           <Action.SubmitForm
             icon={Icon.ChevronRight}
-            onSubmit={(values) => createNewPin(values.nameField, values.urlField, values.iconField, values.groupField)}
+            onSubmit={async (values) => {
+              await createNewPin(values.nameField, values.urlField, values.iconField, values.groupField)
+              await showToast({ title: `Added pin for "${values.nameField}"` });
+              pop();
+            }}
           />
         </ActionPanel>
       }

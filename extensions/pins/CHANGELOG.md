@@ -6,6 +6,8 @@
 - Added support for tilde expansion in paths
 - Added menu bar menu items for "Pin This Tab" and "Pin This Directory"
 - Added 'Show "Pin This" shortcut' setting to allow you to hide the "Pin This" items
+- Added "Create New Pin" and "Create New Group" actions
+- Added "Duplicate Pin" action
 - When adding a new pin, the icon dropdown will now show the favicon or file icon of the URL/path
 
 ## [Initial Version] - 2022-10-05
