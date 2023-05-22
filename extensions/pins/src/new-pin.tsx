@@ -41,7 +41,7 @@ const NewPinForm = () => {
           <Action.SubmitForm
             icon={Icon.ChevronRight}
             onSubmit={async (values) => {
-              await createNewPin(values.nameField, values.urlField, values.iconField, values.groupField)
+              await createNewPin(values.nameField, values.urlField, values.iconField, values.groupField);
               await showToast({ title: `Added pin for "${values.nameField}"` });
               pop();
             }}

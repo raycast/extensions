@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import {
   MenuBarExtra,
-  open,
   openExtensionPreferences,
   getPreferenceValues,
   getFrontmostApplication,
+  Icon,
 } from "@raycast/api";
 import { getFavicon, useCachedState } from "@raycast/utils";
 import {
@@ -63,7 +63,9 @@ const getGroupIcon = (groupName: string, groups: Group[]) => {
 export default function Command() {
   const { pinGroups, isLoading } = usePinGroups();
   const [groups, setGroups] = useGroups();
-  const [currentAppName, setCurrentAppName] = useCachedState<string>("current-app-name", "");
+  const [currentApp, setCurrentApp] = useCachedState<string[]>("current-app-name", ["", "", ""]);
+  const [currentTab, setCurrentTab] = useCachedState<string[]>("current-tab-name", ["", ""]);
+  const [currentDir, setCurrentDir] = useCachedState<string[]>("current-directory", ["", ""]);
   const preferences = getPreferenceValues<ExtensionPreferences>();
   const pinIcon = { source: { light: "pin-icon.svg", dark: "pin-icon@dark.svg" } };
 
@@ -81,9 +83,22 @@ export default function Command() {
       }
     });
 
-    Promise.resolve(getFrontmostApplication()).then((app) => {
-      setCurrentAppName(app.name);
-    });
+    Promise.resolve(getFrontmostApplication())
+      .then((app) => {
+        setCurrentApp([app.name, app.path, app.bundleId || ""]);
+        return app.name;
+      })
+      .then((appName) => {
+        if (appName == "Finder") {
+          Promise.resolve(getCurrentDirectory()).then((dir) => {
+            setCurrentDir(dir);
+          });
+        } else if (SupportedBrowsers.includes(appName)) {
+          Promise.resolve(getCurrentURL(appName)).then((tab) => {
+            setCurrentTab(tab);
+          });
+        }
+      });
   }, []);
 
   // If there are pins to display, then display them
@@ -109,7 +124,7 @@ export default function Command() {
                         ? iconMap[pin.icon]
                         : pin.icon == "None"
                         ? ""
-                        : pin.url.startsWith("/")
+                        : pin.url.startsWith("/") || pin.url.startsWith("~")
                         ? { fileIcon: pin.url }
                         : getFavicon(pin.url)
                     }
@@ -133,7 +148,7 @@ export default function Command() {
                         ? iconMap[pin.icon]
                         : pin.icon == "None"
                         ? ""
-                        : pin.url.startsWith("/")
+                        : pin.url.startsWith("/") || pin.url.startsWith("~")
                         ? { fileIcon: pin.url }
                         : getFavicon(pin.url)
                     }
@@ -156,35 +171,46 @@ export default function Command() {
         ) : null}
 
         <MenuBarExtra.Section>
-          {preferences.showPinShortcut && SupportedBrowsers.includes(currentAppName) ? (
+          {(preferences.showPinShortcut && currentApp[0].length > 0 && currentApp[0] != "Finder") ||
+          currentDir[0] != "Desktop" ? (
             <MenuBarExtra.Item
-              title="Pin This Tab"
+              title={`Pin This App (${currentApp[0].substring(0, 20)})`}
+              icon={{ fileIcon: currentApp[1] }}
+              tooltip="Add a pin whose target path is the path of the current app"
               onAction={async () => {
-                const currentTab = await getCurrentURL(currentAppName);
-                const tabName = currentTab[0];
-                const tabURL = currentTab[1];
-                await createNewPin(tabName, tabURL, "Favicon / File Icon", "None");
+                await createNewPin(currentApp[0], currentApp[1], "Favicon / File Icon", "None");
               }}
             />
           ) : null}
-          {preferences.showPinShortcut && currentAppName == "Finder" ? (
+          {preferences.showPinShortcut && SupportedBrowsers.includes(currentApp[0]) ? (
             <MenuBarExtra.Item
-              title={`Pin This Directory`}
+              title={`Pin This Tab (${currentTab[0].substring(0, 20).trim()}${currentTab[0].length > 20 ? "..." : ""})`}
+              icon={Icon.AppWindow}
+              tooltip="Add a pin whose target URL is the URL of the current browser tab"
+              onAction={async () => {
+                await createNewPin(currentTab[0], currentTab[1], "Favicon / File Icon", "None");
+              }}
+            />
+          ) : null}
+          {preferences.showPinShortcut && currentApp[0] == "Finder" && currentDir[0] != "Desktop" ? (
+            <MenuBarExtra.Item
+              title={`Pin This Directory (${currentDir[0].substring(0, 20).trim()}${
+                currentDir[0].length > 20 ? "..." : ""
+              })`}
+              icon={Icon.Folder}
               tooltip="Add a pin whose target path is the current directory of Finder"
               onAction={async () => {
-                const currentDir = await getCurrentDirectory();
-                const dirName = currentDir[0];
-                const dirPath = currentDir[1];
-                await createNewPin(dirName, dirPath, "Favicon / File Icon", "None");
+                await createNewPin(currentDir[0], currentDir[1], "Favicon / File Icon", "None");
               }}
             />
           ) : null}
           <MenuBarExtra.Item
             title="Copy Pin Data"
+            icon={Icon.CopyClipboard}
             tooltip="Copy the JSON data for all of your pins"
             onAction={() => copyPinData()}
           />
-          <MenuBarExtra.Item title="Preferences..." onAction={() => openExtensionPreferences()} />
+          <MenuBarExtra.Item title="Preferences..." icon={Icon.Gear} onAction={() => openExtensionPreferences()} />
         </MenuBarExtra.Section>
       </MenuBarExtra>
     );
@@ -193,8 +219,9 @@ export default function Command() {
   return (
     <MenuBarExtra icon={pinIcon} isLoading={isLoading}>
       <MenuBarExtra.Item title="No pins yet!" />
-      <MenuBarExtra.Separator />
-      <MenuBarExtra.Item title="Preferences..." onAction={() => openExtensionPreferences()} />
+      <MenuBarExtra.Section>
+        <MenuBarExtra.Item title="Preferences..." icon={Icon.Gear} onAction={() => openExtensionPreferences()} />
+      </MenuBarExtra.Section>
     </MenuBarExtra>
   );
 }

@@ -77,12 +77,10 @@ const modifyPin = async (
   pop();
 };
 
-const EditPinView = (props: {
-  pin: Pin;
-  setPins: React.Dispatch<React.SetStateAction<Pin[] | undefined>>;
-}) => {
+const EditPinView = (props: { pin: Pin; setPins: React.Dispatch<React.SetStateAction<Pin[] | undefined>> }) => {
   const pin = props.pin;
   const setPins = props.setPins;
+  const [url, setURL] = useState<string | undefined>();
   const [urlError, setUrlError] = useState<string | undefined>();
   const groups = useGetGroups();
   const { pop } = useNavigation();
@@ -115,11 +113,22 @@ const EditPinView = (props: {
         title="Pin URL"
         placeholder="Enter the filepath or URL to pin"
         error={urlError}
-        onChange={() => (urlError !== undefined ? setUrlError(undefined) : null)}
+        onChange={(value) => {
+          setURL(value);
+          if (urlError !== undefined) {
+            setUrlError(undefined);
+          } else {
+            null;
+          }
+        }}
         onBlur={(event) => {
           if (event.target.value?.length == 0) {
             setUrlError("URL cannot be empty!");
-          } else if (!event.target.value?.includes(":") && !event.target.value?.startsWith("/") && !event.target.value?.startsWith("~")) {
+          } else if (
+            !event.target.value?.includes(":") &&
+            !event.target.value?.startsWith("/") &&
+            !event.target.value?.startsWith("~")
+          ) {
             setUrlError("Please enter a valid URL or path!");
           } else if (urlError !== undefined) {
             setUrlError(undefined);
@@ -130,12 +139,18 @@ const EditPinView = (props: {
 
       <Form.Dropdown id="iconField" title="Pin Icon" defaultValue={pin.icon}>
         {iconList.map((icon) => {
+          const urlIcon = url
+            ? url.startsWith("/") || url.startsWith("~")
+              ? { fileIcon: url }
+              : getFavicon(url)
+            : iconMap["Minus"];
+
           return (
             <Form.Dropdown.Item
               key={icon}
               title={icon}
               value={icon}
-              icon={icon in iconMap ? iconMap[icon] : iconMap["Minus"]}
+              icon={icon in iconMap ? iconMap[icon] : icon == "Favicon / File Icon" ? urlIcon : iconMap["Minus"]}
             />
           );
         })}
@@ -186,9 +201,7 @@ const movePinDown = async (index: number, setPins: React.Dispatch<React.SetState
   }
 };
 
-const CreateNewPinAction = (props: {
-  setPins: React.Dispatch<React.SetStateAction<Pin[] | undefined>>;
-}) => {
+const CreateNewPinAction = (props: { setPins: React.Dispatch<React.SetStateAction<Pin[] | undefined>> }) => {
   const { setPins } = props;
   return (
     <Action.Push
@@ -209,7 +222,7 @@ const CreateNewPinAction = (props: {
       }
     />
   );
-}
+};
 
 export default function Command() {
   const { pins, setPins } = usePins();
@@ -233,7 +246,7 @@ export default function Command() {
                 ? iconMap[pin.icon]
                 : pin.icon == "None"
                 ? ""
-                : pin.url.startsWith("/")
+                : pin.url.startsWith("/") || pin.url.startsWith("~")
                 ? { fileIcon: pin.url }
                 : getFavicon(pin.url)
             }
@@ -251,7 +264,7 @@ export default function Command() {
                     title="Duplicate"
                     icon={Icon.EyeDropper}
                     shortcut={{ modifiers: ["cmd", "ctrl"], key: "d" }}
-                    target={<EditPinView pin={{...pin, name: pin.name + " Copy"}} setPins={setPins} />}
+                    target={<EditPinView pin={{ ...pin, name: pin.name + " Copy" }} setPins={setPins} />}
                   />
 
                   {index > 0 ? (
