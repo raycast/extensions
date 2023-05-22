@@ -38,7 +38,7 @@ export default function BookmarkCommand() {
         <List.Item
           title={bookmark.content.replace(/<.*?>/g, "")}
           key={bookmark.id}
-          detail={<List.Item.Detail markdown={statusParser(bookmark, "idAndDate")} />}
+          detail={<List.Item.Detail markdown={statusParser(bookmark, "id")} />}
           actions={
             <ActionPanel>
               <Action.OpenInBrowser title="Open Original Status" url={bookmark.url} />

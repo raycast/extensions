@@ -2,8 +2,8 @@ import { getPreferenceValues, Color, Icon, Form } from "@raycast/api";
 import { VisibilityOption } from "../utils/types";
 
 const visibilityOptions: VisibilityOption[] = [
-  { value: "public", title: "Public", icon: Icon.Livestream },
-  { value: "unlisted", title: "Unlisted", icon: Icon.LivestreamDisabled },
+  { value: "public", title: "Public", icon: Icon.Globe },
+  { value: "unlisted", title: "Unlisted", icon: Icon.LockUnlocked },
   { value: "private", title: "Followers-only", icon: Icon.TwoPeople },
   { value: "direct", title: "Direct", icon: Icon.Envelope },
   // { value: "local", title: "Local-only", icon: Icon.Pin },

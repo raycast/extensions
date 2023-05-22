@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useState, useRef } from "react";
 import {
   Form,
   ActionPanel,
@@ -10,12 +10,11 @@ import {
   Icon,
   getPreferenceValues,
   LaunchProps,
-  LocalStorage,
 } from "@raycast/api";
 import apiServer from "./utils/api";
 import { MastodonError, StatusResponse, StatusRequest } from "./utils/types";
-import { getAccessToken } from "./utils/oauth";
 import { dateTimeFormatter } from "./utils/util";
+import { useMe } from "./hooks/masto";
 
 import VisibilityDropdown from "./components/VisibilityDropdown";
 
@@ -33,13 +32,15 @@ interface StatusForm extends StatusRequest {
 
 export default function SimpleCommand(props: CommandProps) {
   const { draftValues } = props;
+  const { username, fetchUsername } = useMe();
+
+  if (username.length === 0) fetchUsername();
 
   const [state, setState] = useState({
     cw: draftValues?.spoiler_text || "",
     isMarkdown: enableMarkdown,
     sensitive: false,
     openActionText: "Open the last published status",
-    username: "",
     content: draftValues?.status || "",
   });
 
@@ -47,22 +48,6 @@ export default function SimpleCommand(props: CommandProps) {
   const [statusInfo, setStatusInfo] = useState<StatusResponse>(cached ? JSON.parse(cached) : null);
 
   const cwRef = useRef<Form.TextField>(null);
-
-  useEffect(() => {
-    const init = async () => {
-      try {
-        await getAccessToken();
-        const username = (await LocalStorage.getItem<string>("account-username")) || "";
-        setState((prevState) => ({
-          ...prevState,
-          username,
-        }));
-      } catch (error) {
-        console.error("Error during authorization or fetching account-username:", error);
-      }
-    };
-    init();
-  }, []);
 
   const handleSubmit = async (value: StatusForm) => {
     try {
@@ -124,7 +109,7 @@ export default function SimpleCommand(props: CommandProps) {
         </ActionPanel>
       }
     >
-      <Form.Description title="Account" text={`${state.username}@${instance}`} />
+      <Form.Description title="Account" text={`${username}@${instance}`} />
       {state.sensitive && (
         <Form.TextField
           id="spoiler_text"

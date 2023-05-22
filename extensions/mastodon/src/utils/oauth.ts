@@ -6,7 +6,7 @@ export const client = new OAuth.PKCEClient({
   providerName: "Mastodon",
   providerIcon: "mastodon-icon.png",
   providerId: "mastodon",
-  description: "Connect to your Mastodon acount",
+  description: "Connect to your Mastodon account",
 });
 
 const requestAccessToken = async (
@@ -15,13 +15,14 @@ const requestAccessToken = async (
   authRequest: OAuth.AuthorizationRequest,
   authCode: string
 ): Promise<OAuth.TokenResponse> => {
-  const params = new URLSearchParams();
-  params.append("client_id", clientId);
-  params.append("client_secret", clientSecret);
-  params.append("code", authCode);
-  params.append("code_verifier", authRequest.codeVerifier);
-  params.append("grant_type", "authorization_code");
-  params.append("redirect_uri", authRequest.redirectURI);
+  const params = new URLSearchParams({
+    client_id: clientId,
+    client_secret: clientSecret,
+    code: authCode,
+    code_verifier: authRequest.codeVerifier,
+    grant_type: "authorization_code",
+    redirect_uri: authRequest.redirectURI,
+  });
 
   return await apiServer.fetchToken(params);
 };
@@ -31,11 +32,12 @@ const refreshToken = async (
   clientSecret: string,
   refreshToken: string
 ): Promise<OAuth.TokenResponse> => {
-  const params = new URLSearchParams();
-  params.append("client_id", clientId);
-  params.append("client_secret", clientSecret);
-  params.append("refresh_token", refreshToken);
-  params.append("grant_type", "refresh_token");
+  const params = new URLSearchParams({
+    client_id: clientId,
+    client_secret: clientSecret,
+    refresh_token: refreshToken,
+    grant_type: "refresh_token",
+  });
 
   const tokenResponse = await apiServer.fetchToken(params);
 
@@ -46,9 +48,7 @@ const refreshToken = async (
 const authorize = async (): Promise<string> => {
   const { instance }: Preferences = getPreferenceValues();
 
-  if (!instance) {
-    throw new Error("instance is required");
-  }
+  if (!instance) throw new Error("Instance is required");
 
   const tokenSet = await client.getTokens();
 
@@ -76,7 +76,7 @@ const authorize = async (): Promise<string> => {
   return username;
 };
 
-async function getValidTokens(): Promise<OAuth.TokenSet> {
+const getValidTokens = async (): Promise<OAuth.TokenSet> => {
   const tokenSet = await client.getTokens();
 
   if (!tokenSet || !tokenSet.accessToken) {
@@ -103,13 +103,13 @@ async function getValidTokens(): Promise<OAuth.TokenSet> {
   }
 
   return tokenSet;
-}
+};
 
-export async function getAccessToken(): Promise<string> {
+export const getAccessToken = async (): Promise<string> => {
   const validTokenSet = await getValidTokens();
   if (validTokenSet && validTokenSet.accessToken) {
     return validTokenSet.accessToken;
   } else {
     throw new Error("Failed to get valid access token");
   }
-}
+};
