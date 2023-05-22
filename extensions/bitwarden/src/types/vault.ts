@@ -41,7 +41,7 @@ export const IDENTITY_TITLES = {
   MS: "Ms",
   MX: "Mx",
   DR: "Dr",
-};
+} as const;
 
 export type IdentityTitle = (typeof IDENTITY_TITLES)[keyof typeof IDENTITY_TITLES];
 
