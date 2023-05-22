@@ -1,5 +1,6 @@
 import {
   Form,
+  Alert,
   ActionPanel,
   Action,
   Icon,
@@ -43,6 +44,11 @@ export default () => {
     const confirmed = await confirmAlert({
       title: 'Remove Account',
       message: `Are you sure you want to remove ${account.name}?`,
+      icon: { source: Icon.Trash, tintColor: Color.Red },
+      primaryAction: {
+        title: 'Remove',
+        style: Alert.ActionStyle.Destructive,
+      },
     });
 
     if (!confirmed) return;
