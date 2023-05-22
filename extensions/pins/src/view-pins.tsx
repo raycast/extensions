@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import {
   Icon,
-  open,
   Form,
   List,
   useNavigation,
@@ -10,10 +9,11 @@ import {
   showToast,
   confirmAlert,
   clearSearchBar,
+  getPreferenceValues,
 } from "@raycast/api";
-import { iconMap, setStorage, getStorage, usePins } from "./utils";
+import { iconMap, setStorage, getStorage, usePins, openPin } from "./utils";
 import { StorageKey } from "./constants";
-import { Pin, Group } from "./types";
+import { Pin, Group, ExtensionPreferences } from "./types";
 import { getFavicon } from "@raycast/utils";
 
 const useGetGroups = () => {
@@ -41,11 +41,12 @@ const modifyPin = async (
   icon: string,
   group: string,
   pop: () => void,
-  setPins: (pins: Pin[]) => void
+  setPins: React.Dispatch<React.SetStateAction<Pin[] | undefined>>
 ) => {
   const storedPins = await getStorage(StorageKey.LOCAL_PINS);
 
-  const newData = storedPins.map((oldPin: Pin) => {
+  const newData: Pin[] = storedPins.map((oldPin: Pin) => {
+    // Update pin if it exists
     if (oldPin.id == pin.id) {
       return {
         name: name,
@@ -59,15 +60,27 @@ const modifyPin = async (
     }
   });
 
+  if (newData.every((storedPin) => storedPin.id != pin.id)) {
+    // Add new pin if it doesn't exist
+    newData.push({
+      name: name,
+      url: url,
+      icon: icon,
+      group: group,
+      id: pin.id,
+    });
+  }
+
   setPins(newData);
   await setStorage(StorageKey.LOCAL_PINS, newData);
   await showToast({ title: `Updated pin!` });
   pop();
 };
 
-const EditPinView = (props: { pin: Pin; setPins: (pins: Pin[]) => void }) => {
+const EditPinView = (props: { pin: Pin; setPins: React.Dispatch<React.SetStateAction<Pin[] | undefined>> }) => {
   const pin = props.pin;
   const setPins = props.setPins;
+  const [url, setURL] = useState<string | undefined>();
   const [urlError, setUrlError] = useState<string | undefined>();
   const groups = useGetGroups();
   const { pop } = useNavigation();
@@ -100,11 +113,22 @@ const EditPinView = (props: { pin: Pin; setPins: (pins: Pin[]) => void }) => {
         title="Pin URL"
         placeholder="Enter the filepath or URL to pin"
         error={urlError}
-        onChange={() => (urlError !== undefined ? setUrlError(undefined) : null)}
+        onChange={(value) => {
+          setURL(value);
+          if (urlError !== undefined) {
+            setUrlError(undefined);
+          } else {
+            null;
+          }
+        }}
         onBlur={(event) => {
           if (event.target.value?.length == 0) {
             setUrlError("URL cannot be empty!");
-          } else if (!event.target.value?.includes(":") && !event.target.value?.startsWith("/")) {
+          } else if (
+            !event.target.value?.includes(":") &&
+            !event.target.value?.startsWith("/") &&
+            !event.target.value?.startsWith("~")
+          ) {
             setUrlError("Please enter a valid URL or path!");
           } else if (urlError !== undefined) {
             setUrlError(undefined);
@@ -115,12 +139,18 @@ const EditPinView = (props: { pin: Pin; setPins: (pins: Pin[]) => void }) => {
 
       <Form.Dropdown id="iconField" title="Pin Icon" defaultValue={pin.icon}>
         {iconList.map((icon) => {
+          const urlIcon = url
+            ? url.startsWith("/") || url.startsWith("~")
+              ? { fileIcon: url }
+              : getFavicon(url)
+            : iconMap["Minus"];
+
           return (
             <Form.Dropdown.Item
               key={icon}
               title={icon}
               value={icon}
-              icon={icon in iconMap ? iconMap[icon] : iconMap["Minus"]}
+              icon={icon in iconMap ? iconMap[icon] : icon == "Favicon / File Icon" ? urlIcon : iconMap["Minus"]}
             />
           );
         })}
@@ -139,7 +169,7 @@ const EditPinView = (props: { pin: Pin; setPins: (pins: Pin[]) => void }) => {
   );
 };
 
-const deletePin = async (pin: Pin, setPins: (pins: Pin[]) => void) => {
+const deletePin = async (pin: Pin, setPins: React.Dispatch<React.SetStateAction<Pin[] | undefined>>) => {
   if (await confirmAlert({ title: "Are you sure?" })) {
     const storedPins = await getStorage(StorageKey.LOCAL_PINS);
 
@@ -153,7 +183,7 @@ const deletePin = async (pin: Pin, setPins: (pins: Pin[]) => void) => {
   }
 };
 
-const movePinUp = async (index: number, setPins: (pins: Pin[]) => void) => {
+const movePinUp = async (index: number, setPins: React.Dispatch<React.SetStateAction<Pin[] | undefined>>) => {
   const storedPins = await getStorage(StorageKey.LOCAL_PINS);
   if (storedPins.length > index) {
     [storedPins[index - 1], storedPins[index]] = [storedPins[index], storedPins[index - 1]];
@@ -162,7 +192,7 @@ const movePinUp = async (index: number, setPins: (pins: Pin[]) => void) => {
   }
 };
 
-const movePinDown = async (index: number, setPins: (pins: Pin[]) => void) => {
+const movePinDown = async (index: number, setPins: React.Dispatch<React.SetStateAction<Pin[] | undefined>>) => {
   const storedPins = await getStorage(StorageKey.LOCAL_PINS);
   if (storedPins.length > index + 1) {
     [storedPins[index], storedPins[index + 1]] = [storedPins[index + 1], storedPins[index]];
@@ -171,12 +201,39 @@ const movePinDown = async (index: number, setPins: (pins: Pin[]) => void) => {
   }
 };
 
+const CreateNewPinAction = (props: { setPins: React.Dispatch<React.SetStateAction<Pin[] | undefined>> }) => {
+  const { setPins } = props;
+  return (
+    <Action.Push
+      title="Create New Pin"
+      icon={Icon.PlusCircle}
+      shortcut={{ modifiers: ["cmd"], key: "n" }}
+      target={
+        <EditPinView
+          pin={{
+            name: "",
+            url: "",
+            icon: "None",
+            group: "None",
+            id: -1,
+          }}
+          setPins={setPins}
+        />
+      }
+    />
+  );
+};
+
 export default function Command() {
-  const [pins, setPins] = usePins();
-  const { push } = useNavigation();
+  const { pins, setPins } = usePins();
+  const preferences = getPreferenceValues<ExtensionPreferences>();
 
   return (
-    <List isLoading={pins === undefined} searchBarPlaceholder="Search pins...">
+    <List
+      isLoading={pins === undefined}
+      searchBarPlaceholder="Search pins..."
+      actions={<ActionPanel>{<CreateNewPinAction setPins={setPins} />}</ActionPanel>}
+    >
       <List.EmptyView title="No Pins Found" icon="no-view.png" />
       {pins &&
         (pins as Pin[]).map((pin, index) => (
@@ -189,49 +246,62 @@ export default function Command() {
                 ? iconMap[pin.icon]
                 : pin.icon == "None"
                 ? ""
-                : pin.url.startsWith("/")
+                : pin.url.startsWith("/") || pin.url.startsWith("~")
                 ? { fileIcon: pin.url }
                 : getFavicon(pin.url)
             }
             actions={
               <ActionPanel>
-                <Action title="Open" icon={Icon.ChevronRight} onAction={() => open(pin.url)} />
-                <Action
-                  title="Edit"
-                  icon={Icon.Pencil}
-                  onAction={() => push(<EditPinView pin={pin} setPins={setPins as (pins: Pin[]) => void} />)}
-                />
+                <ActionPanel.Section title="Pin Actions">
+                  <Action title="Open" icon={Icon.ChevronRight} onAction={() => openPin(pin, preferences)} />
+                  <Action.Push
+                    title="Edit"
+                    icon={Icon.Pencil}
+                    shortcut={{ modifiers: ["cmd"], key: "e" }}
+                    target={<EditPinView pin={pin} setPins={setPins} />}
+                  />
+                  <Action.Push
+                    title="Duplicate"
+                    icon={Icon.EyeDropper}
+                    shortcut={{ modifiers: ["cmd", "ctrl"], key: "d" }}
+                    target={<EditPinView pin={{ ...pin, name: pin.name + " Copy" }} setPins={setPins} />}
+                  />
 
-                {index > 0 ? (
+                  {index > 0 ? (
+                    <Action
+                      title="Move Up"
+                      icon={Icon.ArrowUp}
+                      shortcut={{ modifiers: ["cmd", "shift"], key: "u" }}
+                      onAction={() => {
+                        movePinUp(index, setPins);
+                        clearSearchBar();
+                      }}
+                    />
+                  ) : null}
+                  {index < pins.length - 1 ? (
+                    <Action
+                      title="Move Down"
+                      icon={Icon.ArrowDown}
+                      shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+                      onAction={() => {
+                        movePinDown(index, setPins);
+                        clearSearchBar();
+                      }}
+                    />
+                  ) : null}
+
                   <Action
-                    title="Move Up"
-                    icon={Icon.ArrowUp}
+                    title="Delete Pin"
+                    icon={Icon.Trash}
                     onAction={() => {
-                      movePinUp(index, setPins as (pins: Pin[]) => void);
+                      deletePin(pin, setPins);
                       clearSearchBar();
                     }}
+                    shortcut={{ modifiers: ["cmd"], key: "d" }}
+                    style={Action.Style.Destructive}
                   />
-                ) : null}
-                {index < pins.length - 1 ? (
-                  <Action
-                    title="Move Down"
-                    icon={Icon.ArrowDown}
-                    onAction={() => {
-                      movePinDown(index, setPins as (pins: Pin[]) => void);
-                      clearSearchBar();
-                    }}
-                  />
-                ) : null}
-
-                <Action
-                  title="Delete Pin"
-                  icon={Icon.Trash}
-                  onAction={() => {
-                    deletePin(pin, setPins as (pins: Pin[]) => void);
-                    clearSearchBar();
-                  }}
-                  style={Action.Style.Destructive}
-                />
+                </ActionPanel.Section>
+                <CreateNewPinAction setPins={setPins} />
               </ActionPanel>
             }
           />
