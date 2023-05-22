@@ -32,10 +32,10 @@ export async function getBookmarks() {
   return response ? (JSON.parse(response) as Bookmark[]) : undefined;
 }
 
-export function getNumberOfBookmarks(tabs?: Bookmark[]) {
-  if (!tabs) {
+export function getNumberOfBookmarks(bookmarks?: Bookmark[]) {
+  if (!bookmarks) {
     return undefined;
   }
 
-  return tabs.length === 1 ? "1 bookmark" : `${tabs.length} bookmarks`;
+  return bookmarks.length === 1 ? "1 bookmark" : `${bookmarks.length} bookmarks`;
 }

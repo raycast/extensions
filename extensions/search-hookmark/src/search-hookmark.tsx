@@ -1,22 +1,39 @@
-import { ActionPanel, List, Action, Image } from "@raycast/api";
+import { LaunchProps, ActionPanel, List, Action } from "@raycast/api";
 import { useCachedPromise, getFavicon } from "@raycast/utils";
-import { getBookmarks, getNumberOfBookmarks } from "./hookmark";
+import { getBookmarks } from "./hookmark";
+import { useMemo, useState } from "react";
 
-export default function Command() {
+export default function Command(props: LaunchProps) {
+  const [searchText, setSearchText] = useState(props.fallbackText ?? "");
   const { data, isLoading } = useCachedPromise(getBookmarks);
 
+  const bookmarks = useMemo(() => {
+    return data?.filter((bookmark) => {
+      return bookmark.title.toLowerCase().includes(searchText.toLowerCase());
+    });
+  }, [data, searchText]);
+
+  const numberOfBookmarks = useMemo(() => {
+    return bookmarks?.length ?? 0;
+  }, [bookmarks]);
+
   return (
-    <List isLoading={isLoading}>
-      <List.Section title={`Results:`} subtitle={getNumberOfBookmarks(data)}>
-        {data?.map((bookmark) => (
+    <List
+      isLoading={isLoading}
+      searchText={searchText}
+      filtering={{ keepSectionOrder: true }}
+      onSearchTextChange={setSearchText}
+    >
+      <List.Section title={`Results:`} subtitle={`${numberOfBookmarks}`}>
+        {bookmarks?.map((bookmark) => (
           <List.Item
             title={bookmark.title}
             key={bookmark.address}
-            icon={getFavicon(bookmark.address, { mask: Image.Mask.RoundedRectangle })}
-            accessories={[{ text: bookmark.address }]}
+            icon={bookmark.path == "missing value" ? getFavicon(bookmark.address) : { fileIcon: bookmark.path }}
+            accessories={[{ text: bookmark.path == "missing value" ? bookmark.address : bookmark.path }]}
             actions={
               <ActionPanel>
-                <Action.OpenInBrowser url={bookmark.address} />
+                <Action.OpenInBrowser title="Open bookmark" url={bookmark.address} />
                 <Action.Open title="Open File" target={bookmark.path} />
                 <Action.CopyToClipboard
                   title="Copy As File URL"
