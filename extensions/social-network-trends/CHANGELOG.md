@@ -1,6 +1,6 @@
 # Social Network Trends Changelog
 
-## [More Trends] - {PR_MERGE_DATE}
+## [More Trends] - 2023-05-22
 
 - Add more hotspot options for social platforms
 - Fix the problem of failing to get trends
