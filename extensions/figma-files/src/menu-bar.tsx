@@ -39,9 +39,9 @@ export default function Command() {
         },
       }}
       tooltip="Figma files"
-      isLoading={isLoadingVisitedFiles || isLoading}
+      isLoading={isLoadingVisitedFiles && isLoading}
     >
-      {error && <MenuBarExtra.Item title="Error" />}
+      {error && <MenuBarExtra.Item title="Error" key="ErrorState" />}
       {visitedFiles && (
         <>
           <MenuBarExtra.Submenu key="recent-files" title="Recent">
@@ -56,13 +56,12 @@ export default function Command() {
               />
             ))}
           </MenuBarExtra.Submenu>
-          <MenuBarExtra.Separator />
+          <MenuBarExtra.Separator key="Separator" />
         </>
       )}
-      {!isLoadingVisitedFiles &&
-        data &&
+      {data &&
         data?.map((team) => (
-          <MenuBarExtra.Section title={team.name}>
+          <MenuBarExtra.Section title={team.name} key={team.name + "-team"}>
             {team.files.map((project) => (
               <MenuBarExtra.Submenu
                 key={team.name + project.name + "-project"}
@@ -87,8 +86,8 @@ export default function Command() {
             ))}
           </MenuBarExtra.Section>
         ))}
-      {(isLoading || isLoadingVisitedFiles) && !data && <MenuBarExtra.Item title="Loading..." />}
-      {!isLoading && !data && <MenuBarExtra.Item title="No projects found" />}
+      {isLoading && isLoadingVisitedFiles && !data && <MenuBarExtra.Item title="Loading..." key="loadingState" />}
+      {!isLoading && !data && <MenuBarExtra.Item title="No projects found" key="noProjectsFoundState" />}
     </MenuBarExtra>
   );
 }
