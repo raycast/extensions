@@ -32,7 +32,7 @@ export function extractKeywords(item: Item): string[] {
     }
   }
 
-  // remove duplicates and empty strings
+  // remove duplicates and invalid keywords
   return Array.from(new Set(keywords.filter(Boolean)));
 }
 
