@@ -1,8 +1,8 @@
 import { Action, ActionPanel, Form, useNavigation } from "@raycast/api";
 import { useState } from "react";
-import { Config } from "./types";
+import { Config } from "../types";
 import Top from "./top";
-import { loadConfig, saveConfig } from "./utils";
+import { loadConfig, saveConfig } from "../utils";
 import { useCachedPromise } from "@raycast/utils";
 
 const EditConfig = () => {
@@ -39,7 +39,6 @@ const EditConfigInner = ({ initialConfig }: { initialConfig: Config }) => {
 
   const onSubmit = async (config: Config) => {
     await saveConfig(config);
-    console.log(config);
     push(<Top />);
   };
 

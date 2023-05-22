@@ -1,7 +1,7 @@
 import { ActionPanel, Action, List, Detail } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { useMemo } from "react";
-import { IndexData, StoriesData, Component, Config } from "./types";
+import { IndexData, StoriesData, Component, Config } from "../types";
 import EditConfig from "./edit-config";
 
 const Search = ({ config }: { config: Config }) => {

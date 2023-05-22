@@ -1,3 +1,3 @@
-import Top from "./top";
+import Top from "./components/top";
 
 export default Top;

@@ -1,6 +1,6 @@
 import Search from "./search";
 import EditConfig from "./edit-config";
-import { loadConfig } from "./utils";
+import { loadConfig } from "../utils";
 import { useCachedPromise } from "@raycast/utils";
 
 const Top = () => {
