@@ -3,6 +3,7 @@ import { useMemo } from "react";
 import VaultItemActionPanel from "~/components/searchVault/ItemActionPanel";
 import VaultItemContext from "~/components/searchVault/context/vaultItem";
 import { ITEM_TYPE_TO_ICON_MAP } from "~/constants/general";
+import { ITEM_TYPE_TO_LABEL } from "~/constants/labels";
 import { Folder, Item, ItemType } from "~/types/vault";
 import { getCardImageUrl } from "~/utils/cards";
 import { captureException } from "~/utils/development";
@@ -63,19 +64,19 @@ type ListItemAccessory = NonNullable<List.Item.Props["accessories"]>[number];
 const TYPE_TO_ACCESSORY_MAP: Record<ItemType, ListItemAccessory> = {
   [ItemType.LOGIN]: {
     icon: { source: ITEM_TYPE_TO_ICON_MAP[ItemType.LOGIN], tintColor: Color.Blue },
-    tooltip: "Login",
+    tooltip: ITEM_TYPE_TO_LABEL[ItemType.LOGIN],
   },
   [ItemType.CARD]: {
     icon: { source: ITEM_TYPE_TO_ICON_MAP[ItemType.CARD], tintColor: Color.Green },
-    tooltip: "Card",
+    tooltip: ITEM_TYPE_TO_LABEL[ItemType.CARD],
   },
   [ItemType.IDENTITY]: {
     icon: { source: ITEM_TYPE_TO_ICON_MAP[ItemType.IDENTITY], tintColor: Color.Orange },
-    tooltip: "Identity",
+    tooltip: ITEM_TYPE_TO_LABEL[ItemType.IDENTITY],
   },
   [ItemType.NOTE]: {
     icon: { source: ITEM_TYPE_TO_ICON_MAP[ItemType.NOTE], tintColor: Color.PrimaryText },
-    tooltip: "Secure Note",
+    tooltip: ITEM_TYPE_TO_LABEL[ItemType.NOTE],
   },
 };
 
