@@ -7,7 +7,6 @@ export function TrendListItem(props: { trend: Trend; index: number; keywords: st
   const { trend, index, keywords } = props;
   return (
     <List.Item
-      id={index + trend.name}
       icon={numberIcons[index]}
       title={trend.name}
       keywords={keywords}
