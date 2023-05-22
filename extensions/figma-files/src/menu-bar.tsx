@@ -34,12 +34,12 @@ export default function Command() {
     <MenuBarExtra
       icon={{
         source: {
-          light: "figma-menubar-icon-dark.png",
-          dark: "figma-menubar-icon-light.png",
+          light: "figma-menubar-icon-light.svg",
+          dark: "figma-menubar-icon-dark.svg",
         },
       }}
       tooltip="Figma files"
-      isLoading={isLoadingVisitedFiles && isLoading}
+      isLoading={isLoadingVisitedFiles || isLoading}
     >
       {error && <MenuBarExtra.Item title="Error" key="ErrorState" />}
       {visitedFiles && (
@@ -86,7 +86,7 @@ export default function Command() {
             ))}
           </MenuBarExtra.Section>
         ))}
-      {isLoading && isLoadingVisitedFiles && !data && <MenuBarExtra.Item title="Loading..." key="loadingState" />}
+      {(isLoading || isLoadingVisitedFiles) && !data && <MenuBarExtra.Item title="Loading..." key="loadingState" />}
       {!isLoading && !data && <MenuBarExtra.Item title="No projects found" key="noProjectsFoundState" />}
     </MenuBarExtra>
   );
