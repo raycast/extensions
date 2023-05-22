@@ -6,7 +6,7 @@ import VaultItem from "~/components/searchVault/Item";
 import ListFolderDropdown from "~/components/searchVault/ListFolderDropdown";
 import { BitwardenProvider } from "~/context/bitwarden";
 import { SessionProvider } from "~/context/session";
-import { useVault, VaultProvider } from "~/context/vault";
+import { useVaultContext, VaultProvider } from "~/context/vault";
 import { Folder, Item } from "~/types/vault";
 
 const SearchVaultCommand = () => (
@@ -24,10 +24,10 @@ const SearchVaultCommand = () => (
 );
 
 function SearchVaultComponent() {
-  const { items, folders, isLoading, isEmpty } = useVault();
+  const { items, folders, isLoading, isEmpty } = useVaultContext();
 
   return (
-    <List isLoading={isLoading} searchBarAccessory={<ListFolderDropdown folders={folders} isLoading={isLoading} />}>
+    <List isLoading={isLoading} searchBarAccessory={<ListFolderDropdown />} filtering>
       {items.map((item) => (
         <VaultItem key={item.id} item={item} folder={getItemFolder(folders, item)} />
       ))}

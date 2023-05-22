@@ -1,18 +1,23 @@
 import { List, Icon } from "@raycast/api";
-import { Folder } from "~/types/vault";
+import { useVaultContext } from "~/context/vault";
 
-export type ListFolderDropdownProps = {
-  folders: Folder[];
-  isLoading?: boolean;
-};
+const ALL_OPTION_VALUE = "";
 
-const NO_FOLDER_VALUE = "no-folder";
+export default function ListFolderDropdown() {
+  const { folders, isLoading, currentFolderId, setFolder } = useVaultContext();
 
-export default function ListFolderDropdown({ folders, isLoading }: ListFolderDropdownProps) {
+  if ((isLoading && folders.length === 0) || folders.length === 0) return null;
+
   return (
-    <List.Dropdown tooltip="Select a folder" isLoading={isLoading} defaultValue={NO_FOLDER_VALUE} storeValue>
+    <List.Dropdown
+      tooltip="Select a folder"
+      isLoading={isLoading}
+      defaultValue={currentFolderId ?? ALL_OPTION_VALUE}
+      onChange={setFolder}
+    >
+      <List.Dropdown.Item value={ALL_OPTION_VALUE} title="All" icon={Icon.Folder} />
       {folders.map((folder) => {
-        const id = folder.id ?? NO_FOLDER_VALUE;
+        const id = String(folder.id);
 
         return <List.Dropdown.Item key={id} value={id} title={folder.name} icon={Icon.Folder} />;
       })}

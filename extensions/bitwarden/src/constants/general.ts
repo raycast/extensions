@@ -62,3 +62,9 @@ export const SHORTCUT_KEY_SEQUENCE: Keyboard.Shortcut["key"][] = [
   ".",
   ",",
 ];
+
+export const CACHE_KEYS = {
+  IV: "iv",
+  VAULT: "vault",
+  CURRENT_FOLDER_ID: "currentFolderId",
+};
