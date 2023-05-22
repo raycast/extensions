@@ -59,6 +59,13 @@ export default function MenuBar() {
       <MenuBarExtra.Item title={`${runningTimer.project.name} - ${runningTimer.task.name}`} />
       {runningTimer.notes && runningTimer.notes.length > 0 && <MenuBarExtra.Item title={`${runningTimer.notes}`} />}
 
+      <MenuBarExtra.Item
+        title="View Timesheet"
+        onAction={() => {
+          launchCommand({ extensionName: "harvest", name: "listTimeEntries", type: LaunchType.UserInitiated });
+        }}
+      />
+
       {/* <MenuBarExtra.Item
         title="Stop Timer"
         onAction={async () => {
