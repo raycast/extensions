@@ -59,6 +59,7 @@ export default function ResultView(prompt, toast_title, type = "text", title) {
         } else {
           setResponse(response);
         }
+        setPasteContent(match[1].trim());
       } else if (type === "code") {
         let match = response.match(/```([a-zA-Z]+)?(.*?)```/s)
         if (match) {
@@ -69,6 +70,7 @@ export default function ResultView(prompt, toast_title, type = "text", title) {
         setPasteContent(match[2].trim());
       } else {
         setResponse(response);
+        setPasteContent(response);
       }
 
       setLoading(false);
