@@ -2,7 +2,7 @@
 
 ## [Search Vault Command Improvements] - 2023-05-22
 
-- Added a Folder Picker dropdown to filter the list by folder
+- Added a Folder Dropdown to filter the list by folder
 - Each item now displays an icon that represents its type
 - Allow to search by item type (e.g. login)
 - Display a different image depending on the card brand
