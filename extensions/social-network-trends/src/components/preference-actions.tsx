@@ -13,7 +13,7 @@ export function PreferenceActions() {
       />
       <Action
         icon={Icon.Gear}
-        title={"Open Command Preference"}
+        title={"Open Extension Preference"}
         shortcut={{ modifiers: ["shift", "cmd"], key: "," }}
         onAction={() => {
           openExtensionPreferences().then();
