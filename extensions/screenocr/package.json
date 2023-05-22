@@ -104,8 +104,8 @@
   ],
   "commands": [
     {
-      "title": "Preferences",
-      "description": "Preferences Page for ScreenOCR",
+      "title": "Select Recognition Languages",
+      "description": "Select Recognition Languages for ScreenOCR to recognize",
       "name": "preferences",
       "mode": "view"
     },
