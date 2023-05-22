@@ -27,7 +27,7 @@ function SearchVaultComponent() {
   const { items, folders, isLoading, isEmpty } = useVaultContext();
 
   return (
-    <List isLoading={isLoading} searchBarAccessory={<ListFolderDropdown />}>
+    <List searchBarPlaceholder="Search vault" isLoading={isLoading} searchBarAccessory={<ListFolderDropdown />}>
       {items.map((item) => (
         <VaultItem key={item.id} item={item} folder={getItemFolder(folders, item)} />
       ))}
