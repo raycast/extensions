@@ -20,7 +20,7 @@ export type VaultContextType = VaultState & {
   syncItems: () => Promise<void>;
   loadItems: () => Promise<void>;
   currentFolderId: Nullable<string>;
-  setFolder: (folderOrId: Nullable<string | Folder>) => void;
+  setCurrentFolder: (folderOrId: Nullable<string | Folder>) => void;
 };
 
 const VaultContext = createContext<VaultContextType | null>(null);
@@ -91,7 +91,7 @@ export function VaultProvider(props: VaultProviderProps) {
     }
   }
 
-  async function setFolder(folderOrId: Nullable<string | Folder>) {
+  async function setCurrentFolder(folderOrId: Nullable<string | Folder>) {
     setCurrentFolderId(typeof folderOrId === "string" ? folderOrId : folderOrId?.id);
   }
 
@@ -104,9 +104,9 @@ export function VaultProvider(props: VaultProviderProps) {
       currentFolderId,
       syncItems,
       loadItems,
-      setFolder,
+      setCurrentFolder,
     }),
-    [state, session.isLoading, currentFolderId, syncItems, loadItems, setFolder]
+    [state, session.isLoading, currentFolderId, syncItems, loadItems, setCurrentFolder]
   );
 
   return <VaultContext.Provider value={memoizedValue}>{children}</VaultContext.Provider>;

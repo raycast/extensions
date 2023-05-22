@@ -3,7 +3,7 @@ import { FOLDER_OPTIONS } from "~/constants/general";
 import { useVaultContext } from "~/context/vault";
 
 export default function ListFolderDropdown() {
-  const { folders, currentFolderId, setFolder } = useVaultContext();
+  const { folders, currentFolderId, setCurrentFolder } = useVaultContext();
 
   if (folders.length === 0) return null;
 
@@ -12,7 +12,7 @@ export default function ListFolderDropdown() {
       tooltip="Select a folder"
       placeholder="Search folders"
       defaultValue={currentFolderId ?? FOLDER_OPTIONS.ALL}
-      onChange={setFolder}
+      onChange={setCurrentFolder}
       throttle
     >
       <List.Dropdown.Item value={FOLDER_OPTIONS.ALL} title="All" icon={Icon.Folder} />
