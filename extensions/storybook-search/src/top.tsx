@@ -1,30 +1,14 @@
-import { LocalStorage, useNavigation } from "@raycast/api";
-import { useEffect } from "react";
-import { BASE_URL_STORAGE_KEY } from "./constants";
 import Search from "./search";
-import { Config } from "./types";
 import EditConfig from "./edit-config";
+import { loadConfig } from "./utils";
+import { useCachedPromise } from "@raycast/utils";
 
 const Top = () => {
-  const { push } = useNavigation();
+  const { data: config } = useCachedPromise(loadConfig);
 
-  const init = async () => {
-    const baseUrl = await LocalStorage.getItem(BASE_URL_STORAGE_KEY);
-
-    if (!baseUrl) {
-      push(<EditConfig />);
-      return;
-    } else {
-      const config: Config = { baseUrl: baseUrl.toString() };
-      push(<Search config={config} />);
-    }
-  };
-
-  useEffect(() => {
-    init();
-  }, []);
-
-  return null;
+  if (!config) return null;
+  if (!config.baseUrl) return <EditConfig />;
+  return <Search config={config} />;
 };
 
 export default Top;

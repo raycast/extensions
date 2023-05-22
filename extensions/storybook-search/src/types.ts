@@ -1,5 +1,6 @@
 export type Config = {
   baseUrl: string;
+  nameFilterRegExp: string;
 };
 
 export type Component = {
