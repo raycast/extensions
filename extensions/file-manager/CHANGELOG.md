@@ -1,5 +1,9 @@
 # File Manager Changelog
 
+## [Fixes] - 2023-05-22
+
+- Fix standard shortcuts for deletion.
+
 ## [Features] - 2023-05-18
 
 - Added support for using standard shortcuts.
