@@ -113,10 +113,9 @@ export function VaultProvider(props: VaultProviderProps) {
 }
 
 function filterItemsByFolderId(items: Item[], folderId: Nullable<string>) {
-  if (folderId === FOLDER_OPTIONS.ALL) return items;
+  if (!folderId || folderId === FOLDER_OPTIONS.ALL) return items;
   if (folderId === FOLDER_OPTIONS.NO_FOLDER) return items.filter((item) => item.folderId === null);
-
-  return folderId ? items.filter((item) => item.folderId === folderId) : items;
+  return items.filter((item) => item.folderId === folderId);
 }
 
 function favoriteItemsFirstSorter(a: Item, b: Item) {
