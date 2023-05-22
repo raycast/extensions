@@ -1,7 +1,6 @@
 import { List, Icon } from "@raycast/api";
+import { FOLDER_OPTIONS } from "~/constants/general";
 import { useVaultContext } from "~/context/vault";
-
-const ALL_OPTION_VALUE = "";
 
 export default function ListFolderDropdown() {
   const { folders, isLoading, currentFolderId, setFolder } = useVaultContext();
@@ -12,12 +11,12 @@ export default function ListFolderDropdown() {
     <List.Dropdown
       tooltip="Select a folder"
       isLoading={isLoading}
-      defaultValue={currentFolderId ?? ALL_OPTION_VALUE}
+      defaultValue={currentFolderId ?? FOLDER_OPTIONS.ALL}
       onChange={setFolder}
     >
-      <List.Dropdown.Item value={ALL_OPTION_VALUE} title="All" icon={Icon.Folder} />
+      <List.Dropdown.Item value={FOLDER_OPTIONS.ALL} title="All" icon={Icon.Folder} />
       {folders.map((folder) => {
-        const id = String(folder.id);
+        const id = folder.id || FOLDER_OPTIONS.NO_FOLDER;
 
         return <List.Dropdown.Item key={id} value={id} title={folder.name} icon={Icon.Folder} />;
       })}

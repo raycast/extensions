@@ -8,9 +8,8 @@ import { captureException } from "~/utils/development";
 import useVaultCaching from "~/components/searchVault/utils/useVaultCaching";
 import { FailedToLoadVaultItemsError, getDisplayableErrorMessage } from "~/utils/errors";
 import useOnceEffect from "~/utils/hooks/useOnceEffect";
-import useAfterMountEffect from "~/utils/hooks/useAfterMountEffect";
 import { useCachedState } from "@raycast/utils";
-import { CACHE_KEYS } from "~/constants/general";
+import { CACHE_KEYS, FOLDER_OPTIONS } from "~/constants/general";
 
 export type VaultState = Vault & {
   isLoading: boolean;
@@ -53,10 +52,6 @@ export function VaultProvider(props: VaultProviderProps) {
     void loadItems();
   }, fetchOnMount && session.active && session.token);
 
-  useAfterMountEffect(() => {
-    void loadItems();
-  }, [currentFolderId]);
-
   async function loadItems() {
     try {
       setState({ isLoading: true });
@@ -64,7 +59,7 @@ export function VaultProvider(props: VaultProviderProps) {
       let items: Item[] = [];
       let folders: Folder[] = [];
       try {
-        [items, folders] = await Promise.all([bitwarden.listItems(currentFolderId), bitwarden.listFolders()]);
+        [items, folders] = await Promise.all([bitwarden.listItems(), bitwarden.listFolders()]);
         items.sort(favoriteItemsFirstSorter);
       } catch (error) {
         publishItems(new FailedToLoadVaultItemsError());
@@ -103,6 +98,7 @@ export function VaultProvider(props: VaultProviderProps) {
   const memoizedValue: VaultContextType = useMemo(
     () => ({
       ...state,
+      items: filterItemsByFolderId(state.items, currentFolderId),
       isEmpty: state.items.length == 0,
       isLoading: state.isLoading || session.isLoading,
       currentFolderId,
@@ -110,10 +106,17 @@ export function VaultProvider(props: VaultProviderProps) {
       loadItems,
       setFolder,
     }),
-    [state, session.isLoading, syncItems, loadItems, setFolder]
+    [state, session.isLoading, currentFolderId, syncItems, loadItems, setFolder]
   );
 
   return <VaultContext.Provider value={memoizedValue}>{children}</VaultContext.Provider>;
+}
+
+function filterItemsByFolderId(items: Item[], folderId: Nullable<string>) {
+  if (folderId === FOLDER_OPTIONS.ALL) return items;
+  if (folderId === FOLDER_OPTIONS.NO_FOLDER) return items.filter((item) => item.folderId === null);
+
+  return folderId ? items.filter((item) => item.folderId === folderId) : items;
 }
 
 function favoriteItemsFirstSorter(a: Item, b: Item) {
