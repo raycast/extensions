@@ -1,5 +1,5 @@
 import React from "react";
-import { Cache, LaunchType, MenuBarExtra, launchCommand } from "@raycast/api";
+import { Cache, LaunchType, MenuBarExtra, getPreferenceValues, launchCommand, open } from "@raycast/api";
 import { stopTimer, useMyTimeEntries } from "./services/harvest";
 import { HarvestTimeEntry } from "./services/responseTypes";
 
@@ -16,6 +16,10 @@ export default function MenuBar() {
   const [cacheLoading, setCacheLoading] = React.useState(true);
 
   const runningTimer = getCurrentTimerFromCache();
+  const { callbackURLStart, callbackURLStop } = getPreferenceValues<{
+    callbackURLStart?: string;
+    callbackURLStop?: string;
+  }>();
 
   //   console.log({ isLoading, cacheLoading });
 
@@ -23,7 +27,8 @@ export default function MenuBar() {
     if (data && !isLoading) {
       const found = data.find((o) => o.is_running);
       if (runningTimer?.id !== found?.id) {
-        console.log("found new running timer!!");
+        if (found && callbackURLStart) open(callbackURLStart);
+        if (!found && callbackURLStop) open(callbackURLStop);
       }
       if (found) {
         cache.set("running", JSON.stringify(found));

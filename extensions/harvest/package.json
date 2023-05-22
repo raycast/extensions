@@ -10,15 +10,6 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "menu-bar",
-      "title": "Running Timer",
-      "subtitle": "Harvest",
-      "description": "See your active Harvest timer at a glance",
-      "mode": "menu-bar",
-      "interval": "1m",
-      "disabledByDefault": true
-    },
-    {
       "name": "new",
       "icon": "add.png",
       "title": "New Time Entry",
@@ -74,6 +65,31 @@
       "subtitle": "Harvest",
       "description": "Stop your running timer",
       "mode": "no-view"
+    },
+    {
+      "name": "menu-bar",
+      "title": "Running Timer",
+      "subtitle": "Harvest",
+      "description": "See your active Harvest timer at a glance",
+      "mode": "menu-bar",
+      "interval": "1m",
+      "disabledByDefault": true,
+      "preferences": [
+        {
+          "name": "callbackURLStart",
+          "title": "Callback URL - Timer Started",
+          "description": "URL to open when a running timer starts. See README for more info.",
+          "type": "textfield",
+          "required": false
+        },
+        {
+          "name": "callbackURLStop",
+          "title": "Callback URL - Timer Stopped",
+          "description": "URL to open when a running timer stops. See README for more info.",
+          "type": "textfield",
+          "required": false
+        }
+      ]
     }
   ],
   "preferences": [
