@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Clipboard, Detail, Icon, Keyboard, closeMainWindow, showHUD } from "@raycast/api";
+import { Action, ActionPanel, Clipboard, Detail, Icon, closeMainWindow, showHUD } from "@raycast/api";
 import { getTransientCopyPreference } from "~/utils/preferences";
 import { capitalize } from "~/utils/strings";
 import { SHORTCUT_KEY_SEQUENCE } from "~/constants/general";

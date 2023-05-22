@@ -1,5 +1,17 @@
 # Bitwarden Changelog
 
+## [Fix] - 2023-05-19
+
+- Avoid displaying timeout info label on Unlock Form when the preference is Never 
+- Fix crashing when getting the name of the frontmost application
+
+## [Improvements to Actions] - 2023-05-18
+
+- Add "Show Identity" action for identity vault items
+- Change "Show Card" action details view to a table format
+- Add actions with shortcuts to copy Card and Identity fields in the details view
+- General action improvements: Better order, labels, icons and section titles
+
 ## [New Command] - 2023-05-18
 
 - Add Lock Vault command
