@@ -1,8 +1,9 @@
 import { List, Icon, ActionPanel } from "@raycast/api";
 import RootErrorBoundary from "~/components/RootErrorBoundary";
-import SearchCommonActions from "~/components/searchVault/actions/shared/VaultManagementActions";
+import VaultManagementActions from "~/components/searchVault/actions/shared/VaultManagementActions";
 import VaultListenersProvider from "~/components/searchVault/context/vaultListeners";
 import VaultItem from "~/components/searchVault/Item";
+import ListFolderDropdown from "~/components/searchVault/ListFolderDropdown";
 import { BitwardenProvider } from "~/context/bitwarden";
 import { SessionProvider } from "~/context/session";
 import { useVault, VaultProvider } from "~/context/vault";
@@ -26,7 +27,7 @@ function SearchVaultComponent() {
   const { items, folders, isLoading, isEmpty } = useVault();
 
   return (
-    <List isLoading={isLoading}>
+    <List isLoading={isLoading} searchBarAccessory={<ListFolderDropdown folders={folders} isLoading={isLoading} />}>
       {items.map((item) => (
         <VaultItem key={item.id} item={item} folder={getItemFolder(folders, item)} />
       ))}
@@ -44,7 +45,7 @@ function SearchVaultComponent() {
           actions={
             !isLoading && (
               <ActionPanel>
-                <SearchCommonActions />
+                <VaultManagementActions />
               </ActionPanel>
             )
           }
