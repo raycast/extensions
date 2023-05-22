@@ -5,7 +5,7 @@ import { useVaultContext } from "~/context/vault";
 export default function ListFolderDropdown() {
   const { folders, isLoading, currentFolderId, setFolder } = useVaultContext();
 
-  if ((isLoading && folders.length === 0) || folders.length === 0) return null;
+  if (folders.length === 0) return null;
 
   return (
     <List.Dropdown
@@ -13,6 +13,7 @@ export default function ListFolderDropdown() {
       isLoading={isLoading}
       defaultValue={currentFolderId ?? FOLDER_OPTIONS.ALL}
       onChange={setFolder}
+      throttle
     >
       <List.Dropdown.Item value={FOLDER_OPTIONS.ALL} title="All" icon={Icon.Folder} />
       {folders.map((folder) => {
