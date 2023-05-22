@@ -1,6 +1,6 @@
 import { SHORTCUT_KEY_SEQUENCE } from "~/constants/general";
 import { CARD_KEY_LABEL } from "~/constants/labels";
-import { Card } from "~/types/vault";
+import { Card, CardBrand } from "~/types/vault";
 
 const MONTH_NUMBER_TO_LABEL_MAP = {
   1: "01 - January",
@@ -55,4 +55,22 @@ export function cardBitwardenPageFieldOrderSorter([a]: string | [string, any], [
   const aIndex = CARD_KEY_LABEL_KEYS.indexOf((Array.isArray(a) ? a[0] : a) as keyof Card);
   const bIndex = CARD_KEY_LABEL_KEYS.indexOf((Array.isArray(b) ? b[0] : b) as keyof Card);
   return aIndex - bIndex;
+}
+
+const BASE_CARD_IMAGE_URL = "https://vault.bitwarden.com/images";
+const CARD_BRANDS_TO_IMAGE_URL_MAP: Partial<Record<CardBrand, string>> = {
+  [CardBrand.VISA]: BASE_CARD_IMAGE_URL,
+  [CardBrand.MASTERCARD]: `${BASE_CARD_IMAGE_URL}/mastercard-light.png`,
+  [CardBrand.AMEX]: `${BASE_CARD_IMAGE_URL}/amex-light.png`,
+  [CardBrand.DISCOVER]: `${BASE_CARD_IMAGE_URL}/discover-light.png`,
+  [CardBrand.DINERS_CLUB]: `${BASE_CARD_IMAGE_URL}/diners_club-light.png`,
+  [CardBrand.JCB]: `${BASE_CARD_IMAGE_URL}/jcb-light.png`,
+  [CardBrand.MAESTRO]: `${BASE_CARD_IMAGE_URL}/maestro-light.png`,
+  [CardBrand.UNION_PAY]: `${BASE_CARD_IMAGE_URL}/union_pay-light.png`,
+  [CardBrand.RU_PAY]: `${BASE_CARD_IMAGE_URL}/ru_pay-light.png`,
+};
+
+export function getCardImageUrl(brand: CardBrand): string | undefined {
+  const imageUrl = CARD_BRANDS_TO_IMAGE_URL_MAP[brand];
+  return imageUrl;
 }

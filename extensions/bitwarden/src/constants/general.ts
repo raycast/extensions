@@ -1,6 +1,7 @@
 /* Put constants that you feel like they still don't deserve a file of their own here */
 
-import { Keyboard } from "@raycast/api";
+import { Icon, Keyboard } from "@raycast/api";
+import { ItemType } from "~/types/vault";
 
 export const DEFAULT_SERVER_URL = "https://bitwarden.com";
 
@@ -72,4 +73,11 @@ export const CACHE_KEYS = {
   IV: "iv",
   VAULT: "vault",
   CURRENT_FOLDER_ID: "currentFolderId",
+};
+
+export const ITEM_TYPE_TO_ICON_MAP: Record<ItemType, Icon> = {
+  [ItemType.LOGIN]: Icon.Globe,
+  [ItemType.CARD]: Icon.CreditCard,
+  [ItemType.IDENTITY]: Icon.Person,
+  [ItemType.NOTE]: Icon.Document,
 };

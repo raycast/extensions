@@ -72,8 +72,8 @@ export enum CardBrand {
   DINERS_CLUB = "Diners Club",
   JCB = "JCB",
   MAESTRO = "Maestro",
-  UNIONPAY = "UnionPay",
-  RUPAY = "RuPay",
+  UNION_PAY = "UnionPay",
+  RU_PAY = "RuPay",
   OTHER = "Other",
 }
 

@@ -2,7 +2,9 @@ import { Color, getPreferenceValues, Icon, List } from "@raycast/api";
 import { useMemo } from "react";
 import VaultItemActionPanel from "~/components/searchVault/ItemActionPanel";
 import VaultItemContext from "~/components/searchVault/context/vaultItem";
+import { ITEM_TYPE_TO_ICON_MAP } from "~/constants/general";
 import { Folder, Item, ItemType } from "~/types/vault";
+import { getCardImageUrl } from "~/utils/cards";
 import { captureException } from "~/utils/development";
 import { extractKeywords, faviconUrl } from "~/utils/search";
 
@@ -33,25 +35,48 @@ const VaultItem = (props: VaultItemProps) => {
   );
 };
 
-const ITEM_TYPE_TO_ICON_MAP = {
-  1: Icon.Globe,
-  2: Icon.BlankDocument,
-  3: Icon.List,
-  4: Icon.Person,
+const ITEM_TYPE_TO_IMAGE_OR_ICON_MAP: Record<ItemType, (item: Item) => string | Icon> = {
+  [ItemType.LOGIN]: (item: Item) => {
+    const iconUri = item.login?.uris?.[0]?.uri;
+    if (fetchFavicons && iconUri) return faviconUrl(iconUri);
+    return ITEM_TYPE_TO_ICON_MAP[ItemType.LOGIN];
+  },
+  [ItemType.CARD]: (item: Item) => {
+    const { brand } = item.card ?? {};
+    if (brand) {
+      const cardBrandImage = getCardImageUrl(brand);
+      if (cardBrandImage) return cardBrandImage;
+    }
+    return ITEM_TYPE_TO_ICON_MAP[ItemType.CARD];
+  },
+  [ItemType.IDENTITY]: () => ITEM_TYPE_TO_ICON_MAP[ItemType.IDENTITY],
+  [ItemType.NOTE]: () => ITEM_TYPE_TO_ICON_MAP[ItemType.NOTE],
 };
 
 function getIcon(item: Item) {
-  const iconUri = item.login?.uris?.[0]?.uri;
-  if (fetchFavicons && iconUri) return faviconUrl(iconUri);
-  return ITEM_TYPE_TO_ICON_MAP[item.type];
+  const imageOrIcon = ITEM_TYPE_TO_IMAGE_OR_ICON_MAP[item.type]?.(item);
+  if (imageOrIcon) return imageOrIcon;
+  return Icon.QuestionMark;
 }
 
 type ListItemAccessory = NonNullable<List.Item.Props["accessories"]>[number];
 const TYPE_TO_ACCESSORY_MAP: Record<ItemType, ListItemAccessory> = {
-  [ItemType.LOGIN]: { icon: { source: Icon.Globe, tintColor: Color.Blue }, tooltip: "Login" },
-  [ItemType.CARD]: { icon: { source: Icon.CreditCard, tintColor: Color.Green }, tooltip: "Card" },
-  [ItemType.IDENTITY]: { icon: { source: Icon.Person, tintColor: Color.Orange }, tooltip: "Identity" },
-  [ItemType.NOTE]: { icon: { source: Icon.Document, tintColor: Color.PrimaryText }, tooltip: "Secure Note" },
+  [ItemType.LOGIN]: {
+    icon: { source: ITEM_TYPE_TO_ICON_MAP[ItemType.LOGIN], tintColor: Color.Blue },
+    tooltip: "Login",
+  },
+  [ItemType.CARD]: {
+    icon: { source: ITEM_TYPE_TO_ICON_MAP[ItemType.CARD], tintColor: Color.Green },
+    tooltip: "Card",
+  },
+  [ItemType.IDENTITY]: {
+    icon: { source: ITEM_TYPE_TO_ICON_MAP[ItemType.IDENTITY], tintColor: Color.Orange },
+    tooltip: "Identity",
+  },
+  [ItemType.NOTE]: {
+    icon: { source: ITEM_TYPE_TO_ICON_MAP[ItemType.NOTE], tintColor: Color.PrimaryText },
+    tooltip: "Secure Note",
+  },
 };
 
 function getAccessories(item: Item, folder: Folder | undefined) {
