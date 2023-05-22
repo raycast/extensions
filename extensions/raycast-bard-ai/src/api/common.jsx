@@ -9,19 +9,20 @@ import {
   Icon,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
-import Bard, { askAI } from "bard-ai"
+import Bard, { askAI } from "bard-ai";
 
 export default function ResultView(prompt, toast_title, type = "text", title) {
   if (type === "text") {
-    prompt += " Return your response as a JSON with key 'response'. The value associated should be a single string with your answer. ONLY return that JSON and nothing else. Be accurate and concise. \n\n"
+    prompt +=
+      " Return your response as a JSON with key 'response'. The value associated should be a single string with your answer. ONLY return that JSON and nothing else. Be accurate and concise. \n\n";
   }
   if (type === "code") {
-    prompt += " Return your response in a codeblock. \n\n"
+    prompt += " Return your response in a codeblock. \n\n";
   }
   const pref = getPreferenceValues();
   const [response, setResponse] = useState("");
   const [loading, setLoading] = useState(true);
-  const [pasteContent, setPasteContent] = useState("")
+  const [pasteContent, setPasteContent] = useState("");
   async function getResult() {
     const now = new Date();
     const toast = await showToast(Toast.Style.Animated, toast_title);
@@ -31,7 +32,7 @@ export default function ResultView(prompt, toast_title, type = "text", title) {
       try {
         selectedText = await getSelectedText();
       } catch (error) {
-        toast.title = "Error"
+        toast.title = "Error";
         toast.style = Toast.Style.Failure;
         setLoading(false);
         setResponse("⚠️ Raycast was unable to get the selected text.");
@@ -39,10 +40,10 @@ export default function ResultView(prompt, toast_title, type = "text", title) {
       }
 
       try {
-        await Bard.init(pref['__Secure-1PSID'])
-        return await askAI(`${prompt}; ${selectedText}}`)
+        await Bard.init(pref["__Secure-1PSID"]);
+        return await askAI(`${prompt}; ${selectedText}}`);
       } catch (error) {
-        toast.title = "Error"
+        toast.title = "Error";
         toast.style = Toast.Style.Failure;
         setLoading(false);
         setResponse("⚠️ Unable to reach Bard at this time.");
@@ -53,7 +54,7 @@ export default function ResultView(prompt, toast_title, type = "text", title) {
     getBardResponse().then((response) => {
       if (!response) return;
       if (type === "text") {
-        let match = response.match(/"response": "([^"]*)"/)
+        let match = response.match(/"response": "([^"]*)"/);
         if (match) {
           setResponse(match[1].trim());
         } else {
@@ -61,7 +62,7 @@ export default function ResultView(prompt, toast_title, type = "text", title) {
         }
         setPasteContent(match[1].trim());
       } else if (type === "code") {
-        let match = response.match(/```([a-zA-Z]+)?(.*?)```/s)
+        let match = response.match(/```([a-zA-Z]+)?(.*?)```/s);
         if (match) {
           setResponse(match[0].trim());
         } else {
@@ -74,10 +75,10 @@ export default function ResultView(prompt, toast_title, type = "text", title) {
       }
 
       setLoading(false);
-      toast.style = Toast.Style.Success
-      const duration = ((new Date()).getTime() - now.getTime()) / 1000
-      toast.title = `Finished in ${duration} seconds`
-    })
+      toast.style = Toast.Style.Success;
+      const duration = (new Date().getTime() - now.getTime()) / 1000;
+      toast.title = `Finished in ${duration} seconds`;
+    });
   }
 
   async function retry() {
@@ -89,9 +90,6 @@ export default function ResultView(prompt, toast_title, type = "text", title) {
   useEffect(() => {
     getResult();
   }, []);
-
-
-
 
   return (
     <Detail
@@ -108,8 +106,7 @@ export default function ResultView(prompt, toast_title, type = "text", title) {
       }
       metadata={
         <Detail.Metadata>
-          <Detail.Metadata.Label title="Command Type" text={type.charAt(0).toUpperCase()
-            + type.slice(1)} />
+          <Detail.Metadata.Label title="Command Type" text={type.charAt(0).toUpperCase() + type.slice(1)} />
           <Detail.Metadata.Label title="Command Title" text={title} />
           <Detail.Metadata.Separator />
           <Detail.Metadata.Label title="Model" text={`PaLM 2`} />
