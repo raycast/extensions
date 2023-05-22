@@ -65,9 +65,7 @@ function getAccessories(item: Item, folder: Folder | undefined) {
         tooltip: "Folder",
       });
     }
-    if (item.favorite) {
-      accessories.push({ icon: { source: Icon.Star, tintColor: Color.Yellow }, tooltip: "Favorite" });
-    }
+    if (item.favorite) accessories.push({ icon: { source: Icon.Star, tintColor: Color.Yellow }, tooltip: "Favorite" });
     accessories.push(TYPE_TO_ACCESSORY_MAP[item.type]);
 
     return accessories;
