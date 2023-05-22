@@ -15,12 +15,12 @@ export const LOCAL_STORAGE_KEY = {
   SERVER_URL: "cliServer",
   LAST_ACTIVITY_TIME: "lastActivityTime",
   VAULT_LOCK_REASON: "vaultLockReason",
-};
+} as const;
 
 export const VAULT_LOCK_MESSAGES = {
   TIMEOUT: "Vault timed out due to inactivity",
   MANUAL: "Manually locked by the user",
-};
+} as const;
 
 export const SHORTCUT_KEY_SEQUENCE: Keyboard.Shortcut["key"][] = [
   "1",
@@ -67,13 +67,13 @@ export const SHORTCUT_KEY_SEQUENCE: Keyboard.Shortcut["key"][] = [
 export const FOLDER_OPTIONS = {
   ALL: "all",
   NO_FOLDER: "no-folder",
-};
+} as const;
 
 export const CACHE_KEYS = {
   IV: "iv",
   VAULT: "vault",
   CURRENT_FOLDER_ID: "currentFolderId",
-};
+} as const;
 
 export const ITEM_TYPE_TO_ICON_MAP: Record<ItemType, Icon> = {
   [ItemType.LOGIN]: Icon.Globe,

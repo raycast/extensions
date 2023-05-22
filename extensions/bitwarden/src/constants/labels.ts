@@ -43,7 +43,7 @@ export const IDENTITY_KEY_LABEL: Record<keyof Identity, string> = {
   country: "Country",
 };
 
-export const ITEM_TYPE_TO_LABEL = {
+export const ITEM_TYPE_TO_LABEL: Record<ItemType, string> = {
   [ItemType.LOGIN]: "Login",
   [ItemType.CARD]: "Card",
   [ItemType.IDENTITY]: "Identity",
