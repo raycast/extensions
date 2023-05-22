@@ -36,7 +36,7 @@ export default function Command() {
           title={item.markdown.trim().split("\n")[0].replaceAll("#", "").trim()}
           detail={<List.Item.Detail markdown={item.markdown} />}
           actions={
-            <ActionPanel title="Open in browser">
+            <ActionPanel>
               <Action.OpenInBrowser url={`https://cairo-book.github.io/${item.name.replace(".md", ".html")}`} />
             </ActionPanel>
           }
