@@ -20,4 +20,5 @@ export interface Docset {
 
 export interface DashArguments {
   searchstring: string;
+  docset?: string;
 }
