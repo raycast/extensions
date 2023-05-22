@@ -44,9 +44,9 @@ export default function Command() {
           accessoryTitle={
             entry.split("/").length > 2
               ? entry
-                .split("/")
-                .slice(1, entry.split("/").length - 1)
-                .join("\t")
+                  .split("/")
+                  .slice(1, entry.split("/").length - 1)
+                  .join("\t")
               : ""
           }
           keywords={entry.split("/").slice(1)}
