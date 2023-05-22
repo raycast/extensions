@@ -2,15 +2,6 @@ import { List, ActionPanel, Action, Image } from "@raycast/api";
 import axios from "axios";
 import { useEffect, useState } from "react";
 
-const STARKSCAN_HEADERS = {
-  "User-Agent":
-    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36",
-};
-
-const formatNumber = (str: string): string => {
-  return str.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-};
-
 export default function Command() {
   const [listLoading, setListLoading] = useState<boolean>(true);
   const [listItems, setListItems] = useState<
@@ -29,14 +20,14 @@ export default function Command() {
   }, []);
 
   return (
-    <List isLoading={listLoading} navigationTitle="Fetched from Starkscan">
+    <List isLoading={listLoading}>
       {listItems.map((item) => (
         <List.Item
           key={item.id}
           title={item.name}
           icon={{ source: item.profile_image_url, mask: Image.Mask.Circle }}
           actions={
-            <ActionPanel title="Open in browser">
+            <ActionPanel>
               <Action.OpenInBrowser url={`https://twitter.com/${item.username}`} />
             </ActionPanel>
           }

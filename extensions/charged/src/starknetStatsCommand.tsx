@@ -1,4 +1,4 @@
-import { List, ActionPanel, Action, Image } from "@raycast/api";
+import { List, ActionPanel, Action } from "@raycast/api";
 import axios from "axios";
 import { useEffect, useState } from "react";
 
@@ -46,8 +46,6 @@ export default function Command() {
       const latestBlockStats = latestBlockResponse.data.data.latestBlockStats.latest;
       const overviewStats = overviewStatsResponse.data.data.starknetOverviewStats;
 
-      console.log("these are latestBlockStats", latestBlockStats);
-
       setListItems([
         {
           name: "TPS",
@@ -93,7 +91,7 @@ export default function Command() {
           key={item.name}
           title={item.name}
           actions={
-            <ActionPanel title="Open in browser">
+            <ActionPanel>
               <Action.OpenInBrowser url="https://starkscan.co/stats" />
             </ActionPanel>
           }

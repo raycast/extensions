@@ -53,7 +53,7 @@ export default function Command() {
       <Form
         actions={
           <ActionPanel>
-            <Action.SubmitForm title="Copy to clipboard" onSubmit={onSubmit} />
+            <Action.SubmitForm title="Copy to Clipboard" onSubmit={onSubmit} />
           </ActionPanel>
         }
       >
@@ -141,8 +141,4 @@ export default function Command() {
       </Form>
     </>
   );
-}
-
-function validatePassword(value: string): boolean {
-  return value.length >= 8;
 }

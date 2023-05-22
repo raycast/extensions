@@ -1,5 +1,4 @@
 import { List, ActionPanel, Action } from "@raycast/api";
-import axios from "axios";
 import { useEffect, useState } from "react";
 import fs from "fs";
 
