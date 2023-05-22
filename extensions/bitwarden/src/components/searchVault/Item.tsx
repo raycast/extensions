@@ -2,7 +2,8 @@ import { Color, getPreferenceValues, Icon, List } from "@raycast/api";
 import { useMemo } from "react";
 import VaultItemActionPanel from "~/components/searchVault/ItemActionPanel";
 import VaultItemContext from "~/components/searchVault/context/vaultItem";
-import { Folder, Item } from "~/types/vault";
+import { Folder, Item, ItemType } from "~/types/vault";
+import { captureException } from "~/utils/development";
 import { extractKeywords, faviconUrl } from "~/utils/search";
 
 const { fetchFavicons } = getPreferenceValues();
@@ -45,22 +46,35 @@ function getIcon(item: Item) {
   return ITEM_TYPE_TO_ICON_MAP[item.type];
 }
 
+type ListItemAccessory = NonNullable<List.Item.Props["accessories"]>[number];
+const TYPE_TO_ACCESSORY_MAP: Record<ItemType, ListItemAccessory> = {
+  [ItemType.LOGIN]: { icon: { source: Icon.Globe, tintColor: Color.Blue } },
+  [ItemType.CARD]: { icon: { source: Icon.CreditCard, tintColor: Color.Green } },
+  [ItemType.IDENTITY]: { icon: { source: Icon.Person, tintColor: Color.Orange } },
+  [ItemType.NOTE]: { icon: { source: Icon.Document, tintColor: Color.PrimaryText } },
+};
+
 function getAccessories(item: Item, folder: Folder | undefined) {
-  const accessories = [];
+  try {
+    const accessories: ListItemAccessory[] = [];
 
-  if (folder?.id) {
-    accessories.push({
-      icon: { source: Icon.Folder, tintColor: Color.SecondaryText },
-      tooltip: "Folder",
-      text: folder.name,
-    });
+    if (folder?.id) {
+      accessories.push({
+        icon: { source: Icon.Folder, tintColor: Color.SecondaryText },
+        tooltip: "Folder",
+        text: folder.name,
+      });
+    }
+    if (item.favorite) {
+      accessories.push({ icon: { source: Icon.Star, tintColor: Color.Yellow }, tooltip: "Favorite" });
+    }
+    accessories.push(TYPE_TO_ACCESSORY_MAP[item.type]);
+
+    return accessories;
+  } catch (error) {
+    captureException("Failed to get item accessories", error);
+    return [];
   }
-
-  if (item.favorite) {
-    accessories.push({ icon: { source: Icon.Star, tintColor: Color.Yellow }, tooltip: "Favorite" });
-  }
-
-  return accessories;
 }
 
 export default VaultItem;
