@@ -5,6 +5,9 @@
   "description": "Access the KeePass database with the KeepassXC-cli. Please make sure KeePassXC is installed.",
   "icon": "keepassxc.png",
   "author": "zkytech",
+  "contributors": [
+    "Sulfyderz"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -17,44 +20,44 @@
   ],
   "preferences": [
     {
+      "description": "Set the Path of Keepass Database File",
       "name": "database",
-      "type": "textfield",
+      "placeholder": "Set the Path of KeePass Database File",
       "required": true,
       "title": "Path of Keepass Database File",
-      "description": "Set the Path of Keepass Database File",
-      "placeholder": "Set the Path of KeePass Database File"
+      "type": "textfield"
     },
     {
+      "description": "Password of Keepass database. For more information about security, please visit README on GitHub",
       "name": "dbPassword",
-      "type": "password",
+      "placeholder": "Please input password of Keepass database",
       "required": true,
       "title": "Password",
-      "description": "Password of Keepass database. For more information about security, please visit README on GitHub",
-      "placeholder": "Please input password of Keepass database"
+      "type": "password"
     },
     {
+      "description": "Set the Path of Key File",
       "name": "keyFile",
-      "type": "textfield",
+      "placeholder": "Set the Path of Key File",
       "required": false,
       "title": "Path of Key File",
-      "description": "Set the Path of Key File",
-      "placeholder": "Set the Path of Key File"
+      "type": "textfield"
     },
     {
+      "default": "/Applications/KeePassXC.app",
+      "description": "KeepassXC.app",
       "name": "keepassxcRootPath",
-      "type": "appPicker",
+      "placeholder": "Select KeepassXC.app",
       "required": true,
       "title": "KeepassXC.app",
-      "description": "KeepassXC.app",
-      "placeholder": "Select KeepassXC.app",
-      "default": "/Applications/KeePassXC.app"
+      "type": "appPicker"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.38.1",
     "@types/crypto-js": "^4.1.0",
-    "run-applescript": "^6.0.0",
-    "crypto-js": "^4.1.1"
+    "crypto-js": "^4.1.1",
+    "run-applescript": "^6.0.0"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",
