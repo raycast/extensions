@@ -5,7 +5,7 @@ import { useVisitedFiles } from "./hooks/useVisitedFiles";
 import { resolveAllFiles } from "./components/fetchFigmaData";
 import { useEffect, useState } from "react";
 import { useCachedPromise } from "@raycast/utils";
-import { getPreferenceValues } from "@raycast/api";
+import { getPreferenceValues, Icon } from "@raycast/api";
 
 export default function Command() {
   const { data, isLoading, error } = useCachedPromise(
@@ -94,25 +94,32 @@ export default function Command() {
       )}
 
       {filteredFiles?.map((team) =>
-        team.files.map((project) => (
-          <Grid.Section
-            key={team.name + project.name + "-project"}
-            title={`${project.name} ${
-              project.files?.length != 0
-                ? `(${project.files?.length} File${project.files?.length === 1 ? "" : "s"})`
-                : ""
-            }`}
-            subtitle={team.name}
-          >
-            {project.files?.length != 0 ? (
-              project.files?.map((file) => (
+        team.files.map((project) =>
+          project.files?.length != 0 ? (
+            <Grid.Section
+              key={team.name + project.name + "-project"}
+              title={`${project.name} ${
+                project.files?.length != 0
+                  ? `(${project.files?.length} File${project.files?.length === 1 ? "" : "s"})`
+                  : ""
+              }`}
+              subtitle={team.name}
+            >
+              {project.files?.map((file) => (
                 <FileGridItem key={file.key + "-file"} file={file} desktopApp={desktopApp} onVisit={visitFile} />
-              ))
-            ) : (
-              <Grid.Item key={project.name + "-file-empty"} content="📂" title="Empty project" />
-            )}
-          </Grid.Section>
-        ))
+              ))}
+            </Grid.Section>
+          ) : (
+            <Grid.Section
+              key={team.name + project.name + "-project"}
+              title={project.name}
+              subtitle={team.name}
+              aspectRatio="16/9"
+            >
+              <Grid.Item key={project.name + "-file-empty"} content="emptyProject.svg" title="Empty project" />
+            </Grid.Section>
+          )
+        )
       )}
     </Grid>
   );
