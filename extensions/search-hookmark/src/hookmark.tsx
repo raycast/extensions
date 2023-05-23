@@ -32,6 +32,16 @@ export async function getBookmarks() {
   return response ? (JSON.parse(response) as Bookmark[]) : undefined;
 }
 
+export function openInHook(name: string, address: string) {
+  const script = `
+    tell application "Hookmark"
+      invoke on (make bookmark with properties {name:"${name}", address:"${address}"})
+    end tell
+  `;
+  const result = runAppleScriptSync(script);
+  console.log(`Bookmark added to Hook: ${name} (${address})`);
+}
+
 export function getNumberOfBookmarks(bookmarks?: Bookmark[]) {
   if (!bookmarks) {
     return undefined;

@@ -1,7 +1,21 @@
 import { LaunchProps, ActionPanel, List, Action } from "@raycast/api";
 import { useCachedPromise, getFavicon } from "@raycast/utils";
-import { getBookmarks } from "./hookmark";
+import { getBookmarks, openInHook } from "./hookmark";
 import { useMemo, useState } from "react";
+import fs from "fs";
+
+const HookPath = "/System/Volumes/Data/Applications/Hookmark.app";
+const HookPathSetapp = "/System/Volumes/Data/Applications/Setapp/Hookmark.app";
+let iconPath: string;
+if (fs.existsSync(HookPath)) {
+  iconPath = HookPath;
+  console.log(`iconPath is ${iconPath}`);
+}
+
+if (fs.existsSync(HookPathSetapp)) {
+  iconPath = HookPathSetapp;
+  console.log(`iconPath is ${iconPath}`);
+}
 
 export default function Command(props: LaunchProps) {
   const [searchText, setSearchText] = useState(props.fallbackText ?? "");
@@ -19,7 +33,7 @@ export default function Command(props: LaunchProps) {
   }, [bookmarks]);
 
   const numberOfBookmarksURL = useMemo(() => {
-    const urls = bookmarks?.filter((bookmark) => bookmark.path === "missing value");
+    const urls = bookmarks?.filter((bookmark) => bookmark.path.includes("missing value"));
     return urls?.length ?? 0;
   }, [bookmarks]);
 
@@ -41,8 +55,17 @@ export default function Command(props: LaunchProps) {
               accessories={[{ text: bookmark.path }]}
               actions={
                 <ActionPanel>
-                  <Action.Open title="Open In Hookmark" target={bookmark.path} application={"Hookmark"} />
+                  <Action
+                    icon={{ fileIcon: `${iconPath}` }}
+                    title="Open In Hookmark"
+                    onAction={() => openInHook(bookmark.title, bookmark.address)}
+                  />
                   <Action.OpenInBrowser title="Open In Finder" url={bookmark.address} />
+                  <Action.CopyToClipboard
+                    title="Copy As Markdown link"
+                    content={`[${bookmark.title}](${bookmark.address})`}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                  />
                   <Action.CopyToClipboard
                     title="Copy As Hook link"
                     content={bookmark.address}
@@ -51,11 +74,11 @@ export default function Command(props: LaunchProps) {
                   <Action.CopyToClipboard
                     title="Copy As File Path"
                     content={bookmark.path}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
                   />
                   <Action.Paste
-                    title="Paste Hook link"
-                    content={bookmark.address}
+                    title="Paste Markdown link"
+                    content={`[${bookmark.title}](${bookmark.address})`}
                     shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
                   />
                 </ActionPanel>
@@ -75,15 +98,19 @@ export default function Command(props: LaunchProps) {
               accessories={[{ text: bookmark.address }]}
               actions={
                 <ActionPanel>
-                  <Action.Open title="Open In Hookmark" target={bookmark.address} application={"Hookmark"} />
+                  <Action
+                    icon={{ fileIcon: `${iconPath}` }}
+                    title="Open In Hookmark"
+                    onAction={() => openInHook(bookmark.title, bookmark.address)}
+                  />
                   <Action.CopyToClipboard
-                    title="Copy As Hook link"
-                    content={bookmark.address}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "u" }}
+                    title="Copy As Markdown link"
+                    content={`[${bookmark.title}](${bookmark.address})`}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
                   />
                   <Action.Paste
-                    title="Paste Hook link"
-                    content={bookmark.address}
+                    title="Paste Markdown link"
+                    content={`[${bookmark.title}](${bookmark.address})`}
                     shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
                   />
                 </ActionPanel>
