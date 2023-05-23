@@ -174,10 +174,10 @@ export async function deleteTimeEntry(entry: HarvestTimeEntry) {
   return true;
 }
 
-export function refreshMenuBar() {
+export async function refreshMenuBar() {
   try {
-    launchCommand({ extensionName: "harvest", name: "menu-bar", type: LaunchType.Background }); // refresh menu bar
+    await launchCommand({ extensionName: "harvest", name: "menu-bar", type: LaunchType.Background });
   } catch {
-    // ignore
+    console.log("failed to refresh menu bar");
   }
 }
