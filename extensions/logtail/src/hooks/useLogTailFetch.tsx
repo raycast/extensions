@@ -31,7 +31,7 @@ export function useLogtailFetch<Response, Props = object>(
 export function useLogtailFetch<Response>(opts: UseLogtailFetchOptions): UseLogtailFetchResult<Response>;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function useLogtailFetch<Response, Props = object>({ url, execute }: any, render?: any): any {
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues();
 
   const response = useFetch<Response>(url, {
     execute: !!preferences.logtailApiKey && (execute === undefined ? true : !!execute),

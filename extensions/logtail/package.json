@@ -20,6 +20,12 @@
       "mode": "view"
     },
     {
+      "name": "saved-queries",
+      "title": "View Saved Queries",
+      "description": "Manage queries you have saved for later use",
+      "mode": "view"
+    },
+    {
       "name": "add-metadata",
       "title": "Add Metadata Tag",
       "description": "Add a custom metadata tag to display in log details",
@@ -29,12 +35,6 @@
       "name": "metadata",
       "title": "View Metadata Tags",
       "description": "Manage custom metadata tags you have added",
-      "mode": "view"
-    },
-    {
-      "name": "saved-queries",
-      "title": "View Saved Queries",
-      "description": "Manage queries you have saved for later use",
       "mode": "view"
     }
   ],
