@@ -13,8 +13,14 @@ export default function Command(props: LaunchProps) {
     });
   }, [data, searchText]);
 
-  const numberOfBookmarks = useMemo(() => {
-    return bookmarks?.length ?? 0;
+  const numberOfBookmarksFile = useMemo(() => {
+    const files = bookmarks?.filter((bookmark) => bookmark.path !== "missing value");
+    return files?.length ?? 0;
+  }, [bookmarks]);
+
+  const numberOfBookmarksURL = useMemo(() => {
+    const urls = bookmarks?.filter((bookmark) => bookmark.path === "missing value");
+    return urls?.length ?? 0;
   }, [bookmarks]);
 
   return (
@@ -24,36 +30,66 @@ export default function Command(props: LaunchProps) {
       filtering={{ keepSectionOrder: true }}
       onSearchTextChange={setSearchText}
     >
-      <List.Section title={`Results:`} subtitle={`${numberOfBookmarks} bookmarks are returned`}>
-        {bookmarks?.map((bookmark) => (
-          <List.Item
-            title={bookmark.title}
-            key={bookmark.address}
-            icon={bookmark.path == "missing value" ? getFavicon(bookmark.address) : { fileIcon: bookmark.path }}
-            accessories={[{ text: bookmark.path == "missing value" ? bookmark.address : bookmark.path }]}
-            actions={
-              <ActionPanel>
-                <Action.Open title="Open In Hookmark" target={bookmark.path == "missing value" ? bookmark.address : bookmark.path} application={"Hookmark"}/>
-                <Action.OpenInBrowser title="Open In Finder" url={bookmark.address} />
-                <Action.CopyToClipboard
-                  title="Copy As Hook link"
-                  content={bookmark.address}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "u" }}
-                />
-                <Action.CopyToClipboard
-                  title="Copy As File Path"
-                  content={bookmark.path}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
-                />
-                <Action.Paste
-                  title="Paste Hook link"
-                  content={bookmark.address}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
-                />
-              </ActionPanel>
-            }
-          />
-        ))}
+      <List.Section title={`Files:`} subtitle={`${numberOfBookmarksFile} bookmarks`}>
+        {bookmarks
+          ?.filter((bookmark) => bookmark.path !== "missing value")
+          .map((bookmark) => (
+            <List.Item
+              title={bookmark.title}
+              key={bookmark.address}
+              icon={{ fileIcon: bookmark.path }}
+              accessories={[{ text: bookmark.path }]}
+              actions={
+                <ActionPanel>
+                  <Action.Open title="Open In Hookmark" target={bookmark.path} application={"Hookmark"} />
+                  <Action.OpenInBrowser title="Open In Finder" url={bookmark.address} />
+                  <Action.CopyToClipboard
+                    title="Copy As Hook link"
+                    content={bookmark.address}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "u" }}
+                  />
+                  <Action.CopyToClipboard
+                    title="Copy As File Path"
+                    content={bookmark.path}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                  />
+                  <Action.Paste
+                    title="Paste Hook link"
+                    content={bookmark.address}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
+                  />
+                </ActionPanel>
+              }
+            />
+          ))}
+      </List.Section>
+
+      <List.Section title={`URLs:`} subtitle={`${numberOfBookmarksURL} bookmarks`}>
+        {bookmarks
+          ?.filter((bookmark) => bookmark.path.includes("missing value"))
+          .map((bookmark) => (
+            <List.Item
+              title={bookmark.title}
+              key={bookmark.address}
+              icon={getFavicon(bookmark.address)}
+              accessories={[{ text: bookmark.path }]}
+              actions={
+                <ActionPanel>
+                  <Action.Open title="Open In Hookmark" target={bookmark.address} application={"Hookmark"} />
+                  <Action.CopyToClipboard
+                    title="Copy As Hook link"
+                    content={bookmark.address}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "u" }}
+                  />
+                  <Action.Paste
+                    title="Paste Hook link"
+                    content={bookmark.address}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
+                  />
+                </ActionPanel>
+              }
+            />
+          ))}
       </List.Section>
     </List>
   );
