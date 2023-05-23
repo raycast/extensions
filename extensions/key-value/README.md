@@ -1,6 +1,6 @@
 # Key Value
 
-simple Raycast extension that allows you to quickly convert between keys and values. This extension is perfect for people who are workings with lots GUID.
+A simple Raycast extension that allows you to quickly convert between keys and values. This extension is perfect for people who are workings with lots GUID.
 
 
 ## Import Your Existing key value from JSON
