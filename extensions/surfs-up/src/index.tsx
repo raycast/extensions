@@ -53,18 +53,18 @@ export default function Command() {
                 : {})}
               actions={
                 <ActionPanel>
-                  <Action title="Forecast For Today" onAction={() => onCheckForecast(spot, "today")} icon={Icon.Pin} />
+                  <Action title="Forecast for Today" onAction={() => onCheckForecast(spot, "today")} icon={Icon.Pin} />
                   {isSpotSelected && (
                     <Action
                       autoFocus={isSpotSelected}
-                      title="Forecast For Tomorrow"
+                      title="Forecast for Tomorrow"
                       onAction={() => onCheckForecast(spot, "tomorrow")}
                       icon={Icon.Forward}
                     />
                   )}
                   {isSpotSelected && (
                     <Action
-                      title="Forecast For After Tomorrow"
+                      title="Forecast for After Tomorrow"
                       onAction={() => onCheckForecast(spot, "afterTomorrow")}
                       shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
                       icon={Icon.ForwardFilled}
