@@ -15,6 +15,7 @@
     {
       "name": "reviews",
       "title": "See Reviews",
+      "subtitle": "Pitchfork",
       "description": "Show Recent Pitchfork Album Reviews",
       "mode": "view"
     }
