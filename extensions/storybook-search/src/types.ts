@@ -3,7 +3,7 @@ export type Config = {
   nameFilterRegExp: string;
 };
 
-export type Component = {
+export type Story = {
   id: string;
   title: string;
   name: string;
@@ -12,9 +12,9 @@ export type Component = {
 };
 
 export type IndexData = {
-  entries: { [id: string]: Component };
+  entries: { [id: string]: Story };
 };
 
 export type StoriesData = {
-  stories: { [id: string]: Component };
+  stories: { [id: string]: Story };
 };

@@ -1,7 +1,7 @@
 import { ActionPanel, Action, List, Detail } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { useMemo } from "react";
-import { IndexData, StoriesData, Component, Config } from "../types";
+import { IndexData, StoriesData, Story, Config } from "../types";
 import EditConfig from "./edit-config";
 
 const Search = ({ config }: { config: Config }) => {
@@ -21,7 +21,7 @@ const Search = ({ config }: { config: Config }) => {
     onError: () => undefined, // prevent default toast
   });
 
-  const componentsToShow = useMemo(() => toComponentsToShow({ index, stories, config }), [index, stories, config]);
+  const storiesToShow = useMemo(() => toStoriesToShow({ index, stories, config }), [index, stories, config]);
 
   if (storiesError && indexError)
     return (
@@ -45,14 +45,14 @@ const Search = ({ config }: { config: Config }) => {
         </ActionPanel>
       }
     >
-      {componentsToShow.map((component) => (
-        <SearchListItem key={component.id} component={component} baseUrl={config.baseUrl} />
+      {storiesToShow.map((story) => (
+        <SearchListItem key={story.id} story={story} baseUrl={config.baseUrl} />
       ))}
     </List>
   );
 };
 
-const toComponentsToShow = ({
+const toStoriesToShow = ({
   index,
   stories,
   config,
@@ -60,7 +60,7 @@ const toComponentsToShow = ({
   index?: IndexData;
   stories?: StoriesData;
   config: Config;
-}): Component[] => {
+}): Story[] => {
   let nameFilterRegExp: RegExp;
   try {
     nameFilterRegExp = new RegExp(config.nameFilterRegExp ?? "");
@@ -69,8 +69,8 @@ const toComponentsToShow = ({
   }
 
   // filter by name and title
-  const filter = (components: [string, Component][]) =>
-    components.filter(([_, c]) => nameFilterRegExp.test(c.name)).map(([_, c]) => c);
+  const filter = (stories: [string, Story][]) =>
+    stories.filter(([_, s]) => nameFilterRegExp.test(s.name)).map(([_, s]) => s);
 
   // index.json is the preferred source of truth
   if (index) return filter(Object.entries(index.entries));
@@ -79,20 +79,17 @@ const toComponentsToShow = ({
   return [];
 };
 
-const SearchListItem = ({ component, baseUrl }: { component: Component; baseUrl: string }) => {
-  const title = `${component.title} - ${component.name}`;
+const SearchListItem = ({ story, baseUrl }: { story: Story; baseUrl: string }) => {
+  const title = `${story.title} - ${story.name}`;
   return (
     <List.Item
       title={title}
-      keywords={[component.title, component.id]}
+      keywords={[story.title, story.id, story.name]}
       actions={
         <ActionPanel title={title}>
           <ActionPanel.Section>
-            <Action.OpenInBrowser
-              url={new URL(`?path=/story/${component.id}`, baseUrl).href}
-              title="Open in Storybook"
-            />
-            <Action.CopyToClipboard content={component.importPath} title="Copy Import Path" />
+            <Action.OpenInBrowser url={new URL(`?path=/story/${story.id}`, baseUrl).href} title="Open in Storybook" />
+            <Action.CopyToClipboard content={story.importPath} title="Copy Import Path" />
           </ActionPanel.Section>
           <ActionPanel.Section>
             <EditConfigAction />

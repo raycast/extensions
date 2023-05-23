@@ -61,7 +61,7 @@ const EditConfigInner = ({ initialConfig }: { initialConfig: Config }) => {
       />
       <Form.TextField
         id="nameFilterRegExp"
-        title="RegExp to filter component names"
+        title="RegExp to filter story names"
         placeholder="^Docs$"
         defaultValue={initialConfig.nameFilterRegExp}
         error={nameFilterRegExpError}
