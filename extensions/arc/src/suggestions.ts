@@ -46,11 +46,6 @@ const config: SearchConfigs = {
     suggestions: null, //Note: Unknown
     suggestionParser: null,
   },
-  neeva: {
-    search: "https://neeva.com/search?q=",
-    suggestions: null, //Note: Unknown
-    suggestionParser: null,
-  },
   ecosia: {
     search: "https://www.ecosia.org/search?q=",
     suggestions: "https://ac.ecosia.org?type=list&q=",

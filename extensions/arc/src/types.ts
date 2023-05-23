@@ -25,7 +25,7 @@ export type NewTabPreferences = {
 };
 
 export type SearchArcPreferences = {
-  engine: "google" | "duckduckgo" | "bing" | "yahoo" | "neeva" | "ecosia";
+  engine: "google" | "duckduckgo" | "bing" | "yahoo" | "ecosia";
   sorting: "tabsHistorySuggestions" | "historyTabsSuggestions";
   showFavorites: boolean;
   showPinnedTabs: boolean;
@@ -45,7 +45,6 @@ export type SearchConfigs = {
   duckduckgo: SearchConfig;
   bing: SearchConfig;
   yahoo: SearchConfig;
-  neeva: SearchConfig;
   ecosia: SearchConfig;
 };
 
