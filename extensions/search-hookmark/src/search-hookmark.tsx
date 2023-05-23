@@ -27,15 +27,32 @@ export default function Command(props: LaunchProps) {
     });
   }, [data, searchText]);
 
+  const uniqueBookmarks = bookmarks?.filter((bookmark, index) => {
+    return (
+      index ===
+      bookmarks?.findIndex((b) => {
+        return (
+          b.title === bookmark.title &&
+          b.address === bookmark.address &&
+          b.path === bookmark.path &&
+          b.file === bookmark.file
+        );
+      })
+    );
+  });
+
+  // console.log(bookmarks.length)
+  // console.log(uniqueBookmarks.length)
+
   const numberOfBookmarksFile = useMemo(() => {
-    const files = bookmarks?.filter((bookmark) => bookmark.path !== "missing value");
+    const files = uniqueBookmarks?.filter((bookmark) => bookmark.path !== "missing value");
     return files?.length ?? 0;
-  }, [bookmarks]);
+  }, [uniqueBookmarks]);
 
   const numberOfBookmarksURL = useMemo(() => {
-    const urls = bookmarks?.filter((bookmark) => bookmark.path.includes("missing value"));
+    const urls = uniqueBookmarks?.filter((bookmark) => bookmark.path.includes("missing value"));
     return urls?.length ?? 0;
-  }, [bookmarks]);
+  }, [uniqueBookmarks]);
 
   return (
     <List
@@ -45,7 +62,7 @@ export default function Command(props: LaunchProps) {
       onSearchTextChange={setSearchText}
     >
       <List.Section title={`Files:`} subtitle={`${numberOfBookmarksFile} bookmarks`}>
-        {bookmarks
+        {uniqueBookmarks
           ?.filter((bookmark) => bookmark.path !== "missing value")
           .map((bookmark) => (
             <List.Item
@@ -88,7 +105,7 @@ export default function Command(props: LaunchProps) {
       </List.Section>
 
       <List.Section title={`URLs:`} subtitle={`${numberOfBookmarksURL} bookmarks`}>
-        {bookmarks
+        {uniqueBookmarks
           ?.filter((bookmark) => bookmark.path.includes("missing value"))
           .map((bookmark) => (
             <List.Item
