@@ -1,15 +1,11 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "charged",
+  "name": "Charged",
   "title": "Charged: Starknet Shortcuts",
   "description": "Shorcuts for common web3 tasks",
   "icon": "icon.png",
   "author": "apoorv",
-  "categories": [
-    "Developer Tools",
-    "Applications",
-    "Productivity"
-  ],
+  "categories": ["Developer Tools", "Applications", "Productivity"],
   "license": "MIT",
   "commands": [
     {
@@ -18,7 +14,7 @@
       "description": "Convert between felts, integers, strings and hex",
       "mode": "view",
       "icon": "icon.png",
-      "subtitle": "Convert between string, hex, felt etc."
+      "subtitle": "Charged"
     },
     {
       "name": "cairoBookCommand",
@@ -26,7 +22,7 @@
       "description": "Search the Cairo book",
       "mode": "view",
       "icon": "icon.png",
-      "subtitle": "Search the Cairo book"
+      "subtitle": "Charged"
     },
     {
       "name": "starknetEcosystemSearchCommand",
@@ -34,7 +30,7 @@
       "description": "Search the entire Starknet Ecosystem",
       "mode": "view",
       "icon": "icon.png",
-      "subtitle": "Search the Starknet Ecosystem"
+      "subtitle": "Charged"
     },
     {
       "name": "starknetStatsCommand",
@@ -42,7 +38,7 @@
       "description": "Get live stats of Starknet",
       "mode": "view",
       "icon": "icon.png",
-      "subtitle": "Check Starknet TPS, blocks, transactions etc."
+      "subtitle": "Charged"
     },
     {
       "name": "starknetChadsCommand",
@@ -50,7 +46,7 @@
       "description": "See top contributors on Starknet",
       "mode": "view",
       "icon": "icon.png",
-      "subtitle": "Twitter profiles of all Starknet chads"
+      "subtitle": "Charged"
     }
   ],
   "dependencies": {
