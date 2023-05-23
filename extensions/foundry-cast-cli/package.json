@@ -5,6 +5,7 @@
   "description": "Use the Cast CLI directly inside Raycast",
   "icon": "foundry.png",
   "author": "merklefruit",
+  "version": "0.1.2",
   "categories": [
     "Developer Tools"
   ],

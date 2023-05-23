@@ -39,11 +39,14 @@ export function useCast<Args>(cmd: string, args: Partial<Record<keyof Args, Cast
 
       setIsLoading(false);
     } catch (err: any) {
-      console.error(err);
       setIsLoading(false);
 
-      const error = errorParser(err.stderr, fullCommand);
-      showToast({ style: Toast.Style.Failure, title: error });
+      if (err.stderr) {
+        const error = errorParser(err.stderr, fullCommand);
+        showToast({ style: Toast.Style.Failure, title: error });
+      } else {
+        showToast({ style: Toast.Style.Failure, title: err.message });
+      }
     }
   }
 
