@@ -72,7 +72,7 @@ export default function Command(props: LaunchProps) {
               title={bookmark.title}
               key={bookmark.address}
               icon={getFavicon(bookmark.address)}
-              accessories={[{ text: bookmark.path }]}
+              accessories={[{ text: bookmark.address }]}
               actions={
                 <ActionPanel>
                   <Action.Open title="Open In Hookmark" target={bookmark.address} application={"Hookmark"} />
