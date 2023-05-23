@@ -14,12 +14,14 @@
     {
       "name": "index",
       "title": "Search Documents",
+      "subtitle": "Paperless-ngx",
       "description": "Search your self-hosted Paperless-ngx instance for documents",
       "mode": "view"
     },
     {
       "name": "documentForm",
-      "title": "Upload A Document",
+      "title": "Upload a Document",
+      "subtitle": "Paperless-ngx",
       "description": "Upload document to your Paperless-ngx instance",
       "mode": "view"
     }
