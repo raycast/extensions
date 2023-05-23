@@ -1,6 +1,6 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "Charged",
+  "name": "charged",
   "title": "Charged: Starknet Shortcuts",
   "description": "Shorcuts for common web3 tasks",
   "icon": "icon.png",
