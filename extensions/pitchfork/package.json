@@ -21,7 +21,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.50.0",
+    "@raycast/api": "^1.51.0",
     "@raycast/utils": "^1.4.16",
     "date-fns": "^2.25.0",
     "axios": "^1.4.0",
