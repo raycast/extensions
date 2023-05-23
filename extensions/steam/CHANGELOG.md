@@ -1,5 +1,5 @@
 # Steam Changelog
-## [Add AI Recommendation] - 2023-05-11
+## [Add AI Recommendation] - 2023-05-23
 Added an AI game recommendation to the main view
 
 ## [Bug Fixes] - 2022-09-18
