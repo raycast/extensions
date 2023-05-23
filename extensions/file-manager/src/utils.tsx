@@ -9,12 +9,15 @@ import {
   Action,
   Alert,
   confirmAlert,
+  Color,
+  Form,
+  useNavigation,
 } from "@raycast/api";
 import { promisify } from "node:util";
 import { exec as _exec } from "node:child_process";
 import { filesize } from "filesize";
 import { existsSync, lstatSync, readdirSync, readlinkSync } from "node:fs";
-import { resolve } from "node:path";
+import { basename, dirname, resolve } from "node:path";
 import { homedir } from "node:os";
 import { useState } from "react";
 
@@ -38,6 +41,7 @@ export type PreferencesType = {
   showFileSize: boolean;
   startDirectory: string;
   showDeleteActions: boolean;
+  standardShortcuts: boolean;
 };
 
 export async function deleteFile(filePath: string, fileName: string, refresh: () => void) {
@@ -104,6 +108,7 @@ export function getStartDirectory(): string {
 export function DirectoryItem(props: { fileData: FileDataType; refresh: () => void }) {
   const preferences: PreferencesType = getPreferenceValues();
   const filePath = `${props.fileData.path}/${props.fileData.name}`;
+
   return (
     <List.Item
       id={filePath}
@@ -119,25 +124,38 @@ export function DirectoryItem(props: { fileData: FileDataType; refresh: () => vo
             content={`${filePath}/`}
             shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
           />
-          <Action.Trash
-            title="Move to Trash"
-            shortcut={{ modifiers: ["cmd"], key: "t" }}
-            paths={filePath}
-            onTrash={() => {
-              showToast(Toast.Style.Success, "Moved to Trash", `Directory: ${filePath}`);
-              props.refresh();
-            }}
+          <Action.Push
+            target={<RenameItem filePath={filePath} refresh={props.refresh} isDirectory={true} />}
+            title="Rename Directory"
+            shortcut={{ modifiers: ["cmd"], key: "r" }}
+            icon={Icon.Pencil}
           />
-
-          {preferences.showDeleteActions && (
-            <Action
-              title="Delete Directory"
-              icon={Icon.Trash}
-              style={Action.Style.Destructive}
-              shortcut={{ modifiers: ["cmd"], key: "d" }}
-              onAction={() => deleteDirectory(filePath, props.fileData.name, props.refresh)}
+          <ActionPanel.Section>
+            <Action.Trash
+              title="Move to Trash"
+              shortcut={
+                preferences.standardShortcuts ? { modifiers: ["ctrl"], key: "x" } : { modifiers: ["cmd"], key: "t" }
+              }
+              paths={filePath}
+              onTrash={() => {
+                showToast(Toast.Style.Success, "Moved to Trash", `Directory: ${filePath}`);
+                props.refresh();
+              }}
             />
-          )}
+            {preferences.showDeleteActions && (
+              <Action
+                title="Delete Directory"
+                icon={Icon.Eraser}
+                style={Action.Style.Destructive}
+                shortcut={
+                  preferences.standardShortcuts
+                    ? { modifiers: ["ctrl", "shift"], key: "x" }
+                    : { modifiers: ["cmd"], key: "d" }
+                }
+                onAction={() => deleteDirectory(filePath, props.fileData.name, props.refresh)}
+              />
+            )}
+          </ActionPanel.Section>
         </ActionPanel>
       }
     />
@@ -170,24 +188,39 @@ export function FileItem(props: { fileData: FileDataType; refresh: () => void })
             content={filePath}
             shortcut={{ modifiers: ["opt", "shift"], key: "c" }}
           />
-          <Action.Trash
-            title="Move to Trash"
-            shortcut={{ modifiers: ["cmd"], key: "t" }}
-            paths={filePath}
-            onTrash={() => {
-              showToast(Toast.Style.Success, "Moved to Trash", `File: ${filePath}`);
-              props.refresh();
-            }}
+          <Action.Push
+            target={<RenameItem filePath={filePath} refresh={props.refresh} isDirectory={false} />}
+            title={`Rename File`}
+            icon={Icon.Pencil}
+            shortcut={{ modifiers: ["cmd"], key: "r" }}
           />
-          {preferences.showDeleteActions && (
-            <Action
-              title="Delete File"
-              icon={Icon.Trash}
-              style={Action.Style.Destructive}
-              shortcut={{ modifiers: ["cmd"], key: "d" }}
-              onAction={() => deleteFile(filePath, props.fileData.name, props.refresh)}
+
+          <ActionPanel.Section>
+            <Action.Trash
+              title="Move to Trash"
+              shortcut={
+                preferences.standardShortcuts ? { modifiers: ["ctrl"], key: "x" } : { modifiers: ["cmd"], key: "t" }
+              }
+              paths={filePath}
+              onTrash={() => {
+                showToast(Toast.Style.Success, "Moved to Trash", `File: ${filePath}`);
+                props.refresh();
+              }}
             />
-          )}
+            {preferences.showDeleteActions && (
+              <Action
+                title="Delete File"
+                icon={Icon.Eraser}
+                style={Action.Style.Destructive}
+                shortcut={
+                  preferences.standardShortcuts
+                    ? { modifiers: ["ctrl", "shift"], key: "x" }
+                    : { modifiers: ["cmd"], key: "d" }
+                }
+                onAction={() => deleteFile(filePath, props.fileData.name, props.refresh)}
+              />
+            )}
+          </ActionPanel.Section>
         </ActionPanel>
       }
     />
@@ -199,8 +232,8 @@ export function SymlinkItem(props: { fileData: FileDataType; refresh: () => void
   const filePath = `${props.fileData.path}/${props.fileData.name}`;
   const a = readlinkSync(filePath);
   const originalPath = a.startsWith("/") ? a : `${props.fileData.path}/${a}`;
-  const originalFileData = lstatSync(originalPath);
-  if (originalFileData.isDirectory()) {
+  const originalFileData = lstatSync(originalPath, { throwIfNoEntry: false });
+  if (originalFileData?.isDirectory() ?? false) {
     return (
       <List.Item
         id={filePath}
@@ -228,9 +261,13 @@ export function SymlinkItem(props: { fileData: FileDataType; refresh: () => void
             {preferences.showDeleteActions && (
               <Action
                 title="Delete Symlink Directory"
-                icon={Icon.Trash}
+                icon={Icon.Eraser}
                 style={Action.Style.Destructive}
-                shortcut={{ modifiers: ["cmd"], key: "d" }}
+                shortcut={
+                  preferences.standardShortcuts
+                    ? { modifiers: ["ctrl", "shift"], key: "x" }
+                    : { modifiers: ["cmd"], key: "d" }
+                }
                 onAction={() => deleteDirectory(filePath, props.fileData.name, props.refresh)}
               />
             )}
@@ -245,10 +282,19 @@ export function SymlinkItem(props: { fileData: FileDataType; refresh: () => void
         title={props.fileData.name}
         icon={{ fileIcon: filePath }}
         subtitle={preferences.showFilePermissions ? props.fileData.permissions : ""}
+        accessories={
+          !originalFileData
+            ? [{ icon: { source: Icon.ExclamationMark, tintColor: Color.Red }, tooltip: "Broken Symlink" }]
+            : []
+        }
         actions={
           <ActionPanel>
-            <Action.Open title="Open File" target={originalPath} />
-            <Action.OpenWith path={filePath} shortcut={{ modifiers: ["cmd"], key: "o" }} />
+            {originalFileData && (
+              <>
+                <Action.Open title="Open File" target={originalPath} />
+                <Action.OpenWith path={filePath} shortcut={{ modifiers: ["cmd"], key: "o" }} />
+              </>
+            )}
             <Action.CopyToClipboard
               title="Copy Symlink Path"
               content={filePath}
@@ -262,9 +308,13 @@ export function SymlinkItem(props: { fileData: FileDataType; refresh: () => void
             {preferences.showDeleteActions && (
               <Action
                 title="Delete Symlink File"
-                icon={Icon.Trash}
+                icon={Icon.Eraser}
                 style={Action.Style.Destructive}
-                shortcut={{ modifiers: ["cmd"], key: "d" }}
+                shortcut={
+                  preferences.standardShortcuts
+                    ? { modifiers: ["ctrl", "shift"], key: "x" }
+                    : { modifiers: ["cmd"], key: "d" }
+                }
                 onAction={() => deleteFile(filePath, props.fileData.name, props.refresh)}
               />
             )}
@@ -352,4 +402,48 @@ export function Directory(props: { path: string }) {
       </List>
     );
   }
+}
+
+export function RenameItem(props: { filePath: string; refresh: () => void; isDirectory: boolean }) {
+  const [itemName, setItemName] = useState<string>(basename(props.filePath));
+  const { pop } = useNavigation();
+
+  async function renameItem() {
+    const newFilePath = `${dirname(props.filePath)}/${itemName}`;
+    if (props.filePath !== newFilePath) {
+      await runShellScript(`mv "${props.filePath}" "${newFilePath}"`);
+      showToast(
+        Toast.Style.Success,
+        `${props.isDirectory ? "Directory" : "File"} Renamed`,
+        `${basename(props.filePath)} -> ${itemName}`
+      );
+      props.refresh();
+      pop();
+    }
+    return;
+  }
+
+  return (
+    <Form
+      navigationTitle={basename(props.filePath)}
+      actions={
+        <ActionPanel>
+          <Action
+            title={`Rename ${props.isDirectory ? "Directory" : "File"}`}
+            onAction={renameItem}
+            icon={Icon.Pencil}
+          />
+          <Action title="Cancel" shortcut={{ modifiers: ["cmd"], key: "." }} onAction={pop} icon={Icon.Undo} />
+        </ActionPanel>
+      }
+    >
+      <Form.TextField
+        id="itemName"
+        title={`Rename ${props.isDirectory ? "Directory" : "File"}`}
+        placeholder="Enter new name"
+        value={itemName}
+        onChange={setItemName}
+      />
+    </Form>
+  );
 }

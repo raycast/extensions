@@ -17,3 +17,5 @@ arc
 netlify
 pinata
 grafbase
+tailscale
+todoist

@@ -9,11 +9,14 @@ import {
   HarvestProjectAssignment,
   HarvestUserResponse,
 } from "./responseTypes";
-import { getPreferenceValues, LocalStorage } from "@raycast/api";
+import { Cache, getPreferenceValues, launchCommand, LaunchType, LocalStorage } from "@raycast/api";
 import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
 import { NewTimeEntryDuration, NewTimeEntryStartEnd } from "./requestTypes";
 import dayjs from "dayjs";
 import { useCachedPromise } from "@raycast/utils";
+import { useEffect } from "react";
+
+const cache = new Cache();
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function isAxiosError(error: any): error is AxiosError {
@@ -87,7 +90,23 @@ export async function getMyId() {
   return resp.data.id;
 }
 
-export async function getMyTimeEntries({ from = new Date(), to = new Date() }: { from: Date; to: Date }) {
+export function useMyTimeEntries(from = new Date(), to = new Date()) {
+  const qr = useCachedPromise(getMyTimeEntries, [{ from, to }], { initialData: [], keepPreviousData: true });
+  useEffect(() => {
+    if (from === new Date() && to === new Date()) {
+      const running_timer = qr.data.find((o) => o.is_running);
+      if (running_timer) {
+        cache.set("running", JSON.stringify(running_timer));
+      } else {
+        cache.remove("running");
+      }
+    }
+  }, [qr.data]);
+  return qr;
+}
+
+export async function getMyTimeEntries(args?: { from: Date; to: Date }): Promise<HarvestTimeEntry[]> {
+  const { from = new Date(), to = new Date() } = args ?? {};
   const id = await getMyId();
   let time_entries: HarvestTimeEntry[] = [];
   let page = 1;
@@ -113,6 +132,7 @@ export async function newTimeEntry(param: NewTimeEntryDuration | NewTimeEntrySta
   const url = id ? `/time_entries/${id}` : "/time_entries";
   console.log({ url });
   const resp = await harvestAPI<HarvestTimeEntryCreatedResponse>({ method: id ? "PATCH" : "POST", url, data: param });
+  refreshMenuBar();
   return resp.data;
 }
 
@@ -132,6 +152,7 @@ export async function stopTimer(entry?: HarvestTimeEntry) {
     url: `/time_entries/${entry.id}/stop`,
     method: "PATCH",
   });
+  refreshMenuBar();
   return true;
 }
 
@@ -140,6 +161,7 @@ export async function restartTimer(entry: HarvestTimeEntry) {
     url: `/time_entries/${entry.id}/restart`,
     method: "PATCH",
   });
+  refreshMenuBar();
   return true;
 }
 
@@ -148,5 +170,14 @@ export async function deleteTimeEntry(entry: HarvestTimeEntry) {
     url: `/time_entries/${entry.id}`,
     method: "DELETE",
   });
+  refreshMenuBar();
   return true;
+}
+
+export function refreshMenuBar() {
+  try {
+    launchCommand({ extensionName: "harvest", name: "menu-bar", type: LaunchType.Background }); // refresh menu bar
+  } catch {
+    // ignore
+  }
 }

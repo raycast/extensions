@@ -7,7 +7,8 @@
   "author": "jmaeso",
   "contributors": [
     "GastroGeek",
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "LunaticMuch"
   ],
   "license": "MIT",
   "commands": [
@@ -23,35 +24,87 @@
           "placeholder": "1",
           "required": false
         }
+      ]
+    },
+    {
+      "name": "generateV5",
+      "title": "Generate V5 UUIDs",
+      "description": "Copy generated UUIDs V5 to the clipboard",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "name",
+          "type": "text",
+          "placeholder": "UUID Name",
+          "required": true
+        },
+        {
+          "name": "numberOfUUIDsToGenerate",
+          "type": "text",
+          "placeholder": "1",
+          "required": false
+        }
       ],
       "preferences": [
         {
-          "name": "upperCaseLetters",
-          "type": "checkbox",
+          "name": "uuidNamespace",
+          "type": "textfield",
           "required": false,
-          "default": false,
-          "title": "Options",
-          "label": "Uppercase Letters",
-          "description": "Should letters be uppercased?"
+          "default": "",
+          "title": "UUID v5 Namespace",
+          "label": "Namespace",
+          "description": "The namespace for UUID v5"
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "upperCaseLetters",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "title": "Options",
+      "label": "Uppercase Letters",
+      "description": "Should letters be uppercased?"
+    },
+    {
+      "name": "defaultAction",
+      "description": "Set the default action",
+      "type": "dropdown",
+      "required": false,
+      "title": "Default Action",
+      "default": "copy",
+      "data": [
+        {
+          "title": "Copy",
+          "value": "copy"
+        },
+        {
+          "title": "Paste",
+          "value": "paste"
         }
       ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.39.3",
-    "uuid": "^8.3.2"
+    "@raycast/api": "^1.50.2",
+    "uuid": "^9.0.0"
   },
   "devDependencies": {
-    "@types/uuid": "^8.3.3",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "react-devtools": "^4.19.2",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^1.0.5",
+    "@types/node": "^18.8.3",
+    "@types/uuid": "^9.0.1",
+    "eslint": "^8.38.0",
+    "eslint-plugin-import": "^2.27.5",
+    "react-devtools": "^4.27.4",
+    "typescript": "^5.0.4"
   },
   "scripts": {
     "build": "ray build -e dist",
-    "dev": "ray develop"
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
   }
 }

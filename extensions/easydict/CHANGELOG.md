@@ -1,5 +1,12 @@
 # `Easydict` Changelog
 
+## [v2.8.2] - 2023-04-25
+
+### 🐞 Fixes
+
+- Fixed the issue that OpenAI translation may lose the first character.
+- Fixed the issue that OpenAI does not enable proxy by default.
+
 ## [v2.8.1] - 2023-03-28
 
 ### 🐞 Fixes

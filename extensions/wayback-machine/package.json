@@ -2,9 +2,12 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "wayback-machine",
   "title": "Wayback Machine",
-  "description": "Quickly open webpages in Wayback Machine",
+  "description": "Quickly open and save webpages in Wayback Machine",
   "icon": "518x0w.png",
   "author": "pernielsentikaer",
+  "contributors": [
+    "andreaselia"
+  ],
   "categories": [
     "Web",
     "Developer Tools"
@@ -24,19 +27,31 @@
           "required": false
         }
       ]
+    },
+    {
+      "name": "save",
+      "title": "Save to Wayback Machine",
+      "description": "Save a webpage to Wayback Machine",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "url",
+          "placeholder": "https://www.raycast.com",
+          "type": "text",
+          "required": false
+        }
+      ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.47.3",
+    "@raycast/api": "^1.49.1",
     "cross-fetch": "^3.1.5"
   },
   "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
     "@types/node": "18.8.3",
     "@types/react": "18.0.9",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
     "prettier": "^2.5.1",
     "typescript": "^4.4.3"
   },

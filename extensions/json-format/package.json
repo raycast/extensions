@@ -6,7 +6,9 @@
   "icon": "command-icon.png",
   "author": "destiner",
   "contributors": [
-    "Aayush9029"
+    "Aayush9029",
+    "devlos",
+    "lachero"
   ],
   "categories": [
     "Data",
@@ -17,32 +19,27 @@
     {
       "name": "formatClipboard",
       "title": "Format Clipboard JSON",
-      "description": "Formats a JSON string stored in clipboard and copies it back",
+      "description": "Formats a JSON/JS Object string stored in clipboard and copies it back",
       "mode": "no-view"
     },
     {
       "name": "index",
       "title": "Format JSON",
-      "description": "Formats a JSON",
+      "description": "Formats a JSON/JS Object",
       "mode": "view"
     }
   ],
   "preferences": [
     {
-      "name": "autopaste",
-      "title": "Auto Paste",
-      "label": "Automatically paste the formatted JSON",
+      "default": false,
       "description": "Paste the formatted JSON to an active app",
-      "type": "checkbox",
+      "label": "Automatically paste the formatted JSON",
+      "name": "autopaste",
       "required": false,
-      "default": false
+      "title": "Auto Paste",
+      "type": "checkbox"
     },
     {
-      "name": "indent",
-      "title": "Indentation",
-      "description": "Output file indentation",
-      "type": "dropdown",
-      "required": false,
       "data": [
         {
           "title": "Tab",
@@ -60,7 +57,12 @@
           "title": "Spaces: 8",
           "value": "8"
         }
-      ]
+      ],
+      "description": "Output file indentation",
+      "name": "indent",
+      "required": false,
+      "title": "Indentation",
+      "type": "dropdown"
     }
   ],
   "dependencies": {

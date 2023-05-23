@@ -12,7 +12,7 @@ const useVercel = () => {
    */
   const [user, setUser] = useSharedState<User>("user");
   const [teams, setTeams] = useSharedState<Team[]>("teams");
-  const [selectedTeam, setSelectedTeam] = useSharedState<Team>("selectedTeam");
+  const [selectedTeamId, setSelectedTeamId] = useSharedState<string>("selectedTeamId");
 
   /*
    * Populate user, projects, and teams
@@ -20,18 +20,19 @@ const useVercel = () => {
   useEffect(() => {
     const fetchData = async () => {
       if (!user || !teams) {
+        const selectedTeamId = await LocalStorage.getItem<string>("selectedTeamId");
+        if (selectedTeamId) {
+          setSelectedTeamId(selectedTeamId);
+        }
         const [fetchedUser, fetchedTeams] = await Promise.all([fetchUser(), fetchTeams()]);
 
         setUser(fetchedUser);
         setTeams(fetchedTeams);
 
-        const selectedTeamId = await LocalStorage.getItem("selectedTeam");
         if (selectedTeamId) {
           const selectedTeam = fetchedTeams.find((team) => team.id === selectedTeamId);
-          if (selectedTeam) {
-            setSelectedTeam(selectedTeam);
-          } else {
-            setSelectedTeam(undefined);
+          if (!selectedTeam) {
+            setSelectedTeamId(undefined);
           }
         }
       }
@@ -42,17 +43,17 @@ const useVercel = () => {
   const updateSelectedTeam = async (teamIdOrUsername: string) => {
     const teamIfExists = teams?.find((team) => team.id === teamIdOrUsername);
     if (teamIfExists) {
-      setSelectedTeam(teamIfExists);
-      await LocalStorage.setItem("selectedTeam", teamIfExists.id);
+      setSelectedTeamId(teamIfExists.id);
+      await LocalStorage.setItem("selectedTeamId", teamIfExists.id);
     } else {
-      setSelectedTeam(undefined);
-      await LocalStorage.removeItem("selectedTeam");
+      setSelectedTeamId(undefined);
+      await LocalStorage.removeItem("selectedTeamId");
     }
   };
 
   return {
     user,
-    selectedTeam,
+    selectedTeam: selectedTeamId,
     teams,
     updateSelectedTeam,
   };

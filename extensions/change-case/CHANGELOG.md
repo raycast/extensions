@@ -1,5 +1,15 @@
 # Change Case Changelog
 
+## [Added new case] - 2023-05-15
+
+- Added Slug case
+
+## [Update] - 2023-03-27
+
+- Added a list detail view for a better view of the modified text
+- Added the ability to pin cases
+- Added recent cases
+
 ## [Update] - 2023-03-21
 
 - Updated API

@@ -1,8 +1,9 @@
-import { Detail } from '@raycast/api';
+import { Action, ActionPanel, Detail, openExtensionPreferences } from '@raycast/api';
 import { useEffect, useState } from 'react';
 import { parse } from 'tough-cookie';
 import { checkAuthState, isAuthenticated, setAuthData } from '../../services/shared';
 import { QRLogin } from './qr-login';
+import { DOMAIN } from '../../utils/config';
 
 const AuthGuard: React.FC<{ component: React.FC }> = ({ component: Component }) => {
   const [checked, setChecked] = useState(isAuthenticated);
@@ -24,7 +25,28 @@ const AuthGuard: React.FC<{ component: React.FC }> = ({ component: Component }) 
     }
   };
 
+  if (!DOMAIN) return <MissingDomain />;
+
   return checked ? isAuthenticated ? <Component /> : <QRLogin onConfirm={handleLogin} /> : <Detail markdown="" />;
+};
+
+const MissingDomain = () => {
+  const markdown = 'Due to your choice of self-hosted deployment, please fill in the self-hosted domain name.';
+
+  return (
+    <Detail
+      markdown={markdown}
+      actions={
+        <ActionPanel>
+          <Action
+            title="Open Extension Preferences"
+            onAction={openExtensionPreferences}
+            shortcut={{ key: 'enter', modifiers: [] }}
+          />
+        </ActionPanel>
+      }
+    />
+  );
 };
 
 export const withAuth =

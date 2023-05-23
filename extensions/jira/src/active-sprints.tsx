@@ -1,11 +1,11 @@
 import { List } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { useCachedPromise, useCachedState } from "@raycast/utils";
 import { useState } from "react";
 
-import { getIssues } from "./api/issues";
 import { getProjects } from "./api/projects";
 import StatusIssueList from "./components/StatusIssueList";
 import { withJiraCredentials } from "./helpers/withJiraCredentials";
+import useIssues from "./hooks/useIssues";
 
 export function ActiveSprints() {
   const [projectQuery, setProjectQuery] = useState("");
@@ -15,25 +15,22 @@ export function ActiveSprints() {
     { keepPreviousData: true }
   );
 
-  const [projectKey, setProjectKey] = useState("");
+  const [projectKey, setProjectKey] = useCachedState("active-sprint-project", "");
+
   const jql = `sprint in openSprints() AND project = ${projectKey} ORDER BY updated DESC`;
 
-  const {
-    data: issues,
-    isLoading,
-    mutate,
-  } = useCachedPromise((jql) => getIssues({ jql }), [jql], { execute: projectKey !== "" });
+  const { issues, isLoading: isLoadingIssues, mutate } = useIssues(jql, { execute: projectKey !== "" });
 
   const searchBarAccessory = projects ? (
     <List.Dropdown
       tooltip="Filter issues by project"
       onChange={setProjectKey}
-      storeValue
+      value={projectKey}
       throttle
       isLoading={isLoadingProjects}
       onSearchTextChange={setProjectQuery}
     >
-      {projects?.map((project) => {
+      {projects.map((project) => {
         return (
           <List.Dropdown.Item
             key={project.id}
@@ -47,7 +44,12 @@ export function ActiveSprints() {
   ) : null;
 
   return (
-    <StatusIssueList issues={issues} isLoading={isLoading} mutate={mutate} searchBarAccessory={searchBarAccessory} />
+    <StatusIssueList
+      issues={issues}
+      isLoading={isLoadingIssues || isLoadingProjects}
+      mutate={mutate}
+      searchBarAccessory={searchBarAccessory}
+    />
   );
 }
 

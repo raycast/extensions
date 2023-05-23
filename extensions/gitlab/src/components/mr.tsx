@@ -82,6 +82,20 @@ function stateColor(state: string): Color.ColorLike {
   }
 }
 
+function MRSourceBranchTagList({ mr }: { mr: MergeRequest }) {
+  const deleteText = mr.force_remove_source_branch === true ? "Delete after Merge" : undefined;
+  const squashText = mr.squash_on_merge === true ? "Squash before Merge" : undefined;
+  if (!deleteText && !squashText) {
+    return null;
+  }
+  return (
+    <Detail.Metadata.TagList title="Source Branch">
+      {deleteText && <Detail.Metadata.TagList.Item text={deleteText} />}
+      {squashText && <Detail.Metadata.TagList.Item text={squashText} />}
+    </Detail.Metadata.TagList>
+  );
+}
+
 export function MRDetail(props: { mr: MergeRequest }): JSX.Element {
   const mr = props.mr;
   const { mrdetail, error, isLoading } = useDetail(props.mr.id);
@@ -145,6 +159,7 @@ export function MRDetail(props: { mr: MergeRequest }): JSX.Element {
               ))}
             </Detail.Metadata.TagList>
           )}
+          <MRSourceBranchTagList mr={mr} />
         </Detail.Metadata>
       }
     />
@@ -390,7 +405,7 @@ export function MRListItem(props: {
   if (!getListDetailsPreference()) {
     accessories.push(
       { icon: mr.has_conflicts ? "⚠️" : undefined, tooltip: mr.has_conflicts ? "Has Conflict" : undefined },
-      { text: mr.milestone?.title },
+      { tag: mr.milestone?.title ?? "", tooltip: mr.milestone ? `Milestone: ${mr.milestone?.title}` : "" },
       { date: new Date(mr.updated_at), tooltip: `Updated: ${toLongDateString(mr.updated_at)}` }
     );
   }
@@ -433,11 +448,40 @@ export function MRListItem(props: {
   );
 }
 
-function getIssueQuery(query: string | undefined) {
-  return tokenizeQueryText(query, ["label", "author", "milestone", "assignee", "draft", "target-branch", "reviewer"]);
+export function getMRQuery(query: string | undefined) {
+  return tokenizeQueryText(query, [
+    "label",
+    "author",
+    "milestone",
+    "assignee",
+    "draft",
+    "target-branch",
+    "reviewer",
+    "state",
+  ]);
 }
 
-function injectQueryNamedParameters(
+function isValidMRState(texts: string[] | undefined) {
+  if (!texts) {
+    return false;
+  }
+  for (const v of texts) {
+    if (
+      ![
+        MRState.closed.valueOf(),
+        MRState.opened.valueOf(),
+        MRState.locked.valueOf,
+        MRState.merged.valueOf,
+        MRState.all.valueOf(),
+      ].includes(v)
+    ) {
+      return false;
+    }
+  }
+  return true;
+}
+
+export function injectMRQueryNamedParameters(
   requestParams: Record<string, any>,
   query: Query,
   scope: MRScope,
@@ -490,6 +534,13 @@ function injectQueryNamedParameters(
             requestParams[prefixed("reviewer_username")] = extraParamVal.join(",");
           }
           break;
+        case "state":
+          {
+            if (isValidMRState(extraParamVal)) {
+              requestParams[prefixed("state")] = extraParamVal.join(",");
+            }
+          }
+          break;
       }
     }
   }
@@ -530,7 +581,7 @@ export function useSearch(
       setError(undefined);
 
       try {
-        const qd = getIssueQuery(query);
+        const qd = getMRQuery(query);
         query = qd.query;
         const params: Record<string, any> = {
           state: state,
@@ -538,8 +589,8 @@ export function useSearch(
           search: query || "",
           in: "title",
         };
-        injectQueryNamedParameters(params, qd, scope, false);
-        injectQueryNamedParameters(params, qd, scope, true);
+        injectMRQueryNamedParameters(params, qd, scope, false);
+        injectMRQueryNamedParameters(params, qd, scope, true);
         if (group) {
           const glMRs = await gitlab.getGroupMergeRequests(params, group);
           if (!didUnmount) {

@@ -1,6 +1,7 @@
 import { List, Icon, ActionPanel } from "@raycast/api";
 import RootErrorBoundary from "~/components/RootErrorBoundary";
-import SearchCommonActions from "~/components/searchVault/actions/CommonActions";
+import SearchCommonActions from "~/components/searchVault/actions/shared/VaultManagementActions";
+import VaultListenersProvider from "~/components/searchVault/context/vaultListeners";
 import VaultItem from "~/components/searchVault/Item";
 import { BitwardenProvider } from "~/context/bitwarden";
 import { SessionProvider } from "~/context/session";
@@ -11,9 +12,11 @@ const SearchVaultCommand = () => (
   <RootErrorBoundary>
     <BitwardenProvider>
       <SessionProvider unlock>
-        <VaultProvider>
-          <SearchVaultComponent />
-        </VaultProvider>
+        <VaultListenersProvider>
+          <VaultProvider>
+            <SearchVaultComponent />
+          </VaultProvider>
+        </VaultListenersProvider>
       </SessionProvider>
     </BitwardenProvider>
   </RootErrorBoundary>
