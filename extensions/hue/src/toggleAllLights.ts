@@ -91,9 +91,7 @@ async function userInitiated() {
     console.error(error.message);
     showHUD(error.message).then();
   } finally {
-    if (environment.launchType === "userInitiated") {
-      await closeMainWindow();
-    }
+    await closeMainWindow();
   }
 }
 
