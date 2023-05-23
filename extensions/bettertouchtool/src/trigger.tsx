@@ -12,17 +12,24 @@ export default function Command() {
   const namedTriggerId = 643;
   const getTriggersJXA = `function run(argv) {
     let BetterTouchTool = Application('BetterTouchTool');
-    return BetterTouchTool.get_triggers(${namedTriggerId ? `{trigger_id: ${namedTriggerId}${shared_secret ? ', ...' + sharedSecretString : ''} }` : sharedSecretString});
+    return BetterTouchTool.get_triggers(${
+      namedTriggerId
+        ? `{trigger_id: ${namedTriggerId}${shared_secret ? ", ..." + sharedSecretString : ""} }`
+        : sharedSecretString
+    });
   } run();`;
   const { isLoading, data, revalidate } = useExec("osascript", ["-l", "JavaScript", "-e", getTriggersJXA]);
 
   const checkError = (data: string) => {
-    if (!data || data === 'null' || data.includes("error:")) {
-      const errorMessage = data === 'null' ? "No data returned from BTT. Have you configured a shared secret?" : data.replace("error:", "").trim() || "Unknown error";
+    if (!data || data === "null" || data.includes("error:")) {
+      const errorMessage =
+        data === "null"
+          ? "No data returned from BTT. Have you configured a shared secret?"
+          : data.replace("error:", "").trim() || "Unknown error";
       showToast({
         title: "Error:",
         message: errorMessage,
-        style: Toast.Style.Failure
+        style: Toast.Style.Failure,
       });
       return true;
     }
