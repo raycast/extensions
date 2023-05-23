@@ -1,5 +1,3 @@
-// @ts-nocheck
-
 import { Action, ActionPanel, getSelectedText, Icon, List, showToast, Toast } from '@raycast/api'
 import axios from 'axios'
 import { Configuration, OpenAIApi } from 'openai'
