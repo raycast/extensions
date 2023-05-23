@@ -12,7 +12,8 @@
   "commands": [
     {
       "name": "clipboard-ocr",
-      "title": "Clipboard OCR",
+      "title": "Copy Text from Image",
+      "subtitle": "Baidu OCR",
       "description": "Recognize texts from image in your clipboard.",
       "mode": "no-view",
       "preferences": [
