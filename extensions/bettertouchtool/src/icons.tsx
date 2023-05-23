@@ -51,6 +51,6 @@ const icons = {
   VolumeDown: Icon.SpeakerDown,
   VolumeUp: Icon.SpeakerUp,
   Window: Icon.Window,
-}
+};
 
 export default icons;
