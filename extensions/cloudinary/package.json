@@ -15,6 +15,7 @@
     {
       "name": "search",
       "title": "Search Assets",
+      "subtitle": "Cloudinary",
       "description": "Search for assets inside Cloudinary",
       "mode": "view",
       "arguments": [
@@ -35,12 +36,14 @@
     {
       "name": "upload-clipboard",
       "title": "Upload Clipboard",
+      "subtitle": "Cloudinary",
       "description": "Upload image contents from clipboard to Cloudinary.",
       "mode": "view"
     },
     {
       "name": "upload-url",
       "title": "Upload URL",
+      "subtitle": "Cloudinary",
       "description": "Upload a file by URL to Cloudinary.",
       "mode": "view",
       "arguments": [
