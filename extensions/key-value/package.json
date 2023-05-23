@@ -21,7 +21,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "Find Value By Key",
+      "title": "Find Value by Key",
       "description": "Copy a key from the clipboard and paste a value from a JSON file",
       "mode": "no-view"
     }
