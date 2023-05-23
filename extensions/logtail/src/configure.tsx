@@ -1,4 +1,4 @@
-import { LogTail } from "./lib/logtail";
+import { Logtail } from "./lib/logtail";
 
 import { Action, ActionPanel, Icon, Form } from "@raycast/api";
 import { useState } from "react";
@@ -26,22 +26,22 @@ const ConfigureCommand = (props: { onSubmit?: () => void }) => {
       actions={
         <ActionPanel>
           <Action.SubmitForm
-            title="Save LogTail API Token"
+            title="Save Logtail API Token"
             icon={Icon.Lock}
             onSubmit={async (value: Form.Values) => {
-              await LogTail.setToken(value.password);
+              await Logtail.setToken(value.password);
               props.onSubmit?.();
             }}
           />
-          <Action.OpenInBrowser url={LogTail.DOCS_URL} title="Open LogTail API Docs" />
+          <Action.OpenInBrowser url={Logtail.DOCS_URL} title="Open Logtail API Docs" />
         </ActionPanel>
       }
     >
       <Form.PasswordField
         id="password"
-        title="LogTail API Token"
+        title="Logtail API Token"
         autoFocus
-        placeholder="Enter your LogTail API Token"
+        placeholder="Enter your Logtail API Token"
         defaultValue={""}
         error={passwordError}
         onChange={dropPasswordErrorIfNeeded}

@@ -1,53 +1,68 @@
 import { UseCachedPromiseReturnType } from "@raycast/utils/dist/types";
-import { UseLogTailTokenResult, useLogTailToken } from "./useLogTailToken";
 import { useFetch } from "@raycast/utils";
-import SetToken from "../configure";
+import { confirmAlert, getPreferenceValues, openExtensionPreferences } from "@raycast/api";
+import { useEffect } from "react";
 
-export type LogTailFetchOptions = {
+export type UseLogtailFetchOptions = {
   url: string;
   execute?: boolean;
 };
 
-export type LogTailFetchResponse<Response> = UseCachedPromiseReturnType<Response, undefined> & {
-  tokenData: UseLogTailTokenResult;
+export type UseLogtailFetchResultWithRender<Response, Props> = {
+  Render: UseLogtailFetchComponent<Response, Props>;
+  response: UseCachedPromiseReturnType<Response, undefined>;
 };
-export type UseLogTailFetchResult<Response, Props> = [
-  UseLogTailFetchComponent<Response, Props> | null,
-  LogTailFetchResponse<Response>
-];
-export type UseLogTailFetchRenderProps<Response> = LogTailFetchResponse<Response>;
-export type UseLogTailFetchComponent<Response, Props> = (
-  props: Partial<UseLogTailFetchRenderProps<Response> & { additionalProps?: Props }>
+export type UseLogtailFetchResult<Response> = {
+  response: UseCachedPromiseReturnType<Response, undefined>;
+};
+
+export type UseLogtailFetchRenderProps<Response> = UseCachedPromiseReturnType<Response, undefined>;
+export type UseLogtailFetchComponent<Response, Props> = (
+  props: Partial<UseLogtailFetchRenderProps<Response> & { additionalProps?: Props }>
 ) => React.ReactElement<unknown>;
-export type UseLogTailFetchRenderFn<Response, Props> = (
-  props: UseLogTailFetchRenderProps<Response> & { additionalProps?: Props }
+export type UseLogtailFetchRenderFn<Response, Props> = (
+  props: UseLogtailFetchRenderProps<Response> & { additionalProps?: Props }
 ) => React.ReactElement<unknown>;
 
-export function useLogTailFetch<Response, Props = object>(
-  { url, execute }: LogTailFetchOptions,
-  render?: UseLogTailFetchRenderFn<Response, Props>
-): UseLogTailFetchResult<Response, Props> {
-  const tokenData = useLogTailToken();
-  const res = useFetch<Response>(url, {
-    execute: !!tokenData.token && (execute === undefined ? true : !!execute),
+export function useLogtailFetch<Response, Props = object>(
+  opts: UseLogtailFetchOptions,
+  render: UseLogtailFetchRenderFn<Response, Props>
+): UseLogtailFetchResultWithRender<Response, Props>;
+export function useLogtailFetch<Response>(opts: UseLogtailFetchOptions): UseLogtailFetchResult<Response>;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function useLogtailFetch<Response, Props = object>({ url, execute }: any, render?: any): any {
+  const preferences = getPreferenceValues<Preferences>();
+
+  const response = useFetch<Response>(url, {
+    execute: !!preferences.logtailApiKey && (execute === undefined ? true : !!execute),
     headers: {
-      Authorization: `Bearer ${tokenData.token}`,
+      Authorization: `Bearer ${preferences.logtailApiKey}`,
     },
   });
 
-  const handleSubmitToken = async () => {
-    tokenData.mutate();
-  };
+  const isInvalidApiKey = !!preferences.logtailApiKey && response.error?.message.includes("Unauthorized");
 
-  const result = { ...res, tokenData } as LogTailFetchResponse<Response>;
-
-  if (!tokenData.token && !tokenData.isTokenLoading) {
-    return [() => <SetToken onSubmit={handleSubmitToken} />, result];
-  }
+  useEffect(() => {
+    if (isInvalidApiKey) {
+      confirmAlert({
+        title: "Invalid Logtail API Key",
+        message: "Please set a valid Logtail API Key in the extension preferences.",
+        primaryAction: {
+          title: "Open Preferences",
+          onAction: () => {
+            openExtensionPreferences();
+          },
+        },
+      });
+    }
+  }, [isInvalidApiKey]);
 
   if (render) {
-    return [({ additionalProps }: { additionalProps?: Props }) => render({ ...result, additionalProps }), result];
+    const renderWrapper = ({ additionalProps }: { additionalProps?: Props }) =>
+      render({ ...response, additionalProps });
+
+    return { Render: renderWrapper, response };
   }
 
-  return [null, result];
+  return { response };
 }

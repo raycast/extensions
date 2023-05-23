@@ -1,9 +1,9 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "logtail",
-  "title": "LogTail",
+  "title": "Logtail",
   "version": "1.0.0",
-  "description": "Search and View your LogTail logs at any time",
+  "description": "Search and View your Logtail logs at any time",
   "icon": "extension_icon.png",
   "author": "Cavallando",
   "categories": [
@@ -16,7 +16,7 @@
     {
       "name": "query-logs",
       "title": "Query Logs",
-      "description": "Query your LogTail account for logs based on Live Tail Query Language",
+      "description": "Query your Logtail account for logs based on Live Tail Query Language",
       "mode": "view"
     },
     {
@@ -36,12 +36,15 @@
       "title": "View Saved Queries",
       "description": "Manage queries you have saved for later use",
       "mode": "view"
-    },
+    }
+  ],
+  "preferences": [
     {
-      "name": "configure",
-      "title": "Configure LogTail",
-      "description": "Set the API Key for your LogTail account",
-      "mode": "view"
+      "name": "logtailApiKey",
+      "title": "Logtail API Key",
+      "description": "Set the API Key for your Logtail account",
+      "type": "password",
+      "required": true
     }
   ],
   "dependencies": {

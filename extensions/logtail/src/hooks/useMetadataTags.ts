@@ -1,6 +1,6 @@
 import { LocalStorage } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { LogTail } from "../lib/logtail";
+import { Logtail } from "../lib/logtail";
 import { UseCachedPromiseReturnType } from "@raycast/utils/dist/types";
 
 export type CustomMetadataTag = {
@@ -18,11 +18,11 @@ export type UseMetadataTagsResult = UseCachedPromiseReturnType<CustomMetadataTag
 };
 
 export const useMetadataTags = (): UseMetadataTagsResult => {
-  const result = useCachedPromise(() => LocalStorage.getItem<string>(LogTail.METADATA_TAGS_CACHE_KEY));
+  const result = useCachedPromise(() => LocalStorage.getItem<string>(Logtail.METADATA_TAGS_CACHE_KEY));
   let tags: CustomMetadataTag[] = [];
 
   const setMetadataTags = async (tags: CustomMetadataTag[]) => {
-    await LocalStorage.setItem(LogTail.METADATA_TAGS_CACHE_KEY, JSON.stringify(tags));
+    await LocalStorage.setItem(Logtail.METADATA_TAGS_CACHE_KEY, JSON.stringify(tags));
   };
 
   const addMetadataTag = async (tag: CustomMetadataTag) => {

@@ -1,6 +1,6 @@
 import { Log, LogResponse, Source } from "../lib/types";
-import { LogTail } from "../lib/logtail";
-import { UseLogTailFetchRenderProps, useLogTailFetch } from "../hooks/useLogTailFetch";
+import { Logtail } from "../lib/logtail";
+import { UseLogtailFetchRenderProps, useLogtailFetch } from "../hooks/useLogtailFetch";
 import { ActionPanel, List, Action, Icon, Detail } from "@raycast/api";
 import { useState } from "react";
 import { useDefaultSourceId } from "../hooks/useDefaultSourceId";
@@ -19,6 +19,18 @@ const QueryMessageAction = ({ onSubmit }: { onSubmit: () => void }) => {
     />
   );
 };
+
+const ViewSourcesAction = ({ onSubmit }: { onSubmit: () => void }) => {
+  return (
+    <Action.SubmitForm
+      title="View Sources"
+      icon={Icon.Plug}
+      onSubmit={onSubmit}
+      shortcut={{ modifiers: ["cmd"], key: "s" }}
+    />
+  );
+};
+
 const CopyMessageAction = ({ content }: { content: string }) => {
   return <Action.CopyToClipboard title="Copy Message" content={content} shortcut={{ modifiers: ["cmd"], key: "m" }} />;
 };
@@ -63,7 +75,7 @@ const DetailLogMetadata = ({ log }: { log: Log }) => {
       <Detail.Metadata.TagList title="Log Level">
         <Detail.Metadata.TagList.Item text={log["log.level"]} color={getLogLevelColor(log["log.level"])} />
       </Detail.Metadata.TagList>
-      <Detail.Metadata.Label key="app" title="LogTail App" text={log._app} />
+      <Detail.Metadata.Label key="app" title="Logtail App" text={log._app} />
       <Detail.Metadata.Label key="host" title="Host" text={log.host} />
       {log.dt && <Detail.Metadata.Label key="timestamp" title="Timestamp" text={new Date(log.dt).toISOString()} />}
       {!!customMetadata.length && (
@@ -79,32 +91,37 @@ const DetailLogMetadata = ({ log }: { log: Log }) => {
 export const QueryLogs = ({ query: _query, sourceId: _sourceId }: { query: string; sourceId?: string }) => {
   const { data } = useDefaultSourceId();
   const [sourceId, setSourceId] = useState(_sourceId ?? data);
-
+  const [showSources, setShowSources] = useState<boolean>();
   const [query, setQuery] = useState<string>(getQueryString(_query, sourceId).query ?? "");
 
-  const renderComponent = ({ data, isLoading, mutate }: UseLogTailFetchRenderProps<LogResponse>) => {
+  const renderComponent = ({ data, isLoading, mutate }: UseLogtailFetchRenderProps<LogResponse>) => {
     const { addQuery } = useSavedQueries();
     const handleSearchTextChange = (text: string) => {
       setQuery(text);
-      mutate(LogTail.getLogs(`${text}`));
+      mutate(Logtail.getLogs(`${text}`));
     };
 
     const handleSaveQuerySubmit = async () => {
       await addQuery(query);
-      await mutate(LogTail.getLogs(query));
+      await mutate(Logtail.getLogs(query));
     };
 
     const handleQueryMessageSubmit = async (log: Log) => {
       const { query, params } = getQueryString(removeAnsi(log.message), sourceId);
       setQuery(query ?? "");
-      mutate(LogTail.getLogs(params));
+      mutate(Logtail.getLogs(params));
     };
 
     const handleQueryForSource = async (source: Source) => {
       setSourceId(source.id);
+      setShowSources(false);
       const { params } = getQueryString(undefined, source.id);
-      mutate(LogTail.getLogs(params));
+      mutate(Logtail.getLogs(params));
     };
+
+    if (showSources) {
+      return <QuerySources onSubmit={handleQueryForSource} autoSelect={false} />;
+    }
 
     // If we have no log data and no source id, show the query sources
     if (!sourceId) {
@@ -156,6 +173,7 @@ export const QueryLogs = ({ query: _query, sourceId: _sourceId }: { query: strin
               <CopyMessageAction content={removeAnsi(log.message)} />
               <QueryMessageAction onSubmit={handleQueryMessageSubmit.bind(this, log)} />
               <CopyRawLogAction content={JSON.stringify(log)} />
+              <ViewSourcesAction onSubmit={setShowSources.bind(this, true)} />
               {!!query && <SaveQueryAction onSubmit={handleSaveQuerySubmit} />}
             </ActionPanel>
           }
@@ -182,14 +200,10 @@ export const QueryLogs = ({ query: _query, sourceId: _sourceId }: { query: strin
     );
   };
 
-  const [Component] = useLogTailFetch<LogResponse>(
+  const { Render } = useLogtailFetch<LogResponse>(
     { url: `https://logtail.com/api/v1/query?${getQueryString(query, sourceId).params}` },
     renderComponent
   );
 
-  if (Component) {
-    return <Component />;
-  }
-
-  return null;
+  return <Render />;
 };

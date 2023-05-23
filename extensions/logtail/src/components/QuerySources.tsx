@@ -1,13 +1,19 @@
 import { Source, SourceResponse } from "../lib/types";
-import { LogTail } from "../lib/logtail";
-import { UseLogTailFetchRenderProps, useLogTailFetch } from "../hooks/useLogTailFetch";
+import { Logtail } from "../lib/logtail";
+import { UseLogtailFetchRenderProps, useLogtailFetch } from "../hooks/useLogtailFetch";
 import { ActionPanel, List, Action, Icon, Color } from "@raycast/api";
 import { useDefaultSourceId } from "../hooks/useDefaultSourceId";
+import { useEffect } from "react";
 
-export const QuerySources = ({ onSubmit }: { onSubmit?: (source: Source) => void }) => {
+type QuerySourcesProps = {
+  onSubmit?: (source: Source) => void;
+  autoSelect?: boolean;
+};
+
+export const QuerySources = ({ onSubmit, autoSelect = true }: QuerySourcesProps) => {
   const { data: defaultSourceId, setDefaultSourceId, removeDefaultSourceId } = useDefaultSourceId();
 
-  const renderComponent = ({ data, isLoading }: UseLogTailFetchRenderProps<SourceResponse>) => {
+  const renderComponent = ({ data, isLoading }: UseLogtailFetchRenderProps<SourceResponse>) => {
     const handleSelectSourceSubmit = async (source: Source) => {
       onSubmit?.(source);
     };
@@ -45,11 +51,13 @@ export const QuerySources = ({ onSubmit }: { onSubmit?: (source: Source) => void
                 onSubmit={handleSelectSourceSubmit.bind(this, source)}
                 icon={Icon.MagnifyingGlass}
               />
-              <Action.SubmitForm
-                title="Set as Default"
-                onSubmit={handleSetSourceDefault.bind(this, source)}
-                icon={Icon.Star}
-              />
+              {!isDefault && (
+                <Action.SubmitForm
+                  title="Set Default"
+                  onSubmit={handleSetSourceDefault.bind(this, source)}
+                  icon={Icon.Star}
+                />
+              )}
               {isDefault && (
                 <Action.SubmitForm
                   title="Remove Default"
@@ -62,19 +70,25 @@ export const QuerySources = ({ onSubmit }: { onSubmit?: (source: Source) => void
         />
       );
     };
+
+    // If there is only one source, automatically select it as the default
+    useEffect(() => {
+      if (autoSelect && data?.data.length === 1) {
+        onSubmit?.(data.data[0]);
+      }
+    }, [data?.data.length]);
+
+    const searchBarPlaceholder = autoSelect && data?.data.length === 1 ? "Searching..." : "Select a source to query";
+
     return (
-      <List isLoading={isLoading} searchBarPlaceholder="Select a source to query">
-        {data?.data.map(renderSource)}
+      <List isLoading={isLoading} searchBarPlaceholder={searchBarPlaceholder}>
+        {(!autoSelect || (data?.data.length ?? 0) > 1) && data?.data.map(renderSource)}
         {data?.data.length && <List.EmptyView title="No sources found" />}
       </List>
     );
   };
 
-  const [Component] = useLogTailFetch<SourceResponse>({ url: LogTail.SOURCES_URL }, renderComponent);
+  const { Render } = useLogtailFetch<SourceResponse>({ url: Logtail.SOURCES_URL }, renderComponent);
 
-  if (Component) {
-    return <Component />;
-  }
-
-  return null;
+  return <Render />;
 };

@@ -1,4 +1,4 @@
-import { LogTail } from "./lib/logtail";
+import { Logtail } from "./lib/logtail";
 
 import { Action, ActionPanel, Icon, Form, Color, useNavigation } from "@raycast/api";
 import { useState } from "react";
@@ -59,7 +59,7 @@ const AddMetadataTagCommand = (props: AddMetadataTagCommandProps) => {
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Save Metadata Tag" icon={Icon.Lock} onSubmit={handleSaveTag} />
-          <Action.OpenInBrowser url={LogTail.DOCS_URL} title="Open LogTail API Docs" />
+          <Action.OpenInBrowser url={Logtail.DOCS_URL} title="Open Logtail API Docs" />
         </ActionPanel>
       }
     >
