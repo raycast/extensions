@@ -314,6 +314,7 @@
   "gather": "gather",
   "geist-ui-components": "geist-ui-components",
   "geohash-encode-decode": "geohash-encode-decode",
+  "gerrit-code-review": "gerrit-code-review",
   "get-direct-link": "get-direct-link",
   "get-favicon": "get-favicon",
   "get-ssh-key": "get-ssh-key",
