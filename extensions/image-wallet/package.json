@@ -24,7 +24,7 @@
       "title": "Wallet Directory",
       "description": "Path to load Wallet from. Leave blank for default.",
       "type": "directory",
-      "required": false
+      "required": true
     }
   ],
   "dependencies": {
