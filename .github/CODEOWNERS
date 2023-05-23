@@ -49,6 +49,7 @@
 /extensions/auto-quit-app                            @koinzhang
 /extensions/avatar                                   @koinzhang
 /extensions/axios-docs                               @denizyoldas
+/extensions/baidu-ocr                                @Chivier
 /extensions/bamboo-search-self-hosted                @axp-dev
 /extensions/banca-d-italia-currency-converter        @FezVrasta
 /extensions/bark                                     @koinzhang
@@ -138,6 +139,7 @@
 /extensions/clockify                                 @ismamz @sxn
 /extensions/clojuredocs-search                       @edblancas
 /extensions/cloudflare                               @Destiner @niklaswa
+/extensions/cloudinary                               @colbyfayock
 /extensions/coda-bookmarks-search                    @allienx
 /extensions/code-review-emojis                       @rus64
 /extensions/code-stash                               @ben-greenwood
@@ -280,6 +282,7 @@
 /extensions/excalidraw                               @slyguy5646 @pernielsentikaer
 /extensions/f1-standings                             @csigritz @sxn @qeude
 /extensions/facetime                                 @ron-myers
+/extensions/fake-financial-data                      @andre-rd-rodrigues
 /extensions/fantastical                              @devahschaefers
 /extensions/fantasy-premier-league-rankings          @hwb15
 /extensions/fastmail-masked-email                    @PhotonQuantum
@@ -313,6 +316,7 @@
 /extensions/gather                                   @yannglt
 /extensions/geist-ui-components                      @Rahuls-Coding
 /extensions/geohash-encode-decode                    @alrico88
+/extensions/gerrit-code-review                       @vkhitrin
 /extensions/get-direct-link                          @trungnghiatn
 /extensions/get-favicon                              @vimtor
 /extensions/get-ssh-key                              @tc9011 @pernielsentikaer
@@ -409,6 +413,7 @@
 /extensions/imessage-2fa                             @yuercl @thomaspaulmann @arronhunt
 /extensions/imgur                                    @BalliAsghar @pernielsentikaer @caumeira
 /extensions/improvmx                                 @ImprovMX
+/extensions/incognito-clone                          @kgrhartlage
 /extensions/inertiajs-documentation                  @danyelkeddah
 /extensions/infakt                                   @teziovsky
 /extensions/initium                                  @toto-minai
@@ -449,6 +454,7 @@
 /extensions/kaomoji-search                           @allexks
 /extensions/karabiner-profile-switcher               @lucaschultz
 /extensions/keepassxc                                @zkytech
+/extensions/key-value                                @NirLevy98
 /extensions/keyboard-layout-switcher                 @lucaschultz
 /extensions/keyboard-maestro                         @eluce2
 /extensions/keyboard-shortcut-sequences              @SKaplanOfficial
@@ -486,6 +492,7 @@
 /extensions/liba-ro                                  @neemspees
 /extensions/libraries-io                             @djpowers
 /extensions/library-genesis                          @yz3440
+/extensions/lichess-org                              @ftonato
 /extensions/life-progress                            @koinzhang
 /extensions/lifx                                     @felixb1010
 /extensions/lightning-time                           @MatthewStanciu
@@ -530,6 +537,7 @@
 /extensions/microsoft-edge                           @KartikKumarSahoo @bromanko @crisboarna
 /extensions/microsoft-teams                          @svenwiegand
 /extensions/microsoft-teams-calling                  @svenwiegand
+/extensions/migadu                                   @xmok
 /extensions/miniflux                                 @Sevichecc
 /extensions/miro                                     @felixhaeberle @mathieudutour
 /extensions/mixpanel                                 @smsimone
@@ -548,6 +556,7 @@
 /extensions/morning-coffee                           @olimynameis
 /extensions/mousehunt-helper                         @chesterhow
 /extensions/mozilla-firefox                          @crisboarna
+/extensions/mui-documentation                        @kgrhartlage
 /extensions/multilinks                               @abhisheksatre
 /extensions/multipass                                @davibe @pernielsentikaer
 /extensions/music                                    @Rawnly @peterdev22 @danpalmer
@@ -624,6 +633,7 @@
 /extensions/pagerduty                                @horimislime
 /extensions/palette-colors                           @douglas-pires
 /extensions/palette-picker                           @juliusmarminge
+/extensions/paperless-ngx                            @Padamdam
 /extensions/papermatch                               @marlonjames71
 /extensions/paperspace                               @yuri-becker
 /extensions/parabol                                  @parabol @BartoszJarocki
@@ -650,6 +660,7 @@
 /extensions/pins                                     @SKaplanOfficial @pernielsentikaer
 /extensions/pipe-commands                            @pomdtr @gasolin
 /extensions/pipedrive                                @stephendolan
+/extensions/pitchfork                                @koayon
 /extensions/pixabay                                  @tonka3000
 /extensions/placeholder                              @koinzhang
 /extensions/plausible-analytics                      @thebrokenfinger
@@ -737,6 +748,7 @@
 /extensions/retool                                   @andre347
 /extensions/reverso-context                          @MrModest
 /extensions/ricescore                                @tonka3000
+/extensions/risk-reward-calculator                   @demirtarik
 /extensions/roam-research                            @dive2Pro
 /extensions/roblox-games                             @TayIorRobinson
 /extensions/roll-d20                                 @kaylasween
@@ -950,7 +962,7 @@
 /extensions/word-count                               @itsmingjie
 /extensions/word-search                              @RishabSwift @thomaspaulmann
 /extensions/wordle                                   @chrisalxlng
-/extensions/wordpress-docs                           @tillkruss
+/extensions/wordpress-docs                           @tillkruss @KevinBatdorf
 /extensions/work-time-countdown                      @thomaspaulmann @pernielsentikaer
 /extensions/world-clock                              @koinzhang
 /extensions/world-cup                                @ismamz @djpowers @pernielsentikaer

@@ -76,6 +76,7 @@ jest.mock(
       pop: jest.fn(),
     })),
     showHUD: jest.fn(),
+    Icon: {},
   }),
   { virtual: true }
 );
