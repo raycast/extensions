@@ -19,30 +19,32 @@ export default function ScanWifi() {
     <List isLoading={loading} searchBarPlaceholder={"Search Wi-Fi"}>
       <EmptyView title={"No Wi-Fi"} description={wifiStatus ? " " : "Wi-Fi is turned off"} />
 
-      <List.Section title={"Connected"}>
-        {curWifi.map((value, index) => {
-          return (
-            <List.Item
-              icon={{
-                source: Icon.Wifi,
-                tintColor: Color.Green,
-              }}
-              key={index}
-              title={value.ssid}
-              subtitle={{ value: value.security, tooltip: value.security_flags.join(", ") }}
-              accessories={[
-                {
-                  icon: {
-                    source: getSignalIcon(value.quality),
-                    tintColor: value.quality < 40 ? Color.Red : value.quality < 70 ? Color.Orange : Color.Green,
+      {curWifi.length !== 0 && (
+        <List.Section title={"Connected"}>
+          {curWifi.map((value, index) => {
+            return (
+              <List.Item
+                icon={{
+                  source: Icon.Wifi,
+                  tintColor: Color.Green,
+                }}
+                key={index}
+                title={value.ssid}
+                subtitle={{ value: value.security, tooltip: value.security_flags.join(", ") }}
+                accessories={[
+                  {
+                    icon: {
+                      source: getSignalIcon(value.quality),
+                      tintColor: value.quality < 40 ? Color.Red : value.quality < 70 ? Color.Orange : Color.Green,
+                    },
+                    tooltip: value.quality + "%",
                   },
-                  tooltip: value.quality + "%",
-                },
-              ]}
-            />
-          );
-        })}
-      </List.Section>
+                ]}
+              />
+            );
+          })}
+        </List.Section>
+      )}
 
       <List.Section title={"Preferred"}>
         {wifiWithPasswordList.map((value, index) => {
