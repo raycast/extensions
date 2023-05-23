@@ -1,8 +1,8 @@
 import { Action, ActionPanel, Form, useNavigation } from "@raycast/api";
 import { useState } from "react";
-import { Config } from "../types";
-import Top from "./top";
-import { loadConfig, saveConfig } from "../utils";
+import { Config } from "./types";
+import Top from ".";
+import { loadConfig, saveConfig } from "./utils";
 import { useCachedPromise } from "@raycast/utils";
 
 const EditConfig = () => {
@@ -74,7 +74,9 @@ const EditConfigInner = ({ initialConfig }: { initialConfig: Config }) => {
 
 const validateUrl = (url: string) => {
   try {
-    new URL(url);
+    if (!url.startsWith("http://") && !url.startsWith("https://")) return false;
+
+    new URL("index.json", url); // validate with the existence of index.json
     return true;
   } catch {
     return false;

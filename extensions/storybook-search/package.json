@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "storybook-search",
-  "title": "storybook search",
+  "title": "Storybook Search",
   "description": "Search components in Storybook",
   "icon": "command-icon.png",
   "author": "nakaakist",
@@ -12,8 +12,14 @@
   "commands": [
     {
       "name": "index",
-      "title": "Search Storybook Components",
+      "title": "Search Components",
       "description": "Search Storybook components",
+      "mode": "view"
+    },
+    {
+      "name": "edit-config",
+      "title": "Edit Config",
+      "description": "Edit config in Search Storybook components",
       "mode": "view"
     }
   ],
