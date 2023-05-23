@@ -175,5 +175,9 @@ export async function deleteTimeEntry(entry: HarvestTimeEntry) {
 }
 
 export function refreshMenuBar() {
-  launchCommand({ extensionName: "harvest", name: "menu-bar", type: LaunchType.Background }); // refresh menu bar
+  try {
+    launchCommand({ extensionName: "harvest", name: "menu-bar", type: LaunchType.Background }); // refresh menu bar
+  } catch {
+    // ignore
+  }
 }
