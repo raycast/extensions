@@ -39,18 +39,21 @@
     {
       "name": "mailboxes-and-identities",
       "title": "Mailboxes & Identities",
+      "subtitle": "Migadu",
       "description": "View, Create, Update or Delete Mailboxes and Identities in your Migadu Account",
       "mode": "view"
     },
     {
       "name": "aliases",
       "title": "Aliases",
+      "subtitle": "Migadu",
       "description": "View, Create, Update or Delete Aliases in your Migadu Account",
       "mode": "view"
     },
     {
       "name": "rewrites",
       "title": "Rewrites",
+      "subtitle": "Migadu",
       "description": "View, Create, Update or Delete Rewrites in your Migadu Account",
       "mode": "view"
     }
