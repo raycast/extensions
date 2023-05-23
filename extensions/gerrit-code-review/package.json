@@ -21,13 +21,15 @@
   "commands": [
     {
       "name": "query-changes",
-      "title": "Query Gerrit Changes",
+      "title": "Query Changes",
+      "subtitle": "Gerrit Code Review",
       "description": "Execute query to search for changes in Gerrit",
       "mode": "view"
     },
     {
       "name": "browse-projects",
       "title": "Browse Projects",
+      "subtitle": "Gerrit Code Review",
       "description": "Browse projects hosted on Gerrit",
       "mode": "view"
     }
