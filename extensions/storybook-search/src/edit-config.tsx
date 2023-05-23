@@ -4,6 +4,7 @@ import { Config } from "./types";
 import Top from ".";
 import { loadConfig, saveConfig } from "./utils";
 import { useCachedPromise } from "@raycast/utils";
+import urlJoin from "url-join";
 
 const EditConfig = () => {
   const { data: initialConfig } = useCachedPromise(loadConfig);
@@ -76,7 +77,7 @@ const validateUrl = (url: string) => {
   try {
     if (!url.startsWith("http://") && !url.startsWith("https://")) return false;
 
-    new URL("index.json", url); // validate with the existence of index.json
+    new URL(urlJoin(url, "index.json")); // validate with the existence of index.json
     return true;
   } catch {
     return false;

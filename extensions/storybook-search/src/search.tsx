@@ -3,6 +3,7 @@ import { useFetch } from "@raycast/utils";
 import { useMemo } from "react";
 import { IndexData, StoriesData, Story, Config } from "./types";
 import EditConfig from "./edit-config";
+import urlJoin from "url-join";
 
 const Search = ({ config }: { config: Config }) => {
   // Load Storybook's index file https://storybook.js.org/docs/react/configure/sidebar-and-urls#story-indexers
@@ -10,14 +11,14 @@ const Search = ({ config }: { config: Config }) => {
     data: index,
     isLoading: isLoadingIndex,
     error: indexError,
-  } = useFetch<IndexData>(new URL("index.json", config.baseUrl).href, {
+  } = useFetch<IndexData>(urlJoin(config.baseUrl, "index.json"), {
     onError: () => undefined, // prevent default toast
   });
   const {
     data: stories,
     isLoading: isLoadingStories,
     error: storiesError,
-  } = useFetch<StoriesData>(new URL("stories.json", config.baseUrl).href, {
+  } = useFetch<StoriesData>(urlJoin(config.baseUrl, "stories.json"), {
     onError: () => undefined, // prevent default toast
   });
 
