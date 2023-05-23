@@ -1,5 +1,9 @@
 # Hookmark Changelog
 
+## 🔒 avoid duplicated bookmarks
+
+## ➕ add open in hookmark action with correct icon
+
 ## 📁 group bookmarks into files and URLs separately
 
 ## 🔁 rename command title
