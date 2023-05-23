@@ -24,7 +24,7 @@ export default function Command(props: LaunchProps) {
       filtering={{ keepSectionOrder: true }}
       onSearchTextChange={setSearchText}
     >
-      <List.Section title={`Results:`} subtitle={`${numberOfBookmarks}`}>
+      <List.Section title={`Results:`} subtitle={`${numberOfBookmarks} bookmarks are returned`}>
         {bookmarks?.map((bookmark) => (
           <List.Item
             title={bookmark.title}
@@ -33,20 +33,20 @@ export default function Command(props: LaunchProps) {
             accessories={[{ text: bookmark.path == "missing value" ? bookmark.address : bookmark.path }]}
             actions={
               <ActionPanel>
-                <Action.OpenInBrowser title="Open bookmark" url={bookmark.address} />
-                <Action.Open title="Open File" target={bookmark.path} />
+                <Action.Open title="Open In Hookmark" target={bookmark.path == "missing value" ? bookmark.address : bookmark.path} application={"Hookmark"}/>
+                <Action.OpenInBrowser title="Open In Finder" url={bookmark.address} />
                 <Action.CopyToClipboard
-                  title="Copy As File URL"
+                  title="Copy As Hook link"
                   content={bookmark.address}
                   shortcut={{ modifiers: ["cmd", "shift"], key: "u" }}
                 />
                 <Action.CopyToClipboard
-                  title="Copy As Path"
+                  title="Copy As File Path"
                   content={bookmark.path}
                   shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
                 />
                 <Action.Paste
-                  title="Paste Address"
+                  title="Paste Hook link"
                   content={bookmark.address}
                   shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
                 />
