@@ -1,4 +1,4 @@
-import { LaunchProps, Color, Icon, List, Clipboard, Action, ActionPanel, showHUD } from "@raycast/api";
+import { LaunchProps, Icon, List, Clipboard, Action, ActionPanel, showHUD } from "@raycast/api";
 import { useState, useEffect } from "react";
 import generatePassword, { PasswordData } from "./generatePassword";
 
@@ -29,13 +29,13 @@ export default function Command(props: LaunchProps<{ arguments: PasswordArgument
   }, [wordCount, passwordCount]);
 
   const handleCopyPassword = (password: string) => {
-    Clipboard.copy(password);
+    Clipboard.copy(password, { transient: true });
     showHUD("Password has been copied to the clipboard 😄");
   };
 
   return (
-    <List>
-      <List.Section title={`Results：${passwords.length}`}>
+    <List isLoading={passwords.length === 0}>
+      <List.Section title="Results" subtitle={`${passwords.length}`}>
         {passwords.map((p, index) => {
           const words = p.plaintext.split(" ");
           return (
@@ -45,13 +45,17 @@ export default function Command(props: LaunchProps<{ arguments: PasswordArgument
               title={{ value: p.password, tooltip: p.plaintext }}
               accessories={[
                 { icon: Icon.Eye },
-                ...words.map((word, i) => ({
+                ...words.map((word) => ({
                   tag: { value: word },
                 })),
               ]}
               actions={
-                <ActionPanel title="Copy Password">
-                  <Action title={`Copy Password: ${p.password}`} onAction={() => handleCopyPassword(p.password)} />
+                <ActionPanel>
+                  <Action
+                    title="Copy Password"
+                    icon={Icon.CopyClipboard}
+                    onAction={() => handleCopyPassword(p.password)}
+                  />
                 </ActionPanel>
               }
             />
