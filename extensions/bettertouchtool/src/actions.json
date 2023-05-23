@@ -13,26 +13,102 @@
   { "name": "Finder", "id": "BTTPredefinedActionFinder", "type": 10, "icon": "Finder" },
   { "name": "Zoom In", "id": "BTTPredefinedActionZoomIn", "type": 11, "keywords": ["magnify"], "icon": "Plus" },
   { "name": "Zoom Out", "id": "BTTPredefinedActionZoomOut", "type": 12, "icon": "Minus" },
-  { "name": "Sleep Display", "id": "BTTPredefinedActionSleepDisplay", "type": 13, "keywords": ["screen"], "icon": "Moon" },
-  { "name": "Sleep Computer", "id": "BTTPredefinedActionSleepComputer", "type": 14, "keywords": ["power"], "icon": "Moon" },
+  {
+    "name": "Sleep Display",
+    "id": "BTTPredefinedActionSleepDisplay",
+    "type": 13,
+    "keywords": ["screen"],
+    "icon": "Moon"
+  },
+  {
+    "name": "Sleep Computer",
+    "id": "BTTPredefinedActionSleepComputer",
+    "type": 14,
+    "keywords": ["power"],
+    "icon": "Moon"
+  },
   { "name": "Logout", "id": "BTTPredefinedActionLogout", "type": 15, "icon": "Logout" },
-  { "name": "Hidden Files", "id": "BTTPredefinedActionHiddenFiles", "type": 16, "keywords": ["finder"], "icon": "EyeDisabled" },
+  {
+    "name": "Hidden Files",
+    "id": "BTTPredefinedActionHiddenFiles",
+    "type": 16,
+    "keywords": ["finder"],
+    "icon": "EyeDisabled"
+  },
   { "name": "Move Window Left", "id": "BTTPredefinedActionMoveWindowLeft", "type": 17 },
   { "name": "Move Window Right", "id": "BTTPredefinedActionMoveWindowRight", "type": 18 },
   { "name": "Max Window Left", "id": "BTTPredefinedActionMaxWindowLeft", "type": 19 },
   { "name": "Max Window Right", "id": "BTTPredefinedActionMaxWindowRight", "type": 20 },
   { "name": "Max Window", "id": "BTTPredefinedActionMaxWindow", "type": 21 },
-  { "name": "Mute", "id": "BTTPredefinedActionMute", "type": 22, "keywords": ["media", "unmute"], "icon": "MicrophoneDisabled" },
+  {
+    "name": "Mute",
+    "id": "BTTPredefinedActionMute",
+    "type": 22,
+    "keywords": ["media", "unmute"],
+    "icon": "MicrophoneDisabled"
+  },
   { "name": "Play", "id": "BTTPredefinedActionPlay", "type": 23, "keywords": ["media", "pause"], "icon": "Play" },
-  { "name": "Volume Up", "id": "BTTPredefinedActionVolumeUp", "type": 24, "keywords": ["media", "louder"], "icon": "VolumeUp" },
-  { "name": "Volume Down", "id": "BTTPredefinedActionVolumeDown", "type": 25, "keywords": ["media", "quieter"], "icon": "VolumeDown" },
-  { "name": "Backwards", "id": "BTTPredefinedActionBackwards", "type": 26, "keywords": ["media", "previous"], "icon": "Rewind" },
-  { "name": "Forward", "id": "BTTPredefinedActionForward", "type": 27, "keywords": ["media", "next", "skip"], "icon": "Forward" },
-  { "name": "Brightness Up", "id": "BTTPredefinedActionBrightnessUp", "type": 28, "keywords": ["screen"], "icon": "Sun" },
-  { "name": "Brightness Down", "id": "BTTPredefinedActionBrightnessDown", "type": 29, "keywords": ["screen"], "icon": "Sun" },
-  { "name": "Eject", "id": "BTTPredefinedActionEject", "type": 30, "keywords": ["media", "cd", "dvd"], "icon": "Eject" },
-  { "name": "Illumination Up", "id": "BTTPredefinedActionIlluminationUp", "type": 31, "keywords": ["keyboard", "backlight"] },
-  { "name": "Illumination Down", "id": "BTTPredefinedActionIlluminationDown", "type": 32, "keywords": ["keyboard", "backlight"] },
+  {
+    "name": "Volume Up",
+    "id": "BTTPredefinedActionVolumeUp",
+    "type": 24,
+    "keywords": ["media", "louder"],
+    "icon": "VolumeUp"
+  },
+  {
+    "name": "Volume Down",
+    "id": "BTTPredefinedActionVolumeDown",
+    "type": 25,
+    "keywords": ["media", "quieter"],
+    "icon": "VolumeDown"
+  },
+  {
+    "name": "Backwards",
+    "id": "BTTPredefinedActionBackwards",
+    "type": 26,
+    "keywords": ["media", "previous"],
+    "icon": "Rewind"
+  },
+  {
+    "name": "Forward",
+    "id": "BTTPredefinedActionForward",
+    "type": 27,
+    "keywords": ["media", "next", "skip"],
+    "icon": "Forward"
+  },
+  {
+    "name": "Brightness Up",
+    "id": "BTTPredefinedActionBrightnessUp",
+    "type": 28,
+    "keywords": ["screen"],
+    "icon": "Sun"
+  },
+  {
+    "name": "Brightness Down",
+    "id": "BTTPredefinedActionBrightnessDown",
+    "type": 29,
+    "keywords": ["screen"],
+    "icon": "Sun"
+  },
+  {
+    "name": "Eject",
+    "id": "BTTPredefinedActionEject",
+    "type": 30,
+    "keywords": ["media", "cd", "dvd"],
+    "icon": "Eject"
+  },
+  {
+    "name": "Illumination Up",
+    "id": "BTTPredefinedActionIlluminationUp",
+    "type": 31,
+    "keywords": ["keyboard", "backlight"]
+  },
+  {
+    "name": "Illumination Down",
+    "id": "BTTPredefinedActionIlluminationDown",
+    "type": 32,
+    "keywords": ["keyboard", "backlight"]
+  },
   { "name": "F1", "id": "BTTPredefinedActionF1", "type": 33, "keywords": ["function", "fn"], "icon": "Keyboard" },
   { "name": "F2", "id": "BTTPredefinedActionF2", "type": 34, "keywords": ["function", "fn"], "icon": "Keyboard" },
   { "name": "F3", "id": "BTTPredefinedActionF3", "type": 35, "keywords": ["function", "fn"], "icon": "Keyboard" },
@@ -68,7 +144,12 @@
   { "name": "Start Drag", "id": "BTTPredefinedActionStartDrag", "type": 65, "icon": "Mouse" },
   { "name": "Stop Drag", "id": "BTTPredefinedActionStopDrag", "type": 66, "icon": "Mouse" },
   { "name": "Move Tablet", "id": "BTTPredefinedActionMoveTablet", "type": 67 },
-  { "name": "Toggle Magic Mouse Touchpad Mode", "id": "BTTPredefinedActionToggleMagicMouseTouchpadMode", "type": 68, "icon": "Mouse" },
+  {
+    "name": "Toggle Magic Mouse Touchpad Mode",
+    "id": "BTTPredefinedActionToggleMagicMouseTouchpadMode",
+    "type": 68,
+    "icon": "Mouse"
+  },
   { "name": "Start Moving Windows", "id": "BTTPredefinedActionStartMovingWindows", "type": 69 },
   { "name": "Stop Moving Windows", "id": "BTTPredefinedActionStopMovingWindows", "type": 70 },
   { "name": "Start Resizing Windows", "id": "BTTPredefinedActionStartResizingWindows", "type": 71 },
@@ -120,8 +201,18 @@
   { "name": "Smart Zoom", "id": "BTTPredefinedActionSmartZoom", "type": 117 },
   { "name": "Paste String", "id": "BTTPredefinedActionPasteString", "type": 118, "icon": "Clipboard" },
   { "name": "Custom Click", "id": "BTTPredefinedActionCustomClick", "type": 119 },
-  { "name": "Brightness Up On External", "id": "BTTPredefinedActionBrightnessUpOnExternal", "type": 120, "icon": "Sun" },
-  { "name": "Brightness Down On External", "id": "BTTPredefinedActionBrightnessDownOnExternal", "type": 121, "icon": "Sun" },
+  {
+    "name": "Brightness Up On External",
+    "id": "BTTPredefinedActionBrightnessUpOnExternal",
+    "type": 120,
+    "icon": "Sun"
+  },
+  {
+    "name": "Brightness Down On External",
+    "id": "BTTPredefinedActionBrightnessDownOnExternal",
+    "type": 121,
+    "icon": "Sun"
+  },
   { "name": "Notification Center", "id": "BTTPredefinedActionNotificationCenter", "type": 122 },
   { "name": "Toggle Cursor Size", "id": "BTTPredefinedActionToggleCursorSize", "type": 123 },
   { "name": "Trigger Menu Item", "id": "BTTPredefinedActionTriggerMenuItem", "type": 124 },
@@ -150,22 +241,70 @@
   { "name": "Dock Application Expose", "id": "BTTPredefinedActionDockApplicationExpose", "type": 147 },
   { "name": "Dock Send Keyboard Shortcut", "id": "BTTPredefinedActionDockSendKeyboardShortcut", "type": 148 },
   { "name": "CMD Double Click", "id": "BTTPredefinedActionCMDDoubleClick", "type": 149 },
-  { "name": "If Mouse Hovers Dock Icon Enable It", "id": "BTTPredefinedActionIfMouseHoversDockIconEnableIt", "type": 150 },
-  { "name": "Move Window To Left Space", "id": "BTTPredefinedActionMoveWindowToLeftSpace", "type": 151, "icon": "AppWindowLeft" },
-  { "name": "Move Window To Right Space", "id": "BTTPredefinedActionMoveWindowToRightSpace", "type": 152, "icon": "AppWindowRight" },
+  {
+    "name": "If Mouse Hovers Dock Icon Enable It",
+    "id": "BTTPredefinedActionIfMouseHoversDockIconEnableIt",
+    "type": 150
+  },
+  {
+    "name": "Move Window To Left Space",
+    "id": "BTTPredefinedActionMoveWindowToLeftSpace",
+    "type": 151,
+    "icon": "AppWindowLeft"
+  },
+  {
+    "name": "Move Window To Right Space",
+    "id": "BTTPredefinedActionMoveWindowToRightSpace",
+    "type": 152,
+    "icon": "AppWindowRight"
+  },
   { "name": "Change Mouse Position", "id": "BTTPredefinedActionChangeMousePosition", "type": 153, "icon": "Mouse" },
-  { "name": "Save Current Mouse Position", "id": "BTTPredefinedActionSaveCurrentMousePosition", "type": 154, "icon": "Mouse" },
-  { "name": "Restore Saved Mouse Position", "id": "BTTPredefinedActionRestoreSavedMousePosition", "type": 155, "icon": "Mouse" },
+  {
+    "name": "Save Current Mouse Position",
+    "id": "BTTPredefinedActionSaveCurrentMousePosition",
+    "type": 154,
+    "icon": "Mouse"
+  },
+  {
+    "name": "Restore Saved Mouse Position",
+    "id": "BTTPredefinedActionRestoreSavedMousePosition",
+    "type": 155,
+    "icon": "Mouse"
+  },
   { "name": "Empty Trash", "id": "BTTPredefinedActionEmptyTrash", "type": 156, "icon": "Trash" },
-  { "name": "Open Finder Selection With App", "id": "BTTPredefinedActionOpenFinderSelectionWithApp", "type": 157, "icon": "Finder" },
+  {
+    "name": "Open Finder Selection With App",
+    "id": "BTTPredefinedActionOpenFinderSelectionWithApp",
+    "type": 157,
+    "icon": "Finder"
+  },
   { "name": "Lock Screen", "id": "BTTPredefinedActionLockScreen", "type": 158, "icon": "Lock" },
   { "name": "Unlock Screen", "id": "BTTPredefinedActionUnlockScreen", "type": 159, "icon": "LockUnlocked" },
-  { "name": "Start Recording Mouse Gesture", "id": "BTTPredefinedActionStartRecordingMouseGesture", "type": 160, "icon": "Mouse" },
-  { "name": "Stop Recording Mouse Gesture", "id": "BTTPredefinedActionStopRecordingMouseGesture", "type": 161, "icon": "Mouse" },
-  { "name": "Trigger Context Menu Item", "id": "BTTPredefinedActionTriggerContextMenuItem", "type": 162, "icon": "Ellipsis" },
+  {
+    "name": "Start Recording Mouse Gesture",
+    "id": "BTTPredefinedActionStartRecordingMouseGesture",
+    "type": 160,
+    "icon": "Mouse"
+  },
+  {
+    "name": "Stop Recording Mouse Gesture",
+    "id": "BTTPredefinedActionStopRecordingMouseGesture",
+    "type": 161,
+    "icon": "Mouse"
+  },
+  {
+    "name": "Trigger Context Menu Item",
+    "id": "BTTPredefinedActionTriggerContextMenuItem",
+    "type": 162,
+    "icon": "Ellipsis"
+  },
   { "name": "El Capitan Split Screen Left", "id": "BTTPredefinedActionElCapitanSplitScreenLeft", "type": 163 },
   { "name": "El Capitan Split Screen Right", "id": "BTTPredefinedActionElCapitanSplitScreenRight", "type": 164 },
-  { "name": "Mission Control And Show Desktop Preview", "id": "BTTPredefinedActionMissionControlAndShowDesktopPreview", "type": 165 },
+  {
+    "name": "Mission Control And Show Desktop Preview",
+    "id": "BTTPredefinedActionMissionControlAndShowDesktopPreview",
+    "type": 165
+  },
   { "name": "Toggle Siri Remote Touchpad Mode", "id": "BTTPredefinedActionToggleSiriRemoteTouchpadMode", "type": 166 },
   { "name": "Show Character Palette", "id": "BTTPredefinedActionShowCharacterPalette", "type": 167 },
   { "name": "Trigger SnapArea", "id": "BTTPredefinedActionTriggerSnapArea", "type": 168 },
@@ -194,16 +333,38 @@
   { "name": "Close Current Touch Bar Group", "id": "BTTPredefinedActionCloseCurrentTouchBarGroup", "type": 191 },
   { "name": "Type String", "id": "BTTPredefinedActionTypeString", "type": 193 },
   { "name": "Toggle Caps Lock", "id": "BTTPredefinedActionToggleCapsLock", "type": 194, "icon": "Keyboard" },
-  { "name": "Run Apple Script In Background String", "id": "BTTPredefinedActionRunAppleScriptInBackgroundString", "type": 195, "icon": "Code" },
+  {
+    "name": "Run Apple Script In Background String",
+    "id": "BTTPredefinedActionRunAppleScriptInBackgroundString",
+    "type": 195,
+    "icon": "Code"
+  },
   { "name": "Add New Space", "id": "BTTPredefinedActionAddNewSpace", "type": 196, "icon": "Monitor" },
   { "name": "Toggle Dark Mode", "id": "BTTPredefinedActionToggleDarkMode", "type": 197, "icon": "Contrast" },
   { "name": "Volume Up Little", "id": "BTTPredefinedActionVolumeUpLittle", "type": 198, "icon": "VolumeUp" },
   { "name": "Volume Down Little", "id": "BTTPredefinedActionVolumeDownLittle", "type": 199, "icon": "VolumeDown" },
   { "name": "Toggle Do Not Disturb", "id": "BTTPredefinedActionToggleDoNotDisturb", "type": 200 },
-  { "name": "Toggle Night Shift", "id": "BTTPredefinedActionToggleNightShift", "type": 201, "keywords": ["screen"], "icon": "Moon" },
+  {
+    "name": "Toggle Night Shift",
+    "id": "BTTPredefinedActionToggleNightShift",
+    "type": 201,
+    "keywords": ["screen"],
+    "icon": "Moon"
+  },
   { "name": "Start Screen Saver", "id": "BTTPredefinedActionStartScreenSaver", "type": 202 },
-  { "name": "Show Clipboard Manager", "id": "BTTPredefinedActionShowClipboardManager", "type": 203, "keywords": ["copied", "copy", "paste", "cb"], "icon": "Clipboard" },
-  { "name": "Bring Window Under Cursor To Front", "id": "BTTPredefinedActionBringWindowUnderCursorToFront", "type": 204, "icon": "Window" },
+  {
+    "name": "Show Clipboard Manager",
+    "id": "BTTPredefinedActionShowClipboardManager",
+    "type": 203,
+    "keywords": ["copied", "copy", "paste", "cb"],
+    "icon": "Clipboard"
+  },
+  {
+    "name": "Bring Window Under Cursor To Front",
+    "id": "BTTPredefinedActionBringWindowUnderCursorToFront",
+    "type": 204,
+    "icon": "Window"
+  },
   { "name": "Open Touch Bar Group With Name", "id": "BTTPredefinedActionOpenTouchBarGroupWithName", "type": 205 },
   { "name": "Shell Task", "id": "BTTPredefinedActionShellTask", "type": 206, "icon": "Terminal" },
   { "name": "Switch To Desktop 1", "id": "BTTPredefinedActionSwitchToDesktop1", "type": 207, "icon": "Monitor" },
@@ -215,15 +376,60 @@
   { "name": "Switch To Desktop 7", "id": "BTTPredefinedActionSwitchToDesktop7", "type": 213, "icon": "Monitor" },
   { "name": "Switch To Desktop 8", "id": "BTTPredefinedActionSwitchToDesktop8", "type": 214, "icon": "Monitor" },
   { "name": "Switch To Desktop 9", "id": "BTTPredefinedActionSwitchToDesktop9", "type": 215, "icon": "Monitor" },
-  { "name": "Move Window To Desktop 1", "id": "BTTPredefinedActionMoveWindowToDesktop1", "type": 216, "icon": "Monitor" },
-  { "name": "Move Window To Desktop 2", "id": "BTTPredefinedActionMoveWindowToDesktop2", "type": 217, "icon": "Monitor" },
-  { "name": "Move Window To Desktop 3", "id": "BTTPredefinedActionMoveWindowToDesktop3", "type": 218, "icon": "Monitor" },
-  { "name": "Move Window To Desktop 4", "id": "BTTPredefinedActionMoveWindowToDesktop4", "type": 219, "icon": "Monitor" },
-  { "name": "Move Window To Desktop 5", "id": "BTTPredefinedActionMoveWindowToDesktop5", "type": 220, "icon": "Monitor" },
-  { "name": "Move Window To Desktop 6", "id": "BTTPredefinedActionMoveWindowToDesktop6", "type": 222, "icon": "Monitor" },
-  { "name": "Move Window To Desktop 7", "id": "BTTPredefinedActionMoveWindowToDesktop7", "type": 223, "icon": "Monitor" },
-  { "name": "Move Window To Desktop 8", "id": "BTTPredefinedActionMoveWindowToDesktop8", "type": 224, "icon": "Monitor" },
-  { "name": "Move Window To Desktop 9", "id": "BTTPredefinedActionMoveWindowToDesktop9", "type": 225, "icon": "Monitor" },
+  {
+    "name": "Move Window To Desktop 1",
+    "id": "BTTPredefinedActionMoveWindowToDesktop1",
+    "type": 216,
+    "icon": "Monitor"
+  },
+  {
+    "name": "Move Window To Desktop 2",
+    "id": "BTTPredefinedActionMoveWindowToDesktop2",
+    "type": 217,
+    "icon": "Monitor"
+  },
+  {
+    "name": "Move Window To Desktop 3",
+    "id": "BTTPredefinedActionMoveWindowToDesktop3",
+    "type": 218,
+    "icon": "Monitor"
+  },
+  {
+    "name": "Move Window To Desktop 4",
+    "id": "BTTPredefinedActionMoveWindowToDesktop4",
+    "type": 219,
+    "icon": "Monitor"
+  },
+  {
+    "name": "Move Window To Desktop 5",
+    "id": "BTTPredefinedActionMoveWindowToDesktop5",
+    "type": 220,
+    "icon": "Monitor"
+  },
+  {
+    "name": "Move Window To Desktop 6",
+    "id": "BTTPredefinedActionMoveWindowToDesktop6",
+    "type": 222,
+    "icon": "Monitor"
+  },
+  {
+    "name": "Move Window To Desktop 7",
+    "id": "BTTPredefinedActionMoveWindowToDesktop7",
+    "type": 223,
+    "icon": "Monitor"
+  },
+  {
+    "name": "Move Window To Desktop 8",
+    "id": "BTTPredefinedActionMoveWindowToDesktop8",
+    "type": 224,
+    "icon": "Monitor"
+  },
+  {
+    "name": "Move Window To Desktop 9",
+    "id": "BTTPredefinedActionMoveWindowToDesktop9",
+    "type": 225,
+    "icon": "Monitor"
+  },
   { "name": "Switch To Desktop 10", "id": "BTTPredefinedActionSwitchToDesktop10", "type": 226, "icon": "Monitor" },
   { "name": "Switch To Desktop 11", "id": "BTTPredefinedActionSwitchToDesktop11", "type": 227, "icon": "Monitor" },
   { "name": "Switch To Desktop 12", "id": "BTTPredefinedActionSwitchToDesktop12", "type": 228, "icon": "Monitor" },
@@ -234,33 +440,122 @@
   { "name": "Switch To Desktop 17", "id": "BTTPredefinedActionSwitchToDesktop17", "type": 233, "icon": "Monitor" },
   { "name": "Switch To Desktop 18", "id": "BTTPredefinedActionSwitchToDesktop18", "type": 234, "icon": "Monitor" },
   { "name": "Switch To Desktop 19", "id": "BTTPredefinedActionSwitchToDesktop19", "type": 235, "icon": "Monitor" },
-  { "name": "Move Window To Desktop 10", "id": "BTTPredefinedActionMoveWindowToDesktop10", "type": 236, "icon": "Monitor" },
-  { "name": "Move Window To Desktop 11", "id": "BTTPredefinedActionMoveWindowToDesktop11", "type": 237, "icon": "Monitor" },
-  { "name": "Move Window To Desktop 12", "id": "BTTPredefinedActionMoveWindowToDesktop12", "type": 238, "icon": "Monitor" },
-  { "name": "Move Window To Desktop 13", "id": "BTTPredefinedActionMoveWindowToDesktop13", "type": 239, "icon": "Monitor" },
-  { "name": "Move Window To Desktop 14", "id": "BTTPredefinedActionMoveWindowToDesktop14", "type": 240, "icon": "Monitor" },
-  { "name": "Move Window To Desktop 15", "id": "BTTPredefinedActionMoveWindowToDesktop15", "type": 241, "icon": "Monitor" },
-  { "name": "Move Window To Desktop 16", "id": "BTTPredefinedActionMoveWindowToDesktop16", "type": 242, "icon": "Monitor" },
-  { "name": "Move Window To Desktop 17", "id": "BTTPredefinedActionMoveWindowToDesktop17", "type": 243, "icon": "Monitor" },
-  { "name": "Move Window To Desktop 18", "id": "BTTPredefinedActionMoveWindowToDesktop18", "type": 244, "icon": "Monitor" },
-  { "name": "Move Window To Desktop 19", "id": "BTTPredefinedActionMoveWindowToDesktop19", "type": 245, "icon": "Monitor" },
-  { "name": "Terminal Command Blocking", "id": "BTTPredefinedActionTerminalCommandBlocking", "type": 246, "icon": "Terminal" },
+  {
+    "name": "Move Window To Desktop 10",
+    "id": "BTTPredefinedActionMoveWindowToDesktop10",
+    "type": 236,
+    "icon": "Monitor"
+  },
+  {
+    "name": "Move Window To Desktop 11",
+    "id": "BTTPredefinedActionMoveWindowToDesktop11",
+    "type": 237,
+    "icon": "Monitor"
+  },
+  {
+    "name": "Move Window To Desktop 12",
+    "id": "BTTPredefinedActionMoveWindowToDesktop12",
+    "type": 238,
+    "icon": "Monitor"
+  },
+  {
+    "name": "Move Window To Desktop 13",
+    "id": "BTTPredefinedActionMoveWindowToDesktop13",
+    "type": 239,
+    "icon": "Monitor"
+  },
+  {
+    "name": "Move Window To Desktop 14",
+    "id": "BTTPredefinedActionMoveWindowToDesktop14",
+    "type": 240,
+    "icon": "Monitor"
+  },
+  {
+    "name": "Move Window To Desktop 15",
+    "id": "BTTPredefinedActionMoveWindowToDesktop15",
+    "type": 241,
+    "icon": "Monitor"
+  },
+  {
+    "name": "Move Window To Desktop 16",
+    "id": "BTTPredefinedActionMoveWindowToDesktop16",
+    "type": 242,
+    "icon": "Monitor"
+  },
+  {
+    "name": "Move Window To Desktop 17",
+    "id": "BTTPredefinedActionMoveWindowToDesktop17",
+    "type": 243,
+    "icon": "Monitor"
+  },
+  {
+    "name": "Move Window To Desktop 18",
+    "id": "BTTPredefinedActionMoveWindowToDesktop18",
+    "type": 244,
+    "icon": "Monitor"
+  },
+  {
+    "name": "Move Window To Desktop 19",
+    "id": "BTTPredefinedActionMoveWindowToDesktop19",
+    "type": 245,
+    "icon": "Monitor"
+  },
+  {
+    "name": "Terminal Command Blocking",
+    "id": "BTTPredefinedActionTerminalCommandBlocking",
+    "type": 246,
+    "icon": "Terminal"
+  },
   { "name": "Quit App Under Cursor", "id": "BTTPredefinedActionQuitAppUnderCursor", "type": 247, "icon": "Close" },
   { "name": "Trigger Named Trigger", "id": "BTTPredefinedActionTriggerNamedTrigger", "type": 248 },
   { "name": "Show Floating Web View", "id": "BTTPredefinedActionShowFloatingWebView", "type": 249 },
   { "name": "Custom Paste", "id": "BTTPredefinedActionCustomPaste", "type": 250, "icon": "Clipboard" },
   { "name": "Custom Move Resize", "id": "BTTPredefinedActionCustomMoveResize", "type": 251 },
-  { "name": "Run JavaScript In Background String", "id": "BTTPredefinedActionRunJavaScriptInBackgroundString", "type": 252, "icon": "Code" },
-  { "name": "Run JavaScript On Main Thread String", "id": "BTTPredefinedActionRunJavaScriptOnMainThreadString", "type": 253, "icon": "Code" },
+  {
+    "name": "Run JavaScript In Background String",
+    "id": "BTTPredefinedActionRunJavaScriptInBackgroundString",
+    "type": 252,
+    "icon": "Code"
+  },
+  {
+    "name": "Run JavaScript On Main Thread String",
+    "id": "BTTPredefinedActionRunJavaScriptOnMainThreadString",
+    "type": 253,
+    "icon": "Code"
+  },
   { "name": "Show HUD", "id": "BTTPredefinedActionShowHUD", "type": 254 },
   { "name": "Haptic Feedback", "id": "BTTPredefinedActionHapticFeedback", "type": 255 },
   { "name": "Save Selected Text To Variable", "id": "BTTPredefinedActionSaveSelectedTextToVariable", "type": 256 },
   { "name": "Toggle True Tone", "id": "BTTPredefinedActionToggleTrueTone", "type": 257, "keywords": ["display"] },
   { "name": "Toggle Preset", "id": "BTTPredefinedActionTogglePreset", "type": 258 },
-  { "name": "Brightness Up Little", "id": "BTTPredefinedActionBrightnessUpLittle", "type": 259, "keywords": ["display"], "icon": "Brightness" },
-  { "name": "Brightness Down Little", "id": "BTTPredefinedActionBrightnessDownLittle", "type": 260, "keywords": ["display"], "icon": "Brightness" },
-  { "name": "Brightness External Up Little", "id": "BTTPredefinedActionBrightnessExternalUpLittle", "type": 261, "keywords": ["display"], "icon": "Brightness" },
-  { "name": "Brightness External Down Little", "id": "BTTPredefinedActionBrightnessExternalDownLittle", "type": 262, "keywords": ["display"], "icon": "Brightness" },
+  {
+    "name": "Brightness Up Little",
+    "id": "BTTPredefinedActionBrightnessUpLittle",
+    "type": 259,
+    "keywords": ["display"],
+    "icon": "Brightness"
+  },
+  {
+    "name": "Brightness Down Little",
+    "id": "BTTPredefinedActionBrightnessDownLittle",
+    "type": 260,
+    "keywords": ["display"],
+    "icon": "Brightness"
+  },
+  {
+    "name": "Brightness External Up Little",
+    "id": "BTTPredefinedActionBrightnessExternalUpLittle",
+    "type": 261,
+    "keywords": ["display"],
+    "icon": "Brightness"
+  },
+  {
+    "name": "Brightness External Down Little",
+    "id": "BTTPredefinedActionBrightnessExternalDownLittle",
+    "type": 262,
+    "keywords": ["display"],
+    "icon": "Brightness"
+  },
   { "name": "Take Screenshot Or Video", "id": "BTTPredefinedActionTakeScreenshotOrVideo", "type": 263 },
   { "name": "Keyboard Shortcut", "id": "BTTPredefinedActionKeyboardShortcut", "type": 264, "icon": "Keyboard" },
   { "name": "Hide Menubar Extras", "id": "BTTPredefinedActionHideMenubarExtras", "type": 265, "icon": "EyeDisabled" },
@@ -272,9 +567,24 @@
   { "name": "Connect MIDI Device", "id": "BTTPredefinedActionConnectMIDIDevice", "type": 271 },
   { "name": "Scroll", "id": "BTTPredefinedActionScroll", "type": 272, "icon": "Mouse" },
   { "name": "Show Custom Context Menu", "id": "BTTPredefinedActionShowCustomContextMenu", "type": 273 },
-  { "name": "Connect Bluetooth Device", "id": "BTTPredefinedActionConnectBluetoothDevice", "type": 274, "icon": "Bluetooth" },
-  { "name": "Disconnect Bluetooth Device", "id": "BTTPredefinedActionDisconnectBluetoothDevice", "type": 275, "icon": "Bluetooth" },
-  { "name": "Toggle Bluetooth Device", "id": "BTTPredefinedActionToggleBluetoothDevice", "type": 276, "icon": "Bluetooth" },
+  {
+    "name": "Connect Bluetooth Device",
+    "id": "BTTPredefinedActionConnectBluetoothDevice",
+    "type": 274,
+    "icon": "Bluetooth"
+  },
+  {
+    "name": "Disconnect Bluetooth Device",
+    "id": "BTTPredefinedActionDisconnectBluetoothDevice",
+    "type": 275,
+    "icon": "Bluetooth"
+  },
+  {
+    "name": "Toggle Bluetooth Device",
+    "id": "BTTPredefinedActionToggleBluetoothDevice",
+    "type": 276,
+    "icon": "Bluetooth"
+  },
   { "name": "Enable Bluetooth", "id": "BTTPredefinedActionEnableBluetooth", "type": 277, "icon": "Bluetooth" },
   { "name": "Disable Bluetooth", "id": "BTTPredefinedActionDisableBluetooth", "type": 278, "icon": "Bluetooth" },
   { "name": "Toggle Bluetooth", "id": "BTTPredefinedActionToggleBluetooth", "type": 279, "icon": "Bluetooth" },
