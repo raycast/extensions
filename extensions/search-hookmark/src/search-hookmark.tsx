@@ -1,26 +1,21 @@
 import { LaunchProps, ActionPanel, List, Action } from "@raycast/api";
 import { useCachedPromise, getFavicon } from "@raycast/utils";
-import { getBookmarks, openInHook } from "./hookmark";
 import { useMemo, useState } from "react";
-import fs from "fs";
-
-const HookPath = "/System/Volumes/Data/Applications/Hookmark.app";
-const HookPathSetapp = "/System/Volumes/Data/Applications/Setapp/Hookmark.app";
-let iconPath: string;
-if (fs.existsSync(HookPath)) {
-  iconPath = HookPath;
-  console.log(`iconPath is ${iconPath}`);
-}
-
-if (fs.existsSync(HookPathSetapp)) {
-  iconPath = HookPathSetapp;
-  console.log(`iconPath is ${iconPath}`);
-}
+import { getBookmarks, openInHook, getHookIconPath } from "./utils/hookmark";
+import { checkHookmarkInstallation } from "./utils/checkInstall";
+import { showHookmarkNotOpenToast } from "./utils/checkOpen";
 
 export default function Command(props: LaunchProps) {
-  const [searchText, setSearchText] = useState(props.fallbackText ?? "");
-  const { data, isLoading } = useCachedPromise(getBookmarks);
+  checkHookmarkInstallation();
 
+  const [searchText, setSearchText] = useState(props.fallbackText ?? "");
+  const { data, isLoading, error } = useCachedPromise(getBookmarks);
+
+  if (error) {
+    showHookmarkNotOpenToast();
+  }
+
+  const iconPath = getHookIconPath();
   const bookmarks = useMemo(() => {
     return data?.filter((bookmark) => {
       return bookmark.title.toLowerCase().includes(searchText.toLowerCase());

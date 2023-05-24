@@ -1,5 +1,6 @@
 import { runAppleScriptSync } from "run-applescript";
 import { Bookmark } from "./type";
+import fs from "fs";
 
 export async function getBookmarks() {
   const response = runAppleScriptSync(`
@@ -38,14 +39,22 @@ export function openInHook(name: string, address: string) {
       invoke on (make bookmark with properties {name:"${name}", address:"${address}"})
     end tell
   `;
-  const result = runAppleScriptSync(script);
-  console.log(`Bookmark added to Hook: ${name} (${address})`);
+  runAppleScriptSync(script);
+  // console.log(`Bookmark added to Hook: ${name} (${address})`);
 }
 
-export function getNumberOfBookmarks(bookmarks?: Bookmark[]) {
-  if (!bookmarks) {
-    return undefined;
+export function getHookIconPath() {
+  const HookPath = "/System/Volumes/Data/Applications/Hookmark.app";
+  const HookPathSetapp = "/System/Volumes/Data/Applications/Setapp/Hookmark.app";
+  let iconPath = "";
+  if (fs.existsSync(HookPath)) {
+    iconPath = HookPath;
+    // console.log(`iconPath is ${iconPath}`);
   }
 
-  return bookmarks.length === 1 ? "1 bookmark" : `${bookmarks.length} bookmarks`;
+  if (fs.existsSync(HookPathSetapp)) {
+    iconPath = HookPathSetapp;
+    // console.log(`iconPath is ${iconPath}`);
+  }
+  return iconPath;
 }
