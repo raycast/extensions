@@ -10,6 +10,7 @@ interface PasswordArguments {
 export default function Command(props: LaunchProps<{ arguments: PasswordArguments }>) {
   const { wordCount, passwordCount } = props.arguments;
   if (parseInt(passwordCount) > 1000) {
+    popToRoot();
     showToast(Toast.Style.Failure, "Password count cannot be greater than 1000");
   }
   const [passwords, setPasswords] = useState<PasswordData[]>([]);
