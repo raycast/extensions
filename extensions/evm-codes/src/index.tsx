@@ -47,7 +47,7 @@ export default function Command() {
       />
       {precompiles.map((pc: string) => {
         const address = parseInt(pc);
-        const hex = `0x${address.toString(16).padStart(2, '0')}`;
+        const hex = `0x${address.toString(16).padStart(2, "0")}`;
         return (
           <List.Item
             icon="🅿️"
@@ -62,7 +62,7 @@ export default function Command() {
         );
       })}
       {Object.values(opcodes).map((op: Opcode) => {
-        const padded = op.code.toString(16).padStart(2, '0')
+        const padded = op.code.toString(16).padStart(2, "0");
         return (
           <List.Item
             icon={getOpIcon(op) || "list-icon.png"}
