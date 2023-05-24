@@ -7,31 +7,42 @@ interface PasswordArguments {
   passwordCount: string;
 }
 
+const DEFAULT_WORD_COUNT = 3;
+const DEFAULT_PASSWORD_COUNT = 9;
+const MAX_COUNT = 99;
+
 export default function Command(props: LaunchProps<{ arguments: PasswordArguments }>) {
-  const { wordCount, passwordCount } = props.arguments;
-  if (parseInt(passwordCount) > 1000) {
-    popToRoot();
-    showToast(Toast.Style.Failure, "Password count cannot be greater than 1000");
-  }
+  // Assigning command arguments to new variables to avoid reassignment within the component.
+  const wordCountArg = props.arguments.wordCount;
+  const passwordCountArg = props.arguments.passwordCount;
+
+  // State to hold the generated passwords.
   const [passwords, setPasswords] = useState<PasswordData[]>([]);
 
+  // Function to parse string arguments to numbers.
+  // If argument is greater than MAX_COUNT, MAX_COUNT is used instead.
   const parseNumber = (value: string, defaultValue: number) => {
-    const parsedValue = parseInt(value);
+    let parsedValue = parseInt(value);
+    if (parsedValue > MAX_COUNT) {
+      showToast(Toast.Style.Failure, "Count cannot be greater than 99");
+      parsedValue = MAX_COUNT;
+    }
     return !isNaN(parsedValue) ? parsedValue : defaultValue;
   };
 
   useEffect(() => {
     const fetchData = async () => {
-      const validWordCount = parseNumber(wordCount, 3);
-      const validPasswordCount = parseNumber(passwordCount, 9);
+      const validWordCount = parseNumber(wordCountArg, DEFAULT_WORD_COUNT);
+      const validPasswordCount = parseNumber(passwordCountArg, DEFAULT_PASSWORD_COUNT);
 
+      // Generate passwords and set them in state.
       const passwords = await generatePassword(validWordCount, validPasswordCount);
-
       setPasswords(passwords);
     };
     fetchData();
-  }, [wordCount, passwordCount]);
+  }, [wordCountArg, passwordCountArg]);
 
+  // Function to handle password copy action.
   const handleCopyPassword = async (password: string) => {
     Clipboard.copy(password, { transient: true });
     await showToast(Toast.Style.Success, "Password has been copied to the clipboard 😄");
@@ -45,6 +56,8 @@ export default function Command(props: LaunchProps<{ arguments: PasswordArgument
           const words = p.plaintext.split(" ");
           const wordCount = words.length;
           const passwordLength = p.password.length;
+
+          // Rendering each password with its associated details and actions.
           return (
             <List.Item
               key={index}
