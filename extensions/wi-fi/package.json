@@ -33,7 +33,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.41.0",
+    "@raycast/api": "^1.51.3",
     "node-wifi": "^2.0.16",
     "shell-env": "^4.0.1"
   },
