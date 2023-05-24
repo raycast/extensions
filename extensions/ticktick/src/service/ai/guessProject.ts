@@ -4,12 +4,12 @@ import { getProjects } from "../project";
 
 const promptTemplate = `
 
-Given the title, guess which project it belongs to.
+Given the task, guess which project it belongs to.
 You should write the project name as YOUR ANSWER.
-You can just say 'Inbox' if it is irrelevant to any project.
+You can just say 'null' if it is irrelevant to all current projects.
 
-TITLE:
-{title}
+TASK:
+{task}
 
 PROJECTS:
 {projects}
@@ -18,10 +18,10 @@ YOUR ANSWER:
 
 `.trim();
 
-export default async (title: string): Promise<string> => {
+export default async (taskTitle: string): Promise<string | null> => {
   const projects = getProjects();
   const prompt = promptTemplate
-    .replace("{title}", title)
+    .replace("{task}", taskTitle)
     .replace("{projects}", projects.map((p) => `- ${p.name}`).join("\n"));
 
   const result = await AI.ask(prompt, { creativity: 0 });
@@ -30,5 +30,5 @@ export default async (title: string): Promise<string> => {
     .map(({ id, name }) => ({ id, name, similarity: similarity(name, result) }))
     .sort((a, b) => b.similarity - a.similarity)[0];
 
-  return guess.similarity > 0.6 ? guess.id : "index";
+  return guess.similarity > 0.6 ? guess.id : null;
 };

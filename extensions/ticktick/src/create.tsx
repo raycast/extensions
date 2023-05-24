@@ -1,7 +1,19 @@
-import { Form, Action, ActionPanel, Detail, LocalStorage, showToast, Toast, environment, AI } from "@raycast/api";
+import {
+  Form,
+  Action,
+  ActionPanel,
+  Detail,
+  LocalStorage,
+  showToast,
+  Toast,
+  environment,
+  AI,
+  getPreferenceValues,
+} from "@raycast/api";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import useStartApp from "./hooks/useStartApp";
 import { addTask } from "./service/osScript";
+import useDebouncedCallback from "./hooks/useDebouncedCallback";
 import { getProjects } from "./service/project";
 import { formatToServerDate } from "./utils/date";
 import guessProject from "./service/ai/guessProject";
@@ -15,6 +27,7 @@ interface FormValues {
 
 export default function TickTickCreate() {
   const { isInitCompleted } = useStartApp();
+  const { autoFillEnabled } = getPreferenceValues<Preferences>();
 
   const [isLocalDataLoaded, setIsLocalDataLoaded] = useState(false);
   const [projectId, setProjectId] = useState<string>("");
@@ -80,14 +93,22 @@ export default function TickTickCreate() {
     setProjectId(newValue);
   }, []);
 
-  const onTitleBlur: NonNullable<Form.TextField.Props["onBlur"]> = useCallback(async (newValue) => {
-    const title = newValue.target.value;
-    if (title && environment.canAccess(AI)) {
-      const toast = await showToast(Toast.Style.Animated, "🧠 Guessing project...");
-      setProjectId(await guessProject(title));
-      toast.hide();
-    }
-  }, []);
+  const autoFillWithAI: NonNullable<Form.TextField.Props["onChange"]> = useDebouncedCallback(
+    async (title: string) => {
+      if (!autoFillEnabled || !environment.canAccess(AI)) return;
+
+      if (title) {
+        const toast = await showToast(Toast.Style.Animated, "🧠 Guessing project...");
+        const guessedProjectId = await guessProject(title);
+        if (guessedProjectId) {
+          setProjectId(guessedProjectId);
+        }
+        toast.hide();
+      }
+    },
+    500,
+    []
+  );
 
   if (isLoading) {
     return <Detail isLoading markdown="" />;
@@ -102,14 +123,21 @@ export default function TickTickCreate() {
       }
       isLoading={isLoading}
     >
-      <Form.TextField ref={titleRef} id="title" onBlur={onTitleBlur} autoFocus title="Title" placeholder="No Title" />
-      <Form.TextArea ref={descRef} id="desc" title="Description" placeholder="" />
-      <Form.DatePicker ref={dueDatePickerRef} id="dueDate" title="Due Date" type={Form.DatePicker.Type.DateTime} />
+      <Form.TextField
+        ref={titleRef}
+        id="title"
+        onChange={autoFillWithAI}
+        autoFocus
+        title="Title"
+        placeholder="No Title"
+      />
       <Form.Dropdown value={projectId} ref={listPickerRef} id="list" title="List" onChange={onListChange}>
         {listOptions.map((option) => {
           return <Form.Dropdown.Item key={option.id} value={option.id} title={option.name} />;
         })}
       </Form.Dropdown>
+      <Form.TextArea ref={descRef} id="desc" title="Description" placeholder="" />
+      <Form.DatePicker ref={dueDatePickerRef} id="dueDate" title="Due Date" type={Form.DatePicker.Type.DateTime} />
     </Form>
   );
 }
