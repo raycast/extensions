@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "mullvad",
-  "title": "Am I using Mullvad VPN?",
+  "title": "Mullvad VPN Checker",
   "description": "Fastest way to check if you are connected to Mullvad VPN",
   "icon": "mullvad-icon.png",
   "author": "0x46616c6b",
@@ -9,7 +9,7 @@
   "commands": [
     {
       "name": "mullvad",
-      "title": "Mullvad",
+      "title": "Check Mullvad Connection",
       "description": "Check whether you are connected to Mullvad VPN",
       "mode": "view"
     }
