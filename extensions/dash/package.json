@@ -29,7 +29,8 @@
         {
           "name": "docset",
           "placeholder": "Docset keyword",
-          "type": "text"
+          "type": "text",
+          "required": true
         }
       ]
     },
@@ -38,12 +39,13 @@
       "title": "Create Docset Quicklink",
       "subtitle": "Docset keyword in Dash",
       "description": "Create a quicklink for a specific docset in Dash.",
-      "mode": "view",
+      "mode": "no-view",
       "arguments": [
         {
           "name": "docset",
           "placeholder": "Docset keyword",
-          "type": "text"
+          "type": "text",
+          "required": true
         }
       ]
     }

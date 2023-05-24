@@ -1,14 +1,13 @@
 import { SingleDocsetSearch } from "./views";
-import { DashArguments, Docset } from "./types";
+import { Docset } from "./types";
 import { useDocsets } from "./hooks";
 import { ActionPanel, List } from "@raycast/api";
 import { getDocsetByKeyword } from "./utils";
 import OpenInBrowserAction from "./components/OpenInBrowserAction";
 import { useEffect, useState } from "react";
 
-export default function Command(props: { arguments?: DashArguments }) {
-  const qs = (props.arguments || {}) as DashArguments;
-  const { docset, searchstring } = qs;
+export default function Command(props: { arguments: { docset: string } }) {
+  const { docset } = props.arguments;
   const [docsets, isLoadingDocsets] = useDocsets();
   const [matchedDocset, setMatchedDocset] = useState<Docset | undefined>();
 
@@ -33,5 +32,5 @@ export default function Command(props: { arguments?: DashArguments }) {
     );
   }
 
-  return <SingleDocsetSearch docset={matchedDocset} initialSearchString={searchstring} />;
+  return <SingleDocsetSearch docset={matchedDocset} />;
 }
