@@ -1,5 +1,20 @@
 # Changelog
 
+## 1.52.0 - 2023-05-24
+
+### ✨ New
+
+- **SVG**: You can now use the Raycast `Color` in an SVG.
+
+### 💎 Improvements
+
+- Improve the error message when a required property is missing on a component
+
+### 🐞 Fixes
+
+- Fixed an edge case where the keyboard events triggered while an extension is loading would not be passed down to the extension once loaded
+- Fixed an issue where the fallback of an image would show while it is being loaded
+
 ## 1.51.0 - 2023-05-10
 
 ### ✨ New
