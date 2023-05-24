@@ -26,7 +26,10 @@ export default function SearchNotes(props: LaunchProps<{ arguments: SearchNotesA
   }
 
   const showDetail = (notes ?? []).length > 0 && getPreferenceValues().showPreviewInListView;
-  const handleTagChange = (tag: string) => setNotes(db?.getNotes(tag));
+  const handleTagChange = (tag: string) => {
+    const query = tag.includes(" ") ? `#${tag}#` : `#${tag}`;
+    setNotes(db?.getNotes(query));
+  }
 
   return (
     <List
