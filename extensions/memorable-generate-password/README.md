@@ -1,8 +1,8 @@
 # Memorable Password Generator Extension for Raycast
 
-![screenshot](./metadata/memorable-generate-password-1.png)
-
 Generate Password is an extension for Raycast that allows you to generate strong and memorable passwords.
+
+![screenshot](./metadata/memorable-generate-password-1.png)
 
 During the process of designing and generating passwords, we aim to balance two main factors: memorability and robustness.
 
@@ -43,17 +43,22 @@ z        | 2        |
 
 ## Features
 
-- 🔄🔢 Generate multiple passwords with customizable options.
-- 📚🔤 Use a word list to create passwords with memorable phrases.
-- 🔄✨ Utilize character substitution rules for increased password complexity.
-- 📋✅ Copy generated passwords to the clipboard with a single click.
+- [x] Generate multiple passwords with customizable options.
+- [ ] Write the generated word group into a sentence that is smooth, grammatical and meaningful.
 
 ## Installation
 
-1. 🖥️ Make sure you have [Raycast](https://www.raycast.com) installed on your system.
-2. 📂 Open Raycast and navigate to the Extensions tab.
-3. 🔍 Search for "Generate Password" in the Raycast Extension Marketplace.
-4. ⬇️ Click the "Install" button to add the extension to Raycast.
+### 
+
+[Memorable Password Generator Extension for Raycast]()
+
+### 
+
+```bash
+git clone https://github.com/gandli/generate-password-raycast-extension
+cd generate-password-raycast-extension
+npm install && npm run dev
+```
 
 ## Usage
 
