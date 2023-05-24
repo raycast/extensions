@@ -25,9 +25,8 @@ export const HARDFORK_ICONS: any = {
 export const getOpIcon = (op: Opcode) => {
   if (OP_ICONS[op.name]) {
     return OP_ICONS[op.name];
-  }
-  if (op.code == 4 || op.code == 5) {
-    return "➗";
+  } else if (op.code == 5) {
+    return OP_ICONS["DIV"];
   } else if (op.code >= 5 && op.code <= 9) {
     return "arb_arithmetic.png";
   } else if (op.code == 0x10 || op.code == 0x12) {
@@ -131,4 +130,4 @@ export const PRECOMPILE_NAMES = [
   "alt_bn128_mul",
   "alt_bn128_pairing",
   "blake2f",
-];
+];                                   
