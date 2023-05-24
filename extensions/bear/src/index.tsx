@@ -14,11 +14,11 @@ export default function SearchNotes(props: LaunchProps<{ arguments: SearchNotesA
   const [searchQuery, setSearchQuery] = useState(initialSearchQuery ?? "");
   const [db, error] = useBearDb();
   const [notes, setNotes] = useState<Note[]>();
-  const [selectedTag, setSelectedTag] = useState<string>("");
+  const [selectedTag, setSelectedTag] = useState<string | null>(null);
 
   useEffect(() => {
     if (db != null) {
-      setNotes(db.getNotes(searchQuery, selectedTag));
+      setNotes(db.getNotes(searchQuery, selectedTag ?? undefined));
     }
   }, [db, searchQuery, selectedTag]);
 
@@ -27,13 +27,7 @@ export default function SearchNotes(props: LaunchProps<{ arguments: SearchNotesA
   }
 
   const showDetail = (notes ?? []).length > 0 && getPreferenceValues().showPreviewInListView;
-  const handleTagChange = (tag: string) => {
-    let formattedTag = "";
-    if (tag !== formattedTag) {
-      formattedTag = tag.includes(" ") ? `#${tag}#` : `#${tag}`;
-    }
-    setSelectedTag(formattedTag);
-  };
+  const handleTagChange = (tag: string | null) => setSelectedTag(tag);
 
   return (
     <List

@@ -4,7 +4,7 @@ import { useBearDb } from "./hooks";
 
 type Tag = string;
 type TagsDropdownProps = {
-  onTagChange: (tag: Tag) => void;
+  onTagChange: (tag: Tag | null) => void;
 };
 
 const TagsDropdown = (props: TagsDropdownProps) => {
@@ -27,7 +27,7 @@ const TagsDropdown = (props: TagsDropdownProps) => {
       storeValue={true}
       onChange={(newValue) => {
         if (newValue === "All tags") {
-          onTagChange("");
+          onTagChange(null);
           return;
         }
         onTagChange(newValue);

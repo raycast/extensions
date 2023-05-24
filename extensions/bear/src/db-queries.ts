@@ -31,6 +31,8 @@ WHERE
   )
 GROUP BY
   notes.ZUNIQUEIDENTIFIER
+HAVING
+(:tag IS NULL OR group_concat('#' || tags.ZTITLE || '#') LIKE '%#' || :tag || '#%')
 ORDER BY
   -- Sort title matches ahead of body matches
   CASE WHEN (
@@ -77,7 +79,7 @@ WHERE
 GROUP BY
   notes.ZUNIQUEIDENTIFIER
 HAVING
-  (:tag = '' OR group_concat('#' || tags.ZTITLE || '#') LIKE '#' || :tag || '#')
+(:tag IS NULL OR group_concat('#' || tags.ZTITLE || '#') LIKE '%#' || :tag || '#%')
 ORDER BY
   -- Sort title matches ahead of body matches
   CASE WHEN (

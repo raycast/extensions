@@ -114,7 +114,7 @@ export class BearDb {
     return z5TagsExist ? 2 : 1;
   }
 
-  getNotes(searchQuery: string, tag = ""): Note[] {
+  getNotes(searchQuery: string, tag?: string): Note[] {
     const statement = this.database.prepare(
       this.getBearVersion() === 2 ? BearDb.searchNotesQueries.v2 : BearDb.searchNotesQueries.v1
     );
