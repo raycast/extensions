@@ -1,2 +1,3 @@
 import DashResult from "./DashResult";
-export { DashResult };
+import OpenInBrowserAction from "./OpenInBrowserAction";
+export { DashResult, OpenInBrowserAction };
