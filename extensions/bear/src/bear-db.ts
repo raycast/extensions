@@ -114,11 +114,15 @@ export class BearDb {
     return z5TagsExist ? 2 : 1;
   }
 
-  getNotes(searchQuery: string): Note[] {
+  getNotes(searchQuery: string, tag = ""): Note[] {
     const statement = this.database.prepare(
       this.getBearVersion() === 2 ? BearDb.searchNotesQueries.v2 : BearDb.searchNotesQueries.v1
     );
-    statement.bind({ ":query": searchQuery });
+    if (tag) {
+      statement.bind({ ":query": `${searchQuery}`, ":tag": `${tag}` });
+    } else {
+      statement.bind({ ":query": `${searchQuery}` });
+    }
     const results: Note[] = [];
     while (statement.step()) {
       const row = statement.getAsObject();
@@ -126,7 +130,6 @@ export class BearDb {
     }
 
     statement.free();
-
     return results;
   }
 
