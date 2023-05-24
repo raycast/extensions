@@ -3,9 +3,11 @@ import { shuffle } from "lodash";
 import { resolve } from "path";
 import { environment } from "@raycast/api";
 
+// Load the word list from file
 const filePath = resolve(environment.assetsPath, "The_Oxford_3000.txt");
 const words = fs.readFileSync(filePath, "utf8").split("\n");
 
+// Define the leet speak rules
 const leetRules: Record<string, string[]> = {
   a: ["a", "A", "4", "@"],
   b: ["b", "B", "8"],
@@ -41,12 +43,13 @@ export interface PasswordData {
   strength: number;
 }
 
+// Password strength evaluation function
 const evaluatePasswordStrength = (password: string): number => {
   const strengthRules = [/[a-z]/, /[A-Z]/, /\d/, /[^a-zA-Z0-9]/];
-
   return strengthRules.reduce((strength, rule) => (rule.test(password) ? strength + 1 : strength), 0);
 };
 
+// Password generation function
 const generatePassword = async (
   wordCount: number,
   passwordCount: number,
