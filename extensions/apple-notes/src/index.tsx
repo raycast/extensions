@@ -123,7 +123,7 @@ export default function Command() {
             actions={
               <ActionPanel title="Failure Actions">
                 <Action.OpenInBrowser
-                  title={"Submit bug report"}
+                  title={"Submit Bug Report"}
                   url="https://github.com/raycast/extensions/issues/new?template=extension_bug_report.yml&title=%5BApple%20Notes%5D+...&extension-url=https%3A%2F%2Fraycast.com%2Ftumtum%2Fapple-notes"
                 />
                 <Action.CopyToClipboard
@@ -284,7 +284,7 @@ export default function Command() {
                         onAction={() => openNote(note, true)}
                       />
                       <Action
-                        title="Restore To Notes Folder"
+                        title="Restore to Notes Folder"
                         icon={Icon.ArrowCounterClockwise}
                         onAction={() => {
                           restoreNote(note);
