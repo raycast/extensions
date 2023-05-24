@@ -1,6 +1,8 @@
 # NATO Phonetic Alphabet Changelog
 
-## [Optimized search] - 2023-05-24
+## [Fix] - 2023-05-24
+
+- Fixed uppercase letters not being handled correctly
 
 ## [Added missing screenshots] - 2023-01-19
 
