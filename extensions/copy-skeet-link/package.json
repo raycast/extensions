@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "copy-skeet-link",
-  "title": "Copy Skeet Link 🦟",
+  "title": "Copy Skeet Link",
   "description": "Create a rich Bluesky skeet link using skeeet.xyz.",
   "icon": "command-icon.png",
   "author": "justinw",
@@ -12,7 +12,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "Copy Skeet Link 🦟",
+      "title": "Copy Skeet Link",
       "description": "Create a rich skeet link using skeeet.xyz.",
       "mode": "no-view"
     }
