@@ -35,3 +35,4 @@ Pods
 # Compiled source
 lib/
 packages/*/lib
+raycast-env.d.ts
