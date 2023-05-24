@@ -47,7 +47,7 @@ export default function Command() {
       />
       {precompiles.map((pc: string) => {
         const address = parseInt(pc);
-        const hex = `0x0${address.toString(16)}`;
+        const hex = `0x${address.toString(16).padStart(2, '0')}`;
         return (
           <List.Item
             icon="🅿️"
@@ -62,15 +62,16 @@ export default function Command() {
         );
       })}
       {Object.values(opcodes).map((op: Opcode) => {
+        const padded = op.code.toString(16).padStart(2, '0')
         return (
           <List.Item
             icon={getOpIcon(op) || "list-icon.png"}
             key={`OP-${op.code}`}
-            title={`[0x${op.code.toString(16)}] ${op.fullName}`}
+            title={`[0x${padded}] ${op.fullName}`}
             accessories={[{ text: `${op.fee}${op.dynamicGas ? " + dynamic" : ""} gas` }]}
             actions={
               <ActionPanel>
-                <Action.OpenInBrowser url={`https://evm.codes/#${op.code.toString(16)}?fork=${common.hardfork()}`} />
+                <Action.OpenInBrowser url={`https://evm.codes/#${padded}?fork=${common.hardfork()}`} />
               </ActionPanel>
             }
           />
