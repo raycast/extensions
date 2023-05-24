@@ -18,12 +18,13 @@
       "mode": "view",
       "arguments": [
         {
-          "name":"wordCount",
+          "name": "wordCount",
           "placeholder": "Number of word(3)",
           "type": "text",
           "required": false
-        },{
-          "name":"passwordCount",
+        },
+        {
+          "name": "passwordCount",
           "placeholder": "Number of password(9)",
           "type": "text",
           "required": false

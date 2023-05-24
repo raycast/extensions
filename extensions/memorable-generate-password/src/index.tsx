@@ -1,4 +1,4 @@
-import { LaunchProps, Icon, List, Clipboard, Action, ActionPanel, showHUD } from "@raycast/api";
+import { LaunchProps, Icon, List, Clipboard, Action, ActionPanel, popToRoot, showToast, Toast } from "@raycast/api";
 import { useState, useEffect } from "react";
 import generatePassword, { PasswordData } from "./generatePassword";
 
@@ -9,6 +9,9 @@ interface PasswordArguments {
 
 export default function Command(props: LaunchProps<{ arguments: PasswordArguments }>) {
   const { wordCount, passwordCount } = props.arguments;
+  if (parseInt(passwordCount) > 1000) {
+    showToast(Toast.Style.Failure, "Password count cannot be greater than 1000");
+  }
   const [passwords, setPasswords] = useState<PasswordData[]>([]);
 
   const parseNumber = (value: string, defaultValue: number) => {
@@ -28,9 +31,10 @@ export default function Command(props: LaunchProps<{ arguments: PasswordArgument
     fetchData();
   }, [wordCount, passwordCount]);
 
-  const handleCopyPassword = (password: string) => {
+  const handleCopyPassword = async (password: string) => {
     Clipboard.copy(password, { transient: true });
-    showHUD("Password has been copied to the clipboard 😄");
+    await showToast(Toast.Style.Success, "Password has been copied to the clipboard 😄");
+    await popToRoot();
   };
 
   return (
