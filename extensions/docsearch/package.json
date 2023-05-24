@@ -6,7 +6,8 @@
   "icon": "docsearch.png",
   "author": "Fatpandac",
   "keywords": [
-    "algolia"
+    "algolia",
+    "meilisearch"
   ],
   "categories": [
     "Documentation"
@@ -282,7 +283,7 @@
     {
       "name": "tailwindcss3",
       "icon": "logo/tailwindcss.png",
-      "title": "TailwindCSS v3",
+      "title": "TailwindCSS V3",
       "subtitle": "DocSearch",
       "description": "Search TailwindCss documentation",
       "arguments": [
@@ -417,7 +418,7 @@
     {
       "name": "vuepress1",
       "icon": "logo/vuepress.png",
-      "title": "Vuepress v1",
+      "title": "Vuepress V1",
       "subtitle": "DocSearch",
       "description": "Search Vuepress v1 documentation",
       "arguments": [
@@ -432,7 +433,7 @@
     {
       "name": "vuepress2",
       "icon": "logo/vuepress.png",
-      "title": "Vuepress v2",
+      "title": "Vuepress V2",
       "subtitle": "DocSearch",
       "description": "Search Vuepress v2 documentation",
       "arguments": [
@@ -477,7 +478,7 @@
     {
       "name": "pnpm",
       "icon": "logo/pnpm.png",
-      "title": "pnpm",
+      "title": "Pnpm",
       "subtitle": "DocSearch",
       "description": "Search pnpm documentation",
       "arguments": [
@@ -492,7 +493,7 @@
     {
       "name": "pnpm_zh-Hans",
       "icon": "logo/pnpm.png",
-      "title": "pnpm(zh-Hans)",
+      "title": "Pnpm(zh-Hans)",
       "subtitle": "DocSearch",
       "description": "Search pnpm documentation",
       "arguments": [
