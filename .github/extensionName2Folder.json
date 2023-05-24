@@ -135,6 +135,7 @@
   "clear-clipboard": "clear-clipboard",
   "manage-clickup-tasks": "clickup",
   "clipboard-editor": "clipboard-editor",
+  "clipboard-formatter": "clipboard-formatter",
   "clockify": "clockify",
   "search-clojuredocs": "clojuredocs-search",
   "cloudflare": "cloudflare",

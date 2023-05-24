@@ -136,6 +136,7 @@
 /extensions/clear-clipboard                          @d3caf
 /extensions/clickup                                  @Ali-Parandeh @aesadde
 /extensions/clipboard-editor                         @pomdtr
+/extensions/clipboard-formatter                      @joshtemple
 /extensions/clockify                                 @ismamz @sxn
 /extensions/clojuredocs-search                       @edblancas
 /extensions/cloudflare                               @Destiner @niklaswa
