@@ -48,13 +48,13 @@ z        | 2        |
 
 ## Installation
 
-### 
+### Store
 
 [Memorable Password Generator Extension for Raycast]()
 
-### 
+### Manual
 
-```bash
+```shell
 git clone https://github.com/gandli/generate-password-raycast-extension
 cd generate-password-raycast-extension
 npm install && npm run dev
