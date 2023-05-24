@@ -5,13 +5,9 @@ import { getActivePrecompiles } from "@ethereumjs/evm/src/precompiles";
 import { Common, Chain } from "@ethereumjs/common";
 import { HARDFORK_ICONS, PRECOMPILE_NAMES, getOpIcon } from "./utils";
 
-interface Preferences {
-  hardfork: string;
-}
-
 export default function Command() {
   const common = useMemo(() => {
-    const hardfork = getPreferenceValues<Preferences>().hardfork;
+    const hardfork = getPreferenceValues<{ hardfork: string }>().hardfork;
     return new Common({
       chain: Chain.Mainnet,
       hardfork: hardfork,
@@ -26,7 +22,7 @@ export default function Command() {
     while (!(op = iter.next()).done) opcodes.push(op.value);
 
     return opcodes;
-  }, []);
+  }, [common]);
 
   const precompiles = useMemo(() => {
     const pcs = [];
@@ -36,7 +32,7 @@ export default function Command() {
     while (!(pc = iter.next()).done) pcs.push(pc.value);
 
     return pcs;
-  }, []);
+  }, [common]);
 
   return (
     <List>
