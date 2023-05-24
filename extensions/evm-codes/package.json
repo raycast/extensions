@@ -4,7 +4,7 @@
   "title": "evm-codes",
   "description": "Search for EVM opcodes on evm.codes",
   "icon": "extension_icon.png",
-  "author": "clabby <https://github.com/clabby>",
+  "author": "clabby",
   "categories": [
     "Developer Tools"
   ],
