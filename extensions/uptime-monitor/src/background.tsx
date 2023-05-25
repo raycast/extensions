@@ -35,7 +35,7 @@ async function writeStatus(url: string, displayName: string, status: string, tim
   try {
     // Write to file
     const timestamp = Date.now(); // Get the current UNIX timestamp
-    const data = `${timestamp}, ${displayName}, ${status}, ${time}\n`; // Format the data to log
+    const data = `${timestamp}, ${displayName}, ${time}, ${url}\n`; // Format the data to log
     fs.appendFileSync(filePath, data, "utf8"); // Append the data to the file
   } catch (err: any) {
     if (err.code === "ENOENT") {

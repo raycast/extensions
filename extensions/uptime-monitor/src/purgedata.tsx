@@ -11,7 +11,7 @@ Hey there 👋🏻, we would like to inform you that all of your uptime monitor 
 
 Here are some cool stats we think you would love ❤️:
     
-    - ${size} bytes of monitor data have been removed.
+    - Coming Soon
     
 If you have any questions or concerns, please do not hesitate to contact us on slack.`}
     />
@@ -19,21 +19,14 @@ If you have any questions or concerns, please do not hesitate to contact us on s
 }
 
 const directoryPath = path.join(environment.supportPath, `data/https:/`);
-
-let size = 0; // initialize the size variable to 0
-
-// Read all files in the directory
 fs.readdir(directoryPath, async (err, files) => {
   if (err) {
     console.log("Error reading directory:", err);
     return;
   }
 
-  // Loop through each file and delete it
   for (const file of files) {
     const filePath = path.join(directoryPath, file);
-    const stats = await fs.promises.stat(filePath); // get file stats
-    size += stats.size; // add file size to the total size
     await fs.promises.unlink(filePath);
     console.log(`Deleted file ${file}`);
   }

@@ -1,4 +1,14 @@
-import { environment, ActionPanel, List, Action, updateCommandMetadata, Detail } from "@raycast/api";
+import {
+  environment,
+  ActionPanel,
+  List,
+  Action,
+  updateCommandMetadata,
+  Detail,
+  launchCommand,
+  LaunchType,
+  showHUD,
+} from "@raycast/api";
 import { useEffect, useState } from "react";
 import fs from "fs";
 import path from "path";
@@ -27,16 +37,18 @@ const getMonitorStatus = (filename: string) => {
     .trim()
     .split("\n")
     .map((line) => {
-      const [timestamp, name, responseTime] = line.split(", ");
+      // Use array destructuring to get the url from the last element
+      const [timestamp, name, responseTime, url] = line.split(", ");
       return {
         timestamp: Number(timestamp),
         name,
         responseTime: Number.parseInt(responseTime),
+        url, // Add url as a property of the returned object
       };
     });
   const currentTime = Math.floor(Date.now() / 1000);
   const lastLine = lines[lines.length - 1];
-  const url = `${filename.replace(".txt", "").replace("https:--", "https://")}`;
+  // Use lastLine.url instead of filename to get the url
   const successfulChecks = lines.filter((line) => line.responseTime > 0);
   const averageResponseTime =
     successfulChecks.reduce((sum, line) => sum + line.responseTime, 0) / successfulChecks.length;
@@ -50,12 +62,15 @@ const getMonitorStatus = (filename: string) => {
     { Online: 0, Offline: 0 } // initial value of the accumulator
   );
 
+  // Check if lastLine.responseTime is NaN
+  const responseTime = Number.isNaN(lastLine.responseTime) ? "Offline" : `${lastLine.responseTime}ms`;
+
   return {
     name: lastLine.name,
-    responseTime: lastLine.responseTime === 0 ? "Offline" : `${lastLine.responseTime}ms`,
+    responseTime: responseTime,
     averageResponseTime: `${Math.round(averageResponseTime)}ms`,
     lastCheck: Math.round(currentTime - lastLine.timestamp / 1000),
-    url: url,
+    url: lastLine.url,
     uptime: Math.round((successfulChecks.length / lines.length) * 100),
     statusCounts,
   };
@@ -81,13 +96,6 @@ export default function UptimeMonitor() {
     return <Detail markdown={`You need to add a monitor first before you can see the dashboard.😉`} />;
   }
 
-  // Use useEffect hook to call setMonitors function once
-  useEffect(() => {
-    const data = files.map(getMonitorStatus);
-    setMonitors(data);
-  }, []); // Pass an empty array as dependency to run only once
-
-  // Use useEffect hook to call setOutages function once
   // Use useEffect hook to call setMonitors function once
   useEffect(() => {
     const data = files.map(getMonitorStatus);
@@ -121,6 +129,10 @@ export default function UptimeMonitor() {
               <Action
                 title={showingDetail ? "Hide Detail" : "Show Detail"}
                 onAction={() => setShowingDetail(!showingDetail)}
+              />
+              <Action
+                title={showingDetail ? "Ping All Monitors" : "Ping All Monitors"}
+                onAction={() => launchCommand({ name: "background", type: LaunchType.Background })}
               />
             </ActionPanel>
           }

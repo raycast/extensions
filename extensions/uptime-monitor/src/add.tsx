@@ -78,9 +78,14 @@ export default function Command() {
         </ActionPanel>
       }
     >
-      <Form.Description text="This form showcases all available form elements." />
-      <Form.TextField id="name" title="Display Name" placeholder="Google" defaultValue="Google" />
-      <Form.TextField id="url" title="URL" placeholder="https://google.com" defaultValue="https://google.com" />
+      <Form.Description text="This form will add a new monitor" />
+      <Form.TextField id="name" title="Display Name" placeholder="Raycast" defaultValue="Raycast" />
+      <Form.TextField
+        id="url"
+        title="URL"
+        placeholder="https://www.raycast.com/Ek217"
+        defaultValue="https://www.raycast.com/Ek217"
+      />
     </Form>
   );
 }

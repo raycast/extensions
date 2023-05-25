@@ -9,7 +9,10 @@ export default function Command() {
 
 Hey there 👋🏻, we would like to inform you that all of your added Moniters have been deleted. Your data is stored locally, which means that we do not have access to it. Therefore, we are unable to recover any deleted data.
 
+Here are some cool stats we think you would love ❤️:
 
+    - Coming Soon
+      
 If you have any questions or concerns, please do not hesitate to contact us on slack.`}
     />
   );
