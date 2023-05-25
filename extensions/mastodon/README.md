@@ -5,7 +5,7 @@
 -  [Mastodon](https://joinmastodon.org/) 
 -  [Raycast](https://raycast.com)
 
-The original version was baseed on [Raycast-Akkoma](https://www.raycast.com/SevicheCC/akkoma), thanks to the generous contributions of [BasixKOR](https://github.com/BasixKOR) and [pernielsentikaer](https://github.com/pernielsentikaer), many new features have been added.
+The original version was based on [Raycast-Akkoma](https://www.raycast.com/SevicheCC/akkoma), thanks to the generous contributions of [BasixKOR](https://github.com/BasixKOR) and [pernielsentikaer](https://github.com/pernielsentikaer), many new features have been added.
 
 **Features**:
 - Boost / favourite / bookmark / reply / edit / delete status
