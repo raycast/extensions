@@ -25,12 +25,12 @@ export default function Command() {
 
       if (expectedHash === result) {
         showToast({
-          title: "Hashes Match!",
+          title: "Hashes match!",
           message: "The file hash matches the expected hash.",
         });
       } else {
         showToast({
-          title: "Hashes Do Not Match!",
+          title: "Hashes don't match!",
           message: "The file hash does not match the expected hash.",
           style: Toast.Style.Failure,
         });
@@ -46,14 +46,13 @@ export default function Command() {
         </ActionPanel>
       }
     >
-      <Form.Description text="" />
       <Form.TextField
         id="textfield"
         title="Reported Checksum"
         placeholder="Place reported checksum here"
         defaultValue=""
       />
-      <Form.FilePicker id="file" title="File To Compare" />
+      <Form.FilePicker id="file" title="File to Compare" allowMultipleSelection={false} />
       <Form.Dropdown id="dropdown" title="Hashing Algorithm">
         <Form.Dropdown.Item value="sha1" title="sha1" />
         <Form.Dropdown.Item value="sha224" title="sha224" />

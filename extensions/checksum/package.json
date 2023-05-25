@@ -5,29 +5,32 @@
   "description": "This Raycast extension allows you to check the checksum of a file. Simply enter the file path and the extension will calculate its checksum and compare it to a provided value. This can be useful for verifying the integrity of downloaded files or ensuring that a file has not been tampered with",
   "icon": "command_icon.png",
   "author": "Ek217",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "license": "MIT",
   "commands": [
     {
       "name": "checksum",
-      "title": "Run A Checksum",
+      "title": "Verify File Checksum",
       "description": "Run a checksum on a specified file",
       "mode": "view"
     },
     {
       "name": "hashfile",
-      "title": "Get A Files Hash",
+      "title": "Get File Hash",
       "description": "Calculate the hash of a specified file",
       "mode": "view"
     },
     {
       "name": "hashtext",
-      "title": "Get A Texts Hash",
+      "title": "Get Text Hash",
       "description": "Calculate the hash of a specified text",
       "mode": "view"
     },
     {
       "name": "menubar",
-      "title": "Show In Menubar",
+      "title": "Show in Menubar",
       "description": "Show the checksum extension shortcuts in the menubar",
       "mode": "menu-bar",
       "interval": "1m"

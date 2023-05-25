@@ -1,4 +1,4 @@
-import { Form, ActionPanel, Action, showToast, Toast, Clipboard } from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, Clipboard } from "@raycast/api";
 import { createHash } from "crypto";
 import fs from "fs";
 
@@ -22,7 +22,7 @@ export default function Command() {
       const result = hash.digest("hex");
       Clipboard.copy(result);
 
-      showToast({ title: "Files Hash Copied To Clipboard" });
+      showToast({ title: "File hash copied to clipboard" });
     }
     return true;
   }
@@ -35,8 +35,7 @@ export default function Command() {
         </ActionPanel>
       }
     >
-      <Form.Description text="" />
-      <Form.FilePicker id="file" title="File To Hase" allowMultipleSelection={false} />
+      <Form.FilePicker id="file" title="File to Hash" allowMultipleSelection={false} />
       <Form.Dropdown id="dropdown" title="Hashing Algorithm">
         <Form.Dropdown.Item value="sha1" title="sha1" />
         <Form.Dropdown.Item value="sha224" title="sha224" />

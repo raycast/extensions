@@ -1,4 +1,4 @@
-import { Form, ActionPanel, Action, showToast, Toast, Clipboard } from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, Clipboard } from "@raycast/api";
 import { createHash } from "crypto";
 
 type Values = {
@@ -20,7 +20,7 @@ export default function Command() {
     const result = hash.digest("hex");
     Clipboard.copy(result);
 
-    showToast({ title: "Texts Hash Copied To Clipboard" });
+    showToast({ title: "Texts hash copied to clipboard" });
 
     return true;
   }
@@ -34,7 +34,7 @@ export default function Command() {
       }
     >
       <Form.Description text="" />
-      <Form.TextField
+      <Form.TextArea
         id="textfield"
         title="Text To Hash"
         placeholder="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
