@@ -57,7 +57,7 @@
 /extensions/battery-health                           @o1y
 /extensions/bazinga-tools                            @luin
 /extensions/beancount-mate                           @iwfan
-/extensions/bear                                     @hmarr @lucaschultz @diokhan @ron-myers
+/extensions/bear                                     @hmarr @lucaschultz @diokhan @ron-myers @juanbanchero
 /extensions/beat-per-minute                          @pernielsentikaer
 /extensions/beeminder                                @vivgui
 /extensions/berlin-public-transportation             @arjanski
@@ -136,6 +136,7 @@
 /extensions/clear-clipboard                          @d3caf
 /extensions/clickup                                  @Ali-Parandeh @aesadde
 /extensions/clipboard-editor                         @pomdtr
+/extensions/clipboard-formatter                      @joshtemple
 /extensions/clockify                                 @ismamz @sxn
 /extensions/clojuredocs-search                       @edblancas
 /extensions/cloudflare                               @Destiner @niklaswa
@@ -168,6 +169,7 @@
 /extensions/converter                                @koinzhang @Saafo
 /extensions/copy-gcp-icons                           @pomdtr
 /extensions/copy-path                                @koinzhang
+/extensions/copy-skeet-link                          @justin
 /extensions/country-lookup                           @pernielsentikaer
 /extensions/cpf-cnpj-generator                       @gstvds
 /extensions/craftdocs                                @kudrykv @mafredri @0x77dev
@@ -188,7 +190,7 @@
 /extensions/cyberduck                                @scottaglia
 /extensions/cypress-docs                             @robertguss
 /extensions/dad-jokes                                @pernielsentikaer @Abdulaziz-Aljadaan
-/extensions/dash                                     @RSO @sxn
+/extensions/dash                                     @RSO @sxn @JasonBoy
 /extensions/dashlane                                 @dpnick
 /extensions/datadog                                  @kudrykv @rcruzper @aexvir @albertoxamin
 /extensions/datetime-format-converter                @yangxyo
@@ -557,6 +559,7 @@
 /extensions/mousehunt-helper                         @chesterhow
 /extensions/mozilla-firefox                          @crisboarna
 /extensions/mui-documentation                        @kgrhartlage
+/extensions/mullvad                                  @0x46616c6b
 /extensions/multilinks                               @abhisheksatre
 /extensions/multipass                                @davibe @pernielsentikaer
 /extensions/music                                    @Rawnly @peterdev22 @danpalmer
@@ -765,6 +768,7 @@
 /extensions/scrcpy                                   @zcfan @bxb100
 /extensions/screen-saver                             @koinzhang
 /extensions/screen-sharing-recents                   @m-hall
+/extensions/screen-studio                            @pie6k
 /extensions/screenocr                                @neo773
 /extensions/screenshot                               @Aayush9029
 /extensions/script-commands                          @unnamedd
@@ -772,6 +776,7 @@
 /extensions/search-chatwork                          @nagauta
 /extensions/search-composer-packagist                @danyelkeddah @macbookandrew
 /extensions/search-hexpm                             @jordelver
+/extensions/search-hookmark                          
 /extensions/search-mdn                               @krzysztofzuraw @OBQun @k8scat
 /extensions/search-notion                            @sadanand-singh
 /extensions/search-npm                               @mrmartineau @reloadedhead @TimonVS @luisFilipePT @LunaticMuch
@@ -952,7 +957,7 @@
 /extensions/whatsapp                                 @vimtor
 /extensions/whois                                    @zavbala
 /extensions/whosampled                               @ajtruex @pernielsentikaer
-/extensions/wi-fi                                    @koinzhang
+/extensions/wi-fi                                    @koinzhang @louishuyng
 /extensions/wifi-password-reveal                     @louishuyng
 /extensions/wiggle-text                              @PineappleRind
 /extensions/wikipedia                                @vimtor @shubzkothekar @JonathanWbn @NikosEfthias @menahishayan @pernielsentikaer @igor9silva

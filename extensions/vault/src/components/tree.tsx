@@ -113,6 +113,7 @@ export function VaultTree(props: { path: string }) {
   ) : (
     <List filtering={true} isLoading={isLoading || isLoadingTree} navigationTitle={props.path}>
       <List.EmptyView
+        title={"No secrets found"}
         actions={
           <ActionPanel>
             <Configuration />

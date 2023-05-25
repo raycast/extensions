@@ -28,6 +28,15 @@
       "title": "Vault url",
       "description": "Vault url",
       "type": "textfield",
+      "default": "http://localhost:8200",
+      "required": true
+    },
+    {
+      "name": "secretEngine",
+      "title": "Secret engine",
+      "description": "Used only if not set by 'List Engines' action",
+      "type": "textfield",
+      "default": "secret",
       "required": true
     },
     {
