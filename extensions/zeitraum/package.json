@@ -14,35 +14,35 @@
     {
       "name": "trackCommand",
       "title": "Track",
-      "subtitle": "Start a new timer with tags",
+      "subtitle": "Zeitraum",
       "description": "Describe what you do using tags and start a timer",
       "mode": "view"
     },
     {
       "name": "timeSpansCommand",
       "title": "Time Spans",
-      "subtitle": "List time spans and stop a previously started timers",
+      "subtitle": "Zeitraum",
       "description": "List time spans and stop a previously started timers",
       "mode": "view"
     },
     {
       "name": "createPresetCommand",
       "title": "Create Preset",
-      "subtitle": "Create a new preset",
+      "subtitle": "Zeitraum",
       "description": "Create a new preset",
       "mode": "view"
     },
     {
       "name": "presetsCommand",
       "title": "Presets",
-      "subtitle": "List of presets",
+      "subtitle": "Zeitraum",
       "description": "List of presets",
       "mode": "view"
     },
     {
       "name": "createTagCommand",
       "title": "Create Tag",
-      "subtitle": "Create a new tag",
+      "subtitle": "Zeitraum",
       "description": "Create a new tag",
       "mode": "view"
     }
