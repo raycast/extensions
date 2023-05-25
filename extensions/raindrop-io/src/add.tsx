@@ -10,6 +10,7 @@ import {
 import { useCachedState, useForm, FormValidation } from "@raycast/utils";
 import { FormValues, Preferences } from "./types";
 import fetch from "node-fetch";
+import { useState } from "react";
 
 import { useRequest } from "./hooks/useRequest";
 import { useTags } from "./hooks/useTags";
@@ -19,21 +20,35 @@ const AddBookmarks = () => {
   const [collection] = useCachedState("selected-collection", "0");
   const { collections } = useRequest({ collection });
   const { data: tags } = useTags();
+  const [dropdownValue, setDropdownValue] = useState<string>("-1");
+  const [showCollectionCreation, setShowCollectionCreation] = useState<boolean>(false);
+
+  const onDropdownValueChange = (newValue: string) => {
+    if (newValue === "-2") {
+      setShowCollectionCreation(true);
+    } else {
+      setShowCollectionCreation(false);
+    }
+    setDropdownValue(newValue);
+  };
 
   const { handleSubmit, itemProps, reset } = useForm<FormValues>({
     async onSubmit(values) {
       const toast = await showToast(Toast.Style.Animated, "Adding Link");
       try {
-        fetch("https://api.raindrop.io/rest/v1/raindrop", {
+        fetch("https://api.raindrop.io/rest/v1/raindrops", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${preferences.token}`,
           },
           body: JSON.stringify({
-            link: values.link,
-            collectionId: values.collection,
-            tags: values.tags,
+            items: values.link.split(/[ ,;]/).map((link) => ({
+              link: link.trim(),
+              collectionId: values.collection,
+              tags: values.tags,
+              pleaseParse: {},
+            })),
           }),
         }).then(async (res) => {
           if (res.status === 200) {
@@ -56,6 +71,11 @@ const AddBookmarks = () => {
     },
     validation: {
       link: FormValidation.Required,
+      newCollection: () => {
+        if (showCollectionCreation) {
+          return "This field is required";
+        }
+      },
     },
     initialValues: {
       collection: "-1",
@@ -70,19 +90,37 @@ const AddBookmarks = () => {
         </ActionPanel>
       }
     >
-      <Form.TextField title="Link" placeholder="https://" autoFocus {...itemProps.link} />
-      <Form.Dropdown title="Collection" {...itemProps.collection}>
-        <Form.Dropdown.Item key={"-1"} value={"-1"} title={"Unsorted"} />
+      <Form.TextField
+        title="Link"
+        placeholder="https:// (You can add multiple links)"
+        autoFocus
+        {...itemProps.link}
+      />
+      <Form.Dropdown
+        title="Collection"
+        {...itemProps.collection}
+        value={dropdownValue}
+        onChange={onDropdownValueChange}
+      >
+        <Form.Dropdown.Item key={"-2"} value={"-2"} title={"Create Collection"} icon={Icon.Plus} />
+
+        <Form.Dropdown.Item key={"-1"} value={"-1"} title={"Unsorted"} icon={Icon.Tray} />
         {collections.map((collection) => {
           return (
             <Form.Dropdown.Item
               key={collection.value}
               value={collection.value ? collection.value.toString() : "-1"}
               title={collection.label}
+              icon={Icon.Folder}
             />
           );
         })}
       </Form.Dropdown>
+      {showCollectionCreation && (
+        <Form.TextField title="New Collection" placeholder="Name" {...itemProps.newCollection} />
+      )}
+      {/* <Form.Separator />
+      <Form.Checkbox id="createNewTag" label="Create new tag" title="Create tag" /> */}
       <Form.TagPicker title="Tags" {...itemProps.tags}>
         {tags?.items?.map((tag) => {
           return <Form.TagPicker.Item key={tag._id} value={tag._id} title={tag._id} />;
