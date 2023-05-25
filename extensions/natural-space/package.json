@@ -12,7 +12,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "Format selected text",
+      "title": "Format Selected Text",
       "description": "Text will be paste back to the original place and add to clipboard.",
       "icon": "command-icon.png",
       "mode": "no-view"
