@@ -118,21 +118,22 @@ Returns an object with the [AsyncState](#asyncstate) corresponding to the execut
 ## Example
 
 ```tsx
-import { List, ActionPanel, Action } from "@raycast/api";
+import { List } from "@raycast/api";
 import { useExec } from "@raycast/utils";
+import { useMemo } from "react";
 
-const Demo = () => {
-  const { isLoading, data, revalidate } = useExec("brew", ["info", "--json=v2", "--installed"]);
-  const results = useMemo<{}[]>(() => JSON.parse(data || "[]"), [data]);
+export default function () {
+  const { isLoading, data } = useExec("brew", ["info", "--json=v2", "--installed"]);
+  const results = useMemo<{ id: string; name: string }[]>(() => JSON.parse(data || "[]"), [data]);
 
   return (
     <List isLoading={isLoading}>
-      {(data || []).map((item) => (
+      {results.map((item) => (
         <List.Item key={item.id} title={item.name} />
       ))}
     </List>
   );
-};
+}
 ```
 
 ## Argument dependent on user input
