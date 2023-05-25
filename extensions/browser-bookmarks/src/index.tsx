@@ -10,6 +10,7 @@ import useChromeBookmarks from "./hooks/useChromeBookmarks";
 import useEdgeBookmarks from "./hooks/useEdgeBookmarks";
 import useFirefoxBookmarks from "./hooks/useFirefoxBookmarks";
 import useSafariBookmarks from "./hooks/useSafariBookmarks";
+import useVivaldiBookmarks from "./hooks/useVivaldiBookmarks";
 import { getMacOSDefaultBrowser } from "./utils/browsers";
 import { BookmarkFrecency, getBookmarkFrecency } from "./utils/frecency";
 
@@ -80,12 +81,14 @@ export default function Command() {
   const hasEdge = browsers.includes(BROWSERS_BUNDLE_ID.edge) ?? false;
   const hasFirefox = browsers.includes(BROWSERS_BUNDLE_ID.firefox) ?? false;
   const hasSafari = browsers.includes(BROWSERS_BUNDLE_ID.safari) ?? false;
+  const hasVivaldi = browsers.includes(BROWSERS_BUNDLE_ID.vivaldi) ?? false;
 
   const brave = useBraveBookmarks(hasBrave);
   const chrome = useChromeBookmarks(hasChrome);
   const edge = useEdgeBookmarks(hasEdge);
   const firefox = useFirefoxBookmarks(hasFirefox);
   const safari = useSafariBookmarks(hasSafari);
+  const vivaldi = useVivaldiBookmarks(hasVivaldi);
 
   const [bookmarks, setBookmarks] = useCachedState<Bookmark[]>("bookmarks", []);
   const [folders, setFolders] = useCachedState<Folder[]>("folders", []);
@@ -97,6 +100,7 @@ export default function Command() {
       ...edge.bookmarks,
       ...firefox.bookmarks,
       ...safari.bookmarks,
+      ...vivaldi.bookmarks,
     ]
       .map((item) => {
         return {
@@ -132,15 +136,16 @@ export default function Command() {
     edge.bookmarks,
     firefox.bookmarks,
     safari.bookmarks,
+    vivaldi.bookmarks,
     frecencies,
     setBookmarks,
   ]);
 
   useEffect(() => {
-    const folders = [...brave.folders, ...chrome.folders, ...edge.folders, ...firefox.folders, ...safari.folders];
+    const folders = [...brave.folders, ...chrome.folders, ...edge.folders, ...firefox.folders, ...safari.folders, ...vivaldi.folders];
 
     setFolders(folders);
-  }, [brave.folders, chrome.folders, edge.folders, firefox.folders, safari.folders, setFolders]);
+  }, [brave.folders, chrome.folders, edge.folders, firefox.folders, safari.folders, vivaldi.folders, setFolders]);
 
   const folderBookmarks = useMemo(() => {
     return bookmarks.filter((item) => {
@@ -207,6 +212,10 @@ export default function Command() {
     if (hasSafari) {
       safari.mutate();
     }
+
+    if (hasVivaldi) {
+      vivaldi.mutate();
+    }
   }
 
   async function updateFrecency(item: { id: string; title: string; url: string; folder: string }) {
@@ -251,7 +260,8 @@ export default function Command() {
         chrome.isLoading ||
         edge.isLoading ||
         firefox.isLoading ||
-        safari.isLoading
+        safari.isLoading ||
+        vivaldi.isLoading
       }
       searchBarPlaceholder="Search by title, domain name or tag in selected folder"
       onSearchTextChange={setQuery}
@@ -332,6 +342,16 @@ export default function Command() {
                     profiles={firefox.profiles}
                     currentProfile={firefox.currentProfile}
                     setCurrentProfile={firefox.setCurrentProfile}
+                  />
+
+                  <SelectProfileSubmenu
+                    bundleId={BROWSERS_BUNDLE_ID.vivaldi}
+                    name="Vivaldi"
+                    icon="vivaldi.png"
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
+                    profiles={vivaldi.profiles}
+                    currentProfile={vivaldi.currentProfile}
+                    setCurrentProfile={vivaldi.setCurrentProfile}
                   />
                 </ActionPanel.Section>
 
