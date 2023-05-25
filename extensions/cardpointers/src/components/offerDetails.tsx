@@ -1,9 +1,9 @@
 import { List, ActionPanel, Action } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 
-import { apiUrl } from "./constants";
-import { Offer, OfferDataResponse } from "./interfaces";
-import { toCurrency } from "./helpers";
+import { apiUrl } from "../utils/constants";
+import { Offer, OfferDataResponse } from "../utils/interfaces";
+import { toCurrency } from "../utils/helpers";
 
 import OfferActions from "./offerActions";
 

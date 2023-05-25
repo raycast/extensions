@@ -1,12 +1,12 @@
 import { Grid, ActionPanel, Action, Icon } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 
-import { apiUrl } from "./constants";
-import { Card, CardDataResponse } from "./interfaces";
+import { apiUrl } from "./utils/constants";
+import { Card, CardDataResponse } from "./utils/interfaces";
 
-import CardDetails from "./cardDetails";
+import CardDetails from "./components/cardDetails";
 
-export default function Cards() {
+export default function TopCards() {
   const url = `${apiUrl}/cards/`;
 
   const { isLoading, data } = useFetch(url);
@@ -36,7 +36,7 @@ export default function Cards() {
 
   return (
     <Grid columns={3} isLoading={isLoading} aspectRatio="4/3">
-      <Grid.Section title={`Top 10 Credit Card Offers for ${monthYear}`}>
+      <Grid.Section title="Top 10 Credit Card Offers" subtitle={monthYear}>
         {results?.map((card) => (
           <Grid.Item
             key={card.slug}

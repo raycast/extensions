@@ -12,7 +12,7 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "searchCards",
+      "name": "search-cards",
       "title": "Search Cards",
       "description": "Find all of the details for any credit card in an instant.",
       "mode": "view",
@@ -26,14 +26,14 @@
       ]
     },
     {
-      "name": "topCards",
+      "name": "top-cards",
       "title": "View Top 10 Cards",
       "subtitle": "Updated Monthly by CardPointers",
       "description": "View this month's top 10 credit cards.",
       "mode": "view"
     },
     {
-      "name": "searchOffers",
+      "name": "search-offers",
       "title": "Search Offers",
       "description": "Find all of the details for any Amex or Chase offer in an instant.",
       "mode": "view",
@@ -47,7 +47,7 @@
       ]
     },
     {
-      "name": "topOffers",
+      "name": "top-offers",
       "title": "View Newest Offers",
       "subtitle": "Updated Daily by CardPointers",
       "description": "View today's top Amex/Chase Offers.",

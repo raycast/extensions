@@ -1,5 +1,5 @@
 import { ActionPanel, Action } from "@raycast/api";
-import { Card } from "./interfaces";
+import { Card } from "../utils/interfaces";
 
 export default function CreditCardActions({ card }: { card: Card }) {
   return (

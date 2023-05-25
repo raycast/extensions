@@ -1,12 +1,12 @@
 import { Grid, ActionPanel, Action, Icon, LaunchProps } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 
-import { apiUrl } from "./constants";
-import { Card, CardNameQuery, CardDataResponse } from "./interfaces";
+import { apiUrl } from "./utils/constants";
+import { Card, CardNameQuery, CardDataResponse } from "./utils/interfaces";
 
-import CardDetails from "./cardDetails";
+import CardDetails from "./components/cardDetails";
 
-export default function Cards(props: LaunchProps<{ arguments: CardNameQuery }>) {
+export default function SearchCards(props: LaunchProps<{ arguments: CardNameQuery }>) {
   const { cardName } = props.arguments;
 
   const url = `${apiUrl}/search/cards/${cardName}`;
@@ -35,7 +35,7 @@ export default function Cards(props: LaunchProps<{ arguments: CardNameQuery }>) 
 
   return (
     <Grid columns={3} isLoading={isLoading} searchBarPlaceholder={"Card Name"} aspectRatio="4/3">
-      <Grid.Section title={`Matching Cards: ${cardName} `}>
+      <Grid.Section title="Matching Cards" subtitle={cardName}>
         {results?.map((card) => (
           <Grid.Item
             key={card.slug}

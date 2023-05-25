@@ -1,12 +1,12 @@
 import { Grid } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 
-import { apiUrl } from "./constants";
-import { Offer, OfferDataResponse } from "./interfaces";
+import { apiUrl } from "./utils/constants";
+import { Offer, OfferDataResponse } from "./utils/interfaces";
 
-import OfferActions from "./offerActions";
+import OfferActions from "./components/offerActions";
 
-export default function Offers() {
+export default function TopOffers() {
   const url = `${apiUrl}/offers/`;
 
   const { isLoading, data } = useFetch(url);

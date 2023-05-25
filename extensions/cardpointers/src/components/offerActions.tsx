@@ -1,6 +1,6 @@
 import { ActionPanel, Action, Icon } from "@raycast/api";
 import OfferDetails from "./offerDetails";
-import { Offer } from "./interfaces";
+import { Offer } from "../utils/interfaces";
 
 export default function OfferActions({
   offer,

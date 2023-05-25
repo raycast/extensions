@@ -1,9 +1,9 @@
 import { List, ActionPanel, Action } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 
-import { apiUrl } from "./constants";
-import { Card, CardDataResponse, Earning, Feature } from "./interfaces";
-import { getNumbersOnly, getEarningIcon } from "./helpers";
+import { apiUrl } from "../utils/constants";
+import { Card, CardDataResponse, Earning, Feature } from "../utils/interfaces";
+import { getNumbersOnly, getEarningIcon } from "../utils/helpers";
 
 import CreditCardActions from "./creditCardActions";
 

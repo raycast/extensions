@@ -1,12 +1,12 @@
 import { Grid, LaunchProps } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 
-import { apiUrl } from "./constants";
-import { Offer, OfferNameQuery, OfferDataResponse } from "./interfaces";
+import { apiUrl } from "./utils/constants";
+import { Offer, OfferNameQuery, OfferDataResponse } from "./utils/interfaces";
 
-import OfferActions from "./offerActions";
+import OfferActions from "./components/offerActions";
 
-export default function Cards(props: LaunchProps<{ arguments: OfferNameQuery }>) {
+export default function SearchOffers(props: LaunchProps<{ arguments: OfferNameQuery }>) {
   const { offerName } = props.arguments;
 
   const url = `${apiUrl}/search/offers/${offerName}`;
@@ -35,7 +35,7 @@ export default function Cards(props: LaunchProps<{ arguments: OfferNameQuery }>)
 
   return (
     <Grid columns={3} isLoading={isLoading} searchBarPlaceholder={"Offer Name"} aspectRatio="4/3">
-      <Grid.Section title={`Matching Offers: ${offerName} `}>
+      <Grid.Section title="Matching Offers" subtitle={offerName}>
         {results?.map((offer) => (
           <Grid.Item
             key={offer.slug}
