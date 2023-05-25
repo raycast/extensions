@@ -19,20 +19,21 @@ export default function ViewStatusCommand() {
 
   return (
     <List isShowingDetail isLoading={isLoading} searchBarPlaceholder="Search your status">
-      {filterReblog(statuses)?.map((status) => (
-        <List.Item
-          title={contentExtractor(status.content)}
-          key={status.id}
-          detail={<List.Item.Detail markdown={statusParser(status, "date")} />}
-          actions={
-            <ActionPanel>
-              <ReplyAction status={status} />
-              <MyStatusActions status={status} />
-              <Action.OpenInBrowser url={status.url} />
-            </ActionPanel>
-          }
-        />
-      ))}
+      {statuses &&
+        filterReblog(statuses)?.map((status) => (
+          <List.Item
+            title={contentExtractor(status.content)}
+            key={status.id}
+            detail={<List.Item.Detail markdown={statusParser(status, "date")} />}
+            actions={
+              <ActionPanel>
+                <ReplyAction status={status} />
+                <MyStatusActions status={status} />
+                <Action.OpenInBrowser url={status.url} />
+              </ActionPanel>
+            }
+          />
+        ))}
     </List>
   );
 }
