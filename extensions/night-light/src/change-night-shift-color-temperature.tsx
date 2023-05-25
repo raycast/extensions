@@ -1,8 +1,9 @@
-import { Action, ActionPanel, Form, popToRoot } from "@raycast/api";
+import { Action, ActionPanel, Form, popToRoot, getPreferenceValues, closeMainWindow } from "@raycast/api";
 import { useState } from "react";
 import { nightlight } from "./utils";
 
 export default function Main() {
+  const { closeWindow } = getPreferenceValues<{ closeWindow: boolean }>();
   const [temperatureError, setTemperatureError] = useState<string | undefined>();
 
   function validate(temperature: string): boolean {
@@ -28,8 +29,10 @@ export default function Main() {
             title="Change Color Temperature"
             onSubmit={async ({ temperature }) => {
               if (validate(temperature)) {
+                if (closeWindow) closeMainWindow();
+                else await popToRoot({ clearSearchBar: true });
+
                 await nightlight(["temp", temperature]);
-                await popToRoot({ clearSearchBar: true });
               }
             }}
           />

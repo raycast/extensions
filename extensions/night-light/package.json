@@ -43,6 +43,16 @@
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "name": "closeWindow",
+      "default": false,
+      "type": "checkbox",
+      "label": "Close Raycast window",
+      "description": "Should the main Raycast window close when triggering a command?",
+      "required": false
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.51.1"
   },
