@@ -11,8 +11,8 @@ export default function Command() {
         {results.map((item) => (
           <List.Item
             key={item.id}
-            title={item.query}
-            subtitle={item.description}
+            title={Buffer.from(item.query, 'binary').toString()}
+            subtitle={Buffer.from(item.description, 'binary').toString()}
             icon={getIcon(item)}
             actions={
               <ActionPanel>
