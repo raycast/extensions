@@ -1,14 +1,12 @@
 import { useState } from "react";
-import { showToast, popToRoot, Toast, Cache } from "@raycast/api";
-import { useForm } from "@raycast/utils";
+import { showToast, popToRoot, Toast } from "@raycast/api";
+import { useCachedState, useForm } from "@raycast/utils";
 
 import apiServer from "../utils/api";
 import { MastodonError, StatusResponse, StatusRequest } from "../utils/types";
 import { dateTimeFormatter, errorHandler } from "../utils/helpers";
 
 import { LaunchContext } from "../post-simple-status";
-
-const cache = new Cache();
 
 export interface StatusFormValues extends StatusRequest {
   files: string[];
@@ -19,8 +17,7 @@ export interface StatusFormValues extends StatusRequest {
 export function useSubmitStatus(draftValues: Partial<StatusRequest> | undefined, launchContext: LaunchContext) {
   const [openActionText, setOpenActionText] = useState("View the latest published status");
 
-  const cached = cache.get("latest_published_status");
-  const [latestStatus, setLatestStatus] = useState<StatusResponse>(cached ? JSON.parse(cached) : null);
+  const [latestStatus, setLatestStatus] = useCachedState<StatusResponse>("latest_published_status");
 
   const validator = (value: StatusFormValues) => {
     if (value.status.trim().length === 0 && value.files.length === 0)
@@ -75,7 +72,6 @@ export function useSubmitStatus(draftValues: Partial<StatusRequest> | undefined,
 
         setLatestStatus(response);
         setOpenActionText("View the status in Browser");
-        cache.set("latest_published_status", JSON.stringify(response));
         setTimeout(() => popToRoot(), 2000);
       } catch (error) {
         errorHandler(error as MastodonError);
