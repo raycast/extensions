@@ -20,7 +20,7 @@ export default function ViewStatusCommand() {
   return (
     <List isShowingDetail isLoading={isLoading} searchBarPlaceholder="Search your status">
       {statuses &&
-        filterReblog(statuses)?.map((status) => (
+        filterReblog(statuses).map((status) => (
           <List.Item
             title={contentExtractor(status.content)}
             key={status.id}
