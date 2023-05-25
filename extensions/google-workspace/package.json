@@ -4,15 +4,16 @@
   "title": "Google Workspace",
   "description": "Access Google Drive files.",
   "icon": "google-logo.png",
-  "owner": "raycast",
-  "access": "public",
   "author": "thomaslombart",
+  "owner": "raycast",
   "contributors": [
-    "mathieudutour"
+    "mathieudutour",
+    "seanrose"
   ],
   "categories": [
     "Productivity"
   ],
+  "access": "public",
   "license": "MIT",
   "commands": [
     {
@@ -20,15 +21,7 @@
       "title": "Create Google Document",
       "description": "Create a new Google document.",
       "icon": "google-docs.png",
-      "mode": "no-view",
-      "arguments": [
-        {
-          "name": "title",
-          "placeholder": "Title",
-          "type": "text",
-          "required": false
-        }
-      ]
+      "mode": "no-view"
     },
     {
       "name": "create-google-spreadsheet",
@@ -42,30 +35,14 @@
       "title": "Create Google Presentation",
       "description": "Create a new Google presentation.",
       "icon": "google-slides.png",
-      "mode": "no-view",
-      "arguments": [
-        {
-          "name": "title",
-          "placeholder": "Title",
-          "type": "text",
-          "required": false
-        }
-      ]
+      "mode": "no-view"
     },
     {
       "name": "create-google-form",
       "title": "Create Google Form",
       "description": "Create a new Google form.",
       "icon": "google-forms.png",
-      "mode": "no-view",
-      "arguments": [
-        {
-          "name": "title",
-          "placeholder": "Title",
-          "type": "text",
-          "required": false
-        }
-      ]
+      "mode": "no-view"
     },
     {
       "name": "starred-google-drive-files",
