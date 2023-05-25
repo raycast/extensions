@@ -6,7 +6,7 @@ import { pluralize } from "./helpers";
 
 const hltbService = new HowLongToBeatService();
 
-export const baseUrl = "https://howlongtobeat.com/api/search";
+export const baseUrl = "https://howlongtobeat.com/game?id=";
 
 export default function Command() {
   const { state, search } = useSearch();
@@ -29,6 +29,7 @@ function SearchListItem({ searchResult }: { searchResult: HowLongToBeatEntry }) 
   const mainStoryHours = searchResult.gameplayMain || 0;
   const mainStoryText = mainStoryHours >= 1 ? `${searchResult.gameplayMain} ${pluralize(mainStoryHours, "hour")}` : "-";
 
+  
   return (
     <List.Item
       title={searchResult.name}
