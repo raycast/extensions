@@ -41,7 +41,7 @@ export default function ResultView(prompt, toast_title, type = "text", title) {
 
       try {
         await Bard.init(pref["__Secure-1PSID"]);
-        return await askAI(`${prompt}; ${selectedText}}`);
+        return await askAI(`${prompt}${selectedText}`);
       } catch (error) {
         toast.title = "Error";
         toast.style = Toast.Style.Failure;
