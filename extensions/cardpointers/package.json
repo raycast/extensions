@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "cardpointers",
   "title": "CardPointers",
-  "description": "Search for any credit card details or Amex/Chase offer",
+  "description": "Search for any credit card details or Amex/Chase offer from the CardPointers database.",
   "icon": "cp-icon.png",
   "author": "emcro",
   "categories": [
