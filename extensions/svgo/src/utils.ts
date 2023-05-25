@@ -32,10 +32,7 @@ const processFilePath = async (path: string) => {
     const filename = path.substring(filenameStartIdx, fileExtensionIdx);
     const fileExtension = path.substring(fileExtensionIdx);
 
-    return `${path.substring(
-      0,
-      filenameStartIdx
-    )}${filename}.min${fileExtension}`;
+    return `${path.substring(0, filenameStartIdx)}${filename}.min${fileExtension}`;
   } else {
     return `${path}.min.svg`;
   }

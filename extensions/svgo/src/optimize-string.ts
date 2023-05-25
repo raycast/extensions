@@ -1,11 +1,4 @@
-import {
-  Clipboard,
-  closeMainWindow,
-  showHUD,
-  showToast,
-  Toast,
-  getPreferenceValues,
-} from "@raycast/api";
+import { Clipboard, closeMainWindow, showHUD, showToast, Toast, getPreferenceValues } from "@raycast/api";
 import isSvg from "is-svg";
 import { optimize } from "svgo";
 

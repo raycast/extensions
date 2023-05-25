@@ -1,10 +1,4 @@
-import {
-  closeMainWindow,
-  getSelectedFinderItems,
-  showHUD,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { closeMainWindow, getSelectedFinderItems, showHUD, showToast, Toast } from "@raycast/api";
 
 import optimizeItems from "./utils";
 
