@@ -69,17 +69,17 @@ export default function Command(props: LaunchProps) {
                 <ActionPanel>
                   <Action
                     icon={{ fileIcon: `${iconPath}` }}
-                    title="Open In Hookmark"
+                    title="Open in Hookmark"
                     onAction={() => openInHook(bookmark.title, bookmark.address)}
                   />
-                  <Action.OpenInBrowser title="Open In Finder" url={bookmark.address} />
+                  <Action.OpenInBrowser title="Open in Finder" url={bookmark.address} />
                   <Action.CopyToClipboard
-                    title="Copy As Markdown link"
+                    title="Copy As Markdown Link"
                     content={`[${bookmark.title}](${bookmark.address})`}
                     shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
                   />
                   <Action.CopyToClipboard
-                    title="Copy As Hook link"
+                    title="Copy As Hook Link"
                     content={bookmark.address}
                     shortcut={{ modifiers: ["cmd", "shift"], key: "u" }}
                   />
@@ -89,7 +89,7 @@ export default function Command(props: LaunchProps) {
                     shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
                   />
                   <Action.Paste
-                    title="Paste Markdown link"
+                    title="Paste Markdown Link"
                     content={`[${bookmark.title}](${bookmark.address})`}
                     shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
                   />
@@ -112,16 +112,16 @@ export default function Command(props: LaunchProps) {
                 <ActionPanel>
                   <Action
                     icon={{ fileIcon: `${iconPath}` }}
-                    title="Open In Hookmark"
+                    title="Open in Hookmark"
                     onAction={() => openInHook(bookmark.title, bookmark.address)}
                   />
                   <Action.CopyToClipboard
-                    title="Copy As Markdown link"
+                    title="Copy as Markdown Link"
                     content={`[${bookmark.title}](${bookmark.address})`}
                     shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
                   />
                   <Action.Paste
-                    title="Paste Markdown link"
+                    title="Paste Markdown Link"
                     content={`[${bookmark.title}](${bookmark.address})`}
                     shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
                   />
