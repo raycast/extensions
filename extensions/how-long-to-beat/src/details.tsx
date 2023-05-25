@@ -25,7 +25,6 @@ export function Details(props: DetailsProps) {
   const [state, setState] = useState<DetailsState>({ result: null, isLoading: true });
 
   const getDetails = useCallback(async function () {
-
     try {
       const html = await detailHtml(id);
       const result = parseDetails(html, id);
@@ -35,8 +34,7 @@ export function Details(props: DetailsProps) {
         result, // Update the result with the parsed data
         isLoading: false,
       }));
-
-    }catch (error) {
+    } catch (error) {
       showToast({ style: Toast.Style.Failure, title: "Error building detail page", message: String(error) });
     }
     // const result = await hltbService.detail(id);
@@ -113,9 +111,9 @@ async function detailHtml(gameId: string, signal?: AbortSignal): Promise<string>
     const result = await axios.get(`${baseUrl}${gameId}`, {
       // followRedirect: false,
       headers: {
-        'User-Agent': new UserAgent().toString(),
-        'origin': 'https://howlongtobeat.com',
-        'referer': 'https://howlongtobeat.com'
+        "User-Agent": new UserAgent().toString(),
+        origin: "https://howlongtobeat.com",
+        referer: "https://howlongtobeat.com",
       },
       timeout: 20000,
       signal,
@@ -127,59 +125,46 @@ async function detailHtml(gameId: string, signal?: AbortSignal): Promise<string>
   }
 }
 
-
 function parseDetails(html: string, id: string): HowLongToBeatEntry {
   const $ = cheerio.load(html);
-  let gameName = '';
-  let imageUrl = '';
+  let gameName = "";
+  let imageUrl = "";
   const timeLabels: Array<string[]> = new Array<string[]>();
   let gameplayMain = 0;
   let gameplayMainExtra = 0;
   let gameplayComplete = 0;
 
-  gameName = $('div[class*=GameHeader_profile_header__]').text();
-  imageUrl = $('div[class*=GameHeader_game_image__]').find('img')[0].attribs.src;
+  gameName = $("div[class*=GameHeader_profile_header__]").text();
+  imageUrl = $("div[class*=GameHeader_game_image__]").find("img")[0].attribs.src;
 
-  const liElements = $('div[class*=GameStats_game_times__] li');
+  const liElements = $("div[class*=GameStats_game_times__] li");
 
-  const gameDescription = $(
-    '.in.back_primary.shadow_box div[class*=GameSummary_large__]'
-  ).text();
+  const gameDescription = $(".in.back_primary.shadow_box div[class*=GameSummary_large__]").text();
 
   let platforms: string[] = [];
 
-  $('div[class*=GameSummary_profile_info__]').each(function () {
+  $("div[class*=GameSummary_profile_info__]").each(function () {
     const metaData = $(this).text();
-    const platformKeyword = metaData.includes('Platforms:') ? 'Platforms:' : 'Platform:';
+    const platformKeyword = metaData.includes("Platforms:") ? "Platforms:" : "Platform:";
     platforms = metaData
-      .replace(/\n/g, '')
-      .replace(platformKeyword, '')
-      .split(',')
-      .map(data => data.trim());
+      .replace(/\n/g, "")
+      .replace(platformKeyword, "")
+      .split(",")
+      .map((data) => data.trim());
   });
 
   liElements.each(function () {
-    const type: string = $(this)
-      .find('h4')
-      .text();
-    const time: number = parseTime(
-      $(this)
-        .find('h5')
-        .text()
-    );
-    if (
-      type.startsWith('Main Story') ||
-      type.startsWith('Single-Player') ||
-      type.startsWith('Solo')
-    ) {
+    const type: string = $(this).find("h4").text();
+    const time: number = parseTime($(this).find("h5").text());
+    if (type.startsWith("Main Story") || type.startsWith("Single-Player") || type.startsWith("Solo")) {
       gameplayMain = time;
-      timeLabels.push(['gameplayMain', type]);
-    } else if (type.startsWith('Main + Sides') || type.startsWith('Co-Op')) {
+      timeLabels.push(["gameplayMain", type]);
+    } else if (type.startsWith("Main + Sides") || type.startsWith("Co-Op")) {
       gameplayMainExtra = time;
-      timeLabels.push(['gameplayMainExtra', type]);
-    } else if (type.startsWith('Completionist') || type.startsWith('Vs.')) {
+      timeLabels.push(["gameplayMainExtra", type]);
+    } else if (type.startsWith("Completionist") || type.startsWith("Vs.")) {
       gameplayComplete = time;
-      timeLabels.push(['gameplayComplete', type]);
+      timeLabels.push(["gameplayComplete", type]);
     }
   });
 
@@ -199,31 +184,28 @@ function parseDetails(html: string, id: string): HowLongToBeatEntry {
 }
 
 /**
-   * Utility method used for parsing a given input text (like
-   * &quot;44&#189;&quot;) as double (like &quot;44.5&quot;). The input text
-   * represents the amount of hours needed to play this game.
-   *
-   * @param text
-   *            representing the hours
-   * @return the pares time as double
-   */
+ * Utility method used for parsing a given input text (like
+ * &quot;44&#189;&quot;) as double (like &quot;44.5&quot;). The input text
+ * represents the amount of hours needed to play this game.
+ *
+ * @param text
+ *            representing the hours
+ * @return the pares time as double
+ */
 function parseTime(text: string): number {
   // '65&#189; Hours/Mins'; '--' if not known
-  if (text.startsWith('--')) {
+  if (text.startsWith("--")) {
     return 0;
   }
-  if (text.indexOf(' - ') > -1) {
+  if (text.indexOf(" - ") > -1) {
     return handleRange(text);
   }
   return getTime(text);
 }
 
 function handleRange(text: string): number {
-  const range: Array<string> = text.split(' - ');
-  const d: number =
-    (getTime(range[0]) +
-      getTime(range[1])) /
-    2;
+  const range: Array<string> = text.split(" - ");
+  const d: number = (getTime(range[0]) + getTime(range[1])) / 2;
   return d;
 }
 
@@ -235,13 +217,13 @@ function handleRange(text: string): number {
  */
 function getTime(text: string): number {
   //check for Mins, then assume 1 hour at least
-  const timeUnit = text.substring(text.indexOf(' ') + 1).trim();
-  if (timeUnit === 'Mins') {
+  const timeUnit = text.substring(text.indexOf(" ") + 1).trim();
+  if (timeUnit === "Mins") {
     return 1;
   }
-  const time: string = text.substring(0, text.indexOf(' '));
-  if (time.indexOf('½') > -1) {
-    return 0.5 + parseInt(time.substring(0, text.indexOf('½')));
+  const time: string = text.substring(0, text.indexOf(" "));
+  if (time.indexOf("½") > -1) {
+    return 0.5 + parseInt(time.substring(0, text.indexOf("½")));
   }
   return parseInt(time);
 }

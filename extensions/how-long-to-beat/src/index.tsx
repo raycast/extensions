@@ -29,7 +29,6 @@ function SearchListItem({ searchResult }: { searchResult: HowLongToBeatEntry }) 
   const mainStoryHours = searchResult.gameplayMain || 0;
   const mainStoryText = mainStoryHours >= 1 ? `${searchResult.gameplayMain} ${pluralize(mainStoryHours, "hour")}` : "-";
 
-  
   return (
     <List.Item
       title={searchResult.name}
@@ -53,7 +52,6 @@ function SearchListItem({ searchResult }: { searchResult: HowLongToBeatEntry }) 
 
 function useSearch() {
   const [state, setState] = useState<SearchState>({ results: [], isLoading: true });
-
 
   const search = useCallback(
     async function search(searchText: string) {
