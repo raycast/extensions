@@ -7,3 +7,5 @@
 .DS_Store
 
 schema.graphql
+
+raycast-env.d.ts
