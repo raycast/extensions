@@ -9,7 +9,7 @@ export async function getMe() {
     return response;
   } catch (err) {
     const error = getErrorMessage(err);
-    console.log("getArtistTopTracks.ts Error:", error);
+    console.log("getMe.ts Error:", error);
     throw new Error(error);
   }
 }
