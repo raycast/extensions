@@ -6,8 +6,9 @@ import {
   getIconForVisibility,
   isMyStatus,
   contentExtractor,
+  dateTimeFormatter,
+  isVisiblityPrivate,
 } from "../utils/helpers";
-import { dateTimeFormatter } from "../utils/helpers";
 
 import StatusAction from "./StatusActions";
 import { useInteract } from "../hooks/useInteraction";
@@ -15,11 +16,13 @@ import MyStatusActions from "./MyStatusActions";
 interface StatusItemProps {
   status: Status;
   showMetaData?: boolean;
+  originalStatus?: Status;
 }
 
-const StatusItem: React.FC<StatusItemProps> = ({ status, showMetaData }) => {
+const StatusItem: React.FC<StatusItemProps> = ({ status, showMetaData, originalStatus }) => {
   const content = status.spoiler_text || status.content;
   const time = dateTimeFormatter(new Date(status.created_at), "short");
+
   const { statusInfo, toggleReblog, toggleFavourite, toggleBookmark } = useInteract(status);
 
   return (
@@ -29,6 +32,7 @@ const StatusItem: React.FC<StatusItemProps> = ({ status, showMetaData }) => {
         source: status.account.avatar,
         mask: Image.Mask.Circle,
       }}
+      accessories={isVisiblityPrivate(status.visibility) ? [{ icon: getIconForVisibility(status.visibility) }] : []}
       detail={
         <List.Item.Detail
           markdown={statusParser(status, "id")}
@@ -63,6 +67,16 @@ const StatusItem: React.FC<StatusItemProps> = ({ status, showMetaData }) => {
                   icon={getIconForVisibility(status.visibility)}
                 />
                 <List.Item.Detail.Metadata.Label title="Published Time" text={time} />
+                {originalStatus?.reblog && (
+                  <List.Item.Detail.Metadata.Label
+                    title="Boosted by"
+                    text={originalStatus.account.display_name}
+                    icon={{
+                      source: originalStatus.account.avatar,
+                      mask: Image.Mask.Circle,
+                    }}
+                  />
+                )}
               </List.Item.Detail.Metadata>
             ) : null
           }

@@ -12,7 +12,12 @@ export default function Home() {
   return (
     <List isShowingDetail isLoading={isLoading}>
       {statuses?.map((status) => (
-        <StatusItem key={status.id} status={status.reblog ? status.reblog : status} showMetaData />
+        <StatusItem
+          key={status.id}
+          status={status.reblog ? status.reblog : status}
+          originalStatus={status}
+          showMetaData
+        />
       ))}
     </List>
   );
