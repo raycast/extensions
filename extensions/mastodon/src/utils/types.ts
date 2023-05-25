@@ -1,5 +1,3 @@
-import type { Icon } from "@raycast/api";
-
 export type VisibilityScope = "public" | "unlisted" | "direct" | "private";
 
 export interface Preference {
@@ -8,11 +6,9 @@ export interface Preference {
   bookmarkLimit: string;
   enableMarkdown: boolean;
 }
-
-export interface VisibilityOption {
-  title: string;
-  value: VisibilityScope;
-  icon: Icon;
+export interface LaunchContext {
+  status: Status;
+  action: "post" | "edit" | "reply";
 }
 
 // Error

@@ -27,8 +27,9 @@ const CONFIG = {
 };
 
 const requestApi = async <T>(
-  method: "GET" | "POST" | "PUT" = "GET",
+  method: "GET" | "POST" | "PUT" | "DELETE" = "GET",
   endpoint: string,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   body?: any,
   isFormData?: boolean
 ): Promise<T> => {
@@ -73,10 +74,11 @@ const fetchToken = async (params: URLSearchParams): Promise<OAuth.TokenResponse>
 
 const createApp = async (): Promise<Credentials> =>
   requestApi<Credentials>("POST", CONFIG.appUrl, {
-    client_name: "Raycast-Mastodon-Extension",
+    client_name: "Raycast - Mastodon",
     redirect_uris: "https://raycast.com/redirect?packageName=Extension",
-    scopes: "read:statuses write:statuses read:bookmarks read:accounts write:media",
-    website: "https://raycast.com",
+    scopes:
+      "read:statuses read:bookmarks read:accounts read:favourites write:favourites write:media write:bookmarks write:statuses",
+    website: "https://raycast.com/SevicheCC/mastodon",
   });
 
 const fetchAccountInfo = async (): Promise<Account> => requestApi<Account>("GET", CONFIG.verifyCredentialsUrl);
@@ -119,34 +121,45 @@ const fetchPublicTL = async (): Promise<Status[]> => requestApi<Status[]>("GET",
 const postNewStatus = async (statusOptions: Partial<StatusRequest>): Promise<StatusResponse> =>
   requestApi<StatusResponse>("POST", CONFIG.statusesUrl, statusOptions);
 
+const editStatus = async (id: string, statusOptions: Partial<StatusRequest>): Promise<StatusResponse> =>
+  requestApi<StatusResponse>("PUT", `${CONFIG.statusesUrl}/${id}`, statusOptions);
+
+const deleteStatus = async (id: string): Promise<Status> => requestApi<Status>("DELETE", `${CONFIG.statusesUrl}/${id}`);
+
 const favouriteStatus = async (id: string): Promise<Status> =>
   requestApi<Status>("POST", `${CONFIG.statusesUrl}/${id}/favourite`);
 
 const undoFavouriteStatus = async (id: string): Promise<Status> =>
   requestApi<Status>("POST", `${CONFIG.statusesUrl}/${id}/unfavourite`);
 
-const boostStatus = async (id: string): Promise<Status> =>
+const reblogStatus = async (id: string): Promise<Status> =>
   requestApi<Status>("POST", `${CONFIG.statusesUrl}/${id}/reblog`);
 
-const undoBoostStatus = async (id: string): Promise<Status> =>
+const undoReblogStatus = async (id: string): Promise<Status> =>
   requestApi<Status>("POST", `${CONFIG.statusesUrl}/${id}/unreblog`);
 
-const toggleBookmark = async (id: string): Promise<Status> =>
+const bookmarkStatus = async (id: string): Promise<Status> =>
   requestApi<Status>("POST", `${CONFIG.statusesUrl}/${id}/bookmark`);
+
+const undoBookmarkStatus = async (id: string): Promise<Status> =>
+  requestApi<Status>("POST", `${CONFIG.statusesUrl}/${id}/unbookmark`);
 
 export default {
   fetchToken,
   createApp,
   postNewStatus,
+  deleteStatus,
   fetchAccountInfo,
   uploadAttachment,
   fetchBookmarks,
   fetchUserStatus,
   fetchHomeTL,
   fetchPublicTL,
-  toggleBookmark,
-  boostStatus,
-  undoBoostStatus,
+  reblogStatus,
+  undoReblogStatus,
   favouriteStatus,
   undoFavouriteStatus,
+  bookmarkStatus,
+  undoBookmarkStatus,
+  editStatus,
 };

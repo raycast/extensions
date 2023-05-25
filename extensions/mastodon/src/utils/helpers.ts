@@ -1,6 +1,9 @@
-import { Status, VisibilityScope } from "./types";
+import { Account, Status, VisibilityScope } from "./types";
 import { NodeHtmlMarkdown } from "node-html-markdown";
 import { Icon } from "@raycast/api";
+import { showToast, Toast } from "@raycast/api";
+import { MastodonError } from "../utils/types";
+import { useMe } from "../hooks/useMe";
 
 const nhm = new NodeHtmlMarkdown();
 
@@ -28,7 +31,6 @@ export const statusParser = (
   type: "id" | "date" | "idAndDate"
 ) => {
   const images = media_attachments.filter((attachment) => attachment.type === "gifv" || attachment.type === "image");
-
   const parsedImages = images.reduce(
     (link, image) =>
       link + `![${image.description ?? ""}](${image.preview_url || image.remote_url || image.preview_remote_url})`,
@@ -48,20 +50,39 @@ export const statusParser = (
   );
 };
 
-export const getTextForVisibility = (visibility: VisibilityScope) =>
-  visibility.charAt(0).toUpperCase() + visibility.slice(1);
+export const contentExtractor = (html: string) => html.replace(/<.*?>/g, "");
 
-export const getIconForVisibility = (visibility: VisibilityScope) => {
-  switch (visibility) {
-    case "public":
-      return Icon.Globe;
-    case "unlisted":
-      return Icon.LockUnlocked;
-    case "private":
-      return Icon.TwoPeople;
-    case "direct":
-      return Icon.Envelope;
-    default:
-      return Icon.Livestream;
-  }
+export const errorHandler = (error: MastodonError | Error) => {
+  const requestErr = error as MastodonError;
+  return showToast(Toast.Style.Failure, "Error", requestErr.error || (error as Error).message);
+};
+
+/**
+ * @source https://github.com/raycast/extensions/pull/5001/files#diff-a23f4b1af6a806e43e32f070b2f7ef858103f894395ce378fb2c1da4b9a2b2f1
+ * @author BasixKOR
+ */
+
+const ICON_MAP: Record<VisibilityScope, Icon> = {
+  public: Icon.Globe,
+  unlisted: Icon.LockUnlocked,
+  private: Icon.Lock,
+  direct: Icon.AtSymbol,
+};
+
+const NAME_MAP: Record<VisibilityScope, string> = {
+  public: "Public",
+  unlisted: "Unlisted",
+  private: "Followers-only",
+  direct: "Mentioned people only",
+};
+
+export const getIconForVisibility = (visibility: VisibilityScope): Icon => ICON_MAP[visibility];
+
+export const getNameForVisibility = (visibility: VisibilityScope) => NAME_MAP[visibility];
+
+export const isVisiblityPrivate = (visibility: VisibilityScope) => visibility === "private" || visibility === "direct";
+
+export const isMyStatus = (account: Account) => {
+  const { username } = useMe();
+  return username === account.acct;
 };
