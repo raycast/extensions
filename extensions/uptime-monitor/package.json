@@ -1,0 +1,71 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "uptime-monitor",
+  "title": "Local Uptime Monitor",
+  "description": "Monitor the uptime of a website(s) locally on your machine.",
+  "icon": "extension_icon.png",
+  "author": "Ek217",
+  "categories": [
+    "Data",
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "add",
+      "title": "Add A Monitor",
+      "subtitle": "Add A Monitor",
+      "description": "Add a website as a monitor",
+      "mode": "view"
+    },
+    {
+      "name": "purgedata",
+      "title": "Purge Monitor Data",
+      "subtitle": "Purge All Monitor Data",
+      "description": "Purge All Monitor Data - Recommended once a month",
+      "mode": "view"
+    },
+    {
+      "name": "purgeinputs",
+      "title": "Purge Monitors",
+      "subtitle": "Purge The List Of Websites To Monitor",
+      "description": "Purge The List Of Websites To Monitor",
+      "mode": "view"
+    },
+    {
+      "name": "grid",
+      "title": "Show Uptime Info",
+      "subtitle": "Shows Status Of All Websites Being Monitored",
+      "description": "Shows Status Of All Websites Being Monitoredr",
+      "mode": "view"
+    },
+    {
+      "name": "background",
+      "title": "Manually Ping Websites",
+      "description": "Manually ping all websites being monitored",
+      "mode": "no-view",
+      "interval": "1m"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.51.3",
+    "chart.js": "^4.3.0",
+    "markdown": "^0.5.0",
+    "node-fetch": "^3.3.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
