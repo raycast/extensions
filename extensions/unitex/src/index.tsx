@@ -28,14 +28,15 @@ export default function Command() {
         </ActionPanel>
       }
     >
+      <Form.TextArea id="inputTextField" title="Input" placeholder="f(x) = \pi + \lambda_0" onChange={update} />
       <Form.TextArea
-        id="inputTextField"
-        title="Input"
-        placeholder="f(x) = \pi + \lambda_0"
-        value={inputText}
-        onChange={update}
+        title="Result"
+        id="outputTextField"
+        value={outputText}
+        onChange={() => {
+          console.log("changed");
+        }}
       />
-      <Form.TextArea title="Result" id="outputTextField" value={outputText} />
     </Form>
   );
 }
