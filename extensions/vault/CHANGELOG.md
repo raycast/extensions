@@ -1,5 +1,9 @@
 # Vault Changelog
 
+## [Secret Engine Selection] - 2023-05-24
+
+- Add possibility to select secret engine (via action 'List Engines' or directly in preferences)
+
 ## [Export Env] - 2023-05-16
 
 - Add export to env format
