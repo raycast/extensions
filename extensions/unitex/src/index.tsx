@@ -28,8 +28,14 @@ export default function Command() {
         </ActionPanel>
       }
     >
-      <Form.TextArea id="inputTextField" value={inputText} onChange={update} />
-      <Form.TextArea id="outputTextField" value={outputText} />
+      <Form.TextArea
+        id="inputTextField"
+        title="Input"
+        placeholder="f(x) = \pi + \lambda_0"
+        value={inputText}
+        onChange={update}
+      />
+      <Form.TextArea title="Result" id="outputTextField" value={outputText} />
     </Form>
   );
 }

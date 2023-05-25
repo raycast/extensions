@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "unitex",
-  "title": "UniTex - LaTeX math to Unicode Text.",
+  "title": "UniTex - LaTeX Math to Unicode Text.",
   "description": "Convert LaTeX math to Unicode Text.",
   "icon": "command-icon.png",
   "author": "jaykmody",
