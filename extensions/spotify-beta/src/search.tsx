@@ -69,10 +69,10 @@ function SearchCommand() {
                   title={search}
                   actions={
                     <ActionPanel>
-                      <Action icon={Icon.MagnifyingGlass} title="Search again" onAction={() => setSearchText(search)} />
+                      <Action icon={Icon.MagnifyingGlass} title="Search Again" onAction={() => setSearchText(search)} />
                       <Action
                         icon={Icon.Trash}
-                        title="Remove search"
+                        title="Remove Search"
                         onAction={async () => {
                           await LocalStorage.setItem(
                             "recent-searches",
