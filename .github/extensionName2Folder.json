@@ -775,6 +775,7 @@
   "chatwork-search": "search-chatwork",
   "search-composer-packagist": "search-composer-packagist",
   "search-hex": "search-hexpm",
+  "search-hookmark": "search-hookmark",
   "search-mdn": "search-mdn",
   "search-notion": "search-notion",
   "search-npm": "search-npm",
