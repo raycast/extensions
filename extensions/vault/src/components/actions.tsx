@@ -37,7 +37,7 @@ export function Configuration() {
               <Action
                 key={namespace}
                 icon={Icon.Book}
-                title={`Switch To ${namespace}`}
+                title={`Switch to ${namespace}`}
                 onAction={() => setNamespaceAndGoToTree({ namespace }, push)}
               />
             ))}
