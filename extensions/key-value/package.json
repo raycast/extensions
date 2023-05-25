@@ -22,8 +22,8 @@
     {
       "name": "index",
       "title": "Find Value by Key",
-      "description": "Copy a key from the clipboard and paste a value from a JSON file",
-      "mode": "no-view"
+      "description": "Shows a list of key-value pairs from a JSON file and allows you to copy them to the clipboard",
+      "mode": "view"
     }
   ],
   "dependencies": {

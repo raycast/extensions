@@ -1,5 +1,4 @@
-import { ActionPanel, Detail, List, Action, showToast, Toast, Clipboard, closeMainWindow } from "@raycast/api";
-import { getPreferenceValues } from "@raycast/api";
+import { ActionPanel, List, Action, showToast, Toast, getPreferenceValues } from "@raycast/api";
 
 import * as fs from "fs";
 
@@ -42,7 +41,7 @@ export default function Command() {
     return null;
   }
 
-  var createListItem = (key: string, value: string) => {
+  const createListItem = (key: string, value: string) => {
     return <List.Item
       key={key}
       title={key}
