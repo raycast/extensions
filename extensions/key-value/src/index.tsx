@@ -5,7 +5,7 @@ import * as fs from "fs";
 interface Preferences {
   jsonFilePath: string;
 }
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 
 export default function Command() {
   const [loading, setLoading] = useState(true);
@@ -42,31 +42,27 @@ export default function Command() {
   }
 
   const createListItem = (key: string, value: string) => {
-    return <List.Item
-      key={key}
-      title={key}
-      subtitle={value}
-      actions={
-        <ActionPanel>
-          <Action.CopyToClipboard
-            content={value}
-          />
-        </ActionPanel>
-      }
-    />
-  }
+    return (
+      <List.Item
+        key={key}
+        title={key}
+        subtitle={value}
+        actions={
+          <ActionPanel>
+            <Action.CopyToClipboard content={value} />
+          </ActionPanel>
+        }
+      />
+    );
+  };
 
   return (
     <List>
-      <List.Section title="Key -> Value" >
-        {Object.keys(jsonData).map((key) => (
-          createListItem(key, jsonData[key])
-        ))}
+      <List.Section title="Key -> Value">
+        {Object.keys(jsonData).map((key) => createListItem(key, jsonData[key]))}
       </List.Section>
-      <List.Section title="Value -> Key" >
-        {Object.keys(jsonData).map((key) => (
-          createListItem(jsonData[key], key)
-        ))}
+      <List.Section title="Value -> Key">
+        {Object.keys(jsonData).map((key) => createListItem(jsonData[key], key))}
       </List.Section>
     </List>
   );
