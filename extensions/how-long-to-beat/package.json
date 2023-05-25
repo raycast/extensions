@@ -5,6 +5,9 @@
   "description": "Discover how many hours you need to beat a game.",
   "icon": "icon.png",
   "author": "Cronos87",
+  "contributors": [
+    "Whitespace"
+  ],
   "categories": [
     "Data",
     "Web"
@@ -20,7 +23,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.38.3",
-    "howlongtobeat": "^1.5.1",
+    "howlongtobeat": "^1.7.0",
     "node-fetch": "^3.2.10"
   },
   "devDependencies": {

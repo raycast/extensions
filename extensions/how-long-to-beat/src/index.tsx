@@ -6,7 +6,7 @@ import { pluralize } from "./helpers";
 
 const hltbService = new HowLongToBeatService();
 
-export const baseUrl = "https://howlongtobeat.com/game?id=";
+export const baseUrl = "https://howlongtobeat.com/api/search";
 
 export default function Command() {
   const { state, search } = useSearch();
@@ -52,6 +52,7 @@ function SearchListItem({ searchResult }: { searchResult: HowLongToBeatEntry }) 
 
 function useSearch() {
   const [state, setState] = useState<SearchState>({ results: [], isLoading: true });
+
 
   const search = useCallback(
     async function search(searchText: string) {
