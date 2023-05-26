@@ -5,6 +5,13 @@
   "description": "Manage your todo list quickly by adding items and marking items as completed.",
   "icon": "command-icon.png",
   "author": "maggie",
+  "contributors": [
+    "jkorol3"
+  ],
+  "categories": [
+    "Applications",
+    "Productivity"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -19,10 +26,6 @@
       "description": "See your Todos at a glance",
       "mode": "menu-bar"
     }
-  ],
-  "categories": [
-    "Applications",
-    "Productivity"
   ],
   "dependencies": {
     "@raycast/api": "^1.38.1",
