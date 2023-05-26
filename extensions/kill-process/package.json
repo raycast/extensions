@@ -2,18 +2,19 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "kill-process",
   "title": "Kill Process",
-  "description": "Lists all running processes, ordered by CPU usage and allows killing one",
+  "description": "Lists all running processes, ordered by CPU or memory usage and allows killing one",
   "icon": "icon.png",
   "author": "rolandleth",
   "contributors": [
-    "crazyones110"
+    "crazyones110",
+    "Saafo"
   ],
   "license": "MIT",
   "commands": [
     {
       "name": "index",
       "title": "Kill Process",
-      "description": "Lists all running processes, ordered by CPU usage and allows killing one",
+      "description": "Lists all running processes, ordered by CPU or memory usage and allows killing one",
       "mode": "view"
     }
   ],
@@ -43,6 +44,22 @@
       "type": "checkbox"
     },
     {
+      "description": "Determines whether processes are sorted by CPU or memory usage.",
+      "label": "Sort processes by memory usage",
+      "name": "sortByMem",
+      "required": false,
+      "title": "",
+      "type": "checkbox"
+    },
+    {
+      "description": "Determines whether aggregate processes belong to the same app.",
+      "label": "Aggregate apps",
+      "name": "aggregateApps",
+      "required": false,
+      "title": "",
+      "type": "checkbox"
+    },
+    {
       "description": "Show process PID info.",
       "label": "Show PID",
       "name": "shouldShowPID",
@@ -60,8 +77,9 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.25.0",
-    "node-fetch": "^3.0.0"
+    "@raycast/api": "^1.52.1",
+    "node-fetch": "^3.0.0",
+    "pretty-bytes": "^6.1.0"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",
