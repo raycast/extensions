@@ -25,7 +25,7 @@ import { isPreferredLanguage } from "./utils";
  * @reutn confirmed: Only mark confirmed = true when > confirmedConfidence && is preferred language.
  * @return detectedLanguageId: The first language id when language is confirmed. If not confirmed, it will be detectedLanguageArray[0].
  */
-export function francLangaugeDetect(text: string, confirmedConfidence = 0.8): DetectedLangModel {
+export function francLanguageDetect(text: string, confirmedConfidence = 0.8): DetectedLangModel {
   const startTime = new Date().getTime();
   console.log(`start franc detect: ${text}`);
   let detectedLanguageId = "auto"; // 'und', language code that stands for undetermined.
