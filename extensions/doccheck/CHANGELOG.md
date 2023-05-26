@@ -1,5 +1,9 @@
 # DocCheck Changelog
 
+## [Version 1.3.2] - 2023-05-26
+
+- NEW: Embedded YouTube videos are now shown as a http://youtu.be/*** shortlink
+
 ## [Version 1.3.1] - 2023-05-10
 
 - Fix: flickering loading indicator when no search result is found

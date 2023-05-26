@@ -127,6 +127,11 @@ export default function DocCheckPage(props: { url: string; prevurl: string; quer
           .replace(/#cite_\D*\d*/gm, '"')
           .replace(`>&nbsp;<`, `>.<`)
           .replace(`tr>\n<th></th>`, `tr>\n<th>.</th>`)
+          .replace(`tr>\n<th></th>`, `tr>\n<th>.</th>`)
+          .replace(
+            /<iframe.*src=".*embed\/(.*)" frame.*><\/iframe>/gm,
+            `YouTube Video: <a href="$1">http://youtu.be/$1</a>`
+          )
       )
       .replace(/\s{94}\|\n/gm, `\n`); // HEADING + ``SYNONYME`` -TOC + ARTICLE (removal of anchors, relative to absolute links, putting a dot in the empty start line when calculating "Relatives Risiko" and "Odds Ratio" for correct display, removal of some table ends like DDx in "Scharlach")
 
