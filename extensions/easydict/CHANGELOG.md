@@ -1,6 +1,6 @@
 # `Easydict` Changelog
 
-## [v2.9.0] - 2023-05-17
+## [v2.9.0] - 2023-05-26
 
 ### ✨ New Features
 
