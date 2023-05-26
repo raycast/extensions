@@ -5,7 +5,11 @@
   "description": "Shorcuts for common web3 tasks",
   "icon": "icon.png",
   "author": "apoorv",
-  "categories": ["Developer Tools", "Applications", "Productivity"],
+  "categories": [
+    "Developer Tools",
+    "Applications",
+    "Productivity"
+  ],
   "license": "MIT",
   "commands": [
     {

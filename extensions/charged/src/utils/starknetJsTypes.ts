@@ -25,65 +25,65 @@ declare enum TransactionHashPrefix {
 
 // [CUSTOM] removed Program from here
 declare type LegacyContractClass = {
-    entry_points_by_type: EntryPointsByType;
-    abi: Abi;
+  entry_points_by_type: EntryPointsByType;
+  abi: Abi;
 };
 
 // [CUSTOM] removed Omit from here
 declare type LegacyCompiledContract = LegacyContractClass & {
-    program: Program;
+  program: Program;
 };
 
 declare type CompressedProgram = string;
 
 declare type EntryPointsByType = {
-    CONSTRUCTOR: ContractEntryPointFields[];
-    EXTERNAL: ContractEntryPointFields[];
-    L1_HANDLER: ContractEntryPointFields[];
+  CONSTRUCTOR: ContractEntryPointFields[];
+  EXTERNAL: ContractEntryPointFields[];
+  L1_HANDLER: ContractEntryPointFields[];
 };
 
 /** ABI */
 declare type Abi = Array<FunctionAbi | EventAbi | StructAbi>;
 declare type AbiEntry = {
-    name: string;
-    type: 'felt' | 'felt*' | string;
+  name: string;
+  type: "felt" | "felt*" | string;
 };
 declare enum FunctionAbiType {
-    'function' = 0,
-    'l1_handler' = 1,
-    'constructor' = 2
+  "function" = 0,
+  "l1_handler" = 1,
+  "constructor" = 2,
 }
 declare type FunctionAbi = {
-    inputs: AbiEntry[];
-    name: string;
-    outputs: AbiEntry[];
-    stateMutability?: 'view';
-    state_mutability?: string;
-    type: FunctionAbiType;
+  inputs: AbiEntry[];
+  name: string;
+  outputs: AbiEntry[];
+  stateMutability?: "view";
+  state_mutability?: string;
+  type: FunctionAbiType;
 };
 declare type AbiStructs = {
-    [name: string]: StructAbi;
+  [name: string]: StructAbi;
 };
 declare type StructAbi = {
-    members: (AbiEntry & {
-        offset: number;
-    })[];
-    name: string;
-    size: number;
-    type: 'struct';
+  members: (AbiEntry & {
+    offset: number;
+  })[];
+  name: string;
+  size: number;
+  type: "struct";
 };
 declare type EventAbi = any;
 
 // [CUSTOM] removed extends Record<string,any> from here
 interface Program {
-    builtins: string[];
-    data: string[];
+  builtins: string[];
+  data: string[];
 }
 
 declare type ContractEntryPointFields = {
-    selector: string;
-    offset: string;
-    builtins?: Builtins;
+  selector: string;
+  offset: string;
+  builtins?: Builtins;
 };
 
 declare type Builtins = string[];
@@ -92,40 +92,40 @@ declare type CompiledSierra = SierraContractClass;
 declare type CompiledSierraCasm = CairoAssembly;
 
 declare type SierraContractClass = {
-    sierra_program: ByteCode;
-    sierra_program_debug_info: SierraProgramDebugInfo;
-    contract_class_version: string;
-    entry_points_by_type: SierraEntryPointsByType;
-    abi: Abi;
+  sierra_program: ByteCode;
+  sierra_program_debug_info: SierraProgramDebugInfo;
+  contract_class_version: string;
+  entry_points_by_type: SierraEntryPointsByType;
+  abi: Abi;
 };
 
 declare type CairoAssembly = {
-    prime: string;
-    compiler_version: string;
-    bytecode: ByteCode;
-    hints: any[];
-    pythonic_hints: PythonicHints;
-    entry_points_by_type: EntryPointsByType;
+  prime: string;
+  compiler_version: string;
+  bytecode: ByteCode;
+  hints: any[];
+  pythonic_hints: PythonicHints;
+  entry_points_by_type: EntryPointsByType;
 };
 
 declare type ByteCode = string[];
 declare type PythonicHints = [number, string[]][];
 
 declare type SierraProgramDebugInfo = {
-    type_names: [number, string][];
-    libfunc_names: [number, string][];
-    user_func_names: [number, string][];
+  type_names: [number, string][];
+  libfunc_names: [number, string][];
+  user_func_names: [number, string][];
 };
 
 declare type SierraEntryPointsByType = {
-    CONSTRUCTOR: SierraContractEntryPointFields[];
-    EXTERNAL: SierraContractEntryPointFields[];
-    L1_HANDLER: SierraContractEntryPointFields[];
+  CONSTRUCTOR: SierraContractEntryPointFields[];
+  EXTERNAL: SierraContractEntryPointFields[];
+  L1_HANDLER: SierraContractEntryPointFields[];
 };
 
 declare type SierraContractEntryPointFields = {
-    selector: string;
-    function_idx: number;
+  selector: string;
+  function_idx: number;
 };
 
 export {};
