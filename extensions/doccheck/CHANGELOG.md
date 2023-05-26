@@ -2,7 +2,8 @@
 
 ## [Version 1.3.2] - 2023-05-26
 
-- NEW: Embedded YouTube videos are now shown as a http://youtu.be/*** shortlink
+- NEW: embedded YouTube videos are now shown as a http://youtu.be/*** shortlink
+- Fix: removed links in the synonyms section
 
 ## [Version 1.3.1] - 2023-05-10
 
@@ -10,12 +11,12 @@
 
 ## [Version 1.3] - 2023-05-07
 
-- NEW: Search in AMBOSS, Google, Wikipedia or the German Wikipedia if no entry is found.
-- NEW: Tooltips now also for titles of search results
+- NEW: search in AMBOSS, Google, Wikipedia or the German Wikipedia if no entry is found.
+- NEW: tooltips now also for titles of search results
 - NEW: "Articulus brevis minimus" is removed
 - Fix: "Top articles" are now always displayed correctly and loaded only once (optimisation when displaying search results after leaving an article view via the "← Search \*" link and when deleting the search term)
 - Fix: if a top article was selected, "← Top article" now appears in the detail view; if "Open in: Browser" is selected in the settings, nothing is displayed any more, as it is possible to jump back with "Esc".
-- Fix: Table calculation in article [Odds Ratio](https://flexikon.doccheck.com/de/Odds_Ratio) is now displayed correctly (apparently a table cannot start with an empty cell)
+- Fix: table calculation in article [Odds Ratio](https://flexikon.doccheck.com/de/Odds_Ratio) is now displayed correctly (apparently a table cannot start with an empty cell)
 - Fix: all german names deleted
 
 ## [Version 1.2.2] - 2023-04-12
@@ -24,7 +25,7 @@
 
 ## [Version 1.2.1] - 2023-04-12
 
-- Bugfixes from @sxn (thanks!)
+- bugfixes from @sxn (thanks!)
 
 ## [Version 1.2] - 2023-04-12
 

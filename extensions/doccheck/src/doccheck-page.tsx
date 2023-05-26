@@ -45,22 +45,16 @@ export default function DocCheckPage(props: { url: string; prevurl: string; quer
       "```\n" +
       synonyms
         .trim()
-        .split("<br>")
-        .join("")
-        .split("</b>\n")
-        .join(" ")
-        .split("<b>")
-        .join("")
-        .split("</b>")
-        .join("")
-        .split("<sub>")
-        .join("")
-        .split("</sub>")
-        .join("")
-        .split("<sup>")
-        .join("")
-        .split("</sup>")
-        .join("") +
+        .replace(/<br>/gm, ``)
+        .replace(/<\/b>/gm, ``)
+        .replace(/<b>/gm, ``)
+        .replace(/\/<b>/gm, ``)
+        .replace(/<sub>/gm, ``)
+        .replace(/<\/sub>/gm, ``)
+        .replace(/<sup>/gm, ``)
+        .replace(/<\/sup>/gm, ``)
+        .replace(/<a .*">/gm, ``)
+        .replace(/<\/a>/gm, ``) +
       "\n" +
       "``` " +
       "\n";
