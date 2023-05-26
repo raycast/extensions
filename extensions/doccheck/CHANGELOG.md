@@ -49,10 +49,6 @@
 - NEW: open articles directly in Raycast via deep links (you can even go back once!)
 - NEW: go back to search if there is no prevous article
 
-## [Version 1.1] - 2023-04-09
-
-- NEW: Open article directly in Raycast using deeplinks (you can even go back one time!)
-
 ## [Initial Version] - 2023-04-01
 
 Initial version code
