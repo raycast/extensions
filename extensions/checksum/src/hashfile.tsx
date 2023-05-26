@@ -1,6 +1,7 @@
 import { Form, ActionPanel, Action, showToast, Clipboard } from "@raycast/api";
 import { createHash } from "crypto";
 import fs from "fs";
+import { HashDropdown } from "./components/dropdown";
 
 type Values = {
   textfield: string; // Expected hash
@@ -36,12 +37,7 @@ export default function Command() {
       }
     >
       <Form.FilePicker id="file" title="File to Hash" allowMultipleSelection={false} />
-      <Form.Dropdown id="dropdown" title="Hashing Algorithm">
-        <Form.Dropdown.Item value="sha1" title="sha1" />
-        <Form.Dropdown.Item value="sha224" title="sha224" />
-        <Form.Dropdown.Item value="sha256" title="sha256" />
-        <Form.Dropdown.Item value="sha512" title="sha512" />
-      </Form.Dropdown>
+      <HashDropdown />
     </Form>
   );
 }
