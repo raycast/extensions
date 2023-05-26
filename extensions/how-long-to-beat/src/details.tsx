@@ -7,8 +7,6 @@ import axios from "axios";
 import UserAgent from "user-agents";
 import cheerio from "cheerio";
 
-// const hltbService = new HowLongToBeatService();
-
 interface DetailsProps {
   id: string;
   name: string;
@@ -37,7 +35,6 @@ export function Details(props: DetailsProps) {
     } catch (error) {
       showToast({ style: Toast.Style.Failure, title: "Error building detail page", message: String(error) });
     }
-    // const result = await hltbService.detail(id);
   }, []);
 
   const getMarkdown = useCallback(() => {
@@ -197,7 +194,7 @@ function parseTime(text: string): number {
   if (text.startsWith("--")) {
     return 0;
   }
-  if (text.indexOf(" - ") > -1) {
+  if (text.includes(" - ")) {
     return handleRange(text);
   }
   return getTime(text);
@@ -222,7 +219,7 @@ function getTime(text: string): number {
     return 1;
   }
   const time: string = text.substring(0, text.indexOf(" "));
-  if (time.indexOf("½") > -1) {
+  if (time.includes("½")) {
     return 0.5 + parseInt(time.substring(0, text.indexOf("½")));
   }
   return parseInt(time);
