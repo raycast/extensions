@@ -15,7 +15,14 @@ type Values = {
 
 export default function Command() {
   function handleSubmit(values: Values) {
-    const data = `${values.url}, ${values.name}`;
+    // Check if the url starts with https:// or http://
+    // If not, add https:// to the url
+    let url = values.url.trim();
+    if (!url.startsWith("https://") && !url.startsWith("http://")) {
+      url = "https://" + url;
+    }
+
+    const data = `${url}, ${values.name}`;
 
     const filePath = path.join(environment.supportPath, "inputs.txt");
 
@@ -79,13 +86,8 @@ export default function Command() {
       }
     >
       <Form.Description text="This form will add a new monitor" />
-      <Form.TextField id="name" title="Display Name" placeholder="Raycast" defaultValue="Raycast" />
-      <Form.TextField
-        id="url"
-        title="URL"
-        placeholder="https://www.raycast.com/Ek217"
-        defaultValue="https://www.raycast.com/Ek217"
-      />
+      <Form.TextField id="name" title="Display Name" placeholder="Raycast" defaultValue="" />
+      <Form.TextField id="url" title="URL" placeholder="https://www.raycast.com/Ek217" defaultValue="https://" />
     </Form>
   );
 }

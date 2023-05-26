@@ -1,4 +1,4 @@
-import { environment, updateCommandMetadata } from "@raycast/api";
+import { environment, updateCommandMetadata, getPreferenceValues, LaunchType } from "@raycast/api";
 import fs from "fs";
 import fetch from "node-fetch";
 import path from "path";
@@ -7,6 +7,25 @@ type Url = {
   url: string;
   displayName: string;
 };
+interface interval19322 {
+  interval: string;
+}
+
+const filePath = path.join(environment.supportPath, "background.txt");
+updateCommandMetadata({ subtitle: `Manually ping websites` });
+function getLastRunTime(): number | null {
+  if (fs.existsSync(filePath)) {
+    const content = fs.readFileSync(filePath, "utf-8");
+    if (content) {
+      return parseInt(content.trim());
+    }
+  }
+  return null;
+}
+
+function setLastRunTime(time: number) {
+  fs.writeFileSync(filePath, time.toString(), "utf8");
+}
 
 async function getUrls(): Promise<Url[]> {
   const filePath = path.join(environment.supportPath, `inputs.txt`);
@@ -76,6 +95,40 @@ export default async function Command() {
     await updateCommandMetadata({ subtitle: `Please Add A Monitor First` });
     return;
   }
-  await Promise.all(urls.map((url) => monitorUptime(url.url, url.displayName)));
-  await updateCommandMetadata({ subtitle: `Monitored ${urls.length} URLs` });
+
+  // Check if the command was launched by a human
+  if (environment.launchType === LaunchType.UserInitiated) {
+    const currentTime = Date.now();
+    // Skip the last run time check
+  } else {
+    // Get the timestamp of the last run
+    const lastRunTime = getLastRunTime();
+    const preferences = getPreferenceValues<Preferences>();
+    const howoftenstr = Object.values(preferences);
+    const output = howoftenstr[0]; // '20'
+    const stringhowoften = Number(output);
+
+    const currentTime = Date.now();
+
+    // Assume lastRunTime is declared as number | Date
+    if (lastRunTime) {
+      let time: number;
+      if (typeof lastRunTime === "number") {
+        time = lastRunTime; // Use the number value as it is
+      } else {
+        time = (lastRunTime as Date).getTime();
+      }
+      if ((Date.now() - time) / 1000 < stringhowoften) {
+        console.log(`Command Ran To Recently.`);
+        return;
+      }
+    }
+
+    // Set the timestamp of the current run
+    setLastRunTime(currentTime);
+
+    // Monitor the URLs
+    await Promise.all(urls.map((url) => monitorUptime(url.url, url.displayName)));
+    await updateCommandMetadata({ subtitle: `Monitored ${urls.length} URLs` });
+  }
 }

@@ -63,7 +63,8 @@ const getMonitorStatus = (filename: string) => {
   );
 
   // Check if lastLine.responseTime is NaN
-  const responseTime = Number.isNaN(lastLine.responseTime) ? "Offline" : `${lastLine.responseTime}ms`;
+  const responseTime =
+    Number.isInteger(lastLine.responseTime) && lastLine.responseTime == 0 ? "Offline" : `${lastLine.responseTime}ms`;
 
   return {
     name: lastLine.name,
@@ -132,7 +133,7 @@ export default function UptimeMonitor() {
               />
               <Action
                 title={showingDetail ? "Ping All Monitors" : "Ping All Monitors"}
-                onAction={() => launchCommand({ name: "background", type: LaunchType.Background })}
+                onAction={() => launchCommand({ name: "background", type: LaunchType.UserInitiated })}
               />
             </ActionPanel>
           }
