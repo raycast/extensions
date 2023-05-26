@@ -5,6 +5,9 @@
   "description": "Generate a set of passwords that are easy to remember and use·",
   "icon": "extension_icon.png",
   "author": "gandli",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "categories": [
     "Productivity",
     "Developer Tools"
