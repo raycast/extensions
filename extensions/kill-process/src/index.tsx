@@ -27,7 +27,7 @@ export default function ProcessList() {
           const processName = path.match(/[^/]*[^/]*$/i)?.[0] ?? "";
           const isPrefPane = path.includes(".prefPane");
           const isApp = path.includes(".app/");
-          const appName = path.match(/(?<=\/)[^\/]+(?=\.app\/)/)?.[0] ?? "";
+          const appName = path.match(/(?<=\/)[^/]+(?=\.app\/)/)?.[0] ?? "";
 
           return {
             id: parseInt(id),
@@ -43,7 +43,7 @@ export default function ProcessList() {
 
       if (aggregateApps) {
         processes = (() => {
-          let map = new Map<string, Process>();
+          const map = new Map<string, Process>();
           processes.forEach((process) => {
             if (process.type == "app" && process.appName != undefined) {
               const originalProcess = map.get(process.appName);
