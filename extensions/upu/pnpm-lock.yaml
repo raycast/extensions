@@ -7,7 +7,7 @@ specifiers:
   '@types/react': 18.0.9
   eslint: ^7.32.0
   node-fetch: ^3.3.1
-  prettier: ^2.5.1
+  prettier: ^2.8.8
   typescript: ^4.4.3
 
 dependencies:
@@ -72,6 +72,8 @@ packages:
       js-yaml: 3.14.1
       minimatch: 3.1.2
       strip-json-comments: 3.1.1
+    transitivePeerDependencies:
+      - supports-color
     dev: true
 
   /@humanwhocodes/config-array/0.5.0:
@@ -81,6 +83,8 @@ packages:
       '@humanwhocodes/object-schema': 1.2.1
       debug: 4.3.4
       minimatch: 3.1.2
+    transitivePeerDependencies:
+      - supports-color
     dev: true
 
   /@humanwhocodes/object-schema/1.2.1:
@@ -115,6 +119,11 @@ packages:
     peerDependencies:
       '@types/node': 18.8.3
       '@types/react': 18.0.9
+    peerDependenciesMeta:
+      '@types/node':
+        optional: true
+      '@types/react':
+        optional: true
     dependencies:
       '@types/node': 18.8.3
       '@types/react': 18.0.9
@@ -137,6 +146,8 @@ packages:
       eslint-config-prettier: 8.8.0_eslint@7.32.0
       prettier: 2.8.8
       typescript: 4.9.5
+    transitivePeerDependencies:
+      - supports-color
     dev: true
 
   /@raycast/eslint-plugin/1.0.4_jofidmxrjzhj7l6vknpw5ecvfe:
@@ -148,6 +159,7 @@ packages:
       eslint: 7.32.0
       title-case: 3.0.3
     transitivePeerDependencies:
+      - supports-color
       - typescript
     dev: true
 
@@ -185,6 +197,10 @@ packages:
     peerDependencies:
       '@typescript-eslint/parser': ^5.0.0
       eslint: ^6.0.0 || ^7.0.0 || ^8.0.0
+      typescript: '*'
+    peerDependenciesMeta:
+      typescript:
+        optional: true
     dependencies:
       '@eslint-community/regexpp': 4.5.1
       '@typescript-eslint/parser': 5.59.7_jofidmxrjzhj7l6vknpw5ecvfe
@@ -198,8 +214,9 @@ packages:
       natural-compare-lite: 1.4.0
       semver: 7.5.1
       tsutils: 3.21.0_typescript@4.9.5
+      typescript: 4.9.5
     transitivePeerDependencies:
-      - typescript
+      - supports-color
     dev: true
 
   /@typescript-eslint/parser/5.59.7_jofidmxrjzhj7l6vknpw5ecvfe:
@@ -207,14 +224,19 @@ packages:
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
     peerDependencies:
       eslint: ^6.0.0 || ^7.0.0 || ^8.0.0
+      typescript: '*'
+    peerDependenciesMeta:
+      typescript:
+        optional: true
     dependencies:
       '@typescript-eslint/scope-manager': 5.59.7
       '@typescript-eslint/types': 5.59.7
       '@typescript-eslint/typescript-estree': 5.59.7_typescript@4.9.5
       debug: 4.3.4
       eslint: 7.32.0
+      typescript: 4.9.5
     transitivePeerDependencies:
-      - typescript
+      - supports-color
     dev: true
 
   /@typescript-eslint/scope-manager/5.59.7:
@@ -230,14 +252,19 @@ packages:
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
     peerDependencies:
       eslint: '*'
+      typescript: '*'
+    peerDependenciesMeta:
+      typescript:
+        optional: true
     dependencies:
       '@typescript-eslint/typescript-estree': 5.59.7_typescript@4.9.5
       '@typescript-eslint/utils': 5.59.7_jofidmxrjzhj7l6vknpw5ecvfe
       debug: 4.3.4
       eslint: 7.32.0
       tsutils: 3.21.0_typescript@4.9.5
+      typescript: 4.9.5
     transitivePeerDependencies:
-      - typescript
+      - supports-color
     dev: true
 
   /@typescript-eslint/types/5.59.7:
@@ -248,6 +275,11 @@ packages:
   /@typescript-eslint/typescript-estree/5.59.7_typescript@4.9.5:
     resolution: {integrity: sha1-uIesvUtY5lSCnJSGDb/0rFXFz/g=, tarball: http://npm.zhenguanyu.com/@typescript-eslint/typescript-estree/download/@typescript-eslint/typescript-estree-5.59.7.tgz}
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
+    peerDependencies:
+      typescript: '*'
+    peerDependenciesMeta:
+      typescript:
+        optional: true
     dependencies:
       '@typescript-eslint/types': 5.59.7
       '@typescript-eslint/visitor-keys': 5.59.7
@@ -256,8 +288,9 @@ packages:
       is-glob: 4.0.3
       semver: 7.5.1
       tsutils: 3.21.0_typescript@4.9.5
+      typescript: 4.9.5
     transitivePeerDependencies:
-      - typescript
+      - supports-color
     dev: true
 
   /@typescript-eslint/utils/5.59.7_jofidmxrjzhj7l6vknpw5ecvfe:
@@ -276,6 +309,7 @@ packages:
       eslint-scope: 5.1.1
       semver: 7.5.1
     transitivePeerDependencies:
+      - supports-color
       - typescript
     dev: true
 
@@ -444,6 +478,11 @@ packages:
   /debug/4.3.4:
     resolution: {integrity: sha1-Exn2V5NX8jONMzfSzdSRS7XcyGU=, tarball: http://npm.zhenguanyu.com/debug/download/debug-4.3.4.tgz}
     engines: {node: '>=6.0'}
+    peerDependencies:
+      supports-color: '*'
+    peerDependenciesMeta:
+      supports-color:
+        optional: true
     dependencies:
       ms: 2.1.2
     dev: true
@@ -571,6 +610,8 @@ packages:
       table: 6.8.1
       text-table: 0.2.0
       v8-compile-cache: 2.3.0
+    transitivePeerDependencies:
+      - supports-color
     dev: true
 
   /espree/7.3.1:
@@ -955,7 +996,7 @@ packages:
     dev: true
 
   /prettier/2.8.8:
-    resolution: {integrity: sha1-6MXX6YpDBf/j3i4fxKyhpxwosdo=, tarball: http://npm.zhenguanyu.com/prettier/download/prettier-2.8.8.tgz}
+    resolution: {integrity: sha512-tdN8qQGvNjw4CHbY+XXk0JgCXn9QiF21a55rBe5LJAU+kDyC4WQn4+awm2Xfk2lQMk5fKup9XgzTZtGkjBdP9Q==}
     engines: {node: '>=10.13.0'}
     hasBin: true
     dev: true
