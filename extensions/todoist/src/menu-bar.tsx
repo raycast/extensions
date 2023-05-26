@@ -18,6 +18,7 @@ import MenuBarTask from "./components/MenubarTask";
 import View from "./components/View";
 import { getToday } from "./helpers/dates";
 import { groupByDueDates } from "./helpers/groupBy";
+import { sortByAddedTime } from "./helpers/sortBy";
 import { getTasksForTodayOrUpcomingView } from "./helpers/tasks";
 import useFilterTasks from "./hooks/useFilterData";
 import { useFocusedTask } from "./hooks/useFocusedTask";
@@ -78,10 +79,13 @@ function MenuBar(props: MenuBarProps) {
       return "";
     }
 
-    if (tasks) {
+    if (tasks && view !== "filter") {
       return tasks.length > 0 ? tasks.length.toString() : "🎉";
+    } else if (filterTasks) {
+      return filterTasks.length > 0 ? filterTasks.length.toString() : "🎉";
     }
-  }, [focusedTask.id, tasks]);
+
+  }, [focusedTask.id, tasks, filterTasks]);
 
   let taskView;
   if (view === "today") {
@@ -220,13 +224,23 @@ const FilterView = ({ tasks }: TaskViewProps) => {
 
   const todayStats = stats?.days_items.find((d) => d.date === format(Date.now(), "yyyy-MM-dd"));
   const completedToday = todayStats?.total_completed ?? 0;
+  const sections = useMemo(() => {
+    return groupByDueDates(tasks);
+  }, [tasks]);
 
   if (tasks.length > 0) {
     return (
       <MenuBarExtra.Section title={"Filtered tasks"} key={"filterTasks"}>
-        {tasks.map((task) => {
-          return <MenuBarTask key={task.id} task={task} />;
-        })}
+        {sections.map((section, index) => {
+        return (
+          <MenuBarExtra.Section title={section.name} key={index}>
+            {section.tasks.map((task) => (
+              <MenuBarTask key={task.id} task={task} />
+            ))}
+          </MenuBarExtra.Section>
+        );
+      })}
+
       </MenuBarExtra.Section>
     );
   }

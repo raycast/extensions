@@ -83,7 +83,8 @@ export function groupByAssignees({ tasks, collaborators, user }: GroupByAssignee
 }
 
 export function groupByDueDates(tasks: Task[]) {
-  const [overdue, upcoming] = partition(tasks, (task: Task) => task.due?.date && isOverdue(task.due.date));
+  const [dated, notdated] = partition(tasks, (task: Task) => task.due?.date);
+  const [overdue, upcoming] = partition(dated, (task: Task) => task.due?.date && isOverdue(task.due.date));
 
   const allDueDates = [...new Set(upcoming.map((task) => parseDay(task.due?.date).toISOString()))] as string[];
   allDueDates.sort();
@@ -97,6 +98,12 @@ export function groupByDueDates(tasks: Task[]) {
     sections.unshift({
       name: "Overdue",
       tasks: overdue,
+    });
+  }
+  if (notdated.length > 0) {
+    sections.push({
+      name: "No due date",
+      tasks: notdated,
     });
   }
 
