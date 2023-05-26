@@ -32,8 +32,7 @@
       "name": "menubar",
       "title": "Show in Menubar",
       "description": "Show the checksum extension shortcuts in the menubar",
-      "mode": "menu-bar",
-      "interval": "1m"
+      "mode": "menu-bar"
     }
   ],
   "dependencies": {
@@ -53,5 +52,16 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "preferences": [
+    {
+      "name": "popRootAfterSubmit",
+      "description": "Pop to root after submit",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "title": "Options",
+      "label": "Pop to root after submit"
+    }
+  ]
 }

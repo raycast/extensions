@@ -1,38 +1,39 @@
-import { Form, ActionPanel, Action, showToast, Clipboard } from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, Clipboard, getPreferenceValues, popToRoot, Icon } from "@raycast/api";
 import { createHash } from "crypto";
 import fs from "fs";
 import { HashDropdown } from "./components/dropdown";
-
-type Values = {
-  textfield: string; // Expected hash
-  textarea: string;
-  datepicker: Date;
-  checkbox: boolean;
-  dropdown: string;
-  tokeneditor: string[];
-  file: string[]; // Array of file paths
-};
+import { Values } from "./types";
 
 export default function Command() {
-  function handleSubmit(values: Values) {
-    for (const filePath of values.file) {
+  const preferences = getPreferenceValues<ExtensionPreferences>();
+
+  async function handleSubmit(values: Values) {
+    const filePath = values.file[0];
+
+    try {
       const buff = fs.readFileSync(filePath);
 
       const hash = createHash(values.dropdown);
       hash.update(buff);
       const result = hash.digest("hex");
-      Clipboard.copy(result);
+      await Clipboard.copy(result);
 
-      showToast({ title: "File hash copied to clipboard" });
+      await showToast({ title: "File hash copied to clipboard" });
+      if (preferences.popRootAfterSubmit) {
+        await popToRoot();
+      }
+    } catch (err) {
+      if (err instanceof Error) {
+        await showToast({ title: "Error", message: err.message });
+      }
     }
-    return true;
   }
 
   return (
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm onSubmit={handleSubmit} />
+          <Action.SubmitForm icon={Icon.Wand} onSubmit={handleSubmit} title="Get Hash" />
         </ActionPanel>
       }
     >

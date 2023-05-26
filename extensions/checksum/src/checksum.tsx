@@ -1,23 +1,15 @@
-import { Form, ActionPanel, Action, showToast, Toast } from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, Toast, Icon } from "@raycast/api";
 import { createHash } from "crypto";
 import fs from "fs";
 import { HashDropdown } from "./components/dropdown";
-
-type Values = {
-  textfield: string; // Expected hash
-  textarea: string;
-  datepicker: Date;
-  checkbox: boolean;
-  dropdown: string;
-  tokeneditor: string[];
-  file: string[]; // Array of file paths
-};
+import { Values } from "./types";
 
 export default function Command() {
-  function handleSubmit(values: Values) {
+  async function handleSubmit(values: Values) {
     const expectedHash = values.textfield;
+    const filePath = values.file[0];
 
-    for (const filePath of values.file) {
+    try {
       const buff = fs.readFileSync(filePath);
 
       const hash = createHash(values.dropdown);
@@ -36,6 +28,10 @@ export default function Command() {
           style: Toast.Style.Failure,
         });
       }
+    } catch (err) {
+      if (err instanceof Error) {
+        await showToast({ title: "Error", message: err.message });
+      }
     }
   }
 
@@ -43,16 +39,11 @@ export default function Command() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm onSubmit={handleSubmit} />
+          <Action.SubmitForm icon={Icon.Wand} onSubmit={handleSubmit} title="Verify Checksum" />
         </ActionPanel>
       }
     >
-      <Form.TextField
-        id="textfield"
-        title="Reported Checksum"
-        placeholder="Place reported checksum here"
-        defaultValue=""
-      />
+      <Form.TextField id="textfield" title="Reported Checksum" placeholder="Place reported checksum here" />
       <Form.FilePicker id="file" title="File to Compare" allowMultipleSelection={false} />
       <HashDropdown />
     </Form>

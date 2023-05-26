@@ -24,7 +24,7 @@ export default function Command() {
         }}
       />
       <MenuBarExtra.Item
-        title="Get Hash Of File"
+        title="Get Hash of File"
         onAction={async () => {
           try {
             await launchCommand({ name: "hashfile", type: LaunchType.UserInitiated });

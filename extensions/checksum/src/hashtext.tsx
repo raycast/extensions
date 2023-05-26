@@ -1,45 +1,37 @@
-import { Form, ActionPanel, Action, showToast, Clipboard } from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, Clipboard, getPreferenceValues, popToRoot, Icon } from "@raycast/api";
 import { createHash } from "crypto";
 import { HashDropdown } from "./components/dropdown";
-
-type Values = {
-  textfield: string; // Expected hash
-  textarea: string;
-  datepicker: Date;
-  checkbox: boolean;
-  dropdown: string;
-  tokeneditor: string[];
-  file: string[]; // Array of file paths
-};
+import { Values } from "./types";
 
 export default function Command() {
-  function handleSubmit(values: Values) {
+  const preferences = getPreferenceValues<ExtensionPreferences>();
+  async function handleSubmit(values: Values) {
     const buff = Buffer.from(values.textfield);
-
     const hash = createHash(values.dropdown);
+
     hash.update(buff);
     const result = hash.digest("hex");
-    Clipboard.copy(result);
 
-    showToast({ title: "Texts hash copied to clipboard" });
+    await Clipboard.copy(result);
+    await showToast({ title: "Texts hash copied to clipboard" });
 
-    return true;
+    if (preferences.popRootAfterSubmit) {
+      await popToRoot();
+    }
   }
 
   return (
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm onSubmit={handleSubmit} />
+          <Action.SubmitForm icon={Icon.Wand} onSubmit={handleSubmit} title="Get Hash" />
         </ActionPanel>
       }
     >
-      <Form.Description text="" />
       <Form.TextArea
         id="textfield"
         title="Text To Hash"
         placeholder="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
-        defaultValue=""
       />
       <HashDropdown />
     </Form>
