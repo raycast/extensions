@@ -20,54 +20,63 @@
     {
       "name": "summarize",
       "title": "Summarize",
+      "subtitle": "Google Bard",
       "description": "Summarize selected text",
       "mode": "view"
     },
     {
       "name": "explain",
       "title": "Explain",
+      "subtitle": "Google Bard",
       "description": "Explain selected text",
       "mode": "view"
     },
     {
       "name": "comment",
       "title": "Add Comments to Code",
+      "subtitle": "Google Bard",
       "description": "Add comments to code",
       "mode": "view"
     },
     {
       "name": "friendly",
       "title": "Change Tone to Friendly",
+      "subtitle": "Google Bard",
       "description": "Change tone of selected text to friendly",
       "mode": "view"
     },
     {
       "name": "professional",
       "title": "Change Tone to Professional",
+      "subtitle": "Google Bard",
       "description": "Change tone of selected text to professional",
       "mode": "view"
     },
     {
       "name": "synonym",
       "title": "Find Synonym",
+      "subtitle": "Google Bard",
       "description": "Find synonym of selected word",
       "mode": "view"
     },
     {
       "name": "grammar",
       "title": "Fix Spelling and Grammar",
+      "subtitle": "Google Bard",
       "description": "Fix spelling and grammar of selected text",
       "mode": "view"
     },
     {
       "name": "longer",
       "title": "Make Longer",
+      "subtitle": "Google Bard",
       "description": "Make selected text longer",
       "mode": "view"
     },
     {
       "name": "shorter",
       "title": "Make Shorter",
+      "subtitle": "Google Bard",
       "description": "Make selected text shorter",
       "mode": "view"
     }
