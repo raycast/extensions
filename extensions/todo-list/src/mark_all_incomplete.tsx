@@ -8,7 +8,7 @@ const MarkAllIncompleteAction = () => {
 
   const handleMarkAllIncomplete = () => {
     // update completed and pinned items
-    const updatedCompletedItems= todoItems.completed.map((item) => ({
+    const updatedCompletedItems = todoItems.completed.map((item) => ({
       ...item,
       completed: false,
     }));
@@ -20,15 +20,15 @@ const MarkAllIncompleteAction = () => {
       pinned: updatedPinnedItems,
       todo: todoItems.todo,
       completed: updatedCompletedItems,
-    }
-    setTodoItems(updatedTodoItems)
-  }
+    };
+    setTodoItems(updatedTodoItems);
+  };
   return (
     <Action
       title="Mark All Incomplete"
-      onAction={ handleMarkAllIncomplete }
+      onAction={handleMarkAllIncomplete}
       shortcut={{ modifiers: ["cmd"], key: "r" }}
-      icon={{ source: Icon.RotateAntiClockwise, tintColor: Color.Magenta}}
+      icon={{ source: Icon.RotateAntiClockwise, tintColor: Color.Magenta }}
     />
   );
 };
