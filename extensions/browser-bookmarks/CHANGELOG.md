@@ -1,5 +1,9 @@
 # Browser Bookmarks Changelog
 
+## [Support for Vivaldi] - 2023-05-26
+
+Added support for the Vivaldi browser.
+
 ## [Various Fixes] - 2023-05-16
 
 - Support root bookmark folders for Safari
