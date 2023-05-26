@@ -31,7 +31,7 @@ function MenuBar(props: MenuBarProps) {
   const { data, isLoading } = useSyncData(!launchedFromWithinCommand);
   const { focusedTask, unfocusTask } = useFocusedTask();
   const { view, filter, upcomingDays, hideMenuBarCount } = getPreferenceValues<Preferences.MenuBar>();
-  const { data: filterTasks, isLoading: isLoadingFilter } = useFilterTasks(filter);
+  const { data: filterTasks, isLoading: isLoadingFilter } = useFilterTasks(view === "filter" ? filter: "");
 
   useEffect(() => {
     const isFocusedTaskInTasks = tasks?.some((t) => t.id === focusedTask.id);
@@ -42,9 +42,6 @@ function MenuBar(props: MenuBarProps) {
   }, [data]);
 
   const tasks = useMemo(() => {
-    if (filter != "") {
-      return filterTasks ? filterTasks : [];
-    }
     const tasks = data ? getTasksForTodayOrUpcomingView(data.items, data.user.id) : [];
 
     if (view === "today") {
@@ -52,7 +49,7 @@ function MenuBar(props: MenuBarProps) {
         if (!t.due) {
           return false;
         }
-
+        
         return isBefore(new Date(t.due.date), getToday()) || isSameDay(new Date(t.due.date), getToday());
       });
     }
@@ -89,7 +86,7 @@ function MenuBar(props: MenuBarProps) {
   let taskView;
   if (view === "today") {
     taskView = tasks && <TodayView tasks={tasks} />;
-  } else if (filterTasks) {
+  } else if (view === "filter") {
     taskView = filterTasks && <FilterView tasks={filterTasks} />;
   } else {
     taskView = tasks && <UpcomingView tasks={tasks} />;

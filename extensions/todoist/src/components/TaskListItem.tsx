@@ -76,7 +76,7 @@ export default function TaskListItem({ task, mode, viewProps, quickLinkView }: T
   if (task.due?.date) {
     const exactTime = isExactTimeTask(task);
     const recurring = isRecurring(task);
-    const overdue = isOverdue(new Date(task.due.date));
+    const overdue = isOverdue(task.due.date);
 
     const text = exactTime ? displayDueDateTime(task.due.date) : displayDueDate(task.due.date);
 
@@ -91,7 +91,7 @@ export default function TaskListItem({ task, mode, viewProps, quickLinkView }: T
       accessories.unshift({ icon: Icon.Clock, text, tooltip: `Due time: ${text}` });
     }
 
-    if (isOverdue(new Date(task.due.date)) || mode !== ViewMode.date) {
+    if (isOverdue(task.due.date) || mode !== ViewMode.date) {
       accessories.unshift({
         icon: {
           source: recurring ? Icon.ArrowClockwise : Icon.Calendar,

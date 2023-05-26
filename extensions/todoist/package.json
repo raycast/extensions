@@ -131,6 +131,10 @@
               "value": "today"
             },
             {
+              "title": "Filter",
+              "value": "filter"
+            },
+            {
               "title": "Upcoming",
               "value": "upcoming"
             }
@@ -149,20 +153,20 @@
           "description": "Indicates the number of days you want in the upcoming view."
         },
         {
+          "default": "",
+          "description": "Task filter for Filter view. Use Todoist filter syntax. Ex: today & (##Work | @next)",
+          "name": "filter",
+          "required": false,
+          "title": "Filter query",
+          "type": "textfield"
+        },
+        {
           "name": "focusFeatureWidth",
           "type": "textfield",
           "required": false,
           "default": "40",
           "title": "Maximum Width of Focused Task",
           "description": "Maximum width of the focused task's text."
-        },
-        {
-          "default": "",
-          "description": "Task filter. Use Todoist filter syntax.",
-          "name": "filter",
-          "required": false,
-          "title": "Filter query",
-          "type": "textfield"
         }
       ],
       "interval": "10m"
