@@ -395,7 +395,7 @@
 /extensions/host-switch                              @ewgenius
 /extensions/hostloc                                  @J3n5en
 /extensions/houdahspot-search                        @blackspike
-/extensions/how-long-to-beat                         @Cronos87
+/extensions/how-long-to-beat                         @Cronos87 @whitespacecode
 /extensions/http-status-codes                        @AlexVanderbist
 /extensions/hubspot                                  @harisvsulaiman @pernielsentikaer @6farer
 /extensions/hubspot-portal-launcher                  @chrisoklepke @pernielsentikaer
@@ -721,6 +721,7 @@
 /extensions/random-password-generator                @textnav
 /extensions/random-us-phone-number                   @yug2005
 /extensions/ray-so                                   @gt-codes @RSO @dgrzedzielski
+/extensions/raycast-bard-ai                          @EvanZhouDev @EvanZhouDev
 /extensions/raycast-icons                            @PitNikola @peduarte
 /extensions/raycast-wallpaper                        @koinzhang
 /extensions/raycast-wemo                             @IAmNatch
