@@ -157,7 +157,7 @@
           "description": "Task filter for Filter view. Use Todoist filter syntax. Ex: today & (##Work | @next)",
           "name": "filter",
           "required": false,
-          "title": "Filter query",
+          "title": "Filter Query",
           "type": "textfield"
         },
         {
