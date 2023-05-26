@@ -72,6 +72,7 @@ export default function Command() {
   const browsers = useMemo(() => storedBrowsers ?? [], [storedBrowsers]);
   const frecencies = useMemo(() => storedFrecencies ?? {}, [storedFrecencies]);
 
+  const [query, setQuery] = useState("");
   const [selectedFolderId, setSelectedFolderId] = useState("");
 
   const hasBrave = browsers.includes(BROWSERS_BUNDLE_ID.brave) ?? false;
@@ -141,7 +142,7 @@ export default function Command() {
     setFolders(folders);
   }, [brave.folders, chrome.folders, edge.folders, firefox.folders, safari.folders, setFolders]);
 
-  const filteredBookmarks = useMemo(() => {
+  const folderBookmarks = useMemo(() => {
     return bookmarks.filter((item) => {
       if (selectedFolderId === "") {
         return true;
@@ -156,6 +157,25 @@ export default function Command() {
       return item.browser === folder.browser && item.folder.includes(folder.title);
     });
   }, [bookmarks, selectedFolderId, folders]);
+
+  // Limit display to 100 bookmarks to avoid heap memory errors
+  // Use custom filtering instead of native filtering
+  const filteredBookmarks = useMemo(() => {
+    return folderBookmarks.filter((item) => {
+      if (query === "") {
+        return true;
+      }
+
+      // Check if the query matches the item's title, domain, or folder (case-insensitive)
+      const lowercasedQuery = query.toLowerCase();
+
+      return (
+        item.title.toLowerCase().includes(lowercasedQuery) ||
+        item.domain.toLowerCase().includes(lowercasedQuery) ||
+        item.folder.toLowerCase().includes(lowercasedQuery)
+      );
+    });
+  }, [folderBookmarks, query]);
 
   const filteredFolders = useMemo(() => {
     return folders.filter((item) => {
@@ -234,6 +254,7 @@ export default function Command() {
         safari.isLoading
       }
       searchBarPlaceholder="Search by title, domain name or tag in selected folder"
+      onSearchTextChange={setQuery}
       searchBarAccessory={
         <List.Dropdown tooltip="Folder" onChange={setSelectedFolderId}>
           <List.Dropdown.Item icon={Icon.Globe} title="All" value="" />
@@ -253,13 +274,12 @@ export default function Command() {
         </List.Dropdown>
       }
     >
-      {filteredBookmarks?.map((item) => {
+      {filteredBookmarks.slice(0, 100).map((item) => {
         return (
           <List.Item
             key={item.id}
             icon={getFavicon(item.url)}
             title={item.title}
-            keywords={[item.domain, ...item.folder.split("/")]}
             accessories={item.folder ? [{ icon: Icon.Folder, tag: item.folder }] : []}
             actions={
               <ActionPanel>

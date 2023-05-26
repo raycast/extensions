@@ -101,20 +101,14 @@ function getFolders(bookmark: BookmarkFolder | BookmarkItem, hierarchy = ""): Fo
 }
 
 export default function useSafariBookmarks(enabled: boolean) {
-  const {
-    data: plist,
-    isLoading,
-    mutate,
-    error,
-  } = useCachedPromise(
+  const { data, isLoading, mutate, error } = useCachedPromise(
     (enabled) => {
       return enabled ? (readPlist(PLIST_PATH) as Promise<BookmarkFolder>) : Promise.resolve();
     },
     [enabled]
   );
-
-  const bookmarks = plist ? getBookmarks(plist) : [];
-  const folders = plist ? getFolders(plist) : [];
+  const bookmarks = data ? getBookmarks(data) : [];
+  const folders = data ? getFolders(data) : [];
 
   return {
     bookmarks: bookmarks.map((bookmark) => {

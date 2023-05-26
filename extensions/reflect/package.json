@@ -16,23 +16,28 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "quickAppend",
-      "title": "Quick Append",
+      "name": "append",
+      "title": "Append to Daily Note",
       "subtitle": "Reflect",
-      "description": "Quickly append to your Reflect daily note via command arguments or fallback text.",
+      "description": "Append to your Reflect Daily Note.",
+      "keywords": [
+        "reflect",
+        "daily",
+        "append"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "quickAppend",
+      "title": "Quick Append to Daily Note",
+      "subtitle": "Reflect",
+      "description": "Quickly append to your Reflect Daily Note via command arguments or fallback text.",
       "keywords": [
         "reflect",
         "daily",
         "append"
       ],
       "preferences": [
-        {
-          "name": "authorizationToken",
-          "title": "Authorization Token",
-          "description": "Reflect Authorization Token",
-          "type": "password",
-          "required": true
-        },
         {
           "name": "graphId",
           "title": "Graph ID",
@@ -102,7 +107,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.50.5",
+    "@raycast/api": "^1.51.1",
+    "@raycast/utils": "^1.6.1",
     "node-fetch": "^3.3.1",
     "date-fns": "^2.23.0",
     "run-applescript": "^6.1.0"

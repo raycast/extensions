@@ -18,3 +18,5 @@ netlify
 pinata
 grafbase
 tailscale
+todoist
+screen-studio

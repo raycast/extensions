@@ -14,7 +14,8 @@
     "cruelmoney",
     "sykuang",
     "thanhlongb",
-    "k8scat"
+    "k8scat",
+    "Nauxscript"
   ],
   "categories": [
     "Productivity",
@@ -95,7 +96,7 @@
       "description": "Pause the history of the conversation",
       "type": "checkbox",
       "title": "Pause History",
-      "default": true,
+      "default": false,
       "required": false
     },
     {
@@ -124,6 +125,22 @@
       "title": "Text-to-Speech",
       "required": false,
       "default": false
+    },
+    {
+      "default": false,
+      "description": "Change the OpenAI's default API endpoint to custom endpoint",
+      "label": "Change API Endpoint",
+      "name": "useApiEndpoint",
+      "required": false,
+      "title": "Use API Endpoint",
+      "type": "checkbox"
+    },
+    {
+      "description": "Custom API endpoint",
+      "name": "apiEndpoint",
+      "required": false,
+      "title": "API Endpoint",
+      "type": "textfield"
     },
     {
       "name": "useProxy",
@@ -162,7 +179,7 @@
     },
     {
       "name": "proxyHost",
-      "description": "Sever address of the proxy",
+      "description": "Server address of the proxy",
       "type": "textfield",
       "title": "Proxy Host",
       "required": false

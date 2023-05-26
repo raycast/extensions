@@ -5,6 +5,8 @@
   "description": "Check your Todoist tasks and quickly create new ones",
   "icon": "todoist.png",
   "author": "thomaslombart",
+  "owner": "doist",
+  "access": "public",
   "license": "MIT",
   "categories": [
     "Productivity"

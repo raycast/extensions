@@ -56,7 +56,7 @@ export function getYoudaoWebDictionaryLanguageId(queryTextInfo: QueryWordInfo): 
 }
 
 /**
- * Check is vaild Youdao web translate language.
+ * Check is valid Youdao web translate language.
  *
  * See: https://fanyi.youdao.com/
  */
