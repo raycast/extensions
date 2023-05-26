@@ -25,11 +25,10 @@ export function getToday() {
   return parseDay(undefined);
 }
 
-
 export function isOverdue(date: string) {
-  const day = parseDay(date)
-  const today = getToday()
-  
+  const day = parseDay(date);
+  const today = getToday();
+
   // We only consider overdue when is a day before as the app does not consider overdue items which were
   // supposed to happen earlier in the same day.
   return isBefore(day, today) && !isSameDay(day, today);
@@ -73,10 +72,10 @@ export function getAPIDate(date: Date): string {
   return formatISO(date, { representation: "date" });
 }
 
-export function parseDay(date: string|undefined): Date {
+export function parseDay(date: string | undefined): Date {
   if (date == undefined) {
     // Default to today in local time.
-    return new Date(new Date().toDateString())
+    return new Date(new Date().toDateString());
   }
-  return new Date(parseISO(date).toDateString())
+  return new Date(parseISO(date).toDateString());
 }

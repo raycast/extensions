@@ -64,7 +64,7 @@ export function sortByAssignee(collaborators: Collaborator[], a: Task, b: Task):
 }
 
 export function sortByAddedTime(a: Task, b: Task): number {
-  return new Date(a.added_at).getTime() - new Date(b.added_at).getTime()
+  return new Date(a.added_at).getTime() - new Date(b.added_at).getTime();
 }
 
 export function sortByDate(a: Task, b: Task): number {

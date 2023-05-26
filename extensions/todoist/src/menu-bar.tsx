@@ -32,7 +32,7 @@ function MenuBar(props: MenuBarProps) {
   const { data, isLoading } = useSyncData(!launchedFromWithinCommand);
   const { focusedTask, unfocusTask } = useFocusedTask();
   const { view, filter, upcomingDays, hideMenuBarCount } = getPreferenceValues<Preferences.MenuBar>();
-  const { data: filterTasks, isLoading: isLoadingFilter } = useFilterTasks(view === "filter" ? filter: "");
+  const { data: filterTasks, isLoading: isLoadingFilter } = useFilterTasks(view === "filter" ? filter : "");
 
   useEffect(() => {
     const isFocusedTaskInTasks = tasks?.some((t) => t.id === focusedTask.id);
@@ -50,7 +50,7 @@ function MenuBar(props: MenuBarProps) {
         if (!t.due) {
           return false;
         }
-        
+
         return isBefore(new Date(t.due.date), getToday()) || isSameDay(new Date(t.due.date), getToday());
       });
     }
@@ -84,7 +84,6 @@ function MenuBar(props: MenuBarProps) {
     } else if (filterTasks) {
       return filterTasks.length > 0 ? filterTasks.length.toString() : "🎉";
     }
-
   }, [focusedTask.id, tasks, filterTasks]);
 
   let taskView;
@@ -232,15 +231,14 @@ const FilterView = ({ tasks }: TaskViewProps) => {
     return (
       <MenuBarExtra.Section title={"Filtered tasks"} key={"filterTasks"}>
         {sections.map((section, index) => {
-        return (
-          <MenuBarExtra.Section title={section.name} key={index}>
-            {section.tasks.map((task) => (
-              <MenuBarTask key={task.id} task={task} />
-            ))}
-          </MenuBarExtra.Section>
-        );
-      })}
-
+          return (
+            <MenuBarExtra.Section title={section.name} key={index}>
+              {section.tasks.map((task) => (
+                <MenuBarTask key={task.id} task={task} />
+              ))}
+            </MenuBarExtra.Section>
+          );
+        })}
       </MenuBarExtra.Section>
     );
   }
