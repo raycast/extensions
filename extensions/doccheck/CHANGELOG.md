@@ -1,8 +1,15 @@
 # DocCheck Changelog
 
+## [Version 1.4] - 2023-05-28
+
+- NEW: added actions to search the original search term when viewing an article
+- Fix: show search term actions only when there is a query
+- Fix: show the actual search or article term for each action
+- Fix: search only the Flexikon (and not whole DocCheck) when using the "Flexikon Search" action (except for when nothing is found on Flexikon)
+
 ## [Version 1.3.3] - 2023-05-27
 
-- NEW: embedded trinket code is now shown as embedded link 
+- NEW: embedded trinket code is now shown as embedded link
 - Fix: embedded YouTube videos are now shown as the original embedded link (doesn't look so sleek on the page, but there are no ads)
 
 ## [Version 1.3.2] - 2023-05-26
