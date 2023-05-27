@@ -2,7 +2,7 @@ import { Action, ActionPanel, Form, popToRoot } from "@raycast/api";
 import { argValueExists, updateArgValue } from "./arg_value_repository";
 import { useState } from "react";
 
-export default function EditArgCommand({ argName, oldArgValue }: { argName: string; oldArgValue: string }) {
+export default function EditArgValueCommand({ argName, oldArgValue }: { argName: string; oldArgValue: string }) {
   const [argValue, setArgValue] = useState<string>(oldArgValue);
   const [argValueErr, setArgValueErr] = useState<string | undefined>("");
   return (

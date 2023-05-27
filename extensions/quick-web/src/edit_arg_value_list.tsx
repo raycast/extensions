@@ -1,6 +1,6 @@
 import { deleteArgValue } from "./arg_value_repository";
-import { Action, ActionPanel, Icon, List, popToRoot, showToast, Toast } from "@raycast/api";
-import EditArgCommand from "./edit_arg_value";
+import { Action, ActionPanel, Clipboard, Icon, List, popToRoot, showHUD, showToast, Toast } from "@raycast/api";
+import EditArgValueCommand from "./edit_arg_value";
 import Style = Toast.Style;
 
 export default function EditArgValueList({
@@ -20,7 +20,7 @@ export default function EditArgValueList({
           <Action.Push
             icon={Icon.List}
             title="Add Arg Value"
-            target={<EditArgCommand argName={argName} oldArgValue="" />}
+            target={<EditArgValueCommand argName={argName} oldArgValue="" />}
           />
         </ActionPanel>
       }
@@ -41,7 +41,12 @@ export default function EditArgValueList({
             <Action.Push
               icon={Icon.Pencil}
               title="Edit Arg Value"
-              target={<EditArgCommand argName={argName} oldArgValue={argValue} />}
+              target={<EditArgValueCommand argName={argName} oldArgValue={argValue} />}
+            />
+            <Action
+              icon={Icon.CopyClipboard}
+              title="Copy Arg Value"
+              onAction={() => Clipboard.copy(argValue).then(() => showHUD("copied to clipboard"))}
             />
             <Action
               icon={Icon.XMarkCircle}
