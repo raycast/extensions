@@ -1,6 +1,6 @@
-export type Config = {
+export type Preferences = {
   baseUrl: string;
-  nameFilterRegExp: string;
+  nameFilterRegExp?: string;
 };
 
 export type Story = {

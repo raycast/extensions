@@ -15,12 +15,24 @@
       "title": "Search Components",
       "description": "Search Storybook components",
       "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "baseUrl",
+      "title": "Storybook Server Base URL",
+      "description": "Storybook Server Base URL",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "http://localhost:6006"
     },
     {
-      "name": "edit-config",
-      "title": "Edit Config",
-      "description": "Edit config in Search Storybook components",
-      "mode": "view"
+      "name": "nameFilterRegExp",
+      "title": "RegExp to filter story names",
+      "description": "RegExp to filter story names. (e.g., ^Docs$ to show only Docs stories) If you want to search all stories, leave it blank.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "^Docs$"
     }
   ],
   "dependencies": {
