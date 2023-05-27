@@ -5,7 +5,9 @@
   "description": "Quick Web is a configurable url autocompletion tool",
   "icon": "rocket.png",
   "author": "ShawYoungTang",
-  "categories": ["Productivity"],
+  "categories": [
+    "Productivity"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -25,12 +27,6 @@
       "name": "add_url",
       "title": "Add Url Config",
       "description": "Open a page where users can add url pattern configs",
-      "mode": "view"
-    },
-    {
-      "name": "add_arg",
-      "title": "Add Arg Config",
-      "description": "Open a page where users can add arg names",
       "mode": "view"
     },
     {
@@ -66,7 +62,7 @@
     "@types/node": "18.8.3",
     "@types/react": "18.0.9",
     "eslint": "^7.32.0",
-    "prettier": "^2.5.1",
+    "prettier": "2.8.8",
     "typescript": "^4.4.3"
   },
   "scripts": {
