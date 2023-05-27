@@ -1,5 +1,10 @@
 # DocCheck Changelog
 
+## [Version 1.3.3] - 2023-05-27
+
+- NEW: embedded trinket code is now shown as embedded link 
+- Fix: embedded YouTube videos are now shown as the original embedded link (doesn't look so sleek on the page, but there are no ads)
+
 ## [Version 1.3.2] - 2023-05-26
 
 - NEW: embedded YouTube videos are now shown as a http://youtu.be/*** shortlink

@@ -38,7 +38,6 @@ export default function DocCheckPage(props: { url: string; prevurl: string; quer
   // 	notSynonyms = notSynonyms.trim();
   synonyms = synonyms.replace(notSynonyms, "");
 
-  // SYNONYME
   if (synonyms) {
     // there are synonyms or explanations under the heading
     mdSynonyms =
@@ -119,15 +118,12 @@ export default function DocCheckPage(props: { url: string; prevurl: string; quer
           .replace(toc ?? "", "")
           .replace(abm ?? "", "")
           .replace(/#cite_\D*\d*/gm, '"')
-          .replace(`>&nbsp;<`, `>.<`)
+          .replace(`th>&nbsp;</th`, `th>.</th`)
           .replace(`tr>\n<th></th>`, `tr>\n<th>.</th>`)
-          .replace(`tr>\n<th></th>`, `tr>\n<th>.</th>`)
-          .replace(
-            /<iframe.*src=".*embed\/(.*)" frame.*><\/iframe>/gm,
-            `YouTube Video: <a href="$1">http://youtu.be/$1</a>`
-          )
+          .replace(/<iframe.*src="(.*youtu.*)" frame.*><\/iframe>/gm, `YouTube Video: <a href="$1">$1</a>`)
+          .replace(/<iframe.*src="(.*trinket.*)" frame.*><\/iframe>/gm, `trinket Code: <a href="$1">$1</a>`)
       )
-      .replace(/\s{94}\|\n/gm, `\n`); // HEADING + ``SYNONYME`` -TOC + ARTICLE (removal of anchors, relative to absolute links, putting a dot in the empty start line when calculating "Relatives Risiko" and "Odds Ratio" for correct display, removal of some table ends like DDx in "Scharlach")
+      .replace(/\s{94}\|\n/gm, `\n`); // HEADING + ``SYNONYMS`` -TOC + ARTICLE (removal of anchors, relative to absolute links, putting a dot in the empty start line when calculating "Relatives Risiko" and "Odds Ratio" for correct display, removal of some table ends like DDx in "Scharlach")
 
   return (
     <Detail
