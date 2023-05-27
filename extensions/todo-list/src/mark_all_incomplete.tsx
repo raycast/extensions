@@ -1,27 +1,32 @@
 import { useAtom } from "jotai";
 import { todoAtom } from "./atoms";
+import { insertIntoSection, compare } from "./utils";
 import { TodoSections } from "./atoms";
 import { Action, Color, Icon } from "@raycast/api";
 
 const MarkAllIncompleteAction = () => {
-  const [todoItems, setTodoItems] = useAtom(todoAtom);
-
+  const [todoSections, setTodoItems] = useAtom(todoAtom);
   const handleMarkAllIncomplete = () => {
     // update completed and pinned items
-    const updatedCompletedItems = todoItems.completed.map((item) => ({
+    const updatedPinnedItems = todoSections.pinned.map((item) => ({
       ...item,
       completed: false,
     }));
-    const updatedPinnedItems = todoItems.pinned.map((item) => ({
-      ...item,
-      completed: false,
-    }));
-    const updatedTodoItems: TodoSections = {
+    // move all items from completed section
+    while (todoSections.completed.length != 0) {
+      const item = todoSections.completed[0];
+      item.completed = false;
+      todoSections["todo"] = [...insertIntoSection(todoSections["todo"], item, compare)];
+      todoSections["completed"].splice(0, 1);
+    }
+    const updatedTodoItems = todoSections["todo"];
+    const updatedCompletedItems = todoSections["completed"];
+    const updatedTodoSections: TodoSections = {
       pinned: updatedPinnedItems,
-      todo: todoItems.todo,
+      todo: updatedTodoItems,
       completed: updatedCompletedItems,
     };
-    setTodoItems(updatedTodoItems);
+    setTodoItems(updatedTodoSections);
   };
   return (
     <Action
