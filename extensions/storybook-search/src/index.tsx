@@ -7,7 +7,7 @@ import urlJoin from "url-join";
 const Search = () => {
   const preferences = getPreferenceValues<Preferences>();
 
-  // Load Storybook's index file https://storybook.js.org/docs/react/preferencesure/sidebar-and-urls#story-indexers
+  // Load Storybook's index file https://storybook.js.org/docs/react/sharing/storybook-composition#with-feature-flags
   const {
     data: index,
     isLoading: isLoadingIndex,
