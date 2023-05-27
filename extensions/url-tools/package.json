@@ -11,26 +11,26 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "encode",
-      "title": "Encode",
+      "name": "encodeInput",
+      "title": "URL Encode From Input",
       "description": "Input and get an encoded string, support url encode and base64",
       "mode": "view"
     },
     {
-      "name": "decode",
-      "title": "Decode",
+      "name": "decodeInput",
+      "title": "URL Decode From Input",
       "description": "Input and get an decoded string, support url decode and base64",
       "mode": "view"
     },
     {
-      "name": "encodeFromClipboard",
-      "title": "URL Encode from Clipboard",
+      "name": "encode",
+      "title": "URL Encode",
       "description": "Overwrite the clipboard contents with an URL encoded string",
       "mode": "no-view"
     },
     {
-      "name": "decodeFromClipboard",
-      "title": "URL Decode from Clipboard",
+      "name": "decode",
+      "title": "URL Decode",
       "description": "Overwrite the clipboard contents with a URL decoded string",
       "mode": "no-view"
     },
@@ -42,7 +42,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.47.0",
+    "@raycast/api": "^1.52.0",
     "js-base64": "3.7.2"
   },
   "devDependencies": {

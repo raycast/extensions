@@ -15,10 +15,7 @@ export const ActionListSection = ({
         title={text}
         actions={
           <ActionPanel>
-            <Action.CopyToClipboard
-              content={needFormat ? JSON.stringify(JSON.parse(text), null, 2) : text}
-              shortcut={{ modifiers: ["ctrl"], key: "c" }}
-            />
+            <Action.CopyToClipboard content={needFormat ? JSON.stringify(JSON.parse(text), null, 2) : text} />
           </ActionPanel>
         }
       />
