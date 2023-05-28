@@ -13,7 +13,7 @@
     {
       "name": "index",
       "title": "Search Crates",
-      "subtitle": "create.io",
+      "subtitle": "crates.io",
       "description": "Search for crates on crates.io",
       "mode": "view"
     }
