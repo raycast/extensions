@@ -23,7 +23,8 @@ const modifyGroup = async (
 ) => {
   const storedGroups = await getStorage(StorageKey.LOCAL_GROUPS);
 
-  const newGroups = storedGroups.map((oldGroup: Group) => {
+  const newGroups: Group[] = storedGroups.map((oldGroup: Group) => {
+    // Update group if it exists
     if (oldGroup.id == group.id) {
       return {
         name: name,
@@ -34,6 +35,15 @@ const modifyGroup = async (
       return oldGroup;
     }
   });
+
+  if (newGroups.every((storedGroup) => storedGroup.id != group.id)) {
+    // Add new group if it doesn't exist
+    newGroups.push({
+      name: name,
+      icon: icon,
+      id: group.id,
+    });
+  }
 
   const storedPins = await getStorage(StorageKey.LOCAL_PINS);
   const newPins = storedPins.map((pin: Pin) => {
@@ -139,6 +149,27 @@ const deleteGroup = async (group: Group, setGroups: (groups: Group[]) => void) =
   }
 };
 
+const CreateNewGroupAction = (props: { setGroups: (groups: Group[]) => void }) => {
+  const { setGroups } = props;
+  return (
+    <Action.Push
+      title="Create New Group"
+      icon={Icon.PlusCircle}
+      shortcut={{ modifiers: ["cmd"], key: "n" }}
+      target={
+        <EditGroupView
+          group={{
+            name: "",
+            icon: "None",
+            id: -1,
+          }}
+          setGroups={setGroups}
+        />
+      }
+    />
+  );
+};
+
 export default function Command() {
   const [groups, setGroups] = useGroups();
   const { push } = useNavigation();
@@ -147,7 +178,15 @@ export default function Command() {
   iconList.unshift("None");
 
   return (
-    <List isLoading={groups === undefined} searchBarPlaceholder="Search groups...">
+    <List
+      isLoading={groups === undefined}
+      searchBarPlaceholder="Search groups..."
+      actions={
+        <ActionPanel>
+          <CreateNewGroupAction setGroups={setGroups as (groups: Group[]) => void} />
+        </ActionPanel>
+      }
+    >
       <List.EmptyView title="No Groups Found" icon="no-view.png" />
       {((groups as Group[]) || []).map((group) => (
         <List.Item
@@ -156,22 +195,25 @@ export default function Command() {
           icon={group.icon in iconMap ? iconMap[group.icon] : ""}
           actions={
             <ActionPanel>
-              <Action
-                title="Edit"
-                icon={Icon.Pencil}
-                onAction={() =>
-                  push(<EditGroupView group={group} setGroups={setGroups as (groups: Group[]) => void} />)
-                }
-              />
-              <Action
-                title="Delete Group"
-                icon={Icon.Trash}
-                onAction={() => {
-                  deleteGroup(group, setGroups as (groups: Group[]) => void);
-                  clearSearchBar();
-                }}
-                style={Action.Style.Destructive}
-              />
+              <ActionPanel.Section title="Group Actions">
+                <Action
+                  title="Edit"
+                  icon={Icon.Pencil}
+                  onAction={() =>
+                    push(<EditGroupView group={group} setGroups={setGroups as (groups: Group[]) => void} />)
+                  }
+                />
+                <Action
+                  title="Delete Group"
+                  icon={Icon.Trash}
+                  onAction={() => {
+                    deleteGroup(group, setGroups as (groups: Group[]) => void);
+                    clearSearchBar();
+                  }}
+                  style={Action.Style.Destructive}
+                />
+              </ActionPanel.Section>
+              <CreateNewGroupAction setGroups={setGroups as (groups: Group[]) => void} />
             </ActionPanel>
           }
         />

@@ -1,5 +1,13 @@
 # TickTick Changelog
 
+## [Added] - 2023-05-26
+
+- When creating a new task, the extension will guess which project the task belongs to. For non-pro users it just acts as before.
+
+## [Added] - 2022-04-06
+
+- Add "Add Task" action.
+
 ## [Added] - 2022-10-14
 
 - Add "Copy" action.

@@ -1,5 +1,53 @@
 # Bitwarden Changelog
 
+## [Search Vault Command Improvements] - 2023-05-22
+
+- Added a Folder Dropdown to filter the list by folder
+- Each item now displays an icon that represents its type
+- Allow to search by item type (e.g. login)
+- Display a different image depending on the card brand
+
+## [Fix] - 2023-05-19
+
+- Avoid displaying timeout info label on Unlock Form when the preference is Never 
+- Fix crashing when getting the name of the frontmost application
+
+## [Improvements to Actions] - 2023-05-18
+
+- Add "Show Identity" action for identity vault items
+- Change "Show Card" action details view to a table format
+- Add actions with shortcuts to copy Card and Identity fields in the details view
+- General action improvements: Better order, labels, icons and section titles
+
+## [New Command] - 2023-05-18
+
+- Add Lock Vault command
+
+## [Fix] - 2023-05-16
+
+- Fixed Generate Password (Quick) command not copying password before pasting
+
+## [Improvement] - 2023-05-12
+
+- Add different icons for each command
+
+## [Fix] - 2023-05-08
+
+- Hopefully fixed a bug that caused the extension to keep logging out right after logging in.
+
+## [Improvement] - 2023-05-04
+
+- Use session token on every bitwarden cli command
+
+## [Performance Improvement] - 2023-04-03
+
+- Implemented caching of vault items (only safe values) to speed up the Search Vault command loading time.
+
+## [Improvement] - 2023-04-03
+
+- Display better login/unlock error messages
+- Allow to copy the last login/unlock error to debug issues
+
 ## [Fix] - 2023-03-29
 
 - Fix copy TOTP action

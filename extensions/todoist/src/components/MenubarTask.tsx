@@ -1,47 +1,47 @@
-import { Task } from "@doist/todoist-api-typescript";
 import { Color, confirmAlert, Icon, MenuBarExtra, open, showHUD } from "@raycast/api";
-import { MutatePromise } from "@raycast/utils";
 import removeMarkdown from "remove-markdown";
 
-import { todoist } from "../api";
-import { priorities } from "../constants";
+import { Task, deleteTask as apiDeleteTAsk, closeTask, updateTask } from "../api";
+import { getCollaboratorIcon, getProjectCollaborators } from "../helpers/collaborators";
 import { isTodoistInstalled } from "../helpers/isTodoistInstalled";
+import { getRemainingLabels } from "../helpers/labels";
+import { priorities } from "../helpers/priorities";
+import { getPriorityIcon } from "../helpers/priorities";
+import { getTaskAppUrl, getTaskUrl } from "../helpers/tasks";
+import useCachedData from "../hooks/useCachedData";
 import { useFocusedTask } from "../hooks/useFocusedTask";
 
 import View from "./View";
 
-interface MenubarTaskProps {
+type MenuBarTaskProps = {
   task: Task;
-  mutateTasks: MutatePromise<Task[] | undefined>;
-}
+};
 
-const MenubarTask = ({ task, mutateTasks }: MenubarTaskProps) => {
+const MenuBarTask = ({ task }: MenuBarTaskProps) => {
+  const [data, setData] = useCachedData();
   const { focusedTask, unfocusTask, focusTask } = useFocusedTask();
 
-  const priority = priorities.find((p) => p.value === task.priority);
+  const collaborators = getProjectCollaborators(task.project_id, data);
+  const remainingLabels = task && data?.labels ? getRemainingLabels(task, data.labels) : [];
 
   async function completeTask(task: Task) {
-    await showHUD("⏰ Completing task");
     try {
-      await todoist.closeTask(task.id);
-      await showHUD("Task completed 🙌");
-      mutateTasks();
+      await closeTask(task.id, { data, setData });
 
       if (focusedTask.id === task.id) {
         unfocusTask();
       }
+
+      await showHUD("Completed task 🙌");
     } catch (error) {
       showHUD("Unable to complete task ❌");
     }
   }
 
   async function changeDueDate(task: Task, dueString: string) {
-    await showHUD("⏰ Updating task due date");
-
     try {
-      await todoist.updateTask(task.id, { dueString });
-      await showHUD("Updated task due date 🙌");
-      mutateTasks();
+      await updateTask({ id: task.id, due: { string: dueString } }, { data, setData });
+      await showHUD("Updated task due date");
     } catch (error) {
       console.log(error);
       showHUD("Unable to update task due date ❌");
@@ -49,15 +49,32 @@ const MenubarTask = ({ task, mutateTasks }: MenubarTaskProps) => {
   }
 
   async function changePriority(task: Task, priority: number) {
-    await showHUD("⏰ Updating task priority");
-
     try {
-      await todoist.updateTask(task.id, { priority });
-      await showHUD("Task Priority Updated 🙌");
-      mutateTasks();
+      await updateTask({ id: task.id, priority }, { data, setData });
+      await showHUD("Updated task priority");
     } catch (error) {
       console.log(error);
       showHUD("Unable to update task priority ❌");
+    }
+  }
+
+  async function changeAssignee(task: Task, collaboratorId: string) {
+    try {
+      await updateTask({ id: task.id, responsible_uid: collaboratorId }, { data, setData });
+      await showHUD("Updated task priority");
+    } catch (error) {
+      console.log(error);
+      showHUD("Unable to update task priority ❌");
+    }
+  }
+
+  async function addLabel(task: Task, label: string) {
+    try {
+      await updateTask({ id: task.id, labels: [...task.labels, label] }, { data, setData });
+      await showHUD("Added task label");
+    } catch (error) {
+      console.log(error);
+      showHUD("Unable to add task label ❌");
     }
   }
 
@@ -69,13 +86,9 @@ const MenubarTask = ({ task, mutateTasks }: MenubarTaskProps) => {
         icon: { source: Icon.Trash, tintColor: Color.Red },
       })
     ) {
-      await showHUD("⏰ Deleting task");
-
       try {
-        await todoist.deleteTask(task.id);
-        await showHUD("Task deleted 🙌");
-
-        mutateTasks();
+        await apiDeleteTAsk(task.id, { data, setData });
+        await showHUD("Deleted task");
       } catch (error) {
         console.log(error);
         showHUD("Unable to delete task ❌");
@@ -85,10 +98,15 @@ const MenubarTask = ({ task, mutateTasks }: MenubarTaskProps) => {
 
   return (
     <View>
-      <MenuBarExtra.Submenu
-        title={removeMarkdown(task.content)}
-        icon={priority && priority.value === 1 ? Icon.Circle : { source: Icon.Circle, tintColor: priority?.color }}
-      >
+      <MenuBarExtra.Submenu title={removeMarkdown(task.content)} icon={getPriorityIcon(task)}>
+        <MenuBarExtra.Item
+          title="Open in Todoist"
+          onAction={() => {
+            isTodoistInstalled ? open(getTaskAppUrl(task.id)) : getTaskUrl(task.id);
+          }}
+          icon={isTodoistInstalled ? "todoist.png" : Icon.Globe}
+        />
+
         {focusedTask.id !== task.id ? (
           <MenuBarExtra.Item title="Focus Task" onAction={() => focusTask(task)} icon={Icon.Center} />
         ) : (
@@ -96,13 +114,7 @@ const MenubarTask = ({ task, mutateTasks }: MenubarTaskProps) => {
         )}
 
         <MenuBarExtra.Item title="Complete Task" onAction={() => completeTask(task)} icon={Icon.Checkmark} />
-        <MenuBarExtra.Item
-          title="Open in Todoist"
-          onAction={() => {
-            isTodoistInstalled ? open(`todoist://task?id=${task.id}`) : open(task.url);
-          }}
-          icon={isTodoistInstalled ? "todoist.png" : Icon.Globe}
-        />
+
         <MenuBarExtra.Submenu title="Change Due Date" icon={Icon.Clock}>
           <MenuBarExtra.Item title="Today" icon={Icon.Calendar} onAction={() => changeDueDate(task, "today")} />
           <MenuBarExtra.Item title="Tomorrow" icon={Icon.Sunrise} onAction={() => changeDueDate(task, "tomorrow")} />
@@ -112,7 +124,11 @@ const MenubarTask = ({ task, mutateTasks }: MenubarTaskProps) => {
             onAction={() => changeDueDate(task, "next week")}
           />
           <MenuBarExtra.Item title="Next Weekend" icon={"🌴"} onAction={() => changeDueDate(task, "next weekend")} />
-          <MenuBarExtra.Item title="No Due Date" icon={Icon.XMarkCircle} onAction={() => changeDueDate(task, "")} />
+          <MenuBarExtra.Item
+            title="No Due Date"
+            icon={Icon.XMarkCircle}
+            onAction={() => changeDueDate(task, "no due date")}
+          />
         </MenuBarExtra.Submenu>
         <MenuBarExtra.Submenu title="Change Priority" icon={{ source: "priority.svg", tintColor: Color.SecondaryText }}>
           {priorities.map((priority, index) => (
@@ -125,10 +141,38 @@ const MenubarTask = ({ task, mutateTasks }: MenubarTaskProps) => {
           ))}
         </MenuBarExtra.Submenu>
 
+        {collaborators && collaborators.length > 0 ? (
+          <MenuBarExtra.Submenu icon={Icon.AddPerson} title="Assign To">
+            {collaborators.map((collaborator) => {
+              return (
+                <MenuBarExtra.Item
+                  key={collaborator.id}
+                  icon={getCollaboratorIcon(collaborator)}
+                  title={collaborator.full_name}
+                  onAction={() => changeAssignee(task, collaborator.id)}
+                />
+              );
+            })}
+          </MenuBarExtra.Submenu>
+        ) : null}
+
+        {remainingLabels && remainingLabels.length > 0 ? (
+          <MenuBarExtra.Submenu title="Add Label" icon={Icon.Tag}>
+            {remainingLabels.map((label) => (
+              <MenuBarExtra.Item
+                key={label.id}
+                title={label.name}
+                icon={{ source: Icon.Tag, tintColor: label.color }}
+                onAction={() => addLabel(task, label.name)}
+              />
+            ))}
+          </MenuBarExtra.Submenu>
+        ) : null}
+
         <MenuBarExtra.Item title="Delete Task" onAction={() => deleteTask(task)} icon={Icon.Trash} />
       </MenuBarExtra.Submenu>
     </View>
   );
 };
 
-export default MenubarTask;
+export default MenuBarTask;

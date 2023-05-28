@@ -1,5 +1,9 @@
 # Vercast Changelog
 
+## [2.4] - 2023-04-12
+
+- Fixed persistency of the selected team
+
 ## [2.3] - 2023-03-28
 
 - Added gray dot icon for queued deployments

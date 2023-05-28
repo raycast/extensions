@@ -5,7 +5,7 @@ import { v4 as uuidv4 } from "uuid";
 import { Chat, ChatHook, CreateChatCompletionDeltaResponse, Model } from "../type";
 import { chatTransfomer } from "../utils";
 import { useAutoTTS } from "./useAutoTTS";
-import { useChatGPT } from "./useChatGPT";
+import { getConfiguration, useChatGPT } from "./useChatGPT";
 import { useHistory } from "./useHistory";
 import { useProxy } from "./useProxy";
 
@@ -17,6 +17,13 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
     return getPreferenceValues<{
       useStream: boolean;
     }>().useStream;
+  });
+  const [streamData, setStreamData] = useState<Chat | undefined>();
+
+  const [isHistoryPaused] = useState<boolean>(() => {
+    return getPreferenceValues<{
+      isHistoryPaused: boolean;
+    }>().isHistoryPaused;
   });
 
   const history = useHistory();
@@ -48,6 +55,17 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
       setSelectedChatId(chat.id);
     }, 50);
 
+    const getHeaders = function () {
+      const config = getConfiguration();
+      if (!config.useAzure) {
+        return { apiKey: "", params: {} };
+      }
+      return {
+        apiKey: config.apiKey,
+        params: { "api-version": "2023-03-15-preview" },
+      };
+    };
+
     await chatGPT
       .createChatCompletion(
         {
@@ -58,7 +76,9 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
         },
         {
           responseType: useStream ? "stream" : undefined,
-          proxy,
+          headers: { "api-key": getHeaders().apiKey },
+          params: getHeaders().params,
+          proxy: proxy,
         }
       )
       .then(async (res) => {
@@ -72,12 +92,27 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
             for (const line of lines) {
               const message = line.replace(/^data: /, "");
               if (message === "[DONE]") {
+                setData((prev) => {
+                  return prev.map((a) => {
+                    if (a.id === chat.id) {
+                      return chat;
+                    }
+                    return a;
+                  });
+                });
+
+                setTimeout(async () => {
+                  setStreamData(undefined);
+                }, 5);
+
                 setLoading(false);
 
                 toast.title = "Got your answer!";
                 toast.style = Toast.Style.Success;
 
-                history.add(chat);
+                if (!isHistoryPaused) {
+                  history.add(chat);
+                }
                 return;
               }
               try {
@@ -85,18 +120,10 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
 
                 const content = response.choices[0].delta?.content;
 
-                if (content) chat.answer += response.choices[0].delta.content;
-
-                setTimeout(async () => {
-                  setData((prev) => {
-                    return prev.map((a) => {
-                      if (a.id === chat.id) {
-                        return chat;
-                      }
-                      return a;
-                    });
-                  });
-                }, 5);
+                if (content) {
+                  chat.answer += response.choices[0].delta.content;
+                  setStreamData({ ...chat, answer: chat.answer });
+                }
               } catch (error) {
                 toast.title = "Error";
                 toast.message = `Couldn't stream message`;
@@ -128,16 +155,19 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
               });
             });
 
-            history.add(chat);
+            if (!isHistoryPaused) {
+              history.add(chat);
+            }
           }
         }
       })
       .catch((err) => {
-        toast.title = "Error";
-        if (err) {
-          if (err?.response?.data?.error?.message) {
-            toast.message = err.response.data.error.message;
+        if (err?.message) {
+          if (err.message.includes("429")) {
+            toast.title = "You've reached your API limit";
+            toast.message = "Please upgrade to pay-as-you-go";
           } else {
+            toast.title = "Error";
             toast.message = err.message;
           }
         }
@@ -151,7 +181,7 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
   }, [setData]);
 
   return useMemo(
-    () => ({ data, setData, isLoading, setLoading, selectedChatId, setSelectedChatId, ask, clear }),
-    [data, setData, isLoading, setLoading, selectedChatId, setSelectedChatId, ask, clear]
+    () => ({ data, setData, isLoading, setLoading, selectedChatId, setSelectedChatId, ask, clear, streamData }),
+    [data, setData, isLoading, setLoading, selectedChatId, setSelectedChatId, ask, clear, streamData]
   );
 }

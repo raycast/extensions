@@ -17,6 +17,7 @@ import {
   deleteTimeEntry,
   getMyTimeEntries,
   newTimeEntry,
+  refreshMenuBar,
   restartTimer,
   stopTimer,
   useCompany,
@@ -122,6 +123,8 @@ export default function Command() {
     } else {
       setNavSubtitle(dayTotal);
     }
+
+    refreshMenuBar();
 
     setIsLoading(false);
   }

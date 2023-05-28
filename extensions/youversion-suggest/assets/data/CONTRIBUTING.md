@@ -16,7 +16,7 @@ If you are submitting a bug report, please answer the following questions:
 If you would like to see YouVersion Suggest support a language not in the above
 list, please [submit an GitHub issue][issues-page] with the following details:
 
-- The name and ISO 639 code of the language from [this list][language-list] (*e.g.* spa_es)
+- The name and IETF language tag of the language from [this list][language-list] (*e.g.* spa_es)
 
 - The name of the YouVersion-supported Bible version to use as the default for
 this language; click the language name on the page linked above to view the
@@ -88,8 +88,8 @@ open htmlcov/index.html
 
 ### Language storage
 
-Every language supported by YouVersion Suggest is identified by an ISO 639-3
-code (*e.g.* `nld`, `spa_es`). The IDs and native names of all supported
+Every language supported by YouVersion Suggest is identified by an IETF language
+tag (*e.g.* `nld`, `spa_es`). The IDs and native names of all supported
 languages are listed in a single manifest file
 (`yvs/data/bible/languages.json`). Each language also has a corresponding Bible
 data file, where book and version information is stored (*e.g.*
@@ -99,9 +99,9 @@ data file, where book and version information is stored (*e.g.*
 
 The project includes a special utility which substantially eases the task of
 adding language support to the workflow. The utility must be run as a module and
-must be provided the ISO 639-3 code of the language to add. YouVersion provides
-[a complete list][language-list] of the languages it supports with their
-respective language codes.
+must be provided the IETF language tag of the language to add. YouVersion
+provides [a complete list][language-list] of the languages it supports with
+their respective language codes.
 
 ```bash
 python -m utilities.add_language spa_es

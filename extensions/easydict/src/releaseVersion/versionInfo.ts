@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-07-01 19:05
  * @lastEditor: tisfeng
- * @lastEditTime: 2023-03-17 22:00
+ * @lastEditTime: 2023-05-17 23:05
  * @fileName: versionInfo.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -26,18 +26,20 @@ export class Easydict {
   static repo = "Raycast-Easydict";
 
   // * NOTE: this is new version info, don't use it directly. Use getCurrentStoredVersionInfo() instead.
-  version = "2.8.1";
-  buildNumber = 24;
-  versionDate = "2023-03-28";
-  isNeedPrompt = false;
+  version = "2.9.0";
+  buildNumber = 26;
+  versionDate = "2023-05-17";
+  isNeedPrompt = true;
   hasPrompted = false; // * always default false, only show once, then should be set to true.
 
   releaseMarkdown = `
 ## [v${this.version}] - ${this.versionDate}
 
-### 🐞 修复
+### ✨ 新功能
 
-- 修复请求 OpenAI 可能报错崩溃问题。
+- 添加了 OCR 截图翻译功能，感谢 [aidevjoe](https://github.com/aidevjoe) 的 PR。
+
+![](https://github-production-user-asset-6210df.s3.amazonaws.com/25194972/238993145-9dbe2fbb-8407-49bc-8909-adb0515e850e.png)
 
 #### 如果觉得这个扩展还不错，给个 [Star](https://github.com/tisfeng/Raycast-Easydict) ⭐️ 支持一下吧 (^-^)
 
@@ -49,8 +51,9 @@ export class Easydict {
 
 ---
 
-### 🐞 Fixes
-- Fixed the crash problem when requesting OpenAI translation.
+### ✨ New Features
+
+- Added OCR screenshot translation command, thanks to [aidevjoe](https://github.com/aidevjoe)'s PR.
 `;
 
   getRepoUrl() {
