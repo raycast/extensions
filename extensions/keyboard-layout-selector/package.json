@@ -1,0 +1,81 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "keyboard-layout-selector",
+  "title": "Keyboard Layout Selector",
+  "description": "Quickly Selector keyboard Layout with Keyboard ID and Without Listing.",
+  "icon": "keyboard-icon.png",
+  "author": "spaceoi",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Show All Keyboard Layouts",
+      "description": "Show all available keyboard layout and paste selected keyboard id.",
+      "mode": "view"
+    },
+    {
+      "name": "command1",
+      "title": "Layout 1",
+      "description": "Selected Layout 1",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "layout1",
+          "title": "Layout 1",
+          "description": "Paste the selected layout id here",
+          "required": true,
+          "type": "textfield"
+        }
+      ]
+    },
+    {
+      "name": "command2",
+      "title": "Layout 2",
+      "description": "Selected Layout 2",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "layout2",
+          "title": "Layout 2",
+          "description": "Paste the selected layout id here",
+          "required": true,
+          "type": "textfield"
+        }
+      ]
+    },
+    {
+      "name": "command3",
+      "title": "Layout 3",
+      "description": "Selected Layout 3",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "layout3",
+          "title": "Layout 3",
+          "description": "Paste the selected layout id here",
+          "required": true,
+          "type": "textfield"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.52.0",
+    "got": "^13.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
