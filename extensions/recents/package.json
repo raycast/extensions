@@ -5,6 +5,9 @@
   "description": "Show Recently used files and folders in Raycast",
   "icon": "recents.png",
   "author": "GastroGeek",
+  "contributors": [
+    "kgrhartlage"
+  ],
   "license": "MIT",
   "commands": [
     {
