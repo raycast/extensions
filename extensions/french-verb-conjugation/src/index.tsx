@@ -1,4 +1,4 @@
-import { showToast, Toast, LaunchProps, List, ActionPanel, Action, Color, Icon } from "@raycast/api";
+import { showToast, Toast, LaunchProps, List, ActionPanel, Action } from "@raycast/api";
 import { useState } from "react";
 import conjugationFR from "conjugation-fr";
 
@@ -80,7 +80,6 @@ export default function Command(props: LaunchProps<{ arguments: ConjugationArgum
 
   return (
     <List
-      filtering={false}
       onSearchTextChange={setSearchText}
       navigationTitle="Search Conjugations"
       searchBarPlaceholder="Search Conjugations"
@@ -91,10 +90,11 @@ export default function Command(props: LaunchProps<{ arguments: ConjugationArgum
             {item["body"].map((verbTense: any) => (
               <List.Item
                 key={Math.random()}
-                title={verbTense["pronoun"] + " " + verbTense["verb"]}
+                title={verbTense["pronoun"]}
+                subtitle={verbTense["verb"]}
                 actions={
                   <ActionPanel>
-                    <Action.CopyToClipboard content={verbTense["verb"]} />
+                    <Action.CopyToClipboard content={verbTense["pronoun"] + " " + verbTense["verb"]} />
                   </ActionPanel>
                 }
               />
