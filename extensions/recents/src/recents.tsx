@@ -5,7 +5,6 @@ import { Action, ActionPanel, Color, Icon, List, getPreferenceValues, popToRoot 
 import { useEffect, useState } from "react";
 
 import mdfind from "mdfind";
-import moment from "moment";
 
 import { copyRecentToClipboard, showInfoInFinder, maybeMoveResultToTrash } from "./utils";
 
@@ -106,13 +105,9 @@ export default function Command(props: { scope?: string | undefined }) {
       return;
     }
 
-    setFiltered(
-      recents.sort(
-        (a, b) =>
-          moment(b.kMDItemLastUsedDate, "YYYY-MM-DD HH:mm:ss +0000").unix() -
-          moment(a.kMDItemLastUsedDate, "YYYY-MM-DD HH:mm:ss +0000").unix()
-      )
-    );
+    const sorted = recents.sort((a, b) => Date.parse(b.kMDItemLastUsedDate) - Date.parse(a.kMDItemLastUsedDate));
+
+    setFiltered(sorted);
 
     setKinds(
       recents
