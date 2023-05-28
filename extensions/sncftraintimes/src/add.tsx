@@ -24,58 +24,64 @@ export default function Add() {
 
   const preferences = getPreferenceValues<Preferences>();
 
-  const getPlaces = (value: string, type: 'departure' | 'arrival') => {
+  const getPlaces = (value: string, type: "departure" | "arrival") => {
     places(preferences.sncfApiKey, {
       q: value,
-      'type[]': 'stop_area',
+      "type[]": "stop_area",
       disable_geojson: true,
-    }).then((response) => {
-      if (!response) return;
-      if (type === 'departure') {
-        setDepartures(response.map((place) => ({
-          name: place.name,
-          code: place.stop_area?.id || '',
-        })));
-      } else {
-        setArrivals(response.map((place) => ({
-          name: place.name,
-          code: place.stop_area?.id || '',
-        })));
-      }
-    }).catch(() => {
-      showToast({
-        title: "Error while searching for places",
-        style: Toast.Style.Failure,
+    })
+      .then((response) => {
+        if (!response) return;
+        if (type === "departure") {
+          setDepartures(
+            response.map((place) => ({
+              name: place.name,
+              code: place.stop_area?.id || "",
+            }))
+          );
+        } else {
+          setArrivals(
+            response.map((place) => ({
+              name: place.name,
+              code: place.stop_area?.id || "",
+            }))
+          );
+        }
+      })
+      .catch(() => {
+        showToast({
+          title: "Error while searching for places",
+          style: Toast.Style.Failure,
+        });
       });
-    });
-  }
+  };
 
   useEffect(() => {
     if (debounceDeparture) {
-      getPlaces(debounceDeparture, 'departure');
+      getPlaces(debounceDeparture, "departure");
     }
   }, [debounceDeparture]);
 
   useEffect(() => {
     if (debounceArrival) {
-      getPlaces(debounceArrival, 'arrival');
+      getPlaces(debounceArrival, "arrival");
     }
   }, [debounceArrival]);
 
   const onSubmit = async () => {
-    const storedJourneys = await LocalStorage.getItem<string>(STORAGE_JOURNEYS_KEY) || '[]';
+    const storedJourneys = (await LocalStorage.getItem<string>(STORAGE_JOURNEYS_KEY)) || "[]";
 
     try {
-      const journeys = JSON.parse(storedJourneys) as Storage['journeys'];
-      
+      const journeys = JSON.parse(storedJourneys) as Storage["journeys"];
+
       const newJourneys = journeys.concat({
         departure: {
-          name: departure.split(' & ')[0],
-          code: departure.split(' & ')[1],
+          name: departure.split(" & ")[0],
+          code: departure.split(" & ")[1],
         },
         arrival: {
-          name: arrival.split(' & ')[0],
-          code: arrival.split(' & ')[1],
+          name: arrival.split(" & ")[0],
+          code: arrival.split(" & ")[1],
         },
       });
       await LocalStorage.setItem(STORAGE_JOURNEYS_KEY, JSON.stringify(newJourneys));
@@ -90,25 +96,39 @@ export default function Add() {
         style: Toast.Style.Failure,
       });
     }
-  }
+  };
 
   return (
-    <Form actions={
-      <ActionPanel>
-        <Action.SubmitForm title="Add Journey" icon={Icon.CheckCircle} onSubmit={onSubmit} />
-        <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
-      </ActionPanel>
-    }>
-      <Form.Dropdown id="departure" title="Departure" onChange={setDeparture} value={departure} onSearchTextChange={setDraftDeparture}>
+    <Form
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm title="Add Journey" icon={Icon.CheckCircle} onSubmit={onSubmit} />
+          <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
+        </ActionPanel>
+      }
+    >
+      <Form.Dropdown
+        id="departure"
+        title="Departure"
+        onChange={setDeparture}
+        value={departure}
+        onSearchTextChange={setDraftDeparture}
+      >
         {departures.map((stopPoint) => (
           <Form.Dropdown.Item key={stopPoint.code} title={stopPoint.name} value={formatPlace(stopPoint)} />
         ))}
       </Form.Dropdown>
-      <Form.Dropdown id="arrival" title="Arrival" onChange={setArrival} value={arrival} onSearchTextChange={setDraftArrival}>
+      <Form.Dropdown
+        id="arrival"
+        title="Arrival"
+        onChange={setArrival}
+        value={arrival}
+        onSearchTextChange={setDraftArrival}
+      >
         {arrivals.map((stopPoint) => (
           <Form.Dropdown.Item key={stopPoint.code} title={stopPoint.name} value={formatPlace(stopPoint)} />
         ))}
       </Form.Dropdown>
     </Form>
-  )
+  );
 }

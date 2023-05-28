@@ -13,7 +13,7 @@ export default function ListJourneys() {
 
   useEffect(() => {
     (async () => {
-      const storedJourneys = await LocalStorage.getItem<string>(STORAGE_JOURNEYS_KEY) || '[]';
+      const storedJourneys = (await LocalStorage.getItem<string>(STORAGE_JOURNEYS_KEY)) || "[]";
 
       if (!storedJourneys) {
         return;
@@ -49,23 +49,28 @@ export default function ListJourneys() {
         style: Toast.Style.Failure,
       });
     }
-  }
+  };
 
   return (
     <List>
-      {journeys.length > 0 && journeys.map((journey, i) => (
-        <List.Item 
-          key={i}
-          title={formatJourney(journey)}
-          actions={
-            <ActionPanel title={`Actions for ${formatJourney(journey)}`}>
-              <Action.Push title="View Hours" target={<Detail journey={journey} />} /> 
-              <Action title="Delete" shortcut={{ modifiers: ['cmd'], key: 'delete' }} onAction={async () => deleteJourney(i)} />
-              <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
-            </ActionPanel>
-          }
-        />
-      ))}
+      {journeys.length > 0 &&
+        journeys.map((journey, i) => (
+          <List.Item
+            key={i}
+            title={formatJourney(journey)}
+            actions={
+              <ActionPanel title={`Actions for ${formatJourney(journey)}`}>
+                <Action.Push title="View Hours" target={<Detail journey={journey} />} />
+                <Action
+                  title="Delete"
+                  shortcut={{ modifiers: ["cmd"], key: "delete" }}
+                  onAction={async () => deleteJourney(i)}
+                />
+                <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
+              </ActionPanel>
+            }
+          />
+        ))}
       {journeys.length === 0 && (
         <List.EmptyView
           title="No journeys, you can use the 'Add' command to add journey"
@@ -78,5 +83,5 @@ export default function ListJourneys() {
         />
       )}
     </List>
-  )
+  );
 }
