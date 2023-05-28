@@ -1,0 +1,52 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "gmail-assistant",
+  "title": "Gmail Assistant",
+  "description": "This extension adds Gmail integration to Raycast, allowing users to send emails and check their inbox without leaving the Raycast interface.",
+  "icon": "gmail-icon.png",
+  "author": "Parikshith",
+  "categories": [
+    "Productivity",
+    "Communication"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Send Email",
+      "subtitle": "Compose and send an email to anyone",
+      "description": "Compose and send an email to anyone using your Gmail account. You can specify the recipient, subject, and body of the email.",
+      "icon": "gmail-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "checkInbox",
+      "title": "Check Inbox",
+      "subtitle": "View your latest emails",
+      "description": "View your latest emails in your Gmail inbox. This command shows the sender, subject, and date of each email.",
+      "icon": "gmail-icon.png",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.51.3",
+    "@raycast/utils": "^1.7.0",
+    "dotenv": "^16.0.3",
+    "node-fetch": "^3.3.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
