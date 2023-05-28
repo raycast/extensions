@@ -142,13 +142,9 @@ function getEmailLink(email: Email): string {
   const messageId = email.id;
   return `https://mail.google.com/mail/u/0/#inbox/${messageId}`;
 }
-export async function sendEmail(email: SendMail, toDraft: boolean) {
-  let url = "";
-  if (!toDraft) {
-    url = "https://gmail.googleapis.com/gmail/v1/users/me/messages/send";
-  } else {
-    url = "https://gmail.googleapis.com/gmail/v1/users/me/drafts";
-  }
+export async function sendEmail(email: SendMail) {
+  const url = "https://gmail.googleapis.com/gmail/v1/users/me/messages/send";
+
   const to = email.to;
   const subject = email.subject;
   const body = email.body;
@@ -181,7 +177,6 @@ export async function sendEmail(email: SendMail, toDraft: boolean) {
   });
 
   const result = (await response.json()) as any;
-  // console.log(`Sent email to ${to}. Message id: ${result.id});`);
   return result.id;
 }
 // API call to fetch unread emails from inbox

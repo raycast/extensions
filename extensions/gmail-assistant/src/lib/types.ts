@@ -18,7 +18,7 @@ export interface Service {
   authorize(): Promise<void>;
   fetchInboxEmails(): Promise<EmailDetails[]>;
   logout(): Promise<void>;
-  sendEmail(email: SendMail, toDraft: boolean): Promise<string | undefined>;
+  sendEmail(email: SendMail): Promise<string | undefined>;
 }
 export function getService(serviceName: string): Service {
   switch (serviceName) {

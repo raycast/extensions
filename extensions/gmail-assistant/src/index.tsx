@@ -37,7 +37,7 @@ export default function Command() {
     })();
   }, []);
 
-  const handelSend = async (toDraft: boolean) => {
+  const handelSend = async () => {
     try {
       const values: SendMail = {
         to,
@@ -45,7 +45,7 @@ export default function Command() {
         body,
       };
 
-      const res = await service.sendEmail(values, toDraft);
+      const res = await service.sendEmail(values);
       // console.log("submit:", res);
       // console.log(typeof res);
       if (typeof res === "string") {
@@ -68,8 +68,7 @@ export default function Command() {
       isLoading={isLoading}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Send" onSubmit={() => handelSend(false)} />
-          <Action title="Send to Draft" onAction={() => handelSend(true)} />
+          <Action.SubmitForm title="Send" onSubmit={() => handelSend()} />
         </ActionPanel>
       }
     >
