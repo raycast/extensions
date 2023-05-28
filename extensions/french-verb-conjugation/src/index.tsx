@@ -1,4 +1,5 @@
-import { Grid, Detail, Form, showToast, Toast, LaunchProps } from "@raycast/api";
+import { showToast, Toast, LaunchProps, List, ActionPanel, Action, Color, Icon } from "@raycast/api";
+import { useState } from "react";
 import conjugationFR from "conjugation-fr";
 
 interface ConjugationArguments {
@@ -49,10 +50,10 @@ type TenseInput = (typeof tenses)[number];
 
 function generateTenseTable(args: ConjugationArguments) {
   const { verb, tense, mode } = args;
-  let output = "";
+  let output: any = [];
   try {
     if (tense !== "" || mode !== "") {
-      return generateTenseConjugationTable({ verb, mode, tense });
+      output = generateTenseConjugationDict({ verb, mode, tense });
     } else {
       output = displayAllTenses({ verb, tense, mode });
     }
@@ -63,46 +64,71 @@ function generateTenseTable(args: ConjugationArguments) {
         title: "Something went wrong",
         message: error.message,
       });
-      return error.message;
+      return [];
     } else {
-      return "unknown error has occurred";
+      return [];
     }
   }
-  return output;
+
+  return output.filter((record: any) => record !== "");
 }
 
 export default function Command(props: LaunchProps<{ arguments: ConjugationArguments }>) {
-  const markdown = generateTenseTable(props.arguments);
+  const [searchText, setSearchText] = useState("");
+  const table = generateTenseTable(props.arguments);
+  const [filteredList, filterList] = useState(table);
 
-  return <Detail markdown={markdown} />;
+  return (
+    <List
+      filtering={false}
+      onSearchTextChange={setSearchText}
+      navigationTitle="Search Conjugations"
+      searchBarPlaceholder="Search Conjugations"
+    >
+      {table.length > 0 ? (
+        filteredList.map((item: any) => (
+          <List.Section key={Math.random()} title={"Tense"} subtitle={item["mode"] + "," + item["tense"]}>
+            {item["body"].map((verbTense: any) => (
+              <List.Item
+                key={Math.random()}
+                title={verbTense["pronoun"] + " " + verbTense["verb"]}
+                actions={
+                  <ActionPanel>
+                    <Action.CopyToClipboard content={verbTense["verb"]} />
+                  </ActionPanel>
+                }
+              />
+            ))}
+          </List.Section>
+        ))
+      ) : (
+        <List.EmptyView
+          icon={{ source: "https://placekitten.com/500/500" }}
+          title="We can't find what you're looking for :("
+        />
+      )}
+    </List>
+  );
 }
 
 function displayAllTenses({ verb, mode, tense }: ConjugationArguments) {
-  let output = "";
+  const output = [];
   for (const [mode, tenses] of Object.entries(structure)) {
     for (const tense of tenses) {
-      output += generateTenseConjugationTable({ verb, mode, tense });
+      output.push(generateTenseConjugationDict({ verb, mode, tense }));
     }
-    output += "\n";
   }
   return output;
 }
 
-function generateTenseConjugationTable({ verb, mode, tense }: ConjugationArguments) {
-  let tenseTable = "";
+function generateTenseConjugationDict({ verb, mode, tense }: ConjugationArguments) {
   const body = conjugationFR.conjugate(verb, mode ?? "", tense ?? "").filter((record) => record.pronounIndex !== -1);
   if (body.length === 0) {
     return "";
   }
-  tenseTable =
-    tenseTable +
-    `**Tense**: ${mode}, ${tense}` +
-    "\n" +
-    `| Pronoun | Verb  |
-| ------- | ----- |`;
-  for (const record of body) {
-    tenseTable = tenseTable + "\n" + `| ${record.pronoun} | ${record.verb}|`;
-  }
-  tenseTable += "\n\n";
-  return tenseTable;
+  return {
+    mode: mode,
+    tense: tense,
+    body,
+  };
 }
