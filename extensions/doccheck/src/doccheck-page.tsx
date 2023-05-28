@@ -45,9 +45,9 @@ export default function DocCheckPage(props: { url: string; prevurl: string; quer
       synonyms
         .trim()
         .replace(/<br>/gm, ``)
-        .replace(/<\/b>/gm, ``)
+        .replace(/<\/b>\n/gm, ` `)
         .replace(/<b>/gm, ``)
-        .replace(/\/<b>/gm, ``)
+        .replace(/<\/b>/gm, ``)
         .replace(/<sub>/gm, ``)
         .replace(/<\/sub>/gm, ``)
         .replace(/<sup>/gm, ``)
