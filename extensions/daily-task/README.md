@@ -3,13 +3,13 @@
 An extension for manage your Daily Task.
 
 ## List
-![List](./metadata/daily-task-1.png)
+![List](./media/daily-task-1.png)
 ## Complete
-![Complete](./metadata/daily-task-2.png)
+![Complete](./media/daily-task-2.png)
 ## Menubar
-![Menubar](./metadata/daily-task-3.png)
+![Menubar](./media/daily-task-3.png)
 ## Actions
-![Task Actions](./metadata/daily-task-4.png)
+![Task Actions](./media/daily-task-4.png)
 
 ## Preferences
 - Play Completion Sound
