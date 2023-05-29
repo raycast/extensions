@@ -139,8 +139,6 @@ const AddBookmarks = () => {
       {showCollectionCreation && (
         <Form.TextField title="New Collection" placeholder="Name" {...itemProps.newCollection} />
       )}
-      {/* <Form.Separator />
-      <Form.Checkbox id="createNewTag" label="Create new tag" title="Create tag" /> */}
       <Form.TagPicker title="Tags" {...itemProps.tags}>
         {tags?.items?.map((tag) => {
           return <Form.TagPicker.Item key={tag._id} value={tag._id} title={tag._id} />;
