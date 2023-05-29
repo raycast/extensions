@@ -1,4 +1,4 @@
-import {getTime, parseDate} from "../../src/utils/dateUtils";
+import { getTime, parseDate } from "../../src/utils/dateUtils";
 
 process.env.TZ = "UTC";
 
