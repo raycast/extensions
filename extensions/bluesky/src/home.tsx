@@ -2,6 +2,7 @@ import { Action, ActionPanel, Color, List, useNavigation } from "@raycast/api";
 import { HomeNavigationTitle, SelectActionMessage } from "./utils/constants";
 
 import About from "./components/about/About";
+import AccountsView from "./components/accounts/AccountsView";
 import AuthorFeed from "./components/feed/AuthorFeed";
 import Error from "./components/error/Error";
 import { HomeLaunchContext } from "./types/types";
@@ -9,10 +10,10 @@ import LikeFeed from "./components/feed/LikeFeed";
 import NewPost from "./new-post";
 import Notifications from "./notifications";
 import Onboard from "./components/onboarding/Onboard";
-import PeopleView from "./components/people/PeopleView";
+import Privacy from "./components/privacy/Privacy";
 import Timeline from "./timeline";
 import { ViewTypes } from "./config/viewTypeMap";
-import { getSignedInUserHandle } from "./libs/atp";
+import { getSignedInAccountHandle } from "./libs/atp";
 import { useEffect } from "react";
 import useStartATSession from "./hooks/useStartATSession";
 
@@ -31,7 +32,7 @@ const Home = ({ launchContext }: HomeProps) => {
   }, []);
 
   const onViewSelected = async (viewId: string) => {
-    const handle = await getSignedInUserHandle();
+    const handle = await getSignedInAccountHandle();
     switch (parseInt(viewId)) {
       case 1:
         push(<Timeline />);
@@ -40,7 +41,7 @@ const Home = ({ launchContext }: HomeProps) => {
         push(<Notifications />);
         break;
       case 3:
-        push(<PeopleView />);
+        push(<AccountsView />);
         break;
       case 4:
         push(<NewPost />);
@@ -56,6 +57,11 @@ const Home = ({ launchContext }: HomeProps) => {
         }
         break;
       case 7:
+        if (handle) {
+          push(<Privacy />);
+        }
+        break;
+      case 8:
         push(<About />);
         break;
     }

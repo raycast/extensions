@@ -32,16 +32,16 @@
     {
       "type": "password",
       "title": "App Password",
-      "description": "Your app password",
+      "description": "Your App Password",
       "name": "password",
       "required": true
     }
   ],
   "commands": [
     {
-      "name": "unread-notifications",
-      "title": "Unread Notifications",
-      "description": "A menu bar item to show your unread notification count.",
+      "name": "menu-bar-notifications",
+      "title": "Menu bar Notifications",
+      "description": "A menu bar item to show your recent notifications.",
       "mode": "menu-bar"
     },
     {
@@ -60,6 +60,7 @@
       "name": "search",
       "title": "Search",
       "description": "Search for people and entities on Bluesky.",
+      "disabledByDefault": true,
       "mode": "view",
       "arguments": [
         {
@@ -87,6 +88,7 @@
       "title": "Recent Posts",
       "description": "View your recent posts on Bluesky. Click on a post to see more details.",
       "mode": "view",
+      "disabledByDefault": true,
       "arguments": [
         {
           "name": "handle",
@@ -98,9 +100,9 @@
     }
   ],
   "dependencies": {
-    "@atproto/api": "^0.2.5",
+    "@atproto/api": "^0.3.3",
     "@atproto/uri": "^0.0.2",
-    "@raycast/api": "^1.49.2",
+    "@raycast/api": "^1.52.1",
     "@raycast/utils": "^1.5.2",
     "cross-fetch": "^3.1.5",
     "use-debounce": "^9.0.4"
