@@ -9,6 +9,7 @@ import {
   LaunchType,
   confirmAlert,
   closeMainWindow,
+  popToRoot,
 } from "@raycast/api";
 import { useAtom } from "jotai";
 import { getProgressIcon } from "@raycast/utils";
@@ -50,6 +51,7 @@ export default function Command() {
       name: "menubar",
       type: LaunchType.UserInitiated,
     });
+    popToRoot({ clearSearchBar: true });
     closeMainWindow();
   };
   const onSetTime = (id: string) => {
@@ -167,6 +169,7 @@ export default function Command() {
               {!task.disabled && (
                 <Action
                   title="Set Time"
+                  shortcut={{ modifiers: ["opt"], key: "t" }}
                   icon={{ source: Icon.Clock }}
                   onAction={() => {
                     onSetTime(task.id);
@@ -175,6 +178,7 @@ export default function Command() {
               )}
               <Action
                 title="Edit"
+                shortcut={{ modifiers: ["opt"], key: "e" }}
                 icon={{ source: Icon.Text }}
                 onAction={() => {
                   onEdit(task.id);
@@ -183,6 +187,7 @@ export default function Command() {
               {index != 0 && (
                 <Action
                   title="Sort Up"
+                  shortcut={{ modifiers: ["ctrl", "opt"], key: "arrowUp" }}
                   icon={{ source: Icon.ChevronUp }}
                   onAction={() => {
                     onSort(task.id, "up");
@@ -192,6 +197,7 @@ export default function Command() {
               {index != DATA.length - 1 && (
                 <Action
                   title="Sort Down"
+                  shortcut={{ modifiers: ["ctrl", "opt"], key: "arrowDown" }}
                   icon={{ source: Icon.ChevronDown }}
                   onAction={() => {
                     onSort(task.id, "down");
@@ -200,6 +206,7 @@ export default function Command() {
               )}
               <Action
                 title="Remove"
+                shortcut={{ modifiers: ["opt"], key: "x" }}
                 icon={{ source: Icon.Trash }}
                 style={Action.Style.Destructive}
                 onAction={() => {
@@ -208,9 +215,15 @@ export default function Command() {
               />
             </ActionPanel.Section>
             <ActionPanel.Section title="More">
-              <Action title="Add" icon={{ source: Icon.PlusCircle, tintColor: Color.Green }} onAction={onAdd} />
+              <Action
+                title="Add"
+                shortcut={{ modifiers: ["opt"], key: "a" }}
+                icon={{ source: Icon.PlusCircle, tintColor: Color.Green }}
+                onAction={onAdd}
+              />
               <Action
                 title="Reset"
+                shortcut={{ modifiers: ["opt"], key: "r" }}
                 icon={{ source: Icon.RotateAntiClockwise, tintColor: Color.Red }}
                 onAction={onReset}
               />
