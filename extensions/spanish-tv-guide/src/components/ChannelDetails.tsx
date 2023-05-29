@@ -15,7 +15,6 @@ const ChannelDetails = (channel: ChannelSchedule) => (
         {channel.schedule.map((program, index) => (
           <Fragment key={index}>
             <Item.Detail.Metadata.Label
-              icon={program.live ? Icon.SpeakerOn : ""}
               title={program.description}
               text={{ value: getTime(program.startTime), color: Color.SecondaryText }}
             />

@@ -1,7 +1,6 @@
 type Program = {
   startTime: Date;
   description: string;
-  live: boolean;
 };
 
 export type ChannelSchedule = {

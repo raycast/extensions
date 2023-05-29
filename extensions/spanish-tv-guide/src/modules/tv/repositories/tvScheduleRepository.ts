@@ -1,7 +1,7 @@
 import fetch from "isomorphic-fetch";
 
 import { TVSchedule } from "../domain/tvSchedule";
-import { isActiveInterval, parseDate } from "../../../utils/dateUtils";
+import { parseDate } from "../../../utils/dateUtils";
 import { truncate } from "../../../utils/stringUtils";
 import { ProgramResponse } from "./dto/programResponse";
 import { ChannelResponse } from "./dto/channelResponse";
@@ -27,13 +27,11 @@ const mapToChannel = (channel: ChannelResponse) => {
 
 const mapToProgram = (program: ProgramResponse) => {
   const startTime = parseDate(program.HORA_INICIO);
-  const endTime = parseDate(program.HORA_FIN);
 
   return {
     startTime,
     gender: program.GENERO,
     description: truncate(program.TITULO),
-    live: isActiveInterval(startTime, endTime),
   };
 };
 
