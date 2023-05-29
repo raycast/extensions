@@ -54,6 +54,11 @@ export interface CollectionsResponse {
   items: Collection[];
 }
 
+export interface CollectionCreationResponse {
+  result: boolean;
+  item: Collection;
+}
+
 export interface BookmarksResponse {
   items: Bookmark[];
 }

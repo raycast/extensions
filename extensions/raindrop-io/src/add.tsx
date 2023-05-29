@@ -8,7 +8,7 @@ import {
   Toast,
 } from "@raycast/api";
 import { useCachedState, useForm, FormValidation } from "@raycast/utils";
-import { FormValues, Preferences } from "./types";
+import { FormValues, Preferences, CollectionCreationResponse } from "./types";
 import fetch from "node-fetch";
 import { useState } from "react";
 
@@ -35,7 +35,25 @@ const AddBookmarks = () => {
   const { handleSubmit, itemProps, reset } = useForm<FormValues>({
     async onSubmit(values) {
       const toast = await showToast(Toast.Style.Animated, "Adding Link");
+      let newCollectionData: CollectionCreationResponse;
       try {
+        if (showCollectionCreation) {
+          console.log(values.newCollection);
+          const newCollectionResponse = await fetch("https://api.raindrop.io/rest/v1/collection", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${preferences.token}`,
+            },
+            body: JSON.stringify({
+              title: values.newCollection,
+              parent: {
+                $id: {},
+              },
+            }),
+          });
+          newCollectionData = (await newCollectionResponse.json()) as CollectionCreationResponse;
+        }
         fetch("https://api.raindrop.io/rest/v1/raindrops", {
           method: "POST",
           headers: {
@@ -45,7 +63,9 @@ const AddBookmarks = () => {
           body: JSON.stringify({
             items: values.link.split(/[ ,;]/).map((link) => ({
               link: link.trim(),
-              collectionId: values.collection,
+              collectionId: showCollectionCreation
+                ? newCollectionData.item._id.toString()
+                : values.collection,
               tags: values.tags,
               pleaseParse: {},
             })),
@@ -71,8 +91,8 @@ const AddBookmarks = () => {
     },
     validation: {
       link: FormValidation.Required,
-      newCollection: () => {
-        if (showCollectionCreation) {
+      newCollection: (value) => {
+        if (showCollectionCreation && value === "") {
           return "This field is required";
         }
       },
