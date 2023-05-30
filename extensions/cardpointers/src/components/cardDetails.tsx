@@ -28,7 +28,7 @@ export default function CardDetails(props: { cardSlug: string }) {
   const cardCurrency = card?.currency ?? "";
 
   return (
-    <List isLoading={isLoading} navigationTitle="Card Details">
+    <List isLoading={isLoading}>
       {card && (
         <>
           <List.Item
