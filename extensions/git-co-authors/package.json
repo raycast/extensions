@@ -5,6 +5,9 @@
   "description": "Manage and copy co-authors for git commits",
   "icon": "extension_icon.png",
   "author": "nickradford",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "categories": [
     "Developer Tools",
     "Productivity"

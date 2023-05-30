@@ -1,8 +1,23 @@
-import { Action, ActionPanel, Icon, List, showToast, Toast, confirmAlert } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Icon,
+  List,
+  showToast,
+  Toast,
+  confirmAlert,
+  Color,
+  Alert,
+} from "@raycast/api";
 import { useEffect, useState } from "react";
 import AddOrEditAuthor from "./add-or-edit-author";
 import { Authors } from "./types";
-import { cache, getAuthorsArrFromCache, KEY, removeAuthorFromCache } from "./utils";
+import {
+  cache,
+  getAuthorsArrFromCache,
+  KEY,
+  removeAuthorFromCache,
+} from "./utils";
 
 export default function ChooseAuthor() {
   const [authors, setAuthors] = useState<Authors>(getAuthorsArrFromCache());
@@ -23,7 +38,9 @@ export default function ChooseAuthor() {
           key={author.email}
           actions={
             <ActionPanel>
-              <Action.CopyToClipboard content={`Co-authored-by: ${author.name} <${author.email}>`} />
+              <Action.CopyToClipboard
+                content={`Co-authored-by: ${author.name} <${author.email}>`}
+              />
               <Action.Push
                 title={`Edit ${author.name}`}
                 target={<AddOrEditAuthor author={author} />}
@@ -35,15 +52,22 @@ export default function ChooseAuthor() {
                 style={Action.Style.Destructive}
                 shortcut={{ modifiers: ["cmd"], key: "backspace" }}
                 onAction={async () => {
-                  if (
-                    await confirmAlert({
-                      title: "Remove Author",
-                      message: `Are you sure you want to remove ${author.name}?`,
-                    })
-                  ) {
-                    removeAuthorFromCache(author.email);
-                    showToast(Toast.Style.Success, `Removed ${author.name}`);
-                  }
+                  await confirmAlert({
+                    title: "Remove Author",
+                    message: `Are you sure you want to remove ${author.name}?`,
+                    icon: { source: Icon.RemovePerson, tintColor: Color.Red },
+                    primaryAction: {
+                      title: "Remove",
+                      style: Alert.ActionStyle.Destructive,
+                      onAction: () => {
+                        removeAuthorFromCache(author.email);
+                        showToast(
+                          Toast.Style.Success,
+                          `Removed ${author.name}`
+                        );
+                      },
+                    },
+                  });
                 }}
               />
             </ActionPanel>
