@@ -35,7 +35,7 @@ export default function Command() {
         return defCom;
       }
       const taskIcon: Icon = d[i].icon as Icon;
-      return <MenuBarExtra title={d[i].title + ":" + remainder + "m"} icon={taskIcon} />;
+      return <MenuBarExtra title={d[i].title + ": " + remainder} icon={taskIcon} />;
     }
   }
   return defCom;

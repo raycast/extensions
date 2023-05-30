@@ -54,6 +54,14 @@ export default function TaskForm({ taskId }: { taskId: string }) {
   };
 
   const submit = (sd: taskItemType) => {
+    if (sd.title == '') {
+      setTitleError("The field should't be empty!");
+      return
+    }
+    if (!isInt(sd.duration)) {
+      setDurationError("The field need a integer!");
+      return;
+    }
     setIsLoading(true);
     const d = JSON.parse(JSON.stringify(DATA));
     sd.sec = formData.sec;
