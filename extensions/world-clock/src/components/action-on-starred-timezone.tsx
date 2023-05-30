@@ -53,7 +53,7 @@ export function ActionOnStarredTimezone(props: {
         {index != 0 && (
           <Action
             icon={Icon.ArrowUpCircle}
-            title={"Move to Top"}
+            title={"Move Up"}
             shortcut={{ modifiers: ["shift", "cmd"], key: "arrowUp" }}
             onAction={() => {
               const _starTimezones = [...starTimezones];
@@ -68,7 +68,7 @@ export function ActionOnStarredTimezone(props: {
         {index != starTimezones.length - 1 && (
           <Action
             icon={Icon.ArrowDownCircle}
-            title={"Move to Bottom"}
+            title={"Move Down"}
             shortcut={{ modifiers: ["shift", "cmd"], key: "arrowDown" }}
             onAction={() => {
               const _starTimezones = [...starTimezones];
