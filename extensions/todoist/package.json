@@ -17,48 +17,44 @@
   ],
   "commands": [
     {
-      "name": "home",
-      "title": "Home",
+      "name": "show-inbox-tasks",
+      "title": "Show Inbox Tasks",
       "subtitle": "Todoist",
-      "description": "Show your Todoist tasks and views (inbox, today, upcoming, completed, projects, labels).",
+      "description": "Show your Todoist inbox tasks.",
       "mode": "view",
-      "preferences": [
-        {
-          "name": "view",
-          "type": "dropdown",
-          "data": [
-            {
-              "title": "Inbox",
-              "value": "inbox"
-            },
-            {
-              "title": "Today",
-              "value": "today"
-            },
-            {
-              "title": "Upcoming",
-              "value": "upcoming"
-            },
-            {
-              "title": "Completed",
-              "value": "completed"
-            }
-          ],
-          "default": "today",
-          "required": false,
-          "title": "View",
-          "description": "Indicates which view you want to see in the command."
-        }
-      ],
+      "disabledByDefault": true
+    },
+    {
+      "name": "show-today-tasks",
+      "title": "Show Today Tasks",
+      "subtitle": "Todoist",
+      "description": "Show your Todoist tasks due today.",
+      "mode": "view",
       "keywords": [
-        "inbox",
-        "today",
-        "today tasks",
-        "upcoming",
-        "upcoming tasks",
-        "completed",
-        "completed tasks"
+        "overdue"
       ]
+    },
+    {
+      "name": "show-upcoming-tasks",
+      "title": "Show Upcoming Tasks",
+      "subtitle": "Todoist",
+      "description": "Show your upcoming Todoist tasks.",
+      "mode": "view"
+    },
+    {
+      "name": "show-completed-tasks",
+      "title": "Show Completed Tasks",
+      "subtitle": "Todoist",
+      "description": "Show your completed Todoist tasks.",
+      "mode": "view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "search-tasks",
+      "title": "Search Tasks",
+      "subtitle": "Todoist",
+      "description": "Search your Todoist tasks.",
+      "mode": "view"
     },
     {
       "name": "create-task",
@@ -103,7 +99,8 @@
       "title": "Create Project",
       "subtitle": "Todoist",
       "description": "Create a Todoist project.",
-      "mode": "view"
+      "mode": "view",
+      "disabledByDefault": true
     },
     {
       "name": "menu-bar",
@@ -192,8 +189,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.50.0",
-    "@raycast/utils": "^1.5.2",
+    "@raycast/api": "^1.52.1",
+    "@raycast/utils": "^1.7.0",
     "axios": "^1.3.6",
     "date-fns": "^2.29.3",
     "form-data": "^4.0.0",
@@ -203,7 +200,7 @@
     "remove-markdown": "^0.5.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.5",
+    "@raycast/eslint-config": "^1.0.6",
     "@types/lodash": "^4.14.185",
     "@types/mime": "^3.0.1",
     "@types/node": "^18.7.18",
@@ -211,6 +208,7 @@
     "@types/remove-markdown": "^0.3.1",
     "eslint": "^8.23.1",
     "eslint-plugin-import": "^2.27.5",
+    "eslint-plugin-react-hooks": "^4.6.0",
     "typescript": "^4.8.3"
   },
   "scripts": {

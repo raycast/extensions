@@ -6,14 +6,9 @@ import { useMemo } from "react";
 
 import { getProductivityStats } from "../api";
 import CreateTask from "../create-task";
-import { QuickLinkView } from "../home";
 import useCachedData from "../hooks/useCachedData";
 
-import CreateViewAction from "./CreateViewAction";
-
-type TodayEmptyViewProps = { quickLinkView: QuickLinkView };
-
-export default function TodayEmptyView({ quickLinkView }: TodayEmptyViewProps) {
+export default function TodayEmptyView() {
   const [data] = useCachedData();
   const { data: stats } = useCachedPromise(() => getProductivityStats());
 
@@ -26,8 +21,6 @@ export default function TodayEmptyView({ quickLinkView }: TodayEmptyViewProps) {
           target={<CreateTask fromTodayEmptyView={true} />}
           shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
         />
-
-        <CreateViewAction {...quickLinkView} />
       </ActionPanel>
     );
 

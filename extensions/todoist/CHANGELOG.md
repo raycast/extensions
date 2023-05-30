@@ -1,5 +1,21 @@
 # Todoist Changelog
 
+## [Bringing back various commands] - 2023-05-30
+
+This update brings back the previously removed commands based on user feedback. The Home command, which replaced `Today Tasks`, `Upcoming Tasks`, `Search Tasks`, and `Completed Tasks`, proved to be less intuitive than anticipated. As a result, these commands have been re-implemented for easier navigation and task management. Exit `Home`, welcome:
+
+- `Show Inbox Tasks` (disabled by default)
+- `Show Today Tasks`
+- `Show Upcoming Tasks`
+- `Show Completed Tasks` (disabled by default)
+- `Search Tasks`
+
+This update enhances the user experience by addressing and fixing several bugs:
+- The `JS heap out of memory error` in the menu bar has been resolved (still not the case for other commands)
+- The ability to focus on tasks outside the menu bar tasks has been added for improved usability
+- The `Quick Add Task` command now works properly a fallback command
+- The dates with a datetime should be placed in full dates sections
+
 ## [Todoist v2] - 2023-05-12
 
 The Todoist extension has been completely revamped for a cleaner, better and smoother Raycast experience. The goal of this extension is clear: make you able to use Todoist anytime, anywhere, for anything on your computer using the power of Raycast. This update is packed with new features, so let's jump right into them.

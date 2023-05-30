@@ -6,6 +6,7 @@ import {
   AddTaskArgs,
   MoveTaskArgs,
   Reminder,
+  SyncData,
   Task,
   UpdateTaskArgs,
   addTask,
@@ -26,13 +27,10 @@ import { refreshMenuBarCommand } from "../helpers/menu-bar";
 import { getPriorityIcon, priorities } from "../helpers/priorities";
 import { getProjectIcon } from "../helpers/projects";
 import { displayReminderName } from "../helpers/reminders";
-import { getTaskAppUrl, getTaskUrl } from "../helpers/tasks";
-import { QuickLinkView, ViewMode } from "../home";
-import useCachedData from "../hooks/useCachedData";
+import { ViewMode, getTaskAppUrl, getTaskUrl } from "../helpers/tasks";
 import { useFocusedTask } from "../hooks/useFocusedTask";
 import { ViewProps } from "../hooks/useViewTasks";
 
-import CreateViewAction from "./CreateViewAction";
 import Project from "./Project";
 import RefreshAction from "./RefreshAction";
 import SubTasks from "./SubTasks";
@@ -45,7 +43,8 @@ type TaskActionsProps = {
   fromDetail?: boolean;
   mode?: ViewMode;
   viewProps?: ViewProps;
-  quickLinkView?: QuickLinkView;
+  data?: SyncData;
+  setData: React.Dispatch<React.SetStateAction<SyncData | undefined>>;
 };
 
 export default function TaskActions({
@@ -53,12 +52,12 @@ export default function TaskActions({
   fromDetail,
   viewProps,
   mode,
-  quickLinkView,
+  data,
+  setData,
 }: TaskActionsProps): JSX.Element {
   const { pop } = useNavigation();
 
   const { focusedTask, focusTask, unfocusTask } = useFocusedTask();
-  const [data, setData] = useCachedData();
 
   const projects = data?.projects;
   const comments = data?.notes;
@@ -614,12 +613,6 @@ export default function TaskActions({
           shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
         />
       </ActionPanel.Section>
-
-      {quickLinkView ? (
-        <ActionPanel.Section>
-          <CreateViewAction {...quickLinkView} />
-        </ActionPanel.Section>
-      ) : null}
 
       <RefreshAction />
     </>

@@ -4,19 +4,15 @@ import { compareDesc, format } from "date-fns";
 import { useMemo } from "react";
 import removeMarkdown from "remove-markdown";
 
-import { handleError, getActivity } from "../api";
-import { uncompleteTask as apiUncompleteTask } from "../api";
-import { displayDueDate } from "../helpers/dates";
-import { refreshMenuBarCommand } from "../helpers/menu-bar";
-import { QuickLinkView } from "../home";
-import useCachedData from "../hooks/useCachedData";
+import { handleError, getActivity, uncompleteTask as apiUncompleteTask } from "./api";
+import View from "./components/View";
+import { displayDueDate } from "./helpers/dates";
+import { refreshMenuBarCommand } from "./helpers/menu-bar";
+import useSyncData from "./hooks/useSyncData";
 
-import CreateViewAction from "./CreateViewAction";
+function CompletedTasks() {
+  const { data, setData, isLoading } = useSyncData();
 
-type CompletedTaskProps = { quickLinkView: QuickLinkView };
-
-export default function CompletedTasks({ quickLinkView }: CompletedTaskProps) {
-  const [data, setData] = useCachedData();
   const { data: activity, mutate } = useCachedPromise(() => getActivity());
 
   async function uncompleteTask(taskId: string) {
@@ -50,10 +46,10 @@ export default function CompletedTasks({ quickLinkView }: CompletedTaskProps) {
     }));
 
     return sections;
-  }, [activity]);
+  }, [events]);
 
   return (
-    <>
+    <List isLoading={isLoading} searchBarPlaceholder="Filter completed tasks by name">
       {sections?.map((section) => {
         return (
           <List.Section key={section.name} title={section.name}>
@@ -76,8 +72,6 @@ export default function CompletedTasks({ quickLinkView }: CompletedTaskProps) {
 
                       <Action.CopyToClipboard title="Copy Task Title" content={event.extra_data.content} />
 
-                      <CreateViewAction {...quickLinkView} />
-
                       <Action
                         title="Refresh Data"
                         icon={Icon.ArrowClockwise}
@@ -92,6 +86,14 @@ export default function CompletedTasks({ quickLinkView }: CompletedTaskProps) {
           </List.Section>
         );
       })}
-    </>
+    </List>
+  );
+}
+
+export default function Command() {
+  return (
+    <View>
+      <CompletedTasks />
+    </View>
   );
 }
