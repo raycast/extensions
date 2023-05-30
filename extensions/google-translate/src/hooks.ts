@@ -19,7 +19,9 @@ export const useTextState = () => {
           setText(cbText ?? "");
         }
       })
-      .catch((err) => {});
+      .catch((err) => {
+        console.log("Error:", err);
+      });
   }, []);
 
   return [text, setText] as const;
