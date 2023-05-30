@@ -14,6 +14,7 @@
     {
       "name": "search-cards",
       "title": "Search Cards",
+      "subtitle": "CardPointers",
       "description": "Find all of the details for any credit card in an instant.",
       "mode": "view",
       "arguments": [
@@ -28,6 +29,7 @@
     {
       "name": "top-cards",
       "title": "View Top 10 Cards",
+      "subtitle": "CardPointers",
       "subtitle": "Updated Monthly by CardPointers",
       "description": "View this month's top 10 credit cards.",
       "mode": "view"
@@ -35,6 +37,7 @@
     {
       "name": "search-offers",
       "title": "Search Offers",
+      "subtitle": "CardPointers",
       "description": "Find all of the details for any Amex or Chase offer in an instant.",
       "mode": "view",
       "arguments": [
@@ -49,7 +52,7 @@
     {
       "name": "top-offers",
       "title": "View Newest Offers",
-      "subtitle": "Updated Daily by CardPointers",
+      "subtitle": "CardPointers",
       "description": "View today's top Amex/Chase Offers.",
       "mode": "view"
     }
