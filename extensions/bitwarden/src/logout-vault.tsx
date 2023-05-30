@@ -1,6 +1,4 @@
-import { Alert } from "@raycast/api";
-import { Icon } from "@raycast/api";
-import { confirmAlert, showToast, Toast } from "@raycast/api";
+import { Alert, Icon, confirmAlert, showToast, Toast } from "@raycast/api";
 import { ExecaError } from "execa";
 import { Bitwarden } from "~/api/bitwarden";
 import { SessionStorage } from "~/context/session/utils";
