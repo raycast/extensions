@@ -9,7 +9,7 @@ import { Cache } from "~/utils/cache";
 async function logoutVaultCommand() {
   try {
     const hasConfirmed = await confirmAlert({
-      title: "Logout from Bitwarden vault",
+      title: "Logout From Bitwarden Vault",
       message: "Are you sure you want to logout from your current vault account?",
       icon: Icon.Logout,
       primaryAction: { title: "Confirm", style: Alert.ActionStyle.Destructive },
