@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "hupu",
   "title": "Hupu",
-  "description": "commands for hupu china",
+  "description": "Read posts from Hupu China",
   "icon": "hupu.png",
   "author": "alpacachen",
   "categories": [
@@ -19,6 +19,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.51.3",
+    "@raycast/utils": "^1.7.0",
     "node-fetch": "^3.3.1"
   },
   "devDependencies": {
