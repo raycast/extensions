@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "quick-web",
   "title": "Quick Web",
-  "description": "Quick Web is a configurable url autocompletion tool",
+  "description": "Quick Web is a configurable URL autocompletion tool",
   "icon": "rocket.png",
   "author": "ShawYoungTang",
   "categories": [
@@ -25,13 +25,13 @@
     },
     {
       "name": "add_url",
-      "title": "Add Url Config",
+      "title": "Add URL Config",
       "description": "Open a page where users can add url pattern configs",
       "mode": "view"
     },
     {
       "name": "edit_url_list",
-      "title": "Edit Url Config",
+      "title": "Edit URL Config",
       "description": "Open list of url patterns and jump to edit page or delete url configs",
       "mode": "view"
     },
