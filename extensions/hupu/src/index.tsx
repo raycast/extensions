@@ -55,7 +55,7 @@ export default function Command() {
             icon={item.icon}
             key={item.url + Date.now()}
             title={item.title}
-            accessories={[{ text: "👍" + item.recommendCount + "💬" + item.replies }]}
+            accessories={[{ text: "👍 " + item.recommendCount }, { text: "💬 " + item.replies }]}
             actions={
               <ActionPanel>
                 <Action.OpenInBrowser url={item.url}></Action.OpenInBrowser>
