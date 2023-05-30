@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, showToast, Toast, confirmAlert } from "@raycast/api";
 import { useEffect, useState } from "react";
 import AddOrEditAuthor from "./add-or-edit-author";
 import { Authors } from "./types";
@@ -34,9 +34,16 @@ export default function ChooseAuthor() {
                 icon={Icon.RemovePerson}
                 style={Action.Style.Destructive}
                 shortcut={{ modifiers: ["cmd"], key: "backspace" }}
-                onAction={() => {
-                  removeAuthorFromCache(author.email);
-                  showToast(Toast.Style.Success, `Removed ${author.name}`);
+                onAction={async () => {
+                  if (
+                    await confirmAlert({
+                      title: "Remove Author",
+                      message: `Are you sure you want to remove ${author.name}?`,
+                    })
+                  ) {
+                    removeAuthorFromCache(author.email);
+                    showToast(Toast.Style.Success, `Removed ${author.name}`);
+                  }
                 }}
               />
             </ActionPanel>
