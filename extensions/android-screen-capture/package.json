@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "android-screen-capture",
   "title": "Android Screen Capture",
-  "description": "ScreenShot & ScreenRecord Of Android",
+  "description": "Screenshot & screenrecords of Android via ADB",
   "icon": "command-icon.png",
   "author": "chenhuazhao",
   "categories": [
@@ -14,14 +14,12 @@
     {
       "name": "take-screenshot-of-android",
       "title": "Capture Android Screen",
-      "subtitle": "Take ScreenShot Of Android",
       "description": "Take ScreenShot Of Your Android And Save Into Your Mac Ciipboard",
       "mode": "view"
     },
     {
       "name": "take-screenrecord-of-android",
       "title": "Record Android Screen",
-      "subtitle": "Take ScreenRecord Of Android",
       "description": "Take ScreenRecord Of Your Android And Save Into Your Mac Ciipboard",
       "mode": "view"
     }
