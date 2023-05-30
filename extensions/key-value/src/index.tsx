@@ -18,7 +18,6 @@ export default function Command() {
       <List.Item
         key={key}
         title={key}
-        keywords={[value]}
         subtitle={value}
         actions={
           <ActionPanel>
