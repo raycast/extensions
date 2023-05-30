@@ -1,6 +1,6 @@
 # World Clock Changelog
 
-## [Sort Time Zones] - {PR_MERGE_DATE}
+## [Sort Time Zones] - 2023-05-30
 
 - Starred time zones support sorting
 
