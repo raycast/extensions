@@ -4,7 +4,7 @@ export function refreshMenuBarCommand() {
   return launchCommand({ name: "menu-bar", type: LaunchType.Background, context: { fromCommand: true } });
 }
 
-export const truncateMiddle = (fullStr: string, strLen: number, separator = "…") => {
+export const truncateMiddle = (fullStr: string, strLen: number, separator = "…"): string => {
   if (fullStr.length <= strLen) return fullStr;
 
   const sepLen = separator.length;
