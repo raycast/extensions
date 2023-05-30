@@ -1,10 +1,29 @@
 import React from "react";
-import { getPreferenceValues } from "@raycast/api";
+import { Clipboard, getPreferenceValues } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import { LanguageCodeSet, TranslatePreferences } from "./types";
 
 export const usePreferences = () => {
   return React.useMemo(() => getPreferenceValues<TranslatePreferences>(), []);
+};
+
+export const useTextState = () => {
+  const preferences = usePreferences();
+  const [text, setText] = React.useState("");
+  const textRef = React.useRef(text);
+  textRef.current = text;
+
+  React.useEffect(() => {
+    if (preferences.autoPasteClipboardText) {
+      Clipboard.readText().then((cbText) => {
+        if (!textRef.current) {
+          setText(cbText ?? "");
+        }
+      });
+    }
+  }, []);
+
+  return [text, setText] as const;
 };
 
 export const useSelectedLanguagesSet = () => {
