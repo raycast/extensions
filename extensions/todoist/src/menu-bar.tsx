@@ -13,7 +13,7 @@ import { addDays, format, isBefore, isSameDay } from "date-fns";
 import { useEffect, useMemo } from "react";
 import removeMarkdown from "remove-markdown";
 
-import { Task, getProductivityStats } from "./api";
+import { SyncData, Task, getProductivityStats } from "./api";
 import MenuBarTask from "./components/MenubarTask";
 import View from "./components/View";
 import { getToday } from "./helpers/dates";
@@ -27,23 +27,15 @@ type MenuBarProps = LaunchProps<{ launchContext: { fromCommand: boolean } }>;
 function MenuBar(props: MenuBarProps) {
   const launchedFromWithinCommand = props.launchContext?.fromCommand ?? false;
   // Don't perform a full sync if the command was launched from within another commands
-  const { data, isLoading } = useSyncData(!launchedFromWithinCommand);
+  const { data, setData, isLoading } = useSyncData(!launchedFromWithinCommand);
   const { focusedTask, unfocusTask } = useFocusedTask();
   const { view, upcomingDays, hideMenuBarCount } = getPreferenceValues<Preferences.MenuBar>();
-
-  useEffect(() => {
-    const isFocusedTaskInTasks = tasks?.some((t) => t.id === focusedTask.id);
-
-    if (!isFocusedTaskInTasks) {
-      unfocusTask();
-    }
-  }, [data]);
 
   const tasks = useMemo(() => {
     const tasks = data ? getTasksForTodayOrUpcomingView(data.items, data.user.id) : [];
 
     if (view === "today") {
-      return tasks?.filter((t) => {
+      return tasks.filter((t) => {
         if (!t.due) {
           return false;
         }
@@ -53,7 +45,7 @@ function MenuBar(props: MenuBarProps) {
     }
 
     if (upcomingDays && !isNaN(Number(upcomingDays))) {
-      return tasks?.filter((t) => {
+      return tasks.filter((t) => {
         if (!t.due) {
           return false;
         }
@@ -64,8 +56,16 @@ function MenuBar(props: MenuBarProps) {
       });
     }
 
-    return data?.items.filter((t) => t.due?.date);
-  }, [data]);
+    return data?.items.filter((t) => t.due?.date) ?? [];
+  }, [data, upcomingDays, view]);
+
+  useEffect(() => {
+    const isFocusedTaskInTasks = data?.items?.some((t) => t.id === focusedTask.id);
+
+    if (!isFocusedTaskInTasks) {
+      unfocusTask();
+    }
+  }, [focusedTask, unfocusTask, data]);
 
   const menuBarExtraTitle = useMemo(() => {
     if (focusedTask.id) {
@@ -79,7 +79,7 @@ function MenuBar(props: MenuBarProps) {
     if (tasks) {
       return tasks.length > 0 ? tasks.length.toString() : "🎉";
     }
-  }, [focusedTask.id, tasks]);
+  }, [focusedTask, tasks, hideMenuBarCount]);
 
   return (
     <MenuBarExtra
@@ -87,19 +87,14 @@ function MenuBar(props: MenuBarProps) {
       isLoading={isLoading}
       title={menuBarExtraTitle}
     >
-      {view === "today" ? tasks && <TodayView tasks={tasks} /> : tasks && <UpcomingView tasks={tasks} />}
+      {view === "today"
+        ? tasks && <TodayView tasks={tasks} data={data} setData={setData} />
+        : tasks && <UpcomingView tasks={tasks} data={data} setData={setData} />}
 
       <MenuBarExtra.Section>
         {focusedTask.id !== "" && (
           <MenuBarExtra.Item icon={Icon.MinusCircle} title="Unfocus the current task" onAction={unfocusTask} />
         )}
-
-        <MenuBarExtra.Item
-          title="Home"
-          icon={Icon.House}
-          shortcut={{ modifiers: ["cmd"], key: "h" }}
-          onAction={() => launchCommand({ name: "home", type: LaunchType.UserInitiated })}
-        />
 
         <MenuBarExtra.Item
           title="Inbox"
@@ -164,9 +159,11 @@ function MenuBar(props: MenuBarProps) {
 
 type TaskViewProps = {
   tasks: Task[];
+  data?: SyncData;
+  setData: React.Dispatch<React.SetStateAction<SyncData | undefined>>;
 };
 
-const TodayView = ({ tasks }: TaskViewProps) => {
+const TodayView = ({ tasks, data, setData }: TaskViewProps) => {
   const { data: stats } = useCachedPromise(() => getProductivityStats());
 
   const todayStats = stats?.days_items.find((d) => d.date === format(Date.now(), "yyyy-MM-dd"));
@@ -183,7 +180,7 @@ const TodayView = ({ tasks }: TaskViewProps) => {
           return (
             <MenuBarExtra.Section title={section.name} key={index}>
               {section.tasks.map((task) => (
-                <MenuBarTask key={task.id} task={task} />
+                <MenuBarTask key={task.id} task={task} data={data} setData={setData} />
               ))}
             </MenuBarExtra.Section>
           );
@@ -204,7 +201,7 @@ const TodayView = ({ tasks }: TaskViewProps) => {
   }
 };
 
-const UpcomingView = ({ tasks }: TaskViewProps): JSX.Element => {
+const UpcomingView = ({ tasks, data, setData }: TaskViewProps): JSX.Element => {
   const { upcomingDays } = getPreferenceValues<Preferences.MenuBar>();
   const isUpcomingDaysView = upcomingDays !== "" && !isNaN(Number(upcomingDays));
 
@@ -222,7 +219,7 @@ const UpcomingView = ({ tasks }: TaskViewProps): JSX.Element => {
         return (
           <MenuBarExtra.Section title={section.name} key={index}>
             {section.tasks.map((task) => (
-              <MenuBarTask key={task.id} task={task} />
+              <MenuBarTask key={task.id} task={task} data={data} setData={setData} />
             ))}
           </MenuBarExtra.Section>
         );
