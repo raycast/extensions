@@ -33,14 +33,6 @@
   ],
   "preferences": [
     {
-      "name": "autoPasteClipboardText",
-      "type": "checkbox",
-      "label": "Auto paste clipboard text",
-      "description": "Auto paste clipboard text",
-      "default": false,
-      "required": false
-    },
-    {
       "name": "lang1",
       "type": "dropdown",
       "required": true,
