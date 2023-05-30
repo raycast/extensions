@@ -17,9 +17,7 @@ async function logoutVaultCommand() {
 
     if (hasConfirmed) {
       const toast = await showToast(Toast.Style.Animated, "Logging out...");
-
-      const bitwarden = await new Bitwarden().initialize();
-      await bitwarden.logout();
+      await new Bitwarden().logout();
       await SessionStorage.logoutClearSession();
       Cache.clear();
 
