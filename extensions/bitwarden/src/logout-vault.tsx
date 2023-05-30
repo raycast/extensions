@@ -1,0 +1,40 @@
+import { Alert } from "@raycast/api";
+import { Icon } from "@raycast/api";
+import { confirmAlert, showToast, Toast } from "@raycast/api";
+import { ExecaError } from "execa";
+import { Bitwarden } from "~/api/bitwarden";
+import { SessionStorage } from "~/context/session/utils";
+import { Cache } from "~/utils/cache";
+
+async function logoutVaultCommand() {
+  try {
+    const hasConfirmed = await confirmAlert({
+      title: "Logout from Bitwarden vault",
+      message: "Are you sure you want to logout from your current vault account?",
+      icon: Icon.Logout,
+      primaryAction: { title: "Confirm", style: Alert.ActionStyle.Destructive },
+    });
+
+    if (hasConfirmed) {
+      const toast = await showToast(Toast.Style.Animated, "Logging out...");
+
+      const bitwarden = await new Bitwarden().initialize();
+      await bitwarden.logout();
+      await SessionStorage.logoutClearSession();
+      Cache.clear();
+
+      toast.title = "Logged out";
+      toast.style = Toast.Style.Success;
+    }
+  } catch (error) {
+    const execaError = error as ExecaError;
+    if (execaError.stderr.toLowerCase().includes("not logged in")) {
+      await showToast(Toast.Style.Failure, "You are not logged in");
+      return;
+    }
+
+    await showToast(Toast.Style.Failure, "Failed to logout from vault");
+  }
+}
+
+export default logoutVaultCommand;
