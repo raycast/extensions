@@ -23,13 +23,13 @@ async function logoutVaultCommand() {
       await SessionStorage.logoutClearSession();
       Cache.clear();
 
-      toast.title = "Logged out";
+      toast.title = "Successfully logged out";
       toast.style = Toast.Style.Success;
     }
   } catch (error) {
     const execaError = error as ExecaError;
     if (execaError.stderr.toLowerCase().includes("not logged in")) {
-      await showToast(Toast.Style.Failure, "You are not logged in");
+      await showToast(Toast.Style.Failure, "No session found", "You are not logged in");
       return;
     }
 

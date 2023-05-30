@@ -174,7 +174,11 @@
       "subtitle": "Bitwarden",
       "description": "Logout from your bitwarden vault account",
       "icon": "logout-vault.png",
-      "mode": "no-view"
+      "mode": "no-view",
+      "keywords": [
+        "log out",
+        "account"
+      ]
     }
   ],
   "preferences": [
