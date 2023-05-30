@@ -26,6 +26,7 @@
   "amphetamine": "amphetamine",
   "android": "android",
   "android-adb-input": "android-adb-input",
+  "android-screen-capture": "android-screen-capture",
   "anilist-airing-schedule": "anilist-airing-schedule",
   "anonaddy": "anonaddy",
   "search-ansible-documentation": "ansible-documentation",

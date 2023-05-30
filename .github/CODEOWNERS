@@ -27,6 +27,7 @@
 /extensions/amphetamine                              @gstvds
 /extensions/android                                  @MohamedISoliman
 /extensions/android-adb-input                        @STAR-ZERO
+/extensions/android-screen-capture                   @Leaking
 /extensions/anilist-airing-schedule                  @yeskunall
 /extensions/anonaddy                                 @httpjamesm @pernielsentikaer
 /extensions/ansible-documentation                    @Kcih4518
