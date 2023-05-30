@@ -219,10 +219,6 @@ const TodayView = ({ tasks }: TaskViewProps) => {
 };
 
 const FilterView = ({ tasks }: TaskViewProps) => {
-  const { data: stats } = useCachedPromise(() => getProductivityStats());
-
-  const todayStats = stats?.days_items.find((d) => d.date === format(Date.now(), "yyyy-MM-dd"));
-  const completedToday = todayStats?.total_completed ?? 0;
   const sections = useMemo(() => {
     return groupByDueDates(tasks);
   }, [tasks]);
@@ -243,18 +239,7 @@ const FilterView = ({ tasks }: TaskViewProps) => {
     );
   }
 
-  if (completedToday > 0) {
-    return (
-      <MenuBarExtra.Section title={"No tasks matching filter"} key={"filterTasks"}>
-        <MenuBarExtra.Item
-          title={`Congrats! You've completed ${completedToday} ${completedToday === 1 ? "task" : "tasks"} today.`}
-          icon="🎉"
-        />
-      </MenuBarExtra.Section>
-    );
-  } else {
-    return <MenuBarExtra.Item title="No tasks matching filter." />;
-  }
+  return <MenuBarExtra.Item title="No tasks matching filter." />;
 };
 
 const UpcomingView = ({ tasks }: TaskViewProps): JSX.Element => {

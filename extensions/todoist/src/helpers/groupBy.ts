@@ -1,5 +1,4 @@
 import { Icon, Image } from "@raycast/api";
-import { endOfDay } from "date-fns";
 import { partition } from "lodash";
 import React from "react";
 
