@@ -5,6 +5,10 @@
   "description": "Copy a key from the clipboard and paste a value from a JSON file",
   "icon": "key-value-icon.png",
   "author": "NirLevy",
+  "contributors": [
+    "pernielsentikaer",
+    "gkpln3"
+  ],
   "categories": [
     "Productivity"
   ],
