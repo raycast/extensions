@@ -5,10 +5,9 @@ important functions in the language: the `main` function, which is the entry
 point of many programs. You’ve also seen the `fn` keyword, which allows you to
 declare new functions.
 
-Cairo code uses *snake case* as the conventional style for function and variable
+Cairo code uses _snake case_ as the conventional style for function and variable
 names, in which all letters are lowercase and underscores separate words.
 Here’s a program that contains an example function definition:
-
 
 ```rust
 use debug::PrintTrait;
@@ -30,12 +29,12 @@ body begins and ends.
 We can call any function we’ve defined by entering its name followed by a set
 of parentheses. Because `another_function` is defined in the program, it can be
 called from inside the `main` function. Note that we defined `another_function`
-*before* the `main` function in the source code; we could have defined it after
+_before_ the `main` function in the source code; we could have defined it after
 as well. Cairo doesn’t care where you define your functions, only that they’re
 defined somewhere in a scope that can be seen by the caller.
 
-Let’s start a new project with Scarb named *functions* to explore functions
-further. Place the `another_function` example in *src/lib.cairo* and run it. You
+Let’s start a new project with Scarb named _functions_ to explore functions
+further. Place the `another_function` example in _src/lib.cairo_ and run it. You
 should see the following output:
 
 ```console
@@ -50,11 +49,11 @@ and its message is printed.
 
 ### Parameters
 
-We can define functions to have *parameters*, which are special variables that
+We can define functions to have _parameters_, which are special variables that
 are part of a function’s signature. When a function has parameters, you can
 provide it with concrete values for those parameters. Technically, the concrete
-values are called *arguments*, but in casual conversation, people tend to use
-the words *parameter* and *argument* interchangeably for either the variables
+values are called _arguments_, but in casual conversation, people tend to use
+the words _parameter_ and _argument_ interchangeably for either the variables
 in a function’s definition or the concrete values passed in when you call a
 function.
 
@@ -83,7 +82,7 @@ The declaration of `another_function` has one parameter named `x`. The type of
 `x` is specified as `felt252`. When we pass `5` in to `another_function`, the
 `.print()` function outputs `5` in the console.
 
-In function signatures, you *must* declare the type of each parameter. This is
+In function signatures, you _must_ declare the type of each parameter. This is
 a deliberate decision in Cairo’s design: requiring type annotations in function
 definitions means the compiler almost never needs you to use them elsewhere in
 the code to figure out what type you mean. The compiler is also able to give
@@ -109,8 +108,8 @@ This example creates a function named `another_function` with two
 parameters. The first parameter is named `x` and is an `felt252`. The second is
 named `y` and is type `felt252` too. The function then prints the content of the felt `x` and then the content of the felt `y`.
 
-Let’s try running this code. Replace the program currently in your *functions*
-project’s *src/lib.cairo* file with the preceding example and run it using `cairo-run src/lib.cairo`:
+Let’s try running this code. Replace the program currently in your _functions_
+project’s _src/lib.cairo_ file with the preceding example and run it using `cairo-run src/lib.cairo`:
 
 ```console
 $ cairo-run src/lib.cairo
@@ -131,9 +130,9 @@ understand. Other languages don’t have the same distinctions, so let’s look 
 what statements and expressions are and how their differences affect the bodies
 of functions.
 
-* **Statements** are instructions that perform some action and do not return
+- **Statements** are instructions that perform some action and do not return
   a value.
-* **Expressions** evaluate to a resultant value. Let’s look at some examples.
+- **Expressions** evaluate to a resultant value. Let’s look at some examples.
 
 We’ve actually already used statements and expressions. Creating a variable and
 assigning a value to it with the `let` keyword is a statement. In Listing 3-1,
@@ -158,7 +157,9 @@ fn main() {
     let x = (let y = 6);
 }
 ```
+
 When you run this program, the error you’ll get looks like this:
+
 ```console
 $ cairo-run src/lib.cairo
 error: Missing token TerminalRParen.
@@ -195,7 +196,6 @@ expression that evaluates to the value `6`. Calling a function is an
 expression. A new scope block created with
 curly brackets is an expression, for example:
 
-
 ```rust
 use debug::PrintTrait;
 fn main() {
@@ -209,12 +209,14 @@ fn main() {
 ```
 
 This expression:
+
 ```rust
 {
     let x = 3;
     x + 1
 }
 ```
+
 is a block that, in this case, evaluates to `4`. That value gets bound to `y`
 as part of the `let` statement. Note that the `x + 1` line doesn’t have a
 semicolon at the end, which is unlike most of the lines you’ve seen so far.
@@ -222,7 +224,9 @@ Expressions do not include ending semicolons. If you add a semicolon to the end
 of an expression, you turn it into a statement, and it will then not return a
 value. Keep this in mind as you explore function return values and expressions
 next.
+
 ### Functions with Return Values
+
 Functions can return values to the code that calls them. We don’t name return
 values, but we must declare their type after an arrow (`->`). In Cairo, the
 return value of the function is synonymous with the value of the final
@@ -243,22 +247,27 @@ fn main() {
     x.print();
 }
 ```
+
 There are no function calls, or even `let` statements in the `five`
 function—just the number `5` by itself. That’s a perfectly valid function in
 Cairo. Note that the function’s return type is specified too, as `-> u32`. Try
 running this code; the output should look like this:
+
 ```console
 $ cairo-run src/lib.cairo
 [DEBUG]                                 (raw: 5)
 ```
+
 The `5` in `five` is the function’s return value, which is why the return type
 is `u32`. Let’s examine this in more detail. There are two important bits:
 first, the line `let x = five();` shows that we’re using the return value of a
 function to initialize a variable. Because the function `five` returns a `5`,
 that line is the same as the following:
+
 ```rust
 let x = 5;
 ```
+
 Second, the `five` function has no parameters and defines the type of the
 return value, but the body of the function is a lonely `5` with no semicolon
 because it’s an expression whose value we want to return.
@@ -277,6 +286,7 @@ fn plus_one(x: u32) -> u32 {
     x + 1_u32
 }
 ```
+
 Running this code will print `[DEBUG]                    (raw: 6)`. But if we place a
 semicolon at the end of the line containing `x + 1`, changing it from an
 expression to a statement, we’ll get an error:
@@ -296,9 +306,11 @@ fn plus_one(x: u32) -> u32 {
 ```
 
 Compiling this code produces an error, as follows:
+
 ```console
 error: Unexpected return type. Expected: "core::integer::u32", found: "()".
 ```
+
 The main error message, `Unexpected return type`, reveals the core issue with this
 code. The definition of the function `plus_one` says that it will return an
 `u32`, but statements don’t evaluate to a value, which is expressed by `()`,
