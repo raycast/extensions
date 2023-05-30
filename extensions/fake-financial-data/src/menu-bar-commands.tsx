@@ -1,10 +1,11 @@
 import React from "react";
 import { MenuBarExtra } from "@raycast/api";
-import { IBAN } from "ibankit";
+
 import {
-  generateFakeAccountNumber,
-  generateFakeSWIFT,
-  copyToClipboard,
+  copyIbanToClipboard,
+  copySwiftToClipboard,
+  copyAccountNumberToClipboard,
+  copySortCodeToClipboard,
 } from "../utils";
 
 export default function Command() {
@@ -14,26 +15,21 @@ export default function Command() {
       tooltip="Generate Financial Data"
     >
       <MenuBarExtra.Item title="IBAN" />
-      <MenuBarExtra.Item
-        title="Generate IBAN"
-        onAction={() => {
-          const iban = IBAN.random();
-          copyToClipboard(iban.toString());
-        }}
-      />
+      <MenuBarExtra.Item title="Generate IBAN" onAction={copyIbanToClipboard} />
       <MenuBarExtra.Item title="SWIFT/BIC" />
       <MenuBarExtra.Item
         title="Generate SWIFT/BIC"
-        onAction={() => {
-          copyToClipboard(generateFakeSWIFT());
-        }}
+        onAction={copySwiftToClipboard}
       />
       <MenuBarExtra.Item title="Account Number" />
       <MenuBarExtra.Item
         title="Generate Account Number"
-        onAction={() => {
-          copyToClipboard(generateFakeAccountNumber());
-        }}
+        onAction={copyAccountNumberToClipboard}
+      />
+      <MenuBarExtra.Item title="Sort Code" />
+      <MenuBarExtra.Item
+        title="Generate Sort Code"
+        onAction={copySortCodeToClipboard}
       />
     </MenuBarExtra>
   );
