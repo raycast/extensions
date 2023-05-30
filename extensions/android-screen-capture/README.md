@@ -1,3 +1,3 @@
 # Android Capture
 
-ScreenShot  & ScreenRecord Of Android
+Make screenshot & screenrecords of Android via ADB
