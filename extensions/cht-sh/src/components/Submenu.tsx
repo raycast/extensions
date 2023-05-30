@@ -22,13 +22,15 @@ export default function Submenu(props: SubmenuProps) {
     setFilteredData(searchStringArray(data, searchText));
   }, [searchText]);
 
+  const navigationTitle = props.url === "/" ? "Cheatsheets" : `Cheatsheets: ${props.url}`;
+
   return (
     <List
       isLoading={isLoading}
       filtering={false}
       searchBarPlaceholder={`Filter ${props.url} cheatsheets by name or search for a keyword`}
       onSearchTextChange={setSearchText}
-      navigationTitle={"Cheatsheets"}
+      navigationTitle={navigationTitle}
     >
       {searchText && props.url !== "/" && (
         <List.Item
