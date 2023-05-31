@@ -1,4 +1,4 @@
-import { Action, ActionPanel, List, showToast, Toast } from "@raycast/api";
+import { List, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { getFreeDiskSpace, getTopRamProcess, getTotalDiskSpace, getMemoryUsage } from "./MemoryUtils";
 import { useInterval } from "usehooks-ts";
