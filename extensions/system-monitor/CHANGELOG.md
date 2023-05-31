@@ -2,7 +2,7 @@
 
 ## [New Action] - 2023-05-31
 
-- Addded Open Activity Monitor action
+- Added Open Activity Monitor action
 
 ## [New Additions] - 2022-07-12
 
