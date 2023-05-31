@@ -23,6 +23,9 @@ function Projects() {
     return data?.projects.filter((p) => !p.inbox_project) ?? [];
   }, [data]);
 
+  projects.forEach(project => {
+    project.task_num = data?.items.reduce((acc, p) => (p.project_id === project.id ? acc + 1 : acc), 0) ?? 0;
+  });
   async function toggleFavorite(project: TProject) {
     try {
       await showToast({
@@ -84,11 +87,13 @@ function Projects() {
             key={project.id}
             icon={getProjectIcon(project)}
             title={project.name}
+            subtitle={project.task_num.toString()}
             accessories={[
               {
                 icon: project.is_favorite ? { source: Icon.Star, tintColor: Color.Yellow } : undefined,
                 tooltip: project.is_favorite ? "Favorite" : undefined,
               },
+              // {text:project.task_num.toString()}
             ]}
             actions={
               <ActionPanel title={project.name}>

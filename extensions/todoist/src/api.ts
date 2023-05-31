@@ -47,6 +47,7 @@ export type Project = {
   inbox_project?: boolean;
   team_inbox?: boolean;
   view_style: ProjectViewStyle;
+  task_num:number;
 };
 
 export type SyncData = {
