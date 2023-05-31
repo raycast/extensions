@@ -7,8 +7,8 @@ import { getNumbersOnly, getEarningIcon } from "../utils/helpers";
 
 import CreditCardActions from "./creditCardActions";
 
-export default function CardDetails(props: { cardSlug: string }) {
-  const { cardSlug } = props;
+export default function CardDetails(props: { cardSlug: string; cardName: string }) {
+  const { cardSlug, cardName } = props;
 
   const url = `${apiUrl}/cards/${cardSlug}`;
 
@@ -28,7 +28,7 @@ export default function CardDetails(props: { cardSlug: string }) {
   const cardCurrency = card?.currency ?? "";
 
   return (
-    <List isLoading={isLoading}>
+    <List isLoading={isLoading} navigationTitle={`Card Details: ${cardName}`}>
       {card && (
         <>
           <List.Item

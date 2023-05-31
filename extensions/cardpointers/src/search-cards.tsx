@@ -50,7 +50,7 @@ export default function SearchCards(props: LaunchProps<{ arguments: CardNameQuer
                 <Action.Push
                   title="View Details"
                   icon={Icon.CreditCard}
-                  target={<CardDetails cardSlug={card.slug} />}
+                  target={<CardDetails cardSlug={card.slug} cardName={card.title} />}
                 />
                 <Action.OpenInBrowser
                   title="Open in CardPointers"
