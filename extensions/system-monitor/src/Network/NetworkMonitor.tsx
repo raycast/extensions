@@ -93,11 +93,13 @@ export default function NetworkMonitor() {
       <List.Item
         title={`Network`}
         icon={{ source: "connection.png", tintColor: Color.Blue }}
-        accessoryTitle={
-          state.processList.length
-            ? "↓ " + formatBytes(state.download) + "/s ↑ " + formatBytes(state.upload) + " /s"
-            : "Loading..."
-        }
+        accessories={[
+          {
+            text: state.processList.length
+              ? "↓ " + formatBytes(state.download) + "/s ↑ " + formatBytes(state.upload) + " /s"
+              : "Loading...",
+          },
+        ]}
         detail={
           <List.Item.Detail
             metadata={

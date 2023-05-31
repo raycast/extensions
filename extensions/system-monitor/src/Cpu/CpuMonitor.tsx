@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { cpuUsage, sysUptime } from "os-utils";
-import { Action, ActionPanel, List, showToast, Toast } from "@raycast/api";
+import { List, showToast, Toast } from "@raycast/api";
 import { loadavg } from "os";
 import { getTopCpuProcess, getRelativeTime } from "./CpuUtils";
 import { useInterval } from "usehooks-ts";
@@ -60,13 +60,11 @@ export default function CpuMonitor() {
     }
   }, [error]);
 
-  console.log(state);
-
   return (
     <>
       <List.Item
         title={`🖥️  CPU`}
-        accessoryTitle={isLoading ? "Loading..." : `${state.cpu}%`}
+        accessories={[{ text: isLoading ? "Loading..." : `${state.cpu}%` }]}
         detail={
           <List.Item.Detail
             metadata={
