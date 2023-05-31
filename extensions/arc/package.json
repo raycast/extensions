@@ -114,7 +114,7 @@
         {
           "name": "engine",
           "title": "Search Engine",
-          "description": "SSearch engine used to find search results",
+          "description": "Search engine used for suggestions",
           "type": "dropdown",
           "required": false,
           "default": "google",
