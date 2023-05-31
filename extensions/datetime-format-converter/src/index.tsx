@@ -6,7 +6,7 @@ export default function main() {
 
   function isValidFormat(format: string) {
     const regex =
-    /^((Y{2,4})[-\/]?(M{1,2})[-\/]?(D{1,2}))?(\s?((H{1,2})|(h{1,2}))[:]?(m{1,2})?[:]?(s{1,2})?)?(A{1})?(a{1})?(Z{1,2})?$/;
+      /^((Y{2,4})[-/]?(M{1,2})[-/]?(D{1,2}))?(\s?((H{1,2})|(h{1,2}))[:]?(m{1,2})?[:]?(s{1,2})?)?(A{1})?(a{1})?(Z{1,2})?$/;
     return regex.test(format);
   }
 
