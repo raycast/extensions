@@ -4,4 +4,4 @@
 
 ## Screenshot
 
-![](images/screenshot.png)
+![](metadata/hupu-1.png)
