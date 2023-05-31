@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, List, LocalStorage } from "@raycast/api";
+import { AI, Action, ActionPanel, Icon, List, LocalStorage, environment } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { SWRConfig } from "swr";
 import { cacheProvider } from "./lib/cache";
@@ -10,6 +10,7 @@ import { Search, SearchList } from "./components/Search";
 import { DefaultActions } from "./components/Actions";
 import { useIsLoggedIn } from "./lib/hooks";
 import { GameDataSimple } from "./types";
+import { GameRecommendations } from "./components/GameRecommendations";
 
 export default function Command() {
   return (
@@ -24,7 +25,7 @@ const App = () => {
   const [hovered, setHovered] = useState(0);
   const isLoggedIn = useIsLoggedIn();
   const { data: recentlyPlayed } = useRecentlyPlayedGames();
-  const { data: searchedGames } = useGamesSearch({ term: search, ready: search.length > 0 });
+  const { data: searchedGames } = useGamesSearch({ term: search, execute: search.length > 0 });
   const [recentlyViewed, setRecentlyViewed] = useState<GameDataSimple[]>();
   const { data: myGames } = useMyGames();
 
@@ -84,10 +85,17 @@ const App = () => {
               }
             />
           ) : null}
+          {isLoggedIn && environment.canAccess(AI) ? <GameRecommendations recentlyViewed={recentlyViewed} /> : null}
           {recentlyViewed && recentlyViewed?.length > 0 ? (
             <List.Section title="Recently Viewed Games">
               {recentlyViewed?.map((game) => (
-                <DynamicGameListItem key={game.appid} game={game} ready={true} myGames={myGames} />
+                <DynamicGameListItem
+                  context="recently-viewed"
+                  key={game.appid}
+                  game={game}
+                  ready={true}
+                  myGames={myGames}
+                />
               ))}
             </List.Section>
           ) : null}

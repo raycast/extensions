@@ -312,21 +312,23 @@ export default function Command() {
                         icon={{ source: Icon.Eye }}
                         target={<Message id={message.id} />}
                       />
-                      <Action
-                        title="View in Mail App"
-                        icon={{ source: Icon.AppWindow }}
-                        onAction={() => downloadEmail(message.downloadUrl, EmailViewMedium.MailApp)}
-                      />
-                      <Action
-                        title="View in Browser"
-                        icon={{ source: Icon.Globe }}
-                        onAction={() => downloadEmail(message.downloadUrl, EmailViewMedium.Browser)}
-                      />
-                      <Action
-                        title="Download Email"
-                        icon={{ source: Icon.Download }}
-                        onAction={() => downloadEmail(message.downloadUrl, EmailViewMedium.Finder)}
-                      />
+                      <ActionPanel.Submenu title="View Email Externally" icon={{ source: Icon.Upload }}>
+                        <Action
+                          title="Mail App"
+                          icon={{ source: Icon.AppWindow }}
+                          onAction={() => downloadEmail(message.downloadUrl, EmailViewMedium.MailApp)}
+                        />
+                        <Action
+                          title="Browser"
+                          icon={{ source: Icon.Globe }}
+                          onAction={() => downloadEmail(message.downloadUrl, EmailViewMedium.Browser)}
+                        />
+                        <Action
+                          title="Download Email"
+                          icon={{ source: Icon.Download }}
+                          onAction={() => downloadEmail(message.downloadUrl, EmailViewMedium.Finder)}
+                        />
+                      </ActionPanel.Submenu>
                     </ActionPanel.Section>
                     <ActionPanel.Section title="Modify">
                       <Action

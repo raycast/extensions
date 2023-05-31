@@ -2,12 +2,12 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "docker",
   "title": "Docker",
-  "version": "1.1.1",
   "description": "Manage Docker with Raycast",
   "icon": "docker-icon.png",
   "author": "priithaamer",
   "contributors": [
-    "gebeto"
+    "gebeto",
+    "BalliAsghar"
   ],
   "license": "MIT",
   "commands": [
@@ -35,18 +35,14 @@
   ],
   "preferences": [
     {
+      "description": "Path to Docker socket",
       "name": "socketPath",
-      "type": "textfield",
+      "placeholder": "/var/run/docker.sock",
       "required": false,
       "title": "Socket path",
-      "description": "Path to Docker socket",
-      "placeholder": "/var/run/docker.sock"
+      "type": "textfield"
     }
   ],
-  "scripts": {
-    "build": "ray build -e dist",
-    "dev": "ray develop"
-  },
   "dependencies": {
     "@priithaamer/dockerode": "^3.3.1-priithaamer.1",
     "@raycast/api": "^1.25.0",
@@ -62,5 +58,9 @@
     "eslint-plugin-react-hooks": "^4.2.0",
     "react-devtools": "^4.19.2",
     "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop"
   }
 }

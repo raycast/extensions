@@ -1,12 +1,12 @@
-import { getVPNStatusByName } from "./getVPN";
-import { CMD_PATH, runScriptSilently, SHELL_PATH } from "./utils";
+import { VPN } from "./type";
+import { CMD_PATH, runScript } from "./utils";
 
-export default async (VPNName: string) => {
-  const isConnected = await getVPNStatusByName(VPNName);
-  if (isConnected) {
-    await disconnectVPNByName(VPNName);
+export default async (VPN: VPN) => {
+  const VPNName = VPN.name;
+  if (VPN.isConnected) {
+    await disconnectVPNByName(VPNName, true);
   } else {
-    await connectVPNByName(VPNName);
+    await connectVPNByName(VPNName, true);
   }
 
   /*
@@ -22,12 +22,12 @@ export default async (VPNName: string) => {
     */
 };
 
-export async function disconnectVPNByName(VPNName: string) {
+export async function disconnectVPNByName(VPNName: string, isSilently = false) {
   const DISCONNECT_VPN = `${CMD_PATH} --nc stop "${VPNName}"`;
-  await runScriptSilently(DISCONNECT_VPN);
+  await runScript(DISCONNECT_VPN, isSilently);
 }
 
-export async function connectVPNByName(VPNName: string) {
+export async function connectVPNByName(VPNName: string, isSilently = false) {
   const CONNECT_VPN = `${CMD_PATH} --nc start "${VPNName}"`;
-  await runScriptSilently(CONNECT_VPN);
+  await runScript(CONNECT_VPN, isSilently);
 }

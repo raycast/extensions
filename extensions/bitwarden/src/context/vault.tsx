@@ -1,5 +1,5 @@
 import { showToast, Toast } from "@raycast/api";
-import { createContext, PropsWithChildren, useContext, useEffect, useMemo, useReducer } from "react";
+import { createContext, ReactNode, useContext, useMemo, useReducer } from "react";
 import { useVaultItemPublisher } from "~/components/searchVault/context/vaultListeners";
 import { useBitwarden } from "~/context/bitwarden";
 import { useSession } from "~/context/session";
@@ -7,6 +7,9 @@ import { Folder, Item, Vault } from "~/types/vault";
 import { captureException } from "~/utils/development";
 import useVaultCaching from "~/components/searchVault/utils/useVaultCaching";
 import { FailedToLoadVaultItemsError, getDisplayableErrorMessage } from "~/utils/errors";
+import useOnceEffect from "~/utils/hooks/useOnceEffect";
+import { useCachedState } from "@raycast/utils";
+import { CACHE_KEYS, FOLDER_OPTIONS } from "~/constants/general";
 
 export type VaultState = Vault & {
   isLoading: boolean;
@@ -14,36 +17,45 @@ export type VaultState = Vault & {
 
 export type VaultContextType = VaultState & {
   isEmpty: boolean;
-  isLoading: boolean;
   syncItems: () => Promise<void>;
+  loadItems: () => Promise<void>;
+  currentFolderId: Nullable<string>;
+  setCurrentFolder: (folderOrId: Nullable<string | Folder>) => void;
 };
 
 const VaultContext = createContext<VaultContextType | null>(null);
 
-const initialState: VaultState = { items: [], folders: [], isLoading: true };
+function getInitialState(fetchOnMount = true): VaultState {
+  return { items: [], folders: [], isLoading: fetchOnMount };
+}
 
-export const VaultProvider = ({ children }: PropsWithChildren) => {
+export type VaultProviderProps = {
+  children: ReactNode;
+  fetchOnMount?: boolean;
+};
+
+export function VaultProvider(props: VaultProviderProps) {
+  const { children, fetchOnMount = true } = props;
+
   const session = useSession();
   const bitwarden = useBitwarden();
   const publishItems = useVaultItemPublisher();
   const { getCachedVault, cacheVault } = useVaultCaching();
+
+  const [currentFolderId, setCurrentFolderId] = useCachedState<Nullable<string>>(CACHE_KEYS.CURRENT_FOLDER_ID, null);
   const [state, setState] = useReducer(
     (previous: VaultState, next: Partial<VaultState>) => ({ ...previous, ...next }),
-    { ...initialState, ...getCachedVault() }
+    { ...getInitialState(fetchOnMount), ...getCachedVault() }
   );
 
-  const isEmpty = state.items.length == 0;
-  const isLoading = session.isLoading || state.isLoading;
-
-  useEffect(() => {
-    if (!session.active) return;
-    if (session.token) {
-      void loadItems();
-    }
-  }, [session.token, session.active]);
+  useOnceEffect(() => {
+    void loadItems();
+  }, fetchOnMount && session.active && session.token);
 
   async function loadItems() {
     try {
+      setState({ isLoading: true });
+
       let items: Item[] = [];
       let folders: Folder[] = [];
       try {
@@ -79,20 +91,39 @@ export const VaultProvider = ({ children }: PropsWithChildren) => {
     }
   }
 
-  const memoizedValue = useMemo(
-    () => ({ ...state, isEmpty, isLoading, syncItems }),
-    [state, isEmpty, isLoading, syncItems]
+  async function setCurrentFolder(folderOrId: Nullable<string | Folder>) {
+    setCurrentFolderId(typeof folderOrId === "string" ? folderOrId : folderOrId?.id);
+  }
+
+  const memoizedValue: VaultContextType = useMemo(
+    () => ({
+      ...state,
+      items: filterItemsByFolderId(state.items, currentFolderId),
+      isEmpty: state.items.length == 0,
+      isLoading: state.isLoading || session.isLoading,
+      currentFolderId,
+      syncItems,
+      loadItems,
+      setCurrentFolder,
+    }),
+    [state, session.isLoading, currentFolderId, syncItems, loadItems, setCurrentFolder]
   );
 
   return <VaultContext.Provider value={memoizedValue}>{children}</VaultContext.Provider>;
-};
+}
+
+function filterItemsByFolderId(items: Item[], folderId: Nullable<string>) {
+  if (!folderId || folderId === FOLDER_OPTIONS.ALL) return items;
+  if (folderId === FOLDER_OPTIONS.NO_FOLDER) return items.filter((item) => item.folderId === null);
+  return items.filter((item) => item.folderId === folderId);
+}
 
 function favoriteItemsFirstSorter(a: Item, b: Item) {
   if (a.favorite && b.favorite) return 0;
   return a.favorite ? -1 : 1;
 }
 
-export const useVault = () => {
+export const useVaultContext = () => {
   const context = useContext(VaultContext);
   if (context == null) {
     throw new Error("useVault must be used within a VaultProvider");

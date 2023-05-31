@@ -1,5 +1,10 @@
 # Bear Changelog
 
+## [Adding tag's filter in search notes] - 2023-05-23
+
+- Adding tag's filter in search notes command
+- Changing `cmd+p` from preview to filter notes to `cmd+shift+p` to be consistent with Raycast's conventions
+
 ## [Add support for Bear 2] - 2023-04-01
 
 - Add support for Bear 2

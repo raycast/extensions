@@ -1,5 +1,6 @@
-import { applyTextTransform } from "./utils";
-import { appendToDailyNote, ReflectApiError } from "./api";
+import { authorize } from "./helpers/oauth";
+import { prependTimestampIfSelected } from "./helpers/dates";
+import { appendToDailyNote, ReflectApiError } from "./helpers/api";
 import { getPreferenceValues, openExtensionPreferences, LaunchProps } from "@raycast/api";
 import { confirmAlert, showToast, Toast, closeMainWindow } from "@raycast/api";
 
@@ -12,9 +13,10 @@ export default async (props: LaunchProps<{ arguments: Arguments.QuickAppend }>) 
   });
 
   try {
-    const text = applyTextTransform(props.fallbackText || props.arguments.text, preferences);
+    const authorizationToken = await authorize();
+    const text = prependTimestampIfSelected(props.fallbackText || props.arguments.text, preferences);
 
-    await appendToDailyNote(preferences.authorizationToken, preferences.graphId, text, preferences.listName);
+    await appendToDailyNote(authorizationToken, preferences.graphId, text, preferences.listName);
 
     toast.hide();
   } catch (error) {

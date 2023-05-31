@@ -145,9 +145,13 @@ export function DirectoryItem(props: { fileData: FileDataType; refresh: () => vo
             {preferences.showDeleteActions && (
               <Action
                 title="Delete Directory"
-                icon={Icon.Trash}
+                icon={Icon.Eraser}
                 style={Action.Style.Destructive}
-                shortcut={{ modifiers: ["cmd"], key: "d" }}
+                shortcut={
+                  preferences.standardShortcuts
+                    ? { modifiers: ["ctrl", "shift"], key: "x" }
+                    : { modifiers: ["cmd"], key: "d" }
+                }
                 onAction={() => deleteDirectory(filePath, props.fileData.name, props.refresh)}
               />
             )}
@@ -257,9 +261,13 @@ export function SymlinkItem(props: { fileData: FileDataType; refresh: () => void
             {preferences.showDeleteActions && (
               <Action
                 title="Delete Symlink Directory"
-                icon={Icon.Trash}
+                icon={Icon.Eraser}
                 style={Action.Style.Destructive}
-                shortcut={{ modifiers: ["cmd"], key: "d" }}
+                shortcut={
+                  preferences.standardShortcuts
+                    ? { modifiers: ["ctrl", "shift"], key: "x" }
+                    : { modifiers: ["cmd"], key: "d" }
+                }
                 onAction={() => deleteDirectory(filePath, props.fileData.name, props.refresh)}
               />
             )}
@@ -300,9 +308,13 @@ export function SymlinkItem(props: { fileData: FileDataType; refresh: () => void
             {preferences.showDeleteActions && (
               <Action
                 title="Delete Symlink File"
-                icon={Icon.Trash}
+                icon={Icon.Eraser}
                 style={Action.Style.Destructive}
-                shortcut={{ modifiers: ["cmd"], key: "d" }}
+                shortcut={
+                  preferences.standardShortcuts
+                    ? { modifiers: ["ctrl", "shift"], key: "x" }
+                    : { modifiers: ["cmd"], key: "d" }
+                }
                 onAction={() => deleteFile(filePath, props.fileData.name, props.refresh)}
               />
             )}
