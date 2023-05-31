@@ -16,7 +16,11 @@ export default function OfferActions({
   return (
     <ActionPanel title="Offer Details">
       {showViewDetails && (
-        <Action.Push title="View Details" icon={Icon.LightBulb} target={<OfferDetails offerSlug={offer.slug} />} />
+        <Action.Push
+          title="View Details"
+          icon={Icon.LightBulb}
+          target={<OfferDetails offerSlug={offer.slug} offerName={offer.title} />}
+        />
       )}
 
       <Action.OpenInBrowser

@@ -9,8 +9,8 @@ import OfferActions from "./offerActions";
 
 import CardDetails from "./cardDetails";
 
-export default function OfferDetails(props: { offerSlug: string }) {
-  const { offerSlug } = props;
+export default function OfferDetails(props: { offerSlug: string; offerName: string }) {
+  const { offerSlug, offerName } = props;
 
   const url = `${apiUrl}/offers/${offerSlug}`;
 
@@ -26,7 +26,7 @@ export default function OfferDetails(props: { offerSlug: string }) {
   }
 
   return (
-    <List isLoading={isLoading} navigationTitle="Offer Details">
+    <List isLoading={isLoading} navigationTitle={`Offer Details: ${offerName}`}>
       {offer && (
         <>
           <List.Item
@@ -109,7 +109,10 @@ export default function OfferDetails(props: { offerSlug: string }) {
                   keywords={["Related Offers"]}
                   actions={
                     <ActionPanel title="Related Offer">
-                      <Action.Push title="View Offer" target={<OfferDetails offerSlug={relatedOffer.slug} />} />
+                      <Action.Push
+                        title="View Offer"
+                        target={<OfferDetails offerSlug={relatedOffer.slug} offerName={relatedOffer.title} />}
+                      />
                       <Action.OpenInBrowser
                         title="Open in CardPointers"
                         url={`cardpointers://open/offer/${relatedOffer.slug}`}
@@ -136,7 +139,10 @@ export default function OfferDetails(props: { offerSlug: string }) {
                   keywords={["Top Cards", "Cards"]}
                   actions={
                     <ActionPanel title="Related Card">
-                      <Action.Push title="View Card" target={<CardDetails cardSlug={card.slug} />} />
+                      <Action.Push
+                        title="View Card"
+                        target={<CardDetails cardSlug={card.slug} cardName={card.name} />}
+                      />
                       <Action.OpenInBrowser
                         title="Open in CardPointers"
                         url={`cardpointers://open/cards/${card.slug}`}

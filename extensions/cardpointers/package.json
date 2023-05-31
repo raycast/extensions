@@ -30,7 +30,6 @@
       "name": "top-cards",
       "title": "View Top 10 Cards",
       "subtitle": "CardPointers",
-      "subtitle": "Updated Monthly by CardPointers",
       "description": "View this month's top 10 credit cards.",
       "mode": "view"
     },
