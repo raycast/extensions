@@ -56,6 +56,7 @@ export default function Command() {
       highlightHighlightedAt,
       highlightLocation,
       highlightNote,
+      highlightNoteSupertag,
       highlightSupertag,
       highlightUpdatedAt,
       highlightUrl,
@@ -140,7 +141,11 @@ export default function Command() {
     highlights += '\n{{#each note}}'
     highlights += highlightNote
       ? `{{#if this}}    - ${highlightNote}:: {{this}}{{/if}}`
-      : '{{#if this}}    - {{this}}{{/if}}'
+      : `{{#if this}}    - {{this}}${
+          highlightNoteSupertag
+            ? ` #[[${highlightNoteSupertag.replaceAll('#', '')}]]`
+            : ''
+        }{{/if}}`
     highlights += '\n{{/each}}'
 
     highlights += '\n{{/each}}'
