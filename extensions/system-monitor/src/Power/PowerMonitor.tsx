@@ -11,6 +11,7 @@ import {
 } from "./PowerUtils";
 import { useInterval } from "usehooks-ts";
 import { ExecError, PowerMonitorState } from "../Interfaces";
+import { Actions } from "../components/Actions";
 
 const PowerMonitor = () => {
   const [isLoading, setIsLoading] = useState(true);
@@ -115,6 +116,7 @@ const PowerMonitor = () => {
           }
         />
       }
+      actions={<Actions />}
     />
   );
 };

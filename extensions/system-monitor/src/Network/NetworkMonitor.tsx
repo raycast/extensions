@@ -4,6 +4,7 @@ import { getNetworkData } from "./NetworkUtils";
 import { useInterval } from "usehooks-ts";
 import { formatBytes, isObjectEmpty } from "../utils";
 import { ExecError, NetworkMonitorState } from "../Interfaces";
+import { Actions } from "../components/Actions";
 
 export default function NetworkMonitor() {
   const [error, setError] = useState<ExecError>();
@@ -111,7 +112,7 @@ export default function NetworkMonitor() {
                 />
                 <List.Item.Detail.Metadata.Separator />
                 <List.Item.Detail.Metadata.Label title="Process Name" />
-                {state.processList &&
+                {state.processList.length > 0 &&
                   state.processList.map((value, index) => {
                     return (
                       <List.Item.Detail.Metadata.Label
@@ -125,6 +126,7 @@ export default function NetworkMonitor() {
             }
           />
         }
+        actions={<Actions />}
       />
     </>
   );
