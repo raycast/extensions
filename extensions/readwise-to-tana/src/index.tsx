@@ -24,7 +24,17 @@ export default function Command() {
     const getTemplate = async () => {
       const template = await LocalStorage.getItem<string>('template')
 
-      setTemplate(template ?? '%%tana%%\n')
+      let defaultTemplate = '%%tana%%'
+
+      defaultTemplate += '\n- {{title}}'
+
+      let defaultHighlights = '\n\n{{#each highlights}}'
+      defaultHighlights += '\n  - {{text}}'
+      defaultHighlights += '\n{{/each}}'
+
+      defaultTemplate += defaultHighlights
+
+      setTemplate(template ?? defaultTemplate)
     }
 
     getTemplate()
