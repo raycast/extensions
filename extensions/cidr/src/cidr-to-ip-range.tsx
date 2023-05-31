@@ -25,29 +25,32 @@ export default function CIDRToIPRange(props: { arguments: CIDRArgument }) {
       onSearchTextChange={setSearchContent}
       throttle={true}
     >
-      {
-        isEmpty(searchContent) ? <IpEmptyView title={"Waiting for CIDR input"} /> :
-          !res.ok ? <IpEmptyView title={`${res.val.msg}`} /> :
-            Object.entries(convertCIDRToMap(splitCIDR(res.val))).map(
-              ([key, value], index) => {
-                return <List.Item
-                  key={index}
-                  icon={PANEL_MAPPINGS[key].icon}
-                  title={PANEL_MAPPINGS[key].itemName}
-                  subtitle={`${value}`}
-                  actions={
-                    <ActionPanel>
-                      <Action.CopyToClipboard icon={PANEL_MAPPINGS[key].icon} title={`Copy ${PANEL_MAPPINGS[key].itemName}`} content={`${value}`} />
-                      <Action.CopyToClipboard
-                        title="Copy All Info"
-                        content={JSON.stringify(splitCIDR(res.val))}
-                      />
-                    </ActionPanel>
-                  }
-                />
+      {isEmpty(searchContent) ? (
+        <IpEmptyView title={"Waiting for CIDR input"} />
+      ) : !res.ok ? (
+        <IpEmptyView title={`${res.val.msg}`} />
+      ) : (
+        Object.entries(convertCIDRToMap(splitCIDR(res.val))).map(([key, value], index) => {
+          return (
+            <List.Item
+              key={index}
+              icon={PANEL_MAPPINGS[key].icon}
+              title={PANEL_MAPPINGS[key].itemName}
+              subtitle={`${value}`}
+              actions={
+                <ActionPanel>
+                  <Action.CopyToClipboard
+                    icon={PANEL_MAPPINGS[key].icon}
+                    title={`Copy ${PANEL_MAPPINGS[key].itemName}`}
+                    content={`${value}`}
+                  />
+                  <Action.CopyToClipboard title="Copy All Info" content={JSON.stringify(splitCIDR(res.val))} />
+                </ActionPanel>
               }
-            )
-      }
+            />
+          );
+        })
+      )}
     </List>
   );
 }
