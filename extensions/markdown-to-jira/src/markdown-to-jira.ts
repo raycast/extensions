@@ -1,5 +1,5 @@
 import { showHUD, Clipboard, getSelectedText, showToast, Toast } from "@raycast/api";
-import jira2md from 'jira2md';
+import jira2md from "jira2md";
 
 export default async function main() {
   try {

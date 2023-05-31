@@ -1,1 +1,1 @@
-declare module 'jira2md';
+declare module "jira2md";
