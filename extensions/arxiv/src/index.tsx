@@ -19,6 +19,7 @@ export default function Command() {
     "http://export.arxiv.org/api/query?" + constructSearchQuery(searchText || DEFAULT_TEXT, MAX_RESULTS),
     {
       parseResponse: parseResponse,
+      execute: searchText.length > 0,
     }
   );
 
@@ -29,6 +30,8 @@ export default function Command() {
       ({ category: entryCategory }: SearchResult) =>
         category == "" || category === "phys" || entryCategory.includes(category)
     );
+
+  const title = isLoading ? "Loading..." : searchText.length ? "No Results" : "Use the search bar above to get started";
 
   return (
     <List
@@ -49,14 +52,11 @@ export default function Command() {
         </List.Dropdown>
       }
     >
-      {searchText === "" && filteredData?.length === 0 ? (
-        <List.EmptyView icon={{ source: "../assets/arxiv-logo.png" }} title="Use the search bar above to get started" />
-      ) : (
-        <List.Section title="Results" subtitle={filteredData?.length + ""}>
-          {filteredData?.length == 0 && <List.Item title="No results found." />}
-          {filteredData?.map((searchResult: SearchResult) => constructSearchListItem(searchResult))}
-        </List.Section>
-      )}
+      <List.EmptyView icon={{ source: "../assets/1arxiv-logo.png" }} title={title} />
+
+      <List.Section title="Results" subtitle={filteredData?.length + ""}>
+        {filteredData?.map((searchResult: SearchResult) => constructSearchListItem(searchResult))}
+      </List.Section>
     </List>
   );
 }

@@ -5,6 +5,9 @@
   "description": "Search the arXiv for papers and find citations. For Researchers, Students and Scholars in Computer Science, Mathematics, Physics, Quantitative Biology, Quantitative Finance, Statistics, Electrical Engineering and Systems Science, and Economics.",
   "icon": "arxiv-icon.png",
   "author": "koayon",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "categories": [
     "Productivity",
     "Web",
