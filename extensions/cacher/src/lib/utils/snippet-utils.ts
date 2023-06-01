@@ -8,7 +8,9 @@ import { format } from "date-fns";
 
 export type SnippetWithLibrary = Snippet & { libraryGuid: string; libraryName: string; teamGuid?: string };
 
-export function getSnippets(response: SnippetsResponse): SnippetWithLibrary[] {
+export function getSnippets(response: SnippetsResponse | undefined): SnippetWithLibrary[] {
+  if (!response) return [];
+
   let snippets: SnippetWithLibrary[] = [
     ...response.personalLibrary.snippets.map((snippet) => ({
       ...snippet,
@@ -31,14 +33,20 @@ export function getSnippets(response: SnippetsResponse): SnippetWithLibrary[] {
   return snippets;
 }
 
-function getAllLabels(response: SnippetsResponse) {
+function getAllLabels(response: SnippetsResponse | undefined) {
   const labels: Label[] = [];
+  if (!response) {
+    return labels;
+  }
+
   response.personalLibrary.labels.forEach((label) => labels.push(label));
   response.teams.forEach((team) => team.library.labels.forEach((label) => labels.push(label)));
   return labels;
 }
 
-export function getLabelsForSnippet(response: SnippetsResponse, snippet: Snippet) {
+export function getLabelsForSnippet(response: SnippetsResponse | undefined, snippet: Snippet) {
+  if (!response) return [];
+
   const labels = getAllLabels(response);
   const labelsForSnippet = labels.filter((label) => label.snippets.some((s) => s.guid === snippet.guid));
   return labelsForSnippet;

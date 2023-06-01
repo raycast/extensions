@@ -24,7 +24,7 @@ function SnippetItem({
   isShowingDetail,
   setIsShowingDetail,
 }: {
-  response: SnippetsResponse;
+  response: SnippetsResponse | undefined;
   snippet: SnippetWithLibrary;
   file: SnippetFile;
   isShowingDetail: boolean;
@@ -106,26 +106,24 @@ export default function SearchSnippets() {
   }
 
   return (
-    response && (
-      <List
-        searchText={searchQuery}
-        onSearchTextChange={setSearchQuery}
-        isShowingDetail={isShowingDetail}
-        isLoading={isLoading}
-        searchBarPlaceholder="Search snippets"
-        searchBarAccessory={<SearchBarAccessory response={response} filter={filter} setFilter={setFilter} />}
-      >
-        {filteredFiles.map((file) => (
-          <SnippetItem
-            key={file.guid}
-            response={response}
-            snippet={file.snippet}
-            file={file}
-            isShowingDetail={isShowingDetail}
-            setIsShowingDetail={setIsShowingDetail}
-          />
-        ))}
-      </List>
-    )
+    <List
+      searchText={searchQuery}
+      onSearchTextChange={setSearchQuery}
+      isShowingDetail={isShowingDetail}
+      isLoading={isLoading}
+      searchBarPlaceholder="Search snippets"
+      searchBarAccessory={<SearchBarAccessory response={response} filter={filter} setFilter={setFilter} />}
+    >
+      {filteredFiles.map((file) => (
+        <SnippetItem
+          key={file.guid}
+          response={response}
+          snippet={file.snippet}
+          file={file}
+          isShowingDetail={isShowingDetail}
+          setIsShowingDetail={setIsShowingDetail}
+        />
+      ))}
+    </List>
   );
 }

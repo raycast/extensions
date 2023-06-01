@@ -13,10 +13,14 @@ function LabelItem({ label }: { label: Label }) {
 interface SearchBarAccessoryProps {
   filter: SNIPPETS_FILTER;
   setFilter: (value: SNIPPETS_FILTER) => void;
-  response: SnippetsResponse;
+  response: SnippetsResponse | undefined;
 }
 
 export function SearchBarAccessory({ response, filter, setFilter }: SearchBarAccessoryProps) {
+  if (!response) {
+    return null;
+  }
+
   const personalLibrary = response.personalLibrary;
   const teams = response.teams;
 
