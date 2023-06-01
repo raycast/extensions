@@ -3,22 +3,10 @@ import { useCachedPromise } from "@raycast/utils";
 
 const API_URL = "https://cht.sh";
 
-function getCheatsheetList(url: string) {
-  const { isLoading, data } = useCachedPromise(
-    async (url: string) => {
-      const response = await fetch(url);
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      const result = await response.text();
-      return result.split("\n");
-    },
-    [`${API_URL}${url}/:list`],
-    { initialData: [] }
-  );
-  let tmp = data as string[];
-  tmp = tmp.filter((name) => name && !name.includes(":") && !name.includes("/"));
-  return { isLoading, data: tmp };
+async function getCheatsheetList(url: string) {
+  const data = await fetch(`${API_URL}${url}/:list`).then((res) => res.text());
+  const tmp = data.split("\n");
+  return tmp.filter((name) => name && !name.includes(":") && !name.includes("/"));
 }
 
 function searchCheatsheet(url: string, search: string, count: number) {

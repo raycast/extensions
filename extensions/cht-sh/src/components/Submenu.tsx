@@ -9,10 +9,17 @@ interface SubmenuProps {
 }
 
 export default function Submenu(props: SubmenuProps) {
-  const { isLoading, data } = getCheatsheetList(`/${props.url}`);
-
+  const [data, setData] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [searchText, setSearchText] = useState("");
   const [filteredData, setFilteredData] = useState<string[]>(data);
+
+  useEffect(() => {
+    getCheatsheetList(`/${props.url}`).then((data) => {
+      setData(data);
+      setIsLoading(false);
+    });
+  }, [props.url]);
 
   useEffect(() => {
     if (!searchText) {
@@ -20,7 +27,7 @@ export default function Submenu(props: SubmenuProps) {
       return;
     }
     setFilteredData(searchStringArray(data, searchText));
-  }, [searchText]);
+  }, [searchText, data]);
 
   const navigationTitle = props.url === "/" ? "Cheatsheets" : `Cheatsheets: ${props.url}`;
 

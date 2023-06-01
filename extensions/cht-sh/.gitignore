@@ -12,3 +12,5 @@ raycast-env.d.ts
 # Editors
 .idea
 .vscode
+
+pnpm-lock.yaml

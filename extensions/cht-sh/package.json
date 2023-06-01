@@ -12,10 +12,10 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "index",
+      "name": "cheatsheets",
       "title": "Cheatsheets",
-      "subtitle": "Show cheatsheets",
-      "description": "Show cheatsheets",
+      "subtitle": "Show Cheatsheets",
+      "description": "Show Cheatsheets",
       "mode": "view"
     }
   ],
