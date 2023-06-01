@@ -21,7 +21,6 @@ export default function PhpDatePicker() {
 			/>
 			
 			<FavoritesSection
-				enabled={"" === searchText}	
 				favorites={favorites} 
 				removeFavorite={removeFavorite} 
 			/>
@@ -89,8 +88,8 @@ function InputSection({input, onAddFavorite}: { input: string, onAddFavorite: ()
 	);
 }
 
-function FavoritesSection({favorites, enabled, removeFavorite}: { favorites: string[], enabled: boolean, removeFavorite: (favorite: string) => Promise<void> }) {
-	if (!favorites.length || !enabled) {
+function FavoritesSection({favorites, removeFavorite}: { favorites: string[], removeFavorite: (favorite: string) => Promise<void> }) {
+	if (!favorites.length) {
 		return null;
 	}
 	
