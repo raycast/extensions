@@ -31,7 +31,7 @@ export function useMe() {
   const getMyStatuses = async () => {
     try {
       showToast(Toast.Style.Animated, "Loading Statuses...");
-      await apiServer.fetchUserStatus();
+      const statuses = await apiServer.fetchUserStatus();
 
       setStatuses(statuses);
       showToast(Toast.Style.Success, "Statuses loaded");
