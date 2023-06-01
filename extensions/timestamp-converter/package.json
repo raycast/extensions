@@ -2,10 +2,10 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "timestamp-converter",
   "title": "Develop Tools",
-  "description": "convert to time or date by user input",
+  "description": "convert timestamp to date or date to timestamp",
   "icon": "command-icon.png",
   "author": "beacya",
-  "owner": "codog",
+  "owner": "beacya",
   "license": "MIT",
   "commands": [
     {
