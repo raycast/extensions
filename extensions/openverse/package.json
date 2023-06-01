@@ -5,7 +5,7 @@
   "title": "Openverse",
   "description": "Openverse is a search engine for openly-licensed media.",
   "icon": "openverse-icon.png",
-  "author": "dhruvkb",
+  "author": "wp_openverse",
   "categories": [
     "Media",
     "Web"

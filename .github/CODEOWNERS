@@ -634,7 +634,7 @@
 /extensions/openai-translator                        @douo
 /extensions/openfortivpn                             @rafalpetryka
 /extensions/openstreetmap-search                     @crisboarna
-/extensions/openverse                                @dhruvkb
+/extensions/openverse                                @openverse-bot @dhruvkb
 /extensions/openweathermap                           @tonka3000
 /extensions/opera                                    @crisboarna
 /extensions/opsgenie                                 @ricoberger
