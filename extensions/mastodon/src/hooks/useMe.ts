@@ -30,7 +30,6 @@ export function useMe() {
 
   const getMyStatuses = async () => {
     try {
-      await getAccessToken();
       showToast(Toast.Style.Animated, "Loading Statuses...");
       await apiServer.fetchUserStatus();
 
