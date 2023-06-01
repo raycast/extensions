@@ -25,10 +25,7 @@ export function ShowTime() {
           icon={item.icon}
           actions={
             <ActionPanel title="Copy to Clipboard">
-              <Action.CopyToClipboard
-                title="Copy to Clipboard"
-                content={item.val}
-              />
+              <Action.CopyToClipboard title="Copy to Clipboard" content={item.val} />
             </ActionPanel>
           }
         />
