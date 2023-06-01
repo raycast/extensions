@@ -10,7 +10,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "timestamp-converter",
+      "title": "Timestamp-converter",
       "description": "convert timestamp.",
       "mode": "view"
     }

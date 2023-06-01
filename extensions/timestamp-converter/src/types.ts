@@ -5,4 +5,4 @@ export type TimeItem = {
   tType: string;
   icon: string;
   ctime: string;
-}
+};

@@ -1,5 +1,5 @@
 export function convertDateString(dateString: string) {
-  return  new Date(dateString).getTime() / 1000;
+  return new Date(dateString).getTime() / 1000;
 }
 
 export function convertTimestamp(timestamp: number) {
