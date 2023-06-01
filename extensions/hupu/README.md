@@ -1,6 +1,6 @@
 # Raycast Search Hupu
 
-通过Raycast来浏览[虎扑步行街](https://bbs.hupu.com/all-gambia)!
+Read posts from [Hupu China](https://bbs.hupu.com/all-gambia) via Raycast!
 
 ## Screenshot
 
