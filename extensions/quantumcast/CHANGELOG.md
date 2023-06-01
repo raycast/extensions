@@ -1,6 +1,6 @@
 # Quantumcast Changelog
 
-## [0.0.5] - 2023-xx-xx
+## [0.0.5] - 2023-05-31
 
 - ✨ New - Extension preferences `Cloudflow User Name`
 - ✨ New - Extension preferences `Cloudflow User Password`
