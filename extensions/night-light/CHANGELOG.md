@@ -1,8 +1,8 @@
 # Night Light Changelog
 
-## [Fixes & Bits] - 2023-05-12
+## [Add Extension Preferences] - 2023-06-01
 
-- Clear search for `no-view` commands
+- Add preference setting to close Raycast window
 - Upgrade dependencies
 
 ## [Initial Version] - 2022-07-20
