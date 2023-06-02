@@ -19,6 +19,28 @@ export default function ScanWifi() {
     <List isLoading={loading} searchBarPlaceholder={"Search Wi-Fi"}>
       <EmptyView title={"No Wi-Fi"} description={wifiStatus ? " " : "Wi-Fi is turned off"} />
 
+      {curWifi.length > 0 && curWifi[0].ssid && (
+        <List.Section title={"Connected"}>
+          <List.Item
+            icon={{
+              source: Icon.Wifi,
+              tintColor: Color.Green,
+            }}
+            title={curWifi[0].ssid}
+            subtitle={{ value: curWifi[0].security, tooltip: curWifi[0].security_flags.join(", ") }}
+            accessories={[
+              {
+                icon: {
+                  source: getSignalIcon(curWifi[0].quality),
+                  tintColor: curWifi[0].quality < 40 ? Color.Red : curWifi[0].quality < 70 ? Color.Orange : Color.Green,
+                },
+                tooltip: curWifi[0].quality + "%",
+              },
+            ]}
+          />
+        </List.Section>
+      )}
+
       <List.Section title={"Preferred"}>
         {wifiWithPasswordList.map((value, index) => {
           return (

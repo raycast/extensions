@@ -23,15 +23,18 @@ export async function initializeApi() {
 }
 
 export function withTodoistApi(component: JSX.Element) {
+  // eslint-disable-next-line react-hooks/rules-of-hooks
   const [x, forceRerender] = useState(0);
 
   // we use a `useMemo` instead of `useEffect` to avoid a render
+  // eslint-disable-next-line react-hooks/rules-of-hooks
   useMemo(() => {
     (async function () {
       await initializeApi();
 
       forceRerender(x + 1);
     })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   if (!todoistApi) {

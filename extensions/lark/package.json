@@ -68,16 +68,18 @@
     "dev": "ray develop"
   },
   "dependencies": {
-    "@raycast/api": "^1.35.2",
-    "dayjs": "^1.11.2",
-    "got": "^12.1.0",
-    "qrcode": "^1.5.0",
+    "@raycast/api": "^1.51.3",
+    "@raycast/utils": "^1.6.1",
+    "@tanstack/react-query": "^5.0.0-alpha.35",
+    "dayjs": "^1.11.7",
+    "got": "^12.6.0",
+    "qrcode": "^1.5.3",
     "string": "^3.3.3",
-    "tough-cookie": "^4.0.0"
+    "tough-cookie": "^4.1.2"
   },
   "devDependencies": {
     "@types/node": "~17.0.35",
-    "@types/qrcode": "^1.4.2",
+    "@types/qrcode": "^1.5.0",
     "@types/react": "^18.0.9",
     "@types/string": "^0.0.31",
     "@types/tough-cookie": "^4.0.2",
@@ -86,6 +88,6 @@
     "eslint": "^8.16.0",
     "eslint-config-prettier": "^8.5.0",
     "react-devtools": "^4.24.6",
-    "typescript": "^4.7.2"
+    "typescript": "^5.0.4"
   }
 }

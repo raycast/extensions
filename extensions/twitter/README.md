@@ -89,7 +89,7 @@ After all these steps you should have all required 4 tokens.
 
 Store them in a secure box, twitter want display that again for you.
 
-You also need to activate `OAuth 1.0a` for at least `v1` API, otherwise you will get an `403` error. Activate `v2` is recommended, but right no not required.
+You also need to activate `OAuth 1.0a` for at least `v1` API, otherwise you will get an `403` error. Activate `v2` is recommended, but right now not required.
 
 - Click on your Twitter app on https://apps.twitter.com 
 - Navigate to `User authentication settings`

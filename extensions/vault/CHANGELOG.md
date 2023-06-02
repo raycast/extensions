@@ -1,5 +1,14 @@
 # Vault Changelog
 
+## [Fix] - 2023-05-26
+
+- Update dependencies
+- Fix issue when wrong namespace was set and could not change it afterward 
+
+## [Secret Engine Selection] - 2023-05-24
+
+- Add possibility to select secret engine (via action 'List Engines' or directly in preferences)
+
 ## [Export Env] - 2023-05-16
 
 - Add export to env format

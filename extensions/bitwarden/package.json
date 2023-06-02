@@ -159,6 +159,26 @@
           ]
         }
       ]
+    },
+    {
+      "name": "lock-vault",
+      "title": "Lock Vault",
+      "subtitle": "Bitwarden",
+      "description": "Lock your bitwarden vault",
+      "icon": "lock-vault.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "logout-vault",
+      "title": "Logout",
+      "subtitle": "Bitwarden",
+      "description": "Logout from your bitwarden vault account",
+      "icon": "logout-vault.png",
+      "mode": "no-view",
+      "keywords": [
+        "log out",
+        "account"
+      ]
     }
   ],
   "preferences": [
@@ -265,6 +285,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.49.3",
+    "@raycast/utils": "^1.6.1",
     "execa": "^7.0.0"
   },
   "devDependencies": {
@@ -277,6 +298,7 @@
     "eslint": "^8.35.0",
     "eslint-config-prettier": "^8.6.0",
     "eslint-plugin-prettier": "^4.2.1",
+    "eslint-plugin-promise": "^6.1.1",
     "eslint-plugin-react-hooks": "^4.6.0",
     "jest": "^29.5.0",
     "prettier": "^2.8.4",

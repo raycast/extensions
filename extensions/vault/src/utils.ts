@@ -3,12 +3,13 @@ import {
   DeleteMode,
   ExportMode,
   VAULT_NAMESPACE_CACHE_KEY,
+  VAULT_SECRET_ENGINE_CACHE_KEY,
   VAULT_TOKEN_CACHE_KEY,
-  VaultAuth,
   VaultEntity,
   VaultListEntry,
   VaultLoginResponse,
   VaultMetaDataResponse,
+  VaultMount,
   VaultReadMetadataResponse,
   VaultReadResponse,
   VaultTokenCache,
@@ -21,8 +22,10 @@ import fs from "fs";
 import hdate from "human-date";
 import Values = Form.Values;
 
+const NO_NAMESPACE = "<EMPTY>";
+
 const preferences = getPreferenceValues<Preferences.Vault>();
-const vaultUrl = (preferences.url || "").replace(/\/$/, "");
+const vaultUrl = preferences.url.replace(/\/$/, "");
 const cache = new Cache();
 
 export function writeEnabled(): boolean {
@@ -48,14 +51,35 @@ export function getVaultUrl(): string {
   return vaultUrl;
 }
 
-export function getVaultNamespace(): string | undefined {
+export function getVaultNamespaceConfiguration(): string | null | undefined {
   return cache.get(VAULT_NAMESPACE_CACHE_KEY);
 }
 
+export function getVaultNamespace(): string {
+  const namespaceInCache = cache.get(VAULT_NAMESPACE_CACHE_KEY);
+  if (!namespaceInCache || namespaceInCache === NO_NAMESPACE) {
+    return "";
+  }
+  return namespaceInCache;
+}
+
 export function setVaultNamespace(newNamespace: string) {
-  cache.set(VAULT_NAMESPACE_CACHE_KEY, newNamespace);
+  const newNamespaceInCache = newNamespace === "" ? NO_NAMESPACE : newNamespace;
+  cache.set(VAULT_NAMESPACE_CACHE_KEY, newNamespaceInCache);
   // remove cached token as namespace changes
   cache.remove(VAULT_TOKEN_CACHE_KEY);
+}
+
+export function setSecretEngine(secretEngine: string) {
+  cache.set(VAULT_SECRET_ENGINE_CACHE_KEY, secretEngine);
+}
+
+export function getSecretEngine(): string {
+  const secretEngineInCache = cache.get(VAULT_SECRET_ENGINE_CACHE_KEY);
+  if (!secretEngineInCache) {
+    return preferences.secretEngine;
+  }
+  return secretEngineInCache;
 }
 
 export function getTechnicalPaths(): string[] {
@@ -76,6 +100,10 @@ export function parseTokenFromCache(): VaultTokenCache | undefined {
   if (tokenCacheString) {
     return JSON.parse(tokenCacheString) as VaultTokenCache;
   }
+}
+
+function nothingFound(error: any) {
+  return error?.response?.statusCode === 404 && error?.response?.body?.errors?.length === 0;
 }
 
 export class ConfigurationError extends Error {}
@@ -138,6 +166,7 @@ export async function getVaultClient(): Promise<NodeVault.client> {
     endpoint: vaultUrl,
     namespace: getVaultNamespace(),
     token: token,
+    noCustomHTTPVerbs: true,
   });
 }
 
@@ -175,25 +204,33 @@ export async function exportSecretToFile(secret: object, path: string, mode: Exp
 
 export async function callTree(path: string): Promise<VaultListEntry[]> {
   console.info("Calling tree", path);
-  const response = await (await getVaultClient()).list("secret/metadata" + path, {});
-  const favorites = (await listFavorites()).map(({ key }) => key);
-  return response.data.keys.map((key: string) => ({
-    key: path + key,
-    label: key,
-    folder: key.endsWith("/"),
-    favorite: favorites.includes(path + key),
-  }));
+  try {
+    const response = await (await getVaultClient()).list(getSecretEngine() + "/metadata" + path, {});
+    const favorites = (await listFavorites()).map(({ key }) => key);
+    return response.data.keys.map((key: string) => ({
+      key: path + key,
+      label: key,
+      folder: key.endsWith("/"),
+      favorite: favorites.includes(path + key),
+    }));
+  } catch (error) {
+    console.log(">>>", error);
+    if (nothingFound(error)) {
+      return [];
+    }
+    throw error;
+  }
 }
 
 export async function callRead(path: string): Promise<VaultReadResponse> {
   console.info("Calling read", path);
-  const response = await (await getVaultClient()).read("secret/data" + path, {});
+  const response = await (await getVaultClient()).read(getSecretEngine() + "/data" + path, {});
   return response.data;
 }
 
 export async function callReadMetadata(path: string): Promise<VaultReadMetadataResponse> {
   console.info("Calling read metadata", path);
-  const response = await (await getVaultClient()).read("secret/metadata" + path, {});
+  const response = await (await getVaultClient()).read(getSecretEngine() + "/metadata" + path, {});
   let currentVersion: VaultVersion | undefined;
   const versions = Object.getOwnPropertyNames(response.data.versions)
     .map((versionStr) => {
@@ -223,14 +260,14 @@ export async function callReadMetadata(path: string): Promise<VaultReadMetadataR
 
 export async function callWrite(path: string, newSecret: object): Promise<VaultMetaDataResponse> {
   console.info("Calling write", path);
-  const response = await (await getVaultClient()).write("secret/data" + path, { data: newSecret }, {});
+  const response = await (await getVaultClient()).write(getSecretEngine() + "/data" + path, { data: newSecret }, {});
   return response.data;
 }
 
 export async function callDelete(path: string, deleteMode: DeleteMode, version?: number) {
   console.info("Calling delete", path, deleteMode);
   if (deleteMode === DeleteMode.deleteVersion) {
-    await (await getVaultClient()).delete("secret/data" + path, {});
+    await (await getVaultClient()).delete(getSecretEngine() + "/data" + path, {});
   } else if (deleteMode === DeleteMode.destroyVersion) {
     if (!version) {
       throw new Error("Version is mandatory to destroy specific version");
@@ -238,14 +275,14 @@ export async function callDelete(path: string, deleteMode: DeleteMode, version?:
     await (
       await getVaultClient()
     ).request({
-      path: "/secret/destroy" + path,
+      path: "/" + getSecretEngine() + "/destroy" + path,
       method: "POST",
       json: {
         versions: [version],
       },
     });
   } else if (deleteMode === DeleteMode.destroyAllVersions) {
-    await (await getVaultClient()).delete("secret/metadata" + path, {});
+    await (await getVaultClient()).delete(getSecretEngine() + "/metadata" + path, {});
   }
 }
 
@@ -257,7 +294,7 @@ export async function callUndelete(path: string, version?: number) {
   await (
     await getVaultClient()
   ).request({
-    path: "/secret/undelete" + path,
+    path: "/" + getSecretEngine() + "/undelete" + path,
     method: "POST",
     json: {
       versions: [version],
@@ -267,13 +304,20 @@ export async function callUndelete(path: string, version?: number) {
 
 export async function callListEntities(): Promise<string[]> {
   console.info("Calling list entities");
-  const response = await (
-    await getVaultClient()
-  ).request({
-    path: "/identity/entity/id",
-    method: "LIST",
-  });
-  return response.data.keys;
+  try {
+    const response = await (
+      await getVaultClient()
+    ).request({
+      path: "/identity/entity/id",
+      method: "LIST",
+    });
+    return response.data.keys;
+  } catch (error) {
+    if (nothingFound(error)) {
+      return [];
+    }
+    throw error;
+  }
 }
 
 export async function callGetEntity(entityId: string): Promise<VaultEntity> {
@@ -325,7 +369,7 @@ export async function callCreateAlias(entityId: string, aliasName: string, alias
   });
 }
 
-export async function callGetSysAuth(): Promise<VaultAuth[]> {
+export async function callGetSysAuth(): Promise<VaultMount[]> {
   const response = await (
     await getVaultClient()
   ).request({
@@ -335,6 +379,7 @@ export async function callGetSysAuth(): Promise<VaultAuth[]> {
   return Object.keys(response.data).map((name) => ({
     name: name.substring(0, name.length - 1),
     type: response.data[name].type,
+    description: response.data[name].description,
     accessor: response.data[name].accessor,
   }));
 }
@@ -347,6 +392,24 @@ export async function callGetPolicies(): Promise<string[]> {
     method: "LIST",
   });
   return response.data.keys;
+}
+
+export async function callGetSysMounts(): Promise<VaultMount[]> {
+  const response = await (
+    await getVaultClient()
+  ).request({
+    path: "/sys/mounts",
+    method: "GET",
+  });
+  return Object.keys(response.data)
+    .map((name) => ({
+      name: name.substring(0, name.length - 1),
+      type: response.data[name].type,
+      description: response.data[name].description,
+      accessor: response.data[name].accessor,
+    }))
+    .filter((mount) => mount.type === "kv")
+    .sort((a, b) => a.name.localeCompare(b.name));
 }
 
 export async function listFavorites(): Promise<VaultListEntry[]> {

@@ -1,5 +1,5 @@
 import { environment, getPreferenceValues } from "@raycast/api";
-import { VAULT_TIMEOUT_MS_TO_LABEL } from "~/constants/preferences";
+import { VAULT_TIMEOUT_MS_TO_LABEL } from "~/constants/labels";
 import { CommandName } from "~/types/general";
 import { Preferences, TransientCopyPreferences } from "~/types/preferences";
 
@@ -26,6 +26,6 @@ export function getTransientCopyPreference(type: "password" | "other"): boolean 
   return true;
 }
 
-export function getLabelForTimeoutPreference(timeout: string | number): string {
+export function getLabelForTimeoutPreference(timeout: string | number): string | undefined {
   return VAULT_TIMEOUT_MS_TO_LABEL[timeout as keyof typeof VAULT_TIMEOUT_MS_TO_LABEL];
 }

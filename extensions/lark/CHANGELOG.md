@@ -1,5 +1,12 @@
 # Lark Changelog
 
+## [Update] - 2023-05-22
+
+- Updated Raycast API
+- Replaced .png with .svg assets
+- Use @tanstack/react-query to fetch data
+- Support abort outdated on-going request
+
 ## [Update] - 2023-05-16
 
 - Support custom domain names

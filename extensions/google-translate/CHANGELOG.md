@@ -1,5 +1,16 @@
 # Google Translate Changelog
 
+## [Enhancement] - 2023-05-30
+
+- Added ability to translate selected text
+
+## [Enhancement] - 2023-05-22
+
+- Added error handling
+- Updated the Raycast libraries to the latest version.
+- Translations are now identical to translate.google.com 🎉
+- Ideally, there should be no more TooManyRequests errors now! 🚀
+
 ## [Enhancement] - 2023-02-10
 
 - Add Languages Set manager to be able to configure multiple language presets and easy switch between them
