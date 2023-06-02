@@ -12,7 +12,7 @@
   "commands": [
     {
       "name": "list-active-tasks",
-      "title": "List active tasks",
+      "title": "List Active Tasks",
       "subtitle": "Taskwarrior",
       "description": "list all your active tasks",
       "mode": "view"
