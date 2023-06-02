@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "raytaskwarrior",
-  "title": "RayTaskwarrior",
+  "title": "Taskwarrior",
   "description": "Taskwarrior integration to Raycast",
   "icon": "icon.png",
   "author": "yosy2010",
