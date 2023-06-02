@@ -1,4 +1,4 @@
-import data from "./data";
+import data, {FormatItem} from "./data";
 import {useFavorites} from "./favorites";
 import {Action, ActionPanel, Icon, List} from "@raycast/api";
 import {useState} from "react";
@@ -21,39 +21,18 @@ export default function PhpDatePicker() {
 			/>
 			
 			<FavoritesSection
-				favorites={favorites} 
-				removeFavorite={removeFavorite} 
+				favorites={favorites}
+				removeFavorite={removeFavorite}
 			/>
 			
 			{data.map(({section, items}) => (
-				<List.Section title={section} key={section}>
-					{items.map((item) => {
-						const {character, description, example} = item;
-						return (
-							<List.Item
-								key={character}
-								title={character}
-								subtitle={description}
-								keywords={[...description.split(" "), example, section]}
-								accessories={example.length ? [{text: `“${example}”`}, {icon: Icon.TextInput}] : []}
-								actions={
-									<ActionPanel>
-										<Action
-											title={`Continue with “${searchText}${character}”`}
-											onAction={() => setSearchText(`${searchText}${character}`)}
-											icon={Icon.TextInput}
-										/>
-										<Action.CopyToClipboard
-											title={`Copy “${searchText}${character}” to Clipboard`}
-											content={`${searchText}${character}`}
-											icon={Icon.Clipboard}
-										/>
-									</ActionPanel>
-								}
-							/>
-						);
-					})}
-				</List.Section>
+				<DataSection
+					key={section}
+					prefix={searchText}
+					section={section}
+					items={items}
+					onAction={(value) => setSearchText(value)}
+				/>
 			))}
 		</List>
 	);
@@ -112,6 +91,39 @@ function FavoritesSection({favorites, removeFavorite}: { favorites: string[], re
 									title={`Remove “${favorite}” from Favorites`}
 									onAction={async () => await removeFavorite(favorite)}
 									icon={Icon.Trash}
+								/>
+							</ActionPanel>
+						}
+					/>
+				);
+			})}
+		</List.Section>
+	);
+}
+
+function DataSection({prefix, section, items, onAction}: { prefix: string, section: string, items: FormatItem[], onAction: (value: string) => void }) {
+	return (
+		<List.Section title={section} key={section}>
+			{items.map((item) => {
+				const {character, description, example} = item;
+				return (
+					<List.Item
+						key={character}
+						title={character}
+						subtitle={description}
+						keywords={[...description.split(" "), example, section]}
+						accessories={example.length ? [{text: `“${example}”`}, {icon: Icon.TextInput}] : []}
+						actions={
+							<ActionPanel>
+								<Action
+									title={`Continue with “${prefix}${character}”`}
+									onAction={() => onAction(`${prefix}${character}`)}
+									icon={Icon.TextInput}
+								/>
+								<Action.CopyToClipboard
+									title={`Copy “${prefix}${character}” to Clipboard`}
+									content={`${prefix}${character}`}
+									icon={Icon.Clipboard}
 								/>
 							</ActionPanel>
 						}

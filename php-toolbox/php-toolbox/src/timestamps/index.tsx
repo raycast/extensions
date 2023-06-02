@@ -1,6 +1,7 @@
 import {Action, ActionPanel, Clipboard, List} from "@raycast/api";
 import {useEffect, useState} from "react";
 import {addDays, addMonths, addWeeks, addYears, endOfDay, format, fromUnixTime, getUnixTime, startOfDay, startOfMonth, startOfWeek, startOfYear,} from "date-fns";
+import {parseDate} from 'chrono-node';
 
 interface Timestamp {
 	label: string,
@@ -15,9 +16,11 @@ function verbose(timestamp: number) {
 	return format(fromUnixTime(timestamp), "yyyy-MM-dd h:mm:ssaaa O");
 }
 
-function defaultSections(): TimestampCollection {
+function buildSections(searchText: string, clipboard: Date | null): TimestampCollection {
 	const now = new Date();
-	return {
+	
+	const sections: TimestampCollection = {
+		'Input': [],
 		'Today': [
 			{label: "Now", value: now},
 			{label: "Start of Today", value: startOfDay(now)},
@@ -36,24 +39,41 @@ function defaultSections(): TimestampCollection {
 			{label: "Next Year", value: addYears(now, 1)},
 		],
 	};
+	
+	if ("" !== searchText) {
+		const parsed = parseDate(searchText);
+		if (null !== parsed) {
+			sections['Input'].push({label: `“${searchText}”`, value: parsed});
+		}
+	}
+	
+	if (null !== clipboard) {
+		sections['Input'].push({label: "From Your Clipboard", value: clipboard});
+	}
+	
+	return sections;
 }
 
 export default function PhpTimestampHelper() {
-	const [sections, setSections] = useState(defaultSections);
+	const [searchText, setSearchText] = useState("");
+	const [clipboard, setClipboard] = useState<Date | null>(null);
+	const sections = buildSections(searchText, clipboard);
 	
 	useEffect(() => {
 		Clipboard.readText().then((text) => {
 			if (text && text.match(/^\s*\d{10}\s*$/)) {
-				setSections({
-					'Clipboard': [{label: "Clipboard", value: fromUnixTime(parseInt(text.trim()))}],
-					...sections,
-				});
+				setClipboard(fromUnixTime(parseInt(text.trim())));
 			}
 		});
 	}, []);
 	
 	return (
-		<List>
+		<List
+			filtering={false}
+			searchText={searchText}
+			onSearchTextChange={setSearchText}
+			searchBarPlaceholder="Enter any date…"
+		>
 			{Object.entries(sections).map(([label, timestamps]) => {
 				return <Section key={label} label={label} timestamps={timestamps} />;
 			})}

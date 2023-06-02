@@ -25,6 +25,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.52.1",
+    "chrono-node": "^2.6.3",
     "date-fns": "^2.30.0"
   },
   "devDependencies": {
