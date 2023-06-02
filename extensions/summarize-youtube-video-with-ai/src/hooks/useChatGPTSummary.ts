@@ -45,7 +45,12 @@ const useChatGPTSummary = async ({ transcript, setSummaryIsLoading, setSummary }
 
     for (const summaryBlock of splitTranscripts) {
       const index = splitTranscripts.indexOf(summaryBlock) + 1;
-      const aiInstructions = getSummaryBlockSnippet(index, splitTranscripts, summaryBlock, CHATGPT_SUMMARY_MAX_CHARS);
+      const aiInstructions = getSummaryBlockSnippet(
+        index,
+        splitTranscripts.length,
+        summaryBlock,
+        CHATGPT_SUMMARY_MAX_CHARS
+      );
 
       try {
         const result = await openai.createChatCompletion({

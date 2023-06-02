@@ -1,13 +1,13 @@
 export function getSummaryBlockSnippet(
   index: number,
-  splitTranscripts: string[],
+  splitTranscripts: number,
   summaryBlock: string,
   MAX_CHARS: number
 ) {
   return `Summarize this transcription of a youtube video.
-    The transcription is split into parts and this is part ${index} of ${splitTranscripts.length}.
+    The transcription is split into parts and this is part ${index} of ${splitTranscripts}.
     Be as concise as possible.
-    Do not use more then ${MAX_CHARS / splitTranscripts.length} characters.
+    Do not use more then ${MAX_CHARS / splitTranscripts} characters.
     
     Here is the transcript: ${summaryBlock}`;
 }

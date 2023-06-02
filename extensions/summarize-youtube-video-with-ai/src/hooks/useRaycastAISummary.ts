@@ -54,7 +54,12 @@ const useRaycastAISummary = async ({ transcript, setSummaryIsLoading, setSummary
 
     for (const summaryBlock of splitTranscripts) {
       const index = splitTranscripts.indexOf(summaryBlock) + 1;
-      const aiInstructions = getSummaryBlockSnippet(index, splitTranscripts, summaryBlock, RAYCASTAI_SUMMARY_MAX_CHARS);
+      const aiInstructions = getSummaryBlockSnippet(
+        index,
+        splitTranscripts.length,
+        summaryBlock,
+        RAYCASTAI_SUMMARY_MAX_CHARS
+      );
 
       const result = await fetchAiAnswer(aiInstructions);
 
