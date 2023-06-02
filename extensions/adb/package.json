@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "adb",
-  "title": "Adb commands",
+  "title": "Adb Commands",
   "description": "Run useful adb commands",
   "icon": "adb.png",
   "author": "Quentin23Soleil",
@@ -12,19 +12,19 @@
   "commands": [
     {
       "name": "adb-screenshots",
-      "title": "Take screenshot",
+      "title": "Take Screenshot",
       "description": "Takes a screenshot, saves it, and put it in your clipboard for easy-sharing",
       "mode": "no-view"
     },
     {
       "name": "adb-open-locale-settings",
-      "title": "Open locale settings",
+      "title": "Open Locale Settings",
       "description": "Open the locale settings on your device",
       "mode": "no-view"
     },
     {
       "name": "adb-wifi",
-      "title": "Enable or disable wifi",
+      "title": "Enable or Disable Wifi",
       "description": "enable/disable wifi",
       "mode": "no-view",
       "arguments": [
@@ -38,7 +38,7 @@
     },
     {
       "name": "adb-airplane",
-      "title": "Enable or disable airplane mode",
+      "title": "Enable or Disable Airplane Mode",
       "description": "enable/disable airplane mode (all connectivity on/off)",
       "mode": "no-view",
       "arguments": [
@@ -52,7 +52,7 @@
     },
     {
       "name": "adb-dark-mode",
-      "title": "Enable or disable dark mode",
+      "title": "Enable or Disable Dark Mode",
       "description": "enable/disable/auto dark mode",
       "mode": "no-view",
       "arguments": [
@@ -66,7 +66,7 @@
     },
     {
       "name": "adb-open-url",
-      "title": "Open url",
+      "title": "Open Url",
       "description": "Open an url through ADB (deeplink)",
       "mode": "no-view",
       "arguments": [
@@ -80,7 +80,7 @@
     },
     {
       "name": "adb-write",
-      "title": "Write text",
+      "title": "Write Text",
       "description": "Send text to the device",
       "mode": "no-view",
       "arguments": [

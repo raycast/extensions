@@ -1,6 +1,7 @@
 # Adb Changelog
 
 ## [Initial Version] - 2023-06-02
+
 - Added multiple commands:
   - `airplane` to toggle on/off the airplane mode
   - `dark-mode` to toggle on/off/auto the dark mode
