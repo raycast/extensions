@@ -1,4 +1,4 @@
-# Summarize Youtube Video Changelog
+# Summarize YouTube Video Changelog
 
 ## [New Features] - 2023-05-16
 
