@@ -70,7 +70,9 @@ const useRaycastAISummary = async ({ transcript, setSummaryIsLoading, setSummary
   }.
   
   Format:
-  [Emoji] [List Item] [\n\n]
+
+  [Emoji] [List Item] &nbsp;&nbsp;
+  
   Here is the transcript: ${temporarySummary.length > 0 ? temporarySummary : transcript}`;
 
   const raycastSummary = AI.ask(aiInstructions, {
