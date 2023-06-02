@@ -10,6 +10,7 @@ import {
 } from "../const/toast_messages";
 import React from "react";
 import splitTranscript from "../utils/splitTranscript";
+import { getAiInstructionSnippet, getSummaryBlockSnippet } from "../utils/getAiInstructionSnippets";
 
 type GetChatGPTSummaryProps = {
   transcript?: string;
@@ -30,7 +31,6 @@ const useChatGPTSummary = async ({ transcript, setSummaryIsLoading, setSummary }
   });
   const openai = new OpenAIApi(configuration);
   let temporarySummary = "";
-  let openAiInstructions = "";
 
   setSummaryIsLoading(true);
 
@@ -41,23 +41,17 @@ const useChatGPTSummary = async ({ transcript, setSummaryIsLoading, setSummary }
       message: LONG_VIDEO.message,
     });
 
-    const transcriptionSummary = splitTranscript(transcript, CHATGPT_SUMMARY_MAX_CHARS);
+    const splitTranscripts = splitTranscript(transcript, CHATGPT_SUMMARY_MAX_CHARS);
 
-    for (const summaryBlock of transcriptionSummary) {
-      const index = transcriptionSummary.indexOf(summaryBlock) + 1;
-      const openAiInstructionBlock = `
-        Summarize this transcription of a youtube video.
-        The transcription is split into parts and this is part ${index} of ${transcriptionSummary.length}.
-        Be as concise as possible.
-        Do not use more then ${CHATGPT_SUMMARY_MAX_CHARS / transcriptionSummary.length} characters.
-
-        Here is the transcript: ${summaryBlock}`;
+    for (const summaryBlock of splitTranscripts) {
+      const index = splitTranscripts.indexOf(summaryBlock) + 1;
+      const aiInstructions = getSummaryBlockSnippet(index, splitTranscripts, summaryBlock, CHATGPT_SUMMARY_MAX_CHARS);
 
       try {
         const result = await openai.createChatCompletion({
           model: "gpt-3.5-turbo",
           temperature: parseInt(creativity),
-          messages: [{ role: "user", content: openAiInstructionBlock }],
+          messages: [{ role: "user", content: aiInstructions }],
         });
         temporarySummary += result.data.choices[0].message?.content;
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -71,13 +65,7 @@ const useChatGPTSummary = async ({ transcript, setSummaryIsLoading, setSummary }
     }
   }
 
-  openAiInstructions +=
-    transcript &&
-    `Summarize the following transcription of a youtube video as a list of the most important points each starting with a fitting emoji. Ignore mentions of video sponsors. Answer in ${language}.
-
-    Format:
-    [Emoji] [List Item] [\n\n]
-    Here is the transcript: ${temporarySummary.length > 0 ? temporarySummary : transcript}`;
+  const aiInstructions = getAiInstructionSnippet(language, temporarySummary, transcript);
 
   try {
     showToast({
@@ -89,7 +77,7 @@ const useChatGPTSummary = async ({ transcript, setSummaryIsLoading, setSummary }
     const result = await openai.createChatCompletion({
       model: "gpt-3.5-turbo",
       temperature: parseInt(creativity),
-      messages: [{ role: "user", content: openAiInstructions }],
+      messages: [{ role: "user", content: aiInstructions }],
     });
     showToast({
       style: Toast.Style.Success,
