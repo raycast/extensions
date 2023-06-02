@@ -225,7 +225,7 @@ const FilterView = ({ tasks }: TaskViewProps) => {
 
   if (tasks.length > 0) {
     return (
-      <MenuBarExtra.Section title={"Filtered tasks"} key={"filterTasks"}>
+      <MenuBarExtra.Section title={"Filtered tasks"}>
         {sections.map((section, index) => {
           return (
             <MenuBarExtra.Section title={section.name} key={index}>
