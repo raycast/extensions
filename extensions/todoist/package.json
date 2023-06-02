@@ -154,7 +154,7 @@
         },
         {
           "default": "",
-          "description": "Task filter for Filter view. Use Todoist filter syntax. Ex: today & (##Work | @next)",
+          "description": "Task filter for the filter view. Use Todoist filter syntax, e.g. today & (#Work | @next).",
           "name": "filter",
           "required": false,
           "title": "Filter Query",
