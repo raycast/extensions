@@ -33,6 +33,9 @@ export default function Command() {
       isShowingDetail={selectedDeviceId !== undefined}
       searchBarPlaceholder="Filter by name..."
       searchBarAccessory={<SearchBar onChange={setFilterDeviceType} />}
+      onSelectionChange={(id) => {
+        id && selectedDeviceId && setSelectedDeviceId(id);
+      }}
     >
       {!loading &&
         Object.entries(devicesGroups)
@@ -44,6 +47,7 @@ export default function Command() {
 
                 return (
                   <List.Item
+                    id={device.identifier}
                     key={device.identifier}
                     icon={device.image}
                     title={`${device.device} ${device.model}`}
