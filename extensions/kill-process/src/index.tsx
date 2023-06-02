@@ -15,7 +15,7 @@ export default function ProcessList() {
   const [aggregateApps, setAggregateApps] = useState<boolean>((preferences.aggregateApps?.value as boolean) ?? false);
 
   const fetchProcesses = () => {
-    exec(`ps -eo pid,pcpu,rss,comm`, (err, stdout) => {
+    exec(`ps -eo pid,ppid,pcpu,rss,comm`, async (err, stdout) => {
       if (err != null) {
         return;
       }
@@ -23,57 +23,27 @@ export default function ProcessList() {
       let processes = stdout
         .split("\n")
         .map((line) => {
-          const [, id, cpu, mem, path] = line.match(/(\d+)\s+(\d+[.|,]\d+)\s+(\d+)\s+(.*)/) ?? ["", "", "", "", ""];
+          const defaultValue = ["", "", "", "", "", ""];
+          const regex = /(\d+)\s+(\d+)\s+(\d+[.|,]\d+)\s+(\d+)\s+(.*)/;
+          const [, id, pid, cpu, mem, path] = line.match(regex) ?? defaultValue;
           const processName = path.match(/[^/]*[^/]*$/i)?.[0] ?? "";
           const isPrefPane = path.includes(".prefPane");
           const isApp = path.includes(".app/");
-          const appName = path.match(/(?<=\/)[^/]+(?=\.app\/)/)?.[0] ?? "";
 
           return {
             id: parseInt(id),
+            pid: parseInt(pid),
             cpu: parseFloat(cpu),
             mem: parseInt(mem),
             type: isPrefPane ? "prefPane" : isApp ? "app" : "binary",
             path,
             processName,
-            appName: isApp ? appName : undefined,
           } as Process;
         })
         .filter((process) => process.processName !== "");
 
       if (aggregateApps) {
-        processes = (() => {
-          const map = new Map<string, Process>();
-          processes.forEach((process) => {
-            if (process.type == "app" && process.appName != undefined) {
-              const originalProcess = map.get(process.appName);
-              if (originalProcess != undefined) {
-                map.set(process.appName, {
-                  id: undefined,
-                  cpu: originalProcess.cpu + process.cpu,
-                  mem: originalProcess.mem + process.mem,
-                  type: "aggregatedApp",
-                  path: originalProcess.path,
-                  processName: undefined,
-                  appName: process.appName,
-                } as Process);
-              } else {
-                map.set(process.appName, {
-                  id: undefined,
-                  cpu: process.cpu,
-                  mem: process.mem,
-                  type: "aggregatedApp",
-                  path: process.path?.match(/.*\.app/)?.[0] ?? undefined,
-                  processName: undefined,
-                  appName: process.appName,
-                } as Process);
-              }
-            } else if (process.processName != undefined) {
-              map.set(process.processName, process);
-            }
-          });
-          return Array.from(map.values());
-        })();
+        processes = aggregate(processes);
       }
 
       processes.sort((a, b) => {
@@ -105,32 +75,102 @@ export default function ProcessList() {
   };
 
   const killProcess = (process: Process) => {
-    let message: string;
-    if (process.type == "aggregatedApp") {
-      exec(`killall "${process.appName}"`);
-      setState(state.filter((p) => p.appName != process.appName));
-      message = `✅ Killed App ${process.appName}`;
-    } else {
-      exec(`kill -9 ${process.id}`);
-      setState(state.filter((p) => p.id !== process.id));
-      message = `✅ Killed ${process.processName === "-" ? `process ${process.id}` : process.processName}`;
-    }
+    exec(`kill -9 ${process.id}`);
+    setState(state.filter((p) => p.id !== process.id));
     clearSearchBar({ forceScrollToTop: true });
-    showHUD(message);
+    showHUD(`✅ Killed ${process.processName === "-" ? `process ${process.id}` : process.processName}`);
   };
 
   const subtitleString = (process: Process) => {
-    let subtitle = undefined;
-
+    const subtitles = [];
+    if (process.type == "aggregatedApp" && process.appName != undefined) {
+      subtitles.push(process.appName);
+    }
     if (shouldShowPID) {
-      subtitle = process.id?.toString();
+      subtitles.push(process.id.toString());
     }
-
     if (shouldShowPath) {
-      subtitle = subtitle ? `${subtitle} - ${process.path}` : process.path;
+      subtitles.push(process.path);
     }
+    return subtitles.join(" - ");
+  };
 
-    return subtitle;
+  const aggregate = (processes: Process[]): Process[] => {
+    const result = Array<Process>();
+    type ProcessNode = {
+      process: Process | undefined;
+      childNodes: ProcessNode[];
+    };
+    const appMap = new Map<number, ProcessNode>();
+    appMap.set(1, { process: { id: 1 } as Process, childNodes: [] });
+    const originalAppIds = Array<number>();
+    processes.forEach((process) => {
+      if (process.type == "app") {
+        originalAppIds.push(process.id);
+        let node = appMap.get(process.id);
+        if (node == undefined) {
+          node = { process, childNodes: [] } as ProcessNode;
+          appMap.set(process.id, node);
+        } else {
+          node.process = process;
+        }
+        let knownRootNode = appMap.get(process.pid);
+        if (knownRootNode == undefined) {
+          knownRootNode = { process: undefined, childNodes: [node] } as ProcessNode;
+          appMap.set(process.pid, knownRootNode);
+        } else {
+          if (knownRootNode.process == undefined) {
+            knownRootNode.childNodes.push(node);
+          } else {
+            let nextNode;
+            while (
+              knownRootNode?.process != undefined &&
+              knownRootNode.process.pid != 1 &&
+              (nextNode = appMap.get(knownRootNode.process.pid)) != undefined
+            ) {
+              knownRootNode = nextNode;
+            }
+            knownRootNode?.childNodes.push(node);
+          }
+        }
+        // move childNodes to parent
+        if (knownRootNode.process?.id != 1) {
+          knownRootNode.childNodes = knownRootNode.childNodes.concat(node.childNodes);
+          node.childNodes = [];
+        }
+      } else {
+        result.push(process);
+      }
+    });
+    const rootApps = appMap.get(1)?.childNodes;
+    let afterAppIds = Array<number>();
+    rootApps?.forEach((rootApp) => {
+      if (rootApp.process == undefined) {
+        return;
+      }
+      afterAppIds.push(rootApp.process.id);
+      const childIds: number[] = rootApp.childNodes
+        .map((node) => node.process?.id)
+        .filter((item): item is number => item != undefined);
+      afterAppIds = afterAppIds.concat(childIds);
+      result.push({
+        id: rootApp.process.id,
+        pid: rootApp.process.pid,
+        cpu:
+          (rootApp.childNodes?.reduce((acc, cur) => {
+            return acc + (cur.process?.cpu ?? 0);
+          }, 0) ?? 0) + rootApp.process.cpu,
+        mem:
+          (rootApp.childNodes?.reduce((acc, cur) => {
+            return acc + (cur.process?.mem ?? 0);
+          }, 0) ?? 0) + rootApp.process.mem,
+        type: "aggregatedApp",
+        path: rootApp.process.path,
+        processName: rootApp.process.processName,
+        appName: rootApp.process.path.match(/(?<=\/)[^/]+(?=\.app\/)/)?.[0],
+      } as Process);
+    });
+    return result;
   };
 
   return (
@@ -141,17 +181,18 @@ export default function ProcessList() {
     >
       {state
         .filter((process) => {
-          if (query == "" || query == undefined) {
+          if (!query) {
             return true;
           }
-
-          const name = process.type == "aggregatedApp" ? process.appName : process.processName;
-          const nameMatches = name?.toLowerCase().includes(query.toLowerCase()) ?? false;
+          const nameMatches = process.processName.toLowerCase().includes(query.toLowerCase());
           const pathMatches =
-            process.path?.toLowerCase().match(new RegExp(`.+${query}.*\\.[app|framework|prefpane]`, "ig")) != null;
-          const pidMatches = process.id?.toString().includes(query) ?? false;
+            shouldIncludePaths &&
+            process.path.toLowerCase().match(new RegExp(`.+${query}.*\\.[app|framework|prefpane]`, "ig")) != null;
+          const pidMatches = shouldIncludePid && process.id.toString().includes(query);
+          const appNameMatches =
+            process.type == "aggregatedApp" && process.appName?.toLowerCase().includes(query.toLowerCase());
 
-          return nameMatches || (shouldIncludePaths && pathMatches) || (shouldIncludePid && pidMatches);
+          return nameMatches || pathMatches || pidMatches || appNameMatches;
         })
         .sort((a, b) => {
           // If this flag is true, we bring apps to the top, but only if we have a query.
@@ -172,7 +213,7 @@ export default function ProcessList() {
           return (
             <List.Item
               key={index}
-              title={(process.type == "aggregatedApp" ? process.appName : process.processName) ?? ""}
+              title={process.processName}
               subtitle={subtitleString(process)}
               icon={icon}
               accessoryTitle={
@@ -222,11 +263,12 @@ export default function ProcessList() {
 }
 
 type Process = {
-  id: number | undefined;
+  id: number;
+  pid: number;
   cpu: number;
   mem: number;
   type: "prefPane" | "app" | "binary" | "aggregatedApp";
-  path: string | undefined;
-  processName: string | undefined;
+  path: string;
+  processName: string;
   appName: string | undefined;
 };
