@@ -1,5 +1,17 @@
 # Todoist Changelog
 
+## [Search command and bug fixes] - 2023-06-02
+
+This update adds a new command called `Search`, allowing you to search among your Todoist tasks, projects, labels, and comments. Please note that the `All Tasks` view of the `Home` command has been moved to the `Search` command.
+
+It also enhances the user experience by addressing and fixing several bugs:
+- The `JS heap out of memory error` in the menu bar has been resolved (still not the case for other commands)
+- The ability to focus on tasks outside the menu bar tasks has been added for improved usability
+- The `Quick Add Task` command now works properly a fallback command
+- The dates with a datetime should be placed in full dates sections
+
+Happy searching!
+
 ## [Todoist v2] - 2023-05-12
 
 The Todoist extension has been completely revamped for a cleaner, better and smoother Raycast experience. The goal of this extension is clear: make you able to use Todoist anytime, anywhere, for anything on your computer using the power of Raycast. This update is packed with new features, so let's jump right into them.

@@ -4,9 +4,9 @@
   "title": "Google Bard",
   "description": "Perform Actions with Google Bard",
   "icon": "bard.png",
-  "author": "EZDev",
+  "author": "EvanZhouDev",
   "contributors": [
-    "VaibhavSatishkumar"
+    "Vaibhav-Satishkumar"
   ],
   "categories": [
     "Productivity"
@@ -79,6 +79,12 @@
       "subtitle": "Google Bard",
       "description": "Make selected text shorter",
       "mode": "view"
+    },
+    {
+      "name": "askAI",
+      "title": "Ask AI",
+      "description": "Ask AI about anything",
+      "mode": "view"
     }
   ],
   "preferences": [
@@ -92,7 +98,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.48.5",
-    "bard-ai": "^1.0.4"
+    "bard-ai": "1.1.3"
   },
   "devDependencies": {
     "@types/node": "18.8.3",

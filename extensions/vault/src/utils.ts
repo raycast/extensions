@@ -23,11 +23,9 @@ import hdate from "human-date";
 import Values = Form.Values;
 
 const NO_NAMESPACE = "<EMPTY>";
-const DEFAULT_URL = "http://localhost:8200";
-const DEFAULT_SECRET_ENGINE = "secret";
 
 const preferences = getPreferenceValues<Preferences.Vault>();
-const vaultUrl = (preferences.url || DEFAULT_URL).replace(/\/$/, "");
+const vaultUrl = preferences.url.replace(/\/$/, "");
 const cache = new Cache();
 
 export function writeEnabled(): boolean {
@@ -67,7 +65,6 @@ export function getVaultNamespace(): string {
 
 export function setVaultNamespace(newNamespace: string) {
   const newNamespaceInCache = newNamespace === "" ? NO_NAMESPACE : newNamespace;
-
   cache.set(VAULT_NAMESPACE_CACHE_KEY, newNamespaceInCache);
   // remove cached token as namespace changes
   cache.remove(VAULT_TOKEN_CACHE_KEY);
@@ -80,7 +77,7 @@ export function setSecretEngine(secretEngine: string) {
 export function getSecretEngine(): string {
   const secretEngineInCache = cache.get(VAULT_SECRET_ENGINE_CACHE_KEY);
   if (!secretEngineInCache) {
-    return preferences.secretEngine || DEFAULT_SECRET_ENGINE;
+    return preferences.secretEngine;
   }
   return secretEngineInCache;
 }

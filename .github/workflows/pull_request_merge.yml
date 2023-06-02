@@ -9,7 +9,7 @@ on:
 
 jobs:
   merge:
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     name: Merge PR
     env:
       GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
@@ -42,6 +42,21 @@ jobs:
                   echo "  skipping (file not existing)"
               fi
           done
+      - name: Optimise images
+        run: |
+          images=$(gh pr view ${{ github.event.inputs.pr_number }} --json files | jq -r '.files[].path | select(endswith("png") or endswith("jpeg") or endswith("jpg"))')
+          images_array=()
+          while IFS= read -r image; do
+            images_array+=("$image")
+          done <<< "$images"
+          count=${#images_array[@]}
+          echo "Found $count images"
+          if [ $count -gt 0 ]; then
+            brew update
+            brew install imageoptim
+            brew install imageoptim-cli
+            imageoptim "${images_array[@]}"
+          fi
       - name: Commit changes
         id: commit_changes
         run: |
@@ -57,7 +72,7 @@ jobs:
 
             git add .
             git status .
-            git commit --message "Update CHANGELOG.md"
+            git commit --message "Update CHANGELOG.md and optimise images"
 
             pr_branch=$(echo $pr_info | jq -r .headRefName)
             pr_repo_name=$(echo $pr_info | jq -r .headRepository.name)
