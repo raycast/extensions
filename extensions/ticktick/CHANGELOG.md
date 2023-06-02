@@ -1,8 +1,12 @@
 # TickTick Changelog
 
+## [Added] - 2023-06-02
+
+- Add `Inbox` command.
+
 ## [Improve] - 2023-05-31
 
-- The `Search Tasks` command will showing all tasks related to a specific project if the search field is left empty.
+- The `Search Tasks` command will show all tasks related to a specific project if the search field is empty.
 
 ## [Added] - 2023-05-26
 

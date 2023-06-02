@@ -25,16 +25,23 @@
   "commands": [
     {
       "name": "index",
-      "title": "Today Tasks",
+      "title": "Today",
       "subtitle": "TickTick",
       "description": "Show today to-do tasks.",
       "mode": "view"
     },
     {
       "name": "next7Days",
-      "title": "Next 7 Days Tasks",
+      "title": "Next 7 Days",
       "subtitle": "TickTick",
       "description": "Show next 7 days to-do tasks.",
+      "mode": "view"
+    },
+    {
+      "name": "inbox",
+      "title": "Inbox",
+      "subtitle": "TickTick",
+      "description": "Show Inbox to-do tasks.",
       "mode": "view"
     },
     {
