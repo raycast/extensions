@@ -63,10 +63,6 @@ export function sortByAssignee(collaborators: Collaborator[], a: Task, b: Task):
   return aName.localeCompare(bName);
 }
 
-export function sortByAddedTime(a: Task, b: Task): number {
-  return new Date(a.added_at).getTime() - new Date(b.added_at).getTime();
-}
-
 export function sortByDate(a: Task, b: Task): number {
   // Handle tasks with no due dates
   if (!a.due && !b.due) {

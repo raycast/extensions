@@ -18,7 +18,6 @@ import MenuBarTask from "./components/MenubarTask";
 import View from "./components/View";
 import { getToday } from "./helpers/dates";
 import { groupByDueDates } from "./helpers/groupBy";
-import { sortByAddedTime } from "./helpers/sortBy";
 import { getTasksForTodayOrUpcomingView } from "./helpers/tasks";
 import useFilterTasks from "./hooks/useFilterData";
 import { useFocusedTask } from "./hooks/useFocusedTask";
