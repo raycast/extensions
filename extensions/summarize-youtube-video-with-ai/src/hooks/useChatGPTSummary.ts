@@ -1,14 +1,15 @@
-import React from "react";
 import { CHATGPT_SUMMARY_MAX_CHARS } from "../const/max_chars";
 import { Configuration, OpenAIApi } from "openai";
+import { PreferenceValues } from "../summarizeVideo";
 import { Toast, getPreferenceValues, showToast } from "@raycast/api";
-import splitTranscript from "../utils/splitTranscript";
 import {
   ERROR_SUMMARIZING_VIDEO,
   LONG_VIDEO,
   SUCCESS_SUMMARIZING_VIDEO,
   SUMMARIZING_VIDEO,
 } from "../const/toast_messages";
+import React from "react";
+import splitTranscript from "../utils/splitTranscript";
 
 type GetChatGPTSummaryProps = {
   transcript?: string;
@@ -17,14 +18,15 @@ type GetChatGPTSummaryProps = {
 };
 
 const useChatGPTSummary = async ({ transcript, setSummaryIsLoading, setSummary }: GetChatGPTSummaryProps) => {
-  const preferences = getPreferenceValues();
+  const preferences = getPreferenceValues() as PreferenceValues;
+  const { chosenAi, languageModel, creativity, openaiApiToken, language } = preferences;
 
-  if (preferences.chosenAi !== "chatgpt") {
+  if (chosenAi !== "chatgpt") {
     return;
   }
 
   const configuration = new Configuration({
-    apiKey: preferences.openaiApiToken,
+    apiKey: openaiApiToken,
   });
   const openai = new OpenAIApi(configuration);
   let temporarySummary = "";
@@ -53,7 +55,8 @@ const useChatGPTSummary = async ({ transcript, setSummaryIsLoading, setSummary }
 
       try {
         const result = await openai.createChatCompletion({
-          model: "gpt-3.5-turbo",
+          model: languageModel,
+          temperature: parseInt(creativity),
           messages: [{ role: "user", content: openAiInstructionBlock }],
         });
         temporarySummary += result.data.choices[0].message?.content;
@@ -70,9 +73,7 @@ const useChatGPTSummary = async ({ transcript, setSummaryIsLoading, setSummary }
 
   openAiInstructions +=
     transcript &&
-    `Summarize the following transcription of a youtube video as a list of the most important points each starting with a fitting emoji. Ignore mentions of video sponsors. Answer in ${
-      preferences.language
-    }.
+    `Summarize the following transcription of a youtube video as a list of the most important points each starting with a fitting emoji. Ignore mentions of video sponsors. Answer in ${language}.
 
     Format:
     [Emoji] [List Item] [\n\n]
@@ -86,7 +87,8 @@ const useChatGPTSummary = async ({ transcript, setSummaryIsLoading, setSummary }
     });
 
     const result = await openai.createChatCompletion({
-      model: "gpt-3.5-turbo",
+      model: languageModel,
+      temperature: parseInt(creativity),
       messages: [{ role: "user", content: openAiInstructions }],
     });
     showToast({

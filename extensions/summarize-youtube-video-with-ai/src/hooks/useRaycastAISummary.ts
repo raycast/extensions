@@ -8,6 +8,7 @@ import {
   SUCCESS_SUMMARIZING_VIDEO,
   SUMMARIZING_VIDEO,
 } from "../const/toast_messages";
+import { PreferenceValues } from "../summarizeVideo";
 
 type GetRaycastAISummaryProps = {
   transcript?: string;
@@ -16,9 +17,10 @@ type GetRaycastAISummaryProps = {
 };
 
 const useRaycastAISummary = async ({ transcript, setSummaryIsLoading, setSummary }: GetRaycastAISummaryProps) => {
-  const preferences = getPreferenceValues();
+  const preferences = getPreferenceValues() as PreferenceValues;
+  const { chosenAi, languageModel, creativity, language } = preferences;
 
-  if (preferences.chosenAi !== "raycastai") {
+  if (chosenAi !== "raycastai") {
     return;
   }
 
@@ -65,9 +67,7 @@ const useRaycastAISummary = async ({ transcript, setSummaryIsLoading, setSummary
     }
   }
 
-  const aiInstructions = `Summarize the following transcription of a youtube video as a list of the most important points each starting with a fitting emoji. Ignore mentions of video sponsors. Answer in ${
-    preferences.language
-  }.
+  const aiInstructions = `Summarize the following transcription of a youtube video as a list of the most important points each starting with a fitting emoji. Ignore mentions of video sponsors. Answer in ${language}.
   
   Format:
 
@@ -76,7 +76,8 @@ const useRaycastAISummary = async ({ transcript, setSummaryIsLoading, setSummary
   Here is the transcript: ${temporarySummary.length > 0 ? temporarySummary : transcript}`;
 
   const raycastSummary = AI.ask(aiInstructions, {
-    model: "gpt-3.5-turbo",
+    model: languageModel,
+    creativity: creativity,
   });
 
   showToast({

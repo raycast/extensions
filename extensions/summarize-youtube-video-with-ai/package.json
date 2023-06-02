@@ -44,6 +44,54 @@
           "required": true
         },
         {
+          "name": "languageModel",
+          "title": "Language Model",
+          "description": "Choose a language model for the AI.",
+          "type": "dropdown",
+          "default": "text-davinci-003",
+          "data": [
+            {
+              "value": "text-davinci-003",
+              "title": "text-davinci-003"
+            },
+            {
+              "value": "gpt-3.5-turbo",
+              "title": "gpt-3.5-turbo"
+            }
+          ],
+          "required": true
+        },
+        {
+          "name": "creativity",
+          "title": "Creativity",
+          "description": "Choose how creative the AI should be.",
+          "type": "dropdown",
+          "default": "0.5",
+          "data": [
+            {
+              "value": "0",
+              "title": "None"
+            },
+            {
+              "value": "0.5",
+              "title": "Low"
+            },
+            {
+              "value": "1",
+              "title": "Medium"
+            },
+            {
+              "value": "1.5",
+              "title": "High"
+            },
+            {
+              "value": "2",
+              "title": "Maximum"
+            }
+          ],
+          "required": false
+        },
+        {
           "name": "openaiApiToken",
           "title": "OpenAI API Token",
           "description": "Your OpenAI API Token. Required if you choose ChatGPT as your AI.",
