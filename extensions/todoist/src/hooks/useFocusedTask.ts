@@ -29,8 +29,8 @@ export const useFocusedTask = () => {
   }
 
   useEffect(() => {
-    focusedTask.content = truncateMiddle(focusedTask.content, parseInt(focusFeatureWidth));
-  }, [focusedTask.content, focusFeatureWidth]);
+    focusedTask.content = truncateMiddle(focusedTask.content, parseInt(focusFeatureWidth ?? "40"));
+  }, [focusedTask, focusFeatureWidth]);
 
   return { focusedTask, unfocusTask, focusTask };
 };

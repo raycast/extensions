@@ -1,5 +1,5 @@
 import { Icon, Image } from "@raycast/api";
-import { compareAsc } from "date-fns";
+import { compareAsc, format } from "date-fns";
 import { partition } from "lodash";
 import React from "react";
 
@@ -85,12 +85,15 @@ export function groupByAssignees({ tasks, collaborators, user }: GroupByAssignee
 export function groupByDueDates(tasks: Task[]) {
   const [overdue, upcoming] = partition(tasks, (task: Task) => task.due?.date && isOverdue(new Date(task.due.date)));
 
-  const allDueDates = [...new Set(upcoming.map((task) => task.due?.date))] as string[];
+  const allDueDates = [
+    ...new Set(upcoming.map((task) => (task.due ? format(new Date(task.due.date), "yyyy-MM-dd") : null))),
+  ] as string[];
+
   allDueDates.sort((dateA, dateB) => compareAsc(new Date(dateA), new Date(dateB)));
 
   const sections = allDueDates.map((date) => ({
     name: displayDueDate(date),
-    tasks: upcoming?.filter((task) => task.due?.date === date) || [],
+    tasks: upcoming?.filter((task) => (task.due ? format(new Date(task.due.date), "yyyy-MM-dd") === date : null || [])),
   }));
 
   if (overdue.length > 0) {
