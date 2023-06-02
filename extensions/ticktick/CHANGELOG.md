@@ -1,5 +1,9 @@
 # TickTick Changelog
 
+## [Improve] - 2023-05-31
+
+- The `Search Tasks` command will showing all tasks related to a specific project if the search field is left empty.
+
 ## [Added] - 2023-05-26
 
 - When creating a new task, the extension will guess which project the task belongs to. For non-pro users it just acts as before.

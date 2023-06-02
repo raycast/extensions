@@ -1,19 +1,44 @@
-import { List } from "@raycast/api";
-import React, { useMemo, useState } from "react";
-import { getTaskCopyContent, getTaskDetailMarkdownContent } from "./service/task";
+import { List, LocalStorage } from "@raycast/api";
+import React, { useEffect, useMemo, useState } from "react";
+import { Section, getTaskCopyContent, getTaskDetailMarkdownContent } from "./service/task";
 import useStartApp from "./hooks/useStartApp";
 import TaskItem from "./components/taskItem";
 import useSearchTasks from "./hooks/useSearchTasks";
 import { getProjects } from "./service/project";
 import SearchFilter from "./components/searchFilter";
+import { getTasksByProjectId } from "./service/osScript";
 
 const TickTickSearch: React.FC<Record<string, never>> = () => {
   const [searchQuery, setSearchQuery] = useState<string>("");
+  const [sections, setSections] = useState<Section[]>([]);
   const [projectFilter, setProjectFilter] = useState("all");
+
   const { isInitCompleted } = useStartApp();
 
+  const [isAllTasksLoaded, setIsAllTasksLoaded] = useState(false);
+  const [isLocalDataLoaded, setIsLocalDataLoaded] = useState(false);
+
+  useEffect(() => {
+    (async () => {
+      const defaultProjectId = await LocalStorage.getItem<string>("searchProjectFilter");
+      if (defaultProjectId) {
+        setProjectFilter(defaultProjectId);
+      }
+      setIsLocalDataLoaded(true);
+    })();
+  }, []);
+
+  useEffect(() => {
+    if (isInitCompleted && isLocalDataLoaded) {
+      const projects = getProjects();
+      if (projectFilter !== "all" && !projects.find((project) => project.id === projectFilter)) {
+        setProjectFilter("all");
+      }
+    }
+  }, [isInitCompleted, isLocalDataLoaded, projectFilter]);
+
   const filterSections = useMemo(() => {
-    if (isInitCompleted) {
+    if (isInitCompleted || getProjects().length > 0) {
       return [
         { id: "hide", name: "Hide", filters: [{ id: "all", name: "All" }] },
         {
@@ -29,17 +54,54 @@ const TickTickSearch: React.FC<Record<string, never>> = () => {
   const { searchTasks, isSearching } = useSearchTasks({ searchQuery, isInitCompleted });
 
   const isLoading = useMemo(() => {
-    if (!isInitCompleted) {
+    if (!isInitCompleted || !isLocalDataLoaded || !isAllTasksLoaded) {
       return true;
     }
     return isSearching;
-  }, [isInitCompleted, isSearching]);
+  }, [isAllTasksLoaded, isInitCompleted, isLocalDataLoaded, isSearching]);
 
   const onFilterChange = (filterId: string) => {
     setProjectFilter(filterId);
+    LocalStorage.setItem("searchProjectFilter", filterId);
   };
 
+  useEffect(() => {
+    const getTasks = async () => {
+      setIsAllTasksLoaded(false);
+      const tasks = await getTasksByProjectId(projectFilter);
+      setSections(tasks);
+      setTimeout(() => {
+        setIsAllTasksLoaded(true);
+      });
+    };
+    if (isLocalDataLoaded) {
+      getTasks();
+    }
+  }, [isLocalDataLoaded, projectFilter]);
+
   const renderTasks = useMemo(() => {
+    if (!searchQuery) {
+      return sections?.map((section) => {
+        return (
+          <List.Section key={section.id} title={`${section.name}`} subtitle={`${section.children.length}`}>
+            {section.children.map((task) => (
+              <TaskItem
+                key={task.id}
+                actionType="week"
+                id={task.id}
+                title={task.title}
+                projectId={task.projectId}
+                priority={task.priority}
+                tags={task.tags}
+                detailMarkdown={getTaskDetailMarkdownContent(task)}
+                copyContent={getTaskCopyContent(task)}
+              />
+            ))}
+          </List.Section>
+        );
+      });
+    }
+
     if (!searchTasks) {
       return [];
     }
@@ -64,7 +126,7 @@ const TickTickSearch: React.FC<Record<string, never>> = () => {
         copyContent={getTaskCopyContent(task)}
       />
     ));
-  }, [projectFilter, searchTasks]);
+  }, [projectFilter, searchQuery, searchTasks, sections]);
 
   return (
     <List
@@ -72,13 +134,11 @@ const TickTickSearch: React.FC<Record<string, never>> = () => {
       onSearchTextChange={setSearchQuery}
       searchBarPlaceholder="Search all tasks..."
       isShowingDetail
-      searchBarAccessory={<SearchFilter filterSections={filterSections} onFilterChange={onFilterChange} />}
+      searchBarAccessory={
+        <SearchFilter value={projectFilter} filterSections={filterSections} onFilterChange={onFilterChange} />
+      }
     >
-      {!searchTasks && renderTasks.length === 0 ? (
-        <List.EmptyView title="Type something to search tasks" />
-      ) : (
-        renderTasks
-      )}
+      {renderTasks.length === 0 ? <List.EmptyView title="Type something to search tasks" /> : renderTasks}
     </List>
   );
 };
