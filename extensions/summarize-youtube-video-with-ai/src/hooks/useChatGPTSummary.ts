@@ -19,7 +19,7 @@ type GetChatGPTSummaryProps = {
 
 const useChatGPTSummary = async ({ transcript, setSummaryIsLoading, setSummary }: GetChatGPTSummaryProps) => {
   const preferences = getPreferenceValues() as PreferenceValues;
-  const { chosenAi, languageModel, creativity, openaiApiToken, language } = preferences;
+  const { chosenAi, creativity, openaiApiToken, language } = preferences;
 
   if (chosenAi !== "chatgpt") {
     return;
@@ -55,7 +55,7 @@ const useChatGPTSummary = async ({ transcript, setSummaryIsLoading, setSummary }
 
       try {
         const result = await openai.createChatCompletion({
-          model: languageModel,
+          model: "gpt-3.5-turbo",
           temperature: parseInt(creativity),
           messages: [{ role: "user", content: openAiInstructionBlock }],
         });
@@ -87,7 +87,7 @@ const useChatGPTSummary = async ({ transcript, setSummaryIsLoading, setSummary }
     });
 
     const result = await openai.createChatCompletion({
-      model: languageModel,
+      model: "gpt-3.5-turbo",
       temperature: parseInt(creativity),
       messages: [{ role: "user", content: openAiInstructions }],
     });

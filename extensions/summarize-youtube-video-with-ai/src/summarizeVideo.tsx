@@ -14,7 +14,6 @@ interface SummarizeVideoProps {
 }
 export type PreferenceValues = {
   chosenAi: "raycastai" | "chatgpt";
-  languageModel: "text-davinci-003" | "gpt-3.5-turbo";
   creativity: "0" | "0.5" | "1" | "1.5" | "2";
   openaiApiToken: string;
   language: string;

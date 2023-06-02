@@ -18,7 +18,7 @@ type GetRaycastAISummaryProps = {
 
 const useRaycastAISummary = async ({ transcript, setSummaryIsLoading, setSummary }: GetRaycastAISummaryProps) => {
   const preferences = getPreferenceValues() as PreferenceValues;
-  const { chosenAi, languageModel, creativity, language } = preferences;
+  const { chosenAi, creativity, language } = preferences;
 
   if (chosenAi !== "raycastai") {
     return;
@@ -76,8 +76,8 @@ const useRaycastAISummary = async ({ transcript, setSummaryIsLoading, setSummary
   Here is the transcript: ${temporarySummary.length > 0 ? temporarySummary : transcript}`;
 
   const raycastSummary = AI.ask(aiInstructions, {
-    model: languageModel,
-    creativity: creativity,
+    model: "gpt-3.5-turbo",
+    creativity: parseInt(creativity),
   });
 
   showToast({
