@@ -12,16 +12,25 @@ export const SessionStorage = {
       LocalStorage.getItem<string>(LOCAL_STORAGE_KEY.LAST_ACTIVITY_TIME),
     ]);
   },
-  clearSession: () => {
-    return Promise.all([
+  clearSession: async () => {
+    await Promise.all([
       LocalStorage.removeItem(LOCAL_STORAGE_KEY.SESSION_TOKEN),
       LocalStorage.removeItem(LOCAL_STORAGE_KEY.REPROMPT_HASH),
     ]);
   },
-  saveSession: (token: string, passwordHash: string) => {
-    return Promise.all([
+  saveSession: async (token: string, passwordHash: string) => {
+    await Promise.all([
       LocalStorage.setItem(LOCAL_STORAGE_KEY.SESSION_TOKEN, token),
       LocalStorage.setItem(LOCAL_STORAGE_KEY.REPROMPT_HASH, passwordHash),
+    ]);
+  },
+  logoutClearSession: async () => {
+    // clear everything related to the session
+    await Promise.all([
+      LocalStorage.removeItem(LOCAL_STORAGE_KEY.SESSION_TOKEN),
+      LocalStorage.removeItem(LOCAL_STORAGE_KEY.REPROMPT_HASH),
+      LocalStorage.removeItem(LOCAL_STORAGE_KEY.LAST_ACTIVITY_TIME),
+      LocalStorage.removeItem(LOCAL_STORAGE_KEY.VAULT_LOCK_REASON),
     ]);
   },
 };

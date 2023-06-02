@@ -1,5 +1,9 @@
 # Bitwarden Changelog
 
+## [New Command] - 2023-05-31
+
+- Added Logout command
+
 ## [Search Vault Command Improvements] - 2023-05-22
 
 - Added a Folder Dropdown to filter the list by folder

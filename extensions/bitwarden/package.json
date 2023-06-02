@@ -167,6 +167,18 @@
       "description": "Lock your bitwarden vault",
       "icon": "lock-vault.png",
       "mode": "no-view"
+    },
+    {
+      "name": "logout-vault",
+      "title": "Logout",
+      "subtitle": "Bitwarden",
+      "description": "Logout from your bitwarden vault account",
+      "icon": "logout-vault.png",
+      "mode": "no-view",
+      "keywords": [
+        "log out",
+        "account"
+      ]
     }
   ],
   "preferences": [

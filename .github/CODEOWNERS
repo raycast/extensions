@@ -41,6 +41,7 @@
 /extensions/apple-notes                              @tumispro @ron-myers @mathieudutour @StevenRCE0 @SKaplanOfficial
 /extensions/arc                                      @thomaspaulmann @pomdtr @zach-fuller @ankitchouhan1020 @pernielsentikaer @danpalmer
 /extensions/archiver                                 @404J
+/extensions/arxiv                                    @koayon @pernielsentikaer
 /extensions/asana                                    @thomaslombart
 /extensions/associated-press                         @Dammmien
 /extensions/asyncapi                                 @smoya
@@ -112,6 +113,7 @@
 /extensions/capture-fullpage-of-website              @Coun1er
 /extensions/capture-raycast-metadata                 @koinzhang
 /extensions/carbon-raycast                           @adelowo
+/extensions/cardpointers                             @emcro
 /extensions/center                                   @enesozturk
 /extensions/chakra-ui-docs                           @pgvr @Ansub
 /extensions/change-case                              @es183923 @pernielsentikaer
@@ -328,6 +330,7 @@
 /extensions/gh-pic                                   @xiangsanliu
 /extensions/gif-search                               @josephschmitt
 /extensions/git-branch-name-generator                @michaelbonner
+/extensions/git-co-authors                           @nickradford @pernielsentikaer
 /extensions/git-repos                                @moored
 /extensions/gitee                                    @koinzhang
 /extensions/gitfox                                   @L3K0V
@@ -404,6 +407,7 @@
 /extensions/hue                                      @pindab0ter @thomaspaulmann @robertvanhoesel
 /extensions/huggingcast                              @ragnorc
 /extensions/humaans                                  @farisaziz12
+/extensions/hupu                                     @alpacachen
 /extensions/hyper-focus                              @iloveitaly @pernielsentikaer
 /extensions/hypersonic                               @prrrcl
 /extensions/iata-code-decoder                        @timrogers
@@ -513,6 +517,7 @@
 /extensions/lodash                                   @vimtor
 /extensions/logitech-litra                           @timrogers
 /extensions/logseq                                   @futantan @sawhney17
+/extensions/logtail                                  @Cavallando
 /extensions/lorem-ipsum                              @AntonNiklasson @GastroGeek @enkia
 /extensions/lucide-icons                             @gBasil @aeither
 /extensions/lyrics                                   @ajzbc
@@ -738,7 +743,7 @@
 /extensions/readwise-to-tana                         @believer
 /extensions/readymetrics                             @chadbutz
 /extensions/rebrandly                                @grikomsn
-/extensions/recents                                  @GastroGeek
+/extensions/recents                                  @GastroGeek @kgrhartlage
 /extensions/recurly                                  @kudrykv
 /extensions/reddit-search                            @ewlcheng
 /extensions/redis                                    @k8scat
@@ -828,11 +833,12 @@
 /extensions/sourcegraph                              @bobheadxi
 /extensions/sourcetree                               @i906
 /extensions/spaces                                   @pradeepb28
+/extensions/spanish-tv-guide                         @doktor500
 /extensions/spatie-documentation                     @danyelkeddah
 /extensions/specify                                  @AllanMichay
 /extensions/speedtest                                @tonka3000 @koayon
 /extensions/spotify-beta                             @mattisssa @peduarte @sxn @dillionverma @andreaselia @stuart @tonka3000 @dancannon
-/extensions/spotify-controls                         @thomaspaulmann @altrdev @ron-myers @sandypockets @Kenan7 @dmacdermott @pernielsentikaer
+/extensions/spotify-controls                         @thomaspaulmann @altrdev @ron-myers @sandypockets @Kenan7 @dmacdermott @pernielsentikaer @yansq
 /extensions/spotify-player                           @mattisssa @dillionverma @andreaselia @stuart @tonka3000 @dancannon @sxn
 /extensions/ssh-manager                              @scopsy @LenoxFro
 /extensions/ssh-tunnel-manager                       @MinatoHikari
@@ -895,7 +901,7 @@
 /extensions/tldr                                     @pomdtr
 /extensions/tmdb                                     @Aayush9029 @andreaselia
 /extensions/tmux-sessioner                           @louishuyng
-/extensions/todo-list                                @maggie-j-liu
+/extensions/todo-list                                @maggie-j-liu @joshkorol
 /extensions/todoist                                  @thomaslombart @AnishDe12020 @kud
 /extensions/toggl-track                              @franzwilhelm @bkeys818 @rogatty @michaelfaisst
 /extensions/toggle-desktop-visibility                @Haojen
