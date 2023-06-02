@@ -1,5 +1,8 @@
 # Country Changelog
 
+## [New Screenshots] - 2023-06-02
+
+
 ## [Enhancement] - 2023-05-30
 
 - Added possibility to search for cca3 code
