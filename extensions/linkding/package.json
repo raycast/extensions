@@ -15,35 +15,16 @@
       "title": "Search Linkding",
       "description": "Searches through Linkding Bookmarks",
       "mode": "view"
-    }
-  ],
-  "preferences": [
-    {
-      "title": "Linkding Server URL",
-      "name": "serverUrl",
-      "description": "URL from the Linkding instance",
-      "placeholder": "https://bookmarks.my-domain.com",
-      "type": "textfield",
-      "required": true
     },
     {
-      "title": "Linkding API Key",
-      "name": "apiKey",
-      "description": "API Key from from the Linkding instance",
-      "type": "password",
-      "required": true
-    },
-    {
-      "label": "Ignore Server SSL",
-      "name": "ignoreSSL",
-      "description": "Ignore SSL Certificate from Linkding Server",
-      "type": "checkbox",
-      "default": false,
-      "required": false
+      "name": "manage-account",
+      "title": "Manage Linkding Accounts",
+      "description": "Mange your Linkding Accounts and Servers",
+      "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.49.1",
+    "@raycast/api": "^1.52.0",
     "axios": "^1.3.4"
   },
   "devDependencies": {
