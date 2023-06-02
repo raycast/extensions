@@ -11,7 +11,8 @@
     "sandypockets",
     "kenan",
     "dmacdermott",
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "yansq"
   ],
   "license": "MIT",
   "commands": [
@@ -94,6 +95,13 @@
           "required": false
         }
       ]
+    },
+    {
+      "name": "backwardToBeginning",
+      "title": "Backward To The Beginning",
+      "subtitle": "Spotify",
+      "description": "Plays current track from the beginning in Spotify.",
+      "mode": "no-view"
     },
     {
       "name": "forwardXseconds",
