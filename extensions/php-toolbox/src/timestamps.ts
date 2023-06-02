@@ -1,3 +1,3 @@
-import PhpTimestampHelper from "./timestamps/index"
+import PhpTimestampHelper from "./timestamps/index";
 
 export default PhpTimestampHelper;
