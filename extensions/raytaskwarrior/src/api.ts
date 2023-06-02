@@ -1,12 +1,12 @@
-import { exec } from 'child_process';
-import { promisify } from 'util';
-import { Task, Status, Priority } from './types/types';
-import { getPreferenceValues } from '@raycast/api';
+import { exec } from "child_process";
+import { promisify } from "util";
+import { Task, Status, Priority } from "./types/types";
+import { getPreferenceValues } from "@raycast/api";
 
 const execPromise = promisify(exec);
 const taskPath = getPreferenceValues().taskPath;
 
-const overrideError = 'Configuration override rc.json.array:on\n';
+const overrideError = "Configuration override rc.json.array:on\n";
 const command = `${taskPath} export rc.json.array:on`;
 
 //
@@ -16,13 +16,13 @@ export const getTasks = async () => {
   try {
     const { stdout, stderr } = await execPromise(command);
     if (stderr && stderr !== overrideError) {
-      throw new Error('please make sure you have set the path to task in the extension settings');
+      throw new Error("please make sure you have set the path to task in the extension settings");
     }
 
     const data = JSON.parse(stdout) as Task[];
     if (data) tasks = data.sort((a, b) => b.urgency - a.urgency);
   } catch (error) {
-    throw new Error('Please make sure you have set the path to task in the settings');
+    throw new Error("Please make sure you have set the path to task in the settings");
   }
   return tasks;
 };
@@ -48,11 +48,9 @@ export const getTasksForProject = async (project: string) => {
 };
 
 // returns all pending tasks for a tag (defaults to next)
-export const getTasksForTag = async (tag = 'next') => {
+export const getTasksForTag = async (tag = "next") => {
   const tasks = await getTasks();
-  return tasks.filter(
-    (task) => task.tags && Array.from(task.tags).includes(tag) && task.status === Status.Pending
-  );
+  return tasks.filter((task) => task.tags && Array.from(task.tags).includes(tag) && task.status === Status.Pending);
 };
 
 export const addTask = async (commandString: string) => {
@@ -93,37 +91,37 @@ export const updateTask = async (
   project?: string,
   tags?: string[],
   due?: string,
-  priority?: Priority | ''
+  priority?: Priority | ""
 ) => {
   const commandParts = [`${taskPath}`];
 
   if (uuid) {
-    commandParts.push('modify', uuid);
+    commandParts.push("modify", uuid);
   } else {
-    commandParts.push('add');
+    commandParts.push("add");
   }
 
-  if (typeof description !== 'undefined') {
+  if (typeof description !== "undefined") {
     commandParts.push(`"${description}"`);
   }
 
-  if (typeof project !== 'undefined') {
-    if (project !== '') {
+  if (typeof project !== "undefined") {
+    if (project !== "") {
       commandParts.push(`project:"${project}"`);
     } else {
       commandParts.push(`project:`);
     }
   }
 
-  if (typeof tags !== 'undefined') {
+  if (typeof tags !== "undefined") {
     commandParts.push(...tags);
   }
 
-  if (typeof due !== 'undefined') {
+  if (typeof due !== "undefined") {
     commandParts.push(`due:${due}`);
   }
 
-  if (typeof priority !== 'undefined') {
+  if (typeof priority !== "undefined") {
     if (priority) {
       commandParts.push(`priority:${priority}`);
     } else {
@@ -131,12 +129,12 @@ export const updateTask = async (
     }
   }
 
-  const command = commandParts.join(' ');
+  const command = commandParts.join(" ");
 
   // execute command
   try {
     const { stderr } = await execPromise(command);
-    if (stderr.includes('not a valid date')) {
+    if (stderr.includes("not a valid date")) {
       throw new Error(`Invalid due date format. Use the Y-M-D format or Taskwarrior format`);
     }
   } catch (error) {
@@ -164,6 +162,6 @@ export const getAllProjects = async () => {
   tasks.forEach((task) => {
     if (task.project) projects.add(task.project);
   });
-  projects.add('All');
+  projects.add("All");
   return projects;
 };

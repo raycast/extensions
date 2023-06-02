@@ -1,15 +1,12 @@
-import { List } from '@raycast/api';
+import { List } from "@raycast/api";
 
-const ProjectsDropdown = (props: {
-  projects: Set<string>;
-  onProjectChange: (newValue: string) => void;
-}) => {
+const ProjectsDropdown = (props: { projects: Set<string>; onProjectChange: (newValue: string) => void }) => {
   const { projects: projects, onProjectChange: onProjectChange } = props;
   return (
     <List.Dropdown
-      tooltip='Select Project'
+      tooltip="Select Project"
       storeValue={true}
-      defaultValue={'All'}
+      defaultValue={"All"}
       onChange={(newValue) => {
         onProjectChange(newValue);
       }}
@@ -17,7 +14,7 @@ const ProjectsDropdown = (props: {
       {Array.from(projects).map((project) => (
         <List.Dropdown.Item key={project} title={project} value={project} />
       ))}
-      <List.Dropdown.Section title='Projects'></List.Dropdown.Section>
+      <List.Dropdown.Section title="Projects"></List.Dropdown.Section>
     </List.Dropdown>
   );
 };

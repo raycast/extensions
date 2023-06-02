@@ -17,15 +17,15 @@ export interface Task {
 }
 
 export enum Status {
-  Pending = 'pending',
-  Deleted = 'deleted',
-  Completed = 'completed',
-  Waiting = 'waiting',
-  Recurring = 'recurring',
+  Pending = "pending",
+  Deleted = "deleted",
+  Completed = "completed",
+  Waiting = "waiting",
+  Recurring = "recurring",
 }
 
 export enum Priority {
-  H = 'H',
-  M = 'M',
-  L = 'L',
+  H = "H",
+  M = "M",
+  L = "L",
 }
