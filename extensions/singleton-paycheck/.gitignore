@@ -2,3 +2,6 @@
 /.idea/modules.xml
 /.idea/singleton-paycheck.iml
 /.idea/vcs.xml
+
+.DS_Store
+raycast-env.d.ts

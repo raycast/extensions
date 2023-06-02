@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "singleton-paycheck",
-  "title": "singleton-paycheck",
+  "title": "Singleton Paycheck",
   "description": "Saves time for singletonians by counting and displaying paycheck details",
   "icon": "command-icon.png",
   "author": "dufftie",
@@ -9,7 +9,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "Singleton utility",
+      "title": "Singleton Utility",
       "description": "An utility to make singletonians life better",
       "mode": "view",
       "icon": "command-icon.png",
