@@ -13,7 +13,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "Toggle Perfomance HUD",
+      "title": "Toggle Performance HUD",
       "description": "Toggles macOS's built-in Metal performance HUD",
       "mode": "no-view"
     }
