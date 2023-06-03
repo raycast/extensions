@@ -284,8 +284,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.49.3",
-    "@raycast/utils": "^1.6.1",
+    "@raycast/api": "^1.52.1",
+    "@raycast/utils": "^1.7.0",
     "execa": "^7.0.0"
   },
   "devDependencies": {
