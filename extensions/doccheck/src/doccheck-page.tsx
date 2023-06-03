@@ -67,13 +67,26 @@ export default function DocCheckPage(props: { url: string; prevurl: string; quer
 
   const title = $(".mw-page-title-main").html() != undefined ? $(".mw-page-title-main").html() : urlTitle ?? "";
 
-  let html = isLoading ? "<br><em>Artikel wird geladen…</em>" : "";
+  let html = "";
   $(".mw-parser-output").each(function (i, link) {
     html +=
       title === "Medizinische Abkürzungen"
         ? "<br><em>Dieser Artikel enthält eine zu lange Tabelle und kann in Raycast nicht angezeigt werden</em>"
         : $(link).html();
   });
+
+  // authors
+  let authors = isLoading ? "*Artikel wird geladen…*" : $(".detail-text").html();
+  if (authors) {
+    if (authors.indexOf("Autoren:") <= 0 && authors.indexOf("Autor:") <= 0 && authors.indexOf("Artikel") <= 0) {
+      authors = "Autor:" + authors;
+    }
+    authors = authors
+      .replace(/\s{2,}/gm, ``)
+      .replace(`:`, `: `)
+      .replace(`+`, ` +`)
+      .trim();
+  }
 
   // table of contents
   const toc = $("#toc").html();
@@ -89,7 +102,6 @@ export default function DocCheckPage(props: { url: string; prevurl: string; quer
 
   const query = props.query ? props.query : "";
   const queryText = props.query ? ` "` + props.query + `"` : "";
-  markdown = title ? "# " + title : "# " + urlTitle;
   const goback =
     props.prevurl != undefined && props.prevurl != "" && preferences.openIn != "browser"
       ? "[← " +
@@ -108,9 +120,13 @@ export default function DocCheckPage(props: { url: string; prevurl: string; quer
       : preferences.openIn != "browser"
       ? "[← Top Articles](raycast://extensions/spacedog/doccheck/doccheck-flexikon)\n"
       : "";
+  markdown = title ? "# " + title : "# " + urlTitle;
   markdown +=
     "\n " +
     goback +
+    "\n" +
+    authors +
+    "\n\n" +
     mdSynonyms +
     nhm
       .translate(
