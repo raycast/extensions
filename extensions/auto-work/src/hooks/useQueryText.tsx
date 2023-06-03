@@ -2,14 +2,14 @@ import { clearSearchBar, showToast, Toast, Cache } from '@raycast/api';
 import { useMemo, useState } from 'react';
 import say from 'say';
 import { v4 as uuidv4 } from 'uuid';
-import { Chat, Model } from '../type';
+import { Chat, Model, QueryHook } from '../type';
 import { chatTransfomer } from '../utils';
 import { useAutoTTS } from './useAutoTTS';
 import { useChatGPT } from './useChatGPT';
 import { useProxy } from './useProxy';
 import { PromptCollection } from './useModel';
 
-export function useQueryText<T extends Chat>(props: T): any {
+export function useQueryText<T extends Chat>(props: T): QueryHook {
   const cache = new Cache();
   const [data, setData] = useState<Chat>(props);
   const [isLoading, setLoading] = useState<boolean>(false);

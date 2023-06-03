@@ -1,13 +1,13 @@
 import { ActionPanel, Detail, Action } from '@raycast/api';
 import { useEffect, useState } from 'react';
-import { ImproveWrite } from './type';
+import { Chat, Query } from './type';
 import { useQueryText } from './hooks/useQueryText';
 import { SUMMARY_MODEL } from './hooks/useModel';
 import { getSelectText } from './utils';
 
-export default function Summary(props: { improveWrite?: ImproveWrite }) {
+export default function Improve(props: { improve?: Query }) {
   const [selectedText, setSelectedText] = useState<string>('');
-  const chats = useQueryText<any>(props.improveWrite ? props.improveWrite.chats : {});
+  const chats = useQueryText<Chat>(props.improve ? props.improve.chats : {} as Chat);
   const { isLoading, data } = chats;
   const [markdown, setMarkdown] = useState<string>('');
 

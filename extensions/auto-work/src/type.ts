@@ -27,7 +27,7 @@ export interface Conversation {
   pinned: boolean;
 }
 
-export interface ImproveWrite {
+export interface Query {
   id: string;
   model: Model;
   chats: Chat;
@@ -86,6 +86,15 @@ export interface ChatHook {
   setSelectedChatId: Set<string | null>;
   ask: PromiseFunctionWithTwoArg<string, Model>;
   clear: PromiseFunctionNoArg;
+}
+
+
+export interface QueryHook {
+  data: Chat;
+  setData: Set<Chat>;
+  isLoading: boolean;
+  setLoading: Set<boolean>;
+  ask: (question: string, model: Model, promptType?: string) => Promise<void>;
 }
 
 export interface ChangeModelProp {
