@@ -1,5 +1,4 @@
 import { Toast, getPreferenceValues, popToRoot, showHUD, showToast } from "@raycast/api";
-import { Preferences } from "~/types/preferences";
 import { capitalize } from "~/utils/strings";
 
 /** Displays a HUD or Toast and closes the window or not, depending on the preferences. */
