@@ -7,24 +7,26 @@ const convertToPixels = (twValue: number) => (twValue / 4) * 16 + "px";
 export default function Command() {
   const [px, setPx] = React.useState<string>(16 + "px");
   const [tw, setTw] = React.useState<string>(convertToTailwind(16));
+  const [currentInput, setCurrentInput] = React.useState<string>("");
 
   const handleOnTextChange = (value = "") => {
     const input = Number(value.trim().split(" ")[0]);
     if (!isNaN(input)) {
       setTw(convertToTailwind(input));
       setPx(convertToPixels(input));
+      setCurrentInput(value);
     }
   };
 
   return (
     <List
       onSearchTextChange={handleOnTextChange}
-      navigationTitle="Pixels to Tailwind"
-      searchBarPlaceholder="Search your Pixels"
+      navigationTitle="Pixels <–> Tailwind"
+      searchBarPlaceholder="Convert Pixels or Tailwind units"
     >
-      <List.Section title="Tailwind units">
+      <List.Section title={"Tailwind units"}>
         <List.Item
-          title={tw}
+          title={`${currentInput}px is --tw-${tw}`}
           actions={
             <ActionPanel title="Copy">
               <Action.CopyToClipboard title="Copy To Clipboard" content={tw} />
@@ -32,9 +34,9 @@ export default function Command() {
           }
         />
       </List.Section>
-      <List.Section title="In pixels">
+      <List.Section title={"Pixels"}>
         <List.Item
-          title={px}
+          title={`--tw-${currentInput} is ${px}`}
           actions={
             <ActionPanel title="Copy">
               <Action.CopyToClipboard title="Copy To Clipboard" content={px} />
