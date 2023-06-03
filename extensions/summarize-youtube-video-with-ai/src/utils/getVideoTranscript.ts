@@ -18,7 +18,7 @@ async function getVideoTranscript(video: string) {
         message: "Sorry, this video doesn't have a transcript.",
       });
       popToRoot();
-      return "";
+      return undefined;
     });
 
   return transcript;
