@@ -9,7 +9,7 @@ export default function DocCheckPage(props: { url: string; prevurl: string; quer
   const prevtitle = decodeURI(props.prevurl?.split("/")?.pop() ?? "").replace(/_/gm, " ");
   const urlTitle = decodeURI(props.url?.split("/")?.pop() ?? "")
     .replace(/_/gm, " ")
-    .replace(/.*\?title=(.*?)&.*/gm, `$1: Hier fehlt dein Wissen! Schreib diesen Artikel...`);
+    .replace(/.*\?title=(.*?)&.*/gm, `$1`);
 
   const { isLoading, data } = useFetch(props.url, {
     // to make sure the screen isn't flickering when the searchText changes
@@ -76,7 +76,7 @@ export default function DocCheckPage(props: { url: string; prevurl: string; quer
   });
 
   // authors
-  let authors = isLoading ? "*Artikel wird geladen…*" : $(".detail-text").html();
+  let authors = isLoading ? "*Artikel wird geladen…*" : $(".detail-text").html() ?? "*Hier fehlt dein Wissen! Schreib diesen Artikel...*";
   if (authors) {
     if (authors.indexOf("Autoren:") <= 0 && authors.indexOf("Autor:") <= 0 && authors.indexOf("Artikel") <= 0) {
       authors = "Autor:" + authors;

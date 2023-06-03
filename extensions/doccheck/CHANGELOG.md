@@ -4,6 +4,7 @@
 
 - NEW: Authors are displayed
 - Fixed: Some tables are now displayed better: Content within table cells spanning multiple columns is now displayed in two columns, cells spanning multiple rows have now a little arrow (this improvement was implemented because there is no "colspan" or "rowspan" functionality in Markdown)
+- Fixed: note about a missing article is now in the body and not behind the headline
 
 ## [Version 1.4] - 2023-05-28
 
