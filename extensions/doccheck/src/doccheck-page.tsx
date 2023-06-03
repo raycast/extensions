@@ -123,7 +123,10 @@ export default function DocCheckPage(props: { url: string; prevurl: string; quer
           .replace(`<td></td>`, `<td> </td>`)
           .replace(/<iframe.*src="(.*youtu.*)" frame.*><\/iframe>/gm, `YouTube Video: <a href="$1">$1</a>`)
           .replace(/<iframe.*src="(.*trinket.*)" frame.*><\/iframe>/gm, `trinket Code: <a href="$1">$1</a>`)
-          .replace(/ colspan="2"/gm, `>.</th><th`)
+          .replace(/<th colspan="2">(.*)<\/th>/gm, `<th>$1</th><th> </th>`)
+          .replace(/<td colspan="2">(.*)<\/td>/gm, `<td>$1</td><td> </td>`)
+          .replace(/<tr>\n<td rowspan="2">((.|\n)*?<tr>)/gm, `<tr>\n<td>$1<td>➥</td>`)
+          .replace(/<tr>\n<td rowspan="3">((.|\n)*?<tr>)((.|\n)*?<tr>)/gm, `<tr>\n<td>$1<td>➥</td>$3<td>➥➥</td>`)
       )
       .replace(/\s{94}\|\n/gm, `\n`); // HEADING + ``SYNONYMS`` -TOC + ARTICLE (removal of anchors, relative to absolute links, putting a dot in the empty start line when calculating "Relatives Risiko" and "Odds Ratio" for correct display, removal of some table ends like DDx in "Scharlach")
 

@@ -1,8 +1,8 @@
 # DocCheck Changelog
 
-## [Version 1.4.1] - 2023-06-02
+## [Version 1.4.1] - 2023-06-03
 
-- Fixed: Some tables are now displayed better: Content within table cells spanning multiple columns is now displayed in two columns (this improvement was implemented because there is no "colspan" functionality in Markdown)
+- Fixed: Some tables are now displayed better: Content within table cells spanning multiple columns is now displayed in two columns, cells spanning multiple rows have now a little arrow (this improvement was implemented because there is no "colspan" or "rowspan" functionality in Markdown)
 
 ## [Version 1.4] - 2023-05-28
 
