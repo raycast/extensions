@@ -2,7 +2,7 @@
 
 ## [Update] - 2023-06-03
 
-Adds support for opening the goal un the browser.
+Adds support for opening the goal in the browser.
 
 ## [Update] - 2023-02-20
 
