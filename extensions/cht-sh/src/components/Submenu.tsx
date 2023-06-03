@@ -9,19 +9,20 @@ interface SubmenuProps {
 }
 
 export default function Submenu(props: SubmenuProps) {
-  const [data, setData] = useState<string[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [data, setData] = useState<string[]>();
   const [searchText, setSearchText] = useState("");
-  const [filteredData, setFilteredData] = useState<string[]>(data);
+  const [filteredData, setFilteredData] = useState<string[]>();
 
   useEffect(() => {
     getCheatsheetList(`/${props.url}`).then((data) => {
       setData(data);
-      setIsLoading(false);
     });
   }, [props.url]);
 
   useEffect(() => {
+    if (!data) {
+      return;
+    }
     if (!searchText) {
       setFilteredData(data);
       return;
@@ -33,7 +34,7 @@ export default function Submenu(props: SubmenuProps) {
 
   return (
     <List
-      isLoading={isLoading}
+      isLoading={data === undefined}
       filtering={false}
       searchBarPlaceholder={`Filter ${props.url} cheatsheets by name or search for a keyword`}
       onSearchTextChange={setSearchText}
@@ -52,7 +53,7 @@ export default function Submenu(props: SubmenuProps) {
           }
         />
       )}
-      {filteredData.slice(0, 3000).map((cheatsheet, index) => (
+      {filteredData?.slice(0, 3000).map((cheatsheet, index) => (
         <List.Item
           key={index}
           title={cheatsheet}
