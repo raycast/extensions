@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "auto-work",
-  "title": "auto-work",
+  "title": "Auto work",
   "description": "Interact with OpenAI's auto-work API directly from your command bar",
   "icon": "icon.png",
   "author": "weitanai",
