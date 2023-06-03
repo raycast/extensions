@@ -1,14 +1,9 @@
-import {
-  ActionPanel,
-  Detail,
-  Action,
-} from '@raycast/api';
+import { ActionPanel, Detail, Action } from '@raycast/api';
 import { useEffect, useState } from 'react';
 import { ImproveWrite } from './type';
 import { useQueryText } from './hooks/useQueryText';
 import { SUMMARY_MODEL } from './hooks/useModel';
-import {getSelectText} from './utils';
-
+import { getSelectText } from './utils';
 
 export default function Summary(props: { improveWrite?: ImproveWrite }) {
   const [selectedText, setSelectedText] = useState<string>('');
@@ -62,5 +57,7 @@ ${data.answer}
         </ActionPanel>
       }
     />
-  ) : (<Detail markdown='You can select or copy text to summary' />)
+  ) : (
+    <Detail markdown="You can select or copy text to summary" />
+  );
 }
