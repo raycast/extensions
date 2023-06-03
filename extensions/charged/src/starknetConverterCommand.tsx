@@ -1,7 +1,8 @@
 import { Form, ActionPanel, Action, Clipboard, closeMainWindow, showHUD, Icon } from "@raycast/api";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import starknetConverter from "./utils/starknetConverter.js";
 import { shortString } from "starknet";
+import * as analytics from "./utils/analytics";
 
 enum ELEMENTS {
   RAW_VALUE = "rawValueField",
@@ -23,6 +24,10 @@ export default function Command() {
   const [big3Value, setBig3Value] = useState<string>("");
   const [focussedElement, setFocussedElement] = useState<ELEMENTS>(ELEMENTS.RAW_VALUE);
 
+  useEffect(() => {
+    analytics.trackEvent("OPEN_STARKNET_CONVERTER");
+  }, []);
+
   const onRawValueChange = (value: string) => {
     setRawValue(value);
 
@@ -43,6 +48,7 @@ export default function Command() {
   };
 
   const onSubmit = async (values: any) => {
+    analytics.trackEvent("CONVERTER_VALUE_COPIED");
     await Clipboard.copy(values[focussedElement]);
     await showHUD("Copied ✅");
     await closeMainWindow();

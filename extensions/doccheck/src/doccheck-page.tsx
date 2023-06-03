@@ -38,29 +38,22 @@ export default function DocCheckPage(props: { url: string; prevurl: string; quer
   // 	notSynonyms = notSynonyms.trim();
   synonyms = synonyms.replace(notSynonyms, "");
 
-  // SYNONYME
   if (synonyms) {
     // there are synonyms or explanations under the heading
     mdSynonyms =
       "```\n" +
       synonyms
         .trim()
-        .split("<br>")
-        .join("")
-        .split("</b>\n")
-        .join(" ")
-        .split("<b>")
-        .join("")
-        .split("</b>")
-        .join("")
-        .split("<sub>")
-        .join("")
-        .split("</sub>")
-        .join("")
-        .split("<sup>")
-        .join("")
-        .split("</sup>")
-        .join("") +
+        .replace(/<br>/gm, ``)
+        .replace(/<\/b>\n/gm, ` `)
+        .replace(/<b>/gm, ``)
+        .replace(/<\/b>/gm, ``)
+        .replace(/<sub>/gm, ``)
+        .replace(/<\/sub>/gm, ``)
+        .replace(/<sup>/gm, ``)
+        .replace(/<\/sup>/gm, ``)
+        .replace(/<a .*">/gm, ``)
+        .replace(/<\/a>/gm, ``) +
       "\n" +
       "``` " +
       "\n";
@@ -125,45 +118,98 @@ export default function DocCheckPage(props: { url: string; prevurl: string; quer
           .replace(toc ?? "", "")
           .replace(abm ?? "", "")
           .replace(/#cite_\D*\d*/gm, '"')
-          .replace(`>&nbsp;<`, `>.<`)
+          .replace(`th>&nbsp;</th`, `th>.</th`)
           .replace(`tr>\n<th></th>`, `tr>\n<th>.</th>`)
+          .replace(/<iframe.*src="(.*youtu.*)" frame.*><\/iframe>/gm, `YouTube Video: <a href="$1">$1</a>`)
+          .replace(/<iframe.*src="(.*trinket.*)" frame.*><\/iframe>/gm, `trinket Code: <a href="$1">$1</a>`)
       )
-      .replace(/\s{94}\|\n/gm, `\n`); // HEADING + ``SYNONYME`` -TOC + ARTICLE (removal of anchors, relative to absolute links, putting a dot in the empty start line when calculating "Relatives Risiko" and "Odds Ratio" for correct display, removal of some table ends like DDx in "Scharlach")
+      .replace(/\s{94}\|\n/gm, `\n`); // HEADING + ``SYNONYMS`` -TOC + ARTICLE (removal of anchors, relative to absolute links, putting a dot in the empty start line when calculating "Relatives Risiko" and "Odds Ratio" for correct display, removal of some table ends like DDx in "Scharlach")
 
-  return (
-    <Detail
-      navigationTitle={urlTitle}
-      isLoading={isLoading}
-      markdown={
-        preferences.openIn === "browser"
-          ? markdown.replace(/]\(\//gm, "](https://flexikon.doccheck.com/")
-          : markdown.replace(/\[(.*?)\]\((\/.*?) "(.*?)"\)/g, function (match, p1, p2, p3) {
-              const url = "https://flexikon.doccheck.com" + p2;
-              const args = {
-                url: url,
-                prevurl: props.url,
-                query: props.query,
-              };
-              const query = encodeURIComponent(JSON.stringify(args));
-              return "[" + p1 + "](raycast://extensions/spacedog/doccheck/open-page?arguments=" + query + ")";
-            })
-      }
-      actions={
-        <ActionPanel>
-          <Action.Open
-            icon={Icon.Globe}
-            title="Open Article in Browser"
-            target={props.url}
-            shortcut={{ modifiers: ["cmd"], key: "enter" }}
-          />
-          <Action.Open
-            icon={Icon.Uppercase}
-            title="Article Title as AMBOSS Search"
-            target={"https://next.amboss.com/de/search?q=" + encodeURI(urlTitle) + "&v=overview"}
-            shortcut={{ modifiers: ["opt"], key: "enter" }}
-          />
-        </ActionPanel>
-      }
-    />
-  );
+  if (query) {
+    return (
+      <Detail
+        navigationTitle={urlTitle}
+        isLoading={isLoading}
+        markdown={
+          preferences.openIn === "browser"
+            ? markdown.replace(/]\(\//gm, "](https://flexikon.doccheck.com/")
+            : markdown.replace(/\[(.*?)\]\((\/.*?) "(.*?)"\)/g, function (match, p1, p2, p3) {
+                const url = "https://flexikon.doccheck.com" + p2;
+                const args = {
+                  url: url,
+                  prevurl: props.url,
+                  query: props.query,
+                };
+                const query = encodeURIComponent(JSON.stringify(args));
+                return "[" + p1 + "](raycast://extensions/spacedog/doccheck/open-page?arguments=" + query + ")";
+              })
+        }
+        actions={
+          <ActionPanel>
+            <Action.Open
+              icon={Icon.Globe}
+              title="Open Article in Browser"
+              target={props.url}
+              shortcut={{ modifiers: ["cmd"], key: "enter" }}
+            />
+            <Action.Open
+              icon={Icon.Globe}
+              title={`Flexikon Search "` + query + `"`}
+              target={"https://www.doccheck.com/search?q=" + encodeURI(query) + "&facetq=content_type:flexikon"}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
+            />
+            <Action.Open
+              icon={Icon.Uppercase}
+              title={`AMBOSS Search "` + urlTitle + `"`}
+              target={"https://next.amboss.com/de/search?q=" + encodeURI(urlTitle) + "&v=overview"}
+              shortcut={{ modifiers: ["opt"], key: "enter" }}
+            />
+            <Action.Open
+              icon={Icon.Uppercase}
+              title={`AMBOSS Search "` + query + `"`}
+              target={"https://next.amboss.com/de/search?q=" + encodeURI(query) + "&v=overview"}
+              shortcut={{ modifiers: ["opt", "shift"], key: "enter" }}
+            />
+          </ActionPanel>
+        }
+      />
+    );
+  } else {
+    return (
+      <Detail
+        navigationTitle={urlTitle}
+        isLoading={isLoading}
+        markdown={
+          preferences.openIn === "browser"
+            ? markdown.replace(/]\(\//gm, "](https://flexikon.doccheck.com/")
+            : markdown.replace(/\[(.*?)\]\((\/.*?) "(.*?)"\)/g, function (match, p1, p2, p3) {
+                const url = "https://flexikon.doccheck.com" + p2;
+                const args = {
+                  url: url,
+                  prevurl: props.url,
+                  query: props.query,
+                };
+                const query = encodeURIComponent(JSON.stringify(args));
+                return "[" + p1 + "](raycast://extensions/spacedog/doccheck/open-page?arguments=" + query + ")";
+              })
+        }
+        actions={
+          <ActionPanel>
+            <Action.Open
+              icon={Icon.Globe}
+              title="Open Article in Browser"
+              target={props.url}
+              shortcut={{ modifiers: ["cmd"], key: "enter" }}
+            />
+            <Action.Open
+              icon={Icon.Uppercase}
+              title={`AMBOSS Search "` + urlTitle + `"`}
+              target={"https://next.amboss.com/de/search?q=" + encodeURI(urlTitle) + "&v=overview"}
+              shortcut={{ modifiers: ["opt"], key: "enter" }}
+            />
+          </ActionPanel>
+        }
+      />
+    );
+  }
 }

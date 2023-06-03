@@ -11,6 +11,7 @@ import {
 } from "./PowerUtils";
 import { useInterval } from "usehooks-ts";
 import { ExecError, PowerMonitorState } from "../Interfaces";
+import { Actions } from "../components/Actions";
 
 const PowerMonitor = () => {
   const [isLoading, setIsLoading] = useState(true);
@@ -97,7 +98,7 @@ const PowerMonitor = () => {
     <List.Item
       title={`Power`}
       icon={{ source: "lightning.png", tintColor: Color.Yellow }}
-      accessoryTitle={isLoading ? "Loading..." : `${state.batteryLevel}%`}
+      accessories={[{ text: isLoading ? "Loading..." : `${state.batteryLevel}%` }]}
       detail={
         <List.Item.Detail
           metadata={
@@ -115,6 +116,7 @@ const PowerMonitor = () => {
           }
         />
       }
+      actions={<Actions />}
     />
   );
 };

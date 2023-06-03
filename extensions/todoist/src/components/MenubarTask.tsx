@@ -1,24 +1,24 @@
 import { Color, confirmAlert, Icon, MenuBarExtra, open, showHUD } from "@raycast/api";
 import removeMarkdown from "remove-markdown";
 
-import { Task, deleteTask as apiDeleteTAsk, closeTask, updateTask } from "../api";
+import { SyncData, Task, deleteTask as apiDeleteTAsk, closeTask, updateTask } from "../api";
 import { getCollaboratorIcon, getProjectCollaborators } from "../helpers/collaborators";
 import { isTodoistInstalled } from "../helpers/isTodoistInstalled";
 import { getRemainingLabels } from "../helpers/labels";
 import { priorities } from "../helpers/priorities";
 import { getPriorityIcon } from "../helpers/priorities";
 import { getTaskAppUrl, getTaskUrl } from "../helpers/tasks";
-import useCachedData from "../hooks/useCachedData";
 import { useFocusedTask } from "../hooks/useFocusedTask";
 
 import View from "./View";
 
 type MenuBarTaskProps = {
   task: Task;
+  data?: SyncData;
+  setData: React.Dispatch<React.SetStateAction<SyncData | undefined>>;
 };
 
-const MenuBarTask = ({ task }: MenuBarTaskProps) => {
-  const [data, setData] = useCachedData();
+const MenuBarTask = ({ task, data, setData }: MenuBarTaskProps) => {
   const { focusedTask, unfocusTask, focusTask } = useFocusedTask();
 
   const collaborators = getProjectCollaborators(task.project_id, data);
