@@ -1,0 +1,185 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "auto-work",
+  "title": "auto-work",
+  "description": "Interact with OpenAI's auto-work API directly from your command bar",
+  "icon": "icon.png",
+  "author": "weitanai",
+  "homepage": "https://github.com/weitanai/auto-work#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/weitanai/auto-work.git"
+  },
+  "bugs": "https://github.com/weitanai/auto-work/issues",
+  "contributors": [
+    "timolins",
+    "shichongrui",
+    "pomdtr"
+  ],
+  "categories": [
+    "Applications",
+    "Productivity",
+    "Developer Tools",
+    "Web",
+    "Communication",
+    "Finance",
+    "Other"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "ask",
+      "title": "Ask Question",
+      "subtitle": "auto-work",
+      "description": "Ask auto-work via Raycast",
+      "mode": "view"
+    },
+    {
+      "name": "model",
+      "title": "Change Model",
+      "subtitle": "auto-work",
+      "description": "Change gpt mode via Raycast",
+      "mode": "view"
+    },
+    {
+      "name": "improve",
+      "title": "Improve Write",
+      "subtitle": "auto-work",
+      "description": "Improve write auto-work via Raycast",
+      "mode": "view"
+    },
+    {
+      "name": "summarize",
+      "title": "Summarize Text",
+      "subtitle": "auto-work",
+      "description": "Summarize text auto-work via Raycast",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "api",
+      "label": "Open AI API",
+      "description": "Enter your personal Open AI API",
+      "type": "password",
+      "title": "API",
+      "required": true
+    },
+    {
+      "name": "isAutoLoad",
+      "label": "Enable auto-load selected text",
+      "description": "Load selected text from your frontmost application to the question bar automatically",
+      "type": "checkbox",
+      "title": "Auto-load",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "isAutoFullInput",
+      "label": "Enable full text input initially",
+      "description": "Use full text input form when asking question for the first time",
+      "type": "checkbox",
+      "title": "Use Full Text Input",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "isAutoTTS",
+      "label": "Enable text-to-speech for every response",
+      "description": "Enable auto TTS everytime you get a generated answer",
+      "type": "checkbox",
+      "title": "Text-to-Speech",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "useProxy",
+      "label": "Enable proxy for each request",
+      "description": "Each request will be passed through the proxy",
+      "type": "checkbox",
+      "title": "Use Proxy",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "proxyProtocol",
+      "description": "Each request will be passed through the proxy",
+      "type": "dropdown",
+      "title": "Proxy Protocol",
+      "data": [
+        {
+          "title": "HTTP",
+          "value": "http"
+        },
+        {
+          "title": "HTTPs",
+          "value": "https"
+        },
+        {
+          "title": "Socks4",
+          "value": "socks4"
+        },
+        {
+          "title": "Socks5",
+          "value": "socks5"
+        }
+      ],
+      "required": false,
+      "default": "http"
+    },
+    {
+      "name": "proxyHost",
+      "description": "Sever address of the proxy",
+      "type": "textfield",
+      "title": "Proxy Host",
+      "required": false
+    },
+    {
+      "name": "proxyPort",
+      "description": "Server port of the proxy",
+      "type": "textfield",
+      "title": "Proxy Port",
+      "required": false
+    },
+    {
+      "name": "proxyUsername",
+      "description": "Leave empty if doesn't have",
+      "type": "textfield",
+      "title": "Proxy Username",
+      "required": false
+    },
+    {
+      "name": "proxyPassword",
+      "description": "Leave empty if doesn't have",
+      "type": "password",
+      "title": "Proxy Password",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.52.1",
+    "@raycast/utils": "^1.7.0",
+    "@types/uuid": "^9.0.1",
+    "axios": "^1.4.0",
+    "openai": "^3.2.1",
+    "say": "^0.16.0",
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "@typescript-eslint/eslint-plugin": "^5.59.8",
+    "@typescript-eslint/parser": "^5.59.8",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.8.0",
+    "prettier": "^2.8.8",
+    "typescript": "^4.9.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
