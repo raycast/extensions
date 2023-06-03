@@ -13,7 +13,7 @@ type Constraint = RecordOfAny;
 export type CopyObjectStringFieldsActionsProps<TValue extends Constraint> = {
   selector: (item: Item) => TValue | null | undefined;
   sorter?: (itemA: [string, any], itemB: [string, any]) => number;
-  labelMapper?: (field: keyof TValue) => string; // TODO: figure out why the field is not being inferred as a keyof TValue
+  labelMapper?: (field: keyof TValue) => string;
 };
 
 function CopyObjectStringFieldsActions<TValue extends Constraint>({
