@@ -120,7 +120,7 @@ export default function DocCheckPage(props: { url: string; prevurl: string; quer
           .replace(/#cite_\D*\d*/gm, '"')
           .replace(`th>&nbsp;</th`, `th>.</th`)
           .replace(`tr>\n<th></th>`, `tr>\n<th>.</th>`)
-          .replace(`<td></td>`, `<td>.</td>`)
+          .replace(`<td></td>`, `<td> </td>`)
           .replace(/<iframe.*src="(.*youtu.*)" frame.*><\/iframe>/gm, `YouTube Video: <a href="$1">$1</a>`)
           .replace(/<iframe.*src="(.*trinket.*)" frame.*><\/iframe>/gm, `trinket Code: <a href="$1">$1</a>`)
           .replace(/ colspan="2"/gm, `>.</th><th`)
