@@ -36,7 +36,7 @@
           "type": "dropdown",
           "description": "The primary action to perform on a vault item.",
           "required": false,
-          "title": "Primary Action",
+          "title": "Primary Password Action",
           "default": "copy",
           "data": [
             {
@@ -281,6 +281,28 @@
       "title": "Self-signed Certificates Path",
       "description": "Advanced: Path to self-signed TLS certificate for self-hosted instances.",
       "placeholder": "absolute/path/to/your/certs.pem"
+    },
+    {
+      "name": "windowActionOnCopy",
+      "type": "dropdown",
+      "required": false,
+      "title": "Window Behaviour On Copy",
+      "description": "What to do with the window when copying a value to the clipboard.",
+      "default": "close",
+      "data": [
+        {
+          "title": "Keep Open",
+          "value": "keepOpen"
+        },
+        {
+          "title": "Close",
+          "value": "close"
+        },
+        {
+          "title": "Close And Exit Command",
+          "value": "closeAndPopToRoot"
+        }
+      ]
     }
   ],
   "dependencies": {
