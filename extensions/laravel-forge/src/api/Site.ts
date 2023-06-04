@@ -1,93 +1,78 @@
-import { showToast, Toast } from "@raycast/api";
-import fetch from "node-fetch";
-import { ISite } from "../Site";
-import { sortBy, mapKeys, camelCase } from "lodash";
-import { IServer } from "../Server";
-import { checkServerisOnline } from "../helpers";
+import { sortBy } from "lodash";
 import { FORGE_API_URL } from "../config";
+import { ConfigFile, IDeployment, IServer, ISite } from "../types";
+import { apiFetch, apiFetchText } from "../lib/api";
 
-function theHeaders(token: string) {
-  return {
-    Authorization: `Bearer ${token}`,
-    "Content-Type": "application/x-www-form-urlencoded",
-    Accept: "application/json",
-  };
-}
+const defaultHeaders = {
+  "Content-Type": "application/x-www-form-urlencoded",
+  Accept: "application/json",
+};
+type ServerWithToken = { serverId: IServer["id"]; token: string };
+type ServerSiteWithToken = { serverId: IServer["id"]; siteId: ISite["id"]; token: string };
 
 export const Site = {
-  async getAll(server: IServer) {
-    const headers = theHeaders(server?.apiToken ?? "");
-    try {
-      const response = await fetch(`${FORGE_API_URL}/servers/${server.id}/sites`, {
-        method: "get",
-        headers,
-      });
-      const siteData = (await response.json()) as SitesResponse;
-      let sites = siteData?.sites ?? [];
-      // do a check to see if the server is returning 200
-      sites = await Promise.all(
-        sites?.map(async (s) => {
-          const urls = [...(s?.aliases ?? []), s?.name ?? ""];
-          s.isOnline = await checkServerisOnline(urls);
-          return s;
-        })
-      );
-      sites = sites.map((s) => mapKeys(s, (_, k) => camelCase(k)) as ISite);
-      return sortBy(sites, "name") as ISite[];
-    } catch (error: unknown) {
-      showToast(Toast.Style.Failure, (error as ErrorEvent).message);
-      return;
-    }
+  async getSitesWithoutServer({ token }: { token: string }) {
+    if (!token) return [];
+    const { sites } = await apiFetch<{ sites: ISite[] }>(`${FORGE_API_URL}/sites`, {
+      method: "get",
+      headers: { ...defaultHeaders, Authorization: `Bearer ${token}` },
+    });
+    return sortAndFilterSites(sites);
   },
-  async get(site: ISite, server: IServer) {
-    const headers = theHeaders(server?.apiToken ?? "");
-    try {
-      const response = await fetch(`${FORGE_API_URL}/servers/${server.id}/sites/${site.id}`, {
-        method: "get",
-        headers,
-      });
-      const siteData = (await response.json()) as SitesResponse;
-      // eslint-disable-next-line
-      // @ts-expect-error Not sure how to convert Dictionary from lodash to IServer
-      return mapKeys(siteData["site"], (_, k) => camelCase(k)) as ISite;
-    } catch (error: unknown) {
-      showToast(Toast.Style.Failure, (error as ErrorEvent).message);
-      return;
-    }
+
+  async getAll({ serverId, token }: ServerWithToken) {
+    const { sites } = await apiFetch<{ sites: ISite[] }>(`${FORGE_API_URL}/servers/${serverId}/sites`, {
+      method: "get",
+      headers: { ...defaultHeaders, Authorization: `Bearer ${token}` },
+    });
+    return sortAndFilterSites(sites);
   },
-  async deploy(site: ISite, server: IServer) {
-    const headers = theHeaders(server?.apiToken ?? "");
-    const toast = new Toast({ style: Toast.Style.Animated, title: "Deploying..." });
-    try {
-      toast.show();
-      await fetch(`${FORGE_API_URL}/servers/${server.id}/sites/${site.id}/deployment/deploy`, {
-        method: "post",
-        headers,
-      });
-      await new Promise((resolve) => setTimeout(resolve, 3000));
-      toast.hide();
-    } catch (error: unknown) {
-      showToast(Toast.Style.Failure, (error as ErrorEvent).message);
-      return;
-    }
+
+  async deploy({ serverId, siteId, token }: ServerSiteWithToken) {
+    await apiFetch(`${FORGE_API_URL}/servers/${serverId}/sites/${siteId}/deployment/deploy`, {
+      method: "post",
+      headers: { ...defaultHeaders, Authorization: `Bearer ${token}` },
+    });
   },
-  async getConfig(type: "env" | "nginx", site: ISite, server: IServer) {
-    const headers = theHeaders(server?.apiToken ?? "");
-    try {
-      const response = await fetch(`${FORGE_API_URL}/servers/${server.id}/sites/${site.id}/${type}`, {
-        method: "get",
-        headers,
-      });
-      const resource = await response.text();
-      // Adding <pre> here seems to convert the file into a readable markdown format
-      return resource ? `<pre><!-- ${type} file begin -->\n\n${resource}` : "Nothing found";
-    } catch (error: unknown) {
-      showToast(Toast.Style.Failure, "There was an error.");
-      return (error as ErrorEvent).message;
-    }
+
+  async getConfig({ serverId, siteId, token, type }: ServerSiteWithToken & { type: ConfigFile }) {
+    const response = await apiFetchText<string>(`${FORGE_API_URL}/servers/${serverId}/sites/${siteId}/${type}`, {
+      method: "get",
+      headers: { ...defaultHeaders, Authorization: `Bearer ${token}` },
+    });
+    return response.trim();
+  },
+
+  async getDeploymentHistory({ serverId, siteId, token }: ServerSiteWithToken) {
+    const endpoint = `${FORGE_API_URL}/servers/${serverId}/sites/${siteId}/deployment-history`;
+    const { deployments } = await apiFetch<{ deployments: IDeployment[] }>(endpoint, {
+      method: "get",
+      headers: { ...defaultHeaders, Authorization: `Bearer ${token}` },
+    });
+    return deployments;
+  },
+
+  async getDeploymentOutput({
+    serverId,
+    siteId,
+    deploymentId,
+    token,
+  }: ServerSiteWithToken & { deploymentId: IDeployment["id"] }) {
+    const endpoint = `${FORGE_API_URL}/servers/${serverId}/sites/${siteId}/deployment-history/${deploymentId}/output`;
+    const { output } = await apiFetch<{ output: string }>(endpoint, {
+      method: "get",
+      headers: { ...defaultHeaders, Authorization: `Bearer ${token}` },
+    });
+    return output;
   },
 };
 
-export type SitesResponse = {
-  sites?: ISite[];
+export const sortAndFilterSites = (sites: ISite[]) => {
+  const filtered =
+    sites?.map((site) => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { telegram_secret, ...siteData } = site;
+      return siteData;
+    }) ?? [];
+  return sortBy(filtered, "name") as ISite[];
 };

@@ -104,7 +104,7 @@ export function CreateTodoMRAction(props: { mr: MergeRequest; shortcut?: Keyboar
   if (mr.state === "opened") {
     return (
       <Action
-        title="Add a to do"
+        title="Add a To Do"
         shortcut={props.shortcut}
         icon={{ source: GitLabIcons.todo, tintColor: Color.PrimaryText }}
         onAction={handleAction}

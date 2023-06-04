@@ -1,5 +1,9 @@
 # Docker Changelog
 
+## [Feature] - 2023-05-12
+
+- Added ability to create container from image
+
 ## [Added screenshots] - 2022-12-22
 
 ## [Fix] - 2022-08-25

@@ -209,44 +209,116 @@
   ],
   "preferences": [
     {
+      "name": "provider",
+      "type": "dropdown",
+      "required": true,
+      "title": "Provider",
+      "default": "openai",
+      "description": "Choice API Provider",
+      "data": [
+        {
+          "value": "openai",
+          "title": "OpenAI"
+        },
+        {
+          "value": "raycast",
+          "title": "Raycast AI"
+        },
+        {
+          "value": "azure",
+          "title": "Azure"
+        },
+        {
+          "value": "palm2",
+          "title": "PaLM 2"
+        }
+      ]
+    },
+    {
       "name": "apikey",
-      "label": "OpenAI API Key",
-      "description": "Enter your personal OpenAI API Key,  Type 'none' if your entrypoint do not require an API key.",
+      "label": "API Key",
+      "description": "Enter your API Key for your provider,  Type 'none' if your entrypoint do not require an API key",
       "type": "password",
-      "title": "OpenAI API Key",
+      "title": "API Key",
       "required": true
     },
     {
       "name": "entrypoint",
-      "label": "OpenAI API Entrypoint",
-      "description": "Enter your custom OpenAI entrypoint.",
+      "label": "API Entrypoint",
+      "description": "Enter your provider entrypoint, If your provider does not require an entrypoint, it will be ignored.",
       "type": "textfield",
-      "title": "OpenAI API Entrypoint",
+      "title": "API Entrypoint",
       "default": "https://api.openai.com/v1/chat/completions",
       "required": true
+    },
+    {
+      "name": "apiModel",
+      "type": "dropdown",
+      "required": false,
+      "title": "API Model",
+      "default": "gpt-3.5-turbo",
+      "description": "Choose an OpenAI API model, which is only available when using the OpenAI provider",
+      "data": [
+        {
+          "value": "gpt-3.5-turbo",
+          "title": "gpt-3.5-turbo"
+        },
+        {
+          "value": "gpt-3.5-turbo-0301",
+          "title": "gpt-3.5-turbo-0301"
+        },
+        {
+          "value": "gpt-4",
+          "title": "gpt-4"
+        },
+        {
+          "value": "gpt-4-0314",
+          "title": "gpt-4-0314"
+        },
+        {
+          "value": "gpt-4-32k",
+          "title": "gpt-4-32k"
+        },
+        {
+          "value": "gpt-4-32k-0314",
+          "title": "gpt-4-32k-0314"
+        }
+      ]
     },
     {
       "name": "toLang",
       "type": "dropdown",
       "required": true,
       "title": "Translate to",
-      "default": "zh",
+      "default": "zh-Hans",
       "data": [
         {
           "value": "en",
           "title": "English"
         },
         {
-          "value": "zh",
-          "title": "中文"
+          "value": "zh-Hans",
+          "title": "简体中文"
+        },
+        {
+          "value": "zh-Hant",
+          "title": "正體中文"
         },
         {
           "value": "yue",
           "title": "粤语"
         },
         {
-          "value": "wyw",
+          "value": "lzh",
           "title": "古文"
+        },
+        {
+          "value": "jdbhw",
+          "title": "近代白话文"
+        },
+        {
+          "value": "xdbhw",
+          "title": "现代白话文"
         },
         {
           "value": "ja",
@@ -487,17 +559,56 @@
       "title": "Max History Size",
       "required": false,
       "default": "30"
+    },
+    {
+      "name": "useProxy",
+      "label": "Enable proxy for each request",
+      "description": "Each request will be passed through the proxy",
+      "type": "checkbox",
+      "title": "Use Proxy",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "proxyHost",
+      "description": "Sever address of the proxy",
+      "type": "textfield",
+      "title": "Socks5 Proxy Host",
+      "required": false
+    },
+    {
+      "name": "proxyPort",
+      "description": "Server port of the proxy",
+      "type": "textfield",
+      "title": "Socks5 Proxy Port",
+      "required": false
+    },
+    {
+      "name": "proxyUsername",
+      "description": "Leave empty if doesn't have",
+      "type": "textfield",
+      "title": "Socks5 Proxy Username",
+      "required": false
+    },
+    {
+      "name": "proxyPassword",
+      "description": "Leave empty if doesn't have",
+      "type": "password",
+      "title": "Socks5 Proxy Password",
+      "required": false
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.48.4",
+    "@google-ai/generativelanguage": "^0.2.0",
+    "@raycast/api": "^1.51.1",
     "capitalize": "^2.0.4",
     "eventsource-parser": "^0.1.0",
-    "guesslanguage-ng": "^0.0.2",
-    "languagedetect": "^2.0.0",
+    "google-auth-library": "^8.8.0",
+    "iso-639-1": "^2.1.15",
+    "iso-639-3-to-1": "^1.0.0",
     "node-fetch": "^3.3.0",
-    "uuid": "^9.0.0",
-    "xregexp": "^5.1.1"
+    "socks-proxy-agent": "^7.0.0",
+    "uuid": "^9.0.0"
   },
   "devDependencies": {
     "@types/capitalize": "^2.0.0",
@@ -513,7 +624,7 @@
   },
   "scripts": {
     "build": "ray build -e dist",
-    "build-swift": "swift build --configuration=release --arch arm64 --arch x86_64 && mv .build/apple/Products/Release/ocr assets",
+    "build-swift": "swift build --configuration=release --arch arm64 --arch x86_64 && mv .build/apple/Products/Release/{ocr,lang} assets",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",

@@ -43,7 +43,7 @@ export function checkPreferences() {
   if (langFirst.langId === langSecond.langId) {
     return <LanguageConflict />;
   }
-  return checkService(preferences.defaultServiceProvider);
+  return checkService(preferences.defaultServiceProvider, true);
 }
 
 export function checkService(service: TransServiceProviderTp, checkEnable?: boolean) {
@@ -53,7 +53,7 @@ export function checkService(service: TransServiceProviderTp, checkEnable?: bool
   switch (service) {
     case TransServiceProviderTp.Google:
       checkCfg = true;
-      disabled = false;
+      disabled = preferences.disableGoogleFree;
       break;
     case TransServiceProviderTp.GoogleCouldTrans:
       if (!preferences.googleApiKey) checkCfg = false;
@@ -98,6 +98,7 @@ export function getLang(value: string): ILangItem {
     LANG_LIST.find((lang) =>
       [
         lang.langId,
+        lang.googleLangId,
         lang.deeplLangId,
         lang.baiduLangId,
         lang.tencentLangId,
@@ -125,6 +126,7 @@ export function getServiceProviderMap(): Map<TransServiceProviderTp, ITransServi
   const serviceProviderMap = new Map<TransServiceProviderTp, ITransServiceProvider>([]);
   switch (preferences.defaultServiceProvider) {
     case TransServiceProviderTp.Google:
+      if (preferences.disableGoogleFree) break;
       serviceProviderMap.set(preferences.defaultServiceProvider, {
         serviceProvider: preferences.defaultServiceProvider,
         appId: "",
@@ -188,7 +190,7 @@ export function getServiceProviderMap(): Map<TransServiceProviderTp, ITransServi
       });
       break;
   }
-  if (preferences.defaultServiceProvider != TransServiceProviderTp.Google) {
+  if (!preferences.disableGoogleFree && preferences.defaultServiceProvider != TransServiceProviderTp.Google) {
     serviceProviderMap.set(TransServiceProviderTp.Google, {
       serviceProvider: TransServiceProviderTp.Google,
       appId: "",
@@ -467,7 +469,7 @@ function fetchGoogleCouldTransAPI(
             key: APP_KEY,
             q: queryText,
             format: "text",
-            target: targetLang.langId,
+            target: targetLang.googleLangId || targetLang.langId,
           })
       )
       .then((res) => {
@@ -514,7 +516,11 @@ function fetchGoogleTransAPI(
     const opt = Number(preferences.googleFreeTimeout)
       ? { timeout: Number(preferences.googleFreeTimeout), retry: 0 }
       : {};
-    translate(queryText, { to: targetLang.langId, from: fromLang, tld: preferences.googleFreeTLD }, opt)
+    translate(
+      queryText,
+      { to: targetLang.googleLangId || targetLang.langId, from: fromLang, tld: preferences.googleFreeTLD },
+      opt
+    )
       .then((res) => {
         const resDate: IGoogleTranslateResult = res;
         const transRes: ITranslateRes = {
@@ -876,7 +882,7 @@ async function fetchAliyunTransAPI(
   });
 }
 
-const cache = new Cache();
+export const cache = new Cache();
 
 export function getHistories(): ITransHistory[] {
   return JSON.parse(cache.get(HistoriesCacheKey) || "[]");
@@ -892,14 +898,40 @@ export function clearAllHistory() {
   cache.remove(HistoriesCacheKey);
 }
 
-export function say(text: string, lang: ILangItem) {
-  if (!lang.voice) return;
+export function say(text: string, voice?: string) {
   try {
-    const command = `say -v ${lang.voice} "${text.replace(/"/g, " ")}"`;
+    const command = `say -v "${voice}" "${text.replace(/"/g, " ")}"`;
     execSync(command);
   } catch (error) {
     console.log(error);
   }
+}
+
+export function getVoiceList(): IVoice[] {
+  try {
+    const command = `say -v "?"`;
+    return String(execSync(command))
+      .split("\n")
+      .filter((item) => item)
+      .map((item) => {
+        item = item.substring(0, item.indexOf("#")).trim();
+        const res: IVoice = {
+          voice: "",
+          code: "",
+        };
+        if (item.includes(")")) {
+          res.voice = item.substring(0, item.lastIndexOf(")") + 1).trim();
+          res.code = item.substring(item.lastIndexOf(")") + 1, item.length).trim();
+        } else {
+          res.voice = item.substring(0, item.lastIndexOf(" ")).trim();
+          res.code = item.substring(item.lastIndexOf(" "), item.length).trim();
+        }
+        return res;
+      });
+  } catch (error) {
+    console.log(error);
+  }
+  return [];
 }
 
 function checkServiceNotSupportLang(

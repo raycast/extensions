@@ -5,6 +5,13 @@
   "description": "Manage your todo list quickly by adding items and marking items as completed.",
   "icon": "command-icon.png",
   "author": "maggie",
+  "contributors": [
+    "jkorol3"
+  ],
+  "categories": [
+    "Applications",
+    "Productivity"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -19,10 +26,6 @@
       "description": "See your Todos at a glance",
       "mode": "menu-bar"
     }
-  ],
-  "categories": [
-    "Applications",
-    "Productivity"
   ],
   "dependencies": {
     "@raycast/api": "^1.38.1",
@@ -41,7 +44,8 @@
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
-    "react-devtools": "^4.19.2",
+    "prettier": "2.8.8",
+    "react-devtools": "^4.27.8",
     "typescript": "^4.4.3"
   },
   "scripts": {

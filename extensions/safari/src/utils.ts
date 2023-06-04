@@ -74,7 +74,7 @@ export const getTitle = (tab: Tab) => _.truncate(tab.title, { length: 75 });
 export const plural = (count: number, string: string) => `${count} ${string}${count > 1 ? "s" : ""}`;
 
 const normalizeText = (text: string) =>
-  text
+  (text || "")
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
     .toLowerCase();

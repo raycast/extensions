@@ -30,25 +30,50 @@ export default function SearchColors() {
                 key={shade}
                 title={shade}
                 subtitle={value as string}
-                content={{ color: { light: value as string, dark: value as string, adjustContrast: false } }}
+                content={{
+                  color: {
+                    light: value as string,
+                    dark: value as string,
+                    adjustContrast: false,
+                  },
+                }}
                 keywords={[name, name + shade, `${name} ${shade}`, `${name}-${shade}`]}
                 actions={
                   <ActionPanel>
-                    <Action.CopyToClipboard
-                      title="Copy HEX"
-                      content={value as string}
-                      shortcut={{ modifiers: ["cmd"], key: "h" }}
-                    />
-                    <Action.CopyToClipboard
-                      title="Copy RGB"
-                      content={`rgb(${hex.rgb(value as string).join(", ")})`}
-                      shortcut={{ modifiers: ["cmd"], key: "r" }}
-                    />
-                    <Action.CopyToClipboard
-                      title="Copy HSL"
-                      content={`hsl(${hex.hsl(value as string).join(", ")})`}
-                      shortcut={{ modifiers: ["cmd"], key: "s" }}
-                    />
+                    <ActionPanel.Section>
+                      <Action.CopyToClipboard
+                        title="Copy HEX"
+                        content={value as string}
+                        shortcut={{ modifiers: ["cmd"], key: "h" }}
+                      />
+                      <Action.CopyToClipboard
+                        title="Copy RGB"
+                        content={`rgb(${hex.rgb(value as string).join(", ")})`}
+                        shortcut={{ modifiers: ["cmd"], key: "r" }}
+                      />
+                      <Action.CopyToClipboard
+                        title="Copy HSL"
+                        content={`hsl(${hex.hsl(value as string).join(", ")})`}
+                        shortcut={{ modifiers: ["cmd"], key: "s" }}
+                      />
+                    </ActionPanel.Section>
+                    <ActionPanel.Section>
+                      <Action.CopyToClipboard
+                        title="Copy Background Class"
+                        content={`bg-${name}-${shade}`}
+                        shortcut={{ modifiers: ["cmd", "opt"], key: "b" }}
+                      />
+                      <Action.CopyToClipboard
+                        title="Copy Text Class"
+                        content={`text-${name}-${shade}`}
+                        shortcut={{ modifiers: ["cmd", "opt"], key: "t" }}
+                      />
+                      <Action.CopyToClipboard
+                        title="Copy Border Class"
+                        content={`border-${name}-${shade}`}
+                        shortcut={{ modifiers: ["cmd", "opt"], key: "o" }}
+                      />
+                    </ActionPanel.Section>
                   </ActionPanel>
                 }
               />

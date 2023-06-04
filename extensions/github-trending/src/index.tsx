@@ -1,6 +1,6 @@
 import { List, Cache } from '@raycast/api'
 import { useEffect, useReducer, useCallback } from 'react'
-import trending from 'trending-github'
+import trending from './lib/trending-github'
 
 import { DropdownRange } from './components/DropdownRange'
 import { ListItemLanguage } from './components/ListItemLanguage'

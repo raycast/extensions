@@ -20,7 +20,8 @@ const build: VSCodeBuild = preferences.build;
 const appKeyMapping = {
   Code: "com.microsoft.VSCode",
   "Code - Insiders": "com.microsoft.VSCodeInsiders",
-  VSCodium: "com.visualstudio.code.oss",
+  "VSCodium < 1.71": "com.visualstudio.code.oss",
+  VSCodium: "com.vscodium",
 } as const;
 const appKey: string = appKeyMapping[build] ?? appKeyMapping.Code;
 
@@ -139,7 +140,7 @@ export default function Command() {
   if (!projectEntries || projectEntries.length === 0) {
     return (
       <Detail
-        markdown="To use this extension, the Visual Studio Extension 
+        markdown="To use this extension, the Visual Studio Extension
       [Project Manager](https://marketplace.visualstudio.com/items?itemName=alefragnani.project-manager)
        is required."
       />
