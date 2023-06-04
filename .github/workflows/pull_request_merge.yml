@@ -83,7 +83,7 @@ jobs:
             echo "No changes, skipping sync."
           fi
       - name: Sleep for 30 seconds
-        run: sleep 30s
+        run: sleep 30
         shell: bash
       - name: Merge
         run: gh pr merge ${{ github.event.inputs.pr_number }} --squash
