@@ -19,6 +19,8 @@ export default function Command() {
       isLoading={isLoading}
       isShowingDetail={true}
       onSelectionChange={(id) => {
+        if (!id) return;
+
         setCountSet(countSet.add(id));
 
         if (countSet.size % 20 === 0) setPn(pn + 1);
