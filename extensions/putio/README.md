@@ -10,7 +10,7 @@
   </p>
 
   <p>
-    <img src="https://static.put.io/demos/raycast/2.png" width="640">
+    <img src="https://static.put.io/demos/raycast/v1.0.0/2.png" width="640">
   </p>
 
   <p>
