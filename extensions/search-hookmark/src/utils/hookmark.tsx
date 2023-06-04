@@ -99,7 +99,7 @@ export function ShowHookedSubmenu(bookmark: Bookmark) {
             }
             actions={
               <ActionPanel>
-                <Action title="Open In Hookmark" onAction={() => openInHook(bookmark.title, bookmark.address)} />
+                <Action title="Open in Hookmark" onAction={() => openInHook(bookmark.title, bookmark.address)} />
               </ActionPanel>
             }
           />
