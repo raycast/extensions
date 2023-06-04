@@ -7,7 +7,7 @@ import { getSelectText } from './utils';
 
 export default function Summary(props: { summary?: Query }) {
   const [selectedText, setSelectedText] = useState<string>('');
-  const chats = useQueryText<Chat>(props.summary ? props.summary.chats : {} as Chat);
+  const chats = useQueryText<Chat>(props.summary ? props.summary.chats : ({} as Chat));
   const { isLoading, data } = chats;
   const [markdown, setMarkdown] = useState<string>('');
   useEffect(() => {

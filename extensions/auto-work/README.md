@@ -2,9 +2,7 @@
 
 # Motivation
 
-- Clear and concise writing
-- Attention to detail
-- Creative problem solving
+- Clear and concise writing, Attention to detail
 - Collaborative approach to work
 - Adaptable and flexible mindset
 - Time management and prioritization skills

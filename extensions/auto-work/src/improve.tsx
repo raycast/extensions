@@ -7,7 +7,7 @@ import { getSelectText } from './utils';
 
 export default function Improve(props: { improve?: Query }) {
   const [selectedText, setSelectedText] = useState<string>('');
-  const chats = useQueryText<Chat>(props.improve ? props.improve.chats : {} as Chat);
+  const chats = useQueryText<Chat>(props.improve ? props.improve.chats : ({} as Chat));
   const { isLoading, data } = chats;
   const [markdown, setMarkdown] = useState<string>('');
 

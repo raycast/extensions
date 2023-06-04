@@ -28,7 +28,7 @@ export function useQueryText<T extends Chat>(props: T): QueryHook {
     };
     const prompt = promptType === 'summarize' ? 'summarize' : 'improve';
     const cacheKey = Buffer.from(`${prompt}-${question}`).toString('base64');
-    const cachedData = cache.get(cacheKey.slice(0, 40));
+    const cachedData = cache.get(cacheKey.slice(0, 10) + cacheKey.slice(-10));
     if (cachedData) {
       const newChat = { ...chat, answer: cachedData };
       setLoading(false);

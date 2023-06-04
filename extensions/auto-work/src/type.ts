@@ -88,7 +88,6 @@ export interface ChatHook {
   clear: PromiseFunctionNoArg;
 }
 
-
 export interface QueryHook {
   data: Chat;
   setData: Set<Chat>;

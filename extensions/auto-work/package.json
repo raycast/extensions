@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "auto-work",
   "title": "Auto work",
-  "description": "Interact with OpenAI's auto-work API directly from your command bar",
+  "description": "Interact with OpenAI's API  directly from your command bar",
   "icon": "icon.png",
   "author": "weitanai",
   "homepage": "https://github.com/weitanai/auto-work#readme",
@@ -30,29 +30,29 @@
     {
       "name": "ask",
       "title": "Ask Question",
-      "subtitle": "auto-work",
-      "description": "Ask auto-work via Raycast",
+      "subtitle": "Auto Work",
+      "description": "Ask Auto Work via Raycast",
       "mode": "view"
     },
     {
       "name": "model",
       "title": "Change Model",
-      "subtitle": "auto-work",
+      "subtitle": "Auto Work",
       "description": "Change gpt mode via Raycast",
       "mode": "view"
     },
     {
       "name": "improve",
       "title": "Improve Write",
-      "subtitle": "auto-work",
-      "description": "Improve write auto-work via Raycast",
+      "subtitle": "Auto Work",
+      "description": "Improve write Auto Work via Raycast",
       "mode": "view"
     },
     {
       "name": "summarize",
       "title": "Summarize Text",
-      "subtitle": "auto-work",
-      "description": "Summarize text auto-work via Raycast",
+      "subtitle": "Auto Work",
+      "description": "Summarize text Auto Work via Raycast",
       "mode": "view"
     }
   ],
