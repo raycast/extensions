@@ -13,7 +13,7 @@
   "commands": [
     {
       "name": "files",
-      "title": "View your files",
+      "title": "View Your Files",
       "description": "View your files in put.io",
       "mode": "view",
       "keywords": [
@@ -42,7 +42,7 @@
     },
     {
       "name": "new-transfer",
-      "title": "New transfer",
+      "title": "New Transfer",
       "description": "Add new transfer to put.io",
       "mode": "view",
       "keywords": [
@@ -61,7 +61,7 @@
     },
     {
       "name": "transfers",
-      "title": "View transfers",
+      "title": "View Transfers",
       "description": "View your transfers in put.io",
       "mode": "view",
       "keywords": [
@@ -71,7 +71,7 @@
     },
     {
       "name": "history",
-      "title": "View history",
+      "title": "View History",
       "description": "View your history in put.io",
       "mode": "view",
       "keywords": [
