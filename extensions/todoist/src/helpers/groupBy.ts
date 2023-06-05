@@ -85,7 +85,6 @@ export function groupByDueDates(tasks: Task[]) {
   const [dated, notdated] = partition(tasks, (task: Task) => task.due?.date);
   const [overdue, upcoming] = partition(dated, (task: Task) => task.due?.date && isOverdue(task.due.date));
 
-
   const allDueDates = [...new Set(upcoming.map((task) => parseDay(task.due?.date).toISOString()))] as string[];
   allDueDates.sort();
 

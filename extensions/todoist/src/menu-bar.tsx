@@ -89,7 +89,7 @@ function MenuBar(props: MenuBarProps) {
     taskView = tasks && <TodayView tasks={tasks} data={data} setData={setData} />;
   } else if (view === "filter") {
     taskView = filterTasks && <FilterView tasks={filterTasks} />;
-  } 
+  }
 
   return (
     <MenuBarExtra
@@ -97,7 +97,6 @@ function MenuBar(props: MenuBarProps) {
       isLoading={isLoading || isLoadingFilter}
       title={menuBarExtraTitle}
     >
-
       {taskView}
 
       <MenuBarExtra.Section>
@@ -209,7 +208,6 @@ const TodayView = ({ tasks, data, setData }: TaskViewProps) => {
     return <MenuBarExtra.Item title="No tasks due today." />;
   }
 };
-
 
 const FilterView = ({ tasks, data, setData }: TaskViewProps) => {
   const sections = useMemo(() => {
