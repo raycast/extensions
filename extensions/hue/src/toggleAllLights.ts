@@ -1,18 +1,10 @@
 import { Cache, closeMainWindow, environment, LocalStorage, showHUD, Toast, updateCommandMetadata } from "@raycast/api";
 import { BRIDGE_CONFIG_KEY } from "./helpers/constants";
 import createHueClient from "./lib/createHueClient";
+import { Light } from "./lib/types";
+import HueClient from "./lib/HueClient";
 
 export default async function ToggleAllLights() {
-  if (environment.launchType === "background") {
-    await background();
-  }
-
-  if (environment.launchType === "userInitiated") {
-    await userInitiated();
-  }
-}
-
-async function userInitiated() {
   try {
     const bridgeConfigString = await LocalStorage.getItem<string>(BRIDGE_CONFIG_KEY);
     if (bridgeConfigString === undefined) throw Error("No Hue Bridge configured");
@@ -20,120 +12,90 @@ async function userInitiated() {
     const hueClient = await createHueClient(bridgeConfig);
     const lights = await hueClient.getLights();
     const onLights = lights.filter((light) => light.on.on);
-    const toast = new Toast({
-      style: Toast.Style.Animated,
-      title: "",
-      message: "Please wait…",
-    });
 
-    if (onLights.length === 0) {
-      toast.title = "Turning on all lights…";
-      toast.show().then();
+    if (environment.launchType === "userInitiated") {
+      await toggleLightsAndNotifyUser(lights, onLights, hueClient);
+    }
 
-      const settledTurnLightOnPromises = await Promise.allSettled(
-        lights.map((light) => {
-          return hueClient.updateLight(light, { on: { on: true } });
-        })
-      );
+    const updatedLights = await hueClient.getLights();
+    const updatedOnLights = updatedLights.filter((light) => light.on.on);
+    const groupedLights = await hueClient.getGroupedLights();
+    const zones = await hueClient.getZones();
+    const scenes = await hueClient.getScenes();
 
-      const lightsTurnedOn = settledTurnLightOnPromises.filter((settledPromise) => {
-        return settledPromise.status === "fulfilled";
-      });
-      const lightsFailedToTurnOn = settledTurnLightOnPromises.filter((settledPromise) => {
-        return settledPromise.status === "rejected";
-      });
+    const cache = new Cache();
+    if (lights.length > 0) {
+      cache.set("lights", JSON.stringify(updatedLights));
+    }
+    if (groupedLights.length > 0) {
+      cache.set("groupedLights", JSON.stringify(groupedLights));
+    }
+    if (zones.length > 0) {
+      cache.set("zones", JSON.stringify(zones));
+    }
+    if (scenes.length > 0) {
+      cache.set("scenes", JSON.stringify(scenes));
+    }
 
-      if (lightsTurnedOn.length === 0 && lightsFailedToTurnOn.length > 0) {
-        showHUD(`Failed turning on all ${lightsFailedToTurnOn.length} lights.`).then();
-      } else if (lightsFailedToTurnOn.length > 0) {
-        showHUD(
-          `Turned on ${lightsTurnedOn.length} lights, failed turning on ${lightsFailedToTurnOn.length} lights.`
-        ).then();
-      } else {
-        showHUD(`Turned on all ${settledTurnLightOnPromises.length} lights.`).then();
-      }
+    // Update command metadata
+    if (updatedOnLights.length === 0) {
+      updateCommandMetadata({ subtitle: "All lights are off" });
+    } else if (updatedOnLights.length === lights.length) {
+      updateCommandMetadata({ subtitle: "All lights are on" });
     } else {
-      toast.title = "Turning off all lights…";
-      toast.show().then();
-
-      const settledTurnLightOffPromises = await Promise.allSettled(
-        onLights
-          .filter((light) => {
-            return light.on.on;
-          })
-          .map((light) => {
-            return hueClient.updateLight(light, { on: { on: false } });
-          })
-      );
-
-      const lightsTurnedOff = settledTurnLightOffPromises.filter((settledPromise) => {
-        return settledPromise.status === "fulfilled";
-      });
-      const lightsFailedToTurnOff = settledTurnLightOffPromises.filter((settledPromise) => {
-        return settledPromise.status === "rejected";
-      });
-
-      if (lightsTurnedOff.length === 0 && lightsFailedToTurnOff.length > 0) {
-        showHUD(`Failed turning off all ${lightsFailedToTurnOff.length} lights that were on.`).then();
-      } else if (lightsFailedToTurnOff.length > 0) {
-        showHUD(
-          `Turned off ${lightsTurnedOff.length} lights, failed turning off ${lightsFailedToTurnOff.length} lights.`
-        ).then();
-      } else {
-        showHUD(`Turned off all ${settledTurnLightOffPromises.length} lights that were on.`).then();
-      }
+      updateCommandMetadata({ subtitle: `${updatedOnLights.length} of ${lights.length} lights are on` });
     }
   } catch (error) {
-    if (!(error instanceof Error)) {
+    if (environment.launchType !== "userInitiated" || !(error instanceof Error)) {
       throw error;
     }
 
     console.error(error.message);
-    showHUD(error.message).then();
+    showHUD(error.message);
   } finally {
-    // TODO: Update cached state and command metadata
-    await closeMainWindow();
+    if (environment.launchType === "userInitiated") {
+      await closeMainWindow();
+    }
   }
 }
 
-async function background() {
-  const bridgeConfigString = await LocalStorage.getItem<string>(BRIDGE_CONFIG_KEY);
-  if (bridgeConfigString === undefined) throw Error("No Hue Bridge configured");
-  const bridgeConfig = JSON.parse(bridgeConfigString);
-  const hueClient = await createHueClient(bridgeConfig);
-  const lights = await hueClient.getLights();
-  const onLights = lights.filter((light) => light.on.on);
-  const groupedLights = await hueClient.getGroupedLights();
-  const zones = await hueClient.getZones();
-  const scenes = await hueClient.getScenes();
+async function toggleLightsAndNotifyUser(lights: Light[], onLights: Light[], hueClient: HueClient): Promise<void> {
+  const toast = new Toast({
+    style: Toast.Style.Animated,
+    title: "",
+    message: "Please wait…",
+  });
 
-  // Update cached state
-  const cache = new Cache();
-  if (lights.length > 0) {
-    cache.set("lights", JSON.stringify(lights));
-  }
-  if (groupedLights.length > 0) {
-    cache.set("groupedLights", JSON.stringify(groupedLights));
-  }
-  if (zones.length > 0) {
-    cache.set("zones", JSON.stringify(zones));
-  }
-  if (scenes.length > 0) {
-    cache.set("scenes", JSON.stringify(scenes));
-  }
+  let toastTitle = "";
+  let successMessage = "";
+  let failureMessage = "";
 
-  // Update command metadata
   if (onLights.length === 0) {
-    updateCommandMetadata({
-      subtitle: "All lights are off",
-    }).then();
-  } else if (onLights.length === lights.length) {
-    updateCommandMetadata({
-      subtitle: "All lights are on",
-    }).then();
+    toastTitle = "Turning on all lights…";
+    successMessage = `Turned on all ${lights.length} lights.`;
+    failureMessage = `failed turning on ${lights.length} lights.`;
   } else {
-    updateCommandMetadata({
-      subtitle: `${onLights.length} of ${lights.length} lights are on`,
-    }).then();
+    toastTitle = "Turning off all lights…";
+    successMessage = `Turned off all ${onLights.length} lights that were on.`;
+    failureMessage = `failed turning off ${onLights.length} lights that were on.`;
+  }
+
+  toast.title = toastTitle;
+  toast.show().then();
+
+  const settledPromises = await Promise.allSettled(
+    lights.map((light) => {
+      const on = onLights.includes(light);
+      return hueClient.updateLight(light, { on: { on: !on } });
+    })
+  );
+
+  const lightsTurnedOn = settledPromises.filter((p) => p.status === "fulfilled").length;
+  const lightsFailed = settledPromises.filter((p) => p.status === "rejected").length;
+
+  if (lightsFailed === 0) {
+    showHUD(successMessage);
+  } else {
+    showHUD(`Turned on ${lightsTurnedOn} lights, ${failureMessage}`);
   }
 }
