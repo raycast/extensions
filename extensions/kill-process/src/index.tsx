@@ -13,7 +13,7 @@ export default function ProcessList() {
   const shouldPrioritizeAppsWhenFiltering = preferences.shouldPrioritizeAppsWhenFiltering ?? false;
   const shouldShowPID = preferences.shouldShowPID ?? false;
   const shouldShowPath = preferences.shouldShowPath ?? false;
-  const refreshDuration = +(preferences.refreshDuration ?? 1000);
+  const refreshDuration = +preferences.refreshDuration;
 
   const fetchProcesses = () => {
     exec(`ps -eo pid,pcpu,comm | sort -nrk 2,3`, (err, stdout) => {
