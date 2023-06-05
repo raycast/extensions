@@ -1,4 +1,4 @@
-# <img src="./assets/Shroud.email.png" width="20" height="20" /> Shroud.email Raycast Extension
+# <img src="./assets/shroud-email.png" width="20" height="20" /> Shroud.email Raycast Extension
 
 This is a Raycast extension for [Shroud.email](https://shroud.email/). With this extension, you can View Domains and Create or View Aliases in your Shroud.email instance.
 
@@ -21,9 +21,6 @@ This is a Raycast extension for [Shroud.email](https://shroud.email/). With this
 ## 🗒️ Notes
 * The `Domains` command will only fetch domains that have **valid** DNS records.
 * When **Creating** `Alias`, you can only create alias for custom domain if the domain is able to be fetched i.e. domains that have **valid** DNS records.
-* The **Page Size** and **Page** settings:
-    * PAGE SIZE - Number of items to fetch in a batch e.g. if you have `30` aliases/domains in your account, you can choose to fetch in batches of `10` or any other number.
-    * PAGE - Page/Batch to fetch e.g. if you have `30` aliases/domains, PAGE_SIZE of `10`, then setting PAGE to `2` would show you aliases `20 to 30`.
 
 
 ## 🔧 Commands

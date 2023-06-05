@@ -3,7 +3,7 @@
   "name": "shroud-email",
   "title": "Shroud.email",
   "description": "View Domains and Create or View Aliases in Shroud.email instance",
-  "icon": "Shroud.email.png",
+  "icon": "shroud-email.png",
   "author": "xmok",
   "categories": [
     "Communication"

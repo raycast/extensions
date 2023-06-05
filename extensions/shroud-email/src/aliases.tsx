@@ -1,26 +1,21 @@
-import { Action, ActionPanel, Form, Icon, List, Toast, showToast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Color, Form, Icon, List, Toast, showToast, useNavigation } from "@raycast/api";
 import { getFavicon, useForm } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { createAlias, getAliases, getDomains } from "./utils/api";
-import { AliasesCreateRequest, AliasesRequestParameters, AliasesResponse, DomainsResponse } from "./utils/types";
+import { Alias, AliasesCreateRequest, AliasesRequestParameters, AliasesResponse, DomainsResponse } from "./utils/types";
 import { API_DOMAIN } from "./utils/constants";
-import PageOptionsForm from "./components/PageOptionsForm";
 
 export default function Aliases() {
   const { push } = useNavigation();
-  const handleOptionsSelected = (page_size: string, page: string) =>
-    push(<AliasesList page_size={page_size} page={page} />);
-  return <PageOptionsForm onOptionsSelected={handleOptionsSelected} />;
-}
-
-function AliasesList({ page_size, page }: AliasesRequestParameters) {
-  const { push } = useNavigation();
-  const [isLoading, setIsLoading] = useState(false);
-  const [aliases, setAliases] = useState<AliasesResponse>();
+  const [isLoading, setIsLoading] = useState(true);
+  const [aliasesResponse, setAliasesResponse] = useState<AliasesResponse>();
+  const [filter, setFilter] = useState("");
+  const [filteredList, filterList] = useState<Alias[]>([]);
 
   async function getAliasesFromApi() {
     setIsLoading(true);
-    const response = await getAliases({ page_size, page });
+    const parameters: AliasesRequestParameters = { page_size: "9999", page: "1" };
+    const response = await getAliases(parameters);
     if (!("error" in response)) {
       const numOfAliases = response.email_aliases.length;
       await showToast({
@@ -28,19 +23,49 @@ function AliasesList({ page_size, page }: AliasesRequestParameters) {
         message: `Fetched ${numOfAliases} ${numOfAliases === 1 ? "alias" : "aliases"}`,
         style: Toast.Style.Success,
       });
-      setAliases(response);
+      setAliasesResponse(response);
     }
     setIsLoading(false);
   }
   useEffect(() => {
     getAliasesFromApi();
   }, []);
-  const title =
-    aliases &&
-    `Entries: ${aliases.email_aliases.length}/${aliases.total_entries} | Pages: ${aliases.page_number}/${aliases.total_pages}`;
-  return !aliases ? null : (
-    <List isLoading={isLoading} searchBarPlaceholder="Search alias" isShowingDetail={aliases.total_entries > 0}>
-      {aliases.email_aliases.length === 0 ? (
+
+  useEffect(() => {
+    doFilter();
+  }, [filter, aliasesResponse]);
+
+  function doFilter() {
+    if (aliasesResponse) {
+      if (!filter) filterList(aliasesResponse.email_aliases);
+      else if (filter === "enabled")
+        filterList(aliasesResponse.email_aliases.filter((emailAlias) => emailAlias.enabled));
+      else if (filter === "disabled")
+        filterList(aliasesResponse.email_aliases.filter((emailAlias) => !emailAlias.enabled));
+      else filterList([]);
+    }
+  }
+
+  const numOfAliases = aliasesResponse && aliasesResponse.email_aliases.length;
+  const title = aliasesResponse && `${numOfAliases} ${numOfAliases === 1 ? "alias" : "aliases"}`;
+  return (
+    <List
+      isLoading={isLoading}
+      searchBarPlaceholder="Search alias"
+      searchBarAccessory={
+        !aliasesResponse ? undefined : (
+          <List.Dropdown tooltip="Filter" onChange={setFilter}>
+            <List.Dropdown.Item title="All" value="" />
+            <List.Dropdown.Section title="Status">
+              <List.Dropdown.Item title="Enabled" value="enabled" />
+              <List.Dropdown.Item title="Disabled" value="disabled" />
+            </List.Dropdown.Section>
+          </List.Dropdown>
+        )
+      }
+      isShowingDetail={numOfAliases ? numOfAliases > 0 : false}
+    >
+      {aliasesResponse?.email_aliases.length === 0 ? (
         <List.EmptyView
           title="No aliases found."
           actions={
@@ -52,11 +77,11 @@ function AliasesList({ page_size, page }: AliasesRequestParameters) {
       ) : (
         <>
           <List.Section title={title}>
-            {aliases.email_aliases.map((emailAlias) => (
+            {filteredList.map((emailAlias) => (
               <List.Item
                 key={emailAlias.address}
                 title={emailAlias.address}
-                icon={Icon.TwoPeople}
+                icon={{ source: Icon.TwoPeople, tintColor: emailAlias.enabled ? Color.Green : Color.Red }}
                 actions={
                   <ActionPanel>
                     <Action.OpenInBrowser
@@ -169,7 +194,7 @@ function AliasesCreate({ onAliasCreated }: AliasesCreateProps) {
 
   async function getDomainsFromApi() {
     setIsLoading(true);
-    const response = await getDomains({ page_size: "20", page: "1" });
+    const response = await getDomains({ page_size: "9999", page: "1" });
     if (!("error" in response)) setDomains(response);
     setIsLoading(false);
   }
@@ -201,7 +226,7 @@ function AliasesCreate({ onAliasCreated }: AliasesCreateProps) {
             title={domainItem.domain}
             value={domainItem.domain}
             key={domainItem.domain}
-            icon={getFavicon(`https://${domainItem.domain}`, { fallback: "Shroud.email.png" })}
+            icon={getFavicon(`https://${domainItem.domain}`, { fallback: "shroud-email.png" })}
           />
         ))}
       </Form.Dropdown>

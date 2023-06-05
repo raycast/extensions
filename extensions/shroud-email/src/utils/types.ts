@@ -7,7 +7,7 @@ export type TokenResponse = {
   token: string;
 };
 
-export type PageOptionsParameters = {
+type PageOptionsParameters = {
   page_size: string;
   page: string;
 };
