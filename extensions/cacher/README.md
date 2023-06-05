@@ -23,13 +23,13 @@
 
 Search Cacher snippets across your personal and team libraries with support for filtering by labels. Easily copy/paste or insert code into your editor.
 
-![Search Code Snippets](media/search-code-snippets.png "Search Code Snippets")
+![Search Code Snippets](metadata/cacher-2.png "Search Code Snippets")
 
 ### ✏️ Create Code Snippet
 
 Quickly create snippets for personal or team use.
 
-![Create Code Snippet](media/create-code-snippet.png "Create Code Snippet")
+![Create Code Snippet](metadata/cacher-4.png "Create Code Snippet")
 
 ## Support
 
