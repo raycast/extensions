@@ -201,7 +201,7 @@ export default function Command() {
         return;
       }
 
-      const url = `http://localhost:3000/transaction_builder?calldata=${encodeURIComponent(
+      const url = `https://getcharged.dev/transaction_builder?calldata=${encodeURIComponent(
         JSON.stringify(getCalldata()?.calldata)
       )}`;
 
