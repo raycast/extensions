@@ -35,6 +35,10 @@
           "value": "com.microsoft.VSCode"
         },
         {
+          "title": "Visual Studio Code - Insiders",
+          "value": "com.microsoft.VSCodeInsiders"
+        },
+        {
           "title": "VSCodium",
           "value": "com.vscodium"
         }
