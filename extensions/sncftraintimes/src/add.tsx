@@ -1,15 +1,28 @@
-import { Action, ActionPanel, Form, Icon, Toast, openExtensionPreferences, showToast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Form,
+  Icon,
+  Toast,
+  openExtensionPreferences,
+  showToast,
+  useNavigation,
+} from "@raycast/api";
 import { getPreferenceValues, LocalStorage } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { places } from "sncf-api-wrapper";
-import { Preferences, STORAGE_JOURNEYS_KEY, StopPoint, Storage } from "./types";
+import { Preferences, STORAGE_JOURNEYS_KEY, StopPoint, Storage, DefaultSNCFApiResponse } from "./types";
 import useDebounce from "./hooks/useDebounce";
+import PreferencesView from "./preferences";
+import { useFetch } from "@raycast/utils";
 
 function formatPlace(place: StopPoint) {
   return `${place.name} & ${place.code}`;
 }
 
 export default function Add() {
+  const { push } = useNavigation();
+
   const [departure, setDeparture] = useState<string>("");
   const [arrival, setArrival] = useState<string>("");
 
@@ -19,10 +32,19 @@ export default function Add() {
   const debounceDeparture = useDebounce<string>(draftDeparture, 300);
   const debounceArrival = useDebounce<string>(draftArrival, 300);
 
+  const [departureError, setDepartureError] = useState<string>("");
+  const [arrivalError, setArrivalError] = useState<string>("");
+
   const [departures, setDepartures] = useState<StopPoint[]>([]);
   const [arrivals, setArrivals] = useState<StopPoint[]>([]);
 
   const preferences = getPreferenceValues<Preferences>();
+
+  const { data } = useFetch("https://api.sncf.com/v1/coverage/sncf/", {
+    headers: {
+      Authorization: preferences.sncfApiKey,
+    },
+  });
 
   const getPlaces = (value: string, type: "departure" | "arrival") => {
     places(preferences.sncfApiKey, {
@@ -59,16 +81,34 @@ export default function Add() {
   useEffect(() => {
     if (debounceDeparture) {
       getPlaces(debounceDeparture, "departure");
+      setDepartureError("");
     }
   }, [debounceDeparture]);
 
   useEffect(() => {
     if (debounceArrival) {
       getPlaces(debounceArrival, "arrival");
+      setArrivalError("");
     }
   }, [debounceArrival]);
 
+  useEffect(() => {
+    if ((data as DefaultSNCFApiResponse)?.message || !(data as DefaultSNCFApiResponse)?.regions) {
+      push(<PreferencesView />);
+    }
+  }, [data]);
+
   const onSubmit = async () => {
+    if (!departure) {
+      setDepartureError("Please fill in the departure");
+      return;
+    }
+
+    if (!arrival) {
+      setArrivalError("Please fill in the arrival");
+      return;
+    }
+
     const storedJourneys = (await LocalStorage.getItem<string>(STORAGE_JOURNEYS_KEY)) || "[]";
 
     try {
@@ -102,14 +142,15 @@ export default function Add() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Add Journey" icon={Icon.CheckCircle} onSubmit={onSubmit} />
-          <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
+          <Action.SubmitForm title="Add Journey" onSubmit={onSubmit} icon={Icon.CheckCircle} />
+          <Action title="Open Extension Preferences" onAction={openExtensionPreferences} icon={Icon.Gear} />
         </ActionPanel>
       }
     >
       <Form.Dropdown
         id="departure"
         title="Departure"
+        error={departureError}
         onChange={setDeparture}
         value={departure}
         onSearchTextChange={setDraftDeparture}
@@ -121,6 +162,7 @@ export default function Add() {
       <Form.Dropdown
         id="arrival"
         title="Arrival"
+        error={arrivalError}
         onChange={setArrival}
         value={arrival}
         onSearchTextChange={setDraftArrival}

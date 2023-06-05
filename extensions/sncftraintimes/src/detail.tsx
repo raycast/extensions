@@ -100,8 +100,6 @@ function getDetailMetadata(journey: SimplifiedJourney): React.ReactNode {
           readableBaseArrivalTime &&
           (readableDepartureTime !== readableBaseDepartureTime || readableArrivalTime !== readableBaseArrivalTime);
 
-        console.log("section", section);
-
         return (
           <React.Fragment key={index}>
             <List.Item.Detail.Metadata.TagList
@@ -118,7 +116,11 @@ function getDetailMetadata(journey: SimplifiedJourney): React.ReactNode {
                 <List.Item.Detail.Metadata.Label title="Initial arrival time" text={readableBaseArrivalTime} />
                 <List.Item.Detail.Metadata.Label title="Delay" text={section.delay} />
                 {section.disruptions.map((disruption, index) => (
-                  <List.Item.Detail.Metadata.Label key={index} title="Reason" text={disruption.messages.join(",")} />
+                  <List.Item.Detail.Metadata.Label
+                    key={index}
+                    title="Reason"
+                    text={disruption.messages?.join(",") ?? "?"}
+                  />
                 ))}
               </React.Fragment>
             )}

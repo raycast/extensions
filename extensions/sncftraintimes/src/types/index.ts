@@ -17,3 +17,10 @@ export type StopPoint = {
   name: string;
   code: string;
 };
+
+export type DefaultSNCFApiResponse = {
+  regions?: unknown[];
+  context?: unknown;
+  links?: unknown[];
+  message?: string;
+};

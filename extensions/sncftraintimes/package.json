@@ -36,7 +36,7 @@
     "@raycast/api": "^1.51.1",
     "@raycast/utils": "^1.6.1",
     "moment-timezone": "^0.5.43",
-    "sncf-api-wrapper": "^0.0.9"
+    "sncf-api-wrapper": "^0.0.11"
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.5",
