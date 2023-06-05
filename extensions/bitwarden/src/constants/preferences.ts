@@ -1,3 +1,4 @@
+// TODO: Type check with satisfies when TypeScript 4.9+ is supported
 export const VAULT_TIMEOUT = {
   IMMEDIATELY: 0,
   ONE_MINUTE: 60000,
