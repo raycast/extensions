@@ -1,5 +1,10 @@
 # Readwise to Tana Changelog
 
+## [Update default template and supertags on notes] - 2023-05-31
+
+- Update default template with title and notes
+- Add the ability to set supertags on nested notes
+
 ## [Add supertags depending on source category, highlight tags, reset sync of one source] - 2023-04-12
 
 - Add the ability to set different supertags for articles, books, podcasts, supplementals, and tweets

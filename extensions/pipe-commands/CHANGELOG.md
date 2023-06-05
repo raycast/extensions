@@ -1,5 +1,9 @@
 # Pipe Commands Changelog
 
+## [Added new pipe command] - 2023-05-31
+
+- Add a pipe text command script to remove duplicate newlines.
+
 ## [File/Tab input] - 2022-10-04
 
 ### Added

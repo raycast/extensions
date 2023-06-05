@@ -11,18 +11,20 @@ import {
 import { useEffect, useState } from "react";
 import Bard, { askAI } from "bard-ai";
 
-export default function ResultView(prompt, toast_title, type = "text", title) {
+export default function ResultView(prompt, toast_title, type = "text", title, optionalSelect) {
   if (type === "text") {
     prompt +=
-      " Return your response as a JSON with key 'response'. The value associated should be a single string with your answer. ONLY return that JSON and nothing else. Be accurate and concise. \n\n";
+      " Return your response as a JSON with key 'response', and key 'explanation'. The value associated with 'response' should be a single string with your answer. The value associated with 'explanation' should be a string describing what you did. Be sure to be elaborate with your explanation, giving specific examples of what you did. If you did nothing, then simply say that. ONLY return that JSON and nothing else. Be accurate and concise. \n\n";
   }
   if (type === "code") {
-    prompt += " Return your response in a codeblock. \n\n";
+    prompt +=
+      " Return your response in a codeblock. DO NOT ADD ANY EXTRA CODE UNLESS TOLD TO. \n\n Then add a JSON IN A SEPERATE CODEBLOCK at the end with ONE key, 'explanation'. The value associated with 'explanation' should be a string describing the code you have written, what you have changed, or WHY you wrote what you wrote. \n\n";
   }
   const pref = getPreferenceValues();
   const [response, setResponse] = useState("");
   const [loading, setLoading] = useState(true);
   const [pasteContent, setPasteContent] = useState("");
+
   async function getResult() {
     const now = new Date();
     const toast = await showToast(Toast.Style.Animated, toast_title);
@@ -31,12 +33,26 @@ export default function ResultView(prompt, toast_title, type = "text", title) {
 
       try {
         selectedText = await getSelectedText();
+        if (!prompt) {
+          prompt = selectedText;
+        } else if (optionalSelect) {
+          selectedText = "\n\n" + selectedText;
+        }
       } catch (error) {
-        toast.title = "Error";
-        toast.style = Toast.Style.Failure;
-        setLoading(false);
-        setResponse("⚠️ Raycast was unable to get the selected text.");
-        return;
+        if (!prompt) {
+          toast.title = "Error";
+          toast.style = Toast.Style.Failure;
+          setLoading(false);
+          setResponse("⚠️ No input was provided.");
+          return;
+        }
+        if (!optionalSelect) {
+          toast.title = "Error";
+          toast.style = Toast.Style.Failure;
+          setLoading(false);
+          setResponse("⚠️ Raycast was unable to get the selected text.");
+          return;
+        }
       }
 
       try {
@@ -55,20 +71,27 @@ export default function ResultView(prompt, toast_title, type = "text", title) {
       if (!response) return;
       if (type === "text") {
         let match = response.match(/"response": "([^"]*)"/);
-        if (match) {
-          setResponse(match[1].trim());
+        let explain = response.match(/"explanation": "([^"]*)"/);
+        if (match[1]) {
+          setResponse("## AI Response:\n" + match[1].trim() + "\n\n\n ## Explanation: \n" + explain[1].trim());
         } else {
           setResponse(response);
         }
+
         setPasteContent(match[1].trim());
       } else if (type === "code") {
+        let wholeCode = response.match(/(```[a-zA-Z]+?.*?```)/s);
         let match = response.match(/```([a-zA-Z]+)?(.*?)```/s);
+        let explain = response.match(/"explanation": "([^"]*)"/);
         if (match) {
-          setResponse(match[0].trim());
+          setResponse("## AI Code Response:\n" + wholeCode[0].trim() + "\n\n\n ## Explanation: \n" + explain[1].trim());
         } else {
           setResponse(response);
         }
         setPasteContent(match[2].trim());
+      } else if (type === "general") {
+        setResponse(response);
+        setPasteContent(response);
       } else {
         setResponse(response);
         setPasteContent(response);
@@ -110,7 +133,7 @@ export default function ResultView(prompt, toast_title, type = "text", title) {
           <Detail.Metadata.Label title="Command Title" text={title} />
           <Detail.Metadata.Separator />
           <Detail.Metadata.Label title="Model" text={`PaLM 2`} />
-          <Detail.Metadata.Label title="Version" text="2023.05.15" />
+          <Detail.Metadata.Label title="Version" text="2023.05.23" />
         </Detail.Metadata>
       }
     />

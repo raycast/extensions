@@ -1,5 +1,9 @@
 # Todo List Changelog
 
+## [New Action] - 2023-06-01
+
+- Added possibility to mark all completed todo items as incomplete
+
 ## [New icon] - 2022-08-30
 
 Added light icon to the extension's menu MenuBarExtra

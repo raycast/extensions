@@ -1,11 +1,7 @@
 {
   "root": true,
-  "plugins": [
-    "import"
-  ],
-  "extends": [
-    "@raycast"
-  ],
+  "plugins": ["import"],
+  "extends": ["@raycast", "plugin:react-hooks/recommended"],
   "rules": {
     "import/order": [
       "error",
