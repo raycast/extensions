@@ -111,7 +111,7 @@ export default function SearchSnippets() {
       onSearchTextChange={setSearchQuery}
       isShowingDetail={isShowingDetail}
       isLoading={isLoading}
-      searchBarPlaceholder="Search snippets"
+      searchBarPlaceholder="Search Snippets"
       searchBarAccessory={<SearchBarAccessory response={response} filter={filter} setFilter={setFilter} />}
     >
       {filteredFiles.map((file) => (
