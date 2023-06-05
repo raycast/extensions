@@ -1,6 +1,6 @@
 # CIDR to IPv4 info
 
-![preview](./assets/screenshot.png)
+![preview](./metadata/cidr-1.png)
 
 ### description
 
