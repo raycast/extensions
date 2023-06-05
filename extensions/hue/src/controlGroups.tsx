@@ -253,7 +253,6 @@ function IncreaseBrightnessAction(props: { group: Group; groupedLight: GroupedLi
     return null;
   }
 
-  // TODO: Why does this shortcut not work, but Increase Brightness for Light does?
   return (
     <ActionPanel.Item
       title="Increase Brightness"
@@ -272,7 +271,6 @@ function DecreaseBrightnessAction(props: { group: Group; groupedLight: GroupedLi
     return null;
   }
 
-  // TODO: Why does this shortcut not work, but Decrease Brightness for Light does?
   return (
     <ActionPanel.Item
       title="Decrease Brightness"
