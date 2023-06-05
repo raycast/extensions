@@ -88,7 +88,7 @@ function MenuBar(props: MenuBarProps) {
   if (view === "today") {
     taskView = tasks && <TodayView tasks={tasks} data={data} setData={setData} />;
   } else if (view === "filter") {
-    taskView = <FilterView tasks={filterTasks || []}  data={data} setData={setData} />;
+    taskView = <FilterView tasks={filterTasks || []} data={data} setData={setData} />;
   }
 
   return (
