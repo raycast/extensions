@@ -1,6 +1,7 @@
 import {
   Action,
   ActionPanel,
+  Icon,
   List,
   getPreferenceValues,
   openExtensionPreferences,
@@ -141,6 +142,7 @@ function Actions(props: { id: string }) {
       <ActionPanel.Section>
         <Action
           title="Open Extension Preferences"
+          icon={Icon.Gear}
           onAction={openExtensionPreferences}
         />
       </ActionPanel.Section>
