@@ -1,4 +1,4 @@
-import { closeMainWindow, environment, LocalStorage, showHUD, Toast, updateCommandMetadata } from "@raycast/api";
+import { Cache, closeMainWindow, environment, LocalStorage, showHUD, Toast, updateCommandMetadata } from "@raycast/api";
 import { BRIDGE_CONFIG_KEY } from "./helpers/constants";
 import createHueClient from "./lib/createHueClient";
 
@@ -91,6 +91,7 @@ async function userInitiated() {
     console.error(error.message);
     showHUD(error.message).then();
   } finally {
+    // TODO: Update cached state and command metadata
     await closeMainWindow();
   }
 }
@@ -102,7 +103,26 @@ async function background() {
   const hueClient = await createHueClient(bridgeConfig);
   const lights = await hueClient.getLights();
   const onLights = lights.filter((light) => light.on.on);
+  const groupedLights = await hueClient.getGroupedLights();
+  const zones = await hueClient.getZones();
+  const scenes = await hueClient.getScenes();
 
+  // Update cached state
+  const cache = new Cache();
+  if (lights.length > 0) {
+    cache.set("lights", JSON.stringify(lights));
+  }
+  if (groupedLights.length > 0) {
+    cache.set("groupedLights", JSON.stringify(groupedLights));
+  }
+  if (zones.length > 0) {
+    cache.set("zones", JSON.stringify(zones));
+  }
+  if (scenes.length > 0) {
+    cache.set("scenes", JSON.stringify(scenes));
+  }
+
+  // Update command metadata
   if (onLights.length === 0) {
     updateCommandMetadata({
       subtitle: "All lights are off",
@@ -116,6 +136,4 @@ async function background() {
       subtitle: `${onLights.length} of ${lights.length} lights are on`,
     }).then();
   }
-
-  // TODO: Update status of all groups and lights
 }
