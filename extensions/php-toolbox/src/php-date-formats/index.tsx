@@ -26,6 +26,7 @@ export default function PhpDatePicker() {
           section={section}
           items={items}
           onAction={(value) => setSearchText(value)}
+          onClear={() => setSearchText("")}
         />
       ))}
     </List>
@@ -98,11 +99,13 @@ function DataSection({
   section,
   items,
   onAction,
+  onClear,
 }: {
   prefix: string;
   section: string;
   items: FormatItem[];
   onAction: (value: string) => void;
+  onClear: () => void;
 }) {
   return (
     <List.Section title={section} key={section}>
@@ -114,19 +117,28 @@ function DataSection({
             title={character}
             subtitle={description}
             keywords={[...description.split(" "), example, section]}
-            accessories={example.length ? [{ text: `“${example}”` }, { icon: Icon.TextInput }] : []}
+            accessories={example.length ? [{ text: `“${example}”` }] : []}
             actions={
               <ActionPanel>
                 <Action
-                  title={`Continue with “${prefix}${character}”`}
+                  title={`Add “${character}” to Input`}
                   onAction={() => onAction(`${prefix}${character}`)}
                   icon={Icon.TextInput}
                 />
-                <Action.CopyToClipboard
-                  title={`Copy “${prefix}${character}” to Clipboard`}
-                  content={`${prefix}${character}`}
-                  icon={Icon.Clipboard}
-                />
+                {"" !== prefix && (
+                    <Action.CopyToClipboard
+                      title={`Copy “${prefix}${character}” to Clipboard`}
+                      content={`${prefix}${character}`}
+                      icon={Icon.Clipboard}
+                    />
+                )}
+                {"" !== prefix && (
+                    <Action
+                        title="Clear Input"
+                        onAction={onClear}
+                        icon={Icon.Undo}
+                    />
+                )}
               </ActionPanel>
             }
           />
