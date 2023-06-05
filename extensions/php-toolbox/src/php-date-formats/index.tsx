@@ -126,19 +126,13 @@ function DataSection({
                   icon={Icon.TextInput}
                 />
                 {"" !== prefix && (
-                    <Action.CopyToClipboard
-                      title={`Copy “${prefix}${character}” to Clipboard`}
-                      content={`${prefix}${character}`}
-                      icon={Icon.Clipboard}
-                    />
+                  <Action.CopyToClipboard
+                    title={`Copy “${prefix}${character}” to Clipboard`}
+                    content={`${prefix}${character}`}
+                    icon={Icon.Clipboard}
+                  />
                 )}
-                {"" !== prefix && (
-                    <Action
-                        title="Clear Input"
-                        onAction={onClear}
-                        icon={Icon.Undo}
-                    />
-                )}
+                {"" !== prefix && <Action title="Clear Input" onAction={onClear} icon={Icon.Undo} />}
               </ActionPanel>
             }
           />
