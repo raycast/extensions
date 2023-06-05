@@ -26,27 +26,27 @@ export const PANEL_MAPPINGS: Record<string, panelMapping> = {
     icon: Icon.Code,
   },
   wildcardBits: {
-    itemName: "Wildcard bits",
+    itemName: "Wildcard Bits",
     icon: Icon.CodeBlock,
   },
   firstIp: {
-    itemName: "First ip",
+    itemName: "First IP",
     icon: Icon.ArrowRight,
   },
   firstIpInt: {
-    itemName: "First ip (decimal)",
+    itemName: "First IP (Decimal)",
     icon: Icon.ArrowRightCircle,
   },
   lastIp: {
-    itemName: "Last ip",
+    itemName: "Last IP",
     icon: Icon.ArrowLeft,
   },
   lastIpInt: {
-    itemName: "Last ip (decimal)",
+    itemName: "Last IP (Decimal)",
     icon: Icon.ArrowLeftCircle,
   },
   totalHost: {
-    itemName: "Total host",
+    itemName: "Total Host",
     icon: Icon.PlusMinusDivideMultiply,
   },
 };
