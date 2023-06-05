@@ -16,7 +16,7 @@ function toSelector(val: string): string {
   if (!val) {
     return "";
   }
-  return (toBN(hash.getSelectorFromName(val)) as BN).toString();
+  return toHex((toBN(hash.getSelectorFromName(val)) as BN).toString());
 }
 
 function toBN(val: string): BN | undefined {
@@ -33,6 +33,14 @@ function toBN(val: string): BN | undefined {
     return new BN(val, 10);
   }
   return new BN(removeHexPrefix(asciiToHex(val)), 16);
+}
+
+function toBNArray(val: string, chunkSize: number): string[] {
+  if (!val) {
+    return [];
+  }
+  const valArray = val.match(new RegExp(`.{1,${chunkSize}}`, "g"));
+  return (valArray?.map((v: string) => toBN(v)?.toString()).filter((v) => v) as string[]) ?? [];
 }
 
 function toHex(val: string): string {
@@ -117,4 +125,5 @@ export default {
   toHex,
   toSelector,
   startWith0xAndIsHex,
+  toBNArray,
 };

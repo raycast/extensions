@@ -1,5 +1,9 @@
 # 1Password Changelog
 
+## [Add Support for Password Items in 1Password 8] - 2023-05-30
+
+- Password items now support copying the password to the clipboard
+
 ## [Bug fixes] - 2023-04-03
 
 - Fixed newline in clipboard copied values

@@ -48,6 +48,40 @@ export function ActionOnStarredTimezone(props: {
       {getPreferenceValues<Preferences>().itemLayout === "List" && (
         <ActionToggleDetails showDetail={showDetail} setRefresh={setRefreshDetail} />
       )}
+
+      <ActionPanel.Section>
+        {index != 0 && (
+          <Action
+            icon={Icon.ArrowUpCircle}
+            title={"Move Up"}
+            shortcut={{ modifiers: ["shift", "cmd"], key: "arrowUp" }}
+            onAction={() => {
+              const _starTimezones = [...starTimezones];
+              const [removed] = _starTimezones.splice(index, 1);
+              _starTimezones.splice(index - 1, 0, removed);
+              LocalStorage.setItem(localStorageKey.STAR_TIMEZONE, JSON.stringify(_starTimezones)).then(() => {
+                setRefresh(Date.now());
+              });
+            }}
+          />
+        )}
+        {index != starTimezones.length - 1 && (
+          <Action
+            icon={Icon.ArrowDownCircle}
+            title={"Move Down"}
+            shortcut={{ modifiers: ["shift", "cmd"], key: "arrowDown" }}
+            onAction={() => {
+              const _starTimezones = [...starTimezones];
+              const [removed] = _starTimezones.splice(index, 1);
+              _starTimezones.splice(index + 1, 0, removed);
+              LocalStorage.setItem(localStorageKey.STAR_TIMEZONE, JSON.stringify(_starTimezones)).then(() => {
+                setRefresh(Date.now());
+              });
+            }}
+          />
+        )}
+      </ActionPanel.Section>
+
       <ActionOpenCommandPreferences command={true} extension={true} />
     </ActionPanel>
   );

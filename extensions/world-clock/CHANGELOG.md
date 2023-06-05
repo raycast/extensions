@@ -1,5 +1,9 @@
 # World Clock Changelog
 
+## [Sort Time Zones] - 2023-05-30
+
+- Starred time zones support sorting
+
 ## [Update Date Format] - 2023-01-02
 
 - Add more date formats

@@ -1,17 +1,34 @@
 # DocCheck Changelog
 
+## [Version 1.4] - 2023-05-28
+
+- NEW: added actions to search the original search term when viewing an article
+- Fix: show search term actions only when there is a query
+- Fix: show the actual search or article term for each action
+- Fix: search only the Flexikon (and not whole DocCheck) when using the "Flexikon Search" action (except for when nothing is found on Flexikon)
+
+## [Version 1.3.3] - 2023-05-27
+
+- NEW: embedded trinket code is now shown as embedded link
+- Fix: embedded YouTube videos are now shown as the original embedded link (doesn't look so sleek on the page, but there are no ads)
+
+## [Version 1.3.2] - 2023-05-26
+
+- NEW: embedded YouTube videos are now shown as a http://youtu.be/*** shortlink
+- Fix: removed links in the synonyms section
+
 ## [Version 1.3.1] - 2023-05-10
 
 - Fix: flickering loading indicator when no search result is found
 
 ## [Version 1.3] - 2023-05-07
 
-- NEW: Search in AMBOSS, Google, Wikipedia or the German Wikipedia if no entry is found.
-- NEW: Tooltips now also for titles of search results
+- NEW: search in AMBOSS, Google, Wikipedia or the German Wikipedia if no entry is found.
+- NEW: tooltips now also for titles of search results
 - NEW: "Articulus brevis minimus" is removed
 - Fix: "Top articles" are now always displayed correctly and loaded only once (optimisation when displaying search results after leaving an article view via the "← Search \*" link and when deleting the search term)
 - Fix: if a top article was selected, "← Top article" now appears in the detail view; if "Open in: Browser" is selected in the settings, nothing is displayed any more, as it is possible to jump back with "Esc".
-- Fix: Table calculation in article [Odds Ratio](https://flexikon.doccheck.com/de/Odds_Ratio) is now displayed correctly (apparently a table cannot start with an empty cell)
+- Fix: table calculation in article [Odds Ratio](https://flexikon.doccheck.com/de/Odds_Ratio) is now displayed correctly (apparently a table cannot start with an empty cell)
 - Fix: all german names deleted
 
 ## [Version 1.2.2] - 2023-04-12
@@ -20,7 +37,7 @@
 
 ## [Version 1.2.1] - 2023-04-12
 
-- Bugfixes from @sxn (thanks!)
+- bugfixes from @sxn (thanks!)
 
 ## [Version 1.2] - 2023-04-12
 
@@ -44,10 +61,6 @@
 
 - NEW: open articles directly in Raycast via deep links (you can even go back once!)
 - NEW: go back to search if there is no prevous article
-
-## [Version 1.1] - 2023-04-09
-
-- NEW: Open article directly in Raycast using deeplinks (you can even go back one time!)
 
 ## [Initial Version] - 2023-04-01
 
