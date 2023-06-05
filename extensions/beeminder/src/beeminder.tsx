@@ -137,14 +137,14 @@ export default function Command() {
               actions={
                 <ActionPanel>
                   <Action.Push
-                    title="Enter datapoint"
+                    title="Enter Datapoint"
                     target={<DataPointForm goalSlug={goal.slug} />}
                   />
                   <Action.OpenInBrowser
-                    title="Open goal in Beeminder"
+                    title="Open Goal in Beeminder"
                     url={`https://www.beeminder.com/${beeminderUsername}/${goal.slug}`}
                   />
-                  <Action title="Refresh data" onAction={async () => await fetchData()} />
+                  <Action title="Refresh Data" onAction={async () => await fetchData()} />
                 </ActionPanel>
               }
             />
