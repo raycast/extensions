@@ -1,6 +1,6 @@
 # SVGO Changelog
 
-## [New Command] - {PR_MERGE_DATE}
+## [New Command] - 2023-06-06
 
 - Added new command to create optimized SVG files based on the current Finder selection
 - Refactored original command to close Raycast window
