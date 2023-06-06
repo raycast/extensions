@@ -1,5 +1,5 @@
 # Snake Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2023-06-06
 
  - Add separate command and details view
