@@ -28,9 +28,12 @@ function SearchTasks() {
     }
 
     if (searchType === "projects") {
-      return data.projects.map((project) => (
-        <ProjectListItem key={project.id} project={project} data={data} setData={setData} />
-      ));
+      return data.projects.map((project) => {
+        const taskCount = data?.items.reduce((acc, t) => (t.project_id === project.id ? acc + 1 : acc), 0) ?? 0;
+        return (
+          <ProjectListItem key={project.id} project={project} data={data} setData={setData} taskCount={taskCount} />
+        );
+      });
     }
 
     if (searchType === "labels") {
