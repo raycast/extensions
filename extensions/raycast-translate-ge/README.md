@@ -1,0 +1,3 @@
+# Translate.ge
+
+Georgian translation
