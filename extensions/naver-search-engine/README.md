@@ -8,15 +8,10 @@ This extension is inspired by [alfnaversearch : Naver Search Workflow for Alfred
 ## Supported Features
 
 * Search Word: Search the word in the [Naver](https://naver.com)
-![](metadata/naver-search-engine-general.png)
 * Search Shopping Items: Search the shopping items in the [Naver Shopping](https://shopping.naver.com/)
-![](metadata/naver-search-engine-shopping.png)
 * Search Korean-English Dictionary: Search the word in the [Naver Korean-English Dictionary](https://en.dict.naver.com/)
-![](metadata/naver-search-engine-kor-eng.png)
 * Search Korean Dictionary: Search the word in the [Naver Korean Dictionary](https://dict.naver.com/kokodict/)
-![](metadata/naver-search-engine-korean.png)
 * Search Sino-Korean (Hanja) Dictionary: Search the word in the [Naver Sino-Korean (Hanja) Dictionary](https://dict.naver.com/cckodict/)
-![](metadata/naver-search-engine-sino-korean.png)
 
 ## Author
 
