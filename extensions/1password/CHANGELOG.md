@@ -1,6 +1,6 @@
 # 1Password Changelog
 
-## [Raycast window closes after copying (opt-out option)] - {PR_MERGE_DATE}
+## [Raycast window closes after copying (opt-out option)] - 2023-06-06
 
 - NEW: Raycast window now closes itself after copying a username or password (you can turn this off in settings)
 
