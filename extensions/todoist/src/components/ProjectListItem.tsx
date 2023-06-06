@@ -1,4 +1,14 @@
-import { ActionPanel, Icon, showToast, Toast, List, confirmAlert, Action, Color, getPreferenceValues } from "@raycast/api";
+import {
+  ActionPanel,
+  Icon,
+  showToast,
+  Toast,
+  List,
+  confirmAlert,
+  Action,
+  Color,
+  getPreferenceValues,
+} from "@raycast/api";
 
 import {
   Project as TProject,
@@ -83,7 +93,7 @@ export default function ProjectListItem({ project, data, setData, taskCount }: P
       key={project.id}
       icon={getProjectIcon(project)}
       title={project.name}
-      subtitle={preferences.showTaskCount ? taskCount.toString():undefined}
+      subtitle={preferences.showTaskCount ? taskCount.toString() : undefined}
       accessories={[
         {
           icon: project.is_favorite ? { source: Icon.Star, tintColor: Color.Yellow } : undefined,
