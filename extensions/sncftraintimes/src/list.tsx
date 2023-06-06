@@ -73,6 +73,7 @@ export default function ListJourneys() {
                 <Action
                   title="Delete"
                   shortcut={{ modifiers: ["cmd"], key: "delete" }}
+                  style={Action.Style.Destructive}
                   onAction={async () => deleteJourney(i)}
                   icon={Icon.Trash}
                 />
@@ -86,8 +87,8 @@ export default function ListJourneys() {
           title="No journeys, you can use the 'Add' command to add journey"
           actions={
             <ActionPanel>
-              <Action.Push title="Go to Add" target={<Add />} />
-              <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
+              <Action.Push title="Add Journey" icon={Icon.Plus} target={<Add />} />
+              <Action title="Open Extension Preferences" onAction={openExtensionPreferences} icon={Icon.Gear} />
             </ActionPanel>
           }
         />
