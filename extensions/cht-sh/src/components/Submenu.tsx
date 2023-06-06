@@ -34,7 +34,7 @@ export default function Submenu(props: SubmenuProps) {
 
   return (
     <List
-      isLoading={data === undefined}
+      isLoading={filteredData === undefined}
       filtering={false}
       searchBarPlaceholder={`Filter ${props.url} cheatsheets by name or search for a keyword`}
       onSearchTextChange={setSearchText}

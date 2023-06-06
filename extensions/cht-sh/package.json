@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "cht-sh",
-  "title": "cht.sh",
+  "title": "Cht.sh",
   "description": "Quickly search cheatsheet by accessing cht.sh online.",
   "icon": "command-icon.png",
   "author": "BrandenXia",
