@@ -1,6 +1,6 @@
 # Logseq Changelog
 
-## [Fix search] - 2023-05-10
+## [Fix search] - {PR_MERGE_DATE}
 
 - Fix protocol change in Logseq in the search functionality [Issue](https://github.com/raycast/extensions/issues/5415)
 
