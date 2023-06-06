@@ -5,7 +5,6 @@ import { showToast, Toast } from "@raycast/api";
 export async function searchWords(wordToSearch: string, type: string): Promise<string[][][]> {
   const url = SearchType[type].searchURL + wordToSearch;
   const response = await fetch(url, { method: "GET" });
-  console.log(url);
 
   if (!response.ok) {
     await showToast(
@@ -18,7 +17,6 @@ export async function searchWords(wordToSearch: string, type: string): Promise<s
 
   const results = (await response.json()) as { query: string[]; items: string[][][][] };
   const words = results["items"][0];
-  console.log(words);
 
   return words;
 }

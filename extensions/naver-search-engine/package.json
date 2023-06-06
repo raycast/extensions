@@ -1,0 +1,68 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "naver-search-engine",
+  "title": "Naver Search Engine",
+  "description": "An extension to look up words in the Naver dictionary or search for content with the Naver search engine.",
+  "icon": "command-icon.png",
+  "author": "kw-lee",
+  "license": "MIT",
+  "categories": [
+    "Web"
+  ],
+  "commands": [
+    {
+      "name": "na-search",
+      "title": "Search Word",
+      "subtitle": "Naver Search Engine",
+      "description": "Search the word in the Naver",
+      "mode": "view"
+    },
+    {
+      "name": "ns-search",
+      "title": "Search Shopping Items",
+      "subtitle": "Naver Search Engine",
+      "description": "Search the shopping items in the Naver Shopping",
+      "mode": "view"
+    },
+    {
+      "name": "nae-search",
+      "title": "Search Korean-English Dictionary",
+      "subtitle": "Naver Search Engine",
+      "description": "Search the word in the Naver Korean-English dictionary",
+      "mode": "view"
+    },
+    {
+      "name": "nak-search",
+      "title": "Search Korean Dictionary",
+      "subtitle": "Naver Search Engine",
+      "description": "Search the word in the Naver Korean dictionary",
+      "mode": "view"
+    },
+    {
+      "name": "nask-search",
+      "title": "Search Sino-Korean (Hanja) Dictionary",
+      "subtitle": "Naver Search Engine",
+      "description": "Search the word in the Naver Sino-Korean (Hanja) dictionary",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.52.1",
+    "node-fetch": "3.2.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
