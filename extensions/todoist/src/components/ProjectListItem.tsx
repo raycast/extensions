@@ -1,4 +1,4 @@
-import { ActionPanel, Icon, showToast, Toast, List, confirmAlert, Action, Color } from "@raycast/api";
+import { ActionPanel, Icon, showToast, Toast, List, confirmAlert, Action, Color, getPreferenceValues } from "@raycast/api";
 
 import {
   Project as TProject,
@@ -19,9 +19,10 @@ type ProjectListItemProps = {
   project: TProject;
   data?: SyncData;
   setData: React.Dispatch<React.SetStateAction<SyncData | undefined>>;
+  taskCount: number;
 };
 
-export default function ProjectListItem({ project, data, setData }: ProjectListItemProps) {
+export default function ProjectListItem({ project, data, setData, taskCount }: ProjectListItemProps) {
   async function toggleFavorite(project: TProject) {
     try {
       await showToast({
@@ -75,11 +76,14 @@ export default function ProjectListItem({ project, data, setData }: ProjectListI
     }
   }
 
+  const preferences = getPreferenceValues<Preferences.ShowProjects>();
+
   return (
     <List.Item
       key={project.id}
       icon={getProjectIcon(project)}
       title={project.name}
+      subtitle={preferences.showTaskCount ? taskCount.toString():undefined}
       accessories={[
         {
           icon: project.is_favorite ? { source: Icon.Star, tintColor: Color.Yellow } : undefined,

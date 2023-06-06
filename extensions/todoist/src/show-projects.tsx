@@ -16,7 +16,8 @@ function Projects() {
   return (
     <List searchBarPlaceholder="Filter projects by name">
       {projects.map((project) => {
-        return <ProjectListItem key={project.id} project={project} data={data} setData={setData} />;
+        const taskCount = data?.items.reduce((acc,  t) => (t.project_id === project.id ? acc + 1 : acc), 0) ?? 0;
+        return <ProjectListItem key={project.id} project={project} data={data} setData={setData} taskCount={taskCount}/>;
       })}
 
       <List.EmptyView

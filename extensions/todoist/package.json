@@ -171,7 +171,18 @@
       "title": "Show Projects",
       "subtitle": "Todoist",
       "description": "Show your Todoist projects.",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "showTaskCount",
+          "type": "checkbox",
+          "title": "Advanced",
+          "label": "Show the task count besides the project", 
+          "description": "When enabled, you can see the task count besides your project.",
+          "default": false,
+          "required": false
+        }
+      ]
     },
     {
       "name": "show-labels",
