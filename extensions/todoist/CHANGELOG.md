@@ -1,5 +1,7 @@
 # Todoist Changelog
 
+## [Show task count for projects] - 2023-06-07
+This update adds a new feature to display the `task count` besides project name  in the `Show Projects` view. Note it's turned off by default in the command's preferences.  
 ## [Search command and bug fixes] - 2023-06-02
 
 This update adds a new command called `Search`, allowing you to search among your Todoist tasks, projects, labels, and comments. Please note that the `All Tasks` view of the `Home` command has been moved to the `Search` command.

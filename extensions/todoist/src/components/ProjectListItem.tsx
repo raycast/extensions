@@ -29,10 +29,9 @@ type ProjectListItemProps = {
   project: TProject;
   data?: SyncData;
   setData: React.Dispatch<React.SetStateAction<SyncData | undefined>>;
-  taskCount: number;
 };
 
-export default function ProjectListItem({ project, data, setData, taskCount }: ProjectListItemProps) {
+export default function ProjectListItem({ project, data, setData }: ProjectListItemProps) {
   async function toggleFavorite(project: TProject) {
     try {
       await showToast({
@@ -87,13 +86,23 @@ export default function ProjectListItem({ project, data, setData, taskCount }: P
   }
 
   const preferences = getPreferenceValues<Preferences.ShowProjects>();
+  const taskCount = ((count: number) => {
+    switch (count) {
+      case 0:
+        return "no task";
+      case 1:
+        return "1 task";
+      default:
+        return `${count} tasks`;
+    }
+  })(data?.items.filter((t) => t.project_id === project.id).length ?? 0);
 
   return (
     <List.Item
       key={project.id}
       icon={getProjectIcon(project)}
       title={project.name}
-      subtitle={preferences.showTaskCount ? taskCount.toString() : undefined}
+      subtitle={preferences.showTaskCount ? taskCount : undefined}
       accessories={[
         {
           icon: project.is_favorite ? { source: Icon.Star, tintColor: Color.Yellow } : undefined,
