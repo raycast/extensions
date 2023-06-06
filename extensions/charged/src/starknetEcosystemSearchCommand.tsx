@@ -1,6 +1,7 @@
 import { List, ActionPanel, Action, Image } from "@raycast/api";
 import axios from "axios";
 import { useEffect, useState } from "react";
+import * as analytics from "./utils/analytics";
 
 interface Network {
   website?: string;
@@ -61,6 +62,10 @@ export default function Command() {
   const [listItems, setListItems] = useState<Project[]>([]);
 
   useEffect(() => {
+    analytics.trackEvent("OPEN_STARKNET_ECOSYSTEM");
+  }, []);
+
+  useEffect(() => {
     (async () => {
       const response = await axios.get(
         `https://raw.githubusercontent.com/419Labs/starknet-ecosystem.com/main/data/ecosystem.ts`
@@ -90,6 +95,11 @@ export default function Command() {
           actions={
             <ActionPanel>
               <Action.OpenInBrowser
+                onOpen={() =>
+                  analytics.trackEvent("ECOSYSTEM_PAGE_OPEN", {
+                    project: item.name,
+                  })
+                }
                 url={
                   item.network.website ? item.network.website : `https://www.starknet-ecosystem.com/projects/${item.id}`
                 }

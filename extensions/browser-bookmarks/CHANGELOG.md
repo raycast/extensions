@@ -1,5 +1,9 @@
 # Browser Bookmarks Changelog
 
+## [Invalid URL Error Fix] - 2023-05-30
+
+- Validate URLs before creating URL objects to prevent `TypeError: Invalid URL` errors
+
 ## [Various Fixes] - 2023-05-16
 
 - Support root bookmark folders for Safari
