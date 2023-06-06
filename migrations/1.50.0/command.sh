@@ -1,1 +1,1 @@
-echo "raycast-env.d.ts" >> .gitignore
+echo -e "\nraycast-env.d.ts" >> .gitignore

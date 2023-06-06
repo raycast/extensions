@@ -13,3 +13,4 @@
   - [useForm](utils-reference/react-hooks/useForm.md)
   - [useExec](utils-reference/react-hooks/useExec.md)
   - [useSQL](utils-reference/react-hooks/useSQL.md)
+  - [useAI](utils-reference/react-hooks/useAI.md)

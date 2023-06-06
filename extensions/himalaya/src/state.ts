@@ -5,4 +5,6 @@ export interface State {
   envelopes: Envelope[];
   folders: Folder[];
   exe: boolean;
+  currentFolderName: string;
+  currentAccountName: string;
 }

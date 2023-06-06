@@ -56,6 +56,6 @@ export default async () => {
     })
     .catch((error) => {
       closeMainWindow();
-      showHUD(error);
+      showHUD(error?.toString());
     });
 };

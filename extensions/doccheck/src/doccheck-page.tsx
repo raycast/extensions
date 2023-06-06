@@ -28,7 +28,7 @@ export default function DocCheckPage(props: { url: string; prevurl: string; quer
       synonyms += $(link).html() + "\n";
     });
 
-  // erster <i></i> im Artikel - zum Abgleich ob es Synonyme gibt oder nicht
+  // first <i></i> in the article - to check if there are synonyms or not
   let notSynonyms = "";
   $(".collapsible")
     .find("i")
@@ -38,29 +38,22 @@ export default function DocCheckPage(props: { url: string; prevurl: string; quer
   // 	notSynonyms = notSynonyms.trim();
   synonyms = synonyms.replace(notSynonyms, "");
 
-  // SYNONYME
   if (synonyms) {
-    // es gibt Synonyme oder Erklärungen unter der Überschrift
+    // there are synonyms or explanations under the heading
     mdSynonyms =
       "```\n" +
       synonyms
         .trim()
-        .split("<br>")
-        .join("")
-        .split("</b>\n")
-        .join(" ")
-        .split("<b>")
-        .join("")
-        .split("</b>")
-        .join("")
-        .split("<sub>")
-        .join("")
-        .split("</sub>")
-        .join("")
-        .split("<sup>")
-        .join("")
-        .split("</sup>")
-        .join("") +
+        .replace(/<br>/gm, ``)
+        .replace(/<\/b>\n/gm, ` `)
+        .replace(/<b>/gm, ``)
+        .replace(/<\/b>/gm, ``)
+        .replace(/<sub>/gm, ``)
+        .replace(/<\/sub>/gm, ``)
+        .replace(/<sup>/gm, ``)
+        .replace(/<\/sup>/gm, ``)
+        .replace(/<a .*">/gm, ``)
+        .replace(/<\/a>/gm, ``) +
       "\n" +
       "``` " +
       "\n";
@@ -82,10 +75,11 @@ export default function DocCheckPage(props: { url: string; prevurl: string; quer
         : $(link).html();
   });
 
-  let toc = "";
-  $("#toc").each(function (i, link) {
-    toc += $(link).html();
-  });
+  // table of contents
+  const toc = $("#toc").html();
+
+  // "Articulus brevis minimus"
+  const abm = $(".has-bg-gray-200").html();
 
   // remove synonyms
   let markdown = "";
@@ -103,54 +97,119 @@ export default function DocCheckPage(props: { url: string; prevurl: string; quer
         "](" +
         "raycast://extensions/spacedog/doccheck/open-page?arguments=" +
         encodeURI(JSON.stringify({ url: props.prevurl, query: props.query })) +
-        ")"
-      : "[← Suche" +
+        ")\n"
+      : props.query != "" && preferences.openIn != "browser"
+      ? "[← Search" +
         queryText +
         "](" +
         "raycast://extensions/spacedog/doccheck/doccheck-flexikon?fallbackText=" +
         encodeURI(query) +
-        ")";
+        ")\n"
+      : preferences.openIn != "browser"
+      ? "[← Top Articles](raycast://extensions/spacedog/doccheck/doccheck-flexikon)\n"
+      : "";
   markdown +=
-    "\n" +
+    "\n " +
     goback +
-    "\n" +
     mdSynonyms +
-    nhm.translate(html.replace(toc, "").replace(/#cite_\D*\d*/gm, '"')).replace(/\s{94}\|\n/gm, `\n`); // ÜBERSCHRIFT + ```SYNONYME``` -TOC + ARTIKEL (Entfernung von Ankern, relative zu absoluten Links, Entfernung einiger Tabellenenden wie bei DDx in "Scharlach")
+    nhm
+      .translate(
+        html
+          .replace(toc ?? "", "")
+          .replace(abm ?? "", "")
+          .replace(/#cite_\D*\d*/gm, '"')
+          .replace(`th>&nbsp;</th`, `th>.</th`)
+          .replace(`tr>\n<th></th>`, `tr>\n<th>.</th>`)
+          .replace(/<iframe.*src="(.*youtu.*)" frame.*><\/iframe>/gm, `YouTube Video: <a href="$1">$1</a>`)
+          .replace(/<iframe.*src="(.*trinket.*)" frame.*><\/iframe>/gm, `trinket Code: <a href="$1">$1</a>`)
+      )
+      .replace(/\s{94}\|\n/gm, `\n`); // HEADING + ``SYNONYMS`` -TOC + ARTICLE (removal of anchors, relative to absolute links, putting a dot in the empty start line when calculating "Relatives Risiko" and "Odds Ratio" for correct display, removal of some table ends like DDx in "Scharlach")
 
-  return (
-    <Detail
-      navigationTitle={urlTitle}
-      isLoading={isLoading}
-      markdown={
-        preferences.openIn === "browser"
-          ? markdown.replace(/]\(\//gm, "](https://flexikon.doccheck.com/")
-          : markdown.replace(/\[(.*?)\]\((\/.*?) "(.*?)"\)/g, function (match, p1, p2, p3) {
-              const url = "https://flexikon.doccheck.com" + p2;
-              const args = {
-                url: url,
-                prevurl: props.url,
-                query: props.query,
-              };
-              const query = encodeURIComponent(JSON.stringify(args));
-              return "[" + p1 + "](raycast://extensions/spacedog/doccheck/open-page?arguments=" + query + ")";
-            })
-      }
-      actions={
-        <ActionPanel>
-          <Action.Open
-            icon={Icon.Globe}
-            title="Eintrag im Browser öffnen"
-            target={props.url}
-            shortcut={{ modifiers: ["cmd"], key: "enter" }}
-          />
-          <Action.Open
-            icon={Icon.Uppercase}
-            title="Eintragtitel als AMBOSS-Suche"
-            target={"https://next.amboss.com/de/search?q=" + encodeURI(urlTitle) + "&v=overview"}
-            shortcut={{ modifiers: ["opt"], key: "enter" }}
-          />
-        </ActionPanel>
-      }
-    />
-  );
+  if (query) {
+    return (
+      <Detail
+        navigationTitle={urlTitle}
+        isLoading={isLoading}
+        markdown={
+          preferences.openIn === "browser"
+            ? markdown.replace(/]\(\//gm, "](https://flexikon.doccheck.com/")
+            : markdown.replace(/\[(.*?)\]\((\/.*?) "(.*?)"\)/g, function (match, p1, p2, p3) {
+                const url = "https://flexikon.doccheck.com" + p2;
+                const args = {
+                  url: url,
+                  prevurl: props.url,
+                  query: props.query,
+                };
+                const query = encodeURIComponent(JSON.stringify(args));
+                return "[" + p1 + "](raycast://extensions/spacedog/doccheck/open-page?arguments=" + query + ")";
+              })
+        }
+        actions={
+          <ActionPanel>
+            <Action.Open
+              icon={Icon.Globe}
+              title="Open Article in Browser"
+              target={props.url}
+              shortcut={{ modifiers: ["cmd"], key: "enter" }}
+            />
+            <Action.Open
+              icon={Icon.Globe}
+              title={`Flexikon Search "` + query + `"`}
+              target={"https://www.doccheck.com/search?q=" + encodeURI(query) + "&facetq=content_type:flexikon"}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
+            />
+            <Action.Open
+              icon={Icon.Uppercase}
+              title={`AMBOSS Search "` + urlTitle + `"`}
+              target={"https://next.amboss.com/de/search?q=" + encodeURI(urlTitle) + "&v=overview"}
+              shortcut={{ modifiers: ["opt"], key: "enter" }}
+            />
+            <Action.Open
+              icon={Icon.Uppercase}
+              title={`AMBOSS Search "` + query + `"`}
+              target={"https://next.amboss.com/de/search?q=" + encodeURI(query) + "&v=overview"}
+              shortcut={{ modifiers: ["opt", "shift"], key: "enter" }}
+            />
+          </ActionPanel>
+        }
+      />
+    );
+  } else {
+    return (
+      <Detail
+        navigationTitle={urlTitle}
+        isLoading={isLoading}
+        markdown={
+          preferences.openIn === "browser"
+            ? markdown.replace(/]\(\//gm, "](https://flexikon.doccheck.com/")
+            : markdown.replace(/\[(.*?)\]\((\/.*?) "(.*?)"\)/g, function (match, p1, p2, p3) {
+                const url = "https://flexikon.doccheck.com" + p2;
+                const args = {
+                  url: url,
+                  prevurl: props.url,
+                  query: props.query,
+                };
+                const query = encodeURIComponent(JSON.stringify(args));
+                return "[" + p1 + "](raycast://extensions/spacedog/doccheck/open-page?arguments=" + query + ")";
+              })
+        }
+        actions={
+          <ActionPanel>
+            <Action.Open
+              icon={Icon.Globe}
+              title="Open Article in Browser"
+              target={props.url}
+              shortcut={{ modifiers: ["cmd"], key: "enter" }}
+            />
+            <Action.Open
+              icon={Icon.Uppercase}
+              title={`AMBOSS Search "` + urlTitle + `"`}
+              target={"https://next.amboss.com/de/search?q=" + encodeURI(urlTitle) + "&v=overview"}
+              shortcut={{ modifiers: ["opt"], key: "enter" }}
+            />
+          </ActionPanel>
+        }
+      />
+    );
+  }
 }

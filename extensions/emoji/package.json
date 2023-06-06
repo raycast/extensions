@@ -7,7 +7,8 @@
   "author": "FezVrasta",
   "contributors": [
     "kidonng",
-    "sxn"
+    "sxn",
+    "maxdavid"
   ],
   "license": "MIT",
   "categories": [
@@ -46,9 +47,13 @@
       "type": "dropdown",
       "required": false,
       "title": "Unicode Version",
-      "description": "Unicode version to use (default: 14.0)",
-      "default": "14.0",
+      "description": "Unicode version to use (default: 15.0)",
+      "default": "15.0",
       "data": [
+        {
+          "title": "15.0",
+          "value": "15.0"
+        },
         {
           "title": "14.0",
           "value": "14.0"
@@ -96,7 +101,7 @@
   "dependencies": {
     "@raycast/api": "^1.45.1",
     "cross-fetch": "^3.1.5",
-    "emojilib": "^3.0.6",
+    "emojilib": "^3.0.10",
     "fuse.js": "^6.5.3",
     "raycast-toolkit": "^1.0.3"
   },

@@ -2,14 +2,25 @@ import { Application, getApplications, Grid } from "@raycast/api";
 import FileGridItem from "./components/FileGridItem";
 import { ErrorView } from "./components/ErrorView";
 import { useVisitedFiles } from "./hooks/useVisitedFiles";
-import { useProjectFiles } from "./hooks/useProjectFiles";
+import { resolveAllFiles } from "./components/fetchFigmaData";
 import { useEffect, useState } from "react";
+import { useCachedPromise } from "@raycast/utils";
 
 export default function Command() {
-  const { projectFiles, isLoading: isLoadingProjectFiles, hasError } = useProjectFiles();
+  const { data, isLoading, error } = useCachedPromise(
+    async () => {
+      const results = await resolveAllFiles();
+      return results;
+    },
+    [],
+    {
+      keepPreviousData: true,
+    }
+  );
+
   const { files: visitedFiles, visitFile, isLoading: isLoadingVisitedFiles } = useVisitedFiles();
-  const isLoading = isLoadingProjectFiles || isLoadingVisitedFiles;
-  const [filteredFiles, setFilteredFiles] = useState(projectFiles);
+  const isLoadingBlock = isLoading || isLoadingVisitedFiles;
+  const [filteredFiles, setFilteredFiles] = useState(data);
   const [isFiltered, setIsFiltered] = useState(false);
   const [desktopApp, setDesktopApp] = useState<Application>();
 
@@ -20,20 +31,20 @@ export default function Command() {
   }, []);
 
   useEffect(() => {
-    setFilteredFiles(projectFiles);
-  }, [projectFiles]);
+    setFilteredFiles(data);
+  }, [data]);
 
-  if (hasError) {
+  if (error) {
     return <ErrorView />;
   }
 
   function handleDropdownChange(value: string) {
-    if (projectFiles && !isLoadingProjectFiles) {
+    if (data && !isLoading) {
       if (value === "All") {
-        setFilteredFiles(projectFiles);
+        setFilteredFiles(data);
         setIsFiltered(false);
       } else {
-        setFilteredFiles(projectFiles.filter((file) => file.name === value));
+        setFilteredFiles(data.filter((team) => team.name === value));
         setIsFiltered(true);
       }
     }
@@ -42,14 +53,18 @@ export default function Command() {
   const filterDropdown = () => (
     <Grid.Dropdown tooltip="Projects" defaultValue="All" onChange={handleDropdownChange} storeValue>
       <Grid.Dropdown.Item key="all" title="All" value="All" />
-      {projectFiles?.map((project) => (
-        <Grid.Dropdown.Item key={project.name} title={project.name} value={project.name} />
+      {data?.map((team) => (
+        <Grid.Dropdown.Item key={team.name} title={team.name} value={team.name} />
       ))}
     </Grid.Dropdown>
   );
 
   return (
-    <Grid isLoading={isLoading} searchBarPlaceholder="Filter files by name..." searchBarAccessory={filterDropdown()}>
+    <Grid
+      isLoading={isLoadingBlock}
+      searchBarPlaceholder="Filter files by name..."
+      searchBarAccessory={filterDropdown()}
+    >
       {!isFiltered && (
         <Grid.Section key="recent-files" title="Recent Files">
           {visitedFiles?.map((file) => (
@@ -64,13 +79,15 @@ export default function Command() {
         </Grid.Section>
       )}
 
-      {filteredFiles?.map((project) => (
-        <Grid.Section key={project.name + "-project"} title={project.name}>
-          {(project.files || []).map((file) => (
-            <FileGridItem key={file.key + "-file"} file={file} desktopApp={desktopApp} onVisit={visitFile} />
-          ))}
-        </Grid.Section>
-      ))}
+      {filteredFiles?.map((team) =>
+        team.files.map((project) => (
+          <Grid.Section key={team.name + project.name + "-project"} title={team.name + " - " + project.name}>
+            {(project.files || []).map((file) => (
+              <FileGridItem key={file.key + "-file"} file={file} desktopApp={desktopApp} onVisit={visitFile} />
+            ))}
+          </Grid.Section>
+        ))
+      )}
     </Grid>
   );
 }

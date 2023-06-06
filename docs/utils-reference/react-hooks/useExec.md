@@ -94,7 +94,7 @@ With a few options:
 
 Including the [useCachedPromise](./useCachedPromise.md)'s options:
 
-- `options.keepPreviousData` is a boolean to tell the hook to keep the previous results instead of returning the initial value if there aren't any in the cache for the new arguments. This is particularly useful when used for data for a List to avoid flickering.
+- `options.keepPreviousData` is a boolean to tell the hook to keep the previous results instead of returning the initial value if there aren't any in the cache for the new arguments. This is particularly useful when used for data for a List to avoid flickering. See [Argument dependent on user input](#argument-dependent-on-user-input) for more information.
 
 Including the [useCachedState](./useCachedState.md)'s options:
 
@@ -118,21 +118,22 @@ Returns an object with the [AsyncState](#asyncstate) corresponding to the execut
 ## Example
 
 ```tsx
-import { List, ActionPanel, Action } from "@raycast/api";
+import { List } from "@raycast/api";
 import { useExec } from "@raycast/utils";
+import { useMemo } from "react";
 
-const Demo = () => {
-  const { isLoading, data, revalidate } = useExec("brew", ["info", "--json=v2", "--installed"]);
-  const results = useMemo<{}[]>(() => JSON.parse(data || "[]"), [data]);
+export default function () {
+  const { isLoading, data } = useExec("brew", ["info", "--json=v2", "--installed"]);
+  const results = useMemo<{ id: string; name: string }[]>(() => JSON.parse(data || "[]"), [data]);
 
   return (
     <List isLoading={isLoading}>
-      {(data || []).map((item) => (
+      {results.map((item) => (
         <List.Item key={item.id} title={item.name} />
       ))}
     </List>
   );
-};
+}
 ```
 
 ## Argument dependent on user input

@@ -14,11 +14,11 @@ export default function EpisodeListItem({ episode, show }: EpisodeListItemProps)
   let icon: Image.ImageLike | undefined = undefined;
   if (show?.images) {
     icon = {
-      source: show.images[show.images.length - 1].url,
+      source: show.images[show.images.length - 1]?.url,
     };
   } else if (episode.images) {
     icon = {
-      source: episode.images[episode.images.length - 1].url,
+      source: episode.images[episode.images.length - 1]?.url,
     };
   }
 

@@ -5,7 +5,14 @@
   "description": "Speedtest via speedtest.net",
   "icon": "speedtest.png",
   "author": "tonka3000",
+  "contributors": [
+    "koayon"
+  ],
   "license": "MIT",
+  "categories": [
+    "Applications",
+    "Developer Tools"
+  ],
   "commands": [
     {
       "name": "index",
@@ -15,7 +22,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.33.0",
+    "@raycast/api": "^1.51.0",
+    "@raycast/utils": "^1.4.16",
     "download": "^8.0.0",
     "sha256-file": "^1.0.0",
     "tar": "^6.1.11"
@@ -36,7 +44,8 @@
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "fix-lint": "ray lint --fix"
+    "publish": "npx @raycast/api@latest publish"
   }
 }

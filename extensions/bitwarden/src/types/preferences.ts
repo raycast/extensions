@@ -13,4 +13,6 @@ export type Preferences = {
   serverCertsPath: string;
   repromptIgnoreDuration: string;
   generatePasswordQuickAction: "paste" | "copy" | "copyAndPaste";
+  shouldCacheVaultItems: boolean;
+  windowActionOnCopy: "keepOpen" | "close" | "closeAndPopToRoot";
 } & TransientCopyPreferences;

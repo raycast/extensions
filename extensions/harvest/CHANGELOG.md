@@ -1,5 +1,10 @@
 # Harvest Changelog
 
+## [Menu Bar Support] - 2023-05-22
+
+- Add support for a menu bar widget that shows the current running timer.
+- Add Callback URLs to trigger other apps when a timer is started or stopped.
+
 ## [Better Project Search] - 2023-01-31
 
 - Add user preference to show the client's name for the selected project in the time entry form

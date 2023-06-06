@@ -11,7 +11,7 @@ export const BitwardenProvider = (props: BitwardenProviderProps) => {
   const [bitwarden, setBitwarden] = useState<Bitwarden>();
 
   useEffect(() => {
-    new Bitwarden().initialize().then(setBitwarden);
+    void new Bitwarden().initialize().then(setBitwarden);
   }, []);
 
   if (!bitwarden) return <Detail isLoading />;
@@ -20,12 +20,12 @@ export const BitwardenProvider = (props: BitwardenProviderProps) => {
 };
 
 export const useBitwarden = () => {
-  const session = useContext(BitwardenContext);
-  if (session == null) {
+  const context = useContext(BitwardenContext);
+  if (context == null) {
     throw new Error("useBitwarden must be used within a BitwardenProvider");
   }
 
-  return session;
+  return context;
 };
 
 export default BitwardenContext;

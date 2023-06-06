@@ -1,28 +1,9 @@
 import { useState, useEffect } from "react";
-import { Form, Icon, ActionPanel, Action, showToast, popToRoot } from "@raycast/api";
-import { iconMap, setStorage, getStorage } from "./utils";
+import { Form, Icon, ActionPanel, Action, showToast, useNavigation } from "@raycast/api";
+import { iconMap, getStorage, createNewPin } from "./utils";
 import { StorageKey } from "./constants";
 import { Group } from "./types";
-
-const createNewPin = async (name: string, url: string, icon: string, group: string) => {
-  const storedPins = await getStorage(StorageKey.LOCAL_PINS);
-
-  const newID = (await getStorage(StorageKey.NEXT_PIN_ID))[0];
-  setStorage(StorageKey.NEXT_PIN_ID, [newID + 1]);
-
-  const newData = [...storedPins];
-  newData.push({
-    name: name,
-    url: url,
-    icon: icon,
-    group: group,
-    id: newID,
-  });
-
-  await setStorage(StorageKey.LOCAL_PINS, newData);
-  await showToast({ title: `Added pin for "${name}"` });
-  popToRoot();
-};
+import { getFavicon } from "@raycast/utils";
 
 const useGetGroups = () => {
   const [groups, setGroups] = useState<Group[]>([]);
@@ -43,6 +24,7 @@ const useGetGroups = () => {
 };
 
 const NewPinForm = () => {
+  const [url, setURL] = useState<string | undefined>();
   const [urlError, setUrlError] = useState<string | undefined>();
 
   const groups = useGetGroups();
@@ -50,13 +32,19 @@ const NewPinForm = () => {
   iconList.unshift("Favicon / File Icon");
   iconList.unshift("None");
 
+  const { pop } = useNavigation();
+
   return (
     <Form
       actions={
         <ActionPanel>
           <Action.SubmitForm
             icon={Icon.ChevronRight}
-            onSubmit={(values) => createNewPin(values.nameField, values.urlField, values.iconField, values.groupField)}
+            onSubmit={async (values) => {
+              await createNewPin(values.nameField, values.urlField, values.iconField, values.groupField);
+              await showToast({ title: `Added pin for "${values.nameField}"` });
+              pop();
+            }}
           />
         </ActionPanel>
       }
@@ -72,11 +60,22 @@ const NewPinForm = () => {
         title="Pin Path/URL"
         placeholder="Enter the filepath or URL to pin"
         error={urlError}
-        onChange={() => (urlError !== undefined ? setUrlError(undefined) : null)}
+        onChange={(value) => {
+          setURL(value);
+          if (urlError !== undefined) {
+            setUrlError(undefined);
+          } else {
+            null;
+          }
+        }}
         onBlur={(event) => {
           if (event.target.value?.length == 0) {
             setUrlError("URL cannot be empty!");
-          } else if (!event.target.value?.includes(":") && !event.target.value?.startsWith("/")) {
+          } else if (
+            !event.target.value?.includes(":") &&
+            !event.target.value?.startsWith("/") &&
+            !event.target.value?.startsWith("~")
+          ) {
             setUrlError("Please enter a valid URL or path!");
           } else if (urlError !== undefined) {
             setUrlError(undefined);
@@ -86,12 +85,18 @@ const NewPinForm = () => {
 
       <Form.Dropdown id="iconField" title="Pin Icon" defaultValue="None">
         {iconList.map((icon) => {
+          const urlIcon = url
+            ? url.startsWith("/") || url.startsWith("~")
+              ? { fileIcon: url }
+              : getFavicon(url)
+            : iconMap["Minus"];
+
           return (
             <Form.Dropdown.Item
               key={icon}
               title={icon}
               value={icon}
-              icon={icon in iconMap ? iconMap[icon] : iconMap["Minus"]}
+              icon={icon in iconMap ? iconMap[icon] : icon == "Favicon / File Icon" ? urlIcon : iconMap["Minus"]}
             />
           );
         })}
