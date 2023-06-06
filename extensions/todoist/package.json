@@ -13,7 +13,8 @@
   ],
   "contributors": [
     "AnishDe12020",
-    "kud"
+    "kud",
+    "gerardcs"
   ],
   "commands": [
     {
@@ -138,6 +139,10 @@
               "value": "today"
             },
             {
+              "title": "Filter",
+              "value": "filter"
+            },
+            {
               "title": "Upcoming",
               "value": "upcoming"
             }
@@ -154,6 +159,14 @@
           "required": false,
           "title": "Number of Days for Upcoming View",
           "description": "Indicates the number of days you want in the upcoming view."
+        },
+        {
+          "default": "",
+          "description": "Task filter for the filter view. Use Todoist filter syntax, e.g. today & (#Work | @next).",
+          "name": "filter",
+          "required": false,
+          "title": "Filter Query",
+          "type": "textfield"
         },
         {
           "name": "focusFeatureWidth",
