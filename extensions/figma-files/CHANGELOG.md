@@ -1,6 +1,6 @@
 # Figma Files Changelog
 
-## [Support for opening file branches and improvements] - {PR_MERGE_DATE}
+## [Support for opening file branches and improvements] - 2023-06-07
 
 - Added support for opening a specific branch of a file through the CMD+K menu.
 - Added icons to differentiate between Projects and Teams.
