@@ -1,0 +1,86 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "aria2",
+  "title": "Aria2",
+  "description": "The Aria2 extension for Raycast enables users to manage Aria2 downloads directly from the Raycast command bar.",
+  "icon": "icon.png",
+  "author": "gandli",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Aria2",
+      "description": "inThe Aria2 extension for Raycast enables users to manage Aria2 downloads directly from the Raycast command bar.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "host",
+          "title": "Host Name",
+          "description": "Host of the Aria2 server",
+          "type": "textfield",
+          "placeholder": "localhost",
+          "default": "localhost",
+          "required": true
+        },
+        {
+          "name": "port",
+          "title": "Port",
+          "description": "Port number of the Aria2 server",
+          "type": "textfield",
+          "placeholder": "6800",
+          "default": "6800",
+          "required": true
+        },
+        {
+          "name": "secure",
+          "title": "Secure",
+          "description": "Whether to use secure connection",
+          "type": "checkbox",
+          "label": "Use Secure Connection",
+          "default": false,
+          "required": true
+        },
+        {
+          "name": "secret",
+          "title": "RPC Secret",
+          "description": "Secret key for authenticating with the Aria2 server",
+          "type": "password",
+          "placeholder": "Secret Key",
+          "default": "",
+          "required": true
+        },
+        {
+          "name": "path",
+          "title": "Path",
+          "description": "Path to the Aria2 server",
+          "type": "textfield",
+          "placeholder": "/jsonrpc",
+          "default": "/jsonrpc",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.52.1",
+    "aria2": "^4.1.2",
+    "node-fetch": "^3.3.1",
+    "ws": "^8.13.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "@types/ws": "^8.5.4",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
