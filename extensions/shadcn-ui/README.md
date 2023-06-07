@@ -10,7 +10,7 @@ Beautifully designed components that you can copy and paste into your apps. Acce
 
 ## How it works
 
-![demo gif](https://media.giphy.com/media/UVyHzW0ofYQkpvAZif/giphy.gif)
+[![Watch the video](assets/demo-thumbnail.png)](https://share.cleanshot.com/zxKJx9Cd)
 
 ## Support
 
