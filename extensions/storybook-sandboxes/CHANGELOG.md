@@ -1,5 +1,5 @@
 # Storybook Sandbox Changelog
 
-## [Initial Version] - 2023-05-15
+## [Initial Version] - {PR_MERGE_DATE}
 
 Initial version
