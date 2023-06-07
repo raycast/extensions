@@ -1,7 +1,8 @@
-import { Icon, MenuBarExtra, launchCommand, LaunchType } from "@raycast/api";
+import { Icon, MenuBarExtra, launchCommand, LaunchType, getPreferenceValues } from "@raycast/api";
 import { useEffect } from "react";
 import useTimers from "./hooks/useTimers";
 import { formatTime } from "./formatUtils";
+import { Preferences } from "./types";
 
 export default function Command() {
   const { timers, customTimers, isLoading, refreshTimers, handleStartTimer, handleStopTimer, handleStartCT } =
@@ -12,6 +13,14 @@ export default function Command() {
       refreshTimers();
     }, 1000);
   }, []);
+
+  if(isLoading){
+    refreshTimers();
+  }
+  const prefs = getPreferenceValues<Preferences>();
+  if ((timers == undefined || timers.length == 0 || timers.length == undefined) && prefs.showMenubarIconOnlyOnRun){
+    return null;
+  }
 
   return (
     <MenuBarExtra
