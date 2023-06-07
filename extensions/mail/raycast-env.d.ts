@@ -9,13 +9,13 @@
 
 type ExtensionPreferences = {
   /** Message Format - Sets whether to show messages in plain text or HTML. */
-  "plainTextMode"?: boolean,
+  "plainTextMode": boolean,
   /** Primary Action - The primary action to be performed on the selected message. */
-  "primaryAction"?: "seeMessage" | "openMessage",
+  "primaryAction": "seeMessage" | "openMessage",
   /** Save Attachments To - Directory to save mail attachments. */
-  "saveDirectory"?: string,
+  "saveDirectory": string,
   /** Message Limit - The amount of messages to retrieve. */
-  "messageLimit"?: "5" | "10" | "25" | "50" | "100"
+  "messageLimit": "5" | "10" | "25" | "50" | "100"
 }
 
 /** Preferences accessible in all the extension's commands */
