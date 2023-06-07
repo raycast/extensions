@@ -17,10 +17,10 @@ const Ask = (props: LaunchProps<{ arguments: AskArguments }>) => {
 
       try {
         fastGPTResponse = await query(props.arguments.query, true);
-      } catch (err: any) {
+      } catch (err) {
         showToast({
           title: "Error",
-          message: err.message,
+          message: (err as Error).message,
           style: Toast.Style.Failure,
         });
         return;

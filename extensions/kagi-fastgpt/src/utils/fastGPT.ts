@@ -2,7 +2,7 @@ import type { AxiosError, AxiosResponse } from "axios";
 import { FastGPTResponse } from "../interfaces/fastGPTResponse";
 import axiosClient from "./axios";
 
-export const query = async (query: string, webSearch: boolean = true): Promise<FastGPTResponse> => {
+export const query = async (query: string, webSearch = true): Promise<FastGPTResponse> => {
   let res: AxiosResponse;
   try {
     res = await axiosClient.post("/fastgpt", {
