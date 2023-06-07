@@ -1,4 +1,4 @@
-import {ActionPanel, Action, List, showToast, Toast} from "@raycast/api";
+import { ActionPanel, Action, List, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { Octokit } from "octokit";
 
@@ -16,23 +16,26 @@ export default function Command() {
       try {
         const octokit = new Octokit();
 
-        const res = await octokit.rest.repos.getContent({
+        const res = (await octokit.rest.repos.getContent({
           mediaType: {
             format: "json",
           },
           owner: "shadcn",
           repo: "ui",
           path: "apps/www/app/examples",
-        }) as { data: SearchResult[] };
+        })) as { data: SearchResult[] };
 
-        setData(res.data.filter((res: { name: string }) => !res.name.includes('.tsx')).map((e) => ({
-          name: e.name.charAt(0).toUpperCase() + e.name.slice(1),
-          url: `https://ui.shadcn.com/examples/${e.name}`
-            })),
+        setData(
+          res.data
+            .filter((res: { name: string }) => !res.name.includes(".tsx"))
+            .map((e) => ({
+              name: e.name.charAt(0).toUpperCase() + e.name.slice(1),
+              url: `https://ui.shadcn.com/examples/${e.name}`,
+            }))
         );
-        setIsLoading(false)
+        setIsLoading(false);
       } catch (e) {
-        setIsLoading(false)
+        setIsLoading(false);
         await showToast({
           style: Toast.Style.Failure,
           title: "Request failed 🔴",
@@ -47,7 +50,7 @@ export default function Command() {
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search examples...">
       <List.Section title="Examples">
-        {data.map((searchResult: SearchResult ) => (
+        {data.map((searchResult: SearchResult) => (
           <SearchListItem key={searchResult.name} searchResult={searchResult} />
         ))}
       </List.Section>

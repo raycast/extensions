@@ -1,4 +1,4 @@
-import {ActionPanel, Action, List, showToast, Toast} from "@raycast/api";
+import { ActionPanel, Action, List, showToast, Toast } from "@raycast/api";
 import { useFetch, Response } from "@raycast/utils";
 
 export default function Command() {
@@ -31,19 +31,19 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
           <ActionPanel.Section>
             <Action.CopyToClipboard
               icon="npm-icon.png"
-              title="Copy Add Component [npm]"
+              title="Copy Add Component [Npm]"
               content={`npx shadcn-ui add ${searchResult.component}`}
               shortcut={{ modifiers: ["cmd"], key: "n" }}
             />
             <Action.CopyToClipboard
               icon="yarn-icon.png"
-              title="Copy Add Component [yarn]"
+              title="Copy Add Component [Yarn]"
               content={`npx shadcn-ui add ${searchResult.component}`}
               shortcut={{ modifiers: ["cmd"], key: "y" }}
             />
             <Action.CopyToClipboard
               icon="pnpm-icon.png"
-              title="Copy Add Component [pnpm]"
+              title="Copy Add Component [Pnpm]"
               content={`pnpx shadcn-ui add ${searchResult.component}`}
               shortcut={{ modifiers: ["cmd"], key: "p" }}
             />
