@@ -9,6 +9,19 @@ export default function Command() {
   const [filter, setFilter] = useState<Filter>(Filter.All);
   const [isLoading, setIsLoading] = useState(true);
 
+  useEffect(() => {
+    if (isConnected) {
+      const fetchData = async () => {
+        setIsLoading(true);
+        const tasks = await fetchTasks();
+        setTasks(tasks);
+        console.log(tasks);
+        setIsLoading(false);
+      };
+      fetchData();
+    }
+  }, [fetchTasks, isConnected]);
+
   const filterTasks = useCallback(
     (filter: Filter): Task[] => {
       return tasks.filter((task) => {
@@ -25,19 +38,6 @@ export default function Command() {
     },
     [tasks]
   );
-
-  useEffect(() => {
-    if (isConnected) {
-      const fetchData = async () => {
-        setIsLoading(true);
-        const tasks = await fetchTasks();
-        setTasks(tasks);
-        console.log(tasks);
-        setIsLoading(false);
-      };
-      fetchData();
-    }
-  }, [fetchTasks, isConnected]);
 
   const filteredTasks = useMemo(() => filterTasks(filter), [filter, filterTasks]);
 

@@ -1,4 +1,4 @@
-import { List, ActionPanel } from "@raycast/api";
+import { List } from "@raycast/api";
 import { Task, Filter } from "../types";
 import { getTaskIcon } from "../utils/utils";
 import TaskActions from "./TaskActions";
