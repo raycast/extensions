@@ -32,7 +32,7 @@ interface TaskResponse {
   downloadSpeed: string;
   uploadSpeed: string;
   bitfield?: string;
-  infoHash?: string;
+  infoHash: string;
   numSeeders?: string;
   seeder?: boolean;
   connections?: string;
@@ -60,6 +60,7 @@ interface Task {
   remainingTime?: string;
   downloadSpeed?: string;
   status: Status;
+  infoHash: string;
 }
 
 interface Preferences {

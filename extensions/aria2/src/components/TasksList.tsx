@@ -1,4 +1,4 @@
-import { List } from "@raycast/api";
+import { List, ActionPanel, Action } from "@raycast/api";
 import { Task, Filter } from "../types";
 import { getTaskIcon } from "../utils/utils";
 
@@ -48,6 +48,15 @@ const TasksList = ({ isLoading, tasks, onFilterChange }: Props) => {
             }}
             subtitle={{ tooltip: "File Size", value: `💾${task.fileSize}` }}
             accessories={accessories}
+            actions={
+              <ActionPanel title="Actions">
+                <Action.CopyToClipboard
+                  title="Copy Link"
+                  content={`magnet:?xt=urn:btih:${task.infoHash}`}
+                  shortcut={{ modifiers: ["cmd"], key: "c" }}
+                />
+              </ActionPanel>
+            }
           />
         );
       })}

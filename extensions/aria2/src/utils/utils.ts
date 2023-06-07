@@ -69,6 +69,7 @@ export function calculateRemainingTime(completedLength: string, totalLength: str
 
 export function formatTasks(tasks: TaskResponse[]): Task[] {
   return tasks.map((task) => {
+    const infoHash = task.infoHash;
     const file = task.files[0];
     const progress = formatProgress(task.completedLength, task.totalLength);
     let remainingTime: string | undefined;
@@ -86,6 +87,7 @@ export function formatTasks(tasks: TaskResponse[]): Task[] {
       remainingTime,
       downloadSpeed,
       status: task.status as Status,
+      infoHash,
     };
   });
 }

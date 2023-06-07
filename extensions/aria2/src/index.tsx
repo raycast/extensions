@@ -32,6 +32,7 @@ export default function Command() {
         setIsLoading(true);
         const tasks = await fetchTasks();
         setTasks(tasks);
+        console.log(tasks);
         setIsLoading(false);
       };
       fetchData();
