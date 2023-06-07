@@ -505,6 +505,8 @@ export default function Command() {
 | title<mark style="color:red;">*</mark> | A title for the Action. | <code>string</code> | - |
 | onChange<mark style="color:red;">*</mark> | Callback when the Date was picked | <code>(date: Date) => void</code> | - |
 | icon | A optional icon displayed for the Action. | <code>[Image.ImageLike](icons-and-images.md#image.imagelike)</code> | [Icon.Calendar](icons-and-images.md#icon) |
+| max | The maximum date (inclusive) allowed for selection. | <code>Date</code> | - |
+| min | The minimum date (inclusive) allowed for selection. | <code>Date</code> | - |
 | shortcut | The keyboard shortcut for the Action. | <code>[Keyboard.Shortcut](../keyboard.md#keyboard.shortcut)</code> | - |
 | type | Indicates what types of date components can be picked | <code>[Action.PickDate.Type](actions.md#action.pickdate.type)</code> | - |
 

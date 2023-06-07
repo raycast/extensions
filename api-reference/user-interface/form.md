@@ -603,6 +603,8 @@ export default function Command() {
 | defaultValue | The default value of the item. Keep in mind that `defaultValue` will be configured once per component lifecycle. This means that if a user changes the value, `defaultValue` won't be configured on re-rendering. | <code>Date</code> | - |
 | error | An optional error message to show the form item validation issues. If the `error` is present, the Form Item will be highlighted with red border and will show an error message on the right. | <code>string</code> | - |
 | info | An optional info message to describe the form item. It appears on the right side of the item with an info icon. When the icon is hovered, the info message is shown. | <code>string</code> | - |
+| max | The maximum date (inclusive) allowed for selection. | <code>Date</code> | - |
+| min | The minimum date (inclusive) allowed for selection. | <code>Date</code> | - |
 | storeValue | Indicates whether the value of the item should be persisted after submitting, and restored next time the form is rendered. | <code>boolean</code> | - |
 | title | The title displayed on the left side of the item. | <code>string</code> | - |
 | type | Indicates what types of date components can be picked | <code>[Form.DatePicker.Type](form.md#form.datepicker.type)</code> | - |

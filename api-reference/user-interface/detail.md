@@ -238,6 +238,7 @@ A Tag in a `Detail.Metadata.TagList`.
 | text<mark style="color:red;">*</mark> | The text of the tag. | <code>string</code> | - |
 | color | Changes the text color to the provided color and sets a transparent background with the same color. | <code>[Color.ColorLike](colors.md#color.colorlike)</code> | - |
 | icon | An optional icon in front of the text of the tag. | <code>[Image.ImageLike](icons-and-images.md#image.imagelike)</code> | - |
+| onAction | Callback that is triggered when the item is clicked. | <code>() => void</code> | - |
 
 ### Detail.Metadata.Separator
 
