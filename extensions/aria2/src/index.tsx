@@ -1,44 +1,70 @@
 import { useState, useEffect } from "react";
-import Aria2 from "aria2";
-import ws from "ws";
-import nodefetch from "node-fetch";
-import { getPreferenceValues } from "@raycast/api";
-import { Preferences, Task } from "./types";
-import { formatTasks } from "./utils/utils";
-import { TasksList } from "./components";
+import TasksList from "./components/TasksList";
+import useAria2 from "./hooks/useAria2";
+import { Task, Filter } from "./types";
+
+type State = {
+  isLoading: boolean;
+  searchText: string;
+  filter: Filter;
+  tasks: Task[];
+  visibleTasks: Task[];
+};
 
 export default function Command() {
-  const [tasks, setTasks] = useState<Task[]>([]);
+  const { fetchTasks, isConnected } = useAria2();
+  const [state, setState] = useState<State>({
+    filter: Filter.All,
+    isLoading: true,
+    searchText: "",
+    tasks: [],
+    visibleTasks: [],
+  });
+
   useEffect(() => {
-    async function fetchTasks() {
-      const options = getPreferenceValues<Preferences>();
-      const aria2 = new Aria2({ WebSocket: ws, fetch: nodefetch, ...options });
-      try {
-        await aria2.open();
-        console.log("Connection to aria2 server is open");
-        const fetchAndUpdateTasks = async () => {
-          const activeTaskResponse = await aria2.call("tellActive");
-          const waitingTaskResponse = await aria2.call("tellWaiting", 0, 99);
-          const stoppedTaskResponse = await aria2.call("tellStopped", 0, 99);
-          const activeTasks = formatTasks(activeTaskResponse);
-          const waitingTasks = formatTasks(waitingTaskResponse);
-          const stoppedTasks = formatTasks(stoppedTaskResponse);
-
-          const updatedTasks: Task[] = [...activeTasks, ...waitingTasks, ...stoppedTasks];
-          setTasks(updatedTasks);
-        };
-        await fetchAndUpdateTasks();
-        const interval = setInterval(fetchAndUpdateTasks, 1000);
-        return () => {
-          clearInterval(interval);
-        };
-      } catch (error) {
-        console.error("Failed to connect to aria2 server:", error);
+    const fetchData = async () => {
+      if (isConnected) {
+        const tasks = await fetchTasks();
+        setState((prevState) => ({
+          ...prevState,
+          tasks,
+          isLoading: false,
+        }));
       }
-    }
+    };
 
-    fetchTasks();
-  }, []);
+    fetchData();
+  }, [fetchTasks, isConnected]);
 
-  return <TasksList tasks={tasks} />;
+  useEffect(() => {
+    setState((prevState) => ({
+      ...prevState,
+      visibleTasks: filterTasks(prevState.filter, prevState.tasks),
+    }));
+  }, [state.filter, state.tasks]);
+
+  const filterTasks = (filter: Filter, tasks: Task[]): Task[] => {
+    // 根据当前状态筛选并更新可见任务列表
+    return tasks.filter((task) => {
+      if (filter === Filter.Active) {
+        return task.status === "active"; // 筛选正在下载的任务
+      } else if (filter === Filter.Waiting) {
+        return task.status === "waiting"; // 筛选正在等待的任务
+      } else if (filter === Filter.CompletePaused) {
+        return ["complete", "paused"].includes(task.status); // 筛选已完成/已停止的任务
+      } else {
+        return true;
+      }
+    });
+  };
+
+  const handleFilterChange = (filter: Filter) => {
+    setState((prevState) => ({
+      ...prevState,
+      filter,
+      visibleTasks: filterTasks(filter, prevState.tasks),
+    }));
+  };
+
+  return <TasksList tasks={state.visibleTasks} onFilterChange={handleFilterChange} />;
 }

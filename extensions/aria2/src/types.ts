@@ -7,6 +7,13 @@ enum Status {
   Removed = "removed",
 }
 
+enum Filter {
+  All = "all", // 全部任务
+  Active = "active", // 正在下载的任务
+  Waiting = "waiting", // 正在等待的任务
+  CompletePaused = "complete_paused", // 已完成/已停止的任务
+}
+
 interface File {
   completedLength: string;
   index: string;
@@ -63,5 +70,5 @@ interface Preferences {
   secure: boolean;
 }
 
-export { Status };
+export { Status, Filter };
 export type { TaskResponse, Task, Preferences };

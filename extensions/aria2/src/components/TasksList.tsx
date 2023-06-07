@@ -1,12 +1,31 @@
 import { List } from "@raycast/api";
-import { Task } from "../types";
+import { Task, Filter } from "../types";
 import { getTaskIcon } from "../utils/utils";
 
-function TasksList(props: { tasks: Task[] }) {
+type Props = {
+  tasks: Task[];
+  onFilterChange: (filter: Filter) => void;
+};
+
+const TasksList = ({ tasks, onFilterChange }: Props) => {
+  const handleFilterChange = (newValue: string) => {
+    const filter: Filter = newValue as Filter;
+    onFilterChange(filter);
+  };
+
   return (
-    <List>
-      {props.tasks.map((task) => {
+    <List
+      searchBarAccessory={
+        <List.Dropdown tooltip="Filter Tasks" onChange={handleFilterChange}>
+          {Object.values(Filter).map((filter) => (
+            <List.Dropdown.Item key={filter} title={filter} value={filter} />
+          ))}
+        </List.Dropdown>
+      }
+    >
+      {tasks.map((task) => {
         const accessories = [];
+
         if (task.status === "active" && task.progress !== "100.00%") {
           accessories.push(
             { tooltip: "Download Speed", text: ` ${task.downloadSpeed}`, icon: "🚀" },
@@ -32,6 +51,6 @@ function TasksList(props: { tasks: Task[] }) {
       })}
     </List>
   );
-}
+};
 
 export default TasksList;
