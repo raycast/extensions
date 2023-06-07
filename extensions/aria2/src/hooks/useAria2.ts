@@ -122,9 +122,9 @@ const useAria2 = (): Aria2Client => {
 
       try {
         await client.call("unpause", taskId);
-        console.log("Paused task:", taskId);
+        console.log("Restart task:", taskId);
       } catch (error) {
-        console.error("Failed to pause task:", error);
+        console.error("Failed to Restart task:", error);
       }
     },
     [client]
