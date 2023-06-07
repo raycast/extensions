@@ -1,39 +1,21 @@
-import {
-  ActionPanel,
-  Action,
-  List,
-  showToast,
-  Toast,
-  Icon,
-  Cache,
-} from '@raycast/api'
-import { useState, useEffect, useRef, useCallback } from 'react'
-import fetch, { AbortError } from 'node-fetch'
-import { URLSearchParams } from 'url'
+import { ActionPanel, Action, List, Icon } from '@raycast/api'
+import { useState } from 'react'
+import { useFetch } from '@raycast/utils'
 
-const cache = new Cache()
-
-type Arguments = {
-  query: string
-}
-
-export default function Command(props: { arguments: Arguments }) {
+export default function Command(props: { arguments: Arguments.Index }) {
   const [searchText, setSearchText] = useState(props.arguments.query ?? '')
-  const { state, search } = useSearch('autocomplete-extra', searchText)
+  const { isLoading, data } = useSearch('autocomplete-extra', searchText)
 
   return (
     <List
-      isLoading={state.isLoading}
-      onSearchTextChange={(text) => {
-        setSearchText(text)
-        search(text)
-      }}
+      isLoading={isLoading}
+      onSearchTextChange={setSearchText}
       searchBarPlaceholder="Search Urban Dictionary..."
       throttle
       searchText={searchText}
     >
-      <List.Section title="Suggestions" subtitle={state.results.length + ''}>
-        {state.results.map((searchResult) => (
+      <List.Section title="Suggestions" subtitle={`${data?.length ?? 0}`}>
+        {data?.map((searchResult) => (
           <SearchListItem
             key={searchResult.preview}
             searchResult={searchResult}
@@ -78,17 +60,17 @@ function SearchListItem({
 }
 
 function ItemDetails({ term }: { term: string }) {
-  const { state } = useSearch('define', term)
+  const { isLoading, data } = useSearch('define', term)
   return (
     <List
-      isLoading={state.isLoading}
+      isLoading={isLoading}
       searchBarPlaceholder={`Definitions for "${term}"`}
       isShowingDetail
-      enableFiltering
+      filtering={true}
       navigationTitle="Show Definitions"
     >
-      <List.Section title="Results" subtitle={state.results.length + ''}>
-        {state.results.map((result) => (
+      <List.Section title="Results" subtitle={`${data?.length ?? 0}`}>
+        {data?.map((result) => (
           <List.Item
             key={result.defid}
             title={result.definition}
@@ -163,73 +145,29 @@ ${makeLinks(result.definition)}
 type Endpoint = 'define' | 'autocomplete-extra'
 
 function useSearch<T extends Endpoint>(endpoint: T, initial = '') {
-  const [state, setState] = useState<SearchState<T>>({
-    results: [],
-    isLoading: true,
-  })
-  const cancelRef = useRef<AbortController | null>(null)
+  const params = new URLSearchParams({ term: initial })
+  return useFetch(
+    `https://api.urbandictionary.com/v0/${endpoint}?${params.toString()}`,
+    {
+      method: 'GET',
+      parseResponse: async (response) => {
+        const json = (await response.json()) as UrbanResponseList<
+          typeof endpoint
+        >
 
-  const search = useCallback(
-    async function search(searchText: string) {
-      cancelRef.current?.abort()
-
-      const cacheKey = `${endpoint}.${searchText}`
-      if (cache.has(cacheKey)) {
-        setState({
-          results: JSON.parse(cache.get(cacheKey)!),
-          isLoading: false,
-        })
-        return
-      }
-
-      cancelRef.current = new AbortController()
-      setState((oldState) => ({
-        ...oldState,
-        isLoading: true,
-      }))
-      try {
-        const results = await performSearch(
-          endpoint,
-          searchText,
-          cancelRef.current.signal
-        )
-        setState({
-          results: results,
-          isLoading: false,
-        })
-        cache.set(cacheKey, JSON.stringify(results))
-      } catch (error) {
-        setState((oldState) => ({
-          ...oldState,
-          isLoading: false,
-        }))
-
-        if (error instanceof AbortError) {
-          return
+        if (!response.ok) {
+          throw new Error(response.statusText)
         }
 
-        console.error('search error', error)
-        showToast({
-          style: Toast.Style.Failure,
-          title: 'Could not perform search',
-          message: String(error),
-        })
-      }
-    },
-    [cancelRef, setState, endpoint]
-  )
+        if ('list' in json) {
+          return json.list as UrbanResponseItem<typeof endpoint>[]
+        }
 
-  useEffect(() => {
-    search(initial)
-    return () => {
-      cancelRef.current?.abort()
+        return json.results as UrbanResponseItem<typeof endpoint>[]
+      },
+      keepPreviousData: true,
     }
-  }, [initial])
-
-  return {
-    state: state,
-    search: search,
-  }
+  )
 }
 
 type UrbanAutocompleteResponseItem = {
@@ -257,38 +195,3 @@ type UrbanResponseItem<T extends Endpoint> = T extends 'define'
 type UrbanResponseList<T extends Endpoint> = T extends 'define'
   ? { list: UrbanDefineResponseItem[] }
   : { results: UrbanAutocompleteResponseItem[] }
-
-async function performSearch<T extends Endpoint>(
-  endpoint: T,
-  searchText: string,
-  signal: AbortSignal
-): Promise<UrbanResponseItem<T>[]> {
-  const params = new URLSearchParams()
-  params.append('term', searchText)
-
-  const response = await fetch(
-    `https://api.urbandictionary.com/v0/${endpoint}?${params.toString()}`,
-    {
-      method: 'get',
-      // @ts-expect-error -- not me
-      signal: signal,
-    }
-  )
-
-  if (!response.ok) {
-    throw new Error(response.statusText)
-  }
-
-  const json = (await response.json()) as UrbanResponseList<typeof endpoint>
-
-  if ('list' in json) {
-    return json.list as UrbanResponseItem<typeof endpoint>[]
-  }
-
-  return json.results as UrbanResponseItem<typeof endpoint>[]
-}
-
-interface SearchState<T extends Endpoint> {
-  results: UrbanResponseItem<T>[]
-  isLoading: boolean
-}
