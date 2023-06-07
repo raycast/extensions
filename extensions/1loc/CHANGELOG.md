@@ -1,6 +1,6 @@
 # 1loc Changelog
 
-## [Fixes & Bits] - 2023-05-18
+## [Fixes & Bits] - {PR_MERGE_DATE}
 
 - Fix broken URL for fetching data
 - Flag GitHub Access Token as required setting
