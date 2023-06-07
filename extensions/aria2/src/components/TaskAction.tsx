@@ -1,13 +1,24 @@
-import { Action, Icon } from "@raycast/api";
+import { ActionPanel, Action, Icon } from "@raycast/api";
 
-function TaskAction(props: { onDelete: () => void }) {
+type props = {
+  infoHash: string;
+  onRemove?: () => void;
+  onPause?: () => void;
+  onStart?: () => void;
+};
+
+function TaskAction({ infoHash, onRemove, onPause, onStart }: props) {
   return (
-    <Action
-      icon={Icon.Trash}
-      title="Delete Download Task"
-      shortcut={{ modifiers: ["ctrl"], key: "d" }}
-      onAction={props.onDelete}
-    />
+    <ActionPanel title="Actions">
+      <Action.CopyToClipboard
+        title="Copy Link"
+        content={`magnet:?xt=urn:btih:${infoHash}`}
+        shortcut={{ modifiers: ["cmd"], key: "c" }}
+      />
+      <Action title="Start" icon={Icon.Play} shortcut={{ modifiers: ["cmd"], key: "s" }} onAction={onStart} />
+      <Action title="Pause" icon={Icon.Pause} shortcut={{ modifiers: ["cmd"], key: "p" }} onAction={onPause} />
+      <Action title="Remove" icon={Icon.Trash} shortcut={{ modifiers: ["cmd"], key: "r" }} onAction={onRemove} />
+    </ActionPanel>
   );
 }
 
