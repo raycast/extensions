@@ -1,6 +1,6 @@
 # Lark Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2023-06-07
 
 - Added slide type icon
 - Enhanced error tips
