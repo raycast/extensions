@@ -10,9 +10,7 @@ http://example.com/file.zip
 ftp://example.com/files/document.pdf
 ...`;
 
-  const [taskLinkArray, setTaskLinkArray] = useState<string[]>([
-    "magnet:?xt=urn:btih:cab53546444eac30036a1e0befd5b57982b2e3ad",
-  ]);
+  const [taskLinkArray, setTaskLinkArray] = useState<string[]>([]);
   const [error, setError] = useState<string | undefined>(undefined);
 
   const handleChange = (newValue: string) => {
