@@ -5,7 +5,7 @@ For now we upload this file manually and update the date here
 
 const lastUpdated = "2023-06-06T20:16:30.458Z";
 
-const documentationBase = 'https://ui.shadcn.com/docs'
+const documentationBase = "https://ui.shadcn.com/docs";
 
 export default [
   {

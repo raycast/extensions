@@ -8,11 +8,9 @@ export default function Command() {
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search components...">
-      <List.Section title="Components">
-        {data?.map((searchResult) => (
-          <SearchListItem key={searchResult.name} searchResult={searchResult} />
-        ))}
-      </List.Section>
+      {data?.map((searchResult) => (
+        <SearchListItem key={searchResult.name} searchResult={searchResult} />
+      ))}
     </List>
   );
 }

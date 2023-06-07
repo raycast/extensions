@@ -49,11 +49,9 @@ export default function Command() {
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search examples...">
-      <List.Section title="Examples">
-        {data.map((searchResult: SearchResult) => (
-          <SearchListItem key={searchResult.name} searchResult={searchResult} />
-        ))}
-      </List.Section>
+      {data.map((searchResult: SearchResult) => (
+        <SearchListItem key={searchResult.name} searchResult={searchResult} />
+      ))}
     </List>
   );
 }
