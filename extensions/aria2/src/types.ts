@@ -8,10 +8,10 @@ enum Status {
 }
 
 enum Filter {
-  All = "all", // 全部任务
-  Active = "active", // 正在下载的任务
-  Waiting = "waiting", // 正在等待的任务
-  CompletePaused = "complete_paused", // 已完成/已停止的任务
+  All = "All", // 全部任务
+  Active = "Active", // 正在下载的任务
+  Waiting = "Waiting", // 正在等待的任务
+  CompletePaused = "Complete or Paused", // 已完成/已停止的任务
 }
 
 interface File {
