@@ -4,8 +4,8 @@ function DeleteTaskAction(props: { onDelete: () => void }) {
   return (
     <Action
       icon={Icon.Trash}
-      title="Delete Todo"
-      shortcut={{ modifiers: ["ctrl"], key: "x" }}
+      title="Delete Download Task"
+      shortcut={{ modifiers: ["ctrl"], key: "d" }}
       onAction={props.onDelete}
     />
   );
