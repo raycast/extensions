@@ -3,15 +3,23 @@ import { useCachedPromise } from "@raycast/utils";
 import fetch, { type Response } from "node-fetch";
 import yaml from "js-yaml";
 
+const onRequestError = async () => {
+  await showToast({
+    style: Toast.Style.Failure,
+    title: "Request failed 🔴",
+    message: "Please try again later 🙏",
+  });
+};
 export default function Command() {
   const { isLoading, data } = useCachedPromise(
     async (url: string) => {
       const response = await fetch(url);
       return await parseFetchResponse(response);
     },
-    ["https://ui.shadcn.com/api/components"],
+    ["https://ui.shadcn.com/api/component"],
     {
       keepPreviousData: true,
+      onError: onRequestError,
     }
   );
 
@@ -33,6 +41,7 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
     [`https://raw.githubusercontent.com/shadcn/ui/main/apps/www/content/docs/components/${searchResult.component}.mdx`],
     {
       keepPreviousData: true,
+      onError: onRequestError,
     }
   );
 
@@ -127,11 +136,6 @@ async function parseFetchDetailResponse(response: Response) {
   const mdx = await response.text();
 
   if (!response.ok) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Request failed 🔴",
-      message: "Please try again later 🙏",
-    });
     throw new Error(response.statusText);
   }
 
@@ -147,11 +151,6 @@ async function parseFetchResponse(response: Response) {
     | { code: string; message: string };
 
   if (!response.ok || "message" in json) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Request failed 🔴",
-      message: "Please try again later 🙏",
-    });
     throw new Error("message" in json ? json.message : response.statusText);
   }
 
