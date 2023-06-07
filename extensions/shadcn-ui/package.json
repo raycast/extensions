@@ -48,11 +48,13 @@
     "@octokit/types": "^9.2.3",
     "@raycast/api": "^1.52.1",
     "@raycast/utils": "^1.4.8",
+    "js-yaml": "^4.1.0",
     "node-fetch": "^3.3.1",
     "octokit": "^2.0.19"
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.5",
+    "@types/js-yaml": "^4.0.5",
     "@types/node": "18.8.3",
     "@types/react": "18.0.9",
     "eslint": "^7.32.0",
