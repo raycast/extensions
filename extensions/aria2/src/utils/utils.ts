@@ -1,6 +1,6 @@
 import { Status, TaskResponse, Task } from "../types";
 import { Color, Icon } from "@raycast/api";
-export function getTaskIcon(status: Status): Icon {
+export function getTaskIcon(status: Status): { source: Icon; tintColor: Color } {
   switch (status) {
     case "active":
       return {
