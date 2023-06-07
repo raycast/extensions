@@ -132,71 +132,69 @@ const Modify = (props: { task: Task }) => {
   };
 
   return (
-    <>
-      <Form
-        actions={
-          <ActionPanel>
-            <Action.SubmitForm onSubmit={onSubmit} />
-          </ActionPanel>
-        }
-      >
-        <Form.TextField
-          id="description"
-          key="description"
-          title="Description"
-          placeholder="task description"
-          defaultValue={task.description}
-          error={descriptionError}
-          onChange={dropDescriptionErrorIfNeeded}
-          onBlur={(event) => {
-            if (event.target.value?.length == 0) {
-              setdescriptionError("A task must at least have a description.");
-            } else {
-              dropDescriptionErrorIfNeeded();
-            }
-          }}
-        />
-        <Form.TextField
-          id="project"
-          key="project"
-          title="Project"
-          placeholder="project name"
-          defaultValue={task.project ? task.project : ""}
-          info="leave empty to delete or not add a new project"
-        />
-        <Form.TextField
-          id="tags"
-          title="Tags"
-          placeholder="-tag1,+tag2,+tag3"
-          defaultValue={task.tags ? formatTags(task.tags) : ""}
-          info="add comma saparated list of tags. +tag to add and -tag to remove"
-          error={tagsError}
-          onChange={dropTagsErrorIfNeeded}
-          onBlur={(event) => {
-            if (event.target.value?.includes(" ")) {
-              setTagsError("spaces are not allowed. format: tag1,tag2,tag3");
-            } else {
-              dropTagsErrorIfNeeded();
-            }
-          }}
-        />
-        <Form.TextField
-          id="due"
-          title="Due Date"
-          placeholder="Y-M-D or Taskwarrior shorthand"
-          defaultValue={initialDueDate}
-          info="Enter due date in Y-M-D format or Taskwarrior shorthand (e.g., 'today', 'tomorrow', '+3d', '+1w')"
-          error={dueDateError}
-          onChange={dropDueDateErrorIfNeeded}
-        />
-        <Form.Dropdown id="priority" title="Priority" value={selectedPriority} onChange={setSelectedPriority}>
-          <Form.Dropdown.Item value="High" title="High" />
-          <Form.Dropdown.Item value="Medium" title="Medium" />
-          <Form.Dropdown.Item value="Low" title="Low" />
-          <Form.Dropdown.Item value="None" title="None" />
-        </Form.Dropdown>
-      </Form>
-    </>
+    <Form
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm onSubmit={onSubmit} />
+        </ActionPanel>
+      }
+    >
+      <Form.TextField
+        id="description"
+        key="description"
+        title="Description"
+        placeholder="task description"
+        defaultValue={task.description}
+        error={descriptionError}
+        onChange={dropDescriptionErrorIfNeeded}
+        onBlur={(event) => {
+          if (event.target.value?.length == 0) {
+            setdescriptionError("A task must at least have a description.");
+          } else {
+            dropDescriptionErrorIfNeeded();
+          }
+        }}
+      />
+      <Form.TextField
+        id="project"
+        key="project"
+        title="Project"
+        placeholder="project name"
+        defaultValue={task.project ? task.project : ""}
+        info="leave empty to delete or not add a new project"
+      />
+      <Form.TextField
+        id="tags"
+        title="Tags"
+        placeholder="-tag1,+tag2,+tag3"
+        defaultValue={task.tags ? formatTags(task.tags) : ""}
+        info="add comma saparated list of tags. +tag to add and -tag to remove"
+        error={tagsError}
+        onChange={dropTagsErrorIfNeeded}
+        onBlur={(event) => {
+          if (event.target.value?.includes(" ")) {
+            setTagsError("spaces are not allowed. format: tag1,tag2,tag3");
+          } else {
+            dropTagsErrorIfNeeded();
+          }
+        }}
+      />
+      <Form.TextField
+        id="due"
+        title="Due Date"
+        placeholder="Y-M-D or Taskwarrior shorthand"
+        defaultValue={initialDueDate}
+        info="Enter due date in Y-M-D format or Taskwarrior shorthand (e.g., 'today', 'tomorrow', '+3d', '+1w')"
+        error={dueDateError}
+        onChange={dropDueDateErrorIfNeeded}
+      />
+      <Form.Dropdown id="priority" title="Priority" value={selectedPriority} onChange={setSelectedPriority}>
+        <Form.Dropdown.Item value="High" title="High" />
+        <Form.Dropdown.Item value="Medium" title="Medium" />
+        <Form.Dropdown.Item value="Low" title="Low" />
+        <Form.Dropdown.Item value="None" title="None" />
+      </Form.Dropdown>
+    </Form>
   );
 };
 

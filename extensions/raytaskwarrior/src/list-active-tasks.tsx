@@ -115,6 +115,7 @@ const ListActiveTabs = () => {
                 <Action
                   key="delete"
                   title="Delete"
+                  style={Action.Style.Destructive}
                   shortcut={{ modifiers: ["ctrl"], key: "x" }}
                   onAction={() => deleteAndUpdateList(task.uuid)}
                 />
