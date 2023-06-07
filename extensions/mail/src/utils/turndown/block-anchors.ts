@@ -11,7 +11,7 @@ export const blockAnchors = (turndownService: TurndownService) => {
       }
 
       const descendants = node.querySelectorAll("*");
-      return Array.from(descendants).some((innerNode: HTMLElement) => {
+      return Array.from(descendants).some((innerNode) => {
         const isBlock = blockRegex.test(innerNode.nodeName);
         return isBlock;
       });

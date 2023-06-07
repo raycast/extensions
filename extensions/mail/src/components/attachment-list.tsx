@@ -74,7 +74,7 @@ export const AttachmentList = (props: AttachmentListProps) => {
 
 type SaveAttachmentProps = { mailbox: Mailbox; message: Message; attachment: Attachment };
 
-const SaveAttachment = ({ mailbox, message, attachment }: SaveAttachmentProps): JSX.Element => {
+const SaveAttachment = ({ mailbox, message, attachment }: SaveAttachmentProps) => {
   const [isSavingAttachment, setIsSavingAttachment] = useState(false);
 
   return (

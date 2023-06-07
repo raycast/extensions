@@ -2,7 +2,7 @@ import { useState, useCallback, useRef } from "react";
 import { List, showToast, Toast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 
-import { Account, Mailbox, Message } from "./types";
+import { Account, Mailbox } from "./types";
 import { MessageListItem } from "./components";
 import { getAccounts } from "./scripts/accounts";
 import { getMessages } from "./scripts/messages";
@@ -22,7 +22,7 @@ export default function SeeRecentMail() {
     }
 
     const messages = await Promise.all(
-      accounts.map((account: Account) => {
+      accounts.map((account) => {
         const mailbox = account.mailboxes.find(isInbox);
         if (mailbox) {
           return getMessages(account, mailbox, 10, true);
@@ -32,7 +32,7 @@ export default function SeeRecentMail() {
       })
     );
 
-    return accounts.map((account: Account, index: number) => {
+    return accounts.map((account, index) => {
       account.messages = messages[index]?.slice(0, 5);
       return account;
     });
@@ -60,7 +60,7 @@ export default function SeeRecentMail() {
         optimisticUpdate: (data) => {
           if (!data) return data;
 
-          return data.map((account: Account) => {
+          return data.map((account) => {
             const messages = Cache.getMessages(account.id, mailbox.name);
             account.messages = messages.filter((x) => !x.read);
             return account;
@@ -71,8 +71,8 @@ export default function SeeRecentMail() {
   }, []);
 
   const numMessages = accounts
-    ?.filter((a: Account) => account === undefined || a.id === account.id)
-    .reduce((a: number, account: Account) => a + (account.messages ? account.messages.length : 0), 0);
+    ?.filter((a) => account === undefined || a.id === account.id)
+    .reduce((a, account) => a + (account.messages ? account.messages.length : 0), 0);
 
   return (
     <List
@@ -88,7 +88,7 @@ export default function SeeRecentMail() {
         >
           <List.Dropdown.Item title="All Accounts" value="" />
           <List.Dropdown.Section>
-            {accounts?.map((account: Account) => (
+            {accounts?.map((account) => (
               <List.Dropdown.Item key={account.id} title={account.name} value={account.id} />
             ))}
           </List.Dropdown.Section>
@@ -97,12 +97,12 @@ export default function SeeRecentMail() {
     >
       {numMessages && numMessages > 0 ? (
         accounts
-          ?.filter((a: Account) => account === undefined || a.id === account.id)
-          .map((account: Account) => {
+          ?.filter((a) => account === undefined || a.id === account.id)
+          .map((account) => {
             const recentMailbox = account.mailboxes.find(isInbox);
             return recentMailbox ? (
               <List.Section key={account.id} title={account.name} subtitle={account.email}>
-                {account.messages?.map((message: Message) => (
+                {account.messages?.map((message) => (
                   <MessageListItem
                     key={message.id}
                     mailbox={recentMailbox}

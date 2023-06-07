@@ -5,7 +5,7 @@ import { useCachedPromise } from "@raycast/utils";
 import { MessageListItem } from "./components";
 import { getAccounts } from "./scripts/accounts";
 import { getMessages } from "./scripts/messages";
-import { Account, Mailbox, Message } from "./types";
+import { Account, Mailbox } from "./types";
 import { invoke } from "./utils";
 import { isImportantMailbox } from "./utils/mailbox";
 import { Cache } from "./utils/cache";
@@ -22,7 +22,7 @@ export default function SeeImportantMail() {
     }
 
     const messages = await Promise.all(
-      accounts.map((account: Account) => {
+      accounts.map((account) => {
         const mailbox = account.mailboxes.find(isImportantMailbox);
         if (mailbox) {
           return getMessages(account, mailbox);
@@ -32,7 +32,7 @@ export default function SeeImportantMail() {
       })
     );
 
-    return accounts.map((account: Account, index: number) => {
+    return accounts.map((account, index) => {
       account.messages = messages[index];
       return account;
     });
@@ -62,7 +62,7 @@ export default function SeeImportantMail() {
         optimisticUpdate: (data) => {
           if (!data) return data;
 
-          return data.map((account: Account) => {
+          return data.map((account) => {
             const messages = Cache.getMessages(account.id, mailbox.name);
             account.messages = messages;
             return account;
@@ -73,8 +73,8 @@ export default function SeeImportantMail() {
   }, []);
 
   const numMessages = accounts
-    ?.filter((a: Account) => account === undefined || a.id === account.id)
-    .reduce((a: number, account: Account) => a + (account.messages ? account.messages.length : 0), 0);
+    ?.filter((a) => account === undefined || a.id === account.id)
+    .reduce((a, account) => a + (account.messages ? account.messages.length : 0), 0);
 
   return (
     <List
@@ -90,7 +90,7 @@ export default function SeeImportantMail() {
         >
           <List.Dropdown.Item title="All Accounts" value="" />
           <List.Dropdown.Section>
-            {accounts?.map((account: Account) => (
+            {accounts?.map((account) => (
               <List.Dropdown.Item key={account.id} title={account.name} value={account.id} />
             ))}
           </List.Dropdown.Section>
@@ -99,12 +99,12 @@ export default function SeeImportantMail() {
     >
       {numMessages && numMessages > 0 ? (
         accounts
-          ?.filter((a: Account) => account === undefined || a.id === account.id)
-          .map((account: Account) => {
+          ?.filter((a) => account === undefined || a.id === account.id)
+          .map((account) => {
             const importantMailbox = account.mailboxes.find(isImportantMailbox);
             return importantMailbox ? (
               <List.Section key={account.id} title={account.name} subtitle={account.email}>
-                {account.messages?.map((message: Message) => (
+                {account.messages?.map((message) => (
                   <MessageListItem
                     key={message.id}
                     mailbox={importantMailbox}

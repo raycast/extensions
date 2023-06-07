@@ -3,7 +3,7 @@ import { List, Icon } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 
 import { MessageActions } from "./message-actions";
-import { Account, Mailbox, Message, MessageProps } from "../types";
+import { Account, Mailbox, MessageProps } from "../types";
 import { getMessages } from "../scripts/messages";
 import { shortenText, toRelative, titleCase, invoke } from "../utils";
 import { MailIcon } from "../utils/presets";
@@ -72,7 +72,7 @@ export const MessageList = (props: MessageListProps) => {
         </List.Dropdown>
       }
     >
-      {messages?.map((message: Message, index: number) => (
+      {messages?.map((message, index) => (
         <MessageListItem
           key={index}
           mailbox={mailbox}
@@ -87,8 +87,9 @@ export const MessageList = (props: MessageListProps) => {
   );
 };
 
-export const MessageListItem = (props: MessageProps): JSX.Element => {
+export const MessageListItem = (props: MessageProps) => {
   const { message } = props;
+
   const attachments = `${message.numAttachments} Attachment${message.numAttachments > 1 ? "s" : ""}`;
 
   return (
