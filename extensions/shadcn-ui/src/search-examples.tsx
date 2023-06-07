@@ -1,0 +1,72 @@
+import {ActionPanel, Action, List, showToast, Toast} from "@raycast/api";
+import { useEffect, useState } from "react";
+import { Octokit } from "octokit";
+
+interface SearchResult {
+  name: string;
+  url: string;
+}
+
+export default function Command() {
+  const [data, setData] = useState<SearchResult[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const getData = async () => {
+      try {
+        const octokit = new Octokit();
+
+        const res = await octokit.rest.repos.getContent({
+          mediaType: {
+            format: "json",
+          },
+          owner: "shadcn",
+          repo: "ui",
+          path: "apps/www/app/examples",
+        }) as { data: SearchResult[] };
+
+        setData(res.data.filter((res: { name: string }) => !res.name.includes('.tsx')).map((e) => ({
+          name: e.name.charAt(0).toUpperCase() + e.name.slice(1),
+          url: `https://ui.shadcn.com/examples/${e.name}`
+            })),
+        );
+        setIsLoading(false)
+      } catch (e) {
+        setIsLoading(false)
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Request failed 🔴",
+          message: "Please try again later 🙏",
+        });
+      }
+    };
+
+    getData();
+  }, []);
+
+  return (
+    <List isLoading={isLoading} searchBarPlaceholder="Search examples...">
+      <List.Section title="Examples">
+        {data.map((searchResult: SearchResult ) => (
+          <SearchListItem key={searchResult.name} searchResult={searchResult} />
+        ))}
+      </List.Section>
+    </List>
+  );
+}
+
+function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
+  return (
+    <List.Item
+      title={searchResult.name}
+      icon="shadcn-icon.png"
+      actions={
+        <ActionPanel>
+          <ActionPanel.Section>
+            <Action.OpenInBrowser title="Open in Browser" url={searchResult.url} />
+          </ActionPanel.Section>
+        </ActionPanel>
+      }
+    />
+  );
+}
