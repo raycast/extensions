@@ -1,10 +1,19 @@
 import { ActionPanel, Action, List, showToast, Toast } from "@raycast/api";
-import { useFetch, Response } from "@raycast/utils";
+import { useCachedPromise } from "@raycast/utils";
+import fetch, { type Response } from "node-fetch";
 
 export default function Command() {
-  const { data, isLoading } = useFetch("https://ui.shadcn.com/api/components", {
-    parseResponse: parseFetchResponse,
-  });
+  const { isLoading, data } = useCachedPromise(
+    async (url: string) => {
+      const response = await fetch(url);
+      return await parseFetchResponse(response);
+    },
+    ["https://ui.shadcn.com/api/components"],
+    {
+      // to make sure the screen isn't flickering when the searchText changes
+      keepPreviousData: true,
+    }
+  );
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search components...">

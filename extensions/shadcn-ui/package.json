@@ -1,4 +1,4 @@
-                    {
+{
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "shadcn-ui",
   "title": "Shadcn/ui",
@@ -48,6 +48,7 @@
     "@octokit/types": "^9.2.3",
     "@raycast/api": "^1.52.1",
     "@raycast/utils": "^1.4.8",
+    "node-fetch": "^3.3.1",
     "octokit": "^2.0.19"
   },
   "devDependencies": {
