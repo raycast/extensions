@@ -16,6 +16,18 @@ npm install --save @raycast/utils
 
 ## Changelog
 
+### v1.7.1
+
+Change the signature of [`getProgressIcon`](./icons/getProgressIcon.md) to accept a `Color` in addition to a string for the `options.background`.
+
+### v1.7.0
+
+Change the signature of [`getProgressIcon`](./icons/getProgressIcon.md) to accept a `Color` in addition to a string for the `color`.
+
+### v1.6.0
+
+Added the [`useAI`](./react-hooks/useAI.md) hook.
+
 ### v1.4.0
 
 Added the [`useSQL`](./react-hooks/useSQL.md) hook.
