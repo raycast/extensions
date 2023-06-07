@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
-import TasksList from "./components/TasksList";
+import { TasksList } from "./components";
 import useAria2 from "./hooks/useAria2";
 import { Task, Filter } from "./types";
 
@@ -45,5 +45,22 @@ export default function Command() {
     setFilter(filter);
   }, []);
 
-  return <TasksList isLoading={isLoading} tasks={filteredTasks} onFilterChange={handleFilterChange} />;
+  const handleActionSuccess = useCallback(() => {
+    const fetchData = async () => {
+      setIsLoading(true);
+      const tasks = await fetchTasks();
+      setTasks(tasks);
+      setIsLoading(false);
+    };
+    fetchData();
+  }, [fetchTasks]);
+
+  return (
+    <TasksList
+      isLoading={isLoading}
+      tasks={filteredTasks}
+      onFilterChange={handleFilterChange}
+      onActionSuccess={handleActionSuccess}
+    />
+  );
 }

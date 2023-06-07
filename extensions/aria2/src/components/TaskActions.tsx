@@ -5,9 +5,10 @@ import useAria2 from "../hooks/useAria2";
 type Props = {
   gid: string;
   infoHash: string;
+  onActionSuccess: () => void;
 };
 
-function TaskActions({ gid, infoHash }: Props) {
+function TaskActions({ gid, infoHash, onActionSuccess }: Props) {
   const { pauseTask, removeTask, restartTask } = useAria2();
 
   return (
@@ -44,6 +45,7 @@ function TaskActions({ gid, infoHash }: Props) {
         icon={Icon.Trash}
         shortcut={{ modifiers: ["cmd"], key: "r" }}
         onAction={() => {
+          console.log("gid=>", gid);
           removeTask(gid);
         }}
       />
