@@ -6,11 +6,11 @@ Raycast extension to work with [shadcn/ui](https://ui.shadcn.com/)
 Build your component library.
 Beautifully designed components that you can copy and paste into your apps. Accessible. Customizable. Open Source.
 
-![shadcn/ui home](metadata/shadcn-ui-home.png)
+![shadcn/ui home](assets/shadcn-ui-home.png)
 
 ## How it works
 
-![demo gif](metadata/demo.gif)
+![demo gif](assets/demo.gif)
 
 ## Support
 
