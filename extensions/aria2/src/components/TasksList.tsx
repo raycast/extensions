@@ -1,13 +1,14 @@
-import { List } from "@raycast/api";
+import { List, Spinner } from "@raycast/api";
 import { Task, Filter } from "../types";
 import { getTaskIcon } from "../utils/utils";
 
 type Props = {
+  isLoading: boolean;
   tasks: Task[];
   onFilterChange: (filter: Filter) => void;
 };
 
-const TasksList = ({ tasks, onFilterChange }: Props) => {
+const TasksList = ({ isLoading, tasks, onFilterChange }: Props) => {
   const handleFilterChange = (newValue: string) => {
     const filter: Filter = newValue as Filter;
     onFilterChange(filter);
@@ -23,32 +24,36 @@ const TasksList = ({ tasks, onFilterChange }: Props) => {
         </List.Dropdown>
       }
     >
-      {tasks.map((task) => {
-        const accessories = [];
+      {isLoading ? (
+        <List.Item id="loading" title="Loading..." icon={Spinner} />
+      ) : (
+        tasks.map((task) => {
+          const accessories = [];
 
-        if (task.status === "active" && task.progress !== "100.00%") {
-          accessories.push(
-            { tooltip: "Download Speed", text: ` ${task.downloadSpeed}`, icon: "🚀" },
-            { tooltip: "Remaining Time", text: `${task.remainingTime}`, icon: "🕐" }
+          if (task.status === "active" && task.progress !== "100.00%") {
+            accessories.push(
+              { tooltip: "Download Speed", text: ` ${task.downloadSpeed}`, icon: "🚀" },
+              { tooltip: "Remaining Time", text: `${task.remainingTime}`, icon: "🕐" }
+            );
+          }
+
+          accessories.push({ tooltip: "Progress", text: ` ${task.progress}`, icon: "⏳" });
+
+          return (
+            <List.Item
+              icon={getTaskIcon(task.status)}
+              key={task.gid}
+              id={task.gid}
+              title={{
+                tooltip: "Task Name",
+                value: task.fileName,
+              }}
+              subtitle={{ tooltip: "File Size", value: `💾${task.fileSize}` }}
+              accessories={accessories}
+            />
           );
-        }
-
-        accessories.push({ tooltip: "Progress", text: ` ${task.progress}`, icon: "⏳" });
-
-        return (
-          <List.Item
-            icon={getTaskIcon(task.status)}
-            key={task.gid}
-            id={task.gid}
-            title={{
-              tooltip: "Task Name",
-              value: task.fileName,
-            }}
-            subtitle={{ tooltip: "File Size", value: `💾${task.fileSize}` }}
-            accessories={accessories}
-          />
-        );
-      })}
+        })
+      )}
     </List>
   );
 };

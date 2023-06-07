@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Aria2, { Aria2Options } from "aria2";
 import ws from "ws";
 import nodefetch from "node-fetch";
@@ -44,7 +44,7 @@ const useAria2 = (): Aria2Client => {
     };
   }, []);
 
-  const fetchTasks = async (): Promise<Task[]> => {
+  const fetchTasks = useCallback(async (): Promise<Task[]> => {
     if (!client) {
       throw new Error("Aria2 client is not available");
     }
@@ -63,46 +63,55 @@ const useAria2 = (): Aria2Client => {
       console.error("Failed to fetch tasks:", error);
       return [];
     }
-  };
+  }, [client]);
 
-  const addDownloadTask = async (url: string): Promise<void> => {
-    if (!client) {
-      throw new Error("Aria2 client is not available");
-    }
+  const addDownloadTask = useCallback(
+    async (url: string): Promise<void> => {
+      if (!client) {
+        throw new Error("Aria2 client is not available");
+      }
 
-    try {
-      await client.call("addUri", [url]);
-      console.log("Added download task:", url);
-    } catch (error) {
-      console.error("Failed to add download task:", error);
-    }
-  };
+      try {
+        await client.call("addUri", [url]);
+        console.log("Added download task:", url);
+      } catch (error) {
+        console.error("Failed to add download task:", error);
+      }
+    },
+    [client]
+  );
 
-  const removeTask = async (taskId: string): Promise<void> => {
-    if (!client) {
-      throw new Error("Aria2 client is not available");
-    }
+  const removeTask = useCallback(
+    async (taskId: string): Promise<void> => {
+      if (!client) {
+        throw new Error("Aria2 client is not available");
+      }
 
-    try {
-      await client.call("remove", taskId);
-      console.log("Removed task:", taskId);
-    } catch (error) {
-      console.error("Failed to remove task:", error);
-    }
-  };
+      try {
+        await client.call("remove", taskId);
+        console.log("Removed task:", taskId);
+      } catch (error) {
+        console.error("Failed to remove task:", error);
+      }
+    },
+    [client]
+  );
 
-  const pauseTask = async (taskId: string): Promise<void> => {
-    if (!client) {
-      throw new Error("Aria2 client is not available");
-    }
+  const pauseTask = useCallback(
+    async (taskId: string): Promise<void> => {
+      if (!client) {
+        throw new Error("Aria2 client is not available");
+      }
 
-    try {
-      await client.call("pause", taskId);
-      console.log("Paused task:", taskId);
-    } catch (error) {
-      console.error("Failed to pause task:", error);
-    }
-  };
+      try {
+        await client.call("pause", taskId);
+        console.log("Paused task:", taskId);
+      } catch (error) {
+        console.error("Failed to pause task:", error);
+      }
+    },
+    [client]
+  );
 
   return {
     client,
