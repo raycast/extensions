@@ -1,6 +1,6 @@
 # Visual Studio Code Search Recent Projects Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2023-06-07
 
 - Add `Show Installed Extensions` command
 - Add `Install Extension` command
