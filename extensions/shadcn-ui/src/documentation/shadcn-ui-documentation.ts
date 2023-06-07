@@ -5,6 +5,8 @@ For now we upload this file manually and update the date here
 
 const lastUpdated = "2023-06-06T20:16:30.458Z";
 
+const documentationBase = 'https://ui.shadcn.com/docs'
+
 export default [
   {
     name: "Getting Started",
@@ -12,27 +14,27 @@ export default [
       {
         doc: "introduction",
         name: "Introduction",
-        path: "",
+        path: `${documentationBase}/introduction`,
       },
       {
         doc: "installation",
         name: "Installation",
-        path: "/installation",
+        path: `${documentationBase}/installation`,
       },
       {
         doc: "theming",
         name: "Theming",
-        path: "theming",
+        path: `${documentationBase}/theming`,
       },
       {
         doc: "cli",
         name: "CLI",
-        path: "cli",
+        path: `${documentationBase}/cli`,
       },
       {
         doc: "typography",
         name: "Typography",
-        path: "typography",
+        path: `${documentationBase}/components/typography`,
       },
     ],
   },
@@ -42,7 +44,7 @@ export default [
       {
         doc: "figma",
         name: "Figma",
-        path: "figma",
+        path: `${documentationBase}/figma`,
       },
     ],
   },
@@ -52,7 +54,7 @@ export default [
       {
         doc: "react-hook-form",
         name: "React Hook Form",
-        path: "forms/react-hook-form",
+        path: `${documentationBase}/forms/react-hook-form`,
       },
     ],
   },
