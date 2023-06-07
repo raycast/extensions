@@ -14,11 +14,11 @@ export default function Command() {
     }, 1000);
   }, []);
 
-  if(isLoading){
+  if (isLoading) {
     refreshTimers();
   }
   const prefs = getPreferenceValues<Preferences>();
-  if ((timers == undefined || timers.length == 0 || timers.length == undefined) && prefs.showMenubarIconOnlyOnRun){
+  if ((timers == undefined || timers.length == 0 || timers.length == undefined) && prefs.showMenubarIconOnlyOnRun) {
     return null;
   }
 
