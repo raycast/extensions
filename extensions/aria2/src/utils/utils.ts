@@ -1,21 +1,42 @@
 import { Status, TaskResponse, Task } from "../types";
-
-export function getTaskIcon(status: Status): string {
+import { Color, Icon } from "@raycast/api";
+export function getTaskIcon(status: Status): object {
   switch (status) {
     case "active":
-      return "▶️";
+      return {
+        source: Icon.ArrowDownCircle,
+        tintColor: Color.Yellow,
+      };
     case "waiting":
-      return "⌛️";
+      return {
+        source: Icon.Clock,
+        tintColor: Color.Blue,
+      };
     case "paused":
-      return "⏸️";
+      return {
+        source: Icon.Pause,
+        tintColor: Color.Red,
+      };
     case "error":
-      return "⚠️";
+      return {
+        source: Icon.XMarkCircle,
+        tintColor: Color.Orange,
+      };
     case "complete":
-      return "✅";
+      return {
+        source: Icon.CheckCircle,
+        tintColor: Color.Green,
+      };
     case "removed":
-      return "🗑️";
+      return {
+        source: Icon.Trash,
+        tintColor: Color.Magenta,
+      };
     default:
-      return "▶️";
+      return {
+        source: Icon.Play,
+        tintColor: Color.Purple,
+      };
   }
 }
 
