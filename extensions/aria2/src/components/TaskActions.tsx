@@ -2,13 +2,14 @@ import { ActionPanel, Action, Icon } from "@raycast/api";
 import CreateTaskForm from "./CreateTaskForm";
 
 type Props = {
+  gid: string;
   infoHash: string;
   onRemove?: () => void;
   onPause?: () => void;
   onStart?: () => void;
 };
 
-function TaskAction({ infoHash, onRemove, onPause, onStart }: Props) {
+function TaskActions({ gid, infoHash, onRemove, onPause, onStart }: Props) {
   return (
     <ActionPanel title="Actions">
       <Action.CopyToClipboard
@@ -29,4 +30,4 @@ function TaskAction({ infoHash, onRemove, onPause, onStart }: Props) {
   );
 }
 
-export default TaskAction;
+export default TaskActions;

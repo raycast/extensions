@@ -1,7 +1,7 @@
 import { List, ActionPanel } from "@raycast/api";
 import { Task, Filter } from "../types";
 import { getTaskIcon } from "../utils/utils";
-import TaskAction from "./TaskAction";
+import TaskActions from "./TaskActions";
 
 type Props = {
   isLoading: boolean;
@@ -49,7 +49,7 @@ const TasksList = ({ isLoading, tasks, onFilterChange }: Props) => {
             }}
             subtitle={{ tooltip: "File Size", value: `💾${task.fileSize}` }}
             accessories={accessories}
-            actions={<TaskAction infoHash={task.infoHash} />}
+            actions={<TaskActions gid={task.gid} infoHash={task.infoHash} />}
           />
         );
       })}
