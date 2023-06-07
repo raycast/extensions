@@ -1,4 +1,4 @@
-import { showToast, Toast, open } from "@raycast/api";
+import { showToast, Toast, closeMainWindow } from "@raycast/api";
 import { exec } from "child_process";
 
 export async function showHookmarkNotOpenToast() {
@@ -10,6 +10,7 @@ export async function showHookmarkNotOpenToast() {
       onAction: (toast) => {
         exec(`open -ga Hookmark`);
         toast.hide();
+        closeMainWindow();
       },
     },
   };

@@ -1,5 +1,9 @@
 # Bitwarden Changelog
 
+## [New Preference] - 2023-06-03
+
+- Added preference to change the window behaviour when copying values
+
 ## [New Command] - 2023-05-31
 
 - Added Logout command

@@ -6,7 +6,8 @@
   "icon": "command-icon.png",
   "author": "maggie",
   "contributors": [
-    "jkorol3"
+    "jkorol3",
+    "madza"
   ],
   "categories": [
     "Applications",
@@ -27,8 +28,31 @@
       "mode": "menu-bar"
     }
   ],
+  "preferences": [
+    {
+      "name": "completed",
+      "type": "dropdown",
+      "required": false,
+      "title": "Completed tasks in Menu Bar",
+      "description": "Show only 3 latest completed tasks, or show/hide all.",
+      "data": [
+        {
+          "title": "Show Latest",
+          "value": "latest"
+        },
+        {
+          "title": "Show All",
+          "value": "show_all"
+        },
+        {
+          "title": "Hide All",
+          "value": "hide_all"
+        }
+      ]
+    }
+  ],
   "dependencies": {
-    "@raycast/api": "^1.38.1",
+    "@raycast/api": "^1.52.1",
     "@raycast/utils": "^1.1.0",
     "dayjs": "^1.10.7",
     "jotai": "^1.4.0",
