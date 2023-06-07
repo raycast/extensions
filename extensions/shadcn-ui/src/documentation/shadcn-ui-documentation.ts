@@ -14,7 +14,7 @@ export default [
       {
         doc: "introduction",
         name: "Introduction",
-        path: `${documentationBase}/introduction`,
+        path: `${documentationBase}/`,
       },
       {
         doc: "installation",
