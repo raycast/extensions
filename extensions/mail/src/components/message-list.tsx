@@ -5,7 +5,7 @@ import { useCachedPromise } from "@raycast/utils";
 import { MessageActions } from "./message-actions";
 import { Account, Mailbox, MessageProps } from "../types";
 import { getMessages } from "../scripts/messages";
-import { shortenText, toRelative, titleCase, invoke } from "../utils";
+import { shortenText, toRelative, titleCase, invoke, isValidDate } from "../utils";
 import { MailIcon } from "../utils/presets";
 import { Cache } from "../utils/cache";
 
@@ -97,7 +97,7 @@ export const MessageListItem = (props: MessageProps) => {
       title={message.subject ? shortenText(message.subject, 60) : "No Subject"}
       icon={message.read ? MailIcon.Read : MailIcon.Unread}
       accessories={[
-        { text: toRelative(message.date), icon: Icon.Calendar },
+        ...(isValidDate(message.date) ? [{ text: toRelative(message.date), icon: Icon.Calendar }] : []),
         { text: shortenText(message.senderName, 20), icon: Icon.PersonCircle },
         message.numAttachments === 0 ? {} : { text: attachments, icon: Icon.Paperclip },
       ]}
