@@ -1,5 +1,11 @@
 # Visual Studio Code Search Recent Projects Changelog
 
+## [Update] - 2023-06-07
+
+- Add `Show Installed Extensions` command
+- Add `Install Extension` command
+- Add `Commands` command
+
 ## [Update] - 2023-01-31
 
 - Updated pinned projects logic

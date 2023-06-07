@@ -1,5 +1,9 @@
 # Timers Changelog
 
+## [Enhancement] - 2023-06-07
+
+- Added option to hide menubar icon when no timers are running
+
 ## [Add volume cap error for alert sound] - 2023-03-19
 
 ## [Enhancement] - 2023-03-15
