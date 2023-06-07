@@ -1,15 +1,15 @@
 import { ActionPanel, Action, Icon } from "@raycast/api";
 import CreateTaskForm from "./CreateTaskForm";
+import useAria2 from "../hooks/useAria2";
 
 type Props = {
   gid: string;
   infoHash: string;
-  onRemove?: () => void;
-  onPause?: () => void;
-  onStart?: () => void;
 };
 
-function TaskActions({ gid, infoHash, onRemove, onPause, onStart }: Props) {
+function TaskActions({ gid, infoHash }: Props) {
+  const { pauseTask, removeTask, restartTask } = useAria2();
+
   return (
     <ActionPanel title="Actions">
       <Action.CopyToClipboard
@@ -19,13 +19,34 @@ function TaskActions({ gid, infoHash, onRemove, onPause, onStart }: Props) {
       />
       <Action.Push
         icon={Icon.Download}
-        title="Create Task"
+        title="Add Task"
         shortcut={{ modifiers: ["cmd"], key: "n" }}
         target={<CreateTaskForm />}
       />
-      <Action title="Start Task" icon={Icon.Play} shortcut={{ modifiers: ["cmd"], key: "s" }} onAction={onStart} />
-      <Action title="Pause Task" icon={Icon.Pause} shortcut={{ modifiers: ["cmd"], key: "p" }} onAction={onPause} />
-      <Action title="Remove Task" icon={Icon.Trash} shortcut={{ modifiers: ["cmd"], key: "r" }} onAction={onRemove} />
+      <Action
+        title="Restart Task"
+        icon={Icon.Play}
+        shortcut={{ modifiers: ["cmd"], key: "s" }}
+        onAction={() => {
+          restartTask(gid);
+        }}
+      />
+      <Action
+        title="Pause Task"
+        icon={Icon.Pause}
+        shortcut={{ modifiers: ["cmd"], key: "p" }}
+        onAction={() => {
+          pauseTask(gid);
+        }}
+      />
+      <Action
+        title="Remove Task"
+        icon={Icon.Trash}
+        shortcut={{ modifiers: ["cmd"], key: "r" }}
+        onAction={() => {
+          removeTask(gid);
+        }}
+      />
     </ActionPanel>
   );
 }

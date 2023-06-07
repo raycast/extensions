@@ -13,6 +13,7 @@ type Aria2Client = {
   addDownloadTask: (url: string) => Promise<void>;
   removeTask: (taskId: string) => Promise<void>;
   pauseTask: (taskId: string) => Promise<void>;
+  restartTask: (taskId: string) => Promise<void>;
 };
 
 const useAria2 = (): Aria2Client => {
@@ -113,6 +114,22 @@ const useAria2 = (): Aria2Client => {
     [client]
   );
 
+  const restartTask = useCallback(
+    async (taskId: string): Promise<void> => {
+      if (!client) {
+        throw new Error("Aria2 client is not available");
+      }
+
+      try {
+        await client.call("unpause", taskId);
+        console.log("Paused task:", taskId);
+      } catch (error) {
+        console.error("Failed to pause task:", error);
+      }
+    },
+    [client]
+  );
+
   return {
     client,
     isConnected,
@@ -120,6 +137,7 @@ const useAria2 = (): Aria2Client => {
     addDownloadTask,
     removeTask,
     pauseTask,
+    restartTask,
   };
 };
 
