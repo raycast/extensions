@@ -5,23 +5,13 @@ import useAria2 from "../hooks/useAria2";
 type Props = {
   gid: string;
   infoHash: string;
-  // onActionSuccess: () => void;
 };
 
-function TaskActions({
-  gid,
-  infoHash,
-}: // onActionSuccess
-Props) {
+function TaskActions({ gid, infoHash }: Props) {
   const { pauseTask, removeTask, restartTask } = useAria2();
 
   return (
     <ActionPanel title="Actions">
-      <Action.CopyToClipboard
-        title="Copy Link"
-        content={`magnet:?xt=urn:btih:${infoHash}`}
-        shortcut={{ modifiers: ["cmd"], key: "c" }}
-      />
       <Action.Push
         icon={Icon.PlusCircle}
         title="Add Task"
@@ -52,6 +42,11 @@ Props) {
           console.log("gid=>", gid);
           removeTask(gid);
         }}
+      />
+      <Action.CopyToClipboard
+        title="Copy Link"
+        content={`magnet:?xt=urn:btih:${infoHash}`}
+        shortcut={{ modifiers: ["cmd"], key: "c" }}
       />
     </ActionPanel>
   );

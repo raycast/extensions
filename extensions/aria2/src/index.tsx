@@ -3,7 +3,7 @@ import { TasksList } from "./components";
 import useAria2 from "./hooks/useAria2";
 import { Task, Filter } from "./types";
 
-const REFRESH_INTERVAL = 1000; // 定时器刷新间隔时间，单位为毫秒
+const REFRESH_INTERVAL = 1000;
 
 export default function Command() {
   const { fetchTasks, isConnected, handleNotification } = useAria2();
@@ -72,16 +72,5 @@ export default function Command() {
     setFilter(filter);
   }, []);
 
-  // const handleActionSuccess = useCallback(() => {
-  //   fetchData();
-  // }, [fetchData]);
-
-  return (
-    <TasksList
-      isLoading={isLoading}
-      tasks={filteredTasks}
-      onFilterChange={handleFilterChange}
-      // onActionSuccess={handleActionSuccess}
-    />
-  );
+  return <TasksList isLoading={isLoading} tasks={filteredTasks} onFilterChange={handleFilterChange} />;
 }
