@@ -1,6 +1,7 @@
 import { ActionPanel, Action, List, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { Octokit } from "octokit";
+import {OCTOKIT_CONFIG, SHADCN_URL} from "./constants";
 
 interface SearchResult {
   name: string;
@@ -18,9 +19,9 @@ export default function SearchExamples() {
 
         const res = (await octokit.rest.repos.getContent({
           mediaType: { format: "json" },
-          owner: "shadcn",
-          repo: "ui",
-          path: "apps/www/app/examples",
+          owner: OCTOKIT_CONFIG.owner,
+          repo: OCTOKIT_CONFIG.repo,
+          path: OCTOKIT_CONFIG.pathExamples,
         })) as { data: SearchResult[] };
 
         setData(
@@ -28,7 +29,7 @@ export default function SearchExamples() {
             .filter((res: { name: string }) => !res.name.includes(".tsx"))
             .map((e) => ({
               name: e.name.charAt(0).toUpperCase() + e.name.slice(1),
-              url: `https://ui.shadcn.com/examples/${e.name}`,
+              url: `${SHADCN_URL.EXAMPLES}/${e.name}`,
             }))
         );
       } catch (e) {

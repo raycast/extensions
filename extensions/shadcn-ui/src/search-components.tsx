@@ -1,5 +1,6 @@
 import { ActionPanel, Action, List, showToast, Toast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
+import { SHADCN_URL } from './constants'
 import fetch, { type Response } from "node-fetch";
 import yaml from "js-yaml";
 
@@ -38,7 +39,7 @@ async function parseFetchResponse(response: Response) {
     return {
       name: result.name,
       component: result.component,
-      url: `https://ui.shadcn.com/docs/components/${result.component}`,
+      url: `${SHADCN_URL.DOCS_COMPONENTS}/${result.component}`,
     } as SearchResult;
   });
 }
@@ -50,7 +51,7 @@ export default function SearchComponents() {
 
       return await parseFetchResponse(response);
     },
-    ["https://ui.shadcn.com/api/components"],
+    [SHADCN_URL.API_COMPONENTS],
     {
       keepPreviousData: true,
       onError: onRequestError,
@@ -89,7 +90,7 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
       const response = await fetch(url);
       return await parseFetchDetailResponse(response);
     },
-    [`https://raw.githubusercontent.com/shadcn/ui/main/apps/www/content/docs/components/${searchResult.component}.mdx`],
+    [`${SHADCN_URL.RAW_GITHUB_COMPONENTS}/${searchResult.component}.mdx`],
     {
       keepPreviousData: true,
       onError: onRequestError,
