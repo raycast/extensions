@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "aria2-manager",
   "title": "Aria2 Manager",
-  "description": "Manage Aria2 downloads directly from the Raycast command bar.",
+  "description": "Manage Aria2 downloads directly from the Raycast.",
   "icon": "icon.png",
   "author": "gandli",
   "license": "MIT",
@@ -10,7 +10,7 @@
     {
       "name": "index",
       "title": "Aria2 Manager",
-      "description": "Manage Aria2 downloads directly from the Raycast command bar.",
+      "description": "Manage Aria2 downloads directly from the Raycast.",
       "mode": "view",
       "preferences": [
         {
