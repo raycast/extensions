@@ -1,6 +1,6 @@
 import { Action, ActionPanel, clearSearchBar, getPreferenceValues, Icon, List, showHUD } from "@raycast/api";
 import { exec } from "child_process";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import useInterval from "./hooks/use-interval";
 
 export default function ProcessList() {
@@ -13,7 +13,8 @@ export default function ProcessList() {
   const shouldPrioritizeAppsWhenFiltering = preferences.shouldPrioritizeAppsWhenFiltering ?? false;
   const shouldShowPID = preferences.shouldShowPID ?? false;
   const shouldShowPath = preferences.shouldShowPath ?? false;
-  const refreshDuration = +preferences.refreshDuration;
+  const refreshEnabled = +preferences.refreshDuration >= 0;
+  const refreshDuration = Math.max(+preferences.refreshDuration, 1000); // ms
 
   const fetchProcesses = () => {
     exec(`ps -eo pid,pcpu,comm | sort -nrk 2,3`, (err, stdout) => {
@@ -43,9 +44,7 @@ export default function ProcessList() {
     });
   };
 
-  useInterval(() => {
-    fetchProcesses();
-  }, refreshDuration);
+  refreshEnabled ? useInterval(fetchProcesses, refreshDuration) : useEffect(fetchProcesses, []);
 
   const fileIcon = (process: Process) => {
     if (process.type === "prefPane") {

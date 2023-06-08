@@ -60,13 +60,13 @@
       "type": "checkbox"
     },
     {
-      "description": "Refresh duration in milliseconds.",
+      "description": "Refresh duration in milliseconds. The minimum value is 1000ms and to disable auto-refresh, set it to -1.",
       "label": "Refresh Duration",
       "name": "refreshDuration",
       "required": false,
       "title": "Refresh Duration",
       "type": "textfield",
-      "default": "5000"
+      "default": "3000"
     }
   ],
   "dependencies": {
