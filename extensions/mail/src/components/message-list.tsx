@@ -90,16 +90,20 @@ export const MessageList = (props: MessageListProps) => {
 export const MessageListItem = (props: MessageProps) => {
   const { message } = props;
 
-  const attachments = `${message.numAttachments} Attachment${message.numAttachments > 1 ? "s" : ""}`;
-
   return (
     <List.Item
       title={message.subject ? shortenText(message.subject, 60) : "No Subject"}
       icon={message.read ? MailIcon.Read : MailIcon.Unread}
       accessories={[
-        ...(isValidDate(message.date) ? [{ text: toRelative(message.date), icon: Icon.Calendar }] : []),
+        message.numAttachments > 0
+          ? {
+              text: message.numAttachments.toString(),
+              icon: Icon.Paperclip,
+              tooltip: `${message.numAttachments} Attachment${message.numAttachments > 1 ? "s" : ""}`,
+            }
+          : {},
         { text: shortenText(message.senderName, 20), icon: Icon.PersonCircle },
-        message.numAttachments === 0 ? {} : { text: attachments, icon: Icon.Paperclip },
+        isValidDate(message.date) ? { text: toRelative(message.date), icon: Icon.Calendar } : {},
       ]}
       actions={<MessageActions {...props} />}
     />
