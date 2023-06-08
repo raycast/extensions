@@ -46,21 +46,40 @@ interface TaskResponse {
   bittorrent: {
     announceList: string[][];
     info: {
-      name: string; // 任务名称
+      name: string;
     };
     mode: string;
   };
 }
 
+// interface Task {
+//   gid: string;
+//   fileName: string;
+//   fileSize: string;
+//   progress: string;
+//   remainingTime?: string;
+//   downloadSpeed?: string;
+//   status: Status;
+//   infoHash: string;
+// }
 interface Task {
   gid: string;
   fileName: string;
   fileSize: string;
-  progress: string;
+  progress: number;
   remainingTime?: string;
   downloadSpeed?: string;
   status: Status;
+  health: number;
+  downloaded: string;
+  uploaded: string;
+  shareRatio: number;
+  numSeeds: number;
+  numPeers: number;
   infoHash: string;
+  downloadPath: string;
+  bittorrentServers: string[];
+  uri: string[];
 }
 
 interface Preferences {

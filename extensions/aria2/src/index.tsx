@@ -38,7 +38,7 @@ export default function Command() {
 
   useEffect(() => {
     const timer = setInterval(() => {
-      const hasActiveTasks = tasks.some((task) => task.status === "active" && parseFloat(task.progress) < 100);
+      const hasActiveTasks = tasks.some((task) => task.status === "active" && task.progress < 100);
       if (hasActiveTasks) {
         fetchData();
       }

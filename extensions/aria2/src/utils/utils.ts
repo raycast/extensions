@@ -53,20 +53,41 @@ export function formatSize(size: string): string {
   return `${bytes.toFixed(2)} ${units[index]}`;
 }
 
-export function formatProgress(completedLength: string, totalLength: string): string {
-  const percentage = (parseFloat(completedLength) / parseFloat(totalLength)) * 100;
-  return `${percentage.toFixed(2)}%`;
+export function formatProgress(completedLength: string, totalLength: string): number {
+  const completed = parseFloat(completedLength);
+  const total = parseFloat(totalLength);
+
+  if (isNaN(completed) || isNaN(total) || total === 0) {
+    return 0;
+  }
+
+  const percentage = (completed / total) * 100;
+  return Math.round(percentage);
 }
 
 export function formatRemainingTime(seconds: number): string {
-  const remainingSeconds = Math.floor(seconds);
-  const hours = Math.floor(remainingSeconds / 3600);
-  const minutes = Math.floor((remainingSeconds % 3600) / 60);
-  const secondsLeft = remainingSeconds % 60;
+  if (!isFinite(seconds) || isNaN(seconds) || seconds < 0) {
+    return "Unknown";
+  }
 
-  return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:${secondsLeft
-    .toString()
-    .padStart(2, "0")}`;
+  const remainingSeconds = Math.floor(seconds);
+  const minutes = Math.floor(remainingSeconds / 60) % 60;
+  const hours = Math.floor(remainingSeconds / 3600) % 24;
+  const days = Math.floor(remainingSeconds / 86400);
+
+  if (days >= 30) {
+    const months = Math.floor(days / 30);
+    const years = Math.floor(months / 12);
+
+    return `${years}y ${months % 12}m ${days % 30}d`;
+  } else if (days >= 1) {
+    return `${days}d ${hours}h ${minutes}m`;
+  } else {
+    const secondsLeft = remainingSeconds % 60;
+    return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:${secondsLeft
+      .toString()
+      .padStart(2, "0")}`;
+  }
 }
 
 export function formatSpeed(speed: string): string {
