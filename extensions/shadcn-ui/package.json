@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "shadcn-ui",
   "title": "Shadcn/ui",
-  "description": "Utilities to work with shadcn/ui",
+  "description": "Browse shadcn/ui documentation, components and examples",
   "icon": "shadcn-icon.png",
   "author": "luisFilipePT",
   "categories": [
