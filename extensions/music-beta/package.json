@@ -1,0 +1,212 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "music-beta",
+  "title": "Music (Beta)",
+  "description": "Control the Apple Music app with your keyboard.",
+  "icon": "icon.png",
+  "author": "fedevitaledev",
+  "contributors": [
+    "peterdev22",
+    "danpalmer"
+  ],
+  "license": "MIT",
+  "categories": [
+    "Media",
+    "System",
+    "Applications",
+    "Productivity"
+  ],
+  "keywords": [
+    "music",
+    "player",
+    "media"
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  },
+  "preferences": [
+    {
+      "type": "checkbox",
+      "name": "experimental_music_api",
+      "default": true,
+      "description": "Use the Music Rest API to interact with Apple Music. This is experimental and may not work as expected.",
+      "label": "Use Experimental Music API",
+      "required": false
+    },
+    {
+      "type": "checkbox",
+      "name": "enhancedFeedback",
+      "default": true,
+      "description": "Display toast messages / HUD notifications when actions are completed",
+      "label": "Enhanced Feedback",
+      "required": false
+    },
+    {
+      "type": "checkbox",
+      "name": "preferGrids",
+      "default": false,
+      "description": "Prefer Grids over Lists when possible",
+      "label": "Prefer Grids",
+      "required": false
+    },
+    {
+      "type": "checkbox",
+      "name": "closeMainWindowOnControls",
+      "default": true,
+      "description": "Close Raycast when using the play/pause, next track, previous track, volume up, and volume down etc...",
+      "label": "Close Raycast window on controls",
+      "required": false
+    },
+    {
+      "type": "dropdown",
+      "name": "volumeSteps",
+      "title": "Volume Steps",
+      "description": "Specify the amount of change for volume levels",
+      "required": false,
+      "default": "10",
+      "data": [
+        {
+          "title": "Low",
+          "value": "5"
+        },
+        {
+          "title": "Standard",
+          "value": "10"
+        },
+        {
+          "title": "High",
+          "value": "25"
+        }
+      ]
+    }
+  ],
+  "commands": [
+    {
+      "name": "quick-actions",
+      "title": "Quick actions",
+      "description": "quick actions",
+      "mode": "view",
+      "keywords": [
+        "play",
+        "pause",
+        "love",
+        "dislike",
+        "recommendations"
+      ]
+    },
+    {
+      "name": "currently-playing",
+      "title": "Currently Playing",
+      "subtitle": "Apple Music",
+      "description": "Show currently playing track in Music.",
+      "mode": "menu-bar",
+      "interval": "10s",
+      "preferences": [
+        {
+          "required": false,
+          "name": "displayArtwork",
+          "type": "checkbox",
+          "label": "Display Artwork",
+          "title": "Preferences",
+          "description": "Display the artwork of the currently playing track",
+          "default": false
+        },
+        {
+          "required": false,
+          "name": "displayTitle",
+          "type": "checkbox",
+          "label": "Display Title",
+          "description": "Display the title of the current track in menubar",
+          "default": true
+        },
+        {
+          "required": false,
+          "name": "maxTitleLength",
+          "title": "Max Title Length",
+          "description": "Specify the maximum length of the title",
+          "type": "textfield",
+          "placeholder": "e.g 25"
+        }
+      ]
+    },
+    {
+      "name": "recently-played",
+      "title": "Recently Played",
+      "description": "Show recently played tracks",
+      "mode": "view"
+    },
+    {
+      "name": "recommendations",
+      "title": "Recommendations",
+      "description": "Show recommendations",
+      "mode": "view",
+      "preferences": [
+        {
+          "title": "Preferences",
+          "required": false,
+          "name": "recommendations_displayAsList",
+          "label": "Display as List",
+          "description": "Display recommendations as a List instead of Grid",
+          "type": "checkbox"
+        }
+      ]
+    },
+    {
+      "name": "login",
+      "title": "Login",
+      "subtitle": "Apple Music",
+      "description": "Login with Apple Music",
+      "mode": "no-view"
+    },
+    {
+      "name": "start-playlist",
+      "title": "Start Playlist",
+      "subtitle": "Apple Music",
+      "description": "Start a playlist",
+      "mode": "view",
+      "keywords": [
+        "play",
+        "playlist"
+      ]
+    },
+    {
+      "name": "set-volume",
+      "title": "Set Volume",
+      "subtitle": "Apple Music",
+      "description": "Set Music Volume",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "volume",
+          "placeholder": "e.g 25",
+          "required": false,
+          "type": "text"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.49.2",
+    "@raycast/utils": "^1.5.2",
+    "fp-ts": "^2.13.1",
+    "io-ts": "^2.2.20",
+    "nanoid": "^4.0.2",
+    "run-applescript": "^6.1.0",
+    "ts-pattern": "^4.2.2",
+    "undici": "^5.21.0",
+    "zod": "^3.21.4"
+  },
+  "devDependencies": {
+    "@types/node": "~18.15.11",
+    "@types/react": "^18.0.33",
+    "@typescript-eslint/eslint-plugin": "^5.57.1",
+    "@typescript-eslint/parser": "^5.57.1",
+    "eslint": "^8.37.0",
+    "eslint-config-prettier": "^8.8.0",
+    "react-devtools": "^4.27.4",
+    "typescript": "^5.0.3"
+  }
+}
