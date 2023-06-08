@@ -4,7 +4,7 @@ import { useCachedPromise } from "@raycast/utils";
 import { MessageActions } from "./message-actions";
 import { MessageProps } from "../types";
 import { getMessageMarkdown } from "../scripts/messages";
-import { toRelative } from "../utils";
+import { isValidDate, toRelative } from "../utils";
 
 export const MessageDetail = (props: MessageProps) => {
   const { mailbox, message } = props;
@@ -25,13 +25,17 @@ export const MessageDetail = (props: MessageProps) => {
             icon={{ source: "../assets/icons/envelope.svg", tintColor: Color.SecondaryText }}
           />
 
-          <Detail.Metadata.Label
-            title="Attachments"
-            text={message.numAttachments > 0 ? message.numAttachments.toString() : "None"}
-            icon={Icon.Paperclip}
-          />
+          {message.numAttachments > 0 && (
+            <Detail.Metadata.Label
+              title="Attachments"
+              text={message.numAttachments > 0 ? message.numAttachments.toString() : "None"}
+              icon={Icon.Paperclip}
+            />
+          )}
 
-          <Detail.Metadata.Label title="Received" text={toRelative(message.date)} icon={Icon.Calendar} />
+          {isValidDate(message.date) && (
+            <Detail.Metadata.Label title="Received" text={toRelative(message.date)} icon={Icon.Calendar} />
+          )}
         </Detail.Metadata>
       }
       actions={<MessageActions {...props} inMessageView={true} />}
