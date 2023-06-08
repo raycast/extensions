@@ -125,11 +125,11 @@ function useSearch<T extends Endpoint>(endpoint: T, initial = "") {
   return useFetch(`https://api.urbandictionary.com/v0/${endpoint}?${params.toString()}`, {
     method: "GET",
     parseResponse: async (response) => {
-      const json = (await response.json()) as UrbanResponseList<typeof endpoint>;
-
       if (!response.ok) {
         throw new Error(response.statusText);
       }
+
+      const json = (await response.json()) as UrbanResponseList<typeof endpoint>;
 
       if ("list" in json) {
         return json.list as UrbanResponseItem<typeof endpoint>[];
