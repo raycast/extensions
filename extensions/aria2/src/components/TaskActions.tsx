@@ -23,7 +23,7 @@ Props) {
         shortcut={{ modifiers: ["cmd"], key: "c" }}
       />
       <Action.Push
-        icon={Icon.Download}
+        icon={Icon.PlusCircle}
         title="Add Task"
         shortcut={{ modifiers: ["cmd"], key: "n" }}
         target={<CreateTaskForm />}
