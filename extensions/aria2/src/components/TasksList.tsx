@@ -34,14 +34,14 @@ Props) => {
       {tasks.map((task) => {
         const accessories = [];
 
-        if (task.status === "active" && task.progress !== "100.00%") {
+        if (task.status === "active" && task.progress !== 100) {
           accessories.push(
             { tooltip: "Download Speed", text: ` ${task.downloadSpeed}`, icon: "🚀" },
             { tooltip: "Remaining Time", text: `${task.remainingTime}`, icon: "🕐" }
           );
         }
 
-        accessories.push({ tooltip: "Progress", text: ` ${task.progress}`, icon: "⏳" });
+        accessories.push({ tooltip: "Progress", text: ` ${task.progress.toFixed(2)}%`, icon: "⏳" });
 
         return (
           <List.Item

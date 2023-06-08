@@ -62,7 +62,7 @@ export function formatProgress(completedLength: string, totalLength: string): nu
   }
 
   const percentage = (completed / total) * 100;
-  return Math.round(percentage);
+  return parseFloat(percentage.toFixed(2));
 }
 
 export function formatRemainingTime(seconds: number): string {
