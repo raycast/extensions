@@ -1,22 +1,22 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "aria2",
-  "title": "Aria2",
-  "description": "The Aria2 extension for Raycast enables users to manage Aria2 downloads directly from the Raycast command bar.",
+  "title": "Aria2 Manager",
+  "description": "Manage Aria2 downloads directly from the Raycast.",
   "icon": "icon.png",
   "author": "gandli",
   "license": "MIT",
   "commands": [
     {
       "name": "index",
-      "title": "Aria2",
-      "description": "inThe Aria2 extension for Raycast enables users to manage Aria2 downloads directly from the Raycast command bar.",
+      "title": "Aria2 Manager",
+      "description": "Manage Aria2 downloads directly from the Raycast.",
       "mode": "view",
       "preferences": [
         {
           "name": "host",
-          "title": "Host Name",
-          "description": "Host of the Aria2 server",
+          "title": "Host",
+          "description": "Aria2 server host",
           "type": "textfield",
           "placeholder": "localhost",
           "default": "localhost",
@@ -25,7 +25,7 @@
         {
           "name": "port",
           "title": "Port",
-          "description": "Port number of the Aria2 server",
+          "description": "Aria2 server port number",
           "type": "textfield",
           "placeholder": "6800",
           "default": "6800",
@@ -34,7 +34,7 @@
         {
           "name": "secure",
           "title": "Secure",
-          "description": "Whether to use secure connection",
+          "description": "Use secure connection",
           "type": "checkbox",
           "label": "Use Secure Connection",
           "default": false,
