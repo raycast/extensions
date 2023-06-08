@@ -1,3 +1,3 @@
 # Performance HUD Changelog
 
-## [Initial Version] - 2023-06-02
+## [Initial Version] - {PR_MERGE_DATE}
