@@ -20,7 +20,7 @@ async function setHistoryItem(value: HistoryItem) {
   if (historyString != undefined) {
     let historyItems = JSON.parse(historyString);
 
-    let currentArticleInHistory = historyItems.find((o: HistoryItem) => o.title === value.title);
+    const currentArticleInHistory = historyItems.find((o: HistoryItem) => o.title === value.title);
     if (currentArticleInHistory != undefined) {
       // delete old history entry when it already exists
       historyItems = historyItems.filter((item: HistoryItem) => item !== currentArticleInHistory);
@@ -32,17 +32,15 @@ async function setHistoryItem(value: HistoryItem) {
     }
 
     await LocalStorage.setItem(HISTORY_KEY, JSON.stringify(historyItems));
-
-    let currentArticle = historyItems.find((o: HistoryItem) => o.url === value.url);
   } else {
-    let firstitem = [];
+    const firstitem = [];
     firstitem.push(value);
     await LocalStorage.setItem(HISTORY_KEY, JSON.stringify(firstitem));
   }
 }
 
 export default function DocCheckPage(props: { url: string; navigationItems: string; query: string }) {
-  let navigationItems: string[] = [];
+  const navigationItems: string[] = [];
   let backHistory: string[] = [];
   let forwardHistory: string[] = [];
   let prevurl = "";
