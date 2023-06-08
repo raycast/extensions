@@ -1,5 +1,20 @@
 # DocCheck Changelog
 
+## [Version 2.0] - 2023-06-08
+- NEW: Home - completely redesigned main screen shows the History from the last read articles (see below), "Neu erstellt", "Frisch verbessert", "Schreib über", "Verbessere" in addition to the "Top Artikel" (information from the [main page](https://flexikon.doccheck.com/de/Hauptseite))
+- NEW: Cache - all of the above is now cached (you can change the time for a refresh in settings)
+- NEW: Full Navigation - you can now go back and forth (like in a browser, pro-tip: use the arrow keys (← or →); on the first page you now go back via `pop` (same functionality as using the esc key), so you don't lose context)
+- NEW: History - by default the last 3 articles are shown on the new home screen (you can change the number of entries in settings)
+- NEW: Copy URL of current article with ⌘ + C
+- NEW: open edit URL of current article in browser with ⌘ + E
+- NEW: return to Home with ⌘ + H
+- NEW: embedded DocCheck videos are now displayed as embedded link
+- NEW: embedded Typeform quizzes now display as embedded link
+- NEW: embedded Sketchfab 3D models now display as an embedded link
+- NEW: embedded links are now displayed in a frame
+- Fixed: Links to exclusive content (where you have to be logged in to see it) are now displayed better
+- Fixed: even more complex tables ([Diuretikum](https://flexikon.doccheck.com/de/Diuretikum), [Rutherford-Klassifikation](https://flexikon.doccheck.com/de/Rutherford-Klassifikation), [Schizophrenie](https://flexikon.doccheck.com/de/Schizophrenie)) are now displayed correctly
+
 ## [Version 1.4.1] - 2023-06-03
 
 - NEW: Authors are displayed
