@@ -1,12 +1,13 @@
 import { LaunchProps, showHUD } from "@raycast/api";
 import { execSync } from "child_process";
+import checkAdbExists from "./utils";
 
 interface AdbDarkModeArguments {
   toggle: string;
 }
 
 export default async function darkMode(props: LaunchProps<{ arguments: AdbDarkModeArguments }>) {
-  const adbDir = `${process.env.HOME}/Library/Android/sdk/platform-tools/adb`;
+  const adbDir = await checkAdbExists();
   const auto = props.arguments.toggle === "auto" || props.arguments.toggle === "a";
   const disable = props.arguments.toggle === "disable" || props.arguments.toggle === "d";
   const enable = props.arguments.toggle === "enable" || props.arguments.toggle === "e";

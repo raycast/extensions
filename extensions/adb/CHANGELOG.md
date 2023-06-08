@@ -1,5 +1,9 @@
 # Adb Changelog
 
+## [ADB error fix] 2023-06-08
+
+- Check if `adb` exists before executing command
+
 ## [Initial Version] - 2023-06-02
 
 - Added multiple commands:

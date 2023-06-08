@@ -1,12 +1,13 @@
 import { LaunchProps, showHUD } from "@raycast/api";
 import { execSync } from "child_process";
+import checkAdbExists from "./utils";
 
 interface AdbAirplaneArguments {
   toggle: string;
 }
 
 export default async function airplane(props: LaunchProps<{ arguments: AdbAirplaneArguments }>) {
-  const adbDir = `${process.env.HOME}/Library/Android/sdk/platform-tools/adb`;
+  const adbDir = await checkAdbExists();
   const enable = props.arguments.toggle === "enable" || props.arguments.toggle === "e";
   let toggleValue;
   if (enable) {
