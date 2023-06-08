@@ -114,7 +114,7 @@ const useAria2 = (): Aria2Client => {
           await client.call("remove", taskId);
         } else {
           // 任务已完成或已停止，使用 `purgeDownloadResult` 方法彻底删除任务结果
-          await client.call("purgeDownloadResult", taskId);
+          await client.call("removeDownloadResult", taskId);
         }
 
         console.log("Removed task:", taskId);
