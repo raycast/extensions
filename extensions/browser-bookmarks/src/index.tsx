@@ -99,11 +99,15 @@ export default function Command() {
       ...safari.bookmarks,
     ]
       .map((item) => {
-        return {
-          ...item,
-          domain: new URL(item.url).hostname,
-          bookmarkFrecency: frecencies[item.id],
-        };
+        let domain;
+        try {
+          domain = new URL(item.url).hostname;
+        } catch (error) {
+          console.error(`Invalid URL: ${item.url}`);
+          domain = "";
+        }
+
+        return { ...item, domain, bookmarkFrecency: frecencies[item.id] };
       })
       .sort((a, b) => {
         // If a has a frecency, but b doesn't, a should come first

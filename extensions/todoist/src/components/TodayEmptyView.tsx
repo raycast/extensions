@@ -62,7 +62,7 @@ export default function TodayEmptyView({ quickLinkView }: TodayEmptyViewProps) {
         actions: createNewTaskActionPanel,
       };
     }
-  }, [data, stats]);
+  }, [data, quickLinkView, stats]);
 
   return <List.EmptyView {...emptyViewProps} />;
 }

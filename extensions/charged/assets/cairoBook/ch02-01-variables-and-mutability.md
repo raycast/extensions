@@ -200,7 +200,7 @@ Another distinction between `mut` and shadowing is that when we use the `let` ke
 we are effectively creating a new variable, which allows us to change the type of the
 value while reusing the same name. As mentioned before, variable shadowing and mutable variables
 are equivalent at the lower level.
-The only difference is that by shadowing a variable, the compiler will not complain 
+The only difference is that by shadowing a variable, the compiler will not complain
 if you change its type. For example, say our program performs a type conversion between the
 `u64` and `felt252` types.
 

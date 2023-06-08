@@ -1,10 +1,29 @@
 import TurndownService from "turndown";
-import { downloadAttachment, getMessage } from "../lib/main";
-import { useEffect, useRef } from "react";
+import { parse } from "node-html-parser";
+import { createHTMLFile, downloadAttachment, downloadMessage, getMessage } from "../lib/main";
+import { useRef, useState } from "react";
 import { useCachedPromise } from "@raycast/utils";
-import { Action, ActionPanel, List, Icon, Detail, Color, showToast, Toast, Grid, environment } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  List,
+  Icon,
+  Detail,
+  Color,
+  showToast,
+  Toast,
+  Grid,
+  environment,
+  showInFinder,
+  open,
+} from "@raycast/api";
 import moment from "moment";
-import path from "path";
+
+enum EmailViewMedium {
+  MailApp,
+  Browser,
+  Finder,
+}
 
 function FullscreenDetails(data): React.ReactNode {
   return (
@@ -134,14 +153,24 @@ function FullscreenAttachments(data): React.ReactNode {
 
 export default function Message({ id }) {
   const turndownService = new TurndownService({ headingStyle: "atx" });
+  const [bodyMarkdown, updateBodyMarkdown] = useState<string>();
 
   const abortable = useRef<AbortController>();
   const { isLoading, data, revalidate } = useCachedPromise(getMessage, [id], {
     abortable,
     keepPreviousData: true,
     onData: (data) => {
+      updateBodyMarkdown(getMarkdown(data?.html[0]));
       for (const attachment of data.attachments) {
-        downloadAttachment(attachment);
+        try {
+          downloadAttachment(attachment);
+        } catch (e) {
+          showToast({
+            style: Toast.Style.Failure,
+            title: "Error downloading attachment",
+            message: e.message,
+          });
+        }
       }
     },
     onError: (e) => {
@@ -155,21 +184,58 @@ export default function Message({ id }) {
     },
   });
 
-  const bodyHTML = data?.html[0].includes("<body")
-    ? data?.html[0].slice(data.html[0].indexOf("<body"), data?.html[0].indexOf("</body>") + 7)
-    : data?.html[0];
+  const downloadEmail = async (url: string, openIn: EmailViewMedium) => {
+    try {
+      const emailPath = await downloadMessage(url);
 
-  let bodyMarkdown = `# ${data?.subject ?? ""}\n---\n&nbsp;&nbsp;${turndownService.turndown(bodyHTML ?? "")}`;
+      if (openIn == EmailViewMedium.MailApp) open(emailPath as string);
+      if (openIn == EmailViewMedium.Finder) showInFinder(emailPath as string);
 
-  // replace inline attachments with images
-  const regex = /(attachment:ATTACH\d{1,6})/g;
-  bodyMarkdown = bodyMarkdown.replace(regex, (match, attachmentString) => {
-    // attachmentString will contain the entire "attachment:ATTACH" substring along with the number
-    const attachmentID = attachmentString.substring(11);
-    const attachment = data.attachments.find((attch) => attch.id == attachmentID);
+      if (openIn == EmailViewMedium.Browser) {
+        const htmlPath = await createHTMLFile(emailPath);
+        open(htmlPath);
+      }
+    } catch (e) {
+      if (e.message == "Token Expired") revalidate();
+      else
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Something went wrong",
+          message: e.message,
+        });
+    }
+  };
 
-    return `${environment.supportPath}/temp/attachments/${attachment.id}_${attachment.filename}`.replace(" ", "%20");
-  });
+  const getMarkdown = (html: string) => {
+    try {
+      const root = parse(html);
+      const bodyHTML = root.querySelector("body").toString();
+
+      let bodyMarkdown = `# **${data?.subject ?? ""}**\n---\n&nbsp;&nbsp;${turndownService.turndown(bodyHTML ?? html)}`;
+
+      // replace inline attachments with images
+      const regex = /(attachment:ATTACH\d{1,6})/g;
+      bodyMarkdown = bodyMarkdown.replace(regex, (match, attachmentString) => {
+        // attachmentString will contain the entire "attachment:ATTACH" substring along with the number
+        const attachmentID = attachmentString.substring(11);
+        const attachment = data.attachments.find((attch) => attch.id == attachmentID);
+
+        return `${environment.supportPath}/temp/attachments/${attachment.id}_${attachment.filename}`.replace(
+          " ",
+          "%20"
+        );
+      });
+
+      return bodyMarkdown;
+    } catch (e) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Couldn't read message",
+        message: e.message,
+      });
+      return null;
+    }
+  };
 
   return (
     <List isShowingDetail filtering={false} isLoading={isLoading}>
@@ -191,10 +257,36 @@ export default function Message({ id }) {
         <>
           <List.Item
             title="Email"
-            detail={<List.Item.Detail markdown={bodyMarkdown} />}
+            detail={
+              <List.Item.Detail
+                markdown={
+                  bodyMarkdown ??
+                  "# ❗ **Error Reading Email** ❗\n---\nTry viewing the message externally by pressing `⏎`"
+                }
+              />
+            }
             actions={
               <ActionPanel>
-                <Action.Push title="View Fullscreen" target={<Detail markdown={bodyMarkdown}></Detail>}></Action.Push>
+                {bodyMarkdown && (
+                  <Action.Push title="View Fullscreen" target={<Detail markdown={bodyMarkdown}></Detail>}></Action.Push>
+                )}
+                <ActionPanel.Submenu title="View Email Externally" icon={{ source: Icon.Upload }}>
+                  <Action
+                    title="Mail App"
+                    icon={{ source: Icon.AppWindow }}
+                    onAction={() => downloadEmail(data.downloadUrl, EmailViewMedium.MailApp)}
+                  />
+                  <Action
+                    title="Browser"
+                    icon={{ source: Icon.Globe }}
+                    onAction={() => downloadEmail(data.downloadUrl, EmailViewMedium.Browser)}
+                  />
+                  <Action
+                    title="Download Email"
+                    icon={{ source: Icon.Download }}
+                    onAction={() => downloadEmail(data.downloadUrl, EmailViewMedium.Finder)}
+                  />
+                </ActionPanel.Submenu>
               </ActionPanel>
             }
             accessories={[

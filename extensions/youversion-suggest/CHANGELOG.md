@@ -1,5 +1,10 @@
 # YouVersion Bible Suggest Changelog
 
+## [v3.2.0] - 2023-06-03
+
+- Fixed a recently-occurring error when fetching Bible content
+- Under-the-hood improvements to improve the stability of the extension going forward
+
 ## [v3.1.0] - 2023-05-02
 
 - Added a new setting to control the inclusion of verse numbers in copied Bible

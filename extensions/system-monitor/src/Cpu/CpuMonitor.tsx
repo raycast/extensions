@@ -5,6 +5,7 @@ import { loadavg } from "os";
 import { getTopCpuProcess, getRelativeTime } from "./CpuUtils";
 import { useInterval } from "usehooks-ts";
 import { CpuMonitorState, ExecError } from "../Interfaces";
+import { Actions } from "../components/Actions";
 
 export default function CpuMonitor() {
   const [isLoading, setIsLoading] = useState(true);
@@ -63,7 +64,7 @@ export default function CpuMonitor() {
     <>
       <List.Item
         title={`🖥️  CPU`}
-        accessoryTitle={isLoading ? "Loading..." : `${state.cpu}%`}
+        accessories={[{ text: isLoading ? "Loading..." : `${state.cpu}%` }]}
         detail={
           <List.Item.Detail
             metadata={
@@ -78,7 +79,7 @@ export default function CpuMonitor() {
                 <List.Item.Detail.Metadata.Label title="Uptime" text={state.uptime} />
                 <List.Item.Detail.Metadata.Separator />
                 <List.Item.Detail.Metadata.Label title="Process Name" />
-                {state.topProcess !== [] &&
+                {state.topProcess.length > 0 &&
                   state.topProcess.map((element, index) => {
                     return (
                       <List.Item.Detail.Metadata.Label
@@ -92,6 +93,7 @@ export default function CpuMonitor() {
             }
           />
         }
+        actions={<Actions />}
       />
     </>
   );
