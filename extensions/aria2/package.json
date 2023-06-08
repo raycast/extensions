@@ -47,7 +47,7 @@
           "type": "password",
           "placeholder": "Secret Key",
           "default": "",
-          "required": true
+          "required": false
         },
         {
           "name": "path",
