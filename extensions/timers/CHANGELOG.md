@@ -7,6 +7,7 @@
 - Add reset functionality to Manage Stopwatches
 - Add end time for timers in Manage Timers (thanks to @benqqqq)
 - Show currently selected alert sound in custom sound selection for Preview Alert Sounds and Start Custom Timer commands
+- Fix bug where the 60-minute preset crashed when Start 60 Minute Timer command was run
 - Sort preferences for more natural grouping
 - Update to new Raycast APIs
 

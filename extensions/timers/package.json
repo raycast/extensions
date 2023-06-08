@@ -64,7 +64,7 @@
       "name": "start60MinuteTimer",
       "title": "Start 60 Minute Timer",
       "description": "Set a countdown for 60 minutes.",
-      "mode": "view"
+      "mode": "no-view"
     },
     {
       "name": "start90MinuteTimer",
