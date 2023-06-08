@@ -72,16 +72,16 @@ export default function Command() {
     setFilter(filter);
   }, []);
 
-  const handleActionSuccess = useCallback(() => {
-    fetchData();
-  }, [fetchData]);
+  // const handleActionSuccess = useCallback(() => {
+  //   fetchData();
+  // }, [fetchData]);
 
   return (
     <TasksList
       isLoading={isLoading}
       tasks={filteredTasks}
       onFilterChange={handleFilterChange}
-      onActionSuccess={handleActionSuccess}
+      // onActionSuccess={handleActionSuccess}
     />
   );
 }

@@ -5,10 +5,14 @@ import useAria2 from "../hooks/useAria2";
 type Props = {
   gid: string;
   infoHash: string;
-  onActionSuccess: () => void;
+  // onActionSuccess: () => void;
 };
 
-function TaskActions({ gid, infoHash, onActionSuccess }: Props) {
+function TaskActions({
+  gid,
+  infoHash,
+}: // onActionSuccess
+Props) {
   const { pauseTask, removeTask, restartTask } = useAria2();
 
   return (

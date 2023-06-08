@@ -7,10 +7,15 @@ type Props = {
   isLoading: boolean;
   tasks: Task[];
   onFilterChange: (filter: Filter) => void;
-  onActionSuccess: () => void;
+  // onActionSuccess: () => void;
 };
 
-const TasksList = ({ isLoading, tasks, onFilterChange, onActionSuccess }: Props) => {
+const TasksList = ({
+  isLoading,
+  tasks,
+  onFilterChange,
+}: // onActionSuccess
+Props) => {
   const handleFilterChange = (newValue: string) => {
     const filter: Filter = newValue as Filter;
     onFilterChange(filter);
@@ -50,7 +55,13 @@ const TasksList = ({ isLoading, tasks, onFilterChange, onActionSuccess }: Props)
             }}
             subtitle={{ tooltip: "File Size", value: `💾${task.fileSize}` }}
             accessories={accessories}
-            actions={<TaskActions gid={task.gid} infoHash={task.infoHash} onActionSuccess={onActionSuccess} />}
+            actions={
+              <TaskActions
+                gid={task.gid}
+                infoHash={task.infoHash}
+                // onActionSuccess={onActionSuccess}
+              />
+            }
           />
         );
       })}
