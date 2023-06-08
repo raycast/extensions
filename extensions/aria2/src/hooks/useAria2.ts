@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import Aria2, { Aria2Options } from "aria2";
+import Aria2, { Aria2Options, Notification } from "aria2";
 import ws from "ws";
 import nodefetch from "node-fetch";
 import { Preferences, Task, Status } from "../types";
@@ -14,6 +14,7 @@ type Aria2Client = {
   removeTask: (taskId: string) => Promise<void>;
   pauseTask: (taskId: string) => Promise<void>;
   restartTask: (taskId: string) => Promise<void>;
+  handleNotification: (callback: (notification: Notification) => void) => void;
 };
 
 const useAria2 = (): Aria2Client => {
@@ -171,6 +172,39 @@ const useAria2 = (): Aria2Client => {
     [client]
   );
 
+  const handleNotification = useCallback(
+    (callback: (notification: Notification) => void) => {
+      if (!client) {
+        throw new Error("Aria2 client is not available");
+      }
+
+      client.on("onDownloadStart", (event: Notification) => {
+        callback(event);
+      });
+
+      client.on("onDownloadPause", (event: Notification) => {
+        callback(event);
+      });
+
+      client.on("onDownloadStop", (event: Notification) => {
+        callback(event);
+      });
+
+      client.on("onDownloadComplete", (event: Notification) => {
+        callback(event);
+      });
+
+      client.on("onDownloadError", (event: Notification) => {
+        callback(event);
+      });
+
+      client.on("onBtDownloadComplete", (event: Notification) => {
+        callback(event);
+      });
+    },
+    [client]
+  );
+
   return {
     client,
     isConnected,
@@ -179,6 +213,7 @@ const useAria2 = (): Aria2Client => {
     removeTask,
     pauseTask,
     restartTask,
+    handleNotification,
   };
 };
 

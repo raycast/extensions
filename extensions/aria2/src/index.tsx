@@ -4,7 +4,7 @@ import useAria2 from "./hooks/useAria2";
 import { Task, Filter } from "./types";
 
 export default function Command() {
-  const { fetchTasks, isConnected } = useAria2();
+  const { fetchTasks, isConnected, handleNotification } = useAria2();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [filter, setFilter] = useState<Filter>(Filter.All);
   const [isLoading, setIsLoading] = useState(true);
@@ -15,12 +15,28 @@ export default function Command() {
         setIsLoading(true);
         const tasks = await fetchTasks();
         setTasks(tasks);
-        console.log(tasks);
         setIsLoading(false);
       };
       fetchData();
     }
   }, [fetchTasks, isConnected]);
+
+  useEffect(() => {
+    if (isConnected) {
+      handleNotification((notification) => {
+        // 处理接收到的 Aria2 通知事件
+        console.log("Received Aria2 notification:", notification);
+        fetchData(); // 更新任务列表
+      });
+    }
+  }, [handleNotification, isConnected]);
+
+  const fetchData = useCallback(async () => {
+    setIsLoading(true);
+    const tasks = await fetchTasks();
+    setTasks(tasks);
+    setIsLoading(false);
+  }, [fetchTasks]);
 
   const filterTasks = useCallback(
     (filter: Filter): Task[] => {
@@ -46,14 +62,8 @@ export default function Command() {
   }, []);
 
   const handleActionSuccess = useCallback(() => {
-    const fetchData = async () => {
-      setIsLoading(true);
-      const tasks = await fetchTasks();
-      setTasks(tasks);
-      setIsLoading(false);
-    };
     fetchData();
-  }, [fetchTasks]);
+  }, [fetchData]);
 
   return (
     <TasksList
