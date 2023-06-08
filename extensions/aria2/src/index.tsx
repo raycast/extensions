@@ -3,33 +3,13 @@ import { TasksList } from "./components";
 import useAria2 from "./hooks/useAria2";
 import { Task, Filter } from "./types";
 
+const REFRESH_INTERVAL = 1000; // 定时器刷新间隔时间，单位为毫秒
+
 export default function Command() {
   const { fetchTasks, isConnected, handleNotification } = useAria2();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [filter, setFilter] = useState<Filter>(Filter.All);
   const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    if (isConnected) {
-      const fetchData = async () => {
-        setIsLoading(true);
-        const tasks = await fetchTasks();
-        setTasks(tasks);
-        setIsLoading(false);
-      };
-      fetchData();
-    }
-  }, [fetchTasks, isConnected]);
-
-  useEffect(() => {
-    if (isConnected) {
-      handleNotification((notification) => {
-        // 处理接收到的 Aria2 通知事件
-        console.log("Received Aria2 notification:", notification);
-        fetchData(); // 更新任务列表
-      });
-    }
-  }, [handleNotification, isConnected]);
 
   const fetchData = useCallback(async () => {
     setIsLoading(true);
@@ -37,6 +17,37 @@ export default function Command() {
     setTasks(tasks);
     setIsLoading(false);
   }, [fetchTasks]);
+
+  useEffect(() => {
+    if (isConnected) {
+      const fetchDataAndSetTasks = async () => {
+        await fetchData();
+      };
+      fetchDataAndSetTasks();
+    }
+  }, [fetchData, isConnected]);
+
+  useEffect(() => {
+    if (isConnected) {
+      handleNotification((notification) => {
+        console.log("Received Aria2 notification:", notification);
+        fetchData();
+      });
+    }
+  }, [handleNotification, isConnected, fetchData]);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      const hasActiveTasks = tasks.some((task) => task.status === "active" && parseFloat(task.progress) < 100);
+      if (hasActiveTasks) {
+        fetchData();
+      }
+    }, REFRESH_INTERVAL);
+
+    return () => {
+      clearInterval(timer);
+    };
+  }, [fetchData, tasks]);
 
   const filterTasks = useCallback(
     (filter: Filter): Task[] => {
