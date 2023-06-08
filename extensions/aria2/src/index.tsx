@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { TasksList } from "./components";
 import useAria2 from "./hooks/useAria2";
-import { Task, Filter } from "./types";
+import { Task, Filter, Status } from "./types";
 
 const REFRESH_INTERVAL = 1000;
 
@@ -53,11 +53,11 @@ export default function Command() {
     (filter: Filter): Task[] => {
       return tasks.filter((task) => {
         if (filter === Filter.Active) {
-          return task.status === "active";
+          return task.status === Status.Active;
         } else if (filter === Filter.Waiting) {
-          return task.status === "waiting";
-        } else if (filter === Filter.CompletePaused) {
-          return ["complete", "paused"].includes(task.status);
+          return task.status === Status.Waiting || task.status === Status.Paused;
+        } else if (filter === Filter.Complete) {
+          return task.status === Status.Complete;
         } else {
           return true;
         }
