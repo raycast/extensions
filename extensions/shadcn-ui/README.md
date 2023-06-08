@@ -1,6 +1,6 @@
 # shadcn/ui
 
-Raycast extension to work with [shadcn/ui](https://ui.shadcn.com/)
+Browse [shadcn/ui](https://ui.shadcn.com/) documentation, components and examples
 
 ## About shadcn/ui
 Build your component library.
@@ -10,7 +10,7 @@ Beautifully designed components that you can copy and paste into your apps. Acce
 
 ## How it works
 
-[![Watch the video](assets/demo-thumbnail.png)](https://share.cleanshot.com/zxKJx9Cd)
+[![Watch the video](assets/demo-thumbnail.png)](https://share.cleanshot.com/73CYHv9L)
 
 ## Support
 
