@@ -9,7 +9,6 @@ export default function SearchDocumentation() {
           {section.pages.map((item) => (
             <List.Item
               key={item.doc}
-              icon="shadcn-icon.png"
               title={item.name}
               actions={
                 <ActionPanel>

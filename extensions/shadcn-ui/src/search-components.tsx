@@ -48,7 +48,6 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
   return (
     <List.Item
       title={searchResult.name}
-      icon="shadcn-icon.png"
       detail={
         <List.Item.Detail
           isLoading={isLoading}

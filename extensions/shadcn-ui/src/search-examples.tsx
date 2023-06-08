@@ -60,7 +60,6 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
   return (
     <List.Item
       title={searchResult.name}
-      icon="shadcn-icon.png"
       actions={
         <ActionPanel>
           <ActionPanel.Section>
