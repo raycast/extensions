@@ -16,15 +16,6 @@
   "license": "MIT",
   "preferences": [
     {
-      "name": "plainTextMode",
-      "title": "Message Format",
-      "label": "Plain Text Mode",
-      "description": "Sets whether to show messages in plain text or HTML.",
-      "type": "checkbox",
-      "default": false,
-      "required": false
-    },
-    {
       "name": "primaryAction",
       "title": "Primary Action",
       "description": "The primary action to be performed on the selected message.",

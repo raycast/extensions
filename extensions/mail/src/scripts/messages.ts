@@ -12,7 +12,8 @@ import { isJunkMailbox, isTrashMailbox } from "../utils/mailbox";
 import { blockAnchors, hideElements } from "../utils/turndown";
 import { Validation } from "../utils/validation";
 
-const preferences: Preferences = getPreferenceValues();
+// Override plainTextMode preference until HTML formatting issues in prod build are resolved
+const preferences = { ...getPreferenceValues(), plainTextMode: true } as Preferences;
 const messageLimit = preferences.messageLimit ? parseInt(preferences.messageLimit) : 10;
 const plainTextMode = preferences.plainTextMode ?? false;
 

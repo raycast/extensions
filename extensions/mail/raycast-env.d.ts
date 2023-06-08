@@ -8,8 +8,6 @@
 /* eslint-disable @typescript-eslint/ban-types */
 
 type ExtensionPreferences = {
-  /** Message Format - Sets whether to show messages in plain text or HTML. */
-  "plainTextMode": boolean,
   /** Primary Action - The primary action to be performed on the selected message. */
   "primaryAction": "seeMessage" | "openMessage",
   /** Save Attachments To - Directory to save mail attachments. */
