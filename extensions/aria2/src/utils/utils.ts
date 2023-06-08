@@ -67,7 +67,7 @@ export function formatProgress(completedLength: string, totalLength: string): nu
 
 export function formatRemainingTime(seconds: number): string {
   if (!isFinite(seconds) || isNaN(seconds) || seconds < 0) {
-    return "Unknown";
+    return "00:00:00";
   }
 
   const remainingSeconds = Math.floor(seconds);

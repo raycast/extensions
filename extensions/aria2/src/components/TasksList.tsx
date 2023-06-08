@@ -37,7 +37,7 @@ Props) => {
         if (task.status === "active" && task.progress !== 100) {
           accessories.push(
             { tooltip: "Download Speed", text: ` ${task.downloadSpeed}`, icon: "🚀" },
-            { tooltip: "Remaining Time", text: `${task.remainingTime}`, icon: "🕐" }
+            { tooltip: "Remaining Time", text: ` ${task.remainingTime}`, icon: "🕐" }
           );
         }
 
@@ -52,7 +52,7 @@ Props) => {
               tooltip: "Task Name",
               value: task.fileName,
             }}
-            subtitle={{ tooltip: "File Size", value: `💾${task.fileSize}` }}
+            subtitle={{ tooltip: "File Size", value: `💾 ${task.fileSize}` }}
             accessories={accessories}
             actions={<TaskActions gid={task.gid} infoHash={task.infoHash} />}
           />
