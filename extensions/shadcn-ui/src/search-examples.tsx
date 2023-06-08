@@ -7,7 +7,7 @@ interface SearchResult {
   url: string;
 }
 
-export default function Command() {
+export default function SearchExamples() {
   const [data, setData] = useState<SearchResult[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -17,9 +17,7 @@ export default function Command() {
         const octokit = new Octokit();
 
         const res = (await octokit.rest.repos.getContent({
-          mediaType: {
-            format: "json",
-          },
+          mediaType: { format: "json" },
           owner: "shadcn",
           repo: "ui",
           path: "apps/www/app/examples",
@@ -33,14 +31,16 @@ export default function Command() {
               url: `https://ui.shadcn.com/examples/${e.name}`,
             }))
         );
-        setIsLoading(false);
       } catch (e) {
-        setIsLoading(false);
+        const message = e instanceof Error ? e.message : "Please try again later 🙏"
+
         await showToast({
           style: Toast.Style.Failure,
           title: "Request failed 🔴",
-          message: "Please try again later 🙏",
+          message,
         });
+      } finally {
+        setIsLoading(false);
       }
     };
 

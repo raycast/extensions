@@ -3,20 +3,54 @@ import { useCachedPromise } from "@raycast/utils";
 import fetch, { type Response } from "node-fetch";
 import yaml from "js-yaml";
 
-const onRequestError = async () => {
+const onRequestError = async (e: Error) => {
   await showToast({
     style: Toast.Style.Failure,
     title: "Request failed 🔴",
-    message: "Please try again later 🙏",
+    message: e.message || "Please try again later 🙏",
   });
 };
-export default function Command() {
+
+/*
+ /$$       /$$             /$$
+| $$      |__/            | $$
+| $$       /$$  /$$$$$$$ /$$$$$$
+| $$      | $$ /$$_____/|_  $$_/
+| $$      | $$|  $$$$$$   | $$
+| $$      | $$ \____  $$  | $$ /$$
+| $$$$$$$$| $$ /$$$$$$$/  |  $$$$/
+|________/|__/|_______/    \___/
+*/
+
+async function parseFetchResponse(response: Response) {
+  const json = (await response.json()) as
+    | {
+        name: string;
+        component: string;
+      }[]
+    | { code: string; message: string };
+
+  if (!response.ok || "message" in json) {
+    throw new Error("message" in json ? json.message : response.statusText);
+  }
+
+  return json.map((result) => {
+    return {
+      name: result.name,
+      component: result.component,
+      url: `https://ui.shadcn.com/docs/components/${result.component}`,
+    } as SearchResult;
+  });
+}
+
+export default function SearchComponents() {
   const { isLoading, data } = useCachedPromise(
     async (url: string) => {
       const response = await fetch(url);
+
       return await parseFetchResponse(response);
     },
-    ["https://ui.shadcn.com/api/component"],
+    ["https://ui.shadcn.com/api/components"],
     {
       keepPreviousData: true,
       onError: onRequestError,
@@ -30,6 +64,23 @@ export default function Command() {
       ))}
     </List>
   );
+}
+
+/*
+ /$$$$$$$              /$$               /$$ /$$
+| $$__  $$            | $$              |__/| $$
+| $$  \ $$  /$$$$$$  /$$$$$$    /$$$$$$  /$$| $$
+| $$  | $$ /$$__  $$|_  $$_/   |____  $$| $$| $$
+| $$  | $$| $$$$$$$$  | $$      /$$$$$$$| $$| $$
+| $$  | $$| $$_____/  | $$ /$$ /$$__  $$| $$| $$
+| $$$$$$$/|  $$$$$$$  |  $$$$/|  $$$$$$$| $$| $$
+|_______/  \_______/   \___/   \_______/|__/|__/
+*/
+
+interface SearchResult {
+  name: string;
+  component: string;
+  url: string;
 }
 
 function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
@@ -139,31 +190,4 @@ async function parseFetchDetailResponse(response: Response) {
   }
 
   return parseFrontMatter(mdx);
-}
-
-async function parseFetchResponse(response: Response) {
-  const json = (await response.json()) as
-    | {
-        name: string;
-        component: string;
-      }[]
-    | { code: string; message: string };
-
-  if (!response.ok || "message" in json) {
-    throw new Error("message" in json ? json.message : response.statusText);
-  }
-
-  return json.map((result) => {
-    return {
-      name: result.name,
-      component: result.component,
-      url: `https://ui.shadcn.com/docs/components/${result.component}`,
-    } as SearchResult;
-  });
-}
-
-interface SearchResult {
-  name: string;
-  component: string;
-  url: string;
 }
