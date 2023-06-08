@@ -1,6 +1,6 @@
 import { ActionPanel, Action, List, showToast, Toast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { SHADCN_URL } from './constants'
+import { SHADCN_URL } from "./constants";
 import fetch, { type Response } from "node-fetch";
 import yaml from "js-yaml";
 

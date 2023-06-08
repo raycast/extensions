@@ -1,7 +1,7 @@
 import { ActionPanel, Action, List, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { Octokit } from "octokit";
-import {OCTOKIT_CONFIG, SHADCN_URL} from "./constants";
+import { OCTOKIT_CONFIG, SHADCN_URL } from "./constants";
 
 interface SearchResult {
   name: string;
@@ -33,7 +33,7 @@ export default function SearchExamples() {
             }))
         );
       } catch (e) {
-        const message = e instanceof Error ? e.message : "Please try again later 🙏"
+        const message = e instanceof Error ? e.message : "Please try again later 🙏";
 
         await showToast({
           style: Toast.Style.Failure,
