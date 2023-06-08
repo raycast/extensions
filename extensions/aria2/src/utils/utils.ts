@@ -116,7 +116,7 @@ export function formatTasks(tasks: TaskResponse[]): Task[] {
     const progress = formatProgress(task.completedLength, task.totalLength);
     let remainingTime: string | undefined;
     let downloadSpeed: string | undefined;
-    if (task.status === "active" && progress !== "100.00%") {
+    if (task.status === "active" && progress !== 100) {
       remainingTime = calculateRemainingTime(task.completedLength, task.totalLength, task.downloadSpeed);
       downloadSpeed = formatSpeed(task.downloadSpeed);
     }
@@ -130,6 +130,15 @@ export function formatTasks(tasks: TaskResponse[]): Task[] {
       downloadSpeed,
       status: task.status as Status,
       infoHash,
+      health: 0, // 添加 health 属性
+      downloaded: "0.00 B", // 添加 downloaded 属性
+      uploaded: "0.00 B", // 添加 uploaded 属性
+      shareRatio: 0, // 添加 shareRatio 属性
+      numSeeds: 0, // 添加 numSeeds 属性
+      numPeers: 0, // 添加 numPeers 属性
+      downloadPath: "",
+      bittorrentServers: [],
+      uri: "",
     };
   });
 }

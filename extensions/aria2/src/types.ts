@@ -79,7 +79,7 @@ interface Task {
   infoHash: string;
   downloadPath: string;
   bittorrentServers: string[];
-  uri: string[];
+  uri: string;
 }
 
 interface Preferences {
