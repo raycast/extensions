@@ -1,4 +1,4 @@
-import { Color, confirmAlert, Icon, MenuBarExtra, open, showHUD } from "@raycast/api";
+import { Color, confirmAlert, Icon, MenuBarExtra, open, showHUD, launchCommand, LaunchType } from "@raycast/api";
 import removeMarkdown from "remove-markdown";
 
 import { SyncData, Task, deleteTask as apiDeleteTAsk, closeTask, updateTask } from "../api";
@@ -99,6 +99,12 @@ const MenuBarTask = ({ task, data, setData }: MenuBarTaskProps) => {
   return (
     <View>
       <MenuBarExtra.Submenu title={removeMarkdown(task.content)} icon={getPriorityIcon(task)}>
+      <MenuBarExtra.Item
+          title="Open"
+          onAction={() => launchCommand({ name: "home", type: LaunchType.UserInitiated, context: { view: `task_${task.id}` } })}
+          icon={Icon.Info}
+        />
+
         <MenuBarExtra.Item
           title="Open in Todoist"
           onAction={() => {

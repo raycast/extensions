@@ -13,6 +13,7 @@ import { getColorByKey } from "./helpers/colors";
 import { getProjectIcon } from "./helpers/projects";
 import { searchBarPlaceholder as defaultSearchBarPlaceholder } from "./helpers/tasks";
 import useSyncData from "./hooks/useSyncData";
+import TaskDetail from "./components/TaskDetail";
 
 export type ViewType = "inbox" | "today" | "upcoming" | "completed" | `project_${string}` | `label_${string}`;
 
@@ -35,6 +36,10 @@ export function Home({ launchContext }: LaunchProps) {
 
   if (error) {
     handleError({ error, title: "Unable to get Todoist data" });
+  }
+  if (view.startsWith("task_")) {
+    const taskId = view.replace("task_", "");
+    return <TaskDetail taskId={taskId} />
   }
 
   const { component, searchBarPlaceholder, navigationTitle } = useMemo(() => {
