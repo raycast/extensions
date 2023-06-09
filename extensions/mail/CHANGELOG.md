@@ -1,3 +1,3 @@
 # Mail Changelog
 
-## [Initial Version] - 2022-08-15
+## [Initial Version] - {PR_MERGE_DATE}
