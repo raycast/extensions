@@ -31,10 +31,10 @@ async function findReposWithWorktrees(searchDir: string): Promise<string[]> {
     throw err;
   });
 
-  return stdout
-    .trim()
-    .split("\n")
-    .map((line) => line.slice(0, line.lastIndexOf("/.git/worktrees")));
+  const output = stdout.trim();
+  return output.length === 0
+    ? []
+    : output.split("\n").map((line) => line.slice(0, line.lastIndexOf("/.git/worktrees")));
 }
 
 export interface Worktree {
