@@ -1,3 +1,3 @@
 # Translate.ge
 
-Georgian translation
+Raycast plugin for translating georgian words to english
