@@ -19,8 +19,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.53.1",
-    "mac-sudo-prompt": "^1.0.1"
+    "@raycast/api": "^1.53.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.5",
