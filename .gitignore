@@ -153,3 +153,6 @@ extensions/**/*.zip
 # IntelliJ / WebStorm
 .idea/
 *.iml
+
+# Raycast
+raycast-env.d.ts

@@ -14,8 +14,8 @@ export default function useStopwatches() {
     setIsLoading(false);
   };
 
-  const handleStartSW = () => {
-    startStopwatch();
+  const handleStartSW = (swName = "Untitled") => {
+    startStopwatch(swName);
     refreshSWes();
   };
 
@@ -38,10 +38,17 @@ export default function useStopwatches() {
     refreshSWes();
   };
 
+  const handleRestartSW = (stopwatch: Stopwatch) => {
+    handleStopSW(stopwatch);
+    handleStartSW(stopwatch.name);
+    refreshSWes();
+  };
+
   return {
     stopwatches,
     isLoading,
     refreshSWes,
+    handleRestartSW,
     handleStartSW,
     handleStopSW,
     handlePauseSW,
