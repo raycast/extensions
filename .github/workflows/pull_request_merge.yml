@@ -47,11 +47,14 @@ jobs:
         run: |
           images=$(gh pr view ${{ github.event.inputs.pr_number }} --json files | jq -r '.files[].path | select(endswith("png") or endswith("jpeg") or endswith("jpg"))')
           images_array=()
-          while IFS= read -r image; do
-            images_array+=("$image")
-          done <<< "$images"
+          if [[ -n "$images" ]]; then
+            echo "Images: $images"
+            while IFS= read -r image; do
+              images_array+=("$image")
+            done <<< "$images"
+          fi
           count=${#images_array[@]}
-          echo "Found $count images"
+          echo "Found images: $count"
           if [ $count -gt 0 ]; then
             brew update
             brew install imageoptim
