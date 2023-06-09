@@ -1,23 +1,66 @@
-import { Action, ActionPanel, Form, Toast, getPreferenceValues, open, popToRoot, showToast } from "@raycast/api";
-import { useCachedPromise, useCachedState, usePromise } from "@raycast/utils";
-import { addWorktree, findRepos, formatPath, getBranches, getRootDir } from "./helpers";
-import { useEffect, useState } from "react";
 import { join } from "node:path";
+import { useEffect } from "react";
+import { Action, ActionPanel, Form, Toast, getPreferenceValues, open, popToRoot, showToast } from "@raycast/api";
+import { FormValidation, useCachedPromise, useCachedState, useForm, usePromise } from "@raycast/utils";
+import { addWorktree, findRepos, formatPath, getBranches, getRootDir } from "./helpers";
 
 interface RepoConfig {
   prefix: string;
   startBranch: string;
 }
 
+interface FormValues {
+  repo: string;
+  prefix: string;
+  branch: string;
+  startBranch: string;
+}
+
+function getPath(repo: string, prefix: string, branch: string) {
+  return join(repo, "..", prefix ? `${prefix}-${branch}` : branch);
+}
+
 export default function Command() {
   const rootDir = getRootDir();
   const { data: repos, isLoading: isLoadingRepos } = useCachedPromise((searchDir) => findRepos(searchDir), [rootDir]);
   const [repoConfig, setRepoConfig] = useCachedState<Record<string, RepoConfig>>("repoConfig", {});
-  const [repo, setRepo] = useState("");
-  const [prefix, setPrefix] = useState("");
-  const [branch, setBranch] = useState("");
-  const [branchError, setBranchError] = useState("");
-  const [startBranch, setStartBranch] = useState("main");
+
+  const {
+    values: { repo, prefix, branch, startBranch },
+    setValue,
+    itemProps,
+    handleSubmit,
+  } = useForm<FormValues>({
+    initialValues: {
+      repo: "",
+      prefix: "",
+      branch: "",
+      startBranch: "main",
+    },
+    validation: {
+      repo: FormValidation.Required,
+      branch: FormValidation.Required,
+      startBranch: FormValidation.Required,
+    },
+    async onSubmit({ repo, prefix, branch, startBranch }) {
+      setRepoConfig({ ...repoConfig, [repo]: { prefix, startBranch } });
+
+      const path = getPath(repo, prefix, branch);
+
+      try {
+        await addWorktree(repo, path, branch, startBranch);
+        await open(path, getPreferenceValues<ExtensionPreferences>().editorApp.bundleId);
+        await popToRoot();
+      } catch (err) {
+        await showToast({
+          title: "Could not add worktree!",
+          message: err instanceof Error ? err.message : undefined,
+          style: Toast.Style.Failure,
+        });
+      }
+    },
+  });
+
   const { data: branches, isLoading: isLoadingBranches } = usePromise((repoDir) => getBranches(repoDir), [repo], {
     execute: repo.length > 0,
   });
@@ -32,10 +75,10 @@ export default function Command() {
     }
   }, [repos]);
 
-  // Reset the form when the repo changes
+  // Reset the rest of the form when the repo changes
   useEffect(() => {
-    setPrefix(repoConfig[repo]?.prefix ?? "");
-    setStartBranch(repoConfig[repo]?.startBranch ?? "");
+    setValue("prefix", repoConfig[repo]?.prefix ?? "");
+    setValue("startBranch", repoConfig[repo]?.startBranch ?? "");
   }, [repo]);
 
   // After the branches load, populate the start branch with the last start
@@ -47,37 +90,15 @@ export default function Command() {
 
     const config = repoConfig[repo];
     if (config) {
-      setStartBranch(config.startBranch);
+      setValue("startBranch", config.startBranch);
     } else if (branches.includes("main")) {
-      setStartBranch("main");
+      setValue("startBranch", "main");
     } else if (branches.includes("master")) {
-      setStartBranch("master");
+      setValue("startBranch", "master");
     } else {
-      setStartBranch("");
+      setValue("startBranch", "");
     }
   }, [branches, isLoadingBranches]);
-
-  const path = repo && branch ? join(repo, "..", prefix ? `${prefix}-${branch}` : branch) : null;
-
-  const handleSubmit = async () => {
-    if (!path || !startBranch) {
-      return;
-    }
-
-    setRepoConfig({ ...repoConfig, [repo]: { prefix, startBranch } });
-
-    try {
-      await addWorktree(repo, path, branch, startBranch);
-      await open(path, getPreferenceValues<ExtensionPreferences>().editorApp.bundleId);
-      await popToRoot();
-    } catch (err) {
-      await showToast({
-        title: "Could not add worktree!",
-        message: err instanceof Error ? err.message : undefined,
-        style: Toast.Style.Failure,
-      });
-    }
-  };
 
   return (
     <Form
@@ -87,42 +108,33 @@ export default function Command() {
         </ActionPanel>
       }
     >
-      {path !== null && (
-        <Form.Description
-          title="Summary"
-          text={`A new worktree will be added to ${formatPath(repo)} at ${formatPath(
-            path
-          )} with the branch ${branch} off of ${startBranch}`}
-        />
-      )}
-      <Form.Dropdown id="repo" title="Repo" isLoading={isLoadingRepos} value={repo} onChange={setRepo} storeValue>
+      {/* TODO: This element can be dynamically hidden when empty once https://github.com/raycast/extensions/issues/7016 is fixed */}
+      <Form.Description
+        title="Summary"
+        text={
+          repo &&
+          branch &&
+          `A new worktree will be added to ${formatPath(repo)} at ${formatPath(
+            getPath(repo, prefix, branch)
+          )} with the branch ${branch} off of ${startBranch}`
+        }
+      />
+      <Form.Dropdown title="Repo" isLoading={isLoadingRepos} storeValue {...itemProps.repo}>
         {repos?.map((repo) => (
           <Form.Dropdown.Item key={repo} value={repo} title={formatPath(repo)} />
         ))}
       </Form.Dropdown>
       <Form.TextField
-        id="prefix"
         title="Directory Prefix"
         placeholder="Directory prefix shared by all of this repo's new worktrees"
-        value={prefix}
-        onChange={setPrefix}
+        {...itemProps.prefix}
       />
-      <Form.TextField
-        id="branch"
-        title="New Branch Name"
-        placeholder="Name of the new worktree's branch"
-        value={branch}
-        onChange={setBranch}
-        error={branchError}
-        onBlur={() => setBranchError(branch === "" ? "Branch must not be empty" : "")}
-      />
+      <Form.TextField title="New Branch Name" placeholder="Name of the new worktree's branch" {...itemProps.branch} />
       <Form.Dropdown
-        id="startBranch"
         title="Starting Branch"
         placeholder="Name of the new branch's starting location"
         isLoading={isLoadingBranches}
-        value={startBranch}
-        onChange={setStartBranch}
+        {...itemProps.startBranch}
       >
         {!isLoadingBranches &&
           branches?.map((branch) => <Form.Dropdown.Item key={branch} value={branch} title={branch} />)}
