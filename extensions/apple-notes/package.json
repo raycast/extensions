@@ -10,7 +10,8 @@
     "mathieudutour",
     "StevenRCE0",
     "HelloImSteven",
-    "tylerwince"
+    "tylerwince",
+    "dexterleng"
   ],
   "license": "MIT",
   "commands": [
@@ -33,6 +34,13 @@
         "make note",
         "create note"
       ]
+    },
+    {
+      "name": "backlinks",
+      "title": "View Backlinks",
+      "subtitle": "Notes",
+      "description": "View notes that reference the currently open Apple Note.",
+      "mode": "view"
     }
   ],
   "preferences": [
