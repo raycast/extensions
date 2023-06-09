@@ -99,9 +99,11 @@ const MenuBarTask = ({ task, data, setData }: MenuBarTaskProps) => {
   return (
     <View>
       <MenuBarExtra.Submenu title={removeMarkdown(task.content)} icon={getPriorityIcon(task)}>
-      <MenuBarExtra.Item
+        <MenuBarExtra.Item
           title="Open"
-          onAction={() => launchCommand({ name: "home", type: LaunchType.UserInitiated, context: { view: `task_${task.id}` } })}
+          onAction={() =>
+            launchCommand({ name: "home", type: LaunchType.UserInitiated, context: { view: `task_${task.id}` } })
+          }
           icon={Icon.Info}
         />
 

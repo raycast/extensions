@@ -6,6 +6,7 @@ import CompletedTasks from "./components/CompletedTasks";
 import InboxTasks from "./components/InboxTasks";
 import LabelTasks from "./components/LabelTasks";
 import ProjectTasks from "./components/ProjectTasks";
+import TaskDetail from "./components/TaskDetail";
 import TodayTasks from "./components/TodayTasks";
 import UpcomingTasks from "./components/UpcomingTasks";
 import View from "./components/View";
@@ -13,7 +14,6 @@ import { getColorByKey } from "./helpers/colors";
 import { getProjectIcon } from "./helpers/projects";
 import { searchBarPlaceholder as defaultSearchBarPlaceholder } from "./helpers/tasks";
 import useSyncData from "./hooks/useSyncData";
-import TaskDetail from "./components/TaskDetail";
 
 export type ViewType = "inbox" | "today" | "upcoming" | "completed" | `project_${string}` | `label_${string}`;
 
@@ -36,10 +36,6 @@ export function Home({ launchContext }: LaunchProps) {
 
   if (error) {
     handleError({ error, title: "Unable to get Todoist data" });
-  }
-  if (view.startsWith("task_")) {
-    const taskId = view.replace("task_", "");
-    return <TaskDetail taskId={taskId} />
   }
 
   const { component, searchBarPlaceholder, navigationTitle } = useMemo(() => {
@@ -83,7 +79,10 @@ export function Home({ launchContext }: LaunchProps) {
   const labels = useMemo(() => {
     return data?.labels.sort((a, b) => a.item_order - b.item_order) ?? [];
   }, [data]);
-
+  if (view.startsWith("task_")) {
+    const taskId = view.replace("task_", "");
+    return <TaskDetail taskId={taskId} />;
+  }
   return (
     <List
       navigationTitle={navigationTitle}
