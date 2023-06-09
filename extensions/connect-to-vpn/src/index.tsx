@@ -1,6 +1,6 @@
-import { List, showToast, Toast, ActionPanel, Action, Icon } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { Action, ActionPanel, Icon, List, Toast, getPreferenceValues, showToast } from "@raycast/api";
 import { exec } from "child_process";
+import { useEffect, useState } from "react";
 
 export default function Command() {
   const [isLoading, setIsLoading] = useState(true);
@@ -105,6 +105,12 @@ export default function Command() {
 
         Promise.all(promises).then((services) => {
           const networkServices = services.reduce((acc, service) => {
+            if (getPreferenceValues().hideDisabled && service.status == "invalid") {
+              // Remove notice about disabled services
+              setHeader(undefined);
+              return acc;
+            }
+
             return {
               ...acc,
               [service.id]: service,
@@ -155,7 +161,7 @@ export default function Command() {
               />
             );
           } else {
-            return <List.Item icon={Icon.XmarkCircle} key={service.id} title={service.name} />;
+            return <List.Item icon={Icon.XMarkCircle} key={service.id} title={service.name} />;
           }
         })}
       </List.Section>
@@ -175,4 +181,4 @@ type NetworkServices = {
   [id: string]: NetworkService;
 };
 
-type NetworkServiceStatus = "connected" | "disconnected";
+type NetworkServiceStatus = "connected" | "disconnected" | "invalid";

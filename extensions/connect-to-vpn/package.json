@@ -5,6 +5,9 @@
   "description": "Connect to/disconnect from VPN",
   "icon": "command-icon.png",
   "author": "sato11",
+  "contributors": [
+    "rasmusbe"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -15,19 +18,29 @@
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "type": "checkbox",
+      "name": "hideDisabled",
+      "default": true,
+      "label": "Hide disabled services",
+      "description": "Hide disabled services in the network list",
+      "required": false
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.28.0"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
+    "@types/node": "^18.16.16",
+    "@types/react": "^18.2.9",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
+    "eslint": "^8.42.0",
     "eslint-config-prettier": "^8.3.0",
     "prettier": "^2.5.1",
     "react-devtools": "^4.19.2",
-    "typescript": "^4.4.3"
+    "typescript": "^5.1.3"
   },
   "scripts": {
     "build": "ray build -e dist",
