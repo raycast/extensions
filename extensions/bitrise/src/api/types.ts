@@ -52,8 +52,8 @@ export interface AppOwner {
 }
 
 export interface AppsByOwner {
-  apps: Map<AppSlug, App[]>;
-  owners: Map<OwnerSlug, AppOwner>;
+  owner: AppOwner
+  apps: App[]
 }
 
 export interface BuildsByStatus {
