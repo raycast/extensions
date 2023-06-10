@@ -35,6 +35,7 @@ import {
   copyFolderToClipboard,
   maybeMoveResultToTrash,
   lastUsedSort,
+  fixDoubleConcat,
 } from "./utils";
 
 import fse from "fs-extra";
@@ -54,6 +55,14 @@ export default function Command() {
   const [searchScope, setSearchScope] = useState<string>("");
   const [isShowingDetail, setIsShowingDetail] = useState<boolean>(true);
   const [results, setResults] = useState<SpotlightSearchResult[]>([]);
+
+  // hack to fix annoying double text during fallback. Typing helloworld results in helloworldhelloworld
+  const input = searchText;
+  console.debug("Input: " + input);
+  const fixedText = fixDoubleConcat(searchText);
+  console.debug("Fixed text: " + fixedText);
+  searchText.replace(searchText, fixedText);
+  console.debug("Search text: " + searchText);
 
   const [plugins, setPlugins] = useState<FolderSearchPlugin[]>([]);
 
