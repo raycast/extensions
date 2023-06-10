@@ -1,0 +1,57 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "typescript-to-javascript",
+  "title": "TypeScript to JavaScript",
+  "description": "Strips TypeScript code of types to be easily pluggable to a JavaScript REPL etc.",
+  "icon": "icon.png",
+  "author": "bengry",
+  "access": "private",
+  "keywords": [
+    "typescript",
+    "javascript",
+    "ts",
+    "js"
+  ],
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "paste-from-clipboard",
+      "title": "Paste as JavaScript",
+      "description": "Paste the TypeScript code in the clipboard as plain JavaScript",
+      "mode": "no-view"
+    },
+    {
+      "name": "copy-to-clipboard",
+      "title": "Copy as JavaScript",
+      "description": "Copy the TypeScript code in the clipboard as plain JavaScript",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@babel/core": "^7.22.5",
+    "@babel/preset-typescript": "^7.22.5",
+    "@raycast/api": "^1.53.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.6",
+    "@tsconfig/node18": "^2.0.1",
+    "@tsconfig/recommended": "^1.0.2",
+    "@types/babel__core": "^7.20.1",
+    "@types/node": "^18.16.17",
+    "@types/react": "18.2.10",
+    "eslint": "^8.42.0",
+    "prettier": "^2.8.8",
+    "typescript": "^5.1.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "packageManager": "yarn@3.6.0"
+}
