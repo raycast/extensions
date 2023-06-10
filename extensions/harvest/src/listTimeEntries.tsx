@@ -41,7 +41,6 @@ dayjs.extend(relativeTime);
 
 export interface Preferences {
   sortBy: "updated-desc" | "updated-asc" | "created-desc" | "created-asc" | "none";
-  timeFormat: "hours_minutes" | "decimal";
 }
 
 export default function Command() {
