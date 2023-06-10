@@ -1,31 +1,9 @@
 import { showToast, Toast, LaunchProps, List, ActionPanel, Action } from "@raycast/api";
-import { useState } from "react";
-import conjugationFR from "conjugation-fr";
+import conjugationFR, { Conjugation } from "conjugation-fr";
 
 interface ConjugationArguments {
   verb: string;
-  mode?: ModeInput;
-  tense?: TenseInput;
 }
-
-const modes = ["infinitive", "conditional", "subjunctive", "imperative", "participle"];
-const tenses = [
-  "present",
-  "imperfect",
-  "future",
-  "simple-past",
-  "perfect-tense",
-  "pluperfect",
-  "anterior-past",
-  "anterior-future",
-  "conditional-past",
-  "subjunctive-past",
-  "subjunctive-pluperfect",
-  "imperative-present",
-  "imperative-past",
-  "present-participle",
-  "past-participle",
-];
 
 const structure = {
   infinitive: ["infinitive-present"],
@@ -45,18 +23,19 @@ const structure = {
   participle: ["present-participle", "past-participle"],
 };
 
-type ModeInput = (typeof modes)[number];
-type TenseInput = (typeof tenses)[number];
+type FilteredConjugations = {
+  mode: string;
+  tense: string;
+  body: conjugationFR.Conjugation[];
+};
 
-function generateTenseTable(args: ConjugationArguments) {
-  const { verb, tense, mode } = args;
-  let output: any = [];
+type ConjugationEntry = FilteredConjugations | null;
+
+function generateTenseTable(args: ConjugationArguments): FilteredConjugations[] {
+  let output: ConjugationEntry[] = [];
+  const { verb } = args;
   try {
-    if (tense !== "" || mode !== "") {
-      output = generateTenseConjugationDict({ verb, mode, tense });
-    } else {
-      output = displayAllTenses({ verb, tense, mode });
-    }
+    output = displayAllTenses({ verb });
   } catch (error) {
     if (error instanceof Error) {
       showToast({
@@ -69,25 +48,18 @@ function generateTenseTable(args: ConjugationArguments) {
       return [];
     }
   }
-
-  return output.filter((record: any) => record !== "");
+  output = output.filter((record: ConjugationEntry) => record !== null);
+  return output as FilteredConjugations[];
 }
 
 export default function Command(props: LaunchProps<{ arguments: ConjugationArguments }>) {
-  const [searchText, setSearchText] = useState("");
   const table = generateTenseTable(props.arguments);
-  const [filteredList, filterList] = useState(table);
-
   return (
-    <List
-      onSearchTextChange={setSearchText}
-      navigationTitle="Search Conjugations"
-      searchBarPlaceholder="Search Conjugations"
-    >
+    <List filtering={true} navigationTitle="Search Conjugations" searchBarPlaceholder="Search Conjugations">
       {table.length > 0 ? (
-        filteredList.map((item: any) => (
+        table.map((item: FilteredConjugations) => (
           <List.Section key={Math.random()} title={"Tense"} subtitle={item["mode"] + "," + item["tense"]}>
-            {item["body"].map((verbTense: any) => (
+            {item["body"].map((verbTense: Conjugation) => (
               <List.Item
                 key={Math.random()}
                 title={verbTense["pronoun"]}
@@ -102,16 +74,13 @@ export default function Command(props: LaunchProps<{ arguments: ConjugationArgum
           </List.Section>
         ))
       ) : (
-        <List.EmptyView
-          icon={{ source: "https://placekitten.com/500/500" }}
-          title="We can't find what you're looking for :("
-        />
+        <List.EmptyView icon={{ source: "kitten.jpeg" }} title="We can't find what you're looking for :(" />
       )}
     </List>
   );
 }
 
-function displayAllTenses({ verb, mode, tense }: ConjugationArguments) {
+function displayAllTenses({ verb }: ConjugationArguments): ConjugationEntry[] {
   const output = [];
   for (const [mode, tenses] of Object.entries(structure)) {
     for (const tense of tenses) {
@@ -121,14 +90,13 @@ function displayAllTenses({ verb, mode, tense }: ConjugationArguments) {
   return output;
 }
 
-function generateTenseConjugationDict({ verb, mode, tense }: ConjugationArguments) {
+function generateTenseConjugationDict({ verb, mode, tense }: any): ConjugationEntry {
   const body = conjugationFR.conjugate(verb, mode ?? "", tense ?? "").filter((record) => record.pronounIndex !== -1);
-  if (body.length === 0) {
-    return "";
-  }
-  return {
-    mode: mode,
-    tense: tense,
-    body,
-  };
+  return body.length >= 0
+    ? {
+        mode: mode || "",
+        tense: tense || "",
+        body,
+      }
+    : null;
 }
