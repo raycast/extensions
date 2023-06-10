@@ -52,8 +52,8 @@ export interface AppOwner {
 }
 
 export interface AppsByOwner {
-  owner: AppOwner
-  apps: App[]
+  owner: AppOwner;
+  apps: App[];
 }
 
 export interface BuildsByStatus {

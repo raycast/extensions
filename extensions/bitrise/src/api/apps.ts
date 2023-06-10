@@ -8,10 +8,10 @@ export async function fetchApps(): Promise<AppsByOwner[]> {
 
   const appsByOwner: Map<OwnerSlug, App[]> = groupBy(apps, (app) => app.owner.slug);
   const ownerBySlug: Map<OwnerSlug, AppOwner> = apps
-    .map(a => a.owner)
+    .map((a) => a.owner)
     .reduce((map, owner) => {
-      map.set(owner.slug, owner)
-      return map
+      map.set(owner.slug, owner);
+      return map;
     }, new Map());
 
   const items: AppsByOwner[] = [];
@@ -19,7 +19,7 @@ export async function fetchApps(): Promise<AppsByOwner[]> {
     items.push({
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       owner: ownerBySlug.get(ownerSlug)!,
-      apps: ownerApps
+      apps: ownerApps,
     });
   }
   return items;
