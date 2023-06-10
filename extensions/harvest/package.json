@@ -4,6 +4,9 @@
   "description": "Access Harvest Time Entries",
   "icon": "harvest-logo-icon.png",
   "author": "eluce2",
+  "contributors": [
+    "bchopson"
+  ],
   "categories": [
     "Productivity"
   ],
@@ -115,6 +118,24 @@
       "required": false,
       "label": "Show Client Name above selected project",
       "type": "checkbox"
+    },
+    {
+      "name": "timeFormat",
+      "title": "Time Format",
+      "required": false,
+      "description": "Time Format",
+      "type": "dropdown",
+      "default": "hours_minutes",
+      "data": [
+        {
+          "title": "Hours/Minutes",
+          "value": "hours_minutes"
+        },
+        {
+          "title": "Decimal",
+          "value": "decimal"
+        }
+      ]
     }
   ],
   "dependencies": {

@@ -21,6 +21,7 @@ import {
   restartTimer,
   stopTimer,
   useCompany,
+  formatHours,
 } from "./services/harvest";
 import { HarvestTimeEntry } from "./services/responseTypes";
 import New from "./new";
@@ -40,6 +41,7 @@ dayjs.extend(relativeTime);
 
 export interface Preferences {
   sortBy: "updated-desc" | "updated-asc" | "created-desc" | "created-asc" | "none";
+  timeFormat: "hours_minutes" | "decimal";
 }
 
 export default function Command() {
@@ -115,14 +117,7 @@ export default function Command() {
     setItems(timeEntries);
 
     const dayTotal = _.sumBy(timeEntries, "hours")?.toFixed(2) ?? "";
-    if (company?.time_format === "hours_minutes") {
-      const time = dayTotal.split(".");
-      const hour = time[0];
-      const minute = parseFloat(`0.${time[1]}`) * 60;
-      setNavSubtitle(`${hour}:${minute < 10 ? "0" : ""}${minute.toFixed(0)}`);
-    } else {
-      setNavSubtitle(dayTotal);
-    }
+    setNavSubtitle(formatHours(dayTotal));
 
     refreshMenuBar();
 
@@ -267,7 +262,7 @@ export default function Command() {
               title={entry.project.name}
               accessoryTitle={`${entry.client.name}${entry.client.name && entry.task.name ? " | " : ""}${
                 entry.task.name
-              } | ${entry.hours}`}
+              } | ${formatHours(entry.hours.toFixed(2))}`}
               accessoryIcon={
                 entry.external_reference ? { source: entry.external_reference.service_icon_url } : undefined
               }

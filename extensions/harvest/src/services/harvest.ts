@@ -181,3 +181,14 @@ export async function refreshMenuBar() {
     console.log("failed to refresh menu bar");
   }
 }
+
+export function formatHours(hours: string) {
+  const { timeFormat }: Preferences = getPreferenceValues();
+  if (timeFormat === "hours_minutes") {
+    const time = hours.split(".");
+    const hour = time[0];
+    const minute = parseFloat(`0.${time[1]}`) * 60;
+    return `${hour}:${minute < 10 ? "0" : ""}${minute.toFixed(0)}`;
+  }
+  return hours;
+}
