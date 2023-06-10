@@ -10,7 +10,8 @@
   ],
   "contributes": [
     "marcjulian",
-    "iancanderson"
+    "iancanderson",
+    "mikejongbloet"
   ],
   "license": "MIT",
   "preferences": [
@@ -142,9 +143,9 @@
     },
     {
       "name": "starredNotesCommand",
-      "title": "Starred Notes",
+      "title": "Bookmarked Notes",
       "subtitle": "Obsidian",
-      "description": "Search, open, view, copy, paste and edit starred notes in Obsidian.",
+      "description": "Search, open, view, copy, paste and edit bookmarked notes in Obsidian.",
       "mode": "view",
       "arguments": [
         {
@@ -479,6 +480,67 @@
       "subtitle": "Obsidian",
       "description": "See your pinned notes at a glance and control actions from the menu bar.",
       "mode": "menu-bar"
+    },
+    {
+      "name": "appendTaskCommand",
+      "title": "Append Task",
+      "subtitle": "Obsidian",
+      "description": "Append a task to a note of your choice",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "text",
+          "placeholder": "Your task",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "dueDate",
+          "placeholder": "YYYY-MM-DD",
+          "type": "text",
+          "required": false
+        }
+      ],
+      "preferences": [
+        {
+          "description": "Path of note",
+          "name": "notePath",
+          "required": true,
+          "title": "Path of the note you wish to append the task to",
+          "type": "textfield"
+        },
+        {
+          "name": "noteTag",
+          "required": false,
+          "title": "Tag to append to the beginning of the task.",
+          "description": "Defaults to #task for compatibility with Obsidian Tasks.",
+          "type": "textfield",
+          "default": "#task"
+        },
+        {
+          "description": "Name of Obsidian vault where note is",
+          "name": "vaultName",
+          "required": false,
+          "title": "Name of Obsidian vault where note is",
+          "type": "textfield"
+        },
+        {
+          "description": "If no heading is not set, text will be appended to the end of the note",
+          "name": "heading",
+          "required": false,
+          "title": "Name of heading in note in which to append",
+          "type": "textfield"
+        },
+        {
+          "default": true,
+          "description": "Don't open note when appending.",
+          "label": "Silent Mode",
+          "name": "silent",
+          "required": false,
+          "title": "Silent Mode",
+          "type": "checkbox"
+        }
+      ]
     }
   ],
   "dependencies": {

@@ -147,32 +147,32 @@ export function QuickLookAction(props: { note: Note; notes: Note[]; vault: Vault
   return <Action.Push title="Quick Look" target={<NoteQuickLook note={note} showTitle={true} />} icon={Icon.Eye} />;
 }
 
-export function StarNoteAction(props: { note: Note; vault: Vault }) {
+export function BookmarkNoteAction(props: { note: Note; vault: Vault }) {
   const { note, vault } = props;
   const dispatch = useNotesDispatchContext();
   return (
     <Action
-      title="Star Note"
+      title="Bookmark Note"
       shortcut={{ modifiers: ["opt"], key: "p" }}
       onAction={() => {
-        dispatch({ type: NoteReducerActionType.Star, payload: { note: note, vault: vault } });
+        dispatch({ type: NoteReducerActionType.Bookmark, payload: { note: note, vault: vault } });
       }}
-      icon={Icon.Star}
+      icon={Icon.Bookmark}
     />
   );
 }
 
-export function UnstarNoteAction(props: { note: Note; vault: Vault }) {
+export function UnbookmarkNoteAction(props: { note: Note; vault: Vault }) {
   const { note, vault } = props;
   const dispatch = useNotesDispatchContext();
   return (
     <Action
-      title="Unstar Note"
+      title="Unbookmark Note"
       shortcut={{ modifiers: ["opt"], key: "p" }}
       onAction={() => {
-        dispatch({ type: NoteReducerActionType.Unstar, payload: { note: note, vault: vault } });
+        dispatch({ type: NoteReducerActionType.Unbookmark, payload: { note: note, vault: vault } });
       }}
-      icon={Icon.Star}
+      icon={Icon.Bookmark}
     />
   );
 }
@@ -282,7 +282,11 @@ export function NoteActions(props: { notes: Note[]; note: Note; vault: Vault }) 
     <React.Fragment>
       <ShowPathInFinderAction path={note.path} />
       <ShowMentioningNotesAction vault={vault} str={note.title} notes={notes} />
-      {note.starred ? <UnstarNoteAction note={note} vault={vault} /> : <StarNoteAction note={note} vault={vault} />}
+      {note.bookmarked ? (
+        <UnbookmarkNoteAction note={note} vault={vault} />
+      ) : (
+        <BookmarkNoteAction note={note} vault={vault} />
+      )}
       <CopyCodeAction note={note} />
       <EditNoteAction note={note} vault={vault} />
       <AppendToNoteAction note={note} vault={vault} />
@@ -292,6 +296,7 @@ export function NoteActions(props: { notes: Note[]; note: Note; vault: Vault }) 
       <CopyMarkdownLinkAction note={note} />
       <CopyObsidianURIAction note={note} />
       <DeleteNoteAction note={note} vault={vault} />
+      <AppendTaskAction note={note} vault={vault} />
     </React.Fragment>
   );
 }
@@ -341,4 +346,18 @@ export function OpenNoteActions(props: { note: Note; notes: Note[]; vault: Vault
       </React.Fragment>
     );
   }
+}
+
+export function AppendTaskAction(props: { note: Note; vault: Vault }) {
+  const { note, vault } = props;
+  const dispatch = useNotesDispatchContext();
+
+  return (
+    <Action.Push
+      title="Append task"
+      target={<AppendNoteForm note={note} vault={vault} dispatch={dispatch} />}
+      shortcut={{ modifiers: ["opt"], key: "a" }}
+      icon={Icon.Pencil}
+    />
+  );
 }
