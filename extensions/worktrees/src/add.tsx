@@ -69,7 +69,7 @@ export default function Command() {
     if (repos?.length === 0) {
       showToast({
         title: "No git repos",
-        message: "Could not find any git repos to create a worktree for. Try checking your repo dir setting.",
+        message: "Could not find any git repos to create a worktree for. Try checking your repo dir preference.",
         style: Toast.Style.Failure,
       });
     }
