@@ -20,6 +20,14 @@ import dayjs from "dayjs";
 import isToday from "dayjs/plugin/isToday";
 dayjs.extend(isToday);
 
+
+function tryFormatHours(hours: string | undefined) {
+  if (hours) {
+    return formatHours(hours);
+  }
+  return hours;
+}
+
 export default function Command({
   onSave = async () => {
     return;
@@ -38,7 +46,7 @@ export default function Command({
   const [tasks, setTasks] = useState<HarvestTaskAssignment[]>([]);
   const [taskId, setTaskId] = useState<string | undefined>(entry?.task.id.toString());
   const [notes, setNotes] = useState<string | undefined>(entry?.notes);
-  const [hours, setHours] = useState<string | undefined>(formatHours(entry?.hours.toFixed(2)));
+  const [hours, setHours] = useState<string | undefined>(tryFormatHours(entry?.hours?.toFixed(2)));
   const [spentDate, setSpentDate] = useState<Date>(viewDate);
   const { showClient = false } = getPreferenceValues<{ showClient?: boolean }>();
 

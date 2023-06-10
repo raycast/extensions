@@ -26,6 +26,7 @@ export function isAxiosError(error: any): error is AxiosError {
 interface Preferences {
   token: string;
   accountID: string;
+  timeFormat: "hours_minutes" | "decimal";
 }
 
 const { token, accountID }: Preferences = getPreferenceValues();
@@ -182,7 +183,7 @@ export async function refreshMenuBar() {
   }
 }
 
-export function formatHours(hours: string) {
+export function formatHours(hours: string): string {
   const { timeFormat }: Preferences = getPreferenceValues();
   if (timeFormat === "hours_minutes") {
     const time = hours.split(".");
