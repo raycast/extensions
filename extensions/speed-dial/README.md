@@ -1,3 +1,3 @@
 # Speed Dial
 
-Keep links handy for important contacts using Zoom, Teams, Google Meet, etc
+Keep links handy for important Zoom, Teams, Google Meet, etc meeting rooms

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "speed-dial",
   "title": "Speed Dial",
-  "description": "Add contacts to speed dial to start meetings with one click",
+  "description": "Stop asking for meeting URLs and add them to speed dial to open with one click",
   "icon": "command-icon.png",
   "author": "osama_aamer",
   "categories": [
@@ -12,15 +12,15 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "index",
-      "title": "View Contacts",
-      "description": "Show saved contacts",
+      "name": "list-rooms",
+      "title": "View Rooms",
+      "description": "Show a list of your saved meeting rooms",
       "mode": "view"
     },
     {
-      "name": "form",
-      "title": "Add Contact",
-      "description": "Add a new contact",
+      "name": "add-room",
+      "title": "Add Room",
+      "description": "Add a new meeting room",
       "mode": "view"
     }
   ],
