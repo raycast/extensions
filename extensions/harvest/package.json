@@ -150,10 +150,12 @@
     "@types/lodash": "^4.14.175",
     "@types/node": "^18.8.3",
     "eslint": "^7.32.0",
+    "prettier": "^2.8.7",
     "typescript": "^4.4.3"
   },
   "scripts": {
     "build": "ray build -e dist",
-    "dev": "ray develop"
+    "dev": "ray develop",
+    "lint": "ray lint"
   }
 }

@@ -20,7 +20,6 @@ import dayjs from "dayjs";
 import isToday from "dayjs/plugin/isToday";
 dayjs.extend(isToday);
 
-
 function tryFormatHours(hours: string | undefined) {
   if (hours) {
     return formatHours(hours);
