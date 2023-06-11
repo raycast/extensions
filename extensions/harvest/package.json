@@ -125,8 +125,12 @@
       "required": false,
       "description": "Time Format",
       "type": "dropdown",
-      "default": "hours_minutes",
+      "default": "company",
       "data": [
+        {
+          "title": "Company Default",
+          "value": "company"
+        },
         {
           "title": "Hours/Minutes",
           "value": "hours_minutes"

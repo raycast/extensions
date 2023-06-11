@@ -8,6 +8,7 @@ import {
   HarvestTimeEntry,
   HarvestProjectAssignment,
   HarvestUserResponse,
+  HarvestCompany,
 } from "./responseTypes";
 import { Cache, getPreferenceValues, launchCommand, LaunchType, LocalStorage } from "@raycast/api";
 import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
@@ -26,7 +27,7 @@ export function isAxiosError(error: any): error is AxiosError {
 interface Preferences {
   token: string;
   accountID: string;
-  timeFormat: "hours_minutes" | "decimal";
+  timeFormat: "hours_minutes" | "decimal" | "company";
 }
 
 const { token, accountID }: Preferences = getPreferenceValues();
@@ -183,9 +184,11 @@ export async function refreshMenuBar() {
   }
 }
 
-export function formatHours(hours: string): string {
+export function formatHours(hours: string | undefined, company: HarvestCompany | undefined): string {
+  if (!hours) return "";
   const { timeFormat }: Preferences = getPreferenceValues();
-  if (timeFormat === "hours_minutes") {
+
+  if (timeFormat === "hours_minutes" || (timeFormat === "company" && company?.time_format === "hours_minutes")) {
     const time = hours.split(".");
     const hour = time[0];
     const minute = parseFloat(`0.${time[1]}`) * 60;

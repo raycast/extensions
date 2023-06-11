@@ -116,7 +116,7 @@ export default function Command() {
     setItems(timeEntries);
 
     const dayTotal = _.sumBy(timeEntries, "hours")?.toFixed(2) ?? "";
-    setNavSubtitle(formatHours(dayTotal));
+    setNavSubtitle(formatHours(dayTotal, company));
 
     refreshMenuBar();
 
@@ -261,7 +261,7 @@ export default function Command() {
               title={entry.project.name}
               accessoryTitle={`${entry.client.name}${entry.client.name && entry.task.name ? " | " : ""}${
                 entry.task.name
-              } | ${formatHours(entry.hours.toFixed(2))}`}
+              } | ${formatHours(entry.hours.toFixed(2), company)}`}
               accessoryIcon={
                 entry.external_reference ? { source: entry.external_reference.service_icon_url } : undefined
               }
