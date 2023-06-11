@@ -14,5 +14,3 @@
 ![quick-actions](./metadata/music-3.png)
 > Quick Actions
 
-![menu-bar](./metadata/music-4.png)
-> Menu bar player
