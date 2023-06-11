@@ -235,6 +235,14 @@
       "description": "Conversation with Home Assistant Assist",
       "mode": "view",
       "subtitle": "Home Assistant"
+    },
+    {
+      "name": "connection",
+      "title": "Connection Check",
+      "description": "Check the Connection to Home Assistant",
+      "mode": "view",
+      "subtitle": "Home Assistant",
+      "disabledByDefault": true
     }
   ],
   "preferences": [

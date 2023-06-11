@@ -40,7 +40,7 @@ export interface HomeAssistantOptions {
 
 export class HomeAssistant {
   public token: string;
-  private url: string;
+  public url: string;
   public urlInternal: string | undefined;
   private _nearestURL: string | undefined;
   private httpsAgent?: Agent;
@@ -82,7 +82,8 @@ export class HomeAssistant {
         return true;
       } else {
         console.log(
-          `Current SSID (${ssid}) is not in home network list (${this.wifiSSIDs && this.wifiSSIDs.length > 0 ? this.wifiSSIDs.join(", ") : "No SSIDS defined"
+          `Current SSID (${ssid}) is not in home network list (${
+            this.wifiSSIDs && this.wifiSSIDs.length > 0 ? this.wifiSSIDs.join(", ") : "No SSIDS defined"
           })`
         );
       }
