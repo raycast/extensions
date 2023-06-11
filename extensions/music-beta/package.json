@@ -86,7 +86,7 @@
   "commands": [
     {
       "name": "quick-actions",
-      "title": "Quick actions",
+      "title": "Quick Actions",
       "description": "quick actions",
       "mode": "view",
       "keywords": [
