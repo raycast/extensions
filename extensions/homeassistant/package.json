@@ -251,16 +251,24 @@
       "type": "textfield",
       "required": false,
       "title": "Internal Home Assistant URL (optional)",
-      "description": "URL of your Home Assistant instance in your Home Network. This url is used when the current WiFI SSID is in the SSID list of your Home WiFi.",
+      "description": "URL of your Home Assistant instance in your Home Network. This url is used when the current WiFI SSID is in the SSID list of your Home WiFi or the url is pingable.",
       "placeholder": "http://homeassistant.local:8123"
     },
     {
       "name": "homeSSIDs",
       "type": "textfield",
       "required": false,
-      "title": "WiFi SSIDs of your Home Network",
+      "title": "Home Network Detection",
       "description": "A list of your Home Network WiFi SSIDs separated by a comma if you have multiple. The SSIDs are used to detect your Home WiFi. Only required if the Internal Home Assistant URL is set.",
       "placeholder": "HomeWiFi1,HomeWiFi2"
+    },
+    {
+      "name": "usePing",
+      "description": "Use ping to detect Home Network",
+      "type": "checkbox",
+      "required": false,
+      "label": "Use Ping",
+      "default": true
     },
     {
       "name": "token",
@@ -310,6 +318,7 @@
     "lodash-es": "^4.17.21",
     "node-fetch": "^2.6.1",
     "open": "^8.3.0",
+    "ping": "^0.4.4",
     "url-join": "^4.0.1",
     "ws": "^8.2.3"
   },
@@ -320,6 +329,7 @@
     "@types/node-fetch": "^2.5.12",
     "@types/url-join": "^4.0.1",
     "@types/ws": "^8.2.0",
+    "@types/ping": "^0.4.1",
     "eslint": "^7.31.0",
     "typescript": "^4.3.5"
   },

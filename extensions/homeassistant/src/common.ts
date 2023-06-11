@@ -18,7 +18,12 @@ function createHomeAssistantClient(): HomeAssistant {
   const token = preferences.token as string;
   const ignoreCerts = (preferences.ignorecerts as boolean) || false;
   const wifiSSIDs = ((preferences.homeSSIDs as string) || "").split(",").map((v) => v.trim());
-  const hac = new HomeAssistant(instance, token, ignoreCerts, { urlInternal: instanceInternal, wifiSSIDs: wifiSSIDs });
+  const usePing = preferences.usePing as boolean;
+  const hac = new HomeAssistant(instance, token, ignoreCerts, {
+    urlInternal: instanceInternal,
+    wifiSSIDs: wifiSSIDs,
+    usePing: usePing,
+  });
   return hac;
 }
 
@@ -32,6 +37,7 @@ export async function getHAWSConnection(): Promise<Connection> {
   } else {
     console.log("create new home assistant ws con");
     const instance = await ha.nearestURL();
+    console.log(`Nearest Instance URL ${instance}`);
     const auth = createLongLivedTokenAuth(instance, ha.token);
     con = await createConnection({ auth, createSocket: async () => createSocket(auth, ha.ignoreCerts) });
     return con;

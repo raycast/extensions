@@ -7,6 +7,7 @@ import { pipeline } from "stream";
 import util from "util";
 import { Agent } from "https";
 import { getWifiSSIDSync } from "./lib/wifi";
+import * as ping from "ping";
 const streamPipeline = util.promisify(pipeline);
 
 function paramString(params: { [key: string]: string }): string {
@@ -34,6 +35,7 @@ export class State {
 export interface HomeAssistantOptions {
   urlInternal?: string;
   wifiSSIDs?: string[];
+  usePing?: boolean;
 }
 
 export class HomeAssistant {
@@ -44,12 +46,14 @@ export class HomeAssistant {
   private httpsAgent?: Agent;
   private _ignoreCerts = false;
   private wifiSSIDs: string[] | undefined;
+  private usePing = true;
 
   constructor(url: string, token: string, ignoreCerts: boolean, options: HomeAssistantOptions | undefined = undefined) {
     this.token = token;
     this.url = url;
     this.urlInternal = options?.urlInternal;
     this.wifiSSIDs = options?.wifiSSIDs;
+    this.usePing = options?.usePing ?? true;
     this._ignoreCerts = ignoreCerts;
     if (this.url.startsWith("https://")) {
       this.httpsAgent = new Agent({
@@ -86,6 +90,21 @@ export class HomeAssistant {
     return false;
   }
 
+  private async pingHostSuccessful(url: string): Promise<boolean> {
+    try {
+      const u = new URL(url);
+      console.log(`ping ${u.hostname}`);
+      const res = await ping.promise.probe(u.hostname, {
+        timeout: 2,
+        extra: ["-i", "1", "-c", "1"],
+      });
+      console.log(res);
+      return res.alive;
+    } catch (error) {
+      return false;
+    }
+  }
+
   public async nearestURL(): Promise<string> {
     if (this._nearestURL && this._nearestURL.length > 0) {
       return this._nearestURL;
@@ -95,8 +114,19 @@ export class HomeAssistant {
     }
     if (this.urlInternal && this.urlInternal.length > 0) {
       if (this.isHomeSSIDActive()) {
+        console.log("Current SSID is Home Network");
         this._nearestURL = this.urlInternal;
         return this.urlInternal;
+      }
+      if (this.usePing) {
+        const res = await this.pingHostSuccessful(this.urlInternal);
+        if (res) {
+          console.log(`ping to internal host ${this.urlInternal} successful`);
+          this._nearestURL = this.urlInternal;
+          return this.urlInternal;
+        } else {
+          console.log(`internal host ${this.urlInternal} is not pingable`);
+        }
       }
     }
     this._nearestURL = this.url;
