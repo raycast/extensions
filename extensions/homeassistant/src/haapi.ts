@@ -6,6 +6,7 @@ import fs from "fs";
 import { pipeline } from "stream";
 import util from "util";
 import { Agent } from "https";
+import { getWifiSSIDSync } from "./lib/wifi";
 const streamPipeline = util.promisify(pipeline);
 
 function paramString(params: { [key: string]: string }): string {
@@ -30,14 +31,26 @@ export class State {
   public last_changed = "";
 }
 
+export interface HomeAssistantOptions {
+  urlInternal?: string;
+  wifiSSIDs?: string[];
+}
+
 export class HomeAssistant {
   public token: string;
-  public url: string;
+  private url: string;
+  public urlInternal: string | undefined;
+  private _nearestURL: string | undefined;
   private httpsAgent?: Agent;
+  private _ignoreCerts = false;
+  private wifiSSIDs: string[] | undefined;
 
-  constructor(url: string, token: string, ignoreCerts: boolean) {
+  constructor(url: string, token: string, ignoreCerts: boolean, options: HomeAssistantOptions | undefined = undefined) {
     this.token = token;
     this.url = url;
+    this.urlInternal = options?.urlInternal;
+    this.wifiSSIDs = options?.wifiSSIDs;
+    this._ignoreCerts = ignoreCerts;
     if (this.url.startsWith("https://")) {
       this.httpsAgent = new Agent({
         rejectUnauthorized: !ignoreCerts,
@@ -45,8 +58,44 @@ export class HomeAssistant {
     }
   }
 
+  public get ignoreCerts(): boolean {
+    return this._ignoreCerts;
+  }
+
   public urlJoin(text: string): string {
-    return urljoin(this.url, text);
+    const url = this._nearestURL && this._nearestURL.length > 0 ? this._nearestURL : this.url;
+    return urljoin(url, text);
+  }
+
+  public async nearestURL(): Promise<string> {
+    if (this._nearestURL && this._nearestURL.length > 0) {
+      return this._nearestURL;
+    }
+    if (!this.url || this.url.length <= 0) {
+      throw Error("No Home Assistant Url defined");
+    }
+    if (this.urlInternal && this.urlInternal.length > 0) {
+      const ssid = getWifiSSIDSync();
+      if (ssid) {
+        console.log("ssid: ", ssid);
+        if (!this.wifiSSIDs || this.wifiSSIDs.length <= 0) {
+          console.log("No WiFi SSIDs are specified to the internal url");
+        }
+        if (this.wifiSSIDs && this.wifiSSIDs.includes(ssid)) {
+          console.log(`Return internal URL ${this.urlInternal}`);
+          this._nearestURL = this.urlInternal;
+          return this.urlInternal;
+        } else {
+          console.log(
+            `Current SSID (${ssid}) is not in home network list (${
+              this.wifiSSIDs ? this.wifiSSIDs.join(", ") : "No SSIDS defined"
+            })`
+          );
+        }
+      }
+    }
+    this._nearestURL = this.url;
+    return this._nearestURL;
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

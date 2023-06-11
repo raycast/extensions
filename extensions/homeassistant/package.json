@@ -247,6 +247,22 @@
       "placeholder": "http://homeassistant.local:8123"
     },
     {
+      "name": "instanceInternal",
+      "type": "textfield",
+      "required": false,
+      "title": "Internal Home Assistant URL (optional)",
+      "description": "URL of your Home Assistant instance in your Home Network. This url is used when the current WiFI SSID is in the SSID list of your Home WiFi.",
+      "placeholder": "http://homeassistant.local:8123"
+    },
+    {
+      "name": "homeSSIDs",
+      "type": "textfield",
+      "required": false,
+      "title": "WiFi SSIDs of your Home Network",
+      "description": "A list of your Home Network WiFi SSIDs separated by a comma if you have multiple. The SSIDs are used to detect your Home WiFi. Only required if the Internal Home Assistant URL is set.",
+      "placeholder": "HomeWiFi1,HomeWiFi2"
+    },
+    {
       "name": "token",
       "type": "password",
       "required": true,
