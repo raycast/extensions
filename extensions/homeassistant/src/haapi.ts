@@ -67,6 +67,25 @@ export class HomeAssistant {
     return urljoin(url, text);
   }
 
+  private isHomeSSIDActive(): boolean {
+    const ssid = getWifiSSIDSync();
+    if (ssid) {
+      console.log("Current SSID: ", ssid);
+      if (!this.wifiSSIDs || this.wifiSSIDs.length <= 0) {
+        console.log("No WiFi SSIDs are specified for the internal url");
+      }
+      if (this.wifiSSIDs && this.wifiSSIDs.includes(ssid)) {
+        return true;
+      } else {
+        console.log(
+          `Current SSID (${ssid}) is not in home network list (${this.wifiSSIDs && this.wifiSSIDs.length > 0 ? this.wifiSSIDs.join(", ") : "No SSIDS defined"
+          })`
+        );
+      }
+    }
+    return false;
+  }
+
   public async nearestURL(): Promise<string> {
     if (this._nearestURL && this._nearestURL.length > 0) {
       return this._nearestURL;
@@ -75,23 +94,9 @@ export class HomeAssistant {
       throw Error("No Home Assistant Url defined");
     }
     if (this.urlInternal && this.urlInternal.length > 0) {
-      const ssid = getWifiSSIDSync();
-      if (ssid) {
-        console.log("ssid: ", ssid);
-        if (!this.wifiSSIDs || this.wifiSSIDs.length <= 0) {
-          console.log("No WiFi SSIDs are specified to the internal url");
-        }
-        if (this.wifiSSIDs && this.wifiSSIDs.includes(ssid)) {
-          console.log(`Return internal URL ${this.urlInternal}`);
-          this._nearestURL = this.urlInternal;
-          return this.urlInternal;
-        } else {
-          console.log(
-            `Current SSID (${ssid}) is not in home network list (${
-              this.wifiSSIDs ? this.wifiSSIDs.join(", ") : "No SSIDS defined"
-            })`
-          );
-        }
+      if (this.isHomeSSIDActive()) {
+        this._nearestURL = this.urlInternal;
+        return this.urlInternal;
       }
     }
     this._nearestURL = this.url;
@@ -113,6 +118,7 @@ export class HomeAssistant {
         },
       });
       const json = await response.json();
+      console.log("JJJ");
       return json;
     } catch (error) {
       console.log(error);
