@@ -550,6 +550,7 @@
     "yaml": "^2.1.1"
   },
   "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
     "@types/node": "~16.10.0",
     "@types/react": "^17.0.52",
     "eslint": "^8.42.0",
