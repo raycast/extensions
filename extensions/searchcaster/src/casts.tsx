@@ -1,11 +1,15 @@
 import { Action, ActionPanel, Clipboard, Icon, Image, List, showToast, Toast } from "@raycast/api";
-import { ActionsProps, Cast, CastDetailsProps } from "./types";
-import { useCastSearch, useFarcasterInstalled, linkify } from "./utils";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import got from "got";
 
+import { ActionsProps, Cast, CastDetailsProps } from "./types";
+import { useCastSearch, useFarcasterInstalled, linkify } from "./utils";
+import { useDebounce } from "./hooks/useDebounce";
+
 export default function Command() {
-  const [searchText, setSearchText] = useState<string>();
+  const [_searchText, setSearchText] = useState<string>();
+  const searchText = useDebounce(_searchText, 500);
+
   const { data, isLoading } = useCastSearch(searchText || "");
   const hasFarcaster: boolean = useFarcasterInstalled();
 

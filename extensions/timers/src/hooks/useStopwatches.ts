@@ -1,7 +1,7 @@
-import { Clipboard, environment, getPreferenceValues } from "@raycast/api";
+import { Clipboard, getPreferenceValues } from "@raycast/api";
 import { useState } from "react";
 import { formatTime } from "../formatUtils";
-import { getStopwatches, startStopwatch, stopStopwatch } from "../stopwatchUtils";
+import { getStopwatches, pauseStopwatch, startStopwatch, stopStopwatch, unpauseStopwatch } from "../stopwatchUtils";
 import { Stopwatch } from "../types";
 
 export default function useStopwatches() {
@@ -14,8 +14,18 @@ export default function useStopwatches() {
     setIsLoading(false);
   };
 
-  const handleStartSW = () => {
-    startStopwatch();
+  const handleStartSW = (swName = "Untitled") => {
+    startStopwatch(swName);
+    refreshSWes();
+  };
+
+  const handlePauseSW = (swID: string) => {
+    pauseStopwatch(swID);
+    refreshSWes();
+  };
+
+  const handleUnpauseSW = (swID: string) => {
+    unpauseStopwatch(swID);
     refreshSWes();
   };
 
@@ -24,8 +34,13 @@ export default function useStopwatches() {
     if (prefs.copyOnSwStop) {
       Clipboard.copy(formatTime(stopwatch.timeElapsed));
     }
-    setStopwatches(stopwatches?.filter((s: Stopwatch) => s.originalFile !== stopwatch.originalFile));
-    stopStopwatch(`${environment.supportPath}/${stopwatch.originalFile}`);
+    stopStopwatch(stopwatch.swID);
+    refreshSWes();
+  };
+
+  const handleRestartSW = (stopwatch: Stopwatch) => {
+    handleStopSW(stopwatch);
+    handleStartSW(stopwatch.name);
     refreshSWes();
   };
 
@@ -33,7 +48,10 @@ export default function useStopwatches() {
     stopwatches,
     isLoading,
     refreshSWes,
+    handleRestartSW,
     handleStartSW,
     handleStopSW,
+    handlePauseSW,
+    handleUnpauseSW,
   };
 }

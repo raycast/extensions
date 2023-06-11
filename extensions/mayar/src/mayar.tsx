@@ -2,16 +2,10 @@ import { List, getPreferenceValues } from "@raycast/api";
 import { useEffect, useState } from "react";
 import axios from "axios";
 
-interface Balance {
-  balanceActive: number;
-  balancePending: number;
-  balance: number;
-}
-
 interface Data {
   statusCode: number;
   messages: string;
-  data: Balance;
+  data: any;
 }
 
 function formatRp(value: number): string {
@@ -22,8 +16,8 @@ function formatRp(value: number): string {
   return formatter.format(value);
 }
 
-const fetchData = async (token: string): Promise<Data[]> => {
-  const response = await axios.get<Data[]>("https://api.mayar.id/hl/v1/balance", {
+const fetchData = async (token: string): Promise<Data> => {
+  const response = await axios.get<Data>("https://api.mayar.id/hl/v1/balance", {
     headers: {
       Authorization: `Bearer ${token}`,
     },

@@ -5,13 +5,16 @@ export interface Timer {
   secondsSet: number;
   timeLeft: number;
   originalFile: string;
+  timeEnds: Date;
 }
 
 export interface Stopwatch {
   name: string;
+  swID: string;
   timeStarted: Date;
   timeElapsed: number;
-  originalFile: string;
+  lastPaused: Date | "----";
+  pauseElapsed: number;
 }
 
 export interface Values {
@@ -20,17 +23,22 @@ export interface Values {
   seconds: string;
   name: string;
   willBeSaved: boolean;
+  selectedSound: string;
 }
 
 export interface CustomTimer {
   name: string;
   timeInSeconds: number;
+  selectedSound: string;
 }
 
 export interface Preferences {
+  showMenuBarItemWhen: "never" | "onlyWhenRunning" | "always";
   selectedSound: string;
   ringContinuously: boolean;
   copyOnSwStop: boolean;
+  volumeSetting: string;
+  showTitleInMenuBar: boolean;
 }
 
 export interface CTInlineArgs {

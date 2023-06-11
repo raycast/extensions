@@ -29,7 +29,6 @@ export default function Command() {
         setLoading(true);
         await returnBoards().then((response) => {
           setBoards(response);
-          console.log(currentBoardId);
           setLoading(false);
         });
       } catch (error) {
@@ -45,7 +44,6 @@ export default function Command() {
       setLoading(true);
       await returnLists(boardId).then((response) => {
         setLists(response);
-        console.log(currentBoardId);
         setLoading(false);
       });
     } catch (error) {

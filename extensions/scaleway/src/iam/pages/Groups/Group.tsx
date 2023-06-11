@@ -54,7 +54,7 @@ export const Group = ({ group }: GroupProps) => {
             </>
           ) : null}
 
-          {users && users?.length >= 1 ? (
+          {users && users.length >= 1 ? (
             <>
               <List.Item.Detail.Metadata.Separator />
 

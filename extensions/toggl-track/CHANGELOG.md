@@ -1,5 +1,9 @@
 # Toggl Track Changelog
 
+## [New Feature] - 2023-02-28
+
+- Display the total time tracking in the current today in the main windows navigation title.
+
 ## [Update] - 2023-02-13
 
 - Enhanced call to fetch all workspace projects to retrieve 500 instead of default page size introduced in API v9

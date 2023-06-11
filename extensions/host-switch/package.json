@@ -19,8 +19,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.45.3",
-    "@raycast/utils": "^1.4.16",
+    "@raycast/api": "^1.48.5",
+    "@raycast/utils": "^1.5.2",
     "run-applescript": "^6.1.0"
   },
   "devDependencies": {

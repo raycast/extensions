@@ -25,11 +25,24 @@ interface ExtensionPreferences {
 
 export const dummyStation: StationData = {
   name: "",
+  shortname: "",
   website: "",
+  alternateSites: [],
+  outdatedSites: [],
   stream: "",
+  alternateStreams: [],
+  outdatedStreams: [],
   genres: [],
+  slogan: "",
   description: "",
   discontinued: false,
+  location: "",
+  contacts: [],
+  callsigns: [],
+  socialProfiles: [],
+  logo: "",
+  otherImages: [],
+  policies: [],
 };
 
 interface stationList {
@@ -76,11 +89,24 @@ export async function getAllStations() {
       if (!(stationName in stations)) {
         stations[stationName] = {
           name: stationName,
+          shortname: "",
           website: "",
+          alternateSites: [],
+          outdatedSites: [],
           stream: "",
+          alternateStreams: [],
+          outdatedStreams: [],
           genres: [],
+          slogan: "",
           description: "",
           discontinued: false,
+          location: "",
+          contacts: [],
+          callsigns: [],
+          socialProfiles: [],
+          logo: "",
+          otherImages: [],
+          policies: [],
         };
       }
       stations[stationName][attribute] = trueValue;
@@ -122,7 +148,6 @@ export async function playStation(stationName: string, stationURL: string): Prom
                 if newID is not in trackIDs then
                     set theStream to track id newID
                     set name of theStream to "Raycast: ${stationName}"
-                    say "wow"
                     return contents of newID
                 end if
             end repeat
@@ -191,7 +216,11 @@ export async function playStation(stationName: string, stationURL: string): Prom
   await launchCommand({ name: "current-station", type: LaunchType.Background });
 
   if (environment.commandName != "menubar-radio") {
-    await launchCommand({ name: "menubar-radio", type: LaunchType.Background });
+    try {
+      await launchCommand({ name: "menubar-radio", type: LaunchType.Background });
+    } catch (error) {
+      console.log("Menubar Radio command is disabled.");
+    }
   }
 
   return streamID;
@@ -236,7 +265,11 @@ export async function pausePlayback() {
   await launchCommand({ name: "current-station", type: LaunchType.Background });
 
   if (environment.commandName != "menubar-radio") {
-    await launchCommand({ name: "menubar-radio", type: LaunchType.Background });
+    try {
+      await launchCommand({ name: "menubar-radio", type: LaunchType.Background });
+    } catch (error) {
+      console.log("Menubar Radio command is disabled.");
+    }
   }
 }
 
@@ -368,11 +401,24 @@ export function EditStationForm(props: {
                 stationData,
                 {
                   name: stationName,
+                  shortname: stationData.shortname,
                   website: values.websiteField,
+                  alternateSites: stationData.alternateSites,
+                  outdatedSites: stationData.outdatedSites,
                   stream: values.streamField,
+                  alternateStreams: stationData.alternateStreams,
+                  outdatedStreams: stationData.outdatedStreams,
                   genres: values.genresField,
-                  description: "",
+                  slogan: stationData.slogan,
+                  description: stationData.description,
                   discontinued: false,
+                  location: stationData.location,
+                  contacts: stationData.contacts,
+                  callsigns: stationData.callsigns,
+                  socialProfiles: stationData.socialProfiles,
+                  logo: stationData.logo,
+                  otherImages: stationData.otherImages,
+                  policies: stationData.policies,
                 },
                 setStations
               );
@@ -386,20 +432,10 @@ export function EditStationForm(props: {
         id="nameField"
         autoFocus={true}
         title="Station Name"
-        placeholder="Memorable name for the station"
+        placeholder="Full name of the station"
         defaultValue={stationName}
         error={nameError}
         onBlur={(event) => checkStationNameValidity(event.target.value || "")}
-      />
-
-      <Form.TextField
-        id="streamField"
-        title="Stream URL"
-        placeholder="URL of audio livestream"
-        error={streamError}
-        onChange={() => (streamError !== undefined ? setStreamError(undefined) : null)}
-        onBlur={(event) => checkStationStreamURLValidity(event.target.value || "")}
-        defaultValue={stationData.stream as string}
       />
 
       <Form.TextField
@@ -410,6 +446,16 @@ export function EditStationForm(props: {
         onChange={() => (websiteError !== undefined ? setWebsiteError(undefined) : null)}
         onBlur={(event) => checkStationWebsiteValidity(event.target.value || "")}
         defaultValue={stationData.website as string}
+      />
+
+      <Form.TextField
+        id="streamField"
+        title="Stream URL"
+        placeholder="URL of audio livestream"
+        error={streamError}
+        onChange={() => (streamError !== undefined ? setStreamError(undefined) : null)}
+        onBlur={(event) => checkStationStreamURLValidity(event.target.value || "")}
+        defaultValue={stationData.stream as string}
       />
 
       <Form.TagPicker

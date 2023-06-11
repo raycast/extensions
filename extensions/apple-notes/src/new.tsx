@@ -1,6 +1,7 @@
 import { Clipboard, closeMainWindow, LaunchProps } from "@raycast/api";
 import { runAppleScriptSync } from "run-applescript";
 import { setTimeout } from "timers/promises";
+import { testPermissionErrorType, showPermissionErrorHUD } from "./errors";
 
 export default async (props: LaunchProps) => {
   const fallingBack = !!props.fallbackText && props.fallbackText.length > 0;
@@ -14,7 +15,9 @@ export default async (props: LaunchProps) => {
   }
 
   await closeMainWindow();
-  runAppleScriptSync(`
+
+  try {
+    runAppleScriptSync(`
     tell application "Notes" to activate
     tell application "System Events" to keystroke "0" using command down
     tell application "System Events" to tell process "Notes" to ¬
@@ -22,14 +25,16 @@ export default async (props: LaunchProps) => {
     menu bar item 3 of menu bar 1
   `);
 
-  if (fallingBack) {
-    runAppleScriptSync(`
+    if (fallingBack) {
+      runAppleScriptSync(`
       tell application "System Events" to keystroke "v" using command down
     `);
-    if (currentClipboardContent) {
-      // Simply give it a break before restoring the clipboard
-      await setTimeout(200);
-      Clipboard.copy(currentClipboardContent ?? "");
     }
+  } catch (error) {
+    showPermissionErrorHUD(testPermissionErrorType(error));
   }
+
+  // Simply give it a break before restoring the clipboard
+  await setTimeout(200);
+  Clipboard.copy(currentClipboardContent ?? "");
 };

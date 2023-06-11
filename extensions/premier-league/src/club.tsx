@@ -6,6 +6,7 @@ import Player from "./player";
 import { TeamTeam } from "./types";
 
 function ClubProfile(props: TeamTeam) {
+  const { metadata } = props;
   return (
     <Detail
       navigationTitle={`${props.name} | Club`}
@@ -24,6 +25,36 @@ function ClubProfile(props: TeamTeam) {
             title="Capacity"
             text={props.grounds[0].capacity?.toString()}
           />
+
+          <Detail.Metadata.Separator />
+          {metadata.communities_twitter && (
+            <Detail.Metadata.Link
+              title="Twitter"
+              text={metadata.communities_twitter}
+              target={metadata.communities_twitter}
+            />
+          )}
+          {metadata.communities_facebook && (
+            <Detail.Metadata.Link
+              title="Facebook"
+              text={metadata.communities_facebook}
+              target={metadata.communities_facebook}
+            />
+          )}
+          {metadata.communities_instagram && (
+            <Detail.Metadata.Link
+              title="Instagram"
+              text={metadata.communities_instagram}
+              target={metadata.communities_instagram}
+            />
+          )}
+          {metadata.communities_youtube && (
+            <Detail.Metadata.Link
+              title="YouTube"
+              text={metadata.communities_youtube}
+              target={metadata.communities_youtube}
+            />
+          )}
         </Detail.Metadata>
       }
       actions={

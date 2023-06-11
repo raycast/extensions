@@ -1,64 +1,88 @@
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
+import { Action, ActionPanel, Icon, List, Grid } from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
-import ShowDetailsPage from "./show-details-page";
-import { findPagesByTitle, getPageData } from "./wikipedia";
+import WikipediaPage from "./components/wikipedia-page";
+import { findPagesByTitle, getPageData } from "./utils/api";
+import { toSentenceCase } from "./utils/formatting";
+import { languages, Locale, useLanguage } from "./utils/language";
+import { openInBrowser, prefersListView } from "./utils/preferences";
 
-export default function SearchPage() {
-  const [search, setSearch] = useState("");
-  const [language, setLanguage] = useState("en");
-  const { data, isLoading } = usePromise(findPagesByTitle, [search, language]);
+const View = prefersListView ? List : Grid;
+
+export default function SearchPage(props: { arguments: { title: string } }) {
+  const [language, setLanguage] = useLanguage();
+  const [search, setSearch] = useState(props.arguments.title);
+  const { data, isLoading } = useCachedPromise(findPagesByTitle, [search, language]);
 
   return (
-    <List
+    <View
       throttle
       isLoading={isLoading}
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      fit={Grid.Fit.Fill}
+      searchText={search}
       onSearchTextChange={setSearch}
       searchBarPlaceholder="Search pages by name..."
       searchBarAccessory={
-        <List.Dropdown tooltip="Language" storeValue onChange={setLanguage}>
-          <List.Dropdown.Item title="English" value="en" />
-          <List.Dropdown.Item title="German" value="de" />
-          <List.Dropdown.Item title="French" value="fr" />
-          <List.Dropdown.Item title="Japanese" value="ja" />
-          <List.Dropdown.Item title="Spanish" value="es" />
-          <List.Dropdown.Item title="Russian" value="ru" />
-          <List.Dropdown.Item title="Portuguese" value="pt" />
-          <List.Dropdown.Item title="Italian" value="it" />
-          <List.Dropdown.Item title="Chinese" value="zh" />
-          <List.Dropdown.Item title="Persian" value="fa" />
-          <List.Dropdown.Item title="Arabic" value="ar" />
-          <List.Dropdown.Item title="Polish" value="pl" />
-          <List.Dropdown.Item title="Dutch" value="nl" />
-          <List.Dropdown.Item title="Turkish" value="tr" />
-          <List.Dropdown.Item title="Greek" value="el" />
-        </List.Dropdown>
+        <View.Dropdown tooltip="Language" value={language} onChange={(value) => setLanguage(value as Locale)}>
+          {languages.map((language) => (
+            <View.Dropdown.Item
+              key={language.value}
+              icon={language.icon}
+              title={language.title}
+              value={language.value}
+            />
+          ))}
+        </View.Dropdown>
       }
     >
       {data?.language === language &&
-        data?.results.map((title) => <PageItem key={title} title={title} language={language} />)}
-    </List>
+        data?.results.map((title: string) => <PageItem key={title} title={title} language={language} />)}
+    </View>
   );
 }
 
 function PageItem({ title, language }: { title: string; language: string }) {
-  const { data: page } = usePromise(getPageData, [title, language]);
+  const { data: page } = useCachedPromise(getPageData, [title, language]);
 
   return (
-    <List.Item
+    <View.Item
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      content={{ source: page?.thumbnail?.source || Icon.Image }}
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
       icon={{ source: page?.thumbnail?.source || "../assets/wikipedia.png" }}
       id={title}
       title={title}
-      subtitle={page?.description}
+      subtitle={page?.description ? toSentenceCase(page.description) : ""}
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser url={page?.content_urls.desktop.page || ""} />
-          {page && <Action.Push icon={Icon.Window} title={"Show Details"} target={<ShowDetailsPage page={page} />} />}
-          <Action.CopyToClipboard
-            shortcut={{ modifiers: ["cmd"], key: "." }}
-            title="Copy URL"
-            content={page?.content_urls.desktop.page || ""}
-          />
+          {openInBrowser ? (
+            <>
+              <Action.OpenInBrowser url={page?.content_urls.desktop.page || ""} />
+              <Action.Push icon={Icon.Window} title="Show Details" target={<WikipediaPage title={title} />} />
+            </>
+          ) : (
+            <>
+              <Action.Push icon={Icon.Window} title="Show Details" target={<WikipediaPage title={title} />} />
+              <Action.OpenInBrowser url={page?.content_urls.desktop.page || ""} />
+            </>
+          )}
+          <ActionPanel.Section>
+            <Action.CopyToClipboard
+              shortcut={{ modifiers: ["cmd"], key: "." }}
+              title="Copy URL"
+              content={page?.content_urls.desktop.page || ""}
+            />
+            <Action.CopyToClipboard shortcut={{ modifiers: ["cmd"], key: "," }} title="Copy Title" content={title} />
+            <Action.CopyToClipboard
+              shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
+              title="Copy Subtitle"
+              content={page?.description ?? ""}
+            />
+          </ActionPanel.Section>
         </ActionPanel>
       }
     />

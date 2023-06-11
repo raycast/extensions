@@ -1,8 +1,9 @@
 import { List, ActionPanel, Action, popToRoot, showToast, Toast, Form } from "@raycast/api";
 import { usePromise, useForm } from "@raycast/utils";
-import { fromUnixTime, differenceInDays } from "date-fns";
-import { Goal, GoalResponse, DataPointFormValues } from "./types";
+import moment from "moment";
+import { Goal, GoalResponse, DataPointFormValues, Preferences } from "./types";
 import { fetchGoals, sendDatapoint } from "./api";
+import { getPreferenceValues } from "@raycast/api";
 
 export default function Command() {
   const { isLoading, data: goals, revalidate: fetchData } = usePromise(fetchGoals);
@@ -81,18 +82,39 @@ export default function Command() {
   }
 
   function GoalsList({ goalsData }: { goalsData: GoalResponse }) {
+    const { beeminderUsername } = getPreferenceValues<Preferences>();
     const goals = Array.isArray(goalsData) ? goalsData : undefined;
     return (
       <List isLoading={isLoading}>
         {goals?.map((goal: Goal) => {
-          const [beforeIn, afterIn] = goal.limsum.split("+")?.[1].split(" (")?.[0].split(" in ");
+          const diff = moment.unix(goal.losedate).diff(new Date());
+          const timeDiffDuration = moment.duration(diff);
+          const dayDifference = moment.unix(goal.losedate).diff(new Date(), "days");
+          const goalRate = goal.rate % 1 === 0 ? goal.rate : goal.rate.toFixed(2);
+
           let goalIcon;
 
-          if (differenceInDays(fromUnixTime(goal.losedate), new Date()) < 1) {
+          let dueText = `${goalRate} ${goal.gunits} due in `;
+          if (dayDifference > 1) {
+            dueText += `${dayDifference} days`;
+          } else if (dayDifference === 1) {
+            dueText += `${dayDifference} day`;
+          }
+
+          if (dayDifference < 1) {
             goalIcon = "🔴";
-          } else if (differenceInDays(fromUnixTime(goal.losedate), new Date()) < 2) {
+            // When dayDifference is less than one, express due time in hours and/or minutes
+            const hours = timeDiffDuration.hours();
+            const minutes = timeDiffDuration.minutes();
+            if (hours > 0) {
+              dueText += hours > 1 ? `${hours} hours` : `${hours} hour`;
+            }
+            if (minutes > 0) {
+              dueText += minutes > 1 ? ` ${minutes} minutes` : ` ${minutes} minute`;
+            }
+          } else if (dayDifference < 2) {
             goalIcon = "🟠";
-          } else if (differenceInDays(fromUnixTime(goal.losedate), new Date()) < 3) {
+          } else if (dayDifference < 3) {
             goalIcon = "🔵";
           } else {
             goalIcon = "🟢";
@@ -104,16 +126,25 @@ export default function Command() {
               title={goal.slug}
               subtitle={`Pledged $${goal.pledge}`}
               accessories={[
-                { text: `Due ${beforeIn} ${goal.gunits} in ${afterIn}`, icon: goalIcon },
+                {
+                  text: dueText,
+                },
+                {
+                  icon: goalIcon,
+                },
               ]}
               keywords={[goal.slug, goal.title]}
               actions={
                 <ActionPanel>
                   <Action.Push
-                    title="Enter datapoint"
+                    title="Enter Datapoint"
                     target={<DataPointForm goalSlug={goal.slug} />}
                   />
-                  <Action title="Refresh data" onAction={async () => await fetchData()} />
+                  <Action.OpenInBrowser
+                    title="Open Goal in Beeminder"
+                    url={`https://www.beeminder.com/${beeminderUsername}/${goal.slug}`}
+                  />
+                  <Action title="Refresh Data" onAction={async () => await fetchData()} />
                 </ActionPanel>
               }
             />

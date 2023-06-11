@@ -45,12 +45,9 @@ export default function Command() {
   LocalStorage.getItem("-last-station-name").then((stationName) => setLastStationName(stationName as string));
 
   const listItems = Object.entries(stations)
+    .filter(([, stationData]) => genreSelection == "All Genres" || stationData.genres.includes(genreSelection))
     .sort(([a], [b]) => (a.toLowerCase() > b.toLowerCase() ? 1 : -1))
     .map(([stationName, stationData]) => {
-      if (genreSelection != "All Genres" && !stationData.genres.includes(genreSelection)) {
-        return;
-      }
-
       const accessories = [];
       if (currentStationName == stationName) {
         // Add "Now Playing" icon
@@ -124,7 +121,7 @@ export default function Command() {
   return (
     <List
       isLoading={waitingForAction}
-      searchBarPlaceholder={`Search ${Object.entries(stations).length || ""} radio stations...`}
+      searchBarPlaceholder={listItems.length > 1 ? `Search ${listItems.length} radio stations...` : "Search..."}
       searchBarAccessory={<GenreDropdown onGenreSelection={setGenreSelection} />}
       isShowingDetail={showDetails}
     >

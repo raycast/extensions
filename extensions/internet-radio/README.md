@@ -7,7 +7,7 @@ Note: When adding URLs, they must be URLs that Music.app can play. For a lot of 
 ## Commands
 
 - Search Stations
-    - Search a database of known radio stations, optionally playing them or saving them for later
+    - Search a database of 1500+ radio stations, optionally playing them or saving them for later
 - Browse Saved Stations
     - Browse the list of saved stations, and edit or delete stations, and control playback.
 - New Station
@@ -45,5 +45,6 @@ For help finding internet radio stations and their stream URLs, take a look at m
 
 You can use the import and export capabilities of the extension to share sets of radio stations, or to quickly load many stations that you're interested in. Here are some station sets to get you started:
 
-- [Classical Radio Stations](https://gist.github.com/SKaplanOfficial/ff7b8dd2c877f8aaee2e3e3c8d49a0f9)
+- [Classical Music Stations](https://gist.github.com/SKaplanOfficial/ff7b8dd2c877f8aaee2e3e3c8d49a0f9)
 - [Hawaiian Music Stations](https://gist.github.com/SKaplanOfficial/40b689444fe2362902ed220a76f9066b)
+- [Movie Soundtrack Stations](https://raw.githubusercontent.com/SKaplanOfficial/internet-radio/main/station-sets/genre-soundtracks.json)

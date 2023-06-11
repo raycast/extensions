@@ -1,5 +1,85 @@
 # Bitwarden Changelog
 
+## [New Preference] - 2023-06-03
+
+- Added preference to change the window behaviour when copying values
+
+## [New Command] - 2023-05-31
+
+- Added Logout command
+
+## [Search Vault Command Improvements] - 2023-05-22
+
+- Added a Folder Dropdown to filter the list by folder
+- Each item now displays an icon that represents its type
+- Allow to search by item type (e.g. login)
+- Display a different image depending on the card brand
+
+## [Fix] - 2023-05-19
+
+- Avoid displaying timeout info label on Unlock Form when the preference is Never 
+- Fix crashing when getting the name of the frontmost application
+
+## [Improvements to Actions] - 2023-05-18
+
+- Add "Show Identity" action for identity vault items
+- Change "Show Card" action details view to a table format
+- Add actions with shortcuts to copy Card and Identity fields in the details view
+- General action improvements: Better order, labels, icons and section titles
+
+## [New Command] - 2023-05-18
+
+- Add Lock Vault command
+
+## [Fix] - 2023-05-16
+
+- Fixed Generate Password (Quick) command not copying password before pasting
+
+## [Improvement] - 2023-05-12
+
+- Add different icons for each command
+
+## [Fix] - 2023-05-08
+
+- Hopefully fixed a bug that caused the extension to keep logging out right after logging in.
+
+## [Improvement] - 2023-05-04
+
+- Use session token on every bitwarden cli command
+
+## [Performance Improvement] - 2023-04-03
+
+- Implemented caching of vault items (only safe values) to speed up the Search Vault command loading time.
+
+## [Improvement] - 2023-04-03
+
+- Display better login/unlock error messages
+- Allow to copy the last login/unlock error to debug issues
+
+## [Fix] - 2023-03-29
+
+- Fix copy TOTP action
+
+## [Vault Timeout and Reprompting] - 2023-03-25
+
+- Added a Vault Timeout options that locks your vault after a certain time of inactivity
+- Added password reprompt for Notes, Cards and Identity details
+
+## [Copy Enhancement] - 2023-03-16
+
+- Change copy actions to use the transient flag
+- Added options to choose, per command, if values should be copied as transient
+
+## [Updates] - 2023-03-13
+
+- Added a "Generate Password (Quick)" command that allows to quickly generate a password and copy and/or paste it right away.
+- Added "Show Card Details" action for vault items.
+- Added a new action to the vault items that allows you to open the main URI in the browser.
+
+## [Codebase Refactor] - 2023-03-03
+
+- Cleanup and reorganization of the whole codebase
+
 ## [Enhancements] - 2023-01-17
 
 - Added master password re-prompt feature.

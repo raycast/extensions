@@ -59,12 +59,12 @@ export default function GetTables() {
 
               if (position < startingPosition) {
                 icon = {
-                  source: Icon.ChevronUp,
+                  source: Icon.ChevronUpSmall,
                   tintColor: Color.Green,
                 };
               } else if (position > startingPosition) {
                 icon = {
-                  source: Icon.ChevronDown,
+                  source: Icon.ChevronDownSmall,
                   tintColor: Color.Red,
                 };
               }
@@ -81,21 +81,8 @@ export default function GetTables() {
               ];
 
               if (!showStats) {
-                accessories.unshift(
-                  {
-                    icon: Icon.SoccerBall,
-                    text: overall.played.toString(),
-                    tooltip: "Played",
-                  },
-                  {
-                    icon: Icon.Goal,
-                    text: `${overall.goalsFor} - ${overall.goalsAgainst}`,
-                    tooltip: "Goals For - Goals Against",
-                  }
-                );
-
                 if (Array.isArray(form)) {
-                  form.forEach((m) => {
+                  form.reverse().forEach((m) => {
                     const isHome = m.teams[0].team.shortName === team.shortName;
 
                     let isWinner;
@@ -112,7 +99,7 @@ export default function GetTables() {
                       tintColor = Color.SecondaryText;
                     }
 
-                    accessories.push({
+                    accessories.unshift({
                       icon: {
                         source: Icon.CircleFilled,
                         tintColor,
@@ -121,6 +108,19 @@ export default function GetTables() {
                     });
                   });
                 }
+
+                accessories.unshift(
+                  {
+                    icon: Icon.SoccerBall,
+                    text: overall.played.toString(),
+                    tooltip: "Played",
+                  },
+                  {
+                    icon: Icon.Goal,
+                    text: `${overall.goalsFor} - ${overall.goalsAgainst}`,
+                    tooltip: "Goals For - Goals Against",
+                  }
+                );
 
                 if (next) {
                   const nextTeam = next.teams.find(

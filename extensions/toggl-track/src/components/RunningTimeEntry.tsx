@@ -16,6 +16,7 @@ function RunningTimeEntry({ runningTimeEntry }: { runningTimeEntry: TimeEntry })
     try {
       await toggl.stopTimeEntry({ id: runningTimeEntry.id, workspaceId: runningTimeEntry.workspace_id });
       await storage.runningTimeEntry.refresh();
+      await storage.timeEntries.refresh();
       await showToast(Toast.Style.Success, `Stopped time entry`);
     } catch (e) {
       await showToast(Toast.Style.Failure, "Failed to stop time entry");

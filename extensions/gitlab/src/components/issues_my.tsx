@@ -30,6 +30,7 @@ function MyIssueList(props: {
       searchBarPlaceholder="Search issues by name..."
       isLoading={props.isLoading}
       searchBarAccessory={props.searchBarAccessory}
+      throttle
     >
       <List.Section title={props.title} subtitle={issues?.length.toString() || ""}>
         {issues?.map((issue) => (

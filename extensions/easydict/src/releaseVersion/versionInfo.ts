@@ -1,8 +1,8 @@
 /*
  * @author: tisfeng
  * @createTime: 2022-07-01 19:05
- * @lastEditor: Tisfeng
- * @lastEditTime: 2022-12-16 17:59
+ * @lastEditor: tisfeng
+ * @lastEditTime: 2023-05-17 23:05
  * @fileName: versionInfo.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -26,26 +26,34 @@ export class Easydict {
   static repo = "Raycast-Easydict";
 
   // * NOTE: this is new version info, don't use it directly. Use getCurrentStoredVersionInfo() instead.
-  version = "2.7.2";
-  buildNumber = 21;
-  versionDate = "2023-01-17";
+  version = "2.9.0";
+  buildNumber = 26;
+  versionDate = "2023-05-17";
   isNeedPrompt = true;
   hasPrompted = false; // * always default false, only show once, then should be set to true.
 
   releaseMarkdown = `
 ## [v${this.version}] - ${this.versionDate}
 
-### 🐞 修复
+### ✨ 新功能
 
-- 修复了 Bing 翻译失败问题。
+- 添加了 OCR 截图翻译功能，感谢 [aidevjoe](https://github.com/aidevjoe) 的 PR。
+
+![](https://github-production-user-asset-6210df.s3.amazonaws.com/25194972/238993145-9dbe2fbb-8407-49bc-8909-adb0515e850e.png)
 
 #### 如果觉得这个扩展还不错，给个 [Star](https://github.com/tisfeng/Raycast-Easydict) ⭐️ 支持一下吧 (^-^)
 
+## 推荐
+
+我另一个项目，[Easydict](https://github.com/tisfeng/Easydict) ，一个简洁优雅的翻译词典 macOS App。开箱即用，支持离线 OCR 识别，支持有道词典，🍎苹果系统翻译，DeepL，谷歌，百度和火山翻译。
+
+![iShot_2023-03-17_18.01.22_11zon-1679050206](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/iShot_2023-03-17_18.01.22_11zon-1679050206.jpg)
+
 ---
 
-### 🐞 Fixes
+### ✨ New Features
 
-- Fixed Bing translation failed.
+- Added OCR screenshot translation command, thanks to [aidevjoe](https://github.com/aidevjoe)'s PR.
 `;
 
   getRepoUrl() {

@@ -10,6 +10,11 @@ const SearchResultItem = ({ result }: { result: SearchResult }) => (
       <ActionPanel>
         <Action.Open title="Open in DEVONthink" target={`x-devonthink-item://${result.uuid}`} />
         <Action.Open title="Open in the default app" target={result.path} />
+        <Action.CopyToClipboard title="Copy Item Link" content={`x-devonthink-item://${result.uuid}`} />
+        <Action.CopyToClipboard
+          title="Copy Markdown Link"
+          content={`[${result.name}](x-devonthink-item://${result.uuid})`}
+        />
         <Action.Open title="Reveal in DEVONthink" target={`x-devonthink-item://${result.uuid}?reveal=1`} />
       </ActionPanel>
     }
@@ -33,7 +38,6 @@ const searchResultMetadataItems = (result: SearchResult) => {
         <Tag key={tag} text={tag} />
       ))}
     </TagList>,
-    <MyLabel key="geolocation" propKey="propertyGeolocation" title="Geolocation" text={result.geolocation} />,
     <MyLink key="url" propKey="propertyUrl" title="URL" text={getDomain(result.url)} target={result.url} />,
     <MyLabel
       key="creationDate"

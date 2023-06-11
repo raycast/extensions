@@ -1,11 +1,13 @@
 import { type FC, useCallback, useEffect, useMemo, useState } from "react";
-import { List, ActionPanel, Action, Icon, closeMainWindow, PopToRootType, Color } from "@raycast/api";
+import { List, ActionPanel, Action, Icon, closeMainWindow, PopToRootType, Color, Image } from "@raycast/api";
+import { getFavicon } from "@raycast/utils";
 import type { Host } from "./types";
-import { type WithBrowser, withBrowser } from "./lib/withBrowser";
+import { withBrowser, useBrowser } from "./lib/withBrowser";
 import { useCachedHosts } from "./hooks/useCachedHosts";
 import { useDebouncedQuery } from "./hooks/useDebouncedQuery";
 
-export const Switch: FC<WithBrowser> = ({ browser }) => {
+export const Switch: FC = () => {
+  const browser = useBrowser();
   const { hosts, addHost, deleteHost } = useCachedHosts();
   const { query, filter, setQuery } = useDebouncedQuery();
   const [currentHost, setCurrentHost] = useState<string | undefined>();
@@ -67,8 +69,6 @@ export const Switch: FC<WithBrowser> = ({ browser }) => {
   );
 };
 
-export default withBrowser(Switch);
-
 export interface HostItemProps {
   host: Host;
   onSwitch: (host: Host) => Promise<void>;
@@ -76,21 +76,35 @@ export interface HostItemProps {
 }
 
 export const HostItem = ({ host, onSwitch, onDelete }: HostItemProps) => {
+  const browser = useBrowser();
   const switchHost = useCallback(() => onSwitch(host), [host]);
   const deleteAction = useCallback(() => onDelete && onDelete(host), [host]);
+  const openInNewTab = useCallback(async () => {
+    browser.openUrl(host.host);
+    await closeMainWindow({
+      popToRootType: PopToRootType.Immediate,
+      clearRootSearch: true,
+    });
+  }, [host]);
 
   return (
     <List.Item
       title={host.host}
-      icon={Icon.Globe}
+      icon={
+        host.isLocal
+          ? Icon.Link
+          : getFavicon(host.host, {
+              mask: Image.Mask.RoundedRectangle,
+            })
+      }
       accessories={[
-        { icon: `${host.host}/favicon.ico` },
         { text: host.isLocal ? { value: "local", color: Color.Yellow } : { value: "remote", color: Color.Blue } },
       ]}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
             <Action title="Switch Host" icon={Icon.Switch} onAction={switchHost} />
+            <Action title="Open in New Tab" icon={Icon.Plus} onAction={openInNewTab} />
             {onDelete && <Action title="Delete Host" icon={Icon.Trash} onAction={deleteAction} />}
           </ActionPanel.Section>
         </ActionPanel>
@@ -111,3 +125,5 @@ export const NewHostItem = ({ host, onSwitch }: NewHostItemProps) => {
   };
   return <HostItem host={newHost} onSwitch={() => onSwitch(newHost)} />;
 };
+
+export default withBrowser(Switch);

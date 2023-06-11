@@ -14,7 +14,7 @@ import { getNotificationMenuBarIcon, getNotificationMenuBarTitle, getNotificatio
 import { getUserIcon } from "./helpers/users";
 import useNotifications from "./hooks/useNotifications";
 
-const preferences = getPreferenceValues<{ alwaysShow: boolean }>();
+const preferences = getPreferenceValues<Preferences.UnreadNotifications>();
 
 function UnreadNotifications() {
   const { isLoadingNotifications, unreadNotifications, urlKey, mutateNotifications } = useNotifications();

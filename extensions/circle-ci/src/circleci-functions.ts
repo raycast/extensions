@@ -2,7 +2,7 @@ import { getPreferenceValues } from "@raycast/api";
 import fetch from "node-fetch";
 import { Job, Pipeline, Preferences, Workflow } from "./types";
 
-const { apiKey }: Preferences = getPreferenceValues();
+const { apiKey, myPipelines }: Preferences = getPreferenceValues();
 
 export const circleCIListProjects = (): Promise<string[]> => {
   return fetch("https://circleci.com/api/v1.1/me", headers)
@@ -16,11 +16,15 @@ export const circleCIListProjects = (): Promise<string[]> => {
 export const circleCIProjectPipelines = (uri: string): Promise<Pipeline[]> =>
   projectPipelines(uriToVCSAndFullName(uri));
 
-const projectPipelines = ({ vcs, full_name }: { vcs: string; full_name: string }) =>
-  fetch(`https://circleci.com/api/v2/project/${vcs}/${full_name}/pipeline`, headers)
+const projectPipelines = ({ vcs, full_name }: { vcs: string; full_name: string }) => {
+  const baseUrl = `https://circleci.com/api/v2/project/${vcs}/${full_name}/pipeline`;
+  const filteredUrl = baseUrl + (myPipelines ? "/mine" : "");
+
+  return fetch(filteredUrl, headers)
     .then((resp) => resp.json())
     .then((json) => json as { items: Pipeline[] })
     .then((json) => json.items);
+};
 
 export const circleCIWorkflows = ({ id }: { id: string }): Promise<Workflow[]> =>
   fetch(`https://circleci.com/api/v2/pipeline/${id}/workflow`, headers)

@@ -38,17 +38,17 @@ export function useTodoList() {
   const [newTodo, setNewTodo] = useState<Todo | null>(null)
   const [searchText, setSearchText] = useState<string>('')
   const { filterTodo, setFilterTodo } = useFilter()
-  const { preferences, revalidate: mutatePreferences } = useLocalPreferences()
 
+  const { preferences, revalidatePreferences } = useLocalPreferences()
   const { statuses } = useStatuses(preferences.databaseName)
   const { todos, isLoading, mutate } = useTodos({
     databaseId: preferences.databaseId,
     filter: filterTodo,
   })
 
-  const {
-    data: { projects, projectsById },
-  } = useProjects(preferences.properties?.relatedDatabase?.databaseId)
+  const { projects, projectsById } = useProjects(
+    preferences.properties?.relatedDatabase?.databaseId
+  )
   const { tags } = useTags(preferences.databaseName)
   const { users } = useUsers()
 
@@ -474,7 +474,7 @@ export function useTodoList() {
     filterTodo,
     resetFilter,
     searchText,
-    mutatePreferences,
+    mutatePreferences: revalidatePreferences,
     isNotionInstalled,
   }
 }

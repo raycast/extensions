@@ -1,5 +1,5 @@
 import { XcodeSimulatorService } from "./services/xcode-simulator.service";
-import { closeMainWindow, launchCommand, LaunchProps, LaunchType, showHUD, showToast, Toast } from "@raycast/api";
+import { closeMainWindow, launchCommand, LaunchProps, LaunchType, showToast, Toast } from "@raycast/api";
 import {
   XcodeSimulatorOpenUrlError,
   XcodeSimulatorOpenUrlErrorReason,

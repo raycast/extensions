@@ -1,5 +1,11 @@
 # Grafbase Changelog
 
+## 2023-02-27
+
+- Use a better logo and shorter command name
+- Handle scoped access tokens
+- Improve error handling
+
 ## [Initial Version] - 2023-02-14
 
 - Search projects

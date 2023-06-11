@@ -36,7 +36,10 @@
 ## Information
 
 - [Best Practices](information/best-practices.md)
-- [CLI](information/cli.md)
+- [Tools](information/tools/README.md)
+  - [CLI](information/tools/cli.md)
+  - [ESLint](information/tools/eslint.md)
+  - [VS Code (community tool)](information/tools/vscode.md)
 - [File Structure](information/file-structure.md)
 - [Lifecycle](information/lifecycle/README.md)
   - [Arguments](information/lifecycle/arguments.md)
@@ -49,6 +52,7 @@
 
 ## API Reference
 
+- [AI](api-reference/ai.md)
 - [Cache](api-reference/cache.md)
 - [Clipboard](api-reference/clipboard.md)
 - [Environment](api-reference/environment.md)
@@ -81,4 +85,6 @@
   - [v1.28.0](migration/v1.28.0.md)
   - [v1.31.0](migration/v1.31.0.md)
   - [v1.37.0](migration/v1.37.0.md)
+  - [v1.48.8](migration/v1.48.8.md)
+  - [v1.50.0](migration/v1.50.0.md)
 - [FAQ](faq.md)

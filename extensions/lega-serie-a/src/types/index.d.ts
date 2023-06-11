@@ -178,6 +178,12 @@ export interface Match {
   weather: string;
 }
 
+export interface Broadcaster {
+  url: string;
+  name: string;
+  image: string;
+}
+
 export interface Teams {
   name: string;
   type: string;

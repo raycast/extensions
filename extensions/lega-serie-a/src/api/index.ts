@@ -15,6 +15,7 @@ import {
   SerieAPlayer,
   Club,
 } from "../types";
+import { Championship, CoppaRounds, Round } from "../types/coppa";
 
 const { language } = getPreferenceValues();
 const cache = new Cache();
@@ -99,13 +100,20 @@ export const getStandings = async (season: string): Promise<Standing[]> => {
 
 export const getMatches = async (
   season: string,
-  matchday: number
+  params: object
 ): Promise<Match[]> => {
   const [title, season_id] = season.split("_");
 
   const config: AxiosRequestConfig = {
     method: "GET",
-    url: `${endpoint}/stats/live/match?extra_link=&order=oldest&lang=en&season_id=${season_id}&match_day_id=${matchday}`,
+    url: `${endpoint}/stats/live/match`,
+    params: {
+      extra_link: "",
+      order: "oldest",
+      lang: "en",
+      season_id,
+      ...params,
+    },
   };
 
   try {
@@ -172,7 +180,7 @@ export const getPlayer = async (
 export const getClub = async (slug: string): Promise<Club | undefined> => {
   const config: AxiosRequestConfig = {
     method: "GET",
-    url: `https://www.legaseriea.it/_next/data/sIOZ2yIbsl4I8hp82xokQ/en/team/${slug}/club.json?slug=team&slug=${slug}&slug=club`,
+    url: `https://www.legaseriea.it/_next/data/0pQSbyByFdxlm81lnGxQP/en/team/${slug}/club.json?slug=team&slug=${slug}&slug=club`,
   };
 
   try {
@@ -183,5 +191,45 @@ export const getClub = async (slug: string): Promise<Club | undefined> => {
     showFailureToast();
 
     return undefined;
+  }
+};
+
+export const getCoppaRounds = async (season: string): Promise<Round[]> => {
+  const [title, seasonId] = season.split("_");
+
+  const config: AxiosRequestConfig = {
+    method: "GET",
+    url: `https://www.legaseriea.it/api/season/${seasonId}/championship/CPITA/rounds?lang=en`,
+  };
+
+  try {
+    const { data }: AxiosResponse<CoppaRounds> = await axios(config);
+
+    return data.data;
+  } catch (e) {
+    showFailureToast();
+
+    return [];
+  }
+};
+
+export const getChampionships = async (
+  season: string
+): Promise<Championship[]> => {
+  const [title, seasonId] = season.split("_");
+
+  const config: AxiosRequestConfig = {
+    method: "GET",
+    url: `https://www.legaseriea.it/api/widget/international-championships?season_id=${seasonId}`,
+  };
+
+  try {
+    const { data } = await axios(config);
+
+    return data.data?.body || [];
+  } catch (e) {
+    showFailureToast();
+
+    return [];
   }
 };

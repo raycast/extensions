@@ -1,5 +1,9 @@
 # TablePlus Changelog
 
+## [Update] - 2023-04-27
+
+- Added the ability to search by group name
+
 ## [Update] - 2022-12-16
 
 - Moved data around to match the new Raycast API

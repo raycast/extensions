@@ -25,6 +25,21 @@ function ListView() {
       [] as TimeEntry[]
     );
 
+  const totalDurationToday =
+    timeEntries
+      .filter((timeEntry) => dayjs(timeEntry.start).isSame(dayjs(), "day"))
+      .reduce((acc, timeEntry) => acc + timeEntry.duration, 0) +
+    (runningTimeEntry ? dayjs().diff(runningTimeEntry.start, "second") : 0);
+
+  function formatSeconds(seconds: number) {
+    const h = Math.floor(seconds / 3600);
+    seconds %= 3600;
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+
+    return `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
+  }
+
   async function resumeTimeEntry(timeEntry: TimeEntry) {
     await showToast(Toast.Style.Animated, "Starting timer...");
     try {
@@ -44,7 +59,11 @@ function ListView() {
   }
 
   return (
-    <List isLoading={isLoading} throttle>
+    <List
+      isLoading={isLoading}
+      throttle
+      navigationTitle={isLoading ? undefined : `Today: ${formatSeconds(totalDurationToday)}`}
+    >
       {isValidToken ? (
         !isLoading && (
           <>

@@ -112,7 +112,7 @@ export async function initQRCode(): Promise<
       },
     };
   } catch (error) {
-    let errorMessage = 'Could not load recent documents';
+    let errorMessage = 'Load QR Code failed';
     if (error instanceof Error) {
       errorMessage = `${errorMessage} (${error.message})`;
     }

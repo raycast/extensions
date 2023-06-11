@@ -1,5 +1,16 @@
 # Bear Changelog
 
+## [Adding tag's filter in search notes] - 2023-05-23
+
+- Adding tag's filter in search notes command
+- Changing `cmd+p` from preview to filter notes to `cmd+shift+p` to be consistent with Raycast's conventions
+
+## [Add support for Bear 2] - 2023-04-01
+
+- Add support for Bear 2
+- Add _Search Query_ argument to _Search Notes_ command
+- Fixed a bug where the _Copy Unique Identifier_ action copied `note.id` instead of the note id
+
 ## [Fix crash] - 2022-11-29
 
 - Fix a crash that occurred when a note's text is `null`.

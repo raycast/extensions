@@ -5,35 +5,46 @@ type WaybackArguments = {
   url: string;
 };
 
+const urlRegex = /(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_+.~#?&//=]*)/;
+
 export default async function main(props: LaunchProps<{ arguments: WaybackArguments }>) {
   closeMainWindow();
 
-  const { url } = props.arguments;
-  let selectedText: string | undefined;
+  if (props.arguments.url && urlRegex.test(props.arguments.url)) {
+    await openPage(props.arguments.url);
+    return;
+  }
 
   try {
-    selectedText = await getSelectedText();
+    const selectedText = await getSelectedText();
+
+    if (!urlRegex.test(selectedText)) {
+      return showHUD("❌ No domain found");
+    }
+
+    await openPage(selectedText);
   } catch (error) {
     console.error(error);
   }
+}
 
-  const urlRegex = /(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_+.~#?&//=]*)/;
-  const webpageUrl: string | undefined = url || selectedText;
-  if (webpageUrl === undefined || !urlRegex.test(webpageUrl)) {
-    return showHUD("❌ No domain found");
-  }
-
+async function openPage(webpageUrl: string) {
   try {
     const res = await fetch(`https://archive.org/wayback/available?url=${webpageUrl}`);
+
     if (res.status >= 400) {
       return showHUD("❌ Bad response from server");
     }
+
     const archive = await res.json();
+
     if (archive.archived_snapshots?.closest?.url) {
-      await open(archive.archived_snapshots?.closest?.url);
-    } else {
-      return showHUD("❌ No archived version found");
+      const url = new URL(archive.archived_snapshots.closest.url);
+      await open(`https://${url.host}${url.pathname}`);
+      return;
     }
+
+    return showHUD("❌ No archived version found");
   } catch (err) {
     return showHUD(`❌ An error occurred, try again later`);
   }

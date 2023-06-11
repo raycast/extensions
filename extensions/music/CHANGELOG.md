@@ -1,5 +1,25 @@
 # Apple Music Changelog
 
+## [Update] - 2023-05-03
+
+- This adds the currently playing track in Play Library Track
+
+## [Update] - 2023-04-10
+
+- Improved search to match Apple Music behaviour
+
+## [Fix] - 2023-03-23
+
+- Added fallback scripts to commands that were interacting with the library.
+
+## [Update] - 2023-03-13
+
+- Fixed a localization bug
+
+## [Update] - 2023-03-01
+
+- Fixed dislike song command
+
 ## [Updates] - 2023-02-10
 
 - Fixed typo on "add to playlist"

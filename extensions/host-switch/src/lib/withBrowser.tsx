@@ -1,4 +1,4 @@
-import { type ComponentType, useEffect, useState } from "react";
+import { type ComponentType, useEffect, useState, createContext, useContext } from "react";
 import { type Application, Detail, getFrontmostApplication } from "@raycast/api";
 import { type Browser, getBrowser } from "./browser";
 
@@ -6,8 +6,16 @@ export interface WithBrowser {
   browser: Browser;
 }
 
-export const withBrowser = <P extends WithBrowser>(Component: ComponentType<P>) => {
-  return (props: Omit<P, "browser">) => {
+interface BrowserContextProps {
+  browser: Browser;
+}
+
+const BrowserContext = createContext<BrowserContextProps>({} as BrowserContextProps);
+
+export const useBrowser = () => useContext(BrowserContext).browser;
+
+export const withBrowser = <P extends object>(Component: ComponentType<P>) => {
+  return (props: P) => {
     const [application, setApplication] = useState<Application>();
     const [browser, setBrowser] = useState<Browser>();
 
@@ -18,10 +26,17 @@ export const withBrowser = <P extends WithBrowser>(Component: ComponentType<P>) 
       });
     }, []);
 
-    if (application && !browser) {
-      return <Detail markdown={`**${application.name}** is not supported. Use Safari, Arc or Chrome instead`} />;
+    if (!browser) {
+      if (application) {
+        return <Detail markdown={`**${application.name}** is not supported. Use Safari, Arc or Chrome instead`} />;
+      }
+      return null;
     }
 
-    return <Component {...(props as P)} browser={browser} />;
+    return (
+      <BrowserContext.Provider value={{ browser }}>
+        <Component {...props} />
+      </BrowserContext.Provider>
+    );
   };
 };

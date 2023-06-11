@@ -1,5 +1,5 @@
 import { Toast, showToast } from "@raycast/api";
-import { runAppleScript } from "run-applescript";
+import { runAppleScript } from "./utils";
 
 export default async () => {
   let script = `

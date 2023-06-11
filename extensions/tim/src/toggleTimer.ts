@@ -1,15 +1,10 @@
 import { showToast, Toast } from "@raycast/api";
-import { runAppleScript } from "run-applescript";
-import { buildScriptEnsuringTimIsRunning, checkIfTimInstalled, showNotInstalledToast } from "./utils";
+import { installedWrapper, toggleTimer } from "./lib/tim";
 
-export default async () => {
-  const timAvailable = await checkIfTimInstalled();
-  if (!timAvailable) return showNotInstalledToast();
-
+export default installedWrapper(async () => {
   try {
-    const script = buildScriptEnsuringTimIsRunning(`toggletimer`);
-    await runAppleScript(script);
-    showToast({
+    await toggleTimer();
+    await showToast({
       title: "Success",
       message: "Timer toggled",
       style: Toast.Style.Success,
@@ -21,4 +16,4 @@ export default async () => {
       style: Toast.Style.Failure,
     });
   }
-};
+});

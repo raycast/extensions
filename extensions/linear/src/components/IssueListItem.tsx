@@ -13,7 +13,7 @@ import IssueActions from "./IssueActions";
 import { formatCycle } from "../helpers/cycles";
 import { getProjectIcon } from "../helpers/projects";
 import { getEstimateLabel } from "../helpers/estimates";
-import { getDueDateIcon } from "../helpers/dates";
+import { getDateIcon } from "../helpers/dates";
 
 type IssueListItemProps = {
   issue: IssueResult;
@@ -58,7 +58,7 @@ export default function IssueListItem({
       tooltip: `Updated: ${format(updatedAt, "EEEE d MMMM yyyy 'at' HH:mm")}`,
     },
     {
-      icon: dueDate ? getDueDateIcon(dueDate) : undefined,
+      icon: dueDate ? getDateIcon(dueDate) : undefined,
       text: dueDate ? format(dueDate, "MMM dd") : undefined,
       tooltip: dueDate ? `Due date: ${format(dueDate, "MM/dd/yyyy")}` : undefined,
     },

@@ -1,5 +1,11 @@
 # Toothpick Changelog
 
+## [Partial Device Support Addition] - 2023-02-17
+
+- Added rudimentary mappings for the following devices:
+  - Jabra Elite 85t (custom icon)
+- Cleaned up codebase a little bit
+
 ## [Partial Device Support Addition] - 2023-02-10
 
 - Added rudimentary mappings for the following devices:

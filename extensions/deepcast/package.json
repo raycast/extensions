@@ -4,16 +4,17 @@
   "title": "Deepcast",
   "description": "Translate words, or entire sentences, into 27 different languages using DeepL.",
   "icon": "icon.png",
-  "author": "mooxl",
-  "contributors": [
-    "peter-gy",
-    "popalay"
-  ],
-  "license": "MIT",
   "keywords": [
     "deepl",
     "translate"
   ],
+  "author": "mooxl",
+  "contributors": [
+    "peter-gy",
+    "popalay",
+    "MonsterDeveloper"
+  ],
+  "license": "MIT",
   "commands": [
     {
       "name": "index",
@@ -27,6 +28,34 @@
       "title": "Translate Into Bulgarian",
       "subtitle": "Deepcast",
       "description": "Translate selected text into Bulgarian using DeepL",
+      "mode": "no-view"
+    },
+    {
+      "name": "norwegian",
+      "title": "Translate Into Norwegian",
+      "subtitle": "Deepcast",
+      "description": "Translate selected text into Norwegian (Bokmål) using DeepL",
+      "mode": "no-view"
+    },
+    {
+      "name": "indonesian",
+      "title": "Translate Into Indonesian",
+      "subtitle": "Deepcast",
+      "description": "Translate selected text into Indonesian using DeepL",
+      "mode": "no-view"
+    },
+    {
+      "name": "korean",
+      "title": "Translate Into Korean",
+      "subtitle": "Deepcast",
+      "description": "Translate selected text into Korean using DeepL",
+      "mode": "no-view"
+    },
+    {
+      "name": "turkish",
+      "title": "Translate Into Turkish",
+      "subtitle": "Deepcast",
+      "description": "Translate selected text into Turkish using DeepL",
       "mode": "no-view"
     },
     {
@@ -214,38 +243,29 @@
   ],
   "preferences": [
     {
+      "description": "Your DeepL API key",
       "name": "key",
-      "type": "password",
+      "placeholder": "Enter your free DeepL API key",
       "required": true,
       "title": "API key",
-      "description": "Your DeepL API key",
-      "placeholder": "Enter your free DeepL API key"
-    },
-    {
-      "name": "pro",
-      "type": "checkbox",
-      "label": "Check if you have DeepL API Pro",
-      "required": true,
-      "default": false,
-      "title": "DeepL API Pro",
-      "description": "Check if you have DeepL API Pro"
+      "type": "password"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.31.0",
-    "got": "^11.8.2"
+    "@raycast/api": "^1.48.8",
+    "got": "^11.8.2",
+    "http-status-codes": "^2.2.0"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
+    "@raycast/eslint-config": "^1.0.5",
+    "@types/http-status-codes": "^1.2.0",
+    "@types/node": "^18.8.3",
     "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
     "typescript": "^4.4.3"
   },
   "scripts": {
     "build": "ray build -e dist",
-    "dev": "ray develop"
+    "dev": "ray develop",
+    "lint": "ray lint"
   }
 }

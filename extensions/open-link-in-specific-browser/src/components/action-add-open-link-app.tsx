@@ -11,9 +11,9 @@ export function ActionAddOpenLinkApp(props: {
 
   return (
     <Action
-      title="Add to Preferred"
+      title="Add to Favorites"
       icon={Icon.Star}
-      shortcut={{ modifiers: ["shift", "cmd"], key: "p" }}
+      shortcut={{ modifiers: ["cmd"], key: "s" }}
       onAction={async () => {
         const localBrowsers = await LocalStorage.getItem<string>(CacheKey.PREFERRED_APP);
         const _customApps: OpenLinkApplication[] = typeof localBrowsers == "string" ? JSON.parse(localBrowsers) : [];

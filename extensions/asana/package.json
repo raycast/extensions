@@ -16,18 +16,7 @@
       "name": "create-task",
       "title": "Create Task",
       "description": "Create and assign new tasks.",
-      "mode": "view",
-      "preferences": [
-        {
-          "name": "signature",
-          "type": "checkbox",
-          "title": "Signature",
-          "label": "Add Raycast signature to new tasks",
-          "description": "When enabled, \"Created via Raycast\" signature will be added at the bottom of the description.",
-          "required": false,
-          "default": true
-        }
-      ]
+      "mode": "view"
     },
     {
       "name": "my-tasks",
@@ -47,7 +36,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.41.0",
+    "@raycast/api": "^1.50.0",
     "@raycast/utils": "^1.4.9",
     "axios": "^0.27.2",
     "date-fns": "^2.29.1",
@@ -55,11 +44,10 @@
     "node-html-markdown": "^1.2.0"
   },
   "devDependencies": {
+    "@raycast/eslint-config": "^1.0.5",
     "@types/lodash": "^4.14.182",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
+    "@types/node": "^18.8.3",
     "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
     "prettier": "^2.5.1",
     "typescript": "^4.4.3"
   },

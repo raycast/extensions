@@ -3,7 +3,8 @@ import { useBook, useHighlights } from './useApi'
 import Highlight from './highlight'
 import React from 'react'
 import Handlebars from 'handlebars'
-import { formatDate } from './utils'
+import { cleanTitle, formatDate } from './utils'
+import { ifeq } from './helpers'
 
 type BookProps = {
   id: string
@@ -48,14 +49,28 @@ export default function Book({ id, template }: BookProps) {
   }
 
   const h = Handlebars.compile(template)
-  const allHighlights = h({
-    ...book,
-    highlights: highlights.map((highlight) => ({
-      ...highlight,
-      updated: formatDate(highlight.updated),
-      highlighted_at: formatDate(highlight.highlighted_at),
-    })),
-  })
+  const allHighlights = h(
+    {
+      ...book,
+      title: cleanTitle(book.title),
+      highlights: highlights.map((highlight) => ({
+        ...highlight,
+        text: highlight.text
+          .split('\n')
+          .filter((text) => text)
+          .join(' '),
+        updated: formatDate(highlight.updated),
+        highlighted_at: formatDate(highlight.highlighted_at),
+        note: (highlight.note ?? '').split('\n').filter((note) => note),
+        tags: highlight.tags.map(({ name }) => name).join(', '),
+      })),
+    },
+    {
+      helpers: {
+        ifeq,
+      },
+    }
+  )
 
   const handleCopyAll = async () => {
     const currentTime = new Date().toISOString()
@@ -88,9 +103,19 @@ export default function Book({ id, template }: BookProps) {
     setLastSynced(currentTime)
   }
 
+  const clearSyncHistory = async () => {
+    const ids = highlights.map(({ id }) => id)
+
+    for (const id of ids) {
+      await LocalStorage.removeItem(id.toString())
+    }
+
+    setSyncedItems({})
+  }
+
   return (
     <List
-      navigationTitle={book?.title}
+      navigationTitle={cleanTitle(book.title)}
       isLoading={isLoadingBook || isLoadingHighlights}
       isShowingDetail={highlights.length !== 0}
       searchBarPlaceholder="Filter Highlights"
@@ -103,6 +128,7 @@ export default function Book({ id, template }: BookProps) {
             key={highlight.id}
             allHighlights={allHighlights}
             allUnsyncedHighlights={allUnsyncedHighlights}
+            clearSyncHistory={clearSyncHistory}
             highlight={highlight}
             handleCopyAll={handleCopyAll}
             handleCopyUnsynced={handleCopyUnsynced}

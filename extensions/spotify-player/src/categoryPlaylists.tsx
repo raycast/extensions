@@ -20,9 +20,11 @@ function CategoryPlaylists({ category }: Props) {
       throttle
       enableFiltering
     >
-      {response.result?.playlists.items.map((p) => (
-        <PlaylistItem key={p.id} playlist={p} />
-      ))}
+      {response.result?.playlists.items
+        .filter((item) => !!item) // contrary to the type definitions, an `item` _can_ be null…
+        .map((p) => (
+          <PlaylistItem key={`${category.id}_${p.id}`} playlist={p} />
+        ))}
     </List>
   );
 }

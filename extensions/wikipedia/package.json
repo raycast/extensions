@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "wikipedia",
   "title": "Wikipedia",
-  "description": "Search Wikipedia articles and view them",
+  "description": "Search Wikipedia from Raycast",
   "icon": "wikipedia.png",
   "author": "vimtor",
   "contributors": [
@@ -14,24 +14,87 @@
     "igor9silva"
   ],
   "license": "MIT",
+  "preferences": [
+    {
+      "name": "openIn",
+      "title": "Open In",
+      "description": "Where to open the Wikipedia page by default",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "Browser",
+          "value": "browser"
+        },
+        {
+          "title": "Raycast",
+          "value": "raycast"
+        }
+      ],
+      "default": "raycast",
+      "required": false
+    }
+  ],
   "commands": [
     {
       "name": "search-page",
       "title": "Search Page",
       "subtitle": "Wikipedia",
       "description": "Search Wikipedia pages by title",
-      "mode": "view"
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "title",
+          "placeholder": "Title",
+          "type": "text",
+          "required": false
+        }
+      ],
+      "preferences": [
+        {
+          "name": "viewType",
+          "title": "View Type",
+          "description": "View type to use when searching for a Wikipedia page",
+          "type": "dropdown",
+          "data": [
+            {
+              "title": "List",
+              "value": "list"
+            },
+            {
+              "title": "Grid",
+              "value": "grid"
+            }
+          ],
+          "default": "list",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "open-page",
+      "title": "Open Page",
+      "subtitle": "Wikipedia",
+      "description": "Open Wikipedia page in Raycast",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "title",
+          "placeholder": "Title",
+          "type": "text",
+          "required": true
+        }
+      ]
     },
     {
       "name": "random-page",
-      "title": "Open Random Page",
+      "title": "Random Page",
       "subtitle": "Wikipedia",
       "description": "Open a random Wikipedia page in browser",
       "mode": "no-view"
     },
     {
       "name": "featured-page",
-      "title": "Open Featured Page",
+      "title": "Featured Page",
       "subtitle": "Wikipedia",
       "description": "Open today's featured Wikipedia page in browser",
       "mode": "no-view"
@@ -42,13 +105,15 @@
     "News"
   ],
   "dependencies": {
-    "@raycast/api": "^1.45.1",
-    "@raycast/utils": "^1.4.14",
-    "got": "^12.5.3"
+    "@raycast/api": "^1.47.3",
+    "@raycast/utils": "^1.4.18",
+    "got": "^12.5.3",
+    "wikijs": "^6.4.1"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
+    "@types/node": "^18.13.0",
+    "@types/react": "^18.0.28",
+    "@types/jsdom": "^21.1.0",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",

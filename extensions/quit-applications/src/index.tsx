@@ -1,12 +1,72 @@
 import { ActionPanel, List, Action, showToast, Toast } from "@raycast/api";
 import React from "react";
 import { runAppleScript } from "run-applescript";
+import { execSync } from "child_process";
 
-async function getAllRunningApps() {
-  const result = await runAppleScript(
-    'tell application "System Events" to get the short name of every process whose background only is false'
-  );
-  return result.split(", ").map((app) => app.trim());
+function applicationNameFromPath(path: string): string {
+  /* Example:
+   * '/Applications/Visual Studio Code.app' -> 'Visual Studio Code'
+   */
+
+  const pathParts = path.split("/");
+  const appName = pathParts[pathParts.length - 1];
+  return appName.replace(".app", "");
+}
+
+function applicationIconFromPath(path: string): string {
+  /* Example:
+   * '/Applications/Visual Studio Code.app' -> '/Applications/Visual Studio Code.app/Contents/Resources/{file name}.icns'
+   */
+
+  // read path/Contents/Info.plist and look for <key>CFBundleIconFile</key> or <key>CFBundleIconName</key>
+  // the actual icon file is located at path/Contents/Resources/{file name}.icns
+
+  const infoPlist = `${path}/Contents/Info.plist`;
+
+  const possibleIconKeyNames = ["CFBundleIconFile", "CFBundleIconName"];
+
+  let iconFileName = null;
+
+  for (const keyName of possibleIconKeyNames) {
+    try {
+      iconFileName = execSync(["plutil", "-extract", keyName, "raw", '"' + infoPlist + '"'].join(" "))
+        .toString()
+        .trim();
+      break;
+    } catch (error) {
+      continue;
+    }
+  }
+
+  if (!iconFileName) {
+    // no icon found. fallback to empty string (no icon)
+    return "";
+  }
+
+  // if icon doesn't end with .icns, add it
+  if (!iconFileName.endsWith(".icns")) {
+    iconFileName = `${iconFileName}.icns`;
+  }
+
+  const iconPath = `${path}/Contents/Resources/${iconFileName}`;
+  console.log(iconPath);
+  return iconPath;
+}
+
+async function getRunningAppsPaths(): Promise<string[]> {
+  const result = await runAppleScript(`
+    set appPaths to {}
+    tell application "System Events"
+      repeat with aProcess in (get file of every process whose background only is false)
+        set processPath to POSIX path of aProcess
+        set end of appPaths to processPath
+      end repeat
+    end tell
+
+    return appPaths
+  `);
+
+  return result.split(", ").map((appPath) => appPath.trim());
 }
 
 function quitApp(app: string) {
@@ -58,7 +118,10 @@ function restartAppWithToast(app: string): boolean {
 }
 
 interface AppListState {
-  apps: string[];
+  apps: {
+    name: string;
+    iconPath: string;
+  }[];
   isLoading: boolean;
 }
 
@@ -73,7 +136,19 @@ class AppList extends React.Component<Record<string, never>, AppListState> {
   }
 
   componentDidMount() {
-    getAllRunningApps().then((apps) => {
+    getRunningAppsPaths().then((appCandidatePaths) => {
+      // filter out all apps that do not end with .app
+      const appPaths = appCandidatePaths.filter((appPath) => appPath.endsWith(".app"));
+      const appNames = appPaths.map((appPath) => applicationNameFromPath(appPath));
+      const appIcons = appPaths.map((appPath) => applicationIconFromPath(appPath));
+
+      const apps = appNames.map((appName, index) => {
+        return {
+          name: appName,
+          iconPath: appIcons[index],
+        };
+      });
+
       this.setState({ apps: apps, isLoading: false });
     });
   }
@@ -83,23 +158,24 @@ class AppList extends React.Component<Record<string, never>, AppListState> {
       <List isLoading={this.state.isLoading}>
         {this.state.apps.map((app) => (
           <List.Item
-            title={app}
-            key={app}
+            title={app.name}
+            key={app.name}
+            icon={app.iconPath}
             actions={
               <ActionPanel>
                 <Action
                   title="Quit"
                   onAction={() => {
-                    const success = quitAppWithToast(app);
+                    const success = quitAppWithToast(app.name);
                     if (success) {
-                      this.setState({ apps: this.state.apps.filter((a) => a !== app) });
+                      this.setState({ apps: this.state.apps.filter((a) => a.name !== app.name) });
                     }
                   }}
                 />
                 <Action
                   title="Restart"
                   onAction={() => {
-                    restartAppWithToast(app);
+                    restartAppWithToast(app.name);
                   }}
                 />
               </ActionPanel>

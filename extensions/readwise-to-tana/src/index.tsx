@@ -11,6 +11,7 @@ import Book from './book'
 import Settings from './settings'
 import type { SettingsValues } from './settings'
 import { useBooks } from './useApi'
+import { cleanTitle } from './utils'
 
 export default function Command() {
   const [template, setTemplate] = React.useState<string>('')
@@ -23,7 +24,17 @@ export default function Command() {
     const getTemplate = async () => {
       const template = await LocalStorage.getItem<string>('template')
 
-      setTemplate(template ?? '%%tana%%\n')
+      let defaultTemplate = '%%tana%%'
+
+      defaultTemplate += '\n- {{title}}'
+
+      let defaultHighlights = '\n\n{{#each highlights}}'
+      defaultHighlights += '\n  - {{text}}'
+      defaultHighlights += '\n{{/each}}'
+
+      defaultTemplate += defaultHighlights
+
+      setTemplate(template ?? defaultTemplate)
     }
 
     getTemplate()
@@ -45,20 +56,49 @@ export default function Command() {
       highlightHighlightedAt,
       highlightLocation,
       highlightNote,
+      highlightNoteSupertag,
       highlightSupertag,
       highlightUpdatedAt,
+      highlightUrl,
+      highlightTags,
       id,
       readwiseUrl,
       source,
-      supertag,
+      articleSupertag,
+      bookSupertag,
+      podcastSupertag,
+      supplementalSupertag,
+      tweetSupertag,
       title,
       url,
     } = values
     let t = '%%tana%%'
 
-    t += supertag
-      ? `\n- {{title}} #${supertag.replaceAll('#', '')}`
+    t += '{{#ifeq category "articles"}}'
+    t += articleSupertag
+      ? `\n- {{title}} #${articleSupertag.replaceAll('#', '')}`
       : '\n- {{title}}'
+    t += '{{/ifeq}}'
+    t += '{{#ifeq category "books"}}'
+    t += bookSupertag
+      ? `\n- {{title}} #${bookSupertag.replaceAll('#', '')}`
+      : '\n- {{title}}'
+    t += '{{/ifeq}}'
+    t += '{{#ifeq category "podcasts"}}'
+    t += podcastSupertag
+      ? `\n- {{title}} #${podcastSupertag.replaceAll('#', '')}`
+      : '\n- {{title}}'
+    t += '{{/ifeq}}'
+    t += '{{#ifeq category "supplementals"}}'
+    t += supplementalSupertag
+      ? `\n- {{title}} #${supplementalSupertag.replaceAll('#', '')}`
+      : '\n- {{title}}'
+    t += '{{/ifeq}}'
+    t += '{{#ifeq category "tweets"}}'
+    t += tweetSupertag
+      ? `\n- {{title}} #${tweetSupertag.replaceAll('#', '')}`
+      : '\n- {{title}}'
+    t += '{{/ifeq}}'
 
     t += author
       ? `\n  - ${author}:: {{author}}${
@@ -83,9 +123,9 @@ export default function Command() {
     highlights += highlightLocation
       ? `{{#if location}}\n    - ${highlightLocation}:: {{location}}{{/if}}`
       : ''
-    highlights += highlightNote
-      ? `{{#if note}}\n    - ${highlightNote}:: {{note}}{{/if}}`
-      : '{{#if note}}\n    - **Note:** {{note}}{{/if}}'
+    highlights += highlightTags
+      ? `{{#if tags}}\n    - ${highlightTags}:: {{tags}}{{/if}}`
+      : ''
     highlights += highlightUpdatedAt
       ? `{{#if updated}}\n    - ${highlightUpdatedAt}:: [[{{updated}}]]{{/if}}`
       : ''
@@ -95,6 +135,18 @@ export default function Command() {
     highlights += highlightColor
       ? `{{#if color}}\n    - ${highlightColor}:: {{color}}{{/if}}`
       : ''
+    highlights += highlightUrl
+      ? `{{#if url}}\n    - ${highlightUrl}:: {{url}}{{/if}}`
+      : ''
+    highlights += '\n{{#each note}}'
+    highlights += highlightNote
+      ? `{{#if this}}    - ${highlightNote}:: {{this}}{{/if}}`
+      : `{{#if this}}    - {{this}}${
+          highlightNoteSupertag
+            ? ` #[[${highlightNoteSupertag.replaceAll('#', '')}]]`
+            : ''
+        }{{/if}}`
+    highlights += '\n{{/each}}'
 
     highlights += '\n{{/each}}'
 
@@ -140,7 +192,7 @@ export default function Command() {
           <List.Item
             key={book.id}
             icon={book.cover_image_url}
-            title={book.title}
+            title={cleanTitle(book.title)}
             subtitle={book.author}
             accessories={[
               { text: book.num_highlights.toString(), icon: Icon.Book },

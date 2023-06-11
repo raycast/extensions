@@ -34,13 +34,33 @@ export const ZSnippet = z.object({
   tags: z.string().array().default([]),
   description: z.string().default(""),
   locId: z.string().default("default"),
+  customXML: z.boolean().default(false),
+  dynamicFields: z
+    .discriminatedUnion("type", [
+      z.object({
+        type: z.literal("text"),
+        nameFriendly: z.string(),
+        name: z.string(),
+        default: z.string().default(""),
+      }),
+      z.object({
+        type: z.literal("dropdown"),
+        nameFriendly: z.string(),
+        name: z.string(),
+        default: z.string().default(""),
+        values: z.string().array(),
+      }),
+    ])
+    .array()
+    .default([]),
 });
 export type Snippet = z.infer<typeof ZSnippet>;
 export type SnippetWithPath = Snippet & { path: string };
 
-export type Location = {
-  id: string;
-  path: string;
-  name: string;
-  git?: boolean;
-};
+export const ZLocation = z.object({
+  id: z.string().uuid(),
+  path: z.string(),
+  name: z.string(),
+  git: z.boolean().default(false),
+});
+export type Location = z.infer<typeof ZLocation>;

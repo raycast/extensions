@@ -41,7 +41,7 @@ export const GetProjectsByAccountSlugDocument = /* GraphQL */ `
 `;
 
 export default function ProjectsList() {
-  const { activeSlug, personalAccount } = useGrafbase();
+  const { activeSlug, personalAccount, organizationMemberships } = useGrafbase();
 
   const { isLoading, data, revalidate } = useFetch<{ data: GetProjectsByAccountSlugQuery }>(apiUrl, {
     method: "POST",
@@ -66,7 +66,9 @@ export default function ProjectsList() {
       navigationTitle="Projects"
       searchBarPlaceholder="Search Projects..."
       isLoading={isLoading}
-      searchBarAccessory={personalAccount && <ScopeDropdown onChange={() => revalidate()} />}
+      searchBarAccessory={
+        (personalAccount || organizationMemberships) && <ScopeDropdown onChange={() => revalidate()} />
+      }
     >
       {!projects || projects?.length === 0 ? (
         <List.EmptyView

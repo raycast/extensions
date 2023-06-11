@@ -1,5 +1,30 @@
 # Amazon AWS Changelog
 
+## [Fix Broken Authentication] - 2023-05-06
+
+- Fix regression from AWS Vault changes that affected all non-aws-vault users.
+
+## [Extend Support AWS Vault] - 2023-04-28
+
+- Add support for people using aws-vault with the GetSessionToken API call.
+- Add support for aws-vault usage with a master-credentials approach.
+
+## [Support AWS Vault] - 2023-04-03
+
+- Add support for people using aws-vault to manage their sessions.
+
+## [Add Profile Script Command] - 2023-03-15
+
+- Add "Run Profile Script" command that allows users to list profiles and run a custom script for them.
+
+## [Add Show All Action] - 2023-03-08
+
+- Add "Show All" action to SSM Parameters to bypass the requirement of needing four characters for search.
+
+## [Fix Profile Dropdown] - 2023-03-04
+
+- Fix profile dropdown issue when reading from credentials file
+
 ## [Renamed command] - 2023-02-03
 
 - Renamed Elasticsearch Service to OpenSearch Service

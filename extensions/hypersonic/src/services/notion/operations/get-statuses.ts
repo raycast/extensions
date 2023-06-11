@@ -26,6 +26,15 @@ export async function getStatuses(databaseName: string): Promise<Status[]> {
   const options = database?.properties[statusProperty.name]?.status?.options
   const groups = database?.properties[statusProperty.name]?.status?.groups
 
+  if (!groups) {
+    const status = normalizeStatus(
+      { id: 'no-status', name: 'Todo' },
+      { 'no-status': { name: 'To-do', index: 0 } }
+    )
+
+    return [status]
+  }
+
   const statusIdWithGroup: Record<string, { name: string; index: number }> = {}
   groups.forEach((group: any) => {
     group.option_ids.forEach((id: string, index: number) => {

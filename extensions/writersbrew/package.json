@@ -78,6 +78,20 @@
       "mode": "no-view"
     },
     {
+      "name": "translate-to-tc",
+      "title": "Translate to Traditional Chinese",
+      "subtitle": "Writersbrew",
+      "description": "Translates from any language to traditional chinese.",
+      "mode": "no-view"
+    },
+    {
+      "name": "translate-to-sc",
+      "title": "Translate to Simplified Chinese",
+      "subtitle": "Writersbrew",
+      "description": "Translates from any language to simplified chinese.",
+      "mode": "no-view"
+    },
+    {
       "name": "translate-to-dutch",
       "title": "Translate to Dutch",
       "subtitle": "Writersbrew",
@@ -118,11 +132,32 @@
       "subtitle": "Writersbrew",
       "description": "Write an email in the app",
       "mode": "no-view"
+    },
+    {
+      "name": "upper-case",
+      "title": "Change to Uppercase",
+      "subtitle": "Writersbrew",
+      "description": "Change words to upper-case",
+      "mode": "no-view"
+    },
+    {
+      "name": "lower-case",
+      "title": "Change to Lowercase",
+      "subtitle": "Writersbrew",
+      "description": "Change words to lower-case",
+      "mode": "no-view"
+    },
+    {
+      "name": "title-case",
+      "title": "Change to Titlecase",
+      "subtitle": "Writersbrew",
+      "description": "Change words to title-case",
+      "mode": "no-view"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.45.1",
-    "open": "^8.4.0",
+    "open": "^8.4.2",
     "uuid": "^9.0.0"
   },
   "devDependencies": {

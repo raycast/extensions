@@ -140,6 +140,50 @@ export function CopyProjectIDToClipboardAction(props: { project: Project }): JSX
   return <Action.CopyToClipboard title="Copy Project ID" content={props.project.id} />;
 }
 
+function CloneUrlList(props: { project: Project }): JSX.Element {
+  return (
+    <List navigationTitle="Copy Clone URL">
+      <List.Item
+        title={props.project.http_url_to_repo || ""}
+        icon={{ source: Icon.Link, tintColor: Color.PrimaryText }}
+        actions={
+          <ActionPanel>
+            <Action.CopyToClipboard title="HTTP" content={props.project.http_url_to_repo || ""} />
+          </ActionPanel>
+        }
+      />
+      <List.Item
+        title={props.project.ssh_url_to_repo || ""}
+        icon={{ source: Icon.Link, tintColor: Color.PrimaryText }}
+        actions={
+          <ActionPanel>
+            <Action.CopyToClipboard title="SSH" content={props.project.ssh_url_to_repo || ""} />
+          </ActionPanel>
+        }
+      />
+    </List>
+  );
+}
+
+export function CopyCloneUrlToClipboardAction(props: {
+  shortcut?: Keyboard.Shortcut;
+  project: Project;
+}): JSX.Element | null {
+  const pro = props.project;
+  if (pro.http_url_to_repo || pro.ssh_url_to_repo) {
+    return (
+      <Action.Push
+        title="Copy Clone URL"
+        shortcut={props.shortcut}
+        icon={{ source: Icon.Link, tintColor: Color.PrimaryText }}
+        target={<CloneUrlList project={pro} />}
+      />
+    );
+  } else {
+    return null;
+  }
+}
+
 export function OpenProjectIssuesPushAction(props: { project: Project }): JSX.Element {
   return (
     <Action.Push
@@ -208,6 +252,16 @@ export function OpenProjectMilestonesPushAction(props: { project: Project }): JS
 
 function webUrl(project: Project, partial: string) {
   return getGitLabGQL().urlJoin(`${project.fullPath}/${partial}`);
+}
+
+export function OpenProjectWikiInBrowserAction(props: { project: Project }): JSX.Element {
+  return (
+    <GitLabOpenInBrowserAction
+      title="Wiki"
+      icon={{ source: GitLabIcons.wiki, tintColor: Color.PrimaryText }}
+      url={webUrl(props.project, "-/wikis")}
+    />
+  );
 }
 
 export function OpenProjectLabelsInBrowserAction(props: { project: Project }): JSX.Element {

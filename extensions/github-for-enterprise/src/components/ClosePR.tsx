@@ -1,7 +1,6 @@
 import { CLOSE_PR } from "@/queries/pull-requests";
 import { fetcher } from "@/utils";
-import { ActionPanel, Color, showToast, ToastStyle, useNavigation } from "@raycast/api";
-import React from "react";
+import { Color, showToast, useNavigation, Action, Toast } from "@raycast/api";
 import { useSWRConfig } from "swr";
 
 export default function CloseIssue({ id, number, shouldPop }: any) {
@@ -9,7 +8,10 @@ export default function CloseIssue({ id, number, shouldPop }: any) {
   const { pop } = useNavigation();
 
   async function closePR() {
-    showToast(ToastStyle.Animated, "Closing pull request");
+    showToast({
+      style: Toast.Style.Animated,
+      title: "Closing pull request",
+    });
 
     try {
       await fetcher({
@@ -20,20 +22,23 @@ export default function CloseIssue({ id, number, shouldPop }: any) {
       });
 
       mutate("prs");
-      showToast(ToastStyle.Success, `Pull request #${number} closed`);
+      showToast({
+        style: Toast.Style.Success,
+        title: `Pull request #${number} closed`,
+      });
 
       shouldPop && pop();
     } catch (error: any) {
-      showToast(
-        ToastStyle.Failure,
-        "Failed to close pull request",
-        error instanceof Error ? error.message : error.toString()
-      );
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to close pull request",
+        message: error instanceof Error ? error.message : error.toString(),
+      });
     }
   }
 
   return (
-    <ActionPanel.Item
+    <Action
       title="Close Pull Request"
       icon={{
         source: "xmark-circle-16",

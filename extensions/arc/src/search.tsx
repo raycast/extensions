@@ -1,4 +1,4 @@
-import { Icon, List } from "@raycast/api";
+import { Icon, LaunchProps, List } from "@raycast/api";
 import { MutatePromise, useCachedPromise, useSQL } from "@raycast/utils";
 import { useState } from "react";
 import { historyDatabasePath, getHistoryQuery } from "./sql";
@@ -18,8 +18,8 @@ import { useSuggestions } from "./suggestions";
 import { HistoryEntryListItem, SuggestionListItem, TabListItem } from "./list";
 import { searchArcPreferences } from "./preferences";
 
-function SearchArc() {
-  const [searchText, setSearchText] = useState("");
+function SearchArc(props: LaunchProps) {
+  const [searchText, setSearchText] = useState(props.fallbackText ?? "");
   const {
     data: history,
     isLoading: isLoadingHistory,
@@ -106,10 +106,10 @@ function SuggestionsListSection(props: { suggestions?: Suggestion[]; searchText:
   ) : null;
 }
 
-export default function Command() {
+export default function Command(props: LaunchProps) {
   return (
     <VersionCheck>
-      <SearchArc />
+      <SearchArc {...props} />
     </VersionCheck>
   );
 }

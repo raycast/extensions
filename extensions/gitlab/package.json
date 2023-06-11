@@ -281,11 +281,12 @@
     "immint023",
     "duboiss",
     "metakirby5",
-    "macbookandrew"
+    "macbookandrew",
+    "shaoye"
   ],
   "dependencies": {
     "@apollo/client": "^3.4.8",
-    "@raycast/api": "^1.45.0",
+    "@raycast/api": "^1.48.8",
     "@raycast/utils": "^1.0.6",
     "apollo-link-context": "^1.0.20",
     "fuse.js": "^6.4.6",
@@ -297,15 +298,13 @@
     "use-interval": "^1.4.0"
   },
   "devDependencies": {
+    "@raycast/eslint-config": "^1.0.5",
     "@types/node": "^18.8.3",
     "@types/node-emoji": "^1.8.1",
     "@types/node-fetch": "^2.5.12",
     "@types/open": "^6.2.1",
     "@types/url-join": "^4.0.1",
-    "@typescript-eslint/eslint-plugin": "^4.28.5",
-    "@typescript-eslint/parser": "^4.28.5",
     "eslint": "^7.31.0",
-    "eslint-config-prettier": "^8.3.0",
     "prettier": "^2.5.1",
     "typescript": "^4.3.5"
   },

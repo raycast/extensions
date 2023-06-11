@@ -1,20 +1,28 @@
 import { Application } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
 
-export type BrowserNames = "Safari" | "Arc" | "Chrome";
+export type BrowserIds = "company.thebrowser.Browser" | "com.apple.Safari" | "com.google.Chrome";
 
 export interface IBrowser {
   getCurrentTabUrl(): Promise<string | undefined>;
   setCurrentTabUrl(url: string): Promise<void>;
+  openUrl(url: string): Promise<void>;
 }
 
 export class Browser implements IBrowser {
+  constructor(protected readonly name: string) {}
+
   getCurrentTabUrl() {
     return Promise.resolve<string | undefined>(undefined);
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   setCurrentTabUrl(url: string) {
+    return Promise.resolve();
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  openUrl(url: string) {
     return Promise.resolve();
   }
 
@@ -34,11 +42,9 @@ export class Browser implements IBrowser {
 }
 
 export class Arc extends Browser {
-  static readonly browserName = "Arc";
-
   async getCurrentTabUrl() {
     const response = await runAppleScript(`
-      tell application "Arc"
+      tell application "${this.name}"
         return URL of active tab of front window
       end tell
     `);
@@ -48,8 +54,16 @@ export class Arc extends Browser {
 
   async setCurrentTabUrl(url: string) {
     await runAppleScript(`
-      tell application "Arc"
+      tell application "${this.name}"
         set URL of active tab of front window to "${url}"
+      end tell
+    `);
+  }
+
+  async openUrl(url: string) {
+    await runAppleScript(`
+      tell application "${this.name}"
+        open location "${url}"
       end tell
     `);
   }
@@ -58,7 +72,7 @@ export class Arc extends Browser {
 export class Safari extends Browser {
   async getCurrentTabUrl() {
     const response = await runAppleScript(`
-      tell application "Safari"
+      tell application "${this.name}"
         return URL of current tab of front window
       end tell
     `);
@@ -68,8 +82,16 @@ export class Safari extends Browser {
 
   async setCurrentTabUrl(url: string) {
     await runAppleScript(`
-      tell application "Safari"
+      tell application "${this.name}"
         set URL of current tab of front window to "${url}"
+      end tell
+    `);
+  }
+
+  async openUrl(url: string) {
+    await runAppleScript(`
+      tell application "${this.name}"
+        open location "${url}"
       end tell
     `);
   }
@@ -78,7 +100,7 @@ export class Safari extends Browser {
 export class Chrome extends Browser {
   async getCurrentTabUrl() {
     const response = await runAppleScript(`
-      tell application "Google Chrome"
+      tell application "${this.name}"
         return URL of active tab of front window
       end tell
     `);
@@ -88,39 +110,47 @@ export class Chrome extends Browser {
 
   async setCurrentTabUrl(url: string) {
     await runAppleScript(`
-      tell application "Google Chrome"
+      tell application "${this.name}"
         set URL of active tab of front window to "${url}"
+      end tell
+    `);
+  }
+
+  async openUrl(url: string) {
+    await runAppleScript(`
+      tell application "${this.name}"
+        open location "${url}"
       end tell
     `);
   }
 }
 
-const instances: Partial<Record<BrowserNames, Browser>> = {};
+const instances: Partial<Record<BrowserIds, Browser>> = {};
 
 export function getBrowser(application?: Application) {
   if (!application) {
     return undefined;
   }
 
-  const browserName = application.name as BrowserNames;
+  const browserId = application.bundleId as BrowserIds;
 
-  if (!browserName) {
+  if (!browserId) {
     return undefined;
   }
 
-  if (!instances[browserName]) {
-    switch (browserName) {
-      case "Safari":
-        instances[browserName] = new Safari();
+  if (!instances[browserId]) {
+    switch (browserId) {
+      case "com.apple.Safari":
+        instances[browserId] = new Safari(application.name);
         break;
-      case "Arc":
-        instances[browserName] = new Arc();
+      case "company.thebrowser.Browser":
+        instances[browserId] = new Arc(application.name);
         break;
-      case "Chrome":
-        instances[browserName] = new Chrome();
+      case "com.google.Chrome":
+        instances[browserId] = new Chrome(application.name);
         break;
     }
   }
 
-  return instances[browserName];
+  return instances[browserId];
 }

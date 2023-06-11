@@ -1,5 +1,11 @@
 # Tailwind CSS Changelog
 
+## [Add actions to copy color class names] - 2023-03-12
+- Add actions to copy colors as background, text and border class names for the `Search Colors` command
+
+## [Default Action for Search Classes] - 2023-03-12
+- Add a preference to set the default action for the `Search Classes` command
+
 ## [Search Classes command improvements] - 2023-01-21
 - Search by class content instead of only by selector
 - Add an action to copy the class name

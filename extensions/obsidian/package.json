@@ -1,14 +1,16 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "obsidian",
   "title": "Obsidian",
   "description": "Control Obsidian with Raycast",
   "icon": "extension_icon.png",
-  "author": "marcjulian",
+  "author": "KevinBatdorf",
   "categories": [
     "Productivity"
   ],
   "contributors": [
-    "iancanderson",
+    "marcjulian",
+    "iancanderson"
     "ofalvai"
   ],
   "license": "MIT",
