@@ -2,6 +2,8 @@
 // All important constants for all commands should be defined here.
 //--------------------------------------------------------------------------------
 
+import { Color, Image } from "@raycast/api";
+
 export const MAX_RENDERED_NOTES = 1000;
 export const BYTES_PER_KILOBYTE = 1024;
 export const BYTES_PER_MEGABYTE = BYTES_PER_KILOBYTE ** 2;
@@ -125,10 +127,7 @@ export const IMAGE_SIZE_MAPPING: Map<string, number> = new Map([
   ["medium", 5],
 ]);
 
-export const ObsidianIconWhiteBold = { source: "obsidian-icon-white-bold.svg" };
-export const ObsidianIconBlackBold = { source: "obsidian-icon-black-bold.svg" };
-export const ObsidianIconBlackBolder = { source: "obsidian-icon-black-bolder.svg" };
-export const ObsidianIconWhiteBolder = { source: "obsidian-icon-white-bolder.svg" };
-export const ObsidianIconDynamicBold = {
-  source: { light: "obsidian-icon-black-bolder.svg", dark: "obsidian-icon-white-bolder.svg" },
+export const ObsidianIcon: Image = {
+  source: "obsidian_icon.svg",
+  tintColor: Color.PrimaryText,
 };
