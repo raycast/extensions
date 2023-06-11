@@ -1,6 +1,7 @@
 # Obsidian Changelog
 
 ## [Append Tasks and Update Bookmarks | Version 1.12.0] - 2023-06-012
+
 - Update Starred notes to Bookmarks
 - Add `Append Task` command (thanks @mikejongbloet)
 
