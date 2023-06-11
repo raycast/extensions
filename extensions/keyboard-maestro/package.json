@@ -12,7 +12,15 @@
       "title": "List Macros",
       "subtitle": "Keyboard Maestro",
       "description": "List and quickly trigger Keyboard Maestro Macros",
-      "mode": "view"
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "name",
+          "placeholder": "Macro Name",
+          "type": "text",
+          "required": false
+        }
+      ]
     }
   ],
   "dependencies": {
