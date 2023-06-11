@@ -1,5 +1,9 @@
 # Obsidian Changelog
 
+## [Updated icons | Version 1.11.1] - 2023-06-11
+
+- Update extension icons to match the new [logo and brand guidelines](https://obsidian.md/brand)
+
 ## [Several Quality of Life Improvements | Version 1.11.0] - 2023-02-05
 
 - Add `Silent Mode` preference for the `Append to Daily Note Command` which prevents the command from opening the daily note
