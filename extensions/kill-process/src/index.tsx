@@ -13,8 +13,7 @@ export default function ProcessList() {
   const shouldPrioritizeAppsWhenFiltering = preferences.shouldPrioritizeAppsWhenFiltering ?? false;
   const shouldShowPID = preferences.shouldShowPID ?? false;
   const shouldShowPath = preferences.shouldShowPath ?? false;
-  const refreshEnabled = +preferences.refreshDuration >= 0;
-  const refreshDuration = Math.max(+preferences.refreshDuration, 1000); // ms
+  const refreshDuration = +preferences.refreshDuration;
 
   const fetchProcesses = () => {
     exec(`ps -eo pid,pcpu,comm | sort -nrk 2,3`, (err, stdout) => {
@@ -44,7 +43,7 @@ export default function ProcessList() {
     });
   };
 
-  refreshEnabled ? useInterval(fetchProcesses, refreshDuration) : useEffect(fetchProcesses, []);
+  useInterval(fetchProcesses, refreshDuration);
 
   const fileIcon = (process: Process) => {
     if (process.type === "prefPane") {
