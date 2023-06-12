@@ -1,5 +1,10 @@
 # Obsidian Changelog
 
+## [Append Tasks and Update Bookmarks | Version 1.12.0] - 2023-06-012
+
+- Update Starred notes to Bookmarks
+- Add `Append Task` command (thanks @mikejongbloet)
+
 ## [Several Quality of Life Improvements | Version 1.11.0] - 2023-02-05
 
 - Add `Silent Mode` preference for the `Append to Daily Note Command` which prevents the command from opening the daily note

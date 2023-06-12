@@ -240,7 +240,7 @@
 /extensions/dock                                     @pradeepb28
 /extensions/dock-tinker                              @koinzhang @garrucho
 /extensions/docker                                   @priithaamer @gebeto @BalliAsghar
-/extensions/dockerhub                                @k8scat @tonka3000
+/extensions/dockerhub                                @k8scat @tonka3000 @BalliAsghar
 /extensions/docsearch                                @Fatpandac @AnishDe12020 @pomdtr
 /extensions/dollar-blue                              @agusluques
 /extensions/domainr                                  @Rawnly
@@ -378,7 +378,7 @@
 /extensions/guitar-chords                            @GastroGeek
 /extensions/hacker-news                              @thomaspaulmann @GastroGeek @sxn @itsnwa
 /extensions/hackmd                                   @Yukaii
-/extensions/harvest                                  @eluce2
+/extensions/harvest                                  @eluce2 @eluce2
 /extensions/hashnode                                 @dpnick
 /extensions/hatena-bookmark                          @inamuu
 /extensions/hazeover                                 @ratoru
@@ -524,9 +524,11 @@
 /extensions/logtail                                  @Cavallando
 /extensions/lorem-ipsum                              @AntonNiklasson @GastroGeek @enkia
 /extensions/lucide-icons                             @gBasil @aeither
+/extensions/lunatask                                 @posthardcode
 /extensions/lyrics                                   @ajzbc
 /extensions/m3o                                      @andreaselia
 /extensions/macupdater                               @karlsander
+/extensions/mail                                     @yug2005 @ikupenov @pernielsentikaer
 /extensions/mailsy                                   @BalliAsghar
 /extensions/man-pages                                @SKaplanOfficial
 /extensions/mantine                                  @EmilMalanczak
