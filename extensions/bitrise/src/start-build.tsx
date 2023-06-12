@@ -1,9 +1,10 @@
 import { Form, showToast, Toast, Action, Icon, ActionPanel, open, Clipboard } from "@raycast/api";
-import { App, AppSlug } from "./api/types";
-import { useEffect, useState } from "react";
+import { AppSlug } from "./api/types";
+import { useState } from "react";
 import { fetchApps } from "./api/apps";
 import { fetchWorkflows } from "./api/workflows";
 import { startBuild } from "./api/builds";
+import { useCachedPromise, usePromise } from "@raycast/utils";
 
 interface FormValues {
   appSlug: string;
@@ -12,54 +13,29 @@ interface FormValues {
   message?: string;
 }
 
-interface State {
-  apps?: App[];
-  workflows?: string[];
-  isLoading: boolean;
-  error?: Error;
-}
-
 export default function Command() {
-  const [state, setState] = useState<State>({ isLoading: false });
   const [appSlug, setAppSlug] = useState<AppSlug | null>(null);
 
-  useEffect(() => {
-    async function fetch() {
-      try {
-        setState((previous) => ({ ...previous, isLoading: true }));
-        const apps = await fetchApps();
-        const appList = Array.from(apps.apps.values()).flat();
-        setState({ apps: appList, isLoading: false });
-      } catch (error) {
-        setState(() => ({
-          isLoading: false,
-          error: error instanceof Error ? error : new Error("Something went wrong"),
-        }));
-      }
-    }
-    fetch();
-  }, []);
+  const appsState = useCachedPromise(
+    async () => {
+      const apps = await fetchApps();
+      return apps.map((appsByOwner) => appsByOwner.apps).flat();
+    },
+    [],
+    { initialData: [] }
+  );
 
-  useEffect(() => {
-    async function fetch() {
+  const workflowsState = usePromise(
+    async (appSlug) => {
       if (!appSlug) return;
-      try {
-        setState((previous) => ({ ...previous, isLoading: true }));
-        const workflows = await fetchWorkflows(appSlug);
-        setState((previous) => ({ ...previous, isLoading: false, workflows: workflows }));
-      } catch (error) {
-        setState(() => ({
-          isLoading: false,
-          error: error instanceof Error ? error : new Error("Something went wrong"),
-        }));
-      }
-    }
-    fetch();
-  }, [appSlug]);
+      return await fetchWorkflows(appSlug);
+    },
+    [appSlug]
+  );
 
   return (
     <Form
-      isLoading={state.isLoading}
+      isLoading={workflowsState.isLoading || appsState.isLoading}
       actions={
         <ActionPanel>
           <StartBuildAction />
@@ -67,12 +43,12 @@ export default function Command() {
       }
     >
       <Form.Dropdown id="appSlug" title="App" value={appSlug ?? undefined} onChange={setAppSlug}>
-        {state.apps?.map((app) => (
+        {appsState.data.map((app) => (
           <Form.Dropdown.Item value={app.slug} title={app.title} key={app.slug} icon={app.avatar_url ?? Icon.Box} />
         ))}
       </Form.Dropdown>
       <Form.Dropdown id="workflow" title="Workflow" storeValue>
-        {state.workflows?.map((workflow) => (
+        {workflowsState.data?.map((workflow) => (
           <Form.Dropdown.Item value={workflow} title={workflow} key={workflow} />
         ))}
       </Form.Dropdown>

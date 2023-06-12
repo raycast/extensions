@@ -3,7 +3,7 @@ import { getNotesFromCache } from "./data/cache";
 import { Note, Vault } from "./interfaces";
 import { NotesContext, NotesDispatchContext } from "./utils";
 
-export function useNotes(vault: Vault, starred = false) {
+export function useNotes(vault: Vault, bookmarked = false) {
   /**
    * The preferred way of loading notes inside the extension
    *
@@ -15,8 +15,8 @@ export function useNotes(vault: Vault, starred = false) {
 
   const [notes] = useState<Note[]>(notes_);
   console.log("Using Notes");
-  if (starred) {
-    return [notes.filter((note: Note) => note.starred)] as const;
+  if (bookmarked) {
+    return [notes.filter((note: Note) => note.bookmarked)] as const;
   } else {
     return [notes] as const;
   }
