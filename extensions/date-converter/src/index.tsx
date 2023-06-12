@@ -40,7 +40,7 @@ const DATE_FORMATS: DateFormatter[] = [
   },
   {
     id: "unix-s",
-    title: "Unix Timestamp (Seconds)",
+    title: "Unix Timestamp (seconds)",
     human: false,
     format: (date) => Math.floor(date.getTime() / 1000).toString(),
   },
@@ -74,7 +74,7 @@ function parseMachineReadableDate(query: string): LabeledDate | undefined {
     if (!isNaN(date.getTime())) {
       return {
         date,
-        label: seconds ? "Unix Timestamp (Seconds)" : "Unix Timestamp (ms)",
+        label: seconds ? "Unix Timestamp (seconds)" : "Unix Timestamp (ms)",
         human: false,
       };
     }
