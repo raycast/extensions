@@ -1,6 +1,6 @@
 # Open Path Changelog
 
-## [Fix Deeplink] - {PR_MERGE_DATE}
+## [Fix Deeplink] - 2023-06-12
 
 - Fix the problem that deeplink cannot be opened normally
 
