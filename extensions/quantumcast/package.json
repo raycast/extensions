@@ -39,6 +39,20 @@
       "subtitle": "Quantumcast",
       "description": "Open a Cloudflow API documentation in the browser",
       "mode": "view"
+    },
+    {
+      "name": "open-cloudflow-collection",
+      "title": "Open Cloudflow Collection",
+      "subtitle": "Quantumcast",
+      "description": "Open a Cloudflow collection in the browser",
+      "mode": "view"
+    },
+    {
+      "name": "open-cloudflow-whitepaper",
+      "title": "Open Cloudflow Whitepaper",
+      "subtitle": "Quantumcast",
+      "description": "Open a Cloudflow whitepaper in the browser",
+      "mode": "view"
     }
   ],
   "preferences": [
@@ -49,6 +63,31 @@
       "type": "textfield",
       "required": true,
       "default": "http://127.0.0.1:9090"
+    },
+    {
+      "name": "cloudflowUserName",
+      "title": "Cloudflow User Name",
+      "description": "The name of the Cloudflow admin user",
+      "type": "textfield",
+      "required": true,
+      "default": "admin"
+    },
+    {
+      "name": "cloudflowUserPassword",
+      "title": "Cloudflow User Password",
+      "description": "The password of the Cloudflow admin user",
+      "type": "password",
+      "required": true,
+      "default": "admin"
+    },
+    {
+      "name": "cloudflowListSystemWhitepapers",
+      "label": "Add to list",
+      "title": "Cloudflow List System Whitepapers?",
+      "description": "Decide if system whitepapers should be shown",
+      "type": "checkbox",
+      "required": true,
+      "default": false
     },
     {
       "name": "packzManualLanguage",
@@ -90,8 +129,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.51.2",
-    "quantumlib": "^0.0.10"
+    "@raycast/api": "^1.52.1",
+    "quantumlib": "^0.0.13"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.5",

@@ -1,5 +1,13 @@
 # System Monitor Changelog
 
+## [Update] - 2023-06-12
+
+- Added Time on Battery
+
+## [New Action] - 2023-05-31
+
+- Added Open Activity Monitor action
+
 ## [New Additions] - 2022-07-12
 
 - Updated CPU monitor to show load average and process list of highest CPU comsumption
