@@ -1,6 +1,6 @@
 # Docker Hub Changelog
 
-## [Feature] - {PR_MERGE_DATE}
+## [Feature] - 2023-06-12
 
 - Support Pull Image from Docker Hub
 
