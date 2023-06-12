@@ -1,6 +1,6 @@
 import { Action, ActionPanel, clearSearchBar, getPreferenceValues, Icon, List, showHUD } from "@raycast/api";
 import { exec } from "child_process";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import useInterval from "./hooks/use-interval";
 
 export default function ProcessList() {
