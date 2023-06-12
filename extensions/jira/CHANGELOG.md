@@ -1,5 +1,9 @@
 # Jira Changelog
 
+## [Bug fixes] - 2023-06-12
+
+- Fixed a bug where `Show Details` would show up on the issue's detail view.
+
 ## [Fix missing error title] - 2023-05-09
 
 Statuses in Jira may not have categories. Problem is, these categories are used as a section title in various commands such as `Open Issues` causing the error:

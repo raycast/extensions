@@ -1,5 +1,10 @@
 # Switch Game Play History Changelog
 
+## [Update] - 2023-06-12
+
+- It is now supported to switch the display language of game title names.
+
+
 ## [Initial Version] - 2023-05-02
 
 1. Initial version of the Switch Game Play History.

@@ -53,6 +53,17 @@ export function isIPUrl(text: string): boolean {
   );
 }
 
+export function isIPUrlWithoutHttp(text: string): boolean {
+  const ipRegex = /^(?:[0-9]{1,3}\.){3}[0-9]{1,3}/;
+
+  return ipRegex.test(text);
+}
+
+export function isDeeplink(text: string): boolean {
+  const deepLinkRegex = /^[a-zA-Z0-9-]+:\/\//;
+  return deepLinkRegex.test(text) && !text.includes(" ");
+}
+
 export const urlBuilder = (prefix: string, text: string) => {
   return /^https?:\/\//g.test(text) ? text : `${prefix}${encodeURIComponent(text)}`;
 };
