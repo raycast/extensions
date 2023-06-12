@@ -14,7 +14,6 @@
     {
       "name": "index",
       "title": "Convert CSV to Excel",
-      "subtitle": "Convert CSV table to Excel compatible table",
       "description": "Convert CSV table to Excel compatible table",
       "mode": "view"
     }
