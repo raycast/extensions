@@ -1,5 +1,5 @@
 # Keyboard Maestro Changelog
 
- ## [Update] - {PR_MERGE_DATE}
+ ## [Update] - 2023-06-12
 
  - Add argument support the command
