@@ -22,7 +22,7 @@ This extension is required [godruoyi/laravel-tips](https://github.com/godruoyi/l
 built-in `laraveltips` by default, you can also install it manually and configure the `Binary Path` in the extension
 settings.
 
-![Initial set-up](metadata/3.png)
+![Initial set-up](assets/setting.png)
 
 ## Development
 

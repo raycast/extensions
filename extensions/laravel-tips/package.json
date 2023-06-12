@@ -47,6 +47,14 @@
       "title": "Storage Path",
       "placeholder": "/path/to/save/tips",
       "required": false
+    },
+    {
+      "name": "githubToken",
+      "description": "Specify the github token to sync tips from GitHub when you reach the rate limit",
+      "type": "password",
+      "title": "Github Token",
+      "placeholder": "Github Token",
+      "required": false
     }
   ],
   "dependencies": {

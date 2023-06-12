@@ -5,6 +5,7 @@ import { useBinaryPath } from "./hooks/useBinaryPath";
 import { homedir } from "os";
 import { environment } from "@raycast/api";
 import { spawnSync } from "child_process";
+import { useGithubToken } from "./hooks/useGithubToken";
 
 export interface LaravelTip {
   id: number;
@@ -97,9 +98,26 @@ export async function execute(command: string, args: string[]): Promise<Executio
   return { data: data ? JSON.parse(data) : [] };
 }
 
+/**
+ * Spawn a process with the given binary path, command and arguments
+ *
+ * @param binaryPath
+ * @param command
+ * @param args
+ */
 async function spawn(binaryPath: string, command: string, args: string[]): Promise<ExecutionResult<string>> {
-  const options = ["-o", "json", "-q", "--path", formatStoragePath(useStoragePath()), command, ...args];
-  const { status, stdout, stderr } = spawnSync(binaryPath, options);
+  const storagePath = useStoragePath();
+  const options = ["-o", "json", "-q"];
+
+  if (storagePath) {
+    options.push("--path", formatStoragePath(storagePath));
+  }
+
+  options.push(command, ...args);
+
+  const { status, stdout, stderr } = spawnSync(binaryPath, options, {
+    env: prepareEnvironment(),
+  });
 
   if (status !== 0) {
     return { error: new ExecutionError(stderr.toString()) };
@@ -108,6 +126,28 @@ async function spawn(binaryPath: string, command: string, args: string[]): Promi
   return { data: stdout.toString() };
 }
 
+/**
+ * Prepare environment variables for the laraveltips binary
+ *
+ * Why we need this? Sometimes we can't fetch any data from GitHub API, because of the rate limit.
+ * API rate limit exceeded for your IP address (But here's the good news: Authenticated requests get a higher rate limit.
+ * Check out the documentation for more details).
+ *
+ * @see https://docs.github.com/rest/overview/resources-in-the-rest-api#rate-limiting
+ */
+function prepareEnvironment(): NodeJS.ProcessEnv | undefined {
+  const token = useGithubToken();
+  if (token) {
+    return { LARAVEL_TIPS_ACCESS_TOKEN: token };
+  }
+
+  return undefined;
+}
+
+/**
+ * Detect if the database file exists, if not, we need to sync the data from the remote server
+ * when user run the command for the first time.
+ */
 async function detectDatabaseFileHasExists(): Promise<boolean> {
   const storagePath = formatStoragePath(useStoragePath());
 
@@ -160,10 +200,8 @@ function formatStoragePath(storagePath: string): string {
 async function formatBinaryPath(binaryPath: string): Promise<ExecutionResult<string>> {
   // no binary path provided? use built-in binary
   if (!binaryPath || binaryPath.trim() == "") {
-    binaryPath = `${environment.assetsPath}/laraveltips`;
+    binaryPath = `${environment.assetsPath}/laraveltips-${await uname()}`;
   }
-
-  console.log("binaryPath", binaryPath);
 
   await detect(binaryPath);
 
@@ -181,4 +219,13 @@ async function detect(binary: string): Promise<void> {
   } catch {
     await fs.promises.chmod(binary, 0o775);
   }
+}
+
+/**
+ * Get cpu architecture name
+ */
+async function uname(): Promise<string> {
+  const { stdout } = await spawnSync("uname", ["-m"]);
+
+  return stdout.toString().trim().toLowerCase();
 }

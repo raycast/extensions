@@ -1,16 +1,28 @@
-import { showHUD } from "@raycast/api";
+import { showHUD, confirmAlert, showToast, Toast } from "@raycast/api";
 import { sync } from "./laravel-tip";
 
 export default async function Search() {
-  await showHUD("Syncing tips...");
+  await showToast({
+    style: Toast.Style.Animated,
+    title: "Syncing",
+    message: "Starting to sync all tips from LaravelDaily Repo",
+  });
 
   const { error } = await sync();
 
   if (error) {
-    await showHUD(error.message);
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Error",
+      message: error.message,
+    });
 
     return;
   }
 
-  await showHUD("Successfully synced all tips, enjoy!");
+  await showToast({
+    style: Toast.Style.Success,
+    title: "Synced",
+    message: "All tips have been synced",
+  });
 }
