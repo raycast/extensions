@@ -38,7 +38,6 @@ const Ask = (props: LaunchProps<{ arguments: AskArguments }>) => {
       <Detail
         isLoading={loading}
         markdown={response}
-        navigationTitle="FastGPT Response"
         actions={
           <ActionPanel title="Actions">
             {response && <Action.CopyToClipboard title="Copy Response" content={response} />}
