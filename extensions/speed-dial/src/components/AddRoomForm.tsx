@@ -1,12 +1,15 @@
 import { useContext, useState } from "react";
-import { Action, ActionPanel, Form, Toast, popToRoot, showToast } from "@raycast/api";
+import { Action, ActionPanel, Form, Toast, showToast, useNavigation } from "@raycast/api";
 import { useForm, FormValidation } from "@raycast/utils";
 
 import { RoomContext } from "../contexts/RoomsContext";
 import { AppIcons, Room, SupportedApps } from "../types";
 import { isMeetLink, isTeamsLink, isValidUrl, isZoomLink } from "../utils";
 
-export default function AddRoomForm() {
+export default function AddRoomForm(props: { room?: Room }) {
+  const { room } = props;
+
+  const nav = useNavigation();
   const roomContext = useContext(RoomContext);
 
   if (!roomContext) {
@@ -15,10 +18,13 @@ export default function AddRoomForm() {
 
   const { addRoom } = roomContext;
 
-  const [detectedApp, setDetectedApp] = useState<{
-    app: SupportedApps;
-    icon: AppIcons;
-  }>();
+  const [detectedApp, setDetectedApp] = useState<
+    | {
+        app: SupportedApps;
+        icon: AppIcons;
+      }
+    | undefined
+  >(room ? { app: room.app, icon: room.icon } : undefined);
 
   const { handleSubmit, itemProps } = useForm<Room>({
     onSubmit(values) {
@@ -34,10 +40,15 @@ export default function AddRoomForm() {
             title: "Yay!",
             message: `${values.name} added`,
           });
-          popToRoot();
+          nav.pop();
         })
         .catch(() => {
-          throw new Error("Error adding room");
+          showToast({
+            style: Toast.Style.Failure,
+            title: "Oops!",
+            message: `A room the same URL already exists`,
+          });
+          // throw new Error("Error adding room");
         });
     },
     validation: {
@@ -49,6 +60,10 @@ export default function AddRoomForm() {
           return "Please enter a valid URL";
         }
       },
+    },
+    initialValues: {
+      name: room?.name ?? "",
+      url: room?.url ?? "",
     },
   });
 

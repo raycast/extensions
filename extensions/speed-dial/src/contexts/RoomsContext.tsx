@@ -5,6 +5,7 @@ import { Room } from "../types";
 type RoomContextType = {
   rooms: Room[];
   loading: boolean;
+  refreshRooms: () => void;
   setRooms: React.Dispatch<React.SetStateAction<Room[]>>;
   addRoom: (room: Room) => Promise<void>;
   editRoomName: (arg: { url: string; name: string }) => Promise<void>;
@@ -31,7 +32,20 @@ const RoomProvider = ({ children }: RoomProviderProps) => {
     });
   }, []);
 
+  const refreshRooms = () => {
+    setLoading(true);
+    LocalStorage.getItem<string>("rooms").then((rooms) => {
+      setRooms(JSON.parse(rooms ?? "[]") as Room[]);
+      setLoading(false);
+    });
+  };
+
   const addRoom = async (room: Room) => {
+    // check if room already exists
+    const exists = rooms.find((item) => item.url === room.url);
+    if (exists) {
+      throw new Error("Room already exists");
+    }
     const newRooms = [...rooms, room];
     setRooms(newRooms);
     await LocalStorage.setItem("rooms", JSON.stringify(newRooms));
@@ -59,7 +73,7 @@ const RoomProvider = ({ children }: RoomProviderProps) => {
   };
 
   return (
-    <RoomContext.Provider value={{ loading, rooms, setRooms, addRoom, editRoomName, removeRoom }}>
+    <RoomContext.Provider value={{ loading, refreshRooms, rooms, setRooms, addRoom, editRoomName, removeRoom }}>
       {children}
     </RoomContext.Provider>
   );

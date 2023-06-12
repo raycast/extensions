@@ -1,13 +1,17 @@
 import { useContext } from "react";
-import { Action, ActionPanel, Form, Toast, popToRoot, showToast } from "@raycast/api";
+import { Action, ActionPanel, Form, Toast, showToast, useNavigation } from "@raycast/api";
 import { useForm, FormValidation } from "@raycast/utils";
 
 import { RoomContext } from "../contexts/RoomsContext";
 import { Room } from "../types";
 
-export default function EditRoomForm(props: { room: Room }) {
-  const { room } = props;
+export default function EditRoomForm(props: {
+  room: Room;
+  setRefreshKey: React.Dispatch<React.SetStateAction<number>>;
+}) {
+  const { room, setRefreshKey } = props;
   const roomContext = useContext(RoomContext);
+  const nav = useNavigation();
 
   if (!roomContext) {
     throw new Error("Command must be used within a RoomProvider");
@@ -24,7 +28,8 @@ export default function EditRoomForm(props: { room: Room }) {
           title: "Yay!",
           message: `Room name edited`,
         });
-        popToRoot();
+        nav.pop();
+        setRefreshKey((prevKey) => prevKey + 1);
       });
     },
     validation: {

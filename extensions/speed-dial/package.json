@@ -15,18 +15,33 @@
       "name": "list-rooms",
       "title": "View Rooms",
       "description": "Show a list of your saved meeting rooms",
-      "mode": "view"
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "room",
+          "placeholder": "Name",
+          "type": "text",
+          "required": false
+        }
+      ]
     },
     {
       "name": "add-room",
       "title": "Add Room",
       "description": "Add a new meeting room",
       "mode": "view"
+    },
+    {
+      "name": "google-import",
+      "title": "Import from Google Calendar",
+      "description": "Import your Google Calendar events to speed dial",
+      "mode": "view"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.50.3",
-    "@raycast/utils": "^1.7.1"
+    "@raycast/utils": "^1.7.1",
+    "node-fetch": "^3.3.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.5",

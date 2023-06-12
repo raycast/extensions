@@ -1,10 +1,15 @@
+import { LaunchProps } from "@raycast/api";
 import ListRooms from "./components/ListRooms";
 import { RoomProvider } from "./contexts/RoomsContext";
 
-export default function Command() {
+interface Args {
+  room: string;
+}
+
+export default function Command(props: LaunchProps<{ arguments: Args }>) {
   return (
     <RoomProvider>
-      <ListRooms />
+      <ListRooms name={props.arguments.room} />
     </RoomProvider>
   );
 }
