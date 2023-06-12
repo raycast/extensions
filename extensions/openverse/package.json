@@ -6,6 +6,8 @@
   "description": "Openverse is a search engine for openly-licensed media.",
   "icon": "openverse-icon.png",
   "author": "dhruvkb",
+  "owner": "openverse",
+  "access": "public",
   "categories": [
     "Media",
     "Web"

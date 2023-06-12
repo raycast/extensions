@@ -11,8 +11,8 @@ export enum NoteAction {
   Edit,
   Delete,
   Append,
-  Star,
-  Unstar,
+  Bookmark,
+  UnBookmark,
 }
 
 export enum PrimaryAction {
