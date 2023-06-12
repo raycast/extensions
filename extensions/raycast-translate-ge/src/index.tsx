@@ -30,7 +30,10 @@ export default function Command() {
 async function parseFetchResponse(response: Response) {
   try {
     const data = (await response.json()) as TranslateResponse;
-    return data.hits;
+    return data.hits.map((hit) => ({
+      ...hit,
+      desc: hit.desc.replace(/\r|\n|\t/g, " "),
+    }));
   } catch (err) {
     return [];
   }

@@ -6,12 +6,11 @@ export function WordListItem({ word }: { word: Word }) {
     <List.Item
       title={word.word}
       subtitle={word.desc}
-      accessories={[{ text: "Copy to Clipboard" }]}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
             <Action.CopyToClipboard
-              title="Copy Translation"
+              title="Copy to Clipboard"
               content={word.desc}
               shortcut={{ modifiers: ["cmd"], key: "." }}
             />

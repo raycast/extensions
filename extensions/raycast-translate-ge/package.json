@@ -1,6 +1,6 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "version": "1.0.5",
+  "version": "1.0.9",
   "name": "raycast-translate-ge",
   "title": "Translate.ge",
   "description": "Raycast plugin for translating georgian words to english",
