@@ -1,6 +1,6 @@
 # Crates Search
 
-## [Added] - {PR_MERGE_DATE}
+## [Added] - 2023-06-12
 
 ### Updated
 
