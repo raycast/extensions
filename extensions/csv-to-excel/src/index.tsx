@@ -17,6 +17,13 @@ function getRandomInt(min: number, max: number): number {
 export default function Command() {
   async function handleSubmit(values: Values) {
     const file = values.files[0];
+
+    if (!file) {
+      showToast(Toast.Style.Failure, "You need choose a CSV file");
+
+      return false;
+    }
+
     const fileExtension = path.extname(file);
 
     if (fileExtension !== ".csv") {
