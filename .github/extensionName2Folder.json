@@ -462,6 +462,7 @@
   "jwt-decoder": "jwt-decoder",
   "kaalam": "kaalam",
   "kafka": "kafka",
+  "kagi-fastgpt": "kagi-fastgpt",
   "kagi-search": "kagi-search",
   "kaomoji-search": "kaomoji-search",
   "karabiner-profile-switcher": "karabiner-profile-switcher",
