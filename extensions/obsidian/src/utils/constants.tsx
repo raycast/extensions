@@ -23,7 +23,6 @@ export enum PrimaryAction {
   OpenInObsidianNewPane = "newpane",
 }
 
-export const CURRENT_EXTENSION_VERSION = "1.7.0";
 export const APPLICATION_UUID = "49acc9ee-69a0-4419-9aad-5c2689ff0119";
 
 export const INLINE_TAGS_REGEX = /(#[a-zA-Z_0-9/-]+)/g;

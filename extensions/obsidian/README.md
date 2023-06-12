@@ -211,10 +211,6 @@ Clicking it will reveal a list of your vaults. You can view your starred notes, 
 - [First Update Raycast Obsidian Extension](https://www.marc-julian.de/2022/03/Obsidian%20Raycast%20Extension%20Update.html)
 - [Obsidian Raycast Extension](https://www.marc-julian.de/2022/01/raycastobsidian.html)
 
-## Contributions and Credits
-
-Thank you [macedotavares](https://forum.obsidian.md/t/big-sur-icon/8121?u=marcjulian) for letting me use your amazing Obsidian (Big Sur) icon.
-
 ## Disclaimer
 
 This project is not affiliated, associated, authorized, endorsed by, or in any way officially connected with Obsidian. The official Obsidian website can be found at https://obsidian.md. "Obsidian" as well as related names, marks, emblems and images are registered trademarks of their respective owners.
