@@ -1,3 +1,3 @@
-import { Command } from "./command";
+import { LoginCommand } from "./login-command";
 
-export default Command;
+export default LoginCommand;

@@ -43,7 +43,7 @@ function LoginList({ configName }: { configName: string }) {
   return <Detail isLoading={true} markdown="Loading" />;
 }
 
-export const Command = () => {
+export const LoginCommand = () => {
   const { push } = useNavigation();
 
   const [searchText, setSearchText] = useState("");

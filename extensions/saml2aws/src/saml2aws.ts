@@ -1,8 +1,9 @@
-import { readIniFile } from "./utils";
 import { join } from "path";
 import { homedir } from "os";
 import { existsSync } from "fs";
 import { spawn } from "child_process";
+import { readFileSync } from "fs";
+import ini from "ini";
 
 export interface IConfiguration {
   name: string;
@@ -10,6 +11,13 @@ export interface IConfiguration {
 
 export const getPathToConfigFile = (): string => {
   return join(homedir(), ".saml2aws");
+};
+
+export const readIniFile = (pathToFile: string) => {
+  const iniString = readFileSync(pathToFile, "utf-8");
+  const config = ini.parse(iniString);
+
+  return config;
 };
 
 export const getConfigurations = (pathToFile: string = getPathToConfigFile()) => {
