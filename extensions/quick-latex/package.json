@@ -1,0 +1,47 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "quick-latex",
+  "title": "LaTeX to image",
+  "description": "Converts LaTeX text to image. Copy the image to the Clipboard.",
+  "icon": "bird.png",
+  "author": "Noamko",
+  "categories": [
+    "Design Tools",
+    "Web",
+    "Data",
+    "Productivity",
+    "Finance",
+    "Other"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "quick-latex",
+      "title": "Quick LaTeX",
+      "subtitle": "",
+      "description": "Quickly convert LaTeX to image and copy the image to the Clipboard.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.35.2",
+    "image-downloader": "^4.3.0",
+    "run-applescript": "^6.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}
