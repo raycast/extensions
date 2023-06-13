@@ -36,7 +36,7 @@ export default function Submenu(props: SubmenuProps) {
     <List
       isLoading={filteredData === undefined}
       filtering={false}
-      searchBarPlaceholder={`Filter ${props.url} cheatsheets by name or search for a keyword`}
+      searchBarPlaceholder={`Go to more detailed cheatsheets in ${props.url} or directly search for a keyword`}
       onSearchTextChange={setSearchText}
       navigationTitle={navigationTitle}
     >
@@ -64,6 +64,12 @@ export default function Submenu(props: SubmenuProps) {
           }
         />
       ))}
+      {filteredData?.length === 0 && props.url !== "/" && (
+        <List.EmptyView
+          title={`No more detailed section in "${props.url} cheatsheets"`}
+          description={`Directly search a keyword to search in "${props.url}" cheatsheets. For example, try to type "quick sort" in the navigation bar.`}
+        />
+      )}
     </List>
   );
 }
