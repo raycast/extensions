@@ -3,6 +3,7 @@
 ## [Update] - 2023-06-11
 
 - Add home network detection to switch between an internal url and an external one
+- Add `Connection Check` root command
 
 ## [Update] - 2023-05-04
 

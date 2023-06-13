@@ -1,7 +1,8 @@
-import { List, Toast, showToast } from "@raycast/api";
+import { Color, Icon, List, Toast, showToast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { ha } from "./common";
 import { getErrorMessage } from "./utils";
+import { getWifiSSIDSync } from "./lib/wifi";
 
 export default function ConnectionCommand(): JSX.Element {
   const { error, isLoading, nearestURL } = useConnection();
@@ -11,9 +12,26 @@ export default function ConnectionCommand(): JSX.Element {
   return (
     <List isLoading={isLoading}>
       <List.Section title="Connection">
-        <List.Item title="Chosen Url" accessories={[{ text: nearestURL }]} />
-        <List.Item title="Url" accessories={[{ text: ha.url }]} />
-        <List.Item title="Internal Url" accessories={[{ text: ha.urlInternal || "undefined" }]} />
+        <List.Item
+          title="Chosen Url"
+          icon={Icon.ArrowsContract}
+          accessories={[
+            { icon: { source: nearestURL === ha.urlInternal ? Icon.House : "", tintColor: Color.Yellow } },
+            { text: nearestURL },
+          ]}
+        />
+      </List.Section>
+      <List.Section title="Urls">
+        <List.Item title="Url" icon={Icon.AtSymbol} accessories={[{ text: ha.url }]} />
+        <List.Item title="Internal Url" icon={Icon.House} accessories={[{ text: ha.urlInternal || "-" }]} />
+      </List.Section>
+      <List.Section title="WiFi">
+        <List.Item
+          title="Home WiFi SSIDs"
+          icon={Icon.Network}
+          accessories={[{ text: ha.wifiSSIDs?.join(",") || "undefined" }]}
+        />
+        <List.Item title="Current WiFi SSID" icon={Icon.Wifi} accessories={[{ text: getWifiSSIDSync() || "-" }]} />
       </List.Section>
     </List>
   );

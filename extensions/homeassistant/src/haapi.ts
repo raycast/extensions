@@ -45,7 +45,7 @@ export class HomeAssistant {
   private _nearestURL: string | undefined;
   private httpsAgent?: Agent;
   private _ignoreCerts = false;
-  private wifiSSIDs: string[] | undefined;
+  public wifiSSIDs: string[] | undefined;
   private usePing = true;
 
   constructor(url: string, token: string, ignoreCerts: boolean, options: HomeAssistantOptions | undefined = undefined) {
