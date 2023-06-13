@@ -9,6 +9,15 @@
     "Developer Tools",
     "Productivity"
   ],
+  "keywords": [
+    "date",
+    "epoch",
+    "unix",
+    "seconds",
+    "milliseconds",
+    "iso",
+    "convert"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -16,6 +25,15 @@
       "title": "Convert Date",
       "description": "Parse and convert a date",
       "mode": "view",
+      "keywords": [
+        "date",
+        "epoch",
+        "unix",
+        "seconds",
+        "milliseconds",
+        "iso",
+        "convert"
+      ],
       "preferences": [
         {
           "name": "defaultFormat",
