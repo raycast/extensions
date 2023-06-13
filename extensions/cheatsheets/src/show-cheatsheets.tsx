@@ -34,6 +34,7 @@ function Command() {
                 title="Open Cheatsheet"
                 target={<SheetView slug={sheet} />}
               />
+              <Action.OpenInBrowser url={Service.urlFor(sheet)} />
             </ActionPanel>
           }
           key={sheet}
