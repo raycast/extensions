@@ -10,6 +10,7 @@ type DayProps = {
 };
 
 export default function DateSection({ month, date, events }: DayProps) {
+  console.log(events);
   return (
     <List.Section key={date} title={isToday(date.toString()) ? "Today" : `${month} ${date}`}>
       {eventGroupByDate(date, events).length > 0

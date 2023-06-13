@@ -17,13 +17,15 @@ export default function EventListItem({ event }: EventListItemProps) {
   const isAttending = (attendees: Attendee[]): boolean => {
     let responseStatus = "";
 
-    attendees.forEach((attendee: Attendee) => {
-      if (attendee.self) {
-        if (attendee.responseStatus) {
-          responseStatus = attendee.responseStatus;
+    if (attendees && attendees.length > 0) {
+      attendees.forEach((attendee: Attendee) => {
+        if (attendee.self) {
+          if (attendee.responseStatus) {
+            responseStatus = attendee.responseStatus;
+          }
         }
-      }
-    });
+      });
+    }
     return responseStatus == "accepted";
   };
 
