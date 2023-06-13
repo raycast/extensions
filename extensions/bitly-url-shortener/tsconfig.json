@@ -3,7 +3,10 @@
   "display": "Node 16",
   "include": ["src/**/*"],
   "compilerOptions": {
-    "lib": ["es2020"],
+    "lib": [
+      "es2020",
+      "dom"
+    ],
     "module": "commonjs",
     "target": "es2020",
     "strict": true,

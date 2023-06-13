@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Color, Detail, Icon, List } from "@raycast/api";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { GetLogs } from "./client/ws";
-import { LogLevelT } from "./types";
+import { LogLevelT, LogT } from "./types";
 
 const logLevels: Array<LogLevelT> = ["error", "warning", "info", "debug"];
 const logLevelColors = {
@@ -14,8 +14,15 @@ const logLevelColors = {
 export default function Logs(): JSX.Element {
   const [level, setLevel] = useState<LogLevelT>("info");
   const [logsUrl, logs] = GetLogs(level);
+  const [searchText, setSearchText] = useState("");
+  const [filteredList, filterList] = useState(logs);
+
+  useEffect(() => {
+    filterList(logsUrl ? logs.filter((item: LogT) => item.payload.includes(searchText)) : ([] as Array<LogT>));
+  }, [searchText, logs.length]);
+
   return (
-    <List>
+    <List enableFiltering={false} onSearchTextChange={setSearchText}>
       {logsUrl ? (
         <>
           <List.Item
@@ -37,7 +44,7 @@ export default function Logs(): JSX.Element {
               </ActionPanel>
             }
           />
-          {logs.map((log, index) => (
+          {filteredList.map((log, index) => (
             <List.Item
               icon={{ source: Icon.Circle, tintColor: logLevelColors[log.type] }}
               key={index}

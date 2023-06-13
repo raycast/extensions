@@ -9,40 +9,50 @@ import {
   showToast,
   Image,
   closeMainWindow,
-  popToRoot,
   getSelectedText,
   environment,
   confirmAlert,
   getPreferenceValues,
+  getSelectedFinderItems,
+  open,
 } from "@raycast/api";
 import { spawnSync } from "child_process";
 import { chmodSync, existsSync } from "fs";
 import path from "path";
 import React, { useEffect, useState } from "react";
 import untildify from "untildify";
-import { ScriptCommand } from "./types";
-import { InvalidCommand, parseScriptCommands, sortByAccessTime } from "./utils";
+import { ScriptCommand, InputType } from "./types";
+import { getActiveTabUrl, InvalidCommand, parseScriptCommands, sortByAccessTime } from "./utils";
 
-type InputType = "text" | "clipboard";
-
-export function PipeCommands(props: { inputFrom?: InputType }): JSX.Element {
-  const { inputFrom } = props;
+export function PipeCommands(props: { inputType?: InputType }): JSX.Element {
   const [state, setState] = useState<{ commands: ScriptCommand[]; invalid: InvalidCommand[] }>();
 
-  const loadCommands = async () => {
+  const refreshCommands = async () => {
     const { commands, invalid } = await parseScriptCommands();
-    setState({ commands: await sortByAccessTime(commands), invalid });
+    const filteredCommands = commands.filter((command) => {
+      switch (command.metadatas.mode) {
+        case "pipe":
+          // If the input is not defined, we assume it's a text input
+          if (!command.metadatas.inputType?.type) {
+            return props.inputType === "text";
+          }
+          return command.metadatas.inputType.type === props.inputType;
+        default:
+          return command.metadatas.argument1.type === props.inputType;
+      }
+    });
+    setState({ commands: await sortByAccessTime(filteredCommands), invalid });
   };
 
   useEffect(() => {
-    loadCommands();
+    refreshCommands();
   }, []);
 
   return (
-    <List isLoading={typeof state == "undefined"} searchBarPlaceholder={`Pipe ${inputFrom} to`}>
+    <List isLoading={typeof state == "undefined"} searchBarPlaceholder={`Pipe ${props.inputType} to`}>
       <List.Section title="Commands">
         {state?.commands.map((command) => (
-          <PipeCommand key={command.path} command={command} inputFrom={inputFrom} onTrash={loadCommands} />
+          <PipeCommand key={command.path} command={command} inputFrom={props.inputType} onTrash={refreshCommands} />
         ))}
       </List.Section>
       <List.Section title="Invalid Commands">
@@ -86,15 +96,28 @@ export function getRaycastIcon(script: ScriptCommand): Image.ImageLike {
 
 async function getInput(inputType: InputType) {
   switch (inputType) {
-    case "clipboard": {
+    case "text": {
+      const selection = await getSelectedText();
+      if (selection) {
+        return selection;
+      }
       const clipboard = await Clipboard.readText();
       if (!clipboard) {
         throw new Error("No text in clipboard");
       }
       return clipboard;
     }
-    case "text":
-      return getSelectedText();
+    case "file": {
+      const selection = await getSelectedFinderItems();
+      if (selection.length == 0) {
+        throw new Error("No file selected");
+      }
+
+      return selection[0].path;
+    }
+    case "url": {
+      return getActiveTabUrl();
+    }
   }
 }
 
@@ -149,7 +172,7 @@ async function runCommand(command: ScriptCommand, inputType: InputType) {
   const toast = await showToast(Toast.Style.Animated, "Running...");
   const input = await getInput(inputType);
   let args: string[];
-  if (command.metadatas.argument1) {
+  if (command.metadatas.mode === "silent") {
     args = command.metadatas.argument1.percentEncoded ? [encodeURIComponent(input)] : [input];
   } else {
     args = [];
@@ -194,7 +217,6 @@ function CommandActions(props: { command: ScriptCommand; inputFrom: InputType })
         const output = await runCommand(command, inputFrom);
         if (output) await onSuccess(output);
         await closeMainWindow();
-        await popToRoot();
       } catch (e) {
         const toast = await showToast({
           title: "An error occured",
@@ -236,10 +258,15 @@ function CommandActions(props: { command: ScriptCommand; inputFrom: InputType })
         />
       );
 
+      const openInBrowser = (
+        <Action key="open-url" icon={Icon.Globe} title="Open in Browser" onAction={outputHandler(open)} />
+      );
+
       return (
-        <React.Fragment>
+        <>
+          {command.metadatas.outputType == "url" ? openInBrowser : null}
           {primaryAction === "copy" ? [copyAction, pasteAction] : [pasteAction, copyAction]}
-        </React.Fragment>
+        </>
       );
     }
   }

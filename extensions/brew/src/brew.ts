@@ -100,7 +100,9 @@ export interface OutdatedResults {
 
 /// Paths
 
-export const brewPrefix: string = (() => {
+export const brewPrefix = (() => {
+  if (preferences.customBrewPath && preferences.customBrewPath.length > 0)
+    return path_join(preferences.customBrewPath, "..", "..");
   try {
     return execSync("brew --prefix", { encoding: "utf8" }).trim();
   } catch {
@@ -108,46 +110,8 @@ export const brewPrefix: string = (() => {
   }
 })();
 
-export function brewPath(suffix: string): string {
-  return path_join(brewPrefix, suffix);
-}
-
-export function brewExecutable(): string {
-  if (preferences.customBrewPath && preferences.customBrewPath.length > 0) {
-    return preferences.customBrewPath;
-  } else {
-    return path_join(brewPrefix, "bin/brew");
-  }
-}
-
-/// Commands
-
-export async function brewDoctorCommand(): Promise<string> {
-  try {
-    const output = await execBrew(`doctor`);
-    return output.stdout;
-  } catch (err) {
-    const execErr = err as ExecError;
-    if (execErr?.code === 1) {
-      return execErr.stderr;
-    } else {
-      return `${err}`;
-    }
-  }
-}
-
-export async function brewUpgradeCommand(greedy: boolean, cancel?: AbortController): Promise<string> {
-  let cmd = `upgrade`;
-  if (greedy) {
-    cmd += " --greedy";
-  }
-  const output = await execBrew(cmd, cancel);
-  return output.stdout;
-}
-
-export async function brewUpdateCommand(cancel?: AbortController): Promise<void> {
-  await execBrew(`update`, cancel);
-}
+export const brewPath = (suffix: string) => path_join(brewPrefix, suffix);
+export const brewExecutable = () => brewPath("bin/brew");
 
 /// Fetching
 
@@ -199,7 +163,8 @@ export async function brewFetchInstalled(useCache: boolean, cancel?: AbortContro
       const cacheBuffer = await fs.readFile(installedCachePath);
       return JSON.parse(cacheBuffer.toString());
     } else {
-      throw "Invalid cache";
+      console.error("Invalid cache");
+      return await updateCache();
     }
   }
 
@@ -216,7 +181,7 @@ export async function brewFetchOutdated(greedy: boolean, cancel?: AbortControlle
     cmd += " --greedy"; // include auto_update casks
   }
   // 'outdated' is only reliable after performing a 'brew update'
-  await brewUpdateCommand(cancel);
+  await brewUpdate(cancel);
   const output = await execBrew(cmd, cancel);
   return JSON.parse(output.stdout);
 }
@@ -229,6 +194,9 @@ const caskURL = "https://formulae.brew.sh/api/cask.json";
 const formulaRemote: utils.Remote<Formula> = { url: formulaURL, cachePath: formulaCachePath };
 const caskRemote: utils.Remote<Cask> = { url: caskURL, cachePath: caskCachePath };
 
+// Store the query so that text entered during the initial fetch is respected.
+let searchQuery: string | undefined;
+
 export async function brewFetchFormulae(): Promise<Formula[]> {
   return await utils.fetchRemote(formulaRemote);
 }
@@ -237,12 +205,31 @@ export async function brewFetchCasks(): Promise<Cask[]> {
   return await utils.fetchRemote(caskRemote);
 }
 
-export async function brewSearch(searchText: string, limit?: number): Promise<InstallableResults> {
+export async function brewSearch(
+  searchText: string,
+  limit?: number,
+  signal?: AbortSignal
+): Promise<InstallableResults> {
+  searchQuery = searchText;
+
   let formulae = await brewFetchFormulae();
+
+  if (signal?.aborted) {
+    const error = new Error("Aborted");
+    error.name = "AbortError";
+    throw error;
+  }
+
   let casks = await brewFetchCasks();
 
-  if (searchText.length > 0) {
-    const target = searchText.toLowerCase();
+  if (signal?.aborted) {
+    const error = new Error("Aborted");
+    error.name = "AbortError";
+    throw error;
+  }
+
+  if (searchQuery.length > 0) {
+    const target = searchQuery.toLowerCase();
     formulae = formulae
       ?.filter((formula) => {
         return formula.name.toLowerCase().includes(target) || formula.desc?.toLowerCase().includes(target);
@@ -290,7 +277,7 @@ export async function brewInstall(installable: Cask | Formula, cancel?: AbortCon
 
 export async function brewUninstall(installable: Cask | Nameable, cancel?: AbortController): Promise<void> {
   const identifier = brewIdentifier(installable);
-  await execBrew(`rm ${brewCaskOption(installable)} ${identifier}`, cancel);
+  await execBrew(`rm ${brewCaskOption(installable, true)} ${identifier}`, cancel);
 }
 
 export async function brewUpgrade(upgradable: Cask | Nameable, cancel?: AbortController): Promise<void> {
@@ -298,8 +285,12 @@ export async function brewUpgrade(upgradable: Cask | Nameable, cancel?: AbortCon
   await execBrew(`upgrade ${brewCaskOption(upgradable)} ${identifier}`, cancel);
 }
 
-export async function brewUpgradeAll(cancel?: AbortController): Promise<void> {
-  await execBrew(`upgrade`, cancel);
+export async function brewUpgradeAll(greedy: boolean, cancel?: AbortController): Promise<void> {
+  let cmd = `upgrade --ignore-pinned`;
+  if (greedy) {
+    cmd += " --greedy";
+  }
+  await execBrew(cmd, cancel);
 }
 
 export async function brewPinFormula(formula: Formula | OutdatedFormula): Promise<void> {
@@ -310,6 +301,41 @@ export async function brewPinFormula(formula: Formula | OutdatedFormula): Promis
 export async function brewUnpinFormula(formula: Formula | OutdatedFormula): Promise<void> {
   await execBrew(`unpin ${formula.name}`);
   formula.pinned = false;
+}
+
+export async function brewDoctor(): Promise<string> {
+  try {
+    const output = await execBrew(`doctor`);
+    return output.stdout;
+  } catch (err) {
+    const execErr = err as ExecError;
+    if (execErr?.code === 1) {
+      return execErr.stderr;
+    } else {
+      return `${err}`;
+    }
+  }
+}
+
+export async function brewUpdate(cancel?: AbortController): Promise<void> {
+  await execBrew(`update`, cancel);
+}
+
+/// Commands
+
+export function brewInstallCommand(installable: Cask | Formula | Nameable): string {
+  const identifier = brewIdentifier(installable);
+  return `${brewExecutable()} install ${brewCaskOption(installable)} ${identifier}`.replace(/ +/g, " ");
+}
+
+export function brewUninstallCommand(installable: Cask | Formula | Nameable): string {
+  const identifier = brewIdentifier(installable);
+  return `${brewExecutable()} uninstall ${brewCaskOption(installable, true)} ${identifier}`.replace(/ +/g, " ");
+}
+
+export function brewUpgradeCommand(upgradable: Cask | Formula | Nameable): string {
+  const identifier = brewIdentifier(upgradable);
+  return `${brewExecutable()} upgrade ${brewCaskOption(upgradable)} ${identifier}`.replace(/ +/g, " ");
 }
 
 /// Utilities
@@ -417,8 +443,8 @@ function brewIdentifier(item: Cask | Nameable): string {
   return isCask(item) ? item.token : item.name;
 }
 
-function brewCaskOption(maybeCask: Cask | Nameable): string {
-  return isCask(maybeCask) ? "--cask" : "";
+function brewCaskOption(maybeCask: Cask | Nameable, zappable = false): string {
+  return isCask(maybeCask) ? "--cask" + (zappable && preferences.zapCask ? " --zap" : "") : "";
 }
 
 function isCask(maybeCask: Cask | Nameable): maybeCask is Cask {

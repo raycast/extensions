@@ -6,7 +6,7 @@ import { OpenLinkAppGridItem } from "./open-link-app-grid-item";
 import { Preferences } from "../types/preferences";
 import { OpenLinkInEmptyView } from "./open-link-in-empty-view";
 import { OpenLinkApplication } from "../types/types";
-import { actionTitle, searchBarPlaceholder } from "../utils/open-link-utils";
+import { searchBarPlaceholder } from "../utils/open-link-utils";
 
 export function OpenLinkInGridLayout(props: {
   buildInApps: OpenLinkApplication[];
@@ -16,19 +16,19 @@ export function OpenLinkInGridLayout(props: {
   setRefresh: React.Dispatch<React.SetStateAction<number>>;
   loading: boolean;
 }) {
-  const { itemSize, itemInset } = getPreferenceValues<Preferences>();
+  const { columns, itemInset } = getPreferenceValues<Preferences>();
   const { buildInApps, customApps, otherApps, itemInput, setRefresh, loading } = props;
 
   return (
     <Grid
-      itemSize={itemSize as Grid.ItemSize}
+      columns={parseInt(columns)}
       inset={isEmpty(itemInset) ? undefined : (itemInset as Grid.Inset)}
       isLoading={loading}
       searchBarPlaceholder={searchBarPlaceholder(itemInput)}
     >
       <OpenLinkInEmptyView />
 
-      <Grid.Section title="Custom Apps" subtitle={itemInput.type + ": " + itemInput.content.substring(0, 90)}>
+      <Grid.Section title="Favorites">
         {customApps.map((browser, index) => {
           return (
             <OpenLinkAppGridItem
@@ -42,10 +42,7 @@ export function OpenLinkInGridLayout(props: {
           );
         })}
       </Grid.Section>
-      <Grid.Section
-        title="Build-in Apps"
-        subtitle={customApps.length === 0 ? itemInput.type + ": " + itemInput.content.substring(0, 90) : ""}
-      >
+      <Grid.Section title="Recommended">
         {buildInApps.map((browser, index) => {
           return (
             <OpenLinkAppGridItem
@@ -59,7 +56,7 @@ export function OpenLinkInGridLayout(props: {
           );
         })}
       </Grid.Section>
-      <Grid.Section title="Other Apps">
+      <Grid.Section title="Other" subtitle={"Press ⌘+S to add app to Favorites"}>
         {otherApps.map((browser, index) => {
           return (
             <OpenLinkAppGridItem

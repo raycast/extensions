@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-07-01 19:05
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-07-31 23:55
+ * @lastEditTime: 2023-05-17 23:05
  * @fileName: versionInfo.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -10,7 +10,7 @@
 
 import { LocalStorage } from "@raycast/api";
 import axios from "axios";
-import { changelog } from "./changelog";
+import { requestCostTime } from "../axiosConfig";
 
 const versionInfoKey = "EasydictVersionInfoKey";
 const githubUrl = "https://github.com";
@@ -25,14 +25,36 @@ export class Easydict {
   static author = "tisfeng";
   static repo = "Raycast-Easydict";
 
-  // new version info
   // * NOTE: this is new version info, don't use it directly. Use getCurrentStoredVersionInfo() instead.
-  version = "1.4.1";
-  buildNumber = 7;
-  versionDate = "2022-08-01";
+  version = "2.9.0";
+  buildNumber = 26;
+  versionDate = "2023-05-17";
   isNeedPrompt = true;
-  hasPrompted = false; // always default false, only show once, then should be set to true.
-  releaseMarkdown = changelog;
+  hasPrompted = false; // * always default false, only show once, then should be set to true.
+
+  releaseMarkdown = `
+## [v${this.version}] - ${this.versionDate}
+
+### ✨ 新功能
+
+- 添加了 OCR 截图翻译功能，感谢 [aidevjoe](https://github.com/aidevjoe) 的 PR。
+
+![](https://github-production-user-asset-6210df.s3.amazonaws.com/25194972/238993145-9dbe2fbb-8407-49bc-8909-adb0515e850e.png)
+
+#### 如果觉得这个扩展还不错，给个 [Star](https://github.com/tisfeng/Raycast-Easydict) ⭐️ 支持一下吧 (^-^)
+
+## 推荐
+
+我另一个项目，[Easydict](https://github.com/tisfeng/Easydict) ，一个简洁优雅的翻译词典 macOS App。开箱即用，支持离线 OCR 识别，支持有道词典，🍎苹果系统翻译，DeepL，谷歌，百度和火山翻译。
+
+![iShot_2023-03-17_18.01.22_11zon-1679050206](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/iShot_2023-03-17_18.01.22_11zon-1679050206.jpg)
+
+---
+
+### ✨ New Features
+
+- Added OCR screenshot translation command, thanks to [aidevjoe](https://github.com/aidevjoe)'s PR.
+`;
 
   getRepoUrl() {
     return `${githubUrl}/${Easydict.author}/${Easydict.repo}`;
@@ -50,6 +72,8 @@ export class Easydict {
     return `${this.getRepoUrl()}/releases/tag/${this.version}`;
   }
 
+  chineseREADMEUrl = "https://github.com/tisfeng/Raycast-Easydict/blob/main/docs/README_ZH.md";
+
   /**
    * Chinese Wiki: https://github.com/tisfeng/Raycast-Easydict/wiki
    */
@@ -59,6 +83,8 @@ export class Easydict {
 
   /**
    *  Release tag url: /repos/{owner}/{repo}/releases/tags/{tag}
+   *
+   * * call this url will return a JSON object.
    *
    *  https://api.github.com/repos/tisfeng/Raycast-Easydict/releases/tags/1.2.0
    */
@@ -103,7 +129,7 @@ export class Easydict {
     const currentEasydictInfo = await this.getVersionInfo(currentVersionKey);
     if (currentEasydictInfo) {
       // console.log(`get current easydict cost time: ${Date.now() - startTime} ms`);
-      // console.log(`current easydict info: ${JSON.stringify(currentEasydictInfo, null, 2)}`);
+      // console.log(`current easydict info: ${JSON.stringify(currentEasydictInfo, null, 4)}`);
       return Promise.resolve(currentEasydictInfo);
     } else {
       const startStoredTime = Date.now();
@@ -121,7 +147,7 @@ export class Easydict {
    */
   public async fetchReleaseMarkdown(): Promise<string> {
     try {
-      console.log("fetch release markdown from github");
+      console.log(`fetch release markdown from github: ${this.getReleaseApiUrl()}`);
       const releaseInfo = await this.fetchReleaseInfo(this.getReleaseApiUrl());
       const releaseMarkdown = releaseInfo.body;
       console.log("fetch release markdown from github success");
@@ -156,7 +182,7 @@ export class Easydict {
     try {
       // console.log(`fetch release url: ${releaseUrl}`);
       const response = await axios.get(releaseUrl);
-      console.log(`fetch github cost time: ${response.headers["x-request-cost"]} ms`);
+      console.log(`fetch github cost time: ${response.headers[requestCostTime]} ms`);
 
       return Promise.resolve(response.data);
     } catch (error) {

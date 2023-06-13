@@ -1,6 +1,7 @@
 import fs from "fs";
 import path from "path";
 import { Character, getBlocks, getCharacters } from "unidata";
+import { CharAlias } from "../src/dataset-manager";
 
 // Output path for the generated dataset.
 const datasetOutputPath = path.resolve(__dirname, "../assets/dataset.json");
@@ -38,6 +39,13 @@ const blockNamesToFilter = [
 // Specify here any additional characters and blocks to include in the dataset.
 const additionalCharacterValues = ["", "⌘", "⌥", "⏎", "⌫"];
 const additionalBlockNames = ["Miscellaneous Technical", "Private Use Area"];
+const charCodeToAliases: CharAlias = {
+  8313: ["superscript 9"],
+  8984: ["cmd", "command"],
+  9166: ["enter"],
+  9003: ["delete"],
+  94: ["control", "ctrl"],
+};
 
 // Grab unicode blocks and characters using https://github.com/chbrown/unidata/
 const allBlocks = getBlocks();
@@ -73,7 +81,8 @@ const mapCodeToName = (char: Character): Character => {
 };
 
 function mapCharacterToDatasetItem(char: Character) {
-  return { value: String.fromCodePoint(char.code), code: char.code, name: char.name };
+  const aliases = charCodeToAliases[char.code] ? charCodeToAliases[char.code] : [];
+  if (char.code) return { value: String.fromCodePoint(char.code), code: char.code, name: char.name, aliases: aliases };
 }
 
 function sanitizeCharacters(characters: Character[]) {
@@ -81,7 +90,7 @@ function sanitizeCharacters(characters: Character[]) {
     .filter(Boolean) // Include only valid characters
     .map(mapCodeToName)
     .map(mapCharacterToDatasetItem)
-    .filter((char) => char.name !== "<control>"); // Exclude invisible control characters
+    .filter((char) => char && char.name !== "<control>"); // Exclude invisible control characters
 }
 
 // Run the dataset generation.

@@ -6,6 +6,7 @@ import { XcodeProjectTypeName } from "../../shared/xcode-project-type-name";
  * Xcode Project List Search Bar Accessory
  */
 export function XcodeProjectListSearchBarAccessory(props: {
+  projectTypeFilter?: (xcodeProjectType: XcodeProjectType) => boolean;
   onChange: (projectTypeFilter: XcodeProjectType | undefined) => void;
 }): JSX.Element {
   return (
@@ -16,15 +17,19 @@ export function XcodeProjectListSearchBarAccessory(props: {
       tooltip="Filter projects by type"
     >
       <List.Dropdown.Item key="all" value={""} title="All" />
-      {Object.keys(XcodeProjectType).map((projectType) => {
-        return (
+      {Object.keys(XcodeProjectType)
+        .filter((projectType) =>
+          props.projectTypeFilter
+            ? props.projectTypeFilter(XcodeProjectType[projectType as keyof typeof XcodeProjectType])
+            : true
+        )
+        .map((projectType) => (
           <List.Dropdown.Item
             key={projectType}
             value={projectType}
             title={XcodeProjectTypeName(XcodeProjectType[projectType as keyof typeof XcodeProjectType])}
           />
-        );
-      })}
+        ))}
     </List.Dropdown>
   );
 }

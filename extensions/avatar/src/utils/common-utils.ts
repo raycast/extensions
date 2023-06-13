@@ -1,6 +1,5 @@
 import fse from "fs-extra";
-import { environment, open, showHUD, showInFinder, showToast, Toast } from "@raycast/api";
-import { copyFileByPath } from "./applescript-utils";
+import { Clipboard, environment, open, showHUD, showInFinder, showToast, Toast } from "@raycast/api";
 import { homedir } from "os";
 import { axiosGetImageArrayBuffer } from "./axios-utils";
 import Style = Toast.Style;
@@ -17,7 +16,7 @@ export async function downloadAndCopyImage(url: string, extension: string) {
     : `${selectedPath}/avatar.${extension}`;
 
   fse.writeFileSync(filePath, Buffer.from(await axiosGetImageArrayBuffer(url)));
-  await copyFileByPath(filePath);
+  await Clipboard.copy({ file: filePath });
   await toast.hide();
   await showHUD("Avatar copied to clipboard");
 }

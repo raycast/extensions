@@ -1,158 +1,184 @@
-import { useState, useRef } from "react";
-import { ActionPanel, Form, Icon, showToast, useNavigation, open, Toast, Action } from "@raycast/api";
-import { AddTaskArgs } from "@doist/todoist-api-typescript";
-import useSWR, { mutate } from "swr";
-import { handleError, todoist } from "./api";
-import { priorities } from "./constants";
-import { getAPIDate } from "./helpers";
-import { SWRKeys } from "./types";
+import { ActionPanel, Form, Icon, useNavigation, open, Toast, Action, Color } from "@raycast/api";
+import { FormValidation, useForm } from "@raycast/utils";
+
+import { addComment, addTask, AddTaskArgs, handleError, uploadFile } from "./api";
+import RefreshAction from "./components/RefreshAction";
 import TaskDetail from "./components/TaskDetail";
+import View from "./components/View";
+import { getCollaboratorIcon, getProjectCollaborators } from "./helpers/collaborators";
+import { getColorByKey } from "./helpers/colors";
+import { getAPIDate } from "./helpers/dates";
+import { isTodoistInstalled } from "./helpers/isTodoistInstalled";
+import { priorities } from "./helpers/priorities";
+import { getPriorityIcon } from "./helpers/priorities";
+import { getProjectIcon } from "./helpers/projects";
+import { getTaskAppUrl, getTaskUrl } from "./helpers/tasks";
+import useSyncData from "./hooks/useSyncData";
 
-export default function CreateTask({ fromProjectId }: { fromProjectId?: number }) {
-  const { push } = useNavigation();
-  const { data: projects, error: getProjectsError } = useSWR(SWRKeys.projects, () => todoist.getProjects());
-  const { data: sections, error: getSectionsError } = useSWR(SWRKeys.sections, () => todoist.getSections());
-  const { data: labels, error: getLabelsError } = useSWR(SWRKeys.labels, () => todoist.getLabels());
+type CreateTaskValues = {
+  content: string;
+  description: string;
+  dueDate: Date | null;
+  priority: string;
+  projectId: string;
+  sectionId: string;
+  labels: string[];
+  parentId: string;
+  responsibleUid: string;
+  files: string[];
+};
 
-  if (getProjectsError) {
-    handleError({ error: getProjectsError, title: "Unable to get projects" });
-  }
+type CreateTaskProps = {
+  fromLabel?: string;
+  fromProjectId?: string;
+  fromTodayEmptyView?: boolean;
+  draftValues?: CreateTaskValues;
+};
 
-  if (getSectionsError) {
-    handleError({ error: getSectionsError, title: "Unable to get sections" });
-  }
+function CreateTask({ fromProjectId, fromLabel, fromTodayEmptyView, draftValues }: CreateTaskProps) {
+  const { push, pop } = useNavigation();
 
-  if (getLabelsError) {
-    handleError({ error: getLabelsError, title: "Unable to get labels" });
-  }
+  const { data, setData, isLoading } = useSyncData();
 
-  const isLoading = !projects || !labels;
+  const labels = data?.labels;
+  const projects = data?.projects;
+  const sections = data?.sections;
 
   const lowestPriority = priorities[priorities.length - 1];
 
-  const [content, setContent] = useState("");
-  const [description, setDescription] = useState("");
-  const [dueDate, setDueDate] = useState<Date | undefined>();
-  const [priority, setPriority] = useState<string>(String(lowestPriority.value));
-  const [projectId, setProjectId] = useState<string>(fromProjectId ? String(fromProjectId) : "");
-  const [sectionId, setSectionId] = useState<string>();
-  const [labelIds, setLabelIds] = useState<string[]>();
+  const { handleSubmit, itemProps, values, focus, reset } = useForm<CreateTaskValues>({
+    async onSubmit(values) {
+      const body: AddTaskArgs = { content: values.content, description: values.description };
 
-  const titleField = useRef<Form.TextField>(null);
-
-  function clear() {
-    setContent("");
-    setDescription("");
-    setDueDate(undefined);
-    setPriority(String(lowestPriority.value));
-
-    if (projects) {
-      setProjectId(String(projects[0].id));
-    }
-
-    if (labelIds) {
-      setLabelIds([]);
-    }
-  }
-
-  async function submit() {
-    const body: AddTaskArgs = { content, description };
-
-    if (!body.content) {
-      await showToast({ style: Toast.Style.Failure, title: "The title is required" });
-      return;
-    }
-
-    if (dueDate) {
-      body.dueDate = getAPIDate(dueDate);
-    }
-
-    if (priority) {
-      body.priority = parseInt(priority);
-    }
-
-    if (projectId) {
-      body.projectId = parseInt(projectId);
-    }
-
-    if (sectionId) {
-      body.sectionId = parseInt(sectionId);
-    }
-
-    if (labelIds && labelIds.length > 0) {
-      body.labelIds = labelIds.map((id) => parseInt(id));
-    }
-
-    const toast = new Toast({ style: Toast.Style.Animated, title: "Creating task" });
-    await toast.show();
-
-    try {
-      const { url, id } = await todoist.addTask(body);
-      toast.style = Toast.Style.Success;
-      toast.title = "Task created";
-
-      toast.primaryAction = {
-        title: "Open Task",
-        shortcut: { modifiers: ["cmd", "shift"], key: "o" },
-        onAction: () => push(<TaskDetail taskId={id} />),
-      };
-
-      toast.secondaryAction = {
-        title: "Open in Browser",
-        shortcut: { modifiers: ["cmd"], key: "o" },
-        onAction: () => open(url),
-      };
-
-      if (fromProjectId) {
-        mutate(SWRKeys.tasks);
+      if (values.dueDate) {
+        body.due = { date: getAPIDate(values.dueDate) };
       }
 
-      clear();
-      titleField.current?.focus();
-    } catch (error) {
-      handleError({ error, title: "Unable to create task" });
-    }
-  }
+      if (values.priority) {
+        body.priority = parseInt(values.priority);
+      }
 
-  const projectSections = sections?.filter((section) => String(section.projectId) === projectId);
+      if (values.projectId) {
+        body.project_id = values.projectId;
+      }
+
+      if (values.sectionId) {
+        body.section_id = values.sectionId;
+      }
+      if (values.responsibleUid) {
+        body.responsible_uid = values.responsibleUid;
+      }
+
+      if (values.labels && values.labels.length > 0) {
+        body.labels = values.labels;
+      }
+
+      if (values.parentId) {
+        body.parent_id = values.parentId;
+      }
+
+      const toast = new Toast({ style: Toast.Style.Animated, title: "Creating task" });
+      await toast.show();
+
+      try {
+        const { id, data: newData } = await addTask(body, { data, setData });
+        toast.style = Toast.Style.Success;
+        toast.title = "Task created";
+
+        if (id) {
+          toast.primaryAction = {
+            title: "Open Task",
+            shortcut: { modifiers: ["cmd"], key: "o" },
+            onAction: () => push(<TaskDetail taskId={id} />),
+          };
+
+          toast.secondaryAction = {
+            title: `Open Task ${isTodoistInstalled ? "in Todoist" : "in Browser"}`,
+            shortcut: { modifiers: ["cmd", "shift"], key: "o" },
+            onAction: async () => {
+              open(isTodoistInstalled ? getTaskAppUrl(id) : getTaskUrl(id));
+            },
+          };
+
+          if (values.files.length > 0) {
+            try {
+              toast.message = "Uploading file and adding to comment…";
+              const file = await uploadFile(values.files[0]);
+              await addComment({ item_id: id, file_attachment: file, content: "" }, { data: newData, setData });
+              toast.message = "File uploaded and added to comment";
+            } catch (error) {
+              toast.message = `Failed uploading file and adding to comment`;
+            }
+          }
+        }
+
+        if (fromProjectId) {
+          pop();
+        }
+
+        reset({
+          content: "",
+          description: "",
+          dueDate: null,
+          priority: String(lowestPriority.value),
+          projectId: "",
+          sectionId: "",
+          responsibleUid: "",
+          labels: [],
+          files: [],
+          parentId: "",
+        });
+
+        focus("content");
+      } catch (error) {
+        handleError({ error, title: "Unable to create task" });
+      }
+    },
+    initialValues: {
+      content: draftValues?.content,
+      description: draftValues?.description,
+      dueDate: draftValues?.dueDate ?? (fromTodayEmptyView ? new Date() : null),
+      priority: draftValues?.priority || String(lowestPriority.value),
+      projectId: draftValues?.projectId ? draftValues.projectId : "" || fromProjectId ? fromProjectId : "",
+      sectionId: draftValues?.sectionId ? draftValues.sectionId : "",
+      responsibleUid: draftValues?.responsibleUid ? draftValues.responsibleUid : "",
+      labels: draftValues?.labels ?? (fromLabel ? [fromLabel] : []) ?? [],
+    },
+    validation: {
+      content: FormValidation.Required,
+    },
+  });
+
+  const projectSections = sections?.filter((section) => section.project_id === values.projectId);
+
+  const collaborators = getProjectCollaborators(values.projectId, data);
 
   return (
     <Form
       isLoading={isLoading}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Create Task" onSubmit={submit} icon={Icon.Plus} />
+          <Action.SubmitForm title="Create Task" onSubmit={handleSubmit} icon={Icon.Plus} />
+
+          <RefreshAction />
         </ActionPanel>
       }
+      enableDrafts={!fromProjectId && !fromTodayEmptyView && !fromLabel}
     >
-      <Form.TextField
-        id="content"
-        title="Title"
-        placeholder="Buy fruits"
-        value={content}
-        onChange={setContent}
-        ref={titleField}
-      />
+      <Form.TextField {...itemProps.content} title="Title" placeholder="Buy fruits" />
 
       <Form.TextArea
-        id="description"
+        {...itemProps.description}
         title="Description"
-        placeholder="Apples, pears, and **strawberries**"
-        value={description}
-        onChange={setDescription}
+        placeholder="Apples, pears, and strawberries (Markdown supported)"
+        enableMarkdown
       />
 
       <Form.Separator />
 
-      <Form.DatePicker
-        id="due_date"
-        title="Due date"
-        value={dueDate}
-        onChange={setDueDate}
-        type={Form.DatePicker.Type.Date}
-      />
+      <Form.DatePicker {...itemProps.dueDate} title="Due date" type={Form.DatePicker.Type.Date} />
 
-      <Form.Dropdown id="priority" title="Priority" value={priority} onChange={setPriority}>
+      <Form.Dropdown {...itemProps.priority} title="Priority">
         {priorities.map(({ value, name, color, icon }) => (
           <Form.Dropdown.Item
             value={String(value)}
@@ -164,29 +190,86 @@ export default function CreateTask({ fromProjectId }: { fromProjectId?: number }
       </Form.Dropdown>
 
       {projects && projects.length > 0 ? (
-        <Form.Dropdown id="project_id" title="Project" value={projectId} onChange={setProjectId}>
-          {projects.map(({ id, name }) => (
-            <Form.Dropdown.Item value={String(id)} title={name} key={id} />
+        <Form.Dropdown {...itemProps.projectId} title="Project">
+          <Form.Dropdown.Item title="No project" value="" icon={Icon.List} />
+
+          {projects.map((project) => (
+            <Form.Dropdown.Item
+              key={project.id}
+              value={project.id}
+              icon={getProjectIcon(project)}
+              title={project.name}
+            />
           ))}
         </Form.Dropdown>
       ) : null}
 
       {projectSections && projectSections.length > 0 ? (
-        <Form.Dropdown id="section_id" title="Section" value={sectionId} onChange={setSectionId}>
-          <Form.Dropdown.Item value="" title="No section" />
+        <Form.Dropdown {...itemProps.sectionId} title="Section">
+          <Form.Dropdown.Item
+            value=""
+            title="No section"
+            icon={{ source: "section.svg", tintColor: Color.PrimaryText }}
+          />
+
           {projectSections.map(({ id, name }) => (
-            <Form.Dropdown.Item value={String(id)} title={name} key={id} />
+            <Form.Dropdown.Item
+              key={id}
+              value={id}
+              title={name}
+              icon={{ source: "section.svg", tintColor: Color.PrimaryText }}
+            />
+          ))}
+        </Form.Dropdown>
+      ) : null}
+
+      {collaborators && collaborators.length > 0 ? (
+        <Form.Dropdown {...itemProps.responsibleUid} title="Assignee">
+          <Form.Dropdown.Item icon={Icon.Person} value="" title="Unassigned" />
+
+          {collaborators.map((collaborator) => (
+            <Form.Dropdown.Item
+              key={collaborator.id}
+              value={collaborator.id}
+              title={collaborator.full_name}
+              icon={getCollaboratorIcon(collaborator)}
+            />
           ))}
         </Form.Dropdown>
       ) : null}
 
       {labels && labels.length > 0 ? (
-        <Form.TagPicker id="label_ids" title="Labels" value={labelIds} onChange={setLabelIds}>
-          {labels.map(({ id, name }) => (
-            <Form.TagPicker.Item value={String(id)} title={name} key={id} />
+        <Form.TagPicker {...itemProps.labels} title="Labels">
+          {labels.map(({ id, name, color }) => (
+            <Form.TagPicker.Item
+              key={id}
+              value={name}
+              title={name}
+              icon={{ source: Icon.Tag, tintColor: getColorByKey(color).value }}
+            />
           ))}
         </Form.TagPicker>
       ) : null}
+
+      <Form.Separator />
+
+      <Form.FilePicker {...itemProps.files} title="File" canChooseDirectories={false} allowMultipleSelection={false} />
+
+      <Form.Dropdown {...itemProps.parentId} title="Parent Task">
+        <Form.Dropdown.Item value="" title="None" />
+
+        {data?.items.map((item) => {
+          return <Form.Dropdown.Item key={item.id} title={item.content} icon={getPriorityIcon(item)} value={item.id} />;
+        })}
+      </Form.Dropdown>
     </Form>
+  );
+}
+
+export default function Command(props: CreateTaskProps) {
+  return (
+    <View>
+      <CreateTask {...props} />
+    </View>
   );
 }

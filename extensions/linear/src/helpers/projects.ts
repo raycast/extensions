@@ -1,4 +1,6 @@
+import { Project } from "@linear/sdk";
 import { Image } from "@raycast/api";
+import { getIcon } from "./icons";
 
 type IconAsset = {
   light: Image.Asset;
@@ -40,3 +42,15 @@ export const projectStatusText: Record<string, string> = {
   completed: "Completed",
   canceled: "Canceled",
 };
+
+export function getProjectIcon(project?: Pick<Project, "icon" | "color">) {
+  if (!project) {
+    return { source: { light: "light/no-project.svg", dark: "dark/no-project.svg" } };
+  }
+
+  return getIcon({
+    icon: project.icon,
+    color: project.color,
+    fallbackIcon: { source: { light: "light/project.svg", dark: "dark/project.svg" } },
+  });
+}

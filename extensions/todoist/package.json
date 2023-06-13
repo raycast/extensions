@@ -5,30 +5,67 @@
   "description": "Check your Todoist tasks and quickly create new ones",
   "icon": "todoist.png",
   "author": "thomaslombart",
+  "owner": "doist",
+  "access": "public",
   "license": "MIT",
   "categories": [
     "Productivity"
   ],
+  "contributors": [
+    "AnishDe12020",
+    "kud",
+    "gerardcs"
+  ],
   "commands": [
     {
-      "name": "today",
-      "title": "Today Tasks",
+      "name": "home",
+      "title": "Home",
       "subtitle": "Todoist",
-      "description": "See your Todoist tasks due today.",
-      "mode": "view"
-    },
-    {
-      "name": "upcoming",
-      "title": "Upcoming Tasks",
-      "subtitle": "Todoist",
-      "description": "See your upcoming Todoist tasks grouped by due date.",
-      "mode": "view"
+      "description": "Show your Todoist tasks and views (inbox, today, upcoming, completed, projects, labels).",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "view",
+          "type": "dropdown",
+          "data": [
+            {
+              "title": "Inbox",
+              "value": "inbox"
+            },
+            {
+              "title": "Today",
+              "value": "today"
+            },
+            {
+              "title": "Upcoming",
+              "value": "upcoming"
+            },
+            {
+              "title": "Completed",
+              "value": "completed"
+            }
+          ],
+          "default": "today",
+          "required": false,
+          "title": "View",
+          "description": "Indicates which view you want to see in the command."
+        }
+      ],
+      "keywords": [
+        "inbox",
+        "today",
+        "today tasks",
+        "upcoming",
+        "upcoming tasks",
+        "completed",
+        "completed tasks"
+      ]
     },
     {
       "name": "search",
-      "title": "Search Tasks",
+      "title": "Search",
       "subtitle": "Todoist",
-      "description": "Search across all your Todoist tasks.",
+      "description": "Search your Todoist tasks, projects, labels, and comments.",
       "mode": "view"
     },
     {
@@ -39,103 +76,180 @@
       "mode": "view"
     },
     {
-      "name": "projects",
-      "title": "Search Projects",
+      "name": "quick-add-task",
+      "title": "Quick Add Task",
       "subtitle": "Todoist",
-      "description": "See your Todoist projects and tasks by project.",
-      "mode": "view"
+      "description": "Quickly add a new task in Todoist.",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "shouldCloseMainWindow",
+          "type": "checkbox",
+          "title": "Advanced",
+          "label": "Close window immediately",
+          "description": "When enabled, the Raycast window is closed immediately, allowing you to carry on with other work.",
+          "default": false,
+          "required": false
+        }
+      ],
+      "arguments": [
+        {
+          "name": "text",
+          "placeholder": "Title/info (today 5pm p2)",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "description",
+          "placeholder": "Description",
+          "type": "text"
+        }
+      ]
     },
     {
       "name": "create-project",
       "title": "Create Project",
       "subtitle": "Todoist",
       "description": "Create a Todoist project.",
+      "mode": "view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "menu-bar",
+      "title": "Menu Bar Tasks",
+      "subtitle": "Todoist",
+      "description": "Show your Todoist tasks and views in your menu bar.",
+      "mode": "menu-bar",
+      "preferences": [
+        {
+          "name": "hideMenuBarCount",
+          "type": "checkbox",
+          "title": "Count",
+          "label": "Hide menu bar count",
+          "description": "When enabled, the number of tasks in the menu bar won't be shown.",
+          "default": false,
+          "required": false
+        },
+        {
+          "name": "view",
+          "type": "dropdown",
+          "data": [
+            {
+              "title": "Today",
+              "value": "today"
+            },
+            {
+              "title": "Filter",
+              "value": "filter"
+            },
+            {
+              "title": "Upcoming",
+              "value": "upcoming"
+            }
+          ],
+          "default": "upcoming",
+          "required": false,
+          "title": "View",
+          "description": "Indicates which view you want to see in your menu bar."
+        },
+        {
+          "name": "upcomingDays",
+          "type": "textfield",
+          "default": "7",
+          "required": false,
+          "title": "Number of Days for Upcoming View",
+          "description": "Indicates the number of days you want in the upcoming view."
+        },
+        {
+          "default": "",
+          "description": "Task filter for the filter view. Use Todoist filter syntax, e.g. today & (#Work | @next).",
+          "name": "filter",
+          "required": false,
+          "title": "Filter Query",
+          "type": "textfield"
+        },
+        {
+          "name": "focusFeatureWidth",
+          "type": "textfield",
+          "required": false,
+          "default": "40",
+          "title": "Maximum Width of Focused Task",
+          "description": "Maximum width of the focused task's text."
+        }
+      ],
+      "interval": "10m"
+    },
+    {
+      "name": "show-projects",
+      "title": "Show Projects",
+      "subtitle": "Todoist",
+      "description": "Show your Todoist projects.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "showTaskCount",
+          "type": "checkbox",
+          "title": "Advanced",
+          "label": "Show the task count besides the project",
+          "description": "When enabled, you can see the task count besides your project.",
+          "default": false,
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "show-labels",
+      "title": "Show Labels",
+      "subtitle": "Todoist",
+      "description": "Show your Todoist labels.",
       "mode": "view"
+    },
+    {
+      "name": "unfocus-current-task",
+      "title": "Unfocus Current Task",
+      "subtitle": "Todoist",
+      "description": "Unfocus the current task in the menu bar.",
+      "mode": "no-view",
+      "disabledByDefault": true
     }
   ],
   "preferences": [
     {
       "name": "token",
       "type": "password",
-      "required": true,
+      "required": false,
       "title": "Todoist Token",
       "description": "Your Todoist Token. Find it in Todoist integration settings view.",
       "placeholder": "Enter your Todoist token"
-    },
-    {
-      "name": "todayGroupBy",
-      "type": "dropdown",
-      "data": [
-        {
-          "title": "Default",
-          "value": "default"
-        },
-        {
-          "title": "Project",
-          "value": "project"
-        },
-        {
-          "title": "Priority",
-          "value": "priority"
-        },
-        {
-          "title": "Label",
-          "value": "label"
-        }
-      ],
-      "default": "default",
-      "required": false,
-      "title": "Today's Group By Options",
-      "description": "Indicates how you want to group your tasks in the Today view."
-    },
-    {
-      "name": "projectGroupBy",
-      "type": "dropdown",
-      "data": [
-        {
-          "title": "Default",
-          "value": "default"
-        },
-        {
-          "title": "Date",
-          "value": "date"
-        },
-        {
-          "title": "Priority",
-          "value": "priority"
-        },
-        {
-          "title": "Label",
-          "value": "label"
-        }
-      ],
-      "default": "default",
-      "required": false,
-      "title": "Project's Group By Options",
-      "description": "Indicates how you want to group your tasks in the Project view."
     }
   ],
   "dependencies": {
-    "@doist/todoist-api-typescript": "^1.5.0",
-    "@raycast/api": "^1.35.1",
-    "date-fns": "^2.28.0",
+    "@raycast/api": "^1.52.1",
+    "@raycast/utils": "^1.7.0",
+    "axios": "^1.3.6",
+    "date-fns": "^2.29.3",
+    "form-data": "^4.0.0",
     "lodash": "^4.17.21",
-    "remove-markdown": "^0.3.0",
-    "swr": "^1.3.0"
+    "mime": "^3.0.0",
+    "node-fetch": "^3.3.1",
+    "remove-markdown": "^0.5.0"
   },
   "devDependencies": {
-    "@types/lodash": "^4.14.182",
-    "@types/node": "^16.11.36",
-    "@types/react": "^17.0.45",
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/lodash": "^4.14.185",
+    "@types/mime": "^3.0.1",
+    "@types/node": "^18.7.18",
+    "@types/react": "^18.0.20",
     "@types/remove-markdown": "^0.3.1",
-    "@typescript-eslint/eslint-plugin": "^5.26.0",
-    "@typescript-eslint/parser": "^5.26.0",
-    "eslint": "^8.16.0",
-    "eslint-config-prettier": "^8.5.0",
-    "typescript": "^4.7.2"
+    "eslint": "^8.23.1",
+    "eslint-plugin-import": "^2.27.5",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "prettier": "^2.8.7",
+    "typescript": "^4.8.3"
   },
   "scripts": {
     "build": "ray build -e dist",
-    "dev": "ray develop"
+    "dev": "ray develop",
+    "lint": "ray lint"
   }
 }

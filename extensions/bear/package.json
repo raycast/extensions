@@ -6,7 +6,10 @@
   "icon": "command-icon.png",
   "author": "hmarr",
   "contributors": [
-    "ron-myers"
+    "lucaschultz",
+    "diokhan",
+    "ron-myers",
+    "JuanBanchero"
   ],
   "license": "MIT",
   "commands": [
@@ -32,30 +35,51 @@
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "default": false,
+      "description": "Opens the note in edit mode, placing the cursor at the end of the note",
+      "label": "Focus cursor at end of the note",
+      "name": "focusCursorAtEnd",
+      "required": false,
+      "title": "Opening Notes",
+      "type": "checkbox"
+    },
+    {
+      "default": true,
+      "description": "Shows a preview of the note to the right of the note list",
+      "label": "Show preview in list view",
+      "name": "showPreviewInListView",
+      "required": false,
+      "title": "Notes List",
+      "type": "checkbox"
+    }
+  ],
   "dependencies": {
-    "@raycast/api": "^1.25.1",
+    "@raycast/api": "^1.42.0",
     "@types/commonmark": "^0.27.5",
     "commonmark": "^0.30.0",
-    "date-fns": "^2.25.0",
+    "date-fns": "^2.29.3",
     "open": "^8.4.0",
-    "sql.js": "^1.6.2"
+    "sql.js": "^1.8.0"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@types/sql.js": "^1.4.3",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "react-devtools": "^4.19.2",
-    "typescript": "^4.4.3"
+    "@types/node": "^18.8.3",
+    "@types/react": "^18.0.21",
+    "@types/sql.js": "^1.4.4",
+    "@typescript-eslint/eslint-plugin": "^5.38.1",
+    "@typescript-eslint/parser": "^5.38.1",
+    "eslint": "^8.24.0",
+    "eslint-config-prettier": "^8.5.0",
+    "prettier": "^2.7.1",
+    "react-devtools": "^4.26.0",
+    "typescript": "^4.8.4"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "lint": "ray lint",
-    "prettier": "prettier --write . && prettier --check ."
+    "prettier": "prettier --write . && prettier --check .",
+    "update-sqlite-wasm": "cp node_modules/sql.js/dist/sql-wasm.wasm assets/sql-wasm.wasm"
   }
 }

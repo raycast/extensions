@@ -30,7 +30,15 @@ export default function Profiles(props: ProfileProps) {
           <List.Item
             title={item.name}
             subtitle="Anybox"
-            icon={{ source: Icon.Circle }}
+            icon={{
+              source: `http://127.0.0.1:6391/sf-symbols/${item.icon}`,
+              fallback: Icon.Coins,
+              tintColor: {
+                light: "#505151",
+                dark: "#ffffff",
+                adjustContrast: true,
+              },
+            }}
             accessoryTitle="Command"
             key={item.id}
             actions={

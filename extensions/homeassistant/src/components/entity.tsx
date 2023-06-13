@@ -1,4 +1,5 @@
-import { Icon, Color, Action } from "@raycast/api";
+import { Icon, Color, Action, ActionPanel } from "@raycast/api";
+import React from "react";
 import { ha } from "../common";
 import { State } from "../haapi";
 import { EntityAttributesList } from "./attributes";
@@ -59,5 +60,24 @@ export function CopyEntityIDAction(props: { state: State }): JSX.Element {
       content={props.state.entity_id}
       shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
     />
+  );
+}
+
+export function EntityStandardActionSections(props: { state: State }): JSX.Element {
+  const s = props.state;
+  return (
+    <React.Fragment>
+      <ActionPanel.Section title="Attributes">
+        <ShowAttributesAction state={props.state} />
+      </ActionPanel.Section>
+      <ActionPanel.Section title="Values">
+        <CopyEntityIDAction state={s} />
+        <CopyStateValueAction state={s} />
+      </ActionPanel.Section>
+      <ActionPanel.Section title="History">
+        <OpenEntityHistoryAction state={s} />
+        <OpenEntityLogbookAction state={s} />
+      </ActionPanel.Section>
+    </React.Fragment>
   );
 }

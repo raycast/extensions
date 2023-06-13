@@ -46,7 +46,7 @@ export function MavenEmptyView(props: { title: string; description: string }) {
     <List.EmptyView
       title={title}
       description={description}
-      icon={"android-bot.svg"}
+      icon={"no-view.png"}
       actions={
         <ActionPanel>
           <Action.OpenInBrowser title={"Show Maven in Browser"} url={googleMavenRepository} />

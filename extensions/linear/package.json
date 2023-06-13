@@ -4,12 +4,14 @@
   "title": "Linear",
   "description": "Bring Linear to every corner of your Mac. Create, search, and modify your issues. Stay on top of your notifications in the menu bar.",
   "icon": "linear.png",
-  "owner": "raycast",
+  "owner": "linear",
   "access": "public",
   "author": "thomaslombart",
   "contributors": [
     "mathieudutour",
-    "thomas"
+    "thomas",
+    "peduarte",
+    "pernielsentikaer"
   ],
   "categories": [
     "Productivity"
@@ -23,13 +25,44 @@
       "mode": "view",
       "preferences": [
         {
-          "name": "signature",
-          "type": "checkbox",
-          "title": "Signature",
-          "label": "Add Raycast signature to new issues",
-          "description": "When enabled, \"Created via Raycast\" signature will be added at the bottom of the description.",
+          "name": "autofocusField",
+          "title": "Autofocus Field",
+          "type": "dropdown",
           "required": false,
-          "default": true
+          "description": "Select the field to focus automatically once the form is rendered",
+          "default": "title",
+          "data": [
+            {
+              "title": "Team",
+              "value": "teamId"
+            },
+            {
+              "title": "Title",
+              "value": "title"
+            }
+          ]
+        },
+        {
+          "name": "copyToastAction",
+          "title": "Toast Copy Action",
+          "type": "dropdown",
+          "required": false,
+          "description": "Select the copy action for the toast secondary action",
+          "default": "id",
+          "data": [
+            {
+              "title": "Copy Issue ID",
+              "value": "id"
+            },
+            {
+              "title": "Copy Issue URL",
+              "value": "url"
+            },
+            {
+              "title": "Copy Issue Title",
+              "value": "title"
+            }
+          ]
         }
       ]
     },
@@ -82,7 +115,17 @@
       "mode": "menu-bar",
       "subtitle": "Linear",
       "icon": "linear.png",
-      "interval": "15m"
+      "interval": "15m",
+      "preferences": [
+        {
+          "type": "checkbox",
+          "label": "Always Show",
+          "name": "alwaysShow",
+          "description": "Show the menu bar extra even when you don't have any unread notifications.",
+          "default": true,
+          "required": false
+        }
+      ]
     },
     {
       "name": "create-issue-for-myself",
@@ -121,26 +164,74 @@
           "type": "text"
         }
       ]
+    },
+    {
+      "name": "quick-add-comment-to-issue",
+      "title": "Quick Add Comment to Issue",
+      "description": "Quickly add a comment to an issue using its ID.",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "shouldCloseMainWindow",
+          "type": "checkbox",
+          "title": "Advanced",
+          "label": "Close window immediately",
+          "description": "When enabled, the Raycast window is closed immediately, allowing you to carry on with other work.",
+          "default": false,
+          "required": false
+        }
+      ],
+      "arguments": [
+        {
+          "name": "comment",
+          "placeholder": "Comment",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "issueId",
+          "placeholder": "Issue ID",
+          "type": "text",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "issueCustomCopyAction",
+      "type": "textfield",
+      "title": "Issue Custom Copy Action",
+      "description": "Add a custom copy action to the issue's actions following the format you want.\nAvailable keys: {ISSUE_TITLE}, {ISSUE_ID}, {ISSUE_URL}, {ISSUE_BRANCH_NAME}\nExample: '{ISSUE_ID}: {ISSUE_TITLE} ({ISSUE_URL})'",
+      "required": false
+    },
+    {
+      "name": "limit",
+      "title": "API Issue Limit",
+      "description": "The maximum number of issues to fetch from the Linear API at once. Be careful when changing this, as too large a number can cause you to exceed your API rate limit and/or cause heap memory errors.",
+      "type": "textfield",
+      "default": "50",
+      "required": false
     }
   ],
   "dependencies": {
-    "@linear/sdk": "^1.22.0",
-    "@raycast/api": "^1.38.3",
-    "@raycast/utils": "^1.1.0",
+    "@linear/sdk": "^2.3.0",
+    "@raycast/api": "^1.51.0",
+    "@raycast/utils": "^1.6.1",
     "date-fns": "^2.28.0",
+    "file-type": "^18.2.0",
     "lodash": "^4.17.21",
+    "nanoid": "^4.0.2",
     "node-emoji": "^1.11.0",
     "remove-markdown": "^0.5.0"
   },
   "devDependencies": {
+    "@raycast/eslint-config": "^1.0.5",
     "@types/lodash": "^4.14.182",
     "@types/node-emoji": "^1.8.1",
     "@types/object-hash": "^2.2.1",
     "@types/remove-markdown": "^0.3.1",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
     "prettier": "^2.5.1",
     "react-devtools": "^4.21.0",
     "typescript": "^4.4.3"

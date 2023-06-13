@@ -1,4 +1,4 @@
-import data from "../src/algolia/apiData";
+import data from "../src/data/apis";
 
 import fs from "fs";
 
@@ -14,9 +14,10 @@ function formatSupportedDocsTable() {
   const sortedData = data.sort((a, b) => (a.name > b.name ? 1 : -1));
 
   sortedData.map((item) => {
-    supportedDocsTable += item.lang
-      ? `| [${item.name}(${item.lang})](${item.homepage})`
-      : `| [${item.name}](${item.homepage})`;
+    supportedDocsTable +=
+      "lang" in item && item.lang
+        ? `| [${item.name}(${item.lang})](${item.homepage})`
+        : `| [${item.name}](${item.homepage})`;
     times++;
     if (times % 3 == 0) {
       supportedDocsTable += " |\n";
@@ -30,10 +31,7 @@ export default function formatReadme() {
   var readme = fs.readFileSync("./README.md", "utf8");
 
   // replace supported docs table
-  readme = readme.replace(
-    /### Supported Documentations(.|\s)*?###/,
-    `${formatSupportedDocsTable()}\n\n###`
-  );
+  readme = readme.replace(/### Supported Documentations(.|\s)*?###/, `${formatSupportedDocsTable()}\n\n###`);
 
   // write README.md
   fs.writeFileSync("./README.md", readme);

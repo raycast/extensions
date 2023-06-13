@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useCachedPromise } from "@raycast/utils";
 import { brewFetchInstalled, brewSearch, Cask, Formula, InstallableResults } from "./brew";
-import { InstallableFilterDropdown, InstallableFilterType } from "./components/filter";
+import { InstallableFilterDropdown, InstallableFilterType, placeholder } from "./components/filter";
 import { FormulaList } from "./components/list";
-import { showFailureToast } from "./utils";
 
 /// Main
 
@@ -13,79 +13,70 @@ interface Installed {
   casks: Map<string, Cask>;
 }
 
-interface State {
-  isLoading: boolean;
-  results?: InstallableResults;
-  installed?: Installed;
-  query?: string;
-  filter: InstallableFilterType;
-}
-
 export default function Main(): JSX.Element {
-  const [state, setState] = useState<State>({ isLoading: true, filter: InstallableFilterType.all });
+  const [searchText, setSearchText] = useState("");
+  const [filter, setFilter] = useState(InstallableFilterType.all);
 
+  const {
+    isLoading: isLoadingInstalled,
+    data: _installed,
+    revalidate: revalidateInstalled,
+  } = useCachedPromise(() => brewFetchInstalled(true));
+
+  const installed = useMemo(() => listInstalled(_installed), [_installed]);
+
+  const latestInstalled = useRef(installed);
+  latestInstalled.current = installed;
+
+  const abortable = useRef<AbortController>();
+  const {
+    isLoading: isLoadingSearch,
+    data: results,
+    mutate,
+  } = useCachedPromise(
+    (query) =>
+      brewSearch(query, 200).then((results) => {
+        updateInstalled(results, latestInstalled.current);
+        return results;
+      }),
+    [searchText],
+    { abortable, keepPreviousData: true }
+  );
+
+  // when the installed casks and formulaes have been fetched, we update the results
+  // to show if they are installed
   useEffect(() => {
-    if (!state.isLoading) {
-      return;
-    }
+    mutate(undefined, {
+      optimisticUpdate(data) {
+        updateInstalled(data, installed);
+        return data;
+      },
+      shouldRevalidateAfter: false,
+    });
+  }, [installed]);
 
-    if (state.installed == undefined) {
-      listInstalled()
-        .then((installed: Installed) => {
-          setState((oldState) => ({ ...oldState, installed: installed }));
-        })
-        .catch((err) => {
-          console.log("listInstalled error:", err);
-          showFailureToast("Brew search failed", err);
-        });
-      return;
-    }
-
-    const query = state.query?.trim() ?? "";
-    brewSearch(query, 200)
-      .then((results) => {
-        updateInstalled(results, state.installed);
-        setState((oldState) => ({ ...oldState, results: results, isLoading: false }));
-      })
-      .catch((err) => {
-        showFailureToast("Brew search failed", err);
-        setState((oldState) => ({ ...oldState, results: undefined, isLoading: false }));
-      });
-  }, [state]);
-
-  const formulae = state.filter != InstallableFilterType.casks ? state.results?.formulae ?? [] : [];
-  const casks = state.filter != InstallableFilterType.formulae ? state.results?.casks ?? [] : [];
+  const formulae = filter != InstallableFilterType.casks ? results?.formulae ?? [] : [];
+  const casks = filter != InstallableFilterType.formulae ? results?.casks ?? [] : [];
 
   return (
     <FormulaList
       formulae={formulae}
       casks={casks}
-      searchBarPlaceholder={"Search formulae by name" + String.ellipsis}
-      searchBarAccessory={
-        <InstallableFilterDropdown
-          onSelect={(filterType) => {
-            if (state.filter != filterType) {
-              setState((oldState) => ({ ...oldState, filter: filterType }));
-            }
-          }}
-        />
-      }
-      isLoading={state.isLoading}
-      onSearchTextChange={(query: string) => {
-        // Perhaps query should be another useState??
-        setState((oldState) => ({ ...oldState, query: query, isLoading: true }));
-      }}
-      onAction={() => {
-        setState((oldState) => ({ ...oldState, installed: undefined, isLoading: true }));
-      }}
+      searchBarPlaceholder={placeholder(filter)}
+      searchBarAccessory={<InstallableFilterDropdown onSelect={setFilter} />}
+      isLoading={isLoadingInstalled || isLoadingSearch}
+      onSearchTextChange={(searchText) => setSearchText(searchText.trim())}
+      onAction={() => revalidateInstalled()}
     />
   );
 }
 
 /// Private
 
-async function listInstalled(): Promise<Installed> {
-  const installed = await brewFetchInstalled(true);
+function listInstalled(installed?: InstallableResults): Installed | undefined {
+  if (!installed) {
+    return undefined;
+  }
 
   const formulae = new Map<string, Formula>();
   for (const formula of installed.formulae) {

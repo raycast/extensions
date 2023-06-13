@@ -1,10 +1,10 @@
 import { List } from "@raycast/api";
 
 import { useObsidianVaults } from "./utils/utils";
-import { NoteListObsidian } from "./components/NoteListObsidian";
+import { NoteListObsidian } from "./components/NoteList/NoteListObsidian";
 import { VaultSelection } from "./components/VaultSelection";
 import { Vault, SearchArguments } from "./utils/interfaces";
-import { NoVaultFoundMessage } from "./components/NoVaultFoundMessage";
+import { NoVaultFoundMessage } from "./components/Notifications/NoVaultFoundMessage";
 import { noVaultPathsToast } from "./components/Toasts";
 
 export default function Command(props: { arguments: SearchArguments }) {
@@ -18,11 +18,15 @@ export default function Command(props: { arguments: SearchArguments }) {
     return (
       <VaultSelection
         vaults={vaults}
-        target={(vault: Vault) => <NoteListObsidian vault={vault} showTitle={true} searchArguments={props.arguments} />}
+        target={(vault: Vault) => (
+          <NoteListObsidian vault={vault} showTitle={true} bookmarked={false} searchArguments={props.arguments} />
+        )}
       />
     );
   } else if (vaults.length == 1) {
-    return <NoteListObsidian vault={vaults[0]} showTitle={false} searchArguments={props.arguments} />;
+    return (
+      <NoteListObsidian vault={vaults[0]} showTitle={false} bookmarked={false} searchArguments={props.arguments} />
+    );
   } else {
     noVaultPathsToast();
   }

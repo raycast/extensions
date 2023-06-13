@@ -1,5 +1,50 @@
 # Obsidian Changelog
 
+## [Append Tasks and Update Bookmarks | Version 1.12.0] - 2023-06-012
+
+- Update Starred notes to Bookmarks
+- Add `Append Task` command (thanks @mikejongbloet)
+
+## [Several Quality of Life Improvements | Version 1.11.0] - 2023-02-05
+
+- Add `Silent Mode` preference for the `Append to Daily Note Command` which prevents the command from opening the daily note
+- Unified several preferences to make them more consistent
+- Automatically exclude files and folders from search that are excluded in Obsidian
+- Add `Blank Note` preference to `Create Note` command which lets you create a blank note immediately
+- Add `Create Note` action to `Search Note` command which lets you create a new note from the search results if it doesn't exist yet
+- Remove `Pinned Notes` command
+- Add `Starred Notes` command which lists all starred notes of a vault
+- Update Raycast API to v1.47.0
+- Rewrote parts of the codebase to improve maintainability
+
+## [Fix | Version 1.10.1] - 2022-11-29
+
+- Fixed a bug where command executed with shortcut was not working
+
+## [Append to Daily Note Command | Version 1.10.0] - 2022-11-23
+
+- Add `Append to Daily Note Command` which can append text to a daily note. Text can be appended to the end of the note or to a specific heading. It supports all templates. Contributed by @iancanderson.
+- Fixed dropdown menu preventing search to function in newer Raycast versions
+- Update to Raycast API v1.44.0
+
+## [Fix | Version 1.9.2] - 2022-11-18
+
+- Fixed a bug where the searchbar text didn't update
+
+## [Small fix | Version 1.9.1] - 2022-10-28
+
+- Fix command execution with shortcut not working
+
+## [Copy Code Action, Show Mentioning Notes Action, Tag List, Open URL & More | Version 1.9.0] - 2022-09-14
+
+- Add `Copy Code` action which either copies a code cell to the clipboard or opens a list to select one of the code cells
+- Add `Paste Code` action which directly pastes code cells
+- Add `Show Mentioning Notes` action which shows all notes that mention the selected note
+- Add tag list to metadata view
+- Add an `Open URL` entry to metadata view which opens the url specified in the notes YAML frontmatter for `url`
+- You can now search for mentioning notes in `Search Media` command to find media that has been mentioned in the query note
+- Minor fixes
+
 ## [Search Media Command, Menu Bar Item, Command Arguments, Custom Icons & More | Version 1.8.0] - 2022-08-15
 
 - Add `Search Media` command which lets you search for media like images, video, audio or pdfs in your vault

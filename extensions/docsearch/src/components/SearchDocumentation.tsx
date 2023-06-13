@@ -1,60 +1,43 @@
-import APIData from "../algolia/apiData";
-import type { IAPIData } from "../algolia/types";
-import { escape2Html } from "../utils";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { API } from "../types";
+import APIData from "../data/apis";
+import { useAlgolia, useMeilisearch } from "../hooks";
 
-import { ActionPanel, List, Action, showToast, Toast } from "@raycast/api";
-import { useEffect, useState } from "react";
-import algoliasearch from "algoliasearch/lite";
+import { ActionPanel, List, Action } from "@raycast/api";
+import { useState } from "react";
+import { getTitleForAlgolis, getTitleForMeilisearch } from "../utils/getTitle";
 
-export function SearchDocumentation(props: { docsName: string; lang?: string }) {
-  const currentAPI = APIData.find((api) =>
-    props.lang ? api.name === props.docsName && api.lang === props.lang : api.name === props.docsName
-  ) as IAPIData;
-  const searchClient = algoliasearch(currentAPI.appId, currentAPI.apiKey);
-  const searchIndex = searchClient.initIndex(currentAPI.indexName);
+export function SearchDocumentation(props: { id: string; quickSearch?: string }) {
+  const currentAPI = APIData.find((api) => props.id === api.id) as API;
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [searchResults, setSearchResults] = useState<any[] | undefined>();
-  const [isLoading, setIsLoading] = useState(false);
+  const [searchText, setSearchText] = useState(props.quickSearch || "");
 
-  const search = async (query = "") => {
-    setIsLoading(true);
+  let isLoading = false;
+  let searchResults: Array<any> = [];
 
-    return await searchIndex
-      .search(query, currentAPI.searchParameters)
-      .then((res) => {
-        setIsLoading(false);
-
-        return res.hits;
-      })
-      .catch((err) => {
-        setIsLoading(false);
-        showToast(Toast.Style.Failure, "Algolia Error", err.message);
-
-        return [];
-      });
-  };
-
-  useEffect(() => {
-    (async () => setSearchResults(await search()))();
-  }, []);
+  if (currentAPI.type === "algolia") {
+    const res = useAlgolia(searchText, currentAPI);
+    isLoading = res.isLoading;
+    searchResults = res.searchResults;
+  } else if (currentAPI.type === "meilisearch") {
+    const res = useMeilisearch(searchText, currentAPI);
+    isLoading = res.isLoading;
+    searchResults = res.searchResults;
+  }
 
   return (
     <List
       throttle={true}
       navigationTitle={currentAPI.name}
       isLoading={isLoading || searchResults === undefined}
-      onSearchTextChange={async (query) => setSearchResults(await search(query))}
+      onSearchTextChange={setSearchText}
+      searchText={searchText}
     >
       {searchResults?.map((result) => (
         <List.Item
           icon={currentAPI.icon}
           key={result.objectID}
-          title={escape2Html(
-            Object.values(result.hierarchy)
-              .filter((item) => item)
-              .join(" > ")
-          )}
+          title={currentAPI.type === "algolia" ? getTitleForAlgolis(result) : getTitleForMeilisearch(result)}
           actions={
             <ActionPanel>
               <Action.OpenInBrowser

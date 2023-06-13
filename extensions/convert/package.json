@@ -1,0 +1,50 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "web-converter",
+  "title": "Web Converter",
+  "description": "Converts everything web related: rem, px, pt, hex, hex (with opacity), rgb, rgba, hsl and hsla and the shows closest Tailwind CSS color.",
+  "icon": "icon.png",
+  "author": "nielsvanrijn",
+  "categories": [
+    "Developer Tools",
+    "Productivity",
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "convert",
+      "title": "Convert Unit",
+      "description": "Converts everything web related: rem, px, pt, hex, hex (with opacity), rgb, rgba, hsl and hsla and the shows closest Tailwind CSS color.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "basePixel",
+          "type": "textfield",
+          "required": false,
+          "title": "Base PX Value",
+          "description": "The conversion will be calculated based on this property. Default 16px",
+          "placeholder": "16"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.45.1"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.47.0",
+    "@typescript-eslint/parser": "^5.47.0",
+    "eslint": "^8.30.0",
+    "eslint-config-prettier": "^8.5.0",
+    "prettier": "^2.8.1",
+    "typescript": "^4.9.4"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

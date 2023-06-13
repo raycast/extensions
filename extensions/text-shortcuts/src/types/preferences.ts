@@ -1,6 +1,6 @@
 export interface Preferences {
   layout: string;
-  itemSize: string;
+  columns: string;
   itemInset: string;
   primaryAction: string;
   closeMainWindow: boolean;
@@ -10,7 +10,9 @@ export interface Preferences {
   deletion: boolean;
   format: boolean;
   markdown: boolean;
+  replacement: boolean;
   time: boolean;
+  other: boolean;
   rememberTag: boolean;
   showDetail: boolean;
   showTag: boolean;

@@ -7,7 +7,10 @@
   "author": "MarkusLanger",
   "contributors": [
     "GastroGeek",
-    "4very"
+    "4very",
+    "theherk",
+    "TobiasYin",
+    "yossizahn"
   ],
   "license": "MIT",
   "commands": [
@@ -81,13 +84,16 @@
         {
           "value": "VSCodium",
           "title": "VSCodium"
+        },
+        {
+          "value": "VSCodium < 1.71",
+          "title": "VSCodium < 1.71"
         }
       ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "1.33.2",
-    "open": "^8.4.0",
+    "@raycast/api": "1.48.8",
     "parse-git-config": "^3.0.0",
     "tildify": "^3.0.0"
   },

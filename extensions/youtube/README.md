@@ -55,7 +55,7 @@ and more
 - Goto [Google Developers Console](https://console.developers.google.com) and [obtain authorization credentials](https://developers.google.com/youtube/registering_an_application)  
   Make sure that you logged in with the Google Account which will be associated with your API Key
 - Create a project e.g. `raycast`
-- Make sure to enable `youtube data api v3` [here](https://console.cloud.google.com/apis/dashboard)  
+- Make sure to enable `youtube data api v3` [here](https://console.cloud.google.com/apis/library/youtube.googleapis.com)
   Enable the API via the dashboard. Click on the to activate APIs on the top of the website and search for `youtube data api v3`
 - Now create credentials and restrict it to `youtube data api v3`  
   You should see a green checkmark next to your credentials

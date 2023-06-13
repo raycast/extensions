@@ -20,11 +20,24 @@ constructor(options: Cache.Options): Cache
 #### Example
 
 ```typescript
-import { Cache } from "@raycast/api";
+import { List, Cache } from "@raycast/api";
 
+type Item = { id: string; title: string };
 const cache = new Cache();
 cache.set("items", JSON.stringify([{ id: "1", title: "Item 1" }]));
-console.log(JSON.parse(cache.get("items")));
+
+export default function Command() {
+  const cached = cache.get("items");
+  const items: Item[] = cached ? JSON.parse(cached) : [];
+
+  return (
+    <List>
+      {items.map((item) => (
+        <List.Item key={item.id} title={item.title} />
+      ))}
+    </List>
+  );
+}
 ```
 
 #### Properties

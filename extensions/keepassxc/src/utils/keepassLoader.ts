@@ -1,6 +1,7 @@
 import { Clipboard, getPreferenceValues, showHUD } from "@raycast/api";
 import path from "path";
 import child_process from "child_process";
+import { runAppleScript } from "run-applescript";
 const spawn = child_process.spawn;
 
 interface Preference {
@@ -48,7 +49,14 @@ const entryFilter = (entryStr: string) => {
   return entryStr
     .split("\n")
     .map((f: string) => f.trim())
-    .filter((f: string) => f !== undefined && !f.startsWith("/回收站") && !f.startsWith("/Trash") && f.length > 0)
+    .filter(
+      (f: string) =>
+        f !== undefined &&
+        !f.startsWith("/回收站") &&
+        !f.startsWith("/Trash") &&
+        !f.startsWith("/Deprecated") &&
+        f.length > 0
+    )
     .sort();
 };
 /**
@@ -129,7 +137,7 @@ const pastePassword = async (entry: string) => {
 const copyPassword = async (entry: string) =>
   getPassword(entry).then((password) => {
     showHUD("Password has been Copied to Clipboard");
-    return Clipboard.copy(password).then(() => password);
+    return protectedCopy(password).then(() => password);
   });
 
 const pasteUsername = async (entry: string) => {
@@ -145,4 +153,52 @@ const copyUsername = async (entry: string) =>
     return Clipboard.copy(username).then(() => username);
   });
 
-export { loadEntries, pastePassword, getPassword, copyPassword, copyUsername, pasteUsername };
+const copyTOTP = async (entry: string) =>
+  getTOTP(entry).then((otp) => {
+    showHUD("TOTP has been Copied to Clipboard");
+    return protectedCopy(otp).then(() => otp);
+  });
+
+const getTOTP = (entry: string) =>
+  new Promise<string>((resolve, reject) => {
+    const cli = spawn(`${keepassxcCli}`, [
+      "show",
+      ...cliOptions.filter((x) => x != "-a"),
+      "-t",
+      `${database}`,
+      `${entry}`,
+    ]);
+    cli.stdin.write(`${dbPassword}\n`);
+    cli.stdin.end();
+    cli.on("error", reject);
+    cli.stderr.on("data", cliStdOnErr(reject));
+    const chuncks: Buffer[] = [];
+    cli.stdout.on("data", (chunck) => {
+      chuncks.push(chunck);
+    });
+    cli.stdout.on("end", () => {
+      const otp = chuncks.join("").toString();
+      // remove \n in the end
+      resolve(otp.slice(0, otp.length - 1));
+    });
+  });
+
+async function protectedCopy(concealString: string) {
+  // await closeMainWindow();
+  const script = `
+      use framework "Foundation"
+      set type to current application's NSPasteboardTypeString
+      set pb to current application's NSPasteboard's generalPasteboard()
+      pb's clearContents()
+      pb's setString:"" forType:"org.nspasteboard.ConcealedType"
+      pb's setString:"${concealString}" forType:type
+    `;
+  try {
+    await runAppleScript(script);
+  } catch {
+    // Applescript failed to conceal what is being placed in the pasteboard
+    await showHUD("Protect copy failed...");
+  }
+}
+
+export { loadEntries, pastePassword, getPassword, copyPassword, copyUsername, pasteUsername, copyTOTP };

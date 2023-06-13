@@ -4,7 +4,14 @@
   "title": "Wi-Fi",
   "description": "Connect and toggle Wi-Fi via Raycast.",
   "icon": "extension-icon.png",
+  "keywords": [
+    "wifi",
+    "network"
+  ],
   "author": "koinzhang",
+  "contributors": [
+    "loishy"
+  ],
   "categories": [
     "System"
   ],
@@ -26,7 +33,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.37.0",
+    "@raycast/api": "^1.51.3",
     "node-wifi": "^2.0.16",
     "shell-env": "^4.0.1"
   },

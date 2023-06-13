@@ -1,5 +1,26 @@
 # Harvest Changelog
 
+## [Customize Time Entry Form] - 2023-06-11
+
+- Add new preference to show all times using hours/minutes, decimal, or whatever your company prefers in your Harvest account (default)
+
+## [Menu Bar Support] - 2023-05-22
+
+- Add support for a menu bar widget that shows the current running timer.
+- Add Callback URLs to trigger other apps when a timer is started or stopped.
+
+## [Better Project Search] - 2023-01-31
+
+- Add user preference to show the client's name for the selected project in the time entry form
+
+## [Better Project Search] - 2022-09-29
+
+- You can now search via client name in the project dropdown
+
+## [Improve Cache] - 2022-08-31
+
+- Remove SWR dependency in favor of @raycast/utils useCachedPromise for faster loading of project when creating a time entry
+
 ## [Updated branding & icons] - 2022-08-02
 
 - Updated brading and icons

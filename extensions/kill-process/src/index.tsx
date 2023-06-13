@@ -1,14 +1,19 @@
-import { ActionPanel, clearSearchBar, CopyToClipboardAction, Icon, List, preferences, showHUD } from "@raycast/api";
+import { Action, ActionPanel, clearSearchBar, getPreferenceValues, Icon, List, showHUD } from "@raycast/api";
 import { exec } from "child_process";
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import useInterval from "./hooks/use-interval";
 
 export default function ProcessList() {
   const [state, setState] = useState<Process[]>([]);
   const [query, setQuery] = useState<string | undefined>(undefined);
-  const shouldIncludePaths = (preferences.shouldSearchInPaths?.value as boolean) ?? false;
-  const shouldPrioritizeAppsWhenFiltering = (preferences.shouldPrioritizeAppsWhenFiltering?.value as boolean) ?? false;
-  const shouldShowPID = (preferences.shouldShowPID?.value as boolean) ?? false;
-  const shouldShowPath = (preferences.shouldShowPath?.value as boolean) ?? false;
+
+  const preferences = getPreferenceValues<Preferences>();
+  const shouldIncludePaths = preferences.shouldSearchInPaths ?? false;
+  const shouldIncludePid = preferences.shouldSearchInPid ?? false;
+  const shouldPrioritizeAppsWhenFiltering = preferences.shouldPrioritizeAppsWhenFiltering ?? false;
+  const shouldShowPID = preferences.shouldShowPID ?? false;
+  const shouldShowPath = preferences.shouldShowPath ?? false;
+  const refreshDuration = +preferences.refreshDuration;
 
   const fetchProcesses = () => {
     exec(`ps -eo pid,pcpu,comm | sort -nrk 2,3`, (err, stdout) => {
@@ -38,9 +43,7 @@ export default function ProcessList() {
     });
   };
 
-  useEffect(() => {
-    fetchProcesses();
-  }, []);
+  useInterval(fetchProcesses, refreshDuration);
 
   const fileIcon = (process: Process) => {
     if (process.type === "prefPane") {
@@ -62,7 +65,7 @@ export default function ProcessList() {
   };
 
   const copyToClipboardAction = (process: Process) => {
-    return process.path == null ? null : <CopyToClipboardAction title="Copy Path" content={process.path} />;
+    return process.path == null ? null : <Action.CopyToClipboard title="Copy Path" content={process.path} />;
   };
 
   const subtitleString = (process: Process) => {
@@ -94,8 +97,9 @@ export default function ProcessList() {
           const nameMatches = process.name.toLowerCase().includes(query.toLowerCase());
           const pathMatches =
             process.path?.toLowerCase().match(new RegExp(`.+${query}.*\\.[app|framework|prefpane]`, "ig")) != null;
+          const pidMatches = process.id.includes(query);
 
-          return nameMatches || (shouldIncludePaths && pathMatches);
+          return nameMatches || (shouldIncludePaths && pathMatches) || (shouldIncludePid && pidMatches);
         })
         .sort((a, b) => {
           // If this flag is true, we bring apps to the top, but only if we have a query.
@@ -118,7 +122,7 @@ export default function ProcessList() {
               title={process.name}
               subtitle={subtitleString(process)}
               icon={icon}
-              accessoryTitle={`${process.cpu}%`}
+              accessories={[{ text: `${process.cpu}%` }]}
               actions={
                 <ActionPanel>
                   <ActionPanel.Item title="Kill" icon={Icon.XmarkCircle} onAction={() => killProcess(process)} />

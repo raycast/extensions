@@ -1,21 +1,8 @@
-import { useEffect, useState, EffectCallback, DependencyList } from "react";
+import { DependencyList, EffectCallback, useEffect, useState } from "react";
 import { XcodeSwiftPackageMetadata } from "../../models/swift-package/xcode-swift-package-metadata.model";
 import { XcodeSwiftPackageService } from "../../services/xcode-swift-package.service";
-import {
-  Action,
-  ActionPanel,
-  Clipboard,
-  closeMainWindow,
-  Form,
-  Navigation,
-  showHUD,
-  showToast,
-  Toast,
-  useNavigation,
-} from "@raycast/api";
-import { XcodeAddSwiftPackageSelectXcodeProjectList } from "./xcode-add-swift-package-select-xcode-project-list.component";
-import { XcodeProject } from "../../models/xcode-project/xcode-project.model";
-import { XcodeService } from "../../services/xcode.service";
+import { Action, ActionPanel, Clipboard, Form, showToast, Toast, useNavigation } from "@raycast/api";
+import { XcodeAddSwiftPackage } from "./xcode-add-swift-package.component";
 
 /**
  * Xcode add Swift Package Form
@@ -24,7 +11,7 @@ export function XcodeAddSwiftPackageForm(): JSX.Element {
   // Use navigation
   const navigation = useNavigation();
   // Use Swift Package Url State
-  const [swiftPackageUrl, setSwiftPackageUrl] = useState<string>("");
+  const [swiftPackageUrl, setSwiftPackageUrl] = useState("");
   // Use Swift Package Url State
   const [swiftPackageMetadata, setSwiftPackageMetadata] = useState<XcodeSwiftPackageMetadata | undefined>(undefined);
   // Use Effect to read current Clipboard contents once
@@ -70,22 +57,14 @@ export function XcodeAddSwiftPackageForm(): JSX.Element {
         <ActionPanel>
           <Action.SubmitForm
             title="Add Swift Package"
-            onSubmit={() => {
-              if (XcodeSwiftPackageService.isSwiftPackageUrlValid(swiftPackageUrl)) {
-                navigation.push(
-                  <XcodeAddSwiftPackageSelectXcodeProjectList
-                    onSelect={(xcodeProject) => {
-                      navigation.pop();
-                      return addSwiftPackage(swiftPackageUrl, xcodeProject, navigation);
-                    }}
-                  />
-                );
-              } else {
-                showToast({
+            onSubmit={async () => {
+              if (!XcodeSwiftPackageService.isSwiftPackageUrlValid(swiftPackageUrl)) {
+                await showToast({
                   style: Toast.Style.Failure,
                   title: "Please enter a valid url to a Swift Package",
                 });
               }
+              navigation.push(<XcodeAddSwiftPackage url={swiftPackageUrl} />);
             }}
           />
         </ActionPanel>
@@ -102,58 +81,6 @@ export function XcodeAddSwiftPackageForm(): JSX.Element {
       {swiftPackageMetadata?.license ? <Form.Description title="Name" text={swiftPackageMetadata.license} /> : null}
     </Form>
   );
-}
-
-/**
- * Add Swift Package
- * @param swiftPackageUrl The Swift Package Url
- * @param xcodeProject The XcodeProject where the Swift Package should be added
- * @param navigation The Navigation
- */
-async function addSwiftPackage(swiftPackageUrl: string, xcodeProject: XcodeProject, navigation: Navigation) {
-  try {
-    // Launch Xcode if needed
-    // To ensure that Xcode is already running
-    // before closing the main Raycast window
-    await launchXcodeIfNeeded();
-    // Close main Raycast window to prevent
-    // that the main focus is on the Raycast window
-    await closeMainWindow();
-    // Add Swift Package from Url to XcodeProject
-    await XcodeSwiftPackageService.addSwiftPackage(swiftPackageUrl, xcodeProject);
-    // Pop back
-    navigation.pop();
-  } catch (error) {
-    // Log Error
-    console.error(error);
-    // Show a failure HUD as main Raycast window has already been closed
-    await showHUD("⚠️ An error occurred while trying to add the Swift Package");
-  }
-}
-
-/**
- * Launch Xcode if needed
- */
-async function launchXcodeIfNeeded() {
-  // Check if Xcode is running
-  if (await XcodeService.isXcodeRunning()) {
-    // Return out of function
-    return;
-  }
-  // Show loading Toast
-  const loadingToast = await showToast({
-    style: Toast.Style.Animated,
-    title: "Launching Xcode",
-  });
-  try {
-    // Launch Xcode
-    await XcodeService.launchXcode();
-  } catch {
-    // Ignore error
-  } finally {
-    // Hide loading Toast
-    await loadingToast.hide();
-  }
 }
 
 /**

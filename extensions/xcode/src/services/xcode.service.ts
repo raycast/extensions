@@ -1,4 +1,5 @@
 import { execAsync } from "../shared/exec-async";
+import { getApplications } from "@raycast/api";
 
 /**
  * XcodeService
@@ -9,6 +10,28 @@ export class XcodeService {
    */
   static get bundleIdentifier(): string {
     return "com.apple.dt.Xcode";
+  }
+
+  /**
+   * Xcode download url (Mac App Store)
+   */
+  static get downloadUrl(): string {
+    return "https://apps.apple.com/app/id497799835";
+  }
+
+  /**
+   * Xcode Developer Documentation URL Scheme
+   */
+  static get developerDocumentationURLScheme(): string {
+    return "x-xcode-documentation://";
+  }
+
+  /**
+   * Retrieve boolean if Xcode is installed
+   */
+  static async isXcodeInstalled(): Promise<boolean> {
+    const applications = await getApplications();
+    return !!applications.find((application) => application.bundleId === XcodeService.bundleIdentifier);
   }
 
   /**

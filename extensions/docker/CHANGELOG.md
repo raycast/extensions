@@ -1,5 +1,19 @@
 # Docker Changelog
 
+## [Feature] - 2023-05-12
+
+- Added ability to create container from image
+
+## [Added screenshots] - 2022-12-22
+
+## [Fix] - 2022-08-25
+
+- Fixed issue where default empty setting caused docker client to connect to incorrect address
+
+## [Improcement] - 2022-08-24
+
+- Added option to configure the Docker socket path
+
 ## [Improvement] - 2022-06-09
 
  - Added ability to Copy Container ID

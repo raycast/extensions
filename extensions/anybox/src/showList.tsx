@@ -7,6 +7,9 @@ interface SidebarItemProps {
   name: string;
   heading?: string;
   type?: string;
+  icon?: string;
+  color?: string;
+  count: number;
 }
 
 function itemTitle(item: SidebarItemProps) {
@@ -37,44 +40,6 @@ function itemSubtitle(item: SidebarItemProps) {
 // Case Filter = "/show/filter/:identifier"
 // Case Collection = "/show/collection/:identifier"
 // Case Heading = "/show/heading/:identifier"
-const presetItems: Array<SidebarItemProps> = [
-  {
-    id: "today",
-    name: "Today",
-  },
-  {
-    id: "starred",
-    name: "Starred",
-  },
-  {
-    id: "all",
-    name: "All",
-  },
-  {
-    id: "inbox",
-    name: "Inbox",
-  },
-  {
-    id: "link",
-    name: "Link",
-  },
-  {
-    id: "note",
-    name: "Note",
-  },
-  {
-    id: "image",
-    name: "Image",
-  },
-  {
-    id: "file",
-    name: "File",
-  },
-  {
-    id: "trash",
-    name: "Trash",
-  },
-];
 
 export default function Sidebar() {
   const [items, setItems] = useState<Array<SidebarItemProps>>(Array<SidebarItemProps>());
@@ -83,26 +48,34 @@ export default function Sidebar() {
   useEffect(() => {
     fetchSidebar().then((sidebar) => {
       if (Array.isArray(sidebar)) {
-        const allItems = [...presetItems, ...sidebar];
-        setItems(allItems);
+        setItems(sidebar);
       }
     });
   }, []);
 
   return (
-    <List isLoading={false} searchBarPlaceholder="Filter by title...">
+    <List isLoading={false} searchBarPlaceholder="Filter by list name...">
       {items.map((item) => {
         return (
           <List.Item
             title={itemTitle(item)}
             subtitle={itemSubtitle(item)}
-            icon={{ source: Icon.List, tintColor: Color.Purple }}
-            accessoryTitle="Command"
+            icon={{
+              source: `http://127.0.0.1:6391/sf-symbols/${item.icon}`,
+              fallback: Icon.List,
+              tintColor: item.color || Color.Purple,
+            }}
+            accessoryTitle={item.count > 0 ? String(item.count) : "0"}
             key={item.id}
             actions={
               <ActionPanel>
                 <Action
-                  title="Open Command"
+                  title={`Open ${item.name} List in Anybox`}
+                  icon={{
+                    source: `http://127.0.0.1:6391/sf-symbols/${item.icon}`,
+                    fallback: Icon.List,
+                    tintColor: item.color || Color.Purple,
+                  }}
                   onAction={() => {
                     pop();
                     if (item.type == "filter") {

@@ -1,5 +1,4 @@
 import { getApplications, showHUD, showToast, Toast } from "@raycast/api";
-import { getState, getTrack } from "../spotify/applescript";
 import { SpotifyPlayingState, SpotifyState, TrackInfo } from "../spotify/types";
 
 export interface Preferences {
@@ -12,7 +11,7 @@ export async function isSpotifyInstalled() {
 }
 
 export function trackTitle(track: SpotifyApi.TrackObjectSimplified): string {
-  return `${track.artists[0].name} – ${track.name}`;
+  return `${track.artists[0].name} - ${track.name}`;
 }
 
 export async function spotifyApplicationName(): Promise<string> {

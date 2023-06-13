@@ -1,10 +1,31 @@
-export interface SupernotesErrorPayload {
+import { Status, Visibility } from "./defines";
+
+export interface StandardError {
   detail: string;
 }
 
-export type IStatus = [-2, -1, 0, 1, 2];
-export type IVisibility = [-1, 0, 1];
+export interface ValidationError {
+  errors: {
+    body?: string;
+  };
+}
 
+export interface WrappedResponse {
+  success: boolean;
+  card_id: string;
+  status_code: number;
+  payload: ICard | string;
+}
+export interface WrappedCard extends WrappedResponse {
+  success: true;
+  payload: ICard;
+}
+export interface WrappedError extends WrappedResponse {
+  success: false;
+  payload: string;
+}
+
+export type WrappedCardResponses = Array<WrappedCard | WrappedError>;
 export type ICardCollection = Record<string, ICard>;
 
 export interface ICard {
@@ -24,8 +45,8 @@ export interface ICardMembership {
   has_commented: boolean;
   enrolled: null | boolean;
   is_context: null | boolean;
-  status: IStatus;
-  visibility: IVisibility;
+  status: Status;
+  visibility: Visibility;
   held_total_child_count: number;
   held_published_child_count: number;
   liked: null | boolean;
@@ -48,7 +69,7 @@ export interface ICardData {
   modified_by_id: string | null;
   synced_when: string | null;
   targeted_when: string | null;
-  status: IStatus;
+  status: Status;
   member_count: number;
   comment_count: number;
   published_child_count: number;
@@ -72,7 +93,7 @@ export interface IParentLink {
     granted_perms: number;
     archived: boolean;
   };
-  status: IStatus;
+  status: Status;
   temp?: boolean;
   cutting?: boolean;
 }
