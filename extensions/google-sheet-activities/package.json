@@ -1,0 +1,65 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "google-sheet-activities",
+  "title": "Google Sheet Activities",
+  "description": "Extension to view Google Sheet Activities.",
+  "icon": "google-sheets-icon.svg",
+  "author": "ikupenov",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "activity-list",
+      "title": "Search Activities",
+      "description": "Search all Google Sheet activities",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "API Key",
+      "description": "The Google Sheet API key.",
+      "type": "textfield",
+      "default": "AIzaSyB-6_MCFIYwv_e9m8WhwBeVZSQN6oSSP5k",
+      "required": true
+    },
+    {
+      "name": "sheetId",
+      "title": "Sheet ID",
+      "description": "The Google Sheet ID.",
+      "type": "textfield",
+      "default": "1GKuTm6p77irFb8fEUZttWP3F5pJr0uY8377hRvLJ5Qs",
+      "required": true
+    },
+    {
+      "name": "sheetName",
+      "title": "Sheet Name",
+      "description": "The Google Sheet Name.",
+      "type": "textfield",
+      "default": "Blad1",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.53.2",
+    "@raycast/utils": "^1.7.1",
+    "json2md": "^2.0.0",
+    "node-fetch": "^3.3.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/json2md": "^1.5.1",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
