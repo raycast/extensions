@@ -74,7 +74,7 @@ export default function Command(props: LaunchProps<{ arguments: ConjugationArgum
           </List.Section>
         ))
       ) : (
-        <List.EmptyView icon={{ source: "kitten.jpeg" }} title="We can't find what you're looking for :(" />
+        <List.EmptyView icon={{ source: "french-conjugation.png" }} title="We can't find what you're looking for :(" />
       )}
     </List>
   );
