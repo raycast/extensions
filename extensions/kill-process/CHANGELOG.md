@@ -1,8 +1,8 @@
 # Kill Process Changelog
 
-## [Auto Refresh] - 20230-06-09
+## [Auto Refresh] - 2023-06-13
 
-- Add auto-refresh
+- Add auto-refresh of list, check preferences
 
 ## [Filter by PID] - 2023-03-20
 
