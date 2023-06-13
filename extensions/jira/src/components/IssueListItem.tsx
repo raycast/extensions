@@ -54,7 +54,7 @@ export default function IssueListItem({ issue, mutate }: IssueListItemProps) {
       title={issue.fields.summary || "Unknown issue title"}
       subtitle={issue.key}
       accessories={accessories}
-      actions={<IssueActions issue={issue} mutate={mutate} />}
+      actions={<IssueActions issue={issue} mutate={mutate} showDetailsAction={true} />}
     />
   );
 }

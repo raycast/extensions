@@ -182,7 +182,7 @@
 /extensions/cpf-cnpj-generator                       @gstvds
 /extensions/craftdocs                                @kudrykv @mafredri @0x77dev
 /extensions/cran-e-search                            @flaming-codes
-/extensions/cratecast                                @gleich
+/extensions/cratecast                                @gleich @BalliAsghar
 /extensions/create-t3-app                            @mozzius
 /extensions/cricketcast                              @sampoder
 /extensions/cron-description                         @niall-maloney
@@ -190,6 +190,7 @@
 /extensions/crunchbase                               @qdequele
 /extensions/css-calculations                         @teziovsky
 /extensions/css-gg                                   @astrit
+/extensions/csv-to-excel                             @VictoRD11
 /extensions/cuid-generator                           @dgrcode
 /extensions/cuid2-generator                          @gilbarbara
 /extensions/curator-bio                              @Yukaii
@@ -240,7 +241,7 @@
 /extensions/dock                                     @pradeepb28
 /extensions/dock-tinker                              @koinzhang @garrucho
 /extensions/docker                                   @priithaamer @gebeto @BalliAsghar
-/extensions/dockerhub                                @k8scat @tonka3000
+/extensions/dockerhub                                @k8scat @tonka3000 @BalliAsghar
 /extensions/docsearch                                @Fatpandac @AnishDe12020 @pomdtr
 /extensions/dollar-blue                              @agusluques
 /extensions/domainr                                  @Rawnly
@@ -378,7 +379,7 @@
 /extensions/guitar-chords                            @GastroGeek
 /extensions/hacker-news                              @thomaspaulmann @GastroGeek @sxn @itsnwa
 /extensions/hackmd                                   @Yukaii
-/extensions/harvest                                  @eluce2
+/extensions/harvest                                  @eluce2 @eluce2
 /extensions/hashnode                                 @dpnick
 /extensions/hatena-bookmark                          @inamuu
 /extensions/hazeover                                 @ratoru
@@ -463,6 +464,7 @@
 /extensions/jwt-decoder                              @gdsmith
 /extensions/kaalam                                   @heertheeswaran
 /extensions/kafka                                    @fonimus
+/extensions/kagi-fastgpt                             @httpjamesm
 /extensions/kagi-search                              @fearoffish
 /extensions/kaomoji-search                           @allexks
 /extensions/karabiner-profile-switcher               @lucaschultz
@@ -524,9 +526,11 @@
 /extensions/logtail                                  @Cavallando
 /extensions/lorem-ipsum                              @AntonNiklasson @GastroGeek @enkia
 /extensions/lucide-icons                             @gBasil @aeither
+/extensions/lunatask                                 @posthardcode
 /extensions/lyrics                                   @ajzbc
 /extensions/m3o                                      @andreaselia
 /extensions/macupdater                               @karlsander
+/extensions/mail                                     @yug2005 @ikupenov @pernielsentikaer
 /extensions/mailsy                                   @BalliAsghar
 /extensions/man-pages                                @SKaplanOfficial
 /extensions/mantine                                  @EmilMalanczak
@@ -739,6 +743,7 @@
 /extensions/ray-so                                   @gt-codes @RSO @dgrzedzielski
 /extensions/raycast-bard-ai                          @EvanZhouDev @EvanZhouDev
 /extensions/raycast-icons                            @PitNikola @peduarte
+/extensions/raycast-translate-ge                     @giokaxo
 /extensions/raycast-wallpaper                        @koinzhang
 /extensions/raycast-wemo                             @IAmNatch
 /extensions/raydocs                                  @teziovsky
