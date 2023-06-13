@@ -1,6 +1,6 @@
 # Folder Search Changelog
 
-## [Command rename] - {PR_MERGE_DATE}
+## [Command rename] - 2023-06-13
 Fixing Three Issues / Two bugs
 - Extension only worked in English. Fixed up code to be language agnostic
 - Sometimes the fallback invocation resulted in the search query being duplicated so "Query" would appear "QueryQuery". This is not consistent, but I added some code to deal with this issue.
