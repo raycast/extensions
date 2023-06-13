@@ -53,10 +53,11 @@ const DATE_FORMATS: DateFormatter[] = [
 ];
 
 function parseMachineReadableDate(query: string): LabeledDate | undefined {
-  const iso = Date.parse(query);
-  if (iso) {
+  const parsedDate = new Date(query);
+  const isIso = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/.test(query);
+  if (!isNaN(parsedDate.getTime()) && isIso) {
     return {
-      date: new Date(iso),
+      date: parsedDate,
       label: "ISO Date",
       human: false,
     };
