@@ -4,6 +4,7 @@
 
 - Add home network detection to switch between an internal url and an external one
 - Add `Connection Check` root command
+- Add support for `.local` urls (mDNS)
 
 ## [Update] - 2023-05-04
 

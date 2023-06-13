@@ -8,6 +8,8 @@ import util from "util";
 import { Agent } from "https";
 import { getWifiSSIDSync } from "./lib/wifi";
 import * as ping from "ping";
+import { URL } from "url";
+import { queryMdns } from "./lib/mdns";
 const streamPipeline = util.promisify(pipeline);
 
 function paramString(params: { [key: string]: string }): string {
@@ -106,7 +108,29 @@ export class HomeAssistant {
     }
   }
 
+  /**
+   *
+   * @returns The nearest reachable url including mDNS resolve when required
+   */
   public async nearestURL(): Promise<string> {
+    const url = await this.nearestDefinedURL();
+    const urlParts = new URL(url);
+    const hostname = urlParts.hostname;
+    if (hostname.endsWith(".local")) {
+      const mdnsHost = await queryMdns(hostname);
+      if (mdnsHost) {
+        return url.replace(hostname, mdnsHost);
+      } else {
+        throw Error(`Could not resolve mDNS address ${url}`);
+      }
+    }
+    return url;
+  }
+
+  /**
+   * @returns The nearest reachable url which is define in the preferences
+   */
+  public async nearestDefinedURL(): Promise<string> {
     if (this._nearestURL && this._nearestURL.length > 0) {
       return this._nearestURL;
     }

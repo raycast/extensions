@@ -324,6 +324,7 @@
     "home-assistant-js-websocket": "^5.11.1",
     "javascript-time-ago": "^2.5.9",
     "lodash-es": "^4.17.21",
+    "multicast-dns": "^7.2.5",
     "node-fetch": "^2.6.1",
     "open": "^8.3.0",
     "ping": "^0.4.4",
@@ -333,11 +334,12 @@
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.5",
     "@types/lodash-es": "^4.17.6",
+    "@types/multicast-dns": "^7.2.1",
     "@types/node": "^18.8.3",
     "@types/node-fetch": "^2.5.12",
+    "@types/ping": "^0.4.1",
     "@types/url-join": "^4.0.1",
     "@types/ws": "^8.2.0",
-    "@types/ping": "^0.4.1",
     "eslint": "^7.31.0",
     "typescript": "^4.3.5"
   },
