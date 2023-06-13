@@ -1,27 +1,40 @@
 import { runAppleScript } from "run-applescript";
-import { closeMainWindow, Detail, popToRoot, showToast, Toast } from "@raycast/api";
+import { closeMainWindow, Detail, popToRoot, showToast, showHUD, Toast } from "@raycast/api";
 import { isPermissionError, PermissionErrorScreen } from "./core/permission-error-screen";
 import { useEffect, useState } from "react";
 
 const scriptToSplitHorizontally = `
-  tell application "iTerm"
-    activate
-    repeat until application "iTerm" is running
-        delay 0.1
-    end repeat
-    
-    tell current session of current window
-        split horizontally with default profile
+  on isAppRunning(appName)
+    tell application "System Events" to (name of processes) contains appName
+  end isAppRunning
+
+  if isAppRunning("iTerm2") or isAppRunning("iTerm") then
+    tell application "iTerm"
+      activate
+      repeat until application "iTerm" is running
+          delay 0.1
+      end repeat
+      
+      tell current session of current window
+          split horizontally with default profile
+      end tell
+      activate
     end tell
-    activate
-  end tell`;
+    return true
+  else
+    return "iTerm application is not running"
+  end if`;
 
 export default function Command() {
   const [hasPermissionError, setHasPermissionError] = useState<boolean>(false);
 
   const loadNewTab = () => {
     runAppleScript(scriptToSplitHorizontally)
-      .then(async () => {
+      .then(async (status) => {
+        if (status !== "true") {
+          await showHUD(status);
+        }
+
         await closeMainWindow();
         await popToRoot();
       })
