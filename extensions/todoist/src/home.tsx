@@ -79,6 +79,8 @@ export function Home({ launchContext }: LaunchProps) {
   const labels = useMemo(() => {
     return data?.labels.sort((a, b) => a.item_order - b.item_order) ?? [];
   }, [data]);
+
+  // If task we return earlier the taskDetail component directly
   if (view.startsWith("task_")) {
     const taskId = view.replace("task_", "");
     return <TaskDetail taskId={taskId} />;

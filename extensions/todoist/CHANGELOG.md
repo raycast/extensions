@@ -1,5 +1,15 @@
 # Todoist Changelog
 
+
+## [View task in Raycast from menu bar] - 2023-06-14
+
+When using menu bar you may want to take a closer a look at your task description without opening the Todoist app. This change adds a way to quickly preview any task from menu bar on Raycast floating window.
+
+It also adds subtask count to the task detail view in Raycast, so you can quickly see how many subtasks you have for each task.
+
+Happy viewing!
+
+
 ## [Filter view menu bar] - 2023-06-05
 
 This updates adds a new view on menu bar called filter. When set, you can specify a custom [Filter Query](https://todoist.com/help/articles/205248842) to only show those tasks that matter the most to you in the menu bar.

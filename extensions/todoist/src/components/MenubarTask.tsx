@@ -100,11 +100,11 @@ const MenuBarTask = ({ task, data, setData }: MenuBarTaskProps) => {
     <View>
       <MenuBarExtra.Submenu title={removeMarkdown(task.content)} icon={getPriorityIcon(task)}>
         <MenuBarExtra.Item
-          title="Open"
+          title="Open in Raycast"
           onAction={() =>
             launchCommand({ name: "home", type: LaunchType.UserInitiated, context: { view: `task_${task.id}` } })
           }
-          icon={Icon.Info}
+          icon={Icon.RaycastLogoNeg}
         />
 
         <MenuBarExtra.Item
