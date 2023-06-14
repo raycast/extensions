@@ -3,7 +3,7 @@
   "name": "vuejobs",
   "title": "VueJobs",
   "description": "Browse through our list of Vue.js jobs, find your perfect match and apply. Use the sidebar filters for more accurate results!",
-  "icon": "vuejobs.webp",
+  "icon": "vuejobs.png",
   "author": "abusiraj84",
   "categories": [
     "Other",
@@ -13,7 +13,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "Find the best Vue.js jobs",
+      "title": "Find the Best Vue.js Jobs",
       "subtitle": "vuejobs.com",
       "description": "Browse through our list of Vue.js jobs, find your perfect match and apply. Use the sidebar filters for more accurate results!",
       "mode": "view"
