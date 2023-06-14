@@ -1,6 +1,6 @@
 # Authy Extension Changelog
 
-## [Updated Contributors] - {PR_MERGE_DATE}
+## [Updated Contributors] - 2023-06-14
 
 ## [Bug fix] - 2023-03-30
 
