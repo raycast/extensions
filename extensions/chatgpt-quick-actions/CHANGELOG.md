@@ -1,6 +1,6 @@
 # ChatGPT Quick Actions Changelog
 
-## 2023-06-13
+## [New models] - 2023-06-13
 
  - Adds support for the following models: `gpt-3.5-turbo-16k`, `gpt-4-32k-0613`.
 
