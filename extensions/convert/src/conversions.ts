@@ -32,10 +32,10 @@ export const HEXtoRGB = (hex: string): number[] => {
 
   return result
     ? [
-      parseInt(result[1] ?? result[4] + result[4], 16),
-      parseInt(result[2] ?? result[5] + result[5], 16),
-      parseInt(result[3] ?? result[6] + result[6], 16),
-    ]
+        parseInt(result[1] ?? result[4] + result[4], 16),
+        parseInt(result[2] ?? result[5] + result[5], 16),
+        parseInt(result[3] ?? result[6] + result[6], 16),
+      ]
     : [0, 0, 0];
 };
 
@@ -43,11 +43,11 @@ export const HEXtoRGBA = (hex: string): number[] => {
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
   return result
     ? [
-      parseInt(result[1], 16),
-      parseInt(result[2], 16),
-      parseInt(result[3], 16),
-      Math.round((parseInt(result[4], 16) / 255) * 100) / 100,
-    ]
+        parseInt(result[1], 16),
+        parseInt(result[2], 16),
+        parseInt(result[3], 16),
+        Math.round((parseInt(result[4], 16) / 255) * 100) / 100,
+      ]
     : [0, 0, 0, 0];
 };
 
@@ -182,8 +182,8 @@ export const RGBtoHEXA = (rgb: number[]): string =>
     .slice(0, 3)
     .map((x) => x.toString(16).padStart(2, "0"))
     .join("")}${Math.round(rgb[3] * 255)
-      .toString(16)
-      .padStart(2, "0")}`;
+    .toString(16)
+    .padStart(2, "0")}`;
 
 export const RGBtoHSLA = (rgb: number[]): number[] => {
   const r = (rgb[0] /= 255);
@@ -257,9 +257,9 @@ export const HSLtoRGBA = (hsl: number[]): number[] => {
 export const Base64toDecode = (base64: string): string => {
   const buff = Buffer.from(base64, "base64");
   return buff.toString("ascii");
-}
+};
 
 export const Base64toEncode = (base64: string): string => {
   const buff = Buffer.from(base64);
   return buff.toString("base64");
-}
+};
