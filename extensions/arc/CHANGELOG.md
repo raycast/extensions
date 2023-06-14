@@ -1,6 +1,6 @@
 # Arc Changelog
 
-## [Improvements] - 2023-05-15
+## [Improvements] - {PR_MERGE_DATE}
 
 - Expand Search Arc suggestions to available engines
 
