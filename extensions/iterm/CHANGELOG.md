@@ -1,4 +1,4 @@
 # iTerm Changelog
 
-## [Extension improvement] - 2023-06-13
+## [Extension improvement] - {PR_MERGE_DATE}
 - Added split horizontally anv vertically commands
