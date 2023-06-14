@@ -22,6 +22,7 @@ import {
   HSLtoRGB,
   HSLtoRGBA,
 } from "./conversions";
+import { PXtoTailwindSpacing, REMtoTailwindSpacing } from "./spacings";
 
 function disableAdjustContrast(rawColor: string): Color.Dynamic {
   return { light: rawColor, dark: rawColor, adjustContrast: false };
@@ -37,6 +38,7 @@ export default function Command() {
   const [rgba, setRGBA] = useState<number[] | null>(null);
   const [hsl, setHSL] = useState<number[] | null>(null);
   const [hsla, setHSLA] = useState<number[] | null>(null);
+  const [tailwind, setTailwind] = useState<string | null>(null);
   const [closestColor, setClosestColor] = useState<{ name: string; hex: string } | null>(null);
   const [input, setInput] = useState("");
 
@@ -51,6 +53,7 @@ export default function Command() {
     setHSL(null);
     setHSLA(null);
     setClosestColor(null);
+    setTailwind(null);
     if (value === "") return;
     setInput(value);
     // check what input is
@@ -61,6 +64,7 @@ export default function Command() {
       console.log("its a rem");
       setPX(REMtoPX(Number(remMatch[1])));
       setPT(REMtoPT(Number(remMatch[1])));
+      setTailwind(REMtoTailwindSpacing(Number(remMatch[1])));
     }
 
     // check if input is px
@@ -69,6 +73,7 @@ export default function Command() {
       console.log("its a px");
       setREM(PXtoREM(Number(pxMatch[1])));
       setPT(PXtoPT(Number(pxMatch[1])));
+      setTailwind(PXtoTailwindSpacing(Number(pxMatch[1])));
     }
 
     // check if input is pt
@@ -269,6 +274,17 @@ export default function Command() {
             actions={
               <ActionPanel title="Copy">
                 <Action.CopyToClipboard content={input !== closestColor.hex ? closestColor.hex : closestColor.name} />
+              </ActionPanel>
+            }
+          />
+        )}
+        {tailwind && (
+          <List.Item
+            title={tailwind}
+            accessories={[{ text: tailwind.includes("]") ? "to Tailwind Arbitrary Value" : "to Tailwind Spacing" }]}
+            actions={
+              <ActionPanel title="Copy">
+                <Action.CopyToClipboard content={tailwind} />
               </ActionPanel>
             }
           />

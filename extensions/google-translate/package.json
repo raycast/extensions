@@ -922,11 +922,9 @@
     }
   ],
   "dependencies": {
+    "@iamtraction/google-translate": "^2.0.1",
     "@raycast/api": "^1.47.3",
-    "@raycast/utils": "^1.4.16",
-    "@types/debounce": "^1.2.1",
-    "@vitalets/google-translate-api": "^7.0.0",
-    "debounce": "^1.2.1"
+    "@raycast/utils": "^1.4.16"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",

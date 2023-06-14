@@ -1,5 +1,13 @@
 # `Easydict` Changelog
 
+## [v2.9.0] - 2023-05-26
+
+### ✨ New Features
+
+- Added OCR screenshot translation command, thanks to [aidevjoe](https://github.com/aidevjoe)'s PR.
+
+![](https://github-production-user-asset-6210df.s3.amazonaws.com/25194972/238993145-9dbe2fbb-8407-49bc-8909-adb0515e850e.png)
+
 ## [v2.8.2] - 2023-04-25
 
 ### 🐞 Fixes

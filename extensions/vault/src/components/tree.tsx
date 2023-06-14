@@ -7,6 +7,7 @@ import {
   ConfigurationError,
   deleteEnabled,
   getTechnicalPaths,
+  getVaultNamespace,
   removeFromFavorites,
 } from "../utils";
 import {
@@ -108,11 +109,25 @@ export function VaultTree(props: { path: string }) {
     [deleteInFolder, revalidate]
   );
 
+  function buildError(error: Error | unknown) {
+    const namespace = getVaultNamespace();
+    const namespaceStr = namespace !== "" ? " for namespace " + namespace : "";
+    return "Could not list vault secret tree " + namespaceStr + ":\n\n````\n\n" + error + "\n\n````";
+  }
+
   return error != null ? (
-    <Detail markdown={"Could not list vault secret tree :\n\n````\n\n" + error + "\n\n````"} />
+    <Detail
+      markdown={buildError(error)}
+      actions={
+        <ActionPanel>
+          <Configuration />
+        </ActionPanel>
+      }
+    />
   ) : (
     <List filtering={true} isLoading={isLoading || isLoadingTree} navigationTitle={props.path}>
       <List.EmptyView
+        title={"No secrets found"}
         actions={
           <ActionPanel>
             <Configuration />

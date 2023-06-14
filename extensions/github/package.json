@@ -168,6 +168,7 @@
     "dotenv": "^16.0.3",
     "eslint": "^8.37.0",
     "eslint-plugin-import": "^2.27.5",
+    "graphql": "^16.6.0",
     "prettier": "^2.8.7",
     "typescript": "^5.0.3"
   },

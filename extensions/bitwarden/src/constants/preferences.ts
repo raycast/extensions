@@ -1,24 +1,17 @@
-export const VAULT_TIMEOUT = {
-  IMMEDIATELY: 0,
-  ONE_MINUTE: 60000,
-  FIVE_MINUTES: 300000,
-  FIFTEEN_MINUTES: 900000,
-  THIRTY_MINUTES: 1800000,
-  ONE_HOUR: 3600000,
-  FOUR_HOURS: 14400000,
-  EIGHT_HOURS: 28800000,
-  ONE_DAY: 86400000,
-  NEVER: -1,
-};
+const VAULT_TIMEOUT_OPTIONS = {
+  IMMEDIATELY: "0",
+  ONE_MINUTE: "60000",
+  FIVE_MINUTES: "300000",
+  FIFTEEN_MINUTES: "900000",
+  THIRTY_MINUTES: "1800000",
+  ONE_HOUR: "3600000",
+  FOUR_HOURS: "14400000",
+  EIGHT_HOURS: "28800000",
+  ONE_DAY: "86400000",
+  NEVER: "-1",
+} as const satisfies Record<string, Preferences["repromptIgnoreDuration"]>;
 
-export const VAULT_TIMEOUT_MS_TO_LABEL = {
-  [VAULT_TIMEOUT.IMMEDIATELY]: "Immediately",
-  [VAULT_TIMEOUT.ONE_MINUTE]: "1 Minute",
-  [VAULT_TIMEOUT.FIVE_MINUTES]: "5 Minutes",
-  [VAULT_TIMEOUT.FIFTEEN_MINUTES]: "15 Minutes",
-  [VAULT_TIMEOUT.THIRTY_MINUTES]: "30 Minutes",
-  [VAULT_TIMEOUT.ONE_HOUR]: "1 Hour",
-  [VAULT_TIMEOUT.FOUR_HOURS]: "4 Hours",
-  [VAULT_TIMEOUT.EIGHT_HOURS]: "8 Hours",
-  [VAULT_TIMEOUT.ONE_DAY]: "1 Day",
-};
+export const VAULT_TIMEOUT = Object.entries(VAULT_TIMEOUT_OPTIONS).reduce((acc, [key, value]) => {
+  acc[key as keyof typeof VAULT_TIMEOUT_OPTIONS] = parseInt(value);
+  return acc;
+}, {} as Record<keyof typeof VAULT_TIMEOUT_OPTIONS, number>);

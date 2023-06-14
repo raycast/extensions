@@ -51,7 +51,7 @@ export default function IssueListItem({ issue, mutate }: IssueListItemProps) {
       key={issue.id}
       keywords={keywords}
       icon={{ value: issue.fields.issuetype.iconUrl, tooltip: `Issue Type: ${issue.fields.issuetype.name}` }}
-      title={issue.fields.summary}
+      title={issue.fields.summary || "Unknown issue title"}
       subtitle={issue.key}
       accessories={accessories}
       actions={<IssueActions issue={issue} mutate={mutate} showDetailsAction={true} />}

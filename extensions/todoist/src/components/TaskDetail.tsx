@@ -17,7 +17,7 @@ type TaskDetailProps = {
 };
 
 export default function TaskDetail({ taskId }: TaskDetailProps): JSX.Element {
-  const [data] = useCachedData();
+  const [data, setData] = useCachedData();
 
   const task = data?.items.find((task) => task.id === taskId);
   const comments = data?.notes.filter((comment) => comment.item_id === taskId);
@@ -127,7 +127,7 @@ export default function TaskDetail({ taskId }: TaskDetailProps): JSX.Element {
             ),
             actions: (
               <ActionPanel>
-                <TaskActions task={task} fromDetail={true} />
+                <TaskActions task={task} fromDetail={true} data={data} setData={setData} />
               </ActionPanel>
             ),
           }
