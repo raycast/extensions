@@ -1,7 +1,7 @@
-import { Clipboard, Toast, closeMainWindow, getSelectedText, showToast } from '@raycast/api';
+import { Clipboard, Toast, closeMainWindow, getSelectedText, showToast } from "@raycast/api";
 
 const mockify = (text: string) => {
-  let mockedText = '';
+  let mockedText = "";
   let isUppercase = true;
 
   for (const char of text) {
@@ -42,8 +42,8 @@ export default async () => {
   if (!text) {
     await showToast({
       style: Toast.Style.Failure,
-      title: 'Unable to mockify text.',
-      message: 'Please select some text or copy it to clipboard.',
+      title: "Unable to mockify text.",
+      message: "Please select some text or copy it to clipboard.",
     });
 
     return;
@@ -56,8 +56,8 @@ export default async () => {
 
     await showToast({
       style: Toast.Style.Success,
-      title: 'Text copied to clipboard.',
-      message: 'You can now paste it anywhere.',
+      title: "Text copied to clipboard.",
+      message: "You can now paste it anywhere.",
     });
 
     return;
