@@ -20,20 +20,6 @@ export type Space = {
   title?: string;
 };
 
-export type NewTabPreferences = {
-  url: string;
-};
-
-export type SearchArcPreferences = {
-  engine: "google" | "duckduckgo" | "bing" | "yahoo" | "ecosia";
-  sorting: "tabsHistorySuggestions" | "historyTabsSuggestions";
-  showFavorites: boolean;
-  showPinnedTabs: boolean;
-  showUnpinnedTabs: boolean;
-  showHistory: boolean;
-  showSuggestions: boolean;
-};
-
 export type SearchConfig = {
   search: string;
   suggestions: string | null;
@@ -54,6 +40,6 @@ export type Suggestion = {
   url: string;
 };
 
-export type NewLittleArcArguments = {
+export type URLArguments = {
   url?: string;
 };

@@ -1,4 +1,4 @@
-import { Clipboard, environment, Keyboard, showToast, Toast } from "@raycast/api";
+import { Clipboard, environment, Keyboard, showHUD, showToast, Toast } from "@raycast/api";
 import { searchArcPreferences } from "./preferences";
 import { HistoryEntry, Space, Tab, TabLocation } from "./types";
 
@@ -100,4 +100,21 @@ export async function showFailureToast(error: unknown, options?: Omit<Toast.Opti
       },
     },
   });
+}
+
+export async function validateURL(url: string) {
+  const urlRegex =
+    /(http(s)?:\/\/|arc:\/\/)?(www\.)?[-a-zA-Z0-9@:%._+~#=]{0,256}(\.[a-z]{2,6})?\b([-a-zA-Z0-9@:%_+.~#?&//=]*)/;
+
+  if (url === undefined || url === "") {
+    await showHUD("❌ No URL found");
+    return false;
+  }
+
+  if (!urlRegex.test(url)) {
+    await showHUD("❌ Invalid URL provided");
+    return false;
+  }
+
+  return true;
 }

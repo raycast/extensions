@@ -1,17 +1,23 @@
-import { closeMainWindow, showHUD } from "@raycast/api";
+import { closeMainWindow, showHUD, LaunchProps } from "@raycast/api";
 import { makeNewTab } from "./arc";
 import { newTabPreferences } from "./preferences";
-import isUrl from "is-url";
+import { URLArguments } from "./types";
+import { validateURL } from "./utils";
 
-export default async function command() {
+const DEFAULT_PAGE = "arc://newtab";
+
+export default async function command(props: LaunchProps<{ arguments: URLArguments }>) {
+  const { url } = props.arguments;
+  const { fallbackText } = props;
+  const newTabUrl = url || fallbackText || newTabPreferences.url || DEFAULT_PAGE;
+
   try {
-    const newTabUrl = newTabPreferences.url;
-    if (!isUrl(newTabUrl)) {
-      throw new Error("Invalid URL defined in preferences");
+    if (await validateURL(newTabUrl)) {
+      // Append https:// if protocol is missing
+      const openURL = !/^\S+?:\/\//i.test(newTabUrl) ? "https://" + newTabUrl : newTabUrl;
+      await closeMainWindow();
+      await makeNewTab(openURL);
     }
-
-    await closeMainWindow();
-    await makeNewTab(newTabUrl);
   } catch (e) {
     console.error(e);
 
