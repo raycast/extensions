@@ -1,5 +1,7 @@
 # Authy Extension Changelog
 
+## [Updated Contributors] - {PR_MERGE_DATE}
+
 ## [Bug fix] - 2023-03-30
 
 - Update deps
