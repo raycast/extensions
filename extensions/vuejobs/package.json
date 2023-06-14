@@ -6,17 +6,23 @@
   "icon": "vuejobs.png",
   "author": "abusiraj84",
   "categories": [
-    "Other",
-    "Communication"
+    "Other"
   ],
   "license": "MIT",
   "commands": [
     {
       "name": "index",
       "title": "Find the Best Vue.js Jobs",
-      "subtitle": "vuejobs.com",
+      "subtitle": "vuejobs",
       "description": "Browse through our list of Vue.js jobs, find your perfect match and apply. Use the sidebar filters for more accurate results!",
       "mode": "view"
+    },
+    {
+      "name": "menu-bar",
+      "title": "Show VueJobs In Menu Bar",
+      "subtitle": "vuejobs",
+      "description": "Show our list of Vue.js jobs in mac menu bar",
+      "mode": "menu-bar"
     }
   ],
   "dependencies": {
