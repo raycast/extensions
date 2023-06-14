@@ -1,4 +1,4 @@
 # VueJobs
 
-![screnshot](./metadata/Metadata-3.png)
+![screnshot](./assets/Metadata-3.png)
 Browse through our list of Vue.js jobs on [VueJobs](https://vuejobs.com.), find your perfect match and apply. Use the sidebar filters for more accurate results!
