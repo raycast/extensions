@@ -19,8 +19,10 @@ enum MonthRange {
 }
 
 type Room = {
+  isRecurring?: boolean;
   url: string;
   name: string;
+  meetingDate?: Date;
   app: SupportedApps;
   icon: AppIcons;
 };
@@ -71,6 +73,7 @@ type Event = {
   description: string;
   location: string;
   hangoutLink?: string;
+  recurringEventId?: string;
   colorId: string;
   creator: {
     email: string;
@@ -79,6 +82,16 @@ type Event = {
   organizer: {
     email: string;
     self: boolean;
+  };
+  start: {
+    date: string;
+    dateTime: string;
+    timeZone: string;
+  };
+  end: {
+    date: string;
+    dateTime: string;
+    timeZone: string;
   };
 };
 

@@ -3,7 +3,7 @@
   "name": "speed-dial",
   "title": "Speed Dial",
   "description": "Stop asking for meeting URLs and add them to speed dial to open with one click",
-  "icon": "command-icon.png",
+  "icon": "extension-icon.png",
   "author": "osama_aamer",
   "categories": [
     "Communication",
@@ -29,12 +29,6 @@
       "name": "add-room",
       "title": "Add Room",
       "description": "Add a new meeting room",
-      "mode": "view"
-    },
-    {
-      "name": "google-import",
-      "title": "Import from Google Calendar",
-      "description": "Import your Google Calendar events to speed dial",
       "mode": "view"
     }
   ],

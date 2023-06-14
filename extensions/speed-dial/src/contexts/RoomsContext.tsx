@@ -73,7 +73,17 @@ const RoomProvider = ({ children }: RoomProviderProps) => {
   };
 
   return (
-    <RoomContext.Provider value={{ loading, refreshRooms, rooms, setRooms, addRoom, editRoomName, removeRoom }}>
+    <RoomContext.Provider
+      value={{
+        rooms,
+        loading,
+        refreshRooms,
+        setRooms,
+        addRoom,
+        editRoomName,
+        removeRoom,
+      }}
+    >
       {children}
     </RoomContext.Provider>
   );
