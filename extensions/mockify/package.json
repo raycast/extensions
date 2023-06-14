@@ -5,6 +5,9 @@
   "description": "Mock the input text to look like the Spongebob mock meme format.",
   "icon": "command-icon.png",
   "author": "annedouwe",
+  "categories": [
+    "Fun"
+  ],
   "license": "MIT",
   "commands": [
     {
