@@ -116,7 +116,7 @@ const MenuBarTask = ({ task, data, setData }: MenuBarTaskProps) => {
         )}
         {subTasks && subTasks?.length > 0 ? (
           <MenuBarExtra.Submenu
-            title={`${subTasks.length} subtasks`}
+            title={`${subTasks.length} subtask` + ((subTasks.length > 1) ? "s": "")}
             icon={{ source: "sub-task.svg", tintColor: Color.SecondaryText }}
           >
             {subTasks.map((task) => (
