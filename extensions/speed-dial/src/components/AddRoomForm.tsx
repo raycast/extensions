@@ -13,7 +13,7 @@ export default function AddRoomForm(props: { room?: Room }) {
   const roomContext = useContext(RoomContext);
 
   if (!roomContext) {
-    throw new Error("Command must be used within a RoomProvider");
+    throw new Error("AddRoomForm must be used within a RoomProvider");
   }
 
   const { addRoom } = roomContext;
@@ -38,7 +38,7 @@ export default function AddRoomForm(props: { room?: Room }) {
           showToast({
             style: Toast.Style.Success,
             title: "Yay!",
-            message: `${values.name} added`,
+            message: `"${values.name}" added to Speed Dial`,
           });
           nav.pop();
         })
@@ -46,9 +46,8 @@ export default function AddRoomForm(props: { room?: Room }) {
           showToast({
             style: Toast.Style.Failure,
             title: "Oops!",
-            message: `A room the same URL already exists`,
+            message: `A room with the same URL already exists`,
           });
-          // throw new Error("Error adding room");
         });
     },
     validation: {
@@ -67,6 +66,7 @@ export default function AddRoomForm(props: { room?: Room }) {
     },
   });
 
+  // detect the app based on the meeting URL
   const detectApp = (event: Form.Event<string>) => {
     const url = event.target.value;
     if (!url) {

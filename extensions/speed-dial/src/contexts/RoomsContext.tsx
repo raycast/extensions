@@ -3,10 +3,10 @@ import { LocalStorage } from "@raycast/api";
 import { Room } from "../types";
 
 type RoomContextType = {
-  rooms: Room[];
   loading: boolean;
-  refreshRooms: () => void;
+  rooms: Room[];
   setRooms: React.Dispatch<React.SetStateAction<Room[]>>;
+  refreshRooms: () => void;
   addRoom: (room: Room) => Promise<void>;
   editRoomName: (arg: { url: string; name: string }) => Promise<void>;
   removeRoom: (room: Room) => Promise<void>;

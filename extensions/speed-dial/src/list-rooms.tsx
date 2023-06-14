@@ -1,4 +1,5 @@
 import { LaunchProps } from "@raycast/api";
+
 import ListRooms from "./components/ListRooms";
 import { RoomProvider } from "./contexts/RoomsContext";
 

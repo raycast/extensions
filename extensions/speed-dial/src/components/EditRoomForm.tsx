@@ -14,7 +14,7 @@ export default function EditRoomForm(props: {
   const nav = useNavigation();
 
   if (!roomContext) {
-    throw new Error("Command must be used within a RoomProvider");
+    throw new Error("EditRoomForm must be used within a RoomProvider");
   }
 
   const { editRoomName } = roomContext;
@@ -26,7 +26,7 @@ export default function EditRoomForm(props: {
         showToast({
           style: Toast.Style.Success,
           title: "Yay!",
-          message: `Room name edited`,
+          message: `Room name edited to "${values.name}"`,
         });
         nav.pop();
         setRefreshKey((prevKey) => prevKey + 1);
