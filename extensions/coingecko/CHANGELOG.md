@@ -1,6 +1,6 @@
 # CoinGecko Changelog
 
-## [Tweaks] - {PR_MERGE_DATE}
+## [Tweaks] - 2023-06-14
 - Refactor calculate command to circumvent rate limit issues
 - Handle rate limit error on calculate command
 - Tweaked copy of calculate command actions
