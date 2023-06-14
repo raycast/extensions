@@ -328,7 +328,8 @@ export async function updateTask(args: UpdateTaskArgs, cachedData?: CachedDataPa
     ],
   });
 
-  if (cachedData?.data) {
+  // If returned items length is 0 then no update is needed, we can skip.
+  if (cachedData?.data && updatedData.items.length > 0) {
     cachedData.setData({
       ...cachedData.data,
       items: cachedData.data.items.map((i) => (i.id === args.id ? updatedData.items[0] : i)),
