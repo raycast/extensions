@@ -96,12 +96,14 @@
       "name": "adb-large-font-display",
       "title": "Set Display/Font to Large",
       "description": "Set the display and fond size to large values",
+      "disabledByDefault": true,
       "mode": "no-view"
     },
     {
       "name": "adb-reset-font-display",
       "title": "Reset Display/Font Size",
       "description": "Resets the font and display sizes to normal values",
+      "disabledByDefault": true,
       "mode": "no-view"
     },
     {
