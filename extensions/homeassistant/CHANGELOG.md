@@ -1,6 +1,6 @@
 # Home Assistant Changelog
 
-## [Update] - 2023-06-11
+## [Update] - {PR_MERGE_DATE}
 
 - Add home network detection to switch between an internal url and an external one
 - Add `Connection Check` root command
