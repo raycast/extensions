@@ -122,7 +122,7 @@ const PowerMonitor = () => {
                 text={isValidTime(state.batteryTime) ? state.batteryTime : "Calculating..."}
               />
               <List.Item.Detail.Metadata.Label
-                title={state.isCharging ? "Tine on AC" : "Time on battery"}
+                title={state.isCharging ? "Time on AC" : "Time on battery"}
                 text={state.timeOnBattery}
               />
             </List.Item.Detail.Metadata>
