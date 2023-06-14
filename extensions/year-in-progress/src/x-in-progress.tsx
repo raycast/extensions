@@ -17,7 +17,7 @@ import ProgressDetail from "./components/ProgressDetail";
 import { useCachedProgressState } from "./hooks";
 import { Progress } from "./types";
 import { getIcon } from "./utils/icon";
-import { getProgressNumber, getProgressSubtitle, getYear } from "./utils/progress";
+import { getProgressNumber, getProgressSubtitle } from "./utils/progress";
 
 export default function XInProgress() {
   const navigation = useNavigation();
@@ -192,9 +192,11 @@ export default function XInProgress() {
 
   return (
     <List navigationTitle="X In Progress" isShowingDetail={isShowingDetail}>
-      <List.Section title="Pinned Progress">{userProgress.filter((p) => p.pinned).map(renderProgress)}</List.Section>
+      <List.Section title={`🟢 Pinned Progress`}>
+        {userProgress.filter((p) => p.pinned).map(renderProgress)}
+      </List.Section>
 
-      <List.Section title={`🔵 ${getYear()}`}>
+      <List.Section title={`🔵 All Progress`}>
         {userProgress.length == 0 ? (
           <List.Item
             icon={Icon.Plus}

@@ -7,6 +7,7 @@ export type AddProgressFormValue = Omit<Progress, "key" | "type" | "progressNumb
 
 type FormError = {
   titleError: string | undefined;
+  titleInMenubarError: string | undefined;
   startDateError: string | undefined;
   endDateError: string | undefined;
   showInMenuBarError: string | undefined;
@@ -22,8 +23,8 @@ export default function AddProgressForm(props: AddProgressFormProps) {
 
   const [formValue, setFormValue] = useState<Partial<Progress>>(
     props.defaultFormValues || {
-      title: "My Progress",
-      menubarTitle: "My Progress",
+      title: undefined,
+      menubarTitle: undefined,
       startDate: new Date(),
       endDate: new Date(),
       showInMenuBar: false,
@@ -31,6 +32,7 @@ export default function AddProgressForm(props: AddProgressFormProps) {
   );
   const [error, setError] = useState<FormError>({
     titleError: undefined,
+    titleInMenubarError: undefined,
     startDateError: undefined,
     endDateError: undefined,
     showInMenuBarError: undefined,
@@ -54,6 +56,17 @@ export default function AddProgressForm(props: AddProgressFormProps) {
         title="Progress Title"
         placeholder="Enter the progress title"
         value={formValue.title}
+        onBlur={(event) => {
+          const title = event.target.value;
+          if (!title) {
+            setError({ ...error, titleError: "The field should't be empty!" });
+          } else if (!props.defaultFormValues && userProgress.findIndex((progress) => progress.title === title) > -1) {
+            setError({ ...error, titleError: "The progress already exists!" });
+          } else {
+            setError({ ...error, titleError: undefined });
+          }
+          setFormValue({ ...formValue, title });
+        }}
         onChange={(title) => {
           if (!title) {
             setError({ ...error, titleError: "The field should't be empty!" });
@@ -71,9 +84,19 @@ export default function AddProgressForm(props: AddProgressFormProps) {
         title="Title In Menu Bar"
         placeholder="Enter the title In Menu Bar"
         value={formValue.menubarTitle}
+        onBlur={(event) => {
+          const title = event.target.value;
+          if (!title) {
+            setError({ ...error, titleInMenubarError: "The field should't be empty!" });
+          } else {
+            setError({ ...error, titleInMenubarError: undefined });
+          }
+          setFormValue({ ...formValue, menubarTitle: title });
+        }}
         onChange={(title) => {
           setFormValue({ ...formValue, menubarTitle: title });
         }}
+        error={error.titleInMenubarError}
       />
       <Form.DatePicker
         id="startDate"

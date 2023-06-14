@@ -52,11 +52,11 @@ export default function Command() {
       title={menubarTitle.title ? `${menubarTitle.title} ${menubarTitle.progressNumber}%` : "Nothing to show"}
       icon={getIcon(menubarTitle.progressNumber)}
     >
-      <MenuBarExtra.Section title={`Pinned Progress`}>
+      <MenuBarExtra.Section title={`🟢 Pinned Progress`}>
         {menubarProgress.filter((p) => p.pinned).map(renderProgress)}
       </MenuBarExtra.Section>
 
-      <MenuBarExtra.Section title={`🔵 ${getYear()}`}>
+      <MenuBarExtra.Section title={`🔵 All Progress`}>
         {menubarProgress.filter((p) => !p.pinned).map(renderProgress)}
       </MenuBarExtra.Section>
 
