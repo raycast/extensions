@@ -1,6 +1,6 @@
-import { runAppleScript } from "run-applescript";
 import { Cache, Icon, MenuBarExtra } from "@raycast/api";
-import React, { useState } from "react";
+import { runAppleScript } from "@raycast/utils";
+import { useState } from "react";
 import { toggleSystemAudioInputLevel } from "./utils";
 
 export default function muteMenuBar() {

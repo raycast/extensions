@@ -1,15 +1,5 @@
-import { runAppleScript } from "run-applescript";
-import {
-  Icon,
-  LocalStorage,
-  Cache,
-  MenuBarExtra,
-  showHUD,
-  launchCommand,
-  LaunchType,
-  closeMainWindow,
-} from "@raycast/api";
-import React, { useState } from "react";
+import { runAppleScript } from "@raycast/utils";
+import { launchCommand, LaunchType, closeMainWindow } from "@raycast/api";
 import { toggleSystemAudioInputLevel } from "./utils";
 
 export default async function toggleMute() {

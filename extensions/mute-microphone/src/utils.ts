@@ -1,5 +1,5 @@
 import { Cache, LocalStorage, showHUD } from "@raycast/api";
-import { runAppleScript } from "run-applescript";
+import { runAppleScript } from "@raycast/utils";
 
 export async function toggleSystemAudioInputLevel(currentAudioInputLevel: number) {
   const cache = new Cache();
