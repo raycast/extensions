@@ -5,7 +5,7 @@ import { AUDIO_FILE_EXTENSIONS, VIDEO_FILE_EXTENSIONS } from "../constants";
 import { Note, Vault, Media } from "../interfaces";
 import {
   getNoteFileContent,
-  getStarredNotePaths,
+  getBookmarkedNotePaths,
   getUserIgnoreFilters,
   prefExcludedFolders,
   walkFilesHelper,
@@ -32,7 +32,7 @@ export class NoteLoader {
     console.log("Loading Notes for vault: " + this.vault.path);
     const notes: Note[] = [];
     const files = this._getFiles();
-    const starred = getStarredNotePaths(this.vault);
+    const bookmarked = getBookmarkedNotePaths(this.vault);
 
     for (const f of files) {
       const comp = f.split("/");
@@ -48,7 +48,7 @@ export class NoteLoader {
         path: f,
         tags: tagsForString(noteContent),
         content: noteContent,
-        starred: starred.includes(f.split(this.vault.path)[1].slice(1)),
+        bookmarked: bookmarked.includes(f.split(this.vault.path)[1].slice(1)),
       };
 
       notes.push(note);
