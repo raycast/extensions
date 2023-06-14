@@ -1,10 +1,14 @@
 import { confirmAlert, showHUD } from "@raycast/api";
-import { execSync } from "node:child_process";
+import { SpawnSyncReturns, execSync } from "node:child_process";
+
+const isSpawnReturn = (e: unknown): e is SpawnSyncReturns<Buffer> => {
+  return typeof e === "object" && e !== null && "status" in e && "stdout" in e && "stderr" in e;
+};
 
 const commands = {
-  mDNSResponder: "sudo killall -HUP mDNSResponder",
-  dscacheutil: "sudo dscacheutil -flushcache",
-  mdnsflushcache: "sudo discoveryutil mdnsflushcache",
+  mDNSResponder: "sudo /usr/bin/killall -HUP mDNSResponder",
+  dscacheutil: "sudo /usr/bin/dscacheutil -flushcache",
+  mdnsflushcache: "sudo /usr/bin/discoveryutil mdnsflushcache",
 } as const satisfies Record<string, string>;
 
 export default async function main() {
@@ -45,7 +49,18 @@ export default async function main() {
 
   console.log(`Running command: ${osaCommand}`);
 
-  execSync(osaCommand, { shell: "/bin/bash" });
-
-  await showHUD("DNS Cache Flushed");
+  await showHUD("Administrator Privileges Required");
+  try {
+    execSync(osaCommand, { shell: "/bin/bash" });
+    await showHUD("DNS Cache Flushed");
+  } catch (e) {
+    if (isSpawnReturn(e)) {
+      console.error(`Command exited with status ${e.status}`);
+      console.error(`stdout: ${e.stdout.toString()}`);
+      console.error(`stderr: ${e.stderr.toString()}`);
+    } else {
+      console.error(e);
+    }
+    await showHUD("Error Flushing DNS Cache");
+  }
 }
