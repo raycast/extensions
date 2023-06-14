@@ -814,6 +814,7 @@
   "serverless-framework-docs": "serverless-framework-docs",
   "session": "session",
   "sf-symbols-search": "sf-symbols-search",
+  "shadcn-ui": "shadcn-ui",
   "shell": "shell",
   "shell-buddy": "shell-buddy",
   "shopify-developer-changelog": "shopify-developer-changelog",
