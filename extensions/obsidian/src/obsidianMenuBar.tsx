@@ -1,5 +1,5 @@
 import { MenuBarExtra, open } from "@raycast/api";
-import { ObsidianIconDynamicBold } from "./utils/constants";
+import { ObsidianIcon } from "./utils/constants";
 import { useNotes } from "./utils/hooks";
 import { Vault } from "./utils/interfaces";
 import { getObsidianTarget, ObsidianTargetType, useObsidianVaults, vaultPluginCheck } from "./utils/utils";
@@ -13,7 +13,7 @@ function BookmarkedNotesList(props: { vault: Vault }) {
           title={note.title}
           key={note.path}
           tooltip="Open Note"
-          icon={ObsidianIconDynamicBold}
+          icon={ObsidianIcon}
           onAction={() => open(getObsidianTarget({ type: ObsidianTargetType.OpenPath, path: note.path }))}
         />
       ))}
@@ -64,7 +64,7 @@ function OpenVaultSelection(props: { vaults: Vault[] }) {
 
 function ObsidianMenuBar(props: { vaults: Vault[] }) {
   return (
-    <MenuBarExtra icon={ObsidianIconDynamicBold} tooltip="Obsidian">
+    <MenuBarExtra icon={ObsidianIcon} tooltip="Obsidian">
       <DailyNoteVaultSelection vaults={props.vaults} />
       <OpenVaultSelection vaults={props.vaults} />
       <BookmarkedNotesVaultSelection vaults={props.vaults} />
