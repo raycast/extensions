@@ -36,7 +36,7 @@ function PopularSeriesVideos(props: { number: number }) {
         <Video
           title={item.title}
           cover={item.pic}
-          url={item.short_link}
+          url={item.short_link || item.short_link_v2}
           uploader={{
             mid: item.owner.mid,
             name: item.owner.name,

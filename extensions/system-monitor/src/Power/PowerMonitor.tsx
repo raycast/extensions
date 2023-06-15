@@ -8,6 +8,7 @@ import {
   getIsCharging,
   getMaxBatteryCapacity,
   isValidTime,
+  getTimeOnBattery,
 } from "./PowerUtils";
 import { useInterval } from "usehooks-ts";
 import { ExecError, PowerMonitorState } from "../Interfaces";
@@ -23,6 +24,7 @@ const PowerMonitor = () => {
     batteryCondition: "Loading...",
     maxBatteryCapacity: "Loading...",
     batteryTime: "Calculating...",
+    timeOnBattery: "Calculating...",
   });
 
   useInterval(async () => {
@@ -32,15 +34,22 @@ const PowerMonitor = () => {
           .then((newIsCharging) => {
             getBatteryTime()
               .then((newBatteryTime) => {
-                setState((prevState) => {
-                  return {
-                    ...prevState,
-                    batteryLevel: newBatteryLevel,
-                    isCharging: newIsCharging,
-                    batteryTime: newBatteryTime,
-                  };
-                });
-                setIsLoading(false);
+                getTimeOnBattery()
+                  .then((timeOnBattery) => {
+                    setState((prevState) => {
+                      return {
+                        ...prevState,
+                        batteryLevel: newBatteryLevel,
+                        isCharging: newIsCharging,
+                        batteryTime: newBatteryTime,
+                        timeOnBattery: timeOnBattery,
+                      };
+                    });
+                    setIsLoading(false);
+                  })
+                  .catch((error: ExecError) => {
+                    setError(error);
+                  });
               })
               .catch((error: ExecError) => {
                 setError(error);
@@ -88,7 +97,7 @@ const PowerMonitor = () => {
     if (error) {
       showToast({
         style: Toast.Style.Failure,
-        title: "Couldn't fetch Power Info [Error Code: " + error.code + "]",
+        title: `Couldn't fetch Power Info [Error Code: ${error.code}]`,
         message: error.stderr,
       });
     }
@@ -111,6 +120,10 @@ const PowerMonitor = () => {
               <List.Item.Detail.Metadata.Label
                 title={state.isCharging ? "Time to charge" : "Time to discharge"}
                 text={isValidTime(state.batteryTime) ? state.batteryTime : "Calculating..."}
+              />
+              <List.Item.Detail.Metadata.Label
+                title={state.isCharging ? "Time on AC" : "Time on battery"}
+                text={state.timeOnBattery}
               />
             </List.Item.Detail.Metadata>
           }

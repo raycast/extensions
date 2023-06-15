@@ -1,10 +1,12 @@
+import { DeviceDefinition } from "src/types/device";
+
 export default {
-  // 1
   "0x030D": {
+    name: "Magic Mouse (Gen 1)",
     main: "icons/devices/apple/magic-mouse.svg",
   },
-  // 2
   "0x0269": {
+    name: "Magic Mouse (Gen 2)",
     main: "icons/devices/apple/magic-mouse.svg",
   },
-};
+} as Record<string, DeviceDefinition>;
