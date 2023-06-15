@@ -65,7 +65,19 @@ export default function Command() {
   }
 
   async function onSubmit(values: FormValues) {
+    if (!values.urlField || !values.titleField || !values.tagField) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Error",
+        message: "Form isn't complete.",
+      });
+      return;
+    }
+
     try {
+      // Check if sub-folder is empty and set folderPath accordingly
+      const folderPath = values.folderField !== null ? `${preferences.vault}/${values.folderField}` : preferences.vault;
+
       // Split tags into array and append "#" to each tag
       const tags = values.tagField
         .split(",")
@@ -75,8 +87,13 @@ export default function Command() {
       let summaryContent = "";
       let pText = "";
 
-      // Get HTML and Convert to markdown if enabled
+      // Get content if enabled
       try {
+        if (extractContent) {
+          summaryContent = "AI Summary not enabled.";
+          pText = "Extract Content not enabled.";
+        }
+
         if (!extractContent) {
           const response = await fetch(values.urlField);
           const body = await response.text();
@@ -143,10 +160,9 @@ export default function Command() {
         `${pText}`;
 
       // Generate file name and folder path
-      const fileName = `${preferences.vault}/${values.folderField}/${values.titleField}.md`;
-      const folderPath = `${preferences.vault}/${values.folderField}`;
+      const fileName = `${folderPath}/${values.titleField}.md`;
 
-      // Create folder if it doesn't exist
+      // Create sub-folder if it doesn't exist.
       await fs.mkdir(folderPath, { recursive: true });
 
       // Debug file creation
@@ -214,27 +230,22 @@ export default function Command() {
         onBlur={(event) => {
           const title = String(event.target.value);
           if (!title) {
-            setTitleError("Field is empty.");
+            setTitleError("Field is empty");
           } else {
-            dropTitleErrorIfNeeded();
+            const pattern = /^[a-zA-Z0-9-_]+(\.[a-zA-Z0-9]+)?$/;
+            if (!pattern.test(title)) {
+              setTitleError("Invalid filename");
+            } else {
+              dropTitleErrorIfNeeded();
+            }
           }
         }}
       />
       <Form.TextField
         id="folderField"
         title="Sub-Folder"
-        placeholder="Enter Sub-Folder"
-        info="The clippings sub-folder"
-        error={folderError}
-        onChange={dropFolderErrorIfNeeded}
-        onBlur={(event) => {
-          const folder = String(event.target.value);
-          if (!folder) {
-            setFolderError("Field is empty.");
-          } else {
-            dropFolderErrorIfNeeded();
-          }
-        }}
+        placeholder="Enter Sub-Folder (Optional)"
+        info="The clippings sub-folder. If empty, will be saved in Vault Clipping Location."
       />
       <Form.TextField
         id="tagField"
@@ -245,12 +256,20 @@ export default function Command() {
         onChange={dropTagErrorIfNeeded}
         onBlur={(event) => {
           const tag = String(event.target.value);
-          const numTags = tag.split(" ");
+          const numTags = tag.split(",");
           if (!tag) {
             setTagError("Field is empty.");
-          } else if (numTags.length > 1 && !tag.includes(",")) {
+          } else if (numTags.length > 1 && !tag.includes(", ")) {
             setTagError("Separate with commas.");
           } else {
+            const pattern = /^[a-zA-Z_/-]*[a-zA-Z][a-zA-Z_/-]*$/;
+            for (let i = 0; i < numTags.length; i++) {
+              const trimmedTag = numTags[i].trim();
+              if (!pattern.test(trimmedTag)) {
+                setTagError("Invalid tag format.");
+                return;
+              }
+            }
             dropTagErrorIfNeeded();
           }
         }}

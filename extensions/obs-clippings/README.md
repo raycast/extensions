@@ -2,7 +2,7 @@
 
 Obsidian Clippings is an **opionated** extension for Raycast that allows users to save things from the web directly to their Obsidian Vault. The extension will save and format the page metadata supplied, including title, sub-folder, tag(s), and comments, with the option to extract and summarize the contents of the page using Raycast AI. If the sub-folder does not yet exist, it will create it. 
 
-Currently, the _format_ of the clipping is hardcoded, though as a mardown file it can be easily manipulated. Choosing to extract the contents of the page will download only **paragraph elements** for a cleaner, minimal look. Pages with no paragraph elements will only save the supplied metadata, and AI summaries will not be included.
+Currently, the _format_ of the clipping is hardcoded, though as a markdown file it can be easily manipulated. Choosing to extract the contents of the page will download only **paragraph elements** for a cleaner, minimal look. Pages with no paragraph elements will only save the supplied metadata, and AI summaries will not be included.
 
 ### Configuration
 
@@ -18,11 +18,11 @@ Raycast AI has a limit on the amount of tokens that can be used to request a sum
 ### Actions
 
 The extension includes the following actions:
-    - **Create Obsidian Bookmark:** Submits the form and creates a new clipping in Obsidian.
-    - **Open Extension Preferences:** Opens the extension preferences.
-    - **Adjust AI Prompt:** Allows you to adjust the AI prompt.
+   * **Create Obsidian Bookmark:** Submits the form and creates a new clipping in Obsidian.
+   * **Open Extension Preferences:** Opens the extension preferences.
+   * **Adjust AI Prompt:** Allows you to adjust the AI prompt.
 
 ### Screenshots
 
 ![Clipping Form](./metadata/obs-clippings-form.png)
-![Formatted Clipping in Obsidian](./metadata/obs-clippings-output.png)
+![Formatted Clipping in Obsidian](./assets/obs-clippings-output.png)
