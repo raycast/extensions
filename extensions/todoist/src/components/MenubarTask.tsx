@@ -1,6 +1,15 @@
-import {getPreferenceValues, Color, confirmAlert, Icon, MenuBarExtra, open, showHUD, launchCommand, LaunchType } from "@raycast/api";
+import {
+  getPreferenceValues,
+  Color,
+  confirmAlert,
+  Icon,
+  MenuBarExtra,
+  open,
+  showHUD,
+  launchCommand,
+  LaunchType,
+} from "@raycast/api";
 import { useMemo } from "react";
-
 import removeMarkdown from "remove-markdown";
 
 import { SyncData, Task, deleteTask as apiDeleteTAsk, closeTask, updateTask } from "../api";
