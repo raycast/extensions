@@ -20,26 +20,31 @@ export default function Command() {
 
   return (
     <List onSearchTextChange={handleOnTextChange} searchBarPlaceholder="Convert Pixels or Tailwind units">
-      <List.Section title={"Tailwind units"}>
-        <List.Item
-          title={`${currentInput}px is --tw-${tw}`}
-          actions={
-            <ActionPanel title="Copy">
-              <Action.CopyToClipboard title="Copy To Clipboard" content={tw} />
-            </ActionPanel>
-          }
-        />
-      </List.Section>
-      <List.Section title={"Pixels"}>
-        <List.Item
-          title={`--tw-${currentInput} is ${px}`}
-          actions={
-            <ActionPanel title="Copy">
-              <Action.CopyToClipboard title="Copy To Clipboard" content={px} />
-            </ActionPanel>
-          }
-        />
-      </List.Section>
+      <List.EmptyView title="Enter a numbers to convert" icon="noview.png" />
+      {currentInput !== "" && (
+        <>
+          <List.Section title={"Tailwind units"}>
+            <List.Item
+              title={`${currentInput}px is --tw-${tw}`}
+              actions={
+                <ActionPanel title="Copy">
+                  <Action.CopyToClipboard content={tw} />
+                </ActionPanel>
+              }
+            />
+          </List.Section>
+          <List.Section title={"Pixels"}>
+            <List.Item
+              title={`--tw-${currentInput} is ${px}`}
+              actions={
+                <ActionPanel title="Copy">
+                  <Action.CopyToClipboard content={px} />
+                </ActionPanel>
+              }
+            />
+          </List.Section>
+        </>
+      )}
     </List>
   );
 }
