@@ -57,7 +57,7 @@ export default function Command() {
         toast.style = Toast.Style.Success;
         toast.title = "Short URL copied to clipboard!";
 
-        await closeMainWindow({ clearRootSearch: true });
+        closeMainWindow({ clearRootSearch: true });
       })
       .catch((err) => {
         setUrlError(err.response?.data?.errors?.url?.[0]);
