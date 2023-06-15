@@ -3,7 +3,7 @@ import { runAppleScript } from "@raycast/utils";
 
 export async function toggleSystemAudioInputLevel(currentAudioInputLevel: number) {
   const cache = new Cache();
-  if (currentAudioInputLevel > 0 && currentAudioInputLevel <= 100) {
+  if (currentAudioInputLevel > 0 && currentAudioInputLevel < 100) {
     await LocalStorage.setItem("audio-input-volume", currentAudioInputLevel);
   }
   const savedNonZeroAudioVolume = await LocalStorage.getItem("audio-input-volume");

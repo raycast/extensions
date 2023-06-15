@@ -1,7 +1,7 @@
 import { Cache, Icon, MenuBarExtra } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
 import { useState } from "react";
-import { toggleSystemAudioInputLevel } from "./shared/utils";
+import { toggleSystemAudioInputLevel } from "./utils";
 
 export default function muteMenuBar() {
   const cache = new Cache();
