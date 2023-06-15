@@ -100,7 +100,7 @@ const getPassword = (entry: string) =>
     const cli = spawn(`${keepassxcCli}`, ["show", ...cliOptions, "Password", `${database}`, `${entry}`]);
     cli.stdin.write(`${dbPassword}\n`);
     cli.stdin.end();
-    // cli.on("error", reject);
+    cli.on("error", reject);
     cli.stderr.on("data", cliStdOnErr(reject));
     const chuncks: Buffer[] = [];
     cli.stdout.on("data", (chunck) => {
