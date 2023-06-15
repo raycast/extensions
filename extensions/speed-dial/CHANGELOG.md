@@ -1,5 +1,5 @@
 # Speed Dial Changelog
 
-## [Initial Version] - 2023-06-07
+## [Initial Version] - {PR_MERGE_DATE}
 
 Initial version code
