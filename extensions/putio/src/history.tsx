@@ -5,6 +5,7 @@ import { fetchHistoryEvents } from "./api/history";
 import { getPutioAccountInfo, withPutioClient } from "./api/withPutioClient";
 import { HistoryListItem } from "./components/HistoryListItem";
 import { localizeError, localizedErrorToToastOptions } from "./api/localizeError";
+import { EmptyView } from "./components/EmptyView";
 
 const HistoryList = () => {
   const { data: events, isLoading, error } = usePromise(fetchHistoryEvents);
@@ -17,6 +18,8 @@ const HistoryList = () => {
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search in history">
+      <EmptyView title={events && events?.length === 0 ? "No events" : "History"} />
+
       {events
         ?.filter((e) => e.type === "transfer_completed" || e.type === "file_shared")
         .map((event) => (

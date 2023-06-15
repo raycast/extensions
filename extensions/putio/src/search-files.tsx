@@ -5,7 +5,7 @@ import { withPutioClient } from "./api/withPutioClient";
 import { searchFiles } from "./api/files";
 import { FileListItem } from "./components/FileListItem";
 import { localizeError, localizedErrorToToastOptions } from "./api/localizeError";
-import { EmptyView } from "./components/NoView";
+import { EmptyView } from "./components/EmptyView";
 
 type Props = {
   arguments: {
@@ -25,8 +25,6 @@ const SearchFiles = (props: Props) => {
     }
   }, [error]);
 
-  const title = isLoading ? "Searching" : data && data?.total === 0 ? "No Results" : "Search Files";
-
   return (
     <List
       isLoading={isLoading}
@@ -35,7 +33,8 @@ const SearchFiles = (props: Props) => {
       searchBarPlaceholder="Search in put.io"
       throttle
     >
-      <EmptyView title={title} />
+      <EmptyView title={data && data?.total === 0 ? "No Results" : "Search Files"} />
+
       <List.Section title="Results" subtitle={data?.total.toString()}>
         {data?.files.map((file) => (
           <FileListItem key={file.id} file={file} onMutate={revalidate} />

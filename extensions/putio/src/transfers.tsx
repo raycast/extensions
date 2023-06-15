@@ -5,6 +5,7 @@ import { withPutioClient } from "./api/withPutioClient";
 import { fetchTransfers } from "./api/transfers";
 import { TransferListItem } from "./components/TransferListItem";
 import { localizeError, localizedErrorToToastOptions } from "./api/localizeError";
+import { EmptyView } from "./components/EmptyView";
 
 export const Transfers = () => {
   const intervalRef = useRef<NodeJS.Timeout>();
@@ -33,6 +34,8 @@ export const Transfers = () => {
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search in transfers">
+      <EmptyView title={data && data?.transfers.length === 0 ? "No transfers" : "Transfers"} />
+
       {data?.transfers.map((transfer) => (
         <TransferListItem key={transfer.id} transfer={transfer} />
       ))}
