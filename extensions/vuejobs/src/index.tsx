@@ -62,7 +62,7 @@ export default function Command() {
         return (
           <List.Item
             key={job.slug}
-            icon={job.organization.avatar}
+            icon={job.organization.avatar || "../assets/vuejobs.png"}
             title={job.title}
             actions={
               <ActionPanel>
@@ -72,7 +72,9 @@ export default function Command() {
             accessories={accessories}
             detail={
               <List.Item.Detail
-                markdown={`## ${job.organization.name} \n<img src="${job.organization.avatar}" height="70" />`}
+                markdown={`## ${job.organization.name} \n<img src="${
+                  job.organization.avatar || "../assets/vuejobs.png"
+                }" height="70" />`}
                 metadata={
                   <List.Item.Detail.Metadata>
                     <List.Item.Detail.Metadata.Label
@@ -84,7 +86,7 @@ export default function Command() {
                     <List.Item.Detail.Metadata.Label
                       title="Job Title"
                       text={job.title}
-                      icon={job.organization.avatar}
+                      icon={job.organization.avatar || "../assets/vuejobs.png"}
                     />
                     <List.Item.Detail.Metadata.Separator />
                     <List.Item.Detail.Metadata.Label title="Company" text={`@${job.organization.name}`} />
@@ -131,7 +133,7 @@ export default function Command() {
                     <List.Item.Detail.Metadata.Separator />
                     <List.Item.Detail.Metadata.Label
                       title="Work type"
-                      icon="👨‍💻"
+                      icon="../assets/vuejobs.png"
                       text={job.taxonomies.work_type.map((type) => type).join("- ")}
                     />
                     <List.Item.Detail.Metadata.Separator />

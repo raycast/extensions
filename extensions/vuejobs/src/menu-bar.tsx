@@ -20,8 +20,12 @@ export default function Command() {
           <MenuBarExtra.Item
             key={job.slug}
             title={job.title}
-            icon={job.organization.avatar}
+            icon={job.organization.avatar || "../assets/vuejobs.png"}
             onAction={() => open(`https://vuejobs.com/jobs/${job.slug}`)}
+            subtitle={job.organization.name}
+            tooltip={`from ${job.salary?.from || "Not specified"} to ${job.salary?.to || "Not specified"} ${
+              job.salary?.currency || "Not specified"
+            } - (${job.salary.interval || "Not specified"})`}
           />
         ))}
     </MenuBarExtra>
