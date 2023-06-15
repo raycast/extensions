@@ -5,10 +5,9 @@ import { SyncData, Task, deleteTask as apiDeleteTAsk, closeTask, updateTask } fr
 import { getCollaboratorIcon, getProjectCollaborators } from "../helpers/collaborators";
 import { isTodoistInstalled } from "../helpers/isTodoistInstalled";
 import { getRemainingLabels } from "../helpers/labels";
-import { priorities } from "../helpers/priorities";
-import { getPriorityIcon } from "../helpers/priorities";
-import { getTaskAppUrl, getTaskUrl } from "../helpers/tasks";
 import { truncateMiddle } from "../helpers/menu-bar";
+import { priorities, getPriorityIcon } from "../helpers/priorities";
+import { getTaskAppUrl, getTaskUrl } from "../helpers/tasks";
 import { useFocusedTask } from "../hooks/useFocusedTask";
 
 import View from "./View";
@@ -24,7 +23,7 @@ const MenuBarTask = ({ task, data, setData }: MenuBarTaskProps) => {
 
   const collaborators = getProjectCollaborators(task.project_id, data);
   const remainingLabels = task && data?.labels ? getRemainingLabels(task, data.labels) : [];
-  const taskTitle = truncateMiddle(removeMarkdown(task.content), 50)
+  const taskTitle = truncateMiddle(removeMarkdown(task.content), 50);
 
   const subTasks = data?.items.filter((item) => item.parent_id === task.id);
 
