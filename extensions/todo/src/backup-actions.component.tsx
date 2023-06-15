@@ -7,7 +7,7 @@ export function ShowBackupsAction() {
   return (
     <Action.ShowInFinder
       path={BACKUP_PATH}
-      title='Show Backups in finder'
+      title='Show Backups in Finder'
       shortcut={{ modifiers: ['cmd', 'shift'], key: 'b' }}
     />
   );
