@@ -4,6 +4,7 @@ import { MessageList } from "./message-list";
 import { Account, Mailbox } from "../types";
 import { titleCase } from "../utils";
 import { MailIcon } from "../utils/presets";
+import { sortMailboxes } from "../utils/mailbox";
 
 export type MailboxListProps = Account;
 
@@ -22,11 +23,9 @@ export const MailboxList = (props: MailboxListProps) => {
       accessories={[{ text: fullName, icon: Icon.PersonCircle }, { text: unreadMessages }]}
       actions={
         <ActionPanel>
-          {mailboxes
-            .sort((a, b) => b.unreadCount - a.unreadCount)
-            .map((mailbox) => (
-              <MailboxAction key={mailbox.name} account={props} mailbox={mailbox} />
-            ))}
+          {mailboxes.sort(sortMailboxes).map((mailbox) => (
+            <MailboxAction key={mailbox.name} account={props} mailbox={mailbox} />
+          ))}
         </ActionPanel>
       }
     />
