@@ -54,7 +54,7 @@ export default function AddRoomForm(props: { room?: Room }) {
       name: FormValidation.Required,
       url: (value) => {
         if (!value) {
-          return "The name is required";
+          return "The URL is required";
         } else if (!isValidUrl(value)) {
           return "Please enter a valid URL";
         }

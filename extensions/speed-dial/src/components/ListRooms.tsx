@@ -58,7 +58,8 @@ export default function ListRooms(props: { name?: string }) {
               <Action
                 title="Remove Room"
                 icon={Icon.Trash}
-                shortcut={{ modifiers: ["cmd"], key: "backspace" }}
+                style={Action.Style.Destructive}
+                shortcut={{ modifiers: ["ctrl"], key: "backspace" }}
                 onAction={async () => {
                   if (await confirmAlert({ title: `Are you sure you want to remove "${item.name}"?` })) {
                     removeRoom(item)?.then(() => {
