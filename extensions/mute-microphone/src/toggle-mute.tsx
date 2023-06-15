@@ -1,6 +1,6 @@
 import { runAppleScript } from "@raycast/utils";
 import { launchCommand, LaunchType, closeMainWindow, showHUD } from "@raycast/api";
-import { toggleSystemAudioInputLevel } from "./utils";
+import { toggleSystemAudioInputLevel } from "./shared/utils";
 
 export default async function toggleMute() {
   const currentAudioInputLevelString = await runAppleScript("input volume of (get volume settings)");
