@@ -7,7 +7,7 @@ import { image } from "image-downloader";
 
 const downloadDir = resolve(environment.supportPath, "download");
 const latexUrl = "https://latex.codecogs.com/png.image?" + encodeURIComponent("\\dpi{512}");
-const latexUrlDark = "https://latex.codecogs.com/png.image?" + encodeURIComponent("\\dpi{512}\\bg{white}");
+const latexUrlDark = "https://latex.codecogs.com/png.image?" + encodeURIComponent("\\dpi{512}\\bg{black}\\fg{white}");
 console.log(latexUrl);
 export default function CommandWithCustoEmptyView() {
   const [state, setState] = useState({ searchText: "LaTeX", items: [] });
