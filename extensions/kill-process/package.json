@@ -87,7 +87,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.52.1",
+    "@raycast/api": "^1.53.3",
     "node-fetch": "^3.0.0",
     "pretty-bytes": "^6.1.0"
   },

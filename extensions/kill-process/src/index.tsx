@@ -62,8 +62,7 @@ export default function ProcessList() {
     });
   };
 
-  useInterval(fetchProcesses, refreshDuration);
-  // TODO: add [sortByMem, aggregateApps] as deps
+  useInterval(fetchProcesses, refreshDuration, [sortByMem, aggregateApps]);
 
   const fileIcon = (process: Process) => {
     if (process.type === "prefPane") {
@@ -219,11 +218,13 @@ export default function ProcessList() {
               title={process.processName}
               subtitle={subtitleString(process)}
               icon={icon}
-              accessories={[{ text:
-                sortByMem
-                  ? `${process.cpu.toFixed(2)}% ${prettyBytes(process.mem * 1024)}`
-                  : `${prettyBytes(process.mem * 1024)} ${process.cpu.toFixed(2)}%`
-              }]}
+              accessories={[
+                {
+                  text: sortByMem
+                    ? `${process.cpu.toFixed(2)}% ${prettyBytes(process.mem * 1024)}`
+                    : `${prettyBytes(process.mem * 1024)} ${process.cpu.toFixed(2)}%`,
+                },
+              ]}
               actions={
                 <ActionPanel>
                   <Action title="Kill" icon={Icon.XMarkCircle} onAction={() => killProcess(process)} />
