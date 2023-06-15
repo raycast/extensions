@@ -1,6 +1,6 @@
 # Obsidian Changelog
 
-## [Updated icons] - 2023-06-11
+## [Updated icons] - {PR_MERGE_DATE}
 
 - Update extension icons to match the new [logo and brand guidelines](https://obsidian.md/brand)
 
