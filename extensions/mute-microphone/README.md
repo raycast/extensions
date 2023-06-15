@@ -1,12 +1,9 @@
 # Toggle Audio Input (microphone)
-A [RaycastApp](https://www.raycast.com/) extension to mute/unmute audio input (microphone)
-
-<a title="Install mute-microphone Raycast Extension" href="https://www.raycast.com/Quentin23Soleil/mute-microphone"><img src="https://www.raycast.com/Quentin23Soleil/mute-microphone/install_button@2x.png" height="100" alt="" style="height: 100px;"></a>
+A [Raycast](https://www.raycast.com/) extension to mute/unmute audio input (microphone)
 
 ![commands.png](media/commands.png)
 
 The extension has a command to directly mute/unmute the audio input, but there's also a menu bar extension showing if it's either muted or not, and lets you click on the menu item to toggle its state.
-
 
 ## Notes
 <details>
