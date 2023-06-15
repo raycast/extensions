@@ -158,7 +158,6 @@ export default function Command() {
     <List
       searchText={searchText}
       onSearchTextChange={setSearchText}
-      navigationTitle="Date"
       searchBarPlaceholder="Enter a human or machine readable date"
     >
       <List.EmptyView title="Invalid Date" description="Failed to parse your date in a human or machine format." />
