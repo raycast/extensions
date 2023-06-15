@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "px-to-tailwind",
-  "title": "Px to Tailwind",
-  "description": "Converts pixels to Tailwind class values",
+  "name": "tailwind-size-conversion",
+  "title": "Tailwind Size Conversion",
+  "description": "Converts pixels to Tailwind class values and vice versa",
   "icon": "icon.png",
   "author": "kemiljk",
   "categories": [
@@ -12,9 +12,9 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "convert-to-tailwind",
-      "title": "Convert To Tailwind",
-      "description": "Enables a quick and easy pixel to Tailwind class conversion",
+      "name": "size-convert",
+      "title": "Size Convert",
+      "description": "Enables a quick and easy pixel to Tailwind class conversion and vice versa",
       "mode": "view"
     }
   ],

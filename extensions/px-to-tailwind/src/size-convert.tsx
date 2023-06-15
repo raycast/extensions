@@ -19,11 +19,7 @@ export default function Command() {
   };
 
   return (
-    <List
-      onSearchTextChange={handleOnTextChange}
-      navigationTitle="Pixels <–> Tailwind"
-      searchBarPlaceholder="Convert Pixels or Tailwind units"
-    >
+    <List onSearchTextChange={handleOnTextChange} searchBarPlaceholder="Convert Pixels or Tailwind units">
       <List.Section title={"Tailwind units"}>
         <List.Item
           title={`${currentInput}px is --tw-${tw}`}
