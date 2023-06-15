@@ -48,14 +48,14 @@ export default function Command() {
     <>
       <List isLoading={isLoading} isShowingDetail>
         {data?.objects.map((object) => (
-          <List.Item key={object.id} title={object.title} detail={<ObjectDetail id={object.id ?? ''} />} actions={<Actions id={object.id ?? ''} title={object.title ?? ''} />} />
+          <List.Item key={object.id} title={object.title} detail={<ObjectDetail id={object.id ?? ''} title={object.title ?? ''} />} actions={<Actions id={object.id ?? ''} title={object.title ?? ''} read={object.metadata?.read ?? false} />} />
         ))}
       </List>
     </>
   );
 }
 
-function ObjectDetail(props: { id: string }) {
+function ObjectDetail(props: { id: string; title: string }) {
   const { bucketSlug, readKey } = getPreferenceValues<Preferences>();
 
   const { data, isLoading } = useFetch<SingularObject>(`https://api.cosmicjs.com/v3/buckets/${bucketSlug}/objects/${props.id}?read_key=${readKey}&depth=1&props=`);
@@ -71,7 +71,7 @@ function ObjectDetail(props: { id: string }) {
     data?.object && (
       <List.Item.Detail
         isLoading={isLoading}
-        markdown={`## ${data?.object.title}` + '\n\n' + `${data?.object.metadata?.snippet ?? ''}`}
+        markdown={`## ${props.title}` + '\n\n' + `${data?.object.metadata?.snippet ?? ''}`}
         metadata={
           <List.Item.Detail.Metadata>
             <List.Item.Detail.Metadata.Label title='Slug' text={trimmedURL ?? ''} />
@@ -83,7 +83,7 @@ function ObjectDetail(props: { id: string }) {
   );
 }
 
-function Actions(props: { id: string; title: string }) {
+function Actions(props: { id: string; title: string; read: boolean }) {
   const { bucketSlug, readKey, writeKey } = getPreferenceValues<Preferences>();
 
   const { data } = useFetch<SingularObject>(`https://api.cosmicjs.com/v3/buckets/${bucketSlug}/objects/${props.id}?read_key=${readKey}&depth=1&props=`);
@@ -99,14 +99,14 @@ function Actions(props: { id: string; title: string }) {
           <Action.OpenInBrowser
             url={data?.object.metadata?.url}
             onOpen={() => {
-              markRead(props.id, bucketSlug, readKey, writeKey);
+              markRead(props.id, props.title, props.read, bucketSlug, readKey, writeKey);
             }}
           />
         )}
         {data?.object.slug && <Action.CopyToClipboard content={data?.object.metadata?.url} title='Copy Link' shortcut={{ modifiers: ['cmd'], key: '.' }} />}
       </ActionPanel.Section>
       <ActionPanel.Section>
-        <Action title='Mark as Read' icon={Icon.Checkmark} onAction={() => markRead(props.id, bucketSlug, readKey, writeKey)} />
+        <Action title={data?.object.metadata?.read === true ? 'Mark as Unread' : 'Mark as Read'} icon={Icon.Checkmark} onAction={() => markRead(props.id, props.title, props.read, bucketSlug, readKey, writeKey)} />
         <Action title='Delete Bookmark' icon={Icon.Trash} onAction={() => deleteBookmark(props.id, props.title, bucketSlug, readKey, writeKey)} style={Action.Style.Destructive} />
       </ActionPanel.Section>
       <ActionPanel.Section>
@@ -116,7 +116,7 @@ function Actions(props: { id: string; title: string }) {
   );
 }
 
-async function markRead(id: string, bucketSlug: string, readKey: string, writeKey: string) {
+async function markRead(id: string, title: string, read: boolean, bucketSlug: string, readKey: string, writeKey: string) {
   const cosmic = createBucketClient({
     bucketSlug: bucketSlug,
     readKey: readKey,
@@ -124,14 +124,12 @@ async function markRead(id: string, bucketSlug: string, readKey: string, writeKe
   });
 
   try {
-    const response = await cosmic.objects.updateOne(id, {
+    await cosmic.objects.updateOne(id, {
       metadata: {
-        read: true,
+        read: read === true ? false : true,
       },
     });
-    console.log('Marked as read:', id);
-    const data = await response.object;
-    await showToast({ title: `Marked ${data.title} as read` });
+    await showToast({ title: `Marked ${title} as ${read === true ? 'Unread' : 'Read'}` });
   } catch (err) {
     console.error(err);
   }
