@@ -8,6 +8,7 @@ import { getRemainingLabels } from "../helpers/labels";
 import { priorities } from "../helpers/priorities";
 import { getPriorityIcon } from "../helpers/priorities";
 import { getTaskAppUrl, getTaskUrl } from "../helpers/tasks";
+import { truncateMiddle } from "../helpers/menu-bar";
 import { useFocusedTask } from "../hooks/useFocusedTask";
 
 import View from "./View";
@@ -23,6 +24,7 @@ const MenuBarTask = ({ task, data, setData }: MenuBarTaskProps) => {
 
   const collaborators = getProjectCollaborators(task.project_id, data);
   const remainingLabels = task && data?.labels ? getRemainingLabels(task, data.labels) : [];
+  const taskTitle = truncateMiddle(removeMarkdown(task.content), 50)
 
   async function completeTask(task: Task) {
     try {
@@ -98,7 +100,7 @@ const MenuBarTask = ({ task, data, setData }: MenuBarTaskProps) => {
 
   return (
     <View>
-      <MenuBarExtra.Submenu title={removeMarkdown(task.content)} icon={getPriorityIcon(task)}>
+      <MenuBarExtra.Submenu title={taskTitle} icon={getPriorityIcon(task)}>
         <MenuBarExtra.Item
           title="Open in Raycast"
           onAction={() =>

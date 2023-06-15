@@ -76,7 +76,7 @@ export default function TaskDetail({ taskId }: TaskDetailProps): JSX.Element {
                 {subTasks && subTasks?.length > 0 ? (
                   <Detail.Metadata.Label
                     title={"Sub-tasks"}
-                    text={`${subTasks.length} subtask` + (subTasks.length > 1 ? "s" : "")}
+                    text={`${subTasks.length} subtask${subTasks.length > 1 ? "s" : ""}`}
                     icon={{ source: "sub-task.svg", tintColor: Color.PrimaryText }}
                   />
                 ) : null}

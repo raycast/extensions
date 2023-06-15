@@ -1,12 +1,13 @@
 # Todoist Changelog
 
-## [View task in Raycast from menu bar] - 2023-06-14
+## [View task in Raycast from menu bar] - 2023-06-15
 
 When using menu bar you may want to take a closer a look at your task description without opening the Todoist app. This change adds a way to quickly preview any task from menu bar on Raycast floating window.
 
 It also enhances user experience in the following ways:
 - Add subtask count to the task detail view in Raycast, so you can quickly see how many subtasks you have for each task.
 - Fix null issue when Editing task without changing any field (#7057)
+- Truncate menu bar task content to 50 characters to improve user experience.
 
 Happy viewing!
 
