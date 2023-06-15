@@ -1,5 +1,10 @@
 # Jira Changelog
 
+## [Bug fixes] - 2023-06-15
+
+- Fixed a bug where a user's or project's avatar URL could not be displayed.
+- Fixed rendering failures (`Missing required property "title" for Unknown`).
+
 ## [Bug fixes] - 2023-06-12
 
 - Fixed a bug where `Show Details` would show up on the issue's detail view.
