@@ -1,3 +1,3 @@
 # Date Converter Changelog
 
-## [Initial Version] - 2023-06-12
+## [Initial Version] - {PR_MERGE_DATE}
