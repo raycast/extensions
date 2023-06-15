@@ -1,4 +1,6 @@
-import { Color, confirmAlert, Icon, MenuBarExtra, open, showHUD, launchCommand, LaunchType } from "@raycast/api";
+import {getPreferenceValues, Color, confirmAlert, Icon, MenuBarExtra, open, showHUD, launchCommand, LaunchType } from "@raycast/api";
+import { useMemo } from "react";
+
 import removeMarkdown from "remove-markdown";
 
 import { SyncData, Task, deleteTask as apiDeleteTAsk, closeTask, updateTask } from "../api";
@@ -20,10 +22,13 @@ type MenuBarTaskProps = {
 
 const MenuBarTask = ({ task, data, setData }: MenuBarTaskProps) => {
   const { focusedTask, unfocusTask, focusTask } = useFocusedTask();
+  const { taskWidth } = getPreferenceValues<Preferences.MenuBar>();
 
   const collaborators = getProjectCollaborators(task.project_id, data);
   const remainingLabels = task && data?.labels ? getRemainingLabels(task, data.labels) : [];
-  const taskTitle = truncateMiddle(removeMarkdown(task.content), 50);
+  const taskTitle = useMemo(() => {
+    return truncateMiddle(removeMarkdown(task.content), parseInt(taskWidth ?? "40"));
+  }, [task, taskWidth]);
 
   const subTasks = data?.items.filter((item) => item.parent_id === task.id);
 
