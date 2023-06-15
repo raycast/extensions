@@ -127,6 +127,7 @@ export default function Command(props: LaunchProps<{ arguments: IProps }>) {
         return (
           <List.Item
             key={item.title}
+            icon={{ source: "command-icon-custom.png" }}
             title={item.filename + " -- " + item.title}
             subtitle={item.subTitle}
             {...props}
