@@ -8,6 +8,8 @@ import {
   SUCCESS_SUMMARIZING_VIDEO,
   SUMMARIZING_VIDEO,
 } from "../const/toast_messages";
+import { PreferenceValues } from "../summarizeVideo";
+import { getAiInstructionSnippet, getSummaryBlockSnippet } from "../utils/getAiInstructionSnippets";
 
 type GetRaycastAISummaryProps = {
   transcript?: string;
@@ -16,9 +18,10 @@ type GetRaycastAISummaryProps = {
 };
 
 const useRaycastAISummary = async ({ transcript, setSummaryIsLoading, setSummary }: GetRaycastAISummaryProps) => {
-  const preferences = getPreferenceValues();
+  const preferences = getPreferenceValues() as PreferenceValues;
+  const { chosenAi, creativity, language } = preferences;
 
-  if (preferences.chosenAi !== "raycastai") {
+  if (chosenAi !== "raycastai") {
     return;
   }
 
@@ -51,13 +54,12 @@ const useRaycastAISummary = async ({ transcript, setSummaryIsLoading, setSummary
 
     for (const summaryBlock of splitTranscripts) {
       const index = splitTranscripts.indexOf(summaryBlock) + 1;
-      const aiInstructions = `
-      Summarize this transcription of a youtube video.
-      The transcription is split into parts and this is part ${index} of ${splitTranscripts.length}.
-      Be as concise as possible.
-      Do not use more then ${RAYCASTAI_SUMMARY_MAX_CHARS / splitTranscripts.length} characters.
-      
-      Here is the transcript: ${summaryBlock}`;
+      const aiInstructions = getSummaryBlockSnippet(
+        index,
+        splitTranscripts.length,
+        summaryBlock,
+        RAYCASTAI_SUMMARY_MAX_CHARS
+      );
 
       const result = await fetchAiAnswer(aiInstructions);
 
@@ -65,16 +67,11 @@ const useRaycastAISummary = async ({ transcript, setSummaryIsLoading, setSummary
     }
   }
 
-  const aiInstructions = `Summarize the following transcription of a youtube video as a list of the most important points each starting with a fitting emoji. Ignore mentions of video sponsors. Answer in ${
-    preferences.language
-  }.
-  
-  Format:
-  [Emoji] [List Item] [\n\n]
-  Here is the transcript: ${temporarySummary.length > 0 ? temporarySummary : transcript}`;
+  const aiInstructions = getAiInstructionSnippet(language, temporarySummary, transcript);
 
   const raycastSummary = AI.ask(aiInstructions, {
     model: "gpt-3.5-turbo",
+    creativity: parseInt(creativity),
   });
 
   showToast({

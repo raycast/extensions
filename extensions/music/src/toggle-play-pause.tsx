@@ -10,4 +10,4 @@ export default pipe(
     SFSymbols.WARNING + " Failed to toggle play/pause",
     SFSymbols.PLAYPAUSE + " Successfully played/paused"
   )
-)();
+);

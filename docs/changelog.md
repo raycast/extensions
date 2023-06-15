@@ -1,5 +1,29 @@
 # Changelog
 
+## 1.53.0 - 2023-06-07
+
+### ✨ New
+
+- **Metadata**: `List.Item.Detail.Metadata.TagList.Item` and `Detail.Metadata.TagList.Item` now accepts an action handler via the `onAction` prop!
+- Added [LaunchContext](https://developers.raycast.com/api-reference/utilities#launchcontext) support to `Create Quicklink` and `Create Snippet:`
+  - `launchCommand({ ownerOrAuthorName: "raycast", extensionName: "raycast", name: "create-quicklink", type: LaunchType.UserInitiated, context: { name: "context name", application: "Xcode", }});`
+  - `launchCommand({ ownerOrAuthorName: "raycast", extensionName: "snippets", name: "create-snippet", type: LaunchType.UserInitiated, context: { name: "context name", text: "context text", keyword: "context keyword" }})`
+- **Date Pickers:** You can now add a minimum and maximum date to `Form.DatePicker` and `Action.PickDate` using the `min` and `max` props to limit the suggestions shown when entering a date.
+
+### 💎 Improvements
+
+- Updated NodeJS to 18.16.0
+- Improve the “Fork Extension” action to avoid modifying the manifest as much as possible.
+
+### 🐞 Fixes
+
+- Fixed a bug that sometimes caused `no-view` commands to not display errors.
+- Fixed a bug that caused OAuth not to work if the `client.authorize(authorizationRequest)` was executed more than once.
+- Fixed a problem where commands with background execution would not display the OAuth sign-in screen.
+- **SVG**: Properly handle `currentColor`
+- **List/Grid**: Fixed `selectedItemId` being sometimes ignored on the first render.
+- **Form**: Fixed triggering `onChange` on the TextArea when using a markdown keyboard shortcut.
+
 ## 1.52.0 - 2023-05-24
 
 ### ✨ New

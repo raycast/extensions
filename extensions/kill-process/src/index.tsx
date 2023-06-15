@@ -1,18 +1,22 @@
-import { ActionPanel, Action, clearSearchBar, Icon, List, preferences, showHUD, showToast } from "@raycast/api";
+import { Action, ActionPanel, clearSearchBar, getPreferenceValues, Icon, List, showHUD, showToast } from "@raycast/api";
 import { exec } from "child_process";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import prettyBytes from "pretty-bytes";
+import useInterval from "./hooks/use-interval";
 
 export default function ProcessList() {
   const [state, setState] = useState<Process[]>([]);
   const [query, setQuery] = useState<string | undefined>(undefined);
-  const shouldIncludePaths = (preferences.shouldSearchInPaths?.value as boolean) ?? false;
-  const shouldIncludePid = (preferences.shouldSearchInPid?.value as boolean) ?? false;
-  const shouldPrioritizeAppsWhenFiltering = (preferences.shouldPrioritizeAppsWhenFiltering?.value as boolean) ?? false;
-  const shouldShowPID = (preferences.shouldShowPID?.value as boolean) ?? false;
-  const shouldShowPath = (preferences.shouldShowPath?.value as boolean) ?? false;
-  const [sortByMem, setSortByMem] = useState<boolean>((preferences.sortByMem?.value as boolean) ?? false);
-  const [aggregateApps, setAggregateApps] = useState<boolean>((preferences.aggregateApps?.value as boolean) ?? false);
+
+  const preferences = getPreferenceValues<Preferences>();
+  const shouldIncludePaths = preferences.shouldSearchInPaths ?? false;
+  const shouldIncludePid = preferences.shouldSearchInPid ?? false;
+  const shouldPrioritizeAppsWhenFiltering = preferences.shouldPrioritizeAppsWhenFiltering ?? false;
+  const shouldShowPID = preferences.shouldShowPID ?? false;
+  const shouldShowPath = preferences.shouldShowPath ?? false;
+  const refreshDuration = +preferences.refreshDuration;
+  const [sortByMem, setSortByMem] = useState<boolean>(preferences.sortByMem ?? false);
+  const [aggregateApps, setAggregateApps] = useState<boolean>(preferences.aggregateApps ?? false);
 
   const fetchProcesses = () => {
     exec(`ps -eo pid,ppid,pcpu,rss,comm`, async (err, stdout) => {
@@ -58,9 +62,8 @@ export default function ProcessList() {
     });
   };
 
-  useEffect(() => {
-    fetchProcesses();
-  }, [sortByMem, aggregateApps]);
+  useInterval(fetchProcesses, refreshDuration);
+  // TODO: add [sortByMem, aggregateApps] as deps
 
   const fileIcon = (process: Process) => {
     if (process.type === "prefPane") {
@@ -216,11 +219,11 @@ export default function ProcessList() {
               title={process.processName}
               subtitle={subtitleString(process)}
               icon={icon}
-              accessoryTitle={
+              accessories={[{ text:
                 sortByMem
                   ? `${process.cpu.toFixed(2)}% ${prettyBytes(process.mem * 1024)}`
                   : `${prettyBytes(process.mem * 1024)} ${process.cpu.toFixed(2)}%`
-              }
+              }]}
               actions={
                 <ActionPanel>
                   <Action title="Kill" icon={Icon.XMarkCircle} onAction={() => killProcess(process)} />

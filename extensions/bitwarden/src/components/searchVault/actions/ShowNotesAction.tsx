@@ -1,7 +1,8 @@
-import { Action, ActionPanel, Detail, Icon, Toast, showToast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Clipboard, Detail, Icon, Toast, showToast, useNavigation } from "@raycast/api";
 import ActionWithReprompt from "~/components/actions/ActionWithReprompt";
 import { useSelectedVaultItem } from "~/components/searchVault/context/vaultItem";
 import useGetUpdatedVaultItem from "~/components/searchVault/utils/useGetUpdatedVaultItem";
+import { showCopySuccessMessage } from "~/utils/clipboard";
 import { captureException } from "~/utils/development";
 import { getTransientCopyPreference } from "~/utils/preferences";
 
@@ -34,12 +35,17 @@ function ShowNotesAction() {
 }
 
 function DetailsScreen({ itemName, notes }: { itemName: string; notes: string }) {
+  const handleCopy = async () => {
+    await Clipboard.copy(notes, { transient: getTransientCopyPreference("other") });
+    await showCopySuccessMessage("Copied notes to clipboard");
+  };
+
   return (
     <Detail
       markdown={getNotesDetailsMarkdown(itemName, notes)}
       actions={
         <ActionPanel>
-          <Action.CopyToClipboard title="Copy Notes" content={notes} transient={getTransientCopyPreference("other")} />
+          <Action title="Copy Notes" onAction={handleCopy} icon={Icon.Clipboard} />
         </ActionPanel>
       }
     />
