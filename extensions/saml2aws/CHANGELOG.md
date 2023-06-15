@@ -1,3 +1,3 @@
 # saml2aws Changelog
 
-## [Initial Version] - 2023-05-26
+## [Initial Version] - {PR_MERGE_DATE}
