@@ -27,7 +27,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.51.1",
+    "@raycast/api": "^1.47.3",
     "ts-results-es": "^3.6.0"
   },
   "devDependencies": {
