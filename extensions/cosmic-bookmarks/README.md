@@ -14,7 +14,7 @@ To get access to your Cosmic Bucket securely, you can provide your Bucket slug, 
 
 ## Content model
 
-You'll need a specific content model to use the extension as it stands. In order to get the most out of this extension, you can copy the below content model structure inside of a new Object Type. You'll need to call the Object Type 'Bookmarks' in order for the fetching to validate correctly.
+You'll need a specific content model to use the extension as it stands. In order to get the most out of this extension, you can copy the below content model structure inside of a new Object Type or [install the provided template](https://www.cosmicjs.com/marketplace/templates/raycast-bookmarks). You'll need to call the Object Type 'Bookmarks' in order for the fetching to validate correctly.
 
 **Object Type model**
 ![Cosmic Object Type model](https://media.cleanshot.cloud/media/10895/204ckOoNTmkRnUyu8zmFI580JpL2ICLGoMH0wxTe.jpeg?Expires=1685715684&Signature=iVuDCQdOWof3fyRn8cQQm-ErT8q1lt0HMcPlOHA6b~M1QDHchAu4kGDkVIJodqMwer9RqjWsl4yeMv9-1kg9tpdak79zyqhSeXMpbjPf30RwFI5kTFIKz0hSTll7HtfUR6C-Ae9Nukvs9UhSk-kpFEzAwnHJvcf0DTRGWjo5~lno33vbPYQXoUZYeFAW0ri3g2zHVI24K3Cal6nkPWBWMSXxYOTMUyzGjc1WMwPEHGikqCemOnIL3fU-mxB8pWnBW9YuSuJifgrHB~eH9D9Z5PWG69jzYqo9PR4zxJpV1q5CQCTTHCqxvCgQJ-X1f8UujXFAcIGfnxf1whNKDrKrzA__&Key-Pair-Id=K269JMAT9ZF4GZ)
