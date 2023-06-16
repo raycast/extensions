@@ -18,6 +18,41 @@
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "name": "device",
+      "type": "dropdown",
+      "required": false,
+      "title": "Default Device Type",
+      "description": "Initial filter by device type",
+      "data": [
+        {
+          "title": "Latest used",
+          "value": "latest"
+        },
+        {
+          "title": "All",
+          "value": "all"
+        },
+        {
+          "title": "iPhone",
+          "value": "iPhone"
+        },
+        {
+          "title": "iPad",
+          "value": "iPad"
+        },
+        {
+          "title": "iPod touch",
+          "value": "iPod"
+        },
+        {
+          "title": "Apple Watch",
+          "value": "Apple Watch"
+        }
+      ]
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.52.1",
     "@raycast/utils": "^1.7.0",
