@@ -59,7 +59,7 @@
     "run-applescript": "^6.1.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "1.0.5",
+    "@raycast/eslint-config": "^1.0.6",
     "@types/node": "^20.2.5",
     "@types/react": "^18.2.7",
     "eslint": "^8.41.0",
