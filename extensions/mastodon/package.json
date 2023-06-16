@@ -19,18 +19,21 @@
     {
       "name": "post-simple-status",
       "title": "Add Simple Status",
+      "subtitle": "Mastodon",
       "description": "Publish simple text status",
       "mode": "view"
     },
     {
       "name": "post-status",
       "title": "Add Status",
+      "subtitle": "Mastodon",
       "description": "Publish status with attachments, or scheduled status",
       "mode": "view"
     },
     {
       "name": "bookmark",
       "title": "View Bookmarks",
+      "subtitle": "Mastodon",
       "description": "View your bookmarked statuses",
       "mode": "view",
       "preferences": [
@@ -47,6 +50,7 @@
     {
       "name": "my-status",
       "title": "View My Status",
+      "subtitle": "Mastodon",
       "description": "View your statuses",
       "mode": "view",
       "preferences": [
@@ -63,6 +67,7 @@
     {
       "name": "home",
       "title": "View Home Timeline",
+      "subtitle": "Mastodon",
       "description": "View home timeline",
       "mode": "view",
       "preferences": [
