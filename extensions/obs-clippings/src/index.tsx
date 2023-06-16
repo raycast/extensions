@@ -232,7 +232,7 @@ export default function Command() {
           if (!title) {
             setTitleError("Field is empty");
           } else {
-            const pattern = /^[a-zA-Z0-9-_]+(\.[a-zA-Z0-9]+)?$/;
+            const pattern = /^[a-zA-Z0-9-_ ]+(\.[a-zA-Z0-9]+)?$/;
             if (!pattern.test(title)) {
               setTitleError("Invalid filename");
             } else {
