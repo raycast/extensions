@@ -67,7 +67,7 @@ function ShowVideoDetails(props: VideoActionProps) {
   const { video, refresh } = props;
   return (
     <Action.Push
-      title="Show Details"
+      title="Show Details 1"
       target={<VideoItemDetail {...props} />}
       icon={{ source: Icon.List, tintColor: Color.PrimaryText }}
       onPush={() => {
@@ -105,6 +105,7 @@ export function VideoItemDetail(props: VideoActionProps): JSX.Element {
         <Detail.Metadata>
           <Detail.Metadata.Label title="Channel" text={channel} />
           <Detail.Metadata.Label title="Published" text={formatDate(video.publishedAt)} />
+          <Detail.Metadata.Label title="Duration" text={video.duration} />
           <Detail.Metadata.Separator />
           {statistics && (
             <React.Fragment>
