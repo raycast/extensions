@@ -25,21 +25,26 @@ const SearchVaultCommand = () => (
 
 function SearchVaultComponent() {
   const { items, folders, isLoading, isEmpty } = useVaultContext();
-
-  const [favouriteItems, nonFavouriteItems] = splitItemsByFavourite(items);
+  const { favoriteItems, nonFavoriteItems } = splitItemsByFavorite(items);
 
   return (
     <List searchBarPlaceholder="Search vault" isLoading={isLoading} searchBarAccessory={<ListFolderDropdown />}>
-      <List.Section title="Favourites">
-        {favouriteItems.map((item) => (
-          <VaultItem key={item.id} item={item} folder={getItemFolder(folders, item)} />
-        ))}
-      </List.Section>
-      <List.Section title="Other Items">
-        {nonFavouriteItems.map((item) => (
-          <VaultItem key={item.id} item={item} folder={getItemFolder(folders, item)} />
-        ))}
-      </List.Section>
+      {favoriteItems.length > 0 ? (
+        <>
+          <List.Section title="Favorites">
+            {favoriteItems.map((item) => (
+              <VaultItem key={item.id} item={item} folder={getItemFolder(folders, item)} />
+            ))}
+          </List.Section>
+          <List.Section title="Other Items">
+            {nonFavoriteItems.map((item) => (
+              <VaultItem key={item.id} item={item} folder={getItemFolder(folders, item)} />
+            ))}
+          </List.Section>
+        </>
+      ) : (
+        nonFavoriteItems.map((item) => <VaultItem key={item.id} item={item} folder={getItemFolder(folders, item)} />)
+      )}
       {isLoading ? (
         <List.EmptyView icon={Icon.ArrowClockwise} title="Loading..." description="Please wait." />
       ) : (
@@ -64,17 +69,17 @@ function SearchVaultComponent() {
   );
 }
 
-function splitItemsByFavourite(items: Item[]) {
-  return items.reduce<[Item[], Item[]]>(
-    (acc, item) => {
+function splitItemsByFavorite(items: Item[]) {
+  return items.reduce<{ favoriteItems: Item[]; nonFavoriteItems: Item[] }>(
+    (result, item) => {
       if (item.favorite) {
-        acc[0].push(item);
+        result.favoriteItems.push(item);
       } else {
-        acc[1].push(item);
+        result.nonFavoriteItems.push(item);
       }
-      return acc;
+      return result;
     },
-    [[], []]
+    { favoriteItems: [], nonFavoriteItems: [] }
   );
 }
 
