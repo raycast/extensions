@@ -17,7 +17,10 @@ export default function useOpenAI(config: UseOpenAIConfig, prompt: string) {
 
   const client = OpenAI(config);
 
-  const messages: ChatCompletionRequestMessage[] = generateMessages(histories, prompt) as ChatCompletionRequestMessage[];
+  const messages: ChatCompletionRequestMessage[] = generateMessages(
+    histories,
+    prompt
+  ) as ChatCompletionRequestMessage[];
 
   useEffect(() => {
     (async () => {
