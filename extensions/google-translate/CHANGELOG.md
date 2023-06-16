@@ -1,5 +1,9 @@
 # Google Translate Changelog
 
+## [Fix] - 2023-05-17
+
+- Changed zh-TW info for better acception and less disputation
+
 ## [Enhancement] - 2023-02-10
 
 - Add Languages Set manager to be able to configure multiple language presets and easy switch between them
