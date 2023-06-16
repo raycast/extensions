@@ -70,7 +70,7 @@ function SearchVaultComponent() {
 }
 
 function splitItemsByFavorite(items: Item[]) {
-  return items.reduce<{ favoriteItems: Item[]; nonFavoriteItems: Item[] }>(
+  const sectionedItems = items.reduce<{ favoriteItems: Item[]; nonFavoriteItems: Item[] }>(
     (result, item) => {
       if (item.favorite) {
         result.favoriteItems.push(item);
@@ -81,6 +81,9 @@ function splitItemsByFavorite(items: Item[]) {
     },
     { favoriteItems: [], nonFavoriteItems: [] }
   );
+  sectionedItems.favoriteItems.sort((a, b) => new Date(b.revisionDate).getTime() - new Date(a.revisionDate).getTime());
+
+  return sectionedItems;
 }
 
 function getItemFolder(folderList: Folder[], item: Item) {
