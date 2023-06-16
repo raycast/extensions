@@ -1,6 +1,6 @@
 # Apple Devices Changelog
 
-## [Added preferences] - 2023-06-02
+## [Added preferences] - 2023-06-17
 
 - New preference option: Default Device Type
 - Packages updated to the latest versions
