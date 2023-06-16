@@ -26,11 +26,20 @@ const SearchVaultCommand = () => (
 function SearchVaultComponent() {
   const { items, folders, isLoading, isEmpty } = useVaultContext();
 
+  const [favouriteItems, nonFavouriteItems] = splitItemsByFavourite(items);
+
   return (
     <List searchBarPlaceholder="Search vault" isLoading={isLoading} searchBarAccessory={<ListFolderDropdown />}>
-      {items.map((item) => (
-        <VaultItem key={item.id} item={item} folder={getItemFolder(folders, item)} />
-      ))}
+      <List.Section title="Favourites">
+        {favouriteItems.map((item) => (
+          <VaultItem key={item.id} item={item} folder={getItemFolder(folders, item)} />
+        ))}
+      </List.Section>
+      <List.Section title="Other Items">
+        {nonFavouriteItems.map((item) => (
+          <VaultItem key={item.id} item={item} folder={getItemFolder(folders, item)} />
+        ))}
+      </List.Section>
       {isLoading ? (
         <List.EmptyView icon={Icon.ArrowClockwise} title="Loading..." description="Please wait." />
       ) : (
@@ -52,6 +61,20 @@ function SearchVaultComponent() {
         />
       )}
     </List>
+  );
+}
+
+function splitItemsByFavourite(items: Item[]) {
+  return items.reduce<[Item[], Item[]]>(
+    (acc, item) => {
+      if (item.favorite) {
+        acc[0].push(item);
+      } else {
+        acc[1].push(item);
+      }
+      return acc;
+    },
+    [[], []]
   );
 }
 
