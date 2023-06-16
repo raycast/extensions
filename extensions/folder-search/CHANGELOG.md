@@ -1,5 +1,8 @@
 # Folder Search Changelog
 
+## [Command rename] - 2023-06-16
+- attempt #2 at fixing the fall back command with duplicated query.
+
 ## [Command rename] - 2023-06-13
 Fixing Three Issues / Two bugs
 - Extension only worked in English. Fixed up code to be language agnostic

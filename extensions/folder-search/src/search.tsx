@@ -57,12 +57,14 @@ export default function Command() {
   const [results, setResults] = useState<SpotlightSearchResult[]>([]);
 
   // hack to fix annoying double text during fallback. Typing helloworld results in helloworldhelloworld
-  const input = searchText;
-  console.debug("Input: " + input);
-  const fixedText = fixDoubleConcat(searchText);
-  console.debug("Fixed text: " + fixedText);
-  searchText.replace(searchText, fixedText);
-  console.debug("Search text: " + searchText);
+  let fixedText = "";
+  useEffect(() => {
+    fixedText = fixDoubleConcat(searchText);
+
+    if (fixedText !== searchText) {
+      setSearchText(fixedText); // Update the state of searchText
+    }
+  }, [searchText]);
 
   const [plugins, setPlugins] = useState<FolderSearchPlugin[]>([]);
 
@@ -430,6 +432,8 @@ export default function Command() {
       onSearchTextChange={setSearchText}
       searchBarPlaceholder="Search folders"
       isShowingDetail={isShowingDetail}
+      throttle={true}
+      searchText={searchText}
       selectedItemId={selectedItemId}
       searchBarAccessory={
         hasCheckedPlugins && hasCheckedPreferences ? (
