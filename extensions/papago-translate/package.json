@@ -1,0 +1,190 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "papago-translate",
+  "title": "Papago Translate",
+  "description": "Simple translation via Papago API",
+  "icon": "papago-icon.png",
+  "author": "b41-41",
+  "categories": [
+    "Web",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "translate",
+      "title": "translate",
+      "subtitle": "Papago Translate",
+      "description": "Simple translation via Papago API",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "source",
+      "type": "dropdown",
+      "required": true,
+      "title": "First Language",
+      "default": "auto",
+      "data": [
+        {
+          "title": "🌐 Auto-detect",
+          "value": "auto"
+        },
+        {
+          "title": "🇰🇷 Korean",
+          "value": "ko"
+        },
+        {
+          "title": "🇬🇧 English",
+          "value": "en"
+        },
+        {
+          "title": "🇯🇵 Japanese",
+          "value": "ja"
+        },
+        {
+          "title": "🇨🇳 Chinese Simplified",
+          "value": "zh-CN"
+        },
+        {
+          "title": "🇹🇼 Chinese Traditional",
+          "value": "zh-TW"
+        },
+        {
+          "title": "🇻🇳 Vietnamese",
+          "value": "vi"
+        },
+        {
+          "title": "🇮🇩 Indonesian",
+          "value": "id"
+        },
+        {
+          "title": "🇹🇭 Thai",
+          "value": "th"
+        },
+        {
+          "title": "🇩🇪 German",
+          "value": "de"
+        },
+        {
+          "title": "🇷🇺 Russian",
+          "value": "ru"
+        },
+        {
+          "title": "🇪🇸 Spanish",
+          "value": "es"
+        },
+        {
+          "title": "🇮🇹 Italian",
+          "value": "it"
+        },
+        {
+          "title": "🇫🇷 French",
+          "value": "fr"
+        }
+      ],
+      "description": "First language"
+    },
+    {
+      "name": "target",
+      "type": "dropdown",
+      "required": true,
+      "default": "en",
+      "data": [
+        {
+          "title": "🇰🇷 Korean",
+          "value": "ko"
+        },
+        {
+          "title": "🇬🇧 English",
+          "value": "en"
+        },
+        {
+          "title": "🇯🇵 Japanese",
+          "value": "ja"
+        },
+        {
+          "title": "🇨🇳 Chinese Simplified",
+          "value": "zh-CN"
+        },
+        {
+          "title": "🇹🇼 Chinese Traditional",
+          "value": "zh-TW"
+        },
+        {
+          "title": "🇻🇳 Vietnamese",
+          "value": "vi"
+        },
+        {
+          "title": "🇮🇩 Indonesian",
+          "value": "id"
+        },
+        {
+          "title": "🇹🇭 Thai",
+          "value": "th"
+        },
+        {
+          "title": "🇩🇪 German",
+          "value": "de"
+        },
+        {
+          "title": "🇷🇺 Russian",
+          "value": "ru"
+        },
+        {
+          "title": "🇪🇸 Spanish",
+          "value": "es"
+        },
+        {
+          "title": "🇮🇹 Italian",
+          "value": "it"
+        },
+        {
+          "title": "🇫🇷 French",
+          "value": "fr"
+        }
+      ],
+      "title": "Second Language",
+      "description": "Second language"
+    },
+    {
+      "name": "clientId",
+      "type": "textfield",
+      "required": true,
+      "title": "Papago Client ID",
+      "description": "Papago Client ID"
+    },
+    {
+      "name": "clientSecret",
+      "type": "textfield",
+      "required": true,
+      "title": "Papago Client Secret",
+      "description": "Papago Client Secret"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.52.1",
+    "axios": "^1.4.0",
+    "jotai": "^2.2.0",
+    "lodash": "^4.17.21",
+    "qs": "^6.11.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/lodash": "^4.14.195",
+    "@types/node": "18.8.3",
+    "@types/qs": "^6.9.7",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
