@@ -1,5 +1,11 @@
 # Todoist Changelog
 
+## [Subtasks on menu bar] - 2023-06-14
+
+This update adds subtasks to the menu bar tasks options. Thanks to this change, you can now break down tasks on the app and work on them one step at a time while still using the menu bar for navigation.
+
+Happy task breaking!
+
 ## [Show task count for projects] - 2023-06-07
 
 This update adds a new feature to display the `task count` besides project name  in the `Show Projects` view. Note it's set to off by default in the command's preferences.  

@@ -8,7 +8,7 @@ import { Note, Vault } from "./interfaces";
 
 import { NoteQuickLook } from "../components/NoteQuickLook";
 import { appendSelectedTextTo, getObsidianTarget, vaultPluginCheck, getCodeBlocks, ObsidianTargetType } from "./utils";
-import { ObsidianIconDynamicBold, PrimaryAction } from "./constants";
+import { ObsidianIcon, PrimaryAction } from "./constants";
 import { NoteList } from "../components/NoteList/NoteList";
 import { SearchNotePreferences } from "./preferences";
 import { NoteReducerActionType } from "./data/reducers";
@@ -180,7 +180,7 @@ export function UnbookmarkNoteAction(props: { note: Note; vault: Vault }) {
 export function OpenPathInObsidianAction(props: { path: string }) {
   const { path } = props;
   const target = getObsidianTarget({ type: ObsidianTargetType.OpenPath, path: path });
-  return <Action.Open title="Open in Obsidian" target={target} icon={ObsidianIconDynamicBold} />;
+  return <Action.Open title="Open in Obsidian" target={target} icon={ObsidianIcon} />;
 }
 
 export function OpenNoteInObsidianNewPaneAction(props: { note: Note; vault: Vault }) {
@@ -196,7 +196,7 @@ export function OpenNoteInObsidianNewPaneAction(props: { note: Note; vault: Vaul
         encodeURIComponent(note.path.replace(vault.path, "")) +
         "&newpane=true"
       }
-      icon={ObsidianIconDynamicBold}
+      icon={ObsidianIcon}
     />
   );
 }
