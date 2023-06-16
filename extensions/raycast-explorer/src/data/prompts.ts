@@ -1185,6 +1185,63 @@ Alice`,
       output: `This text has a professional and informative tone, and is likely aimed at business owners or executives. It emphasizes the importance of staying ahead of the competition by investing in innovative strategies and tools. The style is direct and clear, and the message is clear: invest in the right resources to stay competitive.`,
     },
   },
+  {
+    id: "summarize-product-reviews",
+    title: "Summarize Product Reviews",
+    prompt:
+      `Carefully read the product reviews below. Translate them to English and create a summary of all the reviews in English and list them as Pros and Cons in the bullet point format. Remember that each bullet point should be one sentence or at max two short sentences. Most frequently mentioned should come first in each list and every bullet point should have a percentage showing how much evidence the reviews have brought for that pro or con. For example if reviews are mentioning that product is going bad easily and they brought some reasons for what they are saying, the percentage of your confidence should go higher, but if there are some reviews which are unsure about something or there are no evidence or it's not repeated frequently then the percentage should go lower. At the end you should write a paragraph about what I should pay attention to, before buying this product. These can be some warnings or some tips or some suggestions, points that I will miss, or anything that you think is important to know before buying this product.
+
+You can use the following template to create the summary:
+
+'''
+## Summary of the reviews
+**✅ Pros:**
+- Pro 1 - percentage of your confidence%
+- Pro 2 - percentage of your confidence%
+...
+- Pro n - percentage of your confidence%
+
+**❌ Cons:**
+- Con 1 - percentage of your confidence%
+- Con 2 - percentage of your confidence%
+...
+- Con n - percentage of your confidence%
+
+**💡 You should pay attention to:**
+- Tip 1
+- Tip 2
+...
+- Tip n
+'''` + generateSelection("Product reviews", "Summary"),
+    creativity: "low",
+    icon: Icon.Tag,
+    type: "text",
+    author: {
+      name: "Alireza Sheikholmolouki",
+      link: "https://github.com/Alireza29675",
+    },
+    example: {
+      selection: "{list of amazon reviews}",
+      output: `## Summary of the reviews
+**✅ Pros:**
+-  Quick charge connection - 90%
+-  Protective cover - 80%
+-  Charges several devices at once - 80%
+-  Charges my phone 8 times - 80%
+-  Charges my two phones over 6 times - 80%
+-  Charges my S20FE for 1 week - 80%
+-  Long life battery - 80%
+
+**❌ Cons:**
+-  Very bulky - 90%
+-  Heavy - 80%
+-  Takes a while to fully charge itself - 70%
+
+**💡 You should pay attention to:**
+-  The size and weight of the product before purchasing, as it is quite bulky and heavy.
+-  The charging time of the product, as it takes a while to fully charge itself.`,
+    },
+  },
 ];
 
 type Category = {
