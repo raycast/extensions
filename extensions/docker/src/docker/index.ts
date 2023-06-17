@@ -1,4 +1,10 @@
-import Dockerode, { ContainerInfo, ContainerInspectInfo, ImageInfo, ImageInspectInfo } from '@priithaamer/dockerode';
+import Dockerode, {
+  ContainerInfo,
+  ContainerInspectInfo,
+  ImageInfo,
+  ImageInspectInfo,
+  ContainerCreateOptions,
+} from '@priithaamer/dockerode';
 import React, { useEffect, useRef, useState } from 'react';
 import { ComposeProject, containersToProjects } from './compose';
 import { isContainerRunning } from './container';
@@ -179,12 +185,34 @@ export const useDocker = (docker: Dockerode) => {
     };
   };
 
+  const useCreateContainer = () => {
+    const [isLoading, setLoading] = useState(false);
+    const [error, setError] = useState<Error>();
+
+    const createContainer = async (options: ContainerCreateOptions) => {
+      setLoading(true);
+      try {
+        const container = await docker.createContainer(options);
+        await container.start();
+      } catch (error) {
+        if (error instanceof Error) {
+          setError(error);
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    return { createContainer, isLoading, error };
+  };
+
   return {
     useImages,
     useImageInfo,
     useContainers,
     useContainerInfo,
     useProjects,
+    useCreateContainer,
   };
 };
 

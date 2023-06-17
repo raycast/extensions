@@ -38,15 +38,11 @@ type CreateTaskProps = {
 function CreateTask({ fromProjectId, fromLabel, fromTodayEmptyView, draftValues }: CreateTaskProps) {
   const { push, pop } = useNavigation();
 
-  const { data, setData, isLoading, error } = useSyncData();
+  const { data, setData, isLoading } = useSyncData();
 
   const labels = data?.labels;
   const projects = data?.projects;
   const sections = data?.sections;
-
-  if (error) {
-    handleError({ error, title: "Unable to get Todoist data" });
-  }
 
   const lowestPriority = priorities[priorities.length - 1];
 

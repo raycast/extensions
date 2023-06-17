@@ -1,3 +1,4 @@
+import { AbortError } from 'got';
 import { CookieJar, Cookie } from 'tough-cookie';
 import { DOMAIN, GENERAL_DOMAIN } from '../utils/config';
 import { getStorage, setStorage, StorageKey } from '../utils/storage';
@@ -38,4 +39,8 @@ export async function setAuthData(tenantDomain: string, session: string): Promis
 
 export function getTenantPrefixUrl(): string {
   return tenantPrefixUrl;
+}
+
+export function isAbortError(error: unknown): error is AbortError {
+  return error instanceof AbortError;
 }

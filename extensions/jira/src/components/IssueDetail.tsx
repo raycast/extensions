@@ -3,6 +3,7 @@ import { useCachedPromise } from "@raycast/utils";
 import { useMemo } from "react";
 
 import { getIssue, Issue } from "../api/issues";
+import { getProjectAvatar, getUserAvatar } from "../helpers/avatars";
 import { formatDate, getCustomFieldsForDetail, getIssueDescription, getStatusColor } from "../helpers/issues";
 
 import IssueActions from "./IssueActions";
@@ -62,11 +63,13 @@ export default function IssueDetail({ initialIssue, issueKey }: IssueDetailProps
 
           <Detail.Metadata.Label title="Issue Key" text={issue?.key} icon={issue?.fields.issuetype.iconUrl} />
 
-          <Detail.Metadata.Label
-            title="Project"
-            text={issue?.fields.project?.name ?? "None"}
-            icon={issue?.fields.project?.avatarUrls["32x32"]}
-          />
+          {issue?.fields.project ? (
+            <Detail.Metadata.Label
+              title="Project"
+              text={issue.fields.project.name ?? "None"}
+              icon={getProjectAvatar(issue.fields.project)}
+            />
+          ) : null}
 
           <Detail.Metadata.Label
             title="Status"
@@ -87,14 +90,14 @@ export default function IssueDetail({ initialIssue, issueKey }: IssueDetailProps
           <Detail.Metadata.Label
             title="Assignee"
             text={issue?.fields.assignee ? issue?.fields.assignee.displayName : "Unassigned"}
-            icon={issue?.fields.assignee ? issue?.fields.assignee.avatarUrls["32x32"] : Icon.Person}
+            icon={getUserAvatar(issue?.fields.assignee)}
           />
 
           {issue ? (
             <Detail.Metadata.Label
               title="Reporter"
               text={issue.fields.reporter ? issue.fields.reporter.displayName : "Unassigned"}
-              icon={issue.fields.reporter ? issue.fields.reporter.avatarUrls["32x32"] : Icon.Person}
+              icon={getUserAvatar(issue.fields.reporter)}
             />
           ) : null}
 

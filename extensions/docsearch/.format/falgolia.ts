@@ -1,4 +1,4 @@
-import data from "../src/algolia/apiData";
+import data from "../src/data/apis";
 
 import fs from "fs";
 
@@ -10,11 +10,11 @@ function formatAlgoliaApiDataList() {
 
 export default function formatAlgoliaApiData() {
   // read algolia api data
-  var algoliaApiData = fs.readFileSync("./src/algolia/apiData.ts", "utf8");
+  var algoliaApiData = fs.readFileSync("./src/data/apis.ts", "utf8");
 
   // replace algolia api data
-  algoliaApiData = algoliaApiData.replace(/<IAPIData\[\]>\[(.|\n)*\]/, `<IAPIData[]>${formatAlgoliaApiDataList()}`);
+  algoliaApiData = algoliaApiData.replace(/<API\[\]>\[(.|\n)*\]/, `<API[]>${formatAlgoliaApiDataList()}`);
 
   // replace algolia api data
-  fs.writeFileSync("./src/algolia/apiData.ts", algoliaApiData);
+  fs.writeFileSync("./src/data/apis.ts", algoliaApiData);
 }

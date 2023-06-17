@@ -2,10 +2,11 @@ import { List } from "@raycast/api";
 import { useCachedPromise, useCachedState } from "@raycast/utils";
 import { useState } from "react";
 
-import { getIssues } from "./api/issues";
 import { getProjects } from "./api/projects";
 import StatusIssueList from "./components/StatusIssueList";
+import { getProjectAvatar } from "./helpers/avatars";
 import { withJiraCredentials } from "./helpers/withJiraCredentials";
+import useIssues from "./hooks/useIssues";
 
 export function ActiveSprints() {
   const [projectQuery, setProjectQuery] = useState("");
@@ -16,13 +17,10 @@ export function ActiveSprints() {
   );
 
   const [projectKey, setProjectKey] = useCachedState("active-sprint-project", "");
+
   const jql = `sprint in openSprints() AND project = ${projectKey} ORDER BY updated DESC`;
 
-  const {
-    data: issues,
-    isLoading: isLoadingIssues,
-    mutate,
-  } = useCachedPromise((jql) => getIssues({ jql }), [jql], { execute: projectKey !== "" });
+  const { issues, isLoading: isLoadingIssues, mutate } = useIssues(jql, { execute: projectKey !== "" });
 
   const searchBarAccessory = projects ? (
     <List.Dropdown
@@ -39,7 +37,7 @@ export function ActiveSprints() {
             key={project.id}
             title={`${project.name} (${project.key})`}
             value={project.key}
-            icon={project.avatarUrls["32x32"]}
+            icon={getProjectAvatar(project)}
           />
         );
       })}

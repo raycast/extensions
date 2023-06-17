@@ -1,13 +1,26 @@
 import { Action, ActionPanel, Icon, useNavigation } from "@raycast/api";
-import { getFavoriteNamespaces, getUserToken, getVaultNamespace, getVaultUrl, setVaultNamespace } from "../utils";
+import {
+  getFavoriteNamespaces,
+  getUserToken,
+  getVaultNamespace,
+  getVaultUrl,
+  setSecretEngine,
+  setVaultNamespace,
+} from "../utils";
 import { VaultNamespace } from "./namespace";
 import { VaultTree } from "./tree";
 import { VaultEntities } from "./entities";
 import { VaultFavorites } from "./favorites";
 import { ReactNode } from "react";
+import { VaulEngines } from "./engines";
 
 export function setNamespaceAndGoToTree(values: { namespace: string }, push: (component: ReactNode) => void) {
   setVaultNamespace(values.namespace);
+  push(<VaultTree path={"/"} />);
+}
+
+export function setSecretEngineAndGoToTree(secretEngine: string, push: (component: ReactNode) => void) {
+  setSecretEngine(secretEngine);
   push(<VaultTree path={"/"} />);
 }
 
@@ -54,6 +67,12 @@ export function Configuration() {
           title={"List Secrets"}
           shortcut={{ modifiers: ["cmd", "opt"], key: "t" }}
           target={<VaultTree path={"/"} />}
+        />
+        <Action.Push
+          icon={Icon.AppWindow}
+          title={"List Engines"}
+          shortcut={{ modifiers: ["cmd", "opt"], key: "e" }}
+          target={<VaulEngines />}
         />
       </ActionPanel.Section>
     </>

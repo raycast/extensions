@@ -1,8 +1,23 @@
 # Google Translate Changelog
 
-## [Fix] - 2023-05-17
+## [Fix] - 2023-06-17
 
 - Changed zh-TW info for better acception and less disputation
+
+## [Fix] - 2023-06-15
+
+- Fixed langauge code for Hebrew
+
+## [Enhancement] - 2023-05-30
+
+- Added ability to translate selected text
+
+## [Enhancement] - 2023-05-22
+
+- Added error handling
+- Updated the Raycast libraries to the latest version.
+- Translations are now identical to translate.google.com 🎉
+- Ideally, there should be no more TooManyRequests errors now! 🚀
 
 ## [Enhancement] - 2023-02-10
 

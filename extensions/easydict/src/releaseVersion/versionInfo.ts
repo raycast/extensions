@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-07-01 19:05
  * @lastEditor: tisfeng
- * @lastEditTime: 2023-04-25 23:49
+ * @lastEditTime: 2023-05-17 23:05
  * @fileName: versionInfo.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -26,19 +26,20 @@ export class Easydict {
   static repo = "Raycast-Easydict";
 
   // * NOTE: this is new version info, don't use it directly. Use getCurrentStoredVersionInfo() instead.
-  version = "2.8.2";
-  buildNumber = 25;
-  versionDate = "2023-04-25";
+  version = "2.9.0";
+  buildNumber = 26;
+  versionDate = "2023-05-17";
   isNeedPrompt = true;
   hasPrompted = false; // * always default false, only show once, then should be set to true.
 
   releaseMarkdown = `
 ## [v${this.version}] - ${this.versionDate}
 
-### 🐞 修复
+### ✨ 新功能
 
-- 修复了 OpenAI 翻译可能丢失首字符的问题。
-- 修复了 OpenAI 默认未启用代理的问题。
+- 添加了 OCR 截图翻译功能，感谢 [aidevjoe](https://github.com/aidevjoe) 的 PR。
+
+![](https://github-production-user-asset-6210df.s3.amazonaws.com/25194972/238993145-9dbe2fbb-8407-49bc-8909-adb0515e850e.png)
 
 #### 如果觉得这个扩展还不错，给个 [Star](https://github.com/tisfeng/Raycast-Easydict) ⭐️ 支持一下吧 (^-^)
 
@@ -50,9 +51,9 @@ export class Easydict {
 
 ---
 
-### 🐞 Fixes
-- Fixed the issue that OpenAI translation may lose the first character.
-- Fixed the issue that OpenAI does not enable proxy by default.
+### ✨ New Features
+
+- Added OCR screenshot translation command, thanks to [aidevjoe](https://github.com/aidevjoe)'s PR.
 `;
 
   getRepoUrl() {
