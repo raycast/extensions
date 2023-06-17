@@ -1,15 +1,15 @@
 import { Detail, Icon, Grid, ActionPanel, Action, launchCommand, environment, LaunchType } from "@raycast/api";
 import { useState, useMemo } from "react";
-import { IMarketData } from "./market";
 import _ from "lodash";
 import Fuse from "fuse.js";
 import { MOCHI_PROXY_ENDPOINT } from "./config/cfg";
 import useDiscord from "./hooks/useDiscord";
 import useWatchList from "./hooks/useWatchList";
+import { ITickerMarketData } from "./type/api";
 
 export interface IWatchList {
   metadata: Metadata;
-  data: IMarketData[];
+  data: ITickerMarketData[];
 }
 
 export interface Metadata {
@@ -43,7 +43,7 @@ export default function Command() {
     return fues.search(searchText);
   }, [fues, searchText, data?.data]);
 
-  const tokenLookUp: Record<string, IMarketData> = useMemo(() => {
+  const tokenLookUp: Record<string, ITickerMarketData> = useMemo(() => {
     return _.reduce(data?.data, (acc, item) => ({ [item.id]: item, ...acc }), {}) || {};
   }, [data]);
 
@@ -58,10 +58,10 @@ export default function Command() {
       isLoading={isLoading || !data?.metadata || !user?.id}
       filtering={false}
       onSearchTextChange={setSearchText}
-      navigationTitle={`${user?.id ? user?.username + "'s" : ""} Watch list • Coingecko | Mochi`}
+      navigationTitle="Watch list • Mochi"
       searchBarPlaceholder="Search"
       aspectRatio={"16/9"}
-      onSelectionChange={setSelectedToken as any}
+      onSelectionChange={setSelectedToken as (id: string | null) => void}
       actions={
         !!user?.id && (
           <ActionPanel>

@@ -6,8 +6,8 @@ import _ from "lodash";
 
 import { IWatchList } from "../wl";
 import useDiscord from "./useDiscord";
-import { IMarketData } from "../market";
 import { IDiscordUser, subscribeOnUserChange } from "../service/discord";
+import { ITickerBaseCoin } from "../type/api";
 
 export default function useWatchList() {
   const { user } = useDiscord();
@@ -28,13 +28,18 @@ export default function useWatchList() {
         .then(({ data }) => data.data);
 
       mutate(dt);
-    } catch (err: any) {
-      showToast({ style: Toast.Style.Failure, title: err.message });
+    } catch (err) {
+      if (err instanceof Error) {
+        showToast({ style: Toast.Style.Failure, title: err.message });
+      } else {
+        console.error("[ERROR.refreshWatchList]", err);
+        showToast({ style: Toast.Style.Failure, title: "Unexpected Error" });
+      }
     }
   }, [user?.id]);
 
   const addTokenToWatchlist = useCallback(
-    async (token: IMarketData) => {
+    async (token: ITickerBaseCoin) => {
       try {
         await axios.post(`https://api.mochi.pod.town/api/v1/defi/watchlist`, {
           user_id: user?.id,
@@ -45,18 +50,20 @@ export default function useWatchList() {
           style: Toast.Style.Success,
           title: `Added ${token.symbol.toUpperCase()} to your watch list`,
         });
-      } catch (err: any) {
-        showToast({
-          style: Toast.Style.Failure,
-          title: err.message,
-        });
+      } catch (err) {
+        if (err instanceof Error) {
+          showToast({ style: Toast.Style.Failure, title: err.message });
+        } else {
+          console.error("[ERROR.addTokenToWatchlist]", err);
+          showToast({ style: Toast.Style.Failure, title: "Unexpected Error" });
+        }
       }
     },
     [user?.id]
   );
 
   const removeTokenFromWatchlist = useCallback(
-    async (token: IMarketData) => {
+    async (token: ITickerBaseCoin) => {
       try {
         await axios.delete(
           `https://api.mochi.pod.town/api/v1/defi/watchlist?user_id=${user?.id}&symbol=${token.symbol}`
@@ -64,13 +71,15 @@ export default function useWatchList() {
         await refreshWatchList();
         showToast({
           style: Toast.Style.Success,
-          title: `Removed ${token.symbol.toUpperCase()} to your watch list`,
+          title: `${token.symbol.toUpperCase()} removed to your watch list`,
         });
-      } catch (err: any) {
-        showToast({
-          style: Toast.Style.Failure,
-          title: err.message,
-        });
+      } catch (err) {
+        if (err instanceof Error) {
+          showToast({ style: Toast.Style.Failure, title: err.message });
+        } else {
+          console.error("[ERROR.addTokenToWatchlist]", err);
+          showToast({ style: Toast.Style.Failure, title: "Unexpected Error" });
+        }
       }
     },
     [user?.id, refreshWatchList]

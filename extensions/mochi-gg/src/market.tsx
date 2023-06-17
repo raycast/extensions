@@ -23,30 +23,15 @@ import { MOCHI_PROXY_ENDPOINT } from "./config/cfg";
 import { mapLimit } from "async";
 import useDiscord from "./hooks/useDiscord";
 import useWatchList from "./hooks/useWatchList";
-import { ICoinDetailsResp } from "./type/type";
-
-export interface IMarketDataResp {
-  data: IMarketData[];
-}
-
-export interface IMarketData {
-  id: string;
-  name: string;
-  symbol: string;
-  current_price: number;
-  image: string;
-  market_cap: number;
-  market_cap_rank?: number;
-  sparkline_in_7d?: IPrice;
-  price_change_percentage_24h: number;
-  price_change_percentage_7d_in_currency: number;
-  is_pair?: boolean;
-  is_default?: boolean;
-}
-
-export interface IPrice {
-  price: number[];
-}
+import {
+  IBaseCoin,
+  ICoinCompareResult,
+  ICoinSuggestion,
+  IMarketData,
+  IMarketDataResp,
+  ITickerBaseCoin,
+  ITickerResp,
+} from "./type/api";
 
 const EmptyArr = [] as IMarketData[];
 
@@ -70,7 +55,7 @@ export default function Main() {
     isLoading: isLoadingDetails,
     data: itemDetailData,
     mutate,
-  } = useSWR<ICoinDetailsResp>(
+  } = useSWR<ITickerResp>(
     selectedToken && viewMode === "list"
       ? `${MOCHI_PROXY_ENDPOINT}/api/ticker?token=${selectedToken}&time_step=${interval}&currency=usd&theme=${environment.theme}&size=small`
       : null,
@@ -80,15 +65,15 @@ export default function Main() {
   );
 
   const tokenLookUp: Record<string, IMarketData> = useMemo(() => {
-    return (
-      _.concat(data?.data, extraData)
-        .filter((item) => !!item?.id)
-        .reduce((acc, item: any) => ({ [item.id]: item, ...acc }), {}) || {}
-    );
+    const concatData = _.concat(data?.data, extraData).filter((item) => !!item?.id) as IMarketData[];
+
+    return _.reduce(concatData, (acc, item) => ({ [item.id]: item, ...acc }), {});
   }, [data?.data, extraData]);
 
   const tokenLookUpNoExtra: Record<string, IMarketData> = useMemo(() => {
-    return _.filter(data?.data, (item) => !!item?.id).reduce((acc, item: any) => ({ [item.id]: item, ...acc }), {});
+    const filteredData = _.filter(data?.data, (item) => !!item?.id) as IMarketData[];
+
+    return _.reduce(filteredData, (acc, item) => ({ [item.id]: item, ...acc }), {});
   }, [data?.data]);
 
   const canDoBgSearch = extraData.length === 0;
@@ -99,18 +84,20 @@ export default function Main() {
     }
 
     function getCoinDetails(id: string) {
-      return axios.get(`https://api.mochi.pod.town/api/v1/defi/coins/${id}`).then(({ data: { data } }) => {
-        return {
-          id: data.id,
-          name: data.name,
-          symbol: data.symbol,
-          image: data.image.small,
-          current_price: data.market_data.current_price.usd,
-          market_cap: data.market_data.market_cap.usd,
-          price_change_percentage_24h: data.market_data.price_change_percentage_24h_in_currency.usd,
-          price_change_percentage_7d_in_currency: data.market_data.price_change_percentage_7d_in_currency.usd,
-        };
-      });
+      return axios
+        .get<{ data: IBaseCoin }>(`https://api.mochi.pod.town/api/v1/defi/coins/${id}`)
+        .then(({ data: { data } }) => {
+          return {
+            id: data.id,
+            name: data.name,
+            symbol: data.symbol,
+            image: data.image.small,
+            current_price: data.market_data.current_price.usd,
+            market_cap: data.market_data.market_cap.usd,
+            price_change_percentage_24h: data.market_data.price_change_percentage_24h_in_currency.usd,
+            price_change_percentage_7d_in_currency: data.market_data.price_change_percentage_7d_in_currency.usd,
+          } as IMarketData;
+        });
     }
 
     async function getCoins(search: string) {
@@ -120,21 +107,28 @@ export default function Main() {
 
       try {
         const query = search.toLowerCase().replace(/ /g, "-");
+        if (query.length < 2) {
+          return;
+        }
+
         setBgSearch(true);
         const {
           data: { data },
-        } = await axios.get(`https://api.mochi.pod.town/api/v1/defi/coins/compare?base=${query}&interval=7&target=usd`);
+        } = await axios.get<ICoinCompareResult>(
+          `https://api.mochi.pod.town/api/v1/defi/coins/compare?base=${query}&interval=7&target=usd`
+        );
         if (data.base_coin_suggestions) {
-          mapLimit(
+          mapLimit<ICoinSuggestion, IMarketData>(
             data.base_coin_suggestions,
             5,
-            async (item: any) => {
+            async (item: ICoinSuggestion) => {
+              console.log("[getCoins]", JSON.stringify(item, null, 4));
               return getCoinDetails(item.id);
             },
-            (err, results: any) => {
+            (err, results) => {
               console.error("[getCoins]", search, err);
-              const items = _.filter(results, (item: any) => !!tokenLookUpNoExtra[item?.id]);
-              setExtraData(items);
+              const items = _.filter(results, (item: IMarketData) => !!tokenLookUpNoExtra[item?.id]);
+              setExtraData(items as IMarketData[]);
             }
           );
         } else {
@@ -144,8 +138,8 @@ export default function Main() {
             return;
           }
         }
-      } catch (err: any) {
-        console.error(`[ERROR]`, err.message);
+      } catch (err) {
+        console.error(`[ERROR.getCoins]`, err);
       } finally {
         setBgSearch(false);
       }
@@ -185,7 +179,7 @@ export default function Main() {
     }
   }, [error]);
 
-  const AddWatchListAction = (item: any) =>
+  const AddWatchListAction = (item: ITickerBaseCoin) =>
     user?.id ? (
       <Action
         title={watchingMap[item.id] ? "Remove From Watch List" : "Add to Watch List"}
@@ -218,10 +212,10 @@ export default function Main() {
         isLoading={isLoading || bgSearching}
         filtering={false}
         onSearchTextChange={setSearchText}
-        navigationTitle={`Coin market Grid view • Coingecko | Mochi`}
+        navigationTitle="Coin market • Mochi"
         searchBarPlaceholder="Search for a token..."
         aspectRatio={"16/9"}
-        onSelectionChange={setSelectedToken as any}
+        onSelectionChange={setSelectedToken as (id: string | null) => void}
       >
         {filteredList
           .filter(({ item }) => !!item)
@@ -246,7 +240,7 @@ export default function Main() {
                     }
                     icon={Icon.LineChart}
                   />
-                  {AddWatchListAction(item)}
+                  {AddWatchListAction(item as ITickerBaseCoin)}
                   <Action
                     title="Refresh"
                     onAction={() => {
@@ -278,9 +272,9 @@ export default function Main() {
       isShowingDetail={viewDetails}
       filtering={false}
       onSearchTextChange={setSearchText}
-      navigationTitle={`Coin market List view • Mochi`}
+      navigationTitle="Coin market • Mochi"
       searchBarPlaceholder="Search for a token..."
-      onSelectionChange={setSelectedToken as any}
+      onSelectionChange={setSelectedToken as (id: string | null) => void}
       throttle
     >
       {filteredList

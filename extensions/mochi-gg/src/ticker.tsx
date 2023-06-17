@@ -7,6 +7,7 @@ import _ from "lodash";
 import useDiscord from "./hooks/useDiscord";
 import useWatchList from "./hooks/useWatchList";
 import { MOCHI_PROXY_ENDPOINT } from "./config/cfg";
+import { ICoinQueryResp, ITickerBaseCoin, ITickerResp } from "./type/api";
 
 export default function Main({
   arguments: props,
@@ -20,7 +21,7 @@ export default function Main({
   const { user, loginDiscord, logoutDiscord } = useDiscord(false);
   const { addTokenToWatchlist, watchingMap, removeTokenFromWatchlist } = useWatchList();
 
-  const { data: { data: tokens = [] } = {} } = useFetch<{ markdown?: string } & Record<string, any>>(
+  const { data: { data: tokens } = {} } = useFetch<ICoinQueryResp>(
     !launchContext?.disableSearch
       ? `https://api.mochi.pod.town/api/v1/defi/coins?query=${props?.token || launchContext?.token || "btc"}`
       : ""
@@ -31,7 +32,7 @@ export default function Main({
     data: { markdown, base_coin: data } = {},
     error,
     revalidate,
-  } = useFetch<{ markdown?: string } & Record<string, any>>(
+  } = useFetch<ITickerResp>(
     `${MOCHI_PROXY_ENDPOINT}/api/ticker?token=${token || "bitcoin"}&time_step=${interval}&currency=usd&theme=${
       environment.theme
     }`
@@ -47,7 +48,7 @@ export default function Main({
     }
   }, [error]);
 
-  const AddWatchListAction = (item: any) =>
+  const AddWatchListAction = (item: ITickerBaseCoin) =>
     user?.id ? (
       <>
         <Action
@@ -87,13 +88,13 @@ export default function Main({
     <Detail
       isLoading={!markdown || !data || isLoading}
       markdown={markdown || ""}
-      navigationTitle={`Exchange rates ${_.upperCase(data?.symbol || token)}/USD • Coingecko | Mochi`}
+      navigationTitle="Exchange rates • Mochi"
       metadata={
         <Detail.Metadata>
           <Detail.Metadata.Label
             title="Token"
             text={[data?.name || "Loading...", _.toUpper(data?.symbol)].filter(Boolean).join(" - ")}
-            icon={{ source: data?.image }}
+            icon={data?.image ? { source: data?.image } : undefined}
           />
           <Detail.Metadata.Label title="Market cap" text={formatCurrency(data?.market_data?.market_cap)} />
           <Detail.Metadata.Label title="Price (USD)" text={formatCurrency(data?.market_data?.current_price)} />
@@ -125,7 +126,7 @@ export default function Main({
       actions={
         <ActionPanel title="Ticker • Mochi">
           <Action title={"Refresh"} onAction={revalidate} icon={Icon.Repeat} />
-          {!!tokens.length && (
+          {!!tokens?.length && (
             <ActionPanel.Section title="Alternative tokens">
               {_.filter(tokens, (item) => item.id !== data?.id).map((item) => (
                 <Action
@@ -142,7 +143,7 @@ export default function Main({
             {interval != 7 && <Action title="7 Days" onAction={() => setInterval(7)} icon={Icon.Calendar} />}
             {interval != 30 && <Action title="30 Days" onAction={() => setInterval(30)} icon={Icon.Calendar} />}
           </ActionPanel.Section>
-          {AddWatchListAction(data)}
+          {AddWatchListAction(data as ITickerBaseCoin)}
         </ActionPanel>
       }
     />
