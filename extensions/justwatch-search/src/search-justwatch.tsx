@@ -148,7 +148,7 @@ export default function SearchJustwatch() {
         markdown={`<img height="185" src="${props.media.thumbnail}" /> `}
         metadata={
           <List.Item.Detail.Metadata>
-            <List.Item.Detail.Metadata.Label title={""} text={`${props.media.name} (${props.media.year})`} />
+            <List.Item.Detail.Metadata.Label title={"Title"} text={`${props.media.name} (${props.media.year})`} />
             {props.offer.type == MediaType.stream ? (
               <List.Item.Detail.Metadata.TagList title="Available for">
                 <List.Item.Detail.Metadata.TagList.Item
