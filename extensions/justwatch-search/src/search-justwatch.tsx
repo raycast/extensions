@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { searchMedias } from "./api";
 import { Country, JustWatchMedia, JustWatchMediaOffers, MediaType } from "./types";
 import crypto from "crypto";
+import React from "react";
 
 export default function SearchJustwatch() {
   const [medias, setMedias] = useState<JustWatchMedia[]>([]);
@@ -178,10 +179,11 @@ export default function SearchJustwatch() {
 
                 {props.offer.other_prices && props.offer.other_prices.length > 0 ? (
                   <List.Item.Detail.Metadata.TagList title={"Other Prices"}>
-                    {props.offer.other_prices.map((other_price, index) => (
-                      <>
+                    {props.offer.other_prices.map((other_price) => (
+                      <React.Fragment
+                        key={`${props.offer.name}-${other_price.presentation_type}-${other_price.currency}-${other_price.price_amount}-${props.media.id}`}
+                      >
                         <List.Item.Detail.Metadata.TagList.Item
-                          key={`${props.offer.name}-${other_price.presentation_type}-${other_price.currency}-${other_price.price_amount}-${props.media.id}`}
                           text={
                             getParsedCurrency(other_price.price_amount, other_price.currency) +
                             ` (${other_price.presentation_type})`
@@ -189,7 +191,7 @@ export default function SearchJustwatch() {
                           color={Color.SecondaryText}
                           icon={{ source: props.offer.icon, mask: Image.Mask.RoundedRectangle }}
                         />
-                      </>
+                      </React.Fragment>
                     ))}
                   </List.Item.Detail.Metadata.TagList>
                 ) : (
