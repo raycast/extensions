@@ -32,9 +32,16 @@ export interface JustWatchMediaOffers {
   name: string;
   seasons: string;
   price_amount: number;
-  price: string;
   presentation_type: string;
   currency: string;
+  other_prices?: OtherPrices[];
+}
+
+export interface OtherPrices {
+  price_amount: number;
+  presentation_type: string;
+  currency: string;
+  seasons: string;
 }
 
 export interface MediaProvider {

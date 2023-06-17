@@ -2,6 +2,7 @@ import { Action, ActionPanel, Color, Icon, Image, List, LocalStorage } from "@ra
 import { useEffect, useState } from "react";
 import { searchMedias } from "./api";
 import { Country, JustWatchMedia, JustWatchMediaOffers, MediaType } from "./types";
+import crypto from "crypto";
 
 export default function SearchJustwatch() {
   const [medias, setMedias] = useState<JustWatchMedia[]>([]);
@@ -77,7 +78,7 @@ export default function SearchJustwatch() {
                 media.offers.map((offer) => (
                   <List.Item
                     title={offer.name || "-"}
-                    key={offer.url + offer.presentation_type + offer.price_amount}
+                    key={offer.url + offer.presentation_type + offer.price_amount + media.id}
                     icon={{ source: offer.icon, mask: Image.Mask.RoundedRectangle }}
                     accessories={[
                       offer.type == MediaType.free
@@ -144,8 +145,7 @@ export default function SearchJustwatch() {
   function Detail(props: { media: JustWatchMedia; offer: JustWatchMediaOffers }) {
     return (
       <List.Item.Detail
-        // # ${props.media.name} (${props.media.year})
-        markdown={`<img height="185" src="${props.media.thumbnail}" /> `}
+        markdown={`<img height="185" src="${props.media.thumbnail}" />`}
         metadata={
           <List.Item.Detail.Metadata>
             <List.Item.Detail.Metadata.Label title={"Title"} text={`${props.media.name} (${props.media.year})`} />
@@ -163,17 +163,39 @@ export default function SearchJustwatch() {
             )}
 
             {props.offer.type == MediaType.buy || props.offer.type == MediaType.rent ? (
-              <List.Item.Detail.Metadata.TagList title="Price">
-                <List.Item.Detail.Metadata.TagList.Item
-                  text={
-                    `${props.offer.type_parsed} for ` +
-                    getParsedCurrency(props.offer.price_amount, props.offer.currency) +
-                    ` (${props.offer.presentation_type})`
-                  }
-                  color={getColor(props.offer.type)}
-                  icon={{ source: props.offer.icon, mask: Image.Mask.RoundedRectangle }}
-                />
-              </List.Item.Detail.Metadata.TagList>
+              <>
+                <List.Item.Detail.Metadata.TagList title="Price">
+                  <List.Item.Detail.Metadata.TagList.Item
+                    text={
+                      `${props.offer.type_parsed} for ` +
+                      getParsedCurrency(props.offer.price_amount, props.offer.currency) +
+                      ` (${props.offer.presentation_type})`
+                    }
+                    color={getColor(props.offer.type)}
+                    icon={{ source: props.offer.icon, mask: Image.Mask.RoundedRectangle }}
+                  />
+                </List.Item.Detail.Metadata.TagList>
+
+                {props.offer.other_prices && props.offer.other_prices.length > 0 ? (
+                  <List.Item.Detail.Metadata.TagList title={"Other Prices"}>
+                    {props.offer.other_prices.map((other_price, index) => (
+                      <>
+                        <List.Item.Detail.Metadata.TagList.Item
+                          key={`${props.offer.name}-${other_price.presentation_type}-${other_price.currency}-${other_price.price_amount}-${props.media.id}`}
+                          text={
+                            getParsedCurrency(other_price.price_amount, other_price.currency) +
+                            ` (${other_price.presentation_type})`
+                          }
+                          color={Color.SecondaryText}
+                          icon={{ source: props.offer.icon, mask: Image.Mask.RoundedRectangle }}
+                        />
+                      </>
+                    ))}
+                  </List.Item.Detail.Metadata.TagList>
+                ) : (
+                  <></>
+                )}
+              </>
             ) : (
               <></>
             )}

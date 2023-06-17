@@ -1,7 +1,6 @@
 import fetch from "node-fetch";
-import { LocalStorage, showToast, Toast } from "@raycast/api";
+import { getPreferenceValues, LocalStorage, showToast, Toast } from "@raycast/api";
 import { JustWatchMedia, JustWatchMediaOffers, MediaProvider, MediaType } from "./types";
-import { getPreferenceValues } from "@raycast/api";
 
 interface Preferences {
   flatrate?: boolean;
@@ -116,7 +115,6 @@ export async function searchMedias(query: string): Promise<JustWatchMedia[]> {
               offer.element_count === 1 ? "1 season" : offer.element_count ? `${offer.element_count} seasons` : "",
             price_amount: offer.retail_price || 0,
             currency: offer.currency,
-            price: `${offer.retail_price} ${offer.currency}`,
             icon: provider.icon_url,
             name: provider.clear_name,
             presentation_type: offer.presentation_type?.toUpperCase(),
@@ -129,22 +127,13 @@ export async function searchMedias(query: string): Promise<JustWatchMedia[]> {
         }
       });
 
-      // sort by free streaming > rent > buy
-      media.offers.sort((a, b) => a.price_amount - b.price_amount);
-
-      // loop through offers and remove the duplicate ones...
       if (media.offers.length > 0) {
-        media.offers = media.offers.filter(
-          (tag, index, array) => array.findIndex((t) => t.url == tag.url && t.price_amount == tag.price_amount) == index
-        );
-
-        // if we have offers from the same provider and same price, then remove the lowest quality one...
-        media.offers = media.offers.filter(
-          (tag, index, array) =>
-            array.findIndex(
-              (t) => t.service == tag.service && t.price_amount == tag.price_amount && t.type == tag.type
-            ) == index
-        );
+        media.offers = sortMedia(media.offers);
+        media.offers = removeDuplicates(media.offers);
+        media.offers = removeLowerQuality(media.offers);
+        aggregateOtherOffersPrices(media.offers); // this function mutates media.offers in-place
+        media.offers = keepFirstRemoveRest(media.offers);
+        media.offers = sortMediaFinal(media.offers);
       }
 
       medias.push(media);
@@ -154,6 +143,66 @@ export async function searchMedias(query: string): Promise<JustWatchMedia[]> {
   }
 
   return parsedMedias;
+
+  function sortMedia(offers: JustWatchMediaOffers[]) {
+    return offers.sort((a, b) => {
+      const streamOrder = ["stream", "free", "rent", "buy"];
+      const orderA = streamOrder.indexOf(a.type);
+      const orderB = streamOrder.indexOf(b.type);
+
+      if (orderA !== orderB) {
+        return orderA - orderB;
+      } else {
+        return a.presentation_type.localeCompare(b.presentation_type) || a.price_amount - b.price_amount;
+      }
+    });
+  }
+
+  function removeDuplicates(offers: JustWatchMediaOffers[]) {
+    return offers.filter(
+      (offer, index, self) =>
+        index === self.findIndex((t) => t.url === offer.url && t.price_amount === offer.price_amount)
+    );
+  }
+
+  function removeLowerQuality(offers: JustWatchMediaOffers[]) {
+    return offers.filter(
+      (offer, index, self) =>
+        index ===
+        self.findIndex(
+          (t) => t.service === offer.service && t.price_amount === offer.price_amount && t.type === offer.type
+        )
+    );
+  }
+
+  function aggregateOtherOffersPrices(offers: JustWatchMediaOffers[]) {
+    const rentOrBuyOffers = offers.filter((offer) => ["rent", "buy"].includes(offer.type));
+
+    for (const offer of rentOrBuyOffers) {
+      const otherOffers = offers.filter(
+        (o) => o.service === offer.service && o.type === offer.type && o.price_amount !== offer.price_amount
+      );
+
+      if (otherOffers.length > 0) {
+        offer.other_prices = otherOffers.map(({ price_amount, currency, seasons, presentation_type }) => ({
+          price_amount,
+          currency,
+          seasons,
+          presentation_type,
+        }));
+      }
+    }
+  }
+
+  function keepFirstRemoveRest(offers: JustWatchMediaOffers[]) {
+    return offers.filter(
+      (offer, index, self) => index === self.findIndex((t) => t.service === offer.service && t.type === offer.type)
+    );
+  }
+
+  function sortMediaFinal(offers: JustWatchMediaOffers[]) {
+    return sortMedia(offers); // reusing the initial sort function
+  }
 
   function getMediaType(type: string) {
     if (type === MediaType.buy) {
