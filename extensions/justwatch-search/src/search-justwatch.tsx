@@ -42,11 +42,12 @@ export default function SearchJustwatch() {
     if (countries[0][0] === "") {
       countries.shift();
       setCountries(countries);
+    } else {
+      LocalStorage.setItem("country_code", locale);
+      setCountryCode(locale);
+
+      onSearch(searchText);
     }
-
-    LocalStorage.setItem("country_code", locale);
-
-    onSearch(searchText);
   };
 
   return (

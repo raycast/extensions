@@ -14,7 +14,7 @@ export async function searchMedias(query: string): Promise<JustWatchMedia[]> {
   const countryCode = (await LocalStorage.getItem<string>("country_code")) || "en_CA";
 
   const searchParams = new URLSearchParams({
-    language: "en",
+    // language: "en",
     body: JSON.stringify({
       page_size: 8,
       page: 1,
