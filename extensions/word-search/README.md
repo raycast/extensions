@@ -30,3 +30,4 @@ Likewise, if you enter `he??o`, it will show all the combination of five-letter 
 
 ![rhyme](media/5-rhyme.png)
 
+This Raycast extension is powered by Datamuse.
