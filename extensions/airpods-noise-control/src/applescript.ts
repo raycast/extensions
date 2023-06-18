@@ -5,12 +5,55 @@ export interface Prefs {
   airpodsIndex: number;
   soundLoc: string;
   ccLoc: string;
+  expandOffset?: string;
 }
 
-const getScript = ({ airpodsIndex, soundLoc, ccLoc }: Prefs) => `
+export interface TogglePrefs extends Prefs {
+  toggleA: string;
+  toggleB: string;
+}
+
+export interface CyclePrefs extends Prefs {
+  hasAdaptive: boolean;
+}
+
+const cycleThrough = (hasAdaptive: boolean) => {
+  const max = hasAdaptive ? 3 : 2;
+  return `
+    set setting to "🔄 Cycled"
+    set cycled to false
+    repeat with i from 1 to ${max}
+        set currentMode to value of checkbox (AirPodsIndex + i) of btMenu as boolean
+        if currentMode is true then
+            click checkbox (AirPodsIndex + (i + 1)) of btMenu
+            set cycled to true
+            exit repeat
+        end if
+    end repeat
+    if cycled is false then
+        click checkbox (AirPodsIndex + 1) of btMenu
+    end if
+`;
+};
+
+const toggle = (primary: string, secondary: string) => `
+    set PrimaryIndex to AirPodsIndex + ${primary}
+    set SecondaryIndex to AirPodsIndex + ${secondary}
+    set currentMode to value of checkbox PrimaryIndex of btMenu as boolean
+    if currentMode is true then
+        click checkbox SecondaryIndex of btMenu
+        set setting to "🔵Noise Control"
+    else
+        click checkbox PrimaryIndex of btMenu
+        set setting to "🟢Noise Control"
+    end if
+`;
+
+const getScript = (
+  { airpodsIndex, soundLoc, ccLoc, expandOffset }: Prefs,
+  instruction: string
+) => `
 set AirPodsIndex to ${airpodsIndex}
-set ANCIndex to AirPodsIndex + 2
-set TransparencyIndex to AirPodsIndex + 3
 
 tell application "System Events"
 	tell application process "ControlCenter"
@@ -55,20 +98,13 @@ tell application "System Events"
 						exit repeat -- exit the loop
 					end if
 				end repeat
-				set expandToggle to item (i - 1) of btMenuElements
+				set expandToggle to item (i + ${expandOffset ?? -1}) of btMenuElements
 				set expandToggleExpanded to value of expandToggle as boolean
 				if expandToggleExpanded is false then
 					click expandToggle
 					delay 1
 				end if
-				set currentMode to value of checkbox ANCIndex of btMenu as boolean
-				if currentMode is true then
-					click checkbox TransparencyIndex of btMenu
-					set setting to "🟢 Transparency"
-				else
-					click checkbox ANCIndex of btMenu
-					set setting to "🔵 Noise Cancellation"
-				end if
+				${instruction}
 			else
 				tell menuBar to click
 				if soundWindowIndex is not equal to -1 then
@@ -88,8 +124,17 @@ tell application "System Events"
 end tell
 `;
 
-export function runScript(): Promise<string> {
-  const preferences = getPreferenceValues<Prefs>();
-  const script = getScript(preferences);
+export function runToggle(): Promise<string> {
+  const preferences = getPreferenceValues<TogglePrefs>();
+  const script = getScript(
+    preferences,
+    toggle(preferences.toggleA, preferences.toggleB)
+  );
+  return runAppleScript(script);
+}
+
+export function runCycle(): Promise<string> {
+  const preferences = getPreferenceValues<CyclePrefs>();
+  const script = getScript(preferences, cycleThrough(preferences.hasAdaptive));
   return runAppleScript(script);
 }

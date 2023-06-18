@@ -1,8 +1,8 @@
 import { closeMainWindow, showHUD } from "@raycast/api";
-import { runToggle } from "./applescript";
+import { runCycle } from "./applescript";
 
 export default async function main() {
   await closeMainWindow();
-  const result = await runToggle();
+  const result = await runCycle();
   await showHUD(result);
 }

@@ -13,9 +13,8 @@
   "commands": [
     {
       "name": "index",
-      "title": "Switch Noise Control Mode",
-      "subtitle": "Transparency ↔ Noise Cancellation",
-      "description": "This command will toggle between Noise Cancellation and Transparency if AirPods are connected to your device.",
+      "title": "Toggle Noise Control Mode",
+      "description": "This command will toggle between your preferred two Noise Control modes if AirPods are connected to your device.",
       "mode": "no-view",
       "keywords": [
         "airpods",
@@ -23,7 +22,54 @@
         "cancellation",
         "transparency",
         "isolation",
-        "anc"
+        "anc",
+        "adaptive"
+      ],
+      "preferences": [
+        {
+          "name": "toggleA",
+          "title": "\uD83D\uDFE2 Primary Mode Position",
+          "description": "This Noise Control mode will be activated on toggle if your AirPods are in any other mode.",
+          "type": "textfield",
+          "default": "2",
+          "required": true,
+          "placeholder": "1, 2, 3 or 4"
+        },
+        {
+          "name": "toggleB",
+          "title": "\uD83D\uDD35 Secondary Mode Position",
+          "description": "This Noise Control mode will be activated on toggle if your AirPods are in the Primary mode.",
+          "type": "textfield",
+          "default": "3",
+          "required": true,
+          "placeholder": "1, 2, 3 or 4"
+        }
+      ]
+    },
+    {
+      "name": "cycle",
+      "title": "Cycle Noise Control Mode",
+      "description": "This command will cycle through the available Noise Control modes if AirPods are connected to your device.",
+      "mode": "no-view",
+      "keywords": [
+        "airpods",
+        "noise",
+        "cancellation",
+        "transparency",
+        "isolation",
+        "anc",
+        "adaptive"
+      ],
+      "preferences": [
+        {
+          "name": "hasAdaptive",
+          "title": "Adaptive Mode",
+          "description": "Is Adaptive Noise Control available on your AirPods? (AirPods Pro 2nd gen on macOS 14+)",
+          "type": "checkbox",
+          "required": true,
+          "default": false,
+          "label": "Adaptive Mode available"
+        }
       ]
     }
   ],
@@ -34,7 +80,7 @@
       "description": "When your AirPods are connected, at which position are they listed in your Sound menu? (1, 2, 3, etc.)",
       "type": "textfield",
       "required": true,
-      "placeholder": "Position of your AirPods in the Sound menu (1, 2, 3, ...)"
+      "placeholder": "1, 2, 3, ..."
     },
     {
       "name": "ccLoc",
@@ -53,6 +99,14 @@
       "required": false,
       "default": "Sound",
       "placeholder": "Sound, Ton, ..."
+    },
+    {
+      "name": "expandOffset",
+      "title": "AirPods Expander UI Offset",
+      "description": "Only change this if the command is expanding the Noise Control menu on the wrong set of AirPods. Try odd values between -1 and 5.",
+      "type": "textfield",
+      "required": false,
+      "default": "-1"
     }
   ],
   "dependencies": {
