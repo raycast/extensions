@@ -1,4 +1,17 @@
-import { Icon, Color, ActionPanel, Detail, List, Action, showToast, Toast, preferences, Clipboard } from "@raycast/api";
+import {
+  Icon,
+  Color,
+  ActionPanel,
+  Detail,
+  List,
+  Action,
+  showToast,
+  Toast,
+  preferences,
+  Clipboard,
+  LocalStorage,
+  getPreferenceValues,
+} from "@raycast/api";
 import { useEffect, useState } from "react";
 import { useFetch } from "@raycast/utils";
 import fetch from "node-fetch";
@@ -41,6 +54,9 @@ const categories = [
     value: "most+recent",
   },
 ];
+const LASTRELOAD_KEY = "lastReload";
+
+const TRENDINGARTICLES_KEY = "trendingArticles";
 
 export default function Command() {
   const [query, setQuery] = useState<null | string>(null);
@@ -55,103 +71,110 @@ export default function Command() {
       const apikeyArgument = preferences.apikey.value === "0" ? "" : `&api_key=${preferences.apikey.value}`;
       if (!query) {
         try {
-          setLoading(true);
-          const trendinghResponse = await fetch("https://pubmed.ncbi.nlm.nih.gov/trending/");
+          if (
+            (await LocalStorage.getItem(LASTRELOAD_KEY)) === undefined ||
+            new Date().getTime() -
+              (new Date((await LocalStorage.getItem(LASTRELOAD_KEY)) as string) ?? new Date()).getTime() >
+              preferences.refreshInterval.value
+          ) {
+            await LocalStorage.setItem(LASTRELOAD_KEY, new Date().toISOString());
+            setLoading(true);
+            const trendinghResponse = await fetch("https://pubmed.ncbi.nlm.nih.gov/trending/");
 
-          if (trendinghResponse.ok) {
-            const searchTrending = await trendinghResponse.text();
-            const $ = cheerio.load(searchTrending);
-            const trendingPmidsList: string[] = [];
+            if (trendinghResponse.ok) {
+              const searchTrending = await trendinghResponse.text();
+              const $ = cheerio.load(searchTrending);
+              const trendingPmidsList: string[] = [];
 
-            $(".docsum-wrap").each((index, element) => {
-              const pmid = $(element).find(".docsum-pmid").text();
-              trendingPmidsList.push(pmid);
-            });
+              $(".docsum-wrap").each((index, element) => {
+                const pmid = $(element).find(".docsum-pmid").text();
+                trendingPmidsList.push(pmid);
+              });
 
-            if (trendingPmidsList.length !== 0) {
-              const summaryUrl =
-                `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=pubmed&id=${trendingPmidsList.join(
-                  ","
-                )}&version=2.0&retmode=json` + apikeyArgument;
+              if (trendingPmidsList.length !== 0) {
+                const summaryUrl =
+                  `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=pubmed&id=${trendingPmidsList.join(
+                    ","
+                  )}&version=2.0&retmode=json` + apikeyArgument;
 
-              const summaryResponse = await fetch(summaryUrl);
-              if (summaryResponse.ok) {
-                const summaryJson = await summaryResponse.json();
-                const articles: Article[] = Object.values(summaryJson.result).map((doc: any) => {
-                  const uid = doc.uid;
-                  const title = doc.title;
-                  const url = `https://pubmed.ncbi.nlm.nih.gov/${uid}/`;
-                  const authors = doc.authors ? doc.authors.map((author: any) => author.name) : [];
-                  const pubdate = doc.pubdate; // if there is an epubdate take this
-                  const epubdate = doc.epubdate;
+                const summaryResponse = await fetch(summaryUrl);
+                if (summaryResponse.ok) {
+                  const summaryJson = await summaryResponse.json();
+                  const articles: Article[] = Object.values(summaryJson.result).map((doc: any) => {
+                    const uid = doc.uid;
+                    const title = doc.title;
+                    const url = `https://pubmed.ncbi.nlm.nih.gov/${uid}/`;
+                    const authors = doc.authors ? doc.authors.map((author: any) => author.name) : [];
+                    const pubdate = doc.pubdate; // if there is an epubdate take this
+                    const epubdate = doc.epubdate;
 
-                  const doiList = doc.articleids ? doc.articleids.filter((id: any) => id.idtype === "doi") : [];
-                  const doi = doiList.length > 0 ? doiList[0].value : "";
-                  const pmid = doc.articleids
-                    ? doc.articleids.filter((id: any) => id.idtype === "pubmed")[0].value
-                    : "";
+                    const doiList = doc.articleids ? doc.articleids.filter((id: any) => id.idtype === "doi") : [];
+                    const doi = doiList.length > 0 ? doiList[0].value : "";
+                    const pmid = doc.articleids
+                      ? doc.articleids.filter((id: any) => id.idtype === "pubmed")[0].value
+                      : "";
 
-                  // const pmcid = doc.articleids ? doc.articleids.filter((id: any) => id.idtype === "pmc")[0].value : "";
+                    // const pmcid = doc.articleids ? doc.articleids.filter((id: any) => id.idtype === "pmc")[0].value : "";
 
-                  const pmcList = doc.articleids ? doc.articleids.filter((id: any) => id.idtype === "pmc") : [];
-                  const pmc = pmcList.length > 0 ? pmcList[0].value : "";
+                    const pmcList = doc.articleids ? doc.articleids.filter((id: any) => id.idtype === "pmc") : [];
+                    const pmc = pmcList.length > 0 ? pmcList[0].value : "";
 
-                  const fulljournalname = doc.fulljournalname ? doc.fulljournalname : "";
-                  const volume = doc.volume ? doc.volume : "";
-                  const issue = doc.issue ? doc.issue : "";
-                  const pages = doc.pages ? doc.pages : "";
+                    const fulljournalname = doc.fulljournalname ? doc.fulljournalname : "";
+                    const volume = doc.volume ? doc.volume : "";
+                    const issue = doc.issue ? doc.issue : "";
+                    const pages = doc.pages ? doc.pages : "";
 
-                  return {
-                    uid,
-                    title,
-                    url,
-                    authors,
-                    pubdate,
-                    epubdate,
-                    doi,
-                    pmid,
-                    pmc,
-                    fulljournalname,
-                    volume,
-                    issue,
-                    pages,
-                  };
-                });
+                    return {
+                      uid,
+                      title,
+                      url,
+                      authors,
+                      pubdate,
+                      epubdate,
+                      doi,
+                      pmid,
+                      pmc,
+                      fulljournalname,
+                      volume,
+                      issue,
+                      pages,
+                    };
+                  });
 
-                //somehow the articles are sorted by there pmid and not by the initial search order
-                const sortedArticles = articles.sort((a, b) => {
-                  const indexA = trendingPmidsList.indexOf(a.pmid);
-                  const indexB = trendingPmidsList.indexOf(b.pmid);
-                  return indexA - indexB;
-                });
-
-                setEntries(sortedArticles);
-                setLoading(false);
+                  //somehow the articles are sorted by there pmid and not by the initial search order
+                  const sortedArticles = articles.sort((a, b) => {
+                    const indexA = trendingPmidsList.indexOf(a.pmid);
+                    const indexB = trendingPmidsList.indexOf(b.pmid);
+                    return indexA - indexB;
+                  });
+                  await LocalStorage.setItem(TRENDINGARTICLES_KEY, JSON.stringify(sortedArticles));
+                  setLoading(false);
+                } else {
+                  throw new Error(`Error fetching summary data: ${summaryResponse.status}`);
+                }
               } else {
-                throw new Error(`Error fetching summary data: ${summaryResponse.status}`);
+                setEntries([
+                  {
+                    uid: "42",
+                    title: "Nothing found!",
+                    url: "<empty>",
+                    authors: [],
+                    doi: "",
+                    pmid: "",
+                    pmc: "",
+                    pubdate: "",
+                    epubdate: "",
+                    fulljournalname: "Press ⏎ to open the search in the browser",
+                    volume: "",
+                    issue: "",
+                    pages: "",
+                  },
+                ]);
+                setLoading(false);
               }
             } else {
-              setEntries([
-                {
-                  uid: "42",
-                  title: "Nothing found!",
-                  url: "<empty>",
-                  authors: [],
-                  doi: "",
-                  pmid: "",
-                  pmc: "",
-                  pubdate: "",
-                  epubdate: "",
-                  fulljournalname: "Press ⏎ to open the search in the browser",
-                  volume: "",
-                  issue: "",
-                  pages: "",
-                },
-              ]);
-              setLoading(false);
+              throw new Error(`Error fetching search data: ${trendinghResponse.status}`);
             }
-          } else {
-            throw new Error(`Error fetching search data: ${trendinghResponse.status}`);
           }
         } catch (error) {
           console.error(error);
@@ -160,6 +183,8 @@ export default function Command() {
             title: "Failed to fetch entries",
             message: (error as Error).message,
           });
+        } finally {
+          setEntries(JSON.parse((await LocalStorage.getItem(TRENDINGARTICLES_KEY)) ?? "[]"));
           setLoading(false);
         }
       } else {
@@ -317,9 +342,7 @@ export default function Command() {
               <List.Item
                 key={entry.uid}
                 title={{ value: entry.title, tooltip: entry.title }}
-                // icon={entry.title}
                 accessories={[
-                  // { tag: { value: entry.title_alias[0], color: Color.Red }, tooltip: "Tag with tooltip" },
                   { icon: Icon.Person, text: entry.authors[0], tooltip: entry.authors.join(", ") },
                   { tag: { value: "PMC", color: Color.Green }, tooltip: entry.pmc },
                   { tag: { value: "DOI", color: Color.Red }, tooltip: entry.doi },
@@ -341,9 +364,7 @@ export default function Command() {
               <List.Item
                 key={entry.uid}
                 title={{ value: entry.title, tooltip: entry.title }}
-                // icon={entry.title}
                 accessories={[
-                  // { tag: { value: entry.title_alias[0], color: Color.Red }, tooltip: "Tag with tooltip" },
                   { icon: Icon.Person, text: entry.authors[0], tooltip: entry.authors.join(", ") },
                   { tag: { value: "DOI", color: Color.Red }, tooltip: entry.doi },
                   { tag: { value: "PMID", color: Color.Blue }, tooltip: entry.pmid },
@@ -383,9 +404,7 @@ export default function Command() {
               <List.Item
                 key={entry.uid}
                 title={{ value: entry.title, tooltip: entry.title }}
-                // icon={entry.title}
                 accessories={[
-                  // { tag: { value: entry.title_alias[0], color: Color.Red }, tooltip: "Tag with tooltip" },
                   { icon: Icon.Person, text: entry.authors[0], tooltip: entry.authors.join(", ") },
                   { tag: { value: "PMID", color: Color.Blue }, tooltip: entry.pmid },
                   {
@@ -431,6 +450,8 @@ function EntryActions(article: Article, query: string, sortBy: string) {
           shortcut={{ modifiers: ["opt"], key: "enter" }}
         />
         <Action.CopyToClipboard title="Copy DOI" content={article.doi} shortcut={{ modifiers: ["cmd"], key: "d" }} />
+        <Action.CopyToClipboard title="Copy PMID" content={article.pmid} shortcut={{ modifiers: ["cmd"], key: "p" }} />
+        <Action.CopyToClipboard title="Copy URL" content={article.url} shortcut={{ modifiers: ["cmd"], key: "u" }} />
       </ActionPanel>
     );
   } else if (article.doi) {
@@ -450,6 +471,8 @@ function EntryActions(article: Article, query: string, sortBy: string) {
           shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
         />
         <Action.CopyToClipboard title="Copy DOI" content={article.doi} shortcut={{ modifiers: ["cmd"], key: "d" }} />
+        <Action.CopyToClipboard title="Copy PMID" content={article.pmid} shortcut={{ modifiers: ["cmd"], key: "p" }} />
+        <Action.CopyToClipboard title="Copy URL" content={article.url} shortcut={{ modifiers: ["cmd"], key: "u" }} />
       </ActionPanel>
     );
   } else {
@@ -468,6 +491,8 @@ function EntryActions(article: Article, query: string, sortBy: string) {
           target={"https://pubmed.ncbi.nlm.nih.gov/?term=" + encodeURI(query!) + "&sort=" + encodeURI(sortBy!)}
           shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
         />
+        <Action.CopyToClipboard title="Copy PMID" content={article.pmid} shortcut={{ modifiers: ["cmd"], key: "p" }} />
+        <Action.CopyToClipboard title="Copy URL" content={article.url} shortcut={{ modifiers: ["cmd"], key: "u" }} />
       </ActionPanel>
     );
   }
@@ -480,11 +505,13 @@ function EntryActionsDetail(article: Article) {
         <Action.Open icon={Icon.Globe} title="Open Article in Browser" target={article.url} />
         <Action.Open
           icon={Icon.LockUnlocked}
-          title="Open Article on Sci-Hub in Browser"
+          title="Open article on Sci-Hub in Browser"
           target={preferences.scihubinstance.value + encodeURI(article.doi)}
           shortcut={{ modifiers: ["opt"], key: "enter" }}
         />
         <Action.CopyToClipboard title="Copy DOI" content={article.doi} shortcut={{ modifiers: ["cmd"], key: "d" }} />
+        <Action.CopyToClipboard title="Copy PMID" content={article.pmid} shortcut={{ modifiers: ["cmd"], key: "p" }} />
+        <Action.CopyToClipboard title="Copy URL" content={article.url} shortcut={{ modifiers: ["cmd"], key: "u" }} />
       </ActionPanel>
     );
   } else if (article.doi) {
@@ -492,12 +519,16 @@ function EntryActionsDetail(article: Article) {
       <ActionPanel>
         <Action.Open icon={Icon.Globe} title="Open Article in Browser" target={article.url} />
         <Action.CopyToClipboard title="Copy DOI" content={article.doi} shortcut={{ modifiers: ["cmd"], key: "d" }} />
+        <Action.CopyToClipboard title="Copy PMID" content={article.pmid} shortcut={{ modifiers: ["cmd"], key: "p" }} />
+        <Action.CopyToClipboard title="Copy URL" content={article.url} shortcut={{ modifiers: ["cmd"], key: "u" }} />
       </ActionPanel>
     );
   } else {
     return (
       <ActionPanel>
         <Action.Open icon={Icon.Globe} title="Open Article in Browser" target={article.url} />
+        <Action.CopyToClipboard title="Copy PMID" content={article.pmid} shortcut={{ modifiers: ["cmd"], key: "p" }} />
+        <Action.CopyToClipboard title="Copy URL" content={article.url} shortcut={{ modifiers: ["cmd"], key: "u" }} />
       </ActionPanel>
     );
   }

@@ -1,5 +1,10 @@
 # PubMe Changelog
 
+## [Version 1.3] - 2023-06-18
+- NEW: Cache - trending articles are now cached and only refreshed daily by default (you can change the time for a refresh in settings)
+- NEW: Copy URL of current article with ⌘ + U
+- NEW: Copy the PMID of current article with ⌘ + P
+
 ## [Version 1.2] - 2023-04-13
 
 - NEW: Copy the DOI quickly by just pressing ⌘ + D
