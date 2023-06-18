@@ -1,10 +1,12 @@
 # Foundry `Cast` Raycast Extension
 
-Use the Cast CLI directly inside Raycast!
+Use the Foundry Cast CLI directly inside Raycast!
 
 ## Getting started
 
 To use this extension, you need to have [Raycast](https://www.raycast.com/) and [Foundry](https://book.getfoundry.sh/getting-started/installation) installed on your machine.
+
+Additionally, you will need an [Alchemy](https://alchemy.com/) API key to use the commands that require RPC connections. This is used in order to provide every Cast functionality on `Mainnet`, `Optimism`, `Arbitrum` and `Polygon`. You can create an account and get a free API key [here](https://dashboard.alchemyapi.io/signup).
 
 ### Local development / Usage
 
@@ -21,10 +23,10 @@ To use this extension, you need to have [Raycast](https://www.raycast.com/) and 
 - All `ENS` commands
 - All `account` commands
 - All `ABI` commands
+- All `Block` commands
 
 ## TODO
 
-- All `Block` commands
 - All `Transaction` commands
 - All `Conversion` commands
 
@@ -37,6 +39,15 @@ The setup is pretty simple. I made a hook called `useCast` that handles everythi
 take a look at any file inside the `src` directory to see how it works. Here's a quick example:
 
 ```tsx
+// src/commands/utility/keccak.tsx
+
+// Export the info that will be displayed in the list of available commands
+export const CastKeccak: Script = {
+  name: "Keccak",
+  description: "Hash arbitrary data using keccak-256",
+  component: Command,
+};
+
 // Define the arguments that the command can take
 const Arguments = {
   value: { required: true, name: "Value" },
@@ -69,4 +80,5 @@ export default function Command() {
 
 ## License
 
-All files within this repository are licensed under the MIT License unless explicitly stated otherwise.
+All files within this repository are licensed under the MIT License unless explicitly stated otherwise. <br />
+100% Open Source software.
