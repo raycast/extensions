@@ -362,7 +362,7 @@ function EntryActions(
             target={"https://next.amboss.com/de/search?q=" + encodeURI(query) + "&v=overview"}
             shortcut={{ modifiers: ["opt", "shift"], key: "enter" }}
           />
-          <Action.CopyToClipboard title="Copy URL" content={url} shortcut={{ modifiers: ["cmd"], key: "c" }} />
+          <Action.CopyToClipboard title="Copy URL" content={url} shortcut={{ modifiers: ["cmd"], key: "u" }} />
           <Action
             icon={Icon.ArrowLeftCircleFilled}
             title={backTitel}
@@ -411,7 +411,7 @@ function EntryActions(
             target={"https://next.amboss.com/de/search?q=" + encodeURI(query) + "&v=overview"}
             shortcut={{ modifiers: ["opt", "shift"], key: "enter" }}
           />
-          <Action.CopyToClipboard title="Copy URL" content={url} shortcut={{ modifiers: ["cmd"], key: "c" }} />
+          <Action.CopyToClipboard title="Copy URL" content={url} shortcut={{ modifiers: ["cmd"], key: "u" }} />
           <Action.Open
             icon={Icon.ArrowLeftCircleFilled}
             title={backTitel}
@@ -459,7 +459,7 @@ function EntryActions(
             target={"https://next.amboss.com/de/search?q=" + encodeURI(query) + "&v=overview"}
             shortcut={{ modifiers: ["opt", "shift"], key: "enter" }}
           />
-          <Action.CopyToClipboard title="Copy URL" content={url} shortcut={{ modifiers: ["cmd"], key: "c" }} />
+          <Action.CopyToClipboard title="Copy URL" content={url} shortcut={{ modifiers: ["cmd"], key: "u" }} />
           <Action.Open
             icon={Icon.ArrowLeftCircleFilled}
             title={backTitel}
@@ -504,7 +504,7 @@ function EntryActions(
             target={"https://next.amboss.com/de/search?q=" + encodeURI(urlTitle) + "&v=overview"}
             shortcut={{ modifiers: ["opt"], key: "enter" }}
           />
-          <Action.CopyToClipboard title="Copy URL" content={url} shortcut={{ modifiers: ["cmd"], key: "c" }} />
+          <Action.CopyToClipboard title="Copy URL" content={url} shortcut={{ modifiers: ["cmd"], key: "u" }} />
           <Action
             icon={Icon.ArrowLeftCircleFilled}
             title={backTitel}
@@ -540,7 +540,7 @@ function EntryActions(
             target={"https://next.amboss.com/de/search?q=" + encodeURI(urlTitle) + "&v=overview"}
             shortcut={{ modifiers: ["opt"], key: "enter" }}
           />
-          <Action.CopyToClipboard title="Copy URL" content={url} shortcut={{ modifiers: ["cmd"], key: "c" }} />
+          <Action.CopyToClipboard title="Copy URL" content={url} shortcut={{ modifiers: ["cmd"], key: "u" }} />
           <Action.Open
             icon={Icon.ArrowLeftCircleFilled}
             title={backTitel}
@@ -576,7 +576,7 @@ function EntryActions(
             target={"https://next.amboss.com/de/search?q=" + encodeURI(urlTitle) + "&v=overview"}
             shortcut={{ modifiers: ["opt"], key: "enter" }}
           />
-          <Action.CopyToClipboard title="Copy URL" content={url} shortcut={{ modifiers: ["cmd"], key: "c" }} />
+          <Action.CopyToClipboard title="Copy URL" content={url} shortcut={{ modifiers: ["cmd"], key: "u" }} />
           <Action.Open
             icon={Icon.ArrowLeftCircleFilled}
             title={backTitel}

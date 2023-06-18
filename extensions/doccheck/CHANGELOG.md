@@ -5,7 +5,7 @@
 - NEW: Cache - all of the above is now cached (you can change the time for a refresh in settings)
 - NEW: Full Navigation - you can now go back and forth (like in a browser, pro-tip: use the arrow keys (← or →); on the first page you now go back via `pop` (same functionality as using the esc key), so you don't lose context)
 - NEW: History - by default the last 3 articles are shown on the new home screen (you can change the number of entries in settings)
-- NEW: Copy URL of current article with ⌘ + C
+- NEW: Copy URL of current article with ⌘ + U
 - NEW: open edit URL of current article in browser with ⌘ + E
 - NEW: return to Home with ⌘ + H
 - NEW: embedded DocCheck videos are now displayed as embedded link

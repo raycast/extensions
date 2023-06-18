@@ -26,6 +26,7 @@ type HistoryItem = {
   date_publish: string;
   author: string;
 };
+
 const LASTRELOAD_KEY = "lastReload";
 
 const TOPARTICLES_KEY = "topArticles";
@@ -625,7 +626,7 @@ function EntryActions(url: string, title: string, query: string) {
           target={"https://next.amboss.com/de/search?q=" + encodeURI(query) + "&v=overview"}
           shortcut={{ modifiers: ["opt", "shift"], key: "enter" }}
         />
-        <Action.CopyToClipboard title="Copy URL" content={url} shortcut={{ modifiers: ["cmd"], key: "c" }} />
+        <Action.CopyToClipboard title="Copy URL" content={url} shortcut={{ modifiers: ["cmd"], key: "u" }} />
       </ActionPanel>
     );
   } else {
@@ -649,7 +650,7 @@ function EntryActions(url: string, title: string, query: string) {
           target={"https://next.amboss.com/de/search?q=" + encodeURI(title) + "&v=overview"}
           shortcut={{ modifiers: ["opt"], key: "enter" }}
         />
-        <Action.CopyToClipboard title="Copy URL" content={url} shortcut={{ modifiers: ["cmd"], key: "c" }} />
+        <Action.CopyToClipboard title="Copy URL" content={url} shortcut={{ modifiers: ["cmd"], key: "u" }} />
       </ActionPanel>
     );
   }
