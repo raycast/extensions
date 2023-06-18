@@ -94,6 +94,11 @@ export default function AddProgressForm(props: AddProgressFormProps) {
           setFormValue({ ...formValue, menubarTitle: title });
         }}
         onChange={(title) => {
+          if (!title) {
+            setError({ ...error, titleInMenubarError: "The field should't be empty!" });
+          } else {
+            setError({ ...error, titleInMenubarError: undefined });
+          }
           setFormValue({ ...formValue, menubarTitle: title });
         }}
         error={error.titleInMenubarError}
