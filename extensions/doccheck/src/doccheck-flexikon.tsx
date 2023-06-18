@@ -625,7 +625,7 @@ function EntryActions(url: string, title: string, query: string) {
           target={"https://next.amboss.com/de/search?q=" + encodeURI(query) + "&v=overview"}
           shortcut={{ modifiers: ["opt", "shift"], key: "enter" }}
         />
-        <Action.CopyToClipboard title="Copy URL" content={url} />
+        <Action.CopyToClipboard title="Copy URL" content={url} shortcut={{ modifiers: ["cmd"], key: "c" }} />
       </ActionPanel>
     );
   } else {
@@ -649,7 +649,7 @@ function EntryActions(url: string, title: string, query: string) {
           target={"https://next.amboss.com/de/search?q=" + encodeURI(title) + "&v=overview"}
           shortcut={{ modifiers: ["opt"], key: "enter" }}
         />
-        <Action.CopyToClipboard title="Copy URL" content={url} />
+        <Action.CopyToClipboard title="Copy URL" content={url} shortcut={{ modifiers: ["cmd"], key: "c" }} />
       </ActionPanel>
     );
   }
