@@ -14,19 +14,19 @@
   "commands": [
     {
       "name": "random",
-      "title": "Random",
+      "title": "Random Tip",
       "description": "Random a lucky tip",
       "mode": "view"
     },
     {
       "name": "search",
-      "title": "Search",
+      "title": "Search Tips",
       "description": "Search tips by keyword",
       "mode": "view"
     },
     {
       "name": "sync",
-      "title": "Sync",
+      "title": "Sync Tips",
       "description": "Sync all tips from remote",
       "mode": "no-view"
     }
