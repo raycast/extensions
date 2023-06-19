@@ -1,4 +1,4 @@
-import { runAppleScript } from "run-applescript";
+import { runAppleScript } from "@raycast/utils";
 import { getErrorMessage } from "../helpers/getError";
 import { checkSpotifyApp } from "../helpers/isSpotifyInstalled";
 import { EpisodeObject, TrackObject } from "../helpers/spotify.api";

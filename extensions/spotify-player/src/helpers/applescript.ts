@@ -1,5 +1,5 @@
 import { closeMainWindow } from "@raycast/api";
-import { runAppleScript } from "run-applescript";
+import { runAppleScript } from "@raycast/utils";
 
 /**
  * Builds AppleScript to ensure Spotify is running and then wraps the passed command(s).
