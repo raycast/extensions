@@ -18,7 +18,6 @@ export default function Random(): ReactElement {
     <Detail
       markdown={results?.data ? `## ${results.data.title}\n\n${results.data.content}` : ""}
       isLoading={isLoading}
-      navigationTitle={results?.data?.title || "Random Tip"}
       actions={
         <ActionPanel>
           <ActionPanel.Item
