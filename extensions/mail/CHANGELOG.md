@@ -1,6 +1,6 @@
 # Mail Changelog
 
-## [New Feature] - {PR_MERGE_DATE}
+## [New Feature] - 2023-06-19
 
 Add support for multiple languages and email services
 
