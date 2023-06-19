@@ -3,7 +3,7 @@ import {
   BlueskyProfileUrlBase,
   FollowToastMessage,
   MuteToastMessage,
-  OpenAccountProfile,
+  OpenProfile,
   SearchTitle,
   UnfollowToastMessage,
   UnmuteToastMessage,
@@ -73,7 +73,7 @@ const AccountActionPanel = ({
   return (
     <ActionPanel>
       <Action
-        title={OpenAccountProfile}
+        title={OpenProfile}
         icon={{ source: Icon.Person, tintColor: Color.Blue }}
         onAction={() =>
           push(<AuthorFeed showNavDropdown={false} previousViewTitle={SearchTitle} authorHandle={account.handle} />)

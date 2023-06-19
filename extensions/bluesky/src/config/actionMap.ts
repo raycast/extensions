@@ -4,7 +4,7 @@ import {
   LikePost,
   Mute,
   OpenAccountLikes,
-  OpenAccountProfile,
+  OpenProfile,
   QuotePost,
   ReplyPost,
   Repost,
@@ -142,7 +142,7 @@ export const ActionMap: ActionsDictionary = {
     shortcut: { modifiers: ["cmd"], key: "h" },
   },
   openProfile: {
-    getTitle: () => OpenAccountProfile,
+    getTitle: () => OpenProfile,
     icon: Icon.Person,
     color: Color.Blue,
     shortcut: { modifiers: ["cmd"], key: "return" },
