@@ -1,6 +1,7 @@
 import { Clipboard, ActionPanel, List, Action, getPreferenceValues } from "@raycast/api";
 import * as chrono from "chrono-node";
 import { useMemo, useState } from "react";
+import "@total-typescript/ts-reset";
 
 interface LabeledDate {
   label?: string;
@@ -109,11 +110,12 @@ function getResults(query: string): LabeledDate[] {
   }
 
   const machine = parseMachineReadableDate(query);
-  if (machine) {
-    return [machine];
-  }
+  const human = chrono.parse(query).map((x) => ({ date: x.date(), human: true, label: x.text }));
 
-  return chrono.parse(query).map((x) => ({ date: x.date(), human: true, label: x.text }));
+  return [machine, ...human].filter(Boolean).filter((x, i, arr) => {
+    const date = x.date.toISOString();
+    return arr.findIndex((y) => y.date.toISOString() === date) === i;
+  });
 }
 
 function copy(text: string) {
