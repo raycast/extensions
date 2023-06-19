@@ -34,6 +34,7 @@
       "description": "Converts your current selection to Latin and paste it back to your selection.",
       "mode": "no-view",
       "icon": "tolatin.png"
+     
     }
   ],
   "dependencies": {
