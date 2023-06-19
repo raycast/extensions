@@ -1,3 +1,3 @@
 # VueJobs Changelog
 
-## [Initial Version] - 2023-06-11
+## [Initial Version] - {PR_MERGE_DATE}
