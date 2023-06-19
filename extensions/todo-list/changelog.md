@@ -1,5 +1,13 @@
 # Todo List Changelog
 
+## [New Preference Option] - 2023-06-02
+
+- Added preference options for menu-bar's completed tasks (latest, show all, hide all)
+
+## [New Action] - 2023-06-01
+
+- Added possibility to mark all completed todo items as incomplete
+
 ## [New icon] - 2022-08-30
 
 Added light icon to the extension's menu MenuBarExtra

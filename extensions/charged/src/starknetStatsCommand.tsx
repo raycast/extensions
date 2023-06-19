@@ -1,6 +1,7 @@
 import { List, ActionPanel, Action } from "@raycast/api";
 import axios from "axios";
 import { useEffect, useState } from "react";
+import * as analytics from "./utils/analytics";
 
 const STARKSCAN_HEADERS = {
   "User-Agent":
@@ -14,6 +15,10 @@ const formatNumber = (str: string): string => {
 export default function Command() {
   const [listLoading, setListLoading] = useState<boolean>(true);
   const [listItems, setListItems] = useState<{ name: string; value: string }[]>([]);
+
+  useEffect(() => {
+    analytics.trackEvent("OPEN_STARKNET_STATS");
+  }, []);
 
   useEffect(() => {
     (async () => {
@@ -92,7 +97,10 @@ export default function Command() {
           title={item.name}
           actions={
             <ActionPanel>
-              <Action.OpenInBrowser url="https://starkscan.co/stats" />
+              <Action.OpenInBrowser
+                onOpen={() => analytics.trackEvent("STATS_OPEN_STARKSCAN")}
+                url="https://starkscan.co/stats"
+              />
             </ActionPanel>
           }
           accessories={[{ text: item.value }]}

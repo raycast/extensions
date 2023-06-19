@@ -37,6 +37,7 @@ jest.mock(
         transientCopyGeneratePassword: "always",
         transientCopyGeneratePasswordQuick: "always",
         shouldCacheVaultItems: true,
+        windowActionOnCopy: "close",
       })
     ),
     LocalStorage: {

@@ -11,7 +11,7 @@ export interface Note {
   path: string;
   tags: string[];
   content: string;
-  starred: boolean;
+  bookmarked: boolean;
 }
 
 export interface CodeBlock {

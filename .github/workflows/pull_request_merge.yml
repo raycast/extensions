@@ -9,7 +9,7 @@ on:
 
 jobs:
   merge:
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     name: Merge PR
     env:
       GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
@@ -33,7 +33,8 @@ jobs:
                   replacement=$(date '+%Y-%m-%d')
                   if grep -q $pattern $changelog; then
                       echo "  pattern found"
-                      sed -i "s/$pattern/$replacement/g" $changelog
+                      sed -i "" "s/$pattern/$replacement/g" $changelog 
+                      # ubuntu: sed -i "s/$pattern/$replacement/g" $changelog
                       echo "  updated to $replacement"
                   else
                       echo "  pattern not found - skipping"
@@ -42,6 +43,24 @@ jobs:
                   echo "  skipping (file not existing)"
               fi
           done
+      - name: Optimise images
+        run: |
+          images=$(gh pr view ${{ github.event.inputs.pr_number }} --json files | jq -r '.files[].path | select(endswith("png") or endswith("jpeg") or endswith("jpg"))')
+          images_array=()
+          if [[ -n "$images" ]]; then
+            echo "Images: $images"
+            while IFS= read -r image; do
+              images_array+=("$image")
+            done <<< "$images"
+          fi
+          count=${#images_array[@]}
+          echo "Found images: $count"
+          if [ $count -gt 0 ]; then
+            brew update
+            brew install imageoptim
+            brew install imageoptim-cli
+            imageoptim "${images_array[@]}"
+          fi
       - name: Commit changes
         id: commit_changes
         run: |
@@ -57,7 +76,7 @@ jobs:
 
             git add .
             git status .
-            git commit --message "Update CHANGELOG.md"
+            git commit --message "Update CHANGELOG.md and optimise images"
 
             pr_branch=$(echo $pr_info | jq -r .headRefName)
             pr_repo_name=$(echo $pr_info | jq -r .headRepository.name)
@@ -68,7 +87,7 @@ jobs:
             echo "No changes, skipping sync."
           fi
       - name: Sleep for 30 seconds
-        run: sleep 30s
+        run: sleep 30 # sleep 30s for ubuntu
         shell: bash
       - name: Merge
         run: gh pr merge ${{ github.event.inputs.pr_number }} --squash

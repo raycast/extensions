@@ -1,0 +1,118 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "summarize-youtube-video-with-ai",
+  "title": "Summarize YouTube Videos with AI",
+  "description": "Summarize any YouTube Video with AI. Choose between Raycast AI or ChatGPT. You have to either be a Raycast Pro Member or have an OpenAI API Key.",
+  "icon": "extension_icon.png",
+  "author": "iKasch",
+  "categories": [
+    "Productivity",
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "summarizeVideo",
+      "title": "Summarize YouTube Video",
+      "description": "Use AI to create a summary of any YouTube video.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "video",
+          "placeholder": "Video URL or ID",
+          "type": "text",
+          "required": true
+        }
+      ],
+      "preferences": [
+        {
+          "name": "chosenAi",
+          "title": "Choose AI",
+          "description": "Choose between Raycast AI or ChatGPT",
+          "type": "dropdown",
+          "default": "raycastai",
+          "data": [
+            {
+              "value": "raycastai",
+              "title": "Raycast AI"
+            },
+            {
+              "value": "chatgpt",
+              "title": "ChatGPT"
+            }
+          ],
+          "required": true
+        },
+        {
+          "name": "creativity",
+          "title": "Creativity",
+          "description": "Choose how creative the AI should be.",
+          "type": "dropdown",
+          "default": "0.5",
+          "data": [
+            {
+              "value": "0",
+              "title": "None"
+            },
+            {
+              "value": "0.5",
+              "title": "Low"
+            },
+            {
+              "value": "1",
+              "title": "Medium"
+            },
+            {
+              "value": "1.5",
+              "title": "High"
+            },
+            {
+              "value": "2",
+              "title": "Maximum"
+            }
+          ],
+          "required": false
+        },
+        {
+          "name": "openaiApiToken",
+          "title": "OpenAI API Token",
+          "description": "Your OpenAI API Token. Required if you choose ChatGPT as your AI.",
+          "type": "password",
+          "default": "",
+          "required": false
+        },
+        {
+          "name": "language",
+          "title": "Language",
+          "description": "Define the language which the AI should use to summarize the video.",
+          "type": "textfield",
+          "default": "english",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.52.1",
+    "@raycast/utils": "^1.7.0",
+    "date-fns": "^2.30.0",
+    "openai": "^3.2.1",
+    "youtube-transcript": "^1.0.6",
+    "ytdl-core": "^4.11.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "^20.2.5",
+    "@types/react": "^18.2.8",
+    "eslint": "^8.41.0",
+    "prettier": "^2.5.1",
+    "typescript": "^5.1.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

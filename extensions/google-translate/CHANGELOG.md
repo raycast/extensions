@@ -1,5 +1,13 @@
 # Google Translate Changelog
 
+## [Fix] - 2023-06-15
+
+- Fixed langauge code for Hebrew
+
+## [Enhancement] - 2023-05-30
+
+- Added ability to translate selected text
+
 ## [Enhancement] - 2023-05-22
 
 - Added error handling

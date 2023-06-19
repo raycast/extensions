@@ -1,5 +1,18 @@
 # Quantumcast Changelog
 
+## [0.0.6] - 2023-06-07
+
+- ✨ New - Extension preferences `Cloudflow List System Whitepapers`
+- ✨ New - Command `Open Cloudflow Whitepaper`
+- 💎 Improvements - Update package `quantumlib` to v0.0.13
+
+## [0.0.5] - 2023-05-31
+
+- ✨ New - Extension preferences `Cloudflow User Name`
+- ✨ New - Extension preferences `Cloudflow User Password`
+- ✨ New - Command `Open Cloudflow Collection`
+- 💎 Improvements - Update package `quantumlib` to v0.0.12
+
 ## [0.0.4] - 2023-05-17
 
 - ✨ New - Extension preferences `Packz Manual Language`
