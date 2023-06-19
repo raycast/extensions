@@ -111,6 +111,8 @@ export const openPin = async (pin: Pin, preferences: { preferredBrowser: string 
   try {
     const targetRaw = pin.url.startsWith("~") ? pin.url.replace("~", os.homedir()) : pin.url;
     const target = await Placeholders.applyToString(targetRaw);
+    if (target == "") return;
+
     const isPath = pin.url.startsWith("/") || pin.url.startsWith("~");
     const targetApplication = !pin.application || pin.application == "None" ? undefined : pin.application;
     if (isPath) {
@@ -122,7 +124,7 @@ export const openPin = async (pin: Pin, preferences: { preferredBrowser: string 
         throw new Error("File does not exist.");
       }
     } else {
-      if (target.match(/^[a-zA-Z0-9]*?:.*/g)) {
+      if (target.match(/[a-zA-Z0-9]+?:.*/g)) {
         // Open the URL in the target application (fallback to preferred browser, then default browser)
         await open(encodeURI(target), targetApplication || preferences.preferredBrowser);
         await setStorage(StorageKey.LAST_OPENED_PIN, pin.id);
@@ -173,7 +175,7 @@ export const createNewPin = async (
   const storedPins = await getStorage(StorageKey.LOCAL_PINS);
 
   // Get the next available pin ID
-  let newID = (await getStorage(StorageKey.NEXT_PIN_ID))[0];
+  let newID = (await getStorage(StorageKey.NEXT_PIN_ID))[0] || 1;
   while (storedPins.some((pin: Pin) => pin.id == newID)) {
     newID++;
   }
@@ -241,7 +243,7 @@ export const modifyPin = async (
   });
 
   if (pin.id == -1) {
-    pin.id = (await getStorage(StorageKey.NEXT_PIN_ID))[0];
+    pin.id = (await getStorage(StorageKey.NEXT_PIN_ID))[0] || 1;
     while (storedPins.some((storedPin: Pin) => storedPin.id == pin.id)) {
       pin.id = pin.id + 1;
     }

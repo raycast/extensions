@@ -414,7 +414,7 @@ export default function Command() {
                 title="Duplicate"
                 icon={Icon.EyeDropper}
                 shortcut={{ modifiers: ["cmd", "ctrl"], key: "d" }}
-                target={<EditPinView pin={{ ...pin, name: pin.name + " Copy" }} setPins={setPins} />}
+                target={<EditPinView pin={{ ...pin, name: pin.name + " Copy", id: -1 }} setPins={setPins} />}
               />
 
               {index > 0 ? (
