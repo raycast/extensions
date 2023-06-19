@@ -31,19 +31,19 @@
   "preferences": [
     {
       "name": "MarkdownFolder",
-      "description": "markdown folder path, multiple paths are separated by commas",
+      "description": "Markdown folder path, multiple paths are separated by commas",
       "type": "textfield",
       "required": true,
-      "placeholder": "markdown folder path, multiple paths are separated by commas",
-      "title": "MarkdownFolders"
+      "placeholder": "Markdown folder path, multiple paths are separated by commas",
+      "title": "Markdown Folders"
     },
     {
       "name": "excludeFileRegexp",
-      "description": "exclude file or path regexp, multiple files are separated by commas",
+      "description": "Exclude file or path regexp, multiple files are separated by commas",
       "type": "textfield",
       "required": false,
-      "placeholder": "exclude file or path regexp, multiple files are separated by commas",
-      "title": "exclude file or path regexp"
+      "placeholder": "Exclude file or path regexp, multiple files are separated by commas",
+      "title": "Exclude File or Path Regexp"
     }
   ],
   "dependencies": {
