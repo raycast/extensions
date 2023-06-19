@@ -1,11 +1,10 @@
-import { title } from "process";
-
 import { Form, Icon } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { ForwardedRef, forwardRef, useState } from "react";
 
 import { autocomplete } from "../api/request";
 import { User } from "../api/users";
+import { getUserAvatar } from "../helpers/avatars";
 import { getJiraCredentials } from "../helpers/withJiraCredentials";
 
 type FormUserDropdownProps = {
@@ -47,12 +46,7 @@ const FormUserDropdown = forwardRef(
           const title = user.accountId === myself.accountId ? `${user.displayName} (me)` : user.displayName;
 
           return (
-            <Form.Dropdown.Item
-              key={user.accountId}
-              value={user.accountId}
-              title={title}
-              icon={user.avatarUrls["32x32"]}
-            />
+            <Form.Dropdown.Item key={user.accountId} value={user.accountId} title={title} icon={getUserAvatar(user)} />
           );
         })}
       </Form.Dropdown>

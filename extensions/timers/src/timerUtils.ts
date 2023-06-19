@@ -79,12 +79,15 @@ function getTimers() {
         secondsSet: -99,
         timeLeft: -99,
         originalFile: timerFile,
+        timeEnds: new Date(),
       };
       timer.name = readFileSync(environment.supportPath + "/" + timerFile).toString();
       const timerFileParts = timerFile.split("---");
       timer.secondsSet = Number(timerFileParts[1].split(".")[0]);
       const timeStarted = timerFileParts[0].replace(/__/g, ":");
       timer.timeLeft = Math.max(0, Math.round(timer.secondsSet - secondsBetweenDates({ d2: timeStarted })));
+      timer.timeEnds = new Date(timeStarted);
+      timer.timeEnds.setSeconds(timer.timeEnds.getSeconds() + timer.secondsSet);
       setOfTimers.push(timer);
     }
   });

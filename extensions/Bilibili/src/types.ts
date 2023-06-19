@@ -175,6 +175,7 @@ declare global {
       desc: string;
       duration: number;
       owner: uploader;
+      short_link_v2: string;
       stat: {
         danmaku?: number;
         view?: number;

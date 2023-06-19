@@ -89,12 +89,12 @@ With a few options:
 - `options.env` is a key-value pairs to set as the environment of the child process. It will extend automatically from `process.env`.
 - `options.encoding` is a string to specify the character encoding used to decode the `stdout` and `stderr` output. If set to `"buffer"`, then `stdout` and `stderr` will be a `Buffer` instead of a string.
 - `options.input` is a string or a Buffer to write to the `stdin` of the file.
-- `options.timeout` is a number. If greater than `0`, the parent will send the signal `SIGTERM` if the child runs longer than timeout milliseconds.
+- `options.timeout` is a number. If greater than `0`, the parent will send the signal `SIGTERM` if the child runs longer than timeout milliseconds. By default, the execution will timeout after 10000ms (eg. 10s).
 - `options.parseOutput` is a function that accepts the output of the child process as an argument and returns the data the hooks will return - see [ParseExecOutputHandler](#parseexecoutputhandler). By default, the hook will return `stdout`.
 
 Including the [useCachedPromise](./useCachedPromise.md)'s options:
 
-- `options.keepPreviousData` is a boolean to tell the hook to keep the previous results instead of returning the initial value if there aren't any in the cache for the new arguments. This is particularly useful when used for data for a List to avoid flickering.
+- `options.keepPreviousData` is a boolean to tell the hook to keep the previous results instead of returning the initial value if there aren't any in the cache for the new arguments. This is particularly useful when used for data for a List to avoid flickering. See [Argument dependent on user input](#argument-dependent-on-user-input) for more information.
 
 Including the [useCachedState](./useCachedState.md)'s options:
 
@@ -118,21 +118,25 @@ Returns an object with the [AsyncState](#asyncstate) corresponding to the execut
 ## Example
 
 ```tsx
-import { List, ActionPanel, Action } from "@raycast/api";
+import { List } from "@raycast/api";
 import { useExec } from "@raycast/utils";
+import { cpus } from "os";
+import { useMemo } from "react";
 
-const Demo = () => {
-  const { isLoading, data, revalidate } = useExec("brew", ["info", "--json=v2", "--installed"]);
-  const results = useMemo<{}[]>(() => JSON.parse(data || "[]"), [data]);
+const brewPath = cpus()[0].model.includes("Apple") ? "/opt/homebrew/bin/brew" : "/usr/local/bin/brew";
+
+export default function () {
+  const { isLoading, data } = useExec(brewPath, ["info", "--json=v2", "--installed"]);
+  const results = useMemo<{ id: string; name: string }[]>(() => JSON.parse(data || "{}").formulae || [], [data]);
 
   return (
     <List isLoading={isLoading}>
-      {(data || []).map((item) => (
+      {results.map((item) => (
         <List.Item key={item.id} title={item.name} />
       ))}
     </List>
   );
-};
+}
 ```
 
 ## Argument dependent on user input

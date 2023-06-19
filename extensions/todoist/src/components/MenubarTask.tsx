@@ -1,28 +1,30 @@
 import { Color, confirmAlert, Icon, MenuBarExtra, open, showHUD } from "@raycast/api";
 import removeMarkdown from "remove-markdown";
 
-import { Task, deleteTask as apiDeleteTAsk, closeTask, updateTask } from "../api";
+import { SyncData, Task, deleteTask as apiDeleteTAsk, closeTask, updateTask } from "../api";
 import { getCollaboratorIcon, getProjectCollaborators } from "../helpers/collaborators";
 import { isTodoistInstalled } from "../helpers/isTodoistInstalled";
 import { getRemainingLabels } from "../helpers/labels";
 import { priorities } from "../helpers/priorities";
 import { getPriorityIcon } from "../helpers/priorities";
 import { getTaskAppUrl, getTaskUrl } from "../helpers/tasks";
-import useCachedData from "../hooks/useCachedData";
 import { useFocusedTask } from "../hooks/useFocusedTask";
 
 import View from "./View";
 
 type MenuBarTaskProps = {
   task: Task;
+  data?: SyncData;
+  setData: React.Dispatch<React.SetStateAction<SyncData | undefined>>;
 };
 
-const MenuBarTask = ({ task }: MenuBarTaskProps) => {
-  const [data, setData] = useCachedData();
+const MenuBarTask = ({ task, data, setData }: MenuBarTaskProps) => {
   const { focusedTask, unfocusTask, focusTask } = useFocusedTask();
 
   const collaborators = getProjectCollaborators(task.project_id, data);
   const remainingLabels = task && data?.labels ? getRemainingLabels(task, data.labels) : [];
+
+  const subTasks = data?.items.filter((item) => item.parent_id === task.id);
 
   async function completeTask(task: Task) {
     try {
@@ -112,6 +114,16 @@ const MenuBarTask = ({ task }: MenuBarTaskProps) => {
         ) : (
           <MenuBarExtra.Item title="Unfocus Task" onAction={() => unfocusTask()} icon={Icon.MinusCircle} />
         )}
+        {subTasks && subTasks?.length > 0 ? (
+          <MenuBarExtra.Submenu
+            title={`${subTasks.length} subtask` + (subTasks.length > 1 ? "s" : "")}
+            icon={{ source: "sub-task.svg", tintColor: Color.SecondaryText }}
+          >
+            {subTasks.map((task) => (
+              <MenuBarTask key={task.id} task={task} data={data} setData={setData} />
+            ))}
+          </MenuBarExtra.Submenu>
+        ) : null}
 
         <MenuBarExtra.Item title="Complete Task" onAction={() => completeTask(task)} icon={Icon.Checkmark} />
 

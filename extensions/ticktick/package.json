@@ -4,9 +4,22 @@
   "description": "Check and search tasks in TickTick via Raycast",
   "icon": "tick-logo.png",
   "author": "appest",
+  "contributors": [
+    "Alireza"
+  ],
   "license": "MIT",
   "categories": [
     "Productivity"
+  ],
+  "preferences": [
+    {
+      "name": "autoFillEnabled",
+      "description": "Automatically fill the task fields using Raycast AI (Requires Pro)",
+      "type": "checkbox",
+      "defaultValue": false,
+      "label": "Auto Fill with AI",
+      "required": false
+    }
   ],
   "commands": [
     {
@@ -40,12 +53,16 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.36.0",
+    "lodash": "^4.17.21",
     "moment": "^2.29.1",
-    "run-applescript": "^6.0.0"
+    "run-applescript": "^6.0.0",
+    "similarity": "^1.2.1"
   },
   "devDependencies": {
+    "@types/lodash": "^4.14.194",
     "@types/node": "~16.10.0",
     "@types/react": "^17.0.28",
+    "@types/similarity": "^1.2.1",
     "@types/sql.js": "^1.4.3",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",

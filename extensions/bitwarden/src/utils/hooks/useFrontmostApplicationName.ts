@@ -5,7 +5,9 @@ export default function useFrontmostApplicationName() {
   const [currentApplication, setCurrentApplication] = useState<string | undefined>(undefined);
 
   useEffect(() => {
-    void getFrontmostApplication().then((application) => setCurrentApplication(application.name));
+    void getFrontmostApplication()
+      .then((application) => setCurrentApplication(application.name))
+      .catch(() => setCurrentApplication(undefined));
   }, []);
 
   return currentApplication;

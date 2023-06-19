@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Note } from "./bear-db";
 import { useBearDb } from "./hooks";
 import NoteActions from "./note-actions";
+import TagsDropdown from "./search-dropdown";
 
 interface SearchNotesArguments {
   searchQuery?: string;
@@ -13,18 +14,20 @@ export default function SearchNotes(props: LaunchProps<{ arguments: SearchNotesA
   const [searchQuery, setSearchQuery] = useState(initialSearchQuery ?? "");
   const [db, error] = useBearDb();
   const [notes, setNotes] = useState<Note[]>();
+  const [selectedTag, setSelectedTag] = useState<string | null>(null);
 
   useEffect(() => {
     if (db != null) {
-      setNotes(db.getNotes(searchQuery));
+      setNotes(db.getNotes(searchQuery, selectedTag ?? undefined));
     }
-  }, [db, searchQuery]);
+  }, [db, searchQuery, selectedTag]);
 
   if (error) {
     showToast(Toast.Style.Failure, "Something went wrong", error.message);
   }
 
   const showDetail = (notes ?? []).length > 0 && getPreferenceValues().showPreviewInListView;
+  const handleTagChange = (tag: string | null) => setSelectedTag(tag);
 
   return (
     <List
@@ -34,6 +37,7 @@ export default function SearchNotes(props: LaunchProps<{ arguments: SearchNotesA
       searchBarPlaceholder="Search note text or id ..."
       isShowingDetail={showDetail}
       throttle={true}
+      searchBarAccessory={<TagsDropdown onTagChange={handleTagChange} />}
     >
       {notes?.map((note) => (
         <List.Item

@@ -1,5 +1,9 @@
 # Docker Hub Changelog
 
+## [Feature] - 2023-06-12
+
+- Support Pull Image from Docker Hub
+
 ## [Enhance extension] - 2022-09-28
 
 - Support Login Docker Hub Account

@@ -1,8 +1,9 @@
-import { Action, ActionPanel, Clipboard, Detail, Icon, Keyboard, closeMainWindow, showHUD } from "@raycast/api";
+import { Action, ActionPanel, Clipboard, Detail, Icon } from "@raycast/api";
 import { getTransientCopyPreference } from "~/utils/preferences";
 import { capitalize } from "~/utils/strings";
 import { SHORTCUT_KEY_SEQUENCE } from "~/constants/general";
 import { useMemo } from "react";
+import { showCopySuccessMessage } from "~/utils/clipboard";
 
 type Constraint = RecordOfAny;
 
@@ -22,8 +23,7 @@ function ShowDetailsScreen<TDetails extends Constraint>(props: ShowDetailsScreen
 
   const handleCopyField = (value: string) => async () => {
     await Clipboard.copy(value, { transient: getTransientCopyPreference("other") });
-    await showHUD("Copied to clipboard");
-    await closeMainWindow();
+    await showCopySuccessMessage("Copied details to clipboard");
   };
 
   const { sortedDetails, sortedDetailsEntries } = useMemo(() => {
@@ -36,17 +36,18 @@ function ShowDetailsScreen<TDetails extends Constraint>(props: ShowDetailsScreen
     };
   }, [details]);
 
+  const copyDetails = async () => {
+    await Clipboard.copy(getCopyValue(sortedDetails), { transient: getTransientCopyPreference("other") });
+    await showCopySuccessMessage(`Copied ${label} details to clipboard`);
+  };
+
   return (
     <Detail
       markdown={getMarkdown(itemName, sortedDetails)}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <Action.CopyToClipboard
-              title={`Copy ${capitalizedLabel} Details`}
-              content={getCopyValue(sortedDetails)}
-              transient={getTransientCopyPreference("other")}
-            />
+            <Action title={`Copy ${capitalizedLabel} Details`} onAction={copyDetails} />
           </ActionPanel.Section>
           <ActionPanel.Section title={`${capitalizedLabel} Fields`}>
             {sortedDetailsEntries.map(([fieldKey, content], index) => {
