@@ -46,7 +46,7 @@ const NewPinForm = () => {
                 values.nameField,
                 values.urlField,
                 values.iconField,
-                values.groupField,
+                values.groupField || "None",
                 values.openWithField,
                 values.dateField,
                 values.execInBackgroundField
@@ -121,7 +121,7 @@ const NewPinForm = () => {
         />
       ) : null}
 
-      <Form.Dropdown id="iconField" title="Icon" defaultValue="None">
+      <Form.Dropdown id="iconField" title="Icon" defaultValue="Favicon / File Icon">
         {iconList.map((icon) => {
           const urlIcon = url
             ? url.startsWith("/") || url.startsWith("~")

@@ -58,7 +58,7 @@ export const createNewGroup = async (name: string, icon: string) => {
   const storedGroups = await getStorage(StorageKey.LOCAL_GROUPS);
 
   // Get the next available group ID
-  let newID = (await getStorage(StorageKey.NEXT_GROUP_ID))[0];
+  let newID = (await getStorage(StorageKey.NEXT_GROUP_ID))[0] || 1;
   while (storedGroups.some((group: Group) => group.id == newID)) {
     newID++;
   }
@@ -99,7 +99,7 @@ export const modifyGroup = async (
   });
 
   if (group.id == -1) {
-    group.id = (await getStorage(StorageKey.NEXT_GROUP_ID))[0];
+    group.id = (await getStorage(StorageKey.NEXT_GROUP_ID))[0] || 1;
     while (storedGroups.some((storedGroup: Group) => storedGroup.id == group.id)) {
       group.id = group.id + 1;
     }

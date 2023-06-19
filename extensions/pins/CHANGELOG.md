@@ -1,5 +1,11 @@
 # Pins Changelog
 
+## [Bug fixes] - 2023-06-19
+
+- Fixed bug where pins without a group would not be treated as valid pins in some cases
+- Fixed bug where "Duplicate" action would overwrite the original pin
+- Changed "New Pin" to default to Favicon / File Icon instead of "None" 
+
 ## [Pinned Terminal Commands, Placeholders, Pin Expirations, and More] - 2023-06-18
 
 - Added per-pin "Open With" setting to allow you to choose which application to open the pin in

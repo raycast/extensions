@@ -173,7 +173,7 @@ export const createNewPin = async (
   const storedPins = await getStorage(StorageKey.LOCAL_PINS);
 
   // Get the next available pin ID
-  let newID = (await getStorage(StorageKey.NEXT_PIN_ID))[0];
+  let newID = (await getStorage(StorageKey.NEXT_PIN_ID))[0] || 1;
   while (storedPins.some((pin: Pin) => pin.id == newID)) {
     newID++;
   }
@@ -241,7 +241,7 @@ export const modifyPin = async (
   });
 
   if (pin.id == -1) {
-    pin.id = (await getStorage(StorageKey.NEXT_PIN_ID))[0];
+    pin.id = (await getStorage(StorageKey.NEXT_PIN_ID))[0] || 1;
     while (storedPins.some((storedPin: Pin) => storedPin.id == pin.id)) {
       pin.id = pin.id + 1;
     }

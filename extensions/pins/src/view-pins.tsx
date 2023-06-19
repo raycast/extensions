@@ -17,7 +17,7 @@ import {
 import { iconMap, setStorage, getStorage, ExtensionPreferences, installExamples } from "./lib/utils";
 import { StorageKey } from "./lib/constants";
 import { getFavicon, useCachedState } from "@raycast/utils";
-import { Pin, checkExpirations, deletePin, modifyPin, openPin, usePins } from "./lib/Pins";
+import { Pin, checkExpirations, createNewPin, deletePin, modifyPin, openPin, usePins } from "./lib/Pins";
 import { Group, useGroups } from "./lib/Groups";
 import * as os from "os";
 import { useRecentApplications } from "./lib/LocalData";
@@ -414,7 +414,7 @@ export default function Command() {
                 title="Duplicate"
                 icon={Icon.EyeDropper}
                 shortcut={{ modifiers: ["cmd", "ctrl"], key: "d" }}
-                target={<EditPinView pin={{ ...pin, name: pin.name + " Copy" }} setPins={setPins} />}
+                target={<EditPinView pin={{ ...pin, name: pin.name + " Copy", id: -1 }} setPins={setPins} />}
               />
 
               {index > 0 ? (
