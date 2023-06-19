@@ -17,7 +17,7 @@ import {
 import { iconMap, setStorage, getStorage, ExtensionPreferences, installExamples } from "./lib/utils";
 import { StorageKey } from "./lib/constants";
 import { getFavicon, useCachedState } from "@raycast/utils";
-import { Pin, checkExpirations, createNewPin, deletePin, modifyPin, openPin, usePins } from "./lib/Pins";
+import { Pin, checkExpirations, deletePin, modifyPin, openPin, usePins } from "./lib/Pins";
 import { Group, useGroups } from "./lib/Groups";
 import * as os from "os";
 import { useRecentApplications } from "./lib/LocalData";

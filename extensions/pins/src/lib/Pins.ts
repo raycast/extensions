@@ -111,6 +111,8 @@ export const openPin = async (pin: Pin, preferences: { preferredBrowser: string 
   try {
     const targetRaw = pin.url.startsWith("~") ? pin.url.replace("~", os.homedir()) : pin.url;
     const target = await Placeholders.applyToString(targetRaw);
+    if (target == "") return;
+
     const isPath = pin.url.startsWith("/") || pin.url.startsWith("~");
     const targetApplication = !pin.application || pin.application == "None" ? undefined : pin.application;
     if (isPath) {
@@ -122,7 +124,7 @@ export const openPin = async (pin: Pin, preferences: { preferredBrowser: string 
         throw new Error("File does not exist.");
       }
     } else {
-      if (target.match(/^[a-zA-Z0-9]*?:.*/g)) {
+      if (target.match(/[a-zA-Z0-9]+?:.*/g)) {
         // Open the URL in the target application (fallback to preferred browser, then default browser)
         await open(encodeURI(target), targetApplication || preferences.preferredBrowser);
         await setStorage(StorageKey.LAST_OPENED_PIN, pin.id);

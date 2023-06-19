@@ -4,6 +4,7 @@
 
 - Fixed bug where pins without a group would not be treated as valid pins in some cases
 - Fixed bug where "Duplicate" action would overwrite the original pin
+- Fixed bug where script placeholders resolving to empty strings would show an error when used as the target of a pin
 - Changed "New Pin" to default to Favicon / File Icon instead of "None" 
 
 ## [Pinned Terminal Commands, Placeholders, Pin Expirations, and More] - 2023-06-18
