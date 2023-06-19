@@ -1,4 +1,4 @@
-import { Action, ActionPanel, LaunchProps, List, getPreferenceValues } from "@raycast/api";
+import { Action, ActionPanel, LaunchProps, List, Toast, getPreferenceValues, showToast } from "@raycast/api";
 import fs from "fs";
 import { useEffect, useState } from "react";
 
@@ -60,53 +60,57 @@ export default function Command(props: LaunchProps<{ arguments: IProps }>) {
   const [showDetail, setShowDetail] = useState(false);
 
   useEffect(() => {
-    const { MarkdownFolder: foldersText, excludeFileRegexp = "" } = preferences;
-    const folders = foldersText.split(",");
+    try {
+      const { MarkdownFolder: foldersText, excludeFileRegexp = "" } = preferences;
+      const folders = foldersText.split(",");
 
-    const files: string[] = [];
-    folders.map((folder) => {
-      files.push(
-        ...readWithFolder(
-          folder.trim(),
-          excludeFileRegexp
-            .split(",")
-            .filter(Boolean)
-            .map((regexp: string) => new RegExp(regexp.trim()))
-        )
-      );
-    });
-    const findList: IFile[] = [];
-    [...files].forEach((filename) => {
-      const _content = getContent(filename);
-      // 获取内容的第一行
-      const _title = _content.split("\n")[0].replace(/#/g, "").trim();
-      const findIndex = _content.indexOf(query);
-      const match = findIndex > -1 || _title.indexOf(query) > -1 || filename.indexOf(query) > -1;
-      if (match) {
-        let name = filename;
-        folders.forEach((folder) => {
-          name = name.replace(folder, "");
-        });
-        name = name.replace(".md", "").trim();
+      const files: string[] = [];
+      folders.map((folder) => {
+        files.push(
+          ...readWithFolder(
+            folder.trim(),
+            excludeFileRegexp
+              .split(",")
+              .filter(Boolean)
+              .map((regexp: string) => new RegExp(regexp.trim()))
+          )
+        );
+      });
+      const findList: IFile[] = [];
+      [...files].forEach((filename) => {
+        const _content = getContent(filename);
+        // 获取内容的第一行
+        const _title = _content.split("\n")[0].replace(/#/g, "").trim();
+        const findIndex = _content.indexOf(query);
+        const match = findIndex > -1 || _title.indexOf(query) > -1 || filename.indexOf(query) > -1;
+        if (match) {
+          let name = filename;
+          folders.forEach((folder) => {
+            name = name.replace(folder, "");
+          });
+          name = name.replace(".md", "").trim();
 
-        const nameArr = name.split("/");
-        name = nameArr[nameArr.length - 1];
+          const nameArr = name.split("/");
+          name = nameArr[nameArr.length - 1];
 
-        const _subTitle = _content
-          .replace(/\n/g, "")
-          .trim()
-          .substring(findIndex > -1 ? (findIndex - 20 > -1 ? findIndex - 20 : 0) : 0, 200);
+          const _subTitle = _content
+            .replace(/\n/g, "")
+            .trim()
+            .substring(findIndex > -1 ? (findIndex - 20 > -1 ? findIndex - 20 : 0) : 0, 200);
 
-        findList.push({
-          title: _title,
-          subTitle: _subTitle,
-          content: _content,
-          filename: name,
-          pathname: filename,
-        });
-      }
-    });
-    setList([...findList]);
+          findList.push({
+            title: _title,
+            subTitle: _subTitle,
+            content: _content,
+            filename: name,
+            pathname: filename,
+          });
+        }
+      });
+      setList([...findList]);
+    } catch (err: any) {
+      showToast({ style: Toast.Style.Failure, title: "Something went wrong", message: err.message });
+    }
   }, []);
 
   return (
