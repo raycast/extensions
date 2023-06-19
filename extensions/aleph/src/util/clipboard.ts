@@ -29,5 +29,6 @@ export const contents = async () => {
 };
 
 export const update = async (contents: string) => {
+  await Clipboard.copy(contents);
   await Clipboard.paste(contents);
 };
