@@ -3,7 +3,10 @@ import { contents, update } from "./util/clipboard";
 export default async () => {
   try {
     const clipboard = await contents();
-    const encoded = clipboard.split("\n").map(line => line.split("").reverse().join("")).join("\n");
+    const encoded = clipboard
+      .split("\n")
+      .map((line) => line.split("").reverse().join(""))
+      .join("\n");
     await update(encoded);
     showHUD("Reversed text");
   } catch (e) {
@@ -11,4 +14,4 @@ export default async () => {
       await showToast(ToastStyle.Failure, "Encode failed", e);
     }
   }
-}
+};

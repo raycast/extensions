@@ -1,4 +1,3 @@
-
 import { showToast, ToastStyle, showHUD } from "@raycast/api";
 import { contents, update } from "./util/clipboard";
 export default async () => {
@@ -12,5 +11,4 @@ export default async () => {
       await showToast(ToastStyle.Failure, "Encode failed", e);
     }
   }
-}
-
+};

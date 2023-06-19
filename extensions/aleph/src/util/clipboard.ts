@@ -3,7 +3,7 @@ import { Alert, getSelectedText, showHUD, Clipboard } from "@raycast/api";
 export const contents = async () => {
   let selectedText = "";
   let prompt = "";
-  let optionalSelect = true;
+  const optionalSelect = true;
 
   try {
     selectedText = await getSelectedText();
@@ -29,6 +29,5 @@ export const contents = async () => {
 };
 
 export const update = async (contents: string) => {
- 
   await Clipboard.paste(contents);
 };
