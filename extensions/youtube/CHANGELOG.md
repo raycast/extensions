@@ -1,5 +1,9 @@
 # YouTube Changelog
 
+## [Enhancements] - 2023-06-20
+
+- Added video duration info on details view
+
 ## [Enhancements] - 2023-04-18
 
 - Bug fixes for recent and pinned items not updating correctly

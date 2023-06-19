@@ -67,7 +67,7 @@ function ShowVideoDetails(props: VideoActionProps) {
   const { video, refresh } = props;
   return (
     <Action.Push
-      title="Show Details 1"
+      title="Show Details"
       target={<VideoItemDetail {...props} />}
       icon={{ source: Icon.List, tintColor: Color.PrimaryText }}
       onPush={() => {
