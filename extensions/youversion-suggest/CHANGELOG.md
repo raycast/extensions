@@ -1,5 +1,12 @@
 # YouVersion Bible Suggest Changelog
 
+## [v3.3.0] - 2023-06-17
+
+- Fixed a bug where "Search the Bible by Phrase" results were always in English
+- Fixed a bug where copied Bible content was always in English
+- Updated the Raycast API to the latest version (v1.53.4, at the time of
+  writing)
+
 ## [v3.2.0] - 2023-06-03
 
 - Fixed a recently-occurring error when fetching Bible content
