@@ -1,10 +1,11 @@
 import { Action, ActionPanel, clearSearchBar, getPreferenceValues, Icon, List, showHUD, showToast } from "@raycast/api";
 import { exec } from "child_process";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import prettyBytes from "pretty-bytes";
 import useInterval from "./hooks/use-interval";
 
 export default function ProcessList() {
+  const [fetchResult, setFetchResult] = useState<Process[]>([]);
   const [state, setState] = useState<Process[]>([]);
   const [query, setQuery] = useState<string | undefined>(undefined);
 
@@ -19,12 +20,12 @@ export default function ProcessList() {
   const [aggregateApps, setAggregateApps] = useState<boolean>(preferences.aggregateApps ?? false);
 
   const fetchProcesses = () => {
-    exec(`ps -eo pid,ppid,pcpu,rss,comm`, async (err, stdout) => {
+    exec(`ps -eo pid,ppid,pcpu,rss,comm`, (err, stdout) => {
       if (err != null) {
         return;
       }
 
-      let processes = stdout
+      const processes = stdout
         .split("\n")
         .map((line) => {
           const defaultValue = ["", "", "", "", "", ""];
@@ -46,23 +47,25 @@ export default function ProcessList() {
         })
         .filter((process) => process.processName !== "");
 
-      if (aggregateApps) {
-        processes = aggregate(processes);
-      }
-
-      processes.sort((a, b) => {
-        if (sortByMem) {
-          return a.mem > b.mem ? -1 : 1;
-        } else {
-          return a.cpu > b.cpu ? -1 : 1;
-        }
-      });
-
-      setState(processes);
+      setFetchResult(processes);
     });
   };
 
-  useInterval(fetchProcesses, refreshDuration, [sortByMem, aggregateApps]);
+  useInterval(fetchProcesses, refreshDuration);
+  useEffect(() => {
+    let processes = fetchResult;
+    if (aggregateApps) {
+      processes = aggregate(processes);
+    }
+    processes.sort((a, b) => {
+      if (sortByMem) {
+        return a.mem > b.mem ? -1 : 1;
+      } else {
+        return a.cpu > b.cpu ? -1 : 1;
+      }
+    });
+    setState(processes);
+  }, [fetchResult, sortByMem, aggregateApps]);
 
   const fileIcon = (process: Process) => {
     if (process.type === "prefPane") {
@@ -78,7 +81,7 @@ export default function ProcessList() {
 
   const killProcess = (process: Process) => {
     exec(`kill -9 ${process.id}`);
-    setState(state.filter((p) => p.id !== process.id));
+    setFetchResult(state.filter((p) => p.id !== process.id));
     clearSearchBar({ forceScrollToTop: true });
     showHUD(`✅ Killed ${process.processName === "-" ? `process ${process.id}` : process.processName}`);
   };

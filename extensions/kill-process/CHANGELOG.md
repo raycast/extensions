@@ -4,6 +4,7 @@
 
 - Now can sort processes by CPU or memory usage
 - Now can aggregate processes of the same app
+
 ## [Auto Refresh] - 2023-06-13
 
 - Add auto-refresh of list, check preferences

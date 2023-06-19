@@ -3,7 +3,7 @@ import { useEffect, useRef } from "react";
 // eslint-disable-next-line @typescript-eslint/no-empty-function
 const noop = () => {};
 
-export function useInterval(callback: () => void, delay: number | null, deps: React.DependencyList) {
+export function useInterval(callback: () => void, delay: number | null) {
   const savedCallback = useRef(noop);
 
   useEffect(() => {
@@ -19,7 +19,7 @@ export function useInterval(callback: () => void, delay: number | null, deps: Re
       const id = setInterval(() => savedCallback.current(), interval);
       return () => clearInterval(id);
     }
-  }, [delay, ...deps]);
+  }, [delay]);
 }
 
 export default useInterval;
