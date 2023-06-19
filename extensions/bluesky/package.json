@@ -40,7 +40,7 @@
   "commands": [
     {
       "name": "menu-bar-notifications",
-      "title": "Menu bar Notifications",
+      "title": "Menu Bar Notifications",
       "description": "A menu bar item to show your recent notifications.",
       "mode": "menu-bar"
     },
