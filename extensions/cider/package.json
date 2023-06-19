@@ -1,0 +1,90 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "cider",
+  "title": "Cider",
+  "description": "The official Raycast Cider extension, use this extension to control your playback including play/pause, shuffle, search for new songs, and more!",
+  "icon": "command-icon.png",
+  "author": "cidercollective",
+  "categories": [
+    "Applications",
+    "Media"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "play",
+      "title": "Play",
+      "description": "Continues or starts playback from where you last left off.",
+      "mode": "no-view"
+    },
+    {
+      "name": "pause",
+      "title": "Pause",
+      "description": "Pauses playback where you last left off.",
+      "mode": "no-view"
+    },
+    {
+      "name": "stop",
+      "title": "Stop Playback",
+      "description": "Stops playback and resets the progress of the current track.",
+      "mode": "no-view"
+    },
+    {
+      "name": "playpause",
+      "title": "Toggle Play/Pause",
+      "description": "Toggles between play and pause depending on the current state.",
+      "mode": "no-view"
+    },
+    {
+      "name": "next",
+      "title": "Next Track",
+      "description": "Plays the next track (if applicable) in the queue.",
+      "mode": "no-view",
+      "keywords": [
+        "skip"
+      ]
+    },
+    {
+      "name": "previous",
+      "title": "Previous Track",
+      "description": "Returns to the previous played track.",
+      "mode": "no-view",
+      "keywords": [
+        "back"
+      ]
+    },
+    {
+      "name": "toggle-autoplay",
+      "title": "Toggle Autoplay",
+      "description": "Toggles the Autoplay setting in Cider.",
+      "mode": "no-view"
+    },
+    {
+      "name": "add-to-library",
+      "title": "Add to Library",
+      "description": "Adds the currently playing song to library.",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.53.4",
+    "node-fetch": "^3.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
