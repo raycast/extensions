@@ -20,21 +20,21 @@ export const getCurrentWeather = () => {
       try {
         setWeather(JSON.parse(cacheWeather) as OpenMeteoWeather);
       } catch (e) {
-        console.debug(`Could not parse cached weather: ${cacheWeather}`);
+        console.debug(`Could not parse cached weather: ${cacheWeather}`, e);
       }
     }
     if (typeof cacheLocation === "string" && !isEmpty(cacheLocation)) {
       try {
         setLocation(JSON.parse(cacheLocation) as GeoLocation);
       } catch (e) {
-        console.debug(`Could not parse cached location: ${cacheLocation}`);
+        console.debug(`Could not parse cached location: ${cacheLocation}`, e);
       }
     }
     if (typeof cacheTime === "string" && !isEmpty(cacheTime)) {
       try {
         oldRefreshTime = JSON.parse(cacheTime) as number;
       } catch (e) {
-        console.debug(`Could not parse cached time: ${cacheTime}`);
+        console.debug(`Could not parse cached time: ${cacheTime}`, e);
       }
     }
     const newRefreshTime = Date.now();
