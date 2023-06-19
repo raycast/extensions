@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "markdown-search",
-  "title": "Markdown Search",
-  "description": "Markdown Search With Raycast",
+  "title": "Markdown Content Search",
+  "description": "Markdown Content Search With Raycast",
   "icon": "command-icon-custom.png",
   "author": "xiaokyo",
   "categories": [
@@ -14,8 +14,8 @@
   "commands": [
     {
       "name": "index",
-      "title": "Markdown Search",
-      "subtitle": "Markdown Search With Raycast",
+      "title": "Markdown Content Search",
+      "subtitle": "Markdown Content Search With Raycast",
       "description": "Search Local's Markdown File Content and Show Content",
       "mode": "view",
       "arguments": [
