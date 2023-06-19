@@ -26,7 +26,7 @@ const TVDetail: React.FC<TVDetailProps> = ({ data, rating }) => {
   return (
     <Detail.Metadata>
       {orig_title && <Detail.Metadata.Label title="Original Title" text={orig_title} />}
-      {other_title.length !== 0 && <Detail.Metadata.Label title="Other Title" text={other_title.join(",")} />}
+      {other_title.length !== 0 && <Detail.Metadata.Label title="Alternative Title" text={other_title.join(",")} />}
       {renderGenre(genre)}
       {rating && <Detail.Metadata.Label title="Rating" text={rating.toString()} />}
       <Detail.Metadata.Separator />
