@@ -103,7 +103,7 @@ export function getNotificationTypeTitle(notification: Notification): string {
   }
 }
 
-export function getNotificationSubtitle(notification) {
+export function getNotificationSubtitle(notification: Notification) {
   const reason = getNotificationReason(notification);
   const numberTag = getIssueOrPrNumberTag(notification);
 
@@ -141,13 +141,12 @@ export function getNotificationReason(notification: Notification) {
   }
 }
 
-export function getIssueOrPrNumberTag(notification) {
+export function getIssueOrPrNumberTag(notification: Notification) {
   if (notification.subject.type !== "Issue" && notification.subject.type !== "PullRequest") return;
 
   const id = notification.subject.url?.split("/").at(-1);
   return id ? `#${id}` : undefined;
 }
-
 
 export function getNotificationTooltip(date: Date) {
   return `Updated: ${format(date, "EEEE d MMMM yyyy 'at' HH:mm")}`;
