@@ -103,15 +103,11 @@ export function getNotificationTypeTitle(notification: Notification): string {
   }
 }
 
-export function getNotificationSubtitle(notification: Notification) {
+export function getNotificationSubtitle(notification) {
   const reason = getNotificationReason(notification);
   const numberTag = getIssueOrPrNumberTag(notification);
 
-  if (numberTag === undefined) {
-    return reason;
-  }
-
-  return `${numberTag} ･ ${reason}`;
+  return numberTag ? `${numberTag} ･ ${reason}` : reason;
 }
 
 export function getNotificationReason(notification: Notification) {
@@ -145,23 +141,13 @@ export function getNotificationReason(notification: Notification) {
   }
 }
 
-export function getIssueOrPrNumberTag(notification: Notification): string | undefined {
-  if (notification.subject.type !== "Issue" && notification.subject.type !== "PullRequest") {
-    return undefined;
-  }
+export function getIssueOrPrNumberTag(notification) {
+  if (notification.subject.type !== "Issue" && notification.subject.type !== "PullRequest") return;
 
-  const url = notification.subject.url;
-  if (url == undefined) {
-    return undefined;
-  }
-
-  const id = url.split("/").at(-1);
-  if (id === undefined) {
-    return undefined;
-  }
-
-  return `#${id}`;
+  const id = notification.subject.url?.split("/").at(-1);
+  return id ? `#${id}` : undefined;
 }
+
 
 export function getNotificationTooltip(date: Date) {
   return `Updated: ${format(date, "EEEE d MMMM yyyy 'at' HH:mm")}`;
