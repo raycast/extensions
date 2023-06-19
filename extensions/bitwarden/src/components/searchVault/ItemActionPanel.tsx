@@ -17,6 +17,7 @@ import {
   CopyCustomFieldsActions,
 } from "~/components/searchVault/actions";
 import { ItemType } from "~/types/vault";
+import FavoriteItemAction from "~/components/searchVault/actions/FavoriteItemAction";
 
 const { primaryAction } = getPreferenceValues();
 
@@ -71,6 +72,9 @@ const VaultItemActionPanel = () => {
       )}
       <ActionPanel.Section title="Custom Fields">
         <CopyCustomFieldsActions />
+      </ActionPanel.Section>
+      <ActionPanel.Section title="Item Actions">
+        <FavoriteItemAction />
       </ActionPanel.Section>
       <ActionPanel.Section title="Vault Management">
         <VaultManagementActions />

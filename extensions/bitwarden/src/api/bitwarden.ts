@@ -214,6 +214,12 @@ export class Bitwarden {
   private isPromptWaitingForMasterPassword(result: ExecaReturnValue): boolean {
     return !!(result.stderr && result.stderr.includes("Master password"));
   }
+
+  async editItem(item: Item): Promise<Item> {
+    const encodedItem = Buffer.from(JSON.stringify(item)).toString("base64");
+    const { stdout } = await this.exec(["edit", "item", item.id, encodedItem]);
+    return JSON.parse(stdout);
+  }
 }
 
 type Env = {
