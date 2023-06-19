@@ -1,0 +1,63 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "global-media-key",
+  "title": "Global Media Key",
+  "description": "Global media key simulator",
+  "icon": "command-icon.png",
+  "author": "douo",
+  "categories": [
+    "System"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "play",
+      "description": "Toggle Play/Pause",
+      "title": "Play/Pause",
+      "mode": "no-view"
+    },
+    {
+      "name": "next",
+      "description": "Toggle Play/Pause",
+      "title": "Next",
+      "mode": "no-view"
+    },
+    {
+      "name": "previous",
+      "description": "Toggle Play/Pause",
+      "title": "Previous",
+      "mode": "no-view"
+    },
+    {
+      "name": "fast",
+      "description": "Toggle Play/Pause",
+      "title": "Fast",
+      "mode": "no-view"
+    },
+    {
+      "name": "rewind",
+      "description": "Toggle Play/Pause",
+      "title": "Rewind",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.48.9"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "build-swift": "swift build --configuration=release --arch arm64 --arch x86_64 && mv .build/apple/Products/Release/media-key assets",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
