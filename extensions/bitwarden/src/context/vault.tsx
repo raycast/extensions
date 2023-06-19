@@ -21,6 +21,7 @@ export type VaultContextType = VaultState & {
   loadItems: () => Promise<void>;
   currentFolderId: Nullable<string>;
   setCurrentFolder: (folderOrId: Nullable<string | Folder>) => void;
+  mutateItem: (item: Item) => void;
 };
 
 const VaultContext = createContext<VaultContextType | null>(null);
@@ -95,6 +96,16 @@ export function VaultProvider(props: VaultProviderProps) {
     setCurrentFolderId(typeof folderOrId === "string" ? folderOrId : folderOrId?.id);
   }
 
+  async function mutateItem(item: Item) {
+    const itemIndex = state.items.findIndex((listItem) => listItem.id === item.id);
+    if (itemIndex !== -1) {
+      const items = [...state.items];
+      items[itemIndex] = item;
+      setState({ items });
+      cacheVault(items, state.folders);
+    }
+  }
+
   const memoizedValue: VaultContextType = useMemo(
     () => ({
       ...state,
@@ -105,6 +116,7 @@ export function VaultProvider(props: VaultProviderProps) {
       syncItems,
       loadItems,
       setCurrentFolder,
+      mutateItem,
     }),
     [state, session.isLoading, currentFolderId, syncItems, loadItems, setCurrentFolder]
   );
