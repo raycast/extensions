@@ -45,7 +45,7 @@
       "type": "dropdown",
       "description": "Set the number of columns of the avatar items. (Only works with Grid layout)",
       "required": false,
-      "title": "Avatar Item Coloums",
+      "title": "Avatar Item Colums",
       "default": "7",
       "data": [
         {
@@ -84,11 +84,11 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.44.0",
+    "@raycast/api": "^1.53.4",
     "@multiavatar/multiavatar": "^1.0.7",
-    "axios": "^0.27.2",
+    "axios": "^1.4.0",
     "d3-color": "^3.1.0",
-    "fs-extra": "^10.1.0"
+    "fs-extra": "^11.1.1"
   },
   "devDependencies": {
     "@types/d3-color": "^3.1.0",
