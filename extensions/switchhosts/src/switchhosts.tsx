@@ -89,4 +89,4 @@ function SwitchHostsList() {
   }
 }
 
-render(<SwitchHostsList />);
+export default SwitchHostsList;
