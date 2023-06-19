@@ -1,4 +1,4 @@
-import { showHUD, confirmAlert, showToast, Toast } from "@raycast/api";
+import { showToast, Toast } from "@raycast/api";
 import { sync } from "./laravel-tip";
 
 export default async function Search() {
