@@ -1,5 +1,9 @@
 # GitHub Changelog
 
+## [Show Issue/PR number in Notification] - 2023-06-19
+
+- Add Issue/PR number in `Notification` command
+
 ## [Add more branches to the into field] - 2023-06-16
 
 - Add more branches to the into field in Create Pull Request command (#4642)
