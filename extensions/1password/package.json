@@ -5,15 +5,17 @@
   "description": "Search, open or edit your 1Password passwords from Raycast",
   "icon": "1password-icon.png",
   "author": "khasbilegt",
-  "categories": [
-    "Security"
-  ],
   "contributors": [
     "thomas",
     "dteare",
     "pernielsentikaer",
     "cb372",
-    "Davidwalser"
+    "Davidwalser",
+    "henrik-dmg",
+    "spacedog"
+  ],
+  "categories": [
+    "Security"
   ],
   "license": "MIT",
   "commands": [
@@ -22,21 +24,17 @@
       "title": "My Passwords",
       "subtitle": "1Password",
       "description": "List of all your 1Password items. Then open in your default browser, view items in 1Password, or open items in 1Password for editing.",
-      "mode": "view",
       "keywords": [
         "1p",
         "1password",
         "password",
         "login"
-      ]
+      ],
+      "mode": "view"
     }
   ],
   "preferences": [
     {
-      "name": "version",
-      "type": "dropdown",
-      "title": "1Password App Version",
-      "description": "Select the version of the 1Password app you want to use",
       "data": [
         {
           "title": "1Password 8",
@@ -47,7 +45,11 @@
           "value": "v7"
         }
       ],
-      "required": true
+      "description": "Select the version of the 1Password app you want to use",
+      "name": "version",
+      "required": true,
+      "title": "1Password App Version",
+      "type": "dropdown"
     },
     {
       "data": [
@@ -68,10 +70,10 @@
           "value": "copy-password"
         }
       ],
+      "default": "open-in-1password",
       "description": "Primary action for 1Password login items (v8 only)",
       "name": "primaryAction",
       "required": false,
-      "default": "open-in-1password",
       "title": "Primary Action",
       "type": "dropdown"
     },
@@ -94,21 +96,29 @@
           "value": "copy-password"
         }
       ],
+      "default": "open-in-browser",
       "description": "Secondary action for 1Password login items (v8 only)",
       "name": "secondaryAction",
       "required": false,
-      "default": "open-in-browser",
       "title": "Secondary Action",
       "type": "dropdown"
     },
     {
-      "name": "cliPath",
-      "type": "textfield",
-      "title": "1Password CLI path",
-      "description": "Enter the CLI binary path",
+      "name": "closeWindowAfterCopying",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "Close window after copying.",
+      "description": "Close Raycast window after copying a username or password."
+    },
+    {
       "default": "/usr/local/bin/op",
+      "description": "Enter the CLI binary path",
+      "name": "cliPath",
       "placeholder": "e.g., /usr/local/bin/op",
-      "required": false
+      "required": false,
+      "title": "1Password CLI path",
+      "type": "textfield"
     }
   ],
   "dependencies": {

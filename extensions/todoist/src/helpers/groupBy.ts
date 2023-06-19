@@ -1,12 +1,11 @@
 import { Icon, Image } from "@raycast/api";
-import { compareAsc } from "date-fns";
 import { partition } from "lodash";
 import React from "react";
 
 import { Collaborator, Label, Project, Task, User } from "../api";
 import { priorities } from "../helpers/priorities";
 
-import { displayDueDate, isOverdue } from "./dates";
+import { displayDueDate, isOverdue, parseDay } from "./dates";
 
 export type GroupByOption = "default" | "assignee" | "date" | "priority" | "label" | "project";
 
@@ -83,20 +82,27 @@ export function groupByAssignees({ tasks, collaborators, user }: GroupByAssignee
 }
 
 export function groupByDueDates(tasks: Task[]) {
-  const [overdue, upcoming] = partition(tasks, (task: Task) => task.due?.date && isOverdue(new Date(task.due.date)));
+  const [dated, notdated] = partition(tasks, (task: Task) => task.due?.date);
+  const [overdue, upcoming] = partition(dated, (task: Task) => task.due?.date && isOverdue(task.due.date));
 
-  const allDueDates = [...new Set(upcoming.map((task) => task.due?.date))] as string[];
-  allDueDates.sort((dateA, dateB) => compareAsc(new Date(dateA), new Date(dateB)));
+  const allDueDates = [...new Set(upcoming.map((task) => parseDay(task.due?.date).toISOString()))] as string[];
+  allDueDates.sort();
 
   const sections = allDueDates.map((date) => ({
     name: displayDueDate(date),
-    tasks: upcoming?.filter((task) => task.due?.date === date) || [],
+    tasks: upcoming?.filter((task) => parseDay(task.due?.date).toISOString() === date) || [],
   }));
 
   if (overdue.length > 0) {
     sections.unshift({
       name: "Overdue",
       tasks: overdue,
+    });
+  }
+  if (notdated.length > 0) {
+    sections.push({
+      name: "No due date",
+      tasks: notdated,
     });
   }
 

@@ -12,4 +12,4 @@ export default pipe(
     SFSymbols.WARNING + " Failed to save/love the track",
     SFSymbols.LOVE + " Loved & added to library"
   )
-)();
+);

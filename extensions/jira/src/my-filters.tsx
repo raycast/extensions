@@ -29,7 +29,7 @@ export function MyFilters() {
       throttle
     >
       {filters?.map((filter) => {
-        return <List.Dropdown.Item key={filter.id} title={filter.name} value={filter.id} />;
+        return <List.Dropdown.Item key={filter.id} title={filter.name ?? "Unknown filter name"} value={filter.id} />;
       })}
     </List.Dropdown>
   ) : null;

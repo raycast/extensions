@@ -73,7 +73,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.50.0",
+    "@raycast/api": "^1.53.3",
     "@raycast/utils": "^1.5.2",
     "date-fns": "^2.29.3",
     "filesize": "^10.0.6",

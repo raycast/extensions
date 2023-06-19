@@ -24,7 +24,7 @@ export default function TrackListItem({
   let icon: Image.ImageLike | undefined = undefined;
   if (album?.images) {
     icon = {
-      source: album.images[album.images.length - 1].url,
+      source: album.images[album.images.length - 1]?.url,
     };
   }
 

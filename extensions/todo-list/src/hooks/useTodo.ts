@@ -73,5 +73,5 @@ export const useTodo = ({ item, idx, sectionKey }: { item: TodoItem; idx: number
     setSearchBarText(item.title);
   };
 
-  return { editTodo, deleteTodo, markTodo, markCompleted, pin, unPin, toggleTodo };
+  return { editTodo, deleteTodo, markTodo, markCompleted, pin, unPin, toggleCompleted, toggleTodo };
 };

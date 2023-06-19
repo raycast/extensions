@@ -1,12 +1,19 @@
+import { DeviceDefinition } from "src/types/device";
+
 export default {
-  // Standard
-  "0x0267": {},
-  // Numpad
-  "0x026C": {},
-  // Standard2021
-  "0x029C": {},
-  // Numpad2021
-  "0x029F": {},
-  // Fingerprint2021
-  "0x029A": {},
-};
+  "0x0267": {
+    name: "Magic Keyboard (Standard)",
+  },
+  "0x026C": {
+    name: "Magic Keyboard (Numpad)",
+  },
+  "0x029C": {
+    name: "Magic Keyboard (Standard | 2021)",
+  },
+  "0x029F": {
+    name: "Magic Keyboard (Numpad | 2021)",
+  },
+  "0x029A": {
+    name: "Magic Keyboard (Fingerprint | 2021)",
+  },
+} as Record<string, DeviceDefinition>;

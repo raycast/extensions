@@ -13,7 +13,8 @@
   ],
   "contributors": [
     "AnishDe12020",
-    "kud"
+    "kud",
+    "gerardcs"
   ],
   "commands": [
     {
@@ -61,6 +62,13 @@
       ]
     },
     {
+      "name": "search",
+      "title": "Search",
+      "subtitle": "Todoist",
+      "description": "Search your Todoist tasks, projects, labels, and comments.",
+      "mode": "view"
+    },
+    {
       "name": "create-task",
       "title": "Create Task",
       "subtitle": "Todoist",
@@ -103,7 +111,8 @@
       "title": "Create Project",
       "subtitle": "Todoist",
       "description": "Create a Todoist project.",
-      "mode": "view"
+      "mode": "view",
+      "disabledByDefault": true
     },
     {
       "name": "menu-bar",
@@ -130,6 +139,10 @@
               "value": "today"
             },
             {
+              "title": "Filter",
+              "value": "filter"
+            },
+            {
               "title": "Upcoming",
               "value": "upcoming"
             }
@@ -148,6 +161,14 @@
           "description": "Indicates the number of days you want in the upcoming view."
         },
         {
+          "default": "",
+          "description": "Task filter for the filter view. Use Todoist filter syntax, e.g. today & (#Work | @next).",
+          "name": "filter",
+          "required": false,
+          "title": "Filter Query",
+          "type": "textfield"
+        },
+        {
           "name": "focusFeatureWidth",
           "type": "textfield",
           "required": false,
@@ -163,7 +184,18 @@
       "title": "Show Projects",
       "subtitle": "Todoist",
       "description": "Show your Todoist projects.",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "showTaskCount",
+          "type": "checkbox",
+          "title": "Advanced",
+          "label": "Show the task count besides the project",
+          "description": "When enabled, you can see the task count besides your project.",
+          "default": false,
+          "required": false
+        }
+      ]
     },
     {
       "name": "show-labels",
@@ -192,8 +224,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.50.0",
-    "@raycast/utils": "^1.5.2",
+    "@raycast/api": "^1.52.1",
+    "@raycast/utils": "^1.7.0",
     "axios": "^1.3.6",
     "date-fns": "^2.29.3",
     "form-data": "^4.0.0",
@@ -203,7 +235,7 @@
     "remove-markdown": "^0.5.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.5",
+    "@raycast/eslint-config": "^1.0.6",
     "@types/lodash": "^4.14.185",
     "@types/mime": "^3.0.1",
     "@types/node": "^18.7.18",
@@ -211,11 +243,14 @@
     "@types/remove-markdown": "^0.3.1",
     "eslint": "^8.23.1",
     "eslint-plugin-import": "^2.27.5",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "prettier": "^2.8.7",
     "typescript": "^4.8.3"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "fix": "ray lint --fix"
   }
 }
