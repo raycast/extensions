@@ -484,7 +484,10 @@ const placeholders: Placeholder = {
         const script = str.match(/(?<=(jxa|JXA):)(.|[ \n\r\s])*?(?=}})/)?.[0];
         if (!script) return "";
         return execSync(
-          `osascript -l JavaScript -e "${script.replaceAll('"', '\\"').replaceAll("$", "\\$").replaceAll(new RegExp(/[\n\r]/, "g"), "; ")}"`
+          `osascript -l JavaScript -e "${script
+            .replaceAll('"', '\\"')
+            .replaceAll("$", "\\$")
+            .replaceAll(new RegExp(/[\n\r]/, "g"), "; ")}"`
         ).toString();
       } catch (e) {
         return "";
