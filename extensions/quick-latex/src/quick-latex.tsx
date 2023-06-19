@@ -17,7 +17,7 @@ export default function CommandWithCustoEmptyView() {
       mkdirSync(downloadDir, { recursive: true });
     }
   }, [state.searchText]);
-  
+
   return (
     <List onSearchTextChange={(newValue) => setState((previous) => ({ ...previous, searchText: newValue }))}>
       {state.searchText != ""
@@ -28,13 +28,12 @@ export default function CommandWithCustoEmptyView() {
                 source: {
                   light: latexUrl + encodeURIComponent(state.searchText),
                   dark: latexUrlDark + encodeURIComponent(state.searchText),
-                  
                 },
               }}
               actions={
                 <ActionPanel>
                   <Action
-                    title="Copy LaTeX imagee to Clipboard"
+                    title="Copy LaTeX Image to Clipboard"
                     onAction={() => {
                       runAppleScript(`set the clipboard to POSIX file "${downloadDir}/img.jpg"`),
                         popToRoot(),
