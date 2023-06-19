@@ -17,7 +17,7 @@ const GameMeta: React.FC<GameMetaProps> = ({ data, rating }) => {
       {developer.length !== 0 && <Detail.Metadata.Label title="Developer" text={developer.join(", ")} />}
       {publisher.length !== 0 && <Detail.Metadata.Label title="Publisher" text={publisher.join(", ")} />}
       {platform.length !== 0 && <Detail.Metadata.Label title="Platform" text={platform.join(", ")} />}
-      {release_date && <Detail.Metadata.Label title="Release Date" text={release_date.toString()} />}
+      {release_date && <Detail.Metadata.Label title="Released Date" text={release_date.toString()} />}
       {official_site && <Detail.Metadata.Link title="Official Website" target={official_site} text={official_site} />}
     </Detail.Metadata>
   );

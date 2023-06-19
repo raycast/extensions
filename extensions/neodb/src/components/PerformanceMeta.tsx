@@ -29,7 +29,7 @@ const PerformanceMeta: React.FC<PerformanceMetaProps> = ({ data, rating }) => {
   return (
     <Detail.Metadata>
       {orig_title && <Detail.Metadata.Label title="Original Title" text={orig_title} />}
-      {other_title.length !== 0 && <Detail.Metadata.Label title="Other Title" text={other_title.join(",")} />}
+      {other_title.length !== 0 && <Detail.Metadata.Label title="Alternative Title" text={other_title.join(",")} />}
       {renderGenre(genre)}
       {rating && <Detail.Metadata.Label title="Rating" text={rating.toString()} />}
       <Detail.Metadata.Separator />
@@ -38,8 +38,8 @@ const PerformanceMeta: React.FC<PerformanceMetaProps> = ({ data, rating }) => {
       {orig_creator.length !== 0 && <Detail.Metadata.Label title="Original Creator" text={orig_creator.join(", ")} />}
       {playwright.length !== 0 && <Detail.Metadata.Label title="Playwright" text={playwright.join(", ")} />}
       {composer.length !== 0 && <Detail.Metadata.Label title="Composer" text={composer.join(", ")} />}
-      {crew.length !== 0 && <Detail.Metadata.Label title="Composer" text={composer.join(", ")} />}
-      {choreographer.length !== 0 && <Detail.Metadata.Label title="choreographer" text={choreographer.join(", ")} />}
+      {crew.length !== 0 && <Detail.Metadata.Label title="Crew" text={crew.join(", ")} />}
+      {choreographer.length !== 0 && <Detail.Metadata.Label title="Choreographer" text={choreographer.join(", ")} />}
       {performer.length !== 0 && <Detail.Metadata.Label title="Performer" text={performer.join(", ")} />}
       {opening_date && <Detail.Metadata.Label title="Opening Date" text={opening_date.toString()} />}
       {closing_date && <Detail.Metadata.Label title="Closing Date" text={closing_date.toString()} />}

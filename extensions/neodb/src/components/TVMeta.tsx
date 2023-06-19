@@ -39,7 +39,7 @@ const TVDetail: React.FC<TVDetailProps> = ({ data, rating }) => {
       {year && <Detail.Metadata.Label title="Year" text={year.toString()} />}
       {episode_count && <Detail.Metadata.Label title="Episode Count" text={episode_count.toString()} />}
       {season_number && <Detail.Metadata.Label title="Season" text={season_number.toString()} />}
-      {site && <Detail.Metadata.Link title="Website" target={site} text={site} />}
+      {site && <Detail.Metadata.Link title="Official Website" target={site} text={site} />}
     </Detail.Metadata>
   );
 };

@@ -12,7 +12,7 @@ const MusicMeta: React.FC<MusicMetaProps> = ({ data, rating }) => {
   return (
     <Detail.Metadata>
       {rating && <Detail.Metadata.Label title="Rating" text={rating.toString()} />}
-      {other_title.length !== 0 && <Detail.Metadata.Label title="Other Title" text={other_title.join(", ")} />}
+      {other_title.length !== 0 && <Detail.Metadata.Label title="Alternative Title" text={other_title.join(", ")} />}
       {genre.length !== 0 && (
         <Detail.Metadata.TagList title="Genre">
           {genre.map((genre) => (
@@ -21,10 +21,10 @@ const MusicMeta: React.FC<MusicMetaProps> = ({ data, rating }) => {
         </Detail.Metadata.TagList>
       )}
       {artist.length !== 0 && <Detail.Metadata.Label title="Artist" text={artist.join(", ")} />}
-      {company.length !== 0 && <Detail.Metadata.Label title="Compony" text={company.join(", ")} />}
+      {company.length !== 0 && <Detail.Metadata.Label title="Company" text={company.join(", ")} />}
       {duration && <Detail.Metadata.Label title="Duration" text={duration.toString()} />}
       {release_date && <Detail.Metadata.Label title="Artist" text={release_date.toString()} />}
-      {barcode && <Detail.Metadata.Label title="barcode" text={barcode} />}
+      {barcode && <Detail.Metadata.Label title="Barcode" text={barcode} />}
     </Detail.Metadata>
   );
 };
