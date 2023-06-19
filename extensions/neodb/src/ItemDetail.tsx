@@ -1,6 +1,6 @@
 import useDetail from "./hooks/useDetail";
 import { Item, Podcast, Movie, Performance, Album, Game, Book, ItemType, TV, Category } from "./types";
-import { Action, ActionPanel, Detail } from "@raycast/api";
+import { Action, ActionPanel, Detail, showToast, Toast } from "@raycast/api";
 import BookMeta from "./components/BookMeta";
 import MovieMeta from "./components/MovieMeta";
 import TVMeta from "./components/TVMeta";
@@ -8,6 +8,7 @@ import PodcastMeta from "./components/PodcastMeta";
 import GameMeta from "./components/GameMeta";
 import MusicMeta from "./components/MusicMeta";
 import PerformanceMeta from "./components/PerformanceMeta";
+import { useEffect } from "react";
 
 export function renderGenre(genre: string[]) {
   return (
@@ -53,6 +54,12 @@ const ItemDetail: React.FC<{ item: Item }> = ({ item }) => {
 
   ${brief}
   `;
+
+  useEffect(() => {
+    isLoading
+      ? showToast(Toast.Style.Animated, "Loading details ...")
+      : showToast(Toast.Style.Success, "Details loaded");
+  }, [isLoading]);
 
   return (
     <Detail
