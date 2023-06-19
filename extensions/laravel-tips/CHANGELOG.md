@@ -1,3 +1,3 @@
 # Laravel Tips Changelog
 
-## [Initial Version] - 2023-06-05
+## [Initial Version] - {PR_MERGE_DATE}
