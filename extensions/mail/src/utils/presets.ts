@@ -5,9 +5,9 @@ import { OutgoingMessageAction } from "../types";
 const UnreadColor = environment.appearance === "dark" ? "#0983ff" : "#007aff";
 const ReadColor = environment.appearance === "dark" ? "#a7a7a7" : "#757575";
 
-export const MailIcon: { [key: string]: Image.ImageLike } = {
+const _mainIcon = {
   Envelope: { source: "../assets/icons/envelope.svg", tintColor: Color.PrimaryText },
-  Important: { source: "../assets/icons/important.svg", tintColor: Color.PrimaryText },
+  Important: { source: "../assets/icons/flagged.svg", tintColor: Color.PrimaryText },
   Inbox: { source: "../assets/icons/inbox.svg", tintColor: Color.PrimaryText },
   Junk: { source: "../assets/icons/junk.svg", tintColor: Color.PrimaryText },
   MailApp: { source: "../assets/icons/mail.png" },
@@ -19,9 +19,15 @@ export const MailIcon: { [key: string]: Image.ImageLike } = {
   Trash: { source: "../assets/icons/trash.svg", tintColor: Color.PrimaryText },
   TrashRed: { source: "../assets/icons/trash.svg", tintColor: Color.Red },
   Unread: { source: Icon.CircleProgress100, tintColor: UnreadColor },
+  Drafts: { source: Icon.Document, tintColor: Color.PrimaryText },
+  Archive: { source: "../assets/icons/archive.svg", tintColor: Color.PrimaryText },
+  Mailbox: { source: "../assets/icons/folder.svg", tintColor: Color.PrimaryText },
+  Starred: { source: Icon.Star, tintColor: Color.PrimaryText },
 };
 
-export const OutgoingMessageIcon: { [key: string]: Image.ImageLike } = {
+export const MailIcon: Record<keyof typeof _mainIcon, Image.ImageLike> = _mainIcon;
+
+export const OutgoingMessageIcon: Record<OutgoingMessageAction, Image.ImageLike> = {
   [OutgoingMessageAction.New]: MailIcon.Sent,
   [OutgoingMessageAction.Reply]: Icon.Reply,
   [OutgoingMessageAction.ReplyAll]: Icon.Reply,
