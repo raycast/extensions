@@ -140,7 +140,7 @@ export default function Command(props: LaunchProps<{ arguments: IProps }>) {
     const jsonResBodyData = jsonResBody?.data?.object;
     resHasList = jsonResBodyData?.records || jsonResBodyData?.list || !!jsonResBody?.data?.content;
     if (resHasList) {
-      // 有列表值的情况
+      // has list data
       const list = jsonResBodyData?.records || jsonResBodyData?.list || jsonResBodyData?.content;
       list_key_name = jsonResBodyData?.records
         ? "records"

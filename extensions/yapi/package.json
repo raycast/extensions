@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "yapi",
   "title": "YAPI",
-  "description": "yApi's document transform to typescript interfaces",
+  "description": "YApi's document transform to typescript interfaces",
   "icon": "yapi.png",
   "author": "xiaokyo",
   "categories": [
@@ -12,9 +12,9 @@
   "commands": [
     {
       "name": "index",
-      "title": "yApi To Typescript",
+      "title": "YApi To Typescript",
       "subtitle": "Transform to Typescript Interfaces",
-      "description": "yApi's document transform to typescript interfaces",
+      "description": "YApi's document transform to typescript interfaces",
       "mode": "view",
       "arguments": [
         {
@@ -29,19 +29,19 @@
   "preferences": [
     {
       "name": "yapiHost",
-      "description": "yApi Host",
+      "description": "YApi Host",
       "type": "textfield",
       "required": true,
-      "placeholder": "yApi Host",
-      "title": "yApi Host"
+      "placeholder": "YApi Host",
+      "title": "YApi Host"
     },
     {
       "name": "yapiCookie",
-      "description": "yApi Cookie",
+      "description": "YApi Cookie",
       "type": "textfield",
       "required": true,
-      "placeholder": "yApi Cookie",
-      "title": "yApi Cookie"
+      "placeholder": "YApi Cookie",
+      "title": "YApi Cookie"
     }
   ],
   "dependencies": {
