@@ -28,11 +28,9 @@ type HistoryItem = {
 };
 
 const LASTRELOAD_KEY = "lastReload";
-
 const TOPARTICLES_KEY = "topArticles";
 const CURRENTARTICLES_KEY = "currentArticles";
 const PARTICIPATIONARTICLES_KEY = "participationArticles";
-
 const preferences = getPreferenceValues();
 
 type Result = {
