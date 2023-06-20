@@ -515,7 +515,7 @@ function EntryActions(article: Article, query: string, sortBy: string) {
 }
 
 function EntryActionsDetail(article: Article, query: string) {
-  const backTitel = query != undefined && query != "" ? `Back to Search  "` + query + `"` : "Back to Trending Articles"
+  const backTitel = query != undefined && query != "" ? `Back to Search  "` + query + `"` : "Back to Trending Articles";
   const { pop } = useNavigation();
   if (preferences.scihubinstance.value != undefined && preferences.scihubinstance.value != "" && article.doi) {
     return (
