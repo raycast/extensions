@@ -1,0 +1,51 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "tw",
+  "title": "TW - TaskWarrior",
+  "description": "A TaskWarrior extension",
+  "icon": "extension_icon.png",
+  "author": "roalcantara",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Search Tasks",
+      "subtitle": "TW - TaskWarrior",
+      "description": "Search TaskWarrior's tasks, projects & tags",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "custom_task_path",
+      "type": "textfield",
+      "title": "Custom Executable Path",
+      "default": "/usr/local/bin/task",
+      "description": "Set this if your task executable is in a non-standard location",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.53.4",
+    "@raycast/utils": "^1.7.0",
+    "date-fns": "^2.30.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
