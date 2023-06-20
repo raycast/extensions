@@ -1,4 +1,4 @@
-import { Form, ActionPanel, Action, showToast, Clipboard, Toast } from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, Clipboard, Toast, closeMainWindow } from "@raycast/api";
 import axios from "axios";
 import { useState, useRef } from "react";
 
