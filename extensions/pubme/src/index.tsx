@@ -11,6 +11,7 @@ import {
   Clipboard,
   LocalStorage,
   getPreferenceValues,
+  useNavigation,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { useFetch } from "@raycast/utils";
@@ -75,7 +76,7 @@ export default function Command() {
             (await LocalStorage.getItem(LASTRELOAD_KEY)) === undefined ||
             new Date().getTime() -
               (new Date((await LocalStorage.getItem(LASTRELOAD_KEY)) as string) ?? new Date()).getTime() >
-              preferences.refreshInterval.value
+              (preferences.refreshInterval.value as number)
           ) {
             await LocalStorage.setItem(LASTRELOAD_KEY, new Date().toISOString());
             setLoading(true);
@@ -430,7 +431,12 @@ function EntryActions(article: Article, query: string, sortBy: string) {
   if (preferences.scihubinstance.value != undefined && preferences.scihubinstance.value != "" && article.doi) {
     return (
       <ActionPanel>
-        <Action.Push icon={Icon.Book} title="Read abstract" target={<Details article={article} query={query} />} />
+        <Action.Push
+          icon={Icon.Book}
+          title="Read Abstract"
+          target={<Details article={article} query={query} />}
+          shortcut={{ modifiers: [], key: "arrowRight" }}
+        />
         <Action.Open
           icon={Icon.Globe}
           title="Open Article in Browser"
@@ -457,7 +463,12 @@ function EntryActions(article: Article, query: string, sortBy: string) {
   } else if (article.doi) {
     return (
       <ActionPanel>
-        <Action.Push icon={Icon.Book} title="Read Abstract" target={<Details article={article} query={query} />} />
+        <Action.Push
+          icon={Icon.Book}
+          title="Read Abstract"
+          target={<Details article={article} query={query} />}
+          shortcut={{ modifiers: [], key: "arrowRight" }}
+        />
         <Action.Open
           icon={Icon.Globe}
           title="Open Article in Browser"
@@ -478,7 +489,12 @@ function EntryActions(article: Article, query: string, sortBy: string) {
   } else {
     return (
       <ActionPanel>
-        <Action.Push icon={Icon.Book} title="Read abstract" target={<Details article={article} query={query} />} />
+        <Action.Push
+          icon={Icon.Book}
+          title="Read abstract"
+          target={<Details article={article} query={query} />}
+          shortcut={{ modifiers: [], key: "arrowRight" }}
+        />
         <Action.Open
           icon={Icon.Globe}
           title="Open Article in Browser"
@@ -498,7 +514,9 @@ function EntryActions(article: Article, query: string, sortBy: string) {
   }
 }
 
-function EntryActionsDetail(article: Article) {
+function EntryActionsDetail(article: Article, query: string) {
+  const backTitel = query != undefined && query != "" ? `Back to Search  "` + query + `"` : "Back to Trending Articles"
+  const { pop } = useNavigation();
   if (preferences.scihubinstance.value != undefined && preferences.scihubinstance.value != "" && article.doi) {
     return (
       <ActionPanel>
@@ -512,6 +530,12 @@ function EntryActionsDetail(article: Article) {
         <Action.CopyToClipboard title="Copy DOI" content={article.doi} shortcut={{ modifiers: ["cmd"], key: "d" }} />
         <Action.CopyToClipboard title="Copy PMID" content={article.pmid} shortcut={{ modifiers: ["cmd"], key: "p" }} />
         <Action.CopyToClipboard title="Copy URL" content={article.url} shortcut={{ modifiers: ["cmd"], key: "u" }} />
+        <Action
+          icon={Icon.ArrowLeftCircleFilled}
+          title={backTitel}
+          onAction={pop}
+          shortcut={{ modifiers: [], key: "arrowLeft" }}
+        />
       </ActionPanel>
     );
   } else if (article.doi) {
@@ -521,6 +545,12 @@ function EntryActionsDetail(article: Article) {
         <Action.CopyToClipboard title="Copy DOI" content={article.doi} shortcut={{ modifiers: ["cmd"], key: "d" }} />
         <Action.CopyToClipboard title="Copy PMID" content={article.pmid} shortcut={{ modifiers: ["cmd"], key: "p" }} />
         <Action.CopyToClipboard title="Copy URL" content={article.url} shortcut={{ modifiers: ["cmd"], key: "u" }} />
+        <Action
+          icon={Icon.ArrowLeftCircleFilled}
+          title={backTitel}
+          onAction={pop}
+          shortcut={{ modifiers: [], key: "arrowLeft" }}
+        />
       </ActionPanel>
     );
   } else {
@@ -529,6 +559,12 @@ function EntryActionsDetail(article: Article) {
         <Action.Open icon={Icon.Globe} title="Open Article in Browser" target={article.url} />
         <Action.CopyToClipboard title="Copy PMID" content={article.pmid} shortcut={{ modifiers: ["cmd"], key: "p" }} />
         <Action.CopyToClipboard title="Copy URL" content={article.url} shortcut={{ modifiers: ["cmd"], key: "u" }} />
+        <Action
+          icon={Icon.ArrowLeftCircleFilled}
+          title={backTitel}
+          onAction={pop}
+          shortcut={{ modifiers: [], key: "arrowLeft" }}
+        />
       </ActionPanel>
     );
   }
@@ -551,11 +587,12 @@ const Details = (props: { article: Article; query: string }) => {
   );
 
   let abstract = "";
+  const loadingAbstractHTML = "<em>Loading abstract…</em>";
   $("#abstract").each(function (i, link) {
     abstract += $(link).html();
   });
   if (abstract === "") {
-    abstract = "<i>No abstract available</i>";
+    abstract = loadingAbstractHTML;
   }
 
   let copyright = "";
@@ -590,11 +627,10 @@ const Details = (props: { article: Article; query: string }) => {
   });
 
   let markdown = "";
-  if (isLoading === false) {
-    markdown = nhm.translate(abstract + copyright + conflict + figures + affiliations);
-  } else {
-    markdown = nhm.translate("<em>Loading abstract…</em>");
+  if (abstract === loadingAbstractHTML && isLoading === false) {
+    abstract = "<em>No abstract available</em>";
   }
+  markdown = nhm.translate(abstract + copyright + conflict + figures + affiliations);
 
   const dateTitle =
     props.article.epubdate === props.article.pubdate
@@ -664,7 +700,7 @@ const Details = (props: { article: Article; query: string }) => {
             </Detail.Metadata.TagList>
           </Detail.Metadata>
         }
-        actions={EntryActionsDetail(props.article)}
+        actions={EntryActionsDetail(props.article, props.query)}
       />
     );
   } else if (props.article.doi) {
@@ -685,7 +721,7 @@ const Details = (props: { article: Article; query: string }) => {
             </Detail.Metadata.TagList>
           </Detail.Metadata>
         }
-        actions={EntryActionsDetail(props.article)}
+        actions={EntryActionsDetail(props.article, props.query)}
       />
     );
   } else {
@@ -705,7 +741,7 @@ const Details = (props: { article: Article; query: string }) => {
             </Detail.Metadata.TagList>
           </Detail.Metadata>
         }
-        actions={EntryActionsDetail(props.article)}
+        actions={EntryActionsDetail(props.article, props.query)}
       />
     );
   }
