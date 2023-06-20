@@ -88,7 +88,7 @@ export default function ProcessList() {
 
   const subtitleString = (process: Process) => {
     const subtitles = [];
-    if (process.type == "aggregatedApp" && process.appName != undefined) {
+    if (process.type === "aggregatedApp" && process.appName != undefined) {
       subtitles.push(process.appName);
     }
     if (shouldShowPID) {
@@ -110,7 +110,7 @@ export default function ProcessList() {
     appMap.set(1, { process: { id: 1 } as Process, childNodes: [] });
     const originalAppIds = Array<number>();
     processes.forEach((process) => {
-      if (process.type == "app") {
+      if (process.type === "app") {
         originalAppIds.push(process.id);
         let node = appMap.get(process.id);
         if (node == undefined) {
@@ -130,7 +130,7 @@ export default function ProcessList() {
             let nextNode;
             while (
               knownRootNode?.process != undefined &&
-              knownRootNode.process.pid != 1 &&
+              knownRootNode.process.pid !== 1 &&
               (nextNode = appMap.get(knownRootNode.process.pid)) != undefined
             ) {
               knownRootNode = nextNode;
@@ -139,7 +139,7 @@ export default function ProcessList() {
           }
         }
         // move childNodes to parent
-        if (knownRootNode.process?.id != 1) {
+        if (knownRootNode.process?.id !== 1) {
           knownRootNode.childNodes = knownRootNode.childNodes.concat(node.childNodes);
           node.childNodes = [];
         }
@@ -186,7 +186,7 @@ export default function ProcessList() {
     >
       {state
         .filter((process) => {
-          if (!query) {
+          if (query === "" || query == null) {
             return true;
           }
           const nameMatches = process.processName.toLowerCase().includes(query.toLowerCase());
@@ -195,7 +195,7 @@ export default function ProcessList() {
             process.path.toLowerCase().match(new RegExp(`.+${query}.*\\.[app|framework|prefpane]`, "ig")) != null;
           const pidMatches = shouldIncludePid && process.id.toString().includes(query);
           const appNameMatches =
-            process.type == "aggregatedApp" && process.appName?.toLowerCase().includes(query.toLowerCase());
+            process.type === "aggregatedApp" && process.appName?.toLowerCase().includes(query.toLowerCase());
 
           return nameMatches || pathMatches || pidMatches || appNameMatches;
         })
