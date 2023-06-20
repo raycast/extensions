@@ -494,6 +494,7 @@
 /extensions/laravel-livewire                         @tafhyseni
 /extensions/laravel-nova                             @a-drew
 /extensions/laravel-shift                            @denniseilander @pernielsentikaer
+/extensions/laravel-tips                             @godruoyi
 /extensions/laravel-valet                            @denniseilander @KevinBatdorf
 /extensions/laravel-vapor                            @tcampbPPU
 /extensions/large-type                               @gon250 @FezVrasta
@@ -1026,7 +1027,7 @@
 /extensions/yopass                                   @ricoberger
 /extensions/youdao-translate                         @tiancheng92
 /extensions/youtrack                                 @tiulpin @skoch13
-/extensions/youtube                                  @tonka3000 @SKaplanOfficial
+/extensions/youtube                                  @tonka3000 @SKaplanOfficial @madza91
 /extensions/youtube-companion                        @sasivarnan
 /extensions/youtube-downloader                       @vimtor @pernielsentikaer
 /extensions/youtube-music                            @danieldbird @AlexStrNik @zach-fuller
