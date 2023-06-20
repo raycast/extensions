@@ -24,6 +24,8 @@ const MenuBarTask = ({ task, data, setData }: MenuBarTaskProps) => {
   const collaborators = getProjectCollaborators(task.project_id, data);
   const remainingLabels = task && data?.labels ? getRemainingLabels(task, data.labels) : [];
 
+  const subTasks = data?.items.filter((item) => item.parent_id === task.id);
+
   async function completeTask(task: Task) {
     try {
       await closeTask(task.id, { data, setData });
@@ -112,6 +114,16 @@ const MenuBarTask = ({ task, data, setData }: MenuBarTaskProps) => {
         ) : (
           <MenuBarExtra.Item title="Unfocus Task" onAction={() => unfocusTask()} icon={Icon.MinusCircle} />
         )}
+        {subTasks && subTasks?.length > 0 ? (
+          <MenuBarExtra.Submenu
+            title={`${subTasks.length} subtask` + (subTasks.length > 1 ? "s" : "")}
+            icon={{ source: "sub-task.svg", tintColor: Color.SecondaryText }}
+          >
+            {subTasks.map((task) => (
+              <MenuBarTask key={task.id} task={task} data={data} setData={setData} />
+            ))}
+          </MenuBarExtra.Submenu>
+        ) : null}
 
         <MenuBarExtra.Item title="Complete Task" onAction={() => completeTask(task)} icon={Icon.Checkmark} />
 

@@ -1,8 +1,8 @@
-const devices: Record<string, Record<string, string>> = {
-  // Pixel Buds Pro
+import { DeviceDefinition } from "src/types/device";
+
+export default {
   "0x3004": {
+    name: "Pixel Buds Pro",
     main: "icons/devices/google/pixel.buds.pro.svg",
   },
-};
-
-export default devices;
+} as Record<string, DeviceDefinition>;

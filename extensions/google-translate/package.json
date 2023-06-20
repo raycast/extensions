@@ -12,7 +12,8 @@
   "contributors": [
     "FezVrasta",
     "metakirby5",
-    "AlanHuang"
+    "AlanHuang",
+    "nirtamir2"
   ],
   "license": "MIT",
   "commands": [
@@ -181,7 +182,7 @@
         },
         {
           "title": "🇮🇱 Hebrew",
-          "value": "he"
+          "value": "iw"
         },
         {
           "title": "🇮🇳 Hindi",
@@ -622,7 +623,7 @@
         },
         {
           "title": "🇮🇱 Hebrew",
-          "value": "he"
+          "value": "iw"
         },
         {
           "title": "🇮🇳 Hindi",

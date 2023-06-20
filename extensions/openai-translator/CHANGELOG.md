@@ -1,5 +1,9 @@
 # OpenAI Translator Changelog
 
+## [Updated model] - 2023-06-20
+
+- Added gpt-3.5-turbo-0613 model
+
 ## [Updated README] - 2023-06-05
 
 ## [Multiple LLM Provider support] - 2023-05-23

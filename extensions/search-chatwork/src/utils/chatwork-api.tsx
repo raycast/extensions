@@ -6,6 +6,10 @@ import { CWRoom } from "../model/CWRoom";
 import { CMRoomOwner } from "../model/CMRoomOwner";
 import { CWMessageMgr } from "../model/CWMessageMgr";
 import { Constants } from "../utils/constants";
+import { getPreferenceValues } from "@raycast/api";
+import { Preferences } from "../model/Preferences";
+
+const preferences: Preferences = getPreferenceValues();
 
 let headers = new Headers({
   accept: "application/json",
@@ -18,9 +22,14 @@ let headers = new Headers({
  * @returns headr with the token
  */
 async function authorizeApi(_headers: Headers) {
-  const token = await authorize();
-  _headers.append("authorization", `Bearer ${token}`);
-  return _headers;
+  if (preferences.useChatworkApiKey) {
+    _headers.append("x-chatworktoken", `${preferences.chatworkApiKey}`);
+    return _headers;
+  } else {
+    const token = await authorize();
+    _headers.append("authorization", `Bearer ${token}`);
+    return _headers;
+  }
 }
 
 /**
