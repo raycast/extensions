@@ -1,8 +1,21 @@
 # GitHub Changelog
 
+## [Show Issue/PR number in Notification] - 2023-06-19
+
+- Add Issue/PR number in `Notification` command
+
+## [Add more branches to the into field] - 2023-06-16
+
+- Add more branches to the into field in Create Pull Request command (#4642)
+
+## [Menu bar mark all as read] - 2023-05-20
+
+- Add `Mark All as Read` command to menu bar action
+- Fix `graphql` not being part of devDependencies
+
 ## [Notifications fixes] - 2023-04-05
 
-- Add `issuecomment` prefix to read notifications 
+- Add `issuecomment` prefix to read notifications
 - Don't show success toast when opening a notification
 
 ## [Clear form fields] - 2023-01-19

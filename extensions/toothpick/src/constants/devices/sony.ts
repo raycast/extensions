@@ -1,16 +1,24 @@
-const devices: Record<string, Record<string, string>> = {
-  // WH-1000XM4
-  "0x0D58": {},
-  // WH-1000XM3
-  "0x0CD3": {},
-  // WF-1000XM4
+import { DeviceDefinition } from "src/types/device";
+
+export default {
+  "0x0DF0": {
+    name: "WH-1000XM5",
+    main: "icons/devices/sony/wh.1000xm5.svg",
+  },
+  "0x0D58": {
+    name: "WH-1000XM4",
+    main: "icons/devices/sony/wh.1000xm3-4.svg",
+  },
+  "0x0CD3": {
+    name: "WH-1000XM3",
+    main: "icons/devices/sony/wh.1000xm3-4.svg",
+  },
   "0x0DE1": {
+    name: "WF-1000XM4",
     main: "icons/devices/sony/wf.1000xm4.svg",
   },
-  // WF-1000XM3
   "0x0CE0": {
+    name: "WF-1000XM3",
     main: "icons/devices/sony/wf.1000xm3.svg",
   },
-};
-
-export default devices;
+} as Record<string, DeviceDefinition>;

@@ -11,7 +11,8 @@
     "tholanda",
     "tonka3000",
     "khasbilegt",
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "loxygenk"
   ],
   "categories": [
     "Developer Tools",
@@ -148,7 +149,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.50.0",
+    "@raycast/api": "^1.53.3",
     "@raycast/utils": "^1.5.2",
     "date-fns": "^2.29.3",
     "graphql-request": "^5.1.0",
@@ -168,6 +169,7 @@
     "dotenv": "^16.0.3",
     "eslint": "^8.37.0",
     "eslint-plugin-import": "^2.27.5",
+    "graphql": "^16.6.0",
     "prettier": "^2.8.7",
     "typescript": "^5.0.3"
   },

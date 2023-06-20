@@ -9,9 +9,12 @@ function useVaultMessages() {
   const [vaultState, setVaultState] = useState<VaultState | null>(null);
 
   useEffect(() => {
-    void bitwarden.status().then((vaultState) => {
-      setVaultState(vaultState);
-    });
+    void bitwarden
+      .status()
+      .then((vaultState) => setVaultState(vaultState))
+      .catch(() => {
+        /* ignore */
+      });
   }, []);
 
   const shouldShowServer = !!getServerUrlPreference();

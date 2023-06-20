@@ -12,7 +12,7 @@ import axios from "axios";
 import crypto, { BinaryToTextEncoding } from "crypto";
 import * as tencentcloud from "tencentcloud-sdk-nodejs-tmt";
 import { requestCostTime } from "../axiosConfig";
-import { DetectedLangModel, LanguageDetectType } from "../detectLanauge/types";
+import { DetectedLangModel, LanguageDetectType } from "../detectLanguage/types";
 import { QueryWordInfo } from "../dictionary/youdao/types";
 import { getTencentLangCode, getYoudaoLangCodeFromTencentCode } from "../language/languages";
 import { AppKeyStore } from "../preferences";

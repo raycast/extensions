@@ -4,52 +4,53 @@
   "title": "Folder Search",
   "description": "Search for folders on your Mac",
   "icon": "folder-search.png",
-  "author": "GastroGeek",
-  "contributors": [
-    "omarshahine"
-  ],
-  "license": "MIT",
-  "categories": [
-    "Productivity",
-    "System"
-  ],
   "keywords": [
     "folders",
     "search"
   ],
+  "author": "GastroGeek",
+  "contributors": [
+    "omarshahine",
+    "tzfeng"
+  ],
+  "categories": [
+    "Productivity",
+    "System"
+  ],
+  "license": "MIT",
   "commands": [
     {
       "name": "search",
-      "title": "Folder Search",
+      "title": "Search Folders",
       "description": "Search for folders on your Mac",
       "mode": "view"
     }
   ],
   "preferences": [
     {
-      "name": "maxResults",
-      "title": "Maximum Results",
+      "default": "250",
       "description": "The maximum number of search results that Folder Search should return",
-      "type": "textfield",
+      "name": "maxResults",
       "required": false,
-      "default": "250"
+      "title": "Maximum Results",
+      "type": "textfield"
     },
     {
-      "name": "pluginsEnabled",
-      "title": "Plugins Enabled",
+      "default": false,
       "description": "Enables support for custom 'AppleScript' plugins in Folder Search. See README",
       "label": "Enabled",
-      "type": "checkbox",
+      "name": "pluginsEnabled",
       "required": false,
-      "default": false
+      "title": "Plugins Enabled",
+      "type": "checkbox"
     },
     {
-      "name": "pluginsFolder",
-      "title": "Plugins Folder (Absolute Path)",
+      "default": "",
       "description": "The Folder in which your plugins, for Folder Search, are stored",
-      "type": "textfield",
+      "name": "pluginsFolder",
       "required": false,
-      "default": ""
+      "title": "Plugins Folder (Absolute Path)",
+      "type": "textfield"
     }
   ],
   "dependencies": {

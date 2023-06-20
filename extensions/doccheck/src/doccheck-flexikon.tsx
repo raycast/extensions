@@ -25,14 +25,54 @@ export default function Command(props: LaunchProps) {
     if (query === "") {
       // if query is empty load Top Articles
       fetchTopArticles();
+    } else if (noSearchResults) {
+      // if there are no search results load alternative search entries
+      setEntries([
+        {
+          title: "AMBOSS",
+          url: "https://next.amboss.com/de/search?q=",
+          description: `Press ⏎ to search for "` + query + `" on AMBOSS`,
+          title_alias: [],
+          imageUrl: "",
+          date_publish: "",
+          author: "amboss",
+        },
+        {
+          title: "Google",
+          url: "https://www.google.com/search?q=",
+          description: `Press ⏎ to search for "` + query + `" on Google`,
+          title_alias: [],
+          imageUrl: "",
+          date_publish: "",
+          author: "google",
+        },
+        {
+          title: "Wikipedia",
+          url: "https://en.wikipedia.org/w/index.php?search=",
+          description: `Press ⏎ to search for "` + query + `" on Wikipedia`,
+          title_alias: [],
+          imageUrl: "",
+          date_publish: "",
+          author: "google",
+        },
+        {
+          title: "Wikipedia DE",
+          url: "https://de.wikipedia.org/w/index.php?search=",
+          description: `Press ⏎ to search for "` + query + `" on the German Wikipedia`,
+          title_alias: [],
+          imageUrl: "",
+          date_publish: "",
+          author: "google",
+        },
+      ]);
     } else {
       searchArticles(query);
     }
   }, [query, noSearchResults]);
 
   async function fetchTopArticles() {
-    setLoading(true);
     try {
+      setLoading(true);
       const response = await axios.get("https://flexikon.doccheck.com/de/");
       const $ = cheerio.load(response.data);
       const topArticles: Result[] = [];
@@ -59,9 +99,9 @@ export default function Command(props: LaunchProps) {
     }
   }
   async function searchArticles(query: string) {
-    setLoading(true);
     setEntries([]);
     try {
+      setLoading(true);
       const response = await axios.get(
         `https://search.doccheck.com/doccheck-portal/search?q=${query}&language=de&start=0&facetq=content_type:flexikon`
       );
@@ -69,44 +109,6 @@ export default function Command(props: LaunchProps) {
         setEntries(response.data.urls);
       } else if (response.status === 200) {
         setNoSearchResults(true);
-        setEntries([
-          {
-            title: "AMBOSS",
-            url: "https://next.amboss.com/de/search?q=",
-            description: "Press ⏎ to search for the search term in AMBOSS in the browser",
-            title_alias: [],
-            imageUrl: "",
-            date_publish: "",
-            author: "amboss",
-          },
-          {
-            title: "Google",
-            url: "https://www.google.com/search?q=",
-            description: "Press ⏎ to search for the search term in Google in the browser",
-            title_alias: [],
-            imageUrl: "",
-            date_publish: "",
-            author: "google",
-          },
-          {
-            title: "Wikipedia",
-            url: "https://en.wikipedia.org/w/index.php?search=",
-            description: "Press ⏎ to search for the search term in Wikipedia in the browser",
-            title_alias: [],
-            imageUrl: "",
-            date_publish: "",
-            author: "google",
-          },
-          {
-            title: "Wikipedia DE",
-            url: "https://de.wikipedia.org/w/index.php?search=",
-            description: "Press ⏎ to search for the search term in the German Wikipedia in the browser",
-            title_alias: [],
-            imageUrl: "",
-            date_publish: "",
-            author: "google",
-          },
-        ]);
       }
     } catch (e) {
       await showToast({
@@ -186,12 +188,12 @@ export default function Command(props: LaunchProps) {
                     <ActionPanel>
                       <Action.Open
                         icon={Icon.Uppercase}
-                        title={"Search Term as " + entry.title + " Search"}
+                        title={`Search "` + query + `" on ` + entry.title}
                         target={entry.url + encodeURI(query)}
                       />
                       <Action.Open
                         icon={Icon.MagnifyingGlass}
-                        title="Search Term as Flexikon Search"
+                        title={`Search "` + query + `" on DocCheck`}
                         target={"https://www.doccheck.com/search?q=" + encodeURI(query)}
                         shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
                       />
@@ -308,37 +310,61 @@ export default function Command(props: LaunchProps) {
 }
 
 function EntryActions(url: string, title: string, query: string) {
-  return (
-    <ActionPanel>
-      <Action.Push
-        icon={Icon.Book}
-        title="Read Article"
-        target={<DocCheckPage url={url} prevurl={""} query={query} />}
-      />
-      <Action.Open
-        icon={Icon.Globe}
-        title="Open Article in Browser"
-        target={url}
-        shortcut={{ modifiers: ["cmd"], key: "enter" }}
-      />
-      <Action.Open
-        icon={Icon.MagnifyingGlass}
-        title="Search Term as Flexikon Search"
-        target={"https://www.doccheck.com/search?q=" + encodeURI(query)}
-        shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
-      />
-      <Action.Open
-        icon={Icon.Uppercase}
-        title="Article Title as AMBOSS Search"
-        target={"https://next.amboss.com/de/search?q=" + encodeURI(title) + "&v=overview"}
-        shortcut={{ modifiers: ["opt"], key: "enter" }}
-      />
-      <Action.Open
-        icon={Icon.Uppercase}
-        title="Search Term as AMBOSS Search"
-        target={"https://next.amboss.com/de/search?q=" + encodeURI(query) + "&v=overview"}
-        shortcut={{ modifiers: ["opt", "shift"], key: "enter" }}
-      />
-    </ActionPanel>
-  );
+  if (query) {
+    return (
+      <ActionPanel>
+        <Action.Push
+          icon={Icon.Book}
+          title="Read Article"
+          target={<DocCheckPage url={url} prevurl={""} query={query} />}
+        />
+        <Action.Open
+          icon={Icon.Globe}
+          title="Open Article in Browser"
+          target={url}
+          shortcut={{ modifiers: ["cmd"], key: "enter" }}
+        />
+        <Action.Open
+          icon={Icon.Globe}
+          title={`Flexikon Search "` + query + `"`}
+          target={"https://www.doccheck.com/search?q=" + encodeURI(query) + "&facetq=content_type:flexikon"}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
+        />
+        <Action.Open
+          icon={Icon.Uppercase}
+          title={`AMBOSS Search "` + title + `"`}
+          target={"https://next.amboss.com/de/search?q=" + encodeURI(title) + "&v=overview"}
+          shortcut={{ modifiers: ["opt"], key: "enter" }}
+        />
+        <Action.Open
+          icon={Icon.Uppercase}
+          title={`AMBOSS Search "` + query + `"`}
+          target={"https://next.amboss.com/de/search?q=" + encodeURI(query) + "&v=overview"}
+          shortcut={{ modifiers: ["opt", "shift"], key: "enter" }}
+        />
+      </ActionPanel>
+    );
+  } else {
+    return (
+      <ActionPanel>
+        <Action.Push
+          icon={Icon.Book}
+          title="Read Article"
+          target={<DocCheckPage url={url} prevurl={""} query={query} />}
+        />
+        <Action.Open
+          icon={Icon.Globe}
+          title="Open Article in Browser"
+          target={url}
+          shortcut={{ modifiers: ["cmd"], key: "enter" }}
+        />
+        <Action.Open
+          icon={Icon.Uppercase}
+          title={`AMBOSS Search "` + title + `"`}
+          target={"https://next.amboss.com/de/search?q=" + encodeURI(title) + "&v=overview"}
+          shortcut={{ modifiers: ["opt"], key: "enter" }}
+        />
+      </ActionPanel>
+    );
+  }
 }

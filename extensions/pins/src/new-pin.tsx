@@ -1,54 +1,39 @@
-import { useState, useEffect } from "react";
-import { Form, Icon, ActionPanel, Action, showToast, popToRoot } from "@raycast/api";
-import { iconMap, setStorage, getStorage } from "./utils";
-import { StorageKey } from "./constants";
-import { Group } from "./types";
+import { useState } from "react";
+import {
+  Form,
+  Icon,
+  ActionPanel,
+  Action,
+  showToast,
+  useNavigation,
+  getApplications,
+  Application,
+  getPreferenceValues,
+  environment,
+} from "@raycast/api";
+import { ExtensionPreferences, iconMap } from "./lib/utils";
+import { getFavicon } from "@raycast/utils";
+import * as os from "os";
+import { useGroups } from "./lib/Groups";
+import { createNewPin } from "./lib/Pins";
+import path from "path";
 
-const createNewPin = async (name: string, url: string, icon: string, group: string) => {
-  const storedPins = await getStorage(StorageKey.LOCAL_PINS);
-
-  const newID = (await getStorage(StorageKey.NEXT_PIN_ID))[0];
-  setStorage(StorageKey.NEXT_PIN_ID, [newID + 1]);
-
-  const newData = [...storedPins];
-  newData.push({
-    name: name,
-    url: url,
-    icon: icon,
-    group: group,
-    id: newID,
-  });
-
-  await setStorage(StorageKey.LOCAL_PINS, newData);
-  await showToast({ title: `Added pin for "${name}"` });
-  popToRoot();
-};
-
-const useGetGroups = () => {
-  const [groups, setGroups] = useState<Group[]>([]);
-
-  useEffect(() => {
-    Promise.resolve(getStorage(StorageKey.LOCAL_GROUPS)).then((groups) => {
-      const allGroups = [...groups];
-      allGroups.push({
-        name: "None",
-        id: -1,
-        icon: "Minus",
-      });
-      setGroups(allGroups);
-    });
-  }, []);
-
-  return groups;
-};
-
+/**
+ * Form view for creating a new pin.
+ * @returns A form view.
+ */
 const NewPinForm = () => {
+  const [url, setURL] = useState<string | undefined>();
   const [urlError, setUrlError] = useState<string | undefined>();
+  const [applications, setApplications] = useState<Application[]>([]);
+  const { groups } = useGroups();
+  const { pop } = useNavigation();
 
-  const groups = useGetGroups();
   const iconList = Object.keys(Icon);
   iconList.unshift("Favicon / File Icon");
   iconList.unshift("None");
+
+  const preferences = getPreferenceValues<ExtensionPreferences>();
 
   return (
     <Form
@@ -56,7 +41,26 @@ const NewPinForm = () => {
         <ActionPanel>
           <Action.SubmitForm
             icon={Icon.ChevronRight}
-            onSubmit={(values) => createNewPin(values.nameField, values.urlField, values.iconField, values.groupField)}
+            onSubmit={async (values) => {
+              await createNewPin(
+                values.nameField,
+                values.urlField,
+                values.iconField,
+                values.groupField || "None",
+                values.openWithField,
+                values.dateField,
+                values.execInBackgroundField
+              );
+              await showToast({ title: `Added pin for "${values.nameField}"` });
+              pop();
+            }}
+          />
+          <Action.Open
+            title="Open Placeholders Guide"
+            icon={Icon.Info}
+            target={path.resolve(environment.assetsPath, "placeholders_guide.txt")}
+            application="TextEdit"
+            shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
           />
         </ActionPanel>
       }
@@ -67,39 +71,93 @@ const NewPinForm = () => {
         placeholder="Enter pin name, e.g. Google, or leave blank to use URL"
       />
 
-      <Form.TextField
+      <Form.TextArea
         id="urlField"
-        title="Pin Path/URL"
-        placeholder="Enter the filepath or URL to pin"
+        title="Target"
+        placeholder="Enter the filepath, URL, or Terminal command to pin"
         error={urlError}
-        onChange={() => (urlError !== undefined ? setUrlError(undefined) : null)}
+        onChange={async (value) => {
+          setURL(value);
+          if (value.startsWith("~")) {
+            value = value.replace("~", os.homedir());
+          }
+
+          try {
+            setApplications(await getApplications(value));
+          } catch (error) {
+            const allApplications = await getApplications();
+            if (value.match(/^[a-zA-Z0-9]*?:.*/g)) {
+              const preferredBrowser = preferences.preferredBrowser ? preferences.preferredBrowser : "Safari";
+              const browser = allApplications.find((app) => app.name == preferredBrowser);
+              if (browser) {
+                setApplications([browser, ...allApplications.filter((app) => app.name != preferredBrowser)]);
+              }
+            } else {
+              setApplications(allApplications);
+            }
+          }
+
+          if (urlError !== undefined) {
+            setUrlError(undefined);
+          } else {
+            null;
+          }
+        }}
         onBlur={(event) => {
           if (event.target.value?.length == 0) {
             setUrlError("URL cannot be empty!");
-          } else if (!event.target.value?.includes(":") && !event.target.value?.startsWith("/")) {
-            setUrlError("Please enter a valid URL or path!");
           } else if (urlError !== undefined) {
             setUrlError(undefined);
           }
         }}
       />
 
-      <Form.Dropdown id="iconField" title="Pin Icon" defaultValue="None">
+      {!url?.startsWith("/") && !url?.startsWith("~") && !url?.match(/^[a-zA-Z0-9]*?:.*/g) ? (
+        <Form.Checkbox
+          label="Execute in Background"
+          id="execInBackgroundField"
+          defaultValue={false}
+          info="If checked, the pinned Terminal command will be executed in the background instead of in a new Terminal tab."
+        />
+      ) : null}
+
+      <Form.Dropdown id="iconField" title="Icon" defaultValue="Favicon / File Icon">
         {iconList.map((icon) => {
+          const urlIcon = url
+            ? url.startsWith("/") || url.startsWith("~")
+              ? { fileIcon: url }
+              : url.match(/^[a-zA-Z0-9]*?:.*/g)
+              ? getFavicon(url)
+              : Icon.Terminal
+            : iconMap["Minus"];
+
           return (
             <Form.Dropdown.Item
               key={icon}
               title={icon}
               value={icon}
-              icon={icon in iconMap ? iconMap[icon] : iconMap["Minus"]}
+              icon={icon in iconMap ? iconMap[icon] : icon == "Favicon / File Icon" ? urlIcon : iconMap["Minus"]}
             />
           );
         })}
       </Form.Dropdown>
 
+      <Form.Dropdown title="Open With" id="openWithField" info="The application to open the pin with">
+        <Form.Dropdown.Item key="None" title="None" value="None" icon={Icon.Minus} />
+        {applications.map((app) => {
+          return <Form.Dropdown.Item key={app.name} title={app.name} value={app.name} icon={{ fileIcon: app.path }} />;
+        })}
+      </Form.Dropdown>
+
+      <Form.DatePicker
+        id="dateField"
+        title="Expiration Date"
+        info="The date and time at which the pin will be automatically removed"
+      />
+
       {groups?.length ? (
-        <Form.Dropdown id="groupField" title="Pin Group" defaultValue="None">
-          {groups.map((group) => {
+        <Form.Dropdown id="groupField" title="Group" defaultValue="None">
+          {[{ name: "None", icon: "Minus", id: -1 }].concat(groups).map((group) => {
             return (
               <Form.Dropdown.Item key={group.name} title={group.name} value={group.name} icon={iconMap[group.icon]} />
             );
