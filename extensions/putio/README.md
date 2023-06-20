@@ -12,8 +12,4 @@
   <p>
     <img src="https://static.put.io/demos/raycast/v1.0.0/2.png" width="640">
   </p>
-
-  <p>
-  <a title="Install put.io Raycast Extension" href="https://www.raycast.com/putio/putio"><img src="https://www.raycast.com/putio/putio/install_button@2x.png" height="64" alt="" style="height: 64px;"></a>
-  </p>
 </div>
