@@ -13,8 +13,7 @@
   "commands": [
     {
       "name": "translate",
-      "title": "translate",
-      "subtitle": "Papago Translate",
+      "title": "Papago Translate",
       "description": "Simple translation via Papago API",
       "mode": "view"
     }
