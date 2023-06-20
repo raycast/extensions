@@ -1,3 +1,3 @@
 # French Verb Conjugation Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2023-06-20
