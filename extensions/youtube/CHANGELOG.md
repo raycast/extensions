@@ -1,5 +1,9 @@
 # YouTube Changelog
 
+## [Enhancements] - 2023-06-20
+
+- Added video duration info on details view
+
 ## [Update] - 2023-06-15
 
 - Add support for fallback commands
