@@ -1,5 +1,13 @@
 # Apple Music Changelog
 
+## [Fix] - 2023-06-12
+
+- Fixed a few bugs that caused some commands not to open correct
+
+## [Update] - 2023-05-03
+
+- This adds the currently playing track in Play Library Track
+
 ## [Update] - 2023-04-10
 
 - Improved search to match Apple Music behaviour

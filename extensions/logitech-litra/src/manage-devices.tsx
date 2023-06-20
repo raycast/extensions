@@ -1,6 +1,6 @@
 import { ActionPanel, Action, Icon, List, showToast, Toast } from "@raycast/api";
 import React, { useEffect, useState } from "react";
-import { getCliDirectory } from "./preferences";
+import { getCliDirectory, getNodeBinaryPath } from "./preferences";
 import { getDevices, toggle, isOn, setTemperatureInKelvin, setBrightnessPercentage, checkLitraVersion } from "./utils";
 import { getEnabledTemperaturePresets } from "./temperature-presets";
 import { getEnabledBrightnessPresets } from "./brightness-presets";
@@ -16,12 +16,13 @@ export default function Command() {
   const [enabledBrightnessPresets, setEnabledBrightnessPresets] = useState<Set<number>>(new Set());
 
   const cliDirectory = getCliDirectory();
+  const nodeBinaryPath = getNodeBinaryPath();
 
   useEffect(() => {
     (async () => {
-      await checkLitraVersion(cliDirectory);
+      await checkLitraVersion(cliDirectory, nodeBinaryPath);
 
-      const devices = await getDevices(cliDirectory);
+      const devices = await getDevices(cliDirectory, nodeBinaryPath);
       setDevices(devices);
     })();
   }, []);
@@ -53,8 +54,8 @@ export default function Command() {
                 title="Toggle"
                 icon={Icon.LightBulb}
                 onAction={async () => {
-                  await toggle(cliDirectory, device.serial_number);
-                  const isDeviceOn = await isOn(cliDirectory, device.serial_number);
+                  await toggle(cliDirectory, device.serial_number, nodeBinaryPath);
+                  const isDeviceOn = await isOn(cliDirectory, device.serial_number, nodeBinaryPath);
 
                   if (isDeviceOn) {
                     await showToast({ title: `Turned on ${device.name}`, style: Toast.Style.Success });
@@ -69,7 +70,7 @@ export default function Command() {
                   title={`Set Temperature to ${temperature}K`}
                   icon={Icon.Temperature}
                   onAction={async () => {
-                    await setTemperatureInKelvin(cliDirectory, device.serial_number, temperature);
+                    await setTemperatureInKelvin(cliDirectory, device.serial_number, temperature, nodeBinaryPath);
                     await showToast({
                       title: `Set ${device.name}'s temperature to ${temperature}K`,
                       style: Toast.Style.Success,
@@ -83,7 +84,7 @@ export default function Command() {
                   title={`Set Brightness to ${brightness}%`}
                   icon={Icon.CircleProgress100}
                   onAction={async () => {
-                    await setBrightnessPercentage(cliDirectory, device.serial_number, brightness);
+                    await setBrightnessPercentage(cliDirectory, device.serial_number, brightness, nodeBinaryPath);
                     await showToast({
                       title: `Set ${device.name}'s brightness to ${brightness}%`,
                       style: Toast.Style.Success,

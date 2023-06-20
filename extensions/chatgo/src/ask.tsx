@@ -1,4 +1,4 @@
-import { ActionPanel, List } from "@raycast/api";
+import { ActionPanel, List, showToast, Toast } from "@raycast/api";
 import { v4 as uuidv4 } from "uuid";
 import { PreferencesActionSection } from "./actions/preferences";
 import { useEffect, useState } from "react";
@@ -22,6 +22,7 @@ export default function Ask(props: { conversation?: Conversation; templateId?: n
   const question = useQuestion({ initialQuestion: "", disableAutoLoad: !!props.conversation });
   const [isLoading, setLoading] = useState<boolean>(true);
   const myTemplateModel = useMyTemplateModel();
+  const [error, setError] = useState<Error>();
   // const {push, pop} = useNavigation();
 
   const [conversation, setConversation] = useState<Conversation>(
@@ -38,6 +39,16 @@ export default function Ask(props: { conversation?: Conversation; templateId?: n
   const [selectedTemplateModelId, setSelectedTemplateModelId] = useState<number>(
     props.conversation ? props.conversation.model.template_id : props.templateId ? props.templateId : 0
   );
+
+  useEffect(() => {
+    if (error) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Something went wrong",
+        message: error.message,
+      }).then();
+    }
+  }, [error]);
 
   useEffect(() => {
     if ((props.conversation?.id !== conversation.id || conversations.data.length === 0) && isAutoSaveConversation) {
@@ -122,7 +133,7 @@ export default function Ask(props: { conversation?: Conversation; templateId?: n
         !question.data ? (
           <ActionPanel>
             <FormInputActionSection
-              initialQuestion={""}
+              initialQuestion={question.data}
               onSubmit={(question: string) => chats.ask(question, conversation.model)}
               templateModels={myTemplateModel.data}
               selectedTemplateModelId={selectedTemplateModelId}
@@ -145,6 +156,7 @@ export default function Ask(props: { conversation?: Conversation; templateId?: n
         templateModels={myTemplateModel.data}
         selectedTemplateModelId={selectedTemplateModelId}
         onTemplateModelChange={setSelectedTemplateModelId}
+        onSubmit={(question) => chats.ask(question, conversation.model)}
       />
     </List>
   );

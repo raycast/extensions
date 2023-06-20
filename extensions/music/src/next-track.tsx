@@ -7,4 +7,4 @@ import { handleTaskEitherError } from "./util/utils";
 export default pipe(
   music.player.next,
   handleTaskEitherError(SFSymbols.WARNING + " Failed to skip track", SFSymbols.TRACK_NEXT + " Track skipped")
-)();
+);

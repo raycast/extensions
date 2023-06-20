@@ -1,10 +1,69 @@
 # Changelog
 
+## 1.53.0 - 2023-06-07
+
+### ✨ New
+
+- **Metadata**: `List.Item.Detail.Metadata.TagList.Item` and `Detail.Metadata.TagList.Item` now accepts an action handler via the `onAction` prop!
+- Added [LaunchContext](https://developers.raycast.com/api-reference/utilities#launchcontext) support to `Create Quicklink` and `Create Snippet:`
+  - `launchCommand({ ownerOrAuthorName: "raycast", extensionName: "raycast", name: "create-quicklink", type: LaunchType.UserInitiated, context: { name: "context name", application: "Xcode", }});`
+  - `launchCommand({ ownerOrAuthorName: "raycast", extensionName: "snippets", name: "create-snippet", type: LaunchType.UserInitiated, context: { name: "context name", text: "context text", keyword: "context keyword" }})`
+- **Date Pickers:** You can now add a minimum and maximum date to `Form.DatePicker` and `Action.PickDate` using the `min` and `max` props to limit the suggestions shown when entering a date.
+
+### 💎 Improvements
+
+- Updated NodeJS to 18.16.0
+- Improve the “Fork Extension” action to avoid modifying the manifest as much as possible.
+
+### 🐞 Fixes
+
+- Fixed a bug that sometimes caused `no-view` commands to not display errors.
+- Fixed a bug that caused OAuth not to work if the `client.authorize(authorizationRequest)` was executed more than once.
+- Fixed a problem where commands with background execution would not display the OAuth sign-in screen.
+- **SVG**: Properly handle `currentColor`
+- **List/Grid**: Fixed `selectedItemId` being sometimes ignored on the first render.
+- **Form**: Fixed triggering `onChange` on the TextArea when using a markdown keyboard shortcut.
+
+## 1.52.0 - 2023-05-24
+
+### ✨ New
+
+- **SVG**: You can now use the Raycast `Color` in an SVG.
+
+### 💎 Improvements
+
+- Improve the error message when a required property is missing on a component
+
+### 🐞 Fixes
+
+- Fixed an edge case where the keyboard events triggered while an extension is loading would not be passed down to the extension once loaded
+- Fixed an issue where the fallback of an image would show while it is being loaded
+
+## 1.51.0 - 2023-05-10
+
+### ✨ New
+
+- **AI**: Introduced a new `AI` Pro API. Use `AI.ask` to seamlessly ask any prompt and enhance your extensions with artificial intelligence.
+- **Pro APIs:** You can now check whether a user can access a certain API using `environment.canAccess(AI)`.
+
+### 💎 Improvements
+
+- **Custom Theme**: Deprecated `Color.Brown` as it is not part of the Raycast colors anymore.
+- **Custom Theme:** Renamed `environment.theme` to `environment.appearance`.
+- Improve the error message when an API is called with arguments of the wrong type.
+
+### 🐞 Fixes
+
+- **Forms**: Fixed an issue where drafts would not save the value of a File Picker.
+- **Forms**: Fixed an issue where `onChange` would not be triggered in certain cases for a File Picker.
+- **Lists**: Fixed an issue that caused a List’s section to re-render whenever an action panel’s submenu was updated.
+- **Colors:** Fixed a crash that could sometimes occur when using `adjustContrast` on a dynamic color.
+
 ## 1.50.0 - 2023-04-27
 
 ### ✨ New
 
-- Raycast now provides 2 global TypeScript namespaces called `**Preferences**` and `**Arguments**` which respectively contains the types of the preferences and the types of the arguments of all the commands of the extensions.
+- Raycast now provides 2 global TypeScript namespaces called `**Preferences**` and `**Arguments**` which respectively contain the types of the preferences and the types of the arguments of all the commands of the extensions.
   For example, if a command named `show-todos` has some preferences, its `getPreferenceValues`'s return type can be specified with `getPreferenceValues<Preferences.ShowTodos>()`. This will make sure that the types used in the command stay in sync with the manifest.
 - It is now possible to add commands that are disabled by default. A user will have to enable it manually before it shows up in Raycast's root search. This can be useful to provide commands for specific workflows without overwhelming everybody's root search.
 - **Markdown Tables** are now properly supported.
@@ -12,7 +71,7 @@
 
 ### 💎 Improvements
 
-- **Colors**: To improve accessibility, dynamic adjustment for raw colors (`HEX`, `rgb` etc) used in extensions has been switched from opt-in to opt-out. If your extension relies on accurate color reproduction, check the [documentation](https://developers.raycast.com/api-reference/user-interface/colors) for instructions on how to opt out.
+- **Colors**: To improve accessibility, dynamic adjustment for raw colors (`HEX`, `rgb` etc) used in extensions has been switched from opt-in to opt-out. If your extension relies on accurate color reproduction, check the [documentation](https://developers.raycast.com/api-reference/user-interface/colors) for instructions on how to opt-out.
 - **Images**: You can now suffix your local assets with `@dark` to automatically provide a dark theme option, eg: `icon.png` and `icon@dark.png`.
 
 ### 🐞 Fixes

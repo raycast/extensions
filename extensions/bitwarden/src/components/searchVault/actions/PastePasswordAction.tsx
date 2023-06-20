@@ -3,10 +3,12 @@ import ActionWithReprompt from "~/components/actions/ActionWithReprompt";
 import { useSelectedVaultItem } from "~/components/searchVault/context/vaultItem";
 import useGetUpdatedVaultItem from "~/components/searchVault/utils/useGetUpdatedVaultItem";
 import { captureException } from "~/utils/development";
+import useFrontmostApplicationName from "~/utils/hooks/useFrontmostApplicationName";
 
 function PastePasswordAction() {
   const selectedItem = useSelectedVaultItem();
   const getUpdatedVaultItem = useGetUpdatedVaultItem();
+  const actionTitle = useActionTitle();
 
   if (!selectedItem.login?.password) return null;
 
@@ -22,12 +24,17 @@ function PastePasswordAction() {
 
   return (
     <ActionWithReprompt
-      title="Paste Password"
-      icon={Icon.Key}
+      title={actionTitle}
+      icon={Icon.Window}
       onAction={pastePassword}
       repromptDescription={`Pasting the password of <${selectedItem.name}>`}
     />
   );
+}
+
+function useActionTitle() {
+  const currentApplication = useFrontmostApplicationName();
+  return currentApplication ? `Paste Password into ${currentApplication}` : "Paste Password";
 }
 
 export default PastePasswordAction;

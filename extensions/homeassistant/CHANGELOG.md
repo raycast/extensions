@@ -1,5 +1,16 @@
 # Home Assistant Changelog
 
+## [Update] - 2023-06-14
+
+- Add home network detection to switch between an internal url and an external one
+- Add `Connection Check` root command
+- Add support for `.local` urls (mDNS)
+
+## [Update] - 2023-05-04
+
+- Hide hidden or disabled entities
+- Add `Assist` root command
+
 ## [Fix] . 2023-03-15
 
 - Inject https agent only on `https` urls - fix [#5358](https://github.com/raycast/extensions/issues/5358)

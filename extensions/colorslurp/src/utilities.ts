@@ -1,4 +1,5 @@
 import { getApplications, showToast, Toast, open, closeMainWindow } from "@raycast/api";
+import osascript from "osascript-tag";
 
 async function isColorSlurpInstalled() {
   const applications = await getApplications();
@@ -25,5 +26,22 @@ export async function openColorSlurpUrl(url: string) {
   } else {
     await closeMainWindow();
     await open(url);
+  }
+}
+
+export async function runAppleScriptJs(script: string) {
+  try {
+    const result = await osascript.jxa({ parse: true })`${script}`;
+    return result;
+  } catch (err: unknown) {
+    if (typeof err === "string") {
+      const message = err.replace("execution error: Error: ", "");
+      console.log(err);
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Something went wrong",
+        message: message,
+      });
+    }
   }
 }

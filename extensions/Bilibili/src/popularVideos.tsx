@@ -19,6 +19,8 @@ export default function Command() {
       isLoading={isLoading}
       isShowingDetail={true}
       onSelectionChange={(id) => {
+        if (!id) return;
+
         setCountSet(countSet.add(id));
 
         if (countSet.size % 20 === 0) setPn(pn + 1);
@@ -28,7 +30,7 @@ export default function Command() {
         <Video
           title={item.title}
           cover={item.pic}
-          url={item.short_link}
+          url={item.short_link || item.short_link_v2}
           uploader={{
             mid: item.owner.mid,
             name: item.owner.name,

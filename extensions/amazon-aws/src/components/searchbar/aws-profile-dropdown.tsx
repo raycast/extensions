@@ -70,7 +70,7 @@ export default function AWSProfileDropdown({ onProfileSelected }: Props) {
   );
 }
 
-const useVaultSessions = () => {
+const useVaultSessions = (): string[] | undefined => {
   const profileOptions = useProfileOptions();
   const { data: awsVaultSessions } = useExec("aws-vault", ["list"], {
     env: { PATH: "/opt/homebrew/bin" },
@@ -86,7 +86,7 @@ const useVaultSessions = () => {
     .filter((profile) => profile.source_profile && activeSessions?.includes(profile.source_profile))
     .map((profile) => profile.name);
 
-  return [...(activeSessions || []), ...(activeSessionsFromMasterProfile || [])];
+  return activeSessions && [...activeSessions, ...activeSessionsFromMasterProfile];
 };
 
 const useAwsVault = ({ profile, onUpdate }: { profile?: string; onUpdate: VoidFunction }) => {
