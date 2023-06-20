@@ -1,6 +1,6 @@
 # VueJobs Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2023-06-20
 
 - Restructured Job Listings: Divided the list of items into three sections - 'Today', 'Yesterday', and 'Earlier' for improved readability and understanding of job post timings.
 
