@@ -4,6 +4,10 @@
 
 - Added video duration info on details view
 
+## [Update] - 2023-06-15
+
+- Add support for fallback commands
+
 ## [Enhancements] - 2023-04-18
 
 - Bug fixes for recent and pinned items not updating correctly

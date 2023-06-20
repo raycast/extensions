@@ -51,7 +51,7 @@
 /extensions/audio-device                             @benvp @mathieudutour @mike182uk @FezVrasta @rcruzper
 /extensions/authy                                    @guga4ka @gdsmith @pernielsentikaer
 /extensions/auto-quit-app                            @koinzhang
-/extensions/avatar                                   @koinzhang
+/extensions/avatar                                   @koinzhang @madza91
 /extensions/axios-docs                               @denizyoldas
 /extensions/baidu-ocr                                @Chivier
 /extensions/bamboo-search-self-hosted                @axp-dev
@@ -341,7 +341,7 @@
 /extensions/git-repos                                @moored
 /extensions/gitee                                    @koinzhang
 /extensions/gitfox                                   @L3K0V
-/extensions/github                                   @thomaslombart @unnamedd @tonka3000 @khasbilegt @pernielsentikaer
+/extensions/github                                   @thomaslombart @unnamedd @tonka3000 @khasbilegt @pernielsentikaer @loxygenK
 /extensions/github-cli-manual                        @demartini
 /extensions/github-codespaces                        @mkwng
 /extensions/github-for-enterprise                    @Kinbaum @emanguy @LunaticMuch @pernielsentikaer
@@ -533,7 +533,7 @@
 /extensions/lyrics                                   @ajzbc
 /extensions/m3o                                      @andreaselia
 /extensions/macupdater                               @karlsander
-/extensions/mail                                     @yug2005 @ikupenov @pernielsentikaer
+/extensions/mail                                     @yug2005 @ikupenov @pernielsentikaer @fengtianze
 /extensions/mailsy                                   @BalliAsghar
 /extensions/man-pages                                @SKaplanOfficial
 /extensions/mantine                                  @EmilMalanczak
@@ -598,6 +598,7 @@
 /extensions/nature-remo                              @uetchy
 /extensions/naver-search                             @ajchemist
 /extensions/nba-game-viewer                          @AbhinavPalacharla @djpowers @michaelli1324
+/extensions/neodb                                    @Sevichecc
 /extensions/netease-music                            @chyroc
 /extensions/netlify                                  @Destiner @jonohewitt @jasonbarry @peduarte
 /extensions/network-diagnostics                      @hmarr
@@ -727,6 +728,7 @@
 /extensions/quest                                    @zeekrey
 /extensions/quick-access                             @koinzhang
 /extensions/quick-event                              @mblode @bascomb
+/extensions/quick-latex                              @Noamko
 /extensions/quick-open-project                       @zerowidth @bjw-s @mattstein
 /extensions/quick-search                             @iwfan
 /extensions/quickfile                                @danielroe
@@ -980,6 +982,7 @@
 /extensions/visual-studio-code-recent-projects       @thomaspaulmann @iainsimmons @macbookandrew @cy-98 @immint023 @pernielsentikaer @elijah-scott @vimtor @tonka3000
 /extensions/vivaldi                                  @crisboarna
 /extensions/vocab-search                             @DATADEER @pernielsentikaer
+/extensions/vuejobs                                  @abusiraj84
 /extensions/vuejs-documentation                      @Dpblandin
 /extensions/vueuse-functions                         @noopurphalak
 /extensions/wakatime                                 @iammola
@@ -1025,7 +1028,7 @@
 /extensions/youtrack                                 @tiulpin @skoch13
 /extensions/youtube                                  @tonka3000 @SKaplanOfficial
 /extensions/youtube-companion                        @sasivarnan
-/extensions/youtube-downloader                       @vimtor
+/extensions/youtube-downloader                       @vimtor @pernielsentikaer
 /extensions/youtube-music                            @danieldbird @AlexStrNik @zach-fuller
 /extensions/youversion-suggest                       @caleb531
 /extensions/yubikey-code                             @yoyoyeti

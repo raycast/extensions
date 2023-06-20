@@ -9,7 +9,10 @@
     "sxn",
     "JasonJiang"
   ],
-  "categories": ["Documentation", "Productivity"],
+  "categories": [
+    "Documentation",
+    "Productivity"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -51,7 +54,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.51.3",
+    "@raycast/api": "^1.53.4",
     "execa": "6.1.0",
     "fast-xml-parser": "3.20.3",
     "html-entities": "2.3.2",

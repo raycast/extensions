@@ -5,6 +5,9 @@
   "description": "Download YouTube video from Raycast",
   "icon": "youtube.png",
   "author": "vimtor",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "categories": [
     "Applications",
     "Data",
@@ -38,7 +41,7 @@
     "pretty-bytes": "^6.1.0",
     "tempfile": "^4.0.0",
     "unused-filename": "^4.0.1",
-    "ytdl-core": "^4.11.2"
+    "ytdl-core": "^4.11.4"
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.5",
