@@ -12,9 +12,9 @@
   "commands": [
     {
       "name": "seed",
-      "title": "Seed",
+      "title": "Take a Note",
       "description": "A Seedsnote extension, capture your idea instantly.",
-      "subtitle": "Take a note",
+      "subtitle": "Seedsnote",
       "mode": "view",
       "preferences": [
         {
@@ -23,7 +23,7 @@
           "description": "https://seedsnote.com/help/advanced/apitoken/",
           "type": "textfield",
           "required": true,
-          "placeholder": "您的Seedsnote API"
+          "placeholder": "Seedsnote API"
         }
       ]
     }
