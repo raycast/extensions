@@ -1,6 +1,10 @@
 # Chatwork Search Changelog
 
-## [add Chatwork api token support] - 2023-06-18
+## [Added Room Search] - 2023-06-22
+
+- Added room search command 
+
+## [Added Chatwork api token support] - 2023-06-18
 
 - Added api token support incase it cannot be authed using PKCE flow 
 
