@@ -33,6 +33,7 @@ export function hasAccessToDownloadsFolder() {
     accessSync(preferences.downloadsFolder, constants.R_OK);
     return true;
   } catch (error) {
+    console.error(error);
     return false;
   }
 }
