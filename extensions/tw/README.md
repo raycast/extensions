@@ -2,6 +2,10 @@
 
 A TaskWarrior extension
 
+## Usage
+
+[TW](https://github-production-user-asset-6210df.s3.amazonaws.com/361140/247444833-d099bf65-1b82-4269-b834-8522e0ee758f.mp4)
+
 ## Searching
 
 - By tag: _`+home`_
