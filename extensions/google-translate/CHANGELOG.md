@@ -1,6 +1,6 @@
 # Google Translate Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2023-06-21
 
 - Supplementary change for zh-TW info to match Google Translate
 
