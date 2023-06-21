@@ -84,7 +84,7 @@ export function useActions({
       <Action.Push
         key={`task_${task.uuid}_action_edit`}
         title="Edit Task…"
-        shortcut={{ modifiers: ["cmd", "opt"], key: "enter" }}
+        shortcut={{ modifiers: ["opt"], key: "enter" }}
         icon={{ source: Icon.Pencil, tintColor: Color.Green }}
         target={<TaskForm onSave={onSave} task={task.task} />}
       />

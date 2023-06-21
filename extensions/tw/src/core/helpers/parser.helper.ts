@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { handyCommands, HandyAlias } from "../types";
 import {
   isVirtualTag,
   isSpecialTag,
@@ -9,7 +7,6 @@ import {
   isCustomizableReport,
   isHandyAlias,
   isTuple,
-  isTask,
   isHelperCommand,
 } from "../types/task.guard";
 import { Task } from "../types/task.model";
@@ -76,9 +73,7 @@ export const parseTaskCommandArgs = ({ command, uuid, params }: TaskCommandProps
         return [...res, command, `${key}:"${value}"`];
       }
 
-      if (isTask(params)) {
-        return [...res, command, ...buildCommand(params)];
-      }
+      return [...res, command, ...buildCommand(params as Partial<Task>)];
     }
 
     // task undo
@@ -95,7 +90,7 @@ export const parseTaskCommandArgs = ({ command, uuid, params }: TaskCommandProps
   }
 
   if (isHandyAlias(command)) {
-    return handyCommands[command as HandyAlias](params as any).split(" ");
+    return [`${uuid}`, "modify", `status:${command}`];
   }
 
   if (isActionProject(command)) {

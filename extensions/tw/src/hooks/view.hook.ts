@@ -85,20 +85,20 @@ export const useStatusActions = {
     icon: { source: Icon.Checkmark, tintColor: Color.Green },
     shortcut: getShortcut("enter", "cmd"),
   },
-  undone: {
-    title: "Undone",
+  pending: {
+    title: "Pending",
     icon: { source: Icon.Undo, tintColor: Color.Yellow },
     shortcut: getShortcut("z", "cmd"),
   },
   start: {
     title: "Start Working",
     icon: { source: Icon.PlayFilled, tintColor: Color.Yellow },
-    shortcut: getShortcut("s", "cmd", "opt"),
+    shortcut: getShortcut("s", "cmd"),
   },
   stop: {
     title: "Stop Working",
     icon: { source: Icon.PauseFilled, tintColor: Color.Yellow },
-    shortcut: getShortcut("s", "cmd", "shift"),
+    shortcut: getShortcut("s", "cmd"),
   },
   delete: {
     title: "Delete",

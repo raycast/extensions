@@ -30,8 +30,8 @@ export type Situations = typeof situations;
 export type Situation = keyof Situations;
 
 export const customReports = {
-  active: "Started tasks",
   all: "Pending, completed and deleted tasks",
+  active: "Started tasks",
   blocked: "Tasks that are blocked by other tasks",
   blocking: "Tasks that block other tasks",
   completed: "Tasks that have been completed",
@@ -104,28 +104,28 @@ export type Indicator = {
 export type ActionTag = `+${string}` | `-${string}`;
 
 export const handyAliases = {
-  undone: "Mark a task as pending",
+  pending: "Mark a task as pending",
 } as const;
 export type HandyAliases = typeof handyAliases;
 export type HandyAlias = keyof HandyAliases;
 
 export type ActionCommands =
   | Extract<Command, "done" | "start" | "stop" | "delete" | "purge">
-  | Extract<HandyAlias, "undone">;
+  | Extract<HandyAlias, "pending">;
 
 /**
  * Possible commands for each state
  */
 export const stateCommands: Record<Situation, ActionCommands[]> = {
   active: ["done", "delete", "stop"],
-  done: ["undone", "delete"],
-  deleted: ["purge"],
+  done: ["pending", "delete"],
+  deleted: ["pending", "purge"],
   overdue: ["done", "delete", "start"],
   scheduled: ["done", "delete", "start"],
   ready: ["done", "delete", "start"],
   blocked: ["done", "delete", "start"],
   blocking: ["done", "delete", "start"],
-  completed: ["undone", "delete"],
+  completed: ["pending", "delete"],
   pending: ["done", "delete", "start"],
   waiting: ["done", "delete", "start"],
   recurring: ["done", "delete", "start"],
