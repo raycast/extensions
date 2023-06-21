@@ -5,8 +5,8 @@ import fs from "fs";
 import os from 'os';
 
 const currentDate: Date = new Date();
-const formattedDate: string = `${currentDate.getDate()}.${currentDate.getMonth() + 1}.${currentDate.getFullYear().toString().slice(-2)}`;
-const formattedTime: string = `${currentDate.getHours().toString().padStart(2, '0')}-${currentDate.getMinutes().toString().padStart(2, '0')}`;
+const formattedDate = `${currentDate.getDate()}.${currentDate.getMonth() + 1}.${currentDate.getFullYear().toString().slice(-2)}`;
+const formattedTime = `${currentDate.getHours().toString().padStart(2, '0')}-${currentDate.getMinutes().toString().padStart(2, '0')}`;
 const currentUser = os.userInfo().username;
 const basePath = `/Users/${currentUser}/Library/Mobile Documents/`
 
@@ -42,14 +42,14 @@ export default function Command() {
   function terminalBefehlausführen(befehl: string) {
     exec(befehl, (error, stdout, stderr) => {
       if (error) {
-        console.error(`Fehler beim Öffnen der Datei: ${error.message}`);
+        console.error(`Error opening file: ${error.message}`);
         return;
       }
       if (stderr) {
-        console.error(`Fehler beim Ausführen des Befehls: ${stderr}`);
+        console.error(`Error running command: ${stderr}`);
         return;
       }
-      console.log('Datei erfolgreich geöffnet.');
+      console.log('File opened.');
     });
   }
 
@@ -71,8 +71,8 @@ export default function Command() {
     <List
       filtering={false}
       onSearchTextChange={setSearchText}
-      navigationTitle="Dokument Typ"
-      searchBarPlaceholder="Wähle deinen Dokument Typ"
+      navigationTitle="Document type"
+      searchBarPlaceholder="Choose your document type"
     >
       {filteredList.map((item) => (
         <List.Item 

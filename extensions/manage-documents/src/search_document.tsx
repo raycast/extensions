@@ -111,8 +111,6 @@ export default function Command(): JSX.Element {
         });
     }
     
-      
-
     return (
       <List
         filtering={false}
