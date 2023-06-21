@@ -1,8 +1,12 @@
 # Google Translate Changelog
 
+## [Fix] - 2023-06-21
+
+- Changed zh-TW info to match Google Translate
+
 ## [Fix] - 2023-06-15
 
-- Fixed langauge code for Hebrew
+- Fixed language code for Hebrew
 
 ## [Enhancement] - 2023-05-30
 
@@ -21,7 +25,7 @@
 
 ## [Enhancements] - 2023-02-09
 
-- Retuned back LangTo -> LangFrom translation
+- Returned back LangTo -> LangFrom translation
 - Improved auto-detect translation in Translate Form
 
 ## [Add auto-detect option] - 2023-02-07
