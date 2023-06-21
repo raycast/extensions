@@ -1,0 +1,41 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "manage-documents",
+  "title": "Manage-Documents",
+  "description": "Create and search Apple-Related documents like Keynotes, Numbers blazingly fast.",
+  "icon": "command-icon.png",
+  "author": "borgardt_sven",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "create_document",
+      "title": "Create Document",
+      "description": "Create Documents blazingly fast",
+      "mode": "view"
+    },
+    {
+      "name": "search_document",
+      "title": "Search Document",
+      "description": "Search Documents blazingly fast",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.53.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",  
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
