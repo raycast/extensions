@@ -5,6 +5,7 @@ import fs from "fs";
 import { environment } from "@raycast/api";
 import dns from "dns";
 import HueClient from "./HueClient";
+import * as path from "path";
 
 const CONNECTION_TIMEOUT_MS = 5000;
 
@@ -23,7 +24,7 @@ export default async function createHueClient(
       certificate = Buffer.from(bridgeConfig.certificate, "utf-8");
       console.log("Connecting to the Hue Bridge using it’s self-signed certificate…");
     } else {
-      certificate = fs.readFileSync(environment.assetsPath + "/huebridge_cacert.pem");
+      certificate = fs.readFileSync(path.join(environment.assetsPath, "huebridge_cacert.pem"));
       console.log("Connecting to the Hue Bridge, checking it’s certificate against the Hue Bridge root CA…");
     }
 
