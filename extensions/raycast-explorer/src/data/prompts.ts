@@ -12,6 +12,7 @@ type BasePrompt = {
   prompt: string;
   icon: Icon;
   creativity: "none" | "low" | "medium" | "high" | "maximum";
+  date: `${number}-${number}-${number}`;
   example: Example;
   author?: {
     name: string;
@@ -42,6 +43,7 @@ const code: Prompt[] = [
       "Convert the following code into Tailwind CSS classes and give me the result in a code block. Make sure to remove any browser prefixes. Only give me what I can put into my HTML elements `class` properties." +
       generateSelection("Code", "Tailwind CSS classes"),
     creativity: "medium",
+    date: "2023-06-06",
     icon: Icon.Code,
     type: "code",
     language: "css",
@@ -63,6 +65,7 @@ const code: Prompt[] = [
       "Act as a linux terminal. Execute the following code and reply with what the terminal should show. Only reply with the terminal output inside one unique code block, and nothing else. Do not write explanations." +
       generateSelection("Code", "Terminal"),
     creativity: "medium",
+    date: "2023-06-06",
     icon: Icon.Code,
     type: "code",
     example: {
@@ -77,6 +80,7 @@ const code: Prompt[] = [
       "Act as a {argument name=language} interpreter. Execute the {argument name=language} code and reply with the output. Do not provide any explanations." +
       generateSelection("Code", "Output"),
     creativity: "medium",
+    date: "2023-06-06",
     icon: Icon.Code,
     type: "code",
     language: "py",
@@ -95,6 +99,7 @@ print(squared_numbers)`,
       "Translate the text to Git commands. Only reply one unique code block, and nothing else. Do not write explanations." +
       generateSelection("Text", "Git commands"),
     creativity: "low",
+    date: "2023-06-06",
     icon: Icon.Code,
     type: "code",
     example: {
@@ -109,6 +114,7 @@ print(squared_numbers)`,
       "Generate a regular expression that match the specific patterns in the text. Return the regular expression in a format that can be easily copied and pasted into a regex-enabled text editor or programming language. Then, give clear and understandable explanations on what the regex is doing and how it is constructed." +
       generateSelection("Text", "Regex"),
     creativity: "medium",
+    date: "2023-06-06",
     icon: Icon.Code,
     type: "code",
     example: {
@@ -123,6 +129,7 @@ This regular expression matches the pattern of valid email addresses. The expres
     title: "Convert HTML to Markdown",
     prompt: "Convert the HTML code to Markdown." + generateSelection("HTML code", "Markdown"),
     creativity: "none",
+    date: "2023-06-06",
     icon: Icon.Code,
     type: "code",
     language: "html",
@@ -191,6 +198,7 @@ This is a paragraph with **bold text** and *italic text*.
       "Act as a software engineer debugging its code. Add debug statements to the code. Add as many as necessary to make debugging easier." +
       generateSelection("Code", "Debugged code"),
     creativity: "medium",
+    date: "2023-06-06",
     icon: Icon.Bug,
     type: "code",
     language: "ts",
@@ -232,6 +240,7 @@ This is a paragraph with **bold text** and *italic text*.
     prompt:
       "As a software developer, I am currently working on a project using Jest, TypeScript, and React Testing Library. I would like you to help me generate unit tests for the given code. Analyze the given code and provide a single unit test with the necessary imports, without any additional explanations or comments, unless absolutely necessary. Avoid repeating imports and mocks you've mentioned already.\n\nIf I say 'next,' please give me another test for the same code. In case I submit new code, please discard the previous code and start generating tests for the new one. Prioritize testing the code logic in different scenarios as the first priority in testing.\n\nIf I provide specific instructions or ask you to test a particular part or scenario, please follow those instructions and generate the unit test accordingly. If I send you a Jest error, fix the problem and only return the lines which need to be changed in a readable format. Please format the output as a unique code block." +
       generateSelection("Code", "Output"),
+    date: "2023-06-06",
     creativity: "medium",
     icon: Icon.Bug,
     type: "code",
@@ -276,6 +285,7 @@ describe('Counter component', () => {
       "Write a docstring for the function. Make sure the documentation is detailed." +
       generateSelection("Function", "Docstring"),
     creativity: "low",
+    date: "2023-06-06",
     icon: Icon.BlankDocument,
     type: "code",
     language: "ts",
@@ -306,6 +316,7 @@ const communication: Prompt[] = [
     prompt: "Translate the text in {argument name=language}." + generateSelection("Text", "Translation"),
     creativity: "none",
     type: "text",
+    date: "2023-06-06",
     icon: Icon.SpeechBubble,
     example: {
       argument: "english",
@@ -320,6 +331,7 @@ const communication: Prompt[] = [
       "Write a polite and friendly email to decline the following email. The email should be written in a way that it can be sent to the recipient." +
       generateSelection("Email", "Declined email"),
     creativity: "low",
+    date: "2023-06-06",
     type: "text",
     icon: Icon.Envelope,
     example: {
@@ -341,6 +353,7 @@ John`,
       "Rewrite the following text as a concise and friendly message, phrased as a question. This should be written in a way that it can be sent in a chat application like Slack." +
       generateSelection("Text", "Question"),
     creativity: "low",
+    date: "2023-06-06",
     type: "text",
     icon: Icon.QuestionMarkCircle,
     example: {
@@ -360,6 +373,7 @@ John`,
 Make sure the message stays concise and clear so that readers don't lose extra time reading it.` +
       generateSelection("Text", "Rewritten text"),
     creativity: "low",
+    date: "2023-06-06",
     type: "text",
     icon: Icon.SpeechBubbleActive,
     example: {
@@ -387,6 +401,7 @@ Asked from you:
 If there are no action items, the "Asked from you" section will be left empty.` + generateSelection("Email", "Output"),
     creativity: "low",
     type: "text",
+    date: "2023-06-06",
     icon: Icon.Envelope,
     author: {
       name: "Alireza Sheikholmolouki",
@@ -430,6 +445,7 @@ Asked from you:
     prompt:
       "Take a stance on the topic and {argument default=for} it. Construct a convincing argument and provide evidence to support your stance." +
       generateSelection("Topic", "Argument"),
+    date: "2023-06-06",
     creativity: "high",
     type: "text",
     icon: Icon.SpeechBubbleImportant,
@@ -448,6 +464,7 @@ Evidence: Recent studies have consistently shown that companies with remote empl
       "Create a calendar event in ICS format based on the information. Include the start time, the end time, the location, all attendees, and a summary. If no end time is provided, assume the event will be one hour long. Add a reminder 1 hour before the event starts and 1 day before the event starts. Don't include the PRODID property. Only output the code block. Don't add any comments." +
       generateSelection("Information", "ICS"),
     creativity: "medium",
+    date: "2023-06-06",
     type: "text",
     icon: Icon.Calendar,
     author: {
@@ -476,6 +493,21 @@ END:VEVENT
 END:VCALENDAR`,
     },
   },
+  {
+    id: "summarize-and-sympathize",
+    title: "Summarize and sympathize text",
+    prompt:
+      "Please summarize and omit the following. Then express your empathy." + generateSelection("Text", "Sympathy"),
+    creativity: "low",
+    icon: Icon.SpeechBubble,
+    date: "2023-06-12",
+    type: "text",
+    example: {
+      selection:
+        "I'm sorry, but I have to cancel our plans for tonight. I've been feeling really sick all day and I don't think I'll be up for going out.",
+      output: "I'm sorry to hear that you're feeling unwell. Take care of yourself and get some rest.",
+    },
+  },
 ];
 
 const image: Prompt[] = [
@@ -484,6 +516,7 @@ const image: Prompt[] = [
     title: "Create a YouTube Script",
     prompt: "Create a compelling and captivating YouTube script based on the title.",
     creativity: "high",
+    date: "2023-06-06",
     type: "text",
     icon: Icon.Image,
     example: {
@@ -516,6 +549,7 @@ Be consistent in your use of grammar and avoid using cliches or unnecessary word
 The "imagine prompt" should strictly contain under 1,500 words. Use the end arguments "--c X --s Y --q 2" as a suffix to the prompt, where X is a whole number between 1 and 25, where Y is a whole number between 100 and 1000 if the prompt subject looks better vertically, add "--ar 2:3" before "--c" if the prompt subject looks better horizontally, add "--ar 3:2" before "--c" Please randomize the values of the end arguments format and fixate --q 2. Please do not use double quotation marks or punctuation marks. Please use randomized end suffix format.` +
       generateSelection("Text", "Midjourney Prompt"),
     creativity: "high",
+    date: "2023-06-06",
     type: "text",
     icon: Icon.Image,
     example: {
@@ -531,6 +565,7 @@ The "imagine prompt" should strictly contain under 1,500 words. Use the end argu
       generateSelection("Text", "Icons"),
     creativity: "maximum",
     icon: Icon.Image,
+    date: "2023-06-06",
     type: "text",
     author: {
       name: "Stephen Kaplan",
@@ -557,6 +592,7 @@ const writing: Prompt[] = [
     creativity: "high",
     icon: Icon.Pencil,
     type: "text",
+    date: "2023-06-06",
     example: {
       argument: `500`,
       selection: "A time loop",
@@ -585,6 +621,7 @@ Thanks to his incredible journey, Bob discovered the true power of time travel a
       generateSelection("Topic", "Blog post"),
     creativity: "medium",
     icon: Icon.Pencil,
+    date: "2023-06-06",
     type: "text",
     example: {
       selection: "Will ChatGPT replace humans?",
@@ -608,6 +645,7 @@ In conclusion, ChatGPT is an exciting new technology that has the potential to r
       "Convert the text into a list of tweets (= Twitter thread). The first tweet should be clear and engaging. Each tweet should flow smoothly into the next, building anticipation and momentum. The last tweet should be impactful so that the user can reflect on the whole thread. Make sure each tweet doesn't exceed 280 characters. Don't add a single hashtag to any of the tweets." +
       generateSelection("Text", "Tweets"),
     creativity: "medium",
+    date: "2023-06-06",
     icon: Icon.Bird,
     type: "text",
     example: {
@@ -660,6 +698,7 @@ const music: Prompt[] = [
       "Write a song based on the given text. The song should have a clear melody, lyrics that tell a story, and a memorable chorus. The mood of the song should be {argument name=mood}." +
       generateSelection("Text", "Song"),
     creativity: "high",
+    date: "2023-06-06",
     type: "text",
     icon: Icon.Music,
     example: {
@@ -708,6 +747,7 @@ A brilliant way to make my day shine`,
     prompt:
       "Act as a song recommender. Based on the given song, create a playlist of 10 similar songs. Provide a name and description for the playlist. Do not choose songs that are the same name or artist. Do not include the original song in the playlist." +
       generateSelection("Song", "Playlist"),
+    date: "2023-06-06",
     creativity: "high",
     type: "text",
     icon: Icon.Music,
@@ -739,6 +779,7 @@ const ideas: Prompt[] = [
       "Give me 10 alternative versions of the text. Ensure that the alternatives are all distinct from one another." +
       generateSelection("Text", "Alternatives"),
     creativity: "high",
+    date: "2023-06-06",
     type: "text",
     icon: Icon.Shuffle,
     example: {
@@ -761,6 +802,7 @@ const ideas: Prompt[] = [
     prompt:
       "Brainstorm 5 project ideas based on the text. Make sure the ideas are distinct from one another." +
       generateSelection("Text", "Ideas"),
+    date: "2023-06-06",
     creativity: "high",
     type: "text",
     icon: Icon.List,
@@ -784,6 +826,7 @@ const ideas: Prompt[] = [
       "Develop {argument name=number default=3} creative analogies or metaphors that help explain the main idea of the text." +
       generateSelection("Text", "Analogies"),
     creativity: "high",
+    date: "2023-06-06",
     type: "text",
     icon: Icon.LightBulb,
     example: {
@@ -804,6 +847,7 @@ const fun: Prompt[] = [
       "Rewrite the text as if you were {argument name=character default=yoda}. Use {argument name=character default=yoda}'s tone, manner and vocabulary. You must know all of the knowledge of {argument name=character default=yoda}." +
       generateSelection("Text", "Rewritten text"),
     creativity: "high",
+    date: "2023-06-06",
     type: "text",
     icon: Icon.Person,
     example: {
@@ -817,6 +861,7 @@ const fun: Prompt[] = [
     title: "DrunkGPT",
     prompt: "Rewrite the text as if you were drunk." + generateSelection("Text", "Rewritten text"),
     creativity: "high",
+    date: "2023-06-06",
     type: "text",
     icon: Icon.GameController,
     example: {
@@ -833,6 +878,7 @@ const misc: Prompt[] = [
     prompt:
       "Extract all facts from the text and summarize it in all relevant aspects in up to seven bullet points and a 1-liner summary. Pick a good matching emoji for every bullet point." +
       generateSelection("Text", "Summary"),
+    date: "2023-06-06",
     creativity: "medium",
     type: "text",
     icon: Icon.BulletPoints,
@@ -898,6 +944,7 @@ Summary: Rayday is an initiative that encourages team members to come up with in
     title: "Title Case",
     prompt: "Convert {selection} to title case.",
     creativity: "low",
+    date: "2023-06-06",
     type: "text",
     icon: Icon.Text,
     example: {
@@ -912,6 +959,7 @@ Summary: Rayday is an initiative that encourages team members to come up with in
       "Suggest emojis that relate to the text. Suggest around 10 emojis and order them by relevance. Don't add any duplicates. Only respond with emojis." +
       generateSelection("Text", "Emojis"),
     creativity: "medium",
+    date: "2023-06-06",
     type: "text",
     icon: Icon.Emoji,
     example: {
@@ -925,6 +973,7 @@ Summary: Rayday is an initiative that encourages team members to come up with in
     prompt:
       "Find synonyms for the word {selection} and format the output as a list. Words should exist. Do not write any explanations. Do not include the original word in the list. The list should not have any duplicates.",
     creativity: "medium",
+    date: "2023-06-06",
     type: "text",
     icon: Icon.Text,
     example: {
@@ -939,6 +988,7 @@ Summary: Rayday is an initiative that encourages team members to come up with in
       "Give me a recipe based on the ingredients. The recipe should be easy to follow." +
       generateSelection("Ingredients", "Recipe"),
     creativity: "medium",
+    date: "2023-06-06",
     type: "text",
     icon: Icon.BulletPoints,
     example: {
@@ -971,6 +1021,7 @@ prompts:
       "Generate a markdown list of action items to complete based on the text, using a unique identifier for each item as bold headings. If there are any errors in the text, make action items to fix them. In a sublist of each item, provide a description, priority, estimated level of difficulty, and a reasonable duration for the task." +
       generateSelection("Text", "Action items"),
     creativity: "medium",
+    date: "2023-06-06",
     type: "text",
     icon: Icon.CheckCircle,
     author: {
@@ -1023,6 +1074,7 @@ prompts:
       "Extract all email addresses in the text and list them using markdown. Include anything that might be an email address. If possible, provide the name of the person or company to which the email address belongs." +
       generateSelection("Text", "Email addresses"),
     creativity: "low",
+    date: "2023-06-06",
     type: "text",
     icon: Icon.Envelope,
     author: {
@@ -1062,6 +1114,7 @@ Sam
       "Identify all phone numbers in the text and list them using markdown. Include anything that might be a phone number. If possible, provide the name of the person or company to which the phone number belongs." +
       generateSelection("Text", "Phone numbers"),
     creativity: "low",
+    date: "2023-06-06",
     type: "text",
     icon: Icon.Phone,
     author: {
@@ -1101,6 +1154,7 @@ Samantha
       "Extract links in the text. Do not provide any commentary other than the list of Markdown links." +
       generateSelection("Text", "Links"),
     creativity: "low",
+    date: "2023-06-06",
     type: "text",
     icon: Icon.Link,
     author: {
@@ -1133,6 +1187,7 @@ Alice`,
   {
     id: "pros-and-cons",
     title: "Pros & Cons",
+    date: "2023-06-06",
     prompt:
       "List pros and cons for the text based on the topics mentioned. Format the response as a markdown list of pros and cons. Do not provide any other commentary." +
       generateSelection("Text", "Pros & Cons"),
@@ -1162,6 +1217,7 @@ Alice`,
       `Explain the text like I’m a {argument name=identity default="5 year old"}` +
       generateSelection("Text", "Explanation"),
     creativity: "low",
+    date: "2023-06-06",
     type: "text",
     icon: Icon.Book,
     example: {
@@ -1177,6 +1233,7 @@ Alice`,
       "Analyze the text and provide insights on its tone, style, and potential audience." +
       generateSelection("Text", "Analysis"),
     creativity: "medium",
+    date: "2023-06-06",
     type: "text",
     icon: Icon.MagnifyingGlass,
     example: {
@@ -1214,6 +1271,7 @@ You can use the following template to create the summary:
 - Tip n
 '''` + generateSelection("Product reviews", "Summary"),
     creativity: "low",
+    date: "2023-06-16",
     icon: Icon.Tag,
     type: "text",
     author: {
