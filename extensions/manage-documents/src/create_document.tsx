@@ -2,34 +2,69 @@ import { useEffect, useState } from "react";
 import { environment, showToast, Action, ActionPanel, List } from "@raycast/api";
 import { exec } from "child_process";
 import fs from "fs";
-import os from 'os';
+import os from "os";
 
 const currentDate: Date = new Date();
-const formattedDate = `${currentDate.getDate()}.${currentDate.getMonth() + 1}.${currentDate.getFullYear().toString().slice(-2)}`;
-const formattedTime = `${currentDate.getHours().toString().padStart(2, '0')}-${currentDate.getMinutes().toString().padStart(2, '0')}`;
+const formattedDate = `${currentDate.getDate()}.${currentDate.getMonth() + 1}.${currentDate
+  .getFullYear()
+  .toString()
+  .slice(-2)}`;
+const formattedTime = `${currentDate.getHours().toString().padStart(2, "0")}-${currentDate
+  .getMinutes()
+  .toString()
+  .padStart(2, "0")}`;
 const currentUser = os.userInfo().username;
-const basePath = `/Users/${currentUser}/Library/Mobile Documents/`
+const basePath = `/Users/${currentUser}/Library/Mobile Documents/`;
 
-const Pages_Template_DST = `${basePath}com~apple~Pages/Documents/PagesDoc ${formattedTime} ${formattedDate}.pages`
-const Keynote_Template_DST = `${basePath}com~apple~Keynote/Documents/KeynoteDoc ${formattedTime} ${formattedDate}.key`
-const Textedit_Template_DST = `${basePath}com~apple~TextEdit/Documents/TextEditDoc ${formattedTime} ${formattedDate}.rtf`
-const Scriptedit_Template_DST = `${basePath}com~apple~ScriptEditor2/Documents/ScriptEditDoc ${formattedTime} ${formattedDate}.scpt`
-const Numbers_Template_DST = `${basePath}com~apple~Numbers/Documents/NumbersDoc ${formattedTime} ${formattedDate}.numbers`
+const Pages_Template_DST = `${basePath}com~apple~Pages/Documents/PagesDoc ${formattedTime} ${formattedDate}.pages`;
+const Keynote_Template_DST = `${basePath}com~apple~Keynote/Documents/KeynoteDoc ${formattedTime} ${formattedDate}.key`;
+const Textedit_Template_DST = `${basePath}com~apple~TextEdit/Documents/TextEditDoc ${formattedTime} ${formattedDate}.rtf`;
+const Scriptedit_Template_DST = `${basePath}com~apple~ScriptEditor2/Documents/ScriptEditDoc ${formattedTime} ${formattedDate}.scpt`;
+const Numbers_Template_DST = `${basePath}com~apple~Numbers/Documents/NumbersDoc ${formattedTime} ${formattedDate}.numbers`;
 
-const Pages_Template_SRC = `${environment.assetsPath}/PagesOhneTitel.pages`
-const Keynote_Template_SRC = `${environment.assetsPath}/KeynoteOhneTitel.key`
-const Textedit_Template_SRC = `${environment.assetsPath}/TextEditOhneTitel.rtf`
-const Scriptedit_Template_SRC = `${environment.assetsPath}/ScriptEditOhneTItel.scpt`
-const Numbers_Template_SRC = `${environment.assetsPath}/NumbersOhneTitel.numbers`
+const Pages_Template_SRC = `${environment.assetsPath}/PagesOhneTitel.pages`;
+const Keynote_Template_SRC = `${environment.assetsPath}/KeynoteOhneTitel.key`;
+const Textedit_Template_SRC = `${environment.assetsPath}/TextEditOhneTitel.rtf`;
+const Scriptedit_Template_SRC = `${environment.assetsPath}/ScriptEditOhneTItel.scpt`;
+const Numbers_Template_SRC = `${environment.assetsPath}/NumbersOhneTitel.numbers`;
 
 const items = [
-  { keywords: ["numbers"], name: "Numbers", imgsrc: `${environment.assetsPath}/numbers_icon.png`, SRC: Numbers_Template_SRC, DST: Numbers_Template_DST},
-  { keywords: ["keynote"], name: "Keynote", imgsrc: `${environment.assetsPath}/keynote_icon.png`, SRC: Keynote_Template_SRC, DST: Keynote_Template_DST},
-  { keywords: ["pages"], name: "Pages", imgsrc: `${environment.assetsPath}/pages_icon.png`, SRC: Pages_Template_SRC, DST: Pages_Template_DST},
-  { keywords: ["scriptedit", "script"], name: "ScriptEdit", imgsrc: `${environment.assetsPath}/scriptedit_icon.png`, SRC: Scriptedit_Template_SRC, DST: Scriptedit_Template_DST},
-  { keywords: ["textedit", "txt"], name: "TextEdit", imgsrc:`${environment.assetsPath}/textedit_icon.png`, SRC: Textedit_Template_SRC, DST: Textedit_Template_DST},
+  {
+    keywords: ["numbers"],
+    name: "Numbers",
+    imgsrc: `${environment.assetsPath}/numbers_icon.png`,
+    SRC: Numbers_Template_SRC,
+    DST: Numbers_Template_DST,
+  },
+  {
+    keywords: ["keynote"],
+    name: "Keynote",
+    imgsrc: `${environment.assetsPath}/keynote_icon.png`,
+    SRC: Keynote_Template_SRC,
+    DST: Keynote_Template_DST,
+  },
+  {
+    keywords: ["pages"],
+    name: "Pages",
+    imgsrc: `${environment.assetsPath}/pages_icon.png`,
+    SRC: Pages_Template_SRC,
+    DST: Pages_Template_DST,
+  },
+  {
+    keywords: ["scriptedit", "script"],
+    name: "ScriptEdit",
+    imgsrc: `${environment.assetsPath}/scriptedit_icon.png`,
+    SRC: Scriptedit_Template_SRC,
+    DST: Scriptedit_Template_DST,
+  },
+  {
+    keywords: ["textedit", "txt"],
+    name: "TextEdit",
+    imgsrc: `${environment.assetsPath}/textedit_icon.png`,
+    SRC: Textedit_Template_SRC,
+    DST: Textedit_Template_DST,
+  },
 ];
-
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
@@ -49,7 +84,7 @@ export default function Command() {
         console.error(`Error running command: ${stderr}`);
         return;
       }
-      console.log('File opened.');
+      console.log("File opened.");
     });
   }
 
@@ -64,7 +99,7 @@ export default function Command() {
   }
 
   const handleItemAction = (src: string, dst: string) => {
-    copyFile(src, dst)
+    copyFile(src, dst);
   };
 
   return (
@@ -75,17 +110,17 @@ export default function Command() {
       searchBarPlaceholder="Choose your document type"
     >
       {filteredList.map((item) => (
-        <List.Item 
-            key={item.name}
-            title={item.name}
-            icon={item.imgsrc}
-            actions={
-                <ActionPanel>
-                  <Action title="Select" onAction={() => handleItemAction(item.SRC, item.DST)} />
-                </ActionPanel>
-            }
+        <List.Item
+          key={item.name}
+          title={item.name}
+          icon={item.imgsrc}
+          actions={
+            <ActionPanel>
+              <Action title="Select" onAction={() => handleItemAction(item.SRC, item.DST)} />
+            </ActionPanel>
+          }
         />
       ))}
     </List>
   );
-}       
+}
