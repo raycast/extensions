@@ -1,5 +1,9 @@
 # Trello Changelog
 
+## [Update] - 2023-05-20
+
+Added functionality to assign members when creating a new todo
+
 ## [Fix] - 2023-03-28
 
 - Fixed a bug in the endpoint.
