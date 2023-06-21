@@ -1,0 +1,59 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "my-github",
+  "title": "My GitHub",
+  "description": "Commands to list your GitHub pull requests and repositories.",
+  "icon": "github-color-icon.png",
+  "author": "chikalaka",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "pull-requests",
+      "title": "My Pull Requests",
+      "description": "List pull requests you created, participated in, or were mentioned in.",
+      "mode": "view"
+    },
+    {
+      "name": "repos",
+      "title": "My Repositories",
+      "description": "List your repositories.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "personalAccessToken",
+      "type": "password",
+      "required": true,
+      "title": "GitHub Token",
+      "description": "Your GitHub's personal access token. Required scopes: notifications repo read:org read:user read:project.",
+      "link": "https://github.com/settings/tokens",
+      "placeholder": "Enter your personal access token"
+    }
+  ],
+  "dependencies": {
+    "@octokit/rest": "^19.0.11",
+    "@raycast/api": "^1.52.1",
+    "@raycast/utils": "^1.7.0",
+    "date-fns": "^2.30.0",
+    "kickstart-utils": "^2.1.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
