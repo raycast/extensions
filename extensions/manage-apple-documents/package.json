@@ -1,0 +1,42 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "manage-apple-documents",
+  "title": "manage-apple-documents",
+  "description": "Create and search Apple related documents like Keynotes, Pages, Numbers, TextEdit, Scriptedit blazingly fast.",
+  "icon": "command-icon.png",
+  "author": "borgardt_sven",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "create_document",
+      "title": "Create Document",
+      "description": "Create Apple-documents blazingly fast",
+      "mode": "view"
+    },
+    {
+      "name": "search_document",
+      "title": "Search Document",
+      "description": "Search Apple-documents blazingly fast",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.53.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.8.8",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "format": "prettier --write \"src/**/*.tsx\"",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
