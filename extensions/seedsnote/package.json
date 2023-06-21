@@ -9,29 +9,36 @@
     "Productivity"
   ],
   "license": "MIT",
+  "preferences": [
+    {
+      "name": "endpoint",
+      "title": "API",
+      "description": "https://seedsnote.com/help/advanced/apitoken/",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "您的Seedsnote API"
+    }
+  ],
   "commands": [
     {
-      "name": "seed",
-      "title": "Take a Note",
-      "description": "A Seedsnote extension, capture your idea instantly.",
-      "subtitle": "Seedsnote",
-      "mode": "view",
-      "preferences": [
-        {
-          "name": "endpoint",
-          "title": "API",
-          "description": "https://seedsnote.com/help/advanced/apitoken/",
-          "type": "textfield",
-          "required": true,
-          "placeholder": "Seedsnote API"
-        }
-      ]
+      "name": "txtseed",
+      "title": "Send Text",
+      "description": "Send a text to Seedsnote",
+      "mode": "view"
+    },
+    {
+      "name": "imgseed",
+      "title": "Send Image",
+      "description": "Send an image to Seedsnote",
+      "mode": "view"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.53.3",
-    "@types/got": "^9.6.12",
-    "got": "^13.0.0"
+    "form-data": "^4.0.0",
+    "got": "^13.0.0",
+    "image-type": "^5.2.0",
+    "read-chunk": "^4.0.3"
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.5",

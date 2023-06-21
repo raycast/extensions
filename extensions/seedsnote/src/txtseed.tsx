@@ -13,7 +13,9 @@ export default function Command() {
 
   function onContentChange(content: string) {
     setContent(content);
-    setContentError(undefined);
+    if (content.trim().length) {
+      setContentError(undefined);
+    }
   }
   async function handleSubmit(values: { content: "" }) {
     setContentError(undefined);
@@ -52,13 +54,14 @@ export default function Command() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Save" onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Submit" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
       <Form.TextArea
         id="content"
         title="Seed"
+        info="Markdown is supported"
         placeholder="Take a note..."
         error={contentError}
         value={content}
