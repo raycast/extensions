@@ -18,6 +18,13 @@
       "subtitle": "Chatwork",
       "description": "search chats at Chatwork",
       "mode": "view"
+    },
+    {
+      "name": "search-rooms",
+      "title": "Search Rooms",
+      "subtitle": "Chatwork",
+      "description": "search rooms at Chatwork",
+      "mode": "view"
     }
   ],
   "preferences": [
