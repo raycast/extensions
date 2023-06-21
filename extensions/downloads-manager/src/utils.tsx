@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Detail, getPreferenceValues } from "@raycast/api";
 import { accessSync, constants, readdirSync, statSync } from "fs";
 import { join } from "path";
-import { ComponentType, ReactNode } from "react";
+import { ComponentType } from "react";
 import untildify from "untildify";
 
 const preferences: Preferences = getPreferenceValues();
