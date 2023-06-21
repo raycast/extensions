@@ -2,6 +2,10 @@
 
 ## [Fix] - 2023-06-21
 
+- Supplementary change for zh-TW info to match Google Translate
+
+## [Fix] - 2023-06-21
+
 - Changed zh-TW info to match Google Translate
 
 ## [Fix] - 2023-06-15
