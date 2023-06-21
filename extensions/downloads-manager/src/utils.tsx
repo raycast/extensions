@@ -43,7 +43,7 @@ export const withAccessToDownloadsFolder = <P extends object>(Component: Compone
       accessSync(preferences.downloadsFolder, constants.R_OK);
       return <Component {...props} />;
     } else {
-      const markdown = `## Version conflict\n\nThe Downloads Manager extension requires access to your Downloads folder. Please grant permission to use it.\n\n![Grant Permission](permission.png)`;
+      const markdown = `## Permission Required\n\nThe Downloads Manager extension requires access to your Downloads folder. Please grant permission to use it.\n\n![Grant Permission](permission.png)`;
       return (
         <Detail
           markdown={markdown}
