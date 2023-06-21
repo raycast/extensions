@@ -139,7 +139,7 @@ const lastUsedSort = (a: SpotlightSearchResult, b: SpotlightSearchResult) => {
 };
 
 const fixDoubleConcat = (text: string): string => {
-  const regex = /^(.+)\s\1$/; // Matches a string followed by a space and the same string again
+  const regex = /^(.+)\1$/; // Matches a string followed by the same string again
 
   if (regex.test(text)) {
     const originalText = text.replace(regex, "$1");
