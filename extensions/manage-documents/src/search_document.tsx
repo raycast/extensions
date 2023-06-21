@@ -156,7 +156,7 @@ export default function Command(): JSX.Element {
               icon={item.icon}
               accessories={[
                 {
-                  tag: item.tag
+                  tag: item.tag,
                 },
               ]}
               actions={

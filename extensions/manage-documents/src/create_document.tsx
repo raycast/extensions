@@ -121,7 +121,7 @@ export default function Command() {
           accessories={[
             {
               tag: item.tag,
-              tooltip: `The file will be created in ${item.tag}`
+              tooltip: `The file will be created in ${item.tag}`,
             },
           ]}
           icon={item.imgsrc}
