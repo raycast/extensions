@@ -10,7 +10,7 @@ export const getMembers = async (boardId: string) => {
 
     return (await response.json()) as Member[];
   } catch (error) {
-    showToast(Toast.Style.Failure, "An error occured", "Could not fetch todos, check your credentials");
+    showToast(Toast.Style.Failure, "An error occured", "Could not fetch members, check your credentials");
     return Promise.resolve([]);
   }
 };
