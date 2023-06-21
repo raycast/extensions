@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Grid, environment, showToast, Action, ActionPanel, Toast, List } from "@raycast/api";
+import { environment, showToast, Action, ActionPanel, List } from "@raycast/api";
 import { exec } from "child_process";
 import fs from "fs";
 import os from 'os';
@@ -18,19 +18,19 @@ const readFilesFromDirectory = (path: string) => {
     const files = fs.readdirSync(path);
     const keynoteFiles = files
         .filter((file) => !file.startsWith(".") && file.endsWith(".key")) // Filter out hidden files and include only .key files
-        .map((file, index) => ({ title: file.replace(/\.[^/.]+$/, ""), keywords: [file.replace(/\.[^/.]+$/, "")], icon: `${environment.assetsPath}/keynote_icon.png`, pfad: `${KeynoteDocsPath}${file}` }));
+        .map((file) => ({ title: file.replace(/\.[^/.]+$/, ""), keywords: [file.replace(/\.[^/.]+$/, "")], icon: `${environment.assetsPath}/keynote_icon.png`, pfad: `${KeynoteDocsPath}${file}` }));
     const pagesFiles = files
         .filter((file) => !file.startsWith(".") && file.endsWith(".pages")) // Filter out hidden files and include only .pages files
-        .map((file, index) => ({ title: file.replace(/\.[^/.]+$/, ""), keywords: [file.replace(/\.[^/.]+$/, "")], icon: `${environment.assetsPath}/pages_icon.png`, pfad: `${PagesDocsPath}${file}` }));
+        .map((file) => ({ title: file.replace(/\.[^/.]+$/, ""), keywords: [file.replace(/\.[^/.]+$/, "")], icon: `${environment.assetsPath}/pages_icon.png`, pfad: `${PagesDocsPath}${file}` }));
     const numbersFiles = files
         .filter((file) => !file.startsWith(".") && file.endsWith(".numbers")) // Filter out hidden files and include only .numbers files
-        .map((file, index) => ({ title: file.replace(/\.[^/.]+$/, ""), keywords: [file.replace(/\.[^/.]+$/, "")], icon: `${environment.assetsPath}/numbers_icon.png`, pfad: `${NumberesDocsPath}${file}` }));
+        .map((file) => ({ title: file.replace(/\.[^/.]+$/, ""), keywords: [file.replace(/\.[^/.]+$/, "")], icon: `${environment.assetsPath}/numbers_icon.png`, pfad: `${NumberesDocsPath}${file}` }));
     const scriptsFiles = files
         .filter((file) => !file.startsWith(".") && file.endsWith(".scpt")) // Filter out hidden files and include only .scpt files
-        .map((file, index) => ({ title: file.replace(/\.[^/.]+$/, ""), keywords: [file.replace(/\.[^/.]+$/, "")], icon: `${environment.assetsPath}/scriptedit_icon.png`, pfad: `${ScriptEditDocsPath}${file}` }));
+        .map((file) => ({ title: file.replace(/\.[^/.]+$/, ""), keywords: [file.replace(/\.[^/.]+$/, "")], icon: `${environment.assetsPath}/scriptedit_icon.png`, pfad: `${ScriptEditDocsPath}${file}` }));
     const textsFiles = files
         .filter((file) => !file.startsWith(".") && file.endsWith(".rtf")) // Filter out hidden files and include only .rtf files
-        .map((file, index) => ({ title: file.replace(/\.[^/.]+$/, ""), keywords: [file.replace(/\.[^/.]+$/, "")], icon: `${environment.assetsPath}/textedit_icon.png`, pfad: `${TextEditDocsPath}${file}` }));
+        .map((file) => ({ title: file.replace(/\.[^/.]+$/, ""), keywords: [file.replace(/\.[^/.]+$/, "")], icon: `${environment.assetsPath}/textedit_icon.png`, pfad: `${TextEditDocsPath}${file}` }));
     return { keynoteFiles, pagesFiles, numbersFiles, scriptsFiles, textsFiles };
 };
 

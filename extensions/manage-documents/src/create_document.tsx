@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Grid, environment, showToast, Action, ActionPanel, Toast, List } from "@raycast/api";
+import { environment, showToast, Action, ActionPanel, List } from "@raycast/api";
 import { exec } from "child_process";
 import fs from "fs";
 import os from 'os';
@@ -62,19 +62,6 @@ export default function Command() {
       terminalBefehlausführen(`open "${destination}"`);
     });
   }
-
-  function sleep(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
-  }
-
-  function deleteFile(filePath: string): void {
-    fs.unlink(filePath, (err) => {
-      if (err) {
-        console.error(err);
-        return;
-      }
-    });
-  } 
 
   const handleItemAction = (src: string, dst: string) => {
     copyFile(src, dst)
