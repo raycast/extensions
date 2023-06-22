@@ -38,7 +38,7 @@ There are different ways to launch a command:
 
 - The user searches for the command in the root search and executes it.
 - The user registers an alias for the command and presses it.
-- Another command launches the command _via_ [`launchCommand`](../../api-reference/utilities.md).
+- Another command launches the command _via_ [`launchCommand`](../../api-reference/command.md#launchcommand).
 - The command was launched in the [background](./background-refresh.md).
 - A [Form's Draft](../../api-reference/user-interface/form.md#drafts) was saved and the user executes it.
 - A user registers the command as a [fallback command](https://manual.raycast.com/fallback-commands) and executes it when there are no results in the root search.
@@ -63,7 +63,7 @@ export default function Command(props: LaunchProps) {
 | launchType<mark style="color:red;">*</mark> | The type of launch for the command (user initiated or background). | <code>[LaunchType](../../api-reference/environment.md#launchtype)</code> |
 | draftValues | When a user enters the command via a draft, this object will contain the user inputs that were saved as a draft. Use its values to populate the initial state for your Form. | <code>[Form.Values](../../api-reference/user-interface/form.md#form.values)</code> |
 | fallbackText | When the command is launched as a fallback command, this string contains the text of the root search. | <code>string</code> |
-| launchContext | When the command is launched programmatically via `launchCommand`, this object contains the value passed to `context`. | <code>[LaunchContext](../../api-reference/utilities.md#launchcontext)</code> |
+| launchContext | When the command is launched programmatically via `launchCommand`, this object contains the value passed to `context`. | <code>[LaunchContext](../../api-reference/command.md#launchcontext)</code> |
 
 ## Unloading
 
