@@ -71,7 +71,7 @@ export default function Command() {
     //if the inputType is either Binary with comma or decimal with comma, then instead of showing the different representation show the number as a fixed point binary and a floating point binary broken down into its components
     <List
       isLoading={!state.inputType}
-      searchBarPlaceholder="Enter a binary number"
+      searchBarPlaceholder="Enter your calculation: 0b0101+0xff..."
       onSearchTextChange={async (text) => {
         parseInputNumber(text, setState);
       }}
