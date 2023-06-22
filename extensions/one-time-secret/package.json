@@ -12,7 +12,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "Generate One-Time Secret",
+      "title": "Send One-Time Secret",
       "description": "Stores a secret on One-Time Secret and gives back the shareable URL.",
       "mode": "view"
     }
