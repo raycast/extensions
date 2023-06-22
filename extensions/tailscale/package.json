@@ -1,0 +1,76 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "tailscale",
+  "title": "Tailscale",
+  "description": "List devices in your Tailnet and copy the IPv4, IPv6, or MagicDNS address to your clipboard.",
+  "icon": "command-icon.png",
+  "author": "samlinville",
+  "owner": "tailscale",
+  "access": "public",
+  "contributors": [
+    "rosszurowski",
+    "kradalby",
+    "itsmingjie"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Applications",
+    "System",
+    "Security"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "devices",
+      "title": "All Devices",
+      "subtitle": "Tailscale",
+      "description": "View a list of every device in the tailnet",
+      "mode": "view"
+    },
+    {
+      "name": "my-devices",
+      "title": "My Devices",
+      "subtitle": "Tailscale",
+      "description": "View a list of your own devices",
+      "mode": "view"
+    },
+    {
+      "name": "account-switcher",
+      "title": "Switch Account",
+      "subtitle": "Tailscale",
+      "description": "View logged-in Tailscale accounts and quickly switch between them",
+      "mode": "view"
+    },
+    {
+      "name": "exit",
+      "title": "Exit Node",
+      "subtitle": "Tailscale",
+      "description": "View any available Exit node in your Tailnet and quickly activate one",
+      "mode": "view"
+    },
+    {
+      "name": "admin",
+      "title": "Admin Console",
+      "subtitle": "Tailscale",
+      "description": "Open the Tailscale Admin Console",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.48.8"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.5",
+    "@types/node": "^18.8.3",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

@@ -1,244 +1,134 @@
-import React, {useEffect, useState} from "react";
-import {
-  ActionPanel,
-  CopyToClipboardAction,
-  Detail,
-  getApplications,
-  List,
-  OpenInBrowserAction,
-  OpenWithAction,
-  popToRoot,
-  showHUD,
-  ShowInFinderAction,
-  showToast,
-  ToastStyle,
-} from "@raycast/api";
-import {readFile} from "fs/promises";
-import {homedir} from "os";
-import {dirname, resolve} from "path";
-import {exec} from "child_process";
-import which from "which";
-import {
-  AppHistory,
-  bin,
-  createUniqueArray,
-  getFiles,
-  getRecentEntries, historicProjects,
-  JetBrainsIcon,
-  preferredApp,
-  recentEntry, useUrl
-} from "./util";
-import History from "./.history.json";
+import React from "react";
+import { ActionPanel, List } from "@raycast/api";
+import { bin, recentEntry, toolsInstall, useUrl } from "./util";
+import { HelpTextDetail, tbUrl } from "./components/HelpTextDetail";
+import { OpenJetBrainsToolbox } from "./components/OpenJetBrainsToolbox";
+import { RecentProject } from "./components/RecentProject";
+import { OpenInJetBrainsApp } from "./components/OpenInJetBrainsApp";
+import { AppDrop } from "./components/AppDrop";
+import { useAppHistory } from "./useAppHistory";
 
-const ICON_GLOB = "Applications/JetBrains Toolbox/*/Contents/Resources/icon.icns";
-const HISTORY_GLOB = "Library/Application Support/JetBrains/Toolbox/apps/**/.history.json";
+export default function ProjectList(): JSX.Element {
+  const {
+    isLoading,
+    toolboxApp,
+    appHistory,
+    myFavs,
+    filter,
+    dispatch,
+    histories,
+    favActions,
+    sortOrder,
+    screenshotMode,
+    prefActions,
+  } = useAppHistory();
 
-const getRecent = async (path: string | string[], icon: string) => {
-  return getFiles(path).then((apps) => {
-    return apps
-      .map((file) => ({
-          ...file,
-          title: file.title,
-          icon: icon,
-        }))
-      .sort((a, b) => b.lastModifiedAt.getTime() - a.lastModifiedAt.getTime());
-  });
-}
-
-const globFromHistory = (history: History) => {
-  if (history.item.intellij_platform === undefined) {
-    return []
-  }
-  const root = dirname(history.item.intellij_platform.default_config_directories['idea.config.path'].replace('$HOME', homedir()));
-  return history.item.intellij_platform.config.map(config => `${root}/${config.directory}/options/${config.recent_projects_filename}`)
-}
-
-const getHistory = async () => {
-  const icons = await getIcons();
-  return getFiles(resolve(homedir(), HISTORY_GLOB)).then((histories) => {
-    return Promise.all(histories.map((history) => {
-      return readFile(history.path)
-        .then(contents => JSON.parse(String(contents)))
-        .then(json => json.history.pop())
-        .then(async (history: History) => {
-          const icon = icons.find(icon => icon.title.startsWith(history.item.name))?.path ?? JetBrainsIcon
-          const tool = history.item.intellij_platform?.shell_script_name ?? false;
-          const activation = history.item.activation?.hosts[0] ?? false
-          return {
-            title: history.item.name,
-            url: useUrl && activation ? `jetbrains://${activation}/navigate/reference?project=` : false,
-            tool: tool ? await which(tool, {path: bin}).catch(() => false) : false,
-            icon,
-            xmlFiles: await getRecent(globFromHistory(history), icon)
-          } as AppHistory
-        })
-    }))
-  })
-};
-
-const getIcons = async () => {
-  return getFiles(resolve(homedir(), ICON_GLOB)).then((icons) =>
-    icons.map((icon) => {
-      return {
-        ...icon,
-        title: icon.path.split("/").find((path) => path.match(/.+\.app/)) || icon.title,
-        icon: icon.path,
-      };
-    })
-  );
-};
-
-const loadAppEntries = async (apps: AppHistory[]) => {
-  return await Promise.all(apps
-    .map(async app => {
-      const xmlFiles = app.xmlFiles ?? []
-      for (const res of historicProjects ? xmlFiles : xmlFiles.slice(0,1)) {
-        const entries = await getRecentEntries(res, app);
-        // sort before unique so we get the newest versions
-        app.entries =
-          createUniqueArray<recentEntry>("path", [...(app.entries ?? []), ...entries]).sort(
-            (a, b) => b.opened - a.opened
-          )
-      }
-      return app
-    }))
-};
-
-function OpenInJetBrainsAppAction({tool, recent}: { tool: AppHistory; recent: recentEntry | null }) {
-  function handleAction() {
-    const cmd = tool.tool
-      ? `${tool.tool} "${recent?.path ?? ''}"`
-      : `open ${tool.url}${recent?.title ?? ''}`
-    showHUD(`Opening ${recent ? recent.title : tool.title}`)
-      .then(() => exec(cmd, {env: {}}))
-      .then(() => popToRoot())
-      .catch((error) => showToast(ToastStyle.Failure, "Failed", error.message)
-        .then(() => console.error({error}))
-      )
-  }
-
-  return (
-    <ActionPanel.Item title={`Open ${recent ? "with " : ""}${tool.title}`} icon={tool.icon} onAction={handleAction}/>
-  );
-}
-
-function RecentProject({app, recent, tools}: { app: AppHistory; recent: recentEntry, tools: AppHistory[] }) {
-  const otherTools = tools.filter((tool) => tool.title !== app.title);
-
-  return (
-    <List.Item
-      accessoryTitle={app.title}
-      title={recent.title}
-      keywords={recent.path.split("/").concat([recent.path]).concat([app.title])}
-      icon={recent.icon}
-      subtitle={recent.parts}
-      actions={<ActionPanel>
-        <ActionPanel.Section>
-          <OpenInJetBrainsAppAction tool={app} recent={recent}/>
-          <ShowInFinderAction path={recent.path}/>
-          {recent.exists ? <OpenWithAction path={recent.path}/> : null}
-          <CopyToClipboardAction
-            title="Copy Path"
-            content={recent.path}
-            shortcut={{modifiers: ["cmd", "shift"], key: "."}}
-          />
-        </ActionPanel.Section>
-        <ActionPanel.Section>
-          {otherTools.map((tool) => (
-            <OpenInJetBrainsAppAction key={`${tool.title}-${recent.path}`} tool={tool} recent={recent}/>
-          ))}
-          <OpenJetBrainsToolBox/>
-        </ActionPanel.Section>
-      </ActionPanel>}
-    />
-  );
-}
-
-function OpenJetBrainsToolBox() {
-  return <ActionPanel.Item icon={JetBrainsIcon} title="Launch JetBrains Toolbox" onAction={() => {
-    getApplications().then(apps => {
-      const jb = apps.find(app => app.name.match('JetBrains Toolbox'))
-      if (jb) {
-        exec(`open -a "${jb.name}"`, (err) => err && showToast(ToastStyle.Failure, err?.message))
-      } else {
-        showToast(ToastStyle.Failure, 'Unable to find JetBrains Toolbox App').catch((err) => console.error(err))
-      }
-    })
-  }}/>;
-}
-
-function sortApps(a: AppHistory, b: AppHistory) {
-  return a.title.toLowerCase().startsWith(preferredApp.toLowerCase()) ? -1 : b.title.toLowerCase().startsWith(preferredApp.toLowerCase()) ? 1 : 0;
-}
-
-interface state {
-  loading: boolean
-  appHistory: AppHistory[]
-}
-
-export default function ProjectList() {
-  const [{loading, appHistory}, setAppHistory] = useState<state>({loading: true, appHistory: []});
-
-  useEffect(() => {
-    getHistory()
-      .then(apps => loadAppEntries(apps)
-          .then(withEntries => withEntries.sort(sortApps))
-          .then(sorted => {
-            setAppHistory({
-              loading: false,
-              appHistory: sorted,
-            })
-          })
-      )
-  }, []);
-
-  if (loading) {
-    return <Detail isLoading/>;
-  } else if (appHistory.length === 0) {
-    const tbUrl = 'https://jb.gg/toolbox-app';
+  if (isLoading) {
+    return <List searchBarPlaceholder={`Search recent projects…`} isLoading={true} />;
+  } else if (toolboxApp === undefined) {
     const message = [
-      '# Unable to find any JetBrains Toolbox apps',
-      `Please check that you have installed [JetBrains Toolbox](${tbUrl}) and added at least one IDE.`
-    ]
-    return <Detail markdown={message.join('\n\n')} actions={<ActionPanel>
-      <OpenInBrowserAction title='Open Toolbox Website' url={tbUrl} icon={JetBrainsIcon}/>
-      <OpenInBrowserAction title='Open Toolbox FAQ' url={`${tbUrl}-faq`}/>
-    </ActionPanel>}/>
-  } else if (!appHistory.reduce((exists, appHistory) => (exists || appHistory.tool !== false || appHistory.url !== false), false)) {
-    const message = [
-      '# There was a problem finding the JetBrains shell scripts',
-      'We were unable to find shell scripts, ensure you have the **Generate Shell scripts** option checked in *JetBrains Toolbox* under *Settings*.',
-      `If you have set a custom path for your shell scripts, that can set that in the settings for this extension, this is currently set to \`${bin}\`.`,
-      useUrl
-        ? 'Additionally, we were unable to find a protocol url link to fallback on, please ensure you are using the latest version of JetBrains Toolbox and any apps you are using.'
-        : 'You can also enable the extension preference to fallback to protocol url, though that is a less reliable method of opening projects.',
+      "# Unable to find JetBrains Toolbox",
+      `Please check that you have installed [JetBrains Toolbox](${tbUrl})`,
     ];
-    return <Detail markdown={message.join('\n\n')} actions={<ActionPanel>
-      <OpenJetBrainsToolBox/>
-    </ActionPanel>}/>
+    return <HelpTextDetail message={message} toolbox={undefined} />;
+  } else if (appHistory.length === 0) {
+    const message = [
+      "# Unable to find any JetBrains Toolbox apps",
+      `Please check that you have installed [JetBrains Toolbox](${tbUrl}) and added at least one IDE.`,
+      `If you have specified a custom "Tools install location" you'll need to set that in the preferences for this extension, this is currently set to \`${toolsInstall}\`.`,
+    ];
+    return <HelpTextDetail message={message} toolbox={toolboxApp} />;
+  } else if (
+    !appHistory.reduce((exists, appHistory) => exists || appHistory.tool !== false || appHistory.url !== false, false)
+  ) {
+    const missingTools = appHistory
+      .filter((appHistory) => appHistory.tool !== appHistory.toolName && appHistory.toolName !== false)
+      .map((appHistory) => appHistory.toolName);
+    const plural = missingTools.length > 1;
+    const message = [
+      "# There was a problem finding the JetBrains shell scripts",
+      "We were unable to find shell scripts, ensure you have the **Generate Shell scripts** option checked in *JetBrains Toolbox* under *Settings*.",
+      `If you have set a custom path for your shell scripts, that can set that in the settings for this extension, this is currently set to \`${bin}\`.`,
+      missingTools.length > 0
+        ? `The missing ${plural ? "scripts" : "script"} ${plural ? "are" : "is"} \`${missingTools.join(
+            "`, `"
+          )}\` please check ${plural ? "they are" : "it is"} available using ${plural ? "e.g." : ""} \`which ${
+            missingTools[0]
+          }\` from a Terminal window`
+        : "",
+      useUrl
+        ? "Additionally, we were unable to find a protocol url link to fallback on, please ensure you are using the latest version of JetBrains Toolbox and any apps you are using."
+        : "You can also enable the extension preference to fallback to protocol url, though that is a less reliable method of opening projects.",
+    ];
+    return <HelpTextDetail message={message} toolbox={toolboxApp} />;
   }
 
-  const defaultActions = <>
-    {appHistory.map((tool) => (
-      <OpenInJetBrainsAppAction key={tool.title} tool={tool} recent={null}/>
-    ))}
-    <OpenJetBrainsToolBox/>
-  </>
+  const defaultActions = (
+    <>
+      {appHistory.map((tool) => (
+        <OpenInJetBrainsApp key={tool.title} tool={tool} recent={null} />
+      ))}
+      <OpenJetBrainsToolbox app={toolboxApp} />
+    </>
+  );
 
   return (
     <List
       searchBarPlaceholder={`Search recent projects…`}
-      actions={<ActionPanel children={defaultActions}/>}
+      actions={<ActionPanel children={defaultActions} />}
+      searchBarAccessory={
+        <AppDrop
+          onChange={(value) => dispatch({ type: "setFilter", results: String(value) })}
+          appHistories={appHistory}
+        />
+      }
     >
-      {appHistory.map((app) => (
-        <List.Section title={app.title} key={app.title}>
-          {(app.entries ?? []).map((recent: recentEntry) =>
-              recent?.path ? (
-                <RecentProject key={`${app.title}-${recent.path}`} app={app} recent={recent} tools={appHistory}/>
-              ) : null
-            )}
+      {myFavs.length && filter === "" ? (
+        <List.Section title="Favourites" subtitle={screenshotMode ? "⌘+F to remove from favorites" : undefined}>
+          {myFavs.map((fav) => (
+            <RecentProject
+              key={fav.path}
+              app={appHistory.find((history) => history.title === fav.appName) || appHistory[0]}
+              recent={fav}
+              tools={appHistory}
+              toolbox={toolboxApp}
+              remFav={favActions.remove}
+              sortOrder={String(sortOrder)}
+              setSortOrder={(sortOrder) => prefActions.update("sortOrder", sortOrder)}
+              screenshotMode={!!screenshotMode}
+              toggleScreenshotMode={() => prefActions.update("screenshotMode", !screenshotMode)}
+            />
+          ))}
         </List.Section>
-      ))}
+      ) : null}
+      {appHistory
+        .filter((app) => filter === "" || filter === app.title)
+        .map((app, id) => (
+          <List.Section
+            title={app.name}
+            key={app.title}
+            subtitle={screenshotMode ? "⌘+F to add to favorites – ⌃+S to change application order" : app.version}
+          >
+            {(app.entries ?? [])
+              .filter((entry) => filter !== "" || (histories[id] ?? []).includes(entry.path))
+              .map((recent: recentEntry) =>
+                recent?.path ? (
+                  <RecentProject
+                    key={`${app.title}-${recent.path}`}
+                    app={app}
+                    recent={recent}
+                    tools={appHistory}
+                    toolbox={toolboxApp}
+                    addFav={favActions.add}
+                    sortOrder={String(sortOrder)}
+                    setSortOrder={(sortOrder) => prefActions.update("sortOrder", sortOrder)}
+                    screenshotMode={!!screenshotMode}
+                    toggleScreenshotMode={() => prefActions.update("screenshotMode", !screenshotMode)}
+                  />
+                ) : null
+              )}
+          </List.Section>
+        ))}
     </List>
   );
 }

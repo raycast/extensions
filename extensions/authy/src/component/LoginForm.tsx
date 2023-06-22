@@ -4,19 +4,9 @@ import {
   completeRegistration,
   getAuthyApps,
   getServices,
-  requestRegistration
+  requestRegistration,
 } from "../client/authy-client";
-import {
-  ActionPanel,
-  Detail,
-  environment,
-  getPreferenceValues,
-  Icon,
-  render,
-  showToast,
-  SubmitFormAction,
-  ToastStyle
-} from "@raycast/api";
+import { ActionPanel, Detail, environment, getPreferenceValues, Icon, showToast, Action, Toast } from "@raycast/api";
 import {
   addToCache,
   APPS_KEY,
@@ -27,9 +17,8 @@ import {
   removeFromCache,
   REQUEST_ID,
   SECRET_SEED,
-  SERVICES_KEY
+  SERVICES_KEY,
 } from "../cache";
-import Authy from "../search-otp";
 import { genTOTP } from "../util/utils";
 
 const message = `
@@ -42,7 +31,11 @@ Or press ⌘ + ⏎ to start this process from scratch
 `;
 
 async function requestLoginIfNeeded() {
-  const toast = await showToast(ToastStyle.Animated, "Authy", "Waiting for Approval");
+  const toast = await showToast({
+    style: Toast.Style.Animated,
+    title: "Authy",
+    message: "Waiting for Approval",
+  });
   try {
     const requestExists = await checkIfCached(REQUEST_ID);
     if (!requestExists) {
@@ -53,31 +46,45 @@ async function requestLoginIfNeeded() {
   } catch (error) {
     if (error instanceof Error) {
       await toast.hide();
-      await showToast(ToastStyle.Failure, "Authy", error.message);
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Authy",
+        message: error.message,
+      });
     } else {
       throw error;
     }
   }
-
 }
 
 async function checkForApproval(setLogin: (step: boolean) => void) {
-  const toast = await showToast(ToastStyle.Animated, "Checking request status");
+  const toast = await showToast({
+    style: Toast.Style.Animated,
+    title: "Checking request status",
+  });
   try {
     const { authyId } = getPreferenceValues<{ authyId: number }>();
-    if (!await checkIfCached(DEVICE_ID) || !await checkIfCached(SECRET_SEED)) {
+    if (!(await checkIfCached(DEVICE_ID)) || !(await checkIfCached(SECRET_SEED))) {
       const requestId: string = await getFromCache(REQUEST_ID);
       const registrationStatus = await checkRequestStatus(authyId, requestId);
 
       if (registrationStatus.status == "rejected") {
         await toast.hide();
-        await showToast(ToastStyle.Failure, "Authy", "Seems like you rejected registration request");
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Authy",
+          message: "Seems like you rejected registration request",
+        });
         await removeFromCache(REQUEST_ID);
       }
 
       if (registrationStatus.status == "pending") {
         await toast.hide();
-        await showToast(ToastStyle.Failure, "Authy", "Seems like you didn't approve registration request");
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Authy",
+          message: "Seems like you didn't approve registration request",
+        });
         return Promise.resolve();
       }
       const device = await completeRegistration(authyId, registrationStatus.pin);
@@ -95,13 +102,21 @@ async function checkForApproval(setLogin: (step: boolean) => void) {
     await addToCache(AUTHY_ID, authyId);
     setLogin(true);
     await toast.hide();
-    await showToast(ToastStyle.Success, "Authy", "Success Login");
+    await showToast({
+      style: Toast.Style.Success,
+      title: "Authy",
+      message: "Success Login",
+    });
     return Promise.resolve();
   } catch (error) {
     if (error instanceof Error) {
       await removeFromCache(REQUEST_ID);
       await toast.hide();
-      await showToast(ToastStyle.Failure, "Authy", error.message);
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Authy",
+        message: error.message,
+      });
     } else {
       throw error;
     }
@@ -112,24 +127,35 @@ async function resetRegistration() {
   await removeFromCache(REQUEST_ID);
   await removeFromCache(DEVICE_ID);
   await removeFromCache(SECRET_SEED);
-  await render(<Authy />);
+  await requestLoginIfNeeded();
 }
 
 export default function LoginForm(props: { setLogin: (step: boolean) => void }) {
   useEffect(() => {
-    (
-      async () => {
-        await requestLoginIfNeeded();
-      })();
+    (async () => {
+      await requestLoginIfNeeded();
+    })();
   });
 
   return (
-    <Detail markdown={`${message}`} actions={
-      <ActionPanel>
-        <SubmitFormAction icon={Icon.Clipboard} title="Agree" onSubmit={() => checkForApproval(props.setLogin)} />
-        <ActionPanel.Item icon={Icon.ExclamationMark} title={"Start From Scratch"} onAction={resetRegistration} />
-      </ActionPanel>
-    }
+    <Detail
+      markdown={`${message}`}
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm
+            icon={Icon.Checkmark}
+            title="Agree"
+            onSubmit={() => checkForApproval(props.setLogin)}
+            shortcut={{ key: "enter", modifiers: [] }}
+          />
+          <Action
+            icon={Icon.ExclamationMark}
+            title={"Start From Scratch"}
+            onAction={resetRegistration}
+            shortcut={{ key: "enter", modifiers: ["cmd"] }}
+          />
+        </ActionPanel>
+      }
     />
   );
 }

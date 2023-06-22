@@ -4,6 +4,11 @@
   "title": "Brew",
   "description": "Search and install Homebrew formulae",
   "author": "nhojb",
+  "contributors": [
+    "Aayush9029",
+    "mathieudutour",
+    "urwrstkn8mare"
+  ],
   "license": "MIT",
   "icon": "icon.png",
   "commands": [
@@ -11,39 +16,96 @@
       "name": "installed",
       "title": "Show Installed",
       "subtitle": "Brew",
-      "description": "List installed brew formulae",
+      "description": "List installed brew formulae & casks",
       "mode": "view"
     },
     {
       "name": "search",
-      "title": "Search Formulae",
+      "title": "Search",
       "subtitle": "Brew",
-      "description": "Search brew formulae",
+      "description": "Search brew formulae & casks",
       "mode": "view"
     },
     {
       "name": "outdated",
       "title": "Show Outdated",
       "subtitle": "Brew",
-      "description": "Show outdated brew formulae",
+      "description": "Show outdated brew formulae & casks",
       "mode": "view"
+    },
+    {
+      "name": "upgrade",
+      "title": "Upgrade",
+      "subtitle": "Brew",
+      "description": "Upgrade brew formulae & casks",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "customBrewPath",
+      "type": "textfield",
+      "required": false,
+      "title": "Custom Brew Executable Path",
+      "description": "Set this if your brew executable is in a non-standard location"
+    },
+    {
+      "name": "terminalApp",
+      "type": "dropdown",
+      "required": false,
+      "title": "Terminal Application",
+      "data": [
+        {
+          "title": "Terminal",
+          "value": "terminal"
+        },
+        {
+          "title": "iTerm",
+          "value": "iterm"
+        }
+      ],
+      "description": "The terminal application/emulator to use when using any Run in Terminal action."
+    },
+    {
+      "name": "greedyUpgrades",
+      "type": "checkbox",
+      "required": false,
+      "title": "Upgrades",
+      "description": "Include auto-updating casks when upgrading or checking for outdated items.",
+      "default": false,
+      "label": "Include auto-updating casks when upgrading"
+    },
+    {
+      "name": "zapCask",
+      "type": "checkbox",
+      "required": false,
+      "title": "Uninstall",
+      "label": "Remove all files associated with a cask.",
+      "description": "Run cask uninstall with the --zap option for a more complete uninstallation of files associated with cask.\nWARNING: This may remove files shared with other applications."
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.25.0",
-    "node-fetch": "^2.6.1"
+    "@raycast/api": "^1.53.3",
+    "@raycast/utils": "^1.4.11",
+    "@types/stream-json": "^1.7.2",
+    "node-fetch": "^2.6.7",
+    "run-applescript": "^6.0.0",
+    "stream-chain": "^2.2.5",
+    "stream-json": "^1.7.4"
   },
   "devDependencies": {
-    "@types/node": "^16.4.3",
-    "@types/node-fetch": "^2.5.12",
-    "@types/react": "^17.0.15",
-    "@typescript-eslint/eslint-plugin": "^4.28.5",
-    "@typescript-eslint/parser": "^4.28.5",
-    "eslint": "^7.31.0",
-    "eslint-config-prettier": "^8.3.0",
-    "typescript": "^4.3.5"
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "^16.11.26",
+    "@types/node-fetch": "^2.6.1",
+    "@types/react": "^17.0.40",
+    "eslint": "^7.32.0",
+    "typescript": "^4.6.2"
   },
   "scripts": {
-    "dev": "ray develop target"
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
   }
 }

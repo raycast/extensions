@@ -1,50 +1,22 @@
-import {
-  ActionPanel,
-  ActionPanelItem,
-  closeMainWindow,
-  Color,
-  Form,
-  FormCheckbox,
-  FormTextField,
-  getLocalStorageItem,
-  Icon,
-  List,
-  ListItem,
-  PushAction,
-  randomId,
-  setLocalStorageItem,
-  showHUD,
-  showToast,
-  SubmitFormAction,
-  Toast,
-  ToastStyle,
-  useNavigation,
-} from "@raycast/api";
+import { ActionPanel, Color, Icon, List, showHUD, showToast, Toast, useNavigation, Action } from "@raycast/api";
 import { useEffect, useState } from "react";
 import ClearLocalStorage from "./components/clearLocalStorage";
-import Help from "./components/help";
+import { Favorite } from "./components/favoritesForm";
 import NotInstalled from "./components/not-installed";
+import Config from "./config";
 import { listScreenInfo, switchSettings } from "./utils/displayplacer";
+import { useFavorites } from "./utils/use-favorites";
 
 export default function DisplayPlacer() {
-  const { push, pop } = useNavigation();
-  const [favorites, setFavorites] = useState<Favorite[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { push } = useNavigation();
+  const { favorites, isLoading: favsLoading, updateAndSaveFavs } = useFavorites();
+  const [loading, setIsLoading] = useState(true);
   const [currentCommand, setCurrentCommand] = useState<DisplayPlacerList["currentCommand"]>(null);
   const [isError, setIsError] = useState(false);
 
-  async function init() {
-    const myFavs = await getLocalStorageItem("favorites");
-    myFavs;
-    if (myFavs) {
-      setFavorites(JSON.parse(myFavs.toString()));
-    } else {
-      setFavorites([]);
-      await setLocalStorageItem("favorites", "[]");
-    }
-
+  function init() {
     try {
-      const result = await listScreenInfo();
+      const result = listScreenInfo();
 
       if (!result.currentCommand) {
         console.error("problem");
@@ -64,101 +36,18 @@ export default function DisplayPlacer() {
     init();
   }, []);
 
-  async function getCommandForCurrentSettings() {
-    const result = await listScreenInfo();
-
-    if (!result.currentCommand) {
-      showToast(ToastStyle.Failure, "Could not get current display settings");
-      return null;
-    }
-
-    return result.currentCommand;
-  }
+  const isLoading = loading || favsLoading;
 
   function newPreset() {
-    push(
-      <Form
-        navigationTitle="New DisplayPlacer Preset"
-        actions={
-          <ActionPanel>
-            <SubmitFormAction
-              title="New Preset"
-              icon={Icon.Plus}
-              onSubmit={async (values: { name: string; subtitle: string }) => {
-                const command = await getCommandForCurrentSettings();
-                if (!command) return;
-
-                favorites.push({
-                  id: randomId(),
-                  name: values.name,
-                  subtitle: values.subtitle ?? "",
-                  command,
-                });
-                setFavorites(favorites);
-                setLocalStorageItem("favorites", JSON.stringify(favorites));
-                init().then(pop);
-              }}
-            />
-          </ActionPanel>
-        }
-      >
-        <FormTextField title="Preset Name" key="name" id="name" />
-        <FormTextField
-          title="Subtitle"
-          placeholder="Short description shown next to title"
-          defaultValue=""
-          key="subtitle"
-          id="subtitle"
-        />
-      </Form>
-    );
+    push(<Favorite />);
   }
 
   function editPreset(fav: Favorite) {
-    push(
-      <Form
-        navigationTitle="Edit DisplayPlacer Preset"
-        actions={
-          <ActionPanel>
-            <SubmitFormAction
-              title="Save Changes"
-              icon={Icon.Document}
-              onSubmit={async (values: { name: string; subtitle: string; overwrite: boolean }) => {
-                const command = await getCommandForCurrentSettings();
-                if (!command) return;
-
-                const i = favorites.findIndex((f) => f.id === fav.id);
-
-                favorites[i] = {
-                  ...favorites[i],
-                  name: values.name,
-                  subtitle: values.subtitle ?? "",
-                  command: values.overwrite ? command : favorites[i].command,
-                };
-
-                setFavorites(favorites);
-                setLocalStorageItem("favorites", JSON.stringify(favorites));
-                init().then(pop);
-              }}
-            />
-          </ActionPanel>
-        }
-      >
-        <FormTextField title="Preset Name" key="name" id="name" defaultValue={fav.name} />
-        <FormTextField
-          title="Subtitle"
-          placeholder="Short description shown next to title"
-          defaultValue={fav.subtitle}
-          key="subtitle"
-          id="subtitle"
-        />
-        <FormCheckbox label="Overwrite saved display settings with current display settings" id="overwrite" />
-      </Form>
-    );
+    push(<Favorite fav={fav} />);
   }
 
   const NewPresetAction = (
-    <ActionPanelItem
+    <Action
       title="New Display Preset"
       icon={Icon.Plus}
       shortcut={{ key: "n", modifiers: ["cmd"] }}
@@ -184,20 +73,19 @@ export default function DisplayPlacer() {
           <List.Section title="Presets">
             {favorites?.map((fav, i) => {
               return (
-                <ListItem
+                <List.Item
                   title={fav.name}
                   key={i}
                   subtitle={fav.subtitle}
-                  accessoryTitle={`# ${(i + 1).toString()}`}
                   icon={currentCommand === fav.command ? { source: Icon.Dot, tintColor: Color.Blue } : ""}
                   actions={
                     <ActionPanel>
-                      <ActionPanelItem
+                      <Action
                         title="Load Display Preset"
                         icon={Icon.Desktop}
                         onAction={async () => {
-                          const toast = new Toast({
-                            style: ToastStyle.Animated,
+                          const toast = await showToast({
+                            style: Toast.Style.Animated,
                             title: "Switching Display Settings...",
                           });
                           await toast.show();
@@ -209,65 +97,66 @@ export default function DisplayPlacer() {
                           } catch (e) {
                             await init();
                             await toast.hide();
-                            showToast(
-                              ToastStyle.Failure,
-                              "Error",
-                              "An unknown error occured while switching to this preset"
-                            );
+                            showToast({
+                              style: Toast.Style.Failure,
+                              title: "Error",
+                              message: "An unknown error occured while switching to this preset",
+                            });
                           }
                         }}
                       />
-                      <ActionPanelItem
+                      <Action
                         title="Edit Display Preset"
                         icon={Icon.Pencil}
                         shortcut={{ key: "e", modifiers: ["cmd"] }}
                         onAction={() => editPreset(fav)}
                       />
-                      <ActionPanelItem
+                      <Action
                         title="Delete Display Preset"
                         icon={Icon.Trash}
                         shortcut={{ key: "delete", modifiers: ["cmd"] }}
-                        onAction={() => {
-                          const i = favorites.findIndex((f) => f.id === fav.id);
-
-                          favorites.splice(i, 1);
-
-                          setFavorites(favorites);
-                          setLocalStorageItem("favorites", JSON.stringify(favorites));
-                          init();
+                        onAction={async () => {
+                          const newFavorites = [...favorites];
+                          newFavorites.splice(i, 1);
+                          await updateAndSaveFavs(newFavorites);
                         }}
                       />
                       {NewPresetAction}
                     </ActionPanel>
                   }
+                  accessories={[
+                    {
+                      text: `# ${(i + 1).toString()}`,
+                    },
+                  ]}
                 />
               );
             })}
           </List.Section>
           <List.Section title="Config">
-            <ListItem
+            <List.Item
               title="New Display Preset"
               subtitle="using current display settings"
               icon={Icon.Plus}
               actions={
                 <ActionPanel>
-                  <ActionPanelItem
+                  <Action
                     title="New Display Preset"
                     onAction={newPreset}
                     icon={Icon.Plus}
                     shortcut={{ key: "n", modifiers: ["cmd"] }}
                   />
-                  <PushAction title="Clear All Presets" target={<ClearLocalStorage onExit={() => init()} />} />
+                  <Action.Push title="Clear All Presets" target={<ClearLocalStorage onExit={() => init()} />} />
                 </ActionPanel>
               }
             />
 
-            <ListItem
+            <List.Item
               title="Help"
               icon={Icon.QuestionMark}
               actions={
                 <ActionPanel>
-                  <PushAction icon={Icon.QuestionMark} title="Open Readme" target={<Help />} />
+                  <Action.Push icon={Icon.QuestionMark} title="Open Readme" target={<Config />} />
                 </ActionPanel>
               }
             />

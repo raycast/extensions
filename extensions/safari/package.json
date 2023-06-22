@@ -2,43 +2,31 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "safari",
   "title": "Safari",
-  "description": "Manage your Safari Tabs (Local and iCloud) and Reading List",
+  "description": "Manage your Safari Tabs, History and Reading List",
+  "categories": [
+    "Applications",
+    "Web"
+  ],
   "icon": "safari-icon.png",
   "author": "loris",
+  "contributors": [
+    "thomas",
+    "HelloImSteven"
+  ],
   "license": "MIT",
   "commands": [
     {
       "name": "cloud-tabs",
-      "title": "Show Tabs",
+      "title": "Search Tabs",
       "subtitle": "Safari",
-      "description": "List, filter and open your Safari Tabs (Local and iCloud)",
-      "mode": "view",
-      "preferences": [
-        {
-          "name": "safariAppIdentifier",
-          "type": "dropdown",
-          "required": false,
-          "title": "Local Safari Browser",
-          "description": "Switch between Safari or Safari Technology Preview",
-          "default": "Safari",
-          "data": [
-            {
-              "value": "Safari",
-              "title": "Safari"
-            },
-            {
-              "value": "Safari Technology Preview",
-              "title": "Safari Technology Preview"
-            }
-          ]
-        }
-      ]
+      "description": "Browse your open tabs (Local and iCloud)",
+      "mode": "view"
     },
     {
       "name": "reading-list",
-      "title": "Show Reading List",
+      "title": "Search Reading List",
       "subtitle": "Safari",
-      "description": "List, filter and open your Safari Reading List",
+      "description": "Browse your reading list",
       "mode": "view",
       "preferences": [
         {
@@ -55,32 +43,66 @@
       "name": "add-to-reading-list",
       "title": "Add to Reading List",
       "subtitle": "Safari",
-      "description": "Add URL to Safari Reading List",
+      "description": "Add an item to your reading list",
+      "mode": "view"
+    },
+    {
+      "name": "search-history",
+      "title": "Search History",
+      "subtitle": "Safari",
+      "description": "Browse your history",
+      "mode": "view"
+    },
+    {
+      "name": "search-bookmarks",
+      "title": "Search Bookmarks",
+      "subtitle": "Safari",
+      "description": "Browse your bookmarks",
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "name": "safariAppIdentifier",
+      "type": "dropdown",
+      "required": false,
+      "title": "Local Safari Browser",
+      "description": "Switch between Safari or Safari Technology Preview",
+      "default": "Safari",
+      "data": [
+        {
+          "value": "Safari",
+          "title": "Safari"
+        },
+        {
+          "value": "Safari Technology Preview",
+          "title": "Safari Technology Preview"
+        }
+      ]
+    }
+  ],
   "dependencies": {
-    "@raycast/api": "^1.25.0",
-    "execa": "^5.1.1",
+    "@raycast/api": "^1.49.3",
+    "@raycast/utils": "1.5.2",
+    "bplist-creator": "^0.1.1",
     "lodash": "^4.17.21",
     "osascript-tag": "^0.1.2",
-    "simple-plist": "^1.1.1",
-    "sql.js": "^1.6.2"
+    "simple-plist": "^1.4.0"
   },
   "devDependencies": {
-    "@types/lodash": "^4.14.176",
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@types/sql.js": "^1.4.3",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "react-devtools": "^4.19.2",
-    "typescript": "^4.4.3"
+    "@types/lodash": "^4.14.191",
+    "@types/node": "~18.11.10",
+    "@types/react": "^18.0.26",
+    "@typescript-eslint/eslint-plugin": "^5.45.0",
+    "@typescript-eslint/parser": "^5.45.0",
+    "eslint": "^8.29.0",
+    "eslint-config-prettier": "^8.5.0",
+    "react-devtools": "^4.27.0",
+    "typescript": "^4.9.3"
   },
   "scripts": {
     "build": "ray build -e dist",
-    "dev": "ray develop"
+    "dev": "ray develop",
+    "lint": "ray lint"
   }
 }

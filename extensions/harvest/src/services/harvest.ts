@@ -6,19 +6,28 @@ import {
   HarvestTimeEntryCreatedResponse,
   HarvestTimeEntryResponse,
   HarvestTimeEntry,
-  HarvestCompany,
-  HarvestClient,
   HarvestProjectAssignment,
+  HarvestUserResponse,
+  HarvestCompany,
 } from "./responseTypes";
-import { getPreferenceValues } from "@raycast/api";
-import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
+import { Cache, getPreferenceValues, launchCommand, LaunchType, LocalStorage } from "@raycast/api";
+import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
 import { NewTimeEntryDuration, NewTimeEntryStartEnd } from "./requestTypes";
 import dayjs from "dayjs";
-import useSWR from "swr";
+import { useCachedPromise } from "@raycast/utils";
+import { useEffect } from "react";
+
+const cache = new Cache();
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function isAxiosError(error: any): error is AxiosError {
+  return Object.keys(error).includes("isAxiosError");
+}
 
 interface Preferences {
   token: string;
   accountID: string;
+  timeFormat: "hours_minutes" | "decimal" | "company";
 }
 
 const { token, accountID }: Preferences = getPreferenceValues();
@@ -38,36 +47,77 @@ async function harvestAPI<T = AxiosResponse>({ method = "GET", ...props }: Axios
 }
 
 export function useCompany() {
-  const { data, error } = useSWR<HarvestCompany>("company", async () => {
+  return useCachedPromise(async () => {
     const resp = await harvestAPI<HarvestCompanyResponse>({ url: "/company" });
     return resp.data;
   });
-  return { data, error, isLoading: !data && !error };
 }
 
 export function useActiveClients() {
-  const { data, error } = useSWR<HarvestClient[]>("clients", async () => {
+  return useCachedPromise(async () => {
     const resp = await harvestAPI<HarvestClientsResponse>({ url: "/clients", params: { is_active: true } });
     return resp.data.clients;
   });
-  return { data, error, isLoading: !data && !error };
 }
 
 export function useMyProjects() {
-  const { data, error } = useSWR<HarvestProjectAssignment[]>("project-assignments", async () => {
-    const resp = await harvestAPI<HarvestProjectAssignmentsResponse>({ url: "/users/me/project_assignments" });
-    return resp.data.project_assignments;
-  });
-  return { data, error, isLoading: !data && !error };
+  return useCachedPromise(
+    async () => {
+      let project_assignments: HarvestProjectAssignment[] = [];
+      let page = 1;
+      // eslint-disable-next-line no-constant-condition
+      while (true) {
+        const resp = await harvestAPI<HarvestProjectAssignmentsResponse>({
+          url: "/users/me/project_assignments",
+          params: { page },
+        });
+        project_assignments = project_assignments.concat(resp.data.project_assignments);
+        if (resp.data.total_pages >= resp.data.page) break;
+        page += 1;
+      }
+      return project_assignments;
+    },
+    [],
+    { initialData: [] }
+  );
 }
 
-export async function getMyTimeEntries({ from = new Date(), to = new Date() }: { from: Date; to: Date }) {
+export async function getMyId() {
+  const id = await LocalStorage.getItem("myId");
+  if (id) return id;
+
+  const resp = await harvestAPI<HarvestUserResponse>({ url: "/users/me" });
+
+  await LocalStorage.setItem("myId", resp.data.id);
+  return resp.data.id;
+}
+
+export function useMyTimeEntries(from = new Date(), to = new Date()) {
+  const qr = useCachedPromise(getMyTimeEntries, [{ from, to }], { initialData: [], keepPreviousData: true });
+  useEffect(() => {
+    if (from === new Date() && to === new Date()) {
+      const running_timer = qr.data.find((o) => o.is_running);
+      if (running_timer) {
+        cache.set("running", JSON.stringify(running_timer));
+      } else {
+        cache.remove("running");
+      }
+    }
+  }, [qr.data]);
+  return qr;
+}
+
+export async function getMyTimeEntries(args?: { from: Date; to: Date }): Promise<HarvestTimeEntry[]> {
+  const { from = new Date(), to = new Date() } = args ?? {};
+  const id = await getMyId();
   let time_entries: HarvestTimeEntry[] = [];
   let page = 1;
+  // eslint-disable-next-line no-constant-condition
   while (true) {
     const resp = await harvestAPI<HarvestTimeEntriesResponse>({
       url: "/time_entries",
       params: {
+        user_id: id,
         from: dayjs(from).startOf("day").format(),
         to: dayjs(to).endOf("day").format(),
         page,
@@ -80,14 +130,21 @@ export async function getMyTimeEntries({ from = new Date(), to = new Date() }: {
   return time_entries;
 }
 
-export async function newTimeEntry(param: NewTimeEntryDuration | NewTimeEntryStartEnd) {
-  const resp = await harvestAPI<HarvestTimeEntryCreatedResponse>({ method: "POST", url: "/time_entries", data: param });
+export async function newTimeEntry(param: NewTimeEntryDuration | NewTimeEntryStartEnd, id?: string) {
+  const url = id ? `/time_entries/${id}` : "/time_entries";
+  console.log({ url });
+  const resp = await harvestAPI<HarvestTimeEntryCreatedResponse>({ method: id ? "PATCH" : "POST", url, data: param });
+  refreshMenuBar();
   return resp.data;
 }
 
 export async function stopTimer(entry?: HarvestTimeEntry) {
   if (!entry) {
-    const resp = await harvestAPI<HarvestTimeEntriesResponse>({ url: "/time_entries", params: { is_running: true } });
+    const id = await getMyId();
+    const resp = await harvestAPI<HarvestTimeEntriesResponse>({
+      url: "/time_entries",
+      params: { user_id: id, is_running: true },
+    });
     if (resp.data.time_entries.length === 0) {
       return true;
     }
@@ -97,6 +154,7 @@ export async function stopTimer(entry?: HarvestTimeEntry) {
     url: `/time_entries/${entry.id}/stop`,
     method: "PATCH",
   });
+  refreshMenuBar();
   return true;
 }
 
@@ -105,6 +163,7 @@ export async function restartTimer(entry: HarvestTimeEntry) {
     url: `/time_entries/${entry.id}/restart`,
     method: "PATCH",
   });
+  refreshMenuBar();
   return true;
 }
 
@@ -113,5 +172,27 @@ export async function deleteTimeEntry(entry: HarvestTimeEntry) {
     url: `/time_entries/${entry.id}`,
     method: "DELETE",
   });
+  refreshMenuBar();
   return true;
+}
+
+export async function refreshMenuBar() {
+  try {
+    await launchCommand({ extensionName: "harvest", name: "menu-bar", type: LaunchType.Background });
+  } catch {
+    console.log("failed to refresh menu bar");
+  }
+}
+
+export function formatHours(hours: string | undefined, company: HarvestCompany | undefined): string {
+  if (!hours) return "";
+  const { timeFormat }: Preferences = getPreferenceValues();
+
+  if (timeFormat === "hours_minutes" || (timeFormat === "company" && company?.time_format === "hours_minutes")) {
+    const time = hours.split(".");
+    const hour = time[0];
+    const minute = parseFloat(`0.${time[1]}`) * 60;
+    return `${hour}:${minute < 10 ? "0" : ""}${minute.toFixed(0)}`;
+  }
+  return hours;
 }

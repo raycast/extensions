@@ -1,29 +1,57 @@
-export interface FileEntry {
+export type FileEntry = {
   fileUri: string;
-}
+};
 
-export function isFileEntry(entry: EntryLike): entry is FileEntry {
-  return (entry as FileEntry).fileUri !== undefined;
-}
-
-export interface FolderEntry {
+export type FolderEntry = {
   folderUri: string;
-}
+};
 
-export function isFolderEntry(entry: EntryLike): entry is FolderEntry {
-  return (entry as FolderEntry).folderUri !== undefined;
-}
-
-export interface WorkspaceEntry {
+export type WorkspaceEntry = {
   workspace: {
     configPath: string;
   };
+};
+
+export type RemoteEntry = {
+  folderUri: string;
+  remoteAuthority: string;
+  label: string;
+};
+
+export type EntryLike = FolderEntry | FileEntry | WorkspaceEntry | RemoteEntry;
+
+export enum VSCodeBuild {
+  Code = "Code",
+  Insiders = "Code - Insiders",
+  VSCodium = "VSCodium",
 }
 
-export function isWorkspaceEntry(entry: EntryLike): entry is WorkspaceEntry {
-  return (
-    (entry as WorkspaceEntry).workspace !== undefined && (entry as WorkspaceEntry).workspace.configPath !== undefined
-  );
+export type Preferences = {
+  build: VSCodeBuild;
+  keepSectionOrder: boolean;
+  layout: "grid" | "list";
+  closeOtherWindows: boolean;
+};
+
+export type RecentEntries = {
+  entries: string;
+};
+
+export enum EntryType {
+  Workspaces = "Workspaces",
+  Folders = "Folders",
+  RemoteFolders = "Remote Folders",
+  Files = "Files",
+  AllTypes = "All Types",
 }
 
-export type EntryLike = FolderEntry | FileEntry | WorkspaceEntry;
+export type PinnedMovement = "up" | "right" | "down" | "left";
+
+export type PinMethods = {
+  pin: (entry: EntryLike) => void;
+  moveUp: (entry: EntryLike) => void;
+  moveDown: (entry: EntryLike) => void;
+  unpin: (entry: EntryLike) => void;
+  unpinAll: () => void;
+  getAllowedMovements: (entry: EntryLike) => PinnedMovement[];
+};

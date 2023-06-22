@@ -1,30 +1,21 @@
-import { ActionPanel, Form, Detail, showToast, ToastStyle, Icon, useNavigation } from '@raycast/api';
+import { ActionPanel, Form, Detail, showToast, Icon, useNavigation, Action, Toast } from '@raycast/api';
 import _ from 'lodash';
+import qs from 'qs';
 import { exec } from 'child_process';
 import { useEffect, useState } from 'react';
 import { promisify } from 'util';
-import { ListName, executeJxa, thingsNotRunningError } from './shared';
+import { ListName, executeJxa, thingsNotRunningError, preferences } from './shared';
 import ShowList from './show-list';
 
 const asyncExec = promisify(exec);
 
-interface FormValues {
-  title: string;
-  notes: string;
-  tags: string[];
-  list: string | undefined;
-  when: Date | undefined;
-  'checklist-items': string;
-  deadline: Date | undefined;
-}
-
 const getTags = () =>
   executeJxa(`
-  const things = Application('Things');
+  const things = Application('${preferences.thingsAppIdentifier}');
   return things.tags().map(tag => tag.name());
 `);
 
-const buildJSON = (values: FormValues) => [
+const buildJSON = (values: Form.Values) => [
   {
     type: 'to-do',
     operation: 'create',
@@ -49,7 +40,7 @@ const buildJSON = (values: FormValues) => [
   },
 ];
 
-const getTargetListName = (list: FormValues['list']): ListName => {
+const getTargetListName = (list: Form.Values['list']): ListName => {
   if (list === 'today' || list === 'evening') {
     return ListName.Today;
   } else if (list === 'tomorrow' || list === 'upcoming') {
@@ -64,7 +55,7 @@ const getTargetListName = (list: FormValues['list']): ListName => {
 };
 
 export default function AddNewTodo(props: { title?: string; listName?: string }) {
-  const defaultValues: FormValues = {
+  const defaultValues: Form.Values = {
     title: props.title || '',
     notes: '',
     tags: [],
@@ -74,7 +65,7 @@ export default function AddNewTodo(props: { title?: string; listName?: string })
     deadline: undefined,
   };
 
-  const [values, setValues] = useState<FormValues>(defaultValues);
+  const [values, setValues] = useState<Form.Values>(defaultValues);
   // const [projects, setProjects] = useState();
   const [tags, setTags] = useState([]);
   const [thingsNotRunning, setThingsNotRunning] = useState(false);
@@ -99,15 +90,22 @@ export default function AddNewTodo(props: { title?: string; listName?: string })
 
   const addNewTodo = async () => {
     if (!values.title) {
-      showToast(ToastStyle.Failure, 'Title is required');
+      showToast({
+        style: Toast.Style.Failure,
+        title: 'Title is required',
+      });
       return;
     }
 
     const json = buildJSON(values);
-    const url = `open -g things:///json?data=${encodeURIComponent(JSON.stringify(json))}`;
+    const escapedData = qs.stringify({ v: JSON.stringify(json) }).replace(/^v=/, '');
+    const url = `open -g things:///json?data=${escapedData}`;
     await asyncExec(url);
 
-    showToast(ToastStyle.Success, 'Added New To-Do');
+    showToast({
+      style: Toast.Style.Success,
+      title: 'Added New To-Do',
+    });
     setValues({ ...defaultValues, title: '' });
   };
 
@@ -125,12 +123,8 @@ export default function AddNewTodo(props: { title?: string; listName?: string })
     <Form
       actions={
         <ActionPanel>
-          <ActionPanel.Item title="Add New To-Do" onAction={addNewTodo} icon={Icon.Plus} />
-          <ActionPanel.Item
-            title="Add New To-Do and Go To List"
-            onAction={addNewTodoAndGoToList}
-            icon={Icon.ArrowRight}
-          />
+          <Action title="Add New To-Do" onAction={addNewTodo} icon={Icon.Plus} />
+          <Action title="Add New To-Do and Go To List" onAction={addNewTodoAndGoToList} icon={Icon.ArrowRight} />
         </ActionPanel>
       }
     >

@@ -1,26 +1,37 @@
-# Raycast Authy integration
+<img src="media/title.png" alt="Title">
 
-----------
+---
 
 Warning: This extension is using Authy private api and may not compliant with the Terms of Service of Authy. Use at your own risk.
 
-----------
+---
 
 ## Setup
-Required parameters is Authy Id and Backup Password you can get it from Authy App.
-<img src="readme/setup01.png" width="500" alt="Settings">
 
-You should enable multi device access to allow Raycast access to your data.
-<img src="readme/setup02.png" width="500" alt="Multi device">
+Pre-requirements:
+1. Enable _Allow Multi-device_ option to allow extension to connect to your account.  
+   <details> <summary>Screenshot</summary> <img src="media/setup02.png" alt="Multi device"> </details>
+2. Enable _Authenticator Backups_ to get your data synced. Set your backup password.
+   <details> <summary>Screenshot</summary> <img src="media/setup03.png" alt="Backup"> </details>
+3. You can find _Authy Id_ in the settings main tab.
+   <details> <summary>Screenshot</summary> <img src="media/setup01.png" alt="Settings"> </details>
 
-To get your 3rd party Services inside the Raycast. You should enable backups
-<img src="readme/setup03.png" width="500" alt="Backups">
+<img src="media/setup04.png" alt="Setup">
 
 ### Q&A
+
 Q: I got too many attempts error
 
-A: This is should be really rarely error, please wait a time mentioned in error and try again 
+A: This should be really rarely error, please wait a time mentioned in error and try again
+
+Q: I've added a new account in the Authy App, but it's missing in the extension
+
+A: Try to refresh the extension data `cmd + r`
 
 Q: I got my token damaged error during refresh
 
 A: Try a few time, in case problem hasn't been resolved try to re-install extension, any way all synced services should work fine
+
+Q: I got `currpted` OTP for some of my records
+
+A: That mean extension couldn't decrypt your OTP, pls submit a [GitHub issue](https://github.com/raycast/extensions/issues/new/choose) for Authy extension. 

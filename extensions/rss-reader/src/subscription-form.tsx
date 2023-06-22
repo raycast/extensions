@@ -1,65 +1,91 @@
-import { ActionPanel, Form, SubmitFormAction, showToast, ToastStyle, Icon, Color, setLocalStorageItem, useNavigation } from "@raycast/api";
+import { ActionPanel, Form, showToast, Icon, Color, useNavigation, Action, LocalStorage, Toast } from "@raycast/api";
 import { useState } from "react";
 import { Feed, getFeeds } from "./feeds";
 import Parser from "rss-parser";
+import { getFavicon } from "@raycast/utils";
+import { StoriesList } from "./stories";
 
 const parser = new Parser({});
 
-function AddFeedForm(props?: { callback?: (feeds: Feed[]) => void }) {
-  const [value, setValue] = useState("");
-  const { pop } = useNavigation()
-
-  const addFeed = async (values: { feedURL : string }) => { 
-    try {
-      setValue("")
-      showToast(ToastStyle.Animated, "Subscribing...")
-      const feed = await parser.parseURL(values.feedURL)
-      let feedItem = ({
-        url: values.feedURL,
-        title: feed.title || "No Title",
-        icon: feed.image?.url || Icon.TextDocument
-      })
-
-      let feedItems = await getFeeds()
-      if (feedItems?.some(item => item.url === feedItem.url)) {
-        await showToast(ToastStyle.Failure, "Feed already exists", feedItem.title);
-        return
-      }
-      feedItems?.push(feedItem)
-      await setLocalStorageItem("feeds", JSON.stringify(feedItems));
-
-      await showToast(ToastStyle.Success, "Subscribed!", feedItem.title);
-      if (props?.callback) {
-        props.callback(feedItems)
-        pop()
-      }
-    } catch (error) {
-      showToast(ToastStyle.Failure, "Can't find feed", "No valid feed found on " + values.feedURL);
+const getFeedItem = async (feedURL: string): Promise<Feed> => {
+  const feed = await parser.parseURL(feedURL);
+  const feedIcon = () => {
+    if (feed.image?.url) {
+      return feed.image.url;
+    } else {
+      return getFavicon(feedURL, { fallback: Icon.BlankDocument });
     }
-   };
+  };
+  return {
+    url: feedURL,
+    link: feed.link,
+    title: feed.title || "No Title",
+    icon: feedIcon(),
+  };
+};
+
+function AddFeedForm() {
+  const [value, setValue] = useState("");
+  const navigation = useNavigation();
+
+  const addFeed = async (values: { feedURL: string }) => {
+    try {
+      setValue("");
+      showToast({
+        style: Toast.Style.Animated,
+        title: "Subscribing...",
+      });
+      const feedItem = await getFeedItem(values.feedURL);
+
+      const feedItems = await getFeeds();
+      if (feedItems?.some((item) => item.url === feedItem.url)) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Feed already exists",
+          message: feedItem.title,
+        });
+        return;
+      }
+      feedItems?.push(feedItem);
+      await LocalStorage.setItem("feeds", JSON.stringify(feedItems));
+
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Subscribed!",
+        message: feedItem.title,
+      });
+      navigation.push(<StoriesList feeds={[feedItem]} />);
+    } catch (error) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Can't find feed",
+        message: "No valid feed found on " + values.feedURL,
+      });
+    }
+  };
 
   return (
-    <Form 
+    <Form
       actions={
         <ActionPanel>
-          <SubmitFormAction 
-            title="Subscribe" 
-            onSubmit={ addFeed }
+          <Action.SubmitForm
+            title="Subscribe"
+            onSubmit={addFeed}
             icon={{ source: Icon.Plus, tintColor: Color.Green }}
             shortcut={{ modifiers: [], key: "return" }}
           />
         </ActionPanel>
       }
     >
-      <Form.TextField 
+      <Form.TextField
         id="feedURL"
         title="RSS Feed URL"
         placeholder="Paste feed URL here and press enter to subscribe"
-        value={ value }
-        onChange={ setValue }
+        value={value}
+        onChange={setValue}
       />
     </Form>
   );
 }
 
- export default AddFeedForm; 
+export default AddFeedForm;

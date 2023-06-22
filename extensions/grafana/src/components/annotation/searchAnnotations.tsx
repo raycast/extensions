@@ -1,17 +1,8 @@
-import {
-  ActionPanel,
-  List,
-  showToast,
-  ToastStyle,
-} from "@raycast/api";
-import {
-  DeleteAnnotationAction,
-  PatchAnnotationAction
-} from "./annotationActions";
+import { ActionPanel, List, showToast, ToastStyle } from "@raycast/api";
+import { DeleteAnnotationAction, PatchAnnotationAction } from "./annotationActions";
 import { useState, useEffect, useRef } from "react";
-import fetch, { AbortError } from "node-fetch";
+import { AbortError } from "node-fetch";
 
-import { preferences } from "../../helpers/preferences";
 import { annotationGetQuery } from "./queries";
 
 interface SearchState {
@@ -21,26 +12,26 @@ interface SearchState {
 
 interface Annotation {
   id?: number;
-  alertId?: number,
+  alertId?: number;
   alertName?: string;
-  dashboardId?: number,
-  panelId?: number,
-  userId?: number,
-  prevState?: string,
+  dashboardId?: number;
+  panelId?: number;
+  userId?: number;
+  prevState?: string;
   newState?: string;
-  created?: number,
-  updated?: number,
-  time: number,
-  timeEnd?: number,
-  text: string,
-  tags?: string[],
-  login?: string,
-  email?: string,
-  avatarUrl?: string,
-  data?: any
+  created?: number;
+  updated?: number;
+  time: number;
+  timeEnd?: number;
+  text: string;
+  tags?: string[];
+  login?: string;
+  email?: string;
+  avatarUrl?: string;
+  data?: any;
 }
 
-export function SearchAnnotations(props: {}): JSX.Element {
+export function SearchAnnotations(): JSX.Element {
   const { state, search } = useSearch();
 
   return (
@@ -124,7 +115,7 @@ function useSearch() {
 }
 
 async function performSearchOnAnnotations(searchText: string, signal: AbortSignal): Promise<Annotation[]> {
-  const response = await annotationGetQuery(signal)
+  const response = await annotationGetQuery(signal);
 
   if (!response.ok) {
     return Promise.reject(response.statusText);

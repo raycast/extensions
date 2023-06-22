@@ -1,17 +1,13 @@
-import { 
-  URLConstants 
-} from "@constants"
+import { URLConstants } from "@constants";
 
-import { 
-  ContentType 
-} from "@types"
+import { ContentType } from "@types";
 
-export const readmeNormalURL = (path: string) => readmeURL(path, ContentType.Normal)
+export const readmeNormalURL = (path: string) => readmeURL(path, ContentType.Normal);
 
-export const readmeRawURL = (path: string) => readmeURL(path, ContentType.Raw)
+export const readmeRawURL = (path: string) => readmeURL(path, ContentType.Raw);
 
 const readmeURL = (path: string, type: ContentType): string => {
-  const base = type === ContentType.Raw ? URLConstants.baseRawURL : URLConstants.baseURL
+  const base = type === ContentType.Raw ? URLConstants.baseRawURL : URLConstants.baseURL;
 
-  return `${base}/${path}`
-}
+  return `${base}/${path}`;
+};

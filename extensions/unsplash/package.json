@@ -1,0 +1,335 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "unsplash",
+  "title": "Unsplash",
+  "description": "Search images or collections on Unsplash, download, copy or set them as wallpaper without leaving Raycast!",
+  "icon": "command-icon.png",
+  "author": "eggsy",
+  "contributors": [
+    "Kang"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "wallpaper",
+    "photo",
+    "desktop"
+  ],
+  "commands": [
+    {
+      "name": "images",
+      "title": "Search Images",
+      "subtitle": "Unsplash",
+      "description": "Search images on Unsplash.",
+      "mode": "view"
+    },
+    {
+      "name": "collections",
+      "title": "Search Collections",
+      "subtitle": "Unsplash",
+      "description": "Search collections on Unsplash.",
+      "mode": "view"
+    },
+    {
+      "name": "likes",
+      "title": "Liked Images",
+      "subtitle": "Unsplash",
+      "description": "View your liked images on Unsplash.",
+      "mode": "view"
+    },
+    {
+      "name": "random",
+      "title": "Set Random Wallpaper",
+      "subtitle": "Unsplash",
+      "description": "Set a random wallpaper from Unsplash.",
+      "mode": "no-view",
+      "interval": "10m"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "accessKey",
+      "title": "Access Key",
+      "description": "Get your API key from https://unsplash.com/oauth/applications",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "secretKey",
+      "title": "Secret Key",
+      "description": "Get your secret key from https://unsplash.com/oauth/applications",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "gridItemSize",
+      "title": "Grid Item Size",
+      "description": "The size of the grid items.",
+      "type": "dropdown",
+      "default": "medium",
+      "required": false,
+      "data": [
+        {
+          "value": "small",
+          "title": "Small"
+        },
+        {
+          "value": "medium",
+          "title": "Medium"
+        },
+        {
+          "value": "large",
+          "title": "Large"
+        }
+      ]
+    },
+    {
+      "name": "showImageTitle",
+      "label": "Show Image Title",
+      "description": "Show the image title in the grid view.",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "downloadSize",
+      "title": "Default Download Size",
+      "description": "The default size of the image to download. This might not be effective on every image, it will be applied where possible.",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "Original",
+          "value": "raw"
+        },
+        {
+          "title": "Full",
+          "value": "full"
+        },
+        {
+          "title": "Regular",
+          "value": "regular"
+        },
+        {
+          "title": "Small",
+          "value": "small"
+        }
+      ],
+      "required": false,
+      "default": "full"
+    },
+    {
+      "name": "collections",
+      "title": "Custom Collections",
+      "placeholder": "Collection IDs, comma & space separated",
+      "description": "Leave blank for pre-selected ones - Collections to search for images on Set Random Wallpaper. Comma & space separated list of collection IDs.",
+      "type": "textfield",
+      "required": false,
+      "default": ""
+    },
+    {
+      "name": "includeDefaults",
+      "title": "Include Default Collections",
+      "type": "dropdown",
+      "description": "If you're using custom collections, select whether to include the default ones or not.",
+      "data": [
+        {
+          "title": "Yes",
+          "value": "yes"
+        },
+        {
+          "title": "No",
+          "value": "no"
+        }
+      ],
+      "required": false,
+      "default": "no"
+    },
+    {
+      "name": "wallpaperPath",
+      "title": "Wallpaper Path",
+      "placeholder": "~/Pictures/Wallpapers",
+      "description": "The folder to store wallpapers.",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "updateTime",
+      "title": "Update Random Image",
+      "description": "Set the time when the random image is updated.",
+      "type": "dropdown",
+      "default": "none",
+      "required": false,
+      "data": [
+        {
+          "title": "Not used",
+          "value": "none"
+        },
+        {
+          "title": "10 minute",
+          "value": "10 minute"
+        },
+        {
+          "title": "20 minute",
+          "value": "20 minute"
+        },
+        {
+          "title": "30 minute",
+          "value": "30 minute"
+        },
+        {
+          "title": "40 minute",
+          "value": "40 minute"
+        },
+        {
+          "title": "50 minute",
+          "value": "50 minute"
+        },
+        {
+          "title": "1 hour",
+          "value": "1 hour"
+        },
+        {
+          "title": "2 hour",
+          "value": "2 hour"
+        },
+        {
+          "title": "3 hour",
+          "value": "3 hour"
+        },
+        {
+          "title": "4 hour",
+          "value": "4 hour"
+        },
+        {
+          "title": "5 hour",
+          "value": "5 hour"
+        },
+        {
+          "title": "6 hour",
+          "value": "6 hour"
+        },
+        {
+          "title": "7 hour",
+          "value": "7 hour"
+        },
+        {
+          "title": "8 hour",
+          "value": "8 hour"
+        },
+        {
+          "title": "9 hour",
+          "value": "9 hour"
+        },
+        {
+          "title": "10 hour",
+          "value": "10 hour"
+        },
+        {
+          "title": "11 hour",
+          "value": "11 hour"
+        },
+        {
+          "title": "12 hour",
+          "value": "12 hour"
+        },
+        {
+          "title": "13 hour",
+          "value": "13 hour"
+        },
+        {
+          "title": "14 hour",
+          "value": "14 hour"
+        },
+        {
+          "title": "15 hour",
+          "value": "15 hour"
+        },
+        {
+          "title": "16 hour",
+          "value": "16 hour"
+        },
+        {
+          "title": "17 hour",
+          "value": "17 hour"
+        },
+        {
+          "title": "18 hour",
+          "value": "18 hour"
+        },
+        {
+          "title": "19 hour",
+          "value": "19 hour"
+        },
+        {
+          "title": "20 hour",
+          "value": "20 hour"
+        },
+        {
+          "title": "21 hour",
+          "value": "21 hour"
+        },
+        {
+          "title": "22 hour",
+          "value": "22 hour"
+        },
+        {
+          "title": "23 hour",
+          "value": "23 hour"
+        },
+        {
+          "title": "1 day",
+          "value": "1 day"
+        },
+        {
+          "title": "2 day",
+          "value": "2 day"
+        },
+        {
+          "title": "3 day",
+          "value": "3 day"
+        },
+        {
+          "title": "4 day",
+          "value": "4 day"
+        },
+        {
+          "title": "5 day",
+          "value": "5 day"
+        },
+        {
+          "title": "6 day",
+          "value": "6 day"
+        },
+        {
+          "title": "7 day",
+          "value": "7 day"
+        },
+        {
+          "title": "14 day",
+          "value": "14 day"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.38.2",
+    "node-fetch": "^3.0.0",
+    "run-applescript": "^6.0.0",
+    "swr": "^1.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint"
+  }
+}

@@ -4,12 +4,29 @@
   "title": "Google Translate",
   "description": "Simple translation using Google Translate",
   "icon": "google-translate.png",
-  "author": "ospfranco",
+  "author": "gebeto",
+  "categories": [
+    "Web",
+    "Productivity"
+  ],
+  "contributors": [
+    "FezVrasta",
+    "metakirby5",
+    "AlanHuang",
+    "nirtamir2"
+  ],
   "license": "MIT",
   "commands": [
     {
       "name": "translate",
       "title": "Translate",
+      "subtitle": "Google Translate",
+      "description": "Simple translation via Google Translate",
+      "mode": "view"
+    },
+    {
+      "name": "translate-form",
+      "title": "Translate Form",
       "subtitle": "Google Translate",
       "description": "Simple translation via Google Translate",
       "mode": "view"
@@ -21,8 +38,12 @@
       "type": "dropdown",
       "required": true,
       "title": "First Language",
-      "default": "en",
+      "default": "auto",
       "data": [
+        {
+          "title": "🌐 Auto-detect",
+          "value": "auto"
+        },
         {
           "title": "🇿🇦 Afrikaans",
           "value": "af"
@@ -80,7 +101,7 @@
           "value": "zh-CN"
         },
         {
-          "title": "🇨🇳 Chinese Traditional",
+          "title": "Chinese Traditional",
           "value": "zh-TW"
         },
         {
@@ -161,7 +182,7 @@
         },
         {
           "title": "🇮🇱 Hebrew",
-          "value": "he"
+          "value": "iw"
         },
         {
           "title": "🇮🇳 Hindi",
@@ -408,7 +429,7 @@
           "value": "th"
         },
         {
-          "title": "🇹🇭 Turkish",
+          "title": "🇹🇷 Turkish",
           "value": "tr"
         },
         {
@@ -521,7 +542,7 @@
           "value": "zh-CN"
         },
         {
-          "title": "🇨🇳 Chinese Traditional",
+          "title": "🇹🇼 Taiwanese Mandarin",
           "value": "zh-TW"
         },
         {
@@ -602,7 +623,7 @@
         },
         {
           "title": "🇮🇱 Hebrew",
-          "value": "he"
+          "value": "iw"
         },
         {
           "title": "🇮🇳 Hindi",
@@ -849,7 +870,7 @@
           "value": "th"
         },
         {
-          "title": "🇹🇭 Turkish",
+          "title": "🇹🇷 Turkish",
           "value": "tr"
         },
         {
@@ -902,8 +923,9 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.25.1",
-    "@vitalets/google-translate-api": "^7.0.0"
+    "@iamtraction/google-translate": "^2.0.1",
+    "@raycast/api": "^1.47.3",
+    "@raycast/utils": "^1.4.16"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",
@@ -912,11 +934,13 @@
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
-    "react-devtools": "^4.19.2",
     "typescript": "^4.4.3"
   },
   "scripts": {
     "build": "ray build -e dist",
-    "dev": "ray develop"
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
   }
 }

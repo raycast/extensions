@@ -1,9 +1,12 @@
 import { gql } from "@apollo/client";
-import { ActionPanel, List, OpenInBrowserAction, showToast, ToastStyle } from "@raycast/api";
+import { ActionPanel, List } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { gitlabgql } from "../common";
+import { getGitLabGQL } from "../common";
 import { Group, Project } from "../gitlabapi";
-import { getIdFromGqlId } from "../utils";
+import { getErrorMessage, getIdFromGqlId, showErrorToast } from "../utils";
+import { GitLabOpenInBrowserAction } from "./actions";
+
+/* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/explicit-module-boundary-types */
 
 const GET_MILESTONES = gql`
   query GetProjectMilestones($fullPath: ID!) {
@@ -47,7 +50,7 @@ const GET_GROUP_MILESTONES = gql`
   }
 `;
 
-export function MilestoneListItem(props: { milestone: any }) {
+export function MilestoneListItem(props: { milestone: any }): JSX.Element {
   const milestone = props.milestone;
   const issueCounter = `${milestone.closedIssuesCount}/${milestone.totalIssuesCount}`;
   let subtitle = "";
@@ -59,31 +62,33 @@ export function MilestoneListItem(props: { milestone: any }) {
       id={milestone.id}
       title={milestone.title}
       subtitle={subtitle}
-      accessoryTitle={issueCounter}
+      accessories={[{ text: issueCounter }]}
       actions={
         <ActionPanel>
-          <OpenInBrowserAction url={milestone.webUrl} />
+          <GitLabOpenInBrowserAction url={milestone.webUrl} />
         </ActionPanel>
       }
     />
   );
 }
 
-export function MilestoneList(props: { project?: Project; group?: Group }) {
-  const isGroup = props.group ? true : false;
+export function MilestoneList(props: { project?: Project; group?: Group; navigationTitle?: string }): JSX.Element {
+  const isGroup = !!props.group;
   let fullPath = props.project ? props.project.fullPath : "";
   if (fullPath.length <= 0) {
     fullPath = props.group ? props.group.full_path : "";
   }
   const { milestones, error, isLoading } = useSearch("", fullPath, isGroup);
   if (error) {
-    showToast(ToastStyle.Failure, "Cannot search Milestones", error);
+    showErrorToast(error, "Cannot search Milestones");
   }
   return (
-    <List isLoading={isLoading} navigationTitle="Milestones">
-      {milestones?.map((milestone) => (
-        <MilestoneListItem key={milestone.id} milestone={milestone} />
-      ))}
+    <List isLoading={isLoading} navigationTitle={props.navigationTitle || "Milestones"}>
+      <List.Section title="Milestones">
+        {milestones?.map((milestone) => (
+          <MilestoneListItem key={milestone.id} milestone={milestone} />
+        ))}
+      </List.Section>
     </List>
   );
 }
@@ -99,7 +104,7 @@ export function useSearch(
 } {
   const [milestones, setMilestones] = useState<any[]>([]);
   const [error, setError] = useState<string>();
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
     // FIXME In the future version, we don't need didUnmount checking
@@ -116,7 +121,7 @@ export function useSearch(
 
       try {
         const query = isGroup ? GET_GROUP_MILESTONES : GET_MILESTONES;
-        const data = await gitlabgql.client.query({ query: query, variables: { fullPath: projectFullPath } });
+        const data = await getGitLabGQL().client.query({ query: query, variables: { fullPath: projectFullPath } });
         let milestoneRoot;
         if (isGroup) {
           milestoneRoot = data.data.group;
@@ -129,16 +134,16 @@ export function useSearch(
           dueDate: p.dueDate,
           state: p.state,
           expired: p.expired,
-          webUrl: `${gitlabgql.url}/${p.webPath}`,
+          webUrl: `${getGitLabGQL().url}/${p.webPath}`,
           closedIssuesCount: p.stats.closedIssuesCount,
           totalIssuesCount: p.stats.totalIssuesCount,
         }));
         if (!didUnmount) {
           setMilestones(glData);
         }
-      } catch (e: any) {
+      } catch (e) {
         if (!didUnmount) {
-          setError(e.message);
+          setError(getErrorMessage(e));
         }
       } finally {
         if (!didUnmount) {

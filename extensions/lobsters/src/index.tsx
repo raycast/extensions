@@ -35,8 +35,7 @@ export default function Command() {
         setState({ items: feed.items as ParsedItem[] });
       } catch (error) {
         setState({
-          error:
-            error instanceof Error ? error : new Error("Something went wrong"),
+          error: error instanceof Error ? error : new Error("Something went wrong"),
         });
       }
     }
@@ -45,11 +44,7 @@ export default function Command() {
   }, []);
 
   if (state.error) {
-    void showToast(
-      ToastStyle.Failure,
-      "Failed loading stories",
-      state.error.message
-    );
+    void showToast(ToastStyle.Failure, "Failed loading stories", state.error.message);
   }
 
   const isLoading = !state.items && !state.error;
@@ -87,18 +82,10 @@ function Actions({ title, link, guid }: ActionItem) {
     <ActionPanel title={title}>
       <ActionPanel.Section>
         {link && <OpenInBrowserAction url={link} />}
-        {guid && (
-          <OpenInBrowserAction url={guid} title="Open Comments in Browser" />
-        )}
+        {guid && <OpenInBrowserAction url={guid} title="Open Comments in Browser" />}
       </ActionPanel.Section>
       <ActionPanel.Section>
-        {link && (
-          <CopyToClipboardAction
-            content={link}
-            title="Copy Link"
-            shortcut={{ modifiers: ["cmd"], key: "." }}
-          />
-        )}
+        {link && <CopyToClipboardAction content={link} title="Copy Link" shortcut={{ modifiers: ["cmd"], key: "." }} />}
       </ActionPanel.Section>
     </ActionPanel>
   );

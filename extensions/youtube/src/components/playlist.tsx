@@ -1,21 +1,24 @@
-import { showToast, ToastStyle, List } from "@raycast/api";
+import { getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { getErrorMessage } from "../lib/utils";
 import { getPlaylistVideos, useRefresher, Video } from "../lib/youtubeapi";
-import { VideoListItem } from "./video";
+import { VideoItem } from "./video";
+import { ListOrGrid } from "./listgrid";
+import { Preferences } from "../lib/types";
 
 export function PlaylistList(props: { playlistId: string }) {
+  const { griditemsize } = getPreferenceValues<Preferences>();
   const playlistId = props.playlistId;
   const { data, error, isLoading } = useRefresher<Video[] | undefined>(async () => {
     return await getPlaylistVideos(playlistId);
   }, []);
   if (error) {
-    showToast(ToastStyle.Failure, "Could not fetch playlist videos", getErrorMessage(error));
+    showToast(Toast.Style.Failure, "Could Not Fetch Playlist videos", getErrorMessage(error));
   }
   return (
-    <List isLoading={isLoading}>
+    <ListOrGrid isLoading={isLoading} columns={griditemsize} aspectRatio={"4/3"}>
       {data?.map((v) => (
-        <VideoListItem key={v.id} video={v} />
+        <VideoItem key={v.id} video={v} />
       ))}
-    </List>
+    </ListOrGrid>
   );
 }

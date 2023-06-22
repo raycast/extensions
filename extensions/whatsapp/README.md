@@ -16,4 +16,3 @@ commands will serve for adding the chats to the extension so users can access th
 
 When the API is available, the `Add Chat`, `Import Contacts` and `Add Existing Group` commands will be obsolete while
 new commands such as `Create Group` or `Send Message` will become feasible.
-

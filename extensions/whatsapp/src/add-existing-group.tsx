@@ -1,6 +1,7 @@
-import { ActionPanel, Form, popToRoot, randomId, showToast, SubmitFormAction, ToastStyle } from "@raycast/api";
+import { ActionPanel, Form, popToRoot, showToast, Action, Toast } from "@raycast/api";
 import { GroupChat, isGroupChat } from "./utils/types";
 import { useWhatsAppChats } from "./utils/use-whatsapp-chats";
+import { nanoid as randomId } from "nanoid";
 
 interface WhatsAppGroupChatFormProps {
   defaultValue?: GroupChat;
@@ -11,7 +12,7 @@ interface FormValues extends Omit<GroupChat, "id" | "pinned"> {
 }
 
 export default function WhatsAppGroupChatForm({ defaultValue }: WhatsAppGroupChatFormProps) {
-  const { chats, updateChats } = useWhatsAppChats();
+  const [chats, setChats] = useWhatsAppChats();
   const isCreation = !defaultValue;
 
   async function handleSubmit(formValues: FormValues) {
@@ -19,29 +20,31 @@ export default function WhatsAppGroupChatForm({ defaultValue }: WhatsAppGroupCha
       id: isCreation ? randomId() : defaultValue.id,
       name: formValues.name,
       pinned: !!formValues.pinned,
-      groupCode: formValues.groupCode
+      groupCode: formValues.groupCode,
     };
 
     const isNewGroupCode = isCreation || savedChat.groupCode !== defaultValue.groupCode;
-    const doesPhoneNumberAlreadyExist = chats.filter(isGroupChat).some(chat => chat.groupCode === savedChat.groupCode);
+    const doesPhoneNumberAlreadyExist = chats
+      .filter(isGroupChat)
+      .some((chat) => chat.groupCode === savedChat.groupCode);
 
     if (isNewGroupCode && doesPhoneNumberAlreadyExist) {
-      await showToast(ToastStyle.Failure, "Chat already exists");
+      await showToast(Toast.Style.Failure, "Chat already exists");
       return;
     }
 
     if (isCreation) {
-      await updateChats([...chats, savedChat]);
-      await showToast(ToastStyle.Success, `Created new group`, savedChat.name);
+      setChats([...chats, savedChat]);
+      await showToast(Toast.Style.Success, `Created new group`, savedChat.name);
     } else {
-      const newChats = chats.map(chat => {
+      const newChats = chats.map((chat) => {
         if (chat.id === savedChat.id) {
           return savedChat;
         }
         return chat;
       });
-      await updateChats(newChats);
-      await showToast(ToastStyle.Success, `Updated existing group`, savedChat.name);
+      setChats(newChats);
+      await showToast(Toast.Style.Success, `Updated existing group`, savedChat.name);
     }
 
     await popToRoot({ clearSearchBar: true });
@@ -51,27 +54,18 @@ export default function WhatsAppGroupChatForm({ defaultValue }: WhatsAppGroupCha
     <Form
       actions={
         <ActionPanel>
-          <SubmitFormAction title="Save Group" onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Save Group" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
-      <Form.TextField
-        id="name"
-        title="Name"
-        placeholder="Raycasters"
-        defaultValue={defaultValue?.name}
-      />
+      <Form.TextField id="name" title="Name" placeholder="Raycasters" defaultValue={defaultValue?.name} />
       <Form.TextField
         id="groupCode"
         title="Group Code"
         placeholder="LkXPP0Lij10I3OYynP3MXb"
         defaultValue={defaultValue?.groupCode}
       />
-      <Form.Checkbox
-        id="pinned"
-        label="Pinned Chat"
-        defaultValue={defaultValue?.pinned}
-      />
+      <Form.Checkbox id="pinned" label="Pinned Chat" defaultValue={defaultValue?.pinned} />
     </Form>
   );
 }

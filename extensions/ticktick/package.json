@@ -4,31 +4,65 @@
   "description": "Check and search tasks in TickTick via Raycast",
   "icon": "tick-logo.png",
   "author": "appest",
+  "contributors": [
+    "Alireza"
+  ],
   "license": "MIT",
+  "categories": [
+    "Productivity"
+  ],
+  "preferences": [
+    {
+      "name": "autoFillEnabled",
+      "description": "Automatically fill the task fields using Raycast AI (Requires Pro)",
+      "type": "checkbox",
+      "defaultValue": false,
+      "label": "Auto Fill with AI",
+      "required": false
+    }
+  ],
   "commands": [
     {
       "name": "index",
       "title": "Today Tasks",
       "subtitle": "TickTick",
-      "description": "Show today tasks.",
+      "description": "Show today to-do tasks.",
       "mode": "view"
     },
     {
       "name": "next7Days",
       "title": "Next 7 Days Tasks",
       "subtitle": "TickTick",
-      "description": "Show next 7 days tasks.",
+      "description": "Show next 7 days to-do tasks.",
+      "mode": "view"
+    },
+    {
+      "name": "search",
+      "title": "Search Tasks",
+      "subtitle": "TickTick",
+      "description": "Search tasks.",
+      "mode": "view"
+    },
+    {
+      "name": "create",
+      "title": "Add Task",
+      "subtitle": "TickTick",
+      "description": "Convenient way to easily add new task.",
       "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.25.2",
+    "@raycast/api": "^1.36.0",
+    "lodash": "^4.17.21",
     "moment": "^2.29.1",
-    "run-applescript": "^6.0.0"
+    "run-applescript": "^6.0.0",
+    "similarity": "^1.2.1"
   },
   "devDependencies": {
+    "@types/lodash": "^4.14.194",
     "@types/node": "~16.10.0",
     "@types/react": "^17.0.28",
+    "@types/similarity": "^1.2.1",
     "@types/sql.js": "^1.4.3",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
@@ -36,11 +70,11 @@
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-html": "^6.2.0",
     "eslint-plugin-react-hooks": "^4.2.0",
-    "react-devtools": "^4.21.0",
     "typescript": "^4.4.3"
   },
   "scripts": {
     "build": "ray build -e dist",
-    "dev": "ray develop"
+    "dev": "ray develop",
+    "lint": "ray lint"
   }
 }

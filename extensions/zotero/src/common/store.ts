@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { showToast, ToastStyle } from "@raycast/api";
-import { QueryResultItem } from "./zoteroApi";
+import { showToast, Toast } from "@raycast/api";
+import { RefData } from "./zoteroApi";
 
 export type Store = {
-  queryResults: QueryResultItem[][];
+  queryResults: RefData[][];
   queryIsLoading: boolean;
   clearResults: () => void;
   runQuery: (q?: string) => Promise<void>;
@@ -11,7 +11,7 @@ export type Store = {
 
 export const useStore = (
   sections: string[],
-  queryFunc: (section: string, q?: string) => Promise<QueryResultItem[]>,
+  queryFunc: (section: string, q?: string) => Promise<RefData[]>,
   initialLoading?: boolean
 ): Store => {
   const [store, setStore] = useState(() => ({
@@ -27,7 +27,11 @@ export const useStore = (
         setStore((prev) => ({ ...prev, queryResults }));
       } catch (e) {
         console.log("runQuery error", e);
-        showToast(ToastStyle.Failure, "Failed to query", String(e));
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Failed to query",
+          message: String(e),
+        });
       } finally {
         setStore((prev) => ({ ...prev, queryIsLoading: false }));
       }

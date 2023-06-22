@@ -5,12 +5,12 @@ import {
   OpenInBrowserAction,
   Icon,
   OpenAction,
-  getApplications, Application
+  getApplications,
+  Application,
 } from "@raycast/api";
 import type { QueryResultItem } from "./notionApi";
 import { useVisitedUrls } from "./useVisitedUrls";
-import {useEffect, useState} from "react";
-
+import { useEffect, useState } from "react";
 
 type Props = {
   sectionNames: string[];
@@ -20,26 +20,26 @@ type Props = {
   throttle?: boolean;
 };
 
-function OpenFileAction(props: { fileId: string, onOpen: (target: string) => void}) {
-  const [desktopApp, setDesktopApp] = useState<Application>()
+function OpenFileAction(props: { fileId: string; onOpen: (target: string) => void }) {
+  const [desktopApp, setDesktopApp] = useState<Application>();
 
   useEffect(() => {
     getApplications()
-        .then((apps) => apps.find((a) => a.bundleId === "notion.id"))
-        .then(setDesktopApp)
-  }, [])
+      .then((apps) => apps.find((a) => a.bundleId === "notion.id"))
+      .then(setDesktopApp);
+  }, []);
 
   return desktopApp ? (
-      <OpenAction
-          icon="command-icon.png"
-          title="Open in Notion"
-          target={`notion://file/${props.fileId}`}
-          application={desktopApp}
-          onOpen={() => props.onOpen(props.fileId)}
-      />
+    <OpenAction
+      icon="command-icon.png"
+      title="Open in Notion"
+      target={`notion://file/${props.fileId}`}
+      application={desktopApp}
+      onOpen={() => props.onOpen(props.fileId)}
+    />
   ) : (
-      <OpenInBrowserAction url={`https://www.notion.so/${props.fileId}`} onOpen={() => props.onOpen(props.fileId)}/>
-  )
+    <OpenInBrowserAction url={`https://www.notion.so/${props.fileId}`} onOpen={() => props.onOpen(props.fileId)} />
+  );
 }
 
 export const View = ({ sectionNames, queryResults, isLoading, onSearchTextChange, throttle }: Props): JSX.Element => {
@@ -59,13 +59,13 @@ export const View = ({ sectionNames, queryResults, isLoading, onSearchTextChange
               id={item.id}
               title={item.title + (urls.includes(item.fileId) ? " (visited)" : "")}
               subtitle={item.subtitle}
-              icon={item.icon !== '' ? item.icon : Icon.Document}
+              icon={item.icon !== "" ? item.icon : Icon.Document}
               accessoryTitle={item.accessoryTitle}
               actions={
                 <ActionPanel>
-                  <OpenFileAction fileId={item.fileId} onOpen={onOpen}/>
+                  <OpenFileAction fileId={item.fileId} onOpen={onOpen} />
                   <CopyToClipboardAction title="Copy URL" content={`https://www.notion.so/${item.fileId}`} />
-              </ActionPanel>
+                </ActionPanel>
               }
             />
           ))}

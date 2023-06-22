@@ -6,19 +6,110 @@ description: >-
 
 # List
 
-## Features
-
 Our `List` component provides great user experience out of the box:
 
-* Use built-in filtering for best performance.
-* Group related items in sections with titles and subtitles.
-* Show loading indicator for longer operations.
-* Use the search query for typeahead experiences.
+- Use built-in filtering for best performance.
+- Group-related items in sections with titles and subtitles.
+- Show loading indicator for longer operations.
+- Use the search query for typeahead experiences, optionally throttled.
+
+![](../../.gitbook/assets/list.png)
+
+## Search Bar
+
+The search bar allows users to interact quickly with list items. By default, [List.Items](#list.item) are displayed if the user's input can be (fuzzy) matched to the item's `title` or `keywords`.
+
+### Custom filtering
+
+Sometimes, you may not want to rely on Raycast's filtering, but use/implement your own. If that's the case, you can set the `List`'s `filtering` [prop](#props) to false, and the items displayed will be independent of the search bar's text.
+Note that `filtering` is also implicitly set to false if an `onSearchTextChange` listener is specified. If you want to specify a change listener and _still_ take advantage of Raycast's built-in filtering, you can explicitly set `filtering` to true.
+
+```typescript
+import { useEffect, useState } from "react";
+import { Action, ActionPanel, List } from "@raycast/api";
+
+const items = ["Augustiner Helles", "Camden Hells", "Leffe Blonde", "Sierra Nevada IPA"];
+
+export default function Command() {
+  const [searchText, setSearchText] = useState("");
+  const [filteredList, filterList] = useState(items);
+
+  useEffect(() => {
+    filterList(items.filter((item) => item.includes(searchText)));
+  }, [searchText]);
+
+  return (
+    <List
+      filtering={false}
+      onSearchTextChange={setSearchText}
+      navigationTitle="Search Beers"
+      searchBarPlaceholder="Search your favorite beer"
+    >
+      {filteredList.map((item) => (
+        <List.Item
+          key={item}
+          title={item}
+          actions={
+            <ActionPanel>
+              <Action title="Select" onAction={() => console.log(`${item} selected`)} />
+            </ActionPanel>
+          }
+        />
+      ))}
+    </List>
+  );
+}
+```
+
+### Programmatically updating the search bar
+
+Other times, you may want the content of the search bar to be updated by the extension, for example, you may store a list of the user's previous searches and, on the next visit, allow them to "continue" where they left off.
+
+To do so, you can use the `searchText` [prop](#props).
+
+```typescript
+import { useEffect, useState } from "react";
+import { Action, ActionPanel, List } from "@raycast/api";
+
+const items = ["Augustiner Helles", "Camden Hells", "Leffe Blonde", "Sierra Nevada IPA"];
+
+export default function Command() {
+  const [searchText, setSearchText] = useState("");
+
+  return (
+    <List
+      searchText={searchText}
+      onSearchTextChange={setSearchText}
+      navigationTitle="Search Beers"
+      searchBarPlaceholder="Search your favorite beer"
+    >
+      {items.map((item) => (
+        <List.Item
+          key={item}
+          title={item}
+          actions={
+            <ActionPanel>
+              <Action title="Select" onAction={() => setSearchText(item)} />
+            </ActionPanel>
+          }
+        />
+      ))}
+    </List>
+  );
+}
+```
+
+### Dropdown
+
+Some extensions may benefit from giving users a second filtering dimension. A todo extension may allow users to use different groups, a newspaper-reading extension may want to allow quickly switching categories, etc.
+
+This is where the `searchBarAccessory` [prop](#props) is useful. Pass it a [List.Dropdown](#list.dropdown) component, and it will be displayed on the right-side of the search bar. Invoke it either by using the global shortcut `⌘` `P` or by clicking on it.
 
 ## Examples
 
 {% tabs %}
 {% tab title="List.tsx" %}
+
 ```jsx
 import { List } from "@raycast/api";
 
@@ -31,11 +122,13 @@ export default function Command() {
   );
 }
 ```
+
 {% endtab %}
 
 {% tab title="ListWithSections.tsx" %}
+
 ```jsx
-import { List } from "@raycast/api"
+import { List } from "@raycast/api";
 
 export default function Command() {
   return (
@@ -50,11 +143,13 @@ export default function Command() {
   );
 }
 ```
+
 {% endtab %}
 
 {% tab title="ListWithActions.tsx" %}
+
 ```jsx
-import { ActionPanel, CopyToClipboardAction, List } from "@raycast/api"
+import { ActionPanel, Action, List } from "@raycast/api";
 
 export default function Command() {
   return (
@@ -63,7 +158,7 @@ export default function Command() {
         title="Item 1"
         actions={
           <ActionPanel>
-            <CopyToClipboardAction content="👋" />
+            <Action.CopyToClipboard content="👋" />
           </ActionPanel>
         }
       />
@@ -71,14 +166,126 @@ export default function Command() {
   );
 }
 ```
+
 {% endtab %}
+
+{% tab title="ListWithDetail.tsx" %}
+
+```jsx
+import { useState } from "react";
+import { Action, ActionPanel, List } from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
+
+interface Pokemon {
+  name: string;
+  height: number;
+  weight: number;
+  id: string;
+  types: string[];
+  abilities: Array<{ name: string; isMainSeries: boolean }>;
+}
+
+const pokemons: Pokemon[] = [
+  {
+    name: "bulbasaur",
+    height: 7,
+    weight: 69,
+    id: "001",
+    types: ["Grass", "Poison"],
+    abilities: [
+      { name: "Chlorophyll", isMainSeries: true },
+      { name: "Overgrow", isMainSeries: true },
+    ],
+  },
+  {
+    name: "ivysaur",
+    height: 10,
+    weight: 130,
+    id: "002",
+    types: ["Grass", "Poison"],
+    abilities: [
+      { name: "Chlorophyll", isMainSeries: true },
+      { name: "Overgrow", isMainSeries: true },
+    ],
+  },
+];
+
+export default function Command() {
+  const [showingDetail, setShowingDetail] = useState(true);
+  const { data, isLoading } = useCachedPromise(() => new Promise<Pokemon[]>((resolve) => resolve(pokemons)));
+
+  return (
+    <List isLoading={isLoading} isShowingDetail={showingDetail}>
+      {data &&
+        data.map((pokemon) => {
+          const props: Partial<List.Item.Props> = showingDetail
+            ? {
+                detail: (
+                  <List.Item.Detail
+                    markdown={`![Illustration](https://assets.pokemon.com/assets/cms2/img/pokedex/full/${
+                      pokemon.id
+                    }.png)\n\n${pokemon.types.join(" ")}`}
+                  />
+                ),
+              }
+            : { accessories: [{ text: pokemon.types.join(" ") }] };
+          return (
+            <List.Item
+              key={pokemon.id}
+              title={pokemon.name}
+              subtitle={`#${pokemon.id}`}
+              {...props}
+              actions={
+                <ActionPanel>
+                  <Action.OpenInBrowser url={`https://www.pokemon.com/us/pokedex/${pokemon.name}`} />
+                  <Action title="Toggle Detail" onAction={() => setShowingDetail(!showingDetail)} />
+                </ActionPanel>
+              }
+            />
+          );
+        })}
+    </List>
+  );
+}
+
+```
+
+{% endtab %}
+
+{% tab title="ListWithEmptyView.tsx" %}
+
+```typescript
+import { useEffect, useState } from "react";
+import { List } from "@raycast/api";
+
+export default function CommandWithCustomEmptyView() {
+  const [state, setState] = useState({ searchText: "", items: [] });
+
+  useEffect(() => {
+    // perform an API call that eventually populates `items`.
+  }, [state.searchText]);
+
+  return (
+    <List onSearchTextChange={(newValue) => setState((previous) => ({ ...previous, searchText: newValue }))}>
+      {state.searchText === "" && state.items.length === 0 ? (
+        <List.EmptyView icon={{ source: "https://placekitten.com/500/500" }} title="Type something to get started" />
+      ) : (
+        state.items.map((item) => <List.Item key={item} title={item} />)
+      )}
+    </List>
+  );
+}
+```
+
+{% endtab %}
+
 {% endtabs %}
 
 ## API Reference
 
 ### List
 
-Displays [List.Section](https://developers.raycast.com/api-reference/user-interface/list#list-section) or [List.Item](https://developers.raycast.com/api-reference/user-interface/list#list-item).
+Displays [List.Section](#list.section) or [List.Item](#list.item).
 
 The list uses built-in filtering by indexing the title of list items and additionally keywords.
 
@@ -101,24 +308,178 @@ export default function Command() {
 
 #### Props
 
-| Prop | Type | Required | Default | Description |
-| :--- | :--- | :--- | :--- | :--- |
-| actions | <code>null</code> or <code>[ActionPanel](https://developers.raycast.com/api-reference/user-interface/action-panel#actionpanel)</code> | No | - | A reference to an [ActionPanel](https://developers.raycast.com/api-reference/user-interface/action-panel#actionpanel). |
-| children | <code>null</code> or <code>[List.Section](https://developers.raycast.com/api-reference/user-interface/list#list-section)</code> or <code>List.Section[]</code> or <code>[List.Item](https://developers.raycast.com/api-reference/user-interface/list#list-item)</code> or <code>List.Item[]</code> | No | - | List sections or items. If [List.Item](https://developers.raycast.com/api-reference/user-interface/list#list-item) elements are specified, a default section is automatically created. |
-| isLoading | <code>boolean</code> | No | false | Indicates whether a loading bar should be shown or hidden below the search bar |
-| navigationTitle | <code>string</code> | No | Command title | The main title for that view displayed in Raycast |
-| searchBarPlaceholder | <code>string</code> | No | Search value... | Placeholder text that will be shown in the search bar. |
-| selectedItemId | <code>string</code> | No | - | Selects the item with the specified id. |
-| throttle | <code>boolean</code> | No | false | Defines whether the [ListProps.onSearchTextChange](https://developers.raycast.com/api-reference/user-interface/list#listprops) will be triggered on every keyboard press or with a delay for throttling the events. Recommended to set to `true` when using custom filtering logic with asynchronous operations (e.g. network requests). |
-| onSearchTextChange | <code>(text: string) => void</code> | No | - |  |
-| onSelectionChange | <code>(id: string) => void</code> | No | - |  |
+<PropsTableFromJSDoc component="List" />
+
+### List.Dropdown
+
+A dropdown menu that will be shown in the right-hand-side of the search bar.
+
+#### Example
+
+```typescript
+import { List } from "@raycast/api";
+
+type DrinkType = { id: string; name: string };
+
+function DrinkDropdown(props: { drinkTypes: DrinkType[]; onDrinkTypeChange: (newValue: string) => void }) {
+  const { drinkTypes, onDrinkTypeChange } = props;
+  return (
+    <List.Dropdown
+      tooltip="Select Drink Type"
+      storeValue={true}
+      onChange={(newValue) => {
+        onDrinkTypeChange(newValue);
+      }}
+    >
+      <List.Dropdown.Section title="Alcoholic Beverages">
+        {drinkTypes.map((drinkType) => (
+          <List.Dropdown.Item key={drinkType.id} title={drinkType.name} value={drinkType.id} />
+        ))}
+      </List.Dropdown.Section>
+    </List.Dropdown>
+  );
+}
+
+export default function Command() {
+  const drinkTypes: DrinkType[] = [
+    { id: "1", name: "Beer" },
+    { id: "2", name: "Wine" },
+  ];
+  const onDrinkTypeChange = (newValue: string) => {
+    console.log(newValue);
+  };
+  return (
+    <List
+      navigationTitle="Search Beers"
+      searchBarPlaceholder="Search your favorite drink"
+      searchBarAccessory={<DrinkDropdown drinkTypes={drinkTypes} onDrinkTypeChange={onDrinkTypeChange} />}
+    >
+      <List.Item title="Augustiner Helles" />
+      <List.Item title="Camden Hells" />
+      <List.Item title="Leffe Blonde" />
+      <List.Item title="Sierra Nevada IPA" />
+    </List>
+  );
+}
+```
+
+#### Props
+
+<PropsTableFromJSDoc component="List.Dropdown" />
+
+### List.Dropdown.Item
+
+A dropdown item in a [List.Dropdown](#list.dropdown)
+
+#### Example
+
+```typescript
+import { List } from "@raycast/api";
+
+export default function Command() {
+  return (
+    <List
+      searchBarAccessory={
+        <List.Dropdown tooltip="Dropdown With Items">
+          <List.Dropdown.Item title="One" value="one" />
+          <List.Dropdown.Item title="Two" value="two" />
+          <List.Dropdown.Item title="Three" value="three" />
+        </List.Dropdown>
+      }
+    >
+      <List.Item title="Item in the Main List" />
+    </List>
+  );
+}
+```
+
+#### Props
+
+<PropsTableFromJSDoc component="List.Dropdown.Item" />
+
+### List.Dropdown.Section
+
+Visually separated group of dropdown items.
+
+Use sections to group related menu items together.
+
+#### Example
+
+```typescript
+import { List } from "@raycast/api";
+
+export default function Command() {
+  return (
+    <List
+      searchBarAccessory={
+        <List.Dropdown tooltip="Dropdown With Sections">
+          <List.Dropdown.Section title="First Section">
+            <List.Dropdown.Item title="One" value="one" />
+          </List.Dropdown.Section>
+          <List.Dropdown.Section title="Second Section">
+            <List.Dropdown.Item title="Two" value="two" />
+          </List.Dropdown.Section>
+        </List.Dropdown>
+      }
+    >
+      <List.Item title="Item in the Main List" />
+    </List>
+  );
+}
+```
+
+#### Props
+
+<PropsTableFromJSDoc component="List.Dropdown.Section" />
+
+### List.EmptyView
+
+A view to display when there aren't any items available. Use to greet users with a friendly message if the
+extension requires user input before it can show any list items e.g. when searching for a package, an article etc.
+
+Raycast provides a default `EmptyView` that will be displayed if the List component either has no children,
+or if it has children, but none of them match the query in the search bar. This too can be overridden by passing an
+empty view alongside the other `List.Item`s.
+
+Note that the `EmptyView` is _never_ displayed if the `List`'s `isLoading` property is true and the search bar is empty.
+
+![List EmptyView illustration](../../.gitbook/assets/list-empty-view.png)
+
+#### Example
+
+```typescript
+import { useEffect, useState } from "react";
+import { List } from "@raycast/api";
+
+export default function CommandWithCustomEmptyView() {
+  const [state, setState] = useState({ searchText: "", items: [] });
+
+  useEffect(() => {
+    // perform an API call that eventually populates `items`.
+  }, [state.searchText]);
+
+  return (
+    <List onSearchTextChange={(newValue) => setState((previous) => ({ ...previous, searchText: newValue }))}>
+      {state.searchText === "" && state.items.length === 0 ? (
+        <List.EmptyView icon={{ source: "https://placekitten.com/500/500" }} title="Type something to get started" />
+      ) : (
+        state.items.map((item) => <List.Item key={item} title={item} />)
+      )}
+    </List>
+  );
+}
+```
+
+#### Props
+
+<PropsTableFromJSDoc component="List.EmptyView" />
 
 ### List.Item
 
-A item in the [List](https://developers.raycast.com/api-reference/user-interface/list#list).
+A item in the [List](#list).
 
 This is one of the foundational UI components of Raycast. A list item represents a single entity. It can be a
-GitHub pull request, a file or anything else. Most likely you want to perform actions on this item, so make it clear
+GitHub pull request, a file, or anything else. You most likely want to perform actions on this item, so make it clear
 to the user what this list item is about.
 
 #### Example
@@ -129,7 +490,7 @@ import { Icon, List } from "@raycast/api";
 export default function Command() {
   return (
     <List>
-      <List.Item icon={Icon.Star} title="Augustiner Helles" subtitle="0,5 Liter" accessoryTitle="Germany" />
+      <List.Item icon={Icon.Star} title="Augustiner Helles" subtitle="0,5 Liter" accessories={[{ text: "Germany" }]} />
     </List>
   );
 }
@@ -137,23 +498,305 @@ export default function Command() {
 
 #### Props
 
-| Prop | Type | Required | Default | Description |
-| :--- | :--- | :--- | :--- | :--- |
-| accessoryIcon | <code>[ImageLike](https://developers.raycast.com/api-reference/user-interface/icons-and-images#imagelike)</code> | No | - | A optional icon displayed as accessory for the list item. See [ImageLike](https://developers.raycast.com/api-reference/user-interface/icons-and-images#imagelike) for the supported formats and types. |
-| accessoryTitle | <code>string</code> | No | - | An additional title displayed for the item. |
-| actions | <code>null</code> or <code>[ActionPanel](https://developers.raycast.com/api-reference/user-interface/action-panel#actionpanel)</code> | No | - | An [ActionPanel](https://developers.raycast.com/api-reference/user-interface/action-panel#actionpanel) that will be updated for the selected list item. |
-| icon | <code>[ImageLike](https://developers.raycast.com/api-reference/user-interface/icons-and-images#imagelike)</code> | No | - | A optional icon displayed for the list item. See [ImageLike](https://developers.raycast.com/api-reference/user-interface/icons-and-images#imagelike) for the supported formats and types. |
-| id | <code>string</code> | No | - | ID of the item. Make sure to assign each item a unique ID or a UUID will be auto generated. |
-| keywords | <code>string[]</code> | No | - | An optional property used for providing additional indexable strings for search. When filtering the list in Raycast through the search bar, the keywords will be searched in addition to the title. |
-| subtitle | <code>string</code> | No | - | An optional subtitle displayed next to the main title. |
-| title | <code>string</code> | Yes | - | The main title displayed for that item. |
+<PropsTableFromJSDoc component="List.Item" />
+
+### List.Item.Detail
+
+A Detail view that will be shown in the right-hand-side of the `List`.
+
+When shown, it is recommended not to show any accessories on the `List.Item` and instead bring those additional information in the `List.Item.Detail` view.
+
+![List-detail illustration](../../.gitbook/assets/list-detail.png)
+
+#### Example
+
+```typescript
+import { List } from "@raycast/api";
+
+export default function Command() {
+  return (
+    <List isShowingDetail>
+      <List.Item
+        title="Pikachu"
+        subtitle="Electric"
+        detail={
+          <List.Item.Detail markdown="![Illustration](https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png)" />
+        }
+      />
+    </List>
+  );
+}
+```
+
+#### Props
+
+<PropsTableFromJSDoc component="List.Item.Detail" />
+
+### List.Item.Detail.Metadata
+
+A Metadata view that will be shown in the bottom side of the `List.Item.Detail`.
+
+Use it to display additional structured data about the content of the `List.Item`.
+
+#### Example
+
+{% tabs %}
+
+{% tab title="Metadata + Markdown" %}
+
+![List Detail-metadata illustration](../../.gitbook/assets/list-detail-metadata-split.png)
+
+```typescript
+import { List } from "@raycast/api";
+
+export default function Metadata() {
+  const markdown = `
+![Illustration](https://assets.pokemon.com/assets/cms2/img/pokedex/full/001.png)
+There is a plant seed on its back right from the day this Pokémon is born. The seed slowly grows larger.
+`;
+  return (
+    <List isShowingDetail>
+      <List.Item
+        title="Bulbasaur"
+        detail={
+          <List.Item.Detail
+            markdown={markdown}
+            metadata={
+              <List.Item.Detail.Metadata>
+                <List.Item.Detail.Metadata.Label title="Types" />
+                <List.Item.Detail.Metadata.Label title="Grass" icon="pokemon_types/grass.svg" />
+                <List.Item.Detail.Metadata.Separator />
+                <List.Item.Detail.Metadata.Label title="Poison" icon="pokemon_types/poison.svg" />
+                <List.Item.Detail.Metadata.Separator />
+                <List.Item.Detail.Metadata.Label title="Chracteristics" />
+                <List.Item.Detail.Metadata.Label title="Height" text="70cm" />
+                <List.Item.Detail.Metadata.Separator />
+                <List.Item.Detail.Metadata.Label title="Weight" text="6.9 kg" />
+                <List.Item.Detail.Metadata.Separator />
+                <List.Item.Detail.Metadata.Label title="Abilities" />
+                <List.Item.Detail.Metadata.Label title="Chlorophyll" text="Main Series" />
+                <List.Item.Detail.Metadata.Separator />
+                <List.Item.Detail.Metadata.Label title="Overgrow" text="Main Series" />
+                <List.Item.Detail.Metadata.Separator />
+              </List.Item.Detail.Metadata>
+            }
+          />
+        }
+      />
+    </List>
+  );
+}
+```
+
+{% endtab %}
+
+{% tab title="Metadata Standalone" %}
+
+![List Detail-metadata illustration](../../.gitbook/assets/list-detail-metadata-standalone.png)
+
+```typescript
+import { List } from "@raycast/api";
+
+export default function Metadata() {
+  return (
+    <List isShowingDetail>
+      <List.Item
+        title="Bulbasaur"
+        detail={
+          <List.Item.Detail
+            metadata={
+              <List.Item.Detail.Metadata>
+                <List.Item.Detail.Metadata.Label title="Types" />
+                <List.Item.Detail.Metadata.Label title="Grass" icon="pokemon_types/grass.svg" />
+                <List.Item.Detail.Metadata.Separator />
+                <List.Item.Detail.Metadata.Label title="Poison" icon="pokemon_types/poison.svg" />
+                <List.Item.Detail.Metadata.Separator />
+                <List.Item.Detail.Metadata.Label title="Chracteristics" />
+                <List.Item.Detail.Metadata.Label title="Height" text="70cm" />
+                <List.Item.Detail.Metadata.Separator />
+                <List.Item.Detail.Metadata.Label title="Weight" text="6.9 kg" />
+                <List.Item.Detail.Metadata.Separator />
+                <List.Item.Detail.Metadata.Label title="Abilities" />
+                <List.Item.Detail.Metadata.Label title="Chlorophyll" text="Main Series" />
+                <List.Item.Detail.Metadata.Separator />
+                <List.Item.Detail.Metadata.Label title="Overgrow" text="Main Series" />
+                <List.Item.Detail.Metadata.Separator />
+              </List.Item.Detail.Metadata>
+            }
+          />
+        }
+      />
+    </List>
+  );
+}
+```
+
+{% endtab %}
+
+{% endtabs %}
+
+#### Props
+
+<PropsTableFromJSDoc component="List.Item.Detail.Metadata" />
+
+### List.Item.Detail.Metadata.Label
+
+A title with, optionally, an icon and/or text to its right.
+
+![List Detail-metadata-label illustration](../../.gitbook/assets/list-detail-metadata-label.png)
+
+#### Example
+
+```typescript
+import { List } from "@raycast/api";
+
+export default function Metadata() {
+  return (
+    <List isShowingDetail>
+      <List.Item
+        title="Bulbasaur"
+        detail={
+          <List.Item.Detail
+            metadata={
+              <List.Item.Detail.Metadata>
+                <List.Item.Detail.Metadata.Label title="Type" icon="pokemon_types/grass.svg" text="Grass" />
+              </List.Item.Detail.Metadata>
+            }
+          />
+        }
+      />
+    </List>
+  );
+}
+```
+
+#### Props
+
+<PropsTableFromJSDoc component="List.Item.Detail.Metadata.Label" />
+
+### List.Item.Detail.Metadata.Link
+
+An item to display a link.
+
+![List Detail-metadata-link illustration](../../.gitbook/assets/list-detail-metadata-link.png)
+
+#### Example
+
+```typescript
+import { List } from "@raycast/api";
+
+export default function Metadata() {
+  return (
+    <List isShowingDetail>
+      <List.Item
+        title="Bulbasaur"
+        detail={
+          <List.Item.Detail
+            metadata={
+              <List.Item.Detail.Metadata>
+                <List.Item.Detail.Metadata.Link
+                  title="Evolution"
+                  target="https://www.pokemon.com/us/pokedex/pikachu"
+                  text="Raichu"
+                />
+              </List.Item.Detail.Metadata>
+            }
+          />
+        }
+      />
+    </List>
+  );
+}
+```
+
+#### Props
+
+<PropsTableFromJSDoc component="List.Item.Detail.Metadata.Link" />
+
+### List.Item.Detail.Metadata.TagList
+
+A list of [`Tags`](list.md#list.item.detail.metadata.taglist.item) displayed in a row.
+
+![List Detail-metadata-tag-list illustration](../../.gitbook/assets/list-detail-metadata-tag-list.png)
+
+#### Example
+
+```typescript
+import { List } from "@raycast/api";
+
+export default function Metadata() {
+  return (
+    <List isShowingDetail>
+      <List.Item
+        title="Bulbasaur"
+        detail={
+          <List.Item.Detail
+            metadata={
+              <List.Item.Detail.Metadata>
+                <List.Item.Detail.Metadata.TagList title="Type">
+                  <List.Item.Detail.Metadata.TagList.Item text="Electric" color={"#eed535"} />
+                </List.Item.Detail.Metadata.TagList>
+              </List.Item.Detail.Metadata>
+            }
+          />
+        }
+      />
+    </List>
+  );
+}
+```
+
+#### Props
+
+<PropsTableFromJSDoc component="List.Item.Detail.Metadata.TagList" />
+
+### List.Item.Detail.Metadata.TagList.Item
+
+A Tag in a `List.Item.Detail.Metadata.TagList`.
+
+#### Props
+
+<PropsTableFromJSDoc component="List.Item.Detail.Metadata.TagList.Item" />
+
+### List.Item.Detail.Metadata.Separator
+
+A metadata item that shows a separator line. Use it for grouping and visually separating metadata items.
+
+![List Detail-metadata-separator illustration](../../.gitbook/assets/list-detail-metadata-separator.png)
+
+#### Example
+
+```typescript
+import { List } from "@raycast/api";
+
+export default function Metadata() {
+  return (
+    <List isShowingDetail>
+      <List.Item
+        title="Bulbasaur"
+        detail={
+          <List.Item.Detail
+            metadata={
+              <List.Item.Detail.Metadata>
+                <List.Item.Detail.Metadata.Label title="Type" icon="pokemon_types/grass.svg" text="Grass" />
+                <List.Item.Detail.Metadata.Separator />
+                <List.Item.Detail.Metadata.Label title="Type" icon="pokemon_types/poison.svg" text="Poison" />
+              </List.Item.Detail.Metadata>
+            }
+          />
+        }
+      />
+    </List>
+  );
+}
+```
 
 ### List.Section
 
-A group of related [List.Item](https://developers.raycast.com/api-reference/user-interface/list#list-item).
+A group of related [List.Item](#list.item).
 
-Sections are a great way to structure your list. F.e. group GitHub issues with the same status and order them by priority.
-This way the user can quickly access what is most relevant.
+Sections are a great way to structure your list. For example, group GitHub issues with the same status and order them by priority.
+This way, the user can quickly access what is most relevant.
 
 #### Example
 
@@ -176,9 +819,42 @@ export default function Command() {
 
 #### Props
 
-| Prop | Type | Required | Default | Description |
-| :--- | :--- | :--- | :--- | :--- |
-| children | <code>null</code> or <code>[List.Item](https://developers.raycast.com/api-reference/user-interface/list#list-item)</code> or <code>List.Item[]</code> | No | - | The [List.Item](https://developers.raycast.com/api-reference/user-interface/list#list-item) elements of the section. |
-| id | <code>string</code> | No | - | ID of the section. Make sure to assign each section a unique ID or a UUID will be auto generated. |
-| subtitle | <code>string</code> | No | - | An optional subtitle displayed next to the title of the section. |
-| title | <code>string</code> | No | - | Title displayed above the section. |
+<PropsTableFromJSDoc component="List.Section" />
+
+## Types
+
+### List.Item.Accessory
+
+An interface describing an accessory view in a `List.Item`.
+
+![List.Item accessories illustration](../../.gitbook/assets/list-item-accessories.png)
+
+#### Properties
+
+<InterfaceTableFromJSDoc name="List.Item.Accessory" />
+
+#### Example
+
+```typescript
+import { Color, Icon, List } from "@raycast/api";
+
+export default function Command() {
+  return (
+    <List>
+      <List.Item
+        title="An Item with Accessories"
+        accessories={[
+          { text: `An Accessory Text`, icon: Icon.Hammer },
+          { text: { value: `A Colored Accessory Text`, color: Color.Orange }, icon: Icon.Hammer },
+          { icon: Icon.Person, tooltip: "A person" },
+          { text: "Just Do It!" },
+          { date: new Date() },
+          { tag: new Date() },
+          { tag: { value: new Date(), color: Color.Magenta } },
+          { tag: { value: "User", color: Color.Magenta }, tooltip: "Tag with tooltip" },
+        ]}
+      />
+    </List>
+  );
+}
+```

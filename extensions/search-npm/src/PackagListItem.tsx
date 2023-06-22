@@ -2,58 +2,143 @@ import {
   List,
   Icon,
   ActionPanel,
-  OpenInBrowserAction,
-  PushAction,
-  CopyToClipboardAction,
+  Action,
   getPreferenceValues,
+  showToast,
+  Toast,
 } from '@raycast/api'
+import tinyRelativeDate from 'tiny-relative-date'
 import { CopyInstallCommandActions } from './CopyInstallCommandActions'
 import { parseRepoUrl } from './utils/parseRepoUrl'
+import { getChangeLogUrl } from './utils/getChangelogUrl'
 import { Readme } from './Readme'
-import { NpmsResultModel } from './npmsResponse.model'
+import { Package } from './npmResponse.model'
+import { addToHistory, HistoryItem } from './utils/history-storage'
+import {
+  addFavorite,
+  removeAllItemsFromFavorites,
+  removeItemFromFavorites,
+} from './utils/favorite-storage'
+import Favorites from './favorites'
 
 interface PackageListItemProps {
-  result: NpmsResultModel
+  result: Package
+  searchTerm?: string
+  setHistory?: React.Dispatch<React.SetStateAction<HistoryItem[]>>
+  isFavorited: boolean
+  handleFaveChange?: () => Promise<void>
+  isViewingFavorites?: boolean
 }
 
-interface Preferences {
+export interface Preferences {
   defaultOpenAction: 'openRepository' | 'openHomepage' | 'npmPackagePage'
+  historyCount: string
 }
 
 export const PackageListItem = ({
   result,
+  searchTerm,
+  setHistory,
+  isFavorited,
+  handleFaveChange,
+  isViewingFavorites,
 }: PackageListItemProps): JSX.Element => {
   const { defaultOpenAction }: Preferences = getPreferenceValues()
-  const pkg = result.package
+  const pkg = result
   const { owner, name, type } = parseRepoUrl(pkg.links.repository)
+  const changelogUrl = getChangeLogUrl(type, owner, name)
 
-  const actions = {
+  const handleAddToHistory = async () => {
+    const history = await addToHistory({ term: pkg.name, type: 'package' })
+    setHistory?.(history)
+    showToast(Toast.Style.Success, `Added ${result.name} to history`)
+  }
+
+  const handleAddToFaves = async () => {
+    await addFavorite(result)
+    showToast(Toast.Style.Success, `Added ${result.name} to faves`)
+    handleFaveChange?.()
+  }
+  const handleRemoveFromFaves = async () => {
+    await removeItemFromFavorites(result)
+    showToast(Toast.Style.Success, `Removed ${result.name} from faves`)
+    handleFaveChange?.()
+  }
+  const handleRemoveAllFaves = async () => {
+    await removeAllItemsFromFavorites()
+    showToast(Toast.Style.Success, `Removed ${result.name} from faves`)
+    handleFaveChange?.()
+  }
+
+  const openActions = {
     openRepository: pkg.links?.repository ? (
-      <OpenInBrowserAction
+      <Action.OpenInBrowser
         key="openRepository"
         url={pkg.links.repository}
         title="Open Repository"
+        onOpen={handleAddToHistory}
       />
     ) : null,
     openHomepage:
       pkg.links?.homepage && pkg.links.homepage !== pkg.links?.repository ? (
-        <OpenInBrowserAction
+        <Action.OpenInBrowser
           key="openHomepage"
           url={pkg.links.homepage}
           title="Open Homepage"
           icon={Icon.Link}
+          onOpen={handleAddToHistory}
         />
       ) : null,
+    changelogPackagePage: changelogUrl ? (
+      <Action.OpenInBrowser
+        key="openChangelog"
+        url={changelogUrl}
+        title="Open Changelog"
+      />
+    ) : null,
     npmPackagePage: (
-      <OpenInBrowserAction
+      <Action.OpenInBrowser
         key="npmPackagePage"
         url={pkg.links.npm}
         title="npm Package Page"
         icon={{
           source: 'command-icon.png',
         }}
+        onOpen={handleAddToHistory}
       />
     ),
+    skypackPackagePage: (
+      <Action.OpenInBrowser
+        url={`https://www.skypack.dev/view/${pkg.name}`}
+        title="Skypack Package Page"
+        key="skypackPackagePage"
+        onOpen={handleAddToHistory}
+      />
+    ),
+  }
+
+  const accessories: List.Item.Accessory[] = [
+    {
+      icon: Icon.Tag,
+      tooltip: pkg?.keywords?.length ? pkg.keywords.join(', ') : '',
+    },
+  ]
+  if (!isViewingFavorites) {
+    accessories.unshift(
+      {
+        text: `v${pkg.version}`,
+        tooltip: `Latest version`,
+      },
+      {
+        icon: Icon.Calendar,
+        tooltip: `Last updated: ${tinyRelativeDate(new Date(pkg.date))}`,
+      },
+    )
+    if (isFavorited) {
+      accessories.unshift({
+        icon: Icon.Star,
+      })
+    }
   }
 
   return (
@@ -62,42 +147,83 @@ export const PackageListItem = ({
       key={pkg.name}
       title={pkg.name}
       subtitle={pkg.description}
-      icon={Icon.ArrowRight}
-      accessoryTitle={`v${pkg.version}`}
+      icon={Icon.Box}
+      accessories={accessories}
       keywords={pkg.keywords}
       actions={
         <ActionPanel>
           <ActionPanel.Section title="Links">
-            {Object.entries(actions)
-              .sort(([a], [b]) => {
+            {Object.entries(openActions)
+              .sort(([a]) => {
                 if (a === defaultOpenAction) {
                   return -1
                 } else {
                   return 0
                 }
               })
-              .map(([key, action]) => action)}
-            <OpenInBrowserAction
-              url={`https://npms.io/search?q=${pkg.name}`}
-              title="npms.io Search Results"
-            />
+              .map(([, action]) => {
+                if (!action) {
+                  return null
+                }
+                return action
+              })
+              .filter(Boolean)}
+            {searchTerm ? (
+              <Action.OpenInBrowser
+                url={`https://www.npmjs.com/search?q=${searchTerm}`}
+                title="npm Search Results"
+              />
+            ) : null}
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Actions">
+            {isFavorited ? (
+              <Action
+                title="Remove From Favorites"
+                onAction={handleRemoveFromFaves}
+                icon={Icon.StarDisabled}
+                shortcut={{ modifiers: ['cmd', 'shift'], key: 's' }}
+                style={Action.Style.Destructive}
+              />
+            ) : (
+              <Action
+                title="Add to Favorites"
+                onAction={handleAddToFaves}
+                icon={Icon.Star}
+                shortcut={{ modifiers: ['cmd', 'shift'], key: 's' }}
+              />
+            )}
+            {isViewingFavorites ? (
+              <Action
+                title="Remove All Favorites"
+                onAction={handleRemoveAllFaves}
+                icon={Icon.Trash}
+                shortcut={{ modifiers: ['cmd', 'shift'], key: 'backspace' }}
+                style={Action.Style.Destructive}
+              />
+            ) : (
+              <Action.Push
+                title="View Favorites"
+                target={<Favorites />}
+                icon={Icon.ArrowRight}
+              />
+            )}
           </ActionPanel.Section>
           <ActionPanel.Section title="Info">
             {type === 'github' && owner && name ? (
-              <PushAction
-                title="View readme"
+              <Action.Push
+                title="View README"
                 target={<Readme user={owner} repo={name} />}
-                icon={Icon.TextDocument}
+                icon={Icon.Paragraph}
               />
             ) : null}
-            <OpenInBrowserAction
+            <Action.OpenInBrowser
               url={`https://bundlephobia.com/package/${pkg.name}`}
               title="Open Bundlephobia"
               icon={Icon.LevelMeter}
               shortcut={{ modifiers: ['cmd', 'shift'], key: 'enter' }}
             />
             {pkg.links?.repository && type === 'github' ? (
-              <OpenInBrowserAction
+              <Action.OpenInBrowser
                 url={pkg.links.repository.replace('github.com', 'github.dev')}
                 title="View Code in Github.dev"
                 icon={{
@@ -110,7 +236,7 @@ export const PackageListItem = ({
               />
             ) : null}
             {type === 'github' || (type === 'gitlab' && owner && name) ? (
-              <OpenInBrowserAction
+              <Action.OpenInBrowser
                 url={`https://codesandbox.io/s/${
                   type === 'github' ? 'github' : 'gitlab'
                 }/${owner}/${name}`}
@@ -123,7 +249,7 @@ export const PackageListItem = ({
                 }}
               />
             ) : null}
-            <OpenInBrowserAction
+            <Action.OpenInBrowser
               url={`https://snyk.io/vuln/npm:${pkg.name}`}
               title="Open Snyk Vulnerability Check"
               icon={{
@@ -135,8 +261,8 @@ export const PackageListItem = ({
             />
           </ActionPanel.Section>
           <ActionPanel.Section title="Copy">
-            <CopyInstallCommandActions name={pkg.name} />
-            <CopyToClipboardAction
+            <CopyInstallCommandActions packageName={pkg.name} />
+            <Action.CopyToClipboard
               title="Copy Package Name"
               content={pkg.name}
             />

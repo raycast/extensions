@@ -1,54 +1,59 @@
-import { ActionPanel, CopyToClipboardAction, List, OpenInBrowserAction, showToast, ToastStyle } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { Action, ActionPanel, List } from "@raycast/api";
+import { startCase } from "lodash";
+import { getStories } from "./hackernews";
+import { Topic } from "./types";
+import { useState } from "react";
+import { usePromise } from "@raycast/utils";
 import Parser from "rss-parser";
-
-const parser = new Parser();
-
-interface State {
-  items?: Parser.Item[];
-  error?: Error;
-}
+import { getIcon, getAccessories } from "./utils";
 
 export default function Command() {
-  const [state, setState] = useState<State>({});
-
-  useEffect(() => {
-    async function fetchStories() {
-      try {
-        const feed = await parser.parseURL("https://hnrss.org/frontpage?count=25");
-        setState({ items: feed.items });
-      } catch (error) {
-        setState({ error: error instanceof Error ? error : new Error("Something went wrong") });
-      }
-    }
-
-    fetchStories();
-  }, []);
-
-  if (state.error) {
-    showToast(ToastStyle.Failure, "Failed loading stories", state.error.message);
-  }
+  const [topic, setTopic] = useState<Topic | null>(null);
+  const { data, isLoading } = usePromise(getStories, [topic], { execute: !!topic });
 
   return (
-    <List isLoading={!state.items && !state.error}>
-      {state.items?.map((item, index) => (
-        <StoryListItem key={item.guid} item={item} index={index} />
+    <List
+      isLoading={isLoading}
+      searchBarAccessory={
+        <List.Dropdown
+          tooltip="Select Page"
+          defaultValue={Topic.FrontPage}
+          storeValue
+          onChange={(newValue) => setTopic(newValue as Topic)}
+        >
+          {Object.entries(Topic).map(([name, value]) => (
+            <List.Dropdown.Item key={value} title={startCase(name)} value={value} />
+          ))}
+        </List.Dropdown>
+      }
+    >
+      {data?.map((item, index) => (
+        <StoryListItem key={item.guid} item={item} index={index} topic={topic} />
       ))}
     </List>
   );
 }
 
-function StoryListItem(props: { item: Parser.Item; index: number }) {
-  const icon = getIcon(props.index + 1);
-  const points = getPoints(props.item);
-  const comments = getComments(props.item);
+function setTitle(title: string, topic: Topic) {
+  if (topic === Topic.ShowHN) {
+    return title.replace(/Show HN: /, "");
+  }
+  if (topic === Topic.AskHN) {
+    return title.replace(/Ask HN: /, "");
+  }
+  if (topic === Topic.Polls) {
+    return title.replace(/Poll: /, "");
+  }
+  return title;
+}
 
+function StoryListItem(props: { item: Parser.Item; index: number; topic: Topic | null }) {
   return (
     <List.Item
-      icon={icon}
-      title={props.item.title ?? "No title"}
+      icon={getIcon(props.index + 1)}
+      title={setTitle(props.item.title || "No Title", props.topic || Topic.FrontPage)}
       subtitle={props.item.creator}
-      accessoryTitle={`👍  ${points}    💬  ${comments}`}
+      accessories={getAccessories(props.item)}
       actions={<Actions item={props.item} />}
     />
   );
@@ -58,12 +63,12 @@ function Actions(props: { item: Parser.Item }) {
   return (
     <ActionPanel title={props.item.title}>
       <ActionPanel.Section>
-        {props.item.link && <OpenInBrowserAction url={props.item.link} />}
-        {props.item.guid && <OpenInBrowserAction url={props.item.guid} title="Open Comments in Browser" />}
+        {props.item.link && <Action.OpenInBrowser url={props.item.link} />}
+        {props.item.guid && <Action.OpenInBrowser url={props.item.guid} title="Open Comments in Browser" />}
       </ActionPanel.Section>
       <ActionPanel.Section>
         {props.item.link && (
-          <CopyToClipboardAction
+          <Action.CopyToClipboard
             content={props.item.link}
             title="Copy Link"
             shortcut={{ modifiers: ["cmd"], key: "." }}
@@ -72,31 +77,4 @@ function Actions(props: { item: Parser.Item }) {
       </ActionPanel.Section>
     </ActionPanel>
   );
-}
-
-const iconToEmojiMap = new Map<number, string>([
-  [1, "1️⃣"],
-  [2, "2️⃣"],
-  [3, "3️⃣"],
-  [4, "4️⃣"],
-  [5, "5️⃣"],
-  [6, "6️⃣"],
-  [7, "7️⃣"],
-  [8, "8️⃣"],
-  [9, "9️⃣"],
-  [10, "🔟"],
-]);
-
-function getIcon(index: number) {
-  return iconToEmojiMap.get(index) ?? "⏺";
-}
-
-function getPoints(item: Parser.Item) {
-  const matches = item.contentSnippet?.match(/(?<=Points:\s*)(\d+)/g);
-  return matches?.[0];
-}
-
-function getComments(item: Parser.Item) {
-  const matches = item.contentSnippet?.match(/(?<=Comments:\s*)(\d+)/g);
-  return matches?.[0];
 }

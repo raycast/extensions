@@ -1,41 +1,41 @@
-import { useState, useEffect } from 'react'
-import { List, showToast, Toast, ToastStyle } from '@raycast/api'
+import { useState, useEffect } from "react";
+import { List, showToast, Toast, ToastStyle } from "@raycast/api";
 
-import { Volume } from '../types'
-import { listVolumes, ejectVolume } from '../utils'
-import VolumeListItem from './VolumeListItem'
+import { Volume } from "../types";
+import { listVolumes, ejectVolume } from "../utils";
+import VolumeListItem from "./VolumeListItem";
 
 export default function VolumeList() {
-  const [volumes, setVolumes] = useState<Volume[]>([])
-  const [isLoading, setIsLoading] = useState(true)
+  const [volumes, setVolumes] = useState<Volume[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   async function fetchVolumes() {
-    setIsLoading(true)
-    setVolumes(await listVolumes())
-    setIsLoading(false)
+    setIsLoading(true);
+    setVolumes(await listVolumes());
+    setIsLoading(false);
   }
 
   async function eject(volume: Volume): Promise<void> {
-    const toast = new Toast({ style: ToastStyle.Animated, title: `Ejecting ${volume.name}...` })
-    await toast.show()
+    const toast = new Toast({ style: ToastStyle.Animated, title: `Ejecting ${volume.name}...` });
+    await toast.show();
 
-    await ejectVolume(volume)
+    await ejectVolume(volume);
 
-    await toast.hide()
-    showToast(ToastStyle.Success, `Successfully Ejected ${volume.name}`)
+    await toast.hide();
+    showToast(ToastStyle.Success, `Successfully Ejected ${volume.name}`);
 
-    await fetchVolumes()
+    await fetchVolumes();
   }
 
   useEffect(() => {
-    fetchVolumes()
-  }, [])
+    fetchVolumes();
+  }, []);
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Filter Volumes By Name...">
-      {volumes.map(volume => (
+      {volumes.map((volume) => (
         <VolumeListItem key={volume.name} volume={volume} eject={eject} />
       ))}
     </List>
-  )
+  );
 }

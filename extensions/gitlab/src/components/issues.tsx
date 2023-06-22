@@ -1,21 +1,25 @@
-import {
-  ActionPanel,
-  List,
-  OpenInBrowserAction,
-  Color,
-  showToast,
-  ToastStyle,
-  Detail,
-  PushAction,
-  ImageMask,
-} from "@raycast/api";
+import { Action, ActionPanel, List, Color, Detail, Image } from "@raycast/api";
 import { gql } from "@apollo/client";
 import { useEffect, useState } from "react";
-import { gitlab, gitlabgql } from "../common";
+import { getGitLabGQL, gitlab } from "../common";
 import { Group, Issue, Project } from "../gitlabapi";
 import { GitLabIcons } from "../icons";
-import { optimizeMarkdownText, Query, toDateString, tokenizeQueryText } from "../utils";
+import {
+  capitalizeFirstLetter,
+  getErrorMessage,
+  now,
+  optimizeMarkdownText,
+  Query,
+  showErrorToast,
+  tokenizeQueryText,
+  toLongDateString,
+} from "../utils";
 import { IssueItemActions } from "./issue_actions";
+import { GitLabOpenInBrowserAction } from "./actions";
+import { userIcon } from "./users";
+import { CacheActionPanelSection } from "./cache_actions";
+
+/* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/explicit-module-boundary-types */
 
 export enum IssueScope {
   created_by_me = "created_by_me",
@@ -30,26 +34,50 @@ export enum IssueState {
 }
 
 const GET_ISSUE_DETAIL = gql`
-  query GetIssueDetail($id: ID!) {
+  query GetIssueDetail($id: IssueID!) {
     issue(id: $id) {
       description
+      webUrl
     }
   }
 `;
 
-export function IssueDetail(props: { issue: Issue }) {
-  const { description, error, isLoading } = useDetail(props.issue.id);
+export function IssueDetailFetch(props: { project: Project; issueId: number }): JSX.Element {
+  const { issue, isLoading, error } = useIssue(props.project.id, props.issueId);
   if (error) {
-    showToast(ToastStyle.Failure, "Could not get issue details", error);
+    showErrorToast(error, "Could not fetch Issue Details");
+  }
+  if (isLoading || !issue) {
+    return <Detail isLoading={isLoading} />;
+  } else {
+    return <IssueDetail issue={issue} />;
+  }
+}
+
+interface IssueDetailData {
+  description: string;
+  projectWebUrl?: string;
+}
+
+function stateColor(state: string): Color.ColorLike {
+  return state === "closed" ? "red" : "green";
+}
+
+export function IssueDetail(props: { issue: Issue }): JSX.Element {
+  const issue = props.issue;
+  const { issueDetail, error, isLoading } = useDetail(props.issue.id);
+  if (error) {
+    showErrorToast(error, "Could not get Issue Details");
   }
 
-  const desc = (description ? description : props.issue.description) || "";
+  const desc = (issueDetail?.description ? issueDetail.description : props.issue.description) || "";
 
-  let md = "";
-  if (props.issue) {
-    md = props.issue.labels.map((i) => `\`${i.name}\``).join(" ") + "  \n";
+  const lines: string[] = [];
+  if (issue) {
+    lines.push(`# ${issue.title}`);
+    lines.push(optimizeMarkdownText(desc, issueDetail?.projectWebUrl));
   }
-  md += "## Description\n" + optimizeMarkdownText(desc);
+  const md = lines.join("  \n");
 
   return (
     <Detail
@@ -58,22 +86,54 @@ export function IssueDetail(props: { issue: Issue }) {
       navigationTitle={`${props.issue.reference_full}`}
       actions={
         <ActionPanel>
-          <OpenInBrowserAction url={props.issue.web_url} />
+          <GitLabOpenInBrowserAction url={props.issue.web_url} />
           <IssueItemActions issue={props.issue} />
+          <Action.CopyToClipboard title="Copy Issue Description" content={issue.description} />
         </ActionPanel>
+      }
+      metadata={
+        <Detail.Metadata>
+          <Detail.Metadata.TagList title="Status">
+            <Detail.Metadata.TagList.Item text={capitalizeFirstLetter(issue.state)} color={stateColor(issue.state)} />
+          </Detail.Metadata.TagList>
+          {issue.author && (
+            <Detail.Metadata.TagList title="Author">
+              <Detail.Metadata.TagList.Item key={issue.id} text={issue.author.name} icon={userIcon(issue.author)} />
+            </Detail.Metadata.TagList>
+          )}
+          {issue.assignees.length > 0 && (
+            <Detail.Metadata.TagList title="Assignee">
+              {issue.assignees.map((a) => (
+                <Detail.Metadata.TagList.Item key={a.id} text={a.name} icon={userIcon(a)} />
+              ))}
+            </Detail.Metadata.TagList>
+          )}
+          {issue.milestone && <Detail.Metadata.Label title="Milestone" text={issue.milestone.title} />}
+          {issue.labels.length > 0 && (
+            <Detail.Metadata.TagList title="Labels">
+              {issue.labels?.map((i) => (
+                <Detail.Metadata.TagList.Item
+                  key={i.id || (i as any)}
+                  text={i.name || (i as any) || "?"}
+                  color={i.color}
+                />
+              ))}
+            </Detail.Metadata.TagList>
+          )}
+        </Detail.Metadata>
       }
     />
   );
 }
 
-export function useDetail(issueID: number): {
-  description?: string;
+function useDetail(issueID: number): {
+  issueDetail?: IssueDetailData;
   error?: string;
   isLoading: boolean;
 } {
-  const [description, setDescription] = useState<string>();
+  const [issueDetail, setIssueDetail] = useState<IssueDetailData>();
   const [error, setError] = useState<string>();
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
     // FIXME In the future version, we don't need didUnmount checking
@@ -89,17 +149,26 @@ export function useDetail(issueID: number): {
       setError(undefined);
 
       try {
-        const data = await gitlabgql.client.query({
+        const data = await getGitLabGQL().client.query({
           query: GET_ISSUE_DETAIL,
           variables: { id: `gid://gitlab/Issue/${issueID}` },
         });
         const desc = data.data.issue.description || "<no description>";
-        if (!didUnmount) {
-          setDescription(desc);
+        const webUrl = (data.data.issue.webUrl as string) || "";
+        let projectWebUrl: string | undefined;
+        const index = webUrl.indexOf("/-/");
+        if (index > 1) {
+          projectWebUrl = webUrl.substring(0, index);
         }
-      } catch (e: any) {
         if (!didUnmount) {
-          setError(e.message);
+          setIssueDetail({
+            description: desc,
+            projectWebUrl: projectWebUrl,
+          });
+        }
+      } catch (e) {
+        if (!didUnmount) {
+          setError(getErrorMessage(e));
         }
       } finally {
         if (!didUnmount) {
@@ -115,30 +184,49 @@ export function useDetail(issueID: number): {
     };
   }, [issueID]);
 
-  return { description, error, isLoading };
+  return { issueDetail, error, isLoading };
 }
 
-export function IssueListItem(props: { issue: Issue }) {
+export function IssueListItem(props: { issue: Issue; refreshData: () => void }): JSX.Element {
   const issue = props.issue;
   const tintColor = issue.state === "opened" ? Color.Green : Color.Red;
-  const extraSubtitle = issue.milestone ? `${issue.milestone.title}  |  ` : "";
   return (
     <List.Item
       id={issue.id.toString()}
       title={issue.title}
       subtitle={"#" + issue.iid}
-      icon={{ source: GitLabIcons.issue, tintColor: tintColor }}
-      accessoryIcon={{ source: issue.author?.avatar_url || "", mask: ImageMask.Circle }}
-      accessoryTitle={extraSubtitle + toDateString(issue.updated_at)}
+      icon={{
+        value: {
+          source: GitLabIcons.issue,
+          tintColor: tintColor,
+        },
+        tooltip: `Status: ${capitalizeFirstLetter(issue.state)}`,
+      }}
+      accessories={[
+        {
+          tag: issue.milestone ? issue.milestone.title : "",
+          tooltip: issue.milestone ? `Milestone: ${issue.milestone.title}` : undefined,
+        },
+        { date: new Date(issue.updated_at), tooltip: `Updated: ${toLongDateString(issue.updated_at)}` },
+        {
+          icon: { source: issue.author?.avatar_url || "", mask: Image.Mask.Circle },
+          tooltip: issue.author ? `Author: ${issue.author?.name}` : undefined,
+        },
+      ]}
       actions={
         <ActionPanel>
-          <PushAction
-            title="Show Details"
-            target={<IssueDetail issue={issue} />}
-            icon={{ source: GitLabIcons.show_details, tintColor: Color.PrimaryText }}
-          />
-          <OpenInBrowserAction url={issue.web_url} shortcut={{ modifiers: ["cmd"], key: "enter" }} />
-          <IssueItemActions issue={issue} />
+          <ActionPanel.Section>
+            <Action.Push
+              title="Show Details"
+              target={<IssueDetail issue={issue} />}
+              icon={{ source: GitLabIcons.show_details, tintColor: Color.PrimaryText }}
+            />
+            <GitLabOpenInBrowserAction url={issue.web_url} shortcut={{ modifiers: ["cmd"], key: "enter" }} />
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <IssueItemActions issue={issue} onDataChange={props.refreshData} />
+          </ActionPanel.Section>
+          <CacheActionPanelSection />
         </ActionPanel>
       }
     />
@@ -150,6 +238,10 @@ interface IssueListProps {
   state?: IssueState;
   project?: Project;
   group?: Group;
+  searchBarAccessory?:
+    | React.ReactElement<List.Dropdown.Props, string | React.JSXElementConstructor<any>>
+    | null
+    | undefined;
 }
 
 function navTitle(project?: Project, group?: Group): string | undefined {
@@ -157,7 +249,7 @@ function navTitle(project?: Project, group?: Group): string | undefined {
     return `Group Issues ${group.full_path}`;
   }
   if (project) {
-    return `Issue ${project.fullPath}`;
+    return `${project.name_with_namespace}`;
   }
   return undefined;
 }
@@ -167,19 +259,16 @@ export function IssueList({
   state = IssueState.all,
   project = undefined,
   group = undefined,
-}: IssueListProps) {
+  searchBarAccessory = undefined,
+}: IssueListProps): JSX.Element {
   const [searchText, setSearchText] = useState<string>();
-  const { issues, error, isLoading } = useSearch(searchText, scope, state, project, group);
+  const { issues, error, isLoading, refresh } = useSearch(searchText, scope, state, project, group);
 
   if (error) {
-    showToast(ToastStyle.Failure, "Cannot search issue", error);
+    showErrorToast(error, "Cannot search Issue");
   }
 
-  if (!issues) {
-    return <List isLoading={true} searchBarPlaceholder="Loading" />;
-  }
-
-  const title = scope == IssueScope.assigned_to_me ? "Your Issues" : "Created Recently";
+  const title = scope === IssueScope.assigned_to_me ? "Your Issues" : "Created Recently";
 
   return (
     <List
@@ -187,22 +276,35 @@ export function IssueList({
       onSearchTextChange={setSearchText}
       isLoading={isLoading}
       throttle={true}
+      searchBarAccessory={searchBarAccessory}
       navigationTitle={navTitle(project, group)}
     >
       <List.Section title={title} subtitle={issues?.length.toString() || ""}>
         {issues?.map((issue) => (
-          <IssueListItem key={issue.id} issue={issue} />
+          <IssueListItem key={issue.id} issue={issue} refreshData={refresh} />
         ))}
       </List.Section>
     </List>
   );
 }
 
-function getIssueQuery(query: string | undefined) {
-  return tokenizeQueryText(query, ["label", "author", "milestone", "assignee"]);
+export function getIssueQuery(query: string | undefined) {
+  return tokenizeQueryText(query, ["label", "author", "milestone", "assignee", "state"]);
 }
 
-function injectQueryNamedParameters(
+function isValidIssueState(texts: string[] | undefined) {
+  if (!texts) {
+    return false;
+  }
+  for (const v of texts) {
+    if (![IssueState.closed.valueOf(), IssueState.opened.valueOf(), IssueState.all.valueOf()].includes(v)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+export function injectQueryNamedParameters(
   requestParams: Record<string, any>,
   query: Query,
   scope: IssueScope,
@@ -240,6 +342,12 @@ function injectQueryNamedParameters(
             }
           }
           break;
+        case "state": {
+          console.log(extraParamVal);
+          if (isValidIssueState(extraParamVal)) {
+            requestParams[prefixed("state")] = extraParamVal.join(",");
+          }
+        }
       }
     }
   }
@@ -255,10 +363,16 @@ export function useSearch(
   issues?: Issue[];
   error?: string;
   isLoading: boolean;
+  refresh: () => void;
 } {
   const [issues, setIssues] = useState<Issue[]>();
   const [error, setError] = useState<string>();
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [timestamp, setTimestamp] = useState<Date>(now());
+
+  const refresh = () => {
+    setTimestamp(now());
+  };
 
   useEffect(() => {
     // FIXME In the future version, we don't need didUnmount checking
@@ -295,9 +409,9 @@ export function useSearch(
             setIssues(glIssues);
           }
         }
-      } catch (e: any) {
+      } catch (e) {
         if (!didUnmount) {
-          setError(e.message);
+          setError(getErrorMessage(e));
         }
       } finally {
         if (!didUnmount) {
@@ -311,7 +425,58 @@ export function useSearch(
     return () => {
       didUnmount = true;
     };
-  }, [query]);
+  }, [query, timestamp, project]);
 
-  return { issues, error, isLoading };
+  return { issues, error, isLoading, refresh };
+}
+
+export function useIssue(
+  projectID: number,
+  issueID: number
+): {
+  issue?: Issue;
+  error?: string;
+  isLoading: boolean;
+} {
+  const [issue, setIssue] = useState<Issue>();
+  const [error, setError] = useState<string>();
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  useEffect(() => {
+    // FIXME In the future version, we don't need didUnmount checking
+    // https://github.com/facebook/react/pull/22114
+    let didUnmount = false;
+
+    async function fetchData() {
+      if (didUnmount) {
+        return;
+      }
+
+      setIsLoading(true);
+      setError(undefined);
+
+      try {
+        const glIssue = await gitlab.getIssue(projectID, issueID, {});
+        if (!didUnmount) {
+          setIssue(glIssue);
+        }
+      } catch (e) {
+        if (!didUnmount) {
+          setError(getErrorMessage(e));
+        }
+      } finally {
+        if (!didUnmount) {
+          setIsLoading(false);
+        }
+      }
+    }
+
+    fetchData();
+
+    return () => {
+      didUnmount = true;
+    };
+  }, [projectID, issueID]);
+
+  return { issue, error, isLoading };
 }

@@ -1,14 +1,6 @@
-import {
-  ActionPanel,
-  showToast,
-  ToastStyle,
-  FormTextArea,
-  Form,
-  SubmitFormAction,
-  popToRoot
-} from "@raycast/api";
+import { ActionPanel, showToast, ToastStyle, FormTextArea, Form, SubmitFormAction, popToRoot } from "@raycast/api";
 import { getErrorMessage } from "../../utils";
-import { annotationCreationQuery } from './queries'
+import { annotationCreationQuery } from "./queries";
 
 interface Values {
   text: string;
@@ -24,7 +16,7 @@ async function handleSubmit(values: Values) {
     if (!values.text.length) throw Error("Please enter a text");
     if (values.text.length > 100) throw Error("Annotation text should not be longer than 100 characters");
 
-    const tags = values.tags?.split(',').map(tag => tag.trim());
+    const tags = values.tags?.split(",").map((tag) => tag.trim());
 
     await annotationCreationQuery({
       text: values.text,
@@ -38,7 +30,7 @@ async function handleSubmit(values: Values) {
   }
 }
 
-export function CreateAnnotationForm(props: {}) {
+export function CreateAnnotationForm() {
   return (
     <Form
       actions={

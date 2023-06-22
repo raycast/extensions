@@ -103,7 +103,6 @@ function HistorySlotListItem(props: { slot: HistorySlots; setHistorySlots: any }
 
 function Details(props: { slot: HistorySlots; setHistorySlots: any }) {
   const slot = props.slot;
-  const setHistorySlots = props.slot;
 
   const completed = moment.unix(slot.completed).fromNow();
 
@@ -113,7 +112,7 @@ function Details(props: { slot: HistorySlots; setHistorySlots: any }) {
 }
 
 async function onDelete(slot: HistorySlots, setHistorySlots: any) {
-  let client = new Client(preferences.url.value as string, preferences.apiToken.value as string);
+  const client = new Client(preferences.url.value as string, preferences.apiToken.value as string);
 
   try {
     const results = (await client.historyDelete(slot.nzo_id)) as Results;
@@ -130,7 +129,7 @@ async function onDelete(slot: HistorySlots, setHistorySlots: any) {
 }
 
 async function fetchHistorySlots(): Promise<HistorySlots[]> {
-  let client = new Client(preferences.url.value as string, preferences.apiToken.value as string);
+  const client = new Client(preferences.url.value as string, preferences.apiToken.value as string);
 
   try {
     const history = (await client.history()) as History;

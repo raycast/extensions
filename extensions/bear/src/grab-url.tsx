@@ -1,23 +1,28 @@
-import { ActionPanel, Form, Icon, showToast, SubmitFormAction, ToastStyle } from "@raycast/api";
+import { ActionPanel, Action, Form, Icon, popToRoot, showToast, Toast } from "@raycast/api";
 import open from "open";
 
 interface FormValues {
-  url: string,
-  tags: string,
-  pin: boolean
+  url: string;
+  tags: string;
+  pin: boolean;
 }
 
-
 function GrabUrlAction() {
-  function handleSubmit({ url, tags, pin }: FormValues) {
+  async function handleSubmit({ url, tags, pin }: FormValues) {
     if (!url) {
-      showToast(ToastStyle.Failure, "URL is required");
+      showToast(Toast.Style.Failure, "URL is required");
       return;
     }
-    open(`bear://x-callback-url/grab-url?url=${encodeURIComponent(url)}&tags=${encodeURIComponent(tags)}&pin=${pin ? "yes" : "no"}`)
+    open(
+      `bear://x-callback-url/grab-url?url=${encodeURIComponent(url)}&tags=${encodeURIComponent(tags)}&pin=${
+        pin ? "yes" : "no"
+      }`
+    );
+
+    await popToRoot({ clearSearchBar: true });
   }
 
-  return <SubmitFormAction icon={Icon.Globe} title="Capture in New Note" onSubmit={handleSubmit}/>
+  return <Action.SubmitForm icon={Icon.Globe} title="Capture in New Note" onSubmit={handleSubmit} />;
 }
 
 export default function GrabUrl() {
@@ -26,11 +31,11 @@ export default function GrabUrl() {
       navigationTitle="Grab URL"
       actions={
         <ActionPanel>
-          <GrabUrlAction/>
+          <GrabUrlAction />
         </ActionPanel>
       }
     >
-      <Form.TextField id="url" title="URL" placeholder="URL of web page to capture" />
+      <Form.TextField id="url" title="URL" placeholder="URL of web page to capture (eg. http://raycast.com)" />
       <Form.TextField id="tags" title="Tags" placeholder="comma,separated,tags" />
       <Form.Checkbox id="pin" label="Pin note to top of note list" />
     </Form>

@@ -1,5 +1,3 @@
-import { 
-  ScriptCommandsList 
-} from "@commands"
+import { ScriptCommandsList } from "@commands";
 
-export default ScriptCommandsList
+export default ScriptCommandsList;

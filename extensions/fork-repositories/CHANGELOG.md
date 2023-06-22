@@ -1,0 +1,22 @@
+# Fork Repositories Changelog
+
+## [Redesign] - 2023-06-19
+
+- Updated `@raycast/api` to latest version
+- Updated `Search Repositories` command to group repositories by folder
+- Updated `Show Repositories` command to also display repository count for each section (folder)
+
+## [Menu Bar Extra] - 2022-09-02
+
+- Added menu bar command
+- Updated icons
+- Updated screenshots
+- Updated all dependencies to their latest version
+
+## [Metadata] - 2022-03-23
+
+- Added screenshot, changelog and categories for better discoverability
+- Added repo count
+- Updated all dependencies to their latest version
+
+## [Initial Version] - 2022-01-14

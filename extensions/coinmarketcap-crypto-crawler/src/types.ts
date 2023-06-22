@@ -1,28 +1,20 @@
-
 export type ResultData = {
   data: {
-    cryptoCurrencyMap: CryptoCurrency[]
-  },
+    cryptoCurrencyMap: CryptoCurrency[];
+  };
   status: {
-    timestamp: string
-  }
-}
-
+    timestamp: string;
+  };
+};
 
 export type CryptoCurrency = {
-    name: string,
-    slug: string,
-    symbol: string
-  }
+  name: string;
+  slug: string;
+  symbol: string;
+};
 
-export type CryptoList = {
-  name: string,
-  slug: string,
-  symbol: string
-}
-
-export type SearchResult = {
-  obj: CryptoList,
-  currencyPrice?: string,
-  priceDiff?: string
-}
+export type PriceData = {
+  currencyPrice: string;
+  priceDiff: string;
+  isUp: boolean;
+};

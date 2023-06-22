@@ -1,7 +1,7 @@
 import Fuse from "fuse.js";
-import { searchResultLimit } from "./consants";
+import { searchResultLimit } from "./constants";
 import { environment } from "@raycast/api";
-import fs from 'fs';
+import fs from "fs";
 
 export interface Dataset {
   blocks: Block[];
@@ -12,6 +12,7 @@ export interface Character {
   code: number;
   value: string;
   name: string;
+  aliases: string[];
 }
 
 export interface Block {
@@ -20,10 +21,14 @@ export interface Block {
   endCode: number;
 }
 
-const dataset = JSON.parse(fs.readFileSync(`${environment.assetsPath}/dataset.json`, 'utf-8')) as Dataset;
+export interface CharAlias {
+  [key: number]: string[];
+}
+
+const dataset = JSON.parse(fs.readFileSync(`${environment.assetsPath}/dataset.json`, "utf-8")) as Dataset;
 
 // We use Fuse.js (https://fusejs.io/) to speed-up the unicode characters search.
-const fuse = new Fuse(dataset.characters, { keys: ["name"], useExtendedSearch: true });
+const fuse = new Fuse(dataset.characters, { keys: ["name", "aliases"], useExtendedSearch: true });
 
 /**
  * Returns a list of unicode characters that approximately match the user query.

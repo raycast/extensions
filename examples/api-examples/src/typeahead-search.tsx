@@ -1,23 +1,29 @@
-import {
-  ActionPanel,
-  CopyToClipboardAction,
-  List,
-  OpenInBrowserAction,
-  showToast,
-  ToastStyle,
-  randomId,
-} from "@raycast/api";
-import { useState, useEffect, useRef } from "react";
-import fetch, { AbortError } from "node-fetch";
+import { ActionPanel, List, Action, Icon } from "@raycast/api";
+import { useFetch, Response } from "@raycast/utils";
+import { useState } from "react";
 
 export default function Command() {
-  const { state, search } = useSearch();
+  const [searchText, setSearchText] = useState("");
+
+  const params = new URLSearchParams();
+  params.append("q", searchText.length === 0 ? "@raycast/api" : searchText);
+
+  const { data, isLoading } = useFetch("https://api.npms.io/v2/search?" + params.toString(), {
+    parseResponse,
+    initialData: [],
+    keepPreviousData: true,
+  });
 
   return (
-    <List isLoading={state.isLoading} onSearchTextChange={search} searchBarPlaceholder="Search by name..." throttle>
-      <List.Section title="Results" subtitle={state.results.length + ""}>
-        {state.results.map((searchResult) => (
-          <SearchListItem key={searchResult.id} searchResult={searchResult} />
+    <List
+      isLoading={isLoading}
+      onSearchTextChange={setSearchText}
+      searchBarPlaceholder="Search npm packages..."
+      throttle
+    >
+      <List.Section title="Results" subtitle={data.length + ""}>
+        {data.map((searchResult) => (
+          <SearchListItem key={searchResult.name} searchResult={searchResult} />
         ))}
       </List.Section>
     </List>
@@ -29,14 +35,14 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
     <List.Item
       title={searchResult.name}
       subtitle={searchResult.description}
-      accessoryTitle={searchResult.username}
+      accessories={[{ icon: Icon.Person, text: searchResult.username }]}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <OpenInBrowserAction title="Open in Browser" url={searchResult.url} />
+            <Action.OpenInBrowser title="Open in Browser" url={searchResult.url} />
           </ActionPanel.Section>
           <ActionPanel.Section>
-            <CopyToClipboardAction
+            <Action.CopyToClipboard
               title="Copy Install Command"
               content={`npm install ${searchResult.name}`}
               shortcut={{ modifiers: ["cmd"], key: "." }}
@@ -48,84 +54,32 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
   );
 }
 
-function useSearch() {
-  const [state, setState] = useState<SearchState>({ results: [], isLoading: true });
-  const cancelRef = useRef<AbortController | null>(null);
-
-  useEffect(() => {
-    search("");
-    return () => {
-      cancelRef.current?.abort();
-    };
-  }, []);
-
-  async function search(searchText: string) {
-    cancelRef.current?.abort();
-    cancelRef.current = new AbortController();
-    try {
-      setState((oldState) => ({
-        ...oldState,
-        isLoading: true,
-      }));
-      const results = await performSearch(searchText, cancelRef.current.signal);
-      setState((oldState) => ({
-        ...oldState,
-        results: results,
-        isLoading: false,
-      }));
-    } catch (error) {
-      if (error instanceof AbortError) {
-        return;
+async function parseResponse(response: Response): Promise<SearchResult[]> {
+  const json = (await response.json()) as
+    | {
+        results: {
+          package: { name: string; description?: string; publisher?: { username: string }; links: { npm: string } };
+        }[];
       }
-      console.error("search error", error);
-      showToast(ToastStyle.Failure, "Could not perform search", String(error));
-    }
+    | { code: string; message: string };
+
+  if (!response.ok || "message" in json) {
+    throw new Error("message" in json ? json.message : response.statusText);
   }
 
-  return {
-    state: state,
-    search: search,
-  };
-}
-
-async function performSearch(searchText: string, signal: AbortSignal): Promise<SearchResult[]> {
-  const params = new URLSearchParams();
-  params.append("q", searchText.length === 0 ? "@raycast/api" : searchText);
-
-  const response = await fetch("https://api.npms.io/v2/search" + "?" + params.toString(), {
-    method: "get",
-    signal: signal,
-  });
-
-  if (!response.ok) {
-    return Promise.reject(response.statusText);
-  }
-
-  type Json = Record<string, unknown>;
-
-  const json = (await response.json()) as Json;
-  const jsonResults = (json?.results as Json[]) ?? [];
-  return jsonResults.map((jsonResult) => {
-    const npmPackage = jsonResult.package as Json;
+  return json.results.map((result) => {
     return {
-      id: randomId(),
-      name: npmPackage.name as string,
-      description: (npmPackage?.description as string) ?? "",
-      username: ((npmPackage.publisher as Json)?.username as string) ?? "",
-      url: (npmPackage.links as Json).npm as string,
+      name: result.package.name,
+      description: result.package.description,
+      username: result.package.publisher?.username,
+      url: result.package.links.npm,
     };
   });
-}
-
-interface SearchState {
-  results: SearchResult[];
-  isLoading: boolean;
 }
 
 interface SearchResult {
-  id: string;
   name: string;
-  description: string;
+  description?: string;
   username?: string;
   url: string;
 }

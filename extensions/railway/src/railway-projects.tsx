@@ -43,9 +43,10 @@ const useRailwayToken = (): string | null =>
     try {
       const { token } = JSON.parse(fs.readFileSync(railwayConfigPath, "utf8"));
       return token;
-    } catch (e) {}
-
-    return null;
+    } catch (e) {
+      // we ignore the error
+      return null;
+    }
   }, [environment.supportPath]);
 
 const useUser = () => {
@@ -105,14 +106,8 @@ const ListProjects: React.FC<{ token: string }> = ({ token }) => {
               actions={
                 <ActionPanel>
                   <ActionPanel.Section>
-                    <OpenInBrowserAction
-                      title="Project Settings"
-                      url={projectUrl(p.id, "settings")}
-                    />
-                    <OpenInBrowserAction
-                      title="Project Deployments"
-                      url={projectUrl(p.id, "deployments")}
-                    />
+                    <OpenInBrowserAction title="Project Settings" url={projectUrl(p.id, "settings")} />
+                    <OpenInBrowserAction title="Project Deployments" url={projectUrl(p.id, "deployments")} />
                     <OpenInBrowserAction
                       title="Latest Deployment"
                       url={projectUrl(p.id, "deployments?open=true")}
@@ -176,10 +171,7 @@ const RailwayLogin = () => {
           title="Login to Railway"
           actions={
             <ActionPanel title="#1 in raycast/extensions">
-              <PushAction
-                title="Start Railway Login"
-                target={<LoginWaiting loginSession={loginSession} />}
-              />
+              <PushAction title="Start Railway Login" target={<LoginWaiting loginSession={loginSession} />} />
             </ActionPanel>
           }
         />

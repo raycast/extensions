@@ -1,35 +1,22 @@
-import { 
-  ReadmeDetail 
-} from "@components"
+import { ReadmeDetail } from "@components";
 
-import { 
-  IconConstants, 
-  ShortcutConstants 
-} from "@constants"
+import { IconConstants, ShortcutConstants } from "@constants";
 
-import { 
-  CompactGroup 
-} from "@models"
+import { CompactGroup } from "@models";
 
-import { 
-  PushAction 
-} from "@raycast/api"
+import { PushAction } from "@raycast/api";
 
 type Props = {
-  group: CompactGroup
-}
+  group: CompactGroup;
+};
 
 export function ViewReadmeActionItem({ group }: Props): JSX.Element {
   return (
     <PushAction
-      icon={ IconConstants.Readme } 
-      shortcut={ ShortcutConstants.ViewReadme }
-      title="View README" 
-      target={ 
-        <ReadmeDetail 
-          group={ group } 
-        />
-      }
+      icon={IconConstants.Readme}
+      shortcut={ShortcutConstants.ViewReadme}
+      title="View README"
+      target={<ReadmeDetail group={group} />}
     />
-  )
+  );
 }

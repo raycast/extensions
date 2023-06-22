@@ -1,14 +1,15 @@
-<div align="center">
-  <h1 align="center">Script Commands Store</h1>
-  <img src="assets/readme/header.png">
-  </br></br>
-</div>
+![](images/readme/logo/store-icon@light.png#gh-light-mode-only)![](images/readme/logo/store-icon@dark.png#gh-dark-mode-only)
+
+# Script Commands Store
+
+![](images/readme/header-light.png#gh-light-mode-only)![](images/readme/header-dark.png#gh-dark-mode-only)
 
 The Script Commands Store extension was built to help users to manage their Script Commands without the need to download one by one the source code, assets and stuff related.
 
 ### Getting started
 
 On the first open, you will have to:
+
 - Define a folder to store the Script Commands
 - Setup the path you defined for the Script Commands in Raycast Preferences window.
 
@@ -17,32 +18,32 @@ On the first open, you will have to:
 <details>
  <summary>Instructions</summary>
 
-  At the first time you open Script Commands Store, you will need to define the folder which will be used to store the Script Commands downloaded.
+At the first time you open Script Commands Store, you will need to define the folder which will be used to store the Script Commands downloaded.
 
-  This is the setup screen. We strongly suggest you define a new folder for it.  
-  Example: `~/raycast/script-commands`
+This is the setup screen. We strongly suggest you define a new folder for it.  
+ Example: `~/raycast/script-commands`
 
-  ![](assets/readme/setup/first-screen.png)
+![](images/readme/setup/first-screen.png)
 
-  After finishing the first step, the Script Commands Store will be loaded for you, however, this doesn't mean it is fully configured for you, yet.
+After finishing the first step, the Script Commands Store will be loaded for you, however, this doesn't mean it is fully configured for you, yet.
 
-  In the next step, we will need to inform Raycast which folder it needs to watch. Let's take as example the suggestion above.
+In the next step, we will need to inform Raycast which folder it needs to watch. Let's take as example the suggestion above.
 
-  First, open Raycast and press `⌘ Command + ,` and the following window will be presented:
+First, open Raycast and press `⌘ Command + ,` and the following window will be presented:
 
-  ![](assets/readme/setup/preferences.png)
+![](images/readme/setup/preferences.png)
 
-  Now, click on `Extensions` (1) ➔ `Scripts` (2) ➔ `Script Commands` (3) ➔ `Add Directories` (4)
+Now, click on `Extensions` (1) ➔ `Scripts` (2) ➔ `Script Commands` (3) ➔ `Add Directories` (4)
 
-  ![](assets/readme/setup/preferences-extensions.png)
+![](images/readme/setup/preferences-extensions.png)
 
-  After adding the directory, the right panel should be similar to this
+After adding the directory, the right panel should be similar to this
 
-  ![](assets/readme/setup/setup-directory-added.png)
+![](images/readme/setup/setup-directory-added.png)
 
-  Voilà, we are ready to install the first Script Command using our Store!
+Voilà, we are ready to install the first Script Command using our Store!
 
-  💡 Tip: Watch the screencast to see the extension in action.
+💡 Tip: Watch the screencast to see the extension in action.
 
 </details>
 
@@ -55,80 +56,103 @@ https://cln.sh/weZwo2
 <details>
  <summary>List Script Commands</summary>
 
- ![](assets/readme/content/main-list.png)
+![](images/readme/content/main-list.png)
+
 </details>
 <details>
  <summary>Install</summary>
 
- ![](assets/readme/actions/install.png)
+![](images/readme/actions/install.png)
+
+</details>
+<details>
+ <summary>Install Package</summary>
+
+![](images/readme/panels/install-package.png)
+
+</details>
+<details>
+ <summary>Edit Local Source Code</summary>
+
+![](images/readme/actions/edit-local.png)
+
 </details>
 <details>
  <summary>Uninstall</summary>
 
- ![](assets/readme/actions/uninstall.png)
+![](images/readme/actions/uninstall.png)
+
 </details>
 <details>
  <summary>Configure and confirm setup</summary>
 
- ![](assets/readme/actions/configure.png)  
- ![](assets/readme/actions/confirm.png)
+![](images/readme/actions/configure.png)  
+ ![](images/readme/actions/confirm.png)
+
 </details>
 <details>
  <summary>Search by indexed keys</summary>
 
- ![](assets/readme/search-bar/search-bar.png)
- - *Categories*: `communication`, `web searches`...
- - *Subcategories*: `github`, `brew`...
- - *Author name*: `things`
- - *Type*: `installed`, `template`, `setup`
- - *Programming language*: `bash`, `swift`, `python`... 
+![](images/readme/search-bar/search-bar.png)
+
+- _Categories_: `communication`, `web searches`...
+- _Subcategories_: `github`, `brew`...
+- _Author name_: `things`
+- _Type_: `installed`, `template`, `setup`
+- _Programming language_: `bash`, `swift`, `python`...
 </details>
 <details>
  <summary>Filters</summary>
 
- ![](assets/readme/panels/filter-by.png)
- - Type  
- ![](assets/readme/panels/filter-by-type.png)
- - Languages  
- ![](assets/readme/panels/filter-by-language.png)
+![](images/readme/panels/filter-by.png)
+
+- Type  
+  ![](images/readme/panels/filter-by-type.png)
+- Languages  
+ ![](images/readme/panels/filter-by-language.png)
 </details>
 <details>
  <summary>Show README (if available)</summary>
 
- ![](assets/readme/panels/view-readme.png)
+![](images/readme/panels/view-readme.png)
+
 </details>
 <details>
  <summary>Show Source Code</summary>
 
- ![](assets/readme/panels/view-source-code.png)
+![](images/readme/panels/view-source-code.png)
+
 </details>
 <details>
  <summary>Show List of authors</summary>
 
- ![](assets/readme/panels/authors.png)
+![](images/readme/panels/authors.png)
+
 </details>
 
 ### Iconography
 
-- ![](assets/readme/icons/gear-orange.png) Need to be edited by the user before it is ready to be used. i.e: add token, set a username, etc...
-- ![](assets/readme/icons/checkmark-orange.png) Script Command was changed and the Store detected. A user's confirmation is required to activate the Script Command to be used.
-- ![](assets/readme/icons/checkmark-green.png) Indicates the Script Command is installed. In case it needs extra setup, this will indicate the user made the change, confirmed, and now it is ready to use.
+- ![](images/readme/icons/gear-orange.png) Need to be edited by the user before it is ready to be used. i.e: add token, set a username, etc...
+- ![](images/readme/icons/checkmark-orange.png) Script Command was changed and the Store detected. A user's confirmation is required to activate the Script Command to be used.
+- ![](images/readme/icons/checkmark-green.png) Indicates the Script Command is installed. In case it needs extra setup, this will indicate the user made the change, confirmed, and now it is ready to use.
 - If you are not seeing any of the icons above, this indicates the Script Command is not installed and you are seeing the programming language used to write it.  
-  Example: ![](assets/readme/icons/language.png)
+  Example: ![](images/readme/icons/language.png)
 
 ### Data
 
 The data consumed by this extension is automatically generated by [Raycast Toolkit](https://github.com/raycast/script-commands/tree/master/Tools/Toolkit).
- 
+
 ### Thanks
 
-- Special thanks to my personal friend [Diego Ventura](https://github.com/diegoventura), who dedicated some hours to teach me some concepts about React and TypeScript. Appreciated it, bro!
+- Special thanks to my personal friend [**Diego Ventura**](https://github.com/diegoventura), who dedicated some hours to teach me some concepts about React and TypeScript. Appreciated it, bro!
 
-- [Raycast Team](https://github.com/orgs/raycast/people), for the creation of this amazing API.
+- Another huge thanks to [**Konstantin Andrianov**](https://www.youtube.com/c/andrianov) for the long hours talking and searching for nice ways bring the Script Commands Store icon to life! Thanks, pal!
+
+- [**Raycast Team**](https://github.com/orgs/raycast/people), for the creation of this amazing API.
 
 ### Author
 
-[Thiago Holanda](https://unnamedd.codes) is an iOS Software Engineer, from Rio de Janeiro 🇧🇷 living in Berlin 🇩🇪.
+[**Thiago Holanda**](https://twitter.com/tholanda) is an iOS Software Engineer, from Rio de Janeiro 🇧🇷 living in Berlin 🇩🇪.
 
 If you want to get in touch, use the [Raycast Slack Community](https://raycast.com/community).  
-User: [@tholanda](https://raycastcommunity.slack.com/team/U01BYRUJZ3J)
+User: [**@tholanda**](https://raycastcommunity.slack.com/team/U01BYRUJZ3J)

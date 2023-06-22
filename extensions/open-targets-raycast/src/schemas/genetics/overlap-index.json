@@ -1,0 +1,28 @@
+{
+  "fields": [
+    {
+      "metadata": {},
+      "name": "A_study_id",
+      "nullable": true,
+      "type": "string"
+    },
+    { "metadata": {}, "name": "A_chrom", "nullable": true, "type": "string" },
+    { "metadata": {}, "name": "A_pos", "nullable": true, "type": "long" },
+    { "metadata": {}, "name": "A_ref", "nullable": true, "type": "string" },
+    { "metadata": {}, "name": "A_alt", "nullable": true, "type": "string" },
+    {
+      "metadata": {},
+      "name": "B_study_id",
+      "nullable": true,
+      "type": "string"
+    },
+    { "metadata": {}, "name": "B_chrom", "nullable": true, "type": "string" },
+    { "metadata": {}, "name": "B_pos", "nullable": true, "type": "long" },
+    { "metadata": {}, "name": "B_ref", "nullable": true, "type": "string" },
+    { "metadata": {}, "name": "B_alt", "nullable": true, "type": "string" },
+    { "metadata": {}, "name": "A_distinct", "nullable": true, "type": "long" },
+    { "metadata": {}, "name": "AB_overlap", "nullable": true, "type": "long" },
+    { "metadata": {}, "name": "B_distinct", "nullable": true, "type": "long" }
+  ],
+  "type": "struct"
+}

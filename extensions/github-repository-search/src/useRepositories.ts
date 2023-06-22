@@ -1,9 +1,10 @@
-import { preferences } from "@raycast/api";
+import { getPreferenceValues } from "@raycast/api";
 import { Octokit } from "octokit";
 import { useEffect, useState } from "react";
 import { SearchRepositoriesResponse } from "./types";
 
-const octokit = new Octokit({ auth: preferences.token.value });
+const preferenceValues = getPreferenceValues();
+const octokit = new Octokit({ auth: preferenceValues["token"], baseUrl: preferenceValues["baseUrl"] });
 
 const SEARCH_REPOSITORIES_QUERY = `
 query SearchRepositories($searchText: String!) {

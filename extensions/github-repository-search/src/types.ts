@@ -15,8 +15,8 @@ export interface Repository {
   hasWikiEnabled: boolean;
   hasProjectsEnabled: boolean;
   releases: {
-    totalCount: number
-  }
+    totalCount: number;
+  };
 }
 
 export interface SearchRepositoriesResponse {

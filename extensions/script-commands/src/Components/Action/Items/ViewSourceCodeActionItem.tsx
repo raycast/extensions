@@ -1,35 +1,22 @@
-import { 
-  SourceCodeDetail 
-} from "@components"
+import { SourceCodeDetail } from "@components";
 
-import { 
-  IconConstants, 
-  ShortcutConstants 
-} from "@constants"
+import { IconConstants, ShortcutConstants } from "@constants";
 
-import { 
-  ScriptCommand 
-} from "@models"
+import { ScriptCommand } from "@models";
 
-import { 
-  PushAction 
-} from "@raycast/api"
+import { PushAction } from "@raycast/api";
 
 type Props = {
-  scriptCommand: ScriptCommand
-}
+  scriptCommand: ScriptCommand;
+};
 
 export function ViewSourceCodeActionItem({ scriptCommand }: Props): JSX.Element {
   return (
     <PushAction
-      icon={ IconConstants.SourceCode } 
-      shortcut={ ShortcutConstants.ViewSourceCode }
-      title="View Source Code" 
-      target={ 
-        <SourceCodeDetail 
-          scriptCommand={ scriptCommand } 
-        />
-      }
+      icon={IconConstants.SourceCode}
+      shortcut={ShortcutConstants.ViewSourceCode}
+      title="View Source Code"
+      target={<SourceCodeDetail scriptCommand={scriptCommand} />}
     />
-  )
+  );
 }

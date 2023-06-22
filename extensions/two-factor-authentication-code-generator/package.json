@@ -12,21 +12,32 @@
     "authentication",
     "login"
   ],
-  "preferences": [
-    {
-      "name": "sort",
-      "type": "checkbox",
-      "required": false,
-      "label": "Alphabetical Sorting for tokens",
-      "description": "Enable sorting"
-    }
-  ],
   "commands": [
     {
       "name": "index",
       "title": "Generate 2FA Code",
       "description": "Quickly access your two-factor authentication codes.",
       "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "defaultAction",
+      "description": "Set the default action",
+      "type": "dropdown",
+      "required": false,
+      "title": "Default Action",
+      "default": "copy",
+      "data": [
+        {
+          "title": "Copy",
+          "value": "copy"
+        },
+        {
+          "title": "Paste",
+          "value": "paste"
+        }
+      ]
     }
   ],
   "dependencies": {
@@ -40,6 +51,7 @@
     "@typescript-eslint/parser": "^4.28.5",
     "eslint": "^7.31.0",
     "eslint-config-prettier": "^8.3.0",
+    "prettier": "2.8.7",
     "typescript": "^4.3.5"
   },
   "scripts": {

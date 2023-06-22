@@ -1,11 +1,4 @@
-import {
-  ActionPanel,
-  showToast,
-  ToastStyle,
-  Form,
-  SubmitFormAction,
-  popToRoot
-} from "@raycast/api";
+import { ActionPanel, showToast, ToastStyle, Form, SubmitFormAction, popToRoot } from "@raycast/api";
 import { getErrorMessage } from "../../utils";
 
 import { annotationPatchQuery } from "./queries";
@@ -19,7 +12,6 @@ interface Values {
   panelId?: number;
 }
 
-
 async function handleSubmit(values: Values, annotationId: number) {
   try {
     if (!values.text.length) {
@@ -28,11 +20,14 @@ async function handleSubmit(values: Values, annotationId: number) {
     if (values.text.length > 100) {
       throw Error("Annotation text should not be longer than 100 characters");
     }
-    const tags = values.tags?.split(',').map(tag => tag.trim());
+    // const tags = values.tags?.split(",").map((tag) => tag.trim());
 
-    await annotationPatchQuery({
-      text: values.text,
-    }, annotationId);
+    await annotationPatchQuery(
+      {
+        text: values.text,
+      },
+      annotationId
+    );
     await showToast(ToastStyle.Success, "Annotation updated", "Annotation update successful");
 
     popToRoot();
@@ -46,9 +41,10 @@ export function PatchAnnotationForm(props: { annotation: any }) {
     <Form
       actions={
         <ActionPanel>
-          <SubmitFormAction title="Update Annotation" onSubmit={
-            (values: any) => handleSubmit(values, props.annotation.id)
-          } />
+          <SubmitFormAction
+            title="Update Annotation"
+            onSubmit={(values: any) => handleSubmit(values, props.annotation.id)}
+          />
         </ActionPanel>
       }
     >

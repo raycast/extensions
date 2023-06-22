@@ -1,9 +1,15 @@
-import { ActionPanel, List, OpenInBrowserAction, Image, Color, showToast, ToastStyle } from "@raycast/api";
+import { ActionPanel, List, Image, Color } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { Project } from "../gitlabapi";
 import { gitlab } from "../common";
 import { GitLabIcons } from "../icons";
-import { CreateMRAction } from "./branch_actions";
+import { CreateMRAction, ShowBranchCommitsAction } from "./branch_actions";
+import { GitLabOpenInBrowserAction } from "./actions";
+import { useCommitStatus } from "./commits/utils";
+import { getCIJobStatusIcon } from "./jobs";
+import { capitalizeFirstLetter, showErrorToast } from "../utils";
+
+/* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/explicit-module-boundary-types */
 
 function getIcon(merged: boolean): Image {
   if (merged) {
@@ -16,41 +22,55 @@ function getIcon(merged: boolean): Image {
 export function BranchListItem(props: { branch: any; project: Project }) {
   const branch = props.branch;
   const icon = getIcon(branch.merged as boolean);
-  let states = [];
+  const isMergedStatus = branch.merged === true ? "Merged" : "Open";
+  const project = props.project;
+  const states = [];
   if (branch.default) {
     states.push("[default]");
   }
   if (branch.protected) {
     states.push("[protected]");
   }
+  const { commitStatus } = useCommitStatus(project.id, branch?.commit?.id);
+  const statusIcon = commitStatus ? getCIJobStatusIcon(commitStatus.status, commitStatus.allow_failure) : undefined;
+
   return (
     <List.Item
       id={branch.id}
       title={branch.name}
       subtitle={states.join(" ")}
-      icon={icon}
+      icon={{ value: icon, tooltip: `Status: ${isMergedStatus}` }}
+      accessories={[
+        {
+          icon: statusIcon,
+          tooltip: commitStatus?.status ? `Status: ${capitalizeFirstLetter(commitStatus.status)}` : undefined,
+        },
+      ]}
       actions={
         <ActionPanel>
-          <CreateMRAction project={props.project} branch={branch} />
-          <OpenInBrowserAction url={branch.web_url} />
+          <ShowBranchCommitsAction projectID={project.id} branch={branch} />
+          <CreateMRAction project={project} branch={branch} />
+          <GitLabOpenInBrowserAction url={branch.web_url} />
         </ActionPanel>
       }
     />
   );
 }
 
-export function BranchList(props: { project: Project }) {
+export function BranchList(props: { project: Project; navigationTitle?: string }) {
   const [query, setQuery] = useState<string>("");
   const { branches, error, isLoading } = useSearch(query, props.project);
   if (error) {
-    showToast(ToastStyle.Failure, "Cannot search branches", error);
+    showErrorToast(error, "Cannot search Branches");
   }
 
   return (
-    <List isLoading={isLoading} onSearchTextChange={setQuery} throttle={true} navigationTitle="Branches">
-      {branches?.map((branch, index) => (
-        <BranchListItem key={index} branch={branch} project={props.project} />
-      ))}
+    <List isLoading={isLoading} onSearchTextChange={setQuery} throttle={true} navigationTitle={props.navigationTitle}>
+      <List.Section title="Branches">
+        {branches?.map((branch, index) => (
+          <BranchListItem key={index} branch={branch} project={props.project} />
+        ))}
+      </List.Section>
     </List>
   );
 }
@@ -65,7 +85,7 @@ export function useSearch(
 } {
   const [branches, setBranches] = useState<any[]>([]);
   const [error, setError] = useState<string>();
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
     // FIXME In the future version, we don't need didUnmount checking

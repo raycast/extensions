@@ -1,98 +1,78 @@
-import {
-  List,
-  getPreferenceValues,
-  ActionPanel,
-  CopyToClipboardAction,
-  showToast,
-  ToastStyle,
-} from "@raycast/api";
-import { ReactElement, useEffect, useState } from "react";
-import translate from "@vitalets/google-translate-api";
-import supportedLanguagesByCode from "./supportedLanguagesByCode.json";
+import React, { ReactElement, useState } from "react";
+import { List, ActionPanel, showToast, Toast, Action, Icon } from "@raycast/api";
+import { usePromise } from "@raycast/utils";
+import { useDebouncedValue, useSelectedLanguagesSet, useTextState } from "./hooks";
+import { supportedLanguagesByCode } from "./languages";
+import { LanguageManagerListDropdown } from "./LanguagesManager";
+import { doubleWayTranslate } from "./simple-translate";
 
-let count = 0;
-
-export default function Command(): ReactElement {
-  const [isLoading, setIsLoading] = useState(false);
-  const [toTranslate, setToTranslate] = useState("");
-  const [results, setResults] = useState<{ text: string; languages: string }[]>(
-    []
-  );
-
-  useEffect(() => {
-    if (toTranslate === "") {
-      return;
+export default function Translate(): ReactElement {
+  const [selectedLanguageSet] = useSelectedLanguagesSet();
+  const [isShowingDetail, setIsShowingDetail] = useState(false);
+  const [text, setText] = useTextState();
+  const debouncedValue = useDebouncedValue(text, 500);
+  const { data: results, isLoading: isLoading } = usePromise(
+    doubleWayTranslate,
+    [debouncedValue, selectedLanguageSet],
+    {
+      onError(error) {
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Could not translate",
+          message: error.toString(),
+        });
+      },
     }
-
-    count++;
-    const localCount = count;
-
-    setIsLoading(true);
-    setResults([]);
-
-    const preferences = getPreferenceValues();
-
-    const promises = Promise.all([
-      translate(toTranslate, {
-        from: preferences.lang1,
-        to: preferences.lang2,
-      }),
-      translate(toTranslate, {
-        from: preferences.lang2,
-        to: preferences.lang1,
-      }),
-    ]);
-
-    promises
-      .then((res) => {
-        if (localCount === count) {
-          const lang1Rep =
-            (supportedLanguagesByCode as any)[preferences.lang1].flag ??
-            (supportedLanguagesByCode as any)[preferences.lang1].code;
-          const lang2Rep =
-            (supportedLanguagesByCode as any)[preferences.lang2].flag ??
-            (supportedLanguagesByCode as any)[preferences.lang2].code;
-          setResults([
-            {
-              text: res[0].text,
-              languages: `${lang1Rep} -> ${lang2Rep}`,
-            },
-            {
-              text: res[1].text,
-              languages: `${lang2Rep} -> ${lang1Rep}`,
-            },
-          ]);
-        }
-      })
-      .catch((errors) => {
-        showToast(ToastStyle.Failure, "Could not translate", errors);
-      })
-      .then(() => {
-        setIsLoading(false);
-      });
-  }, [toTranslate]);
+  );
 
   return (
     <List
       searchBarPlaceholder="Enter text to translate"
-      onSearchTextChange={setToTranslate}
+      searchText={text}
+      onSearchTextChange={setText}
       isLoading={isLoading}
-      throttle
+      isShowingDetail={isShowingDetail}
+      searchBarAccessory={<LanguageManagerListDropdown />}
     >
-      {results.map((r, index) => (
-        <List.Item
-          key={index}
-          title={r.text}
-          accessoryTitle={r.languages}
-          actions={
-            <ActionPanel>
-              <ActionPanel.Section>
-                <CopyToClipboardAction title="Copy" content={r.text} />
-              </ActionPanel.Section>
-            </ActionPanel>
-          }
-        />
-      ))}
+      {results?.map((r, index) => {
+        const langFrom = supportedLanguagesByCode[r.langFrom];
+        const langTo = supportedLanguagesByCode[r.langTo];
+        const languages = `${langFrom.flag ?? langFrom.code} -> ${langTo.flag ?? langTo.code}`;
+
+        return (
+          <List.Item
+            key={index}
+            title={r.translatedText}
+            accessories={[{ text: languages }]}
+            detail={<List.Item.Detail markdown={r.translatedText} />}
+            actions={
+              <ActionPanel>
+                <ActionPanel.Section>
+                  <Action.CopyToClipboard title="Copy" content={r.translatedText} />
+                  <Action
+                    title="Toggle Full Text"
+                    icon={Icon.Text}
+                    onAction={() => setIsShowingDetail(!isShowingDetail)}
+                  />
+                  <Action.OpenInBrowser
+                    title="Open in Google Translate"
+                    shortcut={{ modifiers: ["opt"], key: "enter" }}
+                    url={
+                      "https://translate.google.com/?sl=" +
+                      r.langFrom +
+                      "&tl=" +
+                      r.langTo +
+                      "&text=" +
+                      encodeURIComponent(debouncedValue) +
+                      "&op=translate"
+                    }
+                  />
+                </ActionPanel.Section>
+              </ActionPanel>
+            }
+          />
+        );
+      })}
     </List>
   );
 }

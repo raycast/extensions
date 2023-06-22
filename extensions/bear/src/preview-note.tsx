@@ -3,10 +3,13 @@ import { homedir } from "os";
 import { Note } from "./bear-db";
 import NoteActions from "./note-actions";
 
-const BEAR_LOCAL_FILES_PATH = homedir() + '/Library/Group Containers/9K33E3U3T4.net.shinyfrog.bear/Application Data/Local Files';
+const BEAR_LOCAL_FILES_PATH =
+  homedir() + "/Library/Group Containers/9K33E3U3T4.net.shinyfrog.bear/Application Data/Local Files";
 
 export function formatBearAttachments(text: string | null, forPreview = true): string {
-  if (text === null) { return "" };
+  if (text === null) {
+    return "";
+  }
   let result = text;
   const matches = result.matchAll(/\[(?<type>file|image):(?<path>.+)\]/g);
   for (const match of matches) {
@@ -31,12 +34,12 @@ export function formatBearAttachments(text: string | null, forPreview = true): s
 }
 
 export default function PreviewNote({ note }: { note: Note }) {
-  const noteContent = note.encrypted ? 
-    `# ${note.title}\n\n*This note's content is encrypted*` :
-    note.text;
-  return (<Detail
-    markdown={formatBearAttachments(noteContent)}
-    navigationTitle={note.title}
-    actions={<NoteActions isNotePreview={true} note={ note }/>}
-  />);
+  const noteContent = note.encrypted ? `# ${note.title}\n\n*This note's content is encrypted*` : note.text;
+  return (
+    <Detail
+      markdown={formatBearAttachments(noteContent)}
+      navigationTitle={note.title}
+      actions={<NoteActions isNotePreview={true} note={note} />}
+    />
+  );
 }

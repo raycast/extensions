@@ -1,0 +1,74 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "iconify",
+  "title": "Iconify — Search Icons",
+  "description": "Search icons via Iconify",
+  "icon": "icon.png",
+  "author": "destiner",
+  "contributors": [
+    "kidonng",
+    "sxn",
+    "robert"
+  ],
+  "categories": [
+    "Design Tools",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint"
+  },
+  "commands": [
+    {
+      "name": "view-icons",
+      "title": "View Icons",
+      "subtitle": "Iconify",
+      "description": "View available icons",
+      "mode": "view"
+    },
+    {
+      "name": "search-icons",
+      "title": "Search All Icons",
+      "subtitle": "Iconify",
+      "description": "Search through all available icons",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "primaryAction",
+      "type": "dropdown",
+      "required": false,
+      "title": "Primary action",
+      "description": "Primary action to use",
+      "default": "paste",
+      "data": [
+        {
+          "title": "Paste to Active App",
+          "value": "paste"
+        },
+        {
+          "title": "Copy to Clipboard",
+          "value": "copy"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.48.0",
+    "axios": "^0.26.1",
+    "react-hooks-global-state": "^2.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^18.8.3",
+    "@typescript-eslint/eslint-plugin": "^5.15.0",
+    "@typescript-eslint/parser": "^5.15.0",
+    "eslint": "^8.11.0",
+    "eslint-config-prettier": "^8.5.0",
+    "prettier": "^2.5.1",
+    "react-devtools": "^4.24.1",
+    "typescript": "^4.6.2"
+  }
+}

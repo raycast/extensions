@@ -1,7 +1,8 @@
 import { ImageInfo, ImageInspectInfo } from '@priithaamer/dockerode';
 import * as markdown from '../utils/markdown';
 
-export const imageTitle = (image: ImageInfo | ImageInspectInfo) => image.RepoTags.join(' ');
+export const imageTitle = (image: ImageInfo | ImageInspectInfo) =>
+  (image.RepoTags ?? image.RepoDigests ?? image.Id).join(' ');
 
 export const formatImageId = (imageId: string, length?: number) => {
   const result = imageId.replace('sha256:', '');

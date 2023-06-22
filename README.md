@@ -22,7 +22,7 @@ Visit [https://developers.raycast.com](https://developers.raycast.com) to get st
 
 ## Feedback
 
-Raycast wouldn't be where it is without the feedback from our community, so we would be happy to hear what you think of the API / DevX and how we can improve. Please use GitHub issues for everything API related (bugs, improvements suggestions, developer experience, docs, etc). We have a few [templates](https://github.com/raycast/extensions/issues/new/choose) that should help you get started.
+Raycast wouldn't be where it is without the feedback from our community, so we would be happy to hear what you think of the API / DevX and how we can improve. Please use [GitHub issues](https://github.com/raycast/extensions/issues/new/choose) for everything API related (bugs, improvements suggestions, developer experience, docs, etc). We have a few [templates](https://developers.raycast.com/examples) that should help you get started.
 
 ## Community
 

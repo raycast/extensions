@@ -1,68 +1,28 @@
-import { ActionPanel, Color, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
-import { todoAtom, TodoItem, TodoSections } from "./atoms";
+import { editingAtom, newTodoTextAtom, searchModeAtom, TodoItem, TodoSections } from "./atoms";
 import { useAtom } from "jotai";
 import { SECTIONS_DATA } from "./config";
 import _ from "lodash";
-import { insertIntoSection, compare } from "./utils";
 import DeleteAllAction from "./delete_all";
 import SearchModeAction from "./search_mode_action";
+import OpenUrlAction from "./open_url_action";
+import ListActions from "./list_actions";
+import { useMemo } from "react";
+import urlRegexSafe from "url-regex-safe";
+import { useTodo } from "./hooks/useTodo";
+import MarkAllIncompleteAction from "./mark_all_incomplete";
 
 const SingleTodoItem = ({ item, idx, sectionKey }: { item: TodoItem; idx: number; sectionKey: keyof TodoSections }) => {
-  const [todoSections, setTodoSections] = useAtom(todoAtom);
+  const { editTodo, deleteTodo, markTodo, markCompleted, pin, unPin } = useTodo({ item, idx, sectionKey });
+  const [newTodoText] = useAtom(newTodoTextAtom);
+  const [editing] = useAtom(editingAtom);
+  const [searchMode, setSearchMode] = useAtom(searchModeAtom);
 
-  const setClone = () => {
-    setTodoSections(_.cloneDeep(todoSections));
-  };
-
-  const toggleCompleted = (completed: boolean) => {
-    todoSections[sectionKey][idx].completed = completed;
-    todoSections[sectionKey].splice(idx, 1);
-    todoSections[sectionKey] = [...insertIntoSection(todoSections[sectionKey], item, compare)];
-    setClone();
-  };
-
-  const moveToSection = (newSection: keyof TodoSections) => {
-    if (newSection === "completed") {
-      item.completed = true;
-    } else if (newSection === "todo") {
-      item.completed = false;
-    }
-    todoSections[newSection] = [...insertIntoSection(todoSections[newSection], item, compare)];
-    todoSections[sectionKey].splice(idx, 1);
-    setClone();
-  };
-
-  const unPin = () => {
-    moveToSection(item.completed ? "completed" : "todo");
-  };
-  const pin = () => {
-    moveToSection("pinned");
-  };
-
-  // don't change section if pinned
-  const markCompleted = () => {
-    if (sectionKey === "pinned") {
-      toggleCompleted(true);
-    } else {
-      moveToSection("completed");
-    }
-  };
-
-  // don't change section if pinned
-  const markTodo = () => {
-    if (sectionKey === "pinned") {
-      toggleCompleted(false);
-    } else {
-      moveToSection("todo");
-    }
-  };
-
-  const deleteTodo = () => {
-    todoSections[sectionKey].splice(idx, 1);
-    setClone();
-  };
+  const urls = useMemo(() => {
+    return item.title.match(urlRegexSafe());
+  }, [item.title]);
 
   dayjs.extend(customParseFormat);
   const datePart = dayjs(item.timeAdded).format("MMM D");
@@ -80,44 +40,83 @@ const SingleTodoItem = ({ item, idx, sectionKey }: { item: TodoItem; idx: number
       }
       accessoryIcon={SECTIONS_DATA[sectionKey].accessoryIcon}
       actions={
-        <ActionPanel>
-          {item.completed ? (
-            <ActionPanel.Item
-              title="Mark as Uncompleted"
-              icon={{ source: Icon.XmarkCircle, tintColor: Color.Red }}
-              onAction={() => markTodo()}
+        searchMode || (newTodoText.length === 0 && !editing) ? (
+          <ActionPanel>
+            {item.completed ? (
+              <Action
+                title="Mark as Uncompleted"
+                icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }}
+                onAction={() => markTodo()}
+              />
+            ) : (
+              <Action
+                title="Mark as Completed"
+                icon={{ source: Icon.Checkmark, tintColor: Color.Green }}
+                onAction={() => markCompleted()}
+              />
+            )}
+            <Action
+              title="Edit Todo"
+              icon={{ source: Icon.Pencil, tintColor: Color.Orange }}
+              onAction={() => {
+                setSearchMode(false);
+                editTodo();
+              }}
+              shortcut={{ modifiers: ["cmd"], key: "e" }}
             />
-          ) : (
-            <ActionPanel.Item
-              title="Mark as Completed"
-              icon={{ source: Icon.Checkmark, tintColor: Color.Green }}
-              onAction={() => markCompleted()}
+            <Action
+              title="Delete Todo"
+              icon={{ source: Icon.Trash, tintColor: Color.Red }}
+              onAction={() => deleteTodo()}
+              shortcut={{ modifiers: ["cmd"], key: "d" }}
             />
-          )}
-          <ActionPanel.Item
-            title="Delete Todo"
-            icon={{ source: Icon.Trash, tintColor: Color.Red }}
-            onAction={() => deleteTodo()}
-            shortcut={{ modifiers: ["cmd"], key: "d" }}
-          />
-          {sectionKey === "pinned" ? (
-            <ActionPanel.Item
-              title="Unpin Todo"
-              icon={{ source: Icon.Pin, tintColor: Color.Blue }}
-              onAction={() => unPin()}
-              shortcut={{ modifiers: ["cmd"], key: "p" }}
-            />
-          ) : (
-            <ActionPanel.Item
-              title="Pin Todo"
-              icon={{ source: Icon.Pin, tintColor: Color.Blue }}
-              onAction={() => pin()}
-              shortcut={{ modifiers: ["cmd"], key: "p" }}
-            />
-          )}
-          <DeleteAllAction />
-          <SearchModeAction />
-        </ActionPanel>
+            {sectionKey === "pinned" ? (
+              <Action
+                title="Unpin Todo"
+                icon={{ source: Icon.Pin, tintColor: Color.Blue }}
+                onAction={() => unPin()}
+                shortcut={{ modifiers: ["cmd"], key: "p" }}
+              />
+            ) : (
+              <Action
+                title="Pin Todo"
+                icon={{ source: Icon.Pin, tintColor: Color.Blue }}
+                onAction={() => pin()}
+                shortcut={{ modifiers: ["cmd"], key: "p" }}
+              />
+            )}
+            {urls &&
+              urls.length > 0 &&
+              (urls.length === 1 ? (
+                <OpenUrlAction
+                  url={urls[0]}
+                  title={`Open ${urls[0]}`}
+                  shortcut={{
+                    modifiers: ["cmd"],
+                    key: "o",
+                  }}
+                />
+              ) : (
+                <ActionPanel.Submenu
+                  title="Open URL"
+                  shortcut={{
+                    modifiers: ["cmd"],
+                    key: "o",
+                  }}
+                  icon={Icon.Globe}
+                >
+                  {urls.map((url, idx) => (
+                    <OpenUrlAction key={idx} url={url} />
+                  ))}
+                </ActionPanel.Submenu>
+              ))}
+            <DeleteAllAction />
+            <MarkAllIncompleteAction />
+            <SearchModeAction />
+          </ActionPanel>
+        ) : (
+          <ListActions />
+        )
       }
     />
   );

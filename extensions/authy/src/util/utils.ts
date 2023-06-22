@@ -8,7 +8,7 @@ export function genTOTP(seed: string): string[] {
   return [
     generateTOTP(secret, { digits: 7, period: 10, timestamp: timestamp.getTime() }),
     generateTOTP(secret, { digits: 7, period: 10, timestamp: timestamp.getTime() + 10 * 1000 }),
-    generateTOTP(secret, { digits: 7, period: 10, timestamp: timestamp.getTime() + 10 * 2 * 1000 })
+    generateTOTP(secret, { digits: 7, period: 10, timestamp: timestamp.getTime() + 10 * 2 * 1000 }),
   ];
 }
 
@@ -16,9 +16,6 @@ export function decryptSeed(encryptedSeed: string, salt: string, password: strin
   let decrypted = decryptAES(salt, password, encryptedSeed, false);
   if (decrypted === null || !isBase32(decrypted)) {
     decrypted = decryptAES(salt, password, encryptedSeed, true);
-    if (decrypted === null || !isBase32(decrypted)) {
-      throw new Error("Couldn't decrypt service tokens. Seems like Backup Password is wrong");
-    }
   }
   return decrypted;
 }
@@ -43,12 +40,7 @@ function generatePBKDF2Key(password: string, salt: string, options: GeneratePBKD
     return forge.pkcs5.pbkdf2(password, salt, options.iterations, options.keySize);
   }
 
-  return forge.pkcs5.pbkdf2(
-    unescape(encodeURIComponent(password)),
-    salt,
-    options.iterations,
-    options.keySize
-  );
+  return forge.pkcs5.pbkdf2(unescape(encodeURIComponent(password)), salt, options.iterations, options.keySize);
 }
 
 function decryptAESWithKey(key: string, value: string) {
@@ -64,17 +56,12 @@ function decryptAESWithKey(key: string, value: string) {
   return decipher.finish() ? decipher.output.data : null;
 }
 
-function decryptAES(
-  salt: string,
-  password: string,
-  value: string,
-  withoutEncoding: boolean
-) {
+function decryptAES(salt: string, password: string, value: string, withoutEncoding: boolean) {
   const pbkdf2Key = generatePBKDF2Key(password, salt, {
     iterations: 1000,
     keySize: 32, // Originally it was denoted in bits, changed to bytes
     decodeSalt: false,
-    withoutEncoding
+    withoutEncoding,
   });
 
   return decryptAESWithKey(pbkdf2Key, value);

@@ -1,0 +1,68 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "supernotes",
+  "title": "Supernotes",
+  "description": "Interact with the Supernotes platform in Raycast.",
+  "icon": "supernotes-icon.png",
+  "author": "acnebs",
+  "owner": "supernotes",
+  "access": "public",
+  "license": "MIT",
+  "categories": [
+    "Applications",
+    "Data",
+    "Productivity"
+  ],
+  "contributors": [
+    "peduarte"
+],
+  "commands": [
+    {
+      "name": "create",
+      "title": "Create Card",
+      "subtitle": "Supernotes",
+      "description": "Quickly create a Supernotes card.",
+      "mode": "view"
+    },
+    {
+      "name": "search",
+      "title": "Search Cards",
+      "subtitle": "Supernotes",
+      "description": "Search your cards on Supernotes.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "API Key",
+      "description": "Get your API key from Supernotes.",
+      "type": "password",
+      "required": true
+    }
+  ],
+  "importSort": {
+    ".js, .jsx, .ts, .tsx": {
+      "style": "supernotes"
+    }
+  },
+  "dependencies": {
+    "@raycast/api": "^1.44.0",
+    "node-fetch": "^3.3.0"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.45.0",
+    "@typescript-eslint/parser": "^5.45.0",
+    "eslint": "^8.29.0",
+    "eslint-config-prettier": "^8.5.0",
+    "import-sort-style-supernotes": "^0.4.1",
+    "prettier": "^2.8.0",
+    "typescript": "^4.9.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

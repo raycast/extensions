@@ -6,8 +6,10 @@ const command = async () => {
   await closeMainWindow({ clearRootSearch: true });
   const keyLight = await KeyLight.discover();
   const brightness = await keyLight.increaseBrightness();
-  const formattedBrightness = brightness.toLocaleString("en", { maximumFractionDigits: 0 });
-  return `Increased brightness to ${formattedBrightness}%`;
+
+  return brightness
+    ? `Increased brightness to ${brightness.toLocaleString("en", { maximumFractionDigits: 0 })}%`
+    : "Error increasing brightness";
 };
 
 export default run(command);

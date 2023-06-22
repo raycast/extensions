@@ -5,11 +5,11 @@
  * @param keyProvider The key provider that is used for grouping
  */
 export function groupBy<Key, Value>(
-  list: Array<Value>,
+  list: Value[],
   keyProvider: (input: Value) => Key
-): Map<Key, Array<Value>> {
+): { key: Key; values: Value[] }[] {
   // Initialize the grouping Map
-  const map = new Map<Key, Array<Value>>();
+  const map = new Map<Key, Value[]>();
   // For each value in the list
   for (const value of list) {
     // Retrieve the key from the key provider
@@ -25,6 +25,8 @@ export function groupBy<Key, Value>(
       values.push(value);
     }
   }
-  // Return map
-  return map;
+  // Return groups
+  return Array.from(map.keys()).map((key) => {
+    return { key: key, values: map.get(key) ?? [] };
+  });
 }

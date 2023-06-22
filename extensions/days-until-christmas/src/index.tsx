@@ -1,9 +1,9 @@
-import { useState } from "react";
-import { Detail } from "@raycast/api";
-import { calculate, format } from "./lib";
-import useInterval from "./lib/useInterval";
+import { useState } from 'react';
+import { Detail } from '@raycast/api';
+import { calculate, format } from './lib';
+import useInterval from './lib/useInterval';
 
-const emojis = ["🎁", "🍪", "❄️", "🎄", "🔔", "🎅", "☃️", "⛄"];
+const emojis = ['🎁', '🍪', '❄️', '🎄', '🔔', '🎅', '☃️', '⛄'];
 
 export default function Command() {
   const [s] = useState(() => {
@@ -28,8 +28,8 @@ export default function Command() {
 
   return (
     <Detail
-      markdown={`## It's ${s.days ? `${format(s.days, "day")} and ` : ""}${
-        s.hours ? format(s.hours, "hour") : ""
+      markdown={`## It's ${s.days ? `${format(s.days, 'day')} and ` : ''}${
+        s.hours ? format(s.hours, 'hour') : ''
       } until Christmas ${emoji}`}
     />
   );

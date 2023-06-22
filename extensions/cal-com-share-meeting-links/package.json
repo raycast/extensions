@@ -1,0 +1,61 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "cal-com-share-meeting-links",
+  "title": "Cal.com - Share Meeting Links",
+  "description": "Quickly share your Cal.com meeting links",
+  "icon": "logo.png",
+  "author": "eluce2",
+  "owner": "cal",
+  "access": "public",
+  "license": "MIT",
+  "categories": [
+    "Communication",
+    "Productivity"
+  ],
+  "contributors": [
+      "peduarte",
+      "pernielsentikaer"
+  ],
+  "commands": [
+    {
+      "name": "index",
+      "title": "Share Meeting Link",
+      "subtitle": "Cal.com",
+      "description": "Copy Meeting URL",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "token",
+      "type": "password",
+      "required": true,
+      "title": "API Key",
+      "description": "Cal.com API Key",
+      "link": "https://app.cal.com/settings/developer",
+      "placeholder": "Cal.com API Key"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.36.1",
+    "@raycast/utils": "^1.3.1",
+    "axios": "^0.27.2",
+    "dayjs": "^1.11.3"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

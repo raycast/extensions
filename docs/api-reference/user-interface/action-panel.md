@@ -1,22 +1,24 @@
 # Action Panel
 
+![](../../.gitbook/assets/action-panel.png)
+
 ## API Reference
 
 ### ActionPanel
 
-Exposes a list of actions that can be performed by the user.
+Exposes a list of [actions](./actions.md) that can be performed by the user.
 
-Often items are context-aware, e.g. based on the selected list item. Actions can be grouped into semantic
-section and can have keyboard shortcuts assigned.
+Often items are context-aware, e.g., based on the selected list item. Actions can be grouped into semantic
+sections and can have keyboard shortcuts assigned.
 
-The first and second action become the primary and secondary action. They get automatically the default keyboard shortcuts assigned.
-In list and details, this is `↵` for the primary and `⌘` `↵` for the secondary action. In forms it's `⌘` `↵` for the primary and
-`⌘` `⇧` `↵` for the secondary.
+The first and second action become the primary and secondary action. They automatically get the default keyboard shortcuts assigned.
+In [List](./list.md), [Grid](./grid.md), and [Detail](./detail.md), this is `↵` for the primary and `⌘` `↵` for the secondary action. In [Form](./form.md) it's `⌘` `↵` for the primary and `⌘` `⇧` `↵` for the secondary.
+Keep in mind that while you can specify an alternative shortcut for the primary and secondary actions, it won't be displayed in the Action Panel.
 
 #### Example
 
 ```typescript
-import { ActionPanel, CopyToClipboardAction, List, OpenInBrowserAction } from "@raycast/api";
+import { ActionPanel, Action, List } from "@raycast/api";
 
 export default function Command() {
   return (
@@ -26,8 +28,8 @@ export default function Command() {
         subtitle="#1"
         actions={
           <ActionPanel title="#1 in raycast/extensions">
-            <OpenInBrowserAction url="https://github.com/raycast/extensions/pull/1" />
-            <CopyToClipboardAction
+            <Action.OpenInBrowser url="https://github.com/raycast/extensions/pull/1" />
+            <Action.CopyToClipboard
               title="Copy Pull Request URL"
               content="https://github.com/raycast/extensions/pull/1"
             />
@@ -41,62 +43,19 @@ export default function Command() {
 
 #### Props
 
-| Prop | Type | Required | Default | Description |
-| :--- | :--- | :--- | :--- | :--- |
-| children | <code>[ActionPanelChildren](https://developers.raycast.com/api-reference/user-interface/action-panel#actionpanelchildren)</code> | No | - | Sections or items. If [ActionPanel.Item](https://developers.raycast.com/api-reference/user-interface/action-panel#actionpanel-item) elements are specified, a default section is automatically created. |
-| title | <code>string</code> | No | - | The title displayed at the top of the panel |
-
-### ActionPanel.Item
-
-A context-specific action that can be performed by the user.
-
-Assign keyboard shortcuts to items to make it easier for users to perform frequently used actions.
-
-#### Example
-
-```typescript
-import { ActionPanel, CopyToClipboardAction, List, OpenInBrowserAction } from "@raycast/api";
-
-export default function Command() {
-  return (
-    <List navigationTitle="Open Pull Requests">
-      <List.Item
-        title="Docs: Update API Reference"
-        subtitle="#1"
-        actions={
-          <ActionPanel title="#1 in raycast/extensions">
-            <OpenInBrowserAction url="https://github.com/raycast/extensions/pull/1" />
-            <CopyToClipboardAction title="Copy Pull Request Number" content="#1" />
-            <ActionPanel.Item title="Close Pull Request" onAction={() => console.log("Close PR #1")} />
-          </ActionPanel>
-        }
-      />
-    </List>
-  );
-}
-```
-
-#### Props
-
-| Prop | Type | Required | Default | Description |
-| :--- | :--- | :--- | :--- | :--- |
-| icon | <code>[ImageLike](https://developers.raycast.com/api-reference/user-interface/icons-and-images#imagelike)</code> | No | - | The icon displayed for the action. |
-| id | <code>string</code> | No | - | ID of the item. |
-| shortcut | <code>[KeyboardShortcut](https://developers.raycast.com/api-reference/keyboard#keyboardshortcut)</code> | No | - | The keyboard shortcut for the item. |
-| title | <code>string</code> | Yes | - | The title displayed for the item. |
-| onAction | <code>() => void</code> | No | - |  |
+<PropsTableFromJSDoc component="ActionPanel" />
 
 ### ActionPanel.Section
 
 A group of visually separated items.
 
-Use sections if the [ActionPanel](https://developers.raycast.com/api-reference/user-interface/action-panel#actionpanel) contains a lot of actions to help guide the user to related actions.
+Use sections when the [ActionPanel](#actionpanel) contains a lot of actions to help guide the user to related actions.
 For example, create a section for all copy actions.
 
 #### Example
 
 ```typescript
-import { ActionPanel, CopyToClipboardAction, List, OpenInBrowserAction } from "@raycast/api";
+import { ActionPanel, Action, List } from "@raycast/api";
 
 export default function Command() {
   return (
@@ -107,15 +66,15 @@ export default function Command() {
         actions={
           <ActionPanel title="#1 in raycast/extensions">
             <ActionPanel.Section title="Copy">
-              <CopyToClipboardAction title="Copy Pull Request Number" content="#1" />
-              <CopyToClipboardAction
+              <Action.CopyToClipboard title="Copy Pull Request Number" content="#1" />
+              <Action.CopyToClipboard
                 title="Copy Pull Request URL"
                 content="https://github.com/raycast/extensions/pull/1"
               />
-              <CopyToClipboardAction title="Copy Pull Request Title" content="Docs: Update API Reference" />
+              <Action.CopyToClipboard title="Copy Pull Request Title" content="Docs: Update API Reference" />
             </ActionPanel.Section>
             <ActionPanel.Section title="Danger zone">
-              <ActionPanel.Item title="Close Pull Request" onAction={() => console.log("Close PR #1")} />
+              <Action title="Close Pull Request" onAction={() => console.log("Close PR #1")} />
             </ActionPanel.Section>
           </ActionPanel>
         }
@@ -127,22 +86,18 @@ export default function Command() {
 
 #### Props
 
-| Prop | Type | Required | Default | Description |
-| :--- | :--- | :--- | :--- | :--- |
-| children | <code>[ActionPanelSectionChildren](https://developers.raycast.com/api-reference/user-interface/action-panel#actionpanelsectionchildren)</code> | No | - | The item elements of the section. When used for the action panel, the first item in the list is the *primary* action that will be triggered by the default shortcut (ENTER), while the second item is the *secondary* action triggered by CMD + ENTER. |
-| title | <code>string</code> | No | - | Title displayed above the section |
+<PropsTableFromJSDoc component="ActionPanel.Section" />
 
 ### ActionPanel.Submenu
 
-An action that shows more actions in a submenu.
+A very specific action that replaces the current [ActionPanel](#actionpanel) with its children when selected.
 
-This is handy when an action needs to select from a range of options. For example, to add a label to a GitHub pull request
-or an assignee to a todo.
+This is handy when an action needs to select from a range of options. For example, to add a label to a GitHub pull request or an assignee to a todo.
 
 #### Example
 
 ```typescript
-import { ActionPanel, Color, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 
 export default function Command() {
   return (
@@ -153,17 +108,17 @@ export default function Command() {
         actions={
           <ActionPanel title="#1 in raycast/extensions">
             <ActionPanel.Submenu title="Add Label">
-              <ActionPanel.Item
+              <Action
                 icon={{ source: Icon.Circle, tintColor: Color.Red }}
                 title="Bug"
                 onAction={() => console.log("Add bug label")}
               />
-              <ActionPanel.Item
+              <Action
                 icon={{ source: Icon.Circle, tintColor: Color.Yellow }}
                 title="Enhancement"
                 onAction={() => console.log("Add enhancement label")}
               />
-              <ActionPanel.Item
+              <Action
                 icon={{ source: Icon.Circle, tintColor: Color.Blue }}
                 title="Help Wanted"
                 onAction={() => console.log("Add help wanted label")}
@@ -179,51 +134,30 @@ export default function Command() {
 
 #### Props
 
-| Prop | Type | Required | Default | Description |
-| :--- | :--- | :--- | :--- | :--- |
-| children | <code>[ActionPanelChildren](https://developers.raycast.com/api-reference/user-interface/action-panel#actionpanelchildren)</code> | No | - | Items of the submenu. |
-| icon | <code>[ImageLike](https://developers.raycast.com/api-reference/user-interface/icons-and-images#imagelike)</code> | No | - | The icon displayed for the submenu. |
-| id | <code>string</code> | No | - | ID of the submenu. Make sure to assign each submenu a unique ID or a UUID will be auto-generated. |
-| shortcut | <code>[KeyboardShortcut](https://developers.raycast.com/api-reference/keyboard#keyboardshortcut)</code> | No | - | The keyboard shortcut for the submenu. |
-| title | <code>string</code> | Yes | - | The title displayed for submenu. |
+<PropsTableFromJSDoc component="ActionPanel.Submenu" />
 
-### useActionPanel
+## Types
 
-A hook that lets you update the global Action Panel.
-
-#### Signature
+### ActionPanel.Children
 
 ```typescript
-function useActionPanel(): ActionPanelState
+ActionPanel.Children: ActionPanel.Section | ActionPanel.Section[] | ActionPanel.Section.Children | null
 ```
 
-#### Return
+Supported children for the [ActionPanel](#actionpanel) component.
 
-A [ActionPanelState](https://developers.raycast.com/api-reference/user-interface/action-panel#actionpanelstate) object with an update function.
-Use the function to update the global Action Panel.
-
-### ActionPanelState
-
-Return type of the [useActionPanel](https://developers.raycast.com/api-reference/user-interface/action-panel#useactionpanel) hook to perform global Action Panel updates.
-
-#### Properties
-
-| Name | Type | Required | Description |
-| :--- | :--- | :--- | :--- |
-| update | <code>(actionPanel: null \| ActionPanel) => void</code> | Yes | Updates the global Action Panel. |
-
-### ActionPanelChildren
+### ActionPanel.Section.Children
 
 ```typescript
-ActionPanelChildren: ActionPanel.Section | ActionPanel.Section[] | ActionPanelSectionChildren | null
+ActionPanel.Section.Children: Action | Action[] | ReactElement<ActionPanel.Submenu.Props> | ReactElement<ActionPanel.Submenu.Props>[] | null
 ```
 
-Supported children for the [ActionPanel](https://developers.raycast.com/api-reference/user-interface/action-panel#actionpanel) and [ActionPanel.Submenu](https://developers.raycast.com/api-reference/user-interface/action-panel#actionpanel-submenu) components.
+Supported children for the [ActionPanel.Section](#actionpanel.section) component.
 
-### ActionPanelSectionChildren
+### ActionPanel.Submenu.Children
 
 ```typescript
-ActionPanelSectionChildren: ActionPanel.Item | ActionPanel.Item[] | ReactElement<ActionPanelSubmenuProps> | ReactElement<ActionPanelSubmenuProps>[] | null
+ActionPanel.Children: ActionPanel.Section | ActionPanel.Section[] | ActionPanel.Section.Children | null
 ```
 
-Supported children for the [ActionPanel.Section](https://developers.raycast.com/api-reference/user-interface/action-panel#actionpanel-section) component.
+Supported children for the [ActionPanel.Submenu](#actionpanel.submenu) component.

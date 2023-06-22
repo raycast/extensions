@@ -1,0 +1,120 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "color-picker",
+  "title": "Color Picker",
+  "description": "Pick and organize colors, everywhere on your Mac",
+  "icon": "icon.png",
+  "author": "thomas",
+  "contributors": [
+    "otakustay",
+    "EmersonEmerson",
+    "pernielsentikaer",
+    "arronhunt"
+  ],
+  "categories": [
+    "Design Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "pick-color",
+      "title": "Pick Color",
+      "description": "Pick a color on your desktop",
+      "mode": "no-view"
+    },
+    {
+      "name": "menu-bar",
+      "title": "Menu Bar Color Picker",
+      "description": "Access your colors from the menu bar",
+      "mode": "menu-bar"
+    },
+    {
+      "name": "organize-colors",
+      "title": "Organize Colors",
+      "description": "Organize your colors",
+      "mode": "view",
+      "preferences": [
+        {
+          "data": [
+            {
+              "title": "Paste to Active App",
+              "value": "paste"
+            },
+            {
+              "title": "Copy to Clipboard",
+              "value": "copy"
+            }
+          ],
+          "default": "copy",
+          "description": "The primary action to perform on a selected color.",
+          "name": "primaryAction",
+          "required": false,
+          "title": "Primary Action",
+          "type": "dropdown"
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "data": [
+        {
+          "title": "HEX - #FF6363",
+          "value": "hex"
+        },
+        {
+          "title": "HEX Lower Case - #ff6363",
+          "value": "hex-lower-case"
+        },
+        {
+          "title": "RGBA - rgba(255, 99, 99, 1)",
+          "value": "rgba"
+        },
+        {
+          "title": "RGBA % - rgba(100%, 39%, 39%, 1)",
+          "value": "rgba-percentage"
+        },
+        {
+          "title": "HSLA - hsla(0, 100%, 69%, 1)",
+          "value": "hsla"
+        },
+        {
+          "title": "HSVA - hsva(0, 100%, 100%, 1)",
+          "value": "hsva"
+        }
+      ],
+      "default": "hex",
+      "description": "The color format to use when copying/pasting colors.",
+      "name": "colorFormat",
+      "required": false,
+      "title": "Color Format",
+      "type": "dropdown"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.53.0",
+    "@raycast/utils": "^1.4.7",
+    "@types/execa": "^2.0.0",
+    "color-convert": "^2.0.1",
+    "execa": "^6.1.0"
+  },
+  "devDependencies": {
+    "@types/color-convert": "^2.0.0",
+    "@types/node": "^18.8.3",
+    "@types/react": "18.0.9",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "build-swift": "swift build --configuration=release --arch arm64 --arch x86_64 && mv .build/apple/Products/Release/color-picker assets",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

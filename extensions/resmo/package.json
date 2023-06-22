@@ -1,0 +1,62 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "resmo",
+  "title": "Resmo",
+  "description": "Search all resources across Cloud and SaaS",
+  "icon": "logo.png",
+  "author": "ozgunarslantas",
+  "owner": "resmo",
+  "access": "public",
+  "categories": [
+    "Security",
+    "Other"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "allResources",
+      "title": "Search Resources",
+      "description": "List all resources with given search keys.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "type": "password",
+      "name": "resmoApiKey",
+      "title": "API Key",
+      "description": "The API Key of the REST API",
+      "required": true
+    },
+    {
+      "type": "textfield",
+      "name": "resmoDomain",
+      "title": "Domain URL",
+      "description": "The customer domain of your account, e.g. https://mydomain.resmo.app",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.44.0",
+    "@raycast/utils": "^1.4.8",
+    "lodash": "^4.17.21"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.14.190",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

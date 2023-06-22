@@ -1,4 +1,4 @@
-import { ActionPanel, closeMainWindow, Form, Icon, showToast, SubmitFormAction, ToastStyle } from "@raycast/api";
+import { ActionPanel, Action, closeMainWindow, Form, Icon, showToast, Toast, popToRoot } from "@raycast/api";
 import open from "open";
 
 interface FormValues {
@@ -13,7 +13,7 @@ interface FormValues {
 function CreateNoteAction() {
   async function handleSubmit(values: FormValues) {
     if (!values.text) {
-      showToast(ToastStyle.Failure, "Please enter text");
+      showToast(Toast.Style.Failure, "Please enter text");
       return;
     }
     open(
@@ -24,11 +24,12 @@ function CreateNoteAction() {
       }&show_window=${values.openNote !== "no" ? "yes" : "no"}&edit=${
         values.openNote === "no" ? "no" : "yes"
       }&timestamp=${values.timestamp ? "yes" : "no"}&text=${encodeURIComponent(values.text)}`,
-      {background: values.openNote === "no" ? true : false}
+      { background: values.openNote === "no" ? true : false }
     );
     await closeMainWindow();
+    await popToRoot({ clearSearchBar: true });
   }
-  return <SubmitFormAction icon={Icon.Document} title="Create Note" onSubmit={handleSubmit} />;
+  return <Action.SubmitForm icon={Icon.Document} title="Create Note" onSubmit={handleSubmit} />;
 }
 
 export default function NewNote() {

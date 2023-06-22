@@ -1,5 +1,5 @@
 import { List } from "@raycast/api";
-import { getIcon, getWindDirectionIcon } from "../icons";
+import { getWeatherCodeIcon, getWindDirectionIcon } from "../icons";
 import { getWindUnit, getTemperatureUnit, getWttrTemperaturePostfix, getWttrWindPostfix } from "../unit";
 import { Hourly, WeatherData } from "../wttr";
 
@@ -9,7 +9,7 @@ function getTime(time: string): string {
   return `${h} ${postfix}`;
 }
 
-export function DayList(props: { day: WeatherData; title: string }) {
+export function DayList(props: { day: WeatherData; title: string }): JSX.Element {
   const day = props.day;
 
   const getWeatherDesc = (hour: Hourly): string => {
@@ -40,18 +40,35 @@ export function DayList(props: { day: WeatherData; title: string }) {
     return `${val} ${getTemperatureUnit()}`;
   };
 
+  const getWindText = (hour: Hourly) => {
+    return `${getWind(hour)} ${getWindDirectionIcon(hour.winddirDegree)}`;
+  };
+
+  const getHumidityText = (hour: Hourly) => {
+    return `${hour.humidity}%`;
+  };
+
   return (
     <List>
       <List.Section title={props.title}>
-        {day.hourly.map((data, _) => (
+        {day.hourly.map((data) => (
           <List.Item
             key={data.time.toString()}
             title={`${getTime(data.time)}`}
-            subtitle={`${getTemp(data)} , ${getWeatherDesc(data)}`}
-            icon={getIcon(data.weatherCode)}
-            accessoryTitle={`humidity: ${data.humidity}% | wind: ${getWind(data)} ${getWindDirectionIcon(
-              data.winddirDegree
-            )}`}
+            subtitle={`${getTemp(data)}     ${getWeatherDesc(data)}`}
+            icon={{ value: getWeatherCodeIcon(data.weatherCode), tooltip: "test" }}
+            accessories={[
+              {
+                icon: "💧",
+                text: getHumidityText(data),
+                tooltip: `Humidity: ${getHumidityText(data)}`,
+              },
+              {
+                icon: "💨",
+                text: getWindText(data),
+                tooltip: `Wind: ${getWindText(data)}`,
+              },
+            ]}
           />
         ))}
       </List.Section>

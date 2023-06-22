@@ -5,6 +5,9 @@
   "description": "Quickly change your Slack status",
   "icon": "slack-icon.png",
   "author": "petr",
+  "contributors": [
+    "jhjr"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -24,6 +27,10 @@
       "description": "Your Slack access token.",
       "placeholder": "See tinyurl.com/raycast-slack-status"
     }
+  ],
+  "categories": [
+    "Communication",
+    "Productivity"
   ],
   "dependencies": {
     "@raycast/api": "^1.25.0",

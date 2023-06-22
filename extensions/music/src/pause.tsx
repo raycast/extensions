@@ -1,8 +1,10 @@
-import { closeMainWindow } from '@raycast/api'
-import * as playerControls from './util/controls'
+import { pipe } from "fp-ts/lib/function";
 
+import { SFSymbols } from "./util/models";
+import * as music from "./util/scripts";
+import { handleTaskEitherError } from "./util/utils";
 
-export default async () => {
-	await closeMainWindow()
-	await playerControls.pause()
-}
+export default pipe(
+  music.player.pause,
+  handleTaskEitherError(SFSymbols.WARNING + " Failed to pause playback", SFSymbols.PAUSE + " Playback paused")
+);

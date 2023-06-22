@@ -2,4 +2,4 @@
 
 📕 Browse the xkcd comics and keep track of the ones you've read.
 
-![demo image](demo.png)
+![demo image](/media/demo.png)

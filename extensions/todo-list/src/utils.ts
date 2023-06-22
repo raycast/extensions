@@ -14,7 +14,7 @@ export const insertIntoSection = (
   let low = -1;
   let high = currentSection.length - 1;
   while (low < high) {
-    let mid = Math.floor((low + high + 1) / 2);
+    const mid = Math.floor((low + high + 1) / 2);
     if (cmp(newItem, currentSection[mid]) < 0) {
       high = mid - 1;
     } else {

@@ -1,11 +1,5 @@
-export { 
-  IconConstants 
-} from "./IconConstants"
+export { IconConstants } from "./IconConstants";
 
-export { 
-  ShortcutConstants
-} from "./ShortcutsConstants"
+export { ShortcutConstants } from "./ShortcutsConstants";
 
-export {
-  URLConstants
-} from "./URLConstants"
+export { URLConstants } from "./URLConstants";

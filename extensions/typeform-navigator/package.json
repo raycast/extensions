@@ -1,0 +1,53 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "typeform",
+  "title": "Typeform Navigator",
+  "description": "Manage your Typeform account",
+  "icon": "command-icon.png",
+  "author": "jdvr",
+  "categories": [
+    "Web",
+    "Other"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Typeform Navigator",
+      "description": "List your workspaces and check your forms highlights",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.40.1",
+    "date-fns": "^2.29.3",
+    "got": "^12.5.1"
+  },
+  "devDependencies": {
+    "@types/node": "^18.8.0",
+    "@types/react": "^18.0.21",
+    "@typescript-eslint/eslint-plugin": "^5.38.1",
+    "@typescript-eslint/parser": "^5.38.1",
+    "eslint": "^8.24.0",
+    "eslint-config-prettier": "^8.5.0",
+    "prettier": "^2.7.1",
+    "react-devtools": "^4.26.0",
+    "typescript": "^4.8.4"
+  },
+  "preferences": [
+    {
+      "name": "personalToken",
+      "type": "password",
+      "required": true,
+      "title": "Personal token",
+      "description": "Add your personal token for typeform",
+      "placeholder": "Personal token"
+    }
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

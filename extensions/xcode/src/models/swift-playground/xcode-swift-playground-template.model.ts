@@ -2,6 +2,16 @@
  * Xcode Swift Playground Template
  */
 export enum XcodeSwiftPlaygroundTemplate {
-  empty = "empty",
-  swiftUI = "swiftUI"
+  /**
+   * Empty
+   */
+  Empty = "Empty",
+  /**
+   * SwiftUI
+   */
+  SwiftUI = "SwiftUI",
+  /**
+   * UIKit
+   */
+  UIKit = "UIKit",
 }

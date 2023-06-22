@@ -1,0 +1,69 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "qr-code-scanner",
+  "title": "QR Code Scanner",
+  "description": "Simple on-screen QR code scanner. (\"Screen recording\" permission is required)",
+  "icon": "command-icon.png",
+  "author": "StevenRCE0",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Scan QR Code",
+      "description": "Scans QR code on screen.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "captureMode",
+      "title": "Capture Mode",
+      "description": "Select screen capture mode. Select \"Selection\" for more precise recognition.",
+      "type": "dropdown",
+      "required": false,
+      "default": "area",
+      "data": [
+        {
+          "title": "Selection",
+          "value": "area"
+        },
+        {
+          "title": "Entire Screen",
+          "value": "fullscreen"
+        }
+      ]
+    },
+    {
+      "name": "silence",
+      "title": "Silence Mode",
+      "label": "Do Not Play Sound",
+      "description": "Do not play sound when capturing screen.",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.26.3",
+    "jimp": "^0.16.1",
+    "jsqr": "^1.4.0",
+    "open": "^8.4.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.37",
+    "@types/screenshot-desktop": "^1.12.0",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "file-loader": "^6.2.0",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint"
+  }
+}

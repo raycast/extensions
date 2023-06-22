@@ -1,113 +1,26 @@
-// #####################################################
-// ACTION ITEMS
-
-export { 
-  ViewSourceCodeActionItem 
-} from "./Action/Items/ViewSourceCodeActionItem"
-
-export { 
-  ViewReadmeActionItem 
-} from "./Action/Items/ViewReadmeActionItem"
-
-export { 
-  ClearFilterActionItem 
-} from "./Action/Items/ClearFilterActionItem"
-
-export { 
-  LanguageActionItem 
-} from "./Action/Items/LanguageActionItem"
-
-export { 
-  AuthorActionItem 
-} from "./Action/Items/AuthorActionItem"
-
-export { 
-  UninstallActionItem
-} from "./Action/Items/UninstallActionItem"
-
-export { 
-  SetupActionItem
-} from "./Action/Items/SetupActionItem"
-
-export { 
-  InstallActionItem
-} from "./Action/Items/InstallActionItem"
-
-export { 
-  ConfirmChangeActionItem
-} from "./Action/Items/ConfirmChangeActionItem"
-
-export { 
-  EditLocalSourceCodeActionItem
-} from "./Action/Items/EditLocalSourceCodeActionItem"
-
-// #####################################################
-// SUBMENUS
-
-export { 
-  TypeActionSubmenu 
-} from "./Action/Submenus/TypeActionSubmenu"
-
-export { 
-  LanguagesActionSubmenu 
-} from "./Action/Submenus/LanguagesActionSubmenu"
-
-// #####################################################
-// PANELS
-
-export { 
-  AuthorsActionPanel
-} from "./Action/Panels/AuthorsActionPanel"
-
-export { 
-  FiltersActionPanel 
-} from "./Action/Panels/FiltersActionPanel"
-
-export { 
-  ManagementActionPanel 
-} from "./Action/Panels/ManagementActionPanel"
-
-export {
-  ReadmeActionPanel
-} from "./Action/Panels/ReadmeActionPanel"  
-
-export { 
-  ViewsActionPanel
-} from "./Action/Panels/ViewsActionPanel"
-
-// #####################################################
-// DETAILS
-
-export { 
-  ReadmeDetail
-} from "./Details/ReadmeDetail"  
-
-export { 
-  SourceCodeDetail 
-} from "./Details/SourceCodeDetail"  
-
-// #####################################################
-// LIST ITEMS
-
-export { 
-  ScriptCommandItem
-} from "./ListItems/ScriptCommandItem"
-
-// #####################################################
-// COMMON
-
-export { 
-  StoreToast, 
-} from "./Common/StoreToast"
-
-export { 
-  FilterToast,
-} from "./Common/FilterToast"
-
-export { 
-  GroupSection 
-} from "./Sections/GroupSection"
-
-export { 
-  MainContent 
-} from "./Contents/MainContent"
+export { AuthorActionItem } from "./Action/Items/AuthorActionItem";
+export { AuthorsActionPanel } from "./Action/Panels/AuthorsActionPanel";
+export { ClearFilterActionItem } from "./Action/Items/ClearFilterActionItem";
+export { ConfirmChangeActionItem } from "./Action/Items/ConfirmChangeActionItem";
+export { EditLocalSourceCodeActionItem } from "./Action/Items/EditLocalSourceCodeActionItem";
+export { FiltersActionPanel } from "./Action/Panels/FiltersActionPanel";
+export { FilterToast } from "./Common/FilterToast";
+export { GroupSection } from "./Sections/GroupSection";
+export { InstallActionItem } from "./Action/Items/InstallActionItem";
+export { InstallPackageActionItem } from "./Action/Items/InstallPackageAction";
+export { LanguageActionItem } from "./Action/Items/LanguageActionItem";
+export { LanguagesActionSubmenu } from "./Action/Submenus/LanguagesActionSubmenu";
+export { MainContent } from "./Contents/MainContent";
+export { ManagementActionPanel } from "./Action/Panels/ManagementActionPanel";
+export { PackageToast } from "./Common/PackageToast";
+export { ReadmeActionPanel } from "./Action/Panels/ReadmeActionPanel";
+export { ReadmeDetail } from "./Details/ReadmeDetail";
+export { ScriptCommandItem } from "./ListItems/ScriptCommandItem";
+export { SetupActionItem } from "./Action/Items/SetupActionItem";
+export { SourceCodeDetail } from "./Details/SourceCodeDetail";
+export { StoreToast } from "./Common/StoreToast";
+export { TypeActionSubmenu } from "./Action/Submenus/TypeActionSubmenu";
+export { UninstallActionItem } from "./Action/Items/UninstallActionItem";
+export { ViewReadmeActionItem } from "./Action/Items/ViewReadmeActionItem";
+export { ViewsActionPanel } from "./Action/Panels/ViewsActionPanel";
+export { ViewSourceCodeActionItem } from "./Action/Items/ViewSourceCodeActionItem";

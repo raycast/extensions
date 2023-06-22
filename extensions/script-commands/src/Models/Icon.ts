@@ -1,4 +1,4 @@
 export interface Icon {
-  dark?: string
-  light?: string
+  dark?: string;
+  light?: string;
 }

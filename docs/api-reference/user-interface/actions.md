@@ -1,19 +1,53 @@
 # Actions
 
-Our API includes a few built-in actions that can be used for common interactions such as opening a link or copying some content to the clipboard. By using them, you make sure to follow our human interface guidelines. If you need something custom, use the [`ActionPanel.Item`](action-panel.md#actionpanel-item) component. All built-in actions are just abstractions on top of it.
+Our API includes a few built-in actions that can be used for common interactions, such as opening a link or copying some content to the clipboard. By using them, you make sure to follow our human interface guidelines. If you need something custom, use the [`Action`](#action) component. All built-in actions are just abstractions on top of it.
 
 ## API Reference
 
-### CopyToClipboardAction
+### Action
 
-Action that copies the content to the clipboard.
+A context-specific action that can be performed by the user.
 
-The main window is closed and a HUD is shown after the content was copied to the clipboard.
+Assign keyboard shortcuts to items to make it easier for users to perform frequently used actions.
 
 #### Example
 
 ```typescript
-import { ActionPanel, CopyToClipboardAction, Detail } from "@raycast/api";
+import { ActionPanel, Action, List } from "@raycast/api";
+
+export default function Command() {
+  return (
+    <List navigationTitle="Open Pull Requests">
+      <List.Item
+        title="Docs: Update API Reference"
+        subtitle="#1"
+        actions={
+          <ActionPanel title="#1 in raycast/extensions">
+            <Action.OpenInBrowser url="https://github.com/raycast/extensions/pull/1" />
+            <Action.CopyToClipboard title="Copy Pull Request Number" content="#1" />
+            <Action title="Close Pull Request" onAction={() => console.log("Close PR #1")} />
+          </ActionPanel>
+        }
+      />
+    </List>
+  );
+}
+```
+
+#### Props
+
+<PropsTableFromJSDoc component="Action" />
+
+### Action.CopyToClipboard
+
+Action that copies the content to the clipboard.
+
+The main window is closed, and a HUD is shown after the content was copied to the clipboard.
+
+#### Example
+
+```typescript
+import { ActionPanel, Action, Detail } from "@raycast/api";
 
 export default function Command() {
   return (
@@ -21,7 +55,7 @@ export default function Command() {
       markdown="Press `⌘ + .` and share some love."
       actions={
         <ActionPanel>
-          <CopyToClipboardAction content="I ❤️ Raycast" shortcut={{ modifiers: ["cmd"], key: "." }} />
+          <Action.CopyToClipboard content="I ❤️ Raycast" shortcut={{ modifiers: ["cmd"], key: "." }} />
         </ActionPanel>
       }
     />
@@ -31,25 +65,19 @@ export default function Command() {
 
 #### Props
 
-| Prop | Type | Required | Default | Description |
-| :--- | :--- | :--- | :--- | :--- |
-| content | <code>string</code> or <code>number</code> | Yes | - | The contents that will be written to the clipboard as string. |
-| icon | <code>[ImageLike](https://developers.raycast.com/api-reference/user-interface/icons-and-images#imagelike)</code> | No | [Icon.Clipboard](https://developers.raycast.com/api-reference/user-interface/icons-and-images#icon) | A optional icon displayed for the item. See [ImageLike](https://developers.raycast.com/api-reference/user-interface/icons-and-images#imagelike) for the supported formats and types. |
-| shortcut | <code>[KeyboardShortcut](https://developers.raycast.com/api-reference/keyboard#keyboardshortcut)</code> | No | - | The keyboard shortcut for the action. |
-| title | <code>string</code> | No | - | An optional title for the action. |
-| onCopy | <code>(content: string \| number) => void</code> | No | - |  |
+<PropsTableFromJSDoc component="Action.CopyToClipboard" />
 
-### OpenAction
+### Action.Open
 
 An action to open a file or folder with a specific application, just as if you had double-clicked the
 file's icon.
 
-The main window is closed, after the file was opened.
+The main window is closed after the file is opened.
 
 #### Example
 
 ```typescript
-import { ActionPanel, Detail, OpenAction } from "@raycast/api";
+import { ActionPanel, Detail, Action } from "@raycast/api";
 
 export default function Command() {
   return (
@@ -57,7 +85,7 @@ export default function Command() {
       markdown="Check out your extension code."
       actions={
         <ActionPanel>
-          <OpenAction title="Open Folder" target={__dirname} />
+          <Action.Open title="Open Folder" target={__dirname} />
         </ActionPanel>
       }
     />
@@ -67,25 +95,18 @@ export default function Command() {
 
 #### Props
 
-| Prop | Type | Required | Default | Description |
-| :--- | :--- | :--- | :--- | :--- |
-| application | <code>string</code> or <code>[Application](https://developers.raycast.com/api-reference/utilities#application)</code> | No | - | The application name to use for opening the file. |
-| icon | <code>[ImageLike](https://developers.raycast.com/api-reference/user-interface/icons-and-images#imagelike)</code> | No | [Icon.Finder](https://developers.raycast.com/api-reference/user-interface/icons-and-images#icon) | The icon displayed for the action. |
-| shortcut | <code>[KeyboardShortcut](https://developers.raycast.com/api-reference/keyboard#keyboardshortcut)</code> | No | - | The keyboard shortcut for the action. |
-| target | <code>string</code> | Yes | - | The file, folder or URL to open. |
-| title | <code>string</code> | Yes | - | The title for the action. |
-| onOpen | <code>(target: string) => void</code> | No | - |  |
+<PropsTableFromJSDoc component="Action.Open" />
 
-### OpenInBrowserAction
+### Action.OpenInBrowser
 
-Action that opens a URL in the default browser..
+Action that opens a URL in the default browser.
 
-The main window is closed, after the URL was opened in the browser.
+The main window is closed after the URL is opened in the browser.
 
 #### Example
 
 ```typescript
-import { ActionPanel, Detail, OpenInBrowserAction } from "@raycast/api";
+import { ActionPanel, Detail, Action } from "@raycast/api";
 
 export default function Command() {
   return (
@@ -93,7 +114,7 @@ export default function Command() {
       markdown="Join the gang!"
       actions={
         <ActionPanel>
-          <OpenInBrowserAction url="https://raycast.com/jobs" />
+          <Action.OpenInBrowser url="https://raycast.com/jobs" />
         </ActionPanel>
       }
     />
@@ -103,25 +124,19 @@ export default function Command() {
 
 #### Props
 
-| Prop | Type | Required | Default | Description |
-| :--- | :--- | :--- | :--- | :--- |
-| icon | <code>[ImageLike](https://developers.raycast.com/api-reference/user-interface/icons-and-images#imagelike)</code> | No | [Icon.Globe](https://developers.raycast.com/api-reference/user-interface/icons-and-images#icon) | The icon displayed for the action. |
-| shortcut | <code>[KeyboardShortcut](https://developers.raycast.com/api-reference/keyboard#keyboardshortcut)</code> | No | - | The optional keyboard shortcut for the menu item |
-| title | <code>string</code> | No | - | An optional title for the action. |
-| url | <code>string</code> | Yes | - | The URL to open. |
-| onOpen | <code>(url: string) => void</code> | No | - |  |
+<PropsTableFromJSDoc component="Action.OpenInBrowser" />
 
-### OpenWithAction
+### Action.OpenWith
 
-An action to open a file or folder with a specific application.
+Action that opens a file or folder with a specific application.
 
 The action opens a sub-menu with all applications that can open the file or folder.
-The main window is closed after the file was opened in the specified application.
+The main window is closed after the file is opened in the specified application.
 
 #### Example
 
 ```typescript
-import { ActionPanel, Detail, OpenWithAction } from "@raycast/api";
+import { ActionPanel, Detail, Action } from "@raycast/api";
 import { homedir } from "os";
 
 const DESKTOP_DIR = `${homedir()}/Desktop`;
@@ -132,7 +147,7 @@ export default function Command() {
       markdown="What do you want to use to open your desktop with?"
       actions={
         <ActionPanel>
-          <OpenWithAction path={DESKTOP_DIR} />
+          <Action.OpenWith path={DESKTOP_DIR} />
         </ActionPanel>
       }
     />
@@ -142,24 +157,18 @@ export default function Command() {
 
 #### Props
 
-| Prop | Type | Required | Default | Description |
-| :--- | :--- | :--- | :--- | :--- |
-| icon | <code>[ImageLike](https://developers.raycast.com/api-reference/user-interface/icons-and-images#imagelike)</code> | No | [Icon.Upload](https://developers.raycast.com/api-reference/user-interface/icons-and-images#icon) | The icon displayed for the action. |
-| path | <code>string</code> | Yes | - | The path to open. |
-| shortcut | <code>[KeyboardShortcut](https://developers.raycast.com/api-reference/keyboard#keyboardshortcut)</code> | No | - | The keyboard shortcut for the action. |
-| title | <code>string</code> | No | Open With | The title for the action. |
-| onOpen | <code>(path: string) => void</code> | No | - |  |
+<PropsTableFromJSDoc component="Action.OpenWith" />
 
-### PasteAction
+### Action.Paste
 
 Action that pastes the content to the front-most applications.
 
-The main window is closed, after the content was pasted to the front-most application.
+The main window is closed after the content is pasted to the front-most application.
 
 #### Example
 
 ```typescript
-import { ActionPanel, Detail, PasteAction } from "@raycast/api";
+import { ActionPanel, Detail, Action } from "@raycast/api";
 
 export default function Command() {
   return (
@@ -167,7 +176,7 @@ export default function Command() {
       markdown="Let us know what you think about the Raycast API?"
       actions={
         <ActionPanel>
-          <PasteAction content="api@raycast.com" />
+          <Action.Paste content="api@raycast.com" />
         </ActionPanel>
       }
     />
@@ -177,22 +186,16 @@ export default function Command() {
 
 #### Props
 
-| Prop | Type | Required | Default | Description |
-| :--- | :--- | :--- | :--- | :--- |
-| content | <code>string</code> or <code>number</code> | Yes | - | The contents that will be written to the clipboard as string. |
-| icon | <code>[ImageLike](https://developers.raycast.com/api-reference/user-interface/icons-and-images#imagelike)</code> | No | [Icon.Clipboard](https://developers.raycast.com/api-reference/user-interface/icons-and-images#icon) | The icon displayed for the action. |
-| shortcut | <code>[KeyboardShortcut](https://developers.raycast.com/api-reference/keyboard#keyboardshortcut)</code> | No | - | The keyboard shortcut for the action. |
-| title | <code>string</code> | No | - | An optional title for the action. |
-| onPaste | <code>(content: string \| number) => void</code> | No | - |  |
+<PropsTableFromJSDoc component="Action.Paste" />
 
-### PushAction
+### Action.Push
 
-Action that allows to push a new view to the navigation stack.
+Action that pushes a new view to the navigation stack.
 
 #### Example
 
 ```typescript
-import { ActionPanel, Detail, PushAction } from "@raycast/api";
+import { ActionPanel, Detail, Action } from "@raycast/api";
 
 function Ping() {
   return (
@@ -200,7 +203,7 @@ function Ping() {
       markdown="Ping"
       actions={
         <ActionPanel>
-          <PushAction title="Push Pong" target={<Pong />} />
+          <Action.Push title="Push Pong" target={<Pong />} />
         </ActionPanel>
       }
     />
@@ -218,24 +221,18 @@ export default function Command() {
 
 #### Props
 
-| Prop | Type | Required | Default | Description |
-| :--- | :--- | :--- | :--- | :--- |
-| icon | <code>[ImageLike](https://developers.raycast.com/api-reference/user-interface/icons-and-images#imagelike)</code> | No | - | The icon displayed for the action. |
-| shortcut | <code>[KeyboardShortcut](https://developers.raycast.com/api-reference/keyboard#keyboardshortcut)</code> | No | - | The keyboard shortcut for the action. |
-| target | <code>ReactNode</code> | Yes | - | The target view that will be pushed to the navigation stack. |
-| title | <code>string</code> | Yes | - | The title displayed for the item. |
-| onPush | <code>() => void</code> | No | - |  |
+<PropsTableFromJSDoc component="Action.Push" />
 
-### ShowInFinderAction
+### Action.ShowInFinder
 
 Action that shows a file or folder in the Finder.
 
-The main window is closed, after the file or folder was revealed in the Finder.
+The main window is closed after the file or folder is revealed in the Finder.
 
 #### Example
 
 ```typescript
-import { ActionPanel, Detail, ShowInFinderAction } from "@raycast/api";
+import { ActionPanel, Detail, Action } from "@raycast/api";
 import { homedir } from "os";
 
 const DOWNLOADS_DIR = `${homedir()}/Downloads`;
@@ -246,7 +243,7 @@ export default function Command() {
       markdown="Are your downloads pilling up again?"
       actions={
         <ActionPanel>
-          <ShowInFinderAction path={DOWNLOADS_DIR} />
+          <Action.ShowInFinder path={DOWNLOADS_DIR} />
         </ActionPanel>
       }
     />
@@ -256,35 +253,44 @@ export default function Command() {
 
 #### Props
 
-| Prop | Type | Required | Default | Description |
-| :--- | :--- | :--- | :--- | :--- |
-| icon | <code>[ImageLike](https://developers.raycast.com/api-reference/user-interface/icons-and-images#imagelike)</code> | No | [Icon.Finder](https://developers.raycast.com/api-reference/user-interface/icons-and-images#icon) | A optional icon displayed for the item. See [ImageLike](https://developers.raycast.com/api-reference/user-interface/icons-and-images#imagelike) for the supported formats and types. |
-| path | <code>PathLike</code> | Yes | - | The path to open. |
-| shortcut | <code>[KeyboardShortcut](https://developers.raycast.com/api-reference/keyboard#keyboardshortcut)</code> | No | - | The keyboard shortcut for the action. |
-| title | <code>string</code> | No | Show in Finder | An optional title for the action. |
-| onShow | <code>(path: PathLike) => void</code> | No | - |  |
+<PropsTableFromJSDoc component="Action.ShowInFinder" />
 
-### SubmitFormAction
+### Action.SubmitForm
 
-Action that allows to add a submit handler for capturing form values.
+Action that adds a submit handler for capturing form values.
+
+#### Example
+
+```typescript
+import { ActionPanel, Form, Action } from "@raycast/api";
+
+export default function Command() {
+  return (
+    <Form
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm title="Submit Answer" onSubmit={(values) => console.log(values)} />
+        </ActionPanel>
+      }
+    >
+      <Form.Checkbox id="answer" label="Are you happy?" defaultValue={true} />
+    </Form>
+  );
+}
+```
 
 #### Props
 
-| Prop | Type | Required | Default | Description |
-| :--- | :--- | :--- | :--- | :--- |
-| icon | <code>[ImageLike](https://developers.raycast.com/api-reference/user-interface/icons-and-images#imagelike)</code> | No | - | The icon displayed for the action. |
-| shortcut | <code>[KeyboardShortcut](https://developers.raycast.com/api-reference/keyboard#keyboardshortcut)</code> | No | - | The keyboard shortcut for the action. |
-| title | <code>string</code> | No | - | The title displayed for the item. |
-| onSubmit | <code>(input: Values) => void</code> | No | - |  |
+<PropsTableFromJSDoc component="Action.SubmitForm" />
 
-### TrashAction
+### Action.Trash
 
 Action that moves a file or folder to the Trash.
 
 #### Example
 
 ```typescript
-import { ActionPanel, Detail, TrashAction } from "@raycast/api";
+import { ActionPanel, Detail, Action } from "@raycast/api";
 import { homedir } from "os";
 
 const FILE = `${homedir()}/Downloads/get-rid-of-me.txt`;
@@ -295,7 +301,7 @@ export default function Command() {
       markdown="Some spring cleaning?"
       actions={
         <ActionPanel>
-          <TrashAction paths={FILE} />
+          <Action.Trash paths={FILE} />
         </ActionPanel>
       }
     />
@@ -305,10 +311,150 @@ export default function Command() {
 
 #### Props
 
-| Prop | Type | Required | Default | Description |
-| :--- | :--- | :--- | :--- | :--- |
-| icon | <code>[ImageLike](https://developers.raycast.com/api-reference/user-interface/icons-and-images#imagelike)</code> | No | [Icon.Trash](https://developers.raycast.com/api-reference/user-interface/icons-and-images#icon) | A optional icon displayed for the action. |
-| paths | <code>PathLike</code> or <code>PathLike[]</code> | Yes | - | The item or items to move to the trash. |
-| shortcut | <code>[KeyboardShortcut](https://developers.raycast.com/api-reference/keyboard#keyboardshortcut)</code> | No | - | The optional keyboard shortcut for the action. |
-| title | <code>string</code> | No | Move to Trash | An optional title for the action. |
-| onTrash | <code>(paths: PathLike \| PathLike[]) => void</code> | No | - |  |
+<PropsTableFromJSDoc component="Action.Trash" />
+
+### Action.CreateSnippet
+
+Action that navigates to the the Create Snippet command with some or all of the fields prefilled.
+
+#### Example
+
+```typescript
+import { ActionPanel, Detail, Action } from "@raycast/api";
+
+export default function Command() {
+  return (
+    <Detail
+      markdown="Test out snippet creation"
+      actions={
+        <ActionPanel>
+          <Action.CreateSnippet snippet={{ text: "DE75512108001245126199" }} />
+        </ActionPanel>
+      }
+    />
+  );
+}
+```
+
+#### Props
+
+<PropsTableFromJSDoc component="Action.CreateSnippet" />
+
+### Action.CreateQuicklink
+
+Action that navigates to the the Create Quicklink command with some or all of the fields prefilled.
+
+#### Example
+
+```typescript
+import { ActionPanel, Detail, Action } from "@raycast/api";
+
+export default function Command() {
+  return (
+    <Detail
+      markdown="Test out quicklink creation"
+      actions={
+        <ActionPanel>
+          <Action.CreateQuicklink quicklink={{ link: "https://duckduckgo.com/?q={Query}" }} />
+        </ActionPanel>
+      }
+    />
+  );
+}
+```
+
+#### Props
+
+<PropsTableFromJSDoc component="Action.CreateQuicklink" />
+
+### Action.ToggleQuickLook
+
+Action that toggles the Quick Look to preview a file.
+
+#### Example
+
+```typescript
+import { ActionPanel, List, Action } from "@raycast/api";
+
+export default function Command() {
+  return (
+    <List>
+      <List.Item
+        title="Preview me"
+        quickLook={{ path: "~/Downloads/Raycast.dmg", name: "Some file" }}
+        actions={
+          <ActionPanel>
+            <Action.ToggleQuickLook shortcut={{ modifiers: ["cmd"], key: "y" }} />
+          </ActionPanel>
+        }
+      />
+    </List>
+  );
+}
+```
+
+#### Props
+
+<PropsTableFromJSDoc component="Action.ToggleQuickLook" />
+
+### Action.PickDate
+
+Action to pick a date.
+
+#### Example
+
+```typescript
+import { ActionPanel, List, Action } from "@raycast/api";
+
+export default function Command() {
+  return (
+    <List>
+      <List.Item
+        title="Todo"
+        actions={
+          <ActionPanel>
+            <Action.PickDate title="Set Due Date…" />
+          </ActionPanel>
+        }
+      />
+    </List>
+  );
+}
+```
+
+#### Props
+
+<PropsTableFromJSDoc component="Action.PickDate" />
+
+## Types
+
+### Snippet
+
+#### Properties
+
+<InterfaceTableFromJSDoc name="Snippet" />
+
+### Quicklink
+
+#### Properties
+
+<InterfaceTableFromJSDoc name="Quicklink" />
+
+### Action.Style
+
+Defines the visual style of the Action.
+
+Use [Action.Style.Regular](#action.style) for displaying a regular actions.
+Use [Action.Style.Destructive](#action.style) when your action has something that user should be careful about.
+Use the confirmation [Alert](../feedback/alert.md) if the action is doing something that user cannot revert.
+
+### Action.PickDate.Type
+
+The types of date components the user can pick with an `Action.PickDate`.
+
+#### Enumeration members
+
+| Name     | Description                                                      |
+| -------- | ---------------------------------------------------------------- |
+| DateTime | Hour and second can be picked in addition to year, month and day |
+| Date     | Only year, month, and day can be picked                          |

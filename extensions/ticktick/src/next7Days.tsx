@@ -1,12 +1,12 @@
 import { List } from "@raycast/api";
 import React, { useEffect, useMemo, useState } from "react";
 import { getNext7Days } from "./service/osScript";
-import { Section } from "./service/task";
+import { getTaskCopyContent, getTaskDetailMarkdownContent, Section } from "./service/task";
 import useStartApp from "./hooks/useStartApp";
 import useSearchTasks from "./hooks/useSearchTasks";
 import TaskItem from "./components/taskItem";
 
-const TickTickNext7Days: React.FC<{}> = () => {
+const TickTickNext7Days: React.FC<Record<string, never>> = () => {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [sections, setSections] = useState<Section[] | null>(null);
   const { isInitCompleted } = useStartApp();
@@ -22,7 +22,7 @@ const TickTickNext7Days: React.FC<{}> = () => {
     }
   }, [isInitCompleted]);
 
-  const { searchTasks } = useSearchTasks({ searchQuery, isInitCompleted });
+  const { searchTasks, isSearching } = useSearchTasks({ searchQuery, isInitCompleted });
 
   const isLoading = useMemo(() => {
     if (!isInitCompleted) {
@@ -30,13 +30,18 @@ const TickTickNext7Days: React.FC<{}> = () => {
     }
 
     if (searchQuery) {
-      return searchTasks == null;
+      return isSearching;
     }
     return sections == null;
-  }, [isInitCompleted, searchQuery, searchTasks, sections]);
+  }, [isInitCompleted, searchQuery, isSearching, sections]);
 
   return (
-    <List isLoading={isLoading} onSearchTextChange={setSearchQuery} searchBarPlaceholder="Search all tasks...">
+    <List
+      isLoading={isLoading}
+      onSearchTextChange={setSearchQuery}
+      searchBarPlaceholder="Search all tasks..."
+      isShowingDetail
+    >
       {searchTasks
         ? searchTasks.map((task) => (
             <TaskItem
@@ -46,6 +51,9 @@ const TickTickNext7Days: React.FC<{}> = () => {
               title={task.title}
               projectId={task.projectId}
               priority={task.priority}
+              tags={task.tags}
+              detailMarkdown={getTaskDetailMarkdownContent(task)}
+              copyContent={getTaskCopyContent(task)}
             />
           ))
         : sections?.map((section) => {
@@ -59,6 +67,9 @@ const TickTickNext7Days: React.FC<{}> = () => {
                     title={task.title}
                     projectId={task.projectId}
                     priority={task.priority}
+                    tags={task.tags}
+                    detailMarkdown={getTaskDetailMarkdownContent(task)}
+                    copyContent={getTaskCopyContent(task)}
                   />
                 ))}
               </List.Section>

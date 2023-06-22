@@ -5,6 +5,13 @@
   "description": "Search and open projects from Visual Studio Code Project Manager",
   "icon": "command-icon.png",
   "author": "MarkusLanger",
+  "contributors": [
+    "GastroGeek",
+    "4very",
+    "theherk",
+    "TobiasYin",
+    "yossizahn"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -34,6 +41,15 @@
       "description": "Groups projects by tag instead of just showing"
     },
     {
+      "name": "hideProjectsWithoutTag",
+      "type": "checkbox",
+      "required": false,
+      "title": "Hide projects...",
+      "default": false,
+      "label": "without tag",
+      "description": "Hide projects without tag"
+    },
+    {
       "name": "terminalAppPath",
       "type": "textfield",
       "required": false,
@@ -48,11 +64,36 @@
       "default": "/Applications/Fork.app",
       "title": "Git client app path",
       "description": "Path to the Git client app"
+    },
+    {
+      "name": "build",
+      "type": "dropdown",
+      "required": false,
+      "title": "Build",
+      "default": "Code",
+      "description": "Select which build of Visual Studio Code to use",
+      "data": [
+        {
+          "value": "Code",
+          "title": "Visual Studio Code"
+        },
+        {
+          "value": "Code - Insiders",
+          "title": "Visual Studio Code - Insiders"
+        },
+        {
+          "value": "VSCodium",
+          "title": "VSCodium"
+        },
+        {
+          "value": "VSCodium < 1.71",
+          "title": "VSCodium < 1.71"
+        }
+      ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.25.1",
-    "open": "^8.4.0",
+    "@raycast/api": "1.48.8",
     "parse-git-config": "^3.0.0",
     "tildify": "^3.0.0"
   },

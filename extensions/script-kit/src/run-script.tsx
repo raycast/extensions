@@ -19,7 +19,7 @@ export default function listScripts(): JSX.Element {
   }, []);
 
   return (
-    <List isLoading={typeof scripts=='undefined'}>
+    <List isLoading={typeof scripts == "undefined"}>
       {scripts
         ?.filter((script) => !script.exclude)
         .map((script) => (
@@ -34,13 +34,13 @@ export default function listScripts(): JSX.Element {
                   <RunScriptAction scriptPath={script.filePath} />
                 </ActionPanel.Section>
                 <ActionPanel.Section>
-                  <NewScriptAction/>
-                  <NewScriptFromUrlAction/>
+                  <NewScriptAction />
+                  <NewScriptFromUrlAction />
                 </ActionPanel.Section>
                 <ActionPanel.Section>
-                  <ShareScriptAsGistAction scriptPath={script.filePath}/>
-                  <EditScriptAction scriptPath={script.filePath}/>
-                  <DeleteScriptAction scriptPath={script.filePath}/>
+                  <ShareScriptAsGistAction scriptPath={script.filePath} />
+                  <EditScriptAction scriptPath={script.filePath} />
+                  <DeleteScriptAction scriptPath={script.filePath} />
                 </ActionPanel.Section>
               </ActionPanel>
             }
@@ -66,22 +66,38 @@ function NewScriptAction() {
 }
 
 function NewScriptFromUrlAction() {
-  return <RunScriptAction title="New Script from Url" icon={Icon.Link} scriptPath={resolve(kit_path, "cli", "new-from-url.js")} />;
+  return (
+    <RunScriptAction
+      title="New Script from Url"
+      icon={Icon.Link}
+      scriptPath={resolve(kit_path, "cli", "new-from-url.js")}
+    />
+  );
 }
 
 function ShareScriptAsGistAction(props: { scriptPath: string }) {
   return (
-    <RunScriptAction title="Share Script as Gist" icon={Icon.Upload} scriptPath={resolve(kit_path, "cli", "share-script.js")} args={[props.scriptPath]} />
+    <RunScriptAction
+      title="Share Script as Gist"
+      icon={Icon.Upload}
+      scriptPath={resolve(kit_path, "cli", "share-script.js")}
+      args={[props.scriptPath]}
+    />
   );
 }
 
 function EditScriptAction(props: { scriptPath: string }) {
   return (
-    <RunScriptAction title="Edit Script" icon={Icon.Pencil} scriptPath={resolve(kit_path, "cli", "edit.js")} args={[props.scriptPath]} />
+    <RunScriptAction
+      title="Edit Script"
+      icon={Icon.Pencil}
+      scriptPath={resolve(kit_path, "cli", "edit.js")}
+      args={[props.scriptPath]}
+    />
   );
 }
 
-function RunScriptAction(props: { scriptPath: string; icon?: Icon, title?: string; args?: string[] }) {
+function RunScriptAction(props: { scriptPath: string; icon?: Icon; title?: string; args?: string[] }) {
   return (
     <ActionPanel.Item
       title={props.title || "Run Script"}
@@ -93,7 +109,7 @@ function RunScriptAction(props: { scriptPath: string; icon?: Icon, title?: strin
           await closeMainWindow();
           await popToRoot();
         } catch (error) {
-          showToast(ToastStyle.Failure, "Could not connect to Kit", "Please check that Kit is running")
+          showToast(ToastStyle.Failure, "Could not connect to Kit", "Please check that Kit is running");
         }
       }}
     />
