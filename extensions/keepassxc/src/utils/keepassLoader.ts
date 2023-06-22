@@ -85,7 +85,11 @@ const loadEntries = () =>
   );
 
 const cliStdOnErr = (reject: (reason: Error) => void) => (data: Buffer) => {
-  if (data.toString().indexOf("Enter password to unlock") != -1 || data.toString().trim().length == 0) {
+  if (
+    data.toString().indexOf("Enter password to unlock") != -1 ||
+    data.toString().indexOf("Maximum depth of replacement has been reached") != -1 ||
+    data.toString().trim().length == 0
+  ) {
     return;
   }
   reject(new Error(data.toString()));

@@ -1,6 +1,6 @@
 # PubMe
 
-Search [PubMed](https://pubmed.ncbi.nlm.nih.gov/), a free database maintained by the National Library of Medicine (NLM), with [Raycast](https://www.raycast.com/). If the search entry is empty, 10 Trending Articles (from [https://pubmed.ncbi.nlm.nih.gov/trending/](https://pubmed.ncbi.nlm.nih.gov/trending/)) are displayed.
+Search [PubMed](https://pubmed.ncbi.nlm.nih.gov/), a free database maintained by the National Library of Medicine (NLM), with [Raycast](https://www.raycast.com/). If the search entry is empty, 10 Trending Articles (from [https://pubmed.ncbi.nlm.nih.gov/trending/](https://pubmed.ncbi.nlm.nih.gov/trending/)) are displayed and cached. You can set the `refreshInterval` in settings.
 
 Required `NIH API Key` (enter "0", if you do not have one): Without an API key, you can only make 3 requests per second. Unfortunately, when listing multiple items, an additional request is sent for each item, so you may receive the error message "Error 429" (too many requests). It is therefore recommended to set an API key to increase the limit to 10 requests/second. Further information at [https://support.nlm.nih.gov/knowledgebase/article/KA-05317/en-us](https://support.nlm.nih.gov/knowledgebase/article/KA-05317/en-us)
 

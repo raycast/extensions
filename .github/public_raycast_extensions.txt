@@ -21,3 +21,4 @@ tailscale
 todoist
 screen-studio
 openverse
+putio

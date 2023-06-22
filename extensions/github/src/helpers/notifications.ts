@@ -104,6 +104,13 @@ export function getNotificationTypeTitle(notification: Notification): string {
 }
 
 export function getNotificationSubtitle(notification: Notification) {
+  const reason = getNotificationReason(notification);
+  const numberTag = getIssueOrPrNumberTag(notification);
+
+  return numberTag ? `${numberTag} ･ ${reason}` : reason;
+}
+
+export function getNotificationReason(notification: Notification) {
   switch (notification.reason) {
     case "assign":
       return "Assigned";
@@ -132,6 +139,13 @@ export function getNotificationSubtitle(notification: Notification) {
     default:
       return "";
   }
+}
+
+export function getIssueOrPrNumberTag(notification: Notification) {
+  if (notification.subject.type !== "Issue" && notification.subject.type !== "PullRequest") return;
+
+  const id = notification.subject.url?.split("/").at(-1);
+  return id ? `#${id}` : undefined;
 }
 
 export function getNotificationTooltip(date: Date) {

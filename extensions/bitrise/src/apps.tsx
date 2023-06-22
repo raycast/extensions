@@ -1,45 +1,18 @@
 import { List, Icon, Action, ActionPanel } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { useCachedPromise, usePromise } from "@raycast/utils";
 import { fetchApps } from "./api/apps";
 import { fetchBuilds } from "./api/builds";
-import { AppsByOwner, BuildsByStatus, App } from "./api/types";
+import { App } from "./api/types";
 import { BuildList } from "./components/BuildList";
-import { handleError } from "./util/error";
-
-interface State {
-  apps: AppsByOwner;
-  error?: Error;
-}
 
 export default function Command() {
-  const [state, setState] = useState<State>({
-    apps: { apps: new Map(), owners: new Map() },
-  });
-
-  useEffect(() => {
-    async function fetch() {
-      try {
-        const apps = await fetchApps();
-        setState({ apps: apps });
-      } catch (error) {
-        setState((previous) => ({
-          ...previous,
-          error: error instanceof Error ? error : new Error("Something went wrong"),
-        }));
-      }
-    }
-    fetch();
-  }, []);
-
-  if (state.error) {
-    handleError(state.error);
-  }
+  const { isLoading, data } = useCachedPromise(async () => await fetchApps(), [], { initialData: [] });
 
   return (
-    <List isLoading={state.apps.apps.size == 0 && !state.error} searchBarPlaceholder="Search apps">
-      {[...state.apps.apps.entries()].map((entry) => (
-        <List.Section title={state.apps.owners.get(entry[0])?.name} key={entry[0]}>
-          {entry[1].map((app) => (
+    <List isLoading={isLoading} searchBarPlaceholder="Search apps">
+      {data.map((appsByOwner) => (
+        <List.Section title={appsByOwner.owner.name} key={appsByOwner.owner.slug}>
+          {appsByOwner.apps.map((app) => (
             <AppListItem app={app} key={app.slug} />
           ))}
         </List.Section>
@@ -74,33 +47,10 @@ function AppListItem(props: { app: App }) {
   );
 }
 
-interface BuildsState {
-  builds?: BuildsByStatus;
-  error?: Error;
-}
-
 function BuildsByApp(props: { appSlug: string }) {
-  const [state, setState] = useState<BuildsState>({});
+  const { data, isLoading } = usePromise(async (slug) => await fetchBuilds(slug), [props.appSlug]);
 
-  useEffect(() => {
-    async function fetch() {
-      try {
-        const builds = await fetchBuilds(props.appSlug);
-        setState({ builds: builds });
-      } catch (error) {
-        setState({
-          error: error instanceof Error ? error : new Error("Something went wrong"),
-        });
-      }
-    }
-    fetch();
-  }, [props.appSlug]);
-
-  if (state.error) {
-    handleError(state.error);
-  }
-
-  return <BuildList builds={state.builds} isLoading={!state.builds && !state.error} displayRepoTitle={false} />;
+  return <BuildList builds={data} isLoading={isLoading} displayRepoTitle={false} />;
 }
 
 function appURL(app: App) {

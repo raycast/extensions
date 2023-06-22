@@ -184,7 +184,18 @@
       "title": "Show Projects",
       "subtitle": "Todoist",
       "description": "Show your Todoist projects.",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "showTaskCount",
+          "type": "checkbox",
+          "title": "Advanced",
+          "label": "Show the task count besides the project",
+          "description": "When enabled, you can see the task count besides your project.",
+          "default": false,
+          "required": false
+        }
+      ]
     },
     {
       "name": "show-labels",
@@ -233,11 +244,13 @@
     "eslint": "^8.23.1",
     "eslint-plugin-import": "^2.27.5",
     "eslint-plugin-react-hooks": "^4.6.0",
+    "prettier": "^2.8.7",
     "typescript": "^4.8.3"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "fix": "ray lint --fix"
   }
 }
