@@ -30,12 +30,8 @@ export default function Command() {
 
       url = `${url}/?secret=${values.secret}`;
 
-      if (values.recipient) {
-        url = `${url}&recipient=${values.recipient}`;
-      }
-
       if (values.passphrase) {
-        url = `${url}&passphrase=${values.secret}`;
+        url = `${url}&passphrase=${values.passphrase}`;
       }
 
       if (values.lifetime) {
@@ -69,7 +65,6 @@ export default function Command() {
       <Form.TextArea id="secret" title="Secret*" placeholder="The secret to be sent" />
       <Form.Separator />
       <Form.TextField id="passphrase" title="Passphrase" placeholder="Something top sneaky" />
-      <Form.TextField id="recipient" title="Recipient Email Address" placeholder="Enter email" />
       <Form.Dropdown id="lifetime" title="Lifetime" storeValue>
         <Form.Dropdown.Item value="300" title="5 minutes" />
         <Form.Dropdown.Item value="1800" title="30 minutes" />
