@@ -37,15 +37,15 @@ export function Details(props: DetailsProps) {
     const { result } = state;
 
     const byPriceTable = state.result?.pricesByPriceLabels
-                            ?.map(([type, price, shop]: [string, string, string]) => `| ${type} | ${price} | ${shop} |`)
-                            .join('\n');
+      ?.map(([type, price, shop]: [string, string, string]) => `| ${type} | ${price} | ${shop} |`)
+      .join("\n");
     const byTimeTable = state.result?.pricesByTimeLabels
-                            ?.map(([type, price, shop]: [string, string, string]) => `| ${type} | ${price} | ${shop} |`)
-                            .join('\n');
+      ?.map(([type, price, shop]: [string, string, string]) => `| ${type} | ${price} | ${shop} |`)
+      .join("\n");
 
-return `
+    return `
 [<img src="${result.imageUrl}" width="180"/>](${result.imageUrl})
-## ${result.gameName.replace('Buy ', '')}
+## ${result.gameName.replace("Buy ", "")}
 | By price       |        |            |
 |----------------|--------|------------|
 ${byPriceTable}
@@ -54,43 +54,35 @@ ${byPriceTable}
 |---------------|--------|------------|
 ${byTimeTable}
 `;
-}, [state]);
+  }, [state]);
 
   useEffect(() => {
     getDetails();
   }, []);
 
-  const priceOfficial = state.result?.priceOfficial || '0';
-  const priceKeyshops = state.result?.priceKeyshops || '';
+  const priceOfficial = state.result?.priceOfficial || "0";
+  const priceKeyshops = state.result?.priceKeyshops || "";
 
-  const officialPriceColor = priceKeyshops ? priceOfficial < priceKeyshops ? Color.Green : Color.Blue : Color.Green;
+  const officialPriceColor = priceKeyshops ? (priceOfficial < priceKeyshops ? Color.Green : Color.Blue) : Color.Green;
   const keyshopPriceColor = priceOfficial < priceKeyshops ? Color.Blue : Color.Green;
 
   const metadata = !state.isLoading ? (
     <Detail.Metadata>
       <Detail.Metadata.Label title="Official Stores" text={{ value: priceOfficial, color: officialPriceColor }} />
-      <Detail.Metadata.Label title="Keyshops"text={{ value: priceKeyshops, color: keyshopPriceColor }} />
+      <Detail.Metadata.Label title="Keyshops" text={{ value: priceKeyshops, color: keyshopPriceColor }} />
       <Detail.Metadata.Separator />
       <Detail.Metadata.TagList title="Editions">
-      {state.result?.editions.length === 0 ? (
-        <Detail.Metadata.TagList.Item text="Standard"   />
-      ) : (
-        state.result?.editions.map((edition: string, index: Key | null | undefined) => (
-          <Detail.Metadata.TagList.Item
-            key={index}
-            text={edition}
-            color={editionColors[edition] || ''}
-          />
-        ))
-      )}
+        {state.result?.editions.length === 0 ? (
+          <Detail.Metadata.TagList.Item text="Standard" />
+        ) : (
+          state.result?.editions.map((edition: string, index: Key | null | undefined) => (
+            <Detail.Metadata.TagList.Item key={index} text={edition} color={editionColors[edition] || ""} />
+          ))
+        )}
       </Detail.Metadata.TagList>
       <Detail.Metadata.Separator />
       {state.result?.linkWidget && (
-        <Detail.Metadata.Link
-          title="External links"
-          target={state.result.linkWidget}
-          text="View on steam"
-        />
+        <Detail.Metadata.Link title="External links" target={state.result.linkWidget} text="View on steam" />
       )}
     </Detail.Metadata>
   ) : null;
@@ -117,10 +109,10 @@ function parseDetails(html: string): DetailEntry {
   const pricesByTimeLabels: [string, string, string][] = [];
 
   const gameName = $("h1").text();
-  const imageUrl = $(".game-info-image").find('img')[0].attribs.src;
-  let linkWidget = $(".game-link-widget").attr('href') ?? '';
+  const imageUrl = $(".game-info-image").find("img")[0].attribs.src;
+  let linkWidget = $(".game-link-widget").attr("href") ?? "";
 
-  if(linkWidget){
+  if (linkWidget) {
     const url = new URL(linkWidget);
     linkWidget = baseUrl + url.pathname;
   }
@@ -147,16 +139,16 @@ function parseDetails(html: string): DetailEntry {
   });
 
   const editions = $(".game-editions-list .badges-container")
-                .children()
-                .map((index, element) => $(element).text())
-                .get();
+    .children()
+    .map((index, element) => $(element).text())
+    .get();
 
   return new DetailEntry(
-    gameName, 
-    imageUrl, 
-    linkWidget, 
-    priceOfficial, 
-    priceKeyshops, 
+    gameName,
+    imageUrl,
+    linkWidget,
+    priceOfficial,
+    priceKeyshops,
     pricesByPriceLabels,
     pricesByTimeLabels,
     editions

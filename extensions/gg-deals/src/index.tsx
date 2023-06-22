@@ -5,98 +5,94 @@ import { Details } from "./detail";
 import { DealEntry, SearchState, genreColors } from "./utils/types";
 import { fetchHtml } from "./utils/fetchHtml";
 
-export const baseUrl = 'https://gg.deals';
+export const baseUrl = "https://gg.deals";
 
 export default function Command() {
-  const {state, search} = useSearch();
+  const { state, search } = useSearch();
   const { push } = useNavigation();
 
   const [itemSize, setItemSize] = useState(8);
   const [isLoading, setIsLoading] = useState(true);
 
   const renderGridSection = (deals: DealEntry[]) => {
-    return deals
-      .slice(0, 8)
-      .map(({ gameName, imageUrl, price, url }, index) => (
-        <Grid.Item        
-          key={index}
-          content={{ value: { source: imageUrl }, tooltip: gameName }}
-          title={gameName}
-          subtitle={price}
-          actions={
-            <ActionPanel>
-              <Action
-                title="Show Details"
-                icon={Icon.Sidebar}
-                onAction={() => push(<Details url={baseUrl + url} name={gameName} />)}
-              />
-              <Action.OpenInBrowser url={baseUrl + url} />
-            </ActionPanel>
-          }
-        />
-      ));
+    return deals.slice(0, 8).map(({ gameName, imageUrl, price, url }, index) => (
+      <Grid.Item
+        key={index}
+        content={{ value: { source: imageUrl }, tooltip: gameName }}
+        title={gameName}
+        subtitle={price}
+        actions={
+          <ActionPanel>
+            <Action
+              title="Show Details"
+              icon={Icon.Sidebar}
+              onAction={() => push(<Details url={baseUrl + url} name={gameName} />)}
+            />
+            <Action.OpenInBrowser url={baseUrl + url} />
+          </ActionPanel>
+        }
+      />
+    ));
   };
 
   const renderListDetail = (deals: DealEntry[]) => {
-    const genreList = deals.map(({ genres }) => genres.split(',').map(genre => genre.trim()));
+    const genreList = deals.map(({ genres }) => genres.split(",").map((genre) => genre.trim()));
 
-    return deals
-      .map(({ gameName, imageUrl, price, priceKeyshop, url, releaseDate }, index) => (
-        <List.Item        
-          key={index}
-          title={gameName}
-          subtitle={price}
-          detail={
-            <List.Item.Detail 
-              markdown={`![Illustration](${imageUrl})`} 
-              metadata={
-                <List.Item.Detail.Metadata>
-                  <List.Item.Detail.Metadata.Label title="Official Stores" text={price} />
-                  <List.Item.Detail.Metadata.Label title="Keyshops" text={priceKeyshop} />
-                  <List.Item.Detail.Metadata.Separator />
-                  <List.Item.Detail.Metadata.Label title="Release Date" text={releaseDate} />
-                  <List.Item.Detail.Metadata.TagList title="Genres">
-                    {genreList[index].map((genre, index) => (
-                      <List.Item.Detail.Metadata.TagList.Item 
-                        key={index} 
-                        text={genre} 
-                        color={genreColors[genre] || "#eed535"}
-                      />
-                    ))}
-                  </List.Item.Detail.Metadata.TagList>
-                </List.Item.Detail.Metadata>
-              }
+    return deals.map(({ gameName, imageUrl, price, priceKeyshop, url, releaseDate }, index) => (
+      <List.Item
+        key={index}
+        title={gameName}
+        subtitle={price}
+        detail={
+          <List.Item.Detail
+            markdown={`![Illustration](${imageUrl})`}
+            metadata={
+              <List.Item.Detail.Metadata>
+                <List.Item.Detail.Metadata.Label title="Official Stores" text={price} />
+                <List.Item.Detail.Metadata.Label title="Keyshops" text={priceKeyshop} />
+                <List.Item.Detail.Metadata.Separator />
+                <List.Item.Detail.Metadata.Label title="Release Date" text={releaseDate} />
+                <List.Item.Detail.Metadata.TagList title="Genres">
+                  {genreList[index].map((genre, index) => (
+                    <List.Item.Detail.Metadata.TagList.Item
+                      key={index}
+                      text={genre}
+                      color={genreColors[genre] || "#eed535"}
+                    />
+                  ))}
+                </List.Item.Detail.Metadata.TagList>
+              </List.Item.Detail.Metadata>
+            }
+          />
+        }
+        actions={
+          <ActionPanel>
+            <Action
+              title="Show Details"
+              icon={Icon.Sidebar}
+              onAction={() => push(<Details url={baseUrl + url} name={gameName} />)}
             />
-          }
-          
-          actions={
-            <ActionPanel>
-              <Action
-                title="Show Details"
-                icon={Icon.Sidebar}
-                onAction={() => push(<Details url={baseUrl + url} name={gameName} />)}
-              />
-              <Action.OpenInBrowser url={baseUrl + url} />
-            </ActionPanel>
-          }
-        />
-      ));
+            <Action.OpenInBrowser url={baseUrl + url} />
+          </ActionPanel>
+        }
+      />
+    ));
   };
 
   if (state.results.length > 0) {
     return (
-      <List 
+      <List
         searchText={state.searchText}
-        filtering={false} 
-        isLoading={state.isLoading} 
-        onSearchTextChange={search} 
-        searchBarPlaceholder="What game are you searching for?" 
-        throttle 
+        filtering={false}
+        isLoading={state.isLoading}
+        onSearchTextChange={search}
+        searchBarPlaceholder="What game are you searching for?"
+        throttle
         isShowingDetail
       >
         <List.Section title="Results" subtitle={state.results.length + ""}>
           {!isLoading && renderListDetail(Object.values(state.results))}
-        </List.Section>      
+        </List.Section>
       </List>
     );
   } else {
@@ -125,21 +121,21 @@ export default function Command() {
       >
         <Grid.Section aspectRatio="3/2" title="Historical lows">
           {!isLoading && renderGridSection(Object.values(state.historicalLows))}
-        </Grid.Section>  
+        </Grid.Section>
 
         <Grid.Section aspectRatio="3/2" title="Best deals">
           {!isLoading && renderGridSection(Object.values(state.bestDeals))}
-        </Grid.Section>  
+        </Grid.Section>
 
         <Grid.Section aspectRatio="3/2" title="New deals">
           {!isLoading && renderGridSection(Object.values(state.newDeals))}
-        </Grid.Section>  
+        </Grid.Section>
       </Grid>
     );
   }
 }
 
-function useSearch(){
+function useSearch() {
   const [state, setState] = useState<SearchState>({
     results: [],
     newDeals: [],
@@ -165,7 +161,7 @@ function useSearch(){
 
         let searchUrl = baseUrl;
 
-        if(searchText){
+        if (searchText) {
           const encodedSearchText = encodeURIComponent(searchText);
           searchUrl = `${baseUrl}/games/?title=${encodedSearchText}`;
         }
@@ -173,12 +169,16 @@ function useSearch(){
         const html = await fetchHtml(searchUrl);
         const $ = load(html);
 
-        if(searchText){
+        if (searchText) {
           populateSearch($, "#games-list .game-item", results);
-        }else{
+        } else {
           populateDeals($, "section[id=deals-presets] div[class*=mp-col]:nth-of-type(1) div.list > div", newDeals);
           populateDeals($, "section[id=deals-presets] div[class*=mp-col]:nth-of-type(2) div.list > div", bestDeals);
-          populateDeals($, "section[id=deals-presets] div[class*=mp-col]:nth-of-type(3) div.list > div", historicalLows);
+          populateDeals(
+            $,
+            "section[id=deals-presets] div[class*=mp-col]:nth-of-type(3) div.list > div",
+            historicalLows
+          );
         }
 
         setState((oldState) => ({
@@ -194,7 +194,7 @@ function useSearch(){
           ...oldState,
           isLoading: false,
         }));
-        showToast({ style : Toast.Style.Failure, title: "Could not perform search", message: String(error) });
+        showToast({ style: Toast.Style.Failure, title: "Could not perform search", message: String(error) });
       }
     },
     [setState]
@@ -216,7 +216,7 @@ function populateSearch($: CheerioAPI, selector: string, deals: DealEntry[]) {
     const imageUrl: string = $(this).find("img")[0].attribs.src;
     const price: string = $(this).find(".shop-price-retail .numeric").text();
     const priceKeyshop: string = $(this).find(".shop-price-keyshops .numeric").text();
-    const url = $(this).find('a').attr('href') ?? '';
+    const url = $(this).find("a").attr("href") ?? "";
     const releaseDate = $(this).find(".game-tags-deal .date-tag .value").text();
     const genres = $(this).find(".game-tags-deal .date-tag").next().find(".value").text();
 
@@ -228,7 +228,7 @@ function populateDeals($: CheerioAPI, selector: string, deals: DealEntry[]) {
   $(selector).each(function () {
     const gameName = $(this).find(".title-line").text().trim();
     const price = $(this).find(".price-wrap").text();
-    const url = $(this).find('a').attr('href') ?? '';
+    const url = $(this).find("a").attr("href") ?? "";
 
     let imageUrl = "";
     const srcsetAttribute = $(this).find("img").attr("srcset");
@@ -238,13 +238,13 @@ function populateDeals($: CheerioAPI, selector: string, deals: DealEntry[]) {
 
       if (highestResolutionSource) {
         imageUrl = highestResolutionSource.split(" ")[0];
-      } 
+      }
     }
 
-    if(!imageUrl){
+    if (!imageUrl) {
       imageUrl = $(this).find("img")[0].attribs.src;
     }
 
-    deals.push(new DealEntry(gameName, imageUrl, price, '', url, '', ''));
+    deals.push(new DealEntry(gameName, imageUrl, price, "", url, "", ""));
   });
 }
