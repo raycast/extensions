@@ -5,10 +5,10 @@
   />
 
   <h1>
-    CSS.GG
+    CSS.GG — Icons & Glyphs
   </h1>
 
-Open-source CSS, SVG and Figma UI Icons — Available in SVG Sprite, styled-components, NPM & API
+Open-source SVG icons and glyphs
 
   <p>
     <a href="https://www.raycast.com/astrit/css-gg">
@@ -45,16 +45,7 @@ Open-source CSS, SVG and Figma UI Icons — Available in SVG Sprite, styled-comp
 
 ## Features
 
-- Copy `SVG` to Clipboard
-- Open in Browser
-- Copy as inline `CSS` or `TSX`
-- Copy Markup: `CSS Markup` or `SVG Sprite` Markup
-- Include as `Stylesheet`, `CSS @import`, `JSON` or `XML`
-- Download single icon as `.CSS`, `SVG`, `.SCSS`, White or Black `.PNG`
-- Open in `Figma` or `Adobe XD`
-- Download all 704 icons package as `SVG Sprite`, `.JSON`, `.CSS`, `.SCSS`
-- Copy NPM command: `npm i css.gg`
-
-## Showcases
-
-https://user-images.githubusercontent.com/2398447/142506444-abb942e7-715f-4101-90a6-a7f633199f4d.mp4
+- Paste on front-most app
+- Open in Browser with `shift + enter`
+- Copy to Clipboard `CMD + C`
+- 6000 glyphs with same functionallity as icons
