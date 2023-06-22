@@ -139,7 +139,7 @@ export default function Command() {
       navigationTitle="Search Icons"
       inset={Grid.Inset.Large}
       columns={8}
-      searchBarPlaceholder="Search your icons"
+      searchBarPlaceholder="Search icons e.g. heart"
       searchBarAccessory={
         <Grid.Dropdown
           tooltip="Select Category"

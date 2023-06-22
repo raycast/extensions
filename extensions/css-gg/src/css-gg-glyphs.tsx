@@ -119,10 +119,10 @@ export default function Glyphs() {
 
   return (
     <Grid
-      navigationTitle="Search Icons"
+      navigationTitle="Search Glyphs"
       inset={Grid.Inset.Large}
       columns={8}
-      searchBarPlaceholder="Search 6000 glyphs"
+      searchBarPlaceholder="Search glyphs e.g. arrow"
       searchBarAccessory={
         <Grid.Dropdown
           tooltip="Select Category"
