@@ -1,10 +1,4 @@
-import {
-  Form,
-  ActionPanel,
-  Action,
-  Clipboard,
-  showToast,
-  Toast } from "@raycast/api";
+import { Form, ActionPanel, Action, Clipboard, showToast, Toast } from "@raycast/api";
 import got from "got";
 
 type Values = {
@@ -34,23 +28,23 @@ export default function Command() {
     try {
       let url = "https://onetimesecret.com/api/v1/share";
 
-      url = `${url}/?secret=${values.secret}`
+      url = `${url}/?secret=${values.secret}`;
 
       if (values.recipient) {
-        url = `${url}&recipient=${values.recipient}`
+        url = `${url}&recipient=${values.recipient}`;
       }
 
       if (values.passphrase) {
-        url = `${url}&passphrase=${values.secret}`
+        url = `${url}&passphrase=${values.secret}`;
       }
 
       if (values.lifetime) {
-        url = `${url}&ttl=${values.lifetime}`
+        url = `${url}&ttl=${values.lifetime}`;
       }
 
       const { body } = await got.post(url);
 
-      const shareableUrl = `https://onetimesecret.com/secret/${JSON.parse(body).secret_key}`
+      const shareableUrl = `https://onetimesecret.com/secret/${JSON.parse(body).secret_key}`;
 
       await Clipboard.copy(shareableUrl);
 
