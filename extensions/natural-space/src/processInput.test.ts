@@ -1,9 +1,9 @@
-import { processInput } from './processInput'
+import { processInput } from './processInput';
 
 describe('processInput', () => {
   it('should handle URL properly', () => {
-    expect(processInput('https://www.apple.com')).toEqual('https://www.apple.com')
-  })
+    expect(processInput('https://www.apple.com')).toEqual('https://www.apple.com');
+  });
 
   it('should work', () => {
     expect(
@@ -12,7 +12,7 @@ describe('processInput', () => {
       )
     ).toEqual(
       '在這個例子中我們將混合使用 CJK, English, and numbers 這樣的文字让你看到一个比较混乱的段落 2023 年 5 月 6 日是今天的日期我们的 ChatGPT 是一个基于 GPT4 架构的大型语言模型有时候混合不同的语言和数字会让段落显得很混乱但这对于我们的模型来说没有问题感谢您的提问让我们一起学习更多关于语言的知识和规则'
-    )
+    );
 
     expect(
       processInput(
@@ -20,7 +20,7 @@ describe('processInput', () => {
       )
     ).toEqual(
       `在这个互联网时代，我们经常会在各种网站浏览各种信息，例如：看到有趣的文章：“混合文化的现象，如何影响我们的生活？”文中谈到了 2030 年的预测，其中包括了英文、中文和日文的融合（如：안녕하세요你好 hello）以及数字的普及，如今我们会看到很多文字中出现各种半角和全角标点的混用，例如“全角的逗号，半角的逗号，全角的句号。半角的句号。”这种现象在网络上非常常见，使得文字阅读更加困难和混乱。`
-    )
+    );
 
     // TODO: detect nearly correct URL?
     // expect(
@@ -30,10 +30,10 @@ describe('processInput', () => {
     // ).toEqual(
     //   '我和 20 名学生一起参加了一个由 OpenAI 主办的编程竞赛在这个网站 http://openai.com/competitions/ 里面有更多的详情。这个竞赛非常有趣，我们使用 Python 和 JavaScript 等编程语言完成了任务，最后我们的团队获得了第 3 名的成绩。“AI 技术正在影响世界，我们应该积极地掌握这些技能 ”，说教授김영수（金英洙）이그의강의에서말했다그래서我们应该对이런기술에대해더많은것을배울필요가있습니다。在이번경연에서일본의한팀은그들의로봇개발프로젝트로주목받았다ロボットプロジェクトは非常に多くの人々を驚かせました그들은인공지능기술을이용하여ロボットを構築했다그들의성과는인상적이었다。'
     // )
-  })
+  });
 
   it('should handle URL properly', () => {
-    expect('https://www.apple.com').toEqual('https://www.apple.com')
-    expect('https://www.apple.com/zh/').toEqual('https://www.apple.com/zh/')
-  })
-})
+    expect('https://www.apple.com').toEqual('https://www.apple.com');
+    expect('https://www.apple.com/zh/').toEqual('https://www.apple.com/zh/');
+  });
+});

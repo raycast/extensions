@@ -1,6 +1,6 @@
-import { memoizeLast } from './utils'
+import { memoizeLast } from './utils';
 
-type TransformRule = [half: string, full: string, limitDirection?: 'full-to-half' | 'half-to-full' | 'both']
+type TransformRule = [half: string, full: string, limitDirection?: 'full-to-half' | 'half-to-full' | 'both'];
 
 // https://unicode.org/charts/PDF/UFF00.pdf
 // Halfwidth and Fullwidth Forms
@@ -61,35 +61,35 @@ const halfAndFullWidthForms: TransformRule[] = [
   ['¦', '￤'], // FFE4 FULLWIDTH BROKEN BAR
   ['¥', '￥'], // FFE5 FULLWIDTH YEN SIGN
   ['₩', '￦'], // FFE6 FULLWIDTH WON SIGN
-].map(([half, full, direction = 'full-to-half']) => [half, full, direction as TransformRule[2]] as TransformRule)
+].map(([half, full, direction = 'full-to-half']) => [half, full, direction as TransformRule[2]] as TransformRule);
 
 const extraFullWidthPairs =
   '‘’“”' + // 201A-201D
-  '〈〉《》「」『』【】〔〕〖〗〘〙〚〛﹁﹂﹃﹄' // 3008-301E (some exclusions)
+  '〈〉《》「」『』【】〔〕〖〗〘〙〚〛﹁﹂﹃﹄'; // 3008-301E (some exclusions)
 const extraFullWidthForms =
   '。、' +
   '〜' + // This is 301C, not FF5E
-  extraFullWidthPairs
+  extraFullWidthPairs;
 
 export const getAllHalfWidthForms = memoizeLast(() => {
-  const all = []
-  for (const [half] of halfAndFullWidthForms) all.push(half)
-  return all.join('')
-})
+  const all = [];
+  for (const [half] of halfAndFullWidthForms) all.push(half);
+  return all.join('');
+});
 
 export const getAllFullWidthForms = memoizeLast(() => {
-  const all = []
-  for (const [, full] of halfAndFullWidthForms) all.push(full)
-  all.push(...extraFullWidthForms)
-  return all.join('')
-})
+  const all = [];
+  for (const [, full] of halfAndFullWidthForms) all.push(full);
+  all.push(...extraFullWidthForms);
+  return all.join('');
+});
 
 export const getAllHalfAndFullWidthForms = memoizeLast(() => {
-  const all = []
-  all.push(...getAllFullWidthForms())
-  all.push(...getAllHalfWidthForms())
-  return all.join('')
-})
+  const all = [];
+  all.push(...getAllFullWidthForms());
+  all.push(...getAllHalfWidthForms());
+  return all.join('');
+});
 
 export const fullWidthCharacterRules = [
   // FF10-FF19
@@ -150,28 +150,28 @@ export const fullWidthCharacterRules = [
   ['x', 'ｘ'], // FF58 FULLWIDTH LATIN SMALL LETTER X
   ['y', 'ｙ'], // FF59 FULLWIDTH LATIN SMALL LETTER Y
   ['z', 'ｚ'], // FF5A FULLWIDTH LATIN SMALL LETTER Z
-]
+];
 
 const transformRules: TransformRule[] = halfAndFullWidthForms.concat(
   fullWidthCharacterRules.map(([half, full]) => [half, full, 'full-to-half'] as TransformRule)
-)
+);
 
 // special rules,
 // e.g. 。 maps to '.', instead of `｡`
-transformRules.push(['.', '。'], [',', '，'])
+transformRules.push(['.', '。'], [',', '，']);
 
 export const halfToFullWidthMap = transformRules
   .filter(([, , d]) => d !== 'full-to-half')
   .reduce((acc, [half, full]) => {
-    acc[half] = full
-    return acc
-  }, {} as Record<string, string>)
+    acc[half] = full;
+    return acc;
+  }, {} as Record<string, string>);
 export const fullToHalfWidthMap = transformRules
   .filter(([, , d]) => d !== 'half-to-full')
   .reduce((acc, [half, full]) => {
-    acc[full] = half
-    return acc
-  }, {} as Record<string, string>)
+    acc[full] = half;
+    return acc;
+  }, {} as Record<string, string>);
 
-export const transformHalfToFullWidth = (match: string) => halfToFullWidthMap[match] || match
-export const transformFullToHalfWidth = (match: string) => fullToHalfWidthMap[match] || match
+export const transformHalfToFullWidth = (match: string) => halfToFullWidthMap[match] || match;
+export const transformFullToHalfWidth = (match: string) => fullToHalfWidthMap[match] || match;

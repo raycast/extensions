@@ -1,5 +1,7 @@
 # Natural Space
 
+This project is still in very early stage, please [log an issue](https://github.com/EnixCoda/NaturalSpace/issues/new?title=Unexpected+format+result+from+...&template=unexpected_format_result.yml) if you got any unexpected result.
+
 This is a [Raycast](https://raycast.com) extension that adds proper space to natural language text.
 
 Based on [sparanoid/chinese-copywriting-guidelines](https://github.com/sparanoid/chinese-copywriting-guidelines), and more.

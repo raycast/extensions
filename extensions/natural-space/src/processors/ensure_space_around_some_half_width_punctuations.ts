@@ -1,6 +1,6 @@
-import { getAllHalfWidthForms } from '../fullAndHalfWidthSymbols'
-import { Processor } from '../orderedProcessor'
-import { regex as r } from '../regex'
+import { Processor } from '../createOrderedProcessor';
+import { getAllHalfWidthForms } from '../fullAndHalfWidthSymbols';
+import { regex as r } from '../regex';
 
 // ex: A&B => A & B
 // ex: A&&B => A && B
@@ -21,4 +21,4 @@ export const ensure_space_around_some_half_width_punctuations: Processor = (inpu
         .after(r.rangeOutOf(getAllHalfWidthForms() + '\\s')._())
         .$(),
       ' $1'
-    )
+    );

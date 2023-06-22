@@ -1,4 +1,4 @@
-export type Pattern = 'nomatch' | 'ignore' | 'url'
+export type Pattern = 'nomatch' | 'ignore' | 'url';
 
 const patterns = {
   // protocol
@@ -7,10 +7,10 @@ const patterns = {
   informalURLPattern: /(\w+\.)+\.com(:\d+)?/gi,
   localhostPattern: /[a-z]+:\/\/localhost/gi,
   ipAddressPattern: /([0-9]{1,3}\.){3}[0-9]{1,3}/g,
-}
+};
 
 export function splitByPattern(text: string): [content: string, pattern: Pattern][] {
-  const chunks: ReturnType<typeof splitByPattern> = []
+  const chunks: ReturnType<typeof splitByPattern> = [];
 
   const allPatterns = new RegExp(
     [
@@ -22,21 +22,21 @@ export function splitByPattern(text: string): [content: string, pattern: Pattern
       .map((_) => `(${_})`)
       .join('|'),
     'ig'
-  )
+  );
 
-  const matches = text.matchAll(allPatterns)
+  const matches = text.matchAll(allPatterns);
 
-  let lastIndex = 0
+  let lastIndex = 0;
   for (const match of matches) {
-    const [matchedText] = match
-    const { index = lastIndex } = match
-    const prefix = text.slice(lastIndex, index)
-    if (prefix) chunks.push([prefix, 'nomatch'])
-    chunks.push([matchedText, 'ignore'])
-    lastIndex = index + matchedText.length
+    const [matchedText] = match;
+    const { index = lastIndex } = match;
+    const prefix = text.slice(lastIndex, index);
+    if (prefix) chunks.push([prefix, 'nomatch']);
+    chunks.push([matchedText, 'ignore']);
+    lastIndex = index + matchedText.length;
   }
-  const prefix = text.slice(lastIndex)
-  if (prefix) chunks.push([prefix, 'nomatch'])
+  const prefix = text.slice(lastIndex);
+  if (prefix) chunks.push([prefix, 'nomatch']);
 
-  return chunks
+  return chunks;
 }

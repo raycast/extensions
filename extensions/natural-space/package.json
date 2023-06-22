@@ -16,6 +16,13 @@
       "description": "Text will be paste back to the original place and add to clipboard.",
       "icon": "command-icon.png",
       "mode": "no-view"
+    },
+    {
+      "name": "issue",
+      "title": "Report Issue Of Format Selected Text",
+      "description": "In case you got a wrong format, please report an issue to me.",
+      "icon": "command-icon.png",
+      "mode": "no-view"
     }
   ],
   "preferences": [

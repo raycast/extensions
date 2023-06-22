@@ -2,8 +2,8 @@ import {
   fullToHalfWidthMap as fullToHalfMap,
   fullWidthCharacterRules,
   halfToFullWidthMap as halfToFullMap,
-} from './fullAndHalfWidthSymbols'
-import { regex } from './regex'
+} from './fullAndHalfWidthSymbols';
+import { regex } from './regex';
 
 export const regexSource = {
   CJK: [
@@ -72,7 +72,7 @@ export const regexSource = {
     '\u2150-\u215E', // ⅐ ⅑ ⅒ ⅓ ⅔ ⅕ ⅖ ⅗ ⅘ ⅙ ⅚ ⅛ ⅜ ⅝ ⅞ ⅟
   ].join(''),
   lineBreakAndNonSpace: '\\S\\r\\n',
-}
+};
 
 export const regexSourceRanges = {
   CJK: regex.rangeOf(regexSource.CJK)._(),
@@ -81,4 +81,4 @@ export const regexSourceRanges = {
   transformableFullWidthPunctuations: regex.rangeOf(regexSource.transformableFullWidthPunctuations)._(),
   units: regex.rangeOf(regexSource.unit)._(),
   space: regex.rangeOutOf(regexSource.lineBreakAndNonSpace)._(),
-}
+};
