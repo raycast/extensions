@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "xcode",
   "title": "Xcode",
-  "version": "2.2.1",
+  "version": "2.2.2",
   "description": "Search and open your recent Xcode Projects, manage your Simulators & Apps, view the latest Releases, search the Apple Developer Documentation and quickly clear Xcode cache files.",
   "icon": "icon.png",
   "author": "SvenTiigi",
@@ -271,8 +271,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.48.4",
-    "@raycast/utils": "^1.4.18",
+    "@raycast/api": "^1.53.4",
+    "@raycast/utils": "^1.8.0",
     "dedent": "^0.7.0",
     "node-fetch": "^3.2.10",
     "plist": "^3.0.6",

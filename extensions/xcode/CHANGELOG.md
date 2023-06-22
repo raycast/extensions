@@ -1,5 +1,9 @@
 # Xcode Changelog
 
+## [Bug Fix] - 2023-06-21
+
+- Fixed a bug where creating a Swift playground failed due to an incorrect date format.
+
 ## [Bug Fix] - 2023-02-26
 
 - Fixed a bug where the URL to an Apple's developer documentation entry wasn't constructed correctly.

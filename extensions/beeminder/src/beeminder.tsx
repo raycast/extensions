@@ -1,8 +1,9 @@
 import { List, ActionPanel, Action, popToRoot, showToast, Toast, Form } from "@raycast/api";
 import { usePromise, useForm } from "@raycast/utils";
 import moment from "moment";
-import { Goal, GoalResponse, DataPointFormValues } from "./types";
+import { Goal, GoalResponse, DataPointFormValues, Preferences } from "./types";
 import { fetchGoals, sendDatapoint } from "./api";
+import { getPreferenceValues } from "@raycast/api";
 
 export default function Command() {
   const { isLoading, data: goals, revalidate: fetchData } = usePromise(fetchGoals);
@@ -81,6 +82,7 @@ export default function Command() {
   }
 
   function GoalsList({ goalsData }: { goalsData: GoalResponse }) {
+    const { beeminderUsername } = getPreferenceValues<Preferences>();
     const goals = Array.isArray(goalsData) ? goalsData : undefined;
     return (
       <List isLoading={isLoading}>
@@ -91,29 +93,25 @@ export default function Command() {
           const goalRate = goal.rate % 1 === 0 ? goal.rate : goal.rate.toFixed(2);
 
           let goalIcon;
-          let dueText = `${goalRate} ${goal.gunits} due in ${
-            dayDifference > 1
-              ? dayDifference + " days"
-              : dayDifference == 1
-              ? dayDifference + " day"
-              : ""
-          }`;
+
+          let dueText = `${goalRate} ${goal.gunits} due in `;
+          if (dayDifference > 1) {
+            dueText += `${dayDifference} days`;
+          } else if (dayDifference === 1) {
+            dueText += `${dayDifference} day`;
+          }
 
           if (dayDifference < 1) {
             goalIcon = "🔴";
-            dueText = `${goalRate} ${goal.gunits} due in${
-              timeDiffDuration.hours() > 1
-                ? " " + timeDiffDuration.hours() + " hours"
-                : timeDiffDuration.hours() == 1
-                ? " " + timeDiffDuration.hours() + " hour"
-                : ""
-            }${
-              timeDiffDuration.minutes() > 1
-                ? " " + timeDiffDuration.minutes() + " minutes"
-                : timeDiffDuration.minutes() == 1
-                ? " " + timeDiffDuration.minutes() + " minute"
-                : ""
-            }`;
+            // When dayDifference is less than one, express due time in hours and/or minutes
+            const hours = timeDiffDuration.hours();
+            const minutes = timeDiffDuration.minutes();
+            if (hours > 0) {
+              dueText += hours > 1 ? `${hours} hours` : `${hours} hour`;
+            }
+            if (minutes > 0) {
+              dueText += minutes > 1 ? ` ${minutes} minutes` : ` ${minutes} minute`;
+            }
           } else if (dayDifference < 2) {
             goalIcon = "🟠";
           } else if (dayDifference < 3) {
@@ -139,10 +137,14 @@ export default function Command() {
               actions={
                 <ActionPanel>
                   <Action.Push
-                    title="Enter datapoint"
+                    title="Enter Datapoint"
                     target={<DataPointForm goalSlug={goal.slug} />}
                   />
-                  <Action title="Refresh data" onAction={async () => await fetchData()} />
+                  <Action.OpenInBrowser
+                    title="Open Goal in Beeminder"
+                    url={`https://www.beeminder.com/${beeminderUsername}/${goal.slug}`}
+                  />
+                  <Action title="Refresh Data" onAction={async () => await fetchData()} />
                 </ActionPanel>
               }
             />

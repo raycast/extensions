@@ -1,4 +1,13 @@
-import { Action, Clipboard, Icon, Keyboard, showToast, Toast } from "@raycast/api";
+import {
+  Action,
+  Clipboard,
+  Icon,
+  Keyboard,
+  showToast,
+  Toast,
+  getPreferenceValues,
+  closeMainWindow,
+} from "@raycast/api";
 import { execFileSync } from "child_process";
 
 import { CLI_PATH, titleCaseWord } from "../utils";
@@ -50,7 +59,6 @@ export function CopyToClipboard({
           style: Toast.Style.Animated,
           title: `Copying ${field}...`,
         });
-
         try {
           const stdout = execFileSync(CLI_PATH!, ["read", `op://${vault_id}/${id}/${field}`]);
           await copyPassword(stdout.toString().trim());
@@ -69,6 +77,11 @@ export function CopyToClipboard({
                 toast.hide();
               },
             };
+          }
+        } finally {
+          const preferences = getPreferenceValues();
+          if (preferences.closeWindowAfterCopying) {
+            await closeMainWindow();
           }
         }
       }}

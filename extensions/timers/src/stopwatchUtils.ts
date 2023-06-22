@@ -9,8 +9,8 @@ import { Stopwatch } from "./types";
 const SWPATH = environment.supportPath + "/raycast-stopwatches.json";
 
 const ensureSWFileExists = () => {
-  if (!existsSync(SWPATH)) {
-    writeFileSync(SWPATH, JSON.stringify([]));
+  if (!existsSync(SWPATH) || readFileSync(SWPATH).toString() == "") {
+    writeFileSync(SWPATH, "[]");
   }
 };
 

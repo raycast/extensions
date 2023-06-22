@@ -6,7 +6,8 @@
   "icon": "icon.png",
   "author": "rolandleth",
   "contributors": [
-    "crazyones110"
+    "crazyones110",
+    "zhenpewu"
   ],
   "license": "MIT",
   "commands": [
@@ -57,25 +58,35 @@
       "required": false,
       "title": "",
       "type": "checkbox"
+    },
+    {
+      "description": "Refresh duration in milliseconds. The minimum value is 1000ms and to disable auto-refresh, set it to 0.",
+      "label": "Refresh Duration",
+      "name": "refreshDuration",
+      "required": false,
+      "title": "Refresh Duration",
+      "type": "textfield",
+      "default": "3000"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.25.0",
-    "node-fetch": "^3.0.0"
+    "@raycast/api": "^1.52.1"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "react-devtools": "^4.19.2",
+    "prettier": "^2.5.1",
     "typescript": "^4.4.3"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
-    "publish": "ray publish"
+    "publish": "npx @raycast/api@latest publish",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
   }
 }

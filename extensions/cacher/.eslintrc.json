@@ -1,0 +1,12 @@
+{
+  "root": true,
+  "plugins": ["react-hooks"],
+  "extends": ["@raycast", "plugin:react/recommended", "prettier"],
+  "rules": {
+    "no-console": "error",
+    "react-hooks/rules-of-hooks": "error",
+    "react-hooks/exhaustive-deps": "error",
+    "react/react-in-jsx-scope": "off",
+    "react/jsx-key": "error"
+  }
+}
