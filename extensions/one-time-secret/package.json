@@ -19,6 +19,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.53.4",
+    "@types/got": "^9.6.12",
     "got": "^13.0.0"
   },
   "devDependencies": {

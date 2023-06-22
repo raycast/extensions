@@ -1,6 +1,5 @@
 import {Form, ActionPanel, Action, Clipboard, showToast, Toast} from "@raycast/api";
-// @ts-ignore
-import got from "got";
+import got, {GotOptions} from "got";
 
 type Values = {
   lifetime: number;
@@ -43,11 +42,9 @@ export default function Command() {
         url = `${url}&ttl=${values.lifetime}`
       }
 
-      const { body } = await got.post(url, {
-        responseType: "json",
-      });
+      const { body } = await got.post(url);
 
-      const shareableUrl = `https://onetimesecret.com/secret/${body.secret_key}`
+      const shareableUrl = `https://onetimesecret.com/secret/${JSON.parse(body).secret_key}`
 
       await Clipboard.copy(shareableUrl);
 
