@@ -16,7 +16,7 @@
       "description": "https://seedsnote.com/help/advanced/apitoken/",
       "type": "textfield",
       "required": true,
-      "placeholder": "您的Seedsnote API"
+      "placeholder": "Seedsnote API"
     }
   ],
   "commands": [
