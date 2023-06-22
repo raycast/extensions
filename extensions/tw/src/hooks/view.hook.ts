@@ -40,12 +40,12 @@ export const useProjectAction = (
     ? {
         source: Icon.MinusCircle,
         tintColor: Color.Red,
-        action: () => modifyCommand("project", ""),
+        onAction: () => modifyCommand("project", ""),
       }
     : {
         source: Icon.PlusCircle,
         tintColor: Color.Green,
-        action: () => modifyCommand("project", project),
+        onAction: () => modifyCommand("project", project),
       }
 ) => ({
   key: `task_${item.task.uuid}_action_project_${project}`,
@@ -61,12 +61,12 @@ export const useTagAction = (
     ? {
         source: Icon.MinusCircle,
         tintColor: Color.Red,
-        action: () => modifyCommand(`-${tag}`),
+        onAction: () => modifyCommand(`-${tag}`),
       }
     : {
         source: Icon.PlusCircle,
         tintColor: Color.Green,
-        action: () => modifyCommand(`+${tag}`),
+        onAction: () => modifyCommand(`+${tag}`),
       }
 ) => ({
   key: `task_${task.uuid}_action_tag_${tag}`,

@@ -7,12 +7,13 @@ import { Task } from "../core/types/task.model";
 import { showToast, Toast } from "@raycast/api";
 import { Command } from "../core/types";
 import { useAlerts } from "./alert.hook";
+import { SaveCommand } from "./command.hook";
 
 type UseTaskCommandProps<T> = {
   isLoading: boolean;
   revalidate: () => void;
   items: T;
-  onSave: (task: Partial<Task>) => Promise<string>;
+  onSave: SaveCommand;
 };
 
 export const useTaskCommand = <T extends TaskAction, R = T extends ExportableAction ? Task[] : string[]>(
@@ -29,9 +30,7 @@ export const useTaskCommand = <T extends TaskAction, R = T extends ExportableAct
     onData: (data) => {
       onSuccess(data);
     },
-    onError: (e) => {
-      onFailure(e);
-    },
+    onError: onFailure,
   });
   const parser = useMemo(() => getParser(command), [command, data]);
   const items = useMemo(() => parser(data) as R, [command, parser, data]);

@@ -8,6 +8,7 @@ import {
   isHandyAlias,
   isTuple,
   isHelperCommand,
+  isActionTag,
 } from "../types/task.guard";
 import { Task } from "../types/task.model";
 import { TaskAction, TaskCommandProps } from "../types/task.type";
@@ -67,6 +68,10 @@ export const parseTaskCommandArgs = ({ command, uuid, params }: TaskCommandProps
     // task eb0eb0e0 modify due:(20230221T002231Z|today|tomorrow|friday|)
     if (command === "modify" || command === "add") {
       const res = command === "modify" ? [`${uuid}`] : [];
+
+      if (isActionTag(params)) {
+        return [...res, command, `${params}`];
+      }
 
       if (isTuple(params)) {
         const [key, value] = params;

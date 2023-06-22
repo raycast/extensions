@@ -53,10 +53,10 @@ export const isStateOverdue = (task: unknown | Task): task is "overdue" =>
   isTask(task) && task?.status !== "completed" && isDateOverdue(task.due);
 
 export const isActionProject = (action?: any): action is ActionProject =>
-  action ? action.startsWith(indicators.project) : false;
+  typeof action === "string" ? action.startsWith(indicators.project) : false;
 
 export const isActionTag = (action?: any): action is ActionTag =>
-  action ? action.startsWith(indicators.tag) || action.startsWith("-") : false;
+  typeof action === "string" ? action.startsWith(indicators.tag) || action.startsWith("-") : false;
 
 export const isAction = (value?: string): value is TaskAction =>
   actions[value as Actions] !== undefined || isActionTag(value) || isActionProject(value);
