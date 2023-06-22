@@ -4,6 +4,8 @@
 
 A set of text manipulation tools, useful for Hebrew and Yiddish typesetters and designers. 
 
+ <img src="metadata/screenshot.png" alt="Aleph Tools" width="600" height="400">
+
 ## How to use 
 
 Select any text that you wish to manipulate, and run the command! Your currently selected text will be replaced with the updated text.
