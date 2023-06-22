@@ -23,7 +23,7 @@ Open the project in your IDE of choice (❤️Jetbrains) and install the depende
 $ npm install
 ```
 
-To run and test the Xcode extension locally:
+To run and test extension locally:
 
 ```bash
 $ npm run dev

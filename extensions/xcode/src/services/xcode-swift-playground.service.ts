@@ -140,7 +140,7 @@ export class XcodeSwiftPlaygroundService {
     let iteration = null;
     const targetLocation = untildify(location);
     do {
-      const dateString = new Date().toLocaleDateString("en-CA");
+      const dateString = new Date().toLocaleDateString().replaceAll("/", "-").replaceAll(".", "-");
       const name =
         iteration == null
           ? `${filename}-${dateString}.playground`
