@@ -39,11 +39,11 @@ export default async function ToggleAllLights() {
 
     // Update command metadata
     if (updatedOnLights.length === 0) {
-      updateCommandMetadata({ subtitle: "All lights are off" });
+      updateCommandMetadata({ subtitle: "All lights are off" }).then();
     } else if (updatedOnLights.length === lights.length) {
-      updateCommandMetadata({ subtitle: "All lights are on" });
+      updateCommandMetadata({ subtitle: "All lights are on" }).then();
     } else {
-      updateCommandMetadata({ subtitle: `${updatedOnLights.length} of ${lights.length} lights are on` });
+      updateCommandMetadata({ subtitle: `${updatedOnLights.length} of ${lights.length} lights are on` }).then();
     }
   } catch (error) {
     if (environment.launchType !== "userInitiated" || !(error instanceof Error)) {
@@ -51,7 +51,7 @@ export default async function ToggleAllLights() {
     }
 
     console.error(error.message);
-    showHUD(error.message);
+    showHUD(error.message).then();
   } finally {
     if (environment.launchType === "userInitiated") {
       await closeMainWindow();
@@ -66,9 +66,9 @@ async function toggleLightsAndNotifyUser(lights: Light[], onLights: Light[], hue
     message: "Please wait…",
   });
 
-  let toastTitle = "";
-  let successMessage = "";
-  let failureMessage = "";
+  let toastTitle: string;
+  let successMessage: string;
+  let failureMessage: string;
 
   if (onLights.length === 0) {
     toastTitle = "Turning on all lights…";
@@ -94,8 +94,8 @@ async function toggleLightsAndNotifyUser(lights: Light[], onLights: Light[], hue
   const lightsFailed = settledPromises.filter((p) => p.status === "rejected").length;
 
   if (lightsFailed === 0) {
-    showHUD(successMessage);
+    showHUD(successMessage).then();
   } else {
-    showHUD(`Turned on ${lightsTurnedOn} lights, ${failureMessage}`);
+    showHUD(`Turned on ${lightsTurnedOn} lights, ${failureMessage}`).then();
   }
 }
