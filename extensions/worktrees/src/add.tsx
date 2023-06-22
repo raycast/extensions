@@ -108,17 +108,14 @@ export default function Command() {
         </ActionPanel>
       }
     >
-      {/* TODO: This element can be dynamically hidden when empty once https://github.com/raycast/extensions/issues/7016 is fixed */}
-      <Form.Description
-        title="Summary"
-        text={
-          repo &&
-          branch &&
-          `A new worktree will be added to ${formatPath(repo)} at ${formatPath(
+      {repo && branch && (
+        <Form.Description
+          title="Summary"
+          text={`A new worktree will be added to ${formatPath(repo)} at ${formatPath(
             getPath(repo, prefix, branch)
-          )} with the branch ${branch} off of ${startBranch}`
-        }
-      />
+          )} with the branch ${branch} off of ${startBranch}`}
+        />
+      )}
       <Form.Dropdown title="Repo" isLoading={isLoadingRepos} storeValue {...itemProps.repo}>
         {repos?.map((repo) => (
           <Form.Dropdown.Item key={repo} value={repo} title={formatPath(repo)} />
