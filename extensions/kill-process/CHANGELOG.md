@@ -1,13 +1,13 @@
 # Kill Process Changelog
 
-## [Sort by memory and App aggregation] - 2023-06-15
+## [Sort by memory and App aggregation] - {PR_MERGE_DATE}
 
 - Now can sort processes by CPU or memory usage
 - Now can aggregate processes of the same app
 
 ## [Auto Refresh] - 2023-06-13
 
-- Add auto-refresh of list, check preferences
+- Add auto-refresh of the list, check preferences
 
 ## [Filter by PID] - 2023-03-20
 
