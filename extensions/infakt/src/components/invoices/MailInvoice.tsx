@@ -55,7 +55,7 @@ export default function MailInvoice({ invoice, mutateInvoices }: Props) {
       print_type: "original",
       locale: "pl",
       recipient: clientData?.email ?? "",
-      send_copy: false,
+      send_copy: true,
     },
     validation: {
       print_type: (value) => {
