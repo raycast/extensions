@@ -1,4 +1,4 @@
-import { showHUD, Clipboard, getPreferenceValues } from "@raycast/api";
+import { showHUD, Clipboard } from "@raycast/api";
 import { resolveBasedOnPreferences } from "./utils";
 
 export default async function main() {
