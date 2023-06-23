@@ -1,0 +1,24 @@
+{
+  "configurations": [
+    {
+      "type": "lldb",
+      "request": "launch",
+      "sourceLanguages": ["swift"],
+      "name": "Debug ruler",
+      "program": "${workspaceFolder:ruler}/.build/debug/ruler",
+      "args": [],
+      "cwd": "${workspaceFolder:ruler}",
+      "preLaunchTask": "swift: Build Debug ruler"
+    },
+    {
+      "type": "lldb",
+      "request": "launch",
+      "sourceLanguages": ["swift"],
+      "name": "Release ruler",
+      "program": "${workspaceFolder:ruler}/.build/release/ruler",
+      "args": [],
+      "cwd": "${workspaceFolder:ruler}",
+      "preLaunchTask": "swift: Build Release ruler"
+    }
+  ]
+}
