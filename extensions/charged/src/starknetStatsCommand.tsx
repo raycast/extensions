@@ -25,6 +25,17 @@ export default function Command() {
     analytics.trackEvent("OPEN_STARKNET_STATS");
   }, []);
 
+  async function getDailyStatus() {
+    try {
+      return await axios.get(`https://starkscan.co/_next/data/cIl8kMxjxKVwWM30EMVIZ/stats.json`);
+    } catch (err) {
+      console.error(err);
+      return {
+        data: false,
+      };
+    }
+  }
+
   useEffect(() => {
     (async () => {
       const promises = [
@@ -50,7 +61,7 @@ export default function Command() {
             headers: STARKSCAN_HEADERS,
           }
         ),
-        axios.get(`https://starkscan.co/_next/data/cIl8kMxjxKVwWM30EMVIZ/stats.json`),
+        getDailyStatus(),
       ];
 
       const [latestBlockResponse, overviewStatsResponse, dodStatsResponse] = await Promise.all(promises);
