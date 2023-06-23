@@ -1,6 +1,6 @@
 # Trello Changelog
 
-## [Update] - 2023-05-20
+## [Update] - 2023-06-23
 
 Added functionality to assign members when creating a new todo
 
@@ -14,7 +14,7 @@ Add fields missing that broke card creation action
 
 ## [Fix] - 2023-03-13
 
-Revert earlier changes that broke search feature
+Revert earlier changes that broke the search feature
 
 ## [Update] - 2023-02-13
 
