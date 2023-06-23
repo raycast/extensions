@@ -5,6 +5,10 @@
   "description": "Raycast extension for showing, searching, and interacting with cards from Trello",
   "icon": "command-icon.png",
   "author": "ChrisChinchilla",
+  "contributors": [
+    "brittanyjoiner15",
+    "ajaypremshankar"
+  ],
   "license": "MIT",
   "commands": [
     {
