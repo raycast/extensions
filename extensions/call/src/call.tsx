@@ -1,19 +1,21 @@
-import {showHUD, LaunchProps} from "@raycast/api";
-const {exec} = require("child_process");
+import { showHUD, LaunchProps } from "@raycast/api";
+import exec from "child_process";
 
 interface Arguments {
-    number: string;
+  number: string;
 }
 
-export default async function main(props : LaunchProps < {
-    arguments : Arguments;
-} >) {
-    let {number} = props.arguments;
+export default async function main(
+  props: LaunchProps<{
+    arguments: Arguments;
+  }>
+) {
+  let { number } = props.arguments;
 
-    // Remove all non-numeric characters
-    number = number.replace("/-/g", "");
+  // Remove all non-numeric characters
+  number = number.replace("/-/g", "");
 
-    exec("open tel://" + number);
+  exec("open tel://" + number);
 
-    await showHUD("Calling " + number);
+  await showHUD("Calling " + number);
 }
