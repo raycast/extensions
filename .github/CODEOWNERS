@@ -725,6 +725,7 @@
 /extensions/purpleair                                @omarshahine
 /extensions/putio                                    @altaywtf
 /extensions/px-to-rem-converter                      @raulanatol
+/extensions/px-to-tailwind                           @kemiljk
 /extensions/qbittorrent                              @J3n5en
 /extensions/qonto                                    @ChristoRibeiro
 /extensions/qotp                                     @ariesly15
@@ -948,7 +949,7 @@
 /extensions/transform                                @Idered @robertrosman
 /extensions/transmission                             @FezVrasta @danpalmer
 /extensions/transmit                                 @kennonb
-/extensions/trello                                   @ChrisChinchilla
+/extensions/trello                                   @ChrisChinchilla @Jimmy-b36
 /extensions/truth-or-dare                            @tandpfun
 /extensions/tunnelblick                              @SamuelNitsche
 /extensions/tuple                                    @inxilpro
