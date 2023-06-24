@@ -1,8 +1,8 @@
-const devices: Record<string, Record<string, string>> = {
-  // Jabra Elite 85t
+import { DeviceDefinition } from "src/types/device";
+
+export default {
   "0x24CD": {
+    name: "Elite 85t",
     main: "icons/devices/jabra/elite.85t.svg",
   },
-};
-
-export default devices;
+} as Record<string, DeviceDefinition>;
