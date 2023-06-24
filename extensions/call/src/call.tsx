@@ -1,5 +1,5 @@
 import { showHUD, LaunchProps } from "@raycast/api";
-import exec from "child_process";
+import { exec } from "child_process";
 
 interface Arguments {
   number: string;
