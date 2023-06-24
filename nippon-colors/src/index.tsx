@@ -1,43 +1,45 @@
-import { useState } from "react";
-import { ActionPanel, Action, Icon, Grid, Color } from "@raycast/api";
+import { useEffect, useState } from "react";
+import { ActionPanel, Action, Grid, showToast, Toast } from "@raycast/api";
+import { NipponColorAgent } from "./nipponColorAgent";
 
 export default function Command() {
-  const [itemSize, setItemSize] = useState<Grid.ItemSize>(Grid.ItemSize.Medium);
   const [isLoading, setIsLoading] = useState(true);
-  return (
-    <Grid
-      itemSize={itemSize}
-      inset={Grid.Inset.Large}
-      isLoading={isLoading}
-      searchBarAccessory={
-        <Grid.Dropdown
-          tooltip="Grid Item Size"
-          storeValue
-          onChange={(newValue) => {
-            setItemSize(newValue as Grid.ItemSize);
-            setIsLoading(false);
-          }}
-        >
-          <Grid.Dropdown.Item title="Large" value={Grid.ItemSize.Large} />
-          <Grid.Dropdown.Item title="Medium" value={Grid.ItemSize.Medium} />
-          <Grid.Dropdown.Item title="Small" value={Grid.ItemSize.Small} />
-        </Grid.Dropdown>
+  const [colors, setColors] = useState<{ [name: string]: string }>({});
+
+  useEffect(() => {
+    async function init() {
+      try {
+        await NipponColorAgent.buildNipponColorAgent(function (name: string, colorCode: string) {
+          setColors((prevColor) => ({ ...prevColor, [name]: colorCode }));
+        });
+        setIsLoading(false);
+      } catch (error) {
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Something went wrong",
+          message: "failed to load colors",
+        });
       }
-    >
-      {!isLoading &&
-        Object.entries(Icon).map(([name, icon]) => (
-          <Grid.Item
-            key={name}
-            content={{ value: { source: icon, tintColor: Color.PrimaryText }, tooltip: name }}
-            title={name}
-            subtitle={icon}
-            actions={
-              <ActionPanel>
-                <Action.CopyToClipboard content={icon} />
-              </ActionPanel>
-            }
-          />
-        ))}
+    }
+    init();
+  }, []);
+  return (
+    <Grid isLoading={isLoading} searchBarPlaceholder={isLoading ? "Loading..." : "Search colors"}>
+      <Grid.EmptyView title="No colors found" description="please create an issue If this screen keeps showing up." />
+      {Object.entries(colors).map(([name, colroCode]) => (
+        <Grid.Item
+          key={name}
+          content={{ color: { light: colroCode, dark: colroCode, adjustContrast: false } }}
+          title={name}
+          subtitle={colroCode}
+          actions={
+            <ActionPanel>
+              <Action.OpenInBrowser title="Open in Nippon Colors" url={`${NipponColorAgent.BASE_URL}#${name}`} />
+              <Action.CopyToClipboard content={colroCode} />
+            </ActionPanel>
+          }
+        />
+      ))}
     </Grid>
   );
 }

@@ -14,14 +14,15 @@
   "commands": [
     {
       "name": "index",
-      "title": "Show Grid",
-      "description": "Template for showing a static grid",
+      "title": "Explore Nippon Color",
+      "description": "explore nippon colors!",
       "mode": "view"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.54.0",
-    "cheerio": "^1.0.0-rc.12"
+    "cheerio": "^1.0.0-rc.12",
+    "node-fetch": "^3.3.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.5",
