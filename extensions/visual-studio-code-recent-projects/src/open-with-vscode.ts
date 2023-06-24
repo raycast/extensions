@@ -1,10 +1,4 @@
-import {
-  showToast,
-  Toast,
-  open,
-  closeMainWindow,
-  getSelectedFinderItems,
-} from "@raycast/api";
+import { showToast, Toast, open, closeMainWindow, getSelectedFinderItems } from "@raycast/api";
 import { bundleIdentifier } from "./preferences";
 import { getCurrentFinderPath } from "./utils/apple-scripts";
 
