@@ -5,6 +5,9 @@
   "description": "Raycast extension for showing, searching, and interacting with cards from Trello",
   "icon": "command-icon.png",
   "author": "ChrisChinchilla",
+  "contributors": [
+    "jimmy-b36"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -38,32 +41,32 @@
   ],
   "preferences": [
     {
-      "name": "username",
-      "type": "textfield",
-      "required": true,
-      "title": "Trello Username",
       "description": "Trello Username",
       "link": "https://developer.atlassian.com/cloud/trello/guides/rest-api/api-introduction/",
-      "placeholder": "Trello username"
+      "name": "username",
+      "placeholder": "Trello username",
+      "required": true,
+      "title": "Trello Username",
+      "type": "textfield"
     },
     {
-      "name": "token",
-      "type": "password",
-      "required": true,
-      "title": "Personal Access Token",
       "description": "Trello Access token",
       "link": "https://developer.atlassian.com/cloud/trello/guides/rest-api/api-introduction/",
-      "placeholder": "Trello Access token"
+      "name": "token",
+      "placeholder": "Trello Access token",
+      "required": true,
+      "title": "Personal Access Token",
+      "type": "password"
     },
     {
-      "name": "apitoken",
-      "type": "textfield",
-      "required": true,
-      "title": "API Token",
+      "default": "13f8c59607ba6d82531d3db5f46999c1",
       "description": "Application Trello API token",
       "link": "https://developer.atlassian.com/cloud/trello/guides/rest-api/api-introduction/",
+      "name": "apitoken",
       "placeholder": "13f8c59607ba6d82531d3db5f46999c1",
-      "default": "13f8c59607ba6d82531d3db5f46999c1"
+      "required": true,
+      "title": "API Token",
+      "type": "textfield"
     }
   ],
   "dependencies": {
@@ -84,7 +87,7 @@
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
-    "lint": "ray lint",
-    "fix-lint": "ray lint --fix"
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
   }
 }
