@@ -1,5 +1,9 @@
 # Menubar Weather Changelog
 
+## [Fix bug] - 2023-06-19
+
+- Fix a bug that caused the extension to crash if cached data couldn't be parsed properly.
+
 ## [Update UI] - 2023-03-29
 
 - Add wind direction display

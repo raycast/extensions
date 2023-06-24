@@ -1,6 +1,6 @@
 import { Icon } from "@raycast/api";
 
-export type AppError = IPValidationError;
+export type AppError = IPValidationError | RangeConvertError;
 
 export type IPV4 = [number, number, number, number];
 export type Mask = number;
@@ -8,6 +8,11 @@ export type CIDR = [IPV4, Mask];
 
 export interface IPValidationError {
   kind: "IP_VALIDATION_ERROR";
+  msg: string;
+}
+
+export interface RangeConvertError {
+  kind: "IP_RANGE_FAILED_TO_CIDR_ERROR";
   msg: string;
 }
 
