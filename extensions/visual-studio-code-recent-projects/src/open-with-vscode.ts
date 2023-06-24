@@ -6,7 +6,7 @@ import {
   getSelectedFinderItems,
 } from "@raycast/api";
 import { bundleIdentifier } from "./preferences";
-import { getCurrentFinderPath } from "./utils/apple-scripts.ts";
+import { getCurrentFinderPath } from "./utils/apple-scripts";
 
 export default async function main() {
   try {
