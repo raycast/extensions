@@ -8,7 +8,7 @@ import { useCachedPromise, usePromise } from "@raycast/utils";
 
 interface FormValues {
   appSlug: string;
-  workflow: string;
+  workflow_or_pipeline: string;
   branch?: string;
   message?: string;
 }
@@ -47,10 +47,17 @@ export default function Command() {
           <Form.Dropdown.Item value={app.slug} title={app.title} key={app.slug} icon={app.avatar_url ?? Icon.Box} />
         ))}
       </Form.Dropdown>
-      <Form.Dropdown id="workflow" title="Workflow" storeValue>
-        {workflowsState.data?.map((workflow) => (
-          <Form.Dropdown.Item value={workflow} title={workflow} key={workflow} />
-        ))}
+      <Form.Dropdown id="workflow_or_pipeline" title="Workflow" storeValue>
+        <Form.Dropdown.Section title="Pipelines">
+          {workflowsState.data?.active_pipelines?.map((pipeline) => (
+            <Form.Dropdown.Item value={"++pipeline++" + pipeline.name} title={pipeline.name} key={pipeline.name} />
+          ))}
+        </Form.Dropdown.Section>
+        <Form.Dropdown.Section title="Workflows">
+          {workflowsState.data?.active_workflows?.map((workflow) => (
+            <Form.Dropdown.Item value={workflow.name} title={workflow.name} key={workflow.name} />
+          ))}
+        </Form.Dropdown.Section>
       </Form.Dropdown>
       <Form.TextField id="branch" title="Branch" placeholder="Enter git branch (optional)" />
       <Form.TextArea id="message" title="Message" placeholder="Enter message (optional)" />
@@ -65,7 +72,7 @@ function StartBuildAction() {
       return;
     }
 
-    if (!values.workflow) {
+    if (!values.workflow_or_pipeline) {
       await showSubmitError("Invalid parameters", "No workflow selected");
       return;
     }
@@ -75,8 +82,19 @@ function StartBuildAction() {
       title: "Starting build",
     });
 
+    let pipeline_id: string | undefined;
+    let workflow_id: string | undefined;
+    if (values.workflow_or_pipeline.startsWith("++pipeline++")) {
+      pipeline_id = values.workflow_or_pipeline.split("++pipeline++")[1];
+      workflow_id = undefined;
+    } else {
+      pipeline_id = undefined;
+      workflow_id = values.workflow_or_pipeline;
+    }
+
     const response = await startBuild(values.appSlug, {
-      workflow_id: values.workflow,
+      pipeline_id: pipeline_id,
+      workflow_id: workflow_id,
       branch: values.branch,
       commit_message: values.message,
     });
