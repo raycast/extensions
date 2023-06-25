@@ -1,0 +1,46 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "remember-this",
+  "title": "Remember This",
+  "description": "With our sleek and user-friendly extension, you can easily input any piece of information you wish to remember. Our extension boasts a beautiful, intuitive interface that is easy to navigate, making it a breeze to store your important data. Whether you need to remember a phone number, a reminder, or a to-do list item, our extension will keep it safe and secure until you need it again.",
+  "icon": "command_icon.png",
+  "author": "Ek217",
+  "categories": [
+    "Data"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Remember This",
+      "subtitle": "Add something for the extension to remember!",
+      "description": "Add something for the extension to remember!",
+      "mode": "view"
+    },
+    {
+      "name": "view",
+      "title": "Remembered Things",
+      "subtitle": "Show a list of things being remembered!",
+      "description": "Show a list of things being remembered!",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.54.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

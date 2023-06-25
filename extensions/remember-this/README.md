@@ -1,0 +1,3 @@
+# Remember This
+
+With our sleek and user-friendly extension, you can easily input any piece of information you wish to remember. Our extension boasts a beautiful, intuitive interface that is easy to navigate, making it a breeze to store your important data. Whether you need to remember a phone number, a reminder, or a to-do list item, our extension will keep it safe and secure until you need it again.
