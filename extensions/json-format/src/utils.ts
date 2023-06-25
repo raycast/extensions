@@ -35,6 +35,13 @@ export async function copyFormattedJs(result: string) {
   }
 }
 
+export async function parseAndFormatJs(text: string) {
+  const parsed = parse(text);
+  if (!parsed) return;
+  const formatted = await formatJS(parsed);
+  return formatted;
+}
+
 interface Preferences {
   indent: IndentType;
   autopaste: boolean;
@@ -68,4 +75,16 @@ function convert(input: string) {
 
 function isExecuteable(input: string) {
   return /\([\s\S]*?\)|[\w$]\s*`[\s\S]*?`/.test(input);
+}
+
+function parse(input: string) {
+  try {
+    return JSON.parse(input);
+  } catch (error) {
+    showToast({
+      style: Toast.Style.Failure,
+      title: 'Please enter a valid JSON string',
+    });
+    return;
+  }
 }
