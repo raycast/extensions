@@ -38,7 +38,7 @@ export default function Command() {
     // Log the expiration date and what to remember
     console.log(`Remembering "${values.textarea}" until ${expirationDate.toString()}`);
     showToast({
-      title: "Remembering That!"
+      title: "Remembering That!",
     });
   }
 

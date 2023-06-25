@@ -133,13 +133,12 @@ export default function Command() {
               <ActionPanel.Section>
                 <ActionPanel.Item
                   title="Delete Item"
-                    icon={Icon.DeleteDocument}
+                  icon={Icon.DeleteDocument}
                   onAction={() => {
                     deleteItem(index);
                   }}
                   shortcut={{ modifiers: ["cmd"], key: "backspace" }}
                 />
-
               </ActionPanel.Section>
             </ActionPanel>
           }
