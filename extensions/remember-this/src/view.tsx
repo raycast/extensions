@@ -1,4 +1,4 @@
-import { List, ListItem, ActionPanel, OpenInBrowserAction, showToast } from "@raycast/api";
+import { List, Icon, ListItem, ActionPanel, showToast } from "@raycast/api";
 import { useState } from "react";
 import fs from "fs";
 import path from "path";
@@ -130,18 +130,16 @@ export default function Command() {
           subtitle={getExpirationString(item.expirationDate)}
           actions={
             <ActionPanel>
-              <OpenInBrowserAction
-                title="Open in Browser"
-                url={`https://www.google.com/search?q=${encodeURIComponent(item.content)}`}
-              />
               <ActionPanel.Section>
                 <ActionPanel.Item
-                  title="Delete"
+                  title="Delete Item"
+                    icon={Icon.DeleteDocument}
                   onAction={() => {
                     deleteItem(index);
                   }}
-                  shortcut={{ modifiers: ["cmd"], key: "." }}
+                  shortcut={{ modifiers: ["cmd"], key: "backspace" }}
                 />
+
               </ActionPanel.Section>
             </ActionPanel>
           }

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "remember-this",
   "title": "Remember This",
-  "description": "With our sleek and user-friendly extension, you can easily input any piece of information you wish to remember. Our extension boasts a beautiful, intuitive interface that is easy to navigate, making it a breeze to store your important data. Whether you need to remember a phone number, a reminder, or a to-do list item, our extension will keep it safe and secure until you need it again.",
+  "description": "Remember This is an app designed to help you stay motivated and focused on completing your work by its due date. Simply enter any information, such as tasks, notes, or reminders, and set a due date. After the due date passes, the app automatically forgets the information, creating a sense of urgency to complete the task before it's lost forever. This unique feature inspires you to work efficiently and stay on top of your deadlines. With Remember This, you can say goodbye to forgotten tasks and missed deadlines, and hello to increased productivity.",
   "icon": "command_icon.png",
   "author": "Ek217",
   "categories": [

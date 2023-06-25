@@ -1,4 +1,4 @@
-import { Form, ActionPanel, Action, showToast, environment } from "@raycast/api";
+import { Form, ActionPanel, launchCommand, LaunchType, Action, showToast, environment } from "@raycast/api";
 import fs from "fs";
 import path from "path";
 
@@ -34,12 +34,11 @@ export default function Command() {
       // Create a new file
       fs.writeFileSync(REMEMBERING_FILE, data);
     }
-
+    launchCommand({ name: "view", type: LaunchType.UserInitiated });
     // Log the expiration date and what to remember
     console.log(`Remembering "${values.textarea}" until ${expirationDate.toString()}`);
     showToast({
-      title: "Submitted form",
-      message: `Remembering "${values.textarea}" until ${expirationDate.toString()}`,
+      title: "Remembering That!"
     });
   }
 
@@ -59,13 +58,10 @@ export default function Command() {
         defaultValue="Meeting on Tuesday"
       />
       <Form.Separator />
-      <Form.Dropdown id="dropdown" title="How long should I remember this for?">
-        <Form.Dropdown.Item value="Forever" title="Forever" />
-        <Form.Dropdown.Item value="10min" title="10 Minutes" />
+      <Form.Dropdown id="dropdown" title="How long should I remember this for?" defaultValue={"1week"}>
         <Form.Dropdown.Item value="30min" title="30 Minutes" />
         <Form.Dropdown.Item value="1h" title="1 Hour" />
         <Form.Dropdown.Item value="2h" title="2 Hours" />
-        <Form.Dropdown.Item value="3h" title="3 Hours" />
         <Form.Dropdown.Item value="6h" title="6 Hours" />
         <Form.Dropdown.Item value="12h" title="12 Hours" />
         <Form.Dropdown.Item value="1day" title="1 Day" />
@@ -78,6 +74,7 @@ export default function Command() {
         <Form.Dropdown.Item value="1year" title="1 Year" />
         <Form.Dropdown.Item value="2year" title="2 Years" />
         <Form.Dropdown.Item value="5year" title="5 Years" />
+        <Form.Dropdown.Item value="Forever" title="Forever" />
       </Form.Dropdown>
     </Form>
   );
