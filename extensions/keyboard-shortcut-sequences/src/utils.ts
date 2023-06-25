@@ -22,11 +22,7 @@ export const runShortcutSequence = async (sequence: Sequence) => {
             tell application "System Events"
                 keystroke ${keystroke} ${modifier}
             end tell
-<<<<<<< Updated upstream
-        end tell`
-=======
         end tell`;
->>>>>>> Stashed changes
     await runAppleScript(script);
   });
   await showHUD(`Ran Shortcut Sequence: ${sequence.name}`);
