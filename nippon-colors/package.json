@@ -14,7 +14,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "Explore Nippon Color",
+      "title": "Explore Nippon Colors",
       "description": "explore nippon colors!",
       "mode": "view"
     }
