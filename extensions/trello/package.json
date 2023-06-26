@@ -6,7 +6,9 @@
   "icon": "command-icon.png",
   "author": "ChrisChinchilla",
   "contributors": [
-    "jimmy-b36"
+    "jimmy-b36",
+    "brittanyjoiner15",
+    "ajaypremshankar"
   ],
   "license": "MIT",
   "commands": [
