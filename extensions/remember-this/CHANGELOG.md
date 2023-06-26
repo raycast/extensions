@@ -25,7 +25,7 @@ Dropdown content goes here!
 
 
 <details>
-    <summary>Remember This `v1.0`</summary>
+    <summary>Remember This v1.0</summary>
 - Initial Commit
 </details>
 
@@ -33,7 +33,7 @@ Dropdown content goes here!
 
 
 <details>
-    <summary># Remember This `v1.1` -r</summary>
+    <summary># Remember This v1.1 -r</summary>
 # Remember This `v1.1`
 
 ## New Features
