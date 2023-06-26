@@ -46,5 +46,5 @@ In the detailed view, the `title`, `commit message`, `status`, `project`, `branc
 
 ## Potential Improvements
 
-* Get Avatars for users (not all instances use avatars, requires additional API call)
-* Add a command preference to modify the unauthenticated query limit
+- Get Avatars for users (not all instances use avatars, requires additional API call)
+- Add a command preference to modify the unauthenticated query limit
