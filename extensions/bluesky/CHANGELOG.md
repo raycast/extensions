@@ -1,6 +1,6 @@
 # Bluesky Changelog
 
-## [Improvements] - 2023-05-29
+## [Improvements] - 2023-06-26
 
 - The extension now requires a Bluesky App Password to be used.
 - Unread Notifications command is renamed to Menu Bar Notifications.
