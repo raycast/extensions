@@ -32,10 +32,16 @@ export function gerritMenu(menuAction: string): JSX.Element {
         const gerritList = await listGerrit();
         setGerritList(gerritList);
         setHasGerrit(gerritList.length > 0);
-        const results = gerritList.filter((g) => g.displayName.toLowerCase().includes(searchText.toLowerCase()));
+        const results = gerritList.filter((g) =>
+          g.displayName.toLowerCase().includes(searchText.toLowerCase())
+        );
         setGerritList(results);
       } catch (err) {
-        showToast({ style: Toast.Style.Failure, title: "Query Failed", message: String(err) });
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Query Failed",
+          message: String(err),
+        });
       } finally {
         setIsLoading(false);
       }
@@ -48,7 +54,11 @@ export function gerritMenu(menuAction: string): JSX.Element {
   }, []);
 
   return (
-    <List isLoading={isLoading} onSearchTextChange={fetch} searchBarPlaceholder="Filter Instances">
+    <List
+      isLoading={isLoading}
+      onSearchTextChange={fetch}
+      searchBarPlaceholder="Filter Instances"
+    >
       <List.EmptyView
         title={hasGerrit ? "No Instances Found" : "No Instances Added"}
         description={hasGerrit ? "" : "Add a Gerrit instance to get started"}
@@ -66,7 +76,12 @@ export function gerritMenu(menuAction: string): JSX.Element {
       />
       <List.Section title="Instances" subtitle={gerritList.length + ""}>
         {gerritList.map((gerrit) => (
-          <GerritItem key={gerrit.displayName} gerrit={gerrit} setGerritList={setGerritList} actionItem={menuAction} />
+          <GerritItem
+            key={gerrit.displayName}
+            gerrit={gerrit}
+            setGerritList={setGerritList}
+            actionItem={menuAction}
+          />
         ))}
       </List.Section>
     </List>
@@ -84,7 +99,12 @@ function GerritItem(props: {
       <Action.Push
         icon={Icon.BarCode}
         title="Browse Changes"
-        target={<FetchChanges gerrit={props.gerrit} navigationTitle={`${props.gerrit.displayName} Changes`} />}
+        target={
+          <FetchChanges
+            gerrit={props.gerrit}
+            navigationTitle={`${props.gerrit.displayName} Changes`}
+          />
+        }
       />
     );
   } else if (props.actionItem == "projects") {
@@ -92,7 +112,12 @@ function GerritItem(props: {
       <Action.Push
         icon={Icon.BarCode}
         title="Browse Projects"
-        target={<FetchProjects gerrit={props.gerrit} navigationTitle={`${props.gerrit.displayName} Projects`} />}
+        target={
+          <FetchProjects
+            gerrit={props.gerrit}
+            navigationTitle={`${props.gerrit.displayName} Projects`}
+          />
+        }
       />
     );
   }
@@ -117,7 +142,12 @@ function GerritItem(props: {
         {
           tooltip: `${
             props.gerrit.updateTime
-              ? "Updated: " + format(new Date(props.gerrit.updateTime), "EEEE d MMMM yyyy 'at' HH:mm") + " UTC"
+              ? "Updated: " +
+                format(
+                  new Date(props.gerrit.updateTime),
+                  "EEEE d MMMM yyyy 'at' HH:mm"
+                ) +
+                " UTC"
               : "Failed to update"
           }`,
         },
@@ -126,7 +156,10 @@ function GerritItem(props: {
         <ActionPanel>
           <ActionPanel.Section>
             {primaryAction ? primaryAction : <></>}
-            <Action.OpenInBrowser title="Open in Browser" url={props.gerrit.url} />
+            <Action.OpenInBrowser
+              title="Open in Browser"
+              url={props.gerrit.url}
+            />
             <Action.Push
               icon={Icon.Plus}
               title="Add Gerrit"
@@ -136,7 +169,12 @@ function GerritItem(props: {
             <Action.Push
               icon={Icon.Patch}
               title="Update Gerrit"
-              target={<AddGerrit gerrit={props.gerrit} setGerritList={props.setGerritList} />}
+              target={
+                <AddGerrit
+                  gerrit={props.gerrit}
+                  setGerritList={props.setGerritList}
+                />
+              }
               shortcut={{ modifiers: ["cmd"], key: "." }}
             />
             <Action.CopyToClipboard
@@ -158,8 +196,13 @@ function GerritItem(props: {
                     onAction: async () => {
                       try {
                         await deleteGerrit(props.gerrit.id);
-                        props.setGerritList((gerritList) => gerritList.filter((j) => j.id !== props.gerrit.id));
-                        showToast(Toast.Style.Success, `Instance ${props.gerrit.displayName} was deleted successfully`);
+                        props.setGerritList((gerritList) =>
+                          gerritList.filter((j) => j.id !== props.gerrit.id)
+                        );
+                        showToast(
+                          Toast.Style.Success,
+                          `Instance ${props.gerrit.displayName} was deleted successfully`
+                        );
                       } catch (err) {
                         showToast(
                           Toast.Style.Failure,
@@ -208,7 +251,9 @@ function AddGerrit(props: {
   }
   return (
     <Form
-      navigationTitle={`${props.gerrit ? "Updating " + props.gerrit.displayName : "Adding Gerrit"}`}
+      navigationTitle={`${
+        props.gerrit ? "Updating " + props.gerrit.displayName : "Adding Gerrit"
+      }`}
       isLoading={isLoading}
       actions={
         <ActionPanel>
@@ -217,7 +262,10 @@ function AddGerrit(props: {
             title="Confirm"
             onSubmit={async (input: GerritInstance) => {
               try {
-                showToast(Toast.Style.Animated, `${props.gerrit ? "Updating" : "Adding"} ${input.displayName}`);
+                showToast(
+                  Toast.Style.Animated,
+                  `${props.gerrit ? "Updating" : "Adding"} ${input.displayName}`
+                );
                 const g = {
                   ...props.gerrit,
                   ...input,
@@ -241,11 +289,18 @@ function AddGerrit(props: {
                     return gerrit;
                   });
                 });
-                showToast(Toast.Style.Success, `Instance ${input.displayName} was ${action} successfully`);
+                showToast(
+                  Toast.Style.Success,
+                  `Instance ${input.displayName} was ${action} successfully`
+                );
                 // A workaround since I was not able to reload previously loaded list items when using pop()
                 popToRoot();
               } catch (err) {
-                showToast(Toast.Style.Failure, `Instance ${input.displayName} was not ${action}`, String(err));
+                showToast(
+                  Toast.Style.Failure,
+                  `Instance ${input.displayName} was not ${action}`,
+                  String(err)
+                );
               } finally {
                 setIsLoading(false);
               }

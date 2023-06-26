@@ -1,4 +1,13 @@
-import { ActionPanel, Action, List, showToast, Toast, Icon, Color, Detail } from "@raycast/api";
+import {
+  ActionPanel,
+  Action,
+  List,
+  showToast,
+  Toast,
+  Icon,
+  Color,
+  Detail,
+} from "@raycast/api";
 import { useState, useEffect, useCallback } from "react";
 import { GerritAPI } from "../utils/api/gerrit";
 import { GerritInstance } from "../interfaces/gerrit";
@@ -76,9 +85,14 @@ export function FetchProjects(props: ProjectProps) {
                 <Action.Push
                   icon={Icon.Info}
                   title="Show Details"
-                  target={<ProjectDetails project={project} gerrit={props.gerrit} />}
+                  target={
+                    <ProjectDetails project={project} gerrit={props.gerrit} />
+                  }
                 />
-                <Action.OpenInBrowser title="Open in Browser" url={project.url} />
+                <Action.OpenInBrowser
+                  title="Open in Browser"
+                  url={project.url}
+                />
                 <ActionPanel.Section>
                   <Action.SubmitForm
                     title="Refresh"
@@ -138,16 +152,23 @@ function ProjectDetails(details: ProjectDetails) {
     <Detail
       navigationTitle={details.project.id}
       isLoading={isLoading}
-      markdown={`# ${details.project.id}\n${details.project.description ? details.project.description : ""}`}
+      markdown={`# ${details.project.id}\n${
+        details.project.description ? details.project.description : ""
+      }`}
       metadata={
         <Detail.Metadata>
           <Detail.Metadata.TagList title="State">
-            <Detail.Metadata.TagList.Item key="State" text={details.project.state} />
+            <Detail.Metadata.TagList.Item
+              key="State"
+              text={details.project.state}
+            />
           </Detail.Metadata.TagList>
           <Detail.Metadata.Separator />
           <Detail.Metadata.TagList title="Branches">
             {branches ? (
-              branches.map((b: ProjectBranch) => <Detail.Metadata.TagList.Item key={b.name} text={`${b.name}`} />)
+              branches.map((b: ProjectBranch) => (
+                <Detail.Metadata.TagList.Item key={b.name} text={`${b.name}`} />
+              ))
             ) : (
               <></>
             )}
@@ -159,7 +180,11 @@ function ProjectDetails(details: ProjectDetails) {
                 <Detail.Metadata.Link
                   key={l.name}
                   title={l.name}
-                  target={l.target && l.target === "_blank" ? `${details.gerrit.url}${l.url}` : l.url}
+                  target={
+                    l.target && l.target === "_blank"
+                      ? `${details.gerrit.url}${l.url}`
+                      : l.url
+                  }
                   text="Link"
                 />
               ) : (
@@ -174,7 +199,10 @@ function ProjectDetails(details: ProjectDetails) {
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <Action.OpenInBrowser title="Open in Browser" url={details.project.url} />
+            <Action.OpenInBrowser
+              title="Open in Browser"
+              url={details.project.url}
+            />
             <Action.CopyToClipboard
               icon={Icon.CopyClipboard}
               title="Copy URL"
