@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "visual-studio-code",
-  "title": "Visual Studio Code Recent Projects",
-  "description": "Search and open recent projects from Visual Studio Code.",
+  "title": "Visual Studio Code",
+  "description": "Control Visual Studio Code directly from Raycast - Search and open recent projects, handle extensions and commands.",
   "icon": "icon.png",
   "author": "thomas",
   "contributors": [
@@ -11,7 +11,9 @@
     "cy-98",
     "immint023",
     "pernielsentikaer",
-    "elijahs"
+    "elijahs",
+    "vimtor",
+    "tonka3000"
   ],
   "keywords": [
     "vscode"
@@ -31,6 +33,25 @@
       "subtitle": "Visual Studio Code",
       "description": "Opens the currently selected Finder item with Visual Studio Code.",
       "mode": "no-view"
+    },
+    {
+      "name": "extensions",
+      "title": "Show Installed Extensions",
+      "description": "Manage Installed Extensions",
+      "mode": "view"
+    },
+    {
+      "name": "install-extension",
+      "title": "Install Extension",
+      "description": "Install Extensions from the VSCode Marketplace",
+      "mode": "view"
+    },
+    {
+      "name": "commandpalette",
+      "title": "Commands",
+      "description": "Show Commands of the VSCode Command Palette",
+      "disabledByDefault": true,
+      "mode": "view"
     }
   ],
   "preferences": [
@@ -82,25 +103,33 @@
       "label": "Keep Section Order",
       "default": false,
       "description": "Keep the order of the sections while searching folders, files, etc."
+    },
+    {
+      "name": "closeOtherWindows",
+      "type": "checkbox",
+      "title": "Usability",
+      "required": false,
+      "label": "Close Other VSCode Windows",
+      "default": false,
+      "description": "Close other VSCode windows when opening a project"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.35.0",
+    "@raycast/api": "^1.53.0",
     "@raycast/utils": "^1.4.0",
     "lodash.get": "^4.4.2",
     "prettier": "^2.8.1",
+    "run-applescript": "^6.1.0",
     "sql.js": "^1.6.2",
     "tildify": "^3.0.0"
   },
   "devDependencies": {
+    "@raycast/eslint-config": "^1.0.5",
     "@types/lodash.get": "^4.4.7",
-    "@types/node": "~16.10.0",
+    "@types/node": "^18.8.3",
     "@types/react": "^17.0.28",
     "@types/sql.js": "^1.4.3",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-react": "^7.26.1",
     "typescript": "^4.4.3"
   },

@@ -179,42 +179,6 @@ export default async function Command() {
 
 A Promise that resolves when the target has been opened.
 
-### launchCommand
-
-Launches another command of the same extension. If the command does not exist, or if it's not enabled, an error will be thrown.
-Use this method if your command needs to open another command based on user interaction,
-or when an immediate background refresh should be triggered, for example when a command needs to update an associated menu-bar command.
-
-#### Signature
-
-```typescript
-async function launchCommand(options: {
-  name: string;
-  type: LaunchType;
-  arguments?: Arguments | null;
-  context?: LaunchContext | null;
-  fallbackText?: string | null;
-}): Promise<void>;
-```
-
-#### Example
-
-```typescript
-import { launchCommand, LaunchType } from "@raycast/api";
-
-export default async function Command() => {
-  await launchCommand({ name: "list", type: LaunchType.UserInitiated, context: { foo: "bar" } });
-};
-```
-
-#### Parameters
-
-<FunctionParametersTableFromJSDoc name="launchCommand" />
-
-#### Return
-
-A Promise that resolves when the command has been launched. (Note that this does not indicate that the launched command has finished executing.)
-
 ## Types
 
 ### Application
@@ -235,11 +199,3 @@ PathLike: string | Buffer | URL;
 ```
 
 Supported path types.
-
-### LaunchContext
-
-Represents the passed context object of programmatic command launches.
-
-### LaunchOptions
-
-A parameter object used to decide which command should be launched and what data (arguments, context) it should receive.

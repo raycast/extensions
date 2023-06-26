@@ -1,9 +1,9 @@
 import { ActionPanel, Action, List } from "@raycast/api";
 import { PathLike } from "fs";
 import { useState } from "react";
-import { downloadsFolder, getDownloads } from "./utils";
+import { downloadsFolder, getDownloads, withAccessToDownloadsFolder } from "./utils";
 
-export default function Command() {
+function Command() {
   const [downloads, setDownloads] = useState(getDownloads());
 
   function handleTrash(paths: PathLike | PathLike[]) {
@@ -39,6 +39,11 @@ export default function Command() {
               <ActionPanel.Section>
                 <Action.Open title="Open File" target={download.path} />
                 <Action.ShowInFinder path={download.path} />
+                <Action.CopyToClipboard
+                  title="Copy File"
+                  content={{ file: download.path }}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                />
               </ActionPanel.Section>
               <ActionPanel.Section>
                 <Action.OpenWith path={download.path} shortcut={{ modifiers: ["cmd"], key: "o" }} />
@@ -65,3 +70,5 @@ export default function Command() {
     </List>
   );
 }
+
+export default withAccessToDownloadsFolder(Command);

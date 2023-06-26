@@ -18,6 +18,4 @@ After you have the source code locally, open the Terminal and navigate to the ex
 
 ![Open imported extension](../.gitbook/assets/basics-open-command.png) ![Icon list command](../.gitbook/assets/basics-icon-list.png)
 
-You should see your forked extension at the top of your root search and can open its commands. When you're done editing the extension, make sure to add yourself to the contributors section of its [manifest](../information/manifest.md#extension-properties), and then [run `npx ray publish`](./publish-an-extension.md)[^1].
-
-[^1]: This requires a version of `@raycast/api` >= 1.48.0 so you might need to update it in the package.json's dependencies.
+You should see your forked extension at the top of your root search and can open its commands. When you're done editing the extension, make sure to add yourself to the contributors section of its [manifest](../information/manifest.md#extension-properties), and then [run `npx @raycast/api@latest publish`](./publish-an-extension.md).

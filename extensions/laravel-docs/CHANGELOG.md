@@ -1,6 +1,10 @@
 # Laravel Documentation Changelog
 
- ## [Update] - 2023-02-15
+## [Optimization] - 2023-04-13
+
+- Made the extension work a bit faster by disabling throttle
+
+## [Update] - 2023-02-15
 
 - Added laravel 10.x support.
 - Update the documentation list for master.

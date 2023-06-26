@@ -1,0 +1,53 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "browser-bookmarks",
+  "title": "Browser Bookmarks",
+  "description": "Integrate bookmarks from Chrome, Brave, Edge, Firefox or Safari.",
+  "icon": "icon.png",
+  "author": "thomaslombart",
+  "owner": "raycast",
+  "access": "public",
+  "contributors": [
+    "sasivarnan"
+  ],
+  "categories": [
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Search Browser Bookmarks",
+      "subtitle": "Browser Bookmarks",
+      "description": "Search bookmarks from your browsers.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.53.4",
+    "@raycast/utils": "^1.6.1",
+    "ini": "^3.0.1",
+    "simple-plist": "^1.4.0-0",
+    "sql.js": "^1.8.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.5",
+    "@types/ini": "^1.3.31",
+    "@types/node": "18.8.3",
+    "@types/plist": "^3.0.2",
+    "@types/react": "18.0.9",
+    "@types/sql.js": "^1.4.4",
+    "eslint": "^7.32.0",
+    "eslint-plugin-import": "^2.27.5",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

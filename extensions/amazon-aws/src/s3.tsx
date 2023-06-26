@@ -13,7 +13,7 @@ import {
   GetBucketLocationCommand,
 } from "@aws-sdk/client-s3";
 import AWSProfileDropdown from "./components/searchbar/aws-profile-dropdown";
-import { resourceToConsoleLink } from "./util";
+import { isReadyToFetch, resourceToConsoleLink } from "./util";
 
 export default function S3() {
   const { data: buckets, error, isLoading, revalidate } = useCachedPromise(fetchBuckets);
@@ -103,7 +103,7 @@ function S3BucketObjects({ bucket }: { bucket: Bucket }) {
 }
 
 async function fetchBuckets() {
-  if (!process.env.AWS_PROFILE) return [];
+  if (!isReadyToFetch()) return [];
   const { Buckets } = await new S3Client({}).send(new ListBucketsCommand({}));
 
   return Buckets;

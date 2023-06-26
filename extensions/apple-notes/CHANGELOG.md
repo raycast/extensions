@@ -1,10 +1,25 @@
 # Apple Notes Changelog
 
+## [Enhnacement] - 2023-06-08
+
+- Added rich text support when copying an URL
+
+## [Bug Fixes & Improvements] - 2023-04-09
+
+- Added Copy Note URL and Copy Mobile Note URL actions.
+- Added Delete Note and Restore Note actions.
+- Moved Recently Deleted notes to their own section at the bottom
+- Fixed Open Note action not working on notes outside of the current account
+
+## [Improvements] - 2023-03-31
+
+- Added the function to open notes in separate windows. 
+
 ## [Fix] - 2023-02-20
 
 - Added error handling when Raycast doesn't have Accessibility/Automation permission.
 
-## [Improvements] - 2023-1-30
+## [Improvements] - 2023-01-30
 
 - Added fallback behaviour to create notes with the input text.
 - Added a workaround to activate the window if there isn't one.

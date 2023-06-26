@@ -18,3 +18,4 @@ export const build = preferences.build;
 export const bundleIdentifier = getBundleIdentifier();
 export const layout = preferences.layout;
 export const keepSectionOrder = preferences.keepSectionOrder;
+export const closeOtherWindows = preferences.closeOtherWindows;

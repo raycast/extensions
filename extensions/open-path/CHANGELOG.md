@@ -1,5 +1,13 @@
 # Open Path Changelog
 
+## [Fix Deeplink] - 2023-06-12
+
+- Fix the problem that deeplink cannot be opened normally
+
+## [Optimize Path Logic] - 2023-03-30
+
+- Optimize the judgment logic of opening path
+
 ## [Update Raycast API] - 2022-12-05
 
 - Update Raycast API version to 1.44.0

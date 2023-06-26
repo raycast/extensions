@@ -6,7 +6,8 @@
   "icon": "youtube.png",
   "author": "tonka3000",
   "contributors": [
-    "HelloImSteven"
+    "HelloImSteven",
+    "madza"
   ],
   "license": "MIT",
   "commands": [
@@ -80,19 +81,19 @@
       "type": "dropdown",
       "title": "Grid Item Size",
       "required": false,
-      "default": "medium",
+      "default": "5",
       "data": [
         {
           "title": "Small",
-          "value": "small"
+          "value": "6"
         },
         {
           "title": "Medium",
-          "value": "medium"
+          "value": "5"
         },
         {
           "title": "Large",
-          "value": "large"
+          "value": "4"
         }
       ],
       "description": "Set the default grid item size"
@@ -136,7 +137,7 @@
   "dependencies": {
     "@google-cloud/local-auth": "^1.0.1",
     "@googleapis/youtube": "^2.0.0",
-    "@raycast/api": "^1.42.0",
+    "@raycast/api": "^1.49.0",
     "duration-iso-8601": "^1.1.0",
     "he": "^1.2.0",
     "javascript-time-ago": "^2.3.10",
@@ -156,6 +157,8 @@
   },
   "scripts": {
     "build": "ray build -e dist",
-    "dev": "ray develop"
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
   }
 }

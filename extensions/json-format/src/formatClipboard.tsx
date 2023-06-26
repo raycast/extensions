@@ -1,6 +1,10 @@
 import { Clipboard } from '@raycast/api';
-import { formatJS } from './utils';
+import { formatJS, copyFormattedJs } from './utils';
 
 export default async () => {
-  await formatJS((await Clipboard.readText()) || '');
+  const output = formatJS((await Clipboard.readText()) || '');
+
+  if (output) {
+    await copyFormattedJs(output);
+  }
 };

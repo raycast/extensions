@@ -9,7 +9,7 @@ import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 import AWSProfileDropdown from "./components/searchbar/aws-profile-dropdown";
-import { resourceToConsoleLink } from "./util";
+import { isReadyToFetch, resourceToConsoleLink } from "./util";
 
 export default function SSM() {
   const [search, setSearch] = useState<string>("");
@@ -76,7 +76,7 @@ async function fetchParameters(
   accParameters?: ParameterMetadata[]
 ): Promise<ParameterMetadata[]> {
   if (search.length < threshold) return [];
-  if (!process.env.AWS_PROFILE) return [];
+  if (!isReadyToFetch()) return [];
 
   const { NextToken, Parameters } = await new SSMClient({}).send(
     new DescribeParametersCommand({

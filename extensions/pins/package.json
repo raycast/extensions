@@ -2,7 +2,19 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "pins",
   "title": "Pins",
+  "version": "1.3.1",
   "description": "Create pins for paths and URLs and display them in the menu bar",
+  "keywords": [
+    "pins",
+    "menubar",
+    "shortcut",
+    "pinned",
+    "fast",
+    "quick",
+    "access",
+    "link",
+    "url"
+  ],
   "icon": "command-icon.png",
   "author": "HelloImSteven",
   "contributors": [
@@ -10,7 +22,8 @@
   ],
   "categories": [
     "Productivity",
-    "Web"
+    "Web",
+    "System"
   ],
   "license": "MIT",
   "commands": [
@@ -18,7 +31,50 @@
       "name": "index",
       "title": "Show Pins",
       "description": "Show pinned items in the menu bar",
-      "mode": "menu-bar"
+      "mode": "menu-bar",
+      "preferences": [
+        {
+          "name": "showCategories",
+          "type": "checkbox",
+          "title": "General Settings",
+          "label": "Show Section Labels (i.e. Pins, Groups)",
+          "description": "Whether to show high-level categories in the menu dropdown.",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "showOpenAll",
+          "type": "checkbox",
+          "label": "Show \"Open All\" Button in Groups",
+          "description": "Whether to show an \"Open All\" item in group submenus.",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "showPinShortcut",
+          "type": "checkbox",
+          "label": "Show \"Quick Pins\" Section",
+          "description": "Whether to show the \"Quick Pins\" section in the menu dropdown. Quick Pins enable one-click creation of pins for active tabs, documents, folders, and more.",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "showCreateNewPin",
+          "type": "checkbox",
+          "label": "Show \"Create New Pin\" Item",
+          "description": "Whether to show a \"Create New Pin\" item in the menu dropdown.",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "showInapplicablePins",
+          "type": "checkbox",
+          "label": "Show Inapplicable Pins",
+          "description": "Whether to show pins that are not applicable to the current context (e.g. a pin using the {{selectedText}} placeholder when no text is selected).",
+          "default": false,
+          "required": false
+        }
+      ]
     },
     {
       "name": "new-pin",
@@ -36,7 +92,26 @@
       "name": "view-pins",
       "title": "View Pins",
       "description": "View and modify pins",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "showGroups",
+          "type": "checkbox",
+          "title": "General Settings",
+          "label": "Sort By Group",
+          "description": "Whether to sort pins into group sections.",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "showSubtitles",
+          "type": "checkbox",
+          "label": "Show Subtitles",
+          "description": "Whether to pin targets (e.g. URLs) as subtitles in the list view.",
+          "default": true,
+          "required": false
+        }
+      ]
     },
     {
       "name": "view-groups",
@@ -55,31 +130,56 @@
       "title": "Import Pin Data",
       "description": "Import groups and pins from a JSON string or file",
       "mode": "view"
+    },
+    {
+      "name": "check-expirations",
+      "title": "Check For Expirations",
+      "description": "Check for expired pins and remove them",
+      "mode": "no-view",
+      "interval": "1m"      
     }
   ],
   "preferences": [
     {
-      "name": "showCategories",
+      "name": "showRecentApplications",
       "type": "checkbox",
-      "title": "General Settings",
-      "label": "Show categories (i.e. Pins, Groups)",
-      "description": "Whether to show high-level categories in the menu dropdown.",
-      "default": true,
+      "label": "Show \"Recent Applications\" Group",
+      "description": "Whether to show a \"Recent Applications\" group in the menu dropdown.",
+      "default": false,
       "required": false
     },
     {
-      "name": "showOpenAll",
-      "type": "checkbox",
-      "label": "Show \"Open All\" button in groups",
-      "description": "Whether to show an \"Open All\" item in group submenus.",
-      "default": true,
+      "name": "topSection",
+      "type": "dropdown",
+      "title": "Section Order",
+      "description": "Specifies which section to display first in lists. \"Pins First\" will show ungrouped pins first, followed by groups. \"Groups First\" will show groups first, followed by ungrouped pins.",
+      "default": "pins",
+      "required": false,
+      "data": [
+        {
+          "title": "Pins First",
+          "value": "pins"
+        },
+        {
+          "title": "Groups First",
+          "value": "groups"
+        }
+      ]
+    },
+    {
+      "name": "preferredBrowser",
+      "title": "Preferred Browser",
+      "type": "appPicker",
+      "label": "Preferred Browser",
+      "description": "The browser to use when opening URLs.",
+      "default": "Safari",
       "required": false
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.40.1",
-    "@raycast/utils": "^1.4.8",
-    "run-applescript": "^6.0.0"
+    "@raycast/api": "^1.53.4",
+    "@raycast/utils": "^1.8.0",
+    "run-applescript": "^6.1.0"
   },
   "devDependencies": {
     "@types/node": "16.10.3",

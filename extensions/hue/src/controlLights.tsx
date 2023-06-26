@@ -1,75 +1,66 @@
-import { ActionPanel, Icon, List, Toast } from "@raycast/api";
-import { hexToXy } from "./lib/colors";
-import {
-  adjustBrightness,
-  adjustColorTemperature,
-  calculateAdjustedBrightness,
-  calculateAdjustedColorTemperature,
-  SendHueMessage,
-  setLightBrightness,
-  setLightColor,
-  toggleLight,
-  useHue,
-} from "./lib/hue";
-import { getIconForColor, getLightIcon } from "./lib/utils";
-import { MutatePromise } from "@raycast/utils";
+import { ActionPanel, Color, Icon, List, Toast } from "@raycast/api";
+import "./helpers/arrayExtensions";
 import { CssColor, Group, Light } from "./lib/types";
-import { BRIGHTNESS_MAX, BRIGHTNESS_MIN, BRIGHTNESSES, COLOR_TEMP_MAX, COLOR_TEMP_MIN, COLORS } from "./lib/constants";
+import { BRIGHTNESS_MAX, BRIGHTNESS_MIN, BRIGHTNESSES, COLORS, MIRED_MAX, MIRED_MIN } from "./helpers/constants";
 import ManageHueBridge from "./components/ManageHueBridge";
 import UnlinkAction from "./components/UnlinkAction";
+import { useHue } from "./hooks/useHue";
+import React from "react";
+import { getProgressIcon } from "@raycast/utils";
+import useInputRateLimiter from "./hooks/useInputRateLimiter";
+import {
+  calculateAdjustedBrightness,
+  calculateAdjustedColorTemperature,
+  getClosestBrightness,
+  hexToXy,
+} from "./helpers/colors";
+import { getLightIcon, getLightsFromGroup } from "./helpers/hueResources";
+import { getIconForColor, getTransitionTimeInMs, optimisticUpdate } from "./helpers/raycast";
 import Style = Toast.Style;
 
 export default function ControlLights() {
-  const { hueBridgeState, sendHueMessage, isLoading, lights, mutateLights, groups } = useHue();
+  const useHueObject = useHue();
+  const { hueBridgeState, sendHueMessage, isLoading, lights, rooms, zones } = useHueObject;
+  const rateLimiter = useInputRateLimiter(10, 1000);
 
-  const manageHueBridgeElement: JSX.Element | null = ManageHueBridge(hueBridgeState, sendHueMessage);
+  const groups = ([] as Group[]).concat(rooms, zones).sort((a, b) => a.metadata.name.localeCompare(b.metadata.name));
+
+  const manageHueBridgeElement = ManageHueBridge(hueBridgeState, sendHueMessage);
   if (manageHueBridgeElement !== null) return manageHueBridgeElement;
 
-  const rooms = groups.filter((group: Group) => group.type === "Room") as Group[];
-  const entertainmentAreas = groups.filter((group: Group) => group.type === "Entertainment") as Group[];
-  const zones = groups.filter((group: Group) => group.type === "Zone") as Group[];
-  const groupTypes = Array.of(rooms, entertainmentAreas, zones);
-
   return (
-    <List isLoading={isLoading}>
-      {groupTypes.map((groupType: Group[]): JSX.Element[] => {
-        return groupType.map((group: Group) => {
-          const groupLights =
-            lights.filter((light: Light) => {
-              return group.lights.includes(`${light.id}`);
-            }) ?? [];
-
-          return (
-            <Group
-              key={group.id}
-              lights={groupLights}
-              group={group}
-              mutateLights={mutateLights}
-              sendHueMessage={sendHueMessage}
-            />
-          );
-        });
+    <List isLoading={isLoading} filtering={{ keepSectionOrder: true }}>
+      {groups.map((group: Group) => {
+        return (
+          <Group
+            key={group.id}
+            group={group}
+            lights={getLightsFromGroup(lights, group).sort((a, b) => a.metadata.name.localeCompare(b.metadata.name))}
+            useHue={useHueObject}
+            rateLimiter={rateLimiter}
+          />
+        );
       })}
     </List>
   );
 }
 
 function Group(props: {
-  lights: Light[];
   group: Group;
-  mutateLights: MutatePromise<Light[]>;
-  sendHueMessage: SendHueMessage;
+  lights: Light[];
+  useHue: ReturnType<typeof useHue>;
+  rateLimiter: ReturnType<typeof useInputRateLimiter>;
 }) {
   return (
-    <List.Section key={props.group.id} title={props.group.name} subtitle={props.group.type}>
+    <List.Section key={props.group.id} title={props.group.metadata.name}>
       {props.lights.map(
         (light: Light): JSX.Element => (
           <Light
             key={light.id}
             light={light}
             group={props.group}
-            mutateLights={props.mutateLights}
-            sendHueMessage={props.sendHueMessage}
+            useHue={props.useHue}
+            rateLimiter={props.rateLimiter}
           />
         )
       )}
@@ -79,57 +70,63 @@ function Group(props: {
 
 function Light(props: {
   light: Light;
-  group: Group;
-  mutateLights: MutatePromise<Light[]>;
-  sendHueMessage: SendHueMessage;
+  group?: Group;
+  useHue: ReturnType<typeof useHue>;
+  rateLimiter: ReturnType<typeof useInputRateLimiter>;
 }) {
   return (
     <List.Item
-      title={props.light.name}
-      icon={getLightIcon(props.light.state)}
-      keywords={[props.group.name]}
+      title={props.light.metadata.name}
+      icon={getLightIcon(props.light)}
+      keywords={[props.group?.metadata?.name ?? ""]}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <ToggleLightAction light={props.light} onToggle={() => handleToggle(props.light, props.mutateLights)} />
+            <ToggleLightAction
+              light={props.light}
+              onToggle={() => handleToggle(props.useHue, props.rateLimiter, props.light)}
+            />
             <SetBrightnessAction
               light={props.light}
-              onSet={(percentage: number) => handleSetBrightness(props.light, props.mutateLights, percentage)}
+              onSet={(percentage: number) => handleSetBrightness(props.useHue, props.light, percentage)}
             />
             <IncreaseBrightnessAction
               light={props.light}
-              onIncrease={() => handleIncreaseBrightness(props.light, props.mutateLights)}
+              onIncrease={() => handleBrightnessChange(props.useHue, props.rateLimiter, props.light, "increase")}
             />
             <DecreaseBrightnessAction
               light={props.light}
-              onDecrease={() => handleDecreaseBrightness(props.light, props.mutateLights)}
+              onDecrease={() => handleBrightnessChange(props.useHue, props.rateLimiter, props.light, "decrease")}
             />
           </ActionPanel.Section>
 
           <ActionPanel.Section>
-            {props.light.state.colormode == "xy" && (
+            {props.light.color !== undefined && (
               <SetColorAction
                 light={props.light}
-                onSet={(color: CssColor) => handleSetColor(props.light, props.mutateLights, color)}
+                onSet={(color: CssColor) => handleSetColor(props.useHue, props.light, color)}
               />
             )}
-            {props.light.state.colormode == "ct" && (
+            {props.light.color_temperature !== undefined && (
               <IncreaseColorTemperatureAction
                 light={props.light}
-                onIncrease={() => handleIncreaseColorTemperature(props.light, props.mutateLights)}
+                onIncrease={() =>
+                  handleColorTemperatureChange(props.useHue, props.rateLimiter, props.light, "increase")
+                }
               />
             )}
-            {props.light.state.colormode == "ct" && (
+            {props.light.color_temperature !== undefined && (
               <DecreaseColorTemperatureAction
                 light={props.light}
-                onDecrease={() => handleDecreaseColorTemperature(props.light, props.mutateLights)}
+                onDecrease={() =>
+                  handleColorTemperatureChange(props.useHue, props.rateLimiter, props.light, "decrease")
+                }
               />
             )}
           </ActionPanel.Section>
 
           <ActionPanel.Section>
-            <RefreshAction onRefresh={() => props.mutateLights()} />
-            <UnlinkAction sendHueMessage={props.sendHueMessage} />
+            <UnlinkAction sendHueMessage={props.useHue.sendHueMessage} />
           </ActionPanel.Section>
         </ActionPanel>
       }
@@ -137,21 +134,22 @@ function Light(props: {
   );
 }
 
-function ToggleLightAction({ light, onToggle }: { light: Light; onToggle?: () => void }) {
+function ToggleLightAction(props: { light: Light; onToggle?: () => void }) {
   return (
     <ActionPanel.Item
-      title={light.state.on ? "Turn Off" : "Turn On"}
-      icon={light.state.on ? Icon.LightBulbOff : Icon.LightBulb}
-      onAction={onToggle}
+      title={`Turn ${props.light.metadata.name} ${props.light.on?.on ? "Off" : "On"}`}
+      icon={props.light.on?.on ? Icon.LightBulbOff : Icon.LightBulb}
+      onAction={props.onToggle}
     />
   );
 }
 
 function SetBrightnessAction(props: { light: Light; onSet: (percentage: number) => void }) {
+  // TODO: Figure out why Color.PrimaryText is black instead of white in dark mode
   return (
     <ActionPanel.Submenu
       title="Set Brightness"
-      icon={Icon.CircleProgress}
+      icon={getProgressIcon((props.light.dimming?.brightness ?? 0) / 100, Color.PrimaryText)}
       shortcut={{ modifiers: ["cmd", "shift"], key: "b" }}
     >
       {BRIGHTNESSES.map((brightness) => (
@@ -165,26 +163,34 @@ function SetBrightnessAction(props: { light: Light; onSet: (percentage: number) 
   );
 }
 
-function IncreaseBrightnessAction(props: { light: Light; onIncrease?: () => void }) {
-  return props.light.state.bri < BRIGHTNESS_MAX ? (
+function IncreaseBrightnessAction(props: { light: Light; onIncrease: () => void }) {
+  if (props.light.dimming === undefined || getClosestBrightness(props.light.dimming.brightness) >= BRIGHTNESS_MAX) {
+    return null;
+  }
+
+  return (
     <ActionPanel.Item
       title="Increase Brightness"
       shortcut={{ modifiers: ["cmd", "shift"], key: "arrowUp" }}
       icon={Icon.Plus}
       onAction={props.onIncrease}
     />
-  ) : null;
+  );
 }
 
-function DecreaseBrightnessAction(props: { light: Light; onDecrease?: () => void }) {
-  return props.light.state.bri > BRIGHTNESS_MIN ? (
+function DecreaseBrightnessAction(props: { light: Light; onDecrease: () => void }) {
+  if (props.light.dimming === undefined || getClosestBrightness(props.light.dimming.brightness) <= BRIGHTNESS_MIN) {
+    return null;
+  }
+
+  return (
     <ActionPanel.Item
       title="Decrease Brightness"
       shortcut={{ modifiers: ["cmd", "shift"], key: "arrowDown" }}
       icon={Icon.Minus}
       onAction={props.onDecrease}
     />
-  ) : null;
+  );
 }
 
 function SetColorAction(props: { light: Light; onSet: (color: CssColor) => void }) {
@@ -203,147 +209,178 @@ function SetColorAction(props: { light: Light; onSet: (color: CssColor) => void 
 }
 
 function IncreaseColorTemperatureAction(props: { light: Light; onIncrease?: () => void }) {
-  return props.light.state.bri > COLOR_TEMP_MIN ? (
+  if (props.light.color_temperature.mirek <= (props.light.color_temperature.mirek_schema?.mirek_minimum ?? MIRED_MIN)) {
+    return null;
+  }
+
+  return (
     <ActionPanel.Item
       title="Increase Color Temperature"
       shortcut={{ modifiers: ["cmd", "shift"], key: "arrowRight" }}
       icon={Icon.Plus}
       onAction={props.onIncrease}
     />
-  ) : null;
+  );
 }
 
 function DecreaseColorTemperatureAction(props: { light: Light; onDecrease?: () => void }) {
-  return props.light.state.bri < COLOR_TEMP_MAX ? (
+  if (props.light.color_temperature.mirek >= (props.light.color_temperature.mirek_schema?.mirek_maximum ?? MIRED_MAX)) {
+    return null;
+  }
+
+  return (
     <ActionPanel.Item
       title="Decrease Color Temperature"
       shortcut={{ modifiers: ["cmd", "shift"], key: "arrowLeft" }}
       icon={Icon.Minus}
       onAction={props.onDecrease}
     />
-  ) : null;
-}
-
-function RefreshAction(props: { onRefresh: () => void }) {
-  return (
-    <ActionPanel.Item
-      title="Refresh"
-      icon={Icon.ArrowClockwise}
-      shortcut={{ modifiers: ["cmd"], key: "r" }}
-      onAction={props.onRefresh}
-    />
   );
 }
 
-async function handleToggle(light: Light, mutateLights: MutatePromise<Light[]>) {
+async function handleToggle(
+  { hueBridgeState, setLights }: ReturnType<typeof useHue>,
+  rateLimiter: ReturnType<typeof useInputRateLimiter>,
+  light: Light
+) {
   const toast = new Toast({ title: "" });
 
   try {
-    await mutateLights(toggleLight(light), {
-      optimisticUpdate(lights) {
-        return lights?.map((it) => (it.id === light.id ? { ...it, state: { ...it.state, on: !light.state.on } } : it));
-      },
+    if (hueBridgeState.context.hueClient === undefined) throw new Error("Not connected to Hue Bridge.");
+    if (!rateLimiter.canExecute()) return;
+
+    const changes = {
+      on: { on: !light.on.on },
+      dynamics: { duration: getTransitionTimeInMs() },
+      ...(light.dimming ? { dimming: { brightness: light.dimming?.brightness } } : {}),
+    };
+
+    const undoOptimisticUpdate = optimisticUpdate(light, changes, setLights);
+    await hueBridgeState.context.hueClient.updateLight(light, changes).catch((e) => {
+      undoOptimisticUpdate();
+      throw e;
     });
 
     toast.style = Style.Success;
-    toast.title = light.state.on ? "Turned light off" : "Turned light on";
+    toast.title = light.on.on ? `Turned ${light.metadata.name} off` : `Turned ${light.metadata.name} on`;
     await toast.show();
   } catch (e) {
+    console.error(e);
     toast.style = Style.Failure;
-    toast.title = light.state.on ? "Failed turning light off" : "Failed turning light on";
+    toast.title = light.on.on
+      ? `Failed turning ${light.metadata.name} off`
+      : `Failed turning ${light.metadata.name} on`;
     toast.message = e instanceof Error ? e.message : undefined;
     await toast.show();
   }
 }
 
-async function handleSetBrightness(light: Light, mutateLights: MutatePromise<Light[]>, percentage: number) {
+async function handleSetBrightness(
+  { hueBridgeState, setLights }: ReturnType<typeof useHue>,
+  light: Light,
+  brightness: number
+) {
   const toast = new Toast({ title: "" });
-  const brightness = (percentage / 100) * 253 + 1;
 
   try {
-    await mutateLights(setLightBrightness(light, brightness), {
-      optimisticUpdate(lights) {
-        return lights.map((it) =>
-          it.id === light.id ? { ...it, state: { ...it.state, on: true, bri: brightness } } : it
-        );
-      },
+    if (hueBridgeState.context.hueClient === undefined) throw new Error("Not connected to Hue Bridge.");
+
+    const changes = {
+      on: { on: true },
+      dimming: { brightness: brightness },
+      dynamics: { duration: getTransitionTimeInMs() },
+    };
+
+    const undoOptimisticUpdate = optimisticUpdate(light, changes, setLights);
+    await hueBridgeState.context.hueClient.updateLight(light, changes).catch((e) => {
+      undoOptimisticUpdate();
+      throw e;
     });
 
     toast.style = Style.Success;
-    toast.title = `Set brightness to ${(percentage / 100).toLocaleString("en", { style: "percent" })}`;
+    toast.title = `Set brightness of ${light.metadata.name} to ${(brightness / 100).toLocaleString("en", {
+      style: "percent",
+    })}`;
     await toast.show();
   } catch (e) {
+    console.error(e);
     toast.style = Style.Failure;
-    toast.title = "Failed setting brightness";
+    toast.title = `Failed setting brightness of ${light.metadata.name}`;
     toast.message = e instanceof Error ? e.message : undefined;
     await toast.show();
   }
 }
 
-async function handleIncreaseBrightness(light: Light, mutateLights: MutatePromise<Light[]>) {
+async function handleBrightnessChange(
+  { hueBridgeState, setLights }: ReturnType<typeof useHue>,
+  rateLimiter: ReturnType<typeof useInputRateLimiter>,
+  light: Light,
+  direction: "increase" | "decrease"
+) {
   const toast = new Toast({ title: "" });
 
   try {
-    await mutateLights(adjustBrightness(light, "increase"), {
-      optimisticUpdate(lights) {
-        return lights?.map((it) =>
-          it.id === light.id
-            ? { ...it, state: { ...it.state, on: true, bri: calculateAdjustedBrightness(light, "increase") } }
-            : it
-        );
-      },
+    if (hueBridgeState.context.hueClient === undefined) throw new Error("Not connected to Hue Bridge.");
+    if (light.dimming === undefined) throw new Error("Light does not support dimming.");
+    if (!rateLimiter.canExecute()) return;
+
+    const adjustedBrightness = calculateAdjustedBrightness(light.dimming.brightness, direction);
+    const changes = {
+      on: { on: true },
+      // dimming_delta exists, but manually calculating the new value
+      // enables the usage of the value in the optimistic update.
+      dimming: { brightness: adjustedBrightness },
+      dynamics: { duration: getTransitionTimeInMs() },
+    };
+
+    const undoOptimisticUpdate = optimisticUpdate(light, changes, setLights);
+    await hueBridgeState.context.hueClient.updateLight(light, changes).catch((e) => {
+      undoOptimisticUpdate();
+      throw e;
     });
 
     toast.style = Style.Success;
-    toast.title = "Increased brightness";
+    toast.title = `${direction === "increase" ? "Increased" : "Decreased"} brightness of ${light.metadata.name} to ${(
+      adjustedBrightness / 100
+    ).toLocaleString("en", {
+      style: "percent",
+    })}`;
     await toast.show();
   } catch (e) {
     toast.style = Style.Failure;
-    toast.title = "Failed increasing brightness";
+    toast.title = `Failed ${direction === "increase" ? "increasing" : "decreasing"} brightness of ${
+      light.metadata.name
+    }`;
     toast.message = e instanceof Error ? e.message : undefined;
     await toast.show();
   }
 }
 
-async function handleDecreaseBrightness(light: Light, mutateLights: MutatePromise<Light[]>) {
+async function handleSetColor({ hueBridgeState, setLights }: ReturnType<typeof useHue>, light: Light, color: CssColor) {
   const toast = new Toast({ title: "" });
 
   try {
-    await mutateLights(adjustBrightness(light, "decrease"), {
-      optimisticUpdate(lights) {
-        return lights.map((it) =>
-          it.id === light.id
-            ? { ...it, state: { ...it.state, on: true, bri: calculateAdjustedBrightness(light, "decrease") } }
-            : it
-        );
-      },
+    if (hueBridgeState.context.hueClient === undefined) throw new Error("Not connected to Hue Bridge.");
+    if (light.color === undefined) throw new Error("Light does not support colors.");
+
+    const { xy, brightness } = hexToXy(color.value);
+
+    // Darker colors will result in a lower brightness value to better match the color.
+    const changes = {
+      on: { on: true },
+      color: { xy: xy },
+      dimming: { brightness: brightness },
+      dynamics: { duration: getTransitionTimeInMs() },
+    };
+
+    const undoOptimisticUpdate = optimisticUpdate(light, changes, setLights);
+    await hueBridgeState.context.hueClient.updateLight(light, changes).catch((e) => {
+      undoOptimisticUpdate();
+      throw e;
     });
 
     toast.style = Style.Success;
-    toast.title = "Decreased brightness";
-    await toast.show();
-  } catch (e) {
-    toast.style = Style.Failure;
-    toast.title = "Failed decreasing brightness";
-    toast.message = e instanceof Error ? e.message : undefined;
-    await toast.show();
-  }
-}
-
-async function handleSetColor(light: Light, mutateLights: MutatePromise<Light[]>, color: CssColor) {
-  const toast = new Toast({ title: "" });
-
-  try {
-    await mutateLights(setLightColor(light, color.value), {
-      optimisticUpdate(lights) {
-        return lights.map((it) =>
-          it.id === light.id ? { ...it, state: { ...it.state, on: true, xy: hexToXy(color.value) } } : it
-        );
-      },
-    });
-
-    toast.style = Style.Success;
-    toast.title = `Set color to ${color.name}`;
+    toast.title = `Set color of ${light.metadata.name} to ${color.name}`;
     await toast.show();
   } catch (e) {
     toast.style = Style.Failure;
@@ -353,51 +390,42 @@ async function handleSetColor(light: Light, mutateLights: MutatePromise<Light[]>
   }
 }
 
-async function handleIncreaseColorTemperature(light: Light, mutateLights: MutatePromise<Light[]>) {
+async function handleColorTemperatureChange(
+  { hueBridgeState, setLights }: ReturnType<typeof useHue>,
+  rateLimiter: ReturnType<typeof useInputRateLimiter>,
+  light: Light,
+  direction: "increase" | "decrease"
+) {
   const toast = new Toast({ title: "" });
 
   try {
-    await mutateLights(adjustColorTemperature(light, "increase"), {
-      optimisticUpdate(lights) {
-        return lights?.map((it) =>
-          it.id === light.id
-            ? { ...it, state: { ...it.state, ct: calculateAdjustedColorTemperature(light, "increase") } }
-            : it
-        );
-      },
+    if (hueBridgeState.context.hueClient === undefined) throw new Error("Not connected to Hue Bridge.");
+    if (light.color_temperature === undefined) throw new Error("Light does not support color temperature.");
+    if (!rateLimiter.canExecute()) return;
+
+    const adjustedColorTemperature = calculateAdjustedColorTemperature(light.color_temperature.mirek, direction);
+    const changes = {
+      on: { on: true },
+      // color_temperature_delta exists, but manually calculating the new value
+      // enables the usage of the value in the optimistic update.
+      color_temperature: { mirek: adjustedColorTemperature },
+      dynamics: { duration: getTransitionTimeInMs() },
+    } as Partial<Light>;
+
+    const undoOptimisticUpdate = optimisticUpdate(light, changes, setLights);
+    await hueBridgeState.context.hueClient.updateLight(light, changes).catch((e) => {
+      undoOptimisticUpdate();
+      throw e;
     });
 
     toast.style = Style.Success;
-    toast.title = "Increased color temperature";
+    toast.title = `${direction === "increase" ? "Increased" : "Decreased"} color temperature of ${light.metadata.name}`;
     await toast.show();
   } catch (e) {
     toast.style = Style.Failure;
-    toast.title = "Failed increasing color temperature";
-    toast.message = e instanceof Error ? e.message : undefined;
-    await toast.show();
-  }
-}
-
-async function handleDecreaseColorTemperature(light: Light, mutateLights: MutatePromise<Light[]>) {
-  const toast = new Toast({ title: "" });
-
-  try {
-    await mutateLights(adjustColorTemperature(light, "decrease"), {
-      optimisticUpdate(lights) {
-        return lights.map((it) =>
-          it.id === light.id
-            ? { ...it, state: { ...it.state, ct: calculateAdjustedColorTemperature(light, "decrease") } }
-            : it
-        );
-      },
-    });
-
-    toast.style = Style.Success;
-    toast.title = "Decreased color temperature";
-    await toast.show();
-  } catch (e) {
-    toast.style = Style.Failure;
-    toast.title = "Failed decreasing color temperature";
+    toast.title = `Failed ${direction === "increase" ? "increasing" : "decreasing"} color temperature of ${
+      light.metadata.name
+    }`;
     toast.message = e instanceof Error ? e.message : undefined;
     await toast.show();
   }

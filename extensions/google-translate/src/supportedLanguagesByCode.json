@@ -70,8 +70,7 @@
   },
   "zh-TW": {
     "code": "zh-TW",
-    "name": "Taiwanese Mandarin",
-    "flag": "🇹🇼"
+    "name": "Chinese Traditional"
   },
   "co": {
     "code": "co",
@@ -162,8 +161,8 @@
     "name": "Hawaiian",
     "flag": "🌺"
   },
-  "he": {
-    "code": "he",
+  "iw": {
+    "code": "iw",
     "name": "Hebrew",
     "flag": "🇮🇱"
   },

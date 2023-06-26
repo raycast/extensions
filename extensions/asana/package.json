@@ -16,18 +16,7 @@
       "name": "create-task",
       "title": "Create Task",
       "description": "Create and assign new tasks.",
-      "mode": "view",
-      "preferences": [
-        {
-          "name": "signature",
-          "type": "checkbox",
-          "title": "Signature",
-          "label": "Add Raycast signature to new tasks",
-          "description": "When enabled, \"Created via Raycast\" signature will be added at the bottom of the description.",
-          "required": false,
-          "default": true
-        }
-      ]
+      "mode": "view"
     },
     {
       "name": "my-tasks",
@@ -47,7 +36,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.48.8",
+    "@raycast/api": "^1.53.4",
     "@raycast/utils": "^1.4.9",
     "axios": "^0.27.2",
     "date-fns": "^2.29.1",
