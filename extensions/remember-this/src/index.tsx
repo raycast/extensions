@@ -11,6 +11,53 @@ type Values = {
   tokeneditor: string[];
 };
 
+const now = new Date();
+now.setHours(now.getHours() + 5);
+
+const placeholders = [
+  "Respond to ✉ important work email",
+  `Pay late 💳 credit card bill before ${now.toLocaleDateString()}`,
+  `Complete 📚 math homework by ${now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`,
+  `Return 🔙 overdue library books by ${now.toLocaleDateString()} `,
+  `Confirm ✅ flight for ${now.toLocaleDateString("en-us", { month: "long", day: "numeric", year: "numeric" })}`,
+  "Call 📞 doctor about medication refill",
+  "Reschedule 📅 important meeting",
+  `Submit ✔ critical project update by ${now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`,
+  "Follow up 📩 on unanswered emails",
+  "Claim 💰 unexpected refund",
+  ` Renew ✅ expired license before ${now.toLocaleDateString()} `,
+  `Pick up 🛒 groceries for dinner today by ${now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`,
+  ` Pay 💸 overdue bills by ${now.toLocaleDateString()} `,
+  `Submit ✔ report ASAP`,
+  "Call 📞 doctor about concerning symptoms",
+  "Fill 🖋 important paperwork",
+  "Respond to 👥 team member's question",
+  "Reply to ✉ important client email",
+  "Call 📞 boss about project issue",
+  "Retrieve 📥 crucial documents from home",
+  "Submit ✅ time-sensitive request",
+  `Pay 💸 late rent by ${now.toLocaleDateString()} `,
+  `Return 📦 package by ${now.toLocaleDateString()} deadline `,
+  "Book 🛩 last-minute flight",
+  `Complete 📒 report for ${now.toLocaleDateString("en-us", {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  })} deadline`,
+  `Withdraw 🏧 money from bank by ${now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} `,
+  "Make 📞 important phone call",
+  "Apply for 📝 time-sensitive opportunity",
+  "Proofread 👀 critical document",
+  "Contact 📞 insurance about claim",
+  `Submit 📝 assignment by ${now} `,
+  `Pick up🛒 groceries for tonight's dinner by ${now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} `,
+  `Renew ✅ expiring subscription before ${now.toLocaleDateString()} `,
+  "Receive 📦 important package delivery",
+  `Investigate 🕵️‍♀️ work issue ASAP`,
+];
+
+const placeholder = placeholders[Math.floor(Math.random() * placeholders.length)];
+
 const REMEMBERING_FILE = path.join(environment.supportPath, "remembering.csv");
 export default function Command() {
   function handleSubmit(values: Values) {
@@ -83,7 +130,7 @@ export default function Command() {
       }
     >
       <Form.Description text="Motivate yourself to stay on top of your deadlines" />
-      <Form.TextArea id="textarea" title="Remember This:" placeholder="Meeting on Tuesday" />
+      <Form.TextArea id="textarea" title="Remember This:" placeholder={placeholder} />
 
       <Form.Dropdown id="dropdown" title="For:" defaultValue={"1week"}>
         <Form.Dropdown.Item value="30min" title="30 Minutes" />

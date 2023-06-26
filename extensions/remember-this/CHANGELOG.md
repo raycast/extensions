@@ -34,24 +34,24 @@ Dropdown content goes here!
 
 <details>
     <summary># Remember This v1.1 -r</summary>
-# Remember This `v1.1`
+    # Remember This `v1.1`
 
-## New Features
-- Calculates expiration dates based on duration
-- Displays expiration information for each item
-- Deletes items permanently from the CSV storage
-- Searches items by content
-- Shows empty view if no valid items remain
-- Removes expired items from CSV file
+    ## New Features
+    - Calculates expiration dates based on duration
+    - Displays expiration information for each item
+    - Deletes items permanently from the CSV storage
+    - Searches items by content
+    - Shows empty view if no valid items remain
+    - Removes expired items from CSV file
 
-## Improvements
-- Optimized for better performance
-- Bug fixes for stability
+    ## Improvements
+    - Optimized for better performance
+    - Bug fixes for stability
 
-## Resolved Issues
-- Fixed crashing issue
-- Fixed expired items interfering with deletion
+    ## Resolved Issues
+    - Fixed crashing issue
+    - Fixed expired items interfering with deletion
 
-## Recommended for All Users
+    ## Recommended for All Users
 
 </details>
