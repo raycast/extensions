@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import useTimers from "./hooks/useTimers";
 import RenameView from "./RenameView";
 import CustomTimerView from "./startCustomTimer";
-import { formatTime } from "./formatUtils";
+import { formatDateTime, formatTime } from "./formatUtils";
 
 export default function Command() {
   const {
@@ -25,16 +25,23 @@ export default function Command() {
     }, 1000);
   }, []);
 
+  const runningIcon = { tag: { value: "Running", color: Color.Yellow } };
+  const finishedIcon = { tag: { value: "Finished!", color: Color.Green } };
+
   return (
     <List isLoading={isLoading}>
       <List.Section title={timers?.length !== 0 && timers != null ? "Currently Running" : "No Timers Running"}>
         {timers?.map((timer) => (
           <List.Item
             key={timer.originalFile}
-            icon={{ source: Icon.Clock, tintColor: Color.Yellow }}
+            icon={{ source: Icon.Clock, tintColor: timer.timeLeft === 0 ? Color.Green : Color.Yellow }}
             title={timer.name}
             subtitle={formatTime(timer.timeLeft) + " left"}
-            accessories={[{ text: formatTime(timer.secondsSet) + " originally" }]}
+            accessories={[
+              { text: formatTime(timer.secondsSet) + " originally" },
+              { text: `${timer.timeLeft === 0 ? "Ended" : "Ends"} at ${formatDateTime(timer.timeEnds)}` },
+              timer.timeLeft === 0 ? finishedIcon : runningIcon,
+            ]}
             actions={
               <ActionPanel>
                 <Action title="Stop Timer" onAction={() => handleStopTimer(timer)} />

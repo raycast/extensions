@@ -35,6 +35,7 @@ import {
   copyFolderToClipboard,
   maybeMoveResultToTrash,
   lastUsedSort,
+  fixDoubleConcat,
 } from "./utils";
 
 import fse from "fs-extra";
@@ -54,6 +55,16 @@ export default function Command() {
   const [searchScope, setSearchScope] = useState<string>("");
   const [isShowingDetail, setIsShowingDetail] = useState<boolean>(true);
   const [results, setResults] = useState<SpotlightSearchResult[]>([]);
+
+  // hack to fix annoying double text during fallback. Typing helloworld results in helloworldhelloworld
+  let fixedText = "";
+  useEffect(() => {
+    fixedText = fixDoubleConcat(searchText);
+
+    if (fixedText !== searchText) {
+      setSearchText(fixedText); // Update the state of searchText
+    }
+  }, [searchText]);
 
   const [plugins, setPlugins] = useState<FolderSearchPlugin[]>([]);
 
@@ -421,6 +432,8 @@ export default function Command() {
       onSearchTextChange={setSearchText}
       searchBarPlaceholder="Search folders"
       isShowingDetail={isShowingDetail}
+      throttle={true}
+      searchText={searchText}
       selectedItemId={selectedItemId}
       searchBarAccessory={
         hasCheckedPlugins && hasCheckedPreferences ? (

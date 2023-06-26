@@ -1,20 +1,22 @@
-import { Color, Icon } from "@raycast/api";
 import {
+  Block,
   Follow,
   LikePost,
   Mute,
-  OpenUserLikes,
-  OpenUserProfile,
+  OpenAccountLikes,
+  OpenProfile,
   QuotePost,
   ReplyPost,
   Repost,
   SwitchToHomeAction,
+  Unblock,
   Unfollow,
   UnlikePost,
   Unmute,
   ViewAsGrid,
   ViewAsList,
 } from "../utils/constants";
+import { Color, Icon } from "@raycast/api";
 
 import { ActionsDictionary } from "../types/types";
 
@@ -79,6 +81,18 @@ export const ActionMap: ActionsDictionary = {
     color: Color.Green,
     shortcut: { modifiers: ["cmd", "shift"], key: "n" },
   },
+  unblock: {
+    getTitle: () => Unblock,
+    icon: Icon.PlusCircleFilled,
+    color: Color.Red,
+    shortcut: { modifiers: ["cmd", "shift"], key: "b" },
+  },
+  block: {
+    getTitle: () => Block,
+    icon: Icon.MinusCircleFilled,
+    color: Color.Red,
+    shortcut: { modifiers: ["cmd", "shift"], key: "b" },
+  },
   viewAsList: {
     getTitle: () => ViewAsList,
     icon: Icon.AppWindowList,
@@ -128,13 +142,13 @@ export const ActionMap: ActionsDictionary = {
     shortcut: { modifiers: ["cmd"], key: "h" },
   },
   openProfile: {
-    getTitle: () => OpenUserProfile,
+    getTitle: () => OpenProfile,
     icon: Icon.Person,
     color: Color.Blue,
     shortcut: { modifiers: ["cmd"], key: "return" },
   },
-  openUserLikes: {
-    getTitle: () => OpenUserLikes,
+  openAccountLikes: {
+    getTitle: () => OpenAccountLikes,
     icon: Icon.Heartbeat,
     color: Color.Blue,
     shortcut: { modifiers: ["cmd", "ctrl"], key: "l" },

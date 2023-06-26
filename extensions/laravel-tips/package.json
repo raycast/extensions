@@ -1,0 +1,79 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "laravel-tips",
+  "title": "Laravel Tips",
+  "description": "Get or search laravel tips in Raycast",
+  "icon": "command-icon.png",
+  "author": "Godruoyi",
+  "categories": [
+    "Productivity",
+    "Developer Tools",
+    "Other"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "random",
+      "title": "Random Tip",
+      "description": "Random a lucky tip",
+      "mode": "view"
+    },
+    {
+      "name": "search",
+      "title": "Search Tips",
+      "description": "Search tips by keyword",
+      "mode": "view"
+    },
+    {
+      "name": "sync",
+      "title": "Sync Tips",
+      "description": "Sync all tips from remote",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "binaryPath",
+      "description": "Specify the path to laraveltips binary, default use built-in binary",
+      "type": "textfield",
+      "title": "Binary Path",
+      "placeholder": "/path/to/your/laraveltips-binary",
+      "required": false
+    },
+    {
+      "name": "storagePath",
+      "description": "Specify the path to store tips, default is $HOME/.laravel",
+      "type": "textfield",
+      "title": "Storage Path",
+      "placeholder": "/path/to/save/tips",
+      "required": false
+    },
+    {
+      "name": "githubToken",
+      "description": "Specify the github token to sync tips from GitHub when you reach the rate limit",
+      "type": "password",
+      "title": "Github Token",
+      "placeholder": "Github Token",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.53.1",
+    "@raycast/utils": "^1.7.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "~16.18.34",
+    "@types/react": "^18.2.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^5.1.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

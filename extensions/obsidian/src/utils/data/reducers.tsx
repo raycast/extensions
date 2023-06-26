@@ -1,13 +1,13 @@
 import { deleteNoteFromCache, updateNoteInCache } from "./cache";
 import { Note, Vault } from "../interfaces";
-import { deleteNote, getNoteFileContent, starNote, unstarNote } from "../utils";
+import { deleteNote, getNoteFileContent, bookmarkNote, unbookmarkNote } from "../utils";
 import { tagsForNotes } from "../yaml";
 
 export enum NoteReducerActionType {
   Set,
   Delete,
-  Star,
-  Unstar,
+  Bookmark,
+  Unbookmark,
   Update,
   Add,
 }
@@ -25,14 +25,14 @@ export type NoteReducerAction =
       };
     }
   | {
-      type: NoteReducerActionType.Star;
+      type: NoteReducerActionType.Bookmark;
       payload: {
         note: Note;
         vault: Vault;
       };
     }
   | {
-      type: NoteReducerActionType.Unstar;
+      type: NoteReducerActionType.Unbookmark;
       payload: {
         note: Note;
         vault: Vault;
@@ -67,23 +67,23 @@ export function NoteReducer(notes: Note[], action: NoteReducerAction) {
       return notes.filter((note) => note.path !== action.payload.note.path);
     }
 
-    case NoteReducerActionType.Star: {
-      console.log("REDUCER STAR");
-      starNote(action.payload.vault, action.payload.note);
+    case NoteReducerActionType.Bookmark: {
+      console.log("REDUCER BOOKMARK");
+      bookmarkNote(action.payload.vault, action.payload.note);
       return notes.map((note) => {
         if (note.path === action.payload.note.path) {
-          note.starred = true;
+          note.bookmarked = true;
           updateNoteInCache(action.payload.vault, note);
         }
         return note;
       });
     }
-    case NoteReducerActionType.Unstar: {
-      console.log("REDUCER UNSTAR");
-      unstarNote(action.payload.vault, action.payload.note);
+    case NoteReducerActionType.Unbookmark: {
+      console.log("REDUCER UNBOOKMARK");
+      unbookmarkNote(action.payload.vault, action.payload.note);
       return notes.map((note) => {
         if (note.path === action.payload.note.path) {
-          note.starred = false;
+          note.bookmarked = false;
           updateNoteInCache(action.payload.vault, note);
         }
         return note;
