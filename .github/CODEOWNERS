@@ -626,6 +626,7 @@
 /extensions/nts-radio                                @arjanski
 /extensions/nuget                                    @hexpl0it
 /extensions/numi                                     @AndresMorelos @pernielsentikaer
+/extensions/obs-clippings                            @trevware
 /extensions/obs-control                              @Yukaii
 /extensions/obsidian                                 @KevinBatdorf @marcjulianschwarz @KevinBatdorf @pernielsentikaer @ofalvai
 /extensions/obsidian-bookmarks                       @Dru89
@@ -724,6 +725,7 @@
 /extensions/purpleair                                @omarshahine
 /extensions/putio                                    @altaywtf
 /extensions/px-to-rem-converter                      @raulanatol
+/extensions/px-to-tailwind                           @kemiljk
 /extensions/qbittorrent                              @J3n5en
 /extensions/qonto                                    @ChristoRibeiro
 /extensions/qotp                                     @ariesly15
@@ -820,6 +822,7 @@
 /extensions/search-regexp                            @musienkoyuriy @pernielsentikaer
 /extensions/search-rubygems                          @aleks
 /extensions/searchcaster                             @gskril @pernielsentikaer
+/extensions/seedsnote                                @nanbingxyz
 /extensions/semantic-scholar                         @blainerothrock
 /extensions/send-to-flomo                            @ahonn @fankaidev @pernielsentikaer
 /extensions/sentry                                   @thomaspaulmann @mattisssa @NoorBayari
@@ -946,7 +949,7 @@
 /extensions/transform                                @Idered @robertrosman
 /extensions/transmission                             @FezVrasta @danpalmer
 /extensions/transmit                                 @kennonb
-/extensions/trello                                   @ChrisChinchilla
+/extensions/trello                                   @ChrisChinchilla @Jimmy-b36
 /extensions/truth-or-dare                            @tandpfun
 /extensions/tunnelblick                              @SamuelNitsche
 /extensions/tuple                                    @inxilpro

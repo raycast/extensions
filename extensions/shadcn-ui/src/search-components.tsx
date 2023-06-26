@@ -4,6 +4,17 @@ import { SHADCN_URL } from "./constants";
 import fetch, { type Response } from "node-fetch";
 import yaml from "js-yaml";
 
+/**
+ * Function to parse a component name
+ * Replaces - with empty space and capitalizes the first letter of each word
+ */
+export const parseComponentName = (componentName: string) => {
+  return componentName
+    .split("-")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+};
+
 const onRequestError = async (e: Error) => {
   await showToast({
     style: Toast.Style.Failure,
@@ -27,7 +38,6 @@ async function parseFetchResponse(response: Response) {
   const json = (await response.json()) as
     | {
         name: string;
-        component: string;
       }[]
     | { code: string; message: string };
 
@@ -35,11 +45,13 @@ async function parseFetchResponse(response: Response) {
     throw new Error("message" in json ? json.message : response.statusText);
   }
 
+  console.log(json);
+
   return json.map((result) => {
     return {
-      name: result.name,
-      component: result.component,
-      url: `${SHADCN_URL.DOCS_COMPONENTS}/${result.component}`,
+      name: parseComponentName(result.name),
+      component: result.name,
+      url: `${SHADCN_URL.DOCS_COMPONENTS}/${result.name}`,
     } as SearchResult;
   });
 }
