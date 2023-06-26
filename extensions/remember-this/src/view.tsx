@@ -136,7 +136,12 @@ export default function Command() {
     fs.writeFileSync(filePath, newFileContents);
 
     console.log(`Deleted line "${deletedLine}" at index ${index} from ${filePath}`);
-    showToast({ title: "Deleted That!", message: `Run ⌘+r to refresh!` });
+
+    // Update the state by filtering the items array to exclude the deleted item
+    const newItems = items.filter((_, i) => i !== index);
+    setItems(newItems);
+
+    showToast({ title: "Deleted That Item!" });
   };
 
   const handleSearch = (query: string) => {

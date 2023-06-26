@@ -43,6 +43,8 @@ Dropdown content goes here!
     - Searches items by content
     - Shows empty view if no valid items remain
     - Removes expired items from CSV file
+    - You dont need to click command r to show list without deleted items
+    - Enhancements have been made to the Remember This form, including the addition of cycling placeholders.
 
     ## Improvements
     - Optimized for better performance
