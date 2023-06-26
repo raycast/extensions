@@ -1,4 +1,4 @@
-import { List, Icon, ListItem, ActionPanel, showToast } from "@raycast/api";
+import { List, Icon, ListItem, ActionPanel, showToast, LaunchType, launchCommand } from "@raycast/api";
 import { useState } from "react";
 import fs from "fs";
 import path from "path";
@@ -12,10 +12,20 @@ type RememberedItem = {
 };
 
 function readRememberedItems(): RememberedItem[] {
+  const now = new Date();
+
   try {
-    const data = fs.readFileSync(REMEMBERING_FILE, "utf8");
-    const lines = data.split("\n").filter((line) => line.trim() !== "");
-    return lines.map((line) => {
+    const fileContents = fs.readFileSync(REMEMBERING_FILE, "utf8");
+    const lines = fileContents.trim().split("\n");
+    const validLines = lines.filter((line) => {
+      const [dateString, content] = line.split(",");
+      const expirationDate = new Date(dateString);
+      return expirationDate > now;
+    });
+    const newFileContents = validLines.join("\n") + "\n\n";
+    fs.writeFileSync(REMEMBERING_FILE, newFileContents);
+
+    return validLines.map((line) => {
       const [dateString, content] = line.split(",");
       return {
         expirationDate: new Date(dateString),
@@ -27,9 +37,15 @@ function readRememberedItems(): RememberedItem[] {
   }
 }
 
-function filterValidItems(items: RememberedItem[]): RememberedItem[] {
+function filterValidItems(items: RememberedItem[], query: string): RememberedItem[] {
   const now = new Date();
-  return items.filter((item) => item.expirationDate > now);
+  return items.filter((item) => {
+    if (query.length === 0) {
+      return item.expirationDate > now;
+    } else {
+      return item.expirationDate > now && item.content.toLowerCase().includes(query.toLowerCase());
+    }
+  });
 }
 
 function getExpirationString(expirationDate: Date): string {
@@ -98,7 +114,8 @@ function getExpirationString(expirationDate: Date): string {
 }
 
 export default function Command() {
-  const [items, setItems] = useState(filterValidItems(readRememberedItems()));
+  const [items, setItems] = useState(filterValidItems(readRememberedItems(), ""));
+  const [query, setQuery] = useState("");
 
   const deleteItem = (index: number) => {
     const filePath = path.join(environment.supportPath, "remembering.csv");
@@ -121,29 +138,63 @@ export default function Command() {
     console.log(`Deleted line "${deletedLine}" at index ${index} from ${filePath}`);
     showToast({ title: "Deleted That!", message: `Run ⌘+r to refresh!` });
   };
+
+  const handleSearch = (query: string) => {
+    setQuery(query);
+    setItems(filterValidItems(readRememberedItems(), query));
+  };
+
   return (
-    <List>
-      {items.map((item, index) => (
-        <ListItem
-          key={index}
-          title={item.content}
-          subtitle={getExpirationString(item.expirationDate)}
+    <List searchBarPlaceholder="Search remembered items" onSearchTextChange={handleSearch}>
+      {items.length > 0 ? (
+        items.map((item, index) => (
+          <ListItem
+            key={index}
+            title={item.content}
+            subtitle={getExpirationString(item.expirationDate)}
+            actions={
+              <ActionPanel>
+                <ActionPanel.Section>
+                  <ActionPanel.Item
+                    title="Add Item"
+                    icon={Icon.Document}
+                    onAction={() => {
+                      launchCommand({ name: "index", type: LaunchType.UserInitiated });
+                    }}
+                    shortcut={{ modifiers: ["cmd"], key: "enter" }}
+                  />
+                  <ActionPanel.Item
+                    title="Delete Item"
+                    icon={Icon.DeleteDocument}
+                    onAction={() => {
+                      deleteItem(index);
+                    }}
+                    shortcut={{ modifiers: ["cmd"], key: "backspace" }}
+                  />
+                </ActionPanel.Section>
+              </ActionPanel>
+            }
+          />
+        ))
+      ) : (
+        <List.EmptyView
+          icon={{ source: Icon.Plus }}
+          title="Theres nothing here 🤔"
+          description="Click ⏎ to remember something!"
           actions={
             <ActionPanel>
-              <ActionPanel.Section>
-                <ActionPanel.Item
-                  title="Delete Item"
-                  icon={Icon.DeleteDocument}
-                  onAction={() => {
-                    deleteItem(index);
-                  }}
-                  shortcut={{ modifiers: ["cmd"], key: "backspace" }}
-                />
-              </ActionPanel.Section>
+              <ActionPanel.Item
+                title="Add Item"
+                icon={Icon.Plus}
+                onAction={() => {
+                  launchCommand({ name: "index", type: LaunchType.UserInitiated });
+                }}
+                shortcut={{ modifiers: ["cmd"], key: "enter" }}
+              />
             </ActionPanel>
           }
         />
-      ))}
+      )}
     </List>
   );
 }

@@ -26,7 +26,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.54.0"
+    "@raycast/api": "^1.54.0",
+    "ts-node": "^10.9.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.5",

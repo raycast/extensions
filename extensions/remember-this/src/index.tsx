@@ -1,4 +1,4 @@
-import { Form, ActionPanel, launchCommand, LaunchType, Action, showToast, environment } from "@raycast/api";
+import { Form, ActionPanel, launchCommand, LaunchType, Action, showToast, Toast, environment } from "@raycast/api";
 import fs from "fs";
 import path from "path";
 
@@ -14,8 +14,14 @@ type Values = {
 const REMEMBERING_FILE = path.join(environment.supportPath, "remembering.csv");
 export default function Command() {
   function handleSubmit(values: Values) {
-    const expirationDate = calculateExpirationDate(values.dropdown);
-    const data = `${expirationDate.toISOString()},${values.textarea}\n`;
+    if (!values.textarea) {
+      showToast({
+        title: "No input provided!",
+        message: "Please input something to remember!",
+        style: Toast.Style.Failure,
+      });
+      return;
+    }
 
     // Check if the file exists
     let fileExists = false;
@@ -25,6 +31,32 @@ export default function Command() {
     } catch (error) {
       console.log("File no existe");
     }
+
+    // Check if the input already exists in the file
+    if (fileExists) {
+      const existingData = fs.readFileSync(REMEMBERING_FILE, "utf-8").toLowerCase().split("\n");
+      const newData = values.textarea.toLowerCase();
+
+      let inputExists = false;
+      for (const row of existingData) {
+        if (row.split(",")[1] === newData) {
+          inputExists = true;
+          break;
+        }
+      }
+
+      if (inputExists) {
+        showToast({
+          title: "Input already exists!",
+          message: "Please input something else to remember!",
+          style: Toast.Style.Failure,
+        });
+        return;
+      }
+    }
+
+    const expirationDate = calculateExpirationDate(values.dropdown);
+    const data = `\n${expirationDate.toISOString()},${values.textarea}`;
 
     // Write to the file
     if (fileExists) {
@@ -50,15 +82,10 @@ export default function Command() {
         </ActionPanel>
       }
     >
-      <Form.Description text="Input anything here and I will remember it for a designated time." />
-      <Form.TextArea
-        id="textarea"
-        title="Remember This:"
-        placeholder="Meeting on Tuesday"
-        defaultValue="Meeting on Tuesday"
-      />
-      <Form.Separator />
-      <Form.Dropdown id="dropdown" title="How long should I remember this for?" defaultValue={"1week"}>
+      <Form.Description text="Motivate yourself to stay on top of your deadlines" />
+      <Form.TextArea id="textarea" title="Remember This:" placeholder="Meeting on Tuesday" />
+
+      <Form.Dropdown id="dropdown" title="For:" defaultValue={"1week"}>
         <Form.Dropdown.Item value="30min" title="30 Minutes" />
         <Form.Dropdown.Item value="1h" title="1 Hour" />
         <Form.Dropdown.Item value="2h" title="2 Hours" />
