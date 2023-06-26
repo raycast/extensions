@@ -9,6 +9,12 @@ import {
   Icon,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
+
+import { launchCommand, LaunchType } from "@raycast/api";
+
+import fetch from "node-fetch";
+globalThis.fetch = fetch;
+
 import Bard, { askAI } from "bard-ai";
 
 export default function ResultView(prompt, toast_title, type = "text", title, optionalSelect) {
@@ -24,6 +30,7 @@ export default function ResultView(prompt, toast_title, type = "text", title, op
   const [response, setResponse] = useState("");
   const [loading, setLoading] = useState(true);
   const [pasteContent, setPasteContent] = useState("");
+  const [failed, setFailed] = useState(false);
 
   async function getResult() {
     const now = new Date();
@@ -44,6 +51,7 @@ export default function ResultView(prompt, toast_title, type = "text", title, op
           toast.style = Toast.Style.Failure;
           setLoading(false);
           setResponse("⚠️ No input was provided.");
+          setFailed(true)
           return;
         }
         if (!optionalSelect) {
@@ -51,6 +59,7 @@ export default function ResultView(prompt, toast_title, type = "text", title, op
           toast.style = Toast.Style.Failure;
           setLoading(false);
           setResponse("⚠️ Raycast was unable to get the selected text.");
+          setFailed(true)
           return;
         }
       }
@@ -63,6 +72,7 @@ export default function ResultView(prompt, toast_title, type = "text", title, op
         toast.style = Toast.Style.Failure;
         setLoading(false);
         setResponse("⚠️ Unable to reach Bard at this time.");
+        setFailed(true)
         return;
       }
     }
@@ -114,6 +124,11 @@ export default function ResultView(prompt, toast_title, type = "text", title, op
     getResult();
   }, []);
 
+  const openInChat = async (response) => {
+    return;
+    // await launchCommand({ name: "aiChat", type: LaunchType.UserInitiated, context: { working: !failed, query: prompt, response: response } })
+  }
+
   return (
     <Detail
       markdown={response}
@@ -122,6 +137,7 @@ export default function ResultView(prompt, toast_title, type = "text", title, op
         !loading && (
           <ActionPanel title="Actions">
             <Action.CopyToClipboard title="Copy Results" content={pasteContent} />
+            {/* <Action title="Open in Chat" onAction={() => openInChat(response)} shortcut={{ modifiers: ["cmd", "shift"], key: "k" }} icon={Icon.Message} /> */}
             <Action.Paste title="Paste Results" content={pasteContent} />
             <Action title="Retry" onAction={retry} shortcut={{ modifiers: ["cmd"], key: "r" }} icon={Icon.Repeat} />
           </ActionPanel>
@@ -133,7 +149,7 @@ export default function ResultView(prompt, toast_title, type = "text", title, op
           <Detail.Metadata.Label title="Command Title" text={title} />
           <Detail.Metadata.Separator />
           <Detail.Metadata.Label title="Model" text={`PaLM 2`} />
-          <Detail.Metadata.Label title="Version" text="2023.05.23" />
+          <Detail.Metadata.Label title="Version" text="2023.06.07" />
         </Detail.Metadata>
       }
     />
