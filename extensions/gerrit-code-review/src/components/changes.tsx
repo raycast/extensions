@@ -1,13 +1,4 @@
-import {
-  ActionPanel,
-  Action,
-  List,
-  showToast,
-  Toast,
-  Icon,
-  Color,
-  Detail,
-} from "@raycast/api";
+import { ActionPanel, Action, List, showToast, Toast, Icon, Color, Detail } from "@raycast/api";
 import { useState, useEffect, useCallback } from "react";
 import { GerritAPI } from "../utils/api/gerrit";
 import { Change, Label } from "../interfaces/change";
@@ -86,10 +77,7 @@ export function FetchChanges(props: ChangeProps) {
               tooltip: `Project: ${change.project}, Branch: ${change.branch}`,
             }}
             subtitle={{
-              value:
-                change.subject.length > 65
-                  ? `${change.subject.substring(0, 62)}...`
-                  : `${change.subject}`,
+              value: change.subject.length > 65 ? `${change.subject.substring(0, 62)}...` : `${change.subject}`,
               tooltip: `${change.subject}`,
             }}
             icon={{
@@ -103,12 +91,9 @@ export function FetchChanges(props: ChangeProps) {
                     icon: { source: Icon.Warning, tintColor: Color.Orange },
                   }
                 : {},
-              change.status != "MERGED" &&
-              change.submitRequirementsMet !== undefined
+              change.status != "MERGED" && change.submitRequirementsMet !== undefined
                 ? {
-                    tooltip: change.submitRequirementsMet
-                      ? "Change can be submitted"
-                      : "Change can not be submitted",
+                    tooltip: change.submitRequirementsMet ? "Change can be submitted" : "Change can not be submitted",
                     icon: change.submitRequirementsMet
                       ? { source: Icon.CheckCircle, tintColor: Color.Green }
                       : { source: Icon.XMarkCircle, tintColor: Color.Red },
@@ -146,25 +131,15 @@ export function FetchChanges(props: ChangeProps) {
                   }
                 : {},
               {
-                tooltip: `Updated: ${format(
-                  parseISO(change.updated.toString()),
-                  "EEEE d MMMM yyyy 'at' HH:mm"
-                )} UTC`,
+                tooltip: `Updated: ${format(parseISO(change.updated.toString()), "EEEE d MMMM yyyy 'at' HH:mm")} UTC`,
                 date: new Date(change.updated),
               },
             ]}
             actions={
               <ActionPanel>
                 <ActionPanel.Section>
-                  <Action.Push
-                    icon={Icon.Info}
-                    title="Show Details"
-                    target={<PatchDetails change={change} />}
-                  />
-                  <Action.OpenInBrowser
-                    title="Open in Browser"
-                    url={change.url}
-                  />
+                  <Action.Push icon={Icon.Info} title="Show Details" target={<PatchDetails change={change} />} />
+                  <Action.OpenInBrowser title="Open in Browser" url={change.url} />
                   <Action.SubmitForm
                     title="Refresh"
                     icon={Icon.ArrowClockwise}
@@ -197,68 +172,38 @@ function PatchDetails(details: PatchDetails) {
       metadata={
         <Detail.Metadata>
           <Detail.Metadata.TagList title="Status">
-            {details.change.status != "MERGED" &&
-            details.change.submitRequirementsMet ? (
-              <Detail.Metadata.TagList.Item
-                key="submittable"
-                text={"Ready To Submit"}
-                color={Color.Green}
-              />
+            {details.change.status != "MERGED" && details.change.submitRequirementsMet ? (
+              <Detail.Metadata.TagList.Item key="submittable" text={"Ready To Submit"} color={Color.Green} />
             ) : (
               <></>
             )}
             {!details.change.mergeable && details.change.status != "MERGED" ? (
-              <Detail.Metadata.TagList.Item
-                key="conflict"
-                text={"Merge Conflict"}
-                color={Color.Red}
-              />
+              <Detail.Metadata.TagList.Item key="conflict" text={"Merge Conflict"} color={Color.Red} />
             ) : (
               <></>
             )}
-            {details.change.status == "NEW" &&
-            !details.change.work_in_progress ? (
-              <Detail.Metadata.TagList.Item
-                key="new"
-                text={"Active"}
-                color={Color.Blue}
-              />
+            {details.change.status == "NEW" && !details.change.work_in_progress ? (
+              <Detail.Metadata.TagList.Item key="new" text={"Active"} color={Color.Blue} />
             ) : (
               <></>
             )}
             {details.change.status == "MERGED" ? (
-              <Detail.Metadata.TagList.Item
-                key="merged"
-                text={"Merged"}
-                color={Color.Green}
-              />
+              <Detail.Metadata.TagList.Item key="merged" text={"Merged"} color={Color.Green} />
             ) : (
               <></>
             )}
             {details.change.status == "ABANDONED" ? (
-              <Detail.Metadata.TagList.Item
-                key="abandoned"
-                text={"Abandoned"}
-                color={Color.Red}
-              />
+              <Detail.Metadata.TagList.Item key="abandoned" text={"Abandoned"} color={Color.Red} />
             ) : (
               <></>
             )}
             {details.change.work_in_progress ? (
-              <Detail.Metadata.TagList.Item
-                key="wip"
-                text={"WIP"}
-                color={Color.Brown}
-              />
+              <Detail.Metadata.TagList.Item key="wip" text={"WIP"} color={Color.Brown} />
             ) : (
               <></>
             )}
             {details.change.is_private ? (
-              <Detail.Metadata.TagList.Item
-                key="private"
-                text={"Private"}
-                color={Color.Purple}
-              />
+              <Detail.Metadata.TagList.Item key="private" text={"Private"} color={Color.Purple} />
             ) : (
               <></>
             )}
@@ -284,10 +229,7 @@ function PatchDetails(details: PatchDetails) {
           />
           <Detail.Metadata.Label
             title="Updated (UTC)"
-            text={`${format(
-              parseISO(details.change.updated.toString()),
-              "EEEE d MMMM yyyy 'at' HH:mm"
-            )}`}
+            text={`${format(parseISO(details.change.updated.toString()), "EEEE d MMMM yyyy 'at' HH:mm")}`}
           />
           <Detail.Metadata.TagList title="Owner">
             <Detail.Metadata.TagList.Item
@@ -327,10 +269,7 @@ function PatchDetails(details: PatchDetails) {
           </Detail.Metadata.TagList>
           <Detail.Metadata.TagList title="Topic">
             {details.change.topic ? (
-              <Detail.Metadata.TagList.Item
-                key={details.change.topic}
-                text={details.change.topic}
-              />
+              <Detail.Metadata.TagList.Item key={details.change.topic} text={details.change.topic} />
             ) : (
               <></>
             )}
@@ -340,10 +279,7 @@ function PatchDetails(details: PatchDetails) {
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <Action.OpenInBrowser
-              title="Open in Browser"
-              url={details.change.url}
-            />
+            <Action.OpenInBrowser title="Open in Browser" url={details.change.url} />
             <Action.CopyToClipboard
               icon={Icon.CopyClipboard}
               title="Copy URL"

@@ -10,9 +10,7 @@ export const saveGerrit = async (gerritList: GerritInstance[]) => {
 
 export const listGerrit = async (): Promise<GerritInstance[]> => {
   const gerritList = await LocalStorage.getItem(GerritKey);
-  return JSON.parse(
-    gerritList ? gerritList.toString() : "[]"
-  ) as GerritInstance[];
+  return JSON.parse(gerritList ? gerritList.toString() : "[]") as GerritInstance[];
 };
 
 export const deleteGerrit = async (id: string) => {
