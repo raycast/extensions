@@ -223,3 +223,4 @@ function calculateExpirationDate(duration: string): Date {
       throw new Error(`Invalid duration: ${duration}`);
   }
 }
+
