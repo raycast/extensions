@@ -1,4 +1,4 @@
-import { List, Icon, ListItem, ActionPanel, showToast, LaunchType, launchCommand } from "@raycast/api";
+import { List, Icon, ListItem, ActionPanel, showToast, LaunchType, Clipboard, launchCommand } from "@raycast/api";
 import { useState } from "react";
 import fs from "fs";
 import path from "path";
@@ -168,6 +168,15 @@ export default function Command() {
                       launchCommand({ name: "index", type: LaunchType.UserInitiated });
                     }}
                     shortcut={{ modifiers: ["cmd"], key: "enter" }}
+                  />
+                  <ActionPanel.Item
+                    title="Copy Item"
+                    icon={Icon.CopyClipboard}
+                    onAction={() => {
+                      Clipboard.copy(item.content);
+                      showToast({ title: `Copied to "${item.content}" Clipboard!` });
+                    }}
+                    shortcut={{ modifiers: ["cmd"], key: "." }}
                   />
                   <ActionPanel.Item
                     title="Delete Item"

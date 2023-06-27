@@ -30,7 +30,7 @@ Applying a recommended update will ensure you:
     - Add a default time to remember for through prefrences menu
     - Add a new `Change Default Time` action in the `Remember This` form.
     - Add a menubar command to show when your next task is
-
+    - Copy items to your clipboard action
 
     ## Improvements
     - Optimized for better performance
@@ -80,14 +80,14 @@ Applying a recommended update will ensure you:
 
 <details>
     <summary>Remember This v2.0 -r</summary>
-    
+
     # Remember This `v2.0`
 
     ## New Features
     - Add a default time to remember for through prefrences menu
     - Add a new `Change Default Time` action in the `Remember This` form.
     - Add a menubar command to show when your next task is
-
+    - Copy items to your clipboard action
 
     ## Improvements
     - Optimized for better performance
