@@ -1,3 +1,3 @@
-# Post to Mastodon Changelog
+# Mastodon Changelog
 
 ## [Initial Version] - {PR_MERGE_DATE}
