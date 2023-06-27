@@ -1,3 +1,3 @@
 # Resend Changelog
 
-## [Initial Version] - 2023-06-23
+## [Initial Version] - 2023-06-27

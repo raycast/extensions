@@ -14,16 +14,18 @@ import {
   showToast,
   useNavigation,
 } from "@raycast/api";
-import { getEmail, sendEmail } from "./utils/api";
+import { getApiKeys, getEmail, sendEmail } from "./utils/api";
 import { RESEND_URL } from "./utils/constants";
 import fs from "fs";
 import path from "path";
+import ErrorComponent from "./components/ErrorComponent";
 
 export default function Emails() {
   const { push } = useNavigation();
   const [isLoading, setIsLoading] = useState(true);
   type LoggedEmail = GetEmailResponse & { logged_at: Date; retrieved_at: Date };
   const [emails, setEmails] = useCachedState<LoggedEmail[]>("emails", []);
+  const [error, setError] = useState("");
 
   async function getNewEmail(id: string) {
     setIsLoading(true);
@@ -71,11 +73,24 @@ export default function Emails() {
     }
   }
 
-  useEffect(() => {
+  async function getAPIKeysFromApi() {
+    const response = await getApiKeys();
+    if ("name" in response) {
+      if (response.name === "validation_error" || response.name === "restricted_api_key") {
+        setError(response.message);
+      }
+    }
     setIsLoading(false);
+  }
+
+  useEffect(() => {
+    // this function is called to determine if the set API Key is valid and has permissions
+    getAPIKeysFromApi();
   }, []);
 
-  return (
+  return error ? (
+    <ErrorComponent error={error} />
+  ) : (
     <List isLoading={isLoading} searchBarPlaceholder="Search email" isShowingDetail={emails.length > 0}>
       {emails.length === 0 ? (
         <List.EmptyView

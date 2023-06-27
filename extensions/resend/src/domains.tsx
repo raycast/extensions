@@ -16,11 +16,13 @@ import {
 } from "@raycast/api";
 import { FormValidation, getFavicon, useForm } from "@raycast/utils";
 import { ADD_DOMAIN_REGIONS, RESEND_URL } from "./utils/constants";
+import ErrorComponent from "./components/ErrorComponent";
 
 export default function Domains() {
   const { push } = useNavigation();
   const [isLoading, setIsLoading] = useState(true);
   const [domainsResponse, setDomainsResponse] = useState<GetDomainsResponse>();
+  const [error, setError] = useState("");
 
   async function getDomainsFromApi() {
     setIsLoading(true);
@@ -33,6 +35,8 @@ export default function Domains() {
         style: Toast.Style.Success,
       });
       setDomainsResponse(response);
+    } else if (response.name === "validation_error" || response.name === "restricted_api_key") {
+      setError(response.message);
     }
     setIsLoading(false);
   }
@@ -80,7 +84,9 @@ export default function Domains() {
 
   const numOfDomains = domainsResponse && domainsResponse.data.length;
   const title = domainsResponse && `${numOfDomains} ${numOfDomains === 1 ? "domain" : "domains"}`;
-  return (
+  return error ? (
+    <ErrorComponent error={error} />
+  ) : (
     <List isLoading={isLoading} searchBarPlaceholder="Search domain">
       <List.Section title={title}>
         {domainsResponse?.data.map((item) => (

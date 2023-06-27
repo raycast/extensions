@@ -22,11 +22,13 @@ import {
 } from "@raycast/api";
 import { FormValidation, getFavicon, useForm } from "@raycast/utils";
 import { CREATE_API_KEY_PERMISSIONS, RESEND_URL } from "./utils/constants";
+import ErrorComponent from "./components/ErrorComponent";
 
 export default function APIKeys() {
   const { push } = useNavigation();
   const [isLoading, setIsLoading] = useState(true);
   const [APIKeysResponse, setAPIKeysResponse] = useState<GetAPIKeysResponse>();
+  const [error, setError] = useState("");
 
   async function getAPIKeysFromApi() {
     setIsLoading(true);
@@ -39,6 +41,8 @@ export default function APIKeys() {
         style: Toast.Style.Success,
       });
       setAPIKeysResponse(response);
+    } else if (response.name === "validation_error" || response.name === "restricted_api_key") {
+      setError(response.message);
     }
     setIsLoading(false);
   }
@@ -65,7 +69,9 @@ export default function APIKeys() {
 
   const numOfKeys = APIKeysResponse && APIKeysResponse.data.length;
   const title = APIKeysResponse && `${numOfKeys} ${numOfKeys === 1 ? "API Key" : "API Keys"}`;
-  return (
+  return error ? (
+    <ErrorComponent error={error} />
+  ) : (
     <List isLoading={isLoading} searchBarPlaceholder="Search key">
       <List.Section title={title}>
         {APIKeysResponse?.data.map((item) => (
