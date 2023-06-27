@@ -2,10 +2,9 @@ import { useState, useEffect, useCallback } from "react";
 import { ActionPanel, Action, Grid, List, Icon, useNavigation, showToast, Toast } from "@raycast/api";
 import { load, CheerioAPI } from "cheerio";
 import { Details } from "./detail";
-import { DealEntry, SearchState, genreColors } from "./utils/types";
+import { DealEntry, SearchState } from "./types/types";
+import { baseUrl, genreColors } from "./utils/constants";
 import { fetchHtml } from "./utils/fetchHtml";
-
-export const baseUrl = "https://gg.deals";
 
 export default function Command() {
   const { state, search } = useSearch();
@@ -79,7 +78,7 @@ export default function Command() {
     ));
   };
 
-  if (state.results.length > 0) {
+  if (state.searchText) {
     return (
       <List
         searchText={state.searchText}
@@ -88,11 +87,19 @@ export default function Command() {
         onSearchTextChange={search}
         searchBarPlaceholder="What game are you searching for?"
         throttle
-        isShowingDetail
+        isShowingDetail={state.results.length > 0 ? true : false}
       >
-        <List.Section title="Results" subtitle={state.results.length + ""}>
-          {!isLoading && renderListDetail(Object.values(state.results))}
-        </List.Section>
+        {state.results.length > 0 ? (
+          <List.Section title="Results" subtitle={state.results.length + ""}>
+            {!isLoading && renderListDetail(Object.values(state.results))}
+          </List.Section>
+        ) : (
+          <List.EmptyView
+            icon={{ source: "logo-white.svg" }}
+            title="No deals found!"
+            description="Please visit the website instead"
+          />
+        )}
       </List>
     );
   } else {
@@ -107,29 +114,41 @@ export default function Command() {
         searchBarPlaceholder="What game are you searching for?"
         searchBarAccessory={
           <Grid.Dropdown
-            tooltip="Grid Item Size"
+            tooltip="Select Grid Size"
             storeValue
             onChange={(newValue) => {
               setItemSize(newValue === "8" ? 8 : 5);
               setIsLoading(false);
             }}
           >
-            <Grid.Dropdown.Item title="Medium" value="5" />
-            <Grid.Dropdown.Item title="Small" value="8" />
+            <Grid.Dropdown.Section title="Grid Size">
+              <Grid.Dropdown.Item title="Medium Icons" value="5" />
+              <Grid.Dropdown.Item title="Small Icons" value="8" />
+            </Grid.Dropdown.Section>
           </Grid.Dropdown>
         }
       >
-        <Grid.Section aspectRatio="3/2" title="Historical lows">
-          {!isLoading && renderGridSection(Object.values(state.historicalLows))}
-        </Grid.Section>
+        {state.historicalLows && !state.bestDeals && !state.newDeals ? (
+          <Grid.EmptyView
+            icon={{ source: "logo-white.svg" }}
+            title="No deals found!"
+            description="Please visit the website instead"
+          />
+        ) : (
+          <>
+            <Grid.Section aspectRatio="3/2" title="Historical lows">
+              {!isLoading && renderGridSection(Object.values(state.historicalLows))}
+            </Grid.Section>
 
-        <Grid.Section aspectRatio="3/2" title="Best deals">
-          {!isLoading && renderGridSection(Object.values(state.bestDeals))}
-        </Grid.Section>
+            <Grid.Section aspectRatio="3/2" title="Best deals">
+              {!isLoading && renderGridSection(Object.values(state.bestDeals))}
+            </Grid.Section>
 
-        <Grid.Section aspectRatio="3/2" title="New deals">
-          {!isLoading && renderGridSection(Object.values(state.newDeals))}
-        </Grid.Section>
+            <Grid.Section aspectRatio="3/2" title="New deals">
+              {!isLoading && renderGridSection(Object.values(state.newDeals))}
+            </Grid.Section>
+          </>
+        )}
       </Grid>
     );
   }

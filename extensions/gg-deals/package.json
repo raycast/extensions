@@ -12,8 +12,8 @@
   "commands": [
     {
       "name": "index",
-      "title": "Search Games...",
-      "description": "Template for showing a static grid",
+      "title": "Game deals",
+      "description": "Find the best game deals",
       "mode": "view"
     }
   ],

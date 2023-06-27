@@ -1,8 +1,8 @@
 import { Action, ActionPanel, Color, Detail, showToast, Toast } from "@raycast/api";
 import { Key, useCallback, useEffect, useState } from "react";
-import { baseUrl } from ".";
 import { load } from "cheerio";
-import { DetailsProps, DetailsState, DetailEntry, editionColors } from "./utils/types";
+import { DetailsProps, DetailsState, DetailEntry } from "./types/types";
+import { editionColors, baseUrl } from "./utils/constants";
 import { fetchHtml } from "./utils/fetchHtml";
 
 export function Details(props: DetailsProps) {
