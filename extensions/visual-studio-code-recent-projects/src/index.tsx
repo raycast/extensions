@@ -24,6 +24,7 @@ import {
 } from "./grid-or-list";
 import { usePinnedEntries } from "./pinned";
 import { runAppleScriptSync } from "run-applescript";
+import { getBuildScheme } from "./lib/vscode";
 
 export default function Command() {
   const { data, isLoading } = useRecentEntries();
@@ -147,7 +148,8 @@ function LocalItem(props: { entry: EntryLike; uri: string; pinned?: boolean } & 
 
 function RemoteItem(props: { entry: RemoteEntry; pinned?: boolean } & PinMethods) {
   const remotePath = decodeURI(basename(props.entry.folderUri));
-  const uri = props.entry.folderUri.replace("vscode-remote://", "vscode://vscode-remote/");
+  const scheme = getBuildScheme()
+  const uri = props.entry.folderUri.replace("vscode-remote://", `${scheme}://vscode-remote/`);
 
   return (
     <ListOrGridItem
