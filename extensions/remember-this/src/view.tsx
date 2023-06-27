@@ -137,7 +137,6 @@ export default function Command() {
     // Write the updated contents back to the file
     fs.writeFileSync(filePath, newFileContents);
 
-    console.log(`Deleted line "${deletedLine}" at index ${index} from ${filePath}`);
 
     // Update the state by filtering the items array to exclude the deleted item
     const newItems = items.filter((_, i) => i !== index);
@@ -186,8 +185,8 @@ export default function Command() {
         ))
       ) : (
         <List.EmptyView
-          icon={{ source: Icon.Plus }}
-          title="Theres nothing here 🤔"
+          icon={{ source: Icon.Stars }}
+          title="Woohoo! You got nothing todo!"
           description="Click ⏎ to remember something!"
           actions={
             <ActionPanel>

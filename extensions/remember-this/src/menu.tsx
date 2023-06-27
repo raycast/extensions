@@ -4,6 +4,12 @@ import * as fs from "fs";
 
 const REMEMBERING_FILE = path.join(environment.supportPath, "remembering.csv");
 
+if (!fs.existsSync(REMEMBERING_FILE)) {
+  // Create the file
+  fs.writeFileSync(REMEMBERING_FILE, '');
+}
+
+
 const second = 1000;
 const minute = 60 * second;
 const hour = 60 * minute;

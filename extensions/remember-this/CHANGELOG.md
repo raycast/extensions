@@ -1,12 +1,7 @@
-# Remember This Changelog
-
-
-# Latest: v2.0
+# __Remember This__ Changelog
 
 <details>
     <summary>Recommended Updates</summary>
-
-
 
 `-r`: Indicates an update includes improvements that are recommended for all users. Applying these updates will have:
 
@@ -20,23 +15,45 @@ Applying a recommended update will ensure you:
 - Avoid any issues fixed in the update
 - Have an optimized experience with better performance
 
-Dropdown content goes here!
 
 </details>
 
-
+# Latest: v2.0
 
 
 <details>
-    <summary>Remember This v1.0</summary>
-- Initial Commit
+    <summary>Remember This v2.0 -r</summary>
+
+    # Remember This `v2.0`
+
+    ## New Features
+    - Add a default time to remember for through prefrences menu
+    - Add a new `Change Default Time` action in the `Remember This` form.
+    - Add a menubar command to show when your next task is
+
+
+    ## Improvements
+    - Optimized for better performance
+    - Bug fixes for stability
+    - Made the UI more polish and included cool icons
+
+    ## Resolved Issues
+    - Fixed crashing issue
+
+    ## Recommended for All Users
+
 </details>
 
+# Previous Versions:
 
-
+<details>
+    <summary>Remember This v1.0 -r</summary>
+    - Initial Commit
+</details>
 
 <details>
     <summary>Remember This v1.1 -r</summary>
+
     # Remember This `v1.1`
 
     ## New Features
@@ -61,18 +78,15 @@ Dropdown content goes here!
 
 </details>
 
-
-
-
-
 <details>
     <summary>Remember This v2.0 -r</summary>
+    
     # Remember This `v2.0`
 
     ## New Features
     - Add a default time to remember for through prefrences menu
     - Add a new `Change Default Time` action in the `Remember This` form.
-    - Add a menubar command to ahow when your next task is
+    - Add a menubar command to show when your next task is
 
 
     ## Improvements
