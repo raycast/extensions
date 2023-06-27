@@ -3,7 +3,7 @@ import got from "got";
 import { useState } from "react";
 
 type Values = {
-  lifetime: number;
+  lifetime: string;
   recipient: string;
   passphrase: string;
   secret: string;
@@ -37,19 +37,18 @@ export default function Command() {
     try {
       const baseUrl = "https://onetimesecret.com";
 
-      let url = `${baseUrl}/api/v1/share`;
+      const url = new URL(`${baseUrl}/api/v1/share`);
 
-      url = `${url}/?secret=${values.secret}`;
+      url.searchParams.set("secret", values.secret);
+      url.searchParams.set("lifetime", values.lifetime);
 
       if (values.passphrase) {
-        url = `${url}&passphrase=${values.passphrase}`;
+        url.searchParams.set("passphrase", values.passphrase);
       }
 
-      if (values.lifetime) {
-        url = `${url}&ttl=${values.lifetime}`;
-      }
+      console.log(url);
 
-      const { body } = await got.post(url);
+      const { body } = await got.post(url.href);
 
       const shareableUrl = `${baseUrl}/secret/${JSON.parse(body).secret_key}`;
 
