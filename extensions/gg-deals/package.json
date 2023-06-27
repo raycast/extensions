@@ -12,7 +12,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "Game deals",
+      "title": "Game Deals",
       "description": "Find the best game deals",
       "mode": "view"
     }
