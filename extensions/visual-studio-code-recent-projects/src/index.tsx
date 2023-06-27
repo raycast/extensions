@@ -148,7 +148,7 @@ function LocalItem(props: { entry: EntryLike; uri: string; pinned?: boolean } & 
 
 function RemoteItem(props: { entry: RemoteEntry; pinned?: boolean } & PinMethods) {
   const remotePath = decodeURI(basename(props.entry.folderUri));
-  const scheme = getBuildScheme()
+  const scheme = getBuildScheme();
   const uri = props.entry.folderUri.replace("vscode-remote://", `${scheme}://vscode-remote/`);
 
   return (
