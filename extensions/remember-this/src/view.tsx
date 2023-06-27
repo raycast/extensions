@@ -4,6 +4,8 @@ import fs from "fs";
 import path from "path";
 import { environment } from "@raycast/api";
 
+launchCommand({ name: "menu", type: LaunchType.UserInitiated });
+
 const REMEMBERING_FILE = path.join(environment.supportPath, "remembering.csv");
 
 type RememberedItem = {
@@ -142,13 +144,14 @@ export default function Command() {
     setItems(newItems);
 
     showToast({ title: "Deleted That Item!" });
+    launchCommand({ name: "menu", type: LaunchType.UserInitiated });
   };
 
   const handleSearch = (query: string) => {
     setQuery(query);
     setItems(filterValidItems(readRememberedItems(), query));
   };
-
+  launchCommand({ name: "menu", type: LaunchType.UserInitiated });
   return (
     <List searchBarPlaceholder="Search remembered items" onSearchTextChange={handleSearch}>
       {items.length > 0 ? (

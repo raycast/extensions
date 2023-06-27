@@ -1,5 +1,8 @@
 # Remember This Changelog
 
+
+# Latest: v2.0
+
 <details>
     <summary>Recommended Updates</summary>
 
@@ -33,7 +36,7 @@ Dropdown content goes here!
 
 
 <details>
-    <summary># Remember This v1.1 -r</summary>
+    <summary>Remember This v1.1 -r</summary>
     # Remember This `v1.1`
 
     ## New Features
@@ -53,6 +56,32 @@ Dropdown content goes here!
     ## Resolved Issues
     - Fixed crashing issue
     - Fixed expired items interfering with deletion
+
+    ## Recommended for All Users
+
+</details>
+
+
+
+
+
+<details>
+    <summary>Remember This v2.0 -r</summary>
+    # Remember This `v2.0`
+
+    ## New Features
+    - Add a default time to remember for through prefrences menu
+    - Add a new `Change Default Time` action in the `Remember This` form.
+    - Add a menubar command to ahow when your next task is
+
+
+    ## Improvements
+    - Optimized for better performance
+    - Bug fixes for stability
+    - Made the UI more polish and included cool icons
+
+    ## Resolved Issues
+    - Fixed crashing issue
 
     ## Recommended for All Users
 

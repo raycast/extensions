@@ -1,4 +1,17 @@
-import { Form, ActionPanel, launchCommand, LaunchType, Action, showToast, Toast, environment } from "@raycast/api";
+import {
+  Form,
+  getPreferenceValues,
+  ActionPanel,
+  launchCommand,
+  LaunchType,
+  Action,
+  Color,
+  showToast,
+  Toast,
+  environment,
+  openExtensionPreferences,
+  Icon,
+} from "@raycast/api";
 import fs from "fs";
 import path from "path";
 
@@ -114,6 +127,7 @@ export default function Command() {
       fs.writeFileSync(REMEMBERING_FILE, data);
     }
     launchCommand({ name: "view", type: LaunchType.UserInitiated });
+    launchCommand({ name: "menu", type: LaunchType.UserInitiated });
     // Log the expiration date and what to remember
     console.log(`Remembering "${values.textarea}" until ${expirationDate.toString()}`);
     showToast({
@@ -121,18 +135,31 @@ export default function Command() {
     });
   }
 
+  const preferences = getPreferenceValues<Preferences>();
+  const rfdValue = preferences.rfd;
+
   return (
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm onSubmit={handleSubmit} />
+          <Action.SubmitForm
+            icon={Icon.CircleProgress100}
+            onSubmit={handleSubmit}
+            shortcut={{ modifiers: ["cmd"], key: "enter" }}
+          />
+          <Action
+            title="Change Default Time"
+            icon={Icon.Hammer}
+            onAction={openExtensionPreferences}
+            shortcut={{ modifiers: ["opt"], key: "enter" }}
+          />
         </ActionPanel>
       }
     >
       <Form.Description text="Motivate yourself to stay on top of your deadlines" />
-      <Form.TextArea id="textarea" title="Remember This:" placeholder={placeholder} />
+      <Form.TextField id="textarea" title="Remember This:" placeholder={placeholder} />
 
-      <Form.Dropdown id="dropdown" title="For:" defaultValue={"1week"}>
+      <Form.Dropdown id="dropdown" title="For:" defaultValue={rfdValue.toString()}>
         <Form.Dropdown.Item value="30min" title="30 Minutes" />
         <Form.Dropdown.Item value="1h" title="1 Hour" />
         <Form.Dropdown.Item value="2h" title="2 Hours" />
