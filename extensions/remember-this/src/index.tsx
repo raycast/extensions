@@ -89,7 +89,7 @@ export default function Command() {
       fs.accessSync(REMEMBERING_FILE);
       fileExists = true;
     } catch (error) {
-      console.log("File No Existe and now it doooose")
+      console.log("File No Existe and now it doooose");
     }
 
     // Check if the input already exists in the file

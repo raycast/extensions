@@ -6,9 +6,8 @@ const REMEMBERING_FILE = path.join(environment.supportPath, "remembering.csv");
 
 if (!fs.existsSync(REMEMBERING_FILE)) {
   // Create the file
-  fs.writeFileSync(REMEMBERING_FILE, '');
+  fs.writeFileSync(REMEMBERING_FILE, "");
 }
-
 
 const second = 1000;
 const minute = 60 * second;
