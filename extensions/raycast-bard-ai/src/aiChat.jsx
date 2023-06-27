@@ -60,7 +60,6 @@ export default function Chat({ launchContext }) {
     let currentQuestions = getCurrentConversation().questions;
     if (typeof currentQuestions === "object") {
       if (!initializing && isLoaded && currentQuestions.length && currentQuestions[0].response === "Loading...") {
-
         let startTime = Date.now();
         setLoading(true);
         toast(Toast.Style.Animated, "Getting response from Bard...");
@@ -198,8 +197,8 @@ export default function Chat({ launchContext }) {
   //     setConversationName("New Conversation");
   //     return newList;
   //   });
-    // toast(Toast.Style.Success, `Sucessfully created converation "${"New Conversation"}"`);
-    // pop();
+  // toast(Toast.Style.Success, `Sucessfully created converation "${"New Conversation"}"`);
+  // pop();
   // }
 
   const deleteConversation = async () => {
@@ -412,15 +411,20 @@ export default function Chat({ launchContext }) {
 
   const copyResponse = async (response) => {
     await Clipboard.copy(response);
-    toast(Toast.Style.Success, `Successfully copied response message.`)
-  }
+    toast(Toast.Style.Success, `Successfully copied response message.`);
+  };
 
   // All of the actions in the Chat page
   const BardActionPanel = ({ response }) => (
     <ActionPanel>
       <ActionPanel.Section title="Google Bard">
         <Action icon={Icon.Stars} title="Get Answer" onAction={submitResponse} />
-        <Action icon={Icon.CopyClipboard} title="Copy Answer" shortcut={{ modifiers: ["cmd", "shift"], key: "c" }} onAction={() => copyResponse(response)} />
+        <Action
+          icon={Icon.CopyClipboard}
+          title="Copy Answer"
+          shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+          onAction={() => copyResponse(response)}
+        />
       </ActionPanel.Section>
       <ActionPanel.Section title="Manage Conversations">
         <Action.Push
@@ -483,9 +487,9 @@ export default function Chat({ launchContext }) {
       inputDate.getFullYear() === currentDate.getFullYear()
       ? `${inputDate.getHours().toString().padStart(2, "0")}:${inputDate.getMinutes().toString().padStart(2, "0")}`
       : `${(inputDate.getMonth() + 1).toString().padStart(2, "0")}/${inputDate
-        .getDate()
-        .toString()
-        .padStart(2, "0")}/${inputDate.getFullYear()}`;
+          .getDate()
+          .toString()
+          .padStart(2, "0")}/${inputDate.getFullYear()}`;
   };
 
   // Makes the dropdown to select conversations

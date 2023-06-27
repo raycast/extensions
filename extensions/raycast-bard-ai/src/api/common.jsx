@@ -51,7 +51,7 @@ export default function ResultView(prompt, toast_title, type = "text", title, op
           toast.style = Toast.Style.Failure;
           setLoading(false);
           setResponse("⚠️ No input was provided.");
-          setFailed(true)
+          setFailed(true);
           return;
         }
         if (!optionalSelect) {
@@ -59,7 +59,7 @@ export default function ResultView(prompt, toast_title, type = "text", title, op
           toast.style = Toast.Style.Failure;
           setLoading(false);
           setResponse("⚠️ Raycast was unable to get the selected text.");
-          setFailed(true)
+          setFailed(true);
           return;
         }
       }
@@ -72,7 +72,7 @@ export default function ResultView(prompt, toast_title, type = "text", title, op
         toast.style = Toast.Style.Failure;
         setLoading(false);
         setResponse("⚠️ Unable to reach Bard at this time.");
-        setFailed(true)
+        setFailed(true);
         return;
       }
     }
@@ -127,7 +127,7 @@ export default function ResultView(prompt, toast_title, type = "text", title, op
   const openInChat = async (response) => {
     return;
     // await launchCommand({ name: "aiChat", type: LaunchType.UserInitiated, context: { working: !failed, query: prompt, response: response } })
-  }
+  };
 
   return (
     <Detail
