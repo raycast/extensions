@@ -43,7 +43,11 @@ const ClubComponent = ({ id }: IClubIdProps) => {
           title="No Club Found"
           actions={
             <ActionPanel>
-              <Action.Push title="Show Club" icon={Icon.Sidebar} target={<ClubComponent id={"" + searchText} />} />
+              <Action.Push
+                title="Show Club"
+                icon={Icon.Sidebar}
+                target={<ClubComponent id={searchText.replace("#", "")} />}
+              />
             </ActionPanel>
           }
         />
