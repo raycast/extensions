@@ -1,5 +1,5 @@
 import { List } from "@raycast/api";
-import { useCachedPromise, useCachedState } from "@raycast/utils";
+import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 
 import { getProjects } from "./api/projects";
@@ -7,16 +7,17 @@ import StatusIssueList from "./components/StatusIssueList";
 import { getProjectAvatar } from "./helpers/avatars";
 import { withJiraCredentials } from "./helpers/withJiraCredentials";
 import useIssues from "./hooks/useIssues";
+import usePersistedState from "./hooks/usePersistedState";
 
 export function ActiveSprints() {
-  const [projectQuery, setProjectQuery] = useState("");
+  const [projectKey, setProjectKey] = usePersistedState("active-sprint-project", "");
+  const [projectQuery, setProjectQuery] = useState(projectKey);
+
   const { data: projects, isLoading: isLoadingProjects } = useCachedPromise(
     (query) => getProjects(query),
     [projectQuery],
     { keepPreviousData: true }
   );
-
-  const [projectKey, setProjectKey] = useCachedState("active-sprint-project", "");
 
   const jql = `sprint in openSprints() AND project = ${projectKey} ORDER BY updated DESC`;
 
