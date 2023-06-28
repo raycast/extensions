@@ -46,12 +46,6 @@ class RulerWindow: NSWindow {
 
   private func convertToScreenCoordinates(_ point: NSPoint) -> NSPoint {
     return NSPoint(x: point.x, y: point.y)
-    // guard let screen = screen else {
-    //   return point
-    // }
-
-    // let screenFrame = screen.frame
-    // return NSPoint(x: point.x, y: screenFrame.size.height - point.y)
   }
 
   override var isOpaque: Bool {
@@ -109,16 +103,22 @@ class RulerWindow: NSWindow {
     // Remove previous distance overlay if exists
     distanceOverlay?.removeFromSuperview()
 
-    // Create a transparent box overlay with the same length as the line
-    let overlayWidth = width
+    // Create a transparent box overlay with the same length as the line but keep minimum width
+    let overlayWidth = width > 80 ? width : 80
     let overlayHeight: CGFloat = 20  // Adjust the height as desired
-    let overlayX = x
+    var overlayX = x + width / 2 - overlayWidth / 2
     let overlayY: CGFloat
 
+    // if there is no space above the line, put the overlay below the line
     if y + height + overlayHeight < screenFrame.size.height {
       overlayY = y + height
     } else {
       overlayY = y - overlayHeight
+    }
+
+    // if last point is on the left side of the first point, put the overlay on the left side
+    if endPoint.x < startPoint.x {
+      overlayX = x - width / 2 - overlayWidth / 2
     }
 
     distanceOverlay = NSView(
@@ -220,7 +220,6 @@ class Ruler: NSObject {
     rulerWindow = window
     rulerWindow?.setupTrackingArea()
 
-    // print("Click anywhere to select the first point.")
     application.run()
 
   }
@@ -232,7 +231,6 @@ class Ruler: NSObject {
 
     if startPoint == nil {
       startPoint = point
-      // print("First point selected. Now select the second point.")
       rulerWindow.drawStroke(from: point, to: point)
     } else if endPoint == nil {
       endPoint = point

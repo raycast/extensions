@@ -10,12 +10,9 @@ export default async function command() {
       return;
     }
 
-    console.log(`Get distance: ${getDistance}`);
     await Clipboard.copy(getDistance);
     await showHUD("Copied distnace");
   } catch (e) {
-    console.error(e);
-
     await showHUD("❌ Failed calculating distance");
   }
 }
