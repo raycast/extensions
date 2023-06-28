@@ -8,4 +8,4 @@ DerivedData/
 .swiftpm/xcode/package.xcworkspace/contents.xcworkspacedata
 .netrc
 /node_modules
-.vscode
+.vscode/
