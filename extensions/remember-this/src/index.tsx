@@ -88,7 +88,8 @@ export default function Command(props: { arguments?: { thingtor?: string } }) {
         dropdown: rfdValue,
       });
 
-      if (result === "failure") {
+      if (!result) {
+        // Use the false condition to check if the result is false
         popToRoot();
       } else {
         launchCommand({ name: "view", type: LaunchType.UserInitiated });
@@ -104,7 +105,7 @@ export default function Command(props: { arguments?: { thingtor?: string } }) {
         message: "Please input something to remember!",
         style: Toast.Style.Failure,
       });
-      return "failure"; // Return a value indicating that the submission was not successful
+      return false; // Return false to indicate that the submission was not successful
     }
 
     // Check if the file exists
@@ -113,7 +114,7 @@ export default function Command(props: { arguments?: { thingtor?: string } }) {
       fs.accessSync(REMEMBERING_FILE);
       fileExists = true;
     } catch (error) {
-      console.log("File No Existe and now it doooose");
+      console.log("File does not exist. Creating a new file...");
     }
 
     // Check if the input already exists in the file
@@ -135,7 +136,7 @@ export default function Command(props: { arguments?: { thingtor?: string } }) {
           message: "Please input something else to remember!",
           style: Toast.Style.Failure,
         });
-        return "failure"; // Return a value indicating that the submission was not successful
+        return false; // Return false to indicate that the submission was not successful
       }
     }
 
@@ -157,6 +158,7 @@ export default function Command(props: { arguments?: { thingtor?: string } }) {
     showToast({
       title: "Remembering That!",
     });
+    return true; // Return true to indicate that the submission was successful
   }
 
   return (
@@ -245,13 +247,15 @@ function calculateExpirationDate(duration: string): Date {
       return new Date(now.getTime() + 60 * 60 * 1000); // 1 hour from now
     case "2h":
       return new Date(now.getTime() + 2 * 60 * 60 * 1000); // 2 hours from now
-    case "3h":
-      return new Date(now.getTime() + 3 * 60 * 60 * 1000); // 3 hours from now
     case "6h":
       return new Date(now.getTime() + 6 * 60 * 60 * 1000); // 6 hours from now
     case "12h":
       return new Date(now.getTime() + 12 * 60 * 60 * 1000); // 12 hours from now
     default:
-      throw new Error(`Invalid duration: ${duration}`);
+      return new Date(now.getFullYear() + 100, 0, 1); // Default to 100 years from now
   }
+}
+
+interface Preferences {
+  rfd: string;
 }
