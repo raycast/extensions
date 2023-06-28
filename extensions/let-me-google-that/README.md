@@ -6,6 +6,6 @@ With LetMeGoogleThat, you can generate custom links to the popular 'Let Me Googl
 
 ## Usage
 
-To use the LetMeGoogleThat Raycast Extension, simply open the Raycast app and type 'Generate Link', click the box labeled "towards" followed by your search term. Hit enter and you'll be presented with a custom link to the 'Let Me Google That For You' website.
+To use the LetMeGoogleThat Raycast Extension, simply open the Raycast app and type 'Generate Link', click the box next to it followed by your search term. Hit enter and you'll be presented with a custom link to the 'Let Me Google That For You' website.
 
 Use this extension to gently (or not-so-gently) remind your less tech-savvy friends to use Google before they ask for your help. Happy Trolling!
