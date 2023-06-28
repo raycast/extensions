@@ -1,5 +1,9 @@
 # Home Assistant Changelog
 
+## [Fix] - 2023-06-25
+
+- Use nearest resolve url also for http requests
+
 ## [Fix] - 2023-06-24
 
 - Get persistent notifications via websocket API instead of entities because since 2023.06 the entity option does not exist anymore.

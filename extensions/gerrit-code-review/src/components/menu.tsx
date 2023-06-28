@@ -35,7 +35,11 @@ export function gerritMenu(menuAction: string): JSX.Element {
         const results = gerritList.filter((g) => g.displayName.toLowerCase().includes(searchText.toLowerCase()));
         setGerritList(results);
       } catch (err) {
-        showToast({ style: Toast.Style.Failure, title: "Query Failed", message: String(err) });
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Query Failed",
+          message: String(err),
+        });
       } finally {
         setIsLoading(false);
       }

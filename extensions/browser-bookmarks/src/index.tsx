@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Icon, Keyboard, List, LocalStorage, Toast, showToast } from "@raycast/api";
 import { getFavicon, useCachedPromise, useCachedState } from "@raycast/utils";
+import Fuse from "fuse.js";
 import { useState, useMemo, useEffect } from "react";
 
 import PermissionErrorScreen from "./components/PermissionErrorScreen";
@@ -162,24 +163,23 @@ export default function Command() {
     });
   }, [bookmarks, selectedFolderId, folders]);
 
+  const fuse = useMemo(() => {
+    return new Fuse(folderBookmarks, {
+      keys: ["title", "domain", "folder"],
+    });
+  }, [folderBookmarks]);
+
   // Limit display to 100 bookmarks to avoid heap memory errors
   // Use custom filtering instead of native filtering
   const filteredBookmarks = useMemo(() => {
-    return folderBookmarks.filter((item) => {
-      if (query === "") {
-        return true;
-      }
+    if (query === "") {
+      return folderBookmarks;
+    }
 
-      // Check if the query matches the item's title, domain, or folder (case-insensitive)
-      const lowercasedQuery = query.toLowerCase();
+    const searchResults = fuse.search(query);
 
-      return (
-        item.title.toLowerCase().includes(lowercasedQuery) ||
-        item.domain.toLowerCase().includes(lowercasedQuery) ||
-        item.folder.toLowerCase().includes(lowercasedQuery)
-      );
-    });
-  }, [folderBookmarks, query]);
+    return searchResults.map((result) => result.item);
+  }, [folderBookmarks, fuse, query]);
 
   const filteredFolders = useMemo(() => {
     return folders.filter((item) => {
@@ -214,29 +214,25 @@ export default function Command() {
   }
 
   async function updateFrecency(item: { id: string; title: string; url: string; folder: string }) {
-    if (frecencies) {
-      const frecency = frecencies[item.id];
+    const frecency = frecencies[item.id];
 
-      await LocalStorage.setItem(
-        "frecencies",
-        JSON.stringify({
-          ...frecencies,
-          [item.id]: getBookmarkFrecency(frecency),
-        })
-      );
+    await LocalStorage.setItem(
+      "frecencies",
+      JSON.stringify({
+        ...frecencies,
+        [item.id]: getBookmarkFrecency(frecency),
+      })
+    );
 
-      mutateFrecencies();
-    }
+    mutateFrecencies();
   }
 
   async function removeFrecency(item: { id: string; title: string; url: string; folder: string }) {
     try {
-      if (frecencies) {
-        delete frecencies[item.id];
-        await LocalStorage.setItem("frecencies", JSON.stringify(frecencies));
-        await showToast({ style: Toast.Style.Success, title: "Reset bookmark's ranking" });
-        mutateFrecencies();
-      }
+      delete frecencies[item.id];
+      await LocalStorage.setItem("frecencies", JSON.stringify(frecencies));
+      await showToast({ style: Toast.Style.Success, title: "Reset bookmark's ranking" });
+      mutateFrecencies();
     } catch {
       await showToast({ style: Toast.Style.Failure, title: "Could not reset bookmark's ranking" });
     }
