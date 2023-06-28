@@ -214,6 +214,7 @@
   "dependencies": {
     "@raycast/api": "^1.53.0",
     "@raycast/utils": "^1.4.16",
+    "cross-fetch": "^3.1.6",
     "iconv-lite": "^0.6.3",
     "is-url": "^1.2.4",
     "lodash": "^4.17.21",

@@ -1,6 +1,8 @@
-import { useFetch } from "@raycast/utils";
+import { useEffect } from "react";
+import { useCachedPromise } from "@raycast/utils";
 import { decode } from "iconv-lite";
 import { nanoid } from "nanoid";
+import { fetch } from "cross-fetch";
 import { Suggestion, SearchConfigs } from "./types";
 import { searchArcPreferences } from "./preferences";
 
@@ -66,13 +68,12 @@ async function parseResponse(response: Response) {
     throw new Error(`${response.statusText} (HTTP ${response.status})`);
   }
 
-  const { suggestionParser } = config[searchArcPreferences.engine];
   const buffer = await response.arrayBuffer();
   const text = decode(Buffer.from(buffer), "iso-8859-1");
   const json = JSON.parse(text);
 
-  const suggestions = new Array<Suggestion>();
-
+  const suggestions: Suggestion[] = [];
+  const { suggestionParser } = config[searchArcPreferences.engine];
   if (suggestionParser) {
     suggestionParser(json, suggestions);
   }
@@ -80,37 +81,43 @@ async function parseResponse(response: Response) {
   return suggestions;
 }
 
-function getDefaultSuggestion(searchText?: string) {
-  return searchText
-    ? {
-        id: nanoid(),
-        query: searchText,
-        url: `${config[searchArcPreferences.engine].search}${encodeURIComponent(searchText)}`,
-      }
-    : undefined;
+function getDefaultSuggestions(searchText?: string): Suggestion[] {
+  if (!searchText) {
+    return [];
+  }
+  return [
+    {
+      id: nanoid(),
+      query: searchText,
+      url: `${config[searchArcPreferences.engine].search}${encodeURIComponent(searchText)}`,
+    },
+  ];
 }
 
 export function useSuggestions(searchText: string) {
-  const suggestionUrl = config[searchArcPreferences.engine].suggestions;
-  const defaultSuggestion = getDefaultSuggestion(searchText);
+  const { data, isLoading, revalidate } = useCachedPromise<() => Promise<Suggestion[]>>(
+    async () => {
+      const suggestionUrl = config[searchArcPreferences.engine].suggestions;
+      if (!suggestionUrl) {
+        return getDefaultSuggestions(searchText);
+      }
 
-  if (suggestionUrl) {
-    const response = useFetch(`${suggestionUrl}${encodeURIComponent(searchText)}`, {
-      headers: {
-        "Content-Type": "text/plain; charset=UTF-8",
-      },
-      parseResponse,
-    });
+      const response = await fetch(`${suggestionUrl}${encodeURIComponent(searchText)}`, {
+        headers: {
+          "Content-Type": "text/plain; charset=UTF-8",
+        },
+      });
+      const parsed = await parseResponse(response);
 
-    if (defaultSuggestion) {
-      response.data = [defaultSuggestion, ...(response.data || [])];
-    }
+      return [...getDefaultSuggestions(searchText), ...parsed];
+    },
+    [],
+    { keepPreviousData: true }
+  );
 
-    return response;
-  }
+  useEffect(() => {
+    revalidate();
+  }, [searchText]);
 
-  return {
-    isLoading: false,
-    data: defaultSuggestion ? [defaultSuggestion] : undefined,
-  };
+  return { data, isLoading };
 }
