@@ -37,7 +37,7 @@ const PlayerComponent = ({ id }: IPlayerIdProps) => {
       } else if (error.includes("404")) {
         return (
           <List onSearchTextChange={setSearchText}>
-            <Error404 searchText={searchText} />
+            <Error404 searchText={searchText.replace("#", "")} />
           </List>
         );
       }
