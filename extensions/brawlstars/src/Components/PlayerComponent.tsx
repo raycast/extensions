@@ -7,6 +7,7 @@ interface IPlayerProps {
 }
 
 export default function Player({ playerData }: IPlayerProps) {
+  const clubInfo = playerData.club.name ? playerData.club.name + " " + playerData.club.tag : "Not in a Club";
   const markdown = `
 
   # ${playerData.name} ${playerData.tag}
@@ -17,7 +18,7 @@ export default function Player({ playerData }: IPlayerProps) {
 
   |Club   | Trophies  |
   |---|---|
-  |  ${playerData.club.name} ${playerData.club.tag}  |   ${playerData.trophies} / ${playerData.highestTrophies} max|
+  |  ${clubInfo} |   ${playerData.trophies} / ${playerData.highestTrophies} max|
 
  
   
@@ -58,18 +59,28 @@ export default function Player({ playerData }: IPlayerProps) {
           </Detail.Metadata>
         }
         actions={
-          <ActionPanel>
-            <Action.Push
-              title="Show Club"
-              icon={Icon.Sidebar}
-              target={<ClubComponent id={"" + playerData.club.tag.replace("#", "")} />}
-            />
-            <Action.OpenInBrowser
-              title="Open in Brawlify"
-              icon={Icon.Globe}
-              url={"https://brawlify.com/stats/profile/" + playerData.tag.replace("#", "%23")}
-            />
-          </ActionPanel>
+          playerData.club.tag ? (
+            <ActionPanel>
+              <Action.Push
+                title="Show Club"
+                icon={Icon.Sidebar}
+                target={playerData.club ? <ClubComponent id={"" + playerData.club.tag} /> : ""}
+              />
+              <Action.OpenInBrowser
+                title="Open in Brawlify"
+                icon={Icon.Globe}
+                url={"https://brawlify.com/stats/profile/" + playerData.tag.replace("#", "%23")}
+              />
+            </ActionPanel>
+          ) : (
+            <ActionPanel>
+              <Action.OpenInBrowser
+                title="Open in Brawlify"
+                icon={Icon.Globe}
+                url={"https://brawlify.com/stats/profile/" + playerData.tag.replace("#", "%23")}
+              />
+            </ActionPanel>
+          )
         }
       />
     </>
