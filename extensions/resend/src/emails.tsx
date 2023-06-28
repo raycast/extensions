@@ -95,7 +95,7 @@ export default function Emails() {
       {emails.length === 0 ? (
         <List.EmptyView
           title="No emails found."
-          description="Send an email to being logging sent emails."
+          description="Send an email to begin logging sent emails."
           actions={
             <ActionPanel>
               <Action
