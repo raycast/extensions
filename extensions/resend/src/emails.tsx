@@ -357,7 +357,7 @@ function EmailSend({ onEmailSent }: EmailSendProps) {
 
       <Form.Separator />
       <Form.Description title="Tags" text="Press 'cmd+T' to add a Tag" />
-      {emailTags.length > 0 && <Form.Description text="Press 'cmd++shift+T' to remove a Tag" />}
+      {emailTags.length > 0 && <Form.Description text="Press 'cmd+shift+T' to remove a Tag" />}
       {emailTags.map((tag, tagIndex) => (
         <React.Fragment key={tagIndex}>
           <Form.TextField
