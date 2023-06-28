@@ -15,7 +15,7 @@ const BrawlerComponent = ({ brawlerData }: IBrawlerProps) => {
   }
 
   const markdown = `
-  # ${brawlerData.name}} 
+  # ${brawlerData.name} 
 
   <img src="${brawlerData.imageUrl2}"  width="100" height="100" /> 
   
