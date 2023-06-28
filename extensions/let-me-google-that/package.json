@@ -19,7 +19,7 @@
       "arguments": [
               {
                 "type": "text",
-                "placeholder": "towards",
+                "placeholder": "How to tie a 👔?",
                 "name": "generate"
               }
             ]
