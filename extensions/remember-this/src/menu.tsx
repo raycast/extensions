@@ -1,5 +1,5 @@
 import path from "path";
-import { MenuBarExtra, environment, LaunchType, launchCommand, Icon } from "@raycast/api";
+import { MenuBarExtra, environment, LaunchType, launchCommand, Icon, getPreferenceValues } from "@raycast/api";
 import * as fs from "fs";
 
 const REMEMBERING_FILE = path.join(environment.supportPath, "remembering.csv");
@@ -8,6 +8,9 @@ if (!fs.existsSync(REMEMBERING_FILE)) {
   // Create the file
   fs.writeFileSync(REMEMBERING_FILE, "");
 }
+
+const preferences = getPreferenceValues<Preferences>();
+const sizeValue = preferences.size;
 
 const second = 1000;
 const minute = 60 * second;
@@ -84,18 +87,34 @@ export default function Command() {
     .sort((a, b) => a.date.getTime() - b.date.getTime());
 
   if (dates.length === 0) {
-    return (
-      <MenuBarExtra icon={Icon.Stars} title={`Woohoo! You got nothing todo!`} tooltip="Enjoy the rest of the day off">
-        <MenuBarExtra.Item icon={Icon.Stars} title={`Woohoo! You got nothing todo!`} />
-        <MenuBarExtra.Item
-          icon={Icon.CircleProgress100}
-          title="Add an item to be remembered!"
-          onAction={() => {
-            launchCommand({ name: "index", type: LaunchType.UserInitiated });
-          }}
-        />
-      </MenuBarExtra>
-    );
+    if (sizeValue === "compact") {
+      return (
+        <MenuBarExtra icon={Icon.Stars} title={``} tooltip="Enjoy the rest of the day off">
+          <MenuBarExtra.Item icon={Icon.Stars} title={`Woohoo! You got nothing todo!`} />
+          <MenuBarExtra.Item
+            icon={Icon.CircleProgress100}
+            title="Add an item to be remembered!"
+            onAction={() => {
+              launchCommand({ name: "index", type: LaunchType.UserInitiated });
+            }}
+          />
+        </MenuBarExtra>
+      );
+    }
+    if (sizeValue === "normal") {
+      return (
+        <MenuBarExtra icon={Icon.Stars} title={`Woohoo! You got nothing todo!`} tooltip="Enjoy the rest of the day off">
+          <MenuBarExtra.Item icon={Icon.Stars} title={`Woohoo! You got nothing todo!`} />
+          <MenuBarExtra.Item
+            icon={Icon.CircleProgress100}
+            title="Add an item to be remembered!"
+            onAction={() => {
+              launchCommand({ name: "index", type: LaunchType.UserInitiated });
+            }}
+          />
+        </MenuBarExtra>
+      );
+    }
   }
 
   const closestDate = dates[0];
@@ -103,24 +122,78 @@ export default function Command() {
   const countdown = getCountdown(diff);
 
   if (countdown === "Forever") {
-    return (
-      <MenuBarExtra icon={Icon.Stars} title={`Woohoo! You got nothing todo!`} tooltip="Enjoy the rest of the day off">
-        <MenuBarExtra.Item icon={Icon.Stars} title={`Woohoo! You got nothing todo!`} />
-        <MenuBarExtra.Item
-          icon={Icon.CircleProgress100}
-          title="Add an item to be remembered!"
-          onAction={() => {
-            launchCommand({ name: "index", type: LaunchType.UserInitiated });
-          }}
-        />
-      </MenuBarExtra>
-    );
+    if (sizeValue === "compact") {
+      return (
+        <MenuBarExtra icon={Icon.Stars} title={``} tooltip="Enjoy the rest of the day off">
+          <MenuBarExtra.Item icon={Icon.Stars} title={`Woohoo! You got nothing todo!`} />
+          <MenuBarExtra.Item
+            icon={Icon.CircleProgress100}
+            title="Add an item to be remembered!"
+            onAction={() => {
+              launchCommand({ name: "index", type: LaunchType.UserInitiated });
+            }}
+          />
+        </MenuBarExtra>
+      );
+    }
+    if (sizeValue === "normal") {
+      return (
+        <MenuBarExtra icon={Icon.Stars} title={`Woohoo! You got nothing todo!`} tooltip="Enjoy the rest of the day off">
+          <MenuBarExtra.Item icon={Icon.Stars} title={`Woohoo! You got nothing todo!`} />
+          <MenuBarExtra.Item
+            icon={Icon.CircleProgress100}
+            title="Add an item to be remembered!"
+            onAction={() => {
+              launchCommand({ name: "index", type: LaunchType.UserInitiated });
+            }}
+          />
+        </MenuBarExtra>
+      );
+    }
   }
 
   if (countdown === "Expired") {
+    if (sizeValue === "compact") {
+      return (
+        <MenuBarExtra icon={Icon.Stars} title={``} tooltip="Enjoy the rest of the day off">
+          <MenuBarExtra.Item icon={Icon.Stars} title={`Woohoo! You got nothing todo!`} />
+          <MenuBarExtra.Item
+            icon={Icon.CircleProgress100}
+            title="Add an item to be remembered!"
+            onAction={() => {
+              launchCommand({ name: "index", type: LaunchType.UserInitiated });
+            }}
+          />
+        </MenuBarExtra>
+      );
+    }
+    if (sizeValue === "normal") {
+      return (
+        <MenuBarExtra icon={Icon.Stars} title={`Woohoo! You got nothing todo!`} tooltip="Enjoy the rest of the day off">
+          <MenuBarExtra.Item icon={Icon.Stars} title={`Woohoo! You got nothing todo!`} />
+          <MenuBarExtra.Item
+            icon={Icon.CircleProgress100}
+            title="Add an item to be remembered!"
+            onAction={() => {
+              launchCommand({ name: "index", type: LaunchType.UserInitiated });
+            }}
+          />
+        </MenuBarExtra>
+      );
+    }
+  }
+
+  if (sizeValue === "normal") {
     return (
-      <MenuBarExtra icon={Icon.Stars} title={`Woohoo! You got nothing todo!`} tooltip="Enjoy the rest of the day off">
-        <MenuBarExtra.Item icon={Icon.Stars} title={`Woohoo! You got nothing todo!`} />
+      <MenuBarExtra icon={Icon.ArrowRight} title={countdown} tooltip={closestDate.taskname}>
+        <MenuBarExtra.Item icon={Icon.ArrowRight} title={`${closestDate.taskname} - Expires In ${countdown}!`} />
+        <MenuBarExtra.Item
+          icon={Icon.Document}
+          title="View all items being remembered!"
+          onAction={() => {
+            launchCommand({ name: "view", type: LaunchType.UserInitiated });
+          }}
+        />
         <MenuBarExtra.Item
           icon={Icon.CircleProgress100}
           title="Add an item to be remembered!"
@@ -131,24 +204,40 @@ export default function Command() {
       </MenuBarExtra>
     );
   }
-
-  return (
-    <MenuBarExtra icon={Icon.ArrowRight} title={countdown} tooltip={closestDate.taskname}>
-      <MenuBarExtra.Item icon={Icon.ArrowRight} title={`${closestDate.taskname} - Expires In ${countdown}!`} />
-      <MenuBarExtra.Item
-        icon={Icon.Document}
-        title="View all items being remembered!"
-        onAction={() => {
-          launchCommand({ name: "view", type: LaunchType.UserInitiated });
-        }}
-      />
-      <MenuBarExtra.Item
-        icon={Icon.CircleProgress100}
-        title="Add an item to be remembered!"
-        onAction={() => {
-          launchCommand({ name: "index", type: LaunchType.UserInitiated });
-        }}
-      />
-    </MenuBarExtra>
-  );
+  if (sizeValue === "compact") {
+    const formattedCountdown = countdown
+      .replace(" seconds", "s")
+      .replace(" second", "s")
+      .replace(" minutes", "m")
+      .replace(" minute", "m")
+      .replace(" hours", "h")
+      .replace(" hour", "h")
+      .replace(" days", "d")
+      .replace(" day", "d")
+      .replace(" weeks", "w")
+      .replace(" week", "w")
+      .replace(" months", "m")
+      .replace(" month", "m")
+      .replace(" years", "y")
+      .replace(" year", "y");
+    return (
+      <MenuBarExtra title={formattedCountdown} tooltip={closestDate.taskname}>
+        <MenuBarExtra.Item icon={Icon.ArrowRight} title={`${closestDate.taskname} - Expires In ${countdown}!`} />
+        <MenuBarExtra.Item
+          icon={Icon.Document}
+          title="View all items being remembered!"
+          onAction={() => {
+            launchCommand({ name: "view", type: LaunchType.UserInitiated });
+          }}
+        />
+        <MenuBarExtra.Item
+          icon={Icon.CircleProgress100}
+          title="Add an item to be remembered!"
+          onAction={() => {
+            launchCommand({ name: "index", type: LaunchType.UserInitiated });
+          }}
+        />
+      </MenuBarExtra>
+    );
+  }
 }

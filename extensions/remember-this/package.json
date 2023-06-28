@@ -15,7 +15,14 @@
       "title": "Remember This",
       "subtitle": "Add something for the extension to remember!",
       "description": "Add something for the extension to remember!",
-      "mode": "view"
+      "mode": "view",
+      "arguments": [
+                    {
+                      "type": "text",
+                      "placeholder": "With Remember This",
+                      "name": "thingtor"
+                    }
+      ]
     },
     {
       "name": "menu",
@@ -41,6 +48,7 @@
       "required": true,
       "title": "Default Remember For",
       "placeholder": "Placeholder",
+      "default": "2day",
       "data": [
         {
           "title": "30 Minutes",
@@ -107,7 +115,26 @@
           "value": "Forever"
         }
       ]
-    }
+    },
+    {
+          "name": "size",
+          "description": "Size of the menubar command",
+          "type": "dropdown",
+          "required": true,
+          "title": "Menubar Command Format",
+          "placeholder": "Placeholder",
+          "default": "normal",
+          "data": [
+            {
+              "title": "Compact",
+              "value": "compact"
+            },
+            {
+              "title": "Normal",
+              "value": "normal"
+            }
+          ]
+        }
   ],
   "dependencies": {
     "@raycast/api": "^1.54.0",

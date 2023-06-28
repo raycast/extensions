@@ -1,19 +1,21 @@
 import {
+  Action,
+  ActionPanel,
+  environment,
   Form,
   getPreferenceValues,
-  ActionPanel,
+  Icon,
   launchCommand,
   LaunchType,
-  Action,
-  Color,
+  openExtensionPreferences,
   showToast,
   Toast,
-  environment,
-  openExtensionPreferences,
-  Icon,
+  closeMainWindow,
+  popToRoot,
 } from "@raycast/api";
 import fs from "fs";
 import path from "path";
+import { useEffect } from "react";
 
 type Values = {
   textfield: string;
@@ -25,7 +27,7 @@ type Values = {
 };
 
 const now = new Date();
-now.setHours(now.getHours() + 5);
+now.setHours(now.getHours() + 100);
 
 const placeholders = [
   "Respond to ✉ important work email",
@@ -70,9 +72,31 @@ const placeholders = [
 ];
 
 const placeholder = placeholders[Math.floor(Math.random() * placeholders.length)];
+const preferences = getPreferenceValues<Preferences>();
+const rfdValue = preferences.rfd;
 
 const REMEMBERING_FILE = path.join(environment.supportPath, "remembering.csv");
-export default function Command() {
+export default function Command(props: { arguments?: { thingtor?: string } }) {
+  useEffect(() => {
+    if (props.arguments?.thingtor) {
+      const result = handleSubmit({
+        textfield: "", // Set the value of textfield property as needed
+        datepicker: new Date(), // Set the value of datepicker property as needed
+        checkbox: false, // Set the value of checkbox property as needed
+        tokeneditor: [], // Set the value of tokeneditor property as needed
+        textarea: props.arguments.thingtor,
+        dropdown: rfdValue,
+      });
+
+      if (result === "failure") {
+        popToRoot();
+      } else {
+        launchCommand({ name: "view", type: LaunchType.UserInitiated });
+        launchCommand({ name: "menu", type: LaunchType.UserInitiated });
+      }
+    }
+  }, [rfdValue]);
+
   function handleSubmit(values: Values) {
     if (!values.textarea) {
       showToast({
@@ -80,7 +104,7 @@ export default function Command() {
         message: "Please input something to remember!",
         style: Toast.Style.Failure,
       });
-      return;
+      return "failure"; // Return a value indicating that the submission was not successful
     }
 
     // Check if the file exists
@@ -111,11 +135,12 @@ export default function Command() {
           message: "Please input something else to remember!",
           style: Toast.Style.Failure,
         });
-        return;
+        return "failure"; // Return a value indicating that the submission was not successful
       }
     }
 
     const expirationDate = calculateExpirationDate(values.dropdown);
+    console.log(expirationDate);
     const data = `\n${expirationDate.toISOString()},${values.textarea}`;
 
     // Write to the file
@@ -133,9 +158,6 @@ export default function Command() {
       title: "Remembering That!",
     });
   }
-
-  const preferences = getPreferenceValues<Preferences>();
-  const rfdValue = preferences.rfd;
 
   return (
     <Form
@@ -204,7 +226,17 @@ function calculateExpirationDate(duration: string): Date {
     case "2year":
       return new Date(now.getTime() + 730 * 24 * 60 * 60 * 1000); // 2 years from now
     case "5year":
-      return new Date(now.getTime() + 1, 825 * 24 * 60 * 60 * 1000); // 2 years from now
+      return new Date(
+        Date.UTC(
+          now.getFullYear() + 5,
+          now.getMonth(),
+          now.getDate(),
+          now.getHours(),
+          now.getMinutes(),
+          now.getSeconds(),
+          now.getMilliseconds()
+        )
+      );
     case "10min":
       return new Date(now.getTime() + 10 * 60 * 1000); // 10 minutes from now
     case "30min":
