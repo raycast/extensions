@@ -1,5 +1,9 @@
 # GitHub Changelog
 
+## [Support rerun failed workflow jobs] - 2023-06-27
+
+- Support rerun failed workflow jobs in `Workflow Runs` command
+
 ## [Show Issue/PR number in Notification] - 2023-06-19
 
 - Add Issue/PR number in `Notification` command
