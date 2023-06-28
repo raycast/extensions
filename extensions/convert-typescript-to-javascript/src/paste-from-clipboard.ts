@@ -1,5 +1,5 @@
-import { Clipboard, showHUD } from '@raycast/api';
-import { covertTypeScriptToJavaScript } from './internal/typescript-to-javascript';
+import { Clipboard, showHUD } from "@raycast/api";
+import { covertTypeScriptToJavaScript } from "./internal/typescript-to-javascript";
 
 export default async function main() {
   const maybeTypeScriptCode = await Clipboard.read()
@@ -7,7 +7,7 @@ export default async function main() {
     .then((clipboardContent) => (clipboardContent?.file ? null : clipboardContent?.text ?? null));
 
   if (!maybeTypeScriptCode) {
-    await showHUD('No text found in clipboard');
+    await showHUD("No text found in clipboard");
     return;
   }
 
@@ -18,7 +18,7 @@ export default async function main() {
     if (error instanceof Error) {
       showHUD(error.message);
     } else {
-      showHUD('Failed to transform TypeScript to JavaScript');
+      showHUD("Failed to transform TypeScript to JavaScript");
     }
   }
 }
