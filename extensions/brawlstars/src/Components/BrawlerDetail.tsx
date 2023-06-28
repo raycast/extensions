@@ -1,19 +1,21 @@
-import { Action, ActionPanel, Detail, Icon } from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon, List } from "@raycast/api";
+import IBrawlers from "../models/IBrawler";
 
-import brawlers from "../../statics/FullBrawlersInfo.json";
-interface IBrawlerIdProps {
-  id: string;
+interface IBrawlerProps {
+  brawlerData: IBrawlers;
 }
 
-const BrawlerComponent = ({ id }: IBrawlerIdProps) => {
-  const brawlerData = brawlers.list.find((brawler) => "" + brawler.id == id);
-
-  if (!brawlerData) {
-    return <Detail markdown="No Brawler Found!" />;
+const BrawlerComponent = ({ brawlerData }: IBrawlerProps) => {
+  if (brawlerData.name == "") {
+    return (
+      <List>
+        <List.EmptyView title="No Brawler Found" icon={Icon.ExclamationMark} description="No data found" />
+      </List>
+    );
   }
 
   const markdown = `
-  # ${brawlerData.name} 
+  # ${brawlerData.name}} 
 
   <img src="${brawlerData.imageUrl2}"  width="100" height="100" /> 
   
@@ -21,37 +23,41 @@ const BrawlerComponent = ({ id }: IBrawlerIdProps) => {
   ${brawlerData.description}
 
 
-  ## <img src="${brawlerData.starPowers[0].imageUrl}" alt= "star power" width="20" height="20">  Star Powers
+  ## <img src="${
+    brawlerData.starPowers[0]?.imageUrl ?? Icon.ExclamationMark
+  }" alt= "star power" width="20" height="20">  Star Powers
 
 
 
-  ### ${brawlerData.starPowers[0].name}
+  ### ${brawlerData.starPowers[0]?.name ?? "No star power n°1"}
   
   
-  ${brawlerData.starPowers[0].description}
+  ${brawlerData.starPowers[0]?.description ?? "No description"}
 
 
 
-  ### ${brawlerData.starPowers[1].name}
+  ### ${brawlerData.starPowers[1]?.name ?? "No star power n°2"}
 
 
-  ${brawlerData.starPowers[1].description}
+  ${brawlerData.starPowers[1]?.description ?? "No description"}
   
   
-  ## <img src="${brawlerData.gadgets[0].imageUrl}" alt= "gadget" width="20" height="20">  Gadgets
+  ## <img src="${
+    brawlerData.gadgets[0]?.imageUrl ?? Icon.ExclamationMark
+  }" alt= "gadget" width="20" height="20">  Gadgets
   
-  ###  ${brawlerData.gadgets[0].name}
+  ###  ${brawlerData.gadgets[0]?.name ?? "No gadget n°1"}
 
   
-${brawlerData.gadgets[0].description}
+${brawlerData.gadgets[0]?.description ?? "No description"}
 
 
 
 
-  ### ${brawlerData.gadgets[1].name}
+  ### ${brawlerData.gadgets[1]?.name ?? "No gadget n°2"}
 
 
-  ${brawlerData.gadgets[1].description}
+  ${brawlerData.gadgets[1]?.description ?? "No description"}
 
 
   
@@ -60,7 +66,7 @@ ${brawlerData.gadgets[0].description}
     <>
       <Detail
         markdown={markdown}
-        navigationTitle={"Player Info | " + brawlerData.name}
+        navigationTitle={"Brawler Info | " + brawlerData.name}
         metadata={
           <Detail.Metadata>
             <Detail.Metadata.TagList title="Class">

@@ -64,7 +64,7 @@ export default function Player({ playerData }: IPlayerProps) {
               <Action.Push
                 title="Show Club"
                 icon={Icon.Sidebar}
-                target={playerData.club ? <ClubComponent id={"" + playerData.club.tag} /> : ""}
+                target={playerData.club ? <ClubComponent id={playerData.club.tag.replace("#", "")} /> : ""}
               />
               <Action.OpenInBrowser
                 title="Open in Brawlify"
