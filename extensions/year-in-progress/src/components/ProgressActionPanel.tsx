@@ -50,6 +50,7 @@ export default function ProgressActionPanel(props: ProgressActionPanelProps) {
         <Action
           title="Add New Progress"
           icon={Icon.Plus}
+          shortcut={{ modifiers: ["cmd"], key: "n" }}
           onAction={() => {
             props.onAddProgress?.();
           }}
