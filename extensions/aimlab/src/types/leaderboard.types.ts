@@ -6,7 +6,7 @@ type Leaderboard = {
     offset: number;
     rows: number;
     totalRows: number;
-  }
+  };
 };
 
 type Profile = {

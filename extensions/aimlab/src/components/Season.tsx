@@ -17,7 +17,7 @@ const SeasonComponent = ({ season }: PropTypes) => {
     >
       {season.tasks.length > 0 ? (
         season.tasks?.map((task) => {
-          return <SeasonTaskComponent key={task.taskId} season={season} seasonTask={task} />
+          return <SeasonTaskComponent key={task.taskId} season={season} seasonTask={task} />;
         })
       ) : (
         <List.EmptyView

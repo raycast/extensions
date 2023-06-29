@@ -10,9 +10,7 @@ const generateSeasonAccessories = (season: Season): List.Item.Accessory[] => {
     return [{ icon: { source: Icon.XMarkCircle, tintColor: Color.Red }, tooltip: "No Active Season" }];
   }
 
-  return [
-
-  ];
+  return [];
 };
 
 export default generateSeasonAccessories;
