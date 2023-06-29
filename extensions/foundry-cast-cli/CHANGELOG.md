@@ -1,6 +1,6 @@
 # Foundry Cast CLI Changelog
 
-## [Initial Version] - 2023-05-13
+## [Initial Version] - 2023-06-29
 
 - Initial version of the CLI
 - Added support for Utility, Wallet, ENS, Account, and ABI commands
