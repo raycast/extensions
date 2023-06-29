@@ -21,7 +21,7 @@ export type VaultContextType = VaultState & {
   loadItems: () => Promise<void>;
   currentFolderId: Nullable<string>;
   setCurrentFolder: (folderOrId: Nullable<string | Folder>) => void;
-  mutateItem: (item: Item) => void;
+  updateState: (next: React.SetStateAction<VaultState>) => void;
 };
 
 const VaultContext = createContext<VaultContextType | null>(null);
@@ -96,14 +96,10 @@ export function VaultProvider(props: VaultProviderProps) {
     setCurrentFolderId(typeof folderOrId === "string" ? folderOrId : folderOrId?.id);
   }
 
-  async function mutateItem(item: Item) {
-    const itemIndex = state.items.findIndex((listItem) => listItem.id === item.id);
-    if (itemIndex !== -1) {
-      const items = [...state.items];
-      items[itemIndex] = item;
-      setState({ items });
-      cacheVault(items, state.folders);
-    }
+  function updateState(next: React.SetStateAction<VaultState>) {
+    const newState = typeof next === "function" ? next(state) : next;
+    setState(newState);
+    cacheVault(newState.items, newState.folders);
   }
 
   const memoizedValue: VaultContextType = useMemo(
@@ -116,9 +112,9 @@ export function VaultProvider(props: VaultProviderProps) {
       syncItems,
       loadItems,
       setCurrentFolder,
-      mutateItem,
+      updateState,
     }),
-    [state, session.isLoading, currentFolderId, syncItems, loadItems, setCurrentFolder]
+    [state, session.isLoading, currentFolderId, syncItems, loadItems, setCurrentFolder, updateState]
   );
 
   return <VaultContext.Provider value={memoizedValue}>{children}</VaultContext.Provider>;

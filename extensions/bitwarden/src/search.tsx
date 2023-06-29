@@ -5,6 +5,7 @@ import VaultListenersProvider from "~/components/searchVault/context/vaultListen
 import VaultItem from "~/components/searchVault/Item";
 import ListFolderDropdown from "~/components/searchVault/ListFolderDropdown";
 import { BitwardenProvider } from "~/context/bitwarden";
+import { FavoritesProvider, useFavoriteItemsGroup } from "~/context/favorites";
 import { SessionProvider } from "~/context/session";
 import { useVaultContext, VaultProvider } from "~/context/vault";
 import { Folder, Item } from "~/types/vault";
@@ -15,7 +16,9 @@ const SearchVaultCommand = () => (
       <SessionProvider unlock>
         <VaultListenersProvider>
           <VaultProvider>
-            <SearchVaultComponent />
+            <FavoritesProvider>
+              <SearchVaultComponent />
+            </FavoritesProvider>
           </VaultProvider>
         </VaultListenersProvider>
       </SessionProvider>
@@ -25,7 +28,7 @@ const SearchVaultCommand = () => (
 
 function SearchVaultComponent() {
   const { items, folders, isLoading, isEmpty } = useVaultContext();
-  const { favoriteItems, nonFavoriteItems } = splitItemsByFavorite(items);
+  const { favoriteItems, nonFavoriteItems } = useFavoriteItemsGroup(items);
 
   return (
     <List searchBarPlaceholder="Search vault" isLoading={isLoading} searchBarAccessory={<ListFolderDropdown />}>
@@ -67,23 +70,6 @@ function SearchVaultComponent() {
       )}
     </List>
   );
-}
-
-function splitItemsByFavorite(items: Item[]) {
-  const sectionedItems = items.reduce<{ favoriteItems: Item[]; nonFavoriteItems: Item[] }>(
-    (result, item) => {
-      if (item.favorite) {
-        result.favoriteItems.push(item);
-      } else {
-        result.nonFavoriteItems.push(item);
-      }
-      return result;
-    },
-    { favoriteItems: [], nonFavoriteItems: [] }
-  );
-  sectionedItems.favoriteItems.sort((a, b) => new Date(b.revisionDate).getTime() - new Date(a.revisionDate).getTime());
-
-  return sectionedItems;
 }
 
 function getItemFolder(folderList: Folder[], item: Item) {
