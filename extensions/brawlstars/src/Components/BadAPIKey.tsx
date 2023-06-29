@@ -1,4 +1,4 @@
-import { ActionPanel, Action, Detail, openExtensionPreferences, List, Icon } from "@raycast/api";
+import { ActionPanel, Action, openExtensionPreferences, List, Icon } from "@raycast/api";
 
 interface IErrorProps {
   error: string;
