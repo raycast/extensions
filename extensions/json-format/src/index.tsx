@@ -40,16 +40,16 @@ export default function main() {
                 }
               }}
             />
-          {result && 
-            <Action.SubmitForm
-              title="Copy Result"
-              icon={Icon.Checkmark}
-              shortcut={{ modifiers: ['cmd', 'shift'], key: 'enter' }}
-              onSubmit={async (values: FormInput) => {
-                await copyFormattedJs(values.result);
-              }}
-            />
-          }
+            {result && (
+              <Action.SubmitForm
+                title="Copy Result"
+                icon={Icon.Checkmark}
+                shortcut={{ modifiers: ['cmd', 'shift'], key: 'enter' }}
+                onSubmit={async (values: FormInput) => {
+                  await copyFormattedJs(values.result);
+                }}
+              />
+            )}
           </ActionPanel.Section>
         </ActionPanel>
       }
