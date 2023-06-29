@@ -18,7 +18,7 @@
     },
     {
       "name": "save-bookmarks",
-      "title": "Save A Bookmark",
+      "title": "Save a Bookmark",
       "description": "Instantly save a Bookmark",
       "icon": "add-Bookmark-icon.png",
       "mode": "no-view"
