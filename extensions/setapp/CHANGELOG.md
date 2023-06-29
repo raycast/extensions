@@ -1,6 +1,7 @@
 # Setapp Changelog
 
-## [Initial Version] - 2023-06-28
+## [Initial Version] - {PR_MERGE_DATE}
+
 
 - Adds search for Setapp apps
 - Filter by installed status
