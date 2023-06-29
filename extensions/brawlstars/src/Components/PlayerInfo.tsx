@@ -46,7 +46,7 @@ const PlayerComponent = ({ id }: IPlayerIdProps) => {
     } else {
       return (
         <List navigationTitle={error}>
-          <UnexpectedError error={error}/>
+          <UnexpectedError error={error} />
         </List>
       );
     }

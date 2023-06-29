@@ -16,7 +16,6 @@ export default function PlayerNotFoundError({ searchText }: IErrorProps) {
           <Action.Push title="Search Player" icon={Icon.MagnifyingGlass} target={<PlayerComponent id={searchText} />} />
         </ActionPanel>
       }
-      />
-      
+    />
   );
 }
