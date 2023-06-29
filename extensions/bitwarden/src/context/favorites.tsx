@@ -4,12 +4,13 @@ import { LoadingIndicator } from "~/components/searchVault/LoadingIndicator";
 import { useBitwarden } from "~/context/bitwarden";
 import { useVaultContext } from "~/context/vault";
 import { Item } from "~/types/vault";
+import { useAsyncEffect } from "~/utils/hooks/useAsyncEffect";
 
 type FavoritesContext = {
   favoriteOrder: string[];
   setFavoriteOrder: React.Dispatch<React.SetStateAction<string[] | undefined>>;
   toggleFavorite: (item: Item) => Promise<void>;
-  moveFavoritePosition: (item: Item, direction: "up" | "down") => Promise<void>;
+  moveFavorite: (item: Item, direction: "up" | "down") => Promise<void>;
 };
 
 type FavoriteItem = Item & {
@@ -25,17 +26,13 @@ type FavoritesProviderProps = {
 export function FavoritesProvider(props: FavoritesProviderProps) {
   const { children } = props;
   const bitwarden = useBitwarden();
-  const { items, updateState } = useVaultContext();
+  const { items, updateState: updateVaultItem } = useVaultContext();
 
   const [favoriteOrder, setFavoriteOrder] = useState<string[]>();
 
-  useEffect(() => {
-    const getFavoriteOrder = async () => {
-      const serializedFavoriteOrder = await LocalStorage.getItem<string>("favoriteOrder");
-      setFavoriteOrder(serializedFavoriteOrder ? JSON.parse(serializedFavoriteOrder) : []);
-    };
-
-    void getFavoriteOrder();
+  useAsyncEffect(async () => {
+    const serializedFavoriteOrder = await LocalStorage.getItem<string>("favoriteOrder");
+    setFavoriteOrder(serializedFavoriteOrder ? JSON.parse(serializedFavoriteOrder) : []);
   }, []);
 
   useEffect(() => {
@@ -45,10 +42,10 @@ export function FavoritesProvider(props: FavoritesProviderProps) {
 
   useEffect(() => {
     if (!favoriteOrder) return;
-    // makes sure the existing favorites have a position in the order array
+    // makes sure all the existing favorites are in the order array
     const favoriteIdsWithoutOrder = items.reduce<string[]>((result, item) => {
       if (!item.favorite) return result;
-      const existingIdInOrderArray = favoriteOrder.find((f) => f === item.id);
+      const existingIdInOrderArray = favoriteOrder.find((fid) => fid === item.id);
       if (!existingIdInOrderArray) result.push(item.id);
       return result;
     }, []);
@@ -65,7 +62,7 @@ export function FavoritesProvider(props: FavoritesProviderProps) {
       if (!item.favorite) return [editedItem.id, ...order];
       return order.filter((fid) => fid !== editedItem.id);
     });
-    updateState((state) => {
+    updateVaultItem((state) => {
       const newState = { ...state };
       const itemIndex = state.items.findIndex((item) => item.id === editedItem.id);
       newState.items[itemIndex] = editedItem;
@@ -73,16 +70,21 @@ export function FavoritesProvider(props: FavoritesProviderProps) {
     });
   };
 
-  const moveFavoritePosition = async ({ id }: Item, direction: "up" | "down") => {
-    const currentOrder = favoriteOrder.findIndex((f) => f === id);
-    const newOrder = currentOrder + (direction === "up" ? -1 : 1);
-    const newFavoriteOrder = favoriteOrder.filter((f) => f !== id);
-    newFavoriteOrder.splice(newOrder, 0, id);
-    setFavoriteOrder(newFavoriteOrder);
+  const moveFavorite = async ({ id }: Item, direction: "up" | "down") => {
+    const currentPosition = favoriteOrder.findIndex((fid) => fid === id);
+    if (currentPosition === -1) return;
+
+    const newPosition = currentPosition + (direction === "up" ? -1 : 1);
+    if (newPosition >= 0 && newPosition < favoriteOrder.length) {
+      const newFavoriteOrder = [...favoriteOrder];
+      newFavoriteOrder.splice(currentPosition, 1); // remove from current position
+      newFavoriteOrder.splice(newPosition, 0, id); // insert at new position
+      setFavoriteOrder(newFavoriteOrder);
+    }
   };
 
   return (
-    <FavoritesContext.Provider value={{ favoriteOrder, setFavoriteOrder, toggleFavorite, moveFavoritePosition }}>
+    <FavoritesContext.Provider value={{ favoriteOrder, setFavoriteOrder, toggleFavorite, moveFavorite }}>
       {children}
     </FavoritesContext.Provider>
   );
@@ -119,7 +121,6 @@ export function useFavoriteItemsGroup(items: Item[]) {
       { favoriteItems: [], nonFavoriteItems: [] }
     );
     sectionedItems.favoriteItems.sort((a, b) => a.listOrder - b.listOrder);
-    console.log({ favoriteOrder, sectionedItems: sectionedItems.favoriteItems.map((f) => f.listOrder) });
 
     return sectionedItems;
   }, [favoriteOrder, favoriteItems]);
