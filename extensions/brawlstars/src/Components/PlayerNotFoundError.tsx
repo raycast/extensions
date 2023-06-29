@@ -1,11 +1,11 @@
-import { ActionPanel, Action, Detail, openExtensionPreferences, List, Icon } from "@raycast/api";
+import { ActionPanel, Action, List, Icon } from "@raycast/api";
 import PlayerComponent from "./PlayerInfo";
 
 interface IErrorProps {
   searchText: string;
 }
 
-export default function Error404({ searchText }: IErrorProps) {
+export default function PlayerNotFoundError({ searchText }: IErrorProps) {
   return (
     <List.EmptyView
       description="Try With Another Player Id."
@@ -13,9 +13,10 @@ export default function Error404({ searchText }: IErrorProps) {
       title="No Player Found"
       actions={
         <ActionPanel>
-          <Action.Push title="Search Player" icon={Icon.Sidebar} target={<PlayerComponent id={searchText} />} />
+          <Action.Push title="Search Player" icon={Icon.MagnifyingGlass} target={<PlayerComponent id={searchText} />} />
         </ActionPanel>
       }
-    />
+      />
+      
   );
 }
