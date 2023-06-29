@@ -1,6 +1,7 @@
 import { getSelectedFinderItems, showToast, Toast, open } from "@raycast/api";
 import fs from "node:fs/promises";
 import path from "node:path";
+import { newTab } from "./uri";
 
 export default async function Command() {
   try {
@@ -21,9 +22,7 @@ export default async function Command() {
     results
       .map((result) => (result.info.isDirectory() ? result.item.path : path.dirname(result.item.path)))
       .filter((value, index, self) => self.indexOf(value) === index)
-      .forEach((toOpen) => {
-        open("warp://action/new_tab?path=" + encodeURIComponent(toOpen));
-      });
+      .forEach((toOpen) => open(newTab(toOpen)));
   } catch (error) {
     await showToast({
       style: Toast.Style.Failure,

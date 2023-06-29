@@ -5,6 +5,7 @@ import path from "node:path";
 import os from "node:os";
 import YAML from "yaml";
 import { usePromise } from "@raycast/utils";
+import { launchConfig } from "./uri";
 
 interface SearchResult {
   name: string;
@@ -100,11 +101,7 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <Action.OpenInBrowser
-              title="Launch"
-              icon={Icon.Terminal}
-              url={`warp://launch/${encodeURIComponent(searchResult.name)}`}
-            />
+            <Action.OpenInBrowser title="Launch" icon={Icon.Terminal} url={launchConfig(searchResult.name)} />
           </ActionPanel.Section>
           <ActionPanel.Section>
             <Action.ShowInFinder

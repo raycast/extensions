@@ -3,6 +3,7 @@ import { useRef, useState } from "react";
 import os from "node:os";
 import spotlight from "node-spotlight";
 import { usePromise } from "@raycast/utils";
+import { newTab, newWindow } from "./uri";
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
@@ -70,20 +71,21 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <Action.OpenInBrowser
-              icon={Icon.Terminal}
-              title="Open in New Warp Tab"
-              url={`warp://action/new_tab?path=${encodeURIComponent(searchResult.path)}`}
-            />
+            <Action.OpenInBrowser icon={Icon.Terminal} title="Open in New Warp Tab" url={newTab(searchResult.path)} />
           </ActionPanel.Section>
           <ActionPanel.Section>
             <Action.OpenInBrowser
               title="Open in New Warp Window"
-              url={`warp://action/new_window?path=${encodeURIComponent(searchResult.path)}`}
+              url={newWindow(searchResult.path)}
               shortcut={{ modifiers: ["cmd"], key: "o" }}
             />
             <Action.CreateQuicklink
-              quicklink={{ link: `warp://action/new_tab?path=${encodeURIComponent(searchResult.path)}` }}
+              title="Save as Quicklink: New Tab"
+              quicklink={{ link: newTab(searchResult.path) }}
+            />
+            <Action.CreateQuicklink
+              title="Save as Quicklink: New Window"
+              quicklink={{ link: newWindow(searchResult.path) }}
             />
           </ActionPanel.Section>
         </ActionPanel>
