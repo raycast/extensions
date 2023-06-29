@@ -1,6 +1,7 @@
 import { LocalStorage } from "@raycast/api";
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
-import { LoadingIndicator } from "~/components/searchVault/LoadingIndicator";
+import { Dispatch, SetStateAction, createContext, useContext, useEffect, useMemo, useState } from "react";
+import { VaultLoadingFallback } from "~/components/searchVault/VaultLoadingFallback";
+import { LOCAL_STORAGE_KEY } from "~/constants/general";
 import { useBitwarden } from "~/context/bitwarden";
 import { useVaultContext } from "~/context/vault";
 import { Item } from "~/types/vault";
@@ -8,13 +9,9 @@ import { useAsyncEffect } from "~/utils/hooks/useAsyncEffect";
 
 type FavoritesContext = {
   favoriteOrder: string[];
-  setFavoriteOrder: React.Dispatch<React.SetStateAction<string[] | undefined>>;
+  setFavoriteOrder: Dispatch<SetStateAction<string[] | undefined>>;
   toggleFavorite: (item: Item) => Promise<void>;
   moveFavorite: (item: Item, direction: "up" | "down") => Promise<void>;
-};
-
-type FavoriteItem = Item & {
-  listOrder: number;
 };
 
 const FavoritesContext = createContext<FavoritesContext>({} as FavoritesContext);
@@ -31,42 +28,48 @@ export function FavoritesProvider(props: FavoritesProviderProps) {
   const [favoriteOrder, setFavoriteOrder] = useState<string[]>();
 
   useAsyncEffect(async () => {
-    const serializedFavoriteOrder = await LocalStorage.getItem<string>("favoriteOrder");
-    setFavoriteOrder(serializedFavoriteOrder ? JSON.parse(serializedFavoriteOrder) : []);
+    // restore favorite order from local storage
+    const serializedFavoriteOrder = await getSavedFavoriteOrder();
+    setFavoriteOrder(serializedFavoriteOrder ?? []);
   }, []);
 
   useEffect(() => {
+    // keep local storage favorite order up to date
     if (!favoriteOrder) return;
-    void persistFavoriteOrder(favoriteOrder);
+    void persistFavoriteOrder([...new Set(favoriteOrder)]);
   }, [favoriteOrder]);
 
   useEffect(() => {
-    if (!favoriteOrder) return;
     // makes sure all the existing favorites are in the order array
+    if (!favoriteOrder) return;
     const favoriteIdsWithoutOrder = items.reduce<string[]>((result, item) => {
       if (!item.favorite) return result;
       const existingIdInOrderArray = favoriteOrder.find((fid) => fid === item.id);
       if (!existingIdInOrderArray) result.push(item.id);
+
       return result;
     }, []);
     if (favoriteIdsWithoutOrder.length === 0) return;
+
     setFavoriteOrder([...favoriteOrder, ...favoriteIdsWithoutOrder]);
   }, [items, favoriteOrder]);
 
-  if (!favoriteOrder) return <LoadingIndicator />;
+  if (!favoriteOrder) return <VaultLoadingFallback />;
 
   const toggleFavorite = async (item: Item) => {
     const editedItem = { ...item, favorite: !item.favorite };
     await bitwarden.editItem(editedItem);
+
     setFavoriteOrder((order = []) => {
       if (!item.favorite) return [editedItem.id, ...order];
       return order.filter((fid) => fid !== editedItem.id);
     });
     updateVaultItem((state) => {
-      const newState = { ...state };
       const itemIndex = state.items.findIndex((item) => item.id === editedItem.id);
+      if (itemIndex === -1) return state;
+      const newState = { ...state };
       newState.items[itemIndex] = editedItem;
-      return { ...state };
+      return newState;
     });
   };
 
@@ -90,28 +93,42 @@ export function FavoritesProvider(props: FavoritesProviderProps) {
   );
 }
 
-async function persistFavoriteOrder(order: string[]): Promise<void> {
-  return LocalStorage.setItem("favoriteOrder", JSON.stringify(order));
-}
-
 export const useFavoritesContext = () => {
   const context = useContext(FavoritesContext);
   if (!context) throw new Error("useFavoritesContext must be used within a FavoritesProvider");
   return context;
 };
 
-export function useFavoriteItemsGroup(items: Item[]) {
+async function getSavedFavoriteOrder(): Promise<string[] | undefined> {
+  const serializedFavoriteOrder = await LocalStorage.getItem<string>(LOCAL_STORAGE_KEY.VAULT_FAVORITE_ORDER);
+  return serializedFavoriteOrder ? JSON.parse(serializedFavoriteOrder) : undefined;
+}
+
+async function persistFavoriteOrder(order: string[]): Promise<void> {
+  return LocalStorage.setItem(LOCAL_STORAGE_KEY.VAULT_FAVORITE_ORDER, JSON.stringify(order));
+}
+
+type FavoriteItem = Item & {
+  listOrder: number;
+};
+
+export type VaultItemsWithFavorites = {
+  favoriteItems: FavoriteItem[];
+  nonFavoriteItems: Item[];
+};
+
+export function useSeparateFavoriteItems(items: Item[]) {
   const { favoriteOrder } = useFavoritesContext();
 
   const favoriteItems = useMemo(() => items.filter((item) => item.favorite), [items]);
 
   const groupedItemList = useMemo(() => {
-    const sectionedItems = items.reduce<{ favoriteItems: FavoriteItem[]; nonFavoriteItems: Item[] }>(
+    const sectionedItems = items.reduce<VaultItemsWithFavorites>(
       (result, item) => {
         if (item.favorite) {
           result.favoriteItems.push({
             ...item,
-            listOrder: favoriteOrder.findIndex((f) => f === item.id) ?? Number.MAX_SAFE_INTEGER,
+            listOrder: favoriteOrder.findIndex((fid) => fid === item.id) ?? Number.MAX_SAFE_INTEGER,
           });
         } else {
           result.nonFavoriteItems.push(item);

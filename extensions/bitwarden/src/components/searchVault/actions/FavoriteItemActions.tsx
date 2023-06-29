@@ -8,18 +8,17 @@ function FavoriteItemActions() {
   const { toggleFavorite, moveFavorite } = useFavoritesContext();
 
   const handleToggleFavorite = async () => {
-    const toast = await showToast(
-      Toast.Style.Animated,
-      selectedItem.favorite ? "Removing favorite" : "Marking as favorite"
-    );
+    const toastMessages = getToastMessages(selectedItem.favorite);
+    const toast = await showToast(Toast.Style.Animated, toastMessages.loading);
     try {
       await toggleFavorite(selectedItem);
       toast.style = Toast.Style.Success;
-      toast.message = "Done";
+      toast.title = toastMessages.success;
+      toast.message = "👍";
     } catch (error) {
       captureException("Failed to toggle favorite", error);
       toast.style = Toast.Style.Failure;
-      toast.title = "Failed";
+      toast.message = "Failed ☹️";
     }
   };
 
@@ -53,21 +52,19 @@ function FavoriteItemActions() {
   );
 }
 
-const messages = {
+const MESSAGES = {
   add: {
     loading: "Marking as favorite",
     success: "Marked as favorite",
-    failure: "Failed to mark as favorite",
   },
   remove: {
     loading: "Removing favorite",
     success: "Removed favorite",
-    failure: "Failed to remove favorite",
   },
 } as const;
 
 function getToastMessages(isFavorite: boolean) {
-  return isFavorite ? messages.remove : messages.add;
+  return isFavorite ? MESSAGES.remove : MESSAGES.add;
 }
 
 export default FavoriteItemActions;

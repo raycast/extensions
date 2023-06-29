@@ -5,7 +5,7 @@ import VaultListenersProvider from "~/components/searchVault/context/vaultListen
 import VaultItem from "~/components/searchVault/Item";
 import ListFolderDropdown from "~/components/searchVault/ListFolderDropdown";
 import { BitwardenProvider } from "~/context/bitwarden";
-import { FavoritesProvider, useFavoriteItemsGroup } from "~/context/favorites";
+import { FavoritesProvider, useSeparateFavoriteItems } from "~/context/favorites";
 import { SessionProvider } from "~/context/session";
 import { useVaultContext, VaultProvider } from "~/context/vault";
 import { Folder, Item } from "~/types/vault";
@@ -28,7 +28,7 @@ const SearchVaultCommand = () => (
 
 function SearchVaultComponent() {
   const { items, folders, isLoading, isEmpty } = useVaultContext();
-  const { favoriteItems, nonFavoriteItems } = useFavoriteItemsGroup(items);
+  const { favoriteItems, nonFavoriteItems } = useSeparateFavoriteItems(items);
 
   return (
     <List searchBarPlaceholder="Search vault" isLoading={isLoading} searchBarAccessory={<ListFolderDropdown />}>

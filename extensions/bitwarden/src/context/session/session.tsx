@@ -1,6 +1,6 @@
 import { createContext, PropsWithChildren, useContext, useMemo } from "react";
 import UnlockForm from "~/components/UnlockForm";
-import { LoadingIndicator } from "~/components/searchVault/LoadingIndicator";
+import { VaultLoadingFallback } from "~/components/searchVault/VaultLoadingFallback";
 import { useBitwarden } from "~/context/bitwarden";
 import { useSessionReducer } from "~/context/session/reducer";
 import { getSavedSession, SessionStorage } from "~/context/session/utils";
@@ -85,7 +85,7 @@ export function SessionProvider(props: SessionProviderProps) {
     [state, confirmMasterPassword]
   );
 
-  if (state.isLoading) return <LoadingIndicator />;
+  if (state.isLoading) return <VaultLoadingFallback />;
 
   const showUnlockForm = state.isLocked || !state.isAuthenticated;
   const children = state.token ? props.children : null;
