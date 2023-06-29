@@ -13,7 +13,7 @@ const searchListBrawlers = async () => {
       listBrawlersData = res.data.list;
     })
     .catch((err) => {
-      console.log(err);
+      throw err;
     });
 
   return listBrawlersData;

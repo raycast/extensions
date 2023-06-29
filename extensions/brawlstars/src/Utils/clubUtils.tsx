@@ -17,7 +17,7 @@ const searchClub = async (swName: string) => {
       clubData = res.data;
     })
     .catch((err) => {
-      console.log(err);
+      throw err;
     });
 
   return clubData;
