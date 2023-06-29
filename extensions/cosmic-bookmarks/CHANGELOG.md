@@ -1,3 +1,3 @@
 # Cosmic Bookmarks Changelog
 
-## [Initial Version] - 2023-05-27
+## [Initial Version] - 2023-06-29
