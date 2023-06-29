@@ -1,10 +1,10 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "warp-launch-configuration",
-  "title": "Warp Launch Configuration",
-  "description": "Open a Warp Launch Configuration right from Raycast.",
+  "name": "warp",
+  "title": "Warp",
+  "description": "Interact with Warp right from Raycast.",
   "icon": "command-icon.png",
-  "author": "joetannenbaum",
+  "author": "warp",
   "categories": [
     "Developer Tools",
     "Productivity"
@@ -12,16 +12,40 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "index",
-      "title": "Warp Launch Configuration",
+      "name": "launch-config",
+      "title": "Open Launch Configuration",
       "description": "Open a Warp Launch Configuration.",
       "mode": "view"
+    },
+    {
+      "name": "open-directory",
+      "title": "Open Directory",
+      "description": "Open a directory in Warp.",
+      "mode": "view"
+    },
+    {
+      "name": "new-tab",
+      "title": "New Tab",
+      "description": "Open a tab in Warp.",
+      "mode": "no-view"
+    },
+    {
+      "name": "new-window",
+      "title": "New Window",
+      "description": "Open a window in Warp.",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-selected-finder-item",
+      "title": "Open Selected Finder Item",
+      "description": "Open selected Finder items in Warp.",
+      "mode": "no-view"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.48.7",
     "@raycast/utils": "^1.4.8",
-    "run-jxa": "^3.0.0",
+    "node-spotlight": "^1.0.0",
     "yaml": "^2.2.1"
   },
   "devDependencies": {
