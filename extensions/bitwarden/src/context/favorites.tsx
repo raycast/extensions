@@ -34,25 +34,20 @@ export function FavoritesProvider(props: FavoritesProviderProps) {
   }, []);
 
   useEffect(() => {
-    // keep local storage favorite order up to date
+    // makes sure only and all the existing favorites are in the order array
     if (!favoriteOrder) return;
-    void persistFavoriteOrder([...new Set(favoriteOrder)]);
-  }, [favoriteOrder]);
+    const cleanFavoriteOrder = items.flatMap((item) => {
+      if (!item.favorite) return [];
+      return !favoriteOrder.some((fid) => fid === item.id) ? [item.id] : [];
+    });
+    setFavoriteOrder([...new Set(cleanFavoriteOrder)]);
+  }, [items, !!favoriteOrder]);
 
   useEffect(() => {
-    // makes sure all the existing favorites are in the order array
+    // keep local storage favorite order up to date
     if (!favoriteOrder) return;
-    const favoriteIdsWithoutOrder = items.reduce<string[]>((result, item) => {
-      if (!item.favorite) return result;
-      const existingIdInOrderArray = favoriteOrder.find((fid) => fid === item.id);
-      if (!existingIdInOrderArray) result.push(item.id);
-
-      return result;
-    }, []);
-    if (favoriteIdsWithoutOrder.length === 0) return;
-
-    setFavoriteOrder([...favoriteOrder, ...favoriteIdsWithoutOrder]);
-  }, [items, favoriteOrder]);
+    void persistFavoriteOrder(favoriteOrder);
+  }, [favoriteOrder]);
 
   if (!favoriteOrder) return <VaultLoadingFallback />;
 
@@ -105,7 +100,7 @@ async function getSavedFavoriteOrder(): Promise<string[] | undefined> {
 }
 
 async function persistFavoriteOrder(order: string[]): Promise<void> {
-  return LocalStorage.setItem(LOCAL_STORAGE_KEY.VAULT_FAVORITE_ORDER, JSON.stringify(order));
+  return LocalStorage.setItem(LOCAL_STORAGE_KEY.VAULT_FAVORITE_ORDER, JSON.stringify([order]));
 }
 
 type FavoriteItem = Item & {
