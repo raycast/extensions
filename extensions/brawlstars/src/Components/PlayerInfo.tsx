@@ -3,9 +3,10 @@ import { searchPlayer } from "../Utils/playerUtils";
 import { Action, ActionPanel, Detail, Icon, List } from "@raycast/api";
 import ClubComponent from "./clubInfo";
 import { IPlayerData, emptyPlayerData } from "../models/IPlayerData";
-import Error403 from "./BadAPIKey";
-import Error404 from "./NotFoundError";
+import BadAPIKey from "./badAPIKey";
 import Player from "./PlayerComponent";
+import PlayerNotFoundError from "./PlayerNotFoundError";
+import UnexpectedError from "./Unexpected";
 
 interface IPlayerIdProps {
   id: string;
@@ -30,17 +31,24 @@ const PlayerComponent = ({ id }: IPlayerIdProps) => {
 
     fetchPlayerData();
   }, []);
+
   if (error) {
     if (typeof error === "string") {
       if (error.includes("403")) {
-        return <Error403 error={error} />;
+        return <BadAPIKey error={error} />;
       } else if (error.includes("404")) {
         return (
-          <List onSearchTextChange={setSearchText}>
-            <Error404 searchText={searchText.replace("#", "")} />
+          <List navigationTitle={error} onSearchTextChange={setSearchText}>
+            <PlayerNotFoundError searchText={searchText.replace("#", "")} />
           </List>
         );
       }
+    } else {
+      return (
+        <List navigationTitle={error}>
+          <UnexpectedError error={error}/>
+        </List>
+      );
     }
   }
   if (!playerData) {
