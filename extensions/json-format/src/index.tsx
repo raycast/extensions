@@ -40,6 +40,7 @@ export default function main() {
                 }
               }}
             />
+          {result && 
             <Action.SubmitForm
               title="Copy Result"
               icon={Icon.Checkmark}
@@ -48,6 +49,7 @@ export default function main() {
                 await copyFormattedJs(values.result);
               }}
             />
+          }
           </ActionPanel.Section>
         </ActionPanel>
       }
