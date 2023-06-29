@@ -14,7 +14,7 @@ export default function Command(props: { arguments: { initialQuery: string } }) 
   const preferences = getPreferenceValues<CommandPreferences>();
 
   const options = {
-    minNumFiles: 0,
+    minNumFiles: 1,
     acceptedFileExtensions: undefined,
     useMetadata: true,
     useAudioDetails: true,

@@ -219,7 +219,7 @@ export default function useModel(
                 // Done
               } else if (line.startsWith("data: ")) {
                 try {
-                  const jsonData = JSON.parse(line.substring(5));
+                  const jsonData = JSON.parse(line.substring(5).trim());
                   const output = get(jsonData, targetModel.outputKeyPath) || "";
                   if (output.toString().includes(text)) {
                     text = output.toString();

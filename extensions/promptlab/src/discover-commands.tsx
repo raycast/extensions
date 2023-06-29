@@ -72,8 +72,8 @@ export default function Discover() {
       searchBarAccessory={<CategoryDropdown onSelection={setTargetCategory} />}
     >
       <List.EmptyView title="No Custom PromptLab Commands" />
-      <List.Section title="Newest Commands">{listItems.slice(0, 5)}</List.Section>
-      <List.Section title="————————————————————">{listItems.slice(5)}</List.Section>
+      {targetCategory == "All" ? <List.Section title="Newest Commands">{listItems.slice(0, 5)}</List.Section> : null}
+      <List.Section title="————————————————————">{listItems.slice(targetCategory == "All" ? 5 : 0)}</List.Section>
     </List>
   );
 }

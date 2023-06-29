@@ -362,7 +362,7 @@ export default function ChatSettingsForm(props: {
         />
       </Form.Dropdown>
 
-      <Form.TextField
+      <Form.TextArea
         title="Base Prompt"
         placeholder="Context prompt for all queries"
         info="A context prompt provided to the model endpoint alongside all queries. This maintains context throughout the conversation."

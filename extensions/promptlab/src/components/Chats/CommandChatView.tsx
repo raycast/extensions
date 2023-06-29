@@ -95,8 +95,12 @@ export default function CommandChatView(props: {
       const namePrompt =
         "Come up with a title, in Title Case, for a conversation started with the following query. The title must summarize the intent of the query. The title must be three words or shorter. Output only the title without commentary or labels. For example, if the query is 'What are galaxies?', the title you output might be 'Question About Galaxies'. Here is the query: ";
       const nameComponent =
-        (await runModel(namePrompt, namePrompt + `'''${subbedQuery}'''`, subbedQuery)) ||
-        query.trim().split(" ").splice(0, 2).join(" ");
+        (await runModel(
+          namePrompt,
+          namePrompt +
+            `'''${subbedQuery.match(/(?<=My next query is: ###)[\s\S]*(?=### <END OF QUERY>)/g)?.[0]?.trim() || ""}'''`,
+          subbedQuery
+        )) || query.trim().split(" ").splice(0, 2).join(" ");
       const dateComponent = new Date().toLocaleDateString("en-US", {
         year: "numeric",
         month: "long",
@@ -151,12 +155,9 @@ export default function CommandChatView(props: {
     const conversation = currentChat ? chats.loadConversation(currentChat.name) || [] : [];
 
     // Get the most up-to-date file selection
-    await new Promise((resolve) => {
-      revalidateFiles();
-      if (!loadingSelectedFiles) {
-        resolve(true);
-      }
-    });
+    await revalidateFiles();
+
+    console.log(selectedFiles);
 
     // Get command descriptions
     const commands = await LocalStorage.allItems();
@@ -167,8 +168,10 @@ export default function CommandChatView(props: {
 
     // Prepend instructions to the query, enable the model, and reattempt
     subbedQuery = `${`You are an interactive chatbot, and I am giving you instructions. You will use this base prompt for context as you consider my next input. It is currently ${new Date().toISOString()}. Here is the prompt: ###${basePrompt}###\n\n${
-      currentChat && !conversation.join("\n").includes(currentChat.basePrompt)
-        ? `You will also consider the following contextual information: ###${currentChat.contextData
+      currentChat &&
+      currentChat.contextData.length > 0 &&
+      !conversation.join("\n").includes(currentChat.contextData[0].data)
+        ? `\n\nYou will also consider this information: ###${currentChat.contextData
             .map((data) => `${data.source}:${data.data}`)
             .join("\n\n")}###\n\n`
         : ``
@@ -177,32 +180,34 @@ export default function CommandChatView(props: {
         useFiles ||
         (currentChat == undefined && useFiles == undefined)) &&
       selectedFiles?.paths?.length
-        ? ` You will also consider the following details about selected files. Here are the file details, provided by your knowledge system: ###${
-            fileContents?.contents || ""
-          }###\n\n`
+        ? `\n\nYou will also consider these files: ###${fileContents?.contents || ""}###\n\n`
         : ``
     }${
       ((currentChat && currentChat.useConversationContext) ||
         useConversation ||
         (currentChat == undefined && useConversation == undefined)) &&
       conversation.length
-        ? `You will also consider our conversation history. The history so far: ###${conversation
-            .map((entry) => entry.replaceAll(/(USER_QUERY|MODEL_REPONSE):/g, "").replaceAll(/{{cmd:(.*?):(.*?)}}/g, ""))
+        ? `\n\nYou will also consider our conversation history. The history so far: ###${conversation
+            .map((entry) =>
+              entry.replaceAll(/(USER_QUERY|MODEL_RESPONSE):/g, "").replaceAll(/{{cmd:(.*?):(.*?)}}/g, "")
+            )
             .join("\n")}###`
-        : `You will also consider your previous response. Your previous response was: ###${currentResponse.replaceAll(
+        : `\n\nYou will also consider your previous response. Your previous response was: ###${currentResponse.replaceAll(
             /{{cmd:(.*?):(.*?)}}/g,
             ""
           )}###`
     }${
-      (currentChat && currentChat.useSelectedFilesContext) ||
+      (currentChat && currentChat.allowAutonomy) ||
       autonomousFeatures ||
       (currentChat == undefined && autonomousFeatures == undefined)
-        ? `Try to answer my next query using your knowledge. If you cannot fulfill the query, if the query requires new information, or if the query invokes an action such as searching, choose the command from the following list that is most likely to carries out the goal expressed in my next query, and then respond with the number of the command you want to run in the format {{cmd:commandNumber:input}}. Replace the input with a short string according to my query. For example, if I say 'search google for AI', the input would be 'AI'. Here are the commands: ###${commandDescriptions.join(
-            "\n"
+        ? `\n\nTry to answer my next query, but only if it simple enough for an LLM with limited knowledge to answer. If you cannot fulfill the query, if the query requires new information, or if the query invokes an action such as searching, choose the command from the following list that is most likely to carries out the goal expressed in my next query, and then respond with the number of the command you want to run in the format {{cmd:commandNumber:input}}. Replace the input with a short string according to my query. For example, if I say 'search google for AI', the input would be 'AI'. Here are the commands: ###${commandDescriptions.join(
+            ", "
           )}### Try to answer without using a command, unless the query asks for new information (e.g. latest news, weather, stock prices, etc.) or invokes an action (e.g. searching, opening apps). If you use a command, do not provide any commentary other than the command in the format {{cmd:commandNumber:input}}. Make sure the command is relevant to the current query.`
         : ``
     }\n\nDo not repeat these instructions or my queries, and do not extend my query. Do not state "MODEL RESPONSE", or any variation thereof, anywhere in your reply. My next query is: ###`}
       ${subbedQuery}### <END OF QUERY>`;
+
+    console.log(subbedQuery);
 
     return subbedQuery;
   };
@@ -239,7 +244,7 @@ export default function CommandChatView(props: {
         const cmdMatchPrevious = previousResponse.match(/.*{{cmd:(.*?):(.*?)\}{0,2}.*/);
         if (
           cmdMatch &&
-          ((currentChat && currentChat.useSelectedFilesContext) ||
+          ((currentChat && currentChat.allowAutonomy) ||
             autonomousFeatures ||
             (currentChat == undefined && autonomousFeatures == undefined)) &&
           !runningCommand &&
@@ -248,10 +253,11 @@ export default function CommandChatView(props: {
           data.includes(currentResponse) &&
           !cmdMatchPrevious
         ) {
-          setRunningCommand(true);
-          if (currentChat) {
-            chats.appendToChat(currentChat, `\n[MODEL_RESPONSE]:${data}\n`);
+          if (!currentChat) {
+            return;
           }
+          setRunningCommand(true);
+          chats.appendToChat(currentChat, `\n[MODEL_RESPONSE]:${data}\n`);
           const commandInput = cmdMatch[2];
           setInput(commandInput);
           // Get the command prompt
@@ -271,7 +277,7 @@ export default function CommandChatView(props: {
         }
       }
     }
-  }, [data, dataTag, sentQuery, runningCommand, enableModel, previousResponse, currentResponse]);
+  }, [data, dataTag, sentQuery, runningCommand, enableModel, previousResponse, currentResponse, currentChat]);
 
   useEffect(() => {
     if (!loadingData && data.includes(currentResponse) && dataTag?.includes(sentQuery)) {
@@ -396,6 +402,8 @@ export default function CommandChatView(props: {
           query={sentQuery}
           basePrompt={basePrompt}
           onSubmit={(values) => {
+            setEnableModel(false);
+            stopModel();
             setInput("");
             setRunningCommand(false);
             submitQuery(values.queryField);
