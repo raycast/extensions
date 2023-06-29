@@ -1,6 +1,7 @@
 import { Grid } from "@raycast/api";
-import ResponseActions from "../ResponseActions";
-import { CommandOptions } from "../utils/types";
+import ResponseActions from "./actions/ResponseActions";
+import { CommandOptions } from "../../utils/types";
+import { useSpeech } from "../../hooks/useSpeech";
 
 export default function CommandGridView(props: {
   isLoading: boolean;
@@ -13,6 +14,7 @@ export default function CommandGridView(props: {
   selectedFiles: string[] | undefined;
 }) {
   const { isLoading, commandName, options, prompt, response, revalidate, cancel, selectedFiles } = props;
+  const { speaking, stopSpeech, restartSpeech } = useSpeech(options, isLoading, response);
   return (
     <Grid
       isLoading={isLoading}
@@ -27,6 +29,9 @@ export default function CommandGridView(props: {
           reattempt={revalidate}
           cancel={cancel}
           files={selectedFiles}
+          speaking={speaking}
+          stopSpeech={stopSpeech}
+          restartSpeech={restartSpeech}
         />
       }
     >
@@ -51,6 +56,9 @@ export default function CommandGridView(props: {
                 cancel={cancel}
                 files={selectedFiles}
                 listItem={item.trim()}
+                speaking={speaking}
+                stopSpeech={stopSpeech}
+                restartSpeech={restartSpeech}
               />
             }
           />

@@ -1,41 +1,46 @@
 import { closeMainWindow, showHUD, showToast, Toast, useNavigation } from "@raycast/api";
-import { ERRORTYPE, useFileContents } from "../utils/file-utils";
 import { useEffect, useState } from "react";
-import { CommandOptions } from "../utils/types";
-import { runActionScript, runReplacements } from "../utils/command-utils";
-import useModel from "../utils/useModel";
-import { useReplacements } from "../hooks/useReplacements";
+import { Command, CommandOptions, ERRORTYPE } from "../../utils/types";
+import { runActionScript, runReplacements } from "../../utils/command-utils";
+import useModel from "../../hooks/useModel";
 import CommandDetailView from "./CommandDetailView";
-import CommandChatView from "./CommandChatView";
+import CommandChatView from "../Chats/CommandChatView";
 import CommandListView from "./CommandListView";
 import CommandGridView from "./CommandGridView";
 import { useCachedState } from "@raycast/utils";
+import { useModels } from "../../hooks/useModels";
+import CommandSetupForm from "./CommandSetupForm";
+import SpeechInputView from "./SpeechInputView";
+import { useFiles } from "../../hooks/useFiles";
 
 export default function CommandResponse(props: {
   commandName: string;
   prompt: string;
   input?: string;
   options: CommandOptions;
+  setCommands?: React.Dispatch<React.SetStateAction<Command[]>>;
 }) {
-  const { commandName, prompt, input, options } = props;
+  const { commandName, prompt, input, setCommands } = props;
   const [substitutedPrompt, setSubstitutedPrompt] = useState<string>(prompt);
   const [loadingData, setLoadingData] = useState<boolean>(true);
   const [shouldCancel, setShouldCancel] = useState<boolean>(false);
-  const [, setPreviousCommand] = useCachedState<string>("promptlab-previous-command", "");
-  const [, setPreviousResponse] = useCachedState<string>("promptlab-previous-response", "");
-  const [, setPreviousPrompt] = useCachedState<string>("promptlab-previous-prompt", "");
+  const [previousCommand, setPreviousCommand] = useCachedState<string>("promptlab-previous-command", "");
+  const [previousResponse, setPreviousResponse] = useCachedState<string>("promptlab-previous-response", "");
+  const [previousPrompt, setPreviousPrompt] = useCachedState<string>("promptlab-previous-prompt", "");
+  const [speechInput, setSpeechInput] = useState<string>();
+  const [options, setOptions] = useState<CommandOptions>({ ...props.options });
 
   const { pop } = useNavigation();
 
-  const { selectedFiles, contentPrompts, loading, errorType } =
-    options.minNumFiles != undefined && options.minNumFiles > 0
-      ? useFileContents(options)
-      : { selectedFiles: [], contentPrompts: [], loading: false, errorType: undefined };
-
-  const replacements = useReplacements(input, selectedFiles);
+  const models = useModels();
+  const { selectedFiles, fileContents, isLoading: loading, error: errorType } = useFiles(options);
 
   useEffect(() => {
-    if (loading || !loadingData) {
+    if (
+      loading ||
+      (!loadingData && !(options.useSpeech == undefined || speechInput?.length)) ||
+      ((!fileContents || !fileContents.contents.length) && options.minNumFiles)
+    ) {
       return;
     }
 
@@ -43,34 +48,46 @@ export default function CommandResponse(props: {
       closeMainWindow();
     }
 
-    Promise.resolve(runReplacements(prompt, replacements, [commandName])).then((subbedPrompt) => {
-      setLoadingData(false);
+    const context = {
+      ...fileContents,
+      input: options.useSpeech != undefined || speechInput?.length ? speechInput || "" : input || "",
+      selectedFiles: selectedFiles?.csv || "",
+      previousCommand: previousCommand,
+      previousResponse: previousResponse,
+      previousPrompt: previousPrompt,
+    };
 
-      if (options.outputKind == "list") {
+    Promise.resolve(runReplacements(prompt, context, [commandName], options)).then((subbedPrompt) => {
+      if (options.outputKind == "list" && subbedPrompt.trim().length > 0) {
         subbedPrompt +=
           "<Format the output as a single list with each item separated by '~~~'. Do not provide any other commentary, headings, or data.>";
-      } else if (options.outputKind == "grid") {
+      } else if (options.outputKind == "grid" && subbedPrompt.trim().length > 0) {
         subbedPrompt +=
           "<Format the output as a single list with each item separated by '~~~'. At the start of each item, put an object emoji or person emoji that represents that item followed by '$$$'. Do not provide any other commentary, headings, or data.>";
       }
 
       setSubstitutedPrompt(subbedPrompt);
+      setLoadingData(false);
     });
-  }, [replacements, loading]);
+  }, [loading, speechInput, fileContents]);
 
-  const contentPromptString = contentPrompts.join("\n");
+  const contentPromptString = fileContents?.contents || "";
   const fullPrompt = (substitutedPrompt.replaceAll("{{contents}}", contentPromptString) + contentPromptString).replace(
     /{{END}}(\n|.)*/,
     ""
   );
 
   const { data, isLoading, revalidate, error } = useModel(
-    substitutedPrompt,
+    substitutedPrompt || "No prompt",
     fullPrompt,
     input || contentPromptString,
     options.temperature == undefined ? "1.0" : options.temperature,
-    !loadingData &&
-      ((options.minNumFiles != undefined && options.minNumFiles == 0) || (contentPrompts.length > 0 && !shouldCancel))
+    substitutedPrompt.trim().length > 0 &&
+      !loadingData &&
+      (!options.minNumFiles || (fileContents?.contents?.length != undefined && fileContents.contents.length > 0)) &&
+      !shouldCancel &&
+      (!options.useSpeech || (speechInput != "" && speechInput != undefined)),
+    models.models.find((model) => model.id == options.model)
   );
 
   useEffect(() => {
@@ -92,7 +109,14 @@ export default function CommandResponse(props: {
         )
       );
     }
-  }, [data, isLoading]);
+
+    // Update previous command placeholders
+    if (!loadingData && !loading && !isLoading && data.length) {
+      setPreviousCommand(commandName);
+      setPreviousResponse(text);
+      setPreviousPrompt(fullPrompt);
+    }
+  }, [data, isLoading, loadingData]);
 
   // Report errors related to getting data from the model
   if (error) {
@@ -123,23 +147,19 @@ export default function CommandResponse(props: {
   }
 
   // Get the text output for the response
-  const text = `${
-    data
-      ? data
-      : options.minNumFiles != undefined && options.minNumFiles == 0
-      ? "Loading response..."
-      : "Analyzing files..."
-  }`;
+  const text = `${data ? data : options.minNumFiles == 0 ? "Loading response..." : "Analyzing files..."}`;
 
-  // Update previous command placeholders
-  if (!loadingData && !loading && !isLoading && data.length) {
-    setPreviousCommand(commandName);
-    setPreviousResponse(text);
-    setPreviousPrompt(fullPrompt);
+  if (
+    options.setupConfig &&
+    !options.setupConfig.fields.every((field) => field.value != undefined && field.value.toString().length > 0)
+  ) {
+    return (
+      <CommandSetupForm commandName={commandName} options={options} setCommands={setCommands} setOptions={setOptions} />
+    );
   }
 
   // Don't show the response if the user has disabled it
-  if (options.showResponse == false) {
+  if (options.showResponse == false || (!loadingData && substitutedPrompt == "")) {
     if (options.showResponse == false) {
       Promise.resolve(showHUD(`Running '${commandName}'...`));
     }
@@ -153,6 +173,10 @@ export default function CommandResponse(props: {
     return null;
   }
 
+  if (options.useSpeech && !speechInput) {
+    return <SpeechInputView prompt={prompt} setSpeechInput={setSpeechInput} />;
+  }
+
   if (options.outputKind == "list") {
     return (
       <CommandListView
@@ -160,7 +184,7 @@ export default function CommandResponse(props: {
           loading ||
           isLoading ||
           loadingData ||
-          (options.minNumFiles != undefined && options.minNumFiles != 0 && contentPrompts.length == 0)
+          (options.minNumFiles != undefined && options.minNumFiles != 0 && fileContents?.contents.length == 0)
         }
         commandName={commandName}
         options={options}
@@ -168,7 +192,7 @@ export default function CommandResponse(props: {
         response={text}
         revalidate={revalidate}
         cancel={() => setShouldCancel(true)}
-        selectedFiles={selectedFiles}
+        selectedFiles={selectedFiles?.paths}
       />
     );
   } else if (options.outputKind == "grid") {
@@ -178,7 +202,7 @@ export default function CommandResponse(props: {
           loading ||
           isLoading ||
           loadingData ||
-          (options.minNumFiles != undefined && options.minNumFiles != 0 && contentPrompts.length == 0)
+          (options.minNumFiles != undefined && options.minNumFiles != 0 && fileContents?.contents.length == 0)
         }
         commandName={commandName}
         options={options}
@@ -186,7 +210,7 @@ export default function CommandResponse(props: {
         response={text}
         revalidate={revalidate}
         cancel={() => setShouldCancel(true)}
-        selectedFiles={selectedFiles}
+        selectedFiles={selectedFiles?.paths}
       />
     );
   } else if (options.outputKind == "chat") {
@@ -196,7 +220,7 @@ export default function CommandResponse(props: {
           loading ||
           isLoading ||
           loadingData ||
-          (options.minNumFiles != undefined && options.minNumFiles != 0 && contentPrompts.length == 0)
+          (options.minNumFiles != undefined && options.minNumFiles != 0 && fileContents?.contents.length == 0)
         }
         commandName={commandName}
         options={options}
@@ -214,7 +238,7 @@ export default function CommandResponse(props: {
         loading ||
         isLoading ||
         loadingData ||
-        (options.minNumFiles != undefined && options.minNumFiles != 0 && contentPrompts.length == 0)
+        (options.minNumFiles != undefined && options.minNumFiles != 0 && fileContents?.contents.length == 0)
       }
       commandName={commandName}
       options={options}
@@ -222,7 +246,7 @@ export default function CommandResponse(props: {
       response={text}
       revalidate={revalidate}
       cancel={() => setShouldCancel(true)}
-      selectedFiles={selectedFiles}
+      selectedFiles={selectedFiles?.paths}
     />
   );
 }
