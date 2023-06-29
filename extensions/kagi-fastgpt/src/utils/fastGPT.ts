@@ -29,5 +29,9 @@ export const query = async (query: string, webSearch = true): Promise<FastGPTRes
     throw new Error(err);
   }
 
+  if (res.status !== 200) {
+    throw new Error(`Received invalid status code ${res.status}`);
+  }
+
   return res.data as FastGPTResponse;
 };
