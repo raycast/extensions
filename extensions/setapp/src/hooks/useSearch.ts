@@ -16,8 +16,7 @@ export function useSearch(term: string, filter = "all") {
 
       // TODO: inform user to enable background refresh
       if (apps.length === 0) {
-        await getApps();
-        apps = JSON.parse(cache.get("apps") || "[]") as App[];
+        apps = await getApps();
       }
 
       let filteredApps = apps.filter((app) => {

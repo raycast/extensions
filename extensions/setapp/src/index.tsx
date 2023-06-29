@@ -54,7 +54,6 @@ function SearchListItem({ app }: { app: App }) {
     accessories.push({ tag: { value: "Installed", color: Color.Green } });
   }
   if (app.type === "mobile_app") {
-    // accessories.push({ tag: { value: "Installed", color: Color.Green } })
     accessories.push({ icon: Icon.Mobile, tooltip: "Mobile App" });
   }
   return (
