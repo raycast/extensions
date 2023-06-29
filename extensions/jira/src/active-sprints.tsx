@@ -1,17 +1,17 @@
 import { List } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
-import { useState } from "react";
+import { useCachedPromise, useCachedState } from "@raycast/utils";
+import { useRef, useState } from "react";
 
 import { getProjects } from "./api/projects";
 import StatusIssueList from "./components/StatusIssueList";
 import { getProjectAvatar } from "./helpers/avatars";
 import { withJiraCredentials } from "./helpers/withJiraCredentials";
 import useIssues from "./hooks/useIssues";
-import usePersistedState from "./hooks/usePersistedState";
 
 export function ActiveSprints() {
-  const [projectKey, setProjectKey] = usePersistedState("active-sprint-project", "");
-  const [projectQuery, setProjectQuery] = useState(projectKey);
+  const [projectKey, setProjectKey] = useCachedState("active-sprint-project", "");
+  const cachedProjectQuery = useRef(projectKey);
+  const [projectQuery, setProjectQuery] = useState("");
 
   const { data: projects, isLoading: isLoadingProjects } = useCachedPromise(
     (query) => getProjects(query),
@@ -19,20 +19,36 @@ export function ActiveSprints() {
     { keepPreviousData: true }
   );
 
+  const { data: cachedProjects, isLoading: isLoadingCachedProject } = useCachedPromise(
+    (query) => getProjects(query),
+    [cachedProjectQuery.current],
+    { keepPreviousData: true }
+  );
+
   const jql = `sprint in openSprints() AND project = ${projectKey} ORDER BY updated DESC`;
 
   const { issues, isLoading: isLoadingIssues, mutate } = useIssues(jql, { execute: projectKey !== "" });
 
-  const searchBarAccessory = projects ? (
+  // Filter out cached project when existing and not performing new search
+  const projectsWithoutCached =
+    cachedProjects?.length && projectQuery === ""
+      ? projects?.filter((project) => project.id !== cachedProjects[0].id)
+      : projects;
+  const allProjects = [
+    ...(cachedProjects && projectQuery === "" ? cachedProjects : []),
+    ...(projectsWithoutCached ? projectsWithoutCached : []),
+  ];
+
+  const searchBarAccessory = (
     <List.Dropdown
       tooltip="Filter issues by project"
       onChange={setProjectKey}
       value={projectKey}
       throttle
-      isLoading={isLoadingProjects}
+      isLoading={cachedProjectQuery ? isLoadingCachedProject : isLoadingProjects}
       onSearchTextChange={setProjectQuery}
     >
-      {projects.map((project) => {
+      {allProjects?.map((project) => {
         return (
           <List.Dropdown.Item
             key={project.id}
@@ -43,7 +59,7 @@ export function ActiveSprints() {
         );
       })}
     </List.Dropdown>
-  ) : null;
+  );
 
   return (
     <StatusIssueList
