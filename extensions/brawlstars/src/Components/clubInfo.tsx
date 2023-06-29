@@ -3,7 +3,7 @@ import { searchClub } from "../Utils/clubUtils";
 import { Icon, List } from "@raycast/api";
 import Club from "./ClubComponent";
 import { IClubData } from "../models/IClubData";
-import BadAPIKey from "./badAPIKey";
+import BadAPIKey from "./BadAPIKey";
 import ClubNotFoundError from "./ClubNotFoundError";
 import Unexpected from "./Unexpected";
 

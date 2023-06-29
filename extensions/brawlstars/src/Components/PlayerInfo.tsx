@@ -3,7 +3,7 @@ import { searchPlayer } from "../Utils/playerUtils";
 import { Action, ActionPanel, Detail, Icon, List } from "@raycast/api";
 import ClubComponent from "./clubInfo";
 import { IPlayerData, emptyPlayerData } from "../models/IPlayerData";
-import BadAPIKey from "./badAPIKey";
+import BadAPIKey from "./BadAPIKey";
 import Player from "./PlayerComponent";
 import PlayerNotFoundError from "./PlayerNotFoundError";
 import UnexpectedError from "./Unexpected";
