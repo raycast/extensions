@@ -1,6 +1,6 @@
 # Todoist Changelog
 
-## [View task in Raycast from menu bar] - 2023-06-15
+## [View task in Raycast from menu bar] - 2023-06-29
 
 When using menu bar you may want to take a closer a look at your task description without opening the Todoist app. This change adds a way to quickly preview any task from menu bar on Raycast floating window.
 
