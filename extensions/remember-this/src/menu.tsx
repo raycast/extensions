@@ -19,15 +19,13 @@ const day = 24 * hour;
 const month = 30 * day;
 const year = 365 * day;
 
-function getCountdown(diff: any) {
+function getCountdown(diff: number) {
   if (diff > 10 * year) {
     return "Expired";
   } else if (diff <= 0) {
     return "Expired";
   } else if (diff >= year) {
     const years = Math.floor(diff / year);
-    const remaining = diff % year;
-    const months = Math.floor(remaining / month);
     if (years === 1) {
       return `${years} year`;
     } else {
@@ -35,8 +33,6 @@ function getCountdown(diff: any) {
     }
   } else if (diff >= month) {
     const months = Math.floor(diff / month);
-    const remaining = diff % month;
-    const days = Math.floor(remaining / day);
     if (months === 1) {
       return `${months} month`;
     } else {
@@ -44,8 +40,6 @@ function getCountdown(diff: any) {
     }
   } else if (diff >= day) {
     const days = Math.floor(diff / day);
-    const remaining = diff % day;
-    const hours = Math.floor(remaining / hour);
     if (days === 1) {
       return `${days} day`;
     } else {
@@ -53,8 +47,6 @@ function getCountdown(diff: any) {
     }
   } else if (diff >= hour) {
     const hours = Math.floor(diff / hour);
-    const remaining = diff % hour;
-    const minutes = Math.floor(remaining / minute);
     if (hours === 1) {
       return `${hours} hour`;
     } else {
@@ -62,8 +54,6 @@ function getCountdown(diff: any) {
     }
   } else if (diff >= minute) {
     const minutes = Math.floor(diff / minute);
-    const remaining = diff % minute;
-    const seconds = Math.floor(remaining / second);
     if (minutes === 1) {
       return `${minutes} minute`;
     } else {
@@ -115,6 +105,20 @@ export default function Command() {
         </MenuBarExtra>
       );
     }
+    if (sizeValue === "large") {
+      return (
+        <MenuBarExtra icon={Icon.Stars} title={`Woohoo! You got nothing todo!`} tooltip="Enjoy the rest of the day off">
+          <MenuBarExtra.Item icon={Icon.Stars} title={`Woohoo! You got nothing todo!`} />
+          <MenuBarExtra.Item
+            icon={Icon.CircleProgress100}
+            title="Add an item to be remembered!"
+            onAction={() => {
+              launchCommand({ name: "index", type: LaunchType.UserInitiated });
+            }}
+          />
+        </MenuBarExtra>
+      );
+    }
   }
 
   const closestDate = dates[0];
@@ -137,6 +141,20 @@ export default function Command() {
       );
     }
     if (sizeValue === "normal") {
+      return (
+        <MenuBarExtra icon={Icon.Stars} title={`Woohoo! You got nothing todo!`} tooltip="Enjoy the rest of the day off">
+          <MenuBarExtra.Item icon={Icon.Stars} title={`Woohoo! You got nothing todo!`} />
+          <MenuBarExtra.Item
+            icon={Icon.CircleProgress100}
+            title="Add an item to be remembered!"
+            onAction={() => {
+              launchCommand({ name: "index", type: LaunchType.UserInitiated });
+            }}
+          />
+        </MenuBarExtra>
+      );
+    }
+    if (sizeValue === "large") {
       return (
         <MenuBarExtra icon={Icon.Stars} title={`Woohoo! You got nothing todo!`} tooltip="Enjoy the rest of the day off">
           <MenuBarExtra.Item icon={Icon.Stars} title={`Woohoo! You got nothing todo!`} />
@@ -181,12 +199,48 @@ export default function Command() {
         </MenuBarExtra>
       );
     }
+    if (sizeValue === "large") {
+      return (
+        <MenuBarExtra icon={Icon.Stars} title={`Woohoo! You got nothing todo!`} tooltip="Enjoy the rest of the day off">
+          <MenuBarExtra.Item icon={Icon.Stars} title={`Woohoo! You got nothing todo!`} />
+          <MenuBarExtra.Item
+            icon={Icon.CircleProgress100}
+            title="Add an item to be remembered!"
+            onAction={() => {
+              launchCommand({ name: "index", type: LaunchType.UserInitiated });
+            }}
+          />
+        </MenuBarExtra>
+      );
+    }
   }
-
+  const delimiter = "/\|\|\&\|/g"; // Define the delimiter as a regular expression with the "g" flag
+  const taskname = closestDate.taskname.replace(delimiter, ",");
   if (sizeValue === "normal") {
     return (
-      <MenuBarExtra icon={Icon.ArrowRight} title={countdown} tooltip={closestDate.taskname}>
-        <MenuBarExtra.Item icon={Icon.ArrowRight} title={`${closestDate.taskname} - Expires In ${countdown}!`} />
+      <MenuBarExtra icon={Icon.ArrowRight} title={countdown} tooltip={taskname}>
+        <MenuBarExtra.Item icon={Icon.ArrowRight} title={` - Expires In ${countdown}!`} />
+        <MenuBarExtra.Item
+          icon={Icon.Document}
+          title="View all items being remembered!"
+          onAction={() => {
+            launchCommand({ name: "view", type: LaunchType.UserInitiated });
+          }}
+        />
+        <MenuBarExtra.Item
+          icon={Icon.CircleProgress100}
+          title="Add an item to be remembered!"
+          onAction={() => {
+            launchCommand({ name: "index", type: LaunchType.UserInitiated });
+          }}
+        />
+      </MenuBarExtra>
+    );
+  }
+  if (sizeValue === "large") {
+    return (
+      <MenuBarExtra icon={Icon.ArrowRight} title={`${taskname} - ${countdown}`} tooltip={taskname}>
+        <MenuBarExtra.Item icon={Icon.ArrowRight} title={`${taskname} - Expires In ${countdown}!`} />
         <MenuBarExtra.Item
           icon={Icon.Document}
           title="View all items being remembered!"
@@ -220,9 +274,10 @@ export default function Command() {
       .replace(" month", "m")
       .replace(" years", "y")
       .replace(" year", "y");
+
     return (
-      <MenuBarExtra title={formattedCountdown} tooltip={closestDate.taskname}>
-        <MenuBarExtra.Item icon={Icon.ArrowRight} title={`${closestDate.taskname} - Expires In ${countdown}!`} />
+      <MenuBarExtra title={formattedCountdown} tooltip={taskname}>
+        <MenuBarExtra.Item icon={Icon.ArrowRight} title={`${taskname} - Expires In ${countdown}!`} />
         <MenuBarExtra.Item
           icon={Icon.Document}
           title="View all items being remembered!"

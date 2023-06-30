@@ -17,11 +17,11 @@
       "description": "Add something for the extension to remember!",
       "mode": "view",
       "arguments": [
-                    {
-                      "type": "text",
-                      "placeholder": "With Remember This",
-                      "name": "thingtor"
-                    }
+        {
+          "type": "text",
+          "placeholder": "With Remember This",
+          "name": "thingtor"
+        }
       ]
     },
     {
@@ -30,11 +30,11 @@
       "subtitle": "A countdown to your next activity!",
       "description": "Show a countdown in your menubar which will countdown to the next thing in you todo!",
       "mode": "menu-bar",
-        "interval": "1m"
+      "interval": "1m"
     },
     {
       "name": "view",
-      "title": "Remembered Things",
+      "title": "List of Reminders",
       "subtitle": "View a list of all the items being remembered.",
       "description": "View a list of all the items being remembered.",
       "mode": "view"
@@ -117,28 +117,42 @@
       ]
     },
     {
-          "name": "size",
-          "description": "Size of the menubar command",
-          "type": "dropdown",
-          "required": true,
-          "title": "Menubar Command Format",
-          "placeholder": "Placeholder",
-          "default": "normal",
-          "data": [
-            {
-              "title": "Compact",
-              "value": "compact"
-            },
-            {
-              "title": "Normal",
-              "value": "normal"
-            }
-          ]
+      "name": "size",
+      "description": "Size of the menubar command",
+      "type": "dropdown",
+      "required": true,
+      "title": "Menubar Command Format",
+      "placeholder": "Placeholder",
+      "default": "normal",
+      "data": [
+        {
+          "title": "Compact",
+          "value": "compact"
+        },
+        {
+          "title": "Normal",
+          "value": "normal"
+        },
+        {
+                  "title": "Large",
+                  "value": "large"
+                }
+      ]
+    },
+    {
+          "name": "webhookurl",
+          "description": "WebhookURL",
+          "type": "password",
+          "required": false,
+          "title": "WebhookURL",
+          "placeholder": "WebhookURL"
         }
   ],
   "dependencies": {
     "@raycast/api": "^1.54.0",
+    "axios": "^1.4.0",
     "node-notifier": "^10.0.1",
+    "node-telegram-bot-api": "^0.61.0",
     "open": "^9.1.0",
     "run-applescript": "^6.1.0",
     "ts-node": "^10.9.1"
@@ -146,6 +160,7 @@
   "devDependencies": {
     "@raycast/eslint-config": "1.0.5",
     "@types/node": "18.8.3",
+    "@types/node-fetch": "^2.6.4",
     "@types/react": "18.0.9",
     "eslint": "^7.32.0",
     "prettier": "^2.5.1",

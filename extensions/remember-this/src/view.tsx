@@ -8,6 +8,32 @@ launchCommand({ name: "menu", type: LaunchType.UserInitiated });
 
 const REMEMBERING_FILE = path.join(environment.supportPath, "remembering.csv");
 
+let fileExists = false;
+try {
+  fs.accessSync(REMEMBERING_FILE);
+  fileExists = true;
+} catch (error) {
+  console.log("File does not exist. Creating a new file...");
+}
+
+let content = "";
+if (fileExists) {
+  // Read the contents of the existing file
+  content = fs.readFileSync(REMEMBERING_FILE, "utf-8");
+}
+
+// Split the CSV into lines
+const lines = content.split('\n');
+
+// Filter out empty lines
+const nonEmptyLines = lines.filter(line => line.trim() !== '');
+
+// Join the remaining lines back together
+const updatedCsv = nonEmptyLines.join('\n');
+
+fs.writeFileSync(REMEMBERING_FILE, updatedCsv);
+
+
 type RememberedItem = {
   expirationDate: Date;
   content: string;
@@ -20,7 +46,10 @@ function readRememberedItems(): RememberedItem[] {
     const fileContents = fs.readFileSync(REMEMBERING_FILE, "utf8");
     const lines = fileContents.trim().split("\n");
     const validLines = lines.filter((line) => {
-      const [dateString, content] = line.split(",");
+      const [dateString, testlol] = line.split(",");
+      const delimiter = /\|\|&\|/g; // Remove unnecessary escape characters
+      const content = testlol.replace(delimiter, ",");
+
       const expirationDate = new Date(dateString);
       return expirationDate > now;
     });
@@ -28,7 +57,9 @@ function readRememberedItems(): RememberedItem[] {
     fs.writeFileSync(REMEMBERING_FILE, newFileContents);
 
     return validLines.map((line) => {
-      const [dateString, content] = line.split(",");
+      const [dateString, testlol] = line.split(",");
+      const delimiter = /\|\|&\|/g; // Remove unnecessary escape characters
+      const content = testlol.replace(delimiter, ",");
       return {
         expirationDate: new Date(dateString),
         content,
@@ -149,7 +180,9 @@ export default function Command() {
     setQuery(query);
     setItems(filterValidItems(readRememberedItems(), query));
   };
+
   launchCommand({ name: "menu", type: LaunchType.UserInitiated });
+
   return (
     <List searchBarPlaceholder="Search remembered items" onSearchTextChange={handleSearch}>
       {items.length > 0 ? (
@@ -194,7 +227,7 @@ export default function Command() {
       ) : (
         <List.EmptyView
           icon={{ source: Icon.Stars }}
-          title="Woohoo! You got nothing todo!"
+          title="Woohoo! You got nothing to do!"
           description="Click ⏎ to remember something!"
           actions={
             <ActionPanel>

@@ -10,7 +10,6 @@ import {
   openExtensionPreferences,
   showToast,
   Toast,
-  closeMainWindow,
   popToRoot,
 } from "@raycast/api";
 import fs from "fs";
@@ -123,8 +122,9 @@ export default function Command(props: { arguments?: { thingtor?: string } }) {
       const newData = values.textarea.toLowerCase();
 
       let inputExists = false;
+      const newDataWDelim = newData.replace(/,/g, "||&|");
       for (const row of existingData) {
-        if (row.split(",")[1] === newData) {
+        if (row.split(",")[1] === newDataWDelim) {
           inputExists = true;
           break;
         }
@@ -141,8 +141,9 @@ export default function Command(props: { arguments?: { thingtor?: string } }) {
     }
 
     const expirationDate = calculateExpirationDate(values.dropdown);
-    console.log(expirationDate);
-    const data = `\n${expirationDate.toISOString()},${values.textarea}`;
+    const delimiter = "||&|"; // Define the delimiter string
+    const escapedTextarea = values.textarea.replace(/,/g, delimiter);
+    const data = `\n${expirationDate.toISOString()},${escapedTextarea}`;
 
     // Write to the file
     if (fileExists) {
