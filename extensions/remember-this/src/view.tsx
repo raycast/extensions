@@ -23,16 +23,15 @@ if (fileExists) {
 }
 
 // Split the CSV into lines
-const lines = content.split('\n');
+const lines = content.split("\n");
 
 // Filter out empty lines
-const nonEmptyLines = lines.filter(line => line.trim() !== '');
+const nonEmptyLines = lines.filter((line) => line.trim() !== "");
 
 // Join the remaining lines back together
-const updatedCsv = nonEmptyLines.join('\n');
+const updatedCsv = nonEmptyLines.join("\n");
 
 fs.writeFileSync(REMEMBERING_FILE, updatedCsv);
-
 
 type RememberedItem = {
   expirationDate: Date;
