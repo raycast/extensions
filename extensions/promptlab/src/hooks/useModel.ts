@@ -26,6 +26,7 @@ export default function useModel(
   const [error] = useState<string>();
   const [dataTag, setDataTag] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(execute);
+  const [attempt, setAttempt] = useState<number>(0);
   const models = useModels();
   const AIRef = useRef<{ fetch: Promise<Response>; tag: string; forceStop: () => void }>();
 
@@ -247,7 +248,7 @@ export default function useModel(
           return;
         }
       });
-  }, [execute, basePrompt, input, prompt]);
+  }, [execute, basePrompt, input, prompt, attempt]);
 
   const stopModel = () => {
     AIRef.current?.fetch?.then((response) => {
@@ -287,6 +288,14 @@ export default function useModel(
     };
   }
 
+  const revalidate = async () => {
+    if (AIRef.current != undefined) {
+      AIRef.current.forceStop();
+      AIRef.current = undefined;
+    }
+    setAttempt(attempt + 1);
+  };
+
   if (validRaycastAIReps.includes(targetModel.endpoint.toLowerCase()) || models.isLoading) {
     // If the endpoint is Raycast AI, use the AI hook
     if (models.isLoading) {
@@ -305,26 +314,19 @@ export default function useModel(
     return {
       data: data,
       isLoading: isLoading,
-      revalidate: () => null,
+      revalidate: revalidate,
       error: error,
       dataTag: dataTag,
       stopModel: stopModel,
     };
   }
 
-  const revalidate = async () => {
-    if (AIRef.current != undefined) {
-      AIRef.current.forceStop();
-      AIRef.current = undefined;
-    }
-  };
-
   // If the endpoint is invalid, return an error
   console.error("Invalid Model Endpoint");
   return {
     data: "",
     isLoading: false,
-    revalidate: revalidate,
+    revalidate: () => null,
     error: "Invalid Endpoint",
     dataTag: "",
     stopModel: stopModel,

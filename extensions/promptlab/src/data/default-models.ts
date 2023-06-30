@@ -60,7 +60,7 @@ export const defaultModels: { [key: string]: Model } = {
     temperature: "1.0",
   },
   "--model-GPT-3.5-Turbo Via OpenAI": {
-    endpoint: "https://api.openai.com/v1/completions",
+    endpoint: "https://api.openai.com/v1/chat/completions",
     apiKey: "",
     inputSchema: '{ "model": "gpt-3.5-turbo", "messages": [{"role": "user", "content": "{prompt}"}] }',
     iconColor: "raycast-green",
@@ -70,7 +70,7 @@ export const defaultModels: { [key: string]: Model } = {
     icon: "speech-bubble-16",
     isDefault: false,
     id: "",
-    authType: "apiKey",
+    authType: "bearerToken",
     favorited: false,
     description: "Optimized for chat but works well for traditional completions tasks as well.",
     name: "GPT-3.5-Turbo Via OpenAI",

@@ -68,7 +68,7 @@ export default function CommandChatView(props: {
     fileContents,
     isLoading: loadingSelectedFiles,
     revalidate: revalidateFiles,
-  } = useFileContents(options);
+  } = useFileContents({ ...options, minNumFiles: options.minNumFiles && query != "" ? 1 : 0 });
   const {
     data,
     isLoading: loadingData,
@@ -155,9 +155,7 @@ export default function CommandChatView(props: {
     const conversation = currentChat ? chats.loadConversation(currentChat.name) || [] : [];
 
     // Get the most up-to-date file selection
-    await revalidateFiles();
-
-    console.log(selectedFiles);
+    const { selectedFiles: files, fileContents: contents } = await revalidateFiles();
 
     // Get command descriptions
     const commands = await LocalStorage.allItems();
@@ -179,8 +177,8 @@ export default function CommandChatView(props: {
       ((currentChat && currentChat.useSelectedFilesContext) ||
         useFiles ||
         (currentChat == undefined && useFiles == undefined)) &&
-      selectedFiles?.paths?.length
-        ? `\n\nYou will also consider these files: ###${fileContents?.contents || ""}###\n\n`
+      files?.paths?.length
+        ? `\n\nYou will also consider these files: ###${contents?.contents || ""}###\n\n`
         : ``
     }${
       ((currentChat && currentChat.useConversationContext) ||
@@ -290,7 +288,7 @@ export default function CommandChatView(props: {
     const cmdMatchPrevious = previousResponse.match(/.*{{cmd:(.*?):(.*?)\}{0,2}.*/);
     if (
       cmdMatchPrevious &&
-      ((currentChat && currentChat.useSelectedFilesContext) ||
+      ((currentChat && currentChat.allowAutonomy) ||
         autonomousFeatures ||
         (currentChat == undefined && autonomousFeatures == undefined)) &&
       !loadingData &&

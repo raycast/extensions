@@ -22,10 +22,6 @@ let maxCharacters = (() => {
   return parseInt(preferences.lengthLimit) || 2500;
 })();
 
-const isDotFile = (filepath: string) => {
-  return path.basename(filepath).startsWith(".");
-};
-
 const isTrueDirectory = (filepath: string) => {
   try {
     return fs.lstatSync(filepath).isDirectory() && !isApp(filepath);
@@ -114,9 +110,8 @@ export const useFiles = (options: CommandOptions) => {
     const selection = rawSelection.paths.reduce(
       (acc, filepath) => {
         if (
-          validExtensions.length == 0 ||
-          !isDotFile(filepath) ||
-          validExtensions.includes(path.extname(filepath).slice(1).toLowerCase())
+          filepath.trim().length > 0 &&
+          (validExtensions.length == 0 || validExtensions.includes(path.extname(filepath).slice(1).toLowerCase()))
         ) {
           return { paths: [...acc.paths, filepath], csv: acc.csv + "," + filepath };
         }
@@ -157,14 +152,15 @@ export const useFiles = (options: CommandOptions) => {
           continue;
         }
 
+        if (isTextFile(filepath)) addTextFileDetails(filepath, currentData);
+
         if (isTrueDirectory(filepath)) addDirectoryDetails(filepath, currentData);
         else if (isApp(filepath)) await addAppDetails(filepath, currentData, options);
         else if (isPDF(filepath)) await addPDFDetails(filepath, currentData, options);
         else if (isVideoFile(filepath)) await addVideoDetails(filepath, currentData, options);
         else if (isAudioFile(filepath)) await addAudioDetails(filepath, currentData, options);
         else if (isImageFile(filepath)) await addImageDetails(filepath, currentData, options);
-        else if (isTextFile(filepath)) addTextFileDetails(filepath, currentData);
-        else attemptAddRawText(filepath, currentData);
+        else if (!isTextFile(filepath)) attemptAddRawText(filepath, currentData);
 
         if (options.useMetadata) addMetadataDetails(filepath, currentData);
 
@@ -176,12 +172,14 @@ export const useFiles = (options: CommandOptions) => {
     }
 
     setFileContents(fileData);
+    return fileData;
   };
 
   const revalidate = async () => {
     const selection = await loadSelection();
-    await loadFileContents(selection);
+    const fileContents = await loadFileContents(selection);
     setIsLoading(false);
+    return { selectedFiles: selection, fileContents };
   };
 
   useEffect(() => {

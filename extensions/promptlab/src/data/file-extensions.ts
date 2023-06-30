@@ -273,6 +273,7 @@ export const textFileExtensions = [
   "sparql",
   "sql",
   "st",
+  "svg",
   "swift",
   "tcc",
   "tcl",

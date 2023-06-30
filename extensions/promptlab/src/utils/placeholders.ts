@@ -2475,7 +2475,9 @@ const loadCustomPlaceholders = async (settings: { allowCustomPlaceholderPaths: b
     const customPlaceholderFiles = [
       customPlaceholdersPath,
       ...(settings.allowCustomPlaceholderPaths ? preferences.customPlaceholderFiles.split(/, ?/g) : []),
-    ];
+    ].filter(
+      (customPlaceholdersPath) => customPlaceholdersPath.trim().length > 0 && fs.existsSync(customPlaceholdersPath)
+    );
     const customPlaceholderFileContents = await Promise.all(
       customPlaceholderFiles.map(async (customPlaceholdersPath) => {
         try {
