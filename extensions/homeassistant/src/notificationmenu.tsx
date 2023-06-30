@@ -1,10 +1,9 @@
 import { getPreferenceValues, MenuBarExtra, open } from "@raycast/api";
-import { ha } from "./common";
-import { State } from "./haapi";
-import { useHAStates } from "./hooks";
+import { useEffect, useState } from "react";
+import { getHAWSConnection, ha } from "./common";
 import { getErrorMessage } from "./utils";
 
-function PersistentNotificationMenuItem(props: { state: State }): JSX.Element {
+function PersistentNotificationMenuItem(props: { notification: HANotification }): JSX.Element {
   const ensureShort = (text: string): string => {
     const max = 40;
     if (text.length > max) {
@@ -12,10 +11,9 @@ function PersistentNotificationMenuItem(props: { state: State }): JSX.Element {
     }
     return text;
   };
-  const s = props.state;
-  const fn = s.attributes.friendly_name || s.entity_id;
-  const title = s.attributes.title;
-  const msg = s.attributes.message || fn;
+  const s = props.notification;
+  const title = s.title;
+  const msg = s.message ?? "?";
   const tt = title ? `${title}: ${msg}` : msg;
   return (
     <MenuBarExtra.Item icon="💬" title={ensureShort(title ? title : msg)} onAction={() => open(ha.url)} tooltip={tt} />
@@ -28,8 +26,7 @@ function showCountInMenu(): boolean {
 }
 
 export default function MenuCommand(): JSX.Element {
-  const { states: allStates, error, isLoading } = useHAStates();
-  const notifications = getPersistentNotifications(allStates);
+  const { notifications, error, isLoading } = useHANotifications();
   const valid = notifications && notifications.length > 0 ? true : false;
   const title = showCountInMenu() && valid ? notifications?.length.toString() : undefined;
   const tooltip = () => {
@@ -50,15 +47,64 @@ export default function MenuCommand(): JSX.Element {
     <MenuBarExtra icon={icon} isLoading={isLoading} title={title} tooltip={tooltip()}>
       <MenuBarExtra.Item key="_header" title={header} />
       {notifications?.map((n) => (
-        <PersistentNotificationMenuItem key={n.entity_id} state={n} />
+        <PersistentNotificationMenuItem key={n.notification_id} notification={n} />
       ))}
     </MenuBarExtra>
   );
 }
 
-function getPersistentNotifications(allStates?: State[]): State[] | undefined {
-  if (!allStates || allStates.length <= 0) {
-    return;
-  }
-  return allStates.filter((s) => s.entity_id.startsWith("persistent_notification."));
+interface HANotification {
+  message: string;
+  notification_id: string;
+  title?: string;
+  created_at: string;
+}
+
+function useHANotifications(): {
+  error?: string;
+  isLoading: boolean;
+  notifications?: HANotification[];
+} {
+  const [notifications, setNotifications] = useState<HANotification[]>();
+  const [error, setError] = useState<string>();
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  useEffect(() => {
+    let didUnmount = false;
+
+    async function fetchData() {
+      if (didUnmount) {
+        return;
+      }
+
+      setIsLoading(true);
+      setError(undefined);
+
+      try {
+        const con = await getHAWSConnection();
+        const data: HANotification[] | undefined = await con.sendMessagePromise({
+          type: "persistent_notification/get",
+        });
+        if (!didUnmount) {
+          setNotifications(data);
+        }
+      } catch (error) {
+        if (!didUnmount) {
+          setError(getErrorMessage(error));
+        }
+      } finally {
+        if (!didUnmount) {
+          setIsLoading(false);
+        }
+      }
+    }
+
+    fetchData();
+
+    return () => {
+      didUnmount = true;
+    };
+  }, []);
+
+  return { error, isLoading, notifications };
 }
