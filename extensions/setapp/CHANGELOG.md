@@ -2,8 +2,8 @@
 
 ## [Initial Version] - {PR_MERGE_DATE}
 
-
 - Adds search for Setapp apps
 - Filter by installed status
 - Filter by mobile/desktop
 - Background refresh
+- Auto sync if background refresh not enabled

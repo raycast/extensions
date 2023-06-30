@@ -23,7 +23,7 @@
       "title": "Background Refresh Setapp Cache",
       "description": "Refreshes the cache of Setapp apps",
       "mode": "no-view",
-      "interval": "1h"
+      "interval": "30m"
     }
   ],
   "dependencies": {

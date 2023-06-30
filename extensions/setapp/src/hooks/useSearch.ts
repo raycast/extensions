@@ -5,6 +5,8 @@ import { getApps } from "../refresh-cache";
 
 const cache = new Cache();
 
+const CACHE_EXPIRY = 35 * 60 * 1000; // 35 minutes
+
 export function useSearch(term: string, filter = "all") {
   const [isLoading, setIsLoading] = useState(true);
   const [data, setData] = useState<App[]>([]);
@@ -14,8 +16,10 @@ export function useSearch(term: string, filter = "all") {
     try {
       let apps = JSON.parse(cache.get("apps") || "[]") as App[];
 
+      const lastSync = cache.get("lastSync");
+      const isOutdated = !lastSync || Date.now() - parseInt(lastSync) > CACHE_EXPIRY;
       // TODO: inform user to enable background refresh
-      if (apps.length === 0) {
+      if (apps.length === 0 || isOutdated) {
         apps = await getApps();
       }
 

@@ -96,6 +96,7 @@ export async function getApps() {
   const installedApps = await getInstalledApps();
   const appsWithInstalledFlag = flagInstalledApps(apps, installedApps);
   cache.set("apps", JSON.stringify(appsWithInstalledFlag));
+  cache.set("lastSync", Date.now().toString());
   return apps;
 }
 
