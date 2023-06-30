@@ -114,6 +114,10 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
               target={searchResult.path}
               shortcut={{ modifiers: ["cmd"], key: "o" }}
             />
+            <Action.CreateQuicklink
+              title="Save as Quicklink"
+              quicklink={{ link: launchConfig(searchResult.name), name: searchResult.name }}
+            />
           </ActionPanel.Section>
         </ActionPanel>
       }
