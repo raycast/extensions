@@ -1,6 +1,6 @@
 # PromptLab Changelog
 
-## [PromptLab 1.1.0] - 2023-05-13
+## [PromptLab 1.1.0] - 2023-06-30
 
 - Added "PromptLab Menu Item" command for easy access to commands
 - Added "Manage Models" command for straightforward switching between multiple models
