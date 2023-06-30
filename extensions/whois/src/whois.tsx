@@ -16,7 +16,15 @@ const WHOIS = (props: LaunchProps<{ arguments: Props }>) => {
 
   const fetcher = async () => {
     let markdown = `# WHOIS 🌐\n`;
-    const url = "https://scraper.run/whois?addr=" + domain;
+    let instance: URL | null = null;
+
+    try {
+      instance = new URL(domain);
+    } catch (error) {
+      instance = new URL("https://" + domain);
+    }
+
+    const url = "https://scraper.run/whois?addr=" + instance.hostname;
 
     try {
       const { data } = await axios.get(url);
