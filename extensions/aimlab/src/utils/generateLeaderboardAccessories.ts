@@ -3,7 +3,6 @@ import { Color, Icon, List } from "@raycast/api";
 
 const generateLeaderboardAccessories = (leaderboardData: LeaderboardData): List.Item.Accessory[] => {
   return [
-    { tooltip: "Rank:" + leaderboardData.rank },
     { text: `Average Score`, icon: Icon.LineChart },
     { tag: { value: leaderboardData.avg_score.toFixed().toString() }, tooltip: "Average Score" },
     { text: `Total Score`, icon: Icon.Star },

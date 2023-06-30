@@ -31,7 +31,7 @@ const LeaderboardComponent = ({ seasonTask, taskName }: PropTypes) => {
                 leaderboardData.rank <= 3
                   ? {
                       value: { source: Icon.Leaderboard, tintColor: rankColors[leaderboardData.rank - 1] },
-                      tooltip: "Rank:" + leaderboardData.rank,
+                      tooltip: "Rank: " + leaderboardData.rank,
                     }
                   : ""
               }

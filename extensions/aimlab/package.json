@@ -22,6 +22,12 @@
       "title": "Aimlab Profile",
       "description": "View your Aimlab profile",
       "mode": "view"
+    },
+    {
+      "name": "view-creators",
+      "title": "Aimlab Top Creators",
+      "description": "View Aimlab Top Creators",
+      "mode": "view"
     }
   ],
   "preferences": [

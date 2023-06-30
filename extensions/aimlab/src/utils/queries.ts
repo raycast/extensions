@@ -191,6 +191,54 @@ export const GET_SEASONAL_COMBINED_LEADERBOARD = `
   }
 `;
 
+export const GET_TOP_CREATORS = `
+  query GetAimlabTopCreators($limit: Int = 10, $offset: Int = 0) {
+    authors(offset: $offset, limit: $limit) {
+      id
+      username
+      d7Users
+      d7Plays
+      tasks(offset: 0, limit: 1) {
+        id
+        name
+        imageUrl
+        description
+      }
+    }
+  }
+`;
+
+export const GET_TOTAL_POINTS = `
+  query getTotalPoints($user_id: String) {
+    aimlab {
+        plays_agg(where: $where) {
+        aggregate {
+          sum {
+            score
+            shots_fired
+            kills
+          }
+        }
+      }
+    }
+  }
+`;
+
+export const GET_TIME_PLAYED = `
+  query getTimePlayed($user_id: String) {
+    aimlab {
+        plays_agg(where: $where) {
+        aggregate {
+          uniq {
+            days
+            weeks
+          }
+        }
+      }
+    }
+  }
+`;
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function APIFetch(query: any, variables: any) {
   try {
@@ -205,6 +253,7 @@ export async function APIFetch(query: any, variables: any) {
         variables: variables,
       },
     });
+
     return response.data.data;
   } catch (error) {
     console.error(error);
