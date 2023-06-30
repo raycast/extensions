@@ -1,11 +1,9 @@
-# Warp Launch Configuration Changelog
+# Warp Changelog
 
-## [Fix] - 2023-03-23
+## [Initial Release] - 2023-29-06
 
-- Ensure that Warp is open before opening the launch profile
-
-## [Fix] - 2023-03-22
-
-- Added support for .yml files
-
-## [Initial Version] - 2023-03-07
+- "Open Directory" command
+- "Open Selected Finder Item" command
+- "Open Launch Configuration" command
+- "New Tab" command
+- "New Window" command
