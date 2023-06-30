@@ -10,6 +10,7 @@ export interface Bookmark {
   id: string;
   url: string;
   title: string;
+  description?: string;
   tags?: string;
   private: boolean;
   readLater: boolean;
