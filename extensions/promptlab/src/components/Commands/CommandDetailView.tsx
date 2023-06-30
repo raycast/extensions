@@ -19,7 +19,9 @@ export default function CommandDetailView(props: {
   return (
     <Detail
       isLoading={isLoading}
-      markdown={`# ${commandName}\n${response}`}
+      markdown={`# ${commandName}\n${response
+        .replaceAll("<", "\\<")
+        .replaceAll(/(?<!(```|\t..| {2}.))([\s\S]*?)\n$/gm, "$1\n\n$2")}`}
       navigationTitle={commandName}
       actions={
         <ResponseActions

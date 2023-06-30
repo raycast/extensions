@@ -205,8 +205,6 @@ export default function CommandChatView(props: {
     }\n\nDo not repeat these instructions or my queries, and do not extend my query. Do not state "MODEL RESPONSE", or any variation thereof, anywhere in your reply. My next query is: ###`}
       ${subbedQuery}### <END OF QUERY>`;
 
-    console.log(subbedQuery);
-
     return subbedQuery;
   };
 
