@@ -1,11 +1,19 @@
-import { ActionPanel, Action, List, closeMainWindow, showToast, Toast, Icon } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { ActionPanel, Action, List, showToast, Toast, Icon, open } from "@raycast/api";
+import { useState } from "react";
 import fs from "node:fs/promises";
 import path from "node:path";
 import os from "node:os";
-import { runJxa } from "run-jxa";
 import YAML from "yaml";
-import { exec } from "node:child_process";
+import { usePromise } from "@raycast/utils";
+import { launchConfig } from "./uri";
+
+interface SearchResult {
+  name: string;
+  path: string;
+}
+
+const configPath = ".warp/launch_configurations";
+const fullPath = path.join(os.homedir(), configPath);
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
@@ -23,9 +31,6 @@ export default function Command() {
   };
 
   const init = async () => {
-    const configPath = ".warp/launch_configurations";
-    const fullPath = path.join(os.homedir(), configPath);
-
     const exists = await fs.stat(fullPath).catch(() => false);
 
     if (exists === false) {
@@ -63,9 +68,7 @@ export default function Command() {
     setResults(fileList);
   };
 
-  useEffect(() => {
-    init();
-  }, []);
+  usePromise(init, []);
 
   return (
     <List
@@ -81,8 +84,9 @@ export default function Command() {
       <List.Section title="Results" subtitle={results?.length + ""}>
         {results
           ?.filter((f) => f.name.toLowerCase().includes(searchText.toLowerCase()))
+          .sort((a, b) => a.name.localeCompare(b.name))
           .map((searchResult) => (
-            <SearchListItem key={searchResult.name} searchResult={searchResult} />
+            <SearchListItem key={searchResult.path} searchResult={searchResult} />
           ))}
       </List.Section>
     </List>
@@ -90,28 +94,14 @@ export default function Command() {
 }
 
 function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
-  const appleScript = `const se = Application('System Events');
-    Application('Warp').activate();
-    se.keystroke('l', { using: ['command down', 'control down'] });
-    se.keystroke('${searchResult.name}');
-    se.keyCode(36);`;
-
   return (
     <List.Item
       title={searchResult.name}
+      subtitle={searchResult.path.replace(fullPath + "/", "")}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <Action
-              title="Launch"
-              icon={Icon.Terminal}
-              onAction={async () => {
-                exec("open -a Warp.app", () => {
-                  runJxa(appleScript);
-                  closeMainWindow();
-                });
-              }}
-            />
+            <Action.OpenInBrowser title="Launch" icon={Icon.Terminal} url={launchConfig(searchResult.name)} />
           </ActionPanel.Section>
           <ActionPanel.Section>
             <Action.ShowInFinder
@@ -124,14 +114,13 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
               target={searchResult.path}
               shortcut={{ modifiers: ["cmd"], key: "o" }}
             />
+            <Action.CreateQuicklink
+              title="Save as Quicklink"
+              quicklink={{ link: launchConfig(searchResult.name), name: searchResult.name }}
+            />
           </ActionPanel.Section>
         </ActionPanel>
       }
     />
   );
-}
-
-interface SearchResult {
-  name: string;
-  path: string;
 }
