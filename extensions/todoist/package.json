@@ -173,8 +173,8 @@
           "type": "textfield",
           "required": false,
           "default": "40",
-          "title": "Maximum Width of Menu-bar Task",
-          "description": "Maximum width of all menu-bar task's text."
+          "title": "Maximum Width of Menu Bar's Tasks",
+          "description": "Maximum width of all menu bar task's text."
         }
       ],
       "interval": "10m"
