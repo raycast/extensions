@@ -1,3 +1,3 @@
-# Priviliges
+# Privileges
 
-Grant and revoke admin permission with SAP Priviliges. Not affiliated with SAP. 
+Grant and revoke admin permission with SAP Privileges. Not affiliated with SAP.

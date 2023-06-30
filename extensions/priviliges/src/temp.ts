@@ -1,12 +1,16 @@
-import { exec } from "child_process";
+import { setTimeout } from "node:timers/promises";
 import { showHUD } from "@raycast/api";
+import { getPrivilegesClient, showInstallToast } from "./utils";
 
 export default async function main() {
-  exec("/Applications/Privileges.app/Contents/Resources/PrivilegesCLI --add");
-  await showHUD("🔓 Granted priviliges for 1 minute");
-  await new Promise((resolve) => setTimeout(resolve, 60000));
-  exec(
-    "/Applications/Privileges.app/Contents/Resources/PrivilegesCLI --remove"
-  );
-  await showHUD("🔒 Priviliges revoked");
+  const privileges = await getPrivilegesClient();
+  if (!privileges) {
+    await showInstallToast();
+    return;
+  }
+  await privileges.grant();
+  await showHUD("🔓 Granting privileges for 1 minute…");
+  await setTimeout(60000);
+  await privileges.revoke();
+  await showHUD("🔒 Privileges revoked");
 }

@@ -1,9 +1,9 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "priviliges",
-  "title": "Priviliges",
-  "description": "Grant and revoke admin permission with SAP Priviliges (https://github.com/SAP/macOS-enterprise-privileges). Not affiliated with SAP.",
-  "icon": "priviliges.png",
+  "name": "privileges",
+  "title": "Privileges",
+  "description": "Grant and revoke admin permission with SAP Privileges (https://github.com/SAP/macOS-enterprise-privileges). Not affiliated with SAP.",
+  "icon": "privileges.png",
   "author": "ph00lt0",
   "categories": [
     "Security"
@@ -12,25 +12,25 @@
   "commands": [
     {
       "name": "grant",
-      "title": "Grant Admin Priviliges",
-      "description": "Grant admin permission with SAP Priviliges",
+      "title": "Grant Admin Privileges",
+      "description": "Grant admin permission with SAP Privileges",
       "mode": "no-view"
     },
     {
       "name": "revoke",
-      "title": "Revoke Admin Priviliges",
-      "description": "Revoke admin permission with SAP Priviliges",
+      "title": "Revoke Admin Privileges",
+      "description": "Revoke admin permission with SAP Privileges",
       "mode": "no-view"
     },
     {
       "name": "temp",
-      "title": "Temporary Grant Admin Priviliges",
-      "description": "Revoke admin permission with SAP Priviliges for 1 minute",
+      "title": "Grant Admin Privileges For 1 Minute",
+      "description": "Grant admin permission with SAP Privileges for 1 minute",
       "mode": "no-view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.49.3"
+    "@raycast/api": "^1.54.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.5",

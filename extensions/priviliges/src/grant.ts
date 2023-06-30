@@ -1,7 +1,12 @@
-import { exec } from "child_process";
 import { showHUD } from "@raycast/api";
+import { getPrivilegesClient, showInstallToast } from "./utils";
 
 export default async function main() {
-  exec("/Applications/Privileges.app/Contents/Resources/PrivilegesCLI --add");
-  await showHUD("🔓 Granted priviliges");
+  const privileges = await getPrivilegesClient();
+  if (!privileges) {
+    await showInstallToast();
+    return;
+  }
+  await privileges.grant();
+  await showHUD("🔓 Granted privileges");
 }
