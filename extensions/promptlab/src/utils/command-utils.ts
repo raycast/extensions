@@ -34,16 +34,25 @@ export const runActionScript = async (
       ${trimHandler}
       ${replaceAllHandler}
       ${rselectHandler}
-      set prompt to "${prompt.replaceAll('"', '\\"')}"
-      set input to "${input.replaceAll('"', '\\"')}"
-      set response to "${response.replaceAll('"', '\\"')}"
+      set prompt to "${prompt.replaceAll('"', '\\"').replaceAll(/(\n|\r|\t|\\)/g, "\\$1")}"
+      set input to "${input.replaceAll('"', '\\"').replaceAll(/(\n|\r|\t|\\)/g, "\\$1")}"
+      set response to "${response.replaceAll('"', '\\"').replaceAll(/(\n|\r|\t|\\)/g, "\\$1")}"
       ${script}`)
       );
     } else if (type == "zsh") {
       const runScript = (script: string): Promise<string> => {
-        const shellScript = `response="${response.trim().replaceAll('"', '\\"').replaceAll("\n", "\\n")}"
-        prompt="${prompt.trim().replaceAll('"', '\\"').replaceAll("\n", "\\n")}"
-        input="${input.trim().replaceAll('"', '\\"').replaceAll("\n", "\\n")}"
+        const shellScript = `response="${response
+          .trim()
+          .replaceAll('"', '\\"')
+          .replaceAll(/(\$|\n|\r|\t|\\)/g, "\\$1")}"
+        prompt="${prompt
+          .trim()
+          .replaceAll('"', '\\"')
+          .replaceAll(/(\$|\n|\r|\t|\\)/g, "\\$1")}"
+        input="${input
+          .trim()
+          .replaceAll('"', '\\"')
+          .replaceAll(/(\$|\n|\r|\t|\\)/g, "\\$1")}"
         ${script.replaceAll("\n", " && ")}`;
 
         return new Promise((resolve, reject) => {
@@ -74,7 +83,7 @@ export const runActionScript = async (
 export const getCommandJSON = (command: Command | StoreCommand) => {
   const cmdObj: { [key: string]: Command | StoreCommand } = {};
   cmdObj[command.name] = command;
-  return JSON.stringify(cmdObj).replaceAll(/\\([^"])/g, "\\\\$1");
+  return JSON.stringify(cmdObj);
 };
 
 const camelize = (str: string) => {
