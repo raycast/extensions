@@ -5,6 +5,8 @@
   "description": "Interact with Warp right from Raycast.",
   "icon": "command-icon.png",
   "author": "joetannenbaum",
+  "owner": "warp",
+  "access":"public",
   "categories": [
     "Developer Tools",
     "Productivity"
