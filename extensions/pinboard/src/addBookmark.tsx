@@ -1,14 +1,4 @@
-import {
-  Form,
-  ActionPanel,
-  Action,
-  showToast,
-  Icon,
-  getSelectedText,
-  Toast,
-  showHUD,
-  popToRoot,
-} from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, Icon, getSelectedText, Toast, showHUD, popToRoot } from "@raycast/api";
 import { useState, useEffect } from "react";
 import fetch from "node-fetch";
 import { Bookmark, addBookmark } from "./api";
@@ -88,15 +78,8 @@ export default function Command() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Add Bookmark"
-            icon={{ source: Icon.Plus }}
-            onSubmit={handleSubmit}
-          />
-          <Action.OpenInBrowser
-            title="Open Pinboard"
-            url="https://pinboard.in"
-          />
+          <Action.SubmitForm title="Add Bookmark" icon={{ source: Icon.Plus }} onSubmit={handleSubmit} />
+          <Action.OpenInBrowser title="Open Pinboard" url="https://pinboard.in" />
         </ActionPanel>
       }
     >
@@ -115,16 +98,8 @@ export default function Command() {
         onChange={handleTitleChange}
       />
       <Form.Separator />
-      <Form.TextArea
-        id="description"
-        title="Description"
-        placeholder="Enter bookmark description"
-      />
-      <Form.TextField
-        id="tags"
-        title="Tags"
-        placeholder="Enter tags (comma-separated)"
-      />
+      <Form.TextArea id="description" title="Description" placeholder="Enter bookmark description" />
+      <Form.TextField id="tags" title="Tags" placeholder="Enter tags (comma-separated)" />
       <Form.Checkbox id="private" title="" label="Private" storeValue />
       <Form.Checkbox id="readLater" title="" label="Read Later" storeValue />
     </Form>
