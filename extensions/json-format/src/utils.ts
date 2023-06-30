@@ -9,17 +9,24 @@ import {
 import beautify from 'js-beautify';
 
 export function formatJS(text: string) {
-  const indent = getIndentation();
   const trimmedText = text.trim();
 
+  const firstChar = trimmedText[0];
+  let json;
+  if (firstChar === '"') {
+    json = convert(parse(trimmedText));
+  } else {
+    json = convert(trimmedText);
+  }
+  if (!json) return;
+
+  const indent = getIndentation();
   const options = {
     indent_size: indent === 'tab' ? 1 : parseInt(indent, 10),
     space_in_empty_paren: true,
     indent_with_tabs: indent === 'tab',
   };
 
-  const json = convert(trimmedText);
-  if (!json) return;
   const output = beautify(json, options);
 
   return output;
@@ -33,13 +40,6 @@ export async function copyFormattedJs(result: string) {
     await Clipboard.copy(result);
     await showHUD('✅ Copied succesfully!');
   }
-}
-
-export async function parseAndFormatJs(text: string) {
-  const parsed = parse(text);
-  if (!parsed) return;
-  const formatted = await formatJS(parsed);
-  return formatted;
 }
 
 interface Preferences {
