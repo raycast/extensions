@@ -48,7 +48,11 @@ export default function Command() {
 function Actions({ cast, farcasterInstalled }: ActionsProps) {
   return (
     <ActionPanel>
-      {farcasterInstalled && <Action.OpenInBrowser title="Open in Farcaster" url={cast.uri} />}
+      {farcasterInstalled && <Action.OpenInBrowser title="Open in Warpcast (Desktop)" url={cast.uri} />}
+      <Action.OpenInBrowser
+        title="Open in Warpcast (Web)"
+        url={`https://warpcast.com/${cast.body.username}/${cast.merkleRoot.substring(0, 8)}`}
+      />
       <Action.OpenInBrowser
         title="Open in Searchcaster"
         url={`https://searchcaster.xyz/search?merkleRoot=${cast.merkleRoot}`}

@@ -60,8 +60,9 @@ function Actions({ profile, farcasterInstalled }: ProfileActionsProps) {
   return (
     <ActionPanel>
       {farcasterInstalled && (
-        <Action.OpenInBrowser title="Open in Farcaster" url={`farcaster://profiles/${profile.body.id}`} />
+        <Action.OpenInBrowser title="Open in Warpcast (Desktop)" url={`farcaster://profiles/${profile.body.id}`} />
       )}
+      <Action.OpenInBrowser title="Open in Warpcast (Web)" url={`https://warpcast.com/${profile.body.username}`} />
       <Action.OpenInBrowser title="Open in Searchcaster" url={`https://searchcaster.xyz/u/${profile.body.username}`} />
       <Action
         title="Copy Shareable Link"
