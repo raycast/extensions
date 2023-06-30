@@ -37,7 +37,7 @@
     },
     {
       "name": "open-selected-finder-item",
-      "title": "Open Selected Finder Item",
+      "title": "Open in Warp",
       "description": "Open selected Finder items in Warp.",
       "mode": "no-view"
     }
