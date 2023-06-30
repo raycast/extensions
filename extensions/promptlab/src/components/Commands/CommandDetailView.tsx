@@ -21,7 +21,7 @@ export default function CommandDetailView(props: {
   let inCodeBlock = false;
   for (const line of parsedResponse) {
     if (line.startsWith("```")) {
-      inCodeBlock = true;
+      inCodeBlock = !inCodeBlock;
     }
 
     if (!inCodeBlock) {
