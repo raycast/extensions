@@ -6,7 +6,7 @@ import { getApps } from "../refresh-cache";
 const cache = new Cache();
 
 export function useSearch(term: string, filter = "all") {
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [data, setData] = useState<App[]>([]);
 
   const searchData = useCallback(async () => {
