@@ -1,5 +1,9 @@
 # Searchcaster Changelog
 
+## [New Actions] - 2023-06-30
+
+Add "Open in Warpcast (Web)" action to profile and cast search results.
+
 ## [Optimizations] - 2023-03-02
 
 Debounce search input to reduce API calls.
