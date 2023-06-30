@@ -37,6 +37,7 @@ class PrivilegesClient {
   public async grant() {
     execSync(`${this.cliPath} --add`);
   }
+
   public async revoke() {
     execSync(`${this.cliPath} --remove`);
   }
