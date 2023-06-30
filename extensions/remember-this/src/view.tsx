@@ -47,7 +47,7 @@ function readRememberedItems(): RememberedItem[] {
     const lines = fileContents.trim().split("\n");
     const validLines = lines.filter((line) => {
       const [dateString, testlol] = line.split(",");
-      const delimiter = /\|\|&\|/g; // Remove unnecessary escape characters
+      const delimiter = "||&|"; // Remove unnecessary escape characters
       const content = testlol.replace(delimiter, ",");
 
       const expirationDate = new Date(dateString);
@@ -58,7 +58,7 @@ function readRememberedItems(): RememberedItem[] {
 
     return validLines.map((line) => {
       const [dateString, testlol] = line.split(",");
-      const delimiter = /\|\|&\|/g; // Remove unnecessary escape characters
+      const delimiter = "||&|"; // Remove unnecessary escape characters
       const content = testlol.replace(delimiter, ",");
       return {
         expirationDate: new Date(dateString),

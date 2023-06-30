@@ -214,7 +214,7 @@ export default function Command() {
       );
     }
   }
-  const delimiter = "/\|\|\&\|/g"; // Define the delimiter as a regular expression with the "g" flag
+  const delimiter = "||&|"; // Define the delimiter as a regular expression with the "g" flag
   const taskname = closestDate.taskname.replace(delimiter, ",");
   if (sizeValue === "normal") {
     return (
