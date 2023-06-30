@@ -3,7 +3,7 @@
   "name": "warp",
   "title": "Warp",
   "description": "Interact with Warp right from Raycast.",
-  "icon": "command-icon.png",
+  "icon": "command-icon-v2.png",
   "author": "joetannenbaum",
   "owner": "warpdotdev",
   "access":"public",
