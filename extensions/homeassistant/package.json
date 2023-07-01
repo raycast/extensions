@@ -321,13 +321,14 @@
   "dependencies": {
     "@raycast/api": "^1.50.0",
     "@raycast/utils": "^1.5.2",
-    "home-assistant-js-websocket": "^5.11.1",
+    "home-assistant-js-websocket": "^8.1.0",
     "javascript-time-ago": "^2.5.9",
     "lodash-es": "^4.17.21",
     "multicast-dns": "^7.2.5",
     "node-fetch": "^2.6.1",
     "open": "^8.3.0",
     "ping": "^0.4.4",
+    "plist": "^3.0.6",
     "url-join": "^4.0.1",
     "ws": "^8.2.3"
   },
@@ -338,6 +339,7 @@
     "@types/node": "^18.8.3",
     "@types/node-fetch": "^2.5.12",
     "@types/ping": "^0.4.1",
+    "@types/plist": "^3.0.2",
     "@types/url-join": "^4.0.1",
     "@types/ws": "^8.2.0",
     "eslint": "^7.31.0",

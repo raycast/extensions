@@ -1,5 +1,5 @@
-import { showToast, Toast } from "@raycast/api";
-import fetch from "node-fetch";
+import { LocalStorage, showToast, Toast } from "@raycast/api";
+import fetch, { Response } from "node-fetch";
 import urljoin from "url-join";
 import { getErrorMessage } from "./utils";
 import fs from "fs";
@@ -10,6 +10,13 @@ import { getWifiSSIDSync } from "./lib/wifi";
 import * as ping from "ping";
 import { URL } from "url";
 import { queryMdns } from "./lib/mdns";
+import {
+  generateMobileDeviceRegistration,
+  HADeviceRegistration,
+  HAMobileDeviceRegistrationResponse,
+} from "./lib/mobiledevice";
+import { getHAWSConnection } from "./common";
+import { Connection } from "home-assistant-js-websocket";
 const streamPipeline = util.promisify(pipeline);
 
 function paramString(params: { [key: string]: string }): string {
@@ -48,6 +55,7 @@ export class HomeAssistant {
   private _ignoreCerts = false;
   public wifiSSIDs: string[] | undefined;
   private usePing = true;
+  private messageSubscription?: object | null;
 
   constructor(url: string, token: string, ignoreCerts: boolean, options: HomeAssistantOptions | undefined = undefined) {
     this.token = token;
@@ -182,7 +190,7 @@ export class HomeAssistant {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public async post(url: string, params: { [key: string]: any } = {}): Promise<null> {
+  public async post(url: string, params: { [key: string]: any } = {}): Promise<Response> {
     const fullUrl = urljoin(await this.nearestURL(), "api", url);
     console.log(`send POST request: ${fullUrl}`);
     const body = JSON.stringify(params);
@@ -204,7 +212,7 @@ export class HomeAssistant {
     //} catch (e) {
     //    console.log(e);
     //}
-    return null;
+    return response;
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -372,5 +380,40 @@ export class HomeAssistant {
 
   async getCameraProxyURL(entityID: string, localFilepath: string): Promise<void> {
     await this.downloadFile(`camera_proxy/${entityID}`, { localFilepath: localFilepath });
+  }
+
+  async registerMobileDevice(con: Connection) {
+    const registrationData = await generateMobileDeviceRegistration();
+    let webhook_id = await LocalStorage.getItem<string>("webhook_id");
+    if (webhook_id && webhook_id.length > 0) {
+      console.log(`Use existing webhook id ${webhook_id}`);
+    } else {
+      console.log("Register Device in Home Assistant");
+      const response = await this.post("mobile_app/registrations", registrationData);
+      const data: HAMobileDeviceRegistrationResponse = await response.json();
+      webhook_id = data.webhook_id;
+      await LocalStorage.setItem("webhook_id", webhook_id);
+    }
+
+    if (this.messageSubscription) {
+      console.log("Use existing message subscription");
+    } else {
+      console.log("Create message subscription");
+      try {
+        this.messageSubscription = await con.subscribeMessage(
+          (result) => {
+            console.log(result);
+          },
+          {
+            type: "mobile_app/push_notification_channel",
+            webhook_id: webhook_id,
+            support_confirm: false,
+          },
+          { resubscribe: true }
+        );
+      } catch (error) {
+        console.log(error);
+      }
+    }
   }
 }

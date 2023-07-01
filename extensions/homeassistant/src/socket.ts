@@ -108,6 +108,7 @@ export function createSocket(auth: Auth, ignoreCertificates: boolean): Promise<a
           socket.removeEventListener("message", handleMessage);
           socket.removeEventListener("close", closeMessage);
           socket.removeEventListener("error", errorMessage);
+          (socket as any).haVersion = message.ha_version; // newer versions of home-assistant-js-websocket get the version via the socket
           promResolve(socket);
           break;
 
