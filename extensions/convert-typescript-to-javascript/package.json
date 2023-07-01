@@ -41,11 +41,11 @@
     "@tsconfig/node18": "^18.2.0",
     "@tsconfig/recommended": "^1.0.2",
     "@types/babel__core": "^7.20.1",
-    "@types/node": "^20.3.2",
+    "@types/node": "^20.3.3",
     "@types/react": "18.2.14",
-    "eslint": "^8.43.0",
+    "eslint": "^8.44.0",
     "prettier": "^2.8.8",
-    "typescript": "^5.1.5"
+    "typescript": "^5.1.6"
   },
   "scripts": {
     "build": "ray build -e dist",
