@@ -47,7 +47,7 @@ function readRememberedItems(): RememberedItem[] {
     const validLines = lines.filter((line) => {
       const [dateString, testlol] = line.split(",");
       const delimiter = "||&|"; // Remove unnecessary escape characters
-      const content = testlol.replace(delimiter, ",");
+      testlol.replace(delimiter, ",");
 
       const expirationDate = new Date(dateString);
       return expirationDate > now;
@@ -159,7 +159,7 @@ export default function Command() {
     const lines = fileContents.trim().split("\n");
 
     // Remove the line at the specified index
-    const deletedLine = lines.splice(index, 1)[0];
+    lines.splice(index, 1)[0];
 
     // Join the remaining lines back into a single string
     const newFileContents = lines.join("\n");

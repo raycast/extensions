@@ -1,6 +1,53 @@
 import path from "path";
 import { MenuBarExtra, environment, LaunchType, launchCommand, Icon, getPreferenceValues } from "@raycast/api";
 import * as fs from "fs";
+import { sendMessageToWebhook } from "./utils/discordwebhook";
+import { WebhookClient, EmbedBuilder } from "discord.js";
+
+const preferences = getPreferenceValues<Preferences>();
+const webhookURL = preferences.webhookurl;
+
+const webhookUrl = `${webhookURL}`;
+
+function extractWebhookInfo(webhookUrl: string) {
+  const [, webhookId, webhookToken] = webhookUrl.match(/\/webhooks\/(\d+)\/([\w-]+)/) || [];
+  return { webhookId, webhookToken };
+}
+
+export async function webhookInfo(webhookUrl: string) {
+  const { webhookId, webhookToken } = extractWebhookInfo(webhookUrl);
+
+  const webhookClient = new WebhookClient({ id: webhookId, token: webhookToken });
+  checktimes();
+
+  async function checktimes() {
+    try {
+      const currentTime = `${Math.round(new Date().getTime() / 1000)}`;
+      const csvFilePath = path.join(environment.supportPath, "webhookdis.csv");
+      const data = fs.readFileSync(csvFilePath, "utf8");
+      const rows = data.trim().split("\n");
+
+      for (const row of rows) {
+        const fields = row.trim().split(",");
+
+        if (fields[1] < currentTime) {
+          // Reminder has expired, delete this row from the CSV file
+          const expembed = new EmbedBuilder().setTitle("Reminder Expired").setColor(0xd8696f).setFields();
+          await webhookClient.editMessage(`${fields[0]}`, {
+            embeds: [expembed],
+          });
+          const rowIndex = rows.indexOf(row);
+          rows.splice(rowIndex, 1);
+          fs.writeFileSync(csvFilePath, rows.join("\n"), { mode: 0o777 });
+        }
+      }
+    } catch (error) {
+      console.error("Error reading or writing CSV file:", error);
+    }
+  }
+}
+
+webhookInfo(webhookUrl);
 
 const REMEMBERING_FILE = path.join(environment.supportPath, "remembering.csv");
 
@@ -9,7 +56,6 @@ if (!fs.existsSync(REMEMBERING_FILE)) {
   fs.writeFileSync(REMEMBERING_FILE, "");
 }
 
-const preferences = getPreferenceValues<Preferences>();
 const sizeValue = preferences.size;
 
 const second = 1000;
@@ -216,6 +262,13 @@ export default function Command() {
   }
   const delimiter = "||&|"; // Define the delimiter as a regular expression with the "g" flag
   const taskname = closestDate.taskname.replace(delimiter, ",");
+  const messageContent = taskname;
+  const timestamp = closestDate.date.toISOString();
+  const unixTimestamp = Date.parse(timestamp) / 1000; // Divide by 1000 to convert to seconds
+  const roundedts = Math.round(unixTimestamp);
+
+  sendMessageToWebhook(webhookUrl, messageContent, roundedts);
+
   if (sizeValue === "normal") {
     return (
       <MenuBarExtra icon={Icon.ArrowRight} title={countdown} tooltip={taskname}>

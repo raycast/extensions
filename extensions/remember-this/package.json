@@ -30,7 +30,8 @@
       "subtitle": "A countdown to your next activity!",
       "description": "Show a countdown in your menubar which will countdown to the next thing in you todo!",
       "mode": "menu-bar",
-      "interval": "1m"
+      "interval":"10s"
+
     },
     {
       "name": "view",
@@ -38,7 +39,14 @@
       "subtitle": "View a list of all the items being remembered.",
       "description": "View a list of all the items being remembered.",
       "mode": "view"
-    }
+    },
+    {
+          "name": "notifs",
+          "title": "Notifications",
+          "subtitle": "View a list of all possible ways to recieve notifications.",
+          "description": "View a list of all possible ways to recieve notifications.",
+          "mode": "view"
+        }
   ],
   "preferences": [
     {
@@ -134,23 +142,25 @@
           "value": "normal"
         },
         {
-                  "title": "Large",
-                  "value": "large"
-                }
+          "title": "Large",
+          "value": "large"
+        }
       ]
     },
     {
-          "name": "webhookurl",
-          "description": "WebhookURL",
-          "type": "password",
-          "required": false,
-          "title": "WebhookURL",
-          "placeholder": "WebhookURL"
-        }
+      "name": "webhookurl",
+      "description": "Discord WebhookURL",
+      "type": "password",
+      "required": false,
+      "title": "Discord WebhookURL",
+      "placeholder": "WebhookURL"
+    }
   ],
   "dependencies": {
     "@raycast/api": "^1.54.0",
     "axios": "^1.4.0",
+    "csv-parser": "^3.0.0",
+    "discord.js": "^14.11.0",
     "node-notifier": "^10.0.1",
     "node-telegram-bot-api": "^0.61.0",
     "open": "^9.1.0",

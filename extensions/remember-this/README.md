@@ -18,6 +18,7 @@ Motivate yourself to stay on top of your deadlines
 - Menubar: A countdown to your next activity!
 - Remember This: Add something for the extension to remember!
 - Remembered Things: View a list of all the items being remembered.
+- Notifications: View a list of notification servicesupcoming and available
 
 ## What makes Remember This so special?
 

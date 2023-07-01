@@ -18,24 +18,25 @@ Applying a recommended update will ensure you:
 
 </details>
 
-# Latest: v2.3
+# Latest: v2.7
 
 
 <details>
-    <summary>Remember This v2.3 -r</summary>
+    <summary>Remember This v2.7 -r</summary>
 
-    # Remember This `v2.3`
+    # Remember This `v2.7`
 
     ## New Features
-    - Add different menubar size formats (Compact and Normal)
-    - Add the ability to enter values right from Root Search instead of opening command (Arguments).
+    - Add menubar size formats of Large (Notification Name - Coundown)
+    - Add the ability to send notifications through discord webhooks!
+    - Add notifications command
 
     ## Improvements
     - Optimized for better performance
     - Bug fixes for stability
 
     ## Resolved Issues
-    - Fixed bug when selecting 5 years as timeframe.
+    - N/A
 
     ## Recommended for All Users
 
