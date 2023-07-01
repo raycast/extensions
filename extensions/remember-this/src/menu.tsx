@@ -49,14 +49,12 @@ export async function webhookInfo(webhookUrl: string) {
 
 webhookInfo(webhookUrl);
 
-
 const REMEMBERING_FILE = path.join(environment.supportPath, "remembering.csv");
 
 if (!fs.existsSync(REMEMBERING_FILE)) {
   // Create the file
   fs.writeFileSync(REMEMBERING_FILE, "");
 }
-
 
 const sizeValue = preferences.size;
 
@@ -270,7 +268,6 @@ export default function Command() {
   const roundedts = Math.round(unixTimestamp);
 
   sendMessageToWebhook(webhookUrl, messageContent, roundedts);
-
 
   if (sizeValue === "normal") {
     return (
