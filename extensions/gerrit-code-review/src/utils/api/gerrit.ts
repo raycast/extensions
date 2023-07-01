@@ -1,4 +1,5 @@
 import fetch, { RequestInit, Response, Headers } from "node-fetch";
+import http from "http";
 import https from "https";
 import { GerritInstance } from "../../interfaces/gerrit";
 import { Project, ProjectBranch } from "../../interfaces/project";
@@ -161,9 +162,14 @@ export class GerritAPI {
   }
 
   async request(url: URL, init?: RequestInit) {
-    const httpsAgent = new https.Agent({
-      rejectUnauthorized: !this.gerrit.unsafeHttps,
-    });
+    let urlAgent;
+    if (url.toString().startsWith("http://")) {
+      new http.Agent({});
+    } else if (url.toString().startsWith("https://")) {
+      new https.Agent({ rejectUnauthorized: !this.gerrit.unsafeHttps });
+    } else {
+      return Promise.reject(new Error("Wrong scheme in URL"));
+    }
     let headers: Headers | undefined = undefined;
     url.href = url.href.replace(/([^:]\/)\/+/g, "$1");
     if (this.gerrit.password) {
@@ -176,7 +182,7 @@ export class GerritAPI {
     const resp = await fetch(url, {
       headers,
       method: "GET",
-      agent: httpsAgent,
+      agent: urlAgent,
       ...init,
     });
     if (!resp.ok) {

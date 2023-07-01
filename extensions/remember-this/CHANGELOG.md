@@ -38,6 +38,7 @@ Applying a recommended update will ensure you:
     ## Resolved Issues
     - N/A
 
+
     ## Recommended for All Users
 
 </details>

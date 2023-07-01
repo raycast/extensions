@@ -49,6 +49,7 @@ function readRememberedItems(): RememberedItem[] {
       const delimiter = "||&|"; // Remove unnecessary escape characters
       testlol.replace(delimiter, ",");
 
+
       const expirationDate = new Date(dateString);
       return expirationDate > now;
     });
@@ -160,6 +161,7 @@ export default function Command() {
 
     // Remove the line at the specified index
     lines.splice(index, 1)[0];
+
 
     // Join the remaining lines back into a single string
     const newFileContents = lines.join("\n");

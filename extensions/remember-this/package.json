@@ -32,6 +32,7 @@
       "mode": "menu-bar",
       "interval":"10s"
 
+
     },
     {
       "name": "view",
@@ -155,6 +156,7 @@
       "title": "Discord WebhookURL",
       "placeholder": "WebhookURL"
     }
+
   ],
   "dependencies": {
     "@raycast/api": "^1.54.0",

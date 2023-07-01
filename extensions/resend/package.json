@@ -1,0 +1,66 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "resend",
+  "title": "Resend",
+  "description": "Manage API Keys and Domains, and Send Emails using Resend",
+  "icon": "resend.png",
+  "author": "xmok",
+  "categories": [
+    "Communication",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "api_key",
+      "title": "API Key",
+      "type": "password",
+      "placeholder": "re_123456789",
+      "description": "API Key From Resend Dashboard",
+      "required": true
+    }
+  ],
+  "commands": [
+    {
+      "name": "api_keys",
+      "title": "API Keys",
+      "subtitle": "Resend",
+      "description": "Create, View and Delete API Keys in Resend.",
+      "mode": "view"
+    },
+    {
+      "name": "domains",
+      "title": "Domains",
+      "subtitle": "Resend",
+      "description": "Add, View, Remove and Verify Domains in Resend",
+      "mode": "view"
+    },
+    {
+      "name": "emails",
+      "title": "Emails",
+      "subtitle": "Resend",
+      "description": "View Logged Emails and Send A New Email",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.54.1",
+    "@raycast/utils": "^1.7.1",
+    "node-fetch": "^3.3.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
