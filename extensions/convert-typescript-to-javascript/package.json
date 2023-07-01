@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "convert-typescript-to-javascript",
   "title": "Convert TypeScript to JavaScript",
-  "description": "Strips TypeScript code of types to be easily pluggable to a JavaScript REPL etc.",
+  "description": "Remove type information from TypeScript code to make it compatible with JavaScript REPLs and other applications",
   "icon": "icon.png",
   "author": "bengry",
   "access": "public",
@@ -10,7 +10,8 @@
     "typescript",
     "javascript",
     "ts",
-    "js"
+    "js",
+    "clipboard"
   ],
   "categories": [
     "Developer Tools"
@@ -19,14 +20,14 @@
   "commands": [
     {
       "name": "paste-from-clipboard",
-      "title": "Paste as JavaScript",
-      "description": "Paste the TypeScript code in the clipboard as plain JavaScript",
+      "title": "Convert & Paste as JavaScript",
+      "description": "Retrieve clipboard content, transform it to JavaScript, and paste it",
       "mode": "no-view"
     },
     {
       "name": "copy-to-clipboard",
-      "title": "Copy as JavaScript",
-      "description": "Copy the TypeScript code in the clipboard as plain JavaScript",
+      "title": "Copy TypeScript as JavaScript",
+      "description": "Get selected text from the active application, transform it to JavaScript, and keep it in the clipboard",
       "mode": "no-view"
     }
   ],
