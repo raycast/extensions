@@ -12,14 +12,8 @@ const pipeline = promisify(stream.pipeline);
 
 const preferences = getPreferenceValues();
 
-const paths = ["/opt/homebrew/bin/", "/usr/local/bin/", "/usr/bin/"];
-
-export const ffmpegPath = paths.find((p) => fs.existsSync(`${p}ffmpeg`));
-
-if (ffmpegPath) {
-  setFfmpegPath(`${ffmpegPath}ffmpeg`);
-  setFfprobePath(`${ffmpegPath}ffprobe`);
-}
+setFfprobePath("/opt/homebrew/bin/ffprobe");
+setFfmpegPath("/opt/homebrew/bin/ffmpeg");
 
 export async function downloadVideo(url: string, options: { format: string; copyToClipboard: boolean }) {
   const info = await ytdl.getInfo(url);

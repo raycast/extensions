@@ -3,7 +3,8 @@ import ytdl, { videoFormat } from "ytdl-core";
 import React, { useEffect, useState } from "react";
 import { FormValidation, useForm } from "@raycast/utils";
 import prettyBytes from "pretty-bytes";
-import { downloadAudio, downloadVideo, ffmpegPath } from "./utils";
+import { downloadAudio, downloadVideo } from "./utils";
+import fs from "fs";
 import { execSync } from "child_process";
 
 type Values = {
@@ -62,7 +63,9 @@ export default function DownloadVideo() {
     });
   }, []);
 
-  if (!ffmpegPath) {
+  const ffmpegExists = fs.existsSync("/opt/homebrew/bin/ffmpeg");
+  const ffprobeExists = fs.existsSync("/opt/homebrew/bin/ffprobe");
+  if (!ffmpegExists || !ffprobeExists) {
     return <NotInstalled onRefresh={() => setError(false)} />;
   }
 
