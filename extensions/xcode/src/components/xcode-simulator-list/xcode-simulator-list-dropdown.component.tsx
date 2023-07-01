@@ -14,9 +14,7 @@ export function XcodeSimulatorStateDropdown(props: {
       }}
     >
       {Object.values(XcodeSimulatorStateFilter).map((filter) => {
-        return (
-          <List.Dropdown.Item key={filter} title={filter} value={filter} />
-        );
+        return <List.Dropdown.Item key={filter} title={filter} value={filter} />;
       })}
     </List.Dropdown>
   );

@@ -7,34 +7,22 @@ import { useState } from "react";
 import { XcodeSimulatorStateFilter } from "../../models/xcode-simulator/xcode-simulator-state-filter.model";
 
 export function XcodeSimulatorList(): JSX.Element {
-  const [simulatorStateFilter, setSimulatorStateFilter] = useState<
-    XcodeSimulatorStateFilter
-  >(XcodeSimulatorStateFilter.all);
-  const xcodeSimulatorGroups = useCachedPromise(
-    XcodeSimulatorService.xcodeSimulatorGroups,
-    [simulatorStateFilter]
+  const [simulatorStateFilter, setSimulatorStateFilter] = useState<XcodeSimulatorStateFilter>(
+    XcodeSimulatorStateFilter.all
   );
+  const xcodeSimulatorGroups = useCachedPromise(XcodeSimulatorService.xcodeSimulatorGroups, [simulatorStateFilter]);
 
-  const onSimulatorStateFilterChange = (
-    newValue: XcodeSimulatorStateFilter
-  ) => {
+  const onSimulatorStateFilterChange = (newValue: XcodeSimulatorStateFilter) => {
     setSimulatorStateFilter(newValue);
   };
   return (
     <List
       isLoading={xcodeSimulatorGroups.isLoading}
-      searchBarAccessory={
-        <XcodeSimulatorStateDropdown
-          onSimulatorStateFilterChange={onSimulatorStateFilterChange}
-        />
-      }
+      searchBarAccessory={<XcodeSimulatorStateDropdown onSimulatorStateFilterChange={onSimulatorStateFilterChange} />}
     >
       {xcodeSimulatorGroups.data?.map((xcodeSimulatorGroup) => {
         return (
-          <List.Section
-            key={xcodeSimulatorGroup.runtime}
-            title={xcodeSimulatorGroup.runtime}
-          >
+          <List.Section key={xcodeSimulatorGroup.runtime} title={xcodeSimulatorGroup.runtime}>
             {xcodeSimulatorGroup.simulators.map((xcodeSimulator) => (
               <XcodeSimulatorListItem
                 key={xcodeSimulator.udid}
