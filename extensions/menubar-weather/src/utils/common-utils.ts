@@ -1,6 +1,6 @@
 import { Cache, getPreferenceValues, Icon } from "@raycast/api";
 import { Preferences } from "../types/preferences";
-import { cityName, latitude, longitude, showForecast, showLocation, showSun, windSpeedUnits } from "./weather-utils";
+import { cityName, latitude, longitude, showForecast, showLocation, showSun, showUVI, windSpeedUnits } from "./weather-utils";
 
 export enum CacheKey {
   CURRENT_WEATHER = "Open-Meteo Weather",
@@ -12,6 +12,7 @@ export enum CacheKey {
   SHOW_SUN = "Show Sun",
   SHOW_LOCATION = "Show Location",
   SHOW_FORECAST = "Show Forecast",
+  SHOW_UVI = "Show UV Index"
 }
 
 export const isEmpty = (string: string | null | undefined) => {
@@ -117,6 +118,7 @@ export function preferencesChanged() {
   cache.set(CacheKey.SHOW_SUN, JSON.stringify(showSun));
   cache.set(CacheKey.SHOW_LOCATION, JSON.stringify(showLocation));
   cache.set(CacheKey.SHOW_FORECAST, JSON.stringify(showForecast));
+  cache.set(CacheKey.SHOW_UVI, JSON.stringify(showUVI));
 
   return (
     oldCityName !== newCityName ||

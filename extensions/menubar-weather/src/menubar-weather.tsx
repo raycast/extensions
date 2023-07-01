@@ -9,6 +9,7 @@ import {
   showForecast,
   showLocation,
   showSun,
+  showUVI,
   windDirection,
   windDirectionSimple,
 } from "./utils/weather-utils";
@@ -87,6 +88,18 @@ export default function MenubarWeather() {
                         );
                       }}
                     />
+                    { showUVI && (
+                      <MenuBarExtra.Item
+                        title={"UVI"}
+                        icon={Icon.Sun}
+                        subtitle={` ${Math.round(weather?.daily.uv_index_max[0])}`}
+                        onAction={async () => {
+                          await Clipboard.copy(
+                            `${Math.round(weather?.daily.uv_index_max[0])}`
+                          )
+                        }}
+                      />
+                    )}
                     <MenuBarExtra.Item
                       title={"Pressure"}
                       icon={Icon.CricketBall}
@@ -311,6 +324,24 @@ export default function MenubarWeather() {
                   );
                 })}
               </MenuBarExtra.Submenu>
+              { showUVI && (
+                <MenuBarExtra.Submenu title={"UVI"} icon={Icon.Sun}>
+                  {weather?.daily?.uv_index_max?.map((value, index) => {
+                    return (
+                      <MenuBarExtra.Item
+                        key={index + weather?.daily?.time[index] + Math.round(value)}
+                        icon={getDateIcon(weather?.daily?.time[index].substring(8))}
+                        title={` ${Math.round(value)}`}
+                        onAction={async () => {
+                          await Clipboard.copy(
+                            weather?.daily?.time[index] + ` ` + Math.round(value)
+                          );
+                        }}
+                      />
+                    )
+                  })}
+                </MenuBarExtra.Submenu>
+              )}
             </MenuBarExtra.Section>
           )}
           <MenuBarExtra.Separator />
