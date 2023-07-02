@@ -1,7 +1,7 @@
 import { showToast, Toast, Form, Icon, popToRoot, Image, ActionPanel, Action } from "@raycast/api";
 import { Project, User, Label, Milestone, Branch, Issue, TemplateSummary } from "../gitlabapi";
 import { gitlab } from "../common";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { getErrorMessage, projectIcon, showErrorToast, stringToSlug, toFormValues } from "../utils";
 import { useCache } from "../cache";
 
@@ -142,14 +142,17 @@ export function MRCreateForm(props: { project?: Project | undefined; branch?: st
   const [removeBranch, setRemoveBranch] = useState<boolean | undefined>(undefined);
   const [description, setDescription] = useState<string | undefined>(undefined);
 
-  const handleTemplateChange = async (templateName: string) => {
-    if (templateName === NO_TEMPLATE) {
-      setDescription("");
-      return;
-    }
-    const template = await gitlab.getProjectMergeRequestTemplate(project?.id || 0, templateName);
-    setDescription(template?.content ?? "");
-  };
+  const handleTemplateChange = useCallback(
+    async (templateName: string) => {
+      if (templateName === NO_TEMPLATE) {
+        setDescription("");
+        return;
+      }
+      const template = await gitlab.getProjectMergeRequestTemplate(project?.id || 0, templateName);
+      setDescription(template?.content ?? "");
+    },
+    [project?.id]
+  );
 
   return (
     <Form
