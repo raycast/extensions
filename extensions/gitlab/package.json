@@ -175,6 +175,13 @@
           "default": false
         }
       ]
+    },
+    {
+      "name": "mrmenu",
+      "title": "Merge Requests Menu Bar",
+      "description": "Display Merge Request directly in the Menubar",
+      "mode": "menu-bar",
+      "interval": "15m"
     }
   ],
   "preferences": [

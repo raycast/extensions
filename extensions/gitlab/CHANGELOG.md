@@ -5,6 +5,7 @@
 - Add unsupported activity
 - Rename `My Recent Activities` to `Recent Activities`
 - `Recent Activities` got a dropdrown to switch between `My Activities` and `My Projects`
+- Add `Merge Request Menu`
 
 ## [Search Scope] - 2023-04-27
 

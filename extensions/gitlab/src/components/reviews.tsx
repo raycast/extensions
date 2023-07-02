@@ -42,9 +42,9 @@ export function ReviewList(): JSX.Element {
   );
 }
 
-function useMyReviews(project?: Project | undefined): {
+export function useMyReviews(project?: Project | undefined): {
   mrs: MergeRequest[] | undefined;
-  isLoading: boolean | undefined;
+  isLoading: boolean;
   error: string | undefined;
   performRefetch: () => void;
 } {

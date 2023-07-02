@@ -118,7 +118,7 @@ export default function TodosMenuBarCommand(): JSX.Element | null {
       </MenuBarExtra.Section>
       <MenuBarExtra.Section>
         <MenuBarExtra.Item
-          title="Configure"
+          title="Configure Command"
           shortcut={{ modifiers: ["cmd"], key: "," }}
           icon={Icon.Gear}
           onAction={() => openCommandPreferences()}
