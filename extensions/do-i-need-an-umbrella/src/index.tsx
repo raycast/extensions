@@ -61,7 +61,7 @@ export default function Command() {
   }
 
   if (error) {
-    console.log("Error, Trying again!")
+    console.log("Error, Trying again!");
   }
 
   return (
