@@ -1,11 +1,15 @@
-import { Action, ActionPanel, Color, Icon, List, useNavigation } from "@raycast/api";
+import { Account, Post } from "../../types/types";
+import { Action, ActionPanel, Color, Icon, List, confirmAlert, useNavigation } from "@raycast/api";
 import {
+  BlockAccountConfirm,
+  BlockToastMessage,
   BlueskyProfileUrlBase,
   ErrorToastMessage,
   FollowToastMessage,
   HideDetails,
   InReplyToTag,
   LikePostToastMessage,
+  LikesTooltip,
   MuteToastMessage,
   OpenPostInBrowser,
   OpenProfileInBrowser,
@@ -20,9 +24,19 @@ import {
   UnlikePostToastMessage,
   UnmuteToastMessage,
 } from "../../utils/constants";
-import { Post, User } from "../../types/types";
-import { deleteFollow, follow, getPostThread, getProfile, like, mute, repost, unlike, unmute } from "../../libs/atp";
-import { getPostUrl, showDangerToast, showLoadingToast, showSuccessToast } from "../../utils/common";
+import {
+  block,
+  deleteFollow,
+  follow,
+  getPostThread,
+  getProfile,
+  like,
+  mute,
+  repost,
+  unlike,
+  unmute,
+} from "../../libs/atp";
+import { getAccountIcon, getPostUrl, showDangerToast, showLoadingToast, showSuccessToast } from "../../utils/common";
 import { useEffect, useState } from "react";
 
 import AuthorFeed from "./AuthorFeed";
@@ -57,7 +71,7 @@ export default function PostItem({
 
   const [following, setFollowing] = useState(post.viewer ? post.viewer.following : null);
   const [muted, setMuted] = useState(post.viewer ? post.viewer.muted : null);
-
+  const [blocked, setBlocked] = useState(false);
   const [postMarkdown, setPostMarkdown] = useState(post.markdownView);
   const [fullThreadLoaded, setFullThreadLoaded] = useState(false);
   const debouncedPostSelected = useDebounce<boolean>(isSelected, 1000);
@@ -172,45 +186,53 @@ export default function PostItem({
     if (likeUri && likeUri.length > 0) {
       accessory.push({
         tag: { value: `${likeCount} ❤️ `, color: Color.Red },
-        tooltip: `${likeCount} ❤️ `,
+        tooltip: LikesTooltip,
       });
     } else {
       accessory.push({
         tag: { value: `${likeCount} ♡ `, color: Color.SecondaryText },
-        tooltip: `${likeCount} ♡ `,
+        tooltip: LikesTooltip,
       });
     }
 
     return accessory;
   };
 
-  const muteUser = async (user: User) => {
-    await mute(user.did);
-    showDangerToast(`${MuteToastMessage} ${user.handle}`);
+  const muteAccount = async (account: Account) => {
+    await mute(account.did);
+    showDangerToast(`${MuteToastMessage} ${account.handle}`);
 
     setMuted(true);
   };
 
-  const unmuteUser = async (user: User) => {
-    await unmute(user.did);
-    showSuccessToast(`${UnmuteToastMessage} ${user.handle}`);
+  const unmuteAccount = async (account: Account) => {
+    await unmute(account.did);
+    showSuccessToast(`${UnmuteToastMessage} ${account.handle}`);
 
     setMuted(false);
   };
 
-  const followUser = async (user: User) => {
-    await follow(user.did);
-    showSuccessToast(`${FollowToastMessage} ${user.handle}`);
+  const followAccount = async (account: Account) => {
+    await follow(account.did);
+    showSuccessToast(`${FollowToastMessage} ${account.handle}`);
 
-    setFollowing(user.did);
+    setFollowing(account.did);
   };
 
-  const unfollowUser = async (user: User) => {
-    const profile = await getProfile(user.handle);
+  const unfollowAccount = async (account: Account) => {
+    const profile = await getProfile(account.handle);
     if (profile && profile.viewer && profile.viewer.following) {
       await deleteFollow(profile.viewer.following);
-      showDangerToast(`${UnfollowToastMessage} ${user.handle}`);
+      showDangerToast(`${UnfollowToastMessage} ${account.handle}`);
       setFollowing(null);
+    }
+  };
+
+  const blockAccount = async (account: Account) => {
+    if (await confirmAlert({ title: BlockAccountConfirm(account.handle) })) {
+      await block(account);
+      showDangerToast(`${BlockToastMessage} ${account.handle}`);
+      setBlocked(true);
     }
   };
 
@@ -251,9 +273,9 @@ export default function PostItem({
     <List.Item
       key={post.uri}
       id={post.uri}
-      icon={{ source: post.createdByUser.avatarUrl }}
+      icon={{ source: getAccountIcon(post.createdByUser) }}
       accessories={getPostAccessory(post, isShowingDetails)}
-      title={getPostTitle(post)}
+      title={getPostTitle(post).replace(/\n/g, " ")}
       subtitle={{ value: post.text, tooltip: post.text }}
       actions={
         <ActionPanel>
@@ -276,7 +298,7 @@ export default function PostItem({
               }
             />
             <CustomAction
-              actionKey="openUserLikes"
+              actionKey="openAccountLikes"
               onClick={() =>
                 push(
                   <LikeFeed
@@ -315,15 +337,16 @@ export default function PostItem({
           {post.viewer && muted !== null && (
             <ActionPanel.Section>
               {following && following?.length > 0 ? (
-                <CustomAction actionKey="unfollow" onClick={() => unfollowUser(post.createdByUser)} />
+                <CustomAction actionKey="unfollow" onClick={() => unfollowAccount(post.createdByUser)} />
               ) : (
-                <CustomAction actionKey="follow" onClick={() => followUser(post.createdByUser)} />
+                <CustomAction actionKey="follow" onClick={() => followAccount(post.createdByUser)} />
               )}
               {muted ? (
-                <CustomAction actionKey="unmute" onClick={() => unmuteUser(post.createdByUser)} />
+                <CustomAction actionKey="unmute" onClick={() => unmuteAccount(post.createdByUser)} />
               ) : (
-                <CustomAction actionKey="mute" onClick={() => muteUser(post.createdByUser)} />
+                <CustomAction actionKey="mute" onClick={() => muteAccount(post.createdByUser)} />
               )}
+              {!blocked && <CustomAction actionKey="block" onClick={() => blockAccount(post.createdByUser)} />}
             </ActionPanel.Section>
           )}
           <ActionPanel.Section>

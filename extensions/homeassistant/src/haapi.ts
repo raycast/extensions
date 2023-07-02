@@ -161,7 +161,7 @@ export class HomeAssistant {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public async fetch(url: string, params: { [key: string]: string } = {}): Promise<any> {
     const ps = paramString(params);
-    const fullUrl = urljoin(this.url, "api", url + ps);
+    const fullUrl = urljoin(await this.nearestURL(), "api", url + ps);
     console.log(`send GET request: ${fullUrl}`);
     try {
       const response = await fetch(fullUrl, {
@@ -182,7 +182,7 @@ export class HomeAssistant {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public async post(url: string, params: { [key: string]: any } = {}): Promise<null> {
-    const fullUrl = this.url + "/api/" + url;
+    const fullUrl = urljoin(await this.nearestURL(), "api", url);
     console.log(`send POST request: ${fullUrl}`);
     const body = JSON.stringify(params);
     console.log(body);
