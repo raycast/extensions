@@ -1,6 +1,6 @@
-import Raycast, { Action, ActionPanel, Detail, Icon, LaunchProps, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, LaunchProps, List, getPreferenceValues } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
-import { exec, spawn } from "node:child_process";
+import { exec } from "node:child_process";
 import { useEffect, useState } from "react";
 import { promisify } from "util";
 
@@ -15,12 +15,12 @@ interface HistoryEntry {
 
 const execp = promisify(exec);
 
-export const NUMI_CLI_BINARY = "/opt/homebrew/bin/numi-cli";
-export const HISTORY_MAX_LENGTH = 10;
+export const DEFAULT_NUMI_CLI_BINARY = "/opt/homebrew/bin/numi-cli";
+export const DEFAULT_HISTORY_MAX_LENGTH = 10;
 
-export async function isHaveNumiCliVersion(): Promise<false|string> {
+export async function isHaveNumiCliVersion(path?: string): Promise<false | string> {
   try {
-    const res = await execp(`${NUMI_CLI_BINARY} --version`, { shell: "/bin/bash" });
+    const res = await execp(`${path || DEFAULT_NUMI_CLI_BINARY} --version`, { shell: "/bin/bash" });
     console.log(res);
     if (res.stderr) {
       return false;
@@ -35,33 +35,43 @@ export async function isHaveNumiCliVersion(): Promise<false|string> {
 export default function Command(props: LaunchProps<{ arguments: NumiArguments }>) {
   const [isLoading, setIsLoading] = useState(true);
   const [isHaveNumi, setIsHaveNumi] = useState(false);
-  const [, setNumiCLiVersion] = useState<string>('v0.0.0');
-  const [query, setQuery] = useState<string|undefined>();
+  const [, setNumiCLiVersion] = useState<string>("v0.0.0");
+  const [query, setQuery] = useState<string | undefined>();
   const [queryResult, setQueryResult] = useState<string>();
   const [histories, setHistories] = useCachedState<HistoryEntry[]>("history", []);
-  
+
+  // prefs
+  const { max_history_elemets, numi_cli_binary_path } = getPreferenceValues<{
+    max_history_elemets: string;
+    numi_cli_binary_path: string;
+  }>();
+
   const queryOnNumi = async (query: string) => {
     if (!isHaveNumi) {
       return;
     }
     try {
-      const res = await execp(`${NUMI_CLI_BINARY} "${query}"`, { shell: "/bin/bash" });
+      const path = numi_cli_binary_path || DEFAULT_NUMI_CLI_BINARY;
+      console.log("path", path);
+      const res = await execp(`${path} "${query}"`, { shell: "/bin/bash" });
       console.log(res);
       if (res.stderr) {
         return;
       }
       let result = res.stdout;
       if (result.endsWith("\n")) result = result.slice(0, -1);
-      result = Buffer.from(result).toString('utf8');
+      result = Buffer.from(result).toString("utf8");
       setQueryResult(result);
 
       // set history
       if (query && result.trim() !== query.trim() && result) {
         setHistories((prev) => {
           let newHistory = [{ query, result }, ...prev];
-          // just keep 10 items newest
-          if (newHistory.length > HISTORY_MAX_LENGTH) {
-            newHistory = newHistory.slice(0, HISTORY_MAX_LENGTH);
+          const maxItems = max_history_elemets
+            ? parseInt(max_history_elemets || DEFAULT_HISTORY_MAX_LENGTH.toString())
+            : DEFAULT_HISTORY_MAX_LENGTH;
+          if (newHistory.length > maxItems) {
+            newHistory = newHistory.slice(0, maxItems);
           }
           return newHistory;
         });
@@ -71,13 +81,13 @@ export default function Command(props: LaunchProps<{ arguments: NumiArguments }>
       setQueryResult(undefined);
     }
     setIsLoading(false);
-  }
+  };
 
   const checkNumiCli = async () => {
-    const res = await isHaveNumiCliVersion();
+    const res = await isHaveNumiCliVersion(numi_cli_binary_path);
     setIsHaveNumi(typeof res === "string");
     if (typeof res === "string") setNumiCLiVersion(res);
-  }
+  };
 
   useEffect(() => {
     checkNumiCli().then(() => {
@@ -87,7 +97,7 @@ export default function Command(props: LaunchProps<{ arguments: NumiArguments }>
           setQuery(props.arguments.queryArgument);
           setIsLoading(true);
         }
-      }, 100)
+      }, 100);
     });
   }, []);
 
@@ -117,7 +127,7 @@ export default function Command(props: LaunchProps<{ arguments: NumiArguments }>
       isLoading={isLoading}
       searchBarPlaceholder="Enter text to query"
       onSearchTextChange={(searchValue) => {
-        const q = searchValue.length > 0 ? searchValue : undefined
+        const q = searchValue.length > 0 ? searchValue : undefined;
         setQuery(q);
         if (q) {
           setIsLoading(true);
@@ -127,14 +137,17 @@ export default function Command(props: LaunchProps<{ arguments: NumiArguments }>
       <List.EmptyView
         icon="empty-view.png"
         title={isHaveNumi ? "Waiting for query" : "numi-cli not installed"}
-        description={isHaveNumi ? "E.g.: 1+1..." : "Please install numi-cli first (brew install nikolaeu/numi/numi-cli)"}
+        description={
+          isHaveNumi ? "E.g.: 1+1..." : "Please install numi-cli first (brew install nikolaeu/numi/numi-cli)"
+        }
       />
       {isHaveNumi && (
         <>
           <List.Section title={`Result "${query}"`}>
-            {queryResult &&
+            {queryResult && (
               <List.Item
                 title={queryResult}
+                icon={Icon.Text}
                 key={Math.random().toString()}
                 actions={
                   <ActionPanel>
@@ -143,7 +156,7 @@ export default function Command(props: LaunchProps<{ arguments: NumiArguments }>
                   </ActionPanel>
                 }
               />
-            }
+            )}
           </List.Section>
           <List.Section title="History">
             {histories &&
@@ -166,6 +179,5 @@ export default function Command(props: LaunchProps<{ arguments: NumiArguments }>
         </>
       )}
     </List>
-  )
-  // return <Detail markdown={`# Hello World ${JSON.stringify(props.arguments)}`} />;
+  );
 }

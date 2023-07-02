@@ -2,12 +2,9 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "numi-cli",
   "title": "Numi CLI",
-  "description": "Query Numi from raycast using numi-cli interface",
+  "description": "Query Numi from Raycast using numi-cli",
   "icon": "numi-icon.png",
   "author": "viandwi24",
-  "contributors": [
-    "viandwi24"
-  ],
   "categories": [
     "Productivity",
     "Data"
@@ -27,6 +24,26 @@
           "required": false
         }
       ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "numi_cli_binary_path",
+      "type": "textfield",
+      "required": false,
+      "title": "Numi CLI bin path",
+      "placeholder": "/opt/homebrew/bin/numi-cli",
+      "description": "The path to installed numi-cli binary",
+      "default": "/opt/homebrew/bin/numi-cli"
+    },
+    {
+      "name": "max_history_elemets",
+      "type": "textfield",
+      "required": false,
+      "title": "Maximum number of history elements",
+      "placeholder": "10",
+      "description": "The number of elements to save on the history",
+      "default": "10"
     }
   ],
   "dependencies": {
