@@ -295,7 +295,7 @@ export function EventListItem(props: { event: Event }): JSX.Element {
                 );
               }
             }
-          } else if (tt === "note") {
+          } else if (tt === "note" || tt == "diffnote") {
             switch (ev.action_name) {
               case "opened":
                 {
