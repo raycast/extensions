@@ -88,15 +88,13 @@ export default function MenubarWeather() {
                         );
                       }}
                     />
-                    { showUVI && (
+                    {showUVI && (
                       <MenuBarExtra.Item
                         title={"UVI"}
                         icon={Icon.Sun}
                         subtitle={` ${Math.round(weather?.daily.uv_index_max[0])}`}
                         onAction={async () => {
-                          await Clipboard.copy(
-                            `${Math.round(weather?.daily.uv_index_max[0])}`
-                          )
+                          await Clipboard.copy(`${Math.round(weather?.daily.uv_index_max[0])}`);
                         }}
                       />
                     )}
@@ -324,7 +322,7 @@ export default function MenubarWeather() {
                   );
                 })}
               </MenuBarExtra.Submenu>
-              { showUVI && (
+              {showUVI && (
                 <MenuBarExtra.Submenu title={"UVI"} icon={Icon.Sun}>
                   {weather?.daily?.uv_index_max?.map((value, index) => {
                     return (
@@ -333,12 +331,10 @@ export default function MenubarWeather() {
                         icon={getDateIcon(weather?.daily?.time[index].substring(8))}
                         title={` ${Math.round(value)}`}
                         onAction={async () => {
-                          await Clipboard.copy(
-                            weather?.daily?.time[index] + ` ` + Math.round(value)
-                          );
+                          await Clipboard.copy(weather?.daily?.time[index] + ` ` + Math.round(value));
                         }}
                       />
-                    )
+                    );
                   })}
                 </MenuBarExtra.Submenu>
               )}
