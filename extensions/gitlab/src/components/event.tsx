@@ -2,7 +2,7 @@ import { Action, ActionPanel, Color, Icon, Image, List } from "@raycast/api";
 import { useState } from "react";
 import { useCache } from "../cache";
 import { gitlab } from "../common";
-import { Project, searchData } from "../gitlabapi";
+import { Project, User, searchData } from "../gitlabapi";
 import { GitLabIcons } from "../icons";
 import { capitalizeFirstLetter, daysInSeconds, showErrorToast } from "../utils";
 import { DefaultActions, GitLabOpenInBrowserAction } from "./actions";
@@ -39,6 +39,7 @@ export interface Event {
   target_title: string;
   push_data?: PushData;
   note?: Note;
+  author?: User;
 }
 
 export function EventListItem(props: { event: Event }): JSX.Element {
@@ -391,7 +392,13 @@ export function EventListItem(props: { event: Event }): JSX.Element {
     <List.Item
       title={title || ""}
       icon={icon}
-      accessories={[{ text: accessoryTitle }]}
+      accessories={[
+        { text: accessoryTitle },
+        {
+          icon: ev.author ? { source: ev.author.avatar_url, mask: Image.Mask.Circle } : undefined,
+          tooltip: ev.author ? ev.author.name : undefined,
+        },
+      ]}
       actions={
         <ActionPanel>
           {actionElement && actionElement}
@@ -402,18 +409,37 @@ export function EventListItem(props: { event: Event }): JSX.Element {
   );
 }
 
+enum ScopeType {
+  MyActivities = "my",
+  MyProjects = "myprojects",
+}
+
+function EventListDropdown(props: { onChange: (text: string) => void }) {
+  return (
+    <List.Dropdown tooltip="Scope" onChange={props.onChange}>
+      <List.Dropdown.Item value={ScopeType.MyActivities} title="My Activities" />
+      <List.Dropdown.Item value={ScopeType.MyProjects} title="My Projects" />
+    </List.Dropdown>
+  );
+}
+
 export function EventList(): JSX.Element {
+  const [scope, setScope] = useState<string>(ScopeType.MyActivities);
   const [searchText, setSearchText] = useState<string>();
+  const params: Record<string, any> = {};
+  if (scope === ScopeType.MyProjects) {
+    params.scope = "all";
+  }
   const { data, error, isLoading } = useCache<Event[]>(
-    "events",
+    `events_${scope}`,
     async (): Promise<any[]> => {
-      const result: Event[] = await gitlab.fetch("events").then((events) => {
+      const result: Event[] = await gitlab.fetch("events", params).then((events) => {
         return events.map((ev: any) => ev as Event);
       });
       return result;
     },
     {
-      deps: [searchText],
+      deps: [searchText, scope],
       secondsToRefetch: 60,
       onFilter: async (epics) => {
         return searchData<Event>(epics, {
@@ -432,7 +458,12 @@ export function EventList(): JSX.Element {
     return <List isLoading={true} />;
   }
   return (
-    <List onSearchTextChange={setSearchText} isLoading={isLoading} throttle={true}>
+    <List
+      onSearchTextChange={setSearchText}
+      isLoading={isLoading}
+      throttle={true}
+      searchBarAccessory={<EventListDropdown onChange={setScope} />}
+    >
       {data?.map((ev) => (
         <EventListItem key={ev.id} event={ev} />
       ))}

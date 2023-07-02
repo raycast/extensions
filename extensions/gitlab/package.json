@@ -115,7 +115,7 @@
     },
     {
       "name": "event_my",
-      "title": "My Recent Activities",
+      "title": "Recent Activities",
       "subtitle": "GitLab",
       "description": "Recent GitLab Activities",
       "mode": "view"
