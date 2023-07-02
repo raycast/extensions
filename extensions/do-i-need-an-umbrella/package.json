@@ -2,7 +2,8 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "do-i-need-an-umbrella",
   "title": "Do I Need An Umbrella?",
-  "description": "'Do I Need An Umbrella?' is a handy extension that helps you determine the appropriate attire for the weather. It analyzes the current weather conditions and advises whether you should wear long sleeves or short sleeves, and whether or not you need to bring an umbrella. Stay prepared for any weather with this useful tool at your fingertips.",  "icon": "command_icon.png",
+  "description": "'Do I Need An Umbrella?' is a handy extension that helps you determine the appropriate attire for the weather. It analyzes the current weather conditions and advises whether you should wear long sleeves or short sleeves, and whether or not you need to bring an umbrella. Stay prepared for any weather with this useful tool at your fingertips.",
+  "icon": "command_icon.png",
   "author": "Ek217",
   "license": "MIT",
   "commands": [
@@ -21,6 +22,7 @@
   "devDependencies": {
     "@raycast/eslint-config": "1.0.5",
     "@types/node": "18.8.3",
+    "@types/node-fetch": "^2.6.4",
     "@types/react": "18.0.9",
     "eslint": "^7.32.0",
     "prettier": "^2.5.1",
