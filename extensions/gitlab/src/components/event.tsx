@@ -390,7 +390,7 @@ export function EventListItem(props: { event: Event }): JSX.Element {
 
   return (
     <List.Item
-      title={title || ""}
+      title={{ value: title || "", tooltip: ev.target_title }}
       icon={icon}
       accessories={[
         { text: accessoryTitle },
