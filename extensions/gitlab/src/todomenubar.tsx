@@ -109,7 +109,7 @@ export default function TodosMenuBarCommand(): JSX.Element | null {
             key={t.id}
             title={t.title}
             subtitle={getPrettyTodoActionName(t)}
-            icon={getTodoIcon(t, "#000000")}
+            icon={getTodoIcon(t, { light: "#000000", dark: "FFFFFF", adjustContrast: false })}
             tooltip={t.project_with_namespace}
             onAction={() => (t.target_url ? open(t.target_url) : launchTodosCommand())}
           />
