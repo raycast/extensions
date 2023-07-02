@@ -613,7 +613,6 @@ export class GitLab {
     const item: TemplateDetail = await this.fetch(
       `projects/${projectId}/templates/merge_requests/${templateName}`
     ).then((template) => {
-      console.log(template);
       return {
         name: template.name,
         content: template.content,
