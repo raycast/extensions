@@ -149,7 +149,7 @@ export function MRCreateForm(props: { project?: Project | undefined; branch?: st
     }
     const template = await gitlab.getProjectMergeRequestTemplate(project?.id || 0, templateName);
     setDescription(template?.content ?? "");
-  }
+  };
 
   return (
     <Form
@@ -177,7 +177,13 @@ export function MRCreateForm(props: { project?: Project | undefined; branch?: st
           <Form.Dropdown.Item key={template.id} value={template.id} title={template.name} />
         ))}
       </Form.Dropdown>
-      <Form.TextArea id="description" title="Description" placeholder="Enter description" value={description} onChange={setDescription} />
+      <Form.TextArea
+        id="description"
+        title="Description"
+        placeholder="Enter description"
+        value={description}
+        onChange={setDescription}
+      />
       <Form.TagPicker id="assignee_ids" title="Assignees" placeholder="Type or choose an assignee">
         {members.map((member) => (
           <Form.TagPicker.Item

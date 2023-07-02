@@ -598,18 +598,22 @@ export class GitLab {
   }
 
   async getProjectMergeRequestTemplates(projectId: number): Promise<TemplateSummary[]> {
-    const items: TemplateSummary[] = await this.fetch(`projects/${projectId}/templates/merge_requests`).then((templates) => {
-      return templates.map((template: any) => ({
-        id: template.key,
-        name: template.name,
-      }));
-    });
+    const items: TemplateSummary[] = await this.fetch(`projects/${projectId}/templates/merge_requests`).then(
+      (templates) => {
+        return templates.map((template: any) => ({
+          id: template.key,
+          name: template.name,
+        }));
+      }
+    );
     return items;
   }
 
   async getProjectMergeRequestTemplate(projectId: number, templateName: string): Promise<TemplateDetail> {
-    const item: TemplateDetail = await this.fetch(`projects/${projectId}/templates/merge_requests/${templateName}`).then((template) => {
-      console.log(template)
+    const item: TemplateDetail = await this.fetch(
+      `projects/${projectId}/templates/merge_requests/${templateName}`
+    ).then((template) => {
+      console.log(template);
       return {
         name: template.name,
         content: template.content,
