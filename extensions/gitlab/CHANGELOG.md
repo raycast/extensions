@@ -1,5 +1,11 @@
 # GitLab Changelog
 
+## [Optimize Recent Activities] - 2023-07-02
+
+- Add unsupported activity
+- Rename `My Recent Activities` to `Recent Activities`
+- `Recent Activities` got a dropdrown to switch between `My Activities` and `My Projects`
+
 ## [Search Scope] - 2023-04-27
 
 - Add scope dropdown for `Search Issues` and `Search Merge Requests`
