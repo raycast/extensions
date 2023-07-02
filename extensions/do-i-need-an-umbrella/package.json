@@ -1,0 +1,36 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "do-i-need-an-umbrella",
+  "title": "Do I Need An Umbrella?",
+  "description": "'Do I Need An Umbrella?' is a handy extension that helps you determine the appropriate attire for the weather. It analyzes the current weather conditions and advises whether you should wear long sleeves or short sleeves, and whether or not you need to bring an umbrella. Stay prepared for any weather with this useful tool at your fingertips.",  "icon": "command_icon.png",
+  "author": "Ek217",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Do I Need An Umbrella?",
+      "subtitle": "Show MenuBar Command",
+      "description": "'Do I Need An Umbrella?' is a handy extension that helps you determine the appropriate attire for the weather. It analyzes the current weather conditions and advises whether you should wear long sleeves or short sleeves, and whether or not you need to bring an umbrella. Stay prepared for any weather with this useful tool at your fingertips.",
+      "mode": "menu-bar"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.54.1",
+    "@raycast/utils": "^1.4.8"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
