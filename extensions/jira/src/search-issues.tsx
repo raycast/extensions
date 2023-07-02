@@ -11,6 +11,7 @@ type SearchIssuesProps = {
 };
 
 export function SearchIssues({ query: initialQuery }: SearchIssuesProps) {
+
   const [query, setQuery] = useState(() => {
     return initialQuery ?? "";
   });
@@ -62,13 +63,6 @@ export function SearchIssues({ query: initialQuery }: SearchIssuesProps) {
     </List>
   );
 }
-
-type CommandProps = LaunchProps<{
-  launchContext: {
-    query: string;
-  };
-}>;
-
-export default function Command({ launchContext }: CommandProps) {
-  return withJiraCredentials(<SearchIssues query={launchContext?.query} />);
+export default function Command(props: LaunchProps) {
+  return withJiraCredentials(<SearchIssues query={props.launchContext?.query} />);
 }
