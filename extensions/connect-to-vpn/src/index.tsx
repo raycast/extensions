@@ -185,8 +185,6 @@ export default function Command() {
     showToast(Toast.Style.Failure, "Something went wrong", error.message);
   }
 
-  // console.log(networkServices);
-
   const NetworkServiceItem: FC<NetworkServiceItemProps> = ({ service }) => {
     let actionName: string | undefined;
     let action: ((service: NetworkService) => void) | undefined;
