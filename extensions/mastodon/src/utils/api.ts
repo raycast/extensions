@@ -46,7 +46,7 @@ const requestApi = async <T>(
     headers["Content-Type"] = "application/json";
   }
 
-  const response = await fetch(`https://${instance}/${endpoint}`, {
+  const response = await fetch(`https://${instance}${endpoint}`, {
     method,
     headers,
     body: isFormData ? body : JSON.stringify(body),
