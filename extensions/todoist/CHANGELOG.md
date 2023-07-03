@@ -1,5 +1,17 @@
 # Todoist Changelog
 
+## [View task in Raycast from menu bar] - 2023-06-29
+
+When using menu bar you may want to take a closer a look at your task description without opening the Todoist app. This change adds a way to quickly preview any task from menu bar on Raycast floating window.
+
+It also enhances user experience in the following ways:
+- Add subtask count to the task detail view in Raycast, so you can quickly see how many subtasks you have for each task.
+- Fix null issue when Editing task without changing any field (#7057)
+- Truncate menu bar task content to 50 characters to improve user experience.
+
+Happy viewing!
+
+
 ## [Subtasks on menu bar] - 2023-06-14
 
 This update adds subtasks to the menu bar tasks options. Thanks to this change, you can now break down tasks on the app and work on them one step at a time while still using the menu bar for navigation.
@@ -9,6 +21,7 @@ Happy task breaking!
 ## [Show task count for projects] - 2023-06-07
 
 This update adds a new feature to display the `task count` besides project name  in the `Show Projects` view. Note it's set to off by default in the command's preferences.  
+
 
 ## [Filter view menu bar] - 2023-06-05
 
