@@ -60,7 +60,7 @@ function Actions({ profile, farcasterInstalled }: ProfileActionsProps) {
   return (
     <ActionPanel>
       {farcasterInstalled && (
-        <Action.OpenInBrowser title="Open in Warpcast (Desktop)" url={`farcaster://profiles/${profile.body.id}`} />
+        <Action.Open title="Open in Warpcast (Desktop)" target={`farcaster://profiles/${profile.body.id}`} />
       )}
       <Action.OpenInBrowser title="Open in Warpcast (Web)" url={`https://warpcast.com/${profile.body.username}`} />
       <Action.OpenInBrowser title="Open in Searchcaster" url={`https://searchcaster.xyz/u/${profile.body.username}`} />
