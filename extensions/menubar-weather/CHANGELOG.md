@@ -1,5 +1,10 @@
 # Menubar Weather Changelog
 
+## [Add UV Index] - 2023-07-03
+
+- UV Index (UVI) is now included in the current weather and forecast
+- UVI can be disabled in the Preferences
+
 ## [Fix bug] - 2023-06-19
 
 - Fix a bug that caused the extension to crash if cached data couldn't be parsed properly.
