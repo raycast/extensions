@@ -1,0 +1,3 @@
+# Open With Text Edit
+
+'Open with TextEdit' is a useful Raycast extension that enables you to open any file in the TextEdit application on your Mac in a snap. You can launch the extension by clicking the menubar shortcut or using your chosen custom shortcut, and it will open the files currently selected in Finder. This extension is ideal for efficiently editing and viewing text-based files such as code files, markdown documents, and others. With 'Open with TextEdit', you can speed up your workflow and save time by avoiding the annoyance of manually opening files in their default application, which can often take a long time to load.

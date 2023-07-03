@@ -1,0 +1,45 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "open-with-text-edit",
+  "title": "Open With Text Edit",
+  "description": "'Open with TextEdit' is a useful Raycast extension that enables you to open any file in the TextEdit application on your Mac in a snap. You can launch the extension by clicking the menubar shortcut or using your chosen custom shortcut, and it will open the files currently selected in Finder. This extension is ideal for efficiently editing and viewing text-based files such as code files, markdown documents, and others. With 'Open with TextEdit', you can speed up your workflow and save time by avoiding the annoyance of manually opening files in their default application, which can often take a long time to load.",
+  "icon": "command_icon.png",
+  "author": "Ek217",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Open Selected File With Text Edit",
+      "description": "Open The Selected File With Text Edit",
+      "mode": "no-view"
+    },
+    {
+      "name": "menu",
+      "title": "Quick Access",
+      "subtitle": "Quickly Access OWTE",
+      "description": "Quickly and easily access Open With Text Edit",
+      "mode": "menu-bar"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.54.1",
+    "open": "^9.1.0",
+    "opn": "^6.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/opn": "^5.5.0",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
