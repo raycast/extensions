@@ -7,6 +7,12 @@ type Bookmark = { name: string; url: string };
 let timezone = "";
 let lastupdate = "";
 
+const DEF_DELAY = 1000;
+
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms || DEF_DELAY));
+}
+
 function formatUnixTimestamp(timestamp: number) {
   const date = new Date(timestamp * 1000);
   const dayOfWeek = date.toLocaleDateString("en-US", { weekday: "long" });
@@ -28,6 +34,7 @@ const useBookmarks = () => {
 
     const fetchBookmarks = async () => {
       try {
+        await sleep(2000);
         const lonlatResponse = await fetch(`http://ip-api.com/json/?fields=lat,lon`);
         const lonlatData = await lonlatResponse.json();
         const lon = lonlatData.lon;
