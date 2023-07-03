@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Detail, LaunchProps } from "@raycast/api";
-import { SourceLanguage, source_languages } from "./utils";
+import { SourceLanguage, source_languages } from "../utils";
 
 export const TranslationView = (props: LaunchProps) => {
   const translation = props?.launchContext?.translation ?? null;

@@ -13,7 +13,8 @@
     "peter-gy",
     "popalay",
     "MonsterDeveloper",
-    "Yamen"
+    "Yamen",
+    "EvanZhouDev"
   ],
   "license": "MIT",
   "commands": [
@@ -240,13 +241,6 @@
       "subtitle": "Deepcast",
       "description": "Translate selected text into Ukrainian using DeepL",
       "mode": "no-view"
-    },
-    {
-      "name": "translation-view",
-      "title": "View Translation",
-      "subtitle": "Deepcast",
-      "description": "View Translation",
-      "mode": "view"
     }
   ],
   "preferences": [

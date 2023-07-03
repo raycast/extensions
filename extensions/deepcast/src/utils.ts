@@ -81,7 +81,7 @@ export async function sendTranslateRequest({
           break;
         case "view":
           await launchCommand({
-            name: "translation-view",
+            name: "index",
             type: LaunchType.UserInitiated,
             context: {
               translation,
