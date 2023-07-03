@@ -1,5 +1,10 @@
 # Jira Changelog
 
+## [Persist Active Sprint Project value when closing command] - 2023-06-28
+
+- Persist Active Sprint Project value when closing command allowing the command to
+  fetch the issues for the latest selected project when opening the command anew. 
+
 ## [Bug fixes] - 2023-06-15
 
 - Fixed a bug where a user's or project's avatar URL could not be displayed.
