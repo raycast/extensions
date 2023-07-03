@@ -10,10 +10,10 @@ export function useRecentArticles() {
   return {
     readArticles: articles,
     addToReadArticles: (article: string) => {
-      setReadArticlesMap({
-        ...readArticlesMap,
+      setReadArticlesMap((r) => ({
+        ...r,
         [language]: [article, ...articles.filter((a) => a !== article)].slice(0, 20),
-      });
+      }));
     },
   };
 }
