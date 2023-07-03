@@ -18,16 +18,6 @@
       "mode": "view"
     }
   ],
-  "preferences": [
-    {
-      "type": "checkbox",
-      "name": "hideDisabled",
-      "default": true,
-      "label": "Hide disabled services",
-      "description": "Hide disabled services in the network list",
-      "required": false
-    }
-  ],
   "dependencies": {
     "@raycast/api": "^1.28.0"
   },

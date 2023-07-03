@@ -1,8 +1,8 @@
 # Connect to VPN Changelog
 
-## [New Additions] - 2023-06-13
+## [New Additions] - 2023-07-03
 
-- Added option to hide disabled network services.
+- Sort network services based on availability.
 - Updated internal dependency packages.
 
 ## [Initial Version] - 2022-02-17
