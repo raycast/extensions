@@ -1,10 +1,18 @@
-import { getSelectedText, Clipboard, Toast, showToast, getPreferenceValues, launchCommand, LaunchType } from "@raycast/api";
+import {
+  getSelectedText,
+  Clipboard,
+  Toast,
+  showToast,
+  getPreferenceValues,
+  launchCommand,
+  LaunchType,
+} from "@raycast/api";
 import got from "got";
 import { StatusCodes, getReasonPhrase } from "http-status-codes";
 
 interface Preferences {
   key: string;
-  onTranslateAction: 'clipboard' | 'view'
+  onTranslateAction: "clipboard" | "view";
 }
 
 export function getPreferences() {
@@ -67,24 +75,24 @@ export async function sendTranslateRequest({
         })
         .json<{ translations: { text: string; detected_source_language: SourceLanguage }[] }>();
       switch (onTranslateAction) {
-        case 'clipboard':
+        case "clipboard":
           await Clipboard.copy(translation);
           await showToast(Toast.Style.Success, "The translation was copied to your clipboard.");
           break;
-        case 'view':
+        case "view":
           await launchCommand({
             name: "translation-view",
             type: LaunchType.UserInitiated,
             context: {
               translation,
-              sourceLanguage: detectedSourceLanguage
-            }
-          })
+              sourceLanguage: detectedSourceLanguage,
+            },
+          });
           break;
         default:
           break;
       }
-     
+
       return { translation, detectedSourceLanguage };
     } catch (error) {
       await showToast(Toast.Style.Failure, "Something went wrong", gotErrorToString(error));
