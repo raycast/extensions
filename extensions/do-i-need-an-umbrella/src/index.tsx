@@ -4,6 +4,17 @@ import fetch from "node-fetch";
 
 type Bookmark = { name: string; url: string };
 
+let timezone = "";
+let lastupdate = "";
+
+function formatUnixTimestamp(timestamp: number) {
+  const date = new Date(timestamp * 1000);
+  const dayOfWeek = date.toLocaleDateString("en-US", { weekday: "long" });
+  const dayOfMonth = date.toLocaleDateString("en-US", { day: "numeric" });
+  const month = date.toLocaleDateString("en-US", { month: "long" });
+  return `${dayOfWeek} ${dayOfMonth} ${month}`;
+}
+
 const useBookmarks = () => {
   const [state, setState] = useState<{ unseen: Bookmark[]; isLoading: boolean; error: string }>({
     unseen: [],
@@ -13,7 +24,7 @@ const useBookmarks = () => {
 
   useEffect(() => {
     let retries = 0;
-    const maxRetries = 5;
+    const maxRetries = 10;
 
     const fetchBookmarks = async () => {
       try {
@@ -28,11 +39,16 @@ const useBookmarks = () => {
         const needUmbrella = precipitation >= 0.2;
         const maxTemperature = data.daily.temperature_2m_max[0];
         const minTemperature = data.daily.temperature_2m_min[0];
-        const needLongSleeve = maxTemperature < 20 || minTemperature < 15;
+        const needLongSleeve = maxTemperature < 23 || minTemperature < 18;
+        const needJacket = maxTemperature < 20 || minTemperature < 15;
+        timezone = data.timezone;
+        const lastupdateunix = data.daily.time;
+        lastupdate = formatUnixTimestamp(lastupdateunix);
 
         const bookmarks: Bookmark[] = [
           { name: needUmbrella ? "Bring an umbrella" : "No umbrella needed", url: "" },
           { name: needLongSleeve ? "Wear a long sleeve shirt" : "Wear a short sleeve shirt", url: "" },
+          { name: needJacket ? "Wear a jacket" : "No jacket needed", url: "" },
         ];
 
         setState({ unseen: bookmarks, isLoading: false, error: "" });
@@ -40,9 +56,9 @@ const useBookmarks = () => {
         console.error("Failed to fetch bookmarks:", error);
         if (retries < maxRetries) {
           retries++;
-          setTimeout(fetchBookmarks, 5000); // retry after 5 seconds
+          setTimeout(fetchBookmarks, 5000);
         } else {
-          setState({ unseen: [], isLoading: false, error: "Error fetching bookmarks" });
+          setState({ unseen: [], isLoading: false, error: "Error" });
         }
       }
     };
@@ -69,12 +85,21 @@ export default function Command() {
       {unseen.map((bookmark, index) => (
         <MenuBarExtra.Item
           key={index}
-          icon={bookmark.name.includes("umbrella") ? Icon.Umbrella : Icon.Person}
+          icon={
+            bookmark.name.includes("umbrella")
+              ? Icon.Umbrella
+              : bookmark.name.includes("jacket")
+              ? Icon.Building
+              : Icon.Person
+          }
           title={bookmark.name}
         />
       ))}
-      <MenuBarExtra.Separator />
-      <MenuBarExtra.Item key={"25"} icon={Icon.Heart} title={"Made with ❤️ by EliasK"} />
+      <MenuBarExtra.Section>
+        <MenuBarExtra.Item key={"27"} icon={Icon.Clock} title={lastupdate} />
+        <MenuBarExtra.Item key={"26"} icon={Icon.Pin} title={timezone.split("/").reverse().join(", ")} />
+        <MenuBarExtra.Item key={"25"} icon={Icon.Heart} title={"Made with ❤️ by EliasK"} />
+      </MenuBarExtra.Section>
     </MenuBarExtra>
   );
 }
