@@ -11,7 +11,6 @@ type SearchIssuesProps = {
 };
 
 export function SearchIssues({ query: initialQuery }: SearchIssuesProps) {
-
   const [query, setQuery] = useState(() => {
     return initialQuery ?? "";
   });

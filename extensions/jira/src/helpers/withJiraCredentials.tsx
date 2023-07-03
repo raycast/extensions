@@ -70,11 +70,7 @@ export function withJiraCredentials(component: JSX.Element) {
   if (!jiraCredentials) {
     if (environment.commandMode === "view") {
       // Using the <List /> component makes the placeholder buggy
-      return <List
-        isLoading
-        onSearchTextChange={setQuery}
-        searchText={query}
-      />;
+      return <List isLoading onSearchTextChange={setQuery} searchText={query} />;
     } else if (environment.commandMode === "menu-bar") {
       return <MenuBarExtra isLoading />;
     } else {
@@ -83,10 +79,7 @@ export function withJiraCredentials(component: JSX.Element) {
     }
   }
 
-  return React.cloneElement(
-    component,
-    { query: query },
-  );
+  return React.cloneElement(component, { query: query });
 }
 
 export function getJiraCredentials() {
