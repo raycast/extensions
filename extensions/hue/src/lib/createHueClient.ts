@@ -1,10 +1,11 @@
-import { ClientHttp2Session, connect } from "http2";
+import { ClientHttp2Session, connect, sensitiveHeaders } from "http2";
 import React from "react";
 import { BridgeConfig, GroupedLight, Light, Room, Scene, Zone } from "./types";
 import fs from "fs";
 import { environment } from "@raycast/api";
 import dns from "dns";
 import HueClient from "./HueClient";
+import * as path from "path";
 
 const CONNECTION_TIMEOUT_MS = 5000;
 
@@ -21,10 +22,10 @@ export default async function createHueClient(
 
     if (bridgeConfig.certificateType === "self-signed" && bridgeConfig.certificate) {
       certificate = Buffer.from(bridgeConfig.certificate, "utf-8");
-      console.log("Connecting to Hue Bridge using self-signed certificate…");
+      console.log("Connecting to the Hue Bridge using it’s self-signed certificate…");
     } else {
-      certificate = fs.readFileSync(environment.assetsPath + "/huebridge_cacert.pem");
-      console.log("Connecting to Hue Bridge and checking it's certificate against the Hue Bridge root CA…");
+      certificate = fs.readFileSync(path.join(environment.assetsPath, "huebridge_cacert.pem"));
+      console.log("Connecting to the Hue Bridge, checking it’s certificate against the Hue Bridge root CA…");
     }
 
     /*
@@ -66,15 +67,30 @@ export default async function createHueClient(
     });
 
     session.setTimeout(CONNECTION_TIMEOUT_MS, () => {
-      reject(new Error("Connection timed out."));
+      return reject("Connection timed out.");
     });
 
     session.once("connect", () => {
-      resolve(session);
+      // Make a request to the Hue Bridge to check if the username is valid
+      const stream = session.request({
+        ":method": "GET",
+        ":path": "/clip/v2/resource/bridge",
+        "hue-application-key": bridgeConfig.username,
+        [sensitiveHeaders]: ["hue-application-key"],
+      });
+
+      stream.on("response", (response) => {
+        if (response[":status"] === 403) {
+          return reject("Please check your username.");
+        } else if (response[":status"] !== 200) {
+          return reject("Status code: " + response[":status"]);
+        }
+        return resolve(session);
+      });
     });
 
     session.once("error", (error) => {
-      reject(error);
+      return reject(error);
     });
   });
 

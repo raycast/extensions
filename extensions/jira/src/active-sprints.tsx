@@ -4,6 +4,7 @@ import { useState } from "react";
 
 import { getProjects } from "./api/projects";
 import StatusIssueList from "./components/StatusIssueList";
+import { getProjectAvatar } from "./helpers/avatars";
 import { withJiraCredentials } from "./helpers/withJiraCredentials";
 import useIssues from "./hooks/useIssues";
 
@@ -36,7 +37,7 @@ export function ActiveSprints() {
             key={project.id}
             title={`${project.name} (${project.key})`}
             value={project.key}
-            icon={project.avatarUrls["32x32"]}
+            icon={getProjectAvatar(project)}
           />
         );
       })}

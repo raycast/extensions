@@ -4,6 +4,9 @@
   "description": "Access Harvest Time Entries",
   "icon": "harvest-logo-icon.png",
   "author": "eluce2",
+  "contributors": [
+    "bchopson"
+  ],
   "categories": [
     "Productivity"
   ],
@@ -115,6 +118,28 @@
       "required": false,
       "label": "Show Client Name above selected project",
       "type": "checkbox"
+    },
+    {
+      "name": "timeFormat",
+      "title": "Time Format",
+      "required": false,
+      "description": "Time Format",
+      "type": "dropdown",
+      "default": "company",
+      "data": [
+        {
+          "title": "Company Default",
+          "value": "company"
+        },
+        {
+          "title": "Hours/Minutes",
+          "value": "hours_minutes"
+        },
+        {
+          "title": "Decimal",
+          "value": "decimal"
+        }
+      ]
     }
   ],
   "dependencies": {
@@ -129,10 +154,12 @@
     "@types/lodash": "^4.14.175",
     "@types/node": "^18.8.3",
     "eslint": "^7.32.0",
+    "prettier": "^2.8.7",
     "typescript": "^4.4.3"
   },
   "scripts": {
     "build": "ray build -e dist",
-    "dev": "ray develop"
+    "dev": "ray develop",
+    "lint": "ray lint"
   }
 }

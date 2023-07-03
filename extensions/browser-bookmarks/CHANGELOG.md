@@ -1,5 +1,9 @@
 # Browser Bookmarks Changelog
 
+## [Fuzzy Search] - 2023-06-27
+
+- Add fuzzy search functionality to enhance search results and user experience
+
 ## [Invalid URL Error Fix] - 2023-05-30
 
 - Validate URLs before creating URL objects to prevent `TypeError: Invalid URL` errors

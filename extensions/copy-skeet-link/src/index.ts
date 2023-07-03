@@ -3,10 +3,10 @@ import { showHUD, Clipboard } from "@raycast/api";
 function transformUrl(url: string): string {
   const urlObj = new URL(url);
 
-  if (urlObj.host == "staging.bsky.app") {
-    urlObj.host = "bsky.app";
-  }
-  return `https://skeeet.xyz?url=${urlObj.toString()}`;
+  // Change the host of the URL to skeeet.xyz
+  urlObj.host = "skeeet.xyz";
+
+  return urlObj.toString();
 }
 
 export default async function main() {
