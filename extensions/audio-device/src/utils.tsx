@@ -1,3 +1,4 @@
+import { environment } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
 
 function sliceIntoChunks(arr: Array<string>, chunkSize: number): Array<Array<string>> {
@@ -79,4 +80,21 @@ export async function setOutputDevice(item: string) {
       tell application "System Preferences" to quit
     end if
   `);
+}
+
+
+/**
+ * Create a deep link to this extension.
+ * */
+export const createDeepLink = function <T>(command: string, context?: T) {
+  const protocol = environment.raycastVersion.includes('alpha') ? 'raycastinternal://' : 'raycast://'
+  const deeplink = `${protocol}extensions/benvp/audio-device/${command}`
+
+  if (context) {
+    const payload = encodeURIComponent(JSON.stringify(context));
+    return `${deeplink}?context=${payload}`
+  }
+
+
+  return deeplink
 }
