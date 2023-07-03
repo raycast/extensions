@@ -59,6 +59,7 @@ export async function sendTranslateRequest({
 
     const { key, onTranslateAction } = getPreferences();
 
+    showToast(Toast.Style.Animated, "Fetching translation...");
     try {
       const {
         translations: [{ text: translation, detected_source_language: detectedSourceLanguage }],
