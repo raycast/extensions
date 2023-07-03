@@ -12,7 +12,8 @@
   "contributors": [
     "peter-gy",
     "popalay",
-    "MonsterDeveloper"
+    "MonsterDeveloper",
+    "YamenSharaf"
   ],
   "license": "MIT",
   "commands": [
@@ -239,6 +240,13 @@
       "subtitle": "Deepcast",
       "description": "Translate selected text into Ukrainian using DeepL",
       "mode": "no-view"
+    },
+    {
+      "name": "translation-view",
+      "title": "View Translation",
+      "subtitle": "Deepcast",
+      "description": "View Translation",
+      "mode": "view"
     }
   ],
   "preferences": [
@@ -249,6 +257,23 @@
       "required": true,
       "title": "API key",
       "type": "password"
+    },
+    {
+      "description": "Action on Translation",
+      "name": "onTranslateAction",
+      "required": false,
+      "title": "On Translation Action",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "Copy to Clipboard",
+          "value": "clipboard"
+        },
+        {
+          "title": "View in Raycast",
+          "value": "view"
+        }
+      ]
     }
   ],
   "dependencies": {

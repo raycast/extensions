@@ -1,9 +1,10 @@
-import { getSelectedText, Clipboard, Toast, showToast, getPreferenceValues } from "@raycast/api";
+import { getSelectedText, Clipboard, Toast, showToast, getPreferenceValues, launchCommand, LaunchType } from "@raycast/api";
 import got from "got";
 import { StatusCodes, getReasonPhrase } from "http-status-codes";
 
 interface Preferences {
   key: string;
+  onTranslateAction: 'clipboard' | 'view'
 }
 
 export function getPreferences() {
@@ -48,7 +49,7 @@ export async function sendTranslateRequest({
   try {
     const text = initialText || (await getSelectedText());
 
-    const { key } = getPreferences();
+    const { key, onTranslateAction } = getPreferences();
 
     try {
       const {
@@ -65,8 +66,25 @@ export async function sendTranslateRequest({
           },
         })
         .json<{ translations: { text: string; detected_source_language: SourceLanguage }[] }>();
-      await Clipboard.copy(translation);
-      await showToast(Toast.Style.Success, "The translation was copied to your clipboard.");
+      switch (onTranslateAction) {
+        case 'clipboard':
+          await Clipboard.copy(translation);
+          await showToast(Toast.Style.Success, "The translation was copied to your clipboard.");
+          break;
+        case 'view':
+          await launchCommand({
+            name: "translation-view",
+            type: LaunchType.UserInitiated,
+            context: {
+              translation,
+              sourceLanguage: detectedSourceLanguage
+            }
+          })
+          break;
+        default:
+          break;
+      }
+     
       return { translation, detectedSourceLanguage };
     } catch (error) {
       await showToast(Toast.Style.Failure, "Something went wrong", gotErrorToString(error));
