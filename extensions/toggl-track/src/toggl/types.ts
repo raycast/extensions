@@ -8,6 +8,7 @@ export interface Workspace {
 }
 
 export interface Project {
+  active: boolean;
   billable: boolean;
   client_id: number;
   color: string;

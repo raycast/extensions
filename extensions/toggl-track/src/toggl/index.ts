@@ -2,9 +2,10 @@ import { Client, Me, Project, Tag, TimeEntry, Workspace } from "./types";
 import { getPreferenceValues } from "@raycast/api";
 import { authenticatedFetch } from "./auth";
 
-const TogglAPI = function (apiToken: string) {
+const TogglAPI = function () {
   const baseUrl = "https://api.track.toggl.com/api/v9";
-  const api = authenticatedFetch(apiToken, baseUrl);
+  const { togglApiToken, hideArchivedProjects }: Preferences = getPreferenceValues();
+  const api = authenticatedFetch(togglApiToken, baseUrl);
 
   return {
     getMe: (): Promise<Me> => {
@@ -22,8 +23,9 @@ const TogglAPI = function (apiToken: string) {
         name: "No project",
         billable: false,
         color: "",
+        active: true,
       });
-      return projects;
+      return hideArchivedProjects ? projects.filter((p) => p.active) : projects;
     },
     createTimeEntry: ({
       projectId,
@@ -74,9 +76,9 @@ const TogglAPI = function (apiToken: string) {
 
 interface Preferences {
   togglApiToken: string;
+  hideArchivedProjects: boolean;
 }
 
-const preferences: Preferences = getPreferenceValues();
-const toggl = TogglAPI(preferences.togglApiToken);
+const toggl = TogglAPI();
 
 export default toggl;
