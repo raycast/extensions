@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "warp",
   "title": "Warp",
-  "description": "Interact with Warp right from Raycast.",
+  "description": "Search and open Warp terminal launch configurations straight from Raycast.",
   "icon": "command-icon-v2.png",
   "author": "joetannenbaum",
   "owner": "warpdotdev",
