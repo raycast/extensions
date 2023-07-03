@@ -18,7 +18,7 @@ To search for a player, enter their username. Make sure to enter the correct use
 
 ### **Leaderboards**
 
-In theory there should not be more then one active season. Aimlab will determine the currently active season.
+In theory, there should not be more than one active season. Aimlab will determine the currently active season.
 You can filter the displayed seasons based on their active status. There are two options available: 'All Seasons' or 'Only Active Seasons'.
 
 Seasons are divided into multiple tasks, and you can view the leaderboard for each task.
