@@ -3,7 +3,7 @@ import { DeviceList } from "./helpers";
 import { AirPlaySelector } from "./airplay";
 
 interface Context {
-  deviceId?: string
+  deviceId?: string;
 }
 
 export default function Command({ launchContext }: { launchContext?: Context }) {

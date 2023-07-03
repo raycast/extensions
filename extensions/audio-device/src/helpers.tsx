@@ -72,35 +72,29 @@ export function DeviceList({ type, deviceId }: DeviceListProps) {
     Object.entries(TransportType).find(([, v]) => v === device.transportType)?.[0];
 
   useEffect(() => {
-    if (!deviceId || !data?.devices) return
-    const device = data.devices.find(d => d.id === deviceId);
+    if (!deviceId || !data?.devices) return;
+    const device = data.devices.find((d) => d.id === deviceId);
     if (!device) {
-      showToast(
-        Toast.Style.Failure,
-        'Error!',
-        `The device with id ${deviceId} was not found.`
-      )
-      return
+      showToast(Toast.Style.Failure, "Error!", `The device with id ${deviceId} was not found.`);
+      return;
     }
 
-    (
-      async function() {
-        try {
-          await (type === "input" ? setDefaultInputDevice(device.id) : setOutputAndSystemDevice(device.id));
-          closeMainWindow({ clearRootSearch: true });
-          popToRoot({ clearSearchBar: true });
-          showHUD(`Active ${type} audio device set to ${device.name}`);
-        } catch (e) {
-          console.log(e);
-          showToast(
-            Toast.Style.Failure,
-            `Error!`,
-            `There was an error setting the active ${type} audio device to ${device.name}`
-          );
-        }
+    (async function () {
+      try {
+        await (type === "input" ? setDefaultInputDevice(device.id) : setOutputAndSystemDevice(device.id));
+        closeMainWindow({ clearRootSearch: true });
+        popToRoot({ clearSearchBar: true });
+        showHUD(`Active ${type} audio device set to ${device.name}`);
+      } catch (e) {
+        console.log(e);
+        showToast(
+          Toast.Style.Failure,
+          `Error!`,
+          `There was an error setting the active ${type} audio device to ${device.name}`
+        );
       }
-    )();
-  }, [deviceId, data, type])
+    })();
+  }, [deviceId, data, type]);
 
   return (
     <List isLoading={isLoading}>
@@ -117,10 +111,10 @@ export function DeviceList({ type, deviceId }: DeviceListProps) {
                 <Action.CreateQuicklink
                   title="Create quicklink"
                   quicklink={{
-                    name: `Set ${d.isOutput ? 'Output' : 'Input'} Device to ${d.name}`,
-                    link: createDeepLink(d.isOutput ? 'set-output-device' : 'set-input-device', {
-                      deviceId: d.id
-                    })
+                    name: `Set ${d.isOutput ? "Output" : "Input"} Device to ${d.name}`,
+                    link: createDeepLink(d.isOutput ? "set-output-device" : "set-input-device", {
+                      deviceId: d.id,
+                    }),
                   }}
                 />
                 <Action

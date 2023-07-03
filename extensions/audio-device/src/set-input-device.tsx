@@ -2,8 +2,8 @@ import { DeviceList } from "./helpers";
 
 interface Props {
   launchContext?: {
-    deviceId?: string
-  }
+    deviceId?: string;
+  };
 }
 
 export default function Command({ launchContext }: Props) {
