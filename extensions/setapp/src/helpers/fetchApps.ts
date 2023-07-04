@@ -52,6 +52,16 @@ async function fetchApps() {
   return apps;
 }
 
+async function isSetappInstalled() {
+  const setappPath = "/Applications/Setapp.app";
+  try {
+    await fs.promises.access(setappPath);
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
+
 async function getInstalledApps() {
   const setappPath = "/Applications/Setapp";
 
@@ -93,6 +103,9 @@ const flagInstalledApps = (apps: App[], installedApps: InstalledApp[]) => {
 
 export async function getApps() {
   const apps = await fetchApps();
+  const setappInstalled = await isSetappInstalled();
+  cache.set("setappInstalled", setappInstalled.toString());
+
   const installedApps = await getInstalledApps();
   const appsWithInstalledFlag = flagInstalledApps(apps, installedApps);
   cache.set("apps", JSON.stringify(appsWithInstalledFlag));

@@ -9,6 +9,7 @@ const CACHE_EXPIRY = 30 * 60 * 1000; // 30 minutes
 
 export function useSearch(term: string, filter = "all") {
   const [isLoading, setIsLoading] = useState(true);
+  const [isSetappInstalled, setIsSetappInstalled] = useState(false);
   const [data, setData] = useState<App[]>([]);
 
   const searchData = useCallback(async () => {
@@ -43,6 +44,9 @@ export function useSearch(term: string, filter = "all") {
         });
       }
       setData(filteredApps);
+
+      const setappInstalled = cache.get("setappInstalled") === "true";
+      setIsSetappInstalled(setappInstalled);
     } catch (error) {
       console.error(error);
     } finally {
@@ -54,5 +58,5 @@ export function useSearch(term: string, filter = "all") {
     searchData();
   }, [searchData]);
 
-  return { isLoading, data };
+  return { isLoading, data, isSetappInstalled };
 }

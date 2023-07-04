@@ -7,7 +7,9 @@ export default function Command() {
   const [searchText, setSearchText] = useState("");
   const [filter, setFilter] = useState("all");
 
-  const { isLoading, data } = useSearch(searchText || "", filter);
+  const { isLoading, data, isSetappInstalled } = useSearch(searchText || "", filter);
+
+  console.log("isSetappInstalled", isSetappInstalled);
 
   return (
     <List
@@ -19,9 +21,9 @@ export default function Command() {
       throttle
     >
       <List.Section title="Results" subtitle={data?.length + ""}>
-        {data?.map((app: App) => (
-          <SearchListItem key={`${app.type}-${app.name}`} app={app} />
-        ))}
+        {data?.map((app: App) => {
+          return <SearchListItem key={`${app.type}-${app.name}`} app={app} setappInstalled={isSetappInstalled} />;
+        })}
       </List.Section>
     </List>
   );
@@ -48,7 +50,7 @@ function DropdownFilter(props: { onFilterChange: (newValue: string) => void }) {
   );
 }
 
-function SearchListItem({ app }: { app: App }) {
+function SearchListItem({ app, setappInstalled }: { app: App; setappInstalled: boolean }) {
   const accessories = [];
   if (app.installed) {
     accessories.push({ tag: { value: "Installed", color: Color.Green } });
@@ -65,7 +67,7 @@ function SearchListItem({ app }: { app: App }) {
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            {app.installed && app.path && <Action.Open title={`Open ${app.name}`} target={app.path} />}
+            {setappInstalled && <Action.Open title={`Open ${app.name}`} target={`setapp://launch/${app.id}`} />}
             <Action.OpenInBrowser title="Open in Browser" url={app.marketing_url} />
             <Action.OpenInBrowser title="Open in Browser (Setapp Page)" url={app.sharing_url} />
           </ActionPanel.Section>
