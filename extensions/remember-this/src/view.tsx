@@ -45,9 +45,9 @@ function readRememberedItems(): RememberedItem[] {
     const fileContents = fs.readFileSync(REMEMBERING_FILE, "utf8");
     const lines = fileContents.trim().split("\n");
     const validLines = lines.filter((line) => {
-      const [dateString, testlol] = line.split(",");
+      const [dateString, contento] = line.split(",");
       const delimiter = "||&|"; // Remove unnecessary escape characters
-      testlol.replace(delimiter, ",");
+      contento.replace(delimiter, ",");
 
       const expirationDate = new Date(dateString);
       return expirationDate > now;
@@ -56,9 +56,9 @@ function readRememberedItems(): RememberedItem[] {
     fs.writeFileSync(REMEMBERING_FILE, newFileContents);
 
     return validLines.map((line) => {
-      const [dateString, testlol] = line.split(",");
+      const [dateString, contento] = line.split(",");
       const delimiter = "||&|"; // Remove unnecessary escape characters
-      const content = testlol.replace(delimiter, ",");
+      const content = contento.replace(delimiter, ",");
       return {
         expirationDate: new Date(dateString),
         content,

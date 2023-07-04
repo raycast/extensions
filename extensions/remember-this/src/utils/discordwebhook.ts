@@ -39,7 +39,7 @@ export async function sendMessageToWebhook(webhookUrl: string, messageContent: s
       { name: "Your reminder for:", value: `\`\`\`${messageContent}\`\`\``, inline: false },
       { name: `Ends:`, value: `<t:${time}:R>`, inline: false }
     )
-    .setFooter({ text: "This message will self destruct upon expirey" });
+    .setFooter({ text: "This message will self destruct upon expiry" });
 
   webhookClient
     .send({
