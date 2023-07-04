@@ -121,6 +121,18 @@ export default function Command() {
     await showHUD('Copied Glyph to clipboard!');
   };
 
+  const copyFAClassesToClipboard = async (icon: Icon) => {
+    // Get first style of icon, or use the default iconStyle
+    const style = icon.familyStylesByLicense.free[0]?.style || iconStyle;
+    const faClass = `fa-${style} fa-${icon.id}`;
+
+    // Copy icon classes to clipboard
+    await Clipboard.copy(faClass);
+
+    // Notify the user
+    await showHUD('Copied Classes to clipboard!');
+  };
+
   return (
     <Grid
       columns={8}
@@ -148,6 +160,11 @@ export default function Command() {
               />
               <Action title={`Copy FA Slug`} icon="copy-clipboard-16" onAction={() => copyFASlugToClipboard(icon)} />
               <Action title={`Copy FA Glyph`} icon="copy-clipboard-16" onAction={() => copyFAGlyphToClipboard(icon)} />
+              <Action
+                title={`Copy FA Class`}
+                icon="copy-clipboard-16"
+                onAction={() => copyFAClassesToClipboard(icon)}
+              />
               <Action.OpenInBrowser
                 title="Open In Browser"
                 url={`https://fontawesome.com/icons/${icon.id}?s=solid&f=classic`}

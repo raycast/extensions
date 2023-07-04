@@ -1,9 +1,5 @@
 # Menu Bar Commands
 
-{% hint style="info" %}
-As of version 1.38.1, you can create Raycast commands that place glanceable information in your menu bar!
-{% endhint %}
-
 The `MenuBarExtra` component can be used to create commands which populate the [extras](https://developer.apple.com/design/human-interface-guidelines/components/system-experiences/the-menu-bar#menu-bar-commands) section of macOS' menu bar.
 
 ## Getting Started

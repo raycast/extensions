@@ -130,12 +130,39 @@ export default function ExplorePrompts(props: Props) {
       ];
     }
 
+    if (selectedCategory === "new") {
+      const prompts = categories.flatMap((category) => category.prompts);
+      // return prompts that have been published in the last 2 weeks
+      const newPrompts = prompts
+        .filter((prompt) => {
+          const twoWeeksAgo = new Date();
+          twoWeeksAgo.setDate(twoWeeksAgo.getDate() - 14);
+          return new Date(prompt.date) >= twoWeeksAgo;
+        })
+        .sort((a, b) => {
+          return new Date(b.date).getTime() - new Date(a.date).getTime();
+        });
+
+      return [
+        {
+          name: "New Prompts",
+          id: "new",
+          icon: Icon.Calendar,
+          prompts: newPrompts,
+        },
+      ];
+    }
+
     return categories.filter((category) => category.id === selectedCategory);
   }, [selectedCategory, categories, selectedIds]);
 
   const selectPromptsTitle = useMemo(() => {
     if (selectedCategory === "popular") {
       return "All Popular Prompts";
+    }
+
+    if (selectedCategory === "new") {
+      return "New Prompts";
     }
 
     const category = categories.find((category) => category.id === selectedCategory);
@@ -163,6 +190,7 @@ export default function ExplorePrompts(props: Props) {
             <List.Dropdown.Item icon={Icon.CheckCircle} title="Selected Prompts" value="selected" />
           ) : null}
           <List.Dropdown.Item icon={Icon.ArrowUp} title="Popular Prompts" value="popular" />
+          <List.Dropdown.Item icon={Icon.Calendar} title="New Prompts" value="new" />
 
           <List.Dropdown.Section title="Categories">
             {categories.map((category) => {

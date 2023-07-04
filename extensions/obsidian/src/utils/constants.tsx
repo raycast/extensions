@@ -128,5 +128,5 @@ export const IMAGE_SIZE_MAPPING: Map<string, number> = new Map([
 
 export const ObsidianIcon: Image = {
   source: "obsidian_icon.svg",
-  tintColor: Color.PrimaryText,
+  tintColor: { dark: "#E6E6E6", light: "#262626", adjustContrast: false },
 };

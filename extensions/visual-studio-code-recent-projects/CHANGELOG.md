@@ -1,5 +1,9 @@
 # Visual Studio Code Search Recent Projects Changelog
 
+## [Update] - 2023-06-29
+
+- Make it possible to open the currently opened Finder folder on vscode
+
 ## [Update] - 2023-06-07
 
 - Add `Show Installed Extensions` command

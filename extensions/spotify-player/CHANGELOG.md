@@ -1,8 +1,81 @@
 # Spotify Player Changelog
 
-## [Fix] - 2023-03-07
+## [Version 2] - 2023-06-19
 
-- Fix crash due to `null` playlists being returned by the API.
+### Spotify Player v2
+
+Spotify Player first launched in October 2021. It was one of our first extensions, and to this day it stands as one of the most popular in the store. Since then, we've learned a lot, received plenty of feedback, and released new, more performant APIs.
+
+So now it's time for a refresher ✨
+
+Spotify Player v2 is a complete re-write, focusing on performance, maintainability, and user experience. One of our main goals was to keep the list of commands to a minimum but still allow users to tailor their own experience. This way, both new users of Raycast, as well as more advanced ones, can make the most of Spotify Player.
+
+#### New Features
+
+- Updated Extension icon
+- Updated Menu Bar icon
+- Support Podcasts and Episodes in "Now Playing"/"Menu Bar Player"
+- Support Podcasts and Episodes in "Search"/"Your Library"
+- Support "Transfer Playback" action, available in "Now Playing"/"Menu Bar Player"
+- Support "Add to Playlist" action, available in "Now Playing"/"Menu Bar Player"
+
+#### New Commands
+
+- **Search:** A single unified search command. Use this to search for artists, albums, songs, playlists, podcasts, and episodes. Use the dropdown menu to filter your search to a specific category. Each category offers contextual actions, so you can dive deeper into the search.
+- **Your Library:** Use this to see your saved artists, albums, songs, playlists, and podcasts. Similar to the "Search" command, it includes a category dropdown and contextual actions.
+- **Quick Actions:** This is a list of lots of Spotify actions. For example: Play/Pause, Like/Dislike current song, Change Volume, and more. If you'd like to have any of these available as a Root Command, you can create Quicklinks via the actions menu (⌘ K).
+- **Toggle Play/Pause:** Use this to toggle the playback of the current song.
+- **Next:** Use this to skip to the next song/episode.
+- **Previous:** Use this to skip to the previous song/episode.
+
+#### Disabled Commands
+
+This extension includes a few commands that are disabled by default. You can enable them by going to the extension's settings. These commands are:
+
+- **Like:**
+  Use this to like the current song.
+- **Dislike:**
+  Use this to dislike the current song.
+- **Set Volume to 0%:**
+  Use this to mute the volume.
+- **Set Volume to 25%:**
+  Use this to set the volume to 25%.
+- **Set Volume to 50%:**
+  Use this to set the volume to 50%.
+- **Set Volume to 75%:**
+  Use this to set the volume to 75%.
+- **Set Volume to 100%:**
+  Use this to set the volume to 100%.
+- **Turn Volume Down:**
+  Use this to turn the volume down by 10%.
+- **Turn Volume Up:**
+  Use this to turn the volume up by 10%.
+- **Toggle Shuffle:**
+  Use this to toggle shuffle.
+- **Toggle Repeat:**
+  Use this to toggle repeat.
+- **Start Radio:**
+  Use this to start a radio station based on the current song.
+- **Copy URL:**
+  Use this to copy the URL of the current song/episode.
+- **Just Play:**
+  Use this to quickly start playing a song based on your query.
+
+#### Removed Commands
+
+- **Search Artists:** Use "Search" instead. You can use the dropdown menu to narrow your search to artists only
+- **Search Albums:** Use "Search" instead. You can use the dropdown menu to narrow your search to albums only
+- **Search Tracks:** Use "Search" instead. You can use the dropdown menu to narrow your search to songs only
+- **Search Playlists:** Use "Search" instead. You can use the dropdown menu to narrow your search to playlists only
+- **Browse All:** Use the Spotify App instead
+- **Featured Playlists:** Use the Spotify App instead
+
+#### General improvements
+
+- Menu Bar Player Preferences: "Max Text Length" has a default value of 20
+- Menu Bar Player Preferences: "showEllipsis" setting has been removed. It'll always show ellipsis if the title needs to be truncated (based on the "Max Text Length" setting)
+
+We hope you enjoy the new and improved Spotify Player Extension — we've [obsessed over every detail](https://twitter.com/peduarte/status/1638101325312577536).
 
 ## [Fix] - 2023-01-13
 

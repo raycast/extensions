@@ -2,19 +2,20 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "kill-process",
   "title": "Kill Process",
-  "description": "Lists all running processes, ordered by CPU usage and allows killing one",
+  "description": "Lists all running processes, ordered by CPU or memory usage and allows killing one",
   "icon": "icon.png",
   "author": "rolandleth",
   "contributors": [
     "crazyones110",
-    "zhenpewu"
+    "zhenpewu",
+    "Saafo"
   ],
   "license": "MIT",
   "commands": [
     {
       "name": "index",
       "title": "Kill Process",
-      "description": "Lists all running processes, ordered by CPU usage and allows killing one",
+      "description": "Lists all running processes, ordered by CPU or memory usage and allows killing one",
       "mode": "view"
     }
   ],
@@ -39,6 +40,22 @@
       "description": "Determines whether apps are listed before other results when filtering.",
       "label": "Prioritize apps when filtering",
       "name": "shouldPrioritizeAppsWhenFiltering",
+      "required": false,
+      "title": "",
+      "type": "checkbox"
+    },
+    {
+      "description": "Determines whether processes are sorted by CPU or memory usage.",
+      "label": "Sort processes by memory usage",
+      "name": "sortByMem",
+      "required": false,
+      "title": "",
+      "type": "checkbox"
+    },
+    {
+      "description": "Determines whether aggregate processes belong to the same app.",
+      "label": "Aggregate apps",
+      "name": "aggregateApps",
       "required": false,
       "title": "",
       "type": "checkbox"
@@ -70,7 +87,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.52.1"
+    "@raycast/api": "^1.53.3",
+    "pretty-bytes": "^6.1.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.5",

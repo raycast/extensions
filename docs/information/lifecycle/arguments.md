@@ -27,7 +27,7 @@ Let's say we want a command with two arguments. Its `package.json` will look lik
   "license": "MIT",
   "commands": [
     {
-      "name": "arguments",
+      "name": "my-command",
       "title": "Arguments",
       "subtitle": "API Examples",
       "description": "Demonstrates usage of arguments",
@@ -63,12 +63,7 @@ The command itself will receive the arguments' values via the `arguments` prop:
 ```typescript
 import { Form, LaunchProps } from "@raycast/api";
 
-interface TodoArguments {
-  title: string;
-  subtitle?: string;
-}
-
-export default function Todoist(props: LaunchProps<{ arguments: TodoArguments }>) {
+export default function Todoist(props: LaunchProps<{ arguments: Arguments.MyCommand }>) {
   const { title, subtitle } = props.arguments;
   console.log(`title: ${title}, subtitle: ${subtitle}`);
 
