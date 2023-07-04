@@ -1,5 +1,10 @@
 # Bitwarden Changelog
 
+## [Improvements] - 2023-07-05
+
+- Display favorites at the top of the list on a separate section
+- Added ability to mark/remove items as favorites and reorder them as preferred using an action or key binding
+
 ## [New Preference] - 2023-06-03
 
 - Added preference to change the window behaviour when copying values
