@@ -18,8 +18,12 @@ Motivate yourself to stay on top of your deadlines
 - Menubar: A countdown to your next activity!
 - Remember This: Add something for the extension to remember!
 - Remembered Things: View a list of all the items being remembered.
-- Notifications: View a list of notification service (supcoming and available).
 
+## Notifications:
+
+- Discord Webhook Notifications\n\nYou can easily receive reminder notifications through Discord using webhooks. Here's how to set it up:\n\n1. Open your Discord server and navigate to the channel where you want to receive the notifications.\n2. Click on the settings icon (the gear icon) to the right of your channels name and select `Integrations`.\n3. Click on the `Webhooks` button before clicking the `New Webhook` button. \n4. Copy the webhook URL and paste it into the `DiscordWebhookURL` field in the extensions prefrences `(click ⏎ to go there now!)`.\n\nThat's it! Now, upcoming reminders will be sent to your Discord channel through the webhook.\n\nIf you encounter any issues, please contact me on slack `@EliasK`\n\n![Discord Webhook Illustration](https://i.imgur.com/kUCaKnO.png)
+
+- Suggest a service! 💡\n\nWe're working on adding notifications to Remember This for a variety of services! 📝🔔\n\nIn the meantime, you can still receive reminders through other channels like Discord. 📧📱\n\nIf you have a suggestion for another messaging or collaboration service that you'd like to see added to Remember This, please let us know! Mention me on Slack `@EliasK` with your suggestion. We're always looking for ways to improve our service and would love to hear your ideas! 💬🙌
 
 ## What makes Remember This so special?
 

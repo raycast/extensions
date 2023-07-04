@@ -40,14 +40,7 @@
       "subtitle": "View a list of all the items being remembered.",
       "description": "View a list of all the items being remembered.",
       "mode": "view"
-    },
-    {
-          "name": "notifs",
-          "title": "Notifications",
-          "subtitle": "View a list of all possible ways to recieve notifications.",
-          "description": "View a list of all possible ways to recieve notifications.",
-          "mode": "view"
-        }
+    }
   ],
   "preferences": [
     {
