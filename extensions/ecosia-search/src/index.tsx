@@ -114,7 +114,10 @@ async function performSearch(searchText: string, signal: AbortSignal): Promise<S
     ? [
         { name: searchText, url: "https://www.ecosia.org/search?q=" + encodeURIComponent(searchText) },
         ...json.suggestions
-          .map((suggestion) => ({ name: suggestion, url: "https://www.ecosia.org/search?q=" + encodeURIComponent(suggestion) }))
+          .map((suggestion) => ({
+            name: suggestion,
+            url: "https://www.ecosia.org/search?q=" + encodeURIComponent(suggestion),
+          }))
           .filter((suggestion) => suggestion.name !== searchText),
       ]
     : [];
