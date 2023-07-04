@@ -20,8 +20,7 @@ type FavoritesProviderProps = {
   children: React.ReactNode;
 };
 
-export function FavoritesProvider(props: FavoritesProviderProps) {
-  const { children } = props;
+export function FavoritesProvider({ children }: FavoritesProviderProps) {
   const bitwarden = useBitwarden();
   const { items, updateState: updateVaultItem } = useVaultContext();
 
@@ -50,8 +49,6 @@ export function FavoritesProvider(props: FavoritesProviderProps) {
     void persistFavoriteOrder(favoriteOrder);
   }, [favoriteOrder]);
 
-  if (!favoriteOrder) return <VaultLoadingFallback />;
-
   const toggleFavorite = async (item: Item) => {
     const editedItem = { ...item, favorite: !item.favorite };
     await bitwarden.editItem(editedItem);
@@ -70,6 +67,7 @@ export function FavoritesProvider(props: FavoritesProviderProps) {
   };
 
   const moveFavorite = async ({ id }: Item, direction: "up" | "down") => {
+    if (!favoriteOrder) return;
     const currentPosition = favoriteOrder.indexOf(id);
     if (currentPosition === -1) return;
 
@@ -81,6 +79,8 @@ export function FavoritesProvider(props: FavoritesProviderProps) {
       setFavoriteOrder(newFavoriteOrder);
     }
   };
+
+  if (!favoriteOrder) return <VaultLoadingFallback />;
 
   return (
     <FavoritesContext.Provider value={{ favoriteOrder, setFavoriteOrder, toggleFavorite, moveFavorite }}>
