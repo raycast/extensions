@@ -1,7 +1,7 @@
 import { showToast, Toast, Form, Icon, popToRoot, Image, ActionPanel, Action } from "@raycast/api";
-import { Project, User, Label, Milestone, Branch, Issue, TemplateSummary } from "../gitlabapi";
+import { Project, User, Label, Milestone, Branch, Issue, TemplateSummary, TemplateDetail } from "../gitlabapi";
 import { gitlab } from "../common";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { getErrorMessage, projectIcon, showErrorToast, stringToSlug, toFormValues } from "../utils";
 import { useCache } from "../cache";
 
@@ -140,19 +140,21 @@ export function MRCreateForm(props: { project?: Project | undefined; branch?: st
     return project?.remove_source_branch_after_merge ?? true;
   };
   const [removeBranch, setRemoveBranch] = useState<boolean | undefined>(undefined);
+  const [selectedTemplateName, setSelectedTemplateName] = useState<string>(NO_TEMPLATE);
   const [description, setDescription] = useState<string | undefined>(undefined);
 
-  const handleTemplateChange = useCallback(
-    async (templateName: string) => {
-      if (templateName === NO_TEMPLATE) {
-        setDescription("");
-        return;
-      }
-      const template = await gitlab.getProjectMergeRequestTemplate(project?.id || 0, templateName);
-      setDescription(template?.content ?? "");
+  const { data: selectedTemplateDetail } = useCache<TemplateDetail | undefined>(
+    `selected_template_${selectedTemplateName}`,
+    async () => {
+      if (selectedTemplateName === NO_TEMPLATE) return undefined;
+      return await gitlab.getProjectMergeRequestTemplate(project?.id || 0, selectedTemplateName);
     },
-    [project?.id]
+    { deps: [selectedTemplateName] }
   );
+
+  useEffect(() => {
+    setDescription(selectedTemplateDetail?.content ?? "");
+  }, [selectedTemplateDetail]);
 
   return (
     <Form
@@ -174,7 +176,7 @@ export function MRCreateForm(props: { project?: Project | undefined; branch?: st
       <SourceBranchDropdown project={project} info={projectinfo} value={props.branch} />
       <TargetBranchDropdown project={project} info={projectinfo} />
       <Form.TextField id="title" title="Title" placeholder="Enter title" />
-      <Form.Dropdown id="template_id" title="Template" defaultValue={NO_TEMPLATE} onChange={handleTemplateChange}>
+      <Form.Dropdown id="template_id" title="Template" value={selectedTemplateName} onChange={setSelectedTemplateName}>
         <Form.Dropdown.Item key={NO_TEMPLATE} value={NO_TEMPLATE} title={"None"} />
         {mergeRequestTemplates.map((template) => (
           <Form.Dropdown.Item key={template.id} value={template.id} title={template.name} />
