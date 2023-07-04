@@ -15,10 +15,7 @@ export default async function main() {
     const javascriptCode = await covertTypeScriptToJavaScript(maybeTypeScriptCode);
     await Clipboard.paste(javascriptCode);
   } catch (error) {
-    if (error instanceof Error) {
-      showHUD(error.message);
-    } else {
-      showHUD("Failed to transform TypeScript to JavaScript");
-    }
+    const message = error instanceof Error ? error.message : "Failed to transform TypeScript to JavaScript";
+    showHUD(message);
   }
 }
