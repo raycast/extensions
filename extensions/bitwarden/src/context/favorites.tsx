@@ -5,6 +5,7 @@ import { LOCAL_STORAGE_KEY } from "~/constants/general";
 import { useBitwarden } from "~/context/bitwarden";
 import { useVaultContext } from "~/context/vault";
 import { Item } from "~/types/vault";
+import { captureException } from "~/utils/development";
 import { useAsyncEffect } from "~/utils/hooks/useAsyncEffect";
 
 type FavoritesContext = {
@@ -95,13 +96,22 @@ export const useFavoritesContext = () => {
   return context;
 };
 
-async function getSavedFavoriteOrder(): Promise<string[] | undefined> {
-  const serializedFavoriteOrder = await LocalStorage.getItem<string>(LOCAL_STORAGE_KEY.VAULT_FAVORITE_ORDER);
-  return serializedFavoriteOrder ? JSON.parse(serializedFavoriteOrder) : undefined;
+async function getSavedFavoriteOrder() {
+  try {
+    const serializedFavoriteOrder = await LocalStorage.getItem<string>(LOCAL_STORAGE_KEY.VAULT_FAVORITE_ORDER);
+    return serializedFavoriteOrder ? JSON.parse<string[]>(serializedFavoriteOrder) : undefined;
+  } catch (error) {
+    captureException("Failed to get favorite order from local storage", error);
+    return undefined;
+  }
 }
 
-async function persistFavoriteOrder(order: string[]): Promise<void> {
-  return LocalStorage.setItem(LOCAL_STORAGE_KEY.VAULT_FAVORITE_ORDER, JSON.stringify(order));
+async function persistFavoriteOrder(order: string[]) {
+  try {
+    await LocalStorage.setItem(LOCAL_STORAGE_KEY.VAULT_FAVORITE_ORDER, JSON.stringify(order));
+  } catch (error) {
+    captureException("Failed to persist favorite order to local storage", error);
+  }
 }
 
 type FavoriteItem = Item & {
