@@ -1,7 +1,7 @@
 # Wikipedia Changelog
 
 ## [Recent Searches] - 2023-07-04
-- Added `Recent Searches` inside the `Search Page` command to veiw a list of your previously viewed articles
+- Added `Recent Searches` inside the `Search Page` to show your previously viewed articles
 
 ## [WikiRaycast] - 2023-02-23
 - Added flag emoji to the language dropdown
