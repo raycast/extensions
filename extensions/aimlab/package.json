@@ -13,19 +13,19 @@
   "commands": [
     {
       "name": "view-leaderboards",
-      "title": "Aimlab Leaderboards",
+      "title": "View Leaderboards",
       "description": "Fetch leaderboards",
       "mode": "view"
     },
     {
       "name": "view-profile",
-      "title": "Aimlab Profile",
+      "title": "View Profile",
       "description": "View your Aimlab profile",
       "mode": "view"
     },
     {
       "name": "view-creators",
-      "title": "Aimlab Top Creators",
+      "title": "View Top Creators",
       "description": "View Aimlab Top Creators",
       "mode": "view"
     }
