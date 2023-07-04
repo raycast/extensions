@@ -122,7 +122,7 @@ export function useSeparateFavoriteItems(items: Item[]) {
         if (item.favorite) {
           result.favoriteItems.push({
             ...item,
-            listOrder: favoriteOrder.findIndex((fid) => fid === item.id) ?? Number.MAX_SAFE_INTEGER,
+            listOrder: favoriteOrder.indexOf(item.id) ?? Number.MAX_SAFE_INTEGER,
           });
         } else {
           result.nonFavoriteItems.push(item);
