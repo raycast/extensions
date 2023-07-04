@@ -35,18 +35,14 @@ function SearchVaultComponent() {
       {favoriteItems.length > 0 ? (
         <>
           <List.Section title="Favorites">
-            {favoriteItems.map((item) => (
-              <VaultItem key={item.id} item={item} folder={getItemFolder(folders, item)} />
-            ))}
+            <VaultItemList items={favoriteItems} folders={folders} />
           </List.Section>
           <List.Section title="Other Items">
-            {nonFavoriteItems.map((item) => (
-              <VaultItem key={item.id} item={item} folder={getItemFolder(folders, item)} />
-            ))}
+            <VaultItemList items={nonFavoriteItems} folders={folders} />
           </List.Section>
         </>
       ) : (
-        nonFavoriteItems.map((item) => <VaultItem key={item.id} item={item} folder={getItemFolder(folders, item)} />)
+        <VaultItemList items={nonFavoriteItems} folders={folders} />
       )}
       {isLoading ? (
         <List.EmptyView icon={Icon.ArrowClockwise} title="Loading..." description="Please wait." />
@@ -69,6 +65,16 @@ function SearchVaultComponent() {
         />
       )}
     </List>
+  );
+}
+
+function VaultItemList({ items, folders }: { items: Item[]; folders: Folder[] }) {
+  return (
+    <>
+      {items.map((item) => (
+        <VaultItem key={item.id} item={item} folder={getItemFolder(folders, item)} />
+      ))}
+    </>
   );
 }
 
