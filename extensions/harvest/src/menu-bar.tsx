@@ -1,6 +1,6 @@
 import React from "react";
 import { Cache, LaunchType, MenuBarExtra, getPreferenceValues, launchCommand, open } from "@raycast/api";
-import { stopTimer, useMyTimeEntries } from "./services/harvest";
+import { formatHours, stopTimer, useCompany, useMyTimeEntries } from "./services/harvest";
 import { HarvestTimeEntry } from "./services/responseTypes";
 
 const cache = new Cache();
@@ -14,14 +14,13 @@ export function getCurrentTimerFromCache() {
 export default function MenuBar() {
   const { data, isLoading, revalidate } = useMyTimeEntries();
   const [cacheLoading, setCacheLoading] = React.useState(true);
+  const { data: company } = useCompany();
 
   const runningTimer = getCurrentTimerFromCache();
   const { callbackURLStart, callbackURLStop } = getPreferenceValues<{
     callbackURLStart?: string;
     callbackURLStop?: string;
   }>();
-
-  //   console.log({ isLoading, cacheLoading });
 
   React.useEffect(() => {
     if (data && !isLoading) {
@@ -58,7 +57,7 @@ export default function MenuBar() {
   return (
     <MenuBarExtra
       icon={{ source: "../assets/harvest-logo-icon.png" }}
-      title={runningTimer.hours.toString()}
+      title={formatHours(runningTimer.hours.toString(), company)}
       isLoading={isLoading || cacheLoading}
     >
       <MenuBarExtra.Item title={`${runningTimer.project.name} - ${runningTimer.task.name}`} />
