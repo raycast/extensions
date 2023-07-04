@@ -78,7 +78,7 @@ interface Preferences {
   hideArchivedProjects: boolean;
 }
 
-const preferences: Preferences = getPreferenceValues()
+const preferences: Preferences = getPreferenceValues();
 
 const toggl = TogglAPI(preferences);
 
