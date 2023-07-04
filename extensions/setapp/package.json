@@ -17,13 +17,6 @@
       "subtitle": "Search for Setapp apps",
       "description": "Searches for installed and not installed apps",
       "mode": "view"
-    },
-    {
-      "name": "refresh-cache",
-      "title": "Background Refresh Setapp Cache",
-      "description": "Refreshes the cache of Setapp apps",
-      "mode": "no-view",
-      "interval": "30m"
     }
   ],
   "dependencies": {

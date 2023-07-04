@@ -1,6 +1,6 @@
-import { environment, Cache } from "@raycast/api";
+import { Cache } from "@raycast/api";
 import fetch from "node-fetch";
-import { SetappResponse, SetappApp, App } from "./types";
+import { SetappResponse, SetappApp, App } from "../types";
 import fs from "fs";
 import path from "path";
 import plist from "plist";
@@ -98,9 +98,4 @@ export async function getApps() {
   cache.set("apps", JSON.stringify(appsWithInstalledFlag));
   cache.set("lastSync", Date.now().toString());
   return apps;
-}
-
-export default async function Command() {
-  console.log("launchType", environment.launchType);
-  await getApps();
 }
