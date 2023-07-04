@@ -2,9 +2,8 @@ import { Client, Me, Project, Tag, TimeEntry, Workspace } from "./types";
 import { getPreferenceValues } from "@raycast/api";
 import { authenticatedFetch } from "./auth";
 
-const TogglAPI = function () {
+const TogglAPI = function ({ togglApiToken, hideArchivedProjects }: Preferences) {
   const baseUrl = "https://api.track.toggl.com/api/v9";
-  const { togglApiToken, hideArchivedProjects }: Preferences = getPreferenceValues();
   const api = authenticatedFetch(togglApiToken, baseUrl);
 
   return {
@@ -79,6 +78,8 @@ interface Preferences {
   hideArchivedProjects: boolean;
 }
 
-const toggl = TogglAPI();
+const preferences: Preferences = getPreferenceValues()
+
+const toggl = TogglAPI(preferences);
 
 export default toggl;
