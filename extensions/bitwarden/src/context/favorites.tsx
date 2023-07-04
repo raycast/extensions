@@ -116,9 +116,7 @@ export type VaultItemsWithFavorites = {
 export function useSeparateFavoriteItems(items: Item[]) {
   const { favoriteOrder } = useFavoritesContext();
 
-  const favoriteItems = useMemo(() => items.filter((item) => item.favorite), [items]);
-
-  const groupedItemList = useMemo(() => {
+  return useMemo(() => {
     const sectionedItems = items.reduce<VaultItemsWithFavorites>(
       (result, item) => {
         if (item.favorite) {
@@ -136,7 +134,5 @@ export function useSeparateFavoriteItems(items: Item[]) {
     sectionedItems.favoriteItems.sort((a, b) => a.listOrder - b.listOrder);
 
     return sectionedItems;
-  }, [favoriteOrder, favoriteItems]);
-
-  return groupedItemList;
+  }, [items, favoriteOrder]);
 }
