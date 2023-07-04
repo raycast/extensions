@@ -28,6 +28,7 @@ const useBookmarks = () => {
     error: "",
   });
 
+  let mounted = true;
   useEffect(() => {
     let retries = 0;
     const maxRetries = 10;
@@ -58,19 +59,28 @@ const useBookmarks = () => {
           { name: needJacket ? "Wear a jacket" : "No jacket needed", url: "" },
         ];
 
-        setState({ unseen: bookmarks, isLoading: false, error: "" });
+        if (mounted) {
+          setState({ unseen: bookmarks, isLoading: false, error: "" });
+        }
       } catch (error) {
         console.error("Failed to fetch bookmarks:", error);
         if (retries < maxRetries) {
           retries++;
-          setTimeout(fetchBookmarks, 5000);
+          await sleep(5000);
+          fetchBookmarks();
         } else {
-          setState({ unseen: [], isLoading: false, error: "Error" });
+          if (mounted) {
+            setState({ unseen: [], isLoading: false, error: "Error" });
+          }
         }
       }
     };
 
     fetchBookmarks();
+
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   return state;
@@ -104,7 +114,7 @@ export default function Command() {
       ))}
       <MenuBarExtra.Section>
         <MenuBarExtra.Item key={"27"} icon={Icon.Clock} title={lastupdate} />
-        <MenuBarExtra.Item key={"26"} icon={Icon.Pin} title={timezone.split("/").reverse().join(", ")} />
+        <MenuBarExtra.Item key={timezone} icon={Icon.Globe} title={timezone} />
         <MenuBarExtra.Item key={"25"} icon={Icon.Heart} title={"Made with ❤️ by EliasK"} />
       </MenuBarExtra.Section>
     </MenuBarExtra>
