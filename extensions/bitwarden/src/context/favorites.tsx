@@ -100,7 +100,7 @@ async function getSavedFavoriteOrder(): Promise<string[] | undefined> {
 }
 
 async function persistFavoriteOrder(order: string[]): Promise<void> {
-  return LocalStorage.setItem(LOCAL_STORAGE_KEY.VAULT_FAVORITE_ORDER, JSON.stringify([order]));
+  return LocalStorage.setItem(LOCAL_STORAGE_KEY.VAULT_FAVORITE_ORDER, JSON.stringify(order));
 }
 
 type FavoriteItem = Item & {
