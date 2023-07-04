@@ -14,12 +14,17 @@ export function getCurrentTimerFromCache() {
 export default function MenuBar() {
   const { data, isLoading, revalidate } = useMyTimeEntries();
   const [cacheLoading, setCacheLoading] = React.useState(true);
-  const { data: company } = useCompany();
+  const { data: company, isLoading: companyLoading } = useCompany();
 
   const runningTimer = getCurrentTimerFromCache();
-  const { callbackURLStart, callbackURLStop } = getPreferenceValues<{
+  const {
+    callbackURLStart,
+    callbackURLStop,
+    showTimerInMenuBar = true,
+  } = getPreferenceValues<{
     callbackURLStart?: string;
     callbackURLStop?: string;
+    showTimerInMenuBar?: boolean;
   }>();
 
   React.useEffect(() => {
@@ -57,8 +62,8 @@ export default function MenuBar() {
   return (
     <MenuBarExtra
       icon={{ source: "../assets/harvest-logo-icon.png" }}
-      title={formatHours(runningTimer.hours.toString(), company)}
-      isLoading={isLoading || cacheLoading}
+      title={showTimerInMenuBar ? formatHours(runningTimer.hours.toString(), company) : undefined}
+      isLoading={isLoading || cacheLoading || companyLoading}
     >
       <MenuBarExtra.Item title={`${runningTimer.project.name} - ${runningTimer.task.name}`} />
       {runningTimer.notes && runningTimer.notes.length > 0 && <MenuBarExtra.Item title={`${runningTimer.notes}`} />}

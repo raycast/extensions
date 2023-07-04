@@ -79,6 +79,14 @@
       "disabledByDefault": true,
       "preferences": [
         {
+          "name": "showTimerInMenuBar",
+          "title": "Show Timer in Menu Bar",
+          "description": "Show your running timer in the menu bar",
+          "type": "checkbox",
+          "default": true,
+          "required": false
+        },
+        {
           "name": "callbackURLStart",
           "title": "Callback URL - Timer Started",
           "description": "URL to open when a running timer starts. See README for more info.",
