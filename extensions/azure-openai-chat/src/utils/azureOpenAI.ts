@@ -1,6 +1,6 @@
 import { AzureKeyCredential, OpenAIClient } from "@azure/openai";
 
-export interface AzureOpenAIConfig {
+interface AzureOpenAIConfig {
   endpoint: string;
   apiKey: string;
 }

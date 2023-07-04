@@ -1,7 +1,7 @@
 import { Detail } from "@raycast/api";
 import dayjs from "dayjs";
 import { useEffect } from "react";
-import { History, useAI } from "../hooks";
+import { History, useAzureOpenAI } from "../hooks";
 import { formatContent } from "../utils";
 
 interface ShowDtailProps {
@@ -19,7 +19,7 @@ export function ShowDtail(props: ShowDtailProps) {
     return <Detail markdown={formatContent(histories.slice(searchPromptIdx, histories.length))} />;
   }
 
-  const { content, isLoading } = useAI(prompt);
+  const { content, isLoading } = useAzureOpenAI(prompt);
 
   useEffect(() => {
     return () => {

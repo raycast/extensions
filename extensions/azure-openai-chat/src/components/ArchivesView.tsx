@@ -1,8 +1,8 @@
 import { Action, ActionPanel, Icon, List, Toast, showToast } from "@raycast/api";
 import dayjs from "dayjs";
-import { formatContent } from "../utils";
 import { useContext } from "react";
 import { IndexContext } from "../context";
+import { formatContent } from "../utils";
 
 function EmptyItem(props: { toggleMainView: () => void }) {
   return (

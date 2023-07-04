@@ -1,22 +1,28 @@
 import { useEffect, useState } from "react";
-import type { AzureOpenAIConfig } from "../utils";
 import { AzureOpenAI, generateMessages } from "../utils";
 import { useHistories } from "./useHistories";
+import { getPreferenceValues } from "@raycast/api";
 
-interface Options {
+export interface AppPreference {
+  endpoint: string;
+  apiKey: string;
   deployment: string;
+  systemPrompt: string;
 }
 
-interface UseAzureOpenAIConfig extends AzureOpenAIConfig, Options {}
+const appPreference = getPreferenceValues<AppPreference>();
 
-export default function useAzureOpenAI(config: UseAzureOpenAIConfig, prompt: string) {
+export function useAzureOpenAI(prompt: string) {
   const [content, setContent] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const { histories } = useHistories();
 
   const messages = generateMessages(histories, prompt);
 
-  const client = AzureOpenAI(config);
+  const client = AzureOpenAI({
+    endpoint: appPreference.endpoint,
+    apiKey: appPreference.apiKey,
+  });
 
   useEffect(() => {
     (async () => {
@@ -24,7 +30,7 @@ export default function useAzureOpenAI(config: UseAzureOpenAIConfig, prompt: str
       setIsLoading(true);
       setContent("");
 
-      const events = await client.listChatCompletions(config.deployment, messages);
+      const events = await client.listChatCompletions(appPreference.deployment, messages);
 
       for await (const event of events) {
         for (const choice of event.choices) {
