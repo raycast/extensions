@@ -1,4 +1,4 @@
-import { List, ActionPanel, Action, Icon, useNavigation, Color } from "@raycast/api";
+import { List, ActionPanel, Action, Icon, Color } from "@raycast/api";
 import { SeasonTasks } from "../types/season.types";
 import useSeasonalLeaderboard from "../hooks/useSeasonalLeadboard";
 import generateLeaderboardAccessories from "../utils/generateLeaderboardAccessories";
@@ -10,8 +10,6 @@ type PropTypes = {
 };
 
 const LeaderboardComponent = ({ seasonTask, taskName }: PropTypes) => {
-  const { push } = useNavigation();
-
   const { data, isLoading } = useSeasonalLeaderboard({
     seasonId: seasonTask.seasonId,
     taskId: seasonTask.taskId,
@@ -41,15 +39,14 @@ const LeaderboardComponent = ({ seasonTask, taskName }: PropTypes) => {
               title={leaderboardData.username}
               actions={
                 <ActionPanel title="Leaderboard Actions">
-                  <Action
+                  <Action.Push
                     title="Show Player Details"
                     icon={Icon.ArrowRight}
-                    onAction={() => push(<UserProfile username={leaderboardData.username} />)}
+                    target={<UserProfile username={leaderboardData.username} />}
                   />
                   <Action.OpenInBrowser
                     title="View Player on Aimlab"
                     url={"https://aimlab.gg/u/" + encodeURIComponent(leaderboardData.username)}
-                    icon={Icon.Globe}
                   />
                 </ActionPanel>
               }
@@ -58,9 +55,14 @@ const LeaderboardComponent = ({ seasonTask, taskName }: PropTypes) => {
         </List.Section>
       ) : (
         <List.EmptyView
-          icon={{ source: "logo.png" }}
+          icon="logo.png"
           title="Nothing found!"
           description="Please visit the website instead"
+          actions={
+            <ActionPanel>
+              <Action.OpenInBrowser title="View Leaderboards on Aimlab" url={"https://aimlab.gg/aimlab/leaderboards"} />
+            </ActionPanel>
+          }
         />
       )}
     </List>

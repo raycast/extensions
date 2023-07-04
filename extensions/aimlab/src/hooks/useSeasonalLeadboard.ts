@@ -24,15 +24,13 @@ const useSeasonalLeaderboard = ({ seasonId, taskId, weaponId, modeId }: PropType
 
     const leaderboard: Leaderboard = {
       profiles: data.profiles.map(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (profile: any): Profile => ({
+        (profile: Profile): Profile => ({
           username: profile.username,
           rank: profile.rank,
         })
       ),
       data: data.data.map(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (data: any): LeaderboardData => ({
+        (data: LeaderboardData): LeaderboardData => ({
           user_id: data.user_id,
           username: data.username,
           countries: data.countries,

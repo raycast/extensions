@@ -43,7 +43,7 @@ ${data?.map((item) => `| ${item.task_name}   | ${item.bestScore.toLocaleString()
       }
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser title="View Player on Aimlab" url={playerLink} icon={Icon.Globe} />
+          <Action.OpenInBrowser title="View Player on Aimlab" url={playerLink} />
         </ActionPanel>
       }
     />

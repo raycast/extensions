@@ -1,4 +1,4 @@
-import { List } from "@raycast/api";
+import { ActionPanel, Action, List } from "@raycast/api";
 import useTopCreators from "../hooks/useTopCreators";
 import AuthorComponent from "../components/Creator";
 
@@ -15,9 +15,14 @@ const Creators = () => {
         </List.Section>
       ) : (
         <List.EmptyView
-          icon={{ source: "logo.png" }}
+          icon="logo.png"
           title="Nothing found!"
           description="Please visit the website instead"
+          actions={
+            <ActionPanel>
+              <Action.OpenInBrowser title="View Leaderboard on Aimlab" url={"https://aimlab.gg/aimlab/creators"} />
+            </ActionPanel>
+          }
         />
       )}
     </List>

@@ -87,21 +87,6 @@ export const GET_TASKS_BY_NAME = `
   }
 `;
 
-// leaderboardInput => {
-//     "leaderboardInput":{
-//       "clientId": "aimlab",
-//       "limit":200,
-//       "offset":0,
-//       "taskId":"id",
-//       "taskMode": 0,
-//       "weaponId":"weapon"
-//   },
-//   "window":
-//   {
-//       "period":"month/week/year",
-//       "value":"yr-mo-day"
-//   }
-// }
 export const GET_TASK_LEADERBOARD = `
   query getAimlabLeaderboard($leaderboardInput:LeaderboardInput!){
     aimlab{

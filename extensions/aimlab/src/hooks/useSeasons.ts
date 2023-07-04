@@ -11,8 +11,7 @@ const useSeasons = (activeOnly: boolean) => {
     }
 
     const seasons: Season[] = data.map(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (season: any): Season => ({
+      (season: Season): Season => ({
         id: season.id,
         name: season.name,
         description: season.description,
@@ -22,8 +21,7 @@ const useSeasons = (activeOnly: boolean) => {
         createdAt: season.createdAt,
         updatedAt: season.updatedAt,
         tasks: season.tasks.map(
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (task: any): SeasonTasks => ({
+          (task: SeasonTasks): SeasonTasks => ({
             seasonId: task.seasonId,
             taskId: task.taskId,
             sortOrder: task.sortOrder,

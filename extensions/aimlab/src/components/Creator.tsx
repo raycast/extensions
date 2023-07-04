@@ -1,4 +1,4 @@
-import { List, ActionPanel, Action, Icon, useNavigation, Color } from "@raycast/api";
+import { List, ActionPanel, Action, Icon, Color } from "@raycast/api";
 import { Author } from "../types/author.types";
 import generateCreatorAccessories from "../utils/generateCreatorAccessories";
 import UserProfile from "../views/profile";
@@ -11,7 +11,6 @@ type PropTypes = {
 const rankColors = [Color.Yellow, Color.SecondaryText, Color.Orange];
 
 const AuthorComponent = ({ author, index }: PropTypes) => {
-  const { push } = useNavigation();
   const rank = index + 1;
 
   return (
@@ -22,7 +21,10 @@ const AuthorComponent = ({ author, index }: PropTypes) => {
               value: { source: Icon.Crown, tintColor: rankColors[rank - 1] },
               tooltip: "Rank: " + rank,
             }
-          : ""
+          : {
+              value: { source: Icon.Dot },
+              tooltip: "Rank: " + rank,
+            }
       }
       title={author.username}
       subtitle={{ value: "#" + rank, tooltip: "Rank" }}
@@ -30,15 +32,14 @@ const AuthorComponent = ({ author, index }: PropTypes) => {
       keywords={[author.username]}
       actions={
         <ActionPanel title="Top Creator Actions">
-          <Action
+          <Action.Push
             title="Show Player Details"
             icon={Icon.ArrowRight}
-            onAction={() => push(<UserProfile username={author.username} />)}
+            target={<UserProfile username={author.username} />}
           />
           <Action.OpenInBrowser
             title="View Player on Aimlab"
             url={"https://aimlab.gg/u/" + encodeURIComponent(author.username)}
-            icon={Icon.Globe}
           />
         </ActionPanel>
       }

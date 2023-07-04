@@ -20,11 +20,7 @@ const SeasonComponent = ({ season }: PropTypes) => {
           return <SeasonTaskComponent key={task.taskId} season={season} seasonTask={task} />;
         })
       ) : (
-        <List.EmptyView
-          icon={{ source: "logo.png" }}
-          title="No tasks found!"
-          description="Please visit the website instead"
-        />
+        <List.EmptyView icon="logo.png" title="No tasks found!" description="Please try again" />
       )}
     </List.Section>
   );

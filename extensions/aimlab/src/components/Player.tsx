@@ -1,5 +1,5 @@
 import type { Player } from "../types/player.types";
-import { List, ActionPanel, Action, Icon, environment, useNavigation } from "@raycast/api";
+import { List, ActionPanel, Action, Icon, environment } from "@raycast/api";
 import generatePlayerAccessories from "../utils/generatePlayerAccessories";
 import generatePlayerRankData from "../utils/generatePlayerRankData";
 import PlaysAgg from "./PlaysAgg";
@@ -11,8 +11,6 @@ type PropTypes = {
 };
 
 const PlayerComponent = ({ player, isShowingDetail, setIsShowingDetail }: PropTypes) => {
-  const { push } = useNavigation();
-
   const { playerSkill, rankingName, rankingTier, rankingLevel, rankingImage, progress, playerLink } =
     generatePlayerRankData(player);
 
@@ -58,17 +56,13 @@ const PlayerComponent = ({ player, isShowingDetail, setIsShowingDetail }: PropTy
       }
       actions={
         <ActionPanel title="Player Actions">
-          <Action
-            title="Show Player Tasks"
-            icon={Icon.ArrowRight}
-            onAction={() => push(<PlaysAgg player={player} />)}
-          />
+          <Action.Push title="Show Player Tasks" icon={Icon.ArrowRight} target={<PlaysAgg player={player} />} />
           <Action
             title={isShowingDetail ? "Hide Player Info" : "Show Player Info"}
             icon={Icon.Sidebar}
             onAction={() => setIsShowingDetail(!isShowingDetail)}
           />
-          <Action.OpenInBrowser title="View Player on Aimlab" url={playerLink} icon={Icon.Globe} />
+          <Action.OpenInBrowser title="View Player on Aimlab" url={playerLink} />
         </ActionPanel>
       }
     />

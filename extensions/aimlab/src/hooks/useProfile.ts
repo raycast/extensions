@@ -19,8 +19,7 @@ const useProfile = (username: string) => {
           skill: data.ranking.skill,
         },
         skillScores: data.skillScores.map(
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (skillScore: any): SkillScores => ({
+          (skillScore: SkillScores): SkillScores => ({
             name: skillScore.name,
             score: skillScore.score,
           })
