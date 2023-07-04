@@ -181,7 +181,26 @@
       "title": "Merge Requests Menu Bar",
       "description": "Display Merge Request directly in the Menubar",
       "mode": "menu-bar",
-      "interval": "15m"
+      "interval": "15m",
+      "preferences": [
+        {
+          "name": "maxitems",
+          "description": "Maximum Merge Requests shown",
+          "type": "textfield",
+          "required": false,
+          "title": "Max. Merge Requests",
+          "placeholder": "10"
+        },
+        {
+          "name": "showtext",
+          "description": "Show Merge Requests Count",
+          "type": "checkbox",
+          "required": false,
+          "label": "Show Merge Requests Count",
+          "title": "Appearance",
+          "default": true
+        }
+      ]
     }
   ],
   "preferences": [
