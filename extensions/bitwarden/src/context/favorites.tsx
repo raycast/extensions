@@ -40,7 +40,8 @@ export function FavoritesProvider(props: FavoritesProviderProps) {
       if (!item.favorite) return [];
       return !favoriteOrder.some((fid) => fid === item.id) ? [item.id] : [];
     });
-    setFavoriteOrder([...new Set(cleanFavoriteOrder)]);
+    if (cleanFavoriteOrder.length === 0) return;
+    setFavoriteOrder(Array.from(new Set(cleanFavoriteOrder)));
   }, [items, !!favoriteOrder]);
 
   useEffect(() => {
@@ -69,12 +70,12 @@ export function FavoritesProvider(props: FavoritesProviderProps) {
   };
 
   const moveFavorite = async ({ id }: Item, direction: "up" | "down") => {
-    const currentPosition = favoriteOrder.findIndex((fid) => fid === id);
+    const currentPosition = favoriteOrder.indexOf(id);
     if (currentPosition === -1) return;
 
     const newPosition = currentPosition + (direction === "up" ? -1 : 1);
     if (newPosition >= 0 && newPosition < favoriteOrder.length) {
-      const newFavoriteOrder = [...favoriteOrder];
+      const newFavoriteOrder = favoriteOrder.slice(0);
       newFavoriteOrder.splice(currentPosition, 1); // remove from current position
       newFavoriteOrder.splice(newPosition, 0, id); // insert at new position
       setFavoriteOrder(newFavoriteOrder);
