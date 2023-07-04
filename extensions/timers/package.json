@@ -9,7 +9,8 @@
     "marcjulian",
     "GastroGeek",
     "pernielsentikaer",
-    "lokot0k"
+    "lokot0k",
+    "mitchwu"
   ],
   "categories": [
     "Productivity",
@@ -63,7 +64,7 @@
       "name": "start60MinuteTimer",
       "title": "Start 60 Minute Timer",
       "description": "Set a countdown for 60 minutes.",
-      "mode": "view"
+      "mode": "no-view"
     },
     {
       "name": "start90MinuteTimer",
@@ -137,6 +138,13 @@
       "mode": "no-view"
     },
     {
+      "name": "stopwatchMenuBar",
+      "title": "Stopwatch Menu Bar",
+      "description": "View, start, or stop existing stopwatches from the Menu Bar.",
+      "mode": "menu-bar",
+      "interval": "10s"
+    },
+    {
       "name": "previewAlertSounds",
       "title": "Preview Alert Sounds",
       "description": "Play samples of different alert sound effects.",
@@ -183,6 +191,63 @@
       ]
     },
     {
+      "name": "volumeSetting",
+      "type": "textfield",
+      "required": true,
+      "title": "Timer Alert Volume",
+      "description": "Volume of the alert sound. Decimal between 0 and 1.",
+      "default": "1"
+    },
+    {
+      "name": "ringContinuously",
+      "type": "checkbox",
+      "required": true,
+      "title": "Timer Alert Type",
+      "description": "Whether or not to play the timer alert sound continuously until dismissed.",
+      "label": "Ring Continuously",
+      "default": false
+    },
+    {
+      "name": "showMenuBarItemWhen",
+      "type": "dropdown",
+      "required": true,
+      "title": "Show Menu Bar Item When",
+      "description": "When to show icon in menubar.",
+      "default": "Always",
+      "data": [
+        {
+          "title": "Never",
+          "value": "never"
+        },
+        {
+          "title": "Only When Running",
+          "value": "onlyWhenRunning"
+        },
+        {
+          "title": "Always",
+          "value": "always"
+        }
+      ]
+    },
+    {
+      "name": "showTitleInMenuBar",
+      "type": "checkbox",
+      "required": true,
+      "title": "Show Title in Menu Bar",
+      "description": "Whether or not to show the timer or stopwatch title in the menu bar.",
+      "label": "Show title",
+      "default": true
+    },
+    {
+      "name": "copyOnSwStop",
+      "type": "checkbox",
+      "required": true,
+      "title": "Copy on Stopwatch Stop",
+      "description": "Whether or not to copy the elapsed time on a stopwatch when it is stopped.",
+      "label": "Copy elapsed time",
+      "default": false
+    },
+    {
       "name": "newTimerInputOrder",
       "type": "dropdown",
       "required": true,
@@ -199,32 +264,6 @@
           "value": "ssmmhh"
         }
       ]
-    },
-    {
-      "name": "ringContinuously",
-      "type": "checkbox",
-      "required": true,
-      "title": "Timer Alert Type",
-      "description": "Whether or not to play the timer alert sound continuously until dismissed.",
-      "label": "Ring Continuously",
-      "default": false
-    },
-    {
-      "name": "copyOnSwStop",
-      "type": "checkbox",
-      "required": true,
-      "title": "Copy on Stopwatch Stop",
-      "description": "Whether or not to copy the elapsed time on a stopwatch when it is stopped.",
-      "label": "Copy elapsed time",
-      "default": false
-    },
-    {
-      "name": "volumeSetting",
-      "type": "textfield",
-      "required": true,
-      "title": "Timer Alert Volume",
-      "description": "Volume of the alert sound. Decimal between 0 and 1.",
-      "default": "1"
     }
   ],
   "dependencies": {

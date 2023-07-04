@@ -1,11 +1,13 @@
-import { Clipboard, closeMainWindow, getPreferenceValues, open, Toast } from "@raycast/api";
+import { Clipboard, closeMainWindow, getPreferenceValues, LaunchProps, open, Toast } from "@raycast/api";
 
 import { quickAddTask, handleError, updateTask } from "./api";
 import { isTodoistInstalled, checkTodoistApp } from "./helpers/isTodoistInstalled";
 import { getTaskAppUrl, getTaskUrl } from "./helpers/tasks";
 import { initializeApi } from "./helpers/withTodoistApi";
 
-const command = async (props: { arguments: Arguments.QuickAddTask }) => {
+type QuickAddTaskProps = { arguments: Arguments.QuickAddTask } & LaunchProps;
+
+export default async function QuickAddTask(props: QuickAddTaskProps) {
   await initializeApi();
   const toast = new Toast({ style: Toast.Style.Animated, title: "Creating task" });
   await toast.show();
@@ -18,7 +20,7 @@ const command = async (props: { arguments: Arguments.QuickAddTask }) => {
     }
 
     const { id } = await quickAddTask({
-      text: props.arguments.text,
+      text: props.arguments.text ?? props.fallbackText,
     });
 
     await updateTask({ id, description: props.arguments.description });
@@ -44,6 +46,4 @@ const command = async (props: { arguments: Arguments.QuickAddTask }) => {
   } catch (error) {
     handleError({ error, title: "Unable to create task" });
   }
-};
-
-export default command;
+}

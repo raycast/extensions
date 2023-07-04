@@ -235,6 +235,14 @@
       "description": "Conversation with Home Assistant Assist",
       "mode": "view",
       "subtitle": "Home Assistant"
+    },
+    {
+      "name": "connection",
+      "title": "Connection Check",
+      "description": "Check the Connection to Home Assistant",
+      "mode": "view",
+      "subtitle": "Home Assistant",
+      "disabledByDefault": true
     }
   ],
   "preferences": [
@@ -245,6 +253,30 @@
       "title": "Home Assistant URL",
       "description": "URL of your Home Assistant instance",
       "placeholder": "http://homeassistant.local:8123"
+    },
+    {
+      "name": "instanceInternal",
+      "type": "textfield",
+      "required": false,
+      "title": "Internal Home Assistant URL (optional)",
+      "description": "URL of your Home Assistant instance in your Home Network. This url is used when the current WiFI SSID is in the SSID list of your Home WiFi or the url is pingable.",
+      "placeholder": "http://homeassistant.local:8123"
+    },
+    {
+      "name": "homeSSIDs",
+      "type": "textfield",
+      "required": false,
+      "title": "Home Network Detection",
+      "description": "A list of your Home Network WiFi SSIDs separated by a comma if you have multiple. The SSIDs are used to detect your Home WiFi. Only required if the Internal Home Assistant URL is set.",
+      "placeholder": "HomeWiFi1,HomeWiFi2"
+    },
+    {
+      "name": "usePing",
+      "description": "Use ping to detect Home Network",
+      "type": "checkbox",
+      "required": false,
+      "label": "Use Ping",
+      "default": true
     },
     {
       "name": "token",
@@ -292,16 +324,20 @@
     "home-assistant-js-websocket": "^5.11.1",
     "javascript-time-ago": "^2.5.9",
     "lodash-es": "^4.17.21",
+    "multicast-dns": "^7.2.5",
     "node-fetch": "^2.6.1",
     "open": "^8.3.0",
+    "ping": "^0.4.4",
     "url-join": "^4.0.1",
     "ws": "^8.2.3"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.5",
     "@types/lodash-es": "^4.17.6",
+    "@types/multicast-dns": "^7.2.1",
     "@types/node": "^18.8.3",
     "@types/node-fetch": "^2.5.12",
+    "@types/ping": "^0.4.1",
     "@types/url-join": "^4.0.1",
     "@types/ws": "^8.2.0",
     "eslint": "^7.31.0",

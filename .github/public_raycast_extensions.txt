@@ -19,3 +19,7 @@ pinata
 grafbase
 tailscale
 todoist
+screen-studio
+openverse
+putio
+warp

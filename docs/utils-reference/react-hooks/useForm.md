@@ -59,7 +59,7 @@ import { useForm, FormValidation } from "@raycast/utils";
 interface SignUpFormValues {
   firstName: string;
   lastName: string;
-  birthday: Date;
+  birthday: Date | null;
   password: string;
   number: string;
   hobbies: string[];

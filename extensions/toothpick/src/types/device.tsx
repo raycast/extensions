@@ -178,3 +178,7 @@ export type DeviceBatteryLevels = {
   left: string | undefined;
   right: string | undefined;
 };
+
+export type DeviceDefinition = {
+  name: string;
+} & Partial<DeviceBatteryLevels>;

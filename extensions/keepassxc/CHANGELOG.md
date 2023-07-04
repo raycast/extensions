@@ -1,5 +1,9 @@
 # KeepassXC Extension Changelog
 
+## [Fix] - 2023-06-20
+
+- Fixed a logic bug
+
 ## [Enhancement] - 2023-05-23
 
 - New feature/action "Paste Username" so as to be more productive;

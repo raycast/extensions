@@ -7,4 +7,4 @@ import { handleTaskEitherError } from "./util/utils";
 export default pipe(
   music.player.previous,
   handleTaskEitherError(SFSymbols.WARNING + " Failed to rewind track", SFSymbols.TRACK_PREVIOUS + " Track rewinded")
-)();
+);

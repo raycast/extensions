@@ -8,3 +8,6 @@
 
 # swiftc
 .build
+
+# https://developers.raycast.com/migration/v1.50.0
+raycast-env.d.ts

@@ -9,4 +9,5 @@ export type postValues = {
   idList: string;
   due?: Date;
   desc?: string;
+  idMember?: string[];
 };

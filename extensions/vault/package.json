@@ -28,6 +28,15 @@
       "title": "Vault url",
       "description": "Vault url",
       "type": "textfield",
+      "default": "http://localhost:8200",
+      "required": true
+    },
+    {
+      "name": "secretEngine",
+      "title": "Secret engine",
+      "description": "Used only if not set by 'List Engines' action",
+      "type": "textfield",
+      "default": "secret",
       "required": true
     },
     {
@@ -103,14 +112,14 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.50.0",
-    "@raycast/utils": "1.5.0",
+    "@raycast/api": "1.52.1",
+    "@raycast/utils": "1.7.0",
     "got": "12.5.3",
     "human-date": "1.4.0",
     "node-vault": "0.9.22"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.5",
+    "@raycast/eslint-config": "1.0.5",
     "@types/human-date": "1.4.2",
     "@types/node": "18.14.2",
     "@types/react": "18.0.28",

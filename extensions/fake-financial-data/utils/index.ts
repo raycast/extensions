@@ -1,5 +1,6 @@
-import { times, random, padStart } from "lodash";
 import { Clipboard, showHUD } from "@raycast/api";
+import { times, random, padStart } from "lodash";
+import { IBAN } from "ibankit";
 
 export const generateFakeSWIFT = (): string => {
   // Define a string containing all the letters in the alphabet
@@ -11,7 +12,7 @@ export const generateFakeSWIFT = (): string => {
     return letters[random(0, letters.length - 1)];
   }).join("");
 
-  return bic
+  return bic;
 };
 
 export const generateFakeAccountNumber = (): string => {
@@ -26,6 +27,21 @@ export const generateFakeAccountNumber = (): string => {
   return paddedNumber;
 };
 
+export const generateFakeSortCode = (): string => {
+  // The length of a sort code is always six digits.
+  const sortCodeLength = 6;
+  let sortCode = "";
+
+  for (let i = 0; i < sortCodeLength; i++) {
+    // Generate a random number between 0 and 9.
+    const randomNumber = Math.floor(Math.random() * 10);
+    // Append the random number to the sort code.
+    sortCode += randomNumber.toString();
+  }
+
+  return sortCode;
+};
+
 export const copyToClipboard = async (value: string): Promise<void> => {
   try {
     await Clipboard.copy(value);
@@ -33,4 +49,24 @@ export const copyToClipboard = async (value: string): Promise<void> => {
   } catch (error) {
     await showHUD("❌ Couldn't copy");
   }
+};
+
+export const copyIbanToClipboard = async () => {
+  const iban = IBAN.random();
+  await copyToClipboard(iban.toString());
+};
+
+export const copySwiftToClipboard = async () => {
+  const swift = generateFakeSWIFT();
+  await copyToClipboard(swift);
+};
+
+export const copyAccountNumberToClipboard = async () => {
+  const accountNumber = generateFakeAccountNumber();
+  await copyToClipboard(accountNumber);
+};
+
+export const copySortCodeToClipboard = async () => {
+  const sortCode = generateFakeSortCode();
+  await copyToClipboard(sortCode);
 };

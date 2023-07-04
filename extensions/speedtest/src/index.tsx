@@ -234,7 +234,7 @@ function CopySummaryAction(props: { result: Result }): JSX.Element {
     `Upload: ${speedToString(r.upload)}`,
     `Result: ${r.url || "?"}`,
   ];
-  return <Action.CopyToClipboard title="Copy Summary To Clipboard" content={parts.join("; ")} />;
+  return <Action.CopyToClipboard title="Copy Summary to Clipboard" content={parts.join("; ")} />;
 }
 
 export default function SpeedtestList() {

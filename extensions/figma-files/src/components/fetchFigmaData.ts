@@ -40,7 +40,7 @@ async function fetchFiles(): Promise<ProjectFiles[][]> {
     //fetch all files for each project of a team
     const projects = (team.projects || []).map(async (project) => {
       try {
-        const response = await fetch(`https://api.figma.com/v1/projects/${project.id}/files`, {
+        const response = await fetch(`https://api.figma.com/v1/projects/${project.id}/files?branch_data=true`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",

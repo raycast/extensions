@@ -1,5 +1,18 @@
 # Bitwarden Changelog
 
+## [Update] - 2023-06-12
+
+- Fixed a bug that prevented the user from searching by username/email
+- Updated the raycast packages and resolved a small type checking TODO
+
+## [New Preference] - 2023-06-03
+
+- Added preference to change the window behaviour when copying values
+
+## [New Command] - 2023-05-31
+
+- Added Logout command
+
 ## [Search Vault Command Improvements] - 2023-05-22
 
 - Added a Folder Dropdown to filter the list by folder

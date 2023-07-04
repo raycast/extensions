@@ -1,5 +1,60 @@
 # Changelog
 
+## 1.54.0 - 2023-06-21
+
+### 💎 Improvements
+
+- Add an action to clear the local storage when an unexpected error occurs
+- When using `showToast` while the Raycast window is closed (for example if a command is launched with a hotkey), a `HUD` will be shown instead
+- Improve the error messages when a command fails to load
+- The NodeJS inspector will now use a random free port instead of using the default 9229 port (which you can use for other NodeJS scripts)
+
+### 🐞 Fixes
+
+- Fix a performance issue on the first render of Lists and Grids
+- Fix an issue where required arguments wouldn’t be required when launching a command right after installing it
+- Fix a regression where the deprecated `render` method would not work anymore
+- Fix an edge case where some Form items would not be updated if some items would be added at the same time
+
+## 1.53.0 - 2023-06-07
+
+### ✨ New
+
+- **Metadata**: `List.Item.Detail.Metadata.TagList.Item` and `Detail.Metadata.TagList.Item` now accepts an action handler via the `onAction` prop!
+- Added [LaunchContext](https://developers.raycast.com/api-reference/command#launchcontext) support to `Create Quicklink` and `Create Snippet:`
+  - `launchCommand({ ownerOrAuthorName: "raycast", extensionName: "raycast", name: "create-quicklink", type: LaunchType.UserInitiated, context: { name: "context name", application: "Xcode", }});`
+  - `launchCommand({ ownerOrAuthorName: "raycast", extensionName: "snippets", name: "create-snippet", type: LaunchType.UserInitiated, context: { name: "context name", text: "context text", keyword: "context keyword" }})`
+- **Date Pickers:** You can now add a minimum and maximum date to `Form.DatePicker` and `Action.PickDate` using the `min` and `max` props to limit the suggestions shown when entering a date.
+
+### 💎 Improvements
+
+- Updated NodeJS to 18.16.0
+- Improve the “Fork Extension” action to avoid modifying the manifest as much as possible.
+
+### 🐞 Fixes
+
+- Fixed a bug that sometimes caused `no-view` commands to not display errors.
+- Fixed a bug that caused OAuth not to work if the `client.authorize(authorizationRequest)` was executed more than once.
+- Fixed a problem where commands with background execution would not display the OAuth sign-in screen.
+- **SVG**: Properly handle `currentColor`
+- **List/Grid**: Fixed `selectedItemId` being sometimes ignored on the first render.
+- **Form**: Fixed triggering `onChange` on the TextArea when using a markdown keyboard shortcut.
+
+## 1.52.0 - 2023-05-24
+
+### ✨ New
+
+- **SVG**: You can now use the Raycast `Color` in an SVG.
+
+### 💎 Improvements
+
+- Improve the error message when a required property is missing on a component
+
+### 🐞 Fixes
+
+- Fixed an edge case where the keyboard events triggered while an extension is loading would not be passed down to the extension once loaded
+- Fixed an issue where the fallback of an image would show while it is being loaded
+
 ## 1.51.0 - 2023-05-10
 
 ### ✨ New

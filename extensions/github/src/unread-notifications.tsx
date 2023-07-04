@@ -33,6 +33,17 @@ function UnreadNotifications() {
     return response.data;
   });
 
+  const hasUnread = data && data.length > 0;
+
+  async function markAllNotificationsAsRead() {
+    try {
+      await mutate(octokit.rest.activity.markNotificationsAsRead());
+      showHUD("All have been marked as Read");
+    } catch {
+      showHUD("❌ Could not mark all as read");
+    }
+  }
+
   async function openNotification(notification: Notification) {
     try {
       const openAndMarkNotificationAsRead = async () => {
@@ -45,7 +56,7 @@ function UnreadNotifications() {
           return data?.filter((n) => n.id !== notification.id) ?? [];
         },
       });
-    } catch (err) {
+    } catch {
       showHUD("❌ Could not open the notification");
     }
   }
@@ -56,8 +67,8 @@ function UnreadNotifications() {
 
   return (
     <MenuBarExtra
-      icon={getGitHubIcon(data && data.length > 0)}
-      title={data && data.length > 0 ? String(data.length) : undefined}
+      icon={getGitHubIcon(hasUnread)}
+      title={hasUnread ? String(data.length) : undefined}
       isLoading={isLoading}
     >
       <MenuBarExtra.Item
@@ -68,7 +79,7 @@ function UnreadNotifications() {
       />
 
       <MenuBarExtra.Section>
-        {data && data.length > 0 ? (
+        {hasUnread ? (
           data.map((notification) => {
             const icon = getNotificationIcon(notification);
             const updatedAt = new Date(notification.updated_at);
@@ -90,6 +101,13 @@ function UnreadNotifications() {
       </MenuBarExtra.Section>
 
       <MenuBarExtra.Section>
+        {hasUnread ? (
+          <MenuBarExtra.Item
+            title="Mark All as Read"
+            shortcut={{ /* gmail uses shift-i to mark as read */ modifiers: ["cmd"], key: "i" }}
+            onAction={markAllNotificationsAsRead}
+          />
+        ) : null}
         <MenuBarExtra.Item
           title="View All Notifications"
           shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}

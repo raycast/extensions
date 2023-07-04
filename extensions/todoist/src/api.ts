@@ -9,7 +9,7 @@ import FormData from "form-data";
 import mime from "mime";
 import { Dispatch, SetStateAction } from "react";
 
-import { getTodoistApi } from "./helpers/withTodoistApi";
+import { getTodoistApi, getTodoistRestApi } from "./helpers/withTodoistApi";
 
 let sync_token = "*";
 
@@ -84,6 +84,17 @@ export async function syncRequest(params: Record<string, any>) {
 
   sync_token = data.sync_token;
   return data;
+}
+
+export async function getFilterTasks(filter: string) {
+  if (filter == "") {
+    return [];
+  }
+
+  const todoistApi = getTodoistRestApi();
+  const { data } = await todoistApi.get<Task[]>("/tasks", { params: { filter: filter } });
+
+  return data as Task[];
 }
 
 export async function initialSync() {
@@ -317,7 +328,8 @@ export async function updateTask(args: UpdateTaskArgs, cachedData?: CachedDataPa
     ],
   });
 
-  if (cachedData?.data) {
+  // If returned items length is 0 then no update is needed, we can skip.
+  if (cachedData?.data && updatedData.items.length > 0) {
     cachedData.setData({
       ...cachedData.data,
       items: cachedData.data.items.map((i) => (i.id === args.id ? updatedData.items[0] : i)),

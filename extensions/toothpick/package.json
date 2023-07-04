@@ -13,11 +13,12 @@
   },
   "scripts": {
     "dev": "ray develop",
+    "build": "ray build -e dist",
+    "publish": "ray publish",
     "lint": "ray lint",
     "fix-lint": "ray lint --fix",
-    "format": "prettier --write \"**/*.{ts,tsx}\"",
-    "build": "ray build -e dist",
-    "publish": "ray publish"
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx}\" --no-error-on-unmatched-pattern",
+    "svg:optimize": "find assets -type f -name '*.svg' -print0 | xargs -0 -n 1 -P 6 svgo"
   },
   "dependencies": {
     "@raycast/api": "^1.38.2",
@@ -33,6 +34,7 @@
     "eslint-config-prettier": "^8.3.0",
     "prettier": "^2.5.1",
     "react-devtools": "^4.19.2",
+    "svgo": "^3.0.2",
     "typescript": "^4.4.3"
   },
   "commands": [
@@ -55,7 +57,8 @@
           "type": "text",
           "required": true
         }
-      ]
+      ],
+      "disabledByDefault": true
     },
     {
       "name": "disconnect-device",
@@ -69,25 +72,37 @@
           "type": "text",
           "required": true
         }
-      ]
+      ],
+      "disabledByDefault": true
     },
     {
       "name": "connect-favorite-device-1",
       "title": "Connect Favorite Device #1",
       "description": "Shortcut for connecting to favorite device #1.",
-      "mode": "no-view"
+      "mode": "no-view",
+      "disabledByDefault": true
     },
     {
       "name": "connect-favorite-device-2",
       "title": "Connect Favorite Device #2",
       "description": "Shortcut for connecting to favorite device #2.",
-      "mode": "no-view"
+      "mode": "no-view",
+      "disabledByDefault": true
     },
     {
       "name": "connect-favorite-device-3",
       "title": "Connect Favorite Device #3",
       "description": "Shortcut for connecting to favorite device #3.",
-      "mode": "no-view"
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "view-mapped-devices",
+      "title": "[Dev] View mapped Devices",
+      "subtitle": "Toothpick",
+      "description": "A list of all mapped devices. Used for development.",
+      "mode": "view",
+      "disabledByDefault": true
     }
   ],
   "preferences": [
@@ -104,21 +119,21 @@
       "type": "textfield",
       "required": false,
       "title": "Favorite Device #1",
-      "description": "Name of the device you want to bind to 'Connect to Favorite Device #1' command"
+      "description": "Display name of the device you want to bind to 'Connect to Favorite Device #1' command"
     },
     {
       "name": "favoriteDevice2",
       "type": "textfield",
       "required": false,
       "title": "Favorite Device #2",
-      "description": "Name of the device you want to bind to 'Connect to Favorite Device #2' command"
+      "description": "Display name of the device you want to bind to 'Connect to Favorite Device #2' command"
     },
     {
       "name": "favoriteDevice3",
       "type": "textfield",
       "required": false,
       "title": "Favorite Device #3",
-      "description": "Name of the device you want to bind to 'Connect to Favorite Device #3' command"
+      "description": "Display name of the device you want to bind to 'Connect to Favorite Device #3' command"
     },
     {
       "name": "closeOnSuccessfulConnection",
