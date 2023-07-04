@@ -2,7 +2,8 @@
 
 ## [New Actions] - 2023-06-30
 
-Add "Open in Warpcast (Web)" action to profile and cast search results.
+- Add "Open in Warpcast (Web)" action to profile and cast search results
+- Remove "Copy Shareable Link" action
 
 ## [Optimizations] - 2023-03-02
 
