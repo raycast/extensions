@@ -5,7 +5,6 @@
   "description": "Quickly create Tasks, see your scheule, & share Scheduling Links from Reclaim",
   "icon": "command-icon.png",
   "author": "webergnr",
-  "owner": "reclaimai",
   "categories": [
     "Productivity",
     "Applications"
