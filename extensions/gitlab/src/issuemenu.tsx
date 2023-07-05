@@ -48,7 +48,7 @@ export default function MenuCommand(): JSX.Element {
     <MenuBarExtra
       isLoading={isLoading}
       title={getShowItemsCountPreference() ? (assignedCount <= 0 ? undefined : `${assignedCount}`) : undefined}
-      icon={{ source: "exclamation.png", tintColor: Color.PrimaryText }}
+      icon={{ source: "issues.svg", tintColor: Color.PrimaryText }}
       tooltip="GitLab Issues"
     >
       <MenuBarSection title="Issues">
