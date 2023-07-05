@@ -1,4 +1,7 @@
-import { NipponColorAgent } from "./nipponColorAgent";
+export type nipponColor = {
+  name: string;
+  colorCode: string;
+};
 
 export type ioResponseJson = {
   index: string;

@@ -34,7 +34,7 @@ export default function Command() {
           subtitle={colroCode}
           actions={
             <ActionPanel>
-              <Action.OpenInBrowser title="Open in Nippon Colors" url={`${NipponColorAgent.BASE_URL}#${name}`} />
+              <Action.OpenInBrowser title="Open in Nippon Colors" url={`https://nipponcolors.com#${name}`} />
               <Action.CopyToClipboard content={colroCode} />
             </ActionPanel>
           }
