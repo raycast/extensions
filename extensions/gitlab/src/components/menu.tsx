@@ -1,4 +1,4 @@
-import { Image, Keyboard, MenuBarExtra } from "@raycast/api";
+import { Image, Keyboard, MenuBarExtra, getPreferenceValues } from "@raycast/api";
 import React from "react";
 import { ReactNode } from "react";
 
@@ -12,6 +12,7 @@ function clipText(text: string) {
 
 export function MenuBarItem(props: {
   title: string;
+  subtitle?: string;
   icon?: Image.ImageLike;
   shortcut?: Keyboard.Shortcut | undefined;
   onAction?: ((event: object) => void) | undefined;
@@ -21,6 +22,7 @@ export function MenuBarItem(props: {
     <MenuBarExtra.Item
       title={clipText(props.title)}
       icon={props.icon}
+      subtitle={props.subtitle}
       shortcut={props.shortcut}
       onAction={props.onAction}
       tooltip={props.tooltip}
@@ -28,7 +30,10 @@ export function MenuBarItem(props: {
   );
 }
 
-function shownElements(elements?: ReactNode, maxElements?: number): { shown?: JSX.Element[]; hidden: number } {
+function shownElements(elements?: ReactNode, maxElements?: number): { shown?: ReactNode; hidden: number } {
+  if (!maxElements) {
+    return { shown: elements, hidden: 0 };
+  }
   if (React.isValidElement(elements)) {
     return { shown: [elements], hidden: 0 };
   }
@@ -85,4 +90,28 @@ export function MenuBarSubmenu(props: {
       {props.children}
     </MenuBarExtra.Submenu>
   );
+}
+
+export function getBoundedPreferenceNumber(params: {
+  name: string;
+  min?: number;
+  max?: number;
+  default?: number;
+}): number {
+  const boundMin = params.min || 1;
+  const boundMax = params.max || 100;
+  const fallback = params.default || 10;
+  const prefs = getPreferenceValues();
+  const maxtext = (prefs[params.name] as string) || "";
+  const max = Number(maxtext);
+  if (isNaN(max)) {
+    return fallback;
+  }
+  if (max < boundMin) {
+    return fallback;
+  }
+  if (max > boundMax) {
+    return fallback;
+  }
+  return max;
 }

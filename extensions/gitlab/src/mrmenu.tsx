@@ -1,8 +1,6 @@
 import {
   Color,
   Icon,
-  Image,
-  Keyboard,
   LaunchType,
   MenuBarExtra,
   Toast,
@@ -16,22 +14,18 @@ import { useMyMergeRequests } from "./components/mr_my";
 import { MRScope, MRState } from "./components/mr";
 import { useMyReviews } from "./components/reviews";
 import { MergeRequest } from "./gitlabapi";
-import { MenuBarItem, MenuBarSection, MenuBarSubmenu } from "./components/menu";
+import { MenuBarItem, MenuBarSection, MenuBarSubmenu, getBoundedPreferenceNumber } from "./components/menu";
+
+async function launchReviewsCommand(): Promise<void> {
+  return launchCommand({ name: "reviews", type: LaunchType.UserInitiated });
+}
+
+async function launchAssignedMergeRequests(): Promise<void> {
+  return launchCommand({ name: "mr_my", type: LaunchType.UserInitiated });
+}
 
 function getMaxMergeRequestsPreference(): number {
-  const prefs = getPreferenceValues();
-  const maxtext = (prefs.maxitems as string) || "";
-  const max = Number(maxtext);
-  if (isNaN(max)) {
-    return 10;
-  }
-  if (max < 1) {
-    return 10;
-  }
-  if (max > 100) {
-    return 10;
-  }
-  return max;
+  return getBoundedPreferenceNumber({ name: "maxitems" });
 }
 
 function getShowItemsCountPreference(): boolean {
@@ -63,16 +57,13 @@ export default function MenuCommand(): JSX.Element {
               title="Open Assigned Merge Requests"
               icon={Icon.Terminal}
               shortcut={{ modifiers: ["cmd"], key: "m" }}
-              onAction={() => launchCommand({ name: "mr_my", type: LaunchType.UserInitiated })}
+              onAction={() => launchAssignedMergeRequests()}
             />
           </MenuBarExtra.Section>
           <MenuBarSection
             maxChildren={getMaxMergeRequestsPreference()}
             moreElement={(hidden) => (
-              <MenuBarItem
-                title={`... ${hidden} more assigned`}
-                onAction={() => launchCommand({ name: "mr_my", type: LaunchType.UserInitiated })}
-              />
+              <MenuBarItem title={`... ${hidden} more assigned`} onAction={() => launchAssignedMergeRequests()} />
             )}
           >
             {mrsAssigned?.map((m) => (
@@ -91,16 +82,13 @@ export default function MenuCommand(): JSX.Element {
               title="Open My Reviews"
               icon={Icon.Terminal}
               shortcut={{ modifiers: ["cmd"], key: "r" }}
-              onAction={() => launchCommand({ name: "reviews", type: LaunchType.UserInitiated })}
+              onAction={() => launchReviewsCommand()}
             />
           </MenuBarSection>
           <MenuBarSection
             maxChildren={getMaxMergeRequestsPreference()}
             moreElement={(hidden) => (
-              <MenuBarItem
-                title={`... ${hidden} more to review`}
-                onAction={() => launchCommand({ name: "reviews", type: LaunchType.UserInitiated })}
-              />
+              <MenuBarItem title={`... ${hidden} more to review`} onAction={() => launchReviewsCommand()} />
             )}
           >
             {mrsReview?.map((m) => (

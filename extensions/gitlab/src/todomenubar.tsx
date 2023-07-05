@@ -11,25 +11,14 @@ import {
 import { gitlab } from "./common";
 import { getTodoIcon, getPrettyTodoActionName } from "./components/todo";
 import { useTodos } from "./components/todo/utils";
+import { MenuBarItem, MenuBarSection, getBoundedPreferenceNumber } from "./components/menu";
 
 function launchTodosCommand() {
   launchCommand({ name: "todos", type: LaunchType.UserInitiated });
 }
 
 function getMaxTodosPreference(): number {
-  const prefs = getPreferenceValues();
-  const maxtext = (prefs.maxtodos as string) || "";
-  const max = Number(maxtext);
-  if (isNaN(max)) {
-    return 10;
-  }
-  if (max < 1) {
-    return 10;
-  }
-  if (max > 100) {
-    return 10;
-  }
-  return max;
+  return getBoundedPreferenceNumber({ name: "maxtodos" });
 }
 
 function getAlwaysVisiblePreference(): boolean {
@@ -55,7 +44,7 @@ function TodosMenuBarExtra(props: {
   const error = props.error;
   return (
     <MenuBarExtra icon={props.icon} isLoading={props.isLoading} title={props.title} tooltip={props.tooltip}>
-      {error ? <MenuBarExtra.Item title={`Error: ${error}`} /> : props.children}
+      {error ? <MenuBarItem title={`Error: ${error}`} /> : props.children}
     </MenuBarExtra>
   );
 }
@@ -70,42 +59,41 @@ function menuBarIcon(): Image.ImageLike {
 }
 
 export default function TodosMenuBarCommand(): JSX.Element | null {
-  const { todos: allTodos, error, isLoading } = useTodos();
+  const { todos, error, isLoading } = useTodos();
 
-  if (!allTodos && !isLoading) {
+  if (!todos && !isLoading) {
     if (!getAlwaysVisiblePreference()) {
       return null;
     }
   }
-
-  const todos = allTodos?.slice(0, getMaxTodosPreference());
-  const unshownTodos =
-    todos && allTodos && allTodos.length > 0 && todos.length < allTodos.length ? allTodos.length - todos.length : 0;
   return (
     <TodosMenuBarExtra
       icon={menuBarIcon()}
       isLoading={isLoading}
       error={error}
-      title={allTodos && allTodos.length > 0 && getShowTodoCountPreference() ? `${allTodos.length}` : undefined}
+      title={todos && todos.length > 0 && getShowTodoCountPreference() ? `${todos.length}` : undefined}
       tooltip="GitLab Todos"
     >
-      <MenuBarExtra.Section>
-        <MenuBarExtra.Item
+      <MenuBarSection>
+        <MenuBarItem
           title="Open Todos"
           icon={Icon.Terminal}
           shortcut={{ modifiers: ["cmd"], key: "o" }}
           onAction={launchTodosCommand}
         />
-        <MenuBarExtra.Item
+        <MenuBarItem
           title="Open Todos in Browser"
           icon={"gitlab.svg"}
           shortcut={{ modifiers: ["cmd"], key: "b" }}
           onAction={() => open(gitlab.joinUrl("dashboard/todos"))}
         />
-      </MenuBarExtra.Section>
-      <MenuBarExtra.Section>
+      </MenuBarSection>
+      <MenuBarSection
+        maxChildren={getMaxTodosPreference()}
+        moreElement={(hidden) => <MenuBarExtra.Item title={`... ${hidden} more`} onAction={launchTodosCommand} />}
+      >
         {todos?.map((t) => (
-          <MenuBarExtra.Item
+          <MenuBarItem
             key={t.id}
             title={t.title}
             subtitle={getPrettyTodoActionName(t)}
@@ -114,16 +102,15 @@ export default function TodosMenuBarCommand(): JSX.Element | null {
             onAction={() => (t.target_url ? open(t.target_url) : launchTodosCommand())}
           />
         ))}
-        {unshownTodos > 0 && <MenuBarExtra.Item title={`... ${unshownTodos} more`} onAction={launchTodosCommand} />}
-      </MenuBarExtra.Section>
-      <MenuBarExtra.Section>
+      </MenuBarSection>
+      <MenuBarSection>
         <MenuBarExtra.Item
           title="Configure Command"
           shortcut={{ modifiers: ["cmd"], key: "," }}
           icon={Icon.Gear}
           onAction={() => openCommandPreferences()}
         />
-      </MenuBarExtra.Section>
+      </MenuBarSection>
     </TodosMenuBarExtra>
   );
 }
