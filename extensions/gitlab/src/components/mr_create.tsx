@@ -144,7 +144,7 @@ export function MRCreateForm(props: { project?: Project | undefined; branch?: st
   const [description, setDescription] = useState<string | undefined>(undefined);
 
   const { data: selectedTemplateDetail } = useCache<TemplateDetail | undefined>(
-    `selected_template_${selectedTemplateName}`,
+    `project_${project?.id}_selected_template_${selectedTemplateName}`,
     async () => {
       if (selectedTemplateName === NO_TEMPLATE) return undefined;
       return await gitlab.getProjectMergeRequestTemplate(project?.id || 0, selectedTemplateName);
