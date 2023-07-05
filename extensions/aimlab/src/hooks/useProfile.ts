@@ -5,6 +5,10 @@ import type { Player, SkillScores } from "../types/player.types";
 const useProfile = (username: string) => {
   return useCachedPromise(
     async (username: string) => {
+      if(!username){
+        return null;
+      }
+      
       const data = await getProfile(username);
 
       if (!data) {

@@ -23,8 +23,6 @@ const UserProfile = ({ username }: PropTypes) => {
     setIsShowingDetail(false);
   }, [searchText]);
 
-  useProfile(searchText);
-
   return (
     <List
       filtering={false}
@@ -48,6 +46,7 @@ const UserProfile = ({ username }: PropTypes) => {
           title={searchText ? `No player found with username ${searchText}` : "Please enter a username"}
         />
       )}
+      
     </List>
   );
 };
