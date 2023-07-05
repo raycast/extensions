@@ -1,4 +1,4 @@
-import { Icon, Image, launchCommand, LaunchType, MenuBarExtra, open, getPreferenceValues } from "@raycast/api";
+import { Icon, Image, launchCommand, LaunchType, MenuBarExtra, open, getPreferenceValues, Color } from "@raycast/api";
 import { gitlab } from "./common";
 import { getTodoIcon, getPrettyTodoActionName } from "./components/todo";
 import { useTodos } from "./components/todo/utils";
@@ -49,7 +49,7 @@ function menuBarIcon(): Image.ImageLike {
   const prefs = getPreferenceValues();
   const useGrayscale = prefs.grayicon as boolean;
   if (useGrayscale === true) {
-    return { source: "gitlab-dark.svg" };
+    return { source: "gitlab.svg", tintColor: Color.PrimaryText };
   }
   return { source: "gitlab.svg" };
 }
