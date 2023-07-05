@@ -32,7 +32,15 @@ export async function webhookInfo(webhookUrl: string) {
 
         if (fields[1] < currentTime) {
           // Reminder has expired, delete this row from the CSV file
-          const expembed = new EmbedBuilder().setTitle("Reminder Expired").setColor(0xd8696f).setFields();
+          const expembed = new EmbedBuilder()
+            .setTitle("Reminder Expired")
+            .setColor(0xd8696f)
+            .setFields()
+            .addFields({
+              name: "Your reminder has expired:",
+              value: `Unfortunatley, this reminder has expired!`,
+              inline: false,
+            });
           await webhookClient.editMessage(`${fields[0]}`, {
             embeds: [expembed],
           });
@@ -272,7 +280,7 @@ export default function Command() {
   if (sizeValue === "normal") {
     return (
       <MenuBarExtra icon={Icon.ArrowRight} title={countdown} tooltip={taskname}>
-        <MenuBarExtra.Item icon={Icon.ArrowRight} title={` - Expires In ${countdown}!`} />
+        <MenuBarExtra.Item icon={Icon.ArrowRight} title={`${taskname} - Expires In ${countdown}!`} />
         <MenuBarExtra.Item
           icon={Icon.Document}
           title="View all items being remembered!"

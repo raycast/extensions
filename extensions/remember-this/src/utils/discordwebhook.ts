@@ -4,6 +4,13 @@ import fs from "fs";
 import { environment } from "@raycast/api";
 
 const csvFilePath = path.join(environment.supportPath, "webhookdis.csv");
+if (!fs.existsSync(csvFilePath)) {
+  fs.writeFileSync(csvFilePath, "");
+  console.log(`File ${csvFilePath} created successfully.`);
+} else {
+  console.log("Discord Webhook File Exists Already");
+  fs.writeFileSync(csvFilePath, "\n\n", { flag: "a" });
+}
 
 function extractWebhookInfo(webhookUrl: string) {
   const [, webhookId, webhookToken] = webhookUrl.match(/\/webhooks\/(\d+)\/([\w-]+)/) || [];
@@ -15,9 +22,9 @@ export async function sendMessageToWebhook(webhookUrl: string, messageContent: s
   const { webhookId, webhookToken } = extractWebhookInfo(webhookUrl);
 
   const webhookClient = new WebhookClient({ id: webhookId, token: webhookToken });
-
+  checktimes();
   try {
-    const data = fs.readFileSync(csvFilePath, "utf8");
+    const data = fs.readFileSync(csvFilePath).toString();
     const rows = data.trim().split("\n");
 
     for (const row of rows) {
@@ -29,7 +36,6 @@ export async function sendMessageToWebhook(webhookUrl: string, messageContent: s
     }
   } catch (error) {
     console.error("Error reading CSV file:", error);
-    checktimes();
   }
 
   const embed = new EmbedBuilder()
@@ -48,14 +54,12 @@ export async function sendMessageToWebhook(webhookUrl: string, messageContent: s
       embeds: [embed],
     })
     .then((message) => {
-      fs.appendFileSync(csvFilePath, `${message.id},${time}\n`);
+      fs.appendFileSync(csvFilePath, `\n${message.id},${time}\n`);
       checktimes();
     })
     .catch((error: string) => {
-      console.error(`Failed to send message: ${error}`);
-      checktimes();
+      console.log(`Failed to send message: ${error}`);
     });
-  checktimes();
 
   async function checktimes() {
     try {
@@ -63,20 +67,22 @@ export async function sendMessageToWebhook(webhookUrl: string, messageContent: s
       const data = fs.readFileSync(csvFilePath, "utf8");
       const rows = data.trim().split("\n");
 
+      const expiredRows = [];
       for (const row of rows) {
         const fields = row.trim().split(",");
+        if (fields.length !== 2) {
+          continue;
+        }
 
         if (fields[1] < currentTime) {
-          // Reminder has expired, delete this row from the CSV file
-          const expembed = new EmbedBuilder().setTitle("Reminder Expired").setColor(0xd8696f).setFields();
-          await webhookClient.editMessage(`${fields[0]}`, {
-            embeds: [expembed],
-          });
-          const rowIndex = rows.indexOf(row);
-          rows.splice(rowIndex, 1);
-          fs.writeFileSync(csvFilePath, rows.join("\n"), { mode: 0o777 });
+          expiredRows.push(rows.indexOf(row));
         }
       }
+
+      for (const rowIndex of expiredRows) {
+        rows.splice(rowIndex, 1);
+      }
+      fs.writeFileSync(csvFilePath, rows.join("\n"), { mode: 0o777 });
     } catch (error) {
       console.error("Error reading or writing CSV file:", error);
     }

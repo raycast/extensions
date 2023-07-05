@@ -30,7 +30,7 @@
       "subtitle": "A countdown to your next activity!",
       "description": "Show a countdown in your menubar which will countdown to the next thing in you todo!",
       "mode": "menu-bar",
-      "interval":"10s"
+      "interval":"30s"
 
 
     },
