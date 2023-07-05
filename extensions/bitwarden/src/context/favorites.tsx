@@ -2,7 +2,6 @@ import { LocalStorage } from "@raycast/api";
 import { Dispatch, SetStateAction, createContext, useContext, useEffect, useMemo, useState } from "react";
 import { VaultLoadingFallback } from "~/components/searchVault/VaultLoadingFallback";
 import { LOCAL_STORAGE_KEY } from "~/constants/general";
-import { useBitwarden } from "~/context/bitwarden";
 import { useVaultContext } from "~/context/vault";
 import { Item } from "~/types/vault";
 import { captureException } from "~/utils/development";
@@ -22,8 +21,7 @@ type FavoritesProviderProps = {
 };
 
 export function FavoritesProvider({ children }: FavoritesProviderProps) {
-  const bitwarden = useBitwarden();
-  const { items, updateState: updateVaultItem } = useVaultContext();
+  const { items } = useVaultContext();
 
   const [favoriteOrder, setFavoriteOrder] = useState<string[]>();
 
@@ -51,19 +49,9 @@ export function FavoritesProvider({ children }: FavoritesProviderProps) {
   }, [favoriteOrder]);
 
   const toggleFavorite = async (item: Item) => {
-    const editedItem = { ...item, favorite: !item.favorite };
-    await bitwarden.editItem(editedItem);
-
     setFavoriteOrder((order = []) => {
-      if (!item.favorite) return [editedItem.id, ...order];
-      return order.filter((fid) => fid !== editedItem.id);
-    });
-    updateVaultItem((state) => {
-      const itemIndex = state.items.findIndex((item) => item.id === editedItem.id);
-      if (itemIndex === -1) return state;
-      const newState = { ...state };
-      newState.items[itemIndex] = editedItem;
-      return newState;
+      if (!favoriteOrder?.includes(item.id)) return [item.id, ...order];
+      return order.filter((fid) => fid !== item.id);
     });
   };
 
@@ -129,11 +117,9 @@ export function useSeparateFavoriteItems(items: Item[]) {
   return useMemo(() => {
     const sectionedItems = items.reduce<VaultItemsWithFavorites>(
       (result, item) => {
-        if (item.favorite) {
-          result.favoriteItems.push({
-            ...item,
-            listOrder: favoriteOrder.indexOf(item.id) ?? Number.MAX_SAFE_INTEGER,
-          });
+        const favoritePosition = favoriteOrder.indexOf(item.id);
+        if (item.favorite || favoritePosition !== -1) {
+          result.favoriteItems.push({ ...item, listOrder: favoritePosition ?? Number.MAX_SAFE_INTEGER });
         } else {
           result.nonFavoriteItems.push(item);
         }

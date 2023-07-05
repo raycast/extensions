@@ -5,20 +5,17 @@ import { captureException } from "~/utils/development";
 
 function FavoriteItemActions() {
   const selectedItem = useSelectedVaultItem();
-  const { toggleFavorite, moveFavorite } = useFavoritesContext();
+  const { favoriteOrder, toggleFavorite, moveFavorite } = useFavoritesContext();
+
+  const isBitwardenFavorite = selectedItem.favorite;
+  const isLocalFavorite = favoriteOrder.includes(selectedItem.id);
 
   const handleToggleFavorite = async () => {
-    const toastMessages = getToastMessages(selectedItem.favorite);
-    const toast = await showToast(Toast.Style.Animated, toastMessages.loading);
     try {
       await toggleFavorite(selectedItem);
-      toast.style = Toast.Style.Success;
-      toast.title = toastMessages.success;
-      toast.message = "👍";
     } catch (error) {
+      await showToast(Toast.Style.Failure, "Failed to toggle favorite ☹️");
       captureException("Failed to toggle favorite", error);
-      toast.style = Toast.Style.Failure;
-      toast.message = "Failed ☹️";
     }
   };
 
@@ -26,13 +23,15 @@ function FavoriteItemActions() {
 
   return (
     <>
-      <Action
-        title={selectedItem.favorite ? "Remove Favorite" : "Mark As Favorite"}
-        onAction={handleToggleFavorite}
-        icon={selectedItem.favorite ? Icon.StarDisabled : Icon.Star}
-        shortcut={{ key: "f", modifiers: ["cmd"] }}
-      />
-      {selectedItem.favorite && (
+      {!isBitwardenFavorite && (
+        <Action
+          title={isLocalFavorite ? "Remove Favorite" : "Mark As Favorite"}
+          onAction={handleToggleFavorite}
+          icon={isLocalFavorite ? Icon.StarDisabled : Icon.Star}
+          shortcut={{ key: "f", modifiers: ["cmd"] }}
+        />
+      )}
+      {(isBitwardenFavorite || isLocalFavorite) && (
         <>
           <Action
             title="Move Favorite Up"
@@ -50,21 +49,6 @@ function FavoriteItemActions() {
       )}
     </>
   );
-}
-
-const MESSAGES = {
-  add: {
-    loading: "Marking as favorite",
-    success: "Marked as favorite",
-  },
-  remove: {
-    loading: "Removing favorite",
-    success: "Removed favorite",
-  },
-} as const;
-
-function getToastMessages(isFavorite: boolean) {
-  return isFavorite ? MESSAGES.remove : MESSAGES.add;
 }
 
 export default FavoriteItemActions;

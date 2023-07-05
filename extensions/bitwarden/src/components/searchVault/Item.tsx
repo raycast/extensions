@@ -1,9 +1,10 @@
 import { Color, getPreferenceValues, Icon, List } from "@raycast/api";
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import VaultItemActionPanel from "~/components/searchVault/ItemActionPanel";
 import VaultItemContext from "~/components/searchVault/context/vaultItem";
 import { ITEM_TYPE_TO_ICON_MAP } from "~/constants/general";
 import { ITEM_TYPE_TO_LABEL } from "~/constants/labels";
+import { useFavoritesContext } from "~/context/favorites";
 import { Folder, Item, ItemType } from "~/types/vault";
 import { getCardImageUrl } from "~/utils/cards";
 import { captureException } from "~/utils/development";
@@ -18,6 +19,7 @@ export type VaultItemProps = {
 
 const VaultItem = (props: VaultItemProps) => {
   const { item, folder } = props;
+  const getAccessories = useGetAccessories();
 
   const keywords = useMemo(() => extractKeywords(item), [item]);
 
@@ -80,25 +82,36 @@ const TYPE_TO_ACCESSORY_MAP: Record<ItemType, ListItemAccessory> = {
   },
 };
 
-function getAccessories(item: Item, folder: Folder | undefined) {
-  try {
-    const accessories: ListItemAccessory[] = [];
+function useGetAccessories() {
+  const { favoriteOrder } = useFavoritesContext();
 
-    if (folder?.id) {
-      accessories.push({
-        icon: { source: Icon.Folder, tintColor: Color.SecondaryText },
-        tag: { value: folder.name, color: Color.SecondaryText },
-        tooltip: "Folder",
-      });
-    }
-    if (item.favorite) accessories.push({ icon: { source: Icon.Star, tintColor: Color.Yellow }, tooltip: "Favorite" });
-    accessories.push(TYPE_TO_ACCESSORY_MAP[item.type]);
+  return useCallback(
+    (item: Item, folder: Folder | undefined) => {
+      try {
+        const accessories: ListItemAccessory[] = [];
 
-    return accessories;
-  } catch (error) {
-    captureException("Failed to get item accessories", error);
-    return [];
-  }
+        if (folder?.id) {
+          accessories.push({
+            icon: { source: Icon.Folder, tintColor: Color.SecondaryText },
+            tag: { value: folder.name, color: Color.SecondaryText },
+            tooltip: "Folder",
+          });
+        }
+        if (item.favorite) {
+          accessories.push({ icon: { source: Icon.Star, tintColor: Color.Blue }, tooltip: "Favorite (Bitwarden)" });
+        } else if (favoriteOrder.includes(item.id)) {
+          accessories.push({ icon: { source: Icon.Star, tintColor: Color.Yellow }, tooltip: "Favorite (Raycast)" });
+        }
+        accessories.push(TYPE_TO_ACCESSORY_MAP[item.type]);
+
+        return accessories;
+      } catch (error) {
+        captureException("Failed to get item accessories", error);
+        return [];
+      }
+    },
+    [favoriteOrder]
+  );
 }
 
 export default VaultItem;
