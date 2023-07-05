@@ -1,4 +1,4 @@
-import { Image, Keyboard, MenuBarExtra, getPreferenceValues } from "@raycast/api";
+import { Icon, Image, Keyboard, MenuBarExtra, getPreferenceValues, openCommandPreferences } from "@raycast/api";
 import React from "react";
 import { ReactNode } from "react";
 
@@ -89,6 +89,17 @@ export function MenuBarSubmenu(props: {
     <MenuBarExtra.Submenu title={title} icon={props.icon}>
       {props.children}
     </MenuBarExtra.Submenu>
+  );
+}
+
+export function MenuBarItemConfigureCommand(): JSX.Element {
+  return (
+    <MenuBarExtra.Item
+      title="Configure Command"
+      shortcut={{ modifiers: ["cmd"], key: "," }}
+      icon={Icon.Gear}
+      onAction={() => openCommandPreferences()}
+    />
   );
 }
 

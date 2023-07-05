@@ -14,7 +14,13 @@ import { useMyMergeRequests } from "./components/mr_my";
 import { MRScope, MRState } from "./components/mr";
 import { useMyReviews } from "./components/reviews";
 import { MergeRequest } from "./gitlabapi";
-import { MenuBarItem, MenuBarSection, MenuBarSubmenu, getBoundedPreferenceNumber } from "./components/menu";
+import {
+  MenuBarItem,
+  MenuBarItemConfigureCommand,
+  MenuBarSection,
+  MenuBarSubmenu,
+  getBoundedPreferenceNumber,
+} from "./components/menu";
 
 async function launchReviewsCommand(): Promise<void> {
   return launchCommand({ name: "reviews", type: LaunchType.UserInitiated });
@@ -103,12 +109,7 @@ export default function MenuCommand(): JSX.Element {
         </MenuBarSubmenu>
       </MenuBarExtra.Section>
       <MenuBarExtra.Section>
-        <MenuBarExtra.Item
-          title="Configure Command"
-          shortcut={{ modifiers: ["cmd"], key: "," }}
-          icon={Icon.Gear}
-          onAction={() => openCommandPreferences()}
-        />
+        <MenuBarItemConfigureCommand />
       </MenuBarExtra.Section>
     </MenuBarExtra>
   );

@@ -11,7 +11,12 @@ import {
 import { gitlab } from "./common";
 import { getTodoIcon, getPrettyTodoActionName } from "./components/todo";
 import { useTodos } from "./components/todo/utils";
-import { MenuBarItem, MenuBarSection, getBoundedPreferenceNumber } from "./components/menu";
+import {
+  MenuBarItem,
+  MenuBarItemConfigureCommand,
+  MenuBarSection,
+  getBoundedPreferenceNumber,
+} from "./components/menu";
 
 function launchTodosCommand() {
   launchCommand({ name: "todos", type: LaunchType.UserInitiated });
@@ -104,12 +109,7 @@ export default function TodosMenuBarCommand(): JSX.Element | null {
         ))}
       </MenuBarSection>
       <MenuBarSection>
-        <MenuBarExtra.Item
-          title="Configure Command"
-          shortcut={{ modifiers: ["cmd"], key: "," }}
-          icon={Icon.Gear}
-          onAction={() => openCommandPreferences()}
-        />
+        <MenuBarItemConfigureCommand />
       </MenuBarSection>
     </TodosMenuBarExtra>
   );
