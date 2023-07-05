@@ -12,6 +12,7 @@ export const {
   longitude,
   latitude,
   showSun,
+  showUVI,
   showLocation,
   showForecast,
 } = getPreferenceValues<Preferences>();
