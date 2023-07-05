@@ -62,7 +62,7 @@ export function MyIssues(props: { scope: IssueScope; state: IssueState }): JSX.E
   );
 }
 
-function useMyIssues(
+export function useMyIssues(
   scope: IssueScope,
   state: IssueState,
   project: Project | undefined

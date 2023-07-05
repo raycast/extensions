@@ -1,0 +1,82 @@
+import {
+  Color,
+  Icon,
+  LaunchType,
+  MenuBarExtra,
+  Toast,
+  getPreferenceValues,
+  launchCommand,
+  open,
+  showToast,
+} from "@raycast/api";
+import { useMyMergeRequests } from "./components/mr_my";
+import { MRScope, MRState } from "./components/mr";
+import { useMyReviews } from "./components/reviews";
+import { MergeRequest } from "./gitlabapi";
+import {
+  MenuBarItem,
+  MenuBarItemConfigureCommand,
+  MenuBarSection,
+  MenuBarSubmenu,
+  getBoundedPreferenceNumber,
+} from "./components/menu";
+import { useMyIssues } from "./components/issues_my";
+import { IssueScope, IssueState } from "./components/issues";
+
+async function launchMyIssues(): Promise<void> {
+  return launchCommand({ name: "issue_my", type: LaunchType.UserInitiated });
+}
+
+function getMaxIssuesPreference(): number {
+  return getBoundedPreferenceNumber({ name: "maxitems" });
+}
+
+function getShowItemsCountPreference(): boolean {
+  const prefs = getPreferenceValues();
+  const result = prefs.showtext as boolean;
+  return result;
+}
+
+export default function MenuCommand(): JSX.Element {
+  const { issues, isLoading, error } = useMyIssues(IssueScope.assigned_to_me, IssueState.opened, undefined);
+  if (error) {
+    showToast({ style: Toast.Style.Failure, title: "Error", message: error });
+  }
+  const assignedCount = issues?.length || 0;
+
+  return (
+    <MenuBarExtra
+      isLoading={isLoading}
+      title={getShowItemsCountPreference() ? (assignedCount <= 0 ? undefined : `${assignedCount}`) : undefined}
+      icon={{ source: "exclamation.png", tintColor: Color.PrimaryText }}
+      tooltip="GitLab Issues"
+    >
+      <MenuBarSection title="Issues">
+        <MenuBarItem
+          title="Open Assigned Issues"
+          icon={Icon.Terminal}
+          shortcut={{ modifiers: ["cmd"], key: "m" }}
+          onAction={() => launchMyIssues()}
+        />
+        <MenuBarSection
+          maxChildren={getMaxIssuesPreference()}
+          moreElement={(hidden) => (
+            <MenuBarItem title={`... ${hidden} more assigned`} onAction={() => launchMyIssues()} />
+          )}
+        >
+          {issues?.map((m) => (
+            <MenuBarItem
+              icon={"mropen.png"}
+              title={`#${m.iid} ${m.title}`}
+              tooltip={m.reference_full}
+              onAction={() => open(m.web_url)}
+            />
+          ))}
+        </MenuBarSection>
+      </MenuBarSection>
+      <MenuBarExtra.Section>
+        <MenuBarItemConfigureCommand />
+      </MenuBarExtra.Section>
+    </MenuBarExtra>
+  );
+}
