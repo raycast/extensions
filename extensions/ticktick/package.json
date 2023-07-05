@@ -61,6 +61,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.36.0",
+    "@raycast/utils": "^1.8.0",
     "lodash": "^4.17.21",
     "moment": "^2.29.1",
     "run-applescript": "^6.0.0",

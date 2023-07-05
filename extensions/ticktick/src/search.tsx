@@ -7,15 +7,12 @@ import useSearchTasks from "./hooks/useSearchTasks";
 import { getProjects } from "./service/project";
 import SearchFilter from "./components/searchFilter";
 import { getTasksByProjectId } from "./service/osScript";
+import { usePromise } from "@raycast/utils";
 
 const TickTickSearch: React.FC<Record<string, never>> = () => {
   const [searchQuery, setSearchQuery] = useState<string>("");
-  const [sections, setSections] = useState<Section[]>([]);
   const [projectFilter, setProjectFilter] = useState("all");
-
   const { isInitCompleted } = useStartApp();
-
-  const [isAllTasksLoaded, setIsAllTasksLoaded] = useState(false);
   const [isLocalDataLoaded, setIsLocalDataLoaded] = useState(false);
 
   useEffect(() => {
@@ -53,53 +50,51 @@ const TickTickSearch: React.FC<Record<string, never>> = () => {
 
   const { searchTasks, isSearching } = useSearchTasks({ searchQuery, isInitCompleted });
 
+  const { isLoading: isAllTasksLoading, data: sections } = usePromise(
+    async (projectId: string) => {
+      return await getTasksByProjectId(projectId);
+    },
+    [projectFilter],
+    {
+      execute: isLocalDataLoaded,
+    }
+  );
+
   const isLoading = useMemo(() => {
-    if (!isInitCompleted || !isLocalDataLoaded || !isAllTasksLoaded) {
+    if (!isInitCompleted || !isLocalDataLoaded || isAllTasksLoading) {
       return true;
     }
     return isSearching;
-  }, [isAllTasksLoaded, isInitCompleted, isLocalDataLoaded, isSearching]);
+  }, [isAllTasksLoading, isInitCompleted, isLocalDataLoaded, isSearching]);
 
   const onFilterChange = (filterId: string) => {
     setProjectFilter(filterId);
     LocalStorage.setItem("searchProjectFilter", filterId);
   };
 
-  useEffect(() => {
-    const getTasks = async () => {
-      setIsAllTasksLoaded(false);
-      const tasks = await getTasksByProjectId(projectFilter);
-      setSections(tasks);
-      setTimeout(() => {
-        setIsAllTasksLoaded(true);
-      });
-    };
-    if (isLocalDataLoaded) {
-      getTasks();
-    }
-  }, [isLocalDataLoaded, projectFilter]);
-
   const renderTasks = useMemo(() => {
     if (!searchQuery) {
-      return sections?.map((section) => {
-        return (
-          <List.Section key={section.id} title={`${section.name}`} subtitle={`${section.children.length}`}>
-            {section.children.map((task) => (
-              <TaskItem
-                key={task.id}
-                actionType="week"
-                id={task.id}
-                title={task.title}
-                projectId={task.projectId}
-                priority={task.priority}
-                tags={task.tags}
-                detailMarkdown={getTaskDetailMarkdownContent(task)}
-                copyContent={getTaskCopyContent(task)}
-              />
-            ))}
-          </List.Section>
-        );
-      });
+      return (
+        sections?.map((section: Section) => {
+          return (
+            <List.Section key={section.id} title={`${section.name}`} subtitle={`${section.children.length}`}>
+              {section.children.map((task) => (
+                <TaskItem
+                  key={task.id}
+                  actionType="week"
+                  id={task.id}
+                  title={task.title}
+                  projectId={task.projectId}
+                  priority={task.priority}
+                  tags={task.tags}
+                  detailMarkdown={getTaskDetailMarkdownContent(task)}
+                  copyContent={getTaskCopyContent(task)}
+                />
+              ))}
+            </List.Section>
+          );
+        }) || []
+      );
     }
 
     if (!searchTasks) {
@@ -138,7 +133,7 @@ const TickTickSearch: React.FC<Record<string, never>> = () => {
         <SearchFilter value={projectFilter} filterSections={filterSections} onFilterChange={onFilterChange} />
       }
     >
-      {renderTasks.length === 0 ? <List.EmptyView title="Type something to search tasks" /> : renderTasks}
+      {renderTasks.length > 0 ? renderTasks : <List.EmptyView title="Type something to search tasks" />}
     </List>
   );
 };
