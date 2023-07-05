@@ -34,9 +34,10 @@ const Leaderboard = () => {
         </List.Dropdown>
       }
     >
-      {data?.map((season) => {
-        return <SeasonComponent key={season.id} season={season} />;
-      })}
+      {!isLoading &&
+        data?.map((season) => {
+          return <SeasonComponent key={season.id} season={season} />;
+        })}
     </List>
   );
 };

@@ -16,6 +16,7 @@ type SeasonTasks = {
   sortOrder: number;
   weaponId: string;
   modeId: number;
+  name: string;
 };
 
 export type { Season, SeasonTasks };

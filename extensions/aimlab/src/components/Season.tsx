@@ -15,13 +15,11 @@ const SeasonComponent = ({ season }: PropTypes) => {
       title={`Season: ${season.name}`}
       subtitle={`${startDate.toLocaleDateString()} - ${endDate.toLocaleDateString()}`}
     >
-      {season.tasks.length > 0 ? (
-        season.tasks?.map((task) => {
-          return <SeasonTaskComponent key={task.taskId} season={season} seasonTask={task} />;
-        })
-      ) : (
-        <List.EmptyView icon="logo.png" title="No tasks found!" description="Please try again" />
-      )}
+      {season.tasks && season.tasks.length > 0
+        ? season.tasks?.map((task) => {
+            return <SeasonTaskComponent key={task.taskId} season={season} seasonTask={task} />;
+          })
+        : null}
     </List.Section>
   );
 };
