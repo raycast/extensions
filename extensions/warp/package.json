@@ -2,11 +2,11 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "warp",
   "title": "Warp",
-  "description": "Search and open Warp terminal launch configurations straight from Raycast.",
+  "description": "Open Warp tabs/windows and launch configurations.",
   "icon": "command-icon-v2.png",
   "author": "joetannenbaum",
   "owner": "warpdotdev",
-  "access":"public",
+  "access": "public",
   "categories": [
     "Developer Tools",
     "Productivity"
