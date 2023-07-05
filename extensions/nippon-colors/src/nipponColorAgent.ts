@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 import { environment } from "@raycast/api";
-import { nipponColor, onLoadingColors } from "./nipponColorTypes";
+import { onLoadingColors } from "./nipponColorTypes";
 export class NipponColorAgent {
   private _colors: { [name: string]: string } = {};
   public get colors(): { [name: string]: string } {

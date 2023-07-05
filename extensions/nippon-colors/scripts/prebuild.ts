@@ -13,12 +13,13 @@ async function prebuild() {
     for (const e of colorsElms) {
       const cId = e.attribs.id;
       const name = $(`#${cId} div a`).text().split(", ")[1];
+      if(!name) continue;
       const colorCode = await getColorProfile(name);
       const color: nipponColor = {name:name, colorCode:`#${colorCode}`} 
       console.log(`loading ${name} : #${colorCode}`);
       colors.push(color);
     }
-    fs.writeFileSync("./nipponColors.json", JSON.stringify(colors));
+    fs.writeFileSync("./assets/nipponColors.json", JSON.stringify(colors));
 }
 
 async function getColorProfile(colorName: string): Promise<string> {
