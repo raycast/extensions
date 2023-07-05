@@ -11,6 +11,7 @@ export const {
   precipitationUnits,
   longitude,
   latitude,
+  tempType,
   showSun,
   showUVI,
   showLocation,

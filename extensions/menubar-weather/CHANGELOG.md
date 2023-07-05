@@ -1,5 +1,9 @@
 # Menubar Weather Changelog
 
+## [Add option to show feels-like in the menubar]
+
+- You can choose to display either the forecasted or the "feels-like" temperature in the menubar.
+
 ## [Add UV Index] - 2023-07-03
 
 - UV Index (UVI) is now included in the current weather and forecast

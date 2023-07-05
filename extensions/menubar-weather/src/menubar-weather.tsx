@@ -6,6 +6,7 @@ import {
   isEmptyLonLat,
   latitude,
   longitude,
+  tempType,
   showForecast,
   showLocation,
   showSun,
@@ -24,7 +25,15 @@ export default function MenubarWeather() {
     <MenuBarExtra
       isLoading={loading}
       tooltip={`${description}`}
-      title={typeof weather === "undefined" ? "" : ` ${Math.round(weather?.current_weather?.temperature)}${tempUnit}`}
+      title={
+        typeof weather === "undefined"
+          ? ""
+          : ` ${Math.round(
+              tempType == "apparent_temperature"
+                ? weather?.hourly.apparent_temperature[timeHour()]
+                : weather?.current_weather?.temperature
+            )}${tempUnit}`
+      }
       icon={icon}
     >
       {!loading && (

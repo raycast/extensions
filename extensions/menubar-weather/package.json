@@ -108,6 +108,24 @@
       ]
     },
     {
+      "name": "tempType",
+      "type": "dropdown",
+      "title": "Display in menubar",
+      "description": "Forecast of feels-like",
+      "required": true,
+      "default": "temperature",
+      "data": [
+        {
+          "title": "Forecast",
+          "value": "temperature"
+        },
+        {
+          "title": "Feels-like",
+          "value": "apparent_temperature"
+        }
+      ]
+    },
+    {
       "name": "showSun",
       "type": "checkbox",
       "label": "Sunrise and sunset",

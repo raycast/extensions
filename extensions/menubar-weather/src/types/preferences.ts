@@ -5,6 +5,7 @@ export interface Preferences {
   tempUnits: string;
   windSpeedUnits: string;
   precipitationUnits: string;
+  tempType: string;
   showSun: boolean;
   showUVI: boolean;
   showLocation: boolean;
