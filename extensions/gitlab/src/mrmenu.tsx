@@ -7,7 +7,6 @@ import {
   getPreferenceValues,
   launchCommand,
   open,
-  openCommandPreferences,
   showToast,
 } from "@raycast/api";
 import { useMyMergeRequests } from "./components/mr_my";

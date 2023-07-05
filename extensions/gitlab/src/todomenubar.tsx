@@ -1,13 +1,4 @@
-import {
-  Icon,
-  Image,
-  launchCommand,
-  LaunchType,
-  MenuBarExtra,
-  open,
-  openCommandPreferences,
-  getPreferenceValues,
-} from "@raycast/api";
+import { Icon, Image, launchCommand, LaunchType, MenuBarExtra, open, getPreferenceValues } from "@raycast/api";
 import { gitlab } from "./common";
 import { getTodoIcon, getPrettyTodoActionName } from "./components/todo";
 import { useTodos } from "./components/todo/utils";
