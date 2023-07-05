@@ -32,15 +32,11 @@ export async function webhookInfo(webhookUrl: string) {
 
         if (fields[1] < currentTime) {
           // Reminder has expired, delete this row from the CSV file
-          const expembed = new EmbedBuilder()
-            .setTitle("Reminder Expired")
-            .setColor(0xd8696f)
-            .setFields()
-            .addFields({
-              name: "Your reminder has expired:",
-              value: `Unfortunatley, this reminder has expired!`,
-              inline: false,
-            });
+          const expembed = new EmbedBuilder().setTitle("Reminder Expired").setColor(0xd8696f).setFields().addFields({
+            name: "Your reminder has expired:",
+            value: `Unfortunatley, this reminder has expired!`,
+            inline: false,
+          });
           await webhookClient.editMessage(`${fields[0]}`, {
             embeds: [expembed],
           });
