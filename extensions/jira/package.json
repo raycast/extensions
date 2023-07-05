@@ -6,7 +6,8 @@
   "icon": "icon.png",
   "author": "thomaslombart",
   "contributors": [
-    "FezVrasta"
+    "FezVrasta",
+    "jesperorb"
   ],
   "owner": "raycast",
   "access": "public",

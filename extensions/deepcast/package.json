@@ -12,7 +12,9 @@
   "contributors": [
     "peter-gy",
     "popalay",
-    "MonsterDeveloper"
+    "MonsterDeveloper",
+    "Yamen",
+    "EvanZhouDev"
   ],
   "license": "MIT",
   "commands": [
@@ -249,6 +251,23 @@
       "required": true,
       "title": "API key",
       "type": "password"
+    },
+    {
+      "description": "Action on Translation",
+      "name": "onTranslateAction",
+      "required": false,
+      "title": "On Translation Action",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "Copy to Clipboard",
+          "value": "clipboard"
+        },
+        {
+          "title": "View in Raycast",
+          "value": "view"
+        }
+      ]
     }
   ],
   "dependencies": {
