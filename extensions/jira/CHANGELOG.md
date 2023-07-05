@@ -1,5 +1,9 @@
 # Jira Changelog
 
+## [Type before credentials load] - 2023-07-05
+
+- Now allows user to start typing before the credentials are loaded
+
 ## [Persist Active Sprint Project value when closing command] - 2023-06-28
 
 - Persist Active Sprint Project value when closing command allowing the command to
