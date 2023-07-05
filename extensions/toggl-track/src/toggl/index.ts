@@ -67,7 +67,7 @@ const TogglAPI = function ({ togglApiToken, hideArchivedProjects }: Preferences)
     },
     getTimeEntries: ({ startDate, endDate }: { startDate: Date; endDate: Date }) => {
       return api.get<TimeEntry[]>(
-        `/me/time_entries?start_date=${startDate.toISOString()}&end_date=${endDate.toISOString()}`
+        `/me/time_entries?start_date=${startDate.toISOString()}&end_date=${endDate.toISOString()}`,
       );
     },
   };
