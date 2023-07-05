@@ -16,6 +16,7 @@ import { useMyMergeRequests } from "./components/mr_my";
 import { MRScope, MRState } from "./components/mr";
 import { useMyReviews } from "./components/reviews";
 import { MergeRequest } from "./gitlabapi";
+import { MenuBarItem, MenuBarSection, MenuBarSubmenu } from "./components/menu";
 
 function getMaxMergeRequestsPreference(): number {
   const prefs = getPreferenceValues();
@@ -39,53 +40,14 @@ function getShowItemsCountPreference(): boolean {
   return result;
 }
 
-function clipText(text: string) {
-  const maxLength = 100;
-  if (text.length > maxLength) {
-    return text.slice(0, maxLength) + " ...";
-  }
-  return text;
-}
-
-function shownMergeRequsets(mrs?: MergeRequest[]): { shown?: MergeRequest[]; hidden: number } {
-  if (!mrs || mrs.length <= 0) {
-    return { shown: undefined, hidden: 0 };
-  }
-  const maxShown = getMaxMergeRequestsPreference();
-  const shown = mrs.slice(0, maxShown);
-  const hidden = mrs.length - shown.length;
-  return { shown, hidden };
-}
-
-function MenuBarItem(props: {
-  title: string;
-  icon?: Image.ImageLike;
-  shortcut?: Keyboard.Shortcut | undefined;
-  onAction?: ((event: object) => void) | undefined;
-  tooltip?: string;
-}): JSX.Element {
-  return (
-    <MenuBarExtra.Item
-      title={clipText(props.title)}
-      icon={props.icon}
-      shortcut={props.shortcut}
-      onAction={props.onAction}
-      tooltip={props.tooltip}
-    />
-  );
-}
-
 export default function MenuCommand(): JSX.Element {
-  const { mrsAssigned: mrsAssignedAll, mrsReview: mrsReviewsAll, isLoading, error } = useMenuMergeRequests();
+  const { mrsAssigned, mrsReview, isLoading, error } = useMenuMergeRequests();
   if (error) {
     showToast({ style: Toast.Style.Failure, title: "Error", message: error });
   }
-  const assignedCount = mrsAssignedAll?.length || 0;
-  const reviewCount = mrsReviewsAll?.length || 0;
+  const assignedCount = mrsAssigned?.length || 0;
+  const reviewCount = mrsReview?.length || 0;
   const totalCount = assignedCount + reviewCount;
-
-  const { shown: mrsAssigned, hidden: mrsAssignedHiddenCount } = shownMergeRequsets(mrsAssignedAll);
-  const { shown: mrsReviews, hidden: mrsReviewHiddenCount } = shownMergeRequsets(mrsReviewsAll);
 
   return (
     <MenuBarExtra
@@ -95,7 +57,7 @@ export default function MenuCommand(): JSX.Element {
       tooltip="GitLab Merge Requests"
     >
       <MenuBarExtra.Section title="Merge Requests">
-        <MenuBarExtra.Submenu title={`Assigned (${assignedCount})`} icon={Icon.Person}>
+        <MenuBarSubmenu title={`Assigned`} subtitle={`(${assignedCount})`} icon={Icon.Person}>
           <MenuBarExtra.Section>
             <MenuBarItem
               title="Open Assigned Merge Requests"
@@ -104,7 +66,15 @@ export default function MenuCommand(): JSX.Element {
               onAction={() => launchCommand({ name: "mr_my", type: LaunchType.UserInitiated })}
             />
           </MenuBarExtra.Section>
-          <MenuBarExtra.Section>
+          <MenuBarSection
+            maxChildren={getMaxMergeRequestsPreference()}
+            moreElement={(hidden) => (
+              <MenuBarItem
+                title={`... ${hidden} more assigned`}
+                onAction={() => launchCommand({ name: "mr_my", type: LaunchType.UserInitiated })}
+              />
+            )}
+          >
             {mrsAssigned?.map((m) => (
               <MenuBarItem
                 icon={"mropen.png"}
@@ -113,25 +83,27 @@ export default function MenuCommand(): JSX.Element {
                 onAction={() => open(m.web_url)}
               />
             ))}
-            {mrsAssignedHiddenCount > 0 && (
-              <MenuBarItem
-                title={`... ${mrsAssignedHiddenCount} more assigned`}
-                onAction={() => launchCommand({ name: "mr_my", type: LaunchType.UserInitiated })}
-              />
-            )}
-          </MenuBarExtra.Section>
-        </MenuBarExtra.Submenu>
-        <MenuBarExtra.Submenu title={`Reviews (${reviewCount})`} icon={Icon.Checkmark}>
-          <MenuBarExtra.Section>
+          </MenuBarSection>
+        </MenuBarSubmenu>
+        <MenuBarSubmenu title={`Reviews`} subtitle={`(${reviewCount})`} icon={Icon.Checkmark}>
+          <MenuBarSection>
             <MenuBarItem
               title="Open My Reviews"
               icon={Icon.Terminal}
               shortcut={{ modifiers: ["cmd"], key: "r" }}
               onAction={() => launchCommand({ name: "reviews", type: LaunchType.UserInitiated })}
             />
-          </MenuBarExtra.Section>
-          <MenuBarExtra.Section>
-            {mrsReviews?.map((m) => (
+          </MenuBarSection>
+          <MenuBarSection
+            maxChildren={getMaxMergeRequestsPreference()}
+            moreElement={(hidden) => (
+              <MenuBarItem
+                title={`... ${hidden} more to review`}
+                onAction={() => launchCommand({ name: "reviews", type: LaunchType.UserInitiated })}
+              />
+            )}
+          >
+            {mrsReview?.map((m) => (
               <MenuBarItem
                 icon={"mropen.png"}
                 title={`!${m.iid} ${m.title}`}
@@ -139,14 +111,8 @@ export default function MenuCommand(): JSX.Element {
                 onAction={() => open(m.web_url)}
               />
             ))}
-            {mrsReviewHiddenCount > 0 && (
-              <MenuBarItem
-                title={`... ${mrsAssignedHiddenCount} more to review`}
-                onAction={() => launchCommand({ name: "reviews", type: LaunchType.UserInitiated })}
-              />
-            )}
-          </MenuBarExtra.Section>
-        </MenuBarExtra.Submenu>
+          </MenuBarSection>
+        </MenuBarSubmenu>
       </MenuBarExtra.Section>
       <MenuBarExtra.Section>
         <MenuBarExtra.Item
