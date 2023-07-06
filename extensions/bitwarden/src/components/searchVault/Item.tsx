@@ -5,7 +5,7 @@ import VaultItemContext from "~/components/searchVault/context/vaultItem";
 import { ITEM_TYPE_TO_ICON_MAP } from "~/constants/general";
 import { ITEM_TYPE_TO_LABEL } from "~/constants/labels";
 import { useFavoritesContext } from "~/context/favorites";
-import { Folder, Item, ItemType } from "~/types/vault";
+import { Folder, Item, ItemType, Reprompt } from "~/types/vault";
 import { getCardImageUrl } from "~/utils/cards";
 import { captureException } from "~/utils/development";
 import { extractKeywords, faviconUrl } from "~/utils/search";
@@ -94,14 +94,23 @@ function useGetAccessories() {
           accessories.push({
             icon: { source: Icon.Folder, tintColor: Color.SecondaryText },
             tag: { value: folder.name, color: Color.SecondaryText },
-            tooltip: "Folder",
+            tooltip: `${folder.name} Folder`,
           });
         }
+
         if (item.favorite) {
           accessories.push({ icon: { source: Icon.Star, tintColor: Color.Blue }, tooltip: "Bitwarden Favorite" });
         } else if (favoriteOrder.includes(item.id)) {
           accessories.push({ icon: { source: Icon.Star, tintColor: Color.Yellow }, tooltip: "Favorite" });
         }
+
+        if (item.reprompt === Reprompt.REQUIRED) {
+          accessories.push({
+            icon: { source: Icon.Lock, tintColor: Color.SecondaryText },
+            tooltip: "Reprompt Required",
+          });
+        }
+
         accessories.push(TYPE_TO_ACCESSORY_MAP[item.type]);
 
         return accessories;
