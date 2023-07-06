@@ -7,7 +7,7 @@ import { Folder, Item, ItemType, Reprompt } from "~/types/vault";
 import { captureException } from "~/utils/development";
 
 type ListItemAccessory = NonNullable<List.Item.Props["accessories"]>[number];
-const TYPE_TO_ACCESSORY_MAP: Record<ItemType, ListItemAccessory> = {
+export const ITEM_TYPE_TO_ACCESSORY_MAP: Record<ItemType, ListItemAccessory> = {
   [ItemType.LOGIN]: {
     icon: { source: ITEM_TYPE_TO_ICON_MAP[ItemType.LOGIN], tintColor: Color.Blue },
     tooltip: ITEM_TYPE_TO_LABEL[ItemType.LOGIN],
@@ -54,7 +54,7 @@ export function useItemAccessories(item: Item, folder: Folder | undefined) {
         });
       }
 
-      accessories.push(TYPE_TO_ACCESSORY_MAP[item.type]);
+      accessories.push(ITEM_TYPE_TO_ACCESSORY_MAP[item.type]);
 
       return accessories;
     } catch (error) {

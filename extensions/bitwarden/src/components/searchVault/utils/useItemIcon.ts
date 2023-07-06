@@ -7,7 +7,7 @@ import { faviconUrl } from "~/utils/search";
 
 const { fetchFavicons } = getPreferenceValues();
 
-const ITEM_TYPE_TO_IMAGE_OR_ICON_MAP: Record<ItemType, (item: Item) => string | Icon> = {
+export const ITEM_TYPE_TO_IMAGE_OR_ICON_MAP: Record<ItemType, (item: Item) => string | Icon> = {
   [ItemType.LOGIN]: (item: Item) => {
     const iconUri = item.login?.uris?.[0]?.uri;
     if (fetchFavicons && iconUri) return faviconUrl(iconUri);
