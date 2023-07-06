@@ -50,7 +50,7 @@ export function useItemAccessories(item: Item, folder: Folder | undefined) {
       if (item.reprompt === Reprompt.REQUIRED) {
         accessories.push({
           icon: { source: Icon.Lock, tintColor: Color.SecondaryText },
-          tooltip: "Reprompt Required",
+          tooltip: "Master password re-prompt",
         });
       }
 
