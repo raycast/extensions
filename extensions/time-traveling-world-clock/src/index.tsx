@@ -1,4 +1,4 @@
-import { ActionPanel, List, Action, LocalStorage, useNavigation, Clipboard, closeMainWindow } from "@raycast/api";
+import { ActionPanel, List, Action, LocalStorage, useNavigation, Clipboard, closeMainWindow, Icon } from "@raycast/api";
 import { CityData, findFromCityStateProvince } from "city-timezones";
 import { useEffect, useState, useMemo } from "react";
 
@@ -75,6 +75,7 @@ export default function Command() {
   const actions = ({ time, city }: { time: string; city?: CityData }) => (
     <ActionPanel>
       <Action
+        icon={Icon.CopyClipboard}
         title="Copy time"
         shortcut={{
           modifiers: [],
@@ -86,7 +87,8 @@ export default function Command() {
         }}
       />
       <Action
-        title="+1hr"
+        icon={Icon.Plus}
+        title="Add 1 hour"
         shortcut={{
           modifiers: ["cmd"],
           key: "arrowRight",
@@ -94,7 +96,8 @@ export default function Command() {
         onAction={() => setOffsetHrs((o) => o + 1)}
       />
       <Action
-        title="-1hr"
+        icon={Icon.Minus}
+        title="Subtract 1 hour"
         shortcut={{
           modifiers: ["cmd"],
           key: "arrowLeft",
@@ -102,6 +105,7 @@ export default function Command() {
         onAction={() => setOffsetHrs((o) => o - 1)}
       />
       <Action
+        icon={Icon.Clock}
         title="Clear hours offset"
         shortcut={{
           modifiers: ["cmd"],
@@ -110,6 +114,7 @@ export default function Command() {
         onAction={() => setOffsetHrs(() => 0)}
       />
       <Action.Push
+        icon={Icon.Building}
         title="Add a city"
         shortcut={{
           modifiers: ["cmd", "shift"],
@@ -127,6 +132,7 @@ export default function Command() {
       />
       {city ? (
         <Action
+          icon={Icon.XMarkCircle}
           title="Remove city"
           style={Action.Style.Destructive}
           shortcut={{
@@ -162,7 +168,7 @@ export default function Command() {
   );
 
   return (
-    <List filtering searchBarPlaceholder="Adjust hour with ⌘← and ⌘→">
+    <List filtering>
       {local}
       {cities.map((c) => {
         const _date = new Date();
@@ -189,15 +195,20 @@ export default function Command() {
 function getIconForTime(date: Date) {
   const h = date.getHours();
 
-  if (h >= 6 && h < 10) {
+  const morning = 6;
+  const day = 10;
+  const evening = 18;
+  const night = 29;
+
+  if (h >= morning && h < day) {
     return "icon-morning.png";
   }
 
-  if (h >= 10 && h < 17) {
+  if (h >= day && h < evening) {
     return "icon-day.png";
   }
 
-  if (h >= 17 && h < 20) {
+  if (h >= evening && h < night) {
     return "icon-evening.png";
   }
 
