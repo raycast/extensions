@@ -1,0 +1,63 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "bird-fact",
+  "title": "Bird fact",
+  "description": "Get a random bird fact!",
+  "icon": "gaerdesmuttefilled.png",
+  "author": "fredpetersen",
+  "categories": [
+    "Fun"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "commands": [
+    {
+      "name": "index",
+      "title": "Get bird fact",
+      "subtitle": "Fetches a random bird fact",
+      "description": "Brings a fun bird fact to your raycast",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "title": "Locale",
+      "required": true,
+      "name": "locale",
+      "description": "The locale to use for the bird facts",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "English",
+          "value": "en"
+        },
+        {
+          "title": "Danish",
+          "value": "da"
+        }
+      ],
+      "default": "en"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.54.1",
+    "@raycast/utils": "^1.8.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
