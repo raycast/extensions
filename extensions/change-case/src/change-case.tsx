@@ -46,6 +46,7 @@ const cases = [
 
 type CaseType = (typeof cases)[number];
 type Cases = { [key: string]: (input: string, options?: object) => string };
+type Case =  (input: string, options?: object) => string ;
 
 async function runShellScript(command: string) {
   const { stdout } = await execa(command, {
@@ -83,6 +84,15 @@ async function readContent(preferredSource: string) {
     if (clipboard.length > 0) return clipboard;
     throw new NoTextError();
   }
+}
+
+function modifyCasesRapper(input: string, case_: Case) {
+  let modifiedArr: string[] = [];
+  const lines = input.split("\n");
+  for (const line of lines) {
+    modifiedArr.push(case_(line));
+  }
+  return modifiedArr.join("\n");
 }
 
 const cache = new Cache();
@@ -286,12 +296,12 @@ export default function Command() {
     <List isShowingDetail={true} selectedItemId={pinned[0] || recent[0]}>
       <List.Section title="Pinned">
         {pinned?.map((key) => (
-          <CaseItem key={key} case={key as CaseType} modified={functions[key](clipboard)} pinned={true} />
+          <CaseItem key={key} case={key as CaseType} modified={modifyCasesRapper(clipboard, functions[key])} pinned={true} />
         ))}
       </List.Section>
       <List.Section title="Recent">
         {recent.map((key) => (
-          <CaseItem key={key} case={key as CaseType} modified={functions[key](clipboard)} recent={true} />
+          <CaseItem key={key} case={key as CaseType} modified={modifyCasesRapper(clipboard, functions[key])} recent={true} />
         ))}
       </List.Section>
       <List.Section title="All Cases">
@@ -303,7 +313,7 @@ export default function Command() {
               !pinned.includes(key as CaseType)
           )
           .map(([key, func]) => (
-            <CaseItem key={key} case={key as CaseType} modified={func(clipboard)} />
+            <CaseItem key={key} case={key as CaseType} modified={modifyCasesRapper(clipboard, func)} />
           ))}
       </List.Section>
     </List>
