@@ -1,4 +1,9 @@
 import http from "http";
+import { exec } from "node:child_process";
+import { promisify } from "util";
+import { DefaultPreferences } from "../constant";
+
+const execp = promisify(exec);
 
 export const query = (q?: string): Promise<string[]> => {
   return new Promise((resolve, rejects) => {
@@ -30,4 +35,17 @@ export const query = (q?: string): Promise<string[]> => {
       resolve([""]);
     }
   });
+};
+
+export const queryWithNumiCli = async (q?: string, path?: string): Promise<string[]> => {
+  const command = `${path || DefaultPreferences.numi_cli_binary_path} "${q}"`;
+  const res = await execp(command, { shell: "/bin/bash" });
+  if (res.stderr) {
+    console.error(res.stderr);
+    return [];
+  }
+  let result = res.stdout;
+  if (result.endsWith("\n")) result = result.slice(0, -1);
+  result = Buffer.from(result).toString("utf8");
+  return [result];
 };

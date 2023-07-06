@@ -1,8 +1,9 @@
 import { List, ActionPanel, Action, showToast, Toast, Icon, getPreferenceValues, LaunchProps } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import { useState, useEffect } from "react";
-import { checkNumiInstallation } from "./services/checkinstall";
-import { query } from "./services/requests";
+import { checkNumiInstallation, isNumiCliInstalled } from "./services/checkinstall";
+import { query, queryWithNumiCli } from "./services/requests";
+import { DefaultPreferences } from "./constant";
 
 interface State {
   isLoading: boolean;
@@ -19,9 +20,15 @@ interface NumiArguments {
   queryArgument: string;
 }
 
+interface Preferences {
+  max_history_elemets: string;
+  use_numi_cli: boolean;
+  numi_cli_binary_path: string;
+}
+
 export default function Command(props: LaunchProps<{ arguments: NumiArguments }>) {
   const { queryArgument } = props.arguments;
-  const { max_history_elemets } = getPreferenceValues<{ max_history_elemets: string }>();
+  const { max_history_elemets, use_numi_cli, numi_cli_binary_path } = getPreferenceValues<Preferences>();
   const [apiStatus, setApiStatus] = useState<boolean | undefined>(undefined);
   const [state, setState] = useState<State>({ isLoading: true });
   const [toast, setToast] = useState<Toast | undefined>(undefined);
@@ -47,7 +54,7 @@ export default function Command(props: LaunchProps<{ arguments: NumiArguments }>
               prev.push({ query: q, results });
             }
 
-            const newHistory = [...prev.slice(-+max_history_elemets || -10)];
+            const newHistory = [...prev.slice(-+max_history_elemets || -DefaultPreferences.max_history_elemets)];
             return newHistory;
           });
         }
@@ -56,39 +63,72 @@ export default function Command(props: LaunchProps<{ arguments: NumiArguments }>
   };
 
   const queryOnNumi = (q: string | undefined) => {
-    query(q)
-      .then((results) => {
-        if (toast) {
-          toast.hide();
-        }
-        setState((oldState) => ({ ...oldState, results, isLoading: false }));
+    console.log("Querying", q);
+    if (!use_numi_cli) {
+      query(q)
+        .then((results) => {
+          if (toast) {
+            toast.hide();
+          }
+          setState((oldState) => ({ ...oldState, results, isLoading: false }));
 
-        handleUpdateHistory(q, results);
-      })
-      .catch((err) => {
-        if (err.message.includes("ECONNREFUSED")) {
-          setApiStatus(false);
-          setState((oldState) => ({ ...oldState, isLoading: false }));
-        }
-
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Something went wrong",
-          message: "Please make sure Numi is running",
+          handleUpdateHistory(q, results);
         })
-          .then((toast) => setToast)
-          .catch((err) => console.error("Error Creating Toast"));
-      });
+        .catch((err) => {
+          if (err.message.includes("ECONNREFUSED")) {
+            setApiStatus(false);
+            setState((oldState) => ({ ...oldState, isLoading: false }));
+          }
+
+          showToast({
+            style: Toast.Style.Failure,
+            title: "Something went wrong",
+            message: "Please make sure Numi is running",
+          })
+            .then((toast) => setToast)
+            .catch((err) => console.error("Error Creating Toast"));
+        });
+    } else {
+      queryWithNumiCli(q, numi_cli_binary_path)
+        .then((results) => {
+          console.log("Results", results);
+          if (toast) {
+            toast.hide();
+          }
+          setState((oldState) => ({ ...oldState, results, isLoading: false }));
+
+          if (results.length > 0) {
+            handleUpdateHistory(q, results);
+          }
+        })
+        .catch((err) => {
+          showToast({
+            style: Toast.Style.Failure,
+            title: "Something went wrong",
+            message: "make sure Numi CLI is installed and binary path is correct",
+          })
+            .then((toast) => setToast)
+            .catch((err) => console.error("Error Creating Toast"));
+        });
+    }
   };
 
   const checkApiStatus = () => {
-    query("1")
-      .then(() => setApiStatus(true))
-      .catch((err) => {
-        if (err.message.includes("ECONNREFUSED")) {
-          setApiStatus(false);
-        }
-      });
+    if (!use_numi_cli) {
+      query("1")
+        .then(() => setApiStatus(true))
+        .catch((err) => {
+          if (err.message.includes("ECONNREFUSED")) {
+            setApiStatus(false);
+          }
+        });
+    } else {
+      let path: string | undefined = numi_cli_binary_path;
+      if (path.trim() === "") path = undefined;
+      isNumiCliInstalled(path)
+        .then(() => setApiStatus(true))
+        .catch(() => setApiStatus(false));
+    }
   };
 
   useEffect(() => {
@@ -108,14 +148,15 @@ export default function Command(props: LaunchProps<{ arguments: NumiArguments }>
   }, []);
 
   useEffect(() => {
-    const q = state.query?.trim() ?? "";
     if (!state.isLoading) {
       return;
     }
+    const q = state.query?.trim() ?? "";
     queryOnNumi(q);
   }, [state]);
 
-  checkNumiInstallation();
+  checkNumiInstallation(use_numi_cli);
+
   return (
     <List
       searchBarPlaceholder="Enter text to query"
@@ -126,8 +167,20 @@ export default function Command(props: LaunchProps<{ arguments: NumiArguments }>
     >
       <List.EmptyView
         icon="empty-view.png"
-        title={apiStatus === false ? "Numi is not running" : "Waiting for query..."}
-        description={apiStatus === false ? "Start Numi and enable Alfred integration" : "E.g.: 1+5..."}
+        title={
+          apiStatus === false
+            ? use_numi_cli
+              ? "Numi CLI is not installed"
+              : "Numi is not running"
+            : "Waiting for query..."
+        }
+        description={
+          apiStatus === false
+            ? use_numi_cli
+              ? "Install numi-cli first"
+              : "Start Numi and enable Alfred integration"
+            : "E.g.: 1+5..."
+        }
       />
       <List.Section title="Current">
         {state.results &&
