@@ -763,8 +763,20 @@ export class GitLab {
       delete params.scope;
     }
 
+    const groupid = params.groupid;
+
     params.include_ancestor_groups = false;
     params.include_descendant_groups = false;
+
+    if (groupid) {
+      try {
+        const data = (await this.fetch(`groups/${groupid}/epics`, params, true)) || [];
+        return data;
+      } catch (e: any) {
+        logAPI("skip during error");
+        return [];
+      }
+    }
 
     const groups = await this.getUserGroups();
     const epics: Epic[] = [];

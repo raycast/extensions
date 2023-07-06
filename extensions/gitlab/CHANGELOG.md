@@ -7,6 +7,7 @@
 - `Recent Activities` got a dropdrown to switch between `My Activities` and `My Projects`
 - Add `Merge Request Menu` command
 - Add `Issues Menu` command
+- Add group filter dropdown for epics
 
 ## [Search Scope] - 2023-04-27
 

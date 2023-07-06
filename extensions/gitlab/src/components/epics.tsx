@@ -1,10 +1,10 @@
-import { Action, ActionPanel, Color, Image, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, Image, List } from "@raycast/api";
 import { useState } from "react";
 import { useCache } from "../cache";
 import { gitlab } from "../common";
 import { Epic, Group, searchData } from "../gitlabapi";
 import { GitLabIcons } from "../icons";
-import { capitalizeFirstLetter, showErrorToast } from "../utils";
+import { capitalizeFirstLetter, showErrorToast, toLongDateString } from "../utils";
 import { GitLabOpenInBrowserAction } from "./actions";
 import { CacheActionPanelSection } from "./cache_actions";
 import { CreateEpicTodoAction } from "./epic_actions";
@@ -30,7 +30,29 @@ function getEpicGroupName(epic: any): string | undefined {
   }
 }
 
-export function EpicListItem(props: { epic: any }) {
+function ActionToggleGroupName(props: { show?: boolean; callback?: (newValue: boolean) => void }): JSX.Element | null {
+  if (!props.callback) {
+    return null;
+  }
+  return (
+    <Action
+      title={props.show === true ? "Hide Group Name" : "Show Group Name"}
+      icon={props.show === true ? Icon.EyeDisabled : Icon.Eye}
+      shortcut={{ modifiers: ["opt"], key: "d" }}
+      onAction={() => {
+        if (props.callback) {
+          props.callback(!props.show);
+        }
+      }}
+    />
+  );
+}
+
+export function EpicListItem(props: {
+  epic: any;
+  displayGroup?: boolean;
+  onChangeDisplayGroup?: (newValue?: boolean) => void;
+}) {
   const epic = props.epic;
   const icon = getIcon(epic.state as string);
   const groupName = getEpicGroupName(epic);
@@ -40,7 +62,18 @@ export function EpicListItem(props: { epic: any }) {
       title={epic.title}
       subtitle={`&${epic.iid}`}
       accessories={[
-        { text: groupName },
+        { text: props.displayGroup === true ? groupName : undefined },
+        {
+          text: epic.upvotes ? `${epic.upvotes}` : undefined,
+          icon: epic.upvotes ? "👍" : undefined,
+          tooltip: epic.upvotes ? `Upvotes: ${epic.upvotes}` : undefined,
+        },
+        {
+          text: epic.downvotes ? `${epic.downvotes}` : undefined,
+          icon: epic.downvotes ? "👎" : undefined,
+          tooltip: epic.downvotes ? `Downvotes: ${epic.downvotes}` : undefined,
+        },
+        { date: new Date(epic.updated_at), tooltip: `Updated: ${toLongDateString(epic.updated_at)}` },
         { icon: { source: epic.author.avatar_url || "", mask: Image.Mask.Circle }, tooltip: epic.author?.name },
       ]}
       icon={{ value: icon, tooltip: epic.state ? `Status: ${capitalizeFirstLetter(epic.state)}` : "" }}
@@ -52,6 +85,7 @@ export function EpicListItem(props: { epic: any }) {
           </ActionPanel.Section>
           <ActionPanel.Section>
             <Action.CopyToClipboard title="Copy Epic ID" content={epic.id} />
+            <ActionToggleGroupName show={props.displayGroup} callback={props.onChangeDisplayGroup} />
           </ActionPanel.Section>
           <CacheActionPanelSection />
         </ActionPanel>
@@ -89,7 +123,6 @@ export function EpicList(props: { group: Group }) {
   }
 
   const navTitle = `Epics ${props.group.full_path}`;
-  console.log("LLLL");
   return (
     <List
       searchBarPlaceholder="Filter Epics by name..."

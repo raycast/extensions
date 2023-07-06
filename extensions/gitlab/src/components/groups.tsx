@@ -131,8 +131,8 @@ export function GroupList(props: { parentGroup?: Group }): JSX.Element {
   );
 }
 
-function useMyGroups(
-  query: string | undefined,
+export function useMyGroups(
+  query?: string,
   parentGroupID?: number
 ): {
   groupsinfo?: GroupInfo;
@@ -172,7 +172,7 @@ function useMyGroups(
   return { groupsinfo, isLoading, error };
 }
 
-interface GroupInfo {
+export interface GroupInfo {
   groups: Group[];
   projects: Project[];
 }

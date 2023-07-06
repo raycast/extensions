@@ -1,25 +1,51 @@
-import { List } from "@raycast/api";
+import { Color, List } from "@raycast/api";
 import { useState } from "react";
 import { useCache } from "../cache";
 import { gitlab } from "../common";
 import { Epic, EpicScope, EpicState, searchData } from "../gitlabapi";
 import { hashRecord, showErrorToast } from "../utils";
 import { EpicListItem } from "./epics";
+import { GroupInfo, useMyGroups } from "./groups";
+import { getTextIcon } from "../icons";
+
+function GroupListDropDown(props: {
+  groupsInfo?: GroupInfo;
+  onChange?: (newValue: string) => void;
+}): JSX.Element | null {
+  const gi = props.groupsInfo;
+  if (!gi || !gi.groups) {
+    return null;
+  }
+  return (
+    <List.Dropdown tooltip="Group" onChange={props.onChange}>
+      <List.Dropdown.Item title="All Groups" value={""} />
+      <List.Dropdown.Section>
+        {gi.groups?.map((g) => (
+          <List.Dropdown.Item key={`${g.id}`} icon={getTextIcon(g.name[0])} title={g.full_name} value={`${g.id}`} />
+        ))}
+      </List.Dropdown.Section>
+    </List.Dropdown>
+  );
+}
 
 export function MyEpicList(props: { scope: EpicScope; state: EpicState }): JSX.Element {
   const [searchText, setSearchText] = useState<string>();
+  const { groupsinfo } = useMyGroups();
+  const [selectedGroupID, setSelectedGroupID] = useState<string>("");
+  const [displayGroup, setDisplayGroup] = useState<boolean>();
   const { data, error, isLoading } = useCache<Epic[]>(
-    hashRecord(props, "myepiclist"),
+    hashRecord(props, `myepiclist_${props.scope}_${props.state}_${selectedGroupID}`),
     async () => {
       const data = await gitlab.getUserEpics({
         min_access_level: "30",
         state: props.state,
         scope: props.scope,
+        groupid: selectedGroupID === "" ? undefined : selectedGroupID,
       });
       return data;
     },
     {
-      deps: [searchText],
+      deps: [searchText, props.scope, props.state, selectedGroupID],
       onFilter: async (epics) => {
         return searchData<Epic>(epics, { search: searchText || "", keys: ["title"], limit: 50 });
       },
@@ -32,16 +58,18 @@ export function MyEpicList(props: { scope: EpicScope; state: EpicState }): JSX.E
 
   return (
     <List
-      searchBarPlaceholder="Filter Epics by name..."
+      searchBarPlaceholder="Filter Epics by Name..."
       onSearchTextChange={setSearchText}
       isLoading={isLoading}
       throttle={true}
+      searchBarAccessory={<GroupListDropDown groupsInfo={groupsinfo} onChange={setSelectedGroupID} />}
     >
       <List.Section title={data ? `Recent Epics` : undefined} subtitle={data ? `${data.length}` : undefined}>
         {data?.map((epic) => (
-          <EpicListItem key={epic.id} epic={epic} />
+          <EpicListItem key={epic.id} epic={epic} displayGroup={displayGroup} onChangeDisplayGroup={setDisplayGroup} />
         ))}
       </List.Section>
+      <List.EmptyView title="No Epics found" icon={{ source: "epic.svg", tintColor: Color.PrimaryText }} />
     </List>
   );
 }
