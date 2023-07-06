@@ -20,6 +20,7 @@ interface IssueStatus {
 interface Issue {
   id: string;
   key: string;
+  issueNumber: string;
   fields: {
     summary: string;
     issuetype: IssueType;
@@ -114,6 +115,7 @@ export async function searchIssues(query: string): Promise<ResultItem[]> {
     id: issue.id,
     title: issue.fields.summary,
     subtitle: `${issue.key} · ${issue.fields.issuetype.name}`,
+    issueNumber: `${issue.key}`,
     icon: await jiraImage(issue.fields.issuetype.iconUrl),
     accessoryIcon: statusIcon(issue.fields.status),
     accessoryTitle: issue.fields.status.name,

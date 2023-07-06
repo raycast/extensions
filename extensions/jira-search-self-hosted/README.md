@@ -21,6 +21,7 @@ search extension built by sven to work with JIRA server instances.
   - Copy URL
   - Copy markdown link
   - Copy HTML link
+  - Copy Issue Number (Ticket Name)
 
 **Note:** This extension does not provide an issue preview or issue editing like the built-in extension – it is totally focused on quickly opening Jira entities in your browser.
 
