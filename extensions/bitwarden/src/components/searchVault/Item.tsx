@@ -1,5 +1,5 @@
 import { Color, getPreferenceValues, Icon, List } from "@raycast/api";
-import { useCallback, useMemo } from "react";
+import { useMemo } from "react";
 import VaultItemActionPanel from "~/components/searchVault/ItemActionPanel";
 import VaultItemContext from "~/components/searchVault/context/vaultItem";
 import { ITEM_TYPE_TO_ICON_MAP } from "~/constants/general";
@@ -17,9 +17,9 @@ export type VaultItemProps = {
   folder: Folder | undefined;
 };
 
-const VaultItem = (props: VaultItemProps) => {
-  const { item, folder } = props;
-  const getAccessories = useGetAccessories();
+const VaultItem = ({ item, folder }: VaultItemProps) => {
+  const icon = useIcon(item);
+  const accessories = useAccessories(item, folder);
 
   const keywords = useMemo(() => extractKeywords(item), [item]);
 
@@ -29,8 +29,8 @@ const VaultItem = (props: VaultItemProps) => {
         id={item.id}
         title={item.name}
         keywords={keywords}
-        accessories={getAccessories(item, folder)}
-        icon={getIcon(item)}
+        accessories={accessories}
+        icon={icon}
         subtitle={item.login?.username || undefined}
         actions={<VaultItemActionPanel />}
       />
@@ -56,10 +56,12 @@ const ITEM_TYPE_TO_IMAGE_OR_ICON_MAP: Record<ItemType, (item: Item) => string | 
   [ItemType.NOTE]: () => ITEM_TYPE_TO_ICON_MAP[ItemType.NOTE],
 };
 
-function getIcon(item: Item) {
-  const imageOrIcon = ITEM_TYPE_TO_IMAGE_OR_ICON_MAP[item.type]?.(item);
-  if (imageOrIcon) return imageOrIcon;
-  return Icon.QuestionMark;
+function useIcon(item: Item) {
+  return useMemo(() => {
+    const imageOrIcon = ITEM_TYPE_TO_IMAGE_OR_ICON_MAP[item.type]?.(item);
+    if (imageOrIcon) return imageOrIcon;
+    return Icon.QuestionMark;
+  }, [item.type, item.card?.brand, item.login?.uris?.[0]?.uri]);
 }
 
 type ListItemAccessory = NonNullable<List.Item.Props["accessories"]>[number];
@@ -82,45 +84,42 @@ const TYPE_TO_ACCESSORY_MAP: Record<ItemType, ListItemAccessory> = {
   },
 };
 
-function useGetAccessories() {
+function useAccessories(item: Item, folder: Folder | undefined) {
   const { favoriteOrder } = useFavoritesContext();
 
-  return useCallback(
-    (item: Item, folder: Folder | undefined) => {
-      try {
-        const accessories: ListItemAccessory[] = [];
+  return useMemo(() => {
+    try {
+      const accessories: ListItemAccessory[] = [];
 
-        if (folder?.id) {
-          accessories.push({
-            icon: { source: Icon.Folder, tintColor: Color.SecondaryText },
-            tag: { value: folder.name, color: Color.SecondaryText },
-            tooltip: `${folder.name} Folder`,
-          });
-        }
-
-        if (item.favorite) {
-          accessories.push({ icon: { source: Icon.Star, tintColor: Color.Blue }, tooltip: "Bitwarden Favorite" });
-        } else if (favoriteOrder.includes(item.id)) {
-          accessories.push({ icon: { source: Icon.Star, tintColor: Color.Yellow }, tooltip: "Favorite" });
-        }
-
-        if (item.reprompt === Reprompt.REQUIRED) {
-          accessories.push({
-            icon: { source: Icon.Lock, tintColor: Color.SecondaryText },
-            tooltip: "Reprompt Required",
-          });
-        }
-
-        accessories.push(TYPE_TO_ACCESSORY_MAP[item.type]);
-
-        return accessories;
-      } catch (error) {
-        captureException("Failed to get item accessories", error);
-        return [];
+      if (folder?.id) {
+        accessories.push({
+          icon: { source: Icon.Folder, tintColor: Color.SecondaryText },
+          tag: { value: folder.name, color: Color.SecondaryText },
+          tooltip: `${folder.name} Folder`,
+        });
       }
-    },
-    [favoriteOrder]
-  );
+
+      if (item.favorite) {
+        accessories.push({ icon: { source: Icon.Star, tintColor: Color.Blue }, tooltip: "Bitwarden Favorite" });
+      } else if (favoriteOrder.includes(item.id)) {
+        accessories.push({ icon: { source: Icon.Star, tintColor: Color.Yellow }, tooltip: "Favorite" });
+      }
+
+      if (item.reprompt === Reprompt.REQUIRED) {
+        accessories.push({
+          icon: { source: Icon.Lock, tintColor: Color.SecondaryText },
+          tooltip: "Reprompt Required",
+        });
+      }
+
+      accessories.push(TYPE_TO_ACCESSORY_MAP[item.type]);
+
+      return accessories;
+    } catch (error) {
+      captureException("Failed to get item accessories", error);
+      return [];
+    }
+  }, [favoriteOrder, item.favorite, item.reprompt, item.type, folder?.id, folder?.name]);
 }
 
 export default VaultItem;
