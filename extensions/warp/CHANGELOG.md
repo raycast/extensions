@@ -1,6 +1,6 @@
 # Warp Changelog
 
-## [Initial Release] - 2023-29-06
+## [Initial Release] - 2023-06-29
 
 - "Open Directory" command
 - "Open in Warp" command
