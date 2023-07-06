@@ -1,0 +1,14 @@
+[
+  { "name": "Chaos Black", "value": "#101010" },
+  { "name": "Stone Cold Gray", "value": "#565656" },
+  { "name": "Shark Fin", "value": "#969696" },
+  { "name": "Snowflake", "value": "#f0f0f0" },
+  { "name": "Jupiter", "value": "#dcdcdc" },
+  { "name": "Jet", "value": "#343434" },
+  { "name": "Black Olive", "value": "#403D3D" },
+  { "name": "Doctor", "value": "#f9f9f9" },
+  { "name": "Pink Wink", "value": "#ffacee" },
+  { "name": "Unsuccesfull", "value": "#e22b2f" },
+  { "name": "Succesful", "value": "#4ef500" },
+  { "name": "Shampoo", "value": "#ffcaf5" }
+]
