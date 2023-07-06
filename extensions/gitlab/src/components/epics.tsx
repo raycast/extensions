@@ -19,15 +19,28 @@ function getIcon(state: string): Image {
   }
 }
 
+function getEpicGroupName(epic: any): string | undefined {
+  const f: string | undefined = epic?.references?.full;
+  if (!f) {
+    return;
+  }
+  const i = f.lastIndexOf("&");
+  if (i > 0) {
+    return f.substring(0, i);
+  }
+}
+
 export function EpicListItem(props: { epic: any }) {
   const epic = props.epic;
   const icon = getIcon(epic.state as string);
+  const groupName = getEpicGroupName(epic);
   return (
     <List.Item
       id={epic.id.toString()}
       title={epic.title}
       subtitle={`&${epic.iid}`}
       accessories={[
+        { text: groupName },
         { icon: { source: epic.author.avatar_url || "", mask: Image.Mask.Circle }, tooltip: epic.author?.name },
       ]}
       icon={{ value: icon, tooltip: epic.state ? `Status: ${capitalizeFirstLetter(epic.state)}` : "" }}
@@ -76,7 +89,7 @@ export function EpicList(props: { group: Group }) {
   }
 
   const navTitle = `Epics ${props.group.full_path}`;
-
+  console.log("LLLL");
   return (
     <List
       searchBarPlaceholder="Filter Epics by name..."
@@ -85,9 +98,14 @@ export function EpicList(props: { group: Group }) {
       throttle={true}
       navigationTitle={navTitle}
     >
-      {data?.map((epic) => (
-        <EpicListItem key={epic.id} epic={epic} />
-      ))}
+      <List.Section
+        title={data ? `Recent Epics ${data.length}` : undefined}
+        subtitle={data ? `${data.length}` : undefined}
+      >
+        {data?.map((epic) => (
+          <EpicListItem key={epic.id} epic={epic} />
+        ))}
+      </List.Section>
     </List>
   );
 }

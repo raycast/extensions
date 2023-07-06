@@ -37,9 +37,11 @@ export function MyEpicList(props: { scope: EpicScope; state: EpicState }): JSX.E
       isLoading={isLoading}
       throttle={true}
     >
-      {data?.map((epic) => (
-        <EpicListItem key={epic.id} epic={epic} />
-      ))}
+      <List.Section title={data ? `Recent Epics` : undefined} subtitle={data ? `${data.length}` : undefined}>
+        {data?.map((epic) => (
+          <EpicListItem key={epic.id} epic={epic} />
+        ))}
+      </List.Section>
     </List>
   );
 }
