@@ -98,9 +98,9 @@ function useGetAccessories() {
           });
         }
         if (item.favorite) {
-          accessories.push({ icon: { source: Icon.Star, tintColor: Color.Blue }, tooltip: "Favorite (Bitwarden)" });
+          accessories.push({ icon: { source: Icon.Star, tintColor: Color.Blue }, tooltip: "Bitwarden Favorite" });
         } else if (favoriteOrder.includes(item.id)) {
-          accessories.push({ icon: { source: Icon.Star, tintColor: Color.Yellow }, tooltip: "Favorite (Raycast)" });
+          accessories.push({ icon: { source: Icon.Star, tintColor: Color.Yellow }, tooltip: "Favorite" });
         }
         accessories.push(TYPE_TO_ACCESSORY_MAP[item.type]);
 
