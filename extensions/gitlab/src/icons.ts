@@ -22,7 +22,7 @@ export enum GitLabIcons {
   settings = "gear.png",
   security = "lock.png",
   labels = "dash.png",
-  epic = "epic.png",
+  epic = "epic.svg",
   comment = "book.png",
   wiki = "list.png",
   show_details = "app-window-sidebar-right-16",

@@ -13,9 +13,9 @@ import { CreateEpicTodoAction } from "./epic_actions";
 
 function getIcon(state: string): Image {
   if (state == "opened") {
-    return { source: GitLabIcons.mropen, tintColor: Color.Green };
+    return { source: GitLabIcons.epic, tintColor: Color.Green };
   } else {
-    return { source: GitLabIcons.merged, tintColor: Color.Purple };
+    return { source: GitLabIcons.epic, tintColor: Color.Purple };
   }
 }
 
