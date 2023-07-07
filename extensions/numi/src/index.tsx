@@ -100,6 +100,7 @@ export default function Command(props: LaunchProps<{ arguments: NumiArguments }>
           }
         })
         .catch((err) => {
+          console.error(err);
           showToast({
             style: Toast.Style.Failure,
             title: "Something went wrong",

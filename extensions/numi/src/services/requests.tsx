@@ -38,6 +38,7 @@ export const query = (q?: string): Promise<string[]> => {
 };
 
 export const queryWithNumiCli = async (q?: string, path?: string): Promise<string[]> => {
+  q = q?.replace(/"/g, '\\"') || ""; // safe " in query
   const command = `${path || DefaultPreferences.numi_cli_binary_path} "${q}"`;
   const res = await execp(command, { shell: "/bin/bash" });
   if (res.stderr) {
