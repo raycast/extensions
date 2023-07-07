@@ -11,73 +11,59 @@
   "license": "MIT",
   "commands": [
     {
-      "description": "Add current application to the end of list. Stickied applications will retain their existing positions.",
+      "description": "Add current application to the start of the list. Stickied applications will retain their existing positions.",
       "icon": "up-icon.png",
+      "keywords": [
+        "add"
+      ],
       "mode": "no-view",
       "name": "addApplicationToStart",
       "subtitle": "Start of List",
-      "title": "Add Application"
+      "title": "Prepend Application to List"
     },
     {
-      "description": "Add current application to the end of list. Stickied applications will retain their existing positions.",
+      "description": "Add current application to the end of the list. Stickied applications will retain their existing positions.",
       "icon": "down-icon.png",
+      "keywords": [
+        "add"
+      ],
       "mode": "no-view",
       "name": "addApplicationToEnd",
       "subtitle": "End of List",
-      "title": "Add Application"
+      "title": "Append Application to List"
     },
     {
-      "description": "List all marked applications",
+      "description": "List all marked applications.",
       "icon": "list-icon.png",
       "mode": "view",
       "name": "showApplicationsList",
       "title": "Show Applications List"
     },
     {
-      "description": "Clear all marked applications",
+      "description": "Clear all marked applications.",
       "icon": "trash-icon.png",
       "mode": "no-view",
       "name": "clearApplicationsList",
       "title": "Clear Applications List"
     },
     {
-      "description": "Opens the first application in the list",
-      "icon": "one-icon.png",
+      "arguments": [
+        {
+          "name": "position",
+          "placeholder": "1",
+          "required": true,
+          "type": "text"
+        }
+      ],
+      "description": "Opens the application at the specified position in the list.",
+      "icon": "number-icon.png",
       "mode": "no-view",
-      "name": "openApplicationOne",
-      "title": "Open Application at Position 1"
-    },
-    {
-      "description": "Opens the second application in the list",
-      "icon": "two-icon.png",
-      "mode": "no-view",
-      "name": "openApplicationTwo",
-      "title": "Open Application at Position 2"
-    },
-    {
-      "description": "Opens the third application in the list",
-      "icon": "three-icon.png",
-      "mode": "no-view",
-      "name": "openApplicationThree",
-      "title": "Open Application at Position 3"
-    },
-    {
-      "description": "Opens the fourth application in the list",
-      "icon": "four-icon.png",
-      "mode": "no-view",
-      "name": "openApplicationFour",
-      "title": "Open Application at Position 4"
-    },
-    {
-      "description": "Opens the fifth application in the list",
-      "icon": "five-icon.png",
-      "mode": "no-view",
-      "name": "openApplicationFive",
-      "title": "Open Application at Position 5"
+      "name": "openApplicationByPosition",
+      "title": "Open Application at Position"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.54.1",
+    "@raycast/api": "^1.55.0",
     "@raycast/utils": "^1.8.0"
   },
   "devDependencies": {

@@ -3,7 +3,7 @@ import HarpoonError, { ErrorCode } from "../HarpoonError";
 import { AppList } from "../models";
 
 export default async function getList(): Promise<AppList> {
-  const list = await LocalStorage.getItem<string>("list").catch(() => {
+  const list = await LocalStorage.getItem<string>("defaultList").catch(() => {
     throw new HarpoonError(ErrorCode.unableToGetList);
   });
 
