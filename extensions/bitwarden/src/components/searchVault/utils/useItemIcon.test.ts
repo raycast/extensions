@@ -75,25 +75,6 @@ describe("useItemIcon", () => {
     expect(result).toEqual(Icon.CreditCard);
   });
 
-  it("returns the corresponding icon for card item", () => {
-    const item = getMockItem({
-      itemType: ItemType.CARD,
-      overrideProps: {
-        card: {
-          brand: null,
-          cardholderName: null,
-          expMonth: null,
-          expYear: null,
-          number: null,
-          code: null,
-        },
-      },
-    });
-    const result = setup({ item });
-
-    expect(result).toEqual(Icon.CreditCard);
-  });
-
   it("returns the corresponding icon for identity item", () => {
     const item = getMockItem({ itemType: ItemType.IDENTITY });
     const result = setup({ item });
