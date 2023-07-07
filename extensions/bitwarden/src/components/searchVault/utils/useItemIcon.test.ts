@@ -50,8 +50,6 @@ describe("useItemIcon", () => {
       });
       const result = setup({ item });
 
-      console.log(item.card?.brand);
-
       if (brand !== CARD_BRANDS.OTHER) {
         expect(result).toEqual(getCardImageUrl(brand));
       }
