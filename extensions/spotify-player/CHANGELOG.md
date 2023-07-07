@@ -1,6 +1,6 @@
 # Spotify Player Changelog
 
-## [Optimisation] - 2023-06-19
+## [Optimisation] - 2023-07-07
 
 This update introduces a few optimisations to the Menu Bar Command. We've reduced the number of API calls, and we've also reduced the number of requests to the Spotify API. This should result in a faster and more responsive experience.
 
