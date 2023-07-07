@@ -12,9 +12,9 @@ const dateFormatter = new Intl.DateTimeFormat("en-US", {
   day: "numeric",
 });
 
-function AddCityView({ onAdd }: { onAdd: (c: CityData) => void }) {
+function AddCityView({ initialCityName, onAdd }: { initialCityName?: string; onAdd: (c: CityData) => void }) {
   const { pop } = useNavigation();
-  const [cityName, setCityName] = useState("");
+  const [cityName, setCityName] = useState(initialCityName ?? "");
 
   const citiesLookup = useMemo(() => {
     const cities = findFromCityStateProvince(cityName);
@@ -25,7 +25,8 @@ function AddCityView({ onAdd }: { onAdd: (c: CityData) => void }) {
   return (
     <List
       filtering={false}
-      onSearchTextChange={(s) => setCityName(s)}
+      searchText={cityName}
+      onSearchTextChange={setCityName}
       navigationTitle="Add a city"
       searchBarPlaceholder="Enter city name"
     >
@@ -55,6 +56,7 @@ function AddCityView({ onAdd }: { onAdd: (c: CityData) => void }) {
 }
 
 export default function Command() {
+  const [searchText, setSearchText] = useState("");
   const [cities, setCities] = useState<CityData[]>([]);
   const [offsetHrs, setOffsetHrs] = useState(0);
   const [, _forceUpdate] = useState({});
@@ -71,6 +73,27 @@ export default function Command() {
     const intervalId = setInterval(forceUpdate, 1000);
     return () => clearInterval(intervalId);
   }, []);
+
+  const addCityAction = (
+    <Action.Push
+      icon={Icon.Building}
+      title="Add a city"
+      shortcut={{
+        modifiers: ["cmd", "shift"],
+        key: "=",
+      }}
+      target={
+        <AddCityView
+          initialCityName={searchText}
+          onAdd={(c) => {
+            const _cities = sortCitiesByTimeZone(cities.concat(c));
+            setCities(_cities);
+            setJSON("cities", _cities);
+          }}
+        />
+      }
+    />
+  );
 
   const actions = ({ time, city }: { time: string; city?: CityData }) => (
     <ActionPanel>
@@ -113,23 +136,7 @@ export default function Command() {
         }}
         onAction={() => setOffsetHrs(() => 0)}
       />
-      <Action.Push
-        icon={Icon.Building}
-        title="Add a city"
-        shortcut={{
-          modifiers: ["cmd", "shift"],
-          key: "=",
-        }}
-        target={
-          <AddCityView
-            onAdd={(c) => {
-              const _cities = sortCitiesByTimeZone(cities.concat(c));
-              setCities(_cities);
-              setJSON("cities", _cities);
-            }}
-          />
-        }
-      />
+      {addCityAction}
       {city ? (
         <Action
           icon={Icon.XMarkCircle}
@@ -168,7 +175,12 @@ export default function Command() {
   );
 
   return (
-    <List filtering>
+    <List filtering searchBarPlaceholder="Search cities" onSearchTextChange={setSearchText}>
+      <List.EmptyView
+        icon={Icon.Globe}
+        title="Add a city"
+        actions={<ActionPanel>{addCityAction}</ActionPanel>}
+      ></List.EmptyView>
       {local}
       {cities.map((c) => {
         const _date = new Date();
