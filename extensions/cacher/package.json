@@ -4,7 +4,7 @@
   "title": "Cacher - Code Snippet Organizer",
   "description": "Create and insert personal and team code snippets from anywhere.",
   "icon": "cacher.png",
-  "author": "rj_cacher",
+  "author": "cacherapp",
   "categories": [
     "Developer Tools",
     "Productivity",
@@ -47,8 +47,7 @@
     "@raycast/api": "^1.48.9",
     "@raycast/utils": "^1.5.2",
     "date-fns": "^2.29.3",
-    "node-fetch": "^3.3.1",
-    "recoil": "^0.7.7"
+    "node-fetch": "^3.3.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.5",
@@ -58,8 +57,6 @@
     "eslint-config-prettier": "^8.8.0",
     "eslint-plugin-react": "^7.32.2",
     "eslint-plugin-react-hooks": "^4.6.0",
-    "husky": "^8.0.3",
-    "lint-staged": "^13.2.2",
     "prettier": "^2.5.1",
     "react-devtools": "^4.24.6",
     "typescript": "^4.4.3"
@@ -69,7 +66,6 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "ray publish",
-    "husky:install": "husky install"
+    "publish": "ray publish"
   }
 }

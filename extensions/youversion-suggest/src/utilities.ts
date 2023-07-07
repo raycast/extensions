@@ -2,6 +2,7 @@ import { Clipboard, showToast, Toast } from "@raycast/api";
 import { fetchReferenceContent } from "youversion-suggest";
 import {
   getDefaultReferenceFormat,
+  getPreferredLanguage,
   getPreferredLineBreaksSetting,
   getPreferredReferenceFormat,
   getPreferredVerseNumbersSetting,
@@ -31,6 +32,7 @@ export async function copyContentToClipboard(reference: BibleReference) {
       title: `Copying ${reference.name} to clipboard...`,
     });
     const { content } = await fetchReferenceContent(reference.id, {
+      language: await getPreferredLanguage(),
       includeVerseNumbers: await getPreferredVerseNumbersSetting(),
       includeLineBreaks: await getPreferredLineBreaksSetting(),
     });

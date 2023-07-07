@@ -1,8 +1,8 @@
-const devices: Record<string, Record<string, string>> = {
-  // HiTuneX6
+import { DeviceDefinition } from "src/types/device";
+
+export default {
   "0x223B": {
+    name: "HiTuneX6",
     main: "icons/devices/ugreen/hitune.x6.svg",
   },
-};
-
-export default devices;
+} as Record<string, DeviceDefinition>;

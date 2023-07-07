@@ -18,13 +18,48 @@
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "name": "device",
+      "type": "dropdown",
+      "required": false,
+      "title": "Default Device Type",
+      "description": "Initial filter by device type",
+      "data": [
+        {
+          "title": "Latest used",
+          "value": "latest"
+        },
+        {
+          "title": "All",
+          "value": "all"
+        },
+        {
+          "title": "iPhone",
+          "value": "iPhone"
+        },
+        {
+          "title": "iPad",
+          "value": "iPad"
+        },
+        {
+          "title": "iPod touch",
+          "value": "iPod"
+        },
+        {
+          "title": "Apple Watch",
+          "value": "Apple Watch"
+        }
+      ]
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.52.1",
     "@raycast/utils": "^1.7.0",
     "run-applescript": "^6.1.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "1.0.5",
+    "@raycast/eslint-config": "^1.0.6",
     "@types/node": "^20.2.5",
     "@types/react": "^18.2.7",
     "eslint": "^8.41.0",

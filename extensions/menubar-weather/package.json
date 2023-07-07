@@ -5,6 +5,9 @@
   "description": "Show current weather on the menu bar",
   "icon": "extension-icon.png",
   "author": "koinzhang",
+  "contributors": [
+    "fuksman"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -110,6 +113,14 @@
       "label": "Sunrise and sunset",
       "title": "Additional Info",
       "description": "Show sunrise and sunset",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "showUVI",
+      "type": "checkbox",
+      "label": "UV Index",
+      "description": "Show UV Index",
       "required": false,
       "default": true
     },

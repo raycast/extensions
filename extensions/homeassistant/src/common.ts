@@ -3,26 +3,32 @@ import { Connection, createConnection, createLongLivedTokenAuth } from "home-ass
 import { HomeAssistant } from "./haapi";
 import { createSocket } from "./socket";
 
-function getInstance(): string {
-  const preferences = getPreferenceValues();
-  let result = preferences.instance as string;
-  if (result && result.endsWith("/")) {
-    // make sure to have no trailing slash
-    result = result.substring(0, result.length - 1);
+function ensureNoTrailingSlash(url: string | undefined): string | undefined {
+  if (url && url.endsWith("/")) {
+    const result = url.substring(0, url.length - 1);
+    return result;
   }
-  return result;
+  return url;
 }
 
-export function createHomeAssistantClient(): HomeAssistant {
-  const instance = getInstance();
+function createHomeAssistantClient(): HomeAssistant {
   const preferences = getPreferenceValues();
+  const instance = ensureNoTrailingSlash((preferences.instance as string) || undefined) || "";
+  const instanceInternal = ensureNoTrailingSlash((preferences.instanceInternal as string) || undefined) || "";
   const token = preferences.token as string;
-  const ignoreCerts = preferences.ignorecerts as boolean;
-  const hac = new HomeAssistant(instance, token, ignoreCerts);
+  const ignoreCerts = (preferences.ignorecerts as boolean) || false;
+  const wifiSSIDs = ((preferences.homeSSIDs as string) || "").split(",").map((v) => v.trim());
+  const usePing = preferences.usePing as boolean;
+  const hac = new HomeAssistant(instance, token, ignoreCerts, {
+    urlInternal: instanceInternal,
+    wifiSSIDs: wifiSSIDs,
+    usePing: usePing,
+  });
   return hac;
 }
 
 let con: Connection;
+export const ha = createHomeAssistantClient();
 
 export async function getHAWSConnection(): Promise<Connection> {
   if (con) {
@@ -30,12 +36,10 @@ export async function getHAWSConnection(): Promise<Connection> {
     return con;
   } else {
     console.log("create new home assistant ws con");
-    const instance = getInstance();
-    const preferences = getPreferenceValues();
-    const token = preferences.token as string;
-    const ignoreCertificates = (preferences.ignorecerts as boolean) || false;
-    const auth = createLongLivedTokenAuth(instance, token);
-    con = await createConnection({ auth, createSocket: async () => createSocket(auth, ignoreCertificates) });
+    const instance = await ha.nearestURL();
+    console.log(`Nearest Instance URL ${instance}`);
+    const auth = createLongLivedTokenAuth(instance, ha.token);
+    con = await createConnection({ auth, createSocket: async () => createSocket(auth, ha.ignoreCerts) });
     return con;
   }
 }
@@ -45,5 +49,3 @@ export function shouldDisplayEntityID(): boolean {
   const result = (preferences.instance as boolean) || false;
   return result;
 }
-
-export const ha = createHomeAssistantClient();
