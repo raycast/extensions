@@ -30,7 +30,7 @@ const setup = ({ item, folder, favoriteOrder = [] }: SetupProps) => {
 };
 
 describe("useItemAccessories", () => {
-  it("returns return only the type accessory (only guaranteed)", () => {
+  it("returns only the type accessory (only guaranteed)", () => {
     const item = getMockItem({ overrideProps: { favorite: false, reprompt: Reprompt.NO } });
     const result = setup({ item, folder: null, favoriteOrder: [] });
 
