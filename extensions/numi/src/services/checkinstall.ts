@@ -56,13 +56,11 @@ export async function checkNumiInstallation(cli: boolean) {
 export async function isNumiCliInstalled(path?: string) {
   try {
     const res = await execp(`${path || DefaultPreferences.numi_cli_binary_path} --version`, { shell: "/bin/bash" });
-    console.log(res);
     if (res.stderr) {
       return false;
     }
     return res.stdout;
   } catch (error) {
-    console.error(error);
     return false;
   }
 }

@@ -63,7 +63,6 @@ export default function Command(props: LaunchProps<{ arguments: NumiArguments }>
   };
 
   const queryOnNumi = (q: string | undefined) => {
-    console.log("Querying", q);
     if (!use_numi_cli) {
       query(q)
         .then((results) => {
@@ -91,7 +90,6 @@ export default function Command(props: LaunchProps<{ arguments: NumiArguments }>
     } else {
       queryWithNumiCli(q, numi_cli_binary_path)
         .then((results) => {
-          console.log("Results", results);
           if (toast) {
             toast.hide();
           }
@@ -123,9 +121,7 @@ export default function Command(props: LaunchProps<{ arguments: NumiArguments }>
           }
         });
     } else {
-      let path: string | undefined = numi_cli_binary_path;
-      if (path.trim() === "") path = undefined;
-      isNumiCliInstalled(path)
+      isNumiCliInstalled(numi_cli_binary_path)
         .then(() => setApiStatus(true))
         .catch(() => setApiStatus(false));
     }
