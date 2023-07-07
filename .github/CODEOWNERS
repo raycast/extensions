@@ -456,7 +456,7 @@
 /extensions/iwork                                    @SKaplanOfficial
 /extensions/jenkins                                  @k8scat
 /extensions/jetbrains                                @gdsmith @adrienbaron @dima-m711
-/extensions/jira                                     @thomaslombart @FezVrasta @jesperorb
+/extensions/jira                                     @thomaslombart @FezVrasta @igor9silva @jesperorb
 /extensions/jira-search                              @svenwiegand
 /extensions/jira-search-self-hosted                  @emanguy @svenwiegand @koseduhemak @rnprest
 /extensions/jira-time-tracking                       @niallpaterson
@@ -622,6 +622,7 @@
 /extensions/nextjs-docs                              @PrasadChinwal
 /extensions/nft-search                               @glazec
 /extensions/night-light                              @devmoath @kgrhartlage
+/extensions/nippon-colors                            @nagauta
 /extensions/nixpkgs-search                           @aiotter
 /extensions/nmbs-planner                             @SamuelVanhaecke
 /extensions/node-js-evaluate                         @selfish
@@ -1033,6 +1034,7 @@
 /extensions/wordle                                   @chrisalxlng
 /extensions/wordpress-docs                           @tillkruss @KevinBatdorf
 /extensions/work-time-countdown                      @thomaspaulmann @pernielsentikaer
+/extensions/worktrees                                @canac
 /extensions/world-clock                              @koinzhang
 /extensions/world-cup                                @ismamz @djpowers @pernielsentikaer
 /extensions/wrike                                    @suarez-agu
