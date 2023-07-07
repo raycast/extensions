@@ -1,4 +1,5 @@
 import { getApplications, showToast, Toast, open } from "@raycast/api";
+import { useExec } from "@raycast/utils";
 import { exec } from "node:child_process";
 import { promisify } from "util";
 import { DefaultPreferences } from "../constant";
@@ -54,6 +55,7 @@ export async function checkNumiInstallation(cli: boolean) {
 }
 
 export async function isNumiCliInstalled(path?: string) {
+  if (path && path.trim() === "") path = undefined;
   try {
     const res = await execp(`${path || DefaultPreferences.numi_cli_binary_path} --version`, { shell: "/bin/bash" });
     if (res.stderr) {
