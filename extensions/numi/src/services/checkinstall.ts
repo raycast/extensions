@@ -58,9 +58,8 @@ export async function isNumiCliInstalled(path?: string) {
   if (path && path.trim() === "") path = undefined;
   try {
     const res = await execp(`${path || DefaultPreferences.numi_cli_binary_path} --version`, { shell: "/bin/bash" });
-    if (res.stderr) {
-      return false;
-    }
+    if (res.stderr) return false;
+    if (!res.stdout.includes("numi-cli")) return false;
     return res.stdout;
   } catch (error) {
     return false;
