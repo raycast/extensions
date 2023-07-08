@@ -36,7 +36,7 @@ function ActionToggleGroupName(props: { show?: boolean; callback?: (newValue: bo
   }
   return (
     <Action
-      title={props.show === true ? "Hide Group Name" : "Show Group Name"}
+      title={"Toggle Group Name"}
       icon={props.show === true ? Icon.EyeDisabled : Icon.Eye}
       shortcut={{ modifiers: ["opt"], key: "d" }}
       onAction={() => {
