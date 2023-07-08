@@ -737,7 +737,9 @@ export class GitLab {
     return user;
   }
 
-  async getUserGroups(params: Record<string, any> = {}): Promise<any> {
+  async getUserGroups(
+    params: { min_access_level?: string; search?: string; top_level_only?: boolean } = {}
+  ): Promise<any> {
     if (!params.min_access_level) {
       params.min_access_level = "30";
     }
@@ -745,12 +747,22 @@ export class GitLab {
     delete params.search;
 
     const dataAll: Group[] = await receiveLargeCachedObject(hashRecord(params, "usergroups"), async () => {
-      return ((await this.fetch(`groups`, params, true)) as Group[]) || [];
+      return ((await this.fetch(`groups`, params as Record<string, any>, true)) as Group[]) || [];
     });
-    return searchData<Group>(dataAll, { search: search, keys: ["title"], limit: 50 });
+    return searchData<Group>(dataAll, { search: search || "", keys: ["title"], limit: 50 });
   }
 
-  async getUserEpics(params: Record<string, any> = {}): Promise<Epic[]> {
+  async getUserEpics(
+    params: {
+      min_access_level?: string;
+      scope?: EpicScope;
+      state?: EpicState;
+      author_id?: number;
+      groupid?: string;
+      include_ancestor_groups?: boolean;
+      include_descendant_groups?: boolean;
+    } = {}
+  ): Promise<Epic[]> {
     if (!params.min_access_level) {
       params.min_access_level = "30";
     }
@@ -765,12 +777,16 @@ export class GitLab {
 
     const groupid = params.groupid;
 
-    params.include_ancestor_groups = false;
-    params.include_descendant_groups = false;
+    if (params.include_ancestor_groups === undefined) {
+      params.include_ancestor_groups = false;
+    }
+    if (params.include_descendant_groups === undefined) {
+      params.include_descendant_groups = false;
+    }
 
     if (groupid) {
       try {
-        const data = (await this.fetch(`groups/${groupid}/epics`, params, true)) || [];
+        const data = (await this.fetch(`groups/${groupid}/epics`, params as Record<string, any>, true)) || [];
         return data;
       } catch (e: any) {
         logAPI("skip during error");
@@ -778,11 +794,11 @@ export class GitLab {
       }
     }
 
-    const groups = await this.getUserGroups();
+    const groups = await this.getUserGroups({ top_level_only: true });
     const epics: Epic[] = [];
     for (const g of groups) {
       try {
-        const data = (await this.fetch(`groups/${g.id}/epics`, params, true)) || [];
+        const data = (await this.fetch(`groups/${g.id}/epics`, params as Record<string, any>, true)) || [];
         for (const e of data) {
           epics.push(e);
         }

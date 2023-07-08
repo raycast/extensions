@@ -41,6 +41,7 @@ export function MyEpicList(props: { scope: EpicScope; state: EpicState }): JSX.E
         state: props.state,
         scope: props.scope,
         groupid: selectedGroupID === "" ? undefined : selectedGroupID,
+        include_descendant_groups: true,
       });
       return data;
     },
