@@ -13,7 +13,7 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "index",
+      "name": "generate-event-reg-link",
       "title": "Create Sharable Event Link",
       "subtitle": "Google Calender",
       "description": "Easy to generate evet link to register for Google Calender!",

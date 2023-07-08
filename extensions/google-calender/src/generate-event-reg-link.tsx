@@ -1,5 +1,5 @@
 import { format } from "date-fns";
-import { Form, ActionPanel, Action, showToast, open } from "@raycast/api";
+import { Form, ActionPanel, Action, open } from "@raycast/api";
 
 type Values = {
   txtTitle: string;
