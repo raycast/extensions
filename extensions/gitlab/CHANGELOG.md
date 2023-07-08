@@ -10,6 +10,10 @@
 - Add group filter dropdown for epics
 - `My Groups` only show one level at a time
 
+## [Add Merge Request Template] - 2023-07-04
+
+- Add template choice for merge request creation
+
 ## [Search Scope] - 2023-04-27
 
 - Add scope dropdown for `Search Issues` and `Search Merge Requests`

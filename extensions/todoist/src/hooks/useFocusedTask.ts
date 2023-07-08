@@ -6,7 +6,7 @@ import { Task } from "../api";
 import { truncateMiddle } from "../helpers/menu-bar";
 
 export const useFocusedTask = () => {
-  const { focusFeatureWidth } = getPreferenceValues<Preferences.MenuBar>();
+  const { taskWidth } = getPreferenceValues<Preferences.MenuBar>();
 
   const { commandMode } = environment;
 
@@ -29,8 +29,8 @@ export const useFocusedTask = () => {
   }
 
   useEffect(() => {
-    focusedTask.content = truncateMiddle(focusedTask.content, parseInt(focusFeatureWidth ?? "40"));
-  }, [focusedTask, focusFeatureWidth]);
+    focusedTask.content = truncateMiddle(focusedTask.content, parseInt(taskWidth ?? "40"));
+  }, [focusedTask, taskWidth]);
 
   return { focusedTask, unfocusTask, focusTask };
 };

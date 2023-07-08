@@ -1,12 +1,23 @@
-import { Color, confirmAlert, Icon, MenuBarExtra, open, showHUD } from "@raycast/api";
+import {
+  getPreferenceValues,
+  Color,
+  confirmAlert,
+  Icon,
+  MenuBarExtra,
+  open,
+  showHUD,
+  launchCommand,
+  LaunchType,
+} from "@raycast/api";
+import { useMemo } from "react";
 import removeMarkdown from "remove-markdown";
 
 import { SyncData, Task, deleteTask as apiDeleteTAsk, closeTask, updateTask } from "../api";
 import { getCollaboratorIcon, getProjectCollaborators } from "../helpers/collaborators";
 import { isTodoistInstalled } from "../helpers/isTodoistInstalled";
 import { getRemainingLabels } from "../helpers/labels";
-import { priorities } from "../helpers/priorities";
-import { getPriorityIcon } from "../helpers/priorities";
+import { truncateMiddle } from "../helpers/menu-bar";
+import { priorities, getPriorityIcon } from "../helpers/priorities";
 import { getTaskAppUrl, getTaskUrl } from "../helpers/tasks";
 import { useFocusedTask } from "../hooks/useFocusedTask";
 
@@ -20,9 +31,13 @@ type MenuBarTaskProps = {
 
 const MenuBarTask = ({ task, data, setData }: MenuBarTaskProps) => {
   const { focusedTask, unfocusTask, focusTask } = useFocusedTask();
+  const { taskWidth } = getPreferenceValues<Preferences.MenuBar>();
 
   const collaborators = getProjectCollaborators(task.project_id, data);
   const remainingLabels = task && data?.labels ? getRemainingLabels(task, data.labels) : [];
+  const taskTitle = useMemo(() => {
+    return truncateMiddle(removeMarkdown(task.content), parseInt(taskWidth ?? "40"));
+  }, [task, taskWidth]);
 
   const subTasks = data?.items.filter((item) => item.parent_id === task.id);
 
@@ -100,7 +115,15 @@ const MenuBarTask = ({ task, data, setData }: MenuBarTaskProps) => {
 
   return (
     <View>
-      <MenuBarExtra.Submenu title={removeMarkdown(task.content)} icon={getPriorityIcon(task)}>
+      <MenuBarExtra.Submenu title={taskTitle} icon={getPriorityIcon(task)}>
+        <MenuBarExtra.Item
+          title="Open in Raycast"
+          onAction={() =>
+            launchCommand({ name: "home", type: LaunchType.UserInitiated, context: { view: `task_${task.id}` } })
+          }
+          icon={Icon.RaycastLogoNeg}
+        />
+
         <MenuBarExtra.Item
           title="Open in Todoist"
           onAction={() => {
