@@ -10,16 +10,10 @@ import stream from "stream";
 
 const pipeline = promisify(stream.pipeline);
 
-const preferences = getPreferenceValues();
+export const preferences = getPreferenceValues<{ downloadPath: string; ffmpegPath: string; ffprobePath: string }>();
 
-const paths = ["/opt/homebrew/bin/", "/usr/local/bin/", "/usr/bin/"];
-
-export const ffmpegPath = paths.find((p) => fs.existsSync(`${p}ffmpeg`));
-
-if (ffmpegPath) {
-  setFfmpegPath(`${ffmpegPath}ffmpeg`);
-  setFfprobePath(`${ffmpegPath}ffprobe`);
-}
+setFfmpegPath(preferences.ffmpegPath);
+setFfprobePath(preferences.ffprobePath);
 
 export async function downloadVideo(url: string, options: { format: string; copyToClipboard: boolean }) {
   const info = await ytdl.getInfo(url);
