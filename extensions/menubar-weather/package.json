@@ -112,7 +112,7 @@
       "type": "dropdown",
       "title": "Display in menubar",
       "description": "Forecast of feels-like",
-      "required": true,
+      "required": false,
       "default": "temperature",
       "data": [
         {
