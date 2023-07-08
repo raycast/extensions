@@ -423,6 +423,10 @@ function EventListDropdown(props: { onChange: (text: string) => void }) {
   );
 }
 
+function EventListEmptyView(): JSX.Element {
+  return <List.EmptyView title="No Activity" icon={{ source: GitLabIcons.activity, tintColor: Color.PrimaryText }} />;
+}
+
 export function EventList(): JSX.Element {
   const [scope, setScope] = useState<string>(ScopeType.MyActivities);
   const [searchText, setSearchText] = useState<string>();
@@ -467,6 +471,7 @@ export function EventList(): JSX.Element {
       {data?.map((ev) => (
         <EventListItem key={ev.id} event={ev} />
       ))}
+      <EventListEmptyView />
     </List>
   );
 }
