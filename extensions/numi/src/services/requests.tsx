@@ -1,9 +1,11 @@
+import { getPreferenceValues } from "@raycast/api";
 import http from "http";
 import { exec } from "node:child_process";
 import { promisify } from "util";
-import { DefaultPreferences } from "../constant";
+import { Preferences } from "..";
 
 const execp = promisify(exec);
+const { numi_cli_binary_path } = getPreferenceValues<Preferences>();
 
 export const query = (q?: string): Promise<string[]> => {
   return new Promise((resolve, rejects) => {
@@ -37,9 +39,9 @@ export const query = (q?: string): Promise<string[]> => {
   });
 };
 
-export const queryWithNumiCli = async (q?: string, path?: string): Promise<string[]> => {
+export const queryWithNumiCli = async (q?: string): Promise<string[]> => {
   q = q?.replace(/"/g, '\\"') || ""; // safe " in query
-  const command = `${path || DefaultPreferences.numi_cli_binary_path} "${q}"`;
+  const command = `${numi_cli_binary_path} "${q}"`;
   const res = await execp(command, { shell: "/bin/bash" });
   if (res.stderr) {
     console.error(res.stderr);

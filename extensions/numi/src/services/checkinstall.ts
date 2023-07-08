@@ -1,10 +1,10 @@
-import { getApplications, showToast, Toast, open } from "@raycast/api";
-import { useExec } from "@raycast/utils";
+import { getApplications, showToast, Toast, open, getPreferenceValues } from "@raycast/api";
 import { exec } from "node:child_process";
 import { promisify } from "util";
-import { DefaultPreferences } from "../constant";
+import { Preferences } from "..";
 
 const execp = promisify(exec);
+const { use_numi_cli, numi_cli_binary_path } = getPreferenceValues<Preferences>();
 
 async function isNumiInstalled() {
   const applications = await getApplications();
@@ -16,8 +16,8 @@ async function isNumiInstalled() {
   );
 }
 
-export async function checkNumiInstallation(cli: boolean) {
-  if (!cli) {
+export async function checkNumiInstallation() {
+  if (!use_numi_cli) {
     if (!(await isNumiInstalled())) {
       const options: Toast.Options = {
         style: Toast.Style.Failure,
@@ -54,10 +54,9 @@ export async function checkNumiInstallation(cli: boolean) {
   }
 }
 
-export async function isNumiCliInstalled(path?: string) {
-  if (path && path.trim() === "") path = undefined;
+export async function isNumiCliInstalled() {
   try {
-    const res = await execp(`${path || DefaultPreferences.numi_cli_binary_path} --version`, { shell: "/bin/bash" });
+    const res = await execp(`${numi_cli_binary_path} --version`, { shell: "/bin/bash" });
     if (res.stderr) return false;
     if (!res.stdout.includes("numi-cli")) return false;
     return res.stdout;

@@ -3,7 +3,6 @@ import { useCachedState } from "@raycast/utils";
 import { useState, useEffect } from "react";
 import { checkNumiInstallation, isNumiCliInstalled } from "./services/checkinstall";
 import { query, queryWithNumiCli } from "./services/requests";
-import { DefaultPreferences } from "./constant";
 
 interface State {
   isLoading: boolean;
@@ -20,7 +19,7 @@ interface NumiArguments {
   queryArgument: string;
 }
 
-interface Preferences {
+export interface Preferences {
   max_history_elemets: string;
   use_numi_cli: boolean;
   numi_cli_binary_path: string;
@@ -54,7 +53,7 @@ export default function Command(props: LaunchProps<{ arguments: NumiArguments }>
               prev.push({ query: q, results });
             }
 
-            const newHistory = [...prev.slice(-+max_history_elemets || -DefaultPreferences.max_history_elemets)];
+            const newHistory = [...prev.slice(-+max_history_elemets || -10)];
             return newHistory;
           });
         }
@@ -88,7 +87,7 @@ export default function Command(props: LaunchProps<{ arguments: NumiArguments }>
             .catch((err) => console.error("Error Creating Toast"));
         });
     } else {
-      queryWithNumiCli(q, numi_cli_binary_path)
+      queryWithNumiCli(q)
         .then((results) => {
           if (toast) {
             toast.hide();
@@ -122,7 +121,7 @@ export default function Command(props: LaunchProps<{ arguments: NumiArguments }>
           }
         });
     } else {
-      isNumiCliInstalled(numi_cli_binary_path)
+      isNumiCliInstalled()
         .then(() => setApiStatus(true))
         .catch(() => setApiStatus(false));
     }
@@ -152,7 +151,7 @@ export default function Command(props: LaunchProps<{ arguments: NumiArguments }>
     queryOnNumi(q);
   }, [state]);
 
-  checkNumiInstallation(use_numi_cli);
+  checkNumiInstallation();
 
   return (
     <List
