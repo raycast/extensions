@@ -82,14 +82,16 @@ export function TodoList(): JSX.Element {
 
   return (
     <List
-      searchBarPlaceholder="Filter Todos by name..."
+      searchBarPlaceholder="Filter Todos by Name..."
       isLoading={isLoading}
       throttle={true}
       searchBarAccessory={<MyProjectsDropdown onChange={setProject} />}
     >
-      {todos?.map((todo) => (
-        <TodoListItem key={todo.id} todo={todo} refreshData={refreshAll} />
-      ))}
+      <List.Section title="Todos" subtitle={`${todos?.length}`}>
+        {todos?.map((todo) => (
+          <TodoListItem key={todo.id} todo={todo} refreshData={refreshAll} />
+        ))}
+      </List.Section>
     </List>
   );
 }

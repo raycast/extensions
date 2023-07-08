@@ -117,14 +117,19 @@ export function ProjectList({ membership = true, starred = false }: ProjectListP
 
   return (
     <List
-      searchBarPlaceholder="Filter Projects by name..."
+      searchBarPlaceholder="Filter Projects by Name..."
       onSearchTextChange={setSearchText}
       isLoading={isLoading}
       throttle={true}
     >
-      {data?.map((project) => (
-        <ProjectListItem key={project.id} project={project} />
-      ))}
+      <List.Section
+        title={searchText && searchText.length > 0 ? "Search Results" : "Projects"}
+        subtitle={`${data?.length}`}
+      >
+        {data?.map((project) => (
+          <ProjectListItem key={project.id} project={project} />
+        ))}
+      </List.Section>
     </List>
   );
 }
