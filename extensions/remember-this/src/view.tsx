@@ -57,7 +57,7 @@ function readRememberedItems(): RememberedItem[] {
 
     return validLines.map((line) => {
       const [dateString, contento] = line.split(",");
-      const delimiter = "||&|"; // Remove unnecessary escape characters
+      const delimiter = /\|\|&\|/g; // Regular expression with global flag
       const content = contento.replace(delimiter, ",");
       return {
         expirationDate: new Date(dateString),

@@ -264,7 +264,7 @@ export default function Command() {
       );
     }
   }
-  const delimiter = "||&|"; // Define the delimiter as a regular expression with the "g" flag
+  const delimiter = /\|\|&\|/g; // Define the delimiter as a regular expression with the "g" flag
   const taskname = closestDate.taskname.replace(delimiter, ",");
   const messageContent = taskname;
   const timestamp = closestDate.date.toISOString();
