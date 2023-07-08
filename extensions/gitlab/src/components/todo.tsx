@@ -63,6 +63,19 @@ export function getTodoIcon(todo: Todo, overrideTintColor?: Color.ColorLike | nu
   };
 }
 
+function TodoListEmptyView(props: { searchMode: boolean }): JSX.Element {
+  if (props.searchMode) {
+    return <List.EmptyView title="No Todos" icon={{ source: "todo.png", tintColor: Color.PrimaryText }} />;
+  }
+  return (
+    <List.EmptyView
+      icon="✨"
+      title="Isn't an empty Todo list beautiful?"
+      description="Are you looking for things to do? Take a look at open issues or contribute to a Merge Request."
+    />
+  );
+}
+
 export function TodoList(): JSX.Element {
   const [project, setProject] = useState<Project>();
   const { todos, error, isLoading, performRefetch: refresh } = useTodos(undefined, project);
@@ -92,6 +105,7 @@ export function TodoList(): JSX.Element {
           <TodoListItem key={todo.id} todo={todo} refreshData={refreshAll} />
         ))}
       </List.Section>
+      <TodoListEmptyView searchMode={todos && todos.length > 0} />
     </List>
   );
 }
