@@ -65,7 +65,10 @@ export function MyEpicList(props: { scope: EpicScope; state: EpicState }): JSX.E
       throttle={true}
       searchBarAccessory={<GroupListDropDown groupsInfo={groupsinfo} onChange={setSelectedGroupID} />}
     >
-      <List.Section title={data ? `Recent Epics` : undefined} subtitle={data ? `${data.length}` : undefined}>
+      <List.Section
+        title={data ? (searchText && searchText.length > 0 ? "Search Results" : "Recent Epics") : undefined}
+        subtitle={data ? `${data.length}` : undefined}
+      >
         {data?.map((epic) => (
           <EpicListItem key={epic.id} epic={epic} displayGroup={displayGroup} onChangeDisplayGroup={setDisplayGroup} />
         ))}
