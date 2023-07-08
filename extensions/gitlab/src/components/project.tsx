@@ -28,13 +28,13 @@ function getProjectTextIcon(project: Project): Image.ImageLike | undefined {
   return getTextIcon((project.name ? project.name[0] : "?").toUpperCase());
 }
 
-export function ProjectListItem(props: { project: Project }): JSX.Element {
+export function ProjectListItem(props: { project: Project; nameOnly?: boolean }): JSX.Element {
   const project = props.project;
   const { localFilepath: localImageFilepath } = useImage(projectIconUrl(project));
 
   return (
     <List.Item
-      title={project.name_with_namespace}
+      title={props.nameOnly === true ? project.name : project.name_with_namespace}
       accessories={[
         {
           icon: {

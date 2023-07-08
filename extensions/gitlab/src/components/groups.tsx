@@ -30,13 +30,13 @@ function webUrl(group: Group, partial: string) {
   return getGitLabGQL().urlJoin(`groups/${group.full_path}/${partial}`);
 }
 
-export function GroupListItem(props: { group: any }): JSX.Element {
+export function GroupListItem(props: { group: any; nameOnly?: boolean }): JSX.Element {
   const group = props.group;
   const { localFilepath: localImageFilepath } = useImage(groupIconUrl(group));
   return (
     <List.Item
       id={`${group.id}`}
-      title={group.full_name}
+      title={props.nameOnly === true ? group.name : group.full_name}
       icon={localImageFilepath || getTextIcon((group.name ? group.name[0] : "?").toUpperCase())}
       actions={
         <ActionPanel>
@@ -108,7 +108,8 @@ export function GroupListItem(props: { group: any }): JSX.Element {
 export function GroupList(props: { parentGroup?: Group }): JSX.Element {
   const parentGroup = props.parentGroup;
   const parentGroupID = parentGroup ? parentGroup.id : 0;
-  const { groupsinfo, error, isLoading } = useMyGroups(undefined, parentGroupID);
+  const topLevelOnly = true;
+  const { groupsinfo, error, isLoading } = useMyGroups({ parentGroupID: parentGroupID, top_level_only: topLevelOnly });
 
   if (error) {
     showErrorToast(error, "Cannot search Groups");
@@ -121,25 +122,31 @@ export function GroupList(props: { parentGroup?: Group }): JSX.Element {
   const navtitle = parentGroup ? `Group ${parentGroup.full_path}` : undefined;
   return (
     <List searchBarPlaceholder="Filter Groups by name..." isLoading={isLoading} navigationTitle={navtitle}>
-      {groupsinfo?.groups?.map((group) => (
-        <GroupListItem key={group.id} group={group} />
-      ))}
-      {groupsinfo?.projects?.map((project) => (
-        <ProjectListItem key={project.id} project={project} />
-      ))}
+      <List.Section title="Groups">
+        {groupsinfo?.groups?.map((group) => (
+          <GroupListItem key={group.id} group={group} nameOnly={topLevelOnly} />
+        ))}
+      </List.Section>
+      <List.Section title="Projects">
+        {groupsinfo?.projects?.map((project) => (
+          <ProjectListItem key={project.id} project={project} nameOnly={topLevelOnly} />
+        ))}
+      </List.Section>
     </List>
   );
 }
 
-export function useMyGroups(
-  query?: string,
-  parentGroupID?: number
-): {
+export function useMyGroups(args?: { query?: string; parentGroupID?: number; top_level_only?: boolean }): {
   groupsinfo?: GroupInfo;
   error?: string;
   isLoading: boolean | undefined;
 } {
+  const query = args?.query;
+  const parentGroupID = args?.parentGroupID;
   const params: Record<string, any> = { min_access_level: "30" };
+  if ((parentGroupID === undefined || parentGroupID <= 0) && args?.top_level_only === true) {
+    params.top_level_only = true;
+  }
   const paramsHash = hashRecord(params);
   const [groupsinfo, setGroupsInfo] = useState<GroupInfo | undefined>();
   const { data, isLoading, error } = useCache<GroupInfo | undefined>(
@@ -168,7 +175,7 @@ export function useMyGroups(
   );
   useEffect(() => {
     setGroupsInfo(data);
-  }, [query, data]);
+  }, [query, data, args?.top_level_only]);
   return { groupsinfo, isLoading, error };
 }
 
