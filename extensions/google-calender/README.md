@@ -1,3 +1,4 @@
-# Google Calender Event Link Generator
+# Google Calender
+
 
 Easy to generate evet link to register for Google Calender!

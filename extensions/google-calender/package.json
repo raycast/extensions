@@ -1,9 +1,9 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "google-calender-event-link-generator",
-  "title": "Google Calender Event Link Generator",
-  "description": "Easy to generate evet link to register for Google Calender!",
-  "icon": "command-icon.png",
+  "name": "google-calender",
+  "title": "Google Calender",
+  "description": "Search and Create sharable link to registrate!",
+  "icon": "google-calender-icon.png",
   "author": "nagauta",
   "categories": [
     "Productivity",
@@ -14,14 +14,15 @@
   "commands": [
     {
       "name": "index",
-      "title": "Create new event",
+      "title": "Create Sharable Event Link",
       "subtitle": "Google Calender",
       "description": "Easy to generate evet link to register for Google Calender!",
       "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.54.1"
+    "@raycast/api": "^1.54.1",
+    "date-fns": "^2.30.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.5",
