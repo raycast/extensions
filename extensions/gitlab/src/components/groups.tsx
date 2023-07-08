@@ -105,6 +105,10 @@ export function GroupListItem(props: { group: any; nameOnly?: boolean }): JSX.El
   );
 }
 
+function GroupListEmptyView(): JSX.Element {
+  return <List.EmptyView title="No Groups or Projects" icon={{ source: "group.svg", tintColor: Color.PrimaryText }} />;
+}
+
 export function GroupList(props: { parentGroup?: Group }): JSX.Element {
   const parentGroup = props.parentGroup;
   const parentGroupID = parentGroup ? parentGroup.id : 0;
@@ -121,7 +125,7 @@ export function GroupList(props: { parentGroup?: Group }): JSX.Element {
 
   const navtitle = parentGroup ? `Group ${parentGroup.full_path}` : undefined;
   return (
-    <List searchBarPlaceholder="Filter Groups by name..." isLoading={isLoading} navigationTitle={navtitle}>
+    <List searchBarPlaceholder="Filter Groups by Name..." isLoading={isLoading} navigationTitle={navtitle}>
       <List.Section title="Groups">
         {groupsinfo?.groups?.map((group) => (
           <GroupListItem key={group.id} group={group} nameOnly={topLevelOnly} />
@@ -132,6 +136,7 @@ export function GroupList(props: { parentGroup?: Group }): JSX.Element {
           <ProjectListItem key={project.id} project={project} nameOnly={topLevelOnly} />
         ))}
       </List.Section>
+      <GroupListEmptyView />
     </List>
   );
 }

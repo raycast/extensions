@@ -8,10 +8,10 @@ import { Image } from "@raycast/api";
 
 export enum GitLabIcons {
   merge_request = "mropen.png",
-  todo = "todo.png",
-  review = "list-icon.png",
+  todo = "todo-done.svg",
+  review = "review-list.svg",
   issue = "exclamation.png",
-  project = "credit-card-16",
+  project = "project.svg",
   merged = "merged.png",
   mropen = "mropen.png",
   mraccepted = "todo.png",

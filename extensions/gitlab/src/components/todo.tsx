@@ -65,7 +65,7 @@ export function getTodoIcon(todo: Todo, overrideTintColor?: Color.ColorLike | nu
 
 function TodoListEmptyView(props: { searchMode: boolean }): JSX.Element {
   if (props.searchMode) {
-    return <List.EmptyView title="No Todos" icon={{ source: "todo.png", tintColor: Color.PrimaryText }} />;
+    return <List.EmptyView title="No Todos" icon={{ source: GitLabIcons.todo, tintColor: Color.PrimaryText }} />;
   }
   return (
     <List.EmptyView
