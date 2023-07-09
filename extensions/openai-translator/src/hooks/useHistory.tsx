@@ -1,7 +1,7 @@
 import { getPreferenceValues, LocalStorage, showToast, Toast } from "@raycast/api";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { TranslateMode, TranslateResult } from "../providers/openai/translate";
 import { promises as fs } from "fs";
+import { TranslateMode, TranslateResult } from "../providers/types";
 
 export interface Record {
   id: string;
@@ -9,6 +9,7 @@ export interface Record {
   mode: TranslateMode;
   result: TranslateResult;
   ocrImg: string | undefined;
+  provider: string | undefined;
 }
 
 export interface HistoryHook {

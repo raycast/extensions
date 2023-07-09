@@ -1,7 +1,7 @@
 import React, { ReactElement, useState } from "react";
 import { List, ActionPanel, showToast, Toast, Action, Icon } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
-import { useDebouncedValue, useSelectedLanguagesSet } from "./hooks";
+import { useDebouncedValue, useSelectedLanguagesSet, useTextState } from "./hooks";
 import { supportedLanguagesByCode } from "./languages";
 import { LanguageManagerListDropdown } from "./LanguagesManager";
 import { doubleWayTranslate } from "./simple-translate";
@@ -9,7 +9,7 @@ import { doubleWayTranslate } from "./simple-translate";
 export default function Translate(): ReactElement {
   const [selectedLanguageSet] = useSelectedLanguagesSet();
   const [isShowingDetail, setIsShowingDetail] = useState(false);
-  const [text, setText] = React.useState("");
+  const [text, setText] = useTextState();
   const debouncedValue = useDebouncedValue(text, 500);
   const { data: results, isLoading: isLoading } = usePromise(
     doubleWayTranslate,
@@ -28,6 +28,7 @@ export default function Translate(): ReactElement {
   return (
     <List
       searchBarPlaceholder="Enter text to translate"
+      searchText={text}
       onSearchTextChange={setText}
       isLoading={isLoading}
       isShowingDetail={isShowingDetail}

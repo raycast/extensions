@@ -16,5 +16,6 @@
     "react-hooks/rules-of-hooks": "error",
     "@typescript-eslint/ban-ts-comment": "off",
     "promise/always-return": "off"
-  }
+  },
+  "ignorePatterns": ["raycast-env.d.ts"]  
 }

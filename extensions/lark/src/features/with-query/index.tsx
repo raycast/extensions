@@ -2,15 +2,15 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 const queryClient = new QueryClient();
 
-const QueryGuard: React.FC<{ component: React.FC }> = ({ component: Component }) => {
-  return (
-    <QueryClientProvider client={queryClient}>
-      <Component />
-    </QueryClientProvider>
-  );
+const QueryGuard = ({ children }: { children: React.ReactElement }) => {
+  return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
 };
 
 export const withQuery =
-  (Component: React.FC): React.FC =>
-  () =>
-    <QueryGuard component={Component} />;
+  <T extends Record<string, unknown>>(Component: React.ComponentType<T>): React.FC<T> =>
+  (props: T) =>
+    (
+      <QueryGuard>
+        <Component {...props} />
+      </QueryGuard>
+    );

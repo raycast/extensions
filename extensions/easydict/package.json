@@ -6,6 +6,7 @@
   "icon": "Eudic.png",
   "author": "isfeng",
   "license": "MIT",
+  "contributors": [],
   "commands": [
     {
       "name": "easydict",
@@ -21,6 +22,14 @@
           "required": false
         }
       ]
+    },
+    {
+      "name": "ocr",
+      "title": "OCR Translate",
+      "icon": "ocr.png",
+      "subtitle": "Query text from image",
+      "description": "Screenshot OCR, and query text from image.",
+      "mode": "no-view"
     }
   ],
   "categories": [
@@ -84,6 +93,7 @@
   },
   "scripts": {
     "build": "ray build -e dist",
+    "build-swift": "swift build --configuration=release --arch arm64 --arch x86_64 && mv .build/apple/Products/Release/recognizeText assets",
     "dev": "ray develop",
     "lint": "ray lint",
     "fix-lint": "ray lint --fix",
@@ -574,7 +584,7 @@
       "name": "enableYoudaoDictionary",
       "label": "Youdao Dictionary",
       "required": false,
-      "description": "Support 5 langauges: (Chinese), English, French, Japanese, Korean.",
+      "description": "Support 5 languages: (Chinese), English, French, Japanese, Korean.",
       "default": true
     },
     {
@@ -582,7 +592,7 @@
       "name": "enableLingueeDictionary",
       "label": "Linguee Dictionary",
       "required": false,
-      "description": "Support 19 langauges: (Chinese, Japanese, Russian), English, French, Spanish, Portuguese, Italian, German, Swedish, Romanian, Slovak, Dutch, Hungarian, Greek, Danish, Finnish, Polish, Czech.",
+      "description": "Support 19 languages: (Chinese, Japanese, Russian), English, French, Spanish, Portuguese, Italian, German, Swedish, Romanian, Slovak, Dutch, Hungarian, Greek, Danish, Finnish, Polish, Czech.",
       "default": true
     },
     {

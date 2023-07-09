@@ -1,5 +1,10 @@
 # Lark Changelog
 
+## [Update] - 2023-06-07
+
+- Added slide type icon
+- Enhanced error tips
+
 ## [Update] - 2023-05-22
 
 - Updated Raycast API

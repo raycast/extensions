@@ -1,10 +1,10 @@
 import { Action, Color, Icon, showToast, Toast } from "@raycast/api";
 import { VAULT_LOCK_MESSAGES } from "~/constants/general";
 import { useBitwarden } from "~/context/bitwarden";
-import { useVault } from "~/context/vault";
+import { useVaultContext } from "~/context/vault";
 
 function VaultManagementActions() {
-  const vault = useVault();
+  const vault = useVaultContext();
   const bitwarden = useBitwarden();
 
   const handleLockVault = async () => {

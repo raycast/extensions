@@ -1,5 +1,9 @@
 # Harvest Changelog
 
+## [Customize Time Entry Form] - 2023-06-11
+
+- Add new preference to show all times using hours/minutes, decimal, or whatever your company prefers in your Harvest account (default)
+
 ## [Menu Bar Support] - 2023-05-22
 
 - Add support for a menu bar widget that shows the current running timer.

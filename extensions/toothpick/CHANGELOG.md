@@ -1,5 +1,20 @@
 # Toothpick Changelog
 
+## [QoL Improvements and Device Additions] - 2023-06-14
+
+- Added rudimentary mappings for the following devices:
+  - Logitech MX Master 3 (custom icon)
+  - Logitech MX Master 3S (custom icon)
+  - Sony WH-1000XM5 (custom icon)
+  - Sony WH-1000XM4 (custom icon)
+  - Sony WH-1000XM3 (custom icon)
+  - Bose QC 35 (custom icon)
+  - Bose QC 35 II (custom icon)
+- Hooked favorite device commands' subtitles to corresponding device's name
+- Configured SVG optimization
+- Cleaned up codebase a little bit
+- Added a guide for setting up favorite devices in README.md
+
 ## [Partial Device Support Addition] - 2023-02-17
 
 - Added rudimentary mappings for the following devices:

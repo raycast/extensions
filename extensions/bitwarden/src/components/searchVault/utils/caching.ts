@@ -1,5 +1,5 @@
 import { SENSITIVE_VALUE_PLACEHOLDER as SENSITIVE_VALUE_PLACEHOLDER } from "~/constants/general";
-import { CardBrand, Folder, IdentityTitle, Item } from "~/types/vault";
+import { Folder, IdentityTitle, Item } from "~/types/vault";
 
 export function prepareItemsForCache(items: Item[]): Item[] {
   return items.map((item) => ({
@@ -77,8 +77,8 @@ function cleanIdentity(identity: Item["identity"]): Item["identity"] {
 function cleanCard(card: Item["card"]): Item["card"] {
   if (!card) return undefined;
   return {
+    brand: card.brand,
     cardholderName: hideIfDefined(card.cardholderName),
-    brand: hideIfDefined(card.brand) as CardBrand | null,
     number: hideIfDefined(card.number),
     expMonth: hideIfDefined(card.expMonth),
     expYear: hideIfDefined(card.expYear),

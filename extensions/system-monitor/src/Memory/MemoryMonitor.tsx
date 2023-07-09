@@ -4,6 +4,7 @@ import { getFreeDiskSpace, getTopRamProcess, getTotalDiskSpace, getMemoryUsage }
 import { useInterval } from "usehooks-ts";
 import { MemoryMonitorState } from "../Interfaces";
 import { ExecError } from "../Interfaces";
+import { Actions } from "../components/Actions";
 
 export default function MemoryMonitor() {
   const [isLoading, setIsLoading] = useState(true);
@@ -94,7 +95,7 @@ export default function MemoryMonitor() {
                 <List.Item.Detail.Metadata.Label title="Free RAM %" text={`${state.freeMemPercentage} %`} />
                 <List.Item.Detail.Metadata.Separator />
                 <List.Item.Detail.Metadata.Label title="Process Name" text="RAM" />
-                {state.topProcess !== [] &&
+                {state.topProcess.length > 0 &&
                   state.topProcess.map((element, index) => {
                     return (
                       <List.Item.Detail.Metadata.Label
@@ -108,6 +109,7 @@ export default function MemoryMonitor() {
             }
           />
         }
+        actions={<Actions />}
       />
     </>
   );

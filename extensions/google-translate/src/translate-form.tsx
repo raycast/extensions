@@ -1,7 +1,7 @@
 import React from "react";
 import { Action, ActionPanel, Form, Icon, showToast, Toast } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
-import { useDebouncedValue, useSelectedLanguagesSet } from "./hooks";
+import { useDebouncedValue, useSelectedLanguagesSet, useTextState } from "./hooks";
 import { LanguageCode, supportedLanguagesByCode, languages } from "./languages";
 import { AUTO_DETECT, simpleTranslate } from "./simple-translate";
 import { LanguagesManagerList } from "./LanguagesManager";
@@ -15,7 +15,7 @@ export default function TranslateForm() {
   const fromLangObj = supportedLanguagesByCode[langFrom];
   const toLangObj = supportedLanguagesByCode[langTo];
 
-  const [text, setText] = React.useState("");
+  const [text, setText] = useTextState();
   const debouncedValue = useDebouncedValue(text, 500);
   const { data: translated, isLoading } = usePromise(
     simpleTranslate,
@@ -131,7 +131,7 @@ export default function TranslateForm() {
         </ActionPanel>
       }
     >
-      <Form.TextArea id="text" title="Text" onChange={handleChange} />
+      <Form.TextArea id="text" title="Text" value={text} onChange={handleChange} />
       <Form.Dropdown
         id="language_from"
         title="From"

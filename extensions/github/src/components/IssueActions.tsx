@@ -344,7 +344,7 @@ function AddAssigneeSubmenu({ issue, mutate }: SubmenuProps) {
   const [load, setLoad] = useState(false);
 
   const { data, isLoading } = useCachedPromise(
-    async (issue) => {
+    async (issue: Issue) => {
       return github.repositoryCollaboratorsForIssues({
         owner: issue.repository.owner.login,
         name: issue.repository.name,
@@ -420,7 +420,7 @@ function AddProjectSubmenu({ issue, mutate }: SubmenuProps) {
   const [load, setLoad] = useState(false);
 
   const { data, isLoading } = useCachedPromise(
-    async (issue) => {
+    async (issue: Issue) => {
       return github.repositoryProjectsForIssues({
         owner: issue.repository.owner.login,
         name: issue.repository.name,
@@ -489,7 +489,7 @@ function SetMilestoneSubmenu({ issue, mutate }: SubmenuProps) {
   const [load, setLoad] = useState(false);
 
   const { data, isLoading } = useCachedPromise(
-    async (issue) => {
+    async (issue: Issue) => {
       return github.milestonesForRepository({
         owner: issue.repository.owner.login,
         name: issue.repository.name,

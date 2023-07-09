@@ -23,6 +23,36 @@
           "type": "textfield",
           "default": "Summarize the following text as concise as possible: \n\n",
           "required": false
+        },
+        {
+          "name": "model_summarize",
+          "description": "Override the global preferred model for this command",
+          "type": "dropdown",
+          "required": false,
+          "title": "Model Override",
+          "placeholder": "Follow global model",
+          "data": [
+            {
+              "title": "Follow global model",
+              "value": "global"
+            },
+            {
+              "title": "GPT-3.5 Turbo",
+              "value": "gpt-3.5-turbo"
+            },
+            {
+              "title": "GPT-3.5 Turbo (16K)",
+              "value": "gpt-3.5-turbo-16k"
+            },
+            {
+              "title": "GPT-4",
+              "value": "gpt-4"
+            },
+            {
+              "title": "GPT-4 (32K, 0613)",
+              "value": "gpt-4-32k-0613"
+            }
+          ]
         }
       ]
     },
@@ -39,6 +69,36 @@
           "type": "textfield",
           "default": "Rewrite this using an academic tone: \n\n",
           "required": false
+        },
+        {
+          "name": "model_rewrite",
+          "description": "Override the global preferred model for this command",
+          "type": "dropdown",
+          "required": false,
+          "title": "Model Override",
+          "placeholder": "Follow global model",
+          "data": [
+            {
+              "title": "Follow global model",
+              "value": "global"
+            },
+            {
+              "title": "GPT-3.5 Turbo",
+              "value": "gpt-3.5-turbo"
+            },
+            {
+              "title": "GPT-3.5 Turbo (16K)",
+              "value": "gpt-3.5-turbo-16k"
+            },
+            {
+              "title": "GPT-4",
+              "value": "gpt-4"
+            },
+            {
+              "title": "GPT-4 (32K, 0613)",
+              "value": "gpt-4-32k-0613"
+            }
+          ]
         }
       ]
     },
@@ -55,6 +115,36 @@
           "type": "textfield",
           "default": "Refine the writing and correct grammar mistakes: \n\n",
           "required": false
+        },
+        {
+          "name": "model_refine",
+          "description": "Override the global preferred model for this command",
+          "type": "dropdown",
+          "required": false,
+          "title": "Model Override",
+          "placeholder": "Follow global model",
+          "data": [
+            {
+              "title": "Follow global model",
+              "value": "global"
+            },
+            {
+              "title": "GPT-3.5 Turbo",
+              "value": "gpt-3.5-turbo"
+            },
+            {
+              "title": "GPT-3.5 Turbo (16K)",
+              "value": "gpt-3.5-turbo-16k"
+            },
+            {
+              "title": "GPT-4",
+              "value": "gpt-4"
+            },
+            {
+              "title": "GPT-4 (32K, 0613)",
+              "value": "gpt-4-32k-0613"
+            }
+          ]
         }
       ]
     },
@@ -71,6 +161,36 @@
           "type": "textfield",
           "default": "Refine the writing and correct grammar mistakes: \n\n",
           "required": false
+        },
+        {
+          "name": "model_custom",
+          "description": "Override the global preferred model for this command",
+          "type": "dropdown",
+          "required": false,
+          "title": "Model Override",
+          "placeholder": "Follow global model",
+          "data": [
+            {
+              "title": "Follow global model",
+              "value": "global"
+            },
+            {
+              "title": "GPT-3.5 Turbo",
+              "value": "gpt-3.5-turbo"
+            },
+            {
+              "title": "GPT-3.5 Turbo (16K)",
+              "value": "gpt-3.5-turbo-16k"
+            },
+            {
+              "title": "GPT-4",
+              "value": "gpt-4"
+            },
+            {
+              "title": "GPT-4 (32K, 0613)",
+              "value": "gpt-4-32k-0613"
+            }
+          ]
         }
       ]
     },
@@ -78,18 +198,83 @@
       "name": "execute",
       "title": "Execute",
       "description": "Replace selected text with ChatGPT output",
-      "mode": "no-view"
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "model_execute",
+          "description": "Override the global preferred model for this command",
+          "type": "dropdown",
+          "required": false,
+          "title": "Model Override",
+          "placeholder": "Follow global model",
+          "data": [
+            {
+              "title": "Follow global model",
+              "value": "global"
+            },
+            {
+              "title": "GPT-3.5 Turbo",
+              "value": "gpt-3.5-turbo"
+            },
+            {
+              "title": "GPT-3.5 Turbo (16K)",
+              "value": "gpt-3.5-turbo-16k"
+            },
+            {
+              "title": "GPT-4",
+              "value": "gpt-4"
+            },
+            {
+              "title": "GPT-4 (32K, 0613)",
+              "value": "gpt-4-32k-0613"
+            }
+          ]
+        }
+      ]
     },
     {
       "name": "preview",
       "title": "Preview",
       "description": "Use selected text as ChatGPT output and preview output",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "model_preview",
+          "description": "Override the global preferred model for this command",
+          "type": "dropdown",
+          "required": false,
+          "title": "Model Override",
+          "placeholder": "Follow global model",
+          "data": [
+            {
+              "title": "Follow global model",
+              "value": "global"
+            },
+            {
+              "title": "GPT-3.5 Turbo",
+              "value": "gpt-3.5-turbo"
+            },
+            {
+
+              "title": "GPT-3.5 Turbo (16K)",
+              "value": "gpt-3.5-turbo-16k"
+            },
+            {
+              "title": "GPT-4",
+              "value": "gpt-4"
+            },
+            {
+              "title": "GPT-4 (32K, 0613)",
+              "value": "gpt-4-32k-0613"
+            }
+          ]
+        }
+      ]
     }
   ],
   "dependencies": {
     "@nem035/gpt-3-encoder": "^1.1.7",
-    "@raycast/api": "^1.48.5",
+    "@raycast/api": "^1.50.0",
     "openai": "^3.2.1",
     "run-applescript": "^6.1.0"
   },
@@ -111,8 +296,16 @@
           "value": "gpt-3.5-turbo"
         },
         {
+          "title": "GPT-3.5 Turbo (16K)",
+          "value": "gpt-3.5-turbo-16k"
+        },
+        {
           "title": "GPT-4",
           "value": "gpt-4"
+        },
+        {
+          "title": "GPT-4 (32K, 0613)",
+          "value": "gpt-4-32k-0613"
         }
       ],
       "required": true,
@@ -129,12 +322,10 @@
     }
   ],
   "devDependencies": {
+    "@raycast/eslint-config": "^1.0.5",
     "@types/node": "18.8.3",
     "@types/react": "18.0.9",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
     "prettier": "^2.5.1",
     "typescript": "^4.4.3"
   },

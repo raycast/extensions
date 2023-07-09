@@ -20,7 +20,7 @@ export default function useSyncData(shouldSync = true) {
     if (syncData) {
       setCachedData(syncData);
     }
-  }, [syncData]);
+  }, [syncData, setCachedData]);
 
   return { data: cachedData, setData: setCachedData, ...rest };
 }

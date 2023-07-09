@@ -6,7 +6,7 @@ type AccountType = "atlassian" | "app" | "customer";
 export type User = {
   accountId: string;
   accountType: AccountType;
-  avatarUrls: Avatar;
+  avatarUrls?: Avatar;
   displayName: string;
 };
 

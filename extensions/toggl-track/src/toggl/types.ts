@@ -1,13 +1,17 @@
+// https://developers.track.toggl.com/docs/api/me#response
 export interface Me {
   default_workspace_id: number;
 }
 
+// https://developers.track.toggl.com/docs/api/workspaces#response-4
 export interface Workspace {
   id: number;
   name: string;
 }
 
+// https://developers.track.toggl.com/docs/api/projects/index.html#response-8
 export interface Project {
+  active: boolean;
   billable: boolean;
   client_id: number;
   color: string;
@@ -16,6 +20,7 @@ export interface Project {
   workspace_id: number;
 }
 
+// https://developers.track.toggl.com/docs/api/time_entries#response
 export interface TimeEntry {
   at: string;
   billable: boolean;
@@ -28,11 +33,13 @@ export interface TimeEntry {
   workspace_id: number;
 }
 
+// https://developers.track.toggl.com/docs/api/clients#response
 export interface Client {
   id: number;
   name: string;
 }
 
+// https://developers.track.toggl.com/docs/api/tags#response
 export interface Tag {
   id: number;
   name: string;

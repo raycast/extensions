@@ -1,5 +1,24 @@
 # Hue Changelog
 
+## [Bug fix] - 2023-06-30
+* Fixed a bug where the extension would not store the username/API key after linking the Hue Bridge.
+
+## [Connectivity update] - 2023-06-22
+
+* Connectivity
+  * Update Hue Bridge discovery and linking code
+  * Add retry action when no Hue Bridge was found
+  * Enable setting manual IP address and/or username (API key)
+  * Improve how error messages are shown when linking a Bridge
+* Front end
+  * Use coloured squares with icons in them for lights
+  * Improve scene/group gradients
+  * Improve responsiveness when toggling groups
+  * Rate limit group toggle action
+* Rework "Turn Off All Lights" into "Toggle All Lights"
+  * Turns off all lights if any are on, turns on all lights if all are off.
+  * Updates state in background every 10 minutes to help "stale while revalidate".
+
 ## [Hue Extension 2.0] - 2023-04-17
 
 * Show groups and scenes as gradients
