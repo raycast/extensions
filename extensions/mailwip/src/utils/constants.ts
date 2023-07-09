@@ -8,6 +8,4 @@ export const API_HEADERS = {
   apikey: API_KEY,
 };
 
-export const DOMAINS = getPreferenceValues<Preferences>().domains;
-
 export const EMAIL_STATUS = ["sent", "spam", "outgoing"];

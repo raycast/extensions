@@ -1,15 +1,15 @@
 import { Action, ActionPanel, Color, Form, Icon, List, showToast, useNavigation } from "@raycast/api";
 import { useState } from "react";
-import { DOMAINS, EMAIL_STATUS } from "./utils/constants";
+import { EMAIL_STATUS } from "./utils/constants";
 import { getEmails } from "./utils/api";
-import { FormValidation, getFavicon, useForm } from "@raycast/utils";
+import { FormValidation, getFavicon, useCachedState, useForm } from "@raycast/utils";
 import { Email } from "./utils/types";
 import ErrorComponent from "./components/ErrorComponent";
 
 export default function Emails() {
   const { push } = useNavigation();
-
   const [isLoading, setIsLoading] = useState(false);
+  const [cachedDomains] = useCachedState<string[]>("domains", []);
 
   type FormValues = {
     domain: string;
@@ -66,12 +66,9 @@ export default function Emails() {
     >
       <Form.Dropdown title="Domain" {...itemProps.domain}>
         <Form.Dropdown.Item title="All domains" value="all" />
-        {DOMAINS &&
-          DOMAINS.replaceAll(" ", "")
-            .split(",")
-            .map((domain) => (
-              <Form.Dropdown.Item key={domain} value={domain} title={domain} icon={getFavicon(`https://${domain}`)} />
-            ))}
+        {cachedDomains.map((domain) => (
+          <Form.Dropdown.Item key={domain} value={domain} title={domain} icon={getFavicon(`https://${domain}`)} />
+        ))}
       </Form.Dropdown>
 
       <Form.Dropdown

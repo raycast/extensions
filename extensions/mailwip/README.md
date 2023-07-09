@@ -1,6 +1,6 @@
 # <img src="./assets/mailwip.png" width="20" height="20" /> Mailwip Raycast Extension
 
-This is a Raycast extension for [Mailwip](https://mailwip.com/) (previously known as **Hanami**). With this extension, you can Batch Delete Domains, Manage Aliases, and View MailLog in Mailwip.
+This is a Raycast extension for [Mailwip](https://mailwip.com/) (previously known as **Hanami**). With this extension, you can Delete Domains, Manage Aliases, and View MailLog in Mailwip.
 
 ## 🚀 Getting Started
 
@@ -26,7 +26,7 @@ This is a Raycast extension for [Mailwip](https://mailwip.com/) (previously know
 
     c. `Add DNS Records` in your domain's DNS and check records through Mailwip
 
-    d. Enter `domain(s)` in Preferences OR at first prompt
+    d. Run `domains` command and `Add New Local Domain` for each domain
 
 4. (OPTIONAL) **Enable Maillog**: To log emails you need to enable Maillog:
 
@@ -43,15 +43,9 @@ This extension provides the following commands:
     - View Aliases
     - Create Alias
     - Delete Alias
-- Batch Delete Domains
+- Domains
+    - View Domains
+    - Delete Domains
+    - Add New Local Domain
 - Emails
-    - View Emails in Maillog
-
-## 🛠️ Installation
-
-To install this extension from the source code, follow these steps:
-
-1.  Clone this repository.
-2.  Run `npm install` to install the dependencies.
-3.  Run `npm run build` to build the extension.
-4.  Run `npm run publish` to publish the extension to Raycast store.
+    - View Emails in Maillogs

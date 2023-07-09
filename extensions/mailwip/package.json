@@ -2,11 +2,11 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "mailwip",
   "title": "Mailwip",
-  "description": "Batch Delete Domains, Manage Aliases, and View MailLog",
+  "description": "Delete Domains, Manage Aliases, and View MailLog",
   "icon": "mailwip.png",
   "author": "xmok",
   "categories": [
-    "Communication"
+    "Developer Tools"
   ],
   "license": "MIT",
   "preferences": [
@@ -18,23 +18,14 @@
       "description": "API Key from Mailwip account",
       "required": true,
       "type": "password"
-    },
-    {
-      "name": "domains",
-      "title": "Domains",
-      "subtitle": "Mailwip",
-      "placeholder": "example.com,example.org",
-      "description": "Comma-separated list of domains you want to use",
-      "required": true,
-      "type": "textfield"
     }
   ],
   "commands": [
     {
-      "name": "batch-delete-domains",
-      "title": "Batch Delete Domains",
+      "name": "domains",
+      "title": "Domains",
       "subtitle": "Mailwip",
-      "description": "Batch Delete Domains from your Mailwip Account",
+      "description": "Add Local Domains or Delete Domains from your Mailwip Account",
       "mode": "view"
     },
     {
@@ -53,7 +44,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.54.1",
+    "@raycast/api": "^1.55.1",
     "@raycast/utils": "^1.7.0",
     "node-fetch": "^3.3.1"
   },
