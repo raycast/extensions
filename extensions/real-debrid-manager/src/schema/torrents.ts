@@ -27,6 +27,19 @@ export type TorrentItemData = {
   seeders?: number; // Only present in "downloading", "magnet_conversion" status
 };
 
+export type TorrentFile = {
+  id: number;
+  path: string; // Path to the file inside the torrent, starting with "/"
+  bytes: number;
+  selected: 0 | 1;
+};
+
+export type TorrentItemDataExtended = TorrentItemData & {
+  original_filename: string; // Original name of the torrent
+  original_bytes: number; // Total size of the torrent
+  files: TorrentFile[];
+};
+
 export type TorrentData = TorrentItemData[];
 export type LinkType = "magnet" | "link";
 

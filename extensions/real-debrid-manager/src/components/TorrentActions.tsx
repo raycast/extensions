@@ -1,15 +1,18 @@
 import { Action, ActionPanel, Icon, Toast, showToast, useNavigation } from "@raycast/api";
-import { TorrentItemData } from "../schema";
+import { TorrentItemData, TorrentItemDataExtended } from "../schema";
 import { useTorrents, useUnrestrict } from "../hooks";
+import TorrentFileSelection from "./TorrentFileSelection";
+import { isTorrentCompleted, isTorrentPendingFileSelection } from "../utils";
 
 type TorrentActionsProp = {
   torrentItem: TorrentItemData;
   revalidate: () => void;
+  popOnSuccess?: boolean;
 };
 
-export const TorrentActions: React.FC<TorrentActionsProp> = ({ torrentItem, revalidate }) => {
-  const { pop } = useNavigation();
-  const { deleteTorrent } = useTorrents();
+export const TorrentActions: React.FC<TorrentActionsProp> = ({ torrentItem, revalidate, popOnSuccess }) => {
+  const { pop, push } = useNavigation();
+  const { deleteTorrent, getTorrentDetails } = useTorrents();
   const { unRestrictLinks } = useUnrestrict();
 
   const handleTorrentItemSelect = async (torrentItem: TorrentItemData) => {
@@ -49,7 +52,7 @@ export const TorrentActions: React.FC<TorrentActionsProp> = ({ torrentItem, reva
         style: Toast.Style.Success,
         title: "Torrent deleted",
       });
-      pop();
+      popOnSuccess && pop();
     } catch {
       await showToast({
         style: Toast.Style.Failure,
@@ -58,9 +61,39 @@ export const TorrentActions: React.FC<TorrentActionsProp> = ({ torrentItem, reva
     }
   };
 
+  const handleFileSelectionRequest = async (id: string) => {
+    try {
+      const torrentDetails = (await getTorrentDetails(id)) as TorrentItemDataExtended;
+      push(<TorrentFileSelection torrentItemData={torrentDetails} revalidate={revalidate} />);
+    } catch (error) {
+      await showToast(Toast.Style.Failure, "Failed to Select Files");
+    }
+  };
+
   return (
     <ActionPanel.Section>
-      <Action icon={Icon.Forward} title="Send to Downloads" onAction={() => handleTorrentItemSelect(torrentItem)} />
+      {isTorrentPendingFileSelection(torrentItem.status) && (
+        <Action
+          title="Select Files"
+          icon={Icon.List}
+          shortcut={{
+            key: "f",
+            modifiers: ["opt", "ctrl"],
+          }}
+          onAction={() => handleFileSelectionRequest(torrentItem.id)}
+        />
+      )}
+      {isTorrentCompleted(torrentItem.status) && (
+        <Action
+          title="Send to Downloads"
+          shortcut={{
+            key: "d",
+            modifiers: ["ctrl", "opt"],
+          }}
+          icon={Icon.Download}
+          onAction={() => handleTorrentItemSelect(torrentItem)}
+        />
+      )}
       <Action
         shortcut={{
           key: "backspace",

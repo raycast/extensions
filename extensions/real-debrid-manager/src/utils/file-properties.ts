@@ -9,7 +9,7 @@ export const formatFileSize = (sizeInBytes: number): string => {
   const i = Math.floor(Math.log(sizeInBytes) / Math.log(1024));
   const size = sizeInBytes / Math.pow(1024, i);
 
-  return `${size.toFixed(2)} ${sizes[i]}`;
+  return `${i === 0 ? size.toFixed(0) : size.toFixed(2)} ${sizes[i]}`;
 };
 
 export const formatGenericProperty = <T>(value: T): string => {

@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Icon, List, useNavigation } from "@raycast/api";
 import { useTorrents } from "./hooks";
-import { formatFileSize } from "./utils";
+import { TORRENT_STATUS_MAP, formatFileSize } from "./utils";
 import { TorrentActions, TorrentView } from "./components";
 
 export const Torrents = () => {
@@ -16,7 +16,12 @@ export const Torrents = () => {
             <List.Item
               key={torrent.id}
               title={torrent?.filename}
-              accessories={[{ text: formatFileSize(torrent?.bytes) }]}
+              accessories={[
+                { text: formatFileSize(torrent?.bytes) },
+                {
+                  icon: TORRENT_STATUS_MAP[torrent.status].icon,
+                },
+              ]}
               actions={
                 <ActionPanel>
                   <ActionPanel.Section>
