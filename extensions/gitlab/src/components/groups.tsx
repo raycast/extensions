@@ -1,4 +1,4 @@
-import { ActionPanel, Color, Action, Icon, List } from "@raycast/api";
+import { ActionPanel, Color, Action, Icon, List, getPreferenceValues } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { useCache } from "../cache";
 import { getGitLabGQL, gitlab } from "../common";
@@ -109,10 +109,15 @@ function GroupListEmptyView(): JSX.Element {
   return <List.EmptyView title="No Groups or Projects" icon={{ source: "group.svg", tintColor: Color.PrimaryText }} />;
 }
 
+function flatListViewPreferences(): boolean {
+  const prefs = getPreferenceValues();
+  return (prefs.flatlist as boolean) || false;
+}
+
 export function GroupList(props: { parentGroup?: Group }): JSX.Element {
   const parentGroup = props.parentGroup;
   const parentGroupID = parentGroup ? parentGroup.id : 0;
-  const topLevelOnly = true;
+  const topLevelOnly = !flatListViewPreferences();
   const { groupsinfo, error, isLoading } = useMyGroups({ parentGroupID: parentGroupID, top_level_only: topLevelOnly });
 
   if (error) {
@@ -155,7 +160,9 @@ export function useMyGroups(args?: { query?: string; parentGroupID?: number; top
   const paramsHash = hashRecord(params);
   const [groupsinfo, setGroupsInfo] = useState<GroupInfo | undefined>();
   const { data, isLoading, error } = useCache<GroupInfo | undefined>(
-    parentGroupID && parentGroupID > 0 ? `mygroups_${parentGroupID}_${paramsHash}` : `mygroups_${paramsHash}`,
+    parentGroupID && parentGroupID > 0
+      ? `mygroups_${parentGroupID}_${paramsHash}`
+      : `mygroups_${paramsHash}_${args?.top_level_only}`,
     async () => {
       const subgroupFilter = parentGroupID && parentGroupID > 0 ? `/${parentGroupID}/subgroups` : "";
       const gldata = ((await gitlab.fetch(`groups${subgroupFilter}`, params)) as Group[]) || [];

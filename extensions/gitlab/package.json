@@ -97,7 +97,17 @@
       "title": "My Groups",
       "subtitle": "GitLab",
       "description": "GitLab Groups",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "flatlist",
+          "description": "Show Groups as Flat List at once",
+          "type": "checkbox",
+          "required": false,
+          "label": "Flat List View",
+          "default": false
+        }
+      ]
     },
     {
       "name": "epics",
