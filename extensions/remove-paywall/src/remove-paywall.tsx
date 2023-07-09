@@ -1,23 +1,40 @@
-import { Toast, getPreferenceValues, getSelectedText, open, showToast } from "@raycast/api";
+import { LaunchProps, Toast, getPreferenceValues, getSelectedText, open, showToast } from "@raycast/api";
 
 interface Preferences {
   service: string;
 }
 
-export default async () => {
+function isUrl(text: string): boolean {
+  return /^https?:\/\//.test(text);
+}
+
+export default async (props: LaunchProps<{ arguments: Arguments.RemovePaywall }>) => {
+  const { service } = await getPreferenceValues<Preferences>();
+
+  // Get the selected text (if any)
+  let selectedText = "";
+
   try {
-    const selectedText = (await getSelectedText()).trim();
-    const { service } = await getPreferenceValues<Preferences>();
+    selectedText = (await getSelectedText()).trim();
+  } catch {
+    // Ignore errors
+  }
 
-    if (!/https?:\/\//.test(selectedText)) {
-      throw new Error("Selected text is not a valid URL.");
+  try {
+    const argumentText = props.arguments.url?.trim() ?? "";
+    const fallbackText = props.fallbackText?.trim() ?? "";
+    const url = [argumentText, fallbackText, selectedText].find((v) => !!v);
+
+    if (!url) {
+      throw new Error("No URL provided.");
     }
 
-    if (!service) {
-      throw new Error("No service selected.");
+    if (!isUrl(url)) {
+      throw new Error(`Invalid URL: "${url}"`);
     }
 
-    open(`${service}/${selectedText}`);
+    // Open the URL with the specified service
+    open(`${service}/${url}`);
   } catch (error) {
     await showToast({
       style: Toast.Style.Failure,

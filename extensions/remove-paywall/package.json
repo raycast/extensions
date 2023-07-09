@@ -14,7 +14,14 @@
       "name": "remove-paywall",
       "title": "Remove Paywall",
       "description": "Remove the paywall from the frontmost browser's displayed site.",
-      "mode": "no-view"
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "url",
+          "type": "text",
+          "placeholder": "URL (or selected text)"
+        }
+      ]
     }
   ],
   "preferences": [
