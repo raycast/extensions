@@ -1,4 +1,14 @@
-import { Icon, Image, Keyboard, MenuBarExtra, getPreferenceValues, openCommandPreferences } from "@raycast/api";
+import {
+  Icon,
+  Image,
+  Keyboard,
+  LaunchType,
+  MenuBarExtra,
+  environment,
+  getPreferenceValues,
+  launchCommand,
+  openCommandPreferences,
+} from "@raycast/api";
 import React from "react";
 import { ReactNode } from "react";
 
@@ -19,9 +29,17 @@ export function MenuBarRoot(props: {
   error?: string | undefined;
 }): JSX.Element {
   const error = props.error;
+  const reloadMenu = () => {
+    environment.commandName;
+    launchCommand({ name: environment.commandName, type: LaunchType.UserInitiated });
+  };
   return (
     <MenuBarExtra icon={props.icon} isLoading={props.isLoading} title={props.title} tooltip={props.tooltip}>
-      {error ? <MenuBarItem title={`Error: ${error}`} /> : props.children}
+      {error ? (
+        <MenuBarItem title={`Error: ${error}`} icon={{ source: Icon.Warning }} onAction={reloadMenu} />
+      ) : (
+        props.children
+      )}
     </MenuBarExtra>
   );
 }
