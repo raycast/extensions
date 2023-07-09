@@ -1,11 +1,8 @@
 import { getPreferenceValues } from "@raycast/api";
-
-type Preferences = {
-  api_token: string;
-};
+import { AppPreferences } from "../schema";
 
 export const useToken = () => {
-  const { api_token } = getPreferenceValues<Preferences>();
+  const { api_token } = getPreferenceValues<AppPreferences>();
   return api_token;
 };
 

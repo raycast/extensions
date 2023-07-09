@@ -12,11 +12,19 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "user-info",
-      "title": "User Info",
-      "subtitle": "View RD User Info",
-      "description": "View logged-in user info",
+      "name": "new-download",
+      "title": "New Download",
+      "subtitle": "Add New Torrent or Link to RD",
+      "description": "Add New Torrent or Link to Real-Debrid",
       "mode": "view",
+      "icon": "command-icon.png"
+    },
+    {
+      "name": "new-download-from-clipboard",
+      "title": "New Download From Clipboard",
+      "subtitle": "Add New Torrent or Link to RD",
+      "description": "Add New Torrent or Link to Real-Debrid from clipboard",
+      "mode": "no-view",
       "icon": "command-icon.png"
     },
     {
@@ -36,10 +44,10 @@
       "icon": "command-icon.png"
     },
     {
-      "name": "new-download",
-      "title": "New Download",
-      "subtitle": "Add New Torrent or Link to RD",
-      "description": "Add New Torrent or Link to Real-Debrid",
+      "name": "user-info",
+      "title": "User Info",
+      "subtitle": "View RD User Info",
+      "description": "View logged-in user info",
       "mode": "view",
       "icon": "command-icon.png"
     }
