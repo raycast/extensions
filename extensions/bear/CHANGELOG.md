@@ -1,5 +1,10 @@
 # Bear Changelog
 
+## [Create new note configurations and new search feature] - 2023-07-09
+
+- When creating a new note, you can choose default options that you don't have to pick in the form. For example, opening the note in main window, new window o don't open it.
+- When searching notes, now if the query didn't match any note, you can create a new note with the query as title.
+
 ## [Adding tag's filter in search notes] - 2023-05-23
 
 - Adding tag's filter in search notes command
