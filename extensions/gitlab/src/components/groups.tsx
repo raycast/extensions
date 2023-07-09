@@ -165,7 +165,7 @@ export function useMyGroups(args?: { query?: string; parentGroupID?: number; top
       : `mygroups_${paramsHash}_${args?.top_level_only}`,
     async () => {
       const subgroupFilter = parentGroupID && parentGroupID > 0 ? `/${parentGroupID}/subgroups` : "";
-      const gldata = ((await gitlab.fetch(`groups${subgroupFilter}`, params)) as Group[]) || [];
+      const gldata = ((await gitlab.fetch(`groups${subgroupFilter}`, params, true)) as Group[]) || [];
 
       let projectsdata: Project[] = [];
       if (parentGroupID && parentGroupID > 0) {
