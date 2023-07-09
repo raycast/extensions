@@ -148,7 +148,7 @@ export function useMyGroups(args?: { query?: string; parentGroupID?: number; top
 } {
   const query = args?.query;
   const parentGroupID = args?.parentGroupID;
-  const params: Record<string, any> = { min_access_level: "30" };
+  const params: Record<string, any> = { min_access_level: "10" };
   if ((parentGroupID === undefined || parentGroupID <= 0) && args?.top_level_only === true) {
     params.top_level_only = true;
   }
