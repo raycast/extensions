@@ -5,6 +5,7 @@ import { useTodos } from "./components/todo/utils";
 import {
   MenuBarItem,
   MenuBarItemConfigureCommand,
+  MenuBarRoot,
   MenuBarSection,
   getBoundedPreferenceNumber,
 } from "./components/menu";
@@ -29,22 +30,6 @@ function getShowTodoCountPreference(): boolean {
   return result;
 }
 
-function TodosMenuBarExtra(props: {
-  children: React.ReactNode;
-  icon?: Image.ImageLike;
-  isLoading?: boolean;
-  title?: string;
-  tooltip?: string;
-  error?: string | undefined;
-}): JSX.Element {
-  const error = props.error;
-  return (
-    <MenuBarExtra icon={props.icon} isLoading={props.isLoading} title={props.title} tooltip={props.tooltip}>
-      {error ? <MenuBarItem title={`Error: ${error}`} /> : props.children}
-    </MenuBarExtra>
-  );
-}
-
 function menuBarIcon(): Image.ImageLike {
   const prefs = getPreferenceValues();
   const useGrayscale = prefs.grayicon as boolean;
@@ -63,7 +48,7 @@ export default function TodosMenuBarCommand(): JSX.Element | null {
     }
   }
   return (
-    <TodosMenuBarExtra
+    <MenuBarRoot
       icon={menuBarIcon()}
       isLoading={isLoading}
       error={error}
@@ -102,6 +87,6 @@ export default function TodosMenuBarCommand(): JSX.Element | null {
       <MenuBarSection>
         <MenuBarItemConfigureCommand />
       </MenuBarSection>
-    </TodosMenuBarExtra>
+    </MenuBarRoot>
   );
 }

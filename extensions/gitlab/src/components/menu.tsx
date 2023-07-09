@@ -10,6 +10,22 @@ function clipText(text: string) {
   return text;
 }
 
+export function MenuBarRoot(props: {
+  children: React.ReactNode;
+  icon?: Image.ImageLike;
+  isLoading?: boolean;
+  title?: string;
+  tooltip?: string;
+  error?: string | undefined;
+}): JSX.Element {
+  const error = props.error;
+  return (
+    <MenuBarExtra icon={props.icon} isLoading={props.isLoading} title={props.title} tooltip={props.tooltip}>
+      {error ? <MenuBarItem title={`Error: ${error}`} /> : props.children}
+    </MenuBarExtra>
+  );
+}
+
 export function MenuBarItem(props: {
   title: string;
   subtitle?: string;

@@ -1,14 +1,4 @@
-import {
-  Color,
-  Icon,
-  LaunchType,
-  MenuBarExtra,
-  Toast,
-  getPreferenceValues,
-  launchCommand,
-  open,
-  showToast,
-} from "@raycast/api";
+import { Color, Icon, LaunchType, MenuBarExtra, getPreferenceValues, launchCommand, open } from "@raycast/api";
 import { useMyMergeRequests } from "./components/mr_my";
 import { MRScope, MRState } from "./components/mr";
 import { useMyReviews } from "./components/reviews";
@@ -16,6 +6,7 @@ import { MergeRequest } from "./gitlabapi";
 import {
   MenuBarItem,
   MenuBarItemConfigureCommand,
+  MenuBarRoot,
   MenuBarSection,
   MenuBarSubmenu,
   getBoundedPreferenceNumber,
@@ -41,19 +32,17 @@ function getShowItemsCountPreference(): boolean {
 
 export default function MenuCommand(): JSX.Element {
   const { mrsAssigned, mrsReview, isLoading, error } = useMenuMergeRequests();
-  if (error) {
-    showToast({ style: Toast.Style.Failure, title: "Error", message: error });
-  }
   const assignedCount = mrsAssigned?.length || 0;
   const reviewCount = mrsReview?.length || 0;
   const totalCount = assignedCount + reviewCount;
 
   return (
-    <MenuBarExtra
+    <MenuBarRoot
       isLoading={isLoading}
       title={getShowItemsCountPreference() ? (totalCount <= 0 ? undefined : `${totalCount}`) : undefined}
       icon={{ source: "mropen.png", tintColor: Color.PrimaryText }}
       tooltip="GitLab Merge Requests"
+      error={error}
     >
       <MenuBarExtra.Section title="Merge Requests">
         <MenuBarSubmenu title={`Assigned`} subtitle={`(${assignedCount})`} icon={Icon.Person}>
@@ -110,7 +99,7 @@ export default function MenuCommand(): JSX.Element {
       <MenuBarExtra.Section>
         <MenuBarItemConfigureCommand />
       </MenuBarExtra.Section>
-    </MenuBarExtra>
+    </MenuBarRoot>
   );
 }
 

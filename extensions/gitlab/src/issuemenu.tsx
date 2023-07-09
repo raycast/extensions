@@ -1,23 +1,9 @@
-import {
-  Color,
-  Icon,
-  LaunchType,
-  MenuBarExtra,
-  Toast,
-  getPreferenceValues,
-  launchCommand,
-  open,
-  showToast,
-} from "@raycast/api";
-import { useMyMergeRequests } from "./components/mr_my";
-import { MRScope, MRState } from "./components/mr";
-import { useMyReviews } from "./components/reviews";
-import { MergeRequest } from "./gitlabapi";
+import { Color, Icon, LaunchType, MenuBarExtra, getPreferenceValues, launchCommand, open } from "@raycast/api";
 import {
   MenuBarItem,
   MenuBarItemConfigureCommand,
+  MenuBarRoot,
   MenuBarSection,
-  MenuBarSubmenu,
   getBoundedPreferenceNumber,
 } from "./components/menu";
 import { useMyIssues } from "./components/issues_my";
@@ -39,17 +25,15 @@ function getShowItemsCountPreference(): boolean {
 
 export default function MenuCommand(): JSX.Element {
   const { issues, isLoading, error } = useMyIssues(IssueScope.assigned_to_me, IssueState.opened, undefined);
-  if (error) {
-    showToast({ style: Toast.Style.Failure, title: "Error", message: error });
-  }
   const assignedCount = issues?.length || 0;
 
   return (
-    <MenuBarExtra
+    <MenuBarRoot
       isLoading={isLoading}
       title={getShowItemsCountPreference() ? (assignedCount <= 0 ? undefined : `${assignedCount}`) : undefined}
       icon={{ source: "issues.svg", tintColor: Color.PrimaryText }}
       tooltip="GitLab Issues"
+      error={error}
     >
       <MenuBarSection title="Issues">
         <MenuBarItem
@@ -77,6 +61,6 @@ export default function MenuCommand(): JSX.Element {
       <MenuBarExtra.Section>
         <MenuBarItemConfigureCommand />
       </MenuBarExtra.Section>
-    </MenuBarExtra>
+    </MenuBarRoot>
   );
 }
