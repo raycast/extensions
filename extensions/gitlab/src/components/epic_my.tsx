@@ -4,7 +4,7 @@ import { useCache } from "../cache";
 import { gitlab } from "../common";
 import { Epic, EpicScope, EpicState, searchData } from "../gitlabapi";
 import { hashRecord, showErrorToast } from "../utils";
-import { EpicListItem } from "./epics";
+import { EpicListItem, includeGroupAncestorPreference } from "./epics";
 import { GroupInfo, useMyGroups } from "./groups";
 import { getTextIcon } from "../icons";
 
@@ -42,6 +42,7 @@ export function MyEpicList(props: { scope: EpicScope; state: EpicState }): JSX.E
         scope: props.scope,
         groupid: selectedGroupID === "" ? undefined : selectedGroupID,
         include_descendant_groups: true,
+        include_ancestor_groups: includeGroupAncestorPreference(),
       });
       return data;
     },

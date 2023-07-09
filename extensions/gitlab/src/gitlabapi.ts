@@ -817,6 +817,9 @@ export class GitLab {
     if (params.include_descendant_groups === undefined) {
       params.include_descendant_groups = false;
     }
+    if (groupid && params.include_ancestor_groups) {
+      delete params.include_ancestor_groups;
+    }
 
     if (groupid) {
       try {
@@ -839,6 +842,9 @@ export class GitLab {
       } catch (e: any) {
         logAPI("skip during error");
       }
+    }
+    if (params.include_ancestor_groups === true && !groupid) {
+      return epics.filter((e, i, a) => a.findIndex((t) => t.id === e.id) === i) || [];
     }
     return epics;
   }

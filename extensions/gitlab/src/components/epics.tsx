@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Icon, Image, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, Image, List, getPreferenceValues } from "@raycast/api";
 import { useState } from "react";
 import { useCache } from "../cache";
 import { gitlab } from "../common";
@@ -17,6 +17,11 @@ function getIcon(state: string): Image {
   } else {
     return { source: GitLabIcons.epic, tintColor: Color.Purple };
   }
+}
+
+export function includeGroupAncestorPreference(): boolean {
+  const prefs = getPreferenceValues();
+  return (prefs.includeEpicAncestor as boolean) || false;
 }
 
 function getEpicGroupName(epic: any): string | undefined {

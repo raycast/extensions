@@ -302,6 +302,14 @@
       "description": "Show details in merge request lists via a metadata view"
     },
     {
+      "name": "includeEpicAncestor",
+      "type": "checkbox",
+      "label": "Include Group Ancestors for Epics",
+      "required": false,
+      "default": false,
+      "description": "Include Group Ancestors for Epics when a higher group is not getable from with the top-level flag"
+    },
+    {
       "name": "ignorecerts",
       "type": "checkbox",
       "label": "Ignore Certificate Errors (not recommended)",
