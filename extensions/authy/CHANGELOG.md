@@ -1,5 +1,7 @@
 # Authy Extension Changelog
 
+## [Updated Contributors] - 2023-06-14
+
 ## [Bug fix] - 2023-03-30
 
 - Update deps

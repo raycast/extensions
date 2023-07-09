@@ -1,7 +1,6 @@
 import { getPreferenceValues } from "@raycast/api";
 import { prepareFoldersForCache, prepareItemsForCache } from "~/components/searchVault/utils/caching";
 import { CACHE_KEYS } from "~/constants/general";
-import { Preferences } from "~/types/preferences";
 import { Folder, Item, Vault } from "~/types/vault";
 import { Cache } from "~/utils/cache";
 import { captureException } from "~/utils/development";
@@ -10,7 +9,7 @@ import useOnceEffect from "~/utils/hooks/useOnceEffect";
 
 function useVaultCaching() {
   const { encrypt, decrypt } = useContentEncryptor();
-  const isCachingEnable = getPreferenceValues<Preferences>().shouldCacheVaultItems;
+  const isCachingEnable = getPreferenceValues<Preferences.Search>().shouldCacheVaultItems;
 
   useOnceEffect(() => {
     // users that opt out of caching probably want to delete any cached data

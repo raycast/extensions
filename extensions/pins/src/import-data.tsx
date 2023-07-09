@@ -1,18 +1,30 @@
 import { useState } from "react";
 import { Form, ActionPanel, Action, showToast, popToRoot, Icon } from "@raycast/api";
-import { setStorage, getStorage } from "./utils";
-import { StorageKey } from "./constants";
-import { Pin, Group } from "./types";
+import { setStorage, getStorage } from "./lib/utils";
+import { StorageKey } from "./lib/constants";
+import { Pin } from "./lib/Pins";
+import { Group } from "./lib/Groups";
 
-const reassignIDs = (newItems: { id: number }[]) => {
+/**
+ * Updates the ID of each pin/group such that there are no duplicates. The first item will have ID 0, the second 1, etc.
+ * @param newItems The list of pins or groups to reassign IDs to.
+ */
+const reassignIDs = async (newItems: { id: number }[]) => {
   let currentID = 0;
   newItems.forEach((item: { id: number }) => {
     item.id = currentID;
     currentID++;
   });
+  await setStorage(StorageKey.NEXT_PIN_ID, [currentID]);
 };
 
-const mergeRemovingDuplicates = (
+/**
+ * Merges the existing pins/groups with the imported pins/groups, removing any duplicate entries. Duplicate entries are determined by the name of the pin. The ID of each pin is updated to ensure that there are no duplicates.
+ * @param dataItems The pins/groups to be imported.
+ * @param oldItems The existing pins/groups.
+ * @returns The merged list of pins/groups.
+ */
+const mergeRemovingDuplicates = async (
   dataItems: { name: string; id: number }[],
   oldItems: { name: string; id: number }[]
 ) => {
@@ -31,23 +43,28 @@ const mergeRemovingDuplicates = (
     }
   });
 
-  reassignIDs(newItems);
+  await reassignIDs(newItems);
   return newItems;
 };
 
+/**
+ * Imports pins and pin groups from JSON-parsed data.
+ * @param data The JSON-parsed data to import.
+ * @param importMethod The method to use when importing the data, e.g. Merge1 (maintain duplicates), Merge2 (remove duplicates), or Replace (replace all existing data).
+ */
 const importData = async (data: { groups: Group[]; pins: Pin[] }, importMethod: string) => {
   if (importMethod == "Merge1") {
     // Maintain duplicates
     // Update groups
     const oldGroups = await getStorage(StorageKey.LOCAL_GROUPS);
     const newGroups = oldGroups.concat(data.groups);
-    reassignIDs(newGroups);
+    await reassignIDs(newGroups);
     await setStorage(StorageKey.LOCAL_GROUPS, newGroups);
 
     // Update pins
     const oldPins = await getStorage(StorageKey.LOCAL_PINS);
     const newPins = oldPins.concat(data.pins);
-    reassignIDs(newPins);
+    await reassignIDs(newPins);
     await setStorage(StorageKey.LOCAL_PINS, newPins);
     showToast({ title: "Merged Pin data!" });
   } else if (importMethod == "Merge2") {
@@ -55,15 +72,15 @@ const importData = async (data: { groups: Group[]; pins: Pin[] }, importMethod: 
     // Remove group duplicates
     const dataGroups = data.groups;
     const oldGroups = await getStorage(StorageKey.LOCAL_GROUPS);
-    const newGroups = mergeRemovingDuplicates(dataGroups, oldGroups);
-    reassignIDs(newGroups);
+    const newGroups = await mergeRemovingDuplicates(dataGroups, oldGroups);
+    await reassignIDs(newGroups);
     await setStorage(StorageKey.LOCAL_GROUPS, newGroups);
 
     // Remove pin duplicates
     const dataPins = data.pins;
     const oldPins = await getStorage(StorageKey.LOCAL_PINS);
-    const newPins = mergeRemovingDuplicates(dataPins, oldPins);
-    reassignIDs(newPins);
+    const newPins = await mergeRemovingDuplicates(dataPins, oldPins);
+    await reassignIDs(newPins);
     await setStorage(StorageKey.LOCAL_PINS, newPins);
 
     showToast({ title: "Updated Pin data!" });
@@ -71,11 +88,23 @@ const importData = async (data: { groups: Group[]; pins: Pin[] }, importMethod: 
     // Replace all groups and pins
     await setStorage(StorageKey.LOCAL_GROUPS, data.groups);
     await setStorage(StorageKey.LOCAL_PINS, data.pins);
+
+    const maxPinID = Math.max(...data.pins.map((pin) => pin.id));
+    await setStorage(StorageKey.NEXT_PIN_ID, [maxPinID + 1]);
+
+    const maxGroupID = Math.max(...data.groups.map((group) => group.id));
+    await setStorage(StorageKey.NEXT_GROUP_ID, [maxGroupID + 1]);
+
     showToast({ title: "Replaced Pin data!" });
   }
   popToRoot();
 };
 
+/**
+ * Checks if the JSON string is properly formatted. If not, displays an error message.
+ * @param jsonString The JSON string to check.
+ * @param setJSONError The function to call to set the error message.
+ */
 const checkJSONFormat = (jsonString: string, setJSONError: (error: string | undefined) => void) => {
   // Check for properly formatted pin data JSON string
   let error = null;
@@ -99,6 +128,10 @@ const checkJSONFormat = (jsonString: string, setJSONError: (error: string | unde
   }
 };
 
+/**
+ * Form view for importing pin data from a JSON string.
+ * @returns A form view.
+ */
 const ImportDataForm = () => {
   const [jsonError, setJSONError] = useState<string | undefined>();
 
@@ -109,9 +142,9 @@ const ImportDataForm = () => {
         <ActionPanel>
           <Action.SubmitForm
             icon={Icon.ChevronRight}
-            onSubmit={(values) => {
+            onSubmit={async (values) => {
               const data = JSON.parse(values.jsonStringField);
-              Promise.resolve(importData(data, values.importMethodField));
+              await importData(data, values.importMethodField);
             }}
           />
         </ActionPanel>

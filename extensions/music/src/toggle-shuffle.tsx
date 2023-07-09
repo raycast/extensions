@@ -12,4 +12,4 @@ export default pipe(
   handleTaskEitherError(`${SFSymbols.WARNING} Failed to toggle shuffle`, (status) =>
     showToast(Toast.Style.Success, `Shuffle ${status ? "On" : "Off"}`)
   )
-)();
+);
