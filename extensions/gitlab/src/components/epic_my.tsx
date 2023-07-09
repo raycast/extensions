@@ -37,7 +37,7 @@ export function MyEpicList(props: { scope: EpicScope; state: EpicState }): JSX.E
     hashRecord(props, `myepiclist_${props.scope}_${props.state}_${selectedGroupID}`),
     async () => {
       const data = await gitlab.getUserEpics({
-        min_access_level: "30",
+        min_access_level: "10",
         state: props.state,
         scope: props.scope,
         groupid: selectedGroupID === "" ? undefined : selectedGroupID,
