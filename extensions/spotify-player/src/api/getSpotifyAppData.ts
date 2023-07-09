@@ -1,12 +1,7 @@
 import { runAppleScript } from "@raycast/utils";
-import { getErrorMessage } from "../helpers/getError";
 import { checkSpotifyApp } from "../helpers/isSpotifyInstalled";
-import { EpisodeObject, TrackObject } from "../helpers/spotify.api";
-import { getSpotifyClient } from "../helpers/withSpotifyClient";
 
-export async function getCurrentlyPlayingUri() {
-  const { spotifyClient } = getSpotifyClient();
-
+export async function getSpotifyAppData() {
   const isSpotifyInstalled = await checkSpotifyApp();
 
   if (isSpotifyInstalled) {
@@ -28,7 +23,7 @@ export async function getCurrentlyPlayingUri() {
     if playerState is "playing" then
         return currentUri
     else if playerState is "paused" then
-        return currentUri
+        return currentUri & "(paused)"
     else
         return "Not playing"
     end if`;
@@ -36,22 +31,22 @@ export async function getCurrentlyPlayingUri() {
     const scriptResponse = await runAppleScript(script);
 
     if (scriptResponse === "Not running") {
-      try {
-        const response = await spotifyClient.getMePlayerCurrentlyPlaying({ additionalTypes: "episode" });
-
-        if (response) {
-          const { uri } = response.item as unknown as EpisodeObject | TrackObject;
-          return uri;
-        }
-      } catch (err) {
-        const error = getErrorMessage(err);
-        console.log("getCurrentlyPlayingUri.ts Error:", error);
-        throw new Error(error);
-      }
+      return {
+        state: "NOT_RUNNING",
+        uri: undefined,
+      };
     } else if (scriptResponse === "Not playing") {
-      return undefined;
+      return {
+        state: "NOT_PLAYING",
+        uri: undefined,
+      };
     } else {
-      return scriptResponse;
+      const state = scriptResponse.includes("(paused)") ? "PAUSED" : "PLAYING";
+      const uri = scriptResponse.replace(" (paused)", "");
+      return {
+        state,
+        uri,
+      };
     }
   }
 }
