@@ -1,104 +1,107 @@
-import { ActionPanel, Icon, List, Action, Image, Color } from "@raycast/api";
-import { useSetAtom } from "jotai";
-import moment from "moment";
-import { extractPropertyValue, pageIcon } from "../utils/notion";
-import { DatabaseView, Page, DatabaseProperty, User } from "../utils/types";
-import { recentlyOpenedPagesAtom } from "../utils/state";
-import { ActionSetVisibleProperties, ActionEditPageProperty } from "./actions";
-import { CreateDatabaseForm, DatabaseViewForm, AppendToPageForm } from "./forms";
+import { FormulaPropertyItemObjectResponse } from "@notionhq/client/build/src/api-endpoints";
+import { ActionPanel, Icon, List, Action, Image, Color, confirmAlert } from "@raycast/api";
+import { format, formatDistanceToNow } from "date-fns";
+
+import { deletePage, notionColorToTintColor, pageIcon } from "../utils/notion";
+import { handleOnOpenPage } from "../utils/openPage";
+import { DatabaseView, Page, DatabaseProperty, User, PagePropertyType } from "../utils/types";
+
 import { DatabaseList } from "./DatabaseList";
 import { PageDetail } from "./PageDetail";
+import { ActionSetVisibleProperties, ActionEditPageProperty } from "./actions";
+import ActionCreateQuicklink from "./actions/ActionCreateQuicklink";
+import { CreateDatabaseForm, DatabaseViewForm, AppendToPageForm } from "./forms";
 
-import { handleOnOpenPage } from "../utils/openPage";
-
-export function PageListItem(props: {
-  keywords?: string[];
+type PageListItemProps = {
   page: Page;
   databaseView?: DatabaseView;
   databaseProperties?: DatabaseProperty[];
-  saveDatabaseView?: (newDatabaseView: DatabaseView) => void;
-  onPageCreated: (page: Page) => void;
-  onPageUpdated: (page: Page) => void;
+  setDatabaseView?: (databaseView: DatabaseView) => Promise<void>;
+  setRecentPage: (page: Page) => Promise<void>;
+  mutate: () => Promise<void>;
   users?: User[];
   icon?: Image.ImageLike;
   customActions?: JSX.Element[];
-}): JSX.Element {
-  const {
-    page,
-    customActions,
-    databaseProperties,
-    databaseView,
-    saveDatabaseView,
-    onPageCreated,
-    onPageUpdated,
-    icon = pageIcon(page),
-    keywords = [],
-  } = props;
+};
 
-  const storeRecentlyOpenedPage = useSetAtom(recentlyOpenedPagesAtom);
-
-  let accessories: List.Item.Accessory[] = page.last_edited_time
-    ? [
-        {
-          text: moment.unix(page.last_edited_time / 1000).fromNow(),
-          tooltip: moment.unix(page.last_edited_time / 1000).toLocaleString(),
-        },
-      ]
-    : [];
+export function PageListItem({
+  page,
+  customActions,
+  databaseProperties,
+  databaseView,
+  setRecentPage,
+  setDatabaseView,
+  icon = pageIcon(page),
+  users,
+  mutate,
+}: PageListItemProps) {
+  const accessories: List.Item.Accessory[] = [];
 
   if (databaseView && databaseView.properties) {
-    const visiblePropertiesIds = Object.keys(databaseView.properties);
-    if (visiblePropertiesIds.length) {
-      const accessoryTitles: string[] = [];
-      visiblePropertiesIds
-        .map((propId) => Object.values(page.properties).find((x) => x.id == propId))
-        .forEach((prop: any | undefined) => {
-          const extractedProperty = prop ? extractPropertyValue(prop) : undefined;
-          if (extractedProperty) {
-            keywords.push(extractedProperty);
-            accessoryTitles.push(extractedProperty);
-          }
-        });
+    const properties = Object.keys(databaseView.properties).map((propId) =>
+      Object.entries(page.properties).find(([, e]) => {
+        return e.id == propId;
+      }),
+    );
 
-      accessories = accessoryTitles.map((x) => ({ text: x }));
-    }
+    const propertyAccessories = properties
+      .map((property) => {
+        const [title, value] = property ?? [];
+        if (!value || !title) return undefined;
+        return getPropertyAccessory(value, title, users);
+      })
+      .filter(Boolean);
+
+    accessories.push(...(propertyAccessories.flat() as List.Item.Accessory[]));
   }
 
-  const quickEditProperties = databaseProperties?.filter((property) =>
-    ["checkbox", "select", "multi_select", "people"].includes(property.type)
-  );
+  const lastEditedUser = users?.find((u) => u.id === page.last_edited_user);
 
-  const visiblePropertiesIds: string[] = [];
-  if (databaseView && databaseView.properties) {
-    databaseProperties?.forEach((dp: DatabaseProperty) => {
-      if (databaseView?.properties && databaseView.properties[dp.id]) {
-        visiblePropertiesIds.push(dp.id);
-      }
+  if (page.last_edited_time) {
+    const date = new Date(page.last_edited_time);
+    accessories.push({
+      date,
+      icon: lastEditedUser?.avatar_url ? { source: lastEditedUser.avatar_url, mask: Image.Mask.Circle } : undefined,
+      tooltip: `Last Edited: ${format(date, "EEE d MMM yyyy 'at' HH:mm")}${
+        lastEditedUser ? ` by ${lastEditedUser.name}` : ""
+      }`,
     });
   }
 
+  const quickEditProperties = databaseProperties?.filter((property) =>
+    ["checkbox", "select", "multi_select", "people"].includes(property.type),
+  );
+
+  const visiblePropertiesIds: string[] =
+    databaseProperties?.filter((dp: DatabaseProperty) => databaseView?.properties?.[dp.id]).map((dp) => dp.id) || [];
+
+  const title = page.title ? page.title : "Untitled";
+
   return (
     <List.Item
-      keywords={keywords}
-      title={page.title ? page.title : "Untitled"}
+      title={title}
       icon={icon}
       subtitle={page.object === "database" ? "Database" : undefined}
       actions={
         <ActionPanel>
-          <ActionPanel.Section title={page.title ? page.title : "Untitled"}>
+          <ActionPanel.Section title={title}>
             {page.object === "database" ? (
               <Action.Push
                 title="Navigate to Database"
                 icon={Icon.List}
-                target={<DatabaseList databasePage={page} />}
+                target={<DatabaseList databasePage={page} setRecentPage={setRecentPage} users={users} />}
               />
             ) : (
-              <Action.Push title="Preview Page" icon={Icon.TextDocument} target={<PageDetail page={page} />} />
+              <Action.Push
+                title="Preview Page"
+                icon={Icon.BlankDocument}
+                target={<PageDetail page={page} setRecentPage={setRecentPage} users={users} />}
+              />
             )}
             <Action
               title="Open in Notion"
               icon={"notion-logo.png"}
-              onAction={() => handleOnOpenPage(page, storeRecentlyOpenedPage)}
+              onAction={() => handleOnOpenPage(page, setRecentPage)}
             />
             {customActions?.map((action) => action)}
             {databaseProperties ? (
@@ -113,7 +116,7 @@ export function PageListItem(props: {
                     databaseProperty={dp}
                     pageId={page.id}
                     pageProperty={page.properties[dp.id]}
-                    onPageUpdated={onPageUpdated}
+                    mutate={mutate}
                   />
                 ))}
               </ActionPanel.Submenu>
@@ -133,26 +136,45 @@ export function PageListItem(props: {
                 title="Create New Page"
                 icon={Icon.Plus}
                 shortcut={{ modifiers: ["cmd"], key: "n" }}
-                target={<CreateDatabaseForm databaseId={page.parent_database_id} onPageCreated={onPageCreated} />}
+                target={<CreateDatabaseForm databaseId={page.id} mutate={mutate} />}
               />
             )}
+
+            <ActionCreateQuicklink page={page} />
+
+            <Action
+              title="Delete Page"
+              icon={Icon.Trash}
+              style={Action.Style.Destructive}
+              shortcut={{ modifiers: ["ctrl"], key: "x" }}
+              onAction={async () => {
+                if (
+                  await confirmAlert({
+                    title: "Delete Page",
+                    icon: Icon.Trash,
+                    message:
+                      "Do you want to delete this page? Don't worry, you'll be able to restore it from Notion's trash.",
+                  })
+                ) {
+                  await deletePage(page.id);
+                  await mutate();
+                }
+              }}
+            />
           </ActionPanel.Section>
 
-          {databaseProperties && saveDatabaseView ? (
+          {databaseProperties && setDatabaseView ? (
             <ActionPanel.Section title="View options">
               {page.parent_database_id ? (
                 <Action.Push
-                  title="Set View Type..."
-                  icon={{
-                    source: databaseView?.type ? `./icon/view_${databaseView.type}.png` : "./icon/view_list.png",
-                    tintColor: Color.PrimaryText,
-                  }}
+                  title="Set View Type"
+                  icon={databaseView?.type ? `./icon/view_${databaseView.type}.png` : "./icon/view_list.png"}
+                  shortcut={{ modifiers: ["cmd", "opt", "shift"], key: "v" }}
                   target={
                     <DatabaseViewForm
-                      isDefaultView
                       databaseId={page.parent_database_id}
                       databaseView={databaseView}
-                      saveDatabaseView={saveDatabaseView}
+                      setDatabaseView={setDatabaseView}
                     />
                   }
                 />
@@ -161,24 +183,18 @@ export function PageListItem(props: {
                 databaseProperties={databaseProperties}
                 selectedPropertiesIds={visiblePropertiesIds}
                 onSelect={(propertyId: string) => {
-                  const databaseViewCopy = (
-                    databaseView ? JSON.parse(JSON.stringify(databaseView)) : {}
-                  ) as DatabaseView;
-                  if (!databaseViewCopy.properties) {
-                    databaseViewCopy.properties = {};
-                  }
-                  databaseViewCopy.properties[propertyId] = {};
-                  saveDatabaseView(databaseViewCopy);
+                  setDatabaseView({
+                    ...databaseView,
+                    properties: { ...databaseView?.properties, [propertyId]: {} },
+                  });
                 }}
                 onUnselect={(propertyId: string) => {
-                  const databaseViewCopy = (
-                    databaseView ? JSON.parse(JSON.stringify(databaseView)) : {}
-                  ) as DatabaseView;
-                  if (!databaseViewCopy.properties) {
-                    databaseViewCopy.properties = {};
-                  }
-                  delete databaseViewCopy.properties[propertyId];
-                  saveDatabaseView(databaseViewCopy);
+                  const { [propertyId]: _, ...remainingProperties } = databaseView?.properties ?? {};
+
+                  setDatabaseView({
+                    ...databaseView,
+                    properties: remainingProperties,
+                  });
                 }}
               />
             </ActionPanel.Section>
@@ -191,10 +207,23 @@ export function PageListItem(props: {
                 content={page.url}
                 shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
               />
+              <Action.CopyToClipboard
+                title="Copy Formatted URL"
+                content={{
+                  html: `<a href="${page.url}" title="${title}">${title}</a>`,
+                  text: title,
+                }}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
+              />
               <Action.Paste
                 title="Paste Page URL"
                 content={page.url}
                 shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
+              />
+              <Action.CopyToClipboard
+                title="Copy Page Title"
+                content={title}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
               />
             </ActionPanel.Section>
           ) : null}
@@ -203,4 +232,83 @@ export function PageListItem(props: {
       accessories={accessories}
     />
   );
+}
+
+function getPropertyAccessory(
+  property: PagePropertyType | FormulaPropertyItemObjectResponse["formula"],
+  title: string,
+  users?: User[],
+): List.Item.Accessory | List.Item.Accessory[] | undefined {
+  switch (property.type) {
+    case "boolean":
+      return {
+        icon: property.boolean ? Icon.CheckCircle : Icon.Circle,
+        tooltip: `${title}: ${property.boolean ? "Checked" : "Unchecked"}`,
+      };
+    case "checkbox":
+      return {
+        icon: property.checkbox ? Icon.CheckCircle : Icon.Circle,
+        tooltip: `${title}: ${property.checkbox ? "Checked" : "Unchecked"}`,
+      };
+    case "date": {
+      if (!property.date) return;
+      const start = new Date(property.date.start);
+      return {
+        text: formatDistanceToNow(start, { addSuffix: true }),
+        tooltip: `${title}: ${format(start, "EEE d MMM yyyy")}`,
+      };
+    }
+    case "email":
+      if (!property.email) return;
+      return { text: property.email, tooltip: `${title}: ${property.email}` };
+    case "formula":
+      if (!property.formula) return;
+      return getPropertyAccessory(property.formula, title);
+    case "multi_select":
+      return property.multi_select.map((option) => {
+        return {
+          tag: { value: option.name, color: notionColorToTintColor(option.color) },
+          tooltip: `${title}: ${option.name}`,
+        };
+      });
+    case "number":
+      if (!property.number) return;
+      return { text: property.number.toString(), tooltip: `${title}: ${property.number}` };
+    case "people":
+      return property.people.map((person) => {
+        const user = users?.find((u) => u.id === person.id);
+        return {
+          text: user?.name ?? "Unknown",
+          icon: user?.avatar_url ? { source: user.avatar_url, mask: Image.Mask.Circle } : Icon.Person,
+          tooltip: `${title}: ${user?.name ?? "Unknown"}`,
+        };
+      });
+    case "phone_number":
+      if (!property.phone_number) return;
+      return { text: property.phone_number, tooltip: `${title}: ${property.phone_number}` };
+    case "rich_text": {
+      const text = property.rich_text[0].plain_text;
+      if (!property.rich_text[0]) return;
+      return { text, tooltip: `${title}: ${text}` };
+    }
+    case "title": {
+      const text = property.title[0].plain_text ?? "Untitled";
+      return { text, tooltip: `${title}: ${text}` };
+    }
+    case "url":
+      if (!property.url) return;
+      return { text: property.url, tooltip: `${title}: ${property.url}` };
+    case "select":
+      if (!property.select) return;
+      return {
+        tag: { value: property.select.name, color: notionColorToTintColor(property.select.color) },
+        tooltip: `${title}: ${property.select.name}`,
+      };
+    case "status":
+      if (!property.status) return;
+      return {
+        tag: { value: property.status.name, color: notionColorToTintColor(property.status.color) },
+        tooltip: `${title}: ${property.status.name}`,
+      };
+  }
 }

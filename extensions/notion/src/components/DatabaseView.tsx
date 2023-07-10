@@ -1,26 +1,51 @@
-import { List, showToast, Image, Toast, Color } from "@raycast/api";
-import { notionColorToTintColor } from "../../utils/notion";
-import { Page, DatabasePropertyOption } from "../../utils/types";
-import { ActionEditPageProperty } from "../actions";
-import { PageListItem } from "../PageListItem";
-import { DatabaseListView } from "./DatabaseListView";
-import { DatabaseViewProps } from "./types";
+import { List, Image, Color } from "@raycast/api";
 
-export function DatabaseKanbanView(props: DatabaseViewProps): JSX.Element | null {
-  // Get database page list info
-  const {
-    databaseId,
-    databasePages,
-    databaseProperties,
-    databaseView,
-    onPageCreated,
-    onPageUpdated,
-    saveDatabaseView,
-  } = props;
+import { notionColorToTintColor } from "../utils/notion";
+import { Page, DatabasePropertyOption, DatabaseProperty, DatabaseView, User } from "../utils/types";
 
-  // Get kanban view settings
+import { PageListItem } from "./PageListItem";
+import { ActionEditPageProperty } from "./actions";
+
+type DatabaseViewProps = {
+  databaseId: string;
+  databasePages: Page[];
+  databaseProperties: DatabaseProperty[];
+  databaseView?: DatabaseView;
+  setDatabaseView?: (view: DatabaseView) => Promise<void>;
+  setRecentPage: (page: Page) => Promise<void>;
+  mutate: () => Promise<void>;
+  users?: User[];
+  sort?: "last_edited_time" | "created_time";
+};
+
+export function DatabaseView(props: DatabaseViewProps) {
+  const { databaseId, databasePages, databaseProperties, databaseView, setDatabaseView, mutate, setRecentPage, users } =
+    props;
+
+  const viewType = databaseView?.type ?? "list";
+  const propertyId = databaseView?.kanban?.property_id;
+  const statusProperty = databaseProperties.find((dp) => dp.id === propertyId);
+
+  if (viewType === "list" || !propertyId || !statusProperty) {
+    return (
+      <>
+        {databasePages?.map((p) => (
+          <PageListItem
+            key={`database-${databaseId}-page-${p.id}`}
+            page={p}
+            mutate={mutate}
+            databaseProperties={databaseProperties}
+            databaseView={databaseView}
+            setDatabaseView={setDatabaseView}
+            setRecentPage={setRecentPage}
+            users={users}
+          />
+        ))}
+      </>
+    );
+  }
+
   const {
-    property_id: propertyId,
     backlog_ids: backlogIds = [],
     not_started_ids: notStartedIds = [],
     started_ids: startedIds = [],
@@ -28,54 +53,11 @@ export function DatabaseKanbanView(props: DatabaseViewProps): JSX.Element | null
     canceled_ids: canceledIds = [],
   } = databaseView?.kanban || {};
 
-  if (!propertyId) {
-    showToast({
-      style: Toast.Style.Failure,
-      title: "Kanban property missing",
-      message: "Please edit view configuration",
-    });
-    return (
-      <DatabaseListView
-        key={`database-${databaseId}-view-list`}
-        databaseId={databaseId}
-        databasePages={databasePages}
-        databaseProperties={databaseProperties}
-        databaseView={databaseView}
-        onPageCreated={onPageCreated}
-        onPageUpdated={onPageUpdated}
-        saveDatabaseView={saveDatabaseView}
-      />
-    );
-  }
-
   // Section Order: Started > Not Started > Completed > Canceled > Backlog | Other (hidden)
   const sectionIds = startedIds.concat(notStartedIds).concat(completedIds).concat(canceledIds).concat(backlogIds);
 
   // Action Order: Backlog > Started > Not Started > Completed > Canceled > Other
   const actionEditIds = backlogIds.concat(notStartedIds).concat(startedIds).concat(completedIds).concat(canceledIds);
-
-  // Get kanban status
-  const statusProperty = databaseProperties.find((dp) => dp.id === propertyId);
-
-  if (!statusProperty) {
-    showToast({
-      style: Toast.Style.Failure,
-      title: "Kanban property missing",
-      message: "Please edit view configuration",
-    });
-    return (
-      <DatabaseListView
-        key={`database-${databaseId}-view-list`}
-        databaseId={databaseId}
-        databasePages={databasePages}
-        databaseProperties={databaseProperties}
-        databaseView={databaseView}
-        onPageCreated={onPageCreated}
-        onPageUpdated={onPageUpdated}
-        saveDatabaseView={saveDatabaseView}
-      />
-    );
-  }
 
   function statusSourceIcon(dspoId: string) {
     let source_icon = "icon/kanban_status_backlog.png";
@@ -179,9 +161,10 @@ export function DatabaseKanbanView(props: DatabaseViewProps): JSX.Element | null
         {ds?.pages?.map((p) => (
           <PageListItem
             key={`kanban-section-${ds.id}-page-${p.id}`}
-            keywords={[ds.name]}
             page={p}
             icon={ds.icon}
+            setRecentPage={setRecentPage}
+            users={users}
             customActions={[
               <ActionEditPageProperty
                 key={`kanban-section-${ds.id}-page-${p.id}-custom-edit-status-action`}
@@ -191,17 +174,16 @@ export function DatabaseKanbanView(props: DatabaseViewProps): JSX.Element | null
                 pageProperty={p.properties[propertyId]}
                 icon={{ source: "./icon/kanban_status_started.png", tintColor: Color.PrimaryText }}
                 shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
-                onPageUpdated={onPageUpdated}
+                mutate={mutate}
               />,
             ]}
             databaseView={databaseView}
             databaseProperties={databaseProperties}
-            saveDatabaseView={saveDatabaseView}
-            onPageUpdated={onPageUpdated}
-            onPageCreated={onPageCreated}
+            setDatabaseView={setDatabaseView}
+            mutate={mutate}
           />
         ))}
-      </List.Section>
+      </List.Section>,
     );
   });
 

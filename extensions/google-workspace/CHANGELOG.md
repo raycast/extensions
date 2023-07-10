@@ -1,5 +1,19 @@
 # Google Workspace Changelog
 
+## [Big update] - 2023-07-25
+
+This update adds a new command to the Notion extension called `Quick Capture`. It allows you to quickly capture websites by selecting their URL. You can then choose to save only the URL, the full page content, or an AI-generated summary, either on a Notion page or in a database.
+
+The page preview now includes a secondary action allowing you to see a metadata panel with page properties. Many properties are supported, including title, emails, numbers, checkboxes, statuses, and more! Speaking of properties, page properties in the list view now make use of Raycast components, improving their visual appearance. Tooltips have also been added to make it easier to identify the property you are viewing. Additionally, when searching Notion pages, you can now see the last author who edited the page.
+
+Page list items have also gained some actions to enhance the extension's power. Now you can:
+- Create quick links to your favorite pages
+- Delete pages
+- Copy a page's formatted URL (useful in chat apps such as Slack)
+- Copy a page's title
+
+The extension has also been revamped under the hood to improve maintainability and ensure it stays up-to-date with the Raycast ecosystem.
+
 ## [Fix Google Spreadsheets creation command] - 2023-03-12
 
 Fix the `Create Google Spreadsheet` command to use the authenticated user.

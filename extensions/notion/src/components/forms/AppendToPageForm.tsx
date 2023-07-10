@@ -1,39 +1,46 @@
 import { ActionPanel, Icon, Form, showToast, useNavigation, Action, Toast } from "@raycast/api";
-import { appendToPage } from "../../utils/notion";
+import { FormValidation, useForm } from "@raycast/utils";
+
+import { appendToPage, getPageName } from "../../utils/notion";
 import { Page } from "../../utils/types";
 
-export function AppendToPageForm(props: { page: Page; onContentUpdate?: (markdown: string) => void }): JSX.Element {
+export function AppendToPageForm(props: { page: Page; onContentUpdate?: () => void }): JSX.Element {
   const { page, onContentUpdate } = props;
   const { pop } = useNavigation();
 
-  async function handleSubmit(values: Form.Values) {
-    if (!values.content) {
-      return;
-    }
+  const { handleSubmit, itemProps } = useForm<{ content: string }>({
+    async onSubmit(values) {
+      try {
+        await showToast({ style: Toast.Style.Animated, title: "Adding content to the page" });
 
-    await showToast({ style: Toast.Style.Animated, title: "Adding content to the Page" });
+        pop();
 
-    pop();
+        await appendToPage(page.id, { content: values.content });
+        onContentUpdate?.();
 
-    const { markdown } = await appendToPage(page.id, { content: values.content });
-    onContentUpdate?.(markdown);
-  }
+        await showToast({ style: Toast.Style.Success, title: "Added content to the page" });
+      } catch (error) {
+        await showToast({ style: Toast.Style.Failure, title: "Failed adding content to the page" });
+      }
+    },
+    validation: {
+      content: FormValidation.Required,
+    },
+  });
 
-  const pageTitle = (page.icon_emoji ? page.icon_emoji + " " : "") + (page.title ? page.title : "Untitled");
+  const pageTitle = getPageName(page);
 
   return (
     <Form
       navigationTitle={pageTitle}
       actions={
         <ActionPanel>
-          <ActionPanel.Section>
-            <Action.SubmitForm title="Append Content" icon={Icon.Plus} onSubmit={handleSubmit} />
-          </ActionPanel.Section>
+          <Action.SubmitForm title="Append Content" icon={Icon.Plus} onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
       <Form.Description text={`Add to ${pageTitle}`} />
-      <Form.TextArea id="content" title="Page Content" />
+      <Form.TextArea title="Page Content" {...itemProps.content} enableMarkdown />
     </Form>
   );
 }
