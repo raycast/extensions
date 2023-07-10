@@ -152,10 +152,27 @@ export default function Command() {
   ]);
 
   useEffect(() => {
-    const folders = [...brave.folders, ...braveBeta.folders, ...chrome.folders, ...chromeDev.folders, ...edge.folders, ...firefox.folders, ...safari.folders];
+    const folders = [
+      ...brave.folders,
+      ...braveBeta.folders,
+      ...chrome.folders,
+      ...chromeDev.folders,
+      ...edge.folders,
+      ...firefox.folders,
+      ...safari.folders,
+    ];
 
     setFolders(folders);
-  }, [brave.folders, braveBeta.folders, chrome.folders, chromeDev.folders, edge.folders, firefox.folders, safari.folders, setFolders]);
+  }, [
+    brave.folders,
+    braveBeta.folders,
+    chrome.folders,
+    chromeDev.folders,
+    edge.folders,
+    firefox.folders,
+    safari.folders,
+    setFolders,
+  ]);
 
   const folderBookmarks = useMemo(() => {
     return bookmarks.filter((item) => {
