@@ -14,7 +14,7 @@ export const DownloadView: React.FC<DownloadViewProps> = ({ downloadItem, revali
       markdown={readDownloadDetails(downloadItem)}
       actions={
         <ActionPanel>
-          <DownloadActions downloadItem={downloadItem} revalidate={revalidate} />
+          <DownloadActions downloadItem={downloadItem} revalidate={revalidate} popOnSuccess />
         </ActionPanel>
       }
     />

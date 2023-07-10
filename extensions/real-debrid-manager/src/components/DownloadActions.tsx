@@ -6,9 +6,10 @@ import { useDownloads, useMediaPlayer } from "../hooks";
 type DownloadActionsProp = {
   downloadItem: DownloadFileData;
   revalidate: () => void;
+  popOnSuccess?: boolean;
 };
 
-export const DownloadActions: React.FC<DownloadActionsProp> = ({ downloadItem, revalidate }) => {
+export const DownloadActions: React.FC<DownloadActionsProp> = ({ downloadItem, revalidate, popOnSuccess }) => {
   const { pop } = useNavigation();
 
   const { supportedMediaPlayers, playWithMediaPlayer, isDownloadItemPlayable } = useMediaPlayer();
@@ -26,7 +27,7 @@ export const DownloadActions: React.FC<DownloadActionsProp> = ({ downloadItem, r
         style: Toast.Style.Success,
         title: "Download deleted",
       });
-      pop();
+      popOnSuccess && pop();
     } catch (e) {
       await showToast({
         style: Toast.Style.Failure,

@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Icon, List, useNavigation } from "@raycast/api";
 import { useDownloads } from "./hooks";
 import { useState } from "react";
-import { formatFileSize, parseFileType } from "./utils";
+import { getFileSizeOrQuality, parseFileType } from "./utils";
 import { DownloadView, DownloadActions } from "./components";
 
 export const Downloads = () => {
@@ -19,7 +19,7 @@ export const Downloads = () => {
               key={download.id}
               title={download?.filename}
               subtitle={parseFileType(download)}
-              accessories={[{ text: formatFileSize(download?.filesize) }]}
+              accessories={[{ text: getFileSizeOrQuality(download) }]}
               actions={
                 <ActionPanel>
                   <ActionPanel.Section>

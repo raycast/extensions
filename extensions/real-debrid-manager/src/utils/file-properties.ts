@@ -17,6 +17,18 @@ export const formatGenericProperty = <T>(value: T): string => {
   return String(value);
 };
 
+export const getFileSizeOrQuality = (downloadData: DownloadFileData) => {
+  if (downloadData.filesize) {
+    return formatFileSize(downloadData.filesize);
+  }
+
+  if (downloadData.type) {
+    return formatGenericProperty(downloadData.type);
+  }
+
+  return "Unknown";
+};
+
 export const parseFileType = (fileData: DownloadFileData) => {
   const mime_type = fileData?.mimeType ?? null;
   const file_name = fileData?.filename;
