@@ -7,7 +7,7 @@ import { sortTools } from "./sortTools";
 
 function appHistorySorter(results: AppHistory[], sortOrder: string) {
   let order = String(sortOrder).split(",");
-  if (order.length === 0) {
+  if (sortOrder === "" || order.length === 0) {
     order = results.map((ah) => ah.title).sort();
   }
   return results.sort(sortTools(order));

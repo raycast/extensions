@@ -1,5 +1,6 @@
 import { ActionPanel, Form, Detail, showToast, Icon, useNavigation, Action, Toast } from '@raycast/api';
 import _ from 'lodash';
+import qs from 'qs';
 import { exec } from 'child_process';
 import { useEffect, useState } from 'react';
 import { promisify } from 'util';
@@ -97,7 +98,8 @@ export default function AddNewTodo(props: { title?: string; listName?: string })
     }
 
     const json = buildJSON(values);
-    const url = `open -g things:///json?data=${escape(JSON.stringify(json))}`;
+    const escapedData = qs.stringify({ v: JSON.stringify(json) }).replace(/^v=/, '');
+    const url = `open -g things:///json?data=${escapedData}`;
     await asyncExec(url);
 
     showToast({

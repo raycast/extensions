@@ -24,10 +24,10 @@ export function VaultEdit(props: { path: string; currentSecret: object }) {
 
         if (
           await confirmAlert({
-            title: "Are you sure you want to erase secret ?",
-            message: "This will create new version for this path",
+            title: "Do you want to create a new version ?",
+            message: "This will create new active version for this path",
             primaryAction: {
-              title: "Erase",
+              title: "Create",
               style: Alert.ActionStyle.Destructive,
             },
             icon: Icon.SaveDocument,

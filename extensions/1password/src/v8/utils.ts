@@ -34,22 +34,20 @@ export function hrefToOpenInBrowser(item: Item): string | undefined {
 }
 
 export function actionsForItem(item: Item): ActionID[] {
-  if (item.category === "LOGIN") {
-    // user-configured primary action first, then secondary action,
-    // then all the actions in the default order,
-    // with duplicates removed
-    return [
-      ...new Set<ActionID>([
-        preferences.primaryAction,
-        preferences.secondaryAction,
-        "open-in-1password",
-        "open-in-browser",
-        "copy-username",
-        "copy-password",
-      ]),
-    ];
-  } else {
-    return ["open-in-1password"];
+  // all actions in the default order
+  const defaultActions: ActionID[] = ["open-in-1password", "open-in-browser", "copy-username", "copy-password"];
+  // prioritize primary and secondary actions, then append the rest and remove duplicates
+  const deduplicatedActions = [
+    ...new Set<ActionID>([preferences.primaryAction, preferences.secondaryAction, ...defaultActions]),
+  ];
+
+  switch (item.category) {
+    case "LOGIN":
+      return deduplicatedActions;
+    case "PASSWORD":
+      return deduplicatedActions.filter((action) => action !== "copy-username");
+    default:
+      return ["open-in-1password"];
   }
 }
 

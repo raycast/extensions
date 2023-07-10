@@ -50,8 +50,11 @@ export function SortTools({
 
   // if order length does not match tools length we need to fix order contents
   useEffect(() => {
-    if (order.length !== tools.length) {
-      const defaultOrder = tools.sort(sortTools(order)).map((tool) => tool.title);
+    if (order.length !== tools.length || String(order) === "") {
+      const defaultOrder =
+        String(order) === ""
+          ? tools.map((tool) => tool.title).sort()
+          : tools.sort(sortTools(order)).map((tool) => tool.title);
       setOrder(defaultOrder);
     }
   }, []);
@@ -72,8 +75,9 @@ export function SortTools({
       >
         {tools.sort(sortTools(order)).map((tool, id) => (
           <List.Item
-            key={tool.title}
+            key={`${tool.title} ${tool.version}`}
             title={tool.title}
+            subtitle={tool.version}
             icon={tool.icon}
             accessories={screenshotMode ? [{ text: "k move up" }, { text: "j move down" }] : []}
             actions={
@@ -106,7 +110,7 @@ export function SortTools({
                 />
                 <Action
                   icon={Icon.Window}
-                  title={`Toggle screenshot mode ${screenshotMode ? "off" : "on"}`}
+                  title={`Toggle Screenshot Mode ${screenshotMode ? "Off" : "On"}`}
                   onAction={toggleScreenshotMode}
                 />
               </ActionPanel>

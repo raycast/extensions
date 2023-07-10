@@ -1,0 +1,51 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "spanish-tv-guide",
+  "title": "Spanish TV Guide",
+  "description": "Browse the Spanish TV Guide",
+  "icon": "app-icon.png",
+  "author": "david.molinero",
+  "categories": [
+    "Media"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Spanish TV Guide",
+      "description": "Displays the Spanish TV Guide",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.52.1",
+    "friendly-truncate": "^1.1.0",
+    "isomorphic-fetch": "^3.0.0",
+    "lodash": "^4.17.21",
+    "luxon": "^3.3.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/isomorphic-fetch": "^0.0.36",
+    "@types/jest": "^29.5.1",
+    "@types/lodash": "^4.14.195",
+    "@types/luxon": "^3.3.0",
+    "@types/node": "20.2.5",
+    "@types/react": "18.2.7",
+    "eslint": "^8.41.0",
+    "jest": "^29.5.0",
+    "jest-environment-jsdom": "^29.5.0",
+    "prettier": "^2.8.8",
+    "ts-jest": "^29.1.0",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.0.4"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "jest"
+  }
+}

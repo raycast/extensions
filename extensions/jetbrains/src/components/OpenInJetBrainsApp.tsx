@@ -15,10 +15,13 @@ export function openInApp(tool: AppHistory, recent: recentEntry | null): () => P
   const toOpen = tool.app?.path ?? (tool.tool ? tool.tool : "");
 
   async function isRunning() {
-    const grep = `ps aux | grep -v "grep" | grep "${tool.shortname}" | grep "${tool.build}"`;
-    const { stdout } = await execPromise(grep).catch(() => ({
-      stdout: "",
-    }));
+    const grep = `ps aux | grep -v "grep" | grep "${tool.id}" | grep "${tool.build}"`;
+    const { stdout } = await execPromise(grep).catch((err) => {
+      // console.error({err})
+      return {
+        stdout: "",
+      };
+    });
     return stdout !== "";
   }
 
@@ -43,7 +46,7 @@ export function openInApp(tool: AppHistory, recent: recentEntry | null): () => P
       console.log("not-running");
       await showHUD(`Opening ${tool.title}`).then(() => open(toOpen));
       do {
-        await sleep(1);
+        await sleep(2);
         running = await isRunning();
       } while (!running);
     }

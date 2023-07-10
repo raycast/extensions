@@ -1,7 +1,7 @@
 import { environment, showToast, Toast } from "@raycast/api";
 import { Component, ErrorInfo, ReactNode } from "react";
 import TroubleshootingGuide from "~/components/TroubleshootingGuide";
-import { ERROR_TYPES } from "~/utils/errors";
+import { ManuallyThrownError } from "~/utils/errors";
 
 type Props = {
   children?: ReactNode;
@@ -23,7 +23,7 @@ export default class RootErrorBoundary extends Component<Props, State> {
   }
 
   async componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    if (error.name in ERROR_TYPES) {
+    if (error instanceof ManuallyThrownError) {
       this.setState((state) => ({ ...state, hasError: true, error: error.message }));
       await showToast(Toast.Style.Failure, error.message);
     } else {

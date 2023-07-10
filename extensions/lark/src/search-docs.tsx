@@ -1,7 +1,10 @@
+import React, { useState } from 'react';
 import { Action, Icon, List, showToast, Toast } from '@raycast/api';
-import React, { useState, useCallback, useEffect, useRef } from 'react';
+import { useCachedState } from '@raycast/utils';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { SpaceListItem } from './components/space-list-item';
 import { withAuth } from './features/with-auth';
+import { withQuery } from './features/with-query';
 import {
   fetchRecentList,
   searchDocs,
@@ -9,71 +12,43 @@ import {
   RecentListResponse as RecentList,
   SearchDocsResponse as SearchResults,
 } from './services/space';
-import { noop } from './utils/function';
-import { getStorage, setStorage, StorageKey } from './utils/storage';
+import { StorageKey } from './utils/storage';
+import { preference } from './utils/config';
 
 const SearchDocsView: React.FC = () => {
-  const fetchIdRef = useRef(0);
-  const [loading, setLoading] = useState(true);
-  const [documentList, setDocumentList] = useState<RecentList | SearchResults | null>(null);
-
-  useEffect(() => {
-    // load cache
-    getStorage(StorageKey.DocsRecentList)
-      .then((cache) => setDocumentList(cache))
-      .catch(noop)
-      .then(handleFetchRecentList);
-  }, []);
-
-  const handleFetchRecentList = () => {
-    // load recent list
-    setLoading(true);
-    const id = ++fetchIdRef.current;
-
-    fetchRecentList()
-      .then((recentList) => {
-        if (fetchIdRef.current === id) {
-          setLoading(false);
-          // set cache
-          setStorage(StorageKey.DocsRecentList, recentList);
-          setDocumentList(recentList);
-        }
-      })
-      .catch(() => {
-        if (fetchIdRef.current === id) {
-          setLoading(false);
-        }
-      });
-  };
-
-  const handleSearch = useCallback((text: string) => {
-    setLoading(true);
-    const id = ++fetchIdRef.current;
-
-    searchDocs({ query: text })
-      .then((searchResults) => {
-        if (fetchIdRef.current === id) {
-          setLoading(false);
-          setDocumentList(searchResults);
-        }
-      })
-      .catch(() => {
-        if (fetchIdRef.current === id) {
-          setLoading(false);
-        }
-      });
-  }, []);
+  const [cachedRecentList, setCachedRecentList] = useCachedState<RecentList | null>(StorageKey.DocsRecentList, null);
+  const [searchKeywords, setSearchKeywords] = useState('');
+  const {
+    isFetching,
+    data: documentList,
+    refetch,
+  } = useQuery<SearchResults | RecentList | null>({
+    queryKey: ['SearchDocsView', searchKeywords],
+    queryFn: ({ signal }) =>
+      searchKeywords
+        ? searchDocs({ query: searchKeywords }, signal)
+        : fetchRecentList(preference.recentListCount, signal).then((data) => {
+            setCachedRecentList(data);
+            return data;
+          }),
+    placeholderData: (previousData) => keepPreviousData(previousData) || cachedRecentList,
+  });
 
   const handleRemoveRecent = async (objToken: string) => {
     const result = await removeRecentDocument(objToken);
     if (result) {
       showToast(Toast.Style.Success, 'Removed successfully');
-      handleFetchRecentList();
+      refetch();
     }
   };
 
   return (
-    <List isLoading={loading} searchBarPlaceholder="Search documents..." onSearchTextChange={handleSearch} throttle>
+    <List
+      isLoading={isFetching}
+      searchBarPlaceholder="Search documents..."
+      onSearchTextChange={setSearchKeywords}
+      throttle
+    >
       {documentList != null && documentList.entities ? (
         isRecentList(documentList) ? (
           <RecentDocumentsView list={documentList} onRemove={handleRemoveRecent} />
@@ -134,4 +109,4 @@ const SearchResultView: React.FC<{ list: SearchResults }> = ({ list }) => {
   );
 };
 
-export default withAuth(SearchDocsView);
+export default withAuth(withQuery(SearchDocsView));

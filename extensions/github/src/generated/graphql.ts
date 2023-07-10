@@ -573,6 +573,22 @@ export type AddVerifiableDomainPayload = {
   domain?: Maybe<VerifiableDomain>;
 };
 
+/** Represents an 'added_to_merge_queue' event on a given pull request. */
+export type AddedToMergeQueueEvent = Node & {
+  __typename?: "AddedToMergeQueueEvent";
+  /** Identifies the actor who performed the event. */
+  actor?: Maybe<Actor>;
+  /** Identifies the date and time when the object was created. */
+  createdAt: Scalars["DateTime"];
+  /** The user who added this Pull Request to the merge queue */
+  enqueuer?: Maybe<User>;
+  id: Scalars["ID"];
+  /** The merge queue where this pull request was added to. */
+  mergeQueue?: Maybe<MergeQueue>;
+  /** PullRequest referenced by event. */
+  pullRequest?: Maybe<PullRequest>;
+};
+
 /** Represents a 'added_to_project' event on a given issue or pull request. */
 export type AddedToProjectEvent = Node & {
   __typename?: "AddedToProjectEvent";
@@ -1028,6 +1044,31 @@ export type BotAvatarUrlArgs = {
 /** Types which can be actors for `BranchActorAllowance` objects. */
 export type BranchActorAllowanceActor = App | Team | User;
 
+/** Parameters to be used for the branch_name_pattern rule */
+export type BranchNamePatternParameters = {
+  __typename?: "BranchNamePatternParameters";
+  /** How this rule will appear to users. */
+  name?: Maybe<Scalars["String"]>;
+  /** If true, the rule will fail if the pattern matches. */
+  negate: Scalars["Boolean"];
+  /** The operator to use for matching. */
+  operator: Scalars["String"];
+  /** The pattern to match with. */
+  pattern: Scalars["String"];
+};
+
+/** Parameters to be used for the branch_name_pattern rule */
+export type BranchNamePatternParametersInput = {
+  /** How this rule will appear to users. */
+  name?: InputMaybe<Scalars["String"]>;
+  /** If true, the rule will fail if the pattern matches. */
+  negate?: InputMaybe<Scalars["Boolean"]>;
+  /** The operator to use for matching. */
+  operator: Scalars["String"];
+  /** The pattern to match with. */
+  pattern: Scalars["String"];
+};
+
 /** A branch protection rule. */
 export type BranchProtectionRule = Node & {
   __typename?: "BranchProtectionRule";
@@ -1201,6 +1242,19 @@ export type BranchProtectionRuleEdge = {
   /** The item at the end of the edge. */
   node?: Maybe<BranchProtectionRule>;
 };
+
+/** Information about a sponsorship to make for a user or organization with a GitHub Sponsors profile, as part of sponsoring many users or organizations at once. */
+export type BulkSponsorship = {
+  /** The amount to pay to the sponsorable in US dollars. Valid values: 1-12000. */
+  amount: Scalars["Int"];
+  /** The ID of the user or organization who is receiving the sponsorship. Required if sponsorableLogin is not given. */
+  sponsorableId?: InputMaybe<Scalars["ID"]>;
+  /** The username of the user or organization who is receiving the sponsorship. Required if sponsorableId is not given. */
+  sponsorableLogin?: InputMaybe<Scalars["String"]>;
+};
+
+/** Types that can represent a repository ruleset bypass actor. */
+export type BypassActor = App | Team;
 
 /** A user, team, or app who has the ability to bypass a force push requirement on a protected branch. */
 export type BypassForcePushAllowance = Node & {
@@ -2182,7 +2236,7 @@ export type Commit = GitObject &
     /** Fetches `git blame` information. */
     blame: Blame;
     /**
-     * We recommend using the `changedFielsIfAvailable` field instead of `changedFiles`, as `changedFiles` will cause your request to return an error if GitHub is unable to calculate the number of changed files.
+     * We recommend using the `changedFilesIfAvailable` field instead of `changedFiles`, as `changedFiles` will cause your request to return an error if GitHub is unable to calculate the number of changed files.
      * @deprecated `changedFiles` will be removed. Use `changedFilesIfAvailable` instead. Removal on 2023-01-01 UTC.
      */
     changedFiles: Scalars["Int"];
@@ -2356,6 +2410,31 @@ export type CommitAuthor = {
   emails?: InputMaybe<Array<Scalars["String"]>>;
   /** ID of a User to filter by. If non-null, only commits authored by this user will be returned. This field takes precedence over emails. */
   id?: InputMaybe<Scalars["ID"]>;
+};
+
+/** Parameters to be used for the commit_author_email_pattern rule */
+export type CommitAuthorEmailPatternParameters = {
+  __typename?: "CommitAuthorEmailPatternParameters";
+  /** How this rule will appear to users. */
+  name?: Maybe<Scalars["String"]>;
+  /** If true, the rule will fail if the pattern matches. */
+  negate: Scalars["Boolean"];
+  /** The operator to use for matching. */
+  operator: Scalars["String"];
+  /** The pattern to match with. */
+  pattern: Scalars["String"];
+};
+
+/** Parameters to be used for the commit_author_email_pattern rule */
+export type CommitAuthorEmailPatternParametersInput = {
+  /** How this rule will appear to users. */
+  name?: InputMaybe<Scalars["String"]>;
+  /** If true, the rule will fail if the pattern matches. */
+  negate?: InputMaybe<Scalars["Boolean"]>;
+  /** The operator to use for matching. */
+  operator: Scalars["String"];
+  /** The pattern to match with. */
+  pattern: Scalars["String"];
 };
 
 /** Represents a comment on a given Commit. */
@@ -2577,6 +2656,31 @@ export type CommitMessage = {
   headline: Scalars["String"];
 };
 
+/** Parameters to be used for the commit_message_pattern rule */
+export type CommitMessagePatternParameters = {
+  __typename?: "CommitMessagePatternParameters";
+  /** How this rule will appear to users. */
+  name?: Maybe<Scalars["String"]>;
+  /** If true, the rule will fail if the pattern matches. */
+  negate: Scalars["Boolean"];
+  /** The operator to use for matching. */
+  operator: Scalars["String"];
+  /** The pattern to match with. */
+  pattern: Scalars["String"];
+};
+
+/** Parameters to be used for the commit_message_pattern rule */
+export type CommitMessagePatternParametersInput = {
+  /** How this rule will appear to users. */
+  name?: InputMaybe<Scalars["String"]>;
+  /** If true, the rule will fail if the pattern matches. */
+  negate?: InputMaybe<Scalars["Boolean"]>;
+  /** The operator to use for matching. */
+  operator: Scalars["String"];
+  /** The pattern to match with. */
+  pattern: Scalars["String"];
+};
+
 /**
  * A git ref for a commit to be appended to.
  *
@@ -2609,6 +2713,31 @@ export type CommittableBranch = {
   id?: InputMaybe<Scalars["ID"]>;
   /** The nameWithOwner of the repository to commit to. */
   repositoryNameWithOwner?: InputMaybe<Scalars["String"]>;
+};
+
+/** Parameters to be used for the committer_email_pattern rule */
+export type CommitterEmailPatternParameters = {
+  __typename?: "CommitterEmailPatternParameters";
+  /** How this rule will appear to users. */
+  name?: Maybe<Scalars["String"]>;
+  /** If true, the rule will fail if the pattern matches. */
+  negate: Scalars["Boolean"];
+  /** The operator to use for matching. */
+  operator: Scalars["String"];
+  /** The pattern to match with. */
+  pattern: Scalars["String"];
+};
+
+/** Parameters to be used for the committer_email_pattern rule */
+export type CommitterEmailPatternParametersInput = {
+  /** How this rule will appear to users. */
+  name?: InputMaybe<Scalars["String"]>;
+  /** If true, the rule will fail if the pattern matches. */
+  negate?: InputMaybe<Scalars["Boolean"]>;
+  /** The operator to use for matching. */
+  operator: Scalars["String"];
+  /** The pattern to match with. */
+  pattern: Scalars["String"];
 };
 
 /** Represents a comparison between two commit revisions. */
@@ -3591,6 +3720,37 @@ export type CreateRepositoryPayload = {
   repository?: Maybe<Repository>;
 };
 
+/** Autogenerated input type of CreateRepositoryRuleset */
+export type CreateRepositoryRulesetInput = {
+  /** A list of Team or App IDs allowed to bypass rules in this ruleset. */
+  bypassActorIds?: InputMaybe<Array<Scalars["ID"]>>;
+  /** The bypass mode for this ruleset */
+  bypassMode?: InputMaybe<RuleBypassMode>;
+  /** A unique identifier for the client performing the mutation. */
+  clientMutationId?: InputMaybe<Scalars["String"]>;
+  /** The set of conditions for this ruleset */
+  conditions: RepositoryRuleConditionsInput;
+  /** The enforcement level for this ruleset */
+  enforcement: RuleEnforcement;
+  /** The name of the ruleset. */
+  name: Scalars["String"];
+  /** The list of rules for this ruleset */
+  rules?: InputMaybe<Array<RepositoryRuleInput>>;
+  /** The global relay id of the source in which a new ruleset should be created in. */
+  sourceId: Scalars["ID"];
+  /** The target of the ruleset. */
+  target?: InputMaybe<RepositoryRulesetTarget>;
+};
+
+/** Autogenerated return type of CreateRepositoryRuleset */
+export type CreateRepositoryRulesetPayload = {
+  __typename?: "CreateRepositoryRulesetPayload";
+  /** A unique identifier for the client performing the mutation. */
+  clientMutationId?: Maybe<Scalars["String"]>;
+  /** The newly created Ruleset. */
+  ruleset?: Maybe<RepositoryRuleset>;
+};
+
 /** Autogenerated input type of CreateSponsorsListing */
 export type CreateSponsorsListingInput = {
   /** The country or region where the sponsorable's bank account is located. Required if fiscalHostLogin is not specified, ignored when fiscalHostLogin is specified. */
@@ -3686,6 +3846,29 @@ export type CreateSponsorshipPayload = {
   clientMutationId?: Maybe<Scalars["String"]>;
   /** The sponsorship that was started. */
   sponsorship?: Maybe<Sponsorship>;
+};
+
+/** Autogenerated input type of CreateSponsorships */
+export type CreateSponsorshipsInput = {
+  /** A unique identifier for the client performing the mutation. */
+  clientMutationId?: InputMaybe<Scalars["String"]>;
+  /** Specify whether others should be able to see that the sponsor is sponsoring the sponsorables. Public visibility still does not reveal the dollar value of the sponsorship. */
+  privacyLevel?: InputMaybe<SponsorshipPrivacy>;
+  /** Whether the sponsor should receive email updates from the sponsorables. */
+  receiveEmails?: InputMaybe<Scalars["Boolean"]>;
+  /** The username of the user or organization who is acting as the sponsor, paying for the sponsorships. */
+  sponsorLogin: Scalars["String"];
+  /** The list of maintainers to sponsor and for how much apiece. */
+  sponsorships: Array<BulkSponsorship>;
+};
+
+/** Autogenerated return type of CreateSponsorships */
+export type CreateSponsorshipsPayload = {
+  __typename?: "CreateSponsorshipsPayload";
+  /** A unique identifier for the client performing the mutation. */
+  clientMutationId?: Maybe<Scalars["String"]>;
+  /** The users and organizations who received a sponsorship. */
+  sponsorables?: Maybe<Array<Sponsorable>>;
 };
 
 /** Autogenerated input type of CreateTeamDiscussionComment */
@@ -4370,6 +4553,21 @@ export type DeleteRefPayload = {
   clientMutationId?: Maybe<Scalars["String"]>;
 };
 
+/** Autogenerated input type of DeleteRepositoryRuleset */
+export type DeleteRepositoryRulesetInput = {
+  /** A unique identifier for the client performing the mutation. */
+  clientMutationId?: InputMaybe<Scalars["String"]>;
+  /** The global relay id of the repository ruleset to be deleted. */
+  repositoryRulesetId: Scalars["ID"];
+};
+
+/** Autogenerated return type of DeleteRepositoryRuleset */
+export type DeleteRepositoryRulesetPayload = {
+  __typename?: "DeleteRepositoryRulesetPayload";
+  /** A unique identifier for the client performing the mutation. */
+  clientMutationId?: Maybe<Scalars["String"]>;
+};
+
 /** Autogenerated input type of DeleteTeamDiscussionComment */
 export type DeleteTeamDiscussionCommentInput = {
   /** A unique identifier for the client performing the mutation. */
@@ -4895,6 +5093,23 @@ export enum DeploymentStatusState {
   /** The deployment is waiting. */
   Waiting = "WAITING",
 }
+
+/** Autogenerated input type of DequeuePullRequest */
+export type DequeuePullRequestInput = {
+  /** A unique identifier for the client performing the mutation. */
+  clientMutationId?: InputMaybe<Scalars["String"]>;
+  /** The ID of the pull request to be dequeued. */
+  id: Scalars["ID"];
+};
+
+/** Autogenerated return type of DequeuePullRequest */
+export type DequeuePullRequestPayload = {
+  __typename?: "DequeuePullRequestPayload";
+  /** A unique identifier for the client performing the mutation. */
+  clientMutationId?: Maybe<Scalars["String"]>;
+  /** The merge queue entry of the dequeued pull request. */
+  mergeQueueEntry?: Maybe<MergeQueueEntry>;
+};
 
 /** The possible sides of a diff. */
 export enum DiffSide {
@@ -5562,6 +5777,27 @@ export type EnablePullRequestAutoMergePayload = {
   pullRequest?: Maybe<PullRequest>;
 };
 
+/** Autogenerated input type of EnqueuePullRequest */
+export type EnqueuePullRequestInput = {
+  /** A unique identifier for the client performing the mutation. */
+  clientMutationId?: InputMaybe<Scalars["String"]>;
+  /** The expected head OID of the pull request. */
+  expectedHeadOid?: InputMaybe<Scalars["GitObjectID"]>;
+  /** Add the pull request to the front of the queue. */
+  jump?: InputMaybe<Scalars["Boolean"]>;
+  /** The ID of the pull request to enqueue. */
+  pullRequestId: Scalars["ID"];
+};
+
+/** Autogenerated return type of EnqueuePullRequest */
+export type EnqueuePullRequestPayload = {
+  __typename?: "EnqueuePullRequestPayload";
+  /** A unique identifier for the client performing the mutation. */
+  clientMutationId?: Maybe<Scalars["String"]>;
+  /** The merge queue entry for the enqueued pull request. */
+  mergeQueueEntry?: Maybe<MergeQueueEntry>;
+};
+
 /** An account to manage multiple organizations with consolidated policy and billing. */
 export type Enterprise = AnnouncementBanner &
   Node & {
@@ -5593,7 +5829,7 @@ export type Enterprise = AnnouncementBanner &
     name: Scalars["String"];
     /** A list of organizations that belong to this enterprise. */
     organizations: OrganizationConnection;
-    /** Enterprise information only visible to enterprise owners. */
+    /** Enterprise information visible to enterprise owners or enterprise owners' personal access tokens (classic) with read:enterprise or admin:enterprise scope. */
     ownerInfo?: Maybe<EnterpriseOwnerInfo>;
     /** The HTTP path for this enterprise. */
     resourcePath: Scalars["URI"];
@@ -5830,7 +6066,7 @@ export type EnterpriseFailedInvitationEdge = {
   node?: Maybe<OrganizationInvitation>;
 };
 
-/** An identity provider configured to provision identities for an enterprise. */
+/** An identity provider configured to provision identities for an enterprise. Visible to enterprise owners or enterprise owners' personal access tokens (classic) with read:enterprise or admin:enterprise scope. */
 export type EnterpriseIdentityProvider = Node & {
   __typename?: "EnterpriseIdentityProvider";
   /** The digest algorithm used to sign SAML requests for the identity provider. */
@@ -5852,7 +6088,7 @@ export type EnterpriseIdentityProvider = Node & {
   ssoUrl?: Maybe<Scalars["URI"]>;
 };
 
-/** An identity provider configured to provision identities for an enterprise. */
+/** An identity provider configured to provision identities for an enterprise. Visible to enterprise owners or enterprise owners' personal access tokens (classic) with read:enterprise or admin:enterprise scope. */
 export type EnterpriseIdentityProviderExternalIdentitiesArgs = {
   after?: InputMaybe<Scalars["String"]>;
   before?: InputMaybe<Scalars["String"]>;
@@ -5983,7 +6219,7 @@ export type EnterpriseOutsideCollaboratorEdgeRepositoriesArgs = {
   orderBy?: InputMaybe<RepositoryOrder>;
 };
 
-/** Enterprise information only visible to enterprise owners. */
+/** Enterprise information visible to enterprise owners or enterprise owners' personal access tokens (classic) with read:enterprise or admin:enterprise scope. */
 export type EnterpriseOwnerInfo = {
   __typename?: "EnterpriseOwnerInfo";
   /** A list of all of the administrators for this enterprise. */
@@ -6002,7 +6238,7 @@ export type EnterpriseOwnerInfo = {
   defaultRepositoryPermissionSetting: EnterpriseDefaultRepositoryPermissionSettingValue;
   /** A list of enterprise organizations configured with the provided base repository permission. */
   defaultRepositoryPermissionSettingOrganizations: OrganizationConnection;
-  /** A list of domains owned by the enterprise. */
+  /** A list of domains owned by the enterprise. Visible to enterprise owners or enterprise owners' personal access tokens (classic) with admin:enterprise scope. */
   domains: VerifiableDomainConnection;
   /** Enterprise Server installations owned by the enterprise. */
   enterpriseServerInstallations: EnterpriseServerInstallationConnection;
@@ -6010,7 +6246,7 @@ export type EnterpriseOwnerInfo = {
   failedInvitations: EnterpriseFailedInvitationConnection;
   /** The setting value for whether the enterprise has an IP allow list enabled. */
   ipAllowListEnabledSetting: IpAllowListEnabledSettingValue;
-  /** The IP addresses that are allowed to access resources owned by the enterprise. */
+  /** The IP addresses that are allowed to access resources owned by the enterprise. Visible to enterprise owners or enterprise owners' personal access tokens (classic) with admin:enterprise scope. */
   ipAllowListEntries: IpAllowListEntryConnection;
   /** The setting value for whether the enterprise has IP allow list configuration for installed GitHub Apps enabled. */
   ipAllowListForInstalledAppsEnabledSetting: IpAllowListForInstalledAppsEnabledSettingValue;
@@ -6074,7 +6310,7 @@ export type EnterpriseOwnerInfo = {
   repositoryProjectsSetting: EnterpriseEnabledDisabledSettingValue;
   /** A list of enterprise organizations configured with the provided repository projects setting value. */
   repositoryProjectsSettingOrganizations: OrganizationConnection;
-  /** The SAML Identity Provider for the enterprise. When used by a GitHub App, requires an installation token with read and write access to members. */
+  /** The SAML Identity Provider for the enterprise. */
   samlIdentityProvider?: Maybe<EnterpriseIdentityProvider>;
   /** A list of enterprise organizations configured with the SAML single sign-on setting value. */
   samlIdentityProviderSettingOrganizations: OrganizationConnection;
@@ -6090,7 +6326,7 @@ export type EnterpriseOwnerInfo = {
   twoFactorRequiredSettingOrganizations: OrganizationConnection;
 };
 
-/** Enterprise information only visible to enterprise owners. */
+/** Enterprise information visible to enterprise owners or enterprise owners' personal access tokens (classic) with read:enterprise or admin:enterprise scope. */
 export type EnterpriseOwnerInfoAdminsArgs = {
   after?: InputMaybe<Scalars["String"]>;
   before?: InputMaybe<Scalars["String"]>;
@@ -6103,7 +6339,7 @@ export type EnterpriseOwnerInfoAdminsArgs = {
   role?: InputMaybe<EnterpriseAdministratorRole>;
 };
 
-/** Enterprise information only visible to enterprise owners. */
+/** Enterprise information visible to enterprise owners or enterprise owners' personal access tokens (classic) with read:enterprise or admin:enterprise scope. */
 export type EnterpriseOwnerInfoAffiliatedUsersWithTwoFactorDisabledArgs = {
   after?: InputMaybe<Scalars["String"]>;
   before?: InputMaybe<Scalars["String"]>;
@@ -6111,7 +6347,7 @@ export type EnterpriseOwnerInfoAffiliatedUsersWithTwoFactorDisabledArgs = {
   last?: InputMaybe<Scalars["Int"]>;
 };
 
-/** Enterprise information only visible to enterprise owners. */
+/** Enterprise information visible to enterprise owners or enterprise owners' personal access tokens (classic) with read:enterprise or admin:enterprise scope. */
 export type EnterpriseOwnerInfoAllowPrivateRepositoryForkingSettingOrganizationsArgs = {
   after?: InputMaybe<Scalars["String"]>;
   before?: InputMaybe<Scalars["String"]>;
@@ -6121,7 +6357,7 @@ export type EnterpriseOwnerInfoAllowPrivateRepositoryForkingSettingOrganizations
   value: Scalars["Boolean"];
 };
 
-/** Enterprise information only visible to enterprise owners. */
+/** Enterprise information visible to enterprise owners or enterprise owners' personal access tokens (classic) with read:enterprise or admin:enterprise scope. */
 export type EnterpriseOwnerInfoDefaultRepositoryPermissionSettingOrganizationsArgs = {
   after?: InputMaybe<Scalars["String"]>;
   before?: InputMaybe<Scalars["String"]>;
@@ -6131,7 +6367,7 @@ export type EnterpriseOwnerInfoDefaultRepositoryPermissionSettingOrganizationsAr
   value: DefaultRepositoryPermissionField;
 };
 
-/** Enterprise information only visible to enterprise owners. */
+/** Enterprise information visible to enterprise owners or enterprise owners' personal access tokens (classic) with read:enterprise or admin:enterprise scope. */
 export type EnterpriseOwnerInfoDomainsArgs = {
   after?: InputMaybe<Scalars["String"]>;
   before?: InputMaybe<Scalars["String"]>;
@@ -6142,7 +6378,7 @@ export type EnterpriseOwnerInfoDomainsArgs = {
   orderBy?: InputMaybe<VerifiableDomainOrder>;
 };
 
-/** Enterprise information only visible to enterprise owners. */
+/** Enterprise information visible to enterprise owners or enterprise owners' personal access tokens (classic) with read:enterprise or admin:enterprise scope. */
 export type EnterpriseOwnerInfoEnterpriseServerInstallationsArgs = {
   after?: InputMaybe<Scalars["String"]>;
   before?: InputMaybe<Scalars["String"]>;
@@ -6152,7 +6388,7 @@ export type EnterpriseOwnerInfoEnterpriseServerInstallationsArgs = {
   orderBy?: InputMaybe<EnterpriseServerInstallationOrder>;
 };
 
-/** Enterprise information only visible to enterprise owners. */
+/** Enterprise information visible to enterprise owners or enterprise owners' personal access tokens (classic) with read:enterprise or admin:enterprise scope. */
 export type EnterpriseOwnerInfoFailedInvitationsArgs = {
   after?: InputMaybe<Scalars["String"]>;
   before?: InputMaybe<Scalars["String"]>;
@@ -6161,7 +6397,7 @@ export type EnterpriseOwnerInfoFailedInvitationsArgs = {
   query?: InputMaybe<Scalars["String"]>;
 };
 
-/** Enterprise information only visible to enterprise owners. */
+/** Enterprise information visible to enterprise owners or enterprise owners' personal access tokens (classic) with read:enterprise or admin:enterprise scope. */
 export type EnterpriseOwnerInfoIpAllowListEntriesArgs = {
   after?: InputMaybe<Scalars["String"]>;
   before?: InputMaybe<Scalars["String"]>;
@@ -6170,7 +6406,7 @@ export type EnterpriseOwnerInfoIpAllowListEntriesArgs = {
   orderBy?: InputMaybe<IpAllowListEntryOrder>;
 };
 
-/** Enterprise information only visible to enterprise owners. */
+/** Enterprise information visible to enterprise owners or enterprise owners' personal access tokens (classic) with read:enterprise or admin:enterprise scope. */
 export type EnterpriseOwnerInfoMembersCanChangeRepositoryVisibilitySettingOrganizationsArgs = {
   after?: InputMaybe<Scalars["String"]>;
   before?: InputMaybe<Scalars["String"]>;
@@ -6180,7 +6416,7 @@ export type EnterpriseOwnerInfoMembersCanChangeRepositoryVisibilitySettingOrgani
   value: Scalars["Boolean"];
 };
 
-/** Enterprise information only visible to enterprise owners. */
+/** Enterprise information visible to enterprise owners or enterprise owners' personal access tokens (classic) with read:enterprise or admin:enterprise scope. */
 export type EnterpriseOwnerInfoMembersCanCreateRepositoriesSettingOrganizationsArgs = {
   after?: InputMaybe<Scalars["String"]>;
   before?: InputMaybe<Scalars["String"]>;
@@ -6190,7 +6426,7 @@ export type EnterpriseOwnerInfoMembersCanCreateRepositoriesSettingOrganizationsA
   value: OrganizationMembersCanCreateRepositoriesSettingValue;
 };
 
-/** Enterprise information only visible to enterprise owners. */
+/** Enterprise information visible to enterprise owners or enterprise owners' personal access tokens (classic) with read:enterprise or admin:enterprise scope. */
 export type EnterpriseOwnerInfoMembersCanDeleteIssuesSettingOrganizationsArgs = {
   after?: InputMaybe<Scalars["String"]>;
   before?: InputMaybe<Scalars["String"]>;
@@ -6200,7 +6436,7 @@ export type EnterpriseOwnerInfoMembersCanDeleteIssuesSettingOrganizationsArgs = 
   value: Scalars["Boolean"];
 };
 
-/** Enterprise information only visible to enterprise owners. */
+/** Enterprise information visible to enterprise owners or enterprise owners' personal access tokens (classic) with read:enterprise or admin:enterprise scope. */
 export type EnterpriseOwnerInfoMembersCanDeleteRepositoriesSettingOrganizationsArgs = {
   after?: InputMaybe<Scalars["String"]>;
   before?: InputMaybe<Scalars["String"]>;
@@ -6210,7 +6446,7 @@ export type EnterpriseOwnerInfoMembersCanDeleteRepositoriesSettingOrganizationsA
   value: Scalars["Boolean"];
 };
 
-/** Enterprise information only visible to enterprise owners. */
+/** Enterprise information visible to enterprise owners or enterprise owners' personal access tokens (classic) with read:enterprise or admin:enterprise scope. */
 export type EnterpriseOwnerInfoMembersCanInviteCollaboratorsSettingOrganizationsArgs = {
   after?: InputMaybe<Scalars["String"]>;
   before?: InputMaybe<Scalars["String"]>;
@@ -6220,7 +6456,7 @@ export type EnterpriseOwnerInfoMembersCanInviteCollaboratorsSettingOrganizations
   value: Scalars["Boolean"];
 };
 
-/** Enterprise information only visible to enterprise owners. */
+/** Enterprise information visible to enterprise owners or enterprise owners' personal access tokens (classic) with read:enterprise or admin:enterprise scope. */
 export type EnterpriseOwnerInfoMembersCanUpdateProtectedBranchesSettingOrganizationsArgs = {
   after?: InputMaybe<Scalars["String"]>;
   before?: InputMaybe<Scalars["String"]>;
@@ -6230,7 +6466,7 @@ export type EnterpriseOwnerInfoMembersCanUpdateProtectedBranchesSettingOrganizat
   value: Scalars["Boolean"];
 };
 
-/** Enterprise information only visible to enterprise owners. */
+/** Enterprise information visible to enterprise owners or enterprise owners' personal access tokens (classic) with read:enterprise or admin:enterprise scope. */
 export type EnterpriseOwnerInfoMembersCanViewDependencyInsightsSettingOrganizationsArgs = {
   after?: InputMaybe<Scalars["String"]>;
   before?: InputMaybe<Scalars["String"]>;
@@ -6240,7 +6476,7 @@ export type EnterpriseOwnerInfoMembersCanViewDependencyInsightsSettingOrganizati
   value: Scalars["Boolean"];
 };
 
-/** Enterprise information only visible to enterprise owners. */
+/** Enterprise information visible to enterprise owners or enterprise owners' personal access tokens (classic) with read:enterprise or admin:enterprise scope. */
 export type EnterpriseOwnerInfoOrganizationProjectsSettingOrganizationsArgs = {
   after?: InputMaybe<Scalars["String"]>;
   before?: InputMaybe<Scalars["String"]>;
@@ -6250,7 +6486,7 @@ export type EnterpriseOwnerInfoOrganizationProjectsSettingOrganizationsArgs = {
   value: Scalars["Boolean"];
 };
 
-/** Enterprise information only visible to enterprise owners. */
+/** Enterprise information visible to enterprise owners or enterprise owners' personal access tokens (classic) with read:enterprise or admin:enterprise scope. */
 export type EnterpriseOwnerInfoOutsideCollaboratorsArgs = {
   after?: InputMaybe<Scalars["String"]>;
   before?: InputMaybe<Scalars["String"]>;
@@ -6264,7 +6500,7 @@ export type EnterpriseOwnerInfoOutsideCollaboratorsArgs = {
   visibility?: InputMaybe<RepositoryVisibility>;
 };
 
-/** Enterprise information only visible to enterprise owners. */
+/** Enterprise information visible to enterprise owners or enterprise owners' personal access tokens (classic) with read:enterprise or admin:enterprise scope. */
 export type EnterpriseOwnerInfoPendingAdminInvitationsArgs = {
   after?: InputMaybe<Scalars["String"]>;
   before?: InputMaybe<Scalars["String"]>;
@@ -6275,7 +6511,7 @@ export type EnterpriseOwnerInfoPendingAdminInvitationsArgs = {
   role?: InputMaybe<EnterpriseAdministratorRole>;
 };
 
-/** Enterprise information only visible to enterprise owners. */
+/** Enterprise information visible to enterprise owners or enterprise owners' personal access tokens (classic) with read:enterprise or admin:enterprise scope. */
 export type EnterpriseOwnerInfoPendingCollaboratorInvitationsArgs = {
   after?: InputMaybe<Scalars["String"]>;
   before?: InputMaybe<Scalars["String"]>;
@@ -6285,7 +6521,7 @@ export type EnterpriseOwnerInfoPendingCollaboratorInvitationsArgs = {
   query?: InputMaybe<Scalars["String"]>;
 };
 
-/** Enterprise information only visible to enterprise owners. */
+/** Enterprise information visible to enterprise owners or enterprise owners' personal access tokens (classic) with read:enterprise or admin:enterprise scope. */
 export type EnterpriseOwnerInfoPendingMemberInvitationsArgs = {
   after?: InputMaybe<Scalars["String"]>;
   before?: InputMaybe<Scalars["String"]>;
@@ -6296,7 +6532,7 @@ export type EnterpriseOwnerInfoPendingMemberInvitationsArgs = {
   query?: InputMaybe<Scalars["String"]>;
 };
 
-/** Enterprise information only visible to enterprise owners. */
+/** Enterprise information visible to enterprise owners or enterprise owners' personal access tokens (classic) with read:enterprise or admin:enterprise scope. */
 export type EnterpriseOwnerInfoRepositoryProjectsSettingOrganizationsArgs = {
   after?: InputMaybe<Scalars["String"]>;
   before?: InputMaybe<Scalars["String"]>;
@@ -6306,7 +6542,7 @@ export type EnterpriseOwnerInfoRepositoryProjectsSettingOrganizationsArgs = {
   value: Scalars["Boolean"];
 };
 
-/** Enterprise information only visible to enterprise owners. */
+/** Enterprise information visible to enterprise owners or enterprise owners' personal access tokens (classic) with read:enterprise or admin:enterprise scope. */
 export type EnterpriseOwnerInfoSamlIdentityProviderSettingOrganizationsArgs = {
   after?: InputMaybe<Scalars["String"]>;
   before?: InputMaybe<Scalars["String"]>;
@@ -6316,7 +6552,7 @@ export type EnterpriseOwnerInfoSamlIdentityProviderSettingOrganizationsArgs = {
   value: IdentityProviderConfigurationState;
 };
 
-/** Enterprise information only visible to enterprise owners. */
+/** Enterprise information visible to enterprise owners or enterprise owners' personal access tokens (classic) with read:enterprise or admin:enterprise scope. */
 export type EnterpriseOwnerInfoSupportEntitlementsArgs = {
   after?: InputMaybe<Scalars["String"]>;
   before?: InputMaybe<Scalars["String"]>;
@@ -6325,7 +6561,7 @@ export type EnterpriseOwnerInfoSupportEntitlementsArgs = {
   orderBy?: InputMaybe<EnterpriseMemberOrder>;
 };
 
-/** Enterprise information only visible to enterprise owners. */
+/** Enterprise information visible to enterprise owners or enterprise owners' personal access tokens (classic) with read:enterprise or admin:enterprise scope. */
 export type EnterpriseOwnerInfoTeamDiscussionsSettingOrganizationsArgs = {
   after?: InputMaybe<Scalars["String"]>;
   before?: InputMaybe<Scalars["String"]>;
@@ -6335,7 +6571,7 @@ export type EnterpriseOwnerInfoTeamDiscussionsSettingOrganizationsArgs = {
   value: Scalars["Boolean"];
 };
 
-/** Enterprise information only visible to enterprise owners. */
+/** Enterprise information visible to enterprise owners or enterprise owners' personal access tokens (classic) with read:enterprise or admin:enterprise scope. */
 export type EnterpriseOwnerInfoTwoFactorRequiredSettingOrganizationsArgs = {
   after?: InputMaybe<Scalars["String"]>;
   before?: InputMaybe<Scalars["String"]>;
@@ -6808,7 +7044,7 @@ export type EnvironmentEdge = {
   node?: Maybe<Environment>;
 };
 
-/** An external identity provisioned by SAML SSO or SCIM. */
+/** An external identity provisioned by SAML SSO or SCIM. If SAML is configured on the organization, the external identity is visible to (1) organization owners, (2) organization owners' personal access tokens (classic) with read:org or admin:org scope, (3) GitHub App with an installation token with read or write access to members. If SAML is configured on the enterprise, the external identity is visible to (1) enterprise owners, (2) enterprise owners' personal access tokens (classic) with read:enterprise or admin:enterprise scope. */
 export type ExternalIdentity = Node & {
   __typename?: "ExternalIdentity";
   /** The GUID for this identity */
@@ -7752,6 +7988,7 @@ export type IpAllowListOwner = App | Enterprise | Organization;
 export type Issue = Assignable &
   Closable &
   Comment &
+  Deletable &
   Labelable &
   Lockable &
   Node &
@@ -7867,6 +8104,8 @@ export type Issue = Assignable &
     userContentEdits?: Maybe<UserContentEditConnection>;
     /** Indicates if the object can be closed by the viewer. */
     viewerCanClose: Scalars["Boolean"];
+    /** Check if the current viewer can delete this object. */
+    viewerCanDelete: Scalars["Boolean"];
     /** Can user react to this subject */
     viewerCanReact: Scalars["Boolean"];
     /** Indicates if the object can be reopened by the viewer. */
@@ -8267,14 +8506,35 @@ export type IssueTemplate = {
   __typename?: "IssueTemplate";
   /** The template purpose. */
   about?: Maybe<Scalars["String"]>;
+  /** The suggested assignees. */
+  assignees: UserConnection;
   /** The suggested issue body. */
   body?: Maybe<Scalars["String"]>;
   /** The template filename. */
   filename: Scalars["String"];
+  /** The suggested issue labels */
+  labels?: Maybe<LabelConnection>;
   /** The template name. */
   name: Scalars["String"];
   /** The suggested issue title. */
   title?: Maybe<Scalars["String"]>;
+};
+
+/** A repository issue template. */
+export type IssueTemplateAssigneesArgs = {
+  after?: InputMaybe<Scalars["String"]>;
+  before?: InputMaybe<Scalars["String"]>;
+  first?: InputMaybe<Scalars["Int"]>;
+  last?: InputMaybe<Scalars["Int"]>;
+};
+
+/** A repository issue template. */
+export type IssueTemplateLabelsArgs = {
+  after?: InputMaybe<Scalars["String"]>;
+  before?: InputMaybe<Scalars["String"]>;
+  first?: InputMaybe<Scalars["Int"]>;
+  last?: InputMaybe<Scalars["Int"]>;
+  orderBy?: InputMaybe<LabelOrder>;
 };
 
 /** The connection type for IssueTimelineItem. */
@@ -8934,6 +9194,23 @@ export type MarkFileAsViewedPayload = {
   pullRequest?: Maybe<PullRequest>;
 };
 
+/** Autogenerated input type of MarkProjectV2AsTemplate */
+export type MarkProjectV2AsTemplateInput = {
+  /** A unique identifier for the client performing the mutation. */
+  clientMutationId?: InputMaybe<Scalars["String"]>;
+  /** The ID of the Project to mark as a template. */
+  projectId: Scalars["ID"];
+};
+
+/** Autogenerated return type of MarkProjectV2AsTemplate */
+export type MarkProjectV2AsTemplatePayload = {
+  __typename?: "MarkProjectV2AsTemplatePayload";
+  /** A unique identifier for the client performing the mutation. */
+  clientMutationId?: Maybe<Scalars["String"]>;
+  /** The project. */
+  projectV2?: Maybe<ProjectV2>;
+};
+
 /** Autogenerated input type of MarkPullRequestReadyForReview */
 export type MarkPullRequestReadyForReviewInput = {
   /** A unique identifier for the client performing the mutation. */
@@ -9404,6 +9681,123 @@ export type MergePullRequestPayload = {
   pullRequest?: Maybe<PullRequest>;
 };
 
+/** The queue of pull request entries to be merged into a protected branch in a repository. */
+export type MergeQueue = Node & {
+  __typename?: "MergeQueue";
+  /** The configuration for this merge queue */
+  configuration?: Maybe<MergeQueueConfiguration>;
+  /** The entries in the queue */
+  entries?: Maybe<MergeQueueEntryConnection>;
+  id: Scalars["ID"];
+  /** The estimated time in seconds until a newly added entry would be merged */
+  nextEntryEstimatedTimeToMerge?: Maybe<Scalars["Int"]>;
+  /** The repository this merge queue belongs to */
+  repository?: Maybe<Repository>;
+  /** The HTTP path for this merge queue */
+  resourcePath: Scalars["URI"];
+  /** The HTTP URL for this merge queue */
+  url: Scalars["URI"];
+};
+
+/** The queue of pull request entries to be merged into a protected branch in a repository. */
+export type MergeQueueEntriesArgs = {
+  after?: InputMaybe<Scalars["String"]>;
+  before?: InputMaybe<Scalars["String"]>;
+  first?: InputMaybe<Scalars["Int"]>;
+  last?: InputMaybe<Scalars["Int"]>;
+};
+
+/** Configuration for a MergeQueue */
+export type MergeQueueConfiguration = {
+  __typename?: "MergeQueueConfiguration";
+  /** The amount of time in minutes to wait for a check response before considering it a failure. */
+  checkResponseTimeout?: Maybe<Scalars["Int"]>;
+  /** The maximum number of entries to build at once. */
+  maximumEntriesToBuild?: Maybe<Scalars["Int"]>;
+  /** The maximum number of entries to merge at once. */
+  maximumEntriesToMerge?: Maybe<Scalars["Int"]>;
+  /** The merge method to use for this queue. */
+  mergeMethod?: Maybe<PullRequestMergeMethod>;
+  /** The strategy to use when merging entries. */
+  mergingStrategy?: Maybe<MergeQueueMergingStrategy>;
+  /** The minimum number of entries required to merge at once. */
+  minimumEntriesToMerge?: Maybe<Scalars["Int"]>;
+  /** The amount of time in minutes to wait before ignoring the minumum number of entries in the queue requirement and merging a collection of entries */
+  minimumEntriesToMergeWaitTime?: Maybe<Scalars["Int"]>;
+};
+
+/** Entries in a MergeQueue */
+export type MergeQueueEntry = Node & {
+  __typename?: "MergeQueueEntry";
+  /** The base commit for this entry */
+  baseCommit?: Maybe<Commit>;
+  /** The date and time this entry was added to the merge queue */
+  enqueuedAt: Scalars["DateTime"];
+  /** The actor that enqueued this entry */
+  enqueuer: Actor;
+  /** The estimated time in seconds until this entry will be merged */
+  estimatedTimeToMerge?: Maybe<Scalars["Int"]>;
+  /** The head commit for this entry */
+  headCommit?: Maybe<Commit>;
+  id: Scalars["ID"];
+  /** Whether this pull request should jump the queue */
+  jump: Scalars["Boolean"];
+  /** The merge queue that this entry belongs to */
+  mergeQueue?: Maybe<MergeQueue>;
+  /** The position of this entry in the queue */
+  position: Scalars["Int"];
+  /** The pull request that will be added to a merge group */
+  pullRequest?: Maybe<PullRequest>;
+  /** Does this pull request need to be deployed on its own */
+  solo: Scalars["Boolean"];
+  /** The state of this entry in the queue */
+  state: MergeQueueEntryState;
+};
+
+/** The connection type for MergeQueueEntry. */
+export type MergeQueueEntryConnection = {
+  __typename?: "MergeQueueEntryConnection";
+  /** A list of edges. */
+  edges?: Maybe<Array<Maybe<MergeQueueEntryEdge>>>;
+  /** A list of nodes. */
+  nodes?: Maybe<Array<Maybe<MergeQueueEntry>>>;
+  /** Information to aid in pagination. */
+  pageInfo: PageInfo;
+  /** Identifies the total count of items in the connection. */
+  totalCount: Scalars["Int"];
+};
+
+/** An edge in a connection. */
+export type MergeQueueEntryEdge = {
+  __typename?: "MergeQueueEntryEdge";
+  /** A cursor for use in pagination. */
+  cursor: Scalars["String"];
+  /** The item at the end of the edge. */
+  node?: Maybe<MergeQueueEntry>;
+};
+
+/** The possible states for a merge queue entry. */
+export enum MergeQueueEntryState {
+  /** The entry is currently waiting for checks to pass. */
+  AwaitingChecks = "AWAITING_CHECKS",
+  /** The entry is currently locked. */
+  Locked = "LOCKED",
+  /** The entry is currently mergeable. */
+  Mergeable = "MERGEABLE",
+  /** The entry is currently queued. */
+  Queued = "QUEUED",
+  /** The entry is currently unmergeable. */
+  Unmergeable = "UNMERGEABLE",
+}
+
+/** The possible merging strategies for a merge queue. */
+export enum MergeQueueMergingStrategy {
+  /** Entries only allowed to merge if they are passing. */
+  Allgreen = "ALLGREEN",
+  /** Failing Entires are allowed to merge if they are with a passing entry. */
+  Headgreen = "HEADGREEN",
+}
+
 /** Whether or not a PullRequest can be merged. */
 export enum MergeableState {
   /** The pull request cannot be merged due to merge conflicts. */
@@ -9458,6 +9852,8 @@ export type Migration = {
   sourceUrl: Scalars["URI"];
   /** The migration state. */
   state: MigrationState;
+  /** The number of warnings encountered for this migration. To review the warnings, check the [Migration Log](https://docs.github.com/en/migrations/using-github-enterprise-importer/completing-your-migration-with-github-enterprise-importer/accessing-your-migration-logs-for-github-enterprise-importer). */
+  warningsCount: Scalars["Int"];
 };
 
 /** A GitHub Enterprise Importer (GEI) migration source. */
@@ -9876,12 +10272,16 @@ export type Mutation = {
   createRef?: Maybe<CreateRefPayload>;
   /** Create a new repository. */
   createRepository?: Maybe<CreateRepositoryPayload>;
+  /** Create a repository ruleset */
+  createRepositoryRuleset?: Maybe<CreateRepositoryRulesetPayload>;
   /** Create a GitHub Sponsors profile to allow others to sponsor you or your organization. */
   createSponsorsListing?: Maybe<CreateSponsorsListingPayload>;
   /** Create a new payment tier for your GitHub Sponsors profile. */
   createSponsorsTier?: Maybe<CreateSponsorsTierPayload>;
   /** Start a new sponsorship of a maintainer in GitHub Sponsors, or reactivate a past sponsorship. */
   createSponsorship?: Maybe<CreateSponsorshipPayload>;
+  /** Make many one-time sponsorships for different sponsorable users or organizations at once. Can only sponsor those who have a public GitHub Sponsors profile. */
+  createSponsorships?: Maybe<CreateSponsorshipsPayload>;
   /** Creates a new team discussion. */
   createTeamDiscussion?: Maybe<CreateTeamDiscussionPayload>;
   /** Creates a new team discussion comment. */
@@ -9926,12 +10326,16 @@ export type Mutation = {
   deletePullRequestReviewComment?: Maybe<DeletePullRequestReviewCommentPayload>;
   /** Delete a Git Ref. */
   deleteRef?: Maybe<DeleteRefPayload>;
+  /** Delete a repository ruleset */
+  deleteRepositoryRuleset?: Maybe<DeleteRepositoryRulesetPayload>;
   /** Deletes a team discussion. */
   deleteTeamDiscussion?: Maybe<DeleteTeamDiscussionPayload>;
   /** Deletes a team discussion comment. */
   deleteTeamDiscussionComment?: Maybe<DeleteTeamDiscussionCommentPayload>;
   /** Deletes a verifiable domain. */
   deleteVerifiableDomain?: Maybe<DeleteVerifiableDomainPayload>;
+  /** Remove a pull request from the merge queue. */
+  dequeuePullRequest?: Maybe<DequeuePullRequestPayload>;
   /** Disable auto merge on the given pull request */
   disablePullRequestAutoMerge?: Maybe<DisablePullRequestAutoMergePayload>;
   /** Dismisses an approved or rejected pull request review. */
@@ -9940,6 +10344,8 @@ export type Mutation = {
   dismissRepositoryVulnerabilityAlert?: Maybe<DismissRepositoryVulnerabilityAlertPayload>;
   /** Enable the default auto-merge on a pull request. */
   enablePullRequestAutoMerge?: Maybe<EnablePullRequestAutoMergePayload>;
+  /** Add a pull request to the merge queue. */
+  enqueuePullRequest?: Maybe<EnqueuePullRequestPayload>;
   /** Follow an organization. */
   followOrganization?: Maybe<FollowOrganizationPayload>;
   /** Follow a user. */
@@ -9962,6 +10368,8 @@ export type Mutation = {
   markDiscussionCommentAsAnswer?: Maybe<MarkDiscussionCommentAsAnswerPayload>;
   /** Mark a pull request file as viewed */
   markFileAsViewed?: Maybe<MarkFileAsViewedPayload>;
+  /** Mark a project as a template. Note that only projects which are owned by an Organization can be marked as a template. */
+  markProjectV2AsTemplate?: Maybe<MarkProjectV2AsTemplatePayload>;
   /** Marks a pull request ready for review. */
   markPullRequestReadyForReview?: Maybe<MarkPullRequestReadyForReviewPayload>;
   /** Merge a head into a branch. */
@@ -10066,6 +10474,8 @@ export type Mutation = {
   unmarkFileAsViewed?: Maybe<UnmarkFileAsViewedPayload>;
   /** Unmark an issue as a duplicate of another issue. */
   unmarkIssueAsDuplicate?: Maybe<UnmarkIssueAsDuplicatePayload>;
+  /** Unmark a project as a template. */
+  unmarkProjectV2AsTemplate?: Maybe<UnmarkProjectV2AsTemplatePayload>;
   /** Unminimizes a comment on an Issue, Commit, Pull Request, or Gist */
   unminimizeComment?: Maybe<UnminimizeCommentPayload>;
   /** Unpin a pinned issue from a repository */
@@ -10142,6 +10552,8 @@ export type Mutation = {
   updateProjectColumn?: Maybe<UpdateProjectColumnPayload>;
   /** Updates an existing project (beta). */
   updateProjectV2?: Maybe<UpdateProjectV2Payload>;
+  /** Update the collaborators on a team or a project */
+  updateProjectV2Collaborators?: Maybe<UpdateProjectV2CollaboratorsPayload>;
   /** Updates a draft issue within a Project. */
   updateProjectV2DraftIssue?: Maybe<UpdateProjectV2DraftIssuePayload>;
   /** This mutation updates the value of a field for an item in a Project. Currently only single-select, text, number, date, and iteration fields are supported. */
@@ -10160,6 +10572,8 @@ export type Mutation = {
   updateRef?: Maybe<UpdateRefPayload>;
   /** Update information about a repository. */
   updateRepository?: Maybe<UpdateRepositoryPayload>;
+  /** Update a repository ruleset */
+  updateRepositoryRuleset?: Maybe<UpdateRepositoryRulesetPayload>;
   /** Sets whether contributors are required to sign off on web-based commits for a repository. */
   updateRepositoryWebCommitSignoffSetting?: Maybe<UpdateRepositoryWebCommitSignoffSettingPayload>;
   /** Change visibility of your sponsorship and opt in or out of email updates from the maintainer. */
@@ -10459,6 +10873,11 @@ export type MutationCreateRepositoryArgs = {
 };
 
 /** The root query for implementing GraphQL mutations. */
+export type MutationCreateRepositoryRulesetArgs = {
+  input: CreateRepositoryRulesetInput;
+};
+
+/** The root query for implementing GraphQL mutations. */
 export type MutationCreateSponsorsListingArgs = {
   input: CreateSponsorsListingInput;
 };
@@ -10471,6 +10890,11 @@ export type MutationCreateSponsorsTierArgs = {
 /** The root query for implementing GraphQL mutations. */
 export type MutationCreateSponsorshipArgs = {
   input: CreateSponsorshipInput;
+};
+
+/** The root query for implementing GraphQL mutations. */
+export type MutationCreateSponsorshipsArgs = {
+  input: CreateSponsorshipsInput;
 };
 
 /** The root query for implementing GraphQL mutations. */
@@ -10584,6 +11008,11 @@ export type MutationDeleteRefArgs = {
 };
 
 /** The root query for implementing GraphQL mutations. */
+export type MutationDeleteRepositoryRulesetArgs = {
+  input: DeleteRepositoryRulesetInput;
+};
+
+/** The root query for implementing GraphQL mutations. */
 export type MutationDeleteTeamDiscussionArgs = {
   input: DeleteTeamDiscussionInput;
 };
@@ -10596,6 +11025,11 @@ export type MutationDeleteTeamDiscussionCommentArgs = {
 /** The root query for implementing GraphQL mutations. */
 export type MutationDeleteVerifiableDomainArgs = {
   input: DeleteVerifiableDomainInput;
+};
+
+/** The root query for implementing GraphQL mutations. */
+export type MutationDequeuePullRequestArgs = {
+  input: DequeuePullRequestInput;
 };
 
 /** The root query for implementing GraphQL mutations. */
@@ -10616,6 +11050,11 @@ export type MutationDismissRepositoryVulnerabilityAlertArgs = {
 /** The root query for implementing GraphQL mutations. */
 export type MutationEnablePullRequestAutoMergeArgs = {
   input: EnablePullRequestAutoMergeInput;
+};
+
+/** The root query for implementing GraphQL mutations. */
+export type MutationEnqueuePullRequestArgs = {
+  input: EnqueuePullRequestInput;
 };
 
 /** The root query for implementing GraphQL mutations. */
@@ -10671,6 +11110,11 @@ export type MutationMarkDiscussionCommentAsAnswerArgs = {
 /** The root query for implementing GraphQL mutations. */
 export type MutationMarkFileAsViewedArgs = {
   input: MarkFileAsViewedInput;
+};
+
+/** The root query for implementing GraphQL mutations. */
+export type MutationMarkProjectV2AsTemplateArgs = {
+  input: MarkProjectV2AsTemplateInput;
 };
 
 /** The root query for implementing GraphQL mutations. */
@@ -10934,6 +11378,11 @@ export type MutationUnmarkIssueAsDuplicateArgs = {
 };
 
 /** The root query for implementing GraphQL mutations. */
+export type MutationUnmarkProjectV2AsTemplateArgs = {
+  input: UnmarkProjectV2AsTemplateInput;
+};
+
+/** The root query for implementing GraphQL mutations. */
 export type MutationUnminimizeCommentArgs = {
   input: UnminimizeCommentInput;
 };
@@ -11124,6 +11573,11 @@ export type MutationUpdateProjectV2Args = {
 };
 
 /** The root query for implementing GraphQL mutations. */
+export type MutationUpdateProjectV2CollaboratorsArgs = {
+  input: UpdateProjectV2CollaboratorsInput;
+};
+
+/** The root query for implementing GraphQL mutations. */
 export type MutationUpdateProjectV2DraftIssueArgs = {
   input: UpdateProjectV2DraftIssueInput;
 };
@@ -11166,6 +11620,11 @@ export type MutationUpdateRefArgs = {
 /** The root query for implementing GraphQL mutations. */
 export type MutationUpdateRepositoryArgs = {
   input: UpdateRepositoryInput;
+};
+
+/** The root query for implementing GraphQL mutations. */
+export type MutationUpdateRepositoryRulesetArgs = {
+  input: UpdateRepositoryRulesetInput;
 };
 
 /** The root query for implementing GraphQL mutations. */
@@ -11222,7 +11681,7 @@ export enum NotificationRestrictionSettingValue {
   Enabled = "ENABLED",
 }
 
-/** An OIDC identity provider configured to provision identities for an enterprise. */
+/** An OIDC identity provider configured to provision identities for an enterprise. Visible to enterprise owners or enterprise owners' personal access tokens (classic) with read:enterprise or admin:enterprise scope. */
 export type OidcProvider = Node & {
   __typename?: "OIDCProvider";
   /** The enterprise this identity provider belongs to. */
@@ -11236,7 +11695,7 @@ export type OidcProvider = Node & {
   tenantId: Scalars["String"];
 };
 
-/** An OIDC identity provider configured to provision identities for an enterprise. */
+/** An OIDC identity provider configured to provision identities for an enterprise. Visible to enterprise owners or enterprise owners' personal access tokens (classic) with read:enterprise or admin:enterprise scope. */
 export type OidcProviderExternalIdentitiesArgs = {
   after?: InputMaybe<Scalars["String"]>;
   before?: InputMaybe<Scalars["String"]>;
@@ -11255,11 +11714,11 @@ export enum OidcProviderType {
 
 /** Metadata for an audit entry with action oauth_application.* */
 export type OauthApplicationAuditEntryData = {
-  /** The name of the OAuth Application. */
+  /** The name of the OAuth application. */
   oauthApplicationName?: Maybe<Scalars["String"]>;
-  /** The HTTP path for the OAuth Application */
+  /** The HTTP path for the OAuth application */
   oauthApplicationResourcePath?: Maybe<Scalars["URI"]>;
-  /** The HTTP URL for the OAuth Application */
+  /** The HTTP URL for the OAuth application */
   oauthApplicationUrl?: Maybe<Scalars["URI"]>;
 };
 
@@ -11283,18 +11742,18 @@ export type OauthApplicationCreateAuditEntry = AuditEntry &
     actorResourcePath?: Maybe<Scalars["URI"]>;
     /** The HTTP URL for the actor. */
     actorUrl?: Maybe<Scalars["URI"]>;
-    /** The application URL of the OAuth Application. */
+    /** The application URL of the OAuth application. */
     applicationUrl?: Maybe<Scalars["URI"]>;
-    /** The callback URL of the OAuth Application. */
+    /** The callback URL of the OAuth application. */
     callbackUrl?: Maybe<Scalars["URI"]>;
     /** The time the action was initiated */
     createdAt: Scalars["PreciseDateTime"];
     id: Scalars["ID"];
-    /** The name of the OAuth Application. */
+    /** The name of the OAuth application. */
     oauthApplicationName?: Maybe<Scalars["String"]>;
-    /** The HTTP path for the OAuth Application */
+    /** The HTTP path for the OAuth application */
     oauthApplicationResourcePath?: Maybe<Scalars["URI"]>;
-    /** The HTTP URL for the OAuth Application */
+    /** The HTTP URL for the OAuth application */
     oauthApplicationUrl?: Maybe<Scalars["URI"]>;
     /** The corresponding operation type for the action */
     operationType?: Maybe<OperationType>;
@@ -11306,9 +11765,9 @@ export type OauthApplicationCreateAuditEntry = AuditEntry &
     organizationResourcePath?: Maybe<Scalars["URI"]>;
     /** The HTTP URL for the organization */
     organizationUrl?: Maybe<Scalars["URI"]>;
-    /** The rate limit of the OAuth Application. */
+    /** The rate limit of the OAuth application. */
     rateLimit?: Maybe<Scalars["Int"]>;
-    /** The state of the OAuth Application. */
+    /** The state of the OAuth application. */
     state?: Maybe<OauthApplicationCreateAuditEntryState>;
     /** The user affected by the action */
     user?: Maybe<User>;
@@ -11320,13 +11779,13 @@ export type OauthApplicationCreateAuditEntry = AuditEntry &
     userUrl?: Maybe<Scalars["URI"]>;
   };
 
-/** The state of an OAuth Application when it was created. */
+/** The state of an OAuth application when it was created. */
 export enum OauthApplicationCreateAuditEntryState {
-  /** The OAuth Application was active and allowed to have OAuth Accesses. */
+  /** The OAuth application was active and allowed to have OAuth Accesses. */
   Active = "ACTIVE",
-  /** The OAuth Application was in the process of being deleted. */
+  /** The OAuth application was in the process of being deleted. */
   PendingDeletion = "PENDING_DELETION",
-  /** The OAuth Application was suspended from generating OAuth Accesses due to abuse or security concerns. */
+  /** The OAuth application was suspended from generating OAuth Accesses due to abuse or security concerns. */
   Suspended = "SUSPENDED",
 }
 
@@ -12044,11 +12503,11 @@ export type OrgOauthAppAccessApprovedAuditEntry = AuditEntry &
     /** The time the action was initiated */
     createdAt: Scalars["PreciseDateTime"];
     id: Scalars["ID"];
-    /** The name of the OAuth Application. */
+    /** The name of the OAuth application. */
     oauthApplicationName?: Maybe<Scalars["String"]>;
-    /** The HTTP path for the OAuth Application */
+    /** The HTTP path for the OAuth application */
     oauthApplicationResourcePath?: Maybe<Scalars["URI"]>;
-    /** The HTTP URL for the OAuth Application */
+    /** The HTTP URL for the OAuth application */
     oauthApplicationUrl?: Maybe<Scalars["URI"]>;
     /** The corresponding operation type for the action */
     operationType?: Maybe<OperationType>;
@@ -12093,11 +12552,11 @@ export type OrgOauthAppAccessDeniedAuditEntry = AuditEntry &
     /** The time the action was initiated */
     createdAt: Scalars["PreciseDateTime"];
     id: Scalars["ID"];
-    /** The name of the OAuth Application. */
+    /** The name of the OAuth application. */
     oauthApplicationName?: Maybe<Scalars["String"]>;
-    /** The HTTP path for the OAuth Application */
+    /** The HTTP path for the OAuth application */
     oauthApplicationResourcePath?: Maybe<Scalars["URI"]>;
-    /** The HTTP URL for the OAuth Application */
+    /** The HTTP URL for the OAuth application */
     oauthApplicationUrl?: Maybe<Scalars["URI"]>;
     /** The corresponding operation type for the action */
     operationType?: Maybe<OperationType>;
@@ -12142,11 +12601,11 @@ export type OrgOauthAppAccessRequestedAuditEntry = AuditEntry &
     /** The time the action was initiated */
     createdAt: Scalars["PreciseDateTime"];
     id: Scalars["ID"];
-    /** The name of the OAuth Application. */
+    /** The name of the OAuth application. */
     oauthApplicationName?: Maybe<Scalars["String"]>;
-    /** The HTTP path for the OAuth Application */
+    /** The HTTP path for the OAuth application */
     oauthApplicationResourcePath?: Maybe<Scalars["URI"]>;
-    /** The HTTP URL for the OAuth Application */
+    /** The HTTP URL for the OAuth application */
     oauthApplicationUrl?: Maybe<Scalars["URI"]>;
     /** The corresponding operation type for the action */
     operationType?: Maybe<OperationType>;
@@ -12860,7 +13319,11 @@ export type Organization = Actor &
     requiresTwoFactorAuthentication?: Maybe<Scalars["Boolean"]>;
     /** The HTTP path for this organization. */
     resourcePath: Scalars["URI"];
-    /** The Organization's SAML identity providers */
+    /** Returns a single ruleset from the current organization by ID. */
+    ruleset?: Maybe<RepositoryRuleset>;
+    /** A list of rulesets for this organization. */
+    rulesets?: Maybe<RepositoryRulesetConnection>;
+    /** The Organization's SAML identity provider. Visible to (1) organization owners, (2) organization owners' personal access tokens (classic) with read:org or admin:org scope, (3) GitHub App with an installation token with read or write access to members. */
     samlIdentityProvider?: Maybe<OrganizationIdentityProvider>;
     /** List of users and organizations this entity is sponsoring. */
     sponsoring: SponsorConnection;
@@ -13133,6 +13596,20 @@ export type OrganizationRepositoryMigrationsArgs = {
 };
 
 /** An account on GitHub, with one or more owners, that has repositories, members and teams. */
+export type OrganizationRulesetArgs = {
+  databaseId: Scalars["Int"];
+};
+
+/** An account on GitHub, with one or more owners, that has repositories, members and teams. */
+export type OrganizationRulesetsArgs = {
+  after?: InputMaybe<Scalars["String"]>;
+  before?: InputMaybe<Scalars["String"]>;
+  first?: InputMaybe<Scalars["Int"]>;
+  includeParents?: InputMaybe<Scalars["Boolean"]>;
+  last?: InputMaybe<Scalars["Int"]>;
+};
+
+/** An account on GitHub, with one or more owners, that has repositories, members and teams. */
 export type OrganizationSponsoringArgs = {
   after?: InputMaybe<Scalars["String"]>;
   before?: InputMaybe<Scalars["String"]>;
@@ -13218,6 +13695,7 @@ export type OrganizationTeamsArgs = {
   first?: InputMaybe<Scalars["Int"]>;
   last?: InputMaybe<Scalars["Int"]>;
   ldapMapped?: InputMaybe<Scalars["Boolean"]>;
+  notificationSetting?: InputMaybe<TeamNotificationSetting>;
   orderBy?: InputMaybe<TeamOrder>;
   privacy?: InputMaybe<TeamPrivacy>;
   query?: InputMaybe<Scalars["String"]>;
@@ -13374,7 +13852,7 @@ export type OrganizationEnterpriseOwnerEdge = {
   organizationRole: RoleInOrganization;
 };
 
-/** An Identity Provider configured to provision SAML and SCIM identities for Organizations */
+/** An Identity Provider configured to provision SAML and SCIM identities for Organizations. Visible to (1) organization owners, (2) organization owners' personal access tokens (classic) with read:org or admin:org scope, (3) GitHub App with an installation token with read or write access to members. */
 export type OrganizationIdentityProvider = Node & {
   __typename?: "OrganizationIdentityProvider";
   /** The digest algorithm used to sign SAML requests for the Identity Provider. */
@@ -13394,7 +13872,7 @@ export type OrganizationIdentityProvider = Node & {
   ssoUrl?: Maybe<Scalars["URI"]>;
 };
 
-/** An Identity Provider configured to provision SAML and SCIM identities for Organizations */
+/** An Identity Provider configured to provision SAML and SCIM identities for Organizations. Visible to (1) organization owners, (2) organization owners' personal access tokens (classic) with read:org or admin:org scope, (3) GitHub App with an installation token with read or write access to members. */
 export type OrganizationIdentityProviderExternalIdentitiesArgs = {
   after?: InputMaybe<Scalars["String"]>;
   before?: InputMaybe<Scalars["String"]>;
@@ -13553,10 +14031,14 @@ export type OrganizationMigration = Node & {
 export enum OrganizationMigrationState {
   /** The Octoshift migration has failed. */
   Failed = "FAILED",
+  /** The Octoshift migration has invalid credentials. */
+  FailedValidation = "FAILED_VALIDATION",
   /** The Octoshift migration is in progress. */
   InProgress = "IN_PROGRESS",
   /** The Octoshift migration has not started. */
   NotStarted = "NOT_STARTED",
+  /** The Octoshift migration needs to have its credentials validated. */
+  PendingValidation = "PENDING_VALIDATION",
   /** The Octoshift migration is performing post repository migrations. */
   PostRepoMigration = "POST_REPO_MIGRATION",
   /** The Octoshift migration is performing pre repository migrations. */
@@ -14773,6 +15255,41 @@ export type ProjectV2WorkflowsArgs = {
   orderBy?: InputMaybe<ProjectV2WorkflowOrder>;
 };
 
+/** Possible collaborators for a project. */
+export type ProjectV2Actor = Team | User;
+
+/** The connection type for ProjectV2Actor. */
+export type ProjectV2ActorConnection = {
+  __typename?: "ProjectV2ActorConnection";
+  /** A list of edges. */
+  edges?: Maybe<Array<Maybe<ProjectV2ActorEdge>>>;
+  /** A list of nodes. */
+  nodes?: Maybe<Array<Maybe<ProjectV2Actor>>>;
+  /** Information to aid in pagination. */
+  pageInfo: PageInfo;
+  /** Identifies the total count of items in the connection. */
+  totalCount: Scalars["Int"];
+};
+
+/** An edge in a connection. */
+export type ProjectV2ActorEdge = {
+  __typename?: "ProjectV2ActorEdge";
+  /** A cursor for use in pagination. */
+  cursor: Scalars["String"];
+  /** The item at the end of the edge. */
+  node?: Maybe<ProjectV2Actor>;
+};
+
+/** A collaborator to update on a project. Only one of the userId or teamId should be provided. */
+export type ProjectV2Collaborator = {
+  /** The role to grant the collaborator */
+  role: ProjectV2Roles;
+  /** The ID of the team as a collaborator. */
+  teamId?: InputMaybe<Scalars["ID"]>;
+  /** The ID of the user as a collaborator. */
+  userId?: InputMaybe<Scalars["ID"]>;
+};
+
 /** The connection type for ProjectV2. */
 export type ProjectV2Connection = {
   __typename?: "ProjectV2Connection";
@@ -14971,9 +15488,9 @@ export type ProjectV2Item = Node & {
   creator?: Maybe<Actor>;
   /** Identifies the primary key from the database. */
   databaseId?: Maybe<Scalars["Int"]>;
-  /** A specific field value given a field name */
+  /** The field value of the first project field which matches the 'name' argument that is set on the item. */
   fieldValueByName?: Maybe<ProjectV2ItemFieldValue>;
-  /** List of field values */
+  /** The field values that are set on the item. */
   fieldValues: ProjectV2ItemFieldValueConnection;
   id: Scalars["ID"];
   /** Whether the item is archived. */
@@ -15428,6 +15945,18 @@ export type ProjectV2RecentRecentProjectsArgs = {
   first?: InputMaybe<Scalars["Int"]>;
   last?: InputMaybe<Scalars["Int"]>;
 };
+
+/** The possible roles of a collaborator on a project. */
+export enum ProjectV2Roles {
+  /** The collaborator can view, edit, and maange the settings of the project */
+  Admin = "ADMIN",
+  /** The collaborator has no direct access to the project */
+  None = "NONE",
+  /** The collaborator can view the project */
+  Reader = "READER",
+  /** The collaborator can view and edit the project */
+  Writer = "WRITER",
+}
 
 /** A single select field inside a project. */
 export type ProjectV2SingleSelectField = Node &
@@ -15954,6 +16483,8 @@ export type PullRequest = Assignable &
     maintainerCanModify: Scalars["Boolean"];
     /** The commit that was created when this pull request was merged. */
     mergeCommit?: Maybe<Commit>;
+    /** The merge queue entry of the pull request in the base branch's merge queue */
+    mergeQueueEntry?: Maybe<MergeQueueEntry>;
     /** Whether or not the pull request can be merged based on the existence of merge conflicts. */
     mergeable: MergeableState;
     /** Whether or not the pull request was merged. */
@@ -16424,6 +16955,35 @@ export enum PullRequestOrderField {
   /** Order pull_requests by update time */
   UpdatedAt = "UPDATED_AT",
 }
+
+/** Require all commits be made to a non-target branch and submitted via a pull request before they can be merged. */
+export type PullRequestParameters = {
+  __typename?: "PullRequestParameters";
+  /** New, reviewable commits pushed will dismiss previous pull request review approvals. */
+  dismissStaleReviewsOnPush: Scalars["Boolean"];
+  /** Require an approving review in pull requests that modify files that have a designated code owner. */
+  requireCodeOwnerReview: Scalars["Boolean"];
+  /** Whether the most recent reviewable push must be approved by someone other than the person who pushed it. */
+  requireLastPushApproval: Scalars["Boolean"];
+  /** The number of approving reviews that are required before a pull request can be merged. */
+  requiredApprovingReviewCount: Scalars["Int"];
+  /** All conversations on code must be resolved before a pull request can be merged. */
+  requiredReviewThreadResolution: Scalars["Boolean"];
+};
+
+/** Require all commits be made to a non-target branch and submitted via a pull request before they can be merged. */
+export type PullRequestParametersInput = {
+  /** New, reviewable commits pushed will dismiss previous pull request review approvals. */
+  dismissStaleReviewsOnPush: Scalars["Boolean"];
+  /** Require an approving review in pull requests that modify files that have a designated code owner. */
+  requireCodeOwnerReview: Scalars["Boolean"];
+  /** Whether the most recent reviewable push must be approved by someone other than the person who pushed it. */
+  requireLastPushApproval: Scalars["Boolean"];
+  /** The number of approving reviews that are required before a pull request can be merged. */
+  requiredApprovingReviewCount: Scalars["Int"];
+  /** All conversations on code must be resolved before a pull request can be merged. */
+  requiredReviewThreadResolution: Scalars["Boolean"];
+};
 
 /** A review object for a given pull request. */
 export type PullRequestReview = Comment &
@@ -16980,6 +17540,7 @@ export type PullRequestTimelineItemEdge = {
 
 /** An item in a pull request timeline */
 export type PullRequestTimelineItems =
+  | AddedToMergeQueueEvent
   | AddedToProjectEvent
   | AssignedEvent
   | AutoMergeDisabledEvent
@@ -17021,6 +17582,7 @@ export type PullRequestTimelineItems =
   | PullRequestRevisionMarker
   | ReadyForReviewEvent
   | ReferencedEvent
+  | RemovedFromMergeQueueEvent
   | RemovedFromProjectEvent
   | RenamedTitleEvent
   | ReopenedEvent
@@ -17279,7 +17841,7 @@ export type Query = {
   organization?: Maybe<Organization>;
   /** The client's rate limit information. */
   rateLimit?: Maybe<RateLimit>;
-  /** Hack to workaround https://github.com/facebook/relay/issues/112 re-exposing the root query object */
+  /** Workaround for re-exposing the root query object. (Refer to https://github.com/facebook/relay/issues/112 for more information.) */
   relay: Query;
   /** Lookup a given repository by the owner and repository name. */
   repository?: Maybe<Repository>;
@@ -17746,6 +18308,23 @@ export type RefEdge = {
   cursor: Scalars["String"];
   /** The item at the end of the edge. */
   node?: Maybe<Ref>;
+};
+
+/** Parameters to be used for the ref_name condition */
+export type RefNameConditionTarget = {
+  __typename?: "RefNameConditionTarget";
+  /** Array of ref names or patterns to exclude. The condition will not pass if any of these patterns match. */
+  exclude: Array<Scalars["String"]>;
+  /** Array of ref names or patterns to include. One of these patterns must match for the condition to pass. Also accepts `~DEFAULT_BRANCH` to include the default branch or `~ALL` to include all branches. */
+  include: Array<Scalars["String"]>;
+};
+
+/** Parameters to be used for the ref_name condition */
+export type RefNameConditionTargetInput = {
+  /** Array of ref names or patterns to exclude. The condition will not pass if any of these patterns match. */
+  exclude: Array<Scalars["String"]>;
+  /** Array of ref names or patterns to include. One of these patterns must match for the condition to pass. Also accepts `~DEFAULT_BRANCH` to include the default branch or `~ALL` to include all branches. */
+  include: Array<Scalars["String"]>;
 };
 
 /** Ways in which lists of git refs can be ordered upon return. */
@@ -18262,6 +18841,26 @@ export type RemoveUpvotePayload = {
   clientMutationId?: Maybe<Scalars["String"]>;
   /** The votable subject. */
   subject?: Maybe<Votable>;
+};
+
+/** Represents a 'removed_from_merge_queue' event on a given pull request. */
+export type RemovedFromMergeQueueEvent = Node & {
+  __typename?: "RemovedFromMergeQueueEvent";
+  /** Identifies the actor who performed the event. */
+  actor?: Maybe<Actor>;
+  /** Identifies the before commit SHA for the 'removed_from_merge_queue' event. */
+  beforeCommit?: Maybe<Commit>;
+  /** Identifies the date and time when the object was created. */
+  createdAt: Scalars["DateTime"];
+  /** The user who removed this Pull Request from the merge queue */
+  enqueuer?: Maybe<User>;
+  id: Scalars["ID"];
+  /** The merge queue where this pull request was removed from. */
+  mergeQueue?: Maybe<MergeQueue>;
+  /** PullRequest referenced by event. */
+  pullRequest?: Maybe<PullRequest>;
+  /** The reason this pull request was removed from the queue. */
+  reason?: Maybe<Scalars["String"]>;
 };
 
 /** Represents a 'removed_from_project' event on a given issue or pull request. */
@@ -19457,6 +20056,8 @@ export type Repository = Node &
     __typename?: "Repository";
     /** Whether or not a pull request head branch that is behind its base branch can always be updated even if it is not required to be up to date before merging. */
     allowUpdateBranch: Scalars["Boolean"];
+    /** Identifies the date and time when the repository was archived. */
+    archivedAt?: Maybe<Scalars["DateTime"]>;
     /** A list of users that can be assigned to issues in this repository. */
     assignableUsers: UserConnection;
     /** Whether or not Auto-merge can be enabled on pull requests in this repository. */
@@ -19578,6 +20179,8 @@ export type Repository = Node &
     mergeCommitMessage: MergeCommitMessage;
     /** How the default commit title will be generated when merging a pull request. */
     mergeCommitTitle: MergeCommitTitle;
+    /** The merge queue for a specified branch, otherwise the default branch if not provided. */
+    mergeQueue?: Maybe<MergeQueue>;
     /** Returns a single milestone from the current repository by number. */
     milestone?: Maybe<Milestone>;
     /** A list of milestones associated with the repository. */
@@ -19622,7 +20225,7 @@ export type Repository = Node &
     pullRequestTemplates?: Maybe<Array<PullRequestTemplate>>;
     /** A list of pull requests that have been opened in the repository. */
     pullRequests: PullRequestConnection;
-    /** Identifies when the repository was last pushed to. */
+    /** Identifies the date and time when the repository was last pushed to. */
     pushedAt?: Maybe<Scalars["DateTime"]>;
     /** Whether or not rebase-merging is enabled on this repository. */
     rebaseMergeAllowed: Scalars["Boolean"];
@@ -19640,6 +20243,10 @@ export type Repository = Node &
     repositoryTopics: RepositoryTopicConnection;
     /** The HTTP path for this repository */
     resourcePath: Scalars["URI"];
+    /** Returns a single ruleset from the current repository by ID. */
+    ruleset?: Maybe<RepositoryRuleset>;
+    /** A list of rulesets for this repository. */
+    rulesets?: Maybe<RepositoryRulesetConnection>;
     /** The security policy URL. */
     securityPolicyUrl?: Maybe<Scalars["URI"]>;
     /** A description of the repository, rendered to HTML without any links in it. */
@@ -19879,6 +20486,11 @@ export type RepositoryMentionableUsersArgs = {
 };
 
 /** A repository contains the content for a project. */
+export type RepositoryMergeQueueArgs = {
+  branch?: InputMaybe<Scalars["String"]>;
+};
+
+/** A repository contains the content for a project. */
 export type RepositoryMilestoneArgs = {
   number: Scalars["Int"];
 };
@@ -20021,6 +20633,20 @@ export type RepositoryRepositoryTopicsArgs = {
   after?: InputMaybe<Scalars["String"]>;
   before?: InputMaybe<Scalars["String"]>;
   first?: InputMaybe<Scalars["Int"]>;
+  last?: InputMaybe<Scalars["Int"]>;
+};
+
+/** A repository contains the content for a project. */
+export type RepositoryRulesetArgs = {
+  databaseId: Scalars["Int"];
+};
+
+/** A repository contains the content for a project. */
+export type RepositoryRulesetsArgs = {
+  after?: InputMaybe<Scalars["String"]>;
+  before?: InputMaybe<Scalars["String"]>;
+  first?: InputMaybe<Scalars["Int"]>;
+  includeParents?: InputMaybe<Scalars["Boolean"]>;
   last?: InputMaybe<Scalars["Int"]>;
 };
 
@@ -20227,6 +20853,8 @@ export type RepositoryEdge = {
 
 /** A subset of repository info. */
 export type RepositoryInfo = {
+  /** Identifies the date and time when the repository was archived. */
+  archivedAt?: Maybe<Scalars["DateTime"]>;
   /** Identifies the date and time when the object was created. */
   createdAt: Scalars["DateTime"];
   /** The description of the repository. */
@@ -20273,7 +20901,7 @@ export type RepositoryInfo = {
   openGraphImageUrl: Scalars["URI"];
   /** The User owner of the repository. */
   owner: RepositoryOwner;
-  /** Identifies when the repository was last pushed to. */
+  /** Identifies the date and time when the repository was last pushed to. */
   pushedAt?: Maybe<Scalars["DateTime"]>;
   /** The HTTP path for this repository */
   resourcePath: Scalars["URI"];
@@ -20432,6 +21060,8 @@ export type RepositoryMigration = Migration &
     sourceUrl: Scalars["URI"];
     /** The migration state. */
     state: MigrationState;
+    /** The number of warnings encountered for this migration. To review the warnings, check the [Migration Log](https://docs.github.com/en/migrations/using-github-enterprise-importer/completing-your-migration-with-github-enterprise-importer/accessing-your-migration-logs-for-github-enterprise-importer). */
+    warningsCount: Scalars["Int"];
   };
 
 /** The connection type for RepositoryMigration. */
@@ -20477,6 +21107,27 @@ export enum RepositoryMigrationOrderField {
   /** Order mannequins why when they were created. */
   CreatedAt = "CREATED_AT",
 }
+
+/** Parameters to be used for the repository_name condition */
+export type RepositoryNameConditionTarget = {
+  __typename?: "RepositoryNameConditionTarget";
+  /** Array of repository names or patterns to exclude. The condition will not pass if any of these patterns match. */
+  exclude: Array<Scalars["String"]>;
+  /** Array of repository names or patterns to include. One of these patterns must match for the condition to pass. Also accepts `~ALL` to include all repositories. */
+  include: Array<Scalars["String"]>;
+  /** Target changes that match these patterns will be prevented except by those with bypass permissions. */
+  protected: Scalars["Boolean"];
+};
+
+/** Parameters to be used for the repository_name condition */
+export type RepositoryNameConditionTargetInput = {
+  /** Array of repository names or patterns to exclude. The condition will not pass if any of these patterns match. */
+  exclude: Array<Scalars["String"]>;
+  /** Array of repository names or patterns to include. One of these patterns must match for the condition to pass. Also accepts `~ALL` to include all repositories. */
+  include: Array<Scalars["String"]>;
+  /** Target changes that match these patterns will be prevented except by those with bypass permissions. */
+  protected?: InputMaybe<Scalars["Boolean"]>;
+};
 
 /** Represents a object that belongs to a repository. */
 export type RepositoryNode = {
@@ -20568,6 +21219,204 @@ export enum RepositoryPrivacy {
   Private = "PRIVATE",
   /** Public */
   Public = "PUBLIC",
+}
+
+/** A repository rule. */
+export type RepositoryRule = Node & {
+  __typename?: "RepositoryRule";
+  id: Scalars["ID"];
+  /** The parameters for this rule. */
+  parameters?: Maybe<RuleParameters>;
+  /** The type of rule. */
+  type: RepositoryRuleType;
+};
+
+/** Set of conditions that determine if a ruleset will evaluate */
+export type RepositoryRuleConditions = {
+  __typename?: "RepositoryRuleConditions";
+  /** Configuration for the ref_name condition */
+  refName?: Maybe<RefNameConditionTarget>;
+  /** Configuration for the repository_name condition */
+  repositoryName?: Maybe<RepositoryNameConditionTarget>;
+};
+
+/** Specifies the conditions required for a ruleset to evaluate */
+export type RepositoryRuleConditionsInput = {
+  /** Configuration for the ref_name condition */
+  refName?: InputMaybe<RefNameConditionTargetInput>;
+  /** Configuration for the repository_name condition */
+  repositoryName?: InputMaybe<RepositoryNameConditionTargetInput>;
+};
+
+/** The connection type for RepositoryRule. */
+export type RepositoryRuleConnection = {
+  __typename?: "RepositoryRuleConnection";
+  /** A list of edges. */
+  edges?: Maybe<Array<Maybe<RepositoryRuleEdge>>>;
+  /** A list of nodes. */
+  nodes?: Maybe<Array<Maybe<RepositoryRule>>>;
+  /** Information to aid in pagination. */
+  pageInfo: PageInfo;
+  /** Identifies the total count of items in the connection. */
+  totalCount: Scalars["Int"];
+};
+
+/** An edge in a connection. */
+export type RepositoryRuleEdge = {
+  __typename?: "RepositoryRuleEdge";
+  /** A cursor for use in pagination. */
+  cursor: Scalars["String"];
+  /** The item at the end of the edge. */
+  node?: Maybe<RepositoryRule>;
+};
+
+/** Specifies the attributes for a new or updated rule. */
+export type RepositoryRuleInput = {
+  /** Optional ID of this rule when updating */
+  id?: InputMaybe<Scalars["ID"]>;
+  /** The parameters for the rule. */
+  parameters?: InputMaybe<RuleParametersInput>;
+  /** The type of rule to create. */
+  type: RepositoryRuleType;
+};
+
+/** The rule types supported in rulesets */
+export enum RepositoryRuleType {
+  /** Branch name pattern */
+  BranchNamePattern = "BRANCH_NAME_PATTERN",
+  /** Committer email pattern */
+  CommitterEmailPattern = "COMMITTER_EMAIL_PATTERN",
+  /** Commit author email pattern */
+  CommitAuthorEmailPattern = "COMMIT_AUTHOR_EMAIL_PATTERN",
+  /** Commit message pattern */
+  CommitMessagePattern = "COMMIT_MESSAGE_PATTERN",
+  /** Only allow users with bypass permission to create matching refs. */
+  Creation = "CREATION",
+  /** Only allow users with bypass permissions to delete matching refs. */
+  Deletion = "DELETION",
+  /** Prevent users with push access from force pushing to branches. */
+  NonFastForward = "NON_FAST_FORWARD",
+  /** Require all commits be made to a non-target branch and submitted via a pull request before they can be merged. */
+  PullRequest = "PULL_REQUEST",
+  /** Choose which environments must be successfully deployed to before branches can be merged into a branch that matches this rule. */
+  RequiredDeployments = "REQUIRED_DEPLOYMENTS",
+  /** Prevent merge commits from being pushed to matching branches. */
+  RequiredLinearHistory = "REQUIRED_LINEAR_HISTORY",
+  /** Commits pushed to matching branches must have verified signatures. */
+  RequiredSignatures = "REQUIRED_SIGNATURES",
+  /** Choose which status checks must pass before branches can be merged into a branch that matches this rule. When enabled, commits must first be pushed to another branch, then merged or pushed directly to a branch that matches this rule after status checks have passed. */
+  RequiredStatusChecks = "REQUIRED_STATUS_CHECKS",
+  /** Tag name pattern */
+  TagNamePattern = "TAG_NAME_PATTERN",
+  /** Only allow users with bypass permission to update matching refs. */
+  Update = "UPDATE",
+}
+
+/** A repository ruleset. */
+export type RepositoryRuleset = Node & {
+  __typename?: "RepositoryRuleset";
+  /** The actors that can bypass this ruleset */
+  bypassActors?: Maybe<RepositoryRulesetBypassActorConnection>;
+  /** The bypass mode of this ruleset */
+  bypassMode: RuleBypassMode;
+  /** The set of conditions that must evaluate to true for this ruleset to apply */
+  conditions: RepositoryRuleConditions;
+  /** Identifies the date and time when the object was created. */
+  createdAt: Scalars["DateTime"];
+  /** Identifies the primary key from the database. */
+  databaseId?: Maybe<Scalars["Int"]>;
+  /** The enforcement level of this ruleset */
+  enforcement: RuleEnforcement;
+  id: Scalars["ID"];
+  /** Name of the ruleset. */
+  name: Scalars["String"];
+  /** List of rules. */
+  rules?: Maybe<RepositoryRuleConnection>;
+  /** Source of ruleset. */
+  source: RuleSource;
+  /** Target of the ruleset. */
+  target?: Maybe<RepositoryRulesetTarget>;
+  /** Identifies the date and time when the object was last updated. */
+  updatedAt: Scalars["DateTime"];
+};
+
+/** A repository ruleset. */
+export type RepositoryRulesetBypassActorsArgs = {
+  after?: InputMaybe<Scalars["String"]>;
+  before?: InputMaybe<Scalars["String"]>;
+  first?: InputMaybe<Scalars["Int"]>;
+  last?: InputMaybe<Scalars["Int"]>;
+};
+
+/** A repository ruleset. */
+export type RepositoryRulesetRulesArgs = {
+  after?: InputMaybe<Scalars["String"]>;
+  before?: InputMaybe<Scalars["String"]>;
+  first?: InputMaybe<Scalars["Int"]>;
+  last?: InputMaybe<Scalars["Int"]>;
+  type?: InputMaybe<RepositoryRuleType>;
+};
+
+/** A team or app that has the ability to bypass a rules defined on a ruleset */
+export type RepositoryRulesetBypassActor = Node & {
+  __typename?: "RepositoryRulesetBypassActor";
+  /** The actor that can bypass rules. */
+  actor?: Maybe<BypassActor>;
+  id: Scalars["ID"];
+  /** Identifies the ruleset associated with the allowed actor */
+  repositoryRuleset?: Maybe<RepositoryRuleset>;
+};
+
+/** The connection type for RepositoryRulesetBypassActor. */
+export type RepositoryRulesetBypassActorConnection = {
+  __typename?: "RepositoryRulesetBypassActorConnection";
+  /** A list of edges. */
+  edges?: Maybe<Array<Maybe<RepositoryRulesetBypassActorEdge>>>;
+  /** A list of nodes. */
+  nodes?: Maybe<Array<Maybe<RepositoryRulesetBypassActor>>>;
+  /** Information to aid in pagination. */
+  pageInfo: PageInfo;
+  /** Identifies the total count of items in the connection. */
+  totalCount: Scalars["Int"];
+};
+
+/** An edge in a connection. */
+export type RepositoryRulesetBypassActorEdge = {
+  __typename?: "RepositoryRulesetBypassActorEdge";
+  /** A cursor for use in pagination. */
+  cursor: Scalars["String"];
+  /** The item at the end of the edge. */
+  node?: Maybe<RepositoryRulesetBypassActor>;
+};
+
+/** The connection type for RepositoryRuleset. */
+export type RepositoryRulesetConnection = {
+  __typename?: "RepositoryRulesetConnection";
+  /** A list of edges. */
+  edges?: Maybe<Array<Maybe<RepositoryRulesetEdge>>>;
+  /** A list of nodes. */
+  nodes?: Maybe<Array<Maybe<RepositoryRuleset>>>;
+  /** Information to aid in pagination. */
+  pageInfo: PageInfo;
+  /** Identifies the total count of items in the connection. */
+  totalCount: Scalars["Int"];
+};
+
+/** An edge in a connection. */
+export type RepositoryRulesetEdge = {
+  __typename?: "RepositoryRulesetEdge";
+  /** A cursor for use in pagination. */
+  cursor: Scalars["String"];
+  /** The item at the end of the edge. */
+  node?: Maybe<RepositoryRuleset>;
+};
+
+/** The targets supported for rulesets */
+export enum RepositoryRulesetTarget {
+  /** Branch */
+  Branch = "BRANCH",
+  /** Tag */
+  Tag = "TAG",
 }
 
 /** A repository-topic connects a repository to a topic. */
@@ -20717,6 +21566,8 @@ export type RepositoryVisibilityChangeEnableAuditEntry = AuditEntry &
 export type RepositoryVulnerabilityAlert = Node &
   RepositoryNode & {
     __typename?: "RepositoryVulnerabilityAlert";
+    /** When was the alert auto-dismissed? */
+    autoDismissedAt?: Maybe<Scalars["DateTime"]>;
     /** When was the alert created? */
     createdAt: Scalars["DateTime"];
     /** The associated Dependabot update */
@@ -20731,11 +21582,6 @@ export type RepositoryVulnerabilityAlert = Node &
     dismissedAt?: Maybe<Scalars["DateTime"]>;
     /** The user who dismissed the alert */
     dismisser?: Maybe<User>;
-    /**
-     * The reason the alert was marked as fixed.
-     * @deprecated The `fixReason` field is being removed. You can still use `fixedAt` and `dismissReason`. Removal on 2023-04-01 UTC.
-     */
-    fixReason?: Maybe<Scalars["String"]>;
     /** When was the alert fixed? */
     fixedAt?: Maybe<Scalars["DateTime"]>;
     id: Scalars["ID"];
@@ -20789,6 +21635,8 @@ export type RepositoryVulnerabilityAlertEdge = {
 
 /** The possible states of an alert */
 export enum RepositoryVulnerabilityAlertState {
+  /** An alert that has been automatically closed by Dependabot. */
+  AutoDismissed = "AUTO_DISMISSED",
   /** An alert that has been manually closed by a user. */
   Dismissed = "DISMISSED",
   /** An alert that has been resolved by a code change. */
@@ -20875,6 +21723,19 @@ export type RequirableByPullRequestIsRequiredArgs = {
   pullRequestNumber?: InputMaybe<Scalars["Int"]>;
 };
 
+/** Choose which environments must be successfully deployed to before branches can be merged into a branch that matches this rule. */
+export type RequiredDeploymentsParameters = {
+  __typename?: "RequiredDeploymentsParameters";
+  /** The environments that must be successfully deployed to before branches can be merged. */
+  requiredDeploymentEnvironments: Array<Scalars["String"]>;
+};
+
+/** Choose which environments must be successfully deployed to before branches can be merged into a branch that matches this rule. */
+export type RequiredDeploymentsParametersInput = {
+  /** The environments that must be successfully deployed to before branches can be merged. */
+  requiredDeploymentEnvironments: Array<Scalars["String"]>;
+};
+
 /** Represents a required status check for a protected branch, but not any specific run of that check. */
 export type RequiredStatusCheckDescription = {
   __typename?: "RequiredStatusCheckDescription";
@@ -20890,6 +21751,23 @@ export type RequiredStatusCheckInput = {
   appId?: InputMaybe<Scalars["ID"]>;
   /** Status check context that must pass for commits to be accepted to the matching branch. */
   context: Scalars["String"];
+};
+
+/** Choose which status checks must pass before branches can be merged into a branch that matches this rule. When enabled, commits must first be pushed to another branch, then merged or pushed directly to a branch that matches this rule after status checks have passed. */
+export type RequiredStatusChecksParameters = {
+  __typename?: "RequiredStatusChecksParameters";
+  /** Status checks that are required. */
+  requiredStatusChecks: Array<StatusCheckConfiguration>;
+  /** Whether pull requests targeting a matching branch must be tested with the latest code. This setting will not take effect unless at least one status check is enabled. */
+  strictRequiredStatusChecksPolicy: Scalars["Boolean"];
+};
+
+/** Choose which status checks must pass before branches can be merged into a branch that matches this rule. When enabled, commits must first be pushed to another branch, then merged or pushed directly to a branch that matches this rule after status checks have passed. */
+export type RequiredStatusChecksParametersInput = {
+  /** Status checks that are required. */
+  requiredStatusChecks: Array<StatusCheckConfigurationInput>;
+  /** Whether pull requests targeting a matching branch must be tested with the latest code. This setting will not take effect unless at least one status check is enabled. */
+  strictRequiredStatusChecksPolicy: Scalars["Boolean"];
 };
 
 /** Autogenerated input type of RerequestCheckSuite */
@@ -21193,6 +22071,69 @@ export enum RoleInOrganization {
   /** A user who is unaffiliated with the organization. */
   Unaffiliated = "UNAFFILIATED",
 }
+
+/** The bypass mode for a rule or ruleset. */
+export enum RuleBypassMode {
+  /** Bypassing is disabled */
+  None = "NONE",
+  /** Those with bypass permission at the organization level can bypass */
+  Organization = "ORGANIZATION",
+  /** Those with bypass permission at the organization level can always bypass */
+  OrganizationAlways = "ORGANIZATION_ALWAYS",
+  /** Bypassing is disabled */
+  OrganizationNone = "ORGANIZATION_NONE",
+  /** Those with bypass permission at the organization level can bypass for pull requests only */
+  OrganizationPrsOnly = "ORGANIZATION_PRS_ONLY",
+  /** Those with bypass permission at the repository level can bypass */
+  Repository = "REPOSITORY",
+}
+
+/** The level of enforcement for a rule or ruleset. */
+export enum RuleEnforcement {
+  /** Rules will be enforced */
+  Active = "ACTIVE",
+  /** Do not evaluate or enforce rules */
+  Disabled = "DISABLED",
+  /** Allow admins to test rules before enforcing them. Admins can view insights on the Rule Insights page (`evaluate` is only available with GitHub Enterprise). */
+  Evaluate = "EVALUATE",
+}
+
+/** Types which can be parameters for `RepositoryRule` objects. */
+export type RuleParameters =
+  | BranchNamePatternParameters
+  | CommitAuthorEmailPatternParameters
+  | CommitMessagePatternParameters
+  | CommitterEmailPatternParameters
+  | PullRequestParameters
+  | RequiredDeploymentsParameters
+  | RequiredStatusChecksParameters
+  | TagNamePatternParameters
+  | UpdateParameters;
+
+/** Specifies the parameters for a `RepositoryRule` object. Only one of the fields should be specified. */
+export type RuleParametersInput = {
+  /** Parameters used for the `branch_name_pattern` rule type */
+  branchNamePattern?: InputMaybe<BranchNamePatternParametersInput>;
+  /** Parameters used for the `commit_author_email_pattern` rule type */
+  commitAuthorEmailPattern?: InputMaybe<CommitAuthorEmailPatternParametersInput>;
+  /** Parameters used for the `commit_message_pattern` rule type */
+  commitMessagePattern?: InputMaybe<CommitMessagePatternParametersInput>;
+  /** Parameters used for the `committer_email_pattern` rule type */
+  committerEmailPattern?: InputMaybe<CommitterEmailPatternParametersInput>;
+  /** Parameters used for the `pull_request` rule type */
+  pullRequest?: InputMaybe<PullRequestParametersInput>;
+  /** Parameters used for the `required_deployments` rule type */
+  requiredDeployments?: InputMaybe<RequiredDeploymentsParametersInput>;
+  /** Parameters used for the `required_status_checks` rule type */
+  requiredStatusChecks?: InputMaybe<RequiredStatusChecksParametersInput>;
+  /** Parameters used for the `tag_name_pattern` rule type */
+  tagNamePattern?: InputMaybe<TagNamePatternParametersInput>;
+  /** Parameters used for the `update` rule type */
+  update?: InputMaybe<UpdateParametersInput>;
+};
+
+/** Types which can have `RepositoryRule` objects. */
+export type RuleSource = Organization | Repository;
 
 /** The possible digest algorithms used to sign SAML requests for an identity provider. */
 export enum SamlDigestAlgorithm {
@@ -21968,6 +22909,8 @@ export type SponsorsActivity = Node & {
   sponsorsTier?: Maybe<SponsorsTier>;
   /** The timestamp of this event. */
   timestamp?: Maybe<Scalars["DateTime"]>;
+  /** Was this sponsorship made alongside other sponsorships at the same time from the same sponsor? */
+  viaBulkSponsorship: Scalars["Boolean"];
 };
 
 /** The possible actions that GitHub Sponsors activities can represent. */
@@ -23089,6 +24032,23 @@ export type StatusContextArgs = {
   name: Scalars["String"];
 };
 
+/** Required status check */
+export type StatusCheckConfiguration = {
+  __typename?: "StatusCheckConfiguration";
+  /** The status check context name that must be present on the commit. */
+  context: Scalars["String"];
+  /** The optional integration ID that this status check must originate from. */
+  integrationId?: Maybe<Scalars["Int"]>;
+};
+
+/** Required status check */
+export type StatusCheckConfigurationInput = {
+  /** The status check context name that must be present on the commit. */
+  context: Scalars["String"];
+  /** The optional integration ID that this status check must originate from. */
+  integrationId?: InputMaybe<Scalars["Int"]>;
+};
+
 /** Represents the rollup for both the check runs and status for a commit. */
 export type StatusCheckRollup = Node & {
   __typename?: "StatusCheckRollup";
@@ -23349,6 +24309,31 @@ export type Tag = GitObject &
     target: GitObject;
   };
 
+/** Parameters to be used for the tag_name_pattern rule */
+export type TagNamePatternParameters = {
+  __typename?: "TagNamePatternParameters";
+  /** How this rule will appear to users. */
+  name?: Maybe<Scalars["String"]>;
+  /** If true, the rule will fail if the pattern matches. */
+  negate: Scalars["Boolean"];
+  /** The operator to use for matching. */
+  operator: Scalars["String"];
+  /** The pattern to match with. */
+  pattern: Scalars["String"];
+};
+
+/** Parameters to be used for the tag_name_pattern rule */
+export type TagNamePatternParametersInput = {
+  /** How this rule will appear to users. */
+  name?: InputMaybe<Scalars["String"]>;
+  /** If true, the rule will fail if the pattern matches. */
+  negate?: InputMaybe<Scalars["Boolean"]>;
+  /** The operator to use for matching. */
+  operator: Scalars["String"];
+  /** The pattern to match with. */
+  pattern: Scalars["String"];
+};
+
 /** A team of users in an organization. */
 export type Team = MemberStatusable &
   Node &
@@ -23397,6 +24382,8 @@ export type Team = MemberStatusable &
     newTeamResourcePath: Scalars["URI"];
     /** The HTTP URL creating a new team */
     newTeamUrl: Scalars["URI"];
+    /** The notification setting that the team has set. */
+    notificationSetting: TeamNotificationSetting;
     /** The organization that owns this team. */
     organization: Organization;
     /** The parent team of the team. */
@@ -24069,6 +25056,14 @@ export enum TeamMembershipType {
   ChildTeam = "CHILD_TEAM",
   /** Includes only immediate members of the team. */
   Immediate = "IMMEDIATE",
+}
+
+/** The possible team notification values. */
+export enum TeamNotificationSetting {
+  /** No one will receive notifications. */
+  NotificationsDisabled = "NOTIFICATIONS_DISABLED",
+  /** Everyone will receive notifications when the team is @mentioned. */
+  NotificationsEnabled = "NOTIFICATIONS_ENABLED",
 }
 
 /** Ways in which team connections can be ordered. */
@@ -24748,6 +25743,23 @@ export type UnmarkIssueAsDuplicatePayload = {
   clientMutationId?: Maybe<Scalars["String"]>;
   /** The issue or pull request that was marked as a duplicate. */
   duplicate?: Maybe<IssueOrPullRequest>;
+};
+
+/** Autogenerated input type of UnmarkProjectV2AsTemplate */
+export type UnmarkProjectV2AsTemplateInput = {
+  /** A unique identifier for the client performing the mutation. */
+  clientMutationId?: InputMaybe<Scalars["String"]>;
+  /** The ID of the Project to unmark as a template. */
+  projectId: Scalars["ID"];
+};
+
+/** Autogenerated return type of UnmarkProjectV2AsTemplate */
+export type UnmarkProjectV2AsTemplatePayload = {
+  __typename?: "UnmarkProjectV2AsTemplatePayload";
+  /** A unique identifier for the client performing the mutation. */
+  clientMutationId?: Maybe<Scalars["String"]>;
+  /** The project. */
+  projectV2?: Maybe<ProjectV2>;
 };
 
 /** Represents an 'unmarked_as_duplicate' event on a given issue or pull request. */
@@ -25588,6 +26600,19 @@ export type UpdateOrganizationWebCommitSignoffSettingPayload = {
   organization?: Maybe<Organization>;
 };
 
+/** Only allow users with bypass permission to update matching refs. */
+export type UpdateParameters = {
+  __typename?: "UpdateParameters";
+  /** Branch can pull changes from its upstream repository */
+  updateAllowsFetchAndMerge: Scalars["Boolean"];
+};
+
+/** Only allow users with bypass permission to update matching refs. */
+export type UpdateParametersInput = {
+  /** Branch can pull changes from its upstream repository */
+  updateAllowsFetchAndMerge: Scalars["Boolean"];
+};
+
 /** Autogenerated input type of UpdateProjectCard */
 export type UpdateProjectCardInput = {
   /** A unique identifier for the client performing the mutation. */
@@ -25651,6 +26676,33 @@ export type UpdateProjectPayload = {
   clientMutationId?: Maybe<Scalars["String"]>;
   /** The updated project. */
   project?: Maybe<Project>;
+};
+
+/** Autogenerated input type of UpdateProjectV2Collaborators */
+export type UpdateProjectV2CollaboratorsInput = {
+  /** A unique identifier for the client performing the mutation. */
+  clientMutationId?: InputMaybe<Scalars["String"]>;
+  /** The collaborators to update. */
+  collaborators: Array<ProjectV2Collaborator>;
+  /** The ID of the project to update the collaborators for. */
+  projectId: Scalars["ID"];
+};
+
+/** Autogenerated return type of UpdateProjectV2Collaborators */
+export type UpdateProjectV2CollaboratorsPayload = {
+  __typename?: "UpdateProjectV2CollaboratorsPayload";
+  /** A unique identifier for the client performing the mutation. */
+  clientMutationId?: Maybe<Scalars["String"]>;
+  /** The collaborators granted a role */
+  collaborators?: Maybe<ProjectV2ActorConnection>;
+};
+
+/** Autogenerated return type of UpdateProjectV2Collaborators */
+export type UpdateProjectV2CollaboratorsPayloadCollaboratorsArgs = {
+  after?: InputMaybe<Scalars["String"]>;
+  before?: InputMaybe<Scalars["String"]>;
+  first?: InputMaybe<Scalars["Int"]>;
+  last?: InputMaybe<Scalars["Int"]>;
 };
 
 /** Autogenerated input type of UpdateProjectV2DraftIssue */
@@ -25907,6 +26959,37 @@ export type UpdateRepositoryPayload = {
   repository?: Maybe<Repository>;
 };
 
+/** Autogenerated input type of UpdateRepositoryRuleset */
+export type UpdateRepositoryRulesetInput = {
+  /** A list of Team or App IDs allowed to bypass rules in this ruleset. */
+  bypassActorIds?: InputMaybe<Array<Scalars["ID"]>>;
+  /** The bypass mode for this ruleset */
+  bypassMode?: InputMaybe<RuleBypassMode>;
+  /** A unique identifier for the client performing the mutation. */
+  clientMutationId?: InputMaybe<Scalars["String"]>;
+  /** The list of conditions for this ruleset */
+  conditions?: InputMaybe<RepositoryRuleConditionsInput>;
+  /** The enforcement level for this ruleset */
+  enforcement?: InputMaybe<RuleEnforcement>;
+  /** The name of the ruleset. */
+  name?: InputMaybe<Scalars["String"]>;
+  /** The global relay id of the repository ruleset to be updated. */
+  repositoryRulesetId: Scalars["ID"];
+  /** The list of rules for this ruleset */
+  rules?: InputMaybe<Array<RepositoryRuleInput>>;
+  /** The target of the ruleset. */
+  target?: InputMaybe<RepositoryRulesetTarget>;
+};
+
+/** Autogenerated return type of UpdateRepositoryRuleset */
+export type UpdateRepositoryRulesetPayload = {
+  __typename?: "UpdateRepositoryRulesetPayload";
+  /** A unique identifier for the client performing the mutation. */
+  clientMutationId?: Maybe<Scalars["String"]>;
+  /** The newly created Ruleset. */
+  ruleset?: Maybe<RepositoryRuleset>;
+};
+
 /** Autogenerated input type of UpdateRepositoryWebCommitSignoffSetting */
 export type UpdateRepositoryWebCommitSignoffSettingInput = {
   /** A unique identifier for the client performing the mutation. */
@@ -26129,7 +27212,7 @@ export type User = Actor &
     isDeveloperProgramMember: Scalars["Boolean"];
     /** Whether or not this user is a GitHub employee. */
     isEmployee: Scalars["Boolean"];
-    /** Whether or not this user is following the viewer. Inverse of viewer_is_following */
+    /** Whether or not this user is following the viewer. Inverse of viewerIsFollowing */
     isFollowingViewer: Scalars["Boolean"];
     /** Whether or not this user is a member of the GitHub Stars Program. */
     isGitHubStar: Scalars["Boolean"];
@@ -26250,7 +27333,7 @@ export type User = Actor &
     viewerCanFollow: Scalars["Boolean"];
     /** Whether or not the viewer is able to sponsor this user/organization. */
     viewerCanSponsor: Scalars["Boolean"];
-    /** Whether or not this user is followed by the viewer. Inverse of is_following_viewer. */
+    /** Whether or not this user is followed by the viewer. Inverse of isFollowingViewer. */
     viewerIsFollowing: Scalars["Boolean"];
     /** True if the viewer is sponsoring this user/organization. */
     viewerIsSponsoring: Scalars["Boolean"];
@@ -26932,22 +28015,27 @@ export type Votable = {
 };
 
 /** A workflow contains meta information about an Actions workflow file. */
-export type Workflow = Node & {
-  __typename?: "Workflow";
-  /** Identifies the date and time when the object was created. */
-  createdAt: Scalars["DateTime"];
-  /** Identifies the primary key from the database. */
-  databaseId?: Maybe<Scalars["Int"]>;
-  id: Scalars["ID"];
-  /** The name of the workflow. */
-  name: Scalars["String"];
-  /** The runs of the workflow. */
-  runs: WorkflowRunConnection;
-  /** The state of the workflow. */
-  state: WorkflowState;
-  /** Identifies the date and time when the object was last updated. */
-  updatedAt: Scalars["DateTime"];
-};
+export type Workflow = Node &
+  UniformResourceLocatable & {
+    __typename?: "Workflow";
+    /** Identifies the date and time when the object was created. */
+    createdAt: Scalars["DateTime"];
+    /** Identifies the primary key from the database. */
+    databaseId?: Maybe<Scalars["Int"]>;
+    id: Scalars["ID"];
+    /** The name of the workflow. */
+    name: Scalars["String"];
+    /** The HTTP path for this workflow */
+    resourcePath: Scalars["URI"];
+    /** The runs of the workflow. */
+    runs: WorkflowRunConnection;
+    /** The state of the workflow. */
+    state: WorkflowState;
+    /** Identifies the date and time when the object was last updated. */
+    updatedAt: Scalars["DateTime"];
+    /** The HTTP URL for this workflow */
+    url: Scalars["URI"];
+  };
 
 /** A workflow contains meta information about an Actions workflow file. */
 export type WorkflowRunsArgs = {
@@ -26972,6 +28060,8 @@ export type WorkflowRun = Node &
     deploymentReviews: DeploymentReviewConnection;
     /** The event that triggered the workflow run */
     event: Scalars["String"];
+    /** The workflow file */
+    file?: Maybe<WorkflowRunFile>;
     id: Scalars["ID"];
     /** The pending deployment requests of all check runs in this workflow run */
     pendingDeploymentRequests: DeploymentRequestConnection;
@@ -27024,6 +28114,29 @@ export type WorkflowRunEdge = {
   /** The item at the end of the edge. */
   node?: Maybe<WorkflowRun>;
 };
+
+/** An executed workflow file for a workflow run. */
+export type WorkflowRunFile = Node &
+  UniformResourceLocatable & {
+    __typename?: "WorkflowRunFile";
+    id: Scalars["ID"];
+    /** The path of the workflow file relative to its repository. */
+    path: Scalars["String"];
+    /** The direct link to the file in the repository which stores the workflow file. */
+    repositoryFileUrl: Scalars["URI"];
+    /** The repository name and owner which stores the workflow file. */
+    repositoryName: Scalars["URI"];
+    /** The HTTP path for this workflow run file */
+    resourcePath: Scalars["URI"];
+    /** The parent workflow run execution for this file. */
+    run: WorkflowRun;
+    /** The HTTP URL for this workflow run file */
+    url: Scalars["URI"];
+    /** If the viewer has permissions to push to the repository which stores the workflow. */
+    viewerCanPushRepository: Scalars["Boolean"];
+    /** If the viewer has permissions to read the repository which stores the workflow. */
+    viewerCanReadRepository: Scalars["Boolean"];
+  };
 
 /** Ways in which lists of workflow runs can be ordered upon return. */
 export type WorkflowRunOrder = {
@@ -27803,6 +28916,7 @@ export type IssueDetailsQueryVariables = Exact<{
 export type IssueDetailsQuery = {
   __typename?: "Query";
   node?:
+    | { __typename?: "AddedToMergeQueueEvent" }
     | { __typename?: "AddedToProjectEvent" }
     | { __typename?: "App" }
     | { __typename?: "AssignedEvent" }
@@ -27959,6 +29073,8 @@ export type IssueDetailsQuery = {
     | { __typename?: "MembersCanDeleteReposDisableAuditEntry" }
     | { __typename?: "MembersCanDeleteReposEnableAuditEntry" }
     | { __typename?: "MentionedEvent" }
+    | { __typename?: "MergeQueue" }
+    | { __typename?: "MergeQueueEntry" }
     | { __typename?: "MergedEvent" }
     | { __typename?: "MigrationSource" }
     | { __typename?: "Milestone" }
@@ -28036,6 +29152,7 @@ export type IssueDetailsQuery = {
     | { __typename?: "ReferencedEvent" }
     | { __typename?: "Release" }
     | { __typename?: "ReleaseAsset" }
+    | { __typename?: "RemovedFromMergeQueueEvent" }
     | { __typename?: "RemovedFromProjectEvent" }
     | { __typename?: "RenamedTitleEvent" }
     | { __typename?: "ReopenedEvent" }
@@ -28061,6 +29178,9 @@ export type IssueDetailsQuery = {
     | { __typename?: "Repository" }
     | { __typename?: "RepositoryInvitation" }
     | { __typename?: "RepositoryMigration" }
+    | { __typename?: "RepositoryRule" }
+    | { __typename?: "RepositoryRuleset" }
+    | { __typename?: "RepositoryRulesetBypassActor" }
     | { __typename?: "RepositoryTopic" }
     | { __typename?: "RepositoryVisibilityChangeDisableAuditEntry" }
     | { __typename?: "RepositoryVisibilityChangeEnableAuditEntry" }
@@ -28107,6 +29227,7 @@ export type IssueDetailsQuery = {
     | { __typename?: "VerifiableDomain" }
     | { __typename?: "Workflow" }
     | { __typename?: "WorkflowRun" }
+    | { __typename?: "WorkflowRunFile" }
     | null;
 };
 
@@ -29747,6 +30868,7 @@ export type PullRequestDetailsQueryVariables = Exact<{
 export type PullRequestDetailsQuery = {
   __typename?: "Query";
   node?:
+    | { __typename?: "AddedToMergeQueueEvent" }
     | { __typename?: "AddedToProjectEvent" }
     | { __typename?: "App" }
     | { __typename?: "AssignedEvent" }
@@ -29826,6 +30948,8 @@ export type PullRequestDetailsQuery = {
     | { __typename?: "MembersCanDeleteReposDisableAuditEntry" }
     | { __typename?: "MembersCanDeleteReposEnableAuditEntry" }
     | { __typename?: "MentionedEvent" }
+    | { __typename?: "MergeQueue" }
+    | { __typename?: "MergeQueueEntry" }
     | { __typename?: "MergedEvent" }
     | { __typename?: "MigrationSource" }
     | { __typename?: "Milestone" }
@@ -30021,6 +31145,7 @@ export type PullRequestDetailsQuery = {
     | { __typename?: "ReferencedEvent" }
     | { __typename?: "Release" }
     | { __typename?: "ReleaseAsset" }
+    | { __typename?: "RemovedFromMergeQueueEvent" }
     | { __typename?: "RemovedFromProjectEvent" }
     | { __typename?: "RenamedTitleEvent" }
     | { __typename?: "ReopenedEvent" }
@@ -30046,6 +31171,9 @@ export type PullRequestDetailsQuery = {
     | { __typename?: "Repository" }
     | { __typename?: "RepositoryInvitation" }
     | { __typename?: "RepositoryMigration" }
+    | { __typename?: "RepositoryRule" }
+    | { __typename?: "RepositoryRuleset" }
+    | { __typename?: "RepositoryRulesetBypassActor" }
     | { __typename?: "RepositoryTopic" }
     | { __typename?: "RepositoryVisibilityChangeDisableAuditEntry" }
     | { __typename?: "RepositoryVisibilityChangeEnableAuditEntry" }
@@ -30092,6 +31220,7 @@ export type PullRequestDetailsQuery = {
     | { __typename?: "VerifiableDomain" }
     | { __typename?: "Workflow" }
     | { __typename?: "WorkflowRun" }
+    | { __typename?: "WorkflowRunFile" }
     | null;
 };
 
@@ -30184,6 +31313,7 @@ export type PullRequestCommitsQueryVariables = Exact<{
 export type PullRequestCommitsQuery = {
   __typename?: "Query";
   node?:
+    | { __typename?: "AddedToMergeQueueEvent" }
     | { __typename?: "AddedToProjectEvent" }
     | { __typename?: "App" }
     | { __typename?: "AssignedEvent" }
@@ -30263,6 +31393,8 @@ export type PullRequestCommitsQuery = {
     | { __typename?: "MembersCanDeleteReposDisableAuditEntry" }
     | { __typename?: "MembersCanDeleteReposEnableAuditEntry" }
     | { __typename?: "MentionedEvent" }
+    | { __typename?: "MergeQueue" }
+    | { __typename?: "MergeQueueEntry" }
     | { __typename?: "MergedEvent" }
     | { __typename?: "MigrationSource" }
     | { __typename?: "Milestone" }
@@ -30361,6 +31493,7 @@ export type PullRequestCommitsQuery = {
     | { __typename?: "ReferencedEvent" }
     | { __typename?: "Release" }
     | { __typename?: "ReleaseAsset" }
+    | { __typename?: "RemovedFromMergeQueueEvent" }
     | { __typename?: "RemovedFromProjectEvent" }
     | { __typename?: "RenamedTitleEvent" }
     | { __typename?: "ReopenedEvent" }
@@ -30386,6 +31519,9 @@ export type PullRequestCommitsQuery = {
     | { __typename?: "Repository" }
     | { __typename?: "RepositoryInvitation" }
     | { __typename?: "RepositoryMigration" }
+    | { __typename?: "RepositoryRule" }
+    | { __typename?: "RepositoryRuleset" }
+    | { __typename?: "RepositoryRulesetBypassActor" }
     | { __typename?: "RepositoryTopic" }
     | { __typename?: "RepositoryVisibilityChangeDisableAuditEntry" }
     | { __typename?: "RepositoryVisibilityChangeEnableAuditEntry" }
@@ -30432,6 +31568,7 @@ export type PullRequestCommitsQuery = {
     | { __typename?: "VerifiableDomain" }
     | { __typename?: "Workflow" }
     | { __typename?: "WorkflowRun" }
+    | { __typename?: "WorkflowRunFile" }
     | null;
 };
 

@@ -1,12 +1,12 @@
-import APIData from "./algolia/apiData";
-import type { IAPIData } from "./algolia/types";
+import APIData from "./data/apis";
+import type { API } from "./types";
 import { SearchDocumentation } from "./components";
 
 import { ActionPanel, List, Action, useNavigation, Icon } from "@raycast/api";
 import { useEffect, useState } from "react";
 
 export default function ChooseSearchDocumentation() {
-  const [currentAPIData, setCurrentAPIData] = useState<IAPIData[]>(APIData);
+  const [currentAPIData, setCurrentAPIData] = useState<API[]>(APIData);
   const { push } = useNavigation();
 
   useEffect(() => {
@@ -24,19 +24,19 @@ export default function ChooseSearchDocumentation() {
           : setCurrentAPIData(APIData)
       }
     >
-      {currentAPIData?.map((API: IAPIData) => (
+      {currentAPIData?.map((API: API) => (
         <List.Item
           icon={API.icon}
           key={`${API.homepage}-${API.indexName}`}
           title={API.name}
-          subtitle={API.lang}
+          subtitle={"lang" in API ? API.lang : ""}
           actions={
             <ActionPanel>
               <Action
-                icon={Icon.ArrowRight}
                 title="Choose"
+                icon={Icon.ArrowRight}
                 onAction={() => {
-                  push(<SearchDocumentation docsName={API.name} lang={API.lang} />);
+                  push(<SearchDocumentation id={API.id} />);
                 }}
               />
               <Action.OpenInBrowser url={API.homepage} title="Open in Browser" />

@@ -1,5 +1,9 @@
 # Linear Changelog
 
+## [Add "Break Issue Into Sub-Issues" action] - 2023-05-09
+
+Thanks to AI, the Linear extension has a new issue action: `Break Issue Into Sub-Issues`. It takes the issue title and description as context and generates actionable sub-issues that you can choose to create or not.
+
 ## [Set title field as default in Create Issue command] - 2023-05-02
 
 Previously, the `Team` field was the default one when the user had more than one team in the `Create Issue` command. Since users often add issues to the same team, let's make the `Title` field the default.

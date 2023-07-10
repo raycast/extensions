@@ -1,6 +1,6 @@
 import { showToast, Toast } from "@raycast/api";
 import { Project } from "./project";
-import { Task } from "./task";
+import { Section, Task } from "./task";
 import { runAppleScript } from "run-applescript";
 import { convertMacTime2JSTime, getSectionNameByDate } from "../utils/date";
 
@@ -56,7 +56,7 @@ const errorHandler = (err: unknown) => {
   showToast(Toast.Style.Failure, "Something went wrong");
 };
 
-const getDateListData = async (command: string) => {
+const getDateListData = async (command: string): Promise<Section[]> => {
   const installed = await checkAppInstalled();
   if (!installed) return [];
   try {
@@ -76,7 +76,7 @@ const getDateListData = async (command: string) => {
       }
       return {
         id: `date-${section.date}`,
-        name: getSectionNameByDate(new Date(convertMacTime2JSTime(section.date))),
+        name: section.date === 0 ? "No Date" : getSectionNameByDate(new Date(convertMacTime2JSTime(section.date))),
         children: section.tasks.map(taskObject2Task),
       };
     });
@@ -126,6 +126,16 @@ export const getSearchByKeyword = async (keyword: string) => {
     errorHandler(e);
     return [];
   }
+};
+
+export const getTasksByProjectId = async (id: string) => {
+  return getDateListData(`
+    set result to ""
+    tell application "TickTick"
+      tasks in "${id}"    
+    end tell
+    return result
+  `);
 };
 
 export const getProjects = async () => {

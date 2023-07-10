@@ -8,7 +8,7 @@
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
  */
 
-import { DetectedLangModel } from "../../detectLanauge/types";
+import { DetectedLangModel } from "../../detectLanguage/types";
 
 export interface YoudaoDictionaryFormatResult {
   queryWordInfo: QueryWordInfo;

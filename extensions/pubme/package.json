@@ -16,6 +16,56 @@
   ],
   "preferences": [
     {
+      "name": "refreshInterval",
+      "title": "Refresh Interval",
+      "description": "Specify how often you want to reload the home page.",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "always",
+          "value": "0"
+        },
+        {
+          "title": "every 1 minute",
+          "value": "60000"
+        },
+        {
+          "title": "every 5 minutes",
+          "value": "300000"
+        },
+        {
+          "title": "every 10 minutes",
+          "value": "600000"
+        },
+        {
+          "title": "every 15 minutes",
+          "value": "900000"
+        },
+        {
+          "title": "every 30 minutes",
+          "value": "1800000"
+        },
+        {
+          "title": "hourly",
+          "value": "3600000"
+        },
+        {
+          "title": "every 3 hours",
+          "value": "10800000"
+        },
+        {
+          "title": "every 12 hours",
+          "value": "43200000"
+        },
+        {
+          "title": "daily",
+          "value": "86400000"
+        }
+      ],
+      "default": "86400000",
+      "required": false
+    },
+    {
       "name": "retmax",
       "type": "textfield",
       "default": "20",

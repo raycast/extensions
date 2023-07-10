@@ -1,5 +1,18 @@
 # Changelog
 
+## [Fix & Feature] - May, 18 2023
+
+- Feature: Custom API Endpoint
+- Fix: 404 error code while Use Azure is enabled
+
+## [Fix & Feature] - May, 2023
+
+- Feature: Azure OpenAI ([@sykuang](https://github.com/abielzulio/chatgpt-raycast/pull/36))
+- Fix: More verbose on handling the `429` error code
+- Fix: `API` -> `APIKey` ([@k8scat](https://github.com/abielzulio/chatgpt-raycast/pull/32))
+- Fix: Refine docs
+- Fix: JavaScript heap out of memory ([@thanhlongb](https://github.com/abielzulio/extensions/pull/1))
+
 ## [Fix & Feature] - April, 9 2023
 
 - Feature: Pause history

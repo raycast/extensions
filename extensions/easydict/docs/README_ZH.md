@@ -25,6 +25,7 @@
 - [x] 自动识别输入语言，自动查询目标偏好语言。
 - [x] 提供丰富的单词查询信息，包括基本翻译，包含该单词的考试类型，发音，多种词性和释义，形式和时态，网络翻译和网络短语。
 - [x] 支持划词查询，默认启用。配合快捷键食用效果更佳。
+- [x] 支持 OCR 截图翻译。
 - [x] 支持打开 [欧路词典](https://www.eudic.net/v4/en/app/eudic) 快速查词（若电脑上有安装）。
 - [x] 支持自动播放单词发音。使用 `Cmd + S` 手动播放单词发音。
 - [x] 支持有道文本合成语音（TTS）。
@@ -405,8 +406,7 @@ Linguee 默认支持系统代理。
 
 ![A2ECFJ-1664270926](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/A2ECFJ-1664270926.png)
 
-## 感谢
+## 致谢
 
-这个项目的灵感来自 [raycast-Parrot](https://github.com/Haojen/raycast-Parrot) 和 [Bob](https://github.com/ripperhe/Bob)，且初始版本是以 [raycast-Parrot](https://github.com/Haojen/raycast-Parrot) 为基础而开发的。`Easydict` 改进了许多 UI 显示，添加了更实用的功能，删除了一些复杂或不适当的操作，并对原始项目进行了大量优化和改进。
-
-最后，欢迎所有对这个项目感兴趣的人来提 issue 和 PR，该项目目前还处在快速发展阶段，任何实用的建议或是有趣的想法都是可以的，不保证一定会接受，但一定会考虑。另外，如果是提交 PR 的话，建议可以先开一个 issue 简单描述一下工作内容，避免 PR 与我目前正在开发的特性冲突，感谢。
+- 这个项目的灵感来自 [raycast-Parrot](https://github.com/Haojen/raycast-Parrot) 和 [Bob](https://github.com/ripperhe/Bob)，且初始版本是以 [raycast-Parrot](https://github.com/Haojen/raycast-Parrot) 为基础而开发的。`Easydict` 改进了许多 UI 显示，添加了更实用的功能，删除了一些复杂或不适当的操作，并对原始项目进行了大量优化和改进。
+- OCR 截图翻译功能参考了 [ScreenOCR](https://github.com/raycast/extensions/tree/d0cb79de95d41891d8ca0568a60db67aefa5806b/extensions/screenocr/)，感谢 [aidevjoe](https://github.com/aidevjoe) 的 PR [feat: add OCR recognition](https://github.com/tisfeng/Raycast-Easydict/pull/41)。

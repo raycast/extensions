@@ -1,18 +1,37 @@
-export const ERROR_TYPES = {
-  CLINotFound: "CLINotFound",
-  FailedToLoadVaultItemsError: "FailedToLoadVaultItemsError",
-} as const;
-
-export class CLINotFoundError extends Error {
+export class ManuallyThrownError extends Error {
   constructor(message: string) {
     super(message);
-    this.name = ERROR_TYPES.CLINotFound;
   }
 }
 
-export class FailedToLoadVaultItemsError extends Error {
+export class DisplayableError extends ManuallyThrownError {
+  constructor(message: string) {
+    super(message);
+  }
+}
+
+export class CLINotFoundError extends DisplayableError {
+  constructor(message: string) {
+    super(message ?? "Bitwarden CLI not found");
+    this.name = "CLINotFoundError";
+  }
+}
+
+export class FailedToLoadVaultItemsError extends ManuallyThrownError {
   constructor(message?: string) {
     super(message ?? "Failed to load vault items");
-    this.name = ERROR_TYPES.CLINotFound;
+    this.name = "FailedToLoadVaultItemsError";
   }
+}
+
+export class VaultIsLockedError extends DisplayableError {
+  constructor(message?: string) {
+    super(message ?? "Vault is locked");
+    this.name = "VaultIsLockedError";
+  }
+}
+
+export function getDisplayableErrorMessage(error: any) {
+  if (error instanceof DisplayableError) return error.message;
+  return undefined;
 }

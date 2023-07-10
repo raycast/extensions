@@ -6,7 +6,8 @@
   "icon": "docsearch.png",
   "author": "Fatpandac",
   "keywords": [
-    "algolia"
+    "algolia",
+    "meilisearch"
   ],
   "categories": [
     "Documentation"
@@ -22,6 +23,21 @@
       "title": "Search Documentation",
       "subtitle": "DocSearch",
       "description": "Search documentation",
+      "mode": "view"
+    },
+    {
+      "name": "flet",
+      "icon": "logo/flet.png",
+      "title": "Flet",
+      "subtitle": "DocSearch",
+      "description": "Search flet documentation",
+      "arguments": [
+        {
+          "name": "search",
+          "placeholder": "Search...",
+          "type": "text"
+        }
+      ],
       "mode": "view"
     },
     {
@@ -267,7 +283,7 @@
     {
       "name": "tailwindcss3",
       "icon": "logo/tailwindcss.png",
-      "title": "TailwindCSS v3",
+      "title": "TailwindCSS V3",
       "subtitle": "DocSearch",
       "description": "Search TailwindCss documentation",
       "arguments": [
@@ -402,7 +418,7 @@
     {
       "name": "vuepress1",
       "icon": "logo/vuepress.png",
-      "title": "Vuepress v1",
+      "title": "Vuepress V1",
       "subtitle": "DocSearch",
       "description": "Search Vuepress v1 documentation",
       "arguments": [
@@ -417,7 +433,7 @@
     {
       "name": "vuepress2",
       "icon": "logo/vuepress.png",
-      "title": "Vuepress v2",
+      "title": "Vuepress V2",
       "subtitle": "DocSearch",
       "description": "Search Vuepress v2 documentation",
       "arguments": [
@@ -462,7 +478,7 @@
     {
       "name": "pnpm",
       "icon": "logo/pnpm.png",
-      "title": "pnpm",
+      "title": "Pnpm",
       "subtitle": "DocSearch",
       "description": "Search pnpm documentation",
       "arguments": [
@@ -477,7 +493,7 @@
     {
       "name": "pnpm_zh-Hans",
       "icon": "logo/pnpm.png",
-      "title": "pnpm(zh-Hans)",
+      "title": "Pnpm(zh-Hans)",
       "subtitle": "DocSearch",
       "description": "Search pnpm documentation",
       "arguments": [
@@ -582,7 +598,8 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.38.2",
-    "algoliasearch": "^4.14.1"
+    "algoliasearch": "^4.14.1",
+    "meilisearch": "^0.32.4"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^5.0.0",

@@ -41,7 +41,7 @@ export default function ProjectList(): JSX.Element {
                 {app.entries ? (
                   app.entries
                     .filter((entry) => filter !== "" || (histories[id] ?? []).includes(entry.path))
-                    .map((recent: recentEntry) =>
+                    .map((recent: recentEntry, index) =>
                       recent?.path ? (
                         <MenuBarExtra.Item
                           key={`${app.title}-${recent.path}`}
@@ -51,7 +51,12 @@ export default function ProjectList(): JSX.Element {
                               ? recent.title
                               : recent.title.substring(0, maxTitleLength - 1) + "…"
                           }`}
-                          tooltip={`Open ${recent.title} in ${app.title}`}
+                          subtitle={`← ${
+                            recent.title.length + recent.parts.length < maxTitleLength
+                              ? recent.parts
+                              : recent.parts.substring(0, maxTitleLength - recent.title.length - 2) + "…"
+                          }`}
+                          tooltip={`Open ${recent.path} in ${app.title}`}
                           onAction={openInApp(app, recent)}
                         />
                       ) : null

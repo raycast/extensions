@@ -1,27 +1,17 @@
-import {
-  Action,
-  ActionPanel,
-  Alert,
-  clearSearchBar,
-  confirmAlert,
-  getPreferenceValues,
-  Icon,
-  List,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { Action, ActionPanel, confirmAlert, getPreferenceValues, Icon, List, showToast, Toast } from "@raycast/api";
 import { DetailView } from "./detail";
 import { EmptyView } from "./empty";
-import { translate, TranslateMode, TranslateQuery } from "../providers/openai/translate";
 import { QueryHook } from "../hooks/useQuery";
 import { useProxy } from "../hooks/useProxy";
-import { useHistory, Record, HistoryHook } from "../hooks/useHistory";
-import { useEffect, useRef, useState } from "react";
-import { detectLang } from "../providers/openai/lang";
+import { Record, HistoryHook } from "../hooks/useHistory";
+import { useEffect, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import capitalize from "capitalize";
 import { getLoadActionSection } from "../actions/load";
 import { getModeActionSection } from "../actions/mode";
+import { TranslateMode, TranslateQuery } from "../providers/types";
+import { detectLang } from "../providers/lang";
+import { getProvider } from "../providers";
 
 export interface ContentViewProps {
   query: QueryHook;
@@ -42,18 +32,33 @@ export interface Querying {
 
 type ViewItem = Querying | Record;
 
+type FinishReason = {
+  reason: string;
+  error: string | undefined;
+  toast: Toast;
+  detectFrom: string;
+  detectTo: string;
+  text: string;
+  img: string | undefined;
+};
+
+const { provider: providerName } = getPreferenceValues<{
+  entrypoint: string;
+  apikey: string;
+  apiModel: string;
+  provider: string;
+}>();
+
+const provider = getProvider(providerName);
+
 export const ContentView = (props: ContentViewProps) => {
   const { query, history, mode, setMode, setSelectedId, setIsInit, setIsEmpty } = props;
   const agent = useProxy();
   const [data, setData] = useState<ViewItem[]>();
   const [querying, setQuerying] = useState<Querying | null>();
+  const [finishReason, setFinishReason] = useState<FinishReason | null>();
   const [translatedText, setTranslatedText] = useState("");
-  const { entrypoint, apikey, apiModel } = getPreferenceValues<{
-    entrypoint: string;
-    apikey: string;
-    apiModel: string;
-  }>();
-  const ref = useRef<string>();
+
   function updateData() {
     if (history.data) {
       const sortedResults = history.data.sort(
@@ -73,36 +78,84 @@ export const ContentView = (props: ContentViewProps) => {
     }
   }
 
-  function onTranslationError(toast: Toast, from: string, title: string, message: string, img: string | undefined) {
-    (toast.title = title), (toast.message = message);
+  function onTranslationError(finishReason: FinishReason) {
+    const { error, toast, detectFrom, detectTo, text, img } = finishReason;
+    const message = error;
+    toast.title = "Error";
+    toast.message = message;
     toast.style = Toast.Style.Failure;
     const record: Record = {
       id: uuidv4(),
       mode,
       created_at: new Date().toISOString(),
       result: {
-        from,
-        to: query.to,
-        original: query.text,
-        text: ref.current ?? "",
+        from: detectFrom,
+        to: detectTo,
+        original: text,
+        text: translatedText,
         error: message,
       },
       ocrImg: img,
+      provider: providerName,
     };
     history.add(record);
+    setFinishReason(null);
     query.updateQuerying(false);
   }
+
+  function onTranslationStop(finishReason: FinishReason) {
+    const { toast, detectFrom, detectTo, text, img } = finishReason;
+    toast.title = "Got your translation!";
+    toast.style = Toast.Style.Success;
+    const txt = translatedText;
+    const newText = ["”", '"', "」"].indexOf(txt[txt.length - 1]) >= 0 ? txt.slice(0, -1) : txt;
+    setTranslatedText(newText);
+    const record: Record = {
+      id: uuidv4(),
+      mode,
+      created_at: new Date().toISOString(),
+      result: {
+        from: detectFrom,
+        to: detectTo,
+        original: text,
+        text: newText,
+      },
+      ocrImg: img,
+      provider: providerName,
+    };
+    history.add(record);
+    setFinishReason(null);
+    query.updateQuerying(false);
+  }
+
+  useEffect(() => {
+    if (finishReason) {
+      const { reason } = finishReason;
+      if (reason !== "stop") {
+        onTranslationError(finishReason);
+      } else {
+        onTranslationStop(finishReason);
+      }
+    }
+  }, [finishReason]);
 
   async function doQuery() {
     const controller = new AbortController();
     const { signal } = controller;
-    const detectFrom: string = query.from == "auto" ? (await detectLang(query.text)) ?? "en" : query.from;
     const toast = await showToast({
       title: "Getting your translation...",
       style: Toast.Style.Animated,
     });
+
     const text = query.text;
-    const detectTo = query.to;
+    const detectFrom: string = query.from == "auto" ? (await detectLang(query.text)) ?? "en" : query.from;
+
+    // 检测语言为中文且目标语言为中文时，自动翻译为英文
+    const detectTo =
+      mode == "translate" && detectFrom == query.to && (query.to == "zh-Hans" || query.to == "zh-Hans")
+        ? "en"
+        : query.to;
+
     const img = query.ocrImage;
 
     const _querying: Querying = {
@@ -119,42 +172,35 @@ export const ContentView = (props: ContentViewProps) => {
           if (message.role) {
             return;
           }
-          setTranslatedText((translatedText) => {
-            return translatedText + message.content;
+          // setIsWordMode(message.isWordMode)
+          setTranslatedText((txt) => {
+            if (message.isFullText) {
+              return message.content;
+            }
+            return txt + message.content;
           });
         },
         onFinish: (reason) => {
-          toast.title = "Got your translation!";
-          toast.style = Toast.Style.Success;
-          if (reason !== "stop") {
-            onTranslationError(toast, detectFrom, "Error", `failed：${reason}`, img);
-          } else {
-            if (ref.current) {
-              const newText =
-                ["”", '"', "」"].indexOf(ref.current[ref.current.length - 1]) >= 0 // FIXME 避免显性引用
-                  ? ref.current.slice(0, -1)
-                  : ref.current;
-              setTranslatedText(newText);
-
-              const record: Record = {
-                id: uuidv4(),
-                mode,
-                created_at: new Date().toISOString(),
-                result: {
-                  from: detectFrom,
-                  to: detectTo,
-                  original: text,
-                  text: newText,
-                },
-                ocrImg: img,
-              };
-              history.add(record);
-            }
-            query.updateQuerying(false);
-          }
+          setFinishReason({
+            reason,
+            error: `failed: ${reason}`,
+            toast,
+            detectFrom,
+            detectTo,
+            text,
+            img,
+          });
         },
         onError: (error) => {
-          onTranslationError(toast, detectFrom, "Error", error, img);
+          setFinishReason({
+            reason: "error",
+            error,
+            toast,
+            detectFrom,
+            detectTo,
+            text,
+            img,
+          });
         },
       },
       id: "querying",
@@ -162,7 +208,7 @@ export const ContentView = (props: ContentViewProps) => {
     setTranslatedText("");
     setQuerying(_querying);
     query.updateText("");
-    translate(_querying.query, entrypoint, apikey, apiModel);
+    provider.translate(_querying.query);
   }
 
   useEffect(() => {
@@ -178,10 +224,6 @@ export const ContentView = (props: ContentViewProps) => {
   useEffect(() => {
     updateData();
   }, [history.data, querying]);
-
-  useEffect(() => {
-    ref.current = translatedText;
-  }, [translatedText]);
 
   useEffect(() => {
     setIsEmpty(data == undefined || data.length == 0);
@@ -290,6 +332,7 @@ export const ContentView = (props: ContentViewProps) => {
                 mode={querying ? querying.query.mode : "translate"}
                 ocrImg={query.ocrImage}
                 to={query.to}
+                provider={providerName}
               />
             }
           />
@@ -309,6 +352,7 @@ export const ContentView = (props: ContentViewProps) => {
                 mode={item.mode}
                 created_at={item.created_at}
                 ocrImg={item.ocrImg}
+                provider={item.provider}
               />
             }
           />

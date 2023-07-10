@@ -1,6 +1,6 @@
 import { List } from "@raycast/api"
 import { format } from "date-fns"
-import { getDateList } from "../common/getDateList"
+import { getDateList } from "../utils/getDateList"
 
 interface CityListDropdownViewProps {
     setCurrentDate: (date: Date) => void

@@ -1,6 +1,8 @@
 import { getPreferenceValues } from "@raycast/api";
 import { Admin, Kafka, KafkaConfig, logLevel } from "kafkajs";
 import * as fs from "fs";
+import path from "path";
+import Os from "os";
 
 export interface KafkaEnv {
   name: string;
@@ -9,39 +11,35 @@ export interface KafkaEnv {
   kafkaJs: KafkaConfig;
 }
 
-export interface KafkaPreferences {
-  configDirectory: string;
-  extractRegex: string;
-  extractTitleGroup: string;
-  extractSubTitleGroup: string;
-  extractMetadataNameAndGroup: string;
-}
-
 export interface LagInfo {
   topicName: string;
   overallLag: number;
 }
 
-const preferences = getPreferenceValues<KafkaPreferences>();
+const configDirectory =
+  getPreferenceValues<ExtensionPreferences>().configDirectory || path.resolve(Os.homedir(), ".kafka");
 const envs = new Map<string, KafkaEnv>();
-const files = fs.readdirSync(preferences.configDirectory, "utf-8");
+const files = fs.readdirSync(configDirectory, "utf-8");
 for (const file of files) {
-  const env = JSON.parse(fs.readFileSync(preferences.configDirectory + "/" + file).toString());
+  const env = JSON.parse(fs.readFileSync(configDirectory + "/" + file).toString());
   envs.set(env.name, env);
 }
 
 const admins: Record<string, Admin> = {};
 
 export function getExtractConfig() {
+  const preferences = getPreferenceValues<Preferences.Kafka>();
   if (preferences.extractRegex) {
     return {
       regex: new RegExp(preferences.extractRegex),
-      extractTitleGroup: Number(preferences.extractTitleGroup),
-      extractSubTitleGroup: Number(preferences.extractSubTitleGroup),
-      extractMetadataNameAndGroup: preferences.extractMetadataNameAndGroup.split(",").map((split) => ({
-        metadataName: split.split("=")[0],
-        group: Number(split.split("=")[1]),
-      })),
+      extractTitleGroup: preferences.extractTitleGroup && Number(preferences.extractTitleGroup),
+      extractSubTitleGroup: preferences.extractSubTitleGroup && Number(preferences.extractSubTitleGroup),
+      extractMetadataNameAndGroup:
+        preferences.extractMetadataNameAndGroup &&
+        preferences.extractMetadataNameAndGroup.split(",").map((split) => ({
+          metadataName: split.split("=")[0],
+          group: Number(split.split("=")[1]),
+        })),
     };
   }
   return null;

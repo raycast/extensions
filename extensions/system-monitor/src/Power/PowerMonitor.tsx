@@ -8,9 +8,11 @@ import {
   getIsCharging,
   getMaxBatteryCapacity,
   isValidTime,
+  getTimeOnBattery,
 } from "./PowerUtils";
 import { useInterval } from "usehooks-ts";
 import { ExecError, PowerMonitorState } from "../Interfaces";
+import { Actions } from "../components/Actions";
 
 const PowerMonitor = () => {
   const [isLoading, setIsLoading] = useState(true);
@@ -22,6 +24,7 @@ const PowerMonitor = () => {
     batteryCondition: "Loading...",
     maxBatteryCapacity: "Loading...",
     batteryTime: "Calculating...",
+    timeOnBattery: "Calculating...",
   });
 
   useInterval(async () => {
@@ -31,15 +34,22 @@ const PowerMonitor = () => {
           .then((newIsCharging) => {
             getBatteryTime()
               .then((newBatteryTime) => {
-                setState((prevState) => {
-                  return {
-                    ...prevState,
-                    batteryLevel: newBatteryLevel,
-                    isCharging: newIsCharging,
-                    batteryTime: newBatteryTime,
-                  };
-                });
-                setIsLoading(false);
+                getTimeOnBattery()
+                  .then((timeOnBattery) => {
+                    setState((prevState) => {
+                      return {
+                        ...prevState,
+                        batteryLevel: newBatteryLevel,
+                        isCharging: newIsCharging,
+                        batteryTime: newBatteryTime,
+                        timeOnBattery: timeOnBattery,
+                      };
+                    });
+                    setIsLoading(false);
+                  })
+                  .catch((error: ExecError) => {
+                    setError(error);
+                  });
               })
               .catch((error: ExecError) => {
                 setError(error);
@@ -87,7 +97,7 @@ const PowerMonitor = () => {
     if (error) {
       showToast({
         style: Toast.Style.Failure,
-        title: "Couldn't fetch Power Info [Error Code: " + error.code + "]",
+        title: `Couldn't fetch Power Info [Error Code: ${error.code}]`,
         message: error.stderr,
       });
     }
@@ -97,7 +107,7 @@ const PowerMonitor = () => {
     <List.Item
       title={`Power`}
       icon={{ source: "lightning.png", tintColor: Color.Yellow }}
-      accessoryTitle={isLoading ? "Loading..." : `${state.batteryLevel}%`}
+      accessories={[{ text: isLoading ? "Loading..." : `${state.batteryLevel}%` }]}
       detail={
         <List.Item.Detail
           metadata={
@@ -111,10 +121,15 @@ const PowerMonitor = () => {
                 title={state.isCharging ? "Time to charge" : "Time to discharge"}
                 text={isValidTime(state.batteryTime) ? state.batteryTime : "Calculating..."}
               />
+              <List.Item.Detail.Metadata.Label
+                title={state.isCharging ? "Time on AC" : "Time on battery"}
+                text={state.timeOnBattery}
+              />
             </List.Item.Detail.Metadata>
           }
         />
       }
+      actions={<Actions />}
     />
   );
 };

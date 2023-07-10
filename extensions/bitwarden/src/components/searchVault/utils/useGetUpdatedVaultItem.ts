@@ -37,7 +37,8 @@ function valueHasSensitiveValuePlaceholder(value: any) {
   try {
     if (typeof value === "object") {
       return JSON.stringify(value).includes(SENSITIVE_VALUE_PLACEHOLDER);
-    } else if (typeof value === "string") {
+    }
+    if (typeof value === "string") {
       return value === SENSITIVE_VALUE_PLACEHOLDER;
     }
     return false;

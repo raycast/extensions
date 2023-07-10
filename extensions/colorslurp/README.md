@@ -1,8 +1,10 @@
 # ColorSlurp
 
-Control ColorSlurp's color picker features from Raycast:
+Pick colors, convert between formats, and more with ColorSlurp.
 
-- Show the ColorSlurp Magnifier
+- Pick colors with ColorSlurp's magnifier.
+- Quickly convert colors to different formats.
+- View your recently picked colors.
 - Show the contrast checker, optionally specify the foreground and background
 - Edit a color
 - Show your palettes

@@ -8,7 +8,8 @@
   "contributors": [
     "lucaschultz",
     "diokhan",
-    "ron-myers"
+    "ron-myers",
+    "JuanBanchero"
   ],
   "license": "MIT",
   "commands": [
@@ -17,15 +18,7 @@
       "title": "Search Notes",
       "subtitle": "Bear",
       "description": "Search and open Bear notes",
-      "mode": "view",
-      "arguments": [
-        {
-          "name": "searchQuery",
-          "placeholder": "Search Query",
-          "type": "text",
-          "required": false
-        }
-      ]
+      "mode": "view"
     },
     {
       "name": "new-note",
@@ -44,22 +37,22 @@
   ],
   "preferences": [
     {
-      "name": "focusCursorAtEnd",
-      "title": "Opening Notes",
-      "description": "Opens the note in edit mode, placing the cursor at the end of the note",
-      "type": "checkbox",
       "default": false,
+      "description": "Opens the note in edit mode, placing the cursor at the end of the note",
       "label": "Focus cursor at end of the note",
-      "required": false
+      "name": "focusCursorAtEnd",
+      "required": false,
+      "title": "Opening Notes",
+      "type": "checkbox"
     },
     {
-      "name": "showPreviewInListView",
-      "title": "Notes List",
-      "description": "Shows a preview of the note to the right of the note list",
-      "type": "checkbox",
       "default": true,
+      "description": "Shows a preview of the note to the right of the note list",
       "label": "Show preview in list view",
-      "required": false
+      "name": "showPreviewInListView",
+      "required": false,
+      "title": "Notes List",
+      "type": "checkbox"
     }
   ],
   "dependencies": {

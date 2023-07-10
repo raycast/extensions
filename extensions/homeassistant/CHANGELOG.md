@@ -1,5 +1,24 @@
 # Home Assistant Changelog
 
+## [Fix] - 2023-06-25
+
+- Use nearest resolve url also for http requests
+
+## [Fix] - 2023-06-24
+
+- Get persistent notifications via websocket API instead of entities because since 2023.06 the entity option does not exist anymore.
+
+## [Update] - 2023-06-14
+
+- Add home network detection to switch between an internal url and an external one
+- Add `Connection Check` root command
+- Add support for `.local` urls (mDNS)
+
+## [Update] - 2023-05-04
+
+- Hide hidden or disabled entities
+- Add `Assist` root command
+
 ## [Fix] . 2023-03-15
 
 - Inject https agent only on `https` urls - fix [#5358](https://github.com/raycast/extensions/issues/5358)

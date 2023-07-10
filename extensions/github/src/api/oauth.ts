@@ -6,7 +6,7 @@ const clientId = "7235fe8d42157f1f38c0";
 export const oauthClient = new OAuth.PKCEClient({
   redirectMethod: OAuth.RedirectMethod.Web,
   providerName: "GitHub",
-  providerIcon: environment.theme === "light" ? "icon.png" : "icon@dark.png",
+  providerIcon: environment.appearance === "light" ? "icon.png" : "icon@dark.png",
   providerId: "github",
   description: "Connect your GitHub account",
 });

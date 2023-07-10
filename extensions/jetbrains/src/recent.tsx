@@ -105,9 +105,9 @@ export default function ProjectList(): JSX.Element {
         .filter((app) => filter === "" || filter === app.title)
         .map((app, id) => (
           <List.Section
-            title={app.title}
+            title={app.name}
             key={app.title}
-            subtitle={screenshotMode ? "⌘+F to add to favorites – ⌃+S to change application order" : undefined}
+            subtitle={screenshotMode ? "⌘+F to add to favorites – ⌃+S to change application order" : app.version}
           >
             {(app.entries ?? [])
               .filter((entry) => filter !== "" || (histories[id] ?? []).includes(entry.path))

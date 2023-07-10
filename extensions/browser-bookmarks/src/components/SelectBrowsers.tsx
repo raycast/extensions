@@ -10,7 +10,6 @@ type SelectBrowsersProps = {
 
 export default function SelectBrowsers({ browsers: initialBrowsers, onSelect }: SelectBrowsersProps) {
   const { data, isLoading } = useAvailableBrowsers();
-
   const [browsers, setBrowsers] = useState(initialBrowsers);
 
   return (
@@ -25,27 +24,17 @@ export default function SelectBrowsers({ browsers: initialBrowsers, onSelect }: 
             title={browser.name}
             actions={
               <ActionPanel>
-                {isSelected ? (
-                  <Action
-                    title={`Disable ${browser.name}`}
-                    icon={Icon.Circle}
-                    onAction={() => {
-                      const newBrowsers = browsers.filter((b) => b !== browser.bundleId);
-                      setBrowsers(newBrowsers);
-                      onSelect(newBrowsers);
-                    }}
-                  />
-                ) : (
-                  <Action
-                    title={`Enable ${browser.name}`}
-                    icon={{ source: Icon.CheckCircle, tintColor: Color.Green }}
-                    onAction={() => {
-                      const newBrowsers = [...browsers, browser.bundleId as string];
-                      setBrowsers(newBrowsers);
-                      onSelect(newBrowsers);
-                    }}
-                  />
-                )}
+                <Action
+                  title={isSelected ? `Disable ${browser.name}` : `Enable ${browser.name}`}
+                  icon={isSelected ? Icon.Circle : { source: Icon.CheckCircle, tintColor: Color.Green }}
+                  onAction={() => {
+                    const newBrowsers = isSelected
+                      ? browsers.filter((b) => b !== browser.bundleId)
+                      : [...browsers, browser.bundleId as string];
+                    setBrowsers(newBrowsers);
+                    onSelect(newBrowsers);
+                  }}
+                />
               </ActionPanel>
             }
           />

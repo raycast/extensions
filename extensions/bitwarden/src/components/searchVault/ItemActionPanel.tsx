@@ -3,24 +3,29 @@ import ComponentReverser from "~/components/ComponentReverser";
 import { useSelectedVaultItem } from "~/components/searchVault/context/vaultItem";
 import {
   CopyPasswordAction,
-  CopyTextFieldsActions,
   CopyTotpAction,
   CopyUsernameAction,
   OpenUrlInBrowserAction,
   PastePasswordAction,
-  SearchCommonActions,
+  VaultManagementActions,
   ShowCardDetailsAction,
-  ShowSecureNoteAction,
+  ShowNotesAction,
+  ShowIdentityDetailsAction,
+  CopyCardFieldsActions,
+  CopyIdentityFieldsActions,
+  CopyLoginUrisActions,
+  CopyCustomFieldsActions,
 } from "~/components/searchVault/actions";
+import { ItemType } from "~/types/vault";
 
 const { primaryAction } = getPreferenceValues();
 
 const VaultItemActionPanel = () => {
-  const { login, card } = useSelectedVaultItem();
+  const { type } = useSelectedVaultItem();
 
   return (
     <ActionPanel>
-      {!!login && (
+      {type === ItemType.LOGIN && (
         <ActionPanel.Section>
           <ComponentReverser reverse={primaryAction === "copy"}>
             <PastePasswordAction />
@@ -29,19 +34,46 @@ const VaultItemActionPanel = () => {
           <CopyTotpAction />
           <CopyUsernameAction />
           <OpenUrlInBrowserAction />
+          <CopyLoginUrisActions />
+          <ShowNotesAction />
         </ActionPanel.Section>
       )}
-      {!!card && (
+      {type === ItemType.CARD && (
+        <>
+          <ActionPanel.Section>
+            <ShowCardDetailsAction />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Card Fields">
+            <CopyCardFieldsActions />
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <ShowNotesAction />
+          </ActionPanel.Section>
+        </>
+      )}
+      {type === ItemType.IDENTITY && (
+        <>
+          <ActionPanel.Section>
+            <ShowIdentityDetailsAction />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Identity Fields">
+            <CopyIdentityFieldsActions />
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <ShowNotesAction />
+          </ActionPanel.Section>
+        </>
+      )}
+      {type === ItemType.NOTE && (
         <ActionPanel.Section>
-          <ShowCardDetailsAction />
-          <ShowSecureNoteAction />
+          <ShowNotesAction />
         </ActionPanel.Section>
       )}
-      <ActionPanel.Section>
-        <CopyTextFieldsActions />
+      <ActionPanel.Section title="Custom Fields">
+        <CopyCustomFieldsActions />
       </ActionPanel.Section>
-      <ActionPanel.Section>
-        <SearchCommonActions />
+      <ActionPanel.Section title="Vault Management">
+        <VaultManagementActions />
       </ActionPanel.Section>
     </ActionPanel>
   );

@@ -98,7 +98,7 @@ export function jsonDataToMergeRequest(mr: any): MergeRequest {
     updated_at: mr.updated_at,
     author: maybeUserFromJson(mr.author),
     assignees: mr.assignees.map(userFromJson),
-    reviewers: mr.reviewers.map(userFromJson),
+    reviewers: mr.reviewers?.map(userFromJson) || [],
     project_id: mr.project_id,
     description: mr.description,
     reference_full: mr.references?.full,
@@ -325,6 +325,16 @@ export class User {
   public state = "";
   public avatar_url = "";
   public web_url = "";
+}
+
+export class TemplateSummary {
+  public id = "";
+  public name = "";
+}
+
+export class TemplateDetail {
+  public name = "";
+  public content = "";
 }
 
 export interface Status {
@@ -585,6 +595,30 @@ export class GitLab {
       }));
     });
     return items;
+  }
+
+  async getProjectMergeRequestTemplates(projectId: number): Promise<TemplateSummary[]> {
+    const items: TemplateSummary[] = await this.fetch(`projects/${projectId}/templates/merge_requests`).then(
+      (templates) => {
+        return templates.map((template: any) => ({
+          id: template.key,
+          name: template.name,
+        }));
+      }
+    );
+    return items;
+  }
+
+  async getProjectMergeRequestTemplate(projectId: number, templateName: string): Promise<TemplateDetail> {
+    const item: TemplateDetail = await this.fetch(
+      `projects/${projectId}/templates/merge_requests/${templateName}`
+    ).then((template) => {
+      return {
+        name: template.name,
+        content: template.content,
+      };
+    });
+    return item;
   }
 
   async getGroupMilestones(group: Group): Promise<Milestone[]> {

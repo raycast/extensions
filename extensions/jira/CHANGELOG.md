@@ -1,5 +1,34 @@
 # Jira Changelog
 
+## [Type before credentials load] - 2023-07-05
+
+- Now allows user to start typing before the credentials are loaded
+
+## [Persist Active Sprint Project value when closing command] - 2023-06-28
+
+- Persist Active Sprint Project value when closing command allowing the command to
+  fetch the issues for the latest selected project when opening the command anew. 
+
+## [Bug fixes] - 2023-06-15
+
+- Fixed a bug where a user's or project's avatar URL could not be displayed.
+- Fixed rendering failures (`Missing required property "title" for Unknown`).
+
+## [Bug fixes] - 2023-06-12
+
+- Fixed a bug where `Show Details` would show up on the issue's detail view.
+
+## [Fix missing error title] - 2023-05-09
+
+Statuses in Jira may not have categories. Problem is, these categories are used as a section title in various commands such as `Open Issues` causing the error:
+
+```
+Error: Rendering failed:
+Missing required component property "title"
+```
+
+This should be fixed now!
+
 ## [Remove Raycast signature] - 2023-04-19
 
 - Remove Raycast signature preference from the `Create Issue` command

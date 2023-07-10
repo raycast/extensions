@@ -1,0 +1,49 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "image-wallet",
+  "title": "Image Wallet",
+  "description": "Store and retrieve images quickly from Raycast!",
+  "icon": "extension-icon.png",
+  "author": "ibll",
+  "categories": [
+    "Media",
+    "Fun"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "image-wallet",
+      "title": "Image Wallet",
+      "description": "Browse and view your saved images.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "walletDirectory",
+      "title": "Wallet Directory",
+      "description": "Path to load Wallet from. Leave blank for default.",
+      "type": "directory",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.49.3",
+    "@raycast/utils": "^1.5.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "^18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

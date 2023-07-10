@@ -1,5 +1,6 @@
 import { LocalStorage } from "@raycast/api";
-import { useState, useEffect } from "react";
+import { useCachedState } from "@raycast/utils";
+import { useEffect } from "react";
 import type { File } from "../types";
 
 const VISITED_FIGMA_FILES_KEY = "VISITED_FIGMA_FILES";
@@ -8,8 +9,8 @@ const VISITED_FIGMA_FILES_LENGTH = 5;
 async function loadVisitedFiles() {
   const item = await LocalStorage.getItem<string>(VISITED_FIGMA_FILES_KEY);
   if (item) {
-    const parsed = JSON.parse(item);
-    return parsed as File[];
+    const parsed = JSON.parse(item) as File[];
+    return parsed;
   } else {
     return [];
   }
@@ -25,7 +26,7 @@ export async function clearVisitedFiles() {
 }
 
 export function useVisitedFiles() {
-  const [files, setFiles] = useState<File[]>();
+  const [files, setFiles] = useCachedState<File[]>("visitedFiles");
 
   useEffect(() => {
     loadVisitedFiles().then(setFiles);

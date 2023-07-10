@@ -1,5 +1,9 @@
 # 1Password Changelog
 
+## [Raycast window closes after copying (opt-out option)] - 2023-06-06
+
+- NEW: Raycast window now closes itself after copying a username or password (you can turn this off in settings)
+
 ## [Bug fixes] - 2023-04-03
 
 - Fixed newline in clipboard copied values
