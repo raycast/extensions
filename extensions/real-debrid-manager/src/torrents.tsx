@@ -19,7 +19,10 @@ export const Torrents = () => {
               accessories={[
                 { text: formatFileSize(torrent?.bytes) },
                 {
-                  icon: TORRENT_STATUS_MAP[torrent.status].icon,
+                  icon: {
+                    source: TORRENT_STATUS_MAP[torrent.status].icon,
+                    tintColor: TORRENT_STATUS_MAP[torrent.status].color,
+                  },
                 },
               ]}
               actions={

@@ -1,3 +1,4 @@
+import { Icon } from "@raycast/api";
 import { DownloadFileData } from "../schema";
 
 export const formatFileSize = (sizeInBytes: number): string => {
@@ -41,6 +42,20 @@ export const parseFileType = (fileData: DownloadFileData) => {
   if (extension_from_file_name) return extension_from_file_name;
 
   return "unknown";
+};
+
+const DOWNLOAD_FILE_TYPE_ICON_MAP: Record<string, Icon> = {
+  audio: Icon.Music,
+  video: Icon.PlayFilled,
+  iso: Icon.Box,
+  application: Icon.Box,
+  apk: Icon.Mobile,
+  other: Icon.BlankDocument,
+};
+
+export const getDownloadItemIcon = (downloadItem: DownloadFileData): string => {
+  const fileType = parseFileType(downloadItem);
+  return DOWNLOAD_FILE_TYPE_ICON_MAP?.[fileType] ?? DOWNLOAD_FILE_TYPE_ICON_MAP.other;
 };
 
 export const isExternalHost = (download: DownloadFileData) => {
