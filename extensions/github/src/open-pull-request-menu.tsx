@@ -4,6 +4,7 @@ import { useCachedPromise } from "@raycast/utils";
 import { MenuBarItem, MenuBarRoot, MenuBarSection, getBoundedPreferenceNumber } from "./components/Menu";
 import View from "./components/View";
 import { IssueFieldsFragment } from "./generated/graphql";
+import { PullRequestFieldsFragment } from "./generated/graphql";
 import { getGitHubClient } from "./helpers/withGithubClient";
 
 async function launchIssuesCommand(): Promise<void> {
@@ -16,21 +17,20 @@ function displayTitlePreference() {
   return val == undefined ? true : val;
 }
 
-function getMaxIssuesPreference(): number {
+function getMaxPullRequestsPreference(): number {
   return getBoundedPreferenceNumber({ name: "maxitems" });
 }
 
-function OpenIssuesMenu() {
+function OpenPullRequestMenu() {
   const { github } = getGitHubClient();
 
   const { data, isLoading } = useCachedPromise(
     async () => {
-      const result = await github.searchIssues({
-        query: `is:issue is:open assignee:@me archived:false`,
+      const result = await github.searchPullRequests({
+        query: `is:pr is:open author:@me archived:false`,
         numberOfItems: 50,
       });
-
-      return result.search.nodes?.map((node) => node as IssueFieldsFragment);
+      return result.search.edges?.map((edge) => edge?.node as PullRequestFieldsFragment);
     },
     [],
     { keepPreviousData: true }
@@ -39,22 +39,22 @@ function OpenIssuesMenu() {
   return (
     <MenuBarRoot
       title={displayTitlePreference() ? `${data?.length}` : undefined}
-      icon={{ source: "issue-opened.svg", tintColor: Color.PrimaryText }}
+      icon={{ source: "pull-request.svg", tintColor: Color.PrimaryText }}
       isLoading={isLoading}
-      tooltip="GitHub Open Issues"
+      tooltip="GitHub My Open Pull Requests"
     >
       <MenuBarSection
-        title="Issues"
-        maxChildren={getMaxIssuesPreference()}
+        title="My Pull Request"
+        maxChildren={getMaxPullRequestsPreference()}
         moreElement={(hidden) => <MenuBarItem title={`... ${hidden} more`} onAction={() => launchIssuesCommand()} />}
       >
-        {(data?.length || 0) <= 0 && <MenuBarItem title="No Issues" onAction={() => launchIssuesCommand()} />}
+        {(data?.length || 0) <= 0 && <MenuBarItem title="No Pull Requests" onAction={() => launchIssuesCommand()} />}
         {data?.map((i) => (
           <MenuBarItem
             key={i.id}
             title={`#${i.number} ${i.title}`}
-            icon="issue-opened.svg"
-            onAction={() => open(i.url)}
+            icon="pull-request.svg"
+            onAction={() => open(i.permalink)}
           />
         ))}
       </MenuBarSection>
@@ -65,7 +65,7 @@ function OpenIssuesMenu() {
 export default function Command() {
   return (
     <View>
-      <OpenIssuesMenu />
+      <OpenPullRequestMenu />
     </View>
   );
 }

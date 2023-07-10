@@ -3,6 +3,7 @@
 ## [Menu Commands] - 2023-07-10
 
 - Add Issues Menu Command
+- Add Pull Requests Menu Command
 
 ## [Support rerun failed workflow jobs] - 2023-06-27
 
