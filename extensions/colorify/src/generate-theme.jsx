@@ -1,7 +1,8 @@
 import { Form, AI, ActionPanel, Action, popToRoot, open, Toast, showToast, environment } from "@raycast/api";
 import { useState } from "react";
 import fs from "fs";
-import ColorThief from "colorthief";
+import ColorThief from "./colorthief";
+import Jimp from "jimp";
 
 export default function Command() {
   if (!environment.canAccess(AI)) {
@@ -38,60 +39,71 @@ export default function Command() {
                   title: "Loading Theme",
                   message: "Using Raycast AI to generate your Theme",
                 });
-                await ColorThief.getPalette(image, 7)
-                  .then(async (palette) => {
-                    let hex = palette.map((x) => rgbToHex(x));
-                    let polished;
-                    if (appearance === "light") {
-                      polished = await AI.ask(
-                        `I am making a LIGHT theme for a product, based on this palette: ${hex.join()}. Choose a \`bgLight\` and a \`bgDark\` for the background. Keep the colors CLOSE to each other. Ensure that the background is CLOSE TO WHITE and LIGHT. For \`text\`, choose a color that has GOOD CONTRAST aginst BOTH background colors. A bright, POPPING (\`highlight\`) is also necessary. You may add to or modify the original palette to improve CONTRAST and LEGIBILITY. Return your result in an array of strings: [bgLight, bgDark, text, highlight], such that it can be parsed with JSON.parse()`
-                      );
-                    } else {
-                      polished = await AI.ask(
-                        `I am making a DARK theme for a product, based on this palette: ${hex.join()}. Choose a \`bgLight\` and a \`bgDark\` for the background. Keep the colors CLOSE to each other. Ensure that the background looks GOOD on a DARK BACKGROUND. For \`text\`, choose a color that has GOOD CONTRAST aginst BOTH background colors. A bright, POPPING (\`highlight\`) is also necessary. You may add to or modify the original palette to improve CONTRAST and LEGIBILITY. Return your result in an array of strings: [bgLight, bgDark, text, highlight], such that it can be parsed with JSON.parse()`
-                      );
-                    }
+                await Jimp.read(image).then(async (image) => {
+                  return image
+                    .resize(1920, 1080)
+                    .getBufferAsync(Jimp.MIME_PNG)
+                    .then(async (resizedImageBuffer) => {
+                      await ColorThief.getPalette(resizedImageBuffer, 7)
+                        .then(async (palette) => {
+                          let hex = palette.map((x) => rgbToHex(x));
+                          let polished;
+                          if (appearance === "light") {
+                            polished = await AI.ask(
+                              `I am making a LIGHT theme for a product, based on this palette: ${hex.join()}. Choose a \`bgLight\` and a \`bgDark\` for the background. Make them CLOSE TO EACH OTHER, NEAR WHITE and DULL, but still include a bit of color. Based on the background, choose the \`text\` color, choose a color that has GOOD CONTRAST aginst BOTH background colors. A bright, POPPING (\`highlight\`) is also necessary. You may add to or modify the original palette to improve CONTRAST and LEGIBILITY. Return your result ONLY in an array of strings: [bgLight, bgDark, text, highlight], such that it can be parsed with JSON.parse().`,
+                              { creativity: 0 }
+                            );
+                          } else {
+                            polished = await AI.ask(
+                              `I am making a DARK theme for a product, based on this palette: ${hex.join()}. Choose a \`bgLight\` and a \`bgDark\` for the background. Keep the colors CLOSE to each other. Ensure that the background looks GOOD on a DARK BACKGROUND. You may have to MODIFY the colors to do this. For \`text\`, choose a color that has GOOD CONTRAST aginst BOTH background colors. A bright, POPPING (\`highlight\`) is also necessary. You may add to or modify the original palette to improve CONTRAST and LEGIBILITY. Return your result ONLY in an array of strings: [bgLight, bgDark, text, highlight], such that it can be parsed with JSON.parse().`,
+                              { creativity: 0 }
+                            );
+                          }
 
-                    let encode = (string) => {
-                      return encodeURI(string).replace("#", "%23");
-                    };
+                          let encode = (string) => {
+                            return encodeURI(string).replace("#", "%23");
+                          };
 
-                    let [backgroundLight, backgroundDark, text, highlight] = JSON.parse(polished.trim()).map((x) =>
-                      encode(x)
-                    );
+                          let [backgroundLight, backgroundDark, text, highlight] = JSON.parse(
+                            polished.trim().replace("Result: ", "")
+                          ).map((x) => encode(x));
 
-                    if (!name) {
-                      showToast({
-                        style: Toast.Style.Animated,
-                        title: "Loading Title",
-                        message: "Using Raycast AI to generate a Title for your Theme",
-                      });
+                          if (!name) {
+                            showToast({
+                              style: Toast.Style.Animated,
+                              title: "Loading Title",
+                              message: "Using Raycast AI to generate a Title for your Theme",
+                            });
 
-                      name = await AI.ask(
-                        `Given the following colors: ${hex.join()}, name a Raycast Theme. Use 1-2 words, and more only if necessary. Some example names are "White Flames", "Bright Lights", "Burning Candle". Do not include any punctuation or special characters in your title, including quotation marks.`
-                      );
-                      name = name.trim().replaceAll('"', "");
-                    }
+                            name = await AI.ask(
+                              `Given the following colors: ${hex.join()}, name a Raycast Theme. Use 1-2 words, and more only if necessary. Some example names are "White Flames", "Bright Lights", "Burning Candle". Keep in mind this is a ${appearance} theme, so adapt the title to it. Do not include any punctuation or special characters in your title, including quotation marks.`,
+                              { creativity: 2 }
+                            );
 
-                    name = encode(name);
+                            name = name.trim().replaceAll('"', "") ?? "New Theme";
+                          }
 
-                    showToast({
-                      style: Toast.Style.Success,
-                      title: "Theme Finished",
-                      message: "Accept the theme download and enjoy!",
+                          name = encode(name);
+
+                          showToast({
+                            style: Toast.Style.Success,
+                            title: "Theme Finished",
+                            message: "Accept the theme download and enjoy!",
+                          });
+
+                          open(
+                            `raycast://theme?version=1&name=${name}&appearance=${appearance}&colors=${backgroundLight},${backgroundDark},${text},${highlight},${highlight},%23F50A0A,%23F5600A,%23E0A200,%2307BA65,%230A7FF5,%23470AF5,%23F50AA3`
+                          );
+                        })
+                        .catch((e) => {
+                          showToast({
+                            style: Toast.Style.Failure,
+                            title: "Generation Failed",
+                            message: "Try again, and submit an issue if it fails again.",
+                          });
+                        });
                     });
-
-                    open(
-                      `raycast://theme?version=1&name=${name}&appearance=${appearance}&colors=${backgroundLight},${backgroundDark},${text},${highlight},${highlight},%23F50A0A,%23F5600A,%23E0A200,%2307BA65,%230A7FF5,%23470AF5,%23F50AA3`
-                    );
-                  })
-                  .catch(() => {
-                    showToast({
-                      style: Toast.Style.Success,
-                      title: "Generation Failed",
-                      message: "Try again, and submit an issue if it fails again.",
-                    });
-                  });
+                });
                 popToRoot();
               }}
             />
@@ -126,6 +138,10 @@ export default function Command() {
           <Form.Dropdown.Item value="light" title="Light Theme" />
           <Form.Dropdown.Item value="dark" title="Dark Theme" />
         </Form.Dropdown>
+        <Form.Description
+          title="Disclaimer"
+          text="Colorify extracts colors from your original image and uses AI to enhance your theme. Because of this, if you provide a light-colored image, it may not generate a good Dark Theme, and vice versa. Feel free to try it out, but a good result is not guarenteed."
+        />
       </Form>
     );
   }
