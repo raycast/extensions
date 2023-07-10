@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "remove-paywall",
   "title": "Remove Paywall",
-  "description": "Remove the paywall from the frontmost browser's displayed site.",
+  "description": "Remove the paywall from the specified URL.",
   "icon": "command-icon.png",
   "author": "tegola",
   "categories": [
@@ -13,7 +13,7 @@
     {
       "name": "remove-paywall",
       "title": "Remove Paywall",
-      "description": "Remove the paywall from the frontmost browser's displayed site.",
+      "description": "Remove the paywall from the specified URL.",
       "mode": "no-view",
       "arguments": [
         {
