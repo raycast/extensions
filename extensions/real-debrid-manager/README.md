@@ -23,7 +23,8 @@ You can obtain your token by going to [your account](https://real-debrid.com/api
 ### Torrents
 
 - View and search Torrents.
-- Add new torrent via magnet links (`.torrent` upload support planned).
+- Add new torrent via magnet links.
+- Add new torrent via torrent file upload.
 - Add magnet links from clipboard.
 - Select files for new torrents and reselect for existing torrents.
 - View files and sizes in uploaded torrent.
@@ -38,6 +39,5 @@ You can obtain your token by going to [your account](https://real-debrid.com/api
 
 Some ideas for further improvements:
 
-- [ ] `.torrent` file upload support: Personally, I prefer magnet links, but I realize this could be useful to some.
 - [ ] Change authentication method: The API token method is not recommended by RD because it can exposes potentially endpoints. None of these endpoints are used in this extension, but it's by far the easiest method to authenticate.
 - [ ] Maybe adding a torrent search functionality that ties in nicely with the existing features. I like the idea of a complete workflow through Raycast.

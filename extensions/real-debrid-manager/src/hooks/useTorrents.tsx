@@ -1,5 +1,5 @@
 import { useFetch } from "@raycast/utils";
-import { GET_TORRENTS, requestTorrentDelete, requestTorrentDetails } from "../api";
+import { GET_TORRENTS, requestAddTorrentFile, requestTorrentDelete, requestTorrentDetails } from "../api";
 import useToken from "./useToken";
 import { TorrentData } from "../schema";
 
@@ -22,7 +22,11 @@ export const useTorrents = () => {
     return requestTorrentDelete(torrent_id, token);
   };
 
-  return { getTorrents, deleteTorrent, getTorrentDetails };
+  const uploadTorrentFile = (file_path: string) => {
+    return requestAddTorrentFile(file_path, token);
+  };
+
+  return { getTorrents, deleteTorrent, getTorrentDetails, uploadTorrentFile };
 };
 
 export default useTorrents;

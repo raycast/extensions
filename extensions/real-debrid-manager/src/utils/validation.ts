@@ -1,3 +1,5 @@
+import fs from "fs";
+
 import { LinkType } from "../schema";
 
 type ValidationResult = {
@@ -25,4 +27,30 @@ export const validateLinkInput = (link?: string): ValidationResult => {
   }
 
   return validationResult;
+};
+
+export const validateTorrentFile = (filePath: string) => {
+  // Check if file exists on disk
+  if (!fs.existsSync(filePath)) {
+    throw new Error("File does not exist.");
+  }
+
+  const stats = fs.lstatSync(filePath);
+
+  // Check if filePath is a file
+  if (!stats.isFile()) {
+    throw new Error("The path is not a file.");
+  }
+
+  // Check if file size is less than 1MB
+  const fileSizeInBytes = stats.size;
+  const fileSizeInMegabytes = fileSizeInBytes / (1024 * 1024);
+  if (fileSizeInMegabytes > 1) {
+    throw new Error("File size should not be more than 1MB.");
+  }
+
+  // Check if the file is a .torrent file
+  if (!filePath.endsWith(".torrent")) {
+    throw new Error("Not a .torrent file.");
+  }
 };
