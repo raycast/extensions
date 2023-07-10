@@ -1,0 +1,42 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "github-image-markdown",
+  "title": "Github Image Markdown",
+  "description": "Formats a screenshot uploaded to Github into reasonable dimension to view.",
+  "icon": "command-icon.png",
+  "author": "daniellacoste",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Github Image Markdown",
+      "subtitle": "Resize your PR image",
+      "description": "This extension will reformat images uploaded to a Github PR so that they are reasonably sized. To use, simply put the image on your clipboard, usually in this format: ![IMG_FILENAME](https://imgUrl.com). The new HTML format will be automatically saved to your clipboard.",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.54.0",
+    "markdown-it": "^13.0.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/markdown-it": "^12.2.3",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
