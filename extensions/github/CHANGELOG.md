@@ -1,5 +1,9 @@
 # GitHub Changelog
 
+## [Menu Commands] - 2023-07-10
+
+- Add Issues Menu Command
+
 ## [Support rerun failed workflow jobs] - 2023-06-27
 
 - Support rerun failed workflow jobs in `Workflow Runs` command
