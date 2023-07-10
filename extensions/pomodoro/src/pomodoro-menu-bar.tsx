@@ -56,7 +56,11 @@ export default function TogglePomodoroTimer() {
     icon = Icon[(progressInQuarters > 0 ? `CircleProgress${progressInQuarters}` : "Circle") as keyof typeof Icon];
   }
 
-  const title = preferences.enableTimeOnMenuBar ? (currentInterval ? secondsToTime(currentInterval.length - duration(currentInterval)) : "--:--") : undefined
+  const title = preferences.enableTimeOnMenuBar
+    ? currentInterval
+      ? secondsToTime(currentInterval.length - duration(currentInterval))
+      : "--:--"
+    : undefined;
 
   return (
     <MenuBarExtra icon={icon} title={title} tooltip={"Pomodoro"}>
