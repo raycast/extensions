@@ -7,7 +7,9 @@ import PermissionErrorScreen from "./components/PermissionErrorScreen";
 import SelectBrowsers from "./components/SelectBrowsers";
 import useAvailableBrowsers, { BROWSERS_BUNDLE_ID } from "./hooks/useAvailableBrowsers";
 import useBraveBookmarks from "./hooks/useBraveBookmarks";
+import useBraveBetaBookmarks from "./hooks/useBraveBetaBookmarks";
 import useChromeBookmarks from "./hooks/useChromeBookmarks";
+import useChromeDevBookmarks from "./hooks/useChromeDevBookmarks";
 import useEdgeBookmarks from "./hooks/useEdgeBookmarks";
 import useFirefoxBookmarks from "./hooks/useFirefoxBookmarks";
 import useSafariBookmarks from "./hooks/useSafariBookmarks";
@@ -77,13 +79,17 @@ export default function Command() {
   const [selectedFolderId, setSelectedFolderId] = useState("");
 
   const hasBrave = browsers.includes(BROWSERS_BUNDLE_ID.brave) ?? false;
+  const hasBraveBeta = browsers.includes(BROWSERS_BUNDLE_ID.braveBeta) ?? false;
   const hasChrome = browsers.includes(BROWSERS_BUNDLE_ID.chrome) ?? false;
+  const hasChromeDev = browsers.includes(BROWSERS_BUNDLE_ID.chromeDev) ?? false;
   const hasEdge = browsers.includes(BROWSERS_BUNDLE_ID.edge) ?? false;
   const hasFirefox = browsers.includes(BROWSERS_BUNDLE_ID.firefox) ?? false;
   const hasSafari = browsers.includes(BROWSERS_BUNDLE_ID.safari) ?? false;
 
   const brave = useBraveBookmarks(hasBrave);
+  const braveBeta = useBraveBetaBookmarks(hasBraveBeta);
   const chrome = useChromeBookmarks(hasChrome);
+  const chromeDev = useChromeDevBookmarks(hasChromeDev);
   const edge = useEdgeBookmarks(hasEdge);
   const firefox = useFirefoxBookmarks(hasFirefox);
   const safari = useSafariBookmarks(hasSafari);
@@ -94,7 +100,9 @@ export default function Command() {
   useEffect(() => {
     const bookmarks = [
       ...brave.bookmarks,
+      ...braveBeta.bookmarks,
       ...chrome.bookmarks,
+      ...chromeDev.bookmarks,
       ...edge.bookmarks,
       ...firefox.bookmarks,
       ...safari.bookmarks,
@@ -133,7 +141,9 @@ export default function Command() {
     setBookmarks(bookmarks);
   }, [
     brave.bookmarks,
+    braveBeta.bookmarks,
     chrome.bookmarks,
+    chromeDev.bookmarks,
     edge.bookmarks,
     firefox.bookmarks,
     safari.bookmarks,
@@ -142,10 +152,10 @@ export default function Command() {
   ]);
 
   useEffect(() => {
-    const folders = [...brave.folders, ...chrome.folders, ...edge.folders, ...firefox.folders, ...safari.folders];
+    const folders = [...brave.folders, ...braveBeta.folders, ...chrome.folders, ...chromeDev.folders, ...edge.folders, ...firefox.folders, ...safari.folders];
 
     setFolders(folders);
-  }, [brave.folders, chrome.folders, edge.folders, firefox.folders, safari.folders, setFolders]);
+  }, [brave.folders, braveBeta.folders, chrome.folders, chromeDev.folders, edge.folders, firefox.folders, safari.folders, setFolders]);
 
   const folderBookmarks = useMemo(() => {
     return bookmarks.filter((item) => {
@@ -195,11 +205,15 @@ export default function Command() {
     if (hasBrave) {
       brave.mutate();
     }
-
+    if (hasBraveBeta) {
+      braveBeta.mutate();
+    }
     if (hasChrome) {
       chrome.mutate();
     }
-
+    if (hasChromeDev) {
+      chromeDev.mutate();
+    }
     if (hasEdge) {
       edge.mutate();
     }
@@ -248,7 +262,9 @@ export default function Command() {
         isLoadingBrowsers ||
         isLoadingFrecencies ||
         brave.isLoading ||
+        braveBeta.isLoading ||
         chrome.isLoading ||
+        chromeDev.isLoading ||
         edge.isLoading ||
         firefox.isLoading ||
         safari.isLoading
@@ -303,7 +319,15 @@ export default function Command() {
                     currentProfile={brave.currentProfile}
                     setCurrentProfile={brave.setCurrentProfile}
                   />
-
+                  <SelectProfileSubmenu
+                    bundleId={BROWSERS_BUNDLE_ID.braveBeta}
+                    name="Brave Beta"
+                    icon="brave.png"
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "b" }}
+                    profiles={braveBeta.profiles}
+                    currentProfile={braveBeta.currentProfile}
+                    setCurrentProfile={braveBeta.setCurrentProfile}
+                  />
                   <SelectProfileSubmenu
                     bundleId={BROWSERS_BUNDLE_ID.chrome}
                     name="Chrome"
@@ -313,7 +337,15 @@ export default function Command() {
                     currentProfile={chrome.currentProfile}
                     setCurrentProfile={chrome.setCurrentProfile}
                   />
-
+                  <SelectProfileSubmenu
+                    bundleId={BROWSERS_BUNDLE_ID.chromeDev}
+                    name="Chrome Dev"
+                    icon="chrome-dev.png"
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                    profiles={chromeDev.profiles}
+                    currentProfile={chromeDev.currentProfile}
+                    setCurrentProfile={chromeDev.setCurrentProfile}
+                  />
                   <SelectProfileSubmenu
                     bundleId={BROWSERS_BUNDLE_ID.edge}
                     name="Edge"
