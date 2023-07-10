@@ -166,6 +166,7 @@ export interface TemplateBaseOps {
   tags: string[];
   avatar: string;
   is_pub: boolean;
+  hot_index: number;
   sample: string;
 }
 

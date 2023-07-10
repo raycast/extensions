@@ -13,6 +13,9 @@ export function useQuestion(props: { initialQuestion: string; disableAutoLoad?: 
   });
 
   useEffect(() => {
+    if (initialQuestion) {
+      return;
+    }
     (async () => {
       if (isAutoLoadText && !disableAutoLoad) {
         setLoading(true);
