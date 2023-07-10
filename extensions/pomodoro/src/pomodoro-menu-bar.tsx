@@ -50,10 +50,10 @@ export default function TogglePomodoroTimer() {
   }
 
   let icon;
-  icon = { source: { light: "tomato-light.png", dark: "tomato-dark.png" } };
+  icon = { source: { light: "tomato-light-0.png", dark: "tomato-dark-0.png" } };
   if (currentInterval) {
-    const progressInQuarters = Math.floor(progress(currentInterval) / 25) * 25;
-    icon = Icon[(progressInQuarters > 0 ? `CircleProgress${progressInQuarters}` : "Circle") as keyof typeof Icon];
+    const progressInTenth = 100 - Math.floor(progress(currentInterval) / 10) * 10;
+    icon = { source: { light: `tomato-light-${progressInTenth}.png`, dark: `tomato-dark-${progressInTenth}.png` } };
   }
 
   const title = currentInterval ? secondsToTime(currentInterval.length - duration(currentInterval)) : "--:--";
