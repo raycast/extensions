@@ -115,6 +115,10 @@ export default function Command() {
           text="Theme name is optional. Leave it blank to have AI generate it for you!"
         />
         <Form.TextField id="themeName" placeholder="Name your theme..." />
+        <Form.Description
+          title="Image"
+          text="Images larger than ~4k are not guarenteed to work. If you must use such a high-quality image, please ues an external image compressor."
+        />
         <Form.FilePicker
           id="image"
           title="Image"
