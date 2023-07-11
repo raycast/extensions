@@ -108,11 +108,61 @@
       ]
     },
     {
+      "name": "tempType",
+      "type": "dropdown",
+      "title": "Show in menubar",
+      "description": "Temperature type",
+      "required": false,
+      "default": "temperature",
+      "data": [
+        {
+          "title": "Forecast",
+          "value": "temperature"
+        },
+        {
+          "title": "Feels-like",
+          "value": "apparent_temperature"
+        }
+      ]
+    },
+    {
+      "name": "menuUVI",
+      "type": "checkbox",
+      "label": "UV Index",
+      "description": "Show UV index in menu",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "menuPressure",
+      "type": "checkbox",
+      "label": "Pressure",
+      "description": "Show pressure in menu",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "menuHumidity",
+      "type": "checkbox",
+      "label": "Humidity",
+      "description": "Show humidity in menu",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "menuWind",
+      "type": "checkbox",
+      "label": "Wind",
+      "description": "Show wind in menu",
+      "required": false,
+      "default": false
+    },
+    {
       "name": "showSun",
       "type": "checkbox",
       "label": "Sunrise and sunset",
-      "title": "Additional Info",
-      "description": "Show sunrise and sunset",
+      "title": "Show in details",
+      "description": "Show sunrise and sunset in details",
       "required": false,
       "default": true
     },
@@ -120,7 +170,7 @@
       "name": "showUVI",
       "type": "checkbox",
       "label": "UV Index",
-      "description": "Show UV Index",
+      "description": "Show UV Index in details",
       "required": false,
       "default": true
     },
@@ -128,7 +178,7 @@
       "name": "showLocation",
       "type": "checkbox",
       "label": "Geolocation Information",
-      "description": "Show geolocation information",
+      "description": "Show geolocation information in details",
       "required": false,
       "default": true
     },
@@ -136,7 +186,7 @@
       "name": "showForecast",
       "type": "checkbox",
       "label": "7-day weather forecast",
-      "description": "Show 7-day weather forecast",
+      "description": "Show 7-day weather forecast in details",
       "required": false,
       "default": true
     }

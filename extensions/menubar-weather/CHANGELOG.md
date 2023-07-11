@@ -1,5 +1,9 @@
 # Menubar Weather Changelog
 
+## [Ass menubar info configutation] - 2023-07-11
+
+- You can choose temperature type, UVI, pressure, humidity and rain to display in the menubar.
+
 ## [Add UV Index] - 2023-07-03
 
 - UV Index (UVI) is now included in the current weather and forecast
