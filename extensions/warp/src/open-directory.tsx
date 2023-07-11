@@ -3,7 +3,7 @@ import { useRef, useState } from "react";
 import os from "node:os";
 import spotlight from "node-spotlight";
 import { usePromise } from "@raycast/utils";
-import { newTab, newWindow } from "./uri";
+import { newTab, newWindow, openUri } from "./uri";
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
@@ -71,12 +71,17 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <Action.OpenInBrowser icon={Icon.Terminal} title="Open in New Warp Tab" url={newTab(searchResult.path)} />
+            <Action
+              icon={Icon.Terminal}
+              title="Open in New Warp Tab"
+              onAction={() => openUri(newTab(searchResult.path))}
+            />
           </ActionPanel.Section>
           <ActionPanel.Section>
-            <Action.OpenInBrowser
+            <Action
               title="Open in New Warp Window"
-              url={newWindow(searchResult.path)}
+              icon={Icon.Terminal}
+              onAction={() => openUri(newWindow(searchResult.path))}
               shortcut={{ modifiers: ["cmd"], key: "o" }}
             />
             <Action.CreateQuicklink

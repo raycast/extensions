@@ -5,7 +5,7 @@ import path from "node:path";
 import os from "node:os";
 import YAML from "yaml";
 import { usePromise } from "@raycast/utils";
-import { launchConfig } from "./uri";
+import { launchConfig, openUri } from "./uri";
 
 interface SearchResult {
   name: string;
@@ -101,7 +101,7 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <Action.OpenInBrowser title="Launch" icon={Icon.Terminal} url={launchConfig(searchResult.name)} />
+            <Action title="Launch" icon={Icon.Terminal} onAction={() => openUri(launchConfig(searchResult.name))} />
           </ActionPanel.Section>
           <ActionPanel.Section>
             <Action.ShowInFinder

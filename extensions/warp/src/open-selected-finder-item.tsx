@@ -2,7 +2,7 @@ import { getSelectedFinderItems, showToast, Toast, open, getFrontmostApplication
 import { runAppleScript } from "@raycast/utils";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { newTab } from "./uri";
+import { newTab, openWarp } from "./uri";
 
 const fallback = async (): Promise<boolean> => {
   const app = await getFrontmostApplication();
@@ -19,6 +19,7 @@ const fallback = async (): Promise<boolean> => {
     return false;
   }
 
+  await openWarp();
   await open(newTab(currentDirectory));
 
   return true;
@@ -42,12 +43,14 @@ export default async function Command() {
       return;
     }
 
+    await openWarp();
+
     const results = await Promise.all(selectedItems.map((item) => fs.stat(item.path).then((info) => ({ item, info }))));
 
     results
       .map((result) => (result.info.isDirectory() ? result.item.path : path.dirname(result.item.path)))
       .filter((value, index, self) => self.indexOf(value) === index)
-      .forEach((toOpen) => open(newTab(toOpen)));
+      .forEach(async (toOpen) => await open(newTab(toOpen)));
   } catch (error) {
     await showToast({
       style: Toast.Style.Failure,
