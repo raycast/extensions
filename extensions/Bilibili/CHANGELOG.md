@@ -2,7 +2,7 @@
 
 ## [New Feat] - 2023-07-04
 
-- Notify of the new dynamics
+- Support notifications
 
 ## [Fix Bug] - 2022-09-28
 
