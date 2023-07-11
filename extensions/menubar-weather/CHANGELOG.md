@@ -1,8 +1,8 @@
 # Menubar Weather Changelog
 
-## [Add option to show feels-like in the menubar]
+## [Ass menubar info configutation] - 2023-07-11
 
-- You can choose to display either the forecasted or the "feels-like" temperature in the menubar.
+- You can choose temperature type, UVI, pressure, humidity and rain to display in the menubar.
 
 ## [Add UV Index] - 2023-07-03
 

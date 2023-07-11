@@ -5,6 +5,10 @@ import {
   latitude,
   longitude,
   tempType,
+  menuUVI,
+  menuPressure,
+  menuHumidity,
+  menuWind,
   showForecast,
   showLocation,
   showSun,
@@ -20,6 +24,10 @@ export enum CacheKey {
   LONGITUDE = "Longitude",
   LATITUDE = "Latitude",
   TEMP_TYPE = "Temperature to display",
+  MENU_UVI = "Show UV index in menu",
+  MENU_PRESSURE = "Show pressure in menu",
+  MENU_HUMIDITY = "Show humidity in menu",
+  MENU_WIND = "Show wind in menu",
   SHOW_SUN = "Show Sun",
   SHOW_LOCATION = "Show Location",
   SHOW_FORECAST = "Show Forecast",
@@ -131,6 +139,10 @@ export function preferencesChanged() {
   cache.set(CacheKey.SHOW_LOCATION, JSON.stringify(showLocation));
   cache.set(CacheKey.SHOW_FORECAST, JSON.stringify(showForecast));
   cache.set(CacheKey.SHOW_UVI, JSON.stringify(showUVI));
+  cache.set(CacheKey.MENU_UVI, JSON.stringify(menuUVI));
+  cache.set(CacheKey.MENU_PRESSURE, JSON.stringify(menuPressure));
+  cache.set(CacheKey.MENU_HUMIDITY, JSON.stringify(menuHumidity));
+  cache.set(CacheKey.MENU_WIND, JSON.stringify(menuWind));
 
   return (
     oldCityName !== newCityName ||
