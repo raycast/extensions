@@ -44,9 +44,7 @@ export default function SearchPage(props: { arguments: { title: string } }) {
       {search ? (
         data?.language === language && (
           <View.Section title="Results">
-            {data?.results.map((title: string) => (
-              <PageItem key={title} title={title} language={language} />
-            ))}
+            {data?.results.map((title: string) => <PageItem key={title} title={title} language={language} />)}
           </View.Section>
         )
       ) : (
