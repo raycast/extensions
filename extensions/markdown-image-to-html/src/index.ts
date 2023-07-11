@@ -33,7 +33,7 @@ export default async function main(
 }
 
 async function getBestMatch(regex: RegExp, param: string | undefined): Promise<string | undefined> {
-  if (param) {
+  if (param && regex.test(param)) {
     return param;
   }
   try {
