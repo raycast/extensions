@@ -20,8 +20,8 @@ export default function MemoryMonitor() {
 
   useInterval(() => {
     getFreeDiskSpace()
-      .then((newFreeDisk) => {
-        getMemoryUsage()
+      .then(async (newFreeDisk) => {
+        return getMemoryUsage()
           .then((memoryUsage) => {
             const memTotal: number = memoryUsage.memTotal;
             const memUsed: number = memoryUsage.memUsed;
@@ -41,9 +41,9 @@ export default function MemoryMonitor() {
             setError(err);
           });
       })
-      .then(() => {
+      .then(async () => {
         if (!state.topProcess.length) {
-          getTopRamProcess()
+          return getTopRamProcess()
             .then((newTopProcess) => {
               setState((prevState) => {
                 return {
