@@ -1,8 +1,101 @@
-import { List, Icon, ListItem, ActionPanel, showToast, LaunchType, Clipboard, launchCommand } from "@raycast/api";
+import {
+  List,
+  Icon,
+  ListItem,
+  ActionPanel,
+  getPreferenceValues,
+  showToast,
+  LaunchType,
+  Clipboard,
+  launchCommand,
+} from "@raycast/api";
 import { useState } from "react";
 import fs from "fs";
 import path from "path";
 import { environment } from "@raycast/api";
+import { sendMessageToWebhook } from "./utils/discordwebhook";
+import { WebhookClient, EmbedBuilder } from "discord.js";
+
+const preferences = getPreferenceValues<Preferences>();
+const webhookURL = preferences.webhookurl;
+const sendWhen = preferences.when;
+
+const webhookUrl = `${webhookURL}`;
+
+function extractWebhookInfo(webhookUrl: string) {
+  const [, webhookId, webhookToken] = webhookUrl.match(/\/webhooks\/(\d+)\/([\w-]+)/) || [];
+  return { webhookId, webhookToken };
+}
+
+export async function webhookInfo(webhookUrl: string) {
+  const { webhookId, webhookToken } = extractWebhookInfo(webhookUrl);
+
+  const webhookClient = new WebhookClient({ id: webhookId, token: webhookToken });
+  checktimes();
+
+  async function checktimes() {
+    try {
+      const currentTime = `${Math.round(new Date().getTime() / 1000)}`;
+      const csvFilePath = path.join(environment.supportPath, "webhookdis.csv");
+      const data = fs.readFileSync(csvFilePath, "utf8");
+      const rows = data.trim().split("\n");
+
+      for (const row of rows) {
+        const fields = row.trim().split(",");
+
+        if (fields[1] < currentTime) {
+          // Reminder has expired, delete this row from the CSV file
+          const expembed = new EmbedBuilder().setTitle("Reminder Expired").setColor(0xd8696f).setFields().addFields({
+            name: "Your reminder has expired:",
+            value: `Unfortunatley, this reminder has expired!`,
+            inline: false,
+          });
+          await webhookClient.editMessage(`${fields[0]}`, {
+            embeds: [expembed],
+          });
+          const rowIndex = rows.indexOf(row);
+          rows.splice(rowIndex, 1);
+          fs.writeFileSync(csvFilePath, rows.join("\n"), { mode: 0o777 });
+        }
+      }
+    } catch (error) {
+      console.error("Error reading or writing CSV file:", error);
+    }
+  }
+}
+
+webhookInfo(webhookUrl);
+
+const csvFilePath = path.join(environment.supportPath, "remembering.csv");
+const data = fs.readFileSync(csvFilePath, "utf8");
+const rows = data.split("\n");
+
+for (let i = 0; i < rows.length; i++) {
+  const fields = rows[i].split(",");
+
+  const dateString = fields[0].trim();
+
+  if (dateString === "") {
+    continue;
+  }
+
+  const isoDateFormat = /(\d{4})-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])([Tt](\d{2}):(\d{2}):(\d{2})\.(\d{3})[Zz]?)/;
+
+  if (isoDateFormat.test(dateString)) {
+    const closestDate = new Date(dateString);
+    const timestamp = closestDate.toISOString();
+    const unixTimestamp = Date.parse(timestamp) / 1000;
+    const roundedts = Math.round(unixTimestamp);
+
+    const messageContent = fields[1];
+
+    if (sendWhen === "asap") {
+      sendMessageToWebhook(webhookUrl, messageContent, roundedts);
+    }
+  }
+
+  i++;
+}
 
 launchCommand({ name: "menu", type: LaunchType.UserInitiated });
 

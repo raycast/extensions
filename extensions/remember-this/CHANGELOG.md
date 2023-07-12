@@ -30,6 +30,7 @@ Applying a recommended update will ensure you:
     - Add menubar size formats of Large (Notification Name - Coundown)
     - Add the ability to send notifications through discord webhooks!
     - Add notifications command
+    - Add `When should notifications to different services be sent?` prefrence
 
     ## Improvements
     - Optimized for better performance

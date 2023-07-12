@@ -6,6 +6,7 @@ import { WebhookClient, EmbedBuilder } from "discord.js";
 
 const preferences = getPreferenceValues<Preferences>();
 const webhookURL = preferences.webhookurl;
+const sendWhen = preferences.when;
 
 const webhookUrl = `${webhookURL}`;
 
@@ -271,7 +272,9 @@ export default function Command() {
   const unixTimestamp = Date.parse(timestamp) / 1000; // Divide by 1000 to convert to seconds
   const roundedts = Math.round(unixTimestamp);
 
-  sendMessageToWebhook(webhookUrl, messageContent, roundedts);
+  if (sendWhen === "next") {
+    sendMessageToWebhook(webhookUrl, messageContent, roundedts);
+  }
 
   if (sizeValue === "normal") {
     return (

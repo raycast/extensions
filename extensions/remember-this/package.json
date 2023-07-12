@@ -124,7 +124,6 @@
       "type": "dropdown",
       "required": true,
       "title": "Menubar Command Format",
-      "placeholder": "Placeholder",
       "default": "normal",
       "data": [
         {
@@ -143,12 +142,34 @@
     },
     {
       "name": "webhookurl",
-      "description": "Discord WebhookURL",
+      "description": "Discord Webhook",
       "type": "password",
       "required": false,
-      "title": "Discord WebhookURL",
-      "placeholder": "WebhookURL"
-    }
+      "title": "Discord Webhook",
+      "placeholder": "Leave empty to disable discord webhooks"
+    },
+    {
+          "name": "when",
+          "description": "When should notifications to different services be sent?\n {1} - Never send any notifications\n {2} - When it's the next item due (requires menubar command enabled)\n {3} - When it's adedd to Remember This (requires list command enabled)",
+          "type": "dropdown",
+          "required": true,
+          "title": "When should notifications be sent?",
+          "default": "next",
+          "data": [
+            {
+              "title": "1 - Never send any notifications",
+              "value": "never"
+            },
+            {
+              "title": "2 - When it's the next item due",
+              "value": "next"
+            },
+            {
+              "title": "3 - When it's adedd to Remember This",
+              "value": "asap"
+            }
+          ]
+        }
 
   ],
   "dependencies": {
