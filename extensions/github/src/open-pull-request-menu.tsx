@@ -1,14 +1,19 @@
-import { Color, LaunchType, getPreferenceValues, launchCommand, open } from "@raycast/api";
+import { Color, Icon, LaunchType, getPreferenceValues, launchCommand, open } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 
-import { MenuBarItem, MenuBarRoot, MenuBarSection, getBoundedPreferenceNumber } from "./components/Menu";
+import {
+  MenuBarItem,
+  MenuBarItemConfigureCommand,
+  MenuBarRoot,
+  MenuBarSection,
+  getBoundedPreferenceNumber,
+} from "./components/Menu";
 import View from "./components/View";
-import { IssueFieldsFragment } from "./generated/graphql";
 import { PullRequestFieldsFragment } from "./generated/graphql";
 import { getGitHubClient } from "./helpers/withGithubClient";
 
-async function launchIssuesCommand(): Promise<void> {
-  return launchCommand({ name: "search-issues", type: LaunchType.UserInitiated });
+async function launchMyPullRequestsCommand(): Promise<void> {
+  return launchCommand({ name: "my-pull-requests", type: LaunchType.UserInitiated });
 }
 
 function displayTitlePreference() {
@@ -43,20 +48,35 @@ function OpenPullRequestMenu() {
       isLoading={isLoading}
       tooltip="GitHub My Open Pull Requests"
     >
+      <MenuBarSection title="My Pull Requests">
+        <MenuBarItem
+          title="Open My Pull Requests"
+          icon={Icon.Terminal}
+          shortcut={{ modifiers: ["cmd"], key: "o" }}
+          onAction={() => launchMyPullRequestsCommand()}
+        />
+      </MenuBarSection>
       <MenuBarSection
-        title="My Pull Request"
         maxChildren={getMaxPullRequestsPreference()}
-        moreElement={(hidden) => <MenuBarItem title={`... ${hidden} more`} onAction={() => launchIssuesCommand()} />}
+        moreElement={(hidden) => (
+          <MenuBarItem title={`... ${hidden} more`} onAction={() => launchMyPullRequestsCommand()} />
+        )}
       >
-        {(data?.length || 0) <= 0 && <MenuBarItem title="No Pull Requests" onAction={() => launchIssuesCommand()} />}
+        {(data?.length || 0) <= 0 && (
+          <MenuBarItem key="-" title="No Pull Requests" onAction={() => launchMyPullRequestsCommand()} />
+        )}
         {data?.map((i) => (
           <MenuBarItem
             key={i.id}
             title={`#${i.number} ${i.title}`}
             icon="pull-request.svg"
+            tooltip={i.repository.nameWithOwner}
             onAction={() => open(i.permalink)}
           />
         ))}
+      </MenuBarSection>
+      <MenuBarSection>
+        <MenuBarItemConfigureCommand />
       </MenuBarSection>
     </MenuBarRoot>
   );

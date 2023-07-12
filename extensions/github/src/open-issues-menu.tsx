@@ -1,13 +1,19 @@
-import { Color, LaunchType, getPreferenceValues, launchCommand, open } from "@raycast/api";
+import { Color, Icon, LaunchType, getPreferenceValues, launchCommand, open } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 
-import { MenuBarItem, MenuBarRoot, MenuBarSection, getBoundedPreferenceNumber } from "./components/Menu";
+import {
+  MenuBarItem,
+  MenuBarItemConfigureCommand,
+  MenuBarRoot,
+  MenuBarSection,
+  getBoundedPreferenceNumber,
+} from "./components/Menu";
 import View from "./components/View";
 import { IssueFieldsFragment } from "./generated/graphql";
 import { getGitHubClient } from "./helpers/withGithubClient";
 
-async function launchIssuesCommand(): Promise<void> {
-  return launchCommand({ name: "search-issues", type: LaunchType.UserInitiated });
+async function launchOpenIssuesCommand(): Promise<void> {
+  return launchCommand({ name: "open-issues", type: LaunchType.UserInitiated });
 }
 
 function displayTitlePreference() {
@@ -44,19 +50,38 @@ function OpenIssuesMenu() {
       tooltip="GitHub Open Issues"
     >
       <MenuBarSection
-        title="Issues"
+        title="Open Issues"
         maxChildren={getMaxIssuesPreference()}
-        moreElement={(hidden) => <MenuBarItem title={`... ${hidden} more`} onAction={() => launchIssuesCommand()} />}
+        moreElement={(hidden) => (
+          <MenuBarItem title={`... ${hidden} more`} onAction={() => launchOpenIssuesCommand()} />
+        )}
       >
-        {(data?.length || 0) <= 0 && <MenuBarItem title="No Issues" onAction={() => launchIssuesCommand()} />}
+        <MenuBarItem
+          title="Open Issues"
+          icon={Icon.Terminal}
+          shortcut={{ modifiers: ["cmd"], key: "o" }}
+          onAction={() => launchOpenIssuesCommand()}
+        />
+      </MenuBarSection>
+      <MenuBarSection
+        maxChildren={getMaxIssuesPreference()}
+        moreElement={(hidden) => (
+          <MenuBarItem title={`... ${hidden} more`} onAction={() => launchOpenIssuesCommand()} />
+        )}
+      >
+        {(data?.length || 0) <= 0 && <MenuBarItem title="No Issues" onAction={() => launchOpenIssuesCommand()} />}
         {data?.map((i) => (
           <MenuBarItem
             key={i.id}
             title={`#${i.number} ${i.title}`}
             icon="issue-opened.svg"
+            tooltip={i.repository.nameWithOwner}
             onAction={() => open(i.url)}
           />
         ))}
+      </MenuBarSection>
+      <MenuBarSection>
+        <MenuBarItemConfigureCommand />
       </MenuBarSection>
     </MenuBarRoot>
   );
