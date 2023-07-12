@@ -23,10 +23,10 @@ export default function Command() {
               onAction={async (event) => {
                 if (event.type === "left-click") {
                   await Clipboard.copy(valueHist.data.value);
-                  await showHUD(`${valueHist.data.value} Copied color to clipboard`);
+                  await showHUD(`${valueHist.data.value} Copied value to clipboard`);
                 } else {
                   remove(valueHist);
-                  await showHUD("Deleted color from history");
+                  await showHUD("Deleted values from history");
                 }
               }}
             />
