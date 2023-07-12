@@ -1,4 +1,15 @@
-import { Action, ActionPanel, Clipboard, Color, Detail, Grid, Icon, showInFinder, showToast, Toast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Clipboard,
+  Color,
+  Detail,
+  Grid,
+  Icon,
+  showInFinder,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 import { getClipboardDownloadFolder, getDownloadFolder, Hit, Pixabay, showInFolderAfterDownload } from "./lib/api";
