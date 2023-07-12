@@ -3,7 +3,7 @@
   "name": "alacritty",
   "title": "Alacritty",
   "description": "Adds commands to control the Alacritty terminal emulator.",
-  "icon": "alacritty-term.svg",
+  "icon": "alacritty-term.png",
   "author": "jose-elias-alvarez",
   "categories": [
     "Developer Tools",
@@ -25,13 +25,13 @@
     },
     {
       "name": "run-from-clipboard",
-      "title": "Run Command from Clipboard",
+      "title": "Run Command From Clipboard",
       "description": "Run the current clipboard content as a shell command in Alacritty. Use at your own risk!",
       "mode": "no-view"
     },
     {
       "name": "run-from-selection",
-      "title": "Run Command from Selection",
+      "title": "Run Command From Selection",
       "description": "Run the currently selected text as a shell command in Alacritty. Use at your own risk!",
       "mode": "no-view"
     }
