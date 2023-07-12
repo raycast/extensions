@@ -19,36 +19,66 @@ export default function MemoryMonitor() {
   });
 
   useInterval(() => {
-    getTopRamProcess()
-      .then((newTopProcess) => {
-        getFreeDiskSpace()
-          .then((newFreeDisk) => {
-            getMemoryUsage().then((memoryUsage) => {
-              const memTotal: number = memoryUsage.memTotal;
-              const memUsed: number = memoryUsage.memUsed;
-              const freeMem: number = memTotal - memUsed;
+    getFreeDiskSpace()
+      .then((newFreeDisk) => {
+        getMemoryUsage()
+          .then((memoryUsage) => {
+            const memTotal: number = memoryUsage.memTotal;
+            const memUsed: number = memoryUsage.memUsed;
+            const freeMem: number = memTotal - memUsed;
 
+            setState((prevState) => {
+              return {
+                ...prevState,
+                freeDisk: newFreeDisk,
+                totalMem: Math.round(memTotal / 1024).toString(),
+                freeMemPercentage: Math.round((freeMem * 100) / memTotal).toString(),
+                freeMem: Math.round(freeMem / 1024).toString(),
+              };
+            });
+          })
+          .catch((err: ExecError) => {
+            setError(err);
+          });
+      })
+      .then(() => {
+        if (!state.topProcess.length) {
+          getTopRamProcess()
+            .then((newTopProcess) => {
               setState((prevState) => {
                 return {
                   ...prevState,
-                  freeDisk: newFreeDisk,
-                  totalMem: Math.round(memTotal / 1024).toString(),
-                  freeMemPercentage: Math.round((freeMem * 100) / memTotal).toString(),
-                  freeMem: Math.round(freeMem / 1024).toString(),
                   topProcess: newTopProcess,
                 };
               });
-              setIsLoading(false);
+            })
+            .catch((err: ExecError) => {
+              setError(err);
             });
-          })
-          .catch((error: ExecError) => {
-            setError(error);
-          });
+        }
+      })
+      .then(() => {
+        setIsLoading(false);
+      })
+      .catch((error: ExecError) => {
+        setError(error);
+      });
+  }, 1000);
+
+  useInterval(() => {
+    getTopRamProcess()
+      .then((newTopProcess) => {
+        setState((prevState) => {
+          return {
+            ...prevState,
+            topProcess: newTopProcess,
+          };
+        });
       })
       .catch((err: ExecError) => {
         setError(err);
       });
-  }, 1000);
+  }, 5000);
 
   useEffect(() => {
     const permData = () => {
