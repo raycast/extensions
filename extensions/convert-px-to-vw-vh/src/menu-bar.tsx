@@ -26,7 +26,6 @@ export default function Command() {
                   await showHUD(`${valueHist.data.value} Copied value to clipboard`);
                 } else {
                   remove(valueHist);
-                  await showHUD("Deleted values from history");
                 }
               }}
             />
