@@ -85,9 +85,25 @@ function EntryItem(props: { entry: EntryLike; pinned?: boolean } & PinMethods) {
   } else if (isFolderEntry(props.entry)) {
     return <LocalItem {...props} uri={props.entry.folderUri} />;
   } else if (isRemoteEntry(props.entry)) {
-    return <RemoteItem {...props} uri={props.entry.folderUri} subtitle={props.entry.label} entry={props.entry} pinned={props.pinned} />;
-  } else if(isRemoteWorkspaceEntry(props.entry)) {
-    return <RemoteItem {...props} uri={props.entry.workspace.configPath} subtitle={props.entry.label} entry={props.entry} pinned={props.pinned} />;
+    return (
+      <RemoteItem
+        {...props}
+        uri={props.entry.folderUri}
+        subtitle={props.entry.label}
+        entry={props.entry}
+        pinned={props.pinned}
+      />
+    );
+  } else if (isRemoteWorkspaceEntry(props.entry)) {
+    return (
+      <RemoteItem
+        {...props}
+        uri={props.entry.workspace.configPath}
+        subtitle={props.entry.label}
+        entry={props.entry}
+        pinned={props.pinned}
+      />
+    );
   } else if (isFileEntry(props.entry)) {
     return <LocalItem {...props} uri={props.entry.fileUri} />;
   } else {

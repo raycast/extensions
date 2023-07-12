@@ -1,7 +1,15 @@
 import { existsSync } from "fs";
 import { URL } from "url";
 import { isDeepStrictEqual } from "util";
-import { EntryType, EntryLike, FileEntry, FolderEntry, RemoteEntry, WorkspaceEntry, RemoteWorkspaceEntry } from "./types";
+import {
+  EntryType,
+  EntryLike,
+  FileEntry,
+  FolderEntry,
+  RemoteEntry,
+  WorkspaceEntry,
+  RemoteWorkspaceEntry,
+} from "./types";
 import { open } from "@raycast/api";
 import * as fs from "fs";
 import { getBuildScheme } from "./lib/vscode";
