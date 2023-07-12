@@ -6,7 +6,7 @@ export const wrapWithErrorToast = (fn: () => Promise<unknown>) => async () => {
   } catch (e) {
     await showToast({
       title: "Error",
-      message: String(e),
+      message: e instanceof Error ? e.message : String(e),
       style: Toast.Style.Failure,
     });
   }
