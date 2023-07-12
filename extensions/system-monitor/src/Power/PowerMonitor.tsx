@@ -45,7 +45,7 @@ const PowerMonitor = () => {
               })
               .then(() => {
                 if (state.timeOnBattery === "Calculating...") {
-                  getTimeOnBattery(isCharging)
+                  getTimeOnBattery()
                     .then((timeOnBattery) => {
                       setState((prevState) => {
                         return {
@@ -76,7 +76,7 @@ const PowerMonitor = () => {
   useInterval(async () => {
     getIsCharging()
       .then((isCharging) => {
-        getTimeOnBattery(isCharging)
+        getTimeOnBattery()
           .then((timeOnBattery) => {
             setState((prevState) => {
               return {
