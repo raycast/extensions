@@ -7,7 +7,6 @@ import {
   getCycleCount,
   getIsCharging,
   getMaxBatteryCapacity,
-  isValidTime,
   getTimeOnBattery,
 } from "./PowerUtils";
 import { useInterval } from "usehooks-ts";
@@ -119,7 +118,7 @@ const PowerMonitor = () => {
               <List.Item.Detail.Metadata.Label title="Maximum Battery Capacity" text={state.maxBatteryCapacity} />
               <List.Item.Detail.Metadata.Label
                 title={state.isCharging ? "Time to charge" : "Time to discharge"}
-                text={isValidTime(state.batteryTime) ? state.batteryTime : "Calculating..."}
+                text={state.batteryTime}
               />
               <List.Item.Detail.Metadata.Label
                 title={state.isCharging ? "Time on AC" : "Time on battery"}
