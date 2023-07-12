@@ -75,7 +75,7 @@ const PowerMonitor = () => {
 
   useInterval(async () => {
     getIsCharging()
-      .then((isCharging) => {
+      .then(() => {
         getTimeOnBattery()
           .then((timeOnBattery) => {
             setState((prevState) => {
