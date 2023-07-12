@@ -7,7 +7,8 @@
   "author": "asubbotin",
   "contributors": [
     "pernielsentikaer",
-    "brodelp"
+    "brodelp",
+    "susan_thapa"
   ],
   "keywords": [
     "pomodoro",
@@ -270,6 +271,15 @@
           "value": "Ping"
         }
       ]
+    },
+    {
+      "name": "enableTimeOnMenuBar",
+      "type": "checkbox",
+      "required": false,
+      "title": "Menu Bar Time",
+      "description": "Shows time on the Menu Bar",
+      "default": true,
+      "label": "Show time on Menu Bar"
     }
   ],
   "dependencies": {
