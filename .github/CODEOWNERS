@@ -634,7 +634,7 @@
 /extensions/nsis-reference                           @idleberg
 /extensions/nts-radio                                @arjanski
 /extensions/nuget                                    @hexpl0it
-/extensions/numi                                     @AndresMorelos @pernielsentikaer
+/extensions/numi                                     @AndresMorelos @pernielsentikaer @viandwi24
 /extensions/obs-clippings                            @trevware
 /extensions/obs-control                              @Yukaii
 /extensions/obsidian                                 @KevinBatdorf @marcjulianschwarz @KevinBatdorf @pernielsentikaer @ofalvai
@@ -794,6 +794,7 @@
 /extensions/remember-the-date                        @pernielsentikaer
 /extensions/remember-this                            @Ek2100
 /extensions/remove-background                        @maantje @FezVrasta
+/extensions/remove-paywall                           @tegola
 /extensions/render                                   @Destiner
 /extensions/replicate                                @KevinBatdorf @bfirsh @cbh123
 /extensions/rescuetime-focus-session-trigger         @tuortheblessed
@@ -1026,7 +1027,7 @@
 /extensions/wi-fi                                    @koinzhang @louishuyng
 /extensions/wifi-password-reveal                     @louishuyng
 /extensions/wiggle-text                              @PineappleRind
-/extensions/wikipedia                                @vimtor @shubzkothekar @JonathanWbn @NikosEfthias @menahishayan @pernielsentikaer @igor9silva
+/extensions/wikipedia                                @vimtor @shubzkothekar @JonathanWbn @NikosEfthias @menahishayan @pernielsentikaer @igor9silva @Ek2100
 /extensions/wireguard                                @sbugzu
 /extensions/wistia                                   @ddoria921
 /extensions/wolfram-alpha                            @mathieudutour
