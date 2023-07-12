@@ -8,6 +8,13 @@ import fetch from "cross-fetch";
 
 const streamPipeline = util.promisify(pipeline);
 
+export function getClipboardDownloadFolder(): string {
+  const d = "~/Downloads/Pixabay";
+  const prefs = getPreferenceValues();
+  const folder = (prefs.clipboarddownloadfolder as string) || d;
+  return resolveFilepath(folder);
+}
+
 export function getDownloadFolder(): string {
   const d = "~/Downloads";
   const prefs = getPreferenceValues();
