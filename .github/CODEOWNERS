@@ -99,7 +99,7 @@
 /extensions/brew                                     @nhojb @Aayush9029 @mathieudutour @urwrstkn8mare
 /extensions/brew-services                            @es183923
 /extensions/brightness-control                       @CaliCastle
-/extensions/browser-bookmarks                        @thomaslombart @sasivarnan
+/extensions/browser-bookmarks                        @thomaslombart @sasivarnan @ahpatel
 /extensions/browser-history                          @crisboarna
 /extensions/browsers-profiles                        @skydiver
 /extensions/bttv-emote                               @Aayush9029
@@ -634,10 +634,10 @@
 /extensions/nsis-reference                           @idleberg
 /extensions/nts-radio                                @arjanski
 /extensions/nuget                                    @hexpl0it
-/extensions/numi                                     @AndresMorelos @pernielsentikaer
+/extensions/numi                                     @AndresMorelos @pernielsentikaer @viandwi24
 /extensions/obs-clippings                            @trevware
 /extensions/obs-control                              @Yukaii
-/extensions/obsidian                                 @KevinBatdorf @marcjulianschwarz @KevinBatdorf @pernielsentikaer @ofalvai
+/extensions/obsidian                                 @KevinBatdorf @marcjulianschwarz @KevinBatdorf @pernielsentikaer @ofalvai @KevinBatdorf
 /extensions/obsidian-bookmarks                       @Dru89
 /extensions/odin                                     @aamoussa97
 /extensions/office-quotes                            @braydoncoyer @sandypockets
@@ -715,7 +715,7 @@
 /extensions/podcasts-now                             @cloudy9101
 /extensions/pokedex                                  @anhthang
 /extensions/polished                                 @LekoArts
-/extensions/pomodoro                                 @KELiON @pernielsentikaer @brodelp
+/extensions/pomodoro                                 @KELiON @pernielsentikaer @brodelp @susonthapa
 /extensions/porkbun                                  @xmok
 /extensions/port-manager                             @lucaschultz
 /extensions/portuguese-primeira-liga                 @danielsequeira
@@ -787,13 +787,14 @@
 /extensions/reddit-search                            @ewlcheng
 /extensions/redis                                    @k8scat
 /extensions/redmine                                  @jwickers
-/extensions/reflect                                  @RyonHuedepohl @joshknowles @joshknowles
+/extensions/reflect                                  @RyonHuedepohl @joshknowles @joshknowles @ocavue
 /extensions/refresh-wifi                             @natterstefan
 /extensions/regex-repl                               @hongkiulam
 /extensions/regex-tester                             @allenan
 /extensions/remember-the-date                        @pernielsentikaer
 /extensions/remember-this                            @Ek2100
 /extensions/remove-background                        @maantje @FezVrasta
+/extensions/remove-paywall                           @tegola
 /extensions/render                                   @Destiner
 /extensions/replicate                                @KevinBatdorf @bfirsh @cbh123
 /extensions/rescuetime-focus-session-trigger         @tuortheblessed
@@ -831,7 +832,7 @@
 /extensions/search-hexpm                             @jordelver
 /extensions/search-hookmark                          @QIanGua
 /extensions/search-mdn                               @krzysztofzuraw @OBQun @k8scat
-/extensions/search-notion                            @sadanand-singh
+/extensions/search-notion                            @sadanand-singh @erikjs14
 /extensions/search-npm                               @mrmartineau @reloadedhead @TimonVS @luisFilipePT @LunaticMuch
 /extensions/search-regexp                            @musienkoyuriy @pernielsentikaer
 /extensions/search-rubygems                          @aleks
@@ -1026,7 +1027,7 @@
 /extensions/wi-fi                                    @koinzhang @louishuyng
 /extensions/wifi-password-reveal                     @louishuyng
 /extensions/wiggle-text                              @PineappleRind
-/extensions/wikipedia                                @vimtor @shubzkothekar @JonathanWbn @NikosEfthias @menahishayan @pernielsentikaer @igor9silva
+/extensions/wikipedia                                @vimtor @shubzkothekar @JonathanWbn @NikosEfthias @menahishayan @pernielsentikaer @igor9silva @Ek2100
 /extensions/wireguard                                @sbugzu
 /extensions/wistia                                   @ddoria921
 /extensions/wolfram-alpha                            @mathieudutour
