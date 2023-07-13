@@ -66,6 +66,8 @@ export default function Command() {
     fetchData();
   }, []);
 
+  const showTimestampFormat: boolean = itemProps.prependTimestamp.value ?? false;
+
   return (
     <Form
       actions={
@@ -76,10 +78,12 @@ export default function Command() {
     >
       <Form.TextArea {...itemProps.note} title="Note" />
       <Form.Checkbox {...itemProps.prependTimestamp} label="Prepend Timestamp" storeValue={true} />
-      <Form.Dropdown {...itemProps.timestampFormat} storeValue={true}>
-        <Form.Dropdown.Item value="12" title="12 hour" />
-        <Form.Dropdown.Item value="24" title="24 hour" />
-      </Form.Dropdown>
+      {showTimestampFormat ? (
+        <Form.Dropdown {...itemProps.timestampFormat} storeValue={true}>
+          <Form.Dropdown.Item value="12" title="12 hour" />
+          <Form.Dropdown.Item value="24" title="24 hour" />
+        </Form.Dropdown>
+      ) : null}
       <Form.TextField
         {...itemProps.parentList}
         title="Parent List (Optional)"
