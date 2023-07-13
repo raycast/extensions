@@ -1,0 +1,140 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "format-code",
+  "title": "Format Code",
+  "description": "Format code on the clipboard",
+  "icon": "icon.png",
+  "author": "ikaraszi",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "format-angular",
+      "title": "Format Angular",
+      "description": "Formats Angular on the clipboard",
+      "mode": "view"
+    },
+    {
+      "name": "format-css",
+      "title": "Format CSS",
+      "description": "Formats CSS on the clipboard",
+      "mode": "view"
+    },
+    {
+      "name": "format-glimmer",
+      "title": "Format Glimmer",
+      "description": "Formats Glimmer on the clipboard",
+      "mode": "view"
+    },
+    {
+      "name": "format-graphql",
+      "title": "Format GraphQL",
+      "description": "Formats GraphQL on the clipboard",
+      "mode": "view"
+    },
+    {
+      "name": "format-html",
+      "title": "Format HTML",
+      "description": "Formats HTML on the clipboard",
+      "mode": "view"
+    },
+    {
+      "name": "format-javascript",
+      "title": "Format JavaScript",
+      "description": "Formats JavaScript on the clipboard",
+      "mode": "view"
+    },
+    {
+      "name": "format-json",
+      "title": "Format JSON",
+      "description": "Formats JSON on the clipboard",
+      "mode": "view"
+    },
+    {
+      "name": "format-json5",
+      "title": "Format JSON5",
+      "description": "Formats JSON5 on the clipboard",
+      "mode": "view"
+    },
+    {
+      "name": "format-less",
+      "title": "Format Less",
+      "description": "Formats Less on the clipboard",
+      "mode": "view"
+    },
+    {
+      "name": "format-lwc",
+      "title": "Format LWC",
+      "description": "Formats LWC on the clipboard",
+      "mode": "view"
+    },
+    {
+      "name": "format-markdown",
+      "title": "Format Markdown",
+      "description": "Formats Markdown on the clipboard",
+      "mode": "view"
+    },
+    {
+      "name": "format-mdx",
+      "title": "Format MDX",
+      "description": "Formats MDX on the clipboard",
+      "mode": "view"
+    },
+    {
+      "name": "format-scss",
+      "title": "Format SCSS",
+      "description": "Formats SCSS on the clipboard",
+      "mode": "view"
+    },
+    {
+      "name": "format-typescript",
+      "title": "Format TypeScript",
+      "description": "Formats TypeScript on the clipboard",
+      "mode": "view"
+    },
+    {
+      "name": "format-vue",
+      "title": "Format VUE",
+      "description": "Formats VUE on the clipboard",
+      "mode": "view"
+    },
+    {
+      "name": "format-yaml",
+      "title": "Format YAML",
+      "description": "Formats YAML on the clipboard",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "printWidth",
+      "title": "Print Width",
+      "type": "textfield",
+      "description": "Specify the line length that the printer will wrap on.",
+      "placeholder": "100",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.55.2",
+    "@raycast/utils": "^1.8.0",
+    "prettier": "^2.8.8"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/prettier": "^2.7.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
