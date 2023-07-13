@@ -19,7 +19,7 @@ const IconTint: Color.Dynamic = {
   light: "#000000",
   dark: "#FFFFFF",
   adjustContrast: false,
-}
+};
 
 export default function TogglePomodoroTimer() {
   const [currentInterval, setCurrentInterval] = useState<Interval | undefined>(getCurrentInterval());
