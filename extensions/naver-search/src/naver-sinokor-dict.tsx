@@ -1,12 +1,17 @@
 import { ActionPanel, closeMainWindow, Action, Icon, List, open } from "@raycast/api";
 import { getIcon } from "./naver/resultUtils";
 import { useSearch } from "./naver/useSearch";
+import { SearchTypeDict } from "./naver/types";
 
 export default function Command() {
-  const { isLoading, results, search, addHistory, deleteAllHistory, deleteHistoryItem } = useSearch("GENERAL");
+  const { isLoading, results, search, addHistory, deleteAllHistory, deleteHistoryItem } = useSearch("SIKO");
 
   return (
-    <List isLoading={isLoading} onSearchTextChange={search} searchBarPlaceholder="Search Naver or enter a URL...">
+    <List
+      isLoading={isLoading}
+      onSearchTextChange={search}
+      searchBarPlaceholder={`Search ${SearchTypeDict["SIKO"].name} or enter a URL...`}
+    >
       <List.Section title="Results" subtitle={results.length + ""}>
         {results.map((item) => (
           <List.Item
@@ -17,6 +22,7 @@ export default function Command() {
             actions={
               <ActionPanel>
                 <ActionPanel.Section title="Result">
+                  <Action.CopyToClipboard title="Copy Suggestion to Clipboard" content={item.query} />
                   <Action
                     title="Open in Browser"
                     onAction={async () => {
@@ -28,7 +34,6 @@ export default function Command() {
                   />
 
                   <Action.CopyToClipboard title="Copy URL to Clipboard" content={item.url} />
-                  <Action.CopyToClipboard title="Copy Suggestion to Clipboard" content={item.query} />
                 </ActionPanel.Section>
 
                 <ActionPanel.Section title="History">
