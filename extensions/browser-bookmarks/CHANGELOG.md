@@ -1,4 +1,7 @@
 # Browser Bookmarks Changelog
+## [Support for Brave Beta and Chrome Dev] - 2023-0709
+
+- Add support for `Brave Beta` and `Chrome Dev` browsers
 
 ## [Fuzzy Search] - 2023-06-27
 
