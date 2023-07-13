@@ -3,7 +3,9 @@
   "name": "ulid",
   "title": "ULID",
   "description": "some basic ulid tools",
-  "categories": ["Developer Tools"],
+  "categories": [
+    "Developer Tools"
+  ],
   "icon": "logo_512.png",
   "author": "entwine7250",
   "license": "MIT",

@@ -1,6 +1,6 @@
 import { Toast, showToast } from "@raycast/api";
 
-import { ulid } from 'ulidx';
+import { ulid } from "ulidx";
 import { update } from "./util/clipboard";
 
 async function generate() {
@@ -11,7 +11,7 @@ async function generate() {
       await showToast(Toast.Style.Failure, "Encode failed", e);
     }
   }
-};
+}
 
 export default async function Command() {
   await generate();

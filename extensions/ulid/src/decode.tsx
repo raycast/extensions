@@ -1,6 +1,6 @@
 import { Toast, showToast } from "@raycast/api";
-import { decodeTime, isValid } from 'ulidx';
-import { getCurrentTimestamp, getDate, getRelativeTime, toDateString } from './util/time';
+import { decodeTime, isValid } from "ulidx";
+import { getCurrentTimestamp, getDate, getRelativeTime, toDateString } from "./util/time";
 
 import { contents } from "./util/clipboard";
 
@@ -25,7 +25,7 @@ async function ulidToTime() {
       await showToast(Toast.Style.Failure, "Decode failed", e);
     }
   }
-};
+}
 
 export default async function Command() {
   await ulidToTime();
