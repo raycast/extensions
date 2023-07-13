@@ -61,10 +61,8 @@ function OpenPullRequestMenu() {
         moreElement={(hidden) => (
           <MenuBarItem title={`... ${hidden} more`} onAction={() => launchMyPullRequestsCommand()} />
         )}
+        emptyElement={<MenuBarItem title="No Pull Requests" />}
       >
-        {(data?.length || 0) <= 0 && (
-          <MenuBarItem key="-" title="No Pull Requests" onAction={() => launchMyPullRequestsCommand()} />
-        )}
         {data?.map((i) => (
           <MenuBarItem
             key={i.id}

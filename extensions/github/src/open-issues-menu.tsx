@@ -68,8 +68,8 @@ function OpenIssuesMenu() {
         moreElement={(hidden) => (
           <MenuBarItem title={`... ${hidden} more`} onAction={() => launchOpenIssuesCommand()} />
         )}
+        emptyElement={<MenuBarItem title="No Issues" />}
       >
-        {(data?.length || 0) <= 0 && <MenuBarItem title="No Issues" onAction={() => launchOpenIssuesCommand()} />}
         {data?.map((i) => (
           <MenuBarItem
             key={i.id}

@@ -94,16 +94,19 @@ export function MenuBarSection(props: {
   maxChildren?: number;
   children?: ReactNode;
   moreElement?: (hidden: number) => JSX.Element | null;
+  emptyElement?: JSX.Element | null;
 }): JSX.Element | null {
   const title = joinNonEmpty(
     [props.title, props.subtitle].filter((e) => e),
     " "
   );
   const { shown, hidden } = shownElements(props.children, props.maxChildren);
+  const empty = shown === undefined || (shown as object[]).length <= 0;
   return (
     <MenuBarExtra.Section title={title}>
       {shown}
       {hidden > 0 && props.moreElement && props.moreElement(hidden)}
+      {empty && props.emptyElement && props.emptyElement}
     </MenuBarExtra.Section>
   );
 }

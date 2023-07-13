@@ -157,7 +157,7 @@
           "description": "Show Issues Count",
           "type": "checkbox",
           "required": false,
-          "label": "Show Issues Count",
+          "label": "Show Count",
           "title": "Appearance",
           "default": true
         }
@@ -172,18 +172,18 @@
       "preferences": [
         {
           "name": "maxitems",
-          "description": "Maximum Issues shown",
+          "description": "Maximum Pull Requests shown",
           "type": "textfield",
           "required": false,
-          "title": "Max. Issues",
+          "title": "Max. Pull Requests",
           "placeholder": "10"
         },
         {
           "name": "showtext",
-          "description": "Show Issues Count",
+          "description": "Show Pull Requests Count",
           "type": "checkbox",
           "required": false,
-          "label": "Show Issues Count",
+          "label": "Show Count",
           "title": "Appearance",
           "default": true
         }
