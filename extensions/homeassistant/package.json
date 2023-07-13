@@ -343,6 +343,7 @@
     "@types/url-join": "^4.0.1",
     "@types/ws": "^8.2.0",
     "eslint": "^7.31.0",
+    "prettier": "^3.0.0",
     "typescript": "^4.3.5"
   },
   "scripts": {

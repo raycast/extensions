@@ -96,7 +96,7 @@ export class HomeAssistant {
         console.log(
           `Current SSID (${ssid}) is not in home network list (${
             this.wifiSSIDs && this.wifiSSIDs.length > 0 ? this.wifiSSIDs.join(", ") : "No SSIDS defined"
-          })`
+          })`,
         );
       }
     }
@@ -352,7 +352,7 @@ export class HomeAssistant {
         result = result.filter(
           (e) =>
             e.entity_id.toLowerCase().includes(params.query.toLowerCase()) ||
-            (e.attributes.friendly_name.toLowerCase() || "").includes(params.query.toLowerCase())
+            (e.attributes.friendly_name.toLowerCase() || "").includes(params.query.toLowerCase()),
         );
       }
       return result;
@@ -409,7 +409,7 @@ export class HomeAssistant {
             webhook_id: webhook_id,
             support_confirm: false,
           },
-          { resubscribe: true }
+          { resubscribe: true },
         );
       } catch (error) {
         console.log(error);

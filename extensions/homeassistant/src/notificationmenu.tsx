@@ -46,9 +46,7 @@ export default function MenuCommand(): JSX.Element {
   return (
     <MenuBarExtra icon={icon} isLoading={isLoading} title={title} tooltip={tooltip()}>
       <MenuBarExtra.Item key="_header" title={header} />
-      {notifications?.map((n) => (
-        <PersistentNotificationMenuItem key={n.notification_id} notification={n} />
-      ))}
+      {notifications?.map((n) => <PersistentNotificationMenuItem key={n.notification_id} notification={n} />)}
     </MenuBarExtra>
   );
 }

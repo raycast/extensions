@@ -83,7 +83,7 @@ export function createSocket(auth: Auth, ignoreCertificates: boolean): Promise<a
           JSON.stringify({
             type: "auth",
             access_token: auth.accessToken,
-          })
+          }),
         );
       } catch (err) {
         // Refresh token failed
