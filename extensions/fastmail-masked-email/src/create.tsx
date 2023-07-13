@@ -1,32 +1,15 @@
-import {
-  showToast,
-  getPreferenceValues,
-  Clipboard,
-  Form,
-  Action,
-  ActionPanel,
-  Toast,
-  showHUD,
-  closeMainWindow,
-  Icon,
-} from "@raycast/api";
-import fetch from "node-fetch";
-
-type Preferences = {
-  api_token: string;
-};
+import { showToast, Clipboard, Form, Action, ActionPanel, Toast, showHUD, closeMainWindow, Icon } from "@raycast/api";
+import { getSession, makeRequest } from "./api";
 
 type Values = {
   description: string;
 };
 
 export default () => {
-  const preference = getPreferenceValues<Preferences>();
-
   const handleSubmit = async (values: Values) => {
     const toast = await showToast({ style: Toast.Style.Animated, title: "Creating masked email..." });
     try {
-      const email = await create_masked_email(preference.api_token, values.description);
+      const email = await create_masked_email(values.description);
       Clipboard.copy(email);
       await toast.hide();
       await closeMainWindow({ clearRootSearch: true });
@@ -56,12 +39,6 @@ export default () => {
   );
 };
 
-type Session = {
-  capabilities: Record<string, unknown>;
-  apiUrl: string;
-  primaryAccounts: Record<string, string>;
-};
-
 type APIRequest<Method> = {
   using: string[];
   methodCalls: [string, Method, string][];
@@ -78,10 +55,6 @@ type CreateMaskedEmail = {
   >;
 };
 
-type APIResponse<Method> = {
-  methodResponses: [string, Method, string][];
-};
-
 type MaskedEmailSet = {
   created: Record<
     string,
@@ -93,24 +66,9 @@ type MaskedEmailSet = {
 
 const MaskedEmailCapability = "https://www.fastmail.com/dev/maskedemail";
 
-const create_masked_email = async (api_token: string, description: string) => {
-  const headers: Record<string, string> = {
-    Authorization: `Bearer ${api_token}`,
-    "Content-Type": "application/json",
-  };
-
-  let session;
-  try {
-    session = (await (
-      await fetch("https://api.fastmail.com/jmap/session", {
-        headers,
-      })
-    ).json()) as Session;
-  } catch (error) {
-    throw new Error("Failed to login. Please check your API token.");
-  }
-
-  const payload: APIRequest<CreateMaskedEmail> = {
+const create_masked_email = async (description: string) => {
+  const session = await getSession();
+  const request: APIRequest<CreateMaskedEmail> = {
     using: ["urn:ietf:params:jmap:core", MaskedEmailCapability],
     methodCalls: [
       [
@@ -129,15 +87,8 @@ const create_masked_email = async (api_token: string, description: string) => {
     ],
   };
   try {
-    const result = (await (
-      await fetch(session.apiUrl, {
-        method: "POST",
-        body: JSON.stringify(payload),
-        headers,
-      })
-    ).json()) as APIResponse<MaskedEmailSet>;
-    const email = Object.values(result.methodResponses[0][1].created)[0].email;
-    return email;
+    const response = await makeRequest<CreateMaskedEmail, MaskedEmailSet>({ request });
+    return Object.values(response.methodResponses[0][1].created)[0].email;
   } catch (error) {
     throw new Error(`Failed to create masked email: ${error}`);
   }
