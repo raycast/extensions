@@ -16,7 +16,8 @@ async function clearSearchBar(options: { forceScrollToTop: boolean }): Promise<v
 
 | Name | Description | Type |
 | :--- | :--- | :--- |
-| options | Can be used to force scrolling to the top. Defaults to scrolling to the top after the the search bar was cleared. | <code>{ forceScrollToTop: boolean }</code> |
+| options | Can be used to force scrolling to the top. Defaults to scrolling to the top after the the search bar was cleared. | <code>Object</code> |
+| options.forceScrollToTop |  | <code>boolean</code> |
 
 #### Return
 
@@ -58,7 +59,9 @@ export default async () => {
 
 | Name | Description | Type |
 | :--- | :--- | :--- |
-| options | A parameter object with the properties: `clearRootSearch`: clears the text in the root search bar and scrolls to the top; default is `false` `popToRootType`: defines the pop to root behavior ([PopToRootType](window-and-search-bar.md#poptoroottype)); the default is to to respect the user's "Pop to Root Search" preference in Raycast | <code>{ clearRootSearch: boolean; popToRootType: [PopToRootType](window-and-search-bar.md#poptoroottype) }</code> |
+| options | A parameter object with the properties: `clearRootSearch`: clears the text in the root search bar and scrolls to the top; default is `false` `popToRootType`: defines the pop to root behavior ([PopToRootType](window-and-search-bar.md#poptoroottype)); the default is to to respect the user's "Pop to Root Search" preference in Raycast | <code>Object</code> |
+| options.clearRootSearch |  | <code>boolean</code> |
+| options.popToRootType |  | <code>[PopToRootType](window-and-search-bar.md#poptoroottype)</code> |
 
 #### Return
 
@@ -96,7 +99,8 @@ export default function Command() {
 
 | Name | Description | Type |
 | :--- | :--- | :--- |
-| options | Can be used to clear the search bar. Defaults to clearing the search bar after popped to root. | <code>{ clearSearchBar: boolean }</code> |
+| options | Can be used to clear the search bar. Defaults to clearing the search bar after popped to root. | <code>Object</code> |
+| options.clearSearchBar |  | <code>boolean</code> |
 
 #### Return
 

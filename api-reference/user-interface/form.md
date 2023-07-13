@@ -1164,7 +1164,7 @@ Some Form.Item callbacks (like `onFocus` and `onBlur`) can return a `Form.Event`
 
 | Property | Description | Type |
 | :--- | :--- | :--- |
-| target<mark style="color:red;">*</mark> | An interface containing target data related to the event | <code>{ id: string; value: any }</code> |
+| target<mark style="color:red;">*</mark> | An interface containing target data related to the event | <code>{ id: string; value?: any }</code> |
 | type<mark style="color:red;">*</mark> | A type of event | <code>[Form.Event.Type](form.md#form.event.type)</code> |
 
 #### Example

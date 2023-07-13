@@ -540,15 +540,15 @@ export default function Command() {
 
 | Prop | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
-| title<mark style="color:red;">*</mark> | The main title displayed for that item, optionally with a tooltip. | <code>string</code> or <code>{ tooltip: string; value: string }</code> | - |
+| title<mark style="color:red;">*</mark> | The main title displayed for that item, optionally with a tooltip. | <code>string</code> or <code>{ tooltip?: string; value: string }</code> | - |
 | accessories | An optional array of [List.Item.Accessory](list.md#list.item.accessory) items displayed on the right side in a List.Item. | <code>[List.Item.Accessory](list.md#list.item.accessory)[]</code> | - |
 | actions | An [ActionPanel](action-panel.md#actionpanel) that will be updated for the selected list item. | <code>React.ReactNode</code> | - |
 | detail | The `List.Item.Detail` to be rendered in the right side area when the parent List is showing details and the item is selected. | <code>React.ReactNode</code> | - |
 | icon | An optional icon displayed for the list item. | <code>[Image.ImageLike](icons-and-images.md#image.imagelike)</code> or <code>{ tooltip: string; value: [Image.ImageLike](icons-and-images.md#image.imagelike) }</code> | - |
 | id | ID of the item. This string is passed to the `onSelectionChange` handler of the [List](list.md#list) when the item is selected. Make sure to assign each item a unique ID or a UUID will be auto generated. | <code>string</code> | - |
 | keywords | An optional property used for providing additional indexable strings for search. When filtering the list in Raycast through the search bar, the keywords will be searched in addition to the title. | <code>string[]</code> | - |
-| quickLook | Optional information to preview files with Quick Look. Toggle the preview with [Action.ToggleQuickLook](actions.md#action.togglequicklook). | <code>{ name: string; path: string }</code> | - |
-| subtitle | An optional subtitle displayed next to the main title, optionally with a tooltip. | <code>string</code> or <code>{ tooltip: string; value: string }</code> | - |
+| quickLook | Optional information to preview files with Quick Look. Toggle the preview with [Action.ToggleQuickLook](actions.md#action.togglequicklook). | <code>{ name?: string; path: string }</code> | - |
+| subtitle | An optional subtitle displayed next to the main title, optionally with a tooltip. | <code>string</code> or <code>{ tooltip?: string; value?: string }</code> | - |
 
 ### List.Item.Detail
 
@@ -732,7 +732,7 @@ export default function Metadata() {
 | :--- | :--- | :--- | :--- |
 | title<mark style="color:red;">*</mark> | The title of the item. | <code>string</code> | - |
 | icon | An icon to illustrate the value of the item. | <code>[Image.ImageLike](icons-and-images.md#image.imagelike)</code> | - |
-| text | The text value of the item. Specifying `color` will display the text in the provided color. Defaults to [Color.SecondaryText](colors.md#color). | <code>string</code> or <code>{ color: [Color](colors.md#color); value: string }</code> | - |
+| text | The text value of the item. Specifying `color` will display the text in the provided color. Defaults to [Color.SecondaryText](colors.md#color). | <code>string</code> or <code>{ color?: [Color](colors.md#color); value: string }</code> | - |
 
 ### List.Item.Detail.Metadata.Link
 
@@ -909,9 +909,9 @@ An interface describing an accessory view in a `List.Item`.
 
 | Property | Description | Type |
 | :--- | :--- | :--- |
-| tag<mark style="color:red;">*</mark> | A string or Date that will be used as the label, optionally colored. The date is formatted relatively to the current time (for example `new Date()` will be displayed as `"now"`, yesterday's Date will be displayed as "1d", etc.). Color changes the text color to the provided color and sets a transparent background with the same color. Defaults to [Color.SecondaryText](colors.md#color). | <code>string</code> or <code>Date</code> or <code>undefined</code> or <code>null</code> or <code>{ color: [Color.ColorLike](colors.md#color.colorlike); value: string</code> or <code>Date</code> or <code>undefined</code> or <code>null }</code> |
-| text | An optional text that will be used as the label, optionally colored. Color changes the text color to the provided color. Defaults to [Color.SecondaryText](colors.md#color). | <code>string</code> or <code>null</code> or <code>{ color: [Color](colors.md#color); value: string</code> or <code>undefined</code> or <code>null }</code> |
-| date | An optional Date that will be used as the label, optionally colored. The date is formatted relatively to the current time (for example `new Date()` will be displayed as `"now"`, yesterday's Date will be displayed as "1d", etc.). Color changes the text color to the provided color. Defaults to [Color.SecondaryText](colors.md#color). | <code>Date</code> or <code>null</code> or <code>{ color: [Color](colors.md#color); value: Date</code> or <code>undefined</code> or <code>null }</code> |
+| tag<mark style="color:red;">*</mark> | A string or Date that will be used as the label, optionally colored. The date is formatted relatively to the current time (for example `new Date()` will be displayed as `"now"`, yesterday's Date will be displayed as "1d", etc.). Color changes the text color to the provided color and sets a transparent background with the same color. Defaults to [Color.SecondaryText](colors.md#color). | <code>string</code> or <code>Date</code> or <code>undefined</code> or <code>null</code> or <code>{ color?: [Color.ColorLike](colors.md#color.colorlike); value: string</code> or <code>Date</code> or <code>undefined</code> or <code>null }</code> |
+| text | An optional text that will be used as the label, optionally colored. Color changes the text color to the provided color. Defaults to [Color.SecondaryText](colors.md#color). | <code>string</code> or <code>null</code> or <code>{ color?: [Color](colors.md#color); value: string</code> or <code>undefined</code> or <code>null }</code> |
+| date | An optional Date that will be used as the label, optionally colored. The date is formatted relatively to the current time (for example `new Date()` will be displayed as `"now"`, yesterday's Date will be displayed as "1d", etc.). Color changes the text color to the provided color. Defaults to [Color.SecondaryText](colors.md#color). | <code>Date</code> or <code>null</code> or <code>{ color?: [Color](colors.md#color); value: Date</code> or <code>undefined</code> or <code>null }</code> |
 | icon | An optional [Image.ImageLike](icons-and-images.md#image.imagelike) that will be used as the icon. | <code>[Image.ImageLike](icons-and-images.md#image.imagelike)</code> or <code>null</code> |
 | tooltip | An optional tooltip shown when the accessory is hovered. | <code>string</code> or <code>null</code> |
 

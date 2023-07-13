@@ -48,6 +48,10 @@ export default function Command() {
 | metadata | The `Detail.Metadata` to be rendered in the right side area | <code>React.ReactNode</code> | - |
 | navigationTitle | The main title for that view displayed in Raycast | <code>string</code> | Command title |
 
+{% hint style="info" %}
+You can specify custom image dimensions by adding a `raycast-width` and `raycast-height` query string to the markdown image. For example: `![Image Title](example.png?raycast-width=250&raycast-height=250)`
+{% endhint %}
+
 ### Detail.Metadata
 
 A Metadata view that will be shown in the right-hand-side of the `Detail`.
@@ -138,7 +142,7 @@ export default function Main() {
 | :--- | :--- | :--- | :--- |
 | title<mark style="color:red;">*</mark> | The title of the item. | <code>string</code> | - |
 | icon | An icon to illustrate the value of the item. | <code>[Image.ImageLike](icons-and-images.md#image.imagelike)</code> | - |
-| text | The text value of the item. Specifying `color` will display the text in the provided color. Defaults to [Color.SecondaryText](colors.md#color). | <code>string</code> or <code>{ color: [Color](colors.md#color); value: string }</code> | - |
+| text | The text value of the item. Specifying `color` will display the text in the provided color. Defaults to [Color.SecondaryText](colors.md#color). | <code>string</code> or <code>{ color?: [Color](colors.md#color); value: string }</code> | - |
 
 ### Detail.Metadata.Link
 
