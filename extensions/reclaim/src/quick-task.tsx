@@ -1,86 +1,103 @@
-import { popToRoot, showToast, Toast } from "@raycast/api";
-import { addDays, addMinutes } from "date-fns";
-import { ApiResponseUser } from "./hooks/useUser.types";
-import { axiosPromiseData, fetcher } from "./utils/axiosPromise";
-import { formatDuration, parseDurationToMinutes, TIME_BLOCK_IN_MINUTES } from "./utils/dates";
+import { Action, ActionPanel, Icon, List, useNavigation } from "@raycast/api";
+import { useState } from "react";
+import { useDebounce } from "./hooks/useDebounce";
+import useInterpreter from "./hooks/useInterpreter";
+import TaskForm from "./task-form";
+import { TaskPlanDetails } from "./types/plan";
+import { addMinutes } from "date-fns";
 
-type Props = { arguments: { event: string; time: string } };
+export type ListType = {
+  uuid: string;
+  title: string;
+  interpreterData: TaskPlanDetails;
+};
 
-export default async function Command(props: Props) {
-  const { event, time } = props.arguments;
+export default function Command() {
+  const { push } = useNavigation();
+  const { sendToInterpreter } = useInterpreter();
+  const [list, setList] = useState<ListType[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
 
-  if (!event || !time) {
-    return;
-  }
+  const _onChangeDebounced = async (text: string) => {
+    try {
+      setLoading(true);
+      if (text !== "") {
+        const response = await sendToInterpreter<TaskPlanDetails>("task", text);
 
-  const toast = await showToast({
-    style: Toast.Style.Animated,
-    title: "Creating task...",
-  });
-
-  try {
-    if (Number(parseDurationToMinutes(time)) % 15 !== 0) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Time must be in a interval of 15 minutes. (15/30/45/60...)";
-      return;
+        if (response) {
+          setList(
+            response.map((item) => ({
+              uuid: item.id,
+              title: item.planDetails.title,
+              interpreterData: item.planDetails,
+            }))
+          );
+        }
+      }
+    } catch (error) {
+      console.error("Error while creating task", error);
+    } finally {
+      setLoading(false);
     }
+  };
 
-    if (time.replace(/(\s|^)\d+(\s|$)/g, "") === "") {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Please provide a valid time. (hours/min)";
-      return;
-    }
+  const onChangeDebounced = useDebounce(_onChangeDebounced, 2000);
 
-    const durationBlock = Number(parseDurationToMinutes(formatDuration(time))) / TIME_BLOCK_IN_MINUTES;
-
-    const [user, userError] = await axiosPromiseData<ApiResponseUser>(fetcher("/users/current"));
-
-    if (!user && userError) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Failed to get user info. Please check your settings.";
-      return;
-    }
-
-    const userDefaults = {
-      defaultDueDate: addDays(new Date(), user?.features.taskSettings.defaults.dueInDays || 0),
-      defaultSnoozeDate: addMinutes(new Date(), user?.features.taskSettings.defaults.delayedStartInMinutes || 0),
-      minDuration: (user?.features.taskSettings.defaults.minChunkSize || 1) * TIME_BLOCK_IN_MINUTES,
-      maxDuration: (user?.features.taskSettings.defaults.maxChunkSize || 1) * TIME_BLOCK_IN_MINUTES,
-      duration: (user?.features.taskSettings.defaults.timeChunksRequired || 1) * TIME_BLOCK_IN_MINUTES,
-      category: user?.features.taskSettings.defaults.category || "WORK",
-      private: user?.features.taskSettings.defaults.alwaysPrivate || true,
-    };
-
-    const data = {
-      title: event,
-      eventCategory: userDefaults.category,
-      timeChunksRequired: durationBlock,
-      snoozeUntil: userDefaults.defaultSnoozeDate.toJSON(),
-      due: userDefaults.defaultDueDate.toJSON(),
-      minChunkSize: userDefaults.minDuration,
-      maxChunkSize: userDefaults.maxDuration,
-      alwaysPrivate: userDefaults.private,
-    };
-
-    const [task, error] = await axiosPromiseData(
-      fetcher("/tasks", {
-        method: "POST",
-        data,
-      })
-    );
-
-    if (!task && error) throw error;
-
-    toast.style = Toast.Style.Success;
-    toast.title = "Task created!";
-    popToRoot();
-  } catch (err) {
-    console.error("Error while creating task", err);
-
-    toast.style = Toast.Style.Failure;
-    toast.title = "Failed to create task";
-    if (err instanceof Error) {
-      toast.message = err.message;
-    }
-  }
+  return (
+    <List
+      searchBarPlaceholder="Type in your task, duration, & due date…"
+      isLoading={loading}
+      onSearchTextChange={onChangeDebounced}
+    >
+      {list.length === 0 ? (
+        <List.EmptyView
+          icon={{
+            source: {
+              light:
+                "https://uploads-ssl.webflow.com/5ec848ec2b50b6cfae06f6cc/64ad8af97797f06482ba8f43_task-icon-black.png",
+              dark: "https://uploads-ssl.webflow.com/5ec848ec2b50b6cfae06f6cc/64ad8af9581c1795283c0a65_task-icon-white.png",
+            },
+          }}
+          description={
+            loading
+              ? `Creating Task...`
+              : `"work task Prep board slides (4h, due: 10am Monday, notbefore: tomorrow)"
+                 "personal task Do the dishes (15min, due: today, notbefore: 12pm)"`
+          }
+          title="Quickly create a Task"
+        />
+      ) : (
+        list.map((item) => (
+          <List.Item
+            key={item.uuid}
+            title={item.title}
+            icon={Icon.LightBulb}
+            actions={
+              <ActionPanel>
+                <Action
+                  title={item.title}
+                  onAction={() => {
+                    push(
+                      <TaskForm
+                        interpreter={{
+                          due: item.interpreterData.due
+                            ? new Date(item.interpreterData.due)
+                            : addMinutes(new Date(), 5),
+                          durationTimeChunk: item.interpreterData.durationTimeChunks,
+                          snoozeUntil: item.interpreterData.snoozeUntil
+                            ? new Date(item.interpreterData.snoozeUntil)
+                            : new Date(),
+                        }}
+                        title={item.title}
+                      />
+                    );
+                  }}
+                />
+              </ActionPanel>
+            }
+          />
+        ))
+      )}
+    </List>
+  );
 }

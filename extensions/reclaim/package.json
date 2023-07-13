@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "reclaim",
   "title": "Reclaim",
-  "description": "Quickly create Tasks, see your scheule, & share Scheduling Links from Reclaim",
+  "description": "Quickly create Tasks, see your schedule, & share Scheduling Links from Reclaim",
   "icon": "command-icon.png",
   "author": "webergnr",
   "categories": [
@@ -13,8 +13,8 @@
   "preferences": [
     {
       "name": "apiToken",
-      "title": "Reclaim.ai API Token",
-      "description": "Your API token from reclaim.ai",
+      "title": "Reclaim.ai API key",
+      "description": "Your API key from reclaim.ai",
       "type": "textfield",
       "default": "",
       "placeholder": "Ex: 1234567890-ABCDEFG-1234567890",
@@ -53,23 +53,7 @@
       "name": "quick-task",
       "title": "Quick Task",
       "description": "Quickly create a Task",
-      "mode": "no-view",
-      "arguments": [
-        {
-          "type": "text",
-          "name": "event",
-          "title": "event",
-          "placeholder": "Task (Meeting prep)",
-          "required": false
-        },
-        {
-          "type": "text",
-          "name": "time",
-          "title": "time",
-          "placeholder": "Time (15min, 2h)",
-          "required": false
-        }
-      ]
+      "mode": "view"
     },
     {
       "name": "my-calendar",

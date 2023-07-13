@@ -105,12 +105,14 @@ export const formatDuration = (e: string | undefined) => {
 };
 
 export const miniDuration = (d: string) => {
-  return d
-    .replace("less than a minute", "1m")
-    .replace(" hours", "h")
-    .replace(" hour", "h")
-    .replace(" minutes", "m")
-    .replace(" minute", "m");
+  const replaced = d
+    .replaceAll("less than a ", "1")
+    .replaceAll(" hours", "h")
+    .replaceAll(" hour", "h")
+    .replaceAll(" minutes", "m")
+    .replaceAll(" minute", "m");
+
+  return replaced;
 };
 
 export const TIME_BLOCK_IN_MINUTES = 15;

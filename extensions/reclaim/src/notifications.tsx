@@ -1,29 +1,23 @@
 import { Icon, LaunchType, MenuBarExtra, getPreferenceValues, launchCommand, open } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
-import {
-  addDays,
-  addMinutes,
-  differenceInHours,
-  endOfDay,
-  format,
-  formatDistance,
-  isAfter,
-  isWithinInterval,
-  startOfDay,
-} from "date-fns";
+import { addDays, differenceInHours, endOfDay, format, formatDistance, isWithinInterval, startOfDay } from "date-fns";
 import { useMemo } from "react";
 import { useEvent } from "./hooks/useEvent";
-import { ApiResponseEvents } from "./hooks/useEvent.types";
+import { ApiResponseEvents, ApiResponseMoment } from "./hooks/useEvent.types";
 import { Event } from "./types/event";
 import { NativePreferences } from "./types/preferences";
-import { sortEvents } from "./utils/arrays";
-import { miniDuration } from "./utils/dates";
 import { eventColors, truncateEventSize } from "./utils/events";
 import { parseEmojiField } from "./utils/string";
+import { miniDuration } from "./utils/dates";
 
 type EventSection = { section: string; sectionTitle: string; events: Event[] };
 
-const GRACE_PERIOD = 5;
+type TitleInfo = {
+  minTitle: string;
+  fullTitle: string;
+  event: Event | null;
+  nowOrNext: "NOW" | "NEXT" | "NONE";
+};
 
 const ActionOptionsWithContext = ({ event }: { event: Event }) => {
   const { getEventActions } = useEvent();
@@ -75,7 +69,7 @@ export default function Command() {
     end: format(addDays(new Date(), 2), "yyyy-MM-dd"),
   };
 
-  const { data, isLoading } = useFetch<ApiResponseEvents>(
+  const { data: eventData, isLoading: isLoadingEvents } = useFetch<ApiResponseEvents>(
     `${apiUrl}/events?sourceDetails=true&start=${range.start}&end=${range.end}`,
     {
       headers: fetchHeaders,
@@ -83,8 +77,13 @@ export default function Command() {
     }
   );
 
+  const { data: eventMoment, isLoading: isLoadingMoment } = useFetch<ApiResponseMoment>(`${apiUrl}/moment/next`, {
+    headers: fetchHeaders,
+    keepPreviousData: true,
+  });
+
   const events = useMemo<EventSection[]>(() => {
-    if (!data) return [];
+    if (!eventData) return [];
 
     const now = new Date();
     const today = startOfDay(now);
@@ -93,7 +92,7 @@ export default function Command() {
       {
         section: "NOW",
         sectionTitle: "Now",
-        events: data
+        events: eventData
           .filter((event) => {
             return event.reclaimEventType !== "CONF_BUFFER" && event.reclaimEventType !== "TRAVEL_BUFFER";
           })
@@ -109,7 +108,7 @@ export default function Command() {
       {
         section: "TODAY",
         sectionTitle: "Upcoming events",
-        events: data
+        events: eventData
           .filter((event) => {
             return event.reclaimEventType !== "CONF_BUFFER" && event.reclaimEventType !== "TRAVEL_BUFFER";
           })
@@ -125,7 +124,7 @@ export default function Command() {
     ];
 
     return events.filter((event) => event.events.length > 0);
-  }, [data]);
+  }, [eventData]);
 
   const handleOpenReclaim = () => {
     open("https://app.reclaim.ai");
@@ -135,64 +134,56 @@ export default function Command() {
     await launchCommand({ name: "my-calendar", type: LaunchType.UserInitiated });
   };
 
-  const title = useMemo(() => {
+  const titleInfo = useMemo<TitleInfo>(() => {
     const now = new Date();
-    const NO_EVENTS_STR = "No upcoming events";
+    const eventNextNow = eventMoment?.event;
 
-    const notEndedEvents = data
-      ?.filter((event) => {
-        const end = new Date(event.eventEnd);
-        return isAfter(end, now);
-      })
-      .filter((event) => {
-        return !(differenceInHours(new Date(event.eventEnd), new Date(event.eventStart)) >= 24);
-      })
-      .sort(sortEvents);
+    if (eventNextNow) {
+      const realEventTitle = eventNextNow.sourceDetails?.title || eventNextNow.title;
+      const eventStart = new Date(eventNextNow.eventStart);
+      const eventEnd = new Date(eventNextNow.eventEnd);
 
-    if (!notEndedEvents?.length) return NO_EVENTS_STR;
+      const isNow = isWithinInterval(new Date(), { start: eventStart, end: eventEnd });
 
-    const hasEventsNow = notEndedEvents.filter((event) => {
-      const start = new Date(event.eventStart);
-      const end = addMinutes(new Date(event.eventStart), GRACE_PERIOD);
-      return isWithinInterval(now, { start, end });
-    });
+      const miniEventString = truncateEventSize(parseEmojiField(realEventTitle).textWithoutEmoji);
+      const eventString = parseEmojiField(realEventTitle).textWithoutEmoji;
 
-    if (hasEventsNow.length > 0) {
-      const evNow = hasEventsNow[hasEventsNow.length - 1];
-      const realEventTitle = evNow.sourceDetails?.title || evNow.title;
-      return `Now: ${truncateEventSize(parseEmojiField(realEventTitle).textWithoutEmoji)}`;
+      const distanceString = miniDuration(
+        formatDistance(new Date(eventStart), now, {
+          addSuffix: true,
+        })
+      );
+
+      return isNow
+        ? {
+            event: eventNextNow,
+            fullTitle: `Now: ${eventString}`,
+            minTitle: `Now: ${miniEventString}`,
+            nowOrNext: "NOW",
+          }
+        : {
+            event: eventNextNow,
+            fullTitle: `Next: ${eventString} ${distanceString}`,
+            minTitle: `Next: ${miniEventString} ${distanceString}`,
+            nowOrNext: "NEXT",
+          };
     }
 
-    const nextEvents = notEndedEvents
-      .filter((event) => {
-        const start = new Date(event.eventStart);
-        return isAfter(start, now);
-      })
-      .filter((event) => {
-        const start = new Date(event.eventStart);
-        const end = new Date(event.eventEnd);
-        return !isWithinInterval(now, { start, end });
-      })
-      .filter((event) => {
-        const start = new Date(event.eventStart);
-        return isWithinInterval(start, { start: now, end: endOfDay(now) });
-      })
-      .sort(sortEvents);
-
-    if (!nextEvents.length) return NO_EVENTS_STR;
-
-    const evNext = nextEvents[0];
-    const realEventTitle = evNext.sourceDetails?.title || evNext.title;
-
-    return `Next: ${truncateEventSize(parseEmojiField(realEventTitle).textWithoutEmoji)} ${miniDuration(
-      formatDistance(new Date(nextEvents[0].eventStart), now, {
-        addSuffix: true,
-      })
-    )}`;
-  }, [data]);
+    return {
+      fullTitle: "No upcoming events",
+      minTitle: "No upcoming events",
+      nowOrNext: "NONE",
+      event: null,
+    };
+  }, [eventMoment]);
 
   return (
-    <MenuBarExtra isLoading={isLoading} icon={"command-icon.png"} title={title} tooltip="test">
+    <MenuBarExtra
+      isLoading={isLoadingEvents || isLoadingMoment}
+      icon={"command-icon.png"}
+      title={titleInfo.minTitle}
+      tooltip={titleInfo.fullTitle}
+    >
       {events.map((eventSection) => (
         <EventsSection
           key={eventSection.section}

@@ -100,7 +100,7 @@ const useEvent = () => {
         isHappening
           ? eventActions.push({
               icon: Icon.Stop,
-              title: "Stop",
+              title: "Complete",
               action: async () => {
                 event.assist?.taskId && (await handleStopTask(String(event.assist.taskId)));
               },
