@@ -1,22 +1,36 @@
-import { getPreferenceValues, MenuBarExtra, open } from "@raycast/api";
+import { getPreferenceValues, Icon, MenuBarExtra, open, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { getHAWSConnection, ha } from "./common";
 import { getErrorMessage } from "./utils";
+import { callService } from "home-assistant-js-websocket";
+import { MenuBarItemConfigureCommand } from "./components/menu";
+
+const ensureShort = (text: string): string => {
+  const max = 80;
+  if (text.length > max) {
+    return text.slice(0, max) + " ...";
+  }
+  return text;
+};
 
 function PersistentNotificationMenuItem(props: { notification: HANotification }): JSX.Element {
-  const ensureShort = (text: string): string => {
-    const max = 40;
-    if (text.length > max) {
-      return text.slice(0, max) + " ...";
-    }
-    return text;
-  };
   const s = props.notification;
+  const dismiss = async () => {
+    try {
+      const con = await getHAWSConnection();
+      await callService(con, "persistent_notification", "dismiss", { notification_id: s.notification_id });
+    } catch (error) {
+      showToast({ style: Toast.Style.Failure, title: getErrorMessage(error) });
+    }
+  };
   const title = s.title;
   const msg = s.message ?? "?";
   const tt = title ? `${title}: ${msg}` : msg;
   return (
-    <MenuBarExtra.Item icon="💬" title={ensureShort(title ? title : msg)} onAction={() => open(ha.url)} tooltip={tt} />
+    <MenuBarExtra.Submenu icon={Icon.SpeechBubbleActive} title={ensureShort(title ? title : msg)}>
+      <MenuBarExtra.Item title="Open" icon={Icon.Globe} onAction={() => open(ha.url)} tooltip={tt} />
+      <MenuBarExtra.Item title="Dismiss" icon={Icon.XMarkCircle} onAction={dismiss} />
+    </MenuBarExtra.Submenu>
   );
 }
 
@@ -47,6 +61,9 @@ export default function MenuCommand(): JSX.Element {
     <MenuBarExtra icon={icon} isLoading={isLoading} title={title} tooltip={tooltip()}>
       <MenuBarExtra.Item key="_header" title={header} />
       {notifications?.map((n) => <PersistentNotificationMenuItem key={n.notification_id} notification={n} />)}
+      <MenuBarExtra.Section>
+        <MenuBarItemConfigureCommand />
+      </MenuBarExtra.Section>
     </MenuBarExtra>
   );
 }
