@@ -1,4 +1,4 @@
-import { MenuBarExtra, Icon, launchCommand, LaunchType } from "@raycast/api";
+import { MenuBarExtra, Icon, launchCommand, LaunchType, Image, Color } from "@raycast/api";
 import { useState } from "react";
 import {
   createInterval,
@@ -14,6 +14,12 @@ import {
   progress,
 } from "../lib/intervals";
 import { secondsToTime } from "../lib/secondsToTime";
+
+const IconTint: Color.Dynamic = {
+  light: "#000000",
+  dark: "#FFFFFF",
+  adjustContrast: false,
+}
 
 export default function TogglePomodoroTimer() {
   const [currentInterval, setCurrentInterval] = useState<Interval | undefined>(getCurrentInterval());
@@ -49,11 +55,11 @@ export default function TogglePomodoroTimer() {
     setCurrentInterval(undefined);
   }
 
-  let icon;
-  icon = { source: { light: "tomato-light-0.png", dark: "tomato-dark-0.png" } };
+  let icon: Image.ImageLike;
+  icon = { source: "tomato-0.png", tintColor: IconTint };
   if (currentInterval) {
     const progressInTenth = 100 - Math.floor(progress(currentInterval) / 10) * 10;
-    icon = { source: { light: `tomato-light-${progressInTenth}.png`, dark: `tomato-dark-${progressInTenth}.png` } };
+    icon = { source: `tomato-${progressInTenth}.png`, tintColor: IconTint };
   }
 
   const title = currentInterval ? secondsToTime(currentInterval.length - duration(currentInterval)) : "--:--";
