@@ -16,22 +16,22 @@
   "commands": [
     {
       "name": "play",
-      "title": "Focus",
-      "subtitle": "Start Music",
+      "title": "Start Music",
+      "subtitle": "Focus",
       "description": "Begin your focused session.",
       "mode": "no-view"
     },
     {
       "name": "stop",
-      "title": "Focus",
-      "subtitle": "Stop Music",
+      "title": "Stop Music",
+      "subtitle": "Focus",
       "description": "Stop the soundscape.",
       "mode": "no-view"
     },
     {
       "name": "skip",
-      "title": "Focus",
-      "subtitle": "Skip Track",
+      "title": "Skip Track",
+      "subtitle": "Focus",
       "description": "Skip current soundscape",
       "mode": "no-view"
     }
