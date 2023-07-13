@@ -26,6 +26,26 @@ function getMaxPullRequestsPreference(): number {
   return getBoundedPreferenceNumber({ name: "maxitems" });
 }
 
+function getCheckStateEmoji(pr: PullRequestFieldsFragment): string | null {
+  const checkState = pr.commits.nodes ? pr.commits.nodes[0]?.commit.statusCheckRollup?.state : null;
+  switch (checkState) {
+    case "SUCCESS":
+      return "✅";
+    case "ERROR":
+    case "FAILURE":
+      return "⚠️";
+    case "PENDING":
+      return "⏱️";
+    default:
+      return null;
+  }
+}
+
+function joinArray(ar: (string | null | undefined)[], separator: string): string {
+  const d = ar?.filter((e) => e);
+  return d?.join(separator) || "";
+}
+
 function OpenPullRequestMenu() {
   const { github } = getGitHubClient();
 
@@ -66,7 +86,7 @@ function OpenPullRequestMenu() {
         {data?.map((i) => (
           <MenuBarItem
             key={i.id}
-            title={`#${i.number} ${i.title}`}
+            title={`#${i.number} ${i.title} ${joinArray([getCheckStateEmoji(i)], "")}`}
             icon="pull-request.svg"
             tooltip={i.repository.nameWithOwner}
             onAction={() => open(i.permalink)}
