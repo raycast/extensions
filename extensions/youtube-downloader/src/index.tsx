@@ -1,11 +1,11 @@
 import { Action, ActionPanel, Clipboard, Detail, Form, Icon, showToast, Toast } from "@raycast/api";
 import ytdl, { videoFormat } from "ytdl-core";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { FormValidation, useForm } from "@raycast/utils";
 import prettyBytes from "pretty-bytes";
-import { downloadAudio, downloadVideo } from "./utils";
-import fs from "fs";
+import { downloadAudio, downloadVideo, preferences } from "./utils";
 import { execSync } from "child_process";
+import fs from "fs";
 
 type Values = {
   url: string;
@@ -17,7 +17,7 @@ export default function DownloadVideo() {
   const [loading, setLoading] = useState(false);
   const [title, setTitle] = useState("");
   const [formats, setFormats] = useState<videoFormat[]>([]);
-  const [, setError] = useState(true);
+  const [error, setError] = useState(0);
 
   const { handleSubmit, values, itemProps, setValue } = useForm<Values>({
     onSubmit: async (values) => {
@@ -63,10 +63,18 @@ export default function DownloadVideo() {
     });
   }, []);
 
-  const ffmpegExists = fs.existsSync("/opt/homebrew/bin/ffmpeg");
-  const ffprobeExists = fs.existsSync("/opt/homebrew/bin/ffprobe");
-  if (!ffmpegExists || !ffprobeExists) {
-    return <NotInstalled onRefresh={() => setError(false)} />;
+  const missingExecutable = useMemo(() => {
+    if (!fs.existsSync(preferences.ffmpegPath)) {
+      return "ffmpeg";
+    }
+    if (!fs.existsSync(preferences.ffprobePath)) {
+      return "ffprobe";
+    }
+    return null;
+  }, [error]);
+
+  if (missingExecutable) {
+    return <NotInstalled executable={missingExecutable} onRefresh={() => setError(error + 1)} />;
   }
 
   const audioFormats = ytdl.filterFormats(formats, "audioonly").filter((format) => format.container === "mp4");
@@ -133,15 +141,15 @@ export default function DownloadVideo() {
   );
 }
 
-function NotInstalled({ onRefresh }: { onRefresh: () => void }) {
+function NotInstalled({ executable, onRefresh }: { executable: string; onRefresh: () => void }) {
   return (
     <Detail
       actions={<AutoInstall onRefresh={onRefresh} />}
       markdown={`
-# 🚨 Error: \`ffmpeg\` is not installed
+# 🚨 Error: \`${executable}\` is not installed
 This extension depends on a command-line utilty that is not detected on your system. You must install it continue.
 
-If you have homebrew installed, simply press **⏎** to have this extension install it for you. Since \`ffmpeg\` is a heavy library, 
+If you have homebrew installed, simply press **⏎** to have this extension install it for you. Since \`${executable}\` is a heavy library, 
 **it can take up 2 minutes to install**.
 
 To install homebrew, visit [this link](https://brew.sh)

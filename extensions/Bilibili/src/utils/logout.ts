@@ -7,7 +7,7 @@ export async function logout() {
   const cache = new Cache();
   const cookie = cache.get("cookie");
 
-  const response: Bilibili.logoutResponse = await got
+  const response: Bilibili.LogoutResponse = await got
     .post(API.logout(), {
       headers: {
         cookie,

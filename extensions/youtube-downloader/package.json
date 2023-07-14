@@ -31,6 +31,22 @@
       "type": "directory",
       "default": "~/Downloads",
       "required": true
+    },
+    {
+      "name": "ffmpegPath",
+      "title": "ffmpeg Path",
+      "description": "Path to the ffmpeg executable",
+      "type": "textfield",
+      "default": "/opt/homebrew/bin/ffmpeg",
+      "required": true
+    },
+    {
+      "name": "ffprobePath",
+      "title": "ffprobe Path",
+      "description": "Path to the ffprobe executable. Usually installed alog with ffmpeg.",
+      "type": "textfield",
+      "default": "/opt/homebrew/bin/ffprobe",
+      "required": true
     }
   ],
   "dependencies": {

@@ -1,5 +1,13 @@
 # Spotify Player Changelog
 
+## [Optimisation] - 2023-07-07
+
+This update introduces a few optimisations to the Menu Bar Command. We've reduced the number of API calls, and we've also reduced the number of requests to the Spotify API. This should result in a faster and more responsive experience.
+
+In order to achieve this, the extension now checks the Spotify Application for the current state of the player. This means that we only need to make API calls when the state changes. With this approach, you can still listen and control Spotify from any connected device.
+
+Please note because of this, it's now required to have the Spotify Application running.
+
 ## [Version 2] - 2023-06-19
 
 ### Spotify Player v2

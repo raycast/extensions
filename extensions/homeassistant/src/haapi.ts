@@ -45,7 +45,6 @@ export class HomeAssistant {
   public url: string;
   public urlInternal: string | undefined;
   private _nearestURL: string | undefined;
-  private httpsAgent?: Agent;
   private _ignoreCerts = false;
   public wifiSSIDs: string[] | undefined;
   private usePing = true;
@@ -57,9 +56,12 @@ export class HomeAssistant {
     this.wifiSSIDs = options?.wifiSSIDs;
     this.usePing = options?.usePing ?? true;
     this._ignoreCerts = ignoreCerts;
-    if (this.url.startsWith("https://")) {
-      this.httpsAgent = new Agent({
-        rejectUnauthorized: !ignoreCerts,
+  }
+
+  private httpsAgent(url: string): Agent | undefined {
+    if (url.startsWith("https://")) {
+      return new Agent({
+        rejectUnauthorized: !this._ignoreCerts,
       });
     }
   }
@@ -101,7 +103,6 @@ export class HomeAssistant {
         timeout: 2,
         extra: ["-i", "1", "-c", "1"],
       });
-      console.log(res);
       return res.alive;
     } catch (error) {
       return false;
@@ -165,7 +166,7 @@ export class HomeAssistant {
     console.log(`send GET request: ${fullUrl}`);
     try {
       const response = await fetch(fullUrl, {
-        agent: this.httpsAgent,
+        agent: this.httpsAgent(fullUrl),
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -188,7 +189,7 @@ export class HomeAssistant {
     console.log(body);
     //try {
     const response = await fetch(fullUrl, {
-      agent: this.httpsAgent,
+      agent: this.httpsAgent(fullUrl),
       method: "POST",
       headers: {
         "Content-Type": "application/json",
