@@ -10,9 +10,8 @@ import { List, Form, Icon, ActionPanel, Action, confirmAlert, Alert } from "@ray
 import useLocalStorage from "./api/useChatStorage";
 import { LocalStorage } from "@raycast/api";
 import { Clipboard } from "@raycast/api";
-import { launchCommand, LaunchType } from "@raycast/api";
 
-export default function Chat({ launchContext }) {
+export default function Chat() {
   let {
     name: [conversationName, setConversationName],
     list: [conversationList, setConversationList],
@@ -52,10 +51,21 @@ export default function Chat({ launchContext }) {
         toast(Toast.Style.Failure, `Bard couldn't connect.`);
         setTryingToConnect(false);
       }
+
+      setConversationList((originalConversation) => {
+        const updatedConversation = structuredClone(originalConversation);
+
+        let currentConversation = getCurrentConversation(updatedConversation);
+        let currentQuestion = currentConversation.questions[0];
+        currentQuestion.ids = currentBard.export();
+        currentConversation.ids = currentQuestion.ids;
+        return updatedConversation;
+      });
     };
 
     initializeBard();
   }, []);
+
   useEffect(() => {
     let currentQuestions = getCurrentConversation().questions;
     if (typeof currentQuestions === "object") {
@@ -74,7 +84,6 @@ export default function Chat({ launchContext }) {
             currentQuestion.response = response;
             currentQuestion.ids = currentBard.export();
             currentConversation.ids = currentQuestion.ids;
-
             setLoading(false);
 
             return updatedConversation;
@@ -173,33 +182,6 @@ export default function Chat({ launchContext }) {
       }
     }
   };
-
-  // if (launchContext?.working) {
-  //   console.log("HIII")
-  //   setConversationList((original) => {
-  //     setCurrentBard(new Bard.Chat());
-  //     let newList = [
-  //       ...structuredClone(original),
-  //       {
-  //         name: "New Conversation",
-  //         questions: [{
-  //           question: launchContext.query,
-  //           response: launchContext.query,
-  //           metadata: {
-  //             conversationID: "Loading IDs...",
-  //             responseID: "Loading IDs...",
-  //             date: new Date(),
-  //           },
-  //         }],
-  //       },
-  //     ];
-  //     nameToIndexMap["New Conversation"] = newList.length - 1;
-  //     setConversationName("New Conversation");
-  //     return newList;
-  //   });
-  // toast(Toast.Style.Success, `Sucessfully created converation "${"New Conversation"}"`);
-  // pop();
-  // }
 
   const deleteConversation = async () => {
     if (
