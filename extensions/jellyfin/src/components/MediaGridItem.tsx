@@ -8,6 +8,54 @@ import ListMediaCommand from "../list-movies-series";
 
 const preferences = getPreferences();
 
+function createFavoriteHandler(item: RawMediaItem, favorite: boolean, update: (newValue: boolean) => void) {
+  const favoriteUrl = buildUrl(["Users", preferences.jellyfinUserID, "FavoriteItems", item.Id]);
+  return async () => {
+    try {
+      const resp = await fetch(favoriteUrl, { method: favorite ? "POST" : "DELETE" });
+      if (!resp.ok) {
+        throw new Error(`server returned status ${resp.status}`);
+      }
+      update(favorite);
+      showToast({
+        title: "❤️",
+        message: `${favorite ? "Marked" : "Unmarked"} '${item.Name}' as Favorite`,
+        style: Toast.Style.Success,
+      });
+    } catch (e) {
+      showToast({
+        title: "❤️",
+        message: `Cannot Mark Item: ${getErrorMessage(e)}`,
+        style: Toast.Style.Failure,
+      });
+    }
+  };
+}
+
+function createWatchedHandler(item: RawMediaItem, watched: boolean, update: (newValue: boolean) => void) {
+  const favoriteUrl = buildUrl(["Users", preferences.jellyfinUserID, "PlayedItems", item.Id]);
+  return async () => {
+    try {
+      const resp = await fetch(favoriteUrl, { method: watched ? "POST" : "DELETE" });
+      if (!resp.ok) {
+        throw new Error(`server returned status ${resp.status}`);
+      }
+      update(watched);
+      showToast({
+        title: "❤️",
+        message: `${watched ? "Marked" : "Unmarked"} '${item.Name}' as Watched`,
+        style: Toast.Style.Success,
+      });
+    } catch (e) {
+      showToast({
+        title: "❤️",
+        message: `Cannot Mark Item: ${getErrorMessage(e)}`,
+        style: Toast.Style.Failure,
+      });
+    }
+  };
+}
+
 export default function MediaGridItem({
   item,
   pushNavigation,
@@ -16,6 +64,7 @@ export default function MediaGridItem({
   pushNavigation?: (component: ReactNode) => void;
 }): JSX.Element {
   const [isFavorite, setIsFavorite] = useState<boolean>(item.UserData.IsFavorite);
+  const [isWatched, setIsWatched] = useState<boolean>(item.UserData.Played);
 
   const coverUrl = buildUrl(["Items", item.Id, "Images", "Primary"], {
     fillHeight: "600",
@@ -32,7 +81,7 @@ export default function MediaGridItem({
   });
 
   let prefix = "";
-  if (preferences.showWatchedStatus && item.UserData.Played) {
+  if (preferences.showWatchedStatus && isWatched) {
     prefix += "✅";
   }
   if (preferences.showFavoriteStatus && isFavorite) {
@@ -47,45 +96,37 @@ export default function MediaGridItem({
     subtitle.push(`${Math.round(item.CommunityRating * 100) / 100}★`);
   }
 
-  function createFavoriteHandler(favorite: boolean) {
-    const favoriteUrl = buildUrl(["Users", preferences.jellyfinUserID, "FavoriteItems", item.Id]);
-    return async () => {
-      try {
-        const resp = await fetch(favoriteUrl, { method: favorite ? "POST" : "DELETE" });
-        if (!resp.ok) {
-          throw new Error(`server returned status ${resp.status}`);
-        }
-        setIsFavorite(favorite);
-        showToast({
-          title: "❤️",
-          message: `${favorite ? "Marked" : "Unmarked"} '${item.Name}' as Favorite`,
-          style: Toast.Style.Success,
-        });
-      } catch (e) {
-        showToast({
-          title: "❤️",
-          message: `Cannot Mark Item: ${getErrorMessage(e)}`,
-          style: Toast.Style.Failure,
-        });
-      }
-    };
-  }
-
   const actions = [
     <Action.OpenInBrowser title="Open in Browser" url={mediaUrl} shortcut={{ key: "enter", modifiers: ["cmd"] }} />,
+    isWatched ? (
+      <Action
+        title="Unmark Watched"
+        icon={Icon.EyeDisabled}
+        style={Action.Style.Destructive}
+        onAction={createWatchedHandler(item, false, setIsWatched)}
+        shortcut={{ key: "w", modifiers: ["cmd"] }}
+      />
+    ) : (
+      <Action
+        title="Mark Watched"
+        icon={Icon.Eye}
+        onAction={createWatchedHandler(item, true, setIsWatched)}
+        shortcut={{ key: "w", modifiers: ["cmd"] }}
+      />
+    ),
     isFavorite ? (
       <Action
-        title="Unfavorite"
+        title="Unmark Favorite"
         icon={Icon.HeartDisabled}
         style={Action.Style.Destructive}
-        onAction={createFavoriteHandler(false)}
+        onAction={createFavoriteHandler(item, false, setIsFavorite)}
         shortcut={{ key: "f", modifiers: ["cmd"] }}
       />
     ) : (
       <Action
-        title="Favorite"
+        title="Mark Favorite"
         icon={Icon.Heart}
-        onAction={createFavoriteHandler(true)}
+        onAction={createFavoriteHandler(item, true, setIsFavorite)}
         shortcut={{ key: "f", modifiers: ["cmd"] }}
       />
     ),
