@@ -1,10 +1,10 @@
 import { Action, ActionPanel, Icon, List, useNavigation } from "@raycast/api";
+import { addMinutes } from "date-fns";
 import { useState } from "react";
 import { useDebounce } from "./hooks/useDebounce";
 import useInterpreter from "./hooks/useInterpreter";
 import TaskForm from "./task-form";
 import { TaskPlanDetails } from "./types/plan";
-import { addMinutes } from "date-fns";
 
 export type ListType = {
   uuid: string;
@@ -61,8 +61,8 @@ export default function Command() {
           description={
             loading
               ? `Creating Task...`
-              : `"work task Prep board slides (4h, due: 10am Monday, notbefore: tomorrow)"
-                 "personal task Do the dishes (15min, due: today, notbefore: 12pm)"`
+              : `"work task Prep board slides (for 4h, by 10am Monday, snooze 1 hour)"
+                 "personal task Do the dishes (for 15min, by 8pm, snooze 12pm)"`
           }
           title="Quickly create a Task"
         />

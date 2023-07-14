@@ -20,6 +20,5 @@ export type SchedulingLinkPlanDetails = {
 export interface Plan<PlanType extends TaskPlanDetails | SchedulingLinkPlanDetails> {
   planType: string;
   id: string;
-  // description: string;
   planDetails: PlanType;
 }

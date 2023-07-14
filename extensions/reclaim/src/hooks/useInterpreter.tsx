@@ -30,20 +30,8 @@ const useInterpreter = () => {
     }
   };
 
-  // const confirmInterpreterMessage = async (planUuid: string) => {
-  //   try {
-  //     const rawRequest = await fetcher(`/interpreter/plans/applied/${planUuid}`, {
-  //       method: "POST",
-  //     });
-  //     return { statusCode: rawRequest.status };
-  //   } catch (error) {
-  //     console.error("Error while confirming interpreter message", error);
-  //   }
-  // };
-
   return {
     sendToInterpreter,
-    // confirmInterpreterMessage,
   };
 };
 

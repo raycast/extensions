@@ -100,9 +100,7 @@ export interface UserFeatures {
     prioritiesEnabled: boolean;
     categoriesEnabled: boolean;
     lastModified: string;
-    // priorities: {
-    //   "0": string;
-    // };
+    priorities: Record<string, string>;
     categories: {
       WORK: string;
       MEETING: string;
@@ -150,17 +148,17 @@ export interface UserFeatures {
     clickup: boolean;
     monday: boolean;
   };
-  // onboard: {
-  //   habits: boolean;
-  //   tasks: boolean;
-  //   googleTasks: boolean;
-  //   planItemPrioritized: boolean;
-  //   smartOneOnOnes: boolean;
-  //   bufferTime: boolean;
-  //   tasksReindex: boolean;
-  //   googleAddOn: boolean;
-  //   schedulingLinks: boolean;
-  // };
+  onboard: {
+    habits: boolean;
+    tasks: boolean;
+    googleTasks: boolean;
+    planItemPrioritized: boolean;
+    smartOneOnOnes: boolean;
+    bufferTime: boolean;
+    tasksReindex: boolean;
+    googleAddOn: boolean;
+    schedulingLinks: boolean;
+  };
   weeklyReport: {
     enabled: boolean;
     sendReport: boolean;
