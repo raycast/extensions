@@ -58,7 +58,7 @@
       "type": "password",
       "required": true,
       "title": "Real-Debrid Token",
-      "description": "You can find your token at https://real-debrid.com/apitoken",
+      "description": "Provide API token found in your account",
       "placeholder": "Enter your secure token"
     },
     {

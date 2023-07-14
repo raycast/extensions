@@ -35,11 +35,3 @@ You can obtain your token by going to [your account](https://real-debrid.com/api
 
 - View user account info and premium status.
 - Display link hosters and remote upload quota along with remaining amount.
-
-# Further development
-
-Some ideas for further improvements:
-
-- [ ] Support link containers upload (RSDF, CCF, CCF3, DLC).
-- [ ] Change authentication method: The API token method is not recommended by RD because it can exposes potentially endpoints. None of these endpoints are used in this extension, but it's by far the easiest method to authenticate.
-- [ ] Maybe adding a torrent search functionality that ties in nicely with the existing features. I like the idea of a complete workflow through Raycast.
