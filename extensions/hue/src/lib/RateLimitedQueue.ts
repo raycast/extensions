@@ -20,9 +20,9 @@ export default class RateLimitedQueue {
       this.queue.push(async () => {
         try {
           const result = await request();
-          resolve(result);
+          return resolve(result);
         } catch (error) {
-          reject(error);
+          return reject(error);
         } finally {
           this.processNext();
         }

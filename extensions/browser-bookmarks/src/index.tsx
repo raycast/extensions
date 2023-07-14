@@ -1,12 +1,15 @@
 import { Action, ActionPanel, Icon, Keyboard, List, LocalStorage, Toast, showToast } from "@raycast/api";
 import { getFavicon, useCachedPromise, useCachedState } from "@raycast/utils";
+import Fuse from "fuse.js";
 import { useState, useMemo, useEffect } from "react";
 
 import PermissionErrorScreen from "./components/PermissionErrorScreen";
 import SelectBrowsers from "./components/SelectBrowsers";
 import useAvailableBrowsers, { BROWSERS_BUNDLE_ID } from "./hooks/useAvailableBrowsers";
+import useBraveBetaBookmarks from "./hooks/useBraveBetaBookmarks";
 import useBraveBookmarks from "./hooks/useBraveBookmarks";
 import useChromeBookmarks from "./hooks/useChromeBookmarks";
+import useChromeDevBookmarks from "./hooks/useChromeDevBookmarks";
 import useEdgeBookmarks from "./hooks/useEdgeBookmarks";
 import useFirefoxBookmarks from "./hooks/useFirefoxBookmarks";
 import useSafariBookmarks from "./hooks/useSafariBookmarks";
@@ -76,13 +79,17 @@ export default function Command() {
   const [selectedFolderId, setSelectedFolderId] = useState("");
 
   const hasBrave = browsers.includes(BROWSERS_BUNDLE_ID.brave) ?? false;
+  const hasBraveBeta = browsers.includes(BROWSERS_BUNDLE_ID.braveBeta) ?? false;
   const hasChrome = browsers.includes(BROWSERS_BUNDLE_ID.chrome) ?? false;
+  const hasChromeDev = browsers.includes(BROWSERS_BUNDLE_ID.chromeDev) ?? false;
   const hasEdge = browsers.includes(BROWSERS_BUNDLE_ID.edge) ?? false;
   const hasFirefox = browsers.includes(BROWSERS_BUNDLE_ID.firefox) ?? false;
   const hasSafari = browsers.includes(BROWSERS_BUNDLE_ID.safari) ?? false;
 
   const brave = useBraveBookmarks(hasBrave);
+  const braveBeta = useBraveBetaBookmarks(hasBraveBeta);
   const chrome = useChromeBookmarks(hasChrome);
+  const chromeDev = useChromeDevBookmarks(hasChromeDev);
   const edge = useEdgeBookmarks(hasEdge);
   const firefox = useFirefoxBookmarks(hasFirefox);
   const safari = useSafariBookmarks(hasSafari);
@@ -93,7 +100,9 @@ export default function Command() {
   useEffect(() => {
     const bookmarks = [
       ...brave.bookmarks,
+      ...braveBeta.bookmarks,
       ...chrome.bookmarks,
+      ...chromeDev.bookmarks,
       ...edge.bookmarks,
       ...firefox.bookmarks,
       ...safari.bookmarks,
@@ -132,7 +141,9 @@ export default function Command() {
     setBookmarks(bookmarks);
   }, [
     brave.bookmarks,
+    braveBeta.bookmarks,
     chrome.bookmarks,
+    chromeDev.bookmarks,
     edge.bookmarks,
     firefox.bookmarks,
     safari.bookmarks,
@@ -141,10 +152,27 @@ export default function Command() {
   ]);
 
   useEffect(() => {
-    const folders = [...brave.folders, ...chrome.folders, ...edge.folders, ...firefox.folders, ...safari.folders];
+    const folders = [
+      ...brave.folders,
+      ...braveBeta.folders,
+      ...chrome.folders,
+      ...chromeDev.folders,
+      ...edge.folders,
+      ...firefox.folders,
+      ...safari.folders,
+    ];
 
     setFolders(folders);
-  }, [brave.folders, chrome.folders, edge.folders, firefox.folders, safari.folders, setFolders]);
+  }, [
+    brave.folders,
+    braveBeta.folders,
+    chrome.folders,
+    chromeDev.folders,
+    edge.folders,
+    firefox.folders,
+    safari.folders,
+    setFolders,
+  ]);
 
   const folderBookmarks = useMemo(() => {
     return bookmarks.filter((item) => {
@@ -162,24 +190,23 @@ export default function Command() {
     });
   }, [bookmarks, selectedFolderId, folders]);
 
+  const fuse = useMemo(() => {
+    return new Fuse(folderBookmarks, {
+      keys: ["title", "domain", "folder"],
+    });
+  }, [folderBookmarks]);
+
   // Limit display to 100 bookmarks to avoid heap memory errors
   // Use custom filtering instead of native filtering
   const filteredBookmarks = useMemo(() => {
-    return folderBookmarks.filter((item) => {
-      if (query === "") {
-        return true;
-      }
+    if (query === "") {
+      return folderBookmarks;
+    }
 
-      // Check if the query matches the item's title, domain, or folder (case-insensitive)
-      const lowercasedQuery = query.toLowerCase();
+    const searchResults = fuse.search(query);
 
-      return (
-        item.title.toLowerCase().includes(lowercasedQuery) ||
-        item.domain.toLowerCase().includes(lowercasedQuery) ||
-        item.folder.toLowerCase().includes(lowercasedQuery)
-      );
-    });
-  }, [folderBookmarks, query]);
+    return searchResults.map((result) => result.item);
+  }, [folderBookmarks, fuse, query]);
 
   const filteredFolders = useMemo(() => {
     return folders.filter((item) => {
@@ -195,11 +222,15 @@ export default function Command() {
     if (hasBrave) {
       brave.mutate();
     }
-
+    if (hasBraveBeta) {
+      braveBeta.mutate();
+    }
     if (hasChrome) {
       chrome.mutate();
     }
-
+    if (hasChromeDev) {
+      chromeDev.mutate();
+    }
     if (hasEdge) {
       edge.mutate();
     }
@@ -214,29 +245,25 @@ export default function Command() {
   }
 
   async function updateFrecency(item: { id: string; title: string; url: string; folder: string }) {
-    if (frecencies) {
-      const frecency = frecencies[item.id];
+    const frecency = frecencies[item.id];
 
-      await LocalStorage.setItem(
-        "frecencies",
-        JSON.stringify({
-          ...frecencies,
-          [item.id]: getBookmarkFrecency(frecency),
-        })
-      );
+    await LocalStorage.setItem(
+      "frecencies",
+      JSON.stringify({
+        ...frecencies,
+        [item.id]: getBookmarkFrecency(frecency),
+      })
+    );
 
-      mutateFrecencies();
-    }
+    mutateFrecencies();
   }
 
   async function removeFrecency(item: { id: string; title: string; url: string; folder: string }) {
     try {
-      if (frecencies) {
-        delete frecencies[item.id];
-        await LocalStorage.setItem("frecencies", JSON.stringify(frecencies));
-        await showToast({ style: Toast.Style.Success, title: "Reset bookmark's ranking" });
-        mutateFrecencies();
-      }
+      delete frecencies[item.id];
+      await LocalStorage.setItem("frecencies", JSON.stringify(frecencies));
+      await showToast({ style: Toast.Style.Success, title: "Reset bookmark's ranking" });
+      mutateFrecencies();
     } catch {
       await showToast({ style: Toast.Style.Failure, title: "Could not reset bookmark's ranking" });
     }
@@ -252,7 +279,9 @@ export default function Command() {
         isLoadingBrowsers ||
         isLoadingFrecencies ||
         brave.isLoading ||
+        braveBeta.isLoading ||
         chrome.isLoading ||
+        chromeDev.isLoading ||
         edge.isLoading ||
         firefox.isLoading ||
         safari.isLoading
@@ -307,7 +336,15 @@ export default function Command() {
                     currentProfile={brave.currentProfile}
                     setCurrentProfile={brave.setCurrentProfile}
                   />
-
+                  <SelectProfileSubmenu
+                    bundleId={BROWSERS_BUNDLE_ID.braveBeta}
+                    name="Brave Beta"
+                    icon="brave.png"
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "b" }}
+                    profiles={braveBeta.profiles}
+                    currentProfile={braveBeta.currentProfile}
+                    setCurrentProfile={braveBeta.setCurrentProfile}
+                  />
                   <SelectProfileSubmenu
                     bundleId={BROWSERS_BUNDLE_ID.chrome}
                     name="Chrome"
@@ -317,7 +354,15 @@ export default function Command() {
                     currentProfile={chrome.currentProfile}
                     setCurrentProfile={chrome.setCurrentProfile}
                   />
-
+                  <SelectProfileSubmenu
+                    bundleId={BROWSERS_BUNDLE_ID.chromeDev}
+                    name="Chrome Dev"
+                    icon="chrome-dev.png"
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                    profiles={chromeDev.profiles}
+                    currentProfile={chromeDev.currentProfile}
+                    setCurrentProfile={chromeDev.setCurrentProfile}
+                  />
                   <SelectProfileSubmenu
                     bundleId={BROWSERS_BUNDLE_ID.edge}
                     name="Edge"

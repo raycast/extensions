@@ -1,15 +1,18 @@
-import { Form, ActionPanel, Action, Clipboard, showToast, Toast } from "@raycast/api";
-import got from "got";
+import { Form, ActionPanel, Action, Clipboard, showToast, Toast, LaunchProps } from "@raycast/api";
 import { useState } from "react";
+import fetch, { Headers, RequestInit } from "node-fetch";
+import { OneTimeSecretClient, OneTimeSecretResponse } from "./one-time-secret-client";
 
 type Values = {
-  lifetime: number;
+  lifetime: string;
   recipient: string;
   passphrase: string;
   secret: string;
 };
 
-export default function Command() {
+export default function Command(props: LaunchProps<{ draftValues: Values }>) {
+  const { draftValues } = props;
+
   const [secretError, setSecretError] = useState<string | undefined>();
 
   function dropSecretErrorIfNeeded() {
@@ -21,39 +24,21 @@ export default function Command() {
   async function handleSubmit(values: Values) {
     console.log(values);
 
-    if (!values.secret) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Secret is required",
-      });
-      return;
-    }
-
     const toast = await showToast({
       style: Toast.Style.Animated,
       title: "Storing secret",
     });
 
     try {
-      const baseUrl = "https://onetimesecret.com";
+      const oneTimeSecretClient = new OneTimeSecretClient();
 
-      let url = `${baseUrl}/api/v1/share`;
+      const response = await oneTimeSecretClient.storeAnonymousSecret(
+        values.secret,
+        values.lifetime,
+        values.passphrase
+      );
 
-      url = `${url}/?secret=${values.secret}`;
-
-      if (values.passphrase) {
-        url = `${url}&passphrase=${values.passphrase}`;
-      }
-
-      if (values.lifetime) {
-        url = `${url}&ttl=${values.lifetime}`;
-      }
-
-      const { body } = await got.post(url);
-
-      const shareableUrl = `${baseUrl}/secret/${JSON.parse(body).secret_key}`;
-
-      await Clipboard.copy(shareableUrl);
+      await Clipboard.copy(oneTimeSecretClient.getShareableUrl(response.secret_key));
 
       toast.style = Toast.Style.Success;
       toast.title = "Shared secret";
@@ -72,12 +57,14 @@ export default function Command() {
           <Action.SubmitForm onSubmit={handleSubmit} />
         </ActionPanel>
       }
+      enableDrafts
     >
       <Form.TextArea
         id="secret"
         title="Secret*"
         placeholder="The secret to be sent"
         info="Required"
+        defaultValue={draftValues?.secret}
         error={secretError}
         onChange={dropSecretErrorIfNeeded}
         onBlur={(event) => {
@@ -94,10 +81,11 @@ export default function Command() {
         title="Passphrase"
         placeholder="Something top sneaky"
         info="Optional. Encrypt the secret with this value."
+        defaultValue={draftValues?.passphrase}
       />
       <Form.Dropdown
-        id="lifetime*"
-        title="Lifetime"
+        id="lifetime"
+        title="Lifetime*"
         info="Required. How long should the secret be available for?"
         storeValue
       >

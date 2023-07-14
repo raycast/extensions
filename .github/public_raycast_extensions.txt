@@ -22,3 +22,5 @@ todoist
 screen-studio
 openverse
 putio
+warp
+getsound
