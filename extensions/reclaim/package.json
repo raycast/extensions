@@ -5,6 +5,8 @@
   "description": "Quickly create Tasks, see your schedule, & share Scheduling Links from Reclaim",
   "icon": "command-icon.png",
   "author": "webergnr",
+  "owner": "reclaim",
+  "access": "public",
   "categories": [
     "Productivity",
     "Applications"
