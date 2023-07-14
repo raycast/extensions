@@ -3,7 +3,7 @@ import { format } from "prettier";
 
 import { Language, Parser, Preferences } from "./types";
 
-const readClipboard = async (): Promise<string> => (await Clipboard.readText()) || "";
+const readFromClipboard = async (): Promise<string> => (await Clipboard.readText()) || "";
 
 const formatCode = (parser: Parser) => {
   const preferences = getPreferenceValues<Preferences>();
@@ -12,7 +12,7 @@ const formatCode = (parser: Parser) => {
   return async (query: string): Promise<string> => format(query, { parser, printWidth });
 };
 
-const copyClipboard = async (code: string): Promise<string> => {
+const copyToClipboard = async (code: string): Promise<string> => {
   await Clipboard.copy(code);
   return code;
 };
@@ -22,5 +22,5 @@ const wrapWithCodeblock = (language: Language) => {
 };
 
 export const pipeline = async (language: Language, parser: Parser): Promise<string> => {
-  return readClipboard().then(formatCode(parser)).then(copyClipboard).then(wrapWithCodeblock(language));
+  return readFromClipboard().then(formatCode(parser)).then(copyToClipboard).then(wrapWithCodeblock(language));
 };
