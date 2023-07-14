@@ -1,5 +1,5 @@
 import { Icon } from "@raycast/api";
-import { DownloadFileData } from "../schema";
+import { DownloadItemData } from "../schema";
 
 export const formatFileSize = (sizeInBytes: number): string => {
   if (!sizeInBytes) {
@@ -10,15 +10,16 @@ export const formatFileSize = (sizeInBytes: number): string => {
   const i = Math.floor(Math.log(sizeInBytes) / Math.log(1024));
   const size = sizeInBytes / Math.pow(1024, i);
 
-  return `${i === 0 ? size.toFixed(0) : size.toFixed(2)} ${sizes[i]}`;
+  return `${size % 1 === 0 ? size.toFixed(0) : size.toFixed(2)} ${sizes[i]}`;
 };
 
 export const formatGenericProperty = <T>(value: T): string => {
   if (!value) return "*Unknown*";
-  return String(value);
+  const stringified = String(value);
+  return stringified.charAt(0).toUpperCase() + stringified.slice(1);
 };
 
-export const getFileSizeOrQuality = (downloadData: DownloadFileData) => {
+export const getFileSizeOrQuality = (downloadData: DownloadItemData) => {
   if (downloadData.filesize) {
     return formatFileSize(downloadData.filesize);
   }
@@ -30,7 +31,7 @@ export const getFileSizeOrQuality = (downloadData: DownloadFileData) => {
   return "Unknown";
 };
 
-export const parseFileType = (fileData: DownloadFileData) => {
+export const parseFileType = (fileData: DownloadItemData) => {
   const mime_type = fileData?.mimeType ?? null;
   const file_name = fileData?.filename;
 
@@ -53,11 +54,11 @@ const DOWNLOAD_FILE_TYPE_ICON_MAP: Record<string, Icon> = {
   other: Icon.BlankDocument,
 };
 
-export const getDownloadItemIcon = (downloadItem: DownloadFileData): string => {
+export const getDownloadItemIcon = (downloadItem: DownloadItemData): string => {
   const fileType = parseFileType(downloadItem);
   return DOWNLOAD_FILE_TYPE_ICON_MAP?.[fileType] ?? DOWNLOAD_FILE_TYPE_ICON_MAP.other;
 };
 
-export const isExternalHost = (download: DownloadFileData) => {
+export const isExternalHost = (download: DownloadItemData) => {
   return download?.host !== "real-debrid.com";
 };

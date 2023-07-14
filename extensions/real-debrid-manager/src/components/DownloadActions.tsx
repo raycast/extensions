@@ -1,10 +1,11 @@
 import { Action, ActionPanel, Icon, Keyboard, Toast, showToast, useNavigation } from "@raycast/api";
-import { DownloadFileData } from "../schema";
+import { DownloadItemData } from "../schema";
 import { isExternalHost } from "../utils";
-import { useDownloads, useMediaPlayer } from "../hooks";
+import { useStreaming } from "../hooks";
+import { requestDownloadDelete } from "../api";
 
 type DownloadActionsProp = {
-  downloadItem: DownloadFileData;
+  downloadItem: DownloadItemData;
   revalidate: () => void;
   popOnSuccess?: boolean;
 };
@@ -12,16 +13,15 @@ type DownloadActionsProp = {
 export const DownloadActions: React.FC<DownloadActionsProp> = ({ downloadItem, revalidate, popOnSuccess }) => {
   const { pop } = useNavigation();
 
-  const { supportedMediaPlayers, playWithMediaPlayer, isDownloadItemPlayable } = useMediaPlayer();
-  const { deleteDownload } = useDownloads();
+  const { supportedMediaPlayers, playWithMediaPlayer, isDownloadItemPlayable } = useStreaming();
 
-  const handleDownloadDelete = async ({ id }: DownloadFileData) => {
+  const handleDownloadDelete = async ({ id }: DownloadItemData) => {
     await showToast({
       style: Toast.Style.Animated,
       title: "Deleting download...",
     });
     try {
-      await deleteDownload(id);
+      await requestDownloadDelete(id);
       revalidate();
       await showToast({
         style: Toast.Style.Success,
@@ -37,6 +37,32 @@ export const DownloadActions: React.FC<DownloadActionsProp> = ({ downloadItem, r
   };
   return (
     <>
+      {isDownloadItemPlayable(downloadItem) && (
+        <ActionPanel.Section>
+          <ActionPanel.Submenu title="Stream">
+            {supportedMediaPlayers.map((player) => (
+              <Action
+                shortcut={{
+                  key: player.key as Keyboard.KeyEquivalent,
+                  modifiers: ["opt", "ctrl"],
+                }}
+                key={player.key}
+                icon={Icon.Play}
+                title={`Stream in ${player.name}`}
+                onAction={() => playWithMediaPlayer(downloadItem.download, player)}
+              />
+            ))}
+            <Action.OpenInBrowser
+              shortcut={{
+                key: "'",
+                modifiers: ["opt", "ctrl"],
+              }}
+              title="Stream in Browser"
+              url={`https://real-debrid.com/streaming-${downloadItem?.id}`}
+            />
+          </ActionPanel.Submenu>
+        </ActionPanel.Section>
+      )}
       <ActionPanel.Section>
         <Action.OpenInBrowser url={downloadItem?.download} />
         <Action.CopyToClipboard
@@ -58,21 +84,7 @@ export const DownloadActions: React.FC<DownloadActionsProp> = ({ downloadItem, r
           />
         )}
       </ActionPanel.Section>
-      <ActionPanel.Section>
-        {isDownloadItemPlayable(downloadItem) &&
-          supportedMediaPlayers.map((player) => (
-            <Action
-              shortcut={{
-                key: player.key as Keyboard.KeyEquivalent,
-                modifiers: ["opt", "ctrl"],
-              }}
-              key={player.key}
-              icon={Icon.Play}
-              title={`Play with ${player.name}`}
-              onAction={() => playWithMediaPlayer(downloadItem.download, player)}
-            />
-          ))}
-      </ActionPanel.Section>
+
       <ActionPanel.Section>
         <Action
           shortcut={{

@@ -1,11 +1,11 @@
 import { Action, ActionPanel, Icon, List, useNavigation } from "@raycast/api";
-import { useTorrents } from "./hooks";
 import { TORRENT_STATUS_MAP, formatFileSize } from "./utils";
 import { TorrentActions, TorrentView } from "./components";
+import { usePromise } from "@raycast/utils";
+import { requestTorrents } from "./api";
 
 export const Torrents = () => {
-  const { getTorrents } = useTorrents();
-  const { data, isLoading, revalidate } = getTorrents();
+  const { data, isLoading, revalidate } = usePromise(requestTorrents);
   const { push } = useNavigation();
 
   return (

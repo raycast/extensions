@@ -3,7 +3,7 @@ import { Action, ActionPanel, Icon, List, Toast, popToRoot, showToast } from "@r
 import { TorrentFile, TorrentItemDataExtended } from "../schema";
 import { formatFileSize } from "../utils";
 import { reducer as fileSelectionReducer } from "../reducers";
-import { useUnrestrict } from "../hooks";
+import { requestSelectTorrentFiles } from "../api";
 
 type TorrentFileSelectionProps = {
   torrentItemData: TorrentItemDataExtended;
@@ -11,8 +11,6 @@ type TorrentFileSelectionProps = {
 };
 
 export const TorrentFileSelection: React.FC<TorrentFileSelectionProps> = ({ torrentItemData, revalidate }) => {
-  const { selectTorrentFiles } = useUnrestrict();
-
   const [torrentFiles, dispatch] = useReducer(fileSelectionReducer, torrentItemData?.files as TorrentFile[]);
 
   const handleFileSelection = (id: number) => {
@@ -29,7 +27,7 @@ export const TorrentFileSelection: React.FC<TorrentFileSelectionProps> = ({ torr
     const selectedFiles = torrentFiles.filter((file) => file.selected);
     const files = selectedFiles.map((file) => file.id).join(",");
     try {
-      await selectTorrentFiles(torrentItemData.id, files);
+      await requestSelectTorrentFiles(torrentItemData.id, files);
       await showToast(Toast.Style.Success, "Files Selected");
       revalidate && revalidate();
       popToRoot();

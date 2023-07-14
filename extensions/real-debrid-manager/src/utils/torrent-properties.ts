@@ -1,19 +1,11 @@
 import { Color, Icon } from "@raycast/api";
-import { TorrentStatus, UnrestrictLinkResponse } from "../schema";
+import { TorrentStatus } from "../schema";
 
 export const formatProgress = (progress: number) => {
   if (!progress && progress !== 0) return "Unknown";
   if (progress === 100) return "Completed";
 
   return `${progress}%`;
-};
-
-export const isUnrestrictedTorrent = (response: UnrestrictLinkResponse) => {
-  return Boolean(response?.id && response?.uri);
-};
-
-export const isUnrestrictedHosterLink = (response: UnrestrictLinkResponse) => {
-  return Boolean(response?.id && response?.host);
 };
 
 export const isTorrentPendingFileSelection = (torrentStatus: TorrentStatus) => {

@@ -1,46 +1,24 @@
-import fetch from "node-fetch";
+import { UNRESTRICT_LINK, fetch } from ".";
+import { ErrorResponse, UnrestrictLinkResponse } from "../schema";
 
-import { SELECT_FILES, UNRESTRICT_LINK, UNRESTRICT_MAGNET } from ".";
-import { ErrorResponse, LinkType } from "../schema";
+import { AxiosResponse, AxiosError } from "axios";
 
-export const requestUnrestrict = async (link: string, token: string, type: LinkType = "link") => {
-  const endpoint = type === "link" ? UNRESTRICT_LINK : UNRESTRICT_MAGNET;
-  const params = new URLSearchParams();
-  params.append(type, link);
+export const requestLinkUnrestrict = async (link: string) => {
+  try {
+    const response: AxiosResponse<UnrestrictLinkResponse> = await fetch.post(
+      UNRESTRICT_LINK,
+      { link },
+      {
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+      }
+    );
 
-  const response = await fetch(endpoint, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded",
-      authorization: `Bearer ${token}`,
-    },
-    body: params,
-  });
-
-  if (!response.ok) {
-    const { message, error } = (await response.json()) as ErrorResponse;
-    throw new Error(`Something went wrong ${error || message || ""}`);
+    return response.data as UnrestrictLinkResponse;
+  } catch (e) {
+    const axiosError = e as AxiosError<ErrorResponse>;
+    const { message, error } = axiosError?.response?.data as ErrorResponse;
+    throw new Error(`Something went wrong: ${error || message || ""}`);
   }
-
-  return response.json();
-};
-export const requestSelectFiles = async (id: string, token: string, selectedFiles?: string) => {
-  const params = new URLSearchParams();
-  params.append("files", selectedFiles || "all");
-
-  const response = await fetch(SELECT_FILES(id), {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded",
-      authorization: `Bearer ${token}`,
-    },
-    body: params,
-  });
-
-  if (!response.ok) {
-    const { message, error } = (await response.json()) as ErrorResponse;
-    throw new Error(`Something went wrong ${error || message || ""}`);
-  }
-
-  return response;
 };

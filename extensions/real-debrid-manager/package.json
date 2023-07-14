@@ -44,10 +44,10 @@
       "icon": "command-icon.png"
     },
     {
-      "name": "user-info",
-      "title": "User Info",
-      "subtitle": "View RD User Info",
-      "description": "View logged-in user info",
+      "name": "account-info",
+      "title": "Account & Traffic Info",
+      "subtitle": "View RD Account & Traffic Info",
+      "description": "View logged-in user and traffic info",
       "mode": "view",
       "icon": "command-icon.png"
     }
@@ -60,12 +60,38 @@
       "title": "Real-Debrid Token",
       "description": "You can find your token at https://real-debrid.com/apitoken",
       "placeholder": "Enter your secure token"
+    },
+    {
+      "name": "item_limit",
+      "type": "dropdown",
+      "required": false,
+      "title": "Items Fetch Limit",
+      "description": "Specify how many torrents/downloads to attempt fetching",
+      "default": "100",
+      "data": [
+        {
+          "title": "50",
+          "value": "50"
+        },
+        {
+          "title": "100",
+          "value": "100"
+        },
+        {
+          "title": "150",
+          "value": "150"
+        },
+        {
+          "title": "200",
+          "value": "200"
+        }
+      ]
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.55.0",
     "@raycast/utils": "^1.8.0",
-    "node-fetch": "^3.3.1"
+    "axios": "^1.4.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.5",

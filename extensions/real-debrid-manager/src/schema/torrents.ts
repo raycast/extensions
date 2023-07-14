@@ -40,7 +40,6 @@ export type TorrentItemDataExtended = TorrentItemData & {
   files: TorrentFile[];
 };
 
-export type TorrentData = TorrentItemData[];
 export type LinkType = "magnet" | "link";
 
 export type ErrorResponse = {
@@ -53,4 +52,8 @@ export type UnrestrictLinkResponse = {
   id: string;
   uri?: string;
   host?: string;
+};
+
+export type UnrestrictTorrentResponse = {
+  id: string;
 };

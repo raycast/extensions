@@ -1,13 +1,13 @@
 import { Action, ActionPanel, Icon, List, useNavigation } from "@raycast/api";
-import { useDownloads } from "./hooks";
 import { useState } from "react";
 import { getDownloadItemIcon, getFileSizeOrQuality } from "./utils";
 import { DownloadView, DownloadActions } from "./components";
+import { usePromise } from "@raycast/utils";
+import { requestDownloads } from "./api";
 
 export const Downloads = () => {
-  const { getDownloads } = useDownloads();
   const { push } = useNavigation();
-  const { data, isLoading, revalidate } = getDownloads();
+  const { data, isLoading, revalidate } = usePromise(requestDownloads);
   const [showingDetail] = useState(false);
 
   return (

@@ -9,3 +9,29 @@ export type UserData = {
   premium: number;
   expiration: string;
 };
+
+type HostInfo = {
+  left: number;
+  type: keyof typeof TrafficType;
+  bytes?: number;
+  links?: number;
+  limit?: number;
+  extra?: number;
+  reset?: keyof typeof TrafficReset;
+};
+
+export type TrafficData = {
+  [hostDomain: "remote" | string]: HostInfo;
+};
+
+export enum TrafficType {
+  megabytes = "MB",
+  gigabytes = "GB",
+  links = "Links",
+}
+
+export enum TrafficReset {
+  daily = "Day",
+  weekly = "Week",
+  monthly = "Month",
+}
