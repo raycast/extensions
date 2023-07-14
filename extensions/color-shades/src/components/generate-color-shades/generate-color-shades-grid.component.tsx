@@ -34,7 +34,7 @@ export function GenerateColorShadesGrid(props: { color: string }): JSX.Element {
                 }}
               />
               <Action.CopyToClipboard
-                title="Copy All Colors as Variable Declaration Ready"
+                title="Copy All Colors as Variables"
                 content={PaletteService.variableDeclarationReadyPalette(palette as Palette)}
                 shortcut={{ modifiers: ["ctrl"], key: "c" }}
               />
