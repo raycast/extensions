@@ -2,6 +2,7 @@ import { UNRESTRICT_LINK, fetch } from ".";
 import { ErrorResponse, UnrestrictLinkResponse } from "../schema";
 
 import { AxiosResponse, AxiosError } from "axios";
+import { formatErrorMessage } from "../utils";
 
 export const requestLinkUnrestrict = async (link: string) => {
   try {
@@ -19,6 +20,6 @@ export const requestLinkUnrestrict = async (link: string) => {
   } catch (e) {
     const axiosError = e as AxiosError<ErrorResponse>;
     const { message, error } = axiosError?.response?.data as ErrorResponse;
-    throw new Error(`Something went wrong: ${error || message || ""}`);
+    throw new Error(formatErrorMessage(error || (message as string)));
   }
 };

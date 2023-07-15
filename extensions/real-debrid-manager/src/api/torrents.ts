@@ -11,6 +11,7 @@ import {
 import { ErrorResponse, TorrentItemData, TorrentItemDataExtended, UnrestrictTorrentResponse } from "../schema";
 import { AxiosError, AxiosResponse } from "axios";
 import { getPreferenceValues } from "@raycast/api";
+import { formatErrorMessage } from "../utils";
 
 export const requestTorrentDelete = async (torrent_id: string) => {
   const response: AxiosResponse<void> = await fetch.delete(TORRENT_DELETE(torrent_id));
@@ -35,7 +36,7 @@ export const requestTorrentDetails = async (torrent_id: string) => {
   } catch (e) {
     const axiosError = e as AxiosError<ErrorResponse>;
     const { message, error } = axiosError?.response?.data as ErrorResponse;
-    throw new Error(`Something went wrong ${error || message || ""}`);
+    throw new Error(formatErrorMessage(error || (message as string)));
   }
 };
 
@@ -50,7 +51,7 @@ export const requestAddMagnet = async (magnet_link: string) => {
   } catch (e) {
     const axiosError = e as AxiosError<ErrorResponse>;
     const { message, error } = axiosError?.response?.data as ErrorResponse;
-    throw new Error(`Something went wrong ${error || message || ""}`);
+    throw new Error(formatErrorMessage(error || (message as string)));
   }
 };
 
@@ -68,7 +69,7 @@ export const requestAddTorrentFile = async (file_path: string) => {
   } catch (e) {
     const axiosError = e as AxiosError<ErrorResponse>;
     const { message, error } = axiosError?.response?.data as ErrorResponse;
-    throw new Error(`Something went wrong ${error || message || ""}`);
+    throw new Error(formatErrorMessage(error || (message as string)));
   }
 };
 
@@ -83,6 +84,6 @@ export const requestSelectTorrentFiles = async (torrent_id: string, selected_fil
   } catch (e) {
     const axiosError = e as AxiosError<ErrorResponse>;
     const { message, error } = axiosError?.response?.data as ErrorResponse;
-    throw new Error(`Something went wrong ${error || message || ""}`);
+    throw new Error(formatErrorMessage(error || (message as string)));
   }
 };
