@@ -99,7 +99,7 @@
 /extensions/brew                                     @nhojb @Aayush9029 @mathieudutour @urwrstkn8mare
 /extensions/brew-services                            @es183923
 /extensions/brightness-control                       @CaliCastle
-/extensions/browser-bookmarks                        @thomaslombart @sasivarnan
+/extensions/browser-bookmarks                        @thomaslombart @sasivarnan @ahpatel
 /extensions/browser-history                          @crisboarna
 /extensions/browsers-profiles                        @skydiver
 /extensions/bttv-emote                               @Aayush9029
@@ -166,6 +166,7 @@
 /extensions/coinpaprika                              @gumbleliks
 /extensions/color-casket                             @slavarazum @fe9lix @pernielsentikaer @fengtianze
 /extensions/color-picker                             @thomaspaulmann @otakustay @EmersonEmerson @pernielsentikaer @arronhunt
+/extensions/color-shades                             @qeude
 /extensions/colorslurp                               @Jordan-Ellis
 /extensions/commitlint                               @lardissone
 /extensions/common-directory                         @koinzhang
@@ -342,6 +343,7 @@
 /extensions/get-direct-link                          @trungnghiatn
 /extensions/get-favicon                              @vimtor
 /extensions/get-ssh-key                              @tc9011 @pernielsentikaer
+/extensions/getsound                                 @asgu @asgu @asgu
 /extensions/gg-deals                                 @whitespacecode
 /extensions/gh-pic                                   @xiangsanliu
 /extensions/gif-search                               @josephschmitt
@@ -376,7 +378,7 @@
 /extensions/google-fonts                             @GastroGeek
 /extensions/google-maps-search                       @ratoru @aeither
 /extensions/google-maven-repository                  @koinzhang
-/extensions/google-meet                              @vitoorgomes @hughlaw
+/extensions/google-meet                              @vitoorgomes @hughlaw @iwex
 /extensions/google-search                            @mblode
 /extensions/google-tasks                             @elliotdes @pernielsentikaer
 /extensions/google-translate                         @gebeto @FezVrasta @metakirby5 @tangerine1202 @nirtamir2
@@ -550,6 +552,7 @@
 /extensions/mantine                                  @EmilMalanczak
 /extensions/marginnote                               @ourongxing
 /extensions/markdown-blog-manager                    @pyronaur
+/extensions/markdown-image-to-html                   @qeude
 /extensions/markdown-reference                       @codedbyjordan
 /extensions/markdown-this                            @aravindballa
 /extensions/markdown-to-jira                         @theo-brlle
@@ -637,7 +640,7 @@
 /extensions/numi                                     @AndresMorelos @pernielsentikaer @viandwi24
 /extensions/obs-clippings                            @trevware
 /extensions/obs-control                              @Yukaii
-/extensions/obsidian                                 @KevinBatdorf @marcjulianschwarz @KevinBatdorf @pernielsentikaer @ofalvai
+/extensions/obsidian                                 @KevinBatdorf @marcjulianschwarz @KevinBatdorf @pernielsentikaer @ofalvai @KevinBatdorf
 /extensions/obsidian-bookmarks                       @Dru89
 /extensions/odin                                     @aamoussa97
 /extensions/office-quotes                            @braydoncoyer @sandypockets
@@ -715,7 +718,7 @@
 /extensions/podcasts-now                             @cloudy9101
 /extensions/pokedex                                  @anhthang
 /extensions/polished                                 @LekoArts
-/extensions/pomodoro                                 @KELiON @pernielsentikaer @brodelp
+/extensions/pomodoro                                 @KELiON @pernielsentikaer @brodelp @susonthapa
 /extensions/porkbun                                  @xmok
 /extensions/port-manager                             @lucaschultz
 /extensions/portuguese-primeira-liga                 @danielsequeira
@@ -783,11 +786,12 @@
 /extensions/readymetrics                             @chadbutz
 /extensions/rebrandly                                @grikomsn
 /extensions/recents                                  @GastroGeek @kgrhartlage
+/extensions/reclaim                                  @webergnr
 /extensions/recurly                                  @kudrykv
 /extensions/reddit-search                            @ewlcheng
 /extensions/redis                                    @k8scat
 /extensions/redmine                                  @jwickers
-/extensions/reflect                                  @RyonHuedepohl @joshknowles @joshknowles
+/extensions/reflect                                  @RyonHuedepohl @joshknowles @joshknowles @ocavue
 /extensions/refresh-wifi                             @natterstefan
 /extensions/regex-repl                               @hongkiulam
 /extensions/regex-tester                             @allenan
@@ -832,7 +836,7 @@
 /extensions/search-hexpm                             @jordelver
 /extensions/search-hookmark                          @QIanGua
 /extensions/search-mdn                               @krzysztofzuraw @OBQun @k8scat
-/extensions/search-notion                            @sadanand-singh
+/extensions/search-notion                            @sadanand-singh @erikjs14
 /extensions/search-npm                               @mrmartineau @reloadedhead @TimonVS @luisFilipePT @LunaticMuch
 /extensions/search-regexp                            @musienkoyuriy @pernielsentikaer
 /extensions/search-rubygems                          @aleks
