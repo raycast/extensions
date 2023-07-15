@@ -1,37 +1,16 @@
 import { ReactNode, useEffect, useState } from "react";
-import { Action, ActionPanel, Color, Icon, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, Image, List, showToast, Toast } from "@raycast/api";
 import { getErrorMessage } from "./utils/errors";
 import { HelpError, ScheduledTask, TaskState, fetchScheduledTasks, signalTask } from "./utils/jellyfinApi";
 import { editToast } from "./utils/utils";
 import ErrorDetailView from "./components/ErrorDetailView";
+import { getProgressIcon } from "@raycast/utils";
 
 const sections: TaskState[] = ["Running", "Idle"];
 
 function TaskListItem({ task, refresh }: { task: ScheduledTask; refresh: () => void }): JSX.Element {
-  let color: Color;
-  let icon: Icon;
-
-  color = Color.SecondaryText;
-  icon = Icon.Dot;
-  if (task.State == "Running") {
-    color = Color.Yellow;
-    icon = Icon.Circle;
-
-    if (task.CurrentProgressPercentage) {
-      if (task.CurrentProgressPercentage >= 50) {
-        color = Color.Orange;
-      }
-      if (task.CurrentProgressPercentage >= 95) {
-        icon = Icon.CircleProgress100;
-      } else if (task.CurrentProgressPercentage >= 75) {
-        icon = Icon.CircleProgress75;
-      } else if (task.CurrentProgressPercentage >= 50) {
-        icon = Icon.CircleProgress50;
-      } else {
-        icon = Icon.CircleProgress25;
-      }
-    }
-  }
+  let color: Color = Color.SecondaryText;
+  let icon: Image.ImageLike = Icon.Heartbeat;
 
   const accessories: List.Item.Accessory[] = [
     {
@@ -42,13 +21,17 @@ function TaskListItem({ task, refresh }: { task: ScheduledTask; refresh: () => v
     },
   ];
 
-  if (task.CurrentProgressPercentage) {
-    accessories.push({ text: `${Math.round(task.CurrentProgressPercentage ?? 0)}%` });
-  }
-
   const actions: ReactNode[] = [];
 
   if (task.State == "Running") {
+    color = Color.Orange;
+    icon = Icon.Bolt;
+
+    accessories.push({
+      icon: getProgressIcon((task.CurrentProgressPercentage ?? 0) / 100),
+      tooltip: `${Math.round(task.CurrentProgressPercentage ?? 0)}%`,
+    });
+
     actions.push(
       <Action
         title="Cancel Task"
@@ -132,16 +115,10 @@ export default function Command() {
     }
   }
 
-  function refreshLoading() {
+  useEffect(() => {
     setIsLoading(true);
     refresh().then(() => setIsLoading(false));
-  }
-
-  useEffect(() => {
-    refreshLoading();
-    const interval = setInterval(() => {
-      refreshLoading();
-    }, 1000);
+    const interval = setInterval(() => refresh(), 1000);
     return () => clearInterval(interval);
   }, []);
 
@@ -153,7 +130,7 @@ export default function Command() {
             {tasks
               .filter((task) => task.State == section)
               .map((task, taskIndex) => (
-                <TaskListItem key={taskIndex} task={task} refresh={refreshLoading} />
+                <TaskListItem key={taskIndex} task={task} refresh={refresh} />
               ))}
           </List.Section>
         ))}
