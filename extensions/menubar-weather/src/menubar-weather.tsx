@@ -6,10 +6,17 @@ import {
   isEmptyLonLat,
   latitude,
   longitude,
+  tempType,
+  menuUVI,
+  menuPressure,
+  menuHumidity,
+  menuWind,
   showForecast,
   showLocation,
   showSun,
+  showUVI,
   windDirection,
+  windAngle2Direction,
   windDirectionSimple,
 } from "./utils/weather-utils";
 import { OPEN_METEO } from "./utils/axios-utils";
@@ -19,13 +26,39 @@ export default function MenubarWeather() {
   const { tempUnit, windUint } = getUnits();
   const { description, icon } = getWeatherDescription(weather?.current_weather?.weathercode);
 
+  const menuItems: string[] = [];
+
+  if (typeof weather !== "undefined") {
+    menuItems.push(
+      Math.round(
+        tempType == "apparent_temperature"
+          ? weather?.hourly.apparent_temperature[timeHour()]
+          : weather?.current_weather?.temperature
+      ) + tempUnit
+    );
+    if (menuUVI && weather.daily?.uv_index_max.length != 0) {
+      menuItems.push("☀ " + Math.round(weather.daily.uv_index_max[0]));
+    }
+    if (menuPressure && weather.hourly?.surface_pressure.length != 0) {
+      menuItems.push("㍱ " + Math.round(weather.hourly.surface_pressure[timeHour()]));
+    }
+    if (menuHumidity && weather.hourly?.relativehumidity_2m.length != 0) {
+      menuItems.push(
+        "🜄 " + Math.round(weather.hourly.relativehumidity_2m[timeHour()]) + weather.hourly_units.relativehumidity_2m
+      );
+    }
+    if (menuWind) {
+      menuItems.push(
+        windAngle2Direction(weather.current_weather.winddirection).icon +
+          " " +
+          Math.round(weather.current_weather.windspeed) +
+          windUint
+      );
+    }
+  }
+
   return (
-    <MenuBarExtra
-      isLoading={loading}
-      tooltip={`${description}`}
-      title={typeof weather === "undefined" ? "" : ` ${Math.round(weather?.current_weather?.temperature)}${tempUnit}`}
-      icon={icon}
-    >
+    <MenuBarExtra isLoading={loading} tooltip={`${description}`} title={menuItems.join(" | ")} icon={icon}>
       {!loading && (
         <>
           {typeof weather === "undefined" && (
@@ -87,6 +120,16 @@ export default function MenubarWeather() {
                         );
                       }}
                     />
+                    {showUVI && (
+                      <MenuBarExtra.Item
+                        title={"UVI"}
+                        icon={Icon.Sun}
+                        subtitle={` ${Math.round(weather?.daily.uv_index_max[0])}`}
+                        onAction={async () => {
+                          await Clipboard.copy(`${Math.round(weather?.daily.uv_index_max[0])}`);
+                        }}
+                      />
+                    )}
                     <MenuBarExtra.Item
                       title={"Pressure"}
                       icon={Icon.CricketBall}
@@ -311,6 +354,22 @@ export default function MenubarWeather() {
                   );
                 })}
               </MenuBarExtra.Submenu>
+              {showUVI && (
+                <MenuBarExtra.Submenu title={"UVI"} icon={Icon.Sun}>
+                  {weather?.daily?.uv_index_max?.map((value, index) => {
+                    return (
+                      <MenuBarExtra.Item
+                        key={index + weather?.daily?.time[index] + Math.round(value)}
+                        icon={getDateIcon(weather?.daily?.time[index].substring(8))}
+                        title={` ${Math.round(value)}`}
+                        onAction={async () => {
+                          await Clipboard.copy(weather?.daily?.time[index] + ` ` + Math.round(value));
+                        }}
+                      />
+                    );
+                  })}
+                </MenuBarExtra.Submenu>
+              )}
             </MenuBarExtra.Section>
           )}
           <MenuBarExtra.Separator />
