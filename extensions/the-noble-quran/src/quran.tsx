@@ -59,7 +59,7 @@ const ReadSurah = ({ surah }: { surah: Surah }): JSX.Element => {
   });
   return (
     <List isLoading={isLoading} isShowingDetail navigationTitle="Ayahs">
-      <List.Section title={surah.englishName} subtitle={surah.englishNameTranslation}>
+      <List.Section title={surah.englishName} subtitle={`${surah.englishNameTranslation} - ${surah.numberOfAyahs}`}>
         {Ayahs?.map((ayah) => (
           <List.Item
             key={ayah.number}

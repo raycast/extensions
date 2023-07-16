@@ -10,17 +10,14 @@ export const useQuran = <T>({ apiFn, cacheKey }: UseQuranOptions<T>) => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    console.log("useQuran", cacheKey);
     const fetchData = async () => {
       setIsLoading(true);
       try {
         const cachedData = cache.get(cacheKey);
         if (cachedData) {
-          console.log("using cached data");
           setData(JSON.parse(cachedData));
         } else {
           const response = await apiFn();
-          console.log("using api data");
           setData(response);
           cache.set(cacheKey, JSON.stringify(response));
         }
