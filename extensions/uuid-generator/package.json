@@ -88,7 +88,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.50.2",
+    "@raycast/api": "^1.55.0",
     "uuid": "^9.0.0"
   },
   "devDependencies": {
