@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, List, Toast, showToast } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, showToast } from "@raycast/api";
 import { useQuran } from "./hooks/useQuran";
 import { getSurah, getAyahs } from "./utils/api";
 import { Surah, Ayah } from "./types";
