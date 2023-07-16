@@ -8,7 +8,7 @@ interface Arguments {
 export default async function main(
   props: LaunchProps<{
     arguments: Arguments;
-  }>
+  }>,
 ) {
   let { number } = props.arguments;
 
