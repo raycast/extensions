@@ -1,6 +1,6 @@
 import { Action, ActionPanel, List, Image } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
-import { useState } from "react";
+import React, { useState } from "react";
 import Parser from "rss-parser";
 
 const parser = new Parser();
