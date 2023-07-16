@@ -15,7 +15,7 @@ interface Article {
 }
 
 export default function Command() {
-  const [rssLink, setRssLink] = useState("https://www.theverge.com/rss/index.xml");
+  const [rssLink, setRssLink] = useState("https://habr.com/ru/rss");
   const { isLoading, data } = useFetch(rssLink, {
     async parseResponse(response) {
       if (!response.ok) {
