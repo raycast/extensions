@@ -6,7 +6,8 @@
   "icon": "extension_icon.png",
   "author": "douo",
   "categories": [
-    "System"
+    "System",
+    "Media"
   ],
   "license": "MIT",
   "commands": [
@@ -19,38 +20,38 @@
     },
     {
       "name": "next",
-      "description": "Toggle Play/Pause",
+      "description": "Send Next KeyEven",
       "title": "Next",
       "icon": "next.png",
       "mode": "no-view"
     },
     {
       "name": "previous",
-      "description": "Toggle Play/Pause",
+      "description": "Send Previous KeyEvent",
       "title": "Previous",
       "icon": "previous.png",
       "mode": "no-view"
     },
     {
       "name": "fast",
-      "description": "Toggle Play/Pause",
-      "title": "Fast",
+      "description": "Send Forward KeyEvent",
+      "title": "Forward",
       "icon": "fast.png",
       "mode": "no-view"
     },
     {
       "name": "rewind",
-      "description": "Toggle Play/Pause",
+      "description": "Send Rewind KeyEvent",
       "title": "Rewind",
       "icon": "rewind.png",
       "mode": "no-view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.48.9"
+    "@raycast/api": "^1.55.2"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "1.0.5",
+    "@raycast/eslint-config": "1.0.6",
     "@types/node": "18.8.3",
     "@types/react": "18.0.9",
     "eslint": "^7.32.0",
