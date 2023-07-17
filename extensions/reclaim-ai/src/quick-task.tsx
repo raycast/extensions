@@ -1,7 +1,5 @@
 import { Action, ActionPanel, Icon, List, useNavigation } from "@raycast/api";
-import { addMinutes } from "date-fns";
 import { useState } from "react";
-import { useDebounce } from "./hooks/useDebounce";
 import useInterpreter from "./hooks/useInterpreter";
 import TaskForm from "./task-form";
 import { TaskPlanDetails } from "./types/plan";
@@ -15,14 +13,16 @@ export type ListType = {
 export default function Command() {
   const { push } = useNavigation();
   const { sendToInterpreter } = useInterpreter();
+
+  const [query, setQuery] = useState<string>("");
   const [list, setList] = useState<ListType[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
 
-  const _onChangeDebounced = async (text: string) => {
+  const onAskTaskCreation = async () => {
     try {
       setLoading(true);
-      if (text !== "") {
-        const response = await sendToInterpreter<TaskPlanDetails>("task", text);
+      if (query !== "") {
+        const response = await sendToInterpreter<TaskPlanDetails>("task", query);
 
         if (response) {
           setList(
@@ -41,13 +41,16 @@ export default function Command() {
     }
   };
 
-  const onChangeDebounced = useDebounce(_onChangeDebounced, 2000);
-
   return (
     <List
       searchBarPlaceholder="Type in your task, duration, & due date…"
       isLoading={loading}
-      onSearchTextChange={onChangeDebounced}
+      onSearchTextChange={setQuery}
+      actions={
+        <ActionPanel>
+          <Action title="Create Task" onAction={onAskTaskCreation} />
+        </ActionPanel>
+      }
     >
       {list.length === 0 ? (
         <List.EmptyView
@@ -70,11 +73,11 @@ export default function Command() {
           <List.Item
             key={item.uuid}
             title={item.title}
-            icon={Icon.LightBulb}
+            icon={Icon.CheckCircle}
             actions={
               <ActionPanel>
                 <Action
-                  title={item.title}
+                  title={`Create: ${item.title}`}
                   onAction={() => {
                     push(<TaskForm interpreter={item.interpreterData} title={item.title} />);
                   }}

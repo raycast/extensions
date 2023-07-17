@@ -68,7 +68,7 @@ export default (props: Props) => {
   );
 
   const handleSubmit = async (formValues: FormValues) => {
-    await showToast(Toast.Style.Animated, "Creating task...");
+    await showToast(Toast.Style.Animated, "Creating Task...");
     const { timeNeeded, durationMin, durationMax, snoozeUntil, due, notes, title, timePolicy } = formValues;
 
     const _timeNeeded = parseDurationToMinutes(timeNeeded) / TIME_BLOCK_IN_MINUTES;
