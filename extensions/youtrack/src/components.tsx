@@ -83,7 +83,7 @@ function IssueDetails(props: {
         </Detail.Metadata>
       }
       actions={
-        <ActionPanel>
+        <ActionPanel title={issue.id}>
           <ActionPanel.Section>
             <Action.OpenInBrowser url={props.link} />
             <Action.CopyToClipboard content={issue.id} title="Copy ID" />
@@ -104,18 +104,16 @@ function Actions(props: { item: Issue; instance: string; getIssueDetailsCb: () =
   return (
     <ActionPanel title={props.item.summary}>
       <ActionPanel.Section>
-        {link && <Action.OpenInBrowser url={link} />}
-        {link && <Action.CopyToClipboard content={props.item.id} title="Copy ID" />}
         {link && (
           <Action.Push
-            icon={Icon.Paragraph}
+            icon={Icon.AppWindowSidebarRight}
             title="Show details"
             target={
               <IssueDetails link={link} instance={props.instance} getIssueDetailsCb={() => props.getIssueDetailsCb()} />
             }
-            shortcut={{ modifiers: ["opt"], key: "enter" }}
           />
         )}
+        {link && <Action.CopyToClipboard content={props.item.id} title="Copy ID" />}
         {link && (
           <Action.CopyToClipboard
             content={link}
@@ -123,6 +121,7 @@ function Actions(props: { item: Issue; instance: string; getIssueDetailsCb: () =
             shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
           />
         )}
+        {link && <Action.OpenInBrowser url={link} shortcut={{ modifiers: ["opt"], key: "enter" }} />}
       </ActionPanel.Section>
     </ActionPanel>
   );
