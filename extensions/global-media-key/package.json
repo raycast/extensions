@@ -20,7 +20,7 @@
     },
     {
       "name": "next",
-      "description": "Send Next KeyEven",
+      "description": "Send Next KeyEvent",
       "title": "Next",
       "icon": "next.png",
       "mode": "no-view"
