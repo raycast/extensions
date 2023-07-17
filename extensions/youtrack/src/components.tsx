@@ -36,7 +36,11 @@ export function IssueListItem(props: {
   );
 }
 
-function IssueDetails(props: { getIssueDetailsCb: () => Promise<IssueExtended> | null; link: string ; instance: string}) {
+function IssueDetails(props: {
+  getIssueDetailsCb: () => Promise<IssueExtended> | null;
+  link: string;
+  instance: string;
+}) {
   const [issue, setIssue] = useState<IssueExtended | null>(null);
   useEffect(() => {
     async function fetchIssueDetails() {
@@ -58,9 +62,17 @@ function IssueDetails(props: { getIssueDetailsCb: () => Promise<IssueExtended> |
       metadata={
         <Detail.Metadata>
           <Detail.Metadata.Label title="Created" text={issue.created} />
-          <Detail.Metadata.Label title="Author" text={issue.reporter?.fullName} icon={`${props.instance}${issue.reporter?.avatarUrl}`} />
+          <Detail.Metadata.Label
+            title="Author"
+            text={issue.reporter?.fullName}
+            icon={`${props.instance}${issue.reporter?.avatarUrl}`}
+          />
           <Detail.Metadata.Label title="Updated" text={issue.date} />
-          <Detail.Metadata.Label title="Updater" text={issue.updater?.fullName} icon={`${props.instance}${issue.reporter?.avatarUrl}`} />
+          <Detail.Metadata.Label
+            title="Updater"
+            text={issue.updater?.fullName}
+            icon={`${props.instance}${issue.reporter?.avatarUrl}`}
+          />
           {issue.tags?.length && (
             <Detail.Metadata.TagList title="Tags">
               {issue.tags.map((tag) => (
@@ -98,7 +110,9 @@ function Actions(props: { item: Issue; instance: string; getIssueDetailsCb: () =
           <Action.Push
             icon={Icon.Paragraph}
             title="Show details"
-            target={<IssueDetails link={link} instance={props.instance} getIssueDetailsCb={() => props.getIssueDetailsCb()} />}
+            target={
+              <IssueDetails link={link} instance={props.instance} getIssueDetailsCb={() => props.getIssueDetailsCb()} />
+            }
             shortcut={{ modifiers: ["opt"], key: "enter" }}
           />
         )}

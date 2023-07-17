@@ -26,8 +26,8 @@ function issueToItem(issue: ReducedIssue): Issue {
 }
 
 async function getUserAvatarUrl(userId: string, yt: Youtrack): Promise<string | undefined> {
-    const {avatarUrl} = await yt.users.byId(userId);
-    return avatarUrl ?? '';
+  const { avatarUrl } = await yt.users.byId(userId);
+  return avatarUrl ?? "";
 }
 
 async function reducedUserToUser(user: ReducedUser, yt: Youtrack): Promise<User> {
@@ -35,7 +35,7 @@ async function reducedUserToUser(user: ReducedUser, yt: Youtrack): Promise<User>
     id: user.id,
     name: user.name,
     fullName: user.fullName,
-    avatarUrl: await getUserAvatarUrl(user.id, yt)
+    avatarUrl: await getUserAvatarUrl(user.id, yt),
   };
 }
 
@@ -46,7 +46,7 @@ export async function fetchIssues(query: string, limit: number, yt: Youtrack): P
 
 function formatDate(dateString: number): string {
   const date = new Date(dateString);
-  return new Intl.DateTimeFormat('en-US', {dateStyle: 'long', timeStyle: 'medium'}).format(date);
+  return new Intl.DateTimeFormat("en-US", { dateStyle: "long", timeStyle: "medium" }).format(date);
 }
 
 export async function fetchIssueDetails(issue: Issue, yt: Youtrack): Promise<IssueExtended> {
@@ -55,9 +55,9 @@ export async function fetchIssueDetails(issue: Issue, yt: Youtrack): Promise<Iss
     ...issue,
     date: formatDate(updated ?? 0),
     created: formatDate(created ?? 0),
-    reporter: reporter && await reducedUserToUser(reporter, yt),
-    updater: updater && await reducedUserToUser(updater, yt),
-    tags
+    reporter: reporter && (await reducedUserToUser(reporter, yt)),
+    updater: updater && (await reducedUserToUser(updater, yt)),
+    tags,
   };
 }
 
