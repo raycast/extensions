@@ -1,5 +1,21 @@
 # NBA Game Viewer Changelog
 
+## [Fix] - 2023-03-12
+
+- Fix data (wins, losses, seed) in "View Standings" command. More robustly find stats by name instead of index.
+- Add a dropdown to "View Standings" command to view by conference
+- Rank standings in "View Standings" command in terms of seeding.
+
+## [Fixes] - 2023-01-08
+
+- Fix data (wins, losses, rank) in "View Standings" command
+- Fix display of weekday in "View Upcoming Games" command
+
+## [Improvements] - 2022-08-15
+
+- Added Cache APIs to speed up the commands.
+- Visual changes to actions and lists.
+
 ## [New Feature] - 2022-06-06
 
 - New command to view NBA headlines / news

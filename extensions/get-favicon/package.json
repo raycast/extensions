@@ -1,0 +1,77 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "get-favicon",
+  "title": "Get Favicon",
+  "description": "Get favicon from website URL",
+  "icon": "icon.png",
+  "author": "vimtor",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "copy",
+      "icon": "copy.png",
+      "title": "Copy Favicon",
+      "description": "Copy favicon from URL",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "required": true,
+          "placeholder": "https://raycast.com",
+          "name": "url",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "name": "download",
+      "icon": "download.png",
+      "title": "Download Favicon",
+      "description": "Download favicon from URL",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "required": true,
+          "placeholder": "https://raycast.com",
+          "name": "url",
+          "type": "text"
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "downloadDirectory",
+      "title": "Download Directory",
+      "type": "directory",
+      "required": true,
+      "default": "~/Downloads",
+      "description": "Directory to download favicon"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.44.0",
+    "@raycast/utils": "^1.4.11",
+    "image-downloader": "^4.3.0",
+    "tempfile": "^4.0.0",
+    "nanoid": "^4.0.0",
+    "is-url": "^1.2.4"
+  },
+  "devDependencies": {
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "@types/is-url": "^1.2.30",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

@@ -1,5 +1,15 @@
 # TablePlus Changelog
 
+## [Update] - 2023-04-27
+
+- Added the ability to search by group name
+
+## [Update] - 2022-12-16
+
+- Moved data around to match the new Raycast API
+- Added ability to disable environment in the list
+- Database paths are now showing relative paths
+
 ## [Update] - 2022-04-01
 
 - Added autodetection if TablePlus is installed through SetApp

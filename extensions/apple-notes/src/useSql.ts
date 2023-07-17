@@ -11,9 +11,8 @@ let SQL: SqlJsStatic;
 
 const loadDatabase = async (path: string) => {
   if (!SQL) {
-    SQL = await initSqlJs({
-      locateFile: () => resolve(environment.assetsPath, "sql-wasm.wasm"),
-    });
+    const wasmBinary = await readFile(resolve(environment.assetsPath, "sql-wasm.wasm"));
+    SQL = await initSqlJs({ wasmBinary });
   }
   const fileContents = await readFile(path);
   return new SQL.Database(fileContents);
@@ -33,7 +32,7 @@ const useSql = <Result>(path: string, query: string) => {
           databaseRef.current = await loadDatabase(path);
         } catch (e) {
           if (e instanceof Error && e.message.includes("operation not permitted")) {
-            setError(new PermissionError("You do not have permission to access the database."));
+            setError(new PermissionError("You do not have permission to access the database.", "fullDiskAccess"));
           } else {
             setError(e as Error);
           }
@@ -54,7 +53,7 @@ const useSql = <Result>(path: string, query: string) => {
       } catch (e) {
         console.error(e);
         if (error instanceof Error && error.message.includes("operation not permitted")) {
-          setError(new PermissionError("You do not have permission to access the database."));
+          setError(new PermissionError("You do not have permission to access the database.", "fullDiskAccess"));
         } else {
           setError(e as Error);
         }
@@ -82,7 +81,8 @@ const notesQuery = `
         folderTitle AS folder,
         datetime(modDate + 978307200, 'unixepoch') AS modifiedAt,
         snippet,
-        accountName AS account
+        accountName AS account,
+        UUID as UUID
     FROM (
         SELECT
             c.ztitle1 AS noteTitle,
@@ -91,7 +91,7 @@ const notesQuery = `
             c.z_pk AS xcoredataID,
             c.zaccount4 AS noteAccountID,
             c.zsnippet AS snippet,
-            c.zidentifier AS identifier
+            c.zidentifier AS UUID
         FROM
             ziccloudsyncingobject AS c
         WHERE
@@ -108,7 +108,6 @@ const notesQuery = `
         FROM ziccloudsyncingobject
         WHERE
             folderTitle IS NOT NULL AND
-            isRecentlyDeletedFolder != 1 AND
             zmarkedfordeletion != 1
     ) AS folders ON noteFolderID = folderID
     LEFT JOIN (

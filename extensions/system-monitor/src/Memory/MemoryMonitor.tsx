@@ -1,10 +1,10 @@
 import { List, showToast, Toast } from "@raycast/api";
-import { freemem, freememPercentage } from "os-utils";
 import { useEffect, useState } from "react";
-import { getFreeDiskSpace, getTopRamProcess, getTotalDiskSpace } from "./MemoryUtils";
+import { getFreeDiskSpace, getTopRamProcess, getTotalDiskSpace, getMemoryUsage } from "./MemoryUtils";
 import { useInterval } from "usehooks-ts";
 import { MemoryMonitorState } from "../Interfaces";
 import { ExecError } from "../Interfaces";
+import { Actions } from "../components/Actions";
 
 export default function MemoryMonitor() {
   const [isLoading, setIsLoading] = useState(true);
@@ -12,6 +12,7 @@ export default function MemoryMonitor() {
   const [state, setState] = useState<MemoryMonitorState>({
     freeDisk: "Loading...",
     totalDisk: "Loading...",
+    totalMem: "Loading...",
     freeMem: "Loading...",
     freeMemPercentage: "Loading...",
     topProcess: [],
@@ -22,16 +23,23 @@ export default function MemoryMonitor() {
       .then((newTopProcess) => {
         getFreeDiskSpace()
           .then((newFreeDisk) => {
-            setState((prevState) => {
-              return {
-                ...prevState,
-                freeDisk: newFreeDisk,
-                freeMemPercentage: Math.round(freememPercentage() * 100).toString(),
-                freeMem: Math.round(freemem() / 1024).toString(),
-                topProcess: newTopProcess,
-              };
+            getMemoryUsage().then((memoryUsage) => {
+              const memTotal: number = memoryUsage.memTotal;
+              const memUsed: number = memoryUsage.memUsed;
+              const freeMem: number = memTotal - memUsed;
+
+              setState((prevState) => {
+                return {
+                  ...prevState,
+                  freeDisk: newFreeDisk,
+                  totalMem: Math.round(memTotal / 1024).toString(),
+                  freeMemPercentage: Math.round((freeMem * 100) / memTotal).toString(),
+                  freeMem: Math.round(freeMem / 1024).toString(),
+                  topProcess: newTopProcess,
+                };
+              });
+              setIsLoading(false);
             });
-            setIsLoading(false);
           })
           .catch((error: ExecError) => {
             setError(error);
@@ -73,8 +81,8 @@ export default function MemoryMonitor() {
   return (
     <>
       <List.Item
-        title={`📝  Memory`}
-        accessoryTitle={isLoading ? "Loading..." : `${state.freeMemPercentage}% (~ ${state.freeMem} GB)`}
+        title="📝  Memory"
+        accessories={[{ text: isLoading ? "Loading..." : `${state.freeMemPercentage}% (~ ${state.freeMem} GB)` }]}
         detail={
           <List.Item.Detail
             metadata={
@@ -82,11 +90,12 @@ export default function MemoryMonitor() {
                 <List.Item.Detail.Metadata.Label title="Total Disk Space" text={state.totalDisk} />
                 <List.Item.Detail.Metadata.Label title="Free Disk Space" text={state.freeDisk} />
                 <List.Item.Detail.Metadata.Separator />
-                <List.Item.Detail.Metadata.Label title="Free RAM %" text={state.freeMemPercentage + " %"} />
-                <List.Item.Detail.Metadata.Label title="Free RAM" text={state.freeMem + " GB"} />
+                <List.Item.Detail.Metadata.Label title="Total RAM" text={`${state.totalMem} GB`} />
+                <List.Item.Detail.Metadata.Label title="Free RAM" text={`${state.freeMem} GB`} />
+                <List.Item.Detail.Metadata.Label title="Free RAM %" text={`${state.freeMemPercentage} %`} />
                 <List.Item.Detail.Metadata.Separator />
                 <List.Item.Detail.Metadata.Label title="Process Name" text="RAM" />
-                {state.topProcess !== [] &&
+                {state.topProcess.length > 0 &&
                   state.topProcess.map((element, index) => {
                     return (
                       <List.Item.Detail.Metadata.Label
@@ -100,6 +109,7 @@ export default function MemoryMonitor() {
             }
           />
         }
+        actions={<Actions />}
       />
     </>
   );

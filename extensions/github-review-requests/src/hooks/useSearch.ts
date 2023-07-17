@@ -41,7 +41,7 @@ export const useSearch = (searchText: string | undefined) => {
 
         const mapped: PullRequest[] =
           result.search.edges
-            ?.map((item) => {
+            ?.map(item => {
               if (item === null) {
                 return null;
               }

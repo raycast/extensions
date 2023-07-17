@@ -22,7 +22,7 @@ Get the API key [here](https://developers.icons8.com).
 
 * Search for icons by name. 
 * Filter the icons by the common styles. 
-* Recolor the colorable icons. 
+* Recolor icons, background, and add padding. 
 * View details about the icon such as style, category, and tags.
 * Configure the download settings such as file name, format, and size. 
 * Pin the icons and view recent icons. 

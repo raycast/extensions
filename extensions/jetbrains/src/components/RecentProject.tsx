@@ -86,7 +86,7 @@ export function RecentProject({
               <Action
                 icon={Icon.Star}
                 shortcut={{ modifiers: ["cmd"], key: "f" }}
-                title="Remove from Fav"
+                title="Remove From Fav"
                 onAction={() => remFav(recent.path)}
               />
             )}

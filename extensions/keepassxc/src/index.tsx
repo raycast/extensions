@@ -1,5 +1,5 @@
 import { Action, ActionPanel, closeMainWindow, Icon, List, showToast, Toast } from "@raycast/api";
-import { loadEntries, pastePassword, copyPassword, copyUsername } from "./utils/keepassLoader";
+import { loadEntries, pastePassword, copyPassword, copyUsername, pasteUsername, copyTOTP } from "./utils/keepassLoader";
 import { useState, useEffect } from "react";
 
 const errorHandler = (e: { message: string }) => {
@@ -35,9 +35,6 @@ export default function Command() {
         setIsLoading(false);
       });
   }, []);
-  useEffect(() => {
-    console.debug(entries);
-  }, [entries]);
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Type to Search in KeepassXC" throttle={true}>
       {entries?.map((entry, i) => (
@@ -56,26 +53,52 @@ export default function Command() {
           actions={
             <ActionPanel>
               <Action
-                title="Paste"
+                title="Paste Password"
                 icon={Icon.BlankDocument}
                 onAction={() => {
-                  pastePassword(entry).then(() => closeMainWindow());
+                  pastePassword(entry)
+                    .then(() => closeMainWindow())
+                    .catch(errorHandler);
+                }}
+              />
+              <Action
+                title="Paste Username"
+                icon={Icon.BlankDocument}
+                shortcut={{ modifiers: ["shift"], key: "enter" }}
+                onAction={() => {
+                  pasteUsername(entry)
+                    .then(() => closeMainWindow())
+                    .catch(errorHandler);
                 }}
               />
               <Action
                 title="Copy Password"
                 icon={Icon.Clipboard}
-                shortcut={{ modifiers: ["cmd"], key: "enter" }}
+                shortcut={{ modifiers: ["cmd"], key: "p" }}
                 onAction={() => {
-                  copyPassword(entry).then(() => closeMainWindow());
+                  copyPassword(entry)
+                    .then(() => closeMainWindow())
+                    .catch(errorHandler);
                 }}
               />
               <Action
                 title="Copy Username"
                 icon={Icon.Clipboard}
-                shortcut={{ modifiers: ["cmd"], key: "b" }}
+                shortcut={{ modifiers: ["cmd"], key: "u" }}
                 onAction={() => {
-                  copyUsername(entry).then(() => closeMainWindow());
+                  copyUsername(entry)
+                    .then(() => closeMainWindow())
+                    .catch(errorHandler);
+                }}
+              />
+              <Action
+                title="Copy TOTP"
+                icon={Icon.Clipboard}
+                shortcut={{ modifiers: ["cmd"], key: "t" }}
+                onAction={() => {
+                  copyTOTP(entry)
+                    .then(() => closeMainWindow())
+                    .catch(errorHandler);
                 }}
               />
             </ActionPanel>

@@ -1,5 +1,10 @@
 import { showToast, Toast } from "@raycast/api";
-import { Note } from "../utils/interfaces";
+import { Vault } from "../utils/interfaces";
+
+//--------------------------------------------------------------------------------
+// All toasts for all commands should be defined here.
+// (makes it easier to manage translations when they are added to Raycast)
+//--------------------------------------------------------------------------------
 
 export function noVaultPathsToast() {
   showToast({
@@ -25,26 +30,10 @@ export function fileWriteErrorToast(path: string, filename: string) {
   });
 }
 
-export function notePinnedToast(note: Note) {
+export function vaultsWithoutAdvancedURIToast(vaultsWithoutPlugin: Vault[]) {
   showToast({
-    title: "Note Pinned",
-    message: "'" + note.title + "' pinned successfully.",
-    style: Toast.Style.Success,
-  });
-}
-
-export function noteAlreadyPinnedToast(note: Note) {
-  showToast({
-    title: "Already Pinned",
-    message: "'" + note.title + "' is already pinned.",
+    title: "Vaults without Advanced URI plugin:",
+    message: vaultsWithoutPlugin.map((vault: Vault) => vault.name).join(", "),
     style: Toast.Style.Failure,
-  });
-}
-
-export function noteUnpinnedToast(note: Note) {
-  showToast({
-    title: "Note Unpinned",
-    message: "'" + note.title + "' unpinned successfully.",
-    style: Toast.Style.Success,
   });
 }

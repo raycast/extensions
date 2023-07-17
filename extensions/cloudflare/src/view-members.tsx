@@ -2,14 +2,9 @@ import { List } from '@raycast/api';
 import { useEffect, useState } from 'react';
 
 import Service, { Account, Member } from './service';
-import {
-  getMemberStatusIcon,
-  getEmail,
-  getKey,
-  handleNetworkError,
-} from './utils';
+import { getMemberStatusIcon, getToken, handleNetworkError } from './utils';
 
-const service = new Service(getEmail(), getKey());
+const service = new Service(getToken());
 
 function Command() {
   const [accounts, setAccounts] = useState<Account[]>([]);

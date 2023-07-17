@@ -22,7 +22,9 @@ import gh = require("parse-github-url");
 
 interface Preferences {
   paths: string;
+  includeWorkspaces: boolean;
   editorApp: Application;
+  editorAppAlt: Application;
   terminalApp: Application;
 }
 
@@ -107,7 +109,13 @@ function searchProjects(query?: string): {
         }
         return sync(base + "/*");
       })
-      .filter((path) => statSync(path)?.isDirectory())
+      .filter(
+        (path) =>
+          statSync(path)?.isDirectory() ||
+          (getPreferenceValues<Preferences>().includeWorkspaces &&
+            statSync(path)?.isFile() &&
+            path.endsWith(".code-workspace"))
+      )
       .map((path) => new Project(path))
       .sort((a, b) => (a.displayPath.toLowerCase > b.displayPath.toLowerCase ? -1 : 1));
     return projects;
@@ -151,6 +159,7 @@ export default function Command() {
   const [searchQuery, setSearchQuery] = useState<string>();
   const { projects } = searchProjects(searchQuery);
   const editorApp = getPreferenceValues<Preferences>().editorApp;
+  const editorAppAlt = getPreferenceValues<Preferences>().editorAppAlt;
   const terminalApp = getPreferenceValues<Preferences>().terminalApp;
 
   return (
@@ -175,6 +184,19 @@ export default function Command() {
                 icon={{ fileIcon: editorApp.path }}
                 shortcut={{ modifiers: ["cmd"], key: "e" }}
               />
+              {editorAppAlt && (
+                <Action
+                  title={"Open in " + editorAppAlt.name}
+                  key="editorAlt"
+                  onAction={() => {
+                    updateFrecency(searchQuery, project);
+                    open(project.fullPath, { app: { name: editorAppAlt.path } });
+                    closeMainWindow();
+                  }}
+                  icon={{ fileIcon: editorAppAlt.path }}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
+                />
+              )}
               <Action
                 title={"Open in " + terminalApp.name}
                 key="terminal"

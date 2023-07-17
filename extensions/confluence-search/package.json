@@ -5,6 +5,9 @@
   "description": "Search through Confluence",
   "icon": "confluence-icon.png",
   "author": "daviddkkim",
+  "contributors": [
+    "lr1980"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -40,6 +43,15 @@
       "title": "Domain",
       "description": "Domain of your Atlassian instance",
       "placeholder": "my.atlassian.net"
+    },
+    {
+      "name": "unsafeHttps",
+      "type": "checkbox",
+      "required": false,
+      "title": "Unsafe HTTPS",
+      "description": "Activate unsafe HTTPS mode for self-signed certificates",
+      "default": false,
+      "label": "Enable"
     },
     {
       "name": "user",

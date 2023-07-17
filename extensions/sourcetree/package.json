@@ -1,0 +1,67 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "sourcetree",
+  "title": "Sourcetree",
+  "description": "Search and open Sourcetree repositories",
+  "icon": "sourcetree_512x512x32.png",
+  "author": "i906",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Search Repositories",
+      "subtitle": "Sourcetree",
+      "description": "Search and open Sourcetree repositories",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "bin",
+      "type": "textfield",
+      "required": false,
+      "title": "Sourcetree command line tools",
+      "description": "The place where the Sourcetree command line tools are installed",
+      "default": "/Applications/SourceTree.app/Contents/Resources/stree",
+      "placeholder": "/Applications/SourceTree.app/Contents/Resources/stree"
+    },
+    {
+      "name": "plist",
+      "type": "textfield",
+      "required": false,
+      "title": "Sourcetree plist file",
+      "description": "The place where Sourcetree plist is located",
+      "default": "~/Library/Application Support/SourceTree/browser.plist",
+      "placeholder": "~/Library/Application Support/SourceTree/browser.plist"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.38.2",
+    "@raycast/utils": "^1.0.6",
+    "bplist-parser": "^0.3.2"
+  },
+  "keywords": [
+    "Git",
+    "Sourcetree",
+    "Atlassian"
+  ],
+  "devDependencies": {
+    "@types/plist": "^3.0.2",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "ts-node": "^10.8.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

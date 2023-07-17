@@ -16,13 +16,13 @@ export function AvatarGridLayout(props: {
   multiAvatarInfo: AvatarInfo;
   diceBearAvatarInfo: AvatarInfo;
 }) {
-  const { itemSize } = getPreferenceValues<Preferences>();
+  const { columns } = getPreferenceValues<Preferences>();
   const { loading, avatarOptions, setAvatarOptions, multiAvatarInfo, diceBearAvatarInfo } = props;
   const [tag, setTag] = useState<string>("");
   return (
     <Grid
       isLoading={loading}
-      itemSize={itemSize as Grid.ItemSize}
+      columns={parseInt(columns)}
       searchBarPlaceholder={"Enter custom seed, don't use sensitive or personal data as seeds"}
       onSearchTextChange={(newValue) => {
         const _avatarOptions = { ...avatarOptions };
@@ -34,13 +34,13 @@ export function AvatarGridLayout(props: {
         setAvatarOptions(_avatarOptions);
       }}
       onSelectionChange={(id) => {
-        if (typeof id !== "undefined") {
+        if (typeof id === "string") {
           const _avatarOptions = { ...avatarOptions };
           _avatarOptions.style = id;
           setAvatarOptions(_avatarOptions);
         }
       }}
-      enableFiltering={false}
+      filtering={false}
       throttle={true}
       searchBarAccessory={
         <Grid.Dropdown

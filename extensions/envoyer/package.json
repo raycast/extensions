@@ -27,6 +27,15 @@
       "title": "Envoyer API Key",
       "description": "Your Envoyer API Key. `deployments:create` scope is required when you want to start deployments.",
       "placeholder": "Enter your Envoyer API Key"
+    },
+    {
+      "name": "open_on_deploy",
+      "type": "checkbox",
+      "title": "Open project on deploy",
+      "description": "Open the project in your browser when you start a new deployment",
+      "required": false,
+      "label": "Open project on deploy",
+      "default": true
     }
   ],
   "dependencies": {

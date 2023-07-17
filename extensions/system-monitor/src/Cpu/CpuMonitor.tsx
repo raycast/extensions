@@ -1,16 +1,18 @@
 import { useState, useEffect } from "react";
-import { cpuUsage } from "os-utils";
+import { cpuUsage, sysUptime } from "os-utils";
 import { List, showToast, Toast } from "@raycast/api";
 import { loadavg } from "os";
-import { getTopCpuProcess } from "./CpuUtils";
+import { getTopCpuProcess, getRelativeTime } from "./CpuUtils";
 import { useInterval } from "usehooks-ts";
 import { CpuMonitorState, ExecError } from "../Interfaces";
+import { Actions } from "../components/Actions";
 
 export default function CpuMonitor() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<ExecError>();
   const [state, setState] = useState<CpuMonitorState>({
     cpu: "Loading...",
+    uptime: "Loading...",
     avgLoad: ["Loading...", "Loading...", "Loading..."],
     topProcess: [],
   });
@@ -37,6 +39,15 @@ export default function CpuMonitor() {
         setError(err);
       }
     });
+
+    setState((prevState) => {
+      const uptime = sysUptime();
+
+      return {
+        ...prevState,
+        uptime: getRelativeTime(uptime),
+      };
+    });
   }, 1000);
 
   useEffect(() => {
@@ -53,7 +64,7 @@ export default function CpuMonitor() {
     <>
       <List.Item
         title={`🖥️  CPU`}
-        accessoryTitle={isLoading ? "Loading..." : `${state.cpu}%`}
+        accessories={[{ text: isLoading ? "Loading..." : `${state.cpu}%` }]}
         detail={
           <List.Item.Detail
             metadata={
@@ -65,8 +76,10 @@ export default function CpuMonitor() {
                 <List.Item.Detail.Metadata.Label title="5 min" text={state.avgLoad[1]} />
                 <List.Item.Detail.Metadata.Label title="15 min" text={state.avgLoad[2]} />
                 <List.Item.Detail.Metadata.Separator />
+                <List.Item.Detail.Metadata.Label title="Uptime" text={state.uptime} />
+                <List.Item.Detail.Metadata.Separator />
                 <List.Item.Detail.Metadata.Label title="Process Name" />
-                {state.topProcess !== [] &&
+                {state.topProcess.length > 0 &&
                   state.topProcess.map((element, index) => {
                     return (
                       <List.Item.Detail.Metadata.Label
@@ -80,6 +93,7 @@ export default function CpuMonitor() {
             }
           />
         }
+        actions={<Actions />}
       />
     </>
   );

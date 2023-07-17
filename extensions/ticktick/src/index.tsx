@@ -1,7 +1,7 @@
 import { List } from "@raycast/api";
 import React, { useEffect, useMemo, useState } from "react";
 import { getToday } from "./service/osScript";
-import { getTaskDetailMarkdownContent, Section } from "./service/task";
+import { getTaskCopyContent, getTaskDetailMarkdownContent, Section } from "./service/task";
 import useStartApp from "./hooks/useStartApp";
 import TaskItem from "./components/taskItem";
 import useSearchTasks from "./hooks/useSearchTasks";
@@ -53,6 +53,7 @@ const TickTickToday: React.FC<Record<string, never>> = () => {
               priority={task.priority}
               detailMarkdown={getTaskDetailMarkdownContent(task)}
               tags={task.tags}
+              copyContent={getTaskCopyContent(task)}
             />
           ))
         : todaySections?.map((section) => {
@@ -68,6 +69,7 @@ const TickTickToday: React.FC<Record<string, never>> = () => {
                     priority={task.priority}
                     tags={task.tags}
                     detailMarkdown={getTaskDetailMarkdownContent(task)}
+                    copyContent={getTaskCopyContent(task)}
                   />
                 ))}
               </List.Section>

@@ -1,58 +1,160 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "definitions": {
-        "ScriptArgument": {
-            "properties": {
-                "percentEncoded": {
-                    "type": "boolean"
-                },
-                "type": {
-                    "enum": [
-                        "text"
+    "anyOf": [
+        {
+            "allOf": [
+                {
+                    "properties": {
+                        "currentDirectoryPath": {
+                            "type": "string"
+                        },
+                        "description": {
+                            "type": "string"
+                        },
+                        "icon": {
+                            "type": "string"
+                        },
+                        "iconDark": {
+                            "type": "string"
+                        },
+                        "needsConfirmation": {
+                            "type": "boolean"
+                        },
+                        "packageName": {
+                            "type": "string"
+                        },
+                        "schemaVersion": {
+                            "enum": [
+                                1
+                            ],
+                            "type": "number"
+                        },
+                        "title": {
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "schemaVersion",
+                        "title"
                     ],
-                    "type": "string"
+                    "type": "object"
+                },
+                {
+                    "properties": {
+                        "argument1": {
+                            "properties": {
+                                "percentEncoded": {
+                                    "type": "boolean"
+                                },
+                                "type": {
+                                    "$ref": "#/definitions/InputType"
+                                }
+                            },
+                            "required": [
+                                "type"
+                            ],
+                            "type": "object"
+                        },
+                        "mode": {
+                            "enum": [
+                                "silent"
+                            ],
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "argument1",
+                        "mode"
+                    ],
+                    "type": "object"
                 }
-            },
-            "required": [
-                "type"
-            ],
-            "type": "object"
+            ]
         },
-        "ScriptMode": {
-            "enum": [
-                "copy",
-                "fullOutput",
-                "replace",
-                "silent"
-            ],
-            "type": "string"
+        {
+            "allOf": [
+                {
+                    "properties": {
+                        "currentDirectoryPath": {
+                            "type": "string"
+                        },
+                        "description": {
+                            "type": "string"
+                        },
+                        "icon": {
+                            "type": "string"
+                        },
+                        "iconDark": {
+                            "type": "string"
+                        },
+                        "needsConfirmation": {
+                            "type": "boolean"
+                        },
+                        "packageName": {
+                            "type": "string"
+                        },
+                        "schemaVersion": {
+                            "enum": [
+                                1
+                            ],
+                            "type": "number"
+                        },
+                        "title": {
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "schemaVersion",
+                        "title"
+                    ],
+                    "type": "object"
+                },
+                {
+                    "properties": {
+                        "input": {
+                            "properties": {
+                                "type": {
+                                    "$ref": "#/definitions/InputType"
+                                }
+                            },
+                            "required": [
+                                "type"
+                            ],
+                            "type": "object"
+                        },
+                        "mode": {
+                            "enum": [
+                                "pipe"
+                            ],
+                            "type": "string"
+                        },
+                        "output": {
+                            "$ref": "#/definitions/ScriptOutput"
+                        }
+                    },
+                    "required": [
+                        "mode"
+                    ],
+                    "type": "object"
+                }
+            ]
         }
-    },
-    "properties": {
-        "argument1": {
-            "$ref": "#/definitions/ScriptArgument"
-        },
-        "currentDirectoryPath": {
-            "type": "string"
-        },
-        "icon": {
-            "type": "string"
-        },
-        "mode": {
-            "$ref": "#/definitions/ScriptMode"
-        },
-        "packageName": {
-            "type": "string"
-        },
-        "title": {
-            "type": "string"
-        }
-    },
-    "required": [
-        "argument1",
-        "mode",
-        "title"
     ],
-    "type": "object"
+    "definitions": {
+        "InputType": {
+            "enum": [
+                "file",
+                "text",
+                "url"
+            ],
+            "type": "string"
+        },
+        "ScriptOutput": {
+            "enum": [
+                "text",
+                "url"
+            ],
+            "type": "string"
+        }
+    }
 }
 

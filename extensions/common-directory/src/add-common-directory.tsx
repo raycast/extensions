@@ -1,22 +1,10 @@
-import {
-  Action,
-  ActionPanel,
-  Form,
-  Icon,
-  LocalStorage,
-  open,
-  popToRoot,
-  showHUD,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, LocalStorage, popToRoot, showHUD, showToast, Toast } from "@raycast/api";
 import { DirectoryInfo, DirectoryType, LocalDirectoryKey } from "./types/directory-info";
 import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
-import { getDirectoryName, getSelectedDirectory, isDirectoryOrFile } from "./utils/common-utils";
+import { getDirectoryName, isDirectoryOrFile } from "./utils/common-utils";
 import { refreshNumber } from "./hooks/hooks";
 import path from "path";
 import fse from "fs-extra";
-import { getChooseFolder, getFinderInsertLocation } from "./utils/applescript-utils";
 
 export default function AddCommonDirectory(props: { setRefresh: React.Dispatch<React.SetStateAction<number>> }) {
   const setRefresh =
@@ -25,24 +13,20 @@ export default function AddCommonDirectory(props: { setRefresh: React.Dispatch<R
           return;
         }
       : props.setRefresh;
-  const [path, setPath] = useState<string>("");
+  const [directoryPath, setDirectoryPath] = useState<string[]>([]);
   const [name, setName] = useState<string>("");
   const [alias, setAlias] = useState<string>("");
   const [pathError, setPathError] = useState<string | undefined>();
 
   useEffect(() => {
-    async function _fetchPath() {
-      await fetchDirectoryPath(setPath);
-    }
-    _fetchPath().then();
-  }, []);
-
-  useEffect(() => {
     async function _setName() {
-      setName(getDirectoryName(path));
+      if (directoryPath.length !== 0) {
+        setName(getDirectoryName(directoryPath[0]));
+      }
     }
+
     _setName().then();
-  }, [path]);
+  }, [directoryPath]);
 
   return (
     <Form
@@ -53,36 +37,14 @@ export default function AddCommonDirectory(props: { setRefresh: React.Dispatch<R
             title={"Add Directory"}
             icon={Icon.Plus}
             onAction={async () => {
-              if (path.length === 0) {
+              if (directoryPath.length === 0) {
                 setPathError("The field should't be empty!");
                 return;
               }
-              await addDirectory(alias, path, setPathError);
+              await addDirectory(alias, directoryPath[0], setPathError);
               setRefresh(refreshNumber());
             }}
           />
-
-          <ActionPanel.Section title="Fill Directory">
-            <Action
-              title={"Fetch Directory"}
-              icon={Icon.TwoArrowsClockwise}
-              shortcut={{ modifiers: ["cmd"], key: "f" }}
-              onAction={async () => {
-                await fetchDirectoryPath(setPath);
-              }}
-            />
-            <Action
-              title={"Choose Directory"}
-              icon={Icon.Sidebar}
-              shortcut={{ modifiers: ["shift", "ctrl"], key: "c" }}
-              onAction={() => {
-                getChooseFolder().then((path) => {
-                  open("raycast://").then();
-                  setPath(path);
-                });
-              }}
-            />
-          </ActionPanel.Section>
         </ActionPanel>
       }
     >
@@ -90,40 +52,23 @@ export default function AddCommonDirectory(props: { setRefresh: React.Dispatch<R
         title="Information"
         text={`Directory added will automatically be available in the Open Common Directory and Send File to Directory commands.`}
       />
-      <Form.TextArea
-        id={"path"}
-        title={"Path"}
-        placeholder={"/xxx/xxx"}
-        value={path}
-        error={pathError}
+      <Form.FilePicker
+        id={"filePicker"}
+        title={"Folder"}
+        allowMultipleSelection={false}
+        canChooseDirectories={true}
+        canChooseFiles={false}
+        value={directoryPath}
         onChange={(newValue) => {
-          setPath(newValue);
-          if (newValue.length > 0) {
-            setPathError(undefined);
-          }
+          setDirectoryPath(newValue);
+          setPathError("");
         }}
-        info={
-          "Insert the full path of the directory. If you select a directory before opening this command, its path is automatically added."
-        }
-        onBlur={(event) => {
-          if (event.target.value?.length == 0) {
-            setPathError("The field should't be empty!");
-          } else {
-            setPathError(undefined);
-          }
-        }}
+        error={pathError}
       />
       <Form.TextField id={"alias"} title={"Alias"} placeholder={"Optional"} value={alias} onChange={setAlias} />
       <Form.Description title={"Name"} text={name} />
     </Form>
   );
-}
-
-async function fetchDirectoryPath(setPath: React.Dispatch<React.SetStateAction<string>>) {
-  await showToast(Toast.Style.Animated, "Fetching path...");
-  const selectedDirectory = await getSelectedDirectory();
-  setPath(selectedDirectory.length === 0 ? await getFinderInsertLocation() : selectedDirectory[0].slice(0, -1));
-  await showToast(Toast.Style.Success, "Fetched successfully!");
 }
 
 async function addDirectory(
@@ -158,7 +103,7 @@ async function addDirectory(
         const newItem = {
           id: _type + "_" + new Date().getTime(),
           alias: alias,
-          name: getDirectoryName(directoryPath),
+          name: parsedPath.base,
           path: parsedPath.dir + "/" + parsedPath.base,
           valid: true,
           type: _type,
@@ -171,7 +116,7 @@ async function addDirectory(
         _SendCommonDirectory.push(newItem);
         await LocalStorage.setItem(LocalDirectoryKey.OPEN_COMMON_DIRECTORY, JSON.stringify(_OpenCommonDirectory));
         await LocalStorage.setItem(LocalDirectoryKey.SEND_COMMON_DIRECTORY, JSON.stringify(_SendCommonDirectory));
-        await showHUD(`Successfully added ${parsedPath.name}`);
+        await showHUD(`${parsedPath.name} added`);
         await popToRoot({ clearSearchBar: false });
       }
     }

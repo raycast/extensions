@@ -1,28 +1,39 @@
 import { Detail, Color } from "@raycast/api";
 import { useState, useEffect } from "react";
-import { Icon8 } from "../types/types";
+import { Icon8, IconProps, Options } from "../types/types";
 import { getIconDetail } from "../hooks/api";
 import { getRandomColor, formatDate } from "../utils/utils";
 import { IconActionPanel } from "./actions";
-import { IconProps } from "./icon";
+import json2md from "json2md";
 
 export const IconDetail = (props: IconProps): JSX.Element => {
   const [icon, setIcon] = useState<Icon8>();
+  const [options, setOptions] = useState<Options>(props.options);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
     const fetchIcon = async () => {
-      setIcon(await getIconDetail(props.icon, props.options.color));
+      setIcon(await getIconDetail(props.icon, props.options));
       setIsLoading(false);
     };
     fetchIcon();
   }, []);
 
+  useEffect(() => {
+    props.setOptions(options);
+  }, [options]);
+
   return (
     <Detail
       isLoading={isLoading}
-      actions={<IconActionPanel props={props} item={false} />}
-      markdown={icon && `# ${icon.name}\n\n${icon.mdImage}`}
+      actions={<IconActionPanel props={{ ...props, options: options, setOptions: setOptions }} detailView={true} />}
+      markdown={
+        icon &&
+        json2md([
+          { h1: icon.name },
+          { img: { source: icon.mdImage?.replace("$color", props.icon.isColor ? "" : `/${options.color.slice(1)}`) } },
+        ])
+      }
       metadata={
         icon && (
           <Detail.Metadata>

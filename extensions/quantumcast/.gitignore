@@ -1,0 +1,6 @@
+# Dependencies
+/node_modules
+
+# Misc
+.DS_Store
+raycast-env.d.ts

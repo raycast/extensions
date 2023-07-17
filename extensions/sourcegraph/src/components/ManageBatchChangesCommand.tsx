@@ -1,4 +1,5 @@
 import { ActionPanel, List, Action, Icon, useNavigation, Toast, Image, Color, showToast, Form } from "@raycast/api";
+import { getProgressIcon } from "@raycast/utils";
 import { useState, Fragment, useMemo } from "react";
 import { DateTime } from "luxon";
 import { nanoid } from "nanoid";
@@ -15,7 +16,7 @@ import {
 } from "../sourcegraph/gql/operations";
 
 import { copyShortcut, refreshShortcut, secondaryActionShortcut, tertiaryActionShortcut } from "./shortcuts";
-import ExpandableErrorToast from "./ExpandableErrorToast";
+import ExpandableToast from "./ExpandableToast";
 import { propsToKeywords } from "./keywords";
 
 import { sentenceCase } from "../text";
@@ -43,7 +44,7 @@ export default function ManageBatchChanges({ src }: { src: Sourcegraph }) {
 
   const { push } = useNavigation();
   if (error) {
-    ExpandableErrorToast(push, "Unexpected error", "Get batch changes failed", error.message).show();
+    ExpandableToast(push, "Unexpected error", "Get batch changes failed", error.message).show();
   }
 
   const showSuggestions = !loading && searchText === "";
@@ -106,22 +107,25 @@ function BatchChangeItem({
   }
   const author = batchChange.creator?.displayName || batchChange.creator?.username;
 
-  const icon: Image.ImageLike = { source: Icon.Circle };
+  // Indicated published changesets with the icon
+  const { changesetsStats } = batchChange;
+  const publishedChangesets = changesetsStats.total - changesetsStats.unpublished;
+  const progress = publishedChangesets ? publishedChangesets / changesetsStats.total : 0;
+  let icon: Image.ImageLike;
   switch (batchChange.state) {
     case "OPEN":
-      icon.source = Icon.Circle;
-      icon.tintColor = Color.Green;
+      // Provide hex because this API does not accept Color.
+      icon = getProgressIcon(progress, "#37b24d");
       break;
     case "CLOSED":
-      icon.source = Icon.Checkmark;
-      icon.tintColor = Color.Red;
+      // Provide hex because this API does not accept Color.
+      icon = getProgressIcon(progress, "#c92a2a");
       break;
-    case "DRAFT":
-      icon.source = Icon.Document;
-      break;
+    default:
+      icon = { source: Icon.Document };
   }
 
-  const { changesetsStats } = batchChange;
+  // Add summary stats
   const accessories: List.Item.Accessory[] = [];
   if (changesetsStats.open) {
     accessories.push({
@@ -139,7 +143,7 @@ function BatchChangeItem({
   }
   if (changesetsStats.draft || changesetsStats.unpublished) {
     accessories.push({
-      icon: { tintColor: Color.SecondaryText, source: Icon.Document },
+      icon: { tintColor: Color.SecondaryText, source: Icon.CircleEllipsis },
       text: `${changesetsStats.draft + changesetsStats.unpublished}`,
       tooltip: "Unpublished changesets",
     });
@@ -158,7 +162,7 @@ function BatchChangeItem({
           <Action.Push
             key={nanoid()}
             title="View Batch Change"
-            icon={{ source: Icon.MagnifyingGlass }}
+            icon={{ source: Icon.Maximize }}
             target={<BatchChangeView batchChange={batchChange} src={src} />}
           />
           <Action.OpenInBrowser key={nanoid()} url={url} shortcut={secondaryActionShortcut} />
@@ -203,7 +207,7 @@ function BatchChangeView({ batchChange, src }: { batchChange: BatchChange; src: 
 
   const { push } = useNavigation();
   if (error) {
-    ExpandableErrorToast(push, "Unexpected error", "Get changesets failed", error.message).show();
+    ExpandableToast(push, "Unexpected error", "Get changesets failed", error.message).show();
   }
 
   const published = changesets.filter((c) => c.state !== "UNPUBLISHED");
@@ -280,7 +284,7 @@ function ChangesetItem({
   const [publishChangeset, { error: publishError }] = usePublishChangesetMutation(src);
   const error = mergeError || publishError || reenqueueError;
   if (error) {
-    ExpandableErrorToast(push, "Unexpected error", "Changeset operation failed", error.message).show();
+    ExpandableToast(push, "Unexpected error", "Changeset operation failed", error.message).show();
   }
 
   const icon: Image.ImageLike = { source: Icon.Circle };
@@ -290,7 +294,7 @@ function ChangesetItem({
   switch (changeset.state) {
     case "OPEN":
       icon.tintColor = Color.Green;
-      icon.source = Icon.Circle;
+      icon.source = Icon.Dot;
 
       if (changeset.__typename !== "ExternalChangeset") {
         break;
@@ -305,7 +309,7 @@ function ChangesetItem({
           icon.source = Icon.Checkmark;
           break;
         case "CHANGES_REQUESTED":
-          icon.source = Icon.XmarkCircle;
+          icon.source = Icon.XMarkCircle;
           break;
         default:
           icon.source = Icon.Circle;
@@ -358,7 +362,7 @@ function ChangesetItem({
       break;
 
     case "CLOSED":
-      icon.source = Icon.XmarkCircle;
+      icon.source = Icon.XMarkCircle;
       icon.tintColor = Color.Red;
       break;
 

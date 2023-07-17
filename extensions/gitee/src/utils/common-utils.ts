@@ -1,4 +1,4 @@
-import { getPreferenceValues, LocalStorage, Toast } from "@raycast/api";
+import { getPreferenceValues, LocalStorage } from "@raycast/api";
 import Values = LocalStorage.Values;
 
 export const commonPreferences = () => {

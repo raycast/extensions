@@ -4,232 +4,43 @@
   "description": "Generate random data using Faker library",
   "icon": "random.png",
   "author": "loris",
+  "contributors": [
+    "Calvein",
+    "pernielsentikaer"
+  ],
   "license": "MIT",
   "categories": [
     "Data",
     "Developer Tools"
+  ],
+  "keywords": [
+    "faker"
   ],
   "commands": [
     {
       "name": "index",
       "title": "Generate Random Data",
       "description": "Generate random data using Faker library",
-      "mode": "view",
-      "preferences": [
-        {
-          "name": "locale",
-          "type": "dropdown",
-          "required": false,
-          "title": "Locale",
-          "description": "Locale used to generate data",
-          "default": "en",
-          "data": [
-            {
-              "value": "ar",
-              "title": "Arabic"
-            },
-            {
-              "value": "hy",
-              "title": "Armenian"
-            },
-            {
-              "value": "az",
-              "title": "Azerbaijani"
-            },
-            {
-              "value": "zh_CN",
-              "title": "Chinese"
-            },
-            {
-              "value": "zh_TW",
-              "title": "Chinese (Taiwan)"
-            },
-            {
-              "value": "cz",
-              "title": "Czech"
-            },
-            {
-              "value": "nl",
-              "title": "Dutch"
-            },
-            {
-              "value": "nl_BE",
-              "title": "Dutch (Belgium)"
-            },
-            {
-              "value": "en",
-              "title": "English"
-            },
-            {
-              "value": "en_AU_ocker",
-              "title": "English (Australia Ocker)"
-            },
-            {
-              "value": "en_AU",
-              "title": "English (Australia)"
-            },
-            {
-              "value": "en_BORK",
-              "title": "English (Bork)"
-            },
-            {
-              "value": "en_CA",
-              "title": "English (Canada)"
-            },
-            {
-              "value": "en_GB",
-              "title": "English (Great Britain)"
-            },
-            {
-              "value": "en_IND",
-              "title": "English (India)"
-            },
-            {
-              "value": "en_IE",
-              "title": "English (Ireland)"
-            },
-            {
-              "value": "en_ZA",
-              "title": "English (South Africa)"
-            },
-            {
-              "value": "en_US",
-              "title": "English (United States)"
-            },
-            {
-              "value": "fa",
-              "title": "Farsi"
-            },
-            {
-              "value": "fi",
-              "title": "Finnish"
-            },
-            {
-              "value": "fr",
-              "title": "French"
-            },
-            {
-              "value": "fr_CA",
-              "title": "French (Canada)"
-            },
-            {
-              "value": "fr_CH",
-              "title": "French (Switzerland)"
-            },
-            {
-              "value": "ge",
-              "title": "Georgian"
-            },
-            {
-              "value": "de",
-              "title": "German"
-            },
-            {
-              "value": "de_AT",
-              "title": "German (Austria)"
-            },
-            {
-              "value": "de_CH",
-              "title": "German (Switzerland)"
-            },
-            {
-              "value": "hr",
-              "title": "Hrvatski"
-            },
-            {
-              "value": "id_ID",
-              "title": "Indonesia"
-            },
-            {
-              "value": "it",
-              "title": "Italian"
-            },
-            {
-              "value": "ja",
-              "title": "Japanese"
-            },
-            {
-              "value": "ko",
-              "title": "Korean"
-            },
-            {
-              "value": "ne",
-              "title": "Nepalese"
-            },
-            {
-              "value": "nb_NO",
-              "title": "Norwegian"
-            },
-            {
-              "value": "pl",
-              "title": "Polish"
-            },
-            {
-              "value": "pt_BR",
-              "title": "Portuguese (Brazil)"
-            },
-            {
-              "value": "pt_PT",
-              "title": "Portuguese (Portugal)"
-            },
-            {
-              "value": "ro",
-              "title": "Romanian"
-            },
-            {
-              "value": "ru",
-              "title": "Russian"
-            },
-            {
-              "value": "sk",
-              "title": "Slovakian"
-            },
-            {
-              "value": "es",
-              "title": "Spanish"
-            },
-            {
-              "value": "es_MX",
-              "title": "Spanish (Mexico)"
-            },
-            {
-              "value": "sv",
-              "title": "Swedish"
-            },
-            {
-              "value": "tr",
-              "title": "Turkish"
-            },
-            {
-              "value": "uk",
-              "title": "Ukrainian"
-            },
-            {
-              "value": "vi",
-              "title": "Vietnamese"
-            }
-          ]
-        }
-      ]
+      "mode": "view"
     }
   ],
   "dependencies": {
-    "@faker-js/faker": "^6.3.1",
-    "@raycast/api": "^1.34.1",
+    "@faker-js/faker": "^7.6.0",
+    "@raycast/api": "^1.41.1",
     "is-url": "^1.2.4",
     "lodash": "^4.17.21"
   },
   "devDependencies": {
     "@types/is-url": "^1.2.30",
-    "@types/lodash": "^4.14.182",
-    "@types/node": "^17.0.31",
-    "@types/react": "^18.0.9",
-    "@typescript-eslint/eslint-plugin": "^5.23.0",
-    "@typescript-eslint/parser": "^5.23.0",
-    "eslint": "^8.15.0",
+    "@types/lodash": "^4.14.186",
+    "@types/node": "^18.11.0",
+    "@types/react": "^18.0.21",
+    "@typescript-eslint/eslint-plugin": "^5.40.0",
+    "@typescript-eslint/parser": "^5.40.0",
+    "eslint": "^8.25.0",
     "eslint-config-prettier": "^8.5.0",
-    "react-devtools": "^4.24.5",
-    "typescript": "^4.6.4"
+    "react-devtools": "^4.26.1",
+    "typescript": "^4.8.4"
   },
   "scripts": {
     "build": "ray build -e dist",

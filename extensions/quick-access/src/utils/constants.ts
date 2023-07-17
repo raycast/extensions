@@ -1,5 +1,5 @@
 export enum LocalStorageKey {
-  LOCAL_PIN_DIRECTORY = "localPinDirectory",
+  LOCAL_PIN_DIRECTORY = "Local Pin",
 }
 
 export const tagDirectoryTypes = ["Image", "Folder", "File"];

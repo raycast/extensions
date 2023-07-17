@@ -1,5 +1,5 @@
 import { List, Action, ActionPanel, Color, getPreferenceValues } from "@raycast/api";
-import { course, announcement, Preferences } from "../utils/types";
+import { course, announcement, Preferences, assignment } from "../utils/types";
 import { Modules } from "./modules";
 import { Assignment } from "./assignment";
 import { Announcement } from "./announcement";
@@ -30,7 +30,7 @@ export const Course = (props: { course: course; announcements: announcement[] })
               shortcut={{ modifiers: ["cmd"], key: "n" }}
               target={
                 <List>
-                  {props.course.assignments.map((assignment: any, index: number) => (
+                  {props.course.assignments.map((assignment: assignment, index: number) => (
                     <Assignment key={index} {...assignment} />
                   ))}
                 </List>
@@ -43,8 +43,8 @@ export const Course = (props: { course: course; announcements: announcement[] })
               target={
                 <List>
                   {props.announcements
-                    .filter((announcement: any) => announcement.course_id === props.course.id)
-                    .map((announcement: any, index: number) => (
+                    .filter((announcement: announcement) => announcement.course_id === props.course.id)
+                    .map((announcement: announcement, index: number) => (
                       <Announcement key={index} {...announcement} />
                     ))}
                 </List>

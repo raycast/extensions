@@ -1,12 +1,9 @@
 import { showToast, Toast, getPreferenceValues } from "@raycast/api";
-import { defaultStyles, getPreviewLink, recolorSVG } from "../utils/utils";
-import { Preferences, Icon8, Style } from "../types/types";
+import { defaultStyles, configureSVG } from "../utils/utils";
+import { Icon8, Style, Options } from "../types/types";
 import fetch from "node-fetch";
 
-const preferences: Preferences = getPreferenceValues();
-
-const api: string = preferences.apiKey;
-const numResults: number = preferences.numResults;
+const { apiKey: api, numResults } = getPreferenceValues();
 
 export const getIcons = async (search: string, style?: string): Promise<Icon8[]> => {
   let query = `https://search.icons8.com/api/iconsets/v5/search?term=${search}&token=${api}&amount=${numResults}`;
@@ -16,7 +13,7 @@ export const getIcons = async (search: string, style?: string): Promise<Icon8[]>
   try {
     const response = await fetch(query);
     if (response.status !== 200) {
-      showToast(Toast.Style.Failure, `Error Fetching Icons.`);
+      await showToast(Toast.Style.Failure, `Error Fetching Icons.`);
       return [];
     }
     const data: any = await response.json();
@@ -31,18 +28,18 @@ export const getIcons = async (search: string, style?: string): Promise<Icon8[]>
       isColor: icon.isColor,
     }));
     return icons8;
-  } catch (e: any) {
+  } catch (e) {
     console.error(e);
     return [];
   }
 };
 
-export const getStyles = async (): Promise<Style[] | null> => {
+export const getStyles = async (): Promise<Style[] | undefined> => {
   const query = `https://api-icons.icons8.com/publicApi/platforms?token=${api}&limit=588`;
   try {
     const response = await fetch(query);
     if (response.status !== 200) {
-      return null;
+      return undefined;
     }
     const data: any = await response.json();
     const platforms = data.docs
@@ -55,17 +52,17 @@ export const getStyles = async (): Promise<Style[] | null> => {
       url: platform.preview,
     }));
     return styles;
-  } catch (e: any) {
+  } catch (e) {
     console.error(e);
-    return [];
+    return undefined;
   }
 };
 
-export const getIconDetail = async (icon8: Icon8, color: string): Promise<Icon8> => {
+export const getIconDetail = async (icon8: Icon8, options: Options): Promise<Icon8> => {
   const query = `https://api-icons.icons8.com/publicApi/icons/icon?id=${icon8.id}&token=${api}`;
   const response = await fetch(query);
   if (response.status !== 200) {
-    showToast(Toast.Style.Failure, `Error Fetching Icon.`);
+    await showToast(Toast.Style.Failure, `Error Fetching Icon.`);
     return icon8;
   }
   const data: any = await response.json();
@@ -80,8 +77,8 @@ export const getIconDetail = async (icon8: Icon8, color: string): Promise<Icon8>
     isFree: icon.isFree,
     isAnimated: icon.isAnimated,
     published: new Date(icon.publishedAt),
+    mdImage: `https://img.icons8.com/${icon8.platform}/300$color/${icon.commonName}.png`,
   };
-  icon8.svg = recolorSVG(icon8.svg, color);
-  icon8.mdImage = `<img src="${getPreviewLink(icon, color)}" />`;
+  icon8.svg = configureSVG(icon8, options);
   return icon8;
 };

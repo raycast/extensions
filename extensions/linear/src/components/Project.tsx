@@ -1,44 +1,43 @@
 import { Action, ActionPanel, Color, confirmAlert, Icon, List, showToast, Toast } from "@raycast/api";
 import { IssuePriorityValue, User } from "@linear/sdk";
 import { getProgressIcon, MutatePromise } from "@raycast/utils";
+import { format } from "date-fns";
 
 import { ProjectResult } from "../api/getProjects";
 
 import { getLinearClient } from "../helpers/withLinearClient";
 import { isLinearInstalled } from "../helpers/isLinearInstalled";
-import { projectStatusIcon, projectStatusText } from "../helpers/projects";
+import { getProjectIcon, projectStatusIcon, projectStatusText } from "../helpers/projects";
 import { getUserIcon } from "../helpers/users";
 import { getErrorMessage } from "../helpers/errors";
 
 import ProjectIssues from "./ProjectIssues";
 import EditProjectForm from "./EditProjectForm";
+import { getDateIcon } from "../helpers/dates";
 
 type ProjectProps = {
   project: ProjectResult;
-  teamId?: string;
   priorities: IssuePriorityValue[] | undefined;
   users: User[] | undefined;
   me: User | undefined;
   mutateProjects: MutatePromise<ProjectResult[] | undefined>;
 };
 
-export default function Project({ project, teamId, priorities, users, me, mutateProjects }: ProjectProps) {
+export default function Project({ project, priorities, users, me, mutateProjects }: ProjectProps) {
   const { linearClient } = getLinearClient();
 
   const progress = `${Math.round(project.progress * 100)}%`;
 
-  const keywords = [project.state, projectStatusText[project.state]];
+  const keywords = [project.state, projectStatusText[project.state], ...project.teams.nodes.map((t) => t.key)];
 
   if (project.lead) {
     keywords.push(project.lead.displayName, project.lead?.email);
   }
 
-  keywords.push(project.milestone ? project.milestone.name : "Upcoming");
-
   async function deleteProject() {
     if (
       await confirmAlert({
-        title: "Delete Issue",
+        title: "Delete Project",
         message: "Are you sure you want to delete the selected project?",
         icon: { source: Icon.Trash, tintColor: Color.Red },
       })
@@ -46,7 +45,7 @@ export default function Project({ project, teamId, priorities, users, me, mutate
       try {
         await showToast({ style: Toast.Style.Animated, title: "Deleting project" });
 
-        await mutateProjects(linearClient.projectArchive(project.id), {
+        await mutateProjects(linearClient.archiveProject(project.id), {
           optimisticUpdate(data) {
             if (!data) {
               return data;
@@ -71,25 +70,30 @@ export default function Project({ project, teamId, priorities, users, me, mutate
     }
   }
 
+  const teams = project.teams.nodes;
+  const targetDate = project.targetDate ? new Date(project.targetDate) : null;
+
   return (
     <List.Item
       key={project.id}
       title={project.name}
       subtitle={project.description}
       keywords={keywords}
-      icon={
-        project
-          ? {
-              source: project.icon || { light: "light/project.svg", dark: "dark/project.svg" },
-              tintColor: { light: project.color, dark: project.color, adjustContrast: true },
-            }
-          : { source: { light: "light/no-project.svg", dark: "dark/no-project.svg" } }
-      }
+      icon={getProjectIcon(project)}
       accessories={[
-        { text: progress, tooltip: `Progress: ${progress}` },
         {
           icon: getProgressIcon(project.progress, project.color, { background: "white" }),
           tooltip: `Progress: ${progress}`,
+        },
+        {
+          icon: targetDate ? getDateIcon(targetDate) : undefined,
+          text: targetDate ? format(targetDate, "MMM dd") : undefined,
+          tooltip: targetDate ? `Target date: ${format(targetDate, "MM/dd/yyyy")}` : undefined,
+        },
+        {
+          icon: Icon.PersonLines,
+          text: teams.length > 1 ? `${teams.length}` : teams[0].key,
+          tooltip: `Teams: ${teams.map((team) => team.key).join(", ")}`,
         },
         { icon: { source: projectStatusIcon[project.state] }, tooltip: projectStatusText[project.state] },
         {
@@ -100,9 +104,7 @@ export default function Project({ project, teamId, priorities, users, me, mutate
       actions={
         <ActionPanel title={project.name}>
           <Action.Push
-            target={
-              <ProjectIssues projectId={project.id} teamId={teamId} priorities={priorities} users={users} me={me} />
-            }
+            target={<ProjectIssues projectId={project.id} priorities={priorities} users={users} me={me} />}
             title="Show Issues"
             icon={Icon.List}
           />

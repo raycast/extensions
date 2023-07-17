@@ -1,0 +1,48 @@
+fragment UserFields on User {
+  id
+  avatarUrl
+  name
+  login
+  isViewer
+}
+
+fragment AuthorFields on Actor {
+  ... on Bot {
+    id
+    login
+    avatarUrl(size: 64)
+  }
+  ... on User {
+    ...UserFields
+  }
+  ... on Mannequin {
+    id
+    login
+    avatarUrl(size: 64)
+  }
+  ... on Organization {
+    id
+    login
+    name
+    avatarUrl(size: 64)
+  }
+  ... on EnterpriseUserAccount {
+    id
+    login
+    name
+    avatarUrl(size: 64)
+  }
+}
+
+query getViewer {
+  viewer {
+    ...UserFields
+    organizations(first: 50) {
+      totalCount
+      nodes {
+        avatarUrl
+        login
+      }
+    }
+  }
+}

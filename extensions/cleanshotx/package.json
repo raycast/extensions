@@ -1,12 +1,25 @@
 {
     "$schema": "https://www.raycast.com/schemas/extension.json",
     "name": "cleanshotx",
-    "title": "Cleanshot X",
+    "title": "CleanShot X",
     "description": "Capture and record your screen!",
     "icon": "command-icon.png",
     "author": "Aayush9029",
+    "contributors": [
+        "thomaslombart",
+        "lukaszmtw"
+    ],
     "license": "MIT",
-    "commands": [{
+    "commands": [
+        {
+            "name": "open-history",
+            "title": "Open History",
+            "subtitle": "CleanShot X",
+            "description": "Show Screenshots History",
+            "icon": "open-history.png",
+            "mode": "no-view"
+        },
+        {
             "name": "all-in-one",
             "title": "All in One",
             "subtitle": "CleanShot X",
@@ -71,12 +84,13 @@
             "mode": "no-view"
         },
         {
-            "name": "text-recognition",
-            "title": "Text Recognition",
+            "name": "capture-text",
+            "title": "Capture Text (OCR)",
             "subtitle": "CleanShot X",
-            "description": "Text Recognition Using Ocr",
+            "description": "Capture text using OCR",
             "icon": "capture-text.png",
-            "mode": "no-view"
+            "mode": "no-view",
+            "keywords": ["text recognition"]
         },
         {
             "name": "annotate",
@@ -119,10 +133,11 @@
             "mode": "no-view"
         }
     ],
-    "categories": ["Applications"],
+    "categories": [
+        "Applications"
+    ],
     "dependencies": {
-        "@raycast/api": "^1.26.3",
-        "open": "^8.4.0"
+        "@raycast/api": "^1.39.2"
     },
     "devDependencies": {
         "@types/node": "~16.10.0",

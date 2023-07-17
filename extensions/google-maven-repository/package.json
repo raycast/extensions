@@ -23,12 +23,20 @@
       "title": "Search Google Maven Repository",
       "icon": "search-google-maven-repository.png",
       "description": "Search for an artifact in Google's Maven repository.",
-      "mode": "view"
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "repository",
+          "placeholder": "Repository",
+          "type": "text",
+          "required": false
+        }
+      ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.34.1",
-    "node-fetch": "^3.2.3"
+    "@raycast/api": "^1.40.1",
+    "node-fetch": "^3.2.10"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",

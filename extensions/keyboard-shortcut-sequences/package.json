@@ -1,0 +1,56 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "keyboard-shortcut-sequences",
+  "title": "Keyboard Shortcut Sequences",
+  "description": "Configure, save, and run sequences of keyboard shortcuts",
+  "icon": "command-icon.png",
+  "author": "HelloImSteven",
+  "categories": [
+    "Productivity",
+    "Developer Tools",
+    "System"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "new-shortcut-sequence",
+      "title": "New Shortcut Sequence",
+      "description": "Create a new shortcut sequence configuration",
+      "mode": "view"
+    },
+    {
+      "name": "run-shortcut-sequence",
+      "title": "Run Shortcut Sequence",
+      "description": "Run a shortcut sequence from your list of configured sequences",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "sequenceName",
+          "placeholder": "Sequence Name",
+          "required": false,
+          "type": "text"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.48.9",
+    "@raycast/utils": "^1.5.2",
+    "run-applescript": "^6.1.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

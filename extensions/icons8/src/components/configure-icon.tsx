@@ -1,14 +1,9 @@
 import { Form, Action, Icon } from "@raycast/api";
 import { useState } from "react";
-import { Icon8 } from "../types/types";
-import * as d3 from "d3-color";
+import { ConfigureProps, Format } from "../types/types";
+import { color as d3color } from "d3-color";
+import { homedir } from "os";
 import fs from "fs";
-
-interface ConfigureProps {
-  icon: Icon8;
-  options: any;
-  setOptions: (options: any) => void;
-}
 
 export const ConfigureAction = (props: ConfigureProps): JSX.Element => {
   return (
@@ -26,9 +21,11 @@ const ConfigureIcon = (props: ConfigureProps): JSX.Element => {
     <Form navigationTitle="Configure Icon">
       <DownloadName {...props} />
       <DownloadPath {...props} />
-      {!props.icon.isColor && <IconColor {...props} />}
       <ImageSize {...props} />
       <ImageFormat {...props} />
+      <IconColor {...props} />
+      <BackgroundColor {...props} />
+      <SVGPadding {...props} />
     </Form>
   );
 };
@@ -56,6 +53,7 @@ const DownloadPath = (props: ConfigureProps): JSX.Element => {
       error={error}
       onChange={(value: string) => {
         if (value) {
+          value = value.replace("~", homedir());
           if (fs.existsSync(value)) {
             setError(undefined);
             props.setOptions({ ...props.options, path: value });
@@ -78,7 +76,7 @@ const ImageFormat = (props: ConfigureProps): JSX.Element => {
       title="Image Format"
       defaultValue={props.options.format}
       onChange={(value: string) => {
-        props.setOptions({ ...props.options, format: value });
+        props.setOptions({ ...props.options, format: value as Format });
       }}
     >
       {formats.map((format: string, index: number) => (
@@ -107,6 +105,7 @@ const ImageSize = (props: ConfigureProps): JSX.Element => {
 };
 
 const IconColor = (props: ConfigureProps): JSX.Element => {
+  const infoMessage = props.icon.isColor ? "This icon cannot be colored" : undefined;
   const [error, setError] = useState<string | undefined>(undefined);
   return (
     <Form.TextField
@@ -114,13 +113,64 @@ const IconColor = (props: ConfigureProps): JSX.Element => {
       title="Icon Color"
       defaultValue={props.options.color}
       error={error}
+      info={infoMessage}
       onChange={(value: string) => {
-        const color = d3.color(value.trim());
-        if (color !== null) {
+        value = value.trim();
+        const color = d3color(value) || d3color(`#${value}`);
+        if (color) {
           setError(undefined);
           props.setOptions({ ...props.options, color: color.formatHex() });
         } else {
           setError("Invalid Color");
+        }
+      }}
+    />
+  );
+};
+
+const BackgroundColor = (props: ConfigureProps): JSX.Element => {
+  const [error, setError] = useState<string | undefined>(undefined);
+  return (
+    <Form.TextField
+      id="backgroundColor"
+      title="Background Color"
+      defaultValue={props.options.bgcolor ? props.options.bgcolor : "Transparent"}
+      info="Only applies to SVG"
+      error={error}
+      onChange={(value: string) => {
+        if (["transparent", "none", "clear"].includes(value.trim().toLowerCase())) {
+          setError(undefined);
+          props.setOptions({ ...props.options, bgcolor: null });
+          return;
+        }
+        const color = d3color(value.trim());
+        if (color) {
+          setError(undefined);
+          props.setOptions({ ...props.options, bgcolor: color.formatHex() });
+        } else {
+          setError("Invalid color");
+        }
+      }}
+    />
+  );
+};
+
+const SVGPadding = (props: ConfigureProps): JSX.Element => {
+  const [error, setError] = useState<string | undefined>(undefined);
+  return (
+    <Form.TextField
+      id="padding"
+      title="Icon Padding"
+      defaultValue={props.options.padding.toString()}
+      info="Only applies to SVG"
+      error={error}
+      onChange={(value: string) => {
+        const padding = value ? parseInt(value) : 0;
+        if (padding >= -50 && padding <= 50) {
+          setError(undefined);
+          props.setOptions({ ...props.options, padding: padding });
+        } else {
+          setError("Padding should be between -50 and 50");
         }
       }}
     />

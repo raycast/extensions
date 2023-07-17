@@ -1,18 +1,15 @@
+import { Action, ActionPanel, getPreferenceValues, Icon, List, showToast, Toast } from "@raycast/api";
 import * as React from "react";
-import { Action, ActionPanel, getPreferenceValues, List, Icon, showToast, Toast } from "@raycast/api";
-import { ReferenceSearchResult, search } from "./bibleGatewayApi";
 import { versions as bibleVersions } from "../assets/bible-versions.json";
+import { ReferenceSearchResult, search } from "./bibleGatewayApi";
 
 const DEFAULT_BIBLE_VERSION_ABBR = "NLT";
-const SEARCH_DELAY_MS = 450;
 
 type Preferences = { enterToSearch: boolean; oneVersePerLine: boolean; includeVerseNumbers: boolean };
 const prefs = getPreferenceValues<Preferences>();
 
 export default function Command() {
   const [query, setQuery] = React.useState({ search: "", version: DEFAULT_BIBLE_VERSION_ABBR });
-  const debounceSearchTimeout = React.useRef<NodeJS.Timeout | null>(null);
-
   const [isLoading, setIsLoading] = React.useState(false);
   const [searchResult, setSearchResult] = React.useState<ReferenceSearchResult | undefined>(undefined);
 
@@ -65,6 +62,7 @@ export default function Command() {
       isLoading={isLoading}
       isShowingDetail={searchResult && searchResult.passages.length > 0}
       searchText={query.search}
+      throttle={true}
       searchBarAccessory={
         <List.Dropdown
           tooltip="Select Bible Version"
@@ -77,18 +75,7 @@ export default function Command() {
           ))}
         </List.Dropdown>
       }
-      onSearchTextChange={(newQuery) => {
-        if (prefs.enterToSearch) {
-          setQuery((old) => ({ ...old, search: newQuery.trim() }));
-        } else {
-          // debounce updating query text. `throttle` prop is too short
-          if (debounceSearchTimeout.current) clearTimeout(debounceSearchTimeout.current);
-          debounceSearchTimeout.current = setTimeout(
-            () => setQuery((old) => ({ ...old, search: newQuery.trim() })),
-            SEARCH_DELAY_MS
-          );
-        }
-      }}
+      onSearchTextChange={(newQuery) => setQuery((old) => ({ ...old, search: newQuery }))}
     >
       {searchResult && searchResult.passages.length > 0 && detailContent ? (
         <List.Item

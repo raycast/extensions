@@ -31,6 +31,34 @@ export async function pastePassword(entry: string): Promise<void> {
   }
 }
 
+export async function copyOTP(entry: string): Promise<void> {
+  try {
+    const toast = await showToast({ title: "Copying OTP", style: Toast.Style.Animated });
+    const otp = await gopass.otp(entry);
+    await Clipboard.copy(otp);
+    await toast.hide();
+    await closeMainWindow();
+    await showHUD("OTP copied");
+  } catch (error) {
+    console.error(error);
+    await showToast({ title: "Could not copy OTP code", style: Toast.Style.Failure });
+  }
+}
+
+export async function pasteOTP(entry: string): Promise<void> {
+  try {
+    const toast = await showToast({ title: "Pasting OTP", style: Toast.Style.Animated });
+    const otp = await gopass.otp(entry);
+    await Clipboard.paste(otp);
+    await toast.hide();
+    await closeMainWindow();
+    await showHUD("OTP pasted");
+  } catch (error) {
+    console.error(error);
+    await showToast({ title: "Could not paste OTP code", style: Toast.Style.Failure });
+  }
+}
+
 const passwordActions = (entry: string) => (
   <>
     <Action title="Copy Password to Clipboard" icon={Icon.Clipboard} onAction={() => copyPassword(entry)} />
@@ -40,6 +68,18 @@ const passwordActions = (entry: string) => (
       onAction={() => pastePassword(entry)}
       shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
     />
+    <Action
+      title="Copy OTP Code to Clipboard"
+      icon={Icon.Clipboard}
+      onAction={() => copyOTP(entry)}
+      shortcut={{ modifiers: ["cmd"], key: "o" }}
+    />
+    <Action
+      title="Paste OTP Code to Active App"
+      icon={Icon.Document}
+      onAction={() => pasteOTP(entry)}
+      shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
+    />
   </>
 );
 
@@ -48,7 +88,7 @@ const getIcon = (entry: string) => (isDirectory(entry) ? Icon.Folder : Icon.Key)
 const getTarget = (entry: string) => (isDirectory(entry) ? <Main prefix={entry} /> : <Details entry={entry} />);
 
 export default function Main({ prefix = "" }): JSX.Element {
-  const [entries, setEntries] = useState<string[]>();
+  const [entries, setEntries] = useState<string[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [searchText, setSearchText] = useState("");
 
@@ -66,21 +106,25 @@ export default function Main({ prefix = "" }): JSX.Element {
 
   return (
     <List isLoading={loading} enableFiltering={false} onSearchTextChange={setSearchText}>
-      <List.Section title={searchText ? "Results" : "/" + prefix} subtitle={searchText && String(entries?.length)}>
-        {entries?.map((entry, i) => (
-          <List.Item
-            key={i}
-            title={entry}
-            icon={getIcon(entry)}
-            accessories={[{ icon: Icon.ChevronRight }]}
-            actions={
-              <ActionPanel>
-                <Action.Push title="Show Details" icon={getIcon(entry)} target={getTarget(prefix + entry)} />
-                {!isDirectory(entry) && passwordActions(entry)}
-              </ActionPanel>
-            }
-          />
-        ))}
+      <List.Section title={searchText ? "Results" : "/" + prefix} subtitle={searchText && String(entries.length)}>
+        {entries.map((entry, i) => {
+          const fullPath = prefix + entry;
+
+          return (
+            <List.Item
+              key={i}
+              title={entry}
+              icon={getIcon(entry)}
+              accessories={[{ icon: Icon.ChevronRight }]}
+              actions={
+                <ActionPanel>
+                  <Action.Push title="Show Details" icon={getIcon(entry)} target={getTarget(fullPath)} />
+                  {!isDirectory(entry) && passwordActions(fullPath)}
+                </ActionPanel>
+              }
+            />
+          );
+        })}
       </List.Section>
     </List>
   );

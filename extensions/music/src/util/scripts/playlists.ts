@@ -51,6 +51,8 @@ export const playById =
       TE.chain(() => tell("Music", `play (every playlist whose id is "${id}")`))
     );
 
+export const getPlaylistId = (name: string) => tell("Music", `get id of playlist "${name}"`);
+
 export const getPlaylists = (kind: PlaylistKind): TE.TaskEither<Error, string> =>
   runScript(`
 	set output to ""

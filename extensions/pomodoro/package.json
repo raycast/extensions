@@ -1,0 +1,303 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "pomodoro",
+  "title": "Pomodoro",
+  "description": "Pomodoro extension with menu-bar timer",
+  "icon": "icon.png",
+  "author": "asubbotin",
+  "contributors": [
+    "pernielsentikaer",
+    "brodelp",
+    "susan_thapa"
+  ],
+  "keywords": [
+    "pomodoro",
+    "timer"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "pomodoro-menu-bar",
+      "title": "Show Pomodoro in Menu Bar",
+      "subtitle": "Control timers from menu-bar",
+      "description": "Start, pause, stop or continue pomodoro intervals",
+      "mode": "menu-bar",
+      "interval": "10s"
+    },
+    {
+      "name": "pomodoro-control-timer",
+      "title": "Control Pomodoro Timer",
+      "subtitle": "Start / Stop Pomodoro Timer",
+      "description": "Start, pause, stop or continue pomodoro intervals",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "focusIntervalDuration",
+      "type": "dropdown",
+      "required": true,
+      "title": "Focus Interval Duration",
+      "description": "Interval duration, minutes",
+      "default": "25",
+      "data": [
+        {
+          "value": "1",
+          "title": "1:00"
+        },
+        {
+          "value": "3",
+          "title": "3:00"
+        },
+        {
+          "value": "5",
+          "title": "5:00"
+        },
+        {
+          "value": "10",
+          "title": "10:00"
+        },
+        {
+          "value": "15",
+          "title": "15:00"
+        },
+        {
+          "value": "20",
+          "title": "20:00"
+        },
+        {
+          "value": "25",
+          "title": "25:00"
+        },
+        {
+          "value": "30",
+          "title": "30:00"
+        },
+        {
+          "value": "35",
+          "title": "35:00"
+        },
+        {
+          "value": "40",
+          "title": "40:00"
+        },
+        {
+          "value": "45",
+          "title": "45:00"
+        },
+        {
+          "value": "50",
+          "title": "50:00"
+        },
+        {
+          "value": "55",
+          "title": "55:00"
+        },
+        {
+          "value": "60",
+          "title": "60:00"
+        },
+        {
+          "value": "90",
+          "title": "90:00"
+        }
+      ]
+    },
+    {
+      "name": "shortBreakIntervalDuration",
+      "type": "dropdown",
+      "required": true,
+      "title": "Short Break Duration",
+      "description": "Interval duration, minutes",
+      "default": "5",
+      "data": [
+        {
+          "value": "1",
+          "title": "1:00"
+        },
+        {
+          "value": "3",
+          "title": "3:00"
+        },
+        {
+          "value": "5",
+          "title": "5:00"
+        },
+        {
+          "value": "10",
+          "title": "10:00"
+        },
+        {
+          "value": "15",
+          "title": "15:00"
+        },
+        {
+          "value": "20",
+          "title": "20:00"
+        },
+        {
+          "value": "25",
+          "title": "25:00"
+        },
+        {
+          "value": "30",
+          "title": "30:00"
+        },
+        {
+          "value": "35",
+          "title": "35:00"
+        },
+        {
+          "value": "40",
+          "title": "40:00"
+        },
+        {
+          "value": "45",
+          "title": "45:00"
+        },
+        {
+          "value": "50",
+          "title": "50:00"
+        },
+        {
+          "value": "55",
+          "title": "55:00"
+        },
+        {
+          "value": "60",
+          "title": "60:00"
+        }
+      ]
+    },
+    {
+      "name": "longBreakIntervalDuration",
+      "type": "dropdown",
+      "required": true,
+      "title": "Long Break Duration",
+      "description": "Interval duration, minutes",
+      "default": "20",
+      "data": [
+        {
+          "value": "1",
+          "title": "1:00"
+        },
+        {
+          "value": "3",
+          "title": "3:00"
+        },
+        {
+          "value": "5",
+          "title": "5:00"
+        },
+        {
+          "value": "10",
+          "title": "10:00"
+        },
+        {
+          "value": "15",
+          "title": "15:00"
+        },
+        {
+          "value": "20",
+          "title": "20:00"
+        },
+        {
+          "value": "25",
+          "title": "25:00"
+        },
+        {
+          "value": "30",
+          "title": "30:00"
+        },
+        {
+          "value": "35",
+          "title": "35:00"
+        },
+        {
+          "value": "40",
+          "title": "40:00"
+        },
+        {
+          "value": "45",
+          "title": "45:00"
+        },
+        {
+          "value": "50",
+          "title": "50:00"
+        },
+        {
+          "value": "55",
+          "title": "55:00"
+        },
+        {
+          "value": "60",
+          "title": "60:00"
+        }
+      ]
+    },
+    {
+      "name": "completionImage",
+      "type": "textfield",
+      "required": false,
+      "title": "Image Markdown Link",
+      "description": "Image on interval completion, URL",
+      "default": "![The Best Thank You GIF by SWR3](https://media0.giphy.com/media/ZBn3ZRvCbWz2PS3Rbg/200.gif)"
+    },
+    {
+      "name": "sound",
+      "description": "Play sound",
+      "type": "dropdown",
+      "required": false,
+      "title": "Play Completion Sound",
+      "default": "",
+      "data": [
+        {
+          "title": "No Sound",
+          "value": ""
+        },
+        {
+          "title": "Submarine",
+          "value": "Submarine"
+        },
+        {
+          "title": "Tink",
+          "value": "Tink"
+        },
+        {
+          "title": "Ping",
+          "value": "Ping"
+        }
+      ]
+    },
+    {
+      "name": "enableTimeOnMenuBar",
+      "type": "checkbox",
+      "required": false,
+      "title": "Menu Bar Time",
+      "description": "Shows time on the Menu Bar",
+      "default": true,
+      "label": "Show time on Menu Bar"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.53.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

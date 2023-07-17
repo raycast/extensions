@@ -1,27 +1,16 @@
 import { LinearClient } from "@linear/sdk";
-import { Clipboard, closeMainWindow, getPreferenceValues, open, Toast } from "@raycast/api";
+import { Clipboard, closeMainWindow, getPreferenceValues, open, Toast, showToast } from "@raycast/api";
 import { authorize, oauthClient } from "./api/oauth";
 
-type Arguments = {
-  title: string;
-  description?: string;
-};
-
-type Preferences = {
-  preferredTeamKey?: string;
-  shouldCloseMainWindow: boolean;
-};
-
-const command = async (props: { arguments: Arguments }) => {
-  const toast = new Toast({ style: Toast.Style.Animated, title: "Creating issue" });
-  await toast.show();
+const command = async (props: { arguments: Arguments.CreateIssueForMyself }) => {
+  const toast = await showToast({ style: Toast.Style.Animated, title: "Creating issue" });
 
   try {
     const tokens = await oauthClient.getTokens();
     const accessToken = tokens?.accessToken || (await authorize());
     const linearClient = new LinearClient({ accessToken });
 
-    const preferences: Preferences = getPreferenceValues();
+    const preferences = getPreferenceValues<Preferences.CreateIssueForMyself>();
 
     if (preferences.shouldCloseMainWindow) {
       await closeMainWindow();
@@ -37,7 +26,7 @@ const command = async (props: { arguments: Arguments }) => {
       throw Error("No team found");
     }
 
-    const payload = await linearClient.issueCreate({
+    const payload = await linearClient.createIssue({
       teamId: team.id,
       title: props.arguments.title,
       description: props.arguments.description,
@@ -61,7 +50,7 @@ const command = async (props: { arguments: Arguments }) => {
     };
 
     toast.secondaryAction = {
-      title: "Copy Issue Key",
+      title: "Copy Issue ID",
       shortcut: { modifiers: ["cmd", "shift"], key: "c" },
       onAction: () => Clipboard.copy(issue.identifier),
     };

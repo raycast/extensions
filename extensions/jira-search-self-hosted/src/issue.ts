@@ -63,6 +63,11 @@ function buildJql(query: string): string {
   console.log("Status: ", statuus);
   query = query.replace(statusRegex, "");
 
+  const assigneeRegex = /%([.@a-z0-9_-]+|"[a-z0-9_ -]+")/gi;
+  const assigneeMatchingGroup = Array.from(query.matchAll(assigneeRegex));
+  const assignee = assigneeMatchingGroup.map((item) => item[1].replace(/^"|"$/g, ""));
+  query = query.replace(assigneeRegex, "");
+
   const terms = query.split(spaceAndInvalidChars).filter((term) => term.length > 0);
 
   const collectPrefixed = (prefix: string, terms: string[]): string[] =>
@@ -74,7 +79,7 @@ function buildJql(query: string): string {
 
   const unwantedTextTermChars = /[-+!*&]/;
   const textTerms = terms
-    .filter((term) => !"@#!".includes(term[0]))
+    .filter((term) => !"@#!%".includes(term[0]))
     .flatMap((term) => term.split(unwantedTextTermChars))
     .filter((term) => term.length > 0);
 
@@ -85,6 +90,7 @@ function buildJql(query: string): string {
     inClause("project", projects),
     inClause("issueType", issueTypes),
     inClause("status", statuus),
+    inClause("assignee", assignee),
     ...textTerms.map((term) => `text~"${term}*"`),
   ];
 
@@ -118,5 +124,5 @@ export async function searchIssues(query: string): Promise<ResultItem[]> {
 }
 
 export default function SearchIssueCommand() {
-  return SearchCommand(searchIssues, "Search issues by text, @project, #issueType and !status");
+  return SearchCommand(searchIssues, "Search issues by text, @project, #issueType, !status and %assignee");
 }

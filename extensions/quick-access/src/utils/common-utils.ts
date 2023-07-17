@@ -29,16 +29,13 @@ export const fetchDirectoryPath = async () => {
     const selectedDirectory = await fetchFileSystemItem();
     if (selectedDirectory.length > 0) {
       selectedDirectory.forEach((value) => {
-        if (isDirectory(value.path)) {
-          directoryPath.push(value.path);
-        }
+        directoryPath.push(value.path);
       });
     } else {
       directoryPath.push(await getFinderInsertLocation());
     }
     return directoryPath;
   } catch (e) {
-    directoryPath.push(await getFinderInsertLocation());
     return directoryPath;
   }
 };
@@ -172,4 +169,14 @@ export function formatBytes(sizeInBytes: number) {
   }
 
   return `${sizeInBytes.toFixed(1)} ${units[unitIndex]}`;
+}
+
+export function directory2File(directory: DirectoryInfo) {
+  return {
+    id: directory.id,
+    name: directory.name,
+    path: directory.path,
+    type: FileType.FILE,
+    modifyTime: directory.date,
+  };
 }

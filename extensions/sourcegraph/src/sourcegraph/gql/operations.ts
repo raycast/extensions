@@ -13,21 +13,11 @@ export type Scalars = {
   Boolean: boolean;
   Int: number;
   Float: number;
-  /** An arbitrarily large integer encoded as a decimal string. */
   BigInt: any;
-  /**
-   * An RFC 3339-encoded UTC date string, such as 1973-11-29T21:33:09Z. This value can be parsed into a
-   * JavaScript Date using Date.parse. To produce this value from a JavaScript Date instance, use
-   * Date#toISOString.
-   */
   DateTime: any;
-  /** A Git object ID (SHA-1 hash, 40 hexadecimal characters). */
   GitObjectID: any;
-  /** A string that contains valid JSON, with additional support for //-style comments and trailing commas. */
   JSONCString: any;
-  /** A valid JSON value. */
   JSONValue: any;
-  /** A quadruple that represents all possible states of the published value: true, false, 'draft', or null. */
   PublishedValue: any;
 };
 
@@ -59,6 +49,26 @@ export enum AlertType {
   Error = "ERROR",
   Info = "INFO",
   Warning = "WARNING",
+}
+
+/** A pre-defined periods to get site analytics. */
+export enum AnalyticsDateRange {
+  /** Custom date range. */
+  Custom = "CUSTOM",
+  /** Last month date range. */
+  LastMonth = "LAST_MONTH",
+  /** Last 3 monthes date range. */
+  LastThreeMonths = "LAST_THREE_MONTHS",
+  /** Last week date range. */
+  LastWeek = "LAST_WEEK",
+}
+
+/** Group site analytics by period. */
+export enum AnalyticsGrouping {
+  /** Group data by day. */
+  Daily = "DAILY",
+  /** Group data by week. */
+  Weekly = "WEEKLY",
 }
 
 /** Denotes the type of operation of a given log entry. */
@@ -182,6 +192,7 @@ export enum ChangesetExternalState {
   Draft = "DRAFT",
   Merged = "MERGED",
   Open = "OPEN",
+  Readonly = "READONLY",
 }
 
 /** The publication state of a changeset on Sourcegraph */
@@ -243,6 +254,8 @@ export enum ChangesetSpecOperation {
   PublishDraft = "PUBLISH_DRAFT",
   /** Push a new commit to the code host. */
   Push = "PUSH",
+  /** The changeset is re-added to the batch change. */
+  Reattach = "REATTACH",
   /** Reopen the changeset on the codehost. */
   Reopen = "REOPEN",
   /** Internal operation to get around slow code host updates. */
@@ -301,6 +314,11 @@ export enum ChangesetState {
    */
   Processing = "PROCESSING",
   /**
+   * The changeset is published, and is now read-only, most likely due to the
+   * repository being archived.
+   */
+  Readonly = "READONLY",
+  /**
    * The changeset reconciler ran into a problem while processing the
    * changeset and will retry it for a number of retries.
    */
@@ -309,6 +327,13 @@ export enum ChangesetState {
   Scheduled = "SCHEDULED",
   /** The changeset has not been marked as to be published. */
   Unpublished = "UNPUBLISHED",
+}
+
+/** The clone status of a repository. */
+export enum CloneStatus {
+  Cloned = "CLONED",
+  Cloning = "CLONING",
+  NotCloned = "NOT_CLONED",
 }
 
 /**
@@ -426,6 +451,8 @@ export type Event = {
   cohortID?: InputMaybe<Scalars["String"]>;
   /** Device ID used for Amplitude analytics. Used on Sourcegraph Cloud only. */
   deviceID?: InputMaybe<Scalars["String"]>;
+  /** Device session ID to identify the user's session for analytics. */
+  deviceSessionID?: InputMaybe<Scalars["String"]>;
   /** The name of the event. */
   event: Scalars["String"];
   /**
@@ -478,6 +505,22 @@ export enum EventStatus {
   Success = "SUCCESS",
 }
 
+/** The compatibility of the executor with the sourcegraph instance. */
+export enum ExecutorCompatibility {
+  /** Executor version is more than one version behind the Sourcegraph instance. */
+  Outdated = "OUTDATED",
+  /** Executor is up-to-date with the Sourcegraph instance. */
+  UpToDate = "UP_TO_DATE",
+  /** Executor version is more than one version ahead of the Sourcegraph instance. */
+  VersionAhead = "VERSION_AHEAD",
+}
+
+/** Enum of the possible scopes for executor secrets. */
+export enum ExecutorSecretScope {
+  /** The secret is meant to be used with Batch Changes execution. */
+  Batches = "BATCHES",
+}
+
 /** A specific kind of external service. */
 export enum ExternalServiceKind {
   Awscodecommit = "AWSCODECOMMIT",
@@ -495,7 +538,26 @@ export enum ExternalServiceKind {
   Perforce = "PERFORCE",
   Phabricator = "PHABRICATOR",
   Pythonpackages = "PYTHONPACKAGES",
+  Rubypackages = "RUBYPACKAGES",
   Rustpackages = "RUSTPACKAGES",
+}
+
+/** The possible states of an external service sync job. */
+export enum ExternalServiceSyncJobState {
+  /** Sync job has been canceled. */
+  Canceled = "CANCELED",
+  /** Sync job is being canceled. */
+  Canceling = "CANCELING",
+  /** Sync finished successfully. */
+  Completed = "COMPLETED",
+  /** An error occured while syncing. Will be retried eventually. */
+  Errored = "ERRORED",
+  /** A fatal error occured while syncing. No retries will be made. */
+  Failed = "FAILED",
+  /** Currently syncing. */
+  Processing = "PROCESSING",
+  /** Not yet started. Will be picked up by a worker eventually. */
+  Queued = "QUEUED",
 }
 
 /** Additional options when performing a permissions sync. */
@@ -550,10 +612,8 @@ export enum GroupByField {
 export type HappinessFeedbackSubmissionInput = {
   /** The path that the happiness feedback will be submitted from. */
   currentPath?: InputMaybe<Scalars["String"]>;
-  /** The answer to "What's going well? What could be better?". */
+  /** The feedback text from the user. */
   feedback?: InputMaybe<Scalars["String"]>;
-  /** User's happiness rating, from 1-4. */
-  score: Scalars["Int"];
 };
 
 /** A specific highlighted line range to fetch. */
@@ -569,6 +629,16 @@ export type HighlightLineRange = {
    */
   startLine: Scalars["Int"];
 };
+
+/** The format and highlighting to use when requesting highlighting information for a file. */
+export enum HighlightResponseFormat {
+  /** HTML formatted file content with syntax highlighting. */
+  HtmlHighlight = "HTML_HIGHLIGHT",
+  /** HTML formatted file content without syntax highlighting. */
+  HtmlPlaintext = "HTML_PLAINTEXT",
+  /** SCIP highlighting information as JSON. */
+  JsonScip = "JSON_SCIP",
+}
 
 /** Denotes the confidence in the correctness of the proposed index target. */
 export enum InferedPreciseSupportLevel {
@@ -649,6 +719,11 @@ export enum LsifIndexState {
 export enum LsifUploadState {
   /** This upload was processed successfully. */
   Completed = "COMPLETED",
+  /**
+   * This upload is deleted and its metadata is reconstructed from existing
+   * audit log entries.
+   */
+  Deleted = "DELETED",
   /**
    * This upload is queued for deletion. This upload was previously in the
    * COMPLETED state and evicted, replaced by a newer upload, or deleted by
@@ -848,6 +923,15 @@ export type MonitorWebhookInput = {
   url: Scalars["String"];
 };
 
+/** An enum to describe the reasons why a search aggregations are not available */
+export enum NotAvailableReasonType {
+  InvalidAggregationModeForQuery = "INVALID_AGGREGATION_MODE_FOR_QUERY",
+  InvalidQuery = "INVALID_QUERY",
+  OtherError = "OTHER_ERROR",
+  TimeoutExtensionAvailable = "TIMEOUT_EXTENSION_AVAILABLE",
+  TimeoutNoExtensionAvailable = "TIMEOUT_NO_EXTENSION_AVAILABLE",
+}
+
 /** Enum of possible block types. */
 export enum NotebookBlockType {
   Compute = "COMPUTE",
@@ -888,6 +972,18 @@ export enum OrganizationInvitationResponseType {
   Accept = "ACCEPT",
   /** The invitation was rejected by the recipient. */
   Reject = "REJECT",
+}
+
+/** Status types of permissions providers. */
+export enum PermissionsProviderStatus {
+  Error = "ERROR",
+  Success = "SUCCESS",
+}
+
+/** Status types of permissions sync jobs. */
+export enum PermissionsSyncJobStatus {
+  Error = "ERROR",
+  Success = "SUCCESS",
 }
 
 /** Options for a pie chart */
@@ -939,21 +1035,6 @@ export type ProductLicenseInput = {
   userCount: Scalars["Int"];
 };
 
-/**
- * An input type that describes a product subscription to be purchased. Corresponds to
- * ProductSubscriptionInvoiceItem.
- * FOR INTERNAL USE ONLY.
- */
-export type ProductSubscriptionInput = {
-  /**
-   * The billing plan ID for the subscription (ProductPlan.billingPlanID). This also specifies the
-   * billing product, because a plan is associated with its product in the billing system.
-   */
-  billingPlanID: Scalars["String"];
-  /** This subscription's user count. */
-  userCount: Scalars["Int"];
-};
-
 /** Input object for adding insight view to dashboard. */
 export type RemoveInsightViewFromDashboardInput = {
   /** ID of the dashboard. */
@@ -968,6 +1049,7 @@ export enum RepositoryOrderBy {
   RepositoryCreatedAt = "REPOSITORY_CREATED_AT",
   RepositoryName = "REPOSITORY_NAME",
   RepoCreatedAt = "REPO_CREATED_AT",
+  Size = "SIZE",
 }
 
 /** Different repository permission levels. */
@@ -980,6 +1062,14 @@ export type RepositoryScopeInput = {
   /** The list of repositories included in this scope. */
   repositories: Array<Scalars["String"]>;
 };
+
+/** Supported aggregation modes for search aggregations */
+export enum SearchAggregationMode {
+  Author = "AUTHOR",
+  CaptureGroup = "CAPTURE_GROUP",
+  Path = "PATH",
+  Repo = "REPO",
+}
 
 /**
  * Tiered list of types of search-based support for a language. This may be expanded as different
@@ -1064,6 +1154,8 @@ export enum SearchContextsOrderBy {
 export type SearchInsightLivePreviewInput = {
   /** Whether or not to generate the timeseries results from the query capture groups. */
   generatedFromCaptureGroups: Scalars["Boolean"];
+  /** Use this field to specify a compute insight. Note: this is experimental and should be considered unstable */
+  groupBy?: InputMaybe<GroupByField>;
   /** The desired label for the series. Will be overwritten when series are dynamically generated. */
   label: Scalars["String"];
   /** The query string. */
@@ -1086,6 +1178,7 @@ export type SearchInsightPreviewInput = {
 
 /** The search pattern type. */
 export enum SearchPatternType {
+  Keyword = "keyword",
   Literal = "literal",
   Lucky = "lucky",
   Regexp = "regexp",
@@ -1093,10 +1186,44 @@ export enum SearchPatternType {
   Structural = "structural",
 }
 
+/** The output format to emit for a parsed query. */
+export enum SearchQueryOutputFormat {
+  /** JSON format. */
+  Json = "JSON",
+  /** Mermaid flowchart format. */
+  Mermaid = "MERMAID",
+  /** S-expression format. */
+  Sexp = "SEXP",
+}
+
+/**
+ * Represents phases in query parsing. The parse tree corresponds closely to the
+ * input query syntax. A subsequent processing phase on the parse tree generates a
+ * job tree. The job tree is an internal representation analogous to a database
+ * query plan. The job tree discards information about query syntax and corresponds
+ * closely to backend services (text search, git commit search, etc.).
+ */
+export enum SearchQueryOutputPhase {
+  JobTree = "JOB_TREE",
+  ParseTree = "PARSE_TREE",
+}
+
+/** The output format to emit for a parsed query. */
+export enum SearchQueryOutputVerbosity {
+  /** Basic verbosity outputs nodes and essential fields associated with nodes. */
+  Basic = "BASIC",
+  /** Maximal verbosity outputs nodes and all information associated with nodes. */
+  Maximal = "MAXIMAL",
+  /** Minimal verbosity outputs only nodes. */
+  Minimal = "MINIMAL",
+}
+
 /** Required input to generate a live preview for a series. */
 export type SearchSeriesPreviewInput = {
   /** Whether or not to generate the timeseries results from the query capture groups. */
   generatedFromCaptureGroups: Scalars["Boolean"];
+  /** Use this field to specify a compute insight. Note: this is experimental and should be considered unstable */
+  groupBy?: InputMaybe<GroupByField>;
   /** The desired label for the series. Will be overwritten when series are dynamically generated. */
   label: Scalars["String"];
   /** The query string. */
@@ -1107,8 +1234,10 @@ export type SearchSeriesPreviewInput = {
 export enum SearchVersion {
   /** Search syntax that defaults to regexp search. */
   V1 = "V1",
-  /** Search syntax that defaults to literal search. */
+  /** Search syntax that defaults to literal-only search. */
   V2 = "V2",
+  /** Search syntax that defaults to standard search. */
+  V3 = "V3",
 }
 
 /** Input type for series display options. */
@@ -1177,6 +1306,43 @@ export type SettingsMutationGroupInput = {
   subject: Scalars["ID"];
 };
 
+/** SiteUserOrderBy enumerates the ways a users list can be ordered. */
+export enum SiteUserOrderBy {
+  /** The datetime when user was added to the system. */
+  CreatedAt = "CREATED_AT",
+  /** The datetime when user was soft deleted. */
+  DeletedAt = "DELETED_AT",
+  /** User's primary email. */
+  Email = "EMAIL",
+  /** The total number of user's event_logs. */
+  EventsCount = "EVENTS_COUNT",
+  /** The last event_log datetime. */
+  LastActiveAt = "LAST_ACTIVE_AT",
+  /** Whether the user is site admin or not. */
+  SiteAdmin = "SITE_ADMIN",
+  Username = "USERNAME",
+}
+
+/** SiteUsersDateRangeInput argument to filter based on date range or date equals to null */
+export type SiteUsersDateRangeInput = {
+  /** Equal to Null */
+  empty?: InputMaybe<Scalars["Boolean"]>;
+  /** Greater than or equal to */
+  gte?: InputMaybe<Scalars["DateTime"]>;
+  /** Less than or equal to */
+  lte?: InputMaybe<Scalars["DateTime"]>;
+  /** Negation */
+  not?: InputMaybe<Scalars["Boolean"]>;
+};
+
+/** SiteUsersNumberRangeInput argument to filter based on the number range */
+export type SiteUsersNumberRangeInput = {
+  /** Less than or equal to */
+  gte?: InputMaybe<Scalars["Float"]>;
+  /** Greater than or equal to */
+  lte?: InputMaybe<Scalars["Float"]>;
+};
+
 /** Input for a user satisfaction (NPS) survey submission. */
 export type SurveySubmissionInput = {
   /** The answer to "What would make Sourcegraph better?" */
@@ -1186,12 +1352,10 @@ export type SurveySubmissionInput = {
    * will not be used.
    */
   email?: InputMaybe<Scalars["String"]>;
-  /** The answer to "What else do you use Sourcegraph to do?". */
+  /** The answer to "What do you use Sourcegraph for?". */
   otherUseCase?: InputMaybe<Scalars["String"]>;
   /** User's likelihood of recommending Sourcegraph to a friend, from 0-10. */
   score: Scalars["Int"];
-  /** The answer to "You use Sourcegraph to...". */
-  useCases?: InputMaybe<Array<SurveyUseCase>>;
 };
 
 /** Possible answers to "You use Sourcegraph to..." in the NPS Survey. */
@@ -1360,10 +1524,23 @@ export type UserSubRepoPermission = {
    * addresses (bindID of "email").
    */
   bindID: Scalars["String"];
-  /** An array of paths that the user is not allowed to access, in glob format. */
-  pathExcludes: Array<Scalars["String"]>;
-  /** An array of paths that the user is allowed to access, in glob format. */
-  pathIncludes: Array<Scalars["String"]>;
+  /**
+   * DEPRECATED
+   * An array of paths that the user is not allowed to access, in glob format.
+   */
+  pathExcludes?: InputMaybe<Array<Scalars["String"]>>;
+  /**
+   * DEPRECATED
+   * An array of paths that the user is allowed to access, in glob format.
+   */
+  pathIncludes?: InputMaybe<Array<Scalars["String"]>>;
+  /**
+   * An array of paths in glob format. Paths starting with a minus (-)
+   * (i.e. "-/dev/private") prevent access, otherwise paths grant access.
+   * The last applicable path takes precedence.
+   * When paths is set, pathIncludes and pathExcludes are ignored.
+   */
+  paths?: InputMaybe<Array<Scalars["String"]>>;
 };
 
 /** Possible sort orderings for a workspace connection. */
@@ -1878,7 +2055,7 @@ export type MergeChangesetMutationOptions = Apollo.BaseMutationOptions<
 >;
 export const GetBatchChangesDocument = gql`
   query GetBatchChanges {
-    batchChanges(first: 100) {
+    batchChanges(first: 250) {
       nodes {
         ...BatchChange
       }
@@ -2068,7 +2245,7 @@ const result: PossibleTypesResultData = {
     ChangesetSpec: ["HiddenChangesetSpec", "VisibleChangesetSpec"],
     ComputeResult: ["ComputeMatchContext", "ComputeText"],
     FeatureFlag: ["FeatureFlagBoolean", "FeatureFlagRollout"],
-    File2: ["GitBlob", "VirtualFile"],
+    File2: ["BatchSpecWorkspaceFile", "GitBlob", "VirtualFile"],
     GenericSearchResultInterface: ["CommitSearchResult", "Repository"],
     GitRevSpec: ["GitObject", "GitRef", "GitRevSpecExpr"],
     GitTreeOrBlob: ["GitBlob", "GitTree"],
@@ -2077,6 +2254,7 @@ const result: PossibleTypesResultData = {
       "HiddenApplyPreviewTargetsDetach",
       "HiddenApplyPreviewTargetsUpdate",
     ],
+    IncompleteDatapointAlert: ["GenericIncompleteDatapointAlert", "TimeoutDatapointAlert"],
     InsightDataSeriesDefinition: ["SearchInsightDataSeriesDefinition"],
     InsightPresentation: ["LineChartInsightViewPresentation", "PieChartInsightViewPresentation"],
     InsightTimeScope: ["InsightIntervalTimeScope"],
@@ -2088,13 +2266,17 @@ const result: PossibleTypesResultData = {
       "BatchChange",
       "BatchChangesCredential",
       "BatchSpec",
+      "BatchSpecWorkspaceFile",
       "BulkOperation",
       "ChangesetEvent",
       "CodeIntelligenceConfigurationPolicy",
       "Executor",
+      "ExecutorSecret",
+      "ExecutorSecretAccessLog",
       "ExternalAccount",
       "ExternalChangeset",
       "ExternalService",
+      "ExternalServiceSyncJob",
       "GitCommit",
       "GitRef",
       "HiddenBatchSpecWorkspace",
@@ -2115,6 +2297,7 @@ const result: PossibleTypesResultData = {
       "Org",
       "OrganizationInvitation",
       "OutOfBandMigration",
+      "PermissionsSyncJob",
       "ProductLicense",
       "ProductSubscription",
       "RegistryExtension",
@@ -2124,15 +2307,21 @@ const result: PossibleTypesResultData = {
       "User",
       "VisibleBatchSpecWorkspace",
       "VisibleChangesetSpec",
+      "Webhook",
       "WebhookLog",
     ],
     NotebookBlock: ["ComputeBlock", "FileBlock", "MarkdownBlock", "QueryBlock", "SymbolBlock"],
     RegistryPublisher: ["Org", "User"],
     RepositoryComparisonInterface: ["PreviewRepositoryComparison", "RepositoryComparison"],
     RepositoryRedirect: ["Redirect", "Repository"],
+    SearchAggregationResult: [
+      "ExhaustiveSearchAggregationResult",
+      "NonExhaustiveSearchAggregationResult",
+      "SearchAggregationNotAvailable",
+    ],
     SearchResult: ["CommitSearchResult", "FileMatch", "Repository"],
     SettingsSubject: ["DefaultSettings", "Org", "Site", "User"],
-    StatusMessage: ["CloningProgress", "ExternalServiceSyncError", "IndexingError", "IndexingProgress", "SyncError"],
+    StatusMessage: ["CloningProgress", "ExternalServiceSyncError", "IndexingProgress", "SyncError"],
     TreeEntry: ["GitBlob", "GitTree"],
     TreeEntryLSIFData: ["GitBlobLSIFData", "GitTreeLSIFData"],
     VisibleApplyPreviewTargets: [

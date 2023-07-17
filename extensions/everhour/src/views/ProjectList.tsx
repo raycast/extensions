@@ -1,30 +1,23 @@
 import { useState, useEffect } from "react";
 import { List, Icon, showToast, ToastStyle } from "@raycast/api";
 import { ProjectListItem } from "../components";
-import { getCurrentUser, getProjects, getTimeRecords } from "../api";
-import { Project } from "../types";
+import { getProjects, getRecentTasks } from "../api";
+import { Project, Task } from "../types";
 import { createResolvedToast } from "../utils";
 
 export function ProjectList() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [timeRecords, setTimeRecords] = useState<Array<any>>([]);
-  const [currentUserId, setCurrentUserId] = useState<string>("");
-
-  const fetchTimeRecords = async (userId: string) => {
-    return await getTimeRecords(userId);
-  };
+  const [timeRecords, setTimeRecords] = useState<Array<Task>>([]);
 
   useEffect(() => {
     async function fetch() {
       const toast = await showToast(ToastStyle.Animated, "Fetching Projects");
       try {
         const projectsResp = await getProjects();
-        const currentUser = await getCurrentUser();
-        const records = await fetchTimeRecords(currentUser.id);
+        const records = await getRecentTasks();
 
         setTimeRecords(records);
-        setCurrentUserId(currentUser.id);
         setProjects(projectsResp);
         setIsLoading(false);
 
@@ -41,12 +34,7 @@ export function ProjectList() {
   const renderProjects = () => {
     if (!isLoading && projects[0]) {
       return projects.map((project) => (
-        <ProjectListItem
-          timeRecords={timeRecords}
-          refreshRecords={() => fetchTimeRecords(currentUserId)}
-          key={project.id}
-          project={project}
-        />
+        <ProjectListItem timeRecords={timeRecords} refreshRecords={getRecentTasks} key={project.id} project={project} />
       ));
     }
 

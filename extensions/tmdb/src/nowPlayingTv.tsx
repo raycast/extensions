@@ -31,7 +31,9 @@ export default function Command() {
   return (
     <Grid
       isLoading={isLoading}
-      itemSize={Grid.ItemSize.Medium}
+      aspectRatio="9/16"
+      fit={Grid.Fit.Fill}
+      columns={6}
       searchBarAccessory={
         <Grid.Dropdown
           tooltip="Page Number"
@@ -55,7 +57,9 @@ export default function Command() {
             key={tv.poster_path}
             content={`https://image.tmdb.org/t/p/w500/${tv.poster_path}`}
             title={tv.name ?? "No title"}
-            subtitle={`${tv.vote_average ?? 0.0} ${STAR.repeat(Math.round((tv.vote_average ?? 0) / 2))}`}
+            subtitle={
+              tv.vote_average ? `${tv.vote_average} ${STAR.repeat(Math.round(tv.vote_average / 2))}` : "Not Rated"
+            }
             actions={
               <ActionPanel>
                 <Action.OpenInBrowser url={`https://www.themoviedb.org/tv/${tv.id}`} />

@@ -1,10 +1,11 @@
 import { List } from "@raycast/api";
+import { useCachedState } from "@raycast/utils";
 import { useState } from "react";
 import { useCache } from "../cache";
-import { gitlab } from "../common";
+import { getListDetailsPreference, gitlab } from "../common";
 import { MergeRequest, Project } from "../gitlabapi";
 import { daysInSeconds, showErrorToast } from "../utils";
-import { MRListItem, MRScope, MRState } from "./mr";
+import { MRListEmptyView, MRListItem, MRScope, MRState } from "./mr";
 import { MyProjectsDropdown } from "./project";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -27,19 +28,31 @@ function MyMRList(props: {
     props.performRefetch();
   };
 
+  const [expandDetails, setExpandDetails] = useCachedState("expand-details", true);
+
   return (
     <List
-      searchBarPlaceholder="Filter Merge Requests by name..."
+      searchBarPlaceholder="Filter Merge Requests by Name..."
       isLoading={props.isLoading}
       searchText={props.searchText}
       onSearchTextChange={props.onSearchTextChange}
       searchBarAccessory={props.searchBarAccessory}
+      isShowingDetail={getListDetailsPreference()}
+      throttle
     >
       <List.Section title={props.title} subtitle={mrs?.length.toString() || ""}>
         {mrs?.map((mr) => (
-          <MRListItem key={mr.id} mr={mr} refreshData={refresh} showCIStatus={true} />
+          <MRListItem
+            key={mr.id}
+            mr={mr}
+            refreshData={refresh}
+            showCIStatus={true}
+            expandDetails={expandDetails}
+            onToggleDetails={() => setExpandDetails(!expandDetails)}
+          />
         ))}
       </List.Section>
+      <MRListEmptyView />
     </List>
   );
 }

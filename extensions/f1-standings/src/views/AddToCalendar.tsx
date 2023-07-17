@@ -71,7 +71,7 @@ export function AddToCalendar({ race, raceDates }: { race: Race; raceDates: [str
       actions={
         <ActionPanel>
           <Action.SubmitForm
-            title="Add all events to calendar"
+            title="Add All Events to Calendar"
             icon={Icon.Calendar}
             onSubmit={({ calendar }) => addEventsToCalendar(calendar)}
           />

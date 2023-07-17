@@ -1,6 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
-import { Domain } from "domain";
-import { request, GraphQLClient } from "graphql-request";
+import { GraphQLClient } from "graphql-request";
 import { RequestInit } from "graphql-request/dist/types.dom";
 import https from "https";
 

@@ -9,7 +9,7 @@ import { useFavorites } from "./utils/use-favorites";
 
 export default function DisplayPlacer() {
   const { push } = useNavigation();
-  const { favorites, actions, isLoading: favsLoading } = useFavorites();
+  const { favorites, isLoading: favsLoading, updateAndSaveFavs } = useFavorites();
   const [loading, setIsLoading] = useState(true);
   const [currentCommand, setCurrentCommand] = useState<DisplayPlacerList["currentCommand"]>(null);
   const [isError, setIsError] = useState(false);
@@ -115,7 +115,11 @@ export default function DisplayPlacer() {
                         title="Delete Display Preset"
                         icon={Icon.Trash}
                         shortcut={{ key: "delete", modifiers: ["cmd"] }}
-                        onAction={() => actions.removeAt(i)}
+                        onAction={async () => {
+                          const newFavorites = [...favorites];
+                          newFavorites.splice(i, 1);
+                          await updateAndSaveFavs(newFavorites);
+                        }}
                       />
                       {NewPresetAction}
                     </ActionPanel>

@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/recurly-icon.png" height="128">
+  <img src="assets/recurly-icon.png" width="128">
   <a href="https://recurly.com/"><h1 align="center">Recurly</h1></a>
 </p>
 

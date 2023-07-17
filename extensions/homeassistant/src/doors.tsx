@@ -1,5 +1,5 @@
-import { StatesList } from "./components/states";
+import { DoorsList } from "./components/doors";
 
 export default function main(): JSX.Element {
-  return <StatesList domain="" deviceClass="door" />;
+  return <DoorsList />;
 }

@@ -9,9 +9,9 @@ export function CopyToDoAction({ todo }: CopyToDoActionProps) {
   return (
     <Action.CopyToClipboard
       icon={Icon.Clipboard}
-      title="Copy to Clipboard"
+      title="Copy Task Title"
       content={todo.title}
-      shortcut={{ modifiers: ['cmd'], key: 'b' }}
+      shortcut={{ modifiers: ['cmd', 'shift'], key: 'c' }}
     />
   )
 }
