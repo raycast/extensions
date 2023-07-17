@@ -103,7 +103,7 @@ async function getHAWSCurrentUser(): Promise<HAUser | undefined> {
 }
 
 function getInitialConversations(): ConversationContent[] {
-  return [{ text: "How can I help you?", author: Author.Assist, date: new Date() }];
+  return [{ text: "How can I assist?", author: Author.Assist, date: new Date() }];
 }
 
 function PipelinesDropdownList(props: {
