@@ -11,10 +11,17 @@ on run (argv)
 
 	set isSonoma to current application's NSProcessInfo's processInfo's isOperatingSystemAtLeastVersion:{majorVersion:14, minorVersion:0, patchVersion:0}
 	if isSonoma then
-		eventStore's requestFullAccessToEventsWithCompletion:(missing value)
-		eventStore's requestFullAccessToRemindersWithCompletion:(missing value)
+		if eventType is "calendar" then
+			eventStore's requestFullAccessToEventsWithCompletion:(missing value)
+		else
+			eventStore's requestFullAccessToRemindersWithCompletion:(missing value)
+		end if
 	else
-		eventStore's requestAccessToEntityType:((get ca's EKEntityMaskEvent) + (get ca's EKEntityMaskReminder)) completion:(missing value)
+		if eventType is "calendar" then
+			eventStore's requestAccessToEntityType:(get ca's EKEntityMaskEvent) completion:(missing value)
+		else
+			eventStore's requestAccessToEntityType:(get ca's EKEntityMaskReminder) completion:(missing value)
+		end if
 	end if
 	delay 0.1
 
