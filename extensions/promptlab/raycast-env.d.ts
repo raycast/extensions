@@ -10,6 +10,10 @@
 type ExtensionPreferences = {
   /** General Settings - If checked, PromptLab will use OCR to extract text from PDFs. This takes longer but enables analysis of more PDF content types. */
   "pdfOCR"?: boolean,
+  /** Export Location - The folder where exported commands and chats will be saved. */
+  "exportLocation"?: string,
+  /** Custom Placeholder Files - A comma-separated list of JSON files containing custom placeholders. These files must follow the format of the original custom_placeholders.json file. See the documentation for more information. */
+  "customPlaceholderFiles"?: string,
   /** Primary Command Action - The top action of the actions menu in command response views. */
   "primaryAction"?: "copy-response-to-clipboard" | "paste-to-active-app" | "copy-prompt-to-clipboard" | "open-chat" | "regenerate",
   /** Level of Automatic Input Condensing - The amount of automatic input condensing to apply to the input text. Higher levels will remove more characters and cut out excess verbiage, resulting in far fewer tokens. However, this may result in less accurate results. Adjust this value according to the model's token limit. For Raycast AI, use 'Medium' or 'High'. */
@@ -24,7 +28,7 @@ type ExtensionPreferences = {
   "authType"?: "apiKey" | "bearerToken" | "x-api-key",
   /** API Key - The API key for the model source. This is only used if the model source is set to something other than Raycast AI. */
   "apiKey"?: string,
-  /** Input Schema - The JSON schema of the endpoint used to generate PromptLab command output. This is only used if the model source is set to something other than Raycast AI. Use {input} to represent PromptLab's input to the command. */
+  /** Input Schema - The JSON schema of the endpoint used to generate PromptLab command output. This is only used if the model source is set to something other than Raycast AI. Use {prompt} to represent PromptLab's entire input to the model. */
   "inputSchema"?: string,
   /**  - If checked, PromptLab will include a temperature (creativity) parameter in the model input, using the value specified during command creation. You may need to disable this if the model does not support temperature. Disabling this will also disable the 'Creativity' textfield in the command creation view. */
   "includeTemperature"?: boolean,
@@ -40,16 +44,12 @@ type ExtensionPreferences = {
 declare type Preferences = ExtensionPreferences
 
 declare namespace Preferences {
-  /** Preferences accessible in the `summarize-files` command */
-  export type SummarizeFiles = ExtensionPreferences & {}
   /** Preferences accessible in the `create-command` command */
   export type CreateCommand = ExtensionPreferences & {}
   /** Preferences accessible in the `search-commands` command */
   export type SearchCommands = ExtensionPreferences & {
-  /**  - If checked, each command category will have its own section in the search results. */
-  "groupByCategory"?: boolean,
-  /** Export Location - The folder where exported commands will be saved. */
-  "exportLocation"?: string
+  /** Search Settings - If checked, each command category will have its own section in the search results. */
+  "groupByCategory"?: boolean
 }
   /** Preferences accessible in the `chat` command */
   export type Chat = ExtensionPreferences & {
@@ -59,18 +59,37 @@ declare namespace Preferences {
   "useConversationHistory"?: boolean,
   /**  - If checked, autonomous agent features such as 'Allow AI To Run Commands' will be enabled by default. */
   "autonomousFeatures"?: boolean,
-  /** Base Prompt - The base prompt that provides the initial context for the conversation. */
+  /** Base Prompt - The base prompt that provides the initial context for conversations. */
   "basePrompt"?: string
 }
   /** Preferences accessible in the `import-commands` command */
   export type ImportCommands = ExtensionPreferences & {}
   /** Preferences accessible in the `discover-commands` command */
   export type DiscoverCommands = ExtensionPreferences & {}
+  /** Preferences accessible in the `manage-models` command */
+  export type ManageModels = ExtensionPreferences & {}
+  /** Preferences accessible in the `menubar-item` command */
+  export type MenubarItem = ExtensionPreferences & {
+  /** Shortcuts To Show - Whether to show the 'New Chat' shortcut in the menu. */
+  "showNewChatShortcut"?: boolean,
+  /**  - Whether to show the 'All Commands' shortcut in the menu. */
+  "showAllCommandsShortcut"?: boolean,
+  /**  - Whether to show the 'PromptLab Store' shortcut in the menu. */
+  "showPromptLabStoreShortcut"?: boolean,
+  /**  - Whether to show the 'New Command' shortcut in the menu. */
+  "showNewCommandShortcut"?: boolean,
+  /** Display Settings - Whether to display icons next to the menu items. */
+  "displayIcons"?: boolean,
+  /**  - Whether to display colors in the menu item icons. */
+  "displayColors"?: boolean,
+  /**  - Whether to separate favorite commands from the rest of the menu items. */
+  "displayFavorites"?: boolean,
+  /**  - Whether to separate commands by category. */
+  "displayCategories"?: boolean
+}
 }
 
 declare namespace Arguments {
-  /** Arguments passed to the `summarize-files` command */
-  export type SummarizeFiles = {}
   /** Arguments passed to the `create-command` command */
   export type CreateCommand = {}
   /** Arguments passed to the `search-commands` command */
@@ -87,4 +106,8 @@ declare namespace Arguments {
   export type ImportCommands = {}
   /** Arguments passed to the `discover-commands` command */
   export type DiscoverCommands = {}
+  /** Arguments passed to the `manage-models` command */
+  export type ManageModels = {}
+  /** Arguments passed to the `menubar-item` command */
+  export type MenubarItem = {}
 }

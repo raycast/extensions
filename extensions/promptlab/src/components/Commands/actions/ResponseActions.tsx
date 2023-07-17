@@ -1,7 +1,9 @@
 import { Action, ActionPanel, Icon, Keyboard, getPreferenceValues } from "@raycast/api";
-import CommandChatView from "./components/CommandChatView";
-import { CommandOptions, ExtensionPreferences } from "./utils/types";
-import { getMenubarOwningApplicationSync } from "./utils/context-utils";
+import CommandChatView from "../../Chats/CommandChatView";
+import { CommandOptions, ExtensionPreferences } from "../../../utils/types";
+import { getMenubarOwningApplication } from "../../../utils/context-utils";
+import { useEffect, useState } from "react";
+import { logDebug } from "../../../utils/dev-utils";
 
 /**
  * A command action that pastes the provided text into the current application.
@@ -11,13 +13,38 @@ import { getMenubarOwningApplicationSync } from "./utils/context-utils";
  */
 function PasteAction(props: { content: string; commandSummary: string }) {
   const { content, commandSummary } = props;
-  const currentApp = getMenubarOwningApplicationSync(true) as { name: string; path: string };
+  const [currentApp, setCurrentApp] = useState<{ name: string; path: string }>();
+
+  /**
+   * Gets the active application and sets the current app state. The timeout will repeat until the component is unmounted by Raycast.
+   */
+  const getActiveApp = async (iter = 0) => {
+    if (iter > 10) {
+      return;
+    }
+
+    Promise.resolve(getMenubarOwningApplication(true) as Promise<{ name: string; path: string }>)
+      .then((app) => {
+        setCurrentApp(app);
+      })
+      .then(() => {
+        setTimeout(() => {
+          logDebug("Getting active app...");
+          getActiveApp(iter + 1);
+        }, 1000);
+      });
+  };
+
+  useEffect(() => {
+    Promise.resolve(getActiveApp());
+  }, []);
+
   return (
     <Action.Paste
-      title={`Paste ${commandSummary} To ${currentApp.name}`}
+      title={`Paste ${commandSummary}${currentApp ? ` To ${currentApp.name}` : ``}`}
       content={content}
       shortcut={{ modifiers: ["cmd"], key: "p" }}
-      icon={{ fileIcon: currentApp.path }}
+      icon={currentApp ? { fileIcon: currentApp.path } : Icon.Clipboard}
     />
   );
 }
@@ -32,8 +59,24 @@ export default function ResponseActions(props: {
   files?: string[];
   listItem?: string;
   cancel: () => void;
+  speaking?: boolean;
+  stopSpeech?: () => void;
+  restartSpeech?: () => void;
 }) {
-  const { commandName, commandSummary, options, responseText, promptText, reattempt, files, listItem, cancel } = props;
+  const {
+    commandName,
+    commandSummary,
+    options,
+    responseText,
+    promptText,
+    reattempt,
+    files,
+    listItem,
+    cancel,
+    stopSpeech,
+    speaking,
+    restartSpeech,
+  } = props;
   const preferences = getPreferenceValues<ExtensionPreferences>();
 
   const actions = [
@@ -110,18 +153,41 @@ export default function ResponseActions(props: {
           <Action.CopyToClipboard title="Copy Item" content={listItem} />
         </ActionPanel.Section>
       ) : null}
+
+      {options.speakResponse ? (
+        <ActionPanel.Section title="Speech Actions">
+          {speaking ? (
+            <Action
+              title="Stop Speech"
+              icon={Icon.SpeakerOff}
+              onAction={() => stopSpeech?.()}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
+            />
+          ) : (
+            <Action
+              title="Restart Speech"
+              icon={Icon.SpeakerOff}
+              onAction={() => restartSpeech?.()}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
+            />
+          )}
+        </ActionPanel.Section>
+      ) : null}
+
       <ActionPanel.Section title="Prompt Actions">{actionComponents}</ActionPanel.Section>
 
-      <ActionPanel.Section title="File Actions">
-        {files?.map((file, index) => (
-          <Action.Open
-            title={`Open ${file.split("/").at(-1)}`}
-            target={file}
-            shortcut={{ modifiers: ["cmd", "shift"], key: (index + 1).toString() as Keyboard.KeyEquivalent }}
-            key={file}
-          />
-        ))}
-      </ActionPanel.Section>
+      {files?.length ? (
+        <ActionPanel.Section title="File Actions">
+          {files?.map((file, index) => (
+            <Action.Open
+              title={`Open ${file.split("/").at(-1)}`}
+              target={file}
+              shortcut={{ modifiers: ["cmd", "shift"], key: (index + 1).toString() as Keyboard.KeyEquivalent }}
+              key={file}
+            />
+          ))}
+        </ActionPanel.Section>
+      ) : null}
     </ActionPanel>
   );
 }
