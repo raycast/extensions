@@ -61,8 +61,7 @@ export default function Command() {
           description={
             loading
               ? `Creating Task...`
-              : `"work task Prep board slides (for 4h, by 10am Monday, snooze 1 hour)"
-                 "personal task Do the dishes (for 15min, by 8pm, snooze 12pm)"`
+              : `"work task Prep board slides (for 4h, by 10am Monday, snooze 1 hour)"\n"personal task Do the dishes (for 15min, by 8pm, snooze 12pm)"`
           }
           title="Quickly create a Task"
         />
@@ -77,20 +76,7 @@ export default function Command() {
                 <Action
                   title={item.title}
                   onAction={() => {
-                    push(
-                      <TaskForm
-                        interpreter={{
-                          due: item.interpreterData.due
-                            ? new Date(item.interpreterData.due)
-                            : addMinutes(new Date(), 5),
-                          durationTimeChunk: item.interpreterData.durationTimeChunks,
-                          snoozeUntil: item.interpreterData.snoozeUntil
-                            ? new Date(item.interpreterData.snoozeUntil)
-                            : new Date(),
-                        }}
-                        title={item.title}
-                      />
-                    );
+                    push(<TaskForm interpreter={item.interpreterData} title={item.title} />);
                   }}
                 />
               </ActionPanel>
