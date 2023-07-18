@@ -1,0 +1,12 @@
+{
+  "extends": [
+    "plugin:react/recommended",
+    "plugin:react/jsx-runtime",
+    "@antfu"
+  ],
+  "rules": {
+    "react/jsx-indent": ["error", 2],
+    "react/jsx-indent-props": ["error", 2],
+    "react/jsx-max-props-per-line": ["error", { "maximum": 4 }],
+  }
+}
