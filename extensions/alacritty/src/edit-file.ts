@@ -11,7 +11,7 @@ const getEditor = () => {
   const { shell } = getAlacrittyPreferences();
   // fish doesn't understand shell parameter expansion
   if (shell === Shell.Fish) {
-    return `set -q $EDITOR || set EDITOR '${fallbackEditorPath}' ; $EDITOR`;
+    return `test -z "$EDITOR" && set EDITOR '${fallbackEditorPath}' ; $EDITOR`;
   }
 
   return `\${EDITOR:-${fallbackEditorPath}}`;
