@@ -96,8 +96,8 @@
     },
     {
       "name": "format-vue",
-      "title": "Format VUE",
-      "description": "Formats VUE on the clipboard",
+      "title": "Format Vue",
+      "description": "Formats Vue on the clipboard",
       "mode": "view"
     },
     {
