@@ -1,11 +1,11 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "reclaim",
+  "name": "reclaim-ai",
   "title": "Reclaim",
   "description": "Quickly create Tasks, see your schedule, & share Scheduling Links from Reclaim",
   "icon": "command-icon.png",
   "author": "webergnr",
-  "owner": "reclaim",
+  "owner": "reclaim-ai",
   "access": "public",
   "categories": [
     "Productivity",

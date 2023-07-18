@@ -6,6 +6,7 @@ import { useTimePolicy } from "./hooks/useTimePolicy";
 import { useUser } from "./hooks/useUser";
 import { TimePolicy } from "./types/time-policy";
 import { TIME_BLOCK_IN_MINUTES, formatDuration, parseDurationToMinutes } from "./utils/dates";
+import { TaskPlanDetails } from "./types/plan";
 
 interface FormValues {
   title: string;
@@ -21,11 +22,7 @@ interface FormValues {
 interface Props {
   timeNeeded?: string;
   title?: string;
-  interpreter?: {
-    due: Date;
-    snoozeUntil: Date;
-    durationTimeChunk: number;
-  };
+  interpreter?: Partial<TaskPlanDetails>;
   loading?: boolean;
 }
 
@@ -49,26 +46,29 @@ export default (props: Props) => {
 
   const [timeNeeded, setTimeNeeded] = useState(
     formatDuration(
-      `${userTimeNeeded || (interpreter?.durationTimeChunk || 0) * TIME_BLOCK_IN_MINUTES || defaults.duration}m`
+      `${userTimeNeeded || (interpreter?.durationTimeChunks || 0) * TIME_BLOCK_IN_MINUTES || defaults.duration}m`
     )
   );
   const [durationMax, setDurationMax] = useState(
-    formatDuration(`${(interpreter?.durationTimeChunk || 0) * TIME_BLOCK_IN_MINUTES || defaults.maxDuration}m`)
+    formatDuration(`${(interpreter?.durationTimeChunks || 0) * TIME_BLOCK_IN_MINUTES || defaults.maxDuration}m`)
   );
   const [durationMin, setDurationMin] = useState(
-    formatDuration(`${(interpreter?.durationTimeChunk || 0) * TIME_BLOCK_IN_MINUTES || defaults.minDuration}m`)
+    formatDuration(`${(interpreter?.durationTimeChunks || 0) * TIME_BLOCK_IN_MINUTES || defaults.minDuration}m`)
   );
 
   const [timeNeededError, setTimeNeededError] = useState<string | undefined>();
   const [durationMinError, setDurationMinError] = useState<string | undefined>();
   const [durationMaxError, setDurationMaxError] = useState<string | undefined>();
   const [timePolicies, setTimePolicies] = useState<TimePolicy[] | undefined>();
+  const [timePolicy, setTimePolicy] = useState<string>("");
 
-  const [due, setDue] = useState<Date | null>(interpreter ? interpreter.due : defaults.defaultDueDate);
-  const [snooze, setSnooze] = useState<Date | null>(interpreter ? interpreter.snoozeUntil : defaults.defaultSnoozeDate);
+  const [due, setDue] = useState<Date | null>(interpreter?.due ? new Date(interpreter.due) : defaults.defaultDueDate);
+  const [snooze, setSnooze] = useState<Date | null>(
+    interpreter?.snoozeUntil ? new Date(interpreter.snoozeUntil) : defaults.defaultSnoozeDate
+  );
 
   const handleSubmit = async (formValues: FormValues) => {
-    await showToast(Toast.Style.Animated, "Creating task...");
+    await showToast(Toast.Style.Animated, "Creating Task...");
     const { timeNeeded, durationMin, durationMax, snoozeUntil, due, notes, title, timePolicy } = formValues;
 
     const _timeNeeded = parseDurationToMinutes(timeNeeded) / TIME_BLOCK_IN_MINUTES;
@@ -108,6 +108,12 @@ export default (props: Props) => {
     const allPolicies = await getTimePolicy("TASK_ASSIGNMENT");
     if (allPolicies) {
       setTimePolicies(allPolicies);
+      if (interpreter?.personal) {
+        const personalPolicy = allPolicies.find((policy) => policy.policyType === "PERSONAL");
+        if (personalPolicy) {
+          setTimePolicy(personalPolicy.id);
+        }
+      }
     }
   };
 
@@ -186,7 +192,8 @@ export default (props: Props) => {
           setDurationMax(formatDuration(e.target.value));
         }}
       />
-      <Form.Dropdown id="timePolicy" title="Hours">
+
+      <Form.Dropdown id="timePolicy" title="Hours" value={timePolicy} onChange={setTimePolicy}>
         {timePolicyOptions?.map((policy) => (
           <Form.Dropdown.Item key={policy.value} title={policy.title} value={policy.value} />
         ))}
