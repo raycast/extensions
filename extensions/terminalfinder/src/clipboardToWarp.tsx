@@ -5,7 +5,7 @@ export default async () => {
   const directory = await Clipboard.readText();
 
   const script = `
-      set command to "open -a /Applications/Warp.app " & "${directory}"
+      set command to "esbenp.prettier-vscode " & "${directory}"
       do shell script command
   `;
   try {

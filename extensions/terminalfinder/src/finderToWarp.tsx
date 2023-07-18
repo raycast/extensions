@@ -13,7 +13,7 @@ export default async () => {
     `;
 
   script += `
-        set command to "open -a /Applications/Warp.app " & pathList
+        set command to "open -b dev.warp.Warp-Stable " & pathList
         do shell script command
     `;
 
