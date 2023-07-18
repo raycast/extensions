@@ -137,8 +137,7 @@ function PipelinesDropdownList(props: {
 
 export default function AssistCommand(): JSX.Element {
   const [searchText, setSearchText] = useState<string>("");
-  const { connection, isLoading: isLoadingConnection } = useHAWSConnection();
-  const { pipelines, isLoading: isLoadingPipeline } = useAssistPipelines(connection);
+  const { pipelines, isLoading: isLoadingPipeline } = useAssistPipelines();
   const [conversations, setConversations] = useState<ConversationContent[]>();
   const { data: currentUser } = useCachedPromise(getHAWSCurrentUser);
   const [selectedPipeline, setSelectedPipeline] = useState<HAAssistPipeline>();
@@ -151,9 +150,7 @@ export default function AssistCommand(): JSX.Element {
         });
         return;
       }
-      if (!connection) {
-        throw Error("No Home Assistant Connection");
-      }
+      const connection = await getHAWSConnection();
       const r: ConversationAnswer = await connection.sendMessagePromise({
         type: "conversation/process",
         text: searchText,
@@ -188,7 +185,7 @@ export default function AssistCommand(): JSX.Element {
     }
     return { source: "person.png", tintColor: Color.PrimaryText, mask: Image.Mask.Circle };
   };
-  const isLoading = isLoadingConnection || isLoadingPipeline || !conversations;
+  const isLoading = isLoadingPipeline || !conversations;
   return (
     <List
       searchBarPlaceholder="Type your Request and Press Enter"
@@ -238,53 +235,7 @@ export default function AssistCommand(): JSX.Element {
   );
 }
 
-function useHAWSConnection(): {
-  error?: string;
-  isLoading: boolean;
-  connection?: Connection;
-} {
-  const [connection, setConnection] = useState<Connection>();
-  const [error, setError] = useState<string>();
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-
-  useEffect(() => {
-    let didUnmount = false;
-
-    async function fetchData() {
-      if (didUnmount) {
-        return;
-      }
-
-      setIsLoading(true);
-      setError(undefined);
-
-      try {
-        const con = await getHAWSConnection();
-        if (!didUnmount) {
-          setConnection(con);
-        }
-      } catch (error) {
-        if (!didUnmount) {
-          setError(getErrorMessage(error));
-        }
-      } finally {
-        if (!didUnmount) {
-          setIsLoading(false);
-        }
-      }
-    }
-
-    fetchData();
-
-    return () => {
-      didUnmount = true;
-    };
-  }, []);
-
-  return { error, isLoading, connection };
-}
-
-function useAssistPipelines(connection?: Connection): {
+function useAssistPipelines(): {
   error?: string;
   isLoading: boolean;
   pipelines?: HAAssistPipelines;
@@ -305,13 +256,12 @@ function useAssistPipelines(connection?: Connection): {
       setError(undefined);
 
       try {
-        if (connection) {
-          const data: HAAssistPipelines | undefined = await connection.sendMessagePromise({
-            type: "assist_pipeline/pipeline/list",
-          });
-          if (!didUnmount) {
-            setPipelines(data);
-          }
+        const con = await getHAWSConnection();
+        const data: HAAssistPipelines | undefined = await con.sendMessagePromise({
+          type: "assist_pipeline/pipeline/list",
+        });
+        if (!didUnmount) {
+          setPipelines(data);
         }
       } catch (error) {
         if (!didUnmount) {
@@ -329,7 +279,7 @@ function useAssistPipelines(connection?: Connection): {
     return () => {
       didUnmount = true;
     };
-  }, [connection]);
+  }, []);
 
   return { error, isLoading, pipelines };
 }
