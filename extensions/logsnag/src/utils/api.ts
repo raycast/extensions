@@ -18,7 +18,7 @@ const callApi = async (endpoint: string, body: Log | Insight, animatedToastMessa
       const error = `${status} Error`;
 
       const response = (await apiResponse.json()) as ErrorResponse;
-      
+
       await showToast(Toast.Style.Failure, error, response.message);
       return response;
     }

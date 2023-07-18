@@ -151,7 +151,7 @@ export function PublishLog({ onLogPublished }: PublishLogProps) {
 
   const [isLoading, setIsLoading] = useState(false);
   const [parser, setParser] = useState("text");
-  
+
   type FormTag = {
     name: string;
     value: string;
@@ -167,10 +167,10 @@ export function PublishLog({ onLogPublished }: PublishLogProps) {
       const { project, channel, event, timestamp, description, icon, notify, parser } = values;
 
       const logOptions: Log = { project, channel, event, notify, parser: parser === "markdown" ? "markdown" : "text" };
-      
+
       if (timestamp) logOptions.timestamp = Math.floor(new Date(timestamp).getTime() / 1000);
       else logOptions.timestamp = Math.floor(new Date().getTime() / 1000);
-      
+
       if (description) logOptions.description = description;
       if (icon) logOptions.icon = icon;
 
@@ -183,7 +183,7 @@ export function PublishLog({ onLogPublished }: PublishLogProps) {
       }
 
       const response = await publishLog(logOptions);
-      
+
       if (!("message" in response)) {
         showToast(Toast.Style.Success, "Logged Successfully");
         onLogPublished(response);
@@ -296,7 +296,7 @@ Code Block = \`\`\`code\`\`\`
       <Form.Separator />
 
       <Form.Checkbox {...itemProps.notify} title="Notify" label="Send push notification" storeValue />
-      
+
       <Form.Separator />
       <Form.Description title="Tags" text="Press 'cmd+T' to add a Tag" />
       {formTags.length > 0 && <Form.Description text="Press 'cmd+shift+T' to remove a Tag" />}
