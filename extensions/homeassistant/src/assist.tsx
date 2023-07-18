@@ -137,10 +137,15 @@ function PipelinesDropdownList(props: {
 
 export default function AssistCommand(): JSX.Element {
   const [searchText, setSearchText] = useState<string>("");
-  const { pipelines, isLoading: isLoadingPipeline } = useAssistPipelines();
+  const { pipelines, isLoading: isLoadingPipeline, error } = useAssistPipelines();
   const [conversations, setConversations] = useState<ConversationContent[]>();
   const { data: currentUser } = useCachedPromise(getHAWSCurrentUser);
   const [selectedPipeline, setSelectedPipeline] = useState<HAAssistPipeline>();
+
+  if (error) {
+    showToast({ style: Toast.Style.Failure, title: "Error", message: error });
+  }
+
   const process = async () => {
     try {
       if (searchText.length <= 0) {
