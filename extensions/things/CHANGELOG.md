@@ -1,5 +1,13 @@
 # Things Changelog
 
+## [Fix] - 2023-05-08
+
+- Fixed encoding
+
+## [Update] - 2023-03-17
+
+Add the ability to copy the Things URI to the clipboard.
+
 ## [Update] - 2022-12-18
 
 Added troubleshooting

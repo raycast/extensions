@@ -1,10 +1,12 @@
+import { DeviceDefinition } from "src/types/device";
+
 export default {
-  // 1
   "0x030E": {
+    name: "Magic Trackpad (Gen 1)",
     main: "icons/devices/apple/magic-trackpad.svg",
   },
-  // 2
   "0x0265": {
+    name: "Magic Trackpad (Gen 2)",
     main: "icons/devices/apple/magic-trackpad.svg",
   },
-};
+} as Record<string, DeviceDefinition>;

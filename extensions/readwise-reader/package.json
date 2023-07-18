@@ -13,9 +13,9 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "open-new",
-      "title": "Open New",
-      "description": "Opens Reader to new page",
+      "name": "open-inbox",
+      "title": "Open Inbox",
+      "description": "Opens Reader Inbox",
       "mode": "no-view",
       "icon": "reader-logo.png"
     },
@@ -39,10 +39,55 @@
       "description": "Opens Reader to the home page",
       "mode": "no-view",
       "icon": "reader-logo.png"
+    },
+    {
+      "name": "save-link",
+      "title": "Save Link",
+      "description": "Save a URL to Reader",
+      "mode": "no-view",
+      "icon": "reader-logo.png",
+      "arguments": [
+        {
+          "name": "url",
+          "placeholder": "URL",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "save-selection",
+      "title": "Save Selection",
+      "description": "Save the currently selected URL",
+      "mode": "no-view",
+      "icon": "reader-logo.png"
+    },
+    {
+      "name": "save-clipboard",
+      "title": "Save Clipboard",
+      "description": "Save a URL from the clipboard",
+      "mode": "no-view",
+      "icon": "reader-logo.png"
+    },
+    {
+      "name": "search",
+      "title": "Search",
+      "description": "Search Reader Library",
+      "mode": "no-view",
+      "icon": "reader-logo.png"
+    },
+    {
+      "name": "open-shortlist",
+      "title": "Open Shortlist",
+      "description": "Opens Reader to the shortlist page",
+      "mode": "no-view",
+      "icon": "reader-logo.png"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.44.0"
+    "@raycast/api": "^1.44.0",
+    "@raycast/utils": "^1.5.2",
+    "node-fetch": "^3.3.1"
   },
   "devDependencies": {
     "@types/node": "18.8.3",
@@ -60,5 +105,15 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish"
-  }
+  },
+  "preferences": [
+    {
+      "name": "token",
+      "description": "Readwise Access Token",
+      "type": "password",
+      "required": true,
+      "title": "Access Token",
+      "placeholder": "Access Token"
+    }
+  ]
 }

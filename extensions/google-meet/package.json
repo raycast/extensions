@@ -6,7 +6,8 @@
   "icon": "google-meet-icon.png",
   "author": "vitoorgomes",
   "contributors": [
-    "hughlaw"
+    "hughlaw",
+    "iwex"
   ],
   "license": "MIT",
   "commands": [

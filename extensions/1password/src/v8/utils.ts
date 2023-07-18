@@ -4,21 +4,52 @@ import { execFileSync } from "child_process";
 import { existsSync } from "fs";
 import { useEffect, useState } from "react";
 
-import { CategoryName } from "./types";
+import { CategoryName, Item } from "./types";
+
+export type ActionID = "open-in-1password" | "open-in-browser" | "copy-username" | "copy-password";
 
 export type Preferences = {
   cliPath: string;
   version: "v7" | "v8";
+  primaryAction: ActionID;
+  secondaryAction: ActionID;
 };
 
 export const cache = new Cache();
 
+const preferences = getPreferenceValues<Preferences>();
+
 export const CLI_PATH =
-  getPreferenceValues<Preferences>().cliPath ||
-  ["/usr/local/bin/op", "/opt/homebrew/bin/op"].find((path) => existsSync(path));
+  preferences.cliPath || ["/usr/local/bin/op", "/opt/homebrew/bin/op"].find((path) => existsSync(path));
 export const CATEGORIES_CACHE_NAME = "@categories";
 export const ITEMS_CACHE_NAME = "@items";
 export const ACCOUNT_CACHE_NAME = "@account";
+
+export function hrefToOpenInBrowser(item: Item): string | undefined {
+  if (item.category === "LOGIN") {
+    return item.urls?.find((url) => url.primary)?.href;
+  } else {
+    return undefined;
+  }
+}
+
+export function actionsForItem(item: Item): ActionID[] {
+  // all actions in the default order
+  const defaultActions: ActionID[] = ["open-in-1password", "open-in-browser", "copy-username", "copy-password"];
+  // prioritize primary and secondary actions, then append the rest and remove duplicates
+  const deduplicatedActions = [
+    ...new Set<ActionID>([preferences.primaryAction, preferences.secondaryAction, ...defaultActions]),
+  ];
+
+  switch (item.category) {
+    case "LOGIN":
+      return deduplicatedActions;
+    case "PASSWORD":
+      return deduplicatedActions.filter((action) => action !== "copy-username");
+    default:
+      return ["open-in-1password"];
+  }
+}
 
 export function op(args: string[]) {
   if (CLI_PATH) {

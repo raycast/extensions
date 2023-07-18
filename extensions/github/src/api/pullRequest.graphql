@@ -21,31 +21,7 @@ fragment PullRequestFields on PullRequest {
     name
   }
   author {
-    ... on Bot {
-      id
-      login
-      avatarUrl(size: 64)
-    }
-    ... on User {
-      ...UserFields
-    }
-    ... on Mannequin {
-      id
-      login
-      avatarUrl(size: 64)
-    }
-    ... on Organization {
-      id
-      login
-      name
-      avatarUrl(size: 64)
-    }
-    ... on EnterpriseUserAccount {
-      id
-      login
-      name
-      avatarUrl(size: 64)
-    }
+    ...AuthorFields
   }
   comments(first: 0) {
     totalCount
@@ -217,31 +193,7 @@ fragment PullRequestDetailsFields on PullRequest {
     }
   }
   author {
-    ... on Bot {
-      id
-      login
-      avatarUrl(size: 64)
-    }
-    ... on User {
-      ...UserFields
-    }
-    ... on Mannequin {
-      id
-      login
-      avatarUrl(size: 64)
-    }
-    ... on Organization {
-      id
-      login
-      name
-      avatarUrl(size: 64)
-    }
-    ... on EnterpriseUserAccount {
-      id
-      login
-      name
-      avatarUrl(size: 64)
-    }
+    ...AuthorFields
   }
   comments(first: 0) {
     totalCount
@@ -274,34 +226,7 @@ fragment PullRequestDetailsFields on PullRequest {
     nodes {
       state
       author {
-        ... on Bot {
-          id
-          login
-          avatarUrl(size: 64)
-        }
-        ... on User {
-          id
-          login
-          name
-          avatarUrl(size: 64)
-        }
-        ... on Mannequin {
-          id
-          login
-          avatarUrl(size: 64)
-        }
-        ... on Organization {
-          id
-          login
-          name
-          avatarUrl(size: 64)
-        }
-        ... on EnterpriseUserAccount {
-          id
-          login
-          name
-          avatarUrl(size: 64)
-        }
+        ...AuthorFields
       }
     }
   }

@@ -18,24 +18,25 @@ function applicationIconFromPath(path: string): string {
    * '/Applications/Visual Studio Code.app' -> '/Applications/Visual Studio Code.app/Contents/Resources/{file name}.icns'
    */
 
-  // read path/Contents/Info.plist and look for <key>CFBundleIconFile</key>
+  // read path/Contents/Info.plist and look for <key>CFBundleIconFile</key> or <key>CFBundleIconName</key>
+  // the actual icon file is located at path/Contents/Resources/{file name}.icns
 
   const infoPlist = `${path}/Contents/Info.plist`;
-  const stdout = execSync(
-    [
-      "plutil",
-      "-convert",
-      "json",
-      '"' + infoPlist + '"',
-      "-o",
-      // By using a dash ("-") for the -o parameter value the output
-      // will be printed in the stdout instead into a local file
-      "-",
-    ].join(" ")
-  ).toString();
 
-  const json = JSON.parse(stdout);
-  let iconFileName = json.CFBundleIconFile;
+  const possibleIconKeyNames = ["CFBundleIconFile", "CFBundleIconName"];
+
+  let iconFileName = null;
+
+  for (const keyName of possibleIconKeyNames) {
+    try {
+      iconFileName = execSync(["plutil", "-extract", keyName, "raw", '"' + infoPlist + '"'].join(" "))
+        .toString()
+        .trim();
+      break;
+    } catch (error) {
+      continue;
+    }
+  }
 
   if (!iconFileName) {
     // no icon found. fallback to empty string (no icon)
@@ -48,6 +49,7 @@ function applicationIconFromPath(path: string): string {
   }
 
   const iconPath = `${path}/Contents/Resources/${iconFileName}`;
+  console.log(iconPath);
   return iconPath;
 }
 
@@ -137,9 +139,6 @@ class AppList extends React.Component<Record<string, never>, AppListState> {
     getRunningAppsPaths().then((appCandidatePaths) => {
       // filter out all apps that do not end with .app
       const appPaths = appCandidatePaths.filter((appPath) => appPath.endsWith(".app"));
-
-      console.log(appPaths);
-
       const appNames = appPaths.map((appPath) => applicationNameFromPath(appPath));
       const appIcons = appPaths.map((appPath) => applicationIconFromPath(appPath));
 

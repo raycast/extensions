@@ -8,6 +8,9 @@
   "categories": [
     "Developer Tools"
   ],
+  "contributors": [
+    "robertrosman"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -78,6 +81,13 @@
       "title": "JSON to GraphQL",
       "subtitle": "Transform",
       "description": "Transform JSON to GraphQL",
+      "mode": "view"
+    },
+    {
+      "name": "json-to-js-object",
+      "title": "JSON to JS Object",
+      "subtitle": "Transform",
+      "description": "Transform JSON to JS Object",
       "mode": "view"
     },
     {
@@ -213,6 +223,7 @@
     "json-to-go": "github:Idered/json-to-go",
     "json-to-jsdoc": "github:Idered/json-to-jsdoc",
     "json-wasm": "github:Idered/json-wasm",
+    "json5": "^2.2.3",
     "markdown-it": "13.0.1",
     "node-html-markdown": "1.2.0",
     "postcss": "^8.4.16",

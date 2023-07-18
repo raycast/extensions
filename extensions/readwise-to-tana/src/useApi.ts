@@ -15,6 +15,11 @@ export type Book = {
   title: string
 }
 
+type Tag = {
+  id: number
+  name: string
+}
+
 export type Highlight = {
   color?: string
   highlighted_at?: string | null
@@ -22,6 +27,7 @@ export type Highlight = {
   location?: string
   location_type?: string
   note?: string
+  tags: Tag[]
   text: string
   updated: string
   url?: string | null
@@ -57,7 +63,7 @@ export const useBook = (id: string) => {
 
 export const useHighlights = (bookId: string) => {
   const { data, isLoading } = useFetch<{ results: Highlight[] }>(
-    `${baseUrl}/highlights?book_id=${bookId}`,
+    `${baseUrl}/highlights?book_id=${bookId}&page_size=1000`,
     getHeaders()
   )
 

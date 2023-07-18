@@ -46,6 +46,11 @@ export function getFormattedColor(color: Color) {
       const alpha = Math.round(color.alpha / 255);
       return `hsla(${hsl[0]}, ${hsl[1]}%, ${hsl[2]}%, ${alpha})`;
     }
+    case "hsva": {
+      const hsv = convert.rgb.hsv(color.red, color.green, color.blue);
+      const alpha = Math.round(color.alpha / 255);
+      return `hsva(${hsv[0]}, ${hsv[1]}%, ${hsv[2]}%, ${alpha})`;
+    }
   }
 }
 

@@ -15,6 +15,7 @@ import {
   updateIssueAssignee,
 } from "../api/issues";
 import { autocompleteUsers, User } from "../api/users";
+import { getUserAvatar } from "../helpers/avatars";
 import { getErrorMessage } from "../helpers/errors";
 import { slugify } from "../helpers/string";
 import { getJiraCredentials } from "../helpers/withJiraCredentials";
@@ -133,7 +134,7 @@ export default function IssueActions({
 
         <Action
           title={isAssignedToMe ? "Un-Assign From Me" : "Assign to Me"}
-          icon={myself.avatarUrls["32x32"]}
+          icon={getUserAvatar(myself)}
           shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
           onAction={assignToMe}
         />
@@ -254,10 +255,10 @@ function ChangePrioritySubmenu({ issue, mutate }: SubmenuProps) {
           return (
             <Action
               key={priority.id}
-              title={priority.name}
+              title={priority.name ?? "Unknown priority name"}
               icon={priority.iconUrl}
               onAction={() => changePriority(priority)}
-              autoFocus={priority.id === issue.fields.priority.id}
+              autoFocus={priority.id === issue.fields.priority?.id}
             />
           );
         })
@@ -337,7 +338,7 @@ function ChangeAssigneeSubmenu({ issue, mutate }: SubmenuProps) {
           <Action
             key={user.accountId}
             title={title}
-            icon={user.avatarUrls["32x32"]}
+            icon={getUserAvatar(user)}
             autoFocus={user.accountId === issue.fields.assignee?.accountId}
             onAction={() => changeAssignee(user)}
           />
@@ -402,7 +403,13 @@ function ChangeStatusSubmenu({ issue, mutate }: SubmenuProps) {
             return null;
           }
 
-          return <Action key={transition.id} title={transition.name} onAction={() => changeTransition(transition)} />;
+          return (
+            <Action
+              key={transition.id}
+              title={transition.name ?? "Unknown status name"}
+              onAction={() => changeTransition(transition)}
+            />
+          );
         })
       )}
     </ActionPanel.Submenu>

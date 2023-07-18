@@ -27,25 +27,38 @@ export default function AppsView() {
       name: string;
       key: string;
       code: string;
+      percent: number;
+      time: string;
     }[]
   >([]);
   const { defaultAction } = getPreferenceValues();
 
+  async function updateApps() {
+    const _apps = await LocalStorage.allItems();
+    setApps(
+      Object.keys(_apps)
+        .sort((a, b) => a.localeCompare(b))
+        .map((name) => {
+          const token: { secret: string; options: Options } = parse(_apps[name]);
+          return {
+            name,
+            key: _apps[name].toString(),
+            time: `${Math.floor(token.options.period - ((new Date().getTime() / 1000) % token.options.period))}`,
+            percent:
+              (Math.floor(token.options.period - ((new Date().getTime() / 1000) % token.options.period)) /
+                token.options.period) *
+              100,
+            code: generateTOTP(token.secret, token.options).toString().padStart(token.options.digits, "0"),
+          };
+        })
+    );
+  }
+
   useEffect(() => {
-    LocalStorage.allItems().then((_apps) => {
-      setApps(
-        Object.keys(_apps)
-          .sort((a, b) => a.localeCompare(b))
-          .map((name) => {
-            const token: { secret: string; options: Options } = parse(_apps[name]);
-            return {
-              name,
-              key: _apps[name].toString(),
-              code: generateTOTP(token.secret, token.options).toString().padStart(token.options.digits, "0"),
-            };
-          })
-      );
-    });
+    updateApps();
+    setInterval(() => {
+      updateApps();
+    }, 100);
   }, []);
 
   return (
@@ -72,6 +85,23 @@ export default function AppsView() {
           title={a.name}
           subtitle={a.code}
           key={a.name}
+          accessories={[
+            {
+              icon: {
+                source:
+                  +a.percent > 75
+                    ? Icon.CircleProgress100
+                    : +a.percent > 50
+                    ? Icon.CircleProgress75
+                    : +a.percent > 25
+                    ? Icon.CircleProgress50
+                    : +a.time > 0
+                    ? Icon.CircleProgress25
+                    : Icon.Circle,
+              },
+              tooltip: a.time,
+            },
+          ]}
           actions={
             <ActionPanel>
               <ActionPanel.Section>
@@ -108,22 +138,7 @@ export default function AppsView() {
                   onAction={async () => {
                     await LocalStorage.removeItem(a.name);
 
-                    LocalStorage.allItems().then((_apps) => {
-                      setApps(
-                        Object.keys(_apps)
-                          .sort((a, b) => a.localeCompare(b))
-                          .map((name) => {
-                            const token = parse(_apps[name]);
-                            return {
-                              name,
-                              key: _apps[name].toString(),
-                              code: generateTOTP(token.secret, token.options)
-                                .toString()
-                                .padStart(token.options.digits, "0"),
-                            };
-                          })
-                      );
-                    });
+                    await updateApps();
                   }}
                   shortcut={{
                     modifiers: ["ctrl"],

@@ -10,7 +10,7 @@ export default function Command() {
   const { dynamicItems, isLoading } = useDynamicFeed();
 
   return (
-    <List enableFiltering={false} isLoading={isLoading} isShowingDetail={true}>
+    <List filtering={false} isLoading={isLoading} isShowingDetail={true}>
       {dynamicItems?.map((item) => {
         switch (item.type) {
           case "DYNAMIC_TYPE_AV":

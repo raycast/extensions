@@ -1,13 +1,17 @@
-import { useCallback, useEffect, useState } from "react";
-import { getIPGeolocation, getIPV4Address, getIPV6Address, isEmpty } from "../utils/common-utils";
 import { Cache, showToast, Toast } from "@raycast/api";
-import { CacheKey, IPGeolocation, IPGeolocationReadable } from "../types/ip-geolocation";
-import Style = Toast.Style;
 import axios from "axios";
-import { WORLD_TIME_API } from "../utils/constants";
 import { publicIpv4, publicIpv6 } from "public-ip";
+import { useCallback, useEffect, useState } from "react";
+import { CacheKey, IPGeolocation, IPGeolocationReadable } from "../types/ip-geolocation";
+import { getIPGeolocation, getIPV4Address, getIPV6Address, isEmpty } from "../utils/common-utils";
+import { WORLD_TIME_API } from "../utils/constants";
+import Style = Toast.Style;
 
-export const searchIpGeolocation = (language: string, searchContent: string) => {
+export const searchIpGeolocation = (
+  language: string,
+  searchContent: string,
+  coordinatesFormat: "latLon" | "lonLat"
+) => {
   const [ipGeolocation, setIpGeolocation] = useState<[string, string][]>([]);
   const [loading, setLoading] = useState<boolean>(false);
 
@@ -30,7 +34,10 @@ export const searchIpGeolocation = (language: string, searchContent: string) => 
             Location: `${ipGeolocation.country}, ${ipGeolocation.regionName}, ${ipGeolocation.city}${
               isEmpty(ipGeolocation.district) ? "" : ", " + ipGeolocation.district
             }${isEmpty(ipGeolocation.zip) ? "" : ", ZIP: " + ipGeolocation.zip}`, //country  regionName city districtGeoCoordinates: `${ipGeolocation.lon} , ${ipGeolocation.lat}`, //(lon,lat)
-            GeoCoordinates: `${ipGeolocation.lon} , ${ipGeolocation.lat}`, ////(lon,lat)
+            GeoCoordinates:
+              coordinatesFormat === "latLon"
+                ? `${ipGeolocation.lat} , ${ipGeolocation.lon}` ////(lat,lon)
+                : `${ipGeolocation.lon} , ${ipGeolocation.lat}`, ////(lon,lat)
             Timezone: ipGeolocation.timezone,
             AS: ipGeolocation.as.substring(0, ipGeolocation.as.indexOf(" ")),
             ISP: ipGeolocation.isp,
@@ -71,7 +78,7 @@ export const searchIpGeolocation = (language: string, searchContent: string) => 
   return { ipGeolocation: ipGeolocation, loading: loading };
 };
 
-export const searchMyIpGeolocation = (language: string, showIPv6: boolean) => {
+export const searchMyIpGeolocation = (language: string, showIPv6: boolean, coordinatesFormat: "latLon" | "lonLat") => {
   const [ipGeolocation, setIpGeolocation] = useState<[string, string][]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -112,7 +119,10 @@ export const searchMyIpGeolocation = (language: string, showIPv6: boolean) => {
               Location: `${ipGeolocation.country}, ${ipGeolocation.regionName}, ${ipGeolocation.city}${
                 isEmpty(ipGeolocation.district) ? "" : ", " + ipGeolocation.district
               }${isEmpty(ipGeolocation.zip) ? "" : ", ZIP: " + ipGeolocation.zip}`, //country  regionName city districtGeoCoordinates: `${ipGeolocation.lon} , ${ipGeolocation.lat}`, //(lon,lat)
-              GeoCoordinates: `${ipGeolocation.lon} , ${ipGeolocation.lat}`, ////(lon,lat)
+              GeoCoordinates:
+                coordinatesFormat === "latLon"
+                  ? `${ipGeolocation.lat} , ${ipGeolocation.lon}` ////(lat,lon)
+                  : `${ipGeolocation.lon} , ${ipGeolocation.lat}`, ////(lon,lat)
               Timezone: ipGeolocation.timezone,
               AS: ipGeolocation.as.substring(0, ipGeolocation.as.indexOf(" ")),
               ISP: ipGeolocation.isp,

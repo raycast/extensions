@@ -19,7 +19,7 @@ export interface IPGeolocation {
 export interface IPGeolocationReadable {
   IP: string; //query
   Location: string; //country  regionName city district
-  GeoCoordinates: string; //(lat,lon)
+  GeoCoordinates: string; //(lat,lon) or (lon,lat)
   Timezone: string;
   AS: string;
   ISP: string; //isp

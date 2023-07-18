@@ -1,13 +1,8 @@
-import { getSelectedFinderItems, showToast, Toast } from "@raycast/api";
+import { showToast, Toast } from "@raycast/api";
 import { execSync } from "child_process";
-import { getSelectedImages } from "./utils";
+import { Direction, execSIPSCommandOnSVG, execSIPSCommandOnWebP, flipPDF, getSelectedImages } from "./utils";
 
 export default async function Command() {
-  try {
-    await getSelectedFinderItems();
-  } catch (error) {
-    console.log("woof");
-  }
   const selectedImages = await getSelectedImages();
 
   if (selectedImages.length === 0 || (selectedImages.length === 1 && selectedImages[0] === "")) {
@@ -15,17 +10,42 @@ export default async function Command() {
     return;
   }
 
+  const toast = await showToast({ title: "Flipping in progress...", style: Toast.Style.Animated });
+
   if (selectedImages) {
     const pluralized = `image${selectedImages.length === 1 ? "" : "s"}`;
     try {
       const pathStrings = '"' + selectedImages.join('" "') + '"';
-      execSync(`sips --flip vertical ${pathStrings}`);
-      await showToast({ title: `Flipped ${selectedImages.length.toString()} ${pluralized} vertically` });
+      if (
+        pathStrings.toLowerCase().includes("webp") ||
+        pathStrings.toLowerCase().includes("svg") ||
+        pathStrings.toLowerCase().includes("pdf")
+      ) {
+        // Handle each image individually
+        selectedImages.forEach((imgPath) => {
+          if (imgPath.toLowerCase().endsWith("webp")) {
+            // Convert to PNG, flip and restore to WebP
+            execSIPSCommandOnWebP("sips --flip vertical", imgPath);
+          } else if (imgPath.toLowerCase().endsWith("svg")) {
+            // Convert to PNG, flip, and restore to SVG
+            execSIPSCommandOnSVG("sips --flip vertical", imgPath);
+          } else if (imgPath.toLowerCase().endsWith("pdf")) {
+            // Flip each page of PDF
+            flipPDF(imgPath, Direction.VERTICAL);
+          } else {
+            // Run command as normal
+            execSync(`sips --flip vertical "${imgPath}"`);
+          }
+        });
+      } else {
+        // Flip all images at once
+        execSync(`sips --flip vertical ${pathStrings}`);
+      }
+      toast.title = `Flipped ${selectedImages.length.toString()} ${pluralized} vertically`;
+      toast.style = Toast.Style.Success;
     } catch {
-      await showToast({
-        title: `Failed to flip ${selectedImages.length.toString()} ${pluralized}`,
-        style: Toast.Style.Failure,
-      });
+      toast.title = `Failed to flip ${selectedImages.length.toString()} ${pluralized}`;
+      toast.style = Toast.Style.Failure;
     }
   }
 }

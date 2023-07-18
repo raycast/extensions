@@ -6,6 +6,7 @@ import { getPreferenceValues, openCommandPreferences, showHUD, showToast, Toast 
 import { runAppleScript } from "run-applescript";
 import { PREDICTIONS_URL } from "../constants";
 import isImage from "is-image";
+import os from "os";
 
 export const buildPredictionsList = (data?: Prediction[]) => {
   if (!data) return undefined;
@@ -89,4 +90,24 @@ export const showAuthError = (title?: string, message?: string) => {
       onAction: openCommandPreferences,
     },
   });
+};
+
+export const saveImage = async (url: string) => {
+  const predictionId = url.split("/").at(-2);
+  const downloadDir = `${os.homedir()}/Downloads/${predictionId}.png`;
+  const { hide } = await showToast(Toast.Style.Animated, "Saving image...");
+  const response = await fetch(url);
+
+  if (response.status !== 200) {
+    await showHUD(`❗Image save failed. Server responded with ${response.status}`);
+    hide();
+    return;
+  }
+  if (response.body !== null) {
+    response.body.pipe(fs.createWriteStream(downloadDir));
+    await showHUD(`✅ Image saved to ${downloadDir}!`);
+
+    hide();
+    return;
+  }
 };

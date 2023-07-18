@@ -1,5 +1,9 @@
-export const defaultEdgeProfilePath = ["Application Support", "Microsoft Edge"];
-export const defaultEdgeStatePath = ["Application Support", "Microsoft Edge", "Local State"];
+import { getPreferenceValues } from "@raycast/api";
+import { Preferences } from "./interfaces";
+const { useDev } = getPreferenceValues<Preferences>();
+export const applicationName = useDev ? "Microsoft Edge Dev" : "Microsoft Edge";
+export const defaultEdgeProfilePath = ["Application Support", applicationName];
+export const defaultEdgeStatePath = ["Application Support", applicationName, "Local State"];
 export const DEFAULT_EDGE_PROFILE_ID = "Default";
 export const EDGE_PROFILE_KEY = "EDGE_PROFILE_KEY";
 export const EDGE_PROFILES_KEY = "EDGE_PROFILES_KEY";

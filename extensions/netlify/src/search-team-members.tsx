@@ -187,7 +187,9 @@ const MemberActions = ({
   <ActionPanel>
     <ActionPanel.Section>
       <Action.OpenInBrowser
-        icon="netlify-icon.png"
+        icon={{
+          source: { light: 'netlify-icon.svg', dark: 'netlify-icon@dark.svg' },
+        }}
         title="Manage Membership"
         url={`https://app.netlify.com/teams/${teamSlug}/${page}`}
       />

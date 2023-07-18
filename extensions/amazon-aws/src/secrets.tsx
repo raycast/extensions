@@ -8,7 +8,7 @@ import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useCallback, useState } from "react";
 import AWSProfileDropdown from "./components/searchbar/aws-profile-dropdown";
-import { resourceToConsoleLink } from "./util";
+import { isReadyToFetch, resourceToConsoleLink } from "./util";
 
 export default function Secrets() {
   const [search, setSearch] = useState<string>("");
@@ -97,7 +97,7 @@ async function fetchSecrets(
   accSecrets?: SecretListEntry[]
 ): Promise<SecretListEntry[]> {
   if (search.length < 4) return [];
-  if (!process.env.AWS_PROFILE) return [];
+  if (!isReadyToFetch()) return [];
 
   const { NextToken, SecretList } = await new SecretsManagerClient({}).send(
     new ListSecretsCommand({

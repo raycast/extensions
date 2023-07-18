@@ -1,8 +1,8 @@
 /*
  * @author: tisfeng
  * @createTime: 2022-06-26 11:13
- * @lastEditor: Tisfeng
- * @lastEditTime: 2022-12-16 17:24
+ * @lastEditor: tisfeng
+ * @lastEditTime: 2023-03-16 23:10
  * @fileName: components.tsx
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -31,7 +31,7 @@ import { openInEudic } from "./scripts";
 import { getVolcanoWebTranslateURL } from "./translation/volcano/volcanoAPI";
 import {
   ActionListPanelProps,
-  DicionaryType,
+  DictionaryType,
   ListDisplayItem,
   QueryType,
   TranslationType,
@@ -40,9 +40,9 @@ import {
 import { checkIsLingueeListItem, checkIsTranslationType, checkIsYoudaoDictionaryListItem } from "./utils";
 
 const queryWebItemTypes = [
-  DicionaryType.Youdao,
-  DicionaryType.Linguee,
-  DicionaryType.Eudic,
+  DictionaryType.Youdao,
+  DictionaryType.Linguee,
+  DictionaryType.Eudic,
   TranslationType.DeepL,
   TranslationType.Google,
   TranslationType.Baidu,
@@ -256,7 +256,7 @@ function playSoundIcon(lightTintColor: string) {
  */
 export function getListItemIcon(listItem: ListDisplayItem): Image.ImageLike {
   const { displayType } = listItem;
-  // console.log(`---> get list type: ${displayType}`);
+  // console.warn(`---> get list type: ${displayType}`);
 
   let itemIcon: Image.ImageLike = {
     source: Icon.Dot,
@@ -383,7 +383,7 @@ export function getYoudaoListItemIcon(youdaoListType: YoudaoDictionaryListItemTy
 function getQueryTypeIcon(queryType: QueryType): Image.ImageLike {
   return {
     source: `${queryType}.png`,
-    mask: Image.Mask.RoundedRectangle,
+    // mask: Image.Mask.RoundedRectangle, // !!!: mask may cause rendering issue, like flickering.
   };
 }
 
@@ -453,15 +453,15 @@ function getWebQueryItem(queryType: QueryType, wordInfo: QueryWordInfo): WebQuer
       webUrl = getVolcanoWebTranslateURL(wordInfo);
       break;
     }
-    case DicionaryType.Linguee: {
+    case DictionaryType.Linguee: {
       webUrl = getLingueeWebDictionaryURL(wordInfo);
       break;
     }
-    case DicionaryType.Youdao: {
+    case DictionaryType.Youdao: {
       webUrl = getYoudaoWebDictionaryURL(wordInfo);
       break;
     }
-    case DicionaryType.Eudic: {
+    case DictionaryType.Eudic: {
       webUrl = getEudicWebDictionaryURL(wordInfo);
       break;
     }

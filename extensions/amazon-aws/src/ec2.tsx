@@ -2,7 +2,7 @@ import { DescribeInstancesCommand, EC2Client, Instance } from "@aws-sdk/client-e
 import { ActionPanel, List, Action, Icon } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import AWSProfileDropdown from "./components/searchbar/aws-profile-dropdown";
-import { resourceToConsoleLink } from "./util";
+import { isReadyToFetch, resourceToConsoleLink } from "./util";
 
 export default function EC2() {
   const { data: instances, error, isLoading, revalidate } = useCachedPromise(fetchEC2Instances);
@@ -52,7 +52,7 @@ function EC2Instance({ instance }: { instance: Instance }) {
 }
 
 async function fetchEC2Instances(token?: string, accInstances?: Instance[]): Promise<Instance[]> {
-  if (!process.env.AWS_PROFILE) return [];
+  if (!isReadyToFetch()) return [];
   const { NextToken, Reservations } = await new EC2Client({}).send(new DescribeInstancesCommand({ NextToken: token }));
   const instances = (Reservations || []).reduce<Instance[]>(
     (acc, reservation) => [...acc, ...(reservation.Instances || [])],

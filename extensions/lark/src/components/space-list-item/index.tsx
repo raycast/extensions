@@ -25,8 +25,8 @@ export const SpaceListItem: React.FC<SpaceListItemProps> = ({ node, owner, actio
     title = node.name;
     icon =
       node.type === NodeType.Box
-        ? `space-icons/type-${node.type}-${node.extra.subtype}.png`
-        : `space-icons/type-${node.type}.png`;
+        ? `space-icons/type-${node.type}-${node.extra.subtype}.svg`
+        : `space-icons/type-${node.type}.svg`;
     time = {
       short: timeSince(node.activity_time),
       full: `Last visit: ${timeFormat(node.activity_time)}`,
@@ -37,8 +37,8 @@ export const SpaceListItem: React.FC<SpaceListItemProps> = ({ node, owner, actio
     subtitle = node.preview;
     icon =
       node.type === NodeType.Box
-        ? `space-icons/type-${node.type}-${node.subtype}.png`
-        : `space-icons/type-${node.type}.png`;
+        ? `space-icons/type-${node.type}-${node.subtype}.svg`
+        : `space-icons/type-${node.type}.svg`;
     time = {
       short: timeSince(node.edit_time),
       full: `Last edit: ${timeFormat(node.edit_time)}`,

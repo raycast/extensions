@@ -10,6 +10,9 @@
     "Developer Tools"
   ],
   "license": "MIT",
+  "contributors": [
+    "lin"
+  ],
   "commands": [
     {
       "name": "index",
@@ -20,17 +23,17 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.38.1",
-    "@raycast/utils": "^1.1.0"
+    "@raycast/api": "^1.48.9",
+    "@raycast/utils": "^1.5.2"
   },
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "lucide-static": "^0.84.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@typescript-eslint/eslint-plugin": "^5.55.0",
+    "@typescript-eslint/parser": "^5.55.0",
+    "eslint": "^8.36.0",
+    "eslint-config-prettier": "^8.7.0",
+    "lucide-static": "^0.126.0",
+    "prettier": "^2.8.4",
+    "typescript": "^5.0.2"
   },
   "scripts": {
     "prebuild": "node prebuild.js",

@@ -5,6 +5,9 @@
   "description": "Quickly open Google Maps directions, for example from your current location to your home.",
   "icon": "google-maps-icon.png",
   "author": "ratoru",
+  "categories": [
+    "Web"
+  ],
   "contributors": [
     "lin"
   ],
@@ -66,18 +69,25 @@
           "value": "bicycling"
         }
       ]
+    },
+    {
+      "name": "useSelected",
+      "title": "Autofill Destination Field",
+      "label": "Always fill the destination using selected text, or clipboard.",
+      "description": "Check this box if you want to autofill form values using selected text, or clipboard if no text selected.",
+      "type": "checkbox",
+      "required": false,
+      "default": false
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.39.1"
+    "@raycast/api": "^1.48.8"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
+    "@raycast/eslint-config": "^1.0.5",
+    "@types/node": "^18.8.3",
     "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.33.1",
-    "@typescript-eslint/parser": "^5.33.1",
     "eslint": "^8.22.0",
-    "eslint-config-prettier": "^8.5.0",
     "typescript": "^4.7.4"
   },
   "scripts": {

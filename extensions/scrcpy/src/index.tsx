@@ -6,6 +6,7 @@ import { getAdbDir, getScrcpyDir } from "./utils";
 type Values = {
   device: string;
   size: string;
+  disableAudio: boolean;
   turnScreenOff: boolean;
   stayAwake: boolean;
   hidKeyboard: boolean;
@@ -22,6 +23,7 @@ export default function Command() {
         ${values["stayAwake"] ? "--stay-awake" : ""} \
         ${values["hidKeyboard"] ? "--hid-keyboard" : ""} \
         ${values["hidMouse"] ? "--hid-mouse" : ""} \
+        ${values["disableAudio"] ? "--no-audio" : ""} \
         -m ${values["size"]} -s ${values["device"]}`,
       {
         env: {
@@ -62,6 +64,7 @@ export default function Command() {
       <Form.Separator />
 
       <Form.Description text="Advanced Options" />
+      <Form.Checkbox id="disableAudio" defaultValue={true} label="Disable audio" storeValue />
       <Form.Checkbox id="turnScreenOff" defaultValue={true} label="Turn screen off" storeValue />
       <Form.Checkbox id="stayAwake" defaultValue={true} label="Stay awake" storeValue />
       <Form.Checkbox id="hidKeyboard" defaultValue={true} label="HID keyboard (USB only)" storeValue />

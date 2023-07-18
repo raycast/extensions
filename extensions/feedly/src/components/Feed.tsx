@@ -4,11 +4,14 @@ import {
   Detail,
   getPreferenceValues,
   Icon,
-  List
+  List,
+  showToast,
+  Toast
 } from '@raycast/api';
 import { useFetch } from '@raycast/utils';
 import { NodeHtmlMarkdown } from 'node-html-markdown';
 import { Feed as IFeed } from '../types/feed.types';
+import fetch from 'node-fetch';
 
 const Feed = ({ id, title }: { id: IFeed['id']; title: IFeed['title'] }) => {
   const { isLoading, data } = useFetch<IFeed>(
@@ -20,6 +23,41 @@ const Feed = ({ id, title }: { id: IFeed['id']; title: IFeed['title'] }) => {
       }
     }
   );
+
+  const handleMarkAsSaved = async (id: string) => {
+    const toast = await showToast(
+      Toast.Style.Animated,
+      "'Saving to Read Later'"
+    );
+    fetch(`https://cloud.feedly.com/v3/markers`, {
+      method: 'POST',
+      headers: {
+        Authorization: getPreferenceValues().feedlyAccessToken,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        action: 'markAsSaved',
+        type: 'entries',
+        entryIds: [id]
+      })
+    })
+      .then((res) => {
+        if (res.ok) {
+          toast.title = 'Success';
+          toast.style = Toast.Style.Success;
+          toast.message = 'Saved to Read Later';
+        } else {
+          toast.title = 'Error';
+          toast.style = Toast.Style.Failure;
+          toast.message = 'Something went wrong';
+        }
+      })
+      .catch((error) => {
+        toast.title = 'Error';
+        toast.style = Toast.Style.Failure;
+        toast.message = error.message;
+      });
+  };
 
   return (
     <List
@@ -44,7 +82,7 @@ const Feed = ({ id, title }: { id: IFeed['id']; title: IFeed['title'] }) => {
                   text: item?.unread ? 'Unread' : null
                 }
               ]}
-              icon={{ source: item.visual?.edgeCacheUrl ?? Icon.Person }}
+              icon={{ source: item.visual?.edgeCacheUrl ?? Icon.Image }}
               actions={
                 <ActionPanel>
                   <Action.Push
@@ -58,12 +96,24 @@ const Feed = ({ id, title }: { id: IFeed['id']; title: IFeed['title'] }) => {
                         actions={
                           <ActionPanel>
                             <Action.OpenInBrowser url={item.canonicalUrl} />
+                            <Action
+                              title="Save to Read Later"
+                              icon={Icon.Bookmark}
+                              shortcut={{ modifiers: ['cmd'], key: 's' }}
+                              onAction={() => handleMarkAsSaved(item.id)}
+                            />
                           </ActionPanel>
                         }
                       />
                     }
                   />
                   <Action.OpenInBrowser url={item.canonicalUrl} />
+                  <Action
+                    title="Save to Read Later"
+                    icon={Icon.Bookmark}
+                    shortcut={{ modifiers: ['cmd'], key: 's' }}
+                    onAction={() => handleMarkAsSaved(item.id)}
+                  />
                 </ActionPanel>
               }
             />

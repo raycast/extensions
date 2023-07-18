@@ -3,6 +3,7 @@ import { Image } from "@raycast/api";
 import { getFavicon } from "@raycast/utils";
 
 export interface Preferences {
+  readonly useDev: boolean;
   readonly useOriginalFavicon: boolean;
   readonly openTabInProfile: SettingsProfileOpenBehaviour;
 }

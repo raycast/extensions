@@ -19,6 +19,13 @@ export function getExportResponse(response: unknown) {
   );
 }
 
+export function isReadyToFetch() {
+  const isProfileSelected = !!process.env.AWS_PROFILE;
+  const isAwsVaultSessionActive = !!process.env.AWS_VAULT;
+
+  return isProfileSelected || isAwsVaultSessionActive;
+}
+
 export function resourceToConsoleLink(resourceId: string | undefined, resourceType: string) {
   const { AWS_REGION } = process.env;
 

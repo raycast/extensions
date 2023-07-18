@@ -1,5 +1,9 @@
 # Browser History Changelog
 
+## [Enhancement] - 2023-04-19
+
+- Make it possible to force historic links to open in the originating browser as opposed to forcing either the default or a specific one.
+
 ## [Add Arc, Opera, Iridium and Orion browser, custom profile support & custom default open in browser] - 2022-12-16
 
 - Added Arc history search support.

@@ -1,5 +1,5 @@
 ---
-description: The Raycast CLI allows you to build, develop and lint your extension.
+description: The Raycast CLI allows you to build, develop, and lint your extension.
 ---
 
 # CLI
@@ -35,6 +35,8 @@ You can use `npx ray build -e dist` to validate that your extension builds prope
 
 `npx ray migrate` [migrates](../../migration/README.md) your extension to the latest version of the `@raycast/api`.
 
-## Publish (For Teams Only)
+## Publish
 
-`npx ray publish` verifies, builds and publishes an extension to an organization store. This command is only availble to users that are part of an organization. Learn more about it [here](../../teams/getting-started.md).
+`npx ray publish` verifies, builds, and publishes an extension.
+
+If the extension is private (eg. has an `owner` and no public `access`), it will be published to the organization's private store. This command is only available to users that are part of that organization. Learn more about it [here](../../teams/getting-started.md).

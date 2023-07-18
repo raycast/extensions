@@ -8,14 +8,6 @@ export function getPasswordGeneratingArgs(options: PasswordGeneratorOptions): st
   return Object.entries(options).flatMap(([arg, value]) => (value ? [`--${arg}`, value] : []));
 }
 
-export async function getPasswordGeneratorOptions() {
-  const storedOptions = await LocalStorage.getItem<string>(LOCAL_STORAGE_KEY.PASSWORD_OPTIONS);
-  return {
-    ...DEFAULT_PASSWORD_OPTIONS,
-    ...(storedOptions ? JSON.parse(storedOptions) : {}),
-  } as PasswordGeneratorOptions;
-}
-
 export async function hashMasterPasswordForReprompting(password: string): Promise<string> {
   return new Promise((resolve, reject) => {
     pbkdf2(password, REPROMPT_HASH_SALT, 100000, 64, "sha512", (error, hashed) => {
@@ -27,4 +19,12 @@ export async function hashMasterPasswordForReprompting(password: string): Promis
       resolve(hashed.toString("hex"));
     });
   });
+}
+
+export async function getPasswordGeneratorOptions() {
+  const storedOptions = await LocalStorage.getItem<string>(LOCAL_STORAGE_KEY.PASSWORD_OPTIONS);
+  return {
+    ...DEFAULT_PASSWORD_OPTIONS,
+    ...(storedOptions ? JSON.parse(storedOptions) : {}),
+  } as PasswordGeneratorOptions;
 }

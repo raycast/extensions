@@ -1,5 +1,6 @@
 export type Preferences = {
   apiKey: string;
+  myPipelines: boolean;
 };
 
 export enum WorkflowStatus {

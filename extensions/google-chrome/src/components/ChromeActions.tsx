@@ -84,8 +84,16 @@ function HistoryItemActions({
 
 function GoToTab(props: { tab: Tab }) {
   async function handleAction() {
-    await setActiveTab(props.tab);
-    await closeMainWindow();
+    try {
+      await setActiveTab(props.tab);
+      await closeMainWindow();
+    } catch (e) {
+      if (e instanceof Error) {
+        throw new Error("Issue with tab: '" + props.tab.sourceLine + "'\n" + e.message);
+      } else {
+        throw e;
+      }
+    }
   }
 
   return <ActionPanel.Item title="Open Tab" icon={{ source: Icon.Eye }} onAction={handleAction} />;

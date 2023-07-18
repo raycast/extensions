@@ -1,9 +1,7 @@
 import { runAppleScript } from "run-applescript";
 import { closeMainWindow, popToRoot } from "@raycast/api";
 import { SettingsProfileOpenBehaviour, Tab } from "../interfaces";
-import { NOT_INSTALLED_MESSAGE } from "../constants";
-
-const applicationName = "Microsoft Edge";
+import { NOT_INSTALLED_MESSAGE, applicationName } from "../constants";
 
 export async function getOpenTabs(useOriginalFavicon: boolean): Promise<Tab[]> {
   const faviconFormula = useOriginalFavicon

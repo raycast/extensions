@@ -1,32 +1,43 @@
-import { Color, getPreferenceValues, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Color, getPreferenceValues, LaunchProps, List, showToast, Toast } from "@raycast/api";
 import { formatDistanceToNowStrict } from "date-fns";
 import { useEffect, useState } from "react";
 import { Note } from "./bear-db";
 import { useBearDb } from "./hooks";
-import NoteActions from "./note-actions";
+import NoteActions, { createBasicNote } from "./note-actions";
+import TagsDropdown from "./search-dropdown";
 
-export default function SearchNotes() {
-  const [searchQuery, setSearchQuery] = useState<string>("");
+interface SearchNotesArguments {
+  searchQuery?: string;
+}
+export default function SearchNotes(props: LaunchProps<{ arguments: SearchNotesArguments }>) {
+  const { searchQuery: initialSearchQuery } = props.arguments;
+  const [searchQuery, setSearchQuery] = useState(initialSearchQuery ?? "");
   const [db, error] = useBearDb();
   const [notes, setNotes] = useState<Note[]>();
+  const [selectedTag, setSelectedTag] = useState<string | null>(null);
 
   useEffect(() => {
     if (db != null) {
-      setNotes(db.getNotes(searchQuery));
+      setNotes(db.getNotes(searchQuery, selectedTag ?? undefined));
     }
-  }, [db, searchQuery]);
+  }, [db, searchQuery, selectedTag]);
 
   if (error) {
     showToast(Toast.Style.Failure, "Something went wrong", error.message);
   }
 
   const showDetail = (notes ?? []).length > 0 && getPreferenceValues().showPreviewInListView;
+  const handleTagChange = (tag: string | null) => setSelectedTag(tag);
+
   return (
     <List
       isLoading={notes == undefined}
       onSearchTextChange={setSearchQuery}
+      searchText={searchQuery}
       searchBarPlaceholder="Search note text or id ..."
       isShowingDetail={showDetail}
+      throttle={true}
+      searchBarAccessory={<TagsDropdown onTagChange={handleTagChange} />}
     >
       {notes?.map((note) => (
         <List.Item
@@ -36,8 +47,15 @@ export default function SearchNotes() {
           icon={{ source: "command-icon.png" }}
           keywords={[note.id]}
           actions={<NoteActions isNotePreview={false} note={note} />}
-          accessoryTitle={
-            showDetail ? undefined : `edited ${formatDistanceToNowStrict(note.modifiedAt, { addSuffix: true })}`
+          accessories={
+            showDetail
+              ? undefined
+              : [
+                  {
+                    date: note.modifiedAt,
+                    tooltip: `Last modified ${formatDistanceToNowStrict(note.modifiedAt, { addSuffix: true })}`,
+                  },
+                ]
           }
           detail={
             <List.Item.Detail
@@ -47,6 +65,21 @@ export default function SearchNotes() {
           }
         />
       ))}
+      {notes?.length === 0 && (
+        <List.Item
+          title={searchQuery}
+          icon={{ source: "command-icon.png" }}
+          actions={
+            <ActionPanel>
+              <Action
+                title="Create new note"
+                shortcut={{ modifiers: ["cmd"], key: "n" }}
+                onAction={() => createBasicNote(searchQuery)}
+              />
+            </ActionPanel>
+          }
+        />
+      )}
     </List>
   );
 }

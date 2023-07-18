@@ -18,6 +18,7 @@ export interface SearchResult<T> {
   readonly errorView?: ReactNode;
   readonly data?: T[];
   readonly revalidate?: (profileId: string) => void;
+  readonly profile: BraveProfile;
 }
 
 export interface HistoryEntry {

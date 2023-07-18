@@ -254,6 +254,16 @@ function webUrl(project: Project, partial: string) {
   return getGitLabGQL().urlJoin(`${project.fullPath}/${partial}`);
 }
 
+export function OpenProjectWikiInBrowserAction(props: { project: Project }): JSX.Element {
+  return (
+    <GitLabOpenInBrowserAction
+      title="Wiki"
+      icon={{ source: GitLabIcons.wiki, tintColor: Color.PrimaryText }}
+      url={webUrl(props.project, "-/wikis")}
+    />
+  );
+}
+
 export function OpenProjectLabelsInBrowserAction(props: { project: Project }): JSX.Element {
   return (
     <GitLabOpenInBrowserAction

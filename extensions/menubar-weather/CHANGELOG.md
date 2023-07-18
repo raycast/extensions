@@ -1,5 +1,22 @@
 # Menubar Weather Changelog
 
+## [Ass menubar info configutation] - 2023-07-11
+
+- You can choose temperature type, UVI, pressure, humidity and rain to display in the menubar.
+
+## [Add UV Index] - 2023-07-03
+
+- UV Index (UVI) is now included in the current weather and forecast
+- UVI can be disabled in the Preferences
+
+## [Fix bug] - 2023-06-19
+
+- Fix a bug that caused the extension to crash if cached data couldn't be parsed properly.
+
+## [Update UI] - 2023-03-29
+
+- Add wind direction display
+
 ## [Fix bug] - 2022-12-13
 
 - Fix the bug of pop-up Toast error when refreshing in the background

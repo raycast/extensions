@@ -1,7 +1,9 @@
 import { Clipboard, getSelectedText } from "@raycast/api";
 
 /**
- * @returns Get selected text, if not get clipboard text
+ * Gets selected text. If no text selected, gets clipboard text.
+ *
+ * @returns selected text, or otherwise clipboard text
  */
 export const fetchItemInput = async () => {
   return getSelectedText()
