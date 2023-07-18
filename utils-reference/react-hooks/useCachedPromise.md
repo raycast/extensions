@@ -65,7 +65,7 @@ Returns an object with the [AsyncState](#asyncstate) corresponding to the execut
 import { Detail, ActionPanel, Action } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 
-const Demo = () => {
+export default function Command() {
   const abortable = useRef<AbortController>();
   const { isLoading, data, revalidate } = useCachedPromise(
     async (url: string) => {
@@ -90,7 +90,7 @@ const Demo = () => {
       }
     />
   );
-};
+}
 ```
 
 ## Promise Argument dependent on List search text
@@ -104,7 +104,7 @@ import { useState } from "react";
 import { List, ActionPanel, Action } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 
-const Demo = () => {
+export default function Command() {
   const [searchText, setSearchText] = useState("");
   const { isLoading, data } = useCachedPromise(
     async (url: string) => {
@@ -126,7 +126,7 @@ const Demo = () => {
       ))}
     </List>
   );
-};
+}
 ```
 
 ## Mutation and Optimistic Updates
@@ -141,7 +141,7 @@ When doing so, you can specify a `rollbackOnError` function to mutate back the d
 import { Detail, ActionPanel, Action, showToast, Toast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 
-const Demo = () => {
+export default function Command() {
   const { isLoading, data, mutate } = useCachedPromise(
     async (url: string) => {
       const response = await fetch(url);
@@ -188,7 +188,7 @@ const Demo = () => {
       }
     />
   );
-};
+}
 ```
 
 ## Types

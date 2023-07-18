@@ -60,7 +60,7 @@ Returns an object with the [AsyncState](#asyncstate) corresponding to the execut
 import { Detail, ActionPanel, Action } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 
-const Demo = () => {
+export default function Command() {
   const { isLoading, data, revalidate } = useFetch("https://api.example");
 
   return (
@@ -74,7 +74,7 @@ const Demo = () => {
       }
     />
   );
-};
+}
 ```
 
 ## Argument dependent on List search text
@@ -88,7 +88,7 @@ import { useState } from "react";
 import { List, ActionPanel, Action } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 
-const Demo = () => {
+export default function Command() {
   const [searchText, setSearchText] = useState("");
   const { isLoading, data } = useFetch(`https://api.example?q=${searchText}`, {
     // to make sure the screen isn't flickering when the searchText changes
@@ -102,7 +102,7 @@ const Demo = () => {
       ))}
     </List>
   );
-};
+}
 ```
 
 ## Mutation and Optimistic Updates
@@ -117,7 +117,7 @@ When doing so, you can specify a `rollbackOnError` function to mutate back the d
 import { Detail, ActionPanel, Action, showToast, Toast } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 
-const Demo = () => {
+export default function Command() {
   const { isLoading, data, mutate } = useFetch("https://api.example");
 
   const appendFoo = async () => {
@@ -157,7 +157,7 @@ const Demo = () => {
       }
     />
   );
-};
+}
 ```
 
 ## Types
