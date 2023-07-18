@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 import { getErrorMessage } from "./utils";
 import { clearSearchBar } from "@raycast/api";
 import { Connection } from "home-assistant-js-websocket";
+import { getTranslation } from "./lib/translation";
 
 interface PlainSpeech {
   speech: string;
@@ -102,8 +103,13 @@ async function getHAWSCurrentUser(): Promise<HAUser | undefined> {
   return r;
 }
 
-function getInitialConversations(): ConversationContent[] {
-  return [{ text: "How can I assist?", author: Author.Assist, date: new Date() }];
+function getInitialConversations(language: string): ConversationContent[] {
+  const ts = getTranslation({
+    language: language,
+    id: "ui.dialogs.voice_command.how_can_i_help",
+    fallback: "How can I assist",
+  });
+  return [{ text: ts, author: Author.Assist, date: new Date() }];
 }
 
 function PipelinesDropdownList(props: {
@@ -122,7 +128,9 @@ function PipelinesDropdownList(props: {
   };
   return (
     <List.Dropdown tooltip="Assist" onChange={onAction}>
-      {p?.pipelines?.map((a) => <List.Dropdown.Item key={a.id} title={a.name} value={a.id} />)}
+      {p?.pipelines?.map((a) => (
+        <List.Dropdown.Item key={a.id} title={`${a.name} (${a.conversation_language})`} value={a.id} />
+      ))}
     </List.Dropdown>
   );
 }
@@ -131,7 +139,7 @@ export default function AssistCommand(): JSX.Element {
   const [searchText, setSearchText] = useState<string>("");
   const { connection, isLoading: isLoadingConnection } = useHAWSConnection();
   const { pipelines, isLoading: isLoadingPipeline } = useAssistPipelines(connection);
-  const [conversations, setConversations] = useState<ConversationContent[]>(getInitialConversations());
+  const [conversations, setConversations] = useState<ConversationContent[]>();
   const { data: currentUser } = useCachedPromise(getHAWSCurrentUser);
   const [selectedPipeline, setSelectedPipeline] = useState<HAAssistPipeline>();
   const process = async () => {
@@ -153,15 +161,16 @@ export default function AssistCommand(): JSX.Element {
         language: selectedPipeline?.language,
       });
       clearSearchBar();
+      const convs = conversations || [];
       const assistAnswer = r.response?.speech?.plain?.speech;
       if (assistAnswer) {
         setConversations([
           { text: assistAnswer, author: Author.Assist, date: new Date() },
           { text: searchText, author: Author.Me, date: new Date() },
-          ...conversations,
+          ...convs,
         ]);
       } else {
-        setConversations([{ text: searchText, author: Author.Me, date: new Date() }, ...conversations]);
+        setConversations([{ text: searchText, author: Author.Me, date: new Date() }, ...convs]);
       }
     } catch (error) {
       showToast({
@@ -179,42 +188,52 @@ export default function AssistCommand(): JSX.Element {
     }
     return { source: "person.png", tintColor: Color.PrimaryText, mask: Image.Mask.Circle };
   };
-  const isLoading = isLoadingConnection || isLoadingPipeline;
+  const isLoading = isLoadingConnection || isLoadingPipeline || !conversations;
   return (
     <List
       searchBarPlaceholder="Type your Request and Press Enter"
       isLoading={isLoading}
       onSearchTextChange={setSearchText}
-      searchBarAccessory={<PipelinesDropdownList pipelines={pipelines} onChange={setSelectedPipeline} />}
+      searchBarAccessory={
+        <PipelinesDropdownList
+          pipelines={pipelines}
+          onChange={(newLanguage: HAAssistPipeline | undefined) => {
+            setSelectedPipeline(newLanguage);
+            setConversations(newLanguage ? getInitialConversations(newLanguage.conversation_language) : []);
+          }}
+        />
+      }
     >
-      <List.Section title="Conversation">
-        {conversations.map((c, i) => (
-          <List.Item
-            key={i.toString()}
-            title={c.text}
-            icon={{
-              value: c.author === Author.Assist ? "home-assistant.png" : userPicture(),
-              tooltip: c.author === Author.Assist ? "Assist" : currentUser?.name ?? "",
-            }}
-            accessories={[{ date: c.date }]}
-            actions={
-              <ActionPanel>
-                <ActionPanel.Section>
-                  <Action onAction={() => process()} title="Send" icon={Icon.Terminal} />
-                  <Action.CopyToClipboard title="Copy Text to Clipboard" content={c.text} />
-                </ActionPanel.Section>
-                <ActionPanel.Section>
-                  <Action
-                    title="Clear Conversation"
-                    icon={Icon.DeleteDocument}
-                    onAction={() => setConversations(getInitialConversations())}
-                  />
-                </ActionPanel.Section>
-              </ActionPanel>
-            }
-          />
-        ))}
-      </List.Section>
+      {selectedPipeline && (
+        <List.Section title="Conversation">
+          {conversations?.map((c, i) => (
+            <List.Item
+              key={i.toString()}
+              title={c.text}
+              icon={{
+                value: c.author === Author.Assist ? "home-assistant.png" : userPicture(),
+                tooltip: c.author === Author.Assist ? "Assist" : currentUser?.name ?? "",
+              }}
+              accessories={[{ date: c.date }]}
+              actions={
+                <ActionPanel>
+                  <ActionPanel.Section>
+                    <Action onAction={() => process()} title="Send" icon={Icon.Terminal} />
+                    <Action.CopyToClipboard title="Copy Text to Clipboard" content={c.text} />
+                  </ActionPanel.Section>
+                  <ActionPanel.Section>
+                    <Action
+                      title="Clear Conversation"
+                      icon={Icon.DeleteDocument}
+                      onAction={() => setConversations(getInitialConversations(selectedPipeline.conversation_language))}
+                    />
+                  </ActionPanel.Section>
+                </ActionPanel>
+              }
+            />
+          ))}
+        </List.Section>
+      )}
     </List>
   );
 }
