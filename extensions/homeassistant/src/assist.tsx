@@ -227,6 +227,7 @@ export default function AssistCommand(): JSX.Element {
                     <Action
                       title="Clear Conversation"
                       icon={Icon.DeleteDocument}
+                      shortcut={{ modifiers: ["opt"], key: "x" }}
                       onAction={() => setConversations(getInitialConversations(selectedPipeline.conversation_language))}
                     />
                   </ActionPanel.Section>
