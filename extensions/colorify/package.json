@@ -23,6 +23,7 @@
     "@raycast/api": "^1.55.1",
     "file-type": "^18.5.0",
     "get-pixels": "^3.3.3",
+    "image-size": "^1.0.2",
     "jimp": "^0.22.8"
   },
   "devDependencies": {
