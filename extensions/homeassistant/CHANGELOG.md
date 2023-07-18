@@ -3,6 +3,7 @@
 ## [Modernize] - 2023-07-16
 
 - Add support for switching assist pipelines
+- Persistent Notifications can now be dismissed in the menu bar
 
 ## [Fix] - 2023-06-25
 
