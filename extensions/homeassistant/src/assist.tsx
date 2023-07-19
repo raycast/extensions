@@ -190,7 +190,7 @@ export default function AssistCommand(): JSX.Element {
     }
     return { source: "person.png", tintColor: Color.PrimaryText, mask: Image.Mask.Circle };
   };
-  const isLoading = isLoadingPipeline || !conversations;
+  const isLoading = !error ? isLoadingPipeline || !conversations : false;
   return (
     <List
       searchBarPlaceholder="Type your Request and Press Enter"
