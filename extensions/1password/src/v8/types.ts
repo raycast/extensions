@@ -59,3 +59,5 @@ export type User = {
   user_uuid: string;
   account_uuid: string;
 };
+
+export type ChangeCurrentAccount = (newValue: string) => void;

@@ -2,24 +2,27 @@ import { Color, Icon, List } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 
 import { Categories, DEFAULT_CATEGORY } from "./Categories";
-import { Item, User } from "../types";
-import { getCategoryIcon, ITEMS_CACHE_NAME, ACCOUNT_CACHE_NAME, useOp, actionsForItem } from "../utils";
+import { ChangeCurrentAccount, Item, User } from "../types";
+import { getCategoryIcon, useOp, actionsForItem, cacheKeyForItemsAccountId } from "../utils";
 import { Guide } from "./Guide";
 import { ItemActionPanel } from "./ItemActionPanel";
 
-export function Items() {
+export function Items({
+  accountId,
+  account,
+  changeCurrentAccount,
+}: {
+  accountId: string;
+  account: User;
+  changeCurrentAccount: ChangeCurrentAccount;
+}) {
   const [category, setCategory] = useCachedState<string>("selected_category", DEFAULT_CATEGORY);
 
-  const {
-    data: account,
-    error: accountError,
-    isLoading: accountIsLoading,
-  } = useOp<User>(["whoami"], ACCOUNT_CACHE_NAME);
   const {
     data: items,
     error: itemsError,
     isLoading: itemsIsLoading,
-  } = useOp<Item[]>(["item", "list", "--long"], ITEMS_CACHE_NAME);
+  } = useOp<Item[]>(accountId, ["item", "list", "--long"], cacheKeyForItemsAccountId(accountId));
 
   const categoryItems =
     category === DEFAULT_CATEGORY
@@ -29,11 +32,12 @@ export function Items() {
     category !== newCategory && setCategory(newCategory);
   };
 
-  if (itemsError || accountError) return <Guide />;
+  if (itemsError) return <Guide />;
   return (
     <List
-      searchBarAccessory={<Categories onCategoryChange={onCategoryChange} />}
-      isLoading={itemsIsLoading || accountIsLoading}
+      navigationTitle={`${account.url}`}
+      searchBarAccessory={<Categories accountId={accountId} onCategoryChange={onCategoryChange} />}
+      isLoading={itemsIsLoading}
     >
       <List.EmptyView
         title="No items found"
@@ -60,7 +64,14 @@ export function Items() {
                     : {},
                   { text: item.vault?.name },
                 ]}
-                actions={<ItemActionPanel account={account!} item={item} actions={actionsForItem(item)} />}
+                actions={
+                  <ItemActionPanel
+                    account={account}
+                    item={item}
+                    actions={actionsForItem(item)}
+                    changeCurrentAccount={changeCurrentAccount}
+                  />
+                }
               />
             ))}
       </List.Section>

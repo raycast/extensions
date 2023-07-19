@@ -6,8 +6,14 @@ import { CATEGORIES_CACHE_NAME, getCategoryIcon, useOp } from "../utils";
 
 export const DEFAULT_CATEGORY = "null";
 
-export function Categories({ onCategoryChange }: { onCategoryChange: (newCategory: string) => void }) {
-  const { data, error, isLoading } = useOp<Category[]>(["item", "template", "list"], CATEGORIES_CACHE_NAME);
+export function Categories({
+  accountId,
+  onCategoryChange,
+}: {
+  accountId: string;
+  onCategoryChange: (newCategory: string) => void;
+}) {
+  const { data, error, isLoading } = useOp<Category[]>(accountId, ["item", "template", "list"], CATEGORIES_CACHE_NAME);
 
   if (error) return <Guide />;
   return !isLoading ? (

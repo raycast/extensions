@@ -6,7 +6,12 @@ import { useEffect, useState } from "react";
 
 import { CategoryName, Item } from "./types";
 
-export type ActionID = "open-in-1password" | "open-in-browser" | "copy-username" | "copy-password";
+export type ActionID =
+  | "open-in-1password"
+  | "open-in-browser"
+  | "copy-username"
+  | "copy-password"
+  | "reset-current-account";
 
 export type Preferences = {
   cliPath: string;
@@ -22,8 +27,18 @@ const preferences = getPreferenceValues<Preferences>();
 export const CLI_PATH =
   preferences.cliPath || ["/usr/local/bin/op", "/opt/homebrew/bin/op"].find((path) => existsSync(path));
 export const CATEGORIES_CACHE_NAME = "@categories";
-export const ITEMS_CACHE_NAME = "@items";
-export const ACCOUNT_CACHE_NAME = "@account";
+const ITEMS_CACHE_PREFIX = "@items";
+const ACCOUNT_CACHE_PREFIX = "@account";
+export const ACCOUNTS_CACHE_NAME = "@accounts";
+export const CURRENT_ACCOUNT_CACHE_NAME = "@current_account";
+
+export function cacheKeyForAccountId(accountId: string) {
+  return `${ACCOUNT_CACHE_PREFIX}/${accountId}`;
+}
+
+export function cacheKeyForItemsAccountId(accountId: string) {
+  return `${ITEMS_CACHE_PREFIX}/${accountId}`;
+}
 
 export function hrefToOpenInBrowser(item: Item): string | undefined {
   if (item.category === "LOGIN") {
@@ -35,7 +50,13 @@ export function hrefToOpenInBrowser(item: Item): string | undefined {
 
 export function actionsForItem(item: Item): ActionID[] {
   // all actions in the default order
-  const defaultActions: ActionID[] = ["open-in-1password", "open-in-browser", "copy-username", "copy-password"];
+  const defaultActions: ActionID[] = [
+    "open-in-1password",
+    "open-in-browser",
+    "copy-username",
+    "copy-password",
+    "reset-current-account",
+  ];
   // prioritize primary and secondary actions, then append the rest and remove duplicates
   const deduplicatedActions = [
     ...new Set<ActionID>([preferences.primaryAction, preferences.secondaryAction, ...defaultActions]),
@@ -47,7 +68,7 @@ export function actionsForItem(item: Item): ActionID[] {
     case "PASSWORD":
       return deduplicatedActions.filter((action) => action !== "copy-username");
     default:
-      return ["open-in-1password"];
+      return ["open-in-1password", "reset-current-account"];
   }
 }
 
@@ -59,7 +80,7 @@ export function op(args: string[]) {
   throw Error("1Password CLI is not found!");
 }
 
-export function useOp<T>(args: string[], cacheKey?: string) {
+export function useOp<T>(accountId: string, args: string[], cacheKey?: string) {
   const [data, setData] = useState<T>();
   const [error, setError] = useState<unknown>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -71,7 +92,7 @@ export function useOp<T>(args: string[], cacheKey?: string) {
     }
 
     try {
-      const items = op([...args, "--format=json"]);
+      const items = op([...args, "--format=json", `--account=${accountId}`]);
 
       if (cacheKey) {
         cache.set(cacheKey, items);

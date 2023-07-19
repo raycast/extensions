@@ -1,10 +1,20 @@
 import { Action, ActionPanel, Icon } from "@raycast/api";
 import { CopyToClipboard } from "./ActionCopyToClipboard";
-import { Item, User } from "../types";
+import { ChangeCurrentAccount, Item, User } from "../types";
 import { ActionID, hrefToOpenInBrowser } from "../utils";
 import resetCache from "../../reset-cache";
 
-export function ItemActionPanel({ account, item, actions }: { account: User; item: Item; actions: ActionID[] }) {
+export function ItemActionPanel({
+  account,
+  item,
+  actions,
+  changeCurrentAccount,
+}: {
+  account: User;
+  item: Item;
+  actions: ActionID[];
+  changeCurrentAccount: ChangeCurrentAccount;
+}) {
   return (
     <ActionPanel>
       {actions.map((actionId) => {
@@ -17,6 +27,8 @@ export function ItemActionPanel({ account, item, actions }: { account: User; ite
             return CopyUsername(item);
           case "copy-password":
             return CopyPassword(item);
+          case "reset-current-account":
+            return ResetCurrentAccount(changeCurrentAccount);
         }
       })}
       <ActionPanel.Section>
@@ -74,6 +86,20 @@ function CopyPassword(item: Item) {
       vault_id={item.vault.id}
       field="password"
       shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
+    />
+  );
+}
+
+function ResetCurrentAccount(changeCurrentAccount: ChangeCurrentAccount) {
+  return (
+    <Action
+      key="reset-current-account"
+      title="Switch Account"
+      icon={Icon.Switch}
+      shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
+      onAction={() => {
+        changeCurrentAccount("");
+      }}
     />
   );
 }
