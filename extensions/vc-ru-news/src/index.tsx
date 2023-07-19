@@ -38,11 +38,11 @@ export default function Command() {
       searchBarAccessory={
         <List.Dropdown
           tooltip="Select a category"
-          defaultValue={"Popular"}
+          defaultValue={"Популярное"}
           storeValue
           onChange={(newValue) => setRssLink(newValue as string)}
         >
-          <List.Dropdown.Item title={"Popular"} value={"https://vc.ru/rss?ref=vc.ru"} />
+          <List.Dropdown.Item title={"Популярное"} value={"https://vc.ru/rss?ref=vc.ru"} />
         </List.Dropdown>
       }
     >
