@@ -14,8 +14,23 @@ const WHOIS = (props: LaunchProps<{ arguments: Props }>) => {
     fetcher();
   }, []);
 
+  function getCleanDomain(rawDomain) {
+    try {
+      // Assume "http://" if no protocol is provided in rawDomain
+      if (!rawDomain.match(/^[a-zA-Z]+:\/\//)) {
+        rawDomain = 'http://' + rawDomain;
+      }
+      const url = new URL(rawDomain);
+      return url.hostname;
+    } catch (error) {
+      console.log("Failed to parse domain:", error);
+      return rawDomain;
+    }
+  }
+  
   const fetcher = async () => {
     let markdown = `# WHOIS 🌐\n`;
+    domain = getCleanDomain(domain);
     const url = "https://scraper.run/whois?addr=" + domain;
 
     try {
