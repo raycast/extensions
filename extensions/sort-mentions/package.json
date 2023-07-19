@@ -73,21 +73,12 @@
     },
     {
       "name": "should_play_sound_on_success",
-      "type": "dropdown",
-      "default": "",
+      "type": "checkbox",
       "required": false,
-      "title": "Play Sound on success",
-      "description": "Play sound on success",
-      "data": [
-        {
-          "title": "Yes",
-          "value": "true"
-        },
-        {
-          "title": "No",
-          "value": ""
-        }
-      ]
+      "default": false,
+      "title": "On success",
+      "label": "Play sound",
+      "description": "Play sound on success"
     }
   ],
   "scripts": {
