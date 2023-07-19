@@ -1,4 +1,4 @@
-# Vc.ru news for Raycast
+# Rusbase news for Raycast
 
 <!--- [Link to the original repo]() -->
 
