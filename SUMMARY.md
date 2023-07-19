@@ -97,6 +97,7 @@
   - [useExec](utils-reference/react-hooks/useExec.md)
   - [useSQL](utils-reference/react-hooks/useSQL.md)
   - [useAI](utils-reference/react-hooks/useAI.md)
+  - [useFrecencySorting](utils-reference/react-hooks/useFrecencySorting.md)
 
 ---
 
