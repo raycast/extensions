@@ -1,5 +1,15 @@
 # shadcn/ui Changelog
 
+## [Update to shadcn/ui June 2023 version] - 2023-06-22
+
+- Update Icon
+- Update metadata
+- Update README.md
+- Fix broken components search and details
+- Update documentation
+
+(shadcn/ui changelog)[https://ui.shadcn.com/docs/changelog]
+
 ## [Initial Version] - 2023-06-06
 
 - Add search components command

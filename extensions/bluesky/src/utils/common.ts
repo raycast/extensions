@@ -1,7 +1,7 @@
-import { Toast, showToast } from "@raycast/api";
+import { Account, AllowedActionKeys } from "../types/types";
+import { Icon, Toast, showToast } from "@raycast/api";
 
 import { ActionMap } from "../config/actionMap";
-import { AllowedActionKeys } from "../types/types";
 import { BlueskyProfileUrlBase } from "./constants";
 import { ProfileViewDetailed } from "@atproto/api/dist/client/types/app/bsky/actor/defs";
 import crypto from "crypto";
@@ -62,6 +62,14 @@ export const getFormattedActionShortcut = (actionKey: AllowedActionKeys) => {
 
 export const getPostUrl = (handle: string, uri: string) => {
   return `${BlueskyProfileUrlBase}/${handle}/post/${getRKey(uri)}`;
+};
+
+export const getAccountName = (account: Account | ProfileViewDetailed) => {
+  return account.displayName || account.handle;
+};
+
+export const getAccountIcon = (account: Account) => {
+  return account.avatarUrl ? account.avatarUrl : Icon.ChessPiece;
 };
 
 export const getAuthorDetailsMarkdown = (author: ProfileViewDetailed): string => {

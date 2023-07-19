@@ -1,5 +1,9 @@
 # Xcode Changelog
 
+## [Filtering Simulators on State with Dropdown]
+
+- Added a dropdown in simulators list to filter simulators on the boot state.
+
 ## [Bug Fix] - 2023-06-21
 
 - Fixed a bug where creating a Swift playground failed due to an incorrect date format.

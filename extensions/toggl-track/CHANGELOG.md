@@ -1,5 +1,9 @@
 # Toggl Track Changelog
 
+## [Enhancements] - 2023-07-05
+
+- New preference that allows archived projects to be hidden (default: true).
+
 ## [New Feature] - 2023-02-28
 
 - Display the total time tracking in the current today in the main windows navigation title.

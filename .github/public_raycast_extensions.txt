@@ -1,5 +1,6 @@
 linear
 github
+browser-bookmarks
 google-workspace
 zoom
 hypersonic
@@ -22,3 +23,6 @@ todoist
 screen-studio
 openverse
 putio
+warp
+getsound
+reclaim-ai
