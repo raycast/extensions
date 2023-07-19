@@ -1,6 +1,5 @@
 # Jellyfin Extension for Raycast
 
-This project focuses on developing an extension for the application "Raycast".
 This extension aims at adding support to find Collections, Movies, Shows, Scheduled Tasks, and Recent Sessions on your Jellyfin instance.
 
 ![header](./media/header.png)
