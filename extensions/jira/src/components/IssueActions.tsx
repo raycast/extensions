@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Icon, launchCommand, LaunchType, showToast, Toast } from "@raycast/api";
 import { MutatePromise, useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 
@@ -140,6 +140,17 @@ export default function IssueActions({
         />
 
         <ChangeStatusSubmenu issue={issue} mutate={mutateWithOptimisticUpdate} />
+      </ActionPanel.Section>
+
+      <ActionPanel.Section>
+        <Action
+          title="Create Issue"
+          icon={Icon.NewDocument}
+          shortcut={{ modifiers: ["cmd"], key: "n" }}
+          onAction={async () => {
+            await launchCommand({ name: "create-issue", type: LaunchType.UserInitiated });
+          }}
+        />
       </ActionPanel.Section>
 
       <ActionPanel.Section>
