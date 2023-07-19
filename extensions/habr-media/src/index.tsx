@@ -38,18 +38,18 @@ export default function Command() {
       searchBarAccessory={
         <List.Dropdown
           tooltip="Select a category"
-          defaultValue={"All streams. New"}
+          defaultValue={"Лента. Новое"}
           storeValue
           onChange={(newValue) => setRssLink(newValue as string)}
         >
-          <List.Dropdown.Item title={"All streams. New"} value={"https://habr.com/ru/rss/all/all/?fl=ru"} />
-          <List.Dropdown.Item title={"All streams. Best"} value={"https://habr.com/ru/rss/best/daily/?fl=ru"} />
-          <List.Dropdown.Item title={"Development"} value={"https://habr.com/ru/rss/flows/develop/all/?fl=ru"} />
-          <List.Dropdown.Item title={"Administration"} value={"https://habr.com/ru/rss/flows/admin/all/?fl=ru"} />
-          <List.Dropdown.Item title={"Design"} value={"https://habr.com/ru/rss/flows/design/all/?fl=ru"} />
-          <List.Dropdown.Item title={"Management"} value={"https://habr.com/ru/rss/flows/management/all/?fl=ru"} />
-          <List.Dropdown.Item title={"Marketing"} value={"https://habr.com/ru/rss/flows/marketing/all/?fl=ru"} />
-          <List.Dropdown.Item title={"Sci-fi"} value={"https://habr.com/ru/rss/flows/popsci/all/?fl=ru"} />
+          <List.Dropdown.Item title={"Лента. Новое"} value={"https://habr.com/ru/rss/all/all/?fl=ru"} />
+          <List.Dropdown.Item title={"Лента. Лучшее"} value={"https://habr.com/ru/rss/best/daily/?fl=ru"} />
+          <List.Dropdown.Item title={"Разработка"} value={"https://habr.com/ru/rss/flows/develop/all/?fl=ru"} />
+          <List.Dropdown.Item title={"Администрирование"} value={"https://habr.com/ru/rss/flows/admin/all/?fl=ru"} />
+          <List.Dropdown.Item title={"Дизайн"} value={"https://habr.com/ru/rss/flows/design/all/?fl=ru"} />
+          <List.Dropdown.Item title={"Менеджмент"} value={"https://habr.com/ru/rss/flows/management/all/?fl=ru"} />
+          <List.Dropdown.Item title={"Маркетинг"} value={"https://habr.com/ru/rss/flows/marketing/all/?fl=ru"} />
+          <List.Dropdown.Item title={"Научпоп"} value={"https://habr.com/ru/rss/flows/popsci/all/?fl=ru"} />
         </List.Dropdown>
       }
     >
