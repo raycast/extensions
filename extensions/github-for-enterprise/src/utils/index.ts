@@ -17,16 +17,19 @@ export async function fetcher({ document, variables = {}, headers = {} }: any) {
     {
       Authorization: `Bearer ${token}`,
       ...headers,
-    }
+    },
   );
 }
 
 export const groupBy = <T, K extends keyof T>(arr: T[], key: K) => {
-  return arr.reduce((r, a) => {
-    const v = a[key];
-    (r as any)[v] = [...((r as any)[v] || []), a];
-    return r;
-  }, {} as Record<string, T[]>);
+  return arr.reduce(
+    (r, a) => {
+      const v = a[key];
+      (r as any)[v] = [...((r as any)[v] || []), a];
+      return r;
+    },
+    {} as Record<string, T[]>,
+  );
 };
 
 export const partition = <T>(arr: T[], predicate: (item: T) => boolean) => {
