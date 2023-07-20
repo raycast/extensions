@@ -1,5 +1,9 @@
 # Obsidian Changelog
 
+## [Add week placeholder] - 2023-07-14
+
+- Adds a {week} template placeholder (thanks @adamadamsmusic)
+
 ## [Fix] - 2023-06-19
 
 - Fixed menubar icon for light backgrounds

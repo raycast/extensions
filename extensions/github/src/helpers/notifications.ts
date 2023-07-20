@@ -107,7 +107,7 @@ export function getNotificationSubtitle(notification: Notification) {
   const reason = getNotificationReason(notification);
   const numberTag = getIssueOrPrNumberTag(notification);
 
-  return numberTag ? `${numberTag} ･ ${reason}` : reason;
+  return numberTag ? `${numberTag} ･ ${notification.repository.full_name} ･ ${reason}` : reason;
 }
 
 export function getNotificationReason(notification: Notification) {

@@ -1,4 +1,5 @@
 import { Icon } from "@raycast/api";
+import { PrivacyNavigationTitle } from "../utils/constants";
 import { ViewType } from "../types/types";
 import { getFormattedActionShortcut } from "../utils/common";
 
@@ -20,7 +21,7 @@ export const ViewTypes: ViewType[] = [
     description: `
 View your timeline feed. 
 
-- Press \`⌘ + Enter\` to enter selected user profile.
+- Press \`⌘ + Enter\` to enter selected an account profile.
 - Press ${getFormattedActionShortcut("like")} to like a post.
 - Press ${getFormattedActionShortcut("unlike")} to unlike a post.
 - Press ${getFormattedActionShortcut("repost")} to repost.
@@ -99,6 +100,13 @@ View your recently liked posts.
   },
   {
     id: "7",
+    getName: () => PrivacyNavigationTitle,
+    navbarSectionId: "3",
+    icon: Icon.Lock,
+    description: "View and manage accounts you have muted or blocked.",
+  },
+  {
+    id: "8",
     getName: () => "About",
     navbarSectionId: "3",
     icon: Icon.Cd,

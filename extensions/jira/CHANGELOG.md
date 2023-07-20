@@ -1,5 +1,14 @@
 # Jira Changelog
 
+## [Type before credentials load] - 2023-07-05
+
+- Now allows user to start typing before the credentials are loaded
+
+## [Persist Active Sprint Project value when closing command] - 2023-06-28
+
+- Persist Active Sprint Project value when closing command allowing the command to
+  fetch the issues for the latest selected project when opening the command anew. 
+
 ## [Bug fixes] - 2023-06-15
 
 - Fixed a bug where a user's or project's avatar URL could not be displayed.
