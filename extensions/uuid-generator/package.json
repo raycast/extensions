@@ -56,6 +56,20 @@
           "description": "The namespace for UUID v5"
         }
       ]
+    },
+    {
+      "name": "generateUlid",
+      "title": "Generate ULIDs",
+      "description": "Copy generated ULIDs to the clipboard",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "numberOfULIDsToGenerate",
+          "type": "text",
+          "placeholder": "1",
+          "required": false
+        }
+      ]
     }
   ],
   "preferences": [
@@ -89,6 +103,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.55.0",
+    "ulidx": "^2.0.0",
     "uuid": "^9.0.0"
   },
   "devDependencies": {
