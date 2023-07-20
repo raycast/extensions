@@ -20,6 +20,7 @@ export default function FormView({ push }: { push: (component: React.ReactNode) 
   const [method, setMethod] = useState<string>("GET");
   const [url, setUrl] = useState<string>("https://jsonplaceholder.typicode.com/todos/1");
   const [headers, setHeaders] = useState<Header[]>([{ key: "Content-Type", value: "application/json" }]);
+  const [headerSearchTexts, setHeaderSearchTexts] = useState<(string | undefined)[]>([]);
   const [body, setBody] = useState<string>("");
 
   async function handleSubmit() {
@@ -88,6 +89,19 @@ export default function FormView({ push }: { push: (component: React.ReactNode) 
     setHeaders(newHeaders);
   }
 
+  function handleSearchTextChange(index: number, payload: string) {
+    handleHeaderState("key", index, "");
+    const newHeaderSearchTexts = [...headerSearchTexts];
+    payload = payload.trim();
+    newHeaderSearchTexts[index] = payload === "" ? undefined : payload;
+    setHeaderSearchTexts(newHeaderSearchTexts);
+  }
+
+  function filterHeaderOptions(index: number, option: string) {
+    const search = headerSearchTexts[index];
+    return search === undefined || option.toLowerCase().includes(search);
+  }
+
   return (
     <Form
       isLoading={isLoading}
@@ -142,10 +156,14 @@ export default function FormView({ push }: { push: (component: React.ReactNode) 
                 title="Key"
                 onChange={(key) => handleHeaderState("key", index, key)}
                 value={headers[index].key}
+                onSearchTextChange={(text) => handleSearchTextChange(index, text)}
               >
-                {headerKeys.map((key, idx) => (
-                  <Form.Dropdown.Item key={`header-${idx}-key`} value={key} title={key} />
-                ))}
+                {}
+                {headerKeys
+                  .filter((option) => filterHeaderOptions(index, option))
+                  .map((key, idx) => (
+                    <Form.Dropdown.Item key={`header-${idx}-key`} value={key} title={key} />
+                  ))}
               </Form.Dropdown>
               <Form.TextField
                 id={`header-value-${index}`}
