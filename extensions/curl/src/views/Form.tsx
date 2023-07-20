@@ -19,7 +19,7 @@ export default function FormView({ push }: { push: (component: React.ReactNode) 
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [method, setMethod] = useState<string>("GET");
   const [url, setUrl] = useState<string>("https://jsonplaceholder.typicode.com/todos/1");
-  const [headers, setHeaders] = useState<Header[]>([{ key: "A-IM", value: "application/json" }]);
+  const [headers, setHeaders] = useState<Header[]>([{ key: "Content-Type", value: "application/json" }]);
   const [headerSearchTexts, setHeaderSearchTexts] = useState<(string | undefined)[]>([]);
   const [body, setBody] = useState<string>("");
 
@@ -61,7 +61,7 @@ export default function FormView({ push }: { push: (component: React.ReactNode) 
 
         await LocalStorage.setItem(
           `${method}-${url}`,
-          JSON.stringify({ ...payload, meta: { title: "", description: "" } }),
+          JSON.stringify({ ...payload, meta: { title: "", description: "" } })
         );
         push(<ResultView result={result as never} curl={curl} />);
       })
