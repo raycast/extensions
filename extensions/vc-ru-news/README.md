@@ -1,12 +1,6 @@
 # Vc.ru news for Raycast
 
-<!--- [Link to the original repo]() -->
-
 This is a simple extension that allows you to read [VC.ru](https://vc.ru) news. It works directly in Raycast, no external applications or dependencies are required 
-
-<!--- <a id="install-extension-button" title="Install Harb Raycast Extension" href="https://www.raycast.com/ThatNerd/timers#install">
-        <img height="64" style="height: 64px" src="https://assets.raycast.com/ThatNerd/timers/install_button@2x.png">
-</a> -->
 
 #### If you enjoy using Habr for Raycast and/or want to support further development, feel free to donate below!
 
