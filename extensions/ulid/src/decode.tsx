@@ -7,7 +7,7 @@ import { contents } from "./util/clipboard";
 async function ulidToTime() {
   try {
     const clipboard = await contents();
-    if (!isValid(clipboard)) throw "not a valid ulid string";
+    if (!isValid(clipboard)) throw "string from clipboard is not a valid ulid";
     const decodedTime = decodeTime(clipboard);
     const d = getDate(decodedTime);
     const ds = toDateString(d);
@@ -22,7 +22,7 @@ async function ulidToTime() {
     });
   } catch (e) {
     if (typeof e === "string") {
-      await showToast(Toast.Style.Failure, "Decode failed", e);
+      await showToast(Toast.Style.Failure, "Decode ULID on Clipboard failed", e);
     }
   }
 }

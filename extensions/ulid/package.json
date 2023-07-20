@@ -12,14 +12,14 @@
   "commands": [
     {
       "name": "generator",
-      "title": "Generate ULID by now",
-      "description": "generate a ULID id by current time",
+      "title": "Generate ULID based on Exact Current Time",
+      "description": "generate a ULID based on Exact current time",
       "mode": "no-view"
     },
     {
       "name": "decode",
-      "title": "Translate ULID to Time",
-      "description": "decode ULID id to time",
+      "title": "Translate ULID On Clipboard to Time",
+      "description": "decode the ULID on clipboard to exact time",
       "mode": "no-view"
     }
   ],
@@ -53,7 +53,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.52.1",
+    "@raycast/api": "^1.55.2",
     "run-applescript": "^6.1.0",
     "ulidx": "^2.0.0"
   },
