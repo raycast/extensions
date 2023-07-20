@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { useCachedState } from '@raycast/utils'
 import { loadTodaySolat, PrayerTime, PrayerTimeItem } from './lib/prayer-times'
 import { Color, List } from '@raycast/api'
+import Accessory = List.Item.Accessory
 
 function Zones(props: { onChange: (z: Zone) => void }) {
   const [isLoading, setLoading] = useState(true)
@@ -48,14 +49,13 @@ function PrayerItem(props: { item: PrayerTimeItem }) {
       : undefined
   }
 
+  const accessories: Accessory[] = []
+  const tag = getTag()
+  if (tag) {
+    accessories.push({ tag })
+  }
   return (
-    <List.Item
-      icon="🕌"
-      key={label}
-      title={label}
-      subtitle={value}
-      accessories={[{ tag: getTag() }]}
-    />
+    <List.Item icon="🕌" key={label} title={label} subtitle={value} accessories={accessories} />
   )
 }
 
@@ -73,7 +73,7 @@ function prayerTimes() {
   return (
     <List searchBarAccessory={<Zones onChange={onZoneChange} />} isLoading={isLoading}>
       {prayerTime?.items?.map((p) => (
-        <PrayerItem item={p} />
+        <PrayerItem item={p} key={p.label} />
       ))}
     </List>
   )

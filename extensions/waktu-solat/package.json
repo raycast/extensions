@@ -4,7 +4,7 @@
   "title": "Waktu Solat",
   "description": "Malaysia Prayer Time (JAKIM)",
   "icon": "mosque.png",
-  "author": "sayuthisobri",
+  "author": "msms",
   "categories": [
     "Productivity",
     "Other"
@@ -23,6 +23,7 @@
     "@raycast/api": "^1.55.2",
     "@raycast/utils": "^1.8.0",
     "axios": "^1.4.0",
+    "humanize-duration": "^3.29.0",
     "jsdom": "^22.1.0",
     "moment": "^2.29.4",
     "node-fetch": "^3.3.1",
@@ -30,6 +31,7 @@
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.5",
+    "@types/humanize-duration": "^3.27.1",
     "@types/jsdom": "^21.1.1",
     "@types/moment": "^2.13.0",
     "@types/node": "18.8.3",

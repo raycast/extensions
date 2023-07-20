@@ -2,6 +2,24 @@ import fetch from 'node-fetch'
 import { LocalStorage } from '@raycast/api'
 import moment from 'moment'
 
+import humanizeDuration from 'humanize-duration'
+
+const humanizer = humanizeDuration.humanizer({
+  language: 'shortEn',
+  languages: {
+    shortEn: {
+      y: () => 'y',
+      mo: () => 'mo',
+      w: () => 'w',
+      d: () => 'd',
+      h: () => 'hour',
+      m: () => 'min',
+      s: () => 'sec',
+      ms: () => 'ms',
+    },
+  },
+})
+
 export interface PrayerTimeItem {
   label: string
   time: moment.Moment
@@ -93,17 +111,25 @@ export async function loadTodaySolat(zoneId: string): Promise<PrayerTime | undef
       t.items = keys.map((key) => {
         const value: string = t[key as PrayerKey] as string
         const time = moment(value, 'HH:mm:ss')
-        const diffSec = time.diff(moment(), 'seconds')
+        const diffSec = time.diff(moment(), 'ms')
         return {
           value: time.format('hh:mm A'),
           label: prayerNameMap.get(key)!,
-          different: moment.duration(diffSec, 'seconds').humanize(true),
+          different: `in ${humanizer(diffSec, {
+            round: true,
+            conjunction: ' and ',
+            serialComma: false,
+            largest: 2,
+          })}`,
           time,
         } as PrayerTimeItem
       })
-      const current = t.items.find(
-        (item, i) => moment().isSameOrAfter(item.time) || (t.items && i == t.items?.length - 1)
-      )
+      const current = t.items
+        .slice()
+        .reverse()
+        .find(
+          (item, i) => moment().isSameOrAfter(item.time) || (t.items && i == t.items?.length - 1)
+        )
       if (current) {
         current.isCurrent = true
         const currentIndex = t.items.indexOf(current)
