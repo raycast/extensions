@@ -20,8 +20,8 @@ export const algoliaIndex = client.initIndex('material-ui');
  */
 const prepareFilterString = (library: string) => {
   return library === 'mui-x'
-    ? 'product:data-grid OR product:date-pickers'
-    : `product:${library}`;
+    ? 'productId:data-grid OR productId:date-pickers'
+    : `productId:${library}`;
 };
 
 /**
@@ -33,7 +33,7 @@ const prepareFilterString = (library: string) => {
  * See more: [Filters and facet filters](https://www.algolia.com/doc/guides/managing-results/refine-results/filtering/in-depth/filters-and-facetfilters/)
  * @example
  * prepareFilters('preferences')
- * // => 'product:material-ui OR product:data-grid'
+ * // => 'productId:material-ui OR productId:data-grid'
  */
 export const prepareFilters = (dropdownValue: string) => {
   const preferences = getPreferenceValues<Preferences>();
@@ -84,7 +84,7 @@ const prepareSubtitle = (hierarchy: Hit['hierarchy']) => {
  * @param {string} product - The MUI product name.
  * @returns {string} The formatted display name.
  */
-const formatProductName = (product: Hit['product']) => {
+const formatProductName = (product: Hit['productId']) => {
   switch (product) {
     case 'base':
       return 'Base UI';
@@ -135,7 +135,7 @@ export const prepareResults = (results: Hit[]) => {
     // Limit each section to a maximum number of results to display.
     // This acts as a frontend alternative to `distinct`.
     if (acc[section].length < Number(limit === 'all' ? 100 : limit)) {
-      const { objectID, product, url, hierarchy = {} } = curr;
+      const { objectID, productId, url, hierarchy = {} } = curr;
 
       // Omit results for nested 'Component API' hits, for example:
       // Alert API > Import
@@ -143,7 +143,7 @@ export const prepareResults = (results: Hit[]) => {
 
       const item = {
         objectID,
-        product: formatProductName(product) as ProductName,
+        product: formatProductName(productId) as ProductName,
         subtitle: prepareSubtitle(hierarchy),
         title: hierarchy.lvl1,
         url,
