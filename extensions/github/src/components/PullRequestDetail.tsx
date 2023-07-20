@@ -37,7 +37,7 @@ export default function PullRequestDetail({ initialPullRequest, mutateList }: Pu
       return pullRequestDetail.node as PullRequestDetailsFieldsFragment;
     },
     [initialPullRequest.id],
-    { initialData: initialPullRequest }
+    { initialData: initialPullRequest },
   );
 
   let markdown = `# ${pullRequest.title}`;
