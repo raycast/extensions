@@ -1,6 +1,5 @@
-import algoliasearch from 'algoliasearch';
-
 import { getPreferenceValues } from '@raycast/api';
+import algoliasearch from 'algoliasearch';
 
 import { Hit, ListItem, Preferences, ProductName } from './types';
 
@@ -113,7 +112,7 @@ const formatSectionTitle = (str: string) => {
     .replace('&amp;', '&')
     .replace(
       /^(Data Grid|Date and Time Pickers)(.*)$/,
-      (_match, p1, p2) => p1 + (p2 ? ` > ${p2}` : '')
+      (_match, p1, p2) => p1 + (p2 ? ` > ${p2}` : ''),
     );
 };
 
@@ -135,7 +134,7 @@ export const prepareResults = (results: Hit[]) => {
     // Limit each section to a maximum number of results to display.
     // This acts as a frontend alternative to `distinct`.
     if (acc[section].length < Number(limit === 'all' ? 100 : limit)) {
-      const { objectID, productId, url, hierarchy = {} } = curr;
+      const { hierarchy = {}, objectID, productId, url } = curr;
 
       // Omit results for nested 'Component API' hits, for example:
       // Alert API > Import
@@ -164,7 +163,7 @@ const packageMap = {
 };
 
 const isMaterialPackage = (
-  product: ProductName
+  product: ProductName,
 ): product is Exclude<ProductName, 'MUI X'> => {
   if (product in packageMap) return true;
   else return false;
