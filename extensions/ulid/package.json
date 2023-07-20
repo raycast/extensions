@@ -12,8 +12,8 @@
   "commands": [
     {
       "name": "generator",
-      "title": "Generate ULID based on Exact Current Time",
-      "description": "generate a ULID based on Exact current time",
+      "title": "Generate ULID Based on Exact Current Time",
+      "description": "Generate a ULID based on the exact current time",
       "mode": "no-view"
     },
     {
