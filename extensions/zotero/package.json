@@ -165,7 +165,7 @@
     "@raycast/api": "^1.55.2",
     "citation-js": "^0.6.8",
     "fuse.js": "^6.6.2",
-    "sql.js": "^1.6.2"
+    "sql.js": "^1.8.0"
   },
   "devDependencies": {
     "@types/he": "^1.2.0",

@@ -23,6 +23,7 @@ export interface RefData {
   citekey?: string;
   tags?: string[];
   attachment?: Attachment;
+  collection?: string[];
   [key: string]: any;
 }
 
@@ -124,6 +125,20 @@ WHERE itemCreators.itemID = :id
 ORDER BY "index" ASC
 `;
 
+const ALL_COLLECTIONS_SQL = `
+SELECT  collections.collectionName AS name
+    FROM collections
+`;
+
+const COLLECTIONS_SQL = `
+SELECT  collections.collectionName AS name,
+        collections.key AS key
+    FROM collections
+    LEFT JOIN collectionItems
+        ON collections.collectionID = collectionItems.collectionID
+WHERE collectionItems.itemID = :id
+`;
+
 const cachePath = utils.cachePath("zotero.json");
 
 export function resolveHome(filepath: string): string {
@@ -207,6 +222,16 @@ async function getLatestModifyDate(): Promise<Date> {
   return latest;
 }
 
+export const getCollections = async (): Promise<string[]> => {
+  const db = await openDb();
+  const st = db.prepare(ALL_COLLECTIONS_SQL);
+  const cols = [];
+  while (st.step()) {
+    cols.push(st.getAsObject().name);
+  }
+  return cols;
+};
+
 async function getData(): Promise<RefData[]> {
   const db = await openDb();
   const preferences: Preferences = getPreferenceValues();
@@ -277,6 +302,20 @@ async function getData(): Promise<RefData[]> {
       row.creators = cts;
     }
 
+    const st6 = db.prepare(COLLECTIONS_SQL);
+    st6.bind({ ":id": row.id });
+
+    const clt = [];
+    while (st6.step()) {
+      clt.push(st6.getAsObject().name);
+    }
+
+    st6.free();
+
+    if (clt.length > 0) {
+      row.collection = clt;
+    }
+
     if (preferences.use_bibtex) {
       row.citekey = await getBibtexKey(row.key, row.library);
     }
@@ -338,7 +377,7 @@ export const searchResources = async (q: string): Promise<RefData[]> => {
     const now = new Date();
     const diffTime = Math.abs(now.getTime() - cacheTime.getTime());
 
-    if (diffTime < 3600000) {
+    if (diffTime < 0) {
       const cacheBuffer = await readFile(cachePath);
       const fData = JSON.parse(cacheBuffer.toString());
       return fData.data;
