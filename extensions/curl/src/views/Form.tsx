@@ -61,7 +61,7 @@ export default function FormView({ push }: { push: (component: React.ReactNode) 
 
         await LocalStorage.setItem(
           `${method}-${url}`,
-          JSON.stringify({ ...payload, meta: { title: "", description: "" } })
+          JSON.stringify({ ...payload, meta: { title: "", description: "" } }),
         );
         push(<ResultView result={result as never} curl={curl} />);
       })
@@ -109,7 +109,7 @@ export default function FormView({ push }: { push: (component: React.ReactNode) 
       isLoading={isLoading}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Make request" icon={Icon.Rocket} onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Make Request" icon={Icon.Rocket} onSubmit={handleSubmit} />
           <Action
             title="Add Headers"
             icon={Icon.Plus}
