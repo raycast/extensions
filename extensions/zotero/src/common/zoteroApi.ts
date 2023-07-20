@@ -377,7 +377,7 @@ export const searchResources = async (q: string): Promise<RefData[]> => {
     const now = new Date();
     const diffTime = Math.abs(now.getTime() - cacheTime.getTime());
 
-    if (diffTime < 0) {
+    if (diffTime < 3600000) {
       const cacheBuffer = await readFile(cachePath);
       const fData = JSON.parse(cacheBuffer.toString());
       return fData.data;
