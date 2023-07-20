@@ -5,6 +5,9 @@
   "description": "Remove the paywall from the specified URL.",
   "icon": "command-icon.png",
   "author": "tegola",
+  "contributors": [
+    "Whitespace"
+  ],
   "categories": [
     "Web"
   ],
@@ -40,6 +43,10 @@
         {
           "title": "RemovePaywall (removepaywall.com)",
           "value": "https://www.removepaywall.com"
+        },
+        {
+          "title": "Archive (archive.is)",
+          "value": "https://archive.is"
         }
       ]
     }
