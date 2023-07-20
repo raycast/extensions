@@ -13,19 +13,19 @@
     {
       "name": "index",
       "title": "Sections",
-      "description": "Template with a plain detail view",
+      "description": "Sections News from Rusbase",
       "mode": "view"
     },
     {
       "name": "markets",
       "title": "Markets",
-      "description": "Template with a plain detail view",
+      "description": "Markets News from Rusbase",
       "mode": "view"
     },
     {
       "name": "companies",
       "title": "Companies",
-      "description": "Template with a plain detail view",
+      "description": "Companies News from Rusbase",
       "mode": "view"
     }
   ],
