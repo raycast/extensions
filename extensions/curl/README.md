@@ -11,6 +11,6 @@
 - Add method's icons for requests
 - Add loading state "true" as default when using the requests command and fetching history to avoid flickering empty state.
 
- ## [Initial Release] - 2022-09-01
+## [Initial Release] - 2022-09-01
 
 Keyboard-first HTTP client

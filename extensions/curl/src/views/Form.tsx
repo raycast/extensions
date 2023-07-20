@@ -61,7 +61,7 @@ export default function FormView({ push }: { push: (component: React.ReactNode) 
 
         await LocalStorage.setItem(
           `${method}-${url}`,
-          JSON.stringify({ ...payload, meta: { title: "", description: "" } })
+          JSON.stringify({ ...payload, meta: { title: "", description: "" } }),
         );
         push(<ResultView result={result as never} curl={curl} />);
       })
