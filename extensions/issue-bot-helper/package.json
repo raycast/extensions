@@ -1,0 +1,74 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "issue-bot-helper",
+  "title": "issue-bot-helper",
+  "description": "Internal Tribe 개발자를 위한 슬랙 이슈봇을 편하게 부르기 위한 extension",
+  "icon": "command-icon.png",
+  "author": "han2",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "!이슈등록",
+      "subtitle": "슬랙 채널에 이슈봇 부르기",
+      "description": "Internal Tribe 개발자를 위한 슬랙 이슈봇을 편하게 부르기 위한 extension",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "summary",
+          "placeholder": "내용 (Summary)",
+          "type": "text",
+          "required": false
+        }
+      ],
+      "preferences": [
+        {
+          "title": "Token",
+          "description": "A bot/user token from slack",
+          "placeholder": "xoxb-******",
+          "type": "password",
+          "name": "token",
+          "required": true
+        },
+        {
+          "title": "Slack Channel List",
+          "description": "콤마로 구분된 ID 리스트",
+          "default": "C01869D4230,C046Q2QC4HH",
+          "type": "textfield",
+          "name": "channels",
+          "required": true
+        },
+        {
+          "title": "Slack ID",
+          "description": "나에게 할당 슬랙 ID",
+          "type": "textfield",
+          "name": "slackId",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.55.2",
+    "@raycast/utils": "^1.9.0",
+    "node-fetch": "^3.3.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
