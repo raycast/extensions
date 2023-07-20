@@ -13,7 +13,7 @@
     {
       "name": "index",
       "title": "Habr",
-      "description": "Template with a plain detail view",
+      "description": "News from Habr",
       "mode": "view"
     }
   ],
