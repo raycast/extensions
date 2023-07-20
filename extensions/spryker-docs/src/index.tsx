@@ -44,13 +44,13 @@ export default function main() {
       return;
     }
 
-    let queryByIndices: Query = ALGOLIA_INDICES.map(index => ({
+    const queryByIndices: Query = ALGOLIA_INDICES.map((index) => ({
       indexName: index.key,
       query: query,
       params: {
         hitsPerPage: 5,
         distinct: true,
-      }
+      },
     }));
 
     setIsLoading(true);
@@ -81,42 +81,42 @@ export default function main() {
     >
       {searchResults
         ? searchResults.map((item: ResultItem) => (
-          <List.Section title={ALGOLIA_INDICES.find(index => index.key == item.index)?.name}>
-            {item.hits.map((hit: Hit) => (
-              < List.Item
-                key={hit.objectID}
-                title={getTitle(hit)}
-                subtitle={getSubTitle(hit)}
-                icon={ICON}
-                actions={
-                  < ActionPanel title={hit.url} >
-                    <Action.OpenInBrowser url={getUrl(hit.url)} title="Open in Browser" />
-                    <Action.CopyToClipboard content={getUrl(hit.url)} title="Copy URL" />
-                  </ActionPanel>
-                }
-              />
-            ))}
-          </List.Section>
-        ))
-        : Object.entries(currentDocs).map(([section, items]: Array<any>) => (
-          <List.Section title={section} key={section}>
-            {items.map((item: DocLink) => {
-              return (
+            <List.Section title={ALGOLIA_INDICES.find((index) => index.key == item.index)?.name}>
+              {item.hits.map((hit: Hit) => (
                 <List.Item
-                  key={item.url}
-                  title={item.title}
+                  key={hit.objectID}
+                  title={getTitle(hit)}
+                  subtitle={getSubTitle(hit)}
                   icon={ICON}
                   actions={
-                    <ActionPanel title={item.url}>
-                      <Action.OpenInBrowser url={getUrl(item.url)} title="Open in Browser" />
-                      <Action.CopyToClipboard content={getUrl(item.url)} title="Copy URL" />
+                    <ActionPanel title={hit.url}>
+                      <Action.OpenInBrowser url={getUrl(hit.url)} title="Open in Browser" />
+                      <Action.CopyToClipboard content={getUrl(hit.url)} title="Copy URL" />
                     </ActionPanel>
                   }
                 />
-              );
-            })}
-          </List.Section>
-        ))}
-    </List >
+              ))}
+            </List.Section>
+          ))
+        : Object.entries(currentDocs).map(([section, items]: Array<any>) => (
+            <List.Section title={section} key={section}>
+              {items.map((item: DocLink) => {
+                return (
+                  <List.Item
+                    key={item.url}
+                    title={item.title}
+                    icon={ICON}
+                    actions={
+                      <ActionPanel title={item.url}>
+                        <Action.OpenInBrowser url={getUrl(item.url)} title="Open in Browser" />
+                        <Action.CopyToClipboard content={getUrl(item.url)} title="Copy URL" />
+                      </ActionPanel>
+                    }
+                  />
+                );
+              })}
+            </List.Section>
+          ))}
+    </List>
   );
 }
