@@ -13,7 +13,7 @@
     {
       "name": "index",
       "title": "VC.ru",
-      "description": "Template with a plain detail view",
+      "description": "Popular news from VC.ru",
       "mode": "view"
     }
   ],
