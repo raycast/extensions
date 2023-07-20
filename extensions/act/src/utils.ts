@@ -66,7 +66,7 @@ async function youdaoTrans(src_text: string): Promise<string[]> {
       const translated_text = data?.translation?.[0] ?? "";
       const phonetic = data?.basic?.phonetic ?? "";
       console.log(phonetic);
-      return new Promise((resolve, reject) => {
+      return new Promise((resolve) => {
         resolve([src_text, translated_text, phonetic]);
       });
     } else {

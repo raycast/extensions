@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "act",
   "title": "AcT",
-  "description": " It's  an advanced translation extension tailored for academic and technology texts. Key features include direct text selection from various sources including PDFs, automatic special character filtering, instant translation result saving to the clipboard, and storage of translations in local cache for easy access. Ideal for researchers, technologists, and students, IntelliTranslate Pro simplifies and accelerates your translation tasks, ensuring productivity and accuracy.",
+  "description": "It's an advanced translation extension tailored for academic and technology texts. Key features include direct text selection from various sources including PDFs, automatic special character filtering, instant translation result saving to the clipboard, and storage of translations in local cache for easy access. Ideal for researchers, technologists, and students, IntelliTranslate Pro simplifies and accelerates your translation tasks, ensuring productivity and accuracy",
   "icon": "command-icon.png",
   "author": "KissInt8",
   "categories": [
@@ -12,7 +12,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "translate",
+      "title": "Translate",
       "description": "Show translation result.",
       "mode": "view",
       "preferences": [

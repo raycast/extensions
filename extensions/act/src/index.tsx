@@ -24,8 +24,9 @@ export default function Command() {
         const selectedText = await getSelectedText();
         // const encoder = new TextEncoder();
         // const decoder = new TextDecoder();
-        //分别去除了pdf单词连字符、pdf换行符 同时补充了单词间空格
-        //感谢 https://www.utf8-chartable.de/unicode-utf8-table.pl?utf8=dec
+        // 分别去除了pdf单词连字符、pdf换行符 同时补充了单词间空格
+        // 感谢 https://www.utf8-chartable.de/unicode-utf8-table.pl?utf8=dec
+        // eslint-disable-next-line no-control-regex
         const format = selectedText
           .replace(/\u0002/g, "")
           .replace(/\u000A/g, "")

@@ -2,11 +2,8 @@
 
 # dependencies
 /node_modules
-
+.npmrc
 # Raycast specific files
 raycast-env.d.ts
-#prettier config
-.prettierrc
-.eslintrc.json
 # misc
 .DS_Store

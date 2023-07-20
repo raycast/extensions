@@ -1,0 +1,7 @@
+{
+  "root": true,
+  "extends": ["@raycast"],
+  "rules":{
+	  "no-control-regex": "off"
+  }
+}
