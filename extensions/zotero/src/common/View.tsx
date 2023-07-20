@@ -139,7 +139,7 @@ function getItemIcon(item: RefData): string {
     case "document":
       return "document.png";
     default:
-      return "zotero.png";
+      return "default.png";
   }
 }
 
@@ -200,20 +200,20 @@ export const View = ({ sectionNames, queryResults, isLoading, onSearchTextChange
                 detail={<List.Item.Detail markdown={getItemDetail(item)} />}
                 actions={
                   <ActionPanel>
+                    {item.attachment && item.attachment.key !== `` && (
+                      <Action.OpenInBrowser
+                        icon={Icon.ArrowRightCircleFilled}
+                        title="Open PDF"
+                        url={`zotero://open-pdf/library/items/${item.attachment.key}`}
+                        onOpen={onOpen}
+                      />
+                    )}
                     <Action.OpenInBrowser
                       icon={Icon.Link}
                       title="Open in Zotero"
                       url={`zotero://select/items/${item.library ? item.library : 0}_${item.key}`}
                       onOpen={onOpen}
                     />
-                    {item.attachment && item.attachment.key !== `` && (
-                      <Action.OpenInBrowser
-                        icon={Icon.Document}
-                        title="Open PDF"
-                        url={`zotero://open-pdf/library/items/${item.attachment.key}`}
-                        onOpen={onOpen}
-                      />
-                    )}
                     {getURL(item) !== "" && (
                       <Action.OpenInBrowser
                         title="Open Original Link"
