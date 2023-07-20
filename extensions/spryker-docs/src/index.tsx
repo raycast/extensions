@@ -4,6 +4,7 @@ import algoliasearch from "algoliasearch";
 import striptags from "striptags";
 import { ENV } from "./env";
 import { Hit, Query, ResultItem } from "./types/algolia";
+import currentDocs from "./documentation/default.json";
 
 const ICON = {
   source: {
@@ -17,7 +18,6 @@ type DocLink = {
 };
 
 export default function main() {
-  const currentDocs = require("./documentation/default.json");
   const env = ENV;
   const { ALGOLIA_INDICES, ALGOLIA_APP_ID, ALGOLIA_API_KEY, SPRYKER_DOCS_URL } = env;
   const [searchResults, setSearchResults] = useState<any[] | undefined>();
