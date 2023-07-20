@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, launchCommand, LaunchType, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Icon, showToast, Toast } from "@raycast/api";
 import { MutatePromise, useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 
@@ -8,8 +8,8 @@ import {
   getIssuePriorities,
   getIssueTransitions,
   Issue,
-  IssueDetail as TIssueDetail,
   Priority,
+  IssueDetail as TIssueDetail,
   Transition,
   updateIssue,
   updateIssueAssignee,
@@ -20,6 +20,7 @@ import { getErrorMessage } from "../helpers/errors";
 import { slugify } from "../helpers/string";
 import { getJiraCredentials } from "../helpers/withJiraCredentials";
 
+import CreateIssueForm from "./CreateIssueForm";
 import IssueAttachments from "./IssueAttachments";
 import IssueDetail from "./IssueDetail";
 
@@ -143,13 +144,11 @@ export default function IssueActions({
       </ActionPanel.Section>
 
       <ActionPanel.Section>
-        <Action
+        <Action.Push
           title="Create Issue"
           icon={Icon.NewDocument}
           shortcut={{ modifiers: ["cmd"], key: "n" }}
-          onAction={async () => {
-            await launchCommand({ name: "create-issue", type: LaunchType.UserInitiated });
-          }}
+          target={<CreateIssueForm />}
         />
       </ActionPanel.Section>
 
