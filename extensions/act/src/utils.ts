@@ -7,10 +7,10 @@ interface Prefercences {
   youdaoTransAPPSecret: string;
 }
 interface TranslationResponse {
-  errorCode?: string; 
-  translation?: string[]; 
+  errorCode?: string;
+  translation?: string[];
   basic?: {
-    phonetic?: string; 
+    phonetic?: string;
     // Add other properties if necessary
   };
   // Add other properties if necessary
@@ -58,7 +58,7 @@ async function youdaoTrans(src_text: string): Promise<string[]> {
     };
     //发起请求
     const response = await fetch(youdaoURL + "?" + params, options);
-    const data = await response.json() as TranslationResponse;
+    const data = (await response.json()) as TranslationResponse;
     console.log(data);
     //解析和提取翻译结果
     const error_code = data?.errorCode;
