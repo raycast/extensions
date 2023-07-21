@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Color, List, Icon, Image } from "@raycast/api";
+import { Color, List, Icon, Image, ActionPanel, Action } from "@raycast/api";
 import { APIRequest, makeRequest, getSession } from "./api";
 
 type ListMaskedEmail = {
@@ -77,6 +77,11 @@ export default function Command() {
           subtitle={email.forDomain || email.description}
           keywords={[email.description]}
           accessories={[accessoryForMaskedEmail(email)]}
+          actions={
+            <ActionPanel title={email.email}>
+              <Action.CopyToClipboard title="Copy Masked Email" content={email.email} />
+            </ActionPanel>
+          }
         />
       ))}
     </List>
