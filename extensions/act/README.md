@@ -8,6 +8,6 @@ single word translation as following:
 
 selected sentence translation as following:
 
-![sentence](assets/sentence-9869311.png)
+![sentence](assets/sentence.png)
 
 ß
