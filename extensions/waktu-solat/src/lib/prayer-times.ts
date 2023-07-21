@@ -97,6 +97,19 @@ export async function loadSolatData(zoneId = 'WLY01') {
   return
 }
 
+function getDiffSec(time: moment.Moment) {
+  return time.diff(moment(), 'ms')
+}
+
+export function getHumanDifferent(time: any) {
+  return `in ${humanizer(getDiffSec(moment(time)), {
+    round: true,
+    conjunction: ' and ',
+    serialComma: false,
+    largest: 2,
+  })}`
+}
+
 export async function loadTodaySolat(zoneId: string): Promise<PrayerTime | undefined> {
   const data = await loadSolatData(zoneId)
 
@@ -111,16 +124,10 @@ export async function loadTodaySolat(zoneId: string): Promise<PrayerTime | undef
       t.items = keys.map((key) => {
         const value: string = t[key as PrayerKey] as string
         const time = moment(value, 'HH:mm:ss')
-        const diffSec = time.diff(moment(), 'ms')
         return {
           value: time.format('hh:mm A'),
           label: prayerNameMap.get(key)!,
-          different: `in ${humanizer(diffSec, {
-            round: true,
-            conjunction: ' and ',
-            serialComma: false,
-            largest: 2,
-          })}`,
+          different: `${getHumanDifferent(time)}`,
           time,
         } as PrayerTimeItem
       })

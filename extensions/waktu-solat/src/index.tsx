@@ -1,8 +1,8 @@
 import { loadZones, Zone } from './lib/zones'
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useCachedState } from '@raycast/utils'
 import { loadTodaySolat, PrayerTime, PrayerTimeItem } from './lib/prayer-times'
-import { Color, List } from '@raycast/api'
+import { Action, ActionPanel, Color, List } from '@raycast/api'
 import Accessory = List.Item.Accessory
 
 function Zones(props: { onChange: (z: Zone) => void }) {
@@ -36,32 +36,45 @@ function Zones(props: { onChange: (z: Zone) => void }) {
   )
 }
 
-function PrayerItem(props: { item: PrayerTimeItem }) {
+function PrayerItem(props: { item: PrayerTimeItem; items: PrayerTimeItem[] }) {
   const {
     item: { isCurrent, label, value, different, isNext },
   } = props
+  const [tag, setTag] = useState<Accessory>()
 
-  function getTag() {
+  function setupTag(): Accessory | undefined {
     return isCurrent
-      ? { value: 'Current', color: Color.Green }
+      ? {
+          tag: { value: 'Current', color: Color.Green },
+        }
       : isNext
-      ? { value: different }
+      ? { tag: { value: different } }
       : undefined
   }
 
-  const accessories: Accessory[] = []
-  const tag = getTag()
-  if (tag) {
-    accessories.push({ tag })
-  }
+  useEffect(() => {
+    setTag(setupTag)
+  }, [])
+
   return (
-    <List.Item icon="🕌" key={label} title={label} subtitle={value} accessories={accessories} />
+    <List.Item
+      icon="🕌"
+      key={label}
+      title={label}
+      subtitle={value}
+      accessories={tag ? [tag] : []}
+      actions={
+        <ActionPanel>
+          <Action title="Refresh" onAction={() => setTag(setupTag())} />
+        </ActionPanel>
+      }
+    />
   )
 }
 
 function prayerTimes() {
   const [isLoading, setLoading] = useState(true)
-  const [prayerTime, setPrayerTime] = useCachedState<PrayerTime>('prayer')
+  const [prayerTime, setPrayerTime] = useState<PrayerTime>()
 
   async function onZoneChange(z: Zone) {
     setLoading(true)
@@ -72,9 +85,11 @@ function prayerTimes() {
 
   return (
     <List searchBarAccessory={<Zones onChange={onZoneChange} />} isLoading={isLoading}>
-      {prayerTime?.items?.map((p) => (
-        <PrayerItem item={p} key={p.label} />
-      ))}
+      <List.Section title={prayerTime?.date}>
+        {prayerTime?.items?.map((p) => (
+          <PrayerItem item={p} key={p.label} items={prayerTime.items!} />
+        ))}
+      </List.Section>
     </List>
   )
 }
