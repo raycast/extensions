@@ -1,6 +1,6 @@
 # Remove Paywall
 
-Remove the paywall from the selected URL. Can either use [12ft](https://12ft.io) or [RemovePaywall](https://www.removepaywall.com), depending on user preference.
+Remove the paywall from the selected URL. Can either use [12ft](https://12ft.io), [RemovePaywall](https://www.removepaywall.com) or [Archive](https://archive.is) depending on user preference.
 
 ## Author
 
@@ -14,3 +14,4 @@ Remove the paywall from the selected URL. Can either use [12ft](https://12ft.io)
 
 - [12ft](https://12ft.io)
 - [RemovePaywall](https://www.removepaywall.com)
+- [Archive](https://archive.is)

@@ -1,4 +1,4 @@
-import { MenuBarExtra, Icon, launchCommand, LaunchType } from "@raycast/api";
+import { MenuBarExtra, Icon, launchCommand, LaunchType, Image, Color } from "@raycast/api";
 import { useState } from "react";
 import {
   createInterval,
@@ -14,6 +14,12 @@ import {
   progress,
 } from "../lib/intervals";
 import { secondsToTime } from "../lib/secondsToTime";
+
+const IconTint: Color.Dynamic = {
+  light: "#000000",
+  dark: "#FFFFFF",
+  adjustContrast: false,
+};
 
 export default function TogglePomodoroTimer() {
   const [currentInterval, setCurrentInterval] = useState<Interval | undefined>(getCurrentInterval());
@@ -49,11 +55,11 @@ export default function TogglePomodoroTimer() {
     setCurrentInterval(undefined);
   }
 
-  let icon;
-  icon = { source: { light: "tomato-light.png", dark: "tomato-dark.png" } };
+  let icon: Image.ImageLike;
+  icon = { source: "tomato-0.png", tintColor: IconTint };
   if (currentInterval) {
-    const progressInQuarters = Math.floor(progress(currentInterval) / 25) * 25;
-    icon = Icon[(progressInQuarters > 0 ? `CircleProgress${progressInQuarters}` : "Circle") as keyof typeof Icon];
+    const progressInTenth = 100 - Math.floor(progress(currentInterval) / 10) * 10;
+    icon = { source: `tomato-${progressInTenth}.png`, tintColor: IconTint };
   }
 
   const title = preferences.enableTimeOnMenuBar

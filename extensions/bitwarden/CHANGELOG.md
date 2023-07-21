@@ -1,5 +1,11 @@
 # Bitwarden Changelog
 
+## [Improvements] - 2023-07-06
+
+- Display favorites at the top of the list on a separate section
+- Added ability to mark/remove items as favorites and reorder them in the list (with keybindings)
+- Display reprompt required icon on the list
+
 ## [Update] - 2023-06-12
 
 - Fixed a bug that prevented the user from searching by username/email

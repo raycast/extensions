@@ -1,5 +1,9 @@
 # GitHub Changelog
 
+## [Menu Commands] - 2023-07-18
+
+- Add repo name to `Unread Notifications` Menu
+
 ## [Menu Commands] - 2023-07-10
 
 - Add Issues Menu Command

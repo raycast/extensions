@@ -22,6 +22,7 @@
 /extensions/airsy                                    @piotrzaborow
 /extensions/airtable                                 @marks @SeanKeenan-at @pernielsentikaer
 /extensions/akkoma                                   @Sevichecc
+/extensions/alacritty                                @jose-elias-alvarez
 /extensions/aleph                                    @d7mtg
 /extensions/algolia                                  @valentindotxyz
 /extensions/aliyun-oss                               @yangxyo
@@ -167,6 +168,7 @@
 /extensions/color-casket                             @slavarazum @fe9lix @pernielsentikaer @fengtianze
 /extensions/color-picker                             @thomaspaulmann @otakustay @EmersonEmerson @pernielsentikaer @arronhunt
 /extensions/color-shades                             @qeude
+/extensions/colorify                                 @EvanZhouDev
 /extensions/colorslurp                               @Jordan-Ellis
 /extensions/commitlint                               @lardissone
 /extensions/common-directory                         @koinzhang
@@ -368,6 +370,7 @@
 /extensions/gitlab-docs                              @saschaeggi
 /extensions/gitmoji                                  @ricoberger
 /extensions/gitpod                                   @henit-chobisa @Palanikannan1437
+/extensions/global-media-key                         @douo
 /extensions/glyph-search                             @gbougakov
 /extensions/go-package-search                        @bstncartwright @k8scat @BalliAsghar
 /extensions/google-books                             @Ali-Parandeh
@@ -390,6 +393,7 @@
 /extensions/graphcdn                                 @mathieudutour
 /extensions/greip                                    @gre-dev @pernielsentikaer
 /extensions/guitar-chords                            @GastroGeek
+/extensions/habr-media                               @khlebobul
 /extensions/hacker-news                              @thomaspaulmann @GastroGeek @sxn @itsnwa
 /extensions/hackmd                                   @Yukaii
 /extensions/harvest                                  @eluce2 @eluce2
@@ -453,7 +457,7 @@
 /extensions/iridium                                  @crisboarna
 /extensions/is-it-toxic-to                           @chesterhow @pernielsentikaer
 /extensions/itch-io                                  @Aayush9029
-/extensions/iterm                                    @ron-myers
+/extensions/iterm                                    @ron-myers @flops
 /extensions/itranslate                               @404J
 /extensions/iwork                                    @SKaplanOfficial
 /extensions/jenkins                                  @k8scat
@@ -784,9 +788,10 @@
 /extensions/readwise-reader                          @zach-fuller
 /extensions/readwise-to-tana                         @believer
 /extensions/readymetrics                             @chadbutz
+/extensions/real-debrid-manager                      @YamenSharaf
 /extensions/rebrandly                                @grikomsn
 /extensions/recents                                  @GastroGeek @kgrhartlage
-/extensions/reclaim                                  @webergnr
+/extensions/reclaim-ai                               @webergnr
 /extensions/recurly                                  @kudrykv
 /extensions/reddit-search                            @ewlcheng
 /extensions/redis                                    @k8scat
@@ -798,7 +803,7 @@
 /extensions/remember-the-date                        @pernielsentikaer
 /extensions/remember-this                            @Ek2100
 /extensions/remove-background                        @maantje @FezVrasta
-/extensions/remove-paywall                           @tegola
+/extensions/remove-paywall                           @tegola @whitespacecode
 /extensions/render                                   @Destiner
 /extensions/replicate                                @KevinBatdorf @bfirsh @cbh123
 /extensions/rescuetime-focus-session-trigger         @tuortheblessed
@@ -843,7 +848,7 @@
 /extensions/searchcaster                             @gskril @pernielsentikaer
 /extensions/seedsnote                                @nanbingxyz
 /extensions/semantic-scholar                         @blainerothrock
-/extensions/send-to-flomo                            @ahonn @fankaidev @pernielsentikaer
+/extensions/send-to-flomo                            @ahonn @fankaidev @pernielsentikaer @thishym
 /extensions/sentry                                   @thomaspaulmann @mattisssa @NoorBayari
 /extensions/sequel-ace                               @nagauta
 /extensions/serverless-framework-docs                @yemilgr
@@ -942,6 +947,7 @@
 /extensions/text-shortcuts                           @koinzhang
 /extensions/textlint-rule-aws-service-name           @bun913
 /extensions/tfl                                      @haneenmahd
+/extensions/the-noble-quran                          @BalliAsghar
 /extensions/the-verge                                @klkvsky @pernielsentikaer
 /extensions/thesaurus                                @ABukSwienty
 /extensions/things                                   @loris @andreaselia
@@ -989,6 +995,7 @@
 /extensions/typescript-documentation-search          @chezhe
 /extensions/typescript-mock-generator                @comoser
 /extensions/typographer                              @mikeozornin
+/extensions/ulid                                     @zephyrpathsofglory
 /extensions/ulysses                                  @praveenjuge
 /extensions/unicode-symbols                          @mmazzarolo @FezVrasta @pernielsentikaer
 /extensions/unitex                                   @jaymody
@@ -1009,7 +1016,7 @@
 /extensions/vercast                                  @MaxLeiter @gleich @dgrcode
 /extensions/vim-bro                                  @ajaypremshankar
 /extensions/visual-studio-code-project-manager       @MarkusLanger @GastroGeek @4very @theherk @TobiasYin @yossizahn
-/extensions/visual-studio-code-recent-projects       @thomaspaulmann @iainsimmons @macbookandrew @cy-98 @immint023 @pernielsentikaer @elijah-scott @vimtor @tonka3000 @aka-rabbi-inv
+/extensions/visual-studio-code-recent-projects       @thomaspaulmann @iainsimmons @macbookandrew @cy-98 @immint023 @pernielsentikaer @elijah-scott @vimtor @tonka3000 @aka-rabbi-inv @oilbeater
 /extensions/vivaldi                                  @crisboarna
 /extensions/vocab-search                             @DATADEER @pernielsentikaer
 /extensions/vuejobs                                  @abusiraj84
