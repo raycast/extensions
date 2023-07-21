@@ -4,7 +4,7 @@ export default function OpenPage(props: { arguments: { url: string; navigationIt
   const dummyFunction = () => {
     // Do nothing here
   };
-  
+
   return (
     <DocCheckPage
       url={props.arguments.url}
