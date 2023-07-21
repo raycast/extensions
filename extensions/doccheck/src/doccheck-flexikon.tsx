@@ -254,7 +254,7 @@ export default function Command(props: LaunchProps) {
     const favouritesString = await LocalStorage.getItem<string>(FAVOURITES_KEY);
     if (favouritesString != undefined) {
       const favouritesArray = JSON.parse(favouritesString);
-      let favourites = [];
+      const favourites = [];
       let thisItem = 0;
       for (let i = favouritesArray.length - 1; i >= 0; i--) {
         favourites[thisItem] = favouritesArray[i];
@@ -890,7 +890,7 @@ function EntryActions(
   }
 }
 
-async function controllToast(title: string, loading: Boolean) {
+async function controllToast(title: string, loading: boolean) {
   const toast = await showToast({
     style: Toast.Style.Animated,
     title: title,
