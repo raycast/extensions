@@ -23,7 +23,7 @@
     },
     {
       "name": "list",
-      "title": "Show masked emails",
+      "title": "Show Masked Emails",
       "subtitle": "Fastmail",
       "description": "Show all your masked emails",
       "mode": "view"
