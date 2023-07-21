@@ -1,3 +1,4 @@
+
 import {
   Action,
   ActionPanel,
@@ -766,7 +767,7 @@ async function controllToast(loading: boolean) {
 async function setHistoryItem(value: HistoryItem) {
   const historyString = (await LocalStorage.getItem(HISTORY_KEY)) as string;
   if (historyString != undefined) {
-    const historyItems = JSON.parse(historyString);
+    let historyItems = JSON.parse(historyString);
 
     const currentArticleInHistory = historyItems.find((o: HistoryItem) => o.title === value.title);
     if (currentArticleInHistory != undefined) {
