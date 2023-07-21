@@ -11,7 +11,7 @@ import {
   getPreferenceValues,
   useNavigation,
   showToast,
-  Toast
+  Toast,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { useFetch } from "@raycast/utils";
@@ -55,9 +55,6 @@ const categories = [
     value: "most+recent",
   },
 ];
-const LASTRELOAD_KEY = "lastReload";
-
-const TRENDINGARTICLES_KEY = "trendingArticles";
 
 const HISTORY_KEY = "history";
 const FAVOURITES_KEY = "favourites";
@@ -332,7 +329,7 @@ export default function Command() {
     const favouritesString = await LocalStorage.getItem<string>(FAVOURITES_KEY);
     if (favouritesString != undefined) {
       const favouritesArray = JSON.parse(favouritesString);
-      let favourites = [];
+      const favourites = [];
       let thisItem = 0;
       for (let i = favouritesArray.length - 1; i >= 0; i--) {
         favourites[thisItem] = favouritesArray[i];
@@ -494,7 +491,7 @@ export default function Command() {
             <ActionPanel>
               <Action.Open
                 icon={Icon.MagnifyingGlass}
-                title="Open search in Browser"
+                title="Open Search in Browser"
                 target={"https://pubmed.ncbi.nlm.nih.gov/?term=" + encodeURI(query!) + "&sort=" + encodeURI(sortBy!)}
               />
             </ActionPanel>
@@ -578,89 +575,8 @@ export default function Command() {
             <ActionPanel>
               <Action.Open
                 icon={Icon.MagnifyingGlass}
-                title="Open search in Browser"
+                title="Open Search in Browser"
                 target={"https://pubmed.ncbi.nlm.nih.gov/?term=" + encodeURI(query!) + "&sort=" + encodeURI(sortBy!)}
-        {entries.map((entry) => {
-          if (entry.pmc && entry.doi) {
-            return (
-              <List.Item
-                key={entry.uid}
-                title={{ value: entry.title, tooltip: entry.title }}
-                accessories={[
-                  { icon: Icon.Person, text: entry.authors[0], tooltip: entry.authors.join(", ") },
-                  { tag: { value: "PMC", color: Color.Green }, tooltip: entry.pmc },
-                  { tag: { value: "DOI", color: Color.Red }, tooltip: entry.doi },
-                  { tag: { value: "PMID", color: Color.Blue }, tooltip: entry.pmid },
-                  {
-                    tag: new Date(entry.epubdate ? entry.epubdate : entry.pubdate),
-                    tooltip: new Date(entry.epubdate ? entry.epubdate : entry.pubdate).toLocaleDateString("de-DE", {
-                      day: "2-digit",
-                      month: "2-digit",
-                      year: "numeric",
-                    }),
-                  },
-                ]}
-                actions={EntryActions(entry, query!, sortBy!)}
-              />
-            );
-          } else if (entry.doi) {
-            return (
-              <List.Item
-                key={entry.uid}
-                title={{ value: entry.title, tooltip: entry.title }}
-                accessories={[
-                  { icon: Icon.Person, text: entry.authors[0], tooltip: entry.authors.join(", ") },
-                  { tag: { value: "DOI", color: Color.Red }, tooltip: entry.doi },
-                  { tag: { value: "PMID", color: Color.Blue }, tooltip: entry.pmid },
-                  {
-                    tag: new Date(entry.epubdate ? entry.epubdate : entry.pubdate),
-                    tooltip: new Date(entry.epubdate ? entry.epubdate : entry.pubdate).toLocaleDateString("de-DE", {
-                      day: "2-digit",
-                      month: "2-digit",
-                      year: "numeric",
-                    }),
-                  },
-                ]}
-                actions={EntryActions(entry, query!, sortBy!)}
-              />
-            );
-          } else if (entry.url === "<empty>") {
-            return (
-              <List.Item
-                key={entry.uid}
-                title={entry.title}
-                subtitle={entry.fulljournalname}
-                actions={
-                  <ActionPanel>
-                    <Action.Open
-                      icon={Icon.MagnifyingGlass}
-                      title="Open search in Browser"
-                      target={
-                        "https://pubmed.ncbi.nlm.nih.gov/?term=" + encodeURI(query!) + "&sort=" + encodeURI(sortBy!)
-                      }
-                    />
-                  </ActionPanel>
-                }
-              />
-            );
-          } else if (entry.title) {
-            return (
-              <List.Item
-                key={entry.uid}
-                title={{ value: entry.title, tooltip: entry.title }}
-                accessories={[
-                  { icon: Icon.Person, text: entry.authors[0], tooltip: entry.authors.join(", ") },
-                  { tag: { value: "PMID", color: Color.Blue }, tooltip: entry.pmid },
-                  {
-                    tag: new Date(entry.epubdate ? entry.epubdate : entry.pubdate),
-                    tooltip: new Date(entry.epubdate ? entry.epubdate : entry.pubdate).toLocaleDateString("de-DE", {
-                      day: "2-digit",
-                      month: "2-digit",
-                      year: "numeric",
-                    }),
-                  },
-                ]}
-                actions={EntryActions(entry, query!, sortBy!)}
               />
             </ActionPanel>
           }
@@ -776,7 +692,7 @@ function EntryActions(
           <Action.CopyToClipboard title="Copy URL" content={article.url} shortcut={{ modifiers: ["cmd"], key: "u" }} />
           <Action
             icon={Icon.ArrowClockwise}
-            title={"Reload Trending articles"}
+            title={"Reload Trending Articles"}
             onAction={() => reloadArticles(fetchData)}
             shortcut={{ modifiers: ["cmd"], key: "r" }}
           />
@@ -828,7 +744,7 @@ function EntryActions(
           <Action.CopyToClipboard title="Copy URL" content={article.url} shortcut={{ modifiers: ["cmd"], key: "u" }} />
           <Action
             icon={Icon.ArrowClockwise}
-            title={"Reload Trending articles"}
+            title={"Reload Trending Articles"}
             onAction={() => reloadArticles(fetchData)}
             shortcut={{ modifiers: ["cmd"], key: "r" }}
           />
@@ -849,7 +765,7 @@ function EntryActions(
         <ActionPanel>
           <Action.Push
             icon={Icon.Book}
-            title="Read abstract"
+            title="Read Abstract"
             target={<Details article={article} query={query} onDetailViewPop={getHistoryAndFavourites} />}
             shortcut={{ modifiers: [], key: "arrowRight" }}
           />
@@ -867,7 +783,7 @@ function EntryActions(
           />
           <Action.Open
             icon={Icon.MagnifyingGlass}
-            title="Open search in Browser"
+            title="Open Search in Browser"
             target={"https://pubmed.ncbi.nlm.nih.gov/?term=" + encodeURI(query!) + "&sort=" + encodeURI(sortBy!)}
             shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
           />
@@ -879,7 +795,7 @@ function EntryActions(
           <Action.CopyToClipboard title="Copy URL" content={article.url} shortcut={{ modifiers: ["cmd"], key: "u" }} />
           <Action
             icon={Icon.ArrowClockwise}
-            title={"Reload Trending articles"}
+            title={"Reload Trending Articles"}
             onAction={() => reloadArticles(fetchData)}
             shortcut={{ modifiers: ["cmd"], key: "r" }}
           />
@@ -928,7 +844,7 @@ function EntryActions(
         <Action.CopyToClipboard title="Copy URL" content={article.url} shortcut={{ modifiers: ["cmd"], key: "u" }} />
         <Action
           icon={Icon.ArrowClockwise}
-          title={"Reload Trending articles"}
+          title={"Reload Trending Articles"}
           onAction={() => reloadArticles(fetchData)}
           shortcut={{ modifiers: ["cmd"], key: "r" }}
         />
@@ -970,7 +886,7 @@ function EntryActions(
         <Action.CopyToClipboard title="Copy URL" content={article.url} shortcut={{ modifiers: ["cmd"], key: "u" }} />
         <Action
           icon={Icon.ArrowClockwise}
-          title={"Reload Trending articles"}
+          title={"Reload Trending Articles"}
           onAction={() => reloadArticles(fetchData)}
           shortcut={{ modifiers: ["cmd"], key: "r" }}
         />
@@ -991,7 +907,7 @@ function EntryActions(
       <ActionPanel>
         <Action.Push
           icon={Icon.Book}
-          title="Read abstract"
+          title="Read Abstract"
           target={<Details article={article} query={query} onDetailViewPop={getHistoryAndFavourites} />}
           shortcut={{ modifiers: [], key: "arrowRight" }}
         />
@@ -1003,7 +919,7 @@ function EntryActions(
         />
         <Action.Open
           icon={Icon.MagnifyingGlass}
-          title="Open search in Browser"
+          title="Open Search in Browser"
           target={"https://pubmed.ncbi.nlm.nih.gov/?term=" + encodeURI(query!) + "&sort=" + encodeURI(sortBy!)}
           shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
         />
@@ -1011,7 +927,7 @@ function EntryActions(
         <Action.CopyToClipboard title="Copy URL" content={article.url} shortcut={{ modifiers: ["cmd"], key: "u" }} />
         <Action
           icon={Icon.ArrowClockwise}
-          title={"Reload Trending articles"}
+          title={"Reload Trending Articles"}
           onAction={() => reloadArticles(fetchData)}
           shortcut={{ modifiers: ["cmd"], key: "r" }}
         />
@@ -1228,7 +1144,7 @@ const Details = (props: { article: Article; query: string; onDetailViewPop: () =
   }
 
   async function checkFavouriteStatus(value: Article) {
-    let thisItem = value;
+    const thisItem = value;
 
     const favouritesString = (await LocalStorage.getItem(FAVOURITES_KEY)) as string;
     if (favouritesString != undefined) {
@@ -1255,7 +1171,7 @@ const Details = (props: { article: Article; query: string; onDetailViewPop: () =
         message: "Please wait for the article to load",
       });
     } else if (historyString != undefined) {
-      let historyItems = JSON.parse(historyString);
+      const historyItems = JSON.parse(historyString);
       const thisItem = historyItems[historyItems.length - 1];
 
       const favouritesString = (await LocalStorage.getItem(FAVOURITES_KEY)) as string;
@@ -1387,7 +1303,7 @@ const Details = (props: { article: Article; query: string; onDetailViewPop: () =
           />
           <Action.Open
             icon={Icon.LockUnlocked}
-            title="Open article on Sci-Hub in Browser"
+            title="Open Article on Sci-Hub in Browser"
             target={preferences.scihubinstance.value + encodeURI(article.doi)}
             shortcut={{ modifiers: ["opt"], key: "enter" }}
           />
@@ -1459,7 +1375,7 @@ const Details = (props: { article: Article; query: string; onDetailViewPop: () =
   }
 };
 
-async function controllToast(title: string, loading: Boolean) {
+async function controllToast(title: string, loading: boolean) {
   const toast = await showToast({
     style: Toast.Style.Animated,
     title: title,
