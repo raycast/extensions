@@ -4,11 +4,11 @@ import { getHAWSConnection, ha } from "./common";
 import { useState, useEffect } from "react";
 import { getErrorMessage } from "./utils";
 import { clearSearchBar } from "@raycast/api";
-import { Connection } from "home-assistant-js-websocket";
 import { getTranslation } from "./lib/translation";
 
 interface PlainSpeech {
   speech: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   extra_data?: any;
 }
 
